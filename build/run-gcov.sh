@@ -5,10 +5,6 @@ if [ ! -d coverage ]; then
 fi
 cd coverage
 
-for i in `find .. -name "*.bb" -maxdepth 1`; do
-    gcov $i -o ..
-done
-
 # It would be really nice to find a better way to do this than copying the 
 # HTML into this script.  But, I am being lazy right now.
 cat > index.html << EOF
@@ -86,14 +82,35 @@ code.  To generate this data, do the following:</p>
 but all tests should be moving to the unified framework, so this is correct.</p>
    </blockquote>
 
+   <table border="0" width="100%" cellspacing="4">
 EOF
 
-for i in `find . -name "*.gcov" -print`; do
+for i in `find .. -name "*.bb" -maxdepth 1`; do
+    percent=`gcov $i -o .. | grep "%" | awk -F'%' {'print $1'}`
     name=`echo $i | awk -F'/' {'print $2'}`
-    echo " <a href=\"$name\">$name</a><br>"  >> index.html
-done;
+    basename=`echo $name | awk -F'.' {'print $1'}` 
 
-echo "<p>Last generated `date`</p>" >> index.html
+    if [ "x$percent" = "x" ]; then
+        echo "<tr>" >> index.html
+        echo "<td bgcolor=#ffffff> Error generating data for $basename<br>" >> index.html
+        continue;	
+    fi
+    intpercent=`echo "$percent/1" | bc`
+    if [ $intpercent -lt 33 ]; then
+        color="#ffaaaa"
+    else if [ $intpercent -lt 66 ]; then
+        color="#ffff77"
+        else
+            color="#aaffaa"
+        fi
+    fi
+
+    echo "<tr>" >> index.html
+    echo "<td bgcolor=$color><a href=\"$basename.c.gcov\">$basename</a><br>" >> index.html
+    echo "<td bgcolor=$color>$percent% tested"  >> index.html
+done
+
+echo "</table><p>Last generated `date`</p>" >> index.html
 
 cat >> index.html << EOF
 </td></tr>
