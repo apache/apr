@@ -90,21 +90,17 @@ typedef enum {
 #ifndef TRUE
 #define TRUE			1
 #endif
-#ifndef APR_LONGEST_LONG
-#define APR_LONGEST_LONG	long
-#endif
 #define NUL			'\0'
 #define WIDE_INT		long
-#define WIDEST_INT		APR_LONGEST_LONG
 
 typedef WIDE_INT wide_int;
 typedef unsigned WIDE_INT u_wide_int;
-typedef WIDEST_INT widest_int;
+typedef apr_int64_t widest_int;
 #ifdef __TANDEM
 /* Although Tandem supports "long long" there is no unsigned variant. */
 typedef unsigned long       u_widest_int;
 #else
-typedef unsigned WIDEST_INT u_widest_int;
+typedef apr_uint64_t u_widest_int;
 #endif
 typedef int bool_int;
 
