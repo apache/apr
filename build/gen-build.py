@@ -58,7 +58,7 @@ def main():
 
   # Build a list of all necessary directories in build tree
   alldirs = { }
-  for dir in dirs:
+  for dir in dirs.keys():
     d = dir
     while d:
       alldirs[d] = None
