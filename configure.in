@@ -117,7 +117,10 @@ AC_PROG_LIBTOOL
         LTFLAGS='--silent'
     fi
     dnl get libtool's setting of shlibpath_var
-    eval `grep "^shlibpath_var=[[A-Z_]]\+$" $apr_builddir/libtool`
+    eval `grep "^shlibpath_var=[[A-Z_]]*$" $apr_builddir/libtool`
+    if test "x$shlibpath_var" = "x"; then
+        shlibpath_var=REPLACE_WITH_YOUR_SHLIBPATH_VAR
+    fi
     ;;
 esac
 
