@@ -260,6 +260,11 @@ struct apr_sockaddr_t {
         /** IPv6 sockaddr structure */
         struct sockaddr_in6 sin6;
 #endif
+#if APR_HAVE_SA_STORAGE
+        /** Placeholder to ensure that the size of this union is not
+         * dependent on whether APR_HAVE_IPV6 is defined. */
+        struct sockaddr_storage sas;
+#endif
     } sa;
 };
 

@@ -230,6 +230,7 @@ extern "C" {
 #define APR_HAVE_SIGACTION      @have_sigaction@
 #define APR_HAVE_SIGSUSPEND     @have_sigsuspend@
 #define APR_HAVE_SIGWAIT        @have_sigwait@
+#define APR_HAVE_SA_STORAGE     @have_sa_storage@
 #define APR_HAVE_STRCASECMP     @have_strcasecmp@
 #define APR_HAVE_STRDUP         @have_strdup@
 #define APR_HAVE_STRICMP        @have_stricmp@
