@@ -14,7 +14,7 @@ INCDIR=../include
 INCDIR1=../misc/@OSDIR@
 INCLUDES=-I$(INCDIR) -I$(INCDIR1)
 
-LIB=@LIBPREFIX@apr.a
+#LIB=@LIBPREFIX@apr.a
 
 OBJS=apr_cpystrn.o \
 	apr_fnmatch.o \
@@ -30,7 +30,7 @@ OBJS=apr_cpystrn.o \
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
 
-all: $(LIB)
+all: $(OBJS)
 
 clean:
 	$(RM) -f *.o *.a *.so
@@ -40,10 +40,10 @@ distclean: clean
 
 $(OBJS): Makefile
 
-$(LIB): $(OBJS)
-	$(RM) -f $@
-	$(AR) cr $@ $(OBJS)
-	$(RANLIB) $@
+#$(LIB): $(OBJS)
+#	$(RM) -f $@
+#	$(AR) cr $@ $(OBJS)
+#	$(RANLIB) $@
 
 #
 # We really don't expect end users to use this rule.  It works only with
