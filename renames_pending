@@ -1,9 +1,5 @@
 Symbol renames for APR 
 
-apr_time_ansi_put                from apr_ansi_time_to_apr_time
-
-apr_time_exp_t                   from apr_exploded_time_t
-
 apr_time_exp_get                 from apr_implode_time
 apr_time_exp_gmt                 from apr_explode_gmt
 apr_time_exp_lt                  from apr_explode_localtime
