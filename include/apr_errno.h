@@ -178,7 +178,7 @@ int ap_canonical_error(ap_status_t err);
 #define APR_ENOSPC         (APR_OS_START_CANONERR + 6)
 #endif
 
-#ifdef ENONOMEM
+#ifdef ENOMEM
 #define APR_ENOMEM ENOMEM
 #else
 #define APR_ENOMEM         (APR_OS_START_CANONERR + 7)
