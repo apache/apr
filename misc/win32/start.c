@@ -133,6 +133,12 @@ APR_DECLARE(apr_status_t) apr_app_initialize(int *argc,
                                              const char * const * *argv, 
                                              const char * const * *env)
 {
+    apr_status_t rv = apr_initialize();
+
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
@@ -142,8 +148,10 @@ APR_DECLARE(apr_status_t) apr_app_initialize(int *argc,
         int dupenv;
 
         if (apr_app_init_complete) {
-            return apr_initialize();
+            return rv;
         }
+
+        apr_app_init_complete = 1;
 
         sysstr = GetCommandLineW();
         if (sysstr) {
@@ -178,10 +186,9 @@ APR_DECLARE(apr_status_t) apr_app_initialize(int *argc,
             free(wenv);
         }
 
-        apr_app_init_complete = 1;
     }
 #endif
-    return apr_initialize();
+    return rv;
 }
 
 static int initialized = 0;
