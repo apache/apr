@@ -575,14 +575,14 @@ APR_POOL_DECLARE_ACCESSOR(file);
  * @param file The file to enable inheritance.
  * @deffunc void apr_file_set_inherit(apr_file_t *file)
  */
-APR_DECLARE_SET_INHERIT(file);
+APR_DECLARE(void) apr_file_set_inherit(apr_file_t *file);
 
 /**
  * Unset a file from being inherited by child processes.
  * @param file The file to disable inheritance.
  * @deffunc void apr_file_unset_inherit(apr_file_t *file)
  */
-APR_DECLARE_UNSET_INHERIT(file);
+APR_DECLARE(void) apr_file_unset_inherit(apr_file_t *file);
 
 #ifdef __cplusplus
 }
