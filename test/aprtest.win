@@ -5,11 +5,14 @@
 # E.g. add c:\program files\perl\bin to the list of directories
 
 !IF "$(TARGET)" == ""
-TARGET=all
+TARGET=ALL
 !ENDIF 
 
-all: Makefile
+$(TARGET): Makefile
 	$(MAKE) /nologo /f Makefile $(TARGET)
 
-Makefile: Makefile.in
+Makefile: Makefile.in MakeWin32Make.pl
 	perl MakeWin32Make.pl
+
+clean:
+        del makefile *.obj *.exe *.idb *.pdb

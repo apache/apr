@@ -17,8 +17,8 @@ while ($t = <$srcfl>) {
         $t = "";
     }
     if ($t =~ m|^LOCAL_LIBS=|) {
-        $t = "LOCAL_LIBS=\n"
-           . "ALL_LIBS=../LibD/apr.lib kernel32\.lib user32\.lib advapi32\.lib ws2_32\.lib wsock32\.lib ole32\.lib\n\n";
+        $t = "LOCAL_LIBS=../LibD/apr.lib\n"
+           . "ALL_LIBS=kernel32\.lib user32\.lib advapi32\.lib ws2_32\.lib wsock32\.lib ole32\.lib\n\n";
     }
     if ($t =~ s|\@CFLAGS\@||) {
         $t = "";
@@ -55,3 +55,5 @@ while ($t = <$srcfl>) {
 
 undef $srcfl;
 undef $dstfl;
+
+print "Generated Makefile from Makefile.in\n";
