@@ -281,6 +281,31 @@ else
         APR_CHECK_PTHREAD_GETSPECIFIC_TWO_ARGS
         APR_CHECK_PTHREAD_ATTR_GETDETACHSTATE_ONE_ARG
         AC_CHECK_FUNCS(pthread_key_delete pthread_rwlock_init)
+
+        if test "$ac_cv_func_pthread_rwlock_init" = "yes"; then
+            dnl #----------------------------- Checking for pthread_rwlock_t
+            dnl # Linux is silly as it has pthread_rwlock_init defined
+            dnl # but keeps the pthread_rwlock_t structure hidden unless 
+            dnl # special things are defined.
+            AC_CACHE_CHECK([for pthread_rwlock_t], ac_cv_struct_pthread_rw,
+                [AC_TRY_COMPILE([#include <sys/types.h>
+                #include <pthread.h>], 
+                [pthread_rwlock_t rwlock=PTHREAD_RWLOCK_INITIALIZER;],
+                ac_cv_struct_pthread_rw=yes, ac_cv_struct_pthread_rw=no)])
+            if test "$ac_cv_struct_pthread_rw" = "no"; then
+                AC_TRY_COMPILE([#define _XOPEN_SOURCE 500
+                    #define _BSD_SOURCE
+                    #define _SVID_SOURCE
+                    #include <sys/types.h>
+                    #include <pthread.h>], 
+                    [pthread_rwlock_t rwlock=PTHREAD_RWLOCK_INITIALIZER;],
+                    ac_cv_struct_pthread_rw=yes, ac_cv_struct_pthread_rw=no)
+                if test "$ac_cv_struct_pthread_rw" = "yes"; then
+                    APR_ADDTO(CPPFLAGS, [-D_XOPEN_SOURCE=500 -D_BSD_SOURCE])
+                    APR_ADDTO(CPPFLAGS, [-D_SVID_SOURCE])
+                fi
+            fi
+        fi
     fi
 fi
 
