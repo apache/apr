@@ -170,12 +170,19 @@ struct apr_proc_t {
 #if APR_HAS_PROC_INVOKED || defined(DOXYGEN)
     /** Diagnositics/debugging string of the command invoked for 
      *  this process [only present if APR_HAS_PROC_INVOKED is true]
+     * @remark Only enabled on Win32 by default.
+     * @bug This should either always or never be present in release
+     * builds - since it breaks binary compatibility.  We may enable
+     * it always in APR 1.0 yet leave it undefined in most cases.
      */
     char *invoked;
 #endif
 #if defined(WIN32) || defined(DOXYGEN)
-    /** Win32 specific: Must retain the creator's handle granting 
-     *  access, as a new copy may not grant the same permissions 
+    /** (Win32 only) Creator's handle granting access to the process
+     * @remark This handle is closed and reset to NULL in every case
+     * corresponding to a waitpid() on Unix which returns the exit status.
+     * Therefore Win32 correspond's to Unix's zombie reaping characteristics
+     * and avoids potential handle leaks.
      */
     HANDLE hproc;
 #endif
