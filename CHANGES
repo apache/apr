@@ -117,6 +117,28 @@ Changes with APR 1.0
 
 Changes with APR 0.9.5
 
+  *) Various build fixes: thread_rwlock.c on some Solaris platforms
+     (PR 22990); filestat.c on ReliantUnix (PR 22990); config.status
+     on IRIX (PR 19251).  [Various]
+
+  *) Use NI_NAMEREQD instead of NI_NUMERICHOST in
+     APR_CHECK_GETNAMEINFO_IPV4_MAPPED.  PR 24469.  [Justin Erenkrantz]
+
+  *) Ensure that apr_sockaddr_info_get() does not return anything
+     other than AF_INET and AF_INET6 addresses.  [Joe Orton]
+
+  *) Clarify that apr_dir_read() does not guarantee order of returned
+     entries as previously claimed.  [Joe Orton]
+
+  *) The whole codebase was relicensed and is now available under
+     the Apache License, Version 2.0 (http://www.apache.org/licenses).
+     [Apache Software Foundation]
+
+  *) Define apr_off_t as long rather than as off_t on platforms with a
+     32-bit off_t to prevent incompatibility with packages such as
+     Perl which redefine the size of off_t via _FILE_OFFSET_BITS on
+     some platforms.  [Ben Reser <ben reser.org>]
+
   *) apr_socket_connect(): allow app to make subsequent call on 
      non-blocking socket.  [Jeff Trawick]
  
@@ -127,8 +149,8 @@ Changes with APR 0.9.5
 
 Changes with APR 0.9.4
 
-  *) fix apr_file_dup() and apr_file_dup2() to dup the ungetchar
-     member [Stas Bekman]
+  *) win32: fix apr_file_dup() and apr_file_dup2() to dup the
+     ungetchar member [Stas Bekman]
 
   *) Preserve leading '../' segments as when merging to an empty and
      unrooted path - fixes a bug observed in SVN with Win32/Netware/OS2.
