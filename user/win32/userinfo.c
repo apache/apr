@@ -92,6 +92,8 @@ APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
         rv = LookupAccountName(domain, username, *uid, &sidlen, 
                                NULL, NULL, &sidtype);
     }
+    else
+        rv = 0; /* Quiet the compiler */
     if (!sidlen || !rv) {
         return apr_get_os_error();
     }
