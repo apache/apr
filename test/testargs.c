@@ -58,6 +58,7 @@
 #include "apr_lib.h"
 #include "apr_getopt.h"
 #include <stdio.h>
+#include <stdlib.h>
 #ifdef BEOS
 #include <unistd.h>
 #endif
@@ -67,6 +68,8 @@ int main(int argc, char * const argv[])
     ap_context_t *context;
     ap_int32_t data;
 
+    ap_initialize();
+    atexit(ap_terminate);
     ap_create_context(&context, NULL);
 
     while (ap_getopt(argc, argv, "abc:d::", &data, context) == APR_SUCCESS) {

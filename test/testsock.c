@@ -53,6 +53,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <signal.h>
 #include "apr_thread_proc.h"
 #include "apr_errno.h"
@@ -73,6 +74,14 @@ int main(int argc, char *argv[])
     ap_status_t s2;
     char *args[2];
 
+    fprintf(stdout, "Initializing.........");
+    if (ap_initialize() != APR_SUCCESS) {
+        fprintf(stderr, "Something went wrong\n");
+        exit(-1);
+    }
+    fprintf(stdout, "OK\n");
+    atexit(ap_terminate);
+
     fprintf(stdout, "Creating context.......");
     if (ap_create_context(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Could not create context\n");
@@ -82,7 +91,7 @@ int main(int argc, char *argv[])
 
     fprintf(stdout, "This test relies on the process test working.  Please\n");
     fprintf(stdout, "run that test first, and only run this test when it\n");
-    fprintf(stdout, "completes successfully.  Alternitevly, you could run\n");
+    fprintf(stdout, "completes successfully.  Alternatively, you could run\n");
     fprintf(stdout, "server and client by yourself.\n");
 
     fprintf(stdout, "Creating children to run network tests.......\n");

@@ -53,6 +53,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "apr_file_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
@@ -78,6 +79,11 @@ int main()
     char *filename = "test.fil";
     char *teststr;
 
+    if (ap_initialize() != APR_SUCCESS) {
+        fprintf(stderr, "Couldn't initialize.");
+        exit(-1);
+    }
+    atexit(ap_terminate);
     if (ap_create_context(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);

@@ -52,6 +52,7 @@
  * <http://www.apache.org/>.
  */
 
+#include <stdlib.h>
 #include "apr_network_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
@@ -68,7 +69,20 @@ int main(int argc, char *argv[])
     char datasend[STRLEN] = "Send data test";
     char datarecv[STRLEN];
     char *local_ipaddr, *remote_ipaddr;
+    char *dest = "127.0.0.1";
     ap_uint32_t local_port, remote_port;
+
+    if (argc > 1) {
+        dest = argv[1];
+    }
+
+    fprintf(stdout, "Initializing.........");
+    if (ap_initialize() != APR_SUCCESS) {
+        fprintf(stderr, "Something went wrong\n");
+        exit(-1);
+    }
+    fprintf(stdout, "OK\n");
+    atexit(ap_terminate);
 
     fprintf(stdout, "Creating context.......");
     if (ap_create_context(&context, NULL) != APR_SUCCESS) {
@@ -103,7 +117,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "\tClient:  Connecting to socket.......");
 
     do {
-      stat = ap_connect(sock, "127.0.0.1");
+      stat = ap_connect(sock, dest);
     } while (stat == APR_ECONNREFUSED);
 
     if (stat != APR_SUCCESS) {

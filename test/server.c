@@ -52,6 +52,7 @@
  * <http://www.apache.org/>.
  */
 
+#include <stdlib.h>
 #include "apr_network_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
@@ -70,6 +71,14 @@ int main(int argc, char *argv[])
     char datarecv[STRLEN] = "Recv data test";
     char *local_ipaddr, *remote_ipaddr;
     ap_uint32_t local_port, remote_port;
+
+    fprintf(stdout, "Initializing.........");
+    if (ap_initialize() != APR_SUCCESS) {
+        fprintf(stderr, "Something went wrong\n");
+        exit(-1);
+    }
+    fprintf(stdout, "OK\n");
+    atexit(ap_terminate);
 
     fprintf(stdout, "Creating context.......");
     if (ap_create_context(&context, NULL) != APR_SUCCESS) {
