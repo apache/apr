@@ -325,13 +325,16 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, DWORD, WINAPI, NtSetTimerResolution, 0, (
     (ReqRes, Acquire, pNewRes));
 #define SetTimerResolution apr_winapi_NtSetTimerResolution
 
+/* ### These are ULONG_PTR values, but that's int32 for all we care
+ * until the Win64 port is prepared.
+ */
 typedef struct PBI {
     DWORD ExitStatus;
     PVOID PebBaseAddress;
-    ULONG_PTR AffinityMask;
+    ULONG AffinityMask;
     LONG  BasePriority;
-    ULONG_PTR UniqueProcessId;
-    ULONG_PTR InheritedFromUniqueProcessId;
+    ULONG UniqueProcessId;
+    ULONG InheritedFromUniqueProcessId;
 } PBI, *PPBI;
 
 APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, DWORD, WINAPI, NtQueryInformationProcess, 0, (
