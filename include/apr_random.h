@@ -65,7 +65,7 @@ typedef void apr_crypto_hash_add_t(apr_crypto_hash_t *hash,const void *data,
 typedef void apr_crypto_hash_finish_t(apr_crypto_hash_t *hash,
 				      unsigned char *result);
 
-// FIXME: make this opaque
+/* FIXME: make this opaque */
 struct apr_crypto_hash_t {
     apr_crypto_hash_init_t *init;
     apr_crypto_hash_add_t *add;
