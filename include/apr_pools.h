@@ -135,7 +135,7 @@ void        ap_term_alloc(void);        /* Tear down everything */
 
 /* routines to allocate memory from an pool... */
 
-API_EXPORT_NONSTD(char *) ap_psprintf(struct ap_pool_t *, const char *fmt, ...)
+APR_EXPORT_NONSTD(char *) ap_psprintf(struct ap_pool_t *, const char *fmt, ...)
     __attribute__((format(printf,2,3)));
 
 /* array and alist management... keeping lists of things.
@@ -234,8 +234,8 @@ extern int raise_sigstop_flags;
 
 /* Finally, some accounting */
 
-API_EXPORT(long) ap_bytes_in_pool(ap_pool_t *p);
-API_EXPORT(long) ap_bytes_in_free_blocks(void);
+APR_EXPORT(long) ap_bytes_in_pool(ap_pool_t *p);
+APR_EXPORT(long) ap_bytes_in_free_blocks(void);
 
 #ifdef __cplusplus
 }

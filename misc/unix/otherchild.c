@@ -67,7 +67,7 @@
 
 static ap_other_child_rec_t *other_children = NULL;
 
-API_EXPORT(void) ap_register_other_child(ap_proc_t *pid,
+APR_EXPORT(void) ap_register_other_child(ap_proc_t *pid,
                      void (*maintenance) (int reason, void *, int status),
                      void *data, ap_file_t *write_fd, ap_pool_t *p)
 {
@@ -87,7 +87,7 @@ API_EXPORT(void) ap_register_other_child(ap_proc_t *pid,
     other_children = ocr;
 }
 
-API_EXPORT(void) ap_unregister_other_child(void *data)
+APR_EXPORT(void) ap_unregister_other_child(void *data)
 {
     ap_other_child_rec_t **pocr, *nocr;
 
@@ -152,7 +152,7 @@ void ap_probe_writable_fds(void)
     }
 }
 
-API_EXPORT(ap_status_t) ap_reap_other_child(ap_proc_t *pid, int status)
+APR_EXPORT(ap_status_t) ap_reap_other_child(ap_proc_t *pid, int status)
 {
     ap_other_child_rec_t *ocr, *nocr;
 
@@ -168,7 +168,7 @@ API_EXPORT(ap_status_t) ap_reap_other_child(ap_proc_t *pid, int status)
     return APR_CHILD_NOTDONE;
 }
 
-API_EXPORT(void) ap_check_other_child(void)
+APR_EXPORT(void) ap_check_other_child(void)
 {
     ap_other_child_rec_t *ocr, *nocr;
     pid_t waitret; 

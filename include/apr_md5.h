@@ -107,18 +107,18 @@ typedef struct {
 #endif
 } ap_md5_ctx_t;
 
-API_EXPORT(ap_status_t) ap_MD5Init(ap_md5_ctx_t *context);
+APR_EXPORT(ap_status_t) ap_MD5Init(ap_md5_ctx_t *context);
 #if APR_HAS_XLATE
-API_EXPORT(ap_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate);
+APR_EXPORT(ap_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate);
 #else
 #define ap_MD5SetXlate(context, xlate) APR_ENOTIMPL
 #endif
-API_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
+APR_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
                                      const unsigned char *input,
                                      unsigned int inputLen);
-API_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
+APR_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
                                     ap_md5_ctx_t *context);
-API_EXPORT(ap_status_t) ap_MD5Encode(const char *password, const char *salt,
+APR_EXPORT(ap_status_t) ap_MD5Encode(const char *password, const char *salt,
                                      char *result, size_t nbytes);
 
 #ifdef __cplusplus
