@@ -327,14 +327,29 @@ msg=yes,dnl
 msg=no)
 AC_MSG_RESULT([$msg])
 
+AC_MSG_CHECKING(looking for in_addr in netinet/in.h)
+AC_TRY_COMPILE([
+#include <netinet/in.h>
+],[
+struct in_addr arg;
+arg.s_addr = htonl(INADDR_ANY);
+], [ have_in_addr="1" 
+msg=yes ] , [ have_in_addr="0"
+msg=no ])
+AC_MSG_RESULT([$msg])
+
 dnl Checks for library functions.
 AC_CHECK_FUNCS(pthread_sigmask)
 AC_CHECK_FUNCS(strcasecmp stricmp poll setsid)
 AC_CHECK_FUNCS(sigaction writev)
 AC_CHECK_FUNCS(sendfile, [ sendfile="1" ], [ sendfile="0" ]) 
 AC_CHECK_FUNCS(getpass)
+AC_CHECK_FUNC(inet_addr, [ inet_addr="1" ], [ inet_addr="0" ])
+AC_CHECK_FUNC(inet_network, [ inet_network="1" ], [ inet_network="0" ])
 AC_CHECK_FUNC(_getch)
 AC_SUBST(sendfile)
+AC_SUBST(inet_addr)
+AC_SUBST(inet_network)
 
 AC_CHECK_FUNCS(gmtime_r localtime_r)
 
@@ -370,6 +385,7 @@ AC_SUBST(fcntlser)
 AC_SUBST(procpthreadser)
 AC_SUBST(pthreadser)
 AC_SUBST(ssize_t_fmt)
+AC_SUBST(have_in_addr)
 
 AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
 [AC_TRY_COMPILE([#include <sys/types.h>
