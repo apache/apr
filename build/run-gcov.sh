@@ -85,7 +85,7 @@ but all tests should be moving to the unified framework, so this is correct.</p>
    <table border="0" width="100%" cellspacing="0">
 EOF
 
-for i in `find .. -name "*.bb" -maxdepth 1`; do
+for i in `find .. -name "*.bb" -maxdepth 1 | sort`; do
     percent=`gcov $i -o .. | grep "%" | awk -F'%' {'print $1'}`
     name=`echo $i | awk -F'/' {'print $2'}`
     basename=`echo $name | awk -F'.' {'print $1'}` 
