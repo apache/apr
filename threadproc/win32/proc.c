@@ -247,29 +247,32 @@ APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr,
             }
             return rv;
         }
-        len = strlen(password) + 1;
-        wlen = len;
-        wpassword = apr_palloc(attr->pool, wlen * sizeof(apr_wchar_t));
-        if ((rv = apr_conv_utf8_to_ucs2(password, &len, wpassword, &wlen))
-                   != APR_SUCCESS) {
-            if (attr->errfn) {
-                attr->errfn(attr->pool, rv, 
-                            apr_pstrcat(attr->pool, 
+        if (password) {
+            len = strlen(password) + 1;
+            wlen = len;
+            wpassword = apr_palloc(attr->pool, wlen * sizeof(apr_wchar_t));
+            if ((rv = apr_conv_utf8_to_ucs2(password, &len, wpassword, &wlen))
+                       != APR_SUCCESS) {
+                if (attr->errfn) {
+                    attr->errfn(attr->pool, rv, 
+                                apr_pstrcat(attr->pool, 
                                         "utf8 to ucs2 conversion failed" 
                                          " on password: ", password, NULL));
+                }
+                return rv;
             }
-            return rv;
         }
         if (!LogonUserW(wusername, 
                         NULL, 
-                        wpassword, 
+                        wpassword ? wpassword : L"",
                         LOGON32_LOGON_NETWORK,
                         LOGON32_PROVIDER_DEFAULT,
                         &user)) {
             /* Logon Failed */            
             return apr_get_os_error();
-        } 
-        memset(wpassword, 0, wlen * sizeof(apr_wchar_t));
+        }
+        if (wpassword)
+            memset(wpassword, 0, wlen * sizeof(apr_wchar_t));
         /* Get the primary token for user */
         if (!DuplicateTokenEx(user, 
                               TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY, 
