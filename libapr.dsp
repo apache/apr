@@ -1,5 +1,5 @@
 # Microsoft Developer Studio Project File - Name="libapr" - Package Owner=<4>
-# Microsoft Developer Studio Generated Build File, Format Version 5.00
+# Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
@@ -22,6 +22,7 @@ CFG=libapr - Win32 Debug
 !MESSAGE 
 
 # Begin Project
+# PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
@@ -51,8 +52,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib /nologo /base:"0x6EE0000" /subsystem:windows /dll /incremental:no /map /machine:I386 /OPT:NOREF
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib /nologo /base:"0x6EE0000" /subsystem:windows /dll /incremental:no /map /machine:I386 /OPT:NOREF
+# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib /nologo /base:"0x6EE0000" /subsystem:windows /dll /map /machine:I386 /OPT:NOREF
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib /nologo /base:"0x6EE0000" /subsystem:windows /dll /map /machine:I386 /OPT:NOREF
 
 !ELSEIF  "$(CFG)" == "libapr - Win32 Debug"
 
@@ -67,8 +68,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fd"Debug\apr" /FD /c
+# ADD BASE CPP /nologo /MDd /W3 /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
+# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fd"Debug\apr" /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -390,11 +391,11 @@ SOURCE=.\mmap\win32\mmap.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\user\win32\userinfo.c
+SOURCE=.\user\win32\groupinfo.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\user\win32\groupinfo.c
+SOURCE=.\user\win32\userinfo.c
 # End Source File
 # End Group
 # End Group
@@ -532,7 +533,15 @@ SOURCE=.\include\apr_time.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\include\apr_user.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\include\apr_uuid.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_want.h
 # End Source File
 # Begin Source File
 
