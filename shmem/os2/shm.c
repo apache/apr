@@ -143,3 +143,5 @@ APR_DECLARE(apr_size_t) apr_shm_size_get(const apr_shm_t *m)
     DosQueryMem(m->memblock, &size, &flags);
     return size;
 }
+
+APR_POOL_IMPLEMENT_ACCESSOR(shm)
