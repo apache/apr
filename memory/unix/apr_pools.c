@@ -75,19 +75,19 @@
 #ifdef HAVE_SYS_SIGNAL_H
 #include <sys/signal.h>
 #endif
-#ifdef APR_HAVE_SIGNAL_H
+#if APR_HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-#ifdef APR_HAVE_SYS_WAIT_H
+#if APR_HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#ifdef APR_HAVE_SYS_TYPES_H
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef APR_HAVE_FCNTL_H
+#if APR_HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 

@@ -59,13 +59,13 @@
 #include "apr_portable.h"
 #include "atime.h"
 
-#ifdef APR_HAVE_ERRNO_H
+#if APR_HAVE_ERRNO_H
 #include <errno.h>
 #endif
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif
-#ifdef APR_HAVE_DIRENT_H
+#if APR_HAVE_DIRENT_H
 #include <dirent.h>
 #endif
 #ifdef HAVE_SYS_STAT_H
