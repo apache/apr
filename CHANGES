@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Use getpwnam_r() and getgrgid_r() instead of getpwnam() and getgrgid()
+     with threaded builds on glibc (2.1, at least) to avoid thread safety
+     issues.  [Jeff Trawick]
+
   *) Added apr_lock_tryacquire.  It will attempt to acquire the lock, but 
      will not block if it can not acquire the lock.  Returns APR_EBUSY if 
      acquistion can not happen.  [Justin Erenkrantz]

@@ -62,6 +62,9 @@
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+#if APR_HAVE_UNISTD_H
+#include <unistd.h> /* for _POSIX_THREAD_SAFE_FUNCTIONS */
+#endif
 
 static apr_status_t getpwnam_safe(const char *username,
                                   struct passwd **pw)
