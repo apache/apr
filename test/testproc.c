@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
         if (!strcmp(buf, teststr))
             printf("OK\n");
         else {
-            printf( "Uh-Oh\n", buf);
+            printf( "Uh-Oh\n");
             printf("  (I actually got %s_\n", buf);
         }
     }
