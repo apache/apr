@@ -88,6 +88,10 @@
 #define ap_note_subprocess apr_pool_note_subprocess
 /** @deprecated @see apr_pool_cleanup_null */
 #define ap_null_cleanup apr_pool_cleanup_null
+/** @deprecated @see apr_filepath_merge */
+#define ap_os_canonical_filename apr_filepath_merge
+/** @deprecated @see apr_filepath_merge */
+#define ap_os_case_canonical_filename apr_filepath_merge
 /** @deprecated @see apr_dso_load */
 #define ap_os_dso_load apr_dso_load
 /** @deprecated @see apr_dso_unload */
@@ -96,8 +100,13 @@
 #define ap_os_dso_sym apr_dso_sym
 /** @deprecated @see apr_dso_error */
 #define ap_os_dso_error apr_dso_error
+/** @deprecated @see apr_filepath_merge
+ *  @tip apr_filepath_merge rejects invalid filenames */
+#define ap_os_is_filename_valid apr_filepath_merge
 /** @deprecated @see apr_proc_kill */
 #define ap_os_kill apr_proc_kill
+/** @deprecated @see apr_filepath_merge */
+#define ap_os_systemcase_canonical_filename apr_filepath_merge
 /** @deprecated @see apr_table_overlap */
 #define ap_overlap_tables apr_table_overlap
 /** @deprecated @see apr_table_overlay */
