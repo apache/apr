@@ -362,7 +362,7 @@ case $host in
             apr_atomic_sparc_compile=apr_atomic_sparc.lo
             sparc_arch=`uname -m`
             is_gnu_as=`${AS} --help 2>/dev/null | grep gnu.org`
-            if test  -n "$is_gnu_as" 
+            if test -n "$is_gnu_as" 
             then
                 case "$sparc_arch" in
                  sun4c|sun4m|sun4d|sun4t|sun4)
@@ -372,6 +372,7 @@ case $host in
                  *)
                     ASFLAGS="-xarch=v8plus -K PIC"
                     ASCPPFLAGS="-D_ASM -D__STDC__=0"
+                    ASCPP="gcc -E"
                     ;;
                 esac
             else
