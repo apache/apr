@@ -258,16 +258,12 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
 
     /* Initialize the overlapped structure */
     memset(&overlapped,'\0', sizeof(overlapped));
-    if (file->pOverlapped)
-        overlapped.hEvent = file->pOverlapped->hEvent;
-#ifdef WAIT_FOR_EVENT
-    else
-        overlapped.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-#endif
     if (offset && *offset) {
-        file->pOverlapped->Offset     = (DWORD)*offset;
-        file->pOverlapped->OffsetHigh = (DWORD)(*offset >> 32);
+        overlapped.Offset = *offset;
     }
+#ifdef WAIT_FOR_EVENT
+    overlapped.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+#endif
 
     /* Handle the goofy case of sending headers/trailers and a zero byte file */
     if (!bytes_to_send && hdtr) {
@@ -324,14 +320,15 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         if (!rv) {
             status = apr_get_netos_error();
             if (status == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
-                if (overlapped.hEvent)
-                    rv = WaitForSingleObject(overlapped.hEvent, 
-                                             (DWORD)(sock->timeout >= 0 
-                                                ? sock->timeout : INFINITE));
-                else
-                    rv = WaitForSingleObject((HANDLE) sock->sock, 
-                                             (DWORD)(sock->timeout >= 0 
-                                                ? sock->timeout : INFINITE));
+#ifdef WAIT_FOR_EVENT
+                rv = WaitForSingleObject(overlapped.hEvent, 
+                                         (DWORD)(sock->timeout >= 0 
+                                            ? sock->timeout : INFINITE));
+#else
+                rv = WaitForSingleObject((HANDLE) sock->sock, 
+                                         (DWORD)(sock->timeout >= 0 
+                                            ? sock->timeout : INFINITE));
+#endif
                 if (rv == WAIT_OBJECT_0)
                     status = APR_SUCCESS;
                 else if (rv == WAIT_TIMEOUT)
@@ -379,8 +376,7 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     }
 
 #ifdef WAIT_FOR_EVENT
-    if (!file->pOverlapped || !file->pOverlapped->hEvent)
-        CloseHandle(overlapped.hEvent);
+    CloseHandle(overlapped.hEvent);
 #endif
     return status;
 }
