@@ -68,6 +68,7 @@
 
 int main(void)
 {
+#if APR_HAS_MMAP    
     apr_pool_t *context;
     apr_mmap_t *themmap = NULL;
     apr_file_t *thefile = NULL;
@@ -131,4 +132,9 @@ int main(void)
     fprintf (stdout,"\nTest Complete\n");
 
     return 1;
+#else    
+    fprintf(stdout,"APR MMAP Test\n*************\n\n");
+    fprintf(stdout,"Failed!  APR was not built with MMAP.\n");
+    return -1;
+#endif
 }
