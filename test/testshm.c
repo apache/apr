@@ -216,11 +216,11 @@ static apr_status_t test_named(apr_pool_t *parpool)
     }
     fprintf(stdout, "OK\n");
 
-    printf("Non-related Processes Test\n");
+    printf("fork()ing and exec()ing children:\n");
     pidproducer = fork();
     if (pidproducer == 0) { /* child */
         /* FIXME: exec a producer */
-        printf("starting consumer\n");
+        printf("starting consumer.....\n");
         if (execlp("testshmconsumer", "testshmconsumer", (char*)0) < 0) {
             return errno;
         }
@@ -230,7 +230,7 @@ static apr_status_t test_named(apr_pool_t *parpool)
         pidconsumer = fork();
         if (pidconsumer == 0) { /* child */
             /* FIXME: exec a producer */
-            printf("starting producer\n");
+            printf("starting producer.....\n");
             if (execlp("testshmproducer", "testshmproducer", (char*)0) < 0) {
                 return errno;
             }
@@ -249,9 +249,17 @@ static apr_status_t test_named(apr_pool_t *parpool)
     if (waitpid(pidconsumer, &exit_int, 0) < 0) {
         return errno;
     }
+    if (WIFEXITED(exit_int)) {
+        printf("Producer was unsuccessful.\n");
+        return APR_EGENERAL;
+    }
     printf("Waiting for consumer to exit.\n");
     if (waitpid(pidproducer, &exit_int, 0) < 0) {
         return errno;
+    }
+    if (WIFEXITED(exit_int)) {
+        printf("Consumer was unsuccessful.\n");
+        return APR_EGENERAL;
     }
 
     apr_pool_destroy(pool);
