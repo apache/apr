@@ -167,14 +167,10 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     int lasterror = APR_SUCCESS;
     DWORD dwFlags = 0;
 
-#if 0
-    if (flags | APR_SENDFILE_KEEP_SOCKET)
+    if (flags & APR_SENDFILE_DISCONNECT_SOCKET) {
         dwFlags |= TF_REUSE_SOCKET;
-    if (flags | APR_SENDFILE_CLOSE_SOCKET)
         dwFlags |= TF_DISCONNECT;
-#else
-    dwFlags = 0;
-#endif
+    }
 
     /* TransmitFile can only send one header and one footer */
     memset(&tfb, '\0', sizeof (tfb));
