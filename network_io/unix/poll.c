@@ -232,9 +232,15 @@ apr_status_t apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *con
     (*new)->read = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
     (*new)->write = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
     (*new)->except = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
+    (*new)->read_set = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
+    (*new)->write_set = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
+    (*new)->except_set = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
     FD_ZERO((*new)->read);
     FD_ZERO((*new)->write);
     FD_ZERO((*new)->except);
+    FD_ZERO((*new)->read_set);
+    FD_ZERO((*new)->write_set);
+    FD_ZERO((*new)->except_set);
     (*new)->highsock = -1;
     return APR_SUCCESS;
 }
@@ -243,13 +249,13 @@ apr_status_t apr_poll_socket_add(apr_pollfd_t *aprset,
                                apr_socket_t *sock, apr_int16_t event)
 {
     if (event & APR_POLLIN) {
-        FD_SET(sock->socketdes, aprset->read);
+        FD_SET(sock->socketdes, aprset->read_set);
     }
     if (event & APR_POLLPRI) {
-        FD_SET(sock->socketdes, aprset->except);
+        FD_SET(sock->socketdes, aprset->except_set);
     }
     if (event & APR_POLLOUT) {
-        FD_SET(sock->socketdes, aprset->write);
+        FD_SET(sock->socketdes, aprset->write_set);
     }
     if (sock->socketdes > aprset->highsock) {
         aprset->highsock = sock->socketdes;
@@ -262,13 +268,13 @@ apr_status_t apr_poll_socket_mask(apr_pollfd_t *aprset,
                                   apr_int16_t events)
 {
     if (events & APR_POLLIN) {
-        FD_CLR(sock->socketdes, aprset->read);
+        FD_CLR(sock->socketdes, aprset->read_set);
     }
     if (events & APR_POLLPRI) {
-        FD_CLR(sock->socketdes, aprset->except);
+        FD_CLR(sock->socketdes, aprset->except_set);
     }
     if (events & APR_POLLOUT) {
-        FD_CLR(sock->socketdes, aprset->write);
+        FD_CLR(sock->socketdes, aprset->write_set);
     }
     return APR_SUCCESS;
 }
@@ -288,6 +294,10 @@ apr_status_t apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
         tvptr = &tv;
     }
 
+    memcpy(aprset->read, aprset->read_set, sizeof(fd_set));
+    memcpy(aprset->write, aprset->write_set, sizeof(fd_set));
+    memcpy(aprset->except, aprset->except_set, sizeof(fd_set));
+
     rv = select(aprset->highsock + 1, aprset->read, aprset->write, 
                 aprset->except, tvptr);
     
@@ -306,7 +316,7 @@ apr_status_t apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_po
     apr_int16_t revents = 0;
     char data[1];
     int flags = MSG_PEEK;
-
+  
     /* We just want to PEEK at the data, so I am setting up a dummy WSABUF
      * variable here.
      */
@@ -350,22 +360,22 @@ apr_status_t apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_po
 
 apr_status_t apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
 {
-    FD_CLR(sock->socketdes, aprset->read);
-    FD_CLR(sock->socketdes, aprset->except);
-    FD_CLR(sock->socketdes, aprset->write);
+    FD_CLR(sock->socketdes, aprset->read_set);
+    FD_CLR(sock->socketdes, aprset->except_set);
+    FD_CLR(sock->socketdes, aprset->write_set);
     return APR_SUCCESS;
 }
 
 apr_status_t apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_t event)
 {
     if (event & APR_POLLIN) {
-        FD_ZERO(aprset->read);
+        FD_ZERO(aprset->read_set);
     }
     if (event & APR_POLLPRI) {
-        FD_ZERO(aprset->except);
+        FD_ZERO(aprset->except_set);
     }
     if (event & APR_POLLOUT) {
-        FD_ZERO(aprset->write);
+        FD_ZERO(aprset->write_set);
     }
     aprset->highsock = 0;
     return APR_SUCCESS;
