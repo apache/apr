@@ -872,7 +872,7 @@ API_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (apr_abort)(int retcode
     return NULL;
 }
 
-/* return APR_TRUE iff a is an ancestor of b
+/* return TRUE iff a is an ancestor of b
  * NULL is considered an ancestor of all pools
  */
 API_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b)

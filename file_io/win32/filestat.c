@@ -96,9 +96,9 @@ BOOLEAN is_exe(const char* fname, ap_pool_t *cont) {
 
     if (ext && (!strcasecmp(ext,".exe") || !strcasecmp(ext,".com") || 
                 !strcasecmp(ext,".bat") || !strcasecmp(ext,".cmd"))) {
-        return APR_TRUE;
+        return TRUE;
     }
-    return APR_FALSE;
+    return FALSE;
 }
 
 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
