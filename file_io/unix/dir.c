@@ -265,12 +265,6 @@ ap_status_t ap_get_dir_filename(char **new, ap_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir)
- *    convert the dir from apr type to os specific type.
- * arg 1) The os specific dir we are converting to
- * arg 2) The apr dir to convert.
- */   
 ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir)
 {
     if (dir == NULL) {
@@ -280,14 +274,6 @@ ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir, 
- *                           ap_context_t *cont)
- *    convert the dir from os specific type to apr type.
- * arg 1) The apr dir we are converting to.
- * arg 2) The os specific dir to convert
- * arg 3) The context to use when creating to apr directory.
- */
 ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir,
                           ap_context_t *cont)
 {

@@ -168,14 +168,6 @@ ap_status_t ap_remove_file(char *path, ap_context_t *cont)
     }
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file) 
- *    convert the file from apr type to os specific type.
- * arg 1) The os specific file we are converting to
- * arg 2) The apr file to convert.
- * NOTE:  On Unix, it is only possible to get a file descriptor from 
- *        an apr file type.
- */
 ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
 {
     if (thefile == NULL)
@@ -189,16 +181,6 @@ ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
- *                            ap_context_t *cont) 
- *    convert the file from os specific type to apr type.
- * arg 1) The apr file we are converting to.
- * arg 2) The os specific file to convert
- * arg 3) The context to use if it is needed.
- * NOTE:  On Unix, it is only possible to put a file descriptor into
- *        an apr file type.
- */
 ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
                            ap_context_t *cont)
 {

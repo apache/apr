@@ -54,22 +54,10 @@
 
 #include "dso.h"
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_dso_init(void)
- *    Initialize the underlying DSO library.
- */
 ap_status_t ap_dso_init(void){
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path,
- *                         ap_context_t *ctx)
- *    Load a DSO library.
- * arg 1) Location to store new handle for the DSO.
- * arg 2) Path to the DSO library
- * arg 3) Context to use. 
- */
 ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, 
                         ap_context_t *ctx)
 {
@@ -91,11 +79,6 @@ ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path,
     return APR_SUCCESS;
 }
     
-/* ***APRDOC********************************************************
- * ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
- *    Close a DSO library.
- * arg 1) handle to close.
- */
 ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
 {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
@@ -109,14 +92,6 @@ ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, ap_dso_handle_t *handle
- *                        const char *symname)
- *    Load a symbol from a DSO handle.
- * arg 1) Location to store the loaded symbol
- * arg 2) handle to load from.
- * arg 3) Name of the symbol to load.
- */
 ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, 
                        ap_dso_handle_t *handle, 
                        const char *symname)

@@ -80,7 +80,10 @@ typedef ap_int64_t ap_time_t;
 #define AP_USEC_PER_SEC (1000000LL)
 #endif
 
-/* the time right now */
+/* ***APRDOC********************************************************
+ * ap_time_t ap_now(void)
+ *    return the current time
+ */
 ap_time_t ap_now(void);
 
 /* a structure similar to ANSI struct tm with the following differences:
@@ -101,11 +104,37 @@ typedef struct {
     ap_int32_t tm_gmtoff; /* seconds east of UTC */
 } ap_exploded_time_t;
 
-/* convert an ANSI time_t to ap_time_t */
+/* ***APRDOC********************************************************
+ * ap_status_t ap_ansi_time_to_ap_time(ap_time_t *result, time_t input)
+ *    convert an ansi time_t to an ap_time_t
+ * arg 1) the resulting ap_time_t
+ * arg 2) the time_t to convert
+ */
 ap_status_t ap_ansi_time_to_ap_time(ap_time_t *result, time_t input);
 
+/* ***APRDOC********************************************************
+ * ap_status_t ap_explode_gmt(ap_exploded_time_t *result, ap_time_t input)
+ *   convert a time to its human readable components in GMT timezone
+ * arg 1) the exploded time
+ * arg 2) the time to explode
+ */
 ap_status_t ap_explode_gmt(ap_exploded_time_t *result, ap_time_t input);
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_explode_localtime(ap_exploded_time_t *result, ap_time_t input)
+ *   convert a time to its human readable components in local timezone
+ * arg 1) the exploded time
+ * arg 2) the time to explode
+ */
 ap_status_t ap_explode_localtime(ap_exploded_time_t *result, ap_time_t input);
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_implode_time(ap_time_t *t, ap_exploded_time_t *xt)
+ *    Convert time value from human readable format to number of seconds 
+ *    since epoch
+ * arg 1) the resulting imploded time
+ * arg 2) the input exploded time
+ */
 ap_status_t ap_implode_time(ap_time_t *result, ap_exploded_time_t *input);
 
 /* ap_rfc822_date formats dates in the RFC822
