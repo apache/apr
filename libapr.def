@@ -113,7 +113,7 @@ thread_ready   @79
 	ap_get_threadkeydata    @105
 	ap_set_threadkeydata    @106
 	ap_get_procdata    @107
-	ap_set_procdata    @108
+;	ap_set_procdata    @108
 	ap_get_os_proc   @109
 	ap_get_os_thread   @110
 	ap_get_os_threadkey   @111
