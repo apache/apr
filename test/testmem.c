@@ -84,7 +84,7 @@ typedef struct _test_ {
     apr_time_t howlong;
 } _test_;
 
-#define T_QTY 4 /* how many tests do we have?? */
+#define T_QTY 5 /* how many tests do we have?? */
 static _test_ t[T_QTY];
 
 static void its_an_sms(apr_sms_t *ams, _test_ *t, char *name, int lt)
@@ -434,7 +434,7 @@ static void print_timed_results(void)
 
 int main(int argc, char **argv)
 {
-    apr_sms_t *ams, *bms, *dms;
+    apr_sms_t *ams, *bms, *dms, *tms;
     apr_pool_t *pool;
     int i;
     
@@ -452,12 +452,15 @@ int main(int argc, char **argv)
                  apr_sms_tracking_create(&bms, ams))
     STD_TEST_NEQ("    Creating a 64 byte block system",
                  apr_sms_blocks_create(&dms, ams, 64))
+    STD_TEST_NEQ("    Creating a trivial system",
+                 apr_sms_trivial_create(&tms, ams))
 
     its_a_pool(pool, &t[0], "Pool code",     1);
     its_an_sms(ams,  &t[1], "Standard sms",  1);
     t[1].reset_fn = NULL;
     its_an_sms(bms,  &t[2], "Tracking sms",  1);
     its_an_sms(dms,  &t[3], "Blocks sms",    0);
+    its_an_sms(tms,  &t[4], "Trivial sms",   1);
         
     printf("Checking sms identities...\n");
     TEST_NEQ("    Checking identity of standard memory system",
@@ -469,6 +472,9 @@ int main(int argc, char **argv)
     TEST_NEQ("    Checking the identity of blocks memory system",
              strcmp(apr_sms_identity(dms), "BLOCKS"), 0,
              "OK", "Not BLOCKS")
+    TEST_NEQ("    Checking the identity of trivial memory system",
+             strcmp(apr_sms_identity(tms), "TRIVIAL"), 0,
+             "OK", "Not TRIVIAL")
 
     printf("Big allocation test...\n");
     for (i = 0; i < T_QTY; i++) {
@@ -508,6 +514,8 @@ int main(int argc, char **argv)
     
     printf("Destroying the memory...\n");
 
+    STD_TEST_NEQ("Trying to destroy the trivial memory system",
+                 apr_sms_destroy(tms))
     STD_TEST_NEQ("Trying to destroy the tracking memory system",
                  apr_sms_destroy(bms))
     STD_TEST_NEQ("Trying to destroy the block memory system",

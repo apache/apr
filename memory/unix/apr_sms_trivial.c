@@ -1,0 +1,439 @@
+/* ====================================================================
+ * The Apache Software License, Version 1.1
+ *
+ * Copyright (c) 2000-2001 The Apache Software Foundation.  All rights
+ * reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution,
+ *    if any, must include the following acknowledgment:
+ *       "This product includes software developed by the
+ *        Apache Software Foundation (http://www.apache.org/)."
+ *    Alternately, this acknowledgment may appear in the software itself,
+ *    if and wherever such third-party acknowledgments normally appear.
+ *
+ * 4. The names "Apache" and "Apache Software Foundation" must
+ *    not be used to endorse or promote products derived from this
+ *    software without prior written permission. For written
+ *    permission, please contact apache@apache.org.
+ *
+ * 5. Products derived from this software may not be called "Apache",
+ *    nor may "Apache" appear in their name, without prior written
+ *    permission of the Apache Software Foundation.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * ====================================================================
+ *
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the Apache Software Foundation.  For more
+ * information on the Apache Software Foundation, please see
+ * <http://www.apache.org/>.
+ */
+
+#include "apr.h"
+#include "apr_general.h"
+#include "apr_private.h"
+#include "apr_sms.h"
+#include "apr_sms_trivial.h"
+#include "apr_lock.h"
+
+static const char *module_identity = "TRIVIAL";
+
+/*
+ * Simple trivial memory system
+ */
+
+
+/* INTERNALLY USED STRUCTURES */
+
+typedef struct block_t
+{
+    struct node_t  *node;
+} block_t;
+
+typedef struct node_t
+{
+    struct node_t  *next;
+    struct node_t  *prev;
+    char           *first_avail;
+    apr_size_t      avail_size;
+    apr_uint16_t    count;
+} node_t;
+
+typedef struct apr_sms_trivial_t
+{
+    apr_sms_t            sms_hdr;
+    node_t               used_sentinel;
+    node_t               free_sentinel;
+    node_t              *self;
+    apr_size_t           min_alloc;
+    apr_size_t           min_free;
+    apr_size_t           max_free;
+    apr_lock_t          *lock;
+} apr_sms_trivial_t;
+
+#define SIZEOF_BLOCK_T   APR_ALIGN_DEFAULT(sizeof(block_t))
+#define SIZEOF_NODE_T    APR_ALIGN_DEFAULT(sizeof(node_t))
+#define SIZEOF_TRIVIAL_T APR_ALIGN_DEFAULT(sizeof(apr_sms_trivial_t))
+
+#define BLOCK_T(mem)     ((block_t *)(mem))
+#define NODE_T(mem)      ((node_t *)(mem))
+#define TRIVIAL_T(sms)   ((apr_sms_trivial_t *)(sms))
+
+/* Magic numbers :) */
+
+#define MIN_ALLOC  0x2000 
+#define MIN_FREE   0x1000
+#define MAX_FREE  0x80000 
+
+static void *apr_sms_trivial_malloc(apr_sms_t *sms,
+                                     apr_size_t size)
+{
+    node_t *node, *sentinel;
+    apr_size_t node_size;
+    void *mem;
+
+    /* Round up the size to the next 8 byte boundary */
+    size = APR_ALIGN_DEFAULT(size) + SIZEOF_BLOCK_T;
+
+    if (TRIVIAL_T(sms)->lock)
+        apr_lock_acquire(TRIVIAL_T(sms)->lock);
+    
+    node = TRIVIAL_T(sms)->used_sentinel.prev;
+
+    if (node->avail_size >= size) {
+        mem = node->first_avail;
+        node->avail_size -= size;
+        node->first_avail += size;
+        node->count++;
+
+        if (TRIVIAL_T(sms)->lock)
+            apr_lock_release(TRIVIAL_T(sms)->lock);
+    
+        BLOCK_T(mem)->node = node;
+        mem = (char *)mem + SIZEOF_BLOCK_T;
+
+        return mem;
+    }
+
+    /* reset the 'last' block, it will be replaced soon */
+    node->avail_size += node->first_avail - ((char *)node + SIZEOF_NODE_T);
+    node->first_avail = (char *)node + SIZEOF_NODE_T;
+
+    /* browse the free list for a useable block */
+    sentinel = &TRIVIAL_T(sms)->free_sentinel;
+    sentinel->avail_size = size;
+
+    node = sentinel->next;
+    while (node->avail_size < size)
+        node = node->next;
+
+    if (node != sentinel) {
+        node->prev->next = node->next;
+        node->next->prev = node->prev;
+
+        node->prev = TRIVIAL_T(sms)->used_sentinel.prev;
+        node->prev->next = node;
+        node->next = &TRIVIAL_T(sms)->used_sentinel;
+        TRIVIAL_T(sms)->used_sentinel.prev = node;
+        
+        if (node != TRIVIAL_T(sms)->self)
+            TRIVIAL_T(sms)->max_free += node->avail_size;
+
+        mem = node->first_avail;
+        node->avail_size -= size;
+        node->first_avail += size;
+        node->count = 1;
+
+        if (TRIVIAL_T(sms)->lock)
+            apr_lock_release(TRIVIAL_T(sms)->lock);
+
+        BLOCK_T(mem)->node = node;
+        mem = (char *)mem + SIZEOF_BLOCK_T;
+
+        return mem;
+    }
+    
+    /* we have to allocate a new block from our parent */
+    node_size = size + TRIVIAL_T(sms)->min_free;
+    if (node_size < TRIVIAL_T(sms)->min_alloc)
+        node_size = TRIVIAL_T(sms)->min_alloc;
+    
+    node = apr_sms_malloc(sms->parent, node_size);
+    if (!node) {
+        node = TRIVIAL_T(sms)->used_sentinel.prev;
+        node->first_avail += node->avail_size;
+        node->avail_size = 0;
+
+        if (TRIVIAL_T(sms)->lock)
+            apr_lock_release(TRIVIAL_T(sms)->lock);
+        
+        return NULL;
+    }
+
+    node->prev = TRIVIAL_T(sms)->used_sentinel.prev;
+    node->prev->next = node;
+    node->next = &TRIVIAL_T(sms)->used_sentinel;
+    TRIVIAL_T(sms)->used_sentinel.prev = node;
+    
+    mem = node->first_avail = (char *)node + SIZEOF_NODE_T;
+    node->first_avail += size;
+    node->avail_size = node_size - (node->first_avail - (char *)node);
+    node->count = 1;
+
+    if (TRIVIAL_T(sms)->lock)
+        apr_lock_release(TRIVIAL_T(sms)->lock);
+
+    BLOCK_T(mem)->node = node;
+    mem = (char *)mem + SIZEOF_BLOCK_T;
+    
+    return mem;
+}
+
+static apr_status_t apr_sms_trivial_free(apr_sms_t *sms, void *mem)
+{
+    node_t *node;
+
+    node = BLOCK_T((char *)mem - SIZEOF_BLOCK_T)->node;
+
+    if (TRIVIAL_T(sms)->lock)
+        apr_lock_acquire(TRIVIAL_T(sms)->lock);
+
+    node->count--;
+
+    if (node->count) {
+        if (TRIVIAL_T(sms)->lock)
+            apr_lock_release(TRIVIAL_T(sms)->lock);
+
+        return APR_SUCCESS;
+    }
+
+    node->avail_size += node->first_avail - ((char *)node + SIZEOF_NODE_T);
+    node->first_avail = (char *)node + SIZEOF_NODE_T;
+    
+    if (TRIVIAL_T(sms)->used_sentinel.prev != node) {
+        node->next->prev = node->prev;
+        node->prev->next = node->next;
+
+        if (sms->parent->free_fn &&
+            node->avail_size > TRIVIAL_T(sms)->max_free &&
+            node != TRIVIAL_T(sms)->self) {
+            if (TRIVIAL_T(sms)->lock)
+                apr_lock_release(TRIVIAL_T(sms)->lock);
+
+            return apr_sms_free(sms->parent, node);
+        }
+        
+        node->prev = TRIVIAL_T(sms)->free_sentinel.prev;
+        node->prev->next = node;
+        node->next = &TRIVIAL_T(sms)->free_sentinel;
+        TRIVIAL_T(sms)->free_sentinel.prev = node;
+
+        if (node != TRIVIAL_T(sms)->self)
+            TRIVIAL_T(sms)->max_free -= node->avail_size;
+    }
+
+    if (TRIVIAL_T(sms)->lock)
+        apr_lock_release(TRIVIAL_T(sms)->lock);
+
+    return APR_SUCCESS;
+}
+
+static apr_status_t apr_sms_trivial_reset(apr_sms_t *sms)
+{
+    node_t *node, *prev, *used_sentinel, *free_sentinel;
+ 
+    if (TRIVIAL_T(sms)->lock)
+        apr_lock_acquire(TRIVIAL_T(sms)->lock);
+
+    used_sentinel = &TRIVIAL_T(sms)->used_sentinel;
+    free_sentinel = &TRIVIAL_T(sms)->free_sentinel;
+
+    node = TRIVIAL_T(sms)->self;
+    node->avail_size += node->first_avail - ((char *)node + SIZEOF_NODE_T);
+    node->first_avail = (char *)node + SIZEOF_NODE_T;
+    node->count = 0;
+    node->prev->next = node->next;
+    node->next->prev = node->prev;
+    
+    node = used_sentinel->prev;
+    node->avail_size += node->first_avail - ((char *)node + SIZEOF_NODE_T);
+    node->first_avail = (char *)node + SIZEOF_NODE_T;
+    
+    if (sms->parent->free_fn) {
+        used_sentinel->avail_size = TRIVIAL_T(sms)->min_alloc;
+        while (TRIVIAL_T(sms)->max_free > TRIVIAL_T(sms)->min_alloc) {
+            if (node->avail_size <= TRIVIAL_T(sms)->max_free) {
+                if (node == used_sentinel)
+                    break;
+            
+                TRIVIAL_T(sms)->max_free -= node->avail_size;
+                node->prev->next = node->next;
+                node->next->prev = node->prev;
+        
+                prev = node->prev;
+            
+                node->next = free_sentinel->next;
+                free_sentinel->next = node;
+                node->next->prev = node;
+                node->prev = free_sentinel;
+
+                node = prev;
+            }
+            else
+                node = node->prev;
+        }
+        
+        used_sentinel->prev->next = NULL;
+        while ((node = used_sentinel->next) != NULL) {
+            used_sentinel->next = node->next;
+            apr_sms_free(sms->parent, node);
+        }
+    }
+    else {
+        node = used_sentinel->prev;
+        node->next = free_sentinel->next;
+        node->next->prev = node;
+
+        node = used_sentinel->next;
+        node->prev = free_sentinel;
+        free_sentinel->next = node;
+    }
+        
+    node = TRIVIAL_T(sms)->self;
+    node->next = node->prev = used_sentinel;
+    used_sentinel->next = used_sentinel->prev = node;
+
+    if (TRIVIAL_T(sms)->lock)
+        apr_lock_release(TRIVIAL_T(sms)->lock);
+
+    return APR_SUCCESS;
+}
+
+static apr_status_t apr_sms_trivial_pre_destroy(apr_sms_t *sms)
+{
+    /* This function WILL always be called.  However, be aware that the
+     * main sms destroy function knows that it's not wise to try and destroy
+     * the same piece of memory twice, so the destroy function in a child won't
+     * neccesarily be called.  To guarantee we destroy the lock it's therefore
+     * destroyed here.
+     */
+        
+    if (TRIVIAL_T(sms)->lock) {
+        apr_lock_acquire(TRIVIAL_T(sms)->lock);
+        apr_lock_destroy(TRIVIAL_T(sms)->lock);
+        TRIVIAL_T(sms)->lock = NULL;
+    }
+    
+    return APR_SUCCESS;    
+}
+
+static apr_status_t apr_sms_trivial_destroy(apr_sms_t *sms)
+{
+    apr_sms_trivial_t *tms;
+    node_t *node, *next;
+
+    tms = TRIVIAL_T(sms);
+    node = tms->self;
+    node->next->prev = node->prev;
+    node->prev->next = node->next;
+
+    tms->free_sentinel.prev->next = NULL;
+    tms->used_sentinel.prev->next = tms->free_sentinel.next;
+    
+    node = tms->used_sentinel.next;
+    while (node) {
+        next = node->next;
+        apr_sms_free(sms->parent, node);
+        node = next;
+    }
+
+    apr_sms_free(sms->parent, sms);
+
+    return APR_SUCCESS;
+}
+
+
+APR_DECLARE(apr_status_t) apr_sms_trivial_create(apr_sms_t **sms, 
+                                                  apr_sms_t *pms)
+{
+    return apr_sms_trivial_create_ex(sms, pms, MIN_ALLOC, MIN_FREE, MAX_FREE);
+}
+
+APR_DECLARE(apr_status_t) apr_sms_trivial_create_ex(apr_sms_t **sms, 
+                                                    apr_sms_t *pms,
+                                                    apr_size_t min_alloc,
+                                                    apr_size_t min_free,
+                                                    apr_size_t max_free)
+{
+    apr_sms_t *new_sms;
+    apr_sms_trivial_t *tms;
+    node_t *node;
+    apr_status_t rv;
+
+    *sms = NULL;
+    
+    min_alloc = APR_ALIGN_DEFAULT(min_alloc);
+    min_free  = APR_ALIGN_DEFAULT(min_free);
+
+    /* We're not a top level module, ie we have a parent, so
+     * we allocate the memory for the structure from our parent.
+     * This is safe as we shouldn't outlive our parent...
+     */
+
+    new_sms = apr_sms_calloc(pms, min_alloc);
+    if (!new_sms)
+        return APR_ENOMEM;
+
+    if ((rv = apr_sms_init(new_sms, pms)) != APR_SUCCESS)
+        return rv;
+
+    new_sms->malloc_fn      = apr_sms_trivial_malloc;
+    new_sms->free_fn        = apr_sms_trivial_free;
+    new_sms->reset_fn       = apr_sms_trivial_reset;
+    new_sms->pre_destroy_fn = apr_sms_trivial_pre_destroy;
+    new_sms->destroy_fn     = apr_sms_trivial_destroy;
+    new_sms->identity       = module_identity;
+
+    node = (node_t *)((char *)new_sms + SIZEOF_TRIVIAL_T);
+    node->first_avail = (char *)node + SIZEOF_NODE_T;
+    node->avail_size  = min_alloc - SIZEOF_TRIVIAL_T - SIZEOF_NODE_T;
+    node->count       = 0;
+
+    tms = TRIVIAL_T(new_sms);
+    tms->min_alloc   = min_alloc;
+    tms->min_free    = min_free;
+    tms->max_free    = max_free;
+    tms->self        = node;
+    
+    node->next = node->prev = &tms->used_sentinel;
+    tms->used_sentinel.next = tms->used_sentinel.prev = node;
+    tms->free_sentinel.next = tms->free_sentinel.prev = &tms->free_sentinel;
+   
+    apr_sms_assert(new_sms);
+
+    *sms = new_sms;
+    return APR_SUCCESS;
+}
