@@ -36,7 +36,7 @@ echo "Platform: $host"
 dnl # Some initial steps for configuration.  We setup the default directory
 dnl # and which files are to be configured.
 
-dnl Set optional CC hints here in case autoconf make an inappropriate choice.
+dnl Set optional CC hints here in case autoconf makes an inappropriate choice.
 dnl This allows us to suggest what the compiler should be, but still
 dnl allows the user to override CC externally.
 APR_CC_HINTS
