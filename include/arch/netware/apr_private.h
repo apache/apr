@@ -147,7 +147,6 @@ typedef void (Sigfunc)(int);
 #endif
 
 #define strcasecmp(s1, s2)       stricmp(s1, s2)
-#define sleep(t)                 delay(t * 1000)
 #define Sleep(t)                 delay(t)
 #define lstat(a,b)               stat(a,b)
 
@@ -179,9 +178,6 @@ void* getStatCache();
     and can be shared by the library. */
 #undef malloc
 #define malloc(x) library_malloc(gLibHandle,x)
-
-/* Changes that are waiting for an updated runtime library. */
-#define WAITING_FOR_UPDATE
 
 #endif  /*APR_PRIVATE_H*/
 #endif  /*NETWARE*/
