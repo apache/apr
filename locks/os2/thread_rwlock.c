@@ -56,8 +56,8 @@
 #include "apr_lib.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
-#include "thread_rwlock.h"
-#include "fileio.h"
+#include "apr_arch_thread_rwlock.h"
+#include "apr_arch_fileio.h"
 #include <string.h>
 
 static apr_status_t thread_rwlock_cleanup(void *therwlock)

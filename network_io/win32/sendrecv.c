@@ -52,12 +52,12 @@
  * <http://www.apache.org/>.
  */
 
-#include "networkio.h"
+#include "apr_arch_networkio.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_network_io.h"
 #include "apr_lib.h"
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 #if APR_HAVE_TIME_H
 #include <time.h>
 #endif

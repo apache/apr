@@ -56,7 +56,7 @@
 #if BEOS_BONE /* BONE uses the unix code - woohoo */
 #include "../unix/sendrecv.c"
 #else
-#include "networkio.h"
+#include "apr_arch_networkio.h"
 #include "apr_time.h"
 
 apr_status_t apr_wait_for_io_or_timeout(apr_socket_t *sock, int for_read)

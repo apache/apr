@@ -52,13 +52,13 @@
  * <http://www.apache.org/>.
  */
 
-#include "threadproc.h"
+#include "apr_arch_threadproc.h"
 #include "apr_thread_proc.h"
 #include "apr_portable.h"
 #include "apr_general.h"
 #include "apr_errno.h"
 #include "apr_lib.h"
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 
 APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key,
                                                        void (*dest)(void *), 

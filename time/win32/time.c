@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "win32/atime.h"
+#include "win32/apr_arch_atime.h"
 #include "apr_time.h"
 #include "apr_general.h"
 #include "apr_lib.h"
@@ -65,7 +65,7 @@
 #endif
 #include <string.h>
 #include <winbase.h>
-#include "misc.h"
+#include "apr_arch_misc.h"
 
 /* Leap year is any year divisible by four, but not by 100 unless also
  * divisible by 400

@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "threadproc.h"
+#include "apr_arch_threadproc.h"
 #include "apr_portable.h"
 
 APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *pool)

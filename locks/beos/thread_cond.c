@@ -52,8 +52,8 @@
  * <http://www.apache.org/>.
  */
 
-#include "beos/thread_mutex.h"
-#include "beos/thread_cond.h"
+#include "beos/apr_arch_thread_mutex.h"
+#include "beos/apr_arch_thread_cond.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
 

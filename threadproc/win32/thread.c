@@ -53,7 +53,7 @@
  */
 
 #include "apr_private.h"
-#include "win32/threadproc.h"
+#include "win32/apr_arch_threadproc.h"
 #include "apr_thread_proc.h"
 #include "apr_general.h"
 #include "apr_lib.h"
@@ -61,7 +61,7 @@
 #if APR_HAVE_PROCESS_H
 #include <process.h>
 #endif
-#include "misc.h"   
+#include "apr_arch_misc.h"   
 
 /* Chosen for us by apr_initialize */
 DWORD tls_apr_thread = 0;

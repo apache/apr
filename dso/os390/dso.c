@@ -54,7 +54,7 @@
 
 #include "apr_portable.h"
 #include "apr_strings.h"
-#include "dso.h"
+#include "apr_arch_dso.h"
 #include <errno.h>
 #include <string.h>
 

@@ -53,7 +53,7 @@
  */
 
 #define INCL_DOSEXCEPTIONS      /* for OS2 */
-#include "threadproc.h"
+#include "apr_arch_threadproc.h"
 #include "apr_private.h"
 #include "apr_pools.h"
 #include "apr_signal.h"

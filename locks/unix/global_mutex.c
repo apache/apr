@@ -54,7 +54,7 @@
 
 #include "apr.h"
 #include "apr_strings.h"
-#include "global_mutex.h"
+#include "apr_arch_global_mutex.h"
 #include "apr_proc_mutex.h"
 #include "apr_thread_mutex.h"
 #include "apr_portable.h"

@@ -15,7 +15,7 @@
  */
 
 #include "apr_private.h"
-#include "networkio.h"
+#include "apr_arch_networkio.h"
 #include "apr_strings.h"
 
 #if APR_HAVE_SYS_TYPES_H

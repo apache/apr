@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "networkio.h"
+#include "apr_arch_networkio.h"
 #include "apr_strings.h"
 
 static apr_status_t soblock(int sd)

@@ -59,7 +59,7 @@
 #include "apr_strings.h"
 
 /* private APR headers */
-#include "internal_time.h"
+#include "apr_arch_internal_time.h"
 
 /* System Headers required for time library */
 #if APR_HAVE_SYS_TIME_H

@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "networkio.h"
+#include "apr_arch_networkio.h"
 #include "apr_network_io.h"
 #include "apr_portable.h"
 #include "apr_general.h"

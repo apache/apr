@@ -56,9 +56,9 @@
 
 #if APR_HAS_OTHER_CHILD
 
-#include "misc.h"
-#include "threadproc.h"
-#include "fileio.h"
+#include "apr_arch_misc.h"
+#include "apr_arch_threadproc.h"
+#include "apr_arch_fileio.h"
 #ifdef HAVE_TIME_H
 #include <sys/time.h>
 #endif

@@ -54,7 +54,7 @@
 
 #include "apr.h"
 #include "apr_poll.h"
-#include "networkio.h"
+#include "apr_arch_networkio.h"
 
 APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
                       apr_int32_t *nsds, apr_interval_time_t timeout)

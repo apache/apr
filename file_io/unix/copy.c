@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 #include "apr_file_io.h"
 
 static apr_status_t apr_file_transfer_contents(const char *from_path,

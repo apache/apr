@@ -54,8 +54,8 @@
 
 #include "apr_private.h"
 
-#include "misc.h"
-#include "fileio.h"
+#include "apr_arch_misc.h"
+#include "apr_arch_fileio.h"
 #include <crtdbg.h>
 #include <assert.h>
 

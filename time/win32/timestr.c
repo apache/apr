@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "win32/atime.h"
+#include "win32/apr_arch_atime.h"
 #include "apr_portable.h"
 #include "apr_strings.h"
 

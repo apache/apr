@@ -56,7 +56,7 @@
 #include "apr_private.h"
 #include "apr_general.h"
 #include "apr_portable.h"
-#include "misc.h"
+#include "apr_arch_misc.h"
 #include <wincrypt.h>
 
 

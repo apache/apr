@@ -52,12 +52,12 @@
  * <http://www.apache.org/>.
  */
 
-#include "win32/fileio.h"
+#include "win32/apr_arch_fileio.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_strings.h"
 #include <string.h>
-#include "inherit.h"
+#include "apr_arch_inherit.h"
 
 APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
                                        apr_file_t *old_file, apr_pool_t *p)
