@@ -72,8 +72,8 @@
 #define ap_init_alloc apr_pool_alloc_init
 /** @deprecated @see apr_is_empty_table */
 #define ap_is_empty_table apr_is_empty_table
-/** @deprecated @see apr_is_fnmatch */
-#define ap_is_fnmatch apr_is_fnmatch
+/** @deprecated @see apr_fnmatch_test */
+#define ap_is_fnmatch apr_fnmatch_test
 /** @deprecated @see apr_pool_cleanup_kill */
 #define ap_kill_cleanup apr_pool_cleanup_kill
 /** @deprecated @see apr_array_make */

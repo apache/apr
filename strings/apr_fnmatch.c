@@ -210,7 +210,7 @@ static const char *rangematch(const char *pattern, int test, int flags)
 
 /* This function is an Apache addition */
 /* return non-zero if pattern has any glob chars in it */
-APR_DECLARE(int) apr_is_fnmatch(const char *pattern)
+APR_DECLARE(int) apr_fnmatch_test(const char *pattern)
 {
     int nesting;
 
@@ -240,4 +240,10 @@ APR_DECLARE(int) apr_is_fnmatch(const char *pattern)
 	++pattern;
     }
     return 0;
+}
+
+/* Deprecated */
+APR_DECLARE(int) apr_is_fnmatch(const char *pattern)
+{
+    return apr_fnmatch_test(pattern);
 }
