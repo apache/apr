@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Make the apr_mmap_create() function use the native_flags variable.
+     This allows us to actually create WRITEABLE MMAPs.
+     [Ed Korthof <ed@apache.org>]
+
   *) Completely revamp configure so that it preserves the standard make
      variables CPPFLAGS, CFLAGS, CXXFLAGS, LDFLAGS and LIBS by moving
      the configure additions to EXTRA_* variables.  Also, allow the user
