@@ -384,6 +384,21 @@ Documentation that needs writing:
              should we ever start using any other form of md5 (e.g.
              openssl) then errors would become a distinct possibility.
 
+API Changes Postponed for APR 2.0:
+
+    * apr_socket_sendfile(): the offset parameter should not be
+      pass-by-reference, or it should be updated to do something
+      useful.
+
+    * apr_password_get(): the bufsize parameter should not be
+      pass-by-reference.
+
+    * apr_allocator.h: apr_memnode_t's use of uint32_t's doesn't match
+      well with allocation sizes being apr_size_t, possibly this can
+      be improved by using apr_size_t throughout.
+
+    * apr_hash_count() should take a const apr_hash_t * argument.
+
 Stuff for post 1.0:
 
     * Almost every API in APR depends on pools, but pool semantics
