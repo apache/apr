@@ -170,9 +170,10 @@ static void test_mmap_offset(CuTest *tc)
 CuSuite *testmmap(void)
 {
     CuSuite *suite = CuSuiteNew("MMAP");
-    fsize = strlen(TEST_STRING);
 
 #if APR_HAS_MMAP    
+    fsize = strlen(TEST_STRING);
+
     SUITE_ADD_TEST(suite, create_filename);
     SUITE_ADD_TEST(suite, test_file_open);
     SUITE_ADD_TEST(suite, test_get_filesize);
