@@ -63,99 +63,6 @@
 #include <sys/poll.h>
 #endif
 
-APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
-{
-    (*new) = (apr_pollfd_t *)apr_pcalloc(cont, sizeof(apr_pollfd_t) * (num + 1));
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-    (*new)[num].desc_type = APR_POLL_LASTDESC;
-    (*new)[0].p = cont;
-    return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_pollfd_t*) find_poll_sock(apr_pollfd_t *aprset, apr_socket_t *sock)
-{
-    apr_pollfd_t *curr = aprset;
-    
-    while (curr->desc.s != sock) {
-        if (curr->desc_type == APR_POLL_LASTDESC) {
-            return NULL;
-        }
-        curr++;
-    }
-
-    return curr;
-}
-
-APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset, 
-			       apr_socket_t *sock, apr_int16_t event)
-{
-    apr_pollfd_t *curr = aprset;
-    
-    while (curr->desc_type != APR_NO_DESC) {
-        if (curr->desc_type == APR_POLL_LASTDESC) {
-            return APR_ENOMEM;
-        }
-        curr++;
-    }
-    curr->desc.s = sock;
-    curr->desc_type = APR_POLL_SOCKET;
-    curr->reqevents = event;
-
-    return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
-{
-    apr_pollfd_t *curr = find_poll_sock(aprset, sock);
-    if (curr == NULL) {
-        return APR_NOTFOUND;
-    }
-
-    (*event) = curr->revents;
-    return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset, 
-                                  apr_socket_t *sock, apr_int16_t events)
-{
-    apr_pollfd_t *curr = find_poll_sock(aprset, sock);
-    if (curr == NULL) {
-        return APR_NOTFOUND;
-    }
-    
-    if (curr->reqevents & events) {
-        curr->reqevents ^= events;
-    }
-
-    return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
-{
-    apr_pollfd_t *curr = find_poll_sock(aprset, sock);
-    if (curr == NULL) {
-        return APR_NOTFOUND;
-    }
-
-    curr->desc_type = APR_NO_DESC;
-
-    return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_t events)
-{
-    apr_pollfd_t *curr = aprset;
-
-    while (curr->desc_type != APR_POLL_LASTDESC) {
-        if (curr->events & events) {
-            curr->events &= ~events;
-        }
-    }
-    return APR_SUCCESS;
-}
-
 #ifdef HAVE_POLL    /* We can just use poll to do our socket polling. */
 
 static apr_int16_t get_event(apr_int16_t event)
@@ -216,7 +123,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
         else if (aprset[i].desc_type == APR_POLL_FILE) {
             pollset[i].fd = aprset[i].desc.f->filedes;
         }
-        pollset[i].events = get_event(aprset[i].events);
+        pollset[i].events = get_event(aprset[i].reqevents);
     }
 
     if (timeout > 0) {
@@ -227,7 +134,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
     (*nsds) = i;
 
     for (i = 0; i < num; i++) {
-        aprset[i].revents = get_revent(pollset[i].revents);
+        aprset[i].rtnevents = get_revent(pollset[i].revents);
     }
     
     if ((*nsds) < 0) {
@@ -322,18 +229,3 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
 }
 
 #endif 
-
-#if APR_FILES_AS_SOCKETS
-/* I'm not sure if this needs to return an apr_status_t or not, but
- * for right now, we'll leave it this way, and change it later if
- * necessary.
- */
-APR_DECLARE(apr_status_t) apr_socket_from_file(apr_socket_t **newsock, apr_file_t *file)
-{
-    (*newsock) = apr_pcalloc(file->pool, sizeof(**newsock));
-    (*newsock)->socketdes = file->filedes;
-    (*newsock)->cntxt = file->pool;
-    (*newsock)->timeout = file->timeout;
-    return APR_SUCCESS;
-}
-#endif
