@@ -41,6 +41,9 @@ aprtest
 aprtest.ncb
 aprtest.opt
 aprtest.plg
+aprtest.sln
+aprtest.suo
+aprtest.vcproj
 testfile.tmp
 testflock
 testsockopt
