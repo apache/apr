@@ -52,6 +52,10 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr_private.h"
+#ifdef HAVE_NETINET_TCP_H
+#include "../unix/sockets.c"
+#else
 #include "networkio.h"
 
 ap_status_t socket_cleanup(void *sock)
@@ -231,3 +235,4 @@ ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock,
     (*sock)->socketdes = *thesock;
     return APR_SUCCESS;
 }
+#endif

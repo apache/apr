@@ -52,6 +52,10 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr_private.h"
+#ifdef HAVE_NETINET_TCP_H
+#include "../unix/poll.c"
+#else
 #include "networkio.h"
 
 /*  BeOS R4 doesn't have a poll function, but R5 will have */
@@ -216,3 +220,5 @@ ap_status_t ap_set_polldata(ap_pollfd_t *pollfd, void *data, char *key,
         return APR_ENOFILE;
     }
 }
+#endif
+
