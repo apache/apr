@@ -54,6 +54,9 @@
 
 #include "apr_private.h"
 #include "misc.h"
+#include "crtdbg.h"
+#include "fileio.h"
+#include "assert.h"
 
 apr_oslevel_e apr_os_level = APR_WIN_UNK;
 
@@ -180,9 +183,9 @@ apr_status_t apr_get_oslevel(apr_pool_t *cont, apr_oslevel_e *level)
  */
 
 static const char* const lateDllName[DLL_defined] = {
-    "kernel32", "advapi32", "mswsock",  "ws2_32", "shell32"  };
+    "kernel32", "advapi32", "mswsock",  "ws2_32", "shell32", "ntdll.dll"  };
 static HMODULE lateDllHandle[DLL_defined] = {
-     NULL,       NULL,       NULL,       NULL,     NULL      };
+     NULL,       NULL,       NULL,       NULL,     NULL,       NULL       };
 
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
 {
@@ -195,4 +198,65 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
         return GetProcAddress(lateDllHandle[fnLib], (char *) ordinal);
     else
         return GetProcAddress(lateDllHandle[fnLib], fnName);
+}
+
+/* Declared in include/arch/win32/apr_dbg_win32_handles.h
+ *
+ * apr_dbg_log is a Win32 specific helper to debug handle activity, logging
+ * either the HANDLE ha argument 
+APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln, 
+                                       int nh, /* HANDLE hv, char *dsc */...)
+{
+    static DWORD tlsid = 0xFFFFFFFF;
+    static HANDLE fh = NULL;
+    static long ctr = 0;
+    static CRITICAL_SECTION cs;
+    long seq;
+    DWORD wrote;
+    char *sbuf;
+    
+    seq = (InterlockedIncrement)(&ctr);
+
+    if (tlsid == 0xFFFFFFFF) {
+        tlsid = (TlsAlloc)();
+    }
+
+    sbuf = (TlsGetValue)(tlsid);
+    if (!fh || !sbuf) {
+        sbuf = (malloc)(1024);
+        (TlsSetValue)(tlsid, sbuf);
+        sbuf[1023] = '\0';
+        if (!fh) {
+            (GetModuleFileName)(NULL, sbuf, 250);
+            sprintf(strchr(sbuf, '\0'), ".%d",
+                    (GetCurrentProcessId)());
+            fh = (CreateFile)(sbuf, GENERIC_WRITE, 0, NULL, 
+                            CREATE_ALWAYS, 0, NULL);
+            (InitializeCriticalSection)(&cs);
+        }
+    }
+
+    if (!nh) {
+        (sprintf)(sbuf, "%08x %08x %08x %s() %s:%d\n",
+                  ha, seq, GetCurrentThreadId(), fn, fl, ln);
+        (EnterCriticalSection)(&cs);
+        (WriteFile)(fh, sbuf, strlen(sbuf), &wrote, NULL);
+        (LeaveCriticalSection)(&cs);
+    } 
+    else {
+        va_list a;
+        va_start(a,nh);
+        (EnterCriticalSection)(&cs);
+        do {
+            HANDLE *hv = va_arg(a, HANDLE*);
+            char *dsc = va_arg(a, char*);
+            (sprintf)(sbuf, "%08x %08x %08x %s(%s) %s:%d\n",
+                      *hv, seq, GetCurrentThreadId(), 
+                      fn, dsc, fl, ln);
+            (WriteFile)(fh, sbuf, strlen(sbuf), &wrote, NULL);
+        } while (--nh);
+        (LeaveCriticalSection)(&cs);
+        va_end(a);
+    }
+    return ha;
 }
