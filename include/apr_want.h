@@ -83,7 +83,7 @@
 #if APR_HAVE_STRINGS_H
 #include <strings.h>
 #endif
-#undef APR_WANT_STRFUND
+#undef APR_WANT_STRFUNC
 #endif
 
 /* --------------------------------------------------------------------- */
