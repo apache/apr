@@ -129,30 +129,6 @@ static apr_status_t open_nt_process_pipe(apr_file_t **read, apr_file_t **write,
     return APR_SUCCESS;
 }
 
-static apr_status_t make_handle_private(apr_file_t *file)
-{
-#ifdef _WIN32_WCE
-    return APR_ENOTIMPL;
-#else
-    HANDLE hproc = GetCurrentProcess();
-    HANDLE filehand = file->filehand;
-
-    /* Create new non-inheritable versions of handles that
-     * the child process doesn't care about. Otherwise, the child
-     * inherits these handles; resulting in non-closeable handles
-     * to the respective pipes.
-     */
-    if (!DuplicateHandle(hproc, filehand,
-                         hproc, &file->filehand, 0,
-                         FALSE, DUPLICATE_SAME_ACCESS))
-        return apr_get_os_error();
-    /* 
-     * Close the inerhitable handle we don't need anymore.
-     */
-    CloseHandle(filehand);
-    return APR_SUCCESS;
-#endif
-}
 
 APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
                                              apr_int32_t in, 
@@ -165,19 +141,19 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
         stat = open_nt_process_pipe(&attr->child_in, &attr->parent_in, in,
                                     attr->pool);
         if (stat == APR_SUCCESS)
-            stat = make_handle_private(attr->parent_in);
+            stat = apr_file_inherit_unset(attr->parent_in);
     }
     if (out && stat == APR_SUCCESS) {
         stat = open_nt_process_pipe(&attr->parent_out, &attr->child_out, out,
                                     attr->pool);
         if (stat == APR_SUCCESS)
-            stat = make_handle_private(attr->parent_out);
+            stat = apr_file_inherit_unset(attr->parent_out);
     }
     if (err && stat == APR_SUCCESS) {
         stat = open_nt_process_pipe(&attr->parent_err, &attr->child_err, err,
                                     attr->pool);
         if (stat == APR_SUCCESS)
-            stat = make_handle_private(attr->parent_err);
+            stat = apr_file_inherit_unset(attr->parent_err);
     }
     return stat;
 }
@@ -195,7 +171,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr,
             rv = apr_file_dup2(attr->child_in, child_in, attr->pool);
 
         if (rv == APR_SUCCESS)
-            apr_file_inherit_set(attr->child_in);
+            rv = apr_file_inherit_set(attr->child_in);
     }
 
     if (parent_in && rv == APR_SUCCESS) {
@@ -221,7 +197,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr,
             rv = apr_file_dup2(attr->child_out, child_out, attr->pool);
 
         if (rv == APR_SUCCESS)
-            apr_file_inherit_set(attr->child_out);
+            rv = apr_file_inherit_set(attr->child_out);
     }
 
     if (parent_out && rv == APR_SUCCESS) {
@@ -247,7 +223,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr,
             rv = apr_file_dup2(attr->child_err, child_err, attr->pool);
 
         if (rv == APR_SUCCESS)
-            apr_file_inherit_set(attr->child_err);
+            rv = apr_file_inherit_set(attr->child_err);
     }
 
     if (parent_err && rv == APR_SUCCESS) {

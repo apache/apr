@@ -57,16 +57,17 @@
 
 #include "apr_inherit.h"
 
-#define APR_INHERIT    (2^24)    /* Must not conflicts with other bits */
+#define APR_INHERIT (1 << 24)    /* Must not conflict with other bits */
 
 #define APR_IMPLEMENT_INHERIT_SET(name, flag, pool, cleanup)        \
-void apr_##name##_inherit_set(apr_##name##_t *name)                 \
+apr_status_t apr_##name##_inherit_set(apr_##name##_t *name)         \
 {                                                                   \
     if (!(name->flag & APR_INHERIT)) {                              \
         name->flag |= APR_INHERIT;                                  \
         apr_pool_child_cleanup_set(name->pool, (void *)name,        \
                                    cleanup, apr_pool_cleanup_null); \
     }                                                               \
+    return APR_SUCCESS;                                             \
 }                                                                   \
 /* Deprecated */                                                    \
 void apr_##name##_set_inherit(apr_##name##_t *name)                 \
@@ -75,13 +76,14 @@ void apr_##name##_set_inherit(apr_##name##_t *name)                 \
 }
 
 #define APR_IMPLEMENT_INHERIT_UNSET(name, flag, pool, cleanup)      \
-void apr_##name##_inherit_unset(apr_##name##_t *name)               \
+apr_status_t apr_##name##_inherit_unset(apr_##name##_t *name)       \
 {                                                                   \
     if (name->flag & APR_INHERIT) {                                 \
         name->flag &= ~APR_INHERIT;                                 \
         apr_pool_child_cleanup_set(name->pool, (void *)name,        \
                                    cleanup, cleanup);               \
     }                                                               \
+    return APR_SUCCESS;                                             \
 }                                                                   \
 /* Deprecated */                                                    \
 void apr_##name##_unset_inherit(apr_##name##_t *name)               \
