@@ -60,6 +60,46 @@
 #include <sys/types.h>
 #endif
 
+APR_DECLARE(apr_status_t) apr_get_groupid(apr_gid_t *gid, 
+                                         const char *groupname, apr_pool_t *p)
+{
+    SID_NAME_USE sidtype;
+    char anydomain[256];
+    char *domain;
+    DWORD sidlen = 0;
+    DWORD domlen = sizeof(anydomain);
+    DWORD rv;
+    char *pos;
+
+    if (pos = strchr(groupname, '/')) {
+        domain = apr_pstrndup(p, groupname, pos - groupname);
+        groupname = pos + 1;
+    }
+    else if (pos = strchr(groupname, '\\')) {
+        domain = apr_pstrndup(p, groupname, pos - groupname);
+        groupname = pos + 1;
+    }
+    else {
+        domain = NULL;
+    }
+    /* Get nothing on the first pass ... need to size the sid buffer 
+     */
+    rv = LookupAccountName(domain, groupname, domain, &sidlen, 
+                           anydomain, &domlen, &sidtype);
+    if (sidlen) {
+        /* Give it back on the second pass
+         */
+        *gid = apr_palloc(p, sidlen);
+        domlen = sizeof(anydomain);
+        rv = LookupAccountName(domain, groupname, *gid, &sidlen, 
+                               anydomain, &domlen, &sidtype);
+    }
+    if (!sidlen || !rv) {
+        return apr_get_os_error();
+    }
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid, apr_pool_t *p)
 {
     SID_NAME_USE type;
