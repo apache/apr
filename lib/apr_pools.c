@@ -1255,13 +1255,13 @@ static void free_proc_chain(struct process_chain *procs)
 #ifdef WIN32
             need_timeout = 1;
 #else
-	    if (apr_kill(p->pid, APR_SIGTERM) == APR_SUCCESS) {
+	    if (apr_kill(p->pid, SIGTERM) == APR_SUCCESS) {
 		need_timeout = 1;
 	    }
 #endif
 	}
 	else if (p->kill_how == kill_always) {
-	    apr_kill(p->pid, APR_SIGKILL);
+	    apr_kill(p->pid, SIGKILL);
 	}
     }
 
@@ -1276,7 +1276,7 @@ static void free_proc_chain(struct process_chain *procs)
      */
     for (p = procs; p; p = p->next) {
 	if (p->kill_how == kill_after_timeout) {
-	    apr_kill(p->pid, APR_SIGKILL);
+	    apr_kill(p->pid, SIGKILL);
 	}
     }
 #ifdef WIN32
