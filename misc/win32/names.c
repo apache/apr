@@ -53,7 +53,7 @@
  *
  */
 #ifdef WIN32
-#include "apr_win.h"
+#include "apr_winconfig.h"
 #endif
 #include "apr_file_io.h"
 #include "apr_general.h"

@@ -53,10 +53,10 @@
  *
  */
 
-#include "apr.h"
-
 #ifdef WIN32
-#include <windows.h>
+#include "apr_win.h"
+#else
+#include "apr.h"
 #endif
 
 #if APR_HAVE_STDIO_H

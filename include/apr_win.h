@@ -54,9 +54,9 @@
  */
 
 #ifdef WIN32
+#ifndef APRWIN_H
+#define APRWIN_H
 
-#ifndef APR_WIN_H
-#define APR_WIN_H
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -70,97 +70,69 @@
 #include <windows.h>
 #include <winsock2.h>
 #include <mswsock.h>
-#include <sys\types.h>
+#include <sys/types.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <time.h>
 
-/* Use this section to define all of the HAVE_FOO_H
- * that are required to build properly.
- */
-#define HAVE_CONIO_H 1
+#define ap_inline
+#define __attribute__(__x)
+#define ENUM_BITFIELD(e,n,w)  signed int n : w
 
-typedef enum {APR_WIN_NT, APR_WIN_95, APR_WIN_98} ap_oslevel_e;
+#define APR_HAVE_ERRNO_H        1
+#define APR_HAVE_DIRENT_H       0
+#define APR_HAVE_FCNTL_H        0
+#define APR_HAVE_NETINET_IN_H   0
+#define APR_HAVE_PTHREAD_H      0
+#define APR_HAVE_STDARG_H       1
+#define APR_HAVE_STDIO_H        1
+#define APR_HAVE_SYS_TYPES_H    1
+#define APR_HAVE_SYS_UIO_H      0
 
-#define SIGHUP     1
-/* 2 is used for SIGINT on windows */
-#define SIGQUIT    3
-/* 4 is used for SIGILL on windows */
-#define SIGTRAP    5
-#define SIGIOT     6
-#define SIGBUS     7
-/* 8 is used for SIGFPE on windows */
-#define SIGKILL    9
-#define SIGUSR1    10
-/* 11 is used for SIGSEGV on windows */
-#define SIGUSR2    12
-#define SIGPIPE    13
-#define SIGALRM    14
-/* 15 is used for SIGTERM on windows */
-#define SIGSTKFLT  16
-#define SIGCHLD    17 
-#define SIGCONT    18
-#define SIGSTOP    19
-#define SIGTSTP    20
-/* 21 is used for SIGBREAK on windows */
-/* 22 is used for SIGABRT on windows */
-#define SIGTTIN    23
-#define SIGTTOU    24
-#define SIGURG     25
-#define SIGXCPU    26
-#define SIGXFSZ    27
-#define SIGVTALRM  28
-#define SIGPROF    29
-#define SIGWINCH   30
-#define SIGIO      31
+#define APR_USE_FLOCK_SERIALIZE           0 
+#define APR_USE_SYSVSEM_SERIALIZE         0
+#define APR_USE_FCNTL_SERIALIZE           0
+#define APR_USE_PROC_PTHREAD_SERIALIZE    0 
+#define APR_USE_PTHREAD_SERIALIZE         0 
 
-#define __attribute__(__x) 
+#if APR_HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 
-#define API_EXPORT(x)            x
-#define API_EXPORT_NONSTD(x)     x
-#define API_THREAD_FUNC __stdcall
-#define API_VAR_IMPORT extern _declspec(dllimport)
+/*  APR Feature Macros */
+#define APR_HAS_THREADS  1
+#define APR_HAS_SENDFILE 0
+#define APR_HAS_MMAP     0
 
-/* APR COMPATABILITY FUNCTIONS
- * This section should be used to define functions and
- * macros which are need to make Windows features look
- * like POSIX features.
- */
+/* Typedefs that APR needs. */
+
+typedef  short           ap_int16_t;
+typedef  unsigned short  ap_uint16_t;
+                                               
+typedef  int           ap_int32_t;
+typedef  unsigned int  ap_uint32_t;
+                                               
+typedef  __int64           ap_int64_t;
+typedef  unsigned __int64  ap_uint64_t;
+
+typedef  int         ap_size_t;
+typedef  int         ap_ssize_t;
+typedef  _off_t      ap_off_t;
+typedef  int         pid_t;
+
+/* Definitions that APR programs need to work properly. */
+
+#define API_THREAD_FUNC          __stdcall
+#define API_EXPORT(type)         type
+#define API_EXPORT_NONSTD(type)  type
+#define API_VAR_IMPORT           extern _declspec(dllimport)
+
+
+
 /* struct iovec is needed to emulate Unix writev */
 struct iovec {
     char* iov_base;
     int   iov_len;
 };
-
-typedef _off_t      off_t;
-typedef int         ssize_t;
-typedef int         pid_t;
-typedef void (Sigfunc)(int);
-
-#define strcasecmp(s1, s2)       stricmp(s1, s2)
-#define sleep(t)                 Sleep(t * 1000)
-
-
-/* APR FEATURE MACROS.
- * This section should be used to define feature macros
- * that the windows port needs.
- */
-#define APR_HAS_THREADS        1
-
-#define SIZEOF_SHORT           2
-#define SIZEOF_INT             4
-#define SIZEOF_LONGLONG        8
-#define SIZEOF_CHAR            1
-#define SIZEOF_SSIZE_T         SIZEOF_INT
-
-/* APR WINDOWS-ONLY FUNCTIONS
- * This section should define those functions which are
- * only found in the windows version of APR.
- */
-
-time_t WinTimeToUnixTime(FILETIME *);
-unsigned __stdcall SignalHandling(void *);
-int thread_ready(void);
-
-#endif  /*APR_WIN_H*/
-#endif  /*WIN32*/
+#endif /* APRWIN_H */
+#endif /* WIN32 */
