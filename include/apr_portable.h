@@ -409,12 +409,23 @@ APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **dso,
 APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *dso,
                                                 apr_dso_handle_t *aprdso);
 
-#if APR_HAS_THREADS
-APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void);
-APR_DECLARE(int) apr_os_thread_equal(apr_os_thread_t tid1, apr_os_thread_t tid2);
-#endif
-
 #endif /* APR_HAS_DSO */
+
+#if APR_HAS_THREADS
+/**
+ * Get the thread ID
+ */
+APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void);
+
+/**
+ * Compare two thread id's
+ * @param tid1 1st Thread ID to compare
+ * @param tid2 2nd Thread ID to compare
+ */ 
+APR_DECLARE(int) apr_os_thread_equal(apr_os_thread_t tid1, 
+                                     apr_os_thread_t tid2);
+#endif /* APR_HAS_THREADS */
+
 
 #ifdef __cplusplus
 }
