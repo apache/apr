@@ -63,6 +63,7 @@
 #include "apr_want.h"
 
 #include <assert.h>
+#include <pthread.h>
 
 
 apr_status_t apr_proc_kill(apr_proc_t *proc, int signum)
@@ -264,3 +265,49 @@ const char *apr_signal_get_description(int signum)
 }
 
 #endif /* SYS_SIGLIST_DECLARED */
+
+static void *signal_thread_func(void *signal_handler)
+{
+    sigset_t sig_mask;
+    int (*sig_func)(int signum) = signal_handler;
+
+    /* This thread will be the one responsible for handling signals */
+    sigfillset(&sig_mask);
+    while (1) {
+        int signal_received;
+
+        apr_sigwait(&sig_mask, &signal_received);
+        if (sig_func(signal_received) == 1) {
+            return NULL;
+        }
+    }
+}
+
+APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
+{
+    sigset_t sig_mask;
+    int rv;
+
+    /* All threads should mask signals out, accoring to sigwait(2) man page */
+    sigfillset(&sig_mask);
+
+#ifdef SIGPROCMASK_SETS_THREAD_MASK
+    rv = sigprocmask(SIG_SETMASK, &sig_mask, NULL);
+#else
+    if ((rv = pthread_sigmask(SIG_SETMASK, &sig_mask, NULL)) != 0) {
+#ifdef PTHREAD_SETS_ERRNO
+        rv = errno;
+#endif
+    }
+#endif
+    return rv;
+}
+
+APR_DECLARE(apr_status_t) apr_create_signal_thread(apr_thread_t **td, 
+                                                   apr_threadattr_t *tattr,
+                                              int (*signal_handler)(int signum),
+                                                   apr_pool_t *p)
+{
+    return apr_thread_create(td, tattr, signal_thread_func, signal_handler, p);
+}
+

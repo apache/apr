@@ -584,6 +584,28 @@ APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int sig);
 APR_DECLARE(void) apr_pool_note_subprocess(apr_pool_t *a, apr_proc_t *pid,
                                       enum kill_conditions how);
 
+/**
+ * Setup the process for a single thread to be used for all signal handling.
+ * @warn This must be called before any threads are created
+ * @deffunc apr_status_t apr_setup_signal_thread(void)
+ */
+APR_DECLARE(apr_status_t) apr_setup_signal_thread(void);
+
+/**
+ * Create a thread that will listen for signals.  The thread will loop
+ * forever, calling a provided function whenever it receives a signal.  That
+ * functions should return 1 if the signal has been handled, 0 otherwise.
+ * @param td The newly created thread
+ * @param tattr The threadattr to use when creating the thread
+ * @param signal_handler The function to call when a signal is received
+ * @param p The pool to use when creating the thread
+ * @deffunc apr_status_t apr_create_signal_thread(apr_thread_t **td, apr_threadattr_t *tattr, int (*signal_handler)(int signum), apr_pool_t *p)
+ */
+APR_DECLARE(apr_status_t) apr_create_signal_thread(apr_thread_t **td,
+                                                   apr_threadattr_t *tattr,
+                                              int (*signal_handler)(int signum),
+                                                   apr_pool_t *p);
+
 #ifdef __cplusplus
 }
 #endif
