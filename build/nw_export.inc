@@ -17,6 +17,7 @@
 #include "apr_fnmatch.h"
 #include "apr_general.h"
 #include "apr_getopt.h"
+#include "apr_global_mutex.h"
 #include "apr_hash.h"
 #include "apr_inherit.h"
 #include "apr_lib.h"
