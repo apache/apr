@@ -149,7 +149,7 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
     return APR_SUCCESS;
 #endif /* !defined(_WIN32_WCE) */
 }
-#ifdef UNBORKED
+
 APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
                                             apr_file_t *old_file,
                                             apr_pool_t *p)
@@ -185,6 +185,3 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
                           file_cleanup);
     return APR_SUCCESS;
 }
-#endif
-
-/* XXX Need to fix the function above... */
