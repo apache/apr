@@ -203,6 +203,25 @@ static apr_status_t resolve_ident(apr_finfo_t *finfo, const char *fname,
     return rv;
 }
 
+static void guess_protection_bits(apr_finfo_t *finfo)
+{
+    /* Read, write execute for owner.  In the Win9x environment, any
+     * readable file is executable (well, not entirely 100% true, but
+     * still looking for some cheap logic that would help us here.)
+     * The same holds on NT if a file doesn't have a DACL (e.g., on FAT)
+     */
+    if (finfo->protection & APR_FREADONLY) {
+        finfo->protection |= APR_WREAD | APR_WEXECUTE;
+    }
+    else {
+        finfo->protection |= APR_WREAD | APR_WEXECUTE | APR_WWRITE;
+    }
+    finfo->protection |= (finfo->protection << prot_scope_group)
+                       | (finfo->protection << prot_scope_user);
+
+    finfo->valid |= APR_FINFO_UPROT | APR_FINFO_GPROT | APR_FINFO_WPROT;
+}
+
 apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, 
                         apr_int32_t wanted, int whatfile)
 {
@@ -210,23 +229,8 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
     PACL dacl = NULL;
     apr_status_t rv;
 
-    if (apr_os_level < APR_WIN_NT) 
-    {
-        /* Read, write execute for owner.  In the Win9x environment, any
-         * readable file is executable (well, not entirely 100% true, but
-         * still looking for some cheap logic that would help us here.)
-         */
-        if (finfo->protection & APR_FREADONLY) {
-            finfo->protection |= APR_WREAD | APR_WEXECUTE;
-        }
-        else {
-            finfo->protection |= APR_WREAD | APR_WEXECUTE | APR_WWRITE;
-        }
-        finfo->protection |= (finfo->protection << prot_scope_group) 
-                           | (finfo->protection << prot_scope_user);
-
-        finfo->valid |= APR_FINFO_UPROT | APR_FINFO_GPROT | APR_FINFO_WPROT;
-    }    
+    if (apr_os_level < APR_WIN_NT)
+        guess_protection_bits(finfo);
     else if (wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
     {
         /* On NT this request is incredibly expensive, but accurate.
@@ -296,6 +300,8 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
             /* Retrieved the discresionary access list */
             resolve_prot(finfo, wanted, dacl);
         }
+        else if (wanted & APR_FINFO_PROT)
+            guess_protection_bits(finfo);
     }
 
     return ((wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS);
