@@ -19,7 +19,6 @@ STDTEST_PORTABLE = \
 	testall@EXEEXT@
 
 STDTEST_NONPORTABLE = \
-	testshm@EXEEXT@ \
 	testglobalmutex@EXEEXT@
 
 OTHER_PROGRAMS = client@EXEEXT@ sendfile@EXEEXT@ \
@@ -91,9 +90,6 @@ server@EXEEXT@: server.lo $(LOCAL_LIBS)
 sendfile@EXEEXT@: sendfile.lo $(LOCAL_LIBS)
 	$(LINK_PROG) sendfile.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testshm@EXEEXT@: testshm.lo $(LOCAL_LIBS) testshmproducer@EXEEXT@ testshmconsumer@EXEEXT@
-	$(LINK_PROG) testshm.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
 testshmproducer@EXEEXT@: testshmproducer.lo $(LOCAL_LIBS)
 	$(LINK_PROG) testshmproducer.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
@@ -116,7 +112,7 @@ TESTS = testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testpoll.lo testlock.lo testsockopt.lo testpipe.lo testthread.lo \
 	testhash.lo testargs.lo testnames.lo testuser.lo testpath.lo \
 	testenv.lo testprocmutex.lo testrand2.lo testfnmatch.lo \
-        testatomic.lo testflock.lo
+        testatomic.lo testflock.lo testshm.lo
 
 testall: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
 	 readchild@EXEEXT@ CuTest.lo proc_child@EXEEXT@ \

@@ -53,6 +53,7 @@ CuSuite *testprocmutex(void);
 CuSuite *testrand(void);
 CuSuite *testrand2(void);
 CuSuite *testsleep(void);
+CuSuite *testshm(void);
 CuSuite *testsockopt(void);
 CuSuite *testsockets(void);
 CuSuite *teststr(void);
