@@ -66,7 +66,7 @@
 apr_status_t apr_get_home_directory(char **dirname, const char *userid, apr_pool_t *p)
 {
     struct passwd *pw;
-#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETPWNAM_R)
     struct passwd pwd;
     char pwbuf[512];
 #endif
