@@ -1444,8 +1444,9 @@ if test "$threads" = "1"; then
     dnl really support PROCESS_SHARED locks.  So, we must validate that we 
     dnl can go through the steps without receiving some sort of system error.
     dnl Linux and older versions of AIX have this problem.
-    APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED func:pthread_mutexattr_setpshared, 
-    AC_TRY_RUN([
+    APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED func:pthread_mutexattr_setpshared, [
+      AC_CACHE_CHECK([for working PROCESS_SHARED locks], apr_cv_process_shared_works, [
+      AC_TRY_RUN([
 #include <sys/types.h>
 #include <pthread.h>
         int main()
@@ -1463,11 +1464,15 @@ if test "$threads" = "1"; then
             if (pthread_mutex_destroy(&mutex))
                 exit(5);
             exit(0);
-        }], [], [ac_cv_func_pthread_mutexattr_setpshared=no], 
-        [ac_cv_func_pthread_mutexattr_setpshared=no]))
+        }], [apr_cv_process_shared_works=yes], [apr_cv_process_shared_works=no])])
+      # Override detection of pthread_mutexattr_setpshared
+      ac_cv_func_pthread_mutexattr_setpshared=$apr_cv_process_shared_works])
+
     if test "$ac_cv_func_pthread_mutexattr_setpshared" = "yes"; then
         AC_CHECK_FUNCS(pthread_mutexattr_setrobust_np)
         if test "$ac_cv_func_pthread_mutexattr_setrobust_np" = "no"; then
+            AC_CACHE_CHECK([for pthread_mutexattr_setrobust_np with _POSIX_THREAD_PRIO_INHERIT],
+            [apr_cv_setrobust_with_prio_inherit], [
             AC_TRY_COMPILE([#define _POSIX_THREAD_PRIO_INHERIT
 #include <sys/types.h>
 #include <pthread.h>],[
@@ -1476,8 +1481,9 @@ if test "$threads" = "1"; then
                 pthread_mutexattr_t attr;
                 pthread_mutexattr_setrobust_np(&attr, PTHREAD_MUTEX_ROBUST_NP);
                 return 0;
-            }], [ac_cv_func_pthread_mutexattr_setrobust_np=yes], [])
-            if test "$ac_cv_func_pthread_mutexattr_setrobust_np" = "yes"; then
+            }], [apr_cv_setrobust_with_prio_inherit=yes], [apr_cv_setrobust_with_prio_inherit=no])])
+            if test "$apr_cv_setrobust_with_prio_inherit" = "yes"; then
+                ac_cv_func_pthread_mutexattr_setrobust_np=yes
                 APR_ADDTO(CPPFLAGS, -D_POSIX_THREAD_PRIO_INHERIT)
             fi
         fi
