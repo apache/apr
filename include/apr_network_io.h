@@ -380,6 +380,8 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
  *                 *scope_id will be NULL if no scope id was specified.
  * @param port The port number.  On output, *port will be 0 if no port was 
  *             specified.
+ *             ### FIXME: 0 is a legal port (per RFC 1700). this should
+ *             ### return something besides zero if the port is missing.
  * @param str The input string to be parsed.
  * @param p The pool from which *addr and *scope_id are allocated.
  * @remark If scope id shouldn't be allowed, check for scope_id != NULL in 
