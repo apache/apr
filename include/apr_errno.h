@@ -888,6 +888,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 // XXX deprecated
 #define APR_STATUS_IS_ETIMEDOUT(s)         ((s) == APR_ETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + SOCETIMEDOUT)    
+#undef APR_STATUS_IS_TIMEUP
 #define APR_STATUS_IS_TIMEUP(s)         ((s) == APR_TIMEUP \
                 || (s) == APR_OS_START_SYSERR + SOCETIMEDOUT)    
 #define APR_STATUS_IS_EHOSTUNREACH(s)   ((s) == APR_EHOSTUNREACH \
@@ -1027,6 +1028,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ETIMEDOUT(s)         ((s) == APR_ETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
+#undef APR_STATUS_IS_TIMEUP
 #define APR_STATUS_IS_TIMEUP(s)         ((s) == APR_TIMEUP \
                 || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
@@ -1096,6 +1098,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ETIMEDOUT(s)       ((s) == APR_ETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
+#undef APR_STATUS_IS_TIMEUP
 #define APR_STATUS_IS_TIMEUP(s)         ((s) == APR_TIMEUP \
                 || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
