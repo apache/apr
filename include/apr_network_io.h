@@ -372,7 +372,9 @@ apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec,
  * @param file The open file from which to read
  * @param hdtr A structure containing the headers and trailers to send
  * @param offset Offset into the file where we should begin writing
- * @param len Number of bytes to send from the file 
+ * @param len (input)  - Number of bytes to send from the file 
+ *            (output) - Number of bytes actually sent, 
+ *                         including headers, file, and trailers
  * @param flags APR flags that are mapped to OS specific flags
  * @tip This functions acts like a blocking write by default.  To change 
  *      this behavior, use apr_setsocketopt with the APR_SO_TIMEOUT option.
