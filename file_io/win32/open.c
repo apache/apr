@@ -272,10 +272,10 @@ apr_status_t file_cleanup(void *thefile)
         if (file->filehand == GetStdHandle(STD_ERROR_HANDLE)) {
             SetStdHandle(STD_ERROR_HANDLE, INVALID_HANDLE_VALUE);
         }
-        else if (file->filehand == GetStdHandle(STD_OUTPUT_HANDLE)) {
+        if (file->filehand == GetStdHandle(STD_OUTPUT_HANDLE)) {
             SetStdHandle(STD_OUTPUT_HANDLE, INVALID_HANDLE_VALUE);
         }
-        else if (file->filehand == GetStdHandle(STD_INPUT_HANDLE)) {
+        if (file->filehand == GetStdHandle(STD_INPUT_HANDLE)) {
             SetStdHandle(STD_INPUT_HANDLE, INVALID_HANDLE_VALUE);
         }
 
