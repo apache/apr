@@ -91,6 +91,9 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     ap_status_t rv;
     DWORD bwrote;
 
+    if (!thefile->pipe) {
+        SetFilePointer(thefile->filehand, 0, NULL, FILE_END);
+    }
     if (WriteFile(thefile->filehand, buf, *nbytes, &bwrote, NULL)) {
         *nbytes = bwrote;
         rv = APR_SUCCESS;
