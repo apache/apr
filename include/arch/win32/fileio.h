@@ -133,9 +133,10 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool);
 #endif
 
 /* Internal Flags for apr_file_open */
-#define APR_OPENLINK      8192    /* Open a link itself, if supported */
-#define APR_READCONTROL   4096    /* Read the file's owner/perms */
-#define APR_WRITECONTROL  2048    /* Modifythe file's owner/perms */
+#define APR_OPENINFO     0x4000    /* Open without READ or WRITE access */
+#define APR_OPENLINK     0x2000    /* Open a link itself, if supported */
+#define APR_READCONTROL  0x1000    /* Read the file's owner/perms */
+#define APR_WRITECONTROL 0x0800    /* Modifythe file's owner/perms */
 
 /* Entries missing from the MSVC 5.0 Win32 SDK:
  */
