@@ -83,7 +83,6 @@ ap_status_t lock_cleanup(void *lock_)
 ap_status_t create_inter_lock(ap_lock_t *new)
 {
     union semun ick;
-    struct semid_ds buf;
     
     new->interproc = semget(IPC_PRIVATE, 1, IPC_CREAT | 0600);
 
