@@ -65,15 +65,21 @@ file "master.html";
 ## For each package, generate an index entry.
 
 foreach $p (packages()) {
-  >><a href="$(p.url)" target="Documentation"><b>$(p.name)</b></a><br>
+  $_ = $p->url;
+  s/\s/%20/g;
+  >><a href="$_" target="Documentation"><b>$(p.name)</b></a><br>
     <dir>
   <<
   foreach $e ($p->classes()) {
-    >><li><a href="$(e.url)" target="Documentation">$(e.fullname)</a>
+    $_ = $e->url;
+    s/\s/%20/g;
+    >><li><a href="$_" target="Documentation">$(e.fullname)</a>
     <<
   }
   foreach $e ($p->globals()) {
-    >><li><a href="$(e.url)" target="Documentation">$(e.fullname)</a>
+    $_ = $e->url;
+    s/\s/%20/g;
+    >><li><a href="$_" target="Documentation">$(e.fullname)</a>
     <<
   }
   >></dir><<
@@ -108,7 +114,9 @@ file "packages.html";
 ## For each package, generate an index entry.
 
 foreach $p (packages()) {
-  >><a href = "$(p.url)">$(p.name)</a><br>
+  $_ = $p->url;
+  s/\s/%20/g;
+  >><a href = "$_">$(p.name)</a><br>
   <<
 }
 
