@@ -172,7 +172,6 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
 #define apr_atomic_inc(mem)          atomic_add_int(mem,1)
 #define apr_atomic_set(mem, val)     atomic_set_int(mem, val)
 #define apr_atomic_read(mem)         *mem
-#define apr_atomic_init(pool)        APR_SUCCESS
 
 #define APR_ATOMIC_NEED_CAS_DEFAULT 1
 
@@ -184,13 +183,12 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
 #define apr_atomic_dec(mem)          apr_atomic_sub_sparc(mem,1)
 #define apr_atomic_inc(mem)          apr_atomic_add_sparc(mem,1)
 #define apr_atomic_cas(mem,val,cond) apr_atomic_cas_sparc(mem,val,cond)
-#define apr_atomic_casptr(mem,val,cond) apr_atomic_casptr_sparc(mem,val,cond)
 #define apr_atomic_set(mem, val)     *mem= val
 #define apr_atomic_init(pool)        APR_SUCCESS
 
-apr_uint32_t apr_atomic_add_sparc( volatile apr_atomic_t* mem, apr_uint32_t add);
-apr_uint32_t apr_atomic_sub_sparc( volatile apr_atomic_t* mem, apr_uint32_t sub);
-long apr_atomic_cas_sparc(volatile apr_atomic_t *mem,long with,long cmp);
+apr_uint32_t apr_atomic_add_sparc(volatile apr_atomic_t *mem, apr_uint32_t add);
+apr_uint32_t apr_atomic_sub_sparc(volatile apr_atomic_t *mem, apr_uint32_t sub);
+apr_uint32_t apr_atomic_cas_sparc(volatile apr_uint32_t *mem, long with, long cmp);
 
 #else
 #if APR_HAS_THREADS
