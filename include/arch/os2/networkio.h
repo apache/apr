@@ -72,6 +72,7 @@ struct apr_socket_t {
     int nonblock;
     int local_port_unknown;
     int local_interface_unknown;
+    apr_int32_t netmask;
 };
 
 struct apr_pollfd_t {
