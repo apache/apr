@@ -33,3 +33,5 @@ testsockopt
 testipsub
 *.ilk
 *.pdb
+*.idb
+mod_test
