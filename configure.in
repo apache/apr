@@ -110,6 +110,7 @@ echo $ac_n "${nl}Checking for Shared Memory Support...${nl}"
 # run this on a more conditional basis.
 USE_MM=yes
 mm_dir=shmem/unix/mm
+APR_PREPARE_MM_DIR
 RUN_SUBDIR_CONFIG_NOW($config_subdirs)
 
 AC_MSG_CHECKING(Checking for Shared memory support)
@@ -629,16 +630,6 @@ AC_SUBST(have_in_addr)
 AC_SUBST(file_as_socket)
 
 APR_CHECK_GETHOSTBYNAME_NAS
-
-dnl #----------------------------- Prepare mm directory for VPATH support
-if test -n "$USE_MM" && test -n "$USE_VPATH"; then
-  test -d $mm_dir || $MKDIR -p $mm_dir
-
-  for i in shtool config.guess config.sub fbtool ltconfig \
-           ltmain.sh mm_vers.c; do
-    test -r $mm_dir/$i || ln -s $abs_srcdir/$mm_dir/$i $mm_dir/$i
-  done
-fi
 
 dnl #----------------------------- Construct the files
 AC_SUBST(LDLIBS)

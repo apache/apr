@@ -264,6 +264,7 @@ int main(void) {
 AC_DEFUN(RUN_SUBDIR_CONFIG_NOW, [
   echo "configuring package in $1 now"
   ac_popdir=`pwd`
+  ac_abs_srcdir=`(cd $srcdir/$1 && pwd)`
   cd $1
 
   # Make the cache file name correct relative to the subdirectory.
@@ -273,18 +274,9 @@ AC_DEFUN(RUN_SUBDIR_CONFIG_NOW, [
     ac_sub_cache_file="$ac_dots$cache_file" ;;
   esac
 
-  case "$srcdir" in
-  .) # No --srcdir option.  We are building in place.
-    ac_sub_srcdir=$srcdir ;;
-  /*) # Absolute path.
-    ac_sub_srcdir=$srcdir/$ac_config_dir ;;
-  *) # Relative path.
-    ac_sub_srcdir=$ac_dots$srcdir/$ac_config_dir ;;
-  esac
-
   # The eval makes quoting arguments work.
  
-  if eval ./configure --cache-file=$ac_sub_cache_file --srcdir=$ac_sub_srcdir
+  if eval $ac_abs_srcdir/configure --cache-file=$ac_sub_cache_file --srcdir=$ac_abs_srcdir
   then :
     echo "$1 configured properly"
   else
@@ -292,6 +284,18 @@ AC_DEFUN(RUN_SUBDIR_CONFIG_NOW, [
   fi
 
   cd $ac_popdir
+])
+
+AC_DEFUN(APR_PREPARE_MM_DIR,[
+dnl #----------------------------- Prepare mm directory for VPATH support
+if test -n "$USE_MM" && test -n "$USE_VPATH"; then
+  test -d $mm_dir || $MKDIR -p $mm_dir
+
+  for i in shtool config.guess config.sub fbtool ltconfig \
+           ltmain.sh mm_vers.c; do
+    test -r $mm_dir/$i || ln -s $abs_srcdir/$mm_dir/$i $mm_dir/$i
+  done
+fi
 ])
 
 sinclude(threads.m4)
