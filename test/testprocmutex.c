@@ -179,8 +179,8 @@ int main(int argc, const char * const *argv)
         exit(-1);
     }
 
-    apr_shm_init(&shm, sizeof(int), shmname, pool);
-    x = apr_shm_calloc(shm, sizeof(int));
+    apr_shm_create(&shm, sizeof(int), shmname, pool);
+    x = apr_shm_baseaddr_get(shm);
 
     if ((rv = test_exclusive(lockname)) != APR_SUCCESS) {
         fprintf(stderr,"Exclusive Lock test failed : [%d] %s\n",
