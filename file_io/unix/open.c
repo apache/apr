@@ -168,7 +168,7 @@ ap_status_t ap_open(ap_context_t *cont, const char *fname, ap_int32_t flag,  ap_
         }    
     }
 
-    if ((*new)->filedes < 0 || (*new)->filehand == NULL) {
+    if ((*new)->filedes < 0 && (*new)->filehand == NULL) {
        (*new)->filedes = -1;
        (*new)->eof_hit = 1;
         return errno;
