@@ -77,8 +77,8 @@ int main(int argc, char *argv[])
     }
 
     {
-        apr_os_proc_t var = 0;
-        sprintf(buf, "%" APR_OS_PROC_T_FMT, var);
+        pid_t var = 0;
+        sprintf(buf, "%" APR_PID_T_FMT, var);
     }
 
     {
