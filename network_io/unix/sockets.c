@@ -101,6 +101,13 @@ static void set_socket_vars(apr_socket_t *sock, int family)
         sock->remote_addr->ipaddr_len = sizeof(struct in6_addr);
     }
 #endif
+    sock->netmask = 0;
+#if defined(BEOS) && !defined(BEOS_BONE)
+    /* BeOS pre-BONE has TCP_NODELAY on by default and it can't be
+     * switched off!
+     */
+    sock->netmask |= APR_TCP_NODELAY;
+#endif
 }                                                                                                  
 static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
 {

@@ -130,6 +130,7 @@ struct apr_socket_t {
 #endif
     int local_port_unknown;
     int local_interface_unknown;
+    apr_int32_t netmask;
 };
 
 struct apr_pollfd_t {
