@@ -75,11 +75,11 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct file_t *thefile)
         finfo->size = info.st_size;
         finfo->inode = info.st_ino;
         ap_make_time(&finfo->atime, thefile->cntxt);
-        ap_set_curtime(finfo->atime, info.st_atime);
+        ap_set_ansitime(finfo->atime, info.st_atime);
         ap_make_time(&finfo->mtime, thefile->cntxt);
-        ap_set_curtime(finfo->mtime, info.st_mtime);
+        ap_set_ansitime(finfo->mtime, info.st_mtime);
         ap_make_time(&finfo->ctime, thefile->cntxt);
-        ap_set_curtime(finfo->ctime, info.st_ctime);
+        ap_set_ansitime(finfo->ctime, info.st_ctime);
 
         return APR_SUCCESS;
     }
@@ -108,11 +108,11 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
         finfo->size = info.st_size;
         finfo->inode = info.st_ino;
         ap_make_time(&finfo->atime, cont);
-        ap_set_curtime(finfo->atime, info.st_atime);
+        ap_set_ansitime(finfo->atime, info.st_atime);
         ap_make_time(&finfo->mtime, cont);
-        ap_set_curtime(finfo->mtime, info.st_mtime);
+        ap_set_ansitime(finfo->mtime, info.st_mtime);
         ap_make_time(&finfo->ctime, cont);
-        ap_set_curtime(finfo->ctime, info.st_ctime);
+        ap_set_ansitime(finfo->ctime, info.st_ctime);
         return APR_SUCCESS;
     }
     else {

@@ -56,12 +56,12 @@
 #include "atime.h"
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_curtime(ap_time_t *, ap_int64_t *)
+ * ap_status_t ap_get_ansitime(ap_time_t *, ap_int64_t *)
  *    Get the current time in seconds since Jan 1, 1970.
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_get_curtime(struct atime_t *atime, ap_int64_t *rv)
+ap_status_t ap_get_ansitime(struct atime_t *atime, ap_ansi_time_t *rv)
 {
     if (atime) {
         (*rv) = atime->currtime->tv_sec;
@@ -176,12 +176,12 @@ ap_status_t ap_get_wday(struct atime_t *atime, ap_int32_t *rv)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_curtime(ap_time_t *, ap_int64_t)
+ * ap_status_t ap_set_ansitime(ap_time_t *, ap_int64_t)
  *    Set the current time in seconds since Jan 1, 1970.
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_set_curtime(struct atime_t *atime, ap_int64_t sec)
+ap_status_t ap_set_ansitime(struct atime_t *atime, ap_ansi_time_t sec)
 {
     if (atime) {
         if (!atime->currtime) {
