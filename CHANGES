@@ -1,5 +1,10 @@
 Changes with APR 0.9.2
 
+  *) Numerous bug fixes for file and socket inheritence by child
+     processes on Unix, correcting bugs that affected the correct 
+     behavior of apr_[file|socket]_inherit_[un]set() API.
+     [Bjoern A. Zeeb <bz@zabbadoz.net>, William Rowe, Joe Orton]
+
   *) Define APR_UINT64_T_FMT and APR_UINT64_T_FMT_LEN.
      Define APR_INT64_T_FMT_LEN on Windows and Netware.  [Branko Cibej]
 
