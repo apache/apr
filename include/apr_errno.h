@@ -91,8 +91,6 @@ int apr_canonical_error(apr_status_t err);
 #define APR_OS_START_CANONERR  (APR_OS_START_USEERR + 500)
 #define APR_OS_START_SYSERR    (APR_OS_START_CANONERR + 500)
 
-#define APR_OS2_STATUS(e) (e == 0 ? APR_SUCCESS : e + APR_OS_START_SYSERR)
-
 #define APR_SUCCESS 0
 
 /**
@@ -349,80 +347,60 @@ int apr_canonical_error(apr_status_t err);
 #endif
 
 
-#if !defined(OS2) && !defined(WIN32)
+#if defined(OS2) /* endif !defined(WIN32) && !defined(OS2) */
 
+/*  uhhh... I dunno
+ */
+#define APR_FROM_OS_ERROR(e) (e == 0 ? APR_SUCCESS : e + APR_OS_START_SYSERR)
+#define APR_TO_OS_ERROR(e)   (e == 0 ? APR_SUCCESS : e - APR_OS_START_SYSERR)
 
-#define APR_STATUS_IS_SUCCESS ((s) == APR_SUCCESS)
+#define apr_get_os_error()   (APR_FROM_OS_ERROR(GetLastError()))
+#define apr_set_os_error(e)  (SetLastError(APR_TO_OS_ERROR(e)))
 
-/* APR CANONICAL ERROR TESTS */
-#define APR_STATUS_IS_EACCES(s)         ((s) == APR_EACCES)
-#define APR_STATUS_IS_EEXIST(s)         ((s) == APR_EEXIST)
-#define APR_STATUS_IS_ENAMETOOLONG(s)   ((s) == APR_ENAMETOOLONG)
-#define APR_STATUS_IS_ENOENT(s)         ((s) == APR_ENOENT)
-#define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR)
-#define APR_STATUS_IS_ENOSPC(s)         ((s) == APR_ENOSPC)
-#define APR_STATUS_IS_ENOMEM(s)         ((s) == APR_ENOMEM)
-#define APR_STATUS_IS_EMFILE(s)         ((s) == APR_EMFILE)
-#define APR_STATUS_IS_ENFILE(s)         ((s) == APR_ENFILE)
-#define APR_STATUS_IS_EBADF(s)          ((s) == APR_EBADF)
-#define APR_STATUS_IS_EINVAL(s)         ((s) == APR_EINVAL)
-#define APR_STATUS_IS_ESPIPE(s)         ((s) == APR_ESPIPE)
-#if !defined(EWOULDBLOCK) || !defined(EAGAIN)
-#define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN)
-#elif (EWOULDBLOCK == EAGAIN)
-#define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN)
-#else
-#define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN || (s) == EWOULDBLOCK)
-#endif
-#define APR_STATUS_IS_EINTR(s)          ((s) == APR_EINTR)
-#define APR_STATUS_IS_ENOTSOCK(s)       ((s) == APR_ENOTSOCK)
-#define APR_STATUS_IS_ECONNREFUSED(s)   ((s) == APR_ECONNREFUSED)
-#define APR_STATUS_IS_EINPROGRESS(s)    ((s) == APR_EINPROGRESS)
-
-
-#elif defined(OS2) /* endif !defined(WIN32) && !defined(OS2) */
-
+/* And this needs to be greped away for good:
+ */
+#define APR_OS2_STATUS(e) (APR_FROM_OS_ERROR(e))
 
 #define APR_STATUS_IS_SUCCESS           ((s) == APR_SUCCESS \
-                || (s) - APR_OS_START_SYSERR == NO_ERROR)
+                || (s) == APR_OS_START_SYSERR + NO_ERROR)
 
 /* APR CANONICAL ERROR TESTS */
 #define APR_STATUS_IS_EACCES(s)         ((s) == APR_EACCES \
-                || (s) - APR_OS_START_SYSERR == ERROR_ACCESS_DENIED \
-                || (s) - APR_OS_START_SYSERR == ERROR_SHARING_VIOLATION)
+                || (s) == APR_OS_START_SYSERR + ERROR_ACCESS_DENIED \
+                || (s) == APR_OS_START_SYSERR + ERROR_SHARING_VIOLATION)
 #define APR_STATUS_IS_EEXIST(s)         ((s) == APR_EEXIST)
 #define APR_STATUS_IS_ENAMETOOLONG(s)   ((s) == APR_ENAMETOOLONG \
-                || (s) - APR_OS_START_SYSERR == ERROR_FILENAME_EXCED_RANGE \
-                || (s) - APR_OS_START_SYSERR == SOCENAMETOOLONG)
+                || (s) == APR_OS_START_SYSERR + ERROR_FILENAME_EXCED_RANGE \
+                || (s) == APR_OS_START_SYSERR + SOCENAMETOOLONG)
 #define APR_STATUS_IS_ENOENT(s)         ((s) == APR_ENOENT \
-                || (s) - APR_OS_START_SYSERR == ERROR_FILE_NOT_FOUND \
-                || (s) - APR_OS_START_SYSERR == ERROR_PATH_NOT_FOUND \
-                || (s) - APR_OS_START_SYSERR == ERROR_OPEN_FAILED)
+                || (s) == APR_OS_START_SYSERR + ERROR_FILE_NOT_FOUND \
+                || (s) == APR_OS_START_SYSERR + ERROR_PATH_NOT_FOUND \
+                || (s) == APR_OS_START_SYSERR + ERROR_OPEN_FAILED)
 #define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR)
 #define APR_STATUS_IS_ENOSPC(s)         ((s) == APR_ENOSPC \
-                || (s) - APR_OS_START_SYSERR == ERROR_DISK_FULL)
+                || (s) == APR_OS_START_SYSERR + ERROR_DISK_FULL)
 #define APR_STATUS_IS_ENOMEM(s)         ((s) == APR_ENOMEM)
 #define APR_STATUS_IS_EMFILE(s)         ((s) == APR_EMFILE \
-                || (s) - APR_OS_START_SYSERR == ERROR_TOO_MANY_OPEN_FILES)
+                || (s) == APR_OS_START_SYSERR + ERROR_TOO_MANY_OPEN_FILES)
 #define APR_STATUS_IS_ENFILE(s)         ((s) == APR_ENFILE)
 #define APR_STATUS_IS_EBADF(s)          ((s) == APR_EBADF \
-                || (s) - APR_OS_START_SYSERR == ERROR_INVALID_HANDLE)
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_HANDLE)
 #define APR_STATUS_IS_EINVAL(s)         ((s) == APR_EINVAL \
-                || (s) - APR_OS_START_SYSERR == ERROR_INVALID_PARAMETER \
-                || (s) - APR_OS_START_SYSERR == ERROR_INVALID_FUNCTION)
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_PARAMETER \
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_FUNCTION)
 #define APR_STATUS_IS_ESPIPE(s)         ((s) == APR_ESPIPE \
-                || (s) - APR_OS_START_SYSERR == ERROR_NEGATIVE_SEEK)
+                || (s) == APR_OS_START_SYSERR + ERROR_NEGATIVE_SEEK)
 #define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN \
-                || (s) - APR_OS_START_SYSERR == ERROR_NO_DATA \
-                || (s) - APR_OS_START_SYSERR == SOCEWOULDBLOCK)
+                || (s) == APR_OS_START_SYSERR + ERROR_NO_DATA \
+                || (s) == APR_OS_START_SYSERR + SOCEWOULDBLOCK)
 #define APR_STATUS_IS_EINTR(s)          ((s) == APR_EINTR \
-                || (s) - APR_OS_START_SYSERR == SOCEINTR)
+                || (s) == APR_OS_START_SYSERR + SOCEINTR)
 #define APR_STATUS_IS_ENOTSOCK(s)       ((s) == APR_ENOTSOCK \
-                || (s) - APR_OS_START_SYSERR == SOCENOTSOCK)
+                || (s) == APR_OS_START_SYSERR + SOCENOTSOCK)
 #define APR_STATUS_IS_ECONNREFUSED(s)   ((s) == APR_ECONNREFUSED \
-                || (s) - APR_OS_START_SYSERR == SOCECONNREFUSED)
+                || (s) == APR_OS_START_SYSERR + SOCECONNREFUSED)
 #define APR_STATUS_IS_EINPROGRESS(s)    ((s) == APR_EINPROGRESS \
-                || (s) - APR_OS_START_SYSERR == SOCEINPROGRESS)
+                || (s) == APR_OS_START_SYSERR + SOCEINPROGRESS)
 
 /*
     Sorry, too tired to wrap this up for OS2... feel free to
@@ -461,46 +439,98 @@ int apr_canonical_error(apr_status_t err);
 
 #elif defined(WIN32) /* endif defined(OS2) */
 
+#define APR_FROM_OS_ERROR(e) (e == 0 ? APR_SUCCESS : e + APR_OS_START_SYSERR)
+#define APR_TO_OS_ERROR(e)   (e == 0 ? APR_SUCCESS : e - APR_OS_START_SYSERR)
 
-#define APR_STATUS_IS_SUCCESS ((s) == APR_SUCCESS)
+#define apr_get_os_error()   (APR_FROM_OS_ERROR(GetLastError()))
+#define apr_set_os_error(e)  (SetLastError(APR_TO_OS_ERROR(e)))
+
+/* A special case, only Win32 winsock calls require this:
+ */
+#define apr_get_netos_error()   (APR_FROM_OS_ERROR(WSAGetLastError()))
+
+#define APR_STATUS_IS_SUCCESS           ((s) == APR_SUCCESS \
+                || (s) == APR_OS_START_SYSERR + ERROR_SUCCESS)
 
 /* APR CANONICAL ERROR TESTS */
 #define APR_STATUS_IS_EACCES(s)         ((s) == APR_EACCES \
-                                      || (s) == ERROR_ACCESS_DENIED \
-                                      || (s) == ERROR_SHARING_VIOLATION)
-#define APR_STATUS_IS_EEXIST(s)         ((s) == APR_EEXIST)
+                || (s) == APR_OS_START_SYSERR + ERROR_ACCESS_DENIED \
+                || (s) == APR_OS_START_SYSERR + ERROR_SHARING_VIOLATION)
+#define APR_STATUS_IS_EEXIST(s)         ((s) == APR_EEXIST \
+                || (s) == APR_OS_START_SYSERR + ERROR_FILE_EXISTS \
+                || (s) == APR_OS_START_SYSERR + ERROR_ALREADY_EXISTS)
 #define APR_STATUS_IS_ENAMETOOLONG(s)   ((s) == APR_ENAMETOOLONG \
-                                      || (s) == ERROR_FILENAME_EXCED_RANGE \
-                                      || (s) == WSAENAMETOOLONG)
+                || (s) == APR_OS_START_SYSERR + ERROR_FILENAME_EXCED_RANGE \
+                || (s) == APR_OS_START_SYSERR + WSAENAMETOOLONG)
 #define APR_STATUS_IS_ENOENT(s)         ((s) == APR_ENOENT \
-                                      || (s) == ERROR_FILE_NOT_FOUND \
-                                      || (s) == ERROR_PATH_NOT_FOUND \
-                                      || (s) == ERROR_OPEN_FAILED)
+                || (s) == APR_OS_START_SYSERR + ERROR_FILE_NOT_FOUND \
+                || (s) == APR_OS_START_SYSERR + ERROR_PATH_NOT_FOUND \
+                || (s) == APR_OS_START_SYSERR + ERROR_OPEN_FAILED)
 #define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR)
 #define APR_STATUS_IS_ENOSPC(s)         ((s) == APR_ENOSPC \
-                                      || (s) == ERROR_DISK_FULL)
+                || (s) == APR_OS_START_SYSERR + ERROR_DISK_FULL)
 #define APR_STATUS_IS_ENOMEM(s)         ((s) == APR_ENOMEM)
 #define APR_STATUS_IS_EMFILE(s)         ((s) == APR_EMFILE \
-                                      || (s) == ERROR_TOO_MANY_OPEN_FILES)
+                || (s) == APR_OS_START_SYSERR + ERROR_TOO_MANY_OPEN_FILES)
 #define APR_STATUS_IS_ENFILE(s)         ((s) == APR_ENFILE)
 #define APR_STATUS_IS_EBADF(s)          ((s) == APR_EBADF \
-                                      || (s) == ERROR_INVALID_HANDLE)
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_HANDLE)
 #define APR_STATUS_IS_EINVAL(s)         ((s) == APR_EINVAL \
-                                      || (s) == ERROR_INVALID_PARAMETER \
-                                      || (s) == ERROR_INVALID_FUNCTION)
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_PARAMETER \
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_FUNCTION)
 #define APR_STATUS_IS_ESPIPE(s)         ((s) == APR_ESPIPE \
-                                      || (s) == ERROR_NEGATIVE_SEEK)
+                || (s) == APR_OS_START_SYSERR + ERROR_NEGATIVE_SEEK)
 #define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN \
-                                      || (s) == ERROR_NO_DATA \
-                                      || (s) == WSAEWOULDBLOCK)
+                || (s) == APR_OS_START_SYSERR + ERROR_NO_DATA \
+                || (s) == APR_OS_START_SYSERR + WSAEWOULDBLOCK)
 #define APR_STATUS_IS_EINTR(s)          ((s) == APR_EINTR \
-                                      || (s) == WSAEINTR)
+                || (s) == APR_OS_START_SYSERR + WSAEINTR)
 #define APR_STATUS_IS_ENOTSOCK(s)       ((s) == APR_ENOTSOCK \
-                                      || (s) == WSAENOTSOCK)
+                || (s) == APR_OS_START_SYSERR + WSAENOTSOCK)
 #define APR_STATUS_IS_ECONNREFUSED(s)   ((s) == APR_ECONNREFUSED \
-                                      || (s) == WSAECONNREFUSED)
+                || (s) == APR_OS_START_SYSERR + WSAECONNREFUSED)
 #define APR_STATUS_IS_EINPROGRESS(s)    ((s) == APR_EINPROGRESS \
-                                      || (s) == WSAEINPROGRESS)
+                || (s) == APR_OS_START_SYSERR + WSAEINPROGRESS)
+
+
+#else /* !def OS2 || WIN32 */
+
+
+/*
+ *  os error codes are clib error codes
+ */
+#define APR_FROM_OS_ERROR(e)  (e)
+#define APR_TO_OS_ERROR(e)    (e)
+
+#define apr_get_os_error()    (errno)
+#define apr_set_os_error(e)   (errno = (e))
+
+#define APR_STATUS_IS_SUCCESS           ((s) == APR_SUCCESS)
+
+/* APR CANONICAL ERROR TESTS */
+#define APR_STATUS_IS_EACCES(s)         ((s) == APR_EACCES)
+#define APR_STATUS_IS_EEXIST(s)         ((s) == APR_EEXIST)
+#define APR_STATUS_IS_ENAMETOOLONG(s)   ((s) == APR_ENAMETOOLONG)
+#define APR_STATUS_IS_ENOENT(s)         ((s) == APR_ENOENT)
+#define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR)
+#define APR_STATUS_IS_ENOSPC(s)         ((s) == APR_ENOSPC)
+#define APR_STATUS_IS_ENOMEM(s)         ((s) == APR_ENOMEM)
+#define APR_STATUS_IS_EMFILE(s)         ((s) == APR_EMFILE)
+#define APR_STATUS_IS_ENFILE(s)         ((s) == APR_ENFILE)
+#define APR_STATUS_IS_EBADF(s)          ((s) == APR_EBADF)
+#define APR_STATUS_IS_EINVAL(s)         ((s) == APR_EINVAL)
+#define APR_STATUS_IS_ESPIPE(s)         ((s) == APR_ESPIPE)
+#if !defined(EWOULDBLOCK) || !defined(EAGAIN)
+#define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN)
+#elif (EWOULDBLOCK == EAGAIN)
+#define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN)
+#else
+#define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN || (s) == EWOULDBLOCK)
+#endif
+#define APR_STATUS_IS_EINTR(s)          ((s) == APR_EINTR)
+#define APR_STATUS_IS_ENOTSOCK(s)       ((s) == APR_ENOTSOCK)
+#define APR_STATUS_IS_ECONNREFUSED(s)   ((s) == APR_ECONNREFUSED)
+#define APR_STATUS_IS_EINPROGRESS(s)    ((s) == APR_EINPROGRESS)
 
 #endif /* endif defined(WIN32) */
 
