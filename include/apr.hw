@@ -294,7 +294,7 @@ extern "C" {
 #define APR_HAS_MMAP              1
 #define APR_HAS_FORK              0
 #define APR_HAS_RANDOM            1
-#define APR_HAS_OTHER_CHILD       0
+#define APR_HAS_OTHER_CHILD       1
 #define APR_HAS_DSO               1
 #define APR_HAS_SO_ACCEPTFILTER   0
 #define APR_HAS_UNICODE_FS        1
