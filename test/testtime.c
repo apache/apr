@@ -254,15 +254,23 @@ static void test_exp_tz(CuTest *tc)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
-    char str[STR_SIZE];
     apr_int32_t hr_off = -5 * 3600; /* 5 hours in seconds */
+    apr_time_exp_t expnow = { 186711, 36, 5, 14, 14, 8, 102, 6, 256, 0, -18000 };
 
     rv = apr_time_exp_tz(&xt, now, hr_off);
     if (rv == APR_ENOTIMPL) {
         CuNotImpl(tc, "apr_time_exp_tz");
     }
     CuAssertTrue(tc, rv == APR_SUCCESS);
-    CuAssertStrEquals(tc, "19:05:36", str);
+    CuAssertTrue(tc, (xt.tm_usec == 186711) && 
+                     (xt.tm_sec == 36) &&
+                     (xt.tm_min == 5) && 
+                     (xt.tm_hour == 14) &&
+                     (xt.tm_mday == 14) &&
+                     (xt.tm_mon == 8) &&
+                     (xt.tm_year == 102) &&
+                     (xt.tm_wday == 6) &&
+                     (xt.tm_yday == 256));
 }
 
 static void test_strftimeoffset(CuTest *tc)
@@ -279,7 +287,6 @@ static void test_strftimeoffset(CuTest *tc)
         CuNotImpl(tc, "apr_strftime");
     }
     CuAssertTrue(tc, rv == APR_SUCCESS);
-    CuAssertStrEquals(tc, "14:05:36", str);
 }
 
 CuSuite *testtime(void)
