@@ -75,8 +75,8 @@ static void merge_aboveroot(CuTest *tc)
     rv = apr_filepath_merge(&dstpath, ABS_ROOT"foo", ABS_ROOT"bar", APR_FILEPATH_NOTABOVEROOT,
                             p);
     apr_strerror(rv, errmsg, sizeof(errmsg));
-    CuAssertPtrEquals(tc, NULL, dstpath);
     CuAssertIntEquals(tc, 1, APR_STATUS_IS_EABOVEROOT(rv));
+    CuAssertPtrEquals(tc, NULL, dstpath);
     CuAssertStrEquals(tc, "The given path was above the root path", errmsg);
 }
 
