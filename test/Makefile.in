@@ -8,7 +8,7 @@ RM=@RM@
 CC=@CC@
 RANLIB=@RANLIB@
 CFLAGS=@CFLAGS@ @OPTIM@ 
-LIBS=-L../libs -lnetwork -lthreadproc -lfile -lmisc -lapr -ltime -llock -lsig -lmmap @LIBS@ 
+LIBS=-L.. -lapr @LIBS@ 
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../include
 INCDIR1=../../inc
@@ -24,7 +24,7 @@ TARGETS= testfile@EXEEXT@ \
 	testcontext@EXEEXT@ \
 	ab@EXEEXT@ \
 	htdigest@EXEEXT@ \
-         testmmap@EXEEXT@
+	testmmap@EXEEXT@
 
 OBJS= testfile.o \
 	testproc.o \
