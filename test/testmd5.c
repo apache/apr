@@ -59,6 +59,9 @@
 #include "apr_md5.h"
 #include "apr_xlate.h"
 #include "apr_general.h"
+#include "test_apr.h"
+
+int cur; 
 
 struct testcase {
     const char *s;
@@ -96,45 +99,33 @@ static void try(const void *buf, size_t bufLen, apr_xlate_t *xlate,
     apr_md5_ctx_t context;
     unsigned char hash[MD5_DIGESTSIZE];
     
-    printf("Trying a translation...\n");
+    printf("Trying translation %d\n", cur + 1);
 
-    if ((rv = apr_md5_init(&context)) != APR_SUCCESS){
-        printf("Failed to init APR's md5 routines!\n");
-        exit(-1);
-    }
+    STD_TEST_NEQ("    apr_md5_init", apr_md5_init(&context))
 
     if (xlate) {
 #if APR_HAS_XLATE
-        if ((rv = apr_md5_set_xlate(&context, xlate)) != APR_SUCCESS){
-            fprintf(stderr, "Couldn't set the MD5 translation handle!\n");
-            exit(-1);
-        }
+        STD_TEST_NEQ("    apr_md5_set_xlate", 
+                     apr_md5_set_xlate(&context, xlate))
 #else
-        printf("\tDidn't expect a translation handle! Not fatal.\n");
+        printf("    Didn't expect a translation handle! Not fatal.\n");
 #endif
     }
     
-    if ((rv = apr_md5_update(&context, buf, bufLen)) != APR_SUCCESS){
-        printf("The call to apr_md5_update failed!\n");
-        exit(-1);
-    }
+    STD_TEST_NEQ("    apr_md5_update", apr_md5_update(&context, buf, bufLen))
+    STD_TEST_NEQ("    apr_md5_final", apr_md5_final(hash, &context))
 
-    if ((rv = apr_md5_final(hash, &context)) != APR_SUCCESS){
-        printf("The call to apr_md5_final failed!\n");
-        exit(-1);
-    }
-
-    printf("\t (MD5 hash : ");
+    printf("     (MD5 hash : ");
     for (i = 0; i < MD5_DIGESTSIZE; i++) {
         printf("%02x",hash[i]);
     }
     
     printf(")\n");
 
-    printf("\tChecking hash against expected....................");
+    printf("%-60s", "    Checking hash against expected");
     if (memcmp(hash, digest, MD5_DIGESTSIZE)) {
-        fprintf(stderr,
-                "The digest is not as expected!\n");
+        /* This is a fatal error...report on stderr */
+        fprintf(stderr, "The digest is not as expected!\n");
 #if 'A' != 0x41
         fprintf(stderr,
                 "Maybe you didn't tell me what character sets "
@@ -152,7 +143,6 @@ int main(int argc, char **argv)
     apr_xlate_t *xlate = NULL;
     apr_pool_t *pool;
     const char *src = NULL, *dst = NULL;
-    int cur;
 
     switch(argc) {
     case 1:
@@ -173,28 +163,16 @@ int main(int argc, char **argv)
     atexit(closeapr);
 
     printf("APR MD5 Test\n============\n\n");
-    printf("Creating pool.............................................");
-    if ((rv = apr_pool_create(&pool, NULL)) != APR_SUCCESS){
-        printf("Failed.\n");
-        exit(-1);
-    }
-    printf("OK\n");
-
+    STD_TEST_NEQ("Creating pool", apr_pool_create(&pool, NULL))
 
     if (src) {
 #if APR_HAS_XLATE
-        rv = apr_xlate_open(&xlate, dst, src, pool);
-        if (rv) {
-            char buf[80];
-
-            fprintf(stderr, "apr_xlate_open()->%s (%d)\n",
-                    apr_strerror(rv, buf, sizeof(buf)), rv);
-            exit(1);
-        }
+        STD_TEST_NEQ("Opening xlate functions", 
+                     apr_xlate_open(&xlate, dst, src, pool))
 #else
-        fprintf(stderr,
-                "APR doesn't implement translation for this "
-                "configuration.\n");
+        /* This isn't a fatal error, so just report it... */
+        printf("APR doesn't implement translation for this "
+               "configuration.\n");
 #endif
     }
 
