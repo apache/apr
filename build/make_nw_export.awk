@@ -14,8 +14,6 @@
 /apr_mmap_delete/{next}
 /apr_mmap_dup/{next}
 /apr_mmap_offset/{next}
-/apr_os_thread_get/{next}
-/apr_os_thread_put/{next}
 /apr_pool_free_blocks_num_bytes/{next}
 /apr_pool_join/{next}
 /apr_pool_num_bytes/{next}
@@ -43,8 +41,6 @@
 /apr_signal/{next}
 /apr_signal_thread/{next}
 /apr_socket_from_file/{next}
-/apr_thread_once/{next}
-/apr_thread_once_init/{next}
 /apr_xlate_close/{next}
 /apr_xlate_conv_buffer/{next}
 /apr_xlate_conv_byte/{next}
@@ -58,6 +54,7 @@
 /apr_md4_set_xlate/{next}
 /apr_os_proc_mutex_get/{next}
 /apr_os_proc_mutex_put/{next}
+/proc_mutex/{next}
 
 
 function add_symbol (sym_name) {
@@ -93,6 +90,13 @@ function add_symbol (sym_name) {
     add_symbol("ap_hook_" symbol)
     add_symbol("ap_hook_get_" symbol)
     add_symbol("ap_run_" symbol)
+    next
+}
+
+/^[ \t]*APR_POOL_DECLARE_ACCESSOR[^(]*[(][^)]*[)]/ {
+    sub("[ \t]*APR_POOL_DECLARE_ACCESSOR[^(]*[(]", "", $0)
+    sub("[)].*$", "", $0)
+    add_symbol("apr_" $0 "_pool_get")
     next
 }
 
