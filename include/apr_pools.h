@@ -290,6 +290,12 @@ APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
 #endif
 
 /**
+ * Find the pools allocator
+ * @param pool The pool to get the allocator from.
+ */
+APR_DECLARE(apr_allocator_t *) apr_pool_allocator_get(apr_pool_t *pool);
+
+/**
  * Clear all memory in the pool and run all the cleanups. This also destroys all
  * subpools.
  * @param p The pool to clear
