@@ -549,6 +549,10 @@ SOURCE=.\include\apr_portable.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\include\apr_ring.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\include\apr_shmem.h
 # End Source File
 # Begin Source File
