@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/08/19 21:38:46 $]
+Last modified at [$Date: 2002/08/22 20:16:23 $]
 
 Release:
 
@@ -33,11 +33,15 @@ RELEASE SHOWSTOPPERS:
                               HIBYTE, LOBYTE)
         apr.hw                (NO_USE_SIGACTION)
 
+      1.0 showstopper (not 0.9.x): gstein
+
     * complete the efforts started by DougM for cleaner fn naming
       conventions: see proposed name changes in renames_pending
       and offer up any additions/vetos/clarifications.
       DougM offered to complete the work with his nifty perl rename
       script at the hackathon. 
+
+      1.0 showstopper (not 0.9.0): gstein
 
     * When Win32 apr_proc_create was fixed, the apr_proc_t hproc
       member was added for that platform.  That's a problem (and
@@ -46,18 +50,26 @@ RELEASE SHOWSTOPPERS:
       since apr_proc_create didn't allocate the apr_proc_t storage.
       (Aren't transparent types swell?)  Suggestions?
 
-    * extract the MAJOR version from apr_version.h and pass it to
-      libtool for use in applying version numbers to the shared
-      libraries.
+      1.0 showstopper (not 0.9.0): gstein
 
     * Change apr_initialize to take the expected version (in some form)
       and return an error code if the requirement isn't satisfied.
 
+      gstein: -1
+
       Justin says: "Relying solely on the run-time linker isn't enough
                     to guarantee versioning."
+      Greg says: "yup. but now the libraries have different names.
+                  -lapr-1 and -lapr-2. further, we can always add a
+                  utility function to check (the minor rev), rather
+                  than monkey with the initialization itself. the
+		  runtime linker will catch new function requirements
+		  across minor rev upgrades, but will not catch new
+		  constants."
       
 
 CURRENT VOTES:
+
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
@@ -180,7 +192,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
     * add a version number to apr_initialize() as an extra failsafe against
       (APR) library version skew.
       MsgID: <Pine.LNX.4.10.10005231712380.31927-100000@nebula.lyra.org>
-      Status: Greg +1 (volunteers), Jeff +1, Ryan +1, Tony -0(?), david +1
+      Status: Greg -1, Jeff +1, Ryan +1, Tony -0(?), david +1
 
     * add apr_crypt() and APR_HAS_CRYPT for apps to determine whether the
       crypt() function is available, and a way to call it (whether it is
@@ -225,14 +237,14 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       Justin says: Both thread and file have the accessors now.  Any others?
       Status: Greg volunteers
 
-    * I think apr_open_stderr() and friends dup() the descriptor. That
-      would allow the new/returned file to be closed (via pool cleanup
-      or manually) without accidentally closing stderr/out.
-      Justin says: Is this "I think it should?"
+    * I think apr_open_stderr() and friends *should* dup() the
+      descriptor.  That would allow the new/returned file to be closed
+      (via pool cleanup or manually) without accidentally closing
+      stderr/out.
 
-    * need to export the shared library extension (e.g. ".so") for the
-      platform. clients need to use this to construct filenames to
-      pass to apr_dso_load()
+    * need to export (in code, not just build scripts) the shared
+      library extension (e.g. ".so") for the platform. clients need to
+      use this to construct filenames to pass to apr_dso_load()
       -- note on Win32 we distinguish 'apache module' names from other 
          'loadable module' names, so be careful with Apache's directive.
 
