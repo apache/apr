@@ -61,7 +61,6 @@ if test "x$apr_preload_done" != "xyes" ; then
           APR_SETIFNULL(AIX_XLC, [yes])
           APR_ADDTO(CFLAGS, [-qHALT=E])
         fi
-	APR_SETIFNULL(apr_iconv_inbuf_const, [1])
 	APR_SETIFNULL(apr_sysvsem_is_global, [yes])
 	APR_ADDTO(LDFLAGS, [-Wl,-brtl])
         ;;
@@ -191,7 +190,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-solaris2*)
     	PLATOSVERS=`echo $host | sed 's/^.*solaris2.//'`
 	APR_ADDTO(CPPFLAGS, [-DSOLARIS2=$PLATOSVERS -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT])
-	APR_SETIFNULL(apr_iconv_inbuf_const, [1])
 	;;
     *-sunos4*)
 	APR_ADDTO(CPPFLAGS, [-DSUNOS4])
