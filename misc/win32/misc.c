@@ -62,60 +62,103 @@ apr_status_t apr_get_oslevel(apr_pool_t *cont, apr_oslevel_e *level)
     if (apr_os_level == APR_WIN_UNK) 
     {
         static OSVERSIONINFO oslev;
-        static unsigned int servpack = 0;
-        char *pservpack;
-
         oslev.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
         GetVersionEx(&oslev);
-        if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) {
-            for (pservpack = oslev.szCSDVersion; 
-                 *pservpack && !isdigit(*pservpack); pservpack++)
-                ;
-            if (*pservpack)
-                servpack = atoi(pservpack);
-        }
-        if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) {
-            if (oslev.dwMajorVersion == 5) {
-                (*level) = APR_WIN_2000;
+
+        if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) 
+        {
+            static unsigned int servpack = 0;
+            char *pservpack;
+            if (pservpack = oslev.szCSDVersion) {
+                while (*pservpack && !isdigit(*pservpack)) {
+                    pservpack++;
+                }
+                if (*pservpack)
+                    servpack = atoi(pservpack);
             }
-            else if (oslev.dwMajorVersion == 4) {
-                if (servpack >= 6) {
-                    (*level) = APR_WIN_NT_4_SP6;
+
+            if (oslev.dwMajorVersion < 3) {
+                apr_os_level = APR_WIN_UNSUP;
+            }
+            else if (oslev.dwMajorVersion == 3) {
+                if (oslev.dwMajorVersion < 50) {
+                    apr_os_level = APR_WIN_UNSUP;
                 }
-                else if (servpack >= 4) {
-                    (*level) = APR_WIN_NT_4_SP4;
-                }
-                else if (servpack >= 3) {
-                    (*level) = APR_WIN_NT_4_SP3;
-                }
-                else if (servpack >= 2) {
-                    (*level) = APR_WIN_NT_4_SP2;
+                else if (oslev.dwMajorVersion == 50) {
+                    apr_os_level = APR_WIN_NT_3_5;
                 }
                 else {
-                    (*level) = APR_WIN_NT_4;
+                    apr_os_level = APR_WIN_NT_3_51;
+                }
+            }
+            else if (oslev.dwMajorVersion == 4) {
+                if (servpack < 2)
+                    apr_os_level = APR_WIN_NT_4;
+                else if (servpack <= 2)
+                    apr_os_level = APR_WIN_NT_4_SP2;
+                else if (servpack <= 3)
+                    apr_os_level = APR_WIN_NT_4_SP3;
+                else if (servpack <= 4)
+                    apr_os_level = APR_WIN_NT_4_SP4;
+                else if (servpack <= 5)
+                    apr_os_level = APR_WIN_NT_4_SP5;
+                else 
+                    apr_os_level = APR_WIN_NT_4_SP6;
+            }
+            else if (oslev.dwMajorVersion == 5) {
+                if (oslev.dwMinorVersion == 0) {
+                    if (servpack == 0)
+                        apr_os_level = APR_WIN_2000;
+                    else if (servpack == 1)
+                        apr_os_level = APR_WIN_2000_SP1;
+                    else
+                        apr_os_level = APR_WIN_2000_SP2;
+                }
+                else {
+                    apr_os_level = APR_WIN_XP;
                 }
             }
             else {
-                (*level) = APR_WIN_NT;
+                apr_os_level = APR_WIN_XP;
             }
-            return APR_SUCCESS;
         }
         else if (oslev.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
-            if (oslev.dwMinorVersion == 0) {
-                (*level) = APR_WIN_95;
-                return APR_SUCCESS;
+            char *prevision;
+            if (prevision = oslev.szCSDVersion) {
+                while (*prevision && !isupper(*prevision)) {
+                     prevision++;
+                }
             }
-            else if (oslev.dwMinorVersion > 0) {
-                (*level) = APR_WIN_98;
-                return APR_SUCCESS;
+            else prevision = "";
+
+            if (oslev.dwMinorVersion < 10) {
+                if (*prevision < 'C')
+                    apr_os_level = APR_WIN_95;
+                else
+                    apr_os_level = APR_WIN_95_OSR2;
+            }
+            else if (oslev.dwMinorVersion < 90) {
+                if (*prevision < 'A')
+                    apr_os_level = APR_WIN_98;
+                else
+                    apr_os_level = APR_WIN_98_SE;
+            }
+            else {
+                apr_os_level = APR_WIN_ME;
             }
         }
+        else {
+            apr_os_level = APR_WIN_UNSUP;
+        }
     }
-    else {
-        *level = apr_os_level;
-        return APR_SUCCESS;
+
+    *level = apr_os_level;
+
+    if (apr_os_level < APR_WIN_UNSUP) {
+        return APR_EGENERAL;
     }
-    return APR_EGENERAL;
+
+    return APR_SUCCESS;
 }
 
 
