@@ -84,7 +84,7 @@ APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new,apr_pool_t *p
     (*new)->cmdtype = APR_PROGRAM;
     /* Default to a current path since NetWare doesn't handle it very well */
     apr_filepath_get(&((*new)->currdir), APR_FILEPATH_NATIVE, pool);
-/*	(*new)->detached = 1;*/
+    (*new)->detached = 1;
     return APR_SUCCESS;
 
 }
