@@ -41,6 +41,10 @@
 #define INT16SZ sizeof(apr_int16_t)
 #endif
 
+#ifndef __P
+#define __P(x) x
+#endif
+
 #define SPRINTF(x) ((size_t)sprintf x)
 
 /*
