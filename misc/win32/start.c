@@ -88,12 +88,7 @@ ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
         return APR_ENOPOOL;
     }
     
-    if (cont) {
-        new = (ap_context_t *)ap_palloc(cont, sizeof(ap_context_t));
-    }
-    else {
-        new = (ap_context_t *)malloc(sizeof(ap_context_t));
-    }
+    new = (ap_context_t *)ap_palloc(cont, sizeof(ap_context_t));
     new->pool = pool;
     new->prog_data = NULL;
 
@@ -162,7 +157,7 @@ ap_status_t ap_set_userdata(void *data, char *key,
         if (dptr == NULL) {
             dptr = ap_palloc(cont, sizeof(datastruct));
             dptr->next = dptr->prev = NULL;
-            dptr->key = strdup(key);
+            dptr->key = ap_pstrdup(cont, key);
             if (dptr2) {
                 dptr2->next = dptr;
                 dptr->prev = dptr2;

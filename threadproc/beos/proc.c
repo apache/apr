@@ -125,6 +125,7 @@ ap_status_t ap_setprocattr_dir(struct procattr_t *attr,
         strncat(cwd,"/\0",2);
         strcat(cwd,dir);
         attr->currdir = (char *)ap_pstrdup(attr->cntxt, cwd);
+        free(cwd);
     } else {
         attr->currdir = (char *)ap_pstrdup(attr->cntxt, dir);
     }
@@ -198,17 +199,17 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
     }
 
 	newargs = (char**)malloc(sizeof(char *) * (i + 3));
-	newargs[0] = strdup("/boot/home/config/bin/apr_proc_stub");
+	newargs[0] = "/boot/home/config/bin/apr_proc_stub";
     if (attr->currdir == NULL) {
         /* we require the directory ! */
         dir = malloc(sizeof(char) * PATH_MAX);
         getcwd(dir, PATH_MAX);
-        newargs[1] = strdup(dir);
+        newargs[1] = dir;
         free(dir);
     } else {
 	    newargs[1] = attr->currdir;
 	}
-	newargs[2] = strdup(progname);
+	newargs[2] = progname;
 	i=0;nargs = 3;
 
 	while (args && args[i]) {

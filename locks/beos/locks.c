@@ -73,7 +73,7 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type,
     
     new->cntxt = cont;
     new->type = type;
-    new->fname = strdup(fname);
+    new->fname = ap_pstrdup(cont, fname);
 
     if (type != APR_CROSS_PROCESS) {
         if ((stat = create_intra_lock(new)) != APR_SUCCESS) {

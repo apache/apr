@@ -132,7 +132,7 @@ ap_status_t ap_rewinddir(struct dir_t *thedir)
 {
 	ap_status_t stat;
 	ap_context_t *cont = thedir->cntxt;
-    char *temp = strdup(thedir->dirname);
+    char *temp = ap_pstrdup(cont, thedir->dirname);
 	temp[strlen(temp) - 2] = '\0';   /*remove the \* at the end */
 	if (thedir->dirhand == INVALID_HANDLE_VALUE) {
 		return APR_SUCCESS;
