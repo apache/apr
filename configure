@@ -1541,7 +1541,7 @@ esac
 
 
 # Use /bin/sh if it exists, otherwise go looking for sh in the path
-if (test -z "$SH" -a -e /bin/sh); then
+if (test -z "$SH" -a -x /bin/sh); then
   SH="/bin/sh"
 fi
 # Extract the first word of "sh", so it can be a program name with args.
