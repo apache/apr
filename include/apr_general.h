@@ -78,15 +78,6 @@ extern "C" {
 
 typedef int               apr_signum_t;
 
-#ifdef WIN32
-#define APR_INLINE __inline
-#elif defined(__GNUC__) && defined(__GNUC__) && \
-      __GNUC__ >= 2 && __GNUC_MINOR__ >= 7
-#define APR_INLINE __inline__
-#else
-#define APR_INLINE /*nop*/
-#endif
-
 /* Finding offsets of elements within structures.
  * Taken from the X code... they've sweated portability of this stuff
  * so we don't have to.  Sigh...
