@@ -170,53 +170,6 @@ if test "$ac_cv_retransretry" = "yes"; then
 fi
 ])
 
-
-dnl
-dnl check for gethostbyname() which handles numeric address strings
-dnl
-AC_DEFUN(APR_CHECK_GETHOSTBYNAME_NAS,[
-  AC_CACHE_CHECK(for gethostbyname() which handles numeric address strings, ac_cv_gethostbyname_nas,[
-  AC_TRY_RUN( [
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-void main(void) {
-    struct hostent *he = gethostbyname("127.0.0.1");
-    if (he == NULL) {
-        exit(1);
-    }
-    he = gethostbyname("255.255.255.255");
-    if (he == NULL) {
-        exit(1);
-    }
-    else {
-        exit(0);
-    }
-}
-],[
-  ac_cv_gethostbyname_nas="yes"
-],[
-  ac_cv_gethostbyname_nas="no"
-],[
-  ac_cv_gethostbyname_nas="yes"
-])])
-if test "$ac_cv_gethostbyname_nas" = "yes"; then
-  AC_DEFINE(GETHOSTBYNAME_HANDLES_NAS, 1, [Define if gethostbyname() handles nnn.nnn.nnn.nnn])
-fi
-])
-
 dnl
 dnl Checks the definition of gethostbyname_r and gethostbyaddr_r
 dnl which are different for glibc, solaris and assorted other operating

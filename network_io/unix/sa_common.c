@@ -417,7 +417,6 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
             family = APR_INET; /* we don't support IPv6 here */
         }
 
-#ifndef GETHOSTBYNAME_HANDLES_NAS
         if (*hostname >= '0' && *hostname <= '9' &&
             strspn(hostname, "0123456789.") == strlen(hostname)) {
             struct in_addr ipaddr;
@@ -426,7 +425,6 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
             save_addrinfo(p, *sa, ipaddr, port);
         }
         else {
-#endif
 #if APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
     defined(HAVE_GETHOSTBYNAME_R) && !defined(BEOS)
 #if defined(GETHOSTBYNAME_R_HOSTENT_DATA)
@@ -474,9 +472,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
                           port);
             ++curaddr;
         }
-#ifndef GETHOSTBYNAME_HANDLES_NAS
         }
-#endif
     }
     else {
         (*sa)->pool = p;
