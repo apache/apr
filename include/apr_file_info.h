@@ -246,7 +246,9 @@ APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *thedir);
 
 /**
  * Read the next entry from the specified directory. 
- * @param thedir the directory descriptor to read from, and fill out.
+ * @param finfo the file info structure and filled in by apr_dir_read
+ * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_ values 
+ * @param thedir the directory descriptor returned from apr_dir_open
  * @tip All systems return . and .. as the first two files.
  * @deffunc apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted, apr_dir_t *thedir)
  */                        
@@ -260,6 +262,49 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
  */                        
 APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
 
+/* apr_filepath flags
+ */
+
+/* Cause apr_filepath_merge to fail if addpath is above rootpath */
+#define APR_FILEPATH_NOTABOVEROOT   0x01
+
+/* internal: Only meaningful with APR_FILEPATH_NOTABOVEROOT */
+#define APR_FILEPATH_SECUREROOTTEST 0x02
+
+/* Cause apr_filepath_merge to fail if addpath is above rootpath,
+ * even given a rootpath /foo/bar and an addpath ../bar/bash
+ */
+#define APR_FILEPATH_SECUREROOT     0x03
+
+/* Fail apr_filepath_merge if the merged path is relative */
+#define APR_FILEPATH_NOTRELATIVE    0x04
+
+/* Fail apr_filepath_merge if the merged path is absolute */
+#define APR_FILEPATH_NOTABSOLUTE    0x08
+
+/* Cleans all ambigious /./  or // segments 
+ * if the target is a directory */
+#define APR_FILEPATH_CANONICAL      0x10
+
+/* Resolve the true case of existing directories and file elements
+ * of addpath, and append a proper trailing slash if a directory
+ */
+#define APR_FILEPATH_TRUENAME       0x20
+
+
+/**
+ * Merge additional file path onto the previously processed rootpath
+ * @param newpath the merged paths returned
+ * @param rootpath the root file path (NULL uses the current working path)
+ * @param addpath the path to add to the root path
+ * @param flags the desired APR_FILEPATH_ rules to apply when merging
+ * @param p the pool to allocate the new path string from
+ * @deffunc apr_status_t apr_filepath_merge(char **newpath, const char *rootpath, const char *addpath, apr_int32_t flags, apr_pool_t *p)
+ */                        
+APR_DECLARE(apr_status_t) 
+                apr_filepath_merge(char **newpath, const char *rootpath,
+                                   const char *addpath, apr_int32_t flags,
+                                   apr_pool_t *p);
 
 #ifdef __cplusplus
 }
