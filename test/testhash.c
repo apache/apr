@@ -71,12 +71,12 @@ static void dump_hash(apr_pool_t *p, apr_hash_t *h)
 {
     apr_hash_index_t *hi;
     char *val, *key;
-    int len;
+    apr_ssize_t len;
     int i = 0;
 
     for (hi = apr_hash_first(p, h); hi; hi = apr_hash_next(hi)) {
-        apr_hash_this(hi,(void*) &key, &len,(void*) &val);
-        fprintf(stdout, "Key %s (%d) Value %s\n",key,len,val);
+        apr_hash_this(hi,(void*) &key, &len, (void*) &val);
+        fprintf(stdout, "Key %s (%" APR_SSIZE_T_FMT ") Value %s\n", key, len, val);
         i++;
     }
     if (i != apr_hash_count(h)) 
