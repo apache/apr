@@ -79,6 +79,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 {
     const char *testpath = *inpath;
     char *newpath;
+    char seperator[2] = { (flags & APR_FILEPATH_NATIVE) ? '\\' : '/', 0};
 #ifdef NETWARE
     char server[MAX_SERVER_NAME+1];
     char volume[MAX_VOLUME_NAME+1];
@@ -107,10 +108,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 
         /* NetWare doesn't add the root slash so we need to add it manually.
         */
-        if (flags & APR_FILEPATH_NATIVE)
-            strcat(newpath, "\\");
-        else
-            strcat(newpath, "/");
+        strcat(newpath, "/");
         *rootpath = newpath;
 
         /* Skip the inpath pointer down to the first non-root character
@@ -132,7 +130,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
             in same manner as unix although this path will be
             incomplete.
         */
-        *rootpath = apr_pstrdup(p, ((flags & APR_FILEPATH_NATIVE) ? "\\" : "/"));
+        *rootpath = apr_pstrdup(p, seperator);
         do {
             ++(*inpath);
         } while ((**inpath == '/') || (**inpath == '\\'));
@@ -235,17 +233,30 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                     rv = filepath_root_case(&newpath, newpath, p);
                     if (rv)
                         return rv;
+                    newpath[0] = seperator[0];
+                    newpath[1] = seperator[0];
+                    newpath[delim1 - testpath] = seperator[0];
                 }
+                else {                
+                    /* Give back the caller's own choice of delimiters
+                     */
+                    newpath[0] = testpath[0];
+                    newpath[1] = testpath[1];
+                    newpath[delim1 - testpath] = *delim1;
+                }
+
                 /* If this root included the trailing / or \ designation 
-                 * then lop off multiple trailing slashes
+                 * then lop off multiple trailing slashes and give back
+                 * appropriate delimiters.
                  */
                 if (*delim2) {
                     *inpath = delim2 + 1;
                     while (**inpath == '/' || **inpath == '\\')
                         ++*inpath;
-                    /* Give back the caller's own trailing delimiter
-                     */
-                    newpath[delim2 - testpath] = *delim2;
+                    if (flags & APR_FILEPATH_TRUENAME)
+                        newpath[delim2 - testpath] = seperator[0];
+                    else
+                        newpath[delim2 - testpath] = *delim2;
                 }
                 else
                     *inpath = delim2;
@@ -255,18 +266,27 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
             }
             
             /* Have path of '\\[machine]', if the machine is given,
-             * append the trailing \
+             * append same trailing slash as the leading slash
              */
             delim1 = strchr(testpath, '\0');
             if (delim1 > testpath + 2) {
                 newpath = apr_pstrndup(p, testpath, delim1 - testpath + 1);
-                newpath[delim1 - testpath] = '\\';
+                if (flags & APR_FILEPATH_TRUENAME)
+                    newpath[delim1 - testpath] = seperator[0];
+                else
+                    newpath[delim1 - testpath] = newpath[0];
                 newpath[delim1 - testpath + 1] = '\0';
             }
-            else
+            else {
                 newpath = apr_pstrndup(p, testpath, delim1 - testpath);
-            newpath[0] = '\\';
-            newpath[1] = '\\';
+                if (flags & APR_FILEPATH_TRUENAME) {
+                    newpath[delim1 - testpath] = seperator[0];
+                }
+            }
+            if (flags & APR_FILEPATH_TRUENAME) {
+                newpath[0] = seperator[0];
+                newpath[1] = seperator[0];
+            }
             *rootpath = newpath;
             *inpath = delim1;
             return APR_EINCOMPLETE;
@@ -274,10 +294,12 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 
         /* Left with a path of '/', what drive are we asking about? 
          */
-        // ?? if (flags & APR_FILEPATH_TRUENAME) 
         *inpath = ++testpath;
         newpath = apr_palloc(p, 2);
-        newpath[0] = ((flags & APR_FILEPATH_NATIVE) ? '\\' : '/');
+        if (flags & APR_FILEPATH_TRUENAME)
+            newpath[0] = seperator[0];
+        else
+            newpath[0] = testpath[0];
         newpath[1] = '\0';
         *rootpath = newpath;
         return APR_EINCOMPLETE;
@@ -295,8 +317,8 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
          */
         newpath = apr_palloc(p, 4);
         newpath[0] = testpath[0];
-        newpath[1] = ':';
-        newpath[2] = ((flags & APR_FILEPATH_NATIVE) ? '\\' : '/');
+        newpath[1] = testpath[1];
+        newpath[2] = seperator[0];
         newpath[3] = '\0';
         if (flags & APR_FILEPATH_TRUENAME) {
             newpath[0] = toupper(newpath[0]);
@@ -313,11 +335,15 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
             return APR_EINCOMPLETE;
         }
 
-        /* strip off remaining slashes that designate the root.
+        /* strip off remaining slashes that designate the root,
+         * give the caller back their original choice of slash
+         * unless this is TRUENAME'ed
          */
         *inpath = testpath + 3;
         while (**inpath == '/' || **inpath == '\\')
             ++*inpath;
+        if (!(flags & APR_FILEPATH_TRUENAME))
+            newpath[2] = testpath[0];
         *rootpath = newpath;
         return APR_SUCCESS;
     }
