@@ -190,9 +190,6 @@ case "$host:$CC" in
 	APR_SETVAR(CC,mwcc)
 	APR_SETVAR(AR,ar)
 	;;
-    mips-sni-sysv4:cc )
-	APR_ADDTO(CFLAGS,-Kthread)
-	;;
 esac
 config_subdirs="none"
 INSTALL_SUBDIRS="none"
