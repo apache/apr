@@ -765,11 +765,15 @@ API_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub)
 API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
 {
 #ifdef ALLOC_USE_MALLOC
-    ap_pool_t *a = c->pool;
+    ap_pool_t *a;
     int size = reqsize + CLICK_SZ;
     void *ptr;
 
     ap_block_alarms();
+    if (c == NULL) {
+        return malloc(reqsize);
+    }
+    a = c->pool;
     ptr = malloc(size);
     if (ptr == NULL) {
 	fputs("Ouch!  Out of memory!\n", stderr);
