@@ -173,6 +173,10 @@ SOURCE=.\misc\unix\getopt.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\misc\win32\getuuid.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\locks\win32\locks.c
 # End Source File
 # Begin Source File
@@ -255,6 +259,10 @@ SOURCE=.\time\win32\time.c
 # Begin Source File
 
 SOURCE=.\time\win32\timestr.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\misc\unix\uuid.c
 # End Source File
 # End Group
 # Begin Group "Generated Header Files"
@@ -445,6 +453,10 @@ SOURCE=.\include\apr_thread_proc.h
 # Begin Source File
 
 SOURCE=.\include\apr_time.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_uuid.h
 # End Source File
 # Begin Source File
 
