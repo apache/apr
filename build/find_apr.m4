@@ -28,7 +28,9 @@ dnl
 dnl   apr_srcdir : If an APR source tree is available and needs to be
 dnl                (re)configured, this refers to it.
 dnl
-dnl   apr_config : If the APR config file (APRVARS) exists, this refers to it.
+dnl   apr_config : If the apr-config tool exists, this refers to it.
+dnl
+dnl   apr_vars : If the APR config file (APRVARS) exists, this refers to it.
 dnl
 dnl   apr_found : "yes", "no", "reconfig"
 dnl
@@ -66,10 +68,14 @@ AC_DEFUN(APR_FIND_APR, [
     fi
 
     if test -x $withval/bin/apr-config; then
+       apr_config="$withval/bin/apr-config"
        CFLAGS="$CFLAGS `$withval/bin/apr-config --cflags`"
        LIBS="$LIBS `$withval/bin/apr-config --libs`"
        LDFLAGS="$LDFLAGS `$withval/bin/apr-config --ldflags`"
+    else
+       apr_config=""
     fi
+
     LIBS="$LIBS -lapr"
     LDFLAGS="$preserve_LDFLAGS -L$withval/lib"
     AC_TRY_LINK_FUNC(apr_initialize, [
@@ -85,12 +91,17 @@ AC_DEFUN(APR_FIND_APR, [
         apr_found="yes"
         apr_libdir=""
         apr_la_file="$withval/libapr.la"
-        apr_config="$withval/APRVARS"
+        apr_vars="$withval/APRVARS"
+        if test -x $withval/apr-config; then
+          apr_config="$withval/apr-config"
+        else
+          apr_config=""
+        fi
         apr_includes="-I$withval/include"
         if test ! -f "$withval/APRVARS.in"; then
           dnl extract the APR source directory without polluting our
           dnl shell variable space
-          apr_srcdir="`sed -n '/APR_SOURCE_DIR/s/.*"\(.*\)"/\1/p' $apr_config`"
+          apr_srcdir="`sed -n '/APR_SOURCE_DIR/s/.*"\(.*\)"/\1/p' $apr_vars`"
           apr_includes="$apr_includes -I$apr_srcdir/include"
         fi
       fi
@@ -117,8 +128,8 @@ APR, nor an APR build directory.])
   ])
 
   if test "$apr_found" != "no" && test "$apr_libdir" != ""; then
-    if test "$apr_config" = "" && test -f "$apr_libdir/APRVARS"; then
-      apr_config="$apr_libdir/APRVARS"
+    if test "$apr_vars" = "" && test -f "$apr_libdir/APRVARS"; then
+      apr_vars="$apr_libdir/APRVARS"
     fi
     if test "$apr_la_file" = "" && test -f "$apr_libdir/libapr.la"; then
       apr_la_file="$apr_libdir/libapr.la"
