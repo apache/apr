@@ -153,7 +153,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         /* store the real size in the metadata */
         *(apr_size_t*)(new_m->base) = new_m->realsize;
         /* metadata isn't usable */
-        new_m->usable = new_m->base + sizeof(apr_size_t);
+        new_m->usable = (char *)new_m->base + sizeof(apr_size_t);
 
         *m = new_m;
         return APR_SUCCESS;
