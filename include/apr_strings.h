@@ -75,12 +75,16 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-
-#include "apr.h"
-#include "apr_lib.h"
-
 #ifndef APR_STRINGS_H
 #define APR_STRINGS_H
+
+#include "apr.h"
+#include "apr_errno.h"
+#include "apr_pools.h"
+
+#if APR_HAVE_STDARG_H
+#include <stdarg.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

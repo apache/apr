@@ -85,7 +85,7 @@
 #ifndef APR_MD5_H
 #define APR_MD5_H
 
-#include "apr_lib.h"
+#include "apr.h"
 #include "apr_xlate.h"
 
 #ifdef __cplusplus

@@ -59,9 +59,11 @@
  * @package APR Network library
  */
 
-#include "apr_general.h"
+#include "apr.h"
+#include "apr_pools.h"
 #include "apr_file_io.h"
 #include "apr_errno.h"
+
 #if APR_HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
