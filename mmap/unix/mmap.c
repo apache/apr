@@ -87,14 +87,14 @@ static apr_status_t mmap_cleanup(void *themmap)
     rv = delete_area(mm->area);
 
     if (rv == 0) {
-        mm->mm = (caddr_t)-1;
+        mm->mm = (void *)-1;
         return APR_SUCCESS;
     }
 #else
     rv = munmap(mm->mm, mm->size);
 
     if (rv == 0) {
-        mm->mm = (caddr_t)-1;
+        mm->mm = (void *)-1;
         return APR_SUCCESS;
     }
 #endif
@@ -111,7 +111,7 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
     area_id aid = -1;
     uint32 pages = 0;
 #else
-    caddr_t mm;
+    void *mm;
 #endif
    
     if (file == NULL || file->filedes == -1 || file->buffered)
@@ -155,7 +155,7 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
 
     mm = mmap(NULL, size, PROT_READ, MAP_SHARED, file->filedes, offset);
 
-    if (mm == (caddr_t)-1) {
+    if (mm == (void *)-1) {
         /* we failed to get an mmap'd file... */
         return APR_ENOMEM;
     }
@@ -175,7 +175,7 @@ apr_status_t apr_mmap_delete(apr_mmap_t *mmap)
 {
     apr_status_t rv;
 
-    if (mmap->mm == (caddr_t) -1)
+    if (mmap->mm == (void *)-1)
         return APR_ENOENT;
       
     if ((rv = mmap_cleanup(mmap)) == APR_SUCCESS) {
