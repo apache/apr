@@ -86,6 +86,7 @@
 #define SHELL_PATH "/bin/sh"
 
 #if APR_HAS_THREADS
+
 struct apr_thread_t {
     apr_pool_t *cntxt;
     pthread_t *td;

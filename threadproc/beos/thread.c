@@ -69,7 +69,7 @@ apr_status_t apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *cont)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr, apr_int32_t on)
+apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr, apr_int32_t on)
 {
 	if (on == 1){
 		attr->detached = 1;
@@ -79,7 +79,7 @@ apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr, apr_int32_t on)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr)
+apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr)
 {
 	if (attr->detached == 1){
 		return APR_DETACH;
