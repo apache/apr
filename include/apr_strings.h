@@ -307,6 +307,17 @@ APR_DECLARE(char *) apr_ltoa(apr_pool_t *p, long n);
  */
 APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n);
 
+/**
+ * Format a binary size (magnitiudes are 2^10 rather than 10^3) from an apr_off_t,
+ * as bytes, K, M, T, etc, to a four character compacted human readable string.
+ * @param size The size to format
+ * @param buf The 5 byte text buffer (counting the trailing null)
+ * @return The buf passed to apr_strfsize()
+ * @deffunc char *apr_strfsize(apr_off_t size, char *buf)
+ * @tip All negative sizes report '  - ', apr_strfsize only formats positive values.
+ */
+APR_DECLARE(char *) apr_strfsize(apr_off_t size, char *buf);
+
 #ifdef __cplusplus
 }
 #endif

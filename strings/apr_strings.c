@@ -235,3 +235,37 @@ APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n)
     }
     return start;
 }
+
+APR_DECLARE(char *) apr_strfsize(apr_off_t size, char *buf)
+{
+    const char ord[] = "KMTPE";
+    const char *o = ord;
+    int remain;
+
+    if (size < 0) {
+        return strcpy(buf, "  - ");
+    }
+    if (size < 973) {
+        sprintf(buf, "%3d ", (int) size, o);
+        return buf;
+    }
+    do {
+        remain = (int)(size & 1023);
+        size >>= 10;
+        if (size >= 973) {
+            ++o;
+            continue;
+        }
+        if (size < 9 || (size == 9 && remain < 973)) {
+            if ((remain = ((remain * 5) + 256) / 512) >= 10)
+                ++size, remain = 0;
+            sprintf(buf, "%d.%d%c", (int) size, remain, *o);
+            return buf;
+        }
+        if (remain >= 512)
+            ++size;
+        sprintf(buf, "%3d%c", (int) size, *o);
+        return buf;
+    } while (1);
+}
+
