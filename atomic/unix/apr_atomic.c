@@ -56,17 +56,18 @@
 #include "apr_atomic.h"
 #include "apr_thread_mutex.h"
 
+#if !defined(apr_atomic_init) && !defined(APR_OVERRIDE_ATOMIC_INIT)
+
 #if APR_HAS_THREADS
-
-#if defined(APR_ATOMIC_NEED_DEFAULT) || defined(APR_ATOMIC_NEED_CAS_DEFAULT)
-
 #define NUM_ATOMIC_HASH 7
 /* shift by 2 to get rid of alignment issues */
 #define ATOMIC_HASH(x) (unsigned int)(((unsigned long)(x)>>2)%(unsigned int)NUM_ATOMIC_HASH)
 static apr_thread_mutex_t **hash_mutex;
+#endif /* APR_HAS_THREADS */
 
 apr_status_t apr_atomic_init(apr_pool_t *p)
 {
+#if APR_HAS_THREADS
     int i;
     apr_status_t rv;
     hash_mutex = apr_palloc(p, sizeof(apr_thread_mutex_t*) * NUM_ATOMIC_HASH);
@@ -78,13 +79,15 @@ apr_status_t apr_atomic_init(apr_pool_t *p)
            return rv;
         }
     }
+#endif /* APR_HAS_THREADS */
     return APR_SUCCESS;
 }
-#endif /* APR_ATOMIC_NEED_DEFAULT || APR_ATOMIC_NEED_CAS_DEFAULT */
+#endif /*!defined(apr_atomic_init) && !defined(APR_OVERRIDE_ATOMIC_INIT) */
 
-#if defined(APR_ATOMIC_NEED_DEFAULT) 
+#if !defined(apr_atomic_add) && !defined(APR_OVERRIDE_ATOMIC_ADD)
 void apr_atomic_add(volatile apr_atomic_t *mem, apr_uint32_t val) 
 {
+#if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     apr_uint32_t prev;
        
@@ -93,10 +96,16 @@ void apr_atomic_add(volatile apr_atomic_t *mem, apr_uint32_t val)
         *mem += val;
         apr_thread_mutex_unlock(lock);
     }
+#else
+    *mem += val;
+#endif /* APR_HAS_THREADS */
 }
+#endif /*!defined(apr_atomic_add) && !defined(APR_OVERRIDE_ATOMIC_ADD) */
 
+#if !defined(apr_atomic_set) && !defined(APR_OVERRIDE_ATOMIC_SET)
 void apr_atomic_set(volatile apr_atomic_t *mem, apr_uint32_t val) 
 {
+#if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     apr_uint32_t prev;
 
@@ -105,10 +114,16 @@ void apr_atomic_set(volatile apr_atomic_t *mem, apr_uint32_t val)
         *mem = val;
         apr_thread_mutex_unlock(lock);
     }
+#else
+    *mem = val;
+#endif /* APR_HAS_THREADS */
 }
+#endif /*!defined(apr_atomic_set) && !defined(APR_OVERRIDE_ATOMIC_SET) */
 
+#if !defined(apr_atomic_inc) && !defined(APR_OVERRIDE_ATOMIC_INC)
 void apr_atomic_inc(volatile apr_uint32_t *mem) 
 {
+#if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     apr_uint32_t prev;
 
@@ -117,10 +132,16 @@ void apr_atomic_inc(volatile apr_uint32_t *mem)
         (*mem)++;
         apr_thread_mutex_unlock(lock);
     }
+#else
+    (*mem)++;
+#endif /* APR_HAS_THREADS */
 }
+#endif /*!defined(apr_atomic_inc) && !defined(APR_OVERRIDE_ATOMIC_INC) */
 
+#if !defined(apr_atomic_dec) && !defined(APR_OVERRIDE_ATOMIC_DEC)
 int apr_atomic_dec(volatile apr_atomic_t *mem) 
 {
+#if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     apr_uint32_t new;
 
@@ -130,14 +151,17 @@ int apr_atomic_dec(volatile apr_atomic_t *mem)
         apr_thread_mutex_unlock(lock);
         return new; 
     }
+#else
+    (*mem)--;
+#endif /* APR_HAS_THREADS */
     return *mem; 
 }
+#endif /*!defined(apr_atomic_dec) && !defined(APR_OVERRIDE_ATOMIC_DEC) */
 
-#endif /* APR_ATOMIC_NEED_DEFAULT */
-#if defined(APR_ATOMIC_NEED_CAS_DEFAULT)
-
+#if !defined(apr_atomic_cas) && !defined(APR_OVERRIDE_ATOMIC_CASE)
 apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem, long with, long cmp)
 {
+#if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     long prev;
 
@@ -150,16 +174,12 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem, long with, long cmp)
         return prev;
     }
     return *(long*)mem;
-}
-#endif /* APR_ATOMIC_NEED_CAS_DEFAULT */
-
-#else /* !APR_HAS_THREADS */
-
-#if !defined(apr_atomic_init)
-apr_status_t apr_atomic_init(apr_pool_t *p)
-{
-    return APR_SUCCESS;
-}
-#endif /* !defined(apr_atomic_init) */
-
+#else
+    prev = *(long*)mem;
+    if ( prev == cmp) {
+        *(long*)mem = with;
+    }
+    return prev;
 #endif /* APR_HAS_THREADS */
+}
+#endif /*!defined(apr_atomic_dec) && !defined(APR_OVERRIDE_ATOMIC_DEC) */
