@@ -158,6 +158,17 @@ APR_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[MD5_DIGESTSIZE],
                                         apr_md5_ctx_t *context);
 
 /**
+ * MD5 in one step
+ * @param digest The final MD5 digest
+ * @param input The message block to use
+ * @param inputLen The length of the message block
+ * @deffunc apr_status_t apr_md5(unsigned char digest[MD5_DIGESTSIZE], const unsigned char *input, apr_size_t size);
+ */
+APR_DECLARE(apr_status_t) apr_md5(unsigned char digest[MD5_DIGESTSIZE],
+                                  const unsigned char *input,
+                                  apr_size_t inputLen);
+
+/**
  * Encode a password using an MD5 algorithm
  * @param password The password to encode
  * @param salt The salt to use for the encoding
