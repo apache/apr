@@ -63,6 +63,7 @@ ap_status_t lock_inter_cleanup(void * data)
             release_sem (lock->sem_interproc);
     	}
     }
+    delete_sem(lock->sem_interproc);
     return APR_SUCCESS;
 }    
 
