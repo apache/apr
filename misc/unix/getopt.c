@@ -49,10 +49,8 @@ static const char *pretty_path (const char *name)
 }
 
 APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
-                                     int argc, char *const *argv)
+                                      int argc, const char *const *argv)
 {
-    int i;
-
     *os = apr_palloc(cont, sizeof(apr_getopt_t));
     (*os)->cont = cont;
     (*os)->err = 1;
@@ -64,19 +62,19 @@ APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
        want to use this function with arrays other than the main argv,
        and we shouldn't touch the caller's data.  So we copy. */
     (*os)->argv = apr_palloc(cont, (argc + 1) * sizeof(const char *));
-    for (i = 0; i < argc; i++)
-	(*os)->argv[i] = argv[i];
+    memcpy((*os)->argv, argv, argc * sizeof(const char *));
     (*os)->argv[argc] = NULL;
 
     (*os)->interleave = 0;
     (*os)->ind = 1;
     (*os)->skip_start = 1;
     (*os)->skip_end = 1;
+
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
-                                    char *optch, const char **optarg)
+                                     char *optch, const char **optarg)
 {
     const char *oli;  /* option letter list index */
 

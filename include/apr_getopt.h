@@ -110,7 +110,7 @@ struct apr_getopt_option_t {
  * @deffunc apr_status_t apr_initopt(apr_getopt_t **os, apr_pool_t *cont,int argc, char *const *argv)
  */
 APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
-                                      int argc, char *const *argv);
+                                      int argc, const char *const *argv);
 
 /**
  * Parse the options initialized by apr_initopt().
