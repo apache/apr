@@ -59,6 +59,7 @@
 #include "apr_lib.h"
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "test_apr.h"
 
 
@@ -77,7 +78,8 @@ static void do_sleep(int howlong)
 
     printf("%-60s","    Just woken up, checking how long I've been asleep");
     if (diff < interval || diff > interval * 1.01) {
-        printf("Failed!\n");
+        printf("Failed!\n\t(actual: %" APR_TIME_T_FMT
+               ", wanted: %" APR_TIME_T_FMT")\n", diff, interval);
     } else {
         printf("OK\n");
     }
