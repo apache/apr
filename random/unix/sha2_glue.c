@@ -19,7 +19,7 @@ static void sha256_finish(apr_crypto_hash_t *h,unsigned char *result)
     SHA256_Final(result,h->data);
     }
 
-apr_crypto_hash_t *apr_crypto_sha256_new(apr_pool_t *p)
+APR_DECLARE(apr_crypto_hash_t *) apr_crypto_sha256_new(apr_pool_t *p)
     {
     apr_crypto_hash_t *h=apr_palloc(p,sizeof *h);
 

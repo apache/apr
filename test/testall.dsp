@@ -195,6 +195,10 @@ SOURCE=.\testrand.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testrand2.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\testshm.c
 # End Source File
 # Begin Source File

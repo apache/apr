@@ -61,6 +61,9 @@
 #include "apr_thread_proc.h"
 #include <assert.h>
 
+#ifdef min
+#undef min
+#endif
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
 #define APR_RANDOM_DEFAULT_POOLS 32
@@ -118,9 +121,10 @@ struct apr_random_t {
 
 static apr_random_t *all_random;
 
-void apr_random_init(apr_random_t *g,apr_pool_t *p,
-                     apr_crypto_hash_t *pool_hash,apr_crypto_hash_t *key_hash,
-                     apr_crypto_hash_t *prng_hash)
+APR_DECLARE(void) apr_random_init(apr_random_t *g,apr_pool_t *p,
+                                  apr_crypto_hash_t *pool_hash,
+                                  apr_crypto_hash_t *key_hash,
+                                  apr_crypto_hash_t *prng_hash)
 {
     int n;
 
@@ -185,7 +189,7 @@ static void mixer(apr_random_t *g,pid_t pid)
     g->random_bytes = 0;
 }
 
-void apr_random_after_fork(apr_proc_t *proc)
+APR_DECLARE(void) apr_random_after_fork(apr_proc_t *proc)
 {
     apr_random_t *r;
 
@@ -193,7 +197,7 @@ void apr_random_after_fork(apr_proc_t *proc)
         mixer(r,proc->pid);
 }
 
-apr_random_t *apr_random_standard_new(apr_pool_t *p)
+APR_DECLARE(apr_random_t *) apr_random_standard_new(apr_pool_t *p)
 {
     apr_random_t *r = apr_palloc(p,sizeof *r);
     
@@ -231,8 +235,8 @@ static void rekey(apr_random_t *g)
     }
 }
 
-void apr_random_add_entropy(apr_random_t *g,const void *entropy_,
-                            apr_size_t bytes)
+APR_DECLARE(void) apr_random_add_entropy(apr_random_t *g,const void *entropy_,
+                                         apr_size_t bytes)
 {
     int n;
     const unsigned char *entropy = entropy_;
@@ -293,8 +297,9 @@ static void apr_random_bytes(apr_random_t *g,unsigned char *random,
     }
 }
 
-apr_status_t apr_random_secure_bytes(apr_random_t *g,void *random,
-                                     apr_size_t bytes)
+APR_DECLARE(apr_status_t) apr_random_secure_bytes(apr_random_t *g,
+                                                  void *random,
+                                                  apr_size_t bytes)
 {
     if (!g->secure_started)
         return APR_ENOTENOUGHENTROPY;
@@ -302,8 +307,9 @@ apr_status_t apr_random_secure_bytes(apr_random_t *g,void *random,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_random_insecure_bytes(apr_random_t *g,void *random,
-                                       apr_size_t bytes)
+APR_DECLARE(apr_status_t) apr_random_insecure_bytes(apr_random_t *g,
+                                                    void *random,
+                                                    apr_size_t bytes)
 {
     if (!g->insecure_started)
         return APR_ENOTENOUGHENTROPY;
@@ -311,20 +317,20 @@ apr_status_t apr_random_insecure_bytes(apr_random_t *g,void *random,
     return APR_SUCCESS;
 }
 
-void apr_random_barrier(apr_random_t *g)
+APR_DECLARE(void) apr_random_barrier(apr_random_t *g)
 {
     g->secure_started = 0;
     g->secure_base = g->generation;
 }
 
-apr_status_t apr_random_secure_ready(apr_random_t *r)
+APR_DECLARE(apr_status_t) apr_random_secure_ready(apr_random_t *r)
 {
     if (!r->secure_started)
         return APR_ENOTENOUGHENTROPY;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_random_insecure_ready(apr_random_t *r)
+APR_DECLARE(apr_status_t) apr_random_insecure_ready(apr_random_t *r)
 {
     if (!r->insecure_started)
         return APR_ENOTENOUGHENTROPY;

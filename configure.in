@@ -1051,6 +1051,7 @@ fi
 # The first match is our preference.
 if test "$ac_cv_sizeof_int" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val)'
+    uint64_literal='#define APR_UINT64_C(val) (val)'
     int64_t_fmt='#define APR_INT64_T_FMT "d"'
     uint64_t_fmt='#define APR_UINT64_T_FMT "u"'
     uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "x"'
@@ -1059,6 +1060,7 @@ if test "$ac_cv_sizeof_int" = "8"; then
     int64_strfn="strtoi"
 elif test "$ac_cv_sizeof_long" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val##L)'
+    uint64_literal='#define APR_UINT64_C(val) (val##UL)'
     int64_t_fmt='#define APR_INT64_T_FMT "ld"'
     uint64_t_fmt='#define APR_UINT64_T_FMT "lu"'
     uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "lx"'
@@ -1067,6 +1069,7 @@ elif test "$ac_cv_sizeof_long" = "8"; then
     int64_strfn="strtol"
 elif test "$ac_cv_sizeof_long_long" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val##LL)'
+    uint64_literal='#define APR_UINT64_C(val) (val##ULL)'
     # Linux, Solaris, FreeBSD all support ll with printf.
     # BSD 4.4 originated 'q'.  Solaris is more popular and 
     # doesn't support 'q'.  Solaris wins.  Exceptions can
@@ -1079,6 +1082,7 @@ elif test "$ac_cv_sizeof_long_long" = "8"; then
     int64_strfn="strtoll"
 elif test "$ac_cv_sizeof_long_double" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val##LD)'
+    uint64_literal='#define APR_UINT64_C(val) (val##ULD)'
     int64_t_fmt='#define APR_INT64_T_FMT "Ld"'
     uint64_t_fmt='#define APR_UINT64_T_FMT "Lu"'
     uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "Lx"'
@@ -1087,6 +1091,7 @@ elif test "$ac_cv_sizeof_long_double" = "8"; then
     int64_strfn="strtoll"
 elif test "$ac_cv_sizeof_longlong" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val##LL)'
+    uint64_literal='#define APR_UINT64_C(val) (val##ULL)'
     int64_t_fmt='#define APR_INT64_T_FMT "qd"'
     uint64_t_fmt='#define APR_UINT64_T_FMT "qu"'
     uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "qx"'
@@ -1116,6 +1121,7 @@ YES_IS_DEFINED
 
 if test "$apr_cv_define_INT64_C" = "yes"; then
     int64_literal='#define APR_INT64_C(val) INT64_C(val)'
+    uint64_literal='#define APR_UINT64_C(val) UINT64_C(val##U)'
     stdint=1
 else
     stdint=0
@@ -1249,6 +1255,7 @@ AC_SUBST(size_t_fmt)
 AC_SUBST(off_t_fmt) 
 AC_SUBST(pid_t_fmt)
 AC_SUBST(int64_literal) 
+AC_SUBST(uint64_literal) 
 AC_SUBST(stdint) 
 AC_SUBST(bigendian)
 
