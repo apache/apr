@@ -1,5 +1,8 @@
 Changes with APR 1.0
 
+  *) Added new versions of the apr_atomic functions for
+     use with 32-bit ints  [Brian Pane]
+
   *) The following deprecated interfaces have been removed:
 
      apr_accept                   -> apr_socket_accept

@@ -70,6 +70,7 @@
 
 apr_pool_t *context;
 apr_atomic_t y;      /* atomic locks */
+apr_uint32_t y32;
 
 static apr_status_t check_basic_atomics(void)
 {
@@ -164,6 +165,75 @@ static apr_status_t check_basic_atomics(void)
     return APR_SUCCESS;
 }
 
+static apr_status_t check_basic_atomics32()
+{
+    apr_uint32_t oldval;
+    apr_uint32_t casval = 0;
+
+    apr_atomic_set32(&y32, 2);
+    printf("%-60s", "testing apr_atomic_dec32");
+    if (apr_atomic_dec32(&y32) == 0) {
+        fprintf(stderr, "Failed\noldval =%d should not be zero\n",
+                apr_atomic_read32(&y32));
+        return APR_EGENERAL;
+    }
+    if (apr_atomic_dec32(&y32) != 0) {
+        fprintf(stderr, "Failed\noldval =%d should be zero\n",
+                apr_atomic_read32(&y32));
+        return APR_EGENERAL;
+    }
+    printf("OK\n");
+
+    printf("%-60s", "testing apr_atomic_cas32");
+    oldval = apr_atomic_cas32(&casval, 12, 0);
+    if (oldval != 0) {
+        fprintf(stderr, "Failed\noldval =%d should be zero\n", oldval);
+        return APR_EGENERAL;
+    }
+    printf("OK\n");
+    printf("%-60s", "testing apr_atomic_cas32 - match non-null");
+    oldval = apr_atomic_cas32(&casval, 23, 12);
+    if (oldval != 12) {
+        fprintf(stderr, "Failed\noldval =%d should be 12 y=%d\n",
+                oldval, casval);
+        return APR_EGENERAL;
+    }
+    printf("OK\n");
+    printf("%-60s", "testing apr_atomic_cas32 - no match");
+    oldval = apr_atomic_cas32(&casval, 23, 12);
+    if (oldval != 23) {
+        fprintf(stderr, "Failed\noldval =%d should be 23 y=%d\n",
+                oldval, casval);
+        return APR_EGENERAL;
+    }
+    printf("OK\n");
+
+    printf("%-60s", "testing apr_atomic_add32");
+    apr_atomic_set32(&y32, 23);
+    apr_atomic_add32(&y32, 4);
+    if ((oldval = apr_atomic_read32(&y32)) != 27) {
+        fprintf(stderr,
+                "Failed\nAtomic Add doesn't add up ;( expected 27 got %d\n",
+                oldval);
+        return APR_EGENERAL;
+    }
+ 
+    printf("OK\n");
+    printf("%-60s", "testing add32/inc32/sub32");
+    apr_atomic_set32(&y32, 0);
+    apr_atomic_add32(&y32, 20);
+    apr_atomic_inc32(&y32);
+    apr_atomic_sub32(&y32, 10);
+    if (apr_atomic_read32(&y32) != 11) {
+        fprintf(stderr, "Failed.\natomics do not add up: expected 11 got %d\n",
+		apr_atomic_read32(&y32));
+        return APR_EGENERAL;
+    }
+    fprintf(stdout, "OK\n");
+
+    return APR_SUCCESS;
+}
+
 #if !APR_HAS_THREADS
 int main(void)
 {
@@ -185,6 +255,12 @@ int main(void)
         exit(-1);
     }
     rv = check_basic_atomics();
+    if (rv != APR_SUCCESS) {
+        fprintf(stderr, "Failed.\n");
+        exit(-1);
+    }
+
+    rv = check_basic_atomics32();
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "Failed.\n");
         exit(-1);
@@ -301,6 +377,13 @@ int main(int argc, char**argv)
         exit(-1);
     }
     apr_atomic_set(&y, 0);
+
+    rv = check_basic_atomics32();
+    if (rv != APR_SUCCESS) {
+        fprintf(stderr, "Failed.\n");
+        exit(-1);
+    }
+
 
     printf("%-60s", "Starting all the threads"); 
     for (i = 0; i < NUM_THREADS; i++) {
