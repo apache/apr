@@ -52,13 +52,58 @@
  * <http://www.apache.org/>.
  */
 
-
 #include "apr.h"
 #include "apr_atomic.h"
 
-int apr_atomic_dec(apr_atomic_t *mem) 
+#include <stdlib.h>
+
+APR_DECLARE(apr_status_t) apr_atomic_init(apr_pool_t *pool)
 {
-    atomic_dec(mem);
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(void) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    atomic_add((unsigned long *)mem,(unsigned long)val);
+}
+
+APR_DECLARE(void) apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    atomic_sub((unsigned long *)mem,(unsigned long)val);
+}
+
+APR_DECLARE(void) apr_atomic_inc32(volatile apr_uint32_t *mem)
+{
+    atomic_inc((unsigned long *)mem);
+}
+
+APR_DECLARE(void) apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    *mem = val;
+}
+
+APR_DECLARE(apr_uint32_t) apr_atomic_read32(volatile apr_uint32_t *mem)
+{
+    return *mem;
+}
+
+APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint32_t with,apr_uint32_t cmp)
+{
+    return atomic_cmpxchg((unsigned long *)mem,(unsigned long)cmp,(unsigned long)with);
+}
+
+APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    return atomic_xchg((unsigned long *)mem,(unsigned long)val);
+}
+
+APR_DECLARE(int) apr_atomic_dec32(volatile apr_uint32_t *mem) 
+{
+    atomic_dec((unsigned long *)mem);
     return *mem; 
 }
 
+APR_DECLARE(void *) apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
+{
+    return (void*)atomic_cmpxchg((unsigned long *)mem,(unsigned long)cmp,(unsigned long)with);
+}
