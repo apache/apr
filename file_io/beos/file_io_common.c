@@ -53,99 +53,22 @@
  *
  */
 
-#include "misc.h"
+/* common.c */
 
-ap_status_t ap_create_context(struct context_t **newcont, struct context_t *cont)
-{
-    ap_context_t *new;
-    ap_pool_t *pool;
+/* The code used in readwrite.c in the Unix directory won't work on
+   BeOS so I've moved to using a common.c file for all the common
+   code. */
+   
+#include "../unix/dir.c"
 
-    if (cont) {
-        pool = ap_make_sub_pool(cont->pool, cont->apr_abort);
-    }
-    else {
-        pool = ap_init_alloc();;
-    }
-        
-    if (pool == NULL) {
-        return APR_ENOPOOL;
-    }
-    
-    new = (struct context_t *)ap_palloc(cont, sizeof(struct context_t));
-    
-    new->pool = pool;
-    new->prog_data = NULL;
- 
-    *newcont = new;
-    return APR_SUCCESS;
-}
+#include "../unix/fileacc.c"
 
-ap_status_t ap_destroy_context(ap_context_t *cont)
-{
-    ap_destroy_pool(cont);
-    return APR_SUCCESS;
-}
+#include "../unix/filedup.c"
 
-ap_status_t ap_set_userdata(void *data, char *key,
-                            ap_status_t (*cleanup) (void *),
-                            struct context_t *cont)
-{
-    datastruct *dptr = NULL, *dptr2 = NULL;
-    if (cont) { 
-        dptr = cont->prog_data;
-        while (dptr) {
-            if (!strcmp(dptr->key, key))
-                break;
-            dptr2 = dptr;
-            dptr = dptr->next;
-        }
-        if (dptr == NULL) {
-            dptr = ap_palloc(cont, sizeof(datastruct));
-            dptr->next = dptr->prev = NULL;
-            dptr->key = ap_pstrdup(cont, key);
-            if (dptr2) {
-                dptr2->next = dptr;
-                dptr->prev = dptr2;
-            }
-            else {
-                cont->prog_data = dptr;
-            }
-        }
-        dptr->data = data;
-        ap_register_cleanup(cont, dptr->data, cleanup, cleanup);
-        return APR_SUCCESS;
-    }
-    return APR_ENOCONT;
-}
+#include "../unix/filestat.c"
 
-ap_status_t ap_get_userdata(void **data, char *key, struct context_t *cont)
-{
-    datastruct *dptr = NULL;
-    if (cont) { 
-        dptr = cont->prog_data;
-        while (dptr) {
-            if (!strcmp(dptr->key, key)) {
-                break;
-            }
-            dptr = dptr->next;
-        }
-        if (dptr) {
-            (*data) = dptr->data;
-        }
-        else {
-            (*data) = NULL;
-        }
-        return APR_SUCCESS;
-    }
-    return APR_ENOCONT;
-}
+#include "../unix/open.c"
 
-ap_status_t ap_initialize(void)
-{
-    sigset_t sigset;
+#include "../unix/pipe.c"
 
-    sigfillset(&sigset);
-    sigprocmask(SIG_BLOCK, &sigset, NULL);
-    return APR_SUCCESS;
-}
- 
+#include "../unix/seek.c"
