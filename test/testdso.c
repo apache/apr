@@ -275,9 +275,11 @@ CuSuite *testdso(void)
     getcwd(filename, 256);
     filename = apr_pstrcat(p, filename, "/", LIB_NAME, NULL);
 
+#ifdef LIB_NAME2
     filename2 = apr_pcalloc(p, 256);
     getcwd(filename2, 256);
     filename2 = apr_pstrcat(p, filename2, "/", LIB_NAME2, NULL);
+#endif
 
     SUITE_ADD_TEST(suite, test_load_module);
     SUITE_ADD_TEST(suite, test_dso_sym);
