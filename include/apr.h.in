@@ -384,15 +384,12 @@ typedef  @socklen_t_value@       apr_socklen_t;
 
 /* And APR_INT64_T_FMT */
 @int64_t_fmt@
-@int64_t_fmt_len@
 
 /* And APR_UINT64_T_FMT */
 @uint64_t_fmt@
-@uint64_t_fmt_len@
 
 /* And APR_UINT64_T_HEX_FMT */
 @uint64_t_hex_fmt@
-#define APR_UINT64_T_HEX_FMT_LEN  (sizeof(APR_UINT64_T_HEX_FMT) - 1)
 
 /* Deal with atoi64 variables ... these should move to apr_private.h */
 #define APR_HAVE_INT64_STRFN  @have_int64_strfn@
