@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "unix/locks.h"
+#include "locks.h"
 
 #if APR_HAS_THREADS
 
