@@ -141,7 +141,7 @@ NLM_CHECK_SYM	=
 #
 # If this is specified it will be used by the link '-flags' directive
 #
-NLM_FLAGS		= AUTOUNLOAD, PSEUDOPREEMPTION
+NLM_FLAGS		= AUTOUNLOAD, PSEUDOPREEMPTION, MULTIPLE
  
 #
 # If this is specified it will be linked in with the XDCData option in the def 
