@@ -100,6 +100,22 @@
 #  define NEED_SNPRINTF
 #endif
 
+#if defined(sinix) && defined(mips) && defined(__SNI_TARG_UNIX)
+#  define SHELL_CMD  "/usr/bin/sh"
+#  define DYNAMIC_LIB_EXT "so"
+#  define MODULE_LIB_EXT  "so"
+#  define STATIC_LIB_EXT "a"
+#  define OBJECT_EXT     "o"
+#  define LIBRARIAN      "ar"
+#  define LIBRARIAN_OPTS "cr"
+#  define RPATH "-Brpath"
+#  define SHARED_OPTS "-G"
+#  define MODULE_OPTS "-G"
+#  define DYNAMIC_LINK_OPTS "-Wl,-Blargedynsym"
+#  define LINKER_FLAG_PREFIX "-Wl,"
+#  define NEED_SNPRINTF
+#endif
+
 #ifndef SHELL_CMD
 #error Unsupported platform: Please add defines for SHELL_CMD etc. for your platform.
 #endif
