@@ -117,6 +117,10 @@ SOURCE=.\file_io\win32\filepath.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\file_io\unix\filepath_util.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\file_io\win32\filestat.c
 # End Source File
 # Begin Source File

@@ -1,5 +1,8 @@
 Changes with APR 0.9.2
 
+  *) Add functions apr_filepath_list_split and apr_filepath_list_merge
+     for managing search paths.  [Branko Cibej]
+
   *) Introduce Release mode debugging symbols for Win32 builds of apr.
      All library builds gain /Zi for debug symbols (which are discarded
      at link time if some flavor of the /debug flag isn't passed to link)

@@ -157,6 +157,9 @@ typedef struct apr_pool_t apr_pool_t;
  * If level 0 was specified, debugging is switched off
  * </pre>
  */
+
+#define APR_POOL_DEBUG 1        /* FIXME: Don't commit this! */
+
 #if defined(APR_POOL_DEBUG)
 #if (APR_POOL_DEBUG != 0) && (APR_POOL_DEBUG - 0 == 0)
 #undef APR_POOL_DEBUG
