@@ -112,7 +112,6 @@ static void test_remove(CuTest *tc)
 static void test_removeall_fail(CuTest *tc)
 {
     apr_status_t rv;
-    apr_finfo_t finfo;
 
     rv = apr_dir_remove("data/one", p);
     CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOTEMPTY(rv));
@@ -121,7 +120,6 @@ static void test_removeall_fail(CuTest *tc)
 static void test_removeall(CuTest *tc)
 {
     apr_status_t rv;
-    apr_finfo_t finfo;
 
     rv = apr_dir_remove("data/one/two/three", p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
@@ -136,7 +134,6 @@ static void test_removeall(CuTest *tc)
 static void test_remove_notthere(CuTest *tc)
 {
     apr_status_t rv;
-    apr_finfo_t finfo;
 
     rv = apr_dir_remove("data/notthere", p);
     CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOENT(rv));
@@ -145,7 +142,6 @@ static void test_remove_notthere(CuTest *tc)
 static void test_mkdir_twice(CuTest *tc)
 {
     apr_status_t rv;
-    apr_finfo_t finfo;
 
     rv = apr_dir_make("data/testdir", APR_UREAD | APR_UWRITE | APR_UEXECUTE, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
