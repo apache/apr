@@ -68,8 +68,7 @@
 /*  select for R4.5 of BeOS.  So here we use code that uses the write */
 /*  bits. */
     
-ap_status_t ap_setup_poll(ap_context_t *cont, ap_int32_t num, struct pollfd_t **
-new)
+ap_status_t ap_setup_poll(struct pollfd_t **new, ap_context_t *cont, ap_int32_t num)
 {
     (*new) = (struct pollfd_t *)ap_palloc(cont, sizeof(struct pollfd_t) * num);
     if ((*new) == NULL) {
@@ -208,10 +207,10 @@ ap_status_t ap_clear_poll_sockets(struct pollfd_t *aprset, ap_int16_t event)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_polldata(struct pollfd_t *pollfd, void *data)
+ap_status_t ap_get_polldata(struct pollfd_t *pollfd, char *key, void *data)
 {
     if (pollfd != NULL) {
-        return ap_get_userdata(pollfd->cntxt, &data);
+        return ap_get_userdata(&data, pollfd->cntxt, key);
     }
     else {
         data = NULL;
@@ -219,14 +218,14 @@ ap_status_t ap_get_polldata(struct pollfd_t *pollfd, void *data)
     }
 }
 
-ap_status_t ap_set_polldata(struct pollfd_t *pollfd, void *data)
+ap_status_t ap_set_polldata(struct pollfd_t *pollfd, void *data, char *key,
+                            ap_status_t (*cleanup) (void *))
 {
     if (pollfd != NULL) {
-        return ap_set_userdata(pollfd->cntxt, data);
+        return ap_set_userdata(pollfd->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;
         return APR_ENOFILE;
     }
 }
-
