@@ -123,7 +123,7 @@ static void test_read(CuTest *tc)
 {
     apr_status_t rv;
     apr_size_t nbytes = 256;
-    char *str = apr_palloc(p, nbytes + 1);
+    char *str = apr_pcalloc(p, nbytes + 1);
     
     rv = apr_file_read(filetest, str, &nbytes);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
@@ -215,7 +215,7 @@ static void test_seek(CuTest *tc)
     apr_status_t rv;
     apr_off_t offset = 5;
     apr_size_t nbytes = 256;
-    char *str = apr_palloc(p, nbytes + 1);
+    char *str = apr_pcalloc(p, nbytes + 1);
 
     rv = apr_file_seek(filetest, SEEK_SET, &offset);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
