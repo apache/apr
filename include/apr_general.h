@@ -210,8 +210,6 @@ APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, char ***argv, char ***en
  *         atexit to ensure this is called.  When using APR from a language
  *         other than C that has problems with the calling convention, use
  *         apr_terminate2() instead.
- * Otherwise, this call is identical to apr_app_initialize, and must be 
- * closed with a call to apr_terminate at the end of program execution.
  */
 APR_DECLARE_NONSTD(void) apr_terminate(void);
 
