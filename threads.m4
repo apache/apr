@@ -20,6 +20,7 @@ dnl
 AC_DEFUN(PTHREADS_CHECK_COMPILE, [
 AC_TRY_RUN( [
 #include <pthread.h>
+#include <stddef.h>
 
 void *thread_routine(void *data) {
     return data;
