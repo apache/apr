@@ -94,7 +94,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * @def APR_FROM_OS_ERROR(os_err_type syserr)
  * Fold a platform specific error into an apr_status_t code.
  * @return apr_status_t
- * @param syserr The platform os error code.
+ * @param e The platform os error code.
  * @warning  macro implementation; the syserr argument may be evaluated
  *      multiple times.
  */
@@ -104,7 +104,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * @def APR_TO_OS_ERROR(apr_status_t statcode)
  * @return os_err_type
  * Fold an apr_status_t code back to the native platform defined error.
- * @param syserr The apr_status_t folded platform os error code.
+ * @param e The apr_status_t folded platform os error code.
  * @warning  macro implementation; the statcode argument may be evaluated
  *      multiple times.  If the statcode was not created by apr_get_os_error 
  *      or APR_FROM_OS_ERROR, the results are undefined.

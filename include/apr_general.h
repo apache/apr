@@ -106,6 +106,7 @@ extern "C" {
 /** a tab */
 #define APR_ASCII_TAB    '\011'
 
+/** signal numbers typedef */
 typedef int               apr_signum_t;
 
 /**
@@ -181,6 +182,7 @@ int strncasecmp(const char *a, const char *b, size_t n);
 #define APR_ALIGN(size, boundary) \
     (((size) + ((boundary) - 1)) & ~((boundary) - 1))
 
+/** Default alignment */
 #define APR_ALIGN_DEFAULT(size) APR_ALIGN(size, 8)
 
 
@@ -188,7 +190,9 @@ int strncasecmp(const char *a, const char *b, size_t n);
  * String and memory functions
  */
 
+/** Properly quote a value as a string in the C preprocessor */
 #define APR_STRINGIFY(n) APR_STRINGIFY_HELPER(n)
+/** Helper macro for APR_STRINGIFY */
 #define APR_STRINGIFY_HELPER(n) #n
 
 #if (!APR_HAVE_MEMMOVE)

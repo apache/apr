@@ -113,8 +113,11 @@ extern "C" {
  */
 
 /* flags for apr_file_seek */
+/** Set the file position */
 #define APR_SET SEEK_SET
+/** Current */
 #define APR_CUR SEEK_CUR
+/** Go to end of file */
 #define APR_END SEEK_END
 /** @} */
 
@@ -638,7 +641,8 @@ APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm,
  * will be reported if PATH already exists.
  * @param path the path for the directory to be created.  (use / on all systems)
  * @param perm Permissions for the new direcoty.
- * @param cont the pool to use.  */
+ * @param pool the pool to use.
+ */
 APR_DECLARE(apr_status_t) apr_dir_make_recursive(const char *path,
                                                  apr_fileperms_t perm,
                                                  apr_pool_t *pool);

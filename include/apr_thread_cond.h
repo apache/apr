@@ -78,6 +78,7 @@ extern "C" {
  * @{
  */
 
+/** Opaque structure for thread condition variables */
 typedef struct apr_thread_cond_t apr_thread_cond_t;
 
 /*   Function definitions */

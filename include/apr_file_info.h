@@ -147,6 +147,7 @@ typedef dev_t                     apr_dev_t;
  * @defgroup APR_File_Info Stat Functions
  * @{
  */
+/** file info structure */
 typedef struct apr_finfo_t        apr_finfo_t;
 
 #define APR_FINFO_LINK   0x00000001 /**< Stat the link not the file itself if it is a link */
@@ -155,24 +156,24 @@ typedef struct apr_finfo_t        apr_finfo_t;
 #define APR_FINFO_ATIME  0x00000040 /**< Access Time */
 #define APR_FINFO_SIZE   0x00000100 /**< Size of the file */
 #define APR_FINFO_CSIZE  0x00000200 /**< Storage size consumed by the file */
-#define APR_FINFO_DEV    0x00001000
-#define APR_FINFO_INODE  0x00002000
-#define APR_FINFO_NLINK  0x00004000
-#define APR_FINFO_TYPE   0x00008000
-#define APR_FINFO_USER   0x00010000 
-#define APR_FINFO_GROUP  0x00020000 
-#define APR_FINFO_UPROT  0x00100000 
-#define APR_FINFO_GPROT  0x00200000
-#define APR_FINFO_WPROT  0x00400000
-#define APR_FINFO_ICASE  0x01000000  /**<  if dev is case insensitive */
-#define APR_FINFO_NAME   0x02000000  /**<  ->name in proper case */
+#define APR_FINFO_DEV    0x00001000 /**< Device */
+#define APR_FINFO_INODE  0x00002000 /**< Inode */
+#define APR_FINFO_NLINK  0x00004000 /**< Number of links */
+#define APR_FINFO_TYPE   0x00008000 /**< Type */
+#define APR_FINFO_USER   0x00010000 /**< User */
+#define APR_FINFO_GROUP  0x00020000 /**< Group */
+#define APR_FINFO_UPROT  0x00100000 /**< User protection bits */
+#define APR_FINFO_GPROT  0x00200000 /**< Group protection bits */
+#define APR_FINFO_WPROT  0x00400000 /**< World protection bits */
+#define APR_FINFO_ICASE  0x01000000 /**< if dev is case insensitive */
+#define APR_FINFO_NAME   0x02000000 /**< ->name in proper case */
 
-#define APR_FINFO_MIN    0x00008170  /**<  type, mtime, ctime, atime, size */
-#define APR_FINFO_IDENT  0x00003000  /**<  dev and inode */
-#define APR_FINFO_OWNER  0x00030000  /**<  user and group */
-#define APR_FINFO_PROT   0x00700000  /**<  all protections */
-#define APR_FINFO_NORM   0x0073b170  /**<  an atomic unix apr_stat() */
-#define APR_FINFO_DIRENT 0x02000000  /**<  an atomic unix apr_dir_read() */
+#define APR_FINFO_MIN    0x00008170 /**< type, mtime, ctime, atime, size */
+#define APR_FINFO_IDENT  0x00003000 /**< dev and inode */
+#define APR_FINFO_OWNER  0x00030000 /**< user and group */
+#define APR_FINFO_PROT   0x00700000 /**<  all protections */
+#define APR_FINFO_NORM   0x0073b170 /**<  an atomic unix apr_stat() */
+#define APR_FINFO_DIRENT 0x02000000 /**<  an atomic unix apr_dir_read() */
 
 /**
  * The file information structure.  This is analogous to the POSIX
