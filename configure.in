@@ -124,7 +124,6 @@ if test ".$SYS_SW" = ".AIX"; then
 fi
 
 dnl #----------------------------- Checks for Any required Libraries
-AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_LIB(nsl,gethostbyname)
 AC_CHECK_LIB(nsl,gethostname)
 AC_CHECK_LIB(socket,socket)
@@ -320,17 +319,7 @@ AC_SUBST(off_t_fmt)
 
 dnl #----------------------------- Checking for DSO support
 echo $ac_n "${nl}Checking for DSO...${nl}"
-AC_ARG_ENABLE(dso,
-  [  --enable-dso              Enable reliable child processes ],
-  [ ac_cv_enable_dso=$enableval],
-  [ AC_CACHE_CHECK([for DSO support], ac_cv_enable_dso,
-    [ac_cv_enable_dso="yes"] ) ] )
-
-if test "$ac_cv_enable_dso" = "no"; then
-    aprdso="0"
-else
-    aprdso="1"
-fi
+AC_CHECK_LIB(dl, dlopen, aprdso="1", apr_dso="0")
 
 AC_SUBST(aprdso)
 
