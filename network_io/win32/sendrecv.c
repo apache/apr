@@ -138,14 +138,12 @@ APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
     apr_ssize_t rv;
     int i;
     DWORD dwBytes = 0;
-    WSABUF wsabuf[WSABUF_ON_STACK];
-    LPWSABUF pWsaBuf = wsabuf;
+    WSABUF *pWsaBuf = (nvec <= WSABUF_ON_STACK) ? _alloca(sizeof(WSABUF) * (nvec))
+                                                : malloc(sizeof(WSABUF) * (nvec));
 
-    if (nvec > WSABUF_ON_STACK) {
-        pWsaBuf = (LPWSABUF) malloc(sizeof(WSABUF) * nvec);
-        if (!pWsaBuf)
-            return APR_ENOMEM;
-    }
+    if (!pWsaBuf)
+        return APR_ENOMEM;
+
     for (i = 0; i < nvec; i++) {
         pWsaBuf[i].buf = vec[i].iov_base;
         pWsaBuf[i].len = vec[i].iov_len;
@@ -213,12 +211,12 @@ APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from,
 }
 
 
-static void collapse_iovec(char **buf, int *len, struct iovec *iovec, int numvec, apr_pool_t *p)
+static apr_status_t collapse_iovec(char **off, apr_size_t *len, 
+                                   struct iovec *iovec, int numvec, 
+                                   char *buf, apr_size_t buflen)
 {
-    int ptr = 0;
-
     if (numvec == 1) {
-        *buf = iovec[0].iov_base;
+        *off = iovec[0].iov_base;
         *len = iovec[0].iov_len;
     }
     else {
@@ -227,13 +225,19 @@ static void collapse_iovec(char **buf, int *len, struct iovec *iovec, int numvec
             *len += iovec[i].iov_len;
         }
 
-        *buf = apr_palloc(p, *len); /* Should this be a malloc? */
+        if (*len > buflen) {
+            *len = 0;
+            return APR_INCOMPLETE;
+        }
+
+        *off = buf;
 
         for (i = 0; i < numvec; i++) {
-            memcpy((char*)*buf + ptr, iovec[i].iov_base, iovec[i].iov_len);
-            ptr += iovec[i].iov_len;
+            memcpy(buf, iovec[i].iov_base, iovec[i].iov_len);
+            buf += iovec[i].iov_len;
         }
     }
+    return APR_SUCCESS;
 }
 
 
@@ -274,7 +278,9 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     int ptr = 0;
     int bytes_to_send;   /* Bytes to send out of the file (not including headers) */
     int disconnected = 0;
+    int sendv_trailers = 0;
     HANDLE wait_event;
+    char hdtrbuf[4096];
 
     if (apr_os_level < APR_WIN_NT) {
         return APR_ENOTIMPL;
@@ -313,8 +319,18 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     /* Collapse the headers into a single buffer */
     if (hdtr && hdtr->numheaders) {
         ptfb = &tfb;
-        collapse_iovec((char **)&ptfb->Head, &ptfb->HeadLength, hdtr->headers, 
-                       hdtr->numheaders, sock->cntxt);
+        nbytes = 0;
+        rv = collapse_iovec((char **)&ptfb->Head, &ptfb->HeadLength, 
+                            hdtr->headers, hdtr->numheaders, 
+                            hdtrbuf, sizeof(hdtrbuf));
+        /* If not enough buffer, punt to sendv */
+        if (rv == APR_INCOMPLETE) {
+            rv = apr_sendv(sock, hdtr->headers, hdtr->numheaders, &nbytes);
+            if (rv != APR_SUCCESS)
+                return rv;
+            *len += nbytes;
+            ptfb = NULL;
+        }
     }
 
     while (bytes_to_send) {
@@ -327,11 +343,18 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
             /* Collapse the trailers into a single buffer */
             if (hdtr && hdtr->numtrailers) {
                 ptfb = &tfb;
-                collapse_iovec((char**) &ptfb->Tail, &ptfb->TailLength, 
-                               hdtr->trailers, hdtr->numtrailers, sock->cntxt);
+                rv = collapse_iovec((char**) &ptfb->Tail, &ptfb->TailLength,
+                                    hdtr->trailers, hdtr->numtrailers,
+                                    hdtrbuf + ptfb->HeadLength,
+                                    sizeof(hdtrbuf) - ptfb->HeadLength);
+                if (rv == APR_INCOMPLETE) {
+                    /* If not enough buffer, punt to sendv, later */
+                    sendv_trailers = 1;
+                }
             }
             /* Disconnect the socket after last send */
-            if (flags & APR_SENDFILE_DISCONNECT_SOCKET) {
+            if ((flags & APR_SENDFILE_DISCONNECT_SOCKET)
+                    && !sendv_trailers) {
                 dwFlags |= TF_REUSE_SOCKET;
                 dwFlags |= TF_DISCONNECT;
                 disconnected = 1;
@@ -405,6 +428,14 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     }
 
     if (status == APR_SUCCESS) {
+        if (sendv_trailers) {
+            rv = apr_sendv(sock, hdtr->trailers, hdtr->numtrailers, &nbytes);
+            if (rv != APR_SUCCESS)
+                return rv;
+            *len += nbytes;
+        }
+
+    
         /* Mark the socket as disconnected, but do not close it.
          * Note: The application must have stored the socket prior to making
          * the call to apr_sendfile in order to either reuse it or close it.
