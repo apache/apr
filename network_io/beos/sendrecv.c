@@ -249,42 +249,4 @@ APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from,
     return APR_SUCCESS;
 }
 
-/* deprecated */
-APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
-                                   apr_size_t *len)
-{
-    return apr_socket_send(sock, buf, len);
-}
-
-/* deprecated */
-APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t * sock, 
-                                    const struct iovec *vec,
-                                    apr_int32_t nvec, apr_size_t *len)
-{
-    return apr_socket_sendv(sock, vec, nvec, len);
-}
-
-/* deprecated */
-APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
-                                     apr_int32_t flags, const char *buf,
-                                     apr_size_t *len)
-{
-    return apr_socket_sendto(sock, where, flags, buf, len);
-}
-
-/* deprecated */
-APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
-                                       apr_int32_t flags, char *buf,
-                                       apr_size_t *len)
-{
-    return apr_socket_recvfrom(from, sock, flags, buf, len);
-}
-
-/* deprecated */
-APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf, 
-                                   apr_size_t *len)
-{
-    return apr_socket_recv(sock, buf, len);
-}
-
 #endif

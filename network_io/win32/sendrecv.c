@@ -332,7 +332,7 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
                             hdtrbuf, sizeof(hdtrbuf));
         /* If not enough buffer, punt to sendv */
         if (rv == APR_INCOMPLETE) {
-            rv = apr_sendv(sock, hdtr->headers, hdtr->numheaders, &nbytes);
+            rv = apr_socket_sendv(sock, hdtr->headers, hdtr->numheaders, &nbytes);
             if (rv != APR_SUCCESS)
                 return rv;
             *len += nbytes;
@@ -436,7 +436,7 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
 
     if (status == APR_SUCCESS) {
         if (sendv_trailers) {
-            rv = apr_sendv(sock, hdtr->trailers, hdtr->numtrailers, &nbytes);
+            rv = apr_socket_sendv(sock, hdtr->trailers, hdtr->numtrailers, &nbytes);
             if (rv != APR_SUCCESS)
                 return rv;
             *len += nbytes;
@@ -460,51 +460,5 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
     return status;
 }
 
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
-                                       apr_hdtr_t *hdtr, apr_off_t *offset,
-                                       apr_size_t *len, apr_int32_t flags) 
-{
-    return apr_socket_sendfile(sock, file, hdtr, offset, len, flags);
-}
-
 #endif
 
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
-                                   apr_size_t *len)
-{
-    return apr_socket_send(sock, buf, len);
-}
-
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
-                                    const struct iovec *vec,
-                                    apr_int32_t nvec, apr_size_t *nbytes)
-{
-    return apr_socket_sendv(sock, vec, nvec, nbytes);
-}
-
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
-                                     apr_int32_t flags, const char *buf, 
-                                     apr_size_t *len)
-{
-    return apr_socket_sendto(sock, where, flags, buf, len);
-}
-
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, 
-                                       apr_socket_t *sock,
-                                       apr_int32_t flags, 
-                                       char *buf, apr_size_t *len)
-{
-    return apr_socket_recvfrom(from, sock, flags, buf, len);
-}
-
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf,
-                                   apr_size_t *len) 
-{
-    return apr_socket_recv(sock, buf, len);
-}
