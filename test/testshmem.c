@@ -62,9 +62,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 /*#include <process.h>*/
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 
 typedef struct mbox {
     char msg[1024]; 
@@ -73,25 +71,25 @@ typedef struct mbox {
 apr_pool_t *context;
 mbox *boxes;
 
-void msgwait(int boxnum)
+static void msgwait(int boxnum)
 {
     volatile int test = 0;
     while (test == 0) {
-        sleep(0);
+        apr_sleep(0);
         test = boxes[boxnum].msgavail;
     }    
     fprintf(stdout, "\nreceived a message in box %d, message was: %s\n", 
             boxnum, boxes[boxnum].msg); 
 }
 
-void msgput(int boxnum, char *msg)
+static void msgput(int boxnum, char *msg)
 {
     fprintf(stdout, "Sending message to box %d\n", boxnum);
     apr_cpystrn(boxes[boxnum].msg, msg, strlen(msg));
     boxes[boxnum].msgavail = 1;
 }
 
-int main()
+int main(void)
 {
     apr_shmem_t *shm;
     pid_t pid;
@@ -125,7 +123,7 @@ int main()
     fprintf(stdout, "Creating a child process\n");
     pid = fork();
     if (pid == 0) {
-sleep(1);
+        apr_sleep(1);
         if (apr_open_shmem(shm) == APR_SUCCESS) {
             msgwait(1);
             msgput(0, "Msg received\n");
@@ -136,7 +134,7 @@ sleep(1);
     }
     else if (pid > 0) {
         msgput(1, "Sending a message\n");
-sleep(1);
+    apr_sleep(1);
         msgwait(0);
         exit(1);
     }

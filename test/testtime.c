@@ -61,7 +61,7 @@
 #include <unistd.h>
 #endif
 
-int main()
+int main(void)
 {
     apr_time_t now;
     apr_exploded_time_t xt;
