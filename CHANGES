@@ -1,5 +1,7 @@
 Changes with APR b1
 
+  *) Faster code for the apr_table get/set functions  [Brian Pane]
+
   *) Fix the userid functions on Irix to handle the way that Irix 
      reports a failure from getpwnam_r().  PR 10095.
      [Robert I. Cowles <ric@cs.uregina.ca>, Jeff Trawick]
