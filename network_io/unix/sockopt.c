@@ -123,9 +123,13 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
         }
     }
     if (opt & APR_SO_SNDBUF) {
+#ifdef BEOS
+        return APR_ENOTIMPLE;
+#else
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF, (void *)&on, sizeof(int)) == -1) {
             return errno;
         }
+#endif
     }
     if (opt & APR_SO_NONBLOCK) {
 #ifndef BEOS
