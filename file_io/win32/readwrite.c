@@ -159,7 +159,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
 
 APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *len)
 {
-    apr_size_t rv;
+    apr_status_t rv;
     DWORD bytes_read = 0;
 
     if (*len <= 0) {
@@ -196,16 +196,19 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         rv = 0;
         while (rv == 0 && size > 0) {
             if (thefile->bufpos >= thefile->dataRead) {
+                apr_size_t read;
                 rv = read_with_timeout(thefile, thefile->buffer, 
-                                       APR_FILE_BUFSIZE, &thefile->dataRead);
-                if (thefile->dataRead == 0) {
+                                       APR_FILE_BUFSIZE, &read);
+                if (read == 0) {
                     if (rv == APR_EOF)
                         thefile->eof_hit = TRUE;
                     break;
                 }
-
-                thefile->filePtr += thefile->dataRead;
-                thefile->bufpos = 0;
+                else {
+                    thefile->dataRead = read;
+                    thefile->filePtr += thefile->dataRead;
+                    thefile->bufpos = 0;
+                }
             }
 
             blocksize = size > thefile->dataRead - thefile->bufpos ? thefile->dataRead - thefile->bufpos : size;
