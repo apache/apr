@@ -70,7 +70,7 @@ LDFLAGS="@EXTRA_LDFLAGS@"
 LIBS="@EXTRA_LIBS@"
 EXTRA_INCLUDES="@EXTRA_INCLUDES@"
 SHLIBPATH_VAR="@shlibpath_var@"
-APR_SOURCE_DIR="@abs_srcdir@"
+APR_SOURCE_DIR="@apr_srcdir@"
 APR_SO_EXT="@so_ext@"
 APR_LIB_TARGET="@export_lib_target@"
 

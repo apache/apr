@@ -1,6 +1,9 @@
-Changes with APR b1  
+Changes with APR b1
 
-  *) added new functions for atomic operations. These are experimental
+  *) Enable autoconf 2.52{f,g} build support.
+     [Blair Zajac <blair@orcaware.com>]
+
+  *) Added new functions for atomic operations. These are experimental
      at the moment, so use in apps is discouraged [Ian Holsman]
 
   *) Correct serious problems with the Win32 apr_file_dup2 
