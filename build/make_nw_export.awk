@@ -14,9 +14,12 @@
 /apr_mmap_delete/{next}
 /apr_mmap_dup/{next}
 /apr_mmap_offset/{next}
+/apr_pool_create\(/{next}
 /apr_pool_free_blocks_num_bytes/{next}
 /apr_pool_join/{next}
+/apr_pool_lock/{next}
 /apr_pool_num_bytes/{next}
+/apr_pool_sub_make/{next}
 /apr_proc_mutex_child_init/{next}
 /apr_proc_mutex_create/{next}
 /apr_proc_mutex_create_np/{next}
