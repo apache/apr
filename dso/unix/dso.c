@@ -82,7 +82,7 @@ ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path,
 #endif
     }
 
-    *res_handle = ap_pcalloc(ctx, sizeof(*res_handle));
+    *res_handle = ap_pcalloc(ctx, sizeof(**res_handle));
     (*res_handle)->handle = (void*)os_handle;
     (*res_handle)->cont = ctx;
     (*res_handle)->errormsg = NULL;
