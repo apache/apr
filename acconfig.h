@@ -41,10 +41,6 @@
 /* Make sure we have ssize_t defined to be something */
 #undef ssize_t
 
-#if !defined(HAVE_STRCASECMP) && defined(HAVE_STRICMP)
-#define strcasecmp(s1,s2) stricmp(s1,s2)
-#endif
-
 #if !defined(HAVE_SOCKLEN_T)
 typedef int socklen_t;
 #endif
