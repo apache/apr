@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/01/13 11:51:03 $]
+Last modified at [$Date: 2001/01/13 13:27:16 $]
 
 Release:
 
@@ -19,7 +19,7 @@ RELEASE SHOWSTOPPERS:
       Source code layout needs to be decided for apr and apr-util.  There
       has been some discussion about adding a src/ directory to apr or 
       removing it from apr-util/.  Either way, this needs to be decided.
-      Those for adding apr/src/        : gstein
+      Those for adding apr/src/        : gstein, jim
       Those for removing apr-util/src/ : wrowe, rbb , dreid
 
     * Many linkage errors are gpfaulting Apache/win32 in various configs
@@ -38,6 +38,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       used by the configured User and Group.  Current work-around:
       change the initial permissions to 0666.  Needed code:  See
       1.3's http_main.c, SysV sem flavor of accept_mutex_init().
+      Status: Jim will look into this
 
     * Build scripts do not recognise AIX 4.2.1 pthreads
 
