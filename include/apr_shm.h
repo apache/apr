@@ -114,6 +114,7 @@ APR_DECLARE(apr_status_t) apr_shm_detach(apr_shm_t *m);
  * processes will maintain the same address mapping.
  * @param m The shared memory segment from which to retrieve
  *        the base address.
+ * @return address, aligned by APR_ALIGN_DEFAULT.
  */
 APR_DECLARE(void *) apr_shm_baseaddr_get(const apr_shm_t *m);
 
