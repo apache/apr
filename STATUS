@@ -1,5 +1,5 @@
 Apache 2.0 STATUS:
-Last modified at [$Date: 2000/11/30 23:41:03 $]
+Last modified at [$Date: 2000/12/01 17:48:24 $]
 
 Release:
 
@@ -18,6 +18,12 @@ RELEASE SHOWSTOPPERS:
 		apr_opendir   -->    apr_dir_open
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
+
+    * SysV semaphore support isn't usable by Apache when started as
+      root because we don't have a way to allow the semaphore to be
+      used by the configured User and Group.  Current work-around:
+      change the initial permissions to 0666.  Needed code:  See
+      1.3's http_main.c, SysV sem flavor of accept_mutex_init().
 
     * Build scripts do not recognise AIX 4.2.1 pthreads
 
