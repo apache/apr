@@ -74,8 +74,8 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
     if (thefile->buffered) {
         char *pos = (char *)buf;
-        ULONG blocksize;
-        ULONG size = *nbytes;
+        ap_ssize_t blocksize;
+        ap_ssize_t size = *nbytes;
 
         ap_lock(thefile->mutex);
 
@@ -154,7 +154,7 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
 
         if (thefile->direction == 0) {
             // Position file pointer for writing at the offset we are logically reading from
-            ULONG offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+            ap_ssize_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
             if (offset != thefile->filePtr)
                 SetFilePointer(thefile->filehand, offset, NULL, FILE_BEGIN);
             thefile->bufpos = thefile->dataRead = 0;
