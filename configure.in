@@ -69,8 +69,8 @@ APR_MKDIR_P_CHECK($apr_builders/mkdir.sh)
 dnl get our version information
 get_version="$apr_builders/get-version.sh"
 version_hdr="$apr_srcdir/include/apr_version.h"
-APR_MAJOR_VERSION="`$get_version major $version_hdr`"
-APR_DOTTED_VERSION="`$get_version all $version_hdr`"
+APR_MAJOR_VERSION="`$get_version major $version_hdr APR`"
+APR_DOTTED_VERSION="`$get_version all $version_hdr APR`"
 
 AC_SUBST(APR_DOTTED_VERSION)
 AC_SUBST(APR_MAJOR_VERSION)
@@ -158,7 +158,7 @@ AC_ARG_WITH(libtool, [  --without-libtool       avoid using libtool to link the 
 
 if test "x$use_libtool" = "xyes"; then
       lt_compile='$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -c $< && touch $@'
-      LT_VERSION="-version-info `$get_version libtool $version_hdr`"
+      LT_VERSION="-version-info `$get_version libtool $version_hdr APR`"
       link="\$(LIBTOOL) \$(LTFLAGS) --mode=link \$(LT_LDFLAGS) \$(COMPILE) ${LT_VERSION} \$(ALL_LDFLAGS) -o \$@"
       so_ext='lo'
       lib_target='-rpath $(libdir) $$objects'
