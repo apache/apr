@@ -251,7 +251,6 @@ static void test_exp_tz(CuTest *tc)
     apr_status_t rv;
     apr_time_exp_t xt;
     apr_int32_t hr_off = -5 * 3600; /* 5 hours in seconds */
-    apr_time_exp_t expnow = { 186711, 36, 5, 14, 14, 8, 102, 6, 256, 0, -18000 };
 
     rv = apr_time_exp_tz(&xt, now, hr_off);
     if (rv == APR_ENOTIMPL) {
