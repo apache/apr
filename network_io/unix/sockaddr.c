@@ -57,6 +57,9 @@
 #include "apr.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
+#ifdef NETWARE
+#include "apr_private.h"
+#endif
 
 #if APR_HAVE_STDLIB_H
 #include <stdlib.h>
