@@ -74,7 +74,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         *nbytes = rc == 0 ? pos - (char *)buf : 0;
         apr_thread_mutex_unlock(thefile->mutex);
 
-        if (*nbytes == 0 && rc == 0) {
+        if (*nbytes == 0 && rc == 0 && thefile->eof_hit) {
             return APR_EOF;
         }
 
