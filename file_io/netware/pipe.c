@@ -153,8 +153,8 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
 	if (!tmpnam(tname))
 		return errno;
 
-	if ((filedes[0] = pipe_open(tname, O_RDONLY) != -1)
-		&& (filedes[1] = pipe_open(tname, O_WRONLY) != -1))
+	if (((filedes[0] = pipe_open(tname, O_RDONLY)) != -1)
+		&& ((filedes[1] = pipe_open(tname, O_WRONLY)) != -1))
 	{
         (*in) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
         (*out) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
