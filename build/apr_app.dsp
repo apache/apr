@@ -85,9 +85,5 @@ LIB32=link.exe -lib
 
 SOURCE=..\misc\win32\apr_app.c
 # End Source File
-# Begin Source File
-
-SOURCE=..\i18n\unix\utf8_ucs2.c
-# End Source File
 # End Target
 # End Project
