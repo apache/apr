@@ -126,7 +126,11 @@ struct in_addr {
 typedef struct apr_socket_t     apr_socket_t;
 typedef struct apr_pollfd_t     apr_pollfd_t;
 typedef struct apr_hdtr_t       apr_hdtr_t;
-typedef struct in_addr      apr_in_addr;
+typedef struct in_addr          apr_in_addr;
+
+/* use apr_uint16_t just in case some system has a short that isn't 16 bits... */
+typedef apr_uint16_t            apr_port_t;
+
 
 #if APR_HAS_SENDFILE
 /* Define flags passed in on apr_sendfile() */
@@ -385,7 +389,7 @@ apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t* 
  *      that this socket is going to use this port if possible.  If
  *      the port is already used, we won't find out about it here.
  */
-apr_status_t apr_set_local_port(apr_socket_t *sock, apr_uint32_t port);
+apr_status_t apr_set_local_port(apr_socket_t *sock, apr_port_t port);
 
 /**
  * Associate a remote port with a socket.
@@ -394,21 +398,21 @@ apr_status_t apr_set_local_port(apr_socket_t *sock, apr_uint32_t port);
  * @tip This does not make a connection to the remote port, it is just 
  *      telling apr which port apr_connect() should attempt to connect to.
  */
-apr_status_t apr_set_remote_port(apr_socket_t *sock, apr_uint32_t port);
+apr_status_t apr_set_remote_port(apr_socket_t *sock, apr_port_t port);
 
 /**
  * Return the local port with a socket.
  * @param port The local port this socket is associated with.
  * @param sock The socket to enquire about.
  */
-apr_status_t apr_get_local_port(apr_uint32_t *port, apr_socket_t *sock);
+apr_status_t apr_get_local_port(apr_port_t *port, apr_socket_t *sock);
 
 /**
  * Return the remote port associated with a socket.
  * @param port The remote port this socket is associated with.
  * @param sock The socket to enquire about.
  */
-apr_status_t apr_get_remote_port(apr_uint32_t *port, apr_socket_t *sock);
+apr_status_t apr_get_remote_port(apr_port_t *port, apr_socket_t *sock);
 
 /**
  * Associate a local socket addr with an apr socket.

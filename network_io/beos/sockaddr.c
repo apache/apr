@@ -58,25 +58,25 @@
 #else
 #include "networkio.h"
 
-apr_status_t apr_set_local_port(apr_socket_t *sock, apr_uint32_t port)
+apr_status_t apr_set_local_port(apr_socket_t *sock, apr_port_t port)
 {
     if (!sock) {
         return APR_EBADF;
     }
-    sock->local_addr->sin_port = htons((short)port);
+    sock->local_addr->sin_port = htons(port);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_set_remote_port(apr_socket_t *sock, apr_uint32_t port)
+apr_status_t apr_set_remote_port(apr_socket_t *sock, apr_port_t port)
 {
     if (!sock) {
         return APR_EBADF;
     }
-    sock->remote_addr->sin_port = htons((short)port);
+    sock->remote_addr->sin_port = htons(port);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_local_port(apr_uint32_t *port, apr_socket_t *sock)
+apr_status_t apr_get_local_port(apr_port_t *port, apr_socket_t *sock)
 {
     if (!sock) {
         return APR_EBADF;
@@ -85,7 +85,7 @@ apr_status_t apr_get_local_port(apr_uint32_t *port, apr_socket_t *sock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_remote_port(apr_uint32_t *port, apr_socket_t *sock)
+apr_status_t apr_get_remote_port(apr_port_t *port, apr_socket_t *sock)
 {
     if (!sock) {
         return APR_EBADF;

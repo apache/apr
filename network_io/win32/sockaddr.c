@@ -74,23 +74,23 @@ static apr_status_t get_local_addr(apr_socket_t *sock)
 
 
 
-apr_status_t apr_set_local_port(apr_socket_t *sock, apr_uint32_t port)
+apr_status_t apr_set_local_port(apr_socket_t *sock, apr_port_t port)
 {
-    sock->local_addr->sin_port = htons((short)port);
+    sock->local_addr->sin_port = htons(port);
     return APR_SUCCESS;
 }
 
 
 
-apr_status_t apr_set_remote_port(apr_socket_t *sock, apr_uint32_t port)
+apr_status_t apr_set_remote_port(apr_socket_t *sock, apr_port_t port)
 {
-    sock->remote_addr->sin_port = htons((short)port);
+    sock->remote_addr->sin_port = htons(port);
     return APR_SUCCESS;
 }
 
 
 
-apr_status_t apr_get_local_port(apr_uint32_t *port, apr_socket_t *sock)
+apr_status_t apr_get_local_port(apr_port_t *port, apr_socket_t *sock)
 {
     if (sock->local_port_unknown) {
         apr_status_t rv = get_local_addr(sock);
@@ -106,7 +106,7 @@ apr_status_t apr_get_local_port(apr_uint32_t *port, apr_socket_t *sock)
 
 
 
-apr_status_t apr_get_remote_port(apr_uint32_t *port, apr_socket_t *sock)
+apr_status_t apr_get_remote_port(apr_port_t *port, apr_socket_t *sock)
 {
     *port = ntohs(sock->remote_addr->sin_port);
     return APR_SUCCESS;
