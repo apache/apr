@@ -1833,8 +1833,8 @@ AC_SUBST(have_ipv6)
 # hstrerror is only needed if IPv6 is not enabled,
 # so getaddrinfo/gai_strerror are not used.
 if test $have_ipv6 = 0; then
-  AC_CHECK_LIB(hstrerror, resolv)
-  AC_CHECK_FUNCS(hstrerror)
+  AC_SEARCH_LIBS(hstrerror, resolv,
+    [AC_DEFINE(HAVE_HSTRERROR, 1, [Define if hstrerror is present])])
 fi
 
 dnl Check for langinfo support
