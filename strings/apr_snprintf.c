@@ -1256,7 +1256,7 @@ APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, apr_size_t len,
          * just does actual inserts iff the buffer pointer is non-NULL.
          * In this case, we don't care what buf is; it can be NULL, since
          * we don't touch it at all.
-         * /
+         */
         vbuff.curpos = NULL;
         vbuff.endpos = NULL;
     } else {
