@@ -96,7 +96,7 @@ struct dir_t {
 
 struct iovec_t {
     ap_context_t *cntxt;
-    struct iovec *iovec;
+    struct iovec *theiov;
 };
 
 ap_status_t file_cleanup(void *);
