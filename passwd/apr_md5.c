@@ -699,7 +699,28 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
          */
 #if defined(WIN32) || defined(BEOS) || defined(NETWARE)
         apr_cpystrn(sample, passwd, sizeof(sample) - 1);
+#elif defined(CRYPT_R_CRYPTD)
+        CRYPTD buffer;
+
+        crypt_pw = crypt_r(passwd, hash, &buffer);
+        apr_cpystrn(sample, crypt_pw, sizeof(sample) - 1);
+#elif defined(CRYPT_R_STRUCT_CRYPT_DATA)
+        struct crypt_data buffer;
+
+        /* having to clear this seems bogus... GNU doc is
+         * confusing...  user report found from google says
+         * the crypt_data struct had to be cleared to get
+         * the same result as plain crypt()
+         */
+        memset(&buffer, 0, sizeof(buffer));
+        crypt_pw = crypt_r(passwd, hash, &buffer);
+        apr_cpystrn(sample, crypt_pw, sizeof(sample) - 1);
 #else
+        /* XXX if this is a threaded build, we should hold a mutex 
+         *     around the next two lines... but note that on some
+         *     platforms (e.g., Solaris, HP-UX) crypt() returns a
+         *     pointer to thread-specific data
+         */
         crypt_pw = crypt(passwd, hash);
         apr_cpystrn(sample, crypt_pw, sizeof(sample) - 1);
 #endif
