@@ -577,6 +577,7 @@ else
     if test "$pthreadh" = "1"; then
         APR_CHECK_PTHREAD_GETSPECIFIC_TWO_ARGS
         APR_CHECK_PTHREAD_ATTR_GETDETACHSTATE_ONE_ARG
+        APR_CHECK_PTHREAD_RECURSIVE_MUTEX
         AC_CHECK_FUNCS(pthread_key_delete pthread_rwlock_init)
 
         if test "$ac_cv_func_pthread_rwlock_init" = "yes"; then
