@@ -62,7 +62,7 @@
 #include "../../network_io/os2/os2calls.h"
 
 
-int errormap[][2] = {
+static int errormap[][2] = {
     { NO_ERROR,                   APR_SUCCESS      },
     { ERROR_FILE_NOT_FOUND,       APR_ENOENT       },
     { ERROR_PATH_NOT_FOUND,       APR_ENOENT       },
