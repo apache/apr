@@ -152,10 +152,9 @@ struct apr_pollfd_t {
     fd_set *read_set;
     fd_set *write_set;
     fd_set *except_set;
-#endif
     apr_int16_t *events;
     apr_int16_t *revents;
-
+#endif
 };
 
 const char *apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size);
