@@ -293,13 +293,13 @@ FILES_lib_objs = \
 	$(OBJDIR)/open.o \
 	$(OBJDIR)/pipe.o \
 	$(OBJDIR)/otherchild.o \
-	$(OBJDIR)/poll.o \
 	$(OBJDIR)/proc.o \
 	$(OBJDIR)/procsup.o \
 	$(OBJDIR)/proc_mutex.o \
 	$(OBJDIR)/rand.o \
 	$(OBJDIR)/readwrite.o \
 	$(OBJDIR)/seek.o \
+	$(OBJDIR)/select.o \
 	$(OBJDIR)/sendrecv.o \
 	$(OBJDIR)/sha2.o \
 	$(OBJDIR)/sha2_glue.o \
