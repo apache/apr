@@ -240,7 +240,7 @@ struct apr_dir_t {
 extern const char apr_c_is_fnchar[256];
 
 #define IS_FNCHAR(c) (apr_c_is_fnchar[(unsigned char)(c)] & 1)
-#define IS_SHCHAR(c) (apr_c_is_fnchar[(unsigned char)(c)] & 2 == 2)
+#define IS_SHCHAR(c) ((apr_c_is_fnchar[(unsigned char)(c)] & 2) == 2)
 
 
 /* If the user passes APR_FILEPATH_TRUENAME to either
