@@ -593,7 +593,7 @@ APR_DECLARE(void) apr_file_unset_inherit(apr_file_t *file);
  * @param template The template to use when creating a temp file.
  * @param flags The flags to open the file with. If this is zero,
  *              the file is opened with 
- *              APR_READ | APR_WRITE | APR_EXCL | APR_DELONCLOSE
+ *              APR_CREATE | APR_READ | APR_WRITE | APR_EXCL | APR_DELONCLOSE
  * @param p The pool to allocate the file out of.
  * @ingroup apr_file_open
  * @remark   
