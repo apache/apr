@@ -155,6 +155,10 @@ case $host in
         LIBTOOL="$apr_builddir/libtool"
         LIBTOOL_SRC="$apr_srcdir/build/jlibtool.c"
         $CC $CFLAGS $CPPFLAGS -o $LIBTOOL $LIBTOOL_SRC
+        eval `$apr_builddir/libtool --config | grep "^shlibpath_var=[[A-Z_]]*$"`
+        if test "x$shlibpath_var" = "x"; then
+            shlibpath_var=REPLACE_WITH_YOUR_SHLIBPATH_VAR
+        fi
     else
     dnl libtoolize requires that the following not be indented
 AC_PROG_LIBTOOL

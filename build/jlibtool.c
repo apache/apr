@@ -67,6 +67,7 @@
 #  define dynamic_link_version_func darwin_dynamic_link_function
 #  define DYNAMIC_INSTALL_NAME "-install_name"
 /*-install_name  /Users/jerenk/apache-2.0-cvs/lib/libapr.0.dylib -compatibility_version 1 -current_version 1.0 */
+#  define LD_LIBRARY_PATH "DYLD_LIBRARY_PATH"
 #endif
 
 #if defined(__linux__) || defined(__FreeBSD__)
@@ -84,6 +85,8 @@
 #  define MODULE_OPTS "-shared"
 #  define LINKER_FLAG_PREFIX "-Wl,"
 #  define ADD_MINUS_L
+#  define LD_RUN_PATH "LD_RUN_PATH"
+#  define LD_LIBRARY_PATH "LD_LIBRARY_PATH"
 #endif
 
 #if defined(_OSD_POSIX)
@@ -114,6 +117,8 @@
 #  define DYNAMIC_LINK_OPTS "-Wl,-Blargedynsym"
 #  define LINKER_FLAG_PREFIX "-Wl,"
 #  define NEED_SNPRINTF
+#  define LD_RUN_PATH "LD_RUN_PATH"
+#  define LD_LIBRARY_PATH "LD_LIBRARY_PATH"
 #endif
 
 #ifndef SHELL_CMD
@@ -410,6 +415,23 @@ int run_command(command_t *cmd_data, count_chars *cc)
     return external_spawn(cmd_data, spawn_args[0], (const char**)spawn_args);
 }
 
+/*
+ * print configuration
+ * shlibpath_var is used in configure.
+ */
+void print_config()
+{
+#ifdef LD_RUN_PATH
+    printf("runpath_var=%s\n", LD_RUN_PATH);
+#endif
+#ifdef LD_LIBRARY_PATH
+    printf("shlibpath_var=%s\n", LD_LIBRARY_PATH);
+#endif
+#ifdef SHELL_CMD
+    printf("SHELL=\"%s\"\n", SHELL_CMD);
+#endif
+}
+
 int parse_long_opt(char *arg, command_t *cmd_data)
 {
     char *equal_pos = strchr(arg, '=');
@@ -454,6 +476,8 @@ int parse_long_opt(char *arg, command_t *cmd_data)
         printf("Version " VERSION "\n");
     } else if (strcmp(var, "help") == 0) {
         printf("Sorry.  No help available.\n");
+    } else if (strcmp(var, "config") == 0) {
+        print_config();
     } else {
         return 0;
     }
