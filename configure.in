@@ -1594,7 +1594,6 @@ APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
              func:pthread_mutexattr_setpshared dnl
              file:/dev/zero,
              hasprocpthreadser="1", hasprocpthreadser="0")
-APR_IFALLYES(struct:pthread_rw, hasrwlockser="1", hasrwlockser="0")
 
 # See which lock mechanism we'll select by default on this system.
 # The last APR_DECIDE to execute sets the default.
@@ -1650,7 +1649,6 @@ AC_SUBST(hassysvser)
 AC_SUBST(hasposixser)
 AC_SUBST(hasfcntlser)
 AC_SUBST(hasprocpthreadser)
-AC_SUBST(hasrwlockser)
 AC_SUBST(flockser)
 AC_SUBST(sysvser)
 AC_SUBST(posixser)
