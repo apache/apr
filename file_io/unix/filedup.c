@@ -117,13 +117,23 @@ static apr_status_t _file_dup(apr_file_t **new_file,
     /* make sure unget behavior is consistent */
     (*new_file)->ungetchar = old_file->ungetchar;
 
-    /* apr_file_dup() clears the inherit attribute, user must call 
-     * apr_file_inherit_set() again on the dupped handle, as necessary.
+    /* apr_file_dup() clears the inherit attribute for normal files,
+     * but sets the inherit attribute for std[out,in,err] fd's. 
+     * The user must call apr_file_inherit_[un]set() on the dupped 
+     * apr_file_t when desired.
      */
-    (*new_file)->flags = old_file->flags & ~APR_INHERIT;
+    if ((*new_file)->filedes <= 2) {
+        (*new_file)->flags = old_file->flags | APR_INHERIT;
+    }
+    else {
+        (*new_file)->flags = old_file->flags & ~APR_INHERIT;
+    }
 
     apr_pool_cleanup_register((*new_file)->pool, (void *)(*new_file),
-                              apr_unix_file_cleanup, apr_unix_file_cleanup);
+                              apr_unix_file_cleanup, 
+                              ((*new_file)->flags & APR_INHERIT)
+                                 ? apr_pool_cleanup_null
+                                 : apr_unix_file_cleanup);
 
     return APR_SUCCESS;
 }
