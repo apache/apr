@@ -54,7 +54,6 @@
 
 
 #include "apr.h"
-#include "apr_lock.h"
 #include "apr_thread_mutex.h"
 #include "apr_atomic.h"
 
