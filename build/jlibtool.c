@@ -251,6 +251,10 @@ typedef struct {
     const char *version_info;
 } command_t;
 
+#ifdef RPATH
+void add_rpath(count_chars *cc, const char *path);
+#endif
+
 #if defined(NEED_SNPRINTF)
 /* Write at most n characters to the buffer in str, return the
  * number of chars written or -1 if the buffer would have been
@@ -455,6 +459,16 @@ void print_config()
     printf("SHELL=\"%s\"\n", SHELL_CMD);
 #endif
 }
+/*
+ * Add a directory to the runtime library search path.
+ */
+void add_runtimedirlib(char *arg, command_t *cmd_data)
+{
+#ifdef RPATH
+    add_rpath(cmd_data->shared_opts.dependencies, arg);
+#else
+#endif
+}
 
 int parse_long_opt(char *arg, command_t *cmd_data)
 {
@@ -554,6 +568,10 @@ int parse_short_opt(char *arg, command_t *cmd_data)
             /* Hack... */
             arg--;
             push_count_chars(cmd_data->shared_opts.dependencies, arg);
+            return 1;
+        } else if (arg[0] == 'R' && arg[1]) {
+            /* -Rdir Add dir to runtime library search path. */
+            add_runtimedirlib(&arg[1], cmd_data);
             return 1;
         }
     }
@@ -1282,6 +1300,10 @@ void parse_args(int argc, char *argv[], command_t *cmd_data)
                 } else if (strcmp(arg+1, "export-symbols-regex") == 0) {
                     /* Skip the argument. */
                     ++a;
+                    argused = 1;
+                } else if (arg[1] == 'R' && !arg[2]) {
+                    /* -R dir Add dir to runtime library search path. */
+                    add_runtimedirlib(argv[++a], cmd_data);
                     argused = 1;
                 }
             }
