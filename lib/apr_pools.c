@@ -613,11 +613,8 @@ API_EXPORT(void) ap_kill_cleanup(ap_pool_t *p, void *data,
 API_EXPORT(ap_status_t) ap_run_cleanup(ap_pool_t *p, void *data,
 				 ap_status_t (*cleanup) (void *))
 {
-    ap_status_t rv;
-
-    rv = (*cleanup) (data);
     ap_kill_cleanup(p, data, cleanup);
-    return rv;
+    return (*cleanup) (data);
 }
 
 static void run_cleanups(struct cleanup *c)
