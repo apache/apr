@@ -162,6 +162,82 @@ apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
     return APR_SUCCESS;
 }
 
+apr_status_t apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
+                        apr_int32_t flags, const char *buf, apr_size_t *len)
+{
+    ssize_t rv;
+
+    do {
+        rv = sendto(sock->socketdes, buf, (*len), flags, 
+                    (const struct sockaddr*)&where->sa, 
+                    where->salen);
+    } while (rv == -1 && errno == EINTR);
+
+    if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)
+        && sock->timeout != 0) {
+        apr_status_t arv = wait_for_io_or_timeout(sock, 0);
+        if (arv != APR_SUCCESS) {
+            *len = 0;
+            return arv;
+        } else {
+            do {
+                rv = sendto(sock->socketdes, buf, (*len), flags,
+                            (const struct sockaddr*)&where->sa,
+                            where->salen);
+            } while (rv == -1 && errno == EINTR);
+        }
+    }
+    if (rv == -1) {
+        *len = 0;
+        return errno;
+    }
+    *len = rv;
+    return APR_SUCCESS;
+}
+
+apr_status_t apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
+                          apr_int32_t flags, char *buf, 
+                          apr_size_t *len)
+{
+    ssize_t rv;
+
+    if (from == NULL){
+        return APR_ENOMEM;
+        /* Not sure if this is correct.  Maybe we should just allocate
+           the memory??
+         */
+    }
+
+    do {
+        rv = recvfrom(sock->socketdes, buf, (*len), flags, 
+                      (struct sockaddr*)&from->sa, &from->salen);
+    } while (rv == -1 && errno == EINTR);
+
+    if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) &&
+        sock->timeout != 0) {
+        apr_status_t arv = wait_for_io_or_timeout(sock, 1);
+        if (arv != APR_SUCCESS) {
+            *len = 0;
+            return arv;
+        } else {
+            do {
+                rv = recvfrom(sock->socketdes, buf, (*len), flags,
+                              (struct sockaddr*)&from->sa, &from->salen);
+                } while (rv == -1 && errno == EINTR);
+        }
+    }
+    if (rv == -1) {
+        (*len) = 0;
+        return errno;
+    }
+
+    (*len) = rv;
+    if (rv == 0)
+        return APR_EOF;
+
+    return APR_SUCCESS;
+}
+
 #ifdef HAVE_WRITEV
 apr_status_t apr_sendv(apr_socket_t * sock, const struct iovec *vec,
                      apr_int32_t nvec, apr_size_t *len)
