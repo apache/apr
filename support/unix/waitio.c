@@ -56,6 +56,7 @@
 #include "networkio.h"
 #include "apr_poll.h"
 #include "apr_errno.h"
+#include "apr_support.h"
 
 /* The only case where we don't use wait_for_io_or_timeout is on
  * pre-BONE BeOS, so this check should be sufficient and simpler */
