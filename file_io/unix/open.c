@@ -79,6 +79,11 @@ ap_status_t ap_unix_file_cleanup(void *thefile)
     }
 }
 
+ap_fileperms_t ap_set_default_fperms(ap_fileperms_t perm)
+{
+    return umask(perm);
+}
+
 ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_pool_t *cont)
 {
     int oflags = 0;
