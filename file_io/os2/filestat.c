@@ -202,6 +202,7 @@ APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
 
 APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
                                              apr_fileattrs_t attributes,
+                                             apr_fileattrs_t attr_mask,
                                              apr_pool_t *cont)
 {
     FILESTATUS3 fs3;
@@ -210,10 +211,13 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
     if (rc == 0) {
         ULONG old_attr = fs3.attrFile;
 
-        if (attributes & APR_FILE_ATTR_READONLY) {
-            fs3.attrFile |= FILE_READONLY;
-        } else {
-            fs3.attrFile &= ~FILE_READONLY;
+        if (attr_mask & APR_FILE_ATTR_READONLY)
+        {
+            if (attributes & APR_FILE_ATTR_READONLY) {
+                fs3.attrFile |= FILE_READONLY;
+            } else {
+                fs3.attrFile &= ~FILE_READONLY;
+            }
         }
 
         if (fs3.attrFile != old_attr) {
