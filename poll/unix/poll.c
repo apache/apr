@@ -117,7 +117,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
     /* XXX: I trust that this is a segv when insufficient stack exists? */
     struct pollfd pollset[num];
 #elif defined(HAVE_ALLOCA)
-    struct pollfd *pollset = alloca(sizeof(pollfd) * num);
+    struct pollfd *pollset = alloca(sizeof(struct pollfd) * num);
     if (!pollset)
         return APR_ENOMEM;
 #else
