@@ -97,9 +97,12 @@ struct apr_other_child_rec_t {
     apr_os_file_t write_fd;
 };
 
-#ifdef WIN32
+#if defined(WIN32) || defined(NETWARE)
 #define WSAHighByte 2
 #define WSALowByte 0
+#endif
+
+#ifdef WIN32
 /* Platform specific designation of run time os version.
  * Gaps allow for specific service pack levels that
  * export new kernel or winsock functions or behavior.
