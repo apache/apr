@@ -297,7 +297,7 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, apr_int32_t wante
  */
 int fillin_fileinfo(apr_finfo_t *finfo, 
                     WIN32_FILE_ATTRIBUTE_DATA *wininfo, 
-                    int byhandle) 
+                    int byhandle, apr_int32_t wanted) 
 {
     DWORD *sizes = &wininfo->nFileSizeHigh + byhandle;
     int warn = 0;
@@ -349,12 +349,19 @@ int fillin_fileinfo(apr_finfo_t *finfo,
     
     finfo->valid = APR_FINFO_ATIME | APR_FINFO_CTIME | APR_FINFO_MTIME
                  | APR_FINFO_SIZE  | APR_FINFO_TYPE;   /* == APR_FINFO_MIN */
+
+    /* Only byhandle optionally tests link targets, so tell that caller
+     * what it wants to hear, otherwise the byattributes is never
+     * reporting anything but the link.
+     */
+    if (!byhandle || (wanted & APR_FINFO_LINK))
+        finfo->valid |= APR_FINFO_LINK;
     return warn;
 }
 
 
 APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t wanted,
-                                          apr_file_t *thefile)
+                                            apr_file_t *thefile)
 {
     BY_HANDLE_FILE_INFORMATION FileInfo;
 
@@ -362,7 +369,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
         return apr_get_os_error();
     }
 
-    fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 1);
+    fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 1, wanted);
 
     if (finfo->filetype == APR_REG)
     {
@@ -510,7 +517,8 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
             finfo->protection |= APR_WREAD | APR_WEXECUTE | APR_WWRITE;
             finfo->protection |= (finfo->protection << prot_scope_group) 
                                | (finfo->protection << prot_scope_user);
-            finfo->valid |= APR_FINFO_TYPE | APR_FINFO_PROT | APR_FINFO_MTIME;
+            finfo->valid |= APR_FINFO_TYPE | APR_FINFO_PROT | APR_FINFO_MTIME
+                         | (wanted & APR_FINFO_LINK);
             return (wanted &= ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;            
         }
         else
@@ -533,7 +541,8 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     }
 
     if (ident_rv != APR_INCOMPLETE) {
-        if (fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 0))
+        if (fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 
+                            0, wanted))
         {
             /* Go the extra mile to assure we have a file.  WinNT/2000 seems
              * to reliably translate char devices to the path '\\.\device'
