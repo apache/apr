@@ -145,7 +145,7 @@ static unsigned char PADDING[64] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-#ifdef CHARSET_EBCDIC
+#ifdef AP_CHARSET_EBCDIC
 static apr_xlate_t *xlate_ebcdic_to_ascii; /* used in apr_MD5Encode() */
 #endif
 
@@ -460,7 +460,7 @@ static void Decode(UINT4 *output, const unsigned char *input, unsigned int len)
 	    (((UINT4) input[j + 2]) << 16) | (((UINT4) input[j + 3]) << 24);
 }
 
-#ifdef CHARSET_EBCDIC
+#ifdef AP_CHARSET_EBCDIC
 APR_DECLARE(apr_status_t) apr_MD5InitEBCDIC(apr_xlate_t *xlate)
 {
     xlate_ebcdic_to_ascii = xlate;
@@ -537,7 +537,7 @@ APR_DECLARE(apr_status_t) apr_MD5Encode(const char *pw, const char *salt,
      * 'Time to make the doughnuts..'
      */
     apr_MD5Init(&ctx);
-#ifdef CHARSET_EBCDIC
+#ifdef AP_CHARSET_EBCDIC
     apr_MD5SetXlate(&ctx, xlate_ebcdic_to_ascii);
 #endif
     
