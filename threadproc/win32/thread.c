@@ -231,19 +231,7 @@ APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
 APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control,
                                           void (*func)(void))
 {
-    /* Quick escape hatch, and bug fix.  The InterlockedIncrement
-     * call is just incrementing a long int, so it has the potential
-     * to wrap.  Very unlikely, but still, that would be an almost
-     * impossible bug to hunt.  With this, we might see one or two
-     * calls to InterlockedIncrement, but never enough to wrap the
-     * long int.  This also saves us a kernel call for most calls to
-     * this function.
-     */
-    if (control->value) {
-        return APR_SUCCESS;
-    }
-    InterlockedIncrement(&control->value);
-    if (control->value == 1) {
+    if (!InterlockedExchange(&control->value, 1)) {
         func();
     }
     return APR_SUCCESS;
