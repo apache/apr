@@ -176,10 +176,11 @@ dnl
 AC_DEFUN(APR_CHECK_SIGWAIT_ONE_ARG,[
   AC_CACHE_CHECK(whether sigwait takes one argument,ac_cv_sigwait_one_arg,[
   AC_TRY_COMPILE([
-#ifdef __NETBSD__
+#if defined(__NETBSD__) || defined(DARWIN)
     /* When using the unproven-pthreads package, we need to pull in this
      * header to get a prototype for sigwait().  Else things will fail later
      * on.  XXX Should probably be fixed in the unproven-pthreads package.
+     * Darwin is declaring sigwait() in the wrong place as well.
      */
 #include <pthread.h>
 #endif
