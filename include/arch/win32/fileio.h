@@ -137,7 +137,7 @@ struct ap_dir_t {
 ap_status_t file_cleanup(void *);
 /*mode_t get_fileperms(ap_fileperms_t);
 */
-API_EXPORT(char *) ap_os_systemcase_filename(struct ap_pool_t *pCont, 
+APR_EXPORT(char *) ap_os_systemcase_filename(struct ap_pool_t *pCont, 
                                              const char *szFile);
 char * canonical_filename(struct ap_pool_t *pCont, const char *szFile);
 

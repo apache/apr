@@ -391,7 +391,7 @@ B<Flush the file's buffer.>
 =cut
  */
 ap_status_t ap_flush(ap_file_t *thefile);
-API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
+APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
         __attribute__((format(printf,2,3)));
 
 /*

@@ -82,7 +82,7 @@ static BOOL OnlyDots(char *pString)
  * is present on the existing path.  This routine also
  * converts alias names to long names.
  */
-API_EXPORT(char *) ap_os_systemcase_filename(ap_pool_t *pCont, 
+APR_EXPORT(char *) ap_os_systemcase_filename(ap_pool_t *pCont, 
                                              const char *szFile)
 {
     char buf[HUGE_STRING_LEN];

@@ -111,7 +111,7 @@ ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr,
     /* Use 0 for Thread Stack Size, because that will default the stack to the
      * same size as the calling thread. 
      */
-    if (((*new)->td = (HANDLE *)_beginthreadex(NULL, 0, (unsigned int (API_THREAD_FUNC *)(void *))func,
+    if (((*new)->td = (HANDLE *)_beginthreadex(NULL, 0, (unsigned int (APR_THREAD_FUNC *)(void *))func,
                                                data, 0, &temp)) == 0) {
         lasterror = GetLastError();
         return APR_EEXIST; /* MSVC++ doc doesn't mention any additional error info */

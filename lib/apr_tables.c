@@ -103,7 +103,7 @@ static void make_array_core(ap_array_header_t *res, ap_pool_t *c,
     res->nalloc = nelts;	/* ...but this many allocated */
 }
 
-API_EXPORT(ap_array_header_t *) ap_make_array(ap_pool_t *p,
+APR_EXPORT(ap_array_header_t *) ap_make_array(ap_pool_t *p,
 						int nelts, int elt_size)
 {
     ap_array_header_t *res;
@@ -113,7 +113,7 @@ API_EXPORT(ap_array_header_t *) ap_make_array(ap_pool_t *p,
     return res;
 }
 
-API_EXPORT(void *) ap_push_array(ap_array_header_t *arr)
+APR_EXPORT(void *) ap_push_array(ap_array_header_t *arr)
 {
     if (arr->nelts == arr->nalloc) {
 	int new_size = (arr->nalloc <= 0) ? 1 : arr->nalloc * 2;
@@ -130,7 +130,7 @@ API_EXPORT(void *) ap_push_array(ap_array_header_t *arr)
     return arr->elts + (arr->elt_size * (arr->nelts - 1));
 }
 
-API_EXPORT(void) ap_array_cat(ap_array_header_t *dst,
+APR_EXPORT(void) ap_array_cat(ap_array_header_t *dst,
 			       const ap_array_header_t *src)
 {
     int elt_size = dst->elt_size;
@@ -155,7 +155,7 @@ API_EXPORT(void) ap_array_cat(ap_array_header_t *dst,
     dst->nelts += src->nelts;
 }
 
-API_EXPORT(ap_array_header_t *) ap_copy_array(ap_pool_t *p,
+APR_EXPORT(ap_array_header_t *) ap_copy_array(ap_pool_t *p,
 						const ap_array_header_t *arr)
 {
     ap_array_header_t *res = ap_make_array(p, arr->nalloc, arr->elt_size);
@@ -181,7 +181,7 @@ static APR_INLINE void copy_array_hdr_core(ap_array_header_t *res,
     res->nalloc = arr->nelts;	/* Force overflow on push */
 }
 
-API_EXPORT(ap_array_header_t *)
+APR_EXPORT(ap_array_header_t *)
     ap_copy_array_hdr(ap_pool_t *p,
 		       const ap_array_header_t *arr)
 {
@@ -195,7 +195,7 @@ API_EXPORT(ap_array_header_t *)
 
 /* The above is used here to avoid consing multiple new array bodies... */
 
-API_EXPORT(ap_array_header_t *)
+APR_EXPORT(ap_array_header_t *)
     ap_append_arrays(ap_pool_t *p,
 		      const ap_array_header_t *first,
 		      const ap_array_header_t *second)
@@ -212,7 +212,7 @@ API_EXPORT(ap_array_header_t *)
  * or if there are no elements in the array.
  * If sep is non-NUL, it will be inserted between elements as a separator.
  */
-API_EXPORT(char *) ap_array_pstrcat(ap_pool_t *p,
+APR_EXPORT(char *) ap_array_pstrcat(ap_pool_t *p,
 				     const ap_array_header_t *arr,
 				     const char sep)
 {
@@ -289,7 +289,7 @@ static ap_table_entry_t *table_push(ap_table_t *t)
 #endif /* MAKE_TABLE_PROFILE */
 
 
-API_EXPORT(ap_table_t *) ap_make_table(ap_pool_t *p, int nelts)
+APR_EXPORT(ap_table_t *) ap_make_table(ap_pool_t *p, int nelts)
 {
     ap_table_t *t = ap_palloc(p, sizeof(ap_table_t));
 
@@ -300,7 +300,7 @@ API_EXPORT(ap_table_t *) ap_make_table(ap_pool_t *p, int nelts)
     return t;
 }
 
-API_EXPORT(ap_table_t *) ap_copy_table(ap_pool_t *p, const ap_table_t *t)
+APR_EXPORT(ap_table_t *) ap_copy_table(ap_pool_t *p, const ap_table_t *t)
 {
     ap_table_t *new = ap_palloc(p, sizeof(ap_table_t));
 
@@ -319,12 +319,12 @@ API_EXPORT(ap_table_t *) ap_copy_table(ap_pool_t *p, const ap_table_t *t)
     return new;
 }
 
-API_EXPORT(void) ap_clear_table(ap_table_t *t)
+APR_EXPORT(void) ap_clear_table(ap_table_t *t)
 {
     t->a.nelts = 0;
 }
 
-API_EXPORT(const char *) ap_table_get(const ap_table_t *t, const char *key)
+APR_EXPORT(const char *) ap_table_get(const ap_table_t *t, const char *key)
 {
     ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
     int i;
@@ -342,7 +342,7 @@ API_EXPORT(const char *) ap_table_get(const ap_table_t *t, const char *key)
     return NULL;
 }
 
-API_EXPORT(void) ap_table_set(ap_table_t *t, const char *key,
+APR_EXPORT(void) ap_table_set(ap_table_t *t, const char *key,
 			       const char *val)
 {
     register int i, j, k;
@@ -376,7 +376,7 @@ API_EXPORT(void) ap_table_set(ap_table_t *t, const char *key,
     }
 }
 
-API_EXPORT(void) ap_table_setn(ap_table_t *t, const char *key,
+APR_EXPORT(void) ap_table_setn(ap_table_t *t, const char *key,
 				const char *val)
 {
     register int i, j, k;
@@ -423,7 +423,7 @@ API_EXPORT(void) ap_table_setn(ap_table_t *t, const char *key,
     }
 }
 
-API_EXPORT(void) ap_table_unset(ap_table_t *t, const char *key)
+APR_EXPORT(void) ap_table_unset(ap_table_t *t, const char *key)
 {
     register int i, j, k;
     ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
@@ -448,7 +448,7 @@ API_EXPORT(void) ap_table_unset(ap_table_t *t, const char *key)
     }
 }
 
-API_EXPORT(void) ap_table_merge(ap_table_t *t, const char *key,
+APR_EXPORT(void) ap_table_merge(ap_table_t *t, const char *key,
 				 const char *val)
 {
     ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
@@ -466,7 +466,7 @@ API_EXPORT(void) ap_table_merge(ap_table_t *t, const char *key,
     elts->val = ap_pstrdup(t->a.cont, val);
 }
 
-API_EXPORT(void) ap_table_mergen(ap_table_t *t, const char *key,
+APR_EXPORT(void) ap_table_mergen(ap_table_t *t, const char *key,
 				  const char *val)
 {
     ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
@@ -497,7 +497,7 @@ API_EXPORT(void) ap_table_mergen(ap_table_t *t, const char *key,
     elts->val = (char *)val;
 }
 
-API_EXPORT(void) ap_table_add(ap_table_t *t, const char *key,
+APR_EXPORT(void) ap_table_add(ap_table_t *t, const char *key,
 			       const char *val)
 {
     ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
@@ -507,7 +507,7 @@ API_EXPORT(void) ap_table_add(ap_table_t *t, const char *key,
     elts->val = ap_pstrdup(t->a.cont, val);
 }
 
-API_EXPORT(void) ap_table_addn(ap_table_t *t, const char *key,
+APR_EXPORT(void) ap_table_addn(ap_table_t *t, const char *key,
 				const char *val)
 {
     ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
@@ -530,7 +530,7 @@ API_EXPORT(void) ap_table_addn(ap_table_t *t, const char *key,
     elts->val = (char *)val;
 }
 
-API_EXPORT(ap_table_t *) ap_overlay_tables(ap_pool_t *p,
+APR_EXPORT(ap_table_t *) ap_overlay_tables(ap_pool_t *p,
 					     const ap_table_t *overlay,
 					     const ap_table_t *base)
 {
@@ -584,7 +584,7 @@ API_EXPORT(ap_table_t *) ap_overlay_tables(ap_pool_t *p,
  * Note that rec is simply passed-on to the comp function, so that the
  * caller can pass additional info for the task.
  */
-API_EXPORT(void) ap_table_do(int (*comp) (void *, const char *, const char *),
+APR_EXPORT(void) ap_table_do(int (*comp) (void *, const char *, const char *),
 			      void *rec, const ap_table_t *t, ...)
 {
     va_list vp;
@@ -639,7 +639,7 @@ static int sort_overlap(const void *va, const void *vb)
 #define ap_OVERLAP_TABLES_ON_STACK	(512)
 #endif
 
-API_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
+APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
 				    unsigned flags)
 {
     overlap_key cat_keys_buf[ap_OVERLAP_TABLES_ON_STACK];

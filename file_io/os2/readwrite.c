@@ -325,7 +325,7 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 
 
 
-API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
+APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
 {
     int cc;
     va_list ap;

@@ -78,7 +78,7 @@
  * ap_cpystrn() follows the same call structure as strncpy().
  */
 
-API_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size)
+APR_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size)
 {
 
     char *d, *end;
@@ -118,7 +118,7 @@ API_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size)
  *                   pool and filled in with copies of the tokens
  *                   found during parsing of the arg_str. 
  */
-API_EXPORT(ap_status_t) ap_tokenize_to_argv(const char *arg_str, 
+APR_EXPORT(ap_status_t) ap_tokenize_to_argv(const char *arg_str, 
                                             char ***argv_out,
                                             ap_pool_t *token_context)
 {
@@ -232,7 +232,7 @@ const char *ap_filename_of_pathname(const char *pathname)
  * collapse in place (src == dest) is legal.
  * returns terminating null ptr to dest string.
  */
-API_EXPORT(char *) ap_collapse_spaces(char *dest, const char *src)
+APR_EXPORT(char *) ap_collapse_spaces(char *dest, const char *src)
 {
     while (*src) {
         if (!ap_isspace(*src)) 

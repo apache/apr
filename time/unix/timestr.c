@@ -57,11 +57,11 @@
 
 #include <string.h>
 
-API_VAR_EXPORT const char ap_month_snames[12][4] =
+APR_EXPORT_VAR const char ap_month_snames[12][4] =
 {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
-API_VAR_EXPORT const char ap_day_snames[7][4] =
+APR_EXPORT_VAR const char ap_day_snames[7][4] =
 {
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
