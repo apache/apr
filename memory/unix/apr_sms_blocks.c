@@ -272,7 +272,6 @@ APR_DECLARE(apr_status_t) apr_sms_blocks_create(apr_sms_t **sms,
 
     /* We are normally single threaded so no lock */
 
-    apr_sms_assert(new_sms);
     apr_sms_post_init(new_sms);
 
     *sms = new_sms;
