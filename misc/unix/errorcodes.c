@@ -325,7 +325,7 @@ static char *apr_os_strerror(char *buf, apr_size_t bufsize, apr_status_t errcode
 #else
 /* On Unix, apr_os_strerror() handles error codes from the resolver 
  * (h_errno). 
- e*/
+ */
 static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err) 
 {
 #ifdef HAVE_HSTRERROR
