@@ -306,6 +306,16 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa,
                              apr_pool_t *p);
 
 /**
+ * Look up the host name from an apr_sockaddr_t.
+ * @param hostname The hostname.
+ * @param sa The apr_sockaddr_t.
+ * @param flags Special processing flags.
+ */
+apr_status_t apr_getnameinfo(char **hostname,
+                             apr_sockaddr_t *sa,
+                             apr_int32_t flags);
+                             
+/**
  * Parse hostname/IP address with scope id and port.
  *
  * Any of the following strings are accepted:

@@ -385,6 +385,57 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname,
     return APR_SUCCESS;
 }
 
+apr_status_t apr_getnameinfo(char **hostname, apr_sockaddr_t *sockaddr, 
+                             apr_int32_t flags)
+{
+#if defined(HAVE_GETNAMEINFO) && APR_HAVE_IPV6
+    int rc;
+#if defined(NI_MAXHOST)
+    char tmphostname[NI_MAXHOST];
+#else
+    char tmphostname[256];
+#endif
+
+    h_errno = 0; /* don't know if it is portable for getnameinfo() to set h_errno */
+    rc = getnameinfo((const struct sockaddr *)&sockaddr->sa, sockaddr->salen,
+                     tmphostname, sizeof(tmphostname), NULL, 0,
+                     /* flags != 0 ? flags : */  NI_NAMEREQD);
+    if (rc != 0) {
+        *hostname = NULL;
+        /* XXX I have no idea if this is okay.  I don't see any info
+         * about getnameinfo() returning anything other than good or bad.
+         */
+        if (h_errno) {
+            return h_errno + APR_OS_START_SYSERR;
+        }
+        else {
+            return APR_NOTFOUND;
+        }
+    }
+    *hostname = sockaddr->hostname = apr_pstrdup(sockaddr->pool, 
+                                                 tmphostname);
+    return APR_SUCCESS;
+#else
+    struct hostent *hptr;
+
+    hptr = gethostbyaddr((char *)&sockaddr->sa.sin.sin_addr, 
+                         sizeof(struct in_addr), 
+                         AF_INET);
+    if (hptr) {
+        *hostname = sockaddr->hostname = apr_pstrdup(sockaddr->pool, hptr->h_name);
+        return APR_SUCCESS;
+    }
+    *hostname = NULL;
+#if defined(WIN32)
+    return apr_get_netos_error();
+#elif defined(OS2)
+    return h_errno;
+#else
+    return h_errno + APR_OS_START_SYSERR;
+#endif
+#endif
+}
+
 apr_status_t apr_getservbyname(apr_sockaddr_t *sockaddr, const char *servname)
 {
     struct servent *se;
