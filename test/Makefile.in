@@ -26,6 +26,7 @@ TARGETS= testfile@EXEEXT@ \
 	testshmem@EXEEXT@ \
 	testpipe@EXEEXT@ \
 	testdso@EXEEXT@ \
+	testoc@EXEEXT@ \
 	mod_test.so
 
 OBJS= testfile.o \
@@ -39,6 +40,7 @@ OBJS= testfile.o \
 	htdigest.o \
 	testmmap.o \
 	testdso.o \
+	testoc.o \
 	mod_test.o
 
 .c.o:
@@ -51,6 +53,9 @@ testfile@EXEEXT@: testfile.o
 
 testdso@EXEEXT@: testdso.o
 	$(CC) $(CFLAGS) --export-dynamic -fPIC testdso.o -o testdso@EXEEXT@ $(LDFLAGS) 
+
+testoc@EXEEXT@: testoc.o
+	$(CC) $(CFLAGS) testoc.o -o testoc@EXEEXT@ $(LDFLAGS) 
 
 mod_test.so: mod_test.o
 	$(CC) -shared mod_test.o -o mod_test.so 
