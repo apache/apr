@@ -71,25 +71,10 @@ extern "C" {
 #include "apr_errno.h"
 #include "apr_lock.h"
 #include "apr_time.h"
-#ifdef HAVE_DIR_H
-#include <dir.h>
-#endif
-#ifdef HAVE_PTHREAD_H
-#include <pthread.h>
-#endif
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
-#endif
 
+#include <dirent.h>
+#include <fcntl.h>
+#include <pthread.h>
 
 #ifdef WIN32
 /* The primitives for Windows types */
@@ -177,7 +162,7 @@ typedef int                   ap_os_file_t;
 typedef DIR                   ap_os_dir_t;
 typedef int                   ap_os_sock_t;
 typedef struct os_lock_t      ap_os_lock_t;
-#if APR_HAS_THREADS && HAVE_PTHREAD_H
+#if APR_HAS_THREADS 
 typedef pthread_t             ap_os_thread_t;
 typedef pthread_key_t         ap_os_threadkey_t;
 #endif

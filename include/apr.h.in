@@ -1,23 +1,35 @@
+
+#ifndef APR_H
+#define APR_H
+
+#include <sys/types.h>
+
 /*  APR Feature Macros */
-@apr_has_threads@
-@apr_has_mmap@
+@threads@
+@mmap@
 
 /* Typedefs that APR needs. */
 
-typedef  @short_value@           ap_int16_t     
-typedef  unsigned @short_value@  ap_uint16_t   
+typedef  @short_value@           ap_int16_t;
+typedef  unsigned @short_value@  ap_uint16_t;
                                                
-typedef  @int_value@             ap_int32_t    
-typedef  unsigned @int_value@    ap_uint32_t   
+typedef  @int_value@             ap_int32_t;
+typedef  unsigned @int_value@    ap_uint32_t;
                                                
-typedef  @long_value@            ap_int64_t    
-typedef  unsigned @long_value@   ap_uint64_t   
+typedef  @long_value@            ap_int64_t;
+typedef  unsigned @long_value@   ap_uint64_t;
 
+typedef  @size_t_value@          ap_size_t;
+typedef  @ssize_t_value@         ap_ssize_t;
+typedef  @off_t_value@           ap_off_t;
+
+typedef  ap_int32_t              ap_status_t;
 
 /* Definitions that APR programs need to work properly. */
 
-#undef API_THREAD_FUNC
-#undef API_EXPORT(type)
-#undef API_VAR_IMPORT
+#define API_THREAD_FUNC
+#define API_EXPORT(type)         type
+#define API_EXPORT_NONSTD(type)  type
+#define API_VAR_IMPORT           extern
 
-
+#endif /* APR_H */

@@ -64,6 +64,9 @@
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
 
 /*
  * Apache's "replacement" for the strncpy() function. We roll our

@@ -48,9 +48,6 @@
 #undef APR_HAS_THREADS
 
 @BOTTOM@
-#define API_EXPORT(type) type
-#define API_EXPORT_NONSTD(type) type
-#define API_VAR_IMPORT extern
 
 /* Make sure we have ssize_t defined to be somethine */
 #undef ssize_t

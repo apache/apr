@@ -58,12 +58,7 @@
 
 #include "apr_general.h"
 #include "apr_errno.h"
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-#ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {

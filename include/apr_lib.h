@@ -66,40 +66,9 @@
 
 #include "apr_general.h"
 #include "apr_file_io.h"
-#if HAVE_DIRENT_H
-#include <dirent.h>
-#endif
 
-#ifndef WIN32
-#else
-#include "../file_io/win32/readdir.h" /* definition of DIR for WIN32 */
-#include "apr_win.h"
-#endif
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
-#ifdef HAVE_SIGNAL_H
-#include <signal.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {

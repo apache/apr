@@ -34,14 +34,10 @@
  */
 
 /* This file has been modified by the Apache Group. */
-#ifndef WIN32
-#else
-#include "apr_win.h"
-#endif
-#include "apr_errno.h"
-
 #ifndef	_APR_FNMATCH_H_
 #define	_APR_FNMATCH_H_
+
+#include "apr_errno.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,7 +55,7 @@ API_EXPORT(ap_status_t) ap_fnmatch(const char *pattern, const char *strings,
 			    int flags);
 
 /* this function is an Apache addition */
-API_EXPORT(extern int) ap_is_fnmatch(const char *pattern);
+API_EXPORT(int) ap_is_fnmatch(const char *pattern);
 
 #ifdef __cplusplus
 }

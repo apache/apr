@@ -70,6 +70,9 @@
 #include <sys/types.h>
 #include <errno.h>
 
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #if HAVE_CONIO_H
 #include <conio.h>
 #endif
@@ -206,7 +209,7 @@ static char *getpass(const char *prompt)
 
 API_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsiz)
 {
-    char *pw_got;
+    char *pw_got = NULL;
     int result = 0;
 
     pw_got = getpass(prompt);

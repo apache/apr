@@ -54,6 +54,7 @@
  */
 
 #include <errno.h>
+#include "apr.h"
 
 #ifndef APR_ERRNO_H
 #define APR_ERRNO_H

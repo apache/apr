@@ -68,7 +68,16 @@
 #include "apr_lib.h"
 #include <math.h>
 #ifdef HAVE_CTYPE_H
-# include <ctype.h>
+#include <ctype.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
 #endif
 
 typedef enum {
