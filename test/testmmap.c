@@ -95,6 +95,14 @@ static void create_filename(CuTest *tc)
     CuAssertTrue(tc, oldfileptr != file1);
 }
 
+static void test_file_close(CuTest *tc)
+{
+    apr_status_t rv;
+
+    rv = apr_file_close(thefile);
+    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+}
+   
 static void test_file_open(CuTest *tc)
 {
     apr_status_t rv;
@@ -165,6 +173,7 @@ CuSuite *testmmap(void)
     SUITE_ADD_TEST(suite, test_mmap_contents);
     SUITE_ADD_TEST(suite, test_mmap_offset);
     SUITE_ADD_TEST(suite, test_mmap_delete);
+    SUITE_ADD_TEST(suite, test_file_close);
 #else
     SUITE_ADD_TEST(suite, not_implemented);
 #endif
