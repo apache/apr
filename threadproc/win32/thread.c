@@ -173,6 +173,11 @@ APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
     }
 }
 
+APR_DECLARE(void) apr_thread_yield()
+{
+    SwitchToThread();
+}
+
 APR_DECLARE(apr_status_t) apr_thread_data_get(void **data, const char *key,
                                              apr_thread_t *thread)
 {
