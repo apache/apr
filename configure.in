@@ -222,35 +222,16 @@ else
 fi
 
 AC_CHECK_FUNCS(sigwait, [ have_sigwait="1" ], [ have_sigwait="0" ]) 
+dnl AC_CHECK_FUNCS doesn't work for this on Tru64 since the function
+dnl is renamed in signal.h.  Todo: Autodetect
+case "$OS" in
+    *alpha*-dec-osf* )
+        have_sigwait="1"
+        ;;
+esac
 
 AC_SUBST(threads)
 AC_SUBST(have_sigwait)
-
-dnl THIS MUST COME AFTER THE THREAD TESTS - FreeBSD doesn't always have a
-dnl threaded poll() and we don't want to use sendfile on early FreeBSD 
-dnl systems if we are also using threads.
-
-orig_sendfile=$sendfile
-case "$OS" in
-    *freebsd*)
-        if test $os_version -le "410"; then
-            if test "$threads" = "1"; then
-                sendfile="0"
-            fi
-        fi
-        ;;
-    *alpha*-dec-osf* )
-        sendfile="0"
-        ;;
-    s390-*-linux-gnu)
-        sendfile="0"
-        ;;
-esac       
-if test "$orig_sendfile" != "$sendfile"; then
-  echo "sendfile support disabled to avoid system problem"
-fi
-AC_SUBST(sendfile)
-
 
 AC_CHECK_FUNCS(poll)
 
@@ -365,6 +346,31 @@ AC_CHECK_FUNCS(writev)
 sendfile="0"
 AC_CHECK_FUNCS(sendfile send_file, [ sendfile="1" ])
 
+dnl THIS MUST COME AFTER THE THREAD TESTS - FreeBSD doesn't always have a
+dnl threaded poll() and we don't want to use sendfile on early FreeBSD 
+dnl systems if we are also using threads.
+
+orig_sendfile=$sendfile
+case "$OS" in
+    *freebsd*)
+        if test $os_version -le "410"; then
+            if test "$threads" = "1"; then
+                sendfile="0"
+            fi
+        fi
+        ;;
+    *alpha*-dec-osf* )
+        sendfile="0"
+        ;;
+    s390-*-linux-gnu)
+        sendfile="0"
+        ;;
+esac       
+if test "$orig_sendfile" != "$sendfile"; then
+  echo "sendfile support disabled to avoid system problem"
+fi
+AC_SUBST(sendfile)
+
 AC_CHECK_FUNCS(sigaction, [ have_sigaction="1" ], [ have_sigaction="0" ]) 
 AC_DECL_SYS_SIGLIST
 
@@ -440,16 +446,11 @@ APR_FLAG_HEADERS(
     tpfio.h		\
     unistd.h		\
     unix.h		\
-			\
     arpa/inet.h		\
-			\
     kernel/OS.h		\
-			\
     net/errno.h		\
-			\
     netinet/in.h	\
     netinet/tcp.h	\
-			\
     sys/file.h		\
     sys/mman.h		\
     sys/poll.h		\
@@ -465,6 +466,16 @@ APR_FLAG_HEADERS(
     sys/types.h		\
     sys/uio.h		\
     sys/wait.h)
+
+dnl work around unexplained problem on Tru64 where
+dnl the above invocation says it finds the header but
+dnl APR_HAVE_foo_H is 0
+APR_FLAG_HEADERS(stdio.h)
+APR_FLAG_HEADERS(errno.h)
+APR_FLAG_HEADERS(crypt.h)
+APR_FLAG_HEADERS(ctype.h)
+APR_FLAG_HEADERS(fcntl.h)
+APR_FLAG_HEADERS(netdb.h)
 
 AC_SUBST(arpa_ineth)
 AC_SUBST(conioh)
