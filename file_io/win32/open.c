@@ -436,6 +436,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         }
     }
 
+    /* Create a pollset with room for one descriptor. */
+    /* ### check return codes */
+    (void) apr_pollset_create(&(*new)->pollset, 1, cont, 0);
+
     if (!(flag & APR_FILE_NOCLEANUP)) {
         apr_pool_cleanup_register((*new)->pool, (void *)(*new), file_cleanup,
                                   apr_pool_cleanup_null);
@@ -574,6 +578,10 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
             return rv;
         }
     }
+
+    /* Create a pollset with room for one descriptor. */
+    /* ### check return codes */
+    (void) apr_pollset_create(&(*file)->pollset, 1, pool, 0);
 
     /* XXX... we pcalloc above so all others are zeroed.
      * Should we be testing if thefile is a handle to 

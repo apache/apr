@@ -59,7 +59,7 @@
 #include "apr_arch_networkio.h"
 #include "apr_time.h"
 
-apr_status_t apr_wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
+static apr_status_t wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
 {
     struct timeval tv, *tvptr;
     fd_set fdset;
@@ -139,7 +139,7 @@ APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock, char *buf,
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && errno == EWOULDBLOCK && sock->timeout > 0) {
-        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 1);
+        apr_status_t arv = wait_for_io_or_timeout(sock, 1);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -185,7 +185,7 @@ APR_DECLARE(apr_status_t) apr_socket_sendto(apr_socket_t *sock,
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)
         && sock->timeout != 0) {
-        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
+        apr_status_t arv = wait_for_io_or_timeout(sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -226,7 +226,7 @@ APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from,
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) &&
         sock->timeout != 0) {
-        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 1);
+        apr_status_t arv = wait_for_io_or_timeout(sock, 1);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -249,4 +249,4 @@ APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from,
     return APR_SUCCESS;
 }
 
-#endif
+#endif /* ! BEOS_BONE */

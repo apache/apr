@@ -59,6 +59,8 @@
 #include "apr_network_io.h"
 #include "apr_general.h"
 #include "apr_arch_os2calls.h"
+#include "apr_poll.h"
+
 #if APR_HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -85,6 +87,9 @@ struct apr_socket_t {
     apr_int32_t options;
     apr_int32_t inherit;
     sock_userdata_t *userdata;
+
+    /* if there is a timeout set, then this pollset is used */
+    apr_pollset_t *pollset;
 };
 
 /* Error codes returned from sock_errno() */

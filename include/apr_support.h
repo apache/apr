@@ -76,6 +76,8 @@ extern "C" {
 
 /**
  * Wait for IO to occur or timeout.
+ *
+ * Uses POOL for temporary allocations.
  */
 apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
                                         int for_read);
