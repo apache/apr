@@ -224,8 +224,7 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
     }
     resume_thread(newproc);
     send_data(newproc, 0, (void*)sp, sizeof(struct send_pipe));
-    
-    (*new)->pid = newproc;
+    (*new)->tid = newproc;
 
     /* before we go charging on we need the new process to get to a 
      * certain point.  When it gets there it'll let us know and we
@@ -328,7 +327,7 @@ ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
     if (proc == NULL) {
         return APR_ENOPROC;
     }
-    theproc = &(proc->pid);
+    *theproc = proc->tid;
     return APR_SUCCESS;
 }
 
@@ -342,7 +341,7 @@ ap_status_t ap_put_os_proc(struct proc_t **proc, ap_os_proc_t *theproc,
         (*proc) = (struct proc_t *)ap_palloc(cont, sizeof(struct proc_t));
         (*proc)->cntxt = cont;
     }
-    (*proc)->pid = *theproc;
+    (*proc)->tid = *theproc;
     return APR_SUCCESS;
 }              
 
