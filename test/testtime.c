@@ -68,7 +68,7 @@
  *           2002-08-14 12:05:36.186711 -25200 [257 Sat].
  * Which happens to be when I wrote the new tests.
  */
-static apr_time_t now = 1032030336186711;
+static apr_time_t now = 1032030336186711LL;
 
 static char* print_time (apr_pool_t *pool, const apr_time_exp_t *xt)
 {
