@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/05/01 20:09:30 $]
+Last modified at [$Date: 2002/05/01 23:08:45 $]
 
 Release:
 
@@ -76,6 +76,7 @@ CURRENT VOTES:
                   apps using the atomic API set a preprocessor flag to
                   choose an "optimal" or "portable" version of the atomic
                   ops?)
+          Cliff  (Agrees with BrianP)
           Sander (The positive sides of the atomics outweigh the negative
                   in my opinion.  That said, I am not going to be the
                   one spending time on this, since asm on various
@@ -85,7 +86,7 @@ CURRENT VOTES:
       advantage of compiler optimizations when the size of the block being
       passed to memset is known at compile time.
 
-      +1: BrianP, Justin, Sander
+      +1: BrianP, Justin, Sander, Cliff
 
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
