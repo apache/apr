@@ -220,3 +220,21 @@ apr_status_t apr_get_remote_hostname(char **name, apr_socket_t *sock)
     return (h_errno + APR_OS_START_SYSERR);
 }
 
+apr_status_t apr_get_local_hostname(char **name, apr_socket_t *sock)
+{
+    struct hostent *hptr;
+    
+    hptr = gethostbyaddr((char *)&(sock->local_addr->sin_addr), 
+                         sizeof(struct in_addr), AF_INET);
+    if (hptr != NULL) {
+        *name = apr_pstrdup(sock->cntxt, hptr->h_name);
+        if (*name) {
+            return APR_SUCCESS;
+        }
+        return APR_ENOMEM;
+    }
+
+    /* XXX - Is referencing h_errno threadsafe? */
+    return (h_errno + APR_OS_START_SYSERR);
+}
+

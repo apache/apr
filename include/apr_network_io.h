@@ -222,6 +222,13 @@ apr_status_t apr_connect(apr_socket_t *sock, const char *hostname);
 apr_status_t apr_get_remote_hostname(char **name, apr_socket_t *sock);
 
 /**
+ * Get name of the local machine via it's ip address.
+ * @param name A buffer to store the hostname in.
+ * @param sock The socket to examine.
+ */
+apr_status_t apr_get_local_hostname(char **name, apr_socket_t *sock);
+
+/**
  * Get name of the current machine
  * @param buf A buffer to store the hostname in.
  * @param len The maximum length of the hostname that can be stored in the
