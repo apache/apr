@@ -1,5 +1,11 @@
 Changes with APR b1
 
+  *) Added --with-devrandom=[DEV] configure flag which allows a particular
+     "/dev/random"-compatible device to be specified, overriding the
+     default search path (/dev/random then /dev/arandom then /dev/urandom).
+     Also, if --with-egd=<path> is specified, it now implies
+     --without-devrandom.  [Cliff Woolley]
+
   *) Darwin/Mac OS X: Don't leave zombie processes when the app calls
      apr_signal(SIGCHLD, SIG_IGN).  This fixes a problem with Apache's
      mod_cgid.  PR 9168.  [Jeff Trawick]
