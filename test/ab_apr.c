@@ -219,7 +219,7 @@ static void write_request(struct connection *c)
     ap_ssize_t len = reqlen;
     c->connect = ap_now();
     ap_setsocketopt(c->aprsock, APR_SO_TIMEOUT, 30 * AP_USEC_PER_SEC);
-    if (ap_send(c->aprsock, request, &reqlen) != APR_SUCCESS &&
+    if (ap_send(c->aprsock, request, &reqlen) != APR_SUCCESS ||
         reqlen != len) {
         printf("Send request failed!\n");
     }
@@ -514,19 +514,20 @@ static void close_connection(struct connection *c)
 static void read_connection(struct connection *c)
 {
     ap_ssize_t r;
+    ap_status_t status;
     char *part;
     char respcode[4];		/* 3 digits and null */
 
     r = sizeof(buffer);
     ap_setsocketopt(c->aprsock, APR_SO_TIMEOUT, aprtimeout);
-    ap_recv(c->aprsock, buffer, &r);
-    if (r == 0 || (r < 0 && errno != EAGAIN)) {
+    status = ap_recv(c->aprsock, buffer, &r);
+    if (r == 0 || (status != 0 && status != EAGAIN)) {
         good++;
         close_connection(c);
         return;
     }
 
-    if (r < 0 && errno == EAGAIN)
+    if (status == EAGAIN)
         return;
 
     c->read += r;
@@ -755,13 +756,18 @@ static void test(void)
 
         for (i = 0; i < concurrency; i++) {
             ap_get_revents(&rv, con[i].aprsock, readbits);
-            if ((rv & APR_POLLERR) || (rv & APR_POLLNVAL) || (rv & APR_POLLHUP)) {
+
+            /* Note: APR_POLLHUP is set after FIN is received on some 
+             * systems, so treat that like APR_POLLIN so that we try
+             * to read again. 
+             */
+            if ((rv & APR_POLLERR) || (rv & APR_POLLNVAL)) {
         	bad++;
         	err_except++;
         	start_connect(&con[i]);
         	continue;
             }
-            if ((rv & APR_POLLIN) || (rv & APR_POLLPRI))
+            if ((rv & APR_POLLIN) || (rv & APR_POLLPRI) || (rv & APR_POLLHUP))
         	read_connection(&con[i]);
             if (rv & APR_POLLOUT)
         	write_request(&con[i]);
