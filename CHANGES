@@ -1,4 +1,9 @@
 Changes with APR b1  
+  *)  New function apr_mmap_dup. This is called in the mmap_setaside 
+      [Brain Pane <bpane@pacbell.net>]
+
+  *)  speed up the apr_hash_t implementation's handling of APR_HASH_KEY_STRING.
+      [Brain Pane <bpane@pacbell.net>]
 
   *) Tweak apr_gethostname() so that it detects truncation of the
      name and returns an error.  [Jeff Trawick]
