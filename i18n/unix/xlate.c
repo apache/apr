@@ -268,6 +268,16 @@ ap_status_t ap_xlate_conv_buffer(ap_xlate_t *convset, const char *inbuf,
     return status;
 }
 
+ap_int32_t ap_xlate_conv_byte(ap_xlate_t *convset, unsigned char inchar)
+{
+    if (convset->sbcs_table) {
+        return convset->sbcs_table[inchar];
+    }
+    else {
+        return -1;
+    }
+}
+
 ap_status_t ap_xlate_close(ap_xlate_t *convset)
 {
     ap_status_t status;
