@@ -74,6 +74,10 @@ fi
 #
 echo "Copying libtool helper files ..."
 
+# Remove any libtool files so one can switch between libtool 1.3
+# and libtool 1.4 by simply rerunning the buildconf script.
+(cd build ; rm -f ltconfig ltmain.sh libtool.m4)
+
 $libtoolize --copy --automake
 
 ltpath=`dirname $libtoolize`
@@ -84,7 +88,6 @@ if [ ! -f $ltfile ]; then
     exit 1
 fi
 
-rm -f build/libtool.m4
 cat $ltfile | sed -e 's/LIBTOOL=\(.*\)top_build/LIBTOOL=\1apr_build/' > build/libtool.m4
 
 # This is just temporary until people's workspaces are cleared -- remove
