@@ -58,15 +58,12 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_errno.h"
+#include "apr_time.h"
 #include <sys/stat.h>
 
-#define S_ISLNK(m) (0)
-#ifndef S_ISREG
-#define S_ISREG(m)      (((m)&(S_IFMT)) == (S_IFREG))
-#endif
-#ifndef S_ISDIR
-#define S_ISDIR(m) (((m) & S_IFDIR) == S_IFDIR)
-#endif
+#define S_ISLNK(m)  (0)
+#define S_ISREG(m)  (((m) & (S_IFMT))  == S_IFREG)
+#define S_ISDIR(m)  (((m) & (S_IFDIR)) == S_IFDIR)
 
 static ap_filetype_e filetype_from_mode(int mode)
 {
@@ -80,6 +77,27 @@ static ap_filetype_e filetype_from_mode(int mode)
         type = APR_LNK;
 
     return type;
+}
+BOOLEAN is_exe(const char* fname, ap_context_t *cont) {
+    const char* exename;
+    const char* ext;
+    exename = strrchr(fname, '/');
+    if (!exename) {
+        exename = strrchr(fname, '\\');
+    }
+    if (!exename) {
+        exename = fname;
+    }
+    else {
+        exename++;
+    }
+    ext = strrchr(exename, '.');
+
+    if (ext && (!strcasecmp(ext,".exe") || !strcasecmp(ext,".com") || 
+                !strcasecmp(ext,".bat") || !strcasecmp(ext,".cmd"))) {
+        return TRUE;
+    }
+    return FALSE;
 }
 
 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct file_t *thefile)
@@ -110,6 +128,46 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct file_t *thefile)
 }
 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
 {
+    WIN32_FILE_ATTRIBUTE_DATA FileInformation;
+
+    memset(finfo,'\0', sizeof(*finfo));
+
+    if (!GetFileAttributesEx(fname, GetFileExInfoStandard, &FileInformation)) {
+        return GetLastError();
+    }
+    /* Filetype - Directory or file? */
+    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        finfo->protection |= S_IFDIR;
+        finfo->filetype = APR_DIR;
+    }
+    else {
+        finfo->protection |= S_IFREG;
+        finfo->filetype = APR_REG;
+    }
+    /* Read, write execute for owner */
+    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_READONLY) {
+        finfo->protection |= S_IREAD;
+    }
+    else {
+        finfo->protection |= S_IREAD;
+        finfo->protection |= S_IWRITE;
+    }
+    /* Is this an executable? Guess based on the file extension. */
+    if (is_exe(fname, cont)) {
+        finfo->protection |= S_IEXEC;
+    }
+    /* File times */
+    FileTimeToAprTime(&finfo->atime, &FileInformation.ftLastAccessTime);
+    FileTimeToAprTime(&finfo->ctime, &FileInformation.ftCreationTime);
+    FileTimeToAprTime(&finfo->mtime, &FileInformation.ftLastWriteTime);
+
+    /* File size 
+     * Note: This cannot handle files greater than can be held by an int */
+    finfo->size = FileInformation.nFileSizeLow;
+
+    return APR_SUCCESS;
+#if 0
+    /* ap_stat implemented using stat() */
     struct stat info;
     int rv = stat(fname, &info);
     if (rv == 0) {
@@ -127,5 +185,6 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
     else {
         return errno;
     }
+#endif
 }
 
