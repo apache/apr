@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     char msgbuf[80];
     char *local_ipaddr, *remote_ipaddr;
     char *dest = "127.0.0.1";
-    apr_uint32_t local_port, remote_port;
+    apr_port_t local_port, remote_port;
     apr_interval_time_t read_timeout = -1;
 
     setbuf(stdout, NULL);
