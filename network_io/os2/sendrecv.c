@@ -145,7 +145,7 @@ apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec, apr_int32_t 
     int nv_tosend, total = 0;
 
     /* Make sure writev() only gets fed 64k at a time */
-    for ( nv_tosend = 0; total + vec[nv_tosend].iov_len < 65536; nv_tosend++ ) {
+    for ( nv_tosend = 0; nv_tosend < nvec && total + vec[nv_tosend].iov_len < 65536; nv_tosend++ ) {
         total += vec[nv_tosend].iov_len;
     }
 
