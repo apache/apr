@@ -191,7 +191,7 @@ APR_DECLARE(int) apr_atomic_dec(apr_atomic_t *mem);
          : "memory"); \
     prev;})
 
-#elif defined(__sparc__) || defined(sparc) && !APR_FORCE_ATOMIC_GENERIC
+#elif (defined(__sparc__) || defined(sparc)) && !APR_FORCE_ATOMIC_GENERIC
 
 #define apr_atomic_t apr_uint32_t
 #define apr_atomic_read(p)  *p
