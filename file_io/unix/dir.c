@@ -160,8 +160,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         if (fspec[off - 1] != '/')
             fspec[off++] = '/';
         apr_cpystrn(fspec + off, thedir->entry->d_name, sizeof(fspec) - off);
-        /* ??? Or lstat below?  What is it we really want? */
-        ret = apr_stat(finfo, fspec, wanted, thedir->cntxt);
+        ret = apr_lstat(finfo, fspec, wanted, thedir->cntxt);
     }
 
     if (wanted && (ret == APR_SUCCESS || ret == APR_INCOMPLETE)) {
