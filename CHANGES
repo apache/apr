@@ -66,6 +66,9 @@ Changes with APR 1.0
 
 Changes with APR 0.9.5
 
+  *) Add apr_os_pipe_put_ex(), which allows the caller to tell APR
+     to establish a cleanup on the pipe.  [Jeff Trawick, Brad Nicholes]
+
   *) Fix make_exports.awk to work with apr-iconv.  [Justin Erenkrantz]
 
 Changes with APR 0.9.4

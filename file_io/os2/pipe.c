@@ -184,9 +184,10 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_int
 
 
 
-APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
-                                          apr_os_file_t *thefile,
-                                          apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_os_pipe_put_ex(apr_file_t **file,
+                                             apr_os_file_t *thefile,
+                                             int register_cleanup,
+                                             apr_pool_t *pool)
 {
     (*file) = apr_pcalloc(pool, sizeof(apr_file_t));
     (*file)->pool = pool;
@@ -196,5 +197,19 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
     (*file)->timeout = -1;
     (*file)->filedes = *thefile;
 
+    if (register_cleanup) {
+        apr_pool_cleanup_register(pool, *file, apr_file_cleanup,
+                                  apr_pool_cleanup_null);
+    }
+
     return APR_SUCCESS;
+}
+
+
+
+APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
+                                          apr_os_file_t *thefile,
+                                          apr_pool_t *pool)
+{
+    return apr_os_pipe_put_ex(file, thefile, 0, pool);
 }
