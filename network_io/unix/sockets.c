@@ -111,16 +111,10 @@ ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
 
 ap_status_t ap_shutdown(ap_socket_t *thesocket, ap_shutdown_how_e how)
 {
-#ifdef BEOS
-    return shutdown(thesocket->socketdes, how);
-#else
-    if (shutdown(thesocket->socketdes, how) == 0) {
-        return APR_SUCCESS;
-    }
-    else {
-        return errno;
-    }
-#endif
+    /* BEOS internal documentation indicates that this system call
+     * may not work in 5.0, but we don't have any alternatives.
+     */
+    return (shutdown(thesocket->socketdes, how) == -1) ? errno : APR_SUCCESS;
 }
 
 ap_status_t ap_close_socket(ap_socket_t *thesocket)
