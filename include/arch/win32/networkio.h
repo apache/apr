@@ -69,7 +69,7 @@ struct apr_socket_t {
     int local_port_unknown;
     int local_interface_unknown;
     apr_int32_t netmask;
-    int inherit;
+    apr_int32_t inherit;
 };
 
 struct apr_pollfd_t {
