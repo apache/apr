@@ -55,6 +55,19 @@
 #include "networkio.h"
 #include "apr_strings.h"
 
+static int is_option_set(apr_int32_t mask, apr_int32_t option)
+{
+    return (mask & option) == option;
+}
+
+static void set_option(apr_int32_t *mask, apr_int32_t option, int on)
+{
+    if (on)
+        *mask |= option;
+    else
+        *mask &= ~option;
+}
+
 static apr_status_t soblock(int sd)
 {
 /* BeOS uses setsockopt at present for non blocking... */
@@ -121,49 +134,67 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
         one = 0;
     if (opt & APR_SO_KEEPALIVE) {
 #ifdef SO_KEEPALIVE
-        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_KEEPALIVE, (void *)&one, sizeof(int)) == -1) {
-            return errno;
+        if (on != is_option_set(sock->netmask, APR_SO_KEEPALIVE)){
+            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_KEEPALIVE, (void *)&one, sizeof(int)) == -1) {
+                return errno;
+            }
+            set_option(&sock->netmask,APR_SO_KEEPALIVE, on);
         }
 #else
         return APR_ENOTIMPL;
 #endif
     }
     if (opt & APR_SO_DEBUG) {
-        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_DEBUG, (void *)&one, sizeof(int)) == -1) {
-            return errno;
+        if (on != is_option_set(sock->netmask, APR_SO_DEBUG)){
+            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_DEBUG, (void *)&one, sizeof(int)) == -1) {
+                return errno;
+            }
+            set_option(&sock->netmask, APR_SO_DEBUG, on);
         }
     }
     if (opt & APR_SO_REUSEADDR) {
-        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_REUSEADDR, (void *)&one, sizeof(int)) == -1) {
-            return errno;
+        if (on != is_option_set(sock->netmask, APR_SO_REUSEADDR)){
+            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_REUSEADDR, (void *)&one, sizeof(int)) == -1) {
+                return errno;
+            }
+            set_option(&sock->netmask, APR_SO_REUSEADDR, on);
         }
     }
     if (opt & APR_SO_SNDBUF) {
 #ifdef SO_SNDBUF
-        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF, (void *)&on, sizeof(int)) == -1) {
-            return errno;
+        if (is_option_set(sock->netmask, APR_SO_SNDBUF) != on){
+            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF, (void *)&on, sizeof(int)) == -1) {
+                return errno;
+            }
+            set_option(&sock->netmask, APR_SO_SNDBUF, on);
         }
 #else
         return APR_ENOTIMPL;
 #endif
     }
     if (opt & APR_SO_NONBLOCK) {
-        if (on) {
-            if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS) 
-                return stat;
-        }
-        else {
-            if ((stat = soblock(sock->socketdes)) != APR_SUCCESS)
-                return stat;
+        if (is_option_set(sock->netmask, APR_SO_NONBLOCK) != on){
+            if (on) {
+                if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS) 
+                    return stat;
+            }
+            else {
+                if ((stat = soblock(sock->socketdes)) != APR_SUCCESS)
+                    return stat;
+            }
+            set_option(&sock->netmask, APR_SO_NONBLOCK, on);
         }
     }
     if (opt & APR_SO_LINGER) {
 #ifdef SO_LINGER
-        struct linger li;
-        li.l_onoff = on;
-        li.l_linger = MAX_SECS_TO_LINGER;
-        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_LINGER, (char *) &li, sizeof(struct linger)) == -1) {
-            return errno;
+        if (is_option_set(sock->netmask, APR_SO_LINGER) != on){
+            struct linger li;
+            li.l_onoff = on;
+            li.l_linger = MAX_SECS_TO_LINGER;
+            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_LINGER, (char *) &li, sizeof(struct linger)) == -1) {
+                return errno;
+            }
+            set_option(&sock->netmask, APR_SO_LINGER, on);
         }
 #else
         return APR_ENOTIMPL;
@@ -171,20 +202,30 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
     }
     if (opt & APR_SO_TIMEOUT) { 
         /* don't do the fcntl foo more than needed */ 
-        if (on >= 0 && sock->timeout < 0 
-                && (stat = sononblock(sock->socketdes)) != APR_SUCCESS) { 
-            return stat; 
+        if (on >= 0 && sock->timeout < 0){
+            if (is_option_set(sock->netmask, APR_SO_NONBLOCK) != 1){
+                if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS){
+                    return stat;
+                }
+            }
         } 
-        else if (on < 0 && sock->timeout >= 0 
-                && (stat = soblock(sock->socketdes)) != APR_SUCCESS) { 
-            return stat; 
-        } 
+        else if (on < 0 && sock->timeout >= 0){
+            if (is_option_set(sock->netmask, APR_SO_NONBLOCK) != 0){ 
+                if ((stat = soblock(sock->socketdes)) != APR_SUCCESS) { 
+                    return stat; 
+                }
+            } 
+        }
         sock->timeout = on; 
+        set_option(&sock->netmask, APR_SO_TIMEOUT, on);
     } 
     if (opt & APR_TCP_NODELAY) {
 #if defined(TCP_NODELAY)
-        if (setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(int)) == -1) {
-            return errno;
+        if (is_option_set(sock->netmask, APR_TCP_NODELAY) != on){
+            if (setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(int)) == -1) {
+                return errno;
+            }
+            set_option(&sock->netmask, APR_TCP_NODELAY, on);
         }
 #else
         /* BeOS pre-BONE has TCP_NODELAY set by default.
@@ -199,17 +240,57 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
         return APR_ENOTIMPL;
 #endif
     }
+    if (opt & APR_TCP_NOPUSH){
+#if APR_TCP_NOPUSH_FLAG
+        if (is_option_set(sock->netmask, APR_TCP_NOPUSH) != on){
+            /* OK we're going to change some settings here... */
+            /* TCP_NODELAY is mutually exclusive, so do we have it set? */
+            if (is_option_set(sock->netmask, APR_TCP_NODELAY) == 1 && on){
+                /* If we want to set NOPUSH then if we have the TCP_NODELAY
+                 * flag set we need to switch it off...
+                 */
+                int tmpflag = 1;
+                if (setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY,
+                               (void*)&tmpflag, sizeof(int)) == -1){
+                    return errno;
+                }
+                set_option(&sock->netmask, APR_RESET_NODELAY, 1);
+                set_option(&sock->netmask, APR_TCP_NODELAY, 0);
+            } else if (on){
+                set_option(&sock->netmask, APR_RESET_NODELAY, 0);
+            }
+            /* OK, now we can just set the TCP_NOPUSH flag accordingly...*/
+            if (setsockopt(sock->socketdes, IPPROTO_TCP, APR_TCP_NOPUSH_FLAG,
+                           (void*)&on, sizeof(int)) == -1){
+                return errno;
+            }
+            set_option(&sock->netmask, APR_TCP_NOPUSH, on);
+            if (!on && is_option_set(sock->netmask, APR_RESET_NODELAY)){
+                int tmpflag = 1;
+                if (setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY,
+                               (void*)&tmpflag, sizeof(int)) == -1){
+                    return errno;
+                }
+                set_option(&sock->netmask, APR_RESET_NODELAY,0);
+                set_option(&sock->netmask, APR_TCP_NODELAY, 1);
+            }
+        }
+#else
+        return APR_ENOTIMPL;
+#endif
+    }
+
     return APR_SUCCESS; 
 }         
 
 apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t *on)
 {
     switch(opt) {
-    case APR_SO_TIMEOUT:
-        *on = sock->timeout;
-        break;
-    default:
-        return APR_EINVAL;
+        case APR_SO_TIMEOUT:
+            *on = sock->timeout;
+            break;
+        default:
+            *on = is_option_set(sock->netmask, opt);
     }
     return APR_SUCCESS;
 }

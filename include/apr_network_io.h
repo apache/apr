@@ -95,6 +95,13 @@ extern "C" {
 #define APR_SO_RCVBUF        128
 #define APR_SO_DISCONNECTED  256
 #define APR_TCP_NODELAY      512
+#define APR_TCP_NOPUSH       1024
+#define APR_RESET_NODELAY    2048 /* This flag is ONLY set internally
+                                   * when we set APR_TCP_NOPUSH with
+                                   * APR_TCP_NODELAY set to tell us that
+                                   * APR_TCP_NODELAY should be truned on
+                                   * again when NOPUSH is turned off
+                                   */
 
 #define APR_POLLIN    0x001 
 #define APR_POLLPRI   0x002
