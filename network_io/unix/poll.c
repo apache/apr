@@ -229,7 +229,7 @@ ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
     }
     (*new)->cntxt = cont;
     (*new)->read = (fd_set *)ap_pcalloc(cont, sizeof(fd_set));
-    (*new)->write = (fd_set *)ap_cpalloc(cont, sizeof(fd_set));
+    (*new)->write = (fd_set *)ap_pcalloc(cont, sizeof(fd_set));
     (*new)->except = (fd_set *)ap_pcalloc(cont, sizeof(fd_set));
     FD_ZERO((*new)->read);
     FD_ZERO((*new)->write);
