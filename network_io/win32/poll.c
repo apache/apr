@@ -56,9 +56,12 @@
 #include "apr_network_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#if APR_HAVE_ERRNO_H
 #include <errno.h>
+#endif
+#if APR_HAVE_TIME_H
 #include <time.h>
-
+#endif
 
 APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new, apr_int32_t num,
                                          apr_pool_t *cont)
@@ -70,12 +73,12 @@ APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new, apr_int32_t num,
     (*new)->cntxt = cont;
     (*new)->read = (fd_set *)apr_palloc(cont, sizeof(fd_set));
     (*new)->write = (fd_set *)apr_palloc(cont, sizeof(fd_set));
-    (*new)->except = (fd_set *)apr_palloc(cont, sizeof(fd_set));
+    (*new)->exception = (fd_set *)apr_palloc(cont, sizeof(fd_set));
     FD_ZERO((*new)->read);
     (*new)->numread = 0;
     FD_ZERO((*new)->write);
     (*new)->numwrite = 0;
-    FD_ZERO((*new)->except);
+    FD_ZERO((*new)->exception);
     (*new)->numexcept = 0;
     return APR_SUCCESS;
 }
@@ -115,7 +118,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
         newwrite = aprset->write;
     }
     if (aprset->numexcept != 0) {
-        newexcept = aprset->except;
+        newexcept = aprset->exception;
     }
 
     if (newread == NULL && newwrite == NULL && newexcept == NULL) {
@@ -164,8 +167,13 @@ APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event,
 
     if (FD_ISSET(sock->sock, aprset->read)) {
         revents |= APR_POLLIN;
+#ifdef _WIN32_WCE
+        if (recv(sock->sock, data.buf, data.len, 0) == SOCKET_ERROR) 
+#else
         if (WSARecv(sock->sock, &data, 1, &dummy, &flags, NULL, 
-                    NULL) == SOCKET_ERROR) {
+                    NULL) == SOCKET_ERROR) 
+#endif
+            {
             /* This is only legit since we don't return the error */
             dummy = WSAGetLastError();
             switch (dummy) {
@@ -195,7 +203,7 @@ APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event,
      * connection on a non-blocking socket.  Might be a bad assumption, but
      * it works for now. rbb.
      */
-    if (FD_ISSET(sock->sock, aprset->except)) {
+    if (FD_ISSET(sock->sock, aprset->exception)) {
         revents |= APR_POLLPRI;
     }
 
@@ -225,7 +233,7 @@ APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset,
         aprset->numread--;
     }
     if (events & APR_POLLPRI) {
-        FD_CLR(sock->sock, aprset->except);
+        FD_CLR(sock->sock, aprset->exception);
         aprset->numexcept--;
     }
     if (events & APR_POLLOUT) {

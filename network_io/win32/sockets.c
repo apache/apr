@@ -142,8 +142,9 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
 APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
                                        apr_shutdown_how_e how)
 {
-    int winhow;
+    int winhow = 0;
 
+#if SD_RECEIVE
     switch (how) {
         case APR_SHUTDOWN_READ: {
             winhow = SD_RECEIVE;
@@ -160,6 +161,7 @@ APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
         default:
             return APR_BADARG;
     }
+#endif
     if (shutdown(thesocket->sock, winhow) == 0) {
         return APR_SUCCESS;
     }

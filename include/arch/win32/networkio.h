@@ -78,9 +78,18 @@ struct apr_pollfd_t {
     int numread;
     fd_set *write;
     int numwrite;
-    fd_set *except;
+    fd_set *exception;
     int numexcept;    
 };
+
+#ifdef _WIN32_WCE
+#ifndef WSABUF
+typedef struct _WSABUF {
+    u_long      len;     /* the length of the buffer */
+    char FAR *  buf;     /* the pointer to the buffer */
+} WSABUF, FAR * LPWSABUF;
+#endif
+#endif
 
 apr_status_t status_from_res_error(int);
 

@@ -57,6 +57,7 @@
 #include "apr_general.h"
 #include "apr_strings.h"
 #include "apr_lib.h"
+#include "apr_private.h"
 #include <string.h>
 
 static apr_status_t get_local_addr(apr_socket_t *sock)
@@ -74,6 +75,14 @@ static apr_status_t get_local_addr(apr_socket_t *sock)
     }
 }
 
+#ifdef _WIN32_WCE
+/* WCE lacks getservbyname */
+static void *getservbyname(const char *name, const char *proto)
+{
+    return NULL;
+}
+
+#endif
 /* Include this here so we have get_local_addr defined... */
 #include "../unix/sa_common.c"
 
