@@ -25,7 +25,6 @@ PROGRAMS = \
 	testsockopt@EXEEXT@ \
 	testpoll@EXEEXT@ \
 	testhash@EXEEXT@ \
-	occhild@EXEEXT@ \
 	testuser@EXEEXT@ \
 	testsockets@EXEEXT@ \
 	testdup@EXEEXT@ \
@@ -68,9 +67,6 @@ testflock@EXEEXT@: testflock.lo $(LOCAL_LIBS)
 
 testdso@EXEEXT@: testdso.lo mod_test.la libmod_test.la $(LOCAL_LIBS)
 	$(LINK) testdso.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-testoc@EXEEXT@: testoc.lo occhild@EXEEXT@ $(LOCAL_LIBS)
-	$(LINK) testoc.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)
 	$(LINK) occhild.lo $(LOCAL_LIBS) $(ALL_LIBS)
@@ -157,11 +153,12 @@ testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
 testall: testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
          testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
          testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
-         testdso.lo CuTest.lo mod_test.la libmod_test.la $(LOCAL_LIBS)
+         testdso.lo testoc.lo CuTest.lo mod_test.la libmod_test.la \
+         occhild@EXEEXT@ $(LOCAL_LIBS)
 	$(LINK) testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo      \
 	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo     \
-	testdso.lo CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
+	testdso.lo testoc.lo CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 
 # DO NOT REMOVE
