@@ -189,6 +189,10 @@ static int report(abts_suite *suite)
         count += dptr->failed;
     }
 
+    if (list_tests) {
+        return 0;
+    }
+
     if (count == 0) {
         printf("All tests passed.\n");
         return 0;
