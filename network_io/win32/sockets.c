@@ -85,6 +85,8 @@ ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
     (*new)->cntxt = cont; 
     (*new)->local_addr = (struct sockaddr_in *)ap_pcalloc((*new)->cntxt,
                                                           sizeof(struct sockaddr_in));
+    (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt,
+                          sizeof(struct sockaddr_in));
 
     if ((*new)->local_addr == NULL) {
         return APR_ENOMEM;
@@ -165,6 +167,8 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock, struct
     (*new)->cntxt = connection_context;
     (*new)->local_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
+    (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt,
+                 sizeof(struct sockaddr_in));
     memcpy((*new)->local_addr, sock->local_addr, sizeof(struct sockaddr_in));
 
     (*new)->addr_len = sizeof(struct sockaddr_in);
@@ -193,12 +197,12 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
 
     if (*hostname >= '0' && *hostname <= '9' && 
         strspn(hostname, "0123456789.") == strlen(hostname)) {
-        sock->local_addr->sin_addr.s_addr = inet_addr(hostname);
+        sock->remote_addr->sin_addr.s_addr = inet_addr(hostname);
     }
     else {
         hp = gethostbyname(hostname);
-        memcpy((char *)&sock->local_addr->sin_addr, hp->h_addr_list[0], hp->h_length);
-        sock->addr_len = sizeof(*sock->local_addr);
+        memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr_list[0], hp->h_length);
+        sock->addr_len = sizeof(*sock->remote_addr);
         if (!hp)  {
             if (h_errno == TRY_AGAIN) {
                 return EAGAIN;
@@ -207,9 +211,9 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
         }
     }
     
-    sock->local_addr->sin_family = AF_INET;
+    sock->remote_addr->sin_family = AF_INET;
 
-    if (connect(sock->sock, (const struct sockaddr *)sock->local_addr, 
+    if (connect(sock->sock, (const struct sockaddr *)sock->remote_addr, 
                 sock->addr_len) == 0) {
         return APR_SUCCESS;
     }

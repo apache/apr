@@ -1,4 +1,4 @@
-/* ====================================================================
+ /* ====================================================================
  * Copyright (c) 1998-1999 The Apache Group.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -146,8 +146,8 @@ struct data {
 #define ap_max(a,b) ((a)>(b))?(a):(b)
 
 /* --------------------- GLOBALS ---------------------------- */
-API_VAR_IMPORT char *optarg;                        /* argument associated with option */
-API_VAR_IMPORT int optind;
+API_VAR_IMPORT char *ap_optarg;                        /* argument associated with option */
+API_VAR_IMPORT int ap_optind;
 
 int verbosity = 0;		/* no verbosity by default */
 int posting = 0;		/* GET by default */
@@ -900,11 +900,11 @@ int main(int argc, char **argv)
     ap_make_time(&start, cntxt);
     ap_make_time(&endtime, cntxt);
 
-    optind = 1;
+    ap_optind = 1;
     while (ap_getopt(cntxt, argc, argv, "n:c:t:T:p:v:kVhwx:y:z:", &c) == APR_SUCCESS) {
         switch (c) {
         case 'n':
-            requests = atoi(optarg);
+            requests = atoi(ap_optarg);
             if (!requests) {
         	err("Invalid number of requests\n");
             }
@@ -913,10 +913,10 @@ int main(int argc, char **argv)
             keepalive = 1;
             break;
         case 'c':
-            concurrency = atoi(optarg);
+            concurrency = atoi(ap_optarg);
             break;
         case 'p':
-            if (0 == (r = open_postfile(optarg))) {
+            if (0 == (r = open_postfile(ap_optarg))) {
         	posting = 1;
             }
             else if (postdata) {
@@ -924,14 +924,14 @@ int main(int argc, char **argv)
             }
             break;
         case 'v':
-            verbosity = atoi(optarg);
+            verbosity = atoi(ap_optarg);
             break;
         case 't':
-            tlimit = atoi(optarg);
+            tlimit = atoi(ap_optarg);
             requests = MAX_REQUESTS;	/* need to size data array on something */
             break;
         case 'T':
-            strcpy(content_type, optarg);
+            strcpy(content_type, ap_optarg);
             break;
         case 'V':
             copyright();
@@ -943,15 +943,15 @@ int main(int argc, char **argv)
             /* if any of the following three are used, turn on html output automatically  */
         case 'x':
             use_html = 1;
-            tablestring = optarg;
+            tablestring = ap_optarg;
             break;
         case 'y':
             use_html = 1;
-            trstring = optarg;
+            trstring = ap_optarg;
             break;
         case 'z':
             use_html = 1;
-            tdstring = optarg;
+            tdstring = ap_optarg;
             break;
         case 'h':
             usage(argv[0]);
@@ -962,12 +962,12 @@ int main(int argc, char **argv)
             break;
         }
     }
-    if (optind != argc - 1) {
+    if (ap_optind != argc - 1) {
         fprintf(stderr, "%s: wrong number of arguments\n", argv[0]);
         usage(argv[0]);
     }
 
-    if (parse_url(argv[optind++])) {
+    if (parse_url(argv[ap_optind++])) {
         fprintf(stderr, "%s: invalid URL\n", argv[0]);
         usage(argv[0]);
     }
