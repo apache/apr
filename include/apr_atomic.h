@@ -83,7 +83,7 @@ typedef apr_atomic_t;
 
 /**
  * @param pool 
- * this function is required on some platforms to initiliaze the
+ * this function is required on some platforms to initialize the
  * atomic operation's internal structures
  * returns APR_SUCCESS on successfull completion
  */
