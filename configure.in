@@ -503,7 +503,7 @@ if test -r "/dev/random"; then
     AC_DEFINE(DEV_RANDOM, [/dev/random])
     AC_MSG_RESULT(/dev/random)
     rand="1"
-elif test -f "/dev/urandom"; then
+elif test -r "/dev/urandom"; then
     AC_DEFINE(DEV_RANDOM, [/dev/urandom])
     AC_MSG_RESULT(/dev/urandom)
     rand="1"
