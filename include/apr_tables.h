@@ -135,6 +135,13 @@ APR_DECLARE(const apr_array_header_t *) apr_table_elts(const apr_table_t *t);
 APR_DECLARE(int) apr_is_empty_table(const apr_table_t *t);
 
 /**
+ * Determine if the array is empty
+ * @param a The array to check
+ * @return True if empty, False otherwise
+ */
+APR_DECLARE(int) apr_is_empty_array(const apr_array_header_t *a);
+
+/**
  * Create an array
  * @param p The pool to allocate the memory out of
  * @param nelts the number of elements in the initial array
