@@ -73,12 +73,6 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
         if (fname != NULL) {
             new->fname = ap_pstrdup(cont, fname);
         }
-        else {
-            char *filename = "/tmp/aprXXXXXX";
-            new->interproc = mkstemp(filename);
-            new->fname = ap_pstrdup(cont, filename); 
-            unlink(new->fname);
-	}
     }
 #endif
 
