@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/31 11:35:52 $]
+Last modified at [$Date: 2002/07/31 11:43:15 $]
 
 Release:
 
@@ -50,6 +50,12 @@ RELEASE SHOWSTOPPERS:
       libtool for use in applying version numbers to the shared
       libraries.
 
+    * Change apr_initialize to take the expected version (in some form)
+      and return an error code if the requirement isn't satisfied.
+
+      Justin says: "Relying solely on the run-time linker isn't enough
+                    to guarantee versioning."
+      
 
 CURRENT VOTES:
 
@@ -59,7 +65,7 @@ CURRENT VOTES:
       a way to support alternate allocators polymorphically without
       a significant performance penalty.
 
-      Not a showstopper: Thom
+      Not a showstopper: Thom, Justin
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
