@@ -174,7 +174,7 @@ dnl    *-apple-rhapsody*)
 dnl	APR_ADDTO(CPPFLAGS, [-DDARWIN -DMAC_OS_X_SERVER])
 dnl	;;
     *-apple-darwin*)
-	APR_ADDTO(CPPFLAGS, [-DDARWIN])
+	APR_ADDTO(CPPFLAGS, [-DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK])
 	;;
     *-dec-osf*)
 	APR_ADDTO(CPPFLAGS, [-DOSF1])
