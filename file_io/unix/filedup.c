@@ -59,11 +59,15 @@
  *    duplicate the specified file descriptor.
  * arg 1) The structure to duplicate into. 
  * arg 2) The file to duplicate.
+ * NOTE: *arg1 must point to a valid ap_file_t, or point to NULL
  */         
 ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
 {
     char *buf_oflags;
     int have_file = 0;
+
+    if (new_file == NULL || old_file == NULL)
+        return APR_EBADARG;
 
     if ((*new_file) == NULL) {
         (*new_file) = (struct file_t *)ap_pcalloc(old_file->cntxt,
@@ -92,6 +96,8 @@ ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
         }
         (*new_file)->filehand = freopen(old_file->fname, buf_oflags, 
                                         old_file->filehand); 
+	if ((*new_file)->filehand == NULL)
+	    return errno;
     }
     else {
         if (have_file) {

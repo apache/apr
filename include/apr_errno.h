@@ -111,6 +111,7 @@ typedef int ap_status_t;
 #define APR_ENOFUNCPOINTER (APR_OS_START_ERROR + 17)
 #define APR_ENODSOHANDLE   (APR_OS_START_ERROR + 18)
 #define APR_EDSOOPEN       (APR_OS_START_ERROR + 19)
+#define APR_EBADARG        (APR_OS_START_ERROR + 20)
 
 /* APR STATUS VALUES */
 #define APR_INCHILD        (APR_OS_START_STATUS + 1)

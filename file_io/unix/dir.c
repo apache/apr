@@ -75,6 +75,11 @@ static ap_status_t dir_cleanup(void *thedir)
  */                        
 ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *cont)
 {
+    if (new == NULL)
+        return APR_EBADARG;
+    if (cont == NULL)
+        return APR_ENOCONT;
+
     (*new) = (struct dir_t *)ap_palloc(cont, sizeof(struct dir_t));
 
     (*new)->cntxt = cont;
@@ -101,6 +106,9 @@ ap_status_t ap_closedir(struct dir_t *thedir)
 {
     ap_status_t rv;
 
+    if (thedir == NULL)
+        return APR_EBADARG;
+
     if ((rv = dir_cleanup(thedir)) == APR_SUCCESS) {
         ap_kill_cleanup(thedir->cntxt, thedir, dir_cleanup);
         return APR_SUCCESS;
@@ -119,6 +127,14 @@ ap_status_t ap_readdir(struct dir_t *thedir)
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
     && !defined(READDIR_IS_THREAD_SAFE)
     ap_status_t ret;
+#endif
+
+    if (thedir == NULL)
+        return APR_EBADARG;
+
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
+    && !defined(READDIR_IS_THREAD_SAFE)
+
     ret = readdir_r(thedir->dirstruct, thedir->entry, &thedir->entry);
     /* Avoid the Linux problem where at end-of-directory thedir->entry
      * is set to NULL, but ret = APR_SUCCESS.
@@ -145,6 +161,9 @@ ap_status_t ap_readdir(struct dir_t *thedir)
  */                        
 ap_status_t ap_rewinddir(struct dir_t *thedir)
 {
+    if (thedir == NULL)
+        return APR_EBADARG;
+
     rewinddir(thedir->dirstruct);
     return APR_SUCCESS;
 }
@@ -160,6 +179,10 @@ ap_status_t ap_rewinddir(struct dir_t *thedir)
 ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *cont)
 {
     mode_t mode = get_fileperms(perm);
+
+    if (cont == NULL) 
+        return APR_ENOCONT;
+
     if (mkdir(path, mode) == 0) {
         return APR_SUCCESS;
     }
@@ -176,6 +199,9 @@ ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *con
  */                        
 ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
 {
+    if (cont == NULL)
+        return APR_ENOCONT;
+
     if (rmdir(path) == 0) {
         return APR_SUCCESS;
     }
@@ -195,6 +221,9 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct dir_t *thedir)
     struct stat filestat;
     char *fname = NULL;    
 
+    if (size == NULL || thedir == NULL)
+        return APR_EBADARG;
+
     if (thedir->entry == NULL) {
         *size = -1;
         return APR_ENOFILE;
@@ -211,15 +240,18 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct dir_t *thedir)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_dir_entry_mtime(time_t *mtime, ap_dir_t *thedir)
+ * ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, ap_dir_t *thedir)
  *    Get the last modified time of the current directory entry. 
  * arg 1) the last modified time of the directory entry. 
  * arg 2) the currently open directory.
  */                        
-ap_status_t ap_dir_entry_mtime(time_t *mtime, struct dir_t *thedir)
+ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, struct dir_t *thedir)
 {
     struct stat filestat;
     char *fname = NULL;
+
+    if (mtime == NULL || thedir == NULL)
+        return APR_EBADARG;
 
     if (thedir->entry == NULL) {
         *mtime = -1;
@@ -233,7 +265,7 @@ ap_status_t ap_dir_entry_mtime(time_t *mtime, struct dir_t *thedir)
         return APR_ENOSTAT;
     }
     
-    *mtime = filestat.st_mtime;
+    ap_ansi_time_to_ap_time(mtime, filestat.st_mtime);
     return APR_SUCCESS;
 }
  
@@ -247,6 +279,9 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct dir_t *thedir)
 {
     struct stat filestat;
     char *fname = NULL;
+
+    if (type == NULL || thedir == NULL)
+        return APR_EBADARG;
 
     if (thedir->entry == NULL) {
         *type = APR_REG;
@@ -287,10 +322,13 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct dir_t *thedir)
  */                        
 ap_status_t ap_get_dir_filename(char **new, struct dir_t *thedir)
 {
+    if (new == NULL)
+        return APR_EBADARG;
+
     /* Detect End-Of-File */
     if (thedir == NULL || thedir->entry == NULL) {
-       *new = NULL;
-       return APR_ENOENT;
+        *new = NULL;
+        return APR_ENOENT;
     }
     (*new) = ap_pstrdup(thedir->cntxt, thedir->entry->d_name);
     return APR_SUCCESS;
