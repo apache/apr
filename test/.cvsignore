@@ -70,3 +70,4 @@ testregex
 testmutexscope
 testtable
 testall
+proc_child
