@@ -22,6 +22,7 @@
     if ( match( $0, /\@CFLAGS\@/ ) ) {
         $0 = "";
     }
+    gsub( /\$\([^\)]* [^\)]*\)/, "", $0 );
     gsub( /\$\{LD_FLAGS\}/, "", $0 );
     gsub( /\.\.\/libapr\.la/, "../LibD/apr.lib", $0 );
     gsub( /\@RM\@/, "del", $0 );
