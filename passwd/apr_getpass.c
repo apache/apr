@@ -214,10 +214,7 @@ static char *getpass(const char *prompt)
 
 APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, size_t *bufsiz)
 {
-    char *pw_got = NULL;
-    int result = 0;
-
-    pw_got = getpass(prompt);
+    char *pw_got = getpass(prompt);
     if (strlen(pw_got) > (*bufsiz - 1)) {
 	*bufsiz = ERR_OVERFLOW;
         memset(pw_got, 0, strlen(pw_got));
