@@ -101,12 +101,14 @@ static char *apr_error_string(ap_status_t statcode)
         return "No thread key structure was provided and one was required.";
     case APR_ENOSHMAVAIL:
         return "No shared memory is currently available";
+#if APR_HAS_DSO
     case APR_EDSOOPEN:
 #ifdef HAVE_LIBDL
         return dlerror();
 #else
         return "DSO load failed";
-#endif
+#endif /* HAVE_LIBDL */
+#endif /* APR_HAS_DSO */
     case APR_INCHILD:
         return
 	    "Your code just forked, and you are currently executing in the "

@@ -317,6 +317,22 @@ AC_SUBST(ssize_t_value)
 AC_SUBST(ssize_t_fmt) 
 AC_SUBST(off_t_fmt) 
 
+dnl #----------------------------- Checking for DSO support
+echo $ac_n "${nl}Checking for DSO...${nl}"
+AC_CACHE_CHECK([for DSO support], ac_cv_enable_dso,
+  [ AC_ARG_ENABLE(dso,
+    [  --enable-dso              Enable reliable child processes ],
+    [ ac_cv_enable_dso=$enableval],
+    [ aprdso="1" ] ) ] )
+
+if test "$ac_cv_enable_dso" = "no"; then
+    aprdso="0"
+else
+    aprdso="1"
+fi
+
+AC_SUBST(aprdso)
+
 dnl #----------------------------- Checking for Threads
 echo $ac_n "${nl}Checking for Threads...${nl}"
 AC_CACHE_CHECK([for threads], ac_cv_enable_threads,

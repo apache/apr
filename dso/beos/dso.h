@@ -60,11 +60,16 @@
 #include "apr_pools.h"
 #include "apr_errno.h"
 #include "apr_dso.h"
+#include "apr.h"
 #include <kernel/image.h>
+
+#if APR_HAS_DSO
 
 struct ap_dso_handle_t {
     image_id       handle;    /* Handle to the DSO loaded */
     ap_pool_t   *cont;
 };
+
+#endif
 
 #endif

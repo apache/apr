@@ -59,6 +59,9 @@
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_dso.h"
+#include "apr.h"
+
+#if APR_HAS_DSO
 
 #ifdef HAVE_DLFCN_H
 #include <dlfcn.h>
@@ -87,5 +90,7 @@ struct ap_dso_handle_t {
     void          *handle;
     char          *errormsg;
 };
+
+#endif
 
 #endif
