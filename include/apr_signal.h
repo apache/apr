@@ -101,4 +101,8 @@ const char *apr_signal_get_description(int signum);
  */
 void apr_signal_init(apr_pool_t *pglobal);
 
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
 #endif /* APR_SIGNAL_H */
