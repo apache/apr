@@ -59,25 +59,6 @@
 #include "apr_user.h"
 #include "apr_strings.h"
 
-/*
-#define APR_WANT_MEMFUNC
-#include "apr_want.h"
-*/
-
-/*
-#include "apr_portable.h"
-*/
-
-#if 0
-#if APR_HAVE_SHMEM_SHMGET
-/* The metadata that is stored in the file that we use to rendevous
- * with the segment in unrelated processes. */
-struct apr_shm_shmget_metadata {
-    apr_size_t reqsize;   /* requested size of the segment */
-};
-#endif /* APR_HAVE_SHMEM_SHMGET */
-#endif
-
 APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
                                          apr_size_t reqsize, 
                                          const char *filename,
