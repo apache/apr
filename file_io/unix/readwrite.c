@@ -356,28 +356,18 @@ API_EXPORT(int) ap_fprintf(struct file_t *fptr, const char *format, ...)
 {
     int cc;
     va_list ap;
-    ap_vformatter_buff_t vbuff;
     char *buf;
-    ap_ssize_t len;
+    int len;
 
     buf = malloc(HUGE_STRING_LEN);
     if (buf == NULL) {
         return 0;
     }
-    /* save one byte for nul terminator */
-    vbuff.curpos = buf;
-    vbuff.endpos = buf + len - 1;
     va_start(ap, format);
-#if 0
-    cc = ap_vformatter(printf_flush, &vbuff, format, ap);
+    len = ap_vsnprintf(buf, HUGE_STRING_LEN, format, ap);
+    cc = ap_puts(buf, fptr);
     va_end(ap);
-    *vbuff.curpos = '\0';
-#endif
-    vsprintf(buf, format, ap);
-    len = strlen(buf);
-    cc = ap_write(fptr, buf, &len);
-    va_end(ap);
-    return (cc == -1) ? len : cc;
+    free(buf);
+    return (cc == APR_SUCCESS) ? len : -1;
 }
-
 
