@@ -228,12 +228,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex)
 {
-    apr_status_t rv;
-    if ((rv = thread_mutex_cleanup(mutex)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(mutex->pool, mutex, thread_mutex_cleanup);
-        return APR_SUCCESS;
-    }
-    return rv;
+    return apr_pool_cleanup_run(mutex->pool, mutex, thread_mutex_cleanup);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(thread_mutex)
