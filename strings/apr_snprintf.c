@@ -501,13 +501,12 @@ static char *conv_apr_sockaddr(apr_sockaddr_t *sa, char *buf_end, int *len)
     int sub_len;
     char *ipaddr_str;
 
-    /* XXX IPv6: this assumes sin_port and sin6_port are at same offset */
-    p = conv_10(ntohs(sa->sa.sin.sin_port), TRUE, &is_negative, p, &sub_len);
+    p = conv_10(sa->port, TRUE, &is_negative, p, &sub_len);
     *--p = ':';
     apr_sockaddr_ip_get(&ipaddr_str, sa);
     sub_len = strlen(ipaddr_str);
 #if APR_HAVE_IPV6
-    if (sa->sa.sin.sin_family == APR_INET6 &&
+    if (sa->family == APR_INET6 &&
         !IN6_IS_ADDR_V4MAPPED(&sa->sa.sin6.sin6_addr)) {
         *(p - 1) = ']';
         p -= sub_len + 2;
