@@ -70,6 +70,7 @@
 #include "apr_portable.h"
 #define APR_WANT_MEMFUNC
 #include "apr_want.h"
+#include "sms_private.h"
 
 static const char *module_identity = "BLOCKS";
 #define MIN_ALLOC     8 * 1024 /* don't allocate in smaller blocks than 8Kb */

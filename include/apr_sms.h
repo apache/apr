@@ -125,35 +125,6 @@ extern "C" {
 struct apr_sms_cleanup;
 typedef struct apr_sms_t    apr_sms_t;
 
-/**
- * The memory system structure
- */
-struct apr_sms_t
-{
-    apr_sms_t  *parent;
-    apr_sms_t  *child;
-    apr_sms_t  *sibling;
-    apr_sms_t **ref;
-    apr_sms_t  *accounting;
-    const char *identity; /* a string identifying the module */
-
-    apr_pool_t *pool;
-    apr_lock_t *sms_lock;
-    
-    struct apr_sms_cleanup *cleanups;
-
-    void * (*malloc_fn)            (apr_sms_t *sms, apr_size_t size);
-    void * (*calloc_fn)            (apr_sms_t *sms, apr_size_t size);
-    void * (*realloc_fn)           (apr_sms_t *sms, void *memory, 
-                                    apr_size_t size);
-    apr_status_t (*free_fn)        (apr_sms_t *sms, void *memory);
-    apr_status_t (*reset_fn)       (apr_sms_t *sms);
-    apr_status_t (*pre_destroy_fn) (apr_sms_t *sms);
-    apr_status_t (*destroy_fn)     (apr_sms_t *sms);
-    apr_status_t (*lock_fn)        (apr_sms_t *sms);
-    apr_status_t (*unlock_fn)      (apr_sms_t *sms);
-};
-
 /*
  * memory allocation functions 
  */
@@ -203,27 +174,6 @@ APR_DECLARE(apr_status_t) apr_sms_free(apr_sms_t *sms, void *mem);
 /*
  * memory system functions
  */
-
-/**
- * Initialize a memory system
- * @caution Call this function as soon as you have obtained a block of memory
- *          to serve as a memory system structure from your 
- *          apr_xxx_sms_create. Only use this function when you are
- *          implementing a memory system.
- * @param sms The memory system created
- * @param parent_sms The parent memory system
- * @deffunc apr_status_t apr_sms_init(apr_sms_t *sms,
- *                                    apr_sms_t *parent_sms)
- */
-APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms, 
-                                       apr_sms_t *parent_sms);
-
-/**
- * Do post init work that needs the sms to have been fully
- * initialised.
- * @param sms The memory system to use
- */
-APR_DECLARE(apr_status_t) apr_sms_post_init(apr_sms_t *sms);
 
 #ifdef APR_ASSERT_MEMORY
 
