@@ -294,3 +294,20 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname,
     (*sa)->sa.sin.sin_port = htons(port);
     return APR_SUCCESS;
 }
+
+apr_status_t apr_getservbyname(apr_sockaddr_t *sockaddr, const char *servname)
+{
+    struct servent *se;
+
+    if (servname == NULL)
+        return APR_EINVAL;
+
+    if ((se = getservbyname(servname, NULL)) != NULL){
+        sockaddr->port = htons(se->s_port);
+        sockaddr->servname = apr_pstrdup(sockaddr->pool, servname);
+        sockaddr->sa.sin.sin_port = se->s_port;
+        return APR_SUCCESS;
+    }
+    return errno;
+}
+

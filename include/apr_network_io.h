@@ -637,6 +637,14 @@ apr_status_t apr_get_inaddr(apr_in_addr_t *addr, char *hostname);
 apr_status_t apr_get_socket_inaddr(apr_in_addr_t *addr, apr_interface_e which,
                   apr_socket_t *sock);
 
+/**
+ * Given an apr_sockaddr_t and a service name, set the port for the service
+ * @param sockaddr The apr_sockaddr_t that will have it's port set
+ * @param servname The name of the service you wish to use
+ */
+
+apr_status_t apr_getservbyname(apr_sockaddr_t *sockaddr, const char *servname);
+
 #ifdef __cplusplus
 }
 #endif
