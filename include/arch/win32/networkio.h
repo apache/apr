@@ -86,6 +86,7 @@ apr_status_t status_from_res_error(int);
 
 const char *apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size);
 int apr_inet_pton(int af, const char *src, void *dst);
+void apr_set_sockaddr_vars(apr_sockaddr_t *, int, apr_port_t);
 
 #endif  /* ! NETWORK_IO_H */
 
