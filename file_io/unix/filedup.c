@@ -109,6 +109,16 @@ static apr_status_t _file_dup(apr_file_t **new_file,
     /* make sure unget behavior is consistent */
     (*new_file)->ungetchar = old_file->ungetchar;
 
+    /* apr_file_dup2() retains the original cleanup, reflecting 
+     * the existing inherit and nocleanup flags.  This means, 
+     * that apr_file_dup2() cannot be called against an apr_file_t
+     * already closed with apr_file_close, because the expected
+     * cleanup was already killed.
+     */
+    if (which_dup == 2) {
+        return APR_SUCCESS;
+    }
+
     /* apr_file_dup() clears the inherit attribute for normal files,
      * but sets the inherit attribute for std[out,in,err] fd's. 
      * The user must call apr_file_inherit_[un]set() on the dupped 
@@ -139,14 +149,6 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
 APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                                         apr_file_t *old_file, apr_pool_t *p)
 {
-    /* an existing apr_file_t may already be closed, and therefore
-     * have no cleanup remaining; but we don't want to double-register
-     * the same cleanup in _file_dup.  Kill the existing cleanup before
-     * invoking _file_dup to the existing new_file.
-     */
-    apr_pool_cleanup_kill(new_file->pool, (void *)(new_file),
-                          apr_unix_file_cleanup);
-
     return _file_dup(&new_file, old_file, p, 2);
 }
 
