@@ -117,6 +117,14 @@ typedef size_t                 ap_size_t;
 typedef ssize_t                ap_ssize_t;
 typedef off_t                  ap_off_t;
 
+#if SIZEOF_SSIZE_T == SIZEOF_INT
+# define APR_SSIZE_T_FMT "d"
+#elif SIZEOF_SSIZE_T == SIZEOF_LONG
+# define APR_SSIZE_T_FMT "ld"
+#else
+# error "Don't know ssize_t printf format"
+#endif
+
 typedef struct context_t  ap_context_t;
 typedef int               ap_signum_t;
 
