@@ -924,7 +924,6 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
     int max_keys;
     int nkeys;
     overlap_key *cat_keys; /* concatenation of the keys of a and b */
-    overlap_key *b_start;
     overlap_key **hash_table;
     int nhash;
     int i;
