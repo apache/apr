@@ -12,6 +12,11 @@ BEGIN {
   desc=ARGV[2];
   rel_h=ARGV[3];
 
+  filename = file;
+  if (match(file, /\./)) {
+    sub(/\.[^\.]*$/, "", file);
+  }
+
   i = 4;
   while (length(ARGV[i])) {
     if (match(ARGV[i], /icon=/)) {
@@ -93,7 +98,7 @@ BEGIN {
   print "      VALUE \"InternalName\", \"" file "\\0\"";
   print "      VALUE \"LegalCopyright\", \"Copyright © 2000-2003 "\
         "The Apache Software Foundation.\\0\"";
-  print "      VALUE \"OriginalFilename\", \"" file ".exe\\0\"";
+  print "      VALUE \"OriginalFilename\", \"" filename "\\0\"";
   if (vendor) {
     print "      VALUE \"PrivateBuild\", \"" vendor "\\0\"";
   }
