@@ -688,7 +688,7 @@ apr_status_t apr_init_alloc(apr_pool_t *globalp)
         return status;
     }
 #endif
-    permanent_pool = apr_make_sub_pool(pglobal);
+    permanent_pool = apr_make_sub_pool(globalp, NULL);
 
 #ifdef ALLOC_STATS
     atexit(dump_stats);
