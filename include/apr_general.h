@@ -139,6 +139,10 @@ int strncasecmp(const char *a, const char *b, size_t n);
 #define memmove(a,b,c) bcopy(b,a,c)
 #endif
 
+#if (!APR_HAVE_MEMCHR)
+void *memchr(const void *s, int c, size_t n);
+#endif
+
 /**
  * @package APR Random Functions
  */
