@@ -242,6 +242,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/apr_getpass.o \
 	$(OBJDIR)/apr_hash.o \
 	$(OBJDIR)/apr_pools.o \
+	$(OBJDIR)/apr_random.o \
 	$(OBJDIR)/apr_snprintf.o \
 	$(OBJDIR)/apr_strings.o \
 	$(OBJDIR)/apr_strnatcmp.o \
@@ -280,6 +281,8 @@ FILES_lib_objs = \
 	$(OBJDIR)/readwrite.o \
 	$(OBJDIR)/seek.o \
 	$(OBJDIR)/sendrecv.o \
+	$(OBJDIR)/sha2.o \
+	$(OBJDIR)/sha2_glue.o \
 	$(OBJDIR)/shm.o \
 	$(OBJDIR)/signals.o \
 	$(OBJDIR)/sockaddr.o \
@@ -431,9 +434,9 @@ $(OBJDIR)/%.o: support/unix/%.c $(OBJDIR)\cc.opt
 	@echo Compiling $<
 	$(CC) support\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
 	
-#$(OBJDIR)/%.o: random/unix/%.c $(OBJDIR)\cc.opt
-#	@echo Compiling $<
-#	$(CC) random\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: random/unix/%.c $(OBJDIR)\cc.opt
+	@echo Compiling $<
+	$(CC) random\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined
