@@ -183,6 +183,9 @@ typedef  @socklen_t_value@       apr_socklen_t;
  */
 @ssize_t_fmt@
 
+/* And APR_SIZE_T_FMT */
+@size_t_fmt@
+
 /* And APR_OFF_T_FMT */
 @off_t_fmt@
 

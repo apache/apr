@@ -409,6 +409,16 @@ else
     ssize_t_fmt='#error Can not determine the proper size for ssize_t'
 fi
 
+AC_CHECK_SIZEOF_EXTENDED([#include <stddef.h>], size_t, 8)
+
+if test "$ac_cv_sizeof_size_t" = "$ac_cv_sizeof_int"; then
+    size_t_fmt='#define APR_SIZE_T_FMT "d"'
+elif test "$ac_cv_sizeof_size_t" = "$ac_cv_sizeof_long"; then
+    size_t_fmt='#define APR_SIZE_T_FMT "ld"'
+else
+    size_t_fmt='#error Can not determine the proper size for size_t'
+fi
+
 AC_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], off_t, 8)
 
 if test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_int"; then
@@ -421,13 +431,19 @@ else
     off_t_fmt='#error Can not determine the proper size for off_t'
 fi
 
-# basically, we have tried to figure out the sizes of apr_ssize_t and
-# apr_off_t, but we don't always get it right.  If you find that we
-# don't get it right for your platform, you can override our decision
-# below.
+# Basically, we have tried to figure out the correct format strings
+# for APR types which vary between platforms, but we don't always get 
+# it right.  If you find that we don't get it right for your platform, 
+# you can override our decision below.
 case "$OS" in
    *linux* | *os2_emx | *-solaris*)
        off_t_fmt='#define APR_OFF_T_FMT "ld"'
+       ;;
+   *aix4*)
+       ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
+       size_t_fmt='#define APR_SIZE_T_FMT "ld"'
+       off_t_fmt='#define APR_OFF_T_FMT "ld"'
+       ;;
 esac
 
 AC_SUBST(short_value)
@@ -438,6 +454,7 @@ AC_SUBST(size_t_value)
 AC_SUBST(ssize_t_value)
 AC_SUBST(socklen_t_value)
 AC_SUBST(ssize_t_fmt) 
+AC_SUBST(size_t_fmt)
 AC_SUBST(off_t_fmt) 
 
 dnl #----------------------------- Checking for string functions
