@@ -107,6 +107,11 @@
  */
 #define APR_FILES_AS_SOCKETS      @file_as_socket@
 
+/* Not all platforms have a real INADDR_NONE.  This macro replaces INADDR_NONE
+ * on all platforms.
+ */
+#define APR_INADDR_NONE           @apr_inaddr_none@
+
 /* Typedefs that APR needs. */
 
 typedef  @short_value@           apr_int16_t;

@@ -397,5 +397,39 @@ if test "$ac_cv_define_sockaddr_sa_len" = "yes"; then
 fi
 ])
 
+dnl
+dnl APR_INADDR_NONE
+dnl
+dnl checks for missing INADDR_NONE macro
+dnl
+AC_DEFUN(APR_INADDR_NONE,[
+  AC_CACHE_CHECK(whether system defines INADDR_NONE, ac_cv_inaddr_none,[
+  AC_TRY_COMPILE([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+],[
+unsigned long foo = INADDR_NONE;
+],[
+    ac_cv_inaddr_none=yes
+],[
+    ac_cv_inaddr_none=no
+])])
+  if test "$ac_cv_inaddr_none" = "no"; then
+    apr_inaddr_none="((unsigned int) 0xffffffff)"
+  else
+    apr_inaddr_none="INADDR_NONE"
+  fi
+])
+
 sinclude(apr_common.m4)
 sinclude(hints.m4)

@@ -94,7 +94,7 @@ apr_status_t apr_set_ipaddr(apr_socket_t *sock, apr_interface_e which, const cha
     
     ipaddr = inet_addr(addr);
     
-    if (ipaddr == INADDR_NONE) {
+    if (ipaddr == APR_INADDR_NONE) {
         return WSAEADDRNOTAVAIL;
     }
     
