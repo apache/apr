@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Add DSO support for dyld platforms (Darwin/Mac OS and OpenStep).
+     [Wilfredo Sanchez]
+
   *) Amend the time code to better deal with time zones.
      [David Reid]
 
