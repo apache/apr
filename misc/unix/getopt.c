@@ -32,8 +32,20 @@
  */
 
 #include "misc.h"
+#include "apr_strings.h"
 
 #define EMSG    ""
+
+/* Regardless of what we're invoked as, just print out the last part
+ * of the path */
+static const char *pretty_path (const char *name) 
+{
+    const char *p;
+    if (!(p = strrchr(name, '/')))
+        return p;
+    else
+        return ++p;
+}
 
 APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
                                      int argc, char *const *argv)
@@ -51,7 +63,6 @@ APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
 APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
                                     char *optch, const char **optarg)
 {
-    const char *p;
     const char *oli;  /* option letter list index */
 
     if (os->reset || !*os->place) {   /* update scanning pointer */
@@ -81,12 +92,9 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
         if (!*os->place)
             ++os->ind;
         if (os->err && *opts != ':') {
-            if (!(p = strrchr(*os->argv, '/')))
-                p = *os->argv;
-            else
-                ++p;
             (void) fprintf(stderr,
-                           "%s: illegal option -- %c\n", p, os->opt);
+                           "%s: illegal option -- %c\n",
+                           pretty_path(*os->argv), os->opt);
         }
         *optch = os->opt;
         return (APR_BADCH);
@@ -106,13 +114,9 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
                 return (APR_BADARG);
             }
             if (os->err) {
-                if (!(p = strrchr(*os->argv, '/')))
-                    p = *os->argv;
-                else
-                    ++p;
                 (void) fprintf(stderr,
                                "%s: option requires an argument -- %c\n",
-                               p, os->opt);
+                               pretty_path(*os->argv), os->opt);
             }
             *optch = os->opt;
             return (APR_BADCH);
@@ -125,5 +129,91 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
     *optch = os->opt;
     return APR_SUCCESS;
 }
+
+APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os, 
+                                          const char *opts, 
+                                          const apr_getopt_long_t *long_opts,
+                                          int *optval, 
+                                          const char **optarg)
+     
+{
+    const apr_getopt_long_t *ptr;
+    const char *opt = os->argv[os->ind];
+    const char *arg = os->argv[os->ind +1];
+    int arg_index_incr = 1;
+  
+    /* Finished processing opts */
+    if (os->ind >= os->argc)
+        return APR_EOF;
+
+    /* End of options processing if we encounter "--" */
+    if (strcmp(opt, "--") == 0)
+        return APR_EOF;
+
+    /* 
+     * End of options processing if we encounter something that
+     * doesn't start with "-" or "--" (it's not an option if we hit it
+     * here, it's an argument) 
+     */
+    if (*opt != '-')
+        return APR_EOF;
+
+    if ((os->ind + 1) >= os->argc) 
+        arg = NULL;
+
+    /* Handle --foo=bar style opts */
+    if (strchr(opt, '=')) {
+        const char *index = strchr(opt, '=') + 1;
+        opt = apr_pstrndup(os->cont, opt, ((index - opt) - 1));
+        if (*index != '\0') /* account for "--foo=" */
+            arg = apr_pstrdup(os->cont, index);
+        arg_index_incr = 0;
+    }                       
+
+    /* If it's a longopt */
+    if (opt[1] == '-') {
+        /* see if it's in our array of long opts */
+        for (ptr = long_opts; ptr->name; ptr++) {
+            if (strcmp((opt + 2), ptr->name) == 0) { /* it's in the array */
+                if (ptr->has_arg) { 
+                    if (((os->ind + 1) >= os->argc) 
+                        && (arg == NULL)) {
+                        fprintf(stderr,
+                                "%s: option requires an argument: %s\n",
+                                pretty_path(*os->argv), opt);
+                        return APR_BADARG;
+                    }
+                                
+                    /* If we make it here, then we should be ok. */
+                    *optarg = arg;
+                    os->ind += arg_index_incr;
+                }
+                else { /* has no arg */ 
+                    *optarg = NULL;
+                }
+                *optval = ptr->val;
+                ++os->ind;
+                return APR_SUCCESS;
+            } 
+        }
+
+        /* If we get here, then we don't have the longopt in our
+         * longopts array 
+         */
+        fprintf(stderr, "%s: illegal option: %s\n", 
+                pretty_path(*os->argv), opt);
+        return APR_BADCH;
+    }
+
+    {   /* otherwise, apr_getopt gets it. */
+        char optch;
+        apr_status_t status;
+        status = apr_getopt (os, opts, &optch, optarg);
+        *optval = optch;
+        return status;
+    }
+}
+
+
 
 
