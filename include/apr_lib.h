@@ -170,6 +170,9 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
  * @param bufsize The length of the password buffer.
  * @remark If the password entered must be truncated to fit in
  * the provided buffer, APR_ENAMETOOLONG will be returned.
+ * Note that the bufsize paramater is passed by reference for no
+ * reason; its value will never be modified by the apr_password_get()
+ * function.
  */
 APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, 
                                            apr_size_t *bufsize);
