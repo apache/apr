@@ -1,5 +1,9 @@
 Changes with APR 0.9.4
 
+  *) Fix a bug in socket timeout handling on unix that left the
+     socket non-blocking after disabling the timeout.
+     [Jacob Craig Lewallen <jlewalle@cs.ucr.edu>]
+
   *) Added flag APR_FILE_ATTR_HIDDEN for manipulating the "hidden"
      file attribute on Windows and OS/2.  [Branko Cibej]
 
