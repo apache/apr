@@ -24,6 +24,7 @@
 #include <ifaddrs.h>
 #endif
 
+#ifdef HAVE_STRUCT_IPMREQ
 /* Only UDP and Raw Sockets can be used for Multicast */
 static apr_status_t mcast_check_type(apr_socket_t *sock)
 {
@@ -254,13 +255,14 @@ static apr_status_t do_mcast_opt(int type, apr_socket_t *sock,
 
     return rv;
 }
+#endif
 
 APR_DECLARE(apr_status_t) apr_mcast_join(apr_socket_t *sock,
                                          apr_sockaddr_t *join,
                                          apr_sockaddr_t *iface,
                                          apr_sockaddr_t *source)
 {
-#ifdef IP_ADD_MEMBERSHIP
+#if defined(IP_ADD_MEMBERSHIP) && defined(HAVE_STRUCT_IPMREQ)
     return do_mcast(IP_ADD_MEMBERSHIP, sock, join, iface, source);
 #else
     return APR_ENOTIMPL;
@@ -272,7 +274,7 @@ APR_DECLARE(apr_status_t) apr_mcast_leave(apr_socket_t *sock,
                                           apr_sockaddr_t *iface,
                                           apr_sockaddr_t *source)
 {
-#ifdef IP_DROP_MEMBERSHIP
+#if defined(IP_DROP_MEMBERSHIP) && defined(HAVE_STRUCT_IPMREQ)
     return do_mcast(IP_DROP_MEMBERSHIP, sock, addr, iface, source);
 #else
     return APR_ENOTIMPL;
@@ -281,7 +283,7 @@ APR_DECLARE(apr_status_t) apr_mcast_leave(apr_socket_t *sock,
 
 APR_DECLARE(apr_status_t) apr_mcast_hops(apr_socket_t *sock, apr_byte_t ttl)
 {
-#ifdef IP_MULTICAST_TTL
+#if defined(IP_MULTICAST_TTL) && defined(HAVE_STRUCT_IPMREQ)
     return do_mcast_opt(IP_MULTICAST_TTL, sock, ttl);
 #else
     return APR_ENOTIMPL;
@@ -291,7 +293,7 @@ APR_DECLARE(apr_status_t) apr_mcast_hops(apr_socket_t *sock, apr_byte_t ttl)
 APR_DECLARE(apr_status_t) apr_mcast_loopback(apr_socket_t *sock,
                                              apr_byte_t opt)
 {
-#ifdef IP_MULTICAST_LOOP
+#if defined(IP_MULTICAST_LOOP) && defined(HAVE_STRUCT_IPMREQ)
     return do_mcast_opt(IP_MULTICAST_LOOP, sock, opt);
 #else
     return APR_ENOTIMPL;
@@ -301,7 +303,7 @@ APR_DECLARE(apr_status_t) apr_mcast_loopback(apr_socket_t *sock,
 APR_DECLARE(apr_status_t) apr_mcast_interface(apr_socket_t *sock,
                                               apr_sockaddr_t *iface)
 {
-#ifdef IP_MULTICAST_IF
+#if defined(IP_MULTICAST_IF) && defined(HAVE_STRUCT_IPMREQ)
     apr_status_t rv = APR_SUCCESS;
 
     if (sock_is_ipv4(sock)) {
