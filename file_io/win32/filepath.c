@@ -757,8 +757,9 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         }
         else if (seglen == 2 && addpath[0] == '.' && addpath[1] == '.') 
         {
-            /* NOTE: win32 _hates_ '/.. /' (yes, with a space in there) and
-             * '/..../' so eliminate all preconceptions that they are valid.
+            /* NOTE: win32 _hates_ '/.. /' (yes, with a space in there)
+             * and '/..../', some functions treat it as ".", and some 
+             * fail! Eliminate all preconceptions that they are valid.
              */
             if (seglen < segend && (seglen != 3 || addpath[2] != '.'))
                 return APR_EBADPATH;
@@ -830,7 +831,6 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 apr_status_t testtype;
                 apr_size_t i = (addpath[segend] != '\0');
                 
-
                 /* This isn't legal unless the unc path is complete!
                  */
                 if (seglen < segend)
@@ -886,7 +886,6 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
 
         addpath += segend;
     }
-    path[pathlen] = '\0';
     
     /* keptlen will be the baselen unless the addpath contained
      * backpath elements.  If so, and APR_FILEPATH_NOTABOVEROOT
@@ -896,7 +895,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
      * segment is thoroughly tested prior to path parsing.
      */
     if (flags & APR_FILEPATH_NOTABOVEROOT && (keptlen - rootlen) < baselen) {
-        if (strncmp(basepath, path + rootlen, baselen))
+        if (memcmp(basepath, path + rootlen, baselen))
             return APR_EABOVEROOT;
 
         /* Ahem... if we weren't given a trailing slash on the basepath,
@@ -908,22 +907,115 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
             return APR_EABOVEROOT;
     }
 
-#if 0
-    /* Just an idea - still don't know where it's headed */
-    if (addpath && addpath[endseg - 1] != '/' 
-                && (flags & APR_FILEPATH_TRUECASE)) {
-        apr_finfo_t finfo;
-        if (apr_stat(&finfo, path, APR_FINFO_TYPE, p) == APR_SUCCESS) {
-            if (addpath[endseg - 1] != finfo.filetype == APR_DIR) {
-                if (endseg + 1 >= sizeof(path))
-                    return APR_ENAMETOOLONG;
-                path[endseg++] = '/';
-                path[endseg] = '\0';
+    if (addpath && (flags & APR_FILEPATH_TRUENAME)) {
+        /* We can always skip the root, it's already true-named. */
+        if (rootlen > keptlen)
+            keptlen = rootlen;
+        if ((path[keptlen] == '/') || (path[keptlen] == '\\')) {
+            /* By rights, keptlen may grown longer than pathlen.
+             * we wont' use it again (in that case) so we don't care.
+             */
+            ++keptlen;
+        }
+        /* Go through all the new segments */
+        while (keptlen < pathlen) {
+            apr_finfo_t finfo;
+            char saveslash = 0;
+            seglen = 0;
+            /* find any slash and set it aside for a minute. */
+            for (seglen = 0; keptlen + seglen < pathlen; ++seglen) {
+                if ((path[keptlen + seglen] == '/')  ||
+                    (path[keptlen + seglen] == '\\')) {
+                    saveslash = path[keptlen + seglen];
+                    break;
+                }
+            }
+            /* Null term for stat! */
+            path[keptlen + seglen] = '\0';
+            if ((rv = apr_stat(&finfo, path, APR_FINFO_TYPE | APR_FINFO_NAME, p))
+                    == APR_SUCCESS) {
+                size_t namelen = strlen(finfo.name);
+                if ((namelen != seglen) || 
+                    (memcmp(finfo.name, path + keptlen, seglen) != 0)) 
+                {
+                    if (namelen <= seglen) {
+                        memcpy(path + keptlen, finfo.name, namelen);
+                        if ((namelen < seglen) && saveslash) {
+                            memmove(path + keptlen + namelen + 1,
+                                   path + keptlen + seglen + 1,
+                                   pathlen - keptlen - seglen);
+                            pathlen += namelen - seglen;
+                            seglen = namelen;
+                        }
+                    }
+                    else { /* namelen > seglen */
+                        if (pathlen + namelen - seglen >= sizeof(path))
+                            return APR_ENAMETOOLONG;
+                        if ((namelen < seglen) && saveslash) {
+                            memmove(path + keptlen + namelen + 1,
+                                   path + keptlen + seglen + 1,
+                                   pathlen - keptlen - seglen);
+                        }
+                        memcpy(path + keptlen, finfo.name, namelen);
+                        pathlen += namelen - seglen;
+                        seglen = namelen;
+                    }
+                }
+                /* That's it, the rest is path info. 
+                 * I don't know how we aught to handle this.  Should
+                 * we define a new error to indicate 'more info'?
+                 * Should we split out the rest of the path?
+                 */
+                if ((finfo.filetype != APR_DIR) && 
+                    (finfo.filetype != APR_LNK) && saveslash) 
+                    rv = APR_ENOTDIR;
+#ifdef XXX_FIGURE_THIS_OUT
+                {
+                    /* the example inserts a null between the end of 
+                     * the filename and the next segment, and increments
+                     * the path length so we would return both segments.
+                     */
+                    if (saveslash) {
+                        keptlen += seglen;
+                        path[keptlen] = saveslash;
+                        if (pathlen + 1 >= sizeof(path))
+                            return APR_ENAMETOOLONG;
+                        memmove(path + keptlen + 1,
+                               path + keptlen,
+                               pathlen - keptlen);
+                        path[keptlen] = '\0';
+                        ++pathlen;
+                        break;
+                    }
+                }
+#endif
+            }
+
+            /* put back the '/' */
+            if (saveslash) {
+                path[keptlen + seglen] = saveslash;
+                ++seglen;
+            }
+            keptlen += seglen;
+
+            if (rv != APR_SUCCESS) {
+                if (APR_STATUS_IS_ENOENT(rv))
+                    break;
+                else if (APR_STATUS_IS_ENOENT(rv))
+                    /* This is a little more serious, we just added a name
+                     * onto a filename (think http's CGI MORE_INFO)
+                     * If the caller is foolish enough to do this, we expect
+                     * the've already canonicalized the root) that they knew
+                     * what they are doing :(
+                     */
+                    break;
+                else
+                    return rv;
             }
         }
     }
-#endif
 
-    *newpath = apr_pstrdup(p, path);
+    *newpath = apr_pmemdup(p, path, pathlen + 1);
+    (*newpath)[pathlen] = '\0';
     return APR_SUCCESS;
 }
