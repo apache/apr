@@ -58,6 +58,7 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "fileio.h"
+#include <stdlib.h>
 #define INCL_DOS
 #include <os2.h>
 
@@ -124,7 +125,7 @@ ap_status_t ap_create_thread(struct thread_t **new, struct threadattr_t *attr,
     }
 
     if (attr == NULL) {
-        stat = ap_create_threadattr(thread->cntxt, &thread->attr);
+        stat = ap_create_threadattr(&thread->attr, thread->cntxt);
         
         if (stat != APR_SUCCESS) {
             return stat;
