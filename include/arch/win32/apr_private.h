@@ -110,8 +110,6 @@
 #include <stdio.h>
 #include <time.h>
 
-#define HAVE_SENDFILE 1
-
 /* Use this section to define all of the HAVE_FOO_H
  * that are required to build properly.
  */
