@@ -191,6 +191,8 @@ typedef struct apr_pollfd_t     apr_pollfd_t;
  */
 typedef struct apr_hdtr_t       apr_hdtr_t;
 typedef struct in_addr          apr_in_addr_t;
+/** A structure to represent an IP subnet */
+typedef struct apr_ipsubnet_t apr_ipsubnet_t;
 
 /** @remark use apr_uint16_t just in case some system has a short that isn't 16 bits... */
 typedef apr_uint16_t            apr_port_t;
@@ -253,19 +255,6 @@ struct apr_hdtr_t {
     struct iovec* trailers;
     /** number of trailers in the iovec */
     int numtrailers;
-};
-
-/** A structure to represent an IP subnet */
-typedef struct apr_ipsubnet_t apr_ipsubnet_t;
-struct apr_ipsubnet_t {
-    int family;
-#if APR_HAVE_IPV6
-    apr_uint32_t sub[4]; /* big enough for IPv4 and IPv6 addresses */
-    apr_uint32_t mask[4];
-#else
-    apr_uint32_t sub[1];
-    apr_uint32_t mask[1];
-#endif
 };
 
 /* function definitions */

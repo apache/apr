@@ -74,6 +74,17 @@
 #define APR_WANT_STRFUNC
 #include "apr_want.h"
 
+struct apr_ipsubnet_t {
+    int family;
+#if APR_HAVE_IPV6
+    apr_uint32_t sub[4]; /* big enough for IPv4 and IPv6 addresses */
+    apr_uint32_t mask[4];
+#else
+    apr_uint32_t sub[1];
+    apr_uint32_t mask[1];
+#endif
+};
+
 #ifdef HAVE_SET_H_ERRNO
 #define SET_H_ERRNO(newval) set_h_errno(newval)
 #else
