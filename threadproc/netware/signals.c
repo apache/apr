@@ -90,7 +90,25 @@ void apr_signal_init(apr_pool_t *pglobal)
 
 const char *apr_signal_get_description(int signum)
 {
-    return "unknown signal (not supported)";
+    switch (signum)
+    {
+    case SIGABRT:
+        return "Abort";
+    case SIGFPE:
+        return "Arithmetic exception";
+    case SIGILL:
+        return "Illegal instruction";
+    case SIGINT:
+        return "Interrupt";
+    case SIGSEGV:
+        return "Segmentation fault";
+    case SIGTERM:
+        return "Terminated";
+    case SIGPOLL:
+        return "Pollable event occurred";
+    default:
+        return "unknown signal (not supported)";
+    }
 }
 
 static void *signal_thread_func(void *signal_handler)
