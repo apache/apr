@@ -93,4 +93,17 @@ void apr_random_barrier(apr_random_t *g);
 apr_status_t apr_random_secure_ready(apr_random_t *r);
 apr_status_t apr_random_insecure_ready(apr_random_t *r);
 
+/* Call this in the child after forking to mix the randomness
+   pools. Note that its generally a bad idea to fork a process with a
+   real PRNG in it - better to have the PRNG externally and get the
+   randomness from there. However, if you really must do it, then you
+   should supply all your entropy to all the PRNGs - don't worry, they
+   won't produce the same output.
+
+   Note that apr_proc_fork() calls this for you, so only weird
+   applications need ever call it themselves.
+*/
+struct apr_proc_t;
+void apr_random_after_fork(struct apr_proc_t *proc);
+
 #endif /* ndef APR_RANDOM_H */

@@ -56,6 +56,7 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 #include "apr_signal.h"
+#include "apr_random.h"
 
 APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new,
                                               apr_pool_t *pool)
@@ -231,6 +232,8 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
         proc->in = NULL;
         proc->out = NULL;
         proc->err = NULL;
+
+	apr_random_after_fork(proc);
 
         return APR_INCHILD;
     }

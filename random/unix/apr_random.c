@@ -58,6 +58,7 @@
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_random.h"
+#include "apr_thread_proc.h"
 #include <assert.h>
 
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -99,9 +100,13 @@ struct apr_random_t
 #define K_size(g) ((g)->key_hash->size)
     apr_crypto_hash_t *prng_hash;
 #define B_size(g) ((g)->prng_hash->size)
+
     unsigned char *H;
     unsigned char *H_waiting;
 #define H_size(g) (B_size(g)+K_size(g))
+#define H_current(g) (((g)->insecure_started && !(g)->secure_started) \
+		      ? (g)->H_waiting : (g)->H)
+
     unsigned char *randomness;
     apr_size_t random_bytes;
     unsigned int g_for_insecure;
@@ -109,7 +114,11 @@ struct apr_random_t
     unsigned int secure_base;
     unsigned char insecure_started:1;
     unsigned char secure_started:1;
+
+    apr_random_t *next;
     };
+
+static apr_random_t *all_random;
 
 void apr_random_init(apr_random_t *g,apr_pool_t *p,
 		     apr_crypto_hash_t *pool_hash,apr_crypto_hash_t *key_hash,
@@ -145,6 +154,41 @@ void apr_random_init(apr_random_t *g,apr_pool_t *p,
     g->secure_base=0;
     g->g_for_secure=APR_RANDOM_DEFAULT_G_FOR_SECURE;
     g->secure_started=g->insecure_started=0;
+
+    g->next=all_random;
+    all_random=g;
+    }
+
+static void mix_pid(apr_random_t *g,unsigned char *H,pid_t pid)
+    {
+    hash_init(g->key_hash);
+    hash_add(g->key_hash,H,H_size(g));
+    hash_add(g->key_hash,&pid,sizeof pid);
+    hash_finish(g->key_hash,H);
+    }
+
+static void mixer(apr_random_t *g,pid_t pid)
+    {
+    unsigned char *H=H_current(g);
+
+    /* mix the PID into the current H */
+    mix_pid(g,H,pid);
+    /* if we are in waiting, then also mix into main H */
+    if(H != g->H)
+	mix_pid(g,g->H,pid);
+    /* change order of pool mixing for good measure - note that going
+       backwards is much better than going forwards */
+    --g->generation;
+    /* blow away any lingering randomness */
+    g->random_bytes=0;
+    }
+
+void apr_random_after_fork(apr_proc_t *proc)
+    {
+    apr_random_t *r;
+
+    for(r=all_random ; r ; r=r->next)
+	mixer(r,proc->pid);
     }
 
 apr_random_t *apr_random_standard_new(apr_pool_t *p)
@@ -159,8 +203,7 @@ apr_random_t *apr_random_standard_new(apr_pool_t *p)
 static void rekey(apr_random_t *g)
     {
     int n;
-    unsigned char *H=(g->insecure_started && !g->secure_started) ? g->H_waiting
-	: g->H;
+    unsigned char *H=H_current(g);
 
     hash_init(g->key_hash);
     hash_add(g->key_hash,H,H_size(g));
