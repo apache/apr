@@ -20,6 +20,11 @@ ifndef NLM_THREAD_NAME
 NLM_THREAD_NAME = $(NLM_NAME) Thread
 endif
 
+ifndef NLM_SCREEN_NAME
+NLM_SCREEN_NAME = Apache for NetWare
+endif
+
+
 #
 # Create dependency lists based on the files available
 #
@@ -190,7 +195,7 @@ ifeq "$(RELEASE)" "debug"
 else	
 	@echo -sym internal >> $@
 endif	
-	@echo -screenname "Apache for NetWare" >> $@ 
+	@echo -screenname "$(NLM_SCREEN_NAME)" >> $@ 
 ifneq "$(NLM_VERSION)" ""
 	@echo -nlmversion=$(NLM_VERSION) >> $@ 
 else
