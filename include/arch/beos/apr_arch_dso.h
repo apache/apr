@@ -69,6 +69,9 @@
 struct apr_dso_handle_t {
     image_id      handle;    /* Handle to the DSO loaded */
     apr_pool_t   *pool;
+    const char   *errormsg;  /* if the load fails, we have an error
+                              * message here :)
+                              */
 };
 
 #endif
