@@ -662,6 +662,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + ERROR_INVALID_PARAMETER \
                 || (s) == APR_OS_START_SYSERR + ERROR_INVALID_FUNCTION)
 #define APR_STATUS_IS_ESPIPE(s)         ((s) == APR_ESPIPE \
+                || (s) == APR_OS_START_SYSERR + ERROR_SEEK_ON_DEVICE)
                 || (s) == APR_OS_START_SYSERR + ERROR_NEGATIVE_SEEK)
 #define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN \
                 || (s) == APR_OS_START_SYSERR + ERROR_NO_DATA \
