@@ -58,8 +58,6 @@
 #include "locks.h"
 #include "fileio.h"
 #include <string.h>
-#define INCL_DOS
-#include <os2.h>
 
 #define CurrentTid (lock->tib->tib_ptib2->tib2_ultid)
 

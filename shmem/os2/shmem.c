@@ -59,8 +59,6 @@
 #include "apr_strings.h"
 #include <umalloc.h>
 #include <stdlib.h>
-#define INCL_DOS
-#include <os2.h>
 
 struct shmem_t {
     void *memblock;

@@ -243,4 +243,10 @@ Sigfunc *apr_signal(int signo, Sigfunc * func);
 #endif /* !WEXITSTATUS */
 #endif /* HAVE_SYS_WAIT_H */
 
+#ifdef OS2
+#define INCL_DOS
+#define INCL_DOSERRORS
+#include <os2.h>
+#endif
+
 #endif /* APR_H */

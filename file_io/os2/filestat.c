@@ -58,7 +58,6 @@
 #include "apr_file_io.h"
 #include "apr_lib.h"
 #include <sys/time.h>
-#include <os2.h>
 
 
 static void FS3_to_finfo(apr_finfo_t *finfo, FILESTATUS3 *fstatus)

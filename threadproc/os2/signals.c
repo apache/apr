@@ -61,8 +61,6 @@
 #include <signal.h>
 #include <string.h>
 #include <sys/wait.h>
-#define INCL_DOS
-#include <os2.h>
 
 apr_status_t apr_kill(apr_proc_t *proc, int signal)
 {

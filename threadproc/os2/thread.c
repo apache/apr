@@ -60,7 +60,6 @@
 #include "apr_lib.h"
 #include "fileio.h"
 #include <stdlib.h>
-#include <os2.h>
 
 apr_status_t apr_create_threadattr(apr_threadattr_t **new, apr_pool_t *cont)
 {

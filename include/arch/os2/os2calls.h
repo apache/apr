@@ -52,9 +52,9 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr_errno.h"
 #include <sys/types.h>
 #include <sys/socket.h>
-#include "os2nerrno.h"
 
 extern int (*apr_os2_socket)(int, int, int);
 extern int (*apr_os2_select)(int *, int, int, int, long);

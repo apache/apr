@@ -55,9 +55,6 @@
 #ifndef DSO_H
 #define DSO_H
 
-#define INCL_DOS
-#include <os2.h>
-
 #include "apr_private.h"
 #include "apr_general.h"
 #include "apr_pools.h"

@@ -58,10 +58,6 @@
 #include <string.h>
 #include <io.h>
 
-#define INCL_DOS
-#include <os2.h>
-
-
 
 static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
 {

@@ -59,7 +59,6 @@
 #include "apr_file_io.h"
 #include "apr_lib.h"
 
-#include <os2.h>
 #include <malloc.h>
 
 apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)

@@ -160,8 +160,6 @@ static char *apr_error_string(apr_status_t statcode)
 
 
 #ifdef OS2
-#define INCL_DOS
-#include <os2.h>
 #include <ctype.h>
 
 int apr_canonical_error(apr_status_t err);
