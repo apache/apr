@@ -72,6 +72,7 @@ typedef enum {APR_WAIT, APR_NOWAIT} ap_wait_how_e;
 #define APR_PARENT_BLOCK     3
 #define APR_CHILD_BLOCK      4
 
+#if APR_HAS_OTHER_CHILD
 #define APR_OC_REASON_DEATH         0     /* child has died, caller must call
                                            * unregister still */
 #define APR_OC_REASON_UNWRITABLE    1     /* write_fd is unwritable */
@@ -84,6 +85,7 @@ typedef enum {APR_WAIT, APR_NOWAIT} ap_wait_how_e;
                                            * kill the child) */
 #define APR_OC_REASON_LOST          4     /* somehow the child exited without
                                            * us knowing ... buggy os? */
+#endif /* APR_HAS_OTHER_CHILD */
 
 typedef struct ap_thread_t           ap_thread_t;
 typedef struct ap_threadattr_t       ap_threadattr_t;
@@ -91,7 +93,9 @@ typedef struct ap_proc_t		  ap_proc_t;
 typedef struct ap_procattr_t         ap_procattr_t;
 
 typedef struct ap_threadkey_t        ap_threadkey_t;
+#if APR_HAS_OTHER_CHILD
 typedef struct ap_other_child_rec_t  ap_other_child_rec_t;
+#endif /* APR_HAS_OTHER_CHILD */
 
 typedef void *(API_THREAD_FUNC *ap_thread_start_t)(void *);
 
@@ -583,6 +587,7 @@ B<Detach the process from the controlling terminal.>
  */
 ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont);
 
+#if APR_HAS_OTHER_CHILD
 /*
 
 =head1 void ap_register_other_child(ap_proc_t *pid, void (*maintenance) (int reason, void *data, int status), void *data, int write_fd, ap_pool_t *p)
@@ -645,6 +650,7 @@ B<Loop through all registered other_children and call the appropriate maintenanc
 =cut
  */
 void ap_check_other_child(void); 
+#endif /* APR_HAS_OTHER_CHILD */
 
 /*
 
