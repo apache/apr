@@ -441,11 +441,11 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
 
 #ifdef POOL_DEBUG
     {
-	if (!apr_pool_is_ancestor(apr_find_pool(key), t->a.pool)) {
+	if (!apr_pool_is_ancestor(apr_pool_find(key), t->a.pool)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
-	if (!apr_pool_is_ancestor(apr_find_pool(val), t->a.pool)) {
+	if (!apr_pool_is_ancestor(apr_pool_find(val), t->a.pool)) {
 	    fprintf(stderr, "table_set: val not in ancestor pool of t\n");
 	    abort();
 	}
@@ -540,11 +540,11 @@ APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
 
 #ifdef POOL_DEBUG
     {
-	if (!apr_pool_is_ancestor(apr_find_pool(key), t->a.pool)) {
+	if (!apr_pool_is_ancestor(apr_pool_find(key), t->a.pool)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
-	if (!apr_pool_is_ancestor(apr_find_pool(val), t->a.pool)) {
+	if (!apr_pool_is_ancestor(apr_pool_find(val), t->a.pool)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
@@ -586,11 +586,11 @@ APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
 
 #ifdef POOL_DEBUG
     {
-	if (!apr_pool_is_ancestor(apr_find_pool(key), t->a.pool)) {
+	if (!apr_pool_is_ancestor(apr_pool_find(key), t->a.pool)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
-	if (!apr_pool_is_ancestor(apr_find_pool(val), t->a.pool)) {
+	if (!apr_pool_is_ancestor(apr_pool_find(val), t->a.pool)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
