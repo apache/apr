@@ -15,7 +15,8 @@ TARGETS = \
 	pipe.lo \
 	readwrite.lo \
 	seek.lo \
-	mktemp.lo
+	mktemp.lo \
+	tempdir.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@

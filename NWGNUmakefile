@@ -286,6 +286,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/sockets.o \
 	$(OBJDIR)/sockopt.o \
 	$(OBJDIR)/start.o \
+	$(OBJDIR)/tempdir.o \
 	$(OBJDIR)/thread.o \
 	$(OBJDIR)/thread_cond.o \
 	$(OBJDIR)/thread_mutex.o \
