@@ -56,8 +56,12 @@
 #include "apr_general.h"
 #include "apr_strings.h"
 
+#ifndef APR_TEST_PREFIX
+#define APR_TEST_PREFIX ""
+#endif
+
 #define APR_TEST_BEGIN(rv, desc, op) \
-    fprintf(stdout, "%s%.*s ", desc,                                  \
+    fprintf(stdout, "%s%.*s ", APR_TEST_PREFIX desc,                  \
             strlen(desc) < 37 ? 40 - strlen(desc) : 3,                \
             "........................................");              \
     APR_TEST_MORE(rv, op)
@@ -66,7 +70,7 @@
     if ((rv = (op)) != APR_SUCCESS) {                                 \
         char msgbuf[256];                                             \
         fprintf (stdout, "Failed\n");                                 \
-        fprintf (stderr, "%s Failed, error %d\n%s", #op, rv,          \
+        fprintf (stderr, "Error (%d): %s\n%s", rv, #op,               \
                  apr_strerror(stat, msgbuf, sizeof(msgbuf)));         \
         exit(-1); }
 
