@@ -115,10 +115,10 @@ int main(void)
 
     while (1) {
         fprintf(stdout, "\nEnter a root path$ ");
-        if (!gets(rootpath))
+        if (!fgets(rootpath, 256, stdin))
             exit(0);
         fprintf(stdout, "Enter an add path$ ");
-        if (!gets(addpath))
+        if (!fgets(addpath, 256, stdin))
             exit(0);
         merge_result(rootpath, addpath, 0);
         merge_result(rootpath, addpath, APR_FILEPATH_NOTABOVEROOT);
