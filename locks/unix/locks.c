@@ -67,7 +67,7 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
     new->cntxt = cont;
     new->type  = type;
     new->scope = scope;
-#if defined(USE_FCNTL_SERIALIZE) || defined(USE_FLOCK_SERIALIZE)
+#if (APR_USE_FCNTL_SERIALIZE) || (APR_USE_FLOCK_SERIALIZE)
     /* file-based serialization primitives */
     if (scope != APR_INTRAPROCESS) {
         if (fname != NULL) {
@@ -197,7 +197,7 @@ ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, ap_lock_t *lock)
     }
     oslock->crossproc = lock->interproc;
 #if APR_HAS_THREADS
-#if USE_PTHREAD_SERIALIZE
+#if APR_USE_PTHREAD_SERIALIZE
     oslock->intraproc = lock->intraproc;
 #endif
 #endif
@@ -217,7 +217,7 @@ ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *thelock,
     }
     (*lock)->interproc = thelock->crossproc;
 #if APR_HAS_THREADS
-#if defined (USE_PTHREAD_SERIALIZE)
+#if (APR_USE_PTHREAD_SERIALIZE)
     (*lock)->intraproc = thelock->intraproc;
 #endif
 #endif

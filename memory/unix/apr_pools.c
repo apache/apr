@@ -59,6 +59,7 @@
  * rst --- 4/95 --- 6/95
  */
 
+#include "apr.h"
 #include "apr_private.h"
 
 #include "apr_portable.h" /* for get_os_proc */
@@ -74,19 +75,19 @@
 #ifdef HAVE_SYS_SIGNAL_H
 #include <sys/signal.h>
 #endif
-#ifdef HAVE_SIGNAL_H
+#ifdef APR_HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-#ifdef HAVE_SYS_WAIT_H
+#ifdef APR_HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#ifdef HAVE_SYS_TYPES_H
+#ifdef APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_FCNTL_H
+#ifdef APR_HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 

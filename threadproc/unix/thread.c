@@ -52,12 +52,13 @@
  * <http://www.apache.org/>.
  */
 
-#include "threadproc.h"
+#include "apr.h"
 #include "apr_portable.h"
+#include "threadproc.h"
 
 #if APR_HAS_THREADS
 
-#ifdef HAVE_PTHREAD_H
+#ifdef APR_HAVE_PTHREAD_H
 ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
 {
     ap_status_t stat;

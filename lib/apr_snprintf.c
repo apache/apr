@@ -56,6 +56,7 @@
  * Tsirigotis <panos@alumni.cs.colorado.edu> for xinetd.
  */
 
+#include "apr.h"
 #include "apr_private.h"
 
 #include "apr_lib.h"
@@ -63,7 +64,7 @@
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
 #endif
-#if HAVE_NETINET_IN_H
+#if APR_HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
