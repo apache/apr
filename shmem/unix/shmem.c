@@ -128,13 +128,13 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
     
 #if APR_USE_SHMEM_MMAP_TMP
     /* FIXME: Is APR_OS_DEFAULT sufficient? */
-    status = apr_file_open(new_m->file, filename, 
+    status = apr_file_open(&new_m->file, filename, 
                          APR_READ | APR_WRITE | APR_CREATE, APR_OS_DEFAULT,
                          pool);
     if (status != APR_SUCCESS)
         return APR_EGENERAL;
 
-    tmpfd = apr_os_file_get(&tmpfd, new_m->file);
+    status = apr_os_file_get(&tmpfd, new_m->file);
     status = apr_file_trunc(new_m->file, reqsize);
     if (status != APR_SUCCESS)
         return APR_EGENERAL;
@@ -157,7 +157,7 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
                          APR_OS_DEFAULT);
     if (status != APR_SUCCESS)
         return APR_EGENERAL;
-    tmpfd = apr_os_file_get(&tmpfd, new_m->file);
+    status = apr_os_file_get(&tmpfd, new_m->file);
 #endif
 
     mem = mmap(NULL, reqsize, PROT_READ|PROT_WRITE, MAP_SHARED, tmpfd, 0);
