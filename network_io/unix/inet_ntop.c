@@ -161,16 +161,16 @@ inet_ntop6(const unsigned char *src, char *dst, apr_size_t size)
     next_src = src;
     src_end = src + IN6ADDRSZ;
     next_dest = words;
+    best.base = -1;
+    cur.base = -1;
+    i = 0;
     do {
         unsigned int next_word = (unsigned int)*next_src++;
         next_word <<= 8;
         next_word |= (unsigned int)*next_src++;
         *next_dest++ = next_word;
-    } while (next_src < src_end);
-    best.base = -1;
-    cur.base = -1;
-    for (i = 0; i < (IN6ADDRSZ / INT16SZ); i++) {
-        if (words[i] == 0) {
+
+        if (next_word == 0) {
             if (cur.base == -1) {
                 cur.base = i;
                 cur.len = 1;
@@ -186,7 +186,10 @@ inet_ntop6(const unsigned char *src, char *dst, apr_size_t size)
                 cur.base = -1;
             }
         }
-    }
+
+        i++;
+    } while (next_src < src_end);
+
     if (cur.base != -1) {
         if (best.base == -1 || cur.len > best.len) {
             best = cur;
