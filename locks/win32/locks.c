@@ -66,6 +66,10 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
     apr_lock_t *newlock;
     SECURITY_ATTRIBUTES sec;
 
+    /* FIXME: Remove when read write locks implemented. */
+    if (type == APR_READWRITE)
+        return APR_ENOTIMPL;
+
     newlock = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
 
     newlock->cntxt = cont;
@@ -118,42 +122,87 @@ APR_DECLARE(apr_status_t) apr_lock_child_init(apr_lock_t **lock,
 APR_DECLARE(apr_status_t) apr_lock_acquire(apr_lock_t *lock)
 {
     DWORD rv;
-    if (lock->scope == APR_INTRAPROCESS) {
-        EnterCriticalSection(&lock->section);
-        return APR_SUCCESS;
-    } else {
-        rv = WaitForSingleObject(lock->mutex, INFINITE);
-
-        if (rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
+    switch (lock->type)
+    {
+    case APR_MUTEX:
+        if (lock->scope == APR_INTRAPROCESS) {
+            EnterCriticalSection(&lock->section);
             return APR_SUCCESS;
+        } else {
+            rv = WaitForSingleObject(lock->mutex, INFINITE);
+
+            if (rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
+                return APR_SUCCESS;
+            }
         }
+        break;
+    case APR_READWRITE:
+        return APR_ENOTIMPL;
     }
+
     return apr_get_os_error();
+}
+
+APR_DECLARE(apr_status_t) apr_lock_acquire_rw(apr_lock_t *lock,
+                                              apr_readerwriter_e e)
+{
+    switch (lock->type)
+    {
+    case APR_MUTEX:
+        return APR_ENOTIMPL;
+    case APR_READWRITE:
+        switch (e)
+        {
+        case APR_READER:
+            break;
+        case APR_WRITER:
+            break;
+        } 
+        return APR_ENOTIMPL;
+    }
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_lock_release(apr_lock_t *lock)
 {
-    if (lock->scope == APR_INTRAPROCESS) {
-        LeaveCriticalSection(&lock->section);
-        return APR_SUCCESS;
-    } else {
-        if (ReleaseMutex(lock->mutex) == 0) {
-            return apr_get_os_error();
+    switch (apr->lock)
+    {
+    case APR_MUTEX:
+        if (lock->scope == APR_INTRAPROCESS) {
+            LeaveCriticalSection(&lock->section);
+            return APR_SUCCESS;
+        } else {
+            if (ReleaseMutex(lock->mutex) == 0) {
+                return apr_get_os_error();
+            }
         }
+        break;
+    case APR_READWRITE:
+        return APR_ENOTIMPL;
     }
+
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_lock_destroy(apr_lock_t *lock)
 {
-    if (lock->scope == APR_INTRAPROCESS) {
-        DeleteCriticalSection(&lock->section);
-        return APR_SUCCESS;
-    } else {
-        if (CloseHandle(lock->mutex) == 0) {
-            return apr_get_os_error();
+    switch (lock->type)
+    {
+    case APR_MUTEX:
+        if (lock->scope == APR_INTRAPROCESS) {
+            DeleteCriticalSection(&lock->section);
+            return APR_SUCCESS;
+        } else {
+            if (CloseHandle(lock->mutex) == 0) {
+                return apr_get_os_error();
+            }
         }
+        break;
+    case APR_READWRITE:
+        return APR_ENOTIMPL;
     }
+
     return APR_SUCCESS;
 }
 
