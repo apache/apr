@@ -160,6 +160,7 @@ AC_ARG_ENABLE(profile,[  --enable-profile        Turn on profiling for the build
 
 if test "$host" = "i586-pc-beos"; then
   AC_ARG_ENABLE(malloc-debug,[  --enable-malloc-debug   Switch on malloc_debug for BeOS],
+    APR_REMOVEFROM(CFLAGS, -O2)
     APR_ADDTO(CPPFLAGS, -fcheck-memory-usage -D_KERNEL_MODE)
   ) dnl
 fi
