@@ -330,6 +330,7 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
 {
     apr_status_t rv = APR_SUCCESS; /* get rid of gcc warning */
     apr_size_t nbytes;
+    const char *str_start = str;
     char *final = str + len - 1;
 
     if (len <= 1) {  
@@ -353,7 +354,13 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
     /* We must store a terminating '\0' if we've stored any chars. We can
      * get away with storing it if we hit an error first. 
      */
-    *str = '\0'; 
+    *str = '\0';
+    if (str > str_start) {
+        /* we stored chars; don't report EOF or any other errors;
+         * the app will find out about that on the next call
+         */
+        return APR_SUCCESS;
+    }
     return rv;
 }
 
