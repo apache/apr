@@ -295,7 +295,7 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
                        (void *)&on, sizeof(int)) == -1) {
             return errno;
         }
-        apr_set_option(sock, APR_IPV6_V6ONLY, on);
+        apr_set_option(&sock->netmask, APR_IPV6_V6ONLY, on);
 #else
         return APR_ENOTIMPL;
 #endif
