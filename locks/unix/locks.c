@@ -57,19 +57,22 @@
 #include "apr_portable.h"
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_lock(ap_context_t *, ap_locktype_e, char *, 
- *                            ap_lock_t **)
+ * ap_status_t ap_create_lock(ap_context_t *, ap_locktype_e,
+ *                            ap_lockscope_e scope, char *, ap_lock_t **)
  *    Create a new instance of a lock structure. 
  * arg 1) The context to operate on.
  * arg 2) The type of lock to create, one of:
+ *            APR_MUTEX
+ *            APR_READWRITE
+ * arg 3) The scope of the lock to create, one of:
  *            APR_CROSS_PROCESS -- lock processes from the protected area.
  *            APR_INTRAPROCESS  -- lock threads from the protected area.
  *            APR_LOCKALL       -- lock processes and threads from the
  *                                 protected area.
- * arg 3) A file name to use if the lock mechanism requires one.  This
+ * arg 4) A file name to use if the lock mechanism requires one.  This
  *        argument should always be provided.  The lock code itself will
  *        determine if it should be used.
- * arg 4) The newly created lock structure.
+ * arg 5) The newly created lock structure.
  * NOTE:  APR_CROSS_PROCESS may lock both processes and threads, but it is
  *        only guaranteed to lock processes.
  */
@@ -83,10 +86,11 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type,
     new = (struct lock_t *)ap_palloc(cont, sizeof(struct lock_t));
 
     new->cntxt = cont;
-    new->type = type;
+    new->type  = type;
+    new->scope = scope;
 #if defined(USE_FCNTL_SERIALIZE) || defined(USE_FLOCK_SERIALIZE)
     /* file-based serialization primitives */
-    if (type != APR_INTRAPROCESS) {
+    if (scope != APR_INTRAPROCESS) {
         if (fname != NULL) {
             new->fname = ap_pstrdup(cont, fname);
         }
@@ -97,7 +101,7 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type,
     }
 #endif
 
-    if (type != APR_CROSS_PROCESS) {
+    if (scope != APR_CROSS_PROCESS) {
 #if APR_HAS_THREADS
         if ((stat = create_intra_lock(new)) != APR_SUCCESS) {
             return stat;
@@ -106,7 +110,7 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type,
         return APR_ENOTIMPL;
 #endif
     }
-    if (type != APR_INTRAPROCESS) {
+    if (scope != APR_INTRAPROCESS) {
         if ((stat = create_inter_lock(new)) != APR_SUCCESS) {
             return stat;
         }
@@ -123,7 +127,7 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type,
 ap_status_t ap_lock(struct lock_t *lock)
 {
     ap_status_t stat;
-    if (lock->type != APR_CROSS_PROCESS) {
+    if (lock->scope != APR_CROSS_PROCESS) {
 #if APR_HAS_THREADS
         if ((stat = lock_intra(lock)) != APR_SUCCESS) {
             return stat;
@@ -132,7 +136,7 @@ ap_status_t ap_lock(struct lock_t *lock)
         return APR_ENOTIMPL;
 #endif
     }
-    if (lock->type != APR_INTRAPROCESS) {
+    if (lock->scope != APR_INTRAPROCESS) {
         if ((stat = lock_inter(lock)) != APR_SUCCESS) {
             return stat;
         }
@@ -149,7 +153,7 @@ ap_status_t ap_unlock(struct lock_t *lock)
 {
     ap_status_t stat;
 
-    if (lock->type != APR_CROSS_PROCESS) {
+    if (lock->scope != APR_CROSS_PROCESS) {
 #if APR_HAS_THREADS
         if ((stat = unlock_intra(lock)) != APR_SUCCESS) {
             return stat;
@@ -158,7 +162,7 @@ ap_status_t ap_unlock(struct lock_t *lock)
         return APR_ENOTIMPL;
 #endif
     }
-    if (lock->type != APR_INTRAPROCESS) {
+    if (lock->scope != APR_INTRAPROCESS) {
         if ((stat = unlock_inter(lock)) != APR_SUCCESS) {
             return stat;
         }
@@ -176,7 +180,7 @@ ap_status_t ap_unlock(struct lock_t *lock)
 ap_status_t ap_destroy_lock(struct lock_t *lock)
 {
     ap_status_t stat;
-    if (lock->type != APR_CROSS_PROCESS) {
+    if (lock->scope != APR_CROSS_PROCESS) {
 #if APR_HAS_THREADS
         if ((stat = destroy_intra_lock(lock)) != APR_SUCCESS) {
             return stat;
@@ -185,7 +189,7 @@ ap_status_t ap_destroy_lock(struct lock_t *lock)
         return APR_ENOTIMPL;
 #endif
     }
-    if (lock->type != APR_INTRAPROCESS) {
+    if (lock->scope != APR_INTRAPROCESS) {
         if ((stat = destroy_inter_lock(lock)) != APR_SUCCESS) {
             return stat;
         }
@@ -210,7 +214,7 @@ ap_status_t ap_destroy_lock(struct lock_t *lock)
 ap_status_t ap_child_init_lock(struct lock_t **lock, char *fname, ap_context_t *cont)
 {
     ap_status_t stat;
-    if ((*lock)->type != APR_CROSS_PROCESS) {
+    if ((*lock)->scope != APR_CROSS_PROCESS) {
         if ((stat = child_init_lock(lock, cont, fname)) != APR_SUCCESS) {
             return stat;
         }

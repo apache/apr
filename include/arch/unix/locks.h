@@ -108,6 +108,7 @@ union semun {
 struct lock_t {
     ap_context_t *cntxt;
     ap_locktype_e type;
+    ap_lockscope_e scope;
     int curr_locked;
     char *fname;
 #if USE_SYSVSEM_SERIALIZE
@@ -128,7 +129,7 @@ struct lock_t {
     pthread_mutex_t *intraproc;
 #endif
 #endif
-    /* At some point, we should do a type for both inter and intra process
+    /* At some point, we should do a scope for both inter and intra process
      *  locking here.  Something like pthread_mutex with PTHREAD_PROCESS_SHARED
      */    
 };
