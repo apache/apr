@@ -114,7 +114,7 @@ if test "x$use_libtool" = "xyes"; then
       link='$(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE) $(ALL_LDFLAGS) $(ALL_LIBS) -o $@'
       so_ext='lo'
       lib_target='-rpath $(libdir) $$objects'
-      export_lib_target='-rpath $(libdir) \$\$objects'
+      export_lib_target='-rpath \$(libdir) \$\$objects'
 else
       lt_compile='$(COMPILE) -c $<'
       link='$(AR) cr $(TARGET_LIB) $$objects; $(RANLIB) $(TARGET_LIB)'
