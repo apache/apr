@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/10/22 04:59:26 $]
+Last modified at [$Date: 2002/11/20 19:30:31 $]
 
 Release:
 
@@ -42,8 +42,11 @@ RELEASE SHOWSTOPPERS:
       and offer up any additions/vetos/clarifications.
       DougM offered to complete the work with his nifty perl rename
       script at the hackathon. 
+      Thom says: I think this is close to done; does anyone want to add any
+      further renames?
 
       1.0 showstopper (not 0.9.0): gstein
+       
 
     * When Win32 apr_proc_create was fixed, the apr_proc_t hproc
       member was added for that platform.  That's a problem (and
