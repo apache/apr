@@ -246,8 +246,6 @@ apr_uint32_t apr_atomic_cas(volatile apr_atomic_t *mem, apr_uint32_t swap,
  * with a different signature than the default.)
  */
 
-#define APR_ATOMIC_NEED_DEFAULT_INIT 0
-
 #if !defined(apr_atomic_t)
 #define apr_atomic_t apr_uint32_t
 #endif
@@ -283,6 +281,10 @@ int apr_atomic_dec(volatile apr_atomic_t *mem);
 #if !defined(apr_atomic_cas) && !defined(APR_OVERRIDE_ATOMIC_CAS)
 apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
 #define APR_ATOMIC_NEED_DEFAULT_INIT 1
+#endif
+
+#ifndef APR_ATOMIC_NEED_DEFAULT_INIT
+#define APR_ATOMIC_NEED_DEFAULT_INIT 0
 #endif
 
 /* If we're using the default versions of any of the atomic functions,
