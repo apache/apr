@@ -290,6 +290,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/libprews.o \
 	$(OBJDIR)/mktemp.o \
 	$(OBJDIR)/mmap.o \
+	$(OBJDIR)/multicast.o \
 	$(OBJDIR)/open.o \
 	$(OBJDIR)/pipe.o \
 	$(OBJDIR)/otherchild.o \
