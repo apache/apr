@@ -339,22 +339,7 @@ esac
 dnl Check the depend program we can use
 APR_CHECK_DEPEND
 
-# force_atomic_generic flag 
-# this will be set we find a cpu/OS combo
-# which is historical and doesn't work with the method
-# we are using for the more up to date cpu/OS
-# (ie.. old sparcs)
-apr_force_atomic_generic=0
 proc_mutex_is_global=0
-nonportable_atomics_enabled=0
-
-AC_ARG_ENABLE(nonportable-atomics,
-[  --enable-nonportable-atomics  Turn on optimized atomic code which may produce nonportable binaries],
-[
-    if test "$enableval" = "yes"; then
-        nonportable_atomics_enabled=1
-    fi
-])
 
 config_subdirs="none"
 INSTALL_SUBDIRS="none"
@@ -406,18 +391,6 @@ case $host in
        enable_threads="no"
        eolstr="\\n"
        ;;
-   *linux*)
-       apr_force_atomic_generic=1
-       case $host_cpu in
-         i486|i586|i686|powerpc64)
-            if test "$nonportable_atomics_enabled" = 1; then
-              apr_force_atomic_generic=0
-            fi
-            ;;
-       esac
-       OSDIR="unix"
-       eolstr="\\n"
-       ;;
    *hpux10* ) 
        enable_threads="no"
        OSDIR="unix"
@@ -429,7 +402,25 @@ case $host in
        ;;
 esac
 
-AC_SUBST(apr_force_atomic_generic)
+AC_ARG_ENABLE(nonportable-atomics,
+[  --enable-nonportable-atomics  Use optimized atomic code which may produce nonportable binaries],
+[if test $enableval = yes; then
+   force_generic_atomics=no
+ else
+   force_generic_atomics=yes
+ fi
+],
+[case $host_cpu in
+   i[[456]]86) force_generic_atomics=yes ;;
+   *) force_generic_atomics=no ;;
+esac
+])
+
+if test $force_generic_atomics = yes; then
+   AC_DEFINE([USE_GENERIC_ATOMICS], 1,
+             [Define if use of generic atomics is requested])
+fi
+
 AC_SUBST(proc_mutex_is_global)
 AC_SUBST(eolstr)
 AC_SUBST(INSTALL_SUBDIRS)
