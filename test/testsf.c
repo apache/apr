@@ -217,7 +217,7 @@ static int client(client_socket_mode_t socket_mode)
         exit(1);
     }
 
-    rv = apr_set_remote_port(sock, TESTSF_PORT);
+    rv = apr_set_port(sock, APR_REMOTE, TESTSF_PORT);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_set_remote_port()->%d/%s\n",
                 rv,
@@ -493,7 +493,7 @@ static int server(void)
 
     apr_setup(&p, &sock);
 
-    rv = apr_set_local_port(sock, TESTSF_PORT);
+    rv = apr_set_port(sock, APR_LOCAL, TESTSF_PORT);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_set_local_port()->%d/%s\n",
                 rv,
