@@ -423,12 +423,14 @@ static int client(client_socket_mode_t socket_mode)
             fprintf(stderr,
                     "client problem: sent %ld of %ld bytes\n",
                     (long)total_bytes_sent, (long)expected_len);
+            exit(1);
         }
 
         if (rv) {
             fprintf(stderr,
                     "client problem: rv %d\n",
                     rv);
+            exit(1);
         }
     }
     
