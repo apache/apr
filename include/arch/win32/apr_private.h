@@ -53,8 +53,13 @@
  */
 
 /*
- * Note: This is the windows specific autoconf like config file (apr_config.h)
+ * Note: 
+ * This is the windows specific autoconf like config file
+ * which is used to generate apr_config.h at build time.
+ * Do not put any code into this file which depends on
+ * APR include files.
  */
+
 #ifdef WIN32
 
 #ifndef APR_CONFIG_H
@@ -77,7 +82,6 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <time.h>
-#include "apr_errno.h"
 
 #define HAVE_SENDFILE 1
 
@@ -147,77 +151,6 @@ typedef void (Sigfunc)(int);
 #define SIZEOF_CHAR            1
 #define SIZEOF_SSIZE_T         SIZEOF_INT
 
-
-/* Platform specific designation of run time os version.
- * Gaps allow for specific service pack levels that 
- * export new kernel or winsock functions or behavior.
- */
-typedef enum {
-	APR_WIN_95 = 0, 
-	APR_WIN_98 = 4, 
-	APR_WIN_NT = 8,
-	APR_WIN_NT_4 = 12,
-	APR_WIN_NT_4_SP2 = 14,
-	APR_WIN_NT_4_SP3 = 15,
-	APR_WIN_NT_4_SP4 = 16,
-	APR_WIN_NT_4_SP6 = 18,
-	APR_WIN_2000 = 24
-} ap_oslevel_e;
-
-
-typedef enum {
-    DLL_WINBASEAPI = 0,    // kernel32 From WinBase.h
-    DLL_WINADVAPI = 1,     // advapi32 From WinBase.h
-    DLL_WINSOCKAPI = 2,    // mswsock  From WinSock.h
-    DLL_WINSOCK2API = 3,   // ws2_32   From WinSock2.h
-    DLL_defined = 4        // must define as last idx_ + 1
-} ap_dlltoken_e;
-
-FARPROC LoadLateDllFunc(ap_dlltoken_e fnLib, char *fnName, int ordinal);
-
-/* The LateFunctionName call WILL fault if the function cannot be loaded */
-
-#define DECLARE_LATE_DLL_FUNC(lib, rettype, calltype, fn, ord, args, names) \
-    typedef rettype (calltype *fpt##fn) args; \
-    static fpt##fn pfn##fn = NULL; \
-    __inline rettype Late##fn args \
-    {   if (!pfn##fn) \
-            pfn##fn = (fpt##fn) LoadLateDllFunc(lib, #fn, ord); \
-        return (*(pfn##fn)) names; }; \
-
-/* Provide late bound declarations of every API function missing from 
- * one or more supported releases of the Win32 API
- * 
- * lib is the enumerated token from ap_dlltoken_e, and must correspond 
- * to the string table entry in start.c used by the LoadLateDllFunc().
- * Token names (attempt to) follow Windows.h declarations prefixed by DLL_
- * in order to facilitate comparison.  Use the exact declaration syntax
- * and names from Windows.h to prevent ambigutity and bugs.
- * 
- * rettype and calltype follow the original declaration in Windows.h
- * fn is the true function name - beware Ansi/Unicode #defined macros
- * ord is the ordinal within the library, use 0 if it varies between versions
- * args is the parameter list following the original declaration, in parens
- * names is the parameter list sans data types, enclosed in parens
- *
- * #undef/re#define the Ansi/Unicode generic name to abate confusion
- * In the case of non-text functions, simply #define the original name
- */
-
-DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExA, 0, (
-    IN LPCSTR lpFileName,
-    IN GET_FILEEX_INFO_LEVELS fInfoLevelId,
-    OUT LPVOID lpFileInformation),
-    (lpFileName, fInfoLevelId, lpFileInformation));
-#undef GetFileAttributesEx
-#define GetFileAttributesEx LateGetFileAttributesExA
-
-
-/* APR WINDOWS-ONLY FUNCTIONS
- * This section should define those functions which are
- * only found in the windows version of APR.
- */
-ap_status_t ap_get_oslevel(struct ap_pool_t *, ap_oslevel_e *);
 unsigned __stdcall SignalHandling(void *);
 int thread_ready(void);
 

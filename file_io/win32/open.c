@@ -62,6 +62,7 @@
 #include <winbase.h>
 #include <string.h>
 #include <sys/stat.h>
+#include "misc.h"
 
 ap_status_t file_cleanup(void *thefile)
 {
