@@ -52,8 +52,18 @@
  * <http://www.apache.org/>.
  */
 
-#include "atime.h"
 #include "apr_portable.h"
+#include "apr_time.h"
+#include "apr_lib.h"
+/* System Headers required for time library */
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#if HAVE_TIME_H
+#include <time.h>
+#endif
+/* End System Headers */
+
 
 ap_status_t ap_ansi_time_to_ap_time(ap_time_t *result, time_t input)
 {
