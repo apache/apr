@@ -91,7 +91,11 @@ int main(void)
     char recvbuf[80];
     char *ip_addr;
     apr_port_t fromport;
+#if APR_HAVE_IPV6
     int family = APR_INET6;
+#else
+    int family = APR_INET;
+#endif
 
     STD_TEST_NEQ("Initializing APR", apr_initialize())
 
