@@ -173,9 +173,9 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
 
 #ifdef HAVE_WRITEV
 ap_status_t ap_sendv(ap_socket_t * sock, const struct iovec *vec,
-                     ap_int32_t nvec, ap_int32_t *len)
+                     ap_int32_t nvec, ap_ssize_t *len)
 {
-    ssize_t rv;
+    ap_ssize_t rv;
 
     do {
         rv = writev(sock->socketdes, vec, nvec);
