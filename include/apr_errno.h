@@ -52,12 +52,11 @@
  * <http://www.apache.org/>.
  */
 
-#include "apr_general.h"
-#include "apr.h"
-#include <errno.h>
-
 #ifndef APR_ERRNO_H
 #define APR_ERRNO_H
+
+#include "apr.h"
+#include <errno.h>
 
 #ifdef __cplusplus
 extern "C" {
