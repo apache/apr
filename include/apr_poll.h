@@ -231,10 +231,13 @@ typedef struct apr_pollset_t apr_pollset_t;
  * @param pollset  The pointer in which to return the newly created object 
  * @param size The maximum number of descriptors that this pollset can hold
  * @param p The pool from which to allocate the pollset
+ * @param flags Optional flags to modify the operation of the pollset
+ *              (reserved for future expansion)
  */
 APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                                              apr_uint32_t size,
-                                             apr_pool_t *p);
+                                             apr_pool_t *p,
+                                             apr_uint32_t flags);
 
 /**
  * Destroy a pollset object
