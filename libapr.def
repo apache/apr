@@ -78,10 +78,12 @@ EXPORTS
 	apr_remove_poll_socket   @71
 	apr_clear_poll_sockets   @72
 	apr_getsocketopt @73
-;
-;
-;
-;
+	apr_get_ipaddr @74
+	apr_set_ipaddr @75
+        apr_get_port @76
+	apr_set_port @77
+        apr_get_inaddr @78
+
 ;
 ;
 ; apr_thread_proc.h
@@ -211,17 +213,10 @@ EXPORTS
 	apr_getpass   @202
 
 	apr_tokenize_to_argv @204
-	apr_filename_of_pathname @205
+	apr_filename_of_pathname @205	
 	apr_get_remote_name @206
 	apr_get_local_name @207
-	apr_get_ipaddr @208
-	apr_set_ipaddr @209
-	
-	
-	apr_get_port @212
-	apr_set_port @213
-	
-	
+
 	apr_open_stderr @216
 	apr_get_pipe_timeout @217
         apr_set_pipe_timeout   @218
