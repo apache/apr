@@ -10,6 +10,7 @@ AC_PREREQ(2.12)dnl
 AC_REVISION($1.0$)dnl
 
 dnl #   autoconf initialization
+AC_CONFIG_AUX_DIR(../../../helpers)
 AC_INIT(README)
 AC_CONFIG_HEADER(mm_conf.h)
 AC_PREFIX_DEFAULT(/usr/local)
@@ -50,6 +51,7 @@ dnl #
 AC_CONFIGURE_PART(Build Tools)
 AC_PROG_CC
 AC_PROG_CPP
+#AC_CHECK_TOOL(RANLIB, ranlib, true)
 AC_CHECK_DEBUGGING
 AC_SET_MAKE
 AC_PROG_LIBTOOL

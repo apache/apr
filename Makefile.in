@@ -13,6 +13,7 @@ CC=@CC@
 CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
+AR=@AR@
 RANLIB=@RANLIB@
 #
 # Macros for supporting directories
