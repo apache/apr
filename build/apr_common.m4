@@ -368,15 +368,16 @@ dnl  setting to 1 or 0, we set FLAG-TO-SET to yes or no.
 dnl  
 AC_DEFUN(APR_FLAG_HEADERS,[
 AC_CHECK_HEADERS($1)
-APR_FOREACH([
-[if test "$ac_cv_header_]translit(eachval,[./+-],[__p_])" = "yes"; then
-dnl note: this translit() maps "/" to "_" and omits ".". the third arg
-dnl really *is* intended to be one shorter than the second arg.
-  ifelse($2,,translit(eachval,[/.],[_]),$2)=ifelse($3,yes,yes,1)
-else
-  ifelse($2,,translit(eachval,[/.],[_]),$2)=ifelse($3,yes,no,0)
-fi
-], APR_COMMA_ARGS($1))
+for aprt_i in $1
+do
+    ac_safe=`echo "$aprt_i" | sed 'y%./+-%__p_%'`
+    aprt_2=`echo "$aprt_i" | sed -e 's%/%_%g' -e 's/\.//g'`
+    if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
+       eval "ifelse($2,,$aprt_2,$2)=ifelse($3,yes,yes,1)"
+    else
+       eval "ifelse($2,,$aprt_2,$2)=ifelse($3,yes,no,0)"
+    fi
+done
 ])
 
 dnl APR_FLAG_FUNCS(FUNC ... [, FLAG-TO-SET] [, "yes" ])
