@@ -82,7 +82,7 @@ apr_status_t apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *cont)
     return stat;
 }
 
-apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr, apr_int32_t on)
+apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr, apr_int32_t on)
 {
     apr_status_t stat;
 #ifdef PTHREAD_ATTR_SETDETACHSTATE_ARG2_ADDR
@@ -102,7 +102,7 @@ apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr, apr_int32_t on)
     }
 }
 
-apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr)
+apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr)
 {
     int state;
 

@@ -75,14 +75,14 @@ APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr,
+APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr,
                                                    apr_int32_t on)
 {
     attr->detach = on;
 	return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr)
+APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
 {
     if (attr->detach == 1)
         return APR_DETACH;

@@ -165,20 +165,20 @@ APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new_attr,
                                                 apr_pool_t *cont);
 
 /**
- * Set if newly created threads should be created in detach mode.
+ * Set if newly created threads should be created in detached state.
  * @param attr The threadattr to affect 
  * @param on Thread detach state on or off
- * @deffunc apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr, apr_int32_t on)
+ * @deffunc apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr, apr_int32_t on)
  */
-APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr, 
                                                    apr_int32_t on);
 
 /**
- * Get the detach mode for this threadattr.
+ * Get the detach state for this threadattr.
  * @param attr The threadattr to reference 
- * @deffunc apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr)
+ * @deffunc apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr)
  */
-APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr);
+APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr);
 
 /**
  * Create a new thread of execution

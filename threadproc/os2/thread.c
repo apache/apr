@@ -77,7 +77,7 @@ apr_status_t apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *cont)
 
 
 
-apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr, apr_int32_t on)
+apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr, apr_int32_t on)
 {
     attr->attr |= APR_THREADATTR_DETACHED;
     return APR_SUCCESS;
@@ -85,7 +85,7 @@ apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr, apr_int32_t on)
 
 
 
-apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr)
+apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr)
 {
     return (attr->attr & APR_THREADATTR_DETACHED) ? APR_DETACH : APR_NOTDETACH;
 }
