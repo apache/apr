@@ -67,6 +67,11 @@ struct apr_thread_t {
     apr_pool_t *cntxt;
     NXContext_t ctx;
     NXThreadId_t td;
+    char *thread_name;
+    apr_int32_t cancel;
+    apr_int32_t cancel_how;
+    void *data;
+    apr_thread_start_t func;
 };
 
 struct apr_threadattr_t {
