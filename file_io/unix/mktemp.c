@@ -91,7 +91,7 @@
 
 #ifndef HAVE_MKSTEMP
 
-#if defined(SVR4) || defined(WIN32)
+#if defined(SVR4) || defined(WIN32) || defined(NETWARE)
 #ifdef SVR4
 #include <inttypes.h>
 #endif
