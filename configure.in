@@ -1833,6 +1833,12 @@ fi
 
 AC_SUBST(have_ipv6)
 
+dnl Check for langinfo support
+
+APR_FLAG_HEADERS(langinfo.h)
+APR_FLAG_FUNCS(nl_langinfo)
+APR_CHECK_DEFINE(CODESET, langinfo.h, [CODESET defined in langinfo.h])
+
 dnl ----------------------------- Finalize the variables
 
 echo "${nl}Restore user-defined environment settings..."
