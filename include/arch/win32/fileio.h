@@ -119,6 +119,9 @@ apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars,
 
 /* Entries missing from the MSVC 5.0 Win32 SDK:
  */
+#ifndef FILE_ATTRIBUTE_DEVICE
+#define FILE_ATTRIBUTE_DEVICE        0x00000040
+#endif
 #ifndef FILE_ATTRIBUTE_REPARSE_POINT
 #define FILE_ATTRIBUTE_REPARSE_POINT 0x00000400
 #endif
@@ -141,8 +144,8 @@ apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars,
 #define APR_FREADONLY 0x10000000 
 
 /* Private function for apr_stat/lstat/getfileinfo/dir_read */
-void fillin_fileinfo(apr_finfo_t *finfo, WIN32_FILE_ATTRIBUTE_DATA *wininfo, 
-                     int byhandle);
+int fillin_fileinfo(apr_finfo_t *finfo, WIN32_FILE_ATTRIBUTE_DATA *wininfo, 
+                    int byhandle);
 
 /* Private function that extends apr_stat/lstat/getfileinfo/dir_read */
 apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, 
