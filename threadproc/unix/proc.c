@@ -55,12 +55,6 @@
 #include "threadproc.h"
 #include "apr_portable.h"
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_context_t *cont)
- *    Create and initialize a new procattr variable 
- * arg 1) The newly created procattr. 
- * arg 2) The context to use
- */
 ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_context_t *cont)
 {
     (*new) = (ap_procattr_t *)ap_palloc(cont, 
@@ -82,16 +76,6 @@ ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_context_t *cont)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in, 
- *                               ap_int32_t *out, ap_int32_t err)
- *    Determine if any of stdin, stdout, or stderr should be linked
- *    to pipes when starting a child process. 
- * arg 1) The procattr we care about. 
- * arg 2) Should stdin be a pipe bnack to the parent?
- * arg 3) Should stdout be a pipe bnack to the parent?
- * arg 4) Should stderr be a pipe bnack to the parent?
- */
 ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in, 
                                  ap_int32_t out, ap_int32_t err)
 {
@@ -145,20 +129,6 @@ ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in,
 }
 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_setprocattr_childin(ap_procattr_t *attr, ap_file_t *child_in,
- *                                    ap_file_t *parent_in)
- *    Set the child_in and/or parent_in values to existing ap_file_t
- *    values. This is NOT a required initializer function. This is
- *    useful if you have already opened a pipe (or multiple files)
- *    that you wish to use, perhaps persistently across mutiple
- *    process invocations - such as a log file. You can save some 
- *    extra function calls by not creating your own pipe since this
- *    creates one in the process space for you.
- * arg 1) The procattr we care about. 
- * arg 2) ap_file_t value to use as child_in. Must be a valid file.
- * arg 3) ap_file_t value to use as parent_in. Must be a valid file.
- */
 ap_status_t ap_setprocattr_childin(ap_procattr_t *attr, ap_file_t *child_in,
                                    ap_file_t *parent_in)
 {
@@ -175,19 +145,6 @@ ap_status_t ap_setprocattr_childin(ap_procattr_t *attr, ap_file_t *child_in,
 }
 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_setprocattr_childout(ap_procattr_t *attr, 
- *                                     ap_file_t *child_out, 
- *                                     ap_file_t *parent_out)
- *    Set the child_out and parent_out values to existing ap_file_t
- *    values. This is NOT a required initializer function. This is
- *    useful if you have already opened a pipe (or multiple files)
- *    that you wish to use, perhaps persistently across mutiple
- *    process invocations - such as a log file. 
- * arg 1) The procattr we care about. 
- * arg 2) ap_file_t value to use as child_out. Must be a valid file.
- * arg 3) ap_file_t value to use as parent_out. Must be a valid file.
- */
 ap_status_t ap_setprocattr_childout(ap_procattr_t *attr, ap_file_t *child_out,
                                     ap_file_t *parent_out)
 {
@@ -204,19 +161,6 @@ ap_status_t ap_setprocattr_childout(ap_procattr_t *attr, ap_file_t *child_out,
 }
 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_setprocattr_childerr(ap_procattr_t *attr, 
- *                                     ap_file_t *child_err,
- *                                     ap_file_t *parent_err)
- *    Set the child_err and parent_err values to existing ap_file_t
- *    values. This is NOT a required initializer function. This is
- *    useful if you have already opened a pipe (or multiple files)
- *    that you wish to use, perhaps persistently across mutiple
- *    process invocations - such as a log file. 
- * arg 1) The procattr we care about. 
- * arg 2) ap_file_t value to use as child_err. Must be a valid file.
- * arg 3) ap_file_t value to use as parent_err. Must be a valid file.
- */
 ap_status_t ap_setprocattr_childerr(ap_procattr_t *attr, ap_file_t *child_err,
                                    ap_file_t *parent_err)
 {
@@ -233,14 +177,6 @@ ap_status_t ap_setprocattr_childerr(ap_procattr_t *attr, ap_file_t *child_err,
 }
 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_setprocattr_dir(ap_procattr_t *attr, constchar *dir) 
- *    Set which directory the child process should start executing in. 
- * arg 1) The procattr we care about. 
- * arg 2) Which dir to start in.  By default, this is the same dir as
- *        the parent currently resides in, when the createprocess call
- *        is made. 
- */
 ap_status_t ap_setprocattr_dir(ap_procattr_t *attr, 
                                const char *dir) 
 {
@@ -251,14 +187,6 @@ ap_status_t ap_setprocattr_dir(ap_procattr_t *attr,
     return APR_ENOMEM;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_setprocattr_cmdtype(ap_procattr_t *attr, ap_cmdtype_e cmd) 
- *    Set what type of command the child process will call. 
- * arg 1) The procattr we care about. 
- * arg 2) The type of command.  One of:
- *            APR_SHELLCMD --  Shell script
- *            APR_PROGRAM  --  Executable program   (default) 
- */
 ap_status_t ap_setprocattr_cmdtype(ap_procattr_t *attr,
                                      ap_cmdtype_e cmd) 
 {
@@ -266,25 +194,12 @@ ap_status_t ap_setprocattr_cmdtype(ap_procattr_t *attr,
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t detach) 
- *    Determine if the chlid should start in detached state.
- * arg 1) The procattr we care about. 
- * arg 2) Should the child start in detached state?  Default is no. 
- */
 ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t detach) 
 {
     attr->detached = detach;
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_fork(ap_proc_t **proc, ap_context_t *cont) 
- *    This is currently the only non-portable call in APR.  This executes
- *    a standard unix fork.
- * arg 1) The resulting process handle. 
- * arg 2) The context to use. 
- */
 ap_status_t ap_fork(ap_proc_t **proc, ap_context_t *cont)
 {
     int pid;
@@ -304,21 +219,6 @@ ap_status_t ap_fork(ap_proc_t **proc, ap_context_t *cont)
     return APR_INPARENT;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
- *                               char *const args[], char **env, 
- *                               ap_procattr_t *attr, ap_context_t *cont) 
- *    Create a new process and execute a new program within that process.
- * arg 1) The resulting process handle.
- * arg 2) The program to run 
- * arg 3) the arguments to pass to the new program.  The first one should
- *        be the program name.
- * arg 4) The new environment ap_table_t for the new process.  This should be a
- *        list of NULL-terminated strings.
- * arg 5) the procattr we should use to determine how to create the new
- *        process
- * arg 6) The context to use. 
- */
 ap_status_t ap_create_process(ap_proc_t **new, const char *progname, 
                               char *const args[], char **env,
                               ap_procattr_t *attr, ap_context_t *cont)
@@ -411,55 +311,24 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_childin(ap_file_t **new, ap_proc_t *proc) 
- *    Get the file handle that is assocaited with a child's stdin.
- * arg 1) The returned file handle. 
- * arg 2) The process handle that corresponds to the desired child process 
- */
 ap_status_t ap_get_childin(ap_file_t **new, ap_proc_t *proc)
 {
     (*new) = proc->attr->parent_in;
     return APR_SUCCESS; 
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_childout(ap_file_t **new, ap_proc_t *proc) 
- *    Get the file handle that is assocaited with a child's stdout.
- * arg 1) The returned file handle. 
- * arg 2) The process handle that corresponds to the desired child process 
- */
 ap_status_t ap_get_childout(ap_file_t **new, ap_proc_t *proc)
 {
     (*new) = proc->attr->parent_out; 
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_childerr(ap_file_t **new, ap_proc_t *proc) 
- *    Get the file handle that is assocaited with a child's stderr.
- * arg 1) The returned file handle. 
- * arg 2) The process handle that corresponds to the desired child process 
- */
 ap_status_t ap_get_childerr(ap_file_t **new, ap_proc_t *proc)
 {
     (*new) = proc->attr->parent_err; 
     return APR_SUCCESS;
 }    
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_wait_proc(ap_proc_t *proc, ap_wait_how waithow) 
- *    Wait for a child process to die 
- * arg 1) The process handle that corresponds to the desired child process 
- * arg 2) How should we wait.  One of:
- *            APR_WAIT   -- block until the child process dies.
- *            APR_NOWAIT -- return immediately regardless of if the 
- *                          child is dead or not.
- * NOTE:  The childs status is in the return code to this process.  It is 
- *        one of:
- *            APR_CHILD_DONE     -- child is no longer running.
- *            APR_CHILD_NOTDONE  -- child is still running.
- */
 ap_status_t ap_wait_proc(ap_proc_t *proc, 
                            ap_wait_how_e waithow)
 {
@@ -484,12 +353,6 @@ ap_status_t ap_wait_proc(ap_proc_t *proc,
     return errno;
 } 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
- *    convert the proc from os specific type to apr type.
- * arg 1) The os specific proc we are converting to
- * arg 2) The apr proc we are converting
- */
 ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
 {
     if (proc == NULL) {
@@ -499,14 +362,6 @@ ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_proc(ap_proc_t *proc, ap_os_proc_t *theproc,
- *                            ap_context_t *cont)
- *    convert the proc from os specific type to apr type.
- * arg 1) The apr proc we are converting to.
- * arg 2) The os specific proc to convert
- * arg 3) The context to use if it is needed.
- */
 ap_status_t ap_put_os_proc(ap_proc_t **proc, ap_os_proc_t *theproc, 
                            ap_context_t *cont)
 {

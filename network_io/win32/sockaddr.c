@@ -59,15 +59,6 @@
 #include <string.h>
 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_local_port(ap_socket_t *socket, ap_uint32_t port)
- *    Assocaite a local port with a socket.
- * arg 1) The socket to set
- * arg 2) The local port this socket will be dealing with.
- * NOTE:  This does not bind the two together, it is just telling apr 
- *        that this socket is going to use this port if possible.  If
- *        the port is already used, we won't find out about it here.
- */
 ap_status_t ap_set_local_port(ap_socket_t *sock, ap_uint32_t port)
 {
     sock->local_addr->sin_port = htons((short)port);
@@ -76,14 +67,6 @@ ap_status_t ap_set_local_port(ap_socket_t *sock, ap_uint32_t port)
 
 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_remote_port(ap_socket_t *socket, ap_uint32_t port)
- *    Assocaite a remote port with a socket.
- * arg 1) The socket to enquire about.
- * arg 2) The local port this socket will be dealing with.
- * NOTE:  This does not make a connection to the remote port, it is just 
- *        telling apr which port ap_connect() should attempt to connect to.
- */
 ap_status_t ap_set_remote_port(ap_socket_t *sock, ap_uint32_t port)
 {
     sock->remote_addr->sin_port = htons((short)port);
@@ -92,12 +75,6 @@ ap_status_t ap_set_remote_port(ap_socket_t *sock, ap_uint32_t port)
 
 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_local_port(ap_uint32_t *port, ap_socket_t *socket)
- *    Return the local port with a socket.
- * arg 1) The local port this socket is associated with.
- * arg 2) The socket to enquire about.
- */
 ap_status_t ap_get_local_port(ap_uint32_t *port, ap_socket_t *sock)
 {
     *port = ntohs(sock->local_addr->sin_port);
@@ -106,12 +83,6 @@ ap_status_t ap_get_local_port(ap_uint32_t *port, ap_socket_t *sock)
 
 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_remote_port(ap_uint32_t *port, ap_socket_t *socket)
- *    Return the remote port associated with a socket.
- * arg 1) The remote port this socket is associated with.
- * arg 2) The socket to enquire about.
- */
 ap_status_t ap_get_remote_port(ap_uint32_t *port, ap_socket_t *sock)
 {
     *port = ntohs(sock->remote_addr->sin_port);
@@ -120,15 +91,6 @@ ap_status_t ap_get_remote_port(ap_uint32_t *port, ap_socket_t *sock)
 
 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_local_ipaddr(ap_socket_t *socket, cont char *addr)
- *    Assocaite a local socket addr with an apr socket.
- * arg 1) The socket to use 
- * arg 2) The IP address to attach to the socket.
- *        Use APR_ANYADDR to use any IP addr on the machine.
- * NOTE:  This does not bind the two together, it is just telling apr 
- *        that this socket is going to use this address if possible. 
- */
 ap_status_t ap_set_local_ipaddr(ap_socket_t *sock, const char *addr)
 {
     u_long ipaddr;
@@ -148,14 +110,6 @@ ap_status_t ap_set_local_ipaddr(ap_socket_t *sock, const char *addr)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_remote_ipaddr(ap_socket_t *socket, cont char *addr)
- *    Assocaite a remote socket addr with an apr socket.
- * arg 1) The socket to use 
- * arg 2) The IP address to attach to the socket.
- * NOTE:  This does not make a connection to the remote address, it is just
- *        telling apr which address ap_connect() should attempt to connect to.
- */
 ap_status_t ap_set_remote_ipaddr(ap_socket_t *sock, const char *addr)
 {
     u_long ipaddr;
@@ -175,12 +129,6 @@ ap_status_t ap_set_remote_ipaddr(ap_socket_t *sock, const char *addr)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_local_ipaddr(char **addr, const ap_socket_t *socket)
- *    Return the local IP address associated with an apr socket.
- * arg 1) The local IP address associated with the socket.
- * arg 2) The socket to use 
- */
 ap_status_t ap_get_local_ipaddr(char **addr, const ap_socket_t *sock)
 {
     *addr = ap_pstrdup(sock->cntxt, inet_ntoa(sock->local_addr->sin_addr));
@@ -189,12 +137,6 @@ ap_status_t ap_get_local_ipaddr(char **addr, const ap_socket_t *sock)
 
 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_remote_ipaddr(char **addr, const ap_socket_t *socket)
- *    Return the remote IP address associated with an apr socket.
- * arg 1) The remote IP address associated with the socket.
- * arg 2) The socket to use 
- */
 ap_status_t ap_get_remote_ipaddr(char **addr, const ap_socket_t *sock)
 {
     *addr = ap_pstrdup(sock->cntxt, inet_ntoa(sock->remote_addr->sin_addr));
@@ -202,12 +144,6 @@ ap_status_t ap_get_remote_ipaddr(char **addr, const ap_socket_t *sock)
 }
 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_local_name(struct sockaddr_in **name, const ap_socket_t *socket)
- *    Return the local socket name as a BSD style struct sockaddr_in.
- * arg 1) The local name associated with the socket.
- * arg 2) The socket to use 
- */
 ap_status_t ap_get_local_name(struct sockaddr_in **name, const ap_socket_t *sock)
 {
     *name = sock->local_addr;
@@ -216,12 +152,6 @@ ap_status_t ap_get_local_name(struct sockaddr_in **name, const ap_socket_t *sock
 
 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_remote_name(struct sockaddr_in **name, const ap_socket_t *socket)
- *    Return the remote socket name as a BSD style struct sockaddr_in.
- * arg 1) The remote name associated with the socket.
- * arg 2) The socket to use 
- */
 ap_status_t ap_get_remote_name(struct sockaddr_in **name, const ap_socket_t *sock)
 {
     *name = sock->remote_addr;

@@ -58,15 +58,6 @@
 #if APR_HAS_THREADS
 
 #ifdef HAVE_PTHREAD_H
-/* ***APRDOC********************************************************
- * ap_status_t ap_create_thread_private(ap_threadkey_t **key, 
- *                                      void (*dest)(void *),
- *                                      ap_context_t *cont)
- *    Create and initialize a new thread private address space
- * arg 1) The thread private handle.
- * arg 2) The destructor to use when freeing the private memory.
- * arg 3) The context to use
- */
 ap_status_t ap_create_thread_private(ap_threadkey_t **key, 
                                      void (*dest)(void *), ap_context_t *cont)
 {
@@ -85,24 +76,12 @@ ap_status_t ap_create_thread_private(ap_threadkey_t **key,
     return stat;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_thread_private(void **new, ap_threadkey_t *key)
- *    Get a pointer to the thread private memory
- * arg 1) The data stored in private memory 
- * arg 2) The handle for the desired thread private memory 
- */
 ap_status_t ap_get_thread_private(void **new, ap_threadkey_t *key)
 {
     (*new) = pthread_getspecific(key->key);
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_thread_private(void *priv, ap_threadkey_t *key)
- *    Set the data to be stored in thread private memory
- * arg 1) The data to be stored in private memory 
- * arg 2) The handle for the desired thread private memory 
- */
 ap_status_t ap_set_thread_private(void *priv, ap_threadkey_t *key)
 {
     ap_status_t stat;
@@ -114,11 +93,6 @@ ap_status_t ap_set_thread_private(void *priv, ap_threadkey_t *key)
     }
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_delete_thread_private(ap_threadkey_t *key)
- *    Free the thread private memory
- * arg 1) The handle for the desired thread private memory 
- */
 ap_status_t ap_delete_thread_private(ap_threadkey_t *key)
 {
     ap_status_t stat;
@@ -128,14 +102,6 @@ ap_status_t ap_delete_thread_private(ap_threadkey_t *key)
     return stat;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_threadkeydata(void **data, char *key, 
- *                                  ap_threadkey_t *threadkey)
- *    Return the context associated with the current threadkey.
- * arg 1) The user data associated with the threadkey.
- * arg 2) The key associated with the data
- * arg 3) The currently open threadkey.
- */
 ap_status_t ap_get_threadkeydata(void **data, char *key, ap_threadkey_t *threadkey)
 {
     if (threadkey != NULL) {
@@ -147,16 +113,6 @@ ap_status_t ap_get_threadkeydata(void **data, char *key, ap_threadkey_t *threadk
     }
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_threadkeydata(void *data, char *key,
-                                    ap_status_t (*cleanup) (void *),
-                                    ap_threadkey_t *threadkey)
- *    Return the context associated with the current threadkey.
- * arg 1) The data to set.
- * arg 1) The key to associate with the data.
- * arg 2) The user data to associate with the threadkey.
- * arg 1) The currently open threadkey.
- */
 ap_status_t ap_set_threadkeydata(void *data,
                                  char *key, ap_status_t (*cleanup) (void *),
                                  ap_threadkey_t *threadkey)
@@ -170,13 +126,6 @@ ap_status_t ap_set_threadkeydata(void *data,
     }
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_threadkey(ap_threadkey_t *thekey, ap_os_threadkey_t *key)
- *    convert the thread private memory key to os specific type 
- *    from an apr type.
- * arg 1) The apr handle we are converting from.
- * arg 2) The os specific handle we are converting to.
- */
 ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, ap_threadkey_t *key)
 {
     if (key == NULL) {
@@ -186,14 +135,6 @@ ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, ap_threadkey_t *key)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_threadkey(ap_threadkey_t *key, ap_os_threadkey_t *thekey, 
- *                                 ap_context_t *cont)
- *    convert the thread private memory key from os specific type to apr type.
- * arg 1) The apr handle we are converting to.
- * arg 2) The os specific handle to convert
- * arg 3) The context to use if it is needed.
- */
 ap_status_t ap_put_os_threadkey(ap_threadkey_t **key, 
                                 ap_os_threadkey_t *thekey, ap_context_t *cont)
 {

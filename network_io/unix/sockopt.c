@@ -96,24 +96,6 @@ static ap_status_t sononblock(int sd)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
- *    Setup socket options for the specified socket 
- * arg 1) The socket to set up.
- * arg 2) The option we would like to configure.  One of:
- *            APR_SO_DEBUG      --  turn on debugging information 
- *            APR_SO_KEEPALIVE  --  keep connections active
- *            APR_SO_LINGER     --  lingers on close if data is present
- *            APR_SO_NONBLOCK   --  Turns blocking on/off for socket
- *            APR_SO_REUSEADDR  --  The rules used in validating addresses
- *                                  supplied to bind should allow reuse
- *                                  of local addresses.
- *            APR_SO_TIMEOUT    --  Set the timeout value in seconds.
- *                                  values < 0 mean wait forever.  0 means
- *                                  don't wait at all.
- *            APR_SO_SNDBUF     --  Set the SendBufferSize
- * arg 3) Are we turning the option on or off.
- */
 ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
 {
     int one;
@@ -171,14 +153,6 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
     return APR_SUCCESS;
 }         
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_context_t *cont)
- *    Get name of the current machine 
- * arg 1) A buffer to store the hostname in.
- * arg 2) The maximum length of the hostname that can be stored in the
- *        buffer provided. 
- * arg 3) The context to use.
- */
 ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_context_t *cont)
 {
     if (gethostname(buf, len) == -1)
@@ -187,12 +161,6 @@ ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_context_t *cont)
         return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_remote_hostname(char **name, ap_socket_t *sock)
- *    Get name of the machine we are currently connected to. 
- * arg 1) A buffer to store the hostname in.
- * arg 2) The socket to examine.
- */
 ap_status_t ap_get_remote_hostname(char **name, ap_socket_t *sock)
 {
     struct hostent *hptr;

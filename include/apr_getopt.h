@@ -63,6 +63,25 @@ API_VAR_IMPORT int
 API_VAR_IMPORT char *
     ap_optarg;                          /* argument associated with option */
 
+/* ***APRDOC********************************************************
+ * ap_status_t ap_getopt(ap_int32_t nargc, char *const *nargv, 
+ *                       const char *ostr, ap_int32_t *rv, ap_context_t *cont)
+ *    Parse the command line options passed to the program.
+ * arg 1) The number of arguments passed to ap_getopt to parse
+ * arg 2) The array of command line options to parse
+ * arg 3) A string of characters that are acceptable options to the program.
+ *        characters followed by ":" are required to have an option 
+ *        associated 
+ * arg 4) The next option found.  There are four potential values for 
+ *        this variable on exit. They are:
+ *            APR_EOF    --  No more options to parse
+ *            APR_BADCH  --  Found a bad option character
+ *            APR_BADARG --  Missing parameter for the found option
+ *            Other      --  The next option found.
+ * arg 5) The context to operate on.
+ * NOTE:  Arguments 2 and 3 are most commonly argc and argv from 
+ *        main(argc, argv)
+ */
 ap_status_t ap_getopt(ap_int32_t nargc, char *const *nargv, const char *ostr,
                       ap_int32_t *rv, ap_context_t *cont);
 

@@ -55,27 +55,6 @@
 #include "locks.h"
 #include "apr_portable.h"
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
- *                            ap_lockscope_e scope, char *fname, 
- *                            ap_context_t *cont)
- *    Create a new instance of a lock structure. 
- * arg 1) The newly created lock structure.
- * arg 2) The type of lock to create, one of:
- *            APR_MUTEX
- *            APR_READWRITE
- * arg 3) The scope of the lock to create, one of:
- *            APR_CROSS_PROCESS -- lock processes from the protected area.
- *            APR_INTRAPROCESS  -- lock threads from the protected area.
- *            APR_LOCKALL       -- lock processes and threads from the
- *                                 protected area.
- * arg 4) A file name to use if the lock mechanism requires one.  This
- *        argument should always be provided.  The lock code itself will
- *        determine if it should be used.
- * arg 5) The context to operate on.
- * NOTE:  APR_CROSS_PROCESS may lock both processes and threads, but it is
- *        only guaranteed to lock processes.
- */
 ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, 
                            ap_lockscope_e scope, char *fname, 
                            ap_context_t *cont)
@@ -119,11 +98,6 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_lock(ap_lock_t *lock)
- *    Lock a protected region. 
- * arg 1) The lock to set.
- */
 ap_status_t ap_lock(ap_lock_t *lock)
 {
     ap_status_t stat;
@@ -144,11 +118,6 @@ ap_status_t ap_lock(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_unlock(ap_lock_t *lock)
- *    Unlock a protected region. 
- * arg 1) The lock to reset.
- */
 ap_status_t ap_unlock(ap_lock_t *lock)
 {
     ap_status_t stat;
@@ -170,13 +139,6 @@ ap_status_t ap_unlock(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_destroy_lock(ap_lock_t *lock)
- *    Free the memory associated with a lock. 
- * arg 1) The lock to free.
- * NOTE:  If the lock is currently active when it is destroyed, it 
- *        will be unlocked first.
- */
 ap_status_t ap_destroy_lock(ap_lock_t *lock)
 {
     ap_status_t stat;
@@ -197,21 +159,6 @@ ap_status_t ap_destroy_lock(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_child_init_lock(ap_lock_t **lock, char *fname, 
- *                                ap_context_t *cont)
- *    Re-open a lock in a child process. 
- * arg 1) The newly re-opened lock structure.
- * arg 2) A file name to use if the lock mechanism requires one.  This
- *        argument should always be provided.  The lock code itself will
- *        determine if it should be used.  This filename should be the same
- *        one that was passed to ap_create_lock
- * arg 3) The context to operate on.
- * NOTE:  This function doesn't always do something, it depends on the
- *        locking mechanism chosen for the platform, but it is a good
- *        idea to call it regardless, because it makes the code more
- *        portable. 
- */
 ap_status_t ap_child_init_lock(ap_lock_t **lock, char *fname, ap_context_t *cont)
 {
     ap_status_t stat;
@@ -223,13 +170,6 @@ ap_status_t ap_child_init_lock(ap_lock_t **lock, char *fname, ap_context_t *cont
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_lockdata(ap_lock_t *lock, char *key, void *data)
- *    Return the context associated with the current lock.
- * arg 1) The currently open lock.
- * arg 2) The key to use when retreiving data associated with this lock
- * arg 3) The user data associated with the lock.
- */
 ap_status_t ap_get_lockdata(ap_lock_t *lock, char *key, void *data)
 {
     if (lock != NULL) {
@@ -241,15 +181,6 @@ ap_status_t ap_get_lockdata(ap_lock_t *lock, char *key, void *data)
     }
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, char *key,
-                               ap_status_t (*cleanup) (void *))
- *    Return the context associated with the current lock.
- * arg 1) The currently open lock.
- * arg 2) The user data to associate with the lock.
- * arg 3) The key to use when associating data with this lock
- * arg 4) The cleanup to use when the lock is destroyed.
- */
 ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
 {
@@ -262,12 +193,6 @@ ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, char *key,
     }
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, ap_lock_t *lock)
- *    onvert the lock from os specific type to apr type
- * arg 1) The os specific lock we are converting to.
- * arg 2) The apr lock to convert.
- */
 ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, ap_lock_t *lock)
 {
     if (lock == NULL) {
@@ -283,14 +208,6 @@ ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *,
- *                            ap_context_t *cont)
- *    onvert the lock from os specific type to apr type
- * arg 1) The apr lock we are converting to.
- * arg 2) The os specific lock to convert.
- * arg 3) The context to use if it is needed.
- */
 ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *thelock, 
                            ap_context_t *cont)
 {

@@ -56,14 +56,6 @@
 
 #ifdef HAVE_POLL    /* We can just use poll to do our socket polling. */
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, 
- *                           ap_context_t *cont)
- *    Setup the memory required for poll to operate properly.
- * arg 1) The poll structure to be used. 
- * arg 2) The number of socket descriptors to be polled.
- * arg 3) The context to operate on.
- */
 ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_context_t *cont)
 {
     (*new) = (ap_pollfd_t *)ap_palloc(cont, sizeof(ap_pollfd_t));
@@ -119,17 +111,6 @@ ap_int16_t get_revent(ap_int16_t event)
     return rv;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock, 
- *                                ap_int16_t event)
- *    Add a socket to the poll structure. 
- * arg 1) The poll structure we will be using. 
- * arg 2) The socket to add to the current poll structure. 
- * arg 3) The events to look for when we do the poll.  One of:
- *            APR_POLLIN    -- signal if read will not block
- *            APR_POLLPRI   -- signal if prioirty data is availble to be read
- *            APR_POLLOUT   -- signal if write will not block
- */
 ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset, 
 			       ap_socket_t *sock, ap_int16_t event)
 {
@@ -147,19 +128,6 @@ ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds,
- *                     ap_int32_t timeout)
- *    Poll the sockets in the poll structure.  This is a blocking call,
- *    and it will not return until either a socket has been signalled, or
- *    the timeout has expired. 
- * arg 1) The poll structure we will be using. 
- * arg 2) The number of sockets we are polling. 
- * arg 3) The amount of time in seconds to wait.  This is a maximum, not 
- *        a minimum.  If a socket is signalled, we will wake up before this
- *        time.  A negative number means wait until a socket is signalled.
- * NOTE:  The number of sockets signalled is returned in the second argument. 
- */
 ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeout)
 {
     int i;
@@ -191,21 +159,6 @@ ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeout)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_revents(ap_int_16_t *event, ap_socket_t *sock,
- *                            ap_pollfd_t *aprset)
- *    Get the return events for the specified socket. 
- * arg 1) The returned events for the socket.  One of:
- *            APR_POLLIN    -- Data is available to be read 
- *            APR_POLLPRI   -- Prioirty data is availble to be read
- *            APR_POLLOUT   -- Write will succeed
- *            APR_POLLERR   -- An error occurred on the socket
- *            APR_POLLHUP   -- The connection has been terminated
- *            APR_POLLNVAL  -- This is an invalid socket to poll on.
- *                             Socket not open.
- * arg 2) The socket we wish to get information about. 
- * arg 3) The poll structure we will be using. 
- */
 ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *aprset)
 {
     int i = 0;
@@ -220,17 +173,6 @@ ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *ap
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock,
- *                                   ap_int16_t events)
- *    Add a socket to the poll structure. 
- * arg 1) The poll structure we will be using. 
- * arg 2) The socket to remove from the current poll structure. 
- * arg 3) The events to stop looking for during the poll.  One of:
- *            APR_POLLIN    -- signal if read will not block
- *            APR_POLLPRI   -- signal if prioirty data is availble to be read
- *            APR_POLLOUT   -- signal if write will not block
- */
 ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, 
                                   ap_socket_t *sock, ap_int16_t events)
 {
@@ -251,15 +193,6 @@ ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_clear_poll_sockets(ap_pollfd_t *aprset, ap_int16_t events)
- *    Remove all sockets from the poll structure. 
- * arg 1) The poll structure we will be using. 
- * arg 2) The events to clear from all sockets.  One of:
- *            APR_POLLIN    -- signal if read will not block
- *            APR_POLLPRI   -- signal if prioirty data is availble to be read
- *            APR_POLLOUT   -- signal if write will not block
- */
 ap_status_t ap_clear_poll_sockets(ap_pollfd_t *aprset, ap_int16_t events)
 {
     int i = 0;
@@ -420,13 +353,6 @@ ap_status_t ap_clear_poll_sockets(ap_pollfd_t *aprset, ap_int16_t event)
 
 #endif 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_polldata(ap_pollfd_t *pollfd, char *key, void *data)
- *    Return the context associated with the current poll.
- * arg 1) The currently open pollfd.
- * arg 2) The key to use for retreiving data associated with a poll struct.
- * arg 3) The user data associated with the pollfd.
- */
 ap_status_t ap_get_polldata(ap_pollfd_t *pollfd, char *key, void *data)
 {
     if (pollfd != NULL) {
@@ -438,14 +364,6 @@ ap_status_t ap_get_polldata(ap_pollfd_t *pollfd, char *key, void *data)
     }
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_polldata(ap_pollfd_t *pollfd, void *data, char *key,
-                               ap_status_t (*cleanup) (void *))
- *    Return the context associated with the current poll.
- * arg 1) The currently open pollfd.
- * arg 2) The user data to associate with the pollfd.
-
- */
 ap_status_t ap_set_polldata(ap_pollfd_t *pollfd, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
 {

@@ -215,15 +215,82 @@ typedef int               ap_signum_t;
 
 
 /* Context functions */
+/* ***APRDOC********************************************************
+ * ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
+ *    Create a new context.
+ * arg 1) The context we have just created.
+ * arg 2) The parent context.  If this is NULL, the new context is a root
+ *        context.  If it is non-NULL, the new context will inherit all
+ *        of it's parent context's attributes, except the ap_context_t will be a
+ *        sub-pool.
+ */
 ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont);
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_destroy_context(ap_context_t *cont)
+ *    Free the context and all of it's child contexts'.
+ * arg 1) The context to free.
+ */
 ap_status_t ap_destroy_context(struct ap_context_t *cont);
 ap_status_t ap_exit(ap_context_t *);
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_set_userdata(void *data, char *key, 
+ *                             ap_status_t (*cleanup) (void *),
+ *                             ap_context_t *cont)
+ *    Set the data associated with the current context.
+ * arg 1) The user data associated with the context.
+ * arg 2) The key to use for association
+ * arg 3) The cleanup program to use to cleanup the data;
+ * arg 4) The current context.
+ * NOTE:  The data to be attached to the context should have the same
+ *        life span as the context it is being attached to.
+ *        
+ *        Users of APR must take EXTREME care when choosing a key to
+ *        use for their data.  It is possible to accidentally overwrite
+ *        data by choosing a key that another part of the program is using
+ *        It is advised that steps are taken to ensure that a unique
+ *        key is used at all times.
+ */
 ap_status_t ap_set_userdata(void *data, char *key, 
                             ap_status_t (*cleanup) (void *), 
                             ap_context_t *cont);
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_get_userdata(void **data, char *key, ap_context_t *cont)
+ *    Return the data associated with the current context.
+ * arg 1) The key for the data to retrieve
+ * arg 2) The user data associated with the context.
+ * arg 3) The current context.
+ */
 ap_status_t ap_get_userdata(void **, char *key, ap_context_t *cont);
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_initialize(void)
+ *    Setup any APR internal data structures.  This MUST be the first
+ *    function called for any APR program.
+ */
 ap_status_t ap_initialize(void);
+
+/* ***APRDOC*******************************************************
+ * void ap_terminate(void)
+ *    Tear down any APR internal data structures which aren't
+ *    torn down automatically.  An APR program must call this
+ *    function at termination once it has stopped using APR
+ *    services.
+ */
 void        ap_terminate(void);
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_context_t *cont)
+ *    Set the APR_ABORT function.
+ * NOTE:  This is in for backwards compatability.  If the program using
+ *        APR wants APR to exit on a memory allocation error, then this
+ *        function should be called to set the function to use in order
+ *        to actually exit the program.  If this function is not called,
+ *        then APR will return an error and expect the calling program to
+ *        deal with the error accordingly.
+ */
 ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_context_t *cont);
 
 #ifdef __cplusplus

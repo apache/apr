@@ -54,12 +54,6 @@
 
 #include "threadproc.h"
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_detach(ap_proc_t **new, ap_context_t *cont)
- *    Detach the process from the controlling terminal.
- * arg 1) The new process handler
- * arg 2) The context to use if it is needed.
- */
 ap_status_t ap_detach(ap_proc_t **new, ap_context_t *cont)
 {
     int x;
@@ -124,13 +118,6 @@ ap_status_t ap_detach(ap_proc_t **new, ap_context_t *cont)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_procdata(char *key, void *data, ap_proc_t *proc)
- *    Return the context associated with the current proc.
- * arg 1) The key associated with the data to retreive.
- * arg 2) The user data associated with the proc.
- * arg 3) The currently open proc.
- */
 ap_status_t ap_get_procdata(char *key, void *data, ap_proc_t *proc)
 {
     if (proc != NULL) {
@@ -142,15 +129,6 @@ ap_status_t ap_get_procdata(char *key, void *data, ap_proc_t *proc)
     }
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_procdata(void *data, char *key,
- *                             ap_status_t (*cleanup) (void *), ap_proc_t *proc)
- *    Return the context associated with the current proc.
- * arg 2) The user data to associate with the file.
- * arg 3) The key to use for assocaiteing data with the file.
- * arg 4) The cleanup routine to use when the file is destroyed.
- * arg 1) The current process.
-*/
 ap_status_t ap_set_procdata(void *data, char *key, 
                             ap_status_t (*cleanup) (void *),
                             ap_proc_t *proc)

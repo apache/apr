@@ -69,13 +69,32 @@ typedef struct ap_mmap_t            ap_mmap_t;
 
 /*   Function definitions */
 
-/* creation */
+/* ***APRDOC********************************************************
+ * ap_status_t ap_mmap_create(ap_mmap_t **new, ap_file_t *file, ap_off_t offset)
+ *    Create a new mmap'ed file out of an existing APR file.
+ * arg 1) The newly created mmap'ed file.
+ * arg 2) The file turn into an mmap.
+ * arg 3) The offset into the file to start the data pointer at.
+ * arg 4) The size of the file
+ * arg 5) The context to use when creating the mmap.
+ */
 ap_status_t ap_mmap_create(ap_mmap_t ** newmmap, ap_file_t *file, ap_off_t offset,
                  ap_size_t size, ap_context_t *cntxt);
 
-/* destruction */
+/* ***APRDOC********************************************************
+ * ap_status_t ap_mmap_delete(ap_mmap_t *mmap)
+ *    Remove a mmap'ed.
+ * arg 1) The mmap'ed file.
+ */
 ap_status_t ap_mmap_delete(ap_mmap_t *mmap);
 
+/* ***APRDOC********************************************************
+ * ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_offset_t offset)
+ *    Move the pointer into the mmap'ed file to the specified offset.
+ * arg 1) The pointer to the offset specified.
+ * arg 2) The mmap'ed file.
+ * arg 3) The offset to move to.
+ */
 ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_off_t offset);
 
 #ifdef __cplusplus

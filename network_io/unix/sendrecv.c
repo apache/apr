@@ -94,16 +94,6 @@ static ap_status_t wait_for_io_or_timeout(ap_socket_t *sock, int for_read)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
- *    Send data over a network.
- * arg 1) The socket to send the data over.
- * arg 2) The buffer which contains the data to be sent. 
- * arg 3) The maximum number of bytes to send 
- * NOTE:  This functions acts like a blocking write by default.  To change 
- *        this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
- *        The number of bytes actually sent is stored in argument 3.
- */
 ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
 {
     ssize_t rv;
@@ -134,16 +124,6 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
- *    Read data from a network.
- * arg 1) The socket to read the data from.
- * arg 2) The buffer to store the data in. 
- * arg 3) The maximum number of bytes to read 
- * NOTE:  This functions acts like a blocking write by default.  To change 
- *        this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
- *        The number of bytes actually sent is stored in argument 3.
- */
 ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
 {
     ssize_t rv;
@@ -174,18 +154,6 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, 
-                        ap_int32_t nvec, ap_int32_t *len)
- *    Send multiple packets of data over a network.
- * arg 1) The socket to send the data over.
- * arg 2) The array of iovec structs containing the data to send 
- * arg 3) The number of iovec structs in the array
- * arg 4) Receives the number of bytes actually written
- * NOTE:  This functions acts like a blocking write by default.  To change 
- *        this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
- *        The number of bytes actually sent is stored in argument 3.
- */
 ap_status_t ap_sendv(ap_socket_t * sock, const struct iovec *vec,
                      ap_int32_t nvec, ap_int32_t *len)
 {
@@ -218,21 +186,6 @@ ap_status_t ap_sendv(ap_socket_t * sock, const struct iovec *vec,
 }
 
 #if defined(HAVE_SENDFILE)
-/* ***APRDOC********************************************************
- * ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file, ap_hdtr_t *hdtr, 
- *                         ap_off_t *offset, ap_size_t *len, ap_int32_t flags)
- *    Send a file from an open file descriptor to a socket, along with 
- *    optional headers and trailers
- * arg 1) The socket to which we're writing
- * arg 2) The open file from which to read
- * arg 3) A structure containing the headers and trailers to send
- * arg 4) Offset into the file where we should begin writing
- * arg 5) Number of bytes to send 
- * arg 6) OS-specific flags to pass to sendfile()
- * NOTE:  This functions acts like a blocking write by default.  To change 
- *        this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
- *        The number of bytes actually sent is stored in argument 5.
- */
 
  /* TODO: Verify that all platforms handle the fd the same way 
   *     (i.e. not moving current file pointer)
