@@ -83,7 +83,7 @@ typedef   key_t          apr_shm_name_t;
 typedef   void           apr_shm_name_t;
 #endif
 
-typedef   struct shmem_t apr_shmem_t;
+typedef   struct apr_shmem_t apr_shmem_t;
 
 /**
  * Create a pool of shared memory for use later.
