@@ -80,6 +80,7 @@ ap_status_t ap_open(struct file_t **dafile, const char *fname,
 {
     DWORD oflags = 0;
     DWORD createflags = 0;
+    DWORD attributes = 0;
 
     (*dafile) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
 
@@ -106,12 +107,25 @@ ap_status_t ap_open(struct file_t **dafile, const char *fname,
     (*dafile)->demonfname = canonical_filename((*dafile)->cntxt, fname);
     (*dafile)->lowerdemonfname = strlwr((*dafile)->demonfname);
     
-    createflags = OPEN_ALWAYS;     
     if (flag & APR_CREATE) {
         if (flag & APR_EXCL) {
+            /* only create new if file does not already exist */
             createflags = CREATE_NEW;
+        } else if (flag & APR_TRUNCATE) {
+            /* truncate existing file or create new */
+            createflags = CREATE_ALWAYS;
+        } else {
+            /* open existing but create if necessary */
+            createflags = OPEN_ALWAYS;
         }
+    } else if (flag & APR_TRUNCATE) {
+        /* only truncate if file already exists */
+        createflags = TRUNCATE_EXISTING;
+    } else {
+        /* only open if file already exists */
+        createflags = OPEN_EXISTING;
     }
+
     if ((flag & APR_EXCL) && !(flag & APR_CREATE)) {
         (*dafile)->filehand = INVALID_HANDLE_VALUE;
         return APR_EACCES;
@@ -128,8 +142,13 @@ ap_status_t ap_open(struct file_t **dafile, const char *fname,
         createflags = TRUNCATE_EXISTING;
     }
  
+    attributes = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN;
+    if (flag & APR_DELONCLOSE) {
+        attributes |= FILE_FLAG_DELETE_ON_CLOSE;
+    }
+
     (*dafile)->filehand = CreateFile(fname, oflags, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-                                     NULL, createflags, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0);
+                                     NULL, createflags, attributes, 0);
 
     if ((*dafile)->filehand == INVALID_HANDLE_VALUE) {
         return GetLastError();
