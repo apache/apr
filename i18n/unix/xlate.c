@@ -219,6 +219,14 @@ static void check_sbcs(apr_xlate_t *convset)
 }
 #endif /* HAVE_ICONV */
 
+static void make_identity_table(apr_xlate_t *convset)
+{
+  int i;
+  convset->sbcs_table = apr_palloc(convset->pool, 256);
+  for (i = 0; i < 256; i++)
+      convset->sbcs_table[i] = i;
+}
+
 apr_status_t apr_xlate_open(apr_xlate_t **convset, const char *topage,
                             const char *frompage, apr_pool_t *pool)
 {
@@ -251,6 +259,12 @@ apr_status_t apr_xlate_open(apr_xlate_t **convset, const char *topage,
     set found to non-zero if found in the cache
 #endif
 
+    if ((! found) && (strcmp(topage, frompage) == 0)) {
+        /* to and from are the same */
+        found = 1;
+	make_identity_table(new);
+    }
+
 #ifdef HAVE_ICONV
     if (!found) {
         new->ich = iconv_open(topage, frompage);
@@ -259,7 +273,8 @@ apr_status_t apr_xlate_open(apr_xlate_t **convset, const char *topage,
         }
         found = 1;
         check_sbcs(new);
-    }
+    } else
+        new->ich = (iconv_t)-1;
 #endif /* HAVE_ICONV */
 
     if (found) {
