@@ -152,6 +152,11 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     if (flag & APR_TRUNCATE) {
         oflags |= O_TRUNC;
     }
+#ifdef O_BINARY
+    if (flag & APR_BINARY) {
+        oflags |= O_BINARY;
+    }
+#endif
     
     if (perm == APR_OS_DEFAULT) {
         (*new)->filedes = open(fname, oflags, 0666);
