@@ -55,7 +55,7 @@
 #include "test_apr.h"
 #include "apr.h"
 #include "apr_portable.h"
-
+#include "apr_strings.h"
 
 static void ssize_t_fmt(CuTest *tc)
 {
