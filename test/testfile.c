@@ -57,6 +57,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "apr_file_io.h"
+#include "apr_file_info.h"
 #include "apr_network_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
@@ -64,6 +65,27 @@
 #ifdef BEOS
 #include <unistd.h>
 #endif
+
+struct view_fileinfo
+{
+    apr_int32_t bits;
+    char *description;
+} vfi[] = {
+    APR_FINFO_MTIME,  "MTIME",
+    APR_FINFO_CTIME,  "CTIME",
+    APR_FINFO_ATIME,  "ATIME",
+    APR_FINFO_SIZE,   "SIZE",
+    APR_FINFO_DEV,    "DEV",
+    APR_FINFO_INODE,  "INODE",
+    APR_FINFO_NLINK,  "NLINK",
+    APR_FINFO_TYPE,   "TYPE",
+    APR_FINFO_USER,   "USER", 
+    APR_FINFO_GROUP,  "GROUP", 
+    APR_FINFO_UPROT,  "UPROT", 
+    APR_FINFO_GPROT,  "GPROT",
+    APR_FINFO_WPROT,  "WPROT",
+    0,                NULL
+}; 
 
 int test_filedel(apr_pool_t *);
 int testdirs(apr_pool_t *);
@@ -79,6 +101,7 @@ int main(void)
     apr_pool_t *context;
     apr_pool_t *cont2;
     apr_file_t *thefile = NULL;
+    apr_finfo_t finfo;
     apr_socket_t *testsock = NULL;
     apr_pollfd_t *sdset = NULL;
     apr_status_t status;
@@ -90,6 +113,8 @@ int main(void)
     const char *str;
     char *filename = "test.fil";
     char *teststr;
+    apr_uid_t uid;
+    apr_gid_t gid;
 #if APR_FILES_AS_SOCKETS
     apr_int32_t num;
 #endif
@@ -227,6 +252,25 @@ int main(void)
         fprintf(stdout, "OK\n");
     }
 
+    fprintf(stdout, "\tGetting fileinfo.......");
+    status = apr_getfileinfo(&finfo, APR_FINFO_NORM, thefile);
+    if (status  == APR_INCOMPLETE) {
+	int i;
+        fprintf(stdout, "INCOMPLETE\n");
+        for (i = 0; vfi[i].bits; ++i)
+            if (vfi[i].bits & ~finfo.valid)
+                fprintf(stdout, "\t    Missing %s\n", vfi[i].description);
+    }
+    else if (status  != APR_SUCCESS) {
+        fprintf(stderr, "Couldn't get the fileinfo\n");
+        exit(-1); 
+    }
+    else {
+        fprintf(stdout, "OK\n");
+    }
+    gid = finfo.group;
+    uid = finfo.user;
+
     fprintf(stdout, "\tClosing File.......");
     status = apr_close(thefile);
     if (status  != APR_SUCCESS) {
@@ -236,7 +280,54 @@ int main(void)
     else {
         fprintf(stdout, "OK\n");
     }
-    
+
+    fprintf(stdout, "\tStat'ing file.......");
+    status = apr_stat(&finfo, filename, APR_FINFO_NORM, context);
+    if (status  == APR_INCOMPLETE) {
+	int i;
+        fprintf(stdout, "INCOMPLETE\n");
+        for (i = 0; vfi[i].bits; ++i)
+            if (vfi[i].bits & ~finfo.valid)
+                fprintf(stdout, "\t    Missing %s\n", vfi[i].description);
+    }
+    else if (status  != APR_SUCCESS) {
+        fprintf(stderr, "Couldn't stat the file\n");
+        exit(-1); 
+    }
+    else {
+        fprintf(stdout, "OK\n");
+    }    
+
+    if (finfo.valid & APR_FINFO_GROUP) {
+        fprintf(stdout, "\tComparing group ids.......");
+        status = apr_get_groupname(&buf, finfo.group, context);
+        if (status  != APR_SUCCESS) {
+            fprintf(stderr, "Couldn't retrieve the group name\n");
+            exit(-1); 
+        }
+        status = apr_compare_groups(finfo.group, gid);
+        if (status  != APR_SUCCESS) {
+            fprintf(stderr, "gid's for %s don't match\n", buf);
+            exit(-1); 
+        }
+        fprintf(stdout, "gid's for %s match\n", buf);
+    }
+
+    if (finfo.valid & APR_FINFO_USER) {
+        fprintf(stdout, "\tComparing user ids.......");
+        status = apr_get_username(&buf, finfo.user, context);
+        if (status  != APR_SUCCESS) {
+            fprintf(stderr, "Couldn't retrieve the user name\n");
+            exit(-1); 
+        }
+        status = apr_compare_users(finfo.user, uid);
+        if (status  != APR_SUCCESS) {
+            fprintf(stderr, "uid's for %s don't match\n", buf);
+            exit(-1); 
+        }
+        fprintf(stdout, "uid's for %s match\n", buf);
+    }
+
     fprintf(stdout, "\tDeleting file.......");
     status = apr_remove_file(filename, context);
     if (status  != APR_SUCCESS) {
@@ -261,6 +352,7 @@ int main(void)
     test_filedel(context);
     test_read(context);
 
+    apr_destroy_pool(context);
     return 1;
 }
 

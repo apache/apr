@@ -151,11 +151,11 @@ int main(int argc, char *argv[])
     
     fprintf(stdout, "[PARENT] Checking on children..........\n");
     apr_check_other_child();
-    
-    return 1;
 #else
     fprintf(stdout, "OC failed!\n");
     fprintf(stdout, "Other_child is not supported on this platform\n");
 #endif
+
+    return 1;
 }    
 
