@@ -93,6 +93,8 @@ if test "x$apr_preload_done" != "xyes" ; then
 	;;
     *os2_emx*)
 	APR_SETVAR(SHELL, [sh])
+	APR_SETIFNULL(apr_gethostbyname_is_thread_safe, [yes])
+	APR_SETIFNULL(apr_gethostbyaddr_is_thread_safe, [yes])
 	;;
     *-hi-hiux)
 	APR_ADDTO(CPPFLAGS, [-DHIUX])
