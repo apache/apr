@@ -88,6 +88,7 @@ apr_status_t apr_set_port(apr_socket_t *sock, apr_interface_e which, apr_port_t 
 apr_status_t apr_get_port(apr_port_t *port, apr_interface_e which, apr_socket_t *sock)
 {
     if (which == APR_LOCAL)
+    {
         if (sock->local_port_unknown) {
             apr_status_t rv = get_local_addr(sock);
 

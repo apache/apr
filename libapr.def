@@ -218,10 +218,10 @@ EXPORTS
 	apr_set_local_ipaddr @209
 	apr_get_remote_ipaddr @210
 	apr_set_remote_ipaddr @211
-	apr_get_local_port @212
-	apr_set_local_port @213
-	apr_get_remote_port @214
-	apr_set_remote_port @215
+	apr_get_port @212
+	apr_set_port @213
+	
+	
 	apr_open_stderr @216
 	apr_get_pipe_timeout @217
         apr_set_pipe_timeout   @218
