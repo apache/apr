@@ -58,31 +58,10 @@
 #include "apr_general.h"
 #include "apr_errno.h"
 #include "apr_time.h"
-#if APR_HAS_UNICODE_FS
-#include "i18n.h"
-#endif
 #include <sys/stat.h>
 #include "atime.h"
 #include "misc.h"
 
-/* XXX: this is wrong for W2K */
-#define S_ISLNK(m)  (0)
-#define S_ISREG(m)  (((m) & (S_IFMT))  == S_IFREG)
-#define S_ISDIR(m)  (((m) & (S_IFDIR)) == S_IFDIR)
-
-static apr_filetype_e filetype_from_mode(int mode)
-{
-    apr_filetype_e type = APR_NOFILE;
-
-    if (S_ISREG(mode))
-        type = APR_REG;
-    if (S_ISDIR(mode))
-        type = APR_DIR;
-    if (S_ISLNK(mode))
-        type = APR_LNK;
-
-    return type;
-}
 
 BOOLEAN is_exe(const char* fname, apr_pool_t *cont) {
     /*
@@ -125,20 +104,22 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
 
     /* If my rudimentary knowledge of posix serves... inode is the absolute
      * id of the file (uniquifier) that is returned by NT as follows:
-     * user and group could be related as SID's, although this would ensure
-     * it's own unique set of issues.  All three fields are significantly
-     * longer than the posix compatible kernals would ever require.
-     * TODO: Someday solve this, and fix the executable flag below the
-     * right way with a security permission test (as well as r/w flags.)
      *
      *     dwVolumeSerialNumber
      *     nFileIndexHigh
      *     nFileIndexLow
+     *
+     * user and group could be returned as SID's, although this creates
+     * it's own unique set of issues.  All three fields are significantly
+     * longer than the posix compatible kernals would ever require.
+     * TODO: Someday solve this, and fix the executable flag below the
+     * right way with a security permission test (as well as r/w flags.)
      */
     finfo->user = 0;
     finfo->group = 0;
-    finfo->inode = 0;
-    finfo->device = 0;  /* ### use drive letter - 'A' ? */
+    finfo->inode = (apr_ino_t) FileInformation.nFileIndexHigh << 16
+                             | FileInformation.nFileIndexLow;
+    finfo->device = FileInformation.dwVolumeSerialNumber;
 
     /* Filetype - Directory or file: this case _will_ never happen */
     if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
@@ -160,6 +141,7 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
 #else
         finfo->protection = S_IFIFO;
 #endif
+        finfo->filetype = APR_PIPE;
     }
     else {
         finfo->protection = 0;
@@ -212,6 +194,7 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
 #if APR_HAS_UNICODE_FS
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT)
     {
+        
         apr_wchar_t wname[MAX_PATH];
         int len = MAX_PATH;
         int lremains = strlen(fname) + 1;

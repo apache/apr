@@ -63,9 +63,23 @@
 #include <string.h>
 #include <sys/stat.h>
 #include "misc.h"
-#if APR_HAS_UNICODE_FS
-#include "i18n.h"
-#endif
+
+apr_wchar_t *utf8_to_unicode_path(const char* srcstr, apr_pool_t *p)
+{
+    /* TODO: The computations could preconvert the string to determine
+     * the true size of the retstr, but that's a memory over speed
+     * tradeoff that isn't appropriate this early in development.
+     */
+    int srcremains = strlen(srcstr) + 1;
+    int retremains = srcremains + 4;
+    apr_wchar_t *retstr = apr_palloc(p, retremains * 2);
+    wcscpy (retstr, L"//?/");
+    if (conv_utf8_to_ucs2(srcstr, &srcremains,
+                          retstr + 4, &retremains) || srcremains)
+        return NULL;
+    else
+        return retstr;
+}
 
 apr_status_t file_cleanup(void *thefile)
 {
@@ -85,12 +99,8 @@ apr_status_t apr_open(apr_file_t **new, const char *fname,
     DWORD createflags = 0;
     DWORD attributes = 0;
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
-    apr_oslevel_e level;
+    apr_oslevel_e os_level;
     apr_status_t rv;
-#if APR_HAS_UNICODE_FS
-    int lremains = strlen(fname) + 1;
-    int dremains = (lremains) * 2;
-#endif
 
     (*new) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
     (*new)->cntxt = cont;
@@ -115,20 +125,23 @@ apr_status_t apr_open(apr_file_t **new, const char *fname,
         if (rv)
             return rv;
     }
-#if APR_HAS_UNICODE_FS
-    (*new)->w.fname = apr_palloc(cont, dremains);
-    if ((rv = conv_utf8_to_ucs2(fname, &lremains,
-                                (*new)->w.fname, &dremains)))
-        return rv;
-    if (lremains)
-        return APR_ENAMETOOLONG;
-#else
-    (*new)->n.fname = apr_pstrdup(cont, fname);
-#endif
 
-    if (apr_get_oslevel(cont, &level) == APR_SUCCESS && level >= APR_WIN_NT) {
+    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
         sharemode |= FILE_SHARE_DELETE;
+    else
+        os_level = 0;
+
+#if APR_HAS_UNICODE_FS
+    if (os_level >= APR_WIN_NT) 
+    {
+        (*new)->w.fname = utf8_to_unicode_path(fname, cont);
+        if (!(*new)->w.fname)
+            /* XXX: really bad file name */
+            return APR_ENAMETOOLONG;
     }
+    else
+#endif
+        (*new)->n.fname = apr_pstrdup(cont, fname);
 
     if (flag & APR_CREATE) {
         if (flag & APR_EXCL) {
@@ -167,12 +180,13 @@ apr_status_t apr_open(apr_file_t **new, const char *fname,
     }
 
 #if APR_HAS_UNICODE_FS
-    (*new)->filehand = CreateFileW((*new)->w.fname, oflags, sharemode,
-                                   NULL, createflags, attributes, 0);
-#else
-    (*new)->filehand = CreateFile((*new)->n.fname, oflags, sharemode,
-                                  NULL, createflags, attributes, 0);
+    if (os_level >= APR_WIN_NT) 
+        (*new)->filehand = CreateFileW((*new)->w.fname, oflags, sharemode,
+                                       NULL, createflags, attributes, 0);
+    else
 #endif
+        (*new)->filehand = CreateFile((*new)->n.fname, oflags, sharemode,
+                                      NULL, createflags, attributes, 0);
     if ((*new)->filehand == INVALID_HANDLE_VALUE) {
         return apr_get_os_error();
     }
@@ -213,51 +227,42 @@ apr_status_t apr_close(apr_file_t *file)
 apr_status_t apr_remove_file(const char *path, apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
-    apr_wchar_t wpath[MAX_PATH];
-    int lremains = strlen(path) + 1;
-    int dremains = MAX_PATH;
-    apr_status_t rv;
-    if ((rv = conv_utf8_to_ucs2(path, &lremains,
-                                wpath, &dremains)))
-        return rv;
-    if (lremains)
-        return APR_ENAMETOOLONG;
-    if (DeleteFileW(wpath))
-#else
-    if (DeleteFile(path))
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
+    {
+        apr_wchar_t *wpath = utf8_to_unicode_path(path, cont);
+        if (!wpath)
+            return APR_ENAMETOOLONG;
+        if (DeleteFileW(wpath))
+            return APR_SUCCESS;
+    }
+    else
 #endif
-        return APR_SUCCESS;
+        if (DeleteFile(path))
+            return APR_SUCCESS;
     return apr_get_os_error();
 }
 
 apr_status_t apr_rename_file(const char *from_path, const char *to_path,
-                           apr_pool_t *p)
+                             apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
-    apr_wchar_t wfrompath[MAX_PATH];
-    apr_wchar_t wtopath[MAX_PATH];
-    int lremains = strlen(from_path) + 1;
-    int dremains = MAX_PATH;
-    apr_status_t rv;
-    if ((rv = conv_utf8_to_ucs2(from_path, &lremains,
-                                wfrompath, &dremains)))
-        return rv;
-    if (lremains)
-        return APR_ENAMETOOLONG;
-    lremains = strlen(to_path) + 1;
-    dremains = MAX_PATH;
-    if ((rv = conv_utf8_to_ucs2(to_path, &lremains,
-                                wtopath, &dremains)))
-        return rv;
-    if (lremains)
-        return APR_ENAMETOOLONG;
-    if (MoveFileExW(wfrompath, wtopath, MOVEFILE_REPLACE_EXISTING |
-                                        MOVEFILE_COPY_ALLOWED))
-#else
-    if (MoveFileEx(from_path, to_path, MOVEFILE_REPLACE_EXISTING |
-                                        MOVEFILE_COPY_ALLOWED))
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
+    {
+        apr_wchar_t *wfrompath = utf8_to_unicode_path(from_path, cont);
+        apr_wchar_t *wtopath = utf8_to_unicode_path(to_path, cont);
+        if (!wfrompath || !wtopath)
+            return APR_ENAMETOOLONG;
+        if (MoveFileExW(wfrompath, wtopath, MOVEFILE_REPLACE_EXISTING |
+                                            MOVEFILE_COPY_ALLOWED))
+            return APR_SUCCESS;
+    }
+    else
 #endif
-        return APR_SUCCESS;
+        if (MoveFileEx(from_path, to_path, MOVEFILE_REPLACE_EXISTING |
+                                           MOVEFILE_COPY_ALLOWED))
+            return APR_SUCCESS;
     return apr_get_os_error();
 }
 

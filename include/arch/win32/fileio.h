@@ -89,13 +89,26 @@
 
 #define APR_FILE_BUFSIZE 4096
 
+#if APR_HAS_UNICODE_FS
+#include "i18n.h"
+#include <wchar.h>
+
 typedef apr_int16_t apr_wchar_t;
+
+apr_wchar_t *utf8_to_unicode_path(const char* srcstr, apr_pool_t *p);
+#endif
 
 typedef enum apr_canon_case_e {
     APR_CANON_CASE_GIVEN,
     APR_CANON_CASE_LOWER,
     APR_CANON_CASE_TRUE
 } apr_canon_case_e;
+
+typedef enum apr_canon_path_e {
+    APR_CANON_PATH_VIRUTAL,
+    APR_CANON_PATH_ABSOLUTE,
+    APR_CANON_PATH_RELATIVE
+} apr_canon_path_e;
 
 /*
  * Internal canonical filename elements for the apr_canon_t elems
@@ -117,6 +130,7 @@ typedef struct apr_canon_elem_t {
 struct apr_canon_t {
     apr_pool_t *cntxt;
     apr_array_header_t *elems;
+    apr_canon_path_e type;
 };
 
 /* quick run-down of fields in windows' apr_file_t structure that may have 

@@ -57,10 +57,6 @@
 #include "apr_general.h"
 #include "apr_strings.h"
 #include <string.h>
-#if APR_HAS_UNICODE_FS
-#include "i18n.h"
-#include <wchar.h>
-#endif
 
 apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
 {
