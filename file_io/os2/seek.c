@@ -64,25 +64,77 @@
 
 int os2errno( ULONG oserror );
 
+
+
+static ap_status_t setptr(struct file_t *thefile, unsigned long pos )
+{
+    long newbufpos;
+    ULONG rc;
+
+    if (thefile->direction == 1) {
+        ap_flush(thefile);
+        thefile->bufpos = thefile->direction = thefile->dataRead = 0;
+    }
+
+    newbufpos = pos - (thefile->filePtr - thefile->dataRead);
+    if (newbufpos >= 0 && newbufpos <= thefile->dataRead) {
+        thefile->bufpos = newbufpos;
+        rc = 0;
+    } else {
+        rc = DosSetFilePtr(thefile->filedes, pos, FILE_BEGIN, &thefile->filePtr );
+
+        if ( !rc )
+            thefile->bufpos = thefile->dataRead = 0;
+    }
+
+    return os2errno(rc);
+}
+
+
+
 ap_status_t ap_seek(struct file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
 {
     if (!thefile->isopen) {
         return APR_EBADF;
     }
-    
-    switch (where) {
+
+    if (thefile->buffered) {
+        int rc = EINVAL;
+        ap_ssize_t filesize;
+
+        switch (where) {
+        case APR_SET:
+            rc = setptr(thefile, *offset);
+            break;
+
+        case APR_CUR:
+            rc = setptr(thefile, thefile->filePtr - thefile->dataRead + thefile->bufpos + *offset);
+            break;
+
+        case APR_END:
+            rc = ap_get_filesize(&filesize, thefile);
+            if (rc == APR_SUCCESS)
+                rc = setptr(thefile, filesize - *offset);
+            break;
+        }
+
+        *offset = thefile->filePtr + thefile->bufpos;
+        return rc;
+    } else {
+        switch (where) {
         case APR_SET:
             where = FILE_BEGIN;
             break;
-            
+
         case APR_CUR:
             where = FILE_CURRENT;
             break;
-            
+
         case APR_END:
             where = FILE_END;
             break;
+        }
+
+        return os2errno(DosSetFilePtr(thefile->filedes, *offset, where, (ULONG *)&offset));
     }
-            
-    return os2errno(DosSetFilePtr(thefile->filedes, *offset, where, (ULONG *)&offset));
 }

@@ -83,6 +83,7 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
     dafile->isopen = FALSE;
     dafile->validstatus = FALSE;
     dafile->eof_hit = FALSE;
+    dafile->buffer = NULL;
     
     if ((flag & APR_READ) && (flag & APR_WRITE)) {
         mflags |= OPEN_ACCESS_READWRITE;
@@ -131,6 +132,14 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
     
     dafile->isopen = TRUE;
     dafile->fname = ap_pstrdup(cntxt, fname);
+    dafile->filePtr = 0;
+    dafile->bufpos = 0;
+    dafile->dataRead = 0;
+    dafile->direction = 0;
+
+    if (dafile->buffered)
+        dafile->buffer = ap_palloc(cntxt, APR_FILE_BUFSIZE);
+
     ap_register_cleanup(dafile->cntxt, dafile, file_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 }
@@ -185,6 +194,8 @@ ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile, ap_conte
         (*file)->cntxt = cont;
     }
     (*file)->filedes = *dafile;
+    (*file)->isopen = TRUE;
+    (*file)->buffered = FALSE;
     return APR_SUCCESS;
 }    
 

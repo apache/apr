@@ -75,6 +75,7 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
     (*in)->filedes = filedes[0];
     (*in)->fname = ap_pstrdup(cont, "PIPE");
     (*in)->isopen = TRUE;
+    (*in)->buffered = FALSE;
     ap_register_cleanup(cont, *in, file_cleanup, ap_null_cleanup);
 
     (*out) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
@@ -82,6 +83,7 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
     (*out)->filedes = filedes[1];
     (*out)->fname = ap_pstrdup(cont, "PIPE");
     (*out)->isopen = TRUE;
+    (*out)->buffered = FALSE;
     ap_register_cleanup(cont, *out, file_cleanup, ap_null_cleanup);
 
     return APR_SUCCESS;
