@@ -110,16 +110,9 @@ APR_DECLARE(apr_status_t) apr_ansi_time_to_apr_time(apr_time_t *result,
 /* NB NB NB NB This returns GMT!!!!!!!!!! */
 APR_DECLARE(apr_time_t) apr_time_now(void)
 {
-#ifdef NETWARE
-    uint64_t usec;
-    
-    NXGetTime(NX_SINCE_1970, NX_USECONDS, &usec);
-    return usec;
-#else
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return tv.tv_sec * APR_USEC_PER_SEC + tv.tv_usec;
-#endif
 }
 
 static void explode_time(apr_exploded_time_t *xt, apr_time_t t,
@@ -312,7 +305,7 @@ APR_DECLARE(apr_status_t) apr_os2_time_to_apr_time(apr_time_t *result, FDATE os2
 APR_DECLARE(void) apr_netware_setup_time(void)
 {
     tzset();
-    server_gmt_offset = -timezone;
+    server_gmt_offset = -TZONE;
 }
 #else
 APR_DECLARE(void) apr_unix_setup_time(void)
