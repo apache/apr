@@ -82,7 +82,7 @@ code.  To generate this data, do the following:</p>
 but all tests should be moving to the unified framework, so this is correct.</p>
    </blockquote>
 
-   <table border="0" width="100%" cellspacing="4">
+   <table border="0" width="100%" cellspacing="0">
 EOF
 
 for i in `find .. -name "*.bb" -maxdepth 1`; do
