@@ -70,7 +70,7 @@
 #include <sys/types.h>
 #include <errno.h>
 
-#if HAVE_CONIO_h
+#if HAVE_CONIO_H
 #include <conio.h>
 #endif
 

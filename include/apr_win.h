@@ -75,6 +75,11 @@
 #include <stdio.h>
 #include <time.h>
 
+/* Use this section to define all of the HAVE_FOO_H
+ * that are required to build properly.
+ */
+#define HAVE_CONIO_H 1
+
 /* struct iovec is needed to emulate Unix writev */
 struct iovec {
     char* iov_base;
