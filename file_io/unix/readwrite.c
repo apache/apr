@@ -109,7 +109,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
 
     if (*nbytes <= 0) {
         *nbytes = 0;
-	return APR_SUCCESS;
+        return APR_SUCCESS;
     }
 
     if (thefile->buffered) {
@@ -128,7 +128,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
             thefile->dataRead = 0;
         }
 
-	rv = 0;
+        rv = 0;
         if (thefile->ungetchar != -1) {
             *pos = (char)thefile->ungetchar;
             ++pos;
@@ -177,8 +177,8 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
             (*nbytes)--;
             thefile->ungetchar = -1;
             if (*nbytes == 0) {
-	        *nbytes = bytes_read;
-	        return APR_SUCCESS;
+                *nbytes = bytes_read;
+                return APR_SUCCESS;
             }
         }
 
@@ -237,7 +237,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             thefile->direction = 1;
         }
 
-	rv = 0;
+        rv = 0;
         while (rv == 0 && size > 0) {
             if (thefile->bufpos == APR_FILE_BUFSIZE)   /* write buffer is full*/
                 apr_file_flush(thefile);
@@ -271,7 +271,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             else {
                 do {
                     rv = write(thefile->filedes, buf, *nbytes);
-	        } while (rv == (apr_size_t)-1 && errno == EINTR);
+                } while (rv == (apr_size_t)-1 && errno == EINTR);
             }
         }  
 #endif
