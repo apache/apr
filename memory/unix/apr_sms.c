@@ -882,6 +882,8 @@ APR_DECLARE(apr_status_t) apr_sms_thread_unregister(apr_sms_t *sms,
 
     if (sms->sms_lock)
         apr_lock_release(sms->sms_lock);
+
+    return APR_SUCCESS;
 }
 #endif /* APR_HAS_THREADS */
 
