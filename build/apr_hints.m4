@@ -63,7 +63,6 @@ if test "x$apr_preload_done" != "xyes" ; then
           APR_ADDTO(CFLAGS, [-qHALT=E])
         fi
 	APR_SETIFNULL(apr_iconv_inbuf_const, [1])
-	APR_ADDTO(CPPFLAGS, [-D_THREAD_SAFE])
 	APR_ADDTO(LDFLAGS, [-Wl,-brtl])
         ;;
     *-apollo-*)
