@@ -435,8 +435,8 @@ APR_DECLARE(apr_status_t) apr_file_putc(char ch, apr_file_t *thefile);
 
 /**
  * get a character from the specified file.
- * @param ch The character to write.
- * @param thefile The file descriptor to write to
+ * @param ch The character to read into
+ * @param thefile The file descriptor to read from
  */
 APR_DECLARE(apr_status_t) apr_file_getc(char *ch, apr_file_t *thefile);
 
