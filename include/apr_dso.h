@@ -95,9 +95,9 @@ apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_handle_t *handle,
 
 /**
  * Report more information when a DSO function fails.
- * @param dso Location to store the loaded symbol
- * @param buf handle to load from.
- * @param bufsize Name of the symbol to load.
+ * @param dso The dso handle that has been opened
+ * @param buf Location to store the dso error
+ * @param bufsize The size of the provided buffer
  */
 const char *apr_dso_error(apr_dso_handle_t *dso, char *buf, apr_size_t bufsize);
 
