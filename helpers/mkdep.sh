@@ -8,5 +8,5 @@
 # occurs during the process
 #
 sed -ne '1,/^# DO NOT REMOVE/p' Makefile > Makefile.new \
-    && gcc -MM  $* >> Makefile.new \
+    && gcc -MM  $* | sed -e "s/\.o:/\.lo:/" >> Makefile.new \
     && mv Makefile.new Makefile
