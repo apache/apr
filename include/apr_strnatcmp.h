@@ -27,7 +27,36 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/*
+
+=head1 int ap_strnatcmp(char const *a, char const *b)
+
+B<Do a natural order comparison of two strings.>
+
+    arg 1) The first string to compare
+    arg 2) The second string to compare
+    return) Either <0, 0, or >0.  If the first string is less than the second
+            this returns <0, if they are equivalent it returns 0, and if the
+            first string is greater than second string it retuns >0.
+
+=cut
+ */
 int ap_strnatcmp(char const *a, char const *b);
+
+/*
+
+=head1 int ap_strnatcmp(char const *a, char const *b)
+
+B<Do a natural order comparison of two strings ignoring the case of the strings.>
+
+    arg 1) The first string to compare
+    arg 2) The second string to compare
+    return) Either <0, 0, or >0.  If the first string is less than the second
+            this returns <0, if they are equivalent it returns 0, and if the
+            first string is greater than second string it retuns >0.
+
+=cut
+ */
 int ap_strnatcasecmp(char const *a, char const *b);
 
 #ifdef __cplusplus
