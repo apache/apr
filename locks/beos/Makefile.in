@@ -1,5 +1,5 @@
 
-TARGETS = locks.lo \
+TARGETS = \
 	thread_mutex.lo \
 	thread_rwlock.lo \
 	thread_cond.lo \
