@@ -67,6 +67,11 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     DWORD bread;
     int lasterror;
 
+    if (*nbytes <= 0) {
+        *nbytes = 0;
+        return APR_SUCCESS;
+    }
+
     if (thefile->buffered) {
         char *pos = (char *)buf;
         ULONG blocksize;
@@ -81,13 +86,16 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
             thefile->dataRead = 0;
         }
 
+        lasterror = 0;
         while (lasterror == 0 && size > 0) {
             if (thefile->bufpos >= thefile->dataRead) {
                 lasterror = ReadFile(thefile->filehand, thefile->buffer, APR_FILE_BUFSIZE, &thefile->dataRead, NULL ) ? 0 : GetLastError();
 
                 if (thefile->dataRead == 0) {
-                    if (lasterror == 0)
+                    if (lasterror == 0) {
                         thefile->eof_hit = TRUE;
+                        lasterror = APR_EOF;
+                    }
                     break;
                 }
 
@@ -102,12 +110,20 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
             size -= blocksize;
         }
 
-        *nbytes = lasterror == 0 ? pos - (char *)buf : 0;
+        *nbytes = pos - (char *)buf;
+        if (*nbytes) {
+            lasterror = 0;
+        }
         ap_unlock(thefile->mutex);
     } else {
         if (ReadFile(thefile->filehand, buf, *nbytes, &bread, NULL)) {
             *nbytes = bread;
-            return APR_SUCCESS;
+            if (bread) {
+                return APR_SUCCESS;
+            }
+            else {
+                return APR_EOF;
+            }
         }
 
         *nbytes = 0;
@@ -285,9 +301,11 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
         }
         
         if (str[i] == '\r' || str[i] == '\x1A')
-            i--;
-        else if (str[i] == '\n')
+            i--; /* don't keep this char */
+        else if (str[i] == '\n') {
+            i++; /* don't clobber this char below */
             break;
+        }
     }
     str[i] = 0;
     return rv;
