@@ -225,6 +225,24 @@ static apr_status_t proc_pthread_create(apr_lock_t *new, const char *fname)
         return stat;
     }
 
+#ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
+    if ((stat = pthread_mutexattr_setrobust_np(&mattr, 
+                                               PTHREAD_MUTEX_ROBUST_NP))) {
+#ifdef PTHREAD_SETS_ERRNO
+        stat = errno;
+#endif
+        proc_pthread_cleanup(new);
+        return stat;
+    }
+    if ((stat = pthread_mutexattr_setprotocol(&mattr, PTHREAD_PRIO_INHERIT))) {
+#ifdef PTHREAD_SETS_ERRNO
+        stat = errno;
+#endif
+        proc_pthread_cleanup(new);
+        return stat;
+    }
+#endif
+
     if ((stat = pthread_mutex_init(new->pthread_interproc, &mattr))) {
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
@@ -255,7 +273,16 @@ static apr_status_t proc_pthread_acquire(apr_lock_t *lock)
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
+#ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
+        /* Okay, our owner died.  Let's try to make it consistent again. */
+        if (stat == EOWNERDEAD) {
+            pthread_mutex_consistent_np(lock->pthread_interproc);
+        }
+        else
+            return stat;
+#else
         return stat;
+#endif
     }
     lock->curr_locked = 1;
     return APR_SUCCESS;
@@ -285,7 +312,9 @@ static apr_status_t proc_pthread_destroy(apr_lock_t *lock)
     return stat;
 }
 
-static apr_status_t proc_pthread_child_init(apr_lock_t **lock, apr_pool_t *cont, const char *fname)
+static apr_status_t proc_pthread_child_init(apr_lock_t **lock, 
+                                            apr_pool_t *cont, 
+                                            const char *fname)
 {
     return APR_SUCCESS;
 }
