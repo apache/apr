@@ -300,7 +300,7 @@ APR_DECLARE(apr_status_t) apr_parse_addr_port(char **addr,
     return APR_SUCCESS;
 }
 
-#if defined(HAVE_GETADDRINFO) && APR_HAVE_IPV6
+#if defined(HAVE_GETADDRINFO)
 static void save_addrinfo(apr_pool_t *p, apr_sockaddr_t *sa, 
                           struct addrinfo *ai, apr_port_t port)
 {
@@ -333,7 +333,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
         return APR_ENOMEM;
     (*sa)->hostname = apr_pstrdup(p, hostname);
 
-#if defined(HAVE_GETADDRINFO) && APR_HAVE_IPV6
+#if defined(HAVE_GETADDRINFO)
     if (hostname != NULL) {
         struct addrinfo hints, *ai;
         apr_sockaddr_t *cursa;
