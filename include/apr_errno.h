@@ -906,7 +906,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define apr_get_os_error()   (APR_FROM_OS_ERROR(GetLastError()))
 #define apr_set_os_error(e)  (SetLastError(APR_TO_OS_ERROR(e)))
 
-/* A special case, only Win32 winsock calls require this:
+/* A special case, only socket calls require this:
  */
 #define apr_get_netos_error()   (APR_FROM_OS_ERROR(WSAGetLastError()))
 
@@ -1072,6 +1072,12 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 
 #define apr_get_os_error()    (errno)
 #define apr_set_os_error(e)   (errno = (e))
+
+/* A special case, only socket calls require this:
+ * [Note: platforms using h_errno should replace this macro,
+ * although watch out for thread saftey issues with h_errno.]
+ */
+#define apr_get_netos_error() (errno)
 
 /** no error */
 #define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS)
