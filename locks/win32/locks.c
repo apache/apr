@@ -167,8 +167,7 @@ ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, const char *key,
 
 ap_status_t ap_get_os_lock(ap_os_lock_t *thelock, ap_lock_t *lock)
 {
-    /* ### this is broken. is the signature broken? */
-    thelock = &(lock->mutex);
+    *thelock = lock->mutex;
     return APR_SUCCESS;
 }
 
