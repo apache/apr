@@ -46,6 +46,7 @@ EOF
   fi
 
   for arg in [$]0 "[$]@"; do
+    APR_EXPAND_VAR(arg, $arg)
     echo "\"[$]arg\" \\" >> $1
   done
   echo '"[$]@"' >> $1
