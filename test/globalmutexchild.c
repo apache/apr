@@ -18,6 +18,7 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_global_mutex.h"
+#include "apr_strings.h"
 #include "apr.h"
 
 #if APR_HAVE_STDLIB_H
