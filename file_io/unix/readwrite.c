@@ -119,7 +119,11 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         }  
     }  /* buffered? */
 
-    if ((*nbytes != rv) && (errno != EINTR) && !thefile->buffered) {
+    /* getting less data than requested does not signify an EOF when
+       dealing with a pipe.
+     */
+    if ((*nbytes != rv) && ((errno == EPIPE && thefile->pipe == 1)
+        || (errno != EINTR && !thefile->buffered && thefile->pipe == 0 ))) {
         thefile->eof_hit = 1;
     }
     *nbytes = rv;
