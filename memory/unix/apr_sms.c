@@ -69,6 +69,9 @@
 #ifdef APR_ASSERT_MEMORY
 #include <assert.h>
 #endif
+#if defined(APR_DEBUG_SHOW_STRUCTURE)
+#include <stdio.h>
+#endif
 
 #include <memory.h> /* strikerXXX: had to add this for windows to stop 
                      * complaining, please autoconf the include stuff
@@ -771,7 +774,7 @@ APR_DECLARE(apr_sms_t *) apr_sms_get_parent(apr_sms_t *sms)
     return sms->parent;
 }
 
-#if DEBUG_SHOW_STRUCTURE
+#if APR_DEBUG_SHOW_STRUCTURE
 static void add_sms(char *a, char *b, apr_sms_t *sms, apr_sms_t *caller,
                     int sib)
 {
@@ -807,7 +810,7 @@ static void print_structure(char *l1, char *l2)
 APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction)
 {
     apr_sms_t *thesms, *sibling;
-    int levels = 0, i = 0, j = 0;
+    int levels = 0, i = 0;
     char l1[100], l2[100];
  
     if (direction == 1) {
@@ -867,9 +870,9 @@ APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction)
         }
     }
 }
-#endif /* DEBUG_SHOW_STRUCTURE */
+#endif /* APR_DEBUG_SHOW_STRUCTURE */
 
-#if DEBUG_TAG_SMS
+#if APR_DEBUG_TAG_SMS
 APR_DECLARE(void) apr_sms_tag(const char *tag, apr_sms_t *sms)
 {
     sms->tag = tag;

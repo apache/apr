@@ -104,13 +104,13 @@ extern "C" {
  * Function definitions are at the end of the file...
  */
 
-/* DEBUG_SHOW_STRUCTURE
+/* APR_DEBUG_SHOW_STRUCTURE
  * This turns on a print of the ancestory of the SMS when
  * creating/destroying an SMS so it's place in the world can be seen.
  */
-/* #define DEBUG_SHOW_STRUCTURE      1 */
+ #define APR_DEBUG_SHOW_STRUCTURE      1
 
-/* DEBUG_SHOW_FUNCTIONS
+/* APR_DEBUG_SHOW_FUNCTIONS
  * This turns on debug printing of every call to i
  *    apr_sms_create
  *    apr_sms_destroy
@@ -119,13 +119,13 @@ extern "C" {
  * Format of output is
  *    CREATE - sms 0x0000000 [STANDARD] has been created
  */
-/* #define DEBUG_SHOW_FUNCTIONS     1 */
+ #define APR_DEBUG_SHOW_FUNCTIONS     1
 
-/* DEBUG_TAG_SMS
+/* APR_DEBUG_TAG_SMS
  * Turn on the ability to give an SMS a "tag" that can be used to identify
  * it.
  */
-/* #define DEBUG_TAG_SMS    1 */
+ #define APR_DEBUG_TAG_SMS    1 
 
 /**
  * @package APR memory system
@@ -344,23 +344,23 @@ APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **sms);
 
 /* NB These are only available if the debugging option has been turned on. */
 
-#if DEBUG_SHOW_STRUCTURE
+#ifdef APR_DEBUG_SHOW_STRUCTURE
 /**
  * Show the heirachy of the sms
  * @param sms The sms to show the information for
  * @param direction Do we show up (to parent) or down (to children)
  */
 APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction);
-#endif /* DEBUG_SHOW_STRUCTURE */
+#endif /* APR_DEBUG_SHOW_STRUCTURE */
 
-#if DEBUG_TAG_SMS
+#ifdef APR_DEBUG_TAG_SMS
 /**
  * Set the debugging tag for an sms
  * @param tag The tag to give the sms
  * @param sms The sms to apply the tag to
  */
 APR_DECLARE(void) apr_sms_tag(const char*tag, apr_sms_t *sms);
-#endif
+#endif /* APR_DEBUG_TAG_SMS */
 
 #ifdef __cplusplus
 }

@@ -92,7 +92,7 @@ struct apr_sms_t
     apr_status_t (*lock_fn)        (apr_sms_t *sms);
     apr_status_t (*unlock_fn)      (apr_sms_t *sms);
 
-#if DEBUG_TAG_SMS
+#if APR_DEBUG_TAG_SMS
     const char *tag;
 #endif
 };
