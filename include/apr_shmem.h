@@ -67,12 +67,15 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#if APR_USES_ANONYMOUS_SHM
-typedef   void           apr_shm_name_t;
-#elif APR_USES_FILEBASED_SHM
+#if   APR_USES_FILEBASED_SHM
 typedef   char *         apr_shm_name_t;
 #elif APR_USES_KEYBASED_SHM
 typedef   key_t          apr_shm_name_t;
+#else
+/* If APR_USES_ANONYMOUS_SHM or any other case...
+ * we can't leave apr_shm_name_t entirely undefined.
+ */
+typedef   void           apr_shm_name_t;
 #endif
 
 typedef   struct shmem_t apr_shmem_t;
