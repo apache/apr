@@ -3,13 +3,14 @@
 echo "buildconf: checking installation..."
 
 # any python
-py_version=`python -V 2>&1|sed -e 's/^[^0-9]*//'`
-if test -z "$py_version"; then
+python=`build/PrintPath python`
+if test -z "$python"; then
 echo "buildconf: python not found."
 echo "           You need python installed"
 echo "           to build APR from CVS."
 exit 1
 else
+py_version=`python -V 2>&1|sed -e 's/^[^0-9]*//'`
 echo "buildconf: python version $py_version (ok)"
 fi
 
