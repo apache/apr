@@ -163,6 +163,20 @@ B<Convert time value from human readable format to number of seconds since epoch
  */
 ap_status_t ap_implode_time(ap_time_t *result, ap_exploded_time_t *input);
 
+/*
+
+=head1 void ap_sleep(ap_time_t t)
+
+B<Sleep for the specified number of micro-seconds.>
+
+    arg 1) desired amount of time to sleep.
+
+B<NOTE>:  May sleep for longer than the specified time. 
+
+=cut
+ */
+void ap_sleep(ap_time_t t);
+
 /* ap_rfc822_date formats dates in the RFC822
    format in an efficient manner.  it is a fixed length
    format and requires the indicated amount of storage
