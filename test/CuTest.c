@@ -383,6 +383,7 @@ void CuSuiteListRunWithSummary(CuSuiteList* testSuite)
 
 	        printf("    %s:%s", testCase->name, 
                                   genspaces(21 - strlen(testCase->name)));
+		fflush(stdout);
 		CuSuiteRun(testCase);
 		CuSuiteSummary(testCase, str);
 		printf("    %s", str->buffer);
