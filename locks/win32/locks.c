@@ -166,7 +166,7 @@ APR_DECLARE(apr_status_t) apr_lock_acquire_rw(apr_lock_t *lock,
 
 APR_DECLARE(apr_status_t) apr_lock_release(apr_lock_t *lock)
 {
-    switch (apr->lock)
+    switch (lock->type)
     {
     case APR_MUTEX:
         if (lock->scope == APR_INTRAPROCESS) {
