@@ -112,6 +112,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_unlock(apr_thread_rwlock_t *rwlock)
 {
     if (rwlock->wrcounter) {
         /* If wrcounter is > 0, then we must have a writer lock */
+        rwlock->wrcounter--;
         SetEvent(rwlock->mutex);
         ReleaseMutex(rwlock->writemutex);
     } 
