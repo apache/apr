@@ -60,13 +60,51 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 
+static apr_status_t _proc_mutex_cleanup(void * data)
+{
+    apr_proc_mutex_t *lock = (apr_proc_mutex_t*)data;
+    if (lock->LockCount != 0) {
+        /* we're still locked... */
+    	while (atomic_add(&lock->LockCount , -1) > 1){
+    	    /* OK we had more than one person waiting on the lock so 
+    	     * the sem is also locked. Release it until we have no more
+    	     * locks left.
+    	     */
+            release_sem (lock->Lock);
+    	}
+    }
+    delete_sem(lock->Lock);
+    return APR_SUCCESS;
+}    
+
 APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
                                                 const char *fname,
                                                 apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    apr_proc_mutex_t *new;
+    apr_status_t stat = APR_SUCCESS;
+  
+    new = (apr_proc_mutex_t *)apr_pcalloc(pool, sizeof(apr_proc_mutex_t));
+    if (new == NULL){
+        return APR_ENOMEM;
+    }
+    
+    if ((stat = create_sem(0, "APR_Lock")) < B_NO_ERROR) {
+        _proc_mutex_cleanup(new);
+        return stat;
+    }
+    new->LockCount = 0;
+    new->Lock = stat;  
+    new->pool  = pool;
+
+    apr_pool_cleanup_register(new->pool, (void *)new, _proc_mutex_cleanup,
+                              apr_pool_cleanup_null);
+
+    (*mutex) = new;
+    return APR_SUCCESS;
 }
 
+#if APR_HAS_CREATE_LOCKS_NP
 APR_DECLARE(apr_status_t) apr_proc_mutex_create_np(apr_proc_mutex_t **mutex,
                                                    const char *fname,
                                                    apr_lockmech_e_np mech,
@@ -74,6 +112,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create_np(apr_proc_mutex_t **mutex,
 {
     return APR_ENOTIMPL;
 }       
+#endif
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
                                                     const char *fname,
@@ -84,7 +123,15 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
     
 APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    int32 stat;
+    
+	if (atomic_add(&mutex->LockCount, 1) > 0) {
+		if ((stat = acquire_sem(mutex->Lock)) < B_NO_ERROR) {
+		    atomic_add(&mutex->LockCount, -1);
+		    return stat;
+		}
+	}
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
@@ -94,12 +141,25 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    int32 stat;
+    
+	if (atomic_add(&mutex->LockCount, -1) > 1) {
+        if ((stat = release_sem(mutex->Lock)) < B_NO_ERROR) {
+            atomic_add(&mutex->LockCount, 1);
+            return stat;
+        }
+    }
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    apr_status_t stat;
+    if ((stat = _proc_mutex_cleanup(mutex)) == APR_SUCCESS) {
+        apr_pool_cleanup_kill(mutex->pool, mutex, _proc_mutex_cleanup);
+        return APR_SUCCESS;
+    }
+    return stat;
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
@@ -122,8 +182,7 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
         return APR_ENOPOOL;
     }
     if ((*pmutex) == NULL) {
-        (*pmutex) = (apr_proc_mutex_t *)apr_pcalloc(pool,
-                                                    sizeof(apr_proc_mutex_t));
+        (*pmutex) = (apr_proc_mutex_t *)apr_pcalloc(pool, sizeof(apr_proc_mutex_t));
         (*pmutex)->pool = pool;
     }
     (*pmutex)->Lock = ospmutex->sem;
