@@ -249,6 +249,7 @@ static void rand_kat4(CuTest *tc)
     rand_run_kat(tc,apr_random_secure_bytes,r,expected);
     }    
 
+#if APR_HAS_FORK
 static void rand_fork(CuTest *tc)
     {
     apr_proc_t proc;
@@ -314,7 +315,7 @@ static void rand_fork(CuTest *tc)
         return;
         }
     }
-    
+#endif    
         
 CuSuite *testrand2(void)
     {
@@ -327,7 +328,9 @@ CuSuite *testrand2(void)
     SUITE_ADD_TEST(suite, rand_barrier);
     SUITE_ADD_TEST(suite, rand_kat3);
     SUITE_ADD_TEST(suite, rand_kat4);
+#if APR_HAS_FORK
     SUITE_ADD_TEST(suite, rand_fork);
+#endif
 
     return suite;
     }
