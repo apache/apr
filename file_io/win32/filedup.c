@@ -66,7 +66,7 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
     HANDLE newhand = NULL;
         
     if (!DuplicateHandle(hproc, old_file->filehand, 
-                         hproc, newhand, 0, FALSE, 
+                         hproc, &newhand, 0, FALSE, 
                          DUPLICATE_SAME_ACCESS)) {
         return apr_get_os_error();
     }
@@ -111,7 +111,7 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t **new_file,
 
     if (stdhandle != -1) {
         if (!DuplicateHandle(hproc, old_file->filehand, 
-                             hproc, newhand, 0,
+                             hproc, &newhand, 0,
                              TRUE, DUPLICATE_SAME_ACCESS)) {
             return apr_get_os_error();
         }
@@ -122,7 +122,7 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t **new_file,
     }
     else {
         if (!DuplicateHandle(hproc, old_file->filehand, 
-                             hproc, newhand, 0,
+                             hproc, &newhand, 0,
                              FALSE, DUPLICATE_SAME_ACCESS)) {
             return apr_get_os_error();
         }
