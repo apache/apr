@@ -70,14 +70,14 @@
  * standard memory system
  */
 
-static void * apr_sms_std_malloc(apr_sms_t *mem_sys,
-                                 apr_size_t size)
+static void *apr_sms_std_malloc(apr_sms_t *mem_sys,
+                                apr_size_t size)
 {
     return malloc(size);
 }
 
-static void * apr_sms_std_calloc(apr_sms_t *mem_sys,
-                                 apr_size_t size)
+static void *apr_sms_std_calloc(apr_sms_t *mem_sys,
+                                apr_size_t size)
 {
 #if HAVE_CALLOC
     return calloc(1, size);
@@ -90,8 +90,8 @@ static void * apr_sms_std_calloc(apr_sms_t *mem_sys,
 }
 
 
-static void * apr_sms_std_realloc(apr_sms_t *mem_sys,
-                                  void *mem, apr_size_t size)
+static void *apr_sms_std_realloc(apr_sms_t *mem_sys,
+                                 void *mem, apr_size_t size)
 {
     return realloc(mem, size);
 }
@@ -107,14 +107,14 @@ APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **mem_sys)
 {
     apr_sms_t *new_mem_sys;
 
-    assert(mem_sys != NULL);
+    assert(mem_sys);
 
     *mem_sys = NULL;
     /* should we be using apr_sms_calloc now we have it??? */
     new_mem_sys = apr_sms_create(malloc(sizeof(apr_sms_t)),
                                  NULL);
 
-    if (new_mem_sys == NULL)
+    if (!new_mem_sys)
         return APR_ENOMEM;
 
     new_mem_sys->malloc_fn  = apr_sms_std_malloc;
@@ -125,6 +125,7 @@ APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **mem_sys)
      * track of our allocations, we don't have apr_sms_reset or
      * apr_sms_destroy functions.
      */
+    
     apr_sms_assert(new_mem_sys);
 
     *mem_sys = new_mem_sys;
