@@ -802,7 +802,7 @@ AC_SUBST(sharedmem)
 
 dnl ----------------------------- Checks for Any required Functions
 dnl Checks for library functions. (N.B. poll is further down)
-AC_CHECK_FUNCS(alloca calloc strcasecmp stricmp setsid isinf isnan fstat64)
+AC_CHECK_FUNCS(alloca calloc strcasecmp stricmp setsid isinf isnan)
 AC_CHECK_FUNCS(getenv putenv setenv unsetenv)
 AC_CHECK_FUNCS(setrlimit, [ have_setrlimit="1" ], [ have_setrlimit="0" ]) 
 AC_CHECK_FUNCS(getrlimit, [ have_getrlimit="1" ], [ have_getrlimit="0" ]) 
@@ -1866,6 +1866,22 @@ dnl Check for langinfo support
 
 AC_CHECK_HEADERS(langinfo.h)
 AC_CHECK_FUNCS(nl_langinfo)
+
+dnl Random late checks...
+
+# AC_CHECK_FUNCS is not sufficient since the function may be usable when
+# struct stat64 is not exposed (e.g. HP-UX).  Note that fstat64 only
+# happens to be usable on Linux because -D_GNU_SOURCE is picked up
+# by the earlier crypt_r check.
+AC_CACHE_CHECK([for usable fstat64], [apr_cv_func_fstat64],
+ [AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>], [struct stat64 st; fstat64(0, &st);],
+  [apr_cv_func_fstat64=yes], [apr_cv_func_fstat64=no])])
+if test $apr_cv_func_fstat64 = yes; then
+  AC_DEFINE(HAVE_FSTAT64, 1, [Define if fstat64 can be used])
+fi
+
 
 dnl ----------------------------- Finalize the variables
 
