@@ -114,6 +114,11 @@ APR_DECLARE(apr_sigfunc_t *) apr_signal(int signo, apr_sigfunc_t * func);
  * @param signum The signal number
  * @return The description of the signal
  */
+APR_DECLARE(const char *) apr_signal_description_get(int signum);
+
+/**
+ * Deprecated: use apr_signal_description_get
+ */
 APR_DECLARE(const char *) apr_signal_get_description(int signum);
 
 /**

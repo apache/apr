@@ -81,7 +81,13 @@ APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int signal)
 void apr_signal_init(apr_pool_t *pglobal)
 {
 }
-const char *apr_signal_get_description(int signum)
+const char *apr_signal_description_get(int signum)
 {
     return "unknown signal (not supported)";
+}
+
+/* Deprecated */
+const char *apr_signal_get_description(int signum)
+{
+    return apr_signal_description_get(signum);
 }
