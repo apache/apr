@@ -159,16 +159,53 @@ ap_status_t ap_fork(struct proc_t **proc, ap_context_t *cont)
     return APR_INPARENT;
 }
 
+
+
+/* quotes in the string are doubled up.
+ * Used to escape quotes in args passed to OS/2's cmd.exe
+ */
+static char *double_quotes(struct context_t *cntxt, char *str)
+{
+    int num_quotes = 0;
+    int len = 0;
+    char *quote_doubled_str, *dest;
+    
+    while (str[len]) {
+        num_quotes += str[len++] == '\"';
+    }
+    
+    quote_doubled_str = ap_palloc(cntxt, len + num_quotes + 1);
+    dest = quote_doubled_str;
+    
+    while (*str) {
+        if (*str == '\"')
+            *(dest++) = '\"';
+        *(dest++) = *(str++);
+    }
+    
+    *dest = 0;
+    return quote_doubled_str;
+}
+
+
+
 ap_status_t ap_create_process(struct proc_t **new, const char *progname,
                               char *const args[], char **env,
                               struct procattr_t *attr, ap_context_t *cont)
 {
-    int i;
-    ap_status_t stat;
+    int i, arg, numargs, cmdlen;
+    ap_status_t status;
     char **newargs;
     char savedir[300];
     HFILE save_in, save_out, save_err, dup;
     int criticalsection = FALSE;
+    char *extension, *newprogname, *extra_arg = NULL, *cmdline, *cmdline_pos;
+    char interpreter[1024];
+    char error_object[260];
+    ap_file_t *progfile;
+    int env_len, e;
+    char *env_block, *env_block_pos;
+    RESULTCODES rescodes;
 
     (*new) = (struct proc_t *)ap_palloc(cont, sizeof(struct proc_t));
 
@@ -178,8 +215,8 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
 
     (*new)->cntxt = cont;
     (*new)->running = FALSE;
-    
-/* Prevent other threads from running while these process-wide resources are modified */
+
+    /* Prevent other threads from running while these process-wide resources are modified */
     if (attr->child_in || attr->child_out || attr->child_err || attr->currdir) {
         criticalsection = TRUE;
         DosEnterCritSec();
@@ -221,29 +258,114 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
         }
     }
 
-    if (attr->cmdtype == APR_SHELLCMD) {
-        i = 0;
-        while (args[i]) {
-            i++;
-        }
-        newargs = (char **)ap_palloc(cont, sizeof (char *) * (i + 3));
-        newargs[0] = ap_pstrdup(cont, SHELL_PATH);
-        newargs[1] = ap_pstrdup(cont, "/c");
-        i = 0;
+    interpreter[0] = 0;
+    extension = strrchr(progname, '.');
 
-        while (args[i]) {
-            newargs[i + 2] = ap_pstrdup(cont, args[i]);
-            i++;
-        }
+    if (extension == NULL)
+        extension = "";
 
-        newargs[i + 3] = NULL;
-        (*new)->pid = spawnve(attr->detached ? P_DETACH : P_NOWAIT, SHELL_PATH, newargs, env);
-    } else {
-        (*new)->pid = spawnve(attr->detached ? P_DETACH : P_NOWAIT, progname, args, env);
+    if (attr->cmdtype == APR_SHELLCMD || strcasecmp(extension, ".cmd") == 0) {
+        strcpy(interpreter, "#!" SHELL_PATH);
+        extra_arg = "/C";
+    } else if (stricmp(progname, ".exe") != 0) {
+        status = ap_open(&progfile, progname, APR_READ|APR_BUFFERED, 0, cont);
+
+        if (status == APR_SUCCESS) {
+            status = ap_fgets(interpreter, sizeof(interpreter), progfile);
+
+            if (status == APR_SUCCESS) {
+                if (interpreter[0] == '#' && interpreter[1] == '!') {
+                    if (interpreter[2] != '/' && interpreter[2] != '\\' && interpreter[3] != ':') {
+                        char buffer[300];
+
+                        if (DosSearchPath(SEARCH_ENVIRONMENT, "PATH", interpreter+2, buffer, sizeof(buffer)) == 0) {
+                            strcpy(interpreter+2, buffer);
+                        } else {
+                            strcat(interpreter, ".exe");
+                            if (DosSearchPath(SEARCH_ENVIRONMENT, "PATH", interpreter+2, buffer, sizeof(buffer)) == 0) {
+                                strcpy(interpreter+2, buffer);
+                            }
+                        }
+                    }
+                } else {
+                    interpreter[0] = 0;
+                }
+            }
+        }
+        ap_close(progfile);
     }
-    
-    stat = (*new)->pid < 0 ? errno : APR_SUCCESS;
-    
+
+    i = 0;
+
+    while (args && args[i]) {
+        i++;
+    }
+
+    newargs = (char **)ap_palloc(cont, sizeof (char *) * (i + 4));
+    numargs = 0;
+
+    if (interpreter[0])
+        newargs[numargs++] = interpreter + 2;
+    if (extra_arg)
+        newargs[numargs++] = "/c";
+
+    newargs[numargs++] = newprogname = ap_pstrdup(cont, progname);
+    arg = 0;
+
+    while (args && args[arg]) {
+        newargs[numargs++] = args[arg++];
+    }
+
+    newargs[numargs] = NULL;
+
+    for (i=0; newprogname[i]; i++)
+        if (newprogname[i] == '/')
+            newprogname[i] = '\\';
+
+    cmdlen = 0;
+
+    for (i=0; i<numargs; i++)
+        cmdlen += strlen(newargs[i]) + 3;
+
+    cmdline = ap_pstrndup(cont, newargs[0], cmdlen + 2);
+    cmdline_pos = cmdline + strlen(cmdline);
+
+    for (i=1; i<numargs; i++) {
+        char *a = newargs[i];
+
+        if (strpbrk(a, "&|<>\" "))
+            a = ap_pstrcat(cont, "\"", double_quotes(cont, a), "\"", NULL);
+
+        *(cmdline_pos++) = ' ';
+        strcpy(cmdline_pos, a);
+        cmdline_pos += strlen(cmdline_pos);
+    }
+
+    *(++cmdline_pos) = 0; /* Add required second terminator */
+    cmdline_pos = strchr(cmdline, ' ');
+
+    if (cmdline_pos) {
+        *cmdline_pos = 0;
+        cmdline_pos++;
+    }
+
+    /* Create environment block from list of envariables */
+    for (env_len=1, e=0; env[e]; e++)
+        env_len += strlen(env[e]) + 1;
+
+    env_block = ap_palloc(cont, env_len);
+    env_block_pos = env_block;
+
+    for (e=0; env[e]; e++) {
+        strcpy(env_block_pos, env[e]);
+        env_block_pos += strlen(env_block_pos) + 1;
+    }
+
+    *env_block_pos = 0; /* environment block is terminated by a double null */
+
+    status = DosExecPgm(error_object, sizeof(error_object), EXEC_ASYNC, cmdline, env_block, &rescodes, cmdline);
+    (*new)->pid = rescodes.codeTerminate;
+
     if (attr->currdir != NULL) {
         chdir(savedir);
     }
@@ -273,8 +395,8 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
         DosExitCritSec();
 
     (*new)->attr = attr;
-    (*new)->running = stat == APR_SUCCESS;
-    return stat;
+    (*new)->running = status == APR_SUCCESS;
+    return status;
 }
 
 
