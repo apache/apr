@@ -132,11 +132,10 @@ typedef enum {
 typedef struct apr_socket_t     apr_socket_t;
 typedef struct apr_pollfd_t     apr_pollfd_t;
 typedef struct apr_hdtr_t       apr_hdtr_t;
-typedef struct in_addr          apr_in_addr;
+typedef struct in_addr          apr_in_addr_t;
 
 /* use apr_uint16_t just in case some system has a short that isn't 16 bits... */
 typedef apr_uint16_t            apr_port_t;
-
 
 #if APR_HAS_SENDFILE
 /* Define flags passed in on apr_sendfile() */
@@ -562,7 +561,7 @@ apr_status_t apr_socket_from_file(apr_socket_t **newsock, apr_file_t *file);
  * @param addr The apr_in_addr structure to return.
  * @param hostname The hostname to lookup.
  */
-apr_status_t apr_get_inaddr(apr_in_addr *addr, char* hostname);
+apr_status_t apr_get_inaddr(apr_in_addr_t *addr, char *hostname);
 
 #ifdef __cplusplus
 }
