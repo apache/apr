@@ -422,7 +422,7 @@ AC_DEFUN(APR_TRY_COMPILE_NO_WARNING,
 else
   apr_tcnw_flags=$CFLAGS_WARN
 fi
-if test "$GCC" = "yes"; then 
+if test "$ac_cv_prog_gcc" = "yes"; then 
   apr_tcnw_flags="$apr_tcnw_flags -Werror"
 fi
 changequote(', ')
