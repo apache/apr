@@ -44,8 +44,6 @@
 
 #undef HAVE_INT64_C
 
-#undef HAVE_MM_SHMT_MMFILE
-
 /* BeOS specific flag */
 #undef HAVE_BONE_VERSION
 
