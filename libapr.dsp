@@ -176,10 +176,6 @@ SOURCE=.\i18n\unix\xlate.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\locks\win32\locks.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\locks\win32\proc_mutex.c
 # End Source File
 # Begin Source File
@@ -430,10 +426,6 @@ SOURCE=.\include\arch\unix\inherit.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\win32\locks.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\include\arch\win32\misc.h
 # End Source File
 # Begin Source File
@@ -542,10 +534,6 @@ SOURCE=.\include\apr_inherit.h
 # Begin Source File
 
 SOURCE=.\include\apr_lib.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_lock.h
 # End Source File
 # Begin Source File
 
