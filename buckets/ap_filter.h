@@ -59,7 +59,7 @@
 extern "C" {
 #endif
 
-#ifdef HAVE_STDARG_H
+#ifdef APR_HAVE_STDARG_H
 #include <stdarg.h>
 #endif
 

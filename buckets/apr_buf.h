@@ -62,7 +62,7 @@
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>	/* for struct iovec */
 #endif
-#ifdef HAVE_STDARG_H
+#ifdef APR_HAVE_STDARG_H
 #include <stdarg.h>
 #endif
 
