@@ -219,8 +219,14 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
                                              apr_pool_t *cont)
 {
     FILESTATUS3 fs3;
-    ULONG rc = DosQueryPathInfo(fname, FIL_STANDARD, &fs3, sizeof(fs3));
+    ULONG rc;
 
+    /* Don't do anything if we can't handle the requested attributes */
+    if (!(attr_mask & (APR_FILE_ATTR_READONLY
+                       | APR_FILE_ATTR_HIDDEN)))
+        return APR_SUCCESS;
+
+    rc = DosQueryPathInfo(fname, FIL_STANDARD, &fs3, sizeof(fs3));
     if (rc == 0) {
         ULONG old_attr = fs3.attrFile;
 
@@ -230,6 +236,15 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
                 fs3.attrFile |= FILE_READONLY;
             } else {
                 fs3.attrFile &= ~FILE_READONLY;
+            }
+        }
+
+        if (attr_mask & APR_FILE_ATTR_HIDDEN)
+        {
+            if (attributes & APR_FILE_ATTR_HIDDEN) {
+                fs3.attrFile |= FILE_HIDDEN;
+            } else {
+                fs3.attrFile &= ~FILE_HIDDEN;
             }
         }
 
