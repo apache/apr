@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Better installation.  This makes us install the APRVARS file,
+     as well as MM.  [Ryan Bloom]
+
   *) Provide new number conversion functions apr_itoa, apr_ltoa, and 
      apr_off_t_toa, and inline code in inet_ntop4, to reduce CPU
      consumption. [Brian Pane]
