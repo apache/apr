@@ -85,6 +85,15 @@ typedef struct apr_allocator_t apr_allocator_t;
 /** the structure which holds information about the allocation */
 typedef struct apr_memnode_t apr_memnode_t;
 
+struct apr_memnode_t {
+    apr_memnode_t *next;
+    apr_uint32_t   index;
+    char          *first_avail;
+    char          *endp;
+};
+
+#define APR_MEMNODE_T_SIZE APR_ALIGN_DEFAULT(sizeof(apr_memnode_t))
+
 /**
  * Create a new allocator
  * @param allocator The allocator we have just created.
