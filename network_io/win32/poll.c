@@ -148,14 +148,15 @@ APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event,
 {
     apr_int16_t revents = 0;
     WSABUF data;
+    char buf[256];
     int dummy;
     int flags = MSG_PEEK;
 
     /* We just want to PEEK at the data, so I am setting up a dummy WSABUF
      * variable here.
      */
-    data.len = 256;
-    data.buf = (char *)apr_palloc(aprset->cntxt, 256);
+    data.len = sizeof(buf);
+    data.buf = buf;
 
     if (FD_ISSET(sock->sock, aprset->read)) {
         revents |= APR_POLLIN;
