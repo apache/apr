@@ -186,16 +186,28 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *mem_sys,
      */
      
     if (pms) {
+        /*
+         * We only need to lock the parent as the only other function that
+         * touches the fields we're about to mess with is apr_sms_destroy
+         */
+        apr_lock_acquire(pms->sms_lock);
+        
         if ((mem_sys->sibling_mem_sys = pms->child_mem_sys) != NULL)
             mem_sys->sibling_mem_sys->ref_mem_sys = &mem_sys->sibling_mem_sys;
 
         mem_sys->ref_mem_sys = &pms->child_mem_sys;
         pms->child_mem_sys = mem_sys;
+
+        apr_lock_release(pms->sms_lock);    
     }
 
     /* XXX - This should eventually be removed */
     apr_pool_create(&mem_sys->pool, pms ? pms->pool : NULL);
     
+    /* Create the lock we'll use to protect cleanups and child lists */
+    apr_lock_create(&mem_sys->sms_lock, APR_MUTEX, APR_LOCKALL, NULL,
+                    mem_sys->pool);
+                        
     return APR_SUCCESS;
 }
 
@@ -298,9 +310,13 @@ static void apr_sms_do_child_cleanups(apr_sms_t *mem_sys)
 
 APR_DECLARE(apr_status_t) apr_sms_reset(apr_sms_t *mem_sys)
 {
+    apr_status_t rv;
+    
     if (!mem_sys->reset_fn)
         return APR_ENOTIMPL;
 
+    apr_lock_acquire(mem_sys->sms_lock);
+    
     /* 
      * Run the cleanups of all child memory systems _including_
      * the accounting memory system.
@@ -323,16 +339,23 @@ APR_DECLARE(apr_status_t) apr_sms_reset(apr_sms_t *mem_sys)
     mem_sys->accounting_mem_sys = mem_sys;
 
     /* Let the memory system handle the actual reset */
-    return mem_sys->reset_fn(mem_sys);
+    rv = mem_sys->reset_fn(mem_sys);
+
+    apr_lock_release(mem_sys->sms_lock);
+    
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys)
 {
     apr_sms_t *child_mem_sys;
     apr_sms_t *sibling_mem_sys;
+    apr_sms_t *pms;
     struct apr_sms_cleanup *cleanup;
     struct apr_sms_cleanup *next_cleanup;
 
+    apr_lock_acquire(mem_sys->sms_lock);
+    
     if (apr_sms_is_tracking(mem_sys)) {
         /* 
          * Run the cleanups of all child memory systems _including_
@@ -415,17 +438,27 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys)
         }
     }
 
+    pms = mem_sys->parent_mem_sys;
+    
     /* Remove the memory system from the parent memory systems child list */
+    if (pms)
+        apr_lock_acquire(pms->sms_lock);
+        
     if (mem_sys->sibling_mem_sys)
         mem_sys->sibling_mem_sys->ref_mem_sys = mem_sys->ref_mem_sys;
 
     if (mem_sys->ref_mem_sys)
         *mem_sys->ref_mem_sys = mem_sys->sibling_mem_sys;
 
+    if (pms)
+        apr_lock_release(pms->sms_lock);
+        
     /* Call the pre-destroy if present */
     if (mem_sys->pre_destroy_fn)
         mem_sys->pre_destroy_fn(mem_sys);
 
+    apr_lock_destroy(mem_sys->sms_lock);
+    
     /* XXX - This should eventually be removed */
     apr_pool_destroy(mem_sys->pool);
     
@@ -506,20 +539,27 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *mem_sys,
 
     if (!cleanup_fn)
         return APR_ENOTIMPL;
-
+    
+    apr_lock_acquire(mem_sys->sms_lock);
+    
     cleanup = (struct apr_sms_cleanup *)
                   apr_sms_malloc(mem_sys->accounting_mem_sys,
                                  sizeof(struct apr_sms_cleanup));
 
-    if (!cleanup)
+    if (!cleanup){
+        apr_lock_release(mem_sys->sms_lock);
         return APR_ENOMEM;
+    }
 
     cleanup->data = data;
     cleanup->type = type;
     cleanup->cleanup_fn = cleanup_fn;
+
     cleanup->next = mem_sys->cleanups;
     mem_sys->cleanups = cleanup;
 
+    apr_lock_release(mem_sys->sms_lock);
+    
     return APR_SUCCESS;
 }
 
@@ -531,7 +571,10 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *mem_sys,
 {
     struct apr_sms_cleanup *cleanup;
     struct apr_sms_cleanup **cleanup_ref;
-
+    apr_status_t rv = APR_EINVAL;
+    
+    apr_lock_acquire(mem_sys->sms_lock);
+    
     cleanup = mem_sys->cleanups;
     cleanup_ref = &mem_sys->cleanups;
     while (cleanup) {
@@ -539,17 +582,21 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *mem_sys,
             cleanup->data == data && cleanup->cleanup_fn == cleanup_fn) {
             *cleanup_ref = cleanup->next;
 
+            apr_lock_release(mem_sys->sms_lock);
+            
             mem_sys = mem_sys->accounting_mem_sys;
 
-            if (mem_sys->free_fn != NULL)
+            if (mem_sys->free_fn)
                 apr_sms_free(mem_sys, cleanup);
 
-            return APR_SUCCESS;
+            rv = APR_SUCCESS;
         }
 
         cleanup_ref = &cleanup->next;
         cleanup = cleanup->next;
     }
+
+    apr_lock_release(mem_sys->sms_lock);
 
     /* The cleanup function must have been registered previously */
     return APR_EINVAL;
@@ -562,6 +609,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *mem_sys,
     struct apr_sms_cleanup **cleanup_ref;
     apr_status_t rv = APR_EINVAL;
 
+    apr_lock_acquire(mem_sys->sms_lock);
+    
     cleanup = mem_sys->cleanups;
     cleanup_ref = &mem_sys->cleanups;
     mem_sys = mem_sys->accounting_mem_sys;
@@ -581,6 +630,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *mem_sys,
         }
     }
 
+    apr_lock_release(mem_sys->sms_lock);
+    
     /* The cleanup function must have been registered previously */
     return rv;
 }
@@ -605,8 +656,10 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *mem_sys,
 {
     struct apr_sms_cleanup *cleanup;
     struct apr_sms_cleanup **cleanup_ref;
-    apr_status_t rv = APR_ENOTIMPL;
-
+    apr_status_t rv = APR_EINVAL;
+    
+    apr_lock_acquire(mem_sys->sms_lock);
+    
     cleanup = mem_sys->cleanups;
     cleanup_ref = &mem_sys->cleanups;
     mem_sys = mem_sys->accounting_mem_sys;
@@ -627,6 +680,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *mem_sys,
             cleanup = cleanup->next;
         }
     }
+
+    apr_lock_release(mem_sys->sms_lock);
 
     /* The cleanup function should have been registered previously */
     return rv;
