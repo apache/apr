@@ -62,7 +62,7 @@
 #include "apr_lib.h"
 #include <time.h>
 
-ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, time_t sec)
+ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
 {
     ap_ssize_t rv;
     WSABUF data;
@@ -77,7 +77,7 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, tim
         } 
     } while (rv == SOCKET_ERROR && lasterror == WSAEINTR);
 
-    if (rv == SOCKET_ERROR && lasterror == WSAEWOULDBLOCK && sec > 0) {
+    if (rv == SOCKET_ERROR && lasterror == WSAEWOULDBLOCK && sock->timeout > 0) {
         struct timeval tv;
         fd_set fdset;
         int srv;
@@ -85,7 +85,7 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, tim
         do {
             FD_ZERO(&fdset);
             FD_SET(sock->sock, &fdset);
-            tv.tv_sec  = sec;
+            tv.tv_sec  = sock->timeout;
             tv.tv_usec = 0;
 
             srv = select(FD_SETSIZE, NULL, &fdset, NULL, &tv);
@@ -114,7 +114,7 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, tim
     return APR_SUCCESS;
 }
 
-ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len, time_t sec)
+ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
 {
     ap_ssize_t rv;
     int lasterror;
@@ -126,7 +126,7 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len, time_t se
         } 
     } while (rv == SOCKET_ERROR && lasterror == WSAEINTR);
 
-    if (rv == SOCKET_ERROR && lasterror == WSAEWOULDBLOCK && sec > 0) {
+    if (rv == SOCKET_ERROR && lasterror == WSAEWOULDBLOCK && sock->timeout > 0) {
         struct timeval tv;
         fd_set fdset;
         int srv;
@@ -134,7 +134,7 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len, time_t se
         do {
             FD_ZERO(&fdset);
             FD_SET(sock->sock, &fdset);
-            tv.tv_sec  = sec;
+            tv.tv_sec  = sock->timeout;
             tv.tv_usec = 0;
 
             srv = select(FD_SETSIZE, &fdset, NULL, NULL, &tv);

@@ -196,10 +196,10 @@ ap_status_t ap_get_revents(struct pollfd_t *aprset, struct socket_t *sock, ap_in
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_polldata(struct pollfd_t *pollfd, void *data)
+ap_status_t ap_get_polldata(struct pollfd_t *pollfd, char *key, void *data)
 {
     if (pollfd != NULL) {
-        return ap_get_userdata(pollfd->cntxt, &data);
+        return ap_get_userdata(pollfd->cntxt, key, &data);
     }
     else {
         data = NULL;
@@ -207,10 +207,11 @@ ap_status_t ap_get_polldata(struct pollfd_t *pollfd, void *data)
     }
 }
 
-ap_status_t ap_set_polldata(struct pollfd_t *pollfd, void *data)
+ap_status_t ap_set_polldata(struct pollfd_t *pollfd, void *data, char *key,
+                            ap_status_t (*cleanup) (void *))
 {
     if (pollfd != NULL) {
-        return ap_set_userdata(pollfd->cntxt, data);
+        return ap_set_userdata(pollfd->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;
