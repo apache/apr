@@ -98,7 +98,7 @@ static void calloc_bytes(CuTest *tc)
 
     for (i=0;i<ALLOC_BYTES;i++) {
         char *ptr = alloc + i;
-        CuAssertPtrEquals(tc, NULL, *ptr);
+        CuAssertTrue(tc, *ptr == '\0');
     }
 }
 
