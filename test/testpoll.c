@@ -149,6 +149,7 @@ int main(void)
     apr_socket_t *s[LARGE_NUM_SOCKETS];
     apr_sockaddr_t *sa[LARGE_NUM_SOCKETS];
     apr_pollfd_t *pollarray;
+    apr_pollfd_t *pollarray_large;
     apr_pollset_t *pollset;
     int i = 0, srv = SMALL_NUM_SOCKETS;
     apr_int32_t num;
@@ -180,13 +181,25 @@ int main(void)
     }
     printf("OK\n");
        
-    printf ("\tSetting up the poll array I'll use........");
+    printf ("\tSetting up the poll arrays I'll use........");
     if (apr_poll_setup(&pollarray, SMALL_NUM_SOCKETS, context) != APR_SUCCESS){
+        printf("Couldn't create a poll array!\n");
+        exit (-1);
+    }
+    if (apr_poll_setup(&pollarray_large, LARGE_NUM_SOCKETS, context) !=
+        APR_SUCCESS){
         printf("Couldn't create a poll array!\n");
         exit (-1);
     }
     for (i = 0; i < SMALL_NUM_SOCKETS;i++){
         if (apr_poll_socket_add(pollarray, s[i], APR_POLLIN) != APR_SUCCESS){
+            printf("Failed to add socket %d\n", i);
+            exit (-1);
+        }
+    }
+    for (i = 0; i < LARGE_NUM_SOCKETS;i++){
+        if (apr_poll_socket_add(pollarray_large, s[i], APR_POLLIN) !=
+            APR_SUCCESS){
             printf("Failed to add socket %d\n", i);
             exit (-1);
         }
@@ -221,6 +234,12 @@ int main(void)
 
     recv_msg(s, 0, context);
     recv_msg(s, 2, context);
+
+    send_msg(s, sa, LARGE_NUM_SOCKETS - 1);
+    apr_poll(pollarray_large, LARGE_NUM_SOCKETS, &srv, 10 * APR_USEC_PER_SEC); 
+    check_sockets(pollarray_large, s);
+    recv_msg(s, LARGE_NUM_SOCKETS - 1, context);
+
 
     printf("Tests completed.\n");
 
