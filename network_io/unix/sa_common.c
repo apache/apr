@@ -478,6 +478,7 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
 #ifdef NETDB_INTERNAL
                 NETDB_INTERNAL:
                     return APR_FROM_OS_ERROR(errno);
+#endif
                 HOST_NOT_FOUND:
                     return APR_EHOSTUNREACH;
                 NO_DATA:
