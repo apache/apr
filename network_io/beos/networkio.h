@@ -62,7 +62,7 @@
 /* The definition of isascii was missed from the PowerPC ctype.h
  *
  * It will be included in the next release, but until then... */
-#if __POWER_PC__
+#if __POWERPC__
 #define isascii(c) (((c) & ~0x7f)==0)
 #endif
 
