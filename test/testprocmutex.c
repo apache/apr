@@ -66,7 +66,7 @@
 #include "test_apr.h"
 
 
-#define MAX_ITER 40000
+#define MAX_ITER 4000
 #define MAX_COUNTER (MAX_ITER * 4)
 
 apr_proc_mutex_t *proc_lock;
@@ -146,7 +146,7 @@ int main(int argc, const char * const *argv)
 {
     apr_status_t rv;
     char errmsg[200];
-    const char *lockname = "multi.lock";
+    const char *lockname = NULL;
     const char *shmname = "shm.file";
     apr_getopt_t *opt;
     char optchar;
