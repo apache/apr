@@ -71,20 +71,28 @@
 
 APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
 {
-    if (thepipe->pipe == 1) {
+    /* Always OK to unset timeouts */
+    if (timeout == -1) {
         thepipe->timeout = timeout;
         return APR_SUCCESS;
     }
-    return APR_EINVAL;
+    if (!thepipe->pipe) {
+        return APR_ENOTIMPL;
+    }
+    if (timeout && !(thepipe->pOverlapped)) {
+        /* Cannot be nonzero if a pipe was opened blocking
+         */
+        return APR_EINVAL;
+    }
+    thepipe->timeout = timeout;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_interval_time_t *timeout)
 {
-    if (thepipe->pipe == 1) {
-        *timeout = thepipe->timeout;
-        return APR_SUCCESS;
-    }
-    return APR_EINVAL;
+    /* Always OK to get the timeout (even if it's unset ... -1) */
+    *timeout = thepipe->timeout;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *p)
