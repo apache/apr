@@ -497,7 +497,6 @@ API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retc
     union block_hdr *blok;
     ap_pool_t *new_pool;
 
-    ap_block_alarms();
 
 #if APR_HAS_THREADS
     ap_lock(alloc_mutex);
@@ -529,7 +528,6 @@ API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retc
 #if APR_HAS_THREADS
     ap_unlock(alloc_mutex);
 #endif
-    ap_unblock_alarms();
 
     return new_pool;
 }
@@ -617,10 +615,8 @@ API_EXPORT(ap_status_t) ap_run_cleanup(ap_pool_t *p, void *data,
 {
     ap_status_t rv;
 
-    ap_block_alarms();		/* Run cleanup only once! */
     rv = (*cleanup) (data);
     ap_kill_cleanup(p, data, cleanup);
-    ap_unblock_alarms();
     return rv;
 }
 
@@ -662,9 +658,7 @@ API_EXPORT(void) ap_cleanup_for_exec(void)
      * I can do about that (except if the child decides
      * to go out and close them
      */
-    ap_block_alarms();
     cleanup_pool_for_exec(permanent_pool);
-    ap_unblock_alarms();
 #endif /* ndef WIN32 */
 }
 
@@ -723,8 +717,6 @@ void ap_term_alloc(void)
  */
 API_EXPORT(void) ap_clear_pool(ap_pool_t *a)
 {
-    ap_block_alarms();
-
     while (a->sub_pools) {
 	ap_destroy_pool(a->sub_pools);
     }
@@ -754,13 +746,10 @@ API_EXPORT(void) ap_clear_pool(ap_pool_t *a)
 	a->allocation_list = NULL;
     }
 #endif
-
-    ap_unblock_alarms();
 }
 
 API_EXPORT(void) ap_destroy_pool(ap_pool_t *a)
 {
-    ap_block_alarms();
     ap_clear_pool(a);
 #if APR_HAS_THREADS
     ap_lock(alloc_mutex);
@@ -781,7 +770,6 @@ API_EXPORT(void) ap_destroy_pool(ap_pool_t *a)
     ap_unlock(alloc_mutex);
 #endif
     free_blocks(a->first);
-    ap_unblock_alarms();
 }
 
 API_EXPORT(long) ap_bytes_in_pool(ap_pool_t *p)
@@ -829,7 +817,6 @@ API_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (apr_abort)(int retcode
               (stack_direction == 1 &&    
               is_ptr_in_range(s, known_stack_point, &ts)), 1, apr_abort,
               "Ouch!  find_pool() called on pointer in a free block\n");
-    ap_block_alarms();
     /* search the global_block_list */
     for (pb = &global_block_list; *pb; pb = &b->h.global_next) {
 	b = *pb;
@@ -847,11 +834,9 @@ API_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (apr_abort)(int retcode
 		b->h.global_next = global_block_list;
 		global_block_list = b;
 	    }
-	    ap_unblock_alarms();
 	    return b->h.owning_pool;
 	}
     }
-    ap_unblock_alarms();
     return NULL;
 }
 
@@ -888,7 +873,6 @@ API_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub,
     /* We could handle more general cases... but this is it for now. */
     APR_ABORT(sub->parent != p, 1, apr_abort,
               "pool_join: p is not a parent of sub\n");
-    ap_block_alarms();
     while (p->joined) {
 	p = p->joined;
     }
@@ -898,7 +882,6 @@ API_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub,
 	    b->h.owning_pool = p;
 	}
     }
-    ap_unblock_alarms();
 }
 #endif
 
@@ -916,7 +899,6 @@ void * ap_palloc(ap_pool_t *a, int reqsize)
     if (a == NULL) {
         return malloc(reqsize);
     }
-    ap_block_alarms();
     if (c == NULL) {
         return malloc(reqsize);
     }
@@ -928,7 +910,6 @@ void * ap_palloc(ap_pool_t *a, int reqsize)
     debug_fill(ptr, size); /* might as well get uninitialized protection */
     *(void **)ptr = a->allocation_list;
     a->allocation_list = ptr;
-    ap_unblock_alarms();
     return (char *)ptr + CLICK_SZ;
 #else
 
@@ -977,8 +958,6 @@ void * ap_palloc(ap_pool_t *a, int reqsize)
 
     /* Nope --- get a new one that's guaranteed to be big enough */
 
-    ap_block_alarms();
-
 #if APR_HAS_THREADS
     ap_lock(alloc_mutex);
 #endif
@@ -993,8 +972,6 @@ void * ap_palloc(ap_pool_t *a, int reqsize)
 #if APR_HAS_THREADS
     ap_unlock(alloc_mutex);
 #endif
-
-    ap_unblock_alarms();
 
     first_avail = blok->h.first_avail;
     blok->h.first_avail += size;
@@ -1168,7 +1145,6 @@ API_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap)
     struct psprintf_data ps;
     void *ptr;
 
-    ap_block_alarms();
     ps.base = malloc(512);
     if (ps.base == NULL) {
 	fputs("Ouch!  Out of memory!\n", stderr);
@@ -1188,14 +1164,12 @@ API_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap)
     }
     *(void **)ptr = p->allocation_list;
     p->allocation_list = ptr;
-    ap_unblock_alarms();
     return (char *)ptr + CLICK_SZ;
 #else
     struct psprintf_data ps;
     char *strp;
     int size;
 
-    ap_block_alarms();
     ps.blok = p->last;
     ps.vbuff.curpos = ps.blok->h.first_avail;
     ps.vbuff.endpos = ps.blok->h.endp - 1;	/* save one for NUL */
@@ -1219,7 +1193,6 @@ API_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap)
 	ps.blok->h.owning_pool = p;
 #endif
     }
-    ap_unblock_alarms();
 
     return strp;
 #endif
