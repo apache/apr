@@ -56,7 +56,7 @@
 #define APR_GLOBAL_MUTEX_H
 
 #include "apr.h"
-#include "apr_lock.h"    /* only for apr_lockmech_e_np */
+#include "apr_lock.h"    /* only for apr_lockmech_e */
 #include "apr_pools.h"
 #include "apr_errno.h"
 
