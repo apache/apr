@@ -117,8 +117,9 @@ void apr_atomic_inc(volatile apr_atomic_t *mem);
 /**
  * decrement the atomic variable by 1
  * @param mem pointer to the atomic value
+ * @returns zero if the value is zero, otherwise non-zero
  */
-void apr_atomic_dec(volatile apr_atomic_t *mem);
+int apr_atomic_dec(volatile apr_atomic_t *mem);
 
 /**
  * compare the atomic's value with cmp.
@@ -158,7 +159,7 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
 #define apr_atomic_t atomic_t
 
 #define apr_atomic_add(mem, val)     atomic_add(val,mem)
-#define apr_atomic_dec(mem)          atomic_dec(mem)
+#define apr_atomic_dec(mem)          !atomic_dec_and_test(mem)
 #define apr_atomic_inc(mem)          atomic_inc(mem)
 #define apr_atomic_set(mem, val)     atomic_set(mem, val)
 #define apr_atomic_read(mem)         atomic_read(mem)
@@ -228,7 +229,7 @@ apr_status_t apr_atomic_init(apr_pool_t *p);
 void apr_atomic_set(volatile apr_atomic_t *mem, apr_uint32_t val);
 void apr_atomic_add(volatile apr_atomic_t *mem, apr_uint32_t val);
 void apr_atomic_inc(volatile apr_atomic_t *mem);
-void apr_atomic_dec(volatile apr_atomic_t *mem);
+int apr_atomic_dec(volatile apr_atomic_t *mem);
 #endif
 
 #if defined(APR_ATOMIC_NEED_CAS_DEFAULT)

@@ -123,7 +123,7 @@ void apr_atomic_inc( volatile apr_uint32_t *mem)
     }
 /*    return *mem; */
 }
-void apr_atomic_dec(volatile apr_atomic_t *mem) 
+int apr_atomic_dec(volatile apr_atomic_t *mem) 
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     apr_uint32_t prev;
@@ -132,9 +132,9 @@ void apr_atomic_dec(volatile apr_atomic_t *mem)
         prev = *mem;
         (*mem)--;
         apr_thread_mutex_unlock(lock);
-/*        return prev; */
+        return prev; 
     }
-/*    return *mem; */
+    return *mem; 
 }
 
 #endif /* APR_ATOMIC_NEED_DEFAULT */
