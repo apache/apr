@@ -554,12 +554,6 @@ if test "$threads" = "1"; then
                   [Define if gethostbyaddr is thread safe])
     fi
     AC_CHECK_FUNCS(gethostbyname_r gethostbyaddr_r)
-
-    case "$host" in
-    *-ibm-aix*)
-        APR_ADDTO(CPPFLAGS, [-D_THREAD_SAFE])
-        ;;
-    esac
 else
     echo "APR will be non-threaded"
 fi
