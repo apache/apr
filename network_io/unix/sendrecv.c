@@ -194,35 +194,28 @@ apr_status_t apr_sendv(apr_socket_t * sock, const struct iovec *vec,
 }
 #endif
 
-#if APR_HAS_SENDFILE
+/* XXX - if we start using these elsewhere in this file we'll
+ * need to move these to the top...
+ */
 
- /* TODO: Verify that all platforms handle the fd the same way 
-  *     (i.e. not moving current file pointer)
-  *     - Should flags be an int_32 or what?
-  */
+#if APR_HAVE_CORKABLE_TCP
 
-static apr_hdtr_t no_hdtr; /* used below when caller passes NULL for apr_hdtr_t */
-
-#if defined(__linux__) && defined(HAVE_WRITEV)
-
-/* TCP_CORK keeps us from sending partial frames when we shouldn't 
- * however, it is mutually exclusive w/TCP_NODELAY  
+/* TCP_CORK & TCP_NOPUSH keep us from sending partial frames when we
+ * shouldn't. They are however, mutually exclusive with TCP_NODELAY  
  */
 
 static int os_cork(apr_socket_t *sock)
 {
-    /* Linux only for now */
-
     int nodelay_off = 0, corkflag = 1, rv, delayflag;
     apr_socklen_t delaylen = sizeof(delayflag);
 
     /* XXX it would be cheaper to use an apr_socket_t flag here */
-    rv = getsockopt(sock->socketdes, SOL_TCP, TCP_NODELAY,
+    rv = getsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY,
                     (void *) &delayflag, &delaylen);
     if (rv == 0) {  
         if (delayflag != 0) {
             /* turn off nodelay temporarily to allow cork */
-            rv = setsockopt(sock->socketdes, SOL_TCP, TCP_NODELAY,
+            rv = setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY,
                             (const void *) &nodelay_off, sizeof(nodelay_off));
             /* XXX nuke the rv checking once this is proven solid */
             if (rv < 0) {
@@ -230,25 +223,38 @@ static int os_cork(apr_socket_t *sock)
             }   
         } 
     }
-    rv = setsockopt(sock->socketdes, SOL_TCP, TCP_CORK,
+    rv = setsockopt(sock->socketdes, IPPROTO_TCP, APR_TCP_NOPUSH_FLAG,
                     (const void *) &corkflag, sizeof(corkflag));
     return rv == 0 ? delayflag : rv;
 }   
 
 static int os_uncork(apr_socket_t *sock, int delayflag)
 {
-    /* Uncork to send queued frames - Linux only for now */
+    /* Uncork to send queued frames */
     
     int corkflag = 0, rv;
-    rv = setsockopt(sock->socketdes, SOL_TCP, TCP_CORK,
+    rv = setsockopt(sock->socketdes, IPPROTO_TCP, APR_TCP_NOPUSH_FLAG,
                     (const void *) &corkflag, sizeof(corkflag));
     if (rv == 0) {
         /* restore TCP_NODELAY to its original setting */
-        rv = setsockopt(sock->socketdes, SOL_TCP, TCP_NODELAY,
+        rv = setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY,
                         (const void *) &delayflag, sizeof(delayflag));
     }
     return rv;
 }
+#endif /* APR_HAVE_CORKABLE_TCP */
+
+#if APR_HAS_SENDFILE
+
+/* TODO: Verify that all platforms handle the fd the same way,
+ * i.e. that they don't move the file pointer.
+ */
+/* TODO: what should flags be?  int_32? */
+
+/* Define a structure to pass in when we have a NULL header value */
+static apr_hdtr_t no_hdtr;
+
+#if defined(__linux__) && defined(HAVE_WRITEV)
 
 apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         		apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len,
