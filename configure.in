@@ -427,28 +427,86 @@ AC_HAVE_HEADERS(kernel/OS.h)
 AC_HAVE_FUNCS(create_area)
 AC_HAVE_HEADERS(os2.h)
 
-dnl Now we determine which one is our preference.
-APR_BEGIN_DECISION([shared memory allocation method])
-APR_IFALLYES(header:sys/mman.h func:mmap func:munmap,
-             APR_DECIDE(USE_SHMEM_MMAP_TMP, 
-             [Classical mmap() on temporary file]))
-APR_IFALLYES(header:sys/mman.h func:mmap func:munmap func:shm_open dnl
-             func:shm_unlink,
-             APR_DECIDE(USE_SHMEM_MMAP_SHM, 
-             [mmap() via POSIX.1 shm_open() on temporary file]))
-APR_IFALLYES(header:sys/mman.h func:mmap func:munmap file:/dev/zero,
-             APR_DECIDE(USE_SHMEM_MMAP_ZERO, 
-             [SVR4-style mmap() on /dev/zero]))
+dnl Now we determine which one is our anonymous shmem preference.
+haveshmgetanon="0"
+havemmapzero="0"
+havemmapanon="0"
+APR_BEGIN_DECISION([anonymous shared memory allocation method])
 APR_IFALLYES(header:sys/ipc.h header:sys/shm.h header:sys/file.h dnl
              func:shmget func:shmat func:shmdt func:shmctl,
-             APR_DECIDE(USE_SHMEM_SHMGET, [SysV IPC shmget()]))
+             [haveshmgetanon="1"
+              APR_DECIDE(USE_SHMEM_SHMGET_ANON, [SysV IPC shmget()])])
+APR_IFALLYES(header:sys/mman.h func:mmap func:munmap file:/dev/zero,
+             [havemmapzero="1"
+              APR_DECIDE(USE_SHMEM_MMAP_ZERO, 
+                  [SVR4-style mmap() on /dev/zero])])
 APR_IFALLYES(header:sys/mman.h func:mmap func:munmap define:MAP_ANON,
-             APR_DECIDE(USE_SHMEM_MMAP_ANON, 
-             [4.4BSD-style mmap() via MAP_ANON]))
+             [havemmapanon="1"
+              APR_DECIDE(USE_SHMEM_MMAP_ANON, 
+                  [4.4BSD-style mmap() via MAP_ANON])])
+case $host in
+    *linux* ) 
+        dnl Linux has problems with MM_SHMT_MMANON even though it reports
+        dnl that it has it.
+        dnl FIXME - find exact 2.3 version that MMANON was fixed in.  It is
+        dnl confirmed fixed in 2.4 series.
+        if test $os_version -le "240"; then
+            APR_DECISION_OVERRIDE(USE_SHMEM_MMAP_ZERO USE_SHMEM_SHMGET_ANON)
+        fi
+        ;;
+esac
+APR_END_DECISION
+AC_DEFINE_UNQUOTED($ac_decision)
+
+useshmgetanon="0"
+usemmapzero="0"
+usemmapanon="0"
+
+case $ac_decision in
+    USE_SHMEM_SHMGET_ANON )
+        useshmgetanon="1"
+        ;;
+    USE_SHMEM_MMAP_ZERO )
+        usemmapzero="1"
+        ;;
+    USE_SHMEM_MMAP_ANON )
+        usemmapanon="1"
+        ;;
+esac
+
+AC_SUBST(useshmgetanon)
+AC_SUBST(usemmapzero)
+AC_SUBST(usemmapanon)
+AC_SUBST(haveshmgetanon)
+AC_SUBST(havemmapzero)
+AC_SUBST(havemmapanon)
+
+dnl Now we determine which one is our name-based shmem preference.
+havemmaptmp="0"
+havemmapshm="0"
+haveshmget="0"
+havebeosarea="0"
+haveos2shm="0"
+APR_BEGIN_DECISION([namebased memory allocation method])
+APR_IFALLYES(header:sys/mman.h func:mmap func:munmap,
+             [havemmaptmp="1"
+              APR_DECIDE(USE_SHMEM_MMAP_TMP, 
+                  [Classical mmap() on temporary file])])
+APR_IFALLYES(header:sys/mman.h func:mmap func:munmap func:shm_open dnl
+             func:shm_unlink,
+             [havemmapshm="1"
+              APR_DECIDE(USE_SHMEM_MMAP_SHM, 
+                  [mmap() via POSIX.1 shm_open() on temporary file])])
+APR_IFALLYES(header:sys/ipc.h header:sys/shm.h header:sys/file.h dnl
+             func:shmget func:shmat func:shmdt func:shmctl,
+             [haveshmget="1"
+              APR_DECIDE(USE_SHMEM_SHMGET, [SysV IPC shmget()])])
 APR_IFALLYES(header:kernel/OS.h func:create_area,
-             APR_DECIDE(USE_SHMEM_BEOS, [BeOS areas]))
+             [havebeosshm="1"
+              APR_DECIDE(USE_SHMEM_BEOS, [BeOS areas])])
 APR_IFALLYES(header:os2.h,
-             APR_DECIDE(USE_SHMEM_OS2, [OS/2 DosAllocSharedMem()]))
+             [haveos2shm="1"
+              APR_DECIDE(USE_SHMEM_OS2, [OS/2 DosAllocSharedMem()])])
 case $host in
     *linux* ) 
         dnl Linux has problems with MM_SHMT_MMANON even though it reports
@@ -457,7 +515,7 @@ case $host in
         dnl confirmed fixed in 2.4 series.
         if test $os_version -le "240"; then
             APR_DECISION_OVERRIDE(USE_SHMEM_MMAP_TMP USE_SHMEM_MMAP_SHM dnl
-                                  USE_SHMEM_MMAP_ZERO USE_SHMEM_SHMGET)
+                                  USE_SHMEM_SHMGET)
         fi
         ;;
 esac
@@ -466,42 +524,25 @@ AC_DEFINE_UNQUOTED($ac_decision)
 
 usemmaptmp="0"
 usemmapshm="0"
-usemmapzero="0"
 useshmget="0"
-usemmapanon="0"
 usebeosarea="0"
 useos2shm="0"
-mem_based="0"
-file_based="0"
 
 case $ac_decision in
     USE_SHMEM_MMAP_TMP )
         usemmaptmp="1"
-        file_based="1"
         ;;
     USE_SHMEM_MMAP_SHM )
         usemmapshm="1"
-        mem_based="1"
-        ;;
-    USE_SHMEM_MMAP_ZERO )
-        usemmapzero="1"
-        mem_based="1"
         ;;
     USE_SHMEM_SHMGET )
         useshmget="1"
-        mem_based="1"
-        ;;
-    USE_SHMEM_MMAP_ANON )
-        usemmapanon="1"
-        mem_based="1"
         ;;
     USE_SHMEM_BEOS )
         usebeosarea="1"
-        mem_based="1"
         ;;
     USE_SHMEM_OS2 )
         useos2shm="1"
-        file_based="0"
         ;;
 esac
 
@@ -514,22 +555,15 @@ fi
 
 AC_SUBST(usemmaptmp)
 AC_SUBST(usemmapshm)
-AC_SUBST(usemmapzero)
 AC_SUBST(useshmget)
-AC_SUBST(usemmapanon)
 AC_SUBST(usebeosarea)
+AC_SUBST(useos2shm)
+AC_SUBST(havemmaptmp)
+AC_SUBST(havemmapshm)
+AC_SUBST(haveshmget)
+AC_SUBST(havebeosarea)
+AC_SUBST(haveos2shm)
 AC_SUBST(sharedmem)
-AC_SUBST(file_based)
-AC_SUBST(mem_based)
-
-dnl We only support anonymous shared memory in Unix currently.
-anonymous_shm="1"
-filebased_shm="0"
-keybased_shm="0"
-
-AC_SUBST(anonymous_shm)
-AC_SUBST(filebased_shm)
-AC_SUBST(keybased_shm)
 
 dnl #----------------------------- Checks for Any required Functions
 dnl Checks for library functions. (N.B. poll is further down)
