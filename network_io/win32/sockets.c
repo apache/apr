@@ -59,6 +59,7 @@
 #include "apr_portable.h"
 #include <string.h>
 #include "inherit.h"
+#include "misc.h"
 
 static char generic_inaddr_any[16] = {0}; /* big enough for IPv4 or IPv6 */
 
@@ -129,6 +130,42 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
     if ((*new)->socketdes == INVALID_SOCKET) {
         return apr_get_netos_error();
     }
+
+#ifdef WIN32
+    /* Socket handles are never truly inheritable, there are too many
+     * bugs associated.  WSADuplicateSocket will copy them, but for our
+     * purposes, always transform the socket() created as a non-inherited
+     * handle
+     */
+#if APR_HAS_UNICODE_FS
+    IF_WIN_OS_IS_UNICODE {
+        /* A different approach.  Many users report errors such as 
+         * (32538)An operation was attempted on something that is not 
+         * a socket.  : Parent: WSADuplicateSocket failed...
+         *
+         * This appears that the duplicated handle is no longer recognized
+         * as a socket handle.  SetHandleInformation should overcome that
+         * problem by not altering the handle identifier.  But this won't
+         * work on 9x - it's unsupported.
+         */
+        SetHandleInformation((HANDLE) (*new)->socketdes, 
+                             HANDLE_FLAG_INHERIT, 0);
+    }
+#endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI {
+        HANDLE hProcess = GetCurrentProcess();
+        HANDLE dup;
+        if (DuplicateHandle(hProcess, (HANDLE) (*new)->socketdes, hProcess, 
+                            &dup, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
+            closesocket((*new)->socketdes);
+            (*new)->socketdes = (SOCKET) dup;
+        }
+    }
+#endif
+
+#endif /* def WIN32 */
+
     set_socket_vars(*new, family, type);
 
     (*new)->timeout = -1;
