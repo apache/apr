@@ -91,7 +91,7 @@ apr_status_t apr_set_userdata(const void *data, const char *key,
 {
     int keylen = strlen(key);
 
-    if (!cont->prog_data)
+    if (cont->prog_data == NULL)
         cont->prog_data = apr_make_hash(cont);
 
     if (apr_hash_get(cont->prog_data, key, keylen) == NULL){
@@ -108,7 +108,10 @@ apr_status_t apr_set_userdata(const void *data, const char *key,
 
 apr_status_t apr_get_userdata(void **data, const char *key, apr_pool_t *cont)
 {
-    (*data) = apr_hash_get(cont->prog_data, key, strlen(key));
+    if (cont->prog_data == NULL)
+        *data = NULL;
+    else
+        *data = apr_hash_get(cont->prog_data, key, strlen(key));
     return APR_SUCCESS;
 }
 
