@@ -271,7 +271,7 @@ B<convert the thread to os specific type from apr type.>
 
 =cut
  */
-ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, ap_thread_t *thd);
+ap_status_t ap_get_os_thread(ap_os_thread_t **thethd, ap_thread_t *thd);
 
 /*
 
