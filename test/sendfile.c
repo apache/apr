@@ -512,7 +512,7 @@ static int server(void)
     char buf[120];
     int i;
     apr_socket_t *newsock = NULL;
-    apr_ssize_t bytes_read;
+    apr_size_t bytes_read;
     apr_sockaddr_t *localsa;
     int family;
 
