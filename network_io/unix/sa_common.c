@@ -524,26 +524,24 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
                      flags != 0 ? flags : NI_NAMEREQD);
     if (rc != 0) {
         *hostname = NULL;
-#if 1
-        /* De facto implementations return the error code in their
-         * return value. See isc.org's bind9, or
-         * FreeBSD's lib/libc/net/getnameinfo.c
-         * Implementations that set h_errno a simply broken.
-         * @@ if you encounter one, replace the #if 1 by an
-         * @@ appropriate #ifdef and delete these lines.
-         */
-            return rc + APR_OS_START_SYSERR;
-#else
-        /* XXX I have no idea if this is okay.  I don't see any info
-         * about getnameinfo() returning anything other than good or bad.
-         */
-        if (h_errno) {
-            return h_errno + APR_OS_START_SYSERR;
+
+        /* something went wrong. Look at the EAI_ error code */
+        if (rc != EAI_SYSTEM) {
+#if defined(NEGATIVE_EAI)
+            if (rc < 0) rc = -rc;
+#endif
+            return rc + APR_OS_START_EAIERR; /* return the EAI_ error */
         }
         else {
-            return APR_NOTFOUND;
+            /* EAI_SYSTEM      System error returned in errno. */
+            /* IMHO, Implementations that set h_errno a simply broken. */
+            if (h_errno) { /* for broken implementations which set h_errno */
+                return h_errno + APR_OS_START_SYSERR;
+            }
+            else { /* "normal" case */
+                return errno + APR_OS_START_SYSERR;
+            }
         }
-#endif
     }
     *hostname = sockaddr->hostname = apr_pstrdup(sockaddr->pool, 
                                                  tmphostname);
