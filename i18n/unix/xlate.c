@@ -250,7 +250,11 @@ ap_status_t ap_xlate_conv_buffer(ap_xlate_t *convset, const char *inbuf,
         
         translated = iconv(convset->ich, (const char **)&inbufptr, 
                            inbytes_left, &outbufptr, outbytes_left);
-        if (translated == (size_t)-1) {
+        /* If everything went fine but we ran out of buffer, don't
+         * report it as an error.  Caller needs to look at the two
+         * bytes-left values anyway.
+         */
+        if (translated == (size_t)-1 && *outbytes_left) {
             return errno;
         }
     }
