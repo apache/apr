@@ -262,9 +262,7 @@ extern "C" {
 #define APR_HAS_OS_UUID           0
 
 /* APR sets APR_FILES_AS_SOCKETS to 1 on systems where it is possible
- * to poll on files/pipes.  On such a system, the application can
- * call apr_socket_from_file() to get an APR socket representation and 
- * then pass the socket representation to apr_poll_socket_add().
+ * to poll on files/pipes.
  */
 #define APR_FILES_AS_SOCKETS      @file_as_socket@
 
