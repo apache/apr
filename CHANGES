@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Make clean, distclean, and extraclean consistently according to the
+     Gnu makefile guidelines.  [Justin Erenkrantz <jerenkrantz@ebuilt.com>]
+
   *) Initial implementation of of apr_filepath (get/set/parse_root and 
      merge) for Windows.  [William Rowe]
 
