@@ -108,7 +108,7 @@ ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
     }
     (*new)->timeout = -1;
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
-                        socket_cleanup, NULL);
+                        socket_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 } 
 
@@ -167,7 +167,7 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock, struct
     }
 
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
-                        socket_cleanup, NULL);
+                        socket_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 }
 
