@@ -84,6 +84,8 @@ extern "C" {
 				    exists. */
 #define APR_BUFFERED   128         /* Open the file for buffered I/O */
 #define APR_DELONCLOSE 256         /* Delete the file after close */
+#define APR_XTHREAD    512         /* Platform dependent tag to open the file 
+                                      for use across multiple threads */
 
 /* flags for apr_seek */
 #define APR_SET SEEK_SET
@@ -517,10 +519,12 @@ APR_DECLARE(apr_status_t) apr_remove_dir(const char *path, apr_pool_t *cont);
 /**
  * get the specified file's stats.
  * @param finfo Where to store the information about the file.
+ * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_ values 
  * @param thefile The file to get information about.
- * @deffunc apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
+ * @deffunc apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted, apr_file_t *thefile)
  */ 
-APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo,
+APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo, 
+                                          apr_int32_t wanted,
                                           apr_file_t *thefile);
 
 #ifdef __cplusplus
