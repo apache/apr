@@ -66,13 +66,15 @@
 #define APR_HAS_XLATE             @iconv@
 #define APR_HAS_OTHER_CHILD       @oc@
 
-/* Any time a file and socket are represented as the same type, this macro
- * should be true.  I don't know of any platforms using Autoconf where this
- * isn't true (OS/2? maybe), but I know it isn't true for Windows.  For right
- * now, just define it as 1, and Windows will define it correctly, if this
- * turns out to not work, we can devise an Autoconf test for it later.  rbb
+/* This macro tells APR that it is safe to make a file masquerade as a 
+ * socket.  This is necessary, because some platforms support poll'ing
+ * on pipes/files, while some don't.  APR only supports poll'ing on 
+ * sockets to handle this inconsistensy.  However, it is often useful to
+ * be able to poll on files/pipes on platforms that support it.  This
+ * feature macro allows us to find those platforms and support the feature
+ * where available.
  */
-#define APR_FILES_AS_SOCKETS      1
+#define APR_FILES_AS_SOCKETS      @file_as_socket@
 
 /* Typedefs that APR needs. */
 

@@ -554,7 +554,12 @@ msg=yes ] , [ have_in_addr="0"
 msg=no ])
 AC_MSG_RESULT([$msg])
 
+if test "x$file_as_socket" = "x" ; then
+    file_as_socket="1";
+fi
+
 AC_SUBST(have_in_addr)
+AC_SUBST(file_as_socket)
 
 APR_CHECK_GETHOSTBYNAME_NAS
 
