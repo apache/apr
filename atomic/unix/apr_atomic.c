@@ -63,7 +63,7 @@
 
 #define NUM_ATOMIC_HASH 7
 /* shift by 2 to get rid of alignment issues */
-#define ATOMIC_HASH(x) (int)(((long)x>>2)%NUM_ATOMIC_HASH)
+#define ATOMIC_HASH(x) (unsigned int)(((unsigned long)(x))%(unsigned int)NUM_ATOMIC_HASH)
 static apr_thread_mutex_t **hash_mutex;
 
 apr_status_t apr_atomic_init(apr_pool_t *p )
@@ -92,7 +92,6 @@ void apr_atomic_add(volatile apr_atomic_t *mem, apr_uint32_t val)
         apr_thread_mutex_unlock(lock);
 /*        return prev; */
     }
-    printf("debug no workee\n");
 /*    return *mem; */
 }
 void apr_atomic_set(volatile apr_atomic_t *mem, apr_uint32_t val) 
