@@ -664,6 +664,7 @@ void generate_def_file(cmd_data_t *cmd_data)
 
         if (hDef != NULL) {
             fprintf(hDef, "LIBRARY %s INITINSTANCE\n", nameof(cmd_data->output_name));
+            fprintf(hDef, "DATA NONSHARED\n");
             fprintf(hDef, "EXPORTS\n");
             fclose(hDef);
 
