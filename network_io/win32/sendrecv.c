@@ -66,8 +66,7 @@
  * The same problem can exist with apr_send(). In that case, we rely on the
  * application to adjust socket timeouts and max send segment sizes appropriately.
  * For example, Apache will in most cases call apr_send() with less than 8193 
- * bytes
- * of data.
+ * bytes.
  */
 #define MAX_SEGMENT_SIZE 65536
 apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
@@ -122,6 +121,7 @@ apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec,
     int lasterror;
     DWORD dwBytes = 0;
 
+    /* Todo: Put the WSABUF array on the stack. */
     LPWSABUF pWsaData = (LPWSABUF) malloc(sizeof(WSABUF) * nvec);
 
     if (!pWsaData)
@@ -199,14 +199,10 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
     DWORD nbytes;
     OVERLAPPED overlapped;
     TRANSMIT_FILE_BUFFERS tfb, *ptfb = NULL;
-    int bytes_to_send;
     int ptr = 0;
+    int bytes_to_send = *len;   /* Bytes to send out of the file (not including headers) */
 
-    /* Must pass in a valid length */
-    if (len == 0) {
-        return APR_EINVAL;
-    }
-    bytes_to_send = *len;
+    /* Use len to keep track of number of total bytes sent (including headers) */
     *len = 0;
 
     /* Initialize the overlapped structure */
@@ -218,26 +214,29 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
     overlapped.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 #endif
 
-    /* TransmitFile can only send one header and one footer */
+    /* Handle the goofy case of sending headers/trailers and a zero byte file */
+    if (!bytes_to_send && hdtr) {
+        if (hdtr->numheaders) {
+            rv = apr_sendv(sock, hdtr->headers, hdtr->numheaders, &nbytes);
+            if (rv != APR_SUCCESS)
+                return rv;
+            *len += nbytes;
+        }
+        if (hdtr->numtrailers) {
+            rv = apr_sendv(sock, hdtr->trailers, hdtr->numtrailers, &nbytes);
+            if (rv != APR_SUCCESS)
+                return rv;
+            *len += nbytes;
+        }
+        return APR_SUCCESS;
+    }
+
+    /* Collapse the headers into a single buffer */
     memset(&tfb, '\0', sizeof (tfb));
     if (hdtr && hdtr->numheaders) {
         ptfb = &tfb;
-        collapse_iovec((char **)&ptfb->Head, &ptfb->HeadLength, hdtr->headers, hdtr->numheaders, sock->cntxt);
-    }
-
-    /* If we have more than MAX_SEGMENT_SIZE headers to send, send them
-     * in segments.
-     */
-    if (ptfb && ptfb->HeadLength) {
-        while (ptfb->HeadLength >= MAX_SEGMENT_SIZE) {
-            nbytes = MAX_SEGMENT_SIZE;
-            rv = apr_send(sock, ptfb->Head, &nbytes);
-            if (rv != APR_SUCCESS)
-                return rv;
-            (char*) ptfb->Head += nbytes;
-            ptfb->HeadLength -= nbytes;
-            *len += nbytes;
-        }
+        collapse_iovec((char **)&ptfb->Head, &ptfb->HeadLength, hdtr->headers, 
+                       hdtr->numheaders, sock->cntxt);
     }
 
     while (bytes_to_send) {
@@ -247,9 +246,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
         else {
             /* Last call to TransmitFile() */
             nbytes = bytes_to_send;
-            /* Send trailers on the last packet, even if the total size 
-             * exceeds MAX_SEGMENT_SIZE...
-             */
+            /* Collapse the trailers into a single buffer */
             if (hdtr && hdtr->numtrailers) {
                 ptfb = &tfb;
                 collapse_iovec((char**) &ptfb->Tail, &ptfb->TailLength, 
