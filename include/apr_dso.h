@@ -58,6 +58,10 @@
 #include "apr_general.h"
 #include "apr_errno.h"
 
+/**
+ * @package dso
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -65,48 +69,37 @@ extern "C" {
 typedef struct ap_dso_handle_t        ap_dso_handle_t;
 typedef void *                        ap_dso_handle_sym_t;
 
-/*
-
-=head1 ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, ap_pool_t *ctx)
-
-B<Load a DSO library.>
-
-    arg 1) Location to store new handle for the DSO.
-    arg 2) Path to the DSO library
-    arg 3) Pool to use. 
-
-=cut
+/**
+ * Load a DSO library.
+ * @param res_handle Location to store new handle for the DSO.
+ * @param path Path to the DSO library
+ * @param ctx Pool to use. 
+ * @keyword load DSO
  */
 ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, 
                         ap_pool_t *ctx);
 
-/*
-
-=head1 ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
-
-B<Close a DSO library.>
-
-    arg 1) handle to close.
-
-=cut
+/**
+ * Close a DSO library.
+ * @param handle handle to close.
  */
 ap_status_t ap_dso_unload(ap_dso_handle_t *handle);
 
-/*
-
-=head1 ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, ap_dso_handle_t *handle, const char *symname)
-
-B<Load a symbol from a DSO handle.>
-
-    arg 1) Location to store the loaded symbol
-    arg 2) handle to load from.
-    arg 3) Name of the symbol to load.
-
-=cut
+/**
+ * Load a symbol from a DSO handle.
+ * @param dso Location to store the loaded symbol
+ * @param handle handle to load from.
+ * @param symname Name of the symbol to load.
  */
 ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, ap_dso_handle_t *handle, 
                        const char *symname);
 
+/**
+ * Report more information when a DSO function fails.
+ * @param dso Location to store the loaded symbol
+ * @param buf handle to load from.
+ * @param bufsize Name of the symbol to load.
+ */
 const char *ap_dso_error(ap_dso_handle_t *dso, char *buf, ap_size_t bufsize);
 
 #ifdef __cplusplus
