@@ -77,17 +77,16 @@ APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool, apr_pool_t *p)
                                      0x2000, 0, 0x80000);
 }
     
-APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t * p,
-                                           apr_abortfunc_t abort)
+APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **p,
+                                    apr_pool_t *pparent,
+                                    apr_abortfunc_t abort)
 {
-    apr_pool_t *np;
-
-    if (apr_sms_trivial_create(&np, p) != APR_SUCCESS)
+    if (apr_sms_trivial_create(p, pparent) != APR_SUCCESS)
         return NULL;
 
-    apr_sms_set_abort(abort, np);
+    apr_sms_set_abort(abort, *p);
 
-    return np;
+    return p;
 }
 
 APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *pool,
