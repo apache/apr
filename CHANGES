@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) Added the APR_TRY_GCC_WARNING configure macro for testing a
+     gcc-specific compile with -Werror) and the APR_CHECK_ICONV_INBUF
+     macro to test for annoying iconv prototype differences.
+     [Jeff Trawick, Roy Fielding]
+
   *) Fix a problem with configure on NetBSD.  We must include sys/types.h
      for some platforms.  [jun-ichiro hagino <itojun@kame.net>]
 
