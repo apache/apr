@@ -59,6 +59,7 @@
 #include "apr_general.h"
 #include "apr_errno.h"
 #if APR_HAVE_STRUCT_RLIMIT
+#include <sys/time.h>
 #include <sys/resource.h>
 #endif
 
