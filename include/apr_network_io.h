@@ -128,10 +128,10 @@ typedef struct apr_hdtr_t       apr_hdtr_t;
 typedef struct in_addr      apr_in_addr;
 
 #if APR_HAS_SENDFILE
-/* Define flags passed in on ap_sendfile() */
+/* Define flags passed in on apr_sendfile() */
 #define APR_SENDFILE_DISCONNECT_SOCKET      1
 
-/* A structure to encapsulate headers and trailers for ap_sendfile */
+/* A structure to encapsulate headers and trailers for apr_sendfile */
 struct apr_hdtr_t {
     struct iovec* headers;
     int numheaders;
@@ -293,8 +293,8 @@ apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec,
  *      this behavior, use apr_setsocketopt with the APR_SO_TIMEOUT option.
  *      The number of bytes actually sent is stored in argument 5.
  */
-apr_status_t ap_sendfile(apr_socket_t *sock, apr_file_t *file, apr_hdtr_t *hdtr, 
-                        apr_off_t *offset, apr_size_t *len, apr_int32_t flags);
+apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file, apr_hdtr_t *hdtr, 
+                          apr_off_t *offset, apr_size_t *len, apr_int32_t flags);
 #endif
 
 /**
