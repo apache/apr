@@ -188,7 +188,12 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
 #endif
     }
     if (opt & APR_SO_TIMEOUT) { 
-        /* don't do the fcntl foo more than needed */ 
+        /* If our timeout is positive or zero and our last timeout was
+         * negative, then we need to ensure that we are non-blocking.
+         * Conversely, if our timeout is negative and we had a positive
+         * or zero timeout, we must make sure our socket is blocking.
+         * We want to avoid calling fcntl more than necessary on the socket,
+         */
         if (on >= 0 && sock->timeout < 0){
             if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) != 1){
                 if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS){
