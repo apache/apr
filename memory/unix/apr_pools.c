@@ -1867,10 +1867,6 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
         *data = apr_hash_get(pool->user_data, key, APR_HASH_KEY_STRING);
     }
 
-    if (*data == NULL) {
-        return APR_KEYNOTFOUND;
-    }
-
     return APR_SUCCESS;
 }
 
