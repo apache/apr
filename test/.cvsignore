@@ -4,6 +4,7 @@ Release
 *.lo
 *.swp
 .libs
+.deps
 testmd5
 testmmap
 htdigest
