@@ -70,7 +70,7 @@
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
 #endif
-#if APR_HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
