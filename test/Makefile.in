@@ -11,7 +11,6 @@ VPATH = @srcdir@
 #   or with special parameters
 
 STDTEST_PORTABLE = \
-	testflock@EXEEXT@ \
 	testsock@EXEEXT@ \
 	testlockperf@EXEEXT@ \
 	testshmproducer@EXEEXT@ \
@@ -36,7 +35,7 @@ TARGETS = $(PROGRAMS)
 LOCAL_LIBS=../lib@APR_LIBNAME@.la
 
 CLEAN_TARGETS = testfile.tmp mod_test.slo proc_child@EXEEXT@ occhild@EXEEXT@ \
-readchild@EXEEXT@
+readchild@EXEEXT@ tryread@EXEEXT@
 CLEAN_SUBDIRS = internal
 
 INCDIR=../include
@@ -55,14 +54,14 @@ check: $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 		fi; \
 	done
 
-testflock@EXEEXT@: testflock.lo $(LOCAL_LIBS)
-	$(LINK_PROG) testflock.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
 occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)
 	$(LINK_PROG) occhild.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 readchild@EXEEXT@: readchild.lo $(LOCAL_LIBS)
 	$(LINK_PROG) readchild.lo $(LOCAL_LIBS) $(ALL_LIBS)
+        
+tryread@EXEEXT@: tryread.lo $(LOCAL_LIBS)
+	$(LINK_PROG) tryread.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 proc_child@EXEEXT@: proc_child.lo $(LOCAL_LIBS)
 	$(LINK_PROG) proc_child.lo $(LOCAL_LIBS) $(ALL_LIBS)
@@ -117,10 +116,11 @@ TESTS = testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testpoll.lo testlock.lo testsockopt.lo testpipe.lo testthread.lo \
 	testhash.lo testargs.lo testnames.lo testuser.lo testpath.lo \
 	testenv.lo testprocmutex.lo testrand2.lo testfnmatch.lo \
-        testatomic.lo
+        testatomic.lo testflock.lo
 
 testall: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
-	 readchild@EXEEXT@ CuTest.lo proc_child@EXEEXT@ $(LOCAL_LIBS)
+	 readchild@EXEEXT@ CuTest.lo proc_child@EXEEXT@ \
+         tryread@EXEEXT@ $(LOCAL_LIBS)
 	$(LINK_PROG) $(TESTS) CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 

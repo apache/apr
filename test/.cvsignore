@@ -72,6 +72,7 @@ testvsn
 testregex
 testmutexscope
 testtable
+tryread
 testall
 testall.ncb
 testall.opt
