@@ -79,14 +79,6 @@ extern "C" {
 
 #define MAXIMUM_WAIT_OBJECTS 64
 
-#if SIZEOF_SSIZE_T == SIZEOF_INT
-# define APR_SSIZE_T_FMT "d"
-#elif SIZEOF_SSIZE_T == SIZEOF_LONG
-# define APR_SSIZE_T_FMT "ld"
-#else
-# error "Don't know ssize_t printf format"
-#endif
-
 typedef struct context_t  ap_context_t;
 typedef int               ap_signum_t;
 
