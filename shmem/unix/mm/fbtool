@@ -10,8 +10,10 @@ if [ ! -f .fbtool ]; then
 fi
 result=`cat .fbtool`
 
-PLATFORM=`./config.guess`
-PLATFORM=`./config.sub $PLATFORM`
+VERSION=`./shtool version -l c -d long mm_vers.c`
+
+PLATFORM=`/bin/sh ./config.guess`
+PLATFORM=`/bin/sh ./config.sub $PLATFORM`
 
 VMPS=`grep MM_VMPS_ mm_conf.h | grep define | sed -e 's;.*MM_;MM_;' -e 's; .*;;'`; \
 SHMT=`grep MM_SHMT_ mm_conf.h | grep define | sed -e 's;.*MM_;MM_;' -e 's; .*;;'`; \
@@ -22,6 +24,7 @@ TMP=".fbsummary"
 rm -f $TMP >/dev/null 2>&1
 touch $TMP
 echo "+-MM-Library-Test-Suite-Summary---------------------------" >>$TMP
+echo "| Library Version       : MM $VERSION" >>$TMP
 echo "| Platform              : $PLATFORM" >>$TMP
 echo "| Memory Page Size Type : $VMPS" >>$TMP
 echo "| Shared Memory Type    : $SHMT" >>$TMP

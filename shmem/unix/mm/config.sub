@@ -850,6 +850,8 @@ case $basic_machine in
 		basic_machine=c4x-none
 		os=-coff
 		;;
+	BS2000-siemens)
+		;;
 	*)
 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
 		exit 1
@@ -1214,3 +1216,4 @@ case $basic_machine in
 esac
 
 echo $basic_machine$os
+exit 0

@@ -232,7 +232,7 @@ void *mm_core_create(size_t usersize, const char *file)
 
 #if defined(MM_SHMT_MMANON)
     if ((area = (void *)mmap(NULL, size, PROT_READ|PROT_WRITE, 
-                             MAP_ANON|MAP_SHARED, -1, 0)) == MAP_FAILED)
+                             MAP_ANON|MAP_SHARED, -1, 0)) == (void *)MAP_FAILED)
         FAIL(MM_ERR_CORE|MM_ERR_SYSTEM, "failed to memory map anonymous area");
 #endif /* MM_SHMT_MMANON */
 
@@ -244,7 +244,7 @@ void *mm_core_create(size_t usersize, const char *file)
         FAIL(MM_ERR_CORE|MM_ERR_SYSTEM, "failed to truncate tempfile");
     write(fdmem, &zero, sizeof(zero));
     if ((area = (void *)mmap(NULL, size, PROT_READ|PROT_WRITE, 
-                             MAP_SHARED, fdmem, mm_core_mapoffset)) == MAP_FAILED)
+                             MAP_SHARED, fdmem, mm_core_mapoffset)) == (void *)MAP_FAILED)
         FAIL(MM_ERR_CORE|MM_ERR_SYSTEM, "failed to memory map tempfile");
     shm_unlink(fnmem);
     mm_core_mapoffset += size;
@@ -257,7 +257,7 @@ void *mm_core_create(size_t usersize, const char *file)
         FAIL(MM_ERR_CORE|MM_ERR_SYSTEM, "failed to seek in /dev/zero");
     write(fdmem, &zero, sizeof(zero));
     if ((area = (void *)mmap(NULL, size, PROT_READ|PROT_WRITE, 
-                             MAP_SHARED, fdmem, mm_core_mapoffset)) == MAP_FAILED)
+                             MAP_SHARED, fdmem, mm_core_mapoffset)) == (void *)MAP_FAILED)
         FAIL(MM_ERR_CORE|MM_ERR_SYSTEM, "failed to memory map /dev/zero");
     mm_core_mapoffset += size;
 #endif /* MM_SHMT_MMZERO */
@@ -270,7 +270,7 @@ void *mm_core_create(size_t usersize, const char *file)
         FAIL(MM_ERR_CORE|MM_ERR_SYSTEM, "failed to truncate memory file");
     write(fdmem, &zero, sizeof(zero));
     if ((area = (void *)mmap(NULL, size, PROT_READ|PROT_WRITE, 
-                             MAP_SHARED, fdmem, mm_core_mapoffset)) == MAP_FAILED)
+                             MAP_SHARED, fdmem, mm_core_mapoffset)) == (void *)MAP_FAILED)
         FAIL(MM_ERR_CORE|MM_ERR_SYSTEM, "failed to memory map memory file");
     mm_core_mapoffset += size;
 #endif /* MM_SHMT_MMFILE */

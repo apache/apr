@@ -88,16 +88,17 @@ libmm.la: $(OBJ) $(LOBJ)
 mm_alloc.c mm_core.c mm_global.c: mm_conf.h mm.h mm_vers.c
 
 test: mm_test
-	@./mm_test; \
+	-@./mm_test; \
 	if [ $$? -eq 0 ]; then \
-		PLATFORM=`./config.guess`; PLATFORM=`./config.sub $$PLATFORM`; \
+		PLATFORM=`$(SHELL) ./config.guess`; \
+		PLATFORM=`$(SHELL) ./config.sub $$PLATFORM`; \
 		if [ ".`grep $$PLATFORM README`" = . ]; then \
 	        echo "Please send the following summary via Email to the author"; \
 	        echo "Ralf S. Engelschall <rse@engelschall.com> for inclusion into"; \
 	        echo "the list of successfully tested platforms (see README file):"; \
 	        echo ""; \
 	        echo "Ok" >.fbtool; \
-	        ./fbtool -d; \
+	        $(SHELL) ./fbtool -d; \
 	    fi; \
 	else \
 	    echo "Please send the following summary together with as much other"; \
@@ -106,8 +107,9 @@ test: mm_test
 	    echo "down your platform problem."; \
 	    echo ""; \
 	    echo "Failed" >.fbtool; \
-	    ./fbtool -d; \
-	fi
+	    $(SHELL) ./fbtool -d; \
+	fi; \
+	exit 0
 
 debug: mm_test
 	@$(LIBTOOL) --mode=execute gdb mm_test
@@ -127,13 +129,13 @@ mm-config.1: mm-config.pod
 	V1=`$(SHTOOL) version -l c -d short $(_VERSION_FILE)`; \
 	V2=`$(SHTOOL) version -l c -d long $(_VERSION_FILE)`; \
 	D=`$(SHTOOL) version -l c -d long $(_VERSION_FILE) | sed -e 's;.*(;;' -e 's;).*;;'`; \
-	pod2man --section=3 --center="Shared Memory Library" --release="$$D" --date="MM $$V1" mm-config.pod |\
+	pod2man --section=1 --center="Shared Memory Library" --release="$$D" --date="MM $$V1" mm-config.pod |\
 	perl -p -e 's;^(\\\&\s+.+?)([Mm][Mm]_[a-zA-Z0-9_]+)(\(.+?)$$;$$1\\fB$$2\\fR$$3;' |\
 	sed -e "s;MM_VERSION_STR;$$V2;" >mm-config.1
 
 update:
-	@$(RM) ltmain.sh ltconfig
-	@$(MAKE) $(MFLAGS) ltmain.sh ltconfig configure
+	@$(RM) ltmain.sh ltconfig shtool
+	@$(MAKE) $(MFLAGS) ltmain.sh ltconfig configure shtool
 
 configure: configure.in aclocal.m4
 	$(RM) configure
@@ -149,6 +151,9 @@ ltmain.sh:
 ltconfig:
 	@F=`libtoolize -n -c -f | grep 'cp.*ltconfig' | sed -e 's;[^/]*;;' -e 's; .*;;'`; \
 	echo "ltconfig <-- $$F"; cp $$F .
+
+shtool:
+	shtoolize -o shtool all
 
 install: all
 	$(SHTOOL) mkdir -f -p -m 755 $(bindir)
@@ -183,24 +188,16 @@ realclean: distclean
 dist: distclean
 	@$(SHTOOL) fixperm -v *; \
 	V=`$(SHTOOL) version -l c -d short $(_VERSION_FILE)`; \
-	gtar --no-recursion -cvf - `find * -depth -print | sort | grep -v CVS | grep -v .cvsignore ` |\
-    tardy --user_number=0  --user_name=rse \
-          --group_number=0 --group_name=en \
-          --prefix=mm-$$V - |\
-    gzip --best >/tmp/mm-$$V.tar.gz && \
-	cp /tmp/mm-$$V.tar.gz .; rm -f /tmp/mm-$$V.tar.gz; \
-	ls -l mm-$$V.tar.gz
+	$(SHTOOL) tarball -o mm-$${V}.tar.gz -d mm-$${V} -u rse -g mm \
+	                  -e 'CVS,\.cvsignore,\.[ao],^\.' -c 'gzip --best' .; \
+	ls -l mm-$${V}.tar.gz
 
 snap: distclean
 	@$(SHTOOL) fixperm *; \
 	V=`$(SHTOOL) version -l c -d short $(_VERSION_FILE)`; \
-	gtar --no-recursion -cvf - `find * -depth -print | sort | grep -v CVS | grep -v .cvsignore ` |\
-    tardy --user_number=0  --user_name=rse \
-          --group_number=0 --group_name=en \
-          --prefix=mm-$$V - |\
-    gzip --best >/tmp/mm-$$V-SNAP.tar.gz && \
-	cp /tmp/mm-$$V-SNAP.tar.gz .; rm -f /tmp/mm-$$V-SNAP.tar.gz; \
-	ls -l mm-$$V-SNAP.tar.gz
+	$(SHTOOL) tarball -o mm-$${V}-SNAP.tar.gz -d mm-$${V}-SNAP -u rse -g mm \
+	                  -e 'CVS,\.cvsignore,\.[ao],^\.' -c 'gzip --best' .; \
+	ls -l mm-$${V}-SNAP.tar.gz
 
 new-version:
 	OPT='-i v' && $(_VERSION)
