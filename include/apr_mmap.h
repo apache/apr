@@ -137,6 +137,9 @@ struct apr_mmap_t {
 #  define APR_MMAP_LIMIT                  (4*1024*1024)
 #endif /* MMAP_LIMIT */
 
+#define APR_MMAP_CANDIDATE(filelength) \
+    ((filelength >= APR_MMAP_THRESHOLD) && (filelength < APR_MMAP_LIMIT))
+
 /*   Function definitions */
 
 /** 
