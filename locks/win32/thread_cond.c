@@ -142,10 +142,11 @@ APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
         if (res != WAIT_OBJECT_0) {
             apr_status_t rv = apr_get_os_error();
             ReleaseMutex(cond->mutex);
+            apr_thread_mutex_lock(mutex);
             if (res == WAIT_TIMEOUT) {
-                rv = APR_TIMEUP;
+                return APR_TIMEUP;
             }
-            return rv;
+            return apr_get_os_error();
         }
         if (cond->signal_all) {
             if (cond->num_waiting == 0) {
