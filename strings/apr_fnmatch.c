@@ -64,18 +64,18 @@ APR_DECLARE(apr_status_t) apr_fnmatch(const char *pattern, const char *string, i
     for (stringstart = string;;) {
 	switch (c = *pattern++) {
 	case EOS:
-	    return (*string == EOS ? APR_SUCCESS : FNM_NOMATCH);
+	    return (*string == EOS ? APR_SUCCESS : APR_FNM_NOMATCH);
 	case '?':
 	    if (*string == EOS) {
-		return (FNM_NOMATCH);
+		return (APR_FNM_NOMATCH);
 	    }
-	    if (*string == '/' && (flags & FNM_PATHNAME)) {
-		return (FNM_NOMATCH);
+	    if (*string == '/' && (flags & APR_FNM_PATHNAME)) {
+		return (APR_FNM_NOMATCH);
 	    }
-	    if (*string == '.' && (flags & FNM_PERIOD) &&
+	    if (*string == '.' && (flags & APR_FNM_PERIOD) &&
 		(string == stringstart ||
-		 ((flags & FNM_PATHNAME) && *(string - 1) == '/'))) {
-		return (FNM_NOMATCH);
+		 ((flags & APR_FNM_PATHNAME) && *(string - 1) == '/'))) {
+		return (APR_FNM_NOMATCH);
 	    }
 	    ++string;
 	    break;
@@ -86,58 +86,58 @@ APR_DECLARE(apr_status_t) apr_fnmatch(const char *pattern, const char *string, i
 		c = *++pattern;
 	    }
 
-	    if (*string == '.' && (flags & FNM_PERIOD) &&
+	    if (*string == '.' && (flags & APR_FNM_PERIOD) &&
 		(string == stringstart ||
-		 ((flags & FNM_PATHNAME) && *(string - 1) == '/'))) {
-		return (FNM_NOMATCH);
+		 ((flags & APR_FNM_PATHNAME) && *(string - 1) == '/'))) {
+		return (APR_FNM_NOMATCH);
 	    }
 
 	    /* Optimize for pattern with * at end or before /. */
 	    if (c == EOS) {
-		if (flags & FNM_PATHNAME) {
-		    return (strchr(string, '/') == NULL ? APR_SUCCESS : FNM_NOMATCH);
+		if (flags & APR_FNM_PATHNAME) {
+		    return (strchr(string, '/') == NULL ? APR_SUCCESS : APR_FNM_NOMATCH);
 		}
 		else {
 		    return (APR_SUCCESS);
 		}
 	    }
-	    else if (c == '/' && flags & FNM_PATHNAME) {
+	    else if (c == '/' && flags & APR_FNM_PATHNAME) {
 	        if ((string = strchr(string, '/')) == NULL) {
-		    return (FNM_NOMATCH);
+		    return (APR_FNM_NOMATCH);
 		}
 		break;
 	    }
 
 	    /* General case, use recursion. */
 	    while ((test = *string) != EOS) {
-	        if (!apr_fnmatch(pattern, string, flags & ~FNM_PERIOD)) {
+	        if (!apr_fnmatch(pattern, string, flags & ~APR_FNM_PERIOD)) {
 		    return (APR_SUCCESS);
 		}
-		if (test == '/' && flags & FNM_PATHNAME) {
+		if (test == '/' && flags & APR_FNM_PATHNAME) {
 		    break;
 		}
 		++string;
 	    }
-	    return (FNM_NOMATCH);
+	    return (APR_FNM_NOMATCH);
 	case '[':
 	    if (*string == EOS) {
-		return (FNM_NOMATCH);
+		return (APR_FNM_NOMATCH);
 	    }
-	    if (*string == '/' && flags & FNM_PATHNAME) {
-		return (FNM_NOMATCH);
+	    if (*string == '/' && flags & APR_FNM_PATHNAME) {
+		return (APR_FNM_NOMATCH);
 	    }
-	    if (*string == '.' && (flags & FNM_PERIOD) &&
+	    if (*string == '.' && (flags & APR_FNM_PERIOD) &&
 		(string == stringstart ||
-		 ((flags & FNM_PATHNAME) && *(string - 1) == '/'))) {
-	        return (FNM_NOMATCH);
+		 ((flags & APR_FNM_PATHNAME) && *(string - 1) == '/'))) {
+	        return (APR_FNM_NOMATCH);
 	    }
 	    if ((pattern = rangematch(pattern, *string, flags)) == NULL) {
-		return (FNM_NOMATCH);
+		return (APR_FNM_NOMATCH);
 	    }
 	    ++string;
 	    break;
 	case '\\':
-	    if (!(flags & FNM_NOESCAPE)) {
+	    if (!(flags & APR_FNM_NOESCAPE)) {
 		if ((c = *pattern++) == EOS) {
 		    c = '\\';
 		    --pattern;
@@ -145,13 +145,13 @@ APR_DECLARE(apr_status_t) apr_fnmatch(const char *pattern, const char *string, i
 	    }
 	    /* FALLTHROUGH */
 	default:
-	    if (flags & FNM_CASE_BLIND) {
+	    if (flags & APR_FNM_CASE_BLIND) {
 	        if (apr_tolower(c) != apr_tolower(*string)) {
-		    return (FNM_NOMATCH);
+		    return (APR_FNM_NOMATCH);
 		}
 	    }
 	    else if (c != *string) {
-	        return (FNM_NOMATCH);
+	        return (APR_FNM_NOMATCH);
 	    }
 	    string++;
 	    break;
@@ -177,7 +177,7 @@ static const char *rangematch(const char *pattern, int test, int flags)
     }
 
     for (ok = 0; (c = *pattern++) != ']';) {
-        if (c == '\\' && !(flags & FNM_NOESCAPE)) {
+        if (c == '\\' && !(flags & APR_FNM_NOESCAPE)) {
 	    c = *pattern++;
 	}
 	if (c == EOS) {
@@ -185,21 +185,21 @@ static const char *rangematch(const char *pattern, int test, int flags)
 	}
 	if (*pattern == '-' && (c2 = *(pattern + 1)) != EOS && c2 != ']') {
 	    pattern += 2;
-	    if (c2 == '\\' && !(flags & FNM_NOESCAPE)) {
+	    if (c2 == '\\' && !(flags & APR_FNM_NOESCAPE)) {
 		c2 = *pattern++;
 	    }
 	    if (c2 == EOS) {
 		return (NULL);
 	    }
 	    if ((c <= test && test <= c2)
-		|| ((flags & FNM_CASE_BLIND)
+		|| ((flags & APR_FNM_CASE_BLIND)
 		    && ((apr_tolower(c) <= apr_tolower(test))
 			&& (apr_tolower(test) <= apr_tolower(c2))))) {
 		ok = 1;
 	    }
 	}
 	else if ((c == test)
-		 || ((flags & FNM_CASE_BLIND)
+		 || ((flags & APR_FNM_CASE_BLIND)
 		     && (apr_tolower(c) == apr_tolower(test)))) {
 	    ok = 1;
 	}
