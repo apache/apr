@@ -111,6 +111,8 @@ struct apr_mmap_t {
     void *mm;
     /** The amount of data in the mmap */
     apr_size_t size;
+    /** Whether this object is reponsible for doing the munmap */
+    int is_owner;
 };
 
 #if APR_HAS_MMAP || defined(DOXYGEN)
@@ -134,6 +136,19 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **newmmap,
                                           apr_file_t *file, apr_off_t offset,
                                           apr_size_t size, apr_int32_t flag,
                                           apr_pool_t *cntxt);
+
+/**
+ * Duplicate the specified MMAP.
+ * @param new_mmap The structure to duplicate into. 
+ * @param old_mmap The file to duplicate.
+ * @param p The pool to use for the new file.
+ * @param transfer_ownership  Whether responsibility for destroying
+ *  the memory-mapped segment is transferred from old_mmap to new_mmap
+ */         
+APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
+                                       apr_mmap_t *old_mmap,
+                                       apr_pool_t *p,
+                                       int transfer_ownership);
 
 /**
  * Remove a mmap'ed.

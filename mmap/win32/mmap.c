@@ -66,6 +66,11 @@ static apr_status_t mmap_cleanup(void *themmap)
 {
     apr_mmap_t *mm = themmap;
     apr_status_t rv = 0;
+
+    if (!mm->is_owner) {
+        return APR_SUCCESS;
+    }
+
     if (mm->mv) {
         if (!UnmapViewOfFile(mm->mv))
         {
@@ -155,10 +160,37 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
     (*new)->mm = (char*)((*new)->mv) + offset;
     (*new)->size = size;
     (*new)->cntxt = cont;
+    (*new)->is_owner = 1;
 
     /* register the cleanup... */
     apr_pool_cleanup_register((*new)->cntxt, (void*)(*new), mmap_cleanup,
                          apr_pool_cleanup_null);
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
+                                       apr_mmap_t *old_mmap,
+                                       apr_pool_t *p,
+                                       int transfer_ownership)
+{
+    *new_mmap = (apr_mmap_t *)apr_pmemdup(p, old_mmap, sizeof(apr_mmap_t));
+    (*new_mmap)->cntxt = p;
+
+    /* The old_mmap can transfer ownership only if the old_mmap itself
+     * is an owner of the mmap'ed segment.
+     */
+    if (old_mmap->is_owner) {
+        if (transfer_ownership) {
+            (*new_mmap)->is_owner = 1;
+            old_mmap->is_owner = 0;
+            apr_pool_cleanup_kill(old_mmap->cntxt, old_mmap, mmap_cleanup);
+        }
+        else {
+            (*new_mmap)->is_owner = 0;
+        }
+        apr_pool_cleanup_register(p, *new_mmap, mmap_cleanup,
+                                  apr_pool_cleanup_null);
+    }
     return APR_SUCCESS;
 }
 
