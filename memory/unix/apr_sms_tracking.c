@@ -66,7 +66,6 @@
 #include "apr_sms.h"
 #include "apr_sms_tracking.h"
 #include "apr_lock.h"
-#include <stdlib.h>
 
 static const char *module_identity = "TRACKING";
 
@@ -88,6 +87,30 @@ typedef struct apr_sms_tracking_t
     apr_lock_t          *lock;
 } apr_sms_tracking_t;
 
+#define INSERT_NODE(node, tms) \
+    if (tms->lock) \
+        apr_lock_acquire(tms->lock); \
+    \
+    node->next = tms->nodes; \
+    tms->nodes = node; \
+    node->ref = &tms->nodes; \
+    if (node->next) \
+        node->next->ref = &node->next; \
+    \
+    if (tms->lock) \
+        apr_lock_release(tms->lock);
+    
+#define REMOVE_NODE(node, tms) \
+        if (tms->lock) \
+            apr_lock_acquire(tms->lock); \
+        \
+        *(node->ref) = node->next; \
+        if (node->next) \
+            node->next->ref = node->ref; \
+        \
+        if (tms->lock) \
+            apr_lock_release(tms->lock);
+    
 static void *apr_sms_tracking_malloc(apr_sms_t *sms,
                                      apr_size_t size)
 {
@@ -100,18 +123,9 @@ static void *apr_sms_tracking_malloc(apr_sms_t *sms,
         return NULL;
 
     tms = (apr_sms_tracking_t *)sms;
-    if (tms->lock)
-        apr_lock_acquire(tms->lock);
 
-    node->next = tms->nodes;
-    tms->nodes = node;
-    node->ref = &tms->nodes;
-    if (node->next)
-        node->next->ref = &node->next;
-
-    if (tms->lock)
-        apr_lock_release(tms->lock);
-
+    INSERT_NODE(node, tms)
+    
     node++;
 
     return (void *)node;
@@ -129,17 +143,8 @@ static void *apr_sms_tracking_calloc(apr_sms_t *sms,
         return NULL;
 
     tms = (apr_sms_tracking_t *)sms;
-    if (tms->lock)
-        apr_lock_acquire(tms->lock);
 
-    node->next = tms->nodes;
-    tms->nodes = node;
-    node->ref = &tms->nodes;
-    if (node->next)
-        node->next->ref = &node->next;
-
-    if (tms->lock)
-        apr_lock_release(tms->lock);
+    INSERT_NODE(node, tms)
 
     node++;
 
@@ -158,15 +163,7 @@ static void *apr_sms_tracking_realloc(apr_sms_t *sms,
     if (node) {
         node--;
 
-        if (tms->lock)
-            apr_lock_acquire(tms->lock);
-        
-        *(node->ref) = node->next;
-        if (node->next)
-            node->next->ref = node->ref;
-
-        if (tms->lock)
-            apr_lock_release(tms->lock);
+        REMOVE_NODE(node, tms)
     }
 
     node = apr_sms_realloc(sms->parent,
@@ -174,18 +171,8 @@ static void *apr_sms_tracking_realloc(apr_sms_t *sms,
     if (!node)
         return NULL;
 
-    if (tms->lock)
-        apr_lock_acquire(tms->lock);
-    
-    node->next = tms->nodes;
-    tms->nodes = node;
-    node->ref = &tms->nodes;
-    if (node->next)
-        node->next->ref = &node->next;
+    INSERT_NODE(node, tms)
 
-    if (tms->lock)
-        apr_lock_release(tms->lock);
-    
     node++;
 
     return (void *)node;
@@ -198,20 +185,12 @@ static apr_status_t apr_sms_tracking_free(apr_sms_t *sms,
     apr_sms_tracking_t *tms;
    
     node = (apr_track_node_t *)mem;
+    tms = (apr_sms_tracking_t *)sms;
+
     node--;
 
-    tms = (apr_sms_tracking_t *)sms;
- 
-    if (tms->lock)
-        apr_lock_acquire(tms->lock);
+    REMOVE_NODE(node, tms);
 
-    *(node->ref) = node->next;
-    if (node->next)
-        node->next->ref = node->ref;
- 
-    if (tms->lock)
-        apr_lock_release(tms->lock);
-         
     return apr_sms_free(sms->parent, node);
 }
 
