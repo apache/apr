@@ -236,6 +236,11 @@ case $host in
        OSDIR="os390"
        eolstr="\\n"
        ;;
+   *cygwin*)
+       OSDIR="unix"
+       APR_ADDTO(CPPFLAGS,-DCYGWIN)
+       eolstr="\\n"
+       ;;
    *)
        OSDIR="unix"
        eolstr="\\n"
