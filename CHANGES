@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Fixed APR_STATUS_IS_ETIMEDOUT macro.
+     [Dagfinn Aarvaag <dagfinn.aarvaag@beepscience.com>]
+
   *) Add --disable-atomics switch to override our handcoded assembly
      optimizations.  Note that this has no effect if your operating
      system has a userspace atomic interface.  [Justin Erenkrantz]

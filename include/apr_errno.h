@@ -974,7 +974,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
                 || (s) == APR_OS_START_SYSERR + WSAECONNRESET)
 #define APR_STATUS_IS_ETIMEDOUT(s)      ((s) == APR_ETIMEDOUT \
-                || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT) \
+                || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
 #define APR_STATUS_IS_EHOSTUNREACH(s)   ((s) == APR_EHOSTUNREACH \
                 || (s) == APR_OS_START_SYSERR + WSAEHOSTUNREACH)
@@ -1037,7 +1037,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
                 || (s) == APR_OS_START_SYSERR + WSAECONNRESET)
 #define APR_STATUS_IS_ETIMEDOUT(s)      ((s) == APR_ETIMEDOUT \
-                || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT) \
+                || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
 #define APR_STATUS_IS_EHOSTUNREACH(s)   ((s) == APR_EHOSTUNREACH \
                 || (s) == APR_OS_START_SYSERR + WSAEHOSTUNREACH)
@@ -1079,7 +1079,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
                 || (s) == APR_OS_START_SYSERR + WSAECONNRESET)
 #define APR_STATUS_IS_ETIMEDOUT(s)      ((s) == APR_ETIMEDOUT \
-                || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT) \
+                || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
 #define APR_STATUS_IS_EHOSTUNREACH(s)   ((s) == APR_EHOSTUNREACH \
                 || (s) == APR_OS_START_SYSERR + WSAEHOSTUNREACH)
