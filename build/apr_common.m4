@@ -589,7 +589,7 @@ dnl orig_path="${prefix}/bar"
 dnl APR_PATH_RELATIVE(final_path, $orig_path, $prefix)
 dnl    $final_path now contains "bar"
 AC_DEFUN(APR_PATH_RELATIVE,[
-ap_stripped="`echo $2 | sed -e "s#^$3##"`"
+ap_stripped=`echo $2 | sed -e "s#^$3##"`
 # check if the stripping was successful
 if test "x$2" != "x${ap_stripped}"; then
     # it was, so strip of any leading slashes
