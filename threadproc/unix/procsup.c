@@ -60,7 +60,7 @@ apr_status_t apr_detach(void)
     pid_t pgrp;
 
     chdir("/");
-#if !defined(MPE) && !defined(OS2) && !defined(TPF) && !defined(BEOS)
+#if !defined(MPE) && !defined(OS2) && !defined(TPF) && !defined(BEOS_R5)
 /* Don't detach for MPE because child processes can't survive the death of
    the parent. */
     if ((x = fork()) > 0)
