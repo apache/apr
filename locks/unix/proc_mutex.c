@@ -401,7 +401,7 @@ static apr_status_t proc_mutex_fcntl_create(apr_proc_mutex_t *new_mutex,
  
     if (rv != APR_SUCCESS) {
         proc_mutex_fcntl_cleanup(new_mutex);
-        return errno;
+        return rv;
     }
 
     new_mutex->curr_locked = 0;
