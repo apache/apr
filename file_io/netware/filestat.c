@@ -67,18 +67,20 @@ static apr_filetype_e filetype_from_mode(mode_t mode)
 
     if (S_ISREG(mode))
         type = APR_REG;
-    if (S_ISDIR(mode))
+    else if (S_ISDIR(mode))
         type = APR_DIR;
-    if (S_ISCHR(mode))
+    else if (S_ISCHR(mode))
         type = APR_CHR;
-    if (S_ISBLK(mode))
+    else if (S_ISBLK(mode))
         type = APR_BLK;
-    if (S_ISFIFO(mode))
+    else if (S_ISFIFO(mode))
         type = APR_PIPE;
-    if (S_ISLNK(mode))
+    else if (S_ISLNK(mode))
         type = APR_LNK;
-    if (S_ISSOCK(mode))
+    else if (S_ISSOCK(mode))
         type = APR_SOCK;
+    else
+        type = APR_UNKFILE;
     return type;
 }
 
