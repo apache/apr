@@ -106,7 +106,8 @@ static char *path_remove_last_component (const char *path, apr_pool_t *pool)
     return apr_pstrndup (pool, path, (i < 0) ? 0 : i);
 }
 
-apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *pool)
+apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, 
+                          apr_pool_t *pool)
 {
     /* On some platforms (e.g., Linux+GNU libc), d_name[] in struct 
      * dirent is declared with enough storage for the name.  On other
@@ -129,7 +130,7 @@ apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *pool
     }    
     else {
         apr_pool_cleanup_register((*new)->pool, (void *)(*new), dir_cleanup,
-	                    apr_pool_cleanup_null);
+	                          apr_pool_cleanup_null);
         return APR_SUCCESS;
     }
 }
@@ -225,7 +226,8 @@ apr_status_t apr_dir_rewind(apr_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_dir_make(const char *path, apr_fileperms_t perm, apr_pool_t *pool)
+apr_status_t apr_dir_make(const char *path, apr_fileperms_t perm, 
+                          apr_pool_t *pool)
 {
     mode_t mode = apr_unix_perms2mode(perm);
 
