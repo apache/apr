@@ -38,7 +38,7 @@ while ($srcfile = shift(@ARGV)) {
             $line .= "$macro\n";
             next;
         }
-        elsif (/^(APR_DECLARE[^\(]*\()?[a-z_]+\)?\s+([A-Za-z0-9_]+)\(/) {
+        elsif (/^(APR_DECLARE[^\(]*\()?(const\s)?[a-z_]+\)?\s+\*?([A-Za-z0-9_]+)\(/) {
             # We only want to increase this if we are in the middle of a 
             # #if ... #endif block.
             if ($found) {
@@ -47,7 +47,7 @@ while ($srcfile = shift(@ARGV)) {
             for (my $i=0; $i < $count; $i++) {
                 $line .= "\t";
             }
-            $line .= "$2\n";
+            $line .= "$3\n";
             next;
         }
         elsif (/\#endif/) {
