@@ -57,7 +57,7 @@ extern "C" {
  * Minor API changes that do not cause binary compatibility problems.
  * Should be reset to 0 when upgrading APR_MAJOR_VERSION
  */
-#define APR_MINOR_VERSION       1
+#define APR_MINOR_VERSION       2
 
 /** patch level */
 #define APR_PATCH_VERSION       0
