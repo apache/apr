@@ -66,16 +66,13 @@
 #endif
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_context(ap_context_t *, void *, ap_context_t **)
+ * ap_status_t ap_create_context(ap_context_t *, ap_context_t **)
  *    Create a new context.
  * arg 1) The parent context.  If this is NULL, the new context is a root
  *        context.  If it is non-NULL, the new context will inherit all
  *        of it's parent context's attributes, except the ap_context_t will be a
  *        sub-pool.
- * arg 2) Any data to be assocaited with the context.  If this is a 
- *        sub-context, and this value is NULL, the new context will
- *        inherit the data from it's parent.
- * arg 3) The context we have just created.
+ * arg 2) The context we have just created.
  */
 ap_status_t ap_create_context(struct context_t *cont, struct context_t **newcont)
 {
@@ -119,12 +116,21 @@ ap_status_t ap_destroy_context(struct context_t *cont)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_userdata(ap_context_t *, void *)
+ * ap_status_t ap_set_userdata(ap_context_t *, void *, char *,
+                               ap_status_t (*cleanup) (void *))
  *    Set the data associated with the current context.
  * arg 1) The current context.
  * arg 2) The user data associated with the context.
  * arg 3) The key to use for association
  * arg 4) The cleanup program to use to cleanup the data;
+ * NOTE:  The data to be attached to the context should have the same
+ *        life span as the context it is being attached to.
+ *        
+ *        Users of APR must take EXTREME care when choosing a key to
+ *        use for their data.  It is possible to accidentally overwrite
+ *        data by choosing a key that another part of the program is using
+ *        It is advised that steps are taken to ensure that a unique
+ *        key is used at all times.
  */
 ap_status_t ap_set_userdata(struct context_t *cont, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
