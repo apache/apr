@@ -310,8 +310,8 @@ APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
             tvptr = NULL;
         }
         else {
-            tv.tv_sec = sock->timeout / APR_USEC_PER_SEC;
-            tv.tv_usec = sock->timeout % APR_USEC_PER_SEC;
+            tv.tv_sec =  (long)(sock->timeout / APR_USEC_PER_SEC);
+            tv.tv_usec = (long)(sock->timeout % APR_USEC_PER_SEC);
             tvptr = &tv;
         }
         rc = select(FD_SETSIZE+1, NULL, &wfdset, &efdset, tvptr);
