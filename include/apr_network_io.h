@@ -142,7 +142,7 @@ typedef apr_uint16_t            apr_port_t;
  *
  * It's defined here as I think it should all be platform safe...
  */
-typedef struct {
+typedef struct apr_sockaddr_t {
     apr_pool_t *pool;              /* The pool to use... */
     char *hostname;                /* The hostname */
     char *servname;                /* This is either a string of the port number or
@@ -160,9 +160,9 @@ typedef struct {
                                     * 16 for v4 or 46 for v6
                                     * used in inet_ntop...
                                     */
-    void *addr_ptr;                /* This should be set to point to the
-                                    * sockaddr structure address we're using...
-                                    * i.e. sa.sin.sin_addr or sa.sin6.sin6_addr
+     void *ipaddr_ptr;              /* This points to the IP address
+                                    * structure within the appropriate
+                                    * sockaddr structure.
                                     */
 } apr_sockaddr_t;
 
