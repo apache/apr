@@ -115,6 +115,9 @@ APR_DECLARE_NONSTD(void) apr_terminate(void)
         return;
     }
     apr_pool_alloc_term(global_apr_pool);
+#if defined(NETWARE)
+    WSACleanup();
+#endif
 }
 
 APR_DECLARE(void) apr_terminate2(void)
