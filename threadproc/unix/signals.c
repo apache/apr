@@ -317,7 +317,7 @@ static void *signal_thread_func(void *signal_handler)
 #elif HAVE_SIGSUSPEND
 	sigsuspend(&sig_mask);
 #else
-#error No apr_sigwait() and no sigsuspend(); I'm stuck.
+#error No apr_sigwait() and no sigsuspend(); I am stuck.
 #endif
     }
 }
