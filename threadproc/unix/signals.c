@@ -141,7 +141,7 @@ APR_DECLARE(apr_sigfunc_t *) apr_signal(int signo, apr_sigfunc_t * func)
 
 /* AC_DECL_SYS_SIGLIST defines either of these symbols depending
  * on the version of autoconf used. */
-#if defined(SYS_SIGLIST_DECLARED) || defined(HAVE_DECL_SYS_SIGLIST)
+#if defined(SYS_SIGLIST_DECLARED) || HAVE_DECL_SYS_SIGLIST
 
 void apr_signal_init(apr_pool_t *pglobal)
 {
