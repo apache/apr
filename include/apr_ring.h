@@ -416,20 +416,6 @@
     APR_RING_UNSPLICE((ep), (ep), link)
 
 
-/**
- * Iterate through a ring backwards
- * @param ep The current element
- * @param hp The ring to iterate over
- * @param elem The name of the element struct
- * @param link The name of the APR_RING_ENTRY in the element struct
- * @see APR_RING_FOREACH
- */
-#define APR_RING_FOREACH_REVERSE(ep, hp, elem, link)			\
-    for ((ep)  = APR_RING_LAST((hp));					\
-	 (ep) != APR_RING_SENTINEL((hp), elem, link);			\
-	 (ep)  = APR_RING_PREV((ep), link))
-
-
 /* Debugging tools: */
 
 #ifdef APR_RING_DEBUG
