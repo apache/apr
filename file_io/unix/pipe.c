@@ -62,7 +62,9 @@
  */
 #if BEOS
 #if !BONE7
-# define BEOS_BLOCKING
+# define BEOS_BLOCKING 1
+#else
+# define BEOS_BLOCKING 0
 #endif
 #endif
 
