@@ -28,9 +28,6 @@
 #undef GETHOSTBYADDR_IS_THREAD_SAFE
 #undef STRERROR_R_RC_INT
 
-#undef NEED_RLIM_T
-#undef USEBCOPY
-
 #undef HAVE_GMTOFF
 #undef USE_THREADS
 
