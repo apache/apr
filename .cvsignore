@@ -1,6 +1,7 @@
 Makefile
 config.cache
 config.log
+config.nice
 config.status
 configure
 libtool
