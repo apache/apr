@@ -1492,8 +1492,6 @@ main()
     sem_t *psem;
     const char *sem_name = "/apr_autoconf";
 
-    if (sizeof(int) < sizeof(sem_t *))
-        exit(1);
     psem = sem_open(sem_name, O_CREAT, 0644, 1);
     if (psem == (sem_t *)SEM_FAILED) {
 	exit(1);
