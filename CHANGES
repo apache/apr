@@ -1,5 +1,7 @@
 Changes with APR b1  
 
+  *) Allow APR to be installed. [Ryan Bloom]
+
   *) Generate config.nice for easy re-run of configure. [Roy Fielding]
 
   *) Define preprocessor flags in CPPFLAGS instead of CFLAGS and
