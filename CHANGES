@@ -4,7 +4,6 @@ Changes with APR b1
      just attempts to link them as shared libs.
      [Pier Fumagalli <pier@betaversion.org>]
 
-
   *) apr_atomic_dec now returns a zero value if the value of 
      the atomic is zero, non-zero otherwise [Ian Holsman]
 
