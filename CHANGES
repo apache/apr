@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Win32: Get APR to compile with MSVC 5.0 (a.k.a. VC97).
+     PR #7489  [Jeff Trawick]
+
   *) First draft implementation of apr_filepath (get/set/parse_root
      and merge) for Unix.  [William Rowe]
 
