@@ -28,7 +28,9 @@ void *thread_routine(void *data) {
 
 int main() {
     pthread_t thd;
+    pthread_mutexattr_t mattr;
     int data = 1;
+    pthread_mutexattr_init(&mattr);
     return pthread_create(&thd, NULL, thread_routine, &data);
 } ], [ 
   pthreads_working="yes"
