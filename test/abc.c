@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 
     ap_create_context(&context, NULL); 
 
-    ap_open(&fd, context, argv[1], APR_READ, -1);
+    ap_open(&fd, argv[1], APR_READ, -1, context);
     
     while (!status) {
         status = ap_getc(&ch, fd);

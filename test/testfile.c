@@ -89,7 +89,7 @@ int main()
     fprintf(stdout, "Testing file functions.\n");
 
     fprintf(stdout, "\tOpening file.......");
-    if (ap_open(&thefile, context, filename, flag, APR_UREAD | APR_UWRITE | APR_GREAD) != APR_SUCCESS) {
+    if (ap_open(&thefile, filename, flag, APR_UREAD | APR_UWRITE | APR_GREAD, context) != APR_SUCCESS) {
         perror("Didn't open file");
         exit(-1);
     }
@@ -172,7 +172,7 @@ int main()
     }
     
     fprintf(stdout, "\tMaking sure it's gone.......");
-    status = ap_open(&thefile, context, filename, APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD);
+    status = ap_open(&thefile, filename, APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD, context);
     if (status == APR_SUCCESS) {
         fprintf(stderr, "I could open the file for some reason?\n");
         exit(-1);
@@ -193,7 +193,7 @@ int test_filedel(ap_context_t *context)
     ap_int32_t flag = APR_READ | APR_WRITE | APR_CREATE;
     ap_status_t stat;
   
-    stat = ap_open(&thefile, context, "testdel", flag, APR_UREAD | APR_UWRITE | APR_GREAD);
+    stat = ap_open(&thefile, "testdel", flag, APR_UREAD | APR_UWRITE | APR_GREAD, context);
     if (stat != APR_SUCCESS) {
          return stat;
     }
@@ -206,7 +206,7 @@ int test_filedel(ap_context_t *context)
         return stat;
     }
 
-    stat = ap_open(&thefile, context, "testdel", APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD);
+    stat = ap_open(&thefile, "testdel", APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD, context);
     if (stat == APR_SUCCESS) {
         return stat;
     }
@@ -233,7 +233,7 @@ int testdirs(ap_context_t *context)
         fprintf(stdout, "OK\n");
     }
 
-    if (ap_open(&file, context, "testdir/testfile", APR_READ | APR_WRITE | APR_CREATE, APR_UREAD | APR_UWRITE | APR_UEXECUTE) != APR_SUCCESS) {;
+    if (ap_open(&file, "testdir/testfile", APR_READ | APR_WRITE | APR_CREATE, APR_UREAD | APR_UWRITE | APR_UEXECUTE, context) != APR_SUCCESS) {;
         return -1;
     }
 

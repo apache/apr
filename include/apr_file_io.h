@@ -112,7 +112,7 @@ typedef struct iovec_t           ap_iovec_t;
 typedef ap_int32_t               ap_fileperms_t;
 
 /*   Function definitions */
-ap_status_t ap_open(ap_file_t **, ap_context_t *, const char *, ap_int32_t, ap_fileperms_t);
+ap_status_t ap_open(ap_file_t **, const char *, ap_int32_t, ap_fileperms_t, ap_context_t *);
 ap_status_t ap_close(ap_file_t *);
 ap_status_t ap_remove_file(char *, ap_context_t *);
 ap_status_t ap_eof(ap_file_t *);

@@ -859,7 +859,7 @@ static int open_postfile(char *pfile)
     ap_fileperms_t mode;
     ap_ssize_t length;
 
-    if (ap_open(&postfd, cntxt, pfile, APR_READ, mode) != APR_SUCCESS) {
+    if (ap_open(&postfd, pfile, APR_READ, mode, cntxt) != APR_SUCCESS) {
         printf("Invalid postfile name (%s)\n", pfile);
         return errno;
     }
