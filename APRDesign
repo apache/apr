@@ -11,7 +11,7 @@ APR's place is now to combine any code that can be safely combined without
 sacrificing performance.
 
 To this end we have created a set of operations that are required for cross
-platfrom development.  There may be other types that are desired and those
+platform development.  There may be other types that are desired and those
 will be implemented in the future.  The first version of APR will focus on
 what Apache 2.0 needs.  Of course, anything that is submitted will be
 considered for inclusion.
@@ -42,7 +42,7 @@ and apr.h are created from apr_private.hw and apr.hw respectively.
 APR Features
 
 One of the goals of APR is to provide a common set of features across all 
-platforms.  This is an admirable goal, it is also not realisitic.  We cannot
+platforms.  This is an admirable goal, it is also not realistic.  We cannot
 expect to be able to implement ALL features on ALL platforms.  So we are
 going to do the next best thing.  Provide a common interface to ALL APR 
 features on MOST platforms.
@@ -104,7 +104,7 @@ apr
 
 Obviously, BeOS does not have a directory.  This is because BeOS is currently
 using the Unix directory for it's file_io.  In the near future, it will be
-possible to use indiviual files from the Unix directory.
+possible to use individual files from the Unix directory.
 
 There are a few special top level directories.  These are test, inc, include,
 and libs.  Test is a directory which stores all test programs.  It is expected
@@ -138,7 +138,7 @@ In include/apr_file_io.h:
     typedef struct ap_file_t    ap_file_t;
 
 This will cause a compiler error if somebody tries to access the filedes field
-in this strcture.  Windows does not have a filedes field, so obviously, it is
+in this structure.  Windows does not have a filedes field, so obviously, it is
 important that programs not be able to access these.
 
 The only exception to the incomplete type rule can be found in apr_portable.h.
@@ -150,7 +150,7 @@ type is used to allocate memory within APR.  Any APR type that has this
 field should place this field first.  If it is important to retrieve the
 pool from an APR variable, it is possible to use the macro APR_GET_POOL to
 accomplish this.  This macro will only work on types that actually have
-a pool in them as the first field.  On any other type, this Macro will cause
+a pool in them as the first field.  On any other type, this macro will cause
 a seg fault as soon as the pool is used.
 
 New Function
@@ -193,13 +193,13 @@ hasn't been done yet).
 APR Error reporting
 
 Most APR functions should return an ap_status_t type.  The only time an
-APR function does not return an ap_status_t is if it absolutly CAN NOT
+APR function does not return an ap_status_t is if it absolutely CAN NOT
 fail.  Examples of this would be filling out an array when you know you are
 not beyond the array's range.  If it cannot fail on your platform, but it
 could conceivably fail on another platform, it should return an ap_status_t.
 Unless you are sure, return an ap_status_t.  :-)
 
-All platform return errno values unchanged.  Each platform can also have
+All platforms return errno values unchanged.  Each platform can also have
 one system error type, which can be returned after an offset is added.  
 There are five types of error values in APR, each with it's own offset.
 
@@ -207,16 +207,16 @@ There are five types of error values in APR, each with it's own offset.
 0) 			This is 0 for all platforms and isn't really defined
  			anywhere, but it is the offset for errno values.
 			(This has no name because it isn't actually defined, 
-                        but completeness we are discussing it here).
-1) APR_OS_START_ERROR	This is platform dependant, and is the offset at which
+                        but for completeness we are discussing it here).
+1) APR_OS_START_ERROR	This is platform dependent, and is the offset at which
 			APR errors start to be defined.  (Canonical error
 			values are also defined in this section.  [Canonical
 			error values are discussed later]).
-2) APR_OS_START_STATUS	This is platform dependant, and is the offset at which
+2) APR_OS_START_STATUS	This is platform dependent, and is the offset at which
 			APR status values start.
-4) APR_OS_START_USEERR	This is platform dependant, and is the offset at which
+4) APR_OS_START_USEERR	This is platform dependent, and is the offset at which
 			APR apps can begin to add their own error codes.
-3) APR_OS_START_SYSERR	This is platform dependant, and is the offset at which
+3) APR_OS_START_SYSERR	This is platform dependent, and is the offset at which
 			system error values begin.
 
 All of these definitions can be found in apr_errno.h for all platforms.  When
@@ -233,7 +233,7 @@ other than the primary error value on a platform.  This can also be handled
 by APR applications.  For example:
 
     if (CreateFile(fname, oflags, sharemod, NULL, 
-                   createflags, attributes,0) == INVALID_HANDLE_VALUE
+                   createflags, attributes, 0) == INVALID_HANDLE_VALUE
         return (GetLAstError() + APR_OS_START_SYSERR);
 
 These two examples implement the same function for two different platforms.
@@ -298,7 +298,7 @@ For example, using option 1:
     make syscall that fails
         convert to common error code
         return common error code
-            decide execution basd on common error code
+            decide execution based on common error code
 
 Using option 2:
     
@@ -316,9 +316,9 @@ On all platforms ap_strerror takes the form:
 char *ap_strerror(ap_status_t err)
 {
     if (err < APR_OS_START_ERRNO2)
-        return (platform dependant error string generator)
+        return (platform dependent error string generator)
     if (err < APR_OS_START_ERROR)
-        return (platform dependant error string generator for
+        return (platform dependent error string generator for
                 supplemental error values)
     if (err < APR_OS_SYSERR)
         return (APR generated error or status string)
