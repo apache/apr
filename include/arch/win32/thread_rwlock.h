@@ -59,6 +59,11 @@
 
 struct apr_thread_rwlock_t {
     apr_pool_t *pool;
+    HANDLE readevent;
+    HANDLE mutex;
+    HANDLE writemutex;
+    int counter;
+    int wrcounter;
 };
 
 #endif  /* THREAD_RWLOCK_H */
