@@ -72,14 +72,14 @@ static apr_status_t getpwnam_safe(const char *username,
                                   struct passwd *pw,
                                   char pwbuf[PWBUF_SIZE])
 {
-    return APR_SUCCESS;
+    return APR_ENOTIMPL;
 }
 
 APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname,
                                                  const char *username,
                                                  apr_pool_t *p)
 {
-    return APR_SUCCESS;
+    return APR_ENOTIMPL;
 }
 
 
@@ -88,7 +88,7 @@ APR_DECLARE(apr_status_t) apr_current_userid(apr_uid_t *uid,
                                              apr_gid_t *gid,
                                              apr_pool_t *p)
 {
-    return APR_SUCCESS;
+    return APR_ENOTIMPL;
 }
 
 
@@ -97,12 +97,12 @@ APR_DECLARE(apr_status_t) apr_current_userid(apr_uid_t *uid,
 APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
                                          const char *username, apr_pool_t *p)
 {
-    return APR_SUCCESS;
+    return APR_ENOTIMPL;
 }
 
 APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, apr_pool_t *p)
 {
-    return APR_SUCCESS;
+    return APR_ENOTIMPL;
 }
 
   
