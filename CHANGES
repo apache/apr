@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Make sure to pre-mark anon SysV shared memory segments as
+     removed. [Jim Jagielski]
+
   *) Add --with-efence to allow usage of Electric Fence.
      [Justin Erenkrantz]
 
