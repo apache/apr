@@ -125,7 +125,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     NSObjectFileImage image;
     NSModule os_handle = NULL;
     NSObjectFileImageReturnCode dsoerr;
-    char* err_msg = NULL;
+    const char* err_msg = NULL;
     dsoerr = NSCreateObjectFileImageFromFile(path, &image);
 
     if (dsoerr == NSObjectFileImageSuccess) {
@@ -133,6 +133,13 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
         os_handle = NSLinkModule(image, path,
                                  NSLINKMODULE_OPTION_RETURN_ON_ERROR |
                                  NSLINKMODULE_OPTION_NONE);
+        /* If something went wrong, get the errors... */
+        if (!os_handle) {
+            NSLinkEditErrors errors;
+            int errorNumber;
+            const char *fileName;
+            NSLinkEditError(&errors, &errorNumber, &fileName, &err_msg);
+        }
 #else
         os_handle = NSLinkModule(image, path, FALSE);
 #endif
