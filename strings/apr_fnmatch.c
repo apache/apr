@@ -285,7 +285,7 @@ APR_DECLARE(apr_status_t) apr_match_glob(const char *pattern,
 
     while (apr_dir_read(&finfo, APR_FINFO_NAME, dir) == APR_SUCCESS) {
         if (apr_fnmatch(pattern, finfo.name, 0) == APR_SUCCESS) {
-            *(const char **)apr_array_push(*result) = finfo.name;
+            *(const char **)apr_array_push(*result) = apr_pstrdup(p, finfo.name);
         }
     }
     apr_dir_close(dir);
