@@ -65,8 +65,10 @@ static const char *module_identity = "TRIVIAL";
 
 /*
  * Simple trivial memory system
+ *
+ * The goal of this SMS is to make malloc and reset operations as efficient 
+ * as possible.
  */
-
 
 /* INTERNALLY USED STRUCTURES */
 
@@ -104,8 +106,14 @@ typedef struct apr_sms_trivial_t
 #define NODE_T(mem)          ((node_t *)(mem))
 #define SMS_TRIVIAL_T(sms)   ((apr_sms_trivial_t *)(sms))
 
-/* Magic numbers :) */
-
+/* Magic numbers :)
+ * MIN_ALLOC defines the floor of how many bytes we will ask our parent for
+ * MIN_FREE  defines how many extra bytes we will allocate when asking the
+ *           the system for memory.
+ * MAX_FREE  defines how many bytes the SMS may hold at one time.  If it
+ *           exceeds this value, it will return memory to the parent SMS.
+ *           (note that this implementation counts down to 0)
+ */
 #define MIN_ALLOC  0x2000 
 #define MIN_FREE   0x1000
 #define MAX_FREE  0x80000
@@ -144,7 +152,10 @@ static void *apr_sms_trivial_malloc(apr_sms_t *sms,
     node->avail_size += node->first_avail - ((char *)node + SIZEOF_NODE_T);
     node->first_avail = (char *)node + SIZEOF_NODE_T;
 
-    /* browse the free list for a useable block */
+    /* browse the free list for a useable block.  Note that we set the 
+     * sentinel to be the size we are looking for - so, we'll have to 
+     * stop when we hit the sentinel again. 
+     */
     sentinel = &SMS_TRIVIAL_T(sms)->free_sentinel;
     sentinel->avail_size = size;
 
@@ -153,6 +164,7 @@ static void *apr_sms_trivial_malloc(apr_sms_t *sms,
         node = node->next;
 
     if (node != sentinel) {
+        /* Remove from chain of free nodes and add it to used chain */
         node->prev->next = node->next;
         node->next->prev = node->prev;
 
@@ -161,7 +173,8 @@ static void *apr_sms_trivial_malloc(apr_sms_t *sms,
         node->prev->next = node;
         node->next = sentinel;
         sentinel->prev = node;
-        
+       
+        /* We are no longer free, so increase available free mem. */
         if (node != SMS_TRIVIAL_T(sms)->self)
             SMS_TRIVIAL_T(sms)->max_free += node->avail_size;
 
@@ -178,27 +191,28 @@ static void *apr_sms_trivial_malloc(apr_sms_t *sms,
 
         return mem;
     }
-    
-    /* we have to allocate a new block from our parent */
+   
+    /* We couldn't find any used or free node that had enough space,
+     * so we have to allocate a new block from our parent. 
+     */ 
     node_size = size + SMS_TRIVIAL_T(sms)->min_free;
     if (node_size < SMS_TRIVIAL_T(sms)->min_alloc)
         node_size = SMS_TRIVIAL_T(sms)->min_alloc;
     
     node = apr_sms_malloc(sms->parent, node_size);
     if (!node) {
-        /* restore the 'last' node, so the next allocation
-         * will not segfault
-         */
+        /* restore the 'last' node, so next allocation will not segfault */
         node = SMS_TRIVIAL_T(sms)->used_sentinel.prev;
         node->first_avail += node->avail_size;
         node->avail_size   = 0;
-
+    
         if (SMS_TRIVIAL_T(sms)->lock)
             apr_lock_release(SMS_TRIVIAL_T(sms)->lock);
         
         return NULL;
     }
 
+    /* Add the new node to the used chain. */
     sentinel = &SMS_TRIVIAL_T(sms)->used_sentinel;
     node->prev = sentinel->prev;
     node->prev->next = node;
@@ -312,32 +326,42 @@ static apr_status_t apr_sms_trivial_reset(apr_sms_t *sms)
     if (SMS_TRIVIAL_T(sms)->lock)
         apr_lock_acquire(SMS_TRIVIAL_T(sms)->lock);
 
+    /* Always reset our base node as this can't be reclaimed. */
     node = SMS_TRIVIAL_T(sms)->self;
     node->avail_size += node->first_avail - ((char *)node + SIZEOF_NODE_T);
     node->first_avail = (char *)node + SIZEOF_NODE_T;
     node->count = 0;
     node->prev->next = node->next;
     node->next->prev = node->prev;
-    
+   
+    /* used_sentinel->prev may be currently "active", so disable it. */
     node = used_sentinel->prev;
     node->avail_size += node->first_avail - ((char *)node + SIZEOF_NODE_T);
     node->first_avail = (char *)node + SIZEOF_NODE_T;
     
     if (sms->parent->free_fn) {
+        /* We only reserve max_free bytes. The rest will be passed to the 
+         * parent SMS to be freed. 
+         */
         min_alloc = SMS_TRIVIAL_T(sms)->min_alloc;
         max_free  = SMS_TRIVIAL_T(sms)->max_free;
+
         used_sentinel->avail_size = min_alloc;
+
         while (max_free > min_alloc) {
             if (node->avail_size <= max_free) {
                 if (node == used_sentinel)
                     break;
-            
+                /* These are the nodes that will NOT be freed, but
+                 * placed on the free list for later reuse. 
+                 */
                 max_free -= node->avail_size;
+
                 node->prev->next = node->next;
                 node->next->prev = node->prev;
-        
+
                 prev = node->prev;
-            
+
                 node->next = free_sentinel->next;
                 free_sentinel->next = node;
                 node->next->prev = node;
@@ -346,14 +370,18 @@ static apr_status_t apr_sms_trivial_reset(apr_sms_t *sms)
                 node = prev;
             }
             else
-                node = node->prev;
+                node = node->prev; /* Will be reclaimed. */
         }
+
+        /* Remember that when sms->max_free hits zero, we free everything. */
         SMS_TRIVIAL_T(sms)->max_free = max_free;
-        
+
+        /* Anything remaining on the used_sentinel list will be freed. */
         used_sentinel->prev->next = NULL;
         free_list = used_sentinel->next;
     }
     else {
+        /* Everything we have allocated goes into free_sentinel. */
         node = used_sentinel->prev;
         node->next = free_sentinel->next;
         node->next->prev = node;
@@ -362,7 +390,8 @@ static apr_status_t apr_sms_trivial_reset(apr_sms_t *sms)
         node->prev = free_sentinel;
         free_sentinel->next = node;
     }
-        
+       
+    /* Reset used_sentinel to just be the originally allocated node. */ 
     node = SMS_TRIVIAL_T(sms)->self;
     node->next = node->prev = used_sentinel;
     used_sentinel->next = used_sentinel->prev = node;
