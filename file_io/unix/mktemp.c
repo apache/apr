@@ -120,7 +120,7 @@ static const unsigned char padchar[] =
 "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 static apr_uint32_t randseed=0;
 
-static int gettemp(char *path, apr_file_t **doopen, apr_pool_t *p)
+static int gettemp(char *path, apr_file_t **doopen, apr_int32_t flags, apr_pool_t *p)
 {
     register char *start, *trv, *suffp;
     char *pad;
@@ -168,8 +168,7 @@ static int gettemp(char *path, apr_file_t **doopen, apr_pool_t *p)
     }
 
     for (;;) {
-        if ((rv = apr_file_open(doopen, path, APR_CREATE|APR_EXCL|APR_READ|
-                                APR_WRITE|APR_DELONCLOSE, 
+        if ((rv = apr_file_open(doopen, path, flags,
                                 APR_UREAD | APR_UWRITE, p)) == APR_SUCCESS)
             return APR_SUCCESS;
         if (rv != APR_EEXIST)
@@ -202,24 +201,20 @@ static int gettemp(char *path, apr_file_t **doopen, apr_pool_t *p)
 #endif
 #endif /* !defined(HAVE_MKSTEMP) */
 
-APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_int32_t flags, apr_pool_t *p)
 {
+    flags = (!flags) ? APR_READ | APR_WRITE | APR_EXCL | APR_DELONCLOSE : flags;
 #ifndef HAVE_MKSTEMP
-    return gettemp(template, fp, p);
+    return gettemp(template, fp, flags, p);
 #else
     int fd;
-    (*fp) = apr_pcalloc(p, sizeof(**fp));
-    (*fp)->cntxt = p;
-    (*fp)->timeout = -1;
-    (*fp)->blocking = BLK_ON;
-    (*fp)->flags = APR_READ | APR_WRITE | APR_EXCL | APR_DELONCLOSE;
 
     fd = mkstemp(template);
     if (fd == -1) {
         return errno;
     }
+    apr_os_file_put(fp, &fd, flags, p);
     (*fp)->fname = apr_pstrdup(p, template);
-    (*fp)->filedes = fd;
 
     apr_pool_cleanup_register((*fp)->cntxt, (void *)(*fp),
                               apr_unix_file_cleanup, apr_unix_file_cleanup);

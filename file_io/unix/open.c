@@ -211,7 +211,7 @@ APR_DECLARE(apr_status_t) apr_os_file_get(apr_os_file_t *thefile,
 
 APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, 
                                           apr_os_file_t *thefile,
-                                          apr_pool_t *cont)
+                                          apr_int32_t flags, apr_pool_t *cont)
 {
     int *dafile = thefile;
     
@@ -223,6 +223,7 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     (*file)->timeout = -1;
     (*file)->ungetchar = -1; /* no char avail */
     (*file)->filedes = *dafile;
+    (*file)->flags = flags;
     /* buffer already NULL; 
      * don't get a lock (only for buffered files) 
      */
@@ -242,7 +243,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile,
 {
     int fd = STDERR_FILENO;
 
-    return apr_os_file_put(thefile, &fd, cont);
+    return apr_os_file_put(thefile, &fd, 0, cont);
 }
 
 APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, 
@@ -250,7 +251,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile,
 {
     int fd = STDOUT_FILENO;
 
-    return apr_os_file_put(thefile, &fd, cont);
+    return apr_os_file_put(thefile, &fd, 0, cont);
 }
 
 APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, 
@@ -258,7 +259,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile,
 {
     int fd = STDIN_FILENO;
 
-    return apr_os_file_put(thefile, &fd, cont);
+    return apr_os_file_put(thefile, &fd, 0, cont);
 }
 
 APR_IMPLEMENT_SET_INHERIT(file, flags, cntxt, apr_unix_file_cleanup)

@@ -388,7 +388,7 @@ APR_DECLARE(apr_status_t) apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thel
         (*lock)->pool = pool;
     }
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
-    apr_os_file_put(&(*lock)->interproc, &thelock->crossproc, pool);
+    apr_os_file_put(&(*lock)->interproc, &thelock->crossproc, 0, pool);
 #endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
     (*lock)->pthread_interproc = thelock->pthread_interproc;
