@@ -120,6 +120,7 @@ static void test_mmap_create(CuTest *tc)
 
 static void test_mmap_contents(CuTest *tc)
 {
+    CuAssertPtrNotNull(tc, themmap);
     CuAssertPtrNotNull(tc, themmap->mm);
     CuAssertIntEquals(tc, themmap->size, 28);
     CuAssertStrEquals(tc, themmap->mm, "This is the MMAP data file.\n");
@@ -128,6 +129,8 @@ static void test_mmap_contents(CuTest *tc)
 static void test_mmap_delete(CuTest *tc)
 {
     apr_status_t rv;
+
+    CuAssertPtrNotNull(tc, themmap);
     rv = apr_mmap_delete(themmap);
     CuAssertIntEquals(tc, rv, APR_SUCCESS);
 }
@@ -137,6 +140,7 @@ static void test_mmap_offset(CuTest *tc)
     apr_status_t rv;
     void *addr;
 
+    CuAssertPtrNotNull(tc, themmap);
     rv = apr_mmap_offset(&addr, themmap, 5);
     CuAssertStrEquals(tc, addr, "This is the MMAP data file.\n" + 5);
 }
