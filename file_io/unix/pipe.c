@@ -58,9 +58,8 @@
 static ap_status_t pipenonblock(struct file_t *thefile)
 {
 #ifndef BEOS /* this code won't work on BeOS */
-    int fd_flags;
+    int fd_flags = fcntl(thefile->filedes, F_GETFL, 0);
 
-    fd_flags = fcntl(thefile->filedes, F_GETFL, 0);
 #if defined(O_NONBLOCK)
     fd_flags |= O_NONBLOCK;
 #elif defined(O_NDELAY)
