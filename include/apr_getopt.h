@@ -87,8 +87,9 @@ B<NOTE>:  Arguments 2 and 3 are most commonly argc and argv from
 
 =cut
  */
-ap_status_t ap_getopt(ap_int32_t nargc, char *const *nargv, const char *ostr,
-                      ap_int32_t *rv, ap_pool_t *cont);
+APR_EXPORT(ap_status_t) ap_getopt(ap_int32_t nargc, char *const *nargv, 
+                                  const char *ostr, ap_int32_t *rv, 
+                                  ap_pool_t *cont);
 
 #endif  /* ! APR_GETOPT_H */
 

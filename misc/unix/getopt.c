@@ -42,7 +42,9 @@ APR_EXPORT_VAR char *ap_optarg = "";    /* argument associated with option */
 
 #define EMSG    ""
 
-ap_status_t ap_getopt(ap_int32_t nargc, char *const *nargv, const char *ostr, ap_int32_t *rv, ap_pool_t *cont)
+APR_EXPORT(ap_status_t) ap_getopt(ap_int32_t nargc, char *const *nargv, 
+                                  const char *ostr, ap_int32_t *rv, 
+                                  ap_pool_t *cont)
 {
     char *p;
     static char *place = EMSG;   /* option letter processing */
