@@ -216,12 +216,7 @@ AC_CHECK_FUNCS(getrlimit, [ have_getrlimit="1" ], [ have_getrlimit="0" ])
 AC_CHECK_FUNCS(writev)
 sendfile="0"
 AC_CHECK_FUNCS(sendfile send_file, [ sendfile="1" ])
-case "$OS" in
-    *alpha*-dec-osf* )
-        sendfile="0"
-        echo "sendfile support disabled to avoid system problem"
-        ;;
-esac       
+
 AC_CHECK_FUNCS(fork, [ fork="1" ], [ fork="0" ])
 AC_CHECK_FUNCS(getpass)
 APR_CHECK_INET_ADDR
@@ -238,7 +233,6 @@ AC_CHECK_FUNCS(hstrerror)
 AC_CHECK_FUNCS(memmove, [ have_memmove="1" ], [have_memmove="0" ])
 AC_CHECK_FUNCS(bzero, [ have_bzero="1" ], [ have_bzero="0"] )
 
-AC_SUBST(sendfile)
 AC_SUBST(fork)
 AC_SUBST(have_inet_addr)
 AC_SUBST(have_inet_network)
@@ -585,7 +579,24 @@ fi
 AC_SUBST(threads)
 
 dnl THIS MUST COME AFTER THE THREAD TESTS - FreeBSD doesn't always have a
-dnl threaded poll()
+dnl threaded poll() and we don't want to use sendfile on early FreeBSD 
+dnl systems if we are also using threads.
+
+case "$OS" in
+    *freebsd*)
+        if test `echo "$OS" | sed -e 's/.*\(.\)\.\(.\)/\1\2/'` -le "41"; then
+            if test "$threads" = "1"; then
+                sendfile="0"
+            fi
+        fi
+        ;;
+    *alpha*-dec-osf* )
+        sendfile="0"
+        echo "sendfile support disabled to avoid system problem"
+        ;;
+esac       
+AC_SUBST(sendfile)
+
 
 AC_CHECK_FUNCS(poll)
 

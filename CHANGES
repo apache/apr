@@ -1,5 +1,9 @@
 Changes with APR b1
 
+  *) FreeBSD does not support sendfile() in combination with threads
+     before version 4.2.  We no longer even try to support it.
+     [Ryan Bloom]
+
   *) On FreeBSD, it is possible for the first call to sendfile to
      get EAGAIN, but still send some data.  This means that we cannot
      call sendfile and then check for EAGAIN, and then wait and call
