@@ -380,21 +380,21 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     (*new)->filehand = handle;
     (*new)->fname = apr_pstrdup(pool, fname);
     (*new)->flags = flag;
+    (*new)->timeout = -1;
+    (*new)->ungetchar = -1;
 
     if (flag & APR_APPEND) {
         (*new)->append = 1;
         SetFilePointer((*new)->filehand, 0, NULL, FILE_END);
     }
-    else {
-        (*new)->append = 0;
-    }
-
     if (flag & APR_BUFFERED) {
         (*new)->buffered = 1;
         (*new)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
-        rv = apr_thread_mutex_create(&(*new)->mutex, APR_THREAD_MUTEX_DEFAULT,
-                                     pool);
-
+    }
+    /* Need the mutex to handled buffered and O_APPEND style file i/o */
+    if ((*new)->buffered || (*new)->append) {
+        rv = apr_thread_mutex_create(&(*new)->mutex, 
+                                     APR_THREAD_MUTEX_DEFAULT, pool);
         if (rv) {
             if (file_cleanup(*new) == APR_SUCCESS) {
                 apr_pool_cleanup_kill(pool, *new, file_cleanup);
@@ -402,22 +402,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
             return rv;
         }
     }
-    else {
-        (*new)->buffered = 0;
-        (*new)->buffer = NULL;
-        (*new)->mutex = NULL;
-    }
-
-    (*new)->pipe = 0;
-    (*new)->timeout = -1;
-    (*new)->ungetchar = -1;
-    (*new)->eof_hit = 0;
-
-    /* Buffered mode fields not initialized above */
-    (*new)->bufpos = 0;
-    (*new)->dataRead = 0;
-    (*new)->direction = 0;
-    (*new)->filePtr = 0;
 
     if (!(flag & APR_FILE_NOCLEANUP)) {
         apr_pool_cleanup_register((*new)->pool, (void *)(*new), file_cleanup,
@@ -432,8 +416,9 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
     if ((stat = file_cleanup(file)) == APR_SUCCESS) {
         apr_pool_cleanup_kill(file->pool, file, file_cleanup);
 
-        if (file->buffered)
+        if (file->mutex) {
             apr_thread_mutex_destroy(file->mutex);
+        }
 
         return APR_SUCCESS;
     }
@@ -536,17 +521,19 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     (*file)->ungetchar = -1; /* no char avail */
     (*file)->timeout = -1;
     (*file)->flags = flags;
-    if (flags & APR_APPEND)
+
+    if (flags & APR_APPEND) {
         (*file)->append = 1;
-
+    }
     if (flags & APR_BUFFERED) {
-        apr_status_t rv;
-
         (*file)->buffered = 1;
         (*file)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
-        rv = apr_thread_mutex_create(&(*file)->mutex, APR_THREAD_MUTEX_DEFAULT,
-                                     pool);
+    }
 
+    if ((*file)->append || (*file)->buffered) {
+        apr_status_t rv;
+        rv = apr_thread_mutex_create(&(*file)->mutex, 
+                                     APR_THREAD_MUTEX_DEFAULT, pool);
         if (rv) {
             if (file_cleanup(*file) == APR_SUCCESS) {
                 apr_pool_cleanup_kill(pool, *file, file_cleanup);
