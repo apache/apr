@@ -505,7 +505,7 @@ APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key)
 {
     apr_table_entry_t *next_elt = (apr_table_entry_t *) t->a.elts;
     apr_table_entry_t *end_elt = next_elt + t->a.nelts;
-    apr_table_entry_t *dst_elt = NULL;
+    apr_table_entry_t *dst_elt;
     apr_uint32_t checksum;
 
     COMPUTE_KEY_CHECKSUM(key, checksum);
@@ -513,12 +513,17 @@ APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key)
 	if ((checksum == next_elt->key_checksum) &&
             !strcasecmp(next_elt->key, key)) {
             t->a.nelts--;
-            if (!dst_elt) {
-                dst_elt = next_elt;
+            dst_elt = next_elt;
+            for (next_elt++; next_elt < end_elt; next_elt++) {
+                if ((checksum == next_elt->key_checksum) &&
+                    !strcasecmp(next_elt->key, key)) {
+                    t->a.nelts--;
+                }
+                else {
+                    *dst_elt++ = *next_elt;
+                }
             }
-        }
-        else if (dst_elt) {
-            *dst_elt++ = *next_elt;
+            break;
         }
     }
 }
