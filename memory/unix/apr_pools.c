@@ -873,11 +873,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_allocator_t *) apr_pool_allocator_get(apr_pool_t *pool)
-{
-    return pool->allocator;
-}
-
 
 /*
  * "Print" functions
@@ -1753,6 +1748,11 @@ APR_DECLARE(apr_abortfunc_t) apr_pool_get_abort(apr_pool_t *pool)
 APR_DECLARE(apr_pool_t *) apr_pool_get_parent(apr_pool_t *pool)
 {
     return pool->parent;
+}
+
+APR_DECLARE(apr_allocator_t *) apr_pool_allocator_get(apr_pool_t *pool)
+{
+    return pool->allocator;
 }
 
 /* return TRUE if a is an ancestor of b
