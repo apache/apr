@@ -144,6 +144,7 @@ ap_status_t ap_remove_dir(const char *, ap_context_t *);
 
 ap_status_t ap_create_pipe(ap_file_t **, ap_file_t **, ap_context_t *);
 ap_status_t ap_create_namedpipe(char **, char *, ap_fileperms_t, ap_context_t *);
+ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout);
 
 /*accessor and general file_io functions. */
 ap_status_t ap_get_filename(char **, ap_file_t *);

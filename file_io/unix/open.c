@@ -177,6 +177,7 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
     }
 
     (*new)->stated = 0;  /* we haven't called stat for this file yet. */
+    (*new)->timeout = -1;
     (*new)->eof_hit = 0;
     ap_register_cleanup((*new)->cntxt, (void *)(*new), file_cleanup,
                         ap_null_cleanup);
@@ -257,6 +258,12 @@ ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile,
         (*file) = ap_pcalloc(cont, sizeof(struct file_t));
         (*file)->cntxt = cont;
     }
+    /* if we are putting in a new file descriptor, then we don't really
+     * have any of this information.
+     */
+    (*file)->eof_hit = 0;
+    (*file)->timeout = -1;
+    (*file)->stated = 0;
     (*file)->filedes = *dafile;
     return APR_SUCCESS;
 }    

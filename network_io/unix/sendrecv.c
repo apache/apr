@@ -80,7 +80,7 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
         rv = write(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sock->timeout > 0) {
+    if (rv == -1 && errno == EAGAIN && sock->timeout != 0) {
         struct timeval *tv;
         fd_set fdset;
         int srv;
@@ -88,7 +88,7 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
         do {
             FD_ZERO(&fdset);
             FD_SET(sock->socketdes, &fdset);
-            if (sock->timeout== -1) {
+            if (sock->timeout < 0) {
                 tv = NULL;
             }
             else {
@@ -135,7 +135,7 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
         rv = read(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sock->timeout > 0) {
+    if (rv == -1 && errno == EAGAIN && sock->timeout != 0) {
         struct timeval *tv;
         fd_set fdset;
         int srv;
@@ -143,7 +143,7 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
         do {
             FD_ZERO(&fdset);
             FD_SET(sock->socketdes, &fdset);
-            if (sock->timeout == -1) {
+            if (sock->timeout < 0) {
                 tv = NULL;
             }
             else {
