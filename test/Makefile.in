@@ -11,8 +11,7 @@ CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=-L.. -lapr @LIBS@ 
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../include
-INCDIR1=../../inc
-INCLUDES=-I$(INCDIR) -I$(INCDIR1) 
+INCLUDES=-I$(INCDIR)
 
 TARGETS= testfile@EXEEXT@ \
 	testproc@EXEEXT@ \

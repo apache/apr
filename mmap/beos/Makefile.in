@@ -9,9 +9,8 @@ RANLIB=@RANLIB@
 CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
-INCDIR=../../inc
-INCDIR1=../../include -I../../file_io/unix
-INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
+INCDIR=../../include -I../../file_io/unix
+INCLUDES=-I$(INCDIR) -I.
 
 LIB=libmmap.a
 
