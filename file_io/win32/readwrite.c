@@ -271,34 +271,28 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
 
 ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 {
-    DWORD bread;
-    int i;
-    if (!ReadFile(thefile->filehand, str, len, &bread, NULL)) {
-        switch(GetLastError()) {
-        case ERROR_HANDLE_EOF:
-            return APR_EOF;
-        default:
-            return GetLastError();
+    ap_ssize_t readlen;
+    ap_status_t rv = APR_SUCCESS;
+    int i;    
+
+    for (i = 0; i < len-1; i++) {
+        readlen = 1;
+        rv = ap_read(thefile, str+i, &readlen);
+
+        if (readlen != 1) {
+            rv = APR_EOF;
+            break;
         }
+        
+        if (str[i] == '\r' || str[i] == '\x1A')
+            i--;
+        else if (str[i] == '\n')
+            break;
     }
-    if (bread == 0) {
-        thefile->eof_hit = TRUE;
-        return APR_EOF;
-    }
-    for (i=0; i<len; i++) {
-        if (str[i] == '\n') {
-            ++i;
-            if (i < len)
-                str[i] = '\0';
-            else
-                str [--i] = '\0';
-            SetFilePointer(thefile->filehand, (i - bread), NULL, FILE_CURRENT);
-            return APR_SUCCESS;
-        }
-    }
-    str[i] = '\0';
-    return APR_SUCCESS; 
+    str[i] = 0;
+    return rv;
 }
+
 ap_status_t ap_flush(ap_file_t *thefile)
 {
     if (thefile->buffered) {
