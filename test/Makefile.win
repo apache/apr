@@ -36,7 +36,7 @@ INCLUDES=/I "$(INCDIR)"
 all: $(TARGETS)
 
 clean:
-	-del $(CLEAN_TARGETS) $(PROGRAMS) *.obj 2>NUL
+	-del $(CLEAN_TARGETS) $(PROGRAMS) *.obj *.pdb *.ilk 2>NUL
 
 .c.obj:
 	cl /nologo /c /MDd /W3 /GX /Zi /Od /DWIN32 /D_DEBUG /D_WINDOWS /DAPR_DECLARE_STATIC $(INCLUDES) $<
