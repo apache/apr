@@ -29,6 +29,7 @@
 #undef USE_THREADS
 
 #undef SIZEOF_SSIZE_T
+#undef SIZEOF_SIZE_T
 #undef SIZEOF_OFF_T
 
 #undef HAVE_MM_SHMT_MMFILE
