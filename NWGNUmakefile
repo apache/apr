@@ -324,7 +324,7 @@ ifndef DEST
 	-copy $(subst /,\,$(APRUTIL))\STATUS               $(INSTALLBASE)\*.apu
 	-copy $(subst /,\,$(APRUTIL))\CHANGES              $(INSTALLBASE)\*.apu
 	@echo rem copying the docs directories > xc.bat
-	@echo xcopy docs $(INSTALLBASE)\docs\*.* /E /Y >> xc.bat
+	@echo xcopy docs $(INSTALLBASE)\docs\*.* $(XCOPYSW) >> xc.bat
 	$(CMD) xc.bat
 	$(DEL) xc.bat
 endif	
