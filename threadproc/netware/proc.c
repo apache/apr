@@ -435,3 +435,15 @@ APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr, apr_int32
     return APR_SUCCESS;
 }  
 
+APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr, 
+                                                const char *username,
+                                                const char *password)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_procattr_group_set(apr_procattr_t *attr,
+                                                 const char *groupname)
+{
+    return APR_ENOTIMPL;
+}

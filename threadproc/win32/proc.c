@@ -200,6 +200,116 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
+static apr_status_t attr_cleanup(void *theattr)
+{
+    apr_procattr_t *attr = (apr_procattr_t *)theattr;    
+    if (attr->user_token)
+        CloseHandle(attr->user_token);
+    attr->user_token = NULL;
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr, 
+                                                const char *username,
+                                                const char *password)
+{
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
+    HANDLE user;
+    apr_wchar_t *wusername = NULL;
+    apr_wchar_t *wpassword = NULL;
+    apr_status_t rv;
+    apr_size_t len, wlen;
+
+    if (apr_os_level >= APR_WIN_NT_4) 
+    {
+        if (attr->user_token) {
+            /* Cannot set that twice */
+            if (attr->errfn) {
+                attr->errfn(attr->pool, 0, 
+                            apr_pstrcat(attr->pool, 
+                                        "function called twice" 
+                                         " on username: ", username, NULL));
+            }
+            return APR_EINVAL;
+        }
+        len = strlen(username) + 1;
+        wlen = len;
+        wusername = apr_palloc(attr->pool, wlen * sizeof(apr_wchar_t));
+        if ((rv = apr_conv_utf8_to_ucs2(username, &len, wusername, &wlen))
+                   != APR_SUCCESS) {
+            if (attr->errfn) {
+                attr->errfn(attr->pool, rv, 
+                            apr_pstrcat(attr->pool, 
+                                        "utf8 to ucs2 conversion failed" 
+                                         " on username: ", username, NULL));
+            }
+            return rv;
+        }
+        len = strlen(password) + 1;
+        wlen = len;
+        wpassword = apr_palloc(attr->pool, wlen * sizeof(apr_wchar_t));
+        if ((rv = apr_conv_utf8_to_ucs2(password, &len, wpassword, &wlen))
+                   != APR_SUCCESS) {
+            if (attr->errfn) {
+                attr->errfn(attr->pool, rv, 
+                            apr_pstrcat(attr->pool, 
+                                        "utf8 to ucs2 conversion failed" 
+                                         " on password: ", password, NULL));
+            }
+            return rv;
+        }
+        if (!LogonUserW(wusername, 
+                        NULL, 
+                        wpassword, 
+                        LOGON32_LOGON_NETWORK,
+                        LOGON32_PROVIDER_DEFAULT,
+                        &user)) {
+            /* Logon Failed */            
+            return apr_get_os_error();
+        } 
+        memset(wpassword, 0, wlen * sizeof(apr_wchar_t));
+        /* Get the primary token for user */
+        if (!DuplicateTokenEx(user, 
+                              TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY, 
+                              NULL,
+                              SecurityImpersonation,
+                              TokenPrimary,
+                              &(attr->user_token))) {
+            /* Failed to duplicate the user token */
+            rv = apr_get_os_error();
+            CloseHandle(user);
+            return rv;
+        }
+        CloseHandle(user);
+
+        attr->sd = apr_pcalloc(attr->pool, SECURITY_DESCRIPTOR_MIN_LENGTH);
+        InitializeSecurityDescriptor(attr->sd, SECURITY_DESCRIPTOR_REVISION);
+        SetSecurityDescriptorDacl(attr->sd, -1, 0, 0);
+        attr->sa = apr_palloc(attr->pool, sizeof(SECURITY_ATTRIBUTES));
+        attr->sa->nLength = sizeof (SECURITY_ATTRIBUTES);
+        attr->sa->lpSecurityDescriptor = attr->sd;
+        attr->sa->bInheritHandle = TRUE;
+
+        /* register the cleanup */
+        apr_pool_cleanup_register(attr->pool, (void *)attr,
+                                  attr_cleanup,
+                                  apr_pool_cleanup_null);
+        return APR_SUCCESS;
+    }
+    else
+        return APR_ENOTIMPL;
+#endif
+}
+
+APR_DECLARE(apr_status_t) apr_procattr_group_set(apr_procattr_t *attr,
+                                                 const char *groupname)
+{
+    /* Always return SUCCESS cause groups are irrelevant */
+    return APR_SUCCESS;
+}
+
 static const char* has_space(const char *str)
 {
     const char *ch;
@@ -614,13 +724,36 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                               ? attr->child_err->filehand
                               : INVALID_HANDLE_VALUE;
         }
-        rv = CreateProcessW(wprg, wcmd,        /* Executable & Command line */
-                            NULL, NULL,        /* Proc & thread security attributes */
-                            TRUE,              /* Inherit handles */
-                            dwCreationFlags,   /* Creation flags */
-                            pEnvBlock,         /* Environment block */
-                            wcwd,              /* Current directory name */
-                            &si, &pi);
+        if (attr->user_token) {
+            si.lpDesktop = L"Winsta0\\Default";
+            if (!ImpersonateLoggedOnUser(attr->user_token)) {
+            /* failed to impersonate the logged user */
+                rv = apr_get_os_error();
+                CloseHandle(attr->user_token);
+                attr->user_token = NULL;
+                return rv;
+            }
+            rv = CreateProcessAsUserW(attr->user_token,
+                                      wprg, wcmd,
+                                      attr->sa,
+                                      NULL,
+                                      TRUE,
+                                      dwCreationFlags,
+                                      pEnvBlock,
+                                      wcwd,
+                                      &si, &pi);
+
+            RevertToSelf();
+        }
+        else {
+            rv = CreateProcessW(wprg, wcmd,        /* Executable & Command line */
+                                NULL, NULL,        /* Proc & thread security attributes */
+                                TRUE,              /* Inherit handles */
+                                dwCreationFlags,   /* Creation flags */
+                                pEnvBlock,         /* Environment block */
+                                wcwd,              /* Current directory name */
+                                &si, &pi);
+        }
 #else
         rv = CreateProcessW(wprg, wcmd,        /* Executable & Command line */
                             NULL, NULL,        /* Proc & thread security attributes */
@@ -753,4 +886,9 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
         return APR_CHILD_NOTDONE;
     }
     return apr_get_os_error();
+}
+
+APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize)
+{
+    return APR_ENOTIMPL;
 }
