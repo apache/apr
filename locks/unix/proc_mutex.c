@@ -177,7 +177,8 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_posix_methods =
     NULL, /* no tryacquire */
     proc_mutex_posix_release,
     proc_mutex_posix_destroy,
-    proc_mutex_posix_child_init
+    proc_mutex_posix_child_init,
+    "posixsem"
 };
 
 #endif /* Posix sem implementation */
@@ -292,7 +293,8 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_sysv_methods =
     NULL, /* no tryacquire */
     proc_mutex_sysv_release,
     proc_mutex_sysv_destroy,
-    proc_mutex_sysv_child_init
+    proc_mutex_sysv_child_init,
+    "sysvsem"
 };
 
 #endif /* SysV sem implementation */
@@ -466,7 +468,8 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_proc_pthread_method
     NULL, /* no tryacquire */
     proc_mutex_proc_pthread_release,
     proc_mutex_proc_pthread_destroy,
-    proc_mutex_proc_pthread_child_init
+    proc_mutex_proc_pthread_child_init,
+    "pthread"
 };
 
 #endif
@@ -601,7 +604,8 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_fcntl_methods =
     NULL, /* no tryacquire */
     proc_mutex_fcntl_release,
     proc_mutex_fcntl_destroy,
-    proc_mutex_fcntl_child_init
+    proc_mutex_fcntl_child_init,
+    "fcntl"
 };
 
 #endif /* fcntl implementation */
@@ -730,7 +734,8 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_flock_methods =
     NULL, /* no tryacquire */
     proc_mutex_flock_release,
     proc_mutex_flock_destroy,
-    proc_mutex_flock_child_init
+    proc_mutex_flock_child_init,
+    "flock"
 };
 
 #endif /* flock implementation */
@@ -813,6 +818,19 @@ static apr_status_t proc_mutex_choose_method(apr_proc_mutex_t *new_mutex, apr_lo
     return APR_SUCCESS;
 }
 
+APR_DECLARE(const char *) apr_proc_mutex_defname(void)
+{
+    apr_status_t rv;
+    apr_proc_mutex_t mutex;
+
+    if ((rv = proc_mutex_choose_method(&mutex, APR_LOCK_DEFAULT)) != APR_SUCCESS) {
+        return "unknown";
+    }
+    mutex.meth = mutex.inter_meth;
+
+    return apr_proc_mutex_name(&mutex);
+}
+   
 static apr_status_t proc_mutex_create(apr_proc_mutex_t *new_mutex, apr_lockmech_e mech, const char *fname)
 {
     apr_status_t rv;
@@ -933,6 +951,11 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex)
 APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 {
     return mutex->meth->destroy(mutex);
+}
+
+APR_DECLARE(const char *) apr_proc_mutex_name(apr_proc_mutex_t *mutex)
+{
+    return mutex->meth->name;
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)

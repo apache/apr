@@ -176,6 +176,16 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
     return stat;
 }
 
+APR_DECLARE(const char *) apr_proc_mutex_name(apr_proc_mutex_t *mutex)
+{
+    return "win32mutex";
+}
+
+APR_DECLARE(const char *) apr_proc_mutex_defname(void)
+{
+    return "win32mutex";
+}
+
 APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 
 /* Implement OS-specific accessors defined in apr_portable.h */
