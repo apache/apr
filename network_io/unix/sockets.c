@@ -202,7 +202,8 @@ ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, ap_context_t *
         return errno;
     }
 
-    if (getsockname((*new)->socketdes, (*new)->local_addr, &((*new)->addr_len)) < 0) {
+    if (getsockname((*new)->socketdes, (struct sockaddr *)(*new)->local_addr, 
+                    &((*new)->addr_len)) < 0) {
 	return errno;
     }
 
@@ -334,7 +335,8 @@ ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock,
      
         (*sock)->addr_len = sizeof(*(*sock)->local_addr);
         (*sock)->timeout = -1;
-        if (getsockname(*thesock, (*sock)->local_addr, &((*sock)->addr_len)) < 0) {
+        if (getsockname(*thesock, (struct sockaddr *)(*sock)->local_addr, 
+                        &((*sock)->addr_len)) < 0) {
             return errno;
         }
     }
