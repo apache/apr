@@ -1,13 +1,18 @@
-Changes with APR 1.0
-
-  *) Change i386 FreeBSD to use the asm routines in apr_atomic.h
-     to overcome issues with the FreeBSD atomic functions return
-     type on i386. [David Reid]
+Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
   *) Add a new PRNG. Note that the implementation of SHA-256 is a
      stop-gap pending snarfing the SHA-1 implementation from apr-util
      and upgrading it to do SHA-256. Not yet ready for prime time.
      [Ben Laurie]
+
+Changes with APR 1.0
+
+  *) Removed apr_socket_opt_{get|set}(..., APR_SO_TIMEOUT) which
+     was deprecated in favor of apr_socket_timeout_{get|set}().
+
+  *) Change i386 FreeBSD to use the asm routines in apr_atomic.h
+     to overcome issues with the FreeBSD atomic functions return
+     type on i386. [David Reid]
 
   *) Added new versions of the apr_atomic functions for
      use with 32-bit ints  [Brian Pane]
