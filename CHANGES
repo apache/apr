@@ -1,7 +1,7 @@
 Changes with APR 0.9.2
 
   *) Fix a bug in apr_hash_merge() which caused the last entry in the
-     overlay has to be lost.  PR 10522  [Jeff Trawick]
+     overlay hash to be lost.  PR 10522  [Jeff Trawick]
 
   *) Add DougM's apr_rename.pl script into helpers, and update for the new 
      batch of updates [Thom May]
