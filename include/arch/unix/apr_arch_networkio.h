@@ -149,7 +149,7 @@ struct apr_socket_t {
     int local_port_unknown;
     int local_interface_unknown;
     int remote_addr_unknown;
-    apr_int32_t netmask;
+    apr_int32_t options;
     apr_int32_t inherit;
     sock_userdata_t *userdata;
 };
@@ -158,14 +158,15 @@ const char *apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size);
 int apr_inet_pton(int af, const char *src, void *dst);
 void apr_sockaddr_vars_set(apr_sockaddr_t *, int, apr_port_t);
 
-#define apr_is_option_set(mask, option)  ((mask & option) ==option)
+#define apr_is_option_set(skt, option)  \
+    (((skt)->options & (option)) == (option))
 
-#define apr_set_option(mask, option, on) \
+#define apr_set_option(skt, option, on) \
     do {                                 \
         if (on)                          \
-            *mask |= option;             \
+            (skt)->options |= (option);         \
         else                             \
-            *mask &= ~option;            \
+            (skt)->options &= ~(option);        \
     } while (0)
 
 #endif  /* ! NETWORK_IO_H */

@@ -82,7 +82,7 @@ struct apr_socket_t {
     int local_port_unknown;
     int local_interface_unknown;
     int remote_addr_unknown;
-    apr_int32_t netmask;
+    apr_int32_t options;
     apr_int32_t inherit;
     sock_userdata_t *userdata;
 };

@@ -292,13 +292,13 @@ APR_DECLARE(apr_status_t) apr_socket_accept(apr_socket_t **new,
     }
 
 #if APR_TCP_NODELAY_INHERITED
-    if (apr_is_option_set(sock->netmask, APR_TCP_NODELAY) == 1) {
-        apr_set_option(&(*new)->netmask, APR_TCP_NODELAY, 1);
+    if (apr_is_option_set(sock, APR_TCP_NODELAY) == 1) {
+        apr_set_option(*new, APR_TCP_NODELAY, 1);
     }
 #endif /* TCP_NODELAY_INHERITED */
 #if APR_O_NONBLOCK_INHERITED
-    if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) == 1) {
-        apr_set_option(&(*new)->netmask, APR_SO_NONBLOCK, 1);
+    if (apr_is_option_set(sock, APR_SO_NONBLOCK) == 1) {
+        apr_set_option(*new, APR_SO_NONBLOCK, 1);
     }
 #endif /* APR_O_NONBLOCK_INHERITED */
 

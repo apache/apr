@@ -84,12 +84,12 @@ static void set_socket_vars(apr_socket_t *sock, int family, int type, int protoc
     sock->protocol = protocol;
     apr_sockaddr_vars_set(sock->local_addr, family, 0);
     apr_sockaddr_vars_set(sock->remote_addr, family, 0);
-    sock->netmask = 0;
+    sock->options = 0;
 #if defined(BEOS) && !defined(BEOS_BONE)
     /* BeOS pre-BONE has TCP_NODELAY on by default and it can't be
      * switched off!
      */
-    sock->netmask |= APR_TCP_NODELAY;
+    sock->options |= APR_TCP_NODELAY;
 #endif
 }
 
@@ -224,13 +224,13 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
     }
 
 #if APR_TCP_NODELAY_INHERITED
-    if (apr_is_option_set(sock->netmask, APR_TCP_NODELAY) == 1) {
-        apr_set_option(&(*new)->netmask, APR_TCP_NODELAY, 1);
+    if (apr_is_option_set(sock, APR_TCP_NODELAY) == 1) {
+        apr_set_option(*new, APR_TCP_NODELAY, 1);
     }
 #endif /* TCP_NODELAY_INHERITED */
 #if APR_O_NONBLOCK_INHERITED
-    if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) == 1) {
-        apr_set_option(&(*new)->netmask, APR_SO_NONBLOCK, 1);
+    if (apr_is_option_set(sock, APR_SO_NONBLOCK) == 1) {
+        apr_set_option(*new, APR_SO_NONBLOCK, 1);
     }
 #endif /* APR_O_NONBLOCK_INHERITED */
 
@@ -267,7 +267,7 @@ apr_status_t apr_socket_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
      * socket; if called again, we can see EALREADY
      */
     if (rc == -1 && (errno == EINPROGRESS || errno == EALREADY) &&
-        apr_is_option_set(sock->netmask, APR_SO_TIMEOUT)) {
+        apr_is_option_set(sock, APR_SO_TIMEOUT)) {
         rc = apr_wait_for_io_or_timeout(NULL, sock, 0);
         if (rc != APR_SUCCESS) {
             return rc;
