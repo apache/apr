@@ -127,8 +127,39 @@ AC_DECISION_FORCE(USE_FCNTL_SERIALIZE)
 AC_END_DECISION
 AC_DEFINE_UNQUOTED($ac_decision) 
 
-AC_CHECK_LIB(pthread, pthread_mutex_init, AC_DEFINE(USE_PTHREAD_SERIALIZE))
-AC_CHECK_LIB(c_r, pthread_mutex_init, AC_DEFINE(USE_PTHREAD_SERIALIZE))
+if test ".$ac_decision" = ".USE_FLOCK_SERIALIZE"; then
+    flockser="1"
+else
+    flockser="0"
+fi 
+if test ".$ac_decision" = ".USE_SYSVSEM_SERIALIZE"; then
+    sysvser="1"
+else
+    sysvser="0"
+fi
+if test ".$ac_decision" = ".USE_FCNTL_SERIALIZE"; then
+    fcntlser="1"
+else
+    fcntlser="0"
+fi
+if test ".$ac_decision" = ".USE_PROC_PTHREAD_SERIALIZE"; then
+    procpthreadser="1"
+else
+    procpthreadser="0"
+fi
+
+AC_SUBST(flockser)
+AC_SUBST(sysvser)
+AC_SUBST(fcntlser)
+AC_SUBST(procpthreadser)
+
+AC_CHECK_LIB(pthread, pthread_mutex_init, [ 
+    AC_DEFINE(USE_PTHREAD_SERIALIZE)
+    pthreadser="1" ], [ pthreadser="0" ])
+AC_CHECK_LIB(c_r, pthread_mutex_init, [ 
+    AC_DEFINE(USE_PTHREAD_SERIALIZE)
+    pthreadser="1" ], [ pthreadser="0" ])
+AC_SUBST(pthreadser)
 ac_cv_define_READDIR_IS_THREAD_SAFE=no
 AC_CHECK_LIB(c_r, readdir, AC_DEFINE(READDIR_IS_THREAD_SAFE))
 
