@@ -63,29 +63,24 @@ APR_VAR_IMPORT int
 APR_VAR_IMPORT char *
     ap_optarg;                          /* argument associated with option */
 
-/*
-
-=head1 ap_status_t ap_getopt(ap_int32_t nargc, char *const *nargv, const char *ostr, ap_int32_t *rv, ap_pool_t *cont)
-
-B<Parse the command line options passed to the program.>
-
-    arg 1) The number of arguments passed to ap_getopt to parse
-    arg 2) The array of command line options to parse
-    arg 3) A string of characters that are acceptable options to the program.
-           characters followed by ":" are required to have an option 
-           associated 
-    arg 4) The next option found.  There are four potential values for 
-           this variable on exit. They are:
-               APR_EOF    --  No more options to parse
-               APR_BADCH  --  Found a bad option character
-               APR_BADARG --  Missing parameter for the found option
-               Other      --  The next option found.
-    arg 5) The pool to operate on.
-
-B<NOTE>:  Arguments 2 and 3 are most commonly argc and argv from 
-          main(argc, argv)
-
-=cut
+/**
+ * Parse the command line options passed to the program.
+ * @param nargc The number of arguments passed to ap_getopt to parse
+ * @param nargv The array of command line options to parse
+ * @param ostr A string of characters that are acceptable options to the 
+ *             program.  Characters followed by ":" are required to have an 
+ *             option associated 
+ * @param rv The next option found.  There are four potential values for 
+ *          this variable on exit. They are:
+ * <PRE>
+ *             APR_EOF    --  No more options to parse
+ *             APR_BADCH  --  Found a bad option character
+ *             APR_BADARG --  Missing @parameter for the found option
+ *             Other      --  The next option found.
+ * </PRE>
+ * @param cont The pool to operate on.
+ * @tip Arguments 2 and 3 are most commonly argc and argv from main(argc, argv)
+ * @deffunc ap_status_t ap_getopt(ap_int32_t nargc, char *const *nargv, const char *ostr, ap_int32_t *rv, ap_pool_t *cont)
  */
 APR_EXPORT(ap_status_t) ap_getopt(ap_int32_t nargc, char *const *nargv, 
                                   const char *ostr, ap_int32_t *rv, 
