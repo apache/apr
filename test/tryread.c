@@ -13,25 +13,6 @@
  * limitations under the License.
  */
 
-/*
- * USAGE
- *
- * Start one process, no args, and place it into the background. Start a
- * second process with the "-r" switch to attempt a read on the file
- * created by the first process.
- *
- * $ ./testflock &
- * ...messages...
- * $ ./testflock -r
- * ...messages...
- *
- * The first process will sleep for 30 seconds while holding a lock. The
- * second process will attempt to grab it (non-blocking) and fail. It
- * will then grab it with a blocking scheme. When the first process' 30
- * seconds are up, it will exit (thus releasing its lock). The second
- * process will acquire the lock, then exit.
- */
-
 #include "testflock.h"
 #include "apr_pools.h"
 #include "apr_file_io.h"
@@ -41,7 +22,6 @@
 #if APR_HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-
 
 int main(int argc, const char * const *argv)
 {
