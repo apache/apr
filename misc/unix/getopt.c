@@ -237,10 +237,12 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
             for (i = 0; ; i++) {
                 if (opts[i].optch == 0)             /* No match */
                     return serr(os, "invalid option", p - 2, APR_BADCH);
-                len = strlen(opts[i].name);
-                if (strncmp(p, opts[i].name, len) == 0
-                    && (p[len] == '\0' || p[len] == '='))
-                    break;
+                if (opts[i].name) {
+                    len = strlen(opts[i].name);
+                    if (strncmp(p, opts[i].name, len) == 0
+                        && (p[len] == '\0' || p[len] == '='))
+                        break;
+                }
             }
             *optch = opts[i].optch;
 
