@@ -236,7 +236,13 @@ changequote(<<, >>)dnl
 #endif
 #ifdef TEST_SHMGET
 #include <sys/ipc.h>
+#ifndef _OSD_POSIX
 #include <sys/shm.h>
+#else
+#define _KMEMUSER 1 /* BS2000 needs this to enable SHM_[RW] */
+#include <sys/shm.h>
+#undef  _KMEMUSER
+#endif
 #endif
 #if !defined(MAP_FAILED)
 #define MAP_FAILED ((void *)-1)
