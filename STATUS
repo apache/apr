@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/08/23 03:55:32 $]
+Last modified at [$Date: 2001/08/23 04:03:37 $]
 
 Release:
 
@@ -38,6 +38,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       Status: Jim will look into this
 
     * Build scripts do not recognise AIX 4.2.1 pthreads
+      Justin says: "Is this still true?"
 
     * Win32: Implement apr_shm_ functions 
       Status: rbb insists he has thoughts about splitting apr_shm_*
@@ -45,6 +46,9 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
               schema as well as anonymous inheritable shmem), and has a
               possible solution to the 'ask for 1MB, then ask for 4x256kb
               bogosity, so we are waiting on this.
+      Justin says: "That problem should be fixed now because we ignore memory
+                    management with shared memory on Unix (at least).  So, 
+                    the Win32 guys should be able to go ahead if they want."
 
     * FirstBill says we need a new procattr, APR_CREATE_SUSPENDED (or
       something similar) to direct ap_create_process to create the
@@ -100,6 +104,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
               built-in macro processing is much more powerful, and
               combined with the include facility, generating Makefiles
               becomes simpler and faster.
+      Justin says: "I think this got fixed with Roy's build changes."
 
     * use os_(un)cork in network_io/unix/sendrecv.c for FreeBSD's
       sendfile implementation.
