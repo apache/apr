@@ -264,8 +264,10 @@ ap_status_t ap_dir_entry_ftype(struct dir_t *thedir, ap_filetype_e *type)
         *type = APR_PIPE;    
     if (S_ISLNK(filestat.st_mode))
         *type = APR_LNK;    
+#ifndef BEOS
     if (S_ISSOCK(filestat.st_mode))
         *type = APR_SOCK;    
+#endif
     return APR_SUCCESS;
 }
 

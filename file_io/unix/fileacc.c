@@ -238,8 +238,10 @@ ap_status_t ap_get_filetype(struct file_t *file, ap_filetype_e *type)
             *type = APR_PIPE;
         if (S_ISLNK(file->protection))
             *type = APR_LNK;
+#ifndef BEOS
         if (S_ISSOCK(file->protection))
             *type = APR_SOCK;
+#endif
         return APR_SUCCESS;
     }
     else {
