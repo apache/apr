@@ -55,9 +55,13 @@
 #include "apr_portable.h"
 #include "apr_time.h"
 #include "apr_lib.h"
+#include "apr_private.h"
 /* System Headers required for time library */
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 #if HAVE_TIME_H
 #include <time.h>
