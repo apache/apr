@@ -177,6 +177,11 @@ APR_DECLARE(apr_status_t) apr_thread_data_set(void *data, const char *key,
     return apr_pool_userdata_set(data, key, cleanup, thread->cntxt);
 }
 
+APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void)
+{
+    return GetCurrentThread();
+}
+
 APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd,
                                             apr_thread_t *thd)
 {
