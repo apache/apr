@@ -83,7 +83,7 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
 {
     apr_pool_t *pool;
     apr_status_t status;
-#if defined WIN32 || defined(NETWARE)
+#if defined WIN32
     int iVersionRequested;
     WSADATA wsaData;
     int err;
@@ -96,14 +96,10 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
         return APR_SUCCESS;
     }
 
-#if !defined(BEOS) && !defined(OS2) && !defined(WIN32) && !defined(NETWARE)
+#if !defined(BEOS) && !defined(OS2) && !defined(WIN32)
     apr_unix_setup_lock();
     apr_proc_mutex_unix_setup_lock();
     apr_unix_setup_time();
-#endif
-
-#if defined(NETWARE)
-    apr_netware_setup_time();
 #endif
 
     if ((status = apr_pool_initialize()) != APR_SUCCESS)
@@ -122,7 +118,7 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
     }
 #endif
     
-#if defined(NETWARE) || defined(WIN32)
+#if defined(WIN32)
     iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
     err = WSAStartup((WORD) iVersionRequested, &wsaData);
     if (err) {
@@ -148,7 +144,7 @@ APR_DECLARE_NONSTD(void) apr_terminate(void)
     }
     apr_pool_terminate();
     
-#if defined(NETWARE) || defined(WIN32)
+#if defined(WIN32)
     WSACleanup();
 #endif
 }
