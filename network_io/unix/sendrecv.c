@@ -218,7 +218,7 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
 {
     off_t off = *offset;
     int corkflag = 1;
-    int rv, nbytes = 0;
+    int rv, nbytes = 0, total_hdrbytes, i;
     ap_status_t arv;
 
     /* Ignore flags for now. */
@@ -241,6 +241,21 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
             return errno;
         }
         nbytes += hdrbytes;
+
+        /* If this was a partial write and we aren't doing timeouts, 
+         * return now with the partial byte count; this is a non-blocking 
+         * socket.
+         */
+        if (sock->timeout <= 0) {
+            total_hdrbytes = 0;
+            for (i = 0; i < hdtr->numheaders; i++) {
+                total_hdrbytes += hdtr->headers[i].iov_len;
+            }
+            if (hdrbytes < total_hdrbytes) {
+                *len = hdrbytes;
+                return APR_SUCCESS;
+            }
+        }
     }
 
     do {
@@ -275,6 +290,15 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
     }
 
     nbytes += rv;
+
+    /* If this was a partial write, return now with the partial byte count; 
+     * this is a non-blocking socket.
+     */
+
+    if (rv < *len) {
+        *len = nbytes;
+        return APR_SUCCESS;
+    }
 
     /* Now write the footers */
     if (hdtr->numtrailers > 0) {
