@@ -22,7 +22,6 @@
 #include "apr_hash.h"
 #include "apr_inherit.h"
 #include "apr_lib.h"
-#include "apr_lock.h"
 #include "apr_md5.h"
 #include "apr_mmap.h"
 #include "apr_network_io.h"
