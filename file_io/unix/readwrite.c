@@ -71,7 +71,7 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
     ap_ssize_t rv;
 
     if (thefile->filedes < 0) {
-        *nbytes = -1;
+        *nbytes = 0;
         return APR_EBADF;
     }
     
@@ -104,11 +104,11 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
             } while (srv == -1 && errno == EINTR);
 
             if (srv == 0) {
-                (*nbytes) = -1;
+                (*nbytes) = 0;
                 return APR_TIMEUP;
             }
             else if (srv < 0) {
-                (*nbytes) = -1;
+                (*nbytes) = 0;
                 return errno;
             }
             else {
@@ -126,10 +126,11 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         || (errno != EINTR && !thefile->buffered && thefile->pipe == 0 ))) {
         thefile->eof_hit = 1;
     }
-    *nbytes = rv;
     if (rv == -1) {
+        (*nbytes) = 0;
         return errno;
     }
+    *nbytes = rv;
     return APR_SUCCESS;
 }
 
@@ -149,7 +150,7 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
     ap_size_t rv;
 
     if (thefile->filedes < 0) {
-        *nbytes = -1;
+        *nbytes = 0;
         return APR_EBADF;
     }
 
@@ -182,11 +183,11 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
             } while (srv == -1 && errno == EINTR);
 
             if (srv == 0) {
-                (*nbytes) = -1;
+                (*nbytes) = 0;
                 return APR_TIMEUP;
             }
             else if (srv < 0) {
-                (*nbytes) = -1;
+                (*nbytes) = 0;
                 return errno;
             }
             else {
@@ -197,10 +198,11 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         }  
     }   /* BUFFERED ?? */
 
-    *nbytes = rv;
     if (rv == -1) {
+        (*nbytes) = 0;
         return errno;
     }
+    *nbytes = rv;
     return APR_SUCCESS;
 }
 
