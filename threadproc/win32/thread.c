@@ -53,7 +53,7 @@
  */
 
 #include "apr_private.h"
-#include "threadproc.h"
+#include "win32/threadproc.h"
 #include "apr_thread_proc.h"
 #include "apr_general.h"
 #include "apr_lib.h"

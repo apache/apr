@@ -53,9 +53,9 @@
  */
 
 #ifndef BEOS
-#include "threadproc.h"
+#include "unix/threadproc.h"
 #else
-#include "../beos/threadproc.h"
+#include "beos/threadproc.h"
 #endif
 #include "apr_private.h"
 #include "apr_lib.h"

@@ -55,8 +55,8 @@
 #define INCL_DOS
 #define INCL_DOSERRORS
 
-#include "threadproc.h"
-#include "fileio.h"
+#include "os2/threadproc.h"
+#include "os2/fileio.h"
 #include "apr_private.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"

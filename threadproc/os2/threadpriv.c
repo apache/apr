@@ -52,12 +52,12 @@
  * <http://www.apache.org/>.
  */
 
-#include "threadproc.h"
+#include "os2/threadproc.h"
 #include "apr_thread_proc.h"
 #include "apr_general.h"
 #include "apr_errno.h"
 #include "apr_lib.h"
-#include "fileio.h"
+#include "os2/fileio.h"
 
 apr_status_t apr_create_thread_private(apr_threadkey_t **key,
                                      void (*dest)(void *), apr_pool_t *cont)

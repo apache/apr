@@ -9,8 +9,7 @@ CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../../include
-INCDIR1=../../file_io/unix
-INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
+INCLUDES=-I$(INCDIR) -I$(INCDIR)/arch
 
 LIB=libthreadproc.a
 

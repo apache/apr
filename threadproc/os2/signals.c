@@ -53,8 +53,8 @@
  */
 
 #define INCL_DOSEXCEPTIONS
-#include "threadproc.h"
-#include "fileio.h"
+#include "os2/threadproc.h"
+#include "os2/fileio.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
