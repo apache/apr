@@ -99,15 +99,24 @@ static void get_random_info(unsigned char node[NODE_LENGTH])
      * replace with pid/tid for portability (in the spirit of mod_unique_id) */
     struct {
 	/* Add thread id here, if applicable, when we get to pthread or apr */
-	pid_t pid;
+        pid_t pid;
+#ifdef NETWARE
+        apr_uint64_t t;
+#else
         struct timeval t;
+#endif
         char hostname[257];
 
     } r;
 
     apr_md5_init(&c);
+#ifdef NETWARE
+    r.pid = NXThreadGetId();
+    NXGetTime(NX_SINCE_BOOT, NX_USECONDS, &(r.t));
+#else
     r.pid = getpid();
     gettimeofday(&r.t, (struct timezone *)0);
+#endif
     gethostname(r.hostname, 256);
     apr_md5_update(&c, (const unsigned char *)&r, sizeof(r));
     apr_md5_final(seed, &c);
@@ -130,13 +139,9 @@ static void get_system_time(apr_uint64_t *uuid_time)
 {
 #ifdef NETWARE
     uint64_t sec;
-    uint64_t usec;
     
     NXGetTime(NX_SINCE_1970, NX_SECONDS, &sec);
-    NXGetTime(NX_SINCE_1970, NX_USECONDS, &usec);
-    *uuid_time = (sec * 10000000) + (usec * 10) +
-        0x01B21DD213814000LL;
-EnterDebugger();  /* Check to make sure that we are actually getting what we expect. */
+    *uuid_time = (sec * 10000000) + 0x01B21DD213814000LL;
 #else
     struct timeval tp;
 
