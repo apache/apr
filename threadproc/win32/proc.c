@@ -83,15 +83,15 @@ ap_status_t ap_createprocattr_init(struct procattr_t **new, ap_context_t *cont)
     (*new)->child_err = NULL;
     (*new)->currdir = NULL; 
     (*new)->cmdtype = APR_PROGRAM;
-	(*new)->detached = TRUE;
+    (*new)->detached = TRUE;
 
     memset(&(*new)->si, 0, sizeof((*new)->si));
 
-	return APR_SUCCESS;
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in, 
-                                 ap_int32_t out, ap_int32_t err)
+                              ap_int32_t out, ap_int32_t err)
 {
     ap_status_t stat;
     if (in) {
@@ -99,7 +99,7 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
                                    attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
-    } 
+    }
     if (out) {
         if ((stat = ap_create_pipe(&attr->parent_out, &attr->child_out, 
                                    attr->cntxt)) != APR_SUCCESS) {
@@ -114,7 +114,40 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
     } 
     return APR_SUCCESS;
 }
+#if 0
+ap_status_t ap_setprocattr_childin(struct procattr_t *attr, ap_file_t *child_in,
+                                   ap_file_t *parent_in)
+{
+}
+ap_status_t ap_setprocattr_childout(struct procattr_t *attr, ap_file_t *child_out,
+                                    ap_file_t *parent_out)
+{
 
+    if (attr->child_out == NULL && attr->parent_out == NULL)
+        ap_create_pipe(&attr->child_out, &attr->parent_out, attr->cntxt);
+
+    if (child_out != NULL)
+        ap_dupfile(&attr->child_out, child_out);
+
+    if (parent_out != NULL)
+        ap_dupfile(&attr->parent_out, parent_out);
+
+    return APR_SUCCESS;
+}
+ap_status_t ap_setprocattr_childerr(struct procattr_t *attr, ap_file_t *child_err,
+                                   ap_file_t *parent_err)
+{
+    if (attr->child_err == NULL && attr->parent_err == NULL)
+        ap_create_pipe(&attr->child_err, &attr->parent_err, attr->cntxt);
+
+    if (child_err != NULL)
+        ap_dupfile(&attr->child_err, child_err);
+
+    if (parent_err != NULL)
+        ap_dupfile(&attr->parent_err, parent_err);
+    return APR_SUCCESS;
+}
+#endif
 ap_status_t ap_setprocattr_dir(struct procattr_t *attr, 
                                const char *dir) 
 {
@@ -132,8 +165,7 @@ ap_status_t ap_setprocattr_cmdtype(struct procattr_t *attr,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setprocattr_detach(struct procattr_t *attr,
-									ap_int32_t det) 
+ap_status_t ap_setprocattr_detach(struct procattr_t *attr, ap_int32_t det) 
 {
     attr->detached = det;
     return APR_SUCCESS;
@@ -151,8 +183,6 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
     char *envstr;
     char *pEnvBlock, *pNext;
 
-
-
     (*new) = (struct proc_t *)ap_palloc(cont, sizeof(struct proc_t));
 
     if ((*new) == NULL) {
@@ -160,16 +190,16 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
     }
 
     (*new)->cntxt = cont;
-	(*new)->attr = attr;
+    (*new)->attr = attr;
 
-	attr->si.cb = sizeof(attr->si);
+    attr->si.cb = sizeof(attr->si);
     if (attr->detached) {
         /* If we are creating ourselves detached, Then we should hide the
          * window we are starting in.  And we had better redfine our
          * handles for STDIN, STDOUT, and STDERR.
          */
         attr->si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
-	    attr->si.wShowWindow = SW_HIDE;
+        attr->si.wShowWindow = SW_HIDE;
 
         if (attr->child_in) {
             attr->si.hStdInput = attr->child_in->filehand;
@@ -183,13 +213,12 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
             attr->si.hStdError = attr->child_err->filehand;
         }
     }
-
-	cmdline = args[0];
-	i = 1;
-	while (args[i]) {
-		cmdline = ap_pstrcat(cont, cmdline, " ", args[i], NULL);
-		i++;
-	}
+    cmdline = ap_pstrdup(cont, progname);
+    i = 0;
+    while (args[i]) {
+        cmdline = ap_pstrcat(cont, cmdline, " ", args[i], NULL);
+        i++;
+    }
     /*
      * When the pipe handles are created, the security descriptor
      * indicates that the handle can be inherited.  However, we do not
@@ -204,47 +233,46 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
      */
     hCurrentProcess = GetCurrentProcess();
     if ((attr->child_in && !DuplicateHandle(hCurrentProcess, attr->parent_in->filehand, 
-				                            hCurrentProcess,
-				                            &hParentindup, 0, FALSE,
-				                            DUPLICATE_SAME_ACCESS))
+                                            hCurrentProcess,
+                                            &hParentindup, 0, FALSE,
+                                            DUPLICATE_SAME_ACCESS))
 	|| (attr->child_out && !DuplicateHandle(hCurrentProcess, attr->parent_out->filehand,
-					                        hCurrentProcess, &hParentoutdup,
-						   				    0, FALSE, DUPLICATE_SAME_ACCESS))
+                                                hCurrentProcess, &hParentoutdup,
+                                                0, FALSE, DUPLICATE_SAME_ACCESS))
 	|| (attr->child_err && !DuplicateHandle(hCurrentProcess, attr->parent_err->filehand,
-											hCurrentProcess, &hParenterrdup,
-											0, FALSE, DUPLICATE_SAME_ACCESS))) {
-		if (attr->child_in) {
-			ap_close(attr->child_in);
-			ap_close(attr->parent_in);
-		}
-		if (attr->child_out) {
-			ap_close(attr->child_out);
-			ap_close(attr->parent_out);
-		}
-		if (attr->child_err) {
-			ap_close(attr->child_err);
-			ap_close(attr->parent_err);
-		}
-		return APR_EEXIST;
+                                                hCurrentProcess, &hParenterrdup,
+                                                0, FALSE, DUPLICATE_SAME_ACCESS))) {
+        if (attr->child_in) {
+            ap_close(attr->child_in);
+            ap_close(attr->parent_in);
+        }
+        if (attr->child_out) {
+            ap_close(attr->child_out);
+            ap_close(attr->parent_out);
+        }
+        if (attr->child_err) {
+            ap_close(attr->child_err);
+            ap_close(attr->parent_err);
+        }
+        return APR_EEXIST;
     }
     else {
-		if (attr->child_in) {
-			ap_close(attr->parent_in);
-		    attr->parent_in->filehand = hParentindup;
-		}
-		if (attr->child_out) {
-			ap_close(attr->parent_out);
-			attr->parent_out->filehand = hParentoutdup;
-		}
-		if (attr->child_err) {
-		    ap_close(attr->parent_err);
-		    attr->parent_err->filehand = hParenterrdup;
-		}
+        if (attr->child_in) {
+            ap_close(attr->parent_in);
+            attr->parent_in->filehand = hParentindup;
+        }
+        if (attr->child_out) {
+            ap_close(attr->parent_out);
+            attr->parent_out->filehand = hParentoutdup;
+        }
+        if (attr->child_err) {
+            ap_close(attr->parent_err);
+            attr->parent_err->filehand = hParenterrdup;
+        }
     }
 
     _itoa(_getpid(), ppid, 10);
     if (env) {
-
         envstr = ap_pstrcat(cont, "parentpid=", ppid, NULL);
         /*
          * Win32's CreateProcess call requires that the environment
@@ -272,28 +300,28 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
     else {
         SetEnvironmentVariable("parentpid", ppid);
         pEnvBlock = NULL;
-   } 
+    } 
     
 
     if (CreateProcess(NULL, cmdline, NULL, NULL, TRUE, 0, pEnvBlock, attr->currdir, 
-		&attr->si, &(*new)->pi)) {
-		if (attr->detached) {
-			CloseHandle((*new)->pi.hProcess);
-		}
-		if (attr->child_in) {
-			ap_close(attr->child_in);
-		}
-		if (attr->child_out) {
-			ap_close(attr->child_out);
-		}
-		if (attr->child_err) {
-			ap_close(attr->child_err);
-		}
-		CloseHandle((*new)->pi.hThread);
-		return APR_SUCCESS;
-	}
+                      &attr->si, &(*new)->pi)) {
+        if (attr->detached) {
+            CloseHandle((*new)->pi.hProcess);
+        }
+        if (attr->child_in) {
+            ap_close(attr->child_in);
+        }
+        if (attr->child_out) {
+            ap_close(attr->child_out);
+        }
+        if (attr->child_err) {
+            ap_close(attr->child_err);
+        }
+        CloseHandle((*new)->pi.hThread);
+        return APR_SUCCESS;
+    }
 
-	return GetLastError();
+    return GetLastError();
 }
 
 ap_status_t ap_get_childin(ap_file_t **new, struct proc_t *proc)
@@ -315,7 +343,7 @@ ap_status_t ap_get_childerr(ap_file_t **new, struct proc_t *proc)
 }    
 
 ap_status_t ap_wait_proc(struct proc_t *proc, 
-                           ap_wait_how_e wait)
+                         ap_wait_how_e wait)
 {
     pid_t stat;
     if (!proc)
@@ -330,13 +358,13 @@ ap_status_t ap_wait_proc(struct proc_t *proc,
         return APR_EEXIST;
     }
     if ((stat = WaitForSingleObject(proc->pi.hProcess, 0)) == WAIT_OBJECT_0) {
-            return APR_CHILD_DONE;
-        }
-        else if (stat == WAIT_TIMEOUT) {
-            return APR_CHILD_NOTDONE;
-        }
-        return APR_EEXIST;
-} 
+        return APR_CHILD_DONE;
+    }
+    else if (stat == WAIT_TIMEOUT) {
+        return APR_CHILD_NOTDONE;
+    }
+    return APR_EEXIST;
+}
 
 ap_status_t ap_get_procdata(char *key, void *data, struct proc_t *proc)
 {
