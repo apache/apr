@@ -53,69 +53,93 @@
  */
 
 #include "apr_general.h"
-#include "apr_shmem.h"
+#include "apr_shm.h"
 #include "apr_errno.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
-#include <umalloc.h>
-#include <stdlib.h>
 
-struct apr_shmem_t {
+struct apr_shm_t {
+    apr_pool_t *pool;
     void *memblock;
-    Heap_t heap;
 };
 
-APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize, const char *filename, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
+                                         apr_size_t reqsize,
+                                         const char *filename,
+                                         apr_pool_t *pool)
 {
     int rc;
-    apr_shmem_t *newm = (apr_shmem_t *)apr_palloc(cont, sizeof(apr_shmem_t));
+    apr_shm_t *newm = (apr_shm_t *)apr_palloc(pool, sizeof(apr_shm_t));
     char *name = NULL;
     ULONG flags = PAG_COMMIT|PAG_READ|PAG_WRITE;
 
-    if (file)
-        name = apr_pstrcat(cont, "\\SHAREMEM\\", file, NULL);
+    newm->pool = pool;
 
-    if (name == NULL)
+    if (filename) {
+        name = apr_pstrcat(pool, "\\SHAREMEM\\", filename, NULL);
+    }
+
+    if (name == NULL) {
         flags |= OBJ_GETTABLE;
+    }
 
-    reqsize += 1024; /* Allow some overhead for heap structures */
     rc = DosAllocSharedMem(&(newm->memblock), name, reqsize, flags);
 
-    if (rc)
+    if (rc) {
         return APR_OS2_STATUS(rc);
+    }
 
-    newm->heap = _ucreate(newm->memblock, reqsize, !_BLOCK_CLEAN, _HEAP_REGULAR|_HEAP_SHARED, NULL, NULL);
-    _uopen(newm->heap);
     *m = newm;
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shmem_t *m)
+APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m)
 {
-    _uclose(m->heap);
-    _udestroy(m->heap, _FORCE);
     DosFreeMem(m->memblock);
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_shm_attach(apr_shmem_t **m,
+APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
                                          const char *filename,
                                          apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    int rc;
+    apr_shm_t *newm = (apr_shm_t *)apr_palloc(pool, sizeof(apr_shm_t));
+    char *name = NULL;
+    ULONG flags = PAG_COMMIT|PAG_READ|PAG_WRITE;
+
+    newm->pool = pool;
+    name = apr_pstrcat(pool, "\\SHAREMEM\\", filename, NULL);
+
+    rc = DosGetNamedSharedMem(&(newm->memblock), name, flags);
+
+    if (rc) {
+        return APR_FROM_OS_ERROR(rc);
+    }
+
+    *m = newm;
+    return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_shm_detach(apr_shmem_t *m)
+APR_DECLARE(apr_status_t) apr_shm_detach(apr_shm_t *m)
 {
-    return APR_ENOTIMPL;
+    int rc = 0;
+
+    if (m->memblock) {
+        rc = DosFreeMem(m->memblock);
+    }
+
+    return APR_FROM_OS_ERROR(rc);
 }
 
 APR_DECLARE(void *) apr_shm_baseaddr_get(const apr_shm_t *m)
 {
-    return APR_ENOTIMPL;
+    return m->memblock;
 }
 
 APR_DECLARE(apr_size_t) apr_shm_size_get(const apr_shm_t *m)
 {
-    return APR_ENOTIMPL;
-
+    ULONG flags, size = 0x1000000;
+    DosQueryMem(m->memblock, &size, &flags);
+    return size;
+}
