@@ -54,6 +54,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "apr_general.h"
@@ -119,6 +120,27 @@ static void test_strtok(apr_pool_t *p)
     }
 }
 
+void test_snprintf(apr_pool_t *p)
+{
+    char buff[100];
+    char *testing = apr_palloc(p, 10);
+
+    testing[0] = 't';
+    testing[1] = 'e';
+    testing[2] = 's';
+    testing[3] = 't';
+    testing[4] = 'i';
+    testing[5] = 'n';
+    testing[6] = 'g';
+    
+    fprintf(stderr, "Testing precision  ........  ");
+    apr_snprintf(buff, sizeof(buff), "%.*s", 7, testing);
+    if (!strncmp(buff, testing, 7)) {
+        fprintf(stderr, "OK\n");
+    }
+
+}
+
 int main(int argc, const char * const argv[])
 {
     apr_pool_t *p;
@@ -128,6 +150,7 @@ int main(int argc, const char * const argv[])
     apr_pool_create(&p, NULL);
 
     test_strtok(p);
+    test_snprintf(p);
 
     return 0;
 }

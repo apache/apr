@@ -952,9 +952,38 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
             case 's':
                 s = va_arg(ap, char *);
                 if (s != NULL) {
-                    s_len = strlen(s);
-                    if (adjust_precision && precision < s_len)
-                        s_len = precision;
+                    if (!adjust_precision) {
+                        s_len = strlen(s);
+                    }
+                    else {
+                        /* From the C library standard in section 7.9.6.1:
+                         * ...if the precision is specified, no more then
+                         * that many characters are written.  If the
+                         * precision is not specified or is greater
+                         * than the size of the array, the array shall
+                         * contain a null character.
+                         *
+                         * My reading is is precision is specified and
+                         * is less then or equal to the size of the
+                         * array, no null character is required.  So
+                         * we can't do a strlen.
+                         *
+                         * This figures out the length of the string
+                         * up to the precision.  Once it's long enough
+                         * for the specified precision, we don't care
+                         * anymore.
+                         *
+                         * NOTE: you must do the length comparison
+                         * before the check for the null character.
+                         * Otherwise, you'll check one beyond the
+                         * last valid character.
+                         */
+                        const char *walk;
+
+                        for (walk = s, s_len = 0;
+                             (s_len < precision) && (*walk != '\0');
+                             ++walk, ++s_len);
+                    }
                 }
                 else {
                     s = S_NULL;
