@@ -95,6 +95,19 @@ typedef HANDLE                ap_os_thread_t;
 typedef PROCESS_INFORMATION   ap_os_proc_t;
 typedef DWORD                 ap_os_threadkey_t; 
 typedef SYSTEMTIME            ap_os_time_t;
+
+#elif defined(OS2)
+#define INCL_DOS
+#include <os2.h>
+typedef HFILE                 ap_os_file_t;
+typedef HDIR                  ap_os_dir_t;
+typedef int                   ap_os_sock_t;
+typedef HMTX                  ap_os_lock_t;
+typedef TID                   ap_os_thread_t;
+typedef PID                   ap_os_proc_t;
+typedef PULONG                ap_os_threadkey_t; 
+typedef struct timeval        ap_os_time_t;
+
 #else
 /* Any other OS should go above this one.  This is the lowest common
  * denominator typedefs for  all UNIX-like systems.  :)
