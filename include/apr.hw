@@ -80,6 +80,7 @@
 #include <time.h>
 #include <process.h>
 #include <signal.h>
+#include <stdlib.h>
 
 #define ap_inline
 #define __attribute__(__x)

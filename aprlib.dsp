@@ -39,7 +39,7 @@ CPP=cl.exe
 # PROP Intermediate_Dir "LibR"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "./include" /I "./inc" /I "./misc/win32" /I "./file_io/win32" /I "./time/win32" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "./include" /I "./inc" /I "./misc/win32" /I "./file_io/win32" /I "./time/win32" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
 # SUBTRACT CPP /YX
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
@@ -62,7 +62,7 @@ LIB32=link.exe -lib
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /I "./include" /I "./inc" /I "./misc/win32" /I "./file_io/win32" /I "./time/win32" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "./include" /I "./inc" /I "./misc/win32" /I "./file_io/win32" /I "./time/win32" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
 # SUBTRACT CPP /YX
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
@@ -147,10 +147,6 @@ SOURCE=.\file_io\win32\fileacc.c
 # Begin Source File
 
 SOURCE=.\file_io\win32\filedup.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\file_io\win32\fileio.h
 # End Source File
 # Begin Source File
 
@@ -242,6 +238,10 @@ SOURCE=.\time\win32\timestr.c
 # PROP Default_Filter ".h"
 # Begin Source File
 
+SOURCE=.\include\apr_dso.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\include\apr_errno.h
 # End Source File
 # Begin Source File
@@ -255,6 +255,10 @@ SOURCE=.\include\apr_fnmatch.h
 # Begin Source File
 
 SOURCE=.\include\apr_general.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_getopt.h
 # End Source File
 # Begin Source File
 
@@ -278,6 +282,10 @@ SOURCE=.\inc\apr_pools.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\include\apr_pools.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\include\apr_portable.h
 # End Source File
 # Begin Source File
@@ -287,6 +295,10 @@ SOURCE=.\include\apr_shmem.h
 # Begin Source File
 
 SOURCE=.\include\apr_signal.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_strnatcmp.h
 # End Source File
 # Begin Source File
 
@@ -303,6 +315,10 @@ SOURCE=.\time\win32\atime.h
 # Begin Source File
 
 SOURCE=.\dso\win32\dso.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\file_io\win32\fileio.h
 # End Source File
 # Begin Source File
 
