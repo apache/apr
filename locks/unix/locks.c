@@ -71,7 +71,7 @@
  *        determine if it should be used.
  * arg 4) The newly created lock structure.
  * NOTE:  APR_CROSS_PROCESS may lock both processes and threads, but it is
- *        only garaunteed to lock processes.
+ *        only guaranteed to lock processes.
  */
 ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type, 
                            ap_lockscope_e scope, char *fname, 
@@ -84,13 +84,18 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type,
 
     new->cntxt = cont;
     new->type = type;
-    if (fname != NULL) {
-        new->fname = ap_pstrdup(cont, fname);
+#if defined(USE_FCNTL_SERIALIZE) || defined(USE_FLOCK_SERIALIZE)
+    /* file-based serialization primitives */
+    if (type != APR_INTRAPROCESS) {
+        if (fname != NULL) {
+            new->fname = ap_pstrdup(cont, fname);
+        }
+        else {
+            new->fname = ap_pstrdup(cont, tempnam(NULL, NULL));
+            unlink(new->fname);
+	}
     }
-    else {
-        new->fname = ap_pstrdup(cont, tempnam(NULL, NULL));
-        unlink(new->fname);
-    }
+#endif
 
     if (type != APR_CROSS_PROCESS) {
 #if APR_HAS_THREADS
