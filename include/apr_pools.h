@@ -573,7 +573,7 @@ APR_DECLARE(void) apr_pool_cleanup_for_exec(void);
  * if the data is allocated in any ancestor of T's pool.  This is the
  * basis on which the APR_POOL_DEBUG code works -- it tests these ancestor
  * relationships for all data inserted into tables.  APR_POOL_DEBUG also
- * provides tools (apr_find_pool, and apr_pool_is_ancestor) for other
+ * provides tools (apr_pool_find, and apr_pool_is_ancestor) for other
  * folks to implement similar restrictions for their own data
  * structures.
  *
@@ -606,7 +606,7 @@ APR_DECLARE(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub);
  * @param mem The thing allocated in the pool
  * @return The pool it is allocated in
  */
-APR_DECLARE(apr_pool_t *) apr_find_pool(const void *mem);
+APR_DECLARE(apr_pool_t *) apr_pool_find(const void *mem);
 
 /**
  * Report the number of bytes currently in the pool
