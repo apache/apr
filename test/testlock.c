@@ -60,13 +60,13 @@
 #include "errno.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "test_apr.h"
 
 #if !APR_HAS_THREADS
 int main(void)
 {
-    fprintf(stderr,
-            "This program won't work on this platform because there is no "
-            "support for threads.\n");
+    printf("This program won't work on this platform because there is no "
+           "support for threads.\n");
     return 0;
 }
 #else /* !APR_HAS_THREADS */
@@ -74,7 +74,11 @@ int main(void)
 #define MAX_ITER 40000
 
 void * APR_THREAD_FUNC thread_rw_func(void *data);
-void * APR_THREAD_FUNC thread_func(void *data);
+void * APR_THREAD_FUNC thread_function(void *data);
+apr_status_t test_exclusive(void);
+apr_status_t test_rw(void);
+apr_status_t test_multiple_locking(void);
+
 
 apr_file_t *in, *out, *err;
 apr_lock_t *thread_rw_lock, *thread_lock;
@@ -106,15 +110,16 @@ void * APR_THREAD_FUNC thread_rw_func(void *data)
     return NULL;
 } 
 
-void * APR_THREAD_FUNC thread_func(void *data)
+void * APR_THREAD_FUNC thread_function(void *data)
 {
     int exitLoop = 1;
 
+    /* slight delay to allow things to settle */
+    apr_sleep (1);
+    
     while (1)
     {
         apr_lock_acquire(thread_lock);
-        if (apr_lock_acquire(thread_lock) != APR_SUCCESS)
-            printf("Failed!\n");
         if (i == MAX_ITER)
             exitLoop = 0;
         else 
@@ -122,7 +127,6 @@ void * APR_THREAD_FUNC thread_func(void *data)
             i++;
             x++;
         }
-        apr_lock_release(thread_lock);
         apr_lock_release(thread_lock);
 
         if (!exitLoop)
@@ -136,91 +140,93 @@ int test_rw(void)
     apr_thread_t *t1, *t2, *t3, *t4;
     apr_status_t s1, s2, s3, s4;
 
-    apr_file_printf(out, "Initializing the rw lock.");
-    s1 = apr_lock_create(&thread_rw_lock, APR_READWRITE, APR_INTRAPROCESS, 
-                         "lock.file", pool); 
+    printf("RW Lock Tests\n");
+    printf("%-60s", "    Initializing the RW lock");
+    s1 = apr_lock_create(&thread_rw_lock, APR_READWRITE, APR_INTRAPROCESS,
+                         "lock.file", pool);
     if (s1 != APR_SUCCESS) {
-        apr_file_printf(err, "Could not create lock\n");
+        printf("Failed!\n");
         return s1;
     }
-    apr_file_printf(out, " OK\n");
+    printf("OK\n");
 
     i = 0;
     x = 0;
 
-    apr_file_printf(out, "Starting all the threads......."); 
+    printf("%-60s","    Starting all the threads"); 
     s1 = apr_thread_create(&t1, NULL, thread_rw_func, NULL, pool);
     s2 = apr_thread_create(&t2, NULL, thread_rw_func, NULL, pool);
     s3 = apr_thread_create(&t3, NULL, thread_rw_func, NULL, pool);
     s4 = apr_thread_create(&t4, NULL, thread_rw_func, NULL, pool);
     if (s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
         s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
-        apr_file_printf(err, "Error starting threads\n");
+        printf("Failed!\n");
         return s1;
     }
-    apr_file_printf(out, "OK\n");
+    printf("OK\n");
 
-    apr_file_printf(out, "Waiting for threads to exit.......");
+    printf("%-60s", "    Waiting for threads to exit");
     apr_thread_join(&s1, t1);
     apr_thread_join(&s2, t2);
     apr_thread_join(&s3, t3);
     apr_thread_join(&s4, t4);
-    apr_file_printf(out, "OK\n");
+    printf("OK\n");
 
-    apr_file_printf(out, "OK\n");
     if (x != MAX_ITER) {
-        apr_file_printf(err, "The locks didn't work????  %d\n", x);
+        fprintf(stderr, "RW locks didn't work as expected. x = %d instead of %d\n",
+                x, MAX_ITER);
     }
     else {
-        apr_file_printf(out, "Everything is working!\n");
+        printf("Test passed\n");
     }
     
     return APR_SUCCESS;
 }
 
-int test_exclusive(void)
+apr_status_t test_exclusive(void)
 {
     apr_thread_t *t1, *t2, *t3, *t4;
     apr_status_t s1, s2, s3, s4;
 
-    apr_file_printf(out, "Initializing the lock.");
+    printf("Exclusive lock test\n");
+    printf("%-60s", "    Initializing the lock");
     s1 = apr_lock_create(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, 
                          "lock.file", pool); 
 
     if (s1 != APR_SUCCESS) {
-        apr_file_printf(err, "Could not create lock\n");
+        printf("Failed!\n");
         return s1;
     }
-    apr_file_printf(out, " OK\n");
+    printf("OK\n");
 
     i = 0;
     x = 0;
 
-    apr_file_printf(out, "Starting all the threads......."); 
-    s1 = apr_thread_create(&t1, NULL, thread_func, NULL, pool);
-    s2 = apr_thread_create(&t2, NULL, thread_func, NULL, pool);
-    s3 = apr_thread_create(&t3, NULL, thread_func, NULL, pool);
-    s4 = apr_thread_create(&t4, NULL, thread_func, NULL, pool);
+    printf("%-60s", "    Starting all the threads"); 
+    s1 = apr_thread_create(&t1, NULL, thread_function, NULL, pool);
+    s2 = apr_thread_create(&t2, NULL, thread_function, NULL, pool);
+    s3 = apr_thread_create(&t3, NULL, thread_function, NULL, pool);
+    s4 = apr_thread_create(&t4, NULL, thread_function, NULL, pool);
     if (s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
         s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
-        apr_file_printf(err, "Error starting threads\n");
+        printf("Failed!\n");
         return s1;
     }
-    apr_file_printf(out, "OK\n");
+    printf("OK\n");
 
-    apr_file_printf(out, "Waiting for threads to exit.......");
+    printf("%-60s", "    Waiting for threads to exit");
     apr_thread_join(&s1, t1);
     apr_thread_join(&s2, t2);
     apr_thread_join(&s3, t3);
     apr_thread_join(&s4, t4);
-    apr_file_printf(out, "OK\n");
+    printf("OK\n");
 
-    apr_file_printf(out, "OK\n");
     if (x != MAX_ITER) {
-        apr_file_printf(err, "The locks didn't work????  %d\n", x);
+        fprintf(stderr, "Locks don't appear to work!  x = %d instead of %d\n",
+                x, MAX_ITER);
     }
     else {
-        apr_file_printf(out, "Everything is working!\n");
+        printf("Test passed\n");
     }
     return APR_SUCCESS;
 }
@@ -267,32 +273,40 @@ apr_status_t test_multiple_locking(void)
     }
     printf("OK\n");
 
-    printf("Multiple locking test completed\n");
+    printf("Test passed\n");
     return APR_SUCCESS;
 }
 
 int main(void)
 {
+    apr_status_t rv;
+    char errmsg[200];
+
+    printf("APR Locks Test\n==============\n\n");
+        
     apr_initialize();
     atexit(apr_terminate);
 
     if (apr_pool_create(&pool, NULL) != APR_SUCCESS)
         exit(-1);
 
-    apr_file_open_stdin(&in, pool); 
-    apr_file_open_stdout(&out, pool); 
-    apr_file_open_stderr(&err, pool); 
-
-    apr_file_printf(out, "OK\n");
-
-    if (test_rw() != APR_SUCCESS)
+    if ((rv = test_exclusive()) != APR_SUCCESS) {
+        fprintf(stderr,"Exclusive Lock test failed : [%d] %s\n",
+                rv, apr_strerror(rv, (char*)errmsg, 200));
         exit(-2);
-
-    if (test_exclusive() != APR_SUCCESS)
+    }
+    
+    if ((rv = test_multiple_locking()) != APR_SUCCESS) {
+        fprintf(stderr,"Multiple Locking test failed : [%d] %s\n",
+                rv, apr_strerror(rv, (char*)errmsg, 200));
         exit(-3);
-
-    if (test_multiple_locking() != APR_SUCCESS)
+    }
+    
+    if ((rv = test_rw()) != APR_SUCCESS) {
+        fprintf(stderr,"RW Lock test failed : [%d] %s\n",
+                rv, apr_strerror(rv, (char*)errmsg, 200));
         exit(-4);
+    }
 
     return 1;
 }
