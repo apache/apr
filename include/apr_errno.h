@@ -99,7 +99,11 @@ int ap_canonical_error(ap_status_t err);
 #define APR_ENOSOCKET      (APR_OS_START_ERROR + 11)
 #define APR_ENOTHREAD      (APR_OS_START_ERROR + 12)
 #define APR_ENOTHDKEY      (APR_OS_START_ERROR + 13)
+/* empty slot: +14 */
 #define APR_ENOSHMAVAIL    (APR_OS_START_ERROR + 15)
+/* empty slot: +16 */
+/* empty slot: +17 */
+/* empty slot: +18 */
 #define APR_EDSOOPEN       (APR_OS_START_ERROR + 19)
 #define APR_EBADARG        (APR_OS_START_ERROR + 20)
 
@@ -111,10 +115,17 @@ int ap_canonical_error(ap_status_t err);
 #define APR_CHILD_DONE     (APR_OS_START_STATUS + 5)
 #define APR_CHILD_NOTDONE  (APR_OS_START_STATUS + 6)
 #define APR_TIMEUP         (APR_OS_START_STATUS + 7)
+/* empty slot: +8 */
+/* empty slot: +9 */
+/* empty slot: +10 */
+/* empty slot: +11 */
 #define APR_BADCH          (APR_OS_START_STATUS + 12)
 #define APR_BADARG         (APR_OS_START_STATUS + 13)
 #define APR_EOF            (APR_OS_START_STATUS + 14)
 #define APR_NOTFOUND       (APR_OS_START_STATUS + 15)
+/* empty slot: +16 */
+/* empty slot: +17 */
+/* empty slot: +18 */
 #define APR_ANONYMOUS      (APR_OS_START_STATUS + 19)
 #define APR_FILEBASED      (APR_OS_START_STATUS + 20)
 #define APR_KEYBASED       (APR_OS_START_STATUS + 21)
@@ -131,6 +142,8 @@ int ap_canonical_error(ap_status_t err);
  */
 #define APR_EMISMATCH      (APR_OS_START_STATUS + 24)
 
+
+/* APR CANONICAL ERROR VALUES */
 #ifdef EACCES
 #define APR_EACCES EACCES
 #else
@@ -140,67 +153,67 @@ int ap_canonical_error(ap_status_t err);
 #ifdef EEXIST
 #define APR_EEXIST EEXIST
 #else
-#define APR_EEXIST         (APR_OS_START_CANONERR + 12)
+#define APR_EEXIST         (APR_OS_START_CANONERR + 2)
 #endif
 
 #ifdef ENAMETOOLONG
 #define APR_ENAMETOOLONG ENAMETOOLONG
 #else
-#define APR_ENAMETOOLONG   (APR_OS_START_CANONERR + 13)
+#define APR_ENAMETOOLONG   (APR_OS_START_CANONERR + 3)
 #endif
 
 #ifdef ENOENT
 #define APR_ENOENT ENOENT
 #else
-#define APR_ENOENT         (APR_OS_START_CANONERR + 14)
+#define APR_ENOENT         (APR_OS_START_CANONERR + 4)
 #endif
 
 #ifdef ENOTDIR
 #define APR_ENOTDIR ENOTDIR
 #else
-#define APR_ENOTDIR        (APR_OS_START_CANONERR + 15)
+#define APR_ENOTDIR        (APR_OS_START_CANONERR + 5)
 #endif
 
 #ifdef ENOSPC
 #define APR_ENOSPC ENOSPC
 #else
-#define APR_ENOSPC         (APR_OS_START_CANONERR + 16)
+#define APR_ENOSPC         (APR_OS_START_CANONERR + 6)
 #endif
 
 #ifdef ENONOMEM
 #define APR_ENOMEM ENOMEM
 #else
-#define APR_ENOMEM         (APR_OS_START_CANONERR + 17)
+#define APR_ENOMEM         (APR_OS_START_CANONERR + 7)
 #endif
 
 #ifdef EMFILE
 #define APR_EMFILE EMFILE
 #else
-#define APR_EMFILE         (APR_OS_START_CANONERR + 18)
+#define APR_EMFILE         (APR_OS_START_CANONERR + 8)
 #endif
 
 #ifdef ENFILE
 #define APR_ENFILE ENFILE
 #else
-#define APR_ENFILE         (APR_OS_START_CANONERR + 19)
+#define APR_ENFILE         (APR_OS_START_CANONERR + 9)
 #endif
 
 #ifdef EBADF
 #define APR_EBADF EBADF
 #else
-#define APR_EBADF          (APR_OS_START_CANONERR + 110)
+#define APR_EBADF          (APR_OS_START_CANONERR + 10)
 #endif
 
 #ifdef EINVAL
 #define APR_EINVAL EINVAL
 #else
-#define APR_EINVAL         (APR_OS_START_CANONERR + 111)
+#define APR_EINVAL         (APR_OS_START_CANONERR + 11)
 #endif
 
 #ifdef ESPIPE
 #define APR_ESPIPE ESPIPE
 #else
-#define APR_ESPIPE         (APR_OS_START_CANONERR + 112)
+#define APR_ESPIPE         (APR_OS_START_CANONERR + 12)
 #endif
 
 #ifdef EAGAIN
