@@ -476,16 +476,16 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
 #else
             switch (h_errno) {
 #ifdef NETDB_INTERNAL
-                NETDB_INTERNAL:
+                case NETDB_INTERNAL:
                     return APR_FROM_OS_ERROR(errno);
 #endif
-                HOST_NOT_FOUND:
+                case HOST_NOT_FOUND:
                     return APR_EHOSTUNREACH;
-                NO_DATA:
-                    return APR_E;
-                NO_RECOVERY:
+                case NO_DATA:
+                    return 11111 /* APR_E */;
+                case NO_RECOVERY:
                     return APR_EHOSTUNREACH;
-                TRY_AGAIN:
+                case TRY_AGAIN:
                     return APR_EAGAIN;
             }
             /* return (h_errno + APR_OS_START_SYSERR); */
