@@ -76,10 +76,6 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
                                                 apr_pool_t *pool)
 {
     HANDLE hMutex;
-    SECURITY_ATTRIBUTES sec;
-    sec.nLength = sizeof(SECURITY_ATTRIBUTES);
-    sec.lpSecurityDescriptor = NULL;
-    sec.bInheritHandle = TRUE;
 
     /* With Win2000 Terminal Services, the Mutex name can have a 
      * "Global\" or "Local\" prefix to explicitly create the object 
@@ -94,7 +90,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
             fname = apr_pstrdup(pool, fname);
     }
 
-    hMutex = CreateMutex(&sec, FALSE, fname);
+    hMutex = CreateMutex(NULL, FALSE, fname);
     if (!hMutex) {
 	return apr_get_os_error();
     }
@@ -119,7 +115,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
     else
         fname = apr_pstrdup(pool, fname);
 
-    hMutex = OpenMutex(MUTEX_ALL_ACCESS, TRUE, fname);
+    hMutex = OpenMutex(MUTEX_ALL_ACCESS, FALSE, fname);
     if (!hMutex) {
 	return apr_get_os_error();
     }
