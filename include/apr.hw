@@ -87,11 +87,12 @@
 #pragma warning(disable: 4100 4127 4201 4514; once: 4057 4075 4244)
 
 #define APR_INLINE __inline
-#define APR_HAS_INLINE		1
+#define APR_HAS_INLINE  	1
 #define __attribute__(__x)
 
 #define NO_USE_SIGACTION
 
+#ifndef _WIN32_WCE
 #define APR_HAVE_ARPA_INET_H    0
 #define APR_HAVE_CONIO_H        1
 #define APR_HAVE_CRYPT_H        0
@@ -121,6 +122,43 @@
 #define APR_HAVE_SYS_UIO_H      0
 #define APR_HAVE_SYS_WAIT_H     0
 #define APR_HAVE_UNISTD_H       0
+#define APR_HAVE_STDDEF_H       1
+#define APR_HAVE_PROCESS_H      1
+#define APR_HAVE_TIME_H         1
+#else
+#define APR_HAVE_ARPA_INET_H    0
+#define APR_HAVE_CONIO_H        1
+#define APR_HAVE_CRYPT_H        0
+#define APR_HAVE_CTYPE_H        0
+#define APR_HAVE_DIRENT_H       0
+#define APR_HAVE_ERRNO_H        0
+#define APR_HAVE_FCNTL_H        0
+#define APR_HAVE_IO_H           0
+#define APR_HAVE_LIMITS_H       0
+#define APR_HAVE_NETDB_H        0
+#define APR_HAVE_NETINET_IN_H   0
+#define APR_HAVE_NETINET_TCP_H  0
+#define APR_HAVE_PTHREAD_H      0
+#define APR_HAVE_SIGNAL_H       0
+#define APR_HAVE_STDARG_H       0
+#define APR_HAVE_STDINT_H       0
+#define APR_HAVE_STDIO_H        1
+#define APR_HAVE_STDLIB_H       1
+#define APR_HAVE_STRING_H       1
+#define APR_HAVE_STRINGS_H      0
+#define APR_HAVE_SYS_SENDFILE_H 0
+#define APR_HAVE_SYS_SIGNAL_H   0
+#define APR_HAVE_SYS_SOCKET_H   0
+#define APR_HAVE_SYS_SYSLIMITS_H 0
+#define APR_HAVE_SYS_TIME_H     0
+#define APR_HAVE_SYS_TYPES_H    0
+#define APR_HAVE_SYS_UIO_H      0
+#define APR_HAVE_SYS_WAIT_H     0
+#define APR_HAVE_UNISTD_H       0
+#define APR_HAVE_STDDEF_H       0
+#define APR_HAVE_PROCESS_H      0
+#define APR_HAVE_TIME_H         0
+#endif
 
 #define APR_USE_FLOCK_SERIALIZE           0 
 #define APR_USE_SYSVSEM_SERIALIZE         0
@@ -145,10 +183,10 @@
 #define APR_FILE_BASED_SHM      0
 #define APR_MEM_BASED_SHM       0
 
-#define APR_HAVE_CORKABLE_TCP	0
+#define APR_HAVE_CORKABLE_TCP   0
 #define APR_HAVE_GETRLIMIT      0
 #define APR_HAVE_IN_ADDR        1
-#define APR_HAVE_INET_ADDR	1
+#define APR_HAVE_INET_ADDR      1
 #define APR_HAVE_INET_NETWORK   0
 #define APR_HAVE_IPV6           0
 #define APR_HAVE_MEMMOVE        1
@@ -199,8 +237,12 @@
  * winsock headers were excluded by WIN32_LEAN_AND_MEAN, so include them now
  */
 #define SW_HIDE             0
+#ifndef _WIN32_WCE
 #include <winsock2.h>
 #include <mswsock.h>
+#else
+#include <winsock.h>
+#endif
 #endif /* !_WINDOWS_ */
 
 #if APR_HAVE_STDLIB_H
@@ -212,10 +254,15 @@
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-
+#if APR_HAVE_STDDEF_H
 #include <stddef.h>
+#endif
+#if APR_HAVE_TIME_H
 #include <time.h>
+#endif
+#if APR_HAVE_PROCESS_H
 #include <process.h>
+#endif
 
 /*  APR Feature Macros */
 #define APR_HAS_SHARED_MEMORY     1
@@ -229,9 +276,15 @@
 #define APR_HAS_DSO               1
 #define APR_HAS_SO_ACCEPTFILTER   0
 #define APR_HAS_UNICODE_FS        1
+#ifndef _WIN32_WCE
 #define APR_HAS_USER              1
 #define APR_HAS_LARGE_FILES       1
 #define APR_HAS_XTHREAD_FILES     1
+#else
+#define APR_HAS_USER              0
+#define APR_HAS_LARGE_FILES       0
+#define APR_HAS_XTHREAD_FILES     0
+#endif
 
 /* Not all platforms have a real INADDR_NONE.  This macro replaces INADDR_NONE
  * on all platforms.
@@ -256,8 +309,16 @@ typedef  __int64           apr_int64_t;
 typedef  unsigned __int64  apr_uint64_t;
 
 typedef  size_t      apr_size_t;
+#if APR_HAVE_STDDEF_H
 typedef  ptrdiff_t   apr_ssize_t;
+#else
+typedef  int         apr_ssize_t;
+#endif
+#if APR_HAS_LARGE_FILES
 typedef  __int64     apr_off_t;
+#else
+typedef  int         apr_off_t;
+#endif
 typedef  int         apr_socklen_t;
 typedef  int         pid_t;
 typedef  int         uid_t;
