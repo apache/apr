@@ -58,8 +58,10 @@
  */
 #ifdef NETWARE
 /**
- * @file netware/apr.h netware/apr.h
- * @brief APR header for NetWare
+ * @file include\apr.h
+ * @brief Basic APR header for NetWare
+ * @remark This is a NetWare specific version of apr.h. It is copied as
+ * apr.h at the start of a NetWare build through prebuildNW.bat.
  */
 
 /**
@@ -70,8 +72,6 @@
 
 #ifndef APR_H
 #define APR_H
-
-
 
 #include <sys/types.h>
 #include <stddef.h>
@@ -84,7 +84,6 @@
 #include <nks/thread.h>
 #include <nks/synch.h>
 #include <nks/time.h>
-//#include <process.h>
 #include <signal.h>
 
 
@@ -122,6 +121,7 @@
 #define APR_HAVE_SYS_SIGNAL_H   0
 #define APR_HAVE_SYS_SOCKET_H   0
 #define APR_HAVE_SYS_SYSLIMITS_H 0
+#define APR_HAVE_SYS_TIME_H     0
 #define APR_HAVE_SYS_TYPES_H    1
 #define APR_HAVE_SYS_UIO_H      1
 #define APR_HAVE_SYS_WAIT_H     0
@@ -132,7 +132,14 @@
 #define APR_USE_FCNTL_SERIALIZE           0
 #define APR_USE_PROC_PTHREAD_SERIALIZE    0 
 #define APR_USE_PTHREAD_SERIALIZE         0
+
+#define APR_HAS_FLOCK_SERIALIZE           0
+#define APR_HAS_SYSVSEM_SERIALIZE         0
+#define APR_HAS_FCNTL_SERIALIZE           0
+#define APR_HAS_PROC_PTHREAD_SERIALIZE    0
 #define APR_HAS_RWLOCK_SERIALIZE          0 
+
+#define APR_HAS_LOCK_CREATE_NP            0
 
 #define APR_PROCESS_LOCK_IS_GLOBAL        0
 
@@ -157,7 +164,7 @@
 #define APR_HAVE_STRCASECMP     1
 #define APR_HAVE_STRDUP         1
 #define APR_HAVE_STRICMP        1
-#define APR_HAVE_STRNCASECMP    0
+#define APR_HAVE_STRNCASECMP    1
 #define APR_HAVE_STRNICMP       1
 #define APR_HAVE_STRSTR         1
 #define APR_HAVE_STRUCT_RLIMIT  0
@@ -178,9 +185,11 @@
 #define APR_HAS_XLATE             0
 #define APR_HAS_OTHER_CHILD       0
 #define APR_HAS_DSO               1
+#define APR_HAS_SO_ACCEPTFILTER   0
 #define APR_HAS_UNICODE_FS        0
 #define APR_HAS_USER              1
-#define APR_HAS_LARGE_FILES       1
+#define APR_HAS_LARGE_FILES       0
+#define APR_HAS_XTHREAD_FILES     0
 
 /* Not all platforms have a real INADDR_NONE.  This macro replaces INADDR_NONE
  * on all platforms.
@@ -208,9 +217,6 @@ typedef  size_t            apr_size_t;
 typedef  ssize_t           apr_ssize_t;
 typedef  off_t             apr_off_t;
 typedef  int               apr_socklen_t;
-//typedef  int               pid_t;
-//typedef  int               uid_t;
-//typedef  int               gid_t;
 
 
 /* Mechanisms to properly type numeric literals */
@@ -236,7 +242,7 @@ typedef unsigned short  nuint16;
 
 /* Definitions that APR programs need to work properly. */
 
-#define APR_THREAD_FUNC          __stdcall
+#define APR_THREAD_FUNC
 
 /**
  * APR_DECLARE_EXPORT is defined when building the APR dynamic library,
@@ -251,7 +257,6 @@ typedef unsigned short  nuint16;
  * conventions at compile time.
  */
 
-#if !defined(WIN32)
 /**
  * The public APR functions are declared with APR_DECLARE(), so they may
  * use the most appropriate calling convention.  Public APR functions with 
@@ -276,19 +281,6 @@ typedef unsigned short  nuint16;
  * declarations within headers to properly import the variable.
  */
 #define APR_DECLARE_DATA
-#elif defined(APR_DECLARE_STATIC)
-#define APR_DECLARE(type)            type __stdcall
-#define APR_DECLARE_NONSTD(type)     type
-#define APR_DECLARE_DATA
-#elif defined(APR_DECLARE_EXPORT)
-#define APR_DECLARE(type)            __declspec(dllexport) type __stdcall
-#define APR_DECLARE_NONSTD(type)     __declspec(dllexport) type
-#define APR_DECLARE_DATA             __declspec(dllexport)
-#else
-#define APR_DECLARE(type)            __declspec(dllimport) type __stdcall
-#define APR_DECLARE_NONSTD(type)     __declspec(dllimport) type
-#define APR_DECLARE_DATA             __declspec(dllimport)
-#endif
 
 #define APR_SSIZE_T_FMT          "d"
 
@@ -303,38 +295,11 @@ typedef unsigned short  nuint16;
 
 typedef int apr_wait_t;
 
-/* struct iovec is needed to emulate Unix writev */
-//struct iovec {
-//    char* iov_base;
-//    int   iov_len;
-//};
-
-/* Nasty Win32 .h ommissions we really need */
-#define STDIN_FILENO  0
-#define STDOUT_FILENO 1
-#define STDERR_FILENO 2
-
-#if APR_HAS_UNICODE_FS
-/* An arbitrary size that is digestable. True max is a bit less than 32000 */
-#define APR_PATH_MAX 8192
-#else /* !APR_HAS_UNICODE_FS */
 #define APR_PATH_MAX PATH_MAX
-#endif
-
-///* These need to move into apr_compat.h when the symbol rename is complete 
-// */
-//#define APR_EXPORT(t)         APR_DECLARE(t)
-//#define APR_EXPORT_NONSTD(t)  APR_DECLARE_NONSTD(t)
-//#define APR_VAR_EXPORT        APR_DECLARE_DATA
-//#define APR_VAR_IMPORT        APR_DECLARE_DATA
 
 #define APR_INT64_T_FMT          "l64d"
 #define APR_TIME_T_FMT APR_INT64_T_FMT
 
-
-//#define apr_signal(a,b) signal(a,b)
-//
-//typedef int apr_wait_t;
 
 #endif /* APR_H */
 /** @} */
