@@ -170,9 +170,9 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_SETIFNULL(OPTIM, [-O])
 	APR_ADDTO(CPPFLAGS, [-DNEXT])
 	;;
-dnl    *-apple-rhapsody*)
-dnl	APR_ADDTO(CPPFLAGS, [-DDARWIN -DMAC_OS_X_SERVER])
-dnl	;;
+    *-apple-rhapsody*)
+	APR_ADDTO(CPPFLAGS, [-DRHAPSODY])
+	;;
     *-apple-darwin*)
 	APR_ADDTO(CPPFLAGS, [-DDARWIN])
 	;;
