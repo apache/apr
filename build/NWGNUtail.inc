@@ -25,7 +25,7 @@ NLM_SCREEN_NAME = DEFAULT
 endif
 
 ifndef NLM_COPYRIGHT
-NLM_COPYRIGHT = Copyright (c) 2000-2003 The Apache Software Foundation. All rights reserved.
+NLM_COPYRIGHT = Copyright (c) 2000-2004 The Apache Software Foundation. All rights reserved.
 endif
 
 #
@@ -97,11 +97,11 @@ VERSION_STR	= 1.0.0
 endif
 
 
-$(OBJDIR)/%.o: %.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: %.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) $< -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) $< -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)\cc.opt: $(CCOPT_DEPENDS)
+$(OBJDIR)\$(NLM_NAME)_cc.opt: $(CCOPT_DEPENDS)
 	@echo CCOPT_DEPENDS=$(CCOPT_DEPENDS)
 	$(CHK) $@ $(DEL) $@
 	@echo Generating $@
