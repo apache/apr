@@ -1142,7 +1142,7 @@ if test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_int"; then
 elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long"; then
     off_t_fmt='#define APR_OFF_T_FMT "ld"'
 elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long_long"; then
-    off_t_fmt='#define APR_OFF_T_FMT $int64_t_fmt'
+    off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
 else
     off_t_fmt='#error Can not determine the proper size for off_t'
 fi
@@ -1154,7 +1154,7 @@ if test "$ac_cv_sizeof_pid_t" = "$ac_cv_sizeof_int"; then
 elif test "$ac_cv_sizeof_pid_t" = "$ac_cv_sizeof_long"; then
     pid_t_fmt='#define APR_PID_T_FMT "ld"'
 elif test "$ac_cv_sizeof_pid_t" = "$ac_cv_sizeof_long_long"; then
-    pid_t_fmt='#define APR_PID_T_FMT $int64_t_fmt'
+    pid_t_fmt='#define APR_PID_T_FMT APR_INT64_T_FMT'
 else
     pid_t_fmt='#error Can not determine the proper size for pid_t'
 fi
