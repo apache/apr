@@ -141,7 +141,7 @@ static void recv_msg(apr_socket_t **sockarray, int which, apr_pool_t *p)
 }
 
 #define SMALL_NUM_SOCKETS 3
-#define LARGE_NUM_SOCKETS 100
+#define LARGE_NUM_SOCKETS 64
 
 int main(void)
 {

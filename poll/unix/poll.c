@@ -325,6 +325,12 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                                              apr_uint32_t size,
                                              apr_pool_t *p)
 {
+#if !defined(HAVE_POLL) && defined(FD_SETSIZE)
+    if (size > FD_SETSIZE) {
+        *pollset = NULL;
+        return APR_EINVAL;
+    }
+#endif
     *pollset = apr_palloc(p, sizeof(**pollset));
     (*pollset)->nelts = 0;
     (*pollset)->nalloc = size;
