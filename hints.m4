@@ -344,7 +344,7 @@ dnl	;;
 	APR_SETIFNULL(OPTIM, [-O])
 	APR_SETIFNULL(MAKE, [make])
 	;;
-    *-BeOS*)
+    *-beos*)
 	APR_SETIFNULL(CFLAGS, [-DBEOS])
         APR_SETIFNULL(file_as_socket, [0])
 	;;
