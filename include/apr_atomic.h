@@ -165,7 +165,7 @@ APR_DECLARE(int) apr_atomic_dec(apr_atomic_t *mem);
 #define apr_atomic_set(mem, val)     (*mem = val)
 #define apr_atomic_read(mem)         (*mem)
 #define apr_atomic_init(pool)        APR_SUCCESS
-#define apr_atomic_cas(mem,with,cmp) atomic_cmpxchg(mem,with,cmp)
+#define apr_atomic_cas(mem,with,cmp) atomic_cmpxchg(mem,cmp,with)
 
 #elif defined(__FreeBSD__)
 
