@@ -57,15 +57,17 @@
 #include "apr_portable.h"
 #include "inherit.h"
 
+#if defined(BEOS) && !defined(BEOS_BONE)
+#define close closesocket
+#endif
+
+static char generic_inaddr_any[16] = {0}; /* big enough for IPv4 or IPv6 */
+
 static apr_status_t socket_cleanup(void *sock)
 {
     apr_socket_t *thesocket = sock;
 
-#if defined(BEOS) && !defined(BEOS_BONE)
-    if (closesocket(thesocket->socketdes) == 0) {
-#else
     if (close(thesocket->socketdes) == 0) {
-#endif
         thesocket->socketdes = -1;
         return APR_SUCCESS;
     }
@@ -77,35 +79,8 @@ static apr_status_t socket_cleanup(void *sock)
 static void set_socket_vars(apr_socket_t *sock, int family, int type)
 {
     sock->type = type;
-    sock->local_addr->family = family;
-    sock->local_addr->sa.sin.sin_family = family;
-    sock->remote_addr->family = family;
-    sock->remote_addr->sa.sin.sin_family = family;
-
-    if (family == APR_INET) {
-        sock->local_addr->salen = sizeof(struct sockaddr_in);
-        sock->local_addr->addr_str_len = 16;
-        sock->local_addr->ipaddr_ptr = &(sock->local_addr->sa.sin.sin_addr);
-        sock->local_addr->ipaddr_len = sizeof(struct in_addr);
-
-        sock->remote_addr->salen = sizeof(struct sockaddr_in);
-        sock->remote_addr->addr_str_len = 16;
-        sock->remote_addr->ipaddr_ptr = &(sock->remote_addr->sa.sin.sin_addr);
-        sock->remote_addr->ipaddr_len = sizeof(struct in_addr);
-    }
-#if APR_HAVE_IPV6
-    else if (family == APR_INET6) {
-        sock->local_addr->salen = sizeof(struct sockaddr_in6);
-        sock->local_addr->addr_str_len = 46;
-        sock->local_addr->ipaddr_ptr = &(sock->local_addr->sa.sin6.sin6_addr);
-        sock->local_addr->ipaddr_len = sizeof(struct in6_addr);
-
-        sock->remote_addr->salen = sizeof(struct sockaddr_in6);
-        sock->remote_addr->addr_str_len = 46;
-        sock->remote_addr->ipaddr_ptr = &(sock->remote_addr->sa.sin6.sin6_addr);
-        sock->remote_addr->ipaddr_len = sizeof(struct in6_addr);
-    }
-#endif
+    apr_set_sockaddr_vars(sock->local_addr, family, 0);
+    apr_set_sockaddr_vars(sock->remote_addr, family, 0);
     sock->netmask = 0;
 #if defined(BEOS) && !defined(BEOS_BONE)
     /* BeOS pre-BONE has TCP_NODELAY on by default and it can't be
@@ -113,7 +88,8 @@ static void set_socket_vars(apr_socket_t *sock, int family, int type)
      */
     sock->netmask |= APR_TCP_NODELAY;
 #endif
-}                                                                                                  
+}
+
 static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
 {
     *new = (apr_socket_t *)apr_pcalloc(p, sizeof(apr_socket_t));
@@ -203,7 +179,6 @@ apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 
 apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *connection_context)
 {
-    static char generic_inaddr_any[16] = {0}; /* big enough for IPv4 or IPv6 */
     alloc_socket(new, connection_context);
     set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM);
 
@@ -212,7 +187,6 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
 #endif
     (*new)->timeout = -1;
     
-    (*new)->remote_addr->salen = sizeof((*new)->remote_addr->sa);
     (*new)->socketdes = accept(sock->socketdes, 
                                (struct sockaddr *)&(*new)->remote_addr->sa,
                                &(*new)->remote_addr->salen);
@@ -307,17 +281,13 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
     }
 
     sock->remote_addr = sa;
-    /* XXX IPv6 assumes sin_port and sin6_port at same offset */
-    if (sock->local_addr->sa.sin.sin_port == 0) {
+    if (sock->local_addr->port == 0) {
         /* connect() got us an ephemeral port */
         sock->local_port_unknown = 1;
     }
-    /* XXX IPv6 to be handled better later... */
-    if (
-#if APR_HAVE_IPV6
-        sock->local_addr->sa.sin.sin_family == APR_INET6 ||
-#endif
-        sock->local_addr->sa.sin.sin_addr.s_addr == 0) {
+    if (!memcmp(sock->local_addr->ipaddr_ptr,
+                generic_inaddr_any,
+                sock->local_addr->ipaddr_len)) {
         /* not bound to specific local interface; connect() had to assign
          * one for the socket
          */
