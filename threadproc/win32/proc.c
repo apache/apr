@@ -61,10 +61,28 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 #include <stdlib.h>
+#if APR_HAVE_SIGNAL_H
 #include <signal.h>
+#endif
 #include <string.h>
+#if APR_HAVE_PROCESS_H
 #include <process.h>
+#endif
 
+#ifdef _WIN32_WCE
+#ifndef DETACHED_PROCESS
+#define DETACHED_PROCESS 0
+#endif
+#ifndef CREATE_UNICODE_ENVIRONMENT
+#define CREATE_UNICODE_ENVIRONMENT 0
+#endif
+#ifndef STARTF_USESHOWWINDOW
+#define STARTF_USESHOWWINDOW 0
+#endif
+#ifndef SW_HIDE
+#define SW_HIDE 0
+#endif
+#endif
 /* 
  * some of the ideas expressed herein are based off of Microsoft
  * Knowledge Base article: Q190351
@@ -112,6 +130,9 @@ static apr_status_t open_nt_process_pipe(apr_file_t **read, apr_file_t **write,
 
 static apr_status_t make_handle_private(apr_file_t *file)
 {
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
     HANDLE hproc = GetCurrentProcess();
     HANDLE filehand = file->filehand;
 
@@ -129,11 +150,15 @@ static apr_status_t make_handle_private(apr_file_t *file)
      */
     CloseHandle(filehand);
     return APR_SUCCESS;
+#endif
 }
 
 static apr_status_t make_inheritable_duplicate(apr_file_t *original,
                                                apr_file_t *duplicate)
 {
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
     if (original == NULL)
         return APR_SUCCESS;
 
@@ -153,6 +178,7 @@ static apr_status_t make_inheritable_duplicate(apr_file_t *original,
     }
 
     return APR_SUCCESS;
+#endif
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
@@ -409,6 +435,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
     }
 
+#ifndef _WIN32_WCE
     if (attr->cmdtype == APR_SHELLCMD) {
         char *shellcmd = getenv("COMSPEC");
         if (!shellcmd) {
@@ -433,7 +460,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             cmdline = apr_pstrcat(pool, shellcmd, " /C \"", argv0, cmdline, "\"", NULL);
         }
     } 
-    else {
+    else 
+#endif
+    {
         /* Win32 is _different_ than unix.  While unix will find the given
          * program since it's already chdir'ed, Win32 cannot since the parent
          * attempts to open the program with it's own path.
@@ -613,6 +642,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             si.dwFlags |= STARTF_USESHOWWINDOW;
             si.wShowWindow = SW_HIDE;
         }
+#ifndef _WIN32_WCE
         if ((attr->child_in && attr->child_in->filehand)
             || (attr->child_out && attr->child_out->filehand)
             || (attr->child_err && attr->child_err->filehand))
@@ -625,7 +655,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             if (attr->child_err)
                 si.hStdError = attr->child_err->filehand;
         }
-
         rv = CreateProcessW(wprg, wcmd,        /* Executable & Command line */
                             NULL, NULL,        /* Proc & thread security attributes */
                             TRUE,              /* Inherit handles */
@@ -633,6 +662,16 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                             pEnvBlock,         /* Environment block */
                             wcwd,              /* Current directory name */
                             &si, &pi);
+#else
+        rv = CreateProcessW(wprg, wcmd,        /* Executable & Command line */
+                            NULL, NULL,        /* Proc & thread security attributes */
+                            FALSE,             /* must be 0 */
+                            dwCreationFlags,   /* Creation flags */
+                            NULL,              /* Environment block must be NULL */
+                            NULL,              /* Current directory name must be NULL*/
+                            NULL,              /* STARTUPINFO not supported */
+                            &pi);
+#endif
     }
 #endif /* APR_HAS_UNICODE_FS */
 #if APR_HAS_ANSI_FS
