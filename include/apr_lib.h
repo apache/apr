@@ -250,7 +250,7 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
  * @param bufsize The length of the password buffer.
  */
 APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, 
-                                           size_t *bufsize);
+                                           apr_size_t *bufsize);
 
 #ifdef __cplusplus
 }

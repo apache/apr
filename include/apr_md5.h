@@ -177,7 +177,7 @@ APR_DECLARE(apr_status_t) apr_md5(unsigned char digest[MD5_DIGESTSIZE],
  * @param nbytes The length of the string
  */
 APR_DECLARE(apr_status_t) apr_md5_encode(const char *password, const char *salt,
-                                         char *result, size_t nbytes);
+                                         char *result, apr_size_t nbytes);
 
 /** @} */
 #ifdef __cplusplus
