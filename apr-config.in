@@ -137,7 +137,7 @@ if test -x "`which realpath 2>/dev/null`"; then
   if test -d "$APR_SOURCE_DIR"; then
     APR_SOURCE_DIR="`realpath $APR_SOURCE_DIR`"
   fi
-  if test -n $tmpbindir; then
+  if test -n "$tmpbindir"; then
     tmpbindir="`realpath $tmpbindir`"
   fi
 fi
