@@ -2051,7 +2051,7 @@ static void free_proc_chain(struct process_chain *procs)
 
     /* Sleep only if we have to... */
     if (need_timeout)
-        apr_sleep(3 * APR_USEC_PER_SEC);
+        apr_sleep(apr_time_from_sec(3));
 
     /* OK, the scripts we just timed out for have had a chance to clean up
      * --- now, just get rid of them, and also clean up the system accounting
