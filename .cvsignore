@@ -39,3 +39,4 @@ build-outputs.mk
 *.da
 coverage
 apr*.pc
+apr.spec
