@@ -179,7 +179,7 @@ APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
 
 APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr, apr_int32_t detach) 
 {
-    attr->detached = (detach & 1);
+    attr->detached = detach;
     return APR_SUCCESS;
 }
 
@@ -268,7 +268,7 @@ APR_DECLARE(apr_status_t) apr_procattr_error_check_set(apr_procattr_t *attr,
 APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
                                                        apr_int32_t addrspace)
 {
-    attr->addrspace = (addrspace & 2);
+    attr->addrspace = addrspace;
     return APR_SUCCESS;
 }
 
