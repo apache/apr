@@ -192,10 +192,12 @@ while test $# -gt 0; do
     fi
     ;;
     --apr-so-ext)
-    flags="$flags $APR_SO_EXT"
+    echo "$APR_SO_EXT"
+    exit 0
     ;;
     --apr-lib-target)
-    flags="$flags $APR_LIB_TARGET"
+    echo "$APR_LIB_TARGET"
+    exit 0
     ;;
     --help)
     show_usage
