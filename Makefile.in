@@ -61,9 +61,11 @@ install: $(TARGET_LIB)
 	fi; \
 	$(LIBTOOL) --mode=install cp $(TARGET_LIB) $(libdir)
 	$(LIBTOOL) --mode=install cp APRVARS $(libdir)
-	@for i in $(INSTALL_SUBDIRS); do \
-	    ( cd $$i ; $(MAKE) install ); \
-	done
+	@if [ $(INSTALL_SUBDIRS) != "none" ]; then \
+            for i in $(INSTALL_SUBDIRS); do \
+	        ( cd $$i ; $(MAKE) install ); \
+	    done \
+        fi
 
 $(TARGET_LIB):
 	@for i in $(SUBDIRS); do objects="$$objects $$i/*.@so_ext@"; done ; \
