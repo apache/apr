@@ -36,8 +36,6 @@ Bachelor #1
    ap_rwmem_buf.c
    ap_rmem_buf.c
    ap_eos_buf.c
-   util_filter.h
-   util_filter.c
    ryan.patch
 
 Bachelor #2
