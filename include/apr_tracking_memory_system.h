@@ -67,7 +67,7 @@ extern "C" {
  */
 
 /**
- * Create a tracking malloc/realloc/free memory system
+ * Create a standard malloc/realloc/free memory system
  */
 APR_DECLARE(apr_status_t)
 apr_tracking_memory_system_create(apr_memory_system_t **memory_system,
@@ -79,4 +79,4 @@ apr_tracking_memory_system_create(apr_memory_system_t **memory_system,
 }
 #endif
 
-#endif /* !APR_MEMORY_SYSTEM_H */
+#endif /* !APR_TRACKING_MEMORY_SYSTEM_H */

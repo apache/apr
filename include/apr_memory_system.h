@@ -86,8 +86,8 @@ struct apr_memory_system_t
   void * (*malloc_fn)(apr_memory_system_t *memory_system, apr_size_t size);
   void * (*realloc_fn)(apr_memory_system_t *memory_system, void *memory, 
 		       apr_size_t size);
-  void (*free_fn)(apr_memory_system_t *memory_system, void *memory);
-  void (*reset_fn)(apr_memory_system_t *memory_system);
+  apr_status_t (*free_fn)(apr_memory_system_t *memory_system, void *memory);
+  apr_status_t (*reset_fn)(apr_memory_system_t *memory_system);
   void (*pre_destroy_fn)(apr_memory_system_t *memory_system);
   void (*destroy_fn)(apr_memory_system_t *memory_system);
   void (*threadsafe_lock_fn)(apr_memory_system_t *memory_system);
@@ -132,7 +132,7 @@ apr_memory_system_realloc(apr_memory_system_t *memory_system,
  * Free a block of memory
  * @param memory_system The memory system to use (should be the same as the
  *        one that returned the block)
-G * @param mem The block of memory to be freed
+ * @param mem The block of memory to be freed
  * @deffunc void apr_memory_system_free(apr_memory_system_t *memory_system,
  *					void *mem)
  */
@@ -185,9 +185,9 @@ apr_memory_system_assert(apr_memory_system_t *memory_system);
  *          for the given memory system (i.e. the memory system is non-
  *          tracking).
  * @param memory_system The memory system to be reset
- * @deffunc void apr_memory_system_reset(apr_memory_system_t *memory_system)
+ * @deffunc apr_status_t apr_memory_system_reset(apr_memory_system_t *memory_system)
  */
-APR_DECLARE(void)
+APR_DECLARE(apr_status_t)
 apr_memory_system_reset(apr_memory_system_t *memory_system);
 
 /**
@@ -196,7 +196,7 @@ apr_memory_system_reset(apr_memory_system_t *memory_system);
  * @caution Be carefull when using this function with a non-tracking memory
  *          system
  * @param memory_system The memory system to be destroyed
- * @deffunc void apr_memory_system_destroy(apr_memory_system_t *memory_system)
+ * @deffunc apr_status_t apr_memory_system_destroy(apr_memory_system_t *memory_system)
  */
 APR_DECLARE(apr_status_t)
 apr_memory_system_destroy(apr_memory_system_t *memory_system);
@@ -222,8 +222,8 @@ apr_memory_system_threadsafe_unlock(apr_memory_system_t *memory_system);
  * Determine if memory system a is an ancestor of memory system b
  * @param a The memory system to search
  * @param b The memory system to search for
- * @return TRUE if a is an ancestor of b, FALSE if a is not an ancestor of b
- * @deffunc apr_bool_t apr_memory_system_is_ancestor(apr_memory_system_t *a,
+ * @return APR_SUCCESS if a is an ancestor of b, 1 if it isn't
+ * @deffunc apr_status_t apr_memory_system_is_ancestor(apr_memory_system_t *a,
  *						     apr_memory_system_t *b)
  */
 APR_DECLARE(apr_status_t) 

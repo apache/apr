@@ -146,7 +146,7 @@ apr_tracking_memory_system_realloc(apr_memory_system_t *memory_system,
 }
 
 static 
-void
+apr_status_t
 apr_tracking_memory_system_free(apr_memory_system_t *memory_system,
                                 void *mem)
 {
@@ -160,26 +160,30 @@ apr_tracking_memory_system_free(apr_memory_system_t *memory_system,
 
   *(node->ref) = node->next;
   
-  apr_memory_system_free(memory_system->parent_memory_system, node);
+  return apr_memory_system_free(memory_system->parent_memory_system, node);
 }
 
 static
-void
+apr_status_t
 apr_tracking_memory_system_reset(apr_memory_system_t *memory_system)
 {
-  apr_tracking_memory_system_t *tracking_memory_system;
-  apr_track_node_t *node;
+    apr_tracking_memory_system_t *tracking_memory_system;
+    apr_track_node_t *node;
+    apr_status_t rv;
+    
+    assert (memory_system != NULL);
 
-  assert (memory_system != NULL);
+    tracking_memory_system = (apr_tracking_memory_system_t *)memory_system;
 
-  tracking_memory_system = (apr_tracking_memory_system_t *)memory_system;
-
-  while (tracking_memory_system->nodes != NULL)
-  {
-    node = tracking_memory_system->nodes;
-    *(node->ref) = node->next;
-    apr_memory_system_free(memory_system->parent_memory_system, node);
-  }
+    while (tracking_memory_system->nodes != NULL)
+    {
+        node = tracking_memory_system->nodes;
+        *(node->ref) = node->next;
+        if ((rv = apr_memory_system_free(memory_system->parent_memory_system,
+                                         node)) != APR_SUCCESS)
+            return rv;
+    }
+    return APR_SUCCESS;
 }
 
 static
