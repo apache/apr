@@ -94,7 +94,7 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
 }
 
 
-APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t **new_file,
+APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                                         apr_file_t *old_file, apr_pool_t *p)
 {
     DWORD stdhandle = -1;
@@ -134,17 +134,17 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t **new_file,
                              FALSE, DUPLICATE_SAME_ACCESS)) {
             return apr_get_os_error();
         }
-        if ((*new_file)->filehand) {
-            CloseHandle((*new_file)->filehand);
+        if (new_file->filehand) {
+            CloseHandle(new_file->filehand);
         }
         newflags = old_file->flags & ~APR_INHERIT;
     }
 
-    (*new_file)->flags = newflags;
-    (*new_file)->filehand = newhand;
-    (*new_file)->fname = apr_pstrdup((*new_file)->cntxt, old_file->fname);
-    (*new_file)->append = old_file->append;
-    (*new_file)->buffered = FALSE;
+    new_file->flags = newflags;
+    new_file->filehand = newhand;
+    new_file->fname = apr_pstrdup(new_file->cntxt, old_file->fname);
+    new_file->append = old_file->append;
+    new_file->buffered = FALSE;
 
     return APR_SUCCESS;
 }

@@ -111,7 +111,7 @@ int main (int argc, char ** argv)
                                APR_READ | APR_WRITE | APR_CREATE,
                                APR_OS_DEFAULT, p))
 
-    STD_TEST_NEQ("    Dup2 test", apr_file_dup2(&file3, file2, p))
+    STD_TEST_NEQ("    Dup2 test", apr_file_dup2(file3, file2, p))
 
     txtlen = sizeof(TEST2);
     STD_TEST_NEQ("    Write to dup'd file #3", apr_file_write(file3, TEST2, &txtlen))
