@@ -72,52 +72,77 @@
 #include "apr_want.h"
 
 static const char *module_identity = "BLOCKS";
-#define SIZE_TO_MALLOC 8 * 1024
+#define MIN_ALLOC     8 * 1024 /* don't allocate in smaller blocks than 8Kb */
 
 /*
  * Simple bucket memory system
  */
 
 /* INTERNALLY USED STRUCTURES */
-typedef struct block_t block_t;
-struct block_t {
-    void *nxt;
-};
+typedef struct block_t {
+    char *nxt;
+} block_t;
 
-typedef struct apr_sms_blocks_t apr_sms_blocks_t;
-struct apr_sms_blocks_t
+typedef struct apr_sms_blocks_t
 {
     apr_sms_t            header;
     apr_size_t           block_sz;
+    apr_size_t           alloc_sz; 
+    block_t             *alloc_list;
+    block_t             *free_list;
     char                *ptr;
     char                *endp;
-    block_t             *free_list;
-    apr_lock_t          *lock;
-};
+    char                *self_endp;
+} apr_sms_blocks_t;
 
-#define SIZEOF_BLOCKS_T (sizeof(apr_sms_blocks_t) + \
-                        ((0x8 - (sizeof(apr_sms_blocks_t) & 0x7)) & 0x7))
-#define BLOCKS_T(sms)   ((apr_sms_blocks_t *)sms)
+/* Various defines we'll use */
+#define SIZEOF_SMS_BLOCKS_T         APR_ALIGN_DEFAULT(sizeof(apr_sms_blocks_t))
+#define SIZEOF_BLOCK_T              APR_ALIGN_DEFAULT(sizeof(block_t))
+
+#define SMS_BLOCKS_T(sms)           ((apr_sms_blocks_t *)sms)
+#define BLOCK_T(mem)                ((block_t *)mem)
 
 static void *apr_sms_blocks_malloc(apr_sms_t *sms,
                                    apr_size_t size)
 {
     void *mem;
-    
-    if (size > BLOCKS_T(sms)->block_sz)
+
+    if (size > SMS_BLOCKS_T(sms)->block_sz)
         return NULL;
 
-    if ((mem = BLOCKS_T(sms)->free_list) != NULL) {
-        BLOCKS_T(sms)->free_list = ((block_t*)mem)->nxt;
+    if ((mem = SMS_BLOCKS_T(sms)->free_list) != NULL) {
+        SMS_BLOCKS_T(sms)->free_list = BLOCK_T(BLOCK_T(mem)->nxt);
         return mem;
     }
-    
-    mem = BLOCKS_T(sms)->ptr;
-    BLOCKS_T(sms)->ptr += BLOCKS_T(sms)->block_sz;
 
-    if (BLOCKS_T(sms)->ptr > BLOCKS_T(sms)->endp)
+    mem = SMS_BLOCKS_T(sms)->ptr;
+    if ((SMS_BLOCKS_T(sms)->ptr = (char *)mem + SMS_BLOCKS_T(sms)->block_sz)
+                               <= SMS_BLOCKS_T(sms)->endp)
+        return mem;
+        
+    /* OK, we've run out of memory.  Let's get more :) */
+    mem = apr_sms_malloc(sms->parent, SMS_BLOCKS_T(sms)->alloc_sz);
+    if (!mem) {
+        /* make safe and return */
+        SMS_BLOCKS_T(sms)->ptr = SMS_BLOCKS_T(sms)->endp;
         return NULL;
+    }
 
+    /* Insert our new bit of memory at the start of the list */
+    BLOCK_T(mem)->nxt = (char*)SMS_BLOCKS_T(sms)->alloc_list;
+    SMS_BLOCKS_T(sms)->alloc_list = mem;
+    SMS_BLOCKS_T(sms)->endp = (char *)mem + SMS_BLOCKS_T(sms)->alloc_sz;
+    (char *)mem += SIZEOF_BLOCK_T;
+    SMS_BLOCKS_T(sms)->ptr = (char *)mem + SMS_BLOCKS_T(sms)->block_sz;
+
+    if (SMS_BLOCKS_T(sms)->alloc_list->nxt) {
+        /* we're not the first block being added, so we increase our
+         * size.
+         */
+        SMS_BLOCKS_T(sms)->alloc_sz <<= 1;
+    }
+
+    
     return mem;
 }
     
@@ -125,45 +150,84 @@ static void *apr_sms_blocks_calloc(apr_sms_t *sms,
                                    apr_size_t size)
 {
     void *mem;
-    
-    if (size > BLOCKS_T(sms)->block_sz)
+
+    if (size > SMS_BLOCKS_T(sms)->block_sz)
         return NULL;
 
-    if ((mem = BLOCKS_T(sms)->free_list) != NULL) {
-        BLOCKS_T(sms)->free_list = ((block_t*)mem)->nxt;
+    if ((mem = SMS_BLOCKS_T(sms)->free_list) != NULL) {
+        SMS_BLOCKS_T(sms)->free_list = BLOCK_T(BLOCK_T(mem)->nxt);
+        memset(mem, '\0', SMS_BLOCKS_T(sms)->block_sz);
         return mem;
     }
-    
-    mem = BLOCKS_T(sms)->ptr;
-    BLOCKS_T(sms)->ptr += BLOCKS_T(sms)->block_sz;
 
-    if (BLOCKS_T(sms)->ptr > BLOCKS_T(sms)->endp)
+    mem = SMS_BLOCKS_T(sms)->ptr;
+    if ((SMS_BLOCKS_T(sms)->ptr = (char *)mem + 
+        SMS_BLOCKS_T(sms)->block_sz) <= SMS_BLOCKS_T(sms)->endp) {
+        memset(mem, '\0', SMS_BLOCKS_T(sms)->block_sz);
+        return mem;
+    }
+        
+    /* probably quicker to just grab malloc memory, then memset as 
+     * required.
+     */
+    mem = apr_sms_malloc(sms->parent, SMS_BLOCKS_T(sms)->alloc_sz);
+    if (!mem) {
+        SMS_BLOCKS_T(sms)->ptr = SMS_BLOCKS_T(sms)->endp;
         return NULL;
+    }
 
-    memset(mem, '\0', BLOCKS_T(sms)->block_sz);
-    
+    /* Insert at the start of the list */
+    BLOCK_T(mem)->nxt = (char*)SMS_BLOCKS_T(sms)->alloc_list;
+    SMS_BLOCKS_T(sms)->alloc_list = mem;
+    SMS_BLOCKS_T(sms)->endp = (char *)mem + SMS_BLOCKS_T(sms)->alloc_sz;
+    (char *)mem += SIZEOF_BLOCK_T;
+    SMS_BLOCKS_T(sms)->ptr = (char *)mem + SMS_BLOCKS_T(sms)->block_sz;
+
+    if (SMS_BLOCKS_T(sms)->alloc_list->nxt) {
+        /* we're not the first block being added, so we increase our
+         * size.
+         */
+        SMS_BLOCKS_T(sms)->alloc_sz <<= 1;
+    }
+
+    memset(mem, '\0', SMS_BLOCKS_T(sms)->block_sz);
+
     return mem;
 }
 
 static apr_status_t apr_sms_blocks_free(apr_sms_t *sms,
                                         void *mem)
 {
-    ((block_t *)mem)->nxt = BLOCKS_T(sms)->free_list;
-    BLOCKS_T(sms)->free_list = (block_t*)mem;
-
+    BLOCK_T(mem)->nxt = (char*)SMS_BLOCKS_T(sms)->free_list;
+    SMS_BLOCKS_T(sms)->free_list = mem;
     return APR_SUCCESS;
 }
 
 static apr_status_t apr_sms_blocks_reset(apr_sms_t *sms)
 {
-    BLOCKS_T(sms)->ptr = (char *)sms + SIZEOF_BLOCKS_T;
-    BLOCKS_T(sms)->free_list = NULL;
-    
+    block_t *block;
+
+    SMS_BLOCKS_T(sms)->ptr = (char *)sms + SIZEOF_SMS_BLOCKS_T;
+    SMS_BLOCKS_T(sms)->endp = SMS_BLOCKS_T(sms)->self_endp;
+    SMS_BLOCKS_T(sms)->free_list = NULL;
+
+    while ((block = SMS_BLOCKS_T(sms)->alloc_list) != NULL) {
+        SMS_BLOCKS_T(sms)->alloc_list = BLOCK_T(block->nxt);
+        apr_sms_free(sms->parent, block);
+    }
+
     return APR_SUCCESS;
 }
 
 static apr_status_t apr_sms_blocks_destroy(apr_sms_t *sms)
 {
+    block_t *block;
+    
+    while ((block = SMS_BLOCKS_T(sms)->alloc_list) != NULL) {
+        SMS_BLOCKS_T(sms)->alloc_list = BLOCK_T(block->nxt);
+        apr_sms_free(sms->parent, block);
+    }
+    
     return apr_sms_free(sms->parent, sms);
 }
 
@@ -173,9 +237,19 @@ APR_DECLARE(apr_status_t) apr_sms_blocks_create(apr_sms_t **sms,
 {
     apr_sms_t *new_sms;
     apr_status_t rv;
-
+    apr_size_t alloc_size;
+    apr_sms_blocks_t *bms;
+       
     *sms = NULL;
-    new_sms = apr_sms_calloc(parent, SIZE_TO_MALLOC);
+    if (block_size == 0)
+        return APR_EINVAL;
+
+    block_size = APR_ALIGN_DEFAULT(block_size);
+    alloc_size = block_size << 2;
+    if (alloc_size < MIN_ALLOC)
+        alloc_size = MIN_ALLOC;
+
+    new_sms = apr_sms_calloc(parent, alloc_size);
 
     if (!new_sms)
         return APR_ENOMEM;
@@ -190,17 +264,16 @@ APR_DECLARE(apr_status_t) apr_sms_blocks_create(apr_sms_t **sms,
     new_sms->destroy_fn     = apr_sms_blocks_destroy;
     new_sms->identity       = module_identity;
 
-    BLOCKS_T(new_sms)->ptr = (char *)new_sms + SIZEOF_BLOCKS_T;
-    BLOCKS_T(new_sms)->endp = (char *)new_sms + SIZE_TO_MALLOC;
-    
-    BLOCKS_T(new_sms)->block_sz = block_size +
-                                 ((0x8 - (block_size & 0x7)) & 0x7);
+    bms = SMS_BLOCKS_T(new_sms);
+    bms->block_sz = block_size;
+    bms->alloc_sz = alloc_size;
+    bms->ptr = (char*)new_sms + SIZEOF_SMS_BLOCKS_T;
+    bms->endp = (bms->self_endp = (char*)new_sms + alloc_size);
 
     /* We are normally single threaded so no lock */
-    
+
     apr_sms_assert(new_sms);
 
     *sms = new_sms;
     return APR_SUCCESS;
 }
-
