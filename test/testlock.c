@@ -77,6 +77,7 @@ int main(void)
 
 #define MAX_ITER 40000
 #define MAX_COUNTER 100000
+#define MAX_RETRY 5
 
 void * APR_THREAD_FUNC thread_rw_func(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_rwlock_func(apr_thread_t *thd, void *data);
@@ -109,6 +110,9 @@ struct {
     apr_thread_cond_t  *cond;
     int                nready;
 } nready;
+
+apr_thread_mutex_t *timeout_mutex;
+apr_thread_cond_t *timeout_cond;
 
 void * APR_THREAD_FUNC thread_rw_func(apr_thread_t *thd, void *data)
 {
@@ -564,6 +568,73 @@ apr_status_t test_cond(void)
     return APR_SUCCESS;
 }
 
+apr_status_t test_timeoutcond(void)
+{
+    apr_status_t s;
+    apr_interval_time_t timeout;
+    apr_time_t begin, end;
+    int i;
+
+    printf("thread_cond_timedwait Tests\n");
+    printf("%-60s", "    Initializing the first apr_thread_mutex_t");
+    s = apr_thread_mutex_create(&timeout_mutex, pool);
+    if (s != APR_SUCCESS) {
+        printf("Failed!\n");
+        return s;
+    }
+    printf("OK\n");
+
+    printf("%-60s", "    Initializing the apr_thread_cond_t");
+    s = apr_thread_cond_create(&timeout_cond, pool);
+    if (s != APR_SUCCESS) {
+        printf("Failed!\n");
+        return s;
+    }
+    printf("OK\n");
+
+    timeout = 5 * APR_USEC_PER_SEC;
+
+    for (i = 0; i < MAX_RETRY; i++) {
+        printf("%-60s","    Waiting for condition for 5 seconds"); 
+
+        begin = apr_time_now();
+        s = apr_thread_cond_timedwait(timeout_cond, timeout_mutex, timeout);
+        end = apr_time_now();
+
+        /* If we slept for more than 100ms over the timeout. */
+        if (end - begin - timeout > 100000) {
+            if (APR_STATUS_IS_TIMEUP(s)) {
+                printf("Failed (late TIMEUP)!\n");
+                printf("    The timer returned in %" APR_TIME_T_FMT " usec!\n",
+                    end - begin);
+                return s;
+            }
+            else if (s != APR_SUCCESS) {
+                printf("Failed!\n");
+                return s;
+            }
+        }
+        /* else, everything is ok */
+        else if (APR_STATUS_IS_TIMEUP(s)) {
+            printf("OK\n");
+            return APR_SUCCESS;
+        }
+        /* else, we were within the time limit, and something broke. */
+        else if (s != APR_SUCCESS) {
+            printf("Failed! (bad timer)\n");
+            return s;
+        }
+        /* else, spurious wakeup, just try again. */
+        else {
+            printf("Spurious wakeup...retrying\n");
+            continue;
+        }
+    }
+    printf("Too many spurious wakeups, unable to complete test.\n");
+
+    return APR_EGENERAL;
+}
+
 int main(int argc, const char * const *argv)
 {
     apr_status_t rv;
@@ -632,6 +703,12 @@ int main(int argc, const char * const *argv)
         fprintf(stderr,"thread_cond test failed : [%d] %s\n",
                 rv, apr_strerror(rv, (char*)errmsg, 200));
         exit(-7);
+    }
+
+    if ((rv = test_timeoutcond()) != APR_SUCCESS) {
+        fprintf(stderr,"thread_cond_timedwait test failed : [%d] %s\n",
+                rv, apr_strerror(rv, (char*)errmsg, 200));
+        exit(-8);
     }
 
     return 0;
