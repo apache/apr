@@ -293,8 +293,11 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
             break;
 
         /* Assume the headers have been sent */
-        ptfb->HeadLength = 0;
-        ptfb->Head = NULL;
+        if (ptfb != NULL) {
+            *len += ptfb->HeadLength;
+            ptfb->HeadLength = 0;
+            ptfb->Head = NULL;
+        }
         bytes_to_send -= nbytes;
         *len += nbytes;
         overlapped.Offset += nbytes;
