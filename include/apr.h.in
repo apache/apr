@@ -163,6 +163,18 @@ typedef  @ssize_t_value@         apr_ssize_t;
 typedef  @off_t_value@           apr_off_t;
 typedef  @socklen_t_value@       apr_socklen_t;
 
+
+/* Mechanisms to properly type numeric literals */
+
+/* XXX: this is wrong -- the LL is only required if int64 is implemented as
+ * a long long, it could be just a long on some platforms.  the C99
+ * correct way of doing this is to use INT64_C(1000000) which comes
+ * from stdint.h.  we'd probably be doing a Good Thing to check for
+ * INT64_C in autoconf... or otherwise define an APR_INT64_C(). -dean
+ */
+#define APR_INT64_C(val) (val##LL)
+
+
 /* Definitions that APR programs need to work properly. */
 
 #define APR_THREAD_FUNC
