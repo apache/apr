@@ -99,6 +99,10 @@
 #define ALLOC_USE_MALLOC
 #define DSO_USE_DLFCN
 
+#ifdef NW_BUILD_IPV6
+#define HAVE_GETADDRINFO 1
+#define HAVE_GETNAMEINFO 1
+#endif
 
 /* 1 is used for SIGABRT on netware */
 /* 2 is used for SIGFPE on netware */
