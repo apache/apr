@@ -57,14 +57,6 @@
 #if APR_HAS_SENDFILE
 /* This file is needed to allow us access to the apr_file_t internals. */
 #include "fileio.h"
-
-/* Glibc2.1.1 fails to define TCP_CORK.  This is a bug that will be 
- *fixed in the next release.  It should be 3
- */
-#if !defined(TCP_CORK) && defined(__linux__)
-#define TCP_CORK 3
-#endif
-
 #endif /* APR_HAS_SENDFILE */
 
 static apr_status_t wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
@@ -270,56 +262,6 @@ apr_status_t apr_sendv(apr_socket_t * sock, const struct iovec *vec,
 }
 #endif
 
-/* XXX - if we start using these elsewhere in this file we'll
- * need to move these to the top...
- */
-
-#if APR_HAVE_CORKABLE_TCP && !defined(__FreeBSD__)
-
-/* TCP_CORK & TCP_NOPUSH keep us from sending partial frames when we
- * shouldn't. They are however, mutually exclusive with TCP_NODELAY  
- */
-
-static int os_cork(apr_socket_t *sock)
-{
-    int nodelay_off = 0, corkflag = 1, rv, delayflag;
-    apr_socklen_t delaylen = sizeof(delayflag);
-
-    /* XXX it would be cheaper to use an apr_socket_t flag here */
-    rv = getsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY,
-                    (void *) &delayflag, &delaylen);
-    if (rv == 0) {  
-        if (delayflag != 0) {
-            /* turn off nodelay temporarily to allow cork */
-            rv = setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY,
-                            (const void *) &nodelay_off, sizeof(nodelay_off));
-            /* XXX nuke the rv checking once this is proven solid */
-            if (rv < 0) {
-                return rv;    
-            }   
-        } 
-    }
-    rv = setsockopt(sock->socketdes, IPPROTO_TCP, APR_TCP_NOPUSH_FLAG,
-                    (const void *) &corkflag, sizeof(corkflag));
-    return rv == 0 ? delayflag : rv;
-}   
-
-static int os_uncork(apr_socket_t *sock, int delayflag)
-{
-    /* Uncork to send queued frames */
-    
-    int corkflag = 0, rv;
-    rv = setsockopt(sock->socketdes, IPPROTO_TCP, APR_TCP_NOPUSH_FLAG,
-                    (const void *) &corkflag, sizeof(corkflag));
-    if (rv == 0) {
-        /* restore TCP_NODELAY to its original setting */
-        rv = setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY,
-                        (const void *) &delayflag, sizeof(delayflag));
-    }
-    return rv;
-}
-#endif /* APR_HAVE_CORKABLE_TCP */
-
 #if APR_HAS_SENDFILE
 
 /* TODO: Verify that all platforms handle the fd the same way,
@@ -337,7 +279,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         		apr_int32_t flags)
 {
     off_t off = *offset;
-    int rv, nbytes = 0, total_hdrbytes, i, delayflag = APR_EINIT, corked = 0;
+    int rv, nbytes = 0, total_hdrbytes, i;
     apr_status_t arv;
 
     if (!hdtr) {
@@ -351,12 +293,10 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         apr_int32_t hdrbytes;
 
         /* cork before writing headers */
-        rv = os_cork(sock);
-        if (rv < 0) {
-            return errno;
+        rv = apr_setsocketopt(sock, APR_TCP_NOPUSH, 1);
+        if (rv != APR_SUCCESS) {
+            return rv;
         }
-        delayflag = rv;
-        corked = 1;
 
         /* Now write the headers */
         arv = apr_sendv(sock, hdtr->headers, hdtr->numheaders, &hdrbytes);
@@ -376,7 +316,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         }
         if (hdrbytes < total_hdrbytes) {
             *len = hdrbytes;
-            return os_uncork(sock, delayflag);
+            return apr_setsocketopt(sock, APR_TCP_NOPUSH, 0);
         }
     }
 
@@ -409,9 +349,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     if (rv == -1) {
 	*len = nbytes;
         rv = errno;
-        if (corked) {
-            os_uncork(sock, delayflag);
-        }
+        apr_setsocketopt(sock, APR_TCP_NOPUSH, 0);
         return rv;
     }
 
@@ -423,10 +361,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
 
     if (rv < *len) {
         *len = nbytes;
-        if (corked) {
-            os_uncork(sock, delayflag);
-        }
-        return APR_SUCCESS;
+        return apr_setsocketopt(sock, APR_TCP_NOPUSH, 0);
     }
 
     /* Now write the footers */
@@ -437,18 +372,13 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         if (arv != APR_SUCCESS) {
 	    *len = nbytes;
             rv = errno;
-            if (corked) {
-                os_uncork(sock, delayflag);
-            }
+            apr_setsocketopt(sock, APR_TCP_NOPUSH, 0);
             return rv;
         }
     }
 
-    if (corked) {
-        /* if we corked, uncork & restore TCP_NODELAY setting */
-        rv = os_uncork(sock, delayflag);
-    }
-
+    apr_setsocketopt(sock, APR_TCP_NOPUSH, 0);
+    
     (*len) = nbytes;
     return rv < 0 ? errno : APR_SUCCESS;
 }
