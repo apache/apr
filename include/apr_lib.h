@@ -66,9 +66,11 @@
 
 #include "apr_general.h"
 #include "apr_file_io.h"
+#if HAVE_DIRENT_H
+#include <dirent.h>
+#endif
 
 #ifndef WIN32
-#include <dirent.h>
 #include "apr_config.h"
 #else
 #include "../file_io/win32/readdir.h" /* definition of DIR for WIN32 */

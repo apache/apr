@@ -65,12 +65,12 @@
 #else
 #include "apr_win.h"
 #endif
+#include "apr_lib.h"
 #include "apr_errno.h"
 #include <sys/types.h>
 #include <errno.h>
-#include "apr_lib.h"
 
-#ifdef WIN32
+#if HAVE_CONIO_h
 #include <conio.h>
 #endif
 
