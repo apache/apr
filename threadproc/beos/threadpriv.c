@@ -54,9 +54,6 @@
  */
 
 #include "threadproc.h"
-#include "apr_thread_proc.h"
-#include "apr_general.h"
-#include "apr_errno.h"
 
 static struct beos_key key_table[BEOS_MAX_DATAKEYS];
 static struct beos_private_data *beos_data[BEOS_MAX_DATAKEYS];

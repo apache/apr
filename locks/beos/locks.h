@@ -58,6 +58,8 @@
 #include <kernel/OS.h>
 #include "apr_lock.h"
 #include "apr_file_io.h"
+#include "apr_general.h"
+#include "apr_lib.h"
 
 struct lock_t {
     ap_context_t *cntxt;

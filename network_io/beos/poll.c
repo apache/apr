@@ -55,9 +55,6 @@
 
 
 #include "networkio.h"
-#include "apr_network_io.h"
-#include "networkio.h"
-#include "apr_general.h"
 
 /*  BeOS R4 doesn't have a poll function, but R5 will have */
 /*  so for the time being we try our best with an implementaion that */

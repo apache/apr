@@ -54,12 +54,6 @@
  */
 
 #include "networkio.h"
-#include "apr_network_io.h"
-#include "apr_general.h"
-#include "apr_lib.h"
-#include <errno.h>
-#include <string.h>
-#include <sys/socket.h>
 
 ap_status_t ap_set_local_port(struct socket_t *sock, ap_uint32_t port)
 {

@@ -56,11 +56,18 @@
 #ifndef MMAP_H_H
 #define MMAP_H_H
 
-#include <sys/stat.h>
-#include <kernel/OS.h>
 #include "apr_general.h"
 #include "apr_mmap.h"
 #include "apr_errno.h"
+#include "apr_general.h"
+#include "apr_portable.h"
+#include "apr_lib.h"
+#include "fileio.h"
+#include <sys/stat.h>
+#include <kernel/OS.h>
+#include <errno.h>
+#include <string.h>
+#include <stdio.h>
 
 struct mmap_t {
     ap_context_t *cntxt;
