@@ -251,21 +251,25 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     OVERLAPPED overlapped;
     TRANSMIT_FILE_BUFFERS tfb, *ptfb = NULL;
     int ptr = 0;
-    int bytes_to_send = *len;   /* Bytes to send out of the file (not including headers) */
+    int bytes_to_send;   /* Bytes to send out of the file (not including headers) */
     int disconnected = 0;
+    HANDLE wait_event;
 
     if (apr_os_level < APR_WIN_NT) {
         return APR_ENOTIMPL;
     }
 
-    /* Use len to keep track of number of total bytes sent (including headers) */
-    *len = 0;
-
     /* Initialize the overlapped structure */
     memset(&overlapped,'\0', sizeof(overlapped));
 #ifdef WAIT_FOR_EVENT
-    overlapped.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    wait_event = overlapped.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+#else
+    wait_event = (HANDLE) sock->sock;
 #endif
+
+    /* Use len to keep track of number of total bytes sent (including headers) */
+    bytes_to_send = *len;
+    *len = 0;
 
     /* Handle the goofy case of sending headers/trailers and a zero byte file */
     if (!bytes_to_send && hdtr) {
@@ -328,17 +332,12 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
             status = apr_get_netos_error();
             if ((status == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) ||
                 (status == APR_FROM_OS_ERROR(WSA_IO_PENDING))) {
-                HANDLE event;
-#ifdef WAIT_FOR_EVENT
-                event = overlapped.hEvent;
-#else
-                event = (HANDLE) sock->sock;
-#endif
-                rv = WaitForSingleObject(event, 
+
+                rv = WaitForSingleObject(wait_event, 
                                          (DWORD)(sock->timeout >= 0 
                                                  ? sock->timeout : INFINITE));
                 if (rv == WAIT_OBJECT_0) {
-                    if (!disconnected && !GetOverlappedResult(event, &overlapped,
+                    if (!disconnected && !GetOverlappedResult(wait_event, &overlapped,
                                                               &nbytes, FALSE)) {
                         status = APR_FROM_OS_ERROR(GetLastError());
                     }
@@ -374,7 +373,6 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         *len += nbytes;
         curoff += nbytes;
     }
-
 
     if (status == APR_SUCCESS) {
         if (ptfb && ptfb->TailLength)
