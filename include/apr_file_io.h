@@ -107,7 +107,7 @@ typedef struct iovec_t           ap_iovec_t;
 typedef ap_int32_t               ap_fileperms_t;
 
 /*   Function definitions */
-ap_status_t ap_open(ap_context_t *, char *, ap_int32_t, ap_fileperms_t, ap_file_t **);
+ap_status_t ap_open(ap_context_t *, const char *, ap_int32_t, ap_fileperms_t, ap_file_t **);
 ap_status_t ap_close(ap_file_t *);
 ap_status_t ap_remove_file(ap_context_t *, char *);
 ap_status_t ap_eof(ap_file_t *);
@@ -117,6 +117,7 @@ ap_status_t ap_write(ap_file_t *, void *, ap_ssize_t *);
 ap_status_t ap_writev(ap_file_t *, const ap_iovec_t *, ap_ssize_t *);
 ap_status_t ap_putc(ap_file_t *, char);
 ap_status_t ap_getc(ap_file_t *, char *);
+ap_status_t ap_gets(ap_file_t *, char *, int);
 API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
         __attribute__((format(printf,2,3)));
 
@@ -145,6 +146,7 @@ ap_status_t ap_dir_entry_mtime(ap_dir_t *, time_t *);
 ap_status_t ap_dir_entry_ftype(ap_dir_t *, ap_filetype_e *);
 
 ap_status_t ap_get_filesize(ap_file_t *, ap_ssize_t *);
+ap_status_t ap_get_filetype(ap_file_t *, ap_filetype_e *);
 ap_status_t ap_get_fileperms(ap_file_t *, ap_fileperms_t *);
 ap_status_t ap_get_fileatime(ap_file_t *,time_t *);
 ap_status_t ap_get_filectime(ap_file_t *,time_t *);

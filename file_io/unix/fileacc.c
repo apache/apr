@@ -215,6 +215,40 @@ ap_status_t ap_get_filemtime(struct file_t *file, time_t *time)
 }
 
 /* ***APRDOC********************************************************
+ * ap_status_t ap_get_filetype(ap_file_t *, ap_filetype_e)
+ *    Return the type of the current file.
+ * arg 1) The currently open file.
+ * arg 2) The file type
+ */                     
+ap_status_t ap_get_filetype(struct file_t *file, ap_filetype_e *type)
+{    
+    if (file != NULL) {
+        if (!file->stated) {
+            ap_getfileinfo(file);
+        }
+        if (S_ISREG(file->protection))
+            *type = APR_REG;
+        if (S_ISDIR(file->protection))
+            *type = APR_DIR;
+        if (S_ISCHR(file->protection))
+            *type = APR_CHR;
+        if (S_ISBLK(file->protection))
+            *type = APR_BLK;
+        if (S_ISFIFO(file->protection))
+            *type = APR_PIPE;
+        if (S_ISLNK(file->protection))
+            *type = APR_LNK;
+        if (S_ISSOCK(file->protection))
+            *type = APR_SOCK;
+        return APR_SUCCESS;
+    }
+    else {
+        *type = APR_REG;
+        return APR_ENOFILE;
+    }
+}
+
+/* ***APRDOC********************************************************
  * ap_status_t ap_get_filedata(ap_file_t *, void *)
  *    Return the data associated with the current file.
  * arg 1) The currently open file.

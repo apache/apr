@@ -95,7 +95,7 @@ ap_status_t file_cleanup(void *thefile)
  *          APR_CREATE           create the file if not there
  *          APR_APPEND           file ptr is set to end prior to all writes
  *          APR_TRUNCATE         set length to zero if file exists
- *          APR_BINARY           not a test file
+ *          APR_BINARY           not a text file
  *          APR_BUFFERED         buffer the data.  Default is non-buffered
  *          APR_EXCL             return error if APR_CREATE and file exists
  * arg 4) Access permissions for file.
@@ -103,7 +103,7 @@ ap_status_t file_cleanup(void *thefile)
  * NOTE:  If mode is APR_OS_DEFAULT, the system open command will be 
  *        called without any mode parameters.
  */
-ap_status_t ap_open(ap_context_t *cont, char *fname, ap_int32_t flag,  ap_fileperms_t perm, struct file_t **new)
+ap_status_t ap_open(ap_context_t *cont, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, struct file_t **new)
 {
     int oflags = 0;
     struct stat info;
