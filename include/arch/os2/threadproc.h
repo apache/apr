@@ -78,7 +78,7 @@ struct apr_thread_t {
 };
 
 struct apr_threadkey_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     unsigned long *key;
 };
 
