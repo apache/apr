@@ -1,5 +1,9 @@
 Changes with APR 0.9.5
 
+  *) Fix apr_socket_opt_set with APR_IPV6_V6ONLY flag.  Fixes httpd
+     Listen IPv6 socket behavior on FreeBSD 5.x, OpenBSD, NetBSD.
+     [Justin Erenkrantz]
+
   *) Fix apr_time_exp_get() for dates in 2038.  
      [Philip Martin <philip codematters.co.uk>]
 
