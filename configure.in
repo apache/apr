@@ -322,6 +322,18 @@ case $host in
        enable_threads="no"
        eolstr="\\n"
        ;;
+   *sun*)
+       case $host_cpu in
+        *sparc*)
+           OSDIR="solaris_sparc"
+           eolstr="\\n"
+            ;;
+        *)
+            OSDIR="unix"
+            eolstr="\\n"
+            ;;
+       esac
+       ;;
    *)
        OSDIR="unix"
        eolstr="\\n"

@@ -173,7 +173,7 @@ long apr_atomic_cas(volatile apr_atomic_t *mem,long with,long cmp);
 
 #define APR_ATOMIC_NEED_CAS_DEFAULT 1
 
-#elif defined(__sparc__not_yet)
+#elif defined(__sparc__)
 #define apr_atomic_t apr_uint32_t
 #define apr_atomic_read(p)  *p
 
