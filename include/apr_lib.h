@@ -157,7 +157,8 @@ APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname);
  * The extensions are:
  *
  * %pA	takes a struct in_addr *, and prints it as a.b.c.d
- * %pI	takes a struct sockaddr_in * and prints it as a.b.c.d:port
+ * %pI	takes an apr_sockaddr_t * and prints it as a.b.c.d:port or
+ *      [ipv6-address]:port
  * %pp  takes a void * and outputs it in hex
  *
  * The %p hacks are to force gcc's printf warning code to skip

@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) apr_snprintf()'s %pI format string now takes apr_sockaddr_t *
+     instead of sockaddr_in *.  [Jeff Trawick]
+
   *) Fix a bug in apr_accept() for Win32 and Unix where the local 
      apr_sockaddr_t in the new connected socket was not initialized
      properly.  This could result in a bad string for apr_get_ipaddr(),
