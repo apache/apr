@@ -120,7 +120,6 @@ typedef struct apr_pool_t apr_pool_t;
         (const apr_##typename##_t *ob) { return ob->pool; }
 
 
-#include "apr_allocator.h"
 
 /**
  * Pool debug levels
@@ -206,6 +205,8 @@ APR_DECLARE(void) apr_pool_terminate(void);
 /*
  * Pool creation/destruction
  */
+
+#include "apr_allocator.h"
 
 /**
  * Create a new pool.

@@ -148,7 +148,6 @@ struct apr_proc_mutex_t {
     apr_pool_t *pool;
     const apr_proc_mutex_unix_lock_methods_t *meth;
     const apr_proc_mutex_unix_lock_methods_t *inter_meth;
-    apr_lockscope_e scope;
     int curr_locked;
     char *fname;
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
