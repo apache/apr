@@ -164,11 +164,11 @@ SOURCE=.\i18n\unix\xlate.c
 
 SOURCE=.\locks\win32\locks.c
 # End Source File
-# End Group
+# Begin Source File
 
 SOURCE=.\locks\win32\thread_mutex.c
 # End Source File
-# End Group
+# Begin Source File
 
 SOURCE=.\locks\win32\thread_rwlock.c
 # End Source File
@@ -439,11 +439,11 @@ SOURCE=.\include\arch\win32\networkio.h
 
 SOURCE=.\include\arch\win32\thread_mutex.h
 # End Source File
-# End Group
+# Begin Source File
 
 SOURCE=.\include\arch\win32\thread_rwlock.h
 # End Source File
-# End Group
+# Begin Source File
 
 SOURCE=.\include\arch\win32\threadproc.h
 # End Source File
