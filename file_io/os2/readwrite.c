@@ -1,4 +1,4 @@
-os2//* ====================================================================
+/* ====================================================================
  * The Apache Software License, Version 1.1
  *
  * Copyright (c) 2000 The Apache Software Foundation.  All rights
