@@ -56,6 +56,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <string.h>
 #include "apr_network_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
@@ -76,12 +77,18 @@ int main(void)
 
 #define HDR1           "1234567890ABCD\n"
 #define HDR2           "EFGH\n"
+#define HDR3_LEN       80000
+#define HDR3_CHAR      '^'
 #define TRL1           "IJKLMNOPQRSTUVWXYZ\n"
 #define TRL2           "!@#$%&*()\n"
+#define TRL3_LEN       90000
+#define TRL3_CHAR      '@'
 
 #define TESTSF_PORT    8021
 
 #define TESTFILE       "testsf.dat"
+
+typedef enum {BLK, NONBLK, TIMEOUT} client_socket_mode_t;
 
 static void apr_setup(ap_pool_t **p, ap_socket_t **sock)
 {
@@ -171,19 +178,22 @@ static void create_testfile(ap_pool_t *p, const char *fname)
     }
 }
 
-static int client(int socket_mode)
+static int client(client_socket_mode_t socket_mode)
 {
-    ap_status_t rv;
+    ap_status_t rv, tmprv;
     ap_socket_t *sock;
     ap_pool_t *p;
     char buf[120];
     ap_file_t *f = NULL;
     ap_size_t len, expected_len;
-    ap_off_t offset;
+    ap_off_t current_file_offset;
     ap_hdtr_t hdtr;
-    struct iovec headers[2];
-    struct iovec trailers[2];
+    struct iovec headers[3];
+    struct iovec trailers[3];
     ap_ssize_t bytes_read;
+    ap_pollfd_t *pfd;
+    ap_int32_t nsocks;
+    int i;
 
     apr_setup(&p, &sock);
     create_testfile(p, TESTFILE);
@@ -213,10 +223,10 @@ static int client(int socket_mode)
     }
 
     switch(socket_mode) {
-    case 1:
+    case BLK:
         /* leave it blocking */
         break;
-    case 0:
+    case NONBLK:
         /* set it non-blocking */
         rv = ap_setsocketopt(sock, APR_SO_NONBLOCK, 1);
         if (rv != APR_SUCCESS) {
@@ -226,7 +236,7 @@ static int client(int socket_mode)
             exit(1);
         }
         break;
-    case 2:
+    case TIMEOUT:
         /* set a timeout */
         rv = ap_setsocketopt(sock, APR_SO_TIMEOUT, 
                              100 * AP_USEC_PER_SEC);
@@ -244,51 +254,173 @@ static int client(int socket_mode)
     printf("Sending the file...\n");
 
     hdtr.headers = headers;
-    hdtr.numheaders = 2;
+    hdtr.numheaders = 3;
     hdtr.headers[0].iov_base = HDR1;
     hdtr.headers[0].iov_len  = strlen(hdtr.headers[0].iov_base);
     hdtr.headers[1].iov_base = HDR2;
     hdtr.headers[1].iov_len  = strlen(hdtr.headers[1].iov_base);
+    hdtr.headers[2].iov_base = malloc(HDR3_LEN);
+    assert(hdtr.headers[2].iov_base);
+    memset(hdtr.headers[2].iov_base, HDR3_CHAR, HDR3_LEN);
+    hdtr.headers[2].iov_len  = HDR3_LEN;
 
     hdtr.trailers = trailers;
-    hdtr.numtrailers = 2;
+    hdtr.numtrailers = 3;
     hdtr.trailers[0].iov_base = TRL1;
     hdtr.trailers[0].iov_len  = strlen(hdtr.trailers[0].iov_base);
     hdtr.trailers[1].iov_base = TRL2;
     hdtr.trailers[1].iov_len  = strlen(hdtr.trailers[1].iov_base);
-
-    offset = 0;
-    len = FILE_LENGTH;
-    rv = ap_sendfile(sock, f, &hdtr, &offset, &len, 0);
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_sendfile()->%d/%s\n",
-                rv,
-		ap_strerror(rv, buf, sizeof buf));
-        exit(1);
-    }
-
-    printf("ap_sendfile() updated offset with %ld\n",
-           (long int)offset);
-
-    printf("ap_sendfile() updated len with %ld\n",
-           (long int)len);
+    hdtr.trailers[2].iov_base = malloc(TRL3_LEN);
+    memset(hdtr.trailers[2].iov_base, TRL3_CHAR, TRL3_LEN);
+    assert(hdtr.trailers[2].iov_base);
+    hdtr.trailers[2].iov_len  = TRL3_LEN;
 
     expected_len = 
-        strlen(HDR1) + strlen(HDR2) + 
-        strlen(TRL1) + strlen(TRL2) + 
+        strlen(HDR1) + strlen(HDR2) + HDR3_LEN +
+        strlen(TRL1) + strlen(TRL2) + TRL3_LEN +
         FILE_LENGTH;
+    
+    if (socket_mode == BLK || socket_mode == TIMEOUT) {
+        current_file_offset = 0;
+        len = FILE_LENGTH;
+        rv = ap_sendfile(sock, f, &hdtr, &current_file_offset, &len, 0);
+        if (rv != APR_SUCCESS) {
+            fprintf(stderr, "ap_sendfile()->%d/%s\n",
+                    rv,
+                    ap_strerror(rv, buf, sizeof buf));
+            exit(1);
+        }
+        
+        printf("ap_sendfile() updated offset with %ld\n",
+               (long int)current_file_offset);
+        
+        printf("ap_sendfile() updated len with %ld\n",
+               (long int)len);
+        
+        printf("bytes really sent: %d\n",
+               expected_len);
 
-    printf("bytes really sent: %d\n",
-           expected_len);
+        if (len != expected_len) {
+            fprintf(stderr, "ap_sendfile() didn't report the correct "
+                    "number of bytes sent!\n");
+            exit(1);
+        }
+    }
+    else {
+        /* non-blocking... wooooooo */
+        ap_size_t total_bytes_sent;
 
-    if (len != expected_len) {
-        fprintf(stderr, "ap_sendfile() didn't report the correct "
-                "number of bytes sent!\n");
-        exit(1);
+        pfd = NULL;
+        rv = ap_setup_poll(&pfd, 1, p);
+        assert(!rv);
+        rv = ap_add_poll_socket(pfd, sock, APR_POLLOUT);
+        assert(!rv);
+
+        total_bytes_sent = 0;
+        current_file_offset = 0;
+        len = FILE_LENGTH;
+        do {
+            ap_size_t tmplen;
+
+            tmplen = len; /* bytes remaining to send from the file */
+            printf("Calling ap_sendfile()...\n");
+            printf("Headers:\n");
+            for (i = 0; i < hdtr.numheaders; i++) {
+                printf("\t%d bytes\n",
+                       hdtr.headers[i].iov_len);
+            }
+            printf("File: %ld bytes from offset %ld\n",
+                   (long)tmplen, (long)current_file_offset);
+            printf("Trailers:\n");
+            for (i = 0; i < hdtr.numtrailers; i++) {
+                printf("\t%d bytes\n",
+                       hdtr.trailers[i].iov_len);
+            }
+
+            rv = ap_sendfile(sock, f, &hdtr, &current_file_offset, &tmplen, 0);
+            printf("ap_sendfile()->%d, sent %ld bytes\n", rv, (long)tmplen);
+            if (rv) {
+                if (ap_canonical_error(rv) == APR_EAGAIN) {
+                    nsocks = 1;
+                    tmprv = ap_poll(pfd, &nsocks, -1);
+                    assert(!tmprv);
+                    assert(nsocks == 1);
+                    /* continue; */
+                }
+            }
+
+            total_bytes_sent += tmplen;
+
+            /* Adjust hdtr to compensate for partially-written
+             * data.
+             */
+
+            /* First, skip over any header data which might have
+             * been written.
+             */
+            while (tmplen && hdtr.numheaders) {
+                if (tmplen >= hdtr.headers[0].iov_len) {
+                    tmplen -= hdtr.headers[0].iov_len;
+                    --hdtr.numheaders;
+                    ++hdtr.headers;
+                }
+                else {
+                    hdtr.headers[0].iov_len -= tmplen;
+                    hdtr.headers[0].iov_base += tmplen;
+                    tmplen = 0;
+                }
+            }
+
+            /* Now, skip over any file data which might have been
+             * written.
+             */
+
+            if (tmplen <= len) {
+                current_file_offset += tmplen;
+                len -= tmplen;
+                tmplen = 0;
+            }
+            else {
+                tmplen -= len;
+                len = 0;
+                current_file_offset = 0;
+            }
+
+            /* Last, skip over any trailer data which might have
+             * been written.
+             */
+
+            while (tmplen && hdtr.numtrailers) {
+                if (tmplen >= hdtr.trailers[0].iov_len) {
+                    tmplen -= hdtr.trailers[0].iov_len;
+                    --hdtr.numtrailers;
+                    ++hdtr.trailers;
+                }
+                else {
+                    hdtr.trailers[0].iov_len -= tmplen;
+                    hdtr.trailers[0].iov_base += tmplen;
+                    tmplen = 0;
+                }
+            }
+
+        } while (total_bytes_sent < expected_len &&
+                 (rv == APR_SUCCESS || 
+                  ap_canonical_error(rv) == APR_EAGAIN));
+        if (total_bytes_sent != expected_len) {
+            fprintf(stderr,
+                    "client problem: sent %ld of %ld bytes\n",
+                    (long)total_bytes_sent, (long)expected_len);
+        }
+
+        if (rv) {
+            fprintf(stderr,
+                    "client problem: rv %d\n",
+                    rv);
+        }
     }
     
-    offset = 0;
-    rv = ap_seek(f, APR_CUR, &offset);
+    current_file_offset = 0;
+    rv = ap_seek(f, APR_CUR, &current_file_offset);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "ap_seek()->%d/%s\n",
                 rv,
@@ -298,7 +430,7 @@ static int client(int socket_mode)
 
     printf("After ap_sendfile(), the kernel file pointer is "
            "at offset %ld.\n",
-           (long int)offset);
+           (long int)current_file_offset);
 
     rv = ap_shutdown(sock, APR_SHUTDOWN_WRITE);
     if (rv != APR_SUCCESS) {
@@ -432,6 +564,31 @@ static int server(void)
         exit(1);
     }
 
+    for (i = 0; i < HDR3_LEN; i++) {
+        bytes_read = 1;
+        rv = ap_recv(newsock, buf, &bytes_read);
+        if (rv != APR_SUCCESS) {
+            fprintf(stderr, "ap_recv()->%d/%s\n",
+                    rv,
+                    ap_strerror(rv, buf, sizeof buf));
+            exit(1);
+        }
+        if (bytes_read != 1) {
+            fprintf(stderr, "ap_recv()->%ld bytes instead of 1\n",
+                    (long int)bytes_read);
+            exit(1);
+        }
+        if (buf[0] != HDR3_CHAR) {
+            fprintf(stderr,
+                    "problem with data read (byte %d of hdr 3):\n",
+                    i);
+            fprintf(stderr, "read `%c' (0x%x) from client; expected "
+                    "`%c'\n",
+                    buf[0], buf[0], HDR3_CHAR);
+            exit(1);
+        }
+    }
+        
     for (i = 0; i < FILE_LENGTH; i++) {
         bytes_read = 1;
         rv = ap_recv(newsock, buf, &bytes_read);
@@ -497,6 +654,31 @@ static int server(void)
         exit(1);
     }
 
+    for (i = 0; i < TRL3_LEN; i++) {
+        bytes_read = 1;
+        rv = ap_recv(newsock, buf, &bytes_read);
+        if (rv != APR_SUCCESS) {
+            fprintf(stderr, "ap_recv()->%d/%s\n",
+                    rv,
+                    ap_strerror(rv, buf, sizeof buf));
+            exit(1);
+        }
+        if (bytes_read != 1) {
+            fprintf(stderr, "ap_recv()->%ld bytes instead of 1\n",
+                    (long int)bytes_read);
+            exit(1);
+        }
+        if (buf[0] != TRL3_CHAR) {
+            fprintf(stderr,
+                    "problem with data read (byte %d of trl 3):\n",
+                    i);
+            fprintf(stderr, "read `%c' (0x%x) from client; expected "
+                    "`%c'\n",
+                    buf[0], buf[0], TRL3_CHAR);
+            exit(1);
+        }
+    }
+        
     bytes_read = 1;
     rv = ap_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
@@ -507,8 +689,8 @@ static int server(void)
     }
     if (bytes_read != 0) {
         fprintf(stderr, "We expected the EOF condition on the connected\n"
-                "socket but instead we read %ld bytes.\n",
-                (long int)bytes_read);
+                "socket but instead we read %ld bytes (%c).\n",
+                (long int)bytes_read, buf[0]);
         exit(1);
     }
 
@@ -528,13 +710,13 @@ int main(int argc, char *argv[])
      */
     if (argc == 3 && !strcmp(argv[1], "client")) {
         if (!strcmp(argv[2], "blocking")) {
-            return client(1);
+            return client(BLK);
         }
         else if (!strcmp(argv[2], "timeout")) {
-            return client(2);
+            return client(TIMEOUT);
         }
         else if (!strcmp(argv[2], "nonblocking")) {
-            return client(0);
+            return client(NONBLK);
         }
     }
     else if (argc == 2 && !strcmp(argv[1], "server")) {
