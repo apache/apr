@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 
     if (argc > 1) {
 
-        ap_setup_signal(context, APR_SIGHUP, hup_handler);
+        ap_setup_signal(APR_SIGHUP, hup_handler, context);
 
         while(time_to_die == 0) {
             sleep(1);
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout, "Creating new signal.......");
-    if (ap_create_signal(context, APR_SIGHUP) != APR_SUCCESS) {
+    if (ap_create_signal(APR_SIGHUP, context) != APR_SUCCESS) {
         fprintf(stderr, "Could not create attr\n");
         exit(-1);
     }
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 
     fprintf(stdout, "Sending the signal.......");
     fflush(stdout);
-    ap_send_signal(context, APR_SIGHUP);    
+    ap_send_signal(APR_SIGHUP, context);    
 
     ap_wait_proc(newproc, APR_WAIT);
 

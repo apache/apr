@@ -58,7 +58,7 @@
 #include <signal.h>
 #include <kernel/OS.h>
 
-ap_status_t ap_create_signal(ap_context_t *cont, ap_signum_t signum)
+ap_status_t ap_create_signal(ap_signum_t signum, ap_context_t *cont)
 {
     return APR_SUCCESS;
 }
@@ -68,7 +68,7 @@ ap_status_t ap_create_signal(ap_context_t *cont, ap_signum_t signum)
  * that is solved, this will change here.
  */
  
-ap_status_t ap_send_signal(ap_context_t *cont, ap_signum_t signum)
+ap_status_t ap_send_signal(ap_signum_t signum, ap_context_t *cont)
 {
 /* this function sends a signal to every thread within the current team
  * except the one calling it! */
@@ -84,7 +84,7 @@ ap_status_t ap_send_signal(ap_context_t *cont, ap_signum_t signum)
  	}
 }
 
-ap_setup_signal(ap_context_t *cont, ap_signum_t signum, Sigfunc *func)
+ap_setup_signal(ap_signum_t signum, Sigfunc *func, ap_context_t *cont)
 {
     /* Thanks to Chris Tate at Be for the code below */
     sigset_t newset, oldset;
