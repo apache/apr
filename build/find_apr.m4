@@ -53,11 +53,10 @@ AC_DEFUN(APR_FIND_APR, [
     TEST_X="test -x"
   fi
 
-  m4_if([$4], [],
-  [
-    AC_WARNING([$0: missing argument 4 (acceptable-majors): Defaulting to APR 0.x then APR 1.x])
-    acceptable_majors="0 1"
-  ], [acceptable_majors="$4"])
+  ifelse([$4], [], [
+         ifdef(AC_WARNING,AC_WARNING([$0: missing argument 4 (acceptable-majors): Defaulting to APR 0.x then APR 1.x]))
+         acceptable_majors="0 1"],
+         [acceptable_majors="$4"])
 
   apr_temp_acceptable_apr_config=""
   for apr_temp_major in $acceptable_majors
