@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/09/20 16:26:07 $]
+Last modified at [$Date: 2001/09/26 18:25:04 $]
 
 Release:
 
@@ -27,6 +27,13 @@ RELEASE SHOWSTOPPERS:
       up hproc after the process is dead.  Can't do a pool cleanup,
       since apr_proc_create didn't allocate the apr_proc_t storage.
       (Aren't transparent types swell?)  Suggestions?
+
+    * The new lock API is a full replacement for the old API, save
+      for the apr_lock_data_get/apr_lock_data_set functions. These
+      should be translated into apr_proc_mutex_data_get and
+      apr_proc_mutex_data_set to be complete.
+        Status: This should be in place before we make an APR release.
+                Aaron will do it unless someone beats him to it.
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
@@ -212,6 +219,28 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       FreeBSD.
 
       MsgID: <20010828091959.D17570@ebuilt.com>
+
+    * Currently it is difficult if not impossible to return a proper
+      status code from a thread using apr_thread_exit(), since the
+      value must be a (apr_status_t*), but the pool where this would
+      normally be allocated is in that same function immediately
+      thereafter destroyed. Simply changing the type of this parameter
+      to (apr_status_t) should solve the problem (along with some
+      internal changes in apr_thread_join() to accomodate).
+        Status: Aaron is working on this.
+
+    * There are some optimizations that can be done to the new
+      apr_proc_*() functions (on UNIX). One that may reduce pointer
+      indirection would be to make the apr_proc_mutex_unix_lock_methods_t
+      first-class members of the apr_proc_mutex_t structure.
+
+    * Condition variables are tricky enough to use, and even trickier
+      to implement properly. We could really use a better test case
+      for those subtle quirks that sometimes creep into CV implementations.
+
+    * Once we are fully satisfied with the new lock API, we can
+      begin to migrate the old API to be implemented on top of the
+      new one, or just decide to get rid of it altogether.
       
 Documentation that needs writing:
 
