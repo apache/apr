@@ -355,17 +355,17 @@ fi
 if test "$ac_cv_type_off_t" = "yes"; then
     off_t_value="off_t"
 else
-    off_t_value="ap_int32_t"
+    off_t_value="apr_int32_t"
 fi
 if test "$ac_cv_type_size_t" = "yes"; then
     size_t_value="size_t"
 else
-    size_t_value="ap_int32_t"
+    size_t_value="apr_int32_t"
 fi
 if test "$ac_cv_type_ssize_t" = "yes"; then
     ssize_t_value="ssize_t"
 else
-    ssize_t_value="ap_int32_t"
+    ssize_t_value="apr_int32_t"
 fi
 
 AC_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], ssize_t, 8)
@@ -390,8 +390,8 @@ else
     off_t_fmt='#error Can not determine the proper size for off_t'
 fi
 
-# basically, we have tried to figure out the sizes of ap_ssize_t and
-# ap_off_t, but we don't always get it right.  If you find that we
+# basically, we have tried to figure out the sizes of apr_ssize_t and
+# apr_off_t, but we don't always get it right.  If you find that we
 # don't get it right for your platform, you can override our decision
 # below.
 case "$OS" in
