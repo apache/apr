@@ -347,7 +347,7 @@ static void *mprotect_realloc(void *addr, apr_size_t size)
  * Get a completely new block from the system pool. Note that we rely on
  * malloc() to provide aligned memory.
  */
-static union block_hdr *malloc_block(int size, apr_abortfunc_t abortfunc)
+static union block_hdr *malloc_block(apr_size_t size, apr_abortfunc_t abortfunc)
 {
     union block_hdr *blok;
 
@@ -506,7 +506,7 @@ static void free_blocks(union block_hdr *blok)
  * Get a new block, from our own free list if possible, from the system
  * if necessary.  Must be called with alarms blocked.
  */
-static union block_hdr *new_block(int min_size, apr_abortfunc_t abortfunc)
+static union block_hdr *new_block(apr_size_t min_size, apr_abortfunc_t abortfunc)
 {
     union block_hdr **lastptr = &block_freelist;
     union block_hdr *blok = block_freelist;
@@ -516,7 +516,7 @@ static union block_hdr *new_block(int min_size, apr_abortfunc_t abortfunc)
      */
 
     while (blok != NULL) {
-	if (min_size + BLOCK_MINFREE <= blok->h.endp - blok->h.first_avail) {
+	if ((apr_ssize_t)min_size + BLOCK_MINFREE <= blok->h.endp - blok->h.first_avail) {
 	    *lastptr = blok->h.next;
 	    blok->h.next = NULL;
 	    debug_verify_filled(blok->h.first_avail, blok->h.endp,
@@ -1169,7 +1169,7 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_set(const void *data, const char *ke
 			      apr_status_t (*cleanup) (void *),
 			      apr_pool_t *cont)
 {
-    int keylen = strlen(key);
+    apr_size_t keylen = strlen(key);
 
     if (cont->prog_data == NULL)
         cont->prog_data = apr_hash_make(cont);

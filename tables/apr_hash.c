@@ -86,7 +86,7 @@ struct apr_hash_entry_t {
     apr_hash_entry_t	*next;
     int			 hash;
     const void		*key;
-    apr_size_t		 klen;
+    apr_ssize_t		 klen;
     const void		*val;
 };
 
@@ -168,7 +168,7 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_hash_t *ht)
 
 APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi,
 			       const void **key,
-			       apr_size_t *klen,
+			       apr_ssize_t *klen,
 			       void **val)
 {
     if (key)  *key  = hi->this->key;
@@ -209,14 +209,14 @@ static void expand_array(apr_hash_t *ht)
  */
 
 static apr_hash_entry_t **find_entry(apr_hash_t *ht,
-				    const void *key,
-				    apr_ssize_t klen,
-				    const void *val)
+				     const void *key,
+				     apr_ssize_t klen,
+				     const void *val)
 {
     apr_hash_entry_t **hep, *he;
     const unsigned char *p;
     int hash;
-    int i;
+    apr_ssize_t i;
 
     if (klen == APR_HASH_KEY_STRING)
 	klen = strlen(key);

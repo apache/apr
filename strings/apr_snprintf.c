@@ -1199,7 +1199,7 @@ static int snprintf_flush(apr_vformatter_buff_t *vbuff)
 }
 
 
-APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, size_t len, 
+APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, apr_size_t len, 
                                    const char *format, ...)
 {
     int cc;
@@ -1216,11 +1216,11 @@ APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, size_t len,
     cc = apr_vformatter(snprintf_flush, &vbuff, format, ap);
     va_end(ap);
     *vbuff.curpos = '\0';
-    return (cc == -1) ? len : cc;
+    return (cc == -1) ? (int)len : cc;
 }
 
 
-APR_DECLARE(int) apr_vsnprintf(char *buf, size_t len, const char *format,
+APR_DECLARE(int) apr_vsnprintf(char *buf, apr_size_t len, const char *format,
 			     va_list ap)
 {
     int cc;
@@ -1234,5 +1234,5 @@ APR_DECLARE(int) apr_vsnprintf(char *buf, size_t len, const char *format,
     vbuff.endpos = buf + len - 1;
     cc = apr_vformatter(snprintf_flush, &vbuff, format, ap);
     *vbuff.curpos = '\0';
-    return (cc == -1) ? len : cc;
+    return (cc == -1) ? (int)len : cc;
 }
