@@ -334,7 +334,7 @@ APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
 	    c -= 'A' - 10;
 	else if (c >= 'a' && c <= 'z')
 	    c -= 'a' - 10;
-#elif (('I' - 'A') == 9) && (('R' - 'J') == 9) && (('Z' - 'S') == 8) 
+#elif APR_CHARSET_EBCDIC
 	else if (c >= 'A' && c <= 'I')
 	    c -= 'A' - 10;
 	else if (c >= 'J' && c <= 'R')
