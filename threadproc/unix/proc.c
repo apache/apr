@@ -382,7 +382,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             exit(-1);   /* We have big problems, the child should exit. */
         }
 
-        if (attr->cmdtype == APR_SHELLCMD) {
+        if (attr->cmdtype == APR_SHELLCMD ||
+            attr->cmdtype == APR_SHELLCMD_ENV) {
             int onearg_len = 0;
             const char *newargs[4];
 
@@ -433,7 +434,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 apr_proc_detach(APR_PROC_DETACH_DAEMONIZE);
             }
 
-            execve(SHELL_PATH, (char * const *) newargs, (char * const *)env);
+            if (attr->cmdtype == APR_SHELLCMD) {
+                execve(SHELL_PATH, (char * const *) newargs, (char * const *)env);
+            }
+            else {
+                execv(SHELL_PATH, (char * const *)newargs);
+            }
         }
         else if (attr->cmdtype == APR_PROGRAM) {
             if (attr->detached) {

@@ -1,5 +1,9 @@
 Changes with APR 0.9.5
 
+  *) Add command type APR_SHELLCMD_ENV for creating a process
+     which is started by the shell and which inherits the parent's
+     environment variables.  [Jeff Trawick]
+
   *) Change default inter-process locking mechanisms: POSIX semaphores
      and pthread cross-process mutexes are not used by default; on 
      Solaris, fcntl locks are used by default.  [Joe Orton]
