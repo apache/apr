@@ -151,15 +151,19 @@ apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
     struct tm mangotm;
     localtime_r(&mangotm, &mango);
+/* XXX - Add support for Solaris */
+#ifdef HAVE_GMTOFF
     offs = mangotm.tm_gmtoff;
-#else
+#elif defined(HAVE___OFFSET)
+    offs = mangotm.__tm_gmtoff;
+#endif
+#else /* !APR_HAS_THREADS */
     struct tm *mangotm;
     mangotm=localtime(&mango);
     offs = mangotm->tm_gmtoff;
 #endif
     return apr_explode_time(result, input, offs);
 }
-
 
 apr_status_t apr_implode_time(apr_time_t *t, apr_exploded_time_t *xt)
 {
