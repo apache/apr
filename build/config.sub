@@ -89,6 +89,10 @@ case $maybe_os in
     os=-$maybe_os
     basic_machine=s390;
     ;;
+  os400)
+    os=-$maybe_os
+    basic_machine=as400;
+    ;;
   mvs)
     os=-mvs
     basic_machine=i370;
@@ -240,7 +244,7 @@ case $basic_machine in
 	      | mips64el-* | mips64orion-* | mips64orionel-* \
 	      | mips64vr4100-* | mips64vr4100el-* | mips64vr4300-* | mips64vr4300el-* \
 	      | mipstx39-* | mipstx39el-* | mcore-* \
-	      | f301-* | armv*-* | s390-* | sv1-* | t3e-* \
+	      | f301-* | armv*-* | s390-* | as400-* | sv1-* | t3e-* \
 	      | m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | d10v-* \
 	      | thumb-* | v850-* | d30v-* | tic30-* | c30-* | fr30-* \
 	      | bs2000-*)
@@ -707,6 +711,9 @@ case $basic_machine in
 	s390*)
 		basic_machine=s390-ibm
 		;; 
+        as400*)
+		basic_machine=as400-ibm
+		;;
 # 
 # end Apache changes
 ########################
@@ -954,7 +961,7 @@ case $os in
 ########################
 # changes for Apache
 #
-	-os2_emx | -tpf* | -os390* | -vmcms* )
+	-os2_emx | -tpf* | -os390* | -vmcms* | -os400* )
 		;;
 #
 # end Apache changes
@@ -1159,6 +1166,9 @@ case $basic_machine in
 			;;
 		    i370*)
 			os=-mvs;
+			;;
+		    as400*)
+			os=-os400;
 			;;
 		    *)
 			os=-aix
