@@ -54,16 +54,19 @@ depend:
 crossproc.o: crossproc.c locks.h ../../include/apr_private.h \
  ../../include/apr_general.h ../../include/apr.h \
  ../../include/apr_errno.h ../../include/apr_lib.h \
- ../../include/apr_file_io.h ../../include/apr_time.h \
- ../../include/apr_thread_proc.h ../../include/apr_lock.h
+ ../../include/apr_tables.h ../../include/apr_file_io.h \
+ ../../include/apr_time.h ../../include/apr_thread_proc.h \
+ ../../include/apr_lock.h
 intraproc.o: intraproc.c locks.h ../../include/apr_private.h \
  ../../include/apr_general.h ../../include/apr.h \
  ../../include/apr_errno.h ../../include/apr_lib.h \
- ../../include/apr_file_io.h ../../include/apr_time.h \
- ../../include/apr_thread_proc.h ../../include/apr_lock.h
+ ../../include/apr_tables.h ../../include/apr_file_io.h \
+ ../../include/apr_time.h ../../include/apr_thread_proc.h \
+ ../../include/apr_lock.h
 locks.o: locks.c locks.h ../../include/apr_private.h \
  ../../include/apr_general.h ../../include/apr.h \
  ../../include/apr_errno.h ../../include/apr_lib.h \
- ../../include/apr_file_io.h ../../include/apr_time.h \
- ../../include/apr_thread_proc.h ../../include/apr_lock.h \
- ../../include/apr_portable.h ../../include/apr_network_io.h
+ ../../include/apr_tables.h ../../include/apr_file_io.h \
+ ../../include/apr_time.h ../../include/apr_thread_proc.h \
+ ../../include/apr_lock.h ../../include/apr_portable.h \
+ ../../include/apr_network_io.h
