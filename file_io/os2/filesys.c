@@ -55,6 +55,7 @@
 #include "apr.h"
 #include "fileio.h"
 #include "apr_strings.h"
+#include "apr_lib.h"
 #include <ctype.h>
 
 /* OS/2 Exceptions:
@@ -91,7 +92,7 @@ const char c_is_fnchar[256] =
 
 apr_status_t filepath_root_test(char *path, apr_pool_t *p)
 {
-    char drive = toupper(path[0]);
+    char drive = apr_toupper(path[0]);
 
     if (drive >= 'A' && drive <= 'Z' && path[1] == ':' && IS_SLASH(path[2]))
         return APR_SUCCESS;
@@ -112,7 +113,7 @@ apr_status_t filepath_drive_get(char **rootpath, char drive,
     path[1] = ':';
     path[2] = '/';
 
-    rc = DosQueryCurrentDir(toupper(drive) - 'A', path+3, &bufsize);
+    rc = DosQueryCurrentDir(apr_toupper(drive) - 'A', path+3, &bufsize);
 
     if (rc) {
         return APR_FROM_OS_ERROR(rc);
@@ -136,7 +137,7 @@ apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)
 
     strcpy(path, root);
     if (path[1] == ':')
-        path[0] = toupper(path[0]);
+        path[0] = apr_toupper(path[0]);
     *rootpath = apr_pstrdup(p, path);
     return APR_SUCCESS;
 }
@@ -175,7 +176,7 @@ APR_DECLARE(apr_status_t) apr_filepath_set(const char *path, apr_pool_t *p)
     ULONG rv = 0;
 
     if (path[1] == ':')
-        rv = DosSetDefaultDisk(toupper(path[0]) - '@');
+        rv = DosSetDefaultDisk(apr_toupper(path[0]) - '@');
 
     if (rv == 0)
         rv = DosSetCurrentDir(path);

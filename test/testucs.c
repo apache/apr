@@ -148,11 +148,11 @@ int main(int argc, char **argv)
     struct testval s;
     memset (&s, 0, sizeof(s));
 
-    if (argc < 2 || tolower(*argv[1]) != 'w') {
+    if (argc < 2 || apr_tolower(*argv[1]) != 'w') {
         printf ("\n\nTesting Narrow Char Ranges\n");
         test_nrange(&s);
     }
-    if (argc < 2 || tolower(*argv[1]) != 'n') {
+    if (argc < 2 || apr_tolower(*argv[1]) != 'n') {
         printf ("\n\nTesting Wide Char Ranges\n");
         test_wrange(&s);
     }
