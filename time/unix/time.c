@@ -154,25 +154,16 @@ apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input
     return apr_explode_time(result, input, -timezone);
 #else
     time_t mango = input / APR_USEC_PER_SEC;
-    apr_int32_t offs = 0;
 
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
     struct tm mangotm;
     localtime_r(&mango, &mangotm);
-/* XXX - Add support for Solaris */
-#ifdef HAVE_GMTOFF
-    offs = mangotm.tm_gmtoff;
-#elif defined(HAVE___OFFSET)
-    offs = mangotm.__tm_gmtoff;
-#endif
 #else /* !APR_HAS_THREADS */
-    struct tm *mangotm;
-    mangotm=localtime(&mango);
-#ifdef HAVE_GMTOFF
-    offs = mangotm->tm_gmtoff;
-#endif    
+    struct tm mangotm;
+    mangotm = *localtime(&mango);
 #endif
-    return apr_explode_time(result, input, offs);
+    tm_to_exp(result, &mangotm, &mango);
+    return APR_SUCCESS;
 #endif /* __EMX__ */
 }
 
