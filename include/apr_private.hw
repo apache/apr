@@ -77,6 +77,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <time.h>
+#include "apr_errno.h"
 
 #define HAVE_SENDFILE 1
 
@@ -146,11 +147,23 @@ typedef void (Sigfunc)(int);
 #define SIZEOF_CHAR            1
 #define SIZEOF_SSIZE_T         SIZEOF_INT
 
+
+/* Platform specific designation of run time os version.
+ * Gaps allow for specific service pack levels that 
+ * export new kernel or winsock functions or behavior.
+ */
+typedef enum {
+	APR_WIN_95 = 0, 
+	APR_WIN_98 = 4, 
+	APR_WIN_NT = 8
+} ap_oslevel_e;
+
+
 /* APR WINDOWS-ONLY FUNCTIONS
  * This section should define those functions which are
  * only found in the windows version of APR.
  */
-
+ap_status_t ap_get_oslevel(struct ap_context_t *, ap_oslevel_e *);
 unsigned __stdcall SignalHandling(void *);
 int thread_ready(void);
 
