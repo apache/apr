@@ -55,19 +55,6 @@
 #include "networkio.h"
 #include "apr_strings.h"
 
-int apr_is_option_set(apr_int32_t mask, apr_int32_t option)
-{
-    return (mask & option) == option;
-}
-
-void apr_set_option(apr_int32_t *mask, apr_int32_t option, int on)
-{
-    if (on)
-        *mask |= option;
-    else
-        *mask &= ~option;
-}
-
 static apr_status_t soblock(int sd)
 {
 /* BeOS uses setsockopt at present for non blocking... */
