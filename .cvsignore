@@ -13,3 +13,4 @@ Release
 *.mak
 *.opt
 *.plg
+apr.exports
