@@ -260,6 +260,7 @@ dnl  Set variable iff it's currently null
 dnl
 AC_DEFUN(APR_SETIFNULL,[
   if test -z "$$1"; then
+    echo "  Setting $1 to \"$2\""
     $1="$2"; export $1
   fi
 ])
@@ -270,6 +271,7 @@ dnl
 dnl  Set variable no matter what
 dnl
 AC_DEFUN(APR_SETVAR,[
+  echo "  Forcing $1 to \"$2\""
   $1="$2"; export $1
 ])
 
@@ -279,6 +281,7 @@ dnl
 dnl  Add value to variable
 dnl
 AC_DEFUN(APR_ADDTO,[
-   $1="$$1 $2"; export $1
+  echo "  Adding \"$2\" to $1"
+  $1="$$1 $2"; export $1
 ])
 
