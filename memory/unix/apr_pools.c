@@ -540,7 +540,7 @@ static union block_hdr *new_block(apr_size_t min_size, apr_abortfunc_t abortfunc
 
 
 /* Accounting */
-
+#ifdef APR_POOL_DEBUG
 static apr_size_t bytes_in_block_list(union block_hdr *blok)
 {
     apr_size_t size = 0;
@@ -552,7 +552,7 @@ static apr_size_t bytes_in_block_list(union block_hdr *blok)
 
     return size;
 }
-
+#endif
 
 /*****************************************************************
  *
