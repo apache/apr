@@ -84,6 +84,7 @@ extern "C" {
  * published.
  */
 typedef struct apr_table_t apr_table_t;
+typedef struct apr_btable_t apr_btable_t;
 typedef struct apr_array_header_t apr_array_header_t;
 
 /** An opaque array type */
@@ -100,7 +101,7 @@ struct apr_array_header_t {
     char *elts;
 };
 
-/** The opaque table type */
+/** The opaque string-content table type */
 struct apr_table_t {
     /* This has to be first to promote backwards compatibility with
      * older modules which cast a apr_table_t * to an apr_array_header_t *...
@@ -115,9 +116,27 @@ struct apr_table_t {
 #endif
 };
 
+/** The opaque binary-content table type */
+struct apr_btable_t {
+    /* This has to be first to promote backwards compatibility with
+     * older modules which cast a apr_table_t * to an apr_array_header_t *...
+     * they should use the table_elts() function for most of the
+     * cases they do this for.
+     */
+    /** The underlying array for the table */
+    apr_array_header_t a;
+#ifdef MAKE_TABLE_PROFILE
+    /** Who created the array. */
+    void *creator;
+#endif
+};
+
+/**
+ * The (opaque) structure for string-content tables.
+ */
 typedef struct apr_table_entry_t apr_table_entry_t;
 
-/** The type for each entry in a table */
+/** The type for each entry in a string-content table */
 struct apr_table_entry_t {
     /** The key for the current table entry */
     char *key;          /* maybe NULL in future;
@@ -127,16 +146,51 @@ struct apr_table_entry_t {
     char *val;
 };
 
+/**
+ * The (opaque) structure for binary-content tables.
+ */
+typedef struct apr_btable_entry_t apr_btable_entry_t;
+
+/**
+ * A transparent type for items stored in binary-content tables, and
+ * possibly elsewhere.
+ */
+typedef struct apr_item_t {
+    /** The key for the current table entry */
+    char *key;          /* maybe NULL in future;
+                         * check when iterating thru table_elts
+                         */
+    /** Size of the opaque block comprising the item's content. */
+    size_t size;
+    /** A pointer to the content itself. */
+    void *data;
+} apr_item_t;
+
+/** The type for each entry in a binary-content table */
+struct apr_btable_entry_t {
+    /** The key for the current table entry */
+    char *key;          /* maybe NULL in future;
+                         * check when iterating thru table_elts
+                         */
+    /** The value for the current table entry */
+    apr_item_t *val;
+};
+
 /* XXX: these know about the definition of struct apr_table_t in alloc.c.  That
  * definition is not here because it is supposed to be private, and by not
  * placing it here we are able to get compile-time diagnostics from modules
- * written which assume that a apr_table_t is the same as an apr_array_header_t. -djg
+ * written which assume that a apr_table_t is the same as an
+ * apr_array_header_t. -djg
  */
 #define apr_table_elts(t) ((apr_array_header_t *)(t))
-#define apr_is_empty_table(t) (((t) == NULL)||(((apr_array_header_t *)(t))->nelts == 0))
+#define apr_btable_elts(t) apr_table_elts(t)
 
-APR_EXPORT(apr_array_header_t *) apr_make_array(struct apr_pool_t *p, int nelts,
-						int elt_size);
+#define apr_is_empty_table(t) (((t) == NULL) \
+                               || (((apr_array_header_t *)(t))->nelts == 0))
+#define apr_is_empty_btable(t) apr_is_empty_table(t)
+
+APR_EXPORT(apr_array_header_t *) apr_make_array(struct apr_pool_t *p,
+						int nelts, int elt_size);
 APR_EXPORT(void *) apr_push_array(apr_array_header_t *arr);
 APR_EXPORT(void) apr_array_cat(apr_array_header_t *dst,
 			       const apr_array_header_t *src);
@@ -165,25 +219,44 @@ APR_EXPORT(char *) apr_array_pstrcat(struct apr_pool_t *p,
 				     const apr_array_header_t *arr,
 				     const char sep);
 APR_EXPORT(apr_table_t *) apr_make_table(struct apr_pool_t *p, int nelts);
-APR_EXPORT(apr_table_t *) apr_copy_table(struct apr_pool_t *p, const apr_table_t *t);
+APR_EXPORT(apr_btable_t *) apr_make_btable(struct apr_pool_t *p, int nelts);
+APR_EXPORT(apr_table_t *) apr_copy_table(struct apr_pool_t *p,
+					 const apr_table_t *t);
+APR_EXPORT(apr_btable_t *) apr_copy_btable(struct apr_pool_t *p,
+					   const apr_btable_t *t);
 APR_EXPORT(void) apr_clear_table(apr_table_t *t);
+APR_EXPORT(void) apr_clear_btable(apr_btable_t *t);
 APR_EXPORT(const char *) apr_table_get(const apr_table_t *t, const char *key);
+APR_EXPORT(const apr_item_t *) apr_btable_get(const apr_btable_t *t,
+					      const char *key);
 APR_EXPORT(void) apr_table_set(apr_table_t *t, const char *key,
 			       const char *val);
+APR_EXPORT(void) apr_btable_set(apr_btable_t *t, const char *key,
+				size_t size, const void *val);
 APR_EXPORT(void) apr_table_setn(apr_table_t *t, const char *key,
 				const char *val);
+APR_EXPORT(void) apr_btable_setn(apr_btable_t *t, const char *key,
+				 size_t size, const void *val);
 APR_EXPORT(void) apr_table_unset(apr_table_t *t, const char *key);
+APR_EXPORT(void) apr_btable_unset(apr_btable_t *t, const char *key);
 APR_EXPORT(void) apr_table_merge(apr_table_t *t, const char *key,
 				 const char *val);
 APR_EXPORT(void) apr_table_mergen(apr_table_t *t, const char *key,
 				  const char *val);
 APR_EXPORT(void) apr_table_add(apr_table_t *t, const char *key,
 			       const char *val);
+APR_EXPORT(void) apr_btable_add(apr_btable_t *t, const char *key,
+				size_t size, const void *val);
 APR_EXPORT(void) apr_table_addn(apr_table_t *t, const char *key,
 				const char *val);
+APR_EXPORT(void) apr_btable_addn(apr_btable_t *t, const char *key,
+				 size_t size, const void *val);
 APR_EXPORT(apr_table_t *) apr_overlay_tables(struct apr_pool_t *p,
 					     const apr_table_t *overlay,
 					     const apr_table_t *base);
+APR_EXPORT(apr_btable_t *) apr_overlay_btables(struct apr_pool_t *p,
+					       const apr_btable_t *overlay,
+					       const apr_btable_t *base);
 APR_EXPORT(void)
 	apr_table_do(int (*comp) (void *, const char *, const char *),
 		     void *rec, const apr_table_t *t, ...);
@@ -192,27 +265,27 @@ APR_EXPORT(void)
                      void *rec, const apr_table_t *t, va_list);                  
 
 /* Conceptually, apr_overlap_tables does this:
-
-    apr_array_header_t *barr = apr_table_elts(b);
-    apr_table_entry_t *belt = (apr_table_entry_t *)barr->elts;
-    int i;
-
-    for (i = 0; i < barr->nelts; ++i) {
-        if (flags & apr_OVERLAP_TABLES_MERGE) {
-            apr_table_mergen(a, belt[i].key, belt[i].val);
-        }
-        else {
-            apr_table_setn(a, belt[i].key, belt[i].val);
-        }
-    }
-
-    Except that it is more efficient (less space and cpu-time) especially
-    when b has many elements.
-
-    Notice the assumptions on the keys and values in b -- they must be
-    in an ancestor of a's pool.  In practice b and a are usually from
-    the same pool.
-*/
+ *
+ *  apr_array_header_t *barr = apr_table_elts(b);
+ *  apr_table_entry_t *belt = (apr_table_entry_t *)barr->elts;
+ *  int i;
+ *
+ *  for (i = 0; i < barr->nelts; ++i) {
+ *      if (flags & apr_OVERLAP_TABLES_MERGE) {
+ *          apr_table_mergen(a, belt[i].key, belt[i].val);
+ *      }
+ *      else {
+ *          apr_table_setn(a, belt[i].key, belt[i].val);
+ *      }
+ *  }
+ *
+ *  Except that it is more efficient (less space and cpu-time) especially
+ *  when b has many elements.
+ *
+ *  Notice the assumptions on the keys and values in b -- they must be
+ *  in an ancestor of a's pool.  In practice b and a are usually from
+ *  the same pool.
+ */
 #define APR_OVERLAP_TABLES_SET   (0)
 #define APR_OVERLAP_TABLES_MERGE (1)
 APR_EXPORT(void) apr_overlap_tables(apr_table_t *a, const apr_table_t *b,
