@@ -57,7 +57,7 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 
-#include <nks/vm.h>
+#include <proc.h>
 
 apr_status_t apr_netware_proc_cleanup(void *theproc)
 {
@@ -304,10 +304,10 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
     newproc->out = attr->parent_out;
     newproc->err = attr->parent_err;
 
-    addr_space = attr->detached ? 0 : PROC_CURRENT_SPACE;
+    addr_space = (attr->detached ? 0 : PROC_CURRENT_SPACE) | PROC_LOAD_SILENT;
 
-    if ((newproc->pid = processve(progname, addr_space, (const char**)env, &wire, 
-        NULL, NULL, (const char **)args)) == 0) {
+    if ((newproc->pid = procve(progname, addr_space, (const char**)env, &wire, 
+        NULL, NULL, 0, NULL, (const char **)args)) == 0) {
         return errno;
     }
 
