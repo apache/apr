@@ -53,7 +53,7 @@
  */
 
 #include "apr_private.h"
-#ifdef HAVE_NETINET_TCP_H
+#if BEOS_BONE /* BONE uses the unix code - woohoo */
 #include "../unix/sockets.c"
 #else
 #include "networkio.h"
