@@ -125,6 +125,21 @@ typedef struct ap_array_header_t {
     char *elts;
 } ap_array_header_t;
 
+typedef struct ap_table_entry_t {
+    char *key;          /* maybe NULL in future;
+                         * check when iterating thru table_elts
+                         */
+    char *val;
+} ap_table_entry_t;
+
+/* XXX: these know about the definition of struct table in alloc.c.  That
+ * definition is not here because it is supposed to be private, and by not
+ * placing it here we are able to get compile-time diagnostics from modules
+ * written which assume that a table is the same as an ap_array_header_t. -djg
+ */
+#define ap_table_elts(t) ((ap_array_header_t *)(t))
+#define ap_is_empty_table(t) (((t) == NULL)||(((ap_array_header_t *)(t))->nelts == 0))
+
 /*
  * Structure used by the variable-formatter routines.
  */
@@ -154,11 +169,28 @@ API_EXPORT_NONSTD(int) ap_execve(const char *c, const char *argv[],
 #define ap_create_mutex(x) (0)
 #define ap_release_mutex(x) (0)
 #define ap_acquire_mutex(x) (0)
-#define ap_islower(x) (0)
-#define ap_isalpha(x) (0)
-#define ap_isdigit(x) (0)
 
-#define apr_tolower(c) (tolower(((unsigned char)(c))))
+/* These macros allow correct support of 8-bit characters on systems which
+ * support 8-bit characters.  Pretty dumb how the cast is required, but
+ * that's legacy libc for ya.  These new macros do not support EOF like
+ * the standard macros do.  Tough.
+ */
+#define ap_isalnum(c) (isalnum(((unsigned char)(c))))
+#define ap_isalpha(c) (isalpha(((unsigned char)(c))))
+#define ap_iscntrl(c) (iscntrl(((unsigned char)(c))))
+#define ap_isdigit(c) (isdigit(((unsigned char)(c))))
+#define ap_isgraph(c) (isgraph(((unsigned char)(c))))
+#define ap_islower(c) (islower(((unsigned char)(c))))
+#define ap_isprint(c) (isprint(((unsigned char)(c))))
+#define ap_ispunct(c) (ispunct(((unsigned char)(c))))
+#define ap_isspace(c) (isspace(((unsigned char)(c))))
+#define ap_isupper(c) (isupper(((unsigned char)(c))))
+#define ap_isxdigit(c) (isxdigit(((unsigned char)(c))))
+#define ap_tolower(c) (tolower(((unsigned char)(c))))
+#define ap_toupper(c) (toupper(((unsigned char)(c))))
+
+
+
 
 /*
  * Small utility macros to make things easier to read.  Not usually a
@@ -308,6 +340,8 @@ API_EXPORT(ap_table_t *) ap_overlay_tables(struct context_t *p,
 API_EXPORT(void)
 	ap_table_do(int (*comp) (void *, const char *, const char *),
 		     void *rec, const ap_table_t *t, ...);
+#define AP_OVERLAP_TABLES_SET   (0)
+#define AP_OVERLAP_TABLES_MERGE (1)
 API_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
 				    unsigned flags);
 API_EXPORT(void) ap_register_cleanup(struct context_t *p, void *data,
