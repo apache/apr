@@ -147,7 +147,6 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock, struct
 	                        sizeof(ap_socket_t)); 
 
     (*new)->cntxt = connection_context;
-    (*new)->cntxt = sock->cntxt;
     (*new)->local_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
     (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
