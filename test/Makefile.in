@@ -30,7 +30,8 @@ LOCAL_LIBS=../lib@APR_LIBNAME@.la
 
 CLEAN_TARGETS = testfile.tmp mod_test.slo proc_child@EXEEXT@ occhild@EXEEXT@ \
 	readchild@EXEEXT@ tryread@EXEEXT@ sockchild@EXEEXT@ \
-	globalmutexchild@EXEEXT@ lfstests/large.bin
+	globalmutexchild@EXEEXT@ lfstests/large.bin \
+	data/testputs.txt data/testbigfprintf.dat
 CLEAN_SUBDIRS = internal
 
 INCDIR=../include
