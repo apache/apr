@@ -235,25 +235,24 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         /* Parse each segment, find the closing '/' 
          */
         seglen = 0;
-        while (addpath[seglen] && addpath[seglen] != '/')
+        while (addpath[seglen] && addpath[seglen] != '/') {
             ++seglen;
+        }
 
-        if (seglen == 0 || (seglen == 1 && addpath[0] == '.')) 
-        {
+        if (seglen == 0 || (seglen == 1 && addpath[0] == '.')) {
             /* noop segment (/ or ./) so skip it 
              */
         }
-        else if (seglen == 2 && addpath[0] == '.' && addpath[1] == '.') 
-        {
+        else if (seglen == 2 && addpath[0] == '.' && addpath[1] == '.') {
             /* backpath (../) */
-            if (pathlen == 1 && path[0] == '/') 
-            {
+            if (pathlen == 1 && path[0] == '/') {
                 /* Attempt to move above root.  Always die if the 
                  * APR_FILEPATH_SECUREROOTTEST flag is specified.
                  */
-                if (flags & APR_FILEPATH_SECUREROOTTEST)
+                if (flags & APR_FILEPATH_SECUREROOTTEST) {
                     return APR_EABOVEROOT;
-                
+                }
+
                 /* Otherwise this is simply a noop, above root is root.
                  * Flag that rootpath was entirely replaced.
                  */
@@ -261,18 +260,19 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
             }
             else if (pathlen == 0 
                   || (pathlen == 3 && !memcmp(path + pathlen - 3, "../", 3))
-                  || (pathlen  > 3 && !memcmp(path + pathlen - 4, "/../", 4)))
-            {
+                  || (pathlen  > 3 && !memcmp(path + pathlen - 4, "/../", 4))) {
                 /* Path is already backpathed or empty, if the
                  * APR_FILEPATH_SECUREROOTTEST.was given die now.
                  */
-                if (flags & APR_FILEPATH_SECUREROOTTEST)
+                if (flags & APR_FILEPATH_SECUREROOTTEST) {
                     return APR_EABOVEROOT;
+                }
 
                 /* Otherwise append another backpath.
                  */
-                if (pathlen + 3 >= maxlen )
+                if (pathlen + 3 >= maxlen ) {
                     return APR_ENAMETOOLONG;
+                }
                 memcpy(path + pathlen, "../", 3);
                 pathlen += 3;
             }
@@ -290,8 +290,9 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
              */
             if (pathlen < keptlen) 
             {
-                if (flags & APR_FILEPATH_SECUREROOTTEST)
+                if (flags & APR_FILEPATH_SECUREROOTTEST) {
                     return APR_EABOVEROOT;
+                }
                 keptlen = pathlen;
             }
         }
@@ -300,16 +301,18 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
             /* An actual segment, append it to the destination path
              */
             apr_size_t i = (addpath[seglen] != '\0');
-            if (pathlen + seglen + i >= maxlen)
+            if (pathlen + seglen + i >= maxlen) {
                 return APR_ENAMETOOLONG;
+            }
             memcpy(path + pathlen, addpath, seglen + i);
             pathlen += seglen + i;
         }
 
         /* Skip over trailing slash to the next segment
          */
-        if (addpath[seglen])
+        if (addpath[seglen]) {
             ++seglen;
+        }
 
         addpath += seglen;
     }
@@ -322,11 +325,13 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
      * still within given root path.
      */
     if ((flags & APR_FILEPATH_NOTABOVEROOT) && keptlen < rootlen) {
-        if (strncmp(rootpath, path, rootlen))
+        if (strncmp(rootpath, path, rootlen)) {
             return APR_EABOVEROOT;
+        }
         if (rootpath[rootlen - 1] != '/'
-                && path[rootlen] && path[rootlen] != '/')
+            && path[rootlen] && path[rootlen] != '/') {
             return APR_EABOVEROOT;
+        }
     }
     
     *newpath = path;
