@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     char *dest = "127.0.0.1";
     apr_port_t local_port, remote_port;
     apr_interval_time_t read_timeout = -1;
-    apr_sockaddr_t *destsa;
+    apr_sockaddr_t *local_sa, *remote_sa;
 
     setbuf(stdout, NULL);
     if (argc > 1) {
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");
 
     fprintf(stdout,"\tClient:  Making socket address...............");
-    if ((stat = apr_getaddrinfo(&destsa, dest, APR_UNSPEC, 8021, 0, context)) 
+    if ((stat = apr_getaddrinfo(&remote_sa, dest, APR_UNSPEC, 8021, 0, context)) 
         != APR_SUCCESS) {
         fprintf(stdout, "Failed!\n");
         fprintf(stdout, "Address resolution failed for %s: %s\n", 
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
     fprintf(stdout,"OK\n");
 
     fprintf(stdout, "\tClient:  Creating new socket.......");
-    if (apr_create_socket(&sock, destsa->sa.sin.sin_family, SOCK_STREAM,
+    if (apr_create_socket(&sock, remote_sa->sa.sin.sin_family, SOCK_STREAM,
                           context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't create socket\n");
         exit(-1);
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 
     fprintf(stdout, "\tClient:  Connecting to socket.......");
 
-    stat = apr_connect(sock, destsa);
+    stat = apr_connect(sock, remote_sa);
 
     if (stat != APR_SUCCESS) {
         apr_close_socket(sock);
@@ -140,10 +140,12 @@ int main(int argc, char *argv[])
         fprintf(stdout, "OK\n");
     }
 
-    apr_get_ipaddr(&remote_ipaddr, APR_REMOTE, sock);
-    apr_get_port(&remote_port, APR_REMOTE, sock);
-    apr_get_ipaddr(&local_ipaddr, APR_LOCAL, sock);
-    apr_get_port(&local_port, APR_LOCAL, sock);
+    apr_get_sockaddr(&remote_sa, APR_REMOTE, sock);
+    apr_get_ipaddr(&remote_ipaddr, remote_sa);
+    apr_get_port(&remote_port, remote_sa);
+    apr_get_sockaddr(&local_sa, APR_LOCAL, sock);
+    apr_get_ipaddr(&local_ipaddr, local_sa);
+    apr_get_port(&local_port, local_sa);
     fprintf(stdout, "\tClient socket: %s:%u -> %s:%u\n", local_ipaddr, local_port, remote_ipaddr, remote_port);
 
     fprintf(stdout, "\tClient:  Trying to send data over socket.......");
