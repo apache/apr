@@ -53,4 +53,10 @@
 #define BEOS_BONE 1
 #endif
 
+#ifdef SIGWAIT_TAKES_ONE_ARG
+#define apr_sigwait(a,b) ((*(b)=sigwait((a)))<0?-1:0)
+#else
+#define apr_sigwait(a,b) sigwait((a),(b))
+#endif
+
 #endif /* APR_PRIVATE_H */

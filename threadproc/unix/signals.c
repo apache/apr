@@ -278,12 +278,7 @@ static void *signal_thread_func(void *signal_handler)
     while (1) {
         int signal_received;
 
-#ifdef SIGWAIT_TAKES_ONE_ARG
-        signal_received = sigwait(&sig_mask);
-        if (signal_received == -1)
-#else
-        if (sigwait(&sig_mask, &signal_received) == -1)
-#endif
+        if (apr_sigwait(&sig_mask, &signal_received) != 0)
         {
             /* handle sigwait() error here */
         }
