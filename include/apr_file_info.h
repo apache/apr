@@ -159,7 +159,7 @@ typedef struct apr_finfo_t        apr_finfo_t;
 #define APR_FINFO_OWNER  0x00030000  /*  user and group */
 #define APR_FINFO_PROT   0x00700000  /*  all protections */
 #define APR_FINFO_NORM   0x0073b170  /*  an atomic unix apr_stat() */
-#define APR_FINFO_DIRENT 0x01002000  /*  an atomic unix apr_dir_read() */
+#define APR_FINFO_DIRENT 0x02000000  /*  an atomic unix apr_dir_read() */
 
 /**
  * The file information structure.  This is analogous to the POSIX
