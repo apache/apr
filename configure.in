@@ -931,6 +931,7 @@ APR_FLAG_HEADERS(
     netinet/sctp.h      \
     netinet/sctp_uio.h  \
     sys/file.h		\
+    sys/ioctl.h         \
     sys/mman.h		\
     sys/poll.h		\
     sys/resource.h	\
@@ -986,6 +987,7 @@ AC_SUBST(stdioh)
 AC_SUBST(stdlibh)
 AC_SUBST(stringh)
 AC_SUBST(stringsh)
+AC_SUBST(sys_ioctlh)
 AC_SUBST(sys_sendfileh)
 AC_SUBST(sys_signalh)
 AC_SUBST(sys_socketh)
