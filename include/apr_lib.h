@@ -79,13 +79,17 @@ extern "C" {
  * Define the structures used by the APR general-purpose library.
  */
 
-/*
+typedef struct apr_vformatter_buff_t apr_vformatter_buff_t;
+
+/**
  * Structure used by the variable-formatter routines.
  */
-typedef struct apr_vformatter_buff_t {
+struct apr_vformatter_buff_t {
+    /** The current position */
     char *curpos;
+    /** The end position of the format string */
     char *endpos;
-} apr_vformatter_buff_t;
+};
 
 /**
  * return the final element of the pathname
@@ -211,7 +215,6 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
  */
 APR_DECLARE(apr_status_t) apr_validate_password(const char *passwd, const char *hash);
 
-
 /*
  * These are snprintf implementations based on apr_vformatter().
  *
@@ -230,8 +233,8 @@ APR_DECLARE(apr_status_t) apr_validate_password(const char *passwd, const char *
  */
 
 /**
- *snprintf routine based on apr_vformatter.  This means it understands the 
- *same extensions.>
+ * snprintf routine based on apr_vformatter.  This means it understands the 
+ * same extensions.
  * @param buf The buffer to write to
  * @param len The size of the buffer
  * @param format The format string
