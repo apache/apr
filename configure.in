@@ -47,6 +47,7 @@ AC_PROG_MAKE_SET
 AC_PROG_AWK
 AC_CHECK_PROG(RM, rm, rm)
 AC_CHECK_TOOL(AR, ar, ar)
+SO_LDFLAG="-shared"
 
 # This macro needs to be here in case we are on an AIX box.
 AC_AIX
@@ -105,6 +106,7 @@ case "$OS" in
        USE_MM=yes
        AC_CHECK_DEFINE(BONE_VERSION, sys/socket.h)
        eolstr="\\n"
+       SO_LDFLAG="-nostart"
        ;;
    *os390)
        OSDIR="os390"
@@ -121,6 +123,7 @@ case "$OS" in
 esac
 
 AC_SUBST(eolstr)
+AC_SUBST(SO_LDFLAG)
 
 dnl #----------------------------- Checking for Shared Memory Support 
 echo $ac_n "${nl}Checking for Shared Memory Support...${nl}"
