@@ -172,7 +172,7 @@ static void expand_array(apr_hash_t *ht)
     ht->max = new_max;
 }
 
-unsigned int apr_hashfunc_default( const char *key, apr_ssize_t *klen)
+unsigned int apr_hashfunc_default(const char *key, apr_ssize_t *klen)
 {
     unsigned int hash = 0;
     const unsigned char *p;
@@ -249,7 +249,7 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
     apr_hash_entry_t **hep, *he;
     unsigned int hash;
 
-    hash = ht->hash_func( key, &klen );
+    hash = ht->hash_func(key, &klen);
 
     /* scan linked list */
     for (hep = &ht->array[hash & ht->max], he = *hep;
@@ -395,6 +395,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
 
     res = apr_palloc(p, sizeof(apr_hash_t));
     res->pool = p;
+    res->hash_func = base->hash_func;
     res->count = base->count;
     res->max = (overlay->max > base->max) ? overlay->max : base->max;
     if (base->count + overlay->count > res->max) {
