@@ -1,5 +1,9 @@
 Changes with APR 0.9.5
 
+  *) Return an error instead of silently failing when apr_poll() is
+     used with file descriptors >= FD_SETSIZE.  (Unix systems with
+     no native poll())  [Jeff Trawick, Brad Nicholes]
+
   *) Fix handling of negative numbers in apr_strtoi64() on platforms
      without strtoll.  [Joe Orton]
 

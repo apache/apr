@@ -210,6 +210,12 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
         else {
             break;
         }
+#if !defined(WIN32) && !defined(NETWARE) /* socket sets handled with array of handles */
+        if (fd >= FD_SETSIZE) {
+            /* XXX invent new error code so application has a clue */
+            return APR_EBADF;
+        }
+#endif
         if (aprset[i].reqevents & APR_POLLIN) {
             FD_SET(fd, &readset);
         }
@@ -388,6 +394,12 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
 #endif
 #endif
     }
+#if !defined(WIN32) && !defined(NETWARE) /* socket sets handled with array of handles */
+    if (fd >= FD_SETSIZE) {
+        /* XXX invent new error code so application has a clue */
+        return APR_EBADF;
+    }
+#endif
     if (descriptor->reqevents & APR_POLLIN) {
         FD_SET(fd, &(pollset->readset));
     }
