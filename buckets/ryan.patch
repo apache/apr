@@ -1,10 +1,16 @@
-Index: ap/Makefile.in
+? build.log
+? build.err
+? src/build.log
+? src/build.err
+? src/lib/apr/buckets/Makefile.in
+? src/lib/apr/include/apr_buf.h
+Index: src/ap/Makefile.in
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/ap/Makefile.in,v
 retrieving revision 1.4
 diff -u -d -b -w -u -r1.4 Makefile.in
---- ap/Makefile.in	2000/06/12 20:41:13	1.4
-+++ ap/Makefile.in	2000/07/31 23:24:38
+--- src/ap/Makefile.in	2000/06/12 20:41:13	1.4
++++ src/ap/Makefile.in	2000/08/05 05:01:14
 @@ -1,5 +1,5 @@
  
  LTLIBRARY_NAME    = libap.la
@@ -12,30 +18,31 @@ diff -u -d -b -w -u -r1.4 Makefile.in
 +LTLIBRARY_SOURCES = ap_cache.c ap_base64.c ap_sha1.c ap_hooks.c 
  
  include $(top_srcdir)/build/ltlib.mk
-Index: include/ap_iol.h
+Index: src/include/ap_iol.h
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/include/ap_iol.h,v
-retrieving revision 1.21
-diff -u -d -b -w -u -r1.21 ap_iol.h
---- include/ap_iol.h	2000/07/29 17:43:01	1.21
-+++ include/ap_iol.h	2000/07/31 23:24:40
+retrieving revision 1.23
+diff -u -d -b -w -u -r1.23 ap_iol.h
+--- src/include/ap_iol.h	2000/08/02 17:51:36	1.23
++++ src/include/ap_iol.h	2000/08/05 05:01:14
 @@ -58,7 +58,9 @@
  #define AP_IOL_H
  
  #include "apr_general.h" /* For ap_s?size_t */
+-#include "apr_errno.h" /* For apr_status_t and the APR_errnos */
 +#include "apr_network_io.h" /* For ap_hdtr_t */
- #include "apr_errno.h" /* For ap_status_t and the APR_errnos */
++#include "apr_errno.h" /* For ap_status_t and the APR_errnos */
 +#include "ap_config.h" /* For ap_status_t and the APR_errnos */
  
  typedef struct ap_iol ap_iol;
  typedef struct ap_iol_methods ap_iol_methods;
-Index: include/http_protocol.h
+Index: src/include/http_protocol.h
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/include/http_protocol.h,v
-retrieving revision 1.19
-diff -u -d -b -w -u -r1.19 http_protocol.h
---- include/http_protocol.h	2000/07/11 03:48:17	1.19
-+++ include/http_protocol.h	2000/07/31 23:24:40
+retrieving revision 1.20
+diff -u -d -b -w -u -r1.20 http_protocol.h
+--- src/include/http_protocol.h	2000/08/02 05:25:28	1.20
++++ src/include/http_protocol.h	2000/08/05 05:01:14
 @@ -88,8 +88,19 @@
   */
  API_EXPORT(void) ap_basic_http_header(request_rec *r);
@@ -58,13 +65,13 @@ diff -u -d -b -w -u -r1.19 http_protocol.h
  API_EXPORT(void) ap_send_http_header(request_rec *l);
  
  /* Send the response to special method requests */
-Index: include/httpd.h
+Index: src/include/httpd.h
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/include/httpd.h,v
-retrieving revision 1.66
-diff -u -d -b -w -u -r1.66 httpd.h
---- include/httpd.h	2000/07/29 19:50:07	1.66
-+++ include/httpd.h	2000/07/31 23:24:41
+retrieving revision 1.69
+diff -u -d -b -w -u -r1.69 httpd.h
+--- src/include/httpd.h	2000/08/04 17:40:02	1.69
++++ src/include/httpd.h	2000/08/05 05:01:15
 @@ -589,6 +589,10 @@
  				 * pointer back to the main request.
  				 */
@@ -76,13 +83,22 @@ diff -u -d -b -w -u -r1.66 httpd.h
      /* Info about the request itself... we begin with stuff that only
       * protocol.c should ever touch...
       */
-Index: include/util_filter.h
+@@ -725,7 +729,7 @@
+     struct ap_rr_xlate *rrx;
+ #endif /*APACHE_XLATE*/
+ 
+-    struct apr_filter_t *filters;
++    struct ap_filter_t *filters;
+ 
+ /* Things placed at the end of the record to avoid breaking binary
+  * compatibility.  It would be nice to remember to reorder the entire
+Index: src/include/util_filter.h
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/include/util_filter.h,v
-retrieving revision 1.1
-diff -u -d -b -w -u -r1.1 util_filter.h
---- include/util_filter.h	2000/07/28 20:30:53	1.1
-+++ include/util_filter.h	2000/07/31 23:24:41
+retrieving revision 1.3
+diff -u -d -b -w -u -r1.3 util_filter.h
+--- src/include/util_filter.h	2000/08/05 04:38:57	1.3
++++ src/include/util_filter.h	2000/08/05 05:01:15
 @@ -65,6 +65,7 @@
  
  #include "httpd.h"
@@ -95,16 +111,13 @@ diff -u -d -b -w -u -r1.1 util_filter.h
   * next/prev to insert/remove/replace elements in the bucket list, but
   * the types and values of the individual buckets should not be altered.
   */
--typedef ap_status_t (*ap_filter_func)();
-+typedef ap_status_t (*ap_filter_func)(request_rec *r, ap_filter_t *f, ap_bucket_brigade *b);
+-typedef apr_status_t (*ap_filter_func)();
++typedef apr_status_t (*ap_filter_func)(request_rec *r, ap_filter_t *f, ap_bucket_brigade *b);
  
  /*
   * ap_filter_type:
-@@ -166,8 +167,22 @@
- 
-     ap_filter_type ftype;
+@@ -168,6 +169,19 @@
      ap_filter_t *next;
-+    ap_filter_t *prev;
  };
  
 +/* This function just passes the current bucket brigade down to the next
@@ -123,7 +136,7 @@ diff -u -d -b -w -u -r1.1 util_filter.h
  /*
   * ap_register_filter():
   *
-@@ -192,9 +207,28 @@
+@@ -192,9 +206,28 @@
   * calls to ap_add_filter). If the current filter chain contains filters
   * from another request, then this filter will be added before those other
   * filters.
@@ -152,7 +165,7 @@ diff -u -d -b -w -u -r1.1 util_filter.h
  
  /*
   * Things to do later:
-@@ -206,12 +240,6 @@
+@@ -206,12 +239,6 @@
   *      bucket_brigade, but I am trying to keep this patch neutral.  (If this
   *      comment breaks that, well sorry, but the information must be there
   *      somewhere.  :-)
@@ -165,13 +178,13 @@ diff -u -d -b -w -u -r1.1 util_filter.h
   */
  #ifdef __cplusplus
  }
-Index: lib/apr/configure.in
+Index: src/lib/apr/configure.in
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/lib/apr/configure.in,v
-retrieving revision 1.142
-diff -u -d -b -w -u -r1.142 configure.in
---- lib/apr/configure.in	2000/07/30 12:01:53	1.142
-+++ lib/apr/configure.in	2000/07/31 23:24:42
+retrieving revision 1.143
+diff -u -d -b -w -u -r1.143 configure.in
+--- src/lib/apr/configure.in	2000/08/02 05:51:39	1.143
++++ src/lib/apr/configure.in	2000/08/05 05:01:15
 @@ -688,8 +688,8 @@
  AC_SUBST(EXEEXT)
  
@@ -183,13 +196,13 @@ diff -u -d -b -w -u -r1.142 configure.in
  for dir in $MODULES
  do
      test -d $dir || $MKDIR -p $dir
-Index: main/http_core.c
+Index: src/main/http_core.c
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/main/http_core.c,v
-retrieving revision 1.93
-diff -u -d -b -w -u -r1.93 http_core.c
---- main/http_core.c	2000/07/29 19:50:08	1.93
-+++ main/http_core.c	2000/07/31 23:24:56
+retrieving revision 1.94
+diff -u -d -b -w -u -r1.94 http_core.c
+--- src/main/http_core.c	2000/08/02 05:26:47	1.94
++++ src/main/http_core.c	2000/08/05 05:01:22
 @@ -72,6 +72,8 @@
  #include "util_md5.h"
  #include "apr_fnmatch.h"
@@ -228,7 +241,7 @@ diff -u -d -b -w -u -r1.93 http_core.c
 +static int core_filter(request_rec *r, ap_filter_t *f, ap_bucket_brigade *b)
 +{
 +    ap_bucket *dptr = b->head;
-+    ap_ssize_t bytes_sent;
++    apr_ssize_t bytes_sent;
 +    int len = 0;
 +
 +    if (!r->headers_sent) {
@@ -290,13 +303,13 @@ diff -u -d -b -w -u -r1.93 http_core.c
  }
  
  API_VAR_EXPORT module core_module = {
-Index: main/http_protocol.c
+Index: src/main/http_protocol.c
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/main/http_protocol.c,v
-retrieving revision 1.99
-diff -u -d -b -w -u -r1.99 http_protocol.c
---- main/http_protocol.c	2000/07/28 20:31:00	1.99
-+++ main/http_protocol.c	2000/07/31 23:24:57
+retrieving revision 1.100
+diff -u -d -b -w -u -r1.100 http_protocol.c
+--- src/main/http_protocol.c	2000/08/02 05:26:48	1.100
++++ src/main/http_protocol.c	2000/08/05 05:01:22
 @@ -64,6 +64,8 @@
   */
  
@@ -306,25 +319,27 @@ diff -u -d -b -w -u -r1.99 http_protocol.c
  #include "ap_config.h"
  #include "apr_strings.h"
  #include "httpd.h"
-@@ -1824,7 +1826,11 @@
-         ap_rfc822_date(date, r->request_time);
-         ap_table_addn(r->headers_out, "Expires", date);
+@@ -1824,8 +1826,12 @@
+         apr_rfc822_date(date, r->request_time);
+         apr_table_addn(r->headers_out, "Expires", date);
      }
 +}
  
+-    /* Send the entire apr_table_t of header fields, terminated by an empty line. */
 +API_EXPORT(void) ap_send_http_header_real(request_rec *r)
 +{
 +    const long int zero = 0L;
-     /* Send the entire ap_table_t of header fields, terminated by an empty line. */
++    /* Send the entire ap_table_t of header fields, terminated by an empty line. */
  
-     ap_table_do((int (*) (void *, const char *, const char *)) ap_send_header_field,
+     apr_table_do((int (*) (void *, const char *, const char *)) ap_send_header_field,
+              (void *) r, r->headers_out, NULL);
 @@ -2468,101 +2474,84 @@
- API_EXPORT(size_t) ap_send_mmap(ap_mmap_t *mm, request_rec *r, size_t offset,
+ API_EXPORT(size_t) ap_send_mmap(apr_mmap_t *mm, request_rec *r, size_t offset,
                               size_t length)
  {
 -    size_t total_bytes_sent = 0;
 -    int n;
--    ap_ssize_t w;
+-    apr_ssize_t w;
 -    char *addr;
 -    
 -    if (length == 0)
@@ -342,7 +357,7 @@ diff -u -d -b -w -u -r1.99 http_protocol.c
 +    size_t bytes_sent = 0;
 +    ap_bucket_brigade *bb = NULL;
  
--        ap_mmap_offset((void**)&addr, mm, offset);
+-        apr_mmap_offset((void**)&addr, mm, offset);
 -        w = ap_rwrite(addr, n, r);
 -        if (w < 0)
 -            break;
@@ -367,7 +382,7 @@ diff -u -d -b -w -u -r1.99 http_protocol.c
  API_EXPORT(int) ap_rputc(int c, request_rec *r)
  {
 +    ap_bucket_brigade *bb = NULL;
-+    ap_ssize_t written;
++    apr_ssize_t written;
 +
      if (r->connection->aborted)
          return EOF;
@@ -388,7 +403,7 @@ diff -u -d -b -w -u -r1.99 http_protocol.c
  {
 -    int rcode;
 +    ap_bucket_brigade *bb = NULL;
-+    ap_ssize_t written;
++    apr_ssize_t written;
  
      if (r->connection->aborted)
          return EOF;
@@ -410,10 +425,10 @@ diff -u -d -b -w -u -r1.99 http_protocol.c
  
  API_EXPORT(int) ap_rwrite(const void *buf, int nbyte, request_rec *r)
  {
--    ap_ssize_t n;
--    ap_status_t rv;
+-    apr_ssize_t n;
+-    apr_status_t rv;
 +    ap_bucket_brigade *bb = NULL;
-+    ap_ssize_t written;
++    apr_ssize_t written;
  
      if (r->connection->aborted)
          return EOF;
@@ -436,13 +451,13 @@ diff -u -d -b -w -u -r1.99 http_protocol.c
  {
 -    int n;
 +    ap_bucket_brigade *bb = NULL;
-+    ap_ssize_t written;
++    apr_ssize_t written;
  
      if (r->connection->aborted)
          return EOF;
--
--    n = ap_vbprintf(r->connection->client, fmt, va);
  
+-    n = ap_vbprintf(r->connection->client, fmt, va);
+-
 -    if (n < 0) {
 -        check_first_conn_error(r, "vrprintf", 0);
 -        return EOF;
@@ -480,7 +495,7 @@ diff -u -d -b -w -u -r1.99 http_protocol.c
  API_EXPORT_NONSTD(int) ap_rvputs(request_rec *r, ...)
  {
 +    ap_bucket_brigade *bb = NULL;
-+    ap_ssize_t written;
++    apr_ssize_t written;
      va_list va;
 -    int n;
  
@@ -506,7 +521,7 @@ diff -u -d -b -w -u -r1.99 http_protocol.c
  
  API_EXPORT(int) ap_rflush(request_rec *r)
  {
--    ap_status_t rv;
+-    apr_status_t rv;
 +    ap_bucket_brigade *bb;
  
 -    if ((rv = ap_bflush(r->connection->client)) != APR_SUCCESS) {
@@ -519,13 +534,13 @@ diff -u -d -b -w -u -r1.99 http_protocol.c
      return 0;
  }
  
-Index: main/http_request.c
+Index: src/main/http_request.c
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/main/http_request.c,v
-retrieving revision 1.37
-diff -u -d -b -w -u -r1.37 http_request.c
---- main/http_request.c	2000/07/28 20:31:01	1.37
-+++ main/http_request.c	2000/07/31 23:24:57
+retrieving revision 1.38
+diff -u -d -b -w -u -r1.38 http_request.c
+--- src/main/http_request.c	2000/08/02 05:26:48	1.38
++++ src/main/http_request.c	2000/08/05 05:01:22
 @@ -1276,6 +1276,12 @@
          return;
      }
@@ -539,14 +554,22 @@ diff -u -d -b -w -u -r1.37 http_request.c
      /* Take care of little things that need to happen when we're done */
      ap_finalize_request_protocol(r);
  }
-Index: main/util_filter.c
+Index: src/main/util_filter.c
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/main/util_filter.c,v
-retrieving revision 1.1
-diff -u -d -b -w -u -r1.1 util_filter.c
---- main/util_filter.c	2000/07/28 20:31:02	1.1
-+++ main/util_filter.c	2000/07/31 23:24:57
-@@ -73,7 +73,7 @@
+retrieving revision 1.3
+diff -u -d -b -w -u -r1.3 util_filter.c
+--- src/main/util_filter.c	2000/08/05 04:38:58	1.3
++++ src/main/util_filter.c	2000/08/05 05:01:22
+@@ -52,6 +52,7 @@
+  * <http://www.apache.org/>.
+  */
+ 
++#include "httpd.h"
+ #include "util_filter.h"
+ 
+ /*
+@@ -73,7 +74,7 @@
  } ap_filter_rec_t;
  
  /* ### make this visible for direct manipulation?
@@ -555,7 +578,7 @@ diff -u -d -b -w -u -r1.1 util_filter.c
  */
  static ap_filter_rec_t *registered_filters = NULL;
  
-@@ -144,3 +144,63 @@
+@@ -144,3 +145,63 @@
      }
  }
  
@@ -619,13 +642,13 @@ diff -u -d -b -w -u -r1.1 util_filter.c
 +    ap_brigade_destroy(*b);
 +    f->ctx = bb;
 +}
-Index: os/unix/os.h
+Index: src/os/unix/os.h
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/os/unix/os.h,v
 retrieving revision 1.10
 diff -u -d -b -w -u -r1.10 os.h
---- os/unix/os.h	2000/05/15 23:02:57	1.10
-+++ os/unix/os.h	2000/07/31 23:25:01
+--- src/os/unix/os.h	2000/05/15 23:02:57	1.10
++++ src/os/unix/os.h	2000/08/05 05:01:25
 @@ -59,8 +59,6 @@
  #ifndef APACHE_OS_H
  #define APACHE_OS_H
