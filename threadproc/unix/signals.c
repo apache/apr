@@ -334,10 +334,25 @@ APR_DECLARE(apr_status_t) apr_signal_thread(int(*signal_handler)(int signum))
      * order bit of the second word of flags is turned on.  sigdelset()
      * returns an error when trying to turn this off, so we'll turn it
      * off manually.
+     *
+     * Note that the private fields differ between 32-bit and 64-bit
+     * and even between _ALL_SOURCE and !_ALL_SOURCE.
      */
-#ifdef _AIX
-    sig_mask.hisigs &= 0x7FFFFFFF;
+#if defined(_AIX)
+#ifdef __64BIT__
+#ifdef _ALL_SOURCE
+        sig_mask.ss_set[3] &= 0x7FFFFFFF;
+#else /* not _ALL_SOURCE */
+        sig_mask.__ss_set[3] &= 0x7FFFFFFF;
 #endif
+#else /* not 64-bit build */
+#ifdef _ALL_SOURCE
+        sig_mask.hisigs &= 0x7FFFFFFF;
+#else /* not _ALL_SOURCE */
+        sig_mask.__hisigs &= 0x7FFFFFFF;
+#endif
+#endif
+#endif /* _AIX */
 
     while (1) {
 #if APR_HAVE_SIGWAIT
