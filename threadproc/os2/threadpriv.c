@@ -58,7 +58,7 @@
 #include "apr_general.h"
 #include "apr_errno.h"
 #include "apr_lib.h"
-#include "apr_arch_fileio.h"
+#include "apr_arch_file_io.h"
 
 APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key,
                                                        void (*dest)(void *), 

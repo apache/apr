@@ -53,7 +53,7 @@
  */
 
 #include "apr.h"
-#include "apr_arch_fileio.h"
+#include "apr_arch_file_io.h"
 #include "apr_strings.h"
 #include "apr_lib.h"
 #include <ctype.h>

@@ -53,7 +53,7 @@
  */
 
 #include "apr_strings.h"
-#include "apr_arch_fileio.h"
+#include "apr_arch_file_io.h"
 
 /* A file to put ALL of the accessor functions for apr_file_t types. */
 

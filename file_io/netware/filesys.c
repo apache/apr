@@ -53,7 +53,7 @@
  */
 
 #include "apr.h"
-#include "apr_arch_fileio.h"
+#include "apr_arch_file_io.h"
 #include "apr_strings.h"
 
 apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)

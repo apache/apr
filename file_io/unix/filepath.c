@@ -53,7 +53,7 @@
  */
 
 #include "apr.h"
-#include "apr_arch_fileio.h"
+#include "apr_arch_file_io.h"
 #include "apr_file_io.h"
 #include "apr_strings.h"
 #define APR_WANT_STRFUNC

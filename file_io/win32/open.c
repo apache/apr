@@ -53,7 +53,7 @@
  */
 
 #include "apr_private.h"
-#include "apr_arch_fileio.h"
+#include "apr_arch_file_io.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_strings.h"
