@@ -52,40 +52,214 @@
  * <http://www.apache.org/>.
  */
 
+#define INCL_DOSEXCEPTIONS      /* for OS2 */
 #include "threadproc.h"
 #include "apr_private.h"
-#include "apr_lib.h"
-#if APR_HAVE_SIGNAL_H
-#include <signal.h>
-#endif
+#include "apr_pools.h"
+#include "apr_signal.h"
 
-apr_status_t apr_proc_kill(apr_proc_t *proc, int sig)
+#define APR_WANT_SIGNAL
+#include "apr_want.h"
+
+#include <assert.h>
+
+
+apr_status_t apr_proc_kill(apr_proc_t *proc, int signum)
 {
-    if (kill(proc->pid, sig) == -1) {
+#ifdef OS2
+    /* SIGTERM's don't work too well in OS/2 (only affects other EMX
+     * programs). CGIs may not be, esp. REXX scripts, so use a native
+     * call instead
+     */
+    if (signum == SIGTERM) {
+        return APR_OS2_STATUS(DosSendSignalException(proc->pid,
+                                                     XCPT_SIGNAL_BREAK));
+    }
+#endif /* OS2 */
+
+    if (kill(proc->pid, signum) == -1) {
         return errno;
     }
+
     return APR_SUCCESS;
 }
 
-#if !defined(NO_USE_SIGACTION) && defined(HAVE_SIGACTION)
+
+#ifdef HAVE_SIGACTION
+
 /*
  * Replace standard signal() with the more reliable sigaction equivalent
  * from W. Richard Stevens' "Advanced Programming in the UNIX Environment"
  * (the version that does not automatically restart system calls).
  */
-Sigfunc *apr_signal(int signo, Sigfunc * func)
+apr_sigfunc_t *apr_signal(int signo, apr_sigfunc_t * func)
 {
     struct sigaction act, oact;
 
     act.sa_handler = func;
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
-#ifdef  SA_INTERRUPT            /* SunOS */
+#ifdef SA_INTERRUPT             /* SunOS */
     act.sa_flags |= SA_INTERRUPT;
 #endif
     if (sigaction(signo, &act, &oact) < 0)
         return SIG_ERR;
     return oact.sa_handler;
 }
+
+#endif /* HAVE_SIGACTION */
+
+
+#ifdef SYS_SIGLIST_DECLARED
+
+void apr_signal_init(apr_pool_t *pglobal)
+{
+}
+const char *apr_signal_get_description(int signum)
+{
+    return sys_siglist[signum];
+}
+
+#else /* !SYS_SIGLIST_DECLARED */
+
+/* we need to roll our own signal description stuff */
+
+#if defined(NSIG)
+#define APR_NUMSIG NSIG
+#elif defined(_NSIG)
+#define APR_NUMSIG _NSIG
+#elif defined(__NSIG)
+#define APR_NUMSIG __NSIG
+#else
+#define APR_NUMSIG 33   /* breaks on OS/390 with < 33; 32 is o.k. for most */
 #endif
 
+static const char *signal_description[APR_NUMSIG];
+
+#define store_desc(index, string) \
+	(assert(index < APR_NUMSIG), \
+         signal_description[index] = string)
+
+void apr_signal_init(apr_pool_t *pglobal)
+{
+    int sig;
+
+    store_desc(0, "Signal 0");
+
+#ifdef SIGHUP
+    store_desc(SIGHUP, "Hangup");
+#endif
+#ifdef SIGINT
+    store_desc(SIGINT, "Interrupt");
+#endif
+#ifdef SIGQUIT
+    store_desc(SIGQUIT, "Quit");
+#endif
+#ifdef SIGILL
+    store_desc(SIGILL, "Illegal instruction");
+#endif
+#ifdef SIGTRAP
+    store_desc(SIGTRAP, "Trace/BPT trap");
+#endif
+#ifdef SIGIOT
+    store_desc(SIGIOT, "IOT instruction");
+#endif
+#ifdef SIGABRT
+    store_desc(SIGABRT, "Abort");
+#endif
+#ifdef SIGEMT
+    store_desc(SIGEMT, "Emulator trap");
+#endif
+#ifdef SIGFPE
+    store_desc(SIGFPE, "Arithmetic exception");
+#endif
+#ifdef SIGKILL
+    store_desc(SIGKILL, "Killed");
+#endif
+#ifdef SIGBUS
+    store_desc(SIGBUS, "Bus error");
+#endif
+#ifdef SIGSEGV
+    store_desc(SIGSEGV, "Segmentation fault");
+#endif
+#ifdef SIGSYS
+    store_desc(SIGSYS, "Bad system call");
+#endif
+#ifdef SIGPIPE
+    store_desc(SIGPIPE, "Broken pipe");
+#endif
+#ifdef SIGALRM
+    store_desc(SIGALRM, "Alarm clock");
+#endif
+#ifdef SIGTERM
+    store_desc(SIGTERM, "Terminated");
+#endif
+#ifdef SIGUSR1
+    store_desc(SIGUSR1, "User defined signal 1");
+#endif
+#ifdef SIGUSR2
+    store_desc(SIGUSR2, "User defined signal 2");
+#endif
+#ifdef SIGCLD
+    store_desc(SIGCLD, "Child status change");
+#endif
+#ifdef SIGCHLD
+    store_desc(SIGCHLD, "Child status change");
+#endif
+#ifdef SIGPWR
+    store_desc(SIGPWR, "Power-fail restart");
+#endif
+#ifdef SIGWINCH
+    store_desc(SIGWINCH, "Window changed");
+#endif
+#ifdef SIGURG
+    store_desc(SIGURG, "urgent socket condition");
+#endif
+#ifdef SIGPOLL
+    store_desc(SIGPOLL, "Pollable event occurred");
+#endif
+#ifdef SIGIO
+    store_desc(SIGIO, "socket I/O possible");
+#endif
+#ifdef SIGSTOP
+    store_desc(SIGSTOP, "Stopped (signal)");
+#endif
+#ifdef SIGTSTP
+    store_desc(SIGTSTP, "Stopped");
+#endif
+#ifdef SIGCONT
+    store_desc(SIGCONT, "Continued");
+#endif
+#ifdef SIGTTIN
+    store_desc(SIGTTIN, "Stopped (tty input)");
+#endif
+#ifdef SIGTTOU
+    store_desc(SIGTTOU, "Stopped (tty output)");
+#endif
+#ifdef SIGVTALRM
+    store_desc(SIGVTALRM, "virtual timer expired");
+#endif
+#ifdef SIGPROF
+    store_desc(SIGPROF, "profiling timer expired");
+#endif
+#ifdef SIGXCPU
+    store_desc(SIGXCPU, "exceeded cpu limit");
+#endif
+#ifdef SIGXFSZ
+    store_desc(SIGXFSZ, "exceeded file size limit");
+#endif
+
+    for (sig = 0; sig < APR_NUMSIG; ++sig)
+        if (signal_description[sig] == NULL)
+            signal_description[sig] = apr_psprintf(pglobal, "signal #%d", sig);
+}
+
+const char *apr_signal_get_description(int signum)
+{
+    return
+        signum < APR_NUMSIG
+        ? signal_description[signum]
+        : "unknown signal (number)";
+}
+
+#endif /* SYS_SIGLIST_DECLARED */
