@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/13 01:49:35 $]
+Last modified at [$Date: 2002/07/13 02:46:46 $]
 
 Release:
 
@@ -79,7 +79,7 @@ CURRENT VOTES:
          but keep it ambigious and make no contract with the user about the
          units represented.  Needs a better suggestion than apr_timeval_t.
          +1: aaron, brianp, ianh,
-             fielding [prefers apr_time and apr_span (_t is half the problem)]
+             fielding [prefers apr_utime_t and apr_utimediff_t (64bit)]
          -0: jerenkrantz, striker, dreid
          -0.5: rbb
                wrowe [prefers apr_utime_t and apr_uspan_t where u==undefined]
