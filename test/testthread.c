@@ -53,7 +53,6 @@
  */
 
 #include "apr_thread_proc.h"
-#include "apr_lock.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "errno.h"
@@ -79,7 +78,7 @@ void * APR_THREAD_FUNC thread_func2(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_func3(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_func4(apr_thread_t *thd, void *data);
 
-apr_lock_t *thread_lock;
+apr_thread_mutex_t *thread_lock;
 apr_pool_t *context;
 apr_thread_once_t *control = NULL;
 int x = 0;
@@ -98,9 +97,9 @@ void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data)
     apr_thread_once(control, init_func);
 
     for (i = 0; i < 10000; i++) {
-        apr_lock_acquire(thread_lock);
+        apr_thread_mutex_lock(thread_lock);
         x++;
-        apr_lock_release(thread_lock);
+        apr_thread_mutex_unlock(thread_lock);
     }
     apr_thread_exit(thd, exit_ret_val);
     return NULL;
@@ -129,8 +128,8 @@ int main(void)
     apr_thread_once_init(&control, context);
 
     printf("%-60s", "Initializing the lock"); 
-    r1 = apr_lock_create(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, 
-                         APR_LOCK_DEFAULT, "lock.file", context); 
+    r1 = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_DEFAULT,
+                                 context); 
     if (r1 != APR_SUCCESS) {
         fflush(stdout);
         fprintf(stderr, "Failed\nCould not create lock\n");

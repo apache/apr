@@ -54,7 +54,6 @@
 
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
-#include "apr_lock.h"
 #include "apr_thread_mutex.h"
 #include "apr_thread_rwlock.h"
 #include "apr_thread_cond.h"
@@ -79,22 +78,16 @@ int main(void)
 #define MAX_COUNTER 100000
 #define MAX_RETRY 5
 
-void * APR_THREAD_FUNC thread_rw_func(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_rwlock_func(apr_thread_t *thd, void *data);
-void * APR_THREAD_FUNC thread_function(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_cond_producer(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_cond_consumer(apr_thread_t *thd, void *data);
-apr_status_t test_rw(void);
-apr_status_t test_exclusive(void);
-apr_status_t test_multiple_locking(const char *lockfile);
 apr_status_t test_thread_mutex(void);
 apr_status_t test_thread_rwlock(void);
 apr_status_t test_cond(void);
 apr_status_t test_timeoutcond(void);
 
 apr_file_t *in, *out, *err;
-apr_lock_t *thread_rw_lock, *thread_lock;
 apr_thread_mutex_t *thread_mutex;
 apr_thread_rwlock_t *rwlock;
 apr_pool_t *pool;
@@ -115,31 +108,6 @@ struct {
 
 apr_thread_mutex_t *timeout_mutex;
 apr_thread_cond_t *timeout_cond;
-
-void * APR_THREAD_FUNC thread_rw_func(apr_thread_t *thd, void *data)
-{
-    int exitLoop = 1;
-
-    while (1)
-    {
-        apr_lock_acquire_rw(thread_rw_lock, APR_READER);
-        if (i == MAX_ITER)
-            exitLoop = 0;
-        apr_lock_release(thread_rw_lock);
-
-        if (!exitLoop)
-            break;
-
-        apr_lock_acquire_rw(thread_rw_lock, APR_WRITER);
-        if (i != MAX_ITER)
-        {
-            i++;
-            x++;
-        }
-        apr_lock_release(thread_rw_lock);
-    }
-    return NULL;
-} 
 
 void * APR_THREAD_FUNC thread_rwlock_func(apr_thread_t *thd, void *data)
 {
@@ -162,31 +130,6 @@ void * APR_THREAD_FUNC thread_rwlock_func(apr_thread_t *thd, void *data)
             x++;
         }
         apr_thread_rwlock_unlock(rwlock);
-    }
-    return NULL;
-} 
-
-void * APR_THREAD_FUNC thread_function(apr_thread_t *thd, void *data)
-{
-    int exitLoop = 1;
-
-    /* slight delay to allow things to settle */
-    apr_sleep (1);
-    
-    while (1)
-    {
-        apr_lock_acquire(thread_lock);
-        if (i == MAX_ITER)
-            exitLoop = 0;
-        else 
-        {
-            i++;
-            x++;
-        }
-        apr_lock_release(thread_lock);
-
-        if (!exitLoop)
-            break;
     }
     return NULL;
 } 
@@ -257,148 +200,6 @@ void * APR_THREAD_FUNC thread_cond_consumer(apr_thread_t *thd, void *data)
     }
 
     return NULL;
-}
-
-apr_status_t test_rw(void)
-{
-    apr_thread_t *t1, *t2, *t3, *t4;
-    apr_status_t s1, s2, s3, s4;
-
-    printf("RW Lock Tests\n");
-    printf("%-60s", "    Initializing the RW lock");
-    s1 = apr_lock_create(&thread_rw_lock, APR_READWRITE, APR_INTRAPROCESS,
-                         APR_LOCK_DEFAULT, "lock.file", pool);
-    if (s1 != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s1;
-    }
-    printf("OK\n");
-
-    i = 0;
-    x = 0;
-
-    printf("%-60s","    Starting all the threads"); 
-    s1 = apr_thread_create(&t1, NULL, thread_rw_func, NULL, pool);
-    s2 = apr_thread_create(&t2, NULL, thread_rw_func, NULL, pool);
-    s3 = apr_thread_create(&t3, NULL, thread_rw_func, NULL, pool);
-    s4 = apr_thread_create(&t4, NULL, thread_rw_func, NULL, pool);
-    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
-        s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s1;
-    }
-    printf("OK\n");
-
-    printf("%-60s", "    Waiting for threads to exit");
-    apr_thread_join(&s1, t1);
-    apr_thread_join(&s2, t2);
-    apr_thread_join(&s3, t3);
-    apr_thread_join(&s4, t4);
-    printf("OK\n");
-
-    if (x != MAX_ITER) {
-        fprintf(stderr, "RW locks didn't work as expected. x = %d instead of %d\n",
-                x, MAX_ITER);
-    }
-    else {
-        printf("Test passed\n");
-    }
-    
-    return APR_SUCCESS;
-}
-
-apr_status_t test_exclusive(void)
-{
-    apr_thread_t *t1, *t2, *t3, *t4;
-    apr_status_t s1, s2, s3, s4;
-
-    printf("Exclusive lock test\n");
-    printf("%-60s", "    Initializing the lock");
-    s1 = apr_lock_create(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, 
-                         APR_LOCK_DEFAULT, "lock.file", pool); 
-
-    if (s1 != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s1;
-    }
-    printf("OK\n");
-
-    i = 0;
-    x = 0;
-
-    printf("%-60s", "    Starting all the threads"); 
-    s1 = apr_thread_create(&t1, NULL, thread_function, NULL, pool);
-    s2 = apr_thread_create(&t2, NULL, thread_function, NULL, pool);
-    s3 = apr_thread_create(&t3, NULL, thread_function, NULL, pool);
-    s4 = apr_thread_create(&t4, NULL, thread_function, NULL, pool);
-    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
-        s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s1;
-    }
-    printf("OK\n");
-
-    printf("%-60s", "    Waiting for threads to exit");
-    apr_thread_join(&s1, t1);
-    apr_thread_join(&s2, t2);
-    apr_thread_join(&s3, t3);
-    apr_thread_join(&s4, t4);
-    printf("OK\n");
-
-    if (x != MAX_ITER) {
-        fprintf(stderr, "Locks don't appear to work!  x = %d instead of %d\n",
-                x, MAX_ITER);
-    }
-    else {
-        printf("Test passed\n");
-    }
-    return APR_SUCCESS;
-}
-
-apr_status_t test_multiple_locking(const char *lockfile)
-{
-    apr_lock_t *multi;
-    int try = 0;
-    apr_status_t rv;
- 
-    printf("Testing multiple locking\n");
-    printf("%-60s","    Creating the lock we'll use");
-    if ((rv = apr_lock_create(&multi, APR_MUTEX, APR_LOCKALL, APR_LOCK_DEFAULT,
-                              lockfile, pool)) != APR_SUCCESS) {
-        printf("Failed!\n");
-        return rv;
-    }
-    printf("OK\n");
-
-    printf("%-60s", "    Trying to lock 10 times");
-    for (try = 0; try < 10; try++) {
-        if ((rv = apr_lock_acquire(multi)) != APR_SUCCESS) {
-            printf("Failed!\n");
-            printf("Error at try %d\n", try);
-            return rv;
-        }
-    }
-    printf("OK\n");
-
-    printf("%-60s", "    Trying to unlock 10 times");
-    for (try = 0; try < 10; try++) {
-        if ((rv = apr_lock_release(multi)) != APR_SUCCESS) {
-            printf("Failed!\n");
-            printf("Error at try %d\n", try);
-            return rv;
-        }
-    }
-    printf("OK\n");
-
-    printf("%-60s", "    Destroying the lock we've been using");
-    if ((rv = apr_lock_destroy(multi)) != APR_SUCCESS) {
-        printf("Failed!\n");
-        return rv;
-    }
-    printf("OK\n");
-
-    printf("Test passed\n");
-    return APR_SUCCESS;
 }
 
 apr_status_t test_thread_mutex(void)
@@ -672,23 +473,6 @@ int main(int argc, const char * const *argv)
         fprintf(stderr, "Could not parse options: [%d] %s\n",
                 rv, apr_strerror(rv, errmsg, sizeof errmsg));
         exit(-1);
-    }
-
-    if ((rv = test_exclusive()) != APR_SUCCESS) {
-        fprintf(stderr,"Exclusive Lock test failed : [%d] %s\n",
-                rv, apr_strerror(rv, (char*)errmsg, 200));
-        exit(-2);
-    }
-    
-    if ((rv = test_multiple_locking(lockname)) != APR_SUCCESS) {
-        fprintf(stderr,"Multiple Locking test failed : [%d] %s\n",
-                rv, apr_strerror(rv, (char*)errmsg, 200));
-        exit(-3);
-    }
-    
-    if ((rv = test_rw()) != APR_SUCCESS) {
-        fprintf(stderr,"RW Lock test failed : [%d] %s\n",
-                rv, apr_strerror(rv, (char*)errmsg, 200));
     }
 
     if ((rv = test_thread_mutex()) != APR_SUCCESS) {

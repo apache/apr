@@ -55,7 +55,6 @@
 #include "apr_shm.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
-#include "apr_lock.h"
 #include "apr_global_mutex.h"
 #include "apr_errno.h"
 #include "apr_general.h"
