@@ -78,24 +78,24 @@ static void set_socket_vars(apr_socket_t *sock, int family)
     sock->remote_addr->sa.sin.sin_family = family;
 
     if (family == AF_INET) {
-        sock->local_addr->sa_len = sizeof(struct sockaddr_in);
+        sock->local_addr->salen = sizeof(struct sockaddr_in);
         sock->local_addr->addr_str_len = 16;
         sock->local_addr->ipaddr_ptr = &(sock->local_addr->sa.sin.sin_addr);
         sock->local_addr->ipaddr_len = sizeof(struct in_addr);
 
-        sock->remote_addr->sa_len = sizeof(struct sockaddr_in);
+        sock->remote_addr->salen = sizeof(struct sockaddr_in);
         sock->remote_addr->addr_str_len = 16;
         sock->remote_addr->ipaddr_ptr = &(sock->remote_addr->sa.sin.sin_addr);
         sock->remote_addr->ipaddr_len = sizeof(struct in_addr);
     }
 #if APR_HAVE_IPV6
     else if (family == AF_INET6) {
-        sock->local_addr->sa_len = sizeof(struct sockaddr_in6);
+        sock->local_addr->salen = sizeof(struct sockaddr_in6);
         sock->local_addr->addr_str_len = 46;
         sock->local_addr->ipaddr_ptr = &(sock->local_addr->sa.sin6.sin6_addr);
         sock->local_addr->ipaddr_len = sizeof(struct in6_addr);
 
-        sock->remote_addr->sa_len = sizeof(struct sockaddr_in6);
+        sock->remote_addr->salen = sizeof(struct sockaddr_in6);
         sock->remote_addr->addr_str_len = 46;
         sock->remote_addr->ipaddr_ptr = &(sock->remote_addr->sa.sin6.sin6_addr);
         sock->remote_addr->ipaddr_len = sizeof(struct in6_addr);
@@ -195,7 +195,7 @@ apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
     if (bind(sock->sock, 
              (struct sockaddr *)&sa->sa, 
-             sa->sa_len) == -1) {
+             sa->salen) == -1) {
         return apr_get_netos_error();
     }
     else {
@@ -223,10 +223,10 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
     (*new)->timeout = -1;   
     (*new)->disconnected = 0;
 
-    (*new)->remote_addr->sa_len = sizeof((*new)->remote_addr->sa);
+    (*new)->remote_addr->salen = sizeof((*new)->remote_addr->sa);
     (*new)->sock = accept(sock->sock, 
                           (struct sockaddr *)&(*new)->remote_addr->sa,
-                          &(*new)->remote_addr->sa_len);
+                          &(*new)->remote_addr->salen);
 
     if ((*new)->sock == INVALID_SOCKET) {
         return apr_get_netos_error();
@@ -264,7 +264,7 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
     }
 
     if (connect(sock->sock, (const struct sockaddr *)&sa->sa.sin,
-                sa->sa_len) == SOCKET_ERROR) {
+                sa->salen) == SOCKET_ERROR) {
         lasterror = apr_get_netos_error();
         if (lasterror != APR_FROM_OS_ERROR(WSAEWOULDBLOCK)) {
             return lasterror;
