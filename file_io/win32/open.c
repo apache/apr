@@ -223,7 +223,6 @@ ap_status_t ap_open_stderr(struct file_t **thefile, ap_context_t *cont)
     if ((*thefile) == NULL) {
         return APR_ENOMEM;
     }
-    memset(*thefile, '\0', sizeof(struct file_t));
     (*thefile)->filehand = GetStdHandle(STD_ERROR_HANDLE);
     (*thefile)->cntxt = cont;
     (*thefile)->fname = NULL;
