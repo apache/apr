@@ -422,16 +422,23 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         STARTUPINFOW si;
         apr_wchar_t wprg[APR_PATH_MAX];
         apr_size_t ncmd = strlen(cmdline) + 1, nwcmd = ncmd;
-        apr_size_t ncwd = strlen(attr->currdir) + 1, nwcwd = ncwd;
-        apr_wchar_t *wcmd = apr_palloc(cont, ncmd * 2);
-        apr_wchar_t *wcwd = apr_palloc(cont, ncwd * 2);
+        apr_size_t ncwd = 0, nwcwd = 0;
+        apr_wchar_t *wcmd = apr_palloc(cont, ncmd * sizeof(wcmd[0]));
+        apr_wchar_t *wcwd = NULL;
+
+        if (attr->currdir)
+        {
+            ncwd = nwcwd = strlen(attr->currdir) + 1;
+            wcwd = apr_palloc(cont, ncwd * sizeof(wcwd[0]));
+        }
 
         if (((rv = utf8_to_unicode_path(wprg, sizeof(wprg)/sizeof(wprg[0]),
                                         progname))
                     != APR_SUCCESS)
          || ((rv = conv_utf8_to_ucs2(cmdline, &ncmd, wcmd, &nwcmd)) 
                     != APR_SUCCESS)
-         || ((rv = conv_utf8_to_ucs2(attr->currdir, &ncwd, wcwd, &nwcwd)) 
+         || (attr->currdir &&
+             (rv = conv_utf8_to_ucs2(attr->currdir, &ncwd, wcwd, &nwcwd)) 
                     != APR_SUCCESS)) {
             return rv;
         }
@@ -442,13 +449,17 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             si.dwFlags |= STARTF_USESHOWWINDOW;
             si.wShowWindow = SW_HIDE;
         }
-        if (attr->child_in->filehand || attr->child_out->filehand
-                                     || attr->child_err->filehand) {
+        if (attr->child_in || attr->child_out || attr->child_err)
+        {
             si.dwFlags |= STARTF_USESTDHANDLES;
-            si.hStdInput = attr->child_in->filehand;
-            si.hStdOutput = attr->child_out->filehand;
-            si.hStdError = attr->child_err->filehand;
+            if (attr->child_in)
+                si.hStdInput = attr->child_in->filehand;
+            if (attr->child_out)
+                si.hStdOutput = attr->child_out->filehand;
+            if (attr->child_err)
+                si.hStdError = attr->child_err->filehand;
         }
+
         rv = CreateProcessW(wprg, wcmd,        /* Command line */
                             NULL, NULL,        /* Proc & thread security attributes */
                             TRUE,              /* Inherit handles */
@@ -466,12 +477,15 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             si.dwFlags |= STARTF_USESHOWWINDOW;
             si.wShowWindow = SW_HIDE;
         }
-        if (attr->child_in->filehand || attr->child_out->filehand
-                                     || attr->child_err->filehand) {
+        if (attr->child_in || attr->child_out || attr->child_err)
+        {
             si.dwFlags |= STARTF_USESTDHANDLES;
-            si.hStdInput = attr->child_in->filehand;
-            si.hStdOutput = attr->child_out->filehand;
-            si.hStdError = attr->child_err->filehand;
+            if (attr->child_in)
+                si.hStdInput = attr->child_in->filehand;
+            if (attr->child_out)
+                si.hStdOutput = attr->child_out->filehand;
+            if (attr->child_err)
+                si.hStdError = attr->child_err->filehand;
         }
 
         rv = CreateProcessA(progname, cmdline, /* Command line */
