@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "locks.h"
+#include "beos/locks.h"
 
 apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type, 
                            apr_lockscope_e scope, const char *fname, 
