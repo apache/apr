@@ -194,6 +194,11 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 
         new_m->shmid = shmid;
 
+        /* Remove the segment once use count hits zero. */
+        if (shmctl(shmid, IPC_RMID, NULL) == -1) {
+            return errno;
+        }
+
         *m = new_m;
         return APR_SUCCESS;
 #endif /* APR_USE_SHMEM_SHMGET_ANON */
