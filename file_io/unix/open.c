@@ -95,7 +95,7 @@ ap_status_t file_cleanup(void *thefile)
  *          APR_CREATE           create the file if not there
  *          APR_APPEND           file ptr is set to end prior to all writes
  *          APR_TRUNCATE         set length to zero if file exists
- *          APR_BINARY           not a text file
+ *          APR_BINARY           not a text file (This flag is ignored on UNIX because it has no meaning)
  *          APR_BUFFERED         buffer the data.  Default is non-buffered
  *          APR_EXCL             return error if APR_CREATE and file exists
  * arg 4) Access permissions for file.
