@@ -1,5 +1,9 @@
 Changes with APR b1
 
+  *) Removed --disable-atomics flag and added --enable-nonportable-atomics,
+     thereby defaulting to portable binaries on those systems that could
+     be optimized at the expense of portability. PR: 9507  [Aaron Bannert]
+
   *) Added 2 additional lock functions: apr_proc_mutex_name and
      apr_proc_mutex_defname which returns the type name of the mutex
      (eg: "sysvsem") as well as the default mutex type (APR_LOCK_DEFAULT).
