@@ -69,7 +69,7 @@ int time_to_die = 0;
 
 void hup_handler(int sig)
 {
-    fprintf(stdout, "I got the signal\n");
+    fprintf(stdout, "I got the signal, ");
     time_to_die++;    
 }
 
@@ -85,22 +85,35 @@ int main(int argc, char *argv[])
     ap_create_context(&context, NULL);
 
     if (argc > 1) {
-
         ap_setup_signal(APR_SIGHUP, hup_handler, context);
+        fprintf(stdout, "Child started, waiting for signal\n");
 
         while(time_to_die == 0) {
             sleep(1);
         }
+
+        fprintf(stdout, "Child exiting.....\n");
         return(1);
     }
 
     fprintf(stdout, "Creating new signal.......");
+    fflush(stdout);
     if (ap_create_signal(APR_SIGHUP, context) != APR_SUCCESS) {
-        fprintf(stderr, "Could not create attr\n");
+        fprintf(stderr, "Could not create signal\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
+    fprintf(stdout, "Setting parent to ignore SIGHUP.......");
+    fflush(stdout);
+    if (ap_setup_signal(APR_SIGHUP, SIG_IGN, context)) {
+        fprintf(stderr, "Could not set signal\n");
+        exit(-1);
+    }
+    fprintf(stdout, "OK\n");
+
+    fprintf(stdout, "Creating child process.......");
+    fflush(stdout);
     if (ap_createprocattr_init(&attr, context) != APR_SUCCESS) {
         fprintf(stderr, "Could not create attr\n");
         exit(-1);;
@@ -115,13 +128,24 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Could not create the new process\n");
         exit(-1);
     }
+    fprintf(stdout, "OK\n");
 
+    sleep(1); /* Give child time to get going */
     fprintf(stdout, "Sending the signal.......");
     fflush(stdout);
-    ap_send_signal(APR_SIGHUP, context);    
+    if (ap_send_signal(APR_SIGHUP, context) != APR_SUCCESS) {
+        fprintf(stderr, "Could not send signal\n" );
+        exit(-1);
+    } 
+    fprintf(stdout, "OK\n");
 
-    ap_wait_proc(newproc, APR_WAIT);
-
+    fprintf(stdout, "Waiting for child.......\n");
+    if (ap_wait_proc(newproc, APR_WAIT) != APR_CHILD_DONE) {
+        fprintf(stderr, "Error waiting for child\n" );
+        exit(-1);
+    }
+    fprintf(stdout, "Waiting for child.......OK\n");
+    
     return(1);
 }
 
