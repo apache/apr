@@ -221,6 +221,9 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
     int rv, nbytes = 0;
     ap_status_t arv;
 
+    /* Ignore flags for now. */
+    flags = 0;
+
     /* TCP_CORK keeps us from sending partial frames when we shouldn't */
     rv = setsockopt(sock->socketdes, SOL_TCP, TCP_CORK,
         	    (const void *) &corkflag, sizeof(corkflag));
@@ -310,6 +313,9 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     struct sf_hdtr headerstruct;
     size_t bytes_to_send = *len;
 
+    /* Ignore flags for now. */
+    flags = 0;
+
     /* On FreeBSD, the number of bytes to send must include the length of
      * the headers.  Don't look at the man page for this :(  Instead, look
      * at the the logic in src/sys/kern/uipc_syscalls::sendfile().
@@ -380,6 +386,8 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     struct iovec hdtrarray[2];
     void *headerbuf, *trailerbuf;
 
+    /* Ignore flags for now. */
+    flags = 0;
 
     /* HP-UX can only send one header iovec and one footer iovec */
 
@@ -479,6 +487,9 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     void * hbuf=NULL, * tbuf=NULL;
     ap_status_t arv;
     struct sf_parms parms;
+
+    /* Ignore flags for now. */
+    flags = 0;
 
     /* AIX can also send the headers/footers as part of the system call */
     parms.header_length = 0;

@@ -63,18 +63,19 @@
 static ap_status_t socket_cleanup(void *sock)
 {
     ap_socket_t *thesocket = sock;
-    if (closesocket(thesocket->sock) != SOCKET_ERROR) {
+
+    if (thesocket->sock != INVALID_SOCKET) {
+        if (closesocket(thesocket->sock) == SOCKET_ERROR) {
+            return WSAGetLastError();
+        }
         thesocket->sock = INVALID_SOCKET;
-        return APR_SUCCESS;
     }
-    else {
-        return WSAGetLastError();
-    }
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
 {
-    (*new) = (ap_socket_t *)ap_palloc(cont, sizeof(ap_socket_t));
+    (*new) = (ap_socket_t *)ap_pcalloc(cont, sizeof(ap_socket_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -82,7 +83,7 @@ ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
     (*new)->cntxt = cont; 
     (*new)->local_addr = (struct sockaddr_in *)ap_pcalloc((*new)->cntxt,
                                                           sizeof(struct sockaddr_in));
-    (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt,
+    (*new)->remote_addr = (struct sockaddr_in *)ap_pcalloc((*new)->cntxt,
                           sizeof(struct sockaddr_in));
 
     if (((*new)->local_addr == NULL) || ((*new)->remote_addr == NULL)) {
@@ -104,8 +105,11 @@ ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
     (*new)->local_addr->sin_port = 0;   
 
     (*new)->timeout = -1;
+    (*new)->disconnected = 0;
+
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
                         socket_cleanup, ap_null_cleanup);
+
     return APR_SUCCESS;
 } 
 
@@ -160,18 +164,19 @@ ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog)
 
 ap_status_t ap_accept(ap_socket_t **new, ap_socket_t *sock, ap_pool_t *connection_context)
 {
-    (*new) = (ap_socket_t *)ap_palloc(connection_context, 
+    (*new) = (ap_socket_t *)ap_pcalloc(connection_context, 
                             sizeof(ap_socket_t));
 
     (*new)->cntxt = connection_context;
-    (*new)->local_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
+    (*new)->local_addr = (struct sockaddr_in *)ap_pcalloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
-    (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt,
+    (*new)->remote_addr = (struct sockaddr_in *)ap_pcalloc((*new)->cntxt,
                  sizeof(struct sockaddr_in));
     memcpy((*new)->local_addr, sock->local_addr, sizeof(struct sockaddr_in));
 
     (*new)->addr_len = sizeof(struct sockaddr_in);
     (*new)->timeout = -1;   
+    (*new)->disconnected = 0;
 
     (*new)->sock = accept(sock->sock, (struct sockaddr *)(*new)->local_addr,
                         &(*new)->addr_len);
@@ -251,11 +256,11 @@ ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock,
         return APR_ENOPOOL;
     }
     if ((*sock) == NULL) {
-        (*sock) = (ap_socket_t *)ap_palloc(cont, sizeof(ap_socket_t));
+        (*sock) = (ap_socket_t *)ap_pcalloc(cont, sizeof(ap_socket_t));
         (*sock)->cntxt = cont;
-        (*sock)->local_addr = (struct sockaddr_in *)ap_palloc((*sock)->cntxt,
+        (*sock)->local_addr = (struct sockaddr_in *)ap_pcalloc((*sock)->cntxt,
                              sizeof(struct sockaddr_in));
-        (*sock)->remote_addr = (struct sockaddr_in *)ap_palloc((*sock)->cntxt,
+        (*sock)->remote_addr = (struct sockaddr_in *)ap_pcalloc((*sock)->cntxt,
                               sizeof(struct sockaddr_in));
 
         if ((*sock)->local_addr == NULL || (*sock)->remote_addr == NULL) {
@@ -264,6 +269,7 @@ ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock,
      
         (*sock)->addr_len = sizeof(*(*sock)->local_addr);
         (*sock)->timeout = -1;
+        (*sock)->disconnected = 0;
     }
     (*sock)->sock = *thesock;
     return APR_SUCCESS;

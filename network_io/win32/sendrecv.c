@@ -144,7 +144,7 @@ ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec,
  * arg 3) A structure containing the headers and trailers to send
  * arg 4) Offset into the file where we should begin writing
  * arg 5) Number of bytes to send 
- * arg 6) OS-specific flags to pass to sendfile()
+ * arg 6) APR flags that are mapped to OS specific flags
  */
 ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         		ap_hdtr_t * hdtr, ap_off_t * offset, ap_size_t * len,
@@ -168,6 +168,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     int lasterror = APR_SUCCESS;
     DWORD dwFlags = 0;
 
+    /* Map APR flags to OS specific flags */
     if (flags & APR_SENDFILE_DISCONNECT_SOCKET) {
         dwFlags |= TF_REUSE_SOCKET;
         dwFlags |= TF_DISCONNECT;
@@ -252,6 +253,16 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
                 lasterror = GetLastError();
         }
     }
+
+    /* Mark the socket as disconnected, but do not close it.
+     * Note: The application must have stored the socket prior to making
+     * the call to ap_sendfile in order to either reuse it or close it.
+     */
+    if ((lasterror == APR_SUCCESS) && (flags & APR_SENDFILE_DISCONNECT_SOCKET)) {
+        sock->disconnected = 1;
+        sock->sock = INVALID_SOCKET;
+    }
+
 #ifdef WAIT_FOR_EVENT
     CloseHandle(overlapped.hEvent);
 #endif

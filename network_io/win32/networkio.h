@@ -65,6 +65,7 @@ struct ap_socket_t {
     struct sockaddr_in *remote_addr;
     size_t addr_len;
     ap_interval_time_t timeout;
+    ap_int32_t disconnected;
 };
 
 struct ap_pollfd_t {
