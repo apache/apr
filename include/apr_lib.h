@@ -237,7 +237,8 @@ APR_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *has
  * @param ... The arguments to use to fill out the format string.
  * @deffunc int ap_snprintf(char *buf, size_t len, const char *format, ...)
  */
-APR_EXPORT(int) ap_snprintf(char *buf, size_t len, const char *format, ...)
+APR_EXPORT_NONSTD(int) ap_snprintf(char *buf, size_t len, 
+                                   const char *format, ...)
 	__attribute__((format(printf,3,4)));
 
 /**
