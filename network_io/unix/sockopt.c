@@ -98,7 +98,7 @@ static ap_status_t sononblock(int sd)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_setsocketopt(ap_socket_t *, ap_int32_t , ap_int32_t)
+ * ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
  *    Setup socket options for the specified socket 
  * arg 1) The socket to set up.
  * arg 2) The option we would like to configure.  One of:
@@ -173,12 +173,12 @@ ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on
 }         
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_gethostname(char *, ap_int32_t, ap_context_t *)
+ * ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_context_t *cont)
  *    Get name of the current machine 
- * arg 1) The context to use.
- * arg 2) A buffer to store the hostname in.
- * arg 3) The maximum length of the hostname that can be stored in the
+ * arg 1) A buffer to store the hostname in.
+ * arg 2) The maximum length of the hostname that can be stored in the
  *        buffer provided. 
+ * arg 3) The context to use.
  */
 ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_context_t *cont)
 {
@@ -189,10 +189,10 @@ ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_context_t *cont)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_remote_hostname(ap_socket_t *, char *)
+ * ap_status_t ap_get_remote_hostname(char **name, ap_socket_t *sock)
  *    Get name of the machine we are currently connected to. 
- * arg 1) The socket to examine.
- * arg 2) A buffer to store the hostname in.
+ * arg 1) A buffer to store the hostname in.
+ * arg 2) The socket to examine.
  */
 ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
 {

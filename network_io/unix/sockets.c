@@ -69,10 +69,10 @@ static ap_status_t socket_cleanup(void *sock)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_tcp_socket(ap_socket_t **, ap_context_t *)
+ * ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_context_t *cont)
  *    Create a socket for tcp communication.
- * arg 1) The context to use
- * arg 2) The new socket that has been setup. 
+ * arg 1) The new socket that has been setup. 
+ * arg 2) The context to use
  */
 ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
 {
@@ -108,7 +108,7 @@ ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
 } 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_shutdown(ap_socket_t *, ap_shutdown_how_e)
+ * ap_status_t ap_shutdown(ap_socket_t *thesocket, ap_shutdown_how_e how)
  *    Shutdown either reading, writing, or both sides of a tcp socket.
  * arg 1) The socket to close 
  * arg 2) How to shutdown the socket.  One of:
@@ -129,7 +129,7 @@ ap_status_t ap_shutdown(struct socket_t *thesocket, ap_shutdown_how_e how)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_close_socket(ap_socket_t *)
+ * ap_status_t ap_close_socket(ap_socket_t *thesocket)
  *    Close a tcp socket.
  * arg 1) The socket to close 
  */
@@ -140,7 +140,7 @@ ap_status_t ap_close_socket(struct socket_t *thesocket)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_bind(ap_socket_t *)
+ * ap_status_t ap_bind(ap_socket_t *sock)
  *    Bind the socket to it's assocaited port
  * arg 1) The socket to bind 
  * NOTE:  This is where we will find out if there is any other process
@@ -155,7 +155,7 @@ ap_status_t ap_bind(struct socket_t *sock)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_listen(ap_socket_t *, ap_int32_t)
+ * ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog)
  *    Listen to a bound socketi for connections. 
  * arg 1) The socket to listen on 
  * arg 2) The number of outstanding connections allowed in the sockets
@@ -171,7 +171,8 @@ ap_status_t ap_listen(struct socket_t *sock, ap_int32_t backlog)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_accept(ap_socket_t **, ap_socket_t *, ap_context_t *connection_context)
+ * ap_status_t ap_accept(ap_socket_t **new, ap_socket_t *sock, 
+                         ap_context_t *connection_context)
  *    Accept a new connection request
  * arg 1) A copy of the socket that is connected to the socket that
  *        made the connection request.  This is the socket which should
@@ -212,7 +213,7 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock, struct
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_connect(ap_socket_t *, char *)
+ * ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
  *    Issue a connection request to a socket either on the same machine
  *    or a different one. 
  * arg 1) The socket we wish to use for our side of the connection 
@@ -257,7 +258,7 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_socketdata(void **, char *, ap_socket_t *)
+ * ap_status_t ap_get_socketdata(void **data, char *key, ap_socket_t *sock)
  *    Return the context associated with the current socket.
  * arg 1) The currently open socket.
  * arg 2) The user data associated with the socket.
@@ -274,11 +275,13 @@ ap_status_t ap_get_socketdata(void **data, char *key, struct socket_t *sock)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_socketdata(ap_socket_t *, void *, char *,
+ * ap_status_t ap_set_socketdata(ap_socket_t *sock, void *data, char *key,
                                  ap_status_t (*cleanup) (void *))
  *    Set the context associated with the current socket.
  * arg 1) The currently open socket.
  * arg 2) The user data to associate with the socket.
+ * arg 3) The key to associate with the data.
+ * arg 4) The cleanup to call when the socket is destroyed.
  */
 ap_status_t ap_set_socketdata(struct socket_t *sock, void *data, char *key,
                               ap_status_t (*cleanup) (void *))
@@ -293,7 +296,7 @@ ap_status_t ap_set_socketdata(struct socket_t *sock, void *data, char *key,
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_sock(ap_os_sock_t *, ap_socket_t *)
+ * ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, ap_socket_t *sock)
  *    Convert the socket from an apr type to an OS specific socket
  * arg 1) The socket to convert.
  * arg 2) The os specifc equivelant of the apr socket..
@@ -308,7 +311,8 @@ ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, struct socket_t *sock)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_put_os_sock(ap_socket_t **, ap_os_socket_t *, ap_context_t *)
+ * ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_socket_t *thesock, 
+ *                            ap_context_t *cont)
  *    Convert a socket from the os specific type to the apr type
  * arg 1) The context to use.
  * arg 2) The socket to convert to.

@@ -70,6 +70,13 @@
 
 #if HAVE_MMAP
 
+/* ***APRDOC********************************************************
+ * ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_offset_t offset)
+ *    Move the pointer into the mmap'ed file to the specified offset.
+ * arg 1) The pointer to the offset specified.
+ * arg 2) The mmap'ed file.
+ * arg 3) The offset to move to.
+ */
 ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_off_t offset)
 {  
     if (offset < 0 || offset > mmap->size)
