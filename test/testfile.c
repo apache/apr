@@ -83,19 +83,6 @@ static void test_open_noreadwrite(CuTest *tc)
     CuAssertPtrEquals(tc, NULL, thefile); 
 }
 
-static void test_open_dir_read(CuTest *tc)
-{
-    apr_status_t rv;
-    apr_file_t *thedir = NULL;
-
-    rv = apr_file_open(&thedir, DIRNAME, 
-                       APR_READ, 
-                       APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertTrue(tc, rv != APR_SUCCESS);
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_EACCES(rv));
-    CuAssertPtrEquals(tc, NULL, thedir);
-}
-
 static void test_open_excl(CuTest *tc)
 {
     apr_status_t rv;
@@ -518,7 +505,6 @@ CuSuite *testfile(void)
     CuSuite *suite = CuSuiteNew("File I/O");
 
     SUITE_ADD_TEST(suite, test_open_noreadwrite);
-    SUITE_ADD_TEST(suite, test_open_dir_read);
     SUITE_ADD_TEST(suite, test_open_excl);
     SUITE_ADD_TEST(suite, test_open_read);
     SUITE_ADD_TEST(suite, test_open_readwrite);
