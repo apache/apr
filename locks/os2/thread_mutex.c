@@ -79,7 +79,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
     new_mutex = (apr_thread_mutex_t *)apr_palloc(pool, sizeof(apr_thread_mutex_t));
     new_mutex->pool = pool;
 
-    /* FIXME: Can OS/2 do nested (aka recursive) locks natively? */
     rc = DosCreateMutexSem(NULL, &(new_mutex->hMutex), 0, FALSE);
     *mutex = new_mutex;
 
