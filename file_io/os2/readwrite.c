@@ -107,6 +107,11 @@ apr_status_t apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
 
         *nbytes = rc == 0 ? pos - (char *)buf : 0;
         apr_lock_release(thefile->mutex);
+
+        if (*nbytes == 0 && rc == 0) {
+            return APR_EOF;
+        }
+
         return APR_OS2_STATUS(rc);
     } else {
         if (thefile->pipe)
@@ -130,6 +135,7 @@ apr_status_t apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
         
         if (bytesread == 0) {
             thefile->eof_hit = TRUE;
+            return APR_EOF;
         }
 
         return APR_SUCCESS;
