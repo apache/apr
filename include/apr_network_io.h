@@ -251,10 +251,14 @@ ap_status_t ap_set_socketdata(ap_socket_t *sock, void *data, char *key,
  *    Send data over a network.
  * arg 1) The socket to send the data over.
  * arg 2) The buffer which contains the data to be sent. 
- * arg 3) The maximum number of bytes to send 
+ * arg 3) On entry, the number of bytes to send; on exit, the number
+ *        of bytes sent.
  * NOTE:  This functions acts like a blocking write by default.  To change 
  *        this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
- *        The number of bytes actually sent is stored in argument 3.
+ *
+ * It is possible for both bytes to be sent and an error to be returned.
+ *
+ * APR_EINTR is never returned.
  */
 ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len);
 
@@ -269,6 +273,10 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len);
  * NOTE:  This functions acts like a blocking write by default.  To change 
  *        this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
  *        The number of bytes actually sent is stored in argument 3.
+ *
+ * It is possible for both bytes to be sent and an error to be returned.
+ *
+ * APR_EINTR is never returned.
  */
 ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, 
                      ap_int32_t nvec, ap_int32_t *len);
@@ -298,10 +306,16 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file, ap_hdtr_t *hdtr,
  *    Read data from a network.
  * arg 1) The socket to read the data from.
  * arg 2) The buffer to store the data in. 
- * arg 3) The maximum number of bytes to read 
+ * arg 3) On entry, the number of bytes to receive; on exit, the number
+ *        of bytes received.
  * NOTE:  This functions acts like a blocking write by default.  To change 
  *        this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
  *        The number of bytes actually sent is stored in argument 3.
+ *
+ * It is possible for both bytes to be received and an APR_EOF or
+ * other error to be returned.
+ *
+ * APR_EINTR is never returned.
  */
 ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len);
 
