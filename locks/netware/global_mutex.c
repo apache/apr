@@ -91,5 +91,5 @@ APR_DECLARE(apr_status_t) apr_global_mutex_destroy(apr_global_mutex_t *mutex)
     return APR_ENOTIMPL;
 }
 
-APR_POOL_IMPLEMENT_ACCESSOR(global_mutex);
+APR_POOL_IMPLEMENT_ACCESSOR(global_mutex)
 
