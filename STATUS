@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2003/03/31 05:34:30 $]
+Last modified at [$Date: 2003/04/04 12:46:01 $]
 
 Release:
 
@@ -302,6 +302,27 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       Justin says: What is this system-imposed limit and how do we change it?
                    This gives me more rationale for switching the default
                    interprocess lock mechanism to pthread (if available).
+
+      Explanation:
+      ============
+        The system imposed default limit of outstanding lock requests is
+        512.
+        You can verify this by, in a contemporary version of Solaris:
+
+        # mdb -k
+        > tune_t_flckrec/D
+        tune_t_flckrec:
+        tune_t_flckrec: 512
+
+        This can be increased by adding the following to /etc/system:
+
+        set tune_t_flckrec=1024
+
+        and rebooting.
+
+        Of course "1024" can be any reasonable limit, although we do not know
+        what "reasonable" should be, so be conservative, only increase this as
+        necessary.
 
     * Generate a good bug report to send to the FreeBSD hackers that details
       the problems we have seen with threads and system calls (specifically
