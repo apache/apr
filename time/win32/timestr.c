@@ -71,7 +71,7 @@ APR_DECLARE(apr_status_t) apr_rfc822_date(char *date_str, apr_time_t t)
     const char *s;
     int real_year;
 
-    apr_explode_gmt(&xt, t);
+    apr_time_exp_gmt(&xt, t);
 
     /* example: "Sat, 08 Jan 2000 18:31:41 GMT" */
     /*           12345678901234567890123456789  */

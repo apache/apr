@@ -83,7 +83,7 @@ int main(void)
     now = apr_time_now();
     printf("OK\n");
 
-    STD_TEST_NEQ("    apr_explode_gmt", apr_explode_gmt(&xt, now))
+    STD_TEST_NEQ("    apr_time_exp_gmt", apr_time_exp_gmt(&xt, now))
     
     STD_TEST_NEQ("    apr_explode_localtime", apr_explode_localtime(&xt2, now))
 
