@@ -82,7 +82,8 @@ static void msgwait(int sleep_sec, int first_box, int last_box)
 {
     int i;
     apr_time_t start = apr_time_now();
-    while (apr_time_now() - start < sleep_sec * APR_USEC_PER_SEC) {
+    apr_interval_time_t sleep_duration = apr_time_from_sec(sleep_sec);
+    while (apr_time_now() - start < sleep_duration) {
         for (i = first_box; i < last_box; i++) {
             if (boxes[i].msgavail) {
                 fprintf(stdout, "received a message in box %d, message was: %s\n", 
@@ -90,7 +91,7 @@ static void msgwait(int sleep_sec, int first_box, int last_box)
                 boxes[i].msgavail = 0; /* reset back to 0 */
             }
         }
-        apr_sleep(1*APR_USEC_PER_SEC/100);
+        apr_sleep(apr_time_make(0, 10000)); /* 10ms */
     }
     fprintf(stdout, "done waiting on mailboxes...\n");
 }
@@ -157,7 +158,7 @@ static apr_status_t test_anon(apr_pool_t *parpool)
                 i += N_BOXES; /* start over at the top */
             }
             msgput(i, "Sending a message\n");
-            apr_sleep(1*APR_USEC_PER_SEC/100);
+            apr_sleep(apr_time_make(0, 10000));
         }
     }
     else {

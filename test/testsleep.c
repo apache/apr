@@ -66,7 +66,7 @@
 static void do_sleep(int howlong)
 {
     apr_time_t then, now, diff;
-    apr_time_t interval = howlong * APR_USEC_PER_SEC;
+    apr_time_t interval = apr_time_from_sec(howlong);
 
     printf("    I'm about to go to sleep!\n");
 

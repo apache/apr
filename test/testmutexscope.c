@@ -174,7 +174,7 @@ static void test_mech_mode(apr_lockmech_e mech, const char *mech_name,
     ++i;
   }
 
-  apr_sleep(5 * APR_USEC_PER_SEC);
+  apr_sleep(apr_time_from_sec(5));
 
   if (test_mode == TEST_PROC) {
       printf("  Mutex mechanism `%s' is %sglobal in scope on this platform.\n",
