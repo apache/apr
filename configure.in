@@ -36,24 +36,7 @@ echo "Platform: $host"
 dnl # Some initial steps for configuration.  We setup the default directory
 dnl # and which files are to be configured.
 
-dnl # First, we need to enable the layout handling code, then reparse the 
-dnl # prefix-style arguments due to autoconf being a PITA.
-APR_ENABLE_LAYOUT
-APR_PARSE_ARGUMENTS
-
-dnl Set optional CC hints here in case autoconf makes an inappropriate choice.
-dnl This allows us to suggest what the compiler should be, but still
-dnl allows the user to override CC externally.
-APR_CC_HINTS
-
-dnl Do the various CC checks *before* preloading values. The preload code
-dnl may need to use compiler characteristics to make decisions. This macro
-dnl can only be used once within a configure script, so this prevents a
-dnl preload section from invoking the macro to get compiler info.
-AC_PROG_CC
-
-dnl Preload
-APR_PRELOAD
+dnl Setup the directory macros now
 
 dnl Absolute source/build directory
 apr_srcdir=`(cd $srcdir && pwd)`
@@ -83,6 +66,36 @@ MKDIR=$apr_builders/mkdir.sh
 dnl Initialize mkdir -p functionality.
 APR_MKDIR_P_CHECK($apr_builders/mkdir.sh)
 
+dnl get our version information
+get_version="$apr_builders/get-version.sh"
+version_hdr="$apr_srcdir/include/apr_version.h"
+APR_MAJOR_VERSION="`$get_version major $version_hdr`"
+APR_DOTTED_VERSION="`$get_version all $version_hdr`"
+
+AC_SUBST(APR_DOTTED_VERSION)
+AC_SUBST(APR_MAJOR_VERSION)
+
+echo "APR Version: ${APR_DOTTED_VERSION}"
+
+dnl # Enable the layout handling code, then reparse the prefix-style
+dnl # arguments due to autoconf being a PITA.
+APR_ENABLE_LAYOUT
+APR_PARSE_ARGUMENTS
+
+dnl Set optional CC hints here in case autoconf makes an inappropriate choice.
+dnl This allows us to suggest what the compiler should be, but still
+dnl allows the user to override CC externally.
+APR_CC_HINTS
+
+dnl Do the various CC checks *before* preloading values. The preload code
+dnl may need to use compiler characteristics to make decisions. This macro
+dnl can only be used once within a configure script, so this prevents a
+dnl preload section from invoking the macro to get compiler info.
+AC_PROG_CC
+
+dnl Preload
+APR_PRELOAD
+
 dnl These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
 echo "(Default will be ${DEFAULT_OSDIR})"
@@ -108,19 +121,8 @@ AC_MINIX
 
 APR_EBCDIC
 
-dnl get our version information
-get_version="$apr_builders/get-version.sh"
-version_hdr="$apr_srcdir/include/apr_version.h"
-APR_MAJOR_VERSION="`$get_version major $version_hdr`"
-APR_DOTTED_VERSION="`$get_version all $version_hdr`"
-
-dnl this one will go into apr-config.in
-AC_SUBST(APR_DOTTED_VERSION)
-
-echo "APR Version: ${APR_DOTTED_VERSION}"
-
 dnl this is our library name
-APR_LIBNAME="libapr-${APR_MAJOR_VERSION}"
+APR_LIBNAME="libapr${libsuffix}"
 AC_SUBST(APR_LIBNAME)
 
 dnl prep libtool
