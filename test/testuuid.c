@@ -54,6 +54,7 @@
 
 #include <stdio.h>
 
+#include "apr_general.h"
 #include "apr_uuid.h"
 
 
@@ -63,6 +64,9 @@ int main(int argc, char **argv)
     apr_uuid_t uuid2;
     char buf[APR_UUID_FORMATTED_LENGTH + 1];
     int retcode = 0;
+
+    apr_initialize();
+    atexit(apr_terminate);
 
     apr_uuid_get(&uuid);
     apr_uuid_format(buf, &uuid);
