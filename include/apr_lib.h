@@ -164,6 +164,8 @@ enum kill_conditions {
  * Define the prototypes for the various APR GP routines.
  */
 API_EXPORT(char *) ap_cpystrn(char *d, const char *s, size_t l);
+API_EXPORT(int) ap_tokenize_to_argv(ap_context_t *token_context,
+                                    char *arg_str, char ***argv_out);
 /*API_EXPORT(ap_mutex_t *) ap_create_mutex(void *m);*/
 API_EXPORT(int) ap_slack(int l, int h);
 API_EXPORT_NONSTD(int) ap_execle(const char *c, const char *a, ...);
@@ -371,9 +373,8 @@ API_EXPORT(void) ap_cleanup_for_exec(void);
 API_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
 API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data);
 
-/*API_EXPORT(void) ap_note_subprocess(ap_pool_t *a, pid_t pid,
+API_EXPORT(void) ap_note_subprocess(struct context_t *a, pid_t pid,
 				     enum kill_conditions how);
-*/
 API_EXPORT(int)
 	ap_spawn_child(ap_context_t *p,
 			int (*func) (void *a, ap_child_info_t *c),
