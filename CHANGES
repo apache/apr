@@ -1,5 +1,7 @@
 Changes with APR b1  
 
+  *) Implemented name-based shared memory on Unix. [Aaron Bannert]
+
   *) Fix spelling mistakes in APRDesign.  
      [Blair Zajac <blair@orcaware.com>]
 
