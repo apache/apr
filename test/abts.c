@@ -262,7 +262,7 @@ void abts_ptr_notnull(abts_case *tc, const void *ptr, int lineno)
 
     tc->failed = TRUE;
     if (verbose) {
-        fprintf(stderr, "Line %d: Expected NULL, but saw <%p>", lineno, ptr);
+        fprintf(stderr, "Line %d: Expected NULL, but saw <%p>\n", lineno, ptr);
         fflush(stderr);
     }
 }
@@ -302,7 +302,7 @@ void abts_assert(abts_case *tc, const char *message, int condition, int lineno)
 
     tc->failed = TRUE;
     if (verbose) {
-        fprintf(stderr, "Line %d: %s", lineno, message);
+        fprintf(stderr, "Line %d: %s\n", lineno, message);
         fflush(stderr);
     }
 }
@@ -316,7 +316,7 @@ void abts_true(abts_case *tc, int condition, int lineno)
 
     tc->failed = TRUE;
     if (verbose) {
-        fprintf(stderr, "Line %d: Condition is false, but expected true", lineno);
+        fprintf(stderr, "Line %d: Condition is false, but expected true\n", lineno);
         fflush(stderr);
     }
 }
@@ -327,7 +327,7 @@ void abts_not_impl(abts_case *tc, const char *message, int lineno)
 
     tc->suite->not_impl++;
     if (verbose) {
-        fprintf(stderr, "Line %d: %s", lineno, message);
+        fprintf(stderr, "Line %d: %s\n", lineno, message);
         fflush(stderr);
     }
 }
