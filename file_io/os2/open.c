@@ -57,6 +57,7 @@
 #include "apr_lib.h"
 #include "apr_portable.h"
 #include "apr_strings.h"
+#include "inherit.h"
 #include <string.h>
 
 apr_status_t apr_file_cleanup(void *thefile)
@@ -265,7 +266,7 @@ apr_status_t apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *cont)
 
 APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);
 
-APR_IMPLEMENT_SET_INHERIT(socket, inherit, cntxt, socket_cleanup)
+APR_IMPLEMENT_SET_INHERIT(file, flags, cntxt, apr_file_cleanup)
 
-APR_IMPLEMENT_UNSET_INHERIT(socket, inherit, cntxt, socket_cleanup)
+APR_IMPLEMENT_UNSET_INHERIT(file, flags, cntxt, apr_file_cleanup)
 
