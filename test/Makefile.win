@@ -16,7 +16,6 @@ PROGRAMS = \
 	testlockperf.exe \
 	testshmproducer.exe \
 	testshmconsumer.exe \
-	testatomic.exe \
 	testmutexscope.exe \
 	testall.exe \
 	mod_test.so
@@ -87,9 +86,6 @@ testprocmutex.exe: testprocmutex.obj $(LOCAL_LIBS)
 testglobalmutex.exe: testglobalmutex.obj $(LOCAL_LIBS)
 	$(LINK) testglobalmutex.obj $(LOCAL_LIBS) $(ALL_LIBS)
 
-testatomic.exe: testatomic.obj $(LOCAL_LIBS)
-	$(LINK) testatomic.obj $(LOCAL_LIBS) $(ALL_LIBS)
-
 testmutexscope.exe: testmutexscope.obj $(LOCAL_LIBS)
 	$(LINK) testmutexscope.obj $(LOCAL_LIBS) $(ALL_LIBS)
 
@@ -99,7 +95,8 @@ TESTS = testall.obj testtime.obj teststr.obj testvsn.obj testipsub.obj \
 	testdso.obj testoc.obj testdup.obj testsockets.obj testproc.obj \
 	testpoll.obj testlock.obj testsockopt.obj testpipe.obj testthread.obj \
 	testhash.obj testargs.obj testnames.obj testuser.obj testpath.obj \
-	testenv.obj testprocmutex.obj testrand2.obj testfnmatch.obj
+	testenv.obj testprocmutex.obj testrand2.obj testfnmatch.obj \
+        testatomic.obj
 
 testall.exe: $(TESTS) CuTest.obj $(LOCAL_LIBS)
 	$(LINK) /debug /subsystem:console /machine:I386 $(TESTS) CuTest.obj \
