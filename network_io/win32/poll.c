@@ -136,8 +136,7 @@ ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds,
 
     (*nsds) = rv;    
     if ((*nsds) < 0) {
-        rv = GetLastError();
-        return APR_EEXIST;  /* TODO - get everybody in synch with Win32 ap_status_t */
+        return WSAGetLastError();
     }
     return APR_SUCCESS;
 }

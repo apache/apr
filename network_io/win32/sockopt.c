@@ -64,7 +64,7 @@ ap_status_t soblock(SOCKET sd)
     int one = 1;
 
     if (ioctlsocket(sd, FIONBIO, &one) == SOCKET_ERROR) {
-        return APR_EEXIST;
+        return WSAGetLastError();
     }
     return APR_SUCCESS;
 }
@@ -74,7 +74,7 @@ ap_status_t sononblock(SOCKET sd)
     int zero = 0;
 
     if (ioctlsocket(sd, FIONBIO, &zero) == SOCKET_ERROR) {
-        return APR_EEXIST;
+        return WSAGetLastError();
     }
     return APR_SUCCESS;
 }
@@ -128,7 +128,7 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
         li.l_onoff = on;
         li.l_linger = MAX_SECS_TO_LINGER;
         if (setsockopt(sock->sock, SOL_SOCKET, SO_LINGER, (char *) &li, sizeof(struct linger)) == -1) {
-            return APR_EEXIST;
+            return WSAGetLastError();
         }
     }
     return APR_SUCCESS;
@@ -137,7 +137,7 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
 ap_status_t ap_gethostname(char *buf, int len, ap_pool_t *cont)
 {
     if (gethostname(buf, len) == -1)
-        return APR_EEXIST;
+        return WSAGetLastError();
     else
         return APR_SUCCESS;
 }
@@ -157,30 +157,7 @@ ap_status_t ap_get_remote_hostname(char **name, ap_socket_t *sock)
         return APR_ENOMEM;
     }
 
-    return (WSAGetLastError() + APR_OS_START_SYSERR);
+    return WSAGetLastError();
 }
-#if 0
-ap_status_t status_from_res_error(int reserr)
-{
-    ap_status_t status;
-    switch(reserr) {
-    case WSAHOST_NOT_FOUND:
-        status = APR_EHOSTNOTFOUND;
-        break;
-    case WSATRY_AGAIN:
-        status = APR_EAGAIN;
-        break;
-    case WSANO_RECOVERY:
-        status = APR_ENORECOVERY;
-        break;
-    case WSANO_DATA:
-        status = APR_ENODATA;
-        break;
-    default:
-        status = APR_ENORECOVERY;
-    }
-    return status;
-}
-#endif
 
 

@@ -194,6 +194,7 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     char ppid[20];
     char *envstr;
     char *pEnvBlock, *pNext;
+    ap_status_t rv;
 
     (*new) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
 
@@ -285,6 +286,7 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
 	|| (attr->child_err && !DuplicateHandle(hCurrentProcess, attr->parent_err->filehand,
                                                 hCurrentProcess, &hParenterrdup,
                                                 0, FALSE, DUPLICATE_SAME_ACCESS))) {
+        rv = GetLastError();
         if (attr->child_in) {
             ap_close(attr->child_in);
             ap_close(attr->parent_in);
@@ -297,7 +299,7 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
             ap_close(attr->child_err);
             ap_close(attr->parent_err);
         }
-        return APR_EEXIST;
+        return rv;
     }
     else {
         if (attr->child_in) {
