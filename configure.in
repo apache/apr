@@ -1628,21 +1628,21 @@ if test "$rand" != "1"; then
 
   if test "$apr_devrandom" = "yes"; then
     if test -r "/dev/random"; then
-      AC_DEFINE(DEV_RANDOM, [/dev/random], [Define to path of random device])
+      AC_DEFINE_UNQUOTED(DEV_RANDOM, ["/dev/random"], [Define to path of random device])
       AC_MSG_RESULT(/dev/random)
       rand="1"
     elif test -r "/dev/arandom"; then
-      AC_DEFINE(DEV_RANDOM, [/dev/arandom])
+      AC_DEFINE_UNQUOTED(DEV_RANDOM, ["/dev/arandom"])
       AC_MSG_RESULT(/dev/arandom)
       rand="1"
     elif test -r "/dev/urandom"; then
-      AC_DEFINE(DEV_RANDOM, [/dev/urandom])
+      AC_DEFINE_UNQUOTED(DEV_RANDOM, ["/dev/urandom"])
       AC_MSG_RESULT(/dev/urandom)
       rand="1"
     fi
   elif test "$apr_devrandom" != "no"; then
     if test -r "$apr_devrandom"; then
-      AC_DEFINE(DEV_RANDOM, [$apr_devrandom])
+      AC_DEFINE_UNQUOTED(DEV_RANDOM, ["$apr_devrandom"])
       AC_MSG_RESULT($apr_devrandom)
       rand="1"
     else
