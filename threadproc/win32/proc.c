@@ -339,9 +339,17 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     if (attr->detached) {
         /* If we are creating ourselves detached, Then we should hide the
          * window we are starting in.  And we had better redfine our
-         * handles for STDIN, STDOUT, and STDERR.
+         * handles for STDIN, STDOUT, and STDERR. Do not set the
+         * detached attribute for Win9x. We have found that Win9x does
+         * not manage the stdio handles properly when running old 16
+         * bit executables if the detached attribute is set.
          */
-        dwCreationFlags |= DETACHED_PROCESS;
+        apr_oslevel_e os_level;
+        if (apr_get_oslevel(cont, &os_level) == APR_SUCCESS) {
+            if (os_level >= APR_WIN_NT) {
+                dwCreationFlags |= DETACHED_PROCESS;
+            }
+        }
         attr->si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
         attr->si.wShowWindow = SW_HIDE;
 
