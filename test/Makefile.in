@@ -27,7 +27,8 @@ PROGRAMS = \
 	testhash@EXEEXT@ \
 	occhild@EXEEXT@ \
 	teststr@EXEEXT@ \
-	testuser@EXEEXT@
+	testuser@EXEEXT@ \
+        testsockets@EXEEXT@
 
 TARGETS = $(PROGRAMS)
 

@@ -43,3 +43,4 @@ testlock
 *.core
 testsockets
 testuser
+test.fil
