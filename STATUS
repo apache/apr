@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/01/24 02:24:43 $]
+Last modified at [$Date: 2001/01/24 08:26:19 $]
 
 Release:
 
@@ -17,9 +17,6 @@ RELEASE SHOWSTOPPERS:
 
     * Many linkage errors are gpfaulting Apache/win32 in various configs
       (load mod_dav, for example.)
-
-    * Replace APR_GET_POOL macro with a typesafe mechanism to get the pool
-      from an APR (incomplete) type.
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
@@ -92,6 +89,9 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
     * Change the return type of apr_hash_count() to some counter type 
       (like "int") instead of a size type (apr_size_t).  Jeff will
       do this Real Soon Now (so he says on 20010121).
+
+    * add the rest of the pool accessor declare/impl macros.
+      Status: Greg volunteers
 
 Documentation that needs writing:
 

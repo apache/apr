@@ -262,3 +262,5 @@ apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 
     return APR_SUCCESS;
 }
+
+APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);
