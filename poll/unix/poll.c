@@ -111,24 +111,25 @@ static apr_int16_t get_revent(apr_int16_t event)
 APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
                       apr_int32_t *nsds, apr_interval_time_t timeout)
 {
+    int i;
+#ifdef HAVE_VLA
+    struct pollfd pollset[num];
+#elif defined(HAVE_ALLOCA)
+    struct pollfd *pollset = alloca(sizeof(pollfd) * num);
+#else
     struct pollfd tmp_pollset[SMALL_POLLSET_LIMIT];
     struct pollfd *pollset;
-    int i;
 
     if (num <= SMALL_POLLSET_LIMIT) {
         pollset = tmp_pollset;
     }
     else {
-        /* XXX There are two problems with this code: it leaks
-         * memory, and it requires an O(n)-time loop to copy
-         * n descriptors from the apr_pollfd_t structs into
-         * the pollfd structs.  At the moment, it's best suited
-         * for use with fewer than SMALL_POLLSET_LIMIT
-         * descriptors.
+        /* This does require O(n) to copy the descriptors to the internal
+         * mapping.
          */
-        pollset = apr_palloc(aprset->p,
-                             sizeof(struct pollfd) * num);
+        pollset = malloc(sizeof(struct pollfd) * num);
     }
+#endif
     for (i = 0; i < num; i++) {
         if (aprset[i].desc_type == APR_POLL_SOCKET) {
             pollset[i].fd = aprset[i].desc.s->socketdes;
@@ -150,6 +151,12 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
         aprset[i].rtnevents = get_revent(pollset[i].revents);
     }
     
+#if !defined(HAVE_VLA) && !defined(HAVE_ALLOCA)
+    if (num > SMALL_POLLSET_LIMIT) {
+        free(pollset);
+    }
+#endif
+
     if ((*nsds) < 0) {
         return errno;
     }

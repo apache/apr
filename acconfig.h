@@ -48,6 +48,8 @@
 
 #undef HAVE_INT64_C
 
+#undef HAVE_VLA
+
 /* BeOS specific flag */
 #undef HAVE_BONE_VERSION
 

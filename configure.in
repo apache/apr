@@ -793,7 +793,7 @@ AC_SUBST(sharedmem)
 
 dnl #----------------------------- Checks for Any required Functions
 dnl Checks for library functions. (N.B. poll is further down)
-AC_CHECK_FUNCS(calloc strcasecmp stricmp setsid isinf isnan)
+AC_CHECK_FUNCS(alloca calloc strcasecmp stricmp setsid isinf isnan)
 AC_CHECK_FUNCS(setrlimit, [ have_setrlimit="1" ], [ have_setrlimit="0" ]) 
 AC_CHECK_FUNCS(getrlimit, [ have_getrlimit="1" ], [ have_getrlimit="0" ]) 
 AC_CHECK_FUNCS(writev)
@@ -1280,6 +1280,16 @@ AC_ARG_ENABLE(other-child,
   [ oc=1 ] ) 
   
 AC_SUBST(oc) 
+
+AC_MSG_CHECKING(for Variable Length Arrays)
+APR_TRY_COMPILE_NO_WARNING([],
+[
+    int foo[atoi(argv[1])];
+], vla_msg=yes, vla_msg=no )
+AC_MSG_RESULT([$vla_msg])
+if test "$vla_msg" = "yes"; then
+    AC_DEFINE(HAVE_VLA)
+fi
 
 AC_CACHE_CHECK(struct rlimit,ac_cv_struct_rlimit,[
 AC_TRY_RUN([
