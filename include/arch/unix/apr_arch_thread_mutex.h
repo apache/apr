@@ -60,6 +60,7 @@
 #include "apr_general.h"
 #include "apr_thread_mutex.h"
 #include "apr_portable.h"
+#include "apr_atomic.h"
 
 #if APR_HAVE_PTHREAD_H
 #include <pthread.h>
@@ -69,8 +70,8 @@
 struct apr_thread_mutex_t {
     apr_pool_t *pool;
     pthread_mutex_t mutex;
-    apr_os_thread_t owner;
-    int owner_ref;
+    volatile apr_os_thread_t owner;
+    volatile apr_atomic_t owner_ref;
     char nested; /* a boolean */
 };
 #endif

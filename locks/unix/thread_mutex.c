@@ -108,8 +108,13 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
     apr_status_t rv;
 
     if (mutex->nested) {
+        /*
+         * Although threadsafe, this test is NOT reentrant.  
+         * The thread's main and reentrant attempts will both mismatch 
+         * testing the mutex is owned by this thread, so a deadlock is expected.
+         */
         if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
-            mutex->owner_ref++;
+            apr_atomic_inc(mutex->owner_ref);
             return APR_SUCCESS;
         }
 
@@ -121,8 +126,17 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
             return rv;
         }
 
+        if (apr_atomic_cas(&mutex->owner_ref, 1, 0) != 0) {
+            /* The owner_ref should be zero when the lock is not held,
+             * if owner_ref was non-zero we have a mutex reference bug.
+             * XXX: so now what?
+             */
+            mutex->owner_ref = 1;
+        }
+        /* Note; do not claim ownership until the owner_ref has been
+         * incremented; limits a subtle race in reentrant code.
+         */
         mutex->owner = apr_os_thread_current();
-        mutex->owner_ref = 1;
         return rv;
     }
     else {
@@ -141,8 +155,14 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
     apr_status_t rv;
 
     if (mutex->nested) {
+        /*
+         * Although threadsafe, this test is NOT reentrant.  
+         * The thread's main and reentrant attempts will both mismatch 
+         * testing the mutex is owned by this thread, so one will fail 
+         * the trylock.
+         */
         if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
-            mutex->owner_ref++;
+            apr_atomic_inc(mutex->owner_ref);
             return APR_SUCCESS;
         }
 
@@ -154,8 +174,17 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
             return (rv == EBUSY) ? APR_EBUSY : rv;
         }
 
+        if (apr_atomic_cas(&mutex->owner_ref, 1, 0) != 0) {
+            /* The owner_ref should be zero when the lock is not held,
+             * if owner_ref was non-zero we have a mutex reference bug.
+             * XXX: so now what?
+             */
+            mutex->owner_ref = 1;
+        }
+        /* Note; do not claim ownership until the owner_ref has been
+         * incremented; limits a subtle race in reentrant code.
+         */
         mutex->owner = apr_os_thread_current();
-        mutex->owner_ref = 1;
     }
     else {
         rv = pthread_mutex_trylock(&mutex->mutex);
@@ -175,32 +204,37 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
     apr_status_t status;
 
     if (mutex->nested) {
+        /*
+         * The code below is threadsafe and reentrant.
+         */
         if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
-            mutex->owner_ref--;
-            if (mutex->owner_ref > 0)
-                return APR_SUCCESS;
-        }
-        status = pthread_mutex_unlock(&mutex->mutex);
-        if (status) {
-#ifdef PTHREAD_SETS_ERRNO
-            status = errno;
-#endif
-            return status;
-        }
+            /*
+             * This should never occur, and indicates an application error
+             */
+            if (mutex->owner_ref == 0) {
+                return APR_EINVAL;
+            }
 
-        memset(&mutex->owner, 0, sizeof mutex->owner);
-        mutex->owner_ref = 0;
-        return status;
-    }
-    else {
-        status = pthread_mutex_unlock(&mutex->mutex);
-#ifdef PTHREAD_SETS_ERRNO
-        if (status) {
-            status = errno;
+            if (apr_atomic_dec(mutex->owner_ref) != 0)
+                return APR_SUCCESS;
+            mutex->owner = 0;
         }
-#endif
-        return status;
+        /*
+         * This should never occur, and indicates an application error
+         */
+        else {
+            return APR_EINVAL;
+        }
     }
+
+    status = pthread_mutex_unlock(&mutex->mutex);
+#ifdef PTHREAD_SETS_ERRNO
+    if (status) {
+        status = errno;
+    }
+#endif
+
+    return status;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex)
