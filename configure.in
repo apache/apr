@@ -135,7 +135,7 @@ dnl prep libtool
 dnl
 echo "performing libtool configuration..."
 
-AC_ARG_ENABLE(experimental-libtool,[  --experimental-libtool Use experimental custom libtool],
+AC_ARG_ENABLE(experimental-libtool,[  --enable-experimental-libtool Use experimental custom libtool],
   [experimental_libtool=$enableval],[experimental_libtool=no])
 
 case $host in
