@@ -505,6 +505,52 @@ static void test_mod_neg(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
+/* Test that the contents of file FNAME are equal to data EXPECT of
+ * length EXPECTLEN. */
+static void file_contents_equal(abts_case *tc,
+                                const char *fname,
+                                const void *expect,
+                                apr_size_t expectlen)
+{
+    void *actual = apr_palloc(p, expectlen);
+    apr_file_t *f;
+
+    APR_ASSERT_SUCCESS(tc, "open file",
+                       apr_file_open(&f, fname, APR_READ|APR_BUFFERED,
+                                     0, p));
+    APR_ASSERT_SUCCESS(tc, "read from file",
+                       apr_file_read_full(f, actual, expectlen, NULL));
+    
+    ABTS_ASSERT(tc, "matched expected file contents",
+                memcmp(expect, actual, expectlen) == 0);
+
+    APR_ASSERT_SUCCESS(tc, "close file", apr_file_close(f));
+}
+
+#define LINE1 "this is a line of text\n"
+#define LINE2 "this is a second line of text\n"
+
+static void test_puts(abts_case *tc, void *data)
+{
+    apr_file_t *f;
+    const char *fname = "data/testputs.txt";
+
+    APR_ASSERT_SUCCESS(tc, "open file for writing",
+                       apr_file_open(&f, fname, 
+                                     APR_WRITE|APR_CREATE|APR_TRUNCATE, 
+                                     APR_OS_DEFAULT, p));
+    
+    APR_ASSERT_SUCCESS(tc, "write line to file", 
+                       apr_file_puts(LINE1, f));
+    APR_ASSERT_SUCCESS(tc, "write second line to file", 
+                       apr_file_puts(LINE2, f));
+    
+    APR_ASSERT_SUCCESS(tc, "close for writing",
+                       apr_file_close(f));
+
+    file_contents_equal(tc, fname, LINE1 LINE2, strlen(LINE1 LINE2));
+}
+
 static void test_truncate(abts_case *tc, void *data)
 {
     apr_status_t rv;
@@ -567,6 +613,7 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_getc, NULL);
     abts_run_test(suite, test_ungetc, NULL);
     abts_run_test(suite, test_gets, NULL);
+    abts_run_test(suite, test_puts, NULL);
     abts_run_test(suite, test_bigread, NULL);
     abts_run_test(suite, test_mod_neg, NULL);
     abts_run_test(suite, test_truncate, NULL);
