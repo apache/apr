@@ -153,8 +153,11 @@ static apr_status_t intra_destroy(apr_lock_t *lock)
 
 const apr_unix_lock_methods_t apr_unix_intra_methods =
 {
+    0,
     intra_create,
     intra_acquire,
+    NULL, /* no read lock concept */
+    NULL, /* no write lock concept */
     intra_release,
     intra_destroy,
     NULL /* no child init */
@@ -166,6 +169,18 @@ static apr_status_t rwlock_create(apr_lock_t *new, const char *fname)
     /* XXX check retcode */
     pthread_rwlock_init(&new->rwlock, NULL);
     return APR_SUCCESS;
+}
+
+static apr_status_t rwlock_acquire_read(apr_lock_t *lock)
+{
+    /* XXX PTHREAD_SETS_ERRNO crap? */
+    return pthread_rwlock_rdlock(&lock->rwlock);
+}
+
+static apr_status_t rwlock_acquire_write(apr_lock_t *lock)
+{
+    /* XXX PTHREAD_SETS_ERRNO crap? */
+    return pthread_rwlock_wrlock(&lock->rwlock);
 }
 
 static apr_status_t rwlock_release(apr_lock_t *lock)
@@ -182,8 +197,11 @@ static apr_status_t rwlock_destroy(apr_lock_t *lock)
 
 const apr_unix_lock_methods_t apr_unix_rwlock_methods =
 {
+    0,
     rwlock_create,
     NULL, /* no standard acquire method; app better not call :) */
+    rwlock_acquire_read,
+    rwlock_acquire_write,
     rwlock_release,
     rwlock_destroy,
     NULL /* no child init method */
