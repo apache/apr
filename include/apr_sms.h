@@ -63,6 +63,8 @@
 #ifndef APR_SMS_H
 #define APR_SMS_H
 
+typedef struct apr_sms_t    apr_sms_t;
+
 #include "apr.h"
 #include "apr_errno.h"
 #include "apr_pools.h"
@@ -154,7 +156,6 @@ extern "C" {
  */
 
 struct apr_sms_cleanup;
-typedef struct apr_sms_t    apr_sms_t;
 
 /*
  * memory allocation functions 
