@@ -58,6 +58,10 @@
 #include "apr_pools.h"
 #include "apr_errno.h"
 #include "apr_dso.h"
+#include "apr.h"
+#ifdef APR_HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #ifdef NETWARE
 # define LIB_NAME "mod_test.nlm"
@@ -78,7 +82,7 @@
 static char *filename;
 static char *filename2;
 
-void test_load_module(CuTest *tc)
+static void test_load_module(CuTest *tc)
 {
     apr_dso_handle_t *h = NULL;
     apr_status_t status;
@@ -91,7 +95,7 @@ void test_load_module(CuTest *tc)
     apr_dso_unload(h);
 }
 
-void test_dso_sym(CuTest *tc)
+static void test_dso_sym(CuTest *tc)
 {
     apr_dso_handle_t *h = NULL;
     apr_dso_handle_sym_t func1 = NULL;
@@ -115,13 +119,12 @@ void test_dso_sym(CuTest *tc)
     apr_dso_unload(h);
 }
 
-void test_dso_sym_return_value(CuTest *tc)
+static void test_dso_sym_return_value(CuTest *tc)
 {
     apr_dso_handle_t *h = NULL;
     apr_dso_handle_sym_t func1 = NULL;
     apr_status_t status;
     int (*function)(int);
-    char teststr[256];
     char errstr[256];
 
     status = apr_dso_load(&h, filename, p);
@@ -139,7 +142,7 @@ void test_dso_sym_return_value(CuTest *tc)
     apr_dso_unload(h);
 }
 
-void test_unload_module(CuTest *tc)
+static void test_unload_module(CuTest *tc)
 {
     apr_dso_handle_t *h = NULL;
     apr_status_t status;
@@ -158,7 +161,7 @@ void test_unload_module(CuTest *tc)
 }
 
 
-void test_load_non_module(CuTest *tc)
+static void test_load_non_module(CuTest *tc)
 {
 #ifndef LIB_NAME2
     CuNotImpl(tc, "Can't load non-module library");
@@ -175,7 +178,7 @@ void test_load_non_module(CuTest *tc)
 #endif
 }
 
-void test_dso_sym_non_module(CuTest *tc)
+static void test_dso_sym_non_module(CuTest *tc)
 {
 #ifndef LIB_NAME2
     CuNotImpl(tc, "Can't load non-module library");
@@ -203,7 +206,7 @@ void test_dso_sym_non_module(CuTest *tc)
 #endif
 }
 
-void test_dso_sym_return_value_non_mod(CuTest *tc)
+static void test_dso_sym_return_value_non_mod(CuTest *tc)
 {
 #ifndef LIB_NAME2
     CuNotImpl(tc, "Can't load non-module library");
@@ -212,7 +215,6 @@ void test_dso_sym_return_value_non_mod(CuTest *tc)
     apr_dso_handle_sym_t func1 = NULL;
     apr_status_t status;
     int (*function)(int);
-    char teststr[256];
     char errstr[256];
 
     status = apr_dso_load(&h, filename2, p);
@@ -231,7 +233,7 @@ void test_dso_sym_return_value_non_mod(CuTest *tc)
 #endif
 }
 
-void test_unload_non_module(CuTest *tc)
+static void test_unload_non_module(CuTest *tc)
 {
 #ifndef LIB_NAME2
     CuNotImpl(tc, "Can't load non-module library");
@@ -256,9 +258,7 @@ void test_unload_non_module(CuTest *tc)
 static void test_load_notthere(CuTest *tc)
 {
     apr_dso_handle_t *h = NULL;
-    apr_dso_handle_sym_t func1 = NULL;
     apr_status_t status;
-    char errstr[256];
 
     status = apr_dso_load(&h, "No_File.so", p);
     CuAssertIntEquals(tc, APR_EDSOOPEN, status);
