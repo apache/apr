@@ -240,7 +240,7 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
     if (apr_pools_initialized++)
         return APR_SUCCESS;
     
-    memset(&global_allocator, 0, SIZEOF_ALLOCATOR_T);
+    memset(&global_allocator, 0, sizeof(global_allocator));
 
     if ((rv = apr_pool_create_ex(&global_pool, NULL, NULL, APR_POOL_FDEFAULT)) != APR_SUCCESS) {
         return rv;
@@ -269,7 +269,7 @@ APR_DECLARE(void) apr_pool_terminate(void)
     apr_pool_destroy(global_pool); /* This will also destroy the mutex */
     global_pool = NULL;
 
-    memset(&global_allocator, 0, SIZEOF_ALLOCATOR_T);
+    memset(&global_allocator, 0, sizeof(global_allocator));
 }
 
 #ifdef NETWARE
