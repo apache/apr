@@ -349,11 +349,14 @@ proc_mutex_is_global=0
 
 config_subdirs="none"
 INSTALL_SUBDIRS="none"
+OBJECTS_PLATFORM='$(OBJECTS_unix)'
+
 case $host in
    i386-ibm-aix* | *-ibm-aix[1-2].* | *-ibm-aix3.* | *-ibm-aix4.1 | *-ibm-aix4.1.* | *-ibm-aix4.2 | *-ibm-aix4.2.*)
        OSDIR="aix"
        APR_ADDTO(LDFLAGS,-lld)
        eolstr="\\n"
+       OBJECTS_PLATFORM='$(OBJECTS_aix)'
        ;;
    *-os2*)
        APR_ADDTO(CPPFLAGS,-DOS2)
@@ -364,6 +367,7 @@ case $host in
        eolstr="\\r\\n"
        file_as_socket="0"
        proc_mutex_is_global=1
+       OBJECTS_PLATFORM='$(OBJECTS_os2)'
        ;;
    *beos*)
        OSDIR="beos"
@@ -374,6 +378,7 @@ case $host in
        eolstr="\\n"
        osver=`uname -r`
        proc_mutex_is_global=1
+       OBJECTS_PLATFORM='$(OBJECTS_beos)'
        case $osver in
           5.0.4)
              file_as_socket="1"
@@ -385,6 +390,7 @@ case $host in
        ;;
    *os390)
        OSDIR="os390"
+       OBJECTS_PLATFORM='$(OBJECTS_os390)'
        eolstr="\\n"
        ;;
    *os400)
@@ -407,6 +413,8 @@ case $host in
        eolstr="\\n"
        ;;
 esac
+
+AC_SUBST(OBJECTS_PLATFORM)
 
 AC_ARG_ENABLE(nonportable-atomics,
 [  --enable-nonportable-atomics  Use optimized atomic code which may produce nonportable binaries],

@@ -115,6 +115,12 @@ ALL_INCLUDES = $(INCLUDES) $(EXTRA_INCLUDES)
 LTFLAGS      = @LTFLAGS@
 LT_LDFLAGS   = @LT_LDFLAGS@
 
+# The set of object files that will be linked into the target library.
+# The build-outputs.mk specifies a different set for each platform. The
+# configure script will select the appropriate set.
+#
+OBJECTS      = @OBJECTS_PLATFORM@
+
 #
 # Basic macro setup
 #
