@@ -95,5 +95,10 @@ struct apr_procattr_t {
     apr_int32_t detached;
 };
 
+struct apr_thread_once_t {
+    unsigned long sem;
+    char hit;
+};
+
 #endif  /* ! THREAD_PROC_H */
 
