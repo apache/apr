@@ -61,8 +61,16 @@
 #define INCL_DOS
 #include <os2.h>
 
+#define CurrentTid (lock->tib->tib_ptib2->tib2_ultid)
 
-ap_status_t lock_cleanup(void *thelock)
+
+void setup_lock()
+{
+}
+
+
+
+static ap_status_t lock_cleanup(void *thelock)
 {
     struct lock_t *lock = thelock;
     return ap_destroy_lock(lock);
@@ -75,12 +83,15 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type, ap_lockscop
     struct lock_t *new;
     ULONG rc;
     char *semname;
+    PIB *ppib;
 
     new = (struct lock_t *)ap_palloc(cont, sizeof(struct lock_t));
     new->cntxt = cont;
     new->type = type;
-    new->curr_locked = 0;
+    new->owner = 0;
+    new->lock_count = 0;
     new->fname = ap_pstrdup(cont, fname);
+    DosGetInfoBlocks(&(new->tib), &ppib);
 
     if (fname == NULL)
         semname = NULL;
@@ -89,6 +100,33 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type, ap_lockscop
 
     rc = DosCreateMutexSem(semname, &(new->hMutex), type == APR_CROSS_PROCESS ? DC_SEM_SHARED : 0, FALSE);
     *lock = new;
+
+    if (!rc)
+        ap_register_cleanup(cont, new, lock_cleanup, ap_null_cleanup);
+
+    return os2errno(rc);
+}
+
+
+
+ap_status_t ap_child_init_lock(ap_lock_t **lock, char *fname, ap_context_t *cont)
+{
+    int rc;
+    PIB *ppib;
+
+    *lock = (struct lock_t *)ap_palloc(cont, sizeof(struct lock_t));
+
+    if (lock == NULL)
+        return APR_ENOMEM;
+
+    DosGetInfoBlocks(&((*lock)->tib), &ppib);
+    (*lock)->owner = 0;
+    (*lock)->lock_count = 0;
+    rc = DosOpenMutexSem( fname, &(*lock)->hMutex );
+
+    if (!rc)
+        ap_register_cleanup(cont, *lock, lock_cleanup, ap_null_cleanup);
+
     return os2errno(rc);
 }
 
@@ -98,16 +136,14 @@ ap_status_t ap_lock(struct lock_t *lock)
 {
     ULONG rc;
     
-    if (!lock->curr_locked) {
-        rc = DosRequestMutexSem(lock->hMutex, SEM_INDEFINITE_WAIT);
+    rc = DosRequestMutexSem(lock->hMutex, SEM_INDEFINITE_WAIT);
 
-        if (rc == 0)
-            lock->curr_locked = TRUE;
-
-        return os2errno(rc);
+    if (rc == 0) {
+        lock->owner = CurrentTid;
+        lock->lock_count++;
     }
-    
-    return APR_SUCCESS;
+
+    return os2errno(rc);
 }
 
 
@@ -116,12 +152,9 @@ ap_status_t ap_unlock(struct lock_t *lock)
 {
     ULONG rc;
     
-    if (lock->curr_locked) {
+    if (lock->owner == CurrentTid && lock->lock_count > 0) {
+        lock->lock_count--;
         rc = DosReleaseMutexSem(lock->hMutex);
-
-        if (rc == 0)
-            lock->curr_locked = FALSE;
-
         return os2errno(rc);
     }
     
@@ -133,10 +166,13 @@ ap_status_t ap_unlock(struct lock_t *lock)
 ap_status_t ap_destroy_lock(struct lock_t *lock)
 {
     ULONG rc;
-    ap_status_t stat;
+    ap_status_t stat = APR_SUCCESS;
 
-    stat = ap_unlock(lock);
-    
+    if (lock->owner == CurrentTid) {
+        while (lock->lock_count > 0 && stat == APR_SUCCESS)
+            stat = ap_unlock(lock);
+    }
+
     if (stat != APR_SUCCESS)
         return stat;
         
