@@ -1014,6 +1014,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + ERROR_NO_PROC_SLOTS \
                 || (s) == APR_OS_START_SYSERR + ERROR_NESTING_NOT_ALLOWED \
                 || (s) == APR_OS_START_SYSERR + ERROR_MAX_THRDS_REACHED \
+                || (s) == APR_OS_START_SYSERR + ERROR_LOCK_VIOLATION \
                 || (s) == APR_OS_START_SYSERR + WSAEWOULDBLOCK)
 #define APR_STATUS_IS_EINTR(s)          ((s) == APR_EINTR \
                 || (s) == APR_OS_START_SYSERR + WSAEINTR)
