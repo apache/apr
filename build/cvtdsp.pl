@@ -4,14 +4,19 @@ use File::Find;
 if ($ARGV[0] == '-6') {
     find(\&tovc6, '.');
 }
+elsif ($ARGV[0] == '-5') {
+    find(\&tovc5, '.');
+}
+elsif ($ARGV[0] == '-w3') {
+    find(\&tow3, '.');
+}
+elsif ($ARGV[0] == '-w4') {
+    find(\&tow4, '.');
+}
 else {
-    if ($ARGV[0] == '-5') {
-        find(\&tovc5, '.');
-    }
-    else {
-        print "Specify -5 or -6 for Visual Studio 5 or 6 (98) .dsp format\n\n";
-        die "Missing argument";
-    }
+    print "Specify -5 or -6 for Visual Studio 5 or 6 (98) .dsp format\n";
+    print "Specify -w3 or -w4 for .dsp build with warning level 3 or 4 (strict)\n\n";
+    die "Missing argument";
 }
 
 sub tovc5 { 
@@ -36,7 +41,6 @@ sub tovc5 {
 		print $dstfl $src; }
 	    else {
 		$verchg = -1;
-
 	    }
 	}
 	undef $srcfl;
@@ -92,3 +96,64 @@ sub tovc6 {
 	}
     }
 }
+
+sub tow3 { 
+
+    if (m|.dsp$|) {
+        $oname = $_;
+	$tname = '.#' . $_;
+        $verchg = 0;
+	$srcfl = new IO::File $oname, "r" || die;
+	$dstfl = new IO::File $tname, "w" || die;
+	while ($src = <$srcfl>) {
+	    if ($src =~ s|^(# ADD CPP .*)/W4 (.*)|$1/W3 $2|) {
+		$verchg = -1;
+	    }
+	    if ($src =~ s|^(# ADD BASE CPP .*)/W4 (.*)|$1/W3 $2|) {
+		$verchg = -1;
+	    }
+            print $dstfl $src; 
+	}
+	undef $srcfl;
+	undef $dstfl;
+	if ($verchg) {
+	    unlink $oname || die;
+	    rename $tname, $oname || die;
+	    print "Converted project " . $oname . " to warn:3 in " . $File::Find::dir . "\n"; 
+	}
+	else {
+	    unlink $tname;
+	}
+    }
+}
+
+sub tow4 { 
+
+    if (m|.dsp$|) {
+        $oname = $_;
+	$tname = '.#' . $_;
+        $verchg = 0;
+	$srcfl = new IO::File $oname, "r" || die;
+	$dstfl = new IO::File $tname, "w" || die;
+	while ($src = <$srcfl>) {
+	    if ($src =~ s|^(# ADD CPP .*)/W3 (.*)|$1/W4 $2|) {
+		$verchg = -1;
+	    }
+	    if ($src =~ s|^(# ADD BASE CPP .*)/W3 (.*)|$1/W4 $2|) {
+		$verchg = -1;
+	    }
+            print $dstfl $src; 
+	}
+	undef $srcfl;
+	undef $dstfl;
+	if ($verchg) {
+	    unlink $oname || die;
+	    rename $tname, $oname || die;
+	    print "Converted project " . $oname . " to warn:4 " . $File::Find::dir . "\n"; 
+	}
+	else {
+	    unlink $tname;
+	}
+    }
+}
+
