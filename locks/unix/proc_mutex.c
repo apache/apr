@@ -98,6 +98,7 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
     
     new_mutex->interproc = apr_palloc(new_mutex->pool,
                                       sizeof(*new_mutex->interproc));
+    new_mutex->interproc->filedes = -1;
     /*
      * This bogusness is to follow what appears to be the
      * lowest common denominator in Posix semaphore naming:
