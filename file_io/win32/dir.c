@@ -257,6 +257,12 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
 
 APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *dir)
 {
+    /* XXX FIXME...
+     * 1) dir_cleanup() does FindClose(), so the FindClose() call
+     *    here will always return a meaningless error (bad handle).
+     * 2) Don't we need to re-open the directory, or is there a
+     *    Win32 way to rewind?
+     */
     dir_cleanup(dir);
     if (!FindClose(dir->dirhand)) {
         return apr_get_os_error();
