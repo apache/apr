@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/07/26 03:59:24 $]
+Last modified at [$Date: 2001/07/26 18:46:19 $]
 
 Release:
 
@@ -25,10 +25,6 @@ RELEASE SHOWSTOPPERS:
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
     * Get OTHER_CHILD support into Win32
         Status: Bill S. is looking into this
-
-    * Unconditionally setting AI_CANONNAME flag when apr_sockaddr_info_get()
-      calls getaddrinfo() is bogus and causes undesired DNS requests.
-        Status: Jeff will look into this
 
     * SysV semaphore support isn't usable by Apache when started as
       root because we don't have a way to allow the semaphore to be
@@ -116,6 +112,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
     * toss the per-Makefile setup of INCLUDES; shift to rules.mk.in
 
     * add the rest of the pool accessor declare/impl macros.
+      Justin says: Both thread and file have the accessors now.  Any others?
       Status: Greg volunteers
 
     * I think apr_open_stderr() and friends dup() the descriptor. That
@@ -138,14 +135,9 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       - add more detailed tests to testmem.c
         Status: Optionally enable it with --enable-sms.  Still wildly 
                 unproven.  But, it actually works as a replacement for 
-                pools now.  (httpd works without pools.)
-                There is a current (non-fatal, but silly) flaw in 
-                the trivial SMS implementation that makes it add 4KB 
-                to each level in the allocation chain.  This is bad. 
-                Adding a child_malloc path has been discussed.  Making
-                the apr_sms_pools.c call with 0 for MIN_FREE has been
-                suggested.  As has rethinking which SMSs constitute an 
-                old-style apr_pool_t.
+                pools now.  It may even not segfault when running httpd
+                under high-loads.  The performance impact/benefit still
+                needs to be examined.
 
     * In line with the new SMS code is the fact that threading and pools
       just are not working together well.  This is due to the fact that
@@ -178,6 +170,11 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       the system level (straight arithmetic from what I can tell).  If you 
       have access to the Solaris source code:
         osnet_volume/usr/src/lib/libc/port/gen/time_comm.c.
+
+    * Add a way to query APR for what features it has at runtime (i.e. 
+      threads).
+      Justin says: I'm not completely sold on this, but it has been mentioned 
+                   before and at least added to STATUS.
 
 Documentation that needs writing:
 
