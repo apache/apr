@@ -130,7 +130,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
         return APR_FROM_OS_ERROR(_doserrno);
     }
 #else
-   if (((*new)->td = (HANDLE)CreateThread(NULL, 0, 
+   if (((*new)->td = CreateThread(NULL, 0, 
                         (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
                         (*new), 0, &temp)) == 0) {
         return apr_get_os_error();
