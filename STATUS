@@ -1,7 +1,9 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/05/24 18:34:36 $]
+Last modified at [$Date: 2002/05/31 00:07:40 $]
 
 Release:
+
+    0.9.0-dev : in progress
 
     2.0a9   : released December 12, 2000
     2.0a8   : released November 20, 2000
@@ -48,6 +50,11 @@ RELEASE SHOWSTOPPERS:
       aren't a good match for a lot of applications.  We need to find
       a way to support alternate allocators polymorphically without
       a significant performance penalty.
+
+    * extract the MAJOR version from apr_version.h and pass it to
+      libtool for use in applying version numbers to the shared
+      libraries.
+
 
 CURRENT VOTES:
 
