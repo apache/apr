@@ -652,7 +652,7 @@ APR_DECLARE(void) apr_pool_note_subprocess(apr_pool_t *a, apr_proc_t *pid,
 
 #if APR_HAS_THREADS 
 
-#if APR_HAVE_SIGWAIT && !defined(OS2)
+#if (APR_HAVE_SIGWAIT || APR_HAVE_SIGSUSPEND) && !defined(OS2)
 
 /**
  * Setup the process for a single thread to be used for all signal handling.
@@ -669,7 +669,7 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void);
  */
 APR_DECLARE(apr_status_t) apr_signal_thread(int(*signal_handler)(int signum));
 
-#endif /* !defined(OS2) && APR_HAVE_SIGWAIT */
+#endif /* (APR_HAVE_SIGWAIT || APR_HAVE_SIGSUSPEND) && !defined(OS2) */
 
 /**
  * Get the child-pool used by the thread from the thread info.
