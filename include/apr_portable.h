@@ -503,6 +503,22 @@ APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data);
 #endif /* APR_HAS_DSO */
 
 
+/**
+ * Get the name of the system default characer set.
+ * @param pool the pool to allocate the name from, if needed
+ */
+APR_DECLARE(const char*) apr_os_default_encoding(apr_pool_t *pool);
+
+
+/**
+ * Get the name of the current locale character set.
+ * @param pool the pool to allocate the name from, if needed
+ * @remark Defers to apr_os_default_encoding if the current locale's
+ * data can't be retreved on this system.
+ */
+APR_DECLARE(const char*) apr_os_locale_encoding(apr_pool_t *pool);
+
+
 #ifdef __cplusplus
 }
 #endif
