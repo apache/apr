@@ -86,11 +86,23 @@ typedef struct apr_sms_tracking_t
     apr_track_node_t    *nodes;
 } apr_sms_tracking_t;
 
+static apr_status_t apr_sms_tracking_lock(apr_sms_t *mem_sys)
+{
+    return apr_lock_acquire(mem_sys->lock);
+}
+
+static apr_status_t apr_sms_tracking_unlock(apr_sms_t *mem_sys)
+{
+    return apr_lock_release(mem_sys->lock);
+}
+
 static void *apr_sms_tracking_malloc(apr_sms_t *mem_sys,
                                      apr_size_t size)
 {
     apr_sms_tracking_t *tms;
     apr_track_node_t *node;
+
+    apr_sms_tracking_lock(mem_sys);
   
     tms = (apr_sms_tracking_t *)mem_sys;
     node = apr_sms_malloc(mem_sys->parent_mem_sys,
@@ -106,6 +118,8 @@ static void *apr_sms_tracking_malloc(apr_sms_t *mem_sys,
 
     node++;
 
+    apr_sms_tracking_unlock(mem_sys);
+
     return (void *)node;
 }
 
@@ -115,6 +129,8 @@ static void *apr_sms_tracking_calloc(apr_sms_t *mem_sys,
     apr_sms_tracking_t *tms;
     apr_track_node_t *node;
   
+    apr_sms_tracking_lock(mem_sys);
+
     tms = (apr_sms_tracking_t *)mem_sys;
     node = apr_sms_calloc(mem_sys->parent_mem_sys,
                           size + sizeof(apr_track_node_t));
@@ -129,6 +145,8 @@ static void *apr_sms_tracking_calloc(apr_sms_t *mem_sys,
 
     node++;
 
+    apr_sms_tracking_unlock(mem_sys);
+
     return (void *)node;
 }
 
@@ -137,6 +155,8 @@ static void *apr_sms_tracking_realloc(apr_sms_t *mem_sys,
 {
     apr_sms_tracking_t *tms;
     apr_track_node_t *node;
+
+    apr_sms_tracking_lock(mem_sys);
 
     tms = (apr_sms_tracking_t *)mem_sys;
     node = (apr_track_node_t *)mem;
@@ -159,6 +179,8 @@ static void *apr_sms_tracking_realloc(apr_sms_t *mem_sys,
 
     node++;
 
+    apr_sms_tracking_unlock(mem_sys);
+
     return (void *)node;
 }
 
@@ -166,14 +188,18 @@ static apr_status_t apr_sms_tracking_free(apr_sms_t *mem_sys,
                                           void *mem)
 {
     apr_track_node_t *node;
-    
+ 
+    apr_sms_tracking_lock(mem_sys);
+   
     node = (apr_track_node_t *)mem;
     node--;
 
     *(node->ref) = node->next;
     if (node->next)
         node->next->ref = node->ref;
-          
+ 
+    apr_sms_tracking_unlock(mem_sys);
+         
     return apr_sms_free(mem_sys->parent_mem_sys, node);
 }
 
@@ -182,6 +208,9 @@ static apr_status_t apr_sms_tracking_reset(apr_sms_t *mem_sys)
     apr_sms_tracking_t *tms;
     apr_track_node_t *node;
     apr_status_t rv;
+
+    if ((rv = apr_sms_tracking_lock(mem_sys)) != APR_SUCCESS)
+        return rv;
  
     tms = (apr_sms_tracking_t *)mem_sys;
 
@@ -191,10 +220,15 @@ static apr_status_t apr_sms_tracking_reset(apr_sms_t *mem_sys)
         if (node->next)
             node->next->ref = node->ref;
         if ((rv = apr_sms_free(mem_sys->parent_mem_sys, 
-                               node)) != APR_SUCCESS)
+                               node)) != APR_SUCCESS) {
+            apr_sms_tracking_unlock(mem_sys);
             return rv;
+        }
     }
     
+    if ((rv = apr_sms_tracking_unlock(mem_sys)) != APR_SUCCESS)
+        return rv;
+
     return APR_SUCCESS;
 }
 
@@ -233,8 +267,14 @@ APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **mem_sys,
     new_mem_sys->realloc_fn = apr_sms_tracking_realloc;
     new_mem_sys->free_fn    = apr_sms_tracking_free;
     new_mem_sys->reset_fn   = apr_sms_tracking_reset;
+    new_mem_sys->lock_fn    = apr_sms_tracking_lock;
+    new_mem_sys->unlock_fn  = apr_sms_tracking_unlock;
     new_mem_sys->destroy_fn = apr_sms_tracking_destroy;
     new_mem_sys->identity   = module_identity;
+
+    apr_pool_create(&(new_mem_sys->pool), pms->pool);
+    apr_lock_create(&(new_mem_sys->lock), APR_MUTEX, APR_LOCKALL, NULL,
+                    new_mem_sys->pool);
 
     tms = (apr_sms_tracking_t *)new_mem_sys;
     tms->nodes = NULL;

@@ -67,7 +67,7 @@ static apr_status_t create_lock(apr_lock_t *new, const char *fname)
     /* file-based serialization primitives */
     if (new->scope != APR_INTRAPROCESS) {
         if (fname != NULL) {
-            APR_MEM_PSTRDUP(new, new->fname, fname);
+            new->fname = apr_pstrdup(new->pool, fname);
         }
     }
 #endif
@@ -126,29 +126,16 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_sms_create(apr_lock_t **lock, apr_locktype_e type,
-                                 apr_lockscope_e scope, const char *fname,
-                                 apr_sms_t *mem_sys)
-{
-    apr_lock_t *new;
-    apr_status_t stat;
-    
-    new = (apr_lock_t *)apr_sms_calloc(mem_sys, sizeof(apr_lock_t));
-
-    new->mem_sys = mem_sys;
-    new->type    = type;
-    new->scope   = scope;
-
-    if ((stat = create_lock(new, fname)) != APR_SUCCESS)
-        return stat;
-
-    *lock = new;
-    return APR_SUCCESS;
-}
-
 apr_status_t apr_lock_acquire(apr_lock_t *lock)
 {
     apr_status_t stat;
+
+#if APR_HAS_THREADS
+    if (lock->owner == apr_os_thread_current()){
+        lock->owner_ref++;
+        return APR_SUCCESS;
+    }
+#endif
 
     switch (lock->type)
     {
@@ -175,6 +162,11 @@ apr_status_t apr_lock_acquire(apr_lock_t *lock)
     case APR_READWRITE:
         return APR_ENOTIMPL;
     }
+
+#if APR_HAS_THREADS
+    lock->owner = apr_os_thread_current();
+    lock->owner_ref = 1;
+#endif
 
     return APR_SUCCESS;
 }
@@ -211,6 +203,14 @@ apr_status_t apr_lock_release(apr_lock_t *lock)
 {
     apr_status_t stat;
 
+#if APR_HAS_THREADS
+    if (lock->owner == apr_os_thread_current()) {
+        lock->owner_ref--;
+        if (lock->owner_ref > 0)
+            return APR_SUCCESS;
+    }
+#endif
+
     switch (lock->type)
     {
     case APR_MUTEX:
@@ -242,6 +242,11 @@ apr_status_t apr_lock_release(apr_lock_t *lock)
         return APR_ENOTIMPL;
 #endif
     }
+
+#if APR_HAS_THREADS
+    lock->owner = NULL;
+    lock->owner_ref = 0;
+#endif
     
     return APR_SUCCESS;
 }

@@ -418,6 +418,8 @@ APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **dso,
 APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *dso,
                                                 apr_dso_handle_t *aprdso);
 
+APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void);
+
 #endif /* APR_HAS_DSO */
 
 #ifdef __cplusplus

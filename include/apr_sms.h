@@ -65,6 +65,8 @@
 
 #include "apr.h"
 #include "apr_errno.h"
+#include "apr_pools.h"
+#include "apr_lock.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -80,32 +82,35 @@ extern "C" {
  */
 
 struct apr_sms_cleanup;
+typedef struct apr_sms_t    apr_sms_t;
 
 /**
  * The memory system structure
  */
 struct apr_sms_t
 {
-  apr_sms_t  *parent_mem_sys;
-  apr_sms_t  *child_mem_sys;
-  apr_sms_t  *sibling_mem_sys;
-  apr_sms_t **ref_mem_sys;
-  apr_sms_t  *accounting_mem_sys;
-  const char *identity; /* a string identifying the module */
-  apr_lock_t *lock;
+    apr_sms_t  *parent_mem_sys;
+    apr_sms_t  *child_mem_sys;
+    apr_sms_t  *sibling_mem_sys;
+    apr_sms_t **ref_mem_sys;
+    apr_sms_t  *accounting_mem_sys;
+    const char *identity; /* a string identifying the module */
 
-  struct apr_sms_cleanup *cleanups;
+    apr_pool_t *pool;
+    apr_lock_t *lock;
 
-  void * (*malloc_fn)       (apr_sms_t *mem_sys, apr_size_t size);
-  void * (*calloc_fn)       (apr_sms_t *mem_sys, apr_size_t size);
-  void * (*realloc_fn)      (apr_sms_t *mem_sys, void *memory, 
-                             apr_size_t size);
-  apr_status_t (*free_fn)   (apr_sms_t *mem_sys, void *memory);
-  apr_status_t (*reset_fn)  (apr_sms_t *mem_sys);
-  void (*pre_destroy_fn)    (apr_sms_t *mem_sys);
-  apr_status_t (*destroy_fn)(apr_sms_t *mem_sys);
-  apr_status_t (*lock_fn)   (apr_sms_t *mem_sys);
-  apr_status_t (*unlock_fn) (apr_sms_t *mem_sys);
+    struct apr_sms_cleanup *cleanups;
+
+    void * (*malloc_fn)       (apr_sms_t *mem_sys, apr_size_t size);
+    void * (*calloc_fn)       (apr_sms_t *mem_sys, apr_size_t size);
+    void * (*realloc_fn)      (apr_sms_t *mem_sys, void *memory, 
+                               apr_size_t size);
+    apr_status_t (*free_fn)   (apr_sms_t *mem_sys, void *memory);
+    apr_status_t (*reset_fn)  (apr_sms_t *mem_sys);
+    void (*pre_destroy_fn)    (apr_sms_t *mem_sys);
+    apr_status_t (*destroy_fn)(apr_sms_t *mem_sys);
+    apr_status_t (*lock_fn)   (apr_sms_t *mem_sys);
+    apr_status_t (*unlock_fn) (apr_sms_t *mem_sys);
 };
 
 /*
