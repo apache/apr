@@ -61,9 +61,8 @@
 struct apr_socket_t {
     apr_pool_t *cntxt;
     SOCKET sock;
-    struct sockaddr_in *local_addr;
-    struct sockaddr_in *remote_addr;
-    size_t addr_len;
+    apr_sockaddr_t *local_addr;
+    apr_sockaddr_t *remote_addr;
     apr_interval_time_t timeout;
     apr_int32_t disconnected;
     int local_port_unknown;

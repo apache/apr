@@ -60,9 +60,9 @@
 
 static apr_status_t get_local_addr(apr_socket_t *sock)
 {
-    size_t namelen = sizeof(*sock->local_addr);
+    size_t namelen = sizeof(sock->local_addr->sa);
 
-    if (getsockname(sock->sock, (struct sockaddr *)sock->local_addr,
+    if (getsockname(sock->sock, (struct sockaddr *)&sock->local_addr->sa,
                     &namelen) < 0) {
         return apr_get_netos_error();
     }
@@ -81,9 +81,9 @@ apr_status_t apr_set_ipaddr(apr_socket_t *sock, apr_interface_e which, const cha
     struct sockaddr_in *ptr;
 
     if (which == APR_LOCAL)
-        ptr = sock->local_addr;
+        ptr = &sock->local_addr->sa.sin;
     else if (which == APR_REMOTE)
-        ptr = sock->remote_addr;
+        ptr = &sock->remote_addr->sa.sin;
     else
         return APR_EINVAL;
  
@@ -112,7 +112,7 @@ apr_status_t apr_get_local_name(struct sockaddr_in **name, apr_socket_t *sock)
         }
     }
 
-    *name = sock->local_addr;
+    *name = &sock->local_addr->sa.sin;
     return APR_SUCCESS;
 }
 
@@ -120,6 +120,6 @@ apr_status_t apr_get_local_name(struct sockaddr_in **name, apr_socket_t *sock)
 
 apr_status_t apr_get_remote_name(struct sockaddr_in **name, apr_socket_t *sock)
 {
-    *name = sock->remote_addr;
+    *name = &sock->remote_addr->sa.sin;
     return APR_SUCCESS;
 }

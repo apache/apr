@@ -67,33 +67,65 @@ static apr_status_t socket_cleanup(void *sock)
     }
 }
 
+static void set_socket_vars(apr_socket_t *sock, int family)
+{
+    sock->local_addr->sa.sin.sin_family = family;
+    sock->remote_addr->sa.sin.sin_family = family;
+
+    if (family == AF_INET) {
+        sock->local_addr->sa_len = sizeof(struct sockaddr_in);
+        sock->local_addr->addr_str_len = 16;
+        sock->local_addr->ipaddr_ptr = &(sock->local_addr->sa.sin.sin_addr);
+        sock->local_addr->ipaddr_len = sizeof(struct in_addr);
+
+        sock->remote_addr->sa_len = sizeof(struct sockaddr_in);
+        sock->remote_addr->addr_str_len = 16;
+        sock->remote_addr->ipaddr_ptr = &(sock->remote_addr->sa.sin.sin_addr);
+        sock->remote_addr->ipaddr_len = sizeof(struct in_addr);
+    }
+#if APR_HAVE_IPV6
+    else if (family == AF_INET6) {
+        sock->local_addr->sa_len = sizeof(struct sockaddr_in6);
+        sock->local_addr->addr_str_len = 46;
+        sock->local_addr->ipaddr_ptr = &(sock->local_addr->sa.sin6.sin6_addr);
+        sock->local_addr->ipaddr_len = sizeof(struct in6_addr);
+
+        sock->remote_addr->sa_len = sizeof(struct sockaddr_in6);
+        sock->remote_addr->addr_str_len = 46;
+        sock->remote_addr->ipaddr_ptr = &(sock->remote_addr->sa.sin6.sin6_addr);
+        sock->remote_addr->ipaddr_len = sizeof(struct in6_addr);
+    }
+#endif
+}                                                                                                  
+static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
+{
+    *new = (apr_socket_t *)apr_pcalloc(p, sizeof(apr_socket_t));
+    (*new)->cntxt = p;
+    (*new)->local_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->cntxt,
+                                                       sizeof(apr_sockaddr_t));
+    (*new)->remote_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->cntxt,
+                                                        sizeof(apr_sockaddr_t));
+}
+
 apr_status_t apr_create_tcp_socket(apr_socket_t **new, apr_pool_t *cont)
 {
-    (*new) = (apr_socket_t *)apr_pcalloc(cont, sizeof(apr_socket_t));
+    int family = AF_INET;
+    int proto = IPPROTO_TCP;
+    int type = SOCK_STREAM;
 
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-    (*new)->cntxt = cont; 
-    (*new)->local_addr = (struct sockaddr_in *)apr_pcalloc((*new)->cntxt,
-                         sizeof(struct sockaddr_in));
-    (*new)->remote_addr = (struct sockaddr_in *)apr_pcalloc((*new)->cntxt,
-                          sizeof(struct sockaddr_in));
+    alloc_socket(new, cont);
 
     if ((*new)->local_addr == NULL || (*new)->remote_addr == NULL) {
         return APR_ENOMEM;
     }
- 
-    (*new)->socketdes = socket(AF_INET ,SOCK_STREAM, IPPROTO_TCP);
 
-    (*new)->local_addr->sin_family = AF_INET;
-    (*new)->remote_addr->sin_family = AF_INET;
+    (*new)->socketdes = socket(family, type, proto);
 
-    (*new)->addr_len = sizeof(*(*new)->local_addr);
-    
     if ((*new)->socketdes < 0) {
         return errno;
     }
+    set_socket_vars(*new, family);
+
     (*new)->timeout = -1;
     apr_register_cleanup((*new)->cntxt, (void *)(*new), 
                         socket_cleanup, apr_null_cleanup);
@@ -113,10 +145,12 @@ apr_status_t apr_close_socket(apr_socket_t *thesocket)
 
 apr_status_t apr_bind(apr_socket_t *sock)
 {
-    if (bind(sock->socketdes, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1)
+    if (bind(sock->socketdes, 
+             (struct sockaddr *)&sock->local_addr->sa, sock->local_addr->sa_len) == -1)
         return errno;
     else {
-        if (sock->local_addr->sin_port == 0) { /* no need for ntohs() when comparing w/ 0 */
+        /* XXX fix me for IPv6 */
+        if (sock->local_addr->sa.sin.sin_port == 0) { /* no need for ntohs() when comparing w/ 0 */
             sock->local_port_unknown = 1; /* kernel got us an ephemeral port */
         }
         return APR_SUCCESS;
@@ -133,28 +167,22 @@ apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 
 apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *connection_context)
 {
-    (*new) = (apr_socket_t *)apr_pcalloc(connection_context, 
-                            sizeof(apr_socket_t));
+    alloc_socket(new, connection_context);
+    set_socket_vars(*new, sock->local_addr->sa.sin.sin_family);
 
-    (*new)->cntxt = connection_context;
-    (*new)->local_addr = (struct sockaddr_in *)apr_pcalloc((*new)->cntxt, 
-                 sizeof(struct sockaddr_in));
-
-    (*new)->remote_addr = (struct sockaddr_in *)apr_pcalloc((*new)->cntxt, 
-                 sizeof(struct sockaddr_in));
-    (*new)->addr_len = sizeof(struct sockaddr_in);
 #ifndef HAVE_POLL
     (*new)->connected = 1;
 #endif
     (*new)->timeout = -1;
     
-    (*new)->socketdes = accept(sock->socketdes, (struct sockaddr *)(*new)->remote_addr,
-                        &(*new)->addr_len);
+    (*new)->remote_addr->sa_len = sizeof((*new)->remote_addr->sa);
+    (*new)->socketdes = accept(sock->socketdes, 
+                               (struct sockaddr *)&(*new)->remote_addr->sa,
+                               &(*new)->remote_addr->sa_len);
 
     if ((*new)->socketdes < 0) {
         return errno;
     }
-
     *(*new)->local_addr = *sock->local_addr;
 
     if (sock->local_port_unknown) {
@@ -163,7 +191,8 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
     }
 
     if (sock->local_interface_unknown ||
-        sock->local_addr->sin_addr.s_addr == 0) {
+        /* XXX IPv6 issue */
+        sock->local_addr->sa.sin.sin_addr.s_addr == 0) {
         /* If the interface address inside the listening socket's local_addr wasn't 
          * up-to-date, we don't know local interface of the connected socket either.
          *
@@ -189,8 +218,7 @@ apr_status_t apr_connect(apr_socket_t *sock, const char *hostname)
 #ifndef GETHOSTBYNAME_HANDLES_NAS
         if (*hostname >= '0' && *hostname <= '9' &&
             strspn(hostname, "0123456789.") == strlen(hostname)) {
-            sock->remote_addr->sin_addr.s_addr = inet_addr(hostname);
-            sock->addr_len = sizeof(*sock->remote_addr);
+            sock->remote_addr->sa.sin.sin_addr.s_addr = inet_addr(hostname);
         }
         else {
 #endif
@@ -199,26 +227,30 @@ apr_status_t apr_connect(apr_socket_t *sock, const char *hostname)
         if (!hp)  {
             return (h_errno + APR_OS_START_SYSERR);
         }
-    
-        memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr_list[0], 
+
+        /* XXX IPv6: move name resolution out of this function */
+        memcpy((char *)&sock->remote_addr->sa.sin.sin_addr, hp->h_addr_list[0], 
                hp->h_length);
 
-        sock->addr_len = sizeof(*sock->remote_addr);
 #ifndef GETHOSTBYNAME_HANDLES_NAS
         }
 #endif
     }
 
-    if ((connect(sock->socketdes, (const struct sockaddr *)sock->remote_addr,
-        sock->addr_len) < 0) && (errno != EINPROGRESS)) {
+    if ((connect(sock->socketdes, 
+                 (const struct sockaddr *)&sock->remote_addr->sa.sin,
+                 sock->remote_addr->sa_len) < 0) &&
+        (errno != EINPROGRESS)) {
         return errno;
     }
     else {
-        if (sock->local_addr->sin_port == 0) {
+        /* XXX IPv6 */
+        if (sock->local_addr->sa.sin.sin_port == 0) {
             /* connect() got us an ephemeral port */
             sock->local_port_unknown = 1;
         }
-        if (sock->local_addr->sin_addr.s_addr == 0) {
+        /* XXX IPv6 */
+        if (sock->local_addr->sa.sin.sin_addr.s_addr == 0) {
             /* not bound to specific local interface; connect() had to assign
              * one for the socket
              */
@@ -252,18 +284,9 @@ apr_status_t apr_put_os_sock(apr_socket_t **sock, apr_os_sock_t *thesock,
                            apr_pool_t *cont)
 {
     if ((*sock) == NULL) {
-        (*sock) = (apr_socket_t *)apr_pcalloc(cont, sizeof(apr_socket_t));
-        (*sock)->cntxt = cont;
-        (*sock)->local_addr = (struct sockaddr_in *)apr_pcalloc((*sock)->cntxt,
-                             sizeof(struct sockaddr_in));
-        (*sock)->remote_addr = (struct sockaddr_in *)apr_pcalloc((*sock)->cntxt,
-                              sizeof(struct sockaddr_in));
-
-        if ((*sock)->local_addr == NULL || (*sock)->remote_addr == NULL) {
-            return APR_ENOMEM;
-        }
-     
-        (*sock)->addr_len = sizeof(*(*sock)->local_addr);
+        alloc_socket(sock, cont);
+        /* XXX IPv6 figure out the family here! */
+        set_socket_vars(*sock, AF_INET);
         (*sock)->timeout = -1;
     }
     (*sock)->local_port_unknown = (*sock)->local_interface_unknown = 1;
