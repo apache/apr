@@ -95,13 +95,6 @@ struct ap_procattr_t {
     ap_int32_t detached;
 };
 
-struct ap_proc_t {
-    ap_pool_t *cntxt;
-    pid_t pid;
-    struct ap_procattr_t *attr;
-    int running;
-};
-
 typedef void (*os2_thread_start_t)(void *);
 
 #endif  /* ! THREAD_PROC_H */
