@@ -76,12 +76,10 @@
 ap_status_t dir_cleanup(void *thedir)
 {
     struct dir_t *dir = thedir;
-    if (CloseHandle(dir->dirhand) == 0) {
-        return APR_SUCCESS;
+    if (!CloseHandle(dir->dirhand)) {
+        return GetLastError();
     }
-    else {
-        return errno;
-    }
+    return APR_SUCCESS;
 } 
 
 ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *cont)
