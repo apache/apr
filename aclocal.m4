@@ -95,4 +95,46 @@ else
 fi
 ])dnl
 
+dnl ### AC_TRY_RUN had some problems actually using a programs return code,
+dnl ### so I am re-working it here to be used in APR's configure script.
+dnl MY_TRY_RUN(PROGRAM, [ACTION-IF-TRUE [, ACTION-IF-FALSE
+dnl            [, ACTION-IF-CROSS-COMPILING]]])
+AC_DEFUN(MY_TRY_RUN,
+[if test "$cross_compiling" = yes; then
+  ifelse([$4], ,
+    [errprint(__file__:__line__: warning: [AC_TRY_RUN] called without default to allow cross compiling
+)dnl
+  AC_MSG_ERROR(can not run test program while cross compiling)],
+  [$4])
+else
+  MY_TRY_RUN_NATIVE([$1], [$2], [$3])
+fi
+])
+
+dnl Like AC_TRY_RUN but assumes a native-environment (non-cross) compiler.
+dnl MY_TRY_RUN_NATIVE(PROGRAM, [ACTION-IF-TRUE [, ACTION-IF-FALSE]])
+AC_DEFUN(MY_TRY_RUN_NATIVE,
+[cat > conftest.$ac_ext <<EOF
+[#]line __oline__ "configure"
+#include "confdefs.h"
+ifelse(AC_LANG, CPLUSPLUS, [#ifdef __cplusplus
+extern "C" void exit(int);
+#endif
+])dnl
+[$1]
+EOF
+if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+then
+dnl Don't remove the temporary files here, so they can be examined.
+  ifelse([$2], , :, [$2])
+else
+ifelse([$3], , , [  $3 
+  rm -fr conftest*
+])dnl
+  echo "configure: failed program was:" >&AC_FD_CC
+  cat conftest.$ac_ext >&AC_FD_CC
+fi
+rm -fr conftest*])
+
+
 

@@ -42,6 +42,7 @@
 #undef NEED_RLIM_T
 #undef USEBCOPY
 
+#undef SIZEOF_SSIZE_T
 #undef APR_HAS_THREADS
 
 @BOTTOM@
