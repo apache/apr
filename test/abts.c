@@ -25,6 +25,7 @@ static char status[ABTS_STAT_SIZE] = {'|', '/', '-', '|', '\\', '-'};
 static int curr_char;
 static int verbose = 0;
 static int exclude = 0;
+static int quiet = 0;
 
 const char **testlist = NULL;
 
@@ -58,9 +59,11 @@ static void reset_status(void)
 
 static void update_status(void)
 {
-    curr_char = (curr_char + 1) % ABTS_STAT_SIZE;
-    fprintf(stdout, "\b%c", status[curr_char]);
-    fflush(stdout);
+    if (!quiet) {
+        curr_char = (curr_char + 1) % ABTS_STAT_SIZE;
+        fprintf(stdout, "\b%c", status[curr_char]);
+        fflush(stdout);
+    }
 }
 
 static void end_suite(abts_suite *suite)
@@ -146,11 +149,20 @@ void abts_run_test(abts_suite *ts, test_func f, void *value)
 
 static int report(abts_suite *suite)
 {
-    int return_failed = 0;
+    int count = 0;
     sub_suite *dptr;
 
     if (suite && suite->tail &&!suite->tail->not_run) {
         end_suite(suite);
+    }
+
+    for (dptr = suite->head; dptr; dptr = dptr->next) {
+        count += dptr->failed;
+    }
+
+    if (count == 0) {
+        printf("All tests passed.\n");
+        return 0;
     }
 
     dptr = suite->head;
@@ -161,11 +173,10 @@ static int report(abts_suite *suite)
             float percent = ((float)dptr->failed / (float)dptr->num_test);
             fprintf(stdout, "%-15s\t\t%5d\t%4d\t%6.2f%%\n", dptr->name, 
                     dptr->num_test, dptr->failed, percent * 100);
-            return_failed = 1;
         }
         dptr = dptr->next;
     }
-    return return_failed;
+    return 1;
 }
 
 void abts_log_message(const char *fmt, ...)
@@ -338,6 +349,10 @@ int main(int argc, const char *const argv[]) {
             /* print the list. */
             continue;
         }
+        if (!strcmp(argv[i], "-q")) {
+            quiet = 1;
+            continue;
+        }
         if (argv[i][0] == '-') {
             fprintf(stderr, "Invalid option: `%s'\n", argv[i]);
             exit(1);
@@ -349,7 +364,7 @@ int main(int argc, const char *const argv[]) {
         /* Waste a little space here, because it is easier than counting the
          * number of tests listed.  Besides it is at most three char *.
          */
-        testlist = calloc(0, sizeof(char *) * (argc + 1));
+        testlist = calloc(argc + 1, sizeof(char *));
         for (i = 1; i < argc; i++) {
             testlist[i - 1] = argv[i];
         }
