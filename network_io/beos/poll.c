@@ -171,18 +171,11 @@ ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *ap
     return APR_SUCCESS;
 }
 
-ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, 
-                                  ap_socket_t *sock, ap_int16_t events)
+ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock)
 {
-    if (events & APR_POLLIN) {
-        FD_CLR(sock->socketdes, aprset->read);
-    }
-    if (events & APR_POLLPRI) {
-        FD_CLR(sock->socketdes, aprset->read);
-    }
-    if (events & APR_POLLOUT) {
-        FD_CLR(sock->socketdes, aprset->write);
-    }
+    FD_CLR(sock->socketdes, aprset->read);
+    FD_CLR(sock->socketdes, aprset->read);
+    FD_CLR(sock->socketdes, aprset->write);
     return APR_SUCCESS;
 }
 
