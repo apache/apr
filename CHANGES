@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Fix a problem on unixware where clearing h_errno wouldn't work.
+     Use set_h_errno() instead.  PR #7651  [Jeff Trawick]
+
   *) Add the test and build directories (when present) to the recursive
      make process, being sure that they are run last.  [Roy Fielding]
 
