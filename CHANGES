@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Fixed apr_file_mktemp on systems without mkstemp (Win32, etc).
+     [Mladen Turk, Cliff Woolley]
+
   *) Fix a segfault in apr_poll_clear on Unix.   Also fix the logic 
      for the case where there are multiple events ORed together in 
      the events list.   [Jamshid Mahdavi <mahdavi@volera.com>]
