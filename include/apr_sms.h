@@ -82,9 +82,12 @@ extern "C" {
 #define APR_CHILD_CLEANUP     0x0001
 #define APR_PARENT_CLEANUP    0x0002
 
-/* Alignment macro's */
+/* Alignment macro's 
+ *
+ * APR_ALIGN is only to be used to align on a power of 2 boundary
+ */
 #define APR_ALIGN(size, boundary) \
-    ((size) + (((boundary) - ((size) & ((boundary) - 1))) & ((boundary) - 1)))
+    (((size) + ((boundary) - 1)) & ~ ((boundary) -1))
 
 #define APR_ALIGN_DEFAULT(size) APR_ALIGN(size, 8)
 
@@ -117,6 +120,12 @@ extern "C" {
  *    CREATE - sms 0x0000000 [STANDARD] has been created
  */
 /* #define DEBUG_SHOW_FUNCTIONS     1 */
+
+/* DEBUG_TAG_SMS
+ * Turn on the ability to give an SMS a "tag" that can be used to identify
+ * it.
+ */
+/* #define DEBUG_TAG_SMS    1 */
 
 /**
  * @package APR memory system
@@ -344,6 +353,14 @@ APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **sms);
 APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction);
 #endif /* DEBUG_SHOW_STRUCTURE */
 
+#if DEBUG_TAG_SMS
+/**
+ * Set the debugging tag for an sms
+ * @param tag The tag to give the sms
+ * @param sms The sms to apply the tag to
+ */
+APR_DECLARE(void) apr_sms_tag(const char*tag, apr_sms_t *sms);
+#endif
 
 #ifdef __cplusplus
 }
