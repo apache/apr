@@ -81,8 +81,8 @@ static apr_filetype_e filetype_from_mode(int mode)
     return type;
 }
 
-static apr_status_t fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
-                                   apr_int32_t wanted)
+static void fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
+                           apr_int32_t wanted)
 { 
     finfo->valid = APR_FINFO_MIN | APR_FINFO_IDENT | APR_FINFO_NLINK
                  | APR_FINFO_OWNER | APR_FINFO_PROT;
@@ -103,14 +103,6 @@ static apr_status_t fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
      *   finfo->valid |= APR_FINFO_CSIZE;
      * }
      */
-    if (finfo->filetype == APR_LNK) {
-        finfo->valid |= APR_FINFO_LINK;
-    }
-
-    if (wanted & ~finfo->valid)
-        return APR_INCOMPLETE;
-
-    return APR_SUCCESS;
 }
 
 apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted,
@@ -121,7 +113,8 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted,
     if (fstat(thefile->filedes, &info) == 0) {
         finfo->cntxt = thefile->cntxt;
         finfo->fname = thefile->fname;
-        return fill_out_finfo(finfo, &info, wanted);
+        fill_out_finfo(finfo, &info, wanted);
+        return (wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;
     }
     else {
         return errno;
@@ -151,7 +144,10 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname,
     if (srv == 0) {
         finfo->cntxt = cont;
         finfo->fname = fname;
-        return fill_out_finfo(finfo, &info, wanted);
+        fill_out_finfo(finfo, &info, wanted);
+        if (wanted & APR_FINFO_LINK)
+            wanted &= ~APR_FINFO_LINK;
+        return (wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;
     }
     else {
 #if !defined(ENOENT) || !defined(ENOTDIR)
