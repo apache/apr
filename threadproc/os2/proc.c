@@ -101,17 +101,44 @@ ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in,
                                    attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
+        switch (in) {
+        case APR_FULL_BLOCK:
+            ap_block_pipe(attr->child_in);
+            ap_block_pipe(attr->parent_in);
+        case APR_PARENT_BLOCK:
+            ap_block_pipe(attr->parent_in);
+        case APR_CHILD_BLOCK:
+            ap_block_pipe(attr->child_in);
+        }
     } 
     if (out) {
         if ((stat = ap_create_pipe(&attr->parent_out, &attr->child_out,
                                    attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
+        switch (out) {
+        case APR_FULL_BLOCK:
+            ap_block_pipe(attr->child_out);
+            ap_block_pipe(attr->parent_out);
+        case APR_PARENT_BLOCK:
+            ap_block_pipe(attr->parent_out);
+        case APR_CHILD_BLOCK:
+            ap_block_pipe(attr->child_out);
+        }
     } 
     if (err) {
         if ((stat = ap_create_pipe(&attr->parent_err, &attr->child_err,
                                    attr->cntxt)) != APR_SUCCESS) {
             return stat;
+        }
+        switch (err) {
+        case APR_FULL_BLOCK:
+            ap_block_pipe(attr->child_err);
+            ap_block_pipe(attr->parent_err);
+        case APR_PARENT_BLOCK:
+            ap_block_pipe(attr->parent_err);
+        case APR_CHILD_BLOCK:
+            ap_block_pipe(attr->child_err);
         }
     } 
     return APR_SUCCESS;
