@@ -97,6 +97,8 @@ struct apr_procattr_t {
 #endif
     apr_child_errfn_t *errfn;
     apr_int32_t errchk;
+    apr_uid_t   uid;
+    apr_gid_t   gid;
 };
 
 #endif  /* ! THREAD_PROC_H */

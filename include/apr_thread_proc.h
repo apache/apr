@@ -529,6 +529,27 @@ APR_DECLARE(apr_status_t) apr_procattr_error_check_set(apr_procattr_t *attr,
 APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
                                                        apr_int32_t addrspace);
 
+/**
+ * Set the username used for running process
+ * @param attr The procattr we care about. 
+ * @param username The username used
+ * @param password User password if needed. Password is needed on WIN32
+ *                 or any other platform having
+ *                 APR_PROCATTR_USER_SET_REQUIRES_PASSWORD set.
+ */
+APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr,
+                                                const char *username,
+                                                const char *password);
+
+/**
+ * Set the group used for running process
+ * @param attr The procattr we care about. 
+ * @param groupname The group name  used
+ */
+APR_DECLARE(apr_status_t) apr_procattr_group_set(apr_procattr_t *attr,
+                                                 const char *groupname);
+
+
 #if APR_HAS_FORK
 /**
  * This is currently the only non-portable call in APR.  This executes 

@@ -29,6 +29,7 @@ APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new,
     }
     (*new)->pool = pool;
     (*new)->cmdtype = APR_PROGRAM;
+    (*new)->uid = (*new)->gid = -1;
     return APR_SUCCESS;
 }
 
@@ -280,6 +281,36 @@ APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr,
+                                                const char *username,
+                                                const char *password)
+{
+    apr_status_t rv;
+    apr_gid_t    gid;
+
+    if ((rv = apr_uid_get(&attr->uid, &gid, username,
+                          attr->pool)) != APR_SUCCESS) {
+        attr->uid = -1;
+        return rv;
+    }
+    
+    /* Use default user group if not already set */
+    if (attr->gid == -1) {
+        attr->gid = gid;
+    }
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_procattr_group_set(apr_procattr_t *attr,
+                                                 const char *groupname)
+{
+    apr_status_t rv;
+
+    if ((rv = apr_gid_get(&attr->gid, groupname, attr->pool)) != APR_SUCCESS)
+        attr->gid = -1;
+    return rv;
+}
+
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           const char *progname,
                                           const char * const *args,
@@ -380,6 +411,27 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             if (chdir(attr->currdir) == -1) {
                 if (attr->errfn) {
                     attr->errfn(pool, errno, "change of working directory failed");
+                }
+                exit(-1);   /* We have big problems, the child should exit. */
+            }
+        }
+
+        /* Only try to switch if we are running as root */
+        if (attr->gid != -1 && !geteuid()) {
+            apr_status_t rv;
+            if ((status = setgid(attr->gid))) {
+                if (attr->errfn) {
+                    attr->errfn(pool, errno, "setting of group failed");
+                }
+                exit(-1);   /* We have big problems, the child should exit. */
+            }
+        }
+
+        if (attr->uid != -1 && !geteuid()) {
+            apr_status_t rv;
+            if ((status = setuid(attr->uid))) {
+                if (attr->errfn) {
+                    attr->errfn(pool, errno, "setting of user failed");
                 }
                 exit(-1);   /* We have big problems, the child should exit. */
             }

@@ -223,9 +223,11 @@
 #ifndef _WIN32_WCE
 #define APR_HAVE_STRICMP        1
 #define APR_HAVE_STRNICMP       1
+#define APR_PROCATTR_USER_SET_REQUIRES_PASSWORD 1
 #else
 #define APR_HAVE_STRICMP        0
 #define APR_HAVE_STRNICMP       0
+#define APR_PROCATTR_USER_SET_REQUIRES_PASSWORD 0
 #endif
 
 /** @} */
