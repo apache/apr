@@ -93,6 +93,7 @@ static void test_bad_input(apr_pool_t *p)
 #if APR_HAVE_IPV6
         ,{"::1",               NULL,               APR_SUCCESS}
         ,{"::1",               "20",               APR_SUCCESS}
+        ,{"::ffff:9.67.113.15", NULL,              APR_EBADIP} /* yes, this is goodness */
         ,{"fe80::",            "16",               APR_SUCCESS}
         ,{"fe80::",            "255.0.0.0",        APR_EBADMASK}
         ,{"fe80::1",           "0",                APR_EBADMASK}
@@ -103,6 +104,7 @@ static void test_bad_input(apr_pool_t *p)
         ,{"fe80::1",           "129",              APR_EBADMASK}
 #else
         /* do some IPv6 stuff and verify that it fails with APR_EBADIP */
+        ,{"::ffff:9.67.113.15", NULL,              APR_EBADIP}
 #endif
     };
     int i;
@@ -163,6 +165,8 @@ static void test_interesting_subnets(apr_pool_t *p)
         ,{"fe80::",           "8",             APR_INET6, "fe80::1",             "ff01::1"}
         ,{"ff01::",           "8",             APR_INET6, "ff01::1",             "fe80::1"}
         ,{"3FFE:8160::",      "28",            APR_INET6, "3ffE:816e:abcd:1234::1", "3ffe:8170::1"}
+        ,{"127.0.0.1",        NULL,            APR_INET6, "::ffff:127.0.0.1",    "fe80::1"}
+        ,{"127.0.0.1",        "8",             APR_INET6, "::ffff:127.0.0.1",    "fe80::1"}
 #endif
     };
     apr_ipsubnet_t *ipsub;
