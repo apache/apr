@@ -2,6 +2,7 @@
 TARGETS = \
 	poll.lo \
 	sendrecv.lo \
+	sendrecv_udp.lo \
 	sockets.lo \
 	sockopt.lo \
 	sockaddr.lo \

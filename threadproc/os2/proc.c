@@ -554,3 +554,10 @@ apr_status_t apr_get_os_proc(apr_os_proc_t *theproc, apr_proc_t *proc)
     *theproc = proc->pid;
     return APR_SUCCESS;
 }
+
+
+
+apr_status_t apr_proc_detach()
+{
+    return APR_ENOTIMPL;
+}

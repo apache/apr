@@ -58,6 +58,7 @@
 #include "apr_thread_proc.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_portable.h"
 #include "fileio.h"
 #include <stdlib.h>
 
@@ -182,3 +183,38 @@ apr_status_t apr_thread_detach(apr_thread_t *thd)
 }
 
 
+
+apr_status_t apr_os_thread_get(apr_os_thread_t **thethd, apr_thread_t *thd)
+{
+    *thethd = &thd->tid;
+    return APR_SUCCESS;
+}
+
+
+
+apr_status_t apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd, 
+                             apr_pool_t *cont)
+{
+    if ((*thd) == NULL) {
+        (*thd) = (apr_thread_t *)apr_pcalloc(cont, sizeof(apr_thread_t));
+        (*thd)->cntxt = cont;
+    }
+    (*thd)->tid = *thethd;
+    return APR_SUCCESS;
+}
+
+
+
+apr_status_t apr_thread_data_get(void **data, const char *key, apr_thread_t *thread)
+{
+    return apr_pool_userdata_get(data, key, thread->cntxt);
+}
+
+
+
+apr_status_t apr_thread_data_set(void *data, const char *key,
+                              apr_status_t (*cleanup) (void *),
+                              apr_thread_t *thread)
+{
+    return apr_pool_userdata_set(data, key, cleanup, thread->cntxt);
+}
