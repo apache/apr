@@ -156,6 +156,20 @@ APR_DECLARE(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub);
  */
 APR_DECLARE(apr_pool_t *) apr_find_pool(const void *ts);
 
+/**
+ * Report the number of bytes currently in the pool
+ * @param p The pool to inspect
+ * @param recurse Recurse/include the subpools' sizes
+ * @return The number of bytes
+ */
+APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse);
+
+/**
+ * Report the number of bytes currently in the list of free blocks
+ * @return The number of bytes
+ */
+APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void);
+
 /* @} */
 
 #else
@@ -299,20 +313,6 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
  * @remark This will actually free the memory
  */
 APR_DECLARE(void) apr_pool_destroy(apr_pool_t *p);
-
-/**
- * Report the number of bytes currently in the pool
- * @param p The pool to inspect
- * @param recurse Recurse/include the subpools' sizes
- * @return The number of bytes
- */
-APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse);
-
-/**
- * Report the number of bytes currently in the list of free blocks
- * @return The number of bytes
- */
-APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void);
 
 /**
  * Allocate a block of memory from a pool
