@@ -267,7 +267,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
 
     if (hdtr->numheaders > 0) {
         apr_int32_t hdrbytes;
-        
+
         /* cork before writing headers */
         rv = os_cork(sock);
         if (rv < 0) {
@@ -288,15 +288,13 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
          * return now with the partial byte count; this is a non-blocking 
          * socket.
          */
-        if (sock->timeout <= 0) {
-            total_hdrbytes = 0;
-            for (i = 0; i < hdtr->numheaders; i++) {
-                total_hdrbytes += hdtr->headers[i].iov_len;
-            }
-            if (hdrbytes < total_hdrbytes) {
-                *len = hdrbytes;
-                return os_uncork(sock, delayflag);
-            }
+        total_hdrbytes = 0;
+        for (i = 0; i < hdtr->numheaders; i++) {
+            total_hdrbytes += hdtr->headers[i].iov_len;
+        }
+        if (hdrbytes < total_hdrbytes) {
+            *len = hdrbytes;
+            return os_uncork(sock, delayflag);
         }
     }
 
