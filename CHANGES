@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) Introduce apr_pool_lock for debugging, in combination with
+     ALLOC_USE_MALLOC + DEBUG_WITH_MPROTECT.  Only implemented
+     on Win32 today, very effective for debugging pool constness.
+     [William Rowe]
+
   *) Optimize apr_pstrcat by caching lengths of first 6 strings
      [Brian Pane <bpane@pacbell.net>]
 

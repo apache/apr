@@ -168,7 +168,9 @@
 #ifndef ALLOC_USE_MALLOC
 #error "ALLOC_USE_MALLOC must be enabled to use DEBUG_WITH_MPROTECT"
 #endif
+#ifndef WIN32
 #include <sys/mman.h>
+#endif
 #endif
 
 
@@ -294,12 +296,15 @@ static APR_INLINE void debug_verify_filled(const char *ptr, const char *endp,
 
 #define SIZEOF_BLOCK(p) (((union block_hdr *)(p) - 1)->a.l)
 
+#ifndef WIN32
+
 static void *mprotect_malloc(apr_size_t size)
 {
     union block_hdr * addr;
 
     size += sizeof(union block_hdr);
-    addr = mmap(NULL, size + sizeof(union block_hdr),
+    
+    addr = mmap(NULL, size,
                 PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS,
                 -1, 0);
     if (addr == MAP_FAILED)
@@ -317,6 +322,64 @@ static void mprotect_free(void *addr)
         abort();
     }
 }
+
+#else /* WIN32 */
+
+/* return the number insignificant bits in size, e.g. the typical page 
+ * size of 4096 on x86/WinNT will return 12, as the 12 low-order bits
+ * in the size aren't relevant to the number of pages.
+ */
+static int mprotect_pageshift()
+{
+    static int savesize = 0;
+    if (!savesize) {
+        SYSTEM_INFO sysinfo;
+        GetSystemInfo(&sysinfo);
+        --sysinfo.dwPageSize;
+        while (sysinfo.dwPageSize) {
+            ++savesize;
+            sysinfo.dwPageSize >>= 1;
+        }
+    }
+    return savesize;
+}
+
+static void *mprotect_malloc(apr_size_t size)
+{
+    union block_hdr * addr;
+    int pageshift = mprotect_pageshift();
+    size += sizeof(union block_hdr);
+    size = (((size - 1) >> pageshift) + 1) << pageshift;
+    addr = VirtualAlloc(NULL, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+    if (!addr)
+        return NULL;
+    addr->a.l = size;
+    return addr + 1;
+}
+
+static void mprotect_free(void *addr)
+{
+    apr_size_t size = SIZEOF_BLOCK(addr);
+    BOOL rv = VirtualFree((union block_hdr *)addr - 1, size, MEM_DECOMMIT);
+    if (!rv) {
+        fprintf(stderr, "could not protect. errno=%d\n", errno);
+        abort();
+    }
+}
+
+static void mprotect_lock(void *addr, int lock)
+{
+    size_t size = SIZEOF_BLOCK(addr);
+    DWORD prot = (lock ? PAGE_READONLY : PAGE_READWRITE);
+    BOOL rv = VirtualProtect((union block_hdr *)addr - 1, size, prot, &prot);
+    if (!rv) {
+        fprintf(stderr, "could not protect. errno=%d\n", errno);
+        abort();
+    }
+}
+
+#define DO_LOCK(p,l) mprotect_lock(p,l)
+#endif
 
 static void *mprotect_realloc(void *addr, apr_size_t size)
 {
@@ -846,6 +909,26 @@ APR_DECLARE(void) apr_pool_alloc_term(apr_pool_t *globalp)
     alloc_mutex = NULL;
 #endif
     apr_pool_destroy(globalp);
+}
+
+APR_DECLARE(void) apr_pool_lock(apr_pool_t *a, int l)
+{
+#ifdef ALLOC_USE_MALLOC
+#ifdef DO_LOCK
+    /* lock the subpools. */
+    apr_pool_t *s;
+    void *c, *n;
+
+    for (s = a->sub_pools; s; s = s->sub_next) {
+	apr_pool_lock(s, l);
+    }
+
+    for (c = a->allocation_list; c; c = n) {
+	n = *(void **)c;
+	DO_LOCK(c, l);
+    }
+#endif
+#endif
 }
 
 /* We only want to lock the mutex if we are being called from apr_pool_clear.
