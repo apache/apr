@@ -287,11 +287,10 @@ else
             dnl # Linux is silly as it has pthread_rwlock_init defined
             dnl # but keeps the pthread_rwlock_t structure hidden unless 
             dnl # special things are defined.
-            AC_CACHE_CHECK([for pthread_rwlock_t], ac_cv_struct_pthread_rw,
-                [AC_TRY_COMPILE([#include <sys/types.h>
-                #include <pthread.h>], 
+            AC_TRY_COMPILE([#include <sys/types.h>
+                            #include <pthread.h>], 
                 [pthread_rwlock_t rwlock=PTHREAD_RWLOCK_INITIALIZER;],
-                ac_cv_struct_pthread_rw=yes, ac_cv_struct_pthread_rw=no)])
+                 ac_cv_struct_pthread_rw=yes, ac_cv_struct_pthread_rw=no)
             if test "$ac_cv_struct_pthread_rw" = "no"; then
                 AC_TRY_COMPILE([#define _XOPEN_SOURCE 500
                     #define _BSD_SOURCE
