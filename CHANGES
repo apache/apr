@@ -2,7 +2,8 @@ Changes for APR 1.0.2
 
   *) Make install passed a shell expanded list of header files to the
      build/install.sh script, which can only install one file at a time.
-     Changed to install one header file at a time. [Graham Leggett]
+     Changed to install one header file at a time. [Justin Erenkrantz,
+     Graham Leggett]
 
   *) Add a build script to create a solaris package. [Graham Leggett]
 
