@@ -57,7 +57,7 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_file_io.h"
-#if APR_HAS_UNISTD_H
+#if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <stdio.h>
