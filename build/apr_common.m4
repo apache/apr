@@ -62,7 +62,7 @@ dnl  The nasty eval's allow us to use the 'for'
 dnl  construct and save some lines of code.
 dnl
 AC_DEFUN(APR_DOEXTRA, [
-  for i in CFLAGS LDFLAGS LIBS
+  for i in CFLAGS CPPFLAGS LDFLAGS LIBS
   do
     eval APR_TMP=\$EXTRA_$i
     if test -n "$APR_TMP"; then

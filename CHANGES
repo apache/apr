@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Define preprocessor flags in CPPFLAGS instead of CFLAGS and
+     bring some sanity to the compiler command-lines. [Roy Fielding]
+
   *) Use the dso/aix subdirectory for older versions of AIX and fix 
      a number of bugs in the dso code in that directory.
      [Victor Orlikowski]
