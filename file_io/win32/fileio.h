@@ -89,6 +89,8 @@
 
 #define APR_FILE_BUFSIZE 4096
 
+typedef apr_int16_t apr_wchar_t;
+
 typedef enum apr_canon_case_e {
     APR_CANON_CASE_GIVEN,
     APR_CANON_CASE_LOWER,
@@ -138,7 +140,11 @@ struct apr_file_t {
     apr_interval_time_t timeout;
 
     /* File specific info */
+#if APR_HAS_UNICODE_FS
+    apr_wchar_t *fname;
+#else
     char *fname;
+#endif
     apr_canon_t *canonname;
     
     DWORD dwFileAttributes;
@@ -165,9 +171,14 @@ struct apr_file_t {
 
 struct apr_dir_t {
     apr_pool_t *cntxt;
-    char *dirname;
     HANDLE dirhand;
+#if APR_HAS_UNICODE_FS
+    apr_wchar_t *dirname;
+    WIN32_FIND_DATAW *entry;
+#else
+    char *dirname;
     WIN32_FIND_DATA *entry;
+#endif
 };
 
 apr_status_t file_cleanup(void *);

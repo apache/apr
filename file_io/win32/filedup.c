@@ -57,19 +57,25 @@
 #include "apr_general.h"
 #include "apr_strings.h"
 #include <string.h>
+#if APR_HAS_UNICODE_FS
+#include "i18n.h"
+#include <wchar.h>
+#endif
 
 apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
 {
     BOOLEAN isStdHandle = FALSE;
     HANDLE hCurrentProcess = GetCurrentProcess();
+#if APR_HAS_UNICODE_FS
+    int len = wcslen(old_file->fname) + 1;
+#endif
 
     if ((*new_file) == NULL) {
         if (p == NULL) {
             p = old_file->cntxt;
         }
             
-        (*new_file) = (apr_file_t *) apr_pcalloc(p,
-                                               sizeof(apr_file_t));
+        (*new_file) = (apr_file_t *) apr_pcalloc(p, sizeof(apr_file_t));
         if ((*new_file) == NULL) {
             return APR_ENOMEM;
         }
@@ -104,7 +110,12 @@ apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t
     }
 
     (*new_file)->cntxt = old_file->cntxt;
+#if APR_HAS_UNICODE_FS
+    (*new_file)->fname = apr_palloc(old_file->cntxt, len * 2);
+    wcscpy((*new_file)->fname, old_file->fname);
+#else
     (*new_file)->fname = apr_pstrdup(old_file->cntxt, old_file->fname);
+#endif
 /*    (*new_file)->demonfname = apr_pstrdup(old_file->cntxt, old_file->demonfname);
  *    (*new_file)->lowerdemonfname = apr_pstrdup(old_file->cntxt, old_file->lowerdemonfname);
  */
