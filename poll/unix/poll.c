@@ -275,6 +275,10 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
     }
 #endif
 
+    for (i = 0; i < *nsds; i++) {
+      aprset[i].rtnevents = 0;
+    }
+
     (*nsds) = rv;
     if ((*nsds) == 0) {
         return APR_TIMEUP;
