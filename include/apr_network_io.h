@@ -101,7 +101,7 @@ typedef enum {APR_SHUTDOWN_READ, APR_SHUTDOWN_WRITE,
 /* We need to make sure we always have an in_addr type, so APR will just
  * define it ourselves, if the platform doesn't provide it.
  */
-#if !defined(APR_HAVE_IN_ADDR)
+#if (!APR_HAVE_IN_ADDR)
 struct in_addr {
     ap_uint32_t  s_addr;
 }

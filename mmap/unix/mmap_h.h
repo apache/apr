@@ -55,6 +55,7 @@
 #ifndef MMAP_H_H
 #define MMAP_H_H
 
+#include "apr.h"
 #include "apr_private.h"
 #include "apr_general.h"
 #include "apr_mmap.h"
@@ -69,7 +70,7 @@
 #if HAVE_STRING_H
 #include <string.h>
 #endif
-#if HAVE_STDIO_H
+#if APR_HAVE_STDIO_H
 #include <stdio.h>
 #endif
 #if HAVE_SYS_STAT_H

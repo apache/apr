@@ -55,7 +55,15 @@
 #ifndef FILE_IO_H
 #define FILE_IO_H
 
-#ifdef HAVE_SYS_STAT_H
+#include "apr.h"
+#include "apr_private.h"
+#include "apr_pools.h"
+#include "apr_general.h"
+#include "apr_lock.h"
+#include "apr_file_io.h"
+#include "apr_errno.h"
+
+#ifdef APR_HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -67,7 +75,7 @@
 #ifdef HAVE_TIME_H
 #include <time.h>
 #endif
-#ifdef HAVE_DIRENT_H
+#ifdef APR_HAVE_DIRENT_H
 #include <dirent.h>
 #endif
 #ifdef HAVE_MALLOC_H
@@ -76,12 +84,6 @@
 #ifdef HAVE_UIO_H
 #include <sys/uio.h>
 #endif
-#include "apr_private.h"
-#include "apr_pools.h"
-#include "apr_general.h"
-#include "apr_lock.h"
-#include "apr_file_io.h"
-#include "apr_errno.h"
 
 #define APR_FILE_BUFSIZE 4096
 

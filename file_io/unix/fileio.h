@@ -55,6 +55,7 @@
 #ifndef FILE_IO_H
 #define FILE_IO_H
 
+#include "apr.h"
 #include "apr_private.h"
 #include "apr_general.h"
 #include "apr_file_io.h"
@@ -62,19 +63,19 @@
 #include "apr_lib.h"
 
 /* System headers the file I/O library needs */
-#if HAVE_FCNTL_H
+#if APR_HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#if HAVE_SYS_TYPES_H
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#if HAVE_ERRNO_H
+#if APR_HAVE_ERRNO_H
 #include <errno.h>
 #endif
 #if HAVE_STRING_H
 #include <string.h>
 #endif
-#if HAVE_DIRENT_H
+#if APR_HAVE_DIRENT_H
 #include <dirent.h>
 #endif
 #if HAVE_SYS_STAT_H
@@ -83,13 +84,13 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_STDIO_H
+#if APR_HAVE_STDIO_H
 #include <stdio.h>
 #endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#if HAVE_SYS_UIO_H
+#if APR_HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
 #if HAVE_SYS_TIME_H
