@@ -757,7 +757,7 @@ APR_CHECK_GETHOSTBYNAME_NAS
 echo $ac_n "${nl}Checking for IPv6 Networking support...${nl}"
 dnl # Start of checking for IPv6 support...
 AC_SEARCH_LIBS(getaddrinfo, inet6)
-AC_CHECK_FUNCS(getaddrinfo)
+APR_CHECK_WORKING_GETADDRINFO
 AC_CHECK_FUNCS(getipnodebyname)
 AC_CHECK_FUNCS(getipnodebyaddr)
 APR_CHECK_SOCKADDR_IN6
