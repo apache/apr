@@ -150,6 +150,8 @@ apr_status_t apr_lock_acquire(apr_lock_t *lock)
         break;
     case APR_READWRITE:
         return APR_ENOTIMPL;
+    default:
+        return APR_EINVAL;
     }
 
     return APR_OS2_STATUS(rc);
@@ -218,6 +220,8 @@ apr_status_t apr_lock_destroy(apr_lock_t *lock)
         break;
     case APR_READWRITE:
         return APR_ENOTIMPL;
+    default:
+        return APR_EINVAL;
     }
         
     return APR_OS2_STATUS(rc);
