@@ -59,7 +59,7 @@ static apr_status_t get_local_addr(apr_socket_t *sock)
 {
     apr_socklen_t namelen = sizeof(*sock->local_addr);
 
-    if (getsockname(sock->socketdes, (struct sockaddr *)sock->local_addr, 
+    if (getsockname(sock->socketdes, (struct sockaddr *)&sock->local_addr->sa,
                     &namelen) < 0) {
         return errno;
     }
