@@ -71,6 +71,8 @@ typedef enum {APR_CROSS_PROCESS, APR_INTRAPROCESS, APR_LOCKALL} apr_lockscope_e;
 
 typedef enum {APR_MUTEX, APR_READWRITE} apr_locktype_e;
 
+typedef enum {APR_READER, APR_WRITER} apr_readerwriter_e;
+
 typedef struct apr_lock_t           apr_lock_t;
 
 /*   Function definitions */
@@ -110,6 +112,15 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
  * @deffunc apr_status_t apr_lock_acquire(apr_lock_t *lock)
  */
 APR_DECLARE(apr_status_t) apr_lock_acquire(apr_lock_t *lock);
+
+/**
+ * Lock a region with either a reader or writer lock.
+ * @param lock The lock to set.
+ * @param type The type of lock to acquire.
+ * @deffunc apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e type)
+ */
+APR_DECLARE(apr_status_t) apr_lock_acquire_rw(apr_lock_t *lock,
+                                              apr_readerwriter_e type);
 
 /**
  * Unlock a protected region.
