@@ -735,7 +735,7 @@ APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
      * appropriate.
      */
 
-    if (flags & ap_OVERLAP_TABLES_MERGE) {
+    if (flags & AP_OVERLAP_TABLES_MERGE) {
 	left = cat_keys;
 	last = left + nkeys;
 	while (left < last) {
