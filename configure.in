@@ -321,6 +321,21 @@ AC_SUBST(ssize_t_value)
 AC_SUBST(ssize_t_fmt) 
 AC_SUBST(off_t_fmt) 
 
+dnl #----------------------------- Checking for string functions
+AC_CHECK_FUNCS(strnicmp, have_strnicmp="1", have_strnicmp="0")
+AC_CHECK_FUNCS(strncasecmp, have_strncasecmp="1", have_strncasecmp="0")
+AC_CHECK_FUNCS(stricmp, have_stricmp="1", have_stricmp="0")
+AC_CHECK_FUNCS(strcasecmp, have_strcasecmp="1", have_strcasecmp="0")
+AC_CHECK_FUNCS(strdup, have_strdup="1", have_strdup="0")
+AC_CHECK_FUNCS(strstr, have_strstr="1", have_strstr="0")
+
+AC_SUBST(have_strnicmp)
+AC_SUBST(have_strncasecmp)
+AC_SUBST(have_stricmp)
+AC_SUBST(have_strcasecmp)
+AC_SUBST(have_strdup)
+AC_SUBST(have_strstr)
+
 dnl #----------------------------- Checking for DSO support
 echo $ac_n "${nl}Checking for DSO...${nl}"
 AC_ARG_ENABLE(dso,
