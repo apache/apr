@@ -154,7 +154,7 @@ ap_status_t ap_setprocattr_dir(struct procattr_t *attr,
     char path[MAX_PATH];
     int length;
 
-    if (dir[0] != '\\' && dir[1] != ':') { 
+    if (dir[0] != '\\' && dir[0] != '/' && dir[1] != ':') { 
         length = GetCurrentDirectory(MAX_PATH, path);
 
         if (length == 0 || length + strlen(dir) + 1 >= MAX_PATH)
@@ -229,11 +229,26 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
     }
 
     if (attr->cmdtype == APR_PROGRAM) {
-        if (attr->currdir == NULL) {
+        char *ptr = progname;
+
+        if (*ptr =='"') {
+            ptr++;
+        }
+
+        if (*ptr == '\\' || *++ptr == ':') {
+            cmdline = ap_pstrdup(cont, progname);
+        }
+        else if (attr->currdir == NULL) {
             cmdline = ap_pstrdup(cont, progname);
         }
         else {
+            char lastchar = attr->currdir[strlen(attr->currdir)-1];
+            if ( lastchar == '\\' || lastchar == '/') {
+                cmdline = ap_pstrcat(cont, attr->currdir, progname, NULL);
+            }
+            else {
             cmdline = ap_pstrcat(cont, attr->currdir, "\\", progname, NULL);
+            }
         }
     }
     else {
