@@ -160,6 +160,7 @@ typedef void*                 apr_os_shm_t;
  * denominator typedefs for  all UNIX-like systems.  :)
  */
 
+/** Basic OS process mutex structure. */
 struct apr_os_proc_mutex_t {
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
     int crossproc;
@@ -175,18 +176,23 @@ struct apr_os_proc_mutex_t {
 #endif
 };
 
-typedef int                   apr_os_file_t;
-typedef DIR                   apr_os_dir_t;
-typedef int                   apr_os_sock_t;
-typedef struct apr_os_proc_mutex_t  apr_os_proc_mutex_t;
+typedef int                   apr_os_file_t;        /**< native file */
+typedef DIR                   apr_os_dir_t;         /**< native dir */
+typedef int                   apr_os_sock_t;        /**< native dir */
+typedef struct apr_os_proc_mutex_t  apr_os_proc_mutex_t; /**< native proces
+                                                          *   mutex
+                                                          */
 #if APR_HAS_THREADS && APR_HAVE_PTHREAD_H 
-typedef pthread_t             apr_os_thread_t;
-typedef pthread_key_t         apr_os_threadkey_t;
+typedef pthread_t             apr_os_thread_t;      /**< native thread */
+typedef pthread_key_t         apr_os_threadkey_t;   /**< native thread address
+                                                     *   space */
 #endif
-typedef pid_t                 apr_os_proc_t;
-typedef struct timeval        apr_os_imp_time_t;
-typedef struct tm             apr_os_exp_time_t;
-/* dso types... */
+typedef pid_t                 apr_os_proc_t;        /**< native pid */
+typedef struct timeval        apr_os_imp_time_t;    /**< native timeval */
+typedef struct tm             apr_os_exp_time_t;    /**< native tm */
+/** @var apr_os_dso_handle_t
+ * native dso types
+ */
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
 #include <dl.h>
 typedef shl_t                 apr_os_dso_handle_t;
@@ -196,7 +202,7 @@ typedef NSModule              apr_os_dso_handle_t;
 #else
 typedef void *                apr_os_dso_handle_t;
 #endif
-typedef void*                 apr_os_shm_t;
+typedef void*                 apr_os_shm_t;         /**< native SHM */
 
 #endif
 
@@ -221,10 +227,15 @@ struct apr_os_sock_info_t {
 
 typedef struct apr_os_sock_info_t apr_os_sock_info_t;
 
-#if APR_PROC_MUTEX_IS_GLOBAL
+#if APR_PROC_MUTEX_IS_GLOBAL || defined(DOXYGEN)
+/** Opaque global mutex type */
 #define apr_os_global_mutex_t apr_os_proc_mutex_t
+/** @return apr_os_global_mutex */
 #define apr_os_global_mutex_get apr_os_proc_mutex_get
 #else
+    /** Thread and process mutex for those platforms where process mutexes
+     *  are not held in threads.
+     */
     struct apr_os_global_mutex_t {
         apr_pool_t *pool;
         apr_proc_mutex_t *proc_mutex;
@@ -283,8 +294,8 @@ APR_DECLARE(apr_status_t) apr_os_exp_time_get(apr_os_exp_time_t **ostime,
 
 /**
  * Get the imploded time in the platforms native format.
- * @param ostime the native time format
- * @param aprtimethe time to convert
+ * @param ostime  the native time format
+ * @param aprtime the time to convert
  */
 APR_DECLARE(apr_status_t) apr_os_imp_time_get(apr_os_imp_time_t **ostime, 
                                               apr_time_t *aprtime);

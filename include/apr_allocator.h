@@ -81,15 +81,17 @@ typedef struct apr_allocator_t apr_allocator_t;
 /** the structure which holds information about the allocation */
 typedef struct apr_memnode_t apr_memnode_t;
 
+/** basic memory node structure */
 struct apr_memnode_t {
-    apr_memnode_t *next;
-    apr_memnode_t **ref;
-    apr_uint32_t   index;
-    apr_uint32_t   free_index;
-    char          *first_avail;
-    char          *endp;
+    apr_memnode_t *next;            /**< next memnode */
+    apr_memnode_t **ref;            /**< reference to self */
+    apr_uint32_t   index;           /**< size */
+    apr_uint32_t   free_index;      /**< how much free */
+    char          *first_avail;     /**< pointer to first free memory */
+    char          *endp;            /**< pointer to end of free memory */
 };
 
+/** The base size of a memory node - aligned.  */
 #define APR_MEMNODE_T_SIZE APR_ALIGN_DEFAULT(sizeof(apr_memnode_t))
 
 /** Symbolic constants */

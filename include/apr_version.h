@@ -121,10 +121,10 @@ extern "C" {
  * structure. 
  */
 typedef struct {
-    int major;
-    int minor;
-    int patch;
-    int is_dev;
+    int major;      /**< major number */
+    int minor;      /**< minor number */
+    int patch;      /**< patch number */
+    int is_dev;     /**< is development (1 or 0) */
 } apr_version_t;
 
 /**

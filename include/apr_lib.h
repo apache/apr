@@ -78,12 +78,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/** A constant representing a 'large' string. */
 #define HUGE_STRING_LEN 8192
 
 /*
  * Define the structures used by the APR general-purpose library.
  */
 
+/** @see apr_vformatter_buff_t */
 typedef struct apr_vformatter_buff_t apr_vformatter_buff_t;
 
 /**

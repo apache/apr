@@ -236,7 +236,7 @@ APR_DECLARE(char *) apr_collapse_spaces(char *dest, const char *src);
 /**
  * Convert the arguments to a program from one string to an array of 
  * strings terminated by a NULL pointer
- * @param str The arguments to convert
+ * @param arg_str The arguments to convert
  * @param argv_out Output location.  This is a pointer to an array of strings.
  * @param token_context Pool to use.
  */

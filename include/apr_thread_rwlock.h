@@ -76,6 +76,7 @@ extern "C" {
  * @{
  */
 
+/** Opaque read-write thread-safe lock. */
 typedef struct apr_thread_rwlock_t apr_thread_rwlock_t;
 
 /**

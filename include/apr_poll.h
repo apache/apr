@@ -55,11 +55,11 @@
 #ifndef APR_POLL_H
 #define APR_POLL_H
 /**
- * @file apr_network_io.h
- * @brief APR Network library
+ * @file apr_poll.h
+ * @brief APR Poll interface
  */
 /**
- * @defgroup APR_Net Network Routines
+ * @defgroup APR_Poll Poll Routines
  * @ingroup APR
  * @{
  */
@@ -83,35 +83,39 @@ extern "C" {
  * @defgroup Poll options
  * @{
  */
-#define APR_POLLIN    0x001 
-#define APR_POLLPRI   0x002
-#define APR_POLLOUT   0x004
-#define APR_POLLERR   0x010
-#define APR_POLLHUP   0x020
-#define APR_POLLNVAL  0x040
+#define APR_POLLIN    0x001     /**< Can read without blocking */
+#define APR_POLLPRI   0x002     /**< Priority data available */
+#define APR_POLLOUT   0x004     /**< Can write without blocking */
+#define APR_POLLERR   0x010     /**< Pending error */
+#define APR_POLLHUP   0x020     /**< Hangup occurred */
+#define APR_POLLNVAL  0x040     /**< Descriptior invalid */
 /** @} */
 
+/** Used in apr_pollfd_t to determine what the apr_descriptor is */
 typedef enum { 
-    APR_NO_DESC, 
-    APR_POLL_SOCKET,
-    APR_POLL_FILE,
-    APR_POLL_LASTDESC 
+    APR_NO_DESC,                /**< nothing here */
+    APR_POLL_SOCKET,            /**< descriptor refers to a socket */
+    APR_POLL_FILE,              /**< descriptor refers to a file */
+    APR_POLL_LASTDESC           /**< descriptor is the last one in the list */
 } apr_datatype_e ;
 
+/** Union of either an APR file or socket. */
 typedef union {
-    apr_file_t *f;
-    apr_socket_t *s;
+    apr_file_t *f;              /**< file */
+    apr_socket_t *s;            /**< socket */
 } apr_descriptor;
 
+/** @see apr_pollfd_t */
 typedef struct apr_pollfd_t apr_pollfd_t;
 
+/** Poll descriptor set. */
 struct apr_pollfd_t {
-    apr_pool_t *p;
-    apr_datatype_e desc_type;
-    apr_int16_t reqevents;
-    apr_int16_t rtnevents;
-    apr_descriptor desc;
-    void *client_data; /* allows app to associate context with a descriptor */
+    apr_pool_t *p;              /**< associated pool */
+    apr_datatype_e desc_type;   /**< descriptor type */
+    apr_int16_t reqevents;      /**< requested events */
+    apr_int16_t rtnevents;      /**< returned events */
+    apr_descriptor desc;        /**< @see apr_descriptor */
+    void *client_data;          /**< allows app to associate context */
 };
 
 /**
@@ -128,7 +132,7 @@ APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new_poll,
 /**
  * Poll the sockets in the poll structure
  * @param aprset The poll structure we will be using. 
- * @param num The number of sockets we are polling
+ * @param numsock The number of sockets we are polling
  * @param nsds The number of sockets signalled.
  * @param timeout The amount of time in microseconds to wait.  This is 
  *                a maximum, not a minimum.  If a socket is signalled, we 
@@ -149,7 +153,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t numsock,
 /**
  * Add a socket to the poll structure.
  * @param aprset The poll structure we will be using. 
- * @param socket The socket to add to the current poll structure. 
+ * @param sock The socket to add to the current poll structure. 
  * @param event The events to look for when we do the poll.  One of:
  * <PRE>
  *            APR_POLLIN       signal if read will not block
@@ -224,6 +228,7 @@ APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event,
  * file descriptors
  */
 
+/** Opaque structure used for pollset API */
 typedef struct apr_pollset_t apr_pollset_t;
 
 /**
@@ -249,9 +254,9 @@ APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t *pollset);
  * Add a socket or file descriptor to a pollset
  * @param pollset The pollset to which to add the descriptor
  * @param descriptor The descriptor to add
- * @param remark If you set client_data in the descriptor, that value
- *               will be returned in the client_data field whenever this
- *               descriptor is signalled in apr_pollset_poll().
+ * @remark If you set client_data in the descriptor, that value
+ *         will be returned in the client_data field whenever this
+ *         descriptor is signalled in apr_pollset_poll().
  */
 APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
                                           const apr_pollfd_t *descriptor);
