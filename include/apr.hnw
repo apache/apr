@@ -170,7 +170,11 @@
 #define APR_HAVE_IN_ADDR        1
 #define APR_HAVE_INET_ADDR      1
 #define APR_HAVE_INET_NETWORK   0
+#ifdef NW_BUILD_IPV6
+#define APR_HAVE_IPV6           1
+#else
 #define APR_HAVE_IPV6           0
+#endif
 #define APR_HAVE_MEMCHR         1
 #define APR_HAVE_MEMMOVE        1
 #define APR_HAVE_SETRLIMIT      0
