@@ -20,7 +20,7 @@ Generating Test Coverage information
 If you want to generate test coverage data, use the following steps:
 
 1) ./buildconf
-2) CFLAGS="-fprofile-arcs -ftest-coverage ./configure
+2) CFLAGS="-fprofile-arcs -ftest-coverage" ./configure
 3) make
 4) cd test
 5) make
