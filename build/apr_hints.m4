@@ -147,7 +147,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
           apr_cv_pthreads_cflags="none"
           apr_cv_pthreads_lib="-lpthread"
         else
-          apr_cv_pthreads_cflags="-D_THREAD_SAFE -D_REENTRANT"
+          APR_ADDTO(CPPFLAGS, [-D_THREAD_SAFE -D_REENTRANT])
           APR_SETIFNULL(enable_threads, [no])
         fi
         # prevent use of KQueue before FreeBSD 4.8
