@@ -284,6 +284,8 @@ AC_SUBST(iconv)
 AC_SUBST(mmap)
 AC_SUBST(have_memmove)
 
+APR_CHECK_SIGWAIT_ONE_ARG
+
 dnl #----------------------------- Checks for Any required Headers
 AC_HEADER_STDC
 
