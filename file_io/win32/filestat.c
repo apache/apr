@@ -246,9 +246,9 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
         if (whatfile == MORE_OF_WFSPEC) {
             apr_wchar_t *wfile = (apr_wchar_t*) ufile;
             int fix = 0;
-            if (wcsncmp(wfile, L"\\\\?\\", 4)) {
+            if (wcsncmp(wfile, L"\\\\?\\", 4) == 0) {
                 fix = 4;
-                if (wcsncmp(wfile + fix, L"UNC\\", 4))
+                if (wcsncmp(wfile + fix, L"UNC\\", 4) == 0)
                     wfile[6] = L'\\', fix = 6;
             }
             rv = GetNamedSecurityInfoW(wfile + fix, 
