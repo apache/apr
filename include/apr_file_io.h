@@ -70,15 +70,16 @@ typedef enum {APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK,
               APR_SOCK} ap_filetype_e; 
 
 /* Flags for ap_open */
-#define APR_READ     1           /* Open the file for reading */
-#define APR_WRITE    2           /* Open the file for writing */
-#define APR_CREATE   4           /* Create the file if not there */
-#define APR_APPEND   8           /* Append to the end of the file */
-#define APR_TRUNCATE 16          /* Open the file and truncate to 0 length */
-#define APR_BINARY   32          /* Open the file in binary mode */
-#define APR_BUFFERED 64          /* Buffer the data when reading or writing */
-#define APR_EXCL     128         /* Open should fail if APR_CREATE and file
+#define APR_READ       1           /* Open the file for reading */
+#define APR_WRITE      2           /* Open the file for writing */
+#define APR_CREATE     4           /* Create the file if not there */
+#define APR_APPEND     8           /* Append to the end of the file */
+#define APR_TRUNCATE   16          /* Open the file and truncate to 0 length */
+#define APR_BINARY     32          /* Open the file in binary mode */
+#define APR_BUFFERED   64          /* Buffer the data when reading or writing */
+#define APR_EXCL       128         /* Open should fail if APR_CREATE and file
 				    exists. */
+#define APR_DELONCLOSE 256         /* Delete the file after close */
 
 /* flags for ap_seek */
 #define APR_SET SEEK_SET
