@@ -77,7 +77,7 @@ struct apr_thread_t {
 
 struct apr_threadattr_t {
     apr_pool_t *pool;
-    size_t stack_size;
+    apr_size_t  stack_size;
     apr_int32_t detach;
     char *thread_name;
 };
