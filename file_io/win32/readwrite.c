@@ -59,6 +59,7 @@
 #include "apr_errno.h"
 #include <malloc.h>
 #include "atime.h"
+#include "misc.h"
 
 /*
  * read_with_timeout() 
