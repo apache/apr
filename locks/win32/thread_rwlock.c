@@ -74,13 +74,13 @@ APR_DECLARE(apr_status_t)apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
 
     if (! ((*rwlock)->read_event = CreateEvent(NULL, TRUE, FALSE, NULL))) {
         *rwlock = NULL;
-        return APR_FROM_OS_ERROR(GetLastError());
+        return apr_get_os_error();
     }
 
     if (! ((*rwlock)->write_mutex = CreateMutex(NULL, FALSE, NULL))) {
         CloseHandle((*rwlock)->read_event);
         *rwlock = NULL;
-        return APR_FROM_OS_ERROR(GetLastError());
+        return apr_get_os_error();
     }
 
     apr_pool_cleanup_register(pool, *rwlock, thread_rwlock_cleanup,
@@ -104,10 +104,10 @@ static apr_status_t apr_thread_rwlock_rdlock_core(apr_thread_rwlock_t *rwlock,
     InterlockedIncrement(&rwlock->readers);
     
     if (! ResetEvent(rwlock->read_event))
-        return APR_FROM_OS_ERROR(GetLastError());
+        return apr_get_os_error();
     
     if (! ReleaseMutex(rwlock->write_mutex))
-        return APR_FROM_OS_ERROR(GetLastError());
+        return apr_get_os_error();
     
     return APR_SUCCESS;
 }
@@ -145,7 +145,7 @@ apr_thread_rwlock_wrlock_core(apr_thread_rwlock_t *rwlock, DWORD milliseconds)
         if (code == WAIT_FAILED || code == WAIT_TIMEOUT) {
             /* Unable to wait for readers to finish, release write lock: */
             if (! ReleaseMutex(rwlock->write_mutex))
-                return APR_FROM_OS_ERROR(GetLastError());
+                return apr_get_os_error();
             
             return APR_FROM_OS_ERROR(code);
         }
@@ -166,34 +166,34 @@ APR_DECLARE(apr_status_t)apr_thread_rwlock_trywrlock(apr_thread_rwlock_t *rwlock
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_unlock(apr_thread_rwlock_t *rwlock)
 {
-    DWORD   code = 0;
+    apr_status_t rv = 0;
 
     /* First, guess that we're unlocking a writer */
     if (! ReleaseMutex(rwlock->write_mutex))
-        code = GetLastError();
+        rv = apr_get_os_error();
     
-    if (code == ERROR_NOT_OWNER) {
+    if (rv == APR_FROM_OS_ERROR(ERROR_NOT_OWNER)) {
         /* Nope, we must have a read lock */
         if (rwlock->readers &&
             ! InterlockedDecrement(&rwlock->readers) &&
             ! SetEvent(rwlock->read_event)) {
-            code = GetLastError();
+            rv = apr_get_os_error();
         }
         else {
-            code = 0;
+            rv = 0;
         }
     }
 
-    return APR_FROM_OS_ERROR(code);
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock)
 {
     if (! CloseHandle(rwlock->read_event))
-        return APR_FROM_OS_ERROR(GetLastError());
+        return apr_get_os_error();
 
     if (! CloseHandle(rwlock->write_mutex))
-        return APR_FROM_OS_ERROR(GetLastError());
+        return apr_get_os_error();
     
     return APR_SUCCESS;
 }
