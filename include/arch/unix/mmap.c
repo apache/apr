@@ -53,6 +53,8 @@
  *
  */
 
+#if HAVE_MMAP
+
 #include "mmap_h.h"
 #include "fileio.h"
 #include "apr_mmap.h"
@@ -175,3 +177,5 @@ ap_status_t ap_mmap_delete(struct mmap_t *mmap)
     }
     return rv;
 }
+
+#endif
