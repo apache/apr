@@ -218,10 +218,10 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         return ret;
     }
 
-#ifdef DIRENT_INODE
+#ifndef DIRENT_INODE
     wanted &= ~APR_FINFO_INODE;
 #endif
-#ifdef DIRENT_TYPE
+#ifndef DIRENT_TYPE
     wanted &= ~APR_FINFO_TYPE;
 #endif
 
