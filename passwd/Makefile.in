@@ -1,7 +1,7 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-TARGETS = apr_md5.lo apr_getpass.lo
+TARGETS = apr_getpass.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@

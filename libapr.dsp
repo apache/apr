@@ -307,10 +307,6 @@ SOURCE=.\network_io\win32\sockopt.c
 
 SOURCE=.\passwd\apr_getpass.c
 # End Source File
-# Begin Source File
-
-SOURCE=.\passwd\apr_md5.c
-# End Source File
 # End Group
 # Begin Group "shmem"
 
@@ -544,10 +540,6 @@ SOURCE=.\include\apr_inherit.h
 # Begin Source File
 
 SOURCE=.\include\apr_lib.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_md5.h
 # End Source File
 # Begin Source File
 
