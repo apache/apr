@@ -321,112 +321,94 @@ APR_DECLARE(apr_status_t) apr_parse_addr_port(char **addr,
 }
 
 #if defined(HAVE_GETADDRINFO)
-static void save_addrinfo(apr_pool_t *p, apr_sockaddr_t *sa, 
-                          struct addrinfo *ai, apr_port_t port)
-{
-    sa->pool = p;
-    memcpy(&sa->sa, ai->ai_addr, ai->ai_addrlen);
-    apr_sockaddr_vars_set(sa, ai->ai_family, port);
-}
-#else
-static void save_addrinfo(apr_pool_t *p, apr_sockaddr_t *sa,
-                          struct in_addr ipaddr, apr_port_t port)
-{
-    sa->pool = p;
-    sa->sa.sin.sin_addr = ipaddr;
-    apr_sockaddr_vars_set(sa, AF_INET, port);
-}
-#endif
 
-APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
-                                          const char *hostname, 
-                                          apr_int32_t family, apr_port_t port,
-                                          apr_int32_t flags, apr_pool_t *p)
+static apr_status_t call_resolver(apr_sockaddr_t **sa,
+                                  const char *hostname, apr_int32_t family,
+                                  apr_port_t port, apr_int32_t flags, 
+                                  apr_pool_t *p)
 {
-    (*sa) = (apr_sockaddr_t *)apr_pcalloc(p, sizeof(apr_sockaddr_t));
-    if ((*sa) == NULL)
-        return APR_ENOMEM;
-    (*sa)->hostname = apr_pstrdup(p, hostname);
+    struct addrinfo hints, *ai, *ai_list;
+    apr_sockaddr_t *prev_sa;
+    int error;
 
-#if defined(HAVE_GETADDRINFO)
-    if (hostname != NULL) {
-        struct addrinfo hints, *ai, *ai_list;
-        apr_sockaddr_t *cursa;
-        int error;
-
-        memset(&hints, 0, sizeof(hints));
-#if !APR_HAVE_IPV6
-        /* we can't talk IPv6 so we might as well not search for IPv6
-         * addresses
-         */
-        if (family == AF_UNSPEC)
-            hints.ai_family = AF_INET;
-        else
-#endif
-            hints.ai_family = family;
-        hints.ai_socktype = SOCK_STREAM;
-        error = getaddrinfo(hostname, NULL, &hints, &ai_list);
-        if (error) {
-            if (error == EAI_SYSTEM) {
-                return errno;
-            }
-            else {
-                /* issues with representing this with APR's error scheme:
-                 * glibc uses negative values for these numbers, perhaps so 
-                 * they don't conflict with h_errno values...  Tru64 uses 
-                 * positive values which conflict with h_errno values
-                 */
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = family;
+    hints.ai_socktype = SOCK_STREAM;
+    error = getaddrinfo(hostname, NULL, &hints, &ai_list);
+    if (error) {
+        if (error == EAI_SYSTEM) {
+            return errno;
+        }
+        else {
+            /* issues with representing this with APR's error scheme:
+             * glibc uses negative values for these numbers, perhaps so 
+             * they don't conflict with h_errno values...  Tru64 uses 
+             * positive values which conflict with h_errno values
+             */
 #if defined(NEGATIVE_EAI)
-                error = -error;
+            error = -error;
 #endif
-                return error + APR_OS_START_EAIERR;
-            }
+            return error + APR_OS_START_EAIERR;
         }
-        cursa = *sa;
-        ai = ai_list;
-        save_addrinfo(p, cursa, ai, port);
-        while (ai->ai_next) { /* while more addresses to report */
-            cursa->next = apr_pcalloc(p, sizeof(apr_sockaddr_t));
-            ai = ai->ai_next;
-            cursa = cursa->next;
-            save_addrinfo(p, cursa, ai, port);
+    }
+
+    prev_sa = NULL;
+    ai = ai_list;
+    while (ai) { /* while more addresses to report */
+        apr_sockaddr_t *new_sa = apr_pcalloc(p, sizeof(apr_sockaddr_t));
+
+        new_sa->pool = p;
+        memcpy(&new_sa->sa, ai->ai_addr, ai->ai_addrlen);
+        apr_sockaddr_vars_set(new_sa, ai->ai_family, port);
+
+        if (!prev_sa) { /* first element in new list */
+            new_sa->hostname = apr_pstrdup(p, hostname);
+            *sa = new_sa;
         }
-        freeaddrinfo(ai_list);
+        else {
+            prev_sa->next = new_sa;
+        }
+
+        prev_sa = new_sa;
+        ai = ai->ai_next;
     }
-    else {
-        (*sa)->pool = p;
-        apr_sockaddr_vars_set(*sa, 
-                              family == APR_UNSPEC ? APR_INET : family,
-                              port);
-    }
-#else
-    if (hostname != NULL) {
-        struct hostent *hp;
-        apr_sockaddr_t *cursa;
-        int curaddr;
+    freeaddrinfo(ai_list);
+    return APR_SUCCESS;
+}
+
+#else /* end of HAVE_GETADDRINFO code */
+
+static apr_status_t call_resolver(apr_sockaddr_t **sa, 
+                                  const char *hostname, apr_int32_t family,
+                                  apr_port_t port, apr_int32_t flags, 
+                                  apr_pool_t *p)
+{
+    struct hostent *hp;
+    apr_sockaddr_t *prev_sa;
+    int curaddr;
 #if APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
     defined(HAVE_GETHOSTBYNAME_R) && !defined(BEOS)
 #ifdef GETHOSTBYNAME_R_HOSTENT_DATA
-        struct hostent_data hd;
+    struct hostent_data hd;
 #else
-        char tmp[GETHOSTBYNAME_BUFLEN];
+    char tmp[GETHOSTBYNAME_BUFLEN];
 #endif
-        int hosterror;
-        struct hostent hs;
+    int hosterror;
 #endif
+    struct hostent hs;
+    struct in_addr ipaddr;
+    char *addr_list[2];
 
-        if (family == APR_UNSPEC) {
-            family = APR_INET; /* we don't support IPv6 here */
-        }
+    if (*hostname >= '0' && *hostname <= '9' &&
+        strspn(hostname, "0123456789.") == strlen(hostname)) {
 
-        if (*hostname >= '0' && *hostname <= '9' &&
-            strspn(hostname, "0123456789.") == strlen(hostname)) {
-            struct in_addr ipaddr;
-
-            ipaddr.s_addr = inet_addr(hostname);
-            save_addrinfo(p, *sa, ipaddr, port);
-        }
-        else {
+        ipaddr.s_addr = inet_addr(hostname);
+        addr_list[0] = (char *)&ipaddr;
+        addr_list[1] = NULL; /* just one IP in list */
+        hs.h_addr_list = (char **)addr_list;
+        hp = &hs;
+    }
+    else {
 #if APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
     defined(HAVE_GETHOSTBYNAME_R) && !defined(BEOS)
 #if defined(GETHOSTBYNAME_R_HOSTENT_DATA)
@@ -462,27 +444,55 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
             return (h_errno + APR_OS_START_SYSERR);
 #endif
         }
-        cursa = *sa;
-        curaddr = 0;
-        save_addrinfo(p, cursa, *(struct in_addr *)hp->h_addr_list[curaddr], 
-                      port);
+    }
+
+    prev_sa = NULL;
+    curaddr = 0;
+    while (hp->h_addr_list[curaddr]) {
+        apr_sockaddr_t *new_sa = apr_pcalloc(p, sizeof(apr_sockaddr_t));
+
+        new_sa->pool = p;
+        new_sa->sa.sin.sin_addr = *(struct in_addr *)hp->h_addr_list[curaddr];
+        apr_sockaddr_vars_set(new_sa, AF_INET, port);
+
+        if (!prev_sa) { /* first element in new list */
+            new_sa->hostname = apr_pstrdup(p, hostname);
+            *sa = new_sa;
+        }
+        else {
+            prev_sa->next = new_sa;
+        }
+
+        prev_sa = new_sa;
         ++curaddr;
-        while (hp->h_addr_list[curaddr]) {
-            cursa->next = apr_pcalloc(p, sizeof(apr_sockaddr_t));
-            cursa = cursa->next;
-            save_addrinfo(p, cursa, *(struct in_addr *)hp->h_addr_list[curaddr], 
-                          port);
-            ++curaddr;
-        }
-        }
     }
-    else {
-        (*sa)->pool = p;
-        apr_sockaddr_vars_set(*sa, 
-                              family == APR_UNSPEC ? APR_INET : family,
-                              port);
-    }
+
+    return APR_SUCCESS;
+}
+
+#endif /* end of !HAVE_GETADDRINFO code */
+
+APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
+                                                const char *hostname, 
+                                                apr_int32_t family, apr_port_t port,
+                                                apr_int32_t flags, apr_pool_t *p)
+{
+    *sa = NULL;
+
+    if (hostname) {
+#if !APR_HAVE_IPV6
+        if (family == APR_UNSPEC) {
+            family = APR_INET;
+        }
 #endif
+        return call_resolver(sa, hostname, family, port, flags, p);
+    }
+
+    *sa = apr_pcalloc(p, sizeof(apr_sockaddr_t));
+    (*sa)->pool = p;
+    apr_sockaddr_vars_set(*sa, 
+                          family == APR_UNSPEC ? APR_INET : family,
+                          port);
     return APR_SUCCESS;
 }
 
