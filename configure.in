@@ -1628,27 +1628,24 @@ if test "$rand" != "1"; then
     [ apr_devrandom="$withval" ], [ apr_devrandom="yes" ])
 
   if test "$apr_devrandom" = "yes"; then
-    if test -r "/dev/random"; then
-      AC_DEFINE_UNQUOTED(DEV_RANDOM, ["/dev/random"], [Define to path of random device])
-      AC_MSG_RESULT(/dev/random)
-      rand="1"
-    elif test -r "/dev/arandom"; then
-      AC_DEFINE_UNQUOTED(DEV_RANDOM, ["/dev/arandom"])
-      AC_MSG_RESULT(/dev/arandom)
-      rand="1"
-    elif test -r "/dev/urandom"; then
-      AC_DEFINE_UNQUOTED(DEV_RANDOM, ["/dev/urandom"])
-      AC_MSG_RESULT(/dev/urandom)
-      rand="1"
-    fi
+    for f in /dev/random /dev/arandom /dev/urandom; do
+      if test -r $f; then
+        apr_devrandom=$f
+        rand=1
+        break
+      fi
+    done
   elif test "$apr_devrandom" != "no"; then
     if test -r "$apr_devrandom"; then
-      AC_DEFINE_UNQUOTED(DEV_RANDOM, ["$apr_devrandom"])
-      AC_MSG_RESULT($apr_devrandom)
       rand="1"
     else
       AC_ERROR([$apr_devrandom not found or unreadable.])
     fi
+  fi
+
+  if test "$rand" = "1"; then
+    AC_DEFINE_UNQUOTED(DEV_RANDOM, ["$apr_devrandom"], [Define to path of random device])
+    AC_MSG_RESULT([$apr_devrandom])
   fi
 fi
 
