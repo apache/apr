@@ -107,6 +107,10 @@
 
 /* Details of the debugging options can now be found in the developer
  * section of the documentaion. */
+/*
+#define ALLOC_DEBUG
+#define ALLOC_STATS
+*/
 
 /* magic numbers --- min free bytes to consider a free apr_pool_t block useable,
  * and the min amount to allocate if we have to go to malloc() */
@@ -721,22 +725,37 @@ APR_DECLARE(void) apr_pool_alloc_term(apr_pool_t *globalp)
  */
 APR_DECLARE(void) apr_pool_clear(apr_pool_t *a)
 {
+    /* free the subpools. we can just loop -- the subpools will detach
+       themselve from us, so this is easy. */
     while (a->sub_pools) {
 	apr_pool_destroy(a->sub_pools);
     }
-    /*
-     * Don't hold the mutex during cleanups.
-     */
+
+    /* run cleanups and free any subprocesses. */
     run_cleanups(a->cleanups);
     a->cleanups = NULL;
     free_proc_chain(a->subprocesses);
     a->subprocesses = NULL;
+
+    /* free the pool's blocks, *except* for the first one. the actual pool
+       structure is contained in the first block. this also gives us some
+       ready memory for reallocating within this pool. */
     free_blocks(a->first->h.next);
     a->first->h.next = NULL;
 
+    /* this was allocated in self, or a subpool of self. it simply
+       disappears, so forget the hash table. */
     a->prog_data = NULL;
 
+    /* no other blocks, so the last block is the first. */
     a->last = a->first;
+
+    /* "free_first_avail" is the original first_avail when the pool was
+       constructed. (kind of a misnomer, but it means "when freeing, use
+       this as the first available ptr)
+
+       restore the first/only block avail pointer, effectively resetting
+       the block to empty (except for the pool structure). */
     a->first->h.first_avail = a->free_first_avail;
     debug_fill(a->first->h.first_avail,
 	       a->first->h.endp - a->first->h.first_avail);
@@ -756,13 +775,18 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *a)
 
 APR_DECLARE(void) apr_pool_destroy(apr_pool_t *a)
 {
+    union block_hdr *blok;
+
+    /* toss everything in the pool. */
     apr_pool_clear(a);
+
 #if APR_HAS_THREADS
     if (alloc_mutex) {
         apr_lock_acquire(alloc_mutex);
     }
 #endif
 
+    /* detach this pool from its parent. */
     if (a->parent) {
 	if (a->parent->sub_pools == a) {
 	    a->parent->sub_pools = a->sub_next;
@@ -774,12 +798,26 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *a)
 	    a->sub_next->sub_prev = a->sub_prev;
 	}
     }
+
 #if APR_HAS_THREADS
     if (alloc_mutex) {
         apr_lock_release(alloc_mutex);
     }
 #endif
-    free_blocks(a->first);
+
+    /* freeing the first block will include the pool structure. to prevent
+       a double call to apr_pool_destroy, we want to fill a NULL into
+       a->first so that the second call (or any attempted usage of the
+       pool) will segfault on a deref.
+
+       Note: when ALLOC_DEBUG is on, the free'd blocks are filled with
+       0xa5. That will cause future use of this pool to die since the pool
+       structure resides within the block's 0xa5 overwrite area. However,
+       we want this to fail much more regularly, so stash the NULL.
+    */
+    blok = a->first;
+    a->first = NULL;
+    free_blocks(blok);
 }
 
 APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p)
@@ -895,7 +933,6 @@ APR_DECLARE(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub)
 	    b->h.owning_pool = p;
 	}
     }
-    return 0;
 }
 #endif
 
