@@ -172,7 +172,7 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
 #elif defined(NETWARE)
 
 #include <stdlib.h>
-#define apr_atomic_t apr_uint32_t
+#define apr_atomic_t unsigned long
 
 #define apr_atomic_add(mem, val)     atomic_add(mem,val)
 #define apr_atomic_dec(mem)          atomic_dec(mem)
