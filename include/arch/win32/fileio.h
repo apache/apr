@@ -235,6 +235,7 @@ struct apr_dir_t {
         } n;
 #endif        
     };
+    int bof;
 };
 
 /* There are many goofy characters the filesystem can't accept
