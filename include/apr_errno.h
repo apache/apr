@@ -370,7 +370,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * For more information call apr_dso_error().
  */
 #if defined(WIN32)
-#define APR_STATUS_IS_EDSOOPEN(s)       (APR_TO_OS_ERROR(s) == ERROR_MOD_NOT_FOUND)
+#define APR_STATUS_IS_EDSOOPEN(s)       ((s) == APR_EDSOOPEN \
+                       || APR_TO_OS_ERROR(s) == ERROR_MOD_NOT_FOUND)
 #else
 #define APR_STATUS_IS_EDSOOPEN(s)       ((s) == APR_EDSOOPEN)
 #endif
@@ -386,9 +387,12 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EBADPATH(s)       ((s) == APR_EBADPATH)
 /** The given path contained wildcards. */
 #define APR_STATUS_IS_EPATHWILD(s)      ((s) == APR_EPATHWILD)
-/** Could not find the requested symbol. */
+/** Could not find the requested symbol.
+ * For more information call apr_dso_error().
+ */
 #if defined(WIN32)
-#define APR_STATUS_IS_ESYMNOTFOUND(s)   (APR_TO_OS_ERROR(s) == ERROR_PROC_NOT_FOUND)
+#define APR_STATUS_IS_ESYMNOTFOUND(s)   ((s) == APR_ESYMNOTFOUND \
+                       || APR_TO_OS_ERROR(s) == ERROR_PROC_NOT_FOUND)
 #else
 #define APR_STATUS_IS_ESYMNOTFOUND(s)   ((s) == APR_ESYMNOTFOUND)
 #endif
