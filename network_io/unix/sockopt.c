@@ -137,14 +137,14 @@ apr_status_t apr_socket_timeout_set(apr_socket_t *sock, apr_interval_time_t t)
             apr_set_option(&sock->netmask, APR_SO_NONBLOCK, 0);
         } 
     }
-    /* must disable the incomplete read support if we change to a
-     * blocking socket.
+    /* must disable the incomplete read support if we disable
+     * a timeout
      */
-    if (t == 0) {
+    if (t <= 0) {
         sock->netmask &= ~APR_INCOMPLETE_READ;
     }
     sock->timeout = t; 
-    apr_set_option(&sock->netmask, APR_SO_TIMEOUT, t);
+    apr_set_option(&sock->netmask, APR_SO_TIMEOUT, t > 0);
     return APR_SUCCESS;
 }
 
