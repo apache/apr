@@ -358,7 +358,7 @@ API_EXPORT(int) ap_fprintf(struct file_t *fptr, const char *format, ...)
     va_list ap;
     ap_vformatter_buff_t vbuff;
     char *buf;
-    int len;
+    ap_ssize_t len;
 
     buf = malloc(HUGE_STRING_LEN);
     if (buf == NULL) {
