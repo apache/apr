@@ -52,61 +52,199 @@
  * <http://www.apache.org/>.
  */
 
-#include "mm.h"
 #include "apr_general.h"
 #include "apr_shmem.h"
+#include "apr_lock.h"
+#include "apr_portable.h"
 #include "apr_errno.h"
 
+/*
+ * This is the Unix implementation of shared memory.
+ *
+ * Currently, this code supports the following shared memory techniques:
+ *
+ * - mmap on a temporary file
+ * - mmap/shm_open on a temporary file (POSIX.1)
+ * - mmap with MAP_ANON (4.4BSD)
+ * - mmap /dev/zero (SVR4)
+ * - shmget (SysV)
+ * - create_area (BeOS)
+ */
+
+#if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM || APR_USE_SHMEM_MMAP_ZERO || APR_USE_SHMEM_MMAP_ANON
+#include <sys/mman.h>
+#elif APR_USE_SHMEM_SHMGET
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/file.h>
+#elif APR_USE_SHMEM_BEOS
+#include <kernel/OS.h>
+#endif
+
 struct shmem_t {
-    MM *mm;
+    void *mem;
+    void *curmem;
+    apr_size_t length;
+    apr_lock_t *lock;
+    char *filename;
+#if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM || APR_USE_SHMEM_MMAP_ZERO
+    apr_file_t *file; 
+#elif APR_USE_SHMEM_MMAP_ANON
+    /* Nothing else. */
+#elif APR_USE_SHMEM_SHMGET
+    apr_os_file_t file;
+#elif APR_USE_SHMEM_BEOS
+    area_id areaid; 
+#endif
 };
 
-APR_DECLARE(apr_status_t) apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *file, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize, 
+                                       const char *filename, apr_pool_t *pool)
 {
-    MM *newmm = mm_create(reqsize + sizeof(**m), file, MM_ALLOCATE_ENOUGH);
-    if (newmm == NULL) {
-        return errno;
+    apr_shmem_t *new_m;
+    int tmpfd;
+    void *mem;
+
+#if APR_USE_SHMEM_SHMGET
+    struct shmid_ds shmbuf;
+#else
+    apr_status_t stat;
+#endif
+
+    new_m = apr_palloc(pool, sizeof(apr_shmem_t));
+    if (!new_m)
+        return APR_ENOMEM;
+
+/* These implementations are very similar except for opening the file. */
+#if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM || APR_USE_SHMEM_MMAP_ZERO
+    /* FIXME: Ignore error for now. *
+     *stat = apr_file_remove(filename, pool);*/
+    
+#if APR_USE_SHMEM_MMAP_TMP
+    /* FIXME: Is APR_OS_DEFAULT sufficient? */
+    stat = apr_file_open(new_m->file, filename, 
+                         APR_READ | APR_WRITE | APR_CREATE, APR_OS_DEFAULT,
+                         pool);
+    if (stat != APR_SUCCESS)
+        return APR_EGENERAL;
+
+    tmpfd = apr_os_file_get(&tmpfd, new_m->file);
+    stat = apr_file_trunc(new_m->file, reqsize);
+    if (stat != APR_SUCCESS)
+        return APR_EGENERAL;
+
+#elif APR_USE_SHMEM_MMAP_SHM
+    /* FIXME: Is APR_OS_DEFAULT sufficient? */
+    tmpfd = shm_open(filename, O_RDWR | O_CREAT, APR_OS_DEFAULT);
+    if (tmpfd == -1)
+        return errno + APR_OS_START_SYSERR;
+
+    apr_os_file_put(new_m->file, &tmpfd, pool); 
+    stat = apr_file_trunc(new_m->file, reqsize);
+    if (stat != APR_SUCCESS)
+    {
+        shm_unlink(filename);
+        return APR_EGENERAL;
     }
-    (*m) = mm_malloc(newmm, sizeof(struct shmem_t));
-    /* important to check this; we may be locking a lock file for the first
-     * time, which won't work if the file is on NFS
-     */
-    if (!*m) {
-        return errno;
-    }
-    (*m)->mm = newmm;
+#elif APR_USE_SHMEM_MMAP_ZERO
+    stat = apr_file_open(new_m->file, "/dev/zero", APR_READ | APR_WRITE, 
+                         APR_OS_DEFAULT);
+    if (stat != APR_SUCCESS)
+        return APR_EGENERAL;
+    tmpfd = apr_os_file_get(&tmpfd, new_m->file);
+#endif
+
+    mem = mmap(NULL, reqsize, PROT_READ|PROT_WRITE, MAP_SHARED, tmpfd, 0);
+
+#elif APR_USE_SHMEM_MMAP_ANON
+    mem = mmap(NULL, reqsize, PROT_READ|PROT_WRITE, MAP_ANON|MAP_SHARED, -1, 0);
+#elif APR_USE_SHMEM_SHMGET
+    tmpfd = shmget(IPC_PRIVATE, reqsize, (SHM_R|SHM_W|IPC_CREAT));
+    if (tmpfd == -1)
+        return errno + APR_OS_START_SYSERR;
+
+    new_m->file = tmpfd;
+
+    mem = shmat(new_m->file, NULL, 0);
+
+    /* FIXME: Handle errors. */
+    if (shmctl(new_m->file, IPC_STAT, &shmbuf) == -1)
+        return errno + APR_OS_START_SYSERR;
+
+    apr_current_userid(&shmbuf.shm_perm.uid, &shmbuf.shm_perm.gid, pool);
+
+    if (shmctl(new_m->file, IPC_SET, &shmbuf) == -1)
+        return errno + APR_OS_START_SYSERR;
+
+#elif APR_USE_SHMEM_BEOS
+    new_m->area_id = create_area("mm", (void*)&mem, B_ANY_ADDRESS, reqsize, 
+                                 B_LAZY_LOCK, B_READ_AREA|B_WRITE_AREA);
+    /* FIXME: error code? */
+    if (new_m->area_id < 0)
+        return APR_EGENERAL;
+
+#endif
+
+    new_m->mem = mem;
+    new_m->curmem = mem;
+    new_m->length = reqsize;
+
+    apr_lock_create(&new_m->lock, APR_MUTEX, APR_CROSS_PROCESS, NULL, pool);
+    if (!new_m->lock)
+        return APR_EGENERAL;
+
+    *m = new_m; 
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_shm_destroy(struct shmem_t *m)
+APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shmem_t *m)
 {
-    mm_destroy(m->mm);
+#if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM || APR_USE_SHMEM_MMAP_ZERO
+    munmap(m->mem);
+    apr_file_close(m->file);
+#elif APR_USE_SHMEM_MMAP_ANON
+    munmap(m->mem);
+#elif APR_USE_SHMEM_SHMGET
+    shmdt(m->mem);
+#elif APR_USE_SHMEM_BEOS
+    delete_area(new_m->area_id);
+#endif
+
     return APR_SUCCESS;
 }
 
-APR_DECLARE(void *) apr_shm_malloc(struct shmem_t *c, apr_size_t reqsize)
+APR_DECLARE(void *) apr_shm_malloc(apr_shmem_t *m, apr_size_t reqsize)
 {
-    if (c->mm == NULL) {
-        return NULL;
+    void *new;
+    new = NULL;
+
+    apr_lock_acquire(m->lock);
+    /* Do we have enough space? */
+    if ((m->curmem - m->mem + reqsize) <= m->length)
+    {
+        new = m->curmem;
+        m->curmem += reqsize;
     }
-    return mm_malloc(c->mm, reqsize);
+    apr_lock_release(m->lock);
+    return new;
 }
 
-APR_DECLARE(void *) apr_shm_calloc(struct shmem_t *shared, apr_size_t size) 
+APR_DECLARE(void *) apr_shm_calloc(apr_shmem_t *m, apr_size_t reqsize) 
 {
-    if (shared == NULL) {
-        return NULL;
-    }
-    return mm_calloc(shared->mm, 1, size);
+    void *new = apr_shm_malloc(m, reqsize);
+    memset(new, '\0', reqsize);
+    return new;
 }
 
-APR_DECLARE(apr_status_t) apr_shm_free(struct shmem_t *shared, void *entity)
+APR_DECLARE(apr_status_t) apr_shm_free(apr_shmem_t *shared, void *entity)
 {
-    mm_free(shared->mm, entity);
+    /* Without a memory management scheme within our shared memory, it
+     * is impossible to implement free. */
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_shm_name_get(apr_shmem_t *c, apr_shm_name_t **name)
+APR_DECLARE(apr_status_t) apr_shm_name_get(apr_shmem_t *c, 
+                                           apr_shm_name_t **name)
 {
 #if APR_USES_ANONYMOUS_SHM
     *name = NULL;
@@ -121,7 +259,8 @@ APR_DECLARE(apr_status_t) apr_shm_name_get(apr_shmem_t *c, apr_shm_name_t **name
 #endif
 }
 
-APR_DECLARE(apr_status_t) apr_shm_name_set(apr_shmem_t *c, apr_shm_name_t *name)
+APR_DECLARE(apr_status_t) apr_shm_name_set(apr_shmem_t *c, 
+                                           apr_shm_name_t *name)
 {
 #if APR_USES_ANONYMOUS_SHM
     return APR_ANONYMOUS;
@@ -135,12 +274,12 @@ APR_DECLARE(apr_status_t) apr_shm_name_set(apr_shmem_t *c, apr_shm_name_t *name)
 #endif
 }
 
-APR_DECLARE(apr_status_t) apr_shm_open(struct shmem_t *c)
+APR_DECLARE(apr_status_t) apr_shm_open(apr_shmem_t *c)
 {
 #if APR_USES_ANONYMOUS_SHM
 
-/* When using MM, we don't need to open shared memory segments in child
- * segments, so just return immediately.
+/* we don't need to open shared memory segments in child segments, so 
+ * just return immediately.
  */
     return APR_SUCCESS;
 /* Currently, we are not supporting name based shared memory on Unix
@@ -153,11 +292,18 @@ APR_DECLARE(apr_status_t) apr_shm_open(struct shmem_t *c)
 #endif
 }
 
-APR_DECLARE(apr_status_t) apr_shm_avail(struct shmem_t *c, apr_size_t *size)
+APR_DECLARE(apr_status_t) apr_shm_avail(apr_shmem_t *m, apr_size_t *size)
 {
-    *size = mm_available(c);
-    if (*size == 0) {
-        return APR_ENOSHMAVAIL;
-    }
-    return APR_SUCCESS;
+    apr_status_t stat;
+
+    stat = APR_ENOSHMAVAIL;
+
+    apr_lock_acquire(m->lock);
+
+    *size = m->length - (m->curmem - m->mem);
+    if (*size)
+        stat = APR_SUCCESS;
+
+    apr_lock_release(m->lock);
+    return stat;
 }
