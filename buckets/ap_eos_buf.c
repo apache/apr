@@ -69,7 +69,7 @@ static int eos_get_len(ap_bucket *e)
     return 0;
 }
 
-APR_EXPORT(ap_bucket *) ap_eos_create(void)
+APR_EXPORT(ap_bucket *) ap_bucket_eos_create(void)
 {
     ap_bucket *newbuf;
 

@@ -63,31 +63,6 @@
 #include <sys/uio.h>
 #include "apr_buf.h"
 
-/* We are creating a new bucket here.  The buckets that are created
- * have the correct function pointers and types when they are created. 
- */
-APR_EXPORT(ap_bucket *) ap_bucket_new(ap_bucket_color_e color)
-{
-    /* TODO: keep a free list of ap_bufels... and allocate them in big chunks */
-    switch (color) {
-        case AP_BUCKET_rwmem:
-            return ap_rwmem_create();
-        case AP_BUCKET_mmap:
-            return ap_mmap_bucket_create();
-        case AP_BUCKET_rmem:
-            return ap_rmem_create();
-        case AP_BUCKET_eos:
-            return ap_eos_create();
-        case AP_BUCKET_file:
-        case AP_BUCKET_filename:
-        case AP_BUCKET_cached_entity:
-        case AP_BUCKET_URI:
-            /* not implemented yet */
-            return NULL;
-    }
-    return NULL;
-}
-
 APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e)
 {
     if (e->free) {
@@ -278,7 +253,7 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
     }
     
     for (k = 0;;) {
-        r = ap_bucket_new(AP_BUCKET_rwmem);
+        r = ap_bucket_rwmem_create();
         x = va_arg(va, const char *);
         if (x == NULL)
             break;
@@ -319,7 +294,7 @@ APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_lis
 
     res = ap_vsnprintf(buf, 4096, fmt, va);
 
-    r = ap_bucket_new(AP_BUCKET_rwmem);
+    r = ap_bucket_rwmem_create();
     res = r->insert(r, buf, strlen(buf), &i);
     ap_bucket_brigade_append_buckets(b, r);
 

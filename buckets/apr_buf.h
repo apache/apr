@@ -184,9 +184,6 @@ APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_lis
 
 /*   ******  Bucket Functions  *****  */
 
-/* allocate a bucket of type color */
-APR_EXPORT(ap_bucket *) ap_bucket_new(ap_bucket_color_e color);
-
 /* destroy a bucket */
 APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e);
 
@@ -200,16 +197,16 @@ APR_EXPORT(const char *) ap_get_bucket_char_str(ap_bucket *b);
 APR_EXPORT(int) ap_get_bucket_len(ap_bucket *b);
 
 /* Create a read/write memory bucket */
-APR_EXPORT(ap_bucket *) ap_rwmem_create(void);
+APR_EXPORT(ap_bucket *) ap_bucket_rwmem_create(void);
 
 /* Create a mmap memory bucket */
-APR_EXPORT(ap_bucket *) ap_mmap_bucket_create(void);
+APR_EXPORT(ap_bucket *) ap_bucket_mmap_create(void);
 
 /* Create a read only memory bucket. */
-APR_EXPORT(ap_bucket *) ap_rmem_create(void);
+APR_EXPORT(ap_bucket *) ap_bucket_rmem_create(void);
 
 /* Create an End of Stream bucket */
-APR_EXPORT(ap_bucket *) ap_eos_create(void);
+APR_EXPORT(ap_bucket *) ap_bucket_eos_create(void);
 
 #endif
 
