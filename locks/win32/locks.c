@@ -100,7 +100,6 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
     /* ToDo:  How to handle the case when no pool is available? 
     *         How to cleanup the storage properly?
     */
-    newlock->fname = apr_pstrdup(pool, fname);
     newlock->type = type;
     newlock->scope = scope;
     sec.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -114,9 +113,24 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
     }
 
     if (scope == APR_INTRAPROCESS) {
+        newlock->fname = apr_pstrdup(pool, fname);
         InitializeCriticalSection(&newlock->section);
     } else {
-        newlock->mutex = CreateMutex(&sec, FALSE, fname);
+        /* With Win2000 Terminal Services, the Mutex name can have a 
+         * "Global\" or "Local\" prefix to explicitly create the object 
+         * in the global or session name space.  Without Terminal Service
+         * running on Win2000, Global\ and Local\ are ignored.  These
+         * prefixes are only valid on Win2000+
+         */
+        if (apr_os_level >= APR_WIN_2000)
+            newlock->fname = apr_pstrcat(pool, "Global\\", fname, NULL);
+        else
+            newlock->fname = apr_pstrdup(pool, fname);
+
+        newlock->mutex = CreateMutex(&sec, FALSE, newlock->fname);
+        if (!newlock->mutex) {
+	    return apr_get_os_error();
+        }
     }
     *lock = newlock;
     apr_pool_cleanup_register(newlock->pool, newlock, lock_cleanup,
