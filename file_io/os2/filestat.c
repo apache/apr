@@ -62,18 +62,6 @@
 #include <os2.h>
 
 
-typedef struct {
-  USHORT sec2:5;
-  USHORT min:6;
-  USHORT hour:5;
-} DOSTIME;
-
-typedef struct {
-  USHORT day:5;
-  USHORT month:4;
-  USHORT year:7;
-} DOSDATE;
-
 long os2date2unix( FDATE os2date, FTIME os2time )
 {
   struct tm tmpdate;
