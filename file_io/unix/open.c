@@ -101,6 +101,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     
 #if APR_HAS_LARGE_FILES && defined(_LARGEFILE64_SOURCE)
     oflags |= O_LARGEFILE;
+#elif defined(O_LARGEFILE)
+    if (flag & APR_LARGEFILE) {
+        oflags |= O_LARGEFILE;
+    }
 #endif
 
 #if APR_HAS_THREADS
