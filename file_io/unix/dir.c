@@ -240,14 +240,14 @@ apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_dir_filename(char **new, apr_dir_t *thedir)
+apr_status_t apr_get_dir_filename(const char **new, apr_dir_t *thedir)
 {
     /* Detect End-Of-File */
     if (thedir == NULL || thedir->entry == NULL) {
         *new = NULL;
         return APR_ENOENT;
     }
-    (*new) = apr_pstrdup(thedir->cntxt, thedir->entry->d_name);
+    (*new) = thedir->entry->d_name;
     return APR_SUCCESS;
 }
 
