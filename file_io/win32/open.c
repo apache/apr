@@ -340,10 +340,10 @@ APR_DECLARE(apr_status_t) apr_rename_file(const char *frompath,
                                           const char *topath,
                                           apr_pool_t *cont)
 {
-#if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
     {
+#if APR_HAS_UNICODE_FS
         apr_wchar_t wfrompath[APR_PATH_MAX], wtopath[APR_PATH_MAX];
         apr_status_t rv;
         if (rv = utf8_to_unicode_path(wfrompath, sizeof(wfrompath) 
@@ -357,12 +357,32 @@ APR_DECLARE(apr_status_t) apr_rename_file(const char *frompath,
         if (MoveFileExW(wfrompath, wtopath, MOVEFILE_REPLACE_EXISTING |
                                             MOVEFILE_COPY_ALLOWED))
             return APR_SUCCESS;
-    }
-    else
-#endif
+#else
         if (MoveFileEx(frompath, topath, MOVEFILE_REPLACE_EXISTING |
                                          MOVEFILE_COPY_ALLOWED))
             return APR_SUCCESS;
+#endif
+    }
+    else
+    {
+        /* Windows 95 and 98 do not support MoveFileEx, so we'll use
+         * the old MoveFile function.  However, MoveFile requires that
+         * the new file not already exist...so we have to delete that
+         * file if it does.  Perhaps we should back up the to-be-deleted
+         * file in case something happens?
+         */
+        HANDLE handle = INVALID_HANDLE_VALUE;
+
+        if ((handle = CreateFile(topath, GENERIC_WRITE, 0, 0,  
+            OPEN_EXISTING, 0, 0 )) != INVALID_HANDLE_VALUE )
+        {
+            CloseHandle(handle);
+            if (!DeleteFile(topath))
+                return apr_get_os_error();
+        }
+        if (MoveFile(frompath, topath))
+            return APR_SUCCESS;
+    }        
     return apr_get_os_error();
 }
 
