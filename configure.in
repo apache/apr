@@ -431,6 +431,7 @@ AC_CHECK_FUNCS(mkstemp)
 
 AC_SUBST(fork)
 AC_SUBST(have_inet_addr)
+AC_SUBST(tcp_nodelay_inherited)
 AC_SUBST(have_inet_network)
 AC_SUBST(have_sigaction)
 AC_SUBST(have_setrlimit)
@@ -514,6 +515,7 @@ AC_TRY_CPP([
 ], netinet_tcph="1", netinet_tcph="0")
 if test $netinet_tcph = 1; then
   AC_MSG_RESULT(yes)
+  echo "#define HAVE_NETINET_TCP_H 1" >> confdefs.h
 else
   AC_MSG_RESULT(no)
 fi
@@ -944,6 +946,8 @@ AC_SUBST(file_as_socket)
 APR_CHECK_SOCKADDR_SA_LEN
 
 APR_CHECK_GETHOSTBYNAME_NAS
+
+APR_CHECK_TCP_NODELAY_INHERITED
 
 dnl # Look for a way of corking TCP...
 APR_CHECK_DEFINE(TCP_CORK, netinet/tcp.h)
