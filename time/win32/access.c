@@ -240,28 +240,3 @@ ap_status_t ap_set_wday(struct atime_t *time, ap_int32_t value)
     time->explodedtime->wDayOfWeek = value;
     return APR_SUCCESS;
 }
-
-ap_status_t ap_get_timedata(struct atime_t *atime, char *key, void *data)
-{
-    if (atime != NULL) {
-        return ap_get_userdata(data, key, atime->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOTIME;
-    }
-}
-
-ap_status_t ap_set_timedata(struct atime_t *atime, void *data, char *key,
-                            ap_status_t (*cleanup) (void *))
-{
-    if (atime != NULL) {
-        return ap_set_userdata(data, key, cleanup, atime->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOTIME;
-    }
-}
-
-
