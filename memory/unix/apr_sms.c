@@ -614,7 +614,7 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
     {
         apr_lock_destroy(sms->sms_lock);
         if (pms->free_fn)
-            return apr_sms_free(sms->parent, sms->sms_lock);
+            apr_sms_free(sms->parent, sms->sms_lock);
     }
     
 #ifndef APR_POOLS_ARE_SMS
