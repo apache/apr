@@ -74,7 +74,8 @@ extern APR_DECLARE_DATA const char apr_day_snames[7][4];
 typedef apr_int64_t apr_time_t;
 
 /* intervals for I/O timeouts, in microseconds */
-typedef apr_int32_t apr_interval_time_t;
+typedef apr_int64_t apr_interval_time_t;
+typedef apr_int32_t apr_short_interval_time_t;
 
 #ifdef WIN32
 #define APR_USEC_PER_SEC ((LONGLONG) 1000000)
