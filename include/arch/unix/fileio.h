@@ -109,7 +109,7 @@ struct ap_file_t {
     int oflags;
     int eof_hit;
     int pipe;
-    int timeout;
+    ap_interval_time_t timeout;
     int buffered;
     int ungetchar;    /* Last char provided by an unget op. (-1 = no char)*/
 
@@ -120,7 +120,7 @@ struct ap_file_t {
     int direction;            /* buffer being used for 0 = read, 1 = write */
     unsigned long filePtr;    /* position in file of handle */
 #if APR_HAS_THREADS
-    ap_lock_t *thlock;
+    struct ap_lock_t *thlock;
 #endif
 };
 

@@ -79,6 +79,7 @@ typedef enum {APR_NOFILE, APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK,
 #define APR_EXCL       64          /* Open should fail if APR_CREATE and file
 				    exists. */
 #define APR_DELONCLOSE 256         /* Delete the file after close */
+#define APR_BUFFERED   512         /* Buffered I/O */
 
 /* flags for ap_seek */
 #define APR_SET SEEK_SET
@@ -422,7 +423,7 @@ ap_status_t ap_create_namedpipe(char *filename, ap_fileperms_t perm,
  * arg 3) The timeout value in seconds.  Values < 0 mean wait forever, 0
  *        means do not wait at all.
  */
-ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout);
+ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_block_pipe(ap_file_t *thepipe)

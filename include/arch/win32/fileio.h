@@ -110,7 +110,7 @@ struct ap_file_t {
     ap_time_t mtime;
     ap_time_t ctime;
     int pipe;
-    int timeout;
+    ap_interval_time_t timeout;
 };
 
 struct ap_dir_t {
