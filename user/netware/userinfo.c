@@ -132,5 +132,5 @@ APR_DECLARE(apr_status_t) apr_current_userid(apr_uid_t *uid,
 /* deprecated */
 APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, apr_pool_t *p)
 {
-    return apr_uid_name_get(username, uid, p);
+    return apr_uid_name_get(username, userid, p);
 }
