@@ -244,9 +244,9 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
  * @param len The size of the buffer
  * @param format The format string
  * @param ... The arguments to use to fill out the format string.
- * @deffunc int apr_snprintf(char *buf, size_t len, const char *format, ...)
+ * @deffunc int apr_snprintf(char *buf, apr_size_t len, const char *format, ...)
  */
-APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, size_t len,
+APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, apr_size_t len,
                                      const char *format, ...)
         __attribute__((format(printf,3,4)));
 
@@ -257,9 +257,9 @@ APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, size_t len,
  * @param len The size of the buffer
  * @param format The format string
  * @param ap The arguments to use to fill out the format string.
- * @deffunc int apr_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
+ * @deffunc int apr_vsnprintf(char *buf, apr_size_t len, const char *format, va_list ap)
  */
-APR_DECLARE(int) apr_vsnprintf(char *buf, size_t len, const char *format,
+APR_DECLARE(int) apr_vsnprintf(char *buf, apr_size_t len, const char *format,
                                va_list ap);
 
 #ifdef __cplusplus

@@ -221,7 +221,8 @@ APR_DECLARE(char *) apr_array_pstrcat(apr_pool_t *p,
 				     const char sep)
 {
     char *cp, *res, **strpp;
-    int i, len;
+    apr_size_t len;
+    int i;
 
     if (arr->nelts <= 0 || arr->elts == NULL) {    /* Empty table? */
         return (char *) apr_pcalloc(p, 1);
