@@ -102,7 +102,20 @@ AC_ISC_POSIX
 AC_MINIX
 
 APR_EBCDIC
- 
+
+dnl get our version information
+APR_MAJOR_VERSION="`$apr_builders/get-version.sh major $apr_srcdir/include`"
+APR_DOTTED_VERSION="`$apr_builders/get-version.sh all $apr_srcdir/include`"
+
+dnl this one will go into apr-config.in
+AC_SUBST(APR_DOTTED_VERSION)
+
+echo "APR Version: ${APR_DOTTED_VERSION}"
+
+dnl this is our library name
+APR_LIBNAME="libapr-${APR_MAJOR_VERSION}"
+AC_SUBST(APR_LIBNAME)
+
 dnl prep libtool
 dnl
 echo "performing libtool configuration..."
@@ -1830,7 +1843,6 @@ test -d $dir || $MKDIR $dir
 AC_OUTPUT([
 	$MAKEFILE1 $MAKEFILE2 $MAKEFILE3
 	include/apr.h
-	APRVARS
 	build/rules.mk
 	apr-config
 ],[

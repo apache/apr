@@ -75,6 +75,8 @@ SHLIBPATH_VAR="@shlibpath_var@"
 APR_SOURCE_DIR="@apr_srcdir@"
 APR_SO_EXT="@so_ext@"
 APR_LIB_TARGET="@export_lib_target@"
+APR_DOTTED_VERSION="@APR_DOTTED_VERSION@"
+APR_LIBNAME="@APR_LIBNAME@"
 
 show_usage()
 {
@@ -96,6 +98,7 @@ Known values for OPTION are:
   --apr-so-ext      print the extensions of shared objects on this platform
   --apr-lib-target  print the libtool target information
   --apr-libtool     print the path to APR's libtool
+  --version         print the APR's version as a dotted triple
   --help            print this help
 
 When linking with libtool, an application should do something like:
@@ -106,7 +109,6 @@ or when linking directly:
 An application should use the results of --cflags, --cppflags, --includes,
 and --ldflags in their build process.
 EOF
-#' close a quote from above to make emacs happy
 }
 
 if test $# -eq 0; then
@@ -130,9 +132,9 @@ else
 fi
 
 if test "$location" = "installed"; then
-    LA_FILE="$libdir/libapr.la"
+    LA_FILE="$libdir/${APR_LIBNAME}.la"
 else
-    LA_FILE="$thisdir/libapr.la"
+    LA_FILE="$thisdir/${APR_LIBNAME}.la"
 fi
 
 flags=""
@@ -176,6 +178,10 @@ while test $# -gt 0; do
     ;;
     --srcdir)
     echo $APR_SOURCE_DIR
+    exit 0
+    ;;
+    --version)
+    echo $APR_DOTTED_VERSION
     exit 0
     ;;
     --link-ld)
