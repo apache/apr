@@ -442,7 +442,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
         }
     }
 
-    for (k = 0; k < overlay->max; k++) {
+    for (k = 0; k <= overlay->max; k++) {
         for (iter = overlay->array[k]; iter; iter = iter->next) {
             i = iter->hash & res->max;
             for (ent = res->array[i]; ent; ent = ent->next) {
