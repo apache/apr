@@ -127,9 +127,11 @@
 #define APR_HAVE_STDLIB_H        @stdlibh@
 #define APR_HAVE_STRING_H        @stringh@
 #define APR_HAVE_STRINGS_H       @stringsh@
+#define APR_HAVE_SYS_IOCTL_H     @sys_ioctlh@
 #define APR_HAVE_SYS_SENDFILE_H  @sys_sendfileh@
 #define APR_HAVE_SYS_SIGNAL_H    @sys_signalh@
 #define APR_HAVE_SYS_SOCKET_H    @sys_socketh@
+#define APR_HAVE_SYS_SOCKIO_H    @sys_sockioh@
 #define APR_HAVE_SYS_SYSLIMITS_H @sys_syslimitsh@
 #define APR_HAVE_SYS_TIME_H      @sys_timeh@
 #define APR_HAVE_SYS_TYPES_H     @sys_typesh@
