@@ -136,6 +136,9 @@ changequote([, ])dnl
   done
   ])
 
+  # autoconf doesn't add --silent to ac_configure_args; explicitly pass it
+  test "x$silent" = "xyes" && apr_configure_args="$apr_configure_args --silent"
+
   dnl The eval makes quoting arguments work - specifically $2 where the
   dnl quoting mechanisms used is "" rather than [].
   dnl
@@ -185,8 +188,10 @@ else
     $1="$apr_ste_save_$1"
   fi
 fi
-echo "  restoring $1 to \"$$1\""
-echo "  setting $2$1 to \"$$2$1\""
+if test "x$silent" != "xyes"; then
+  echo "  restoring $1 to \"$$1\""
+  echo "  setting $2$1 to \"$$2$1\""
+fi
 AC_SUBST($2$1)
 ])dnl
 
@@ -197,7 +202,7 @@ dnl  Set variable iff it's currently null
 dnl
 AC_DEFUN(APR_SETIFNULL,[
   if test -z "$$1"; then
-    echo "  setting $1 to \"$2\""
+    test "x$silent" != "xyes" && echo "  setting $1 to \"$2\""
     $1="$2"
   fi
 ])dnl
@@ -208,7 +213,7 @@ dnl
 dnl  Set variable no matter what
 dnl
 AC_DEFUN(APR_SETVAR,[
-  echo "  forcing $1 to \"$2\""
+  test "x$silent" != "xyes" && echo "  forcing $1 to \"$2\""
   $1="$2"
 ])dnl
 
@@ -219,7 +224,7 @@ dnl  Add value to variable
 dnl
 AC_DEFUN(APR_ADDTO,[
   if test "x$$1" = "x"; then
-    echo "  setting $1 to \"$2\""
+    test "x$silent" != "xyes" && echo "  setting $1 to \"$2\""
     $1="$2"
   else
     apr_addto_bugger="$2"
@@ -232,7 +237,7 @@ AC_DEFUN(APR_ADDTO,[
         fi
       done
       if test $apr_addto_duplicate = "0"; then
-        echo "  adding \"$i\" to $1"
+        test "x$silent" != "xyes" && echo "  adding \"$i\" to $1"
         $1="$$1 $i"
       fi
     done
@@ -246,7 +251,7 @@ dnl Remove a value from a variable
 dnl
 AC_DEFUN(APR_REMOVEFROM,[
   if test "x$$1" = "x$2"; then
-    echo "  nulling $1"
+    test "x$silent" != "xyes" && echo "  nulling $1"
     $1=""
   else
     apr_new_bugger=""
@@ -259,7 +264,7 @@ AC_DEFUN(APR_REMOVEFROM,[
       fi
     done
     if test $apr_removed = "1"; then
-      echo "  removed \"$2\" from $1"
+      test "x$silent" != "xyes" && echo "  removed \"$2\" from $1"
       $1=$apr_new_bugger
     fi
   fi
