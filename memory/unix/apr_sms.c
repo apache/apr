@@ -467,18 +467,17 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
     pms = sms->parent;
     
     /* Remove the memory system from the parent memory systems child list */
-    if (pms->sms_lock)
-        apr_lock_acquire(pms->sms_lock);
+    if (pms) {
+        if (pms->sms_lock)
+            apr_lock_acquire(pms->sms_lock);
         
-    if (sms->sibling)
-        sms->sibling->ref = sms->ref;
+        if ((*sms->ref = sms->sibling) != NULL)
+            sms->sibling->ref = sms->ref;
 
-    if (sms->ref)
-        *sms->ref = sms->sibling;
-
-    if (pms->sms_lock)
-        apr_lock_release(pms->sms_lock);
-        
+        if (pms->sms_lock)
+            apr_lock_release(pms->sms_lock);
+    }
+    
     /* Call the pre-destroy if present */
     if (sms->pre_destroy_fn)
         sms->pre_destroy_fn(sms);
@@ -494,16 +493,16 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
         return sms->destroy_fn(sms);
 
     /* 2 - If we don't have a parent, free using ourselves */
-    if (!sms->parent)
+    if (!pms)
         return sms->free_fn(sms, sms);
 
     /* 3 - If we do have a parent and it has a free function, use it */
-    if (sms->parent->free_fn)
+    if (pms->free_fn)
         return apr_sms_free(sms->parent, sms);
 
     /* 4 - Assume we are the child of a tracking memory system, do nothing */
 #ifdef APR_ASSERT_MEMORY
-    sms = sms->parent;
+    sms = pms;
     while (sms) {
         if (apr_sms_is_tracking(sms))
             return APR_SUCCESS;
