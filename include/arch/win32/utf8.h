@@ -56,6 +56,8 @@
 #define UTF8_H
 
 #include "apr.h"
+#include "apr_lib.h"
+#include "apr_errno.h"
 
 /* If we ever support anything more exciting than char... this could move.
  */
