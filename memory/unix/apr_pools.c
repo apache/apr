@@ -983,13 +983,9 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
          return APR_ENOMEM;
     }
 
+    memset(pool, 0, SIZEOF_POOL_T);
+    
     pool->abort_fn = abort_fn;
-    pool->child = NULL;
-    pool->cleanups = NULL;
-    pool->subprocesses = NULL;
-    pool->user_data = NULL;
-    pool->tag = NULL;
-    pool->nodes = NULL;
 
     if ((flags & APR_POOL_FNEW_ALLOCATOR) == APR_POOL_FNEW_ALLOCATOR) {
 #if APR_HAS_THREADS
@@ -1005,8 +1001,10 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
 #endif
     }
     else {
+#if APR_HAS_THREADS
         if (parent)
             pool->mutex = parent->mutex;
+#endif
     }
 
     if ((pool->parent = parent) != NULL) {
