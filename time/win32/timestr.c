@@ -155,6 +155,9 @@ APR_DECLARE(apr_status_t) apr_ctime(char *date_str, apr_time_t t)
     return APR_SUCCESS;
 }
 
+
+#ifndef _WIN32_WCE
+
 int win32_strftime_extra(char *s, size_t max, const char *format,
                          const struct tm *tm) {
    /* If the new format string is bigger than max, the result string won't fit
@@ -216,12 +219,18 @@ int win32_strftime_extra(char *s, size_t max, const char *format,
     }
     free(new_format);
     return return_value;
- }
+}
+
+#endif
+
 
 APR_DECLARE(apr_status_t) apr_strftime(char *s, apr_size_t *retsize,
                                        apr_size_t max, const char *format,
                                        apr_time_exp_t *xt)
 {
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
     struct tm tm;
     memset(&tm, 0, sizeof tm);
     tm.tm_sec  = xt->tm_sec;
@@ -235,4 +244,5 @@ APR_DECLARE(apr_status_t) apr_strftime(char *s, apr_size_t *retsize,
     tm.tm_isdst = xt->tm_isdst;
     (*retsize) = win32_strftime_extra(s, max, format, &tm);
     return APR_SUCCESS;
+#endif
 }
