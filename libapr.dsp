@@ -264,16 +264,11 @@ SOURCE=.\poll\unix\poll.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\network_io\unix\sa_common.c
-# PROP Exclude_From_Build 1
-# End Source File
-# Begin Source File
-
 SOURCE=.\network_io\win32\sendrecv.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\network_io\win32\sockaddr.c
+SOURCE=.\network_io\unix\sockaddr.c
 # End Source File
 # Begin Source File
 
