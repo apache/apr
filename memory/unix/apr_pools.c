@@ -230,8 +230,10 @@ union block_hdr {
  */
 static union block_hdr *block_freelist = NULL;
 
+#if APR_HAS_THREADS
 static ap_lock_t *alloc_mutex;
 static ap_lock_t *spawn_mutex;
+#endif
 
 #ifdef POOL_DEBUG
 static char *known_stack_point;
@@ -361,7 +363,9 @@ static void free_blocks(union block_hdr *blok)
 	return;			/* Sanity check --- freeing empty pool? */
     }
 
+#if APR_HAS_THREADS
     ap_lock(alloc_mutex);
+#endif
     old_free_list = block_freelist;
     block_freelist = blok;
 
@@ -409,7 +413,9 @@ static void free_blocks(union block_hdr *blok)
     num_blocks_freed += num_blocks;
 #endif /* ALLOC_STATS */
 
+#if APR_HAS_THREADS
     ap_unlock(alloc_mutex);
+#endif /* APR_HAS_THREADS */
 #endif /* ALLOC_USE_MALLOC */
 }
 
@@ -499,7 +505,9 @@ API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retc
 
     ap_block_alarms();
 
+#if APR_HAS_THREADS
     ap_lock(alloc_mutex);
+#endif
 
     blok = new_block(POOL_HDR_BYTES, apr_abort);
     new_pool = (ap_pool_t *) blok->h.first_avail;
@@ -521,7 +529,9 @@ API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retc
 	p->sub_pools = new_pool;
     }
 
+#if APR_HAS_THREADS
     ap_unlock(alloc_mutex);
+#endif
     ap_unblock_alarms();
 
     return new_pool;
@@ -565,6 +575,7 @@ ap_pool_t *ap_init_alloc(void)
     known_stack_point = &s;
     stack_var_init(&s);
 #endif
+#if APR_HAS_THREADS
     status1 = ap_create_lock(&alloc_mutex, APR_MUTEX, APR_INTRAPROCESS,
                    NULL, NULL);
     status2 = ap_create_lock(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
@@ -572,6 +583,7 @@ ap_pool_t *ap_init_alloc(void)
     if (status1 != APR_SUCCESS || status2 != APR_SUCCESS) {
         return NULL;
     }
+#endif
 
     permanent_pool = ap_make_sub_pool(NULL, NULL);
 #ifdef ALLOC_STATS
@@ -635,7 +647,9 @@ API_EXPORT(void) ap_destroy_real_pool(ap_pool_t *a)
 {
     ap_block_alarms();
     ap_clear_real_pool(a);
+#if APR_HAS_THREADS
     ap_lock(alloc_mutex);
+#endif
 
     if (a->parent) {
 	if (a->parent->sub_pools == a) {
@@ -648,8 +662,9 @@ API_EXPORT(void) ap_destroy_real_pool(ap_pool_t *a)
 	    a->sub_next->sub_prev = a->sub_prev;
 	}
     }
+#if APR_HAS_THREADS
     ap_unlock(alloc_mutex);
-
+#endif
     free_blocks(a->first);
     ap_unblock_alarms();
 }
@@ -855,7 +870,9 @@ API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
 
     ap_block_alarms();
 
+#if APR_HAS_THREADS
     ap_lock(alloc_mutex);
+#endif
 
     blok = new_block(size, c->apr_abort);
     a->last->h.next = blok;
@@ -864,7 +881,9 @@ API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
     blok->h.owning_pool = a;
 #endif
 
+#if APR_HAS_THREADS
     ap_unlock(alloc_mutex);
+#endif
 
     ap_unblock_alarms();
 
@@ -1000,9 +1019,13 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
     cur_len = strp - blok->h.first_avail;
 
     /* must try another blok */
+#if APR_HAS_THREADS
     ap_lock(alloc_mutex);
+#endif
     nblok = new_block(2 * cur_len, NULL);
+#if APR_HAS_THREADS
     ap_unlock(alloc_mutex);
+#endif
     memcpy(nblok->h.first_avail, blok->h.first_avail, cur_len);
     ps->vbuff.curpos = nblok->h.first_avail + cur_len;
     /* save a byte for the NUL terminator */
@@ -1011,10 +1034,14 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
     /* did we allocate the current blok? if so free it up */
     if (ps->got_a_new_block) {
 	debug_fill(blok->h.first_avail, blok->h.endp - blok->h.first_avail);
+#if APR_HAS_THREADS
         ap_lock(alloc_mutex);
+#endif
 	blok->h.next = block_freelist;
 	block_freelist = blok;
+#if APR_HAS_THREADS
         ap_unlock(alloc_mutex);
+#endif
     }
     ps->blok = nblok;
     ps->got_a_new_block = 1;
