@@ -75,17 +75,17 @@ typedef enum {
  * @{
  */
 
-#define APR_USETID      0x0800 /**< Set user id */
+#define APR_USETID      0x8000 /**< Set user id */
 #define APR_UREAD       0x0400 /**< Read by user */
 #define APR_UWRITE      0x0200 /**< Write by user */
 #define APR_UEXECUTE    0x0100 /**< Execute by user */
 
-#define APR_GSETID      0x0080 /**< Set group id */
+#define APR_GSETID      0x4000 /**< Set group id */
 #define APR_GREAD       0x0040 /**< Read by group */
 #define APR_GWRITE      0x0020 /**< Write by group */
 #define APR_GEXECUTE    0x0010 /**< Execute by group */
 
-#define APR_WSTICKY     0x0008 /**< Sticky bit */
+#define APR_WSTICKY     0x2000 /**< Sticky bit */
 #define APR_WREAD       0x0004 /**< Read by others */
 #define APR_WWRITE      0x0002 /**< Write by others */
 #define APR_WEXECUTE    0x0001 /**< Execute by others */
