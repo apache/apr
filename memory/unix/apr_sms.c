@@ -609,3 +609,7 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *mem_sys,
     return rv;
 }
 
+APR_DECLARE(const char*) apr_sms_identity(apr_sms_t *mem_sys)
+{
+    return mem_sys->identity;
+}

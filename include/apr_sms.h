@@ -232,6 +232,13 @@ APR_DECLARE(apr_status_t) apr_sms_unlock(apr_sms_t *mem_sys);
  */
 APR_DECLARE(apr_status_t) apr_sms_is_ancestor(apr_sms_t *a, apr_sms_t *b);
 
+/** 
+ * Get the memory_system identity
+ * @param mem_sys The memory system to use
+ * @deffunc const char * apr_sms_identity(apr_sms_t *mem_sys);
+ */
+APR_DECLARE(const char *) apr_sms_identity(apr_sms_t *mem_sys);
+
 /*
  * memory system cleanup management functions
  */
