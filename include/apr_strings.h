@@ -220,6 +220,20 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
                                                char ***argv_out,
                                                apr_pool_t *token_context);
 
+/**
+ * Split a string into separate '\0'-terminated tokens.  The tokens are 
+ * delimited in the string by one or more characters from the sep
+ * argument.
+ * @param str The string to separate; this should be specified on the
+ *            first call to apr_strtok() for a given string, and NULL
+ *            on subsequent calls.
+ * @param sep The set of delimiters
+ * @param last Internal state saved by apr_strtok() between calls.
+ * @return The next token from the string
+ * @deffunc char *apr_strtok(char *str, const char *sep, char **last)
+ */
+APR_DECLARE(char *) apr_strtok(char *str, const char *sep, char **last);
+
 /*
  * These are snprintf implementations based on apr_vformatter().
  *
