@@ -85,10 +85,14 @@ struct apr_ipsubnet_t {
 #endif
 };
 
+#ifndef NETWARE
 #ifdef HAVE_SET_H_ERRNO
 #define SET_H_ERRNO(newval) set_h_errno(newval)
 #else
 #define SET_H_ERRNO(newval) h_errno = (newval)
+#endif
+#else
+#define SET_H_ERRNO(newval)
 #endif
 
 #if APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
