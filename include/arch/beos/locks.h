@@ -69,8 +69,18 @@ struct apr_lock_t {
     apr_os_thread_t owner;
     int owner_ref;
 
-    sem_id sem;
-    int32  ben;
+    /* Our lock :) */
+    sem_id Lock;
+    int32  LockCount;
+
+    /* Read/Write lock stuff */
+    sem_id Read;
+    int32  ReadCount;
+    sem_id Write;
+    int32  WriteCount;
+    int32  Nested;
+
+    thread_id writer;
 };
 
 #endif  /* LOCKS_H */

@@ -52,26 +52,56 @@
  * <http://www.apache.org/>.
  */
 
+/*Read/Write locking implementation based on the MultiLock code from
+ * Stephen Beaulieu <hippo@be.com>
+ */
+ 
 #include "beos/locks.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
 
+#define BIG_NUM 100000
 
-/* At present we only have one implementation, so here it is :) */
 static apr_status_t _lock_cleanup(void * data)
 {
     apr_lock_t *lock = (apr_lock_t*)data;
-    if (lock->ben != 0) {
+    if (lock->LockCount != 0) {
         /* we're still locked... */
-    	while (atomic_add(&lock->ben , -1) > 1){
+    	while (atomic_add(&lock->LockCount , -1) > 1){
     	    /* OK we had more than one person waiting on the lock so 
     	     * the sem is also locked. Release it until we have no more
     	     * locks left.
     	     */
-            release_sem (lock->sem);
+            release_sem (lock->Lock);
     	}
     }
-    delete_sem(lock->sem);
+    delete_sem(lock->Lock);
+    return APR_SUCCESS;
+}    
+
+static apr_status_t _lock_rw_cleanup(void * data)
+{
+    apr_lock_t *lock = (apr_lock_t*)data;
+
+    if (lock->ReadCount != 0) {
+    	while (atomic_add(&lock->ReadCount , -1) > 1){
+            release_sem (lock->Read);
+    	}
+    }
+    if (lock->WriteCount != 0) {
+    	while (atomic_add(&lock->WriteCount , -1) > 1){
+            release_sem (lock->Write);
+    	}
+    }
+    if (lock->LockCount != 0) {
+    	while (atomic_add(&lock->LockCount , -1) > 1){
+            release_sem (lock->Lock);
+    	}
+    }
+    
+    delete_sem(lock->Read);
+    delete_sem(lock->Write);
+    delete_sem(lock->Lock);
     return APR_SUCCESS;
 }    
 
@@ -79,13 +109,33 @@ static apr_status_t _create_lock(apr_lock_t *new)
 {
     int32 stat;
     
-    if ((stat = create_sem(0, "apr_lock")) < B_NO_ERROR) {
+    if ((stat = create_sem(0, "APR_Lock")) < B_NO_ERROR) {
         _lock_cleanup(new);
         return stat;
     }
-    new->ben = 0;
-    new->sem = stat;
+    new->LockCount = 0;
+    new->Lock = stat;
     apr_pool_cleanup_register(new->pool, (void *)new, _lock_cleanup,
+                              apr_pool_cleanup_null);
+    return APR_SUCCESS;
+}
+
+static apr_status_t _create_rw_lock(apr_lock_t *new)
+{
+    /* we need to make 3 locks... */
+    new->ReadCount = 0;
+    new->WriteCount = 0;
+    new->LockCount = 0;
+    new->Read  = create_sem(0, "APR_ReadLock");
+    new->Write = create_sem(0, "APR_WriteLock");
+    new->Lock  = create_sem(0, "APR_Lock");
+    
+    if (new->Lock < 0 || new->Read < 0 || new->Write < 0) {
+        _lock_rw_cleanup(new);
+        return -1;
+    }
+
+    apr_pool_cleanup_register(new->pool, (void *)new, _lock_rw_cleanup,
                               apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
@@ -94,9 +144,9 @@ static apr_status_t _lock(apr_lock_t *lock)
 {
     int32 stat;
     
-	if (atomic_add(&lock->ben, 1) > 0) {
-		if ((stat = acquire_sem(lock->sem)) < B_NO_ERROR) {
-		    atomic_add(&lock->ben, -1);
+	if (atomic_add(&lock->LockCount, 1) > 0) {
+		if ((stat = acquire_sem(lock->Lock)) < B_NO_ERROR) {
+		    atomic_add(&lock->LockCount, -1);
 		    return stat;
 		}
 	}
@@ -107,13 +157,110 @@ static apr_status_t _unlock(apr_lock_t *lock)
 {
     int32 stat;
     
-	if (atomic_add(&lock->ben, -1) > 1) {
-        if ((stat = release_sem(lock->sem)) < B_NO_ERROR) {
-            atomic_add(&lock->ben, 1);
+	if (atomic_add(&lock->LockCount, -1) > 1) {
+        if ((stat = release_sem(lock->Lock)) < B_NO_ERROR) {
+            atomic_add(&lock->LockCount, 1);
             return stat;
         }
     }
     return APR_SUCCESS;
+}
+
+static apr_status_t _read_lock(apr_lock_t *lock)
+{
+    int32 rv = APR_SUCCESS;
+
+    if (find_thread(NULL) == lock->writer) {
+        /* we're the writer - no problem */
+        lock->Nested++;
+    } else {
+        /* we're not the writer */
+        int32 r = atomic_add(&lock->ReadCount, 1);
+        if (r < 0) {
+            /* Oh dear, writer holds lock, wait for sem */
+            rv = acquire_sem_etc(lock->Read, 1, B_DO_NOT_RESCHEDULE,
+                                 B_INFINITE_TIMEOUT);
+        }
+    }
+
+    return rv;
+}
+
+static apr_status_t _write_lock(apr_lock_t *lock)
+{
+    int rv = APR_SUCCESS;
+
+    if (find_thread(NULL) == lock->writer) {
+        lock->Nested++;
+    } else {
+        /* we're not the writer... */
+        if (atomic_add(&lock->LockCount, 1) >= 1) {
+            /* we're locked - acquire the sem */
+            rv = acquire_sem_etc(lock->Lock, 1, B_DO_NOT_RESCHEDULE,
+                                 B_INFINITE_TIMEOUT);
+        }
+        if (rv == APR_SUCCESS) {
+            /* decrement the ReadCount to a large -ve number so that
+             * we block on new readers...
+             */
+            int32 readers = atomic_add(&lock->ReadCount, -BIG_NUM);
+            if (readers > 0) {
+                /* readers are holding the lock */
+                rv = acquire_sem_etc(lock->Write, readers, B_DO_NOT_RESCHEDULE,
+                                     B_INFINITE_TIMEOUT);
+            }
+            if (rv == APR_SUCCESS)
+                lock->writer = find_thread(NULL);
+        }
+    }
+    
+    return rv;
+}
+
+
+static apr_status_t _read_unlock(apr_lock_t *lock)
+{
+    apr_status_t rv = APR_SUCCESS;
+    
+    /* we know we hold the lock, so don't check it :) */
+    if (find_thread(NULL) == lock->writer) {
+        /* we're recursively locked */
+        lock->Nested--;
+        return APR_SUCCESS;
+    }
+    /* OK so we need to release the sem if we have it :) */
+    if (atomic_add(&lock->ReadCount, -1) < 0) {
+        /* we have a writer waiting for the lock, so release it */
+        rv = release_sem_etc(lock->Write, 1, B_DO_NOT_RESCHEDULE);
+    }
+
+    return rv;
+}
+
+static apr_status_t _write_unlock(apr_lock_t *lock)
+{
+    apr_status_t rv = APR_SUCCESS;
+    int32 readers;
+    
+    /* we know we hold the lock, so don't check it :) */
+    if (lock->Nested > 1) {
+        /* we're recursively locked */
+        lock->Nested--;
+        return APR_SUCCESS;
+    }
+    /* OK so we need to release the sem if we have it :) */
+    readers = atomic_add(&lock->ReadCount, BIG_NUM) + BIG_NUM;
+    if (readers > 0) {
+        rv = release_sem_etc(lock->Read, readers, B_DO_NOT_RESCHEDULE);
+    }
+    if (rv == APR_SUCCESS) {
+        lock->writer = -1;
+        if (atomic_add(&lock->LockCount, -1) > 1) {
+            rv = release_sem_etc(lock->Lock, 1, B_DO_NOT_RESCHEDULE);
+        }
+    }
+    
+    return rv;
 }
 
 static apr_status_t _destroy_lock(apr_lock_t *lock)
@@ -131,12 +278,8 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
                            apr_pool_t *pool)
 {
     apr_lock_t *new;
-    apr_status_t stat;
+    apr_status_t stat = APR_SUCCESS;
   
-    /* FIXME: Remove when read write locks implemented. */ 
-    if (type == APR_READWRITE)
-        return APR_ENOTIMPL; 
-
     new = (apr_lock_t *)apr_pcalloc(pool, sizeof(apr_lock_t));
     if (new == NULL){
         return APR_ENOMEM;
@@ -146,7 +289,13 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
     new->type  = type;
     new->scope = scope;
 
-    if ((stat = _create_lock(new)) != APR_SUCCESS)
+    if (type == APR_MUTEX) {
+        stat = _create_lock(new);
+    } else if (type == APR_READWRITE) {
+        stat = _create_rw_lock(new);
+    }
+            
+    if (stat != APR_SUCCESS)
         return stat;
 
     (*lock) = new;
@@ -189,11 +338,12 @@ apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e e)
         switch (e)
         {
         case APR_READER:
+            _read_lock(lock);
             break;
         case APR_WRITER:
+            _write_lock(lock);
             break;
         }
-        return APR_ENOTIMPL;
     }
 
     return APR_SUCCESS;
@@ -201,7 +351,7 @@ apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e e)
 
 apr_status_t apr_lock_release(apr_lock_t *lock)
 {
-    apr_status_t stat;
+    apr_status_t stat = APR_SUCCESS;
 
     if (lock->owner_ref > 0 && lock->owner == apr_os_thread_current()) {
         lock->owner_ref--;
@@ -212,13 +362,27 @@ apr_status_t apr_lock_release(apr_lock_t *lock)
     switch (lock->type)
     {
     case APR_MUTEX:
-        if ((stat = _unlock(lock)) != APR_SUCCESS)
-            return stat;
+        stat = _unlock(lock);
         break;
     case APR_READWRITE:
-        return APR_ENOTIMPL;
+        {
+            thread_id me = find_thread(NULL);
+            if (me == lock->writer)
+                stat = _write_unlock(lock);
+            else
+                stat = _read_unlock(lock);
+        }
+        /* if we don't hold the read or write lock then why are
+         * we calling release???
+         *
+         * Just return success.
+         */
+        break;
     }
 
+    if (stat != APR_SUCCESS)
+        return stat;
+    
     lock->owner = -1;
     lock->owner_ref = 0;
 
@@ -261,8 +425,8 @@ apr_status_t apr_lock_data_set(apr_lock_t *lock, void *data, const char *key,
 
 apr_status_t apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
 {
-    oslock->sem = lock->sem;
-    oslock->ben = lock->ben;
+    oslock->sem = lock->Lock;
+    oslock->ben = lock->LockCount;
     return APR_SUCCESS;
 }
 
@@ -276,8 +440,8 @@ apr_status_t apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock,
         (*lock) = (apr_lock_t *)apr_pcalloc(pool, sizeof(apr_lock_t));
         (*lock)->pool = pool;
     }
-    (*lock)->sem = thelock->sem;
-    (*lock)->ben = thelock->ben;
+    (*lock)->Lock = thelock->sem;
+    (*lock)->LockCount = thelock->ben;
 
     return APR_SUCCESS;
 }
