@@ -86,9 +86,6 @@ static apr_status_t dir_cleanup(void *thedir)
 APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
                                        apr_pool_t *cont)
 {
-#if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-#endif
     int len = strlen(dirname);
     (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
     /* Leave room here to add and pop the '*' wildcard for FindFirstFile 
@@ -103,7 +100,7 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
     (*new)->dirname[len] = '\0';
 
 #if APR_HAS_UNICODE_FS
-    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT)
+    if (apr_os_level >= APR_WIN_NT)
     {
         /* Create a buffer for the longest file name we will ever see 
          */
@@ -148,10 +145,9 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
      * we aren't reporting any files where their absolute paths are too long.
      */
 #if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
     apr_wchar_t wdirname[APR_PATH_MAX];
     apr_wchar_t *eos = NULL;
-    if (!apr_get_oslevel(thedir->cntxt, &os_level) && os_level >= APR_WIN_NT)
+    if (apr_os_level >= APR_WIN_NT)
     {
         if (thedir->dirhand == INVALID_HANDLE_VALUE) 
         {
@@ -224,14 +220,14 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         /* Go back and get more_info if we can't answer the whole inquiry
          */
 #if APR_HAS_UNICODE_FS
-        if (os_level >= APR_WIN_NT) {
+        if (apr_os_level >= APR_WIN_NT) {
             /* Almost all our work is done.  Tack on the wide file name
              * to the end of the wdirname (already / delimited)
              */
             if (!eos)
                 eos = wcschr(wdirname, '\0');
             wcscpy(eos, thedir->w.entry->cFileName);
-            rv = more_finfo(finfo, wdirname, wanted, MORE_OF_WFSPEC, os_level);
+            rv = more_finfo(finfo, wdirname, wanted, MORE_OF_WFSPEC);
             eos[0] = '\0';
             return rv;
         }
@@ -249,7 +245,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                 dirlen = sizeof(fspec) - 1;
             apr_cpystrn(fspec, thedir->dirname, sizeof(fspec));
             apr_cpystrn(fspec + dirlen, fname, sizeof(fspec) - dirlen);
-            return more_finfo(finfo, fspec, wanted, MORE_OF_FSPEC, os_level);
+            return more_finfo(finfo, fspec, wanted, MORE_OF_FSPEC);
         }
     }
 
@@ -268,8 +264,7 @@ APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm,
                                        apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
+    if (apr_os_level >= APR_WIN_NT) 
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
@@ -292,8 +287,7 @@ APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm,
 APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
+    if (apr_os_level >= APR_WIN_NT) 
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
