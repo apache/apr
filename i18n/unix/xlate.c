@@ -67,7 +67,7 @@
 #ifdef HAVE_STDDEF_H
 #include <stddef.h> /* for NULL */
 #endif
-#ifdef HAVE_STRINGS_H
+#if APR_HAVE_STRINGS_H
 #include <strings.h>
 #endif
 #ifdef HAVE_LANGINFO_H
