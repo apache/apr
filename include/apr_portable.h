@@ -81,7 +81,7 @@ extern "C" {
 #if APR_HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
-#ifdef HAVE_STRUCT_UNION_SEMUN
+#if APR_HAVE_UNION_SEMUN
 #include <sys/sem.h>
 #endif
 

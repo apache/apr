@@ -43,6 +43,7 @@
 #define APR_HAVE_IN_ADDR        @have_in_addr@
 #define APR_HAVE_INET_ADDR      @inet_addr@
 #define APR_HAVE_INET_NETWORK   @inet_network@
+#define APR_HAVE_UNION_SEMUN    @have_union_semun@
 
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
