@@ -424,7 +424,7 @@ SOURCE=.\include\arch\unix\i18n.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\unix\inherit.h
+SOURCE=.\include\arch\win32\inherit.h
 # End Source File
 # Begin Source File
 
