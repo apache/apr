@@ -194,16 +194,11 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
 #if APR_HAS_UNICODE_FS
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT)
     {
-        
-        apr_wchar_t wname[MAX_PATH];
-        int len = MAX_PATH;
-        int lremains = strlen(fname) + 1;
-        apr_status_t rv;
-        if ((rv = conv_utf8_to_ucs2(fname, &lremains, wname, &len)))
-            return rv;
-        if (lremains)
-            return APR_ENAMETOOLONG;
-        if (!GetFileAttributesExW(wname, GetFileExInfoStandard, 
+        apr_wchar_t *wfname;
+        wfname = utf8_to_unicode_path(fname, cont);
+        if (!wfname)
+            return APR_ENAMETOOLONG;        
+        if (!GetFileAttributesExW(wfname, GetFileExInfoStandard, 
                                   &FileInformation)) {
             return apr_get_os_error();
         }

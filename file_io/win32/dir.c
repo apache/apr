@@ -89,24 +89,29 @@ apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT)
     {
-        apr_status_t rv;
-        int lremains = len;
-        int dremains = len;
+        /* While there is now a generic accessor to convert to Unicode,
+         * we do something special here to provide a few extra wchars
+         * for the /* (really \*) suffix
+         */
+        int srcremains = len;
+        int dirremains = len;
+        apr_wchar_t *wch;
         (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
         (*new)->w.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
-        (*new)->w.dirname = apr_palloc(cont, dremains + 7);
-        wcscpy((*new)->w.dirname, L"//?/");
-        if ((rv = conv_utf8_to_ucs2(dirname, &lremains,
-                                     (*new)->w.dirname + 4, &dremains)))
-            return rv;
-        if (lremains)
+        (*new)->w.dirname = apr_palloc(cont, dirremains + 7);
+        wcscpy((*new)->w.dirname, L"\\\\?\\");
+        if (conv_utf8_to_ucs2(dirname, &srcremains,
+                              (*new)->w.dirname + 4, &dirremains) || srcremains)
             return APR_ENAMETOOLONG;
-        len = len + 4 -  dremains;
+        len = 4 + len -  dirremains;
         if (len && (*new)->w.dirname[len - 1] != '/') {
     	    (*new)->w.dirname[len++] = '/';
         }
         (*new)->w.dirname[len++] = '*';
         (*new)->w.dirname[len] = '\0';
+        for (wch = (*new)->w.dirname + 4; *wch; ++wch);
+            if (*wch == L'/')
+                *wch = L'\\';
     }
     else
 #endif
@@ -238,14 +243,14 @@ apr_status_t apr_get_dir_filename(char **new, apr_dir_t *thedir)
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(thedir->cntxt, &os_level) && os_level >= APR_WIN_NT)
     {
-        apr_status_t rv;
-        int len = wcslen(thedir->w.entry->cFileName) + 1;
-        int dremains = MAX_PATH;
-        (*new) = apr_palloc(thedir->cntxt, len * 2);
-        if ((rv = conv_ucs2_to_utf8(thedir->w.entry->cFileName, &len,
-                                    *new, &dremains)))
-            return rv;
-        if (len)
+        /* The usual Unicode to char* accessor doesn't work here.  Since we don't
+         * have a full path, and don't need to transpose slashes, we don't need it
+         */
+        int entremains = wcslen(thedir->w.entry->cFileName) + 1;
+        int retremains = (entremains - 1) * 3 + 1;
+        (*new) = apr_palloc(thedir->cntxt, retremains);
+        if (conv_ucs2_to_utf8(thedir->w.entry->cFileName, &entremains,
+                              *new, &retremains) || entremains)
             return APR_ENAMETOOLONG;
     }
     else
