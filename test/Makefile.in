@@ -91,37 +91,48 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-ab_apr.o: ab_apr.c ../include/apr_network_io.h \
- ../include/apr_general.h $(INCDIR)/apr_config.h \
- ../include/apr_errno.h ../include/apr_file_io.h
-client.o: client.c ../include/apr_network_io.h \
- ../include/apr_general.h $(INCDIR)/apr_config.h \
- ../include/apr_errno.h
-server.o: server.c ../include/apr_network_io.h \
- ../include/apr_general.h $(INCDIR)/apr_config.h \
- ../include/apr_errno.h
-testargs.o: testargs.c ../include/apr_file_io.h \
- ../include/apr_general.h $(INCDIR)/apr_config.h \
- ../include/apr_errno.h $(INCDIR)/apr_lib.h $(INCDIR)/hsregex.h
-testfile.o: testfile.c ../include/apr_file_io.h \
- ../include/apr_general.h $(INCDIR)/apr_config.h \
- ../include/apr_errno.h $(INCDIR)/apr_lib.h $(INCDIR)/hsregex.h
-testproc.o: testproc.c ../include/apr_thread_proc.h \
- ../include/apr_file_io.h ../include/apr_general.h \
- $(INCDIR)/apr_config.h ../include/apr_errno.h \
- $(INCDIR)/apr_win.h $(INCDIR)/apr_lib.h $(INCDIR)/hsregex.h
-testsig.o: testsig.c ../include/apr_thread_proc.h \
- ../include/apr_file_io.h ../include/apr_general.h \
- $(INCDIR)/apr_config.h ../include/apr_errno.h \
- $(INCDIR)/apr_win.h $(INCDIR)/apr_lib.h $(INCDIR)/hsregex.h
-testsock.o: testsock.c ../include/apr_thread_proc.h \
- ../include/apr_file_io.h ../include/apr_general.h \
- $(INCDIR)/apr_config.h ../include/apr_errno.h \
- $(INCDIR)/apr_win.h $(INCDIR)/apr_lib.h $(INCDIR)/hsregex.h
-testthread.o: testthread.c ../include/apr_thread_proc.h \
- ../include/apr_file_io.h ../include/apr_general.h \
- $(INCDIR)/apr_config.h ../include/apr_errno.h \
- $(INCDIR)/apr_win.h ../include/apr_lock.h
-testtime.o: testtime.c ../include/apr_time.h \
- ../include/apr_general.h $(INCDIR)/apr_config.h \
- ../include/apr_errno.h
+ab_apr.o: ab_apr.c $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_config.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h
+abc.o: abc.c $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_config.h $(INCDIR)/apr_errno.h
+client.o: client.c $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_config.h \
+ $(INCDIR)/apr_errno.h
+htdigest.o: htdigest.c $(INCDIR)/apr_lib.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_config.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/hsregex.h $(INCDIR)/apr_md5.h
+htpasswd.o: htpasswd.c $(INCDIR)/apr_signal.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_config.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_lib.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/hsregex.h
+logresolve.o: logresolve.c $(INCDIR)/apr_config.h
+rotatelogs.o: rotatelogs.c $(INCDIR)/apr_config.h
+server.o: server.c $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_config.h \
+ $(INCDIR)/apr_errno.h
+suexec.o: suexec.c $(INCDIR)/apr_config.h suexec.h
+testargs.o: testargs.c $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_config.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_lib.h $(INCDIR)/hsregex.h
+testfile.o: testfile.c $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_config.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_lib.h $(INCDIR)/hsregex.h
+testproc.o: testproc.c $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_config.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_win.h \
+ $(INCDIR)/apr_lib.h $(INCDIR)/hsregex.h
+testsig.o: testsig.c $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_config.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_win.h \
+ $(INCDIR)/apr_lib.h $(INCDIR)/hsregex.h
+testsock.o: testsock.c $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_config.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_win.h \
+ $(INCDIR)/apr_lib.h $(INCDIR)/hsregex.h
+testthread.o: testthread.c $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_config.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_win.h \
+ $(INCDIR)/apr_lock.h
+testtime.o: testtime.c $(INCDIR)/apr_time.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_config.h $(INCDIR)/apr_errno.h
