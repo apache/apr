@@ -66,11 +66,9 @@ dnl  Preload various ENV/makefile paramsm such as CC, CFLAGS, etc
 dnl  based on outside knowledge
 dnl
 AC_DEFUN(APR_PRELOAD, [
-PLAT=`$ac_config_guess`
-PLAT=`$ac_config_sub $PLAT`
-echo "Applying hints file rules for $PLAT"
+echo "Applying hints file rules for $host"
 
-case "$PLAT" in
+case "$host" in
     *mint)
 	APR_SETIFNULL(CFLAGS, [-DMINT])
 	APR_SETIFNULL(LIBS, [-lportlib -lsocket])

@@ -9,14 +9,23 @@ dnl #
 AC_PREREQ(2.12)dnl
 AC_REVISION($1.0$)dnl
 
+dnl #   autoconf initialization
+AC_INIT(README)
+AC_CONFIG_HEADER(mm_conf.h)
+AC_PREFIX_DEFAULT(/usr/local)
+
 dnl #   shtool bootstrap
 SHTOOL="\$(TOP)/shtool"
 AC_SUBST(SHTOOL)
 ac_shtool="./shtool"
 T_MD=`$ac_shtool echo -n -e %B`
 T_ME=`$ac_shtool echo -n -e %b`
-PLATFORM=`${CONFIG_SHELL-/bin/sh} ./config.guess`
-PLATFORM=`${CONFIG_SHELL-/bin/sh} ./config.sub $PLATFORM`
+
+AC_CANONICAL_SYSTEM
+
+PLATFORM=$host
+echo "Platform = $host"
+
 MM_VERSION_STR="`$ac_shtool version -l c -d long mm_vers.c`"
 AC_SUBST(MM_VERSION_STR)
 
@@ -25,11 +34,6 @@ echo "Configuring ${T_MD}MM${T_ME} (Shared Memory Library), Version ${T_MD}${MM_
 echo "Copyright (c) 1999-2000 Ralf S. Engelschall, All Rights Reserved."
 echo "Platform: ${T_MD}${PLATFORM}${T_ME}"
 
-dnl #   autoconf initialization
-AC_INIT(README)
-AC_CONFIG_HEADER(mm_conf.h)
-AC_PREFIX_DEFAULT(/usr/local)
-
 dnl #   determine build mode
 AC_ARG_ENABLE(batch,dnl
 [  --enable-batch          build in batch mode (default=no)],
@@ -37,7 +41,7 @@ enable_batch="$enableval",
 if test ".$enable_batch" = .; then
     enable_batch=no
 fi
-)dnl
+)
 
 dnl #
 dnl #   determine build tools and parameters
@@ -145,7 +149,7 @@ esac
 AC_ARG_WITH(shm,dnl
 [  --with-shm=TYPE         force shared memory type: MMFILE MMZERO MMPOSX MMANON IPCSHM BEOS],
 AC_DECISION_FORCE(MM_SHMT_$withval)
-)dnl
+)
 AC_END_DECISION
 AC_DEFINE_UNQUOTED($ac_decision)
 
@@ -193,7 +197,7 @@ AC_IFALLYES(header:kernel/OS.h func:create_sem,
 AC_ARG_WITH(sem,dnl
 [  --with-sem=TYPE         force semaphore type: FLOCK FCNTL IPCSEM BEOS],
 AC_DECISION_FORCE(MM_SEMT_$withval)
-)dnl
+)
 AC_END_DECISION
 AC_DEFINE_UNQUOTED($ac_decision)
 
@@ -208,7 +212,7 @@ Makefile dnl
 mm-config dnl
 ,dnl
 chmod a+x mm-config
-)dnl
+)
 
 if test ".$enable_batch" != .yes; then
     echo ""

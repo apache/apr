@@ -43,13 +43,14 @@ AC_ARG_ENABLE(static,dnl
 [  --enable-static         build static libraries (default=yes)],
 enable_static="$enableval",
 enable_static=yes
-)dnl
+)
 AC_ARG_ENABLE(shared,dnl
 [  --enable-shared         build shared libraries (default=yes)],
 enable_shared="$enableval",
 enable_shared=yes
-)dnl
+)
 libtool_flags=''
+echo "Calling ltconfig with PLATFORM=$PLATFORM"
 test ".$silent"            = .yes && libtool_flags="$libtool_flags --silent"
 test ".$enable_static"     = .no  && libtool_flags="$libtool_flags --disable-static"
 test ".$enable_shared"     = .no  && libtool_flags="$libtool_flags --disable-shared"
@@ -61,7 +62,7 @@ $libtool_flags --no-verify ltmain.sh $PLATFORM ||\
 AC_MSG_ERROR([libtool configuration failed])
 LIBTOOL="\$(TOP)/libtool"
 AC_SUBST(LIBTOOL)
-])dnl
+])
 
 define(AC_CHECK_DEBUGGING,[dnl
 AC_MSG_CHECKING(for compilation debug mode)
@@ -94,7 +95,7 @@ case "$CFLAGS" in
                    sed -e 's/ -g / /g' -e 's/ -g$//' -e 's/^-g //g' -e 's/^-g$//'` ;;
 esac
 msg=disabled
-])dnl
+])
 AC_MSG_RESULT([$msg])
 ])
 
@@ -242,12 +243,13 @@ AC_SUBST(NM)
 
 define(AC_CHECK_MAXSEGSIZE,[dnl
 AC_MSG_CHECKING(for shared memory maximum segment size)
+AC_CACHE_VAL(ac_cv_maxsegsize,
+[
 OCFLAGS="$CFLAGS"
 case "$1" in
     MM_SHMT_MM*    ) CFLAGS="-DTEST_MMAP   $CFLAGS" ;;
     MM_SHMT_IPCSHM ) CFLAGS="-DTEST_SHMGET $CFLAGS" ;;
 esac
-cross_compile=no
 AC_TRY_RUN(
 changequote(<<, >>)dnl
 <<
@@ -371,9 +373,15 @@ int main(int argc, char *argv[])
 }
 >>
 changequote([, ])dnl
-,[
-MM_SHM_MAXSEGSIZE="`cat conftestval`"
-msg="$MM_SHM_MAXSEGSIZE"
+,[ac_cv_maxsegsize="`cat conftestval`"
+],
+ac_cv_maxsegsize=0
+,
+ac_cv_maxsegsize=0
+)
+CFLAGS="$OCFLAGS"
+])
+msg="$ac_cv_maxsegsize"
 if test $msg -eq 67108864; then
     msg="64MB (soft limit)"
 elif test $msg -gt 1048576; then
@@ -384,17 +392,10 @@ elif test $msg -gt 1024; then
     msg="`expr $msg / 1024`"
     msg="${msg}KB"
 else
-    MM_SHM_MAXSEGSIZE=0
+    ac_cv_maxsegsize=0
     msg=unknown
 fi
-],
-MM_SHM_MAXSEGSIZE=0
-msg=unknown
-,
-MM_SHM_MAXSEGSIZE=0
-msg=unknown
-)dnl
-CFLAGS="$OCFLAGS"
+MM_SHM_SEGSIZE=$ac_cv_maxsegsize
 test ".$msg" = .unknown && AC_MSG_ERROR([Unable to determine maximum shared memory segment size])
 AC_MSG_RESULT([$msg])
 AC_DEFINE_UNQUOTED(MM_SHM_MAXSEGSIZE, $MM_SHM_MAXSEGSIZE)
