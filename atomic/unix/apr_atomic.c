@@ -58,8 +58,6 @@
 
 #if defined(WIN32)
 
-#define apr_atomic_t LONG /* not used */
-
 APR_DECLARE(apr_status_t) apr_atomic_init(apr_pool_t *p)
 {
     return APR_SUCCESS;
@@ -132,8 +130,6 @@ APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint
 
 #include <machine/atomic.h>
 
-#define apr_atomic_t apr_uint32_t /* unused */
-
 APR_DECLARE(void) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
     atomic_add_int(mem, val);
@@ -162,8 +158,6 @@ APR_DECLARE(void) apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
 
 #if (defined(__linux__) || defined(__EMX__) || defined(__FreeBSD__)) \
         && defined(__i386__) && !APR_FORCE_ATOMIC_GENERIC
-
-/* #define apr_atomic_t apr_uint32_t UNUSED */
 
 APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem, 
                                            apr_uint32_t with,
