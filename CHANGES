@@ -7,6 +7,9 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) Add jlibtool - enabled with '--enable-experimental-libtool' option.
+     [Justin Erenkrantz]
+
   *) Add support for KQueue and sys_epoll to apr_pollset.  [Paul Querna]
 
   *) Support threading on FreeBSD 5.x where kern.osreldate >= 502102.
