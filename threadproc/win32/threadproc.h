@@ -60,7 +60,7 @@
 #ifndef THREAD_PROC_H
 #define THREAD_PROC_H
 
-#define SHELL_PATH "/bin/sh"
+#define SHELL_PATH "cmd.exe"
 
 struct thread_t {
     ap_context_t *cntxt;
