@@ -167,6 +167,13 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
     if ((*new)->socketdes < 0) {
         return errno;
     }
+#ifdef TPF
+    if ((*new)->socketdes == 0) { 
+        /* 0 is an invalid socket for TPF */
+        return APR_EINTR;
+    }
+#endif
+
     *(*new)->local_addr = *sock->local_addr;
 
     /* The above assignment just overwrote the pool entry. Setting the local_addr 
