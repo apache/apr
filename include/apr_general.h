@@ -172,10 +172,24 @@ void *memchr(const void *s, int c, size_t n);
 
 /**
  * Setup any APR internal data structures.  This MUST be the first function 
- * called for any APR program.
+ * called for any APR library.
  * @deffunc apr_status_t apr_initialize(void)
+ * @remark See apr_app_initialize if this is an application, rather than
+ * a library consumer of apr.
  */
 APR_DECLARE(apr_status_t) apr_initialize(void);
+
+/**
+ * Set up an application with normalized argc, argv (and optionally env) in
+ * order to deal with platform-specific oddities, such as Win32 services,
+ * code pages and signals.  This must be the first function called for any
+ * APR program.
+ * @deffunc apr_status_t apr_app_initialize(int *argc, char ***argv, char ***env)
+ * @remark See apr_initialize if this is a library consumer of apr.
+ * Otherwise, this call is identical to apr_initialize, and must be closed
+ * with a call to apr_terminate at the end of program execution.
+ */
+APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, char ***argv, char ***env);
 
 /**
  * Tear down any APR internal data structures which aren't torn down 
@@ -185,6 +199,8 @@ APR_DECLARE(apr_status_t) apr_initialize(void);
  *         atexit to ensure this is called.  When using APR from a language
  *         other than C that has problems with the calling convention, use
  *         apr_terminate2() instead.
+ * Otherwise, this call is identical to apr_app_initialize, and must be 
+ * closed with a call to apr_terminate at the end of program execution.
  */
 APR_DECLARE_NONSTD(void) apr_terminate(void);
 
@@ -198,16 +214,6 @@ APR_DECLARE_NONSTD(void) apr_terminate(void);
  *         while apr_terminate is recommended from c language applications.
  */
 APR_DECLARE(void) apr_terminate2(void);
-
-/**
- * Set up an application with normalized argc, argv (and optionally env) in
- * order to deal with platform-specific oddities, such as Win32 services,
- * code pages and signals.
- * @remark An APR program should invoke apr_app_main immediately following
- * apr_initialize, so it behaves properly as a service on Win32 with respect
- * to its Unicode (utf-8) code page, services and signals.
- */
-APR_DECLARE(apr_status_t) apr_app_main(int *argc, char ***argv, char ***env);
 
 /** @} */
 
