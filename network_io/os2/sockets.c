@@ -189,14 +189,16 @@ apr_status_t apr_close_socket(apr_socket_t *thesocket)
 
 
 
-apr_status_t apr_bind(apr_socket_t *sock)
+apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
     if (bind(sock->socketdes, 
-             (struct sockaddr *)&sock->local_addr->sa,
-             sock->local_addr->sa_len) == -1)
+             (struct sockaddr *)&sa->sa,
+             sa->sa_len) == -1)
         return APR_OS2_STATUS(sock_errno());
-    else
+    else {
+        sock->local_sa = sa;
         return APR_SUCCESS;
+    }
 }
 
 apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
