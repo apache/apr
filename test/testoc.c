@@ -64,7 +64,7 @@
 #include <unistd.h>
 #endif
 
-void ocmaint(int reason, void *data, int status)
+static void ocmaint(int reason, void *data, int status)
 {
     fprintf(stdout,"[CHILD]  Maintenance routine called....");
     fflush(stdout);
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 
     fprintf(stdout, "[PARENT] Sending SIGKILL to child......");
     fflush(stdout);
-    sleep(1);
+    apr_sleep(1 * APR_USEC_PER_SEC);
     if (apr_kill(&newproc, SIGKILL) != APR_SUCCESS) {
         fprintf(stderr,"couldn't send the signal!\n");
         exit(-1);
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
     fprintf(stdout,"OK\n");
     
     /* allow time for things to settle... */
-    sleep(3);
+    apr_sleep(3 * APR_USEC_PER_SEC);
     apr_probe_writable_fds();
     
     fprintf(stdout, "[PARENT] Checking on children..........\n");

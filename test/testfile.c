@@ -68,7 +68,7 @@ int test_filedel(apr_pool_t *);
 int testdirs(apr_pool_t *);
 static void test_read(apr_pool_t *);
 
-int main()
+int main(void)
 {
     apr_pool_t *context;
     apr_pool_t *cont2;

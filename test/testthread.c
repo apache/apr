@@ -117,8 +117,9 @@ void * APR_THREAD_FUNC thread_func4(void *data)
     return NULL;
 } 
 
-int main()
+int main(void)
 {
+#if APR_HAS_THREADS
     apr_thread_t *t1;
     apr_thread_t *t2;
     apr_thread_t *t3;
@@ -171,6 +172,6 @@ int main()
     else {
         fprintf(stdout, "Everything is working!\n");
     }
-
+#endif
     return 1;
 }

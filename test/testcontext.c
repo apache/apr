@@ -63,12 +63,12 @@
 #include <unistd.h>
 #endif
 
-apr_status_t string_cleanup(void *data)
+static apr_status_t string_cleanup(void *data)
 {
     return APR_SUCCESS;
 }
 
-int main()
+int main(void)
 {
     apr_pool_t *context;
     char *testdata;

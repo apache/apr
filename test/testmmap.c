@@ -67,7 +67,7 @@
  */
 #define PATH_LEN 255
 
-int main()
+int main(void)
 {
     apr_pool_t *context;
     apr_mmap_t *themmap = NULL;

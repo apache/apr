@@ -4,6 +4,7 @@
 #include "apr_dso.h"
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #define LIB_NAME "mod_test.so"
 
