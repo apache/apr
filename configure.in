@@ -620,7 +620,7 @@ AC_CHECK_FUNCS([getpwnam_r getpwuid_r getgrnam_r getgrgid_r])
 dnl ----------------------------- Checking for Shared Memory Support 
 echo "${nl}Checking for Shared Memory Support..."
 
-# The Posix function are in librt on Solaris. This will
+# The POSIX function are in librt on Solaris. This will
 # also help us find sem_open when doing locking below
 case $host in
    *-solaris*)
@@ -1440,10 +1440,10 @@ APR_CHECK_DEFINE_FILES(POLLIN, poll.h sys/poll.h)
 if test "$threads" = "1"; then
     APR_CHECK_DEFINE(PTHREAD_PROCESS_SHARED, pthread.h)
     AC_CHECK_FUNCS(pthread_mutexattr_setpshared)
-    dnl Some systems have setpshared and define PROCESS_SHARED, but don't 
-    dnl really support PROCESS_SHARED locks.  So, we must validate that we 
-    dnl can go through the steps without receiving some sort of system error.
-    dnl Linux and older versions of AIX have this problem.
+    # Some systems have setpshared and define PROCESS_SHARED, but don't 
+    # really support PROCESS_SHARED locks.  So, we must validate that we 
+    # can go through the steps without receiving some sort of system error.
+    # Linux and older versions of AIX have this problem.
     APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED func:pthread_mutexattr_setpshared, [
       AC_CACHE_CHECK([for working PROCESS_SHARED locks], apr_cv_process_shared_works, [
       AC_TRY_RUN([
@@ -1519,7 +1519,7 @@ APR_IFALLYES(func:semget func:semctl define:SEM_UNDO,
             APR_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
 APR_IFALLYES(header:semaphore.h func:sem_open func_sem_close dnl
              func_sem_unlink func:sem_post func_sem_wait,
-             APR_DECIDE(USE_POSIXSEM_SERIALIZE, [Posix sem_open()]))
+             APR_DECIDE(USE_POSIXSEM_SERIALIZE, [POSIX sem_open()]))
 # note: the current APR use of shared mutex requires /dev/zero
 APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
             func:pthread_mutexattr_setpshared dnl
@@ -1578,7 +1578,7 @@ fi
 
 AC_SUBST(proclockglobal)
 
-AC_MSG_CHECKING(if Posix sems affect threads in the same process)
+AC_MSG_CHECKING(if POSIX sems affect threads in the same process)
 if test "x$apr_posixsem_is_global" = "xyes"; then
   AC_DEFINE(POSIXSEM_IS_GLOBAL, 1, 
             [Define if POSIX semaphores affect threads within the process])
