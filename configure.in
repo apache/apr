@@ -89,6 +89,8 @@ AC_PROG_LN_S
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_CHECK_PROG(RM, rm, rm)
+AC_CHECK_PROG(AS, as, as)
+AC_CHECK_PROG(ASCPP, cpp, cpp)
 AC_CHECK_TOOL(AR, ar, ar)
 
 dnl Various OS checks that apparently set required flags
@@ -325,8 +327,20 @@ case $host in
    *sun*)
        case $host_cpu in
         *sparc*)
-           OSDIR="solaris_sparc"
-           eolstr="\\n"
+            OSDIR="solaris_sparc"
+            eolstr="\\n"
+            is_gnu_as=`${AS} --help | grep gnu.org`
+            if [ -z "$is_gnu_as" ]
+            then
+                ASFLAGS="-xarch=v8plus -KPIC -q"
+                ASCPPFLAGS="-D_ASM -D__STDC__=0"
+            else
+                ASFLAGS="-K pic -P -D_ASM -D__STDC__=0 -xarch=v8plus"
+                ASCPPFLAGS=""
+                ASCPP="cat"
+            fi
+            AC_SUBST(ASCPPFLAGS)
+            AC_SUBST(ASFLAGS)
             ;;
         *)
             OSDIR="unix"
