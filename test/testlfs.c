@@ -35,7 +35,7 @@ static apr_off_t eightGb = APR_INT64_C(2) << 32;
 
 static int madefile = 0;
 
-#define PRECOND if (!madefile) CuNotImpl(tc, NULL)
+#define PRECOND if (!madefile) CuNotImpl(tc, "Large file tests not enabled")
 
 #define TESTDIR "lfstests"
 #define TESTFILE "large.bin"
@@ -270,7 +270,7 @@ CuSuite *testlfs(void)
 #endif
     SUITE_ADD_TEST(suite, test_format);
 #else
-    SUITE_ADD_TEST(suite, test_nolfs)
+    SUITE_ADD_TEST(suite, test_nolfs);
 #endif
 
     return suite;
