@@ -65,6 +65,10 @@
 #include <stddef.h> /* NULL */
 #endif
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h> /* strtol and strtoll */
+#endif
+
 /** this is used to cache lengths in apr_pstrcat */
 #define MAX_SAVED_LENGTHS  6
 
@@ -228,6 +232,21 @@ void *memchr(const void *s, int c, size_t n)
     return NULL;
 }
 #endif
+
+APR_DECLARE(long long) apr_strtoll(char *buf, char **end, int base)
+{
+#if (APR_HAVE_STRTOLL)
+    return strtoll(buf, NULL, 0);
+#else
+    /* best-effort function. If no strtoll, use strtol */
+    return (long long)strtol(buf, NULL, 0);
+#endif
+}
+
+APR_DECLARE(long long) apr_atoll(char *buf)
+{
+    return apr_strtoll(buf, NULL, 0);
+}
 
 APR_DECLARE(char *) apr_itoa(apr_pool_t *p, int n)
 {
