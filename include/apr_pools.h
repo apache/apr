@@ -446,13 +446,13 @@ APR_DECLARE(void) apr_pool_cleanup_for_exec(void);
  */
 #define APR_POOL_DECLARE_ACCESSOR(typename) \
 	APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
-		(apr_##typename##_t *ob)
+		(const apr_##typename##_t *ob)
 
 #define APR_POOL_IMPLEMENT_ACCESSOR(typename) \
 	APR_POOL_IMPLEMENT_ACCESSOR_X(typename, pool)
 #define APR_POOL_IMPLEMENT_ACCESSOR_X(typename, fieldname) \
 	APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
-		(apr_##typename##_t *ob) { return ob->fieldname; }
+		(const apr_##typename##_t *ob) { return ob->fieldname; }
 
 /* used to guarantee to the apr_pool_t debugging code that the sub apr_pool_t
  * will not be destroyed before the parent pool */
