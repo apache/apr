@@ -554,4 +554,26 @@ do
 done
 ])
 
+dnl Iteratively interpolate the contents of the second argument
+dnl until interpolation offers no new result. Then assign the
+dnl final result to $1.
+dnl
+dnl Example:
+dnl
+dnl foo=1
+dnl bar='${foo}/2'
+dnl baz='${bar}/3'
+dnl APR_EXPAND_VAR(fraz, $baz)
+dnl   $fraz is now "1/2/3"
+dnl 
+AC_DEFUN(APR_EXPAND_VAR,[
+last=
+cur=$2
+while test "x$cur" != "x$last";
+do
+  last=$cur
+  cur=`eval "echo $cur"`
+done
+$1=$cur
+])
 
