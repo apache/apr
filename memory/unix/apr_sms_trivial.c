@@ -58,9 +58,10 @@
 #include "apr_sms.h"
 #include "apr_sms_trivial.h"
 #include "apr_lock.h"
+#define APR_WANT_MEMFUNC
+#include "apr_want.h"
 #include "sms_private.h"
 #include <stddef.h>
-#include <string.h>
 
 static const char *module_identity = "TRIVIAL";
 
