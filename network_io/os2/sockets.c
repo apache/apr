@@ -172,7 +172,7 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
     return APR_SUCCESS;
 }
 
-apr_status_t apr_connect(apr_socket_t *sock, char *hostname)
+apr_status_t apr_connect(apr_socket_t *sock, const char *hostname)
 {
     struct hostent *hp;
 
