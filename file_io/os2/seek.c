@@ -131,3 +131,20 @@ apr_status_t apr_file_seek(apr_file_t *thefile, apr_seek_where_t where, apr_off_
         return APR_OS2_STATUS(DosSetFilePtr(thefile->filedes, *offset, where, (ULONG *)&offset));
     }
 }
+
+
+
+apr_status_t apr_file_trunc(apr_file_t *fp, apr_off_t offset)
+{
+    int rc = DosSetFileSize(fp->filedes, offset);
+
+    if (rc != 0) {
+        return APR_OS2_STATUS(rc);
+    }
+
+    if (fp->buffered) {
+        return setptr(fp, offset);
+    }
+
+    return APR_SUCCESS;
+}
