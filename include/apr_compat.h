@@ -3,7 +3,7 @@
 
 /* redefine 1.3.x symbols to those that now live in libapr */
 
-#define ap_inline apr_inline
+#define ap_inline APR_INLINE
 
 #define ap_md5_ctx_t apr_md5_ctx_t
 #define ap_MD5Encode apr_md5_encode
