@@ -417,7 +417,7 @@ SOURCE=.\include\arch\win32\locks.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\unix\misc.h
+SOURCE=.\include\arch\win32\misc.h
 # End Source File
 # Begin Source File
 
