@@ -107,7 +107,7 @@ ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname,
     (*lock)->mutex = OpenMutex(MUTEX_ALL_ACCESS, TRUE, fname);
     
     if ((*lock)->mutex == NULL) {
-        return APR_EEXIST;
+        return GetLastError();
     }
     return APR_SUCCESS;
 }
@@ -135,7 +135,7 @@ ap_status_t ap_unlock(ap_lock_t *lock)
         return APR_SUCCESS;
     } else {
         if (ReleaseMutex(lock->mutex) == 0) {
-            return APR_EEXIST;
+            return GetLastError();
         }
     }
     return APR_SUCCESS;
@@ -148,7 +148,7 @@ ap_status_t ap_destroy_lock(ap_lock_t *lock)
         return APR_SUCCESS;
     } else {
         if (CloseHandle(lock->mutex) == 0) {
-            return APR_EEXIST;
+            return GetLastError();
         }
     }
     return APR_SUCCESS;

@@ -177,7 +177,7 @@ ap_status_t ap_remove_file(char *path, ap_pool_t *cont)
         return APR_SUCCESS;
     }
     else {
-        return APR_EEXIST;
+        return GetLastError();
     }
 }
 

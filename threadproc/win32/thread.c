@@ -108,20 +108,20 @@ ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr,
         return stat;
     }
 
-	/* Use 0 for Thread Stack Size, because that will default the stack to the
-	 * same size as the calling thread. 
-	*/
+    /* Use 0 for Thread Stack Size, because that will default the stack to the
+     * same size as the calling thread. 
+     */
     if (((*new)->td = (HANDLE *)_beginthreadex(NULL, 0, (unsigned int (API_THREAD_FUNC *)(void *))func,
                                                data, 0, &temp)) == 0) {
         lasterror = GetLastError();
-        return APR_EEXIST;
+        return APR_EEXIST; /* MSVC++ doc doesn't mention any additional error info */
     }
 
-	if (attr && attr->detach) {
-		CloseHandle((*new)->td);
-	}
+    if (attr && attr->detach) {
+        CloseHandle((*new)->td);
+    }
 
-	return APR_SUCCESS;
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
@@ -136,10 +136,10 @@ ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
     ap_status_t stat;
 
     if ((stat = WaitForSingleObject(thd->td, INFINITE)) == WAIT_OBJECT_0) {
-		if (GetExitCodeThread(thd->td, retval) == 0) {
-			return APR_SUCCESS;
-		}
-		return APR_EEXIST;
+        if (GetExitCodeThread(thd->td, retval) == 0) {
+            return APR_SUCCESS;
+        }
+        return GetLastError();
     }
     else {
         return stat;
@@ -152,7 +152,7 @@ ap_status_t ap_thread_detach(ap_thread_t *thd)
         return APR_SUCCESS;
     }
     else {
-        return APR_EEXIST;
+        return GetLastError();
     }
 }
 

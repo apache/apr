@@ -237,22 +237,11 @@ ap_status_t ap_initialize(void)
     int iVersionRequested;
     WSADATA wsaData;
     int err;
-#if 0
-    unsigned tid;
-
-    if (_beginthreadex(NULL, 0, SignalHandling, NULL, 0, &tid) == 0) {
-        return APR_EEXIST;
-    }
-
-    while (thread_ready() != 1) {
-        sleep(1);
-    }
-#endif
 
     iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
     err = WSAStartup((WORD) iVersionRequested, &wsaData);
     if (err) {
-        return APR_EEXIST;
+        return err;
     }
     if (LOBYTE(wsaData.wVersion) != WSAHighByte ||
         HIBYTE(wsaData.wVersion) != WSALowByte) {
