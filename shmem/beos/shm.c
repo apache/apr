@@ -53,7 +53,7 @@
  */
 
 #include "apr_general.h"
-#include "apr_shmem.h"
+#include "apr_shm.h"
 #include "apr_errno.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
@@ -69,14 +69,14 @@ struct apr_shm_t {
     area_id aid;
 };
 
-APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize, const char *file, 
+APR_DECLARE(apr_status_t) apr_shm_init(apr_shm_t **m, apr_size_t reqsize, const char *file, 
                                        apr_pool_t *p)
 {
     apr_size_t pagesize;
     area_id newid;
     char *addr;
 
-    (*m) = (apr_shmem_t *)apr_pcalloc(p, sizeof(apr_shmem_t));
+    (*m) = (apr_shm_t *)apr_pcalloc(p, sizeof(apr_shm_t));
     /* we MUST allocate in pages, so calculate how big an area we need... */
     pagesize = ((reqsize + B_PAGE_SIZE - 1) / B_PAGE_SIZE) * B_PAGE_SIZE;
     
@@ -95,7 +95,7 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize, cons
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shmem_t *m)
+APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m)
 {
     delete_area(m->aid);
     m->avail = 0;
@@ -104,14 +104,14 @@ APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shmem_t *m)
 }
 
 
-APR_DECLARE(apr_status_t) apr_shm_attach(apr_shmem_t **m,
+APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
                                          const char *filename,
                                          apr_pool_t *pool)
 {
     return APR_ENOTIMPL;
 }
 
-APR_DECLARE(apr_status_t) apr_shm_detach(apr_shmem_t *m)
+APR_DECLARE(apr_status_t) apr_shm_detach(apr_shm_t *m)
 {
     return APR_ENOTIMPL;
 }
