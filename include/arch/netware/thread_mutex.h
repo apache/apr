@@ -60,6 +60,7 @@
 
 struct apr_thread_mutex_t {
     apr_pool_t *pool;
+    NXMutex_t *mutex;
 };
 
 #endif  /* THREAD_MUTEX_H */
