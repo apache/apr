@@ -459,7 +459,7 @@ usemmapanon="0"
 usebeosarea="0"
 useos2shm="0"
 mem_based="0"
-file_based="1"
+file_based="0"
 
 case $ac_decision in
     USE_SHMEM_MMAP_TMP )
