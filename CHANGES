@@ -120,12 +120,22 @@ Changes with APR 1.0
 
 Changes with APR 0.9.5
 
+  *) Fix handling of negative numbers in apr_strtoi64() on platforms
+     without strtoll.  [Joe Orton]
+
+  *) Fix printing apr_int64_t values smaller than LONG_MIN on 32-bit
+     platforms in apr_vformatter.  [Joe Orton]
+
   *) Fix apr_socket_opt_set with APR_IPV6_V6ONLY flag.  Fixes httpd
      Listen IPv6 socket behavior on FreeBSD 5.x, OpenBSD, NetBSD.
      [Justin Erenkrantz]
 
   *) Fix apr_time_exp_get() for dates in 2038.  
      [Philip Martin <philip codematters.co.uk>]
+
+  *) Add APR_LARGEFILE flag to allow opening files with the
+     O_LARGEFILE flag; not recommended for general use, see
+     include/apr_file_io.h.  [Joe Orton]
 
   *) Various build fixes: thread_rwlock.c on some Solaris platforms
      (PR 22990); filestat.c on ReliantUnix (PR 22990); config.status
