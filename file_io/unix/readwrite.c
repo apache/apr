@@ -146,9 +146,9 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
     do {
         rv = write(thefile->filedes, buf, *nbytes);
-    } while (rv == -1 && errno == EINTR);
+    } while (rv == (ap_size_t)-1 && errno == EINTR);
 
-    if (rv == -1 && 
+    if (rv == (ap_size_t)-1 &&
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
         thefile->timeout != 0) {
         ap_status_t arv = wait_for_io_or_timeout(thefile, 0);
@@ -159,11 +159,11 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         else {
             do {
                 rv = write(thefile->filedes, buf, *nbytes);
-            } while (rv == -1 && errno == EINTR);
+	    } while (rv == (ap_size_t)-1 && errno == EINTR);
         }
     }  
 
-    if (rv == -1) {
+    if (rv == (ap_size_t)-1) {
         (*nbytes) = 0;
         return errno;
     }
