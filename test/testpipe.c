@@ -114,16 +114,6 @@ static void read_write(CuTest *tc)
     apr_status_t rv;
     char *buf;
     apr_size_t nbytes;
-
-#ifdef WIN32
-    /* XXX:   THIS IS A HACK
-     * This test currently fails on Windows, because it never returns from the file_read
-     * call.  Because this stops the test suite from working, I am just making this fail
-     * automatically on Windows without running the test.  When Windows gets this feature,
-     * this hack should be removed.
-     */
-    CuFail(tc, "Timeouts don't work on pipes on Windows");
-#endif
     
     nbytes = strlen("this is a test");
     buf = (char *)apr_palloc(p, nbytes + 1);
@@ -141,6 +131,32 @@ static void read_write(CuTest *tc)
     CuAssertIntEquals(tc, 0, nbytes);
 }
 
+static void read_write_notimeout(CuTest *tc)
+{
+    apr_status_t rv;
+    char *buf = "this is a test";
+    char *input;
+    apr_size_t nbytes;
+    
+    nbytes = strlen("this is a test");
+
+    rv = apr_file_pipe_create(&readp, &writep, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, readp);
+    CuAssertPtrNotNull(tc, writep);
+
+    rv = apr_file_write(writep, buf, &nbytes);
+    CuAssertIntEquals(tc, strlen("this is a test"), nbytes);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    nbytes = 256;
+    input = apr_pcalloc(p, nbytes + 1);
+    rv = apr_file_read(readp, input, &nbytes);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, strlen("this is a test"), nbytes);
+    CuAssertStrEquals(tc, "this is a test", input);
+}
+
 CuSuite *testpipe(void)
 {
     CuSuite *suite = CuSuiteNew("Pipes");
@@ -149,6 +165,7 @@ CuSuite *testpipe(void)
     SUITE_ADD_TEST(suite, close_pipe);
     SUITE_ADD_TEST(suite, set_timeout);
     SUITE_ADD_TEST(suite, read_write);
+    SUITE_ADD_TEST(suite, read_write_notimeout);
 
     return suite;
 }
