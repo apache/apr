@@ -125,10 +125,10 @@ ap_status_t ap_setprocattr_childout(ap_procattr_t *attr, ap_file_t *child_out,
         ap_create_pipe(&attr->child_out, &attr->parent_out, attr->cntxt);
 
     if (child_out != NULL)
-        ap_dupfile(&attr->child_out, child_out);
+        ap_dupfile(&attr->child_out, child_out, attr->cntxt);
 
     if (parent_out != NULL)
-        ap_dupfile(&attr->parent_out, parent_out);
+        ap_dupfile(&attr->parent_out, parent_out, attr->cntxt);
 
     return APR_SUCCESS;
 }
@@ -139,10 +139,10 @@ ap_status_t ap_setprocattr_childerr(ap_procattr_t *attr, ap_file_t *child_err,
         ap_create_pipe(&attr->child_err, &attr->parent_err, attr->cntxt);
 
     if (child_err != NULL)
-        ap_dupfile(&attr->child_err, child_err);
+        ap_dupfile(&attr->child_err, child_err, attr->cntxt);
 
     if (parent_err != NULL)
-        ap_dupfile(&attr->parent_err, parent_err);
+        ap_dupfile(&attr->parent_err, parent_err, attr->cntxt);
     return APR_SUCCESS;
 }
 #endif
