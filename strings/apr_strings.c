@@ -325,6 +325,7 @@ APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
      * Set 'any' if any `digits' consumed; make it negative to indicate
      * overflow.
      */
+    val = 0;
     while (acc >= 0 && (c = *s++)) {
         if (c >= '0' && c <= '9')
 	    c -= '0';
