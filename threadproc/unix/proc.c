@@ -362,26 +362,26 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
             }
             newargs[i + 2] = NULL;
             if (attr->detached) {
-                apr_proc_detach();
+                apr_proc_detach(APR_PROC_DETACH_DAEMONIZE);
             }
             execve(SHELL_PATH, (char * const *) newargs, (char * const *)env);
         }
         else if (attr->cmdtype == APR_PROGRAM) {
             if (attr->detached) {
-                apr_proc_detach();
+                apr_proc_detach(APR_PROC_DETACH_DAEMONIZE);
             }
             execve(progname, (char * const *)args, (char * const *)env);
         }
         else if (attr->cmdtype == APR_PROGRAM_ENV) {
             if (attr->detached) {
-                apr_proc_detach();
+                apr_proc_detach(APR_PROC_DETACH_DAEMONIZE);
             }
             execv(progname, (char * const *)args);
         }
         else {
             /* APR_PROGRAM_PATH */
             if (attr->detached) {
-                apr_proc_detach();
+                apr_proc_detach(APR_PROC_DETACH_DAEMONIZE);
             }
             execvp(progname, (char * const *)args);
         }

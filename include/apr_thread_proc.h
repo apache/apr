@@ -578,10 +578,16 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
                                                   apr_wait_how_e waithow,
                                                   apr_pool_t *p);
 
+#define APR_PROC_DETACH_FOREGROUND 0
+#define APR_PROC_DETACH_DAEMONIZE 1
+
 /**
  * Detach the process from the controlling terminal.
+ * @param daemonize set to non-zero if the process should daemonize
+ *                  and become a background process, else it will
+ *                  stay in the foreground.
  */
-APR_DECLARE(apr_status_t) apr_proc_detach(void);
+APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize);
 
 #if APR_HAS_OTHER_CHILD
 
