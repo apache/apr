@@ -89,7 +89,7 @@
 #include <kernel/OS.h>
 #endif
 
-typedef struct apr_shmem_t {
+struct apr_shmem_t {
     void *mem;
     void *curmem;
     apr_size_t length;
@@ -104,7 +104,7 @@ typedef struct apr_shmem_t {
 #elif APR_USE_SHMEM_BEOS
     area_id areaid; 
 #endif
-} apr_shmem_t;
+};
 
 APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize, 
                                        const char *filename, apr_pool_t *pool)
