@@ -282,7 +282,7 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new_sock,
                                             apr_pool_t *cont);
 
 /**
- * Shutdown either reading, writing, or both sides of a tcp socket.
+ * Shutdown either reading, writing, or both sides of a socket.
  * @param thesocket The socket to close 
  * @param how How to shutdown the socket.  One of:
  * <PRE>
@@ -297,7 +297,7 @@ APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
                                        apr_shutdown_how_e how);
 
 /**
- * Close a tcp socket.
+ * Close a socket.
  * @param thesocket The socket to close 
  */
 APR_DECLARE(apr_status_t) apr_socket_close(apr_socket_t *thesocket);
@@ -680,7 +680,7 @@ APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset,
  * @param events The events to stop looking for during the poll.  One of:
  * <PRE>
  *            APR_POLLIN       signal if read will not block
- *            APR_POLLPRI      signal if prioirty data is availble to be read
+ *            APR_POLLPRI      signal if priority data is available to be read
  *            APR_POLLOUT      signal if write will not block
  * </PRE>
  */
@@ -701,7 +701,7 @@ APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset,
  * @param events The events to clear from all sockets.  One of:
  * <PRE>
  *            APR_POLLIN       signal if read will not block
- *            APR_POLLPRI      signal if prioirty data is availble to be read
+ *            APR_POLLPRI      signal if priority data is available to be read
  *            APR_POLLOUT      signal if write will not block
  * </PRE>
  */
@@ -713,7 +713,7 @@ APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset,
  * @param event The returned events for the socket.  One of:
  * <PRE>
  *            APR_POLLIN       Data is available to be read 
- *            APR_POLLPRI      Prioirty data is availble to be read
+ *            APR_POLLPRI      Priority data is availble to be read
  *            APR_POLLOUT      Write will succeed
  *            APR_POLLERR      An error occurred on the socket
  *            APR_POLLHUP      The connection has been terminated
@@ -730,7 +730,7 @@ APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event,
 /**
  * Return the data associated with the current poll.
  * @param pollfd The currently open pollfd.
- * @param key The key to use for retreiving data associated with a poll struct.
+ * @param key The key to use for retrieving data associated with a poll struct.
  * @param data The user data associated with the pollfd.
  */
 APR_DECLARE(apr_status_t) apr_poll_data_get(apr_pollfd_t *pollfd, 
