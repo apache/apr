@@ -476,6 +476,17 @@ static int client(client_socket_mode_t socket_mode, char *host)
         exit(1);
     }
 
+    /* in case this is the non-blocking test, set socket timeout;
+     * we're just waiting for EOF */
+
+    rv = apr_socket_timeout_set(sock, apr_time_from_sec(3));
+    if (rv != APR_SUCCESS) {
+        fprintf(stderr, "apr_socket_timeout_set()->%d/%s\n",
+                rv,
+		apr_strerror(rv, buf, sizeof buf));
+        exit(1);
+    }
+    
     bytes_read = 1;
     rv = apr_socket_recv(sock, buf, &bytes_read);
     if (rv != APR_EOF) {
