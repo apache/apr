@@ -742,6 +742,93 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
  * we don't use it until it is fixed.  If it is used as it is now, it will
  * hang the machine and the only way to fix it is a reboot.
  */
+#elif defined(HAVE_SENDFILEV)
+/* Solaris 8's sendfilev() interface 
+ *
+ * SFV_FD_SELF refers to our memory space.
+ *
+ * Required Sparc patches (or newer):
+ * 111297-01, 108528-09, 109472-06, 109234-03, 108995-02, 111295-01, 109025-03,
+ * 108991-13
+ * Required x86 patches (or newer):
+ * 111298-01, 108529-09, 109473-06, 109235-04, 108996-02, 111296-01, 109026-04,
+ * 108992-13
+ */
+apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
+        		apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len,
+        		apr_int32_t flags)
+{
+    apr_status_t rv;
+    size_t nbytes;
+    sendfilevec_t *sfv;
+    int vecs, curvec, i;
+
+    if (!hdtr) {
+        hdtr = &no_hdtr;
+    }
+
+    /* Ignore flags for now. */
+    flags = 0;
+
+    /* Calculate how much space we need. */
+    vecs = hdtr->numheaders + hdtr->numtrailers + 1;
+    sfv = apr_palloc(sock->cntxt, sizeof(sendfilevec_t) * vecs);
+
+    curvec = 0;
+
+    /* Add the headers */
+    for (i = 0; i < hdtr->numheaders; i++, curvec++) {
+        sfv[curvec].sfv_fd = SFV_FD_SELF;
+        sfv[curvec].sfv_flag = 0;
+        sfv[curvec].sfv_off = hdtr->headers[i].iov_base;
+        sfv[curvec].sfv_len = hdtr->headers[i].iov_len;
+    }
+
+    /* If the len is 0, we skip the file. */
+    if (*len)
+    {
+        sfv[curvec].sfv_fd = file->filedes;
+        sfv[curvec].sfv_flag = 0;
+        sfv[curvec].sfv_off = *offset;
+        sfv[curvec].sfv_len = *len; 
+
+        curvec++;
+    }
+    else
+        vecs--;
+
+    /* Add the footers */
+    for (i = 0; i < hdtr->numtrailers; i++, curvec++) {
+        sfv[curvec].sfv_fd = SFV_FD_SELF;
+        sfv[curvec].sfv_flag = 0;
+        sfv[curvec].sfv_off = hdtr->trailers[i].iov_base;
+        sfv[curvec].sfv_len = hdtr->trailers[i].iov_len;
+    }
+ 
+    /* If we are in non-blocking mode, we need to make sure we wait until
+     * the other side says it is okay. */ 
+    if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) == 1 ||
+        apr_is_option_set(sock->netmask, APR_SO_TIMEOUT) == 1)
+    { 
+        rv = apr_wait_for_io_or_timeout(sock, 0);
+    }
+
+    /* Actually do the sendfilev */
+    do {
+        /* socket, vecs, number of vecs, bytes written */
+        rv = sendfilev(sock->socketdes,	sfv, vecs, &nbytes);
+    } while (rv == -1 && errno == EINTR);
+
+    /* Solaris returns EAGAIN even though it sent bytes on a non-block sock */
+    if (rv == -1 && errno != EAGAIN) {
+        rv = errno;
+        return rv;
+    }
+
+    /* Update how much we sent */
+    *len = nbytes;
+    return APR_SUCCESS;
+}
 #else
 #error APR has detected sendfile on your system, but nobody has written a
 #error version of it for APR yet.  To get past this, either write apr_sendfile
