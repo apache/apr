@@ -83,8 +83,6 @@ static char *apr_error_string(apr_status_t statcode)
         return "An invalid date has been provided";
     case APR_EINVALSOCK:
         return "An invalid socket was returned";
-    case APR_ENOFILE:
-        return "No file was provided and one was required.";
     case APR_ENOPROC:
         return "No process was provided and one was required.";
     case APR_ENOTIME:
