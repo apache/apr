@@ -112,7 +112,7 @@ extern "C" {
                                    * again when NOPUSH is turned off
                                    */
 #define APR_INCOMPLETE_READ 4096  /**< Set on non-blocking sockets
-				   * (APR_SO_TIMEOUT != 0) on which the
+				   * (timeout != 0) on which the
 				   * previous read() did not fill a buffer
 				   * completely.  the next apr_recv() will
 				   * first call select()/poll() rather than
@@ -432,7 +432,7 @@ APR_DECLARE(apr_status_t) apr_socket_data_set(apr_socket_t *sock, void *data,
  * @remark
  * <PRE>
  * This functions acts like a blocking write by default.  To change 
- * this behavior, use apr_setsocketopt with the APR_SO_TIMEOUT option.
+ * this behavior, use apr_socket_timeout_set().
  *
  * It is possible for both bytes to be sent and an error to be returned.
  *
@@ -451,7 +451,7 @@ APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
  * @remark
  * <PRE>
  * This functions acts like a blocking write by default.  To change 
- * this behavior, use apr_setsocketopt with the APR_SO_TIMEOUT option.
+ * this behavior, use apr_socket_timeout_set().
  * The number of bytes actually sent is stored in argument 3.
  *
  * It is possible for both bytes to be sent and an error to be returned.
@@ -498,7 +498,7 @@ APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
  *                       including headers, file, and trailers
  * @param flags APR flags that are mapped to OS specific flags
  * @remark This functions acts like a blocking write by default.  To change 
- *         this behavior, use apr_setsocketopt with the APR_SO_TIMEOUT option.
+ *         this behavior, use apr_socket_timeout_set().
  *         The number of bytes actually sent is stored in argument 5.
  */
 APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
@@ -516,7 +516,7 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
  * @remark
  * <PRE>
  * This functions acts like a blocking read by default.  To change 
- * this behavior, use apr_setsocketopt with the APR_SO_TIMEOUT option.
+ * this behavior, use apr_socket_timeout_set().
  * The number of bytes actually sent is stored in argument 3.
  *
  * It is possible for both bytes to be received and an APR_EOF or
@@ -540,16 +540,22 @@ APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock,
  *            APR_SO_REUSEADDR  --  The rules used in validating addresses
  *                                  supplied to bind should allow reuse
  *                                  of local addresses.
- *            APR_SO_TIMEOUT    --  Set the timeout value in microseconds.
- *                                  values < 0 mean wait forever.  0 means
- *                                  don't wait at all.
  *            APR_SO_SNDBUF     --  Set the SendBufferSize
  *            APR_SO_RCVBUF     --  Set the ReceiveBufferSize
  * </PRE>
  * @param on Value for the option.
  */
 APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
-                                           apr_int32_t opt, apr_int32_t on);
+                                           apr_int32_t opt, 
+                                           apr_int32_t on);
+
+/**
+ * Setup socket timeout for the specified socket
+ * @param sock The socket to set up.
+ * @param t Value for the timeout.
+ */
+APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock,
+                                                 apr_interval_time_t t);
 
 /**
  * Query socket options for the specified socket
@@ -563,9 +569,6 @@ APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
  *            APR_SO_REUSEADDR  --  The rules used in validating addresses
  *                                  supplied to bind should allow reuse
  *                                  of local addresses.
- *            APR_SO_TIMEOUT    --  Set the timeout value in microseconds.
- *                                  values < 0 mean wait forever.  0 means
- *                                  don't wait at all.
  *            APR_SO_SNDBUF     --  Set the SendBufferSize
  *            APR_SO_RCVBUF     --  Set the ReceiveBufferSize
  *            APR_SO_DISCONNECTED -- Query the disconnected state of the socket.
@@ -575,6 +578,14 @@ APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
  */
 APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock, 
                                            apr_int32_t opt, apr_int32_t *on);
+
+/**
+ * Query socket timeout for the specified socket
+ * @param sock The socket to query
+ * @param t Socket timeout returned from the query.
+ */
+APR_DECLARE(apr_status_t) apr_socket_timeout_get(apr_socket_t *sock, 
+                                                 apr_interval_time_t *t);
 
 /**
  * Return an apr_sockaddr_t from an apr_socket_t
