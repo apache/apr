@@ -72,6 +72,8 @@
 #include <signal.h>
 #endif
 
+#include <kernel/OS.h>
+
 typedef struct datastruct {
     void *data;
     char *key;
@@ -84,6 +86,16 @@ struct ap_context_t {
     void *prog_data;
     int (*apr_abort)(int retcode);
 };
+
+
+struct ap_other_child_rec_t {
+    struct ap_other_child_rec_t *next;
+    thread_id tid;
+    void (*maintenance) (int, void *);
+    void *data;
+    int write_fd;
+};
+
 
 #endif  /* ! MISC_H */
 

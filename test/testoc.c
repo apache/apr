@@ -64,13 +64,18 @@
 
 void ocmaint(int reason, void *data)
 {
+    fprintf(stdout,"[CHILD]  Maintenance routine called....");
+    fflush(stdout);
     switch (reason) {
     case APR_OC_REASON_DEATH:
-        fprintf(stdout, "OC killed... correctly\n");
+        fprintf(stdout, "Died correctly\n");
         break;
     case APR_OC_REASON_LOST:
+        fprintf(stdout, "APR_OC_REASON_LOST\n");
     case APR_OC_REASON_UNWRITABLE:
+        fprintf(stdout, "APR_OC_REASON_UNWRITEABLE\n");
     case APR_OC_REASON_RESTART:
+        fprintf(stdout, "APR_OC_REASON_RESTART\n");
         fprintf(stdout, "OC maintentance called for reason other than death\n");
         break;
     }
@@ -104,13 +109,16 @@ int main(int argc, char *argv[])
     args[1] = ap_pstrdup(context, "-X");
     args[2] = NULL;
 
-    fprintf(stdout, "Creating procattr.......");
+    fprintf(stdout, "[PARENT] Creating procattr.............");
+    fflush(stdout);
     if (ap_createprocattr_init(&procattr, context) != APR_SUCCESS) {
         fprintf(stderr, "Could not create attr\n");
         exit(-1);;
     }
+    fprintf(stdout, "OK\n");
 
-    fprintf(stdout, "starting other child.......");
+    fprintf(stdout, "[PARENT] Starting other child..........");
+    fflush(stdout);
     if (ap_create_process(&newproc, "../testoc", args, NULL, procattr, context) 
                           != APR_SUCCESS) {
         fprintf(stderr, "error starting other child\n");
@@ -118,10 +126,21 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "OK\n");
 
+
     ap_register_other_child(newproc, ocmaint, NULL, -1, context);
 
-    ap_kill(newproc, SIGKILL);
-
+    fprintf(stdout, "[PARENT] Sending SIGKILL to child......");
+    fflush(stdout);
+    if (ap_kill(newproc, SIGKILL) != APR_SUCCESS) {
+        fprintf(stderr,"couldn't send the signal!\n");
+        exit(-1);
+    }
+    fprintf(stdout,"OK\n");
+    
+    /* allow time for things to settle... */
+    sleep(1);
+    
+    fprintf(stdout, "[PARENT] Checking on children..........\n");
     check_other_child();
     
     return 1;
