@@ -114,12 +114,10 @@ APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
                                                const char *dir) 
 {
     char * cwd;
-    if (strncmp("/",dir,1) != 0 ) {
+    if (dir[0] != '/') {
         cwd = (char*)malloc(sizeof(char) * PATH_MAX);
         getcwd(cwd, PATH_MAX);
-        strncat(cwd,"/\0",2);
-        strcat(cwd,dir);
-        attr->currdir = (char *)apr_pstrdup(attr->pool, cwd);
+        attr->currdir = (char *)apr_pstrcat(attr->pool, cwd, "/", dir, NULL);
         free(cwd);
     } else {
         attr->currdir = (char *)apr_pstrdup(attr->pool, dir);
