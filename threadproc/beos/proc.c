@@ -203,6 +203,12 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
     return APR_INPARENT;
 }
 
+APR_DECLARE(apr_status_t) apr_procattr_child_errfn_set(apr_procattr_t *attr,
+                                                       apr_child_errfn_t *errfn)
+{
+    /* won't ever be called on this platform, so don't save the function pointer */
+    return APR_SUCCESS;
+}
 
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname, 
                                           const char * const *args,

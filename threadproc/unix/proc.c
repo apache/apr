@@ -295,6 +295,13 @@ static apr_status_t limit_proc(apr_procattr_t *attr)
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_procattr_child_errfn_set(apr_procattr_t *attr,
+                                                       apr_child_errfn_t *errfn)
+{
+    attr->errfn = errfn;
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           const char *progname,
                                           const char * const *args,
@@ -368,11 +375,17 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
         if (attr->currdir != NULL) {
             if (chdir(attr->currdir) == -1) {
+                if (attr->errfn) {
+                    attr->errfn(pool, errno, "change of working directory failed");
+                }
                 exit(-1);   /* We have big problems, the child should exit. */
             }
         }
 
         if ((status = limit_proc(attr)) != APR_SUCCESS) {
+            if (attr->errfn) {
+                attr->errfn(pool, errno, "setting of resource limits failed");
+            }
             exit(-1);   /* We have big problems, the child should exit. */
         }
 
@@ -422,6 +435,14 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
             execvp(progname, (char * const *)args);
         }
+        if (attr->errfn) {
+            char *desc;
+
+            desc = apr_psprintf(pool, "exec of '%s' failed",
+                                progname);
+            attr->errfn(pool, errno, desc);
+        }
+
         exit(-1);  /* if we get here, there is a problem, so exit with an
                     * error code. */
     }
