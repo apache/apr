@@ -98,7 +98,7 @@ apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen,
     }
 
     if (rv = conv_utf8_to_ucs2(srcstr, &srcremains, t, &retremains)) {
-        return rv;
+        return (rv == APR_INCOMPLETE) ? APR_EINVAL : rv;
     }
     if (srcremains) {
         return APR_ENAMETOOLONG;
