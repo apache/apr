@@ -7,6 +7,9 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) Fix stack overflow with IPv6 apr_socket_accept() on Win32.
+     PR 28471.  [inoue <inoue ariel-networks.com>]
+
   *) Add new functions apr_signal_block, apr_signal_unblock to block/unblock
      the delivery of a particular signal.  [Madhusudan Mathihalli]
 
