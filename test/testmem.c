@@ -437,7 +437,8 @@ int main(int argc, char **argv)
     apr_sms_t *ams, *bms, *dms, *tms;
     apr_pool_t *pool;
     int i;
-    
+    apr_sms_t *lsms[10];
+ 
     apr_initialize();
         
     printf("APR Memory Test\n");
@@ -454,6 +455,14 @@ int main(int argc, char **argv)
                  apr_sms_blocks_create(&dms, ams, 64))
     STD_TEST_NEQ("    Creating a trivial system",
                  apr_sms_trivial_create(&tms, ams))
+
+/* if we're using tag's then add them :) */
+#if APR_DEBUG_TAG_SMS
+    apr_sms_tag("top-level", ams);
+    apr_sms_tag("tracking", bms);
+    apr_sms_tag("blocks", dms);
+    apr_sms_tag("trivial", tms);
+#endif
 
     its_a_pool(pool, &t[0], "Pool code",     1);
     its_an_sms(ams,  &t[1], "Standard sms",  1);
@@ -511,7 +520,7 @@ int main(int argc, char **argv)
             exit(-1);
     }
     print_timed_results();
-    
+   
     printf("Destroying the memory...\n");
 
     STD_TEST_NEQ("Trying to destroy the trivial memory system",
@@ -520,6 +529,15 @@ int main(int argc, char **argv)
                  apr_sms_destroy(bms))
     STD_TEST_NEQ("Trying to destroy the block memory system",
                  apr_sms_destroy(dms))                        
+
+    printf("Testing layering...\n");
+    apr_sms_tracking_create(&lsms[0], ams); 
+    for (i=1;i<5;i++) {
+        apr_sms_tracking_create(&lsms[i], lsms[i-1]);
+    }
+    for (i=5;i<10;i++) {
+        apr_sms_tracking_create(&lsms[i], lsms[4]);
+    }
     STD_TEST_NEQ("Trying to destroy the standard memory system",
                  apr_sms_destroy(ams))
 
