@@ -374,10 +374,12 @@ typedef int (apr_table_do_callback_fn_t)(void *rec, const char *key,
  * @param ... The vararg.  If this is NULL, then all elements in the table are
  *            run through the function, otherwise only those whose key matches
  *            are run.
+ * @return FALSE if one of the comp() iterations returned zero; TRUE if all
+ *            iterations returned non-zero
  * @see apr_table_do_callback_fn_t
  */
-APR_DECLARE_NONSTD(void) apr_table_do(apr_table_do_callback_fn_t *comp,
-                             void *rec, const apr_table_t *t, ...);
+APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
+                                     void *rec, const apr_table_t *t, ...);
 
 /** 
  * Iterate over a table running the provided function once for every
@@ -391,9 +393,12 @@ APR_DECLARE_NONSTD(void) apr_table_do(apr_table_do_callback_fn_t *comp,
  * @param vp The vararg table.  If this is NULL, then all elements in the 
  *                table are run through the function, otherwise only those 
  *                whose key matches are run.
+ * @return FALSE if one of the comp() iterations returned zero; TRUE if all
+ *            iterations returned non-zero
+ * @see apr_table_do_callback_fn_t
  */
-APR_DECLARE(void) apr_table_vdo(apr_table_do_callback_fn_t *comp,
-                                void *rec, const apr_table_t *t, va_list);
+APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
+                               void *rec, const apr_table_t *t, va_list);
 
 /** flag for overlap to use apr_table_setn */
 #define APR_OVERLAP_TABLES_SET   (0)
