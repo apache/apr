@@ -59,6 +59,7 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_errno.h"
+#include "apr_lib.h"
 
 ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
@@ -109,4 +110,107 @@ ap_status_t ap_writev(struct file_t *thefile, const struct iovec_t *vec, ap_ssiz
 	    *iocnt = bytes;
 		return APR_SUCCESS;
 	}
+}
+
+ap_status_t ap_putc(ap_file_t *thefile, char ch)
+{
+    if (thefile->buffered) {
+        if (fputc(ch, thefile->filehand) == ch) {
+            return APR_SUCCESS;
+        }
+        return errno;
+    }
+    if (write(thefile->filedes, &ch, 1) != 1) {
+        return errno;
+    }
+    return APR_SUCCESS; 
+}
+
+ap_status_t ap_getc(ap_file_t *thefile, char *ch)
+{
+    ssize_t rv;
+    
+    if (thefile->buffered) {
+        if ((*ch) = fgetc(thefile->filehand)) {
+            return APR_SUCCESS;
+        }
+        if (feof(thefile->filehand)) {
+            return APR_EOF;
+        }
+        return errno;
+    }
+    rv = read(thefile->filedes, ch, 1); 
+    if (rv == 0) {
+        thefile->eof_hit = TRUE;
+        return APR_EOF;
+    }
+    else if (rv != 1) {
+        return errno;
+    }
+    return APR_SUCCESS; 
+}
+
+ap_status_t ap_gets(ap_file_t *thefile, char *str, int len)
+{
+    ssize_t rv;
+    int i;    
+
+    if (thefile->buffered) {
+        if (fgets(str, len, thefile->filehand)) {
+            return APR_SUCCESS;
+        }
+        if (feof(thefile->filehand)) {
+            return APR_EOF;
+        }
+        return errno;
+    }
+    for (i = 0; i < len; i++) {
+        rv = read(thefile->filedes, &str[i], 1); 
+        if (rv == 0) {
+            thefile->eof_hit = TRUE;
+            return APR_EOF;
+        }
+        else if (rv != 1) {
+            return errno;
+        }
+        if (str[i] == '\n' || str[i] == '\r')
+            break;
+    }
+    return APR_SUCCESS; 
+}
+
+static int printf_flush(ap_vformatter_buff_t *vbuff)
+{
+    /* I would love to print this stuff out to the file, but I will
+     * get that working later.  :)  For now, just return.
+     */
+    return -1;
+}
+
+API_EXPORT(int) ap_fprintf(struct file_t *fptr, const char *format, ...)
+{
+    int cc;
+    va_list ap;
+    ap_vformatter_buff_t vbuff;
+    char *buf;
+    int len;
+
+    buf = malloc(HUGE_STRING_LEN);
+    if (buf == NULL) {
+        return 0;
+    }
+    /* save one byte for nul terminator */
+    vbuff.curpos = buf;
+    vbuff.endpos = buf + len - 1;
+    va_start(ap, format);
+#if 0
+    cc = ap_vformatter(printf_flush, &vbuff, format, ap);
+    va_end(ap);
+    *vbuff.curpos = '\0';
+#endif
+    vsprintf(buf, format, ap);
+    len = strlen(buf);
+    cc = ap_write(fptr, buf, &len);
+    va_end(ap);
+    return (cc == -1) ? len : cc;
 }

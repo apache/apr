@@ -66,6 +66,7 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_portable.h"
 
 ap_status_t file_cleanup(void *thefile)
 {
@@ -163,4 +164,43 @@ ap_status_t ap_remove_file(ap_context_t *cont, char *path)
     else { 
         return errno; 
     } 
-} 
+}
+
+ap_status_t ap_get_os_file(struct file_t *file, ap_os_file_t *thefile)
+{
+    if (file == NULL) {
+        return APR_ENOFILE;
+    }
+    thefile = &(file->filedes);
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_put_os_file(ap_context_t *cont, struct file_t **file, 
+                            ap_os_file_t *thefile)
+{
+    if (cont == NULL) {
+        return APR_ENOCONT;
+    }
+    if ((*file) == NULL) {
+        (*file) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
+        (*file)->cntxt = cont;
+    }
+    (*file)->filedes = *thefile;
+    return APR_SUCCESS;
+}    
+
+ap_status_t ap_eof(ap_file_t *fptr)
+{
+    char ch;
+    if (fptr->buffered) {
+        if (feof(fptr->filehand) == 0) {
+            return APR_SUCCESS;
+        }
+        return APR_EOF;
+    }
+    if (fptr->eof_hit == 1) {
+        return APR_EOF;
+    }
+    APR_SUCCESS;
+}   
+

@@ -162,3 +162,52 @@ ap_status_t ap_get_filemtime(struct file_t *file, time_t *time)
     }
 }
 
+ap_status_t ap_get_filetype(struct file_t *file, ap_filetype_e *type)
+{    
+    if (file != NULL) {
+        if (!file->stated) {
+            ap_getfileinfo(file);
+        }
+        if (S_ISREG(file->protection))
+            *type = APR_REG;
+        if (S_ISDIR(file->protection))
+            *type = APR_DIR;
+        if (S_ISCHR(file->protection))
+            *type = APR_CHR;
+        if (S_ISBLK(file->protection))
+            *type = APR_BLK;
+        if (S_ISFIFO(file->protection))
+            *type = APR_PIPE;
+        if (S_ISLNK(file->protection))
+            *type = APR_LNK;
+        return APR_SUCCESS;
+    }
+    else {
+        *type = APR_REG;
+        return APR_ENOFILE;
+    }
+}
+
+ap_status_t ap_get_filedata(struct file_t *file, void *data)
+{    
+    if (file != NULL) {
+        return ap_get_userdata(file->cntxt, &data);
+    }
+    else {
+        data = NULL;
+        return APR_ENOFILE;
+    }
+}
+
+ap_status_t ap_set_filedata(struct file_t *file, void *data)
+{    
+    if (file != NULL) {
+        return ap_set_userdata(file->cntxt, data);
+    }
+    else {
+        data = NULL;
+        return APR_ENOFILE;
+    }
+}
+
+

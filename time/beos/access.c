@@ -63,7 +63,7 @@
 ap_status_t ap_get_curtime(struct atime_t *time, ap_int64_t *rv)
 {
     if (time) {
-        (*rv) = time->currtime;
+        (*rv) = time->currtime->tv_sec;
         return APR_SUCCESS;
     }
     return APR_ENOTIME;    

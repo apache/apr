@@ -121,5 +121,8 @@ struct proc_t {
     struct procattr_t *attr;
 };
 
+/* we need a structure to pass off to the thread that will run any
+ * new process we create */
+
 #endif  /* ! THREAD_PROC_H */
 

@@ -71,8 +71,12 @@
 struct file_t {
     ap_context_t *cntxt;
     int filedes;
+    FILE *filehand;
     char * fname;
+    int oflags;
     int buffered;
+    int stated;
+    int eof_hit;
     mode_t protection;
     uid_t user;
     gid_t group;
