@@ -74,7 +74,7 @@ static apr_filetype_e filetype_from_mode(mode_t mode)
         type = APR_PIPE;
     if (S_ISLNK(mode))
         type = APR_LNK;
-#ifndef BEOS
+#if !defined(BEOS) && defined(S_ISSOCK)
     if (S_ISSOCK(mode))
         type = APR_SOCK;
 #endif
