@@ -8,3 +8,4 @@ mm-config
 *.lo
 *.la
 mm_test
+configure
