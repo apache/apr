@@ -184,7 +184,16 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         apr_lock_release(thefile->mutex);
         return APR_OS2_STATUS(rc);
     } else {
-        rc = DosWrite(thefile->filedes, buf, *nbytes, &byteswritten);
+        if (thefile->flags & APR_APPEND) {
+            FILELOCK all = { 0, 0x7fffffff };
+            ULONG newpos;
+            DosSetFileLocks(thefile->filedes, NULL, &all, -1, 0);
+            DosSetFilePtr(thefile->filedes, 0, FILE_END, &newpos);
+            rc = DosWrite(thefile->filedes, buf, *nbytes, &byteswritten);
+            DosSetFileLocks(thefile->filedes, &all, NULL, -1, 0);
+        } else {
+            rc = DosWrite(thefile->filedes, buf, *nbytes, &byteswritten);
+        }
 
         if (rc) {
             *nbytes = 0;
