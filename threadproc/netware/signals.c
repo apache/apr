@@ -69,3 +69,13 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
 
     return rv;
 }
+
+APR_DECLARE(apr_status_t) apr_signal_block(int signum)
+{
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_signal_unblock(int signum)
+{
+    return APR_SUCCESS;
+}

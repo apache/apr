@@ -53,3 +53,13 @@ const char *apr_signal_description_get(int signum)
 {
     return "unknown signal (not supported)";
 }
+
+APR_DECLARE(apr_status_t) apr_signal_block(int signum)
+{
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_signal_unblock(int signum)
+{
+    return APR_SUCCESS;
+}
