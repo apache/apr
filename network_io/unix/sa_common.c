@@ -85,7 +85,7 @@ APR_DECLARE(apr_status_t) apr_set_port(apr_sockaddr_t *sockaddr,
 APR_DECLARE(apr_status_t) apr_set_ipaddr(apr_sockaddr_t *sockaddr,
                                          const char *addr)
 {
-    u_long ipaddr;
+    apr_uint32_t ipaddr;
     
     if (!strcmp(addr, APR_ANYADDR)) {
         sockaddr->sa.sin.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -93,7 +93,7 @@ APR_DECLARE(apr_status_t) apr_set_ipaddr(apr_sockaddr_t *sockaddr,
     }
     
     ipaddr = inet_addr(addr);
-    if (ipaddr == (u_long)-1) {
+    if (ipaddr == (apr_uint32_t)-1) {
 #ifdef WIN32
         return WSAEADDRNOTAVAIL;
 #else
