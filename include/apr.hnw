@@ -112,7 +112,9 @@ extern "C" {
 
 #define APR_INLINE 
 #define APR_HAS_INLINE		0
+#ifndef __attribute__
 #define __attribute__(__x)
+#endif
 #define ENUM_BITFIELD(e,n,w)  signed int n : w
 
 #define APR_HAVE_ARPA_INET_H    0
