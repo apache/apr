@@ -166,6 +166,8 @@ APR_POOL_DECLARE_ACCESSOR(global_mutex);
  * Define these platforms in terms of an apr_proc_mutex_t.
  */
 
+#include "apr_proc_mutex.h"
+
 #define apr_global_mutex_t          apr_proc_mutex_t
 #define apr_global_mutex_create     apr_proc_mutex_create
 #define apr_global_mutex_child_init apr_proc_mutex_child_init
