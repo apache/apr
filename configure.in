@@ -141,11 +141,15 @@ AC_ARG_ENABLE(debug,[  --enable-debug            Turn on debugging and compile t
 ])dnl
 
 AC_ARG_ENABLE(maintainer-mode,[  --enable-maintainer-mode  Turn on debugging and compile time warnings],
-  [APR_ADDTO(CFLAGS,-g)
+  [APR_ADDTO(CFLAGS,-g -DAPR_ASSERT_MEMORY)
    if test "$GCC" = "yes"; then
      APR_ADDTO(CFLAGS,[-Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations])
    fi
 ])dnl
+
+AC_ARG_ENABLE(assert-memory,[ --enable-assert-memory  Turn on asserts in the APR memory code],
+  [APR_ADDTO(CFLAGS,-DAPR_ASSERT_MEMORY)
+])
 
 dnl # this is the place to put specific options for platform/compiler
 dnl # combinations
