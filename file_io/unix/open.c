@@ -55,6 +55,7 @@
 #include "fileio.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
+#include "apr_thread_mutex.h"
 #include "inherit.h"
 
 apr_status_t apr_unix_file_cleanup(void *thefile)
@@ -74,7 +75,7 @@ apr_status_t apr_unix_file_cleanup(void *thefile)
         }
 #if APR_HAS_THREADS
         if (file->thlock) {
-            rv = apr_lock_destroy(file->thlock);
+            rv = apr_thread_mutex_destroy(file->thlock);
         }
 #endif
     }
@@ -118,8 +119,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     if ((*new)->buffered) {
         (*new)->buffer = apr_palloc(cont, APR_FILE_BUFSIZE);
 #if APR_HAS_THREADS
-        rv = apr_lock_create(&((*new)->thlock), APR_MUTEX, APR_INTRAPROCESS, 
-                            NULL, cont);
+        rv = apr_thread_mutex_create(&((*new)->thlock),
+                                     APR_THREAD_MUTEX_DEFAULT, cont);
         if (rv) {
             return rv;
         }
