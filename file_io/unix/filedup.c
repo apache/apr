@@ -55,7 +55,7 @@
 #include "fileio.h"
 #include "apr_portable.h"
 
-ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file)
+ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
 {
     int have_file = 0;
 
@@ -63,8 +63,7 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file)
         return APR_EBADARG;
 
     if ((*new_file) == NULL) {
-        (*new_file) = (ap_file_t *)ap_pcalloc(old_file->cntxt,
-                                   sizeof(ap_file_t));
+        (*new_file) = (ap_file_t *)ap_pcalloc(p, sizeof(ap_file_t));
         if ((*new_file) == NULL) {
             return APR_ENOMEM;
         }
@@ -72,7 +71,7 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file)
         have_file = 1;
     }
     
-    (*new_file)->cntxt = old_file->cntxt; 
+    (*new_file)->cntxt = p; 
     if (have_file) {
         dup2(old_file->filedes, (*new_file)->filedes);
     }
@@ -81,9 +80,9 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file)
     }
 #if APR_HAS_THREADS
     ap_create_lock(&((*new_file)->thlock), APR_MUTEX, APR_INTRAPROCESS, NULL, 
-                   old_file->cntxt);
+                   p);
 #endif
-    (*new_file)->fname = ap_pstrdup(old_file->cntxt, old_file->fname);
+    (*new_file)->fname = ap_pstrdup(p, old_file->fname);
     (*new_file)->buffered = old_file->buffered;
     ap_register_cleanup((*new_file)->cntxt, (void *)(*new_file), ap_unix_file_cleanup,
                         ap_null_cleanup);

@@ -384,18 +384,19 @@ API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
 
 /*
 
-=head1 ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file)
+=head1 ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
 
 B<duplicate the specified file descriptor.>
 
     arg 1) The structure to duplicate into. 
     arg 2) The file to duplicate.
+    arg 3) The pool to use for the new file.
 
 B<NOTE>: *arg1 must point to a valid ap_file_t, or point to NULL
 
 =cut
  */         
-ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file);
+ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p);
 
 /*
 
