@@ -92,6 +92,9 @@ static apr_status_t wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
     return APR_SUCCESS;
 }
 
+#define SEND_WAIT APR_USEC_PER_SEC / 10
+#define MAX_SEND_WAIT 2 * APR_USEC_PER_SEC
+
 apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
 {
     ssize_t rv;
@@ -101,16 +104,31 @@ apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && errno == EWOULDBLOCK && sock->timeout > 0) {
+        apr_int32_t snooze = SEND_WAIT;
+        apr_int32_t zzz = 0;  
+        int loop = 1;
+/*        
         apr_status_t arv = wait_for_io_or_timeout(sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
         }
         else {
-            do {
-                rv = send(sock->socketdes, buf, (*len), 0);
-            } while (rv == -1 && errno == EINTR);
+*/
+        do {
+            rv = send(sock->socketdes, buf, (*len), 0);
+            if (rv == -1 && errno == EWOULDBLOCK){
+                snooze (snooze_val);
+                zzz += snooze_val;
+                snooze_val += (SEND_WAIT * loop++);
+                /* have we passed our timeout value */
+                if (zzz > (sock->timeout * APR_USECS_PER_SEC))
+                    break;
+            }
+        } while (rv == -1 && (errno == EINTR || errno == EWOULDBLOCK));
+/*
         }
+*/
     }
     if (rv == -1) {
         *len = 0;
