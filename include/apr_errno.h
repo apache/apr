@@ -1203,7 +1203,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 /** cross device link */
 #define APR_STATUS_IS_EXDEV(s)           ((s) == APR_EXDEV)
 /** Directory Not Empty */
-#define APR_STATUS_IS_ENOTEMPTY(s)       ((s) == APR_ENOTEMPTY)
+#define APR_STATUS_IS_ENOTEMPTY(s)       ((s) == APR_ENOTEMPTY || \
+                                          (s) == APR_EEXIST)
 
 #endif /* !def OS2 || WIN32 */
 
