@@ -135,7 +135,8 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
         return APR_FROM_OS_ERROR(rv);
 
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT) {
+    IF_WIN_OS_IS_UNICODE
+    {
 
         keylen = sizeof(regkey);
         rv = RegQueryValueExW(key, L"ProfileImagePath", NULL, &type,
@@ -162,8 +163,9 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
         else
             return APR_ENOENT;
     }
-    else
-#endif /* APR_HAS_UNICODE_FS */
+#endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
     {
         keylen = sizeof(regkey);
         rv = RegQueryValueEx(key, "ProfileImagePath", NULL, &type,
@@ -182,6 +184,7 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
         else
             return APR_ENOENT;
     }
+#endif /* APR_HAS_ANSI_FS */
     for (fixch = *dirname; *fixch; ++fixch)
         if (*fixch == '\\')
             *fixch = '/';

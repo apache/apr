@@ -225,9 +225,11 @@ struct apr_dir_t {
             WIN32_FIND_DATAW *entry;
         } w;
 #endif
+#if APR_HAS_ANSI_FS
         struct {
             WIN32_FIND_DATAA *entry;
         } n;
+#endif        
     };
 };
 

@@ -386,7 +386,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             ++iEnvBlockLen;
 
 #if APR_HAS_UNICODE_FS
-        if (apr_os_level >= APR_WIN_NT) {
+        IF_WIN_OS_IS_UNICODE
+        {
             apr_wchar_t *pNext;
             pEnvBlock = (char *)apr_palloc(cont, iEnvBlockLen * 2);
             dwCreationFlags |= CREATE_UNICODE_ENVIRONMENT;
@@ -407,8 +408,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 *(pNext++) = L'\0';
 	    *pNext = L'\0';
         }
-        else 
 #endif /* APR_HAS_UNICODE_FS */
+#if APR_HAS_ANSI_FS
+        ELSE_WIN_OS_IS_ANSI
         {
             char *pNext;
             pEnvBlock = (char *)apr_palloc(cont, iEnvBlockLen);
@@ -424,10 +426,11 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 *(pNext++) = '\0';
 	    *pNext = '\0';
         }
+#endif /* APR_HAS_ANSI_FS */
     } 
 
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT)
+    IF_WIN_OS_IS_UNICODE
     {
         STARTUPINFOW si;
         apr_size_t nprg = strlen(progname) + 1;
@@ -482,8 +485,10 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                             wcwd,              /* Current directory name */
                             &si, &pi);
     }
-    else {
 #endif /* APR_HAS_UNICODE_FS */
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
+    {
         STARTUPINFOA si;
         memset(&si, 0, sizeof(si));
         si.cb = sizeof(si);
@@ -512,6 +517,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                             attr->currdir,     /* Current directory name */
                             &si, &pi);
     }
+#endif /* APR_HAS_ANSI_FS */
 
     /* Check CreateProcess result 
      */

@@ -120,7 +120,7 @@ apr_status_t filepath_drive_get(char **rootpath, char drive,
 {
     char path[APR_PATH_MAX];
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT)
+    IF_WIN_OS_IS_UNICODE
     {
         apr_wchar_t *ignored;
         apr_wchar_t wdrive[8];
@@ -136,8 +136,9 @@ apr_status_t filepath_drive_get(char **rootpath, char drive,
         if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
             return rv;
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
     {
         char *ignored;
         char drivestr[4];
@@ -148,6 +149,7 @@ apr_status_t filepath_drive_get(char **rootpath, char drive,
         if (!GetFullPathName(drivestr, sizeof(path), path, &ignored))
             return apr_get_os_error();
     }
+#endif
     if (!(flags & APR_FILEPATH_NATIVE)) {
         for (*rootpath = path; **rootpath; ++*rootpath) {
             if (**rootpath == '\\')
@@ -162,7 +164,7 @@ apr_status_t filepath_drive_get(char **rootpath, char drive,
 apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)
 {
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT)
+    IF_WIN_OS_IS_UNICODE
     {
         apr_wchar_t *ignored;
         apr_wchar_t wpath[APR_PATH_MAX];
@@ -183,8 +185,9 @@ apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)
             return rv;
         *rootpath = apr_pstrdup(p, (char*)wroot);
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
     {
         char path[APR_PATH_MAX];
         char *ignored;
@@ -192,6 +195,7 @@ apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)
             return apr_get_os_error();
         *rootpath = apr_pstrdup(p, path);
     }
+#endif
     return APR_SUCCESS;
 }
 
@@ -201,7 +205,7 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath, apr_int32_t flags,
 {
     char path[APR_PATH_MAX];
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT)
+    IF_WIN_OS_IS_UNICODE
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
@@ -210,12 +214,14 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath, apr_int32_t flags,
         if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
             return rv;
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
     {
         if (!GetCurrentDirectory(sizeof(path), path))
             return apr_get_os_error();
     }
+#endif
     if (!(flags & APR_FILEPATH_NATIVE)) {
         for (*rootpath = path; **rootpath; ++*rootpath) {
             if (**rootpath == '\\')
@@ -231,7 +237,7 @@ APR_DECLARE(apr_status_t) apr_filepath_set(const char *rootpath,
                                            apr_pool_t *p)
 {
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT)
+    IF_WIN_OS_IS_UNICODE
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
@@ -241,11 +247,13 @@ APR_DECLARE(apr_status_t) apr_filepath_set(const char *rootpath,
         if (!SetCurrentDirectoryW(wpath))
             return apr_get_os_error();
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
     {
         if (!SetCurrentDirectory(rootpath))
             return apr_get_os_error();
     }
+#endif
     return APR_SUCCESS;
 }
