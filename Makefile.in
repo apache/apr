@@ -60,6 +60,7 @@ distclean: subdirs_distclean
 	-$(RM) -f *.o *.a *.so
 	-$(RM) -f config.cache config.status config.log configure
 	-$(RM) -f Makefile
+	-$(RM) -f APRVARS
 	-$(RM) -rf objs
 	cd test; $(MAKE) distclean; cd ..
 
