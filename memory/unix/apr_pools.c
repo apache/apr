@@ -596,24 +596,6 @@ APR_DECLARE(void) apr_pool_terminate(void)
     global_allocator = NULL;
 }
 
-#ifdef NETWARE
-void netware_pool_proc_cleanup ()
-{
-    apr_pool_t *pool = global_pool->child;
-    apr_os_proc_t owner_proc = (apr_os_proc_t)getnlmhandle();
-
-    while (pool) {
-        if (pool->owner_proc == owner_proc) {
-            apr_pool_destroy (pool);
-            pool = global_pool->child;
-        }
-        else {
-            pool = pool->sibling;
-        }
-    }
-    return;
-}
-#endif /* defined(NETWARE) */
 
 /* Node list management helper macros; list_insert() inserts 'node'
  * before 'point'. */
@@ -1566,6 +1548,10 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
 #if APR_HAS_THREADS
     pool->owner = apr_os_thread_current();
 #endif /* APR_HAS_THREADS */
+#ifdef NETWARE
+    pool->owner_proc = (apr_os_proc_t)getnlmhandle();
+#endif /* defined(NETWARE) */
+
 
     if (parent == NULL || parent->allocator != allocator) {
 #if APR_HAS_THREADS
@@ -1758,6 +1744,25 @@ APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag)
 }
 
 #endif /* !APR_POOL_DEBUG */
+
+#ifdef NETWARE
+void netware_pool_proc_cleanup ()
+{
+    apr_pool_t *pool = global_pool->child;
+    apr_os_proc_t owner_proc = (apr_os_proc_t)getnlmhandle();
+
+    while (pool) {
+        if (pool->owner_proc == owner_proc) {
+            apr_pool_destroy (pool);
+            pool = global_pool->child;
+        }
+        else {
+            pool = pool->sibling;
+        }
+    }
+    return;
+}
+#endif /* defined(NETWARE) */
 
 
 /*
