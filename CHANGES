@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Fix the new shared memory code.  We need to pass a pointer to
+     an apr_file_t to apr_file_open.  Also, apr_os_file_get returns
+     a status value, not the OS file descriptor.  [Ryan Bloom]
+
   *) Fix the new shared memory configure script.  The APR_DECIDE
      macros go in order, so the last set of dependancies that are
      met are the ones used.  That means that when using those macros,
