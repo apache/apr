@@ -32,13 +32,14 @@ void main(void) {
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    error = getaddrinfo("127.0.0.1", "8080", &hints, &ai);
+    error = getaddrinfo("127.0.0.1", NULL, &hints, &ai);
     if (error) {
         exit(1);
     }
-    else {
-        exit(0);
+    if (ai->ai_addr->sa_family != AF_INET) {
+        exit(1);
     }
+    exit(0);
 }
 ],[
   ac_cv_working_getaddrinfo="yes"
