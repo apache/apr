@@ -61,6 +61,9 @@
 #include <signal.h>
 #include <errno.h>
 #include <string.h>
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_create_context(ap_context_t *, void *, ap_context_t **)

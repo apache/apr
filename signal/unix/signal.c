@@ -100,7 +100,8 @@ ap_status_t ap_send_signal(ap_context_t *cont, ap_signum_t signum)
  * arg 2) The signal we are expecting to receive.  Same as above list
  * arg 3) The function to execute when this signal is received.
  */
-ap_setup_signal(ap_context_t *cont, ap_signum_t signum, Sigfunc *func)
+ap_status_t ap_setup_signal(ap_context_t *cont, ap_signum_t signum,
+			    Sigfunc *func)
 {
     sigset_t newset;
 
