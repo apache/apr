@@ -138,6 +138,13 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath,
         if (!GetCurrentDirectory(sizeof(path), path))
             return apr_get_os_error();
     }
+    /* ###: We really should consider adding a flag to allow the user
+     * to have the APR_FILEPATH_NATIVE result
+     */
+    for (*rootpath = path; **rootpath; ++*rootpath) {
+        if (**rootpath == '\\')
+            **rootpath = '/';
+    }
     *rootpath = apr_pstrdup(p, path);
     return APR_SUCCESS;
 }
@@ -165,7 +172,6 @@ static apr_status_t apr_filepath_drive_get(char **rootpath,
             return apr_get_os_error();
         if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
             return rv;
-        *rootpath = apr_pstrdup(p, path);
     }
     else
 #endif
@@ -178,8 +184,15 @@ static apr_status_t apr_filepath_drive_get(char **rootpath,
         drivestr[3] = '\0';
         if (!GetFullPathName(drivestr, sizeof(path), path, &ignored))
             return apr_get_os_error();
-        *rootpath = apr_pstrdup(p, path);
     }
+    /* ###: We really should consider adding a flag to allow the user
+     * to have the APR_FILEPATH_NATIVE result
+     */
+    for (*rootpath = path; **rootpath; ++*rootpath) {
+        if (**rootpath == '\\')
+            **rootpath = '/';
+    }
+    *rootpath = apr_pstrdup(p, path);
     return APR_SUCCESS;
 }
 
@@ -687,8 +700,10 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         
             path[pathlen++] = ((flags & APR_FILEPATH_NATIVE) ? '\\' : '/');
         }
-        else if (!fixunc)
-            path[pathlen++] = ((flags & APR_FILEPATH_NATIVE) ? '\\' : '/');
+    /*  XXX: wrong, but gotta figure out what I intended;
+     *  else if (!fixunc)
+     *      path[pathlen++] = ((flags & APR_FILEPATH_NATIVE) ? '\\' : '/');
+     */
     }
 
     while (*addpath) 
