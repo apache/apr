@@ -90,6 +90,23 @@ static void test_read(abts_case *tc, void *data)
     apr_file_close(filetest);
 }
 
+static void test_readzero(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_size_t nbytes = 0;
+    char *str = NULL;
+    apr_file_t *filetest;
+    
+    rv = apr_file_open(&filetest, FILENAME, APR_READ, APR_OS_DEFAULT, p);
+    apr_assert_success(tc, "Opening test file " FILENAME, rv);
+
+    rv = apr_file_read(filetest, str, &nbytes);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 0, nbytes);
+
+    apr_file_close(filetest);
+}
+
 static void test_filename(abts_case *tc, void *data)
 {
     const char *str;
@@ -536,6 +553,7 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_open_read, NULL);
     abts_run_test(suite, test_open_readwrite, NULL);
     abts_run_test(suite, test_read, NULL); 
+    abts_run_test(suite, test_readzero, NULL); 
     abts_run_test(suite, test_seek, NULL);
     abts_run_test(suite, test_filename, NULL);
     abts_run_test(suite, test_fileclose, NULL);
