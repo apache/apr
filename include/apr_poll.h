@@ -111,6 +111,7 @@ struct apr_pollfd_t {
     apr_int16_t reqevents;
     apr_int16_t rtnevents;
     apr_descriptor desc;
+    void *client_data; /* allows app to associate context with a descriptor */
 };
 
 /**
@@ -249,6 +250,9 @@ APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t *pollset);
  * Add a socket or file descriptor to a pollset
  * @param pollset The pollset to which to add the descriptor
  * @param descriptor The descriptor to add
+ * @param remark If you set client_data in the descriptor, that value
+ *               will be returned in the client_data field whenever this
+ *               descriptor is signalled in apr_pollset_poll().
  */
 APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
                                           const apr_pollfd_t *descriptor);
