@@ -52,7 +52,7 @@
  * project, please see <http://www.apache.org/>.
  *
  */
-
+#include "apr_config.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
 #include <pthread.h>
@@ -62,6 +62,7 @@
 
 #define SHELL_PATH "/bin/sh"
 
+#if APR_HAS_THREADS
 struct thread_t {
     ap_context_t *cntxt;
     pthread_t *td;
@@ -76,6 +77,7 @@ struct threadkey_t {
     ap_context_t *cntxt;
     pthread_key_t key;
 };
+#endif
 
 struct procattr_t {
     ap_context_t *cntxt;
