@@ -62,10 +62,8 @@ ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
 {
     ap_status_t stat;
   
-    (*new) = (ap_threadattr_t *)ap_palloc(cont, 
-              sizeof(ap_threadattr_t));
-    (*new)->attr = (pthread_attr_t *)ap_palloc(cont, 
-                    sizeof(pthread_attr_t));
+    (*new) = (ap_threadattr_t *)ap_pcalloc(cont, sizeof(ap_threadattr_t));
+    (*new)->attr = (pthread_attr_t *)ap_pcalloc(cont, sizeof(pthread_attr_t));
 
     if ((*new) == NULL || (*new)->attr == NULL) {
         return APR_ENOMEM;
@@ -108,13 +106,13 @@ ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr,
     ap_status_t stat;
     pthread_attr_t *temp;
  
-    (*new) = (ap_thread_t *)ap_palloc(cont, sizeof(ap_thread_t));
+    (*new) = (ap_thread_t *)ap_pcalloc(cont, sizeof(ap_thread_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
 
-    (*new)->td = (pthread_t *)ap_palloc(cont, sizeof(pthread_t));
+    (*new)->td = (pthread_t *)ap_pcalloc(cont, sizeof(pthread_t));
 
     if ((*new)->td == NULL) {
         return APR_ENOMEM;
@@ -211,7 +209,7 @@ ap_status_t ap_put_os_thread(ap_thread_t **thd, ap_os_thread_t *thethd,
         return APR_ENOPOOL;
     }
     if ((*thd) == NULL) {
-        (*thd) = (ap_thread_t *)ap_palloc(cont, sizeof(ap_thread_t));
+        (*thd) = (ap_thread_t *)ap_pcalloc(cont, sizeof(ap_thread_t));
         (*thd)->cntxt = cont;
     }
     (*thd)->td = thethd;

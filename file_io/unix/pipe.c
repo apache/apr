@@ -93,7 +93,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
         return errno;
     }
     
-    (*in) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
+    (*in) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
     (*in)->cntxt = cont;
     (*in)->filedes = filedes[0];
     (*in)->pipe = 1;
@@ -105,7 +105,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     (*in)->thlock = NULL;
 #endif
 
-    (*out) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
+    (*out) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
     (*out)->cntxt = cont;
     (*out)->filedes = filedes[1];
     (*out)->pipe = 1;
