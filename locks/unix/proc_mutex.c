@@ -262,17 +262,6 @@ static apr_status_t proc_mutex_sysv_release(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_sysv_destroy(apr_proc_mutex_t *mutex)
-{
-    apr_status_t rv;
-
-    if ((rv = proc_mutex_sysv_cleanup(mutex)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(mutex->pool, mutex, proc_mutex_sysv_cleanup);
-        return APR_SUCCESS;
-    }
-    return rv;
-}
-
 static apr_status_t proc_mutex_sysv_child_init(apr_proc_mutex_t **mutex, apr_pool_t *cont, const char *fname)
 {
     return APR_SUCCESS;
@@ -438,18 +427,6 @@ static apr_status_t proc_mutex_proc_pthread_release(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_proc_pthread_destroy(apr_proc_mutex_t *mutex)
-{
-    apr_status_t rv;
-    if ((rv = proc_mutex_proc_pthread_cleanup(mutex)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(mutex->pool,
-                              mutex,
-                              proc_mutex_proc_pthread_cleanup);
-        return APR_SUCCESS;
-    }
-    return rv;
-}
-
 static apr_status_t proc_mutex_proc_pthread_child_init(apr_proc_mutex_t **mutex,
                                             apr_pool_t *cont, 
                                             const char *fname)
@@ -572,16 +549,6 @@ static apr_status_t proc_mutex_fcntl_release(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_fcntl_destroy(apr_proc_mutex_t *mutex)
-{
-    apr_status_t rv;
-    if ((rv = proc_mutex_fcntl_cleanup(mutex)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(mutex->pool, mutex, proc_mutex_fcntl_cleanup);
-        return APR_SUCCESS;
-    }
-    return rv;
-}
-
 static apr_status_t proc_mutex_fcntl_child_init(apr_proc_mutex_t **mutex,
                                                 apr_pool_t *pool, 
                                                 const char *fname)
@@ -687,16 +654,6 @@ static apr_status_t proc_mutex_flock_release(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_flock_destroy(apr_proc_mutex_t *mutex)
-{
-    apr_status_t rv;
-    if ((rv = proc_mutex_flock_cleanup(mutex)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(mutex->pool, mutex, proc_mutex_flock_cleanup);
-        return APR_SUCCESS;
-    }
-    return rv;
-}
-
 static apr_status_t proc_mutex_flock_child_init(apr_proc_mutex_t **mutex,
                                                 apr_pool_t *pool, 
                                                 const char *fname)
@@ -712,7 +669,7 @@ static apr_status_t proc_mutex_flock_child_init(apr_proc_mutex_t **mutex,
     rv = apr_file_open(&new_mutex->interproc, new_mutex->fname,
                        APR_WRITE, 0, new_mutex->pool);
     if (rv != APR_SUCCESS) {
-        proc_mutex_flock_destroy(new_mutex);
+        proc_mutex_flock_cleanup(new_mutex);
         return rv;
     }
     *mutex = new_mutex;
