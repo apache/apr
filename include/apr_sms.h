@@ -77,6 +77,13 @@ extern "C" {
 #define APR_CHILD_CLEANUP     0x0001
 #define APR_PARENT_CLEANUP    0x0002
 
+/* Alignment macro's */
+#define ALIGN(size, boundary) \
+    ((size) + (((boundary) - ((size) & ((boundary) - 1))) & ((boundary) - 1)))
+
+#define ALIGN_DEFAULT(size) ALIGN(size, 8)
+
+
 /**
  * @package APR memory system
  */
