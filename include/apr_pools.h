@@ -97,6 +97,9 @@ extern "C" {
  * |   |   |   |   |   |   | x |   |  Verbose output on stderr (report
  *                                    CREATE, CLEAR, DESTROY).
  *
+ * |   |   |   | x |   |   |   |   |  Verbose output on stderr (report
+ *                                    PALLOC, PCALLOC).
+ *
  * |   |   |   |   |   | x |   |   |  Lifetime checking. On each use of a
  *                                    pool, check its lifetime.  If the pool
  *                                    is out of scope, abort().
@@ -328,11 +331,27 @@ APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *p,
 /**
  * Allocate a block of memory from a pool
  * @param p The pool to allocate from 
- * @param reqsize The amount of memory to allocate 
+ * @param size The amount of memory to allocate 
  * @return The allocated memory
  */
-APR_DECLARE(void *) apr_palloc(apr_pool_t *p, apr_size_t reqsize);
+APR_DECLARE(void *) apr_palloc(apr_pool_t *p, apr_size_t size);
 
+/**
+ * Debug version of apr_palloc
+ * @param p See: apr_palloc 
+ * @param size See: apr_palloc 
+ * @param file_line Where the function is called from.
+ *        This is usually APR_POOL__FILE_LINE__.
+ * @return See: apr_palloc 
+ */
+APR_DECLARE(void *) apr_palloc_debug(apr_pool_t *p, apr_size_t size,
+                                     const char *file_line);
+
+#if APR_POOL_DEBUG
+#define apr_palloc(p, size) \
+    apr_palloc_debug(p, size, APR_POOL__FILE_LINE__)
+#endif
+    
 /**
  * Allocate a block of memory from a pool and set all of the memory to 0
  * @param p The pool to allocate from 
@@ -340,6 +359,22 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *p, apr_size_t reqsize);
  * @return The allocated memory
  */
 APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
+
+/**
+ * Debug version of apr_pcalloc
+ * @param p See: apr_pcalloc 
+ * @param size See: apr_pcalloc 
+ * @param file_line Where the function is called from.
+ *        This is usually APR_POOL__FILE_LINE__.
+ * @return See: apr_pcalloc 
+ */
+APR_DECLARE(void *) apr_pcalloc_debug(apr_pool_t *p, apr_size_t size,
+                                      const char *file_line);
+
+#if APR_POOL_DEBUG
+#define apr_pcalloc(p, size) \
+    apr_pcalloc_debug(p, size, APR_POOL__FILE_LINE__)
+#endif
 
 
 /*
