@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/08/01 16:00:31 $]
+Last modified at [$Date: 2002/08/19 21:38:46 $]
 
 Release:
 
@@ -58,14 +58,6 @@ RELEASE SHOWSTOPPERS:
       
 
 CURRENT VOTES:
-
-    * Is this really a showstopper for the 1.0 release?:
-    * Almost every API in APR depends on pools, but pool semantics
-      aren't a good match for a lot of applications.  We need to find
-      a way to support alternate allocators polymorphically without
-      a significant performance penalty.
-
-      Not a showstopper: Thom, Justin, Sander, Fitz
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
@@ -370,4 +362,11 @@ Stuff waiting for code thawing after Beta 1:
                      belongs!  You'll have to address the random issue in
                      misc/unix/getuuid.c that forces md5 to be in APR.
         Sander: +1 for the move.
+
+Stuff for post 1.0:
+
+    * Almost every API in APR depends on pools, but pool semantics
+      aren't a good match for a lot of applications.  We need to find
+      a way to support alternate allocators polymorphically without
+      a significant performance penalty.
 
