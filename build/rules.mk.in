@@ -138,7 +138,10 @@ install: all-recursive
 all-recursive depend-recursive clean-recursive distclean-recursive \
   extraclean-recursive:
 	@otarget=`echo $@ | sed s/-recursive//`; \
-	list='$(SUBDIRS)'; \
+	case $$otarget in \
+	    *clean) list='$(SUBDIRS) $(CLEAN_SUBDIRS)';; \
+	    *)      list='$(SUBDIRS)';; \
+	esac; \
 	for i in $$list; do \
 	    if test -d "$$i"; then \
 		target="$$otarget"; \
@@ -151,20 +154,10 @@ all-recursive depend-recursive clean-recursive distclean-recursive \
 	    fi; \
 	done; \
         if test "$$otarget" = "all" && test -z "$(TARGETS)"; then \
-	    made_local=n/a; \
+	    made_local=yes; \
 	fi; \
-	if test -z "$$made_local"; then \
+	if test "$$made_local" != "yes"; then \
 	    $(MAKE) "local-$$otarget" || exit 1; \
-	fi; \
-	case $$otarget in *clean) \
-	    if test -d "test"; then \
-	        echo "Making local-$$otarget in test"; \
-	        (cd test && $(MAKE) local-$$otarget) || exit 1; \
-	    fi ;; \
-	esac; \
-	if test -d "build"; then \
-	    echo "Making local-$$otarget in build"; \
-	    (cd build && $(MAKE) local-$$otarget) || exit 1; \
 	fi
 
 local-clean: x-local-clean
