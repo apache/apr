@@ -1,4 +1,9 @@
 Changes with APR b1
+
+  *) Change apr_proc_detach to take a parameter that can enable/disable
+     automatic forking (aka, to "daemonize").
+     [Jos Backus <josb@cncdsl.com>, Aaron Bannert]
+
   *) Implement apr_global_lock_foo() on Win32
      [Bill Stoddard]
 
