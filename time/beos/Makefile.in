@@ -14,7 +14,10 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
 
 LIB=libtime.a
 
-OBJS=time.o \
+OBJS=../unix/time.o \
+	../unix/access.o
+
+OBJS2=time.o \
 	access.o
 
 .c.o:
@@ -32,7 +35,7 @@ $(OBJS): Makefile
 
 $(LIB): $(OBJS)
 	$(RM) -f $@
-	$(AR) cr $@ $(OBJS)
+	$(AR) cr $@ $(OBJS2)
 	$(RANLIB) $@
 
 #
