@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Disable SHMEM_MMAP_ZERO on HPUX 11.x where it is not supported.
+     Use SHMEM_SHMGET_ANON instead.  [Aaron Bannert]
+
   *) Fix a few attempts to add to a void * ptr in the Unix shared
      memory support code.  PR #9710  Per Ekman [pek@pdc.kth.se]
 
