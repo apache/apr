@@ -10,7 +10,7 @@ DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
 INCLUDES=-I$(INCDIR) -I$(OSDIR) -I$(DEFOSDIR)
 MKDEP=../../helpers/mkdep.sh
 
-OBJS=start.o getopt.o otherchild.o errorcodes.o rand.o canonerr.o \
+OBJS=start.o getopt.o otherchild.o errorcodes.o rand.o \
 	uuid.o getuuid.o
 
 .c.o:
