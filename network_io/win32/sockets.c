@@ -290,7 +290,11 @@ APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
         /* wait for the connect to complete */
         FD_ZERO(&temp);
         FD_SET(sock->sock, &temp);
-        if (select(sock->sock+1, NULL, &temp, NULL, NULL) == SOCKET_ERROR) {
+        /* the select(nfds, ...) nfds arg is ignored 
+         * we don't have a bit table for fd_set on Win32,
+         * we have a messy dynamic crossref table.
+         */
+        if (select(FD_SETSIZE+1, NULL, &temp, NULL, NULL) == SOCKET_ERROR) {
             return apr_get_netos_error();
         }
     }
