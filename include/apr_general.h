@@ -346,7 +346,7 @@ B<NOTE>:  The data to be attached to the pool should have the same
 
 =cut
  */
-ap_status_t ap_set_userdata(void *data, const char *key, 
+ap_status_t ap_set_userdata(const void *data, const char *key, 
                             ap_status_t (*cleanup) (void *), 
                             ap_pool_t *cont);
 
@@ -362,7 +362,7 @@ B<Return the data associated with the current pool.>
 
 =cut
  */
-ap_status_t ap_get_userdata(void **, const char *key, ap_pool_t *cont);
+ap_status_t ap_get_userdata(void **data, const char *key, ap_pool_t *cont);
 
 /*
 

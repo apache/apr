@@ -77,7 +77,7 @@ ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_userdata(void *data, const char *key,
+ap_status_t ap_set_userdata(const void *data, const char *key,
                             ap_status_t (*cleanup) (void *),
                             ap_pool_t *cont)
 {
@@ -123,7 +123,10 @@ ap_status_t ap_get_userdata(void **data, const char *key, ap_pool_t *cont)
         dptr = dptr->next;
     }
     if (dptr) {
-        (*data) = dptr->data;
+        /* ->data is const because we never change it. however, we want to
+           cast because the caller may want to change the contents (and
+           it knows whether it can). */
+        (*data) = (void *)dptr->data;
     }
     else {
         (*data) = NULL;

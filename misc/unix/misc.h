@@ -84,8 +84,8 @@
 #endif
  
 typedef struct datastruct {
-    void *data;
-    char *key;
+    const void *data;
+    const char *key;
     struct datastruct *next;
     struct datastruct *prev;
 } datastruct;
