@@ -413,6 +413,14 @@ typedef int ap_status_t;
 #define APR_BADARG         5013
 #define APR_EOF            5014
 #define APR_NOTFOUND       5015
+#define APR_EINIT          5016   /* A simple value to be used to initialze a
+                                   * status variable.
+                                   */ 
+#define APR_ENOTIMPL       5017   /* Not implemented either because we haven't
+                                   * gotten to it yet, or because it is not
+                                   * possible to do correctly.
+                                   */
+
 #ifdef __cplusplus
 }
 #endif
