@@ -87,7 +87,7 @@ ap_status_t ap_create_lock(ap_context_t *cont, ap_locktype_e type,
         sec.bInheritHandle = FALSE;
     }
 
-    if (type == APR_INTRAPROCESS) {
+    if (scope == APR_INTRAPROCESS) {
         InitializeCriticalSection(&newlock->section);
     } else {
         newlock->mutex = CreateMutex(&sec, FALSE, fname);
