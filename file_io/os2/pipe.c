@@ -102,7 +102,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     rc = DosSetNPipeSem(filedes[0], (HSEM)(*in)->pipeSem, 1);
 
     if (!rc) {
-        rc = DosSetNPHState(filedes[0], NP_WAIT)
+        rc = DosSetNPHState(filedes[0], NP_WAIT);
     }
 
     if (rc) {
