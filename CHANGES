@@ -1,5 +1,12 @@
 Changes with APR 0.9.4
 
+  *) When writing to pipes with a timeout set, handle the situation
+     where the kernel says the pipe is writable but an attempt to
+     write <= PIPE_BUF bytes gets EAGAIN.  APR will now write whatever
+     data will fit.  APR applications that relied on the atomic nature
+     of relatively small pipe write requests may be affected.
+     PR 20295  [Mark Street <mark@faime.demon.co.uk>, Jeff Trawick]
+
   *) Define _THREAD_SAFE for all compilations on AIX.  Previously
      those of us who used the vendor compiler had it defined
      implicitly and others did not.  The difference became obvious
