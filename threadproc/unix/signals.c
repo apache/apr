@@ -57,6 +57,7 @@
 #include "apr_private.h"
 #include "apr_pools.h"
 #include "apr_signal.h"
+#include "apr_strings.h"
 
 #define APR_WANT_SIGNAL
 #include "apr_want.h"
