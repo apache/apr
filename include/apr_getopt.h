@@ -82,6 +82,20 @@ struct apr_getopt_t {
     char const* place;
 };
 
+typedef struct apr_getopt_long_t apr_getopt_long_t;
+
+/* structure representing a single longopt */
+struct apr_getopt_long_t {
+    /** the name of the long argument (sans "--") */
+    const char *name;
+    /** 0 for no arg, 1 for arg */
+    int has_arg;
+    /** Either the short option char that this option corresponds to 
+     * or a unique integer > 255 
+     */
+    int val;
+};
+
 /**
  * Initialize the arguments for parsing by apr_getopt().
  * @param cont The pool to operate on
@@ -92,7 +106,7 @@ struct apr_getopt_t {
  * @deffunc apr_status_t apr_initopt(apr_getopt_t **os, apr_pool_t *cont,int argc, char *const *argv)
  */
 APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
-                                     int argc, char *const *argv);
+                                      int argc, char *const *argv);
 
 /**
  * Parse the options initialized by apr_initopt().
@@ -112,8 +126,43 @@ APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
  * @deffunc apr_status_t apr_getopt(apr_getopt_t *os, const char *opts, char *optch, const char **optarg)
  */
 APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
-                                    char *optch, const char **optarg);
+                                     char *optch, const char **optarg);
+
+/**
+ * Parse the options initialized by apr_initopt(), accepting long
+ * options beginning with "--" in addition to single-character
+ * options beginning with "-" (which are passed along to apr_getopt).
+ *
+ * Long options are accepted in both "--foo bar" and well as
+ * "--foo=bar" format
+ *
+ * End of argument processing if we encounter "--" or any option that
+ * doesn't start with "-" or "--".
+ *
+ * @param os       The apr_opt_t structure returned by apr_initopt()
+ * @param opts     A string of acceptable single-character options to the
+ *                 program.  Characters followed by ":" are required to have
+ *                 an argument associated
+ * @param longopts A pointer to an array of apr_long_option_t structures, which
+ *                 can be initialized with { "name", has_args, val }.  has_args
+ *                 is nonzero if the option requires an argument.  A structure
+ *                 with a NULL name terminates the list
+ * @param optval   The next option character parsed, or the value of "optval"
+ *                 from the appropriate apr_long_option_t structure if
+ *                 the next option is a long option.
+ * @param optarg   The argument following the option, if any
+ * @tip There are four potential status values on exit.   They are:
+ * <PRE>
+ *             APR_EOF      --  No more options to parse
+ *             APR_BADCH    --  Found a bad option character
+ *             APR_BADARG   --  No argument followed @parameter:
+ *             APR_SUCCESS  --  The next option was found.
+ * </PRE>
+ * @deffunc apr_status_t apr_getopt_long(apr_getopt_t *os, const char *opts, const apr_getopt_long_t *longopts, int *optval, const char **optarg) */
+APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os, 
+                                          const char *opts, 
+                                          const apr_getopt_long_t *long_opts,
+                                          int *optval, 
+                                          const char **optarg);
 
 #endif  /* ! APR_GETOPT_H */
-
-
