@@ -2,8 +2,7 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 TARGETS = \
-	poll.lo \
-	pollacc.lo 
+	poll.lo
 
 
 # bring in rules.mk for standard functionality

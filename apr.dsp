@@ -278,10 +278,6 @@ SOURCE=.\poll\unix\poll.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\poll\unix\pollacc.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\network_io\win32\sendrecv.c
 # End Source File
 # Begin Source File
