@@ -469,20 +469,30 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
     return APR_SUCCESS;
 }
 
-#elif defined(__HPUX__)
+#elif defined(__hpux) || defined(__hpux__)
 
-#error "there's no way this apr_sendfile implementation works -djg"
+/* HP cc in ANSI mode defines __hpux; gcc defines __hpux__ */
 
-/* HP-UX Version 10.30 or greater */
-apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
-        		apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
-        		apr_int32_t flags)
+/* HP-UX Version 10.30 or greater
+ * (no worries, because we only get here if autoconfiguration found sendfile)
+ */
+
+/* ssize_t sendfile(int s, int fd, off_t offset, size_t nbytes,
+ *                  const struct iovec *hdtrl, int flags);
+ *
+ * nbytes is the number of bytes to send just from the file; as with FreeBSD, 
+ * if nbytes == 0, the rest of the file (from offset) is sent
+ */
+
+apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
+			  apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len,
+			  apr_int32_t flags)
 {
-    int i, ptr = 0;
-    size_t nbytes = 0, headerlen = 0, trailerlen = 0;
-    struct sf_hdtr headerstruct;
+    int i;
+    ssize_t rc;
+    size_t nbytes = *len, headerlen, trailerlen;
     struct iovec hdtrarray[2];
-    void *headerbuf, *trailerbuf;
+    char *headerbuf, *trailerbuf;
 
     if (!hdtr) {
         hdtr = &no_hdtr;
@@ -491,83 +501,107 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
     /* Ignore flags for now. */
     flags = 0;
 
-    /* HP-UX can only send one header iovec and one footer iovec */
+    /* HP-UX can only send one header iovec and one footer iovec; try to
+     * only allocate storage to combine input iovecs when we really have to
+     */
 
-    for (i = 0; i < hdtr->numheaders; i++) {
-        headerlen += hdtr->headers[i].iov_len;
+    switch(hdtr->numheaders) {
+    case 0:
+        hdtrarray[0].iov_base = NULL;
+        hdtrarray[0].iov_len = 0;
+        break;
+    case 1:
+        hdtrarray[0] = hdtr->headers[0];
+        break;
+    default:
+        headerlen = 0;
+        for (i = 0; i < hdtr->numheaders; i++) {
+            headerlen += hdtr->headers[i].iov_len;
+        }  
+
+        /* XXX:  BUHHH? wow, what a memory leak! */
+        headerbuf = hdtrarray[0].iov_base = apr_palloc(sock->cntxt, headerlen);
+        hdtrarray[0].iov_len = headerlen;
+
+        for (i = 0; i < hdtr->numheaders; i++) {
+            memcpy(headerbuf, hdtr->headers[i].iov_base,
+                   hdtr->headers[i].iov_len);
+            headerbuf += hdtr->headers[i].iov_len;
+        }
     }
 
-    /* XXX:  BUHHH? wow, what a memory leak! */
-    headerbuf = apr_palloc(sock->cntxt, headerlen);
+    switch(hdtr->numtrailers) {
+    case 0:
+        hdtrarray[1].iov_base = NULL;
+        hdtrarray[1].iov_len = 0;
+        break;
+    case 1:
+        hdtrarray[1] = hdtr->trailers[0];
+        break;
+    default:
+        trailerlen = 0;
+        for (i = 0; i < hdtr->numtrailers; i++) {
+            trailerlen += hdtr->trailers[i].iov_len;
+        }
 
-    for (i = 0; i < hdtr->numheaders; i++) {
-        memcpy(headerbuf + ptr, hdtr->headers[i].iov_base,
-               hdtr->headers[i].iov_len);
-        ptr += hdtr->headers[i].iov_len;
+        /* XXX:  BUHHH? wow, what a memory leak! */
+        trailerbuf = hdtrarray[1].iov_base = apr_palloc(sock->cntxt, trailerlen);
+        hdtrarray[1].iov_len = trailerlen;
+
+        for (i = 0; i < hdtr->numtrailers; i++) {
+            memcpy(trailerbuf, hdtr->trailers[i].iov_base,
+                   hdtr->trailers[i].iov_len);
+            trailerbuf += hdtr->trailers[i].iov_len;
+        }
     }
-
-    for (i = 0; i < hdtr->numtrailers; i++) {
-        trailerlen += hdtr->headers[i].iov_len;
-    }
-
-    /* XXX:  BUHHH? wow, what a memory leak! */
-    trailerbuf = apr_palloc(sock->cntxt, trailerlen);
-
-    for (i = 0; i < hdtr->numtrailers; i++) {
-        memcpy(trailerbuf + ptr, hdtr->trailers[i].iov_base,
-               hdtr->trailers[i].iov_len);
-        ptr += hdtr->trailers[i].iov_len;
-    }
-
-    hdtrarray[0].iov_base = headerbuf;
-    hdtrarray[0].iov_len = headerlen;
-    hdtrarray[1].iov_base = trailerbuf;
-    hdtrarray[1].iov_len = trailerlen;
 
     do {
-        rv = sendfile(sock->socketdes,	/* socket  */
-        	      file->filedes,	/* file descriptor to send */
-        	      *offset,	/* where in the file to start */
-		      /* XXX: as far as i can see, nbytes == 0 always here -djg */
-        	      nbytes,	/* number of bytes to send */
-        	      hdtrarray,	/* Headers/footers */
-        	      flags	/* undefined, set to 0 */
-            );
-    } while (rv == -1 && errno == EINTR);
+        if (nbytes) {       /* any bytes to send from the file? */
+            rc = sendfile(sock->socketdes,      /* socket  */
+                          file->filedes,        /* file descriptor to send */
+                          *offset,              /* where in the file to start */
+                          nbytes,               /* number of bytes to send from file */
+                          hdtrarray,            /* Headers/footers */
+                          flags);               /* undefined, set to 0 */
+        }
+        else {              /* we can't call sendfile() for trailers only */
+            rc = write(sock->socketdes, hdtrarray[1].iov_base, hdtrarray[1].iov_len);
+        }
+    } while (rc == -1 && errno == EINTR);
 
-    if (rv == -1 && 
+    if (rc == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
         sock->timeout > 0) {
         apr_status_t arv = wait_for_io_or_timeout(sock, 0);
 
         if (arv != APR_SUCCESS) {
-            /* jlt: not tested, but this matches other sendfile logic */
-            (*len) = 0;
+            *len = 0;
             return arv;
         }
         else {
             do {
-        	rv = sendfile(sock->socketdes,	/* socket  */
-        		      file->filedes,	/* file descriptor to send */
-        		      *offset,	/* where in the file to start */
-				/* XXX: as far as i can see, nbytes == 0 always here -djg */
-        		      nbytes,	/* number of bytes to send */
-        		      hdtrarray,	/* Headers/footers */
-        		      flags	/* undefined, set to 0 */
-        	    );
-            } while (rv == -1 && errno == EINTR);
+                if (nbytes) {
+                    rc = sendfile(sock->socketdes,    /* socket  */
+                                  file->filedes,      /* file descriptor to send */
+                                  *offset,            /* where in the file to start */
+                                  nbytes,             /* number of bytes to send from file */
+                                  hdtrarray,          /* Headers/footers */
+                                  flags);             /* undefined, set to 0 */
+                }
+                else {      /* we can't call sendfile() for trailers only */
+                    rc = write(sock->socketdes, hdtrarray[1].iov_base, hdtrarray[1].iov_len);
+                }
+            } while (rc == -1 && errno == EINTR);
         }
     }
 
-
-    if (rv == -1) {
+    if (rc == -1) {
 	*len = 0;
         return errno;
     }
 
-
     /* Set len to the number of bytes written */
-    (*len) = rv;
+    *len = rc;
     return APR_SUCCESS;
 }
 #elif defined(_AIX) || defined(__MVS__)
