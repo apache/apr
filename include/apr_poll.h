@@ -187,7 +187,7 @@ APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset,
                                                  apr_socket_t *sock);
 
 /**
- * Remove all sockets from the poll structure.
+ * Clear all events in the poll structure.
  * @param aprset The poll structure we will be using. 
  * @param events The events to clear from all sockets.  One of:
  * <PRE>
