@@ -81,18 +81,20 @@ extern "C" {
  */
 #define APR_HASH_KEY_STRING     (-1)
 
-/*
+/**
  * Abstract type for hash tables.
+ * @defvar apr_hash_t
  */
 typedef struct apr_hash_t apr_hash_t;
 
-/*
+/**
  * Abstract type for scanning hash tables.
+ * @defvar apr_hash_index_t
  */
 typedef struct apr_hash_index_t apr_hash_index_t;
 
 /**
- * Create a hash table within a pool.
+ * Create a hash table.
  * @param pool The pool to allocate the hash table out of
  * @return The hash table just created
  * @deffunc apr_hash_t *apr_make_hash(apr_pool_t *pool)
@@ -103,7 +105,7 @@ APR_DECLARE(apr_hash_t *) apr_make_hash(apr_pool_t *pool);
  * Associate a value with a key in a hash table.
  * @param ht The hash table
  * @param key Pointer to the key
- * @param klen Length of the key. Can be APR_HASH_KEY_STRING.
+ * @param klen Length of the key. Can be APR_HASH_KEY_STRING to use the string length.
  * @param val Value to associate with the key
  * @tip If the value is NULL the hash entry is deleted.
  * @deffunc void apr_hash_set(apr_hash_t *ht, const void *key, apr_size_t klen, const void *val)
@@ -115,7 +117,7 @@ APR_DECLARE(void) apr_hash_set(apr_hash_t *ht, const void *key,
  * Look up the value associated with a key in a hash table.
  * @param ht The hash table
  * @param key Pointer to the key
- * @param klen Length of the key. Can be APR_HASH_KEY_STRING.
+ * @param klen Length of the key. Can be APR_HASH_KEY_STRING to use the string length.
  * @return Returns NULL if the key is not present.
  * @deffunc void *apr_hash_get(apr_hash_t *ht, const void *key, apr_size_t klen)
  */
@@ -146,7 +148,7 @@ APR_DECLARE(void*) apr_hash_get(apr_hash_t *ht, const void *key,
  * is delete the current entry) and multiple iterations can be in
  * progress at the same time.
  * </PRE>
- * @deffunc apr_hash_index_t * apr_hash_first(apr_hash_t *ht)
+ * @deffunc apr_hash_index_t *apr_hash_first(apr_hash_t *ht)
  */
 APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_hash_t *ht);
 
@@ -154,7 +156,7 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_hash_t *ht);
  * Continue iterating over the entries in a hash table.
  * @param hi The iteration state
  * @return a pointer to the updated iteration state.  NULL if there are no more  *         entries.
- * @deffunc apr_hash_index_t * apr_hash_next(apr_hash_index_t *hi)
+ * @deffunc apr_hash_index_t *apr_hash_next(apr_hash_index_t *hi)
  */
 APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi);
 
