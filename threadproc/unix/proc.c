@@ -418,7 +418,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
         /* Only try to switch if we are running as root */
         if (attr->gid != -1 && !geteuid()) {
-            apr_status_t rv;
             if ((status = setgid(attr->gid))) {
                 if (attr->errfn) {
                     attr->errfn(pool, errno, "setting of group failed");
@@ -428,7 +427,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
 
         if (attr->uid != -1 && !geteuid()) {
-            apr_status_t rv;
             if ((status = setuid(attr->uid))) {
                 if (attr->errfn) {
                     attr->errfn(pool, errno, "setting of user failed");
