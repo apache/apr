@@ -105,8 +105,12 @@ static apr_fileperms_t convert_prot(ACCESS_MASK acc, prot_scope_e scope)
 
 static void resolve_prot(apr_finfo_t *finfo, apr_int32_t wanted, PACL dacl)
 {
-    TRUSTEE ident = {NULL, NO_MULTIPLE_TRUSTEE, TRUSTEE_IS_SID};
+    TRUSTEE_W ident = {NULL, NO_MULTIPLE_TRUSTEE, TRUSTEE_IS_SID};
     ACCESS_MASK acc;
+    /*
+     * This function is only invoked for WinNT, 
+     * there is no reason for os_level testing here.
+     */
     if ((wanted & APR_FINFO_WPROT) && !worldid) {
         SID_IDENTIFIER_AUTHORITY SIDAuth = SECURITY_WORLD_SID_AUTHORITY;
         if (AllocateAndInitializeSid(&SIDAuth, 1, SECURITY_WORLD_RID,
@@ -118,15 +122,24 @@ static void resolve_prot(apr_finfo_t *finfo, apr_int32_t wanted, PACL dacl)
     if ((wanted & APR_FINFO_UPROT) && (finfo->valid & APR_FINFO_USER)) {
         ident.TrusteeType = TRUSTEE_IS_USER;
         ident.ptstrName = finfo->user;
-        if (GetEffectiveRightsFromAcl(dacl, &ident, &acc) == ERROR_SUCCESS) {
+        /* GetEffectiveRightsFromAcl isn't supported under Win9x,
+         * which shouldn't come as a surprize.  Since we are passing
+         * TRUSTEE_IS_SID, always skip the A->W layer.
+         */
+        if (GetEffectiveRightsFromAclW(dacl, &ident, &acc) == ERROR_SUCCESS) {
             finfo->protection |= convert_prot(acc, prot_scope_user);
             finfo->valid |= APR_FINFO_UPROT;
         }
     }
+    /* Windows NT: did not return group rights.
+     * Windows 2000 returns group rights information.
+     * Since WinNT kernels don't follow the unix model of 
+     * group associations, this all all pretty mute.
+     */
     if ((wanted & APR_FINFO_GPROT) && (finfo->valid & APR_FINFO_GROUP)) {
         ident.TrusteeType = TRUSTEE_IS_GROUP;
         ident.ptstrName = finfo->group;
-        if (GetEffectiveRightsFromAcl(dacl, &ident, &acc) == ERROR_SUCCESS) {
+        if (GetEffectiveRightsFromAclW(dacl, &ident, &acc) == ERROR_SUCCESS) {
             finfo->protection |= convert_prot(acc, prot_scope_group);
             finfo->valid |= APR_FINFO_GPROT;
         }
@@ -134,7 +147,7 @@ static void resolve_prot(apr_finfo_t *finfo, apr_int32_t wanted, PACL dacl)
     if ((wanted & APR_FINFO_WPROT) && (worldid)) {
         ident.TrusteeType = TRUSTEE_IS_WELL_KNOWN_GROUP;
         ident.ptstrName = worldid;
-        if (GetEffectiveRightsFromAcl(dacl, &ident, &acc) == ERROR_SUCCESS) {
+        if (GetEffectiveRightsFromAclW(dacl, &ident, &acc) == ERROR_SUCCESS) {
             finfo->protection |= convert_prot(acc, prot_scope_world);
             finfo->valid |= APR_FINFO_WPROT;
         }
@@ -190,14 +203,14 @@ static apr_status_t resolve_ident(apr_finfo_t *finfo, const char *fname,
     return rv;
 }
 
-apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, apr_int32_t wanted, 
-                        int whatfile, apr_oslevel_e os_level)
+apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, 
+                        apr_int32_t wanted, int whatfile)
 {
     PSID user = NULL, grp = NULL;
     PACL dacl = NULL;
     apr_status_t rv;
 
-    if (os_level < APR_WIN_NT) 
+    if (apr_os_level < APR_WIN_NT) 
     {
         /* Read, write execute for owner.  In the Win9x environment, any
          * readable file is executable (well, not entirely 100% true, but
@@ -404,10 +417,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
     /* If we still want something more (besides the name) go get it! 
      */
     if ((wanted &= ~finfo->valid) & ~APR_FINFO_NAME) {
-        apr_oslevel_e os_level;
-        if (apr_get_oslevel(thefile->cntxt, &os_level))
-            os_level = APR_WIN_95;
-        return more_finfo(finfo, thefile->filehand, wanted, MORE_OF_HANDLE, os_level);
+        return more_finfo(finfo, thefile->filehand, wanted, MORE_OF_HANDLE);
     }
 
     return APR_SUCCESS;
@@ -430,7 +440,6 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     apr_wchar_t wfname[APR_PATH_MAX];
 
 #endif
-    apr_oslevel_e os_level;
     char *filename = NULL;
     /* These all share a common subset of this structure */
     union {
@@ -438,9 +447,6 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         WIN32_FIND_DATAA n;
         WIN32_FILE_ATTRIBUTE_DATA i;
     } FileInfo;
-    
-    if (apr_get_oslevel(cont, &os_level))
-        os_level = APR_WIN_95;
     
     /* Catch fname length == MAX_PATH since GetFileAttributesEx fails 
      * with PATH_NOT_FOUND.  We would rather indicate length error than 
@@ -450,7 +456,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         return APR_ENAMETOOLONG;
     }
 
-    if ((os_level >= APR_WIN_NT) 
+    if ((apr_os_level >= APR_WIN_NT) 
             && (wanted & (APR_FINFO_IDENT | APR_FINFO_NLINK))) {
         /* FindFirstFile and GetFileAttributesEx can't figure the inode,
          * device or number of links, so we need to resolve with an open 
@@ -466,7 +472,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     }
 
 #if APR_HAS_UNICODE_FS
-    if (os_level >= APR_WIN_NT) {
+    if (apr_os_level >= APR_WIN_NT) {
         if (rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
                                             / sizeof(apr_wchar_t), fname))
             return rv;
@@ -497,9 +503,10 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     }
     else
 #endif
-      if ((os_level >= APR_WIN_98) && (!(wanted & APR_FINFO_NAME) || isroot))
+      if ((apr_os_level >= APR_WIN_98) && (!(wanted & APR_FINFO_NAME) || isroot))
     {
         /* cannot use FindFile on a Win98 root, it returns \*
+         * GetFileAttributesExA is not available on Win95
          */
         if (!GetFileAttributesExA(fname, GetFileExInfoStandard, 
                                  &FileInfo.i)) {
@@ -548,7 +555,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
              * to reliably translate char devices to the path '\\.\device'
              * so go ask for the full path.
              */
-            if (os_level >= APR_WIN_NT) {
+            if (apr_os_level >= APR_WIN_NT) {
 #if APR_HAS_UNICODE_FS
                 apr_wchar_t tmpname[APR_FILE_MAX];
                 apr_wchar_t *tmpoff;
@@ -582,10 +589,10 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     if (wanted &= ~finfo->valid) {
         /* Caller wants more than APR_FINFO_MIN | APR_FINFO_NAME */
 #if APR_HAS_UNICODE_FS
-        if (os_level >= APR_WIN_NT)
-            return more_finfo(finfo, wfname, wanted, MORE_OF_WFSPEC, os_level);
+        if (apr_os_level >= APR_WIN_NT)
+            return more_finfo(finfo, wfname, wanted, MORE_OF_WFSPEC);
 #endif
-        return more_finfo(finfo, fname, wanted, MORE_OF_FSPEC, os_level);
+        return more_finfo(finfo, fname, wanted, MORE_OF_FSPEC);
     }
 
     return APR_SUCCESS;
