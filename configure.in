@@ -310,8 +310,7 @@ AC_ARG_ENABLE(atomics,
   [  --disable-atomics            Turn off optimized atomic code],
   [ if test "$enableval" = "no"; then
         user_disabled_atomics=1
-    fi ], [] )
-
+    fi ] )
 
 config_subdirs="none"
 INSTALL_SUBDIRS="none"
