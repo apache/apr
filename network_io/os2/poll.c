@@ -189,8 +189,8 @@ ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *ap
 
 
 
-ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, 
-                                  ap_socket_t *sock, ap_int16_t events)
+ap_status_t ap_mask_poll_socket(ap_pollfd_t *aprset, 
+                                ap_socket_t *sock, ap_int16_t events)
 {
     int start, *count, pos;
 
@@ -219,10 +219,15 @@ ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset,
             for (;pos<aprset->num_total; pos++) {
                 aprset->socket_list[pos] = aprset->socket_list[pos+1];
             }
-        } else {
-            return APR_NOTFOUND;
         }
     }
 
     return APR_SUCCESS;
+}
+
+
+
+ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock)
+{
+    return ap_mask_poll_socket(aprset, sock, APR_POLLIN|APR_POLLOUT|APR_POLLPRI);
 }
