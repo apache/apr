@@ -17,7 +17,6 @@ PROGRAMS = \
 	testargs@EXEEXT@ \
 	testud@EXEEXT@ \
 	testmmap@EXEEXT@ \
-	testshmem@EXEEXT@ \
 	testshm@EXEEXT@ \
 	testshmproducer@EXEEXT@ \
 	testshmconsumer@EXEEXT@ \
@@ -28,12 +27,11 @@ PROGRAMS = \
 	testipsub@EXEEXT@ \
 	testmd5@EXEEXT@ \
 	testpoll@EXEEXT@ \
-	testmem@EXEEXT@ \
 	testhash@EXEEXT@ \
 	occhild@EXEEXT@ \
 	teststr@EXEEXT@ \
 	testuser@EXEEXT@ \
-        testsockets@EXEEXT@ \
+	testsockets@EXEEXT@ \
 	testprocmutex@EXEEXT@ \
 	testvsn@EXEEXT@ \
 	testsleep@EXEEXT@ \
@@ -117,9 +115,6 @@ testtime@EXEEXT@: testtime.lo $(LOCAL_LIBS)
 testmmap@EXEEXT@: testmmap.lo $(LOCAL_LIBS)
 	$(LINK) testmmap.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testshmem@EXEEXT@: testshmem.lo $(LOCAL_LIBS)
-	$(LINK) testshmem.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
 testshm@EXEEXT@: testshm.lo $(LOCAL_LIBS) testshmproducer@EXEEXT@ testshmconsumer@EXEEXT@
 	$(LINK) testshm.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
@@ -146,9 +141,6 @@ testmd5@EXEEXT@: testmd5.lo $(LOCAL_LIBS)
 
 testpoll@EXEEXT@: testpoll.lo $(LOCAL_LIBS)
 	$(LINK) testpoll.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-testmem@EXEEXT@: testmem.lo $(LOCAL_LIBS)
-	$(LINK) testmem.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testhash@EXEEXT@: testhash.lo $(LOCAL_LIBS)
 	$(LINK) testhash.lo $(LOCAL_LIBS) $(ALL_LIBS)
