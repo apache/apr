@@ -50,10 +50,10 @@ def main():
     for hdr in deps.keys():
       deps.update(h_deps.get(hdr, {}))
 
-    f.write('%s: %s %s\n' % (obj, file, string.join(deps.keys(), ' ')))
+    f.write('%s: %s include/%s\n' % (obj, file, string.join(deps.keys(), ' include/')))
 
   f.write('\nOBJECTS = %s\n\n' % string.join(objects))
-  f.write('HEADERS = %s\n\n' % string.join(headers))
+  f.write('HEADERS = $(top_srcdir)/%s\n\n' % string.join(headers, ' $(top_srcdir)/'))
   f.write('SOURCE_DIRS = %s\n\n' % string.join(dirs.keys()))
 
 
