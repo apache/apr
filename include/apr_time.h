@@ -182,7 +182,7 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t);
  * apr_rfc822_date formats dates in the RFC822
  * format in an efficient manner.  It is a fixed length
  * format which requires the indicated amount of storage,
- * including the trailing null byte.
+ * including the trailing NUL terminator.
  * @param date_str String to write to.
  * @param t the time to convert 
  */
@@ -194,7 +194,7 @@ APR_DECLARE(apr_status_t) apr_rfc822_date(char *date_str, apr_time_t t);
  * apr_ctime formats dates in the ctime() format
  * in an efficient manner.  it is a fixed length format
  * and requires the indicated amount of storage including
- * the trailing null byte.
+ * the trailing NUL terminator.
  * Unlike ANSI/ISO C ctime(), apr_ctime() does not include
  * a \n at the end of the string.
  * @param date_str String to write to.
