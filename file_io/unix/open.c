@@ -123,10 +123,12 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     if ((*new)->buffered) {
         (*new)->buffer = apr_palloc(cont, APR_FILE_BUFSIZE);
 #if APR_HAS_THREADS
-        rv = apr_thread_mutex_create(&((*new)->thlock),
-                                     APR_THREAD_MUTEX_DEFAULT, cont);
-        if (rv) {
-            return rv;
+        if ((*new)->flags & APR_XTHREAD) {
+            rv = apr_thread_mutex_create(&((*new)->thlock),
+                                         APR_THREAD_MUTEX_DEFAULT, cont);
+            if (rv) {
+                return rv;
+            }
         }
 #endif
     }
