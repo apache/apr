@@ -162,7 +162,7 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
     (*new)->timeout = -1;
     (*new)->inherit = inherit;
     apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), socket_cleanup,
-                              (*new)->inherit & APR_INHERIT) 
+                              ((*new)->inherit & APR_INHERIT) 
                                   ? apr_pool_cleanup_null : socket_cleanup);
     return APR_SUCCESS;
 } 
