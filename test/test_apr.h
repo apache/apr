@@ -91,5 +91,6 @@ CuSuite *testlock(void);
 CuSuite *testsockopt(void);
 CuSuite *testpipe(void);
 CuSuite *testthread(void);
+CuSuite *testgetopt(void);
 
 #endif /* APR_TEST_INCLUDES */
