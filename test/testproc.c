@@ -78,8 +78,10 @@ int main(int argc, char *argv[])
     apr_file_t *testfile = NULL;
     apr_size_t length;
     char *buf;
+    char msgbuf[120];
     const char *args[3];
     char *teststr;
+    apr_status_t rv;
 
     if (apr_initialize() != APR_SUCCESS){
         printf("Failed to initialize APR\n");
@@ -131,7 +133,7 @@ int main(int argc, char *argv[])
     length = 256;
     printf("%-60s", "Checking the data read from pipe to child");
     buf = apr_pcalloc(pool, length);
-    if (apr_file_read(testfile, buf, &length) == APR_SUCCESS) {
+    if ((rv = apr_file_read(testfile, buf, &length)) == APR_SUCCESS) {
         if (!strcmp(buf, teststr))
             printf("OK\n");
         else {
@@ -139,7 +141,10 @@ int main(int argc, char *argv[])
             printf("  (I actually got %s_\n", buf);
         }
     }
-    else printf( "Read failed.\n");
+    else {
+        printf("Read failed - (%d) %s\n",
+               rv, apr_strerror(rv, msgbuf, sizeof msgbuf));
+    }
 
     TEST_NEQ("Waiting for child to die",
              apr_proc_wait(&newproc, NULL, NULL, APR_WAIT),
