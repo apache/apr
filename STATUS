@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/12 00:13:53 $]
+Last modified at [$Date: 2002/07/12 00:30:59 $]
 
 Release:
 
@@ -98,6 +98,10 @@ CURRENT VOTES:
 
       [wrowe: deltas require NO definition of the scale.]
 
+        [fielding: That's nonsense. What does overflow mean?  What are you
+         going to do when you print?  How do you interface with other library
+         routines?  Scale always matters for scalars.]
+
       [fielding: If not, then we should be storing time in a 
        structure with separate fields in order to have better precision 
        with less code.]
@@ -106,6 +110,10 @@ CURRENT VOTES:
        a dead horse... compositing and breaking apart for each simple deltas 
        (the most common case) is too costly.  Scalars are the only clean
        answer - and you do not need to know scale to do addition/subtraction.]
+
+        [fielding: Dean argued that in general.  I argue that httpd never
+         does time arithmetic other than in seconds and second-comparisons.
+         Microseconds are therefore harmful to httpd.]
        
       [fielding: In any case, time_t ==> seconds because time_t is guaranteed
        by POSIX to be a scalar quantity for arithmetic operations.
@@ -114,6 +122,9 @@ CURRENT VOTES:
        defined in terms of seconds and make no use of microseconds.]
 
       [wrowe: read code.]
+
+        [fielding: I read it.  I know exactly which functions from httpd
+         that I wrote were subsequently broken when they were moved into APR.]
 
       [fielding: Meanwhile, the only reason we have this stupid debate is 
        because wrowe insists that time_t is 32 bits and therefore dies in 2038.
@@ -128,6 +139,11 @@ CURRENT VOTES:
             in addition to seconds.  Why do you want to throw away the
             microseconds?!!]
 
+              [fielding: Sorry, I missed them:
+                  86 calls to apr_time_now()
+                  32 calls to time()
+               +1 to making time consistent.]
+
        We don't use them.  We don't even have display functions for them.
        We have to do a stupid conversion every time we actually do something
        useful with time in order to support somebody's wet dream of a
@@ -139,6 +155,14 @@ CURRENT VOTES:
        2. no, on 64 bit WinNT time_t remains 32 bits, as do all ints.
        3. several apps include flood and ab require usec resolution.
        4. Posix timeval structures use sec/usec resolution.]
+
+     [fielding: 1. POSIX requires it to be long, so largest native int.
+       2. Microsoft claims otherwise, but it is still vaporware anyway.
+       3. POSIX always stores them as separate integers.
+       4. Benchmarks are meaningless unless they average over hundreds
+          of requests, which requires double floats (not time intervals).
+       5. +1 for using struct tm everywhere.
+       6. No.]
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
