@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) Fix potential segfault when closing a file on Unix.  If
+     apr_file_close() was called and it failed, it would not
+     deregister the file cleanup.  Therefore the cleanup would
+     be run again later on a now-invalid descriptor.  [Cliff Woolley]
+
   *) Introduce apr_pool_lock for debugging, in combination with
      ALLOC_USE_MALLOC + DEBUG_WITH_MPROTECT.  Only implemented
      on Win32 today, very effective for debugging pool constness.
