@@ -150,6 +150,7 @@ typedef enum {
 /** @} */
 #endif /* APR_HAS_OTHER_CHILD */
 
+/** @see apr_proc_t */
 typedef struct apr_proc_t apr_proc_t;
 
 /** The APR process type */
@@ -176,13 +177,19 @@ struct apr_proc_t {
 #endif
 };
 
+/** Opaque Thread structure. */
 typedef struct apr_thread_t           apr_thread_t;
+/** Opaque Thread attributes structure. */
 typedef struct apr_threadattr_t       apr_threadattr_t;
+/** Opaque Process attributes structure. */
 typedef struct apr_procattr_t         apr_procattr_t;
+/** Opaque control variable for one-time atomic variables.  */
 typedef struct apr_thread_once_t      apr_thread_once_t;
 
+/** Opaque thread private address space. */
 typedef struct apr_threadkey_t        apr_threadkey_t;
 #if APR_HAS_OTHER_CHILD
+/** Opaque record of child process. */
 typedef struct apr_other_child_rec_t  apr_other_child_rec_t;
 #endif /* APR_HAS_OTHER_CHILD */
 
@@ -494,8 +501,8 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *cont);
  * Create a new process and execute a new program within that process.
  * @param new_proc The resulting process handle.
  * @param progname The program to run 
- * @param const_args the arguments to pass to the new program.  The first 
- *                   one should be the program name.
+ * @param args the arguments to pass to the new program.  The first 
+ *             one should be the program name.
  * @param env The new environment table for the new process.  This 
  *            should be a list of NULL-terminated strings. This argument
  *            is ignored for APR_PROGRAM_ENV and APR_PROGRAM_PATH types
@@ -571,8 +578,8 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
                                                   apr_wait_how_e waithow,
                                                   apr_pool_t *p);
 
-#define APR_PROC_DETACH_FOREGROUND 0
-#define APR_PROC_DETACH_DAEMONIZE 1
+#define APR_PROC_DETACH_FOREGROUND 0    /**< Do not detach */
+#define APR_PROC_DETACH_DAEMONIZE 1     /**< Detach */
 
 /**
  * Detach the process from the controlling terminal.

@@ -77,6 +77,7 @@ extern "C" {
 
 #if !APR_PROC_MUTEX_IS_GLOBAL || defined(DOXYGEN)
 
+/** Opaque global mutex structure. */
 typedef struct apr_global_mutex_t apr_global_mutex_t;
 
 /*   Function definitions */

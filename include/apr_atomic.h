@@ -85,23 +85,23 @@ extern "C" {
 typedef apr_atomic_t;
 
 /**
- * @param pool 
  * this function is required on some platforms to initialize the
  * atomic operation's internal structures
- * returns APR_SUCCESS on successfull completion
+ * @param p pool
+ * @return APR_SUCCESS on successful completion
  */
 apr_status_t apr_atomic_init(apr_pool_t *p);
 /**
  * read the value stored in a atomic variable
- * @param the pointer
+ * @param mem the pointer
  * @warning on certain platforms this number is not stored
  * directly in the pointer. in others it is 
  */
 apr_uint32_t apr_atomic_read(volatile apr_atomic_t *mem);
 /**
  * set the value for atomic.
- * @param the pointer
- * @param the value
+ * @param mem the pointer
+ * @param val the value
  */
 void apr_atomic_set(volatile apr_atomic_t *mem, apr_uint32_t val);
 /**
@@ -120,7 +120,7 @@ void apr_atomic_inc(volatile apr_atomic_t *mem);
 /**
  * decrement the atomic variable by 1
  * @param mem pointer to the atomic value
- * @returns zero if the value is zero, otherwise non-zero
+ * @return zero if the value is zero, otherwise non-zero
  */
 int apr_atomic_dec(volatile apr_atomic_t *mem);
 
@@ -129,19 +129,19 @@ int apr_atomic_dec(volatile apr_atomic_t *mem);
  * If they are the same swap the value with 'with'
  * @param mem pointer to the atomic value
  * @param with what to swap it with
- * @param the value to compare it to
+ * @param cmp the value to compare it to
  * @return the old value of the atomic
  * @warning do not mix apr_atomic's with the CAS function.
  * on some platforms they may be implemented by different mechanisms
  */
-apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
+apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem, long with, long cmp);
 
 /**
  * compare the pointer's value with cmp.
  * If they are the same swap the value with 'with'
  * @param mem pointer to the pointer
  * @param with what to swap it with
- * @param the value to compare it to
+ * @param cmp the value to compare it to
  * @return the old value of the pointer
  */
 void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp);

@@ -84,7 +84,7 @@ typedef struct apr_shm_t apr_shm_t;
  * Create and make accessable a shared memory segment.
  * @param m The shared memory structure to create.
  * @param reqsize The desired size of the segment.
- * @param file The file to use for shared memory on platforms that
+ * @param filename The file to use for shared memory on platforms that
  *        require it.
  * @param pool the pool from which to allocate the shared memory
  *        structure.
@@ -118,7 +118,7 @@ APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m);
  * Attach to a shared memory segment that was created
  * by another process.
  * @param m The shared memory structure to create.
- * @param file The file used to create the original segment.
+ * @param filename The file used to create the original segment.
  *        (This MUST match the original filename.)
  * @param pool the pool from which to allocate the shared memory
  *        structure for this process.

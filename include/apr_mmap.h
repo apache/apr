@@ -77,10 +77,14 @@ extern "C" {
  * @{
  */
 
+/** MMap opened for reading */
 #define APR_MMAP_READ    1
+/** MMap opened for writing */
 #define APR_MMAP_WRITE   2
 
+/** @see apr_mmap_t */
 typedef struct apr_mmap_t            apr_mmap_t;
+
 /**
  * @remark
  * As far as I can tell the only really sane way to store an MMAP is as a
@@ -117,7 +121,8 @@ struct apr_mmap_t {
 
 #if APR_HAS_MMAP || defined(DOXYGEN)
 
-/* Files have to be at least this big before they're mmap()d.  This is to deal
+/** @def APR_MMAP_THRESHOLD 
+ * Files have to be at least this big before they're mmap()d.  This is to deal
  * with systems where the expense of doing an mmap() and an munmap() outweighs
  * the benefit for small files.  It shouldn't be set lower than 1.
  */
@@ -131,12 +136,16 @@ struct apr_mmap_t {
 #  endif /* SUNOS4 */
 #endif /* MMAP_THRESHOLD */
 
+/** @def APR_MMAP_LIMIT
+ * Maximum size of MMap region
+ */
 #ifdef MMAP_LIMIT
 #  define APR_MMAP_LIMIT                  MMAP_LIMIT
 #else
 #  define APR_MMAP_LIMIT                  (4*1024*1024)
 #endif /* MMAP_LIMIT */
 
+/** Can this file be MMaped */
 #define APR_MMAP_CANDIDATE(filelength) \
     ((filelength >= APR_MMAP_THRESHOLD) && (filelength < APR_MMAP_LIMIT))
 
@@ -191,14 +200,14 @@ APR_DECLARE(apr_status_t) apr_mmap_setaside(apr_mmap_t **new_mmap,
 
 /**
  * Remove a mmap'ed.
- * @param mmap The mmap'ed file.
+ * @param mm The mmap'ed file.
  */
 APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mm);
 
 /** 
  * Move the pointer into the mmap'ed file to the specified offset.
  * @param addr The pointer to the offset specified.
- * @param mmap The mmap'ed file.
+ * @param mm The mmap'ed file.
  * @param offset The offset to move to.
  */
 APR_DECLARE(apr_status_t) apr_mmap_offset(void **addr, apr_mmap_t *mm, 

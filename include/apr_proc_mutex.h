@@ -74,10 +74,21 @@ extern "C" {
  * @{
  */
 
-typedef enum {APR_LOCK_FCNTL, APR_LOCK_FLOCK, APR_LOCK_SYSVSEM,
-              APR_LOCK_PROC_PTHREAD, APR_LOCK_POSIXSEM,
-              APR_LOCK_DEFAULT} apr_lockmech_e;
+/** 
+ * Enumerated potential types for APR process locking methods
+ * @warning Check APR_HAS_foo_SERIALIZE defines to see if the platform supports
+ *          APR_LOCK_foo.  Only APR_LOCK_DEFAULT is portable.
+ */
+typedef enum {
+    APR_LOCK_FCNTL,         /**< fcntl() */
+    APR_LOCK_FLOCK,         /**< flock() */
+    APR_LOCK_SYSVSEM,       /**< System V Semaphores */
+    APR_LOCK_PROC_PTHREAD,  /**< POSIX pthread process-based locking */
+    APR_LOCK_POSIXSEM,      /**< POSIX semaphore process-based locking */
+    APR_LOCK_DEFAULT        /**< Use the default process lock */
+} apr_lockmech_e;
 
+/** Opaque structure representing a process mutex. */
 typedef struct apr_proc_mutex_t apr_proc_mutex_t;
 
 /*   Function definitions */
@@ -99,6 +110,7 @@ typedef struct apr_proc_mutex_t apr_proc_mutex_t;
  *            APR_LOCK_DEFAULT     pick the default mechanism for the platform
  * </PRE>
  * @param pool the pool from which to allocate the mutex.
+ * @see apr_lockmech_e
  * @warning Check APR_HAS_foo_SERIALIZE defines to see if the platform supports
  *          APR_LOCK_foo.  Only APR_LOCK_DEFAULT is portable.
  */
@@ -159,7 +171,6 @@ APR_DECLARE(const char *) apr_proc_mutex_name(apr_proc_mutex_t *mutex);
 
 /**
  * Display the name of the default mutex: APR_LOCK_DEFAULT
- * @param mutex the name of the default mutex
  */
 APR_DECLARE(const char *) apr_proc_mutex_defname(void);
 

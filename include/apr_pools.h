@@ -212,7 +212,7 @@ APR_DECLARE(void) apr_pool_terminate(void);
  *        pool.  If it is non-NULL, the new pool will inherit all
  *        of its parent pool's attributes, except the apr_pool_t will
  *        be a sub-pool.
- * @param apr_abort A function to use if the pool cannot allocate more memory.
+ * @param abort_fn A function to use if the pool cannot allocate more memory.
  * @param allocator The allocator to use with the new pool.  If NULL the
  *        allocator of the parent pool will be used.
  */

@@ -1,5 +1,7 @@
 Changes with APR 0.9.2
 
+  *) Update doxygen tags.  [Justin Erenkrantz]
+
   *) NetWare: implemented a file IO path context scheme to directly
      reference directory paths and files in the file system rather
      than having to traverse the file system on every stat() or

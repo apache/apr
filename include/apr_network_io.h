@@ -79,14 +79,17 @@ extern "C" {
 #endif /* __cplusplus */
 
 #ifndef MAX_SECS_TO_LINGER
+/** Maximum seconds to linger */
 #define MAX_SECS_TO_LINGER 30
 #endif
 
 #ifndef APRMAXHOSTLEN
+/** Maximum hostname length */
 #define APRMAXHOSTLEN 256
 #endif
 
 #ifndef APR_ANYADDR
+/** Default 'any' address */
 #define APR_ANYADDR "0.0.0.0"
 #endif
 
@@ -94,19 +97,19 @@ extern "C" {
  * @defgroup Sock_opt Socket option definitions
  * @{
  */
-#define APR_SO_LINGER        1
-#define APR_SO_KEEPALIVE     2
-#define APR_SO_DEBUG         4
-#define APR_SO_NONBLOCK      8
-#define APR_SO_REUSEADDR     16
-#define APR_SO_TIMEOUT       32
-#define APR_SO_SNDBUF        64
-#define APR_SO_RCVBUF        128
-#define APR_SO_DISCONNECTED  256
+#define APR_SO_LINGER        1    /**< Linger */
+#define APR_SO_KEEPALIVE     2    /**< Keepalive */
+#define APR_SO_DEBUG         4    /**< Debug */
+#define APR_SO_NONBLOCK      8    /**< Non-blocking IO */
+#define APR_SO_REUSEADDR     16   /**< Reuse addresses */
+#define APR_SO_TIMEOUT       32   /**< Timeout */
+#define APR_SO_SNDBUF        64   /**< Send buffer */
+#define APR_SO_RCVBUF        128  /**< Receive buffer */
+#define APR_SO_DISCONNECTED  256  /**< Disconnected */
 #define APR_TCP_NODELAY      512  /**< For SCTP sockets, this is mapped
                                    * to STCP_NODELAY internally.
                                    */
-#define APR_TCP_NOPUSH       1024
+#define APR_TCP_NOPUSH       1024 /**< No push */
 #define APR_RESET_NODELAY    2048 /**< This flag is ONLY set internally
                                    * when we set APR_TCP_NOPUSH with
                                    * APR_TCP_NODELAY set to tell us that
@@ -124,22 +127,21 @@ extern "C" {
 				   * read, in cases where the app expects
 				   * that an immediate read would fail.)
 				   */
-#define APR_INCOMPLETE_WRITE 8192 /* like APR_INCOMPLETE_READ, but for write
+#define APR_INCOMPLETE_WRITE 8192 /**< like APR_INCOMPLETE_READ, but for write
+                                   * @see APR_INCOMPLETE_READ
                                    */
 
-#define APR_POLLIN    0x001 
-#define APR_POLLPRI   0x002
-#define APR_POLLOUT   0x004
-#define APR_POLLERR   0x010
-#define APR_POLLHUP   0x020
-#define APR_POLLNVAL  0x040
 /** @} */
 
-typedef enum {APR_SHUTDOWN_READ, APR_SHUTDOWN_WRITE, 
-	      APR_SHUTDOWN_READWRITE} apr_shutdown_how_e;
+/** Define what type of socket shutdown should occur. */
+typedef enum {
+    APR_SHUTDOWN_READ,          /**< no longer allow read request */
+    APR_SHUTDOWN_WRITE,         /**< no longer allow write requests */
+    APR_SHUTDOWN_READWRITE      /**< no longer allow read or write requests */
+} apr_shutdown_how_e;
 
-#define APR_IPV4_ADDR_OK  0x01  /* see doc for apr_sockaddr_info_get() */
-#define APR_IPV6_ADDR_OK  0x02  /* see doc for apr_sockaddr_info_get() */
+#define APR_IPV4_ADDR_OK  0x01  /**< @see apr_sockaddr_info_get() */
+#define APR_IPV6_ADDR_OK  0x02  /**< @see apr_sockaddr_info_get() */
 
 #if (!APR_HAVE_IN_ADDR)
 /**
@@ -173,9 +175,9 @@ struct in_addr {
  * @defgroup IP_Proto IP Protocol Definitions for use when creating sockets
  * @{
  */
-#define APR_PROTO_TCP       6
-#define APR_PROTO_UDP      17
-#define APR_PROTO_SCTP    132
+#define APR_PROTO_TCP       6   /**< TCP  */
+#define APR_PROTO_UDP      17   /**< UDP  */
+#define APR_PROTO_SCTP    132   /**< SCTP */
 /** @} */
 
 
@@ -201,11 +203,13 @@ typedef enum {
 #define apr_inet_addr    inet_network
 #endif
 
+/** A structure to represent sockets */
 typedef struct apr_socket_t     apr_socket_t;
 /**
  * A structure to encapsulate headers and trailers for apr_sendfile
  */
 typedef struct apr_hdtr_t       apr_hdtr_t;
+/** A structure to represent in_addr */
 typedef struct in_addr          apr_in_addr_t;
 /** A structure to represent an IP subnet */
 typedef struct apr_ipsubnet_t apr_ipsubnet_t;
@@ -213,13 +217,13 @@ typedef struct apr_ipsubnet_t apr_ipsubnet_t;
 /** @remark use apr_uint16_t just in case some system has a short that isn't 16 bits... */
 typedef apr_uint16_t            apr_port_t;
 
-/* It's defined here as I think it should all be platform safe...
+/** @remark It's defined here as I think it should all be platform safe...
+ * @see apr_sockaddr_t
  */
+typedef struct apr_sockaddr_t apr_sockaddr_t;
 /**
  * APRs socket address type, used to ensure protocol independence
  */
-typedef struct apr_sockaddr_t apr_sockaddr_t;
-
 struct apr_sockaddr_t {
     /** The pool to use... */
     apr_pool_t *pool;
@@ -231,6 +235,7 @@ struct apr_sockaddr_t {
     apr_port_t port;
     /** The family */
     apr_int32_t family;
+    /** Union of either IPv4 or IPv6 sockaddr. */
     union {
         /** IPv4 sockaddr structure */
         struct sockaddr_in sin;
@@ -310,6 +315,7 @@ APR_DECLARE(apr_status_t) apr_socket_create_ex(apr_socket_t **new_sock,
  *            APR_SHUTDOWN_WRITE        no longer allow write requests
  *            APR_SHUTDOWN_READWRITE    no longer allow read or write requests 
  * </PRE>
+ * @see apr_shutdown_how_e
  * @remark This does not actually close the socket descriptor, it just
  *      controls which calls are still valid on the socket.
  */
@@ -511,7 +517,8 @@ APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
 /**
  * @param sock The socket to send from
  * @param where The apr_sockaddr_t describing where to send the data
- * @param data The data to send
+ * @param flags The flags to use
+ * @param buf  The data to send
  * @param len  The length of the data to send
  */
 APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
@@ -521,6 +528,7 @@ APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
 /**
  * @param from The apr_sockaddr_t to fill in the recipient info
  * @param sock The socket to use
+ * @param flags The flags to use
  * @param buf  The buffer to use
  * @param len  The length of the available buffer
  */

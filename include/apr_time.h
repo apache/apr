@@ -95,34 +95,38 @@ typedef apr_int32_t apr_short_interval_time_t;
 /** number of microseconds per second */
 #define APR_USEC_PER_SEC APR_TIME_C(1000000)
 
+/** @return apr_time_t as a second */
 #define apr_time_sec(time) ((time) / APR_USEC_PER_SEC)
 
+/** @return apr_time_t as a usec */
 #define apr_time_usec(time) ((time) % APR_USEC_PER_SEC)
 
+/** @return apr_time_t as a msec */
 #define apr_time_msec(time) (((time) / 1000) % 1000)
 
-
+/** @return apr_time_t as a msec */
 #define apr_time_as_msec(time) ((time) / 1000)
 
-
+/** @return a second as an apr_time_t */
 #define apr_time_from_sec(sec) ((apr_time_t)(sec) * APR_USEC_PER_SEC)
 
-
+/** @return a second and usec combination as an apr_time_t */
 #define apr_time_make(sec, usec) ((apr_time_t)(sec) * APR_USEC_PER_SEC \
                                 + (apr_time_t)(usec))
 
 /**
- * return the current time
+ * @return the current time
  */
 APR_DECLARE(apr_time_t) apr_time_now(void);
+
+/** @see apr_time_exp_t */
+typedef struct apr_time_exp_t apr_time_exp_t;
 
 /**
  * a structure similar to ANSI struct tm with the following differences:
  *  - tm_usec isn't an ANSI field
  *  - tm_gmtoff isn't an ANSI field (it's a bsdism)
  */
-typedef struct apr_time_exp_t apr_time_exp_t;
-
 struct apr_time_exp_t {
     /** microseconds past tm_sec */
     apr_int32_t tm_usec;
@@ -162,7 +166,6 @@ APR_DECLARE(apr_status_t) apr_time_ansi_put(apr_time_t *result,
  * @param result the exploded time
  * @param input the time to explode
  * @param offs the number of seconds offset to apply
- * @param zone the zone description
  */
 APR_DECLARE(apr_status_t) apr_time_exp_tz(apr_time_exp_t *result,
                                           apr_time_t input,
@@ -260,7 +263,7 @@ APR_DECLARE(apr_status_t) apr_strftime(char *s, apr_size_t *retsize,
  * Improve the clock resolution for the lifetime of the given pool.
  * Generally this is only desireable on benchmarking and other very
  * time-sensitive applications, and has no impact on most platforms.
- * @param pool The pool to associate the finer clock resolution 
+ * @param p The pool to associate the finer clock resolution 
  */
 APR_DECLARE(void) apr_time_clock_hires(apr_pool_t *p);
 
