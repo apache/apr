@@ -248,18 +248,16 @@ void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp);
 
 #elif defined(NETWARE)
 
-#define apr_atomic_t unsigned long
-
 #define apr_atomic_init(pool)           APR_SUCCESS
-#define apr_atomic_add32(mem, val)      atomic_add(mem,val)
-#define apr_atomic_sub32(mem, val)      atomic_sub(mem,val)
-#define apr_atomic_inc32(mem)           atomic_inc(mem)
+#define apr_atomic_add32(mem, val)      atomic_add((unsigned long *)(mem),(unsigned long)(val))
+#define apr_atomic_sub32(mem, val)      atomic_sub((unsigned long *)(mem),(unsigned long)(val))
+#define apr_atomic_inc32(mem)           atomic_inc((unsigned long *)(mem))
 #define apr_atomic_set32(mem, val)      (*mem = val)
 #define apr_atomic_read32(mem)          (*mem)
 #define apr_atomic_cas32(mem,with,cmp)  atomic_cmpxchg((unsigned long *)(mem),(unsigned long)(cmp),(unsigned long)(with))
-#define apr_atomic_xchg32(mem, val)     atomic_xchg(mem, val)
+#define apr_atomic_xchg32(mem, val)     atomic_xchg((unsigned long *)(mem),(unsigned long)val)
     
-int apr_atomic_dec32(apr_atomic_t *mem);
+int apr_atomic_dec32(apr_uint32_t *mem);
 void *apr_atomic_casptr(void **mem, void *with, const void *cmp);
 
 #define APR_OVERRIDE_ATOMIC_READ32  1
@@ -273,9 +271,9 @@ void *apr_atomic_casptr(void **mem, void *with, const void *cmp);
 
 #define APR_OVERRIDE_ATOMIC_CASPTR 1
 
-inline int apr_atomic_dec32(apr_atomic_t *mem) 
+inline int apr_atomic_dec32(apr_uint32_t *mem) 
 {
-    atomic_dec(mem);
+    atomic_dec((unsigned long *)mem);
     return *mem; 
 }
 
