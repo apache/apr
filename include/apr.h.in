@@ -63,6 +63,8 @@
 #define APR_HAVE_INET_NETWORK   @inet_network@
 #define APR_HAVE_UNION_SEMUN    @have_union_semun@
 #define APR_HAVE_STRUCT_RLIMIT  @struct_rlimit@
+#define APR_HAVE_SETRLIMIT      @have_setrlimit@
+#define APR_HAVE_GETRLIMIT      @have_getrlimit@
 #define APR_HAVE_STRICMP        @have_stricmp@
 #define APR_HAVE_STRNICMP       @have_strnicmp@
 #define APR_HAVE_STRCASECMP     @have_strcasecmp@

@@ -225,10 +225,9 @@ apr_status_t apr_fork(apr_proc_t *proc, apr_pool_t *cont)
     return APR_INPARENT;
 }
 
-#if APR_HAVE_STRUCT_RLIMIT
-#if defined(RLIMIT_CPU) || defined(RLIMIT_NPROC) || defined(RLIMIT_AS) || defined(RLIMIT_DATA) || defined(RLIMIT_VMEM)
 static apr_status_t limit_proc(apr_procattr_t *attr)
 {
+#if APR_HAVE_STRUCT_RLIMIT && APR_HAVE_SETRLIMIT
 #ifdef RLIMIT_CPU
     if (attr->limit_cpu != NULL) {
         if ((setrlimit(RLIMIT_CPU, attr->limit_cpu)) != 0) {
@@ -262,10 +261,14 @@ static apr_status_t limit_proc(apr_procattr_t *attr)
         }
     }
 #endif
+#else
+    /*
+     * Maybe make a note in error_log that setrlimit isn't supported??
+     */
+
+#endif
     return APR_SUCCESS;
 }
-#endif
-#endif
 
 apr_status_t apr_create_process(apr_proc_t *new, const char *progname, 
                               char *const args[], char **env,
@@ -310,11 +313,9 @@ apr_status_t apr_create_process(apr_proc_t *new, const char *progname,
 
         apr_cleanup_for_exec();
 
-#if defined(RLIMIT_CPU) || defined(RLIMIT_NPROC) || defined(RLIMIT_AS) || defined(RLIMIT_DATA) || defined(RLIMIT_VMEM)
         if ((status = limit_proc(attr)) != APR_SUCCESS) {
             return status;
         }
-#endif 
 
         if (attr->cmdtype == APR_SHELLCMD) {
             i = 0;
