@@ -36,11 +36,13 @@
 #include <string.h>
 #include "misc.h"
 
-int ap_opterr = 1,                      /* if error message should be printed */
+API_VAR_EXPORT int
+    ap_opterr = 1,                      /* if error message should be printed */
     ap_optind = 1,                      /* index into parent argv vector */
     ap_optopt,                          /* character checked for validity */
     ap_optreset;                        /* reset getopt */
-char *ap_optarg = "";                   /* argument associated with option */
+API_VAR_EXPORT char *
+    ap_optarg = "";                     /* argument associated with option */
 
 #define EMSG    ""
 
