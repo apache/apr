@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 
     fprintf(stdout, "\tClient:  Connecting to socket.......");
 
-    stat = apr_connect(sock, remote_sa);
+    stat = apr_socket_connect(sock, remote_sa);
 
     if (stat != APR_SUCCESS) {
         apr_socket_close(sock);
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 
     fprintf(stdout, "\tClient:  Trying to send data over socket.......");
     length = STRLEN;
-    if ((stat = apr_send(sock, datasend, &length) != APR_SUCCESS)) {
+    if ((stat = apr_socket_send(sock, datasend, &length) != APR_SUCCESS)) {
         apr_socket_close(sock);
         fprintf(stderr, "Problem sending data: %s (%d)\n",
 		apr_strerror(stat, msgbuf, sizeof(msgbuf)), stat);
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
     length = STRLEN; 
     fprintf(stdout, "\tClient:  Trying to receive data over socket.......");
 
-    if ((stat = apr_recv(sock, datarecv, &length)) != APR_SUCCESS) {
+    if ((stat = apr_socket_recv(sock, datarecv, &length)) != APR_SUCCESS) {
         apr_socket_close(sock);
         fprintf(stderr, "Problem receiving data: %s (%d)\n", 
 		apr_strerror(stat, msgbuf, sizeof(msgbuf)), stat);
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tClient:  Shutting down socket.......");
-    if (apr_shutdown(sock, APR_SHUTDOWN_WRITE) != APR_SUCCESS) {
+    if (apr_socket_shutdown(sock, APR_SHUTDOWN_WRITE) != APR_SUCCESS) {
         apr_socket_close(sock);
         fprintf(stderr, "Could not shutdown socket\n");
         exit(-1);

@@ -290,4 +290,3 @@ APR_DECLARE(apr_status_t) apr_gethostname(char *buf, int len,
     return APR_SUCCESS;
 }
 
-

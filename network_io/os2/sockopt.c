@@ -170,7 +170,8 @@ APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
 }
                                            
 
-APR_DECLARE(apr_status_t) apr_gethostname(char *buf, apr_int32_t len, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_gethostname(char *buf, apr_int32_t len, 
+                                          apr_pool_t *cont)
 {
     if (gethostname(buf, len) == -1) {
         buf[0] = '\0';
@@ -182,4 +183,3 @@ APR_DECLARE(apr_status_t) apr_gethostname(char *buf, apr_int32_t len, apr_pool_t
     }
     return APR_SUCCESS;
 }
-

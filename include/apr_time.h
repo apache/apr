@@ -211,6 +211,10 @@ APR_DECLARE(apr_status_t) apr_time_exp_get(apr_time_t *result,
  * @param result the resulting imploded time
  * @param input the input exploded time
  */
+APR_DECLARE(apr_status_t) apr_time_exp_gmt_get(apr_time_t *result, 
+                                               apr_time_exp_t *input);
+
+/** @deprecated @see apr_time_exp_gmt_get */
 APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *result, 
                                           apr_time_exp_t *input);
 

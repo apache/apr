@@ -152,7 +152,8 @@ apr_status_t apr_socket_create(apr_socket_t **new, int family, int type,
     return apr_socket_create_ex(new, family, type, 0, cont);
 }
 
-apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
+apr_status_t apr_socket_shutdown(apr_socket_t *thesocket, 
+                                 apr_shutdown_how_e how)
 {
     return (shutdown(thesocket->socketdes, how) == -1) ? errno : APR_SUCCESS;
 }
@@ -162,7 +163,7 @@ apr_status_t apr_socket_close(apr_socket_t *thesocket)
     return apr_pool_cleanup_run(thesocket->cntxt, thesocket, socket_cleanup);
 }
 
-apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
+apr_status_t apr_socket_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
     if (bind(sock->socketdes, 
              (struct sockaddr *)&sa->sa, sa->salen) == -1) {
@@ -178,7 +179,7 @@ apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
     }
 }
 
-apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
+apr_status_t apr_socket_listen(apr_socket_t *sock, apr_int32_t backlog)
 {
     if (listen(sock->socketdes, backlog) == -1)
         return errno;
@@ -186,7 +187,8 @@ apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
         return APR_SUCCESS;
 }
 
-apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *connection_context)
+apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
+                               apr_pool_t *connection_context)
 {
     alloc_socket(new, connection_context);
     set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM, sock->protocol);
@@ -256,7 +258,7 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
     return APR_SUCCESS;
 }
 
-apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
+apr_status_t apr_socket_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
     int rc;        
 
@@ -392,3 +394,34 @@ apr_status_t apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock,
 APR_IMPLEMENT_INHERIT_SET(socket, inherit, cntxt, socket_cleanup)
 
 APR_IMPLEMENT_INHERIT_UNSET(socket, inherit, cntxt, socket_cleanup)
+
+/* deprecated */
+apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
+{
+    return apr_socket_shutdown(thesocket, how);
+}
+
+/* deprecated */
+apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
+{
+    return apr_socket_bind(sock, sa);
+}
+
+/* deprecated */
+apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
+{
+    return apr_socket_listen(sock, backlog);
+}
+
+/* deprecated */
+apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock,
+                        apr_pool_t *connection_context)
+{
+    return apr_socket_accept(new, sock, connection_context);
+}
+
+/* deprecated */
+apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
+{
+    return apr_socket_connect(sock, sa);
+}

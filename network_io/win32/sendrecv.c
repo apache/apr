@@ -65,16 +65,17 @@
 /* MAX_SEGMENT_SIZE is the maximum amount of data that will be sent to a client
  * in one call of TransmitFile. This number must be small enough to give the 
  * slowest client time to receive the data before the socket timeout triggers.
- * The same problem can exist with apr_send(). In that case, we rely on the
- * application to adjust socket timeouts and max send segment sizes appropriately.
- * For example, Apache will in most cases call apr_send() with less than 8193 
- * bytes.
+ * The same problem can exist with apr_socket_send(). In that case, we rely on
+ * the application to adjust socket timeouts and max send segment 
+ * sizes appropriately.
+ * For example, Apache will in most cases call apr_socket_send() with less
+ * than 8193 bytes.
  */
 #define MAX_SEGMENT_SIZE 65536
 #define WSABUF_ON_STACK 50
 
-APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
-                                   apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
+                                          apr_size_t *len)
 {
     apr_ssize_t rv;
     WSABUF wsaData;
@@ -101,8 +102,8 @@ APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
 }
 
 
-APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf,
-                                   apr_size_t *len) 
+APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock, char *buf,
+                                          apr_size_t *len) 
 {
     apr_ssize_t rv;
     WSABUF wsaData;
@@ -130,9 +131,9 @@ APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf,
 }
 
 
-APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
-                                    const struct iovec *vec,
-                                    apr_int32_t nvec, apr_size_t *nbytes)
+APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock,
+                                           const struct iovec *vec,
+                                           apr_int32_t nvec, apr_size_t *nbytes)
 {
     apr_status_t rc = APR_SUCCESS;
     apr_ssize_t rv;
@@ -171,9 +172,10 @@ APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
 }
 
 
-APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
-                                     apr_int32_t flags, const char *buf, 
-                                     apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_socket_sendto(apr_socket_t *sock,
+                                            apr_sockaddr_t *where,
+                                            apr_int32_t flags, const char *buf, 
+                                            apr_size_t *len)
 {
     apr_ssize_t rv;
 
@@ -190,10 +192,10 @@ APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
 }
 
 
-APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, 
-                                       apr_socket_t *sock,
-                                       apr_int32_t flags, 
-                                       char *buf, apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from, 
+                                              apr_socket_t *sock,
+                                              apr_int32_t flags, 
+                                              char *buf, apr_size_t *len)
 {
     apr_ssize_t rv;
 
@@ -253,8 +255,8 @@ static apr_status_t collapse_iovec(char **off, apr_size_t *len,
  */
 
 /*
- * apr_status_t apr_sendfile(apr_socket_t *, apr_file_t *, apr_hdtr_t *, 
- *                         apr_off_t *, apr_size_t *, apr_int32_t flags)
+ * apr_status_t apr_socket_sendfile(apr_socket_t *, apr_file_t *, apr_hdtr_t *, 
+ *                                 apr_off_t *, apr_size_t *, apr_int32_t flags)
  *    Send a file from an open file descriptor to a socket, along with 
  *    optional headers and trailers
  * arg 1) The socket to which we're writing
@@ -264,9 +266,12 @@ static apr_status_t collapse_iovec(char **off, apr_size_t *len,
  * arg 5) Number of bytes to send out of the file
  * arg 6) APR flags that are mapped to OS specific flags
  */
-APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
-                                       apr_hdtr_t *hdtr, apr_off_t *offset,
-                                       apr_size_t *len, apr_int32_t flags) 
+APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock, 
+                                              apr_file_t *file,
+                                              apr_hdtr_t *hdtr,
+                                              apr_off_t *offset,
+                                              apr_size_t *len,
+                                              apr_int32_t flags) 
 {
     apr_status_t status = APR_SUCCESS;
     apr_ssize_t rv;
@@ -293,13 +298,15 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     /* Handle the goofy case of sending headers/trailers and a zero byte file */
     if (!bytes_to_send && hdtr) {
         if (hdtr->numheaders) {
-            rv = apr_sendv(sock, hdtr->headers, hdtr->numheaders, &nbytes);
+            rv = apr_socket_sendv(sock, hdtr->headers, hdtr->numheaders, 
+                                  &nbytes);
             if (rv != APR_SUCCESS)
                 return rv;
             *len += nbytes;
         }
         if (hdtr->numtrailers) {
-            rv = apr_sendv(sock, hdtr->trailers, hdtr->numtrailers, &nbytes);
+            rv = apr_socket_sendv(sock, hdtr->trailers, hdtr->numtrailers,
+                                  &nbytes);
             if (rv != APR_SUCCESS)
                 return rv;
             *len += nbytes;
@@ -438,7 +445,8 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     
         /* Mark the socket as disconnected, but do not close it.
          * Note: The application must have stored the socket prior to making
-         * the call to apr_sendfile in order to either reuse it or close it.
+         * the call to apr_socket_sendfile in order to either reuse it 
+         * or close it.
          */
         if (disconnected) {
             sock->disconnected = 1;
@@ -451,4 +459,52 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
 #endif
     return status;
 }
+
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
+                                       apr_hdtr_t *hdtr, apr_off_t *offset,
+                                       apr_size_t *len, apr_int32_t flags) 
+{
+    return apr_socket_sendfile(sock, file, hdtr, offset, len, flags);
+}
+
 #endif
+
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
+                                   apr_size_t *len)
+{
+    return apr_socket_send(sock. buf, len);
+}
+
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
+                                    const struct iovec *vec,
+                                    apr_int32_t nvec, apr_size_t *nbytes)
+{
+    return apr_socket_sendv(sock, vec, nvec, nbytes);
+}
+
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
+                                     apr_int32_t flags, const char *buf, 
+                                     apr_size_t *len)
+{
+    return apr_socket_sendto(sock, where, flags, buf, len);
+}
+
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, 
+                                       apr_socket_t *sock,
+                                       apr_int32_t flags, 
+                                       char *buf, apr_size_t *len)
+{
+    return apr_socket_recvfrom(from, sock, flags, buf, len);
+}
+
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf,
+                                   apr_size_t *len) 
+{
+    return apr_socket_recv(sock, buf, len);
+}

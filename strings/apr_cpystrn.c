@@ -222,7 +222,7 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
     return APR_SUCCESS;
 }
 
-/* Filename_of_pathname returns the final element of the pathname.
+/* Filepath_name_get returns the final element of the pathname.
  * Using the current platform's filename syntax.
  *   "/foo/bar/gum" -> "gum"
  *   "/foo/bar/gum/" -> ""
@@ -232,7 +232,7 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
  * Corrected Win32 to accept "a/b\\stuff", "a:stuff"
  */
 
-APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname)
+APR_DECLARE(const char *) apr_filepath_name_get(const char *pathname)
 {
     const char path_separator = '/';
     const char *s = strrchr(pathname, path_separator);
@@ -248,6 +248,12 @@ APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname)
 #endif
 
     return s ? ++s : pathname;
+}
+
+/* deprecated */
+APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname)
+{
+        return apr_filepath_name_get(pathname);
 }
 
 /* length of dest assumed >= length of src

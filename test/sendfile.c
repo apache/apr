@@ -245,9 +245,9 @@ static int client(client_socket_mode_t socket_mode, char *host)
         exit(1);
     }
 
-    rv = apr_connect(sock, destsa);
+    rv = apr_socket_connect(sock, destsa);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_connect()->%d/%s\n", 
+        fprintf(stderr, "apr_socket_connect()->%d/%s\n", 
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
@@ -313,25 +313,25 @@ static int client(client_socket_mode_t socket_mode, char *host)
     if (socket_mode == BLK) {
         current_file_offset = 0;
         len = FILE_LENGTH;
-        rv = apr_sendfile(sock, f, &hdtr, &current_file_offset, &len, 0);
+        rv = apr_socket_sendfile(sock, f, &hdtr, &current_file_offset, &len, 0);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_sendfile()->%d/%s\n",
+            fprintf(stderr, "apr_socket_sendfile()->%d/%s\n",
                     rv,
                     apr_strerror(rv, buf, sizeof buf));
             exit(1);
         }
         
-        printf("apr_sendfile() updated offset with %ld\n",
+        printf("apr_socket_sendfile() updated offset with %ld\n",
                (long int)current_file_offset);
         
-        printf("apr_sendfile() updated len with %ld\n",
+        printf("apr_socket_sendfile() updated len with %ld\n",
                (long int)len);
         
         printf("bytes really sent: %" APR_SIZE_T_FMT "\n",
                expected_len);
 
         if (len != expected_len) {
-            fprintf(stderr, "apr_sendfile() didn't report the correct "
+            fprintf(stderr, "apr_socket_sendfile() didn't report the correct "
                     "number of bytes sent!\n");
             exit(1);
         }
@@ -353,7 +353,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
             apr_size_t tmplen;
 
             tmplen = len; /* bytes remaining to send from the file */
-            printf("Calling apr_sendfile()...\n");
+            printf("Calling apr_socket_sendfile()...\n");
             printf("Headers (%d):\n", hdtr.numheaders);
             for (i = 0; i < hdtr.numheaders; i++) {
                 printf("\t%d bytes (%c)\n",
@@ -367,8 +367,8 @@ static int client(client_socket_mode_t socket_mode, char *host)
                        hdtr.trailers[i].iov_len);
             }
 
-            rv = apr_sendfile(sock, f, &hdtr, &current_file_offset, &tmplen, 0);
-            printf("apr_sendfile()->%d, sent %ld bytes\n", rv, (long)tmplen);
+            rv = apr_socket_sendfile(sock, f, &hdtr, &current_file_offset, &tmplen, 0);
+            printf("apr_socket_sendfile()->%d, sent %ld bytes\n", rv, (long)tmplen);
             if (rv) {
                 if (APR_STATUS_IS_EAGAIN(rv)) {
                     assert(tmplen == 0);
@@ -463,22 +463,22 @@ static int client(client_socket_mode_t socket_mode, char *host)
         exit(1);
     }
 
-    printf("After apr_sendfile(), the kernel file pointer is "
+    printf("After apr_socket_sendfile(), the kernel file pointer is "
            "at offset %ld.\n",
            (long int)current_file_offset);
 
-    rv = apr_shutdown(sock, APR_SHUTDOWN_WRITE);
+    rv = apr_socket_shutdown(sock, APR_SHUTDOWN_WRITE);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_shutdown()->%d/%s\n",
+        fprintf(stderr, "apr_socket_shutdown()->%d/%s\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
     bytes_read = 1;
-    rv = apr_recv(sock, buf, &bytes_read);
+    rv = apr_socket_recv(sock, buf, &bytes_read);
     if (rv != APR_EOF) {
-        fprintf(stderr, "apr_recv()->%d/%s (expected APR_EOF)\n",
+        fprintf(stderr, "apr_socket_recv()->%d/%s (expected APR_EOF)\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
@@ -490,7 +490,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
         exit(1);
     }
 
-    printf("client: apr_sendfile() worked as expected!\n");
+    printf("client: apr_socket_sendfile() worked as expected!\n");
 
     rv = apr_file_remove(TESTFILE, p);
     if (rv != APR_SUCCESS) {
@@ -534,17 +534,17 @@ static int server(void)
         exit(1);
     }
 
-    rv = apr_bind(sock, localsa);
+    rv = apr_socket_bind(sock, localsa);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_bind()->%d/%s\n",
+        fprintf(stderr, "apr_socket_bind()->%d/%s\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
-    rv = apr_listen(sock, 5);
+    rv = apr_socket_listen(sock, 5);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_listen()->%d/%s\n",
+        fprintf(stderr, "apr_socket_listen()->%d/%s\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
@@ -552,9 +552,9 @@ static int server(void)
 
     printf("Waiting for a client to connect...\n");
 
-    rv = apr_accept(&newsock, sock, p);
+    rv = apr_socket_accept(&newsock, sock, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_accept()->%d/%s\n",
+        fprintf(stderr, "apr_socket_accept()->%d/%s\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
@@ -564,9 +564,9 @@ static int server(void)
 
     assert(sizeof buf > strlen(HDR1));
     bytes_read = strlen(HDR1);
-    rv = apr_recv(newsock, buf, &bytes_read);
+    rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_recv()->%d/%s\n",
+        fprintf(stderr, "apr_socket_recv()->%d/%s\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
@@ -584,9 +584,9 @@ static int server(void)
         
     assert(sizeof buf > strlen(HDR2));
     bytes_read = strlen(HDR2);
-    rv = apr_recv(newsock, buf, &bytes_read);
+    rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_recv()->%d/%s\n",
+        fprintf(stderr, "apr_socket_recv()->%d/%s\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
@@ -604,15 +604,15 @@ static int server(void)
 
     for (i = 0; i < HDR3_LEN; i++) {
         bytes_read = 1;
-        rv = apr_recv(newsock, buf, &bytes_read);
+        rv = apr_socket_recv(newsock, buf, &bytes_read);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_recv()->%d/%s\n",
+            fprintf(stderr, "apr_socket_recv()->%d/%s\n",
                     rv,
                     apr_strerror(rv, buf, sizeof buf));
             exit(1);
         }
         if (bytes_read != 1) {
-            fprintf(stderr, "apr_recv()->%ld bytes instead of 1\n",
+            fprintf(stderr, "apr_socket_recv()->%ld bytes instead of 1\n",
                     (long int)bytes_read);
             exit(1);
         }
@@ -629,15 +629,15 @@ static int server(void)
         
     for (i = 0; i < FILE_LENGTH; i++) {
         bytes_read = 1;
-        rv = apr_recv(newsock, buf, &bytes_read);
+        rv = apr_socket_recv(newsock, buf, &bytes_read);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_recv()->%d/%s\n",
+            fprintf(stderr, "apr_socket_recv()->%d/%s\n",
                     rv,
                     apr_strerror(rv, buf, sizeof buf));
             exit(1);
         }
         if (bytes_read != 1) {
-            fprintf(stderr, "apr_recv()->%ld bytes instead of 1\n",
+            fprintf(stderr, "apr_socket_recv()->%ld bytes instead of 1\n",
                     (long int)bytes_read);
             exit(1);
         }
@@ -654,9 +654,9 @@ static int server(void)
         
     assert(sizeof buf > strlen(TRL1));
     bytes_read = strlen(TRL1);
-    rv = apr_recv(newsock, buf, &bytes_read);
+    rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_recv()->%d/%s\n",
+        fprintf(stderr, "apr_socket_recv()->%d/%s\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
@@ -674,9 +674,9 @@ static int server(void)
         
     assert(sizeof buf > strlen(TRL2));
     bytes_read = strlen(TRL2);
-    rv = apr_recv(newsock, buf, &bytes_read);
+    rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_recv()->%d/%s\n",
+        fprintf(stderr, "apr_socket_recv()->%d/%s\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
@@ -694,15 +694,15 @@ static int server(void)
 
     for (i = 0; i < TRL3_LEN; i++) {
         bytes_read = 1;
-        rv = apr_recv(newsock, buf, &bytes_read);
+        rv = apr_socket_recv(newsock, buf, &bytes_read);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_recv()->%d/%s\n",
+            fprintf(stderr, "apr_socket_recv()->%d/%s\n",
                     rv,
                     apr_strerror(rv, buf, sizeof buf));
             exit(1);
         }
         if (bytes_read != 1) {
-            fprintf(stderr, "apr_recv()->%ld bytes instead of 1\n",
+            fprintf(stderr, "apr_socket_recv()->%ld bytes instead of 1\n",
                     (long int)bytes_read);
             exit(1);
         }
@@ -718,9 +718,9 @@ static int server(void)
     }
         
     bytes_read = 1;
-    rv = apr_recv(newsock, buf, &bytes_read);
+    rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_EOF) {
-        fprintf(stderr, "apr_recv()->%d/%s (expected APR_EOF)\n",
+        fprintf(stderr, "apr_socket_recv()->%d/%s (expected APR_EOF)\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
@@ -732,7 +732,7 @@ static int server(void)
         exit(1);
     }
 
-    printf("server: apr_sendfile() worked as expected!\n");
+    printf("server: apr_socket_sendfile() worked as expected!\n");
 
     return 0;
 }

@@ -223,8 +223,8 @@ APR_DECLARE(apr_status_t) apr_time_exp_get(apr_time_t *t,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *t,
-                                          apr_time_exp_t *xt)
+APR_DECLARE(apr_status_t) apr_time_exp_gmt_get(apr_time_t *t,
+                                               apr_time_exp_t *xt)
 {
     apr_status_t status = apr_time_exp_get(t, xt);
     if (status == APR_SUCCESS)
@@ -319,3 +319,11 @@ APR_DECLARE(apr_status_t) apr_explode_localtime(apr_time_exp_t *result,
 {
     return apr_time_exp_lt(result, input);
 }
+
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *t,
+                                          apr_time_exp_t *xt)
+{
+    return apr_time_exp_gmt_get(t, xt);
+}
+
