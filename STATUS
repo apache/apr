@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/12 22:26:59 $]
+Last modified at [$Date: 2002/07/13 01:49:35 $]
 
 Release:
 
@@ -78,7 +78,8 @@ CURRENT VOTES:
       2) Renaming the function to get rid of apr_time_t vs time_t confusion,
          but keep it ambigious and make no contract with the user about the
          units represented.  Needs a better suggestion than apr_timeval_t.
-         +1: aaron, brianp, ianh
+         +1: aaron, brianp, ianh,
+             fielding [prefers apr_time and apr_span (_t is half the problem)]
          -0: jerenkrantz, striker, dreid
          -0.5: rbb
                wrowe [prefers apr_utime_t and apr_uspan_t where u==undefined]
@@ -86,14 +87,14 @@ CURRENT VOTES:
       3) Renaming the function to get rid of apr_time_t vs time_t confusion,
          and strongly identify the type as apr_busec_t or apr_butime_t, with
          an ongoing contract with users about the type's units.
-         +1: fielding  [prefers apr_busec]
          +0.5: wrowe,  [prefers apr_time_busec_t and apr_span_busec_t]
-               brianp  [can live with apr_time_busec_t and apr_span_busec_t]
+               brianp, [can live with apr_time_busec_t and apr_span_busec_t]
+               fielding [me too]
          -0: striker, jerenkrantz
          -0.5: rbb, ianh, dreid
 
       4) Using time_t and struct timeval/tm
-         +1: fielding
+         +1: fielding (if apr_time is not an ADT)
          -1: brianp, wrowe
 
       [fielding: Is APR time guaranteed to be a scalar quantity?  If so,
