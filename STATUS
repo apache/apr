@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/11 23:32:50 $]
+Last modified at [$Date: 2002/07/11 23:40:48 $]
 
 Release:
 
@@ -104,6 +104,12 @@ CURRENT VOTES:
        system's time_t time() function to get the time value everywhere
        except Win32 w/SYSTEMTIME, we only ever have a resolution of
        seconds or milliseconds.  So, why the hell are we storing usecs?
+
+           [brianp: This is incorrect.  We use gettimeofday() in place
+            of time.  It's faster than time(), and it gives us microseconds
+            in addition to seconds.  Why do you want to throw away the
+            microseconds?!!]
+
        We don't use them.  We don't even have display functions for them.
        We have to do a stupid conversion every time we actually do something
        useful with time in order to support somebody's wet dream of a
