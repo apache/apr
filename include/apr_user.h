@@ -114,10 +114,10 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
  * @param dirname Pointer to new string containing group name (on output)
  * @param userid The groupid
  * @param p The pool from which to allocate the string
- * @deffunc apr_status_t apr_get_groupname(char **groupname, apr_gid_t userid, apr_pool_t *p)
+ * @deffunc apr_status_t apr_get_groupname(char **groupname, apr_gid_t userid, apr_pool_t *p);
  * @tip This function is available only if APR_HAS_USER is defined.
  */
-APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid, apr_pool_t *p);
 
 #endif  /* ! APR_HAS_USER */
 
