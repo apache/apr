@@ -168,7 +168,13 @@ int main(int argc, char *argv[])
     }
     else fprintf(stderr, "Read failed.\n");
 
-    sleep(1000);
+    fprintf(stdout, "Waiting for child to die.......");
+    if (ap_wait_proc(newproc, APR_WAIT) != APR_CHILD_DONE) {
+        fprintf(stderr, "Wait for child failed\n");
+        exit(-1);
+    }
+    fprintf(stdout, "OK\n");
+    
     fprintf(stdout, "Removing directory.......");
     if (ap_remove_dir("proctest", context) != APR_SUCCESS) {
         fprintf(stderr, "Could not remove directory.\n");
