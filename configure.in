@@ -596,6 +596,8 @@ AC_SUBST(struct_rlimit)
 dnl #----------------------------- Checking for Locking Characteristics 
 echo $ac_n "${nl}Checking for Locking...${nl}"
 
+AC_CHECK_FUNCS(semget semctl)
+
 # It's stupid, but not all platforms have union semun, even those that need it.
 AC_MSG_CHECKING(for union semun in sys/sem.h)
 AC_TRY_COMPILE([
@@ -625,8 +627,8 @@ if test "$threads" = "1"; then
     AC_CHECK_DEFINE(PTHREAD_PROCESS_SHARED, pthread.h)
 fi
 
-AC_BEGIN_DECISION([ap_lock implementation method])
-AC_IFALLYES(custom:union_semun,
+AC_BEGIN_DECISION([apr_lock implementation method])
+AC_IFALLYES(func:semget func:semctl,
             AC_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
 AC_IFALLYES(header:sys/file.h define:LOCK_EX,
             AC_DECIDE(USE_FLOCK_SERIALIZE, [4.2BSD-style flock()]))
@@ -635,7 +637,9 @@ AC_IFALLYES(header:fcntl.h define:F_SETLK,
 AC_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
             custom:with_pthread_cross,
             AC_DECIDE(USE_PROC_PTHREAD_SERIALIZE, [pthread mutex]))
-dnl AC_DECISION_FORCE(USE_FCNTL_SERIALIZE)
+if test "x$apr_lock_method" != "x"; then
+    AC_DECISION_FORCE($apr_lock_method)
+fi
 AC_END_DECISION
 AC_DEFINE_UNQUOTED($ac_decision)
 

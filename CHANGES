@@ -1,4 +1,10 @@
 Changes with APR a9
+  *) Lock config changes: Detect SysV sem capability by the presence of
+     sempaphore functions, not by the presence of union semun.  New
+     config variable apr_lock_method can override autodetection of the 
+     apr_lock implementation method.  For now, hints.m4 uses it to select 
+     SysV semaphores for OS/390.  [Jeff Trawick]
+     
   *) Get APR_OFF_T_FMT defined properly on Solaris Sparc.
      [Jeff Trawick]
 
