@@ -236,6 +236,7 @@ FILES_nlm_exports = \
 # Paths must all use the '/' character
 #
 FILES_lib_objs = \
+	$(OBJDIR)/apr_atomic.o \
 	$(OBJDIR)/apr_cpystrn.o \
 	$(OBJDIR)/apr_fnmatch.o \
 	$(OBJDIR)/apr_getpass.o \
@@ -342,6 +343,10 @@ endif
 #
 # Any specialized rules here
 #
+
+$(OBJDIR)/%.o: atomic/netware/%.c $(OBJDIR)\cc.opt
+	@echo Compiling $<
+	$(CC) atomic\netware\$(<F) -cwd source -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
 
 $(OBJDIR)/%.o: strings/%.c $(OBJDIR)\cc.opt
 	@echo Compiling $<
