@@ -129,6 +129,8 @@ sub rdln {
       if ($debug) { print STDERR "(0:$srcfile) $linenumber.\n"; } 
     }
   }
+  # Dispose of Apache specific macros
+  removeApacheMacros();
 }
 
 # Don't skip "#"
@@ -642,7 +644,7 @@ sub parseDeclaration {
 
     # Eliminate in-line comments
     &removeComment;
-    
+
     # Check for multi-line declaration
     while ((($valid, $d) = &matchDecl) && $valid) { $decl .= $d; }
     
@@ -1076,6 +1078,11 @@ sub seealsoList {
     }
   }
   return @r;
+}
+
+sub removeApacheMacros {
+#    print "removing from $_";
+    s|AP_DECLARE\((.*?)\)|$1|;
 }
 
 # Class for parsed package
