@@ -62,12 +62,20 @@
 #include <sys/stat.h>
 #include "atime.h"
 #include "misc.h"
+#include <aclapi.h>
 
+static apr_status_t free_localheap(void *heap) {
+    LocalFree(heap);
+    return APR_SUCCESS;
+}
 
 APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted,
                                           apr_file_t *thefile)
 {
     BY_HANDLE_FILE_INFORMATION FileInformation;
+    apr_oslevel_e os_level;
+    PSID user = NULL, grp = NULL;
+    PACL dacl = NULL;
 
     if (!GetFileInformationByHandle(thefile->filehand, &FileInformation)) {
         return apr_get_os_error();
@@ -88,20 +96,11 @@ APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted
     finfo->size =  (apr_off_t)FileInformation.nFileSizeLow
                 | ((apr_off_t)FileInformation.nFileSizeHigh << 32);
 #else
-    finfo->size = FileInformation.nFileSizeLow;
+    finfo->size = (apr_off_t)FileInformation.nFileSizeLow;
+    if (finfo->size < 0 || FileInformation.nFileSizeHigh)
+        finfo->size = 0x7fffffff;
 #endif
     
-    /* Read, write execute for owner.  In the Win32 environment, 
-     * anything readable is executable (well, not entirely 100% true, 
-     * but I'm looking for some obvious logic that would help us here.)
-     * TODO: The real permissions come from the DACL
-     */
-    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_READONLY) {
-        finfo->protection |= S_IREAD | S_IEXEC;
-    }
-    else {
-        finfo->protection |= S_IREAD | S_IWRITE | S_IEXEC;
-    }
     
     /* TODO: return user and group could as * SID's, allocated in the pool.
      * [These are variable length objects that will require a 'comparitor'
@@ -140,6 +139,55 @@ APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted
         }
     }
 
+    if ((wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
+            && apr_get_oslevel(thefile->cntxt, &os_level)
+            && os_level >= APR_WIN_NT) {
+        SECURITY_INFORMATION sinf = 0;
+        PSECURITY_DESCRIPTOR pdesc = NULL;
+        if (wanted & APR_FINFO_USER)
+            sinf != OWNER_SECURITY_INFORMATION;
+        if (wanted & APR_FINFO_GROUP)
+            sinf != GROUP_SECURITY_INFORMATION;
+        if (wanted & APR_FINFO_PROT)
+            sinf != SACL_SECURITY_INFORMATION;
+        if (!GetSecurityInfo(thefile->filehand, SE_FILE_OBJECT, sinf,
+                             (wanted & APR_FINFO_USER) ? &user : NULL,
+                             (wanted & APR_FINFO_GROUP) ? &grp : NULL,
+                             (wanted & APR_FINFO_PROT) ? &dacl : NULL,
+                             NULL, &pdesc)) {
+            apr_register_cleanup(thefile->cntxt, pdesc, free_localheap, 
+                                 apr_null_cleanup);
+        }
+    }
+
+    if (user) {
+        finfo->user = user;
+        finfo->valid |= APR_FINFO_USER;
+    }
+
+    if (grp) {
+        finfo->group = grp;
+        finfo->valid |= APR_FINFO_GROUP;
+    }
+
+    if (dacl) {
+        /* Retrieved the discresionary access list */
+        
+    }
+    else {
+        /* Read, write execute for owner.  In the Win32 environment, 
+         * anything readable is executable (well, not entirely 100% true, 
+         * but I'm looking for some obvious logic that would help us here.)
+         * TODO: The real permissions come from the DACL
+         */
+        if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_READONLY) {
+            finfo->protection |= S_IREAD | S_IEXEC;
+        }
+        else {
+            finfo->protection |= S_IREAD | S_IWRITE | S_IEXEC;
+        }
+    }    
+    
     if (wanted & ~finfo->valid)
         return APR_INCOMPLETE;
 
@@ -152,112 +200,181 @@ APR_DECLARE(apr_status_t) apr_setfileperms(const char *fname,
     return APR_ENOTIMPL;
 }
 
-APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
-                                   apr_int32_t wanted, apr_pool_t *cont)
+static int stat_with_handle(apr_finfo_t *finfo, const char *fname,
+                            apr_int32_t wanted, apr_pool_t *cont)
 {
-    apr_oslevel_e os_level;
-    /*
-     * We need to catch the case where fname length == MAX_PATH since for
-     * some strange reason GetFileAttributesEx fails with PATH_NOT_FOUND.
-     * We would rather indicate length error than 'not found'
-     * since in many cases the apr user is testing for 'not found' 
-     * and this is not such a case.
-     */        
-    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
-    {
-        apr_file_t *thefile = NULL;
-        apr_status_t rv;
-        /* 
-         * NT5 (W2K) only supports symlinks in the same manner as mount points.
-         * This code should eventually take that into account, for now treat
-         * every reparse point as a symlink...
-         *
-         * We must open the file with READ_CONTROL if we plan to retrieve the
-         * user, group or permissions.
+    apr_file_t *thefile = NULL;
+    apr_status_t rv;
+    /* 
+     * NT5 (W2K) only supports symlinks in the same manner as mount points.
+     * This code should eventually take that into account, for now treat
+     * every reparse point as a symlink...
+     *
+     * We must open the file with READ_CONTROL if we plan to retrieve the
+     * user, group or permissions.
+     */
+    
+    if ((rv = apr_open(&thefile, fname, 
+                       ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0)
+                     | ((wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
+                           ? APR_READCONTROL : 0),
+                       APR_OS_DEFAULT, cont)) == APR_SUCCESS) {
+        rv = apr_getfileinfo(finfo, wanted, thefile);
+        finfo->filehand = NULL;
+        apr_close(thefile);
+    }
+    else if (APR_STATUS_IS_EACCES(rv) && (wanted & (APR_FINFO_PROT 
+                                                  | APR_FINFO_OWNER))) {
+        /* We have a backup plan.  Perhaps we couldn't grab READ_CONTROL?
+         * proceed without asking for that permission...
          */
-        
         if ((rv = apr_open(&thefile, fname, 
-                           ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0)
-                         | ((wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
-                               ? APR_READCONTROL : 0),
+                           ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0),
                            APR_OS_DEFAULT, cont)) == APR_SUCCESS) {
-            rv = apr_getfileinfo(finfo, wanted, thefile);
+            rv = apr_getfileinfo(finfo, wanted & ~(APR_FINFO_PROT 
+                                                 | APR_FINFO_OWNER),
+                                 thefile);
             finfo->filehand = NULL;
             apr_close(thefile);
         }
-        else if (APR_STATUS_IS_EACCES(rv) && (wanted & (APR_FINFO_PROT 
-                                                      | APR_FINFO_OWNER))) {
-            /* We have a backup plan.  Perhaps we couldn't grab READ_CONTROL?
-             * proceed without asking for that permission...
-             */
-            if ((rv = apr_open(&thefile, fname, 
-                               ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0),
-                               APR_OS_DEFAULT, cont)) == APR_SUCCESS) {
-                rv = apr_getfileinfo(finfo, wanted & ~(APR_FINFO_PROT 
-                                                     | APR_FINFO_OWNER),
-                                     thefile);
-                finfo->filehand = NULL;
-                apr_close(thefile);
-            }
-        }
-        if (rv != APR_SUCCESS && rv != APR_INCOMPLETE)
-            return (rv);
-        /* We picked up this case above and had opened the link's properties */
-        if (wanted & APR_FINFO_LINK)
-            finfo->valid |= APR_FINFO_LINK;
-        finfo->fname = thefile->fname;
     }
-    else
-    {
-        WIN32_FIND_DATA FileInformation;
-        /*
-         * Big enough for the Win95 FindFile, but actually the same
-         * initial fields as the GetFileAttributesEx return structure
-         * used for Win98
-         */
-        if (strlen(fname) >= MAX_PATH) {
-            return APR_ENAMETOOLONG;
-        }
-        else if (os_level >= APR_WIN_98) {
-            if (!GetFileAttributesEx(fname, GetFileExInfoStandard, 
-                                     &FileInformation)) {
-                return apr_get_os_error();
-            }
-        }
-        else  {
-            /* What a waste of cpu cycles... but we don't have a choice
-             */
-            HANDLE hFind;
-            if (strchr(fname, '*') || strchr(fname, '?'))
-                return APR_ENOENT;
-            hFind = FindFirstFile(fname, &FileInformation);
-            if (hFind == INVALID_HANDLE_VALUE) {
-                return apr_get_os_error();
-    	    } 
-            else {
-                FindClose(hFind);
-            }
-        }
+    if (rv != APR_SUCCESS && rv != APR_INCOMPLETE)
+        return (rv);
+    /* We picked up this case above and had opened the link's properties */
+    if (wanted & APR_FINFO_LINK)
+        finfo->valid |= APR_FINFO_LINK;
+    finfo->fname = thefile->fname;
 
-        memset(finfo, '\0', sizeof(*finfo));
-        /* Filetype - Directory or file?
+    return rv;
+}
+
+APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
+                                   apr_int32_t wanted, apr_pool_t *cont)
+{
+    /* The WIN32_FILE_ATTRIBUTE_DATA is a subset of this structure
+     */
+    WIN32_FIND_DATA FileInformation;
+    apr_oslevel_e os_level;
+    PSID user = NULL, grp = NULL;
+    PACL dacl = NULL;
+
+    if (apr_get_oslevel(cont, &os_level))
+        os_level = APR_WIN_95;
+    
+    /* Catch fname length == MAX_PATH since GetFileAttributesEx fails 
+     * with PATH_NOT_FOUND.  We would rather indicate length error than 
+     * 'not found'
+     */        
+    if (strlen(fname) >= APR_PATH_MAX) {
+        return APR_ENAMETOOLONG;
+    }
+#ifdef APR_HAS_UNICODE_FS
+    else if (os_level >= APR_WIN_NT) {
+        apr_wchar_t wfname[APR_PATH_MAX];
+        apr_status_t rv;
+        if (rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
+                                            / sizeof(apr_wchar_t), fname))
+            return rv;
+        if (!GetFileAttributesExW(wfname, GetFileExInfoStandard, 
+                                  &FileInformation)) {
+            return apr_get_os_error();
+        }
+        if (wanted & (APR_FINFO_PROT | APR_FINFO_OWNER)) {
+            SECURITY_INFORMATION sinf = 0;
+            PSECURITY_DESCRIPTOR pdesc = NULL;
+            if (wanted & APR_FINFO_USER)
+                sinf != OWNER_SECURITY_INFORMATION;
+            if (wanted & APR_FINFO_GROUP)
+                sinf != GROUP_SECURITY_INFORMATION;
+            if (wanted & APR_FINFO_PROT)
+                sinf != SACL_SECURITY_INFORMATION;
+            if (!GetNamedSecurityInfoW(wfname, SE_FILE_OBJECT, sinf,
+                                     (wanted & APR_FINFO_USER) ? &user : NULL,
+                                     (wanted & APR_FINFO_GROUP) ? &grp : NULL,
+                                     (wanted & APR_FINFO_PROT) ? &dacl : NULL,
+                                     NULL, &pdesc)) {
+                apr_register_cleanup(cont, pdesc, free_localheap, 
+                                     apr_null_cleanup);
+            }
+        }
+    }
+#endif
+    else if (os_level >= APR_WIN_98) {
+        if (!GetFileAttributesExA(fname, GetFileExInfoStandard, 
+                                 &FileInformation)) {
+            return apr_get_os_error();
+        }
+    }
+    else  {
+        /* What a waste of cpu cycles... but we don't have a choice
+         * Be sure we insulate ourselves against bogus wildcards
+         */
+        HANDLE hFind;
+        if (strchr(fname, '*') || strchr(fname, '?'))
+            return APR_ENOENT;
+        hFind = FindFirstFile(fname, &FileInformation);
+        if (hFind == INVALID_HANDLE_VALUE) {
+            return apr_get_os_error();
+    	} 
+        else {
+            FindClose(hFind);
+        }
+    }
+
+    memset(finfo, '\0', sizeof(*finfo));
+    finfo->cntxt = cont;
+    finfo->valid = APR_FINFO_ATIME | APR_FINFO_CTIME | APR_FINFO_MTIME
+                 | APR_FINFO_SIZE  | APR_FINFO_TYPE;
+
+    /* File times */
+    FileTimeToAprTime(&finfo->atime, &FileInformation.ftLastAccessTime);
+    FileTimeToAprTime(&finfo->ctime, &FileInformation.ftCreationTime);
+    FileTimeToAprTime(&finfo->mtime, &FileInformation.ftLastWriteTime);
+
+#if APR_HAS_LARGE_FILES
+    finfo->size =  (apr_off_t)FileInformation.nFileSizeLow
+                | ((apr_off_t)FileInformation.nFileSizeHigh << 32);
+#else
+    finfo->size = (apr_off_t)FileInformation.nFileSizeLow;
+    if (finfo->size < 0 || FileInformation.nFileSizeHigh)
+        finfo->size = 0x7fffffff;
+#endif
+
+    /* Filetype - Directory or file?
+     */
+    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+        finfo->filetype = APR_LNK;
+    }
+    else if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        finfo->filetype = APR_DIR;
+    }
+    else {
+        /* XXX: Solve this
          * Short of opening the handle to the file, the 'FileType' appears
          * to be unknowable (in any trustworthy or consistent sense), that
          * is, as far as PIPE, CHR, etc.
          */
-        if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-            finfo->protection = S_IFDIR;
-            finfo->filetype = APR_DIR;
-        }
-        else {
-            finfo->protection = S_IFREG;
-            finfo->filetype = APR_REG;
-        }
-    
+        finfo->filetype = APR_REG;
+    }
+
+    if (user) {
+        finfo->user = user;
+        finfo->valid |= APR_FINFO_USER;
+    }
+
+    if (grp) {
+        finfo->group = grp;
+        finfo->valid |= APR_FINFO_GROUP;
+    }
+
+    if (dacl) {
+        /* Retrieved the discresionary access list */
+        
+    }
+    else {
         /* Read, write execute for owner
          * In the Win32 environment, anything readable is executable
-         * (well, not entirely 100% true, but I'm looking for a way 
-         * to get at the acl permissions in simplified fashion.)
+         * (not entirely 100% true, but the dacl is -expensive-!)
          */
         if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_READONLY) {
             finfo->protection |= S_IREAD | S_IEXEC;
@@ -265,29 +382,11 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         else {
             finfo->protection |= S_IREAD | S_IWRITE | S_IEXEC;
         }
+        /* Lying through our teeth */
+        finfo->valid |= APR_FINFO_UPROT;
 
-        /* Is this an executable? Guess based on the file extension?
-         * This is a rather silly test, IMHO... we are looking to test
-         * if the user 'may' execute a file (permissions), 
-         * not if the filetype is executable.
-         * XXX: We need to find a solution, for real.  Or provide some
-         * new mechanism for control.  Note that the PATHEXT env var,
-         * in the format .ext[;.ext]... actually lists the 'executable'
-         * types (invoking without an extension.)  Perhaps a registry
-         * key test is even appropriate here.
-         */
-    
-        /* File times */
-        FileTimeToAprTime(&finfo->atime, &FileInformation.ftLastAccessTime);
-        FileTimeToAprTime(&finfo->ctime, &FileInformation.ftCreationTime);
-        FileTimeToAprTime(&finfo->mtime, &FileInformation.ftLastWriteTime);
-
-        /* Note: This cannot handle files greater than can be held by an int 
-         */
-        finfo->size = FileInformation.nFileSizeLow;
-        if (finfo->size < 0 || FileInformation.nFileSizeHigh)
-            finfo->size = 0x7fffffff;
     }
+
     if (wanted & ~finfo->valid)
         return APR_INCOMPLETE;
 
