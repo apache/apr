@@ -657,7 +657,6 @@ AC_SUBST(file_as_socket)
 APR_CHECK_GETHOSTBYNAME_NAS
 
 dnl #----------------------------- Construct the files
-APR_OUTPUT_VARS
 
 AC_SUBST(LDLIBS)
 AC_SUBST(OPTIM)
@@ -698,7 +697,7 @@ for i in $SAVE_FILES; do
   test -r $i && mv $i $i.save
 done
 
-AC_OUTPUT($MAKEFILE1 $MAKEFILE2 $MAKEFILE3 include/apr.h,[
+AC_OUTPUT($MAKEFILE1 $MAKEFILE2 $MAKEFILE3 include/apr.h APRVARS,[
 
 SAVE_FILES="include/apr.h include/apr_private.h"
 
