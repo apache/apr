@@ -78,8 +78,16 @@
 #endif
 
 /* For the misc.h late-loaded dynamic symbols, we need some obscure types 
+ * Avoid dragging in wtypes.h unless it's absolutely necessary [generally
+ * not with APR itself, until some GUI-related security is introduced.]
  */
+#ifdef __wtypes_h__
 #include <accctrl.h>
+#else
+#define __wtypes_h__
+#include <accctrl.h>
+#undef __wtypes_h__
+#endif
 
 #include <sys/types.h>
 #include <stddef.h>
