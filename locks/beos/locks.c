@@ -59,7 +59,9 @@
 #include <strings.h>
 #include <stdio.h>
 
-ap_status_t ap_create_lock(struct lock_t **lock, ap_context_t *cont, ap_locktype_e type, char *fname)
+ap_status_t ap_create_lock(ap_context_t *cont, ap_locktype_e type, 
+                           ap_lockscope_e scope, char *fname, 
+                           struct lock_t **lock)
 {
     struct lock_t *new;
     ap_status_t stat;
