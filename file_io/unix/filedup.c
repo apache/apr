@@ -64,12 +64,18 @@
 ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
 {
     char *buf_oflags;
-    (*new_file) = (struct file_t *)ap_palloc(old_file->cntxt,
-                               sizeof(struct file_t));
-    
+    int have_file = 0;
+
     if ((*new_file) == NULL) {
-        return APR_ENOMEM;
+        (*new_file) = (struct file_t *)ap_pcalloc(old_file->cntxt,
+                                   sizeof(struct file_t));
+        if ((*new_file) == NULL) {
+            return APR_ENOMEM;
+        }
+    } else {
+        have_file = 1;
     }
+    
     (*new_file)->cntxt = old_file->cntxt; 
     if (old_file->buffered) {
         switch (old_file->oflags) {
@@ -89,7 +95,12 @@ ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
                                         old_file->filehand); 
     }
     else {
-    (*new_file)->filedes = dup(old_file->filedes); 
+        if (have_file) {
+            dup2(old_file->filedes, (*new_file)->filedes);
+        }
+        else {
+            (*new_file)->filedes = dup(old_file->filedes); 
+        }
     }
     (*new_file)->fname = ap_pstrdup(old_file->cntxt, old_file->fname);
     (*new_file)->buffered = old_file->buffered;
