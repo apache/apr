@@ -118,6 +118,9 @@ typedef struct apr_lock_t    apr_lock_t;
  *          only guaranteed to lock processes.
  * @warning Check APR_HAS_foo_SERIALIZE defines to see if the platform supports
  *          APR_LOCK_foo.  Only APR_LOCK_DEFAULT is portable.
+ * @deprecated CAUTION: This API has been deprecated. The new and expanded
+ * synchronization routines reside in apr_thread_mutex.h, apr_proc_mutex.h,
+ * apr_thread_rwlock.h, and apr_thread_cond.h.
  */
 APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
                                           apr_locktype_e type,
@@ -129,6 +132,9 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
 /**
  * Lock a protected region.
  * @param lock The lock to set.
+ * @deprecated CAUTION: This API has been deprecated. The new and expanded
+ * synchronization routines reside in apr_thread_mutex.h, apr_proc_mutex.h,
+ * apr_thread_rwlock.h, and apr_thread_cond.h.
  */
 APR_DECLARE(apr_status_t) apr_lock_acquire(apr_lock_t *lock);
 
@@ -136,6 +142,9 @@ APR_DECLARE(apr_status_t) apr_lock_acquire(apr_lock_t *lock);
  * Tries to lock a protected region.  
  * @param lock The lock to set.
  * @return If it fails, returns APR_EBUSY.  Otherwise, it returns APR_SUCCESS.
+ * @deprecated CAUTION: This API has been deprecated. The new and expanded
+ * synchronization routines reside in apr_thread_mutex.h, apr_proc_mutex.h,
+ * apr_thread_rwlock.h, and apr_thread_cond.h.
  */
 APR_DECLARE(apr_status_t) apr_lock_tryacquire(apr_lock_t *lock);
 
@@ -143,6 +152,9 @@ APR_DECLARE(apr_status_t) apr_lock_tryacquire(apr_lock_t *lock);
  * Lock a region with either a reader or writer lock.
  * @param lock The lock to set.
  * @param type The type of lock to acquire.
+ * @deprecated CAUTION: This API has been deprecated. The new and expanded
+ * synchronization routines reside in apr_thread_mutex.h, apr_proc_mutex.h,
+ * apr_thread_rwlock.h, and apr_thread_cond.h.
  */
 APR_DECLARE(apr_status_t) apr_lock_acquire_rw(apr_lock_t *lock,
                                               apr_readerwriter_e type);
@@ -150,6 +162,9 @@ APR_DECLARE(apr_status_t) apr_lock_acquire_rw(apr_lock_t *lock,
 /**
  * Unlock a protected region.
  * @param lock The lock to reset.
+ * @deprecated CAUTION: This API has been deprecated. The new and expanded
+ * synchronization routines reside in apr_thread_mutex.h, apr_proc_mutex.h,
+ * apr_thread_rwlock.h, and apr_thread_cond.h.
  */
 APR_DECLARE(apr_status_t) apr_lock_release(apr_lock_t *lock);
 
@@ -158,6 +173,9 @@ APR_DECLARE(apr_status_t) apr_lock_release(apr_lock_t *lock);
  * @param lock The lock to free.
  * @remark If the lock is currently active when it is destroyed, it 
  *         will be unlocked first.
+ * @deprecated CAUTION: This API has been deprecated. The new and expanded
+ * synchronization routines reside in apr_thread_mutex.h, apr_proc_mutex.h,
+ * apr_thread_rwlock.h, and apr_thread_cond.h.
  */
 APR_DECLARE(apr_status_t) apr_lock_destroy(apr_lock_t *lock);
 
@@ -173,6 +191,9 @@ APR_DECLARE(apr_status_t) apr_lock_destroy(apr_lock_t *lock);
  *         locking mechanism chosen for the platform, but it is a good
  *         idea to call it regardless, because it makes the code more
  *         portable. 
+ * @deprecated CAUTION: This API has been deprecated. The new and expanded
+ * synchronization routines reside in apr_thread_mutex.h, apr_proc_mutex.h,
+ * apr_thread_rwlock.h, and apr_thread_cond.h.
  */
 APR_DECLARE(apr_status_t) apr_lock_child_init(apr_lock_t **lock,
                                               const char *fname,
@@ -183,6 +204,9 @@ APR_DECLARE(apr_status_t) apr_lock_child_init(apr_lock_t **lock,
  * @param lock The currently open lock.
  * @param key The key to use when retreiving data associated with this lock
  * @param data The user data associated with the lock.
+ * @deprecated CAUTION: This API has been deprecated. The new and expanded
+ * synchronization routines reside in apr_thread_mutex.h, apr_proc_mutex.h,
+ * apr_thread_rwlock.h, and apr_thread_cond.h.
  */
 APR_DECLARE(apr_status_t) apr_lock_data_get(apr_lock_t *lock, const char *key,
                                            void *data);
@@ -193,6 +217,9 @@ APR_DECLARE(apr_status_t) apr_lock_data_get(apr_lock_t *lock, const char *key,
  * @param data The user data to associate with the lock.
  * @param key The key to use when associating data with this lock
  * @param cleanup The cleanup to use when the lock is destroyed.
+ * @deprecated CAUTION: This API has been deprecated. The new and expanded
+ * synchronization routines reside in apr_thread_mutex.h, apr_proc_mutex.h,
+ * apr_thread_rwlock.h, and apr_thread_cond.h.
  */
 APR_DECLARE(apr_status_t) apr_lock_data_set(apr_lock_t *lock, void *data,
                                            const char *key,
