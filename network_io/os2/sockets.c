@@ -191,7 +191,7 @@ apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
              sa->salen) == -1)
         return APR_OS2_STATUS(sock_errno());
     else {
-        sock->local_sa = sa;
+        sock->local_addr = sa;
         return APR_SUCCESS;
     }
 }
