@@ -99,7 +99,7 @@ extern "C" {
 #define APR_RESET_NODELAY    2048 /* This flag is ONLY set internally
                                    * when we set APR_TCP_NOPUSH with
                                    * APR_TCP_NODELAY set to tell us that
-                                   * APR_TCP_NODELAY should be truned on
+                                   * APR_TCP_NODELAY should be turned on
                                    * again when NOPUSH is turned off
                                    */
 
