@@ -180,8 +180,8 @@ typedef pthread_key_t         ap_os_threadkey_t;
 typedef struct timeval        ap_os_time_t;
 #endif
 
-ap_status_t ap_get_os_file(ap_file_t *, ap_os_file_t *);     
-ap_status_t ap_get_os_dir(ap_dir_t *, ap_os_dir_t *);      
+ap_status_t ap_get_os_file(ap_os_file_t *, ap_file_t *);     
+ap_status_t ap_get_os_dir(ap_os_dir_t *, ap_dir_t *);      
 ap_status_t ap_get_os_sock(ap_socket_t *, ap_os_sock_t *);
 ap_status_t ap_get_os_lock(ap_lock_t *, ap_os_lock_t *);     
 ap_status_t ap_get_os_thread(ap_thread_t *, ap_os_thread_t *);

@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     ap_open(&fd, context, argv[1], APR_READ, -1);
     
     while (!status) {
-        status = ap_getc(fd, &ch);
+        status = ap_getc(&ch, fd);
         if (status == APR_EOF )
             fprintf(stdout, "EOF, YEAH!!!!!!!!!\n");
         else if (status == APR_SUCCESS)

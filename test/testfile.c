@@ -162,7 +162,7 @@ int main()
     }
     
     fprintf(stdout, "\tDeleting file.......");
-    status = ap_remove_file(context, filename);
+    status = ap_remove_file(filename, context);
     if (status  != APR_SUCCESS) {
         fprintf(stderr, "Couldn't delete the file\n");
         exit(-1); 
@@ -202,7 +202,7 @@ int test_filedel(ap_context_t *context)
         return stat;
     }
 
-    if ((stat = ap_remove_file(context, "testdel"))  != APR_SUCCESS) {
+    if ((stat = ap_remove_file("testdel", context))  != APR_SUCCESS) {
         return stat;
     }
 
@@ -225,7 +225,7 @@ int testdirs(ap_context_t *context)
     fprintf(stdout, "Testing Directory functions.\n");
 
     fprintf(stdout, "\tMakeing Directory.......");
-    if (ap_make_dir(context, "testdir", APR_UREAD | APR_UWRITE | APR_UEXECUTE | APR_GREAD | APR_GWRITE | APR_GEXECUTE | APR_WREAD | APR_WWRITE | APR_WEXECUTE)  != APR_SUCCESS) {
+    if (ap_make_dir("testdir", APR_UREAD | APR_UWRITE | APR_UEXECUTE | APR_GREAD | APR_GWRITE | APR_GEXECUTE | APR_WREAD | APR_WWRITE | APR_WEXECUTE, context)  != APR_SUCCESS) {
         fprintf(stderr, "Could not create directory\n");
         return -1;
     }
@@ -242,7 +242,7 @@ int testdirs(ap_context_t *context)
 	ap_close(file);
 
     fprintf(stdout, "\tOpening Directory.......");
-    if (ap_opendir(&temp, context, "testdir") != APR_SUCCESS) {
+    if (ap_opendir(&temp, "testdir", context) != APR_SUCCESS) {
         fprintf(stderr, "Could not open directory\n");
         return -1;
     }
@@ -278,7 +278,7 @@ int testdirs(ap_context_t *context)
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\t\tFile type.......");
-    ap_dir_entry_ftype(temp, &type);
+    ap_dir_entry_ftype(&type, temp);
     if (type != APR_REG) {
         fprintf(stderr, "Got wrong file type\n");
         return -1;
@@ -286,7 +286,7 @@ int testdirs(ap_context_t *context)
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\t\tFile size.......");
-    ap_dir_entry_size(temp, &bytes);
+    ap_dir_entry_size(&bytes, temp);
     if (bytes != (ap_ssize_t)strlen("Another test!!!")) {
         fprintf(stderr, "Got wrong file size %d\n", bytes);
         return -1;
@@ -307,7 +307,7 @@ int testdirs(ap_context_t *context)
     }
 
     fprintf(stdout, "\tRemoving file from directory.......");
-    if (ap_remove_file(context, "testdir/testfile")  != APR_SUCCESS) {
+    if (ap_remove_file("testdir/testfile", context)  != APR_SUCCESS) {
         fprintf(stderr, "Could not remove file\n");
         return -1;
     }
@@ -316,7 +316,7 @@ int testdirs(ap_context_t *context)
     }
 
     fprintf(stdout, "\tRemoving Directory.......");
-    if (ap_remove_dir(context, "testdir")  != APR_SUCCESS) {
+    if (ap_remove_dir("testdir", context)  != APR_SUCCESS) {
         fprintf(stderr, "Could not remove directory\n");
         return -1;
     }

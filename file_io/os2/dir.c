@@ -69,7 +69,7 @@ ap_status_t dir_cleanup(void *thedir)
 
 
 
-ap_status_t ap_opendir(struct dir_t **new, ap_context_t *cntxt, const char *dirname)
+ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *cntxt)
 {
     struct dir_t *thedir = (struct dir_t *)ap_palloc(cntxt, sizeof(struct dir_t));
     
@@ -139,21 +139,21 @@ ap_status_t ap_rewinddir(struct dir_t *thedir)
 
 
 
-ap_status_t ap_make_dir(ap_context_t *cont, const char *path, ap_fileperms_t perm)
+ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *cont)
 {
     return os2errno(DosCreateDir(path, NULL));
 }
 
 
 
-ap_status_t ap_remove_dir(ap_context_t *cont, const char *path)
+ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
 {
     return os2errno(DosDeleteDir(path));
 }
 
 
 
-ap_status_t ap_dir_entry_size(struct dir_t *thedir, ap_ssize_t *size)
+ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct dir_t *thedir)
 {
     if (thedir->validentry) {
         *size = thedir->entry.cbFile;
@@ -165,7 +165,7 @@ ap_status_t ap_dir_entry_size(struct dir_t *thedir, ap_ssize_t *size)
 
 
 
-ap_status_t ap_dir_entry_mtime(struct dir_t *thedir, time_t *time)
+ap_status_t ap_dir_entry_mtime(time_t *time, struct dir_t *thedir)
 {
     if (thedir->validentry) {
         *time = os2date2unix(thedir->entry.fdateLastWrite, thedir->entry.ftimeLastWrite);
@@ -177,7 +177,7 @@ ap_status_t ap_dir_entry_mtime(struct dir_t *thedir, time_t *time)
 
 
 
-ap_status_t ap_dir_entry_ftype(struct dir_t *thedir, ap_filetype_e *type)
+ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct dir_t *thedir)
 {
     int rc;
     HFILE hFile;

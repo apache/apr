@@ -126,7 +126,7 @@ ap_status_t ap_writev(struct file_t *thefile, const struct iovec_t *vec, ap_ssiz
     return APR_SUCCESS;
 }
 
-ap_status_t ap_putc(ap_file_t *thefile, char ch)
+ap_status_t ap_putc(char ch, ap_file_t *thefile)
 {
     DWORD bwrote;
 
@@ -136,7 +136,7 @@ ap_status_t ap_putc(ap_file_t *thefile, char ch)
     return APR_SUCCESS; 
 }
 
-ap_status_t ap_ungetc(ap_file_t *thefile, char ch)
+ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 {
     /* 
      * Your application must provide its own serialization (locking) if
@@ -172,7 +172,7 @@ ap_status_t ap_ungetc(ap_file_t *thefile, char ch)
     return APR_SUCCESS; 
 }
 
-ap_status_t ap_getc(ap_file_t *thefile, char *ch)
+ap_status_t ap_getc(char *ch, ap_file_t *thefile)
 {
     DWORD bread;
     if (!ReadFile(thefile->filehand, ch, 1, &bread, NULL)) {
@@ -185,7 +185,7 @@ ap_status_t ap_getc(ap_file_t *thefile, char *ch)
     return APR_SUCCESS; 
 }
 
-ap_status_t ap_puts(ap_file_t *thefile, char *str)
+ap_status_t ap_puts(char *str, ap_file_t *thefile)
 {
     DWORD bwrote;
     int len;
@@ -201,7 +201,7 @@ ap_status_t ap_puts(ap_file_t *thefile, char *str)
     return APR_SUCCESS; 
 }
 
-ap_status_t ap_fgets(ap_file_t *thefile, char *str, int len)
+ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 {
     DWORD bread;
     int i;

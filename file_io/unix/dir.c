@@ -75,13 +75,13 @@ static ap_status_t dir_cleanup(void *thedir)
 } 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_opendir(ap_dir_t **, ap_context_t *, char *)
+ * ap_status_t ap_opendir(ap_dir_t **, char *, ap_context_t *)
  *    Open the specified directory. 
  * arg 1) The context to use.
  * arg 2) The full path to the directory (use / on all systems)
  * arg 3) The opened directory descriptor.
  */                        
-ap_status_t ap_opendir(struct dir_t **new, ap_context_t *cont, const char *dirname)
+ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *cont)
 {
     (*new) = (struct dir_t *)ap_palloc(cont, sizeof(struct dir_t));
 
@@ -142,13 +142,13 @@ ap_status_t ap_rewinddir(struct dir_t *thedir)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_make_dir(ap_context_t *, const char *, ap_fileperms_t)
+ * ap_status_t ap_make_dir(const char *, ap_fileperms_t, ap_context_t *)
  *    Create a new directory on the file system. 
  * arg 1) the context to use.
  * arg 2) the path for the directory to be created.  (use / on all systems)
  * arg 3) Permissions for the new direcoty.
  */                        
-ap_status_t ap_make_dir(ap_context_t *cont, const char *path, ap_fileperms_t perm)
+ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *cont)
 {
     mode_t mode = get_fileperms(perm);
     if (mkdir(path, mode) == 0) {
@@ -160,12 +160,12 @@ ap_status_t ap_make_dir(ap_context_t *cont, const char *path, ap_fileperms_t per
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_remove_dir(ap_context_t *, const char *)
+ * ap_status_t ap_remove_dir(const char *, ap_context_t *)
  *    Remove directory from the file system. 
  * arg 1) the context to use.
  * arg 2) the path for the directory to be removed.  (use / on all systems)
  */                        
-ap_status_t ap_remove_dir(ap_context_t *cont, const char *path)
+ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
 {
     if (rmdir(path) == 0) {
         return APR_SUCCESS;
@@ -176,12 +176,12 @@ ap_status_t ap_remove_dir(ap_context_t *cont, const char *path)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_dir_entry_size(ap_dir_t *, ap_ssize_t *)
+ * ap_status_t ap_dir_entry_size(ap_ssize_t *, ap_dir_t *)
  *    Get the size of the current directory entry. 
  * arg 1) the currently open directory.
  * arg 2) the size of the directory entry. 
  */                        
-ap_status_t ap_dir_entry_size(struct dir_t *thedir, ap_ssize_t *size)
+ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct dir_t *thedir)
 {
     struct stat filestat;
     char *fname = NULL;    
@@ -202,12 +202,12 @@ ap_status_t ap_dir_entry_size(struct dir_t *thedir, ap_ssize_t *size)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_dir_entry_mtime(ap_dir_t *, time_t *)
+ * ap_status_t ap_dir_entry_mtime(time_t *, ap_dir_t *)
  *    Get the last modified time of the current directory entry. 
  * arg 1) the currently open directory.
  * arg 2) the last modified time of the directory entry. 
  */                        
-ap_status_t ap_dir_entry_mtime(struct dir_t *thedir, time_t *mtime)
+ap_status_t ap_dir_entry_mtime(time_t *mtime, struct dir_t *thedir)
 {
     struct stat filestat;
     char *fname = NULL;
@@ -229,12 +229,12 @@ ap_status_t ap_dir_entry_mtime(struct dir_t *thedir, time_t *mtime)
 }
  
 /* ***APRDOC********************************************************
- * ap_status_t ap_dir_entry_ftype(ap_dir_t *, ap_filetype_e *)
+ * ap_status_t ap_dir_entry_ftype(ap_filetype_e *, ap_dir_t *)
  *    Get the file type of the current directory entry. 
  * arg 1) the currently open directory.
  * arg 2) the file type of the directory entry. 
  */                        
-ap_status_t ap_dir_entry_ftype(struct dir_t *thedir, ap_filetype_e *type)
+ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct dir_t *thedir)
 {
     struct stat filestat;
     char *fname = NULL;
@@ -283,12 +283,12 @@ ap_status_t ap_get_dir_filename(char **new, struct dir_t *thedir)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_dir(ap_dir_t *, ap_os_dir_t *)
+ * ap_status_t ap_get_os_dir(ap_os_dir_t *, ap_dir_t *)
  *    convert the dir from apr type to os specific type.
  * arg 1) The apr dir to convert.
  * arg 2) The os specific dir we are converting to
  */   
-ap_status_t ap_get_os_dir(struct dir_t *dir, ap_os_dir_t *thedir)
+ap_status_t ap_get_os_dir(ap_os_dir_t *thedir, struct dir_t *dir)
 {
     if (dir == NULL) {
         return APR_ENODIR;

@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout, "Creating directory for later use.......");
-    if (ap_make_dir(context, "proctest", APR_UREAD | APR_UWRITE | APR_UEXECUTE) != APR_SUCCESS) {
+    if (ap_make_dir("proctest", APR_UREAD | APR_UWRITE | APR_UEXECUTE, context) != APR_SUCCESS) {
         fprintf(stderr, "Could not create dir\n");
         exit(-1);
     }
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
     else fprintf(stderr, "Read failed.\n");
 
     fprintf(stdout, "Removing directory.......");
-    if (ap_remove_dir(context, "proctest") != APR_SUCCESS) {
+    if (ap_remove_dir("proctest", context) != APR_SUCCESS) {
         fprintf(stderr, "Could not remove directory.\n");
         exit(-1);
     }

@@ -110,12 +110,12 @@ mode_t get_fileperms(ap_fileperms_t mode)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_filesize(ap_file_t *, ap_ssize_t *)
+ * ap_status_t ap_get_filesize(ap_ssize_t *, ap_file_t *)
  *    Return the size of the current file.
  * arg 1) The currently open file.
  * arg 2) The size of the file.  
  */                     
-ap_status_t ap_get_filesize(struct file_t *file, ap_ssize_t *size)
+ap_status_t ap_get_filesize(ap_ssize_t *size, struct file_t *file)
 {
     if (file != NULL) {
         if (!file->stated) {
@@ -131,12 +131,12 @@ ap_status_t ap_get_filesize(struct file_t *file, ap_ssize_t *size)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_fileperms(ap_file_t *, ap_fileperms_t *)
+ * ap_status_t ap_get_fileperms(ap_fileperms_t *, ap_file_t *)
  *    Return the permissions of the current file.
  * arg 1) The currently open file.
  * arg 2) The permissions of the file.  
  */                     
-ap_status_t ap_get_fileperms(struct file_t *file, ap_fileperms_t *perm)
+ap_status_t ap_get_fileperms(ap_fileperms_t *perm, struct file_t *file)
 {
     if (file != NULL) {
         if (!file->stated) {
@@ -152,12 +152,12 @@ ap_status_t ap_get_fileperms(struct file_t *file, ap_fileperms_t *perm)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_fileatime(ap_file_t *, time_t *)
+ * ap_status_t ap_get_fileatime(time_t *, ap_file_t *)
  *    Return the last access time of the current file.
  * arg 1) The currently open file.
  * arg 2) The last access time of the file.  
  */                     
-ap_status_t ap_get_fileatime(struct file_t *file, time_t *atime)
+ap_status_t ap_get_fileatime(time_t *atime, struct file_t *file)
 {    
     if (file != NULL) {
         if (!file->stated) {
@@ -173,12 +173,12 @@ ap_status_t ap_get_fileatime(struct file_t *file, time_t *atime)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_filectime(ap_file_t *, time_t *)
+ * ap_status_t ap_get_filectime(time_t *, ap_file_t *)
  *    Return the time of the last change to the current file.
  * arg 1) The currently open file.
  * arg 2) The last change time of the file.  
  */                     
-ap_status_t ap_get_filectime(struct file_t *file, time_t *ptime)
+ap_status_t ap_get_filectime(time_t *ptime, struct file_t *file)
 {    
     if (file != NULL) {
         if (!file->stated) {
@@ -194,12 +194,12 @@ ap_status_t ap_get_filectime(struct file_t *file, time_t *ptime)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_filemtime(ap_file_t *, time_t *)
+ * ap_status_t ap_get_filemtime(time_t *, ap_file_t *)
  *    Return the last modified time of the current file.
  * arg 1) The currently open file.
  * arg 2) The last modified time of the file.  
  */                     
-ap_status_t ap_get_filemtime(struct file_t *file, time_t *mtime)
+ap_status_t ap_get_filemtime(time_t *mtime, struct file_t *file)
 {    
     if (file != NULL) {
         if (!file->stated) {
@@ -215,12 +215,12 @@ ap_status_t ap_get_filemtime(struct file_t *file, time_t *mtime)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_filetype(ap_file_t *, ap_filetype_e)
+ * ap_status_t ap_get_filetype(ap_filetype_e, ap_file_t *)
  *    Return the type of the current file.
  * arg 1) The currently open file.
  * arg 2) The file type
  */                     
-ap_status_t ap_get_filetype(struct file_t *file, ap_filetype_e *type)
+ap_status_t ap_get_filetype(ap_filetype_e *type, struct file_t *file)
 {    
     if (file != NULL) {
         if (!file->stated) {
@@ -251,13 +251,13 @@ ap_status_t ap_get_filetype(struct file_t *file, ap_filetype_e *type)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_filedata(ap_file_t *, char *key, void *)
+ * ap_status_t ap_get_filedata(void *, char *key, ap_file_t *)
  *    Return the data associated with the current file.
  * arg 1) The currently open file.
  * arg 2) The key to use for retreiving data associated with this file.
  * arg 3) The user data associated with the file.  
  */                     
-ap_status_t ap_get_filedata(struct file_t *file, char *key, void *data)
+ap_status_t ap_get_filedata(void *data, char *key, struct file_t *file)
 {    
     if (file != NULL) {
         return ap_get_userdata(&data, file->cntxt, key);
