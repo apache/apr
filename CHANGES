@@ -1,4 +1,8 @@
 Changes with APR b1
+
+  *) Cleanup some compiler warnings on Solaris
+     [Dale Ghent <daleg@elemental.org>
+
   *) apr_getaddrinfo() can now return multiple addresses for a host
      via the next field in apr_sockaddr_t.  [Jeff Trawick]
 
