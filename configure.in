@@ -203,7 +203,7 @@ AC_SUBST(keybased_shm)
 
 APR_CHECK_DEFINE(MM_SHMT_MMFILE, $srcdir/shmem/unix/mm/mm_conf.h) 
 
-if test "ac_cv_define_MM_SHMT_MMFILE" = "yes"; then
+if test "$ac_cv_define_MM_SHMT_MMFILE" = "yes"; then
     file_based="1"
     mem_based="0"
 else
