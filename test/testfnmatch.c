@@ -14,11 +14,6 @@
  */
 
 #include "test_apr.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "apr_file_info.h"
 #include "apr_fnmatch.h"
 #include "apr_tables.h"
