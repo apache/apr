@@ -118,6 +118,20 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
 
 
 
+ap_status_t ap_getsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t *on)
+{
+    switch(opt) {
+    case APR_SO_TIMEOUT:
+        *on = sock->timeout;
+        break;
+    default:
+        return APR_EINVAL;
+    }
+    return APR_SUCCESS;
+}
+
+
+
 ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_pool_t *cont)
 {
     if (gethostname(buf, len) == -1)
