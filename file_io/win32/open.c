@@ -116,14 +116,14 @@ apr_status_t apr_open(apr_file_t **new, const char *fname,
             return rv;
     }
 #if APR_HAS_UNICODE_FS
-    (*new)->fname = apr_palloc(cont, dremains);
+    (*new)->w.fname = apr_palloc(cont, dremains);
     if ((rv = conv_utf8_to_ucs2(fname, &lremains,
-                                (*new)->fname, &dremains)))
+                                (*new)->w.fname, &dremains)))
         return rv;
     if (lremains)
         return APR_ENAMETOOLONG;
 #else
-    (*new)->fname = apr_pstrdup(cont, fname);
+    (*new)->n.fname = apr_pstrdup(cont, fname);
 #endif
 
     if (apr_get_oslevel(cont, &level) == APR_SUCCESS && level >= APR_WIN_NT) {
@@ -167,10 +167,10 @@ apr_status_t apr_open(apr_file_t **new, const char *fname,
     }
 
 #if APR_HAS_UNICODE_FS
-    (*new)->filehand = CreateFileW((*new)->fname, oflags, sharemode,
+    (*new)->filehand = CreateFileW((*new)->w.fname, oflags, sharemode,
                                    NULL, createflags, attributes, 0);
 #else
-    (*new)->filehand = CreateFile((*new)->fname, oflags, sharemode,
+    (*new)->filehand = CreateFile((*new)->n.fname, oflags, sharemode,
                                   NULL, createflags, attributes, 0);
 #endif
     if ((*new)->filehand == INVALID_HANDLE_VALUE) {
@@ -303,7 +303,7 @@ apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
     if ((*thefile)->filehand == INVALID_HANDLE_VALUE)
         return apr_get_os_error();
     (*thefile)->cntxt = cont;
-    (*thefile)->fname = "\0\0"; // What was this: "STD_ERROR_HANDLE";
+    (*thefile)->n.fname = "\0\0"; // What was this??? : "STD_ERROR_HANDLE"; */
     (*thefile)->eof_hit = 0;
 
     return APR_SUCCESS;

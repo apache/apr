@@ -79,7 +79,7 @@ apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *p)
 
     (*in) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*in)->cntxt = p;
-    (*in)->fname = apr_pstrdup(p, "PIPE");
+    (*in)->n.fname = "\0\0"; // What was this??? : apr_pstrdup(p, "PIPE"); */
     (*in)->pipe = 1;
     (*in)->timeout = -1;
     (*in)->ungetchar = -1;
@@ -91,7 +91,7 @@ apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *p)
 
     (*out) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*out)->cntxt = p;
-    (*out)->fname = apr_pstrdup(p, "PIPE");
+    (*in)->n.fname = "\0\0"; // What was this??? : apr_pstrdup(p, "PIPE"); */
     (*out)->pipe = 1;
     (*out)->timeout = -1;
     (*out)->ungetchar = -1;
@@ -149,7 +149,7 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
 
     (*in) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*in)->cntxt = p;
-    (*in)->fname = apr_pstrdup(p, "PIPE");
+    (*in)->n.fname = "\0\0"; // What was this??? : apr_pstrdup(p, "PIPE"); */
     (*in)->pipe = 1;
     (*in)->timeout = -1;
     (*in)->ungetchar = -1;
@@ -162,7 +162,7 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
 
     (*out) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*out)->cntxt = p;
-    (*out)->fname = apr_pstrdup(p, "PIPE");
+    (*in)->n.fname = "\0\0"; // What was this??? : apr_pstrdup(p, "PIPE"); */
     (*out)->pipe = 1;
     (*out)->timeout = -1;
     (*out)->ungetchar = -1;
