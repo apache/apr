@@ -41,7 +41,7 @@ TARGETS = $(TARGET_LIB) export_vars.c apr.exp
 CLEAN_TARGETS = apr-config.out apr.exp exports.c export_vars.c .make.dirs
 DISTCLEAN_TARGETS = config.cache config.log config.status \
 	include/apr.h include/arch/unix/apr_private.h \
-	libtool apr-config build/apr_rules.mk
+	libtool apr-config build/apr_rules.mk apr.pc
 EXTRACLEAN_TARGETS = configure aclocal.m4 include/arch/unix/apr_private.h.in \
 	build-outputs.mk build/ltcf-c.sh build/ltmain.sh build/libtool.m4
 
