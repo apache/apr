@@ -72,7 +72,7 @@ int main(void)
     apr_pool_t *p;
     char *str, *str2;
     apr_size_t sz;
-    apr_interval_time_t hr_off = -5 * 3600; /* 5 hours in seconds */
+    apr_int32_t hr_off = -5 * 3600; /* 5 hours in seconds */
 
     fprintf(stdout, "Testing Time functions.\n");
 
@@ -180,7 +180,8 @@ int main(void)
     hr_off *= APR_USEC_PER_SEC; /* microseconds */ 
     if (imp != now + hr_off){
         printf("Failed! :(\n");
-        printf("Difference is %lld (should be %lld)\n", imp - now, hr_off);
+        printf("Difference is %" APR_TIME_T_FMT " (should be %" 
+               APR_TIME_T_FMT ")\n", imp - now, hr_off);
         exit(-1);
     }
     printf("OK\n");
