@@ -223,6 +223,7 @@ ALL : "$(OUTDIR)\apr.lib"
 CLEAN :
 	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr.idb"
+	-@erase "$(INTDIR)\apr.pdb"
 	-@erase "$(INTDIR)\apr_cpystrn.obj"
 	-@erase "$(INTDIR)\apr_fnmatch.obj"
 	-@erase "$(INTDIR)\apr_getpass.obj"
@@ -279,10 +280,10 @@ CLEAN :
 
 RSC=rc.exe
 CPP=cl.exe
-CPP_PROJ=/nologo /MDd /W3 /GX /Od /I "./include" /I "./include/arch" /I\
+CPP_PROJ=/nologo /MDd /W3 /GX /Zi /Od /I "./include" /I "./include/arch" /I\
  "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D\
  "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\\"\
- /Fd"$(INTDIR)\apr" /FD /ZI /c 
+ /Fd"$(INTDIR)\apr" /FD /c 
 CPP_OBJS=.\LibD/
 CPP_SBRS=.
 
