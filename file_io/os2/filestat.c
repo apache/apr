@@ -73,6 +73,7 @@ static void FS3_to_finfo(ap_finfo_t *finfo, FILESTATUS3 *fstatus)
     finfo->user = 0;
     finfo->group = 0;
     finfo->inode = 0;
+    finfo->device = 0;
     finfo->size = fstatus->cbFile;
     ap_os2_time_to_ap_time(&finfo->atime, fstatus->fdateLastAccess, fstatus->ftimeLastAccess );
     ap_os2_time_to_ap_time(&finfo->mtime, fstatus->fdateLastWrite,  fstatus->ftimeLastWrite );
@@ -136,6 +137,10 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
     return APR_OS2_STATUS(rc);
 }
 
+ap_status_t ap_setfileperms(const char *fname, ap_fileperms_t perms)
+{
+    return APR_ENOTIMPL;
+}
 
 
 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)

@@ -82,32 +82,60 @@ ap_status_t ap_get_filename(char **new, ap_file_t *thefile)
 }
 
 #if !defined(OS2) && !defined(WIN32)
-mode_t ap_unix_get_fileperms(ap_fileperms_t mode)
+mode_t ap_unix_perms2mode(ap_fileperms_t perms)
 {
-    mode_t rv = 0;
+    mode_t mode = 0;
 
-    if (mode & APR_UREAD)
-        rv |= S_IRUSR;
-    if (mode & APR_UWRITE)
-        rv |= S_IWUSR;
-    if (mode & APR_UEXECUTE)
-        rv |= S_IXUSR;
+    if (perms & APR_UREAD)
+        mode |= S_IRUSR;
+    if (perms & APR_UWRITE)
+        mode |= S_IWUSR;
+    if (perms & APR_UEXECUTE)
+        mode |= S_IXUSR;
 
-    if (mode & APR_GREAD)
-        rv |= S_IRGRP;
-    if (mode & APR_GWRITE)
-        rv |= S_IWGRP;
-    if (mode & APR_GEXECUTE)
-        rv |= S_IXGRP;
+    if (perms & APR_GREAD)
+        mode |= S_IRGRP;
+    if (perms & APR_GWRITE)
+        mode |= S_IWGRP;
+    if (perms & APR_GEXECUTE)
+        mode |= S_IXGRP;
 
-    if (mode & APR_WREAD)
-        rv |= S_IROTH;
-    if (mode & APR_WWRITE)
-        rv |= S_IWOTH;
-    if (mode & APR_WEXECUTE)
-        rv |= S_IXOTH;
+    if (perms & APR_WREAD)
+        mode |= S_IROTH;
+    if (perms & APR_WWRITE)
+        mode |= S_IWOTH;
+    if (perms & APR_WEXECUTE)
+        mode |= S_IXOTH;
 
-    return rv;
+    return mode;
+}
+
+ap_fileperms_t ap_unix_mode2perms(mode_t mode)
+{
+    ap_fileperms_t perms = 0;
+
+    if (mode & S_IRUSR)
+        perms |= APR_UREAD;
+    if (mode & S_IWUSR)
+        perms |= APR_UWRITE;
+    if (mode & S_IXUSR)
+        perms |= APR_UEXECUTE;
+
+    if (mode & S_IRGRP)
+        perms |= APR_GREAD;
+    if (mode & S_IWGRP)
+        perms |= APR_GWRITE;
+    if (mode & S_IXGRP)
+        perms |= APR_GEXECUTE;
+
+    if (mode & S_IROTH)
+        perms |= APR_WREAD;
+    if (mode & S_IWOTH)
+        perms |= APR_WWRITE;
+    if (mode & S_IXOTH)
+        perms |= APR_WEXECUTE;
+
+    return perms;
 }
 #endif
 
