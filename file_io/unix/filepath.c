@@ -60,10 +60,7 @@
 #include <unistd.h>
 #endif
 
-#include <direct.h>
-
-
-/* Any OS that requires/refuses trailing slashes should be delt with here.
+/* Any OS that requires/refuses trailing slashes should be dealt with here.
  */
 APR_DECLARE(apr_status_t) apr_filepath_get(char **defpath, apr_pool_t *p)
 {
@@ -79,7 +76,7 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **defpath, apr_pool_t *p)
 }    
 
 
-/* Any OS that requires/refuses trailing slashes should be delt with here
+/* Any OS that requires/refuses trailing slashes should be dealt with here
  */
 APR_DECLARE(apr_status_t) apr_filepath_set(const char *path, apr_pool_t *p)
 {
@@ -88,10 +85,9 @@ APR_DECLARE(apr_status_t) apr_filepath_set(const char *path, apr_pool_t *p)
     return APR_SUCCESS;
 }    
 
-
-APR_DECLARE(apr_status_t) apr_filepath_parse_root(const char **rootpath, 
-                                                  const char **inpath,
-                                                  apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath, 
+                                            const char **inpath,
+                                            apr_pool_t *p)
 {
     if (**inpath == '/') 
     {
@@ -102,7 +98,6 @@ APR_DECLARE(apr_status_t) apr_filepath_parse_root(const char **rootpath,
 
     return APR_ERELATIVE;
 }
-
 
 APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath, 
                                              const char *rootpath, 
