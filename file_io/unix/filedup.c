@@ -89,6 +89,8 @@ apr_status_t apr_file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_pool_
     }
     /* this is the way dup() works */
     (*new_file)->blocking = old_file->blocking; 
+    /* make sure unget behavior is consistent */
+    (*new_file)->ungetchar = old_file->ungetchar;
     /* apr_file_dup() clears the inherit attribute, user must call 
      * apr_file_set_inherit() again on the dupped handle, as necessary.
      */
