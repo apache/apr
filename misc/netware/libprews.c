@@ -15,10 +15,12 @@
 
 #include "apr_pools.h"
 
+#define MAX_PROCESSORS         128
+
 typedef struct app_data {
     int     initialized;
     void*   gPool;
-    void*   statCache;
+    void*   statCache[MAX_PROCESSORS];
 } APP_DATA;
 
 /* library-private data...*/
@@ -174,26 +176,35 @@ void* getGlobalPool()
     return NULL;
 }
 
-int setStatCache(void *data)
+int setStatCache(void *data, int proc)
 {
     APP_DATA *app_data = (APP_DATA*) get_app_data(gLibId);
 
+    if ((proc < 0) || (proc > (MAX_PROCESSORS-1))) {
+        data = NULL;
+        return 0;
+    }
+
     NXLock(gLibLock);
 
-    if (app_data && !app_data->statCache) {
-        app_data->statCache = data;
+    if (app_data && !app_data->statCache[proc]) {
+        app_data->statCache[proc] = data;
     }
 
     NXUnlock(gLibLock);
     return 1;
 }
 
-void* getStatCache()
+void* getStatCache(int proc)
 {
     APP_DATA *app_data = (APP_DATA*) get_app_data(gLibId);
 
+    if ((proc < 0) || (proc > (MAX_PROCESSORS-1))) {
+        return NULL;
+    }
+
     if (app_data) {
-        return app_data->statCache;
+        return app_data->statCache[proc];
     }
 
     return NULL;
