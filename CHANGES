@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Set precompiler for Solaris atomics when using GNU binutils.
+     PR 7876.  [solomon@conceptshopping.com (Marvin Solomon)]
+
   *) AIX: Fix breakage with 64-bit builds on versions of AIX prior
      to 5L.  PR 7957  [Jeff Trawick]
 
