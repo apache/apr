@@ -1,14 +1,18 @@
-? include/util_filter.h
-? lib/apr/buckets/Makefile.in
-? lib/apr/include/apr_buf.h
-? main/util_filter.c
-Index: ap/Makefile.in
+? src/build.log
+? src/build.err
+? src/.inslog2
+? src/include/util_filter.h
+? src/lib/apr/buckets/Makefile.in
+? src/main/build.log
+? src/main/build.err
+? src/main/util_filter.c
+Index: src/ap/Makefile.in
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/ap/Makefile.in,v
 retrieving revision 1.4
 diff -u -d -b -w -u -r1.4 Makefile.in
---- ap/Makefile.in	2000/06/12 20:41:13	1.4
-+++ ap/Makefile.in	2000/07/17 23:40:28
+--- src/ap/Makefile.in	2000/06/12 20:41:13	1.4
++++ src/ap/Makefile.in	2000/07/20 16:17:56
 @@ -1,5 +1,5 @@
  
  LTLIBRARY_NAME    = libap.la
@@ -16,13 +20,13 @@ diff -u -d -b -w -u -r1.4 Makefile.in
 +LTLIBRARY_SOURCES = ap_cache.c ap_base64.c ap_sha1.c ap_hooks.c 
  
  include $(top_srcdir)/build/ltlib.mk
-Index: include/ap_iol.h
+Index: src/include/ap_iol.h
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/include/ap_iol.h,v
 retrieving revision 1.19
 diff -u -d -b -w -u -r1.19 ap_iol.h
---- include/ap_iol.h	2000/05/29 04:22:02	1.19
-+++ include/ap_iol.h	2000/07/17 23:40:31
+--- src/include/ap_iol.h	2000/05/29 04:22:02	1.19
++++ src/include/ap_iol.h	2000/07/20 16:17:56
 @@ -58,6 +58,7 @@
  #define AP_IOL_H
  
@@ -31,13 +35,13 @@ diff -u -d -b -w -u -r1.19 ap_iol.h
  #include "apr_errno.h" /* For ap_status_t and the APR_errnos */
  
  typedef struct ap_iol ap_iol;
-Index: include/http_protocol.h
+Index: src/include/http_protocol.h
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/include/http_protocol.h,v
 retrieving revision 1.19
 diff -u -d -b -w -u -r1.19 http_protocol.h
---- include/http_protocol.h	2000/07/11 03:48:17	1.19
-+++ include/http_protocol.h	2000/07/17 23:40:31
+--- src/include/http_protocol.h	2000/07/11 03:48:17	1.19
++++ src/include/http_protocol.h	2000/07/20 16:17:56
 @@ -89,8 +89,15 @@
  API_EXPORT(void) ap_basic_http_header(request_rec *r);
  
@@ -55,13 +59,13 @@ diff -u -d -b -w -u -r1.19 http_protocol.h
  
  /* Send the response to special method requests */
  
-Index: include/httpd.h
+Index: src/include/httpd.h
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/include/httpd.h,v
 retrieving revision 1.64
 diff -u -d -b -w -u -r1.64 httpd.h
---- include/httpd.h	2000/06/30 21:18:13	1.64
-+++ include/httpd.h	2000/07/17 23:40:32
+--- src/include/httpd.h	2000/06/30 21:18:13	1.64
++++ src/include/httpd.h	2000/07/20 16:17:56
 @@ -596,6 +596,11 @@
  				 * pointer back to the main request.
  				 */
@@ -74,13 +78,13 @@ diff -u -d -b -w -u -r1.64 httpd.h
      /* Info about the request itself... we begin with stuff that only
       * protocol.c should ever touch...
       */
-Index: lib/apr/configure.in
+Index: src/lib/apr/configure.in
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/lib/apr/configure.in,v
 retrieving revision 1.136
 diff -u -d -b -w -u -r1.136 configure.in
---- lib/apr/configure.in	2000/07/15 15:39:05	1.136
-+++ lib/apr/configure.in	2000/07/17 23:40:32
+--- src/lib/apr/configure.in	2000/07/15 15:39:05	1.136
++++ src/lib/apr/configure.in	2000/07/20 16:17:57
 @@ -682,8 +682,8 @@
  AC_SUBST(EXEEXT)
  
@@ -92,325 +96,13 @@ diff -u -d -b -w -u -r1.136 configure.in
  for dir in $MODULES
  do
      test -d $dir || $MKDIR -p $dir
-Index: lib/apr/buckets/ap_buf.c
-===================================================================
-RCS file: /home/cvs/apache-2.0/src/lib/apr/buckets/ap_buf.c,v
-retrieving revision 1.12
-diff -u -d -b -w -u -r1.12 ap_buf.c
---- lib/apr/buckets/ap_buf.c	2000/07/14 00:24:33	1.12
-+++ lib/apr/buckets/ap_buf.c	2000/07/17 23:40:33
-@@ -100,10 +100,25 @@
- APR_EXPORT(ap_status_t) ap_bucket_brigade_destroy(void *data)
- {
-     ap_bucket_brigade *b = data;
--    ap_bucket_list *bl = b->head;
- 
--    ap_destroy_bucket_list(bl);
-+    ap_bucket_list_destroy(b->head);
-+    /* The brigade itself is allocated out of a pool, so we don't actually 
-+     * want to free it.  If we did, we would do that free() here.
-+     */
-+
-+    return APR_SUCCESS;
-+}
-+
-+APR_EXPORT(ap_status_t) ap_bucket_list_destroy(ap_bucket *e)
-+{
-+    ap_bucket *cur = e;
-+    ap_bucket *next;
- 
-+    while (cur) {
-+        next = cur->next;
-+        ap_bucket_destroy(cur);
-+        cur = next;
-+    }
-     return APR_SUCCESS;
- }        
- 
-@@ -120,18 +135,10 @@
-     return b;
- }
- 
--APR_EXPORT(ap_bucket_list *) ap_bucket_list_create(void)
--{
--    ap_bucket_list *b;
--    
--    b = calloc(1, sizeof(*b));
--    return b;
--}
--
--APR_EXPORT(void) ap_bucket_brigade_append_list(ap_bucket_brigade *b, 
--                                               ap_bucket_list *e)
-+APR_EXPORT(void) ap_bucket_brigade_append_buckets(ap_bucket_brigade *b, 
-+                                                  ap_bucket *e)
- {
--    ap_bucket_list *cur = e;
-+    ap_bucket *cur = e;
- 
-     if (b->tail) {
-         b->tail->next = e;
-@@ -146,37 +153,17 @@
-     }
- }
- 
--APR_EXPORT(void) ap_bucket_brigade_append_bucket(ap_bucket_brigade *b,
--                                                 ap_bucket *r)
--{
--    if (b->tail) {
--        if (b->tail->bucket == NULL) {
--            b->tail->bucket = r;
--        }
--        else {
--            b->tail->next = ap_bucket_list_create();
--            b->tail->next->prev = b->tail;
--            b->tail = b->tail->next;
--            b->tail->bucket = r;
--        }
--    }
--    else {
--        b->head = b->tail = ap_bucket_list_create();
--        b->tail->bucket = r;
--    }
--}
--
- APR_EXPORT(int) ap_bucket_brigade_to_iovec(ap_bucket_brigade *b, 
-                                            struct iovec *vec, int nvec)
- {
--    ap_bucket_list *e;
-+    ap_bucket *e;
-     struct iovec *orig;
- 
-     orig = vec;
-     e = b->head;
-     while (e && nvec) {
--	vec->iov_base = (void *)ap_get_bucket_char_str(e->bucket);
--	vec->iov_len = ap_get_bucket_len(e->bucket);
-+	vec->iov_base = (void *)ap_get_bucket_char_str(e);
-+	vec->iov_len = ap_get_bucket_len(e);
- 	e = e->next;
- 	--nvec;
- 	++vec;
-@@ -207,12 +194,12 @@
- 
-     for (i=0; i < nvec; i++) {
-         if (b->head == b->tail) {
--            ap_bucket_destroy(b->head->bucket);
-+            ap_bucket_destroy(b->head);
-             b->head = b->tail = NULL;
-             break;
-         }
-         b->head = b->head->next;
--        ap_bucket_destroy(b->head->prev->bucket);
-+        ap_bucket_destroy(b->head->prev);
-         b->head->prev = NULL;
-     }
- }
-@@ -241,17 +228,6 @@
-     return APR_SUCCESS;
- }
- 
--APR_EXPORT(ap_status_t) ap_destroy_bucket_list(ap_bucket_list *buf)
--{
--    ap_bucket_list *dptr = buf;
--   
--    while (dptr) {
--        ap_bucket_destroy(dptr->bucket);
--        dptr = dptr->next;
--    }
--    return APR_SUCCESS;
--}
--
- APR_EXPORT(const char *) ap_get_bucket_char_str(ap_bucket *b)
- {
-     if (b) {
-@@ -275,10 +251,9 @@
-     int j, k, rv;
-     ap_ssize_t i;
- 
--    if (b->tail && b->tail->bucket && 
--        b->tail->bucket->color == AP_BUCKET_rwmem) {
-+    if (b->tail && b->tail->color == AP_BUCKET_rwmem) {
-         ap_bucket *rw;
--        rw = b->tail->bucket;
-+        rw = b->tail;
-         /* I have no idea if this is a good idea or not.  Probably not.
-          * Basically, if the last bucket in the list is a rwmem bucket,
-          * then we just add to it instead of allocating a new read only
-@@ -298,7 +273,7 @@
-             }
-             k += i;
- 
--            ap_bucket_brigade_append_bucket(b, rw);
-+            ap_bucket_brigade_append_buckets(b, rw);
-         }        
-     }
-     
-@@ -316,7 +291,7 @@
-         }
-         k += i;
- 
--        ap_bucket_brigade_append_bucket(b, r);
-+        ap_bucket_brigade_append_buckets(b, r);
-     }
- 
-     return k;
-@@ -346,7 +321,7 @@
- 
-     r = ap_bucket_new(AP_BUCKET_rwmem);
-     res = r->insert(r, buf, strlen(buf), &i);
--    ap_bucket_brigade_append_bucket(b, r);
-+    ap_bucket_brigade_append_buckets(b, r);
- 
-     return res;
- }
-Index: lib/apr/buckets/ap_eos_buf.c
-===================================================================
-RCS file: /home/cvs/apache-2.0/src/lib/apr/buckets/ap_eos_buf.c,v
-retrieving revision 1.1
-diff -u -d -b -w -u -r1.1 ap_eos_buf.c
---- lib/apr/buckets/ap_eos_buf.c	2000/07/13 21:48:33	1.1
-+++ lib/apr/buckets/ap_eos_buf.c	2000/07/17 23:40:33
-@@ -73,7 +73,7 @@
- {
-     ap_bucket *newbuf;
- 
--    newbuf            = malloc(sizeof(*newbuf));
-+    newbuf            = calloc(1, sizeof(*newbuf));
- 
-     newbuf->color     = AP_BUCKET_eos;
-     newbuf->getstr    = eos_get_str;
-Index: lib/apr/buckets/ap_mmap_buf.c
-===================================================================
-RCS file: /home/cvs/apache-2.0/src/lib/apr/buckets/ap_mmap_buf.c,v
-retrieving revision 1.4
-diff -u -d -b -w -u -r1.4 ap_mmap_buf.c
---- lib/apr/buckets/ap_mmap_buf.c	2000/07/14 00:24:33	1.4
-+++ lib/apr/buckets/ap_mmap_buf.c	2000/07/17 23:40:33
-@@ -89,7 +89,7 @@
-     ap_bucket *newbuf;
-     ap_bucket_mmap *b;
- 
--    newbuf            = malloc(sizeof(*newbuf));
-+    newbuf            = calloc(1, sizeof(*newbuf));
-     b                 = malloc(sizeof(*b));
- 
-     b->data      = NULL;
-Index: lib/apr/buckets/ap_rmem_buf.c
-===================================================================
-RCS file: /home/cvs/apache-2.0/src/lib/apr/buckets/ap_rmem_buf.c,v
-retrieving revision 1.5
-diff -u -d -b -w -u -r1.5 ap_rmem_buf.c
---- lib/apr/buckets/ap_rmem_buf.c	2000/07/14 00:24:33	1.5
-+++ lib/apr/buckets/ap_rmem_buf.c	2000/07/17 23:40:33
-@@ -106,7 +106,7 @@
-     ap_bucket *newbuf;
-     ap_bucket_rmem *b;
- 
--    newbuf                = malloc(sizeof(*newbuf));
-+    newbuf                = calloc(1, sizeof(*newbuf));
-     b                     = malloc(sizeof(*b)); 
- 
-     b->alloc_len          = 0;
-Index: lib/apr/buckets/ap_rwmem_buf.c
-===================================================================
-RCS file: /home/cvs/apache-2.0/src/lib/apr/buckets/ap_rwmem_buf.c,v
-retrieving revision 1.5
-diff -u -d -b -w -u -r1.5 ap_rwmem_buf.c
---- lib/apr/buckets/ap_rwmem_buf.c	2000/07/14 00:24:33	1.5
-+++ lib/apr/buckets/ap_rwmem_buf.c	2000/07/17 23:40:33
-@@ -124,7 +124,7 @@
-     ap_bucket *newbuf;
-     ap_bucket_rwmem *b;
- 
--    newbuf = malloc(sizeof(*newbuf));
-+    newbuf = calloc(1, sizeof(*newbuf));
-     b = malloc(sizeof(*b));
-     
-     b->alloc_addr = calloc(DEFAULT_RWBUF_SIZE, 1);
-Index: lib/apr/buckets/apr_buf.h
-===================================================================
-RCS file: /home/cvs/apache-2.0/src/lib/apr/buckets/apr_buf.h,v
-retrieving revision 1.13
-diff -u -d -b -w -u -r1.13 apr_buf.h
---- lib/apr/buckets/apr_buf.h	2000/07/14 00:24:33	1.13
-+++ lib/apr/buckets/apr_buf.h	2000/07/17 23:40:33
-@@ -95,13 +95,8 @@
-      * into the bucket.
-      */ 
-     int (*insert)(ap_bucket *e, const void *buf, ap_size_t nbytes, ap_ssize_t *w);
--};
--
--typedef struct ap_bucket_list ap_bucket_list;
--struct ap_bucket_list {
--    ap_bucket *bucket;                   /* The bucket */
--    ap_bucket_list *next;                /* The next node in the bucket list */
--    ap_bucket_list *prev;                /* The prev node in the bucket list */
-+    ap_bucket *next;                     /* The next node in the bucket list */
-+    ap_bucket *prev;                     /* The prev node in the bucket list */
- };
- 
- typedef struct ap_bucket_brigade ap_bucket_brigade;
-@@ -111,8 +106,8 @@
-                                            but this lets me register a cleanup
-                                            to put a limit on the brigade's 
-                                            lifetime. */
--    ap_bucket_list *head;               /* The start of the brigade */
--    ap_bucket_list *tail;               /* The end of the brigade */
-+    ap_bucket *head;                    /* The start of the brigade */
-+    ap_bucket *tail;                    /* The end of the brigade */
- };
- 
- /*    ******  Different bucket types   *****/
-@@ -151,14 +146,10 @@
- 
- /* destroy an enitre bucket brigade */
- APR_EXPORT(ap_status_t) ap_bucket_brigade_destroy(void *b);
--
--/* append a bucket_list to a bucket_brigade */
--APR_EXPORT(void) ap_bucket_brigade_append_list(ap_bucket_brigade *b, 
--                                               ap_bucket_list *e);
- 
--/* append a bucket to a bucket_brigade */
--APR_EXPORT(void) ap_bucket_brigade_append_bucket(ap_bucket_brigade *b,
--                                                 ap_bucket *r);
-+/* append bucket(s) to a bucket_brigade */
-+APR_EXPORT(void) ap_bucket_brigade_append_buckets(ap_bucket_brigade *b,
-+                                                  ap_bucket *e);
- 
- /* consume nbytes from beginning of b -- call ap_bucket_destroy as
-     appropriate, and/or modify start on last element */
-@@ -189,14 +180,6 @@
- 
- APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_list va);
- 
--/*   ******  Bucket List Functions  *****  */
--
--/* create a new bucket_list */
--APR_EXPORT(ap_bucket_list *) ap_bucket_list_create(void);
--
--/* destroy an entire bucket_list */
--APR_EXPORT(ap_status_t) ap_destroy_bucket_list(ap_bucket_list *b);
--
- /*   ******  Bucket Functions  *****  */
- 
- /* allocate a bucket of type color */
-@@ -204,6 +187,9 @@
- 
- /* destroy a bucket */
- APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e);
-+
-+/* destroy an entire list of buckets */
-+APR_EXPORT(ap_status_t) ap_bucket_list_destroy(ap_bucket *e);
- 
- /* Convert a bucket to a char * */
- APR_EXPORT(const char *) ap_get_bucket_char_str(ap_bucket *b);
-Index: main/Makefile.in
+Index: src/main/Makefile.in
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/main/Makefile.in,v
 retrieving revision 1.16
 diff -u -d -b -w -u -r1.16 Makefile.in
---- main/Makefile.in	2000/07/01 14:14:15	1.16
-+++ main/Makefile.in	2000/07/17 23:40:52
+--- src/main/Makefile.in	2000/07/01 14:14:15	1.16
++++ src/main/Makefile.in	2000/07/20 16:18:04
 @@ -8,7 +8,7 @@
  	http_protocol.c http_request.c http_vhost.c util.c util_date.c \
  	util_script.c util_uri.c util_md5.c util_cfgtree.c util_ebcdic.c \
@@ -420,13 +112,13 @@ diff -u -d -b -w -u -r1.16 Makefile.in
  
  include $(top_srcdir)/build/ltlib.mk
  
-Index: main/http_core.c
+Index: src/main/http_core.c
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/main/http_core.c,v
 retrieving revision 1.88
 diff -u -d -b -w -u -r1.88 http_core.c
---- main/http_core.c	2000/07/11 03:48:18	1.88
-+++ main/http_core.c	2000/07/17 23:40:52
+--- src/main/http_core.c	2000/07/11 03:48:18	1.88
++++ src/main/http_core.c	2000/07/20 16:18:04
 @@ -71,6 +71,8 @@
  #include "util_md5.h"
  #include "apr_fnmatch.h"
@@ -447,10 +139,31 @@ diff -u -d -b -w -u -r1.88 http_core.c
  /* Allow Apache to use ap_mmap */
  #ifdef USE_MMAP_FILES
  #include "apr_mmap.h"
-@@ -2872,6 +2878,51 @@
+@@ -2872,6 +2878,73 @@
      return OK;
  }
  
++/* This is an incredibly stupid chunking filter.  This will need to be somewhat
++ * smart about when it actually sends the data, but this implements some sort
++ * of chunking for right now.
++ */
++static int chunk_filter(request_rec *r, ap_filter_t *f, ap_bucket_brigade *b)
++{
++    ap_bucket *dptr = b->head;
++    ap_bucket_brigade *c = ap_bucket_brigade_create(r->pool);
++    int len = 0;
++
++    while (dptr) { 
++        len += ap_get_bucket_len(dptr);
++        dptr = dptr->next;
++    }
++     
++    ap_brigade_printf(c, "%d\r\n", len);
++    ap_bucket_brigade_catenate(c, b);
++
++    return ap_pass_brigade(r, f, c);
++}
++
 +/* Default filter.  This filter should almost always be used.  It's only job
 + * is to send the headers if they haven't already been sent, and then send
 + * the actual data.  To send the data, we create an iovec out of the bucket
@@ -464,12 +177,13 @@ diff -u -d -b -w -u -r1.88 http_core.c
 + */
 +static int core_filter(request_rec *r, ap_filter_t *f, ap_bucket_brigade *b)
 +{
++    ap_bucket *dptr = b->head;
 +    ap_ssize_t bytes_sent;
-+    ap_bucket *dptr;
 +    int len = 0;
 +
 +    if (!r->headers_sent) {
 +        ap_send_http_header_real(r);
++        ap_bflush(r->connection->client);
 +        r->headers_sent = 1;
 +    }
 +
@@ -499,19 +213,22 @@ diff -u -d -b -w -u -r1.88 http_core.c
  static const handler_rec core_handlers[] = {
  { "*/*", default_handler },
  { "default-handler", default_handler },
-@@ -2894,6 +2945,11 @@
+@@ -2894,6 +2967,14 @@
  static unsigned short core_port(const request_rec *r)
      { return DEFAULT_HTTP_PORT; }
  
 +static void core_register_filter(request_rec *r)
 +{
++#if 0
++    ap_hook_filter(chunk_filter, r, NULL, NULL, AP_HOOK_TRANSPORT);
++#endif
 +    ap_hook_filter(core_filter, r, NULL, NULL, AP_HOOK_TRANSPORT_LAST);
 +}
 +
  static void register_hooks(void)
  {
      ap_hook_post_config(core_post_config,NULL,NULL,AP_HOOK_REALLY_FIRST);
-@@ -2906,6 +2962,8 @@
+@@ -2906,6 +2987,8 @@
      /* FIXME: I suspect we can eliminate the need for these - Ben */
      ap_hook_type_checker(do_nothing,NULL,NULL,AP_HOOK_REALLY_LAST);
      ap_hook_access_checker(do_nothing,NULL,NULL,AP_HOOK_REALLY_LAST);
@@ -520,13 +237,13 @@ diff -u -d -b -w -u -r1.88 http_core.c
  }
  
  API_VAR_EXPORT module core_module = {
-Index: main/http_protocol.c
+Index: src/main/http_protocol.c
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/main/http_protocol.c,v
 retrieving revision 1.96
 diff -u -d -b -w -u -r1.96 http_protocol.c
---- main/http_protocol.c	2000/07/13 16:26:42	1.96
-+++ main/http_protocol.c	2000/07/17 23:40:52
+--- src/main/http_protocol.c	2000/07/13 16:26:42	1.96
++++ src/main/http_protocol.c	2000/07/20 16:18:04
 @@ -64,6 +64,8 @@
   */
  
@@ -560,7 +277,7 @@ diff -u -d -b -w -u -r1.96 http_protocol.c
 +     * filtering for you.
 +     */
 +    f = ap_init_filter(r->pool);   
-+    
++ 
      if (length == 0)
          return 0;
  
@@ -585,7 +302,7 @@ diff -u -d -b -w -u -r1.96 http_protocol.c
 +     * that does all of this for us.
 +     */
 +    bb = ap_bucket_brigade_create(r->pool);
-+    b = ap_bucket_new(AP_BUCKET_mmap);
++    b = ap_bucket_mmap_create();
 +    b->insert(b, mm, mm->size, &total_bytes_sent);
 +    bb->head = bb->tail = b;
 +    total_bytes_sent = ap_pass_brigade(r, f, bb);
@@ -619,7 +336,7 @@ diff -u -d -b -w -u -r1.96 http_protocol.c
 +     * that does all of this for us.
 +     */
 +    bb = ap_bucket_brigade_create(r->pool);
-+    b = ap_bucket_new(AP_BUCKET_rwmem);
++    b = ap_bucket_rwmem_create();
 +    b->insert(b, &c, 1, &written); 
 +    bb->head = bb->tail = b;
 +    ap_pass_brigade(r, f, bb);
@@ -655,7 +372,7 @@ diff -u -d -b -w -u -r1.96 http_protocol.c
 +     * that does all of this for us.
 +     */
 +    bb = ap_bucket_brigade_create(r->pool);
-+    b = ap_bucket_new(AP_BUCKET_rwmem);
++    b = ap_bucket_rwmem_create();
 +    b->insert(b, str, strlen(str), &written); 
 +    bb->head = bb->tail = b;
 +    ap_pass_brigade(r, f, bb);
@@ -693,7 +410,7 @@ diff -u -d -b -w -u -r1.96 http_protocol.c
 +     * that does all of this for us.
 +     */
 +    bb = ap_bucket_brigade_create(r->pool);
-+    b = ap_bucket_new(AP_BUCKET_rwmem);
++    b = ap_bucket_rwmem_create();
 +    b->insert(b, buf, nbyte, &written); 
 +    bb->head = bb->tail = b;
 +    ap_pass_brigade(r, f, bb);
@@ -812,19 +529,19 @@ diff -u -d -b -w -u -r1.96 http_protocol.c
 +     * that does all of this for us.
 +     */
 +    bb = ap_bucket_brigade_create(r->pool);
-+    b = ap_bucket_new(AP_BUCKET_eos);
++    b = ap_bucket_eos_create();
 +    bb->head = bb->tail = b;
 +    ap_pass_brigade(r, f, bb);
      return 0;
  }
  
-Index: main/http_request.c
+Index: src/main/http_request.c
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/main/http_request.c,v
 retrieving revision 1.35
 diff -u -d -b -w -u -r1.35 http_request.c
---- main/http_request.c	2000/06/24 17:33:57	1.35
-+++ main/http_request.c	2000/07/17 23:40:52
+--- src/main/http_request.c	2000/06/24 17:33:57	1.35
++++ src/main/http_request.c	2000/07/20 16:18:04
 @@ -1263,6 +1263,12 @@
          return;
      }
@@ -838,47 +555,3 @@ diff -u -d -b -w -u -r1.35 http_request.c
      /* Take care of little things that need to happen when we're done */
      ap_finalize_request_protocol(r);
  }
-Index: modules/mpm/config.m4
-===================================================================
-RCS file: /home/cvs/apache-2.0/src/modules/mpm/config.m4,v
-retrieving revision 1.23
-diff -u -d -b -w -u -r1.23 config.m4
---- modules/mpm/config.m4	2000/07/11 19:00:16	1.23
-+++ modules/mpm/config.m4	2000/07/17 23:40:58
-@@ -3,7 +3,6 @@
- [  --with-mpm=MPM          Choose the process model for Apache to use.
-                           MPM={dexter,mpmt_beos,mpmt_pthread,prefork,spmt_os2}],[
-   APACHE_MPM=$withval
--  mpm_explicit="yes"
- ],[
-   APACHE_MPM=mpmt_pthread
-   PLAT=`$ac_config_guess`
-@@ -14,7 +13,6 @@
-     *os2_emx*)
-       APACHE_MPM=spmt_os2;;
-   esac 
--  mpm_explicit="no"
- ])
- AC_MSG_RESULT($APACHE_MPM)
- 
-@@ -41,10 +39,11 @@
- MPM_DIR=modules/mpm/$MPM_NAME
- MPM_LIB=$MPM_DIR/lib${MPM_NAME}.la
- 
--if test "$mpm_explicit" = "no"; then
-   if test "$MPM_NAME" = "prefork" ; then
-     MPM_NAME="prefork"
-     MPM_FAKE_NAME=prefork.c
-+    ln -s mpmt.c modules/mpm/mpmt/prefork.c
-+    
-     EXTRA_CFLAGS="$EXTRA_CFLAGS -DPREFORK"
- 
-     ac_cv_enable_threads="no"
-@@ -78,7 +77,6 @@
-     MPM_DIR=modules/mpm/$MPM_NAME
-     MPM_LIB=$MPM_DIR/lib${MPM_NAME}.la
-   fi
--fi
- 
- APACHE_SUBST(MPM_NAME)
- APACHE_SUBST(MPM_FAKE_NAME)
