@@ -175,8 +175,7 @@ typedef struct apr_file_t         apr_file_t;
  * @param perm Access permissions for file.
  * @param cont The pool to use.
  * @remark If perm is APR_OS_DEFAULT and the file is being created, appropriate 
- *      default permissions will be used.  *arg1 must point to a valid file_t, 
- *      or NULL (in which case it will be allocated)
+ *      default permissions will be used.
  */
 APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new_file, const char *fname,
                                    apr_int32_t flag, apr_fileperms_t perm,
