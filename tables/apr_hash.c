@@ -315,7 +315,7 @@ APR_DECLARE(void) apr_hash_set(apr_hash_t *ht,
     /* else key not present and val==NULL */
 }
 
-APR_DECLARE(void) apr_hash_count(apr_hash_t *ht, apr_size_t *count)
+APR_DECLARE(apr_size_t) apr_hash_count(apr_hash_t *ht)
 {
-    *count = ht->count;
+    return ht->count;
 }
