@@ -278,12 +278,18 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, apr_int32_t wante
  * a WIN32_FILE_ATTRIBUTE_DATA or either WIN32_FIND_DATA [A or W] is
  * passed for wininfo.  When the BY_HANDLE_FILE_INFORMATION structure
  * is passed for wininfo, byhandle is passed as 1 to offset the one
- * dword discrepancy in the High/Low size structure members.
+ * dword discrepancy in offset of the High/Low size structure members.
+ *
+ * The generic fillin returns 1 if the caller should further inquire
+ * if this is a CHR filetype.  If it's resonably certain it can't be,
+ * then the function returns 0.
  */
-void fillin_fileinfo(apr_finfo_t *finfo, WIN32_FILE_ATTRIBUTE_DATA *wininfo, 
-                     int byhandle) 
+int fillin_fileinfo(apr_finfo_t *finfo, 
+                    WIN32_FILE_ATTRIBUTE_DATA *wininfo, 
+                    int byhandle) 
 {
     DWORD *sizes = &wininfo->nFileSizeHigh + byhandle;
+    int warn = 0;
 
     memset(finfo, '\0', sizeof(*finfo));
 
@@ -306,11 +312,21 @@ void fillin_fileinfo(apr_finfo_t *finfo, WIN32_FILE_ATTRIBUTE_DATA *wininfo,
     else if (wininfo->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
         finfo->filetype = APR_DIR;
     }
-    else {
-        /* XXX: Solve this:  Short of opening the handle to the file, the 
-         * 'FileType' appears to be unknowable (in any trustworthy or 
-         * consistent sense), that is, as far as PIPE, CHR, etc are concerned.
+    else if (wininfo->dwFileAttributes & FILE_ATTRIBUTE_DEVICE) {
+        /* Warning: This test only succeeds on Win9x, on NT these files
+         * (con, aux, nul, lpt#, com# etc) escape early detection!
          */
+        finfo->filetype = APR_CHR;
+    }
+    else {
+        /* Warning: Short of opening the handle to the file, the 'FileType'
+         * appears to be unknowable (in any trustworthy or consistent sense)
+         * on WinNT/2K as far as PIPE, CHR, etc are concerned.
+         */
+        if (!wininfo->ftLastWriteTime.dwLowDateTime 
+                && !wininfo->ftLastWriteTime.dwHighDateTime 
+                && !finfo->size)
+            warn = 1;
         finfo->filetype = APR_REG;
     }
 
@@ -322,6 +338,7 @@ void fillin_fileinfo(apr_finfo_t *finfo, WIN32_FILE_ATTRIBUTE_DATA *wininfo,
     
     finfo->valid = APR_FINFO_ATIME | APR_FINFO_CTIME | APR_FINFO_MTIME
                  | APR_FINFO_SIZE  | APR_FINFO_TYPE;   /* == APR_FINFO_MIN */
+    return warn;
 }
 
 
@@ -335,6 +352,27 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
     }
 
     fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 1);
+
+    if (finfo->filetype == APR_REG)
+    {
+        /* Go the extra mile to be -certain- that we have a real, regular
+         * file, since the attribute bits aren't a certain thing.  Even
+         * though fillin should have hinted if we *must* do this, we
+         * don't need to take chances while the handle is already open.
+         */
+        DWORD FileType;
+        if (FileType = GetFileType(thefile->filehand)) {
+            if (FileType == FILE_TYPE_CHAR) {
+                finfo->filetype = APR_CHR;
+            }
+            else if (FileType == FILE_TYPE_PIPE) {
+                finfo->filetype = APR_PIPE;
+            }
+            /* Otherwise leave the original conclusion alone 
+             */
+        }
+    }
+
     finfo->cntxt = thefile->cntxt;
  
     /* Extra goodies known only by GetFileInformationByHandle() */
@@ -344,28 +382,6 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
     finfo->nlink  = FileInfo.nNumberOfLinks;
 
     finfo->valid |= APR_FINFO_IDENT | APR_FINFO_NLINK;
-
-    if ((wanted & APR_FINFO_TYPE) && (APR_FINFO_TYPE == APR_REG))
-    {
-        /* Go the extra mile to be -certain- that we have a real, regular
-         * file, since the attribute bits aren't a certain thing.
-         */
-        DWORD FileType;
-        if (FileType = GetFileType(thefile->filehand)) {
-            if (FileType == FILE_TYPE_DISK) {
-                finfo->filetype = APR_REG;
-            }
-            else if (FileType == FILE_TYPE_CHAR) {
-                finfo->filetype = APR_CHR;
-            }
-            else if (FileType == FILE_TYPE_PIPE) {
-                finfo->filetype = APR_PIPE;
-            }
-            else {
-                finfo->filetype = APR_NOFILE;
-            }
-        }
-    }
 
     if (wanted &= ~finfo->valid) {
         apr_oslevel_e os_level;
@@ -386,6 +402,8 @@ APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
                                    apr_int32_t wanted, apr_pool_t *cont)
 {
+    /* XXX: is constant - needs testing - which needs a lighter-weight root test fn */
+    int isroot = 0;
 #ifdef APR_HAS_UNICODE_FS
     apr_wchar_t wfname[APR_PATH_MAX];
 #endif
@@ -442,16 +460,36 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     }
     else 
 #endif
-      if ((os_level >= APR_WIN_98) && !(wanted & APR_FINFO_NAME))
+      if ((os_level >= APR_WIN_98) && (!(wanted & APR_FINFO_NAME) || isroot))
     {
+        /* cannot use FindFile on a Win98 root, it returns \*
+         */
         if (!GetFileAttributesExA(fname, GetFileExInfoStandard, 
                                  &FileInfo.i)) {
             return apr_get_os_error();
         }
     }
+    else if (isroot) {
+        /* This is Win95 and we are trying to stat a root.  Lie.
+         */
+        if (GetDriveType(fname) != DRIVE_UNKNOWN) 
+        {
+            finfo->cntxt = cont;
+            finfo->filetype = 0;
+            finfo->mtime = apr_time_now();
+            finfo->protection |= APR_WREAD | APR_WEXECUTE | APR_WWRITE;
+            finfo->protection |= (finfo->protection << prot_scope_group) 
+                               | (finfo->protection << prot_scope_user);
+            finfo->valid |= APR_FINFO_TYPE | APR_FINFO_PROT | APR_FINFO_MTIME;
+            return (wanted &= ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;            
+        }
+        else
+            return APR_FROM_OS_ERROR(ERROR_PATH_NOT_FOUND);
+    }
     else  {
         /* Guard against bogus wildcards and retrieve by name
-         * since we want the true name, or are stuck in Win95
+         * since we want the true name, or are stuck in Win95,
+         * or are looking for the root of a Win98 drive.
          */
         HANDLE hFind;
         if (strchr(fname, '*') || strchr(fname, '?'))
@@ -464,10 +502,38 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         filename = apr_pstrdup(cont, FileInfo.n.cFileName);
     }
 
-    fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 0);
+    if (fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 0))
+    {
+        /* Go the extra mile to assure we have a file.  WinNT/2000 seems
+         * to reliably translate char devices to the path '\\.\device'
+         * so go ask for the full path.
+         */
+        if (os_level >= APR_WIN_NT) {
+#ifdef APR_HAS_UNICODE_FS
+            apr_wchar_t tmpname[APR_FILE_MAX];
+            apr_wchar_t *tmpoff;
+            if (GetFullPathNameW(wfname, sizeof(tmpname) / sizeof(apr_wchar_t),
+                                 tmpname, &tmpoff))
+            {
+                if ((tmpoff == tmpname + 4) 
+                    && !wcsncmp(tmpname, L"\\\\.\\", 4))
+                    finfo->filetype = APR_CHR;
+            }
+#else
+            char tmpname[APR_FILE_MAX];
+            char *tmpoff;
+            if (GetFullPathName(fname, sizeof(tmpname), tmpname, &tmpoff))
+            {
+                if ((tmpoff == tmpname + 4) 
+                    && !strncmp(tmpname, "\\\\.\\", 4))
+                    finfo->filetype = APR_CHR;
+            }
+#endif
+        }
+    }
     finfo->cntxt = cont;
 
-    if (filename) {
+    if (filename && !isroot) {
         finfo->name = filename;
         finfo->valid |= APR_FINFO_NAME;
     }
