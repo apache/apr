@@ -293,7 +293,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         apr_size_t hdrbytes;
 
         /* cork before writing headers */
-        rv = apr_setsocketopt(sock, APR_TCP_NOPUSH, 1);
+        rv = apr_socket_opt_set(sock, APR_TCP_NOPUSH, 1);
         if (rv != APR_SUCCESS) {
             return rv;
         }
@@ -316,7 +316,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         }
         if (hdrbytes < total_hdrbytes) {
             *len = hdrbytes;
-            return apr_setsocketopt(sock, APR_TCP_NOPUSH, 0);
+            return apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
         }
     }
 
@@ -355,7 +355,7 @@ do_select:
     if (rv == -1) {
 	*len = nbytes;
         rv = errno;
-        apr_setsocketopt(sock, APR_TCP_NOPUSH, 0);
+        apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
         return rv;
     }
 
@@ -363,7 +363,7 @@ do_select:
 
     if (rv < *len) {
         *len = nbytes;
-        arv = apr_setsocketopt(sock, APR_TCP_NOPUSH, 0);
+        arv = apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
         if (rv > 0) {
                 
             /* If this was a partial write, return now with the 
@@ -393,12 +393,12 @@ do_select:
         if (arv != APR_SUCCESS) {
 	    *len = nbytes;
             rv = errno;
-            apr_setsocketopt(sock, APR_TCP_NOPUSH, 0);
+            apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
             return rv;
         }
     }
 
-    apr_setsocketopt(sock, APR_TCP_NOPUSH, 0);
+    apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
     
     (*len) = nbytes;
     return rv < 0 ? errno : APR_SUCCESS;

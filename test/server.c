@@ -116,10 +116,10 @@ int main(int argc, const char * const argv[])
         apr_socket_create(&sock, family, SOCK_STREAM, context))
 
     APR_TEST_SUCCESS(rv, "Setting option APR_SO_NONBLOCK",
-        apr_setsocketopt(sock, APR_SO_NONBLOCK, 1))
+        apr_socket_opt_set(sock, APR_SO_NONBLOCK, 1))
 
     APR_TEST_SUCCESS(rv, "Setting option APR_SO_REUSEADDR",
-        apr_setsocketopt(sock, APR_SO_REUSEADDR, 1))
+        apr_socket_opt_set(sock, APR_SO_REUSEADDR, 1))
 
     if (!localsa) {
         apr_socket_addr_get(&localsa, APR_LOCAL, sock);

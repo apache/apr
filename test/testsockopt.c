@@ -111,7 +111,7 @@ int main(void)
     printf("OK\n");
 
     printf ("\tTrying to set APR_SO_KEEPALIVE...........");
-    if (apr_setsocketopt(sock, APR_SO_KEEPALIVE, 1) != APR_SUCCESS){
+    if (apr_socket_opt_set(sock, APR_SO_KEEPALIVE, 1) != APR_SUCCESS){
         apr_socket_close(sock);
         printf("Failed!\n");
         exit (-1);
@@ -119,7 +119,7 @@ int main(void)
     printf ("OK\n");
 
     printf("\tChecking if we recorded it...............");
-    if (apr_getsocketopt(sock, APR_SO_KEEPALIVE, &ck) != APR_SUCCESS){
+    if (apr_socket_opt_get(sock, APR_SO_KEEPALIVE, &ck) != APR_SUCCESS){
         apr_socket_close(sock);
         fprintf(stderr,"Failed\n");
         exit(-1);
@@ -132,14 +132,14 @@ int main(void)
     printf("Yes\n");
 
     printf("\tTrying to set APR_SO_DEBUG...............");
-    if (apr_setsocketopt(sock, APR_SO_DEBUG, 1) != APR_SUCCESS){
+    if (apr_socket_opt_set(sock, APR_SO_DEBUG, 1) != APR_SUCCESS){
         printf("Failed (ignored)\n");
     }
     else {
         printf ("OK\n");
 
         printf("\tChecking if we recorded it...............");
-        if (apr_getsocketopt(sock, APR_SO_DEBUG, &ck) != APR_SUCCESS){
+        if (apr_socket_opt_get(sock, APR_SO_DEBUG, &ck) != APR_SUCCESS){
             apr_socket_close(sock);
             printf("Failed!\n");
             exit (-1);
@@ -153,7 +153,7 @@ int main(void)
     }
 
     printf ("\tTrying to remove APR_SO_KEEPALIVE........");
-    if (apr_setsocketopt(sock, APR_SO_KEEPALIVE, 0) != APR_SUCCESS){
+    if (apr_socket_opt_set(sock, APR_SO_KEEPALIVE, 0) != APR_SUCCESS){
         apr_socket_close(sock);
         printf("Failed!\n");
         exit (-1);
@@ -161,7 +161,7 @@ int main(void)
     printf ("OK\n");
 
     printf ("\tDid we record the removal................");
-    if (apr_getsocketopt(sock, APR_SO_KEEPALIVE, &ck) != APR_SUCCESS){
+    if (apr_socket_opt_get(sock, APR_SO_KEEPALIVE, &ck) != APR_SUCCESS){
         apr_socket_close(sock);
         printf("Didn't get value!\n");
         exit(-1);
@@ -174,17 +174,17 @@ int main(void)
 #if APR_HAVE_CORKABLE_TCP
     printf ("\tTesting APR_TCP_NOPUSH!\n");
     printf("\t\tSetting APR_TCP_NODELAY..........");
-    if (apr_setsocketopt(sock, APR_TCP_NODELAY, 1) != APR_SUCCESS){
+    if (apr_socket_opt_set(sock, APR_TCP_NODELAY, 1) != APR_SUCCESS){
         failure(sock);
     }
     printf("OK\n");
     printf("\t\tSetting APR_TCP_NOPUSH...........");
-    if (apr_setsocketopt(sock, APR_TCP_NOPUSH, 1) != APR_SUCCESS){
+    if (apr_socket_opt_set(sock, APR_TCP_NOPUSH, 1) != APR_SUCCESS){
         failure(sock);
     }
     printf("OK\n");
     printf("\t\tChecking on APR_TCP_NODELAY......");
-    if (apr_getsocketopt(sock, APR_TCP_NODELAY, &ck) != APR_SUCCESS){
+    if (apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck) != APR_SUCCESS){
         failure(sock);
     }
     if (ck != 0){
@@ -192,13 +192,13 @@ int main(void)
     }
     printf("Yes (not set)\n");
     printf("\t\tUnsetting APR_TCP_NOPUSH.........");
-    if (apr_setsocketopt(sock, APR_TCP_NOPUSH, 0) != APR_SUCCESS){
+    if (apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0) != APR_SUCCESS){
         failure(sock);
     }
     printf("OK\n");
     
     printf("\t\tChecking on APR_TCP_NODELAY......");
-    if (apr_getsocketopt(sock, APR_TCP_NODELAY, &ck) != APR_SUCCESS){
+    if (apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck) != APR_SUCCESS){
         failure(sock);
     }
     if (ck != 1){

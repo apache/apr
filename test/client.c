@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tClient:  Setting socket timeout.......");
-    stat = apr_setsocketopt(sock, APR_SO_TIMEOUT, timeout);
+    stat = apr_socket_timeout_set(sock, timeout);
     if (stat) {
         fprintf(stderr, "Problem setting timeout: %d\n", stat);
         exit(-1);
