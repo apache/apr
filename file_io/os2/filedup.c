@@ -64,26 +64,37 @@
 ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
 {
     int rv;
-    struct file_t *dup_file = (struct file_t *)ap_palloc(old_file->cntxt, sizeof(struct file_t));
-    
-    if (new_file == NULL) {
-        return APR_ENOMEM;
-    } 
-    
-    dup_file->filedes = -1;
+    struct file_t *dup_file;
+
+    if (*new_file == NULL) {
+        dup_file = (struct file_t *)ap_palloc(old_file->cntxt, sizeof(struct file_t));
+
+        if (dup_file == NULL) {
+            return APR_ENOMEM;
+        }
+
+        dup_file->filedes = -1;
+        dup_file->cntxt = old_file->cntxt;
+    } else {
+      dup_file = *new_file;
+    }
+
     rv = DosDupHandle(old_file->filedes, &dup_file->filedes);
-    
+
     if (rv) {
         return os2errno(rv);
     }
-    
-    dup_file->cntxt = old_file->cntxt;
+
     dup_file->fname = ap_pstrdup(dup_file->cntxt, old_file->fname);
     dup_file->buffered = old_file->buffered;
     dup_file->status = old_file->status;
     dup_file->isopen = old_file->isopen;
-    *new_file = dup_file;
-    ap_register_cleanup(dup_file->cntxt, dup_file, file_cleanup,
-                        ap_null_cleanup);
+
+    if (*new_file == NULL) {
+        ap_register_cleanup(dup_file->cntxt, dup_file, file_cleanup,
+                            ap_null_cleanup);
+        *new_file = dup_file;
+    }
+
     return APR_SUCCESS;
 }
