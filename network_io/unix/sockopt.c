@@ -55,6 +55,7 @@
 #include "apr_arch_networkio.h"
 #include "apr_strings.h"
 
+
 static apr_status_t soblock(int sd)
 {
 /* BeOS uses setsockopt at present for non blocking... */
@@ -365,6 +366,19 @@ apr_status_t apr_socket_opt_get(apr_socket_t *sock,
         default:
             *on = apr_is_option_set(sock->netmask, opt);
     }
+    return APR_SUCCESS;
+}
+
+
+apr_status_t apr_socket_atmark(apr_socket_t *sock, int *atmark)
+{
+    int oobmark;
+
+    if (ioctl(sock->socketdes, SIOCATMARK, (void*) &oobmark) < 0)
+        return apr_get_netos_error();
+
+    *atmark = (oobmark != 0);
+
     return APR_SUCCESS;
 }
 
