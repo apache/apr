@@ -68,6 +68,8 @@
 #include "apr_lock.h"
 #include <stdlib.h>
 #include "apr_portable.h"
+#define APR_WANT_MEMFUNC
+#include "apr_want.h"
 
 static const char *module_identity = "BLOCKS";
 #define SIZE_TO_MALLOC 8 * 1024
