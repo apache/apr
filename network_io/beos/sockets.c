@@ -145,10 +145,11 @@ ap_status_t ap_setipaddr(struct socket_t *sock, const char *addr)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_getipaddr(struct socket_t *sock, char **addr)
+ap_status_t ap_getipaddr(char *addr, ap_ssize_t len,
+			 const struct socket_t *sock)
 {
     char *temp = inet_ntoa(sock->addr->sin_addr);
-    *addr=temp;
+    ap_cpystrn(addr,temp,len-1);
     return APR_SUCCESS;
 }
 
@@ -225,10 +226,10 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
     return APR_SUCCESS; 
 } 
 
-ap_status_t ap_get_socketdata(struct socket_t *socket, char *key, void *data)
+ap_status_t ap_get_socketdata(struct socket_t *sock, char *key, void *data)
 {
     if (socket != NULL) {
-        return ap_get_userdata(socket->cntxt, key, &data);
+        return ap_get_userdata(&data, sock->cntxt, key);
     }
     else {
         data = NULL;
@@ -236,11 +237,11 @@ ap_status_t ap_get_socketdata(struct socket_t *socket, char *key, void *data)
     }
 }
 
-ap_status_t ap_set_socketdata(struct socket_t *socket, void *data, char *key,
+ap_status_t ap_set_socketdata(struct socket_t *sock, void *data, char *key,
                               ap_status_t (*cleanup) (void *))
 {
-    if (socket != NULL) {
-        return ap_set_userdata(socket->cntxt, data, key, cleanup);
+    if (sock != NULL) {
+        return ap_set_userdata(sock->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;
@@ -257,8 +258,8 @@ ap_status_t ap_get_os_sock(struct socket_t *sock, ap_os_sock_t *thesock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_sock(ap_context_t *cont, struct socket_t **sock,
-                            ap_os_sock_t *thesock)
+ap_status_t ap_put_os_sock(struct socket_t **sock, ap_os_sock_t *thesock, 
+                           ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
