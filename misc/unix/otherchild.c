@@ -74,6 +74,22 @@
 
 static apr_other_child_rec_t *other_children = NULL;
 
+static apr_status_t other_child_cleanup(void *data)
+{
+    apr_other_child_rec_t **pocr, *nocr;
+
+    for (pocr = &other_children; *pocr; pocr = &(*pocr)->next) {
+        if ((*pocr)->data == data) {
+            nocr = (*pocr)->next;
+            (*(*pocr)->maintenance) (APR_OC_REASON_UNREGISTER, (*pocr)->data, -1);
+            *pocr = nocr;
+            /* XXX: um, well we've just wasted some space in pconf ? */
+            return APR_SUCCESS;
+        }
+    }
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *pid,
                      void (*maintenance) (int reason, void *, int status),
                      void *data, apr_file_t *write_fd, apr_pool_t *p)
@@ -81,6 +97,7 @@ APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *pid,
     apr_other_child_rec_t *ocr;
 
     ocr = apr_palloc(p, sizeof(*ocr));
+    ocr->p = p;
     ocr->id = pid->pid;
     ocr->maintenance = maintenance;
     ocr->data = data;
@@ -92,21 +109,25 @@ APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *pid,
     }
     ocr->next = other_children;
     other_children = ocr;
+    apr_pool_cleanup_register(p, ocr->data, other_child_cleanup, 
+                              apr_pool_cleanup_null);
 }
 
 APR_DECLARE(void) apr_proc_other_child_unregister(void *data)
 {
-    apr_other_child_rec_t **pocr, *nocr;
+    apr_other_child_rec_t *cur;
 
-    for (pocr = &other_children; *pocr; pocr = &(*pocr)->next) {
-        if ((*pocr)->data == data) {
-            nocr = (*pocr)->next;
-            (*(*pocr)->maintenance) (APR_OC_REASON_UNREGISTER, (*pocr)->data, -1);
-            *pocr = nocr;
-            /* XXX: um, well we've just wasted some space in pconf ? */
-            return;
+    cur = other_children;
+    while (cur) {
+        if (cur->data == data) {
+            break;
         }
+        cur = cur->next;
     }
+
+    /* segfault if this function called with invalid parm */
+    apr_pool_cleanup_kill(cur->p, cur->data, other_child_cleanup);
+    other_child_cleanup(data);
 }
 
 /* test to ensure that the write_fds are all still writable, otherwise

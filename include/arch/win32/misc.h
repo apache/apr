@@ -89,6 +89,7 @@
 #endif
 
 struct apr_other_child_rec_t {
+    apr_pool_t *p;
     struct apr_other_child_rec_t *next;
     int id;  /* This is either a pid or tid depending on the platform */
     void (*maintenance) (int, void *, int);
