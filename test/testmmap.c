@@ -77,7 +77,9 @@ int main(void)
     apr_file_t *thefile = NULL;
     apr_finfo_t finfo;
     apr_int32_t flag = APR_READ;
+    apr_status_t rv;
     char *file1;
+    char errmsg[120];
     
     fprintf (stdout,"APR MMAP Test\n*************\n\n");
     
@@ -101,8 +103,11 @@ int main(void)
     strncat(file1,"/testmmap.c",11);  
 
     fprintf(stdout, "Opening file........................");
-    if (apr_open(&thefile, file1, flag, APR_UREAD | APR_GREAD, context) != APR_SUCCESS) {
-        perror("Didn't open file");
+    rv = apr_open(&thefile, file1, flag, APR_UREAD | APR_GREAD, context);
+    if (rv != APR_SUCCESS) {
+        fprintf(stderr,
+                "couldn't open file `%s': %d/%s\n",
+                file1, rv, apr_strerror(rv, errmsg, sizeof errmsg));
         exit(-1);
     }
     else {
@@ -110,8 +115,11 @@ int main(void)
     }
     
     fprintf(stderr, "Getting file size...................");
-    if (apr_getfileinfo(&finfo, thefile) != APR_SUCCESS) {
-        perror("Didn't get file information!");
+    rv = apr_getfileinfo(&finfo, thefile);
+    if (rv != APR_SUCCESS) {
+        fprintf(stderr,
+                "Didn't get file information: %d/%s\n",
+                rv, apr_strerror(rv, errmsg, sizeof errmsg));
         exit(-1);
     }
     else {
