@@ -558,16 +558,20 @@ static void dump_stats(void)
 
 ap_pool_t *ap_init_alloc(void)
 {
+    ap_status_t status1, status2;
 #ifdef POOL_DEBUG
     char s;
 
     known_stack_point = &s;
     stack_var_init(&s);
 #endif
-    ap_create_lock(&alloc_mutex, APR_MUTEX, APR_INTRAPROCESS,
+    status1 = ap_create_lock(&alloc_mutex, APR_MUTEX, APR_INTRAPROCESS,
                    NULL, NULL);
-    ap_create_lock(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
+    status2 = ap_create_lock(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
                    NULL, NULL);
+    if (status1 != APR_SUCCESS || status2 != APR_SUCCESS) {
+        return NULL;
+    }
 
     permanent_pool = ap_make_sub_pool(NULL, NULL);
 #ifdef ALLOC_STATS
