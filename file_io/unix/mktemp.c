@@ -203,11 +203,13 @@ static int gettemp(char *path, apr_file_t **doopen, apr_int32_t flags, apr_pool_
 
 APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_int32_t flags, apr_pool_t *p)
 {
+#ifdef HAVE_MKSTEMP
+    int fd;
+#endif
     flags = (!flags) ? APR_READ | APR_WRITE | APR_EXCL | APR_DELONCLOSE : flags;
 #ifndef HAVE_MKSTEMP
     return gettemp(template, fp, flags, p);
 #else
-    int fd;
 
     fd = mkstemp(template);
     if (fd == -1) {
