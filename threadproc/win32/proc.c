@@ -364,9 +364,6 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
 
     if (CreateProcess(NULL, cmdline, NULL, NULL, TRUE, 0, pEnvBlock, attr->currdir, 
                       &attr->si, &(*new)->pi)) {
-        if (attr->detached) {
-            CloseHandle((*new)->pi.hProcess);
-        }
         if (attr->child_in) {
             ap_close(attr->child_in);
         }
@@ -404,7 +401,7 @@ ap_status_t ap_get_childerr(ap_file_t **new, struct proc_t *proc)
 ap_status_t ap_wait_proc(struct proc_t *proc, 
                          ap_wait_how_e wait)
 {
-    pid_t stat;
+    DWORD stat;
     if (!proc)
         return APR_ENOPROC;
     if (wait == APR_WAIT) {
@@ -414,7 +411,7 @@ ap_status_t ap_wait_proc(struct proc_t *proc,
         else if (stat == WAIT_TIMEOUT) {
             return APR_CHILD_NOTDONE;
         }
-        return APR_EEXIST;
+        return GetLastError();
     }
     if ((stat = WaitForSingleObject(proc->pi.hProcess, 0)) == WAIT_OBJECT_0) {
         return APR_CHILD_DONE;
@@ -422,7 +419,7 @@ ap_status_t ap_wait_proc(struct proc_t *proc,
     else if (stat == WAIT_TIMEOUT) {
         return APR_CHILD_NOTDONE;
     }
-    return APR_EEXIST;
+    return GetLastError();
 }
 
 ap_status_t ap_get_procdata(char *key, void *data, struct proc_t *proc)
