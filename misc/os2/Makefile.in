@@ -51,7 +51,10 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-start.o: start.c $(INCDIR1)/apr_general.h \
+getopt.o: getopt.c misc.h $(INCDIR1)/apr_general.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_file_io.h
+start.o: start.c ../unix/start.c $(INCDIR1)/apr_general.h \
  $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
  $(INCDIR)/apr_pools.h $(INCDIR1)/apr_lib.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/hsregex.h misc.h
+ $(INCDIR1)/apr_file_io.h ../unix/misc.h
