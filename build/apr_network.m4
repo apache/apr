@@ -5,6 +5,10 @@ dnl
 dnl
 dnl check for working getaddrinfo()
 dnl
+dnl Note that if the system doesn't have gai_strerror(), we
+dnl can't use getaddrinfo() because we can't get strings
+dnl describing the error codes.
+dnl
 AC_DEFUN(APR_CHECK_WORKING_GETADDRINFO,[
   AC_CACHE_CHECK(for working getaddrinfo, ac_cv_working_getaddrinfo,[
   AC_TRY_RUN( [
@@ -44,7 +48,11 @@ void main(void) {
   ac_cv_working_getaddrinfo="yes"
 ])])
 if test "$ac_cv_working_getaddrinfo" = "yes"; then
-  AC_DEFINE(HAVE_GETADDRINFO, 1, [Define if getaddrinfo exists and works well enough for APR])
+  if test "$ac_cv_func_gai_strerror" != "yes"; then
+    ac_cv_working_getaddrinfo="no"
+  else
+    AC_DEFINE(HAVE_GETADDRINFO, 1, [Define if getaddrinfo exists and works well enough for APR])
+  fi
 fi
 ])
 
