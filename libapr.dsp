@@ -54,8 +54,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 apr.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /base:@"..\..\os\win32\BaseAddr.ref",aprlib /subsystem:windows /dll /map /machine:I386 /def:".\aprlib.def" /out:"Release/aprlib.dll" /libpath:"LibR"
-# ADD LINK32 apr.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /base:@"..\..\os\win32\BaseAddr.ref",aprlib /subsystem:windows /dll /map /machine:I386 /def:".\aprlib.def" /out:"Release/aprlib.dll" /libpath:"LibR"
+# ADD BASE LINK32 apr.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /subsystem:windows /dll /map /machine:I386 /def:".\aprlib.def" /out:"Release/aprlib.dll" /libpath:"LibR" /base:@"..\..\os\win32\BaseAddr.ref",aprlib
+# ADD LINK32 apr.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /subsystem:windows /dll /map /machine:I386 /def:".\aprlib.def" /out:"Release/aprlib.dll" /libpath:"LibR" /base:@"..\..\os\win32\BaseAddr.ref",aprlib
 
 !ELSEIF  "$(CFG)" == "aprlibdll - Win32 Debug"
 
@@ -81,8 +81,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 aprlib.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /base:@"..\..\os\win32\BaseAddr.ref",aprlib /subsystem:windows /dll /map /debug /machine:I386 /def:".\aprlib.def" /out:"Debug/aprlib.dll" /libpath:"LibD"
-# ADD LINK32 aprlib.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /base:@"..\..\os\win32\BaseAddr.ref",aprlib /subsystem:windows /dll /map /debug /machine:I386 /def:".\aprlib.def" /out:"Debug/aprlib.dll" /libpath:"LibD"
+# ADD BASE LINK32 aprlib.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /subsystem:windows /dll /map /debug /machine:I386 /def:".\aprlib.def" /out:"Debug/aprlib.dll" /libpath:"LibD" /base:@"..\..\os\win32\BaseAddr.ref",aprlib
+# ADD LINK32 apr.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /subsystem:windows /dll /map /debug /machine:I386 /def:".\aprlib.def" /out:"Debug/aprlib.dll" /libpath:"LibD" /base:@"..\..\os\win32\BaseAddr.ref",aprlib
 
 !ENDIF 
 
