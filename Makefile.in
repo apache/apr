@@ -29,6 +29,8 @@ INSTALL_SUBDIRS=@INSTALL_SUBDIRS@
 TARGET_LIB = lib@APR_LIBNAME@.la
 APR_PCFILE = apr-$(APR_MAJOR_VERSION).pc
 APR_CONFIG = apr-$(APR_MAJOR_VERSION)-config
+INSTALL = @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
 
 #
 # Rules for building specific targets, starting with 'all' for
@@ -64,41 +66,22 @@ build/apr_rules.out: build/apr_rules.mk
 	sed 's,^\(apr_build.*=\).*$$,\1$(installbuilddir),' < build/apr_rules.mk > $@
 
 install: $(TARGET_LIB) apr-config.out build/apr_rules.out
-	if [ ! -d $(DESTDIR)$(includedir) ]; then \
-	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(includedir); \
-	fi;
-	cp -p $(top_srcdir)/include/*.h $(DESTDIR)$(includedir);
-
-	if test -n "$(top_blddir)"; then \
-	    cp -p $(top_blddir)/include/*.h $(DESTDIR)$(includedir); \
-	fi;
-	if [ ! -d $(DESTDIR)$(libdir) ]; then \
-	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(libdir); \
-	fi;
-	$(LIBTOOL) --mode=install cp $(TARGET_LIB) $(DESTDIR)$(libdir)
-	$(LIBTOOL) --mode=install cp apr.exp $(DESTDIR)$(libdir)
-	if [ ! -d $(DESTDIR)$(libdir)/pkgconfig ]; then \
-	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(libdir)/pkgconfig; \
-	fi;
-	cp -p apr.pc $(DESTDIR)$(libdir)/pkgconfig/$(APR_PCFILE)
-	if [ ! -d $(DESTDIR)$(installbuilddir) ]; then \
-	   	$(top_srcdir)/build/mkdir.sh $(DESTDIR)$(installbuilddir); \
-	fi; 
-	if [ -f libtool ]; then \
-		$(LIBTOOL) --mode=install cp libtool $(DESTDIR)$(installbuilddir); \
-	fi;
-	if [ -f shlibtool ]; then \
-		$(LIBTOOL) --mode=install cp shlibtool $(DESTDIR)$(installbuilddir); \
-	fi
-	for f in mkdir.sh make_exports.awk make_var_export.awk; do \
-	        cp $(top_srcdir)/build/$${f} $(DESTDIR)$(installbuilddir); \
+	$(APR_MKDIR) $(DESTDIR)$(libdir) $(DESTDIR)$(bindir) $(DESTDIR)$(installbuilddir) \
+		     $(DESTDIR)$(libdir)/pkgconfig $(DESTDIR)$(includedir)
+	$(INSTALL_DATA) $(top_blddir)/include/apr.h $(DESTDIR)$(includedir)
+	$(INSTALL_DATA) $(top_srcdir)/include/apr_*.h $(DESTDIR)$(includedir)
+	$(LIBTOOL) --mode=install $(INSTALL) -m 755 $(TARGET_LIB) $(DESTDIR)$(libdir)
+	$(INSTALL_DATA) apr.exp $(DESTDIR)$(libdir)/apr.exp
+	$(INSTALL_DATA) apr.pc $(DESTDIR)$(libdir)/pkgconfig/$(APR_PCFILE)
+	for f in libtool shlibtool; do \
+	    if test -f $${f}; then $(INSTALL) -m 755 $${f} $(DESTDIR)$(installbuilddir); fi; \
 	done
-	cp build/apr_rules.out $(DESTDIR)$(installbuilddir)/apr_rules.mk
-	if [ ! -d $(DESTDIR)$(bindir) ]; then \
-	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(bindir); \
-	fi;
-	$(LIBTOOL) --mode=install cp apr-config.out $(DESTDIR)$(bindir)/$(APR_CONFIG)
-	chmod 755 $(DESTDIR)$(bindir)/$(APR_CONFIG)
+	$(INSTALL) -m 755 build/mkdir.sh $(DESTDIR)$(installbuilddir)
+	for f in make_exports.awk make_var_export.awk; do \
+	    $(INSTALL_DATA) $(top_srcdir)/build/$${f} $(DESTDIR)$(installbuilddir); \
+	done
+	$(INSTALL_DATA) build/apr_rules.out $(DESTDIR)$(installbuilddir)/apr_rules.mk
+	$(INSTALL) -m 755 apr-config.out $(DESTDIR)$(bindir)/$(APR_CONFIG)
 	@if [ $(INSTALL_SUBDIRS) != "none" ]; then \
             for i in $(INSTALL_SUBDIRS); do \
 	        ( cd $$i ; $(MAKE) DESTDIR=$(DESTDIR) install ); \
