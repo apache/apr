@@ -270,6 +270,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/mmap.o \
 	$(OBJDIR)/open.o \
 	$(OBJDIR)/pipe.o \
+	$(OBJDIR)/otherchild.o \
 	$(OBJDIR)/poll.o \
 	$(OBJDIR)/pollacc.o \
 	$(OBJDIR)/proc.o \
