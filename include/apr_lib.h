@@ -341,7 +341,7 @@ API_EXPORT(void) ap_register_cleanup(struct ap_pool_t *p, void *data,
 				      ap_status_t (*child_cleanup) (void *));
 API_EXPORT(void) ap_kill_cleanup(struct ap_pool_t *p, void *data,
 				  ap_status_t (*cleanup) (void *));
-API_EXPORT(void) ap_run_cleanup(struct ap_pool_t *p, void *data,
+API_EXPORT(ap_status_t) ap_run_cleanup(struct ap_pool_t *p, void *data,
 				 ap_status_t (*cleanup) (void *));
 API_EXPORT(void) ap_cleanup_for_exec(void);
 API_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
