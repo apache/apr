@@ -73,7 +73,7 @@ static apr_status_t lock_intra_cleanup(void *data)
     return stat;
 }    
 
-apr_status_t apr_unix_create_intra_lock(apr_lock_t *new)
+static apr_status_t intra_create(apr_lock_t *new, const char *fname)
 {
     apr_status_t stat;
     pthread_mutexattr_t mattr;
@@ -113,7 +113,7 @@ apr_status_t apr_unix_create_intra_lock(apr_lock_t *new)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_unix_lock_intra(apr_lock_t *lock)
+static apr_status_t intra_acquire(apr_lock_t *lock)
 {
     apr_status_t stat;
 
@@ -126,7 +126,7 @@ apr_status_t apr_unix_lock_intra(apr_lock_t *lock)
     return stat;
 }
 
-apr_status_t apr_unix_unlock_intra(apr_lock_t *lock)
+static apr_status_t intra_release(apr_lock_t *lock)
 {
     apr_status_t status;
 
@@ -139,7 +139,7 @@ apr_status_t apr_unix_unlock_intra(apr_lock_t *lock)
     return status;
 }
 
-apr_status_t apr_unix_destroy_intra_lock(apr_lock_t *lock)
+static apr_status_t intra_destroy(apr_lock_t *lock)
 {
     apr_status_t stat;
     if ((stat = lock_intra_cleanup(lock)) == APR_SUCCESS) {
@@ -148,5 +148,46 @@ apr_status_t apr_unix_destroy_intra_lock(apr_lock_t *lock)
     }
     return stat;
 }
+
+#endif /* APR_USE_PTHREAD_SERIALIZE */
+
+const apr_unix_lock_methods_t apr_unix_intra_methods =
+{
+    intra_create,
+    intra_acquire,
+    intra_release,
+    intra_destroy,
+    NULL /* no child init */
+};
+
+#if APR_HAS_RWLOCK_SERIALIZE
+static apr_status_t rwlock_create(apr_lock_t *new, const char *fname)
+{
+    /* XXX check retcode */
+    pthread_rwlock_init(&new->rwlock, NULL);
+    return APR_SUCCESS;
+}
+
+static apr_status_t rwlock_release(apr_lock_t *lock)
+{
+    /* XXX PTHREAD_SETS_ERRNO crap? */
+    return pthread_rwlock_unlock(&lock->rwlock);
+}
+
+static apr_status_t rwlock_destroy(apr_lock_t *lock)
+{
+    /* XXX PTHREAD_SETS_ERRNO crap? */
+    return pthread_rwlock_destroy(&lock->rwlock);
+}
+
+const apr_unix_lock_methods_t apr_unix_rwlock_methods =
+{
+    rwlock_create,
+    NULL, /* no standard acquire method; app better not call :) */
+    rwlock_release,
+    rwlock_destroy,
+    NULL /* no child init method */
+};
 #endif
-#endif
+
+#endif /* APR_HAS_THREADS */

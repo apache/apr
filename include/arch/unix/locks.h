@@ -100,7 +100,51 @@
 #endif
 /* End System Headers */
 
-#if !APR_HAVE_UNION_SEMUN && APR_USE_SYSVSEM_SERIALIZE
+struct apr_unix_lock_methods_t {
+    apr_status_t (*create)(apr_lock_t *, const char *);
+    apr_status_t (*acquire)(apr_lock_t *);
+    apr_status_t (*release)(apr_lock_t *);
+    apr_status_t (*destroy)(apr_lock_t *);
+    apr_status_t (*child_init)(apr_lock_t **, apr_pool_t *, const char *);
+};
+typedef struct apr_unix_lock_methods_t apr_unix_lock_methods_t;
+
+#if defined(HAVE_SEMCTL) && defined(HAVE_SEMGET)
+#define APR_HAS_SYSVSEM_SERIALIZE      1
+extern const apr_unix_lock_methods_t apr_unix_sysv_methods;
+#else
+#define APR_HAS_SYSVSEM_SERIALIZE      0
+#endif
+
+#if defined(HAVE_FCNTL_H) && defined(HAVE_F_SETLK)
+#define APR_HAS_FCNTL_SERIALIZE        1
+extern const apr_unix_lock_methods_t apr_unix_fcntl_methods;
+#else
+#define APR_HAS_FCNTL_SERIALIZE        0
+#endif
+
+#if defined(HAVE_SYS_FILE_H) && defined(HAVE_LOCK_EX)
+#define APR_HAS_FLOCK_SERIALIZE        1
+extern const apr_unix_lock_methods_t apr_unix_flock_methods;
+#else
+#define APR_HAS_FLOCK_SERIALIZE        0
+#endif
+
+#if defined(HAVE_PTHREAD_H) && defined(HAVE_PTHREAD_PROCESS_SHARED) && defined(HAVE_PTHREAD_MUTEXATTR_SETPSHARED)
+#define APR_HAS_PROC_PTHREAD_SERIALIZE 1
+extern const apr_unix_lock_methods_t apr_unix_proc_pthread_methods;
+#else
+#define APR_HAS_PROC_PTHREAD_SERIALIZE 0
+#endif
+
+#if defined(HAVE_PTHREAD_RWLOCK_INIT)
+#define APR_HAS_RWLOCK_SERIALIZE       1
+extern const apr_unix_lock_methods_t apr_unix_rwlock_methods;
+#else
+#define APR_HAS_RWLOCK_SERIALIZE       0
+#endif
+
+#if !APR_HAVE_UNION_SEMUN && defined(APR_HAS_SYSVSEM_SERIALIZE)
 /* it makes no sense, but this isn't defined on solaris */
 union semun {
     long val;
@@ -111,22 +155,18 @@ union semun {
 
 struct apr_lock_t {
     apr_pool_t *pool;
+    const apr_unix_lock_methods_t *meth;
+    const apr_unix_lock_methods_t *inter_meth, *intra_meth; /* for APR_LOCK_ALL */
     apr_locktype_e type;
     apr_lockscope_e scope;
     int curr_locked;
     char *fname;
-
-#if APR_USE_SYSVSEM_SERIALIZE
+#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
     int interproc;
-#elif APR_USE_FCNTL_SERIALIZE
-    int interproc;
-#elif APR_USE_PROC_PTHREAD_SERIALIZE
-    pthread_mutex_t *interproc;
-#elif APR_USE_FLOCK_SERIALIZE
-    int interproc;
-#else
-    /* No Interprocess serialization.  Too bad. */
-#endif 
+#endif
+#if APR_HAS_PROC_PTHREAD_SERIALIZE
+    pthread_mutex_t *pthread_interproc;
+#endif
 #if APR_HAS_THREADS
     /* APR doesn't have threads, no sense in having an thread lock mechanism.
      */
@@ -147,20 +187,10 @@ struct apr_lock_t {
 };
 
 #if APR_HAS_THREADS
-apr_status_t apr_unix_create_intra_lock(struct apr_lock_t *new);
-apr_status_t apr_unix_lock_intra(struct apr_lock_t *lock);
-apr_status_t apr_unix_unlock_intra(struct apr_lock_t *lock);
-apr_status_t apr_unix_destroy_intra_lock(struct apr_lock_t *lock);
+extern const apr_unix_lock_methods_t apr_unix_intra_methods;
 #endif
 
 void apr_unix_setup_lock(void);
-apr_status_t apr_unix_create_inter_lock(struct apr_lock_t *new);
-apr_status_t apr_unix_lock_inter(struct apr_lock_t *lock);
-apr_status_t apr_unix_unlock_inter(struct apr_lock_t *lock);
-apr_status_t apr_unix_destroy_inter_lock(struct apr_lock_t *lock);
-
-apr_status_t apr_unix_child_init_lock(struct apr_lock_t **lock, 
-                                      apr_pool_t *cont, const char *fname);
 
 #endif  /* LOCKS_H */
 
