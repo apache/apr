@@ -105,7 +105,6 @@ else
 	;;
     *-hp-hpux11.*)
 	APR_ADDTO(CFLAGS, [-DHPUX11])
-	APR_ADDTO(LIBS, [-lpthread])
 	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
 	;;
     *-hp-hpux10.*)
