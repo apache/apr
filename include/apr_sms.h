@@ -67,10 +67,7 @@
 #include "apr_errno.h"
 #include "apr_pools.h"
 #include "apr_lock.h"
-
-#if APR_HAS_THREADS
 #include "apr_portable.h"
-#endif /* APR_HAS_THREADS */
 
 #ifdef __cplusplus
 extern "C" {
