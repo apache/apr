@@ -72,7 +72,7 @@
 #if APR_HAS_THREADS
 struct apr_thread_cond_t {
     apr_pool_t *pool;
-    pthread_cond_t *cond;
+    pthread_cond_t cond;
 };
 #endif
 
