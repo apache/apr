@@ -55,7 +55,7 @@
 #ifndef MISC_H
 #define MISC_H
 
-#include "apr_config.h"
+#include "apr_private.h"
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_getopt.h"

@@ -49,7 +49,7 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-dso.o: dso.c dso.h $(INCDIR)/apr_config.h \
+dso.o: dso.c dso.h $(INCDIR)/apr_private.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
  $(INCDIR)/apr_errno.h $(INCDIR)/apr_pools.h \
  $(INCDIR)/apr_lib.h $(INCDIR)/apr_file_io.h \

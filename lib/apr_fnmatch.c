@@ -43,7 +43,7 @@ static char sccsid[] = "@(#)fnmatch.c	8.2 (Berkeley) 4/16/94";
  * Compares a filename or pathname to a pattern.
  */
 #ifndef WIN32
-#include "apr_config.h"
+#include "apr_private.h"
 #endif
 #include "apr_fnmatch.h"
 #include "apr_lib.h"

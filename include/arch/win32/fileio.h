@@ -76,7 +76,7 @@
 #ifdef HAVE_UIO_H
 #include <sys/uio.h>
 #endif
-#include "apr_config.h"
+#include "apr_private.h"
 #include "apr_pools.h"
 #include "apr_general.h"
 #include "apr_file_io.h"

@@ -326,7 +326,7 @@ SOURCE=.\include\apr.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\apr_config.h
+SOURCE=.\include\apr_private.h
 # End Source File
 # End Group
 # Begin Group "Internal Header Files"
@@ -334,27 +334,27 @@ SOURCE=.\include\apr_config.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\include\apr_config.hw
+SOURCE=.\include\apr_private.hw
 
 !IF  "$(CFG)" == "aprlib - Win32 Release"
 
 # Begin Custom Build
-InputPath=.\include\apr_config.hw
+InputPath=.\include\apr_private.hw
 
-".\include\apr_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy .\include\apr_config.hw .\include\apr_config.h > nul 
-	echo Created apr_config.h from apr_config.hw 
+".\include\apr_private.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy .\include\apr_private.hw .\include\apr_private.h > nul 
+	echo Created apr_private.h from apr_private.hw 
 	
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
 
 # Begin Custom Build
-InputPath=.\include\apr_config.hw
+InputPath=.\include\apr_private.hw
 
-".\include\apr_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy .\include\apr_config.hw .\include\apr_config.h > nul 
-	echo Created apr_config.h from apr_config.hw 
+".\include\apr_private.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy .\include\apr_private.hw .\include\apr_private.h > nul 
+	echo Created apr_private.h from apr_private.hw 
 	
 # End Custom Build
 

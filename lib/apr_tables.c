@@ -59,7 +59,7 @@
  * rst --- 4/95 --- 6/95
  */
 
-#include "apr_config.h"
+#include "apr_private.h"
 
 #include "apr_general.h"
 #include "apr_pools.h"

@@ -55,7 +55,7 @@
 #ifdef WIN32
 #include <winsock2.h>
 #endif
-#include "apr_config.h"
+#include "apr_private.h"
 
 #include "apr_lib.h"
 #include <math.h>

@@ -130,7 +130,7 @@ client.o: client.c $(INCDIR)/apr_network_io.h \
 htdigest.o: htdigest.c $(INCDIR)/apr_lib.h $(INCDIR)/apr_general.h \
  $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_file_io.h \
  $(INCDIR)/apr_time.h $(INCDIR)/apr_thread_proc.h \
- $(INCDIR)/apr_md5.h $(INCDIR)/apr_config.h
+ $(INCDIR)/apr_md5.h $(INCDIR)/apr_private.h
 mod_test.o: mod_test.c
 server.o: server.c $(INCDIR)/apr_network_io.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \

@@ -48,12 +48,12 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-getopt.o: getopt.c misc.h ../../include/apr_config.h \
+getopt.o: getopt.c misc.h ../../include/apr_private.h \
  ../../include/apr_general.h ../../include/apr.h \
  ../../include/apr_errno.h ../../include/apr_pools.h \
  ../../include/apr_lib.h ../../include/apr_file_io.h \
  ../../include/apr_getopt.h
-start.o: start.c misc.h ../../include/apr_config.h \
+start.o: start.c misc.h ../../include/apr_private.h \
  ../../include/apr_general.h ../../include/apr.h \
  ../../include/apr_errno.h ../../include/apr_pools.h \
  ../../include/apr_lib.h ../../include/apr_file_io.h \

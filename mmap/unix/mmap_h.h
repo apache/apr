@@ -55,7 +55,7 @@
 #ifndef MMAP_H_H
 #define MMAP_H_H
 
-#include "apr_config.h"
+#include "apr_private.h"
 #include "apr_general.h"
 #include "apr_mmap.h"
 #include "apr_errno.h"
