@@ -107,7 +107,7 @@ ap_status_t ap_explode_time(struct atime_t *atime, ap_timetype_e type)
 {
     switch (type) {
     case APR_LOCALTIME: {
-#if APR_HAS_THREADS && _POSIX_THREAD_SAFE_FUNCTIONS
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
         localtime_r(&atime->currtime->tv_sec, atime->explodedtime);
 #else
         atime->explodedtime = localtime(&atime->currtime->tv_sec);
@@ -115,7 +115,7 @@ ap_status_t ap_explode_time(struct atime_t *atime, ap_timetype_e type)
         break;
     }
     case APR_UTCTIME: {
-#if APR_HAS_THREADS && _POSIX_THREAD_SAFE_FUNCTIONS
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
         gmtime_r(&atime->currtime->tv_sec, atime->explodedtime);
 #else
         atime->explodedtime = gmtime(&atime->currtime->tv_sec);
