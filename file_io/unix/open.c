@@ -107,7 +107,6 @@ ap_status_t file_cleanup(void *thefile)
 ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_context_t *cont)
 {
     int oflags = 0;
-    mode_t mode = get_fileperms(perm);    
     char *buf_oflags;
 
     (*new) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
@@ -167,7 +166,7 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
             (*new)->filedes = open(fname, oflags);
         }
         else {
-            (*new)->filedes = open(fname, oflags, mode);
+            (*new)->filedes = open(fname, oflags, get_fileperms(perm));
         }    
     }
 
