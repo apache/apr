@@ -489,8 +489,7 @@ else
       APR_CHECK_PTHREADS_H([
           threads="1"
           pthreadh="1"
-          pthreadser="1"
-          AC_DEFINE(USE_THREADS, 1, [Define if APR supports threads]) ], [
+          pthreadser="1" ], [
           threads="0"
           pthreadh="0"
           pthreadser="0"
@@ -508,8 +507,7 @@ else
       APR_CHECK_PTHREADS_H([
           threads="1"
           pthreadh="1"
-          pthreadser="1"
-          AC_DEFINE(USE_THREADS) ], [
+          pthreadser="1" ], [
           threads="0"
           pthreadser="0"
           pthreadh="0"
