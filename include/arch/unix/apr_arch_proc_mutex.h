@@ -96,10 +96,6 @@ extern const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_flock_method
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
 extern const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_proc_pthread_methods;
 #endif
-#if APR_HAS_RWLOCK_SERIALIZE
-extern const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_rwlock_methods;
-#endif
-
 
 #if !APR_HAVE_UNION_SEMUN && defined(APR_HAS_SYSVSEM_SERIALIZE)
 union semun {
