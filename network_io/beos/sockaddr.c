@@ -58,42 +58,37 @@
 #else
 #include "networkio.h"
 
-apr_status_t apr_set_port(apr_socket_t *sock, apr_interface_e which, apr_port_t port)
+static apr_status_t get_local_addr(apr_socket_t *sock)
 {
-    if (!sock) 
-        return APR_EBADF;
-    if (which == APR_LOCAL) 
-        sock->local_addr->sin_port = htons(port);
-    else if (APR == APR_REMOTE)
-        sock->remote_addr->sin_port = htons(port);
-    else
-        return APR_EINVAL;
-    return APR_SUCCESS;
+    apr_socklen_t namelen = sizeof(*sock->local_addr);
+
+    if (getsockname(sock->socketdes, (struct sockaddr *)sock->local_addr,
+                    &namelen) < 0) {
+        return errno;
+    }
+    else {
+        sock->local_port_unknown = sock->local_interface_unknown = 0;
+        return APR_SUCCESS;
+    }
 }
 
-apr_status_t apr_get_port(apr_port_t *port, apr_interface_e which, apr_socket_t *sock)
-{
-    if (!sock)
-        return APR_EBADF;
-    if (which == APR_LOCAL)
-        *port = ntohs(sock->local_addr->sin_port);
-    else if (which == APR_REMOTE)
-        *port = ntohs(sock->remote_addr->sin_port);
-    else
-        return APR_EINVAL;
-    return APR_SUCCESS;
-}
+/* Include this here so we already have get_local_addr... */
+#include "../unix/sa_common.c"
 
-apr_status_t apr_set_local_ipaddr(apr_socket_t *sock, const char *addr)
+apr_status_t apr_set_ipaddr(apr_socket_t *sock, apr_interface_e which, const char *addr)
 {
     u_long ipaddr;
+    struct sockaddr_in *ptr;
 
-    if (!sock) {
-        return APR_EBADF;
-    }
+    if (which == APR_LOCAL)
+        ptr = sock->local_addr;
+    else if (which == APR_REMOTE)
+        ptr = sock->remote_addr;
+    else 
+        return APR_EINVAL;
     
     if (!strcmp(addr, APR_ANYADDR)) {
-        sock->local_addr->sin_addr.s_addr = htonl(INADDR_ANY);
+        ptr->sin_addr.s_addr = htonl(INADDR_ANY);
         return APR_SUCCESS;
     }
     
@@ -103,55 +98,11 @@ apr_status_t apr_set_local_ipaddr(apr_socket_t *sock, const char *addr)
         return errno;
     }
     
-    sock->local_addr->sin_addr.s_addr = ipaddr;
+    ptr->sin_addr.s_addr = ipaddr;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_set_remote_ipaddr(apr_socket_t *sock, const char *addr)
-{
-    u_long ipaddr;
-
-    if (!sock) {
-        return APR_EBADF;
-    }
-    
-    if (!strcmp(addr, APR_ANYADDR)) {
-        sock->remote_addr->sin_addr.s_addr = htonl(INADDR_ANY);
-        return APR_SUCCESS;
-    }
-    
-    ipaddr = inet_addr(addr);
-    
-    if (ipaddr == (u_long)-1) {
-        return errno;
-    }
-    
-    sock->remote_addr->sin_addr.s_addr = ipaddr;
-    return APR_SUCCESS;
-}
-
-apr_status_t apr_get_local_ipaddr(char **addr, apr_socket_t *sock)
-{
-    if (!sock) {
-        return APR_EBADF;
-    }
-
-    *addr = apr_pstrdup(sock->cntxt, inet_ntoa(sock->local_addr->sin_addr));
-    return APR_SUCCESS;
-}
-
-apr_status_t apr_get_remote_ipaddr(char **addr, apr_socket_t *sock)
-{
-    if (!sock) {
-        return APR_EBADF;
-    }
-
-    *addr = apr_pstrdup(sock->cntxt, inet_ntoa(sock->remote_addr->sin_addr));
-    return APR_SUCCESS;
-}
-
-
-apr_status_t apr_get_local_name(struct sockaddr_in **name, apr_socket_t *sock)
+apr_status_t get_local_name(struct sockaddr_in **name, apr_socket_t *sock)
 {
     if (!sock) {
         return APR_EBADF;

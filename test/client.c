@@ -136,9 +136,9 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "OK\n");
 
-    apr_get_remote_ipaddr(&remote_ipaddr, sock);
+    apr_get_ipaddr(&remote_ipaddr, APR_REMOTE, sock);
     apr_get_port(&remote_port, APR_REMOTE, sock);
-    apr_get_local_ipaddr(&local_ipaddr, sock);
+    apr_get_ipaddr(&local_ipaddr, APR_LOCAL, sock);
     apr_get_port(&local_port, APR_LOCAL, sock);
     fprintf(stdout, "\tClient socket: %s:%u -> %s:%u\n", local_ipaddr, local_port, remote_ipaddr, remote_port);
 
