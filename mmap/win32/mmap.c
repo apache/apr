@@ -59,6 +59,7 @@
 #include "apr_errno.h"
 #include "fileio.h"
 #include "apr_portable.h"
+#include "apr_strings.h"
 
 #if APR_HAS_MMAP
 
