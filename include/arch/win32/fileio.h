@@ -128,6 +128,9 @@ apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars,
 #ifndef FILE_FLAG_OPEN_REPARSE_POINT
 #define FILE_FLAG_OPEN_REPARSE_POINT 0x00200000
 #endif
+#ifndef TRUSTEE_IS_WELL_KNOWN_GROUP
+#define TRUSTEE_IS_WELL_KNOWN_GROUP  5
+#endif
 
 /* Information bits available from the WIN32 FindFirstFile function */
 #define APR_FINFO_WIN32_DIR (APR_FINFO_NAME  | APR_FINFO_TYPE \
