@@ -97,7 +97,7 @@ $(TARGET_LIB):
 	@for i in $(SUBDIRS); do objects="$$objects $$i/*.@so_ext@"; done ; \
 	    tmpcmd="$(LINK) @lib_target@ @lib_target_libs@"; \
 	    echo $$tmpcmd; \
-	    $$tmpcmd
+	    $$tmpcmd && touch $@
 
 delete-exports:
 	@if test -f apr.exp; then \
