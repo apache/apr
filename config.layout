@@ -9,8 +9,25 @@
 ##    (This may become a configurable parameter at some point.)
 ##
 
-#   Classical apr path layout.
+#   Classical APR path layout designed for parallel installs.
 <Layout apr>
+    prefix:        /usr/local/apr
+    exec_prefix:   ${prefix}
+    bindir:        ${exec_prefix}/bin
+    sbindir:       ${exec_prefix}/bin
+    libdir:        ${exec_prefix}/lib
+    libexecdir:    ${exec_prefix}/modules
+    mandir:        ${prefix}/man
+    sysconfdir:    ${prefix}/conf
+    datadir:       ${prefix}
+    installbuilddir: ${datadir}/build
+    includedir:    ${prefix}/include/apr-${APR_MAJOR_VERSION}
+    localstatedir: ${prefix}
+    libsuffix:     -${APR_MAJOR_VERSION}
+</Layout>
+
+#   Classical single-installation APR path layout.
+<Layout classic>
     prefix:        /usr/local/apr
     exec_prefix:   ${prefix}
     bindir:        ${exec_prefix}/bin
@@ -23,23 +40,6 @@
     installbuilddir: ${datadir}/build
     includedir:    ${prefix}/include
     localstatedir: ${prefix}
-</Layout>
-
-#   Classical apr path layout designed for parallel installs.
-<Layout parallel-apr>
-    prefix:        /usr/local/apr
-    exec_prefix:   ${prefix}
-    bindir:        ${exec_prefix}/bin
-    sbindir:       ${exec_prefix}/bin
-    libdir:        ${exec_prefix}/lib/apr-${APR_MAJOR_VERSION}
-    libexecdir:    ${exec_prefix}/modules
-    mandir:        ${prefix}/man
-    sysconfdir:    ${prefix}/conf
-    datadir:       ${prefix}
-    installbuilddir: ${datadir}/build
-    includedir:    ${prefix}/include/apr-${APR_MAJOR_VERSION}
-    localstatedir: ${prefix}
-    libsuffix:     -${APR_MAJOR_VERSION}
 </Layout>
 
 #   GNU standards conforming path layout.
