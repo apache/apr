@@ -1,5 +1,9 @@
 Changes with APR b1
 
+  *) Fix the userid functions on Irix to handle the way that Irix 
+     reports a failure from getpwnam_r().  PR 10095.
+     [Robert I. Cowles <ric@cs.uregina.ca>, Jeff Trawick]
+
   *) apr_table_do() and apr_table_vdo() now return an int rather than
      void to indicate whether or not any of its iterations returned 0.
      [Cliff Woolley]
