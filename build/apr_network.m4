@@ -659,6 +659,44 @@ int h_e = h_errno;
 
 
 dnl
+dnl APR_CHECK_SCTP
+dnl
+dnl check for presence of SCTP protocol support
+dnl
+AC_DEFUN(APR_CHECK_SCTP,[
+  AC_CACHE_CHECK(if SCTP protocol is supported, ac_cv_sctp,[
+  AC_TRY_RUN( [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+int main(void) {
+    int s = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+    if (s < 0) {
+        exit(1);
+    }
+    exit(0);
+}
+],[
+    ac_cv_sctp="yes"
+],[
+    ac_cv_sctp="no"
+],[
+    ac_cv_sctp="yes"
+])])
+if test "$ac_cv_sctp" = "yes"; then
+    have_sctp=1
+else
+    have_sctp=0
+fi
+])
+
+dnl
 dnl APR_CHECK_H_ERRNO_FLAG
 dnl
 dnl checks which flags are necessary for <netdb.h> to define h_errno

@@ -43,6 +43,8 @@
 #define APR_HAVE_LIMITS_H        @limitsh@
 #define APR_HAVE_NETDB_H         @netdbh@
 #define APR_HAVE_NETINET_IN_H    @netinet_inh@
+#define APR_HAVE_NETINET_SCTP_H  @netinet_sctph@
+#define APR_HAVE_NETINET_SCTP_UIO_H @netinet_sctp_uioh@
 #define APR_HAVE_NETINET_TCP_H   @netinet_tcph@
 #define APR_HAVE_PTHREAD_H       @pthreadh@
 #define APR_HAVE_SEMAPHORE_H     @semaphoreh@
@@ -117,6 +119,7 @@
 #define APR_HAVE_MEMCHR         @have_memchr@
 #define APR_HAVE_STRUCT_RLIMIT  @struct_rlimit@
 #define APR_HAVE_UNION_SEMUN    @have_union_semun@
+#define APR_HAVE_SCTP           @have_sctp@
 
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
