@@ -1,6 +1,6 @@
 Changes with APR b1  
 
-  *) Add condition variables for Windows.
+  *) Add condition variables for Windows.  [Ryan Bloom]
 
   *) Add condition variables to the APR set of locking functions.
      This does Unix, and provides stubs for all other platforms.
