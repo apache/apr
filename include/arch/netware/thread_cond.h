@@ -60,6 +60,7 @@
 
 struct apr_thread_cond_t {
     apr_pool_t *pool;
+    NXCond_t *cond;
 };
 
 #endif  /* THREAD_COND_H */

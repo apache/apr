@@ -61,33 +61,63 @@
 
 static apr_status_t thread_mutex_cleanup(void *data)
 {
-    return APR_ENOTIMPL;
+    apr_thread_mutex_t *mutex = (apr_thread_mutex_t *)data;
+
+    NXMutexFree(mutex->mutex);        
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
                                                   apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    apr_thread_mutex_t *new_mutex = NULL;
+
+    new_mutex = (apr_thread_mutex_t *)apr_pcalloc(pool, sizeof(apr_thread_mutex_t));
+	
+	if(new_mutex ==NULL) {
+        return APR_ENOMEM;
+    }     
+    new_mutex->pool = pool;
+
+    new_mutex->mutex = NXMutexAlloc(NX_MUTEX_RECURSIVE, NULL, NULL);
+    
+    if(new_mutex->mutex == NULL)
+        return APR_ENOMEM;
+
+    apr_pool_cleanup_register(new_mutex->pool, new_mutex, 
+                                (void*)thread_mutex_cleanup,
+                                apr_pool_cleanup_null);
+   *mutex = new_mutex;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    NXLock(mutex->mutex);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    if (!NXTryLock(mutex->mutex))
+        return APR_EBUSY;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    NXUnlock(mutex->mutex);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    apr_status_t stat;
+    if ((stat = thread_mutex_cleanup(mutex)) == APR_SUCCESS) {
+        apr_pool_cleanup_kill(mutex->pool, mutex, thread_mutex_cleanup);
+        return APR_SUCCESS;
+    }
+    return stat;
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(thread_mutex)
