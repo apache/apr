@@ -1,5 +1,8 @@
 Changes with APR 0.9.5
 
+  *) Prevent unbounded memory use during repeated operations on a hash table.
+     [Julian Foad <julianfoad btopenworld.com>
+
   *) fix apr_file_dup and apr_file_dup2 win32 implementations
      to create a mutex [Steve Hay <steve.hay uk.radan.com>]
 

@@ -72,6 +72,7 @@ struct apr_hash_t {
     apr_hash_entry_t   **array;
     apr_hash_index_t     iterator;  /* For apr_hash_first(NULL, ...) */
     unsigned int         count, max;
+    apr_hash_entry_t    *free;  /* List of recycled entries */
 };
 
 #define INITIAL_MAX 15 /* tunable == 2^n - 1 */
@@ -91,6 +92,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool)
     apr_hash_t *ht;
     ht = apr_palloc(pool, sizeof(apr_hash_t));
     ht->pool = pool;
+    ht->free = NULL;
     ht->count = 0;
     ht->max = INITIAL_MAX;
     ht->array = alloc_array(ht, ht->max);
@@ -243,7 +245,10 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
         return hep;
 
     /* add a new entry for non-NULL values */
-    he = apr_palloc(ht->pool, sizeof(*he));
+    if (he = ht->free)
+        ht->free = he->next;
+    else
+        he = apr_palloc(ht->pool, sizeof(*he));
     he->next = NULL;
     he->hash = hash;
     he->key  = key;
@@ -265,6 +270,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_copy(apr_pool_t *pool,
                     sizeof(*ht->array) * (orig->max + 1) +
                     sizeof(apr_hash_entry_t) * orig->count);
     ht->pool = pool;
+    ht->free = NULL;
     ht->count = orig->count;
     ht->max = orig->max;
     ht->array = (apr_hash_entry_t **)((char *)ht + sizeof(apr_hash_t));
@@ -311,7 +317,10 @@ APR_DECLARE(void) apr_hash_set(apr_hash_t *ht,
     if (*hep) {
         if (!val) {
             /* delete entry */
+            apr_hash_entry_t *old = *hep;
             *hep = (*hep)->next;
+            old->next = ht->free;
+            ht->free = old;
             --ht->count;
         }
         else {
@@ -374,6 +383,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
 
     res = apr_palloc(p, sizeof(apr_hash_t));
     res->pool = p;
+    res->free = NULL;
     res->count = base->count;
     res->max = (overlay->max > base->max) ? overlay->max : base->max;
     if (base->count + overlay->count > res->max) {
