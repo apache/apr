@@ -1,5 +1,8 @@
 Changes with APR 0.9.0
 
+  *) Running "make check" in the toplevel directory or the test/ directory
+     will build and run all test programs.  [Aaron Bannert]
+
   *) Add apr_array_pop().  [Justin Erenkrantz]
 
   *) Fixed the native SPARC v8plus version of apr_atomic_dec
