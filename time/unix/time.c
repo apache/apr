@@ -294,3 +294,27 @@ ap_status_t ap_put_os_exp_time(ap_exploded_time_t *aprtime,
     return APR_SUCCESS;
 }
 
+
+
+#ifdef OS2
+#define INCL_DOS
+#include <os2.h>
+
+ap_status_t ap_os2_time_to_ap_time(ap_time_t *result, FDATE os2date, FTIME os2time)
+{
+  struct tm tmpdate;
+
+  memset(&tmpdate, 0, sizeof(tmpdate));
+  tmpdate.tm_hour  = os2time.hours;
+  tmpdate.tm_min   = os2time.minutes;
+  tmpdate.tm_sec   = os2time.twosecs * 2;
+
+  tmpdate.tm_mday  = os2date.day;
+  tmpdate.tm_mon   = os2date.month - 1;
+  tmpdate.tm_year  = os2date.year + 80;
+  tmpdate.tm_isdst = -1;
+
+  *result = mktime(&tmpdate) * AP_USEC_PER_SEC;
+  return APR_SUCCESS;
+}
+#endif
