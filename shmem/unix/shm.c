@@ -354,6 +354,57 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     return APR_ENOTIMPL;
 }
 
+APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
+                                         apr_pool_t *pool)
+{
+#if APR_USE_SHMEM_SHMGET
+    apr_status_t status;
+    apr_file_t *file;  
+    key_t shmkey;
+    int shmid;
+#endif
+
+#if APR_USE_SHMEM_MMAP_TMP
+    return apr_file_remove(filename, pool);
+#endif
+#if APR_USE_SHMEM_MMAP_SHM
+    if (shm_unlink(filename) == -1) {
+        return errno;
+    }
+    return APR_SUCCESS;
+#endif
+#if APR_USE_SHMEM_SHMGET
+    /* Presume that the file already exists; just open for writing */    
+    status = apr_file_open(&file, filename, APR_WRITE,
+                           APR_OS_DEFAULT, pool);
+    if (status) {
+        return status;
+    }
+
+    /* ftok() (on solaris at least) requires that the file actually
+     * exist before calling ftok(). */
+    shmkey = ftok(filename, 1);
+    if (shmkey == (key_t)-1) {
+        return errno;
+    }
+
+    if ((shmid = shmget(shmkey, 0, SHM_R | SHM_W)) < 0) {
+        return errno;
+    }
+
+    /* Indicate that the segment is to be destroyed as soon
+     * as all processes have detached. This also disallows any
+     * new attachments to the segment. */
+    if (shmctl(shmid, IPC_RMID, NULL) == -1) {
+        return errno;
+    }
+    return apr_file_remove(filename, pool);
+#endif
+
+    /* No support for anonymous shm */
+    return APR_ENOTIMPL;
+} 
+
 APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m)
 {
     return apr_pool_cleanup_run(m->pool, m, shm_cleanup_owner);

@@ -61,6 +61,12 @@ APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m)
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
+                                         apr_pool_t *pool)
+{
+    return APR_ENOTIMPL;
+}
+
 APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
                                          const char *filename,
                                          apr_pool_t *pool)

@@ -7,6 +7,9 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) Add apr_shm_remove() function for removing a named shared
+     memory segment.  [Amit Athavale <amit_athavale persistent.co.in>]
+
   *) Add apr_strtoff() function for converting numeric strings into 
      apr_off_t values.  [André Malo <nd perlig.de>, Joe Orton]
 
