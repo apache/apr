@@ -56,6 +56,7 @@
 #include "apr_time.h"
 #include "apr_lib.h"
 #include "apr_private.h"
+#include "apr_strings.h"
 /* System Headers required for time library */
 #if APR_HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -65,9 +66,6 @@
 #endif
 #ifdef HAVE_TIME_H
 #include <time.h>
-#endif
-#ifdef BEOS
-#include <sys/socket.h> /* for select */
 #endif
 /* End System Headers */
 
@@ -86,8 +84,28 @@ apr_time_t apr_time_now(void)
     return tv.tv_sec * APR_USEC_PER_SEC + tv.tv_usec;
 }
 
+static void set_xt_gmtoff_from_tm(apr_exploded_time_t *xt, struct tm *tm,
+                                  time_t *tt)
+{
+#ifdef HAVE_GMTOFF
+    xt->tm_gmtoff = tm->tm_gmtoff;
+#elif defined(HAVE___OFFSET)
+    xt->tm_gmtoff = tm->__tm_gmtoff;
+#else
+    {
+        struct tm t;
+        int days = 0, hours = 0, minutes = 0;
+        gmtime_r(tt, &t);
+        days = xt->tm_yday - t.tm_yday;
+        hours = ((days < -1 ? 24 : 1 < days ? -24 : days * 24) +
+                 xt->tm_hour - t.tm_hour);
+        minutes = hours * 60 + xt->tm_min - t.tm_min;
+        xt->tm_gmtoff = minutes * 60;
+    }
+#endif
+}
 
-static void tm_to_exp(apr_exploded_time_t *xt, struct tm *tm)
+static void tm_to_exp(apr_exploded_time_t *xt, struct tm *tm, time_t *tt)
 {
     xt->tm_sec  = tm->tm_sec;
     xt->tm_min  = tm->tm_min;
@@ -98,82 +116,48 @@ static void tm_to_exp(apr_exploded_time_t *xt, struct tm *tm)
     xt->tm_wday = tm->tm_wday;
     xt->tm_yday = tm->tm_yday;
     xt->tm_isdst = tm->tm_isdst;
+    set_xt_gmtoff_from_tm(xt,tm,tt);
 }
 
+apr_status_t apr_explode_time(apr_exploded_time_t *result, apr_time_t input,
+                              apr_int32_t offs)
+{
+    time_t t = (input / APR_USEC_PER_SEC) + offs;
+    result->tm_usec = input % APR_USEC_PER_SEC;
+
+#if APR_HAS_THREADS && defined (_POSIX_THREAD_SAFE_FUNCTIONS)
+    {
+        struct tm apple;
+        gmtime_r(&t, &apple);
+        tm_to_exp(result, &apple, &t);
+    }
+#else
+    tm_to_exp(result, gmtime(&t), &t);
+#endif
+    result->tm_gmtoff = offs;
+    return APR_SUCCESS;
+}
 
 apr_status_t apr_explode_gmt(apr_exploded_time_t *result, apr_time_t input)
 {
-    time_t t = input / APR_USEC_PER_SEC;
-#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
-    struct tm banana;
-#endif
-
-    result->tm_usec = input % APR_USEC_PER_SEC;
-
-#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
-    gmtime_r(&t, &banana);
-    tm_to_exp(result, &banana);
-#else
-    tm_to_exp(result, gmtime(&t));
-#endif
-    result->tm_gmtoff = 0;
-    return APR_SUCCESS;
+    return apr_explode_time(result, input, 0);
 }
 
 apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input)
 {
+    time_t mango = input / APR_USEC_PER_SEC;
+    apr_int32_t offs;
+
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
-    time_t t = input / APR_USEC_PER_SEC;
-    struct tm apricot;
-
-    result->tm_usec = input % APR_USEC_PER_SEC;
-
-    localtime_r(&t, &apricot);
-    tm_to_exp(result, &apricot);
-#if defined(HAVE_GMTOFF)
-    result->tm_gmtoff = apricot.tm_gmtoff;
-#elif defined(HAVE___GMTOFF)
-    result->tm_gmtoff = apricot.__tm_gmtoff;
+    struct tm mangotm;
+    localtime_r(&mangotm, &mango);
+    offs = mangotm.tm_gmtoff;
 #else
-    /* solaris is backwards enough to have pthreads but no tm_gmtoff, feh */
-    {
-	int days, hours, minutes;
-
-	gmtime_r(&t, &apricot);
-	days = result->tm_yday - apricot.tm_yday;
-	hours = ((days < -1 ? 24 : 1 < days ? -24 : days * 24)
-		+ result->tm_hour - apricot.tm_hour);
-	minutes = hours * 60 + result->tm_min - apricot.tm_min;
-	result->tm_gmtoff = minutes * 60;
-    }
+    struct tm *mangotm;
+    mangotm=localtime(&mango);
+    offs = mangotm->tm_gmtoff;
 #endif
-#else
-    time_t t = input / APR_USEC_PER_SEC;
-    struct tm *tmx;
-
-    result->tm_usec = input % APR_USEC_PER_SEC;
-
-    tmx = localtime(&t);
-    tm_to_exp(result, tmx);
-#if defined(HAVE_GMTOFF)
-    result->tm_gmtoff = tmx->tm_gmtoff;
-#elif defined(HAVE___GMTOFF)
-    result->tm_gmtoff = tmx->__tm_gmtoff;
-#else
-    /* need to create tm_gmtoff... assume we are never more than 24 hours away */
-    {
-	int days, hours, minutes;
-
-	tmx = gmtime(&t);
-	days = result->tm_yday - tmx->tm_yday;
-	hours = ((days < -1 ? 24 : 1 < days ? -24 : days * 24)
-		+ result->tm_hour - tmx->tm_hour);
-	minutes = hours * 60 + result->tm_min - tmx->tm_min;
-	result->tm_gmtoff = minutes * 60;
-    }
-#endif
-#endif
-    return APR_SUCCESS;
+    return apr_explode_time(result, input, offs);
 }
 
 
@@ -185,7 +169,6 @@ apr_status_t apr_implode_time(apr_time_t *t, apr_exploded_time_t *xt)
     {306, 337, 0, 31, 61, 92, 122, 153, 184, 214, 245, 275};
 
     year = xt->tm_year;
-
     if (year < 70 || ((sizeof(time_t) <= 4) && (year >= 138))) {
         return APR_EBADDATE;
     }
@@ -200,13 +183,11 @@ apr_status_t apr_implode_time(apr_time_t *t, apr_exploded_time_t *xt)
     days = year * 365 + year / 4 - year / 100 + (year / 100 + 3) / 4;
     days += dayoffset[xt->tm_mon] + xt->tm_mday - 1;
     days -= 25508;              /* 1 jan 1970 is 25508 days since 1 mar 1900 */
-
     days = ((days * 24 + xt->tm_hour) * 60 + xt->tm_min) * 60 + xt->tm_sec;
 
     if (days < 0) {
         return APR_EBADDATE;
     }
-    days -= xt->tm_gmtoff;
     *t = days * APR_USEC_PER_SEC + xt->tm_usec;
     return APR_SUCCESS;
 }
@@ -230,6 +211,7 @@ apr_status_t apr_os_exp_time_get(apr_os_exp_time_t **ostime,
     (*ostime)->tm_wday = aprtime->tm_wday;
     (*ostime)->tm_yday = aprtime->tm_yday;
     (*ostime)->tm_isdst = aprtime->tm_isdst;
+    /* XXX - Need to handle gmt_offset's here ! */ 
     return APR_SUCCESS;
 }
 
@@ -252,6 +234,7 @@ apr_status_t apr_os_exp_time_put(apr_exploded_time_t *aprtime,
     aprtime->tm_wday = (*ostime)->tm_wday;
     aprtime->tm_yday = (*ostime)->tm_yday;
     aprtime->tm_isdst = (*ostime)->tm_isdst;
+    /* XXX - Need to handle gmt_offsets here */
     return APR_SUCCESS;
 }
 
@@ -259,6 +242,8 @@ void apr_sleep(apr_interval_time_t t)
 {
 #ifdef OS2
     DosSleep(t/1000);
+#elseif defined(BEOS)
+    snooze(t);
 #else
     struct timeval tv;
     tv.tv_usec = t % APR_USEC_PER_SEC;
