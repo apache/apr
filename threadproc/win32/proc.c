@@ -235,8 +235,9 @@ apr_status_t apr_setprocattr_detach(apr_procattr_t *attr, apr_int32_t det)
 }
 
 apr_status_t apr_create_process(apr_proc_t *new, const char *progname, 
-                              char *const args[], char **env, 
-                              apr_procattr_t *attr, apr_pool_t *cont)
+                                const char * const *args,
+                                const char * const *env, 
+                                apr_procattr_t *attr, apr_pool_t *cont)
 {
     int i, iEnvBlockLen;
     char *cmdline;
