@@ -91,7 +91,6 @@ ap_status_t ap_opendir(struct dir_t **new, ap_context_t *cont, const char *dirna
     (*new)->entry = NULL;
 
     if ((*new)->dirstruct == NULL) {
-        (*new)->dirstruct = NULL;
         return errno;
     }    
     else {
