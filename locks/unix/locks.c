@@ -159,7 +159,7 @@ ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname,
                                ap_pool_t *cont)
 {
     ap_status_t stat;
-    if ((*lock)->scope != APR_CROSS_PROCESS) {
+    if ((*lock)->scope != APR_INTRAPROCESS) {
         if ((stat = ap_unix_child_init_lock(lock, cont, fname)) != APR_SUCCESS) {
             return stat;
         }

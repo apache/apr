@@ -422,11 +422,12 @@ ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_pool_t *cont,
     new = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));
 
     new->fname = ap_pstrdup(cont, fname);
-    new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0600);
+    new->interproc = open(new->fname, O_WRONLY, 0600);
     if (new->interproc == -1) {
         ap_unix_destroy_inter_lock(new);
         return errno;
     }
+    *lock = new;
     return APR_SUCCESS;
 }
 
