@@ -1,5 +1,11 @@
 Changes with APR b1  
 
+  *) Added a new parameter to apr_thread_mutex_init(). Now, by default,
+     thread mutexes are not nested (sometimes called "recursive"). To
+     enable nested mutexes, a flag must be passed to the init script.
+     Non-nested mutexes are much faster than nested ones.
+     [Aaron Bannert]
+
   *) read_with_timeout in apr/file_io/win32/readwrite.c incorrectly 
      returned APR_SUCCESS instead of APR_EOF when PeekNamedPipe failed
      and the result from GetLastError() was ERROR_BROKEN_PIPE. Because 

@@ -69,11 +69,14 @@ static apr_status_t thread_mutex_cleanup(void *data)
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
+                                                  unsigned int flags,
                                                   apr_pool_t *pool)
 {
     (*mutex) = (apr_thread_mutex_t *)apr_palloc(pool, sizeof(**mutex));
 
     (*mutex)->pool = pool;
+    /* FIXME: Implement nested (aka recursive) locks or use a native
+     * win32 implementation if available. */
     InitializeCriticalSection(&(*mutex)->section);
     apr_pool_cleanup_register((*mutex)->pool, (*mutex), thread_mutex_cleanup,
                               apr_pool_cleanup_null);

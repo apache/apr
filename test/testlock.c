@@ -408,7 +408,7 @@ apr_status_t test_thread_mutex(void)
 
     printf("thread_mutex test\n");
     printf("%-60s", "    Initializing the mutex");
-    s1 = apr_thread_mutex_create(&thread_mutex, pool);
+    s1 = apr_thread_mutex_create(&thread_mutex, APR_THREAD_MUTEX_DEFAULT, pool);
 
     if (s1 != APR_SUCCESS) {
         printf("Failed!\n");
@@ -505,7 +505,7 @@ apr_status_t test_cond(void)
 
     printf("thread_cond Tests\n");
     printf("%-60s", "    Initializing the first apr_thread_mutex_t");
-    s1 = apr_thread_mutex_create(&put.mutex, pool);
+    s1 = apr_thread_mutex_create(&put.mutex, APR_THREAD_MUTEX_DEFAULT, pool);
     if (s1 != APR_SUCCESS) {
         printf("Failed!\n");
         return s1;
@@ -513,7 +513,7 @@ apr_status_t test_cond(void)
     printf("OK\n");
 
     printf("%-60s", "    Initializing the second apr_thread_mutex_t");
-    s1 = apr_thread_mutex_create(&nready.mutex, pool);
+    s1 = apr_thread_mutex_create(&nready.mutex, APR_THREAD_MUTEX_DEFAULT, pool);
     if (s1 != APR_SUCCESS) {
         printf("Failed!\n");
         return s1;
@@ -579,7 +579,7 @@ apr_status_t test_timeoutcond(void)
 
     printf("thread_cond_timedwait Tests\n");
     printf("%-60s", "    Initializing the first apr_thread_mutex_t");
-    s = apr_thread_mutex_create(&timeout_mutex, pool);
+    s = apr_thread_mutex_create(&timeout_mutex, APR_THREAD_MUTEX_DEFAULT, pool);
     if (s != APR_SUCCESS) {
         printf("Failed!\n");
         return s;

@@ -71,6 +71,7 @@ struct apr_thread_mutex_t {
     pthread_mutex_t mutex;
     apr_os_thread_t owner;
     int owner_ref;
+    char nested; /* a boolean */
 };
 #endif
 

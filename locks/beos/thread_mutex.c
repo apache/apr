@@ -66,6 +66,7 @@ static apr_status_t thread_mutex_cleanup(void *data)
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
+                                                  unsigned int flags,
                                                   apr_pool_t *pool)
 {
     return APR_ENOTIMPL;
