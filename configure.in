@@ -32,6 +32,13 @@ AC_CHECK_PROG(AR, ar, ar)
 # This macro needs to be here in case we are on an AIX box.
 AC_AIX
 
+dnl inherit REENTRANCY_FLAGS
+test -n "$ac_cv_pass_REENTRANCY_CFLAGS" && \
+CFLAGS="$CFLAGS $ac_cv_pass_REENTRANCY_CFLAGS"
+
+test -n "$ac_cv_pass_REENTRANCY_LDFLAGS" && \
+LDFLAGS="$LDFLAGS $ac_cv_pass_REENTRANCY_LDFLAGS"
+
 AC_CACHE_CHECK([for threads], ac_cv_enable_threads, 
   [ AC_ARG_ENABLE(threads,
     [  --enable-threads  Enable threading support in APR.], 
@@ -69,20 +76,13 @@ fi
 pthreadser="0"
 if test "$threads" = "1"; then
     AC_CHECK_DEFINE(PTHREAD_PROCESS_SHARED, pthread.h)
-    AC_CHECK_LIB(pthread, pthread_mutex_init, [
+    AC_CHECK_FUNC(pthread_mutex_init, [
         AC_DEFINE(USE_PTHREAD_SERIALIZE)
         pthreadser="1" ])
-    AC_CHECK_LIB(c_r, pthread_mutex_init, [ 
-        AC_DEFINE(USE_PTHREAD_SERIALIZE)
-        pthreadser="1"])
 fi
 
 AC_ARG_WITH(debug,[  --with-debug              Turn on debugging and compile time warnings],
 	[if test "$GCC" = "yes"; then CFLAGS="$CFLAGS -g -Wall"; else CFLAGS="$CFLAGS -g"; fi])
-
-dnl inherit REENTRANCY_FLAGS
-test -n "$ac_cv_pass_REENTRANCY_FLAGS" && \
-CFLAGS="$CFLAGS $ac_cv_pass_REENTRANCY_FLAGS"
 
 dnl # this is the place to put specific options for platform/compiler
 dnl # combinations
@@ -221,8 +221,6 @@ case "$OS" in
 esac
 
 AC_CHECK_LIB(dl, dlopen)
-AC_CHECK_LIB(pthread, pthread_mutex_init)
-AC_CHECK_LIB(c_r, pthread_mutex_init)
 AC_CHECK_LIB(socket,socket)
 AC_CHECK_LIB(crypt,crypt)
 AC_CHECK_LIB(ufc,crypt)
