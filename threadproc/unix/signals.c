@@ -427,7 +427,7 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
 
 APR_DECLARE(apr_status_t) apr_signal_block(int signum)
 {
-#if APR_HAS_SIGACTION
+#if APR_HAVE_SIGACTION
     sigset_t sig_mask;
     int rv;
 
@@ -454,7 +454,7 @@ APR_DECLARE(apr_status_t) apr_signal_block(int signum)
 
 APR_DECLARE(apr_status_t) apr_signal_unblock(int signum)
 {
-#if APR_HAS_SIGACTION
+#if APR_HAVE_SIGACTION
     sigset_t sig_mask;
     int rv;
 
