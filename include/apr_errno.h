@@ -546,6 +546,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ENOENT(s)         ((s) == APR_ENOENT \
                 || (s) == APR_OS_START_SYSERR + ERROR_FILE_NOT_FOUND \
                 || (s) == APR_OS_START_SYSERR + ERROR_PATH_NOT_FOUND \
+                || (s) == APR_OS_START_SYSERR + ERROR_NO_MORE_FILES \
                 || (s) == APR_OS_START_SYSERR + ERROR_OPEN_FAILED)
 #define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR)
 #define APR_STATUS_IS_ENOSPC(s)         ((s) == APR_ENOSPC \
@@ -585,7 +586,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + SOCENETUNREACH)
 #define APR_STATUS_IS_EFTYPE(s)         ((s) == APR_EFTYPE)
 #define APR_STATUS_IS_EPIPE(s)          ((s) == APR_EPIPE \
-                || (s) == APR_OS_START_SYSERR + ERROR_BROKEN_PIPE
+                || (s) == APR_OS_START_SYSERR + ERROR_BROKEN_PIPE \
                 || (s) == APR_OS_START_SYSERR + SOCEPIPE)
 
 /*
