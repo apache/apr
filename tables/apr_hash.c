@@ -385,7 +385,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
                                          const void *data)
 {
     apr_hash_t *res;
-    apr_hash_entry_t *new_vals;
+    apr_hash_entry_t *new_vals = NULL;
     apr_hash_entry_t *iter;
     apr_hash_entry_t *ent;
     int i,j,k;
