@@ -70,7 +70,6 @@ APR_DECLARE(apr_status_t) apr_gid_name_get(char **groupname, apr_gid_t groupid,
                                            apr_pool_t *p)
 {
     struct group *gr;
-#ifndef BEOS
 
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETGRGID_R)
     struct group grp;
@@ -83,7 +82,6 @@ APR_DECLARE(apr_status_t) apr_gid_name_get(char **groupname, apr_gid_t groupid,
         return errno;
     }
     *groupname = apr_pstrdup(p, gr->gr_name);
-#endif
     return APR_SUCCESS;
 }
   
@@ -91,7 +89,6 @@ APR_DECLARE(apr_status_t) apr_gid_get(apr_gid_t *groupid,
                                       const char *groupname, apr_pool_t *p)
 {
     struct group *gr;
-#ifndef BEOS
 
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETGRNAM_R)
     struct group grp;
@@ -104,6 +101,5 @@ APR_DECLARE(apr_status_t) apr_gid_get(apr_gid_t *groupid,
         return errno;
     }
     *groupid = gr->gr_gid;
-#endif
     return APR_SUCCESS;
 }
