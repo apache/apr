@@ -61,13 +61,9 @@
 #include "apr_errno.h"
 #include "apr_file_info.h"
 
-#if APR_HAVE_STDIO_H
-#include <stdio.h>      /* for SEEK_* */
-#endif
-
-#if APR_HAVE_SYS_UIO_H
-#include <sys/uio.h>
-#endif
+#define APR_WANT_STDIO          /* for SEEK_* */
+#define APR_WANT_IOVEC
+#include "apr_want.h"
 
 #ifdef __cplusplus
 extern "C" {
