@@ -67,7 +67,8 @@ CC=@CC@
 AWK=@AWK@
 LIBTOOL=@LIBTOOL@
 
-CFLAGS=@CFLAGS@ @OPTIM@ $(INCLUDES)
+CFLAGS=@CFLAGS@ @OPTIM@
+CPPFLAGS=@CPPFLAGS@ $(INCLUDES)
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@
 
@@ -82,7 +83,7 @@ MKDEP=$(top_builddir)/helpers/mkdep.sh
 #
 # Basic macro setup
 #
-COMPILE      = $(CC) $(CFLAGS)
+COMPILE      = $(CC) $(CFLAGS) $(CPPFLAGS)
 LT_COMPILE   = $(LIBTOOL) --mode=compile $(LTFLAGS) $(COMPILE) -c $< && touch $@
 
 LINK         = $(LIBTOOL) --mode=link $(LTFLAGS) $(COMPILE) $(LDFLAGS) -o $@
@@ -138,8 +139,8 @@ local-all: $(TARGETS)
 
 local-depend:
 	@if test -n "`ls *.c 2> /dev/null`"; then \
-	    echo $(MKDEP) $(INCLUDES) $(CFLAGS) *.c ; \
-	    $(MKDEP) $(INCLUDES) $(CFLAGS) *.c ; \
+	    echo $(MKDEP) $(CFLAGS) $(CPPFLAGS) *.c ; \
+	    $(MKDEP) $(CFLAGS) $(CPPFLAGS) *.c ; \
 	fi
 
 # to be filled in by the actual Makefile
