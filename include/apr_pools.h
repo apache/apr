@@ -291,6 +291,16 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
                                            apr_pool_t *cont);
 
 /**
+ * Lock the pool. All the memory is write protected against changes.
+ * @param p The pool to lock
+ * @param writeprotect If true the pool's memory is locked read-only,
+ * otherwise the lock is released
+ * @remark This is a no-op if the program isn't built with appropriate flags
+ * on a platform that supports page locking.
+ */
+APR_DECLARE(void) apr_pool_lock(apr_pool_t *p, int writeprotect);
+
+/**
  * Clear all memory in the pool and run all the cleanups. This also clears all
  * subpools.
  * @param p The pool to clear
