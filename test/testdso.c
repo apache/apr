@@ -58,6 +58,7 @@
 #include "apr_pools.h"
 #include "apr_errno.h"
 #include "apr_dso.h"
+#include "apr_strings.h"
 #include "apr.h"
 #ifdef APR_HAVE_UNISTD_H
 #include <unistd.h>
