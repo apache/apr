@@ -160,8 +160,9 @@ APR_DECLARE(apr_status_t) apr_socket_atmark(apr_socket_t *sock, int *atmark)
 {
     int oobmark;
 
-    if (ioctl(sock->socketdes, SIOCATMARK, (void*) &oobmark) < 0)
-        return APR_OS2_STATUS(sock_errno());;
+    if (ioctl(sock->socketdes, SIOCATMARK, (void*)&oobmark, sizeof(oobmark)) < 0) {
+        return APR_OS2_STATUS(sock_errno());
+    }
 
     *atmark = (oobmark != 0);
 
