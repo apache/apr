@@ -57,8 +57,13 @@
 apr_status_t lock_inter_cleanup(void * data)
 {
     apr_lock_t *lock = (apr_lock_t*)data;
-    if (lock->curr_locked == 1) {
-    	if (atomic_add(&lock->ben_interproc , -1) > 1){
+    if (lock->ben_interproc != 0) {
+        /* we're still locked... */
+    	while (atomic_add(&lock->ben_interproc , -1) > 1){
+    	    /* OK we had more than one person waiting on the lock so 
+    	     * the sem is also locked. Release it until we have no more
+    	     * locks left.
+    	     */
             release_sem (lock->sem_interproc);
     	}
     }
@@ -70,15 +75,11 @@ apr_status_t create_inter_lock(apr_lock_t *new)
 {
     int32 stat;
     
-    new->sem_interproc = (sem_id)apr_palloc(new->cntxt, sizeof(sem_id));
-    new->ben_interproc = (int32)apr_palloc(new->cntxt, sizeof(int32));
-
     if ((stat = create_sem(0, "apr_interproc")) < B_NO_ERROR) {
         lock_inter_cleanup(new);
         return stat;
     }
     new->ben_interproc = 0;
-    new->curr_locked = 0;
     new->sem_interproc = stat;
     apr_register_cleanup(new->cntxt, (void *)new, lock_inter_cleanup,
                         apr_null_cleanup);
@@ -90,12 +91,11 @@ apr_status_t lock_inter(apr_lock_t *lock)
     int32 stat;
     
 	if (atomic_add(&lock->ben_interproc, 1) > 0){
-		if ((stat = acquire_sem(lock->sem_interproc)) != B_NO_ERROR){
+		if ((stat = acquire_sem(lock->sem_interproc)) < B_NO_ERROR){
 		    atomic_add(&lock->ben_interproc, -1);
 		    return stat;
 		}
 	}
-    lock->curr_locked = 1;
     return APR_SUCCESS;
 }
 
@@ -104,12 +104,11 @@ apr_status_t unlock_inter(apr_lock_t *lock)
     int32 stat;
     
 	if (atomic_add(&lock->ben_interproc, -1) > 1){
-        if ((stat = release_sem(lock->sem_interproc)) != B_NO_ERROR) {
+        if ((stat = release_sem(lock->sem_interproc)) < B_NO_ERROR) {
             atomic_add(&lock->ben_interproc, 1);
             return stat;
         }
     }
-    lock->curr_locked = 0;
     return APR_SUCCESS;
 }
 

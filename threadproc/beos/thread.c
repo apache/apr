@@ -58,8 +58,6 @@ apr_status_t apr_create_threadattr(apr_threadattr_t **new, apr_pool_t *cont)
 {
     (*new) = (apr_threadattr_t *)apr_palloc(cont, 
               sizeof(apr_threadattr_t));
-    (*new)->attr = (int32)apr_palloc(cont, 
-                    sizeof(int32));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -98,11 +96,6 @@ apr_status_t apr_create_thread(apr_thread_t **new, apr_threadattr_t *attr,
     
     (*new) = (apr_thread_t *)apr_palloc(cont, sizeof(apr_thread_t));
     if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-
-	(*new)->td = (thread_id) apr_palloc(cont, sizeof(thread_id));
-    if ((*new)->td == (thread_id)NULL) {
         return APR_ENOMEM;
     }
 
