@@ -265,16 +265,18 @@ APR_DECLARE(char *) apr_strtok(char *str, const char *sep, char **last);
  *
  * Note that various standards and implementations disagree on the return
  * value of snprintf, and side-effects due to %n in the formatting string.
- * apr_snprintf behaves as follows:
+ * apr_snprintf (and apr_vsnprintf) behaves as follows:
  *
  * Process the format string until the entire string is exhausted, or
  * the buffer fills.  If the buffer fills then stop processing immediately
  * (so no further %n arguments are processed), and return the buffer
- * length.  In all cases the buffer is NUL terminated.
+ * length.  In all cases the buffer is NUL terminated. It will return the
+ * number of characters inserted into the buffer, not including the
+ * terminating NUL. As a special case, if len is 0, apr_snprintf will
+ * return the number of characters that would have been inserted if
+ * the buffer had been infinite (in this case, *buffer can be NULL)
  *
- * In no event does apr_snprintf return a negative number.  It's not possible
- * to distinguish between an output which was truncated, and an output which
- * exactly filled the buffer.
+ * In no event does apr_snprintf return a negative number.
  * @{
  */
 
