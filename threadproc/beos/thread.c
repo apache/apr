@@ -88,25 +88,25 @@ apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr)
 	return APR_NOTDETACH;
 }
 
-void *dummy_worker(void *opaque)
+static void *dummy_worker(void *opaque)
 {
     apr_thread_t *thd = (apr_thread_t*)opaque;
     return thd->func(thd, thd->data);
 }
 
 apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr,
-                             apr_thread_start_t func, void *data,
-                             apr_pool_t *cont)
+                               apr_thread_start_t func, void *data,
+                               apr_pool_t *pool)
 {
     int32 temp;
     apr_status_t stat;
     
-    (*new) = (apr_thread_t *)apr_palloc(cont, sizeof(apr_thread_t));
+    (*new) = (apr_thread_t *)apr_palloc(pool, sizeof(apr_thread_t));
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
 
-    (*new)->cntxt = cont;
+    (*new)->cntxt = pool;
     (*new)->data = data;
     (*new)->func = func;
 
@@ -116,12 +116,12 @@ apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr,
 	else
 	    temp = B_NORMAL_PRIORITY;
 
-    stat = apr_pool_create(&(*new)->cntxt, cont);
+    stat = apr_pool_create(&(*new)->cntxt, pool);
     if (stat != APR_SUCCESS) {
         return stat;
     }
 
-    (*new)->td = spawn_thread((thread_func)dummy_func, "apr thread", temp, (*new));
+    (*new)->td = spawn_thread((thread_func)dummy_worker, "apr thread", temp, (*new));
     /* Now we try to run it...*/
     if (resume_thread((*new)->td) == B_NO_ERROR) {
         return APR_SUCCESS;
