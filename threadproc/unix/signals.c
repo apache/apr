@@ -423,8 +423,11 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
     return rv;
 }
 
+#endif /* APR_HAS_THREADS && ... */
+
 APR_DECLARE(apr_status_t) apr_signal_block(int signum)
 {
+#if APR_HAS_SIGACTION
     sigset_t sig_mask;
     int rv;
 
@@ -444,10 +447,14 @@ APR_DECLARE(apr_status_t) apr_signal_block(int signum)
     }
 #endif
     return rv;
+#else
+    return APR_ENOTIMPL;
+#endif
 }
 
 APR_DECLARE(apr_status_t) apr_signal_unblock(int signum)
 {
+#if APR_HAS_SIGACTION
     sigset_t sig_mask;
     int rv;
 
@@ -467,6 +474,7 @@ APR_DECLARE(apr_status_t) apr_signal_unblock(int signum)
     }
 #endif
     return rv;
-}
-
+#else
+    return APR_ENOTIMPL;
 #endif
+}
