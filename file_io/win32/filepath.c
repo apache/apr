@@ -903,7 +903,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
             if (rv != APR_SUCCESS) {
                 if (APR_STATUS_IS_ENOENT(rv))
                     break;
-                else if (APR_STATUS_IS_ENOENT(rv))
+                else if (APR_STATUS_IS_ENOTDIR(rv))
                     /* This is a little more serious, we just added a name
                      * onto a filename (think http's CGI MORE_INFO)
                      * If the caller is foolish enough to do this, we expect
