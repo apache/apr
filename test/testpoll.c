@@ -64,11 +64,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void closeapr(void)
-{
-    apr_terminate();
-}
-
 static int make_socket(apr_socket_t **sock, apr_sockaddr_t **sa, apr_port_t port,
                 apr_pool_t *p)
 {
@@ -160,7 +155,7 @@ int main(void)
         exit(-1);
     }
     printf("OK\n");
-    atexit(closeapr);
+    atexit(apr_terminate);
 
     printf("Creating context...............................");    
     if (apr_pool_create(&context, NULL) != APR_SUCCESS) {

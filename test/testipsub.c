@@ -59,11 +59,6 @@
 #include "apr_network_io.h"
 #include "apr_errno.h"
 
-static void closeapr(void)
-{
-    apr_terminate();
-}
-
 static void test_bad_input(apr_pool_t *p)
 {
     struct {
@@ -202,7 +197,7 @@ int main(void)
         exit(1);
     }
 
-    atexit(closeapr);
+    atexit(apr_terminate);
 
     rv = apr_pool_create(&p, NULL);
     if (rv != APR_SUCCESS) {

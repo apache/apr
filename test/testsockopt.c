@@ -78,11 +78,6 @@ static void failureno(apr_socket_t *sock)
     exit(-1);
 }
 
-static void closeapr(void)
-{
-    apr_terminate();
-}
-
 int main(void)
 {
     apr_pool_t *context;
@@ -95,7 +90,7 @@ int main(void)
         fprintf(stderr, "Couldn't initialize.");
         exit(-1);
     }
-    atexit(closeapr);
+    atexit(apr_terminate);
     if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
