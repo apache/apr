@@ -22,7 +22,7 @@ fi
 
 # libtool 1.3.3 or newer
 libtool=`build/PrintPath glibtool libtool`
-lt_pversion=`$libtool --version 2>/dev/null|sed -e 's/^[^0-9]*//' -e 's/[- ].*//'`
+lt_pversion=`$libtool --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//' -e 's/[- ].*//'`
 if test -z "$lt_pversion"; then
 echo "buildconf: libtool not found."
 echo "           You need libtool version 1.3.3 or newer installed"
