@@ -165,6 +165,10 @@ SOURCE=.\file_io\win32\filestat.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\file_io\unix\fullrw.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\misc\unix\getopt.c
 # End Source File
 # Begin Source File
