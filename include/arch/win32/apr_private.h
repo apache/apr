@@ -143,6 +143,16 @@ APR_DECLARE_DATA int errno;
 #define HAVE_GETNAMEINFO 1
 #endif
 
+#if APR_HAS_LARGE_FILES
+#if APR_HAVE_INT64_STRFN
+#define APR_OFF_T_STRFN         APR_INT64_STRFN
+#else
+#define APR_OFF_T_STRFN         apr_strtoi64
+#endif
+#else
+#define APR_OFF_T_STRFN         strtoi
+#endif
+
 /*
  * Include common private declarations.
  */

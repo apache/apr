@@ -233,6 +233,14 @@ void *memchr(const void *s, int c, size_t n)
 #define INT64_MIN (-APR_INT64_C(0x7fffffffffffffff) - APR_INT64_C(1))
 #endif
 
+APR_DECLARE(apr_status_t) apr_strtoff(apr_off_t *offset, const char *nptr,
+                                      char **endptr, int base)
+{
+    errno = 0;
+    *offset = APR_OFF_T_STRFN(nptr, endptr, base);
+    return APR_FROM_OS_ERROR(errno);
+}
+
 APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
 {
 #if (APR_HAVE_INT64_STRFN)

@@ -296,6 +296,23 @@ APR_DECLARE(char *) apr_ltoa(apr_pool_t *p, long n);
 APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n);
 
 /**
+ * Convert a numeric string into an apr_off_t numeric value.
+ * @param offset The value of the parsed string.
+ * @param buf The string to parse. It may contain optional whitespace,
+ *   followed by an optional '+' (positive, default) or '-' (negative)
+ *   character, followed by an optional '0x' prefix if base is 0 or 16,
+ *   followed by numeric digits appropriate for base.
+ * @param end A pointer to the end of the valid character in buf. If
+ *   not NULL, it is set to the first invalid character in buf.
+ * @param base A numeric base in the range between 2 and 36 inclusive,
+ *   or 0.  If base is zero, buf will be treated as base ten unless its
+ *   digits are prefixed with '0x', in which case it will be treated as
+ *   base 16.
+ */
+APR_DECLARE(apr_status_t) apr_strtoff(apr_off_t *offset, const char *buf, 
+                                      char **end, int base);
+
+/**
  * parse a numeric string into a 64-bit numeric value
  * @param buf The string to parse. It may contain optional whitespace,
  *   followed by an optional '+' (positive, default) or '-' (negative)
