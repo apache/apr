@@ -52,10 +52,10 @@
  * <http://www.apache.org/>.
  */
 
-#include <windows.h>
+#include "apr.h"
 #include <aclapi.h>
 #include "apr_private.h"
-#include "win32/fileio.h"
+#include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_strings.h"
