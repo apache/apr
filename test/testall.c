@@ -135,6 +135,12 @@ int main(int argc, char *argv[])
             exclude = 1;
             continue;
         }
+        if (!strcmp(argv[i], "-l")) {
+            for (i = 0; tests[i].func != NULL; i++) {
+                printf("%s\n", tests[i].testname);
+            }
+            exit(0);
+        }
         if (argv[i][0] == '-') {
             fprintf(stderr, "invalid option: `%s'\n", argv[i]);
             exit(1);
