@@ -148,7 +148,7 @@ SOURCE=.\testproc.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\testshmem.c
+SOURCE=.\testshm.c
 # End Source File
 # Begin Source File
 
