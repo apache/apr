@@ -271,6 +271,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/open.o \
 	$(OBJDIR)/pipe.o \
 	$(OBJDIR)/poll.o \
+	$(OBJDIR)/pollacc.o \
 	$(OBJDIR)/proc.o \
 	$(OBJDIR)/procsup.o \
 	$(OBJDIR)/proc_mutex.o \
