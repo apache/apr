@@ -89,6 +89,9 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
 #endif /* !defined(_WIN32_WCE) */
 }
 
+#define stdin_handle 0x01
+#define stdout_handle 0x02
+#define stderr_handle 0x04
 
 APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                                         apr_file_t *old_file, apr_pool_t *p)
@@ -96,7 +99,7 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
 #ifdef _WIN32_WCE
     return APR_ENOTIMPL;
 #else
-    DWORD stdhandle = -1;
+    DWORD stdhandle = 0;
     HANDLE hproc = GetCurrentProcess();
     HANDLE newhand = NULL;
     apr_int32_t newflags;
@@ -107,22 +110,24 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
      * The os_handle will change, however.
      */
     if (new_file->filehand == GetStdHandle(STD_ERROR_HANDLE)) {
-        stdhandle = STD_ERROR_HANDLE;
+        stdhandle |= stderr_handle;
     }
-    else if (new_file->filehand == GetStdHandle(STD_OUTPUT_HANDLE)) {
-        stdhandle = STD_OUTPUT_HANDLE;
+    if (new_file->filehand == GetStdHandle(STD_OUTPUT_HANDLE)) {
+        stdhandle |= stdout_handle;
     }
-    else if (new_file->filehand == GetStdHandle(STD_INPUT_HANDLE)) {
-        stdhandle = STD_INPUT_HANDLE;
+    if (new_file->filehand == GetStdHandle(STD_INPUT_HANDLE)) {
+        stdhandle |= stdin_handle;
     }
 
-    if (stdhandle != -1) {
+    if (stdhandle) {
         if (!DuplicateHandle(hproc, old_file->filehand, 
                              hproc, &newhand, 0,
                              TRUE, DUPLICATE_SAME_ACCESS)) {
             return apr_get_os_error();
         }
-        if (!SetStdHandle(stdhandle, newhand)) {
+        if (((stdhandle & stderr_handle) && !SetStdHandle(STD_ERROR_HANDLE, newhand)) ||
+            ((stdhandle & stdout_handle) && !SetStdHandle(STD_OUTPUT_HANDLE, newhand)) ||
+            ((stdhandle & stdin_handle) && !SetStdHandle(STD_INPUT_HANDLE, newhand))) {
             return apr_get_os_error();
         }
         newflags = old_file->flags | APR_INHERIT;
