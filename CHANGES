@@ -16,6 +16,8 @@ Changes with APR 1.0
      apr_explode_localtime        -> apr_time_exp_lt
      apr_explode_time             -> apr_time_exp_tz
      apr_filename_of_pathname     -> apr_filepath_name_get
+     apr_file_set_inherit         -> apr_file_inherit_set
+     apr_file_unset_inherit       -> apr_file_inherit_unset
      apr_getsocketopt             -> apr_socket_opt_get
      apr_get_groupid              -> apr_gid_get
      apr_get_groupname            -> apr_gid_name_get
@@ -24,6 +26,7 @@ Changes with APR 1.0
      apr_get_username             -> apr_uid_name_get
      apr_group_name_get           -> apr_gid_name_get
      apr_implode_gmt              -> apr_time_exp_gmt_get
+     apr_is_fnmatch               -> apr_fnmatch_test
      apr_listen                   -> apr_socket_listen
      apr_lstat                    -> apr_stat
      apr_pool_get_abort           -> apr_pool_abort_get

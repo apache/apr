@@ -734,16 +734,10 @@ APR_POOL_DECLARE_ACCESSOR(file);
  */
 APR_DECLARE_INHERIT_SET(file);
 
-/** @deprecated @see apr_file_inherit_set */
-APR_DECLARE(void) apr_file_set_inherit(apr_file_t *file);
-
 /**
  * Unset a file from being inherited by child processes.
  */
 APR_DECLARE_INHERIT_UNSET(file);
-
-/** @deprecated @see apr_file_inherit_unset */
-APR_DECLARE(void) apr_file_unset_inherit(apr_file_t *file);
 
 /**
  * Open a temporary file

@@ -241,9 +241,3 @@ APR_DECLARE(int) apr_fnmatch_test(const char *pattern)
     }
     return 0;
 }
-
-/* Deprecated */
-APR_DECLARE(int) apr_is_fnmatch(const char *pattern)
-{
-    return apr_fnmatch_test(pattern);
-}
