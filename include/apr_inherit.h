@@ -59,14 +59,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define APR_NO_INHERIT 0
 #define APR_INHERIT    (2^24)    /* Outside of conflicts with other bits */
 
 #define APR_DECLARE_SET_INHERIT(name) \
-    void apr_##name##_set_inherit(apr_##name##_t *name)
+    APR_DECLARE(void) apr_##name##_set_inherit(apr_##name##_t *name)
 
 #define APR_DECLARE_UNSET_INHERIT(name) \
-    void apr_##name##_unset_inherit(apr_##name##_t *name)
+    APR_DECLARE(void) apr_##name##_unset_inherit(apr_##name##_t *name)
 
 #ifdef __cplusplus
 }
