@@ -651,7 +651,7 @@ ap_status_t ap_get_dir_filename(char **new_path, ap_dir_t *thedir);
 
 /*
 
-=head1 ap_status_t ap_get_filedata(void **data, char *key, ap_file_t *file)
+=head1 ap_status_t ap_get_filedata(void **data, const char *key, ap_file_t *file)
 
 B<Return the data associated with the current file.>
 
@@ -661,11 +661,11 @@ B<Return the data associated with the current file.>
 
 =cut
  */                     
-ap_status_t ap_get_filedata(void **data, char *key, ap_file_t *file);
+ap_status_t ap_get_filedata(void **data, const char *key, ap_file_t *file);
 
 /*
 
-=head1 ap_status_t ap_set_filedata(ap_file_t *file, void *data, char *key, ap_status_t (*cleanup) (void *))
+=head1 ap_status_t ap_set_filedata(ap_file_t *file, void *data, const char *key, ap_status_t (*cleanup) (void *))
 
 B<Set the data associated with the current file.>
 
@@ -676,7 +676,7 @@ B<Set the data associated with the current file.>
 
 =cut
  */                     
-ap_status_t ap_set_filedata(ap_file_t *file, void *data, char *key,
+ap_status_t ap_set_filedata(ap_file_t *file, void *data, const char *key,
                             ap_status_t (*cleanup) (void *));
 
 /*

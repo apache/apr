@@ -108,7 +108,8 @@ ap_status_t ap_delete_thread_private(ap_threadkey_t *key)
     return stat;
 }
 
-ap_status_t ap_get_threadkeydata(void **data, char *key, ap_threadkey_t *threadkey)
+ap_status_t ap_get_threadkeydata(void **data, const char *key,
+                                 ap_threadkey_t *threadkey)
 {
     if (threadkey != NULL) {
         return ap_get_userdata(data, key, threadkey->cntxt);
@@ -119,8 +120,8 @@ ap_status_t ap_get_threadkeydata(void **data, char *key, ap_threadkey_t *threadk
     }
 }
 
-ap_status_t ap_set_threadkeydata(void *data,
-                                 char *key, ap_status_t (*cleanup) (void *),
+ap_status_t ap_set_threadkeydata(void *data, const char *key,
+                                 ap_status_t (*cleanup) (void *),
                                  ap_threadkey_t *threadkey)
 {
     if (threadkey != NULL) {

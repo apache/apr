@@ -77,7 +77,7 @@ ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_userdata(void *data, char *key,
+ap_status_t ap_set_userdata(void *data, const char *key,
                             ap_status_t (*cleanup) (void *),
                             ap_pool_t *cont)
 {
@@ -109,7 +109,7 @@ ap_status_t ap_set_userdata(void *data, char *key,
     return APR_ENOPOOL;
 }
 
-ap_status_t ap_get_userdata(void **data, char *key, ap_pool_t *cont)
+ap_status_t ap_get_userdata(void **data, const char *key, ap_pool_t *cont)
 {
     datastruct *dptr = NULL;
     if (cont) { 
