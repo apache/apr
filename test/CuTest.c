@@ -192,7 +192,7 @@ void CuAssertStrNEquals(CuTest* tc, const char* expected, const char* actual,
 	CuStringAppend(message, expected);
 	CuStringAppend(message, "\n<----\nbut saw\n---->\n");
 	CuStringAppend(message, actual);
-	CuStringAppend(message, "\n<----\n");
+	CuStringAppend(message, "\n<----");
 	CuFail(tc, message->buffer);
 }
 
@@ -205,7 +205,7 @@ void CuAssertStrEquals(CuTest* tc, const char* expected, const char* actual)
 	CuStringAppend(message, expected);
 	CuStringAppend(message, "\n<----\nbut saw\n---->\n");
 	CuStringAppend(message, actual);
-	CuStringAppend(message, "\n<----\n");
+	CuStringAppend(message, "\n<----");
 	CuFail(tc, message->buffer);
 }
 
