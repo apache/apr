@@ -463,9 +463,3 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
 }
 
 #endif
-
-/* Deprecated */
-const char *apr_signal_get_description(int signum)
-{
-    return apr_signal_description_get(signum);
-}
