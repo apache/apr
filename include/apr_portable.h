@@ -77,7 +77,6 @@
 #include "apr_lock.h"
 #include "apr_time.h"
 #include "apr_dso.h"
-#include "apr_sms.h"
 
 #if APR_HAVE_DIRENT_H
 #include <dirent.h>
@@ -314,22 +313,6 @@ APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void);
  */ 
 APR_DECLARE(int) apr_os_thread_equal(apr_os_thread_t tid1, 
                                      apr_os_thread_t tid2);
-
-/**
- * Register the specified thread with an sms
- * @param sms The SMS to register with
- * @param thread The thread to register
- */
-APR_DECLARE(apr_status_t) apr_sms_thread_register(apr_sms_t *sms,
-                                                  apr_os_thread_t thread);
-
-/**
- * Unregister a thread from an sms
- * @param sms The sms to unregister from 
- * @param thread The thread to be unregistered
- */
-APR_DECLARE(apr_status_t) apr_sms_thread_unregister(apr_sms_t *sms,
-                                                    apr_os_thread_t thread);
 
 /** @} */
 #endif /* APR_HAS_THREADS */

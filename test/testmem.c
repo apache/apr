@@ -52,10 +52,6 @@
  * <http://www.apache.org/>.
  */
 
-#include "apr_sms.h"
-#include "apr_sms_tracking.h"
-#include "apr_sms_trivial.h"
-#include "apr_sms_blocks.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
@@ -86,20 +82,8 @@ typedef struct _test_ {
     apr_time_t howlong;
 } _test_;
 
-#define T_QTY 5 /* how many tests do we have?? */
+#define T_QTY 1 /* how many tests do we have?? */
 static _test_ t[T_QTY];
-
-static void its_an_sms(apr_sms_t *ams, _test_ *t, char *name, int lt)
-{
-    t->malloc_fn = (void*)apr_sms_malloc;
-    t->calloc_fn = (void*)apr_sms_calloc;
-    t->free_fn =   (void*)apr_sms_free;
-    t->reset_fn =  (void*)apr_sms_reset;
-    t->memory = ams;
-    t->title = name;
-    t->large_tests = lt;
-    t->howlong = 0;
-}
 
 static void its_a_pool(apr_pool_t *pool, _test_ *t, char *name, int lt)
 {
@@ -422,12 +406,11 @@ static int timed_test_64byte(_test_ *t, int small, int verbose)
 static void print_timed_results(void)
 {
     int i;
-    printf("    Percentage Results  averages  %% of pools  %% of std sms\n");
+    printf("    Percentage Results  averages  %% of pools\n");
     for (i=0;i < T_QTY; i++) {
         float pa = (float)t[i].howlong / (float)t[0].howlong;
-        float pb = (float)t[i].howlong / (float)t[1].howlong;       
-        printf("    %-20s %-8lld  %7.02f %%     %7.02f %%\n", t[i].title, t[i].howlong,
-               pa * 100, pb * 100);
+        printf("    %-20s %-8lld  %7.02f %%\n", t[i].title, t[i].howlong,
+               pa * 100);
     } 
     printf("\n");  
     for (i=0;i<T_QTY;i++)
@@ -436,10 +419,8 @@ static void print_timed_results(void)
 
 int main(int argc, char **argv)
 {
-    apr_sms_t *ams, *bms, *dms, *tms;
     apr_pool_t *pool;
     int i;
-    apr_sms_t *lsms[10];
  
     apr_initialize();
         
@@ -449,44 +430,9 @@ int main(int argc, char **argv)
     printf("Creating the memory systems...\n");
     STD_TEST_NEQ("    Creating a pool", 
                  apr_pool_create(&pool, NULL))
-    STD_TEST_NEQ("    Creating the standard memory system",
-                 apr_sms_std_create(&ams))   
-    STD_TEST_NEQ("    Creating the tracking memory system",
-                 apr_sms_tracking_create(&bms, ams))
-    STD_TEST_NEQ("    Creating a 64 byte block system",
-                 apr_sms_blocks_create(&dms, ams, 64))
-    STD_TEST_NEQ("    Creating a trivial system",
-                 apr_sms_trivial_create(&tms, ams))
-
-/* if we're using tag's then add them :) */
-#if APR_DEBUG_TAG_SMS
-    apr_sms_tag("top-level", ams);
-    apr_sms_tag("tracking", bms);
-    apr_sms_tag("blocks", dms);
-    apr_sms_tag("trivial", tms);
-#endif
 
     its_a_pool(pool, &t[0], "Pool code",     1);
-    its_an_sms(ams,  &t[1], "Standard sms",  1);
-    t[1].reset_fn = NULL;
-    its_an_sms(bms,  &t[2], "Tracking sms",  1);
-    its_an_sms(dms,  &t[3], "Blocks sms",    0);
-    its_an_sms(tms,  &t[4], "Trivial sms",   1);
         
-    printf("Checking sms identities...\n");
-    TEST_NEQ("    Checking identity of standard memory system",
-             strcmp(apr_sms_get_identity(ams), "STANDARD"), 0,
-             "OK","Not STANDARD")
-    TEST_NEQ("    Checking the identity of tracking memory system",
-             strcmp(apr_sms_get_identity(bms), "TRACKING"), 0,
-             "OK", "Not TRACKING")
-    TEST_NEQ("    Checking the identity of blocks memory system",
-             strcmp(apr_sms_get_identity(dms), "BLOCKS"), 0,
-             "OK", "Not BLOCKS")
-    TEST_NEQ("    Checking the identity of trivial memory system",
-             strcmp(apr_sms_get_identity(tms), "TRIVIAL"), 0,
-             "OK", "Not TRIVIAL")
-
     printf("Big allocation test...\n");
     for (i = 0; i < T_QTY; i++) {
         if (simple_test(&t[i], 0)) {
@@ -523,26 +469,6 @@ int main(int argc, char **argv)
     }
     print_timed_results();
    
-    printf("Destroying the memory...\n");
-
-    STD_TEST_NEQ("Trying to destroy the trivial memory system",
-                 apr_sms_destroy(tms))
-    STD_TEST_NEQ("Trying to destroy the tracking memory system",
-                 apr_sms_destroy(bms))
-    STD_TEST_NEQ("Trying to destroy the block memory system",
-                 apr_sms_destroy(dms))                        
-
-    printf("Testing layering...\n");
-    apr_sms_tracking_create(&lsms[0], ams); 
-    for (i=1;i<5;i++) {
-        apr_sms_tracking_create(&lsms[i], lsms[i-1]);
-    }
-    for (i=5;i<10;i++) {
-        apr_sms_tracking_create(&lsms[i], lsms[4]);
-    }
-    STD_TEST_NEQ("Trying to destroy the standard memory system",
-                 apr_sms_destroy(ams))
-
     printf("Memory test passed.\n");
     return (0);          
 }

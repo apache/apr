@@ -60,7 +60,6 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_lock.h"
-#include "apr_sms.h"
 #include "apr_portable.h"
 #include "proc_mutex.h"
 

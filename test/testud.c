@@ -59,7 +59,6 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
-#include "apr_sms.h"
 #include "test_apr.h"
 
 static apr_status_t string_cleanup(void *data)
@@ -70,7 +69,6 @@ static apr_status_t string_cleanup(void *data)
 int main(void)
 {
     apr_pool_t *pool;
-    apr_sms_t *sms;
     char *testdata;
     char *retdata;
 
@@ -80,7 +78,6 @@ int main(void)
     atexit(apr_terminate);
 
     STD_TEST_NEQ("Creating a pool", apr_pool_create(&pool, NULL))
-    STD_TEST_NEQ("Creating an sms", apr_sms_std_create(&sms))
 
     testdata = apr_pstrdup(pool, "This is a test\n");
 
@@ -90,17 +87,6 @@ int main(void)
     
     STD_TEST_NEQ("    Getting user data from the pool",
           apr_pool_userdata_get((void **)&retdata, "TEST", pool))
-
-    TEST_NEQ("    Checking the data we got", strcmp(testdata, retdata),
-             0, "OK","Failed :(")
-
-    printf("Testing SMS\n");
- 
-    STD_TEST_NEQ("    Setting user data into the pool",
-          apr_sms_userdata_set(testdata, "TEST", string_cleanup, sms))
-    
-    STD_TEST_NEQ("    Getting user data from the pool",
-          apr_sms_userdata_get((void **)&retdata, "TEST", sms))
 
     TEST_NEQ("    Checking the data we got", strcmp(testdata, retdata),
              0, "OK","Failed :(")
