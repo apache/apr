@@ -54,3 +54,6 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
+shmem.o: shmem.c mm/mm.h ../../include/apr_general.h \
+ ../../include/apr.h ../../include/apr_errno.h \
+ ../../include/apr_shmem.h

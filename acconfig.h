@@ -47,6 +47,7 @@
 #undef USE_THREADS
 
 #undef SIZEOF_SSIZE_T
+#undef SIZEOF_OFF_T
 
 @BOTTOM@
 
