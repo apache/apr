@@ -56,6 +56,8 @@
 #include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_strings.h"
+#define APR_WANT_STRFUNC
+#include "apr_want.h"
 #if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
