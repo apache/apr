@@ -13,7 +13,7 @@
 ## simply change these variables
 
 $project_name     = '[Apache Portable RunTime]';
-$company_logo     = '<img src="../images/ScanDocBig.jpg">'; # change this to an image tag.
+#$company_logo     = '<img src="../images/ScanDocBig.jpg">'; # change this to an image tag.
 $copyright        = '&copy 2000 [Apache Software Foundation]';
 $image_directory  = "../images/";
 $bullet1_image    = $image_directory . "ball1.gif";
@@ -66,19 +66,19 @@ file "master.html";
 
 foreach $p (packages()) {
   $_ = $p->url;
-  s/\s/%20/g;
+  s/\s/_/g;
   >><a href="$_" target="Documentation"><b>$(p.name)</b></a><br>
     <dir>
   <<
   foreach $e ($p->classes()) {
     $_ = $e->url;
-    s/\s/%20/g;
+    s/\s/_/g;
     >><li><a href="$_" target="Documentation">$(e.fullname)</a>
     <<
   }
   foreach $e ($p->globals()) {
     $_ = $e->url;
-    s/\s/%20/g;
+    s/\s/_/g;
     >><li><a href="$_" target="Documentation">$(e.fullname)</a>
     <<
   }
@@ -115,7 +115,7 @@ file "packages.html";
 
 foreach $p (packages()) {
   $_ = $p->url;
-  s/\s/%20/g;
+  s/\s/_/g;
   >><a href = "$_">$(p.name)</a><br>
   <<
 }
@@ -180,7 +180,9 @@ if (&todolistFiles()) {
 
 my $p;
 foreach $p (packages()) {
-  file $p->name() . ".html";
+  $_ = $p->name;
+  s/\s/_/g;
+  file $_ . ".html";
   >><html>
   <head>
     <title>$project_name -- $(p.name)</title>
