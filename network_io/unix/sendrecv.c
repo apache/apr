@@ -260,7 +260,7 @@ static int os_uncork(apr_socket_t *sock, int delayflag)
     return rv;
 }
 
-apr_status_t ap_sendfile(apr_socket_t *sock, apr_file_t *file,
+apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         		apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len,
         		apr_int32_t flags)
 {
@@ -391,7 +391,7 @@ apr_status_t ap_sendfile(apr_socket_t *sock, apr_file_t *file,
 #elif defined(__FreeBSD__)
 
 /* Release 3.1 or greater */
-apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
+apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
         		apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
         		apr_int32_t flags)
 {
@@ -481,10 +481,10 @@ apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
 
 #elif defined(__HPUX__)
 
-#error "there's no way this ap_sendfile implementation works -djg"
+#error "there's no way this apr_sendfile implementation works -djg"
 
 /* HP-UX Version 10.30 or greater */
-apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
+apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
         		apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
         		apr_int32_t flags)
 {
@@ -591,7 +591,7 @@ apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
  * AIX -  version 4.3.2 with APAR IX85388, or version 4.3.3 and above
  * OS/390 - V2R7 and above
  */
-apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
+apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
                         apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
                         apr_int32_t flags)
 {
@@ -710,7 +710,7 @@ apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
 }
 #elif defined(__osf__) && defined (__alpha)
 /*
- * ap_sendfile for Tru64 Unix. 
+ * apr_sendfile for Tru64 Unix. 
  *
  * Note: while the sendfile implementation on Tru64 can send 
  * a one header/trailer with the file, it will send only one
@@ -720,7 +720,7 @@ apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
  * Rather than code these special cases in, using apr_sendv for
  * all cases of the headers and trailers seems to be a good idea.
  */
-apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
+apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
                         apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
                         apr_int32_t flags)
 {
@@ -826,7 +826,7 @@ apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
 
 #else
 #error APR has detected sendfile on your system, but nobody has written a
-#error version of it for APR yet.  To get past this, either write ap_sendfile
+#error version of it for APR yet.  To get past this, either write apr_sendfile
 #error or change APR_HAS_SENDFILE in apr.h to 0. 
 #endif /* __linux__, __FreeBSD__, __HPUX__, _AIX, __MVS__, Tru64/OSF1 */
 #endif /* APR_HAS_SENDFILE */
