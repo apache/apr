@@ -56,12 +56,14 @@
 #include "networkio.h"
 #include "apr_network_io.h"
 #include "apr_general.h"
+#include "apr_portable.h"
 #include "apr_lib.h"
 #include <errno.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <netinet/tcp.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 
 ap_status_t socket_cleanup(void *sock)
@@ -100,6 +102,7 @@ ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
     if ((*new)->socketdes < 0) {
         return errno;
     }
+    (*new)->timeout = -1;
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
                         socket_cleanup, NULL);
     return APR_SUCCESS;
@@ -126,6 +129,47 @@ ap_status_t ap_setport(struct socket_t *sock, ap_uint32_t port)
     sock->addr->sin_port = htons((short)port);
     return APR_SUCCESS;
 }
+
+
+
+ap_status_t ap_getport(ap_uint32_t *port, struct socket_t *sock)
+{
+    *port = ntohs(sock->addr->sin_port);
+    return APR_SUCCESS;
+}
+
+
+
+ap_status_t ap_setipaddr(struct socket_t *sock, const char *addr)
+{
+    ULONG ipaddr;
+    
+    if (!strcmp(addr, APR_ANYADDR)) {
+        sock->addr->sin_addr.s_addr = htonl(INADDR_ANY);
+        return APR_SUCCESS;
+    }
+    
+    ipaddr = inet_addr(addr);
+    
+    if (ipaddr == (ULONG)-1) {
+        return errno;
+    }
+    
+    *(ULONG *)&sock->addr->sin_addr = ipaddr;
+    return APR_SUCCESS;
+}
+
+
+
+ap_status_t ap_getipaddr(char *addr, ap_ssize_t len,
+			 const struct socket_t *sock)
+{
+    char *temp = inet_ntoa(sock->addr->sin_addr);
+    ap_cpystrn(addr,temp,len-1);
+    return APR_SUCCESS;
+}
+
+
 
 ap_status_t ap_bind(struct socket_t *sock)
 {
@@ -170,23 +214,23 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
 {
     struct hostent *hp;
 
-    hp = gethostbyname(hostname);
+    if (hostname != NULL) {
+        hp = gethostbyname(hostname);
 
-    if ((sock->socketdes < 0) || (!sock->addr)) {
-        return APR_ENOTSOCK;
-    }
-    if (!hp)  {
-        if (h_errno == TRY_AGAIN) {
-            return EAGAIN;
+        if ((sock->socketdes < 0) || (!sock->addr)) {
+            return APR_ENOTSOCK;
         }
-        return h_errno;
-    }
+        if (!hp)  {
+            if (h_errno == TRY_AGAIN) {
+                return EAGAIN;
+            }
+            return h_errno;
+        }
     
-    memcpy((char *)&sock->addr->sin_addr, hp->h_addr_list[0], hp->h_length);
+        memcpy((char *)&sock->addr->sin_addr, hp->h_addr_list[0], hp->h_length);
 
-    sock->addr->sin_family = AF_INET;
-   
-    sock->addr_len = sizeof(*sock->addr);
+        sock->addr_len = sizeof(*sock->addr);
+    }
 
     if ((connect(sock->socketdes, (const struct sockaddr *)sock->addr, sock->addr_len) < 0) &&
         (errno != EINPROGRESS)) {
@@ -195,5 +239,56 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
     else {
         return APR_SUCCESS;
     }
+}
+
+
+
+ap_status_t ap_get_socketdata(void **data, char *key, struct socket_t *socket)
+{
+    if (socket != NULL) {
+        return ap_get_userdata(data, key, socket->cntxt);
+    }
+    else {
+        data = NULL;
+        return APR_ENOSOCKET;
+    }
+}
+
+
+
+ap_status_t ap_set_socketdata(struct socket_t *socket, void *data, char *key,
+                              ap_status_t (*cleanup) (void *))
+{
+    if (socket != NULL) {
+        return ap_set_userdata(data, key, cleanup, socket->cntxt);
+    }
+    else {
+        data = NULL;
+        return APR_ENOSOCKET;
+    }
+}
+
+ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, struct socket_t *sock)
+{
+    if (sock == NULL) {
+        return APR_ENOSOCKET;
+    }
+    *thesock = sock->socketdes;
+    return APR_SUCCESS;
+}
+
+
+
+ap_status_t ap_put_os_sock(struct socket_t **sock, ap_os_sock_t *thesock, ap_context_t *cont)
+{
+    if (cont == NULL) {
+        return APR_ENOCONT;
+    }
+    if ((*sock) == NULL) {
+        (*sock) = (struct socket_t *)ap_palloc(cont, sizeof(struct socket_t));
+        (*sock)->cntxt = cont;
+    }
+    (*sock)->socketdes = *thesock;
+    return APR_SUCCESS;
 }
 
