@@ -161,6 +161,34 @@ ap_status_t ap_setport(struct socket_t *sock, ap_uint32_t port)
 }
 
 /* ***APRDOC********************************************************
+ * ap_status_t ap_getport(ap_socket_t *, ap_uint32_t *)
+ *    Return the port with a socket.
+ * arg 1) The socket use 
+ * arg 2) The port this socket will be dealing with.
+ */
+ap_status_t ap_getport(struct socket_t *sock, ap_uint32_t *port)
+{
+    *port = ntohs(sock->addr->sin_port);
+    return APR_SUCCESS;
+}
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_setipaddr(ap_socket_t *, apr_uint32_t addr)
+ *    Assocaite a socket addr with an apr socket.
+ * arg 1) The socket to use 
+ * arg 2) The IP address to attach to the socket.
+ * NOTE:  This does not bind the two together, it is just telling apr 
+ *        that this socket is going to use this address if possible. 
+ */
+ap_status_t ap_setipaddr(struct socket_t *sock, const char *addr)
+{
+    if (inet_aton(addr, &sock->addr->sin_addr.s_addr) == 0) {
+        return errno;
+    }
+    return APR_SUCCESS;
+}
+
+/* ***APRDOC********************************************************
  * ap_status_t ap_bind(ap_socket_t *)
  *    Bind the socket to it's assocaited port
  * arg 1) The socket to bind 
@@ -235,29 +263,31 @@ ap_status_t ap_accept(const struct socket_t *sock, struct socket_t **new)
  *    Issue a connection request to a socket either on the same machine
  *    or a different one. 
  * arg 1) The socket we wish to use for our side of the connection 
- * arg 2) The hostname of the machine we wish to connect to. 
+ * arg 2) The hostname of the machine we wish to connect to.  If NULL,
+ *        APR assumes that the sockaddr_in in the apr_socket is completely
+ *        filled out.
  */
 ap_status_t ap_connect(struct socket_t *sock, char *hostname)
 {
     struct hostent *hp;
 
-    hp = gethostbyname(hostname);
+    if (hostname == NULL) {
+        hp = gethostbyname(hostname);
 
-    if ((sock->socketdes < 0) || (!sock->addr)) {
-        return APR_ENOTSOCK;
-    }
-    if (!hp)  {
-        if (h_errno == TRY_AGAIN) {
-            return EAGAIN;
+        if ((sock->socketdes < 0) || (!sock->addr)) {
+            return APR_ENOTSOCK;
         }
-        return h_errno;
-    }
+        if (!hp)  {
+            if (h_errno == TRY_AGAIN) {
+                return EAGAIN;
+            }
+            return h_errno;
+        }
     
-    memcpy((char *)&sock->addr->sin_addr, hp->h_addr_list[0], hp->h_length);
+        memcpy((char *)&sock->addr->sin_addr, hp->h_addr_list[0], hp->h_length);
 
-    sock->addr->sin_family = AF_INET;
-   
-    sock->addr_len = sizeof(*sock->addr);
+        sock->addr_len = sizeof(*sock->addr);
+    }
 
     if ((connect(sock->socketdes, (const struct sockaddr *)sock->addr, sock->addr_len) < 0) &&
         (errno != EINPROGRESS)) {
