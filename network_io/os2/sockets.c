@@ -118,13 +118,6 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family, int 
 
     alloc_socket(new, cont);
 
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-    if ((*new)->local_addr == NULL || (*new)->remote_addr == NULL) {
-        return APR_ENOMEM;
-    }
- 
     (*new)->socketdes = socket(family, type, 0);
 #if APR_HAVE_IPV6
     if ((*new)->socketdes < 0 && downgrade) {
