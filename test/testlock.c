@@ -55,6 +55,8 @@
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
 #include "apr_lock.h"
+#include "apr_thread_mutex.h"
+#include "apr_thread_rwlock.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_getopt.h"
@@ -75,7 +77,9 @@ int main(void)
 #define MAX_ITER 40000
 
 void * APR_THREAD_FUNC thread_rw_func(apr_thread_t *thd, void *data);
+void * APR_THREAD_FUNC thread_rwlock_func(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_function(apr_thread_t *thd, void *data);
+void * APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data);
 apr_status_t test_exclusive(void);
 apr_status_t test_rw(void);
 apr_status_t test_multiple_locking(const char *);
@@ -83,6 +87,8 @@ apr_status_t test_multiple_locking(const char *);
 
 apr_file_t *in, *out, *err;
 apr_lock_t *thread_rw_lock, *thread_lock;
+apr_thread_mutex_t *thread_mutex;
+apr_thread_rwlock_t *rwlock;
 apr_pool_t *pool;
 int i = 0, x = 0;
 
@@ -111,6 +117,31 @@ void * APR_THREAD_FUNC thread_rw_func(apr_thread_t *thd, void *data)
     return NULL;
 } 
 
+void * APR_THREAD_FUNC thread_rwlock_func(apr_thread_t *thd, void *data)
+{
+    int exitLoop = 1;
+
+    while (1)
+    {
+        apr_thread_rwlock_rdlock(rwlock);
+        if (i == MAX_ITER)
+            exitLoop = 0;
+        apr_thread_rwlock_unlock(rwlock);
+
+        if (!exitLoop)
+            break;
+
+        apr_thread_rwlock_wrlock(rwlock);
+        if (i != MAX_ITER)
+        {
+            i++;
+            x++;
+        }
+        apr_thread_rwlock_unlock(rwlock);
+    }
+    return NULL;
+} 
+
 void * APR_THREAD_FUNC thread_function(apr_thread_t *thd, void *data)
 {
     int exitLoop = 1;
@@ -129,6 +160,31 @@ void * APR_THREAD_FUNC thread_function(apr_thread_t *thd, void *data)
             x++;
         }
         apr_lock_release(thread_lock);
+
+        if (!exitLoop)
+            break;
+    }
+    return NULL;
+} 
+
+void * APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data)
+{
+    int exitLoop = 1;
+
+    /* slight delay to allow things to settle */
+    apr_sleep (1);
+    
+    while (1)
+    {
+        apr_thread_mutex_lock(thread_mutex);
+        if (i == MAX_ITER)
+            exitLoop = 0;
+        else 
+        {
+            i++;
+            x++;
+        }
+        apr_thread_mutex_unlock(thread_mutex);
 
         if (!exitLoop)
             break;
@@ -278,6 +334,101 @@ apr_status_t test_multiple_locking(const char *lockfile)
     return APR_SUCCESS;
 }
 
+apr_status_t test_thread_mutex(void)
+{
+    apr_thread_t *t1, *t2, *t3, *t4;
+    apr_status_t s1, s2, s3, s4;
+
+    printf("thread_mutex test\n");
+    printf("%-60s", "    Initializing the mutex");
+    s1 = apr_thread_mutex_create(&thread_mutex, pool);
+
+    if (s1 != APR_SUCCESS) {
+        printf("Failed!\n");
+        return s1;
+    }
+    printf("OK\n");
+
+    i = 0;
+    x = 0;
+
+    printf("%-60s", "    Starting all the threads"); 
+    s1 = apr_thread_create(&t1, NULL, thread_mutex_function, NULL, pool);
+    s2 = apr_thread_create(&t2, NULL, thread_mutex_function, NULL, pool);
+    s3 = apr_thread_create(&t3, NULL, thread_mutex_function, NULL, pool);
+    s4 = apr_thread_create(&t4, NULL, thread_mutex_function, NULL, pool);
+    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
+        s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
+        printf("Failed!\n");
+        return s1;
+    }
+    printf("OK\n");
+
+    printf("%-60s", "    Waiting for threads to exit");
+    apr_thread_join(&s1, t1);
+    apr_thread_join(&s2, t2);
+    apr_thread_join(&s3, t3);
+    apr_thread_join(&s4, t4);
+    printf("OK\n");
+
+    if (x != MAX_ITER) {
+        fprintf(stderr, "pthread_mutex don't appear to work!"
+                        "  x = %d instead of %d\n",
+                x, MAX_ITER);
+    }
+    else {
+        printf("Test passed\n");
+    }
+    return APR_SUCCESS;
+}
+
+int test_thread_rwlock(void)
+{
+    apr_thread_t *t1, *t2, *t3, *t4;
+    apr_status_t s1, s2, s3, s4;
+
+    printf("thread_rwlock Tests\n");
+    printf("%-60s", "    Initializing the apr_thread_rwlock_t");
+    s1 = apr_thread_rwlock_create(&rwlock, pool);
+    if (s1 != APR_SUCCESS) {
+        printf("Failed!\n");
+        return s1;
+    }
+    printf("OK\n");
+
+    i = 0;
+    x = 0;
+
+    printf("%-60s","    Starting all the threads"); 
+    s1 = apr_thread_create(&t1, NULL, thread_rwlock_func, NULL, pool);
+    s2 = apr_thread_create(&t2, NULL, thread_rwlock_func, NULL, pool);
+    s3 = apr_thread_create(&t3, NULL, thread_rwlock_func, NULL, pool);
+    s4 = apr_thread_create(&t4, NULL, thread_rwlock_func, NULL, pool);
+    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
+        s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
+        printf("Failed!\n");
+        return s1;
+    }
+    printf("OK\n");
+
+    printf("%-60s", "    Waiting for threads to exit");
+    apr_thread_join(&s1, t1);
+    apr_thread_join(&s2, t2);
+    apr_thread_join(&s3, t3);
+    apr_thread_join(&s4, t4);
+    printf("OK\n");
+
+    if (x != MAX_ITER) {
+        fprintf(stderr, "thread_rwlock didn't work as expected. x = %d instead of %d\n",
+                x, MAX_ITER);
+    }
+    else {
+        printf("Test passed\n");
+    }
+    
+    return APR_SUCCESS;
+}
+
 int main(int argc, const char * const *argv)
 {
     apr_status_t rv;
@@ -329,6 +480,18 @@ int main(int argc, const char * const *argv)
         fprintf(stderr,"RW Lock test failed : [%d] %s\n",
                 rv, apr_strerror(rv, (char*)errmsg, 200));
         exit(-4);
+    }
+
+    if ((rv = test_thread_mutex()) != APR_SUCCESS) {
+        fprintf(stderr,"thread_mutex test failed : [%d] %s\n",
+                rv, apr_strerror(rv, (char*)errmsg, 200));
+        exit(-5);
+    }
+
+    if ((rv = test_thread_rwlock()) != APR_SUCCESS) {
+        fprintf(stderr,"thread_rwlock test failed : [%d] %s\n",
+                rv, apr_strerror(rv, (char*)errmsg, 200));
+        exit(-6);
     }
 
     return 0;
