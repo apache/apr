@@ -20,7 +20,7 @@
 #include "apr_general.h"
 #include "apr_poll.h"
 #include "apr_lib.h"
-#include "test_apr.h"
+#include "testutil.h"
 
 #define DIRNAME "data"
 #define FILENAME DIRNAME "/file_datafile.txt"
@@ -31,7 +31,7 @@
 
 
 
-static void test_open_noreadwrite(CuTest *tc)
+static void test_open_noreadwrite(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *thefile = NULL;
@@ -39,12 +39,12 @@ static void test_open_noreadwrite(CuTest *tc)
     rv = apr_file_open(&thefile, FILENAME,
                        APR_CREATE | APR_EXCL, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertTrue(tc, rv != APR_SUCCESS);
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_EACCES(rv));
-    CuAssertPtrEquals(tc, NULL, thefile); 
+    abts_true(tc, rv != APR_SUCCESS);
+    abts_int_equal(tc, 1, APR_STATUS_IS_EACCES(rv));
+    abts_ptr_equal(tc, NULL, thefile); 
 }
 
-static void test_open_excl(CuTest *tc)
+static void test_open_excl(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *thefile = NULL;
@@ -52,12 +52,12 @@ static void test_open_excl(CuTest *tc)
     rv = apr_file_open(&thefile, FILENAME,
                        APR_CREATE | APR_EXCL | APR_WRITE, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertTrue(tc, rv != APR_SUCCESS);
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_EEXIST(rv));
-    CuAssertPtrEquals(tc, NULL, thefile); 
+    abts_true(tc, rv != APR_SUCCESS);
+    abts_int_equal(tc, 1, APR_STATUS_IS_EEXIST(rv));
+    abts_ptr_equal(tc, NULL, thefile); 
 }
 
-static void test_open_read(CuTest *tc)
+static void test_open_read(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *filetest = NULL;
@@ -65,12 +65,12 @@ static void test_open_read(CuTest *tc)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_READ, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, filetest);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, filetest);
     apr_file_close(filetest);
 }
 
-static void test_read(CuTest *tc)
+static void test_read(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_size_t nbytes = 256;
@@ -83,14 +83,14 @@ static void test_read(CuTest *tc)
 
     apr_assert_success(tc, "Opening test file " FILENAME, rv);
     rv = apr_file_read(filetest, str, &nbytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, strlen(TESTSTR), nbytes);
-    CuAssertStrEquals(tc, TESTSTR, str);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, strlen(TESTSTR), nbytes);
+    abts_str_equal(tc, TESTSTR, str);
 
     apr_file_close(filetest);
 }
 
-static void test_filename(CuTest *tc)
+static void test_filename(abts_case *tc, void *data)
 {
     const char *str;
     apr_status_t rv;
@@ -102,13 +102,13 @@ static void test_filename(CuTest *tc)
     apr_assert_success(tc, "Opening test file " FILENAME, rv);
 
     rv = apr_file_name_get(&str, filetest);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, FILENAME, str);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_str_equal(tc, FILENAME, str);
 
     apr_file_close(filetest);
 }
     
-static void test_fileclose(CuTest *tc)
+static void test_fileclose(abts_case *tc, void *data)
 {
     char str;
     apr_status_t rv;
@@ -121,26 +121,26 @@ static void test_fileclose(CuTest *tc)
     apr_assert_success(tc, "Opening test file " FILENAME, rv);
 
     rv = apr_file_close(filetest);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     /* We just closed the file, so this should fail */
     rv = apr_file_read(filetest, &str, &one);
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_EBADF(rv));
+    abts_int_equal(tc, 1, APR_STATUS_IS_EBADF(rv));
 }
 
-static void test_file_remove(CuTest *tc)
+static void test_file_remove(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *filetest = NULL;
 
     rv = apr_file_remove(FILENAME, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_open(&filetest, FILENAME, APR_READ, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOENT(rv));
+    abts_int_equal(tc, 1, APR_STATUS_IS_ENOENT(rv));
 }
 
-static void test_open_write(CuTest *tc)
+static void test_open_write(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *filetest = NULL;
@@ -149,11 +149,11 @@ static void test_open_write(CuTest *tc)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_WRITE, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOENT(rv));
-    CuAssertPtrEquals(tc, NULL, filetest);
+    abts_int_equal(tc, 1, APR_STATUS_IS_ENOENT(rv));
+    abts_ptr_equal(tc, NULL, filetest);
 }
 
-static void test_open_writecreate(CuTest *tc)
+static void test_open_writecreate(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *filetest = NULL;
@@ -162,12 +162,12 @@ static void test_open_writecreate(CuTest *tc)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_WRITE | APR_CREATE, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     apr_file_close(filetest);
 }
 
-static void test_write(CuTest *tc)
+static void test_write(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_size_t bytes = strlen(TESTSTR);
@@ -176,15 +176,15 @@ static void test_write(CuTest *tc)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_WRITE | APR_CREATE, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_write(filetest, TESTSTR, &bytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     apr_file_close(filetest);
 }
 
-static void test_open_readwrite(CuTest *tc)
+static void test_open_readwrite(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *filetest = NULL;
@@ -193,13 +193,13 @@ static void test_open_readwrite(CuTest *tc)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_READ | APR_WRITE, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, filetest);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, filetest);
 
     apr_file_close(filetest);
 }
 
-static void test_seek(CuTest *tc)
+static void test_seek(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_off_t offset = 5;
@@ -213,19 +213,19 @@ static void test_seek(CuTest *tc)
     apr_assert_success(tc, "Open test file " FILENAME, rv);
 
     rv = apr_file_read(filetest, str, &nbytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, strlen(TESTSTR), nbytes);
-    CuAssertStrEquals(tc, TESTSTR, str);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, strlen(TESTSTR), nbytes);
+    abts_str_equal(tc, TESTSTR, str);
 
     memset(str, 0, nbytes + 1);
 
     rv = apr_file_seek(filetest, SEEK_SET, &offset);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     
     rv = apr_file_read(filetest, str, &nbytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, strlen(TESTSTR) - 5, nbytes);
-    CuAssertStrEquals(tc, TESTSTR + 5, str);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, strlen(TESTSTR) - 5, nbytes);
+    abts_str_equal(tc, TESTSTR + 5, str);
 
     apr_file_close(filetest);
 
@@ -238,20 +238,20 @@ static void test_seek(CuTest *tc)
 
     offset = -5;
     rv = apr_file_seek(filetest, SEEK_END, &offset);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, strlen(TESTSTR) - 5, nbytes);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, strlen(TESTSTR) - 5, nbytes);
 
     memset(str, 0, nbytes + 1);
     nbytes = 256;
     rv = apr_file_read(filetest, str, &nbytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 5, nbytes);
-    CuAssertStrEquals(tc, TESTSTR + strlen(TESTSTR) - 5, str);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 5, nbytes);
+    abts_str_equal(tc, TESTSTR + strlen(TESTSTR) - 5, str);
 
     apr_file_close(filetest);
 }                
 
-static void test_userdata_set(CuTest *tc)
+static void test_userdata_set(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *filetest = NULL;
@@ -259,15 +259,15 @@ static void test_userdata_set(CuTest *tc)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_WRITE, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_data_set(filetest, "This is a test",
                            "test", apr_pool_cleanup_null);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     apr_file_close(filetest);
 }
 
-static void test_userdata_get(CuTest *tc)
+static void test_userdata_get(abts_case *tc, void *data)
 {
     apr_status_t rv;
     char *teststr;
@@ -276,20 +276,20 @@ static void test_userdata_get(CuTest *tc)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_WRITE, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_data_set(filetest, "This is a test",
                            "test", apr_pool_cleanup_null);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_data_get((void **)&teststr, "test", filetest);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, "This is a test", teststr);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_str_equal(tc, "This is a test", teststr);
 
     apr_file_close(filetest);
 }
 
-static void test_userdata_getnokey(CuTest *tc)
+static void test_userdata_getnokey(abts_case *tc, void *data)
 {
     apr_status_t rv;
     char *teststr;
@@ -298,75 +298,75 @@ static void test_userdata_getnokey(CuTest *tc)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_WRITE, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_data_get((void **)&teststr, "nokey", filetest);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrEquals(tc, NULL, teststr);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_equal(tc, NULL, teststr);
     apr_file_close(filetest);
 }
 
-static void test_getc(CuTest *tc)
+static void test_getc(abts_case *tc, void *data)
 {
     apr_file_t *f = NULL;
     apr_status_t rv;
     char ch;
 
     rv = apr_file_open(&f, FILENAME, APR_READ, 0, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     apr_file_getc(&ch, f);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, (int)TESTSTR[0], (int)ch);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, (int)TESTSTR[0], (int)ch);
     apr_file_close(f);
 }
 
-static void test_ungetc(CuTest *tc)
+static void test_ungetc(abts_case *tc, void *data)
 {
     apr_file_t *f = NULL;
     apr_status_t rv;
     char ch;
 
     rv = apr_file_open(&f, FILENAME, APR_READ, 0, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     apr_file_getc(&ch, f);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, (int)TESTSTR[0], (int)ch);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, (int)TESTSTR[0], (int)ch);
 
     apr_file_ungetc('X', f);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     apr_file_getc(&ch, f);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 'X', (int)ch);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 'X', (int)ch);
 
     apr_file_close(f);
 }
 
-static void test_gets(CuTest *tc)
+static void test_gets(abts_case *tc, void *data)
 {
     apr_file_t *f = NULL;
     apr_status_t rv;
     char *str = apr_palloc(p, 256);
 
     rv = apr_file_open(&f, FILENAME, APR_READ, 0, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_gets(str, 256, f);
     /* Only one line in the test file, so APR will encounter EOF on the first
      * call to gets, but we should get APR_SUCCESS on this call and
      * APR_EOF on the next.
      */
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, TESTSTR, str);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_str_equal(tc, TESTSTR, str);
     rv = apr_file_gets(str, 256, f);
-    CuAssertIntEquals(tc, APR_EOF, rv);
-    CuAssertStrEquals(tc, "", str);
+    abts_int_equal(tc, APR_EOF, rv);
+    abts_str_equal(tc, "", str);
     apr_file_close(f);
 }
 
-static void test_bigread(CuTest *tc)
+static void test_bigread(abts_case *tc, void *data)
 {
     apr_file_t *f = NULL;
     apr_status_t rv;
@@ -378,38 +378,38 @@ static void test_bigread(CuTest *tc)
     rv = apr_file_open(&f, "data/created_file", 
                        APR_CREATE | APR_WRITE | APR_TRUNCATE, 
                        APR_UREAD | APR_UWRITE, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     nbytes = APR_BUFFERSIZE;
     memset(buf, 0xFE, nbytes);
 
     rv = apr_file_write(f, buf, &nbytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, APR_BUFFERSIZE, nbytes);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_BUFFERSIZE, nbytes);
 
     rv = apr_file_close(f);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     f = NULL;
     rv = apr_file_open(&f, "data/created_file", APR_READ, 0, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     nbytes = sizeof buf;
     rv = apr_file_read(f, buf, &nbytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, APR_BUFFERSIZE, nbytes);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_BUFFERSIZE, nbytes);
 
     rv = apr_file_close(f);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_remove("data/created_file", p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 }
 
 /* This is a horrible name for this function.  We are testing APR, not how
  * Apache uses APR.  And, this function tests _way_ too much stuff.
  */
-static void test_mod_neg(CuTest *tc)
+static void test_mod_neg(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *f;
@@ -422,73 +422,73 @@ static void test_mod_neg(CuTest *tc)
 
     rv = apr_file_open(&f, fname, 
                        APR_CREATE | APR_WRITE, APR_UREAD | APR_UWRITE, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     s = "body56789\n";
     nbytes = strlen(s);
     rv = apr_file_write(f, s, &nbytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, strlen(s), nbytes);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, strlen(s), nbytes);
     
     for (i = 0; i < 7980; i++) {
         s = "0";
         nbytes = strlen(s);
         rv = apr_file_write(f, s, &nbytes);
-        CuAssertIntEquals(tc, APR_SUCCESS, rv);
-        CuAssertIntEquals(tc, strlen(s), nbytes);
+        abts_int_equal(tc, APR_SUCCESS, rv);
+        abts_int_equal(tc, strlen(s), nbytes);
     }
     
     s = "end456789\n";
     nbytes = strlen(s);
     rv = apr_file_write(f, s, &nbytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, strlen(s), nbytes);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, strlen(s), nbytes);
 
     for (i = 0; i < 10000; i++) {
         s = "1";
         nbytes = strlen(s);
         rv = apr_file_write(f, s, &nbytes);
-        CuAssertIntEquals(tc, APR_SUCCESS, rv);
-        CuAssertIntEquals(tc, strlen(s), nbytes);
+        abts_int_equal(tc, APR_SUCCESS, rv);
+        abts_int_equal(tc, strlen(s), nbytes);
     }
     
     rv = apr_file_close(f);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_open(&f, fname, APR_READ, 0, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_gets(buf, 11, f);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, "body56789\n", buf);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_str_equal(tc, "body56789\n", buf);
 
     cur = 0;
     rv = apr_file_seek(f, APR_CUR, &cur);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 10, cur);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 10, cur);
 
     nbytes = sizeof(buf);
     rv = apr_file_read(f, buf, &nbytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, nbytes, sizeof(buf));
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, nbytes, sizeof(buf));
 
     cur = -((apr_off_t)nbytes - 7980);
     rv = apr_file_seek(f, APR_CUR, &cur);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 7990, cur);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 7990, cur);
 
     rv = apr_file_gets(buf, 11, f);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, "end456789\n", buf);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_str_equal(tc, "end456789\n", buf);
 
     rv = apr_file_close(f);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_remove(fname, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 }
 
-static void test_truncate(CuTest *tc)
+static void test_truncate(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *f;
@@ -501,57 +501,57 @@ static void test_truncate(CuTest *tc)
 
     rv = apr_file_open(&f, fname,
                        APR_CREATE | APR_WRITE, APR_UREAD | APR_UWRITE, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     
     s = "some data";
     nbytes = strlen(s);
     rv = apr_file_write(f, s, &nbytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, strlen(s), nbytes);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, strlen(s), nbytes);
 
     rv = apr_file_close(f);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_open(&f, fname,
                        APR_TRUNCATE | APR_WRITE, APR_UREAD | APR_UWRITE, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_close(f);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_stat(&finfo, fname, APR_FINFO_SIZE, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 0, finfo.size);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 0, finfo.size);
 
     rv = apr_file_remove(fname, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 }
 
-CuSuite *testfile(void)
+abts_suite *testfile(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("File I/O");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, test_open_noreadwrite);
-    SUITE_ADD_TEST(suite, test_open_excl);
-    SUITE_ADD_TEST(suite, test_open_read);
-    SUITE_ADD_TEST(suite, test_open_readwrite);
-    SUITE_ADD_TEST(suite, test_read); 
-    SUITE_ADD_TEST(suite, test_seek);
-    SUITE_ADD_TEST(suite, test_filename);
-    SUITE_ADD_TEST(suite, test_fileclose);
-    SUITE_ADD_TEST(suite, test_file_remove);
-    SUITE_ADD_TEST(suite, test_open_write);
-    SUITE_ADD_TEST(suite, test_open_writecreate);
-    SUITE_ADD_TEST(suite, test_write);
-    SUITE_ADD_TEST(suite, test_userdata_set);
-    SUITE_ADD_TEST(suite, test_userdata_get);
-    SUITE_ADD_TEST(suite, test_userdata_getnokey);
-    SUITE_ADD_TEST(suite, test_getc);
-    SUITE_ADD_TEST(suite, test_ungetc);
-    SUITE_ADD_TEST(suite, test_gets);
-    SUITE_ADD_TEST(suite, test_bigread);
-    SUITE_ADD_TEST(suite, test_mod_neg);
-    SUITE_ADD_TEST(suite, test_truncate);
+    abts_run_test(suite, test_open_noreadwrite, NULL);
+    abts_run_test(suite, test_open_excl, NULL);
+    abts_run_test(suite, test_open_read, NULL);
+    abts_run_test(suite, test_open_readwrite, NULL);
+    abts_run_test(suite, test_read, NULL); 
+    abts_run_test(suite, test_seek, NULL);
+    abts_run_test(suite, test_filename, NULL);
+    abts_run_test(suite, test_fileclose, NULL);
+    abts_run_test(suite, test_file_remove, NULL);
+    abts_run_test(suite, test_open_write, NULL);
+    abts_run_test(suite, test_open_writecreate, NULL);
+    abts_run_test(suite, test_write, NULL);
+    abts_run_test(suite, test_userdata_set, NULL);
+    abts_run_test(suite, test_userdata_get, NULL);
+    abts_run_test(suite, test_userdata_getnokey, NULL);
+    abts_run_test(suite, test_getc, NULL);
+    abts_run_test(suite, test_ungetc, NULL);
+    abts_run_test(suite, test_gets, NULL);
+    abts_run_test(suite, test_bigread, NULL);
+    abts_run_test(suite, test_mod_neg, NULL);
+    abts_run_test(suite, test_truncate, NULL);
 
     return suite;
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr.h"
 #include "apr_strings.h"
 #include "apr_general.h"
@@ -56,59 +56,59 @@ static void sum_hash(apr_pool_t *p, apr_hash_t *h, int *pcount, int *keySum, int
     *pcount=count;
 }
 
-static void hash_make(CuTest *tc)
+static void hash_make(abts_case *tc, void *data)
 {
     apr_hash_t *h = NULL;
 
     h = apr_hash_make(p);
-    CuAssertPtrNotNull(tc, h);
+    abts_ptr_notnull(tc, h);
 }
 
-static void hash_set(CuTest *tc)
+static void hash_set(abts_case *tc, void *data)
 {
     apr_hash_t *h = NULL;
     char *result = NULL;
 
     h = apr_hash_make(p);
-    CuAssertPtrNotNull(tc, h);
+    abts_ptr_notnull(tc, h);
 
     apr_hash_set(h, "key", APR_HASH_KEY_STRING, "value");
     result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
-    CuAssertStrEquals(tc, "value", result);
+    abts_str_equal(tc, "value", result);
 }
 
-static void hash_reset(CuTest *tc)
+static void hash_reset(abts_case *tc, void *data)
 {
     apr_hash_t *h = NULL;
     char *result = NULL;
 
     h = apr_hash_make(p);
-    CuAssertPtrNotNull(tc, h);
+    abts_ptr_notnull(tc, h);
 
     apr_hash_set(h, "key", APR_HASH_KEY_STRING, "value");
     result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
-    CuAssertStrEquals(tc, "value", result);
+    abts_str_equal(tc, "value", result);
 
     apr_hash_set(h, "key", APR_HASH_KEY_STRING, "new");
     result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
-    CuAssertStrEquals(tc, "new", result);
+    abts_str_equal(tc, "new", result);
 }
 
-static void same_value(CuTest *tc)
+static void same_value(abts_case *tc, void *data)
 {
     apr_hash_t *h = NULL;
     char *result = NULL;
 
     h = apr_hash_make(p);
-    CuAssertPtrNotNull(tc, h);
+    abts_ptr_notnull(tc, h);
 
     apr_hash_set(h, "same1", APR_HASH_KEY_STRING, "same");
     result = apr_hash_get(h, "same1", APR_HASH_KEY_STRING);
-    CuAssertStrEquals(tc, "same", result);
+    abts_str_equal(tc, "same", result);
 
     apr_hash_set(h, "same2", APR_HASH_KEY_STRING, "same");
     result = apr_hash_get(h, "same2", APR_HASH_KEY_STRING);
-    CuAssertStrEquals(tc, "same", result);
+    abts_str_equal(tc, "same", result);
 }
 
 static unsigned int hash_custom( const char *key, apr_ssize_t *klen)
@@ -121,47 +121,47 @@ static unsigned int hash_custom( const char *key, apr_ssize_t *klen)
     return hash;
 }
 
-static void same_value_custom(CuTest *tc)
+static void same_value_custom(abts_case *tc, void *data)
 {
     apr_hash_t *h = NULL;
     char *result = NULL;
 
     h = apr_hash_make_custom(p, hash_custom);
-    CuAssertPtrNotNull(tc, h);
+    abts_ptr_notnull(tc, h);
 
     apr_hash_set(h, "same1", 5, "same");
     result = apr_hash_get(h, "same1", 5);
-    CuAssertStrEquals(tc, "same", result);
+    abts_str_equal(tc, "same", result);
 
     apr_hash_set(h, "same2", 5, "same");
     result = apr_hash_get(h, "same2", 5);
-    CuAssertStrEquals(tc, "same", result);
+    abts_str_equal(tc, "same", result);
 }
 
-static void key_space(CuTest *tc)
+static void key_space(abts_case *tc, void *data)
 {
     apr_hash_t *h = NULL;
     char *result = NULL;
 
     h = apr_hash_make(p);
-    CuAssertPtrNotNull(tc, h);
+    abts_ptr_notnull(tc, h);
 
     apr_hash_set(h, "key with space", APR_HASH_KEY_STRING, "value");
     result = apr_hash_get(h, "key with space", APR_HASH_KEY_STRING);
-    CuAssertStrEquals(tc, "value", result);
+    abts_str_equal(tc, "value", result);
 }
 
 /* This is kind of a hack, but I am just keeping an existing test.  This is
  * really testing apr_hash_first, apr_hash_next, and apr_hash_this which 
  * should be tested in three separate tests, but this will do for now.
  */
-static void hash_traverse(CuTest *tc)
+static void hash_traverse(abts_case *tc, void *data)
 {
     apr_hash_t *h;
     char str[8196];
 
     h = apr_hash_make(p);
-    CuAssertPtrNotNull(tc, h);
+    abts_ptr_notnull(tc, h);
 
     apr_hash_set(h, "OVERWRITE", APR_HASH_KEY_STRING, "should not see this");
     apr_hash_set(h, "FOO3", APR_HASH_KEY_STRING, "bar3");
@@ -174,7 +174,7 @@ static void hash_traverse(CuTest *tc)
     apr_hash_set(h, "OVERWRITE", APR_HASH_KEY_STRING, "Overwrite key");
 
     dump_hash(p, h, str);
-    CuAssertStrEquals(tc, "Key FOO1 (4) Value bar1\n"
+    abts_str_equal(tc, "Key FOO1 (4) Value bar1\n"
                           "Key FOO2 (4) Value bar2\n"
                           "Key OVERWRITE (9) Value Overwrite key\n"
                           "Key FOO3 (4) Value bar3\n"
@@ -188,14 +188,14 @@ static void hash_traverse(CuTest *tc)
  * really testing apr_hash_first, apr_hash_next, and apr_hash_this which 
  * should be tested in three separate tests, but this will do for now.
  */
-static void summation_test(CuTest *tc)
+static void summation_test(abts_case *tc, void *data)
 {
     apr_hash_t *h;
     int sumKeys, sumVal, trySumKey, trySumVal;
     int i, j, *val, *key;
 
     h =apr_hash_make(p);
-    CuAssertPtrNotNull(tc, h);
+    abts_ptr_notnull(tc, h);
 
     sumKeys = 0;
     sumVal = 0;
@@ -214,70 +214,70 @@ static void summation_test(CuTest *tc)
     }
 
     sum_hash(p, h, &i, &trySumKey, &trySumVal);
-    CuAssertIntEquals(tc, 100, i);
-    CuAssertIntEquals(tc, sumVal, trySumVal);
-    CuAssertIntEquals(tc, sumKeys, trySumKey);
+    abts_int_equal(tc, 100, i);
+    abts_int_equal(tc, sumVal, trySumVal);
+    abts_int_equal(tc, sumKeys, trySumKey);
 }
 
-static void delete_key(CuTest *tc)
+static void delete_key(abts_case *tc, void *data)
 {
     apr_hash_t *h = NULL;
     char *result = NULL;
 
     h = apr_hash_make(p);
-    CuAssertPtrNotNull(tc, h);
+    abts_ptr_notnull(tc, h);
 
     apr_hash_set(h, "key", APR_HASH_KEY_STRING, "value");
     apr_hash_set(h, "key2", APR_HASH_KEY_STRING, "value2");
 
     result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
-    CuAssertStrEquals(tc, "value", result);
+    abts_str_equal(tc, "value", result);
 
     result = apr_hash_get(h, "key2", APR_HASH_KEY_STRING);
-    CuAssertStrEquals(tc, "value2", result);
+    abts_str_equal(tc, "value2", result);
 
     apr_hash_set(h, "key", APR_HASH_KEY_STRING, NULL);
 
     result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
-    CuAssertPtrEquals(tc, NULL, result);
+    abts_ptr_equal(tc, NULL, result);
 
     result = apr_hash_get(h, "key2", APR_HASH_KEY_STRING);
-    CuAssertStrEquals(tc, "value2", result);
+    abts_str_equal(tc, "value2", result);
 }
 
-static void hash_count_0(CuTest *tc)
+static void hash_count_0(abts_case *tc, void *data)
 {
     apr_hash_t *h = NULL;
     int count;
 
     h = apr_hash_make(p);
-    CuAssertPtrNotNull(tc, h);
+    abts_ptr_notnull(tc, h);
 
     count = apr_hash_count(h);
-    CuAssertIntEquals(tc, 0, count);
+    abts_int_equal(tc, 0, count);
 }
 
-static void hash_count_1(CuTest *tc)
+static void hash_count_1(abts_case *tc, void *data)
 {
     apr_hash_t *h = NULL;
     int count;
 
     h = apr_hash_make(p);
-    CuAssertPtrNotNull(tc, h);
+    abts_ptr_notnull(tc, h);
 
     apr_hash_set(h, "key", APR_HASH_KEY_STRING, "value");
 
     count = apr_hash_count(h);
-    CuAssertIntEquals(tc, 1, count);
+    abts_int_equal(tc, 1, count);
 }
 
-static void hash_count_5(CuTest *tc)
+static void hash_count_5(abts_case *tc, void *data)
 {
     apr_hash_t *h = NULL;
     int count;
 
     h = apr_hash_make(p);
-    CuAssertPtrNotNull(tc, h);
+    abts_ptr_notnull(tc, h);
 
     apr_hash_set(h, "key1", APR_HASH_KEY_STRING, "value1");
     apr_hash_set(h, "key2", APR_HASH_KEY_STRING, "value2");
@@ -286,10 +286,10 @@ static void hash_count_5(CuTest *tc)
     apr_hash_set(h, "key5", APR_HASH_KEY_STRING, "value5");
 
     count = apr_hash_count(h);
-    CuAssertIntEquals(tc, 5, count);
+    abts_int_equal(tc, 5, count);
 }
 
-static void overlay_empty(CuTest *tc)
+static void overlay_empty(abts_case *tc, void *data)
 {
     apr_hash_t *base = NULL;
     apr_hash_t *overlay = NULL;
@@ -299,8 +299,8 @@ static void overlay_empty(CuTest *tc)
 
     base = apr_hash_make(p);
     overlay = apr_hash_make(p);
-    CuAssertPtrNotNull(tc, base);
-    CuAssertPtrNotNull(tc, overlay);
+    abts_ptr_notnull(tc, base);
+    abts_ptr_notnull(tc, overlay);
 
     apr_hash_set(base, "key1", APR_HASH_KEY_STRING, "value1");
     apr_hash_set(base, "key2", APR_HASH_KEY_STRING, "value2");
@@ -311,10 +311,10 @@ static void overlay_empty(CuTest *tc)
     result = apr_hash_overlay(p, overlay, base);
 
     count = apr_hash_count(result);
-    CuAssertIntEquals(tc, 5, count);
+    abts_int_equal(tc, 5, count);
 
     dump_hash(p, result, str);
-    CuAssertStrEquals(tc, "Key key1 (4) Value value1\n"
+    abts_str_equal(tc, "Key key1 (4) Value value1\n"
                           "Key key2 (4) Value value2\n"
                           "Key key3 (4) Value value3\n"
                           "Key key4 (4) Value value4\n"
@@ -322,7 +322,7 @@ static void overlay_empty(CuTest *tc)
                           "#entries 5\n", str);
 }
 
-static void overlay_2unique(CuTest *tc)
+static void overlay_2unique(abts_case *tc, void *data)
 {
     apr_hash_t *base = NULL;
     apr_hash_t *overlay = NULL;
@@ -332,8 +332,8 @@ static void overlay_2unique(CuTest *tc)
 
     base = apr_hash_make(p);
     overlay = apr_hash_make(p);
-    CuAssertPtrNotNull(tc, base);
-    CuAssertPtrNotNull(tc, overlay);
+    abts_ptr_notnull(tc, base);
+    abts_ptr_notnull(tc, overlay);
 
     apr_hash_set(base, "base1", APR_HASH_KEY_STRING, "value1");
     apr_hash_set(base, "base2", APR_HASH_KEY_STRING, "value2");
@@ -350,13 +350,13 @@ static void overlay_2unique(CuTest *tc)
     result = apr_hash_overlay(p, overlay, base);
 
     count = apr_hash_count(result);
-    CuAssertIntEquals(tc, 10, count);
+    abts_int_equal(tc, 10, count);
 
     dump_hash(p, result, str);
     /* I don't know why these are out of order, but they are.  I would probably
      * consider this a bug, but others should comment.
      */
-    CuAssertStrEquals(tc, "Key base5 (5) Value value5\n"
+    abts_str_equal(tc, "Key base5 (5) Value value5\n"
                           "Key overlay1 (8) Value value1\n"
                           "Key overlay2 (8) Value value2\n"
                           "Key overlay3 (8) Value value3\n"
@@ -369,7 +369,7 @@ static void overlay_2unique(CuTest *tc)
                           "#entries 10\n", str);
 }
 
-static void overlay_same(CuTest *tc)
+static void overlay_same(abts_case *tc, void *data)
 {
     apr_hash_t *base = NULL;
     apr_hash_t *result = NULL;
@@ -377,7 +377,7 @@ static void overlay_same(CuTest *tc)
     char str[8196];
 
     base = apr_hash_make(p);
-    CuAssertPtrNotNull(tc, base);
+    abts_ptr_notnull(tc, base);
 
     apr_hash_set(base, "base1", APR_HASH_KEY_STRING, "value1");
     apr_hash_set(base, "base2", APR_HASH_KEY_STRING, "value2");
@@ -388,13 +388,13 @@ static void overlay_same(CuTest *tc)
     result = apr_hash_overlay(p, base, base);
 
     count = apr_hash_count(result);
-    CuAssertIntEquals(tc, 5, count);
+    abts_int_equal(tc, 5, count);
 
     dump_hash(p, result, str);
     /* I don't know why these are out of order, but they are.  I would probably
      * consider this a bug, but others should comment.
      */
-    CuAssertStrEquals(tc, "Key base5 (5) Value value5\n"
+    abts_str_equal(tc, "Key base5 (5) Value value5\n"
                           "Key base1 (5) Value value1\n"
                           "Key base2 (5) Value value2\n"
                           "Key base3 (5) Value value3\n"
@@ -402,28 +402,28 @@ static void overlay_same(CuTest *tc)
                           "#entries 5\n", str);
 }
 
-CuSuite *testhash(void)
+abts_suite *testhash(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Hash");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, hash_make);
-    SUITE_ADD_TEST(suite, hash_set);
-    SUITE_ADD_TEST(suite, hash_reset);
-    SUITE_ADD_TEST(suite, same_value);
-    SUITE_ADD_TEST(suite, same_value_custom);
-    SUITE_ADD_TEST(suite, key_space);
-    SUITE_ADD_TEST(suite, delete_key);
+    abts_run_test(suite, hash_make, NULL);
+    abts_run_test(suite, hash_set, NULL);
+    abts_run_test(suite, hash_reset, NULL);
+    abts_run_test(suite, same_value, NULL);
+    abts_run_test(suite, same_value_custom, NULL);
+    abts_run_test(suite, key_space, NULL);
+    abts_run_test(suite, delete_key, NULL);
 
-    SUITE_ADD_TEST(suite, hash_count_0);
-    SUITE_ADD_TEST(suite, hash_count_1);
-    SUITE_ADD_TEST(suite, hash_count_5);
+    abts_run_test(suite, hash_count_0, NULL);
+    abts_run_test(suite, hash_count_1, NULL);
+    abts_run_test(suite, hash_count_5, NULL);
 
-    SUITE_ADD_TEST(suite, hash_traverse);
-    SUITE_ADD_TEST(suite, summation_test);
+    abts_run_test(suite, hash_traverse, NULL);
+    abts_run_test(suite, summation_test, NULL);
 
-    SUITE_ADD_TEST(suite, overlay_empty);
-    SUITE_ADD_TEST(suite, overlay_2unique);
-    SUITE_ADD_TEST(suite, overlay_same);
+    abts_run_test(suite, overlay_empty, NULL);
+    abts_run_test(suite, overlay_2unique, NULL);
+    abts_run_test(suite, overlay_same, NULL);
 
     return suite;
 }

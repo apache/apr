@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test_apr.h"
+#include "testutil.h"
 #include "testsock.h"
 #include "apr_thread_proc.h"
 #include "apr_network_io.h"
@@ -22,7 +22,7 @@
 #include "apr_lib.h"
 #include "apr_strings.h"
 
-static void launch_child(CuTest *tc, apr_proc_t *proc, const char *arg1, apr_pool_t *p)
+static void launch_child(abts_case *tc, apr_proc_t *proc, const char *arg1, apr_pool_t *p)
 {
     apr_procattr_t *procattr;
     const char *args[3];
@@ -46,19 +46,19 @@ static void launch_child(CuTest *tc, apr_proc_t *proc, const char *arg1, apr_poo
     apr_assert_success(tc, "Couldn't launch program", rv);
 }
 
-static int wait_child(CuTest *tc, apr_proc_t *proc) 
+static int wait_child(abts_case *tc, apr_proc_t *proc) 
 {
     int exitcode;
     apr_exit_why_e why;
 
-    CuAssert(tc, "Error waiting for child process",
+    abts_assert(tc, "Error waiting for child process",
             apr_proc_wait(proc, &exitcode, &why, APR_WAIT) == APR_CHILD_DONE);
 
-    CuAssert(tc, "child terminated normally", why == APR_PROC_EXIT);
+    abts_assert(tc, "child terminated normally", why == APR_PROC_EXIT);
     return exitcode;
 }
 
-static void test_addr_info(CuTest *tc)
+static void test_addr_info(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_sockaddr_t *sa;
@@ -68,10 +68,10 @@ static void test_addr_info(CuTest *tc)
 
     rv = apr_sockaddr_info_get(&sa, "127.0.0.1", APR_UNSPEC, 80, 0, p);
     apr_assert_success(tc, "Problem generating sockaddr", rv);
-    CuAssertStrEquals(tc, "127.0.0.1", sa->hostname);
+    abts_str_equal(tc, "127.0.0.1", sa->hostname);
 }
 
-static apr_socket_t *setup_socket(CuTest *tc)
+static apr_socket_t *setup_socket(abts_case *tc)
 {
     apr_status_t rv;
     apr_sockaddr_t *sa;
@@ -92,7 +92,7 @@ static apr_socket_t *setup_socket(CuTest *tc)
     return sock;
 }
 
-static void test_create_bind_listen(CuTest *tc)
+static void test_create_bind_listen(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_socket_t *sock = setup_socket(tc);
@@ -101,7 +101,7 @@ static void test_create_bind_listen(CuTest *tc)
     apr_assert_success(tc, "Problem closing socket", rv);
 }
 
-static void test_send(CuTest *tc)
+static void test_send(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_socket_t *sock;
@@ -118,13 +118,13 @@ static void test_send(CuTest *tc)
     apr_assert_success(tc, "Problem with receiving connection", rv);
 
     apr_socket_protocol_get(sock2, &protocol);
-    CuAssertIntEquals(tc, APR_PROTO_TCP, protocol);
+    abts_int_equal(tc, APR_PROTO_TCP, protocol);
     
     length = strlen(DATASTR);
     apr_socket_send(sock2, DATASTR, &length);
 
     /* Make sure that the client received the data we sent */
-    CuAssertIntEquals(tc, strlen(DATASTR), wait_child(tc, &proc));
+    abts_int_equal(tc, strlen(DATASTR), wait_child(tc, &proc));
 
     rv = apr_socket_close(sock2);
     apr_assert_success(tc, "Problem closing connected socket", rv);
@@ -132,7 +132,7 @@ static void test_send(CuTest *tc)
     apr_assert_success(tc, "Problem closing socket", rv);
 }
 
-static void test_recv(CuTest *tc)
+static void test_recv(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_socket_t *sock;
@@ -150,14 +150,14 @@ static void test_recv(CuTest *tc)
     apr_assert_success(tc, "Problem with receiving connection", rv);
 
     apr_socket_protocol_get(sock2, &protocol);
-    CuAssertIntEquals(tc, APR_PROTO_TCP, protocol);
+    abts_int_equal(tc, APR_PROTO_TCP, protocol);
     
     memset(datastr, 0, STRLEN);
     apr_socket_recv(sock2, datastr, &length);
 
     /* Make sure that the server received the data we sent */
-    CuAssertStrEquals(tc, DATASTR, datastr);
-    CuAssertIntEquals(tc, strlen(datastr), wait_child(tc, &proc));
+    abts_str_equal(tc, DATASTR, datastr);
+    abts_int_equal(tc, strlen(datastr), wait_child(tc, &proc));
 
     rv = apr_socket_close(sock2);
     apr_assert_success(tc, "Problem closing connected socket", rv);
@@ -165,7 +165,7 @@ static void test_recv(CuTest *tc)
     apr_assert_success(tc, "Problem closing socket", rv);
 }
 
-static void test_timeout(CuTest *tc)
+static void test_timeout(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_socket_t *sock;
@@ -182,10 +182,10 @@ static void test_timeout(CuTest *tc)
     apr_assert_success(tc, "Problem with receiving connection", rv);
 
     apr_socket_protocol_get(sock2, &protocol);
-    CuAssertIntEquals(tc, APR_PROTO_TCP, protocol);
+    abts_int_equal(tc, APR_PROTO_TCP, protocol);
     
     exit = wait_child(tc, &proc);    
-    CuAssertIntEquals(tc, SOCKET_TIMEOUT, exit);
+    abts_int_equal(tc, SOCKET_TIMEOUT, exit);
 
     /* We didn't write any data, so make sure the child program returns
      * an error.
@@ -196,15 +196,15 @@ static void test_timeout(CuTest *tc)
     apr_assert_success(tc, "Problem closing socket", rv);
 }
 
-CuSuite *testsock(void)
+abts_suite *testsock(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Socket operations");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, test_addr_info);
-    SUITE_ADD_TEST(suite, test_create_bind_listen);
-    SUITE_ADD_TEST(suite, test_send);
-    SUITE_ADD_TEST(suite, test_recv);
-    SUITE_ADD_TEST(suite, test_timeout);
+    abts_run_test(suite, test_addr_info, NULL);
+    abts_run_test(suite, test_create_bind_listen, NULL);
+    abts_run_test(suite, test_send, NULL);
+    abts_run_test(suite, test_recv, NULL);
+    abts_run_test(suite, test_timeout, NULL);
 
     return suite;
 }

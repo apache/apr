@@ -18,13 +18,13 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
-#include "test_apr.h"
+#include "testutil.h"
 
 #define TESTSTR "This is a test"
 
 static apr_proc_t newproc;
 
-static void test_create_proc(CuTest *tc)
+static void test_create_proc(abts_case *tc, void *data)
 {
     const char *args[2];
     apr_procattr_t *attr;
@@ -34,49 +34,49 @@ static void test_create_proc(CuTest *tc)
     char *buf;
 
     rv = apr_procattr_create(&attr, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_procattr_io_set(attr, APR_FULL_BLOCK, APR_FULL_BLOCK, 
                              APR_NO_PIPE);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_procattr_dir_set(attr, "data");
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_procattr_cmdtype_set(attr, APR_PROGRAM);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     args[0] = "proc_child" EXTENSION;
     args[1] = NULL;
     
     rv = apr_proc_create(&newproc, "../proc_child" EXTENSION, args, NULL, 
                          attr, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     testfile = newproc.in;
 
     length = strlen(TESTSTR);
     rv = apr_file_write(testfile, TESTSTR, &length);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, strlen(TESTSTR), length);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, strlen(TESTSTR), length);
 
     testfile = newproc.out;
     length = 256;
     buf = apr_pcalloc(p, length);
     rv = apr_file_read(testfile, buf, &length);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, TESTSTR, buf);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_str_equal(tc, TESTSTR, buf);
 }
 
-static void test_proc_wait(CuTest *tc)
+static void test_proc_wait(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
     rv = apr_proc_wait(&newproc, NULL, NULL, APR_WAIT);
-    CuAssertIntEquals(tc, APR_CHILD_DONE, rv);
+    abts_int_equal(tc, APR_CHILD_DONE, rv);
 }
 
-static void test_file_redir(CuTest *tc)
+static void test_file_redir(abts_case *tc, void *data)
 {
     apr_file_t *testout = NULL;
     apr_file_t *testerr = NULL;
@@ -92,55 +92,55 @@ static void test_file_redir(CuTest *tc)
     rv = apr_file_open(&testfile, "data/stdin",
                        APR_READ | APR_WRITE | APR_CREATE | APR_EXCL,
                        APR_OS_DEFAULT, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     rv = apr_file_open(&testout, "data/stdout",
                        APR_READ | APR_WRITE | APR_CREATE | APR_EXCL,
                        APR_OS_DEFAULT, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     rv = apr_file_open(&testerr, "data/stderr",
                        APR_READ | APR_WRITE | APR_CREATE | APR_EXCL,
                        APR_OS_DEFAULT, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     length = strlen(TESTSTR);
     apr_file_write(testfile, TESTSTR, &length);
     offset = 0;
     rv = apr_file_seek(testfile, APR_SET, &offset);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 0, offset);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 0, offset);
 
     rv = apr_procattr_create(&attr, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     rv = apr_procattr_child_in_set(attr, testfile, NULL);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     rv = apr_procattr_child_out_set(attr, testout, NULL);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     rv = apr_procattr_child_err_set(attr, testerr, NULL);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     rv = apr_procattr_dir_set(attr, "data");
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     rv = apr_procattr_cmdtype_set(attr, APR_PROGRAM);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     args[0] = "proc_child";
     args[1] = NULL;
 
     rv = apr_proc_create(&newproc, "../proc_child" EXTENSION, args, NULL, 
                          attr, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_proc_wait(&newproc, NULL, NULL, APR_WAIT);
-    CuAssertIntEquals(tc, APR_CHILD_DONE, rv);
+    abts_int_equal(tc, APR_CHILD_DONE, rv);
 
     offset = 0;
     rv = apr_file_seek(testout, APR_SET, &offset);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     length = 256;
     buf = apr_pcalloc(p, length);
     rv = apr_file_read(testout, buf, &length);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, TESTSTR, buf);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_str_equal(tc, TESTSTR, buf);
 
 
     apr_file_close(testfile);
@@ -148,20 +148,20 @@ static void test_file_redir(CuTest *tc)
     apr_file_close(testerr);
 
     rv = apr_file_remove("data/stdin", p);;
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     rv = apr_file_remove("data/stdout", p);;
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     rv = apr_file_remove("data/stderr", p);;
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 }
 
-CuSuite *testproc(void)
+abts_suite *testproc(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Process control");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, test_create_proc);
-    SUITE_ADD_TEST(suite, test_proc_wait);
-    SUITE_ADD_TEST(suite, test_file_redir);
+    abts_run_test(suite, test_create_proc, NULL);
+    abts_run_test(suite, test_proc_wait, NULL);
+    abts_run_test(suite, test_file_redir, NULL);
 
     return suite;
 }

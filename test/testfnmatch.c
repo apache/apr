@@ -13,32 +13,32 @@
  * limitations under the License.
  */
 
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr_file_info.h"
 #include "apr_fnmatch.h"
 #include "apr_tables.h"
 
-static void test_glob(CuTest *tc)
+static void test_glob(abts_case *tc, void *data)
 {
     int i;
     char **list;
     apr_array_header_t *result;
     apr_status_t rv = apr_match_glob("data\\*.txt", &result, p);
 
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     /* XXX If we ever add a file that matches *.txt to data, then we need
      * to increase this.
      */
-    CuAssertIntEquals(tc, 2, result->nelts);
+    abts_int_equal(tc, 2, result->nelts);
 
     list = (char **)result->elts;
     for (i = 0; i < result->nelts; i++) {
         char *dot = strrchr(list[i], '.');
-        CuAssertStrEquals(tc, dot, ".txt");
+        abts_str_equal(tc, dot, ".txt");
     }
 }
 
-static void test_glob_currdir(CuTest *tc)
+static void test_glob_currdir(abts_case *tc, void *data)
 {
     int i;
     char **list;
@@ -47,26 +47,26 @@ static void test_glob_currdir(CuTest *tc)
     apr_filepath_set("data", p);
     rv = apr_match_glob("*.txt", &result, p);
 
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     /* XXX If we ever add a file that matches *.txt to data, then we need
      * to increase this.
      */
-    CuAssertIntEquals(tc, 2, result->nelts);
+    abts_int_equal(tc, 2, result->nelts);
 
     list = (char **)result->elts;
     for (i = 0; i < result->nelts; i++) {
         char *dot = strrchr(list[i], '.');
-        CuAssertStrEquals(tc, dot, ".txt");
+        abts_str_equal(tc, dot, ".txt");
     }
     apr_filepath_set("..", p);
 }
 
-CuSuite *testfnmatch(void)
+abts_suite *testfnmatch(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Fnmatch");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, test_glob);
-    SUITE_ADD_TEST(suite, test_glob_currdir);
+    abts_run_test(suite, test_glob, NULL);
+    abts_run_test(suite, test_glob_currdir, NULL);
 
     return suite;
 }

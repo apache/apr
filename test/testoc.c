@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr_thread_proc.h"
 #include "apr_errno.h"
 #include "apr_general.h"
@@ -53,7 +53,7 @@ static void ocmaint(int reason, void *data, int status)
 /* It would be great if we could stress this stuff more, and make the test
  * more granular.
  */
-static void test_child_kill(CuTest *tc)
+static void test_child_kill(abts_case *tc, void *data)
 {
     apr_file_t *std = NULL;
     apr_proc_t newproc;
@@ -66,17 +66,17 @@ static void test_child_kill(CuTest *tc)
     args[2] = NULL;
 
     rv = apr_procattr_create(&procattr, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_procattr_io_set(procattr, APR_FULL_BLOCK, APR_NO_PIPE, 
                              APR_NO_PIPE);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_proc_create(&newproc, "./occhild" EXTENSION, args, NULL, procattr, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, newproc.in);
-    CuAssertPtrEquals(tc, NULL, newproc.out);
-    CuAssertPtrEquals(tc, NULL, newproc.err);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, newproc.in);
+    abts_ptr_equal(tc, NULL, newproc.out);
+    abts_ptr_equal(tc, NULL, newproc.err);
 
     std = newproc.in;
 
@@ -84,31 +84,31 @@ static void test_child_kill(CuTest *tc)
 
     apr_sleep(apr_time_from_sec(1));
     rv = apr_proc_kill(&newproc, SIGKILL);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     
     /* allow time for things to settle... */
     apr_sleep(apr_time_from_sec(3));
     
     apr_proc_other_child_refresh_all(APR_OC_REASON_RUNNING);
-    CuAssertStrEquals(tc, "APR_OC_REASON_DEATH", reasonstr);
+    abts_str_equal(tc, "APR_OC_REASON_DEATH", reasonstr);
 }    
 #else
 
-static void oc_not_impl(CuTest *tc)
+static void oc_not_impl(abts_case *tc, void *data)
 {
-    CuNotImpl(tc, "Other child logic not implemented on this platform");
+    abts_not_impl(tc, "Other child logic not implemented on this platform");
 }
 #endif
 
-CuSuite *testoc(void)
+abts_suite *testoc(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Other Child");
+    suite = ADD_SUITE(suite)
 
 #if !APR_HAS_OTHER_CHILD
-    SUITE_ADD_TEST(suite, oc_not_impl);
+    abts_run_test(suite, oc_not_impl, NULL);
 #else
 
-    SUITE_ADD_TEST(suite, test_child_kill); 
+    abts_run_test(suite, test_child_kill, NULL); 
 
 #endif
     return suite;

@@ -18,13 +18,13 @@
 #include "apr_pools.h"
 #include "apr_errno.h"
 #include "apr_file_io.h"
-#include "test_apr.h"
+#include "testutil.h"
 
 #define TEST "Testing\n"
 #define TEST2 "Testing again\n"
 #define FILEPATH "data/"
 
-static void test_file_dup(CuTest *tc)
+static void test_file_dup(abts_case *tc, void *data)
 {
     apr_file_t *file1 = NULL;
     apr_file_t *file3 = NULL;
@@ -35,24 +35,24 @@ static void test_file_dup(CuTest *tc)
     rv = apr_file_open(&file1, FILEPATH "testdup.file", 
                        APR_READ | APR_WRITE | APR_CREATE |
                        APR_DELONCLOSE, APR_OS_DEFAULT, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, file1);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, file1);
 
     rv = apr_file_dup(&file3, file1, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, file3);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, file3);
 
     rv = apr_file_close(file1);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     /* cleanup after ourselves */
     rv = apr_file_close(file3);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     rv = apr_stat(&finfo, FILEPATH "testdup.file", APR_FINFO_NORM, p);
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOENT(rv));
+    abts_int_equal(tc, 1, APR_STATUS_IS_ENOENT(rv));
 }  
 
-static void test_file_readwrite(CuTest *tc)
+static void test_file_readwrite(abts_case *tc, void *data)
 {
     apr_file_t *file1 = NULL;
     apr_file_t *file3 = NULL;
@@ -66,38 +66,38 @@ static void test_file_readwrite(CuTest *tc)
     rv = apr_file_open(&file1, FILEPATH "testdup.readwrite.file", 
                        APR_READ | APR_WRITE | APR_CREATE |
                        APR_DELONCLOSE, APR_OS_DEFAULT, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, file1);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, file1);
 
     rv = apr_file_dup(&file3, file1, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, file3);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, file3);
 
     rv = apr_file_write(file3, TEST, &txtlen);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, sizeof(TEST), txtlen);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, sizeof(TEST), txtlen);
 
     fpos = 0;
     rv = apr_file_seek(file1, APR_SET, &fpos);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 0, fpos);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 0, fpos);
 
     txtlen = 50;
     rv = apr_file_read(file1, buff, &txtlen);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, TEST, buff);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_str_equal(tc, TEST, buff);
 
     /* cleanup after ourselves */
     rv = apr_file_close(file1);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_close(file3);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     rv = apr_stat(&finfo, FILEPATH "testdup.readwrite.file", APR_FINFO_NORM, p);
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOENT(rv));
+    abts_int_equal(tc, 1, APR_STATUS_IS_ENOENT(rv));
 }  
 
-static void test_dup2(CuTest *tc)
+static void test_dup2(abts_case *tc, void *data)
 {
     apr_file_t *testfile = NULL;
     apr_file_t *errfile = NULL;
@@ -107,29 +107,29 @@ static void test_dup2(CuTest *tc)
     rv = apr_file_open(&testfile, FILEPATH "testdup2.file", 
                        APR_READ | APR_WRITE | APR_CREATE |
                        APR_DELONCLOSE, APR_OS_DEFAULT, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, testfile);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, testfile);
 
     rv = apr_file_open_stderr(&errfile, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     /* Set aside the real errfile */
     rv = apr_file_dup(&saveerr, errfile, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, saveerr);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, saveerr);
 
     rv = apr_file_dup2(errfile, testfile, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, errfile);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, errfile);
 
     apr_file_close(testfile);
 
     rv = apr_file_dup2(errfile, saveerr, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, errfile);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, errfile);
 }
 
-static void test_dup2_readwrite(CuTest *tc)
+static void test_dup2_readwrite(abts_case *tc, void *data)
 {
     apr_file_t *errfile = NULL;
     apr_file_t *testfile = NULL;
@@ -142,51 +142,51 @@ static void test_dup2_readwrite(CuTest *tc)
     rv = apr_file_open(&testfile, FILEPATH "testdup2.readwrite.file", 
                        APR_READ | APR_WRITE | APR_CREATE |
                        APR_DELONCLOSE, APR_OS_DEFAULT, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, testfile);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, testfile);
 
     rv = apr_file_open_stderr(&errfile, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     /* Set aside the real errfile */
     rv = apr_file_dup(&saveerr, errfile, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, saveerr);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, saveerr);
 
     rv = apr_file_dup2(errfile, testfile, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, errfile);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, errfile);
 
     txtlen = sizeof(TEST2);
     rv = apr_file_write(errfile, TEST2, &txtlen);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, sizeof(TEST2), txtlen);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, sizeof(TEST2), txtlen);
 
     fpos = 0;
     rv = apr_file_seek(testfile, APR_SET, &fpos);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 0, fpos);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 0, fpos);
 
     txtlen = 50;
     rv = apr_file_read(testfile, buff, &txtlen);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, TEST2, buff);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_str_equal(tc, TEST2, buff);
       
     apr_file_close(testfile);
 
     rv = apr_file_dup2(errfile, saveerr, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, errfile);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, errfile);
 }
 
-CuSuite *testdup(void)
+abts_suite *testdup(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("File duplication");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, test_file_dup);
-    SUITE_ADD_TEST(suite, test_file_readwrite);
-    SUITE_ADD_TEST(suite, test_dup2);
-    SUITE_ADD_TEST(suite, test_dup2_readwrite);
+    abts_run_test(suite, test_file_dup, NULL);
+    abts_run_test(suite, test_file_readwrite, NULL);
+    abts_run_test(suite, test_dup2, NULL);
+    abts_run_test(suite, test_dup2_readwrite, NULL);
 
     return suite;
 }

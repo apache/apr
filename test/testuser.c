@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_user.h"
 
 #if APR_HAS_USER
-static void uid_current(CuTest *tc)
+static void uid_current(abts_case *tc, void *data)
 {
     apr_uid_t uid;
     apr_gid_t gid;
@@ -28,7 +28,7 @@ static void uid_current(CuTest *tc)
                        apr_uid_current(&uid, &gid, p));
 }
 
-static void username(CuTest *tc)
+static void username(abts_case *tc, void *data)
 {
     apr_uid_t uid;
     apr_gid_t gid;
@@ -41,7 +41,7 @@ static void username(CuTest *tc)
    
     apr_assert_success(tc, "apr_uid_name_get failed",
                        apr_uid_name_get(&uname, uid, p));
-    CuAssertPtrNotNull(tc, uname);
+    abts_ptr_notnull(tc, uname);
 
     apr_assert_success(tc, "apr_uid_get failed",
                        apr_uid_get(&retreived_uid, &retreived_gid, uname, p));
@@ -57,10 +57,10 @@ static void username(CuTest *tc)
          * also return apr_gid_t values, which was bogus.
          */
         if (!gid) {
-            CuNotImpl(tc, "Groups from apr_uid_current");
+            abts_not_impl(tc, "Groups from apr_uid_current");
         }
         else {
-            CuNotImpl(tc, "Groups from apr_uid_get");
+            abts_not_impl(tc, "Groups from apr_uid_get");
         }        
     }
     else {
@@ -72,7 +72,7 @@ static void username(CuTest *tc)
 #endif
 }
 
-static void groupname(CuTest *tc)
+static void groupname(abts_case *tc, void *data)
 {
     apr_uid_t uid;
     apr_gid_t gid;
@@ -84,7 +84,7 @@ static void groupname(CuTest *tc)
 
     apr_assert_success(tc, "apr_gid_name_get failed",
                        apr_gid_name_get(&gname, gid, p));
-    CuAssertPtrNotNull(tc, gname);
+    abts_ptr_notnull(tc, gname);
 
     apr_assert_success(tc, "apr_gid_get failed",
                        apr_gid_get(&retreived_gid, gname, p));
@@ -93,22 +93,22 @@ static void groupname(CuTest *tc)
                        apr_gid_compare(gid, retreived_gid));
 }
 #else
-static void users_not_impl(CuTest *tc)
+static void users_not_impl(abts_case *tc, void *data)
 {
-    CuNotImpl(tc, "Users not implemented on this platform");
+    abts_not_impl(tc, "Users not implemented on this platform");
 }
 #endif
 
-CuSuite *testuser(void)
+abts_suite *testuser(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Users");
+    suite = ADD_SUITE(suite)
 
 #if !APR_HAS_USER
-    SUITE_ADD_TEST(suite, users_not_impl);
+    abts_run_test(suite, users_not_impl, NULL);
 #else
-    SUITE_ADD_TEST(suite, uid_current);
-    SUITE_ADD_TEST(suite, username);
-    SUITE_ADD_TEST(suite, groupname);
+    abts_run_test(suite, uid_current, NULL);
+    abts_run_test(suite, username, NULL);
+    abts_run_test(suite, groupname, NULL);
 #endif
 
     return suite;

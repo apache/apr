@@ -23,7 +23,7 @@
 #include "errno.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "test_apr.h"
+#include "testutil.h"
 
 #if APR_HAS_FORK
 
@@ -41,7 +41,7 @@ static int increment(int n)
     return n+1;
 }
 
-static void make_child(CuTest *tc, apr_proc_t **proc, apr_pool_t *p)
+static void make_child(abts_case *tc, apr_proc_t **proc, apr_pool_t *p)
 {
     apr_status_t rv;
 
@@ -77,22 +77,22 @@ static void make_child(CuTest *tc, apr_proc_t **proc, apr_pool_t *p)
         exit(0);
     } 
 
-    CuAssert(tc, "fork failed", rv == APR_INPARENT);
+    abts_assert(tc, "fork failed", rv == APR_INPARENT);
 }
 
 /* Wait for a child process and check it terminated with success. */
-static void await_child(CuTest *tc, apr_proc_t *proc)
+static void await_child(abts_case *tc, apr_proc_t *proc)
 {
     int code;
     apr_exit_why_e why;
     apr_status_t rv;
 
     rv = apr_proc_wait(proc, &code, &why, APR_WAIT);
-    CuAssert(tc, "child did not terminate with success",
+    abts_assert(tc, "child did not terminate with success",
              rv == APR_CHILD_DONE && why == APR_PROC_EXIT && code == 0);
 }
 
-static void test_exclusive(CuTest *tc, const char *lockname)
+static void test_exclusive(abts_case *tc, const char *lockname)
 {
     apr_proc_t *child[CHILDREN];
     apr_status_t rv;
@@ -107,11 +107,11 @@ static void test_exclusive(CuTest *tc, const char *lockname)
     for (n = 0; n < CHILDREN; n++)
         await_child(tc, child[n]);
     
-    CuAssert(tc, "Locks don't appear to work", *x == MAX_COUNTER);
+    abts_assert(tc, "Locks don't appear to work", *x == MAX_COUNTER);
 }
 #endif
 
-static void proc_mutex(CuTest *tc)
+static void proc_mutex(abts_case *tc, void *data)
 {
 #if APR_HAS_FORK
     apr_status_t rv;
@@ -130,16 +130,16 @@ static void proc_mutex(CuTest *tc)
     x = apr_shm_baseaddr_get(shm);
     test_exclusive(tc, NULL);
 #else
-    CuNotImpl(tc, "APR lacks fork() support");
+    abts_not_impl(tc, "APR lacks fork() support");
 #endif
 }
 
 
-CuSuite *testprocmutex(void)
+abts_suite *testprocmutex(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Cross-Process Mutexes");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, proc_mutex);
+    abts_run_test(suite, proc_mutex, NULL);
 
     return suite;
 }

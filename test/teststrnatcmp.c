@@ -16,61 +16,61 @@
 #include "apr_file_io.h"
 #include "apr_errno.h"
 #include "apr_strings.h"
-#include "test_apr.h"
+#include "testutil.h"
 
-static void less0(CuTest *tc)
+static void less0(abts_case *tc, void *data)
 {
     int rv = apr_strnatcmp("a", "b");
-    CuAssert(tc, "didn't compare simple strings properly", rv < 0);
+    abts_assert(tc, "didn't compare simple strings properly", rv < 0);
 }
 
-static void str_equal(CuTest *tc)
+static void str_equal(abts_case *tc, void *data)
 {
     int rv = apr_strnatcmp("a", "a");
-    CuAssert(tc, "didn't compare simple strings properly", rv == 0);
+    abts_assert(tc, "didn't compare simple strings properly", rv == 0);
 }
 
-static void more0(CuTest *tc)
+static void more0(abts_case *tc, void *data)
 {
     int rv = apr_strnatcmp("b", "a");
-    CuAssert(tc, "didn't compare simple strings properly", rv > 0);
+    abts_assert(tc, "didn't compare simple strings properly", rv > 0);
 }
 
-static void less_ignore_case(CuTest *tc)
+static void less_ignore_case(abts_case *tc, void *data)
 {
     int rv = apr_strnatcasecmp("a", "B");
-    CuAssert(tc, "didn't compare simple strings properly", rv < 0);
+    abts_assert(tc, "didn't compare simple strings properly", rv < 0);
 }
 
-static void str_equal_ignore_case(CuTest *tc)
+static void str_equal_ignore_case(abts_case *tc, void *data)
 {
     int rv = apr_strnatcasecmp("a", "A");
-    CuAssert(tc, "didn't compare simple strings properly", rv == 0);
+    abts_assert(tc, "didn't compare simple strings properly", rv == 0);
 }
 
-static void more_ignore_case(CuTest *tc)
+static void more_ignore_case(abts_case *tc, void *data)
 {
     int rv = apr_strnatcasecmp("b", "A");
-    CuAssert(tc, "didn't compare simple strings properly", rv > 0);
+    abts_assert(tc, "didn't compare simple strings properly", rv > 0);
 }
 
-static void natcmp(CuTest *tc)
+static void natcmp(abts_case *tc, void *data)
 {
     int rv = apr_strnatcasecmp("a2", "a10");
-    CuAssert(tc, "didn't compare simple strings properly", rv < 0);
+    abts_assert(tc, "didn't compare simple strings properly", rv < 0);
 }
 
-CuSuite *teststrnatcmp(void)
+abts_suite *teststrnatcmp(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Natural String Cmp");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, less0);
-    SUITE_ADD_TEST(suite, str_equal);
-    SUITE_ADD_TEST(suite, more0);
-    SUITE_ADD_TEST(suite, less_ignore_case);
-    SUITE_ADD_TEST(suite, str_equal_ignore_case);
-    SUITE_ADD_TEST(suite, more_ignore_case);
-    SUITE_ADD_TEST(suite, natcmp);
+    abts_run_test(suite, less0, NULL);
+    abts_run_test(suite, str_equal, NULL);
+    abts_run_test(suite, more0, NULL);
+    abts_run_test(suite, less_ignore_case, NULL);
+    abts_run_test(suite, str_equal_ignore_case, NULL);
+    abts_run_test(suite, more_ignore_case, NULL);
+    abts_run_test(suite, natcmp, NULL);
 
     return suite;
 }

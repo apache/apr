@@ -58,7 +58,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "test_apr.h"
+#include "testutil.h"
 
 static void hexdump(const unsigned char *b,int n)
     {
@@ -85,21 +85,21 @@ static apr_random_t *r;
 
 typedef apr_status_t APR_THREAD_FUNC rnd_fn(apr_random_t *r,void *b,apr_size_t n);
 
-static void rand_run_kat(CuTest *tc,rnd_fn *f,apr_random_t *r,
+static void rand_run_kat(abts_case *tc,rnd_fn *f,apr_random_t *r,
                          const unsigned char expected[128])
     {
     unsigned char c[128];
     apr_status_t rv;
 
     rv=f(r,c,128);
-    CuAssertIntEquals(tc,0,rv);
+    abts_int_equal(tc,0,rv);
     if(rv)
         return;
     if(memcmp(c,expected,128))
         {
         hexdump(c,128);
         hexdump(expected,128);
-        CuFail(tc,"Randomness mismatch");
+        abts_fail(tc,"Randomness mismatch");
         }
     }
 
@@ -124,7 +124,7 @@ static void rand_add_zeroes(apr_random_t *r)
     apr_random_add_entropy(r,c,sizeof c);
     }
 
-static void rand_run_seed_short(CuTest *tc,rnd_fn *f,apr_random_t *r,
+static void rand_run_seed_short(abts_case *tc,rnd_fn *f,apr_random_t *r,
                                 int count)
     {
     int i;
@@ -134,16 +134,16 @@ static void rand_run_seed_short(CuTest *tc,rnd_fn *f,apr_random_t *r,
     for(i=0 ; i < count ; ++i)
         rand_add_zeroes(r);
     rv=f(r,c,1);
-    CuAssertIntEquals(tc,1,APR_STATUS_IS_ENOTENOUGHENTROPY(rv));
+    abts_int_equal(tc,1,APR_STATUS_IS_ENOTENOUGHENTROPY(rv));
     }
 
-static void rand_seed_short(CuTest *tc)
+static void rand_seed_short(abts_case *tc, void *data)
     {
     r=apr_random_standard_new(p);
     rand_run_seed_short(tc,apr_random_insecure_bytes,r,32);
     }
 
-static void rand_kat(CuTest *tc)
+static void rand_kat(abts_case *tc, void *data)
     {
     unsigned char expected[128]=
         { 0x82,0x04,0xad,0xd2,0x0b,0xd5,0xac,0xda,
@@ -167,12 +167,12 @@ static void rand_kat(CuTest *tc)
     rand_run_kat(tc,apr_random_insecure_bytes,r,expected);
     }    
 
-static void rand_seed_short2(CuTest *tc)
+static void rand_seed_short2(abts_case *tc, void *data)
     {
     rand_run_seed_short(tc,apr_random_secure_bytes,r,320);
     }
 
-static void rand_kat2(CuTest *tc)
+static void rand_kat2(abts_case *tc, void *data)
     {
     unsigned char expected[128]=
         { 0x38,0x8f,0x01,0x29,0x5a,0x5c,0x1f,0xa8,
@@ -196,13 +196,13 @@ static void rand_kat2(CuTest *tc)
     rand_run_kat(tc,apr_random_secure_bytes,r,expected);
     }    
 
-static void rand_barrier(CuTest *tc)
+static void rand_barrier(abts_case *tc, void *data)
     {
     apr_random_barrier(r);
     rand_run_seed_short(tc,apr_random_secure_bytes,r,320);
     }
 
-static void rand_kat3(CuTest *tc)
+static void rand_kat3(abts_case *tc, void *data)
     {
     unsigned char expected[128]=
         { 0xe8,0xe7,0xc9,0x45,0xe2,0x2a,0x54,0xb2,
@@ -225,7 +225,7 @@ static void rand_kat3(CuTest *tc)
     rand_run_kat(tc,apr_random_insecure_bytes,r,expected);
     }    
 
-static void rand_kat4(CuTest *tc)
+static void rand_kat4(abts_case *tc, void *data)
     {
     unsigned char expected[128]=
         { 0x7d,0x0e,0xc4,0x4e,0x3e,0xac,0x86,0x50,
@@ -250,7 +250,7 @@ static void rand_kat4(CuTest *tc)
     }    
 
 #if APR_HAS_FORK
-static void rand_fork(CuTest *tc)
+static void rand_fork(abts_case *tc, void *data)
     {
     apr_proc_t proc;
     apr_status_t rv;
@@ -290,46 +290,46 @@ static void rand_fork(CuTest *tc)
         apr_proc_wait(&proc,&exitcode,&why,APR_WAIT);
         if(why != APR_PROC_EXIT)
             {
-            CuFail(tc,"Child terminated abnormally");
+            abts_fail(tc,"Child terminated abnormally");
             return;
             }
         if(exitcode == 0)
             {
-            CuFail(tc,"Child produced our randomness");
+            abts_fail(tc,"Child produced our randomness");
             return;
             }
         else if(exitcode == 2)
             {
-            CuFail(tc,"Child randomness failed");
+            abts_fail(tc,"Child randomness failed");
             return;
             }
         else if(exitcode != 1)
             {
-            CuFail(tc,"Uknown child error");
+            abts_fail(tc,"Uknown child error");
             return;
             }
         }
     else
         {
-        CuFail(tc,"Fork failed");
+        abts_fail(tc,"Fork failed");
         return;
         }
     }
 #endif    
         
-CuSuite *testrand2(void)
+abts_suite *testrand2(abts_suite *suite)
     {
-    CuSuite *suite = CuSuiteNew("Random2");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, rand_seed_short);
-    SUITE_ADD_TEST(suite, rand_kat);
-    SUITE_ADD_TEST(suite, rand_seed_short2);
-    SUITE_ADD_TEST(suite, rand_kat2);
-    SUITE_ADD_TEST(suite, rand_barrier);
-    SUITE_ADD_TEST(suite, rand_kat3);
-    SUITE_ADD_TEST(suite, rand_kat4);
+    abts_run_test(suite, rand_seed_short, NULL);
+    abts_run_test(suite, rand_kat, NULL);
+    abts_run_test(suite, rand_seed_short2, NULL);
+    abts_run_test(suite, rand_kat2, NULL);
+    abts_run_test(suite, rand_barrier, NULL);
+    abts_run_test(suite, rand_kat3, NULL);
+    abts_run_test(suite, rand_kat4, NULL);
 #if APR_HAS_FORK
-    SUITE_ADD_TEST(suite, rand_fork);
+    abts_run_test(suite, rand_fork, NULL);
 #endif
 
     return suite;
