@@ -404,7 +404,7 @@ APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key,
  * @deffunc apr_status_t apr_os_dso_handle_put(apr_dso_handle_t **dso, apr_os_dso_handle_t *thedso, apr_pool_t *pool)
  */
 APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **dso,
-                                                apr_os_dso_handle_t *thedso,
+                                                apr_os_dso_handle_t thedso,
                                                 apr_pool_t *pool);
 
 /**
