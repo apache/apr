@@ -54,7 +54,7 @@ def main():
 
   f.write('\nOBJECTS = %s\n\n' % string.join(objects))
   f.write('HEADERS = $(top_srcdir)/%s\n\n' % string.join(headers, ' $(top_srcdir)/'))
-  f.write('SOURCE_DIRS = %s\n\n' % string.join(dirs.keys()))
+  f.write('SOURCE_DIRS = %s $(EXTRA_SOURCE_DIRS)\n\n' % string.join(dirs.keys()))
 
 
 def extract_deps(fname, legal_deps):
