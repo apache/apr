@@ -32,6 +32,8 @@
 #ifndef CU_TEST_H
 #define CU_TEST_H
 
+#include "apr_errno.h" /* for apr_status_t */
+
 #include <setjmp.h>
 #include <stdarg.h>
 
@@ -89,6 +91,11 @@ void CuAssertStrEquals(CuTest* tc, const char* expected, const char* actual);
 void CuAssertIntEquals(CuTest* tc, int expected, int actual);
 void CuAssertPtrEquals(CuTest* tc, const void* expected, const void* actual);
 void CuAssertPtrNotNull(CuTest* tc, const void* pointer);
+
+/* Assert that RV is an APR_SUCCESS value; else fail giving strerror
+ * for RV and CONTEXT message. */
+void CuAssertSuccess(CuTest* tc, const char *context, apr_status_t rv);
+
 void CuTestRun(CuTest* tc);
 
 /* CuSuite */
