@@ -17,6 +17,7 @@ TARGETS = \
 	testdso@EXEEXT@ \
 	testoc@EXEEXT@ \
 	testuuid@EXEEXT@ \
+        testsockopt@EXEEXT@ \
 	occhild@EXEEXT@ \
 	mod_test.so
 
@@ -90,5 +91,8 @@ testpipe@EXEEXT@: testpipe.lo
 
 testuuid@EXEEXT@: testuuid.lo
 	$(LINK) testuuid.lo $(ALL_LIBS)
+
+testsockopt@EXEEXT@: testsockopt.lo
+	$(LINK) testsockopt.lo $(ALL_LIBS)
 
 # DO NOT REMOVE
