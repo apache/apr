@@ -88,8 +88,7 @@ APR_DECLARE(void) apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
 
 #endif /* __FreeBSD__ && !__i386__ */
 
-#if (defined(__linux__) || defined(__sun__) || defined(__EMX__) || defined(__FreeBSD__)) \
-        && defined(__i386__) && !APR_FORCE_ATOMIC_GENERIC
+#if defined(__i386__) && defined(__GNUC__) && !APR_FORCE_ATOMIC_GENERIC
 
 APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem, 
                                            apr_uint32_t with,
