@@ -249,6 +249,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
     }
     newargs[nargs] = NULL;
 
+    /* ### we should be looking at attr->cmdtype in here... */
+
     newproc = load_image(nargs, (const char**)newargs, (const char**)env);
 
     /* load_image copies the data so now we can free it... */
