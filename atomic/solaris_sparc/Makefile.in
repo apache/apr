@@ -16,6 +16,6 @@ apr_atomic_sparc.lo: apr_atomic_sparc.s
 
 DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
 INCDIR=../../include
-INCLUDES=-I$(INCDIR) -I$(DEFOSDIRi
+INCLUDES=-I$(INCDIR) -I$(DEFOSDIR)
 
 # DO NOT REMOVE
