@@ -60,9 +60,9 @@
 #include <string.h>
 #include <sys/types.h>
 
-/* A file to put ALL of the accessor functions for struct file_t types. */
+/* A file to put ALL of the accessor functions for struct ap_file_t types. */
 
-ap_status_t ap_get_filename(char **new, struct file_t *thefile)
+ap_status_t ap_get_filename(char **new, struct ap_file_t *thefile)
 {
     if (thefile != NULL) {
         *new = ap_pstrdup(thefile->cntxt, thefile->fname);
@@ -104,7 +104,7 @@ ap_status_t ap_get_filename(char **new, struct file_t *thefile)
 
 
 /*
-ap_status_t ap_get_fileperms(ap_fileperms_t *perm, struct file_t *file)
+ap_status_t ap_get_fileperms(ap_fileperms_t *perm, struct ap_file_t *file)
 {
     if (file != NULL) {
         *perm = file->protection;
@@ -117,7 +117,7 @@ ap_status_t ap_get_fileperms(ap_fileperms_t *perm, struct file_t *file)
 }
 */
 
-ap_status_t ap_get_filedata(void **data, char *key, struct file_t *file)
+ap_status_t ap_get_filedata(void **data, char *key, struct ap_file_t *file)
 {    
     if (file != NULL) {
         return ap_get_userdata(data, key, file->cntxt);
@@ -128,7 +128,7 @@ ap_status_t ap_get_filedata(void **data, char *key, struct file_t *file)
     }
 }
                    
-ap_status_t ap_set_filedata(struct file_t *file, void *data, char *key,
+ap_status_t ap_set_filedata(struct ap_file_t *file, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
 {    
     if (file != NULL) {

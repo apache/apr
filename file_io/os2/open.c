@@ -63,19 +63,19 @@
 
 ap_status_t apr_file_cleanup(void *thefile)
 {
-    struct file_t *file = thefile;
+    struct ap_file_t *file = thefile;
     return ap_close(file);
 }
 
 
 
-ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_context_t *cntxt)
+ap_status_t ap_open(struct ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_context_t *cntxt)
 {
     int oflags = 0;
     int mflags = OPEN_FLAGS_FAIL_ON_ERROR|OPEN_SHARE_DENYNONE;
     int rv;
     ULONG action;
-    ap_file_t *dafile = (struct file_t *)ap_palloc(cntxt, sizeof(struct file_t));
+    ap_file_t *dafile = (struct ap_file_t *)ap_palloc(cntxt, sizeof(struct ap_file_t));
 
     *new = dafile;
     dafile->cntxt = cntxt;
@@ -179,7 +179,7 @@ ap_status_t ap_remove_file(char *path, ap_context_t *cntxt)
 
 
 
-ap_status_t ap_get_os_file(ap_os_file_t *thefile, struct file_t *file)
+ap_status_t ap_get_os_file(ap_os_file_t *thefile, struct ap_file_t *file)
 {
     if (file == NULL) {
         return APR_ENOFILE;
@@ -191,11 +191,11 @@ ap_status_t ap_get_os_file(ap_os_file_t *thefile, struct file_t *file)
 
 
 
-ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile, ap_context_t *cont)
+ap_status_t ap_put_os_file(struct ap_file_t **file, ap_os_file_t *thefile, ap_context_t *cont)
 {
     ap_os_file_t *dafile = thefile;
     if ((*file) == NULL) {
-        (*file) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
+        (*file) = (struct ap_file_t *)ap_palloc(cont, sizeof(struct ap_file_t));
         (*file)->cntxt = cont;
     }
     (*file)->filedes = *dafile;
@@ -218,9 +218,9 @@ ap_status_t ap_eof(ap_file_t *fptr)
 
 
 
-ap_status_t ap_open_stderr(struct file_t **thefile, ap_context_t *cont)
+ap_status_t ap_open_stderr(struct ap_file_t **thefile, ap_context_t *cont)
 {
-    (*thefile) = ap_palloc(cont, sizeof(struct file_t));
+    (*thefile) = ap_palloc(cont, sizeof(struct ap_file_t));
     if ((*thefile) == NULL) {
         return APR_ENOMEM;
     }

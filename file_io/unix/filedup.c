@@ -61,7 +61,7 @@
  * arg 2) The file to duplicate.
  * NOTE: *arg1 must point to a valid ap_file_t, or point to NULL
  */         
-ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
+ap_status_t ap_dupfile(struct ap_file_t **new_file, struct ap_file_t *old_file)
 {
     char *buf_oflags;
     int have_file = 0;
@@ -70,8 +70,8 @@ ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
         return APR_EBADARG;
 
     if ((*new_file) == NULL) {
-        (*new_file) = (struct file_t *)ap_pcalloc(old_file->cntxt,
-                                   sizeof(struct file_t));
+        (*new_file) = (struct ap_file_t *)ap_pcalloc(old_file->cntxt,
+                                   sizeof(struct ap_file_t));
         if ((*new_file) == NULL) {
             return APR_ENOMEM;
         }

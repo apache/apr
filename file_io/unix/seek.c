@@ -67,7 +67,7 @@
  * NOTE:  The third argument is modified to be the offset the pointer
  *        was actually moved to.
  */
-ap_status_t ap_seek(struct file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
+ap_status_t ap_seek(struct ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
 {
     ap_off_t rv;
     if (thefile->buffered) {

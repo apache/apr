@@ -128,7 +128,7 @@ For this reason, each platform defines a structure in their own directories.
 Those structures are then typedef'ed in an external header file.  For example
 in file_io/unix/fileio.h:
 
-    struct file_t {
+    struct ap_file_t {
         ap_context_t *cntxt;
         int filedes;
         FILE *filehand;
@@ -136,7 +136,7 @@ in file_io/unix/fileio.h:
     }
 
 In include/apr_file_io.h:
-    typedef struct file_t    ap_file_t;
+    typedef struct ap_file_t    ap_file_t;
 
 This will cause a compiler error if somebody tries to access the filedes field
 in this strcture.  Windows does not have a filedes field, so obviously, it is

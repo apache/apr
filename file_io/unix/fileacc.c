@@ -54,7 +54,7 @@
 
 #include "fileio.h"
 
-/* A file to put ALL of the accessor functions for struct file_t types. */
+/* A file to put ALL of the accessor functions for struct ap_file_t types. */
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_get_filename(char **new, ap_file_t *thefile)
@@ -62,7 +62,7 @@
  * arg 1) The path of the file.  
  * arg 2) The currently open file.
  */                     
-ap_status_t ap_get_filename(char **new, struct file_t *thefile)
+ap_status_t ap_get_filename(char **new, struct ap_file_t *thefile)
 {
     if(new == NULL)
         return APR_EBADARG;
@@ -112,7 +112,7 @@ mode_t get_fileperms(ap_fileperms_t mode)
  * arg 2) The key to use for retreiving data associated with this file.
  * arg 3) The currently open file.
  */                     
-ap_status_t ap_get_filedata(void **data, char *key, struct file_t *file)
+ap_status_t ap_get_filedata(void **data, char *key, struct ap_file_t *file)
 {    
     if(data == NULL || key == NULL)
         return APR_EBADARG;
@@ -135,7 +135,7 @@ ap_status_t ap_get_filedata(void **data, char *key, struct file_t *file)
  * arg 3) The key to use for assocaiteing data with the file.
  * arg 4) The cleanup routine to use when the file is destroyed.
  */                     
-ap_status_t ap_set_filedata(struct file_t *file, void *data, char *key,
+ap_status_t ap_set_filedata(struct ap_file_t *file, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
 {    
     if(data == NULL || key == NULL)
