@@ -109,7 +109,7 @@ fi
 
 thisdir="`dirname $0`"
 thisdir="`cd $thisdir && pwd`"
-if test "$BINDIR" = "$thisdir"; then
+if test "$bindir" = "$thisdir"; then
   location=installed
 elif test "$APR_SOURCE_DIR" = "$thisdir"; then
   location=source
