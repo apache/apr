@@ -200,6 +200,9 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_p
 #ifdef WIN32
     apr_pool_cleanup_register((*fp)->cntxt, (void *)(*fp),
                               file_cleanup, file_cleanup);
+#elif defined(OS2)
+    apr_pool_cleanup_register((*fp)->cntxt, (void *)(*fp),
+                              apr_file_cleanup, apr_file_cleanup);
 #else
     apr_pool_cleanup_register((*fp)->cntxt, (void *)(*fp),
                               apr_unix_file_cleanup, apr_unix_file_cleanup);
