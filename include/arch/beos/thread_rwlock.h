@@ -65,6 +65,18 @@
 
 struct apr_thread_rwlock_t {
     apr_pool_t *pool;
+
+    /* Our lock :) */
+    sem_id Lock;
+    int32  LockCount;
+    /* Read/Write lock stuff */
+    sem_id Read;
+    int32  ReadCount;
+    sem_id Write;
+    int32  WriteCount;
+    int32  Nested;
+
+    thread_id writer;
 };
 
 #endif  /* THREAD_RWLOCK_H */
