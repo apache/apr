@@ -30,6 +30,7 @@ changequote([, ])dnl
     echo "$1 configured properly"
   else
     echo "configure failed for $1"
+    exit 1
   fi
 
   cd $ac_popdir
