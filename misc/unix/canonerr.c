@@ -54,7 +54,11 @@
 
 #include "misc.h"
 
+#ifndef OS2
+
 int ap_canonical_error(ap_status_t errcode)
 {
     return errcode;
 }
+
+#endif
