@@ -96,8 +96,8 @@ extern "C" {
 
 /**
  * Do a natural order comparison of two strings.
- * @param  The first string to compare
- * @param  The second string to compare
+ * @param a The first string to compare
+ * @param b The second string to compare
  * @return Either <0, 0, or >0.  If the first string is less than the second
  *          this returns <0, if they are equivalent it returns 0, and if the
  *          first string is greater than second string it retuns >0.
