@@ -52,54 +52,56 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef APR_TEST_INCLUDES
-#define APR_TEST_INCLUDES
-
-#include "CuTest.h"
-#include "apr_pools.h"
-
-/* Some simple functions to make the test apps easier to write and
- * a bit more consistent...
+#ifndef APR_ENV_H
+#define APR_ENV_H
+/**
+ * @file apr_env.h
+ * @brief APR Environment functions
+ */
+/**
+ * @defgroup APR_ENV Functions for manupulating the environment
+ * @ingroup APR_ENV
+ * @{
  */
 
-extern apr_pool_t *p;
+#include "apr_errno.h"
+#include "apr_pools.h"
 
-CuSuite *getsuite(void);
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-CuSuite *teststr(void);
-CuSuite *testtime(void);
-CuSuite *testvsn(void);
-CuSuite *testipsub(void);
-CuSuite *testmmap(void);
-CuSuite *testud(void);
-CuSuite *testtable(void);
-CuSuite *testhash(void);
-CuSuite *testsleep(void);
-CuSuite *testpool(void);
-CuSuite *testfmt(void);
-CuSuite *testfile(void);
-CuSuite *testdir(void);
-CuSuite *testfileinfo(void);
-CuSuite *testrand(void);
-CuSuite *testdso(void);
-CuSuite *testoc(void);
-CuSuite *testdup(void);
-CuSuite *testsockets(void);
-CuSuite *testproc(void);
-CuSuite *testpoll(void);
-CuSuite *testlock(void);
-CuSuite *testsockopt(void);
-CuSuite *testpipe(void);
-CuSuite *testthread(void);
-CuSuite *testgetopt(void);
-CuSuite *testnames(void);
-CuSuite *testuser(void);
-CuSuite *testpath(void);
-CuSuite *testenv(void);
+/**
+ * Get the value of an environment variable
+ * @param value the returned value, allocated from @a pool
+ * @param envvar the name of the environment variable
+ * @param pool where to allocate @a value and any temporary storage from
+ * @deffunc apr_status_t apr_env_get(char **value, const char *envvar, apr_pool_t *pool)
+ */
+APR_DECLARE(apr_status_t) apr_env_get(char **value, const char *envvar,
+                                      apr_pool_t *pool);
 
-/* Assert that RV is an APR_SUCCESS value; else fail giving strerror
- * for RV and CONTEXT message. */
-void apr_assert_success(CuTest* tc, const char *context, apr_status_t rv);
+/**
+ * Set the value of an environment variable
+ * @param envvar the name of the environment variable
+ * @param value the value to set
+ * @param pool where to allocate temporary storage from
+ * @deffunc apr_status_t apr_env_get(const char *envvar, const char *value, apr_pool_t *pool)
+ */
+APR_DECLARE(apr_status_t) apr_env_set(const char *envvar, const char *value,
+                                      apr_pool_t *pool);
+
+/**
+ * Delete a variable from the environment
+ * @param envvar the name of the environment variable
+ * @param pool where to allocate temporary storage from
+ * @deffunc apr_status_t apr_env_delete(const char *envvar, apr_pool_t *pool)
+ */
+APR_DECLARE(apr_status_t) apr_env_delete(const char *envvar, apr_pool_t *pool);
 
 
-#endif /* APR_TEST_INCLUDES */
+#ifdef __cplusplus
+}
+#endif
+/** @} */
+#endif  /* ! APR_ENV_H */

@@ -52,54 +52,76 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef APR_TEST_INCLUDES
-#define APR_TEST_INCLUDES
+#include "apr_env.h"
+#include "apr_errno.h"
+#include "test_apr.h"
 
-#include "CuTest.h"
-#include "apr_pools.h"
+#define TEST_ENVVAR_NAME "apr_test_envvar"
+#define TEST_ENVVAR_VALUE "Just a value that we'll check"
 
-/* Some simple functions to make the test apps easier to write and
- * a bit more consistent...
- */
+static int have_env_set;
+static int have_env_get;
 
-extern apr_pool_t *p;
+static void test_setenv(CuTest *tc)
+{
+    apr_status_t rv;
 
-CuSuite *getsuite(void);
+    rv = apr_env_set(TEST_ENVVAR_NAME, TEST_ENVVAR_VALUE, p);
+    have_env_set = (rv != APR_ENOTIMPL);
+    if (!have_env_set) {
+        CuNotImpl(tc, "apr_env_set");
+    }
+    apr_assert_success(tc, "set environment variable", rv);
+}
 
-CuSuite *teststr(void);
-CuSuite *testtime(void);
-CuSuite *testvsn(void);
-CuSuite *testipsub(void);
-CuSuite *testmmap(void);
-CuSuite *testud(void);
-CuSuite *testtable(void);
-CuSuite *testhash(void);
-CuSuite *testsleep(void);
-CuSuite *testpool(void);
-CuSuite *testfmt(void);
-CuSuite *testfile(void);
-CuSuite *testdir(void);
-CuSuite *testfileinfo(void);
-CuSuite *testrand(void);
-CuSuite *testdso(void);
-CuSuite *testoc(void);
-CuSuite *testdup(void);
-CuSuite *testsockets(void);
-CuSuite *testproc(void);
-CuSuite *testpoll(void);
-CuSuite *testlock(void);
-CuSuite *testsockopt(void);
-CuSuite *testpipe(void);
-CuSuite *testthread(void);
-CuSuite *testgetopt(void);
-CuSuite *testnames(void);
-CuSuite *testuser(void);
-CuSuite *testpath(void);
-CuSuite *testenv(void);
+static void test_getenv(CuTest *tc)
+{
+    char *value;
+    apr_status_t rv;
 
-/* Assert that RV is an APR_SUCCESS value; else fail giving strerror
- * for RV and CONTEXT message. */
-void apr_assert_success(CuTest* tc, const char *context, apr_status_t rv);
+    if (!have_env_set) {
+        CuNotImpl(tc, "apr_env_set (skip test for apr_env_get)");
+    }
 
+    rv = apr_env_get(&value, TEST_ENVVAR_NAME, p);
+    have_env_get = (rv != APR_ENOTIMPL);
+    if (!have_env_get) {
+        CuNotImpl(tc, "apr_env_get");
+    }
+    apr_assert_success(tc, "get environment variable", rv);
+    CuAssertStrEquals(tc, TEST_ENVVAR_VALUE, value);
+}
 
-#endif /* APR_TEST_INCLUDES */
+static void test_delenv(CuTest *tc)
+{
+    char *value;
+    apr_status_t rv;
+
+    if (!have_env_set) {
+        CuNotImpl(tc, "apr_env_set (skip test for apr_env_delete)");
+    }
+
+    rv = apr_env_delete(TEST_ENVVAR_NAME, p);
+    if (rv == APR_ENOTIMPL) {
+        CuNotImpl(tc, "apr_env_delete");
+    }
+    apr_assert_success(tc, "delete environment variable", rv);
+
+    if (!have_env_get) {
+        CuNotImpl(tc, "apr_env_get (skip sanity check for apr_env_delete)");
+    }
+    rv = apr_env_get(&value, TEST_ENVVAR_NAME, p);
+    CuAssertIntEquals(tc, APR_ENOENT, rv);
+}
+
+CuSuite *testenv(void)
+{
+    CuSuite *suite = CuSuiteNew("Environment");
+
+    SUITE_ADD_TEST(suite, test_setenv);
+    SUITE_ADD_TEST(suite, test_getenv);
+    SUITE_ADD_TEST(suite, test_delenv);
+
+    return suite;
+}
+

@@ -99,7 +99,8 @@ TESTS = testall.obj testtime.obj teststr.obj testvsn.obj testipsub.obj \
 	testfmt.obj testfile.obj testdir.obj testfileinfo.obj testrand.obj \
 	testdso.obj testoc.obj testdup.obj testsockets.obj testproc.obj \
 	testpoll.obj testlock.obj testsockopt.obj testpipe.obj testthread.obj \
-	testhash.obj testargs.obj testnames.obj testuser.obj testpath.obj
+	testhash.obj testargs.obj testnames.obj testuser.obj testpath.obj \
+	testenv.obj
 
 testall.exe: $(TESTS) CuTest.obj $(LOCAL_LIBS)
 	$(LINK) /debug /subsystem:console /machine:I386 $(TESTS) CuTest.obj \
