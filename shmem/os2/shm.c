@@ -107,7 +107,7 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
     int rc;
     apr_shm_t *newm = (apr_shm_t *)apr_palloc(pool, sizeof(apr_shm_t));
     char *name = NULL;
-    ULONG flags = PAG_COMMIT|PAG_READ|PAG_WRITE;
+    ULONG flags = PAG_READ|PAG_WRITE;
 
     newm->pool = pool;
     name = apr_pstrcat(pool, "\\SHAREMEM\\", filename, NULL);
