@@ -394,7 +394,7 @@ APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **sms);
 
 /* NB These are only available if the debugging option has been turned on. */
 
-#ifdef APR_DEBUG_SHOW_STRUCTURE
+#if APR_DEBUG_SHOW_STRUCTURE
 /**
  * Show the heirachy of the sms
  * @param sms The sms to show the information for
@@ -403,7 +403,7 @@ APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **sms);
 APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction);
 #endif /* APR_DEBUG_SHOW_STRUCTURE */
 
-#ifdef APR_DEBUG_TAG_SMS
+#if APR_DEBUG_TAG_SMS
 /**
  * Set the debugging tag for an sms
  * @param tag The tag to give the sms
