@@ -612,7 +612,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
     active = pool->active;
 
     /* If the active node has enough bytes left, use it. */
-    if (active->first_avail + size < active->endp) {
+    if (size < (apr_size_t)(active->endp - active->first_avail)) {
         mem = active->first_avail;
         active->first_avail += size;
 
@@ -620,7 +620,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
     }
 
     node = active->next;
-    if (node->first_avail + size < node->endp) {
+    if (size < (apr_size_t)(node->endp - node->first_avail)) {
         *node->ref = node->next;
         node->next->ref = node->ref;
     }
@@ -925,7 +925,8 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
         size = APR_PSPRINTF_MIN_STRINGSIZE;
 
     node = active->next;
-    if (!ps->got_a_new_node && (node->first_avail + size < node->endp)) {
+    if (!ps->got_a_new_node
+        && size < (apr_size_t)(node->endp - node->first_avail)) {
         *node->ref = node->next;
         node->next->ref = node->ref;
 
