@@ -42,10 +42,13 @@ extern "C" {
  */
 
 typedef enum {
-    APR_SHELLCMD,       /**< use the shell to invoke the program */
-    APR_PROGRAM,        /**< invoke the program directly, no copied env */
-    APR_PROGRAM_ENV,    /**< invoke the program, replicating our environment */
-    APR_PROGRAM_PATH    /**< find program on PATH, use our environment */
+#ifdef NETWARE
+    APR_PROGRAM_ADDRSPACE,  /**< invoke the program in its own address space */
+#endif
+    APR_SHELLCMD,           /**< use the shell to invoke the program */
+    APR_PROGRAM,            /**< invoke the program directly, no copied env */
+    APR_PROGRAM_ENV,        /**< invoke the program, replicating our environment */
+    APR_PROGRAM_PATH        /**< find program on PATH, use our environment */
 } apr_cmdtype_e;
 
 typedef enum {
