@@ -63,6 +63,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+ap_status_t ap_set_pipe_timeout(struct file_t *thepipe, ap_int32_t timeout)
+{
+    return APR_ENOTIMPL;
+}
 ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t *cont)
 {
     SECURITY_ATTRIBUTES sa;
