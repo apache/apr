@@ -89,7 +89,6 @@ ap_status_t ap_make_time(ap_context_t *cont, struct atime_t **new)
  */
 ap_status_t ap_current_time(struct atime_t *new)
 {
-    struct timeval newtime;
     new->currtime = ap_palloc(new->cntxt, sizeof(struct timeval));
     gettimeofday(new->currtime, NULL);
     return APR_SUCCESS; 
