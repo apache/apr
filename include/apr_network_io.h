@@ -187,6 +187,9 @@ struct apr_sockaddr_t {
     /** This points to the IP address structure within the appropriate
      *  sockaddr structure.  */
     void *ipaddr_ptr;
+    /** If multiple addresses were found by apr_getaddrinfo(), this 
+     *  points to a representation of the next address. */
+    apr_sockaddr_t *next;
 };
 
 #if APR_HAS_SENDFILE

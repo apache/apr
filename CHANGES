@@ -1,4 +1,7 @@
 Changes with APR b1
+  *) apr_getaddrinfo() can now return multiple addresses for a host
+     via the next field in apr_sockaddr_t.  [Jeff Trawick]
+
   *) Tighten up the check for getaddrinfo().  If it can't figure out
      the appropriate address family for 127.0.0.1, it fails.  
      Unfortunately, Tru64 fails this test so we won't do IPv6 on
