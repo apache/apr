@@ -35,7 +35,7 @@ static apr_off_t eightGb = APR_INT64_C(2) << 32;
 
 static int madefile = 0;
 
-#define PRECOND if (!madefile) ABTS_NOT_IMPL(tc, "Large file tests not enabled")
+#define PRECOND if (!madefile) { ABTS_NOT_IMPL(tc, "Large file tests not enabled"); return; }
 
 #define TESTDIR "lfstests"
 #define TESTFILE "large.bin"
@@ -73,7 +73,7 @@ static void test_open(abts_case *tc, void *data)
         apr_assert_success(tc, "truncate file to 8gb", rv);
     }
 
-    madefile = 1;
+    madefile = rv == APR_SUCCESS;
 }
 
 static void test_reopen(abts_case *tc, void *data)
