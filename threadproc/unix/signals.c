@@ -409,7 +409,7 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
     sigfillset(&sig_mask);
     remove_sync_sigs(&sig_mask);
 
-#if defined(SIGPROCMASK_SETS_THREAD_MASK)
+#if defined(SIGPROCMASK_SETS_THREAD_MASK) || ! APR_HAS_THREADS
     if ((rv = sigprocmask(SIG_SETMASK, &sig_mask, NULL)) != 0) {
         rv = errno;
     }
@@ -435,7 +435,7 @@ APR_DECLARE(apr_status_t) apr_signal_block(int signum)
 
     sigaddset(&sig_mask, signum);
 
-#if defined(SIGPROCMASK_SETS_THREAD_MASK)
+#if defined(SIGPROCMASK_SETS_THREAD_MASK) || ! APR_HAS_THREADS
     if ((rv = sigprocmask(SIG_BLOCK, &sig_mask, NULL)) != 0) {
         rv = errno;
     }
@@ -462,7 +462,7 @@ APR_DECLARE(apr_status_t) apr_signal_unblock(int signum)
 
     sigaddset(&sig_mask, signum);
 
-#if defined(SIGPROCMASK_SETS_THREAD_MASK)
+#if defined(SIGPROCMASK_SETS_THREAD_MASK) || ! APR_HAS_THREADS
     if ((rv = sigprocmask(SIG_UNBLOCK, &sig_mask, NULL)) != 0) {
         rv = errno;
     }
