@@ -81,12 +81,14 @@ echo "Copying libtool helper files ..."
 $libtoolize --copy --automake
 
 ltpath=`dirname $libtoolize`
-ltfile=`cd $ltpath/../share/aclocal ; pwd`/libtool.m4
+ltfile=${LIBTOOL_M4-`cd $ltpath/../share/aclocal ; pwd`/libtool.m4}
 
 if [ ! -f $ltfile ]; then
     echo "$ltfile not found"
     exit 1
 fi
+
+echo "buildconf: Using libtool.m4 at ${ltfile}."
 
 cat $ltfile | sed -e 's/LIBTOOL=\(.*\)top_build/LIBTOOL=\1apr_build/' > build/libtool.m4
 
