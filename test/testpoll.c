@@ -121,7 +121,7 @@ static void recv_msg(apr_socket_t **sockarray, int which, apr_pool_t *p,
                      CuTest *tc)
 {
     apr_size_t buflen = 5;
-    char *buffer = apr_pcalloc(p, sizeof(char) * buflen);
+    char *buffer = apr_pcalloc(p, sizeof(char) * (buflen + 1));
     apr_sockaddr_t *recsa;
     apr_status_t rv;
 
