@@ -50,27 +50,47 @@ extern "C" {
 /* Note to implementors: Values in the range 0x00100000--0x80000000
    are reserved for platform-specific values. */
 
-#define APR_READ       0x00001     /**< Open the file for reading */
-#define APR_WRITE      0x00002     /**< Open the file for writing */
-#define APR_CREATE     0x00004     /**< Create the file if not there */
-#define APR_APPEND     0x00008     /**< Append to the end of the file */
-#define APR_TRUNCATE   0x00010     /**< Open the file and truncate to 0 length */
-#define APR_BINARY     0x00020     /**< Open the file in binary mode */
-#define APR_EXCL       0x00040     /**< Open should fail if APR_CREATE and file
-                                        exists. */
-#define APR_BUFFERED   0x00080     /**< Open the file for buffered I/O */
-#define APR_DELONCLOSE 0x00100     /**< Delete the file after close */
-#define APR_XTHREAD    0x00200     /**< Platform dependent tag to open the file
-                                        for use across multiple threads */
-#define APR_SHARELOCK  0x00400     /**< Platform dependent support for higher
-                                        level locked read/write access to support
-                                        writes across process/machines */
-#define APR_FILE_NOCLEANUP 0x00800 /**< Do not register a cleanup when the file
-                                        is opened */
-#define APR_SENDFILE_ENABLED 0x01000 /**< Advisory flag that this file should
-                                          support apr_socket_sendfile operation */
-#define APR_LARGEFILE   0x04000    /**< Platform dependent flag to enable large file
-                                        support; WARNING see below. */
+#define APR_FOPEN_READ       0x00001  /**< Open the file for reading */
+#define APR_FOPEN_WRITE      0x00002  /**< Open the file for writing */
+#define APR_FOPEN_CREATE     0x00004  /**< Create the file if not there */
+#define APR_FOPEN_APPEND     0x00008  /**< Append to the end of the file */
+#define APR_FOPEN_TRUNCATE   0x00010  /**< Open the file and truncate
+                                         to 0 length */
+#define APR_FOPEN_BINARY     0x00020  /**< Open the file in binary mode */
+#define APR_FOPEN_EXCL       0x00040  /**< Open should fail if APR_CREATE
+                                         and file exists. */
+#define APR_FOPEN_BUFFERED   0x00080  /**< Open the file for buffered I/O */
+#define APR_FOPEN_DELONCLOSE 0x00100  /**< Delete the file after close */
+#define APR_FOPEN_XTHREAD    0x00200  /**< Platform dependent tag to open
+                                         the file for use across multiple
+                                         threads */
+#define APR_FOPEN_SHARELOCK  0x00400  /**< Platform dependent support for
+                                         higher level locked read/write
+                                         access to support writes across
+                                         process/machines */
+#define APR_FOPEN_NOCLEANUP  0x00800  /**< Do not register a cleanup
+                                         when the file is opened */
+#define APR_FOPEN_SENDFILE_ENABLED 0x01000 /**< Advisory flag that this
+                                             file should support
+                                             apr_socket_sendfile operation */
+#define APR_FOPEN_LARGEFILE   0x04000 /**< Platform dependent flag to enable
+                                         large file support; WARNING see
+                                         below. */
+/* backcompat */
+#define APR_READ             APR_FOPEN_READ          
+#define APR_WRITE            APR_FOPEN_WRITE         
+#define APR_CREATE           APR_FOPEN_CREATE        
+#define APR_APPEND           APR_FOPEN_APPEND        
+#define APR_TRUNCATE         APR_FOPEN_TRUNCATE      
+#define APR_BINARY           APR_FOPEN_BINARY        
+#define APR_EXCL             APR_FOPEN_EXCL          
+#define APR_BUFFERED         APR_FOPEN_BUFFERED      
+#define APR_DELONCLOSE       APR_FOPEN_DELONCLOSE    
+#define APR_XTHREAD          APR_FOPEN_XTHREAD       
+#define APR_SHARELOCK        APR_FOPEN_SHARELOCK     
+#define APR_FILE_NOCLEANUP   APR_FOPEN_NOCLEANUP
+#define APR_SENDFILE_ENABLED APR_FOPEN_SENDFILE_ENABLED
+#define APR_LARGEFILE        APR_FOPEN_LARGEFILE
 
 /** @warning The APR_LARGEFILE flag only has effect on some platforms
  * where sizeof(apr_off_t) == 4.  Where implemented, it allows opening
