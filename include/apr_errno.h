@@ -770,6 +770,21 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 
 #define INCL_DOSERRORS
 #define INCL_DOS
+
+/* Leave these undefined.
+ * OS2 doesn't rely on the errno concept.
+ * The API calls always return a result codes which
+ * should be filtered through APR_FROM_OS_ERROR().
+ *
+ * #define apr_get_os_error()   (APR_FROM_OS_ERROR(GetLastError()))
+ * #define apr_set_os_error(e)  (SetLastError(APR_TO_OS_ERROR(e)))
+ */
+
+/* A special case, only socket calls require this:
+ */
+define apr_get_netos_error()   (APR_FROM_OS_ERROR(h_errno))
+define apr_set_netos_error(e)   (h_errno = APR_TO_OS_ERROR(e)))
+
 /* And this needs to be greped away for good:
  */
 #define APR_OS2_STATUS(e) (APR_FROM_OS_ERROR(e))
@@ -924,6 +939,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 /* A special case, only socket calls require this:
  */
 #define apr_get_netos_error()   (APR_FROM_OS_ERROR(WSAGetLastError()))
+#define apr_set_netos_error(e)   (WSASetLastError(APR_TO_OS_ERROR(e)))
 
 #define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS \
                 || (s) == APR_OS_START_SYSERR + ERROR_SUCCESS)
@@ -1026,12 +1042,12 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 
 #define APR_FROM_OS_ERROR(e)  (e)
 #define APR_TO_OS_ERROR(e)    (e)
-#define APR_TO_NETOS_ERROR(e)    (e-APR_OS_START_SYSERR)
 
 #define apr_get_os_error()    (errno)
 #define apr_set_os_error(e)   (errno = (e))
 
 #define apr_get_netos_error()   (WSAGetLastError()+APR_OS_START_SYSERR)
+#define apr_set_netos_error(e)   (WSASetLastError((e)-APR_OS_START_SYSERR))
 
 #define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS)
 
@@ -1084,15 +1100,20 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  */
 #define APR_FROM_OS_ERROR(e)  (e)
 #define APR_TO_OS_ERROR(e)    (e)
+/* Platform specific, should be deprecated */
+#define APR_TO_NETOS_ERROR(e)    (e-APR_OS_START_SYSERR)
 
 #define apr_get_os_error()    (errno)
 #define apr_set_os_error(e)   (errno = (e))
 
 /* A special case, only socket calls require this:
- * [Note: platforms using h_errno should replace this macro,
- * although watch out for thread saftey issues with h_errno.]
  */
-#define apr_get_netos_error() (errno)
+#define apr_get_netos_error() (h_errno)
+#ifdef HAVE_SET_H_ERRNO
+#define apr_set_netos_error(e) set_h_errno(e)
+#else
+#define apr_set_netos_error(e) (h_errno = (e))
+#endif
 
 /** no error */
 #define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS)
