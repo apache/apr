@@ -189,7 +189,7 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
         return errno;
     }
     else {
-        int namelen = sizeof(*sock->local_addr);
+        socklen_t namelen = sizeof(*sock->local_addr);
         getsockname(sock->socketdes, (struct sockaddr *)sock->local_addr, &namelen);
 #ifndef HAVE_POLL
 	sock->connected=1;

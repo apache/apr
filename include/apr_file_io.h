@@ -147,9 +147,9 @@ B<Open the specified file.>
     arg 4) Access permissions for file.
     arg 5) The pool to use.
 
-B<NOTE>:  If mode is APR_OS_DEFAULT, the system open command will be 
-          called without any mode parameters.  *arg1 must point to a valid
-          file_t, or NULL (in which case it will be allocated)
+B<NOTE>:  If perm is APR_OS_DEFAULT and the file is being created, appropriate
+          default permissions will be used.  *arg1 must point to a valid file_t, 
+          or NULL (in which case it will be allocated)
 
 =cut
  */

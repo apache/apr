@@ -199,9 +199,6 @@ static char *apr_os_strerror(char* buf, ap_size_t bufsize, int err)
 
 char *ap_strerror(ap_status_t statcode, char *buf, ap_size_t bufsize)
 {
-    char *msg;
-    ap_size_t len;
-
     if (statcode < APR_OS_START_ERROR) {
         return stuffbuffer(buf, bufsize, strerror(statcode));
     }
