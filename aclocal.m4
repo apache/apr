@@ -3,7 +3,7 @@ dnl ##
 dnl ##
 define(AC_USE_FUNCTION,[dnl
 AC_CHECK_FUNCS($1)
-if test ".$ac_cv_func_$1" = .yes; then 
+if test ".$ac_func_$1" = .yes; then 
 AC_DEFINE(USE_$2)
 fi
 ])dnl

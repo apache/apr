@@ -2,13 +2,6 @@
 #ifndef APR_CONFIG_H
 #define APR_CONFIG_H
 
-/* Define if on AIX 3.
-   System headers sometimes define this.
-   We just want to avoid a redefinition error message.  */
-#ifndef _ALL_SOURCE
-#undef _ALL_SOURCE
-#endif
-
 /* So that we can use inline on some critical functions, and use
  * GNUC attributes (such as to get -Wall warnings for printf-like
  * functions).  Only do this in gcc 2.7 or later ... it may work
@@ -30,6 +23,14 @@
 #define ap_inline __inline__
 #define USE_GNU_INLINE
 #define ENUM_BITFIELD(e,n,w)  e n : w
+#endif
+
+
+/* Define if on AIX 3.
+   System headers sometimes define this.
+   We just want to avoid a redefinition error message.  */
+#ifndef _ALL_SOURCE
+#undef _ALL_SOURCE
 #endif
 
 /* Define to empty if the keyword does not work.  */
@@ -101,9 +102,6 @@
 
 /* Define if you have the poll function.  */
 #undef HAVE_POLL
-
-/* Define if you have the pthread_mutex_init function.  */
-#undef HAVE_PTHREAD_MUTEX_INIT
 
 /* Define if you have the setsid function.  */
 #undef HAVE_SETSID
