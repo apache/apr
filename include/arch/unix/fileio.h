@@ -143,7 +143,9 @@ struct ap_dir_t {
 };
 
 ap_status_t ap_unix_file_cleanup(void *);
-mode_t ap_unix_get_fileperms(ap_fileperms_t);
+
+mode_t ap_unix_perms2mode(ap_fileperms_t perms);
+ap_fileperms_t ap_unix_mode2perms(mode_t mode);
 
 #endif  /* ! FILE_IO_H */
 
