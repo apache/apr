@@ -96,17 +96,20 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted,
         finfo->size = info.st_size;
         finfo->inode = info.st_ino;
         finfo->device = info.st_dev;
-        finfo->nlinks = info.st_nlink;
+
+/* We don't have nlinks in the finfo structure.  Are we going to add it? RBB*/
+/*        finfo->nlinks = info.st_nlink;  */
+
         apr_ansi_time_to_apr_time(&finfo->atime, info.st_atime);
         apr_ansi_time_to_apr_time(&finfo->mtime, info.st_mtime);
         apr_ansi_time_to_apr_time(&finfo->ctime, info.st_ctime);
-        finfo->filepath = thefile->fname;
+        finfo->fname = thefile->fname;
         if (wanted & APR_FINFO_CSIZE) {
             finfo->csize = info.st_blocks * 512;
             finfo->valid |= APR_FINFO_CSIZE;
         }
-        if (finfo->filetype = APR_LNK)
-            finfo->valid |= APR_FINFO_LINK
+        if (finfo->filetype == APR_LNK) {
+            finfo->valid |= APR_FINFO_LINK;
         }
         return APR_SUCCESS;
     }
@@ -133,7 +136,7 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname,
     if (wanted & APR_FINFO_LINK)
         srv = lstat(fname, &info);
     else
-        srv = stat(fname,info);
+        srv = stat(fname, &info);
 
     if (srv == 0) {
         finfo->cntxt = cont;
@@ -145,17 +148,20 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname,
         finfo->size = info.st_size;
         finfo->inode = info.st_ino;
         finfo->device = info.st_dev;
-        finfo->nlinks = info.st_nlink;
+
+/* We don't have nlinks in the finfo structure.  Are we going to add it? RBB*/
+/*        finfo->nlinks = info.st_nlink;  */
+
         apr_ansi_time_to_apr_time(&finfo->atime, info.st_atime);
         apr_ansi_time_to_apr_time(&finfo->mtime, info.st_mtime);
         apr_ansi_time_to_apr_time(&finfo->ctime, info.st_ctime);
-        finfo->filepath = fname;
+        finfo->fname = fname;
         if (wanted & APR_FINFO_CSIZE) {
             finfo->csize = info.st_blocks * 512;
             finfo->valid |= APR_FINFO_CSIZE;
         }
-        if (finfo->filetype = APR_LNK)
-            finfo->valid |= APR_FINFO_LINK
+        if (finfo->filetype == APR_LNK) {
+            finfo->valid |= APR_FINFO_LINK;
         }
         return APR_SUCCESS;
     }
@@ -206,7 +212,7 @@ apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname,
  * Unfortuantely, I don't have a clue about tweaking this code for unix,
  * other than the basic stratagy of stat, then walk dirread for dev/inode.
  */
-APR_DECLARE(apr_status_t) apr_get_filename_case(char **fname,
+APR_DECLARE(apr_status_t) apr_get_filename_case(const char **fname,
                                                 const char *fspec,
                                                 apr_pool_t *cont)
 {
