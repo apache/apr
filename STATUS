@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/02/04 21:37:49 $]
+Last modified at [$Date: 2001/02/18 00:32:16 $]
 
 Release:
 
@@ -115,6 +115,11 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
     * I think apr_open_stderr() and friends dup() the descriptor. That
       would allow the new/returned file to be closed (via pool cleanup
       or manually) without accidentally closing stderr/out.
+
+    * need to export the shared library extension (e.g. ".so") for the
+      platform. clients need to use this to construct filenames to
+      pass to apr_dso_load()
+
 
 Documentation that needs writing:
 
