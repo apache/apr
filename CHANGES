@@ -1,6 +1,7 @@
 Changes with APR b1
 
-  *) dont  performs a strlen on that value without checking for NULL in getopt 
+  *) don't perform a strlen on that name value without checking for NULL 
+     first (in getopt)
      [David Waite <mass@akuma.org>, Ian Holsman]
 
   *) Added apr_strtoll() and apr_atoll() to strings lib.
