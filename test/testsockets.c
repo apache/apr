@@ -134,16 +134,16 @@ int main(void)
     apr_sockaddr_info_get(&to, US, APR_UNSPEC, 7772, 0, pool);
     apr_sockaddr_info_get(&from, US, APR_UNSPEC, 7771, 0, pool);
 
-    STD_TEST_NEQ("    Binding socket #1", apr_bind(sock, to))
-    STD_TEST_NEQ("    Binding socket #2", apr_bind(sock2, from))
+    STD_TEST_NEQ("    Binding socket #1", apr_socket_bind(sock, to))
+    STD_TEST_NEQ("    Binding socket #2", apr_socket_bind(sock2, from))
 
     len = STRLEN;
 
     STD_TEST_NEQ("    Trying to sendto",
-                 apr_sendto(sock2, to, 0, sendbuf, &len))
+                 apr_socket_sendto(sock2, to, 0, sendbuf, &len))
     len = 80;
     STD_TEST_NEQ("    Trying to recvfrom",
-                 apr_recvfrom(from, sock, 0, recvbuf, &len))
+                 apr_socket_recvfrom(from, sock, 0, recvbuf, &len))
     printf("\t\tGot back %d bytes [%s] from recvfrom\n", len, recvbuf);   
     apr_sockaddr_ip_get(&ip_addr, from);
     apr_sockaddr_port_get(&fromport, from);

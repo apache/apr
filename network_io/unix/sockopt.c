@@ -396,4 +396,3 @@ apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char *name,
     return APR_SUCCESS;
 }
 #endif
-

@@ -185,8 +185,8 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
     return apr_socket_create_ex(new, family, type, 0, cont);
 }
 
-APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
-                                       apr_shutdown_how_e how)
+APR_DECLARE(apr_status_t) apr_socket_shutdown(apr_socket_t *thesocket,
+                                              apr_shutdown_how_e how)
 {
     int winhow = 0;
 
@@ -222,7 +222,8 @@ APR_DECLARE(apr_status_t) apr_socket_close(apr_socket_t *thesocket)
     return socket_cleanup(thesocket);
 }
 
-APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
+APR_DECLARE(apr_status_t) apr_socket_bind(apr_socket_t *sock,
+                                          apr_sockaddr_t *sa)
 {
     if (bind(sock->socketdes, 
              (struct sockaddr *)&sa->sa, 
@@ -238,7 +239,8 @@ APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
     }
 }
 
-APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog)
+APR_DECLARE(apr_status_t) apr_socket_listen(apr_socket_t *sock,
+                                            apr_int32_t backlog)
 {
     if (listen(sock->socketdes, backlog) == SOCKET_ERROR)
         return apr_get_netos_error();
@@ -246,8 +248,8 @@ APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog)
         return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock,
-                                     apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_socket_accept(apr_socket_t **new, 
+                                            apr_socket_t *sock, apr_pool_t *p)
 {
     SOCKET s;
     struct sockaddr sa;
@@ -323,7 +325,8 @@ APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
+APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock, 
+                                             apr_sockaddr_t *sa)
 {
     apr_status_t rv;
 
@@ -503,4 +506,35 @@ APR_DECLARE(apr_status_t) apr_socket_inherit_unset(apr_socket_t *socket)
 APR_DECLARE(void) apr_socket_unset_inherit(apr_socket_t *socket)    
 {    
     apr_socket_inherit_unset(socket);    
+}
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
+                                       apr_shutdown_how_e how)
+{
+    return apr_socket_shutdown(thesocket, how);
+}
+
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
+{
+    return apr_socket_bind(sock, sa);
+}
+
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog)
+{
+    return apr_socket_listen(sock. backlog);
+}
+
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock,
+                                     apr_pool_t *p)
+{
+    return apr_socket_accept(new, sock, p);
+}
+
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
+{
+    return apr_socket_connect(sock, sa);
 }

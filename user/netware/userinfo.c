@@ -75,34 +75,62 @@ static apr_status_t getpwnam_safe(const char *username,
     return APR_ENOTIMPL;
 }
 
+APR_DECLARE(apr_status_t) apr_uid_homepath_get(char **dirname,
+                                               const char *username,
+                                               apr_pool_t *p)
+{
+    return APR_ENOTIMPL;
+}
+
+
+
+APR_DECLARE(apr_status_t) apr_uid_current(apr_uid_t *uid,
+                                          apr_gid_t *gid,
+                                          apr_pool_t *p)
+{
+    return APR_ENOTIMPL;
+}
+
+
+
+
+APR_DECLARE(apr_status_t) apr_uid_get(apr_uid_t *uid, apr_gid_t *gid,
+                                      const char *username, apr_pool_t *p)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_uid_name_get(char **username, apr_uid_t userid,
+                                           apr_pool_t *p)
+{
+    return APR_ENOTIMPL;
+}
+
+/* deprecated */
 APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname,
                                                  const char *username,
                                                  apr_pool_t *p)
 {
-    return APR_ENOTIMPL;
+    return apr_uid_homepath_get(dirname, username, p);
 }
 
+/* deprecated */
+APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
+                                         const char *username, apr_pool_t *p)
+{
+    return apr_uid_get(uid, gid, username, p);
+}
 
-
+/* deprecated */
 APR_DECLARE(apr_status_t) apr_current_userid(apr_uid_t *uid,
                                              apr_gid_t *gid,
                                              apr_pool_t *p)
 {
-    return APR_ENOTIMPL;
+    return apr_uid_current(uid, gid, p);
 }
 
-
-
-
-APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
-                                         const char *username, apr_pool_t *p)
-{
-    return APR_ENOTIMPL;
-}
-
+/* deprecated */
 APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, apr_pool_t *p)
 {
-    return APR_ENOTIMPL;
+    return apr_uid_name_get(username, uid, p);
 }
-
-  

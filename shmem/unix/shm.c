@@ -240,7 +240,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         if (shmctl(new_m->shmid, IPC_STAT, &shmbuf) == -1) {
             return errno;
         }
-        apr_current_userid(&uid, &gid, pool);
+        apr_uid_current(&uid, &gid, pool);
         shmbuf.shm_perm.uid = uid;
         shmbuf.shm_perm.gid = gid;
         if (shmctl(new_m->shmid, IPC_SET, &shmbuf) == -1) {
@@ -387,7 +387,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         if (shmctl(new_m->shmid, IPC_STAT, &shmbuf) == -1) {
             return errno;
         }
-        apr_current_userid(&uid, &gid, pool);
+        apr_uid_current(&uid, &gid, pool);
         shmbuf.shm_perm.uid = uid;
         shmbuf.shm_perm.gid = gid;
         if (shmctl(new_m->shmid, IPC_SET, &shmbuf) == -1) {
