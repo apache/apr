@@ -35,7 +35,6 @@
 
 /* This file has been modified by the Apache Group. */
 #ifndef WIN32
-#include "apr_config.h"
 #else
 #include "apr_win.h"
 #endif
