@@ -115,7 +115,7 @@ APR_DECLARE(apr_status_t) apr_lock_child_init(apr_lock_t **lock,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_lock_aquire(apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_lock_acquire(apr_lock_t *lock)
 {
     DWORD rv;
     if (lock->scope == APR_INTRAPROCESS) {

@@ -329,7 +329,7 @@ static void free_blocks(union block_hdr *blok)
 
 #if APR_HAS_THREADS
     if (alloc_mutex) {
-        apr_lock_aquire(alloc_mutex);
+        apr_lock_acquire(alloc_mutex);
     }
 #endif
     old_free_list = block_freelist;
@@ -474,7 +474,7 @@ APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t *p, int (*apr_abort)(int 
 
 #if APR_HAS_THREADS
     if (alloc_mutex) {
-        apr_lock_aquire(alloc_mutex);
+        apr_lock_acquire(alloc_mutex);
     }
 #endif
 
@@ -758,7 +758,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *a)
     apr_clear_pool(a);
 #if APR_HAS_THREADS
     if (alloc_mutex) {
-        apr_lock_aquire(alloc_mutex);
+        apr_lock_acquire(alloc_mutex);
     }
 #endif
 
@@ -963,7 +963,7 @@ APR_DECLARE(void*) apr_palloc(apr_pool_t *a, apr_size_t reqsize)
 
 #if APR_HAS_THREADS
     if (alloc_mutex) {
-        apr_lock_aquire(alloc_mutex);
+        apr_lock_acquire(alloc_mutex);
     }
 #endif
 
@@ -1087,7 +1087,7 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
 
     /* must try another blok */
 #if APR_HAS_THREADS
-    apr_lock_aquire(alloc_mutex);
+    apr_lock_acquire(alloc_mutex);
 #endif
     nblok = new_block(2 * cur_len, NULL);
 #if APR_HAS_THREADS
@@ -1102,7 +1102,7 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
     if (ps->got_a_new_block) {
 	debug_fill(blok->h.first_avail, blok->h.endp - blok->h.first_avail);
 #if APR_HAS_THREADS
-        apr_lock_aquire(alloc_mutex);
+        apr_lock_acquire(alloc_mutex);
 #endif
 	blok->h.next = block_freelist;
 	block_freelist = blok;

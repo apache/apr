@@ -76,7 +76,7 @@ apr_status_t apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
         ULONG blocksize;
         ULONG size = *nbytes;
 
-        apr_lock_aquire(thefile->mutex);
+        apr_lock_acquire(thefile->mutex);
 
         if (thefile->direction == 1) {
             apr_file_flush(thefile);
@@ -152,7 +152,7 @@ apr_status_t apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nb
         int blocksize;
         int size = *nbytes;
 
-        apr_lock_aquire(thefile->mutex);
+        apr_lock_acquire(thefile->mutex);
 
         if ( thefile->direction == 0 ) {
             // Position file pointer for writing at the offset we are logically reading from
