@@ -72,8 +72,12 @@
 #include "apr_pools.h"
 #include "apr_lib.h"
 #include "misc.h"
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
+#endif
 
 /*****************************************************************
  * This file contains array and table functions only.

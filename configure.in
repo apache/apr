@@ -144,6 +144,7 @@ AC_CHECK_HEADERS(sys/times.h)
 AC_CHECK_HEADERS(tpfeq.h)
 AC_CHECK_HEADERS(tpfio.h)
 AC_CHECK_HEADERS(unistd.h)
+AC_CHECK_HEADERS(poll.h)
 AC_CHECK_HEADERS(unix.h)
 AC_CHECK_HEADERS(winsock.h)
 
