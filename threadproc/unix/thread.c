@@ -76,6 +76,9 @@ ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
     if (stat == 0) {
         return APR_SUCCESS;
     }
+#ifdef PTHREAD_SETS_ERRNO
+    stat = errno;
+#endif
     return stat;
 }
 
@@ -92,6 +95,9 @@ ap_status_t ap_setthreadattr_detach(ap_threadattr_t *attr, ap_int32_t on)
         return APR_SUCCESS;
     }
     else {
+#ifdef PTHREAD_SETS_ERRNO
+        stat = errno;
+#endif
         return stat;
     }
 }
@@ -145,6 +151,9 @@ ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr,
         return APR_SUCCESS;
     }
     else {
+#ifdef PTHREAD_SETS_ERRNO
+        stat = errno;
+#endif
         return stat;
     } 
 }
@@ -164,6 +173,9 @@ ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
         return APR_SUCCESS;
     }
     else {
+#ifdef PTHREAD_SETS_ERRNO
+        stat = errno;
+#endif
         return stat;
     }
 }
@@ -180,6 +192,9 @@ ap_status_t ap_thread_detach(ap_thread_t *thd)
         return APR_SUCCESS;
     }
     else {
+#ifdef PTHREAD_SETS_ERRNO
+        stat = errno;
+#endif
         return stat;
     }
 }

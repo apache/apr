@@ -61,7 +61,15 @@
 static ap_status_t lock_intra_cleanup(void *data)
 {
     ap_lock_t *lock = (ap_lock_t *) data;
-    return pthread_mutex_unlock(lock->intraproc);
+    ap_status_t stat;
+
+    stat = pthread_mutex_unlock(lock->intraproc);
+#ifdef PTHREAD_SETS_ERRNO
+    if (stat) {
+        stat = errno;
+    }
+#endif
+    return stat;
 }    
 
 ap_status_t ap_unix_create_intra_lock(ap_lock_t *new)
@@ -75,16 +83,25 @@ ap_status_t ap_unix_create_intra_lock(ap_lock_t *new)
         return errno;
     }
     if ((stat = pthread_mutexattr_init(&mattr))) {
+#ifdef PTHREAD_SETS_ERRNO
+        stat = errno;
+#endif
         lock_intra_cleanup(new);
         return stat;
     }
 
     if ((stat = pthread_mutex_init(new->intraproc, &mattr))) {
+#ifdef PTHREAD_SETS_ERRNO
+        stat = errno;
+#endif
         lock_intra_cleanup(new);
         return stat;
     }
 
     if ((stat = pthread_mutexattr_destroy(&mattr))) {
+#ifdef PTHREAD_SETS_ERRNO
+        stat = errno;
+#endif
         lock_intra_cleanup(new);
         return stat;
     }
@@ -97,7 +114,15 @@ ap_status_t ap_unix_create_intra_lock(ap_lock_t *new)
 
 ap_status_t ap_unix_lock_intra(ap_lock_t *lock)
 {
-    return pthread_mutex_lock(lock->intraproc);
+    ap_status_t stat;
+
+    stat = pthread_mutex_lock(lock->intraproc);
+#ifdef PTHREAD_SETS_ERRNO
+    if (stat) {
+        stat = errno;
+    }
+#endif
+    return stat;
 }
 
 ap_status_t ap_unix_unlock_intra(ap_lock_t *lock)
@@ -105,6 +130,11 @@ ap_status_t ap_unix_unlock_intra(ap_lock_t *lock)
     ap_status_t status;
 
     status = pthread_mutex_unlock(lock->intraproc);
+#ifdef PTHREAD_SETS_ERRNO
+    if (status) {
+        status = errno;
+    }
+#endif
     return status;
 }
 
