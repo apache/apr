@@ -465,7 +465,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     headerbuf = ap_palloc(sock->cntxt, headerlen);
 
     for (i = 0; i < hdtr->numheaders; i++) {
-        memcpy(headerbuf, hdtr->headers[i].iov_base + ptr,
+        memcpy(headerbuf + ptr, hdtr->headers[i].iov_base,
                hdtr->headers[i].iov_len);
         ptr += hdtr->headers[i].iov_len;
     }
@@ -477,7 +477,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     trailerbuf = ap_palloc(sock->cntxt, trailerlen);
 
     for (i = 0; i < hdtr->numtrailers; i++) {
-        memcpy(trailerbuf, hdtr->trailers[i].iov_base + ptr,
+        memcpy(trailerbuf + ptr, hdtr->trailers[i].iov_base,
                hdtr->trailers[i].iov_len);
         ptr += hdtr->trailers[i].iov_len;
     }
