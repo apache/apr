@@ -255,6 +255,8 @@ int cstat (const char *path, struct stat *buf)
                 if (!stat_entry) {
                     key = apr_pstrdup (gPool, path);
                     stat_entry = apr_palloc (gPool, sizeof(apr_stat_entry_t));
+                    memcpy (&(stat_entry->info), buf, sizeof(struct stat));
+                    stat_entry->expire = now;
 #ifdef USE_CSTAT_MUTEX
                     apr_thread_mutex_lock(statcache_mutex);
 #endif
@@ -263,8 +265,10 @@ int cstat (const char *path, struct stat *buf)
                     apr_thread_mutex_unlock(statcache_mutex);
 #endif
                 }
-                memcpy (&(stat_entry->info), buf, sizeof(struct stat));
-                stat_entry->expire = now;
+                else {
+                    memcpy (&(stat_entry->info), buf, sizeof(struct stat));
+                    stat_entry->expire = now;
+                }
             }
             else
                 return ret;
