@@ -407,7 +407,7 @@ APR_DECLARE(void) apr_table_clear(apr_table_t *t)
 APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key)
 {
     apr_table_entry_t *next_elt = (apr_table_entry_t *) t->a.elts;
-    apr_table_entry_t *last_elt = next_elt + t->a.nelts;
+    apr_table_entry_t *end_elt = next_elt + t->a.nelts;
     apr_uint32_t checksum;
 
     if (key == NULL) {
@@ -415,7 +415,7 @@ APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key)
     }
 
     COMPUTE_KEY_CHECKSUM(key, checksum);
-    for (; next_elt < last_elt; next_elt++) {
+    for (; next_elt < end_elt; next_elt++) {
 	if ((checksum == next_elt->key_checksum) &&
             !strcasecmp(next_elt->key, key)) {
 	    return next_elt->val;
@@ -428,90 +428,77 @@ APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key)
 APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
 			       const char *val)
 {
-    register int i, j, k;
-    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
-    int done = 0;
+    apr_table_entry_t *next_elt = (apr_table_entry_t *) t->a.elts;
+    apr_table_entry_t *end_elt = next_elt + t->a.nelts;
+    apr_table_entry_t *dst_elt;
     apr_uint32_t checksum;
 
     COMPUTE_KEY_CHECKSUM(key, checksum);
-    for (i = 0; i < t->a.nelts; ) {
-	if ((checksum == elts[i].key_checksum) && !strcasecmp(elts[i].key, key)) {
-	    if (!done) {
-		elts[i].val = apr_pstrdup(t->a.pool, val);
-		done = 1;
-		++i;
-	    }
-	    else {		/* delete an extraneous element */
-		for (j = i, k = i + 1; k < t->a.nelts; ++j, ++k) {
-		    elts[j].key = elts[k].key;
-		    elts[j].val = elts[k].val;
-                    elts[j].key_checksum = elts[k].key_checksum;
-		}
-		--t->a.nelts;
-	    }
-	}
-	else {
-	    ++i;
-	}
+    for (; next_elt < end_elt; next_elt++) {
+	if ((checksum == next_elt->key_checksum) &&
+            !strcasecmp(next_elt->key, key)) {
+            next_elt->val = apr_pstrdup(t->a.pool, val);
+            /* remove any other instances of this key */
+            dst_elt = NULL;
+            for (next_elt++; next_elt < end_elt; next_elt++) {
+                if ((checksum == next_elt->key_checksum) &&
+                    !strcasecmp(next_elt->key, key)) {
+                    t->a.nelts--;
+                    if (!dst_elt) {
+                        dst_elt = next_elt;
+                    }
+                }
+                else if (dst_elt) {
+                    *dst_elt++ = *next_elt;
+                }
+
+            }
+            return;
+        }
     }
 
-    if (!done) {
-	elts = (apr_table_entry_t *) table_push(t);
-	elts->key = apr_pstrdup(t->a.pool, key);
-	elts->val = apr_pstrdup(t->a.pool, val);
-        elts->key_checksum = checksum;
-    }
+    next_elt = (apr_table_entry_t *) table_push(t);
+    next_elt->key = apr_pstrdup(t->a.pool, key);
+    next_elt->val = apr_pstrdup(t->a.pool, val);
+    next_elt->key_checksum = checksum;
 }
 
 APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
 				const char *val)
 {
-    register int i, j, k;
-    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
-    int done = 0;
+    apr_table_entry_t *next_elt = (apr_table_entry_t *) t->a.elts;
+    apr_table_entry_t *end_elt = next_elt + t->a.nelts;
+    apr_table_entry_t *dst_elt;
     apr_uint32_t checksum;
 
-#ifdef POOL_DEBUG
-    {
-	if (!apr_pool_is_ancestor(apr_pool_find(key), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
-	    abort();
-	}
-	if (!apr_pool_is_ancestor(apr_pool_find(val), t->a.pool)) {
-	    fprintf(stderr, "table_set: val not in ancestor pool of t\n");
-	    abort();
-	}
-    }
-#endif
-
     COMPUTE_KEY_CHECKSUM(key, checksum);
-    for (i = 0; i < t->a.nelts; ) {
-	if ((checksum == elts[i].key_checksum) && !strcasecmp(elts[i].key, key)) {
-	    if (!done) {
-		elts[i].val = (char *)val;
-		done = 1;
-		++i;
-	    }
-	    else {		/* delete an extraneous element */
-		for (j = i, k = i + 1; k < t->a.nelts; ++j, ++k) {
-		    elts[j].key = elts[k].key;
-		    elts[j].val = elts[k].val;
-		    elts[j].key_checksum = elts[k].key_checksum;
-		}
-		--t->a.nelts;
-	    }
-	}
-	else {
-	    ++i;
-	}
+    for (; next_elt < end_elt; next_elt++) {
+	if ((checksum == next_elt->key_checksum) &&
+            !strcasecmp(next_elt->key, key)) {
+            next_elt->val = (char *)val;
+            /* remove any other instances of this key */
+            dst_elt = NULL;
+            for (next_elt++; next_elt < end_elt; next_elt++) {
+                if ((checksum == next_elt->key_checksum) &&
+                    !strcasecmp(next_elt->key, key)) {
+                    t->a.nelts--;
+                    if (!dst_elt) {
+                        dst_elt = next_elt;
+                    }
+                }
+                else if (dst_elt) {
+                    *dst_elt++ = *next_elt;
+                }
+
+            }
+            return;
+        }
     }
 
-    if (!done) {
-	elts = (apr_table_entry_t *) table_push(t);
-	elts->key = (char *)key;
-	elts->val = (char *)val;
-	elts->key_checksum = checksum;
-    }
+    next_elt = (apr_table_entry_t *) table_push(t);
+    next_elt->key = (char *)key;
+    next_elt->val = (char *)val;
+    next_elt->key_checksum = checksum;
 }
 
 APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key)
