@@ -81,7 +81,13 @@ ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
 ap_status_t ap_setthreadattr_detach(ap_threadattr_t *attr, ap_int32_t on)
 {
     ap_status_t stat;
+#ifdef PTHREAD_ATTR_SETDETACHSTATE_ARG2_ADDR
+    int arg = on;
+
+    if ((stat = pthread_attr_setdetachstate(attr->attr, &arg)) == 0) {
+#else
     if ((stat = pthread_attr_setdetachstate(attr->attr, on)) == 0) {
+#endif
         return APR_SUCCESS;
     }
     else {
@@ -165,7 +171,11 @@ ap_status_t ap_thread_detach(ap_thread_t *thd)
 {
     ap_status_t stat;
 
+#ifdef PTHREAD_DETACH_ARG1_ADDR
+    if ((stat = pthread_detach(thd->td)) == 0) {
+#else
     if ((stat = pthread_detach(*thd->td)) == 0) {
+#endif
         return APR_SUCCESS;
     }
     else {
