@@ -129,6 +129,10 @@ static void test_localstr(CuTest *tc)
     if (rv == APR_ENOTIMPL) {
         CuNotImpl(tc, "apr_time_exp_lt");
     }
+    /* Force us into PST timezone.  This is the only way the test will
+     * succeed.
+     */
+    xt.tm_gmtoff = -25200;
     CuAssertTrue(tc, rv == APR_SUCCESS);
     CuAssertStrEquals(tc, "2002-08-14 12:05:36.186711 -25200 [257 Sat] DST",
                       print_time(p, &xt));
