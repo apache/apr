@@ -224,7 +224,6 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 {
     int ret, i;
     apr_status_t rv = APR_SUCCESS;
-    pfd_elem_t *ep;
 
     if (timeout > 0) {
         timeout /= 1000;
