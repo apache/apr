@@ -39,8 +39,8 @@ CFG=aprtest - Win32 Debug
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
-# PROP Cmd_Line "NMAKE /f aprtest.win /a"
-# PROP Rebuild_Opt ""
+# PROP Cmd_Line "NMAKE /f aprtest.win"
+# PROP Rebuild_Opt "/a"
 # PROP Bsc_Name ""
 # PROP Target_Dir ""
 
@@ -57,8 +57,8 @@ CFG=aprtest - Win32 Debug
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
-# PROP Cmd_Line "NMAKE /f aprtest.win /a"
-# PROP Rebuild_Opt ""
+# PROP Cmd_Line "NMAKE /f aprtest.win"
+# PROP Rebuild_Opt "/a"
 # PROP Bsc_Name ""
 # PROP Target_Dir ""
 
