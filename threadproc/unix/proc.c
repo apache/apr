@@ -373,7 +373,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
 
         if ((status = limit_proc(attr)) != APR_SUCCESS) {
-            return status;
+            exit(-1);   /* We have big problems, the child should exit. */
         }
 
         if (attr->cmdtype == APR_SHELLCMD) {
