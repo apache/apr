@@ -24,16 +24,21 @@
 #define ENUM_BITFIELD(e,n,w)  e n : w
 #endif
 
+#define APR_HAVE_ARPA_INET_H    @arpa_ineth@
 #define APR_HAVE_CRYPT_H        @crypth@
 #define APR_HAVE_CTYPE_H        @ctypeh@
 #define APR_HAVE_DIRENT_H       @direnth@
 #define APR_HAVE_ERRNO_H        @errnoh@
 #define APR_HAVE_FCNTL_H        @fcntlh@
 #define APR_HAVE_IO_H           @ioh@
+#define APR_HAVE_NETDB_H        @netdbh@
 #define APR_HAVE_NETINET_IN_H   @netinet_inh@
 #define APR_HAVE_PTHREAD_H      @pthreadh@
 #define APR_HAVE_STDARG_H       @stdargh@
 #define APR_HAVE_STDIO_H        @stdioh@
+#define APR_HAVE_STDLIB_H       @stdlibh@
+#define APR_HAVE_STRING_H       @stringh@
+#define APR_HAVE_SYS_SIGNAL_H   @sys_signalh@
 #define APR_HAVE_SYS_SOCKET_H   @sys_socketh@
 #define APR_HAVE_SYS_TYPES_H    @sys_typesh@
 #define APR_HAVE_SYS_UIO_H      @sys_uioh@
