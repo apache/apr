@@ -195,7 +195,7 @@ local-all: $(TARGETS)
 local-depend: x-local-depend
 	@if test -n "`ls *.c 2> /dev/null`"; then \
 	    echo $(MKDEP) $(ALL_CPPFLAGS) $(ALL_INCLUDES) *.c ; \
-	    $(MKDEP) $(ALL_CPPFLAGS) $(ALL_INCLUDES) *.c ; \
+	    CC=${CC} $(MKDEP) $(ALL_CPPFLAGS) $(ALL_INCLUDES) *.c ; \
 	fi
 
 # to be filled in by the actual Makefile
