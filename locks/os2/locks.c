@@ -135,13 +135,14 @@ apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname,
 
 
 
-apr_status_t apr_lock_acquire(apr_lock_t *lock)
+// blocks for no more than ms_timeout milliseconds
+static apr_status_t os2_lock_acquire(apr_lock_t *lock, int ms_timeout)
 {
     ULONG rc;
 
     switch (lock->type) {
     case APR_MUTEX: 
-        rc = DosRequestMutexSem(lock->hMutex, SEM_INDEFINITE_WAIT);
+        rc = DosRequestMutexSem(lock->hMutex, ms_timeout);
 
         if (rc == 0) {
             lock->owner = CurrentTid;
@@ -157,10 +158,21 @@ apr_status_t apr_lock_acquire(apr_lock_t *lock)
     return APR_OS2_STATUS(rc);
 }
 
+
+
+apr_status_t apr_lock_acquire(apr_lock_t *lock)
+{
+    return os2_lock_acquire(lock, SEM_INDEFINITE_WAIT);
+}
+
+
+
 apr_status_t apr_lock_tryacquire(apr_lock_t *lock)
 {
-    return APR_ENOTIMPL;
+    return os2_lock_acquire(lock, SEM_IMMEDIATE_RETURN);
 }
+
+
 
 apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e e)
 {
