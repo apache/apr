@@ -15,6 +15,9 @@ echo "Platform: ${OS}"
 dnl # Some initial steps for configuration.  We setup the default directory
 dnl # and which files are to be configured.
 
+dnl Preload
+APR_PRELOAD
+
 dnl Absolute source/build directory
 abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
