@@ -73,6 +73,9 @@ extern "C" {
 #define apr_atomic_init(pool)        APR_SUCCESS
 
 #else
+
+#if APR_HAS_THREADS
+
 #define apr_atomic_read(p)  *p
 apr_status_t apr_atomic_init(apr_pool_t *p);
 long apr_atomic_set(volatile long*mem, long val);
@@ -80,6 +83,8 @@ long apr_atomic_add(volatile long*mem, long val);
 long apr_atomic_inc( volatile long *mem);
 long apr_atomic_dec(volatile long *mem);
 long apr_atomic_cas(volatile long *mem,long with,long cmp);
+
+#endif /* APR_HAS_THREADS */
 
 #endif
 #ifdef __cplusplus

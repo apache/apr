@@ -7,6 +7,8 @@
 /* win32 implementation is all macros */
 #else
 
+#if APR_HAS_THREADS
+
 #define NUM_ATOMIC_HASH 7
 /* shift by 2 to get rid of alignment issues */
 #define ATOMIC_HASH(x) (int)(((long)x>>2)%NUM_ATOMIC_HASH)
@@ -92,4 +94,7 @@ long apr_atomic_cas(volatile long *mem,long with,long cmp)
     }
     return *mem;
 }
+
+#endif /* APR_HAS_THREADS */
+
 #endif /* default implementation */
