@@ -82,8 +82,9 @@ static void FS3_to_finfo(apr_finfo_t *finfo, FILESTATUS3 *fstatus)
                              fstatus->ftimeLastWrite );
     apr_os2_time_to_apr_time(&finfo->ctime, fstatus->fdateCreation,   
                              fstatus->ftimeCreation );
-    finfo->valid |= APR_FINFO_TYPE | APR_FINFO_PROT | APR_FINFO_SIZE |
-        APR_FINFO_CSIZE | APR_FINFO_MTIME | APR_FINFO_CTIME | APR_FINFO_ATIME;
+    finfo->valid = APR_FINFO_TYPE | APR_FINFO_PROT | APR_FINFO_SIZE
+                 | APR_FINFO_CSIZE | APR_FINFO_MTIME 
+                 | APR_FINFO_CTIME | APR_FINFO_ATIME;
 }
 
 
@@ -129,8 +130,6 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
 
     if (rc == 0) {
         FS3_to_finfo(finfo, &fstatus);
-        /* XXX: This is wrong, but it will work for today */
-        finfo->valid = APR_FINFO_NORM;
 
         if (finfo->filetype == APR_REG) {
             if (thefile->isopen) {
