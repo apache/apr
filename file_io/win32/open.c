@@ -173,14 +173,11 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
                                    apr_int32_t flag, apr_fileperms_t perm,
                                    apr_pool_t *cont)
 {
-    /* XXX: The default FILE_FLAG_SEQUENTIAL_SCAN is _wrong_ for
-     *      sdbm and any other random files!  We _must_ rethink
-     *      this approach.
-     */
+    SECURITY_ATTRIBUTES sa, *psa = NULL;
     HANDLE handle = INVALID_HANDLE_VALUE;
     DWORD oflags = 0;
     DWORD createflags = 0;
-    DWORD attributes = 0 /* FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN*/;
+    DWORD attributes = 0;
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
     apr_oslevel_e os_level;
     apr_status_t rv;
@@ -221,7 +218,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     if (flag & APR_DELONCLOSE) {
         attributes |= FILE_FLAG_DELETE_ON_CLOSE;
     }
-   if (flag & APR_OPENLINK) {
+    if (flag & APR_OPENLINK) {
        attributes |= FILE_FLAG_OPEN_REPARSE_POINT;
     }
     if (!(flag & (APR_READ | APR_WRITE)) && (os_level >= APR_WIN_NT)) {
@@ -236,6 +233,12 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
          */
         attributes |= FILE_FLAG_OVERLAPPED;
     }
+    if (flag & APR_INHERIT) {
+        sa.nLength = sizeof(sa);
+        sa.bInheritHandle = TRUE;
+        sa.lpSecurityDescriptor = NULL;
+        psa = &sa;
+    }
 
 #if APR_HAS_UNICODE_FS
     if (os_level >= APR_WIN_NT) {
@@ -244,12 +247,12 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
                                                / sizeof(apr_wchar_t), fname))
             return rv;
         handle = CreateFileW(wfname, oflags, sharemode,
-                             NULL, createflags, attributes, 0);
+                             psa, createflags, attributes, 0);
     }
     else
 #endif
         handle = CreateFileA(fname, oflags, sharemode,
-                             NULL, createflags, attributes, 0);
+                             psa, createflags, attributes, 0);
 
     if (handle == INVALID_HANDLE_VALUE) {
         return apr_get_os_error();
@@ -307,7 +310,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     (*new)->filePtr = 0;
 
     apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), file_cleanup,
-                        apr_pool_cleanup_null);
+                              apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
