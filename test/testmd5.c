@@ -83,6 +83,11 @@ struct testcase testcases[] =
      "\xd1\xa1\xc0\x97\x8a\x60\xbb\xfb\x2a\x25\x46\x9d\xa5\xae\xd0\xb0"}
 };
 
+static void closeapr(void)
+{
+    apr_terminate();
+}
+
 static void try(const void *buf, size_t bufLen, apr_xlate_t *xlate,
                 const void *digest)
 {
@@ -152,7 +157,7 @@ int main(int argc, char **argv)
 
     rv = apr_initialize();
     assert(!rv);
-    atexit(apr_terminate);
+    atexit(closeapr);
 
     rv = apr_pool_create(&pool, NULL);
 
