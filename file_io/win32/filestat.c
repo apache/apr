@@ -62,6 +62,17 @@
 #include "atime.h"
 #include "misc.h"
 
+/* Entries missing from the MSVC 5.0 Win32 SDK:
+ */
+#ifndef FILE_ATTRIBUTE_REPARSE_POINT
+#define FILE_ATTRIBUTE_REPARSE_POINT 0x00000400
+#endif
+#ifndef FILE_FLAG_OPEN_NO_RECALL
+#define FILE_FLAG_OPEN_NO_RECALL     0x00100000
+#endif
+#ifndef FILE_FLAG_OPEN_REPARSE_POINT
+#define FILE_FLAG_OPEN_REPARSE_POINT 0x00200000
+#endif
 
 BOOLEAN is_exe(const char* fname, apr_pool_t *cont) {
     /*
