@@ -94,6 +94,18 @@ static void errmsg(const char *msg)
     exit(1);
 }
 
+static void errmsg2(const char *msg, apr_status_t rv)
+{
+    char *newmsg;
+    char errstr[120];
+
+    apr_strerror(rv, errstr, sizeof errstr);
+    newmsg = apr_psprintf(pool, "%s: %s (%d)\n",
+                          msg, errstr, rv);
+    errmsg(newmsg);
+    exit(1);
+}
+
 static void do_read(void)
 {
     apr_file_t *file;
@@ -124,18 +136,19 @@ static void do_read(void)
 static void do_write(void)
 {
     apr_file_t *file;
+    apr_status_t rv;
 
     if (apr_file_open(&file, TESTFILE, APR_WRITE|APR_CREATE, APR_OS_DEFAULT,
                  pool) != APR_SUCCESS)
         errmsg("Could not create file.\n");
     printf("Test file created.\n");
 
-    if (apr_file_lock(file, APR_FLOCK_EXCLUSIVE) != APR_SUCCESS)
-        errmsg("Could not lock the file.\n");
+    if ((rv = apr_file_lock(file, APR_FLOCK_EXCLUSIVE)) != APR_SUCCESS)
+        errmsg2("Could not lock the file", rv);
     printf("Lock created.\nSleeping...");
     fflush(stdout);
 
-    apr_sleep(30000000);        /* 30 seconds */
+    apr_sleep(30 * APR_USEC_PER_SEC);
 
     (void) apr_file_close(file);
     printf(" done.\nExiting.\n");
