@@ -6,268 +6,268 @@ DESCRIPTION ''
 EXPORTS
 ; Add new API calls to the end of this list.
 ; apr_file_io.h
-	apr_open	@1
-	apr_close	@2
-	apr_remove_file	@3
-	apr_rename_file @4
-    	apr_eof		@5
-	apr_read	@6
-	apr_write	@7
-	apr_writev	@8
-        apr_full_read	@9
-        apr_full_write	@10
-    	apr_putc	@11
-    	apr_getc	@12
-	apr_ungetc	@13
-	apr_fgets	@14
-	apr_puts	@15
-	apr_flush	@16
-	apr_dupfile	@17
-	apr_getfileinfo	@18
-        apr_setfileperms @19
-	apr_stat	@20
-        apr_lstat	@21
-	apr_seek	@22
-	apr_opendir	@23
-	apr_closedir	@24
-	apr_readdir	@25
-	apr_rewinddir   @26
-	apr_make_dir	@27
-	apr_remove_dir  @28
-	apr_dir_entry_size   @29
-	apr_dir_entry_mtime  @30
-	apr_dir_entry_ftype  @31
-	apr_get_dir_filename @32
-;	apr_get_filename  @33
-	apr_create_pipe   @34
-;       apr_create_namedpipe @35
-;       apr_set_pipe_timeout @36
-    	apr_get_filedata  @37
-    	apr_set_filedata  @38
-    	apr_get_os_file	  @39
-	apr_put_os_file	  @40
-    	apr_get_os_dir	  @41
-    	apr_fprintf	  @42
+	apr_open
+	apr_close
+	apr_remove_file
+	apr_rename_file
+    	apr_eof
+	apr_read
+	apr_write
+	apr_writev
+        apr_full_read
+        apr_full_write
+    	apr_putc
+    	apr_getc
+	apr_ungetc
+	apr_fgets
+	apr_puts
+	apr_flush
+	apr_dupfile
+	apr_getfileinfo
+        apr_setfileperms
+	apr_stat
+        apr_lstat
+	apr_seek
+	apr_opendir
+	apr_closedir
+	apr_readdir
+	apr_rewinddir
+	apr_make_dir
+	apr_remove_dir
+	apr_dir_entry_size
+	apr_dir_entry_mtime
+	apr_dir_entry_ftype
+	apr_get_dir_filename
+;	apr_get_filename
+	apr_create_pipe
+;       apr_create_namedpipe
+;       apr_set_pipe_timeout
+    	apr_get_filedata
+    	apr_set_filedata
+    	apr_get_os_file
+	apr_put_os_file
+    	apr_get_os_dir
+    	apr_fprintf
 
 ;
 ; apr_network_io.h
-        apr_getaddrinfo         @45
-        apr_create_socket       @46
-	apr_create_tcp_socket   @47
-	apr_shutdown   @48
-	apr_close_socket   @49
-	apr_bind   @50
-	apr_listen   @51
-	apr_accept   @52
-	apr_connect   @53
-	apr_get_hostname   @54
-	apr_gethostname   @55
-	apr_send   @56
-	apr_recv   @57
-	apr_setsocketopt   @58
-	apr_sendv @59
-	apr_sendfile  @60
-	apr_setup_poll   @61
-	apr_poll   @62
-	apr_add_poll_socket   @63
-	apr_get_revents   @64
-	apr_get_socketdata   @65
-	apr_set_socketdata   @66
-	apr_get_polldata   @67
-	apr_set_polldata   @68
-	apr_put_os_sock @69
-	apr_get_os_sock   @70
-	apr_remove_poll_socket   @71
-	apr_clear_poll_sockets   @72
-	apr_getsocketopt @73
-	apr_get_ipaddr @74
-	apr_set_ipaddr @75
-        apr_get_port @76
-	apr_set_port @77
-        apr_get_inaddr @78
-        apr_get_socket_inaddr @79
+        apr_getaddrinfo
+        apr_create_socket
+	apr_create_tcp_socket
+	apr_shutdown
+	apr_close_socket
+	apr_bind
+	apr_listen
+	apr_accept
+	apr_connect
+	apr_get_hostname
+	apr_gethostname
+	apr_send
+	apr_recv
+	apr_setsocketopt
+	apr_sendv
+	apr_sendfile
+	apr_setup_poll
+	apr_poll
+	apr_add_poll_socket
+	apr_get_revents
+	apr_get_socketdata
+	apr_set_socketdata
+	apr_get_polldata
+	apr_set_polldata
+	apr_put_os_sock
+	apr_get_os_sock
+	apr_remove_poll_socket
+	apr_clear_poll_sockets
+	apr_getsocketopt
+	apr_get_ipaddr
+	apr_set_ipaddr
+        apr_get_port
+	apr_set_port
+        apr_get_inaddr
+        apr_get_socket_inaddr
 
 ;
 ;
 ; apr_thread_proc.h
-	apr_createprocattr_init   @80
-	apr_setprocattr_io   @81
-	apr_setprocattr_dir   @82
-	apr_setprocattr_cmdtype   @83
-	apr_setprocattr_detach   @84
-	apr_create_process   @85
+	apr_createprocattr_init
+	apr_setprocattr_io
+	apr_setprocattr_dir
+	apr_setprocattr_cmdtype
+	apr_setprocattr_detach
+	apr_create_process
 ;
 ;
 ;
-	apr_wait_proc   @89
-	apr_kill   @90
-	apr_create_threadattr   @91
-	apr_setthreadattr_detach   @92
-	apr_getthreadattr_detach   @93
-	apr_create_thread   @94
-	apr_thread_exit   @95
-	apr_thread_join   @96
-	apr_thread_detach   @97
+	apr_wait_proc
+	apr_kill
+	apr_create_threadattr
+	apr_setthreadattr_detach
+	apr_getthreadattr_detach
+	apr_create_thread
+	apr_thread_exit
+	apr_thread_join
+	apr_thread_detach
 ;
-	apr_create_thread_private   @99
-	apr_get_thread_private   @100
-	apr_set_thread_private   @101
-	apr_delete_thread_private   @102
-	apr_get_threaddata    @103
-	apr_set_threaddata    @104
-	apr_get_threadkeydata    @105
-	apr_set_threadkeydata    @106
+	apr_create_thread_private
+	apr_get_thread_private
+	apr_set_thread_private
+	apr_delete_thread_private
+	apr_get_threaddata
+	apr_set_threaddata
+	apr_get_threadkeydata
+	apr_set_threadkeydata
 ;
 ;
 ;
-	apr_get_os_thread   @110
-	apr_get_os_threadkey   @111
+	apr_get_os_thread
+	apr_get_os_threadkey
 
 
-	apr_create_pool   @114
+	apr_create_pool
 ;
 ;
 ;
-	apr_get_userdata   @118
-	apr_set_userdata   @119
-	apr_initialize   @120
-;	apr_make_time   @127
-	apr_ansi_time_to_apr_time @127
-	apr_now		  @128
-	apr_explode_gmt	  @129
-	apr_explode_localtime @130
-	apr_implode_time	 @131
-	apr_get_os_imp_time	@132
-	apr_get_os_exp_time	@133
-	apr_put_os_imp_time	@134
-	apr_put_os_exp_time	@135
-	apr_ctime     @136
-	apr_rfc822_date	@137
-	apr_strftime   @138
-;
-;
-;
-;
+	apr_get_userdata
+	apr_set_userdata
+	apr_initialize
+;	apr_make_time
+	apr_ansi_time_to_apr_time
+	apr_now
+	apr_explode_gmt
+	apr_explode_localtime
+	apr_implode_time
+	apr_get_os_imp_time
+	apr_get_os_exp_time
+	apr_put_os_imp_time
+	apr_put_os_exp_time
+	apr_ctime
+	apr_rfc822_date
+	apr_strftime
 ;
 ;
 ;
 ;
 ;
 ;
-	apr_MD5Final   @150
-	apr_MD5Init   @151
-	apr_MD5Update   @152
-	apr_cpystrn   @153
-	apr_register_cleanup   @154
-	apr_kill_cleanup   @155
-	apr_fnmatch   @156
-	apr_is_fnmatch   @157
-	apr_MD5Encode   @158
-	apr_validate_password   @159
+;
+;
+;
+;
+	apr_MD5Final
+	apr_MD5Init
+	apr_MD5Update
+	apr_cpystrn
+	apr_register_cleanup
+	apr_kill_cleanup
+	apr_fnmatch
+	apr_is_fnmatch
+	apr_MD5Encode
+	apr_validate_password
 ;
 ; apr_pools.h
-	apr_make_sub_pool   @160
-	apr_init_alloc   @161
-	apr_clear_pool   @162
-	apr_destroy_pool   @163
-	apr_bytes_in_pool   @164
-	apr_bytes_in_free_blocks   @165
-	apr_palloc   @166
-	apr_pcalloc   @167
-	apr_pstrdup   @168
-	apr_pstrndup   @169
-	apr_pstrcat   @170
-	apr_pvsprintf   @171
-	apr_psprintf   @172
+	apr_make_sub_pool
+	apr_init_alloc
+	apr_clear_pool
+	apr_destroy_pool
+	apr_bytes_in_pool
+	apr_bytes_in_free_blocks
+	apr_palloc
+	apr_pcalloc
+	apr_pstrdup
+	apr_pstrndup
+	apr_pstrcat
+	apr_pvsprintf
+	apr_psprintf
 ;
 ; apr_tables.h
-	apr_make_array   @173
-	apr_push_array   @174
-	apr_array_cat    @175
-	apr_copy_array   @176
-	apr_copy_array_hdr   @177
-	apr_append_arrays   @178
-	apr_array_pstrcat   @179
-	apr_make_table   @180
-	apr_copy_table   @181
-	apr_clear_table   @182
-	apr_table_get   @183
-	apr_table_set   @184
-	apr_table_setn   @185
-	apr_table_unset   @186
-	apr_table_merge   @187
-	apr_table_mergen   @188
-	apr_table_add   @189
-	apr_table_addn   @190
-	apr_overlay_tables @191
-	apr_table_do   @192
-	apr_table_vdo @193
-	apr_overlap_tables   @194
+	apr_make_array
+	apr_push_array
+	apr_array_cat
+	apr_copy_array
+	apr_copy_array_hdr
+	apr_append_arrays
+	apr_array_pstrcat
+	apr_make_table
+	apr_copy_table
+	apr_clear_table
+	apr_table_get
+	apr_table_set
+	apr_table_setn
+	apr_table_unset
+	apr_table_merge
+	apr_table_mergen
+	apr_table_add
+	apr_table_addn
+	apr_overlay_tables
+	apr_table_do
+	apr_table_vdo
+	apr_overlap_tables
 ;
 ;
-	apr_run_cleanup   @195
-	apr_cleanup_for_exec   @196
-	apr_null_cleanup   @197
-	apr_note_subprocess   @198
+	apr_run_cleanup
+	apr_cleanup_for_exec
+	apr_null_cleanup
+	apr_note_subprocess
 ;
-	apr_vformatter   @199
-	apr_snprintf   @200
-	apr_vsnprintf   @201
-	apr_getpass   @202
+	apr_vformatter
+	apr_snprintf
+	apr_vsnprintf
+	apr_getpass
 
-	apr_tokenize_to_argv @204
-	apr_filename_of_pathname @205	
-	apr_get_remote_name @206
-	apr_get_local_name @207
+	apr_tokenize_to_argv
+	apr_filename_of_pathname
+	apr_get_remote_name
+	apr_get_local_name
 
-	apr_open_stderr @216
-	apr_get_pipe_timeout @217
-        apr_set_pipe_timeout   @218
-        apr_terminate @219
-        apr_dso_load @220
-        apr_dso_unload @221
-        apr_dso_sym @222
-        apr_collapse_spaces @223
-	apr_month_snames @224
-	apr_day_snames @225
-	apr_canonical_error @226
-	apr_strerror @227
-	apr_generate_random_bytes @228
-	apr_strnatcmp @229
-	apr_strnatcasecmp @230
-        apr_dso_error @231
+	apr_open_stderr
+	apr_get_pipe_timeout
+        apr_set_pipe_timeout
+        apr_terminate
+        apr_dso_load
+        apr_dso_unload
+        apr_dso_sym
+        apr_collapse_spaces
+	apr_month_snames
+	apr_day_snames
+	apr_canonical_error
+	apr_strerror
+	apr_generate_random_bytes
+	apr_strnatcmp
+	apr_strnatcasecmp
+        apr_dso_error
 ;
 ; apr_hash.h
-        apr_make_hash	@232
-	apr_hash_set	@233
-	apr_hash_get	@234
-	apr_hash_first	@235
-	apr_hash_next	@236
-	apr_hash_this	@237
+        apr_make_hash
+	apr_hash_set
+	apr_hash_get
+	apr_hash_first
+	apr_hash_next
+	apr_hash_this
 ;
 ; apr_lock.h
-	apr_create_lock  @240
-	apr_lock	 @241
-	apr_unlock	 @242
-	apr_destroy_lock @243
-	apr_child_init_lock  @244
-	apr_get_lockdata  @245
-	apr_set_lockdata  @246
-	apr_get_os_lock   @247
+	apr_create_lock
+	apr_lock
+	apr_unlock
+	apr_destroy_lock
+	apr_child_init_lock
+	apr_get_lockdata
+	apr_set_lockdata
+	apr_get_os_lock
 ;
 ; apr_uuid.h
-	apr_format_uuid @248
-	apr_parse_uuid  @249
-	apr_get_uuid    @250
+	apr_format_uuid
+	apr_parse_uuid
+	apr_get_uuid
 
 ; Moved out of the way for Bill Stoddard's reorg
 ;
 ; apr_getopt.h
-	apr_getopt    @298
-	apr_initopt    @299
-;	apr_opterr   @122 DATA
-;	apr_optind   @123 DATA
-;	apr_optopt   @124 DATA
-;	apr_optreset   @125 DATA
-;	apr_optarg   @126 DATA
+	apr_getopt
+	apr_initopt
+;	apr_opterr
+;	apr_optind
+;	apr_optopt
+;	apr_optreset
+;	apr_optarg
 
