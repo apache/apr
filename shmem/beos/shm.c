@@ -60,6 +60,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <kernel/OS.h>
+#include "apr_portable.h"
 
 struct apr_shm_t {
     apr_pool_t *pool;
