@@ -138,10 +138,6 @@ ap_status_t ap_open(ap_file_t **dafile, const char *fname,
         (*dafile)->append = 0;
     }
 
-    if (flag & APR_TRUNCATE) {
-        createflags = TRUNCATE_EXISTING;
-    }
- 
     attributes = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN;
     if (flag & APR_DELONCLOSE) {
         attributes |= FILE_FLAG_DELETE_ON_CLOSE;
