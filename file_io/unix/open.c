@@ -82,6 +82,9 @@ ap_status_t ap_unix_file_cleanup(void *thefile)
 ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_pool_t *cont)
 {
     int oflags = 0;
+#if APR_HAS_THREADS
+    ap_status_t rv;
+#endif
 
     if ((*new) == NULL) {
         (*new) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
@@ -90,10 +93,6 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     (*new)->cntxt = cont;
     (*new)->oflags = oflags;
     (*new)->filedes = -1;
-    (*new)->buffer = NULL;
-#if APR_HAS_THREADS
-    ap_create_lock(&((*new)->thlock), APR_MUTEX, APR_INTRAPROCESS, NULL, cont);
-#endif
 
     if ((flag & APR_READ) && (flag & APR_WRITE)) {
         oflags = O_RDWR;
@@ -111,6 +110,20 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     (*new)->fname = ap_pstrdup(cont, fname);
 
     (*new)->buffered = (flag & APR_BUFFERED) > 0;
+
+    if ((*new)->buffered) {
+        (*new)->buffer = ap_palloc(cont, APR_FILE_BUFSIZE);
+#if APR_HAS_THREADS
+        rv = ap_create_lock(&((*new)->thlock), APR_MUTEX, APR_INTRAPROCESS, 
+                            NULL, cont);
+        if (rv) {
+            return rv;
+        }
+#endif
+    }
+    else {
+        (*new)->buffer = NULL;
+    }
 
     if (flag & APR_CREATE) {
         oflags |= O_CREAT; 

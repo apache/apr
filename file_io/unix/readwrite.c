@@ -98,6 +98,9 @@ static ap_status_t wait_for_io_or_timeout(ap_file_t *file, int for_read)
 }
 #endif
 
+/* problems: 
+ * 1) ungetchar not used for buffered files
+ */
 ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_ssize_t rv;
@@ -130,6 +133,11 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
                 thefile->dataRead = read(thefile->filedes, thefile->buffer, APR_FILE_BUFSIZE);
                 if (thefile->dataRead == 0) {
                     thefile->eof_hit = TRUE;
+                    rv = APR_EOF;
+                    break;
+                }
+                else if (thefile->dataRead == -1) {
+                    rv = errno;
                     break;
                 }
                 thefile->filePtr += thefile->dataRead;
@@ -143,7 +151,10 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
             size -= blocksize;
         }
 
-        *nbytes = rv == 0 ? pos - (char *)buf : 0;
+        *nbytes = pos - (char *)buf;
+        if (*nbytes) {
+            rv = 0;
+        }
 #if APR_HAS_THREADS
         ap_unlock(thefile->thlock);
 #endif
@@ -301,22 +312,9 @@ ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 
 ap_status_t ap_getc(char *ch, ap_file_t *thefile)
 {
-    ssize_t rv;
-    
-    if (thefile->ungetchar != -1) {
-        *ch = (char) thefile->ungetchar;
-        thefile->ungetchar = -1;
-        return APR_SUCCESS;
-    }
-    rv = read(thefile->filedes, ch, 1); 
-    if (rv == 0) {
-        thefile->eof_hit = TRUE;
-        return APR_EOF;
-    }
-    else if (rv != 1) {
-        return errno;
-    }
-    return APR_SUCCESS; 
+    ap_ssize_t nbytes = 1;
+
+    return ap_read(thefile, ch, &nbytes);
 }
 
 ap_status_t ap_puts(char *str, ap_file_t *thefile)
@@ -356,59 +354,34 @@ ap_status_t ap_flush(ap_file_t *thefile)
 
 ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 {
-    ssize_t rv;
-    int i, used_unget = FALSE, beg_idx;
+    ap_status_t rv = APR_SUCCESS; /* get rid of gcc warning */
+    ap_ssize_t nbytes;
+    char *final = str + len - 1;
 
-    if (len <= 1) {  /* as per fgets() */
+    if (len <= 1) {  
+        /* sort of like fgets(), which returns NULL and stores no bytes 
+         */
         return APR_SUCCESS;
     }
 
-    if (thefile->ungetchar != -1) {
-        str[0] = thefile->ungetchar;
-	used_unget = TRUE;
-	beg_idx = 1;
-	if (str[0] == '\n' || str[0] == '\r') {
-	    thefile->ungetchar = -1;
-	    str[1] = '\0';
-	    return APR_SUCCESS;
-	}
-    } 
-    else {
-        beg_idx = 0;
-    }
-    
-    for (i = beg_idx; i < len; i++) {
-        rv = read(thefile->filedes, &str[i], 1); 
-        if (rv == 0) {
-            thefile->eof_hit = TRUE;
-	    if (used_unget) {
-                thefile->filedes = -1;
-            }
-	    str[i] = '\0';
-            return APR_EOF;
-        }
-        else if (rv != 1) {
-            return errno;
-        }
-        if (str[i] == '\n' || str[i] == '\r') {
+    while (str < final) { /* leave room for trailing '\0' */
+        nbytes = 1;
+        rv = ap_read(thefile, str, &nbytes);
+        if (rv != APR_SUCCESS) {
             break;
         }
+        if (*str == '\n') {
+            ++str;
+            break;
+        }
+        ++str;
     }
-    if (i < len-1) {
-        str[i+1] = '\0';
-    }
-    return APR_SUCCESS; 
-}
-
-#if 0 /* not currently used */
-static int printf_flush(ap_vformatter_buff_t *vbuff)
-{
-    /* I would love to print this stuff out to the file, but I will
-     * get that working later.  :)  For now, just return.
+    /* We must store a terminating '\0' if we've stored any chars. We can
+     * get away with storing it if we hit an error first. 
      */
-    return -1;
+    *str = '\0'; 
+    return rv;
 }
-#endif
 
 APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
 {
