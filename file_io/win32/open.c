@@ -59,10 +59,14 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 #include "apr_thread_mutex.h"
+#if APR_HAVE_ERRNO_H
 #include <errno.h>
+#endif
 #include <winbase.h>
 #include <string.h>
+#if APR_HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
 #include "misc.h"
 
 #if APR_HAS_UNICODE_FS
@@ -466,8 +470,12 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
                                              / sizeof(apr_wchar_t), topath)) {
             return rv;
         }
+#ifndef _WIN32_WCE
         if (MoveFileExW(wfrompath, wtopath, MOVEFILE_REPLACE_EXISTING |
                                             MOVEFILE_COPY_ALLOWED))
+#else
+        if (MoveFileW(wfrompath, wtopath))
+#endif
             return APR_SUCCESS;
 #else
         if (MoveFileEx(frompath, topath, MOVEFILE_REPLACE_EXISTING |
@@ -530,6 +538,9 @@ APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr)
 
 APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
     apr_os_file_t file_handle;
 
     file_handle = GetStdHandle(STD_ERROR_HANDLE);
@@ -537,10 +548,14 @@ APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t 
         return APR_EINVAL;
 
     return apr_os_file_put(thefile, &file_handle, 0, cont);
+#endif
 }
 
 APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
 {
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
     apr_os_file_t file_handle;
 
     file_handle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -548,10 +563,14 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t 
         return APR_EINVAL;
 
     return apr_os_file_put(thefile, &file_handle, 0, cont);
+#endif
 }
 
 APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *cont)
 {
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
     apr_os_file_t file_handle;
 
     file_handle = GetStdHandle(STD_INPUT_HANDLE);
@@ -559,6 +578,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *
         return APR_EINVAL;
 
     return apr_os_file_put(thefile, &file_handle, 0, cont);
+#endif
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);
