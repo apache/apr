@@ -153,7 +153,6 @@ typedef void (Sigfunc)(int);
  * only found in the windows version of APR.
  */
 
-void FileTimeToAprTime(time_t *atime, FILETIME *ft);
 unsigned __stdcall SignalHandling(void *);
 int thread_ready(void);
 

@@ -61,10 +61,12 @@
 
 struct atime_t {
     ap_context_t *cntxt;
-    time_t currtime;
+    ap_time_t currtime;
     SYSTEMTIME *explodedtime;
 };
     
+void FileTimeToAprTime(ap_time_t *atime, FILETIME *ft);
+void AprTimeToFileTime(LPFILETIME pft, ap_time_t t);
 
 #endif  /* ! ATIME_H */
 
