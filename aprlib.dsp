@@ -68,8 +68,8 @@ LIB32=link.exe -lib
 RSC=rc.exe
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
-# ADD BASE CPP /nologo /MTd /W3 /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "misc/unix" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /FD /c
+# ADD BASE CPP /nologo /MTd /W3 /GX /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /ZI /c
+# ADD CPP /nologo /MDd /W3 /GX /Od /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "misc/unix" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /FD /ZI /c
 # SUBTRACT CPP /YX
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
@@ -87,10 +87,29 @@ LIB32=link.exe -lib
 # Begin Group "Source Files"
 
 # PROP Default_Filter ".c"
+# Begin Group "time"
+
+# PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=.\time\win32\access.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\time\win32\atime.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\time\win32\time.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\time\win32\timestr.c
+# End Source File
+# End Group
+# Begin Group "strings"
+
+# PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=.\strings\apr_cpystrn.c
@@ -98,26 +117,6 @@ SOURCE=.\strings\apr_cpystrn.c
 # Begin Source File
 
 SOURCE=.\strings\apr_fnmatch.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\passwd\apr_getpass.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\tables\apr_hash.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\passwd\apr_md5.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\lib\apr_pools.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\lib\apr_signal.c
 # End Source File
 # Begin Source File
 
@@ -131,41 +130,41 @@ SOURCE=.\strings\apr_strings.c
 
 SOURCE=.\strings\apr_strnatcmp.c
 # End Source File
+# End Group
+# Begin Group "passwd"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\passwd\apr_getpass.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\passwd\apr_md5.c
+# End Source File
+# End Group
+# Begin Group "tables"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\tables\apr_hash.c
+# End Source File
 # Begin Source File
 
 SOURCE=.\tables\apr_tables.c
 # End Source File
+# End Group
+# Begin Group "misc"
+
+# PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=.\misc\unix\canonerr.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\file_io\win32\dir.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\dso\win32\dso.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\misc\unix\errorcodes.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\file_io\unix\fileacc.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\file_io\win32\filedup.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\file_io\win32\filestat.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\file_io\unix\fullrw.c
 # End Source File
 # Begin Source File
 
@@ -177,15 +176,55 @@ SOURCE=.\misc\win32\getuuid.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\locks\win32\locks.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\misc\win32\misc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\misc\unix\misc.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\misc\win32\names.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\misc\win32\rand.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\misc\unix\start.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\misc\unix\uuid.c
+# End Source File
+# End Group
+# Begin Group "file_io"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\file_io\win32\dir.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\file_io\unix\fileacc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\file_io\win32\filedup.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\file_io\win32\fileio.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\file_io\win32\filestat.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\file_io\unix\fullrw.c
 # End Source File
 # Begin Source File
 
@@ -197,36 +236,39 @@ SOURCE=.\file_io\win32\pipe.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\network_io\win32\poll.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\threadproc\win32\proc.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\misc\win32\rand.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\file_io\win32\readwrite.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\file_io\win32\seek.c
 # End Source File
+# End Group
+# Begin Group "locks"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\locks\win32\locks.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\locks\win32\locks.h
+# End Source File
+# End Group
+# Begin Group "network_io"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\network_io\win32\networkio.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\network_io\win32\poll.c
+# End Source File
 # Begin Source File
 
 SOURCE=.\network_io\win32\sendrecv.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\shmem\win32\shmem.c
-# PROP Exclude_From_Build 1
-# End Source File
-# Begin Source File
-
-SOURCE=.\threadproc\win32\signals.c
 # End Source File
 # Begin Source File
 
@@ -240,9 +282,17 @@ SOURCE=.\network_io\win32\sockets.c
 
 SOURCE=.\network_io\win32\sockopt.c
 # End Source File
+# End Group
+# Begin Group "threadproc"
+
+# PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\misc\unix\start.c
+SOURCE=.\threadproc\win32\proc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\threadproc\win32\signals.c
 # End Source File
 # Begin Source File
 
@@ -252,18 +302,44 @@ SOURCE=.\threadproc\win32\thread.c
 
 SOURCE=.\threadproc\win32\threadpriv.c
 # End Source File
+# End Group
+# Begin Group "dso"
+
+# PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\time\win32\time.c
+SOURCE=.\dso\win32\dso.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\time\win32\timestr.c
+SOURCE=.\dso\win32\dso.h
+# End Source File
+# End Group
+# Begin Group "lib"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\lib\apr_pools.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\misc\unix\uuid.c
+SOURCE=.\lib\apr_signal.c
 # End Source File
+# End Group
+# Begin Group "i18n"
+
+# PROP Default_Filter ""
+# End Group
+# Begin Group "shmem"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\shmem\win32\shmem.c
+# PROP Exclude_From_Build 1
+# End Source File
+# End Group
 # End Group
 # Begin Group "Generated Header Files"
 
@@ -308,30 +384,6 @@ InputPath=.\include\apr_private.hw
 
 !ENDIF 
 
-# End Source File
-# Begin Source File
-
-SOURCE=.\time\win32\atime.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\dso\win32\dso.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\file_io\win32\fileio.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\locks\win32\locks.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\misc\unix\misc.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\network_io\win32\networkio.h
 # End Source File
 # Begin Source File
 
