@@ -485,7 +485,9 @@ APR_DECLARE(apr_status_t) apr_sms_trivial_create_ex(apr_sms_t **sms,
     
     min_alloc = APR_ALIGN_DEFAULT(min_alloc);
     min_free  = APR_ALIGN_DEFAULT(min_free);
-
+    if (min_free < SIZEOF_NODE_T)
+        min_free = SIZEOF_NODE_T;
+    
     /* We're not a top level module, ie we have a parent, so
      * we allocate the memory for the structure from our parent.
      * This is safe as we shouldn't outlive our parent...
