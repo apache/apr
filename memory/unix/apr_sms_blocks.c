@@ -268,7 +268,7 @@ APR_DECLARE(apr_status_t) apr_sms_blocks_create(apr_sms_t **sms,
     bms->block_sz = block_size;
     bms->alloc_sz = alloc_size;
     bms->ptr = (char*)new_sms + SIZEOF_SMS_BLOCKS_T;
-    bms->endp = (bms->self_endp = (char*)new_sms + alloc_size);
+    bms->endp = bms->self_endp = (char*)new_sms + alloc_size;
 
     /* We are normally single threaded so no lock */
 
