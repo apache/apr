@@ -83,7 +83,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     /* we MUST allocate in pages, so calculate how big an area we need... */
     pagesize = ((reqsize + B_PAGE_SIZE - 1) / B_PAGE_SIZE) * B_PAGE_SIZE;
      
-    newid = create_area(file, (void*)&addr, B_ANY_ADDRESS,
+    newid = create_area("apr_shmem", (void*)&addr, B_ANY_ADDRESS,
                         pagesize, B_CONTIGUOUS, B_READ_AREA|B_WRITE_AREA);
 
     if (newid < 0)
