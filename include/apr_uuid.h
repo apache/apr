@@ -80,7 +80,7 @@ typedef struct {
     unsigned char data[16]; /**< the actual UUID */
 } apr_uuid_t;
 
-/* UUIDs are formatted as: 00112233-4455-6677-8899-AABBCCDDEEFF */
+/** UUIDs are formatted as: 00112233-4455-6677-8899-AABBCCDDEEFF */
 #define APR_UUID_FORMATTED_LENGTH 36
 
 

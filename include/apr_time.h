@@ -89,8 +89,10 @@ typedef apr_int64_t apr_time_t;
 
 /** intervals for I/O timeouts, in microseconds */
 typedef apr_int64_t apr_interval_time_t;
+/** short interval for I/O timeouts, in microseconds */
 typedef apr_int32_t apr_short_interval_time_t;
 
+/** number of microseconds per second */
 #define APR_USEC_PER_SEC APR_TIME_C(1000000)
 
 

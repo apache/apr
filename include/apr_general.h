@@ -76,20 +76,34 @@ extern "C" {
  * @{
  */
 
+/** FALSE */
 #ifndef FALSE
 #define FALSE 0
 #endif
+/** TRUE */
 #ifndef TRUE
 #define TRUE (!FALSE)
 #endif
+
+/**
+ * The Win32 call WaitForMultipleObjects will only allow you to wait for 
+ * a maximum of MAXIMUM_WAIT_OBJECTS (current 64).  Since the threading 
+ * model in the multithreaded version of apache wants to use this call, 
+ * we are restricted to a maximum of 64 threads.  
+ * @see wait_for_many_objects  for a way to increase this size
+ */
 
 #ifndef MAXIMUM_WAIT_OBJECTS
 #define MAXIMUM_WAIT_OBJECTS 64
 #endif
 
+/** a space */
 #define APR_ASCII_BLANK  '\040'
+/** a carrige return */
 #define APR_ASCII_CR     '\015'
+/** a line feed */
 #define APR_ASCII_LF     '\012'
+/** a tab */
 #define APR_ASCII_TAB    '\011'
 
 typedef int               apr_signum_t;

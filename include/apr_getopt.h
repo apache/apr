@@ -71,6 +71,9 @@ extern "C" {
  * @{
  */
 
+/** 
+ * defintion of a error function 
+ */
 typedef void (apr_getopt_err_fn_t)(void *arg, const char *err, ...);
 
 typedef struct apr_getopt_t apr_getopt_t;
