@@ -57,17 +57,10 @@
  * located at http://www.webdav.org/specs/draft-leach-uuids-guids-01.txt
  */
 
-#define _WINUSER_
-
+#include <windows.h>
+#include <objbase.h>
 #include "apr.h"
 #include "apr_uuid.h"
-
-#ifdef NOUSER
-#undef NOUSER
-#endif
-#undef _WINUSER_
-#include <winuser.h>
-#include <objbase.h>
 
 APR_DECLARE(void) apr_uuid_get(apr_uuid_t *uuid)
 {
