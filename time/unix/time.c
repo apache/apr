@@ -1,4 +1,4 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,15 +34,16 @@
 #endif
 /* End System Headers */
 
-#if !defined(HAVE_GMTOFF) && !defined(HAVE___OFFSET)
+#if !defined(HAVE_STRUCT_TM_TM_GMTOFF) && !defined(HAVE_STRUCT_TM___TM_GMTOFF)
 static apr_int32_t server_gmt_offset;
-#endif /* if !defined(HAVE_GMTOFF) && !defined(HAVE___OFFSET) */
+#define NO_GMTOFF_IN_STRUCT_TM
+#endif          
 
 static apr_int32_t get_offset(struct tm *tm)
 {
-#ifdef HAVE_GMTOFF
+#if defined(HAVE_STRUCT_TM_TM_GMTOFF)
     return tm->tm_gmtoff;
-#elif defined(HAVE___OFFSET)
+#elif defined(HAVE_STRUCT_TM___TM_GMTOFF)
     return tm->__tm_gmtoff;
 #else
 #ifdef NETWARE
@@ -54,7 +55,7 @@ static apr_int32_t get_offset(struct tm *tm)
         return server_gmt_offset + daylightOffset;
     }
 #else
-    if(tm->tm_isdst)
+    if (tm->tm_isdst)
         return server_gmt_offset + 3600;
 #endif
     return server_gmt_offset;
@@ -189,9 +190,9 @@ APR_DECLARE(apr_status_t) apr_os_exp_time_get(apr_os_exp_time_t **ostime,
     (*ostime)->tm_yday = aprtime->tm_yday;
     (*ostime)->tm_isdst = aprtime->tm_isdst;
 
-#if HAVE_GMTOFF
+#if defined(HAVE_STRUCT_TM_TM_GMTOFF)
     (*ostime)->tm_gmtoff = aprtime->tm_gmtoff;
-#elif defined(HAVE__OFFSET)
+#elif defined(HAVE_STRUCT_TM___TM_GMTOFF)
     (*ostime)->__tm_gmtoff = aprtime->tm_gmtoff;
 #endif
 
@@ -220,9 +221,9 @@ APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_time_exp_t *aprtime,
     aprtime->tm_yday = (*ostime)->tm_yday;
     aprtime->tm_isdst = (*ostime)->tm_isdst;
 
-#if HAVE_GMTOFF
+#if defined(HAVE_STRUCT_TM_TM_GMTOFF)
     aprtime->tm_gmtoff = (*ostime)->tm_gmtoff;
-#elif defined(HAVE__OFFSET)
+#elif defined(HAVE_STRUCT_TM___TM_GMTOFF)
     aprtime->tm_gmtoff = (*ostime)->__tm_gmtoff;
 #endif
 
@@ -276,7 +277,7 @@ APR_DECLARE(void) apr_netware_setup_time(void)
 #else
 APR_DECLARE(void) apr_unix_setup_time(void)
 {
-#if !defined(HAVE_GMTOFF) && !defined(HAVE___OFFSET)
+#ifdef NO_GMTOFF_IN_STRUCT_TM
     /* Precompute the offset from GMT on systems where it's not
        in struct tm.
 
@@ -316,7 +317,7 @@ APR_DECLARE(void) apr_unix_setup_time(void)
     t.tm_isdst = 0; /* we know this GMT time isn't daylight-savings */
     t2 = mktime(&t);
     server_gmt_offset = (apr_int32_t) difftime(t1, t2);
-#endif
+#endif /* NO_GMTOFF_IN_STRUCT_TM */
 }
 
 #endif
