@@ -147,7 +147,6 @@ int main(int argc, char *argv[])
     
     /* allow time for things to settle... */
     apr_sleep(3 * APR_USEC_PER_SEC);
-    apr_proc_probe_writable_fds();
     
     fprintf(stdout, "[PARENT] Checking on children..........\n");
     apr_proc_other_child_check();
