@@ -177,5 +177,10 @@ APR_DECLARE_DATA int errno;
 #define ENOSPC 1
 #endif
 
+#if APR_HAVE_IPV6
+#define HAVE_GETADDRINFO 1
+#define HAVE_GETNAMEINFO 1
+#endif
+
 #endif  /*APR_PRIVATE_H*/
 #endif  /*WIN32*/
