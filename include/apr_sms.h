@@ -244,6 +244,12 @@ APR_DECLARE(apr_status_t) apr_sms_is_ancestor(apr_sms_t *a, apr_sms_t *b);
  */
 APR_DECLARE(const char *) apr_sms_identity(apr_sms_t *sms);
 
+/**
+ * Get the parent sms
+ * @param sms the memory system to get the parent from
+ */
+APR_DECLARE(apr_sms_t *) apr_sms_get_parent(apr_sms_t *sms);
+
 /*
  * memory system cleanup management functions
  */
