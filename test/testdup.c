@@ -87,7 +87,7 @@ static void test_file_dup(CuTest *tc)
     rv = apr_file_close(file3);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     rv = apr_stat(&finfo, FILENAME, APR_FINFO_NORM, p);
-    CuAssertIntEquals(tc, APR_ENOENT, rv);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOENT(rv));
 }  
 
 static void test_file_readwrite(CuTest *tc)
@@ -131,7 +131,7 @@ static void test_file_readwrite(CuTest *tc)
     rv = apr_file_close(file3);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     rv = apr_stat(&finfo, FILENAME, APR_FINFO_NORM, p);
-    CuAssertIntEquals(tc, APR_ENOENT, rv);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOENT(rv));
 }  
 
 static void test_dup2(CuTest *tc)
