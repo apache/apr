@@ -70,6 +70,10 @@
 #endif
 /* End System Headers */
 
+#if !defined(HAVE_GMTOFF) && !defined(HAVE___OFFSET)
+static apr_int32_t server_gmt_offset;
+#endif /* if !defined(HAVE_GMTOFF) && !defined(HAVE___OFFSET) */
+
 static apr_int32_t get_offset(struct tm *tm)
 {
 #ifdef HAVE_GMTOFF
@@ -77,29 +81,7 @@ static apr_int32_t get_offset(struct tm *tm)
 #elif defined(HAVE___OFFSET)
     return tm->__tm_gmtoff;
 #else
-    /* We don't have an offset field to use, so calculate it.
-       mktime() is the inverse of localtime(); so, presumably,
-       passing in a struct tm made by gmtime() let's us calculate
-       the true GMT offset. However, there's a catch: if daylight
-       savings is in effect, gmtime()will set the tm_isdst field
-       and confuse mktime() into returning a time that's offset
-       by one hour. In that case, we must adjust the calculated GMT
-       offset. */
-    {
-        time_t t1 = time(0), t2 = 0;
-        struct tm t;
-        int was_dst;
-
-#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
-        gmtime_r(&t1, &t);
-#else
-        t = *gmtime(&t1);
-#endif
-        was_dst = (t.tm_isdst > 0);
-        t.tm_isdst = -1;
-        t2 = mktime(&t);
-        return (apr_int32_t) difftime(t1, t2) + (was_dst ? 3600 : 0);
-    }
+    return server_gmt_offset;
 #endif
 }
 
@@ -308,3 +290,50 @@ APR_DECLARE(apr_status_t) apr_os2_time_to_apr_time(apr_time_t *result, FDATE os2
   return APR_SUCCESS;
 }
 #endif
+
+APR_DECLARE(void) apr_unix_setup_time(void)
+{
+#if !defined(HAVE_GMTOFF) && !defined(HAVE___OFFSET)
+    /* Precompute the offset from GMT on systems where it's not
+       in struct tm.
+
+       Note: This offset is normalized to be independent of daylight
+       savings time; if the calculation happens to be done in a
+       time/place where a daylight savings adjustment is in effect,
+       the returned offset has the same value that it would have
+       in the same location if daylight savings were not in effect.
+       The reason for this is that the returned offset can be
+       applied to a past or future timestamp in explode_time(),
+       so the DST adjustment obtained from the current time won't
+       necessarily be applicable.
+
+       mktime() is the inverse of localtime(); so, presumably,
+       passing in a struct tm made by gmtime() let's us calculate
+       the true GMT offset. However, there's a catch: if daylight
+       savings is in effect, gmtime()will set the tm_isdst field
+       and confuse mktime() into returning a time that's offset
+       by one hour. In that case, we must adjust the calculated GMT
+       offset.
+
+     */
+
+    struct timeval now;
+    time_t t1, t2;
+    struct tm t;
+    int was_dst;
+
+    gettimeofday(&now, NULL);
+    t1 = now.tv_sec;
+    t2 = 0;
+
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
+    gmtime_r(&t1, &t);
+#else
+    t = *gmtime(&t1);
+#endif
+    was_dst = (t.tm_isdst > 0);
+    t.tm_isdst = -1;
+    t2 = mktime(&t);
+    server_gmt_offset = (apr_int32_t) difftime(t1, t2) + (was_dst ? 3600 : 0);
+#endif
+}
