@@ -56,7 +56,6 @@ CLEAN :
 	-@erase "$(INTDIR)\apr_sms_blocks.obj"
 	-@erase "$(INTDIR)\apr_sms_std.obj"
 	-@erase "$(INTDIR)\apr_sms_tracking.obj"
-	-@erase "$(INTDIR)\apr_sms_trivial.obj"
 	-@erase "$(INTDIR)\apr_snprintf.obj"
 	-@erase "$(INTDIR)\apr_strings.obj"
 	-@erase "$(INTDIR)\apr_strnatcmp.obj"
@@ -172,7 +171,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\apr_sms_blocks.obj" \
 	"$(INTDIR)\apr_sms_std.obj" \
 	"$(INTDIR)\apr_sms_tracking.obj" \
-	"$(INTDIR)\apr_sms_trivial.obj" \
 	"$(INTDIR)\apr_snprintf.obj" \
 	"$(INTDIR)\apr_strings.obj" \
 	"$(INTDIR)\apr_strnatcmp.obj" \
@@ -256,7 +254,6 @@ CLEAN :
 	-@erase "$(INTDIR)\apr_sms_blocks.obj"
 	-@erase "$(INTDIR)\apr_sms_std.obj"
 	-@erase "$(INTDIR)\apr_sms_tracking.obj"
-	-@erase "$(INTDIR)\apr_sms_trivial.obj"
 	-@erase "$(INTDIR)\apr_snprintf.obj"
 	-@erase "$(INTDIR)\apr_strings.obj"
 	-@erase "$(INTDIR)\apr_strnatcmp.obj"
@@ -373,7 +370,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\apr_sms_blocks.obj" \
 	"$(INTDIR)\apr_sms_std.obj" \
 	"$(INTDIR)\apr_sms_tracking.obj" \
-	"$(INTDIR)\apr_sms_trivial.obj" \
 	"$(INTDIR)\apr_snprintf.obj" \
 	"$(INTDIR)\apr_strings.obj" \
 	"$(INTDIR)\apr_strnatcmp.obj" \
@@ -429,277 +425,8 @@ LINK32_OBJS= \
 
 
 !IF "$(CFG)" == "libapr - Win32 Release" || "$(CFG)" == "libapr - Win32 Debug"
-SOURCE=.\time\win32\access.c
-DEP_CPP_ACCES=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_time.h"\
-	".\include\arch\win32\apr_private.h"\
-	".\include\arch\win32\atime.h"\
-	
-
-"$(INTDIR)\access.obj" : $(SOURCE) $(DEP_CPP_ACCES) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\time\win32\time.c
-DEP_CPP_TIME_=\
-	".\include\apr.h"\
-	".\include\apr_dso.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\win32\apr_private.h"\
-	".\include\arch\win32\atime.h"\
-	
-
-"$(INTDIR)\time.obj" : $(SOURCE) $(DEP_CPP_TIME_) "$(INTDIR)" ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\time\win32\timestr.c
-DEP_CPP_TIMES=\
-	".\include\apr.h"\
-	".\include\apr_dso.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\win32\apr_private.h"\
-	".\include\arch\win32\atime.h"\
-	
-
-"$(INTDIR)\timestr.obj" : $(SOURCE) $(DEP_CPP_TIMES) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\strings\apr_cpystrn.c
-DEP_CPP_APR_C=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_strings.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\apr_cpystrn.obj" : $(SOURCE) $(DEP_CPP_APR_C) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\strings\apr_fnmatch.c
-DEP_CPP_APR_F=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_fnmatch.h"\
-	".\include\apr_lib.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\apr_fnmatch.obj" : $(SOURCE) $(DEP_CPP_APR_F) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\strings\apr_snprintf.c
-DEP_CPP_APR_S=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_strings.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\apr_snprintf.obj" : $(SOURCE) $(DEP_CPP_APR_S) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\strings\apr_strings.c
-DEP_CPP_APR_ST=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_strings.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\apr_strings.obj" : $(SOURCE) $(DEP_CPP_APR_ST) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\strings\apr_strnatcmp.c
-DEP_CPP_APR_STR=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_strings.h"\
-	
-
-"$(INTDIR)\apr_strnatcmp.obj" : $(SOURCE) $(DEP_CPP_APR_STR) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\strings\apr_strtok.c
-DEP_CPP_APR_STRT=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_strings.h"\
-	".\include\apr_want.h"\
-	
-
-"$(INTDIR)\apr_strtok.obj" : $(SOURCE) $(DEP_CPP_APR_STRT) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\passwd\apr_getpass.c
-DEP_CPP_APR_G=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_strings.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\apr_getpass.obj" : $(SOURCE) $(DEP_CPP_APR_G) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\passwd\apr_md5.c
-DEP_CPP_APR_M=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_md5.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_strings.h"\
-	".\include\apr_xlate.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\apr_md5.obj" : $(SOURCE) $(DEP_CPP_APR_M) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\tables\apr_hash.c
-DEP_CPP_APR_H=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_general.h"\
-	".\include\apr_hash.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_sms.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\apr_hash.obj" : $(SOURCE) $(DEP_CPP_APR_H) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\tables\apr_tables.c
-DEP_CPP_APR_T=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_strings.h"\
-	".\include\apr_tables.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\apr_tables.obj" : $(SOURCE) $(DEP_CPP_APR_T) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\misc\unix\errorcodes.c
-DEP_CPP_ERROR=\
-	".\include\apr.h"\
-	".\include\apr_dso.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_getopt.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_strings.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\unix\misc.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\errorcodes.obj" : $(SOURCE) $(DEP_CPP_ERROR) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\misc\unix\getopt.c
-DEP_CPP_GETOP=\
+SOURCE=.\dso\win32\dso.c
+DEP_CPP_DSO_C=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
@@ -714,96 +441,6 @@ DEP_CPP_GETOP=\
 	".\include\apr_portable.h"\
 	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\unix\misc.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\getopt.obj" : $(SOURCE) $(DEP_CPP_GETOP) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\misc\win32\getuuid.c
-DEP_CPP_GETUU=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_uuid.h"\
-	
-
-"$(INTDIR)\getuuid.obj" : $(SOURCE) $(DEP_CPP_GETUU) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\misc\win32\misc.c
-DEP_CPP_MISC_=\
-	".\include\apr.h"\
-	".\include\apr_dso.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_getopt.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\unix\misc.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\misc.obj" : $(SOURCE) $(DEP_CPP_MISC_) "$(INTDIR)" ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\misc\win32\names.c
-DEP_CPP_NAMES=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_strings.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\names.obj" : $(SOURCE) $(DEP_CPP_NAMES) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\misc\unix\otherchild.c
-DEP_CPP_OTHER=\
-	".\include\apr.h"\
-	".\include\apr_dso.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_getopt.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_sms.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
@@ -813,68 +450,11 @@ DEP_CPP_OTHER=\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
+	".\include\arch\win32\dso.h"\
 	".\include\arch\win32\fileio.h"\
-	".\include\arch\win32\threadproc.h"\
 	
 
-"$(INTDIR)\otherchild.obj" : $(SOURCE) $(DEP_CPP_OTHER) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\misc\win32\rand.c
-DEP_CPP_RAND_=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_general.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_sms.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\rand.obj" : $(SOURCE) $(DEP_CPP_RAND_) "$(INTDIR)" ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\misc\unix\start.c
-DEP_CPP_START=\
-	".\include\apr.h"\
-	".\include\apr_dso.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_getopt.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_signal.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\unix\misc.h"\
-	".\include\arch\win32\apr_private.h"\
-	".\include\arch\win32\locks.h"\
-	
-
-"$(INTDIR)\start.obj" : $(SOURCE) $(DEP_CPP_START) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\misc\unix\uuid.c
-DEP_CPP_UUID_=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_uuid.h"\
-	
-
-"$(INTDIR)\uuid.obj" : $(SOURCE) $(DEP_CPP_UUID_) "$(INTDIR)" ".\include\apr.h"
+"$(INTDIR)\dso.obj" : $(SOURCE) $(DEP_CPP_DSO_C) "$(INTDIR)" ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -1226,6 +806,22 @@ DEP_CPP_SEEK_=\
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
+SOURCE=.\i18n\unix\utf8_ucs2.c
+DEP_CPP_UTF8_=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_xlate.h"\
+	".\include\arch\unix\i18n.h"\
+	
+
+"$(INTDIR)\utf8_ucs2.obj" : $(SOURCE) $(DEP_CPP_UTF8_) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\i18n\unix\xlate.c
 SOURCE=.\locks\win32\locks.c
 DEP_CPP_LOCKS=\
 	".\include\apr.h"\
@@ -1251,6 +847,408 @@ DEP_CPP_LOCKS=\
 
 "$(INTDIR)\locks.obj" : $(SOURCE) $(DEP_CPP_LOCKS) "$(INTDIR)"\
  ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\memory\unix\apr_pools.c
+DEP_CPP_APR_P=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_hash.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_lib.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\apr_pools.obj" : $(SOURCE) $(DEP_CPP_APR_P) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\memory\unix\apr_sms.c
+DEP_CPP_APR_S=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_hash.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\memory\unix\sms_private.h"\
+	
+
+"$(INTDIR)\apr_sms.obj" : $(SOURCE) $(DEP_CPP_APR_S) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\memory\unix\apr_sms_blocks.c
+DEP_CPP_APR_SM=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_sms_blocks.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	".\memory\unix\sms_private.h"\
+	
+
+"$(INTDIR)\apr_sms_blocks.obj" : $(SOURCE) $(DEP_CPP_APR_SM) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\memory\unix\apr_sms_std.c
+DEP_CPP_APR_SMS=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	".\memory\unix\sms_private.h"\
+	
+
+"$(INTDIR)\apr_sms_std.obj" : $(SOURCE) $(DEP_CPP_APR_SMS) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\memory\unix\apr_sms_tracking.c
+DEP_CPP_APR_SMS_=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_sms_tracking.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	".\memory\unix\sms_private.h"\
+	
+
+"$(INTDIR)\apr_sms_tracking.obj" : $(SOURCE) $(DEP_CPP_APR_SMS_) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\misc\unix\errorcodes.c
+DEP_CPP_ERROR=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_lib.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\unix\misc.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\errorcodes.obj" : $(SOURCE) $(DEP_CPP_ERROR) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\misc\unix\getopt.c
+DEP_CPP_GETOP=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\unix\misc.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\getopt.obj" : $(SOURCE) $(DEP_CPP_GETOP) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\misc\win32\getuuid.c
+DEP_CPP_GETUU=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_uuid.h"\
+	
+
+"$(INTDIR)\getuuid.obj" : $(SOURCE) $(DEP_CPP_GETUU) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\misc\win32\misc.c
+DEP_CPP_MISC_=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\unix\misc.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\misc.obj" : $(SOURCE) $(DEP_CPP_MISC_) "$(INTDIR)" ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\misc\win32\names.c
+DEP_CPP_NAMES=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_lib.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\names.obj" : $(SOURCE) $(DEP_CPP_NAMES) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\misc\unix\otherchild.c
+DEP_CPP_OTHER=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_tables.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\apr_xlate.h"\
+	".\include\arch\unix\i18n.h"\
+	".\include\arch\unix\misc.h"\
+	".\include\arch\win32\apr_private.h"\
+	".\include\arch\win32\fileio.h"\
+	".\include\arch\win32\threadproc.h"\
+	
+
+"$(INTDIR)\otherchild.obj" : $(SOURCE) $(DEP_CPP_OTHER) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\misc\win32\rand.c
+DEP_CPP_RAND_=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_general.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\rand.obj" : $(SOURCE) $(DEP_CPP_RAND_) "$(INTDIR)" ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\misc\unix\start.c
+DEP_CPP_START=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_signal.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\unix\misc.h"\
+	".\include\arch\win32\apr_private.h"\
+	".\include\arch\win32\locks.h"\
+	
+
+"$(INTDIR)\start.obj" : $(SOURCE) $(DEP_CPP_START) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\misc\unix\uuid.c
+DEP_CPP_UUID_=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_lib.h"\
+	".\include\apr_uuid.h"\
+	
+
+"$(INTDIR)\uuid.obj" : $(SOURCE) $(DEP_CPP_UUID_) "$(INTDIR)" ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\mmap\unix\common.c
+DEP_CPP_COMMO=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_mmap.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\common.obj" : $(SOURCE) $(DEP_CPP_COMMO) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\mmap\win32\mmap.c
+DEP_CPP_MMAP_=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_mmap.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_tables.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\apr_xlate.h"\
+	".\include\arch\unix\i18n.h"\
+	".\include\arch\unix\misc.h"\
+	".\include\arch\win32\apr_private.h"\
+	".\include\arch\win32\fileio.h"\
+	
+
+"$(INTDIR)\mmap.obj" : $(SOURCE) $(DEP_CPP_MMAP_) "$(INTDIR)" ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -1433,6 +1431,176 @@ DEP_CPP_SOCKO=\
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
+SOURCE=.\passwd\apr_getpass.c
+DEP_CPP_APR_G=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_lib.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\apr_getpass.obj" : $(SOURCE) $(DEP_CPP_APR_G) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\passwd\apr_md5.c
+DEP_CPP_APR_M=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_lib.h"\
+	".\include\apr_md5.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	".\include\apr_xlate.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\apr_md5.obj" : $(SOURCE) $(DEP_CPP_APR_M) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\shmem\win32\shmem.c
+SOURCE=.\strings\apr_cpystrn.c
+DEP_CPP_APR_C=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_lib.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\apr_cpystrn.obj" : $(SOURCE) $(DEP_CPP_APR_C) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\strings\apr_fnmatch.c
+DEP_CPP_APR_F=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_fnmatch.h"\
+	".\include\apr_lib.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\apr_fnmatch.obj" : $(SOURCE) $(DEP_CPP_APR_F) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\strings\apr_snprintf.c
+DEP_CPP_APR_SN=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_lib.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\apr_snprintf.obj" : $(SOURCE) $(DEP_CPP_APR_SN) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\strings\apr_strings.c
+DEP_CPP_APR_ST=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_general.h"\
+	".\include\apr_lib.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\apr_strings.obj" : $(SOURCE) $(DEP_CPP_APR_ST) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\strings\apr_strnatcmp.c
+DEP_CPP_APR_STR=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_lib.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	
+
+"$(INTDIR)\apr_strnatcmp.obj" : $(SOURCE) $(DEP_CPP_APR_STR) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\strings\apr_strtok.c
+DEP_CPP_APR_STRT=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	".\include\apr_want.h"\
+	
+
+"$(INTDIR)\apr_strtok.obj" : $(SOURCE) $(DEP_CPP_APR_STRT) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\tables\apr_hash.c
+DEP_CPP_APR_H=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_general.h"\
+	".\include\apr_hash.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\apr_hash.obj" : $(SOURCE) $(DEP_CPP_APR_H) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\tables\apr_tables.c
+DEP_CPP_APR_T=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_general.h"\
+	".\include\apr_lib.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	".\include\apr_tables.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\apr_tables.obj" : $(SOURCE) $(DEP_CPP_APR_T) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
 SOURCE=.\threadproc\win32\proc.c
 DEP_CPP_PROC_=\
 	".\include\apr.h"\
@@ -1555,106 +1723,74 @@ DEP_CPP_THREAD=\
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=.\dso\win32\dso.c
-DEP_CPP_DSO_C=\
+SOURCE=.\time\win32\access.c
+DEP_CPP_ACCES=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_general.h"\
+	".\include\apr_lib.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_time.h"\
+	".\include\arch\win32\apr_private.h"\
+	".\include\arch\win32\atime.h"\
+	
+
+"$(INTDIR)\access.obj" : $(SOURCE) $(DEP_CPP_ACCES) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\time\win32\time.c
+DEP_CPP_TIME_=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
-	".\include\apr_getopt.h"\
 	".\include\apr_inherit.h"\
+	".\include\apr_lib.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
 	".\include\apr_sms.h"\
-	".\include\apr_strings.h"\
-	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
-	".\include\apr_xlate.h"\
-	".\include\arch\unix\i18n.h"\
-	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
-	".\include\arch\win32\dso.h"\
-	".\include\arch\win32\fileio.h"\
+	".\include\arch\win32\atime.h"\
 	
 
-"$(INTDIR)\dso.obj" : $(SOURCE) $(DEP_CPP_DSO_C) "$(INTDIR)" ".\include\apr.h"
+"$(INTDIR)\time.obj" : $(SOURCE) $(DEP_CPP_TIME_) "$(INTDIR)" ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=.\i18n\unix\utf8_ucs2.c
-DEP_CPP_UTF8_=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_xlate.h"\
-	".\include\arch\unix\i18n.h"\
-	
-
-"$(INTDIR)\utf8_ucs2.obj" : $(SOURCE) $(DEP_CPP_UTF8_) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\i18n\unix\xlate.c
-SOURCE=.\shmem\win32\shmem.c
-SOURCE=.\mmap\unix\common.c
-DEP_CPP_COMMO=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_mmap.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\common.obj" : $(SOURCE) $(DEP_CPP_COMMO) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\mmap\win32\mmap.c
-DEP_CPP_MMAP_=\
+SOURCE=.\time\win32\timestr.c
+DEP_CPP_TIMES=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_getopt.h"\
 	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
-	".\include\apr_mmap.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
 	".\include\apr_sms.h"\
-	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
-	".\include\apr_xlate.h"\
-	".\include\arch\unix\i18n.h"\
-	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
-	".\include\arch\win32\fileio.h"\
+	".\include\arch\win32\atime.h"\
 	
 
-"$(INTDIR)\mmap.obj" : $(SOURCE) $(DEP_CPP_MMAP_) "$(INTDIR)" ".\include\apr.h"
+"$(INTDIR)\timestr.obj" : $(SOURCE) $(DEP_CPP_TIMES) "$(INTDIR)"\
+ ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -1713,173 +1849,6 @@ DEP_CPP_USERI=\
 	
 
 "$(INTDIR)\userinfo.obj" : $(SOURCE) $(DEP_CPP_USERI) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\memory\unix\apr_pools.c
-DEP_CPP_APR_P=\
-	".\include\apr.h"\
-	".\include\apr_dso.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_hash.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_strings.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\apr_pools.obj" : $(SOURCE) $(DEP_CPP_APR_P) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\memory\unix\apr_sms.c
-DEP_CPP_APR_SM=\
-	".\include\apr.h"\
-	".\include\apr_dso.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_hash.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_strings.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\memory\unix\sms_private.h"\
-	
-
-"$(INTDIR)\apr_sms.obj" : $(SOURCE) $(DEP_CPP_APR_SM) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\memory\unix\apr_sms_blocks.c
-DEP_CPP_APR_SMS=\
-	".\include\apr.h"\
-	".\include\apr_dso.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_sms_blocks.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\win32\apr_private.h"\
-	".\memory\unix\sms_private.h"\
-	
-
-"$(INTDIR)\apr_sms_blocks.obj" : $(SOURCE) $(DEP_CPP_APR_SMS) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\memory\unix\apr_sms_std.c
-DEP_CPP_APR_SMS_=\
-	".\include\apr.h"\
-	".\include\apr_dso.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\win32\apr_private.h"\
-	".\memory\unix\sms_private.h"\
-	
-
-"$(INTDIR)\apr_sms_std.obj" : $(SOURCE) $(DEP_CPP_APR_SMS_) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\memory\unix\apr_sms_tracking.c
-DEP_CPP_APR_SMS_T=\
-	".\include\apr.h"\
-	".\include\apr_dso.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_sms_tracking.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\win32\apr_private.h"\
-	".\memory\unix\sms_private.h"\
-	
-
-"$(INTDIR)\apr_sms_tracking.obj" : $(SOURCE) $(DEP_CPP_APR_SMS_T) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\memory\unix\apr_sms_trivial.c
-DEP_CPP_APR_SMS_TR=\
-	".\include\apr.h"\
-	".\include\apr_dso.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_inherit.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_sms.h"\
-	".\include\apr_sms_trivial.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\win32\apr_private.h"\
-	".\memory\unix\sms_private.h"\
-	
-
-"$(INTDIR)\apr_sms_trivial.obj" : $(SOURCE) $(DEP_CPP_APR_SMS_TR) "$(INTDIR)"\
  ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
