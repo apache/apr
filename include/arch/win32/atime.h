@@ -57,7 +57,9 @@
 
 #include "apr_private.h"
 #include "apr_time.h"
+#if APR_HAVE_TIME_H
 #include <time.h>
+#endif
 
 struct atime_t {
     apr_pool_t *cntxt;
