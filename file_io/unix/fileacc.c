@@ -129,7 +129,6 @@ ap_status_t ap_set_filedata(ap_file_t *file, void *data, char *key,
         return ap_set_userdata(data, key, cleanup, file->cntxt);
     }
     else {
-        *data = NULL;
         return APR_ENOFILE;
     }
 }
