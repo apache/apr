@@ -207,8 +207,34 @@ ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
         return APR_ENOMEM;
     }
 
-    /* XXX - Is this threadsafe? */
-    return h_errno;
+    /* XXX - Is referencing h_errno threadsafe? */
+    return status_from_res_error(h_errno);
 }
 
+ap_status_t status_from_res_error(int herr)
+{
+    ap_status_t status;
+    switch(herr) {
+    case HOST_NOT_FOUND:
+        status = APR_EHOSTNOTFOUND;
+        break;
+    case TRY_AGAIN:
+        status = APR_EAGAIN;
+        break;
+    case NO_RECOVERY:
+        status = APR_ENORECOVERY;
+        break;
+    case NO_ADDRESS:
+        status = APR_ENOADDRESS;
+        break;
+#if defined(NO_DATA) && (NO_ADDRESS != NO_DATA)
+    case NO_DATA:
+#endif
+        status = APR_ENODATA;
+        break;
+    default:
+        status = APR_ENORECOVERY;
+    }
+    return status;
+}
 

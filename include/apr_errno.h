@@ -366,29 +366,20 @@ typedef int ap_status_t;
 #define APR_EOPNOTSUPP (APR_OS_START_SYSERR + 35)
 #endif
 
-#ifdef HOST_NOT_FOUND
-#define APR_EHOSTNOTFOUND HOST_NOT_FOUND
-#else
+/* never use h_errno values as-is because doing so makes them 
+ * indistinguishable from errno values
+ * APR_EHOSTNOTFOUND corresponds to HOST_NOT_FOUND
+ * APR_ENODATA corresponds to NO_DATA
+ * APR_ENOADDRESS corresponds to NO_ADDRESS
+ * APR_ENORECOVERY corresponds to NO_RECOVERY
+ */
 #define APR_EHOSTNOTFOUND (APR_OS_START_SYSERR + 36)
-#endif
 
-#ifdef NO_DATA
-#define APR_ENODATA NO_DATA
-#else
 #define APR_ENODATA (APR_OS_START_SYSERR + 37)
-#endif
 
-#ifdef NO_ADDRESS
-#define APR_ENOADDRESS NO_ADDRESS
-#else
 #define APR_ENOADDRESS (APR_OS_START_SYSERR + 38)
-#endif
 
-#ifdef NO_RECOVERY
-#define APR_ENORECOVERY NO_RECOVERY
-#else
 #define APR_ENORECOVERY (APR_OS_START_SYSERR + 39)
-#endif
 
 #ifdef EISCONN
 #define APR_EISCONN EISCONN

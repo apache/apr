@@ -231,10 +231,7 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
             return APR_ENOTSOCK;
         }
         if (!hp)  {
-            if (h_errno == TRY_AGAIN) {
-                return EAGAIN;
-            }
-            return h_errno;
+            return status_from_res_error(h_errno);
         }
     
         memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr_list[0], hp->h_length);
