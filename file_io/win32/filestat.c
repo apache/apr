@@ -282,3 +282,10 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
     return APR_SUCCESS;
 }
 
+apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
+{
+    /* TODO: determine if apr_lstat is a true NT symlink what the stats of the
+     * link are, rather than the target.
+     */
+    return apr_stat(finfo, fname, cont);
+}
