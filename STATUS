@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/13 13:35:19 $]
+Last modified at [$Date: 2002/07/14 20:01:39 $]
 
 Release:
 
@@ -64,7 +64,7 @@ CURRENT VOTES:
 
       1) Keeping the existing apr_time_t names, in spite of confusion
          with ANSI/C99 time_t's units, and prior decimal usec definition.
-         +1: rbb, jerenkrantz, striker, dreid, jim
+         +1: rbb, jerenkrantz, striker, dreid, jim, jwoolley
          +0: wrowe [apr_types don't promise to map to C99/ANSI units]
          +0: brianp
          -1: aaron [veto for reusing the apr_time_t identifier for a new use]
@@ -82,7 +82,7 @@ CURRENT VOTES:
              fielding [prefers apr_utime_t and apr_utimediff_t (64bit)]
 	 +0.5: jim
          -0: jerenkrantz, striker, dreid
-         -0.5: rbb
+         -0.5: rbb, jwoolley
                wrowe [prefers apr_utime_t and apr_uspan_t where u==undefined]
 
       3) Renaming the function to get rid of apr_time_t vs time_t confusion,
@@ -92,11 +92,11 @@ CURRENT VOTES:
                brianp, [can live with apr_time_busec_t and apr_span_busec_t]
                fielding [me too]
          -0: striker, jerenkrantz
-         -0.5: rbb, ianh, dreid, jim
+         -0.5: rbb, ianh, dreid, jim, jwoolley
 
       4) Using time_t and struct timeval/tm
          +1: fielding (if apr_time is not an ADT)
-         -1: brianp, wrowe
+         -1: brianp, wrowe, jwoolley
 
       [fielding: Is APR time guaranteed to be a scalar quantity?  If so,
        then we must include units as part of the definition of the
