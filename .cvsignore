@@ -25,3 +25,8 @@ libapr.rc
 *.dep
 *.mak
 *.rc
+BuildLog.htm
+*.stc
+*.stt
+*.sto
+*.vcproj
