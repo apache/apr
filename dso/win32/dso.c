@@ -59,6 +59,16 @@
 
 #if APR_HAS_DSO
 
+APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **aprdso,
+                                                apr_os_dso_handle_t osdso,
+                                                apr_pool_t *pool)
+{
+    *aprdso = apr_pcalloc(pool, sizeof **aprdso);
+    (*aprdso)->handle = osdso;
+    (*aprdso)->cont = pool;
+    return APR_SUCCESS;
+}
+
 static apr_status_t dso_cleanup(void *thedso)
 {
     apr_dso_handle_t *dso = thedso;
