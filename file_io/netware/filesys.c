@@ -66,7 +66,7 @@ apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)
     return APR_SUCCESS;
 }
 
-apr_status_t filepath_has_drive(char *rootpath, int only, apr_pool_t *p)
+apr_status_t filepath_has_drive(const char *rootpath, int only, apr_pool_t *p)
 {
     char *s;
 
@@ -84,7 +84,7 @@ apr_status_t filepath_has_drive(char *rootpath, int only, apr_pool_t *p)
     return 0;
 }
 
-apr_status_t filepath_compare_drive(char *path1, char *path2, apr_pool_t *p)
+apr_status_t filepath_compare_drive(const char *path1, const char *path2, apr_pool_t *p)
 {
     char *s1, *s2;
 
