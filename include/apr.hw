@@ -324,8 +324,8 @@ typedef int apr_wait_t;
 
 /* struct iovec is needed to emulate Unix writev */
 struct iovec {
-    char* iov_base;
-    int   iov_len;
+    char*  iov_base;
+    size_t iov_len;
 };
 
 /* Nasty Win32 .h ommissions we really need */
