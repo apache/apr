@@ -1179,6 +1179,11 @@ fi
 case $host in
    *linux*)
        off_t_fmt='#define APR_OFF_T_FMT "ld"'
+       case $host in
+           s390*)
+               size_t_fmt='#define APR_SIZE_T_FMT "ld"'
+               ;;
+       esac
        ;;
    *os2_emx)
        off_t_fmt='#define APR_OFF_T_FMT "ld"'
