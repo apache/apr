@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/01/09 11:05:33 $]
+Last modified at [$Date: 2001/01/13 04:23:10 $]
 
 Release:
 
@@ -15,9 +15,18 @@ Release:
 
 RELEASE SHOWSTOPPERS:
 
-    * Source code layout needs to be decided for apr and apr-util.  There
+    * This vote ends on Wednesday!
+      Source code layout needs to be decided for apr and apr-util.  There
       has been some discussion about adding a src/ directory to apr or 
       removing it from apr-util/.  Either way, this needs to be decided.
+      Those for adding apr/src/    : gstein
+      Those removing apr-util/src/ : wrowe, rbb
+
+    * Many linkage errors are gpfaulting Apache/win32 in various configs
+      (load mod_dav, for example.)  Must complete the APR_DECLARES
+        Gregory Nicholes is working on this, with quick response from rbb
+        Will Rowe will fold over the libapr.dsp into it's own library
+        and remove the exports from the simple apr.dsp once it's done.
 
     * Replace APR_GET_POOL macro with a typesafe mechanism to get the pool
       from an APR (incomplete) type.
