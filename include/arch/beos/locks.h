@@ -60,12 +60,13 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_portable.h"
 
 struct apr_lock_t {
     apr_pool_t *pool;
     apr_locktype_e type;
     apr_lockscope_e scope;
-    apr_os_thread_t *owner;
+    apr_os_thread_t owner;
     int owner_ref;
     /* Inter proc */
     sem_id sem_interproc;
