@@ -380,8 +380,13 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
 
             if (status == APR_SUCCESS) {
                 if (interpreter[0] == '#' && interpreter[1] == '!') {
-                    /* delete newline */
-                    interpreter[strlen(interpreter) - 1] = '\0';
+                    /* delete CR/LF & any other whitespace off the end */
+                    int end = strlen(interpreter) - 1;
+
+                    while (end >= 0 && apr_isspace(interpreter[end])) {
+                        interpreter[end] = '\0';
+                        end--;
+                    }
 
                     if (interpreter[2] != '/' && interpreter[2] != '\\' && interpreter[3] != ':') {
                         char buffer[300];
