@@ -443,7 +443,7 @@ static void start_connect(struct connection *c)
     c->cbx = 0;
     c->gotheader = 0;
 
-    if (ap_create_tcp_socket(cntxt, &c->aprsock) != APR_SUCCESS) {
+    if (ap_create_tcp_socket(&c->aprsock, cntxt) != APR_SUCCESS) {
         err("Socket:");
     }
     if (ap_setport(c->aprsock, port) != APR_SUCCESS) {
@@ -677,18 +677,18 @@ static void test(void)
         fflush(stdout);
     }
 
-    ap_make_time(cntxt, &now);
+    ap_make_time(&now, cntxt);
 
     con = (struct connection *)malloc(concurrency * sizeof(struct connection));
     memset(con, 0, concurrency * sizeof(struct connection));
 
     stats = (struct data *)malloc(requests * sizeof(struct data));
-    ap_setup_poll(cntxt, concurrency, &readbits);
+    ap_setup_poll(&readbits, cntxt, concurrency);
 
     for (i = 0; i < concurrency; i++) {
-        ap_make_time(cntxt, &con[i].start);
-        ap_make_time(cntxt, &con[i].connect);
-        ap_make_time(cntxt, &con[i].done);
+        ap_make_time(&con[i].start, cntxt);
+        ap_make_time(&con[i].connect, cntxt);
+        ap_make_time(&con[i].done, cntxt); 
     }
 
     /* setup request */
@@ -859,7 +859,7 @@ static int open_postfile(char *pfile)
     ap_fileperms_t mode;
     ap_ssize_t length;
 
-    if (ap_open(cntxt, pfile, APR_READ, mode, &postfd) != APR_SUCCESS) {
+    if (ap_open(&postfd, cntxt, pfile, APR_READ, mode) != APR_SUCCESS) {
         printf("Invalid postfile name (%s)\n", pfile);
         return errno;
     }
@@ -893,10 +893,10 @@ int main(int argc, char **argv)
     trstring = "";
     tdstring = "bgcolor=white";
 
-    ap_create_context(NULL, &cntxt);
+    ap_create_context(&cntxt, NULL);
 
-    ap_make_time(cntxt, &start);
-    ap_make_time(cntxt, &endtime);
+    ap_make_time(&start, cntxt);
+    ap_make_time(&endtime, cntxt);
 
     optind = 1;
     while (ap_getopt(cntxt, argc, argv, "n:c:t:T:p:v:kVhwx:y:z:", &c) == APR_SUCCESS) {

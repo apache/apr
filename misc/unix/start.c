@@ -66,7 +66,7 @@
 #endif
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_context(ap_context_t *, ap_context_t **)
+ * ap_status_t ap_create_context(ap_context_t **, ap_context_t *)
  *    Create a new context.
  * arg 1) The parent context.  If this is NULL, the new context is a root
  *        context.  If it is non-NULL, the new context will inherit all
@@ -74,7 +74,7 @@
  *        sub-pool.
  * arg 2) The context we have just created.
  */
-ap_status_t ap_create_context(struct context_t *cont, struct context_t **newcont)
+ap_status_t ap_create_context(struct context_t **newcont, struct context_t *cont)
 {
     struct context_t *new;
     ap_pool_t *pool;
@@ -164,13 +164,13 @@ ap_status_t ap_set_userdata(struct context_t *cont, void *data, char *key,
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_userdata(ap_context_t *, void **)
+ * ap_status_t ap_get_userdata(void **, ap_context_t *)
  *    Return the data associated with the current context.
  * arg 1) The current context.
  * arg 2) The key for the data to retrieve
  * arg 3) The user data associated with the context.
  */
-ap_status_t ap_get_userdata(struct context_t *cont, char *key, void **data)
+ap_status_t ap_get_userdata(void **data, struct context_t *cont, char *key)
 {
     datastruct *dptr = NULL;
     if (cont) { 

@@ -103,7 +103,7 @@ ap_status_t file_cleanup(void *thefile)
  * NOTE:  If mode is APR_OS_DEFAULT, the system open command will be 
  *        called without any mode parameters.
  */
-ap_status_t ap_open(ap_context_t *cont, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, struct file_t **new)
+ap_status_t ap_open(struct file_t **new, ap_context_t *cont, const char *fname, ap_int32_t flag,  ap_fileperms_t perm)
 {
     int oflags = 0;
     mode_t mode = get_fileperms(perm);    
@@ -246,8 +246,8 @@ ap_status_t ap_get_os_file(struct file_t *file, ap_os_file_t *thefile)
  * NOTE:  On Unix, it is only possible to put a file descriptor into
  *        an apr file type.
  */
-ap_status_t ap_put_os_file(ap_context_t *cont, struct file_t **file, 
-                            ap_os_file_t *thefile)
+ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile,
+                           ap_context_t *cont)
 {
     int *dafile = thefile;
     if ((*file) == NULL) {

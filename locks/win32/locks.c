@@ -85,7 +85,7 @@ ap_status_t ap_create_lock(ap_context_t *cont, ap_locktype_e type,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_child_init_lock(ap_context_t *cont, char *fname, struct lock_t **lock)
+ap_status_t ap_child_init_lock(struct lock_t **lock, ap_context_t *cont, char *fname)
 {
     (*lock) = (struct lock_t *)ap_palloc(cont, sizeof(struct lock_t));
 

@@ -84,7 +84,7 @@ ap_status_t dir_cleanup(void *thedir)
     }
 } 
 
-ap_status_t ap_opendir(ap_context_t *cont, const char *dirname, struct dir_t **new)
+ap_status_t ap_opendir(struct dir_t **new, ap_context_t *cont, const char *dirname)
 {
 	char * temp;
 	(*new) = ap_palloc(cont, sizeof(struct dir_t));
@@ -203,7 +203,7 @@ ap_status_t ap_dir_entry_ftype(struct dir_t *thedir, ap_filetype_e *type)
 	}
 }
 
-ap_status_t ap_get_dir_filename(struct dir_t *thedir, char **new)
+ap_status_t ap_get_dir_filename(char **new, struct dir_t *thedir)
 {
     (*new) = ap_pstrdup(thedir->cntxt, thedir->entry->cFileName);
     return APR_SUCCESS;

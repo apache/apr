@@ -86,7 +86,7 @@ ap_status_t ap_create_thread_private(ap_context_t *cont,
     return APR_ENOMEM;
 }
 
-ap_status_t ap_get_thread_private(struct threadkey_t *key, void **new)
+ap_status_t ap_get_thread_private(void **new, struct threadkey_t *key)
 {
 	thread_id tid;
 	int i, index=0;

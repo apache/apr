@@ -68,7 +68,7 @@
  * arg 1) The context to operate on.
  * arg 2) The new time entity to create.
  */
-ap_status_t ap_make_time(ap_context_t *cont, struct atime_t **new)
+ap_status_t ap_make_time(struct atime_t **new, ap_context_t *cont)
 {
     (*new) = (struct atime_t *)ap_palloc(cont, sizeof(struct atime_t));
 
@@ -162,12 +162,12 @@ ap_status_t ap_implode_time(struct atime_t *atime)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_time(ap_time_t *, ap_os_time_t **)
+ * ap_status_t ap_get_os_time(ap_os_time_t **, ap_time_t *)
  *    Convert from apr time type to OS specific time value
  * arg 1) The time value to convert.
  * arg 2) The OS specific value to convert to.
  */
-ap_status_t ap_get_os_time(struct atime_t *thetime, ap_os_time_t **atime)
+ap_status_t ap_get_os_time(ap_os_time_t **atime, struct atime_t *thetime)
 {
     if (thetime == NULL) {
         return APR_ENOTIME;
@@ -180,14 +180,14 @@ ap_status_t ap_get_os_time(struct atime_t *thetime, ap_os_time_t **atime)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_put_os_time(ap_context_t *, ap_time_t **, ap_os_time_t *)
+ * ap_status_t ap_put_os_time(ap_time_t **, ap_os_time_t *, ap_context_t *)
  *    Convert to apr time type from OS specific time value
  * arg 1) The context to use.
  * arg 2) The time value to convert to.
  * arg 3) The OS specific value to convert.
  */
-ap_status_t ap_put_os_time(ap_context_t *cont, struct atime_t **thetime, 
-                           ap_os_time_t *atime)
+ap_status_t ap_put_os_time(struct atime_t **thetime, ap_os_time_t *atime, 
+                           ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

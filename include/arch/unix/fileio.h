@@ -65,6 +65,9 @@
 #include "apr_general.h"
 #include "apr_file_io.h"
 #include "apr_errno.h"
+#ifdef BEOS
+#include <kernel/OS.h>
+#endif
 
 struct file_t {
     ap_context_t *cntxt;

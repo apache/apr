@@ -61,7 +61,7 @@
 #define INCL_DOS
 #include <os2.h>
 
-ap_status_t ap_dupfile(struct file_t *old_file, struct file_t **new_file)
+ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
 {
     int rv;
     struct file_t *dup_file = (struct file_t *)ap_palloc(old_file->cntxt, sizeof(struct file_t));

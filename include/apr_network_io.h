@@ -104,16 +104,16 @@ typedef struct pollfd_t    ap_pollfd_t;
 
 /* function definitions */
 
-ap_status_t ap_create_tcp_socket(ap_context_t *, ap_socket_t **);
+ap_status_t ap_create_tcp_socket(ap_socket_t **, ap_context_t *);
 ap_status_t ap_shutdown(ap_socket_t *, ap_shutdown_how_e);
 ap_status_t ap_close_socket(ap_socket_t *);
 
 ap_status_t ap_bind(ap_socket_t *);
 ap_status_t ap_listen(ap_socket_t *, ap_int32_t);
-ap_status_t ap_accept(const ap_socket_t *, ap_socket_t **);
+ap_status_t ap_accept(ap_socket_t **, const ap_socket_t *);
 ap_status_t ap_connect(ap_socket_t *, char *);
 
-ap_status_t ap_get_remote_hostname(ap_socket_t *, char **);
+ap_status_t ap_get_remote_hostname(char **, ap_socket_t *);
 ap_status_t ap_gethostname(ap_context_t *, char *, int);
 ap_status_t ap_get_socketdata(ap_socket_t *, char *, void *);
 ap_status_t ap_set_socketdata(ap_socket_t *, void *, char *,
@@ -128,7 +128,7 @@ ap_status_t ap_setipaddr(ap_socket_t *, const char *);
 ap_status_t ap_getport(ap_socket_t *, ap_uint32_t *);
 ap_status_t ap_getipaddr(char *buf, ap_ssize_t len, const ap_socket_t *sock);
 
-ap_status_t ap_setup_poll(ap_context_t *, ap_int32_t, ap_pollfd_t **);
+ap_status_t ap_setup_poll(ap_pollfd_t **, ap_context_t *, ap_int32_t);
 ap_status_t ap_poll(ap_pollfd_t *, ap_int32_t *, ap_int32_t);
 ap_status_t ap_add_poll_socket(ap_pollfd_t *, ap_socket_t *, ap_int16_t);
 ap_status_t ap_remove_poll_socket(ap_pollfd_t *, ap_socket_t *, ap_int16_t);

@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     char *args[2];
 
     fprintf(stdout, "Creating context.......");
-    if (ap_create_context(NULL, &context) != APR_SUCCESS) {
+    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Could not create context\n");
         exit(-1);
     }
@@ -87,8 +87,8 @@ int main(int argc, char *argv[])
     fprintf(stdout, "server and client by yourself.\n");
 
     fprintf(stdout, "Creating children to run network tests.......\n");
-    s1 = ap_createprocattr_init(context, &attr1);
-    s2 = ap_createprocattr_init(context, &attr2);
+    s1 = ap_createprocattr_init(&attr1, context);
+    s2 = ap_createprocattr_init(&attr2, context);
 
     if (s1 != APR_SUCCESS || s2 != APR_SUCCESS) {
         fprintf(stderr, "Problem creating proc attrs\n");

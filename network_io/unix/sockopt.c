@@ -199,7 +199,7 @@ ap_status_t ap_gethostname(ap_context_t *cont, char *buf, ap_int32_t len)
  * arg 1) The socket to examine.
  * arg 2) A buffer to store the hostname in.
  */
-ap_status_t ap_get_remote_hostname(struct socket_t *sock, char **name)
+ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
 {
     (*name) = ap_pstrdup(sock->cntxt, sock->remote_hostname);
     if (*name) {

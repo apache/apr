@@ -68,7 +68,7 @@ typedef enum {APR_LOCALTIME, APR_UTCTIME} ap_timetype_e;
 typedef struct atime_t       ap_time_t;
 
 /* Function Definitions */
-ap_status_t ap_make_time(ap_context_t *, ap_time_t **);
+ap_status_t ap_make_time(ap_time_t **, ap_context_t *);
 ap_status_t ap_current_time(ap_time_t *);
 ap_status_t ap_explode_time(ap_time_t *, ap_timetype_e);
 ap_status_t ap_implode_time(ap_time_t *);

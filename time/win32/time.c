@@ -62,7 +62,7 @@
 #include <errno.h>
 #include <string.h>
 
-ap_status_t ap_make_time(ap_context_t *cont, struct atime_t **new)
+ap_status_t ap_make_time(struct atime_t **new, ap_context_t *cont)
 {
     (*new) = (struct atime_t *)ap_palloc(cont, sizeof(struct atime_t));
 
@@ -111,7 +111,7 @@ ap_status_t ap_implode_time(struct atime_t *atime)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_os_time(struct atime_t *thetime, ap_os_time_t **atime)
+ap_status_t ap_get_os_time(ap_os_time_t **atime, struct atime_t *thetime)
 {
     if (thetime == NULL) {
         return APR_ENOTIME;

@@ -68,7 +68,7 @@
  * arg 1) The context to use if it is needed.
  * arg 2) The new process handler
  */
-ap_status_t ap_detach(ap_context_t *cont, struct proc_t **new)
+ap_status_t ap_detach(struct proc_t **new, ap_context_t *cont)
 {
     int x;
 
@@ -141,7 +141,7 @@ ap_status_t ap_detach(ap_context_t *cont, struct proc_t **new)
 ap_status_t ap_get_procdata(struct proc_t *proc, char *key, void *data)
 {
     if (proc != NULL) {
-        return ap_get_userdata(proc->cntxt, key, &data);
+        return ap_get_userdata(&data, proc->cntxt, key);
     }
     else {
         data = NULL;

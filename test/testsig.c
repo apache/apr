@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 
     ap_initialize();
 
-    ap_create_context(NULL, &context);
+    ap_create_context(&context, NULL);
 
     if (argc > 1) {
 
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "OK\n");
 
-    if (ap_createprocattr_init(context, &attr) != APR_SUCCESS) {
+    if (ap_createprocattr_init(&attr, context) != APR_SUCCESS) {
         fprintf(stderr, "Could not create attr\n");
         exit(-1);;
     }

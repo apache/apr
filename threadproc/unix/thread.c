@@ -61,12 +61,12 @@
 
 #ifdef HAVE_PTHREAD_H
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_threadattr(ap_context_t *, ap_threadattr_t **)
+ * ap_status_t ap_create_threadattr(ap_threadattr_t **, ap_context_t *)
  *    Create and initialize a new threadattr variable
  * arg 1) The context to use
  * arg 2) The newly created threadattr.
  */
-ap_status_t ap_create_threadattr(ap_context_t *cont, struct threadattr_t **new)
+ap_status_t ap_create_threadattr(struct threadattr_t **new, ap_context_t *cont)
 {
     ap_status_t stat;
   
@@ -157,7 +157,7 @@ ap_status_t ap_create_thread(ap_context_t *cont, struct threadattr_t *attr,
     else
         temp = NULL;
     
-    stat = ap_create_context(cont, &(*new)->cntxt);
+    stat = ap_create_context(&(*new)->cntxt, cont);
     if (stat != APR_SUCCESS) {
         return stat;
     }
@@ -227,7 +227,7 @@ ap_status_t ap_thread_detach(struct thread_t *thd)
 ap_status_t ap_get_threaddata(struct thread_t *thread, char *key, void *data)
 {
     if (thread != NULL) {
-        return ap_get_userdata(thread->cntxt, key, &data);
+        return ap_get_userdata(&data, thread->cntxt, key);
     }
     else {
         data = NULL;
@@ -276,8 +276,8 @@ ap_status_t ap_get_os_thread(struct thread_t *thd, ap_os_thread_t *thethd)
  * arg 2) The apr thread we are converting to.
  * arg 3) The os specific thread to convert
  */
-ap_status_t ap_put_os_thread(ap_context_t *cont, struct thread_t **thd,
-                             ap_os_thread_t *thethd)
+ap_status_t ap_put_os_thread(struct thread_t **thd, ap_os_thread_t *thethd, 
+                             ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
@@ -291,7 +291,7 @@ ap_status_t ap_put_os_thread(ap_context_t *cont, struct thread_t **thd,
 }
 #else
     /* No pthread.h, no threads for right now.*/
-ap_status_t ap_create_threadattr(ap_context_t *cont, struct threadattr_t **new)
+ap_status_t ap_create_threadattr(struct threadattr_t **new, ap_context_t *cont)
 {
     *new = NULL;
     return APR_SUCCESS;

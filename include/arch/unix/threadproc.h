@@ -99,7 +99,7 @@ struct proc_t {
 /*This will move to ap_threadproc.h in time, but I need to figure it out
  * on windows first.  :)
  */
-ap_status_t ap_detach(ap_context_t *, struct proc_t **);
+ap_status_t ap_detach(struct proc_t **, ap_context_t *);
 
 #endif  /* ! THREAD_PROC_H */
 

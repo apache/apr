@@ -75,13 +75,13 @@ static ap_status_t dir_cleanup(void *thedir)
 } 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_opendir(ap_context_t *, char *, ap_dir_t **)
+ * ap_status_t ap_opendir(ap_dir_t **, ap_context_t *, char *)
  *    Open the specified directory. 
  * arg 1) The context to use.
  * arg 2) The full path to the directory (use / on all systems)
  * arg 3) The opened directory descriptor.
  */                        
-ap_status_t ap_opendir(ap_context_t *cont, const char *dirname, struct dir_t **new)
+ap_status_t ap_opendir(struct dir_t **new, ap_context_t *cont, const char *dirname)
 {
     (*new) = (struct dir_t *)ap_palloc(cont, sizeof(struct dir_t));
 
@@ -272,12 +272,12 @@ ap_status_t ap_dir_entry_ftype(struct dir_t *thedir, ap_filetype_e *type)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_dir_filename(ap_dir_t *, char **) 
+ * ap_status_t ap_get_dir_filename(char **, ap_dir_t *) 
  *    Get the file name of the current directory entry. 
  * arg 1) the currently open directory.
  * arg 2) the file name of the directory entry. 
  */                        
-ap_status_t ap_get_dir_filename(struct dir_t *thedir, char **new)
+ap_status_t ap_get_dir_filename(char **new, struct dir_t *thedir)
 {
     (*new) = ap_pstrdup(thedir->cntxt, thedir->entry->d_name);
     return APR_SUCCESS;
@@ -304,8 +304,8 @@ ap_status_t ap_get_os_dir(struct dir_t *dir, ap_os_dir_t *thedir)
  * arg 1) The os specific dir to convert
  * arg 2) The apr dir we are converting to.
  */
-ap_status_t ap_put_os_dir(ap_context_t *cont, struct dir_t **dir,
-                            ap_os_dir_t *thedir)
+ap_status_t ap_put_os_dir(struct dir_t **dir, ap_os_dir_t *thedir,
+                          ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

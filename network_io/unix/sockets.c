@@ -79,12 +79,12 @@ static ap_status_t socket_cleanup(void *sock)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_tcp_socket(ap_context_t *, ap_socket_t **)
+ * ap_status_t ap_create_tcp_socket(ap_socket_t **, ap_context_t *)
  *    Create a socket for tcp communication.
  * arg 1) The context to use
  * arg 2) The new socket that has been setup. 
  */
-ap_status_t ap_create_tcp_socket(ap_context_t *cont, struct socket_t **new)
+ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
 {
     (*new) = (struct socket_t *)ap_palloc(cont, sizeof(struct socket_t));
 
@@ -243,14 +243,14 @@ ap_status_t ap_listen(struct socket_t *sock, ap_int32_t backlog)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_accept(ap_socket_t *, ap_socket_t **)
+ * ap_status_t ap_accept(ap_socket_t **, ap_socket_t *)
  *    Accept a new connection request
  * arg 1) The socket we are listening on 
  * arg 2) A copy of the socket that is connected to the socket that
  *        made the connection request.  This is the socket which should
  *        be used for all future communication.
  */
-ap_status_t ap_accept(const struct socket_t *sock, struct socket_t **new)
+ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock)
 {
     struct hostent *hptr;
     
@@ -329,8 +329,8 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
  */
 ap_status_t ap_get_socketdata(struct socket_t *sock, char *key, void *data)
 {
-    if (sock != NULL) {
-        return ap_get_userdata(sock->cntxt, key, &data);
+    if (socket != NULL) {
+        return ap_get_userdata(&data, sock->cntxt, key);
     }
     else {
         data = NULL;
@@ -373,14 +373,14 @@ ap_status_t ap_get_os_sock(struct socket_t *sock, ap_os_sock_t *thesock)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_put_os_sock(ap_context_t *, ap_socket_t **, ap_os_socket_t *)
+ * ap_status_t ap_put_os_sock(ap_socket_t **, ap_os_socket_t *, ap_context_t *)
  *    Convert a socket from the os specific type to the apr type
  * arg 1) The context to use.
  * arg 2) The socket to convert to.
  * arg 3) The socket we are converting to an apr type.
  */
-ap_status_t ap_put_os_sock(ap_context_t *cont, struct socket_t **sock,
-                            ap_os_sock_t *thesock)
+ap_status_t ap_put_os_sock(struct socket_t **sock, ap_os_sock_t *thesock, 
+                           ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

@@ -65,17 +65,17 @@ extern "C" {
 
 typedef   struct shmem_t ap_shmem_t
 
-ap_status_t ap_shm_create(ap_context_t *, ap_size_t, const char *, ap_shmem_t **);
+ap_status_t ap_shm_create(ap_shmem_t **, ap_context_t *, ap_size_t, const char *);
 ap_status_t ap_shm_destroy(ap_shmem_t *);
-ap_status_t ap_shm_malloc(ap_shmem_t *, ap_size_t, void **);
-ap_status_t ap_shm_calloc(ap_shmem_t *, ap_size_t, ap_size_t, void **);
-ap_status_t ap_shm_realloc(ap_shmem_t *, ap_size_t, void **);
+ap_status_t ap_shm_malloc(void **, ap_shmem_t *, ap_size_t);
+ap_status_t ap_shm_calloc(void **, ap_shmem_t *, ap_size_t, ap_size_t);
+ap_status_t ap_shm_realloc(void **, ap_shmem_t *, ap_size_t);
 ap_status_t ap_shm_free(ap_shmem_t *, void *);
-ap_status_t ap_shm_strdup(ap_shmem_t *, const char *, char **);
+ap_status_t ap_shm_strdup(char **, ap_shmem_t *, const char *);
 ap_status_t ap_shm_sizeof(ap_shmem_t *, void *, ap_size_t *);
 ap_status_t ap_shm_maxsize(ap_size_t *);
 ap_status_t ap_shm_available(ap_shmem_t *, ap_size_t *);
-ap_status_t ap_shm_child_create(ap_context_t *, const char *, ap_shmem_t**);
+ap_status_t ap_shm_child_create(ap_shmem_t**, ap_context_t *, const char *);
 
 #ifdef __cplusplus
 }

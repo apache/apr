@@ -77,11 +77,11 @@ int main()
     char *buf;
     char *str;
     char *filename = "test.fil";
-    if (ap_create_context(NULL, &context) != APR_SUCCESS) {
+    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
-    if (ap_create_context(context, &cont2) != APR_SUCCESS) {
+    if (ap_create_context(&cont2, context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
@@ -89,7 +89,7 @@ int main()
     fprintf(stdout, "Testing file functions.\n");
 
     fprintf(stdout, "\tOpening file.......");
-    if (ap_open(context, filename, flag, APR_UREAD | APR_UWRITE | APR_GREAD, &thefile) != APR_SUCCESS) {
+    if (ap_open(&thefile, context, filename, flag, APR_UREAD | APR_UWRITE | APR_GREAD) != APR_SUCCESS) {
         perror("Didn't open file");
         exit(-1);
     }
@@ -102,7 +102,7 @@ int main()
         fprintf(stderr, "Bad file des\n");
         exit(-1);
     }
-    ap_get_filename(thefile, &str);
+    ap_get_filename(&str, thefile);
     if (strcmp(str, filename) != 0) {
         fprintf(stderr, "wrong filename\n");
         exit(-1);
@@ -172,7 +172,7 @@ int main()
     }
     
     fprintf(stdout, "\tMaking sure it's gone.......");
-    status = ap_open(context, filename, APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD, &thefile);
+    status = ap_open(&thefile, context, filename, APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD);
     if (status == APR_SUCCESS) {
         fprintf(stderr, "I could open the file for some reason?\n");
         exit(-1);
@@ -193,7 +193,7 @@ int test_filedel(ap_context_t *context)
     ap_int32_t flag = APR_READ | APR_WRITE | APR_CREATE;
     ap_status_t stat;
   
-    stat = ap_open(context, "testdel", flag, APR_UREAD | APR_UWRITE | APR_GREAD, &thefile);
+    stat = ap_open(&thefile, context, "testdel", flag, APR_UREAD | APR_UWRITE | APR_GREAD);
     if (stat != APR_SUCCESS) {
          return stat;
     }
@@ -206,7 +206,7 @@ int test_filedel(ap_context_t *context)
         return stat;
     }
 
-    stat = ap_open(context, "testdel", APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD, &thefile);
+    stat = ap_open(&thefile, context, "testdel", APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD);
     if (stat == APR_SUCCESS) {
         return stat;
     }
@@ -233,7 +233,7 @@ int testdirs(ap_context_t *context)
         fprintf(stdout, "OK\n");
     }
 
-    if (ap_open(context, "testdir/testfile", APR_READ | APR_WRITE | APR_CREATE, APR_UREAD | APR_UWRITE | APR_UEXECUTE, &file) != APR_SUCCESS) {;
+    if (ap_open(&file, context, "testdir/testfile", APR_READ | APR_WRITE | APR_CREATE, APR_UREAD | APR_UWRITE | APR_UEXECUTE) != APR_SUCCESS) {;
         return -1;
     }
 
@@ -242,7 +242,7 @@ int testdirs(ap_context_t *context)
 	ap_close(file);
 
     fprintf(stdout, "\tOpening Directory.......");
-    if (ap_opendir(context, "testdir", &temp) != APR_SUCCESS) {
+    if (ap_opendir(&temp, context, "testdir") != APR_SUCCESS) {
         fprintf(stderr, "Could not open directory\n");
         return -1;
     }
@@ -269,7 +269,7 @@ int testdirs(ap_context_t *context)
             fprintf(stderr, "Error reading directory testdir"); 
             return -1;
         }
-        ap_get_dir_filename(temp, &fname);
+        ap_get_dir_filename(&fname, temp);
     } while (fname[0] == '.');
     if (strcmp(fname, "testfile")) {
         fprintf(stderr, "Got wrong file name %s\n", fname);

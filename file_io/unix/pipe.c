@@ -64,13 +64,13 @@
 #include <sys/stat.h>
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_pipe(ap_context_t *, ap_file_t **, ap_file_t **)
+ * ap_status_t ap_create_pipe(ap_file_t **, ap_context_t *, ap_file_t **)
  *    Create an anonymous pipe.
  * arg 1) The context to operate on.
  * arg 2) The file descriptor to use as input to the pipe.
  * arg 3) The file descriptor to use as output from the pipe.
  */
-ap_status_t ap_create_pipe(ap_context_t *cont, struct file_t **in, struct file_t **out)
+ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t *cont)
 {
     int filedes[2];
 
@@ -100,8 +100,8 @@ ap_status_t ap_create_pipe(ap_context_t *cont, struct file_t **in, struct file_t
  * arg 3) The permissions for the newly created pipe.
  * arg 4) The name of the new pipe. 
  */
-ap_status_t ap_create_namedpipe(ap_context_t *cont, char *dirpath, 
-                                ap_fileperms_t perm, char **new)
+ap_status_t ap_create_namedpipe(char **new, ap_context_t *cont, char *dirpath, 
+                                ap_fileperms_t perm)
 {
     mode_t mode = get_fileperms(perm);
 

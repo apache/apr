@@ -66,7 +66,7 @@
 #include <string.h>
 #include <process.h>
 
-ap_status_t ap_createprocattr_init(ap_context_t *cont, struct procattr_t **new)
+ap_status_t ap_createprocattr_init(struct procattr_t **new, ap_context_t *cont)
 {
     (*new) = (struct procattr_t *)ap_palloc(cont, 
               sizeof(struct procattr_t));
@@ -296,19 +296,19 @@ ap_status_t ap_create_process(ap_context_t *cont, char *progname,
 	return GetLastError();
 }
 
-ap_status_t ap_get_childin(struct proc_t *proc, ap_file_t **new)
+ap_status_t ap_get_childin(ap_file_t **new, struct proc_t *proc)
 {
     (*new) = proc->attr->parent_in;
     return APR_SUCCESS; 
 }
 
-ap_status_t ap_get_childout(struct proc_t *proc, ap_file_t **new)
+ap_status_t ap_get_childout(ap_file_t **new, struct proc_t *proc)
 {
     (*new) = proc->attr->parent_out; 
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_childerr(struct proc_t *proc, ap_file_t **new)
+ap_status_t ap_get_childerr(ap_file_t **new, struct proc_t *proc)
 {
     (*new) = proc->attr->parent_err; 
     return APR_SUCCESS;

@@ -59,7 +59,7 @@
 #include "apr_lib.h"
 #include <string.h>
 
-ap_status_t ap_dupfile(struct file_t *old_file, struct file_t **new_file)
+ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
 {
     (*new_file) = (struct file_t *)ap_palloc(old_file->cntxt,
                                sizeof(struct file_t));

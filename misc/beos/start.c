@@ -63,7 +63,7 @@
 #include <errno.h>
 #include <string.h>
 
-ap_status_t ap_create_context(ap_context_t *cont, void *data, ap_context_t **newcont)
+ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont, void *data)
 {
     ap_context_t *new;
     ap_pool_t *pool;
@@ -113,7 +113,7 @@ ap_status_t ap_set_userdata(struct context_t *cont, void *data)
     return APR_ENOCONT;
 }
 
-ap_status_t ap_get_userdata(struct context_t *cont, void **data)
+ap_status_t ap_get_userdata(void **data, struct context_t *cont)
 {
     if (cont) { 
         (*data) = cont->prog_data;

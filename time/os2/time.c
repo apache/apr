@@ -61,7 +61,7 @@
 #include <errno.h>
 #include <string.h>
 
-ap_status_t ap_make_time(ap_context_t *cont, struct atime_t **new)
+ap_status_t ap_make_time(struct atime_t **new, ap_context_t *cont)
 {
     (*new) = (struct atime_t *)ap_palloc(cont, sizeof(struct atime_t));
 

@@ -63,7 +63,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-ap_status_t ap_create_pipe(ap_context_t *cont, struct file_t **in, struct file_t **out)
+ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t *cont)
 {
     SECURITY_ATTRIBUTES sa;
 
@@ -87,7 +87,7 @@ ap_status_t ap_create_pipe(ap_context_t *cont, struct file_t **in, struct file_t
 }
 
 /*
-ap_status_t ap_create_namedpipe(ap_context_t *cont, char *dirpath, ap_fileperms_t perm, char **new)
+ap_status_t ap_create_namedpipe(char **new, ap_context_t *cont, char *dirpath, ap_fileperms_t perm)
 {
     mode_t mode = get_fileperms(perm);
 

@@ -69,7 +69,7 @@ ap_status_t clean_cont(void *data)
 }
     
 
-ap_status_t ap_create_context(ap_context_t *cont, ap_context_t **newcont)
+ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
 {
     int iVersionRequested;
     WSADATA wsaData;
@@ -177,7 +177,7 @@ ap_status_t ap_set_userdata(struct context_t *cont, void *data, char *key,
     return APR_ENOCONT;
 }
 
-ap_status_t ap_get_userdata(struct context_t *cont, char *key, void **data)
+ap_status_t ap_get_userdata(void **data, struct context_t *cont, char *key)
 {
     datastruct *dptr = NULL;
     if (cont) { 

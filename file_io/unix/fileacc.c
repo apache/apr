@@ -64,12 +64,12 @@
 /* A file to put ALL of the accessor functions for struct file_t types. */
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_filename(ap_file_t *, char **)
+ * ap_status_t ap_get_filename(char **, ap_file_t *)
  *    return the file name of the current file.
  * arg 1) The currently open file.
  * arg 2) The path of the file.  
  */                     
-ap_status_t ap_get_filename(struct file_t *thefile, char **new)
+ap_status_t ap_get_filename(char **new, struct file_t *thefile)
 {
     if (thefile != NULL) {
         *new = ap_pstrdup(thefile->cntxt, thefile->fname);
@@ -260,7 +260,7 @@ ap_status_t ap_get_filetype(struct file_t *file, ap_filetype_e *type)
 ap_status_t ap_get_filedata(struct file_t *file, char *key, void *data)
 {    
     if (file != NULL) {
-        return ap_get_userdata(file->cntxt, key, &data);
+        return ap_get_userdata(&data, file->cntxt, key);
     }
     else {
         data = NULL;

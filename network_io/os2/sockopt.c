@@ -162,7 +162,7 @@ ap_status_t ap_gethostname(ap_context_t *cont, char *buf, int len)
         return APR_SUCCESS;
 }
 
-ap_status_t ap_get_remote_hostname(struct socket_t *sock, char **name)
+ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
 {
     (*name) = ap_pstrdup(sock->cntxt, sock->remote_hostname);
     if (*name) {

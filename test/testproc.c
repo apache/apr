@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     char *args[3];
     char *teststr;
 
-    ap_create_context(NULL, &context);
+    ap_create_context(&context, NULL);
 
     teststr = ap_pstrdup(context, "Whooo Hoooo\0");
 
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Creating procattr.......");
-    if (ap_createprocattr_init(context, &attr) != APR_SUCCESS) {
+    if (ap_createprocattr_init(&attr, context) != APR_SUCCESS) {
         fprintf(stderr, "Could not create attr\n");
         exit(-1);;
     }
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK.\n");
 
     fprintf(stdout, "Grabbing child's stdout.......");
-    if (ap_get_childout(newproc, &testfile) != APR_SUCCESS) {
+    if (ap_get_childout(&testfile, newproc) != APR_SUCCESS) {
         fprintf(stderr, "Could not get child's stdout\n");
         exit(-1);
     }

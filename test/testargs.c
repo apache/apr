@@ -69,7 +69,7 @@ int main(int argc, char * const argv[])
     ap_context_t *context;
     ap_int32_t data;
 
-    ap_create_context(NULL, &context);
+    ap_create_context(&context, NULL);
 
     while (ap_getopt(context, argc, argv, "abc:d::", &data) == APR_SUCCESS) {
         switch(data) {

@@ -70,7 +70,7 @@ int main()
     ap_int64_t t1, t2;
 
     fprintf(stdout, "Creating context.......");
-    if (ap_create_context(NULL, &context) != APR_SUCCESS) {
+    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "could not create context\n");
         exit(-1);
     }
@@ -79,7 +79,7 @@ int main()
     fprintf(stdout, "Testing Time functions.\n");
 
     fprintf(stdout, "\tMaking new time variable.......");
-    if (ap_make_time(context, &time) != APR_SUCCESS) {
+    if (ap_make_time(&time, context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate memory\n");
         exit(-1);
     }
@@ -99,7 +99,7 @@ int main()
     }
     fprintf(stdout, "OK\n");
 
-    ap_make_time(context, &time2);
+    ap_make_time(&time2, context);
     fprintf(stdout, "\tGetting the number of seconds.......");
     if (ap_get_sec(time, &rv) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't get the seconds\n");

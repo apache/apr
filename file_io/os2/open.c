@@ -69,7 +69,7 @@ ap_status_t file_cleanup(void *thefile)
 
 
 
-ap_status_t ap_open(ap_context_t *cntxt, char *fname, ap_int32_t flag,  ap_fileperms_t perm, struct file_t **new)
+ap_status_t ap_open(struct file_t **new, ap_context_t *cntxt, char *fname, ap_int32_t flag,  ap_fileperms_t perm)
 {
     int oflags = 0;
     int mflags = OPEN_FLAGS_FAIL_ON_ERROR|OPEN_SHARE_DENYNONE;

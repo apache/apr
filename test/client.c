@@ -70,14 +70,14 @@ int main(int argc, char *argv[])
     char datarecv[STRLEN];
 
     fprintf(stdout, "Creating context.......");
-    if (ap_create_context(NULL, &context) != APR_SUCCESS) {
+    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Something went wrong\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tClient:  Creating new socket.......");
-    if (ap_create_tcp_socket(context, &sock) != APR_SUCCESS) {
+    if (ap_create_tcp_socket(&sock, context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't create socket\n");
         exit(-1);
     }
