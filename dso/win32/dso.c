@@ -81,10 +81,12 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(ctx, &os_level) && os_level >= APR_WIN_NT) 
     {
-        apr_wchar_t *wpath = utf8_to_unicode_path(path, ctx);
-        if (!wpath)
-            return APR_ENAMETOOLONG;
-
+        apr_wchar_t wpath[8192];
+        apr_status_t rv;
+        if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                              / sizeof(apr_wchar_t), path)) {
+            return rv;
+        }
         /* Prevent ugly popups from killing our app */
         em = SetErrorMode(SEM_FAILCRITICALERRORS);
         os_handle = LoadLibraryExW(wpath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);

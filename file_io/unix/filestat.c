@@ -55,6 +55,7 @@
 #include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
+#include "apr_strings.h"
 #include "apr_errno.h"
 
 static apr_filetype_e filetype_from_mode(int mode)
@@ -80,11 +81,14 @@ static apr_filetype_e filetype_from_mode(int mode)
     return type;
 }
 
-apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
+apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted,
+                             apr_file_t *thefile)
 {
     struct stat info;
 
     if (fstat(thefile->filedes, &info) == 0) {
+        finfo->cntxt = thefile->cntxt;
+        finfo->valid = APR_FINFO_MIN| APR_FINFO_IDENT | APR_FINFO_OWNER | APR_FINFO_PROT;
         finfo->protection = apr_unix_mode2perms(info.st_mode);
         finfo->filetype = filetype_from_mode(info.st_mode);
         finfo->user = info.st_uid;
@@ -92,9 +96,18 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
         finfo->size = info.st_size;
         finfo->inode = info.st_ino;
         finfo->device = info.st_dev;
+        finfo->nlinks = info.st_nlink;
         apr_ansi_time_to_apr_time(&finfo->atime, info.st_atime);
         apr_ansi_time_to_apr_time(&finfo->mtime, info.st_mtime);
         apr_ansi_time_to_apr_time(&finfo->ctime, info.st_ctime);
+        finfo->filepath = thefile->fname;
+        if (wanted & APR_FINFO_CSIZE) {
+            finfo->csize = info.st_blocks * 512;
+            finfo->valid |= APR_FINFO_CSIZE;
+        }
+        if (finfo->filetype = APR_LNK)
+            finfo->valid |= APR_FINFO_LINK
+        }
         return APR_SUCCESS;
     }
     else {
@@ -111,11 +124,20 @@ apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
+apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname,
+                      apr_int32_t wanted, apr_pool_t *cont)
 {
     struct stat info;
+    int srv;
 
-    if (stat(fname, &info) == 0) {
+    if (wanted & APR_FINFO_LINK)
+        srv = lstat(fname, &info);
+    else
+        srv = stat(fname,info);
+
+    if (srv == 0) {
+        finfo->cntxt = cont;
+        finfo->valid = APR_FINFO_MIN| APR_FINFO_IDENT | APR_FINFO_OWNER | APR_FINFO_PROT;
         finfo->protection = apr_unix_mode2perms(info.st_mode);
         finfo->filetype = filetype_from_mode(info.st_mode);
         finfo->user = info.st_uid;
@@ -123,9 +145,18 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
         finfo->size = info.st_size;
         finfo->inode = info.st_ino;
         finfo->device = info.st_dev;
+        finfo->nlinks = info.st_nlink;
         apr_ansi_time_to_apr_time(&finfo->atime, info.st_atime);
         apr_ansi_time_to_apr_time(&finfo->mtime, info.st_mtime);
         apr_ansi_time_to_apr_time(&finfo->ctime, info.st_ctime);
+        finfo->filepath = fname;
+        if (wanted & APR_FINFO_CSIZE) {
+            finfo->csize = info.st_blocks * 512;
+            finfo->valid |= APR_FINFO_CSIZE;
+        }
+        if (finfo->filetype = APR_LNK)
+            finfo->valid |= APR_FINFO_LINK
+        }
         return APR_SUCCESS;
     }
     else {
@@ -163,24 +194,24 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
     }
 }
 
-apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
+/* Perhaps this becomes nothing but a macro?
+ */
+apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname,
+                      apr_int32_t wanted, apr_pool_t *cont)
 {
-    struct stat info;
+    return apr_stat(finfo, fname, wanted | APR_FINFO_LINK, cont);
+}
 
-    if (lstat(fname, &info) == 0) {
-        finfo->protection = apr_unix_mode2perms(info.st_mode);
-        finfo->filetype = filetype_from_mode(info.st_mode);
-        finfo->user = info.st_uid;
-        finfo->group = info.st_gid;
-        finfo->size = info.st_size;
-        finfo->inode = info.st_ino;
-        finfo->device = info.st_dev;
-        apr_ansi_time_to_apr_time(&finfo->atime, info.st_atime);
-        apr_ansi_time_to_apr_time(&finfo->mtime, info.st_mtime);
-        apr_ansi_time_to_apr_time(&finfo->ctime, info.st_ctime);
-        return APR_SUCCESS;
-    }
-    else {
-        return errno;
-    }
+/* XXX: This is wrong for case-insensitive, case-preserving mount points.
+ * Unfortuantely, I don't have a clue about tweaking this code for unix,
+ * other than the basic stratagy of stat, then walk dirread for dev/inode.
+ */
+APR_DECLARE(apr_status_t) apr_get_filename_case(char **fname,
+                                                const char *fspec,
+                                                apr_pool_t *cont)
+{
+    *fname = strrchr(fspec, '/');
+    if (!*fname)
+        *fname = fspec;
+    return APR_SUCCESS;
 }

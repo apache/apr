@@ -65,7 +65,8 @@
 #include "misc.h"
 
 #if APR_HAS_UNICODE_FS
-apr_wchar_t *utf8_to_unicode_path(const char* srcstr, apr_pool_t *p)
+apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen, 
+                                  const char* srcstr)
 {
     /* TODO: The computations could preconvert the string to determine
      * the true size of the retstr, but that's a memory over speed
@@ -81,84 +82,84 @@ apr_wchar_t *utf8_to_unicode_path(const char* srcstr, apr_pool_t *p)
      */
     int srcremains = strlen(srcstr) + 1;
     int retremains = srcremains;
-    apr_wchar_t *retstr, *t;
+    apr_wchar_t *t = retstr;
+    apr_status_t rv;
     if (srcstr[1] == ':' && srcstr[2] == '/') {
-        retstr = apr_palloc(p, (retremains + 4) * 2);
         wcscpy (retstr, L"\\\\?\\");
-        t = retstr + 4;
+        retlen -= 4;
+        t += 4;
     }
     else if (srcstr[0] == '/' && srcstr[1] == '/') {
         /* Skip the slashes */
         srcstr += 2;
-        retremains = (srcremains -= 2);
-        retstr = apr_palloc(p, (retremains + 8) * 2);
         wcscpy (retstr, L"\\\\?\\UNC\\");
-        t = retstr + 8;
+        retlen -= 8;
+        t += 8;
     }
-    else
-        t = retstr = apr_palloc(p, retremains * 2);
-    if (conv_utf8_to_ucs2(srcstr, &srcremains,
-                          t, &retremains) || srcremains)
-        return NULL;
+
+    if (rv = conv_utf8_to_ucs2(srcstr, &srcremains, t, &retremains)) {
+        return rv;
+    }
+    if (srcremains) {
+        return APR_ENAMETOOLONG;
+    }
     for (; *t; ++t)
         if (*t == L'/')
             *t = L'\\';
-    return retstr;
+    return APR_SUCCESS;
 }
 
-char *unicode_to_utf8_path(const apr_wchar_t* srcstr, apr_pool_t *p)
+apr_status_t unicode_to_utf8_path(char* retstr, apr_size_t retlen,
+                                  const apr_wchar_t* srcstr)
 {
-    /* TODO: The computations could preconvert the string to determine
-     * the true size of the retstr, but that's a memory over speed
-     * tradeoff that isn't appropriate this early in development.
-     *
-     * Skip the leading 4 characters if the path begins \\?\, or substitute
+    /* Skip the leading 4 characters if the path begins \\?\, or substitute
      * // for the \\?\UNC\ path prefix, allocating the maximum string
      * length based on the remaining string, plus the trailing null.
      * then transform \\'s back into /'s since the \\?\ form never
      * allows '/' path seperators, and APR always uses '/'s.
      */
     int srcremains = wcslen(srcstr) + 1;
-    int retremains = (srcremains - 1) * 3 + 1;
-    char *t, *retstr;
+    apr_status_t rv;
+    char *t = retstr;
     if (srcstr[0] == L'\\' && srcstr[1] == L'\\' && 
         srcstr[2] == L'?'  && srcstr[3] == L'\\') {
         if (srcstr[4] == L'U' && srcstr[5] == L'N' && 
             srcstr[6] == L'C' && srcstr[7] == L'\\') {
             srcremains -= 8;
-            retremains -= 24;
             srcstr += 8;
-            retstr = apr_palloc(p, retremains + 2);
             strcpy(retstr, "//");
-            t = retstr + 2;
+            retlen -= 2;
+            t += 2;
         }
         else {
             srcremains -= 4;
-            retremains -= 12;
             srcstr += 4;
-            t = retstr = apr_palloc(p, retremains);
         }
     }
-    else
-        t = retstr = apr_palloc(p, retremains);
         
-    if (conv_ucs2_to_utf8(srcstr, &srcremains,
-                          t, &retremains) || srcremains)
-        return NULL;
+    if (rv = conv_ucs2_to_utf8(srcstr, &srcremains, t, &retlen)) {
+        return rv;
+    }
+    if (srcremains) {
+        return APR_ENAMETOOLONG;
+    }
     for (; *t; ++t)
         if (*t == L'/')
             *t = L'\\';
-    return retstr;
+    return APR_SUCCESS;
 }
 #endif
 
 apr_status_t file_cleanup(void *thefile)
 {
     apr_file_t *file = thefile;
-    CloseHandle(file->filehand);
-    file->filehand = INVALID_HANDLE_VALUE;
+    if (file->filehand != INVALID_HANDLE_VALUE) {
+        CloseHandle(file->filehand);
+        file->filehand = INVALID_HANDLE_VALUE;
+    }
     if (file->pOverlapped) {
         CloseHandle(file->pOverlapped->hEvent);
+        file->pOverlapped = NULL;
     }
     return APR_SUCCESS;
 }
@@ -167,15 +168,17 @@ APR_DECLARE(apr_status_t) apr_open(apr_file_t **new, const char *fname,
                                    apr_int32_t flag, apr_fileperms_t perm,
                                    apr_pool_t *cont)
 {
+    /* XXX: The default FILE_FLAG_SEQUENTIAL_SCAN is _wrong_ for
+     *      sdbm and any other random files!  We _must_ rethink
+     *      this approach.
+     */
+    HANDLE handle = INVALID_HANDLE_VALUE;
     DWORD oflags = 0;
     DWORD createflags = 0;
-    DWORD attributes = 0;
+    DWORD attributes = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN;
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
     apr_oslevel_e os_level;
     apr_status_t rv;
-
-    (*new) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
-    (*new)->cntxt = cont;
 
     if (flag & APR_READ) {
         oflags |= GENERIC_READ;
@@ -183,37 +186,11 @@ APR_DECLARE(apr_status_t) apr_open(apr_file_t **new, const char *fname,
     if (flag & APR_WRITE) {
         oflags |= GENERIC_WRITE;
     }
-    if (!(flag & APR_READ) && !(flag & APR_WRITE)) {
-        (*new)->filehand = INVALID_HANDLE_VALUE;
-        return APR_EACCES;
-    }
-
-    (*new)->buffered = (flag & APR_BUFFERED) > 0;
-
-    if ((*new)->buffered) {
-        (*new)->buffer = apr_palloc(cont, APR_FILE_BUFSIZE);
-        rv = apr_create_lock(&(*new)->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cont);
-
-        if (rv)
-            return rv;
-    }
-
+    
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
         sharemode |= FILE_SHARE_DELETE;
     else
         os_level = 0;
-
-#if APR_HAS_UNICODE_FS
-    if (os_level >= APR_WIN_NT) 
-    {
-        (*new)->w.fname = utf8_to_unicode_path(fname, cont);
-        if (!(*new)->w.fname)
-            /* XXX: really bad file name */
-            return APR_ENAMETOOLONG;
-    }
-    else
-#endif
-        (*new)->n.fname = apr_pstrdup(cont, fname);
 
     if (flag & APR_CREATE) {
         if (flag & APR_EXCL) {
@@ -235,35 +212,76 @@ APR_DECLARE(apr_status_t) apr_open(apr_file_t **new, const char *fname,
     }
 
     if ((flag & APR_EXCL) && !(flag & APR_CREATE)) {
-        (*new)->filehand = INVALID_HANDLE_VALUE;
         return APR_EACCES;
     }   
+    
+    if (flag & APR_DELONCLOSE) {
+        attributes |= FILE_FLAG_DELETE_ON_CLOSE;
+    }
+    if (flag & APR_OPENLINK) {
+        attributes |= FILE_FLAG_OPEN_REPARSE_POINT;
+    }
+    if (!(flag & (APR_READ | APR_WRITE)) && (os_level >= APR_WIN_NT)) {
+        /* We once failed here, but this is how one opens 
+         * a directory as a file under winnt.  Accelerate
+         * further by not hitting storage, we don't need to.
+         */
+        attributes |= FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_NO_RECALL;
+    }
+    if (flag & APR_XTHREAD) {
+        /* This win32 specific feature is required 
+         * to allow multiple threads to work with the file.
+         */
+        attributes |= FILE_FLAG_OVERLAPPED;
+    }
+
+#if APR_HAS_UNICODE_FS
+    if (os_level >= APR_WIN_NT) {
+        apr_wchar_t wfname[8192];
+        if (rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
+                                               / sizeof(apr_wchar_t), fname))
+            return rv;
+        handle = CreateFileW(wfname, oflags, sharemode,
+                             NULL, createflags, attributes, 0);
+    }
+    else
+#endif
+        handle = CreateFileA((*new)->fname, oflags, sharemode,
+                             NULL, createflags, attributes, 0);
+
+    if (handle == INVALID_HANDLE_VALUE) {
+        return apr_get_os_error();
+    }
+
+    (*new) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
+    (*new)->cntxt = cont;
+    (*new)->filehand = handle;
+    (*new)->fname = apr_pstrdup(cont, fname);
 
     if (flag & APR_APPEND) {
         (*new)->append = 1;
+        SetFilePointer((*new)->filehand, 0, NULL, FILE_END);
     }
     else {
         (*new)->append = 0;
     }
 
-    attributes = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN;
-    if (flag & APR_DELONCLOSE) {
-        attributes |= FILE_FLAG_DELETE_ON_CLOSE;
-    }
+    if (flag & APR_BUFFERED) {
+        (*new)->buffered = 1;
+        (*new)->buffer = apr_palloc(cont, APR_FILE_BUFSIZE);
+        rv = apr_create_lock(&(*new)->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cont);
 
-#if APR_HAS_UNICODE_FS
-    if (os_level >= APR_WIN_NT) 
-        (*new)->filehand = CreateFileW((*new)->w.fname, oflags, sharemode,
-                                       NULL, createflags, attributes, 0);
-    else
-#endif
-        (*new)->filehand = CreateFile((*new)->n.fname, oflags, sharemode,
-                                      NULL, createflags, attributes, 0);
-    if ((*new)->filehand == INVALID_HANDLE_VALUE) {
-        return apr_get_os_error();
+        if (rv) {
+            if (file_cleanup(*new) == APR_SUCCESS) {
+                apr_kill_cleanup(cont, *new, file_cleanup);
+            }
+            return rv;
+        }
     }
-    if (flag & APR_APPEND) {
-        SetFilePointer((*new)->filehand, 0, NULL, FILE_END);
+    else {
+        (*new)->buffered = 0;
+        (*new)->buffer = apr_palloc(cont, APR_FILE_BUFSIZE);
+        (*new)->mutex = NULL;
     }
 
     (*new)->pipe = 0;
@@ -302,9 +320,12 @@ APR_DECLARE(apr_status_t) apr_remove_file(const char *path, apr_pool_t *cont)
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
     {
-        apr_wchar_t *wpath = utf8_to_unicode_path(path, cont);
-        if (!wpath)
-            return APR_ENAMETOOLONG;
+        apr_wchar_t wpath[8192];
+        apr_status_t rv;
+        if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                              / sizeof(apr_wchar_t), path)) {
+            return rv;
+        }
         if (DeleteFileW(wpath))
             return APR_SUCCESS;
     }
@@ -315,26 +336,32 @@ APR_DECLARE(apr_status_t) apr_remove_file(const char *path, apr_pool_t *cont)
     return apr_get_os_error();
 }
 
-APR_DECLARE(apr_status_t) apr_rename_file(const char *from_path,
-                                          const char *to_path,
+APR_DECLARE(apr_status_t) apr_rename_file(const char *frompath,
+                                          const char *topath,
                                           apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
     {
-        apr_wchar_t *wfrompath = utf8_to_unicode_path(from_path, cont);
-        apr_wchar_t *wtopath = utf8_to_unicode_path(to_path, cont);
-        if (!wfrompath || !wtopath)
-            return APR_ENAMETOOLONG;
+        apr_wchar_t wfrompath[8192], wtopath[8192];
+        apr_status_t rv;
+        if (rv = utf8_to_unicode_path(wfrompath, sizeof(wfrompath) 
+                                           / sizeof(apr_wchar_t), frompath)) {
+            return rv;
+        }
+        if (rv = utf8_to_unicode_path(wtopath, sizeof(wtopath) 
+                                             / sizeof(apr_wchar_t), topath)) {
+            return rv;
+        }
         if (MoveFileExW(wfrompath, wtopath, MOVEFILE_REPLACE_EXISTING |
                                             MOVEFILE_COPY_ALLOWED))
             return APR_SUCCESS;
     }
     else
 #endif
-        if (MoveFileEx(from_path, to_path, MOVEFILE_REPLACE_EXISTING |
-                                           MOVEFILE_COPY_ALLOWED))
+        if (MoveFileEx(frompath, topath, MOVEFILE_REPLACE_EXISTING |
+                                         MOVEFILE_COPY_ALLOWED))
             return APR_SUCCESS;
     return apr_get_os_error();
 }
@@ -383,7 +410,7 @@ APR_DECLARE(apr_status_t) apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont
     if ((*thefile)->filehand == INVALID_HANDLE_VALUE)
         return apr_get_os_error();
     (*thefile)->cntxt = cont;
-    (*thefile)->n.fname = "\0\0"; // What was this??? : "STD_ERROR_HANDLE"; */
+    (*thefile)->fname = "\0"; // What was this??? : "STD_ERROR_HANDLE"; */
     (*thefile)->eof_hit = 0;
 
     return APR_SUCCESS;

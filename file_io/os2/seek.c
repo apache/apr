@@ -109,7 +109,7 @@ apr_status_t apr_seek(apr_file_t *thefile, apr_seek_where_t where, apr_off_t *of
             break;
 
         case APR_END:
-            rc = apr_getfileinfo(&finfo, thefile);
+            rc = apr_getfileinfo(&finfo, APR_FINFO_NORM, thefile);
             if (rc == APR_SUCCESS)
                 rc = setptr(thefile, finfo.size - *offset);
             break;

@@ -87,6 +87,18 @@
 #include <sys/uio.h>
 #endif
 
+#if APR_HAS_UNICODE_FS
+#include "i18n.h"
+#include <wchar.h>
+
+typedef apr_int16_t apr_wchar_t;
+
+apr_status_t utf8_to_unicode_path(apr_wchar_t* dststr, apr_size_t dstchars, 
+                                  const char* srcstr);
+apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars, 
+                                  const apr_wchar_t* srcstr);
+#endif
+
 #define APR_FILE_BUFSIZE 4096
 
 /* obscure ommissions from msvc's sys/stat.h */
@@ -98,59 +110,17 @@
 #define S_IFWHT        0160000  /* Whiteout */
 #endif
 
-#if APR_HAS_UNICODE_FS
-#include "i18n.h"
-#include <wchar.h>
+/* Internal Flags for apr_open */
+#define APR_OPENLINK      8192    /* Open a link itself, if supported */
+#define APR_READCONTROL   4096    /* Read the file's owner/perms */
+#define APR_WRITECONTROL  2048    /* Modifythe file's owner/perms */
 
-typedef apr_int16_t apr_wchar_t;
 
-apr_wchar_t *utf8_to_unicode_path(const char* srcstr, apr_pool_t *p);
-char *unicode_to_utf8_path(const apr_wchar_t* srcstr, apr_pool_t *p);
-#endif
-
-typedef enum apr_canon_case_e {
-    APR_CANON_CASE_GIVEN,
-    APR_CANON_CASE_LOWER,
-    APR_CANON_CASE_TRUE
-} apr_canon_case_e;
-
-typedef enum apr_canon_path_e {
-    APR_CANON_PATH_VIRUTAL,
-    APR_CANON_PATH_ABSOLUTE,
-    APR_CANON_PATH_RELATIVE
-} apr_canon_path_e;
-
-/*
- * Internal canonical filename elements for the apr_canon_t elems
- *  ccase   tracks the mechanism used to resolve this element
- *  pathlen is the full path length to the end of this element
- *  name    slash is prefix, as appropriate 
-               
- */
-typedef struct apr_canon_elem_t {
-    apr_canon_case_e ccase;
-    int pathlen;
-    char *name;
-} apr_canon_elem_t;
-
-/* warning: win32 canonical path "/" resolves to a
- * zero'th element of the empty string for testing the
- * psudo-root for the system
- */
-struct apr_canon_t {
-    apr_pool_t *cntxt;
-    apr_array_header_t *elems;
-    apr_canon_path_e type;
-};
 
 /* quick run-down of fields in windows' apr_file_t structure that may have 
  * obvious uses.
  * fname --  the filename as passed to the open call.
  * dwFileAttricutes -- Attributes used to open the file.
- * demonfname -- the canonicalized filename.  Used to store the result from
- *               apr_os_canonicalize_filename.
- * lowerdemonfname -- inserted at Ken Parzygnat's request, because of the
- *                    ugly way windows deals with case in the filesystem.
  * append -- Windows doesn't support the append concept when opening files.
  *           APR needs to keep track of this, and always make sure we append
  *           correctly when writing to a file with this flag set TRUE.
@@ -164,25 +134,13 @@ struct apr_file_t {
     apr_interval_time_t timeout;
 
     /* File specific info */
-    union {
-#if APR_HAS_UNICODE_FS
-        struct {
-            apr_wchar_t *fname;
-        } w;
-#endif
-        struct {
-            char *fname;
-        } n;
-    };
+    apr_finfo_t *finfo;
+    char *fname;
     DWORD dwFileAttributes;
     int eof_hit;
     BOOLEAN buffered;          // Use buffered I/O?
     int ungetchar;             // Last char provided by an unget op. (-1 = no char)
     int append; 
-    off_t size;
-    apr_time_t atime;
-    apr_time_t mtime;
-    apr_time_t ctime;
 
     /* Stuff for buffered mode */
     char *buffer;
@@ -192,24 +150,23 @@ struct apr_file_t {
     apr_ssize_t filePtr;       // position in file of handle
     apr_lock_t *mutex;         // mutex semaphore, must be owned to access the above fields
 
-    /* Pipe specific info */
-    
+    /* Pipe specific info */    
 };
 
 struct apr_dir_t {
     apr_pool_t *cntxt;
     HANDLE dirhand;
     apr_size_t rootlen;
+    char *dirname;
+    char *name;
     union {
 #if APR_HAS_UNICODE_FS
         struct {
-            apr_wchar_t *dirname;
             WIN32_FIND_DATAW *entry;
         } w;
 #endif
         struct {
-            char *dirname;
-            WIN32_FIND_DATA *entry;
+            WIN32_FIND_DATAA *entry;
         } n;
     };
 };
@@ -224,4 +181,3 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
                                 BOOLEAN bAsyncRead, BOOLEAN bAsyncWrite, 
                                 apr_pool_t *p);
 #endif  /* ! FILE_IO_H */
-

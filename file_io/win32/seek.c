@@ -105,8 +105,8 @@ APR_DECLARE(apr_status_t) apr_seek(apr_file_t *thefile, apr_seek_where_t where, 
             break;
 
         case APR_END:
-            rc = apr_getfileinfo(&finfo, thefile);
-            if (rc == APR_SUCCESS)
+            rc = apr_getfileinfo(&finfo, APR_FINFO_SIZE, thefile);
+            if (rc == APR_SUCCESS && (finfo.valid & APR_FINFO_SIZE))
                 rc = setptr(thefile, finfo.size - *offset);
             break;
         }
