@@ -53,6 +53,7 @@
  */
 
 #include "misc.h"
+#include "apr_lib.h"
 #include "apr_dso.h"
 
 #ifdef HAVE_NETDB_H
