@@ -229,7 +229,16 @@ dnl
 dnl  Handle the use of EXTRA_* variables.
 dnl  Basically, EXTRA_* vars are added to the
 dnl  current settings of their "parents". We
-dnl  can expand as needed. This is ugly
+dnl  can expand as needed for additional
+dnl  EXTRA_* variables by adding them to the
+dnl  "for i in..." line.
+dnl
+dnl  To handle recursive configures, the 1st time
+dnl  through we need to null out EXTRA_* and then
+dnl  export the lot of them, since we want/need
+dnl  them to exist in the sub-configures' environment.
+dnl  The nasty eval's allow us to use the 'for'
+dnl  construct and save some lines of code.
 dnl
 AC_DEFUN(APR_DOEXTRA, [
   for i in CFLAGS LDFLAGS LIBS
