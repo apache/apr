@@ -142,10 +142,10 @@ int apr_os_thread_equal(apr_os_thread_t tid1, apr_os_thread_t tid2)
     return tid1 == tid2;
 }
 
-APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
+APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t retval)
 {
     apr_pool_destroy(thd->cntxt);
-    thd->exitval = *retval;
+    thd->exitval = retval;
     exit_thread ((status_t)(*retval));
     /* This will never be reached... */
     return APR_SUCCESS;

@@ -92,6 +92,7 @@ struct apr_thread_t {
     pthread_t *td;
     void *data;
     apr_thread_start_t func;
+    apr_status_t exitval;
 };
 
 struct apr_threadattr_t {
