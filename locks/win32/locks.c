@@ -54,7 +54,7 @@
 
 #include "apr_general.h"
 #include "apr_strings.h"
-#include "locks.h"
+#include "win32/locks.h"
 #include "apr_portable.h"
 
 apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type, 

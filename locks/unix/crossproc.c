@@ -54,7 +54,7 @@
 
 #include "apr.h"
 #include "apr_strings.h"
-#include "locks.h"
+#include "unix/locks.h"
 
 #if APR_USE_SYSVSEM_SERIALIZE  
 
