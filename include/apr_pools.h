@@ -91,31 +91,38 @@ extern "C" {
  *
  * | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
  * ---------------------------------
- * |   |   |   |   |   |   |   | x |  General debug code enabled (good for --with-efence)
+ * |   |   |   |   |   |   |   | x |  General debug code enabled (usefull in
+ *                                    combination with --with-efence).
  *
- * |   |   |   |   |   |   | x |   |  Verbose output on stderr (report CREATE, CLEAR, DESTROY)
+ * |   |   |   |   |   |   | x |   |  Verbose output on stderr (report
+ *                                    CREATE, CLEAR, DESTROY).
  *
- * |   |   |   |   |   | x |   |   |  Lifetime checking. On each use of a pool, check its lifetime.
- *                                    If the pool is out of scope, abort().  In combination with
- *                                    the verbose flag above, it will output LIFE in such an event
- *                                    prior to aborting.
+ * |   |   |   |   |   | x |   |   |  Lifetime checking. On each use of a
+ *                                    pool, check its lifetime.  If the pool
+ *                                    is out of scope, abort().
+ *                                    In combination with the verbose flag
+ *                                    above, it will output LIFE in such an
+ *                                    event prior to aborting.
  *
- * |   |   |   |   | x |   |   |   |  Pool owner checking.  On each use of a pool, check if the
- *                                    current thread is the pools owner.  If not, abort().  In
- *                                    combination with the verbose flag above, it will output OWNER
- *                                    in such an event prior to aborting.  Use the debug function
- *                                    apr_pool_set_owner() to switch a pools ownership.
+ * |   |   |   |   | x |   |   |   |  Pool owner checking.  On each use of a
+ *                                    pool, check if the current thread is the
+ *                                    pools owner.  If not, abort().  In
+ *                                    combination with the verbose flag above,
+ *                                    it will output OWNER in such an event
+ *                                    prior to aborting.  Use the debug
+ *                                    function apr_pool_set_owner() to switch
+ *                                    a pools ownership.
  *
  * When no debug level was specified, assume general debug mode.
  * If level 0 was specified, debugging is switched off
  */
 #if defined(APR_POOL_DEBUG)
-#    if (APR_POOL_DEBUG != 0) && (APR_POOL_DEBUG - 0 == 0)
-#        undef APR_POOL_DEBUG
-#        define APR_POOL_DEBUG 1
-#    endif
+#if (APR_POOL_DEBUG != 0) && (APR_POOL_DEBUG - 0 == 0)
+#undef APR_POOL_DEBUG
+#define APR_POOL_DEBUG 1
+#endif
 #else
-#    define APR_POOL_DEBUG 0
+#define APR_POOL_DEBUG 0
 #endif
     
 #define APR_POOL_STRINGIZE(x) APR_POOL__STRINGIZE(x)
@@ -582,15 +589,15 @@ APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag);
 /* @} */
 
 #else
-#    ifdef apr_pool_join
-#        undef apr_pool_join
-#    endif
-#    define apr_pool_join(a,b)
+#ifdef apr_pool_join
+#undef apr_pool_join
+#endif
+#define apr_pool_join(a,b)
 
-#    ifdef apr_pool_lock
-#        undef apr_pool_lock
-#    endif
-#    define apr_pool_lock(pool, lock)
+#ifdef apr_pool_lock
+#undef apr_pool_lock
+#endif
+#define apr_pool_lock(pool, lock)
 #endif
 
 
