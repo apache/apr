@@ -762,3 +762,37 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
 
     return APR_SUCCESS;
 }
+
+
+APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
+                                             apr_time_t mtime,
+                                             apr_pool_t *pool)
+{
+    apr_file_t *thefile;
+    apr_status_t rv;
+
+    rv = apr_file_open(&thefile, fname,
+                       APR_READ | APR_WRITEATTRS,
+                       APR_OS_DEFAULT, pool);
+    if (!rv)
+    {
+        FILETIME file_ctime;
+        FILETIME file_atime;
+        FILETIME file_mtime;
+
+        if (!GetFileTime(thefile->filehand,
+                         &file_ctime, &file_atime, &file_mtime))
+            rv = apr_get_os_error();
+        else
+        {
+            AprTimeToFileTime(&file_mtime, mtime);
+            if (!SetFileTime(thefile->filehand,
+                             &file_ctime, &file_atime, &file_mtime))
+                rv = apr_get_os_error();
+        }
+
+        apr_file_close(thefile);
+    }
+
+    return rv;
+}

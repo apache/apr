@@ -213,6 +213,32 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
     return apr_file_perms_set(fname, finfo.protection);
 }
 
+
+APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
+                                              apr_time_t mtime,
+                                              apr_pool_t *pool)
+{
+    apr_status_t status;
+    apr_finfo_t finfo;
+    struct timeval tvp[2];
+
+    status = apr_stat(&finfo, fname, APR_FINFO_ATIME, pool);
+    if (!APR_STATUS_IS_SUCCESS(status)) {
+        return status;
+    }
+
+    tvp[0].tv_sec = apr_time_sec(finfo.atime);
+    tvp[0].tv_usec = apr_time_usec(finfo.atime);
+    tvp[1].tv_sec = apr_time_sec(mtime);
+    tvp[1].tv_usec = apr_time_usec(mtime);
+
+    if (utimes(fname, tvp) == -1) {
+        return errno;
+    }
+    return APR_SUCCESS;
+}
+
+
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, 
                                    const char *fname, 
                                    apr_int32_t wanted, apr_pool_t *pool)

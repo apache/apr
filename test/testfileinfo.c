@@ -239,6 +239,53 @@ static void test_buffered_write_size(CuTest *tc)
     apr_file_close(thefile);
 }
 
+static void test_mtime_set(CuTest *tc)
+{
+    apr_file_t *thefile;
+    apr_finfo_t finfo;
+    apr_time_t epoch = 0;
+    apr_status_t rv;
+
+    /* This test sort of depends on the system clock being at least
+     * marginally ccorrect; We'll be setting the modification time to
+     * the epoch.
+     */
+    rv = apr_file_open(&thefile, NEWFILENAME,
+                       APR_READ | APR_WRITE | APR_CREATE | APR_TRUNCATE
+                       | APR_BUFFERED | APR_DELONCLOSE,
+                       APR_OS_DEFAULT, p);
+    apr_assert_success(tc, "open file", rv);
+
+    /* Check that the current mtime is not the epoch */
+    rv = apr_stat(&finfo, NEWFILENAME, APR_FINFO_MTIME, p);
+    if (rv  == APR_INCOMPLETE) {
+        char *str;
+	int i;
+        str = apr_pstrdup(p, "APR_INCOMPLETE:  Missing ");
+        for (i = 0; vfi[i].bits; ++i) {
+            if (vfi[i].bits & ~finfo.valid) {
+                str = apr_pstrcat(p, str, vfi[i].description, " ", NULL);
+            }
+        }
+        CuFail(tc, str);
+    }
+    apr_assert_success(tc, "get initial mtime", rv);
+    CuAssertTrue(tc, finfo.mtime != epoch);
+
+    /* Reset the mtime to the epoch and verify the result.
+     * Note: we blindly assume that if the first apr_stat succeeded,
+     * the second one will, too.
+     */
+    rv = apr_file_mtime_set(NEWFILENAME, epoch, p);
+    apr_assert_success(tc, "set mtime", rv);
+
+    rv = apr_stat(&finfo, NEWFILENAME, APR_FINFO_MTIME, p);
+    apr_assert_success(tc, "get modified mtime", rv);
+    CuAssertTrue(tc, finfo.mtime == epoch);
+
+    apr_file_close(thefile);
+}
+
 CuSuite *testfileinfo(void)
 {
     CuSuite *suite = CuSuiteNew("File Info");
@@ -247,6 +294,7 @@ CuSuite *testfileinfo(void)
     SUITE_ADD_TEST(suite, test_stat);
     SUITE_ADD_TEST(suite, test_stat_eq_finfo);
     SUITE_ADD_TEST(suite, test_buffered_write_size);
+    SUITE_ADD_TEST(suite, test_mtime_set);
 
     return suite;
 }
