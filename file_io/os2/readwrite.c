@@ -52,11 +52,13 @@
  * <http://www.apache.org/>.
  */
 
+#define INCL_DOS
+#define INCL_DOSERRORS
+
 #include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_lib.h"
 
-#define INCL_DOS
 #include <os2.h>
 #include <malloc.h>
 
@@ -75,7 +77,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         ULONG blocksize;
         ULONG size = *nbytes;
 
-        DosEnterCritSec();
+        ap_lock(thefile->mutex);
 
         if (thefile->direction == 1) {
             ap_flush(thefile);
@@ -104,7 +106,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         }
 
         *nbytes = rc == 0 ? pos - (char *)buf : 0;
-        DosExitCritSec();
+        ap_unlock(thefile->mutex);
         return APR_OS2_STATUS(rc);
     } else {
         rc = DosRead(thefile->filedes, buf, *nbytes, &bytesread);

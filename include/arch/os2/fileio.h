@@ -60,6 +60,7 @@
 
 #include "apr_config.h"
 #include "apr_general.h"
+#include "apr_lock.h"
 #include "apr_file_io.h"
 #include "apr_errno.h"
 
@@ -80,6 +81,7 @@ struct ap_file_t {
     unsigned long dataRead;   // amount of valid data read into buffer
     int direction;            // buffer being used for 0 = read, 1 = write
     unsigned long filePtr;    // position in file of handle
+    ap_lock_t *mutex;         // mutex semaphore, must be owned to access the above fields
 };
 
 struct ap_dir_t {

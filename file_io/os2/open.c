@@ -97,6 +97,14 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
 
     dafile->buffered = (flag & APR_BUFFERED) > 0;
 
+    if (dafile->buffered) {
+        dafile->buffer = ap_palloc(cntxt, APR_FILE_BUFSIZE);
+        rv = ap_create_lock(&dafile->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cntxt);
+
+        if (rv)
+            return APR_OS2_STATUS(rv);
+    }
+
     if (flag & APR_CREATE) {
         oflags |= OPEN_ACTION_CREATE_IF_NEW; 
         if (!(flag & APR_EXCL)) {
@@ -136,9 +144,6 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     dafile->dataRead = 0;
     dafile->direction = 0;
 
-    if (dafile->buffered)
-        dafile->buffer = ap_palloc(cntxt, APR_FILE_BUFSIZE);
-
     ap_register_cleanup(dafile->cntxt, dafile, apr_file_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 }
@@ -165,6 +170,9 @@ ap_status_t ap_close(ap_file_t *file)
             return APR_OS2_STATUS(rc);
         }
     }
+
+    if (file->buffered)
+        ap_destroy_lock(file->mutex);
 
     return APR_SUCCESS;
 }
