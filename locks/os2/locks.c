@@ -87,7 +87,8 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type, ap_lockscop
 
     new = (struct lock_t *)ap_palloc(cont, sizeof(struct lock_t));
     new->cntxt = cont;
-    new->type = type;
+    new->type  = type;
+    new->scope = scope;
     new->owner = 0;
     new->lock_count = 0;
     new->fname = ap_pstrdup(cont, fname);
@@ -98,7 +99,7 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type, ap_lockscop
     else
         semname = ap_pstrcat(cont, "/SEM32/", fname, NULL);
 
-    rc = DosCreateMutexSem(semname, &(new->hMutex), type == APR_CROSS_PROCESS ? DC_SEM_SHARED : 0, FALSE);
+    rc = DosCreateMutexSem(semname, &(new->hMutex), scope == APR_CROSS_PROCESS ? DC_SEM_SHARED : 0, FALSE);
     *lock = new;
 
     if (!rc)

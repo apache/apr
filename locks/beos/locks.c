@@ -68,15 +68,16 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type,
     }
     
     new->cntxt = cont;
-    new->type = type;
+    new->type  = type;
+    new->scope = scope;
     new->fname = ap_pstrdup(cont, fname);
 
-    if (type != APR_CROSS_PROCESS) {
+    if (scope != APR_CROSS_PROCESS) {
         if ((stat = create_intra_lock(new)) != APR_SUCCESS) {
             return stat;
         }
     }
-    if (type != APR_INTRAPROCESS) {
+    if (scope != APR_INTRAPROCESS) {
         if ((stat = create_inter_lock(new)) != APR_SUCCESS) {
             return stat;
         }
@@ -89,12 +90,12 @@ ap_status_t ap_lock(ap_lock_t *lock)
 {
     ap_status_t stat;
     
-    if (lock->type != APR_CROSS_PROCESS) {
+    if (lock->scope != APR_CROSS_PROCESS) {
         if ((stat = lock_intra(lock)) != APR_SUCCESS) {
             return stat;
         }
     }
-    if (lock->type != APR_INTRAPROCESS) {
+    if (lock->scope != APR_INTRAPROCESS) {
         if ((stat = lock_inter(lock)) != APR_SUCCESS) {
             return stat;
         }
@@ -105,12 +106,12 @@ ap_status_t ap_lock(ap_lock_t *lock)
 ap_status_t ap_unlock(ap_lock_t *lock)
 {
     ap_status_t stat;
-    if (lock->type != APR_CROSS_PROCESS) {
+    if (lock->scope != APR_CROSS_PROCESS) {
         if ((stat = unlock_intra(lock)) != APR_SUCCESS) {
             return stat;
         }
     }
-    if (lock->type != APR_INTRAPROCESS) {
+    if (lock->scope != APR_INTRAPROCESS) {
         if ((stat = unlock_inter(lock)) != APR_SUCCESS) {
             return stat;
         }
@@ -121,12 +122,12 @@ ap_status_t ap_unlock(ap_lock_t *lock)
 ap_status_t ap_destroy_lock(ap_lock_t *lock)
 {
     ap_status_t stat; 
-    if (lock->type != APR_CROSS_PROCESS) {
+    if (lock->scope != APR_CROSS_PROCESS) {
         if ((stat = destroy_intra_lock(lock)) != APR_SUCCESS) {
             return stat;
         }
     }
-    if (lock->type != APR_INTRAPROCESS) {
+    if (lock->scope != APR_INTRAPROCESS) {
         if ((stat = destroy_inter_lock(lock)) != APR_SUCCESS) {
             return stat;
         }
