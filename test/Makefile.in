@@ -35,8 +35,7 @@ TARGETS = $(PROGRAMS)
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
 
-LOCAL_LIBS=../libapr.la @LOCAL_MM_LIB@
-##../shmem/unix/mm/libmm.la
+LOCAL_LIBS=../libapr.la
 
 CLEAN_TARGETS = testfile.tmp testdso@EXEEXT@ mod_test.so
 

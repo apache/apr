@@ -14,6 +14,7 @@
 #undef HAVE_POLLIN
 #undef HAVE_isascii
 #undef HAVE_SO_ACCEPTFILTER
+#undef HAVE_MAP_ANON
 
 /* Cross process serialization techniques */
 #undef USE_FLOCK_SERIALIZE
