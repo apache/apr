@@ -544,6 +544,9 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     if (!parent)
         parent = global_pool;
 
+    if (!abort_fn)
+        abort_fn = parent ? parent->abort_fn : NULL;
+
     allocator = parent ? parent->allocator : &global_allocator;
     if ((node = node_malloc(allocator, MIN_ALLOC - SIZEOF_NODE_T)) == NULL) {
         if (abort_fn)
