@@ -93,10 +93,7 @@ static apr_status_t fill_out_finfo(apr_finfo_t *finfo, struct stat info,
     finfo->size = info.st_size;
     finfo->inode = info.st_ino;
     finfo->device = info.st_dev;
-
-/* We don't have nlinks in the finfo structure.  Are we going to add it? RBB*/
-/*        finfo->nlinks = info.st_nlink;  */
-
+    finfo->nlink = info.st_nlink;
     apr_ansi_time_to_apr_time(&finfo->atime, info.st_atime);
     apr_ansi_time_to_apr_time(&finfo->mtime, info.st_mtime);
     apr_ansi_time_to_apr_time(&finfo->ctime, info.st_ctime);

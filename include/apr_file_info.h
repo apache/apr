@@ -145,6 +145,7 @@ typedef struct apr_finfo_t        apr_finfo_t;
 #define APR_FINFO_CSIZE  0x00000400
 #define APR_FINFO_DEV    0x00001000
 #define APR_FINFO_INODE  0x00002000
+#define APR_FINFO_NLINK  0x00004000
 #define APR_FINFO_TYPE   0x00008000
 #define APR_FINFO_USER   0x00010000 
 #define APR_FINFO_GROUP  0x00020000 
@@ -152,13 +153,14 @@ typedef struct apr_finfo_t        apr_finfo_t;
 #define APR_FINFO_GPROT  0x00200000
 #define APR_FINFO_WPROT  0x00400000
 #define APR_FINFO_ICASE  0x01000000  /*  if dev is case insensitive */
-#define APR_FINFO_FCASE  0x02000000  /*  filename in proper case */
+#define APR_FINFO_NAME   0x02000000  /*  ->name in proper case */
 
 #define APR_FINFO_MIN    0x00008170  /*  minimal: type, dates and size */
 #define APR_FINFO_IDENT  0x00003000  /*  dev and inode */
 #define APR_FINFO_OWNER  0x00030000  /*  user and group */
 #define APR_FINFO_PROT   0x00700000  /*  all protections */
-#define APR_FINFO_NORM   0x0073b170  /*  the expected unix results */
+#define APR_FINFO_NORM   0x0073b170  /*  an atomic unix apr_stat() */
+#define APR_FINFO_DIRENT 0x01002000  /*  an atomic unix apr_dir_read() */
 
 /**
  * The file information structure.  This is analogous to the POSIX
@@ -184,6 +186,8 @@ struct apr_finfo_t {
     apr_ino_t inode;
     /** The id of the device the file is on. */
     apr_dev_t device;
+    /** The number of hard links to the file. */
+    apr_int16_t nlink;
     /** The size of the file */
     apr_off_t size;
     /** The space allocated for the file */
@@ -198,8 +202,8 @@ struct apr_finfo_t {
     apr_time_t ctime;
     /** The full pathname of the file */
     const char *fname;
-    /** The file's name alone, in filesystem case */
-    char *fcase;
+    /** The file's name (no path) in filesystem case */
+    const char *name;
     /** The file's handle, if accessed (can be submitted to apr_duphandle) */
     struct apr_file_t *filehand;
 };
@@ -247,60 +251,26 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new_dir,
 /**
  * close the specified directory. 
  * @param thedir the directory descriptor to close.
- * @deffunc apr_status_t apr_closedir(apr_dir_t *thedir)
+ * @deffunc apr_status_t apr_dir_close(apr_dir_t *thedir)
  */                        
-APR_DECLARE(apr_status_t) apr_closedir(apr_dir_t *thedir);
+APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *thedir);
 
 /**
  * Read the next entry from the specified directory. 
  * @param thedir the directory descriptor to read from, and fill out.
  * @tip All systems return . and .. as the first two files.
- * @deffunc apr_status_t apr_readdir(apr_dir_t *thedir)
+ * @deffunc apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted, apr_dir_t *thedir)
  */                        
-APR_DECLARE(apr_status_t) apr_readdir(apr_dir_t *thedir);
+APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
+                                       apr_dir_t *thedir);
 
 /**
  * Rewind the directory to the first entry.
  * @param thedir the directory descriptor to rewind.
- * @deffunc apr_status_t apr_rewinddir(apr_dir_t *thedir)
+ * @deffunc apr_status_t apr_dir_rewind(apr_dir_t *thedir)
  */                        
-APR_DECLARE(apr_status_t) apr_rewinddir(apr_dir_t *thedir);
+APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
 
-/**
- * Get the file name of the current directory entry.
- * @param new_path the file name of the directory entry. 
- * @param thedir the currently open directory.
- * @deffunc apr_status_t apr_get_dir_filename(const char **new_path, apr_dir_t *thedir)
- */                        
-APR_DECLARE(apr_status_t) apr_get_dir_filename(const char **new_path, 
-                                               apr_dir_t *thedir);
-
-/**
- * Get the size of the current directory entry.
- * @param size the size of the directory entry. 
- * @param thedir the currently open directory.
- * @deffunc apr_status_t apr_dir_entry_size(apr_size_t *size, apr_dir_t *thedir)
- */                        
-APR_DECLARE(apr_status_t) apr_dir_entry_size(apr_size_t *size, 
-                                             apr_dir_t *thedir);
-
-/**
- * Get the last modified time of the current directory entry.
- * @param mtime the last modified time of the directory entry. 
- * @param thedir the currently open directory.
- * @deffunc apr_status_t apr_dir_entry_mtime(apr_time_t *mtime, apr_dir_t *thedir)
- */ 
-APR_DECLARE(apr_status_t) apr_dir_entry_mtime(apr_time_t *mtime, 
-                                              apr_dir_t *thedir);
-
-/**
- * Get the file type of the current directory entry.
- * @param type the file type of the directory entry. 
- * @param thedir the currently open directory.
- * @deffunc apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir)
- */
-APR_DECLARE(apr_status_t) apr_dir_entry_ftype(apr_filetype_e *type, 
-                                              apr_dir_t *thedir);
 
 #ifdef __cplusplus
 }
