@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2000/12/14 11:10:05 $]
+Last modified at [$Date: 2000/12/17 03:08:44 $]
 
 Release:
 
@@ -13,6 +13,10 @@ Release:
     2.0a1   : released March 10, 2000
 
 RELEASE SHOWSTOPPERS:
+
+    * Source code layout needs to be decided for apr and apr-util.  There
+      has been some discussion about adding a src/ directory to apr or 
+      removing it from apr-util/.  Either way, this needs to be decided.
 
     * Rename Symbols:
 		apr_opendir   -->    apr_dir_open
