@@ -56,10 +56,9 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
-#include <errno.h>
-#include <time.h>
-#include <stdio.h>
 #include "test_apr.h"
+#include "apr_strings.h"
+#include <time.h>
 
 #define STR_SIZE 45
 
