@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/08/01 02:57:27 $]
+Last modified at [$Date: 2002/08/01 16:00:31 $]
 
 Release:
 
@@ -65,7 +65,7 @@ CURRENT VOTES:
       a way to support alternate allocators polymorphically without
       a significant performance penalty.
 
-      Not a showstopper: Thom, Justin, Sander
+      Not a showstopper: Thom, Justin, Sander, Fitz
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
