@@ -174,5 +174,8 @@ int unregister_NLM(void *NLMHandle);
 #undef malloc
 #define malloc(x) library_malloc(gLibHandle,x)
 
+/* Changes that are waiting for an updated runtime library. */
+#define WAITING_FOR_UPDATE
+
 #endif  /*APR_PRIVATE_H*/
 #endif  /*NETWARE*/

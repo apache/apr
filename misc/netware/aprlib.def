@@ -1,3 +1,6 @@
 MODULE  LIBC.NLM
 MODULE  WS2_32.NLM
+IMPORT  NXGetRandom
+IMPORT  NXGetCtlInfo
+IMPORT  NXSetCtlInfo
 EXPORT	@aprlib.imp
