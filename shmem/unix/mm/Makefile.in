@@ -74,15 +74,18 @@ _VERSION = \
 .SUFFIXES: .o .lo
 
 .c.o:
-	$(LIBTOOL) --quiet $(CC) -c $(CFLAGS) $<
+	$(LIBTOOL) --quiet --mode=compile \
+		$(CC) -c $(CFLAGS) $<
 
 .c.lo:
-	$(LIBTOOL) --quiet $(CC) -c $(CFLAGS) $<
+	$(LIBTOOL) --quiet --mode=compile \
+		$(CC) -c $(CFLAGS) $<
 
 all: libmm.la $(MAN) mm_test
 
 libmm.la: $(OBJ) $(LOBJ)
-	$(LIBTOOL) --quiet $(CC) -o libmm.la $(LOBJ) \
+	$(LIBTOOL) --quiet --mode=link  \
+		$(CC) -o libmm.la $(LOBJ) \
 	    -rpath $(libdir) -version-info `$(SHTOOL) version -l c -d libtool mm_vers.c`
 
 mm_alloc.c mm_core.c mm_global.c: mm_conf.h mm.h mm_vers.c
@@ -115,7 +118,8 @@ debug: mm_test
 	@$(LIBTOOL) --mode=execute gdb mm_test
 
 mm_test: mm_test.lo libmm.la
-	$(LIBTOOL) --quiet $(CC) -o $@ mm_test.lo libmm.la
+	$(LIBTOOL) --quiet --mode=link \
+		$(CC) -o $@ mm_test.lo libmm.la
 
 mm.3: mm.pod
 	V1=`$(SHTOOL) version -l c -d short $(_VERSION_FILE)`; \
