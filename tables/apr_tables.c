@@ -503,29 +503,23 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
 
 APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key)
 {
-    register int i, j, k;
-    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
+    apr_table_entry_t *next_elt = (apr_table_entry_t *) t->a.elts;
+    apr_table_entry_t *end_elt = next_elt + t->a.nelts;
+    apr_table_entry_t *dst_elt = NULL;
     apr_uint32_t checksum;
 
     COMPUTE_KEY_CHECKSUM(key, checksum);
-    for (i = 0; i < t->a.nelts; ) {
-	if ((checksum == elts[i].key_checksum) && !strcasecmp(elts[i].key, key)) {
-
-	    /* found an element to skip over
-	     * there are any number of ways to remove an element from
-	     * a contiguous block of memory.  I've chosen one that
-	     * doesn't do a memcpy/bcopy/array_delete, *shrug*...
-	     */
-	    for (j = i, k = i + 1; k < t->a.nelts; ++j, ++k) {
-		elts[j].key = elts[k].key;
-		elts[j].val = elts[k].val;
-		elts[j].key_checksum = elts[k].key_checksum;
-	    }
-	    --t->a.nelts;
-	}
-	else {
-	    ++i;
-	}
+    for (; next_elt < end_elt; next_elt++) {
+	if ((checksum == next_elt->key_checksum) &&
+            !strcasecmp(next_elt->key, key)) {
+            t->a.nelts--;
+            if (!dst_elt) {
+                dst_elt = next_elt;
+            }
+        }
+        else if (dst_elt) {
+            *dst_elt++ = *next_elt;
+        }
     }
 }
 
