@@ -59,7 +59,12 @@
 static apr_status_t dso_cleanup(void *thedso)
 {
     apr_dso_handle_t *dso = thedso;
-    return apr_dso_unload(dso);
+
+    if (dso->handle != NULL && unload_add_on(dso->handle) < B_NO_ERROR)
+      return APR_EINIT;
+    dso->handle = NULL;
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, const char *path,
@@ -81,10 +86,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, const char
 
 APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
 {
-    if(unload_add_on(handle->handle) < B_NO_ERROR)
-      return APR_EINIT;
-
-    return APR_SUCCESS;
+    return apr_run_cleanup(handle->cont, handle, dso_cleanup);
 }
 
 APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_handle_t *handle,
