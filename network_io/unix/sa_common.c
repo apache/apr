@@ -71,6 +71,9 @@
 #include <stdlib.h>
 #endif
 
+#define APR_WANT_STRFUNC
+#include "apr_want.h"
+
 #ifdef HAVE_SET_H_ERRNO
 #define SET_H_ERRNO(newval) set_h_errno(newval)
 #else
