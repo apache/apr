@@ -84,6 +84,8 @@ typedef void                         ap_xlate_t;
 #define ap_xlate_conv_buffer(convset, inbuf, inbytes_left, outbuf, \
                           outbytes_left) APR_ENOTIMPL
 
+#define ap_xlate_conv_byte(convset, inchar) (-1)
+
 /* The purpose of ap_xlate_conv_char is to translate one character
  * at a time.  This needs to be written carefully so that it works
  * with double-byte character sets. 
@@ -149,6 +151,23 @@ ap_status_t ap_xlate_conv_buffer(ap_xlate_t *convset, const char *inbuf,
  * with double-byte character sets. 
  */
 ap_status_t ap_xlate_conv_char(ap_xlate_t *convset, char inchar, char outchar);
+
+/*
+
+=head1 ap_int32_t ap_xlate_conv_byte(ap_xlate_t *convset, unsigned char inchar)
+
+B<Convert a single-byte character from one charset to another.>
+
+    arg 1) The handle allocated by ap_xlate_open, specifying the parameters
+           of conversion
+    arg 2) The single-byte character to convert.
+
+B<NOTE>: This only works when converting between single-byte character sets.
+         -1 will be returned if the conversion can't be performed.
+
+=cut
+*/
+ap_int32_t ap_xlate_conv_byte(ap_xlate_t *convset, unsigned char inchar);
 
 /*
 
