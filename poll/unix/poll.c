@@ -329,7 +329,7 @@ struct apr_pollset_t {
 #endif
     apr_pollfd_t *query_set;
     apr_pollfd_t *result_set;
-    apr_pool_t *pool;
+
 #ifdef NETWARE
     int set_type;
 #endif
@@ -362,7 +362,7 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
 #endif
     (*pollset)->query_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
     (*pollset)->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
-    (*pollset)->pool = p;
+
     return APR_SUCCESS;
 }
 
