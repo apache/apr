@@ -366,7 +366,7 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
  * element in the table.  If there is data passed in as a vararg, then the 
  * function is only run on those element's whose key matches something in 
  * the vararg.  If the vararg is NULL, then every element is run through the
- * function.
+ * function.  Iteration continues while the function returns non-zero.
  * @param comp The function to run
  * @param rec The data to pass as the first argument to the function
  * @param t The table to iterate over
@@ -383,7 +383,7 @@ APR_DECLARE_NONSTD(void) apr_table_do(int (*comp)(void *, const char *, const ch
  * element in the table.  If there is data passed in as a vararg, then the 
  * function is only run on those element's whose key matches something in 
  * the vararg.  If the vararg is NULL, then every element is run through the
- * function.
+ * function.  Iteration continues while the function returns non-zero.
  * @param comp The function to run
  * @param rec The data to pass as the first argument to the function
  * @param t The table to iterate over
