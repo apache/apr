@@ -229,11 +229,15 @@ inline void *apr_atomic_casptr(void **mem, void *with, const void *cmp)
     : "memory")
 
 #define apr_atomic_dec(mem)                                     \
-({ register apr_atomic_t last;                                  \
-   do {                                                         \
-       last = *(mem);                                           \
-   } while (apr_atomic_cas((mem), last - 1, last) != last);     \
-  (--last != 0); })
+({ int prev;                                                    \
+   asm volatile ("mov $0, %%eax;\n\t"                           \
+                 "lock; decl %1;\n\t"                           \
+                 "setnz %%al;\n\t"                              \
+                 "mov %%eax, %0"                                \
+                 : "=r" (prev)                                  \
+                 : "m" (*(mem))                                 \
+                 : "memory", "%eax");                           \
+   prev;})
 
 #define apr_atomic_inc(mem)                                     \
  asm volatile ("lock; incl %0"                                  \
