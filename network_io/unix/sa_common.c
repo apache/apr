@@ -634,7 +634,7 @@ APR_DECLARE(apr_status_t) apr_ipsubnet_create(apr_ipsubnet_t **ipsub, const char
 {
     apr_status_t rv;
     char *endptr;
-    long bits, maxbits;
+    long bits, maxbits = 32;
 
     /* filter out stuff which doesn't look remotely like an IP address; this helps 
      * callers like mod_access which have a syntax allowing hostname or IP address;
@@ -656,11 +656,8 @@ APR_DECLARE(apr_status_t) apr_ipsubnet_create(apr_ipsubnet_t **ipsub, const char
     }
 
     if (mask_or_numbits) {
-        if ((*ipsub)->family == AF_INET) {
-            maxbits = 32;
-        }
 #if APR_HAVE_IPV6
-        else {
+        if ((*ipsub)->family == AF_INET6) {
             maxbits = 128;
         }
 #endif
