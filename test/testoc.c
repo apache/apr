@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     apr_proc_t newproc;
     apr_procattr_t *procattr = NULL;
     apr_file_t *std = NULL;
-    char *args[3];
+    const char *args[3];
 
     if (argc > 1) {
         while (1);

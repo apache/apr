@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     apr_file_t *testfile = NULL;
     apr_ssize_t length;
     char *buf;
-    char *args[3];
+    const char *args[3];
     char *teststr;
 
     if (apr_initialize() != APR_SUCCESS) {
@@ -132,8 +132,8 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "OK.\n");
 
-    args[0] = apr_pstrdup(context, "testproc");
-    args[1] = apr_pstrdup(context, "-X");
+    args[0] = "testproc";
+    args[1] = "-X";
     args[2] = NULL;
     
     fprintf(stdout, "Creating a new process.......");
