@@ -55,7 +55,7 @@
 #include "networkio.h"
 #include "apr_network_io.h"
 #include "apr_portable.h"
-#include "apr_inherit.h"
+#include "inherit.h"
 
 static apr_status_t socket_cleanup(void *sock)
 {

@@ -55,6 +55,7 @@
 #include "fileio.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
+#include "inherit.h"
 
 apr_status_t apr_unix_file_cleanup(void *thefile)
 {

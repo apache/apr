@@ -52,24 +52,29 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef APR_INHERIT_H
-#define APR_INHERIT_H
+#ifndef INHERIT_H
+#define INHERIT_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#include "apr_inherit.h"
 
-#define APR_NO_INHERIT 0
-#define APR_INHERIT    (2^24)    /* Outside of conflicts with other bits */
-
-#define APR_DECLARE_SET_INHERIT(name) \
-    void apr_##name##_set_inherit(apr_##name##_t *name)
-
-#define APR_DECLARE_UNSET_INHERIT(name) \
-    void apr_##name##_unset_inherit(apr_##name##_t *name)
-
-#ifdef __cplusplus
+#define APR_IMPLEMENT_SET_INHERIT(name, flag, pool, cleanup)        \
+void apr_##name##_set_inherit(apr_##name##_t *name)                 \
+{                                                                   \
+    if (!(name->flag & APR_INHERIT)) {                              \
+        name->flag |= APR_INHERIT;                                  \
+        apr_pool_cleanup_register(name->pool, (void *)name,         \
+                                  NULL, cleanup);                   \
+    }                                                               \
 }
-#endif
 
-#endif	/* ! APR_INHERIT_H */
+#define APR_IMPLEMENT_UNSET_INHERIT(name, flag, pool, cleanup)      \
+void apr_##name##_unset_inherit(apr_##name##_t *name)               \
+{                                                                   \
+    if (name->flag & APR_INHERIT) {                                 \
+        name->flag &= ~APR_INHERIT;                                 \
+        apr_pool_cleanup_kill(name->pool, (void *)name,             \
+                              NULL, cleanup);                       \
+    }                                                               \
+}
+
+#endif	/* ! INHERIT_H */
