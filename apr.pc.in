@@ -1,4 +1,5 @@
 prefix=@prefix@
+execprefix=@exec_prefix@
 libdir=@libdir@
 APR_MAJOR_VERSION=@APR_MAJOR_VERSION@
 includedir=@includedir@
