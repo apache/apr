@@ -160,5 +160,6 @@ APR_DECLARE(apr_status_t) apr_thread_cond_destroy(apr_thread_cond_t *cond)
     return stat;
 }
 
+APR_POOL_IMPLEMENT_ACCESSOR(thread_cond)
 
 #endif /* APR_HAS_THREADS */
