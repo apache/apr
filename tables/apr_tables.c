@@ -844,6 +844,7 @@ static void overlap_hash(overlap_key *elt,
                         next->tree_right->tree_parent = elt;
                     }
                     elt->tree_parent = next->tree_parent;
+                    elt->color = next->color;
                     (*child) = elt;
                     elt->merge_next = NULL;
                     elt->merge_last = NULL;

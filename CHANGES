@@ -1,5 +1,7 @@
 Changes with APR b1  
 
+  *) SEGV in apr_table_overlap [Brian Pane]
+
   *) apr_array_copy speedup by removing the zero-fill [Brian Pane]
 
   *) Fix build breakage on systems with getaddrinfo() but not 
