@@ -55,7 +55,7 @@ APR_DECLARE(const char*) apr_os_default_encoding (apr_pool_t *pool)
     }
 
     if ('A' == 0x41) {
-        return "ISO8859-1"; /* not necessarily true */
+        return "ISO-8859-1"; /* not necessarily true */
     }
 
     return "unknown";
