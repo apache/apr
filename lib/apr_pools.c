@@ -71,6 +71,7 @@
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_lib.h"
+#include "apr_lock.h"
 #include "misc.h"
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -204,8 +205,9 @@ union block_hdr {
  * Static cells for managing our internal synchronisation.
  */
 static union block_hdr *block_freelist = NULL;
-static ap_mutex_t *alloc_mutex = NULL;
-static ap_mutex_t *spawn_mutex = NULL;
+
+static ap_lock_t *alloc_mutex;
+static ap_lock_t *spawn_mutex;
 
 #ifdef POOL_DEBUG
 static char *known_stack_point;
@@ -337,7 +339,7 @@ static void free_blocks(union block_hdr *blok)
 	return;			/* Sanity check --- freeing empty pool? */
     }
 
-    (void) ap_acquire_mutex(alloc_mutex);
+    ap_lock(alloc_mutex);
     old_free_list = block_freelist;
     block_freelist = blok;
 
@@ -385,7 +387,7 @@ static void free_blocks(union block_hdr *blok)
     num_blocks_freed += num_blocks;
 #endif /* ALLOC_STATS */
 
-    (void) ap_release_mutex(alloc_mutex);
+    ap_unlock(alloc_mutex);
 #endif /* ALLOC_USE_MALLOC */
 }
 
@@ -475,7 +477,7 @@ API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p)
 
     ap_block_alarms();
 
-    (void) ap_acquire_mutex(alloc_mutex);
+    ap_lock(alloc_mutex);
 
     blok = new_block(POOL_HDR_BYTES);
     new_pool = (ap_pool_t *) blok->h.first_avail;
@@ -497,7 +499,7 @@ API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p)
 	p->sub_pools = new_pool;
     }
 
-    (void) ap_release_mutex(alloc_mutex);
+    ap_unlock(alloc_mutex);
     ap_unblock_alarms();
 
     return new_pool;
@@ -540,8 +542,13 @@ ap_pool_t *ap_init_alloc(void)
     known_stack_point = &s;
     stack_var_init(&s);
 #endif
-    alloc_mutex = ap_create_mutex(NULL);
-    spawn_mutex = ap_create_mutex(NULL);
+    ap_create_lock(NULL, APR_MUTEX, APR_INTRAPROCESS,
+                   NULL,
+                   &alloc_mutex);
+    ap_create_lock(NULL, APR_MUTEX, APR_INTRAPROCESS,
+                   NULL,
+                   &spawn_mutex);
+
     permanent_pool = ap_make_sub_pool(NULL);
 #ifdef ALLOC_STATS
     atexit(dump_stats);
@@ -556,11 +563,11 @@ static void ap_clear_real_pool(ap_pool_t *a)
 {
     ap_block_alarms();
 
-    (void) ap_acquire_mutex(alloc_mutex);
+    ap_lock(alloc_mutex);
     while (a->sub_pools) {
 	ap_destroy_real_pool(a->sub_pools);
     }
-    (void) ap_release_mutex(alloc_mutex);
+    ap_unlock(alloc_mutex);
     /*
      * Don't hold the mutex during cleanups.
      */
@@ -600,8 +607,8 @@ API_EXPORT(void) ap_destroy_real_pool(ap_pool_t *a)
 {
     ap_block_alarms();
     ap_clear_real_pool(a);
+    ap_lock(alloc_mutex);
 
-    (void) ap_acquire_mutex(alloc_mutex);
     if (a->parent) {
 	if (a->parent->sub_pools == a) {
 	    a->parent->sub_pools = a->sub_next;
@@ -613,7 +620,7 @@ API_EXPORT(void) ap_destroy_real_pool(ap_pool_t *a)
 	    a->sub_next->sub_prev = a->sub_prev;
 	}
     }
-    (void) ap_release_mutex(alloc_mutex);
+    ap_unlock(alloc_mutex);
 
     free_blocks(a->first);
     ap_unblock_alarms();
@@ -821,7 +828,7 @@ API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
 
     ap_block_alarms();
 
-    (void) ap_acquire_mutex(alloc_mutex);
+    ap_lock(alloc_mutex);
 
     blok = new_block(size);
     a->last->h.next = blok;
@@ -830,7 +837,7 @@ API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
     blok->h.owning_pool = a;
 #endif
 
-    (void) ap_release_mutex(alloc_mutex);
+    ap_unlock(alloc_mutex);
 
     ap_unblock_alarms();
 
@@ -966,9 +973,9 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
     cur_len = strp - blok->h.first_avail;
 
     /* must try another blok */
-    (void) ap_acquire_mutex(alloc_mutex);
+    ap_lock(alloc_mutex);
     nblok = new_block(2 * cur_len);
-    (void) ap_release_mutex(alloc_mutex);
+    ap_unlock(alloc_mutex);
     memcpy(nblok->h.first_avail, blok->h.first_avail, cur_len);
     ps->vbuff.curpos = nblok->h.first_avail + cur_len;
     /* save a byte for the NUL terminator */
@@ -977,10 +984,10 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
     /* did we allocate the current blok? if so free it up */
     if (ps->got_a_new_block) {
 	debug_fill(blok->h.first_avail, blok->h.endp - blok->h.first_avail);
-	(void) ap_acquire_mutex(alloc_mutex);
+        ap_lock(alloc_mutex);
 	blok->h.next = block_freelist;
 	block_freelist = blok;
-	(void) ap_release_mutex(alloc_mutex);
+        ap_unlock(alloc_mutex);
     }
     ps->blok = nblok;
     ps->got_a_new_block = 1;
