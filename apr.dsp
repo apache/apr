@@ -121,11 +121,6 @@ SOURCE=.\lib\apr_pools.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\lib\apr_slack.c
-# ADD CPP /I "./misc/win32/" /I "./file_io/win32/"
-# End Source File
-# Begin Source File
-
 SOURCE=.\lib\apr_snprintf.c
 # End Source File
 # Begin Source File
