@@ -1035,6 +1035,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ESPIPE(s)         ((s) == APR_ESPIPE)
 
 #define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN \
+                || (s) ==                       EWOULDBLOCK \
                 || (s) == APR_OS_START_SYSERR + WSAEWOULDBLOCK)
 #define APR_STATUS_IS_EINTR(s)          ((s) == APR_EINTR \
                 || (s) == APR_OS_START_SYSERR + WSAEINTR)
@@ -1071,33 +1072,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 
 #define apr_get_os_error()    (errno)
 #define apr_set_os_error(e)   (errno = (e))
-
-#ifdef NETWARE
-#define apr_get_netos_error()   (WSAGetLastError()+APR_OS_START_SYSERR)
-
-#define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN \
-                || (s) == APR_OS_START_SYSERR + ERROR_NO_DATA \
-                || (s) == APR_OS_START_SYSERR + WSAEWOULDBLOCK)
-#define APR_STATUS_IS_EINTR(s)          ((s) == APR_EINTR \
-                || (s) == APR_OS_START_SYSERR + WSAEINTR)
-#define APR_STATUS_IS_ENOTSOCK(s)       ((s) == APR_ENOTSOCK \
-                || (s) == APR_OS_START_SYSERR + WSAENOTSOCK)
-#define APR_STATUS_IS_ECONNREFUSED(s)   ((s) == APR_ECONNREFUSED \
-                || (s) == APR_OS_START_SYSERR + WSAECONNREFUSED)
-#define APR_STATUS_IS_EINPROGRESS(s)    ((s) == APR_EINPROGRESS \
-                || (s) == APR_OS_START_SYSERR + WSAEINPROGRESS)
-#define APR_STATUS_IS_ECONNABORTED(s)   ((s) == APR_ECONNABORTED \
-                || (s) == APR_OS_START_SYSERR + WSAECONNABORTED)
-#define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
-                || (s) == APR_OS_START_SYSERR + WSAECONNRESET)
-#define APR_STATUS_IS_ETIMEDOUT(s)      ((s) == APR_ETIMEDOUT \
-                || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
-                || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
-#define APR_STATUS_IS_EHOSTUNREACH(s)   ((s) == APR_EHOSTUNREACH \
-                || (s) == APR_OS_START_SYSERR + WSAEHOSTUNREACH)
-#define APR_STATUS_IS_ENETUNREACH(s)    ((s) == APR_ENETUNREACH \
-                || (s) == APR_OS_START_SYSERR + WSAENETUNREACH)
-#endif
 
 /** no error */
 #define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS)
