@@ -6,7 +6,7 @@ testmmap
 htdigest
 ab
 proctest
-testcontext
+testud
 testargs
 testdso
 testoc
@@ -40,3 +40,4 @@ testnames
 *.dbg
 testmem
 testlock
+*.core
