@@ -84,28 +84,19 @@ static void set_keepalive(CuTest *tc)
 
 static void set_debug(CuTest *tc)
 {
-    apr_status_t rv;
+    apr_status_t rv1, rv2;
     apr_int32_t ck;
-
-    rv = apr_socket_opt_set(sock, APR_SO_DEBUG, 1);
-    /* Grrrr, this is annoying, but APR_SO_DEBUG is only valid if the program
-     * is running as root.  Rather than add all the logic to determine who
-     * the program is running as, I have just added a simple compile time
-     * check.
-     */
-#if RUN_AS_ROOT
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-#else
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_EACCES(rv));
-#endif
-
-    rv = apr_socket_opt_get(sock, APR_SO_DEBUG, &ck);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-#if RUN_AS_ROOT
-    CuAssertIntEquals(tc, 1, ck);
-#else
-    CuAssertIntEquals(tc, 0, ck);
-#endif
+    
+    /* On some platforms APR_SO_DEBUG can only be set as root; just test
+     * for get/set consistency of this option. */
+    rv1 = apr_socket_opt_set(sock, APR_SO_DEBUG, 1);
+    rv2 = apr_socket_opt_get(sock, APR_SO_DEBUG, &ck);
+    CuAssertSuccess(tc, "get SO_DEBUG option", rv2);
+    if (APR_STATUS_IS_SUCCESS(rv1)) {
+        CuAssertIntEquals(tc, 1, ck);
+    } else {
+        CuAssertIntEquals(tc, 0, ck);
+    }
 }
 
 static void remove_keepalive(CuTest *tc)
