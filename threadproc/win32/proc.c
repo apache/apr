@@ -151,7 +151,21 @@ ap_status_t ap_setprocattr_childerr(struct procattr_t *attr, ap_file_t *child_er
 ap_status_t ap_setprocattr_dir(struct procattr_t *attr, 
                                const char *dir) 
 {
-    attr->currdir = ap_pstrdup(attr->cntxt, dir);
+    char path[MAX_PATH];
+    int length;
+
+    if (dir[0] != '\\' && dir[1] != ':') { 
+        length = GetCurrentDirectory(MAX_PATH, path);
+
+        if (length == 0 || length + strlen(dir) + 1 >= MAX_PATH)
+            return APR_ENOMEM;
+
+        attr->currdir = ap_pstrcat(attr->cntxt, path, "\\", dir, NULL);
+    }
+    else {
+        attr->currdir = ap_pstrdup(attr->cntxt, dir);
+    }
+
     if (attr->currdir) {
         return APR_SUCCESS;
     }
@@ -213,8 +227,38 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
             attr->si.hStdError = attr->child_err->filehand;
         }
     }
-    cmdline = ap_pstrdup(cont, progname);
-    i = 0;
+
+    if (attr->cmdtype == APR_PROGRAM) {
+        if (attr->currdir == NULL) {
+            cmdline = ap_pstrdup(cont, progname);
+        }
+        else {
+            cmdline = ap_pstrcat(cont, attr->currdir, "\\", progname, NULL);
+        }
+    }
+    else {
+        char * shell_cmd;
+        OSVERSIONINFO osver;
+        osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+
+        /*
+         * Use CMD.EXE for NT, COMMAND.COM for WIN95
+         */
+        if (GetVersionEx(&osver)) {
+            if (osver.dwPlatformId != VER_PLATFORM_WIN32_NT) {
+            shell_cmd = ap_pstrdup(cont, "COMMAND.COM /C ");
+         }
+         else {
+            shell_cmd = ap_pstrdup(cont, "CMD.EXE /C ");
+          }
+       }
+       else {
+          shell_cmd = ap_pstrdup(cont, "CMD.EXE /C ");
+       }
+       cmdline = ap_pstrcat(cont, shell_cmd, progname, NULL);
+    }
+
+    i = 1;
     while (args && args[i]) {
         cmdline = ap_pstrcat(cont, cmdline, " ", args[i], NULL);
         i++;
