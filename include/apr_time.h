@@ -62,8 +62,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-APR_IMPORT_VAR const char ap_month_snames[12][4];
-APR_IMPORT_VAR const char ap_day_snames[7][4];
+APR_VAR_IMPORT const char ap_month_snames[12][4];
+APR_VAR_IMPORT const char ap_day_snames[7][4];
 
 /* number of microseconds since 00:00:00 january 1, 1970 UTC */
 typedef ap_int64_t ap_time_t;

@@ -55,12 +55,12 @@
 #ifndef APR_GETOPT_H
 #define APR_GETOPT_H
 
-APR_IMPORT_VAR int
+APR_VAR_IMPORT int
     ap_opterr,                          /* if error message should be printed */
     ap_optind,                          /* index into parent argv vector */
     ap_optopt,                          /* character checked for validity */
     ap_optreset;                        /* reset getopt */
-APR_IMPORT_VAR char *
+APR_VAR_IMPORT char *
     ap_optarg;                          /* argument associated with option */
 
 /*
