@@ -53,7 +53,7 @@
  */
 
 #include "networkio.h"
-#include "unix/fileio.h"
+#include "fileio.h"
 
 #ifdef HAVE_POLL    /* We can just use poll to do our socket polling. */
 

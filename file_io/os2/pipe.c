@@ -53,7 +53,7 @@
  */
 
 #define INCL_DOSERRORS
-#include "os2/fileio.h"
+#include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"

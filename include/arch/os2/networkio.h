@@ -55,9 +55,13 @@
 #ifndef NETWORK_IO_H
 #define NETWORK_IO_H
 
+#include "apr_private.h"
 #include "apr_network_io.h"
 #include "apr_general.h"
 #include "os2calls.h"
+#if HAVE_NETDB_H
+#include <netdb.h>
+#endif
 
 struct apr_socket_t {
     apr_pool_t *cntxt;
@@ -67,6 +71,8 @@ struct apr_socket_t {
     int addr_len;
     apr_interval_time_t timeout;
     int nonblock;
+    int local_port_unknown;
+    int local_interface_unknown;
 };
 
 struct apr_pollfd_t {

@@ -8,8 +8,10 @@ RANLIB=@RANLIB@
 CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
-INCDIR1=../../include
-INCLUDES=-I$(INCDIR) -I$(INCDIR)/arch
+INCDIR=../../include
+OSDIR=$(INCDIR)/arch/@OSDIR@
+DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
+INCLUDES=-I$(INCDIR) -I$(OSDIR) -I$(DEFOSDIR)
 
 LIB=threadproc.a
 
@@ -44,34 +46,48 @@ depend:
 	cp Makefile.in Makefile.in.bak \
 	    && sed -ne '1,/^# DO NOT REMOVE/p' Makefile.in > Makefile.new \
 	    && gcc -MM $(INCLUDES) $(CFLAGS) *.c | sed -e "s%\\\\\(.\)%/\\1%g" >> Makefile.new \
-	    && sed -e '1,$$s: $(INCDIR)/: $$(INCDIR)/:g' \
-                   -e '1,$$s: $(INCDIR1)/: $$(INCDIR1)/:g' \
-                   -e '1,$$s: $(INCDIR2)/: $$(INCDIR2)/:g' \
-	           -e '1,$$s: $(OSDIR)/: $$(OSDIR)/:g' Makefile.new \
+	    && sed -e '1,$$s: $(OSDIR)/: $$(OSDIR)/:g' \
+                   -e '1,$$s: $(DEFOSDIR)/: $$(DEFOSDIR)/:g' \
+	           -e '1,$$s: $(INCDIR)/: $$(INCDIR)/:g' Makefile.new \
 		> Makefile.in \
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-proc.o: proc.c threadproc.h $(INCDIR1)/apr_thread_proc.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_time.h $(INCDIR2)/fileio.h \
- $(INCDIR1)/apr_private.h $(INCDIR1)/apr_lib.h \
- $(INCDIR1)/apr_portable.h $(INCDIR1)/apr_network_io.h \
- $(INCDIR1)/apr_lock.h
-signals.o: signals.c threadproc.h $(INCDIR1)/apr_thread_proc.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_time.h $(INCDIR2)/fileio.h \
- $(INCDIR1)/apr_private.h
-thread.o: thread.c threadproc.h $(INCDIR1)/apr_thread_proc.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h \
- $(INCDIR2)/fileio.h $(INCDIR1)/apr_private.h
-threadpriv.o: threadpriv.c threadproc.h \
- $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_file_io.h \
- $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
- $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_time.h \
- $(INCDIR1)/apr_lib.h $(INCDIR2)/fileio.h \
- $(INCDIR1)/apr_private.h
+proc.o: proc.c $(OSDIR)/threadproc.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/../network_io/os2/os2nerrno.h \
+ $(INCDIR)/apr_time.h $(OSDIR)/fileio.h \
+ $(INCDIR)/apr_private.h $(INCDIR)/apr_lock.h \
+ $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h \
+ $(INCDIR)/apr_tables.h $(INCDIR)/apr_portable.h \
+ $(INCDIR)/apr_network_io.h $(INCDIR)/apr_dso.h \
+ $(INCDIR)/apr_strings.h
+signals.o: signals.c $(OSDIR)/threadproc.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/../network_io/os2/os2nerrno.h \
+ $(INCDIR)/apr_time.h $(OSDIR)/fileio.h \
+ $(INCDIR)/apr_private.h $(INCDIR)/apr_lock.h
+thread.o: thread.c $(OSDIR)/threadproc.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/../network_io/os2/os2nerrno.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_pools.h $(INCDIR)/apr_tables.h \
+ $(OSDIR)/fileio.h $(INCDIR)/apr_private.h \
+ $(INCDIR)/apr_lock.h
+threadcancel.o: threadcancel.c $(OSDIR)/threadproc.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/../network_io/os2/os2nerrno.h \
+ $(INCDIR)/apr_time.h $(OSDIR)/fileio.h \
+ $(INCDIR)/apr_private.h $(INCDIR)/apr_lock.h
+threadpriv.o: threadpriv.c $(OSDIR)/threadproc.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/../network_io/os2/os2nerrno.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_pools.h $(INCDIR)/apr_tables.h \
+ $(OSDIR)/fileio.h $(INCDIR)/apr_private.h \
+ $(INCDIR)/apr_lock.h
