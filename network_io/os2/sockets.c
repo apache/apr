@@ -283,6 +283,9 @@ APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
         /* XXX IPv6 - this assumes sin_port and sin6_port at same offset */
         (*apr_sock)->remote_addr->port = ntohs((*apr_sock)->remote_addr->sa.sin.sin_port);
     }
+    else {
+        (*apr_sock)->remote_addr_unknown = 1;
+    }
         
     apr_pool_cleanup_register((*apr_sock)->cntxt, (void *)(*apr_sock), 
                         socket_cleanup, apr_pool_cleanup_null);
@@ -302,6 +305,7 @@ APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *th
     }
 
     (*sock)->local_port_unknown = (*sock)->local_interface_unknown = 1;
+    (*sock)->remote_addr_unknown = 1;
     (*sock)->socketdes = *thesock;
     return APR_SUCCESS;
 }
