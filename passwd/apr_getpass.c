@@ -133,10 +133,10 @@ static char *getpass(const char *prompt)
 	
     if (tcgetattr(STDIN_FILENO, &attr) != 0)
         return NULL;
-	attr.c_lflag &= ~(ECHO);
-    
-	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &attr) != 0)
-		return NULL;
+    attr.c_lflag &= ~(ECHO);
+
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &attr) != 0)
+	    return NULL;
     while ((password[n] = getchar()) != '\n') {
         if (password[n] >= ' ' && password[n] <= '~') {
             n++;
@@ -215,6 +215,8 @@ static char *getpass(const char *prompt)
 APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, size_t *bufsiz)
 {
     char *pw_got = getpass(prompt);
+    if (!pw_got)
+        return APR_EINVAL;
     apr_cpystrn(pwbuf, pw_got, *bufsiz);
     memset(pw_got, 0, strlen(pw_got));
     if (strlen(pw_got) >= *bufsiz) {
