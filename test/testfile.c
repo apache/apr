@@ -556,7 +556,7 @@ static void test_puts(abts_case *tc, void *data)
 static void test_writev(abts_case *tc, void *data)
 {
     apr_file_t *f;
-    int nbytes;
+    apr_size_t nbytes;
     struct iovec vec[5];
     const char *fname = "data/testwritev.txt";
 
@@ -598,7 +598,7 @@ static void test_writev(abts_case *tc, void *data)
 static void test_writev_full(abts_case *tc, void *data)
 {
     apr_file_t *f;
-    int nbytes;
+    apr_size_t nbytes;
     struct iovec vec[5];
     const char *fname = "data/testwritev_full.txt";
 
