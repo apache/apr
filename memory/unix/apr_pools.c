@@ -252,7 +252,6 @@ static union block_hdr *block_freelist = NULL;
 
 #if APR_HAS_THREADS
 static apr_lock_t *alloc_mutex;
-static apr_lock_t *spawn_mutex;
 #endif
 
 #ifdef APR_POOL_DEBUG
@@ -830,11 +829,6 @@ APR_DECLARE(apr_status_t) apr_pool_alloc_init(apr_pool_t *globalp)
     if (status != APR_SUCCESS) {
         return status;
     }
-    status = apr_lock_create(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
-                   NULL, globalp);
-    if (status != APR_SUCCESS) {
-        return status;
-    }
 #endif
     permanent_pool = globalp;
 
@@ -849,9 +843,7 @@ APR_DECLARE(void) apr_pool_alloc_term(apr_pool_t *globalp)
 {
 #if APR_HAS_THREADS
     apr_lock_destroy(alloc_mutex);
-    apr_lock_destroy(spawn_mutex);
     alloc_mutex = NULL;
-    spawn_mutex = NULL;
 #endif
     apr_pool_destroy(globalp);
 }
