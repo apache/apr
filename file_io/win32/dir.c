@@ -107,11 +107,22 @@ apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
         apr_wchar_t *wch;
         (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
         (*new)->w.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
-        wch = (*new)->w.dirname = apr_palloc(cont, (dirremains + 7) * 2);
         if (dirname[1] == ':' && dirname[2] == '/') {
+            (*new)->w.dirname = apr_palloc(cont, (dirremains + 7) * 2);
             wcscpy((*new)->w.dirname, L"\\\\?\\");
-            wch += 4;
+            wch = (*new)->w.dirname + 4;
         }
+        else if (dirname[0] == '/' && dirname[1] == '/') {
+            /* Skip the leading slashes */
+            dirname += 2;
+            srcremains = dirremains = (len -= 2);
+            (*new)->w.dirname = apr_palloc(cont, (dirremains + 11) * 2);
+            wcscpy ((*new)->w.dirname, L"\\\\?\\UNC\\");
+            wch = (*new)->w.dirname + 8;
+        }
+        else
+            wch = (*new)->w.dirname = apr_palloc(cont, (dirremains + 3) * 2);
+        
         if (conv_utf8_to_ucs2(dirname, &srcremains,
                               wch, &dirremains) || srcremains) {
             (*new) = NULL;
@@ -289,14 +300,9 @@ apr_status_t apr_get_dir_filename(char **new, apr_dir_t *thedir)
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(thedir->cntxt, &os_level) && os_level >= APR_WIN_NT)
     {
-        /* The usual Unicode to char* accessor doesn't work here.  Since we don't
-         * have a full path, and don't need to transpose slashes, we don't need it
-         */
-        int entremains = wcslen(thedir->w.entry->cFileName) + 1;
-        int retremains = (entremains - 1) * 3 + 1;
-        (*new) = apr_palloc(thedir->cntxt, retremains);
-        if (conv_ucs2_to_utf8(thedir->w.entry->cFileName, &entremains,
-                              *new, &retremains) || entremains)
+        (*new) = unicode_to_utf8_path(thedir->w.entry->cFileName, 
+                                      thedir->cntxt);
+        if (!*new)
             return APR_ENAMETOOLONG;
     }
     else
