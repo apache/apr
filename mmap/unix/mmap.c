@@ -85,25 +85,21 @@ static apr_status_t mmap_cleanup(void *themmap)
     apr_mmap_t *mm = themmap;
     int rv;
 
-    if (!mm->is_owner) {
-        return APR_SUCCESS;
+    if ((!mm->is_owner) || (mm->mm == (void *)-1)) {
+        /* XXX: we shouldn't ever get here */
+        return APR_ENOENT;
     }
 
 #ifdef BEOS
     rv = delete_area(mm->area);
-
-    if (rv == 0) {
-        mm->mm = (void *)-1;
-        return APR_SUCCESS;
-    }
 #else
     rv = munmap(mm->mm, mm->size);
+#endif
+    mm->mm = (void *)-1;
 
     if (rv == 0) {
-        mm->mm = (void *)-1;
         return APR_SUCCESS;
     }
-#endif
     return errno;
 }
 
@@ -189,24 +185,21 @@ APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
             (*new_mmap)->is_owner = 1;
             old_mmap->is_owner = 0;
             apr_pool_cleanup_kill(old_mmap->cntxt, old_mmap, mmap_cleanup);
+            apr_pool_cleanup_register(p, *new_mmap, mmap_cleanup,
+                                      apr_pool_cleanup_null);
         }
         else {
             (*new_mmap)->is_owner = 0;
         }
-        apr_pool_cleanup_register(p, *new_mmap, mmap_cleanup,
-                                  apr_pool_cleanup_null);
     }
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mm)
 {
-    apr_status_t rv;
+    apr_status_t rv = APR_SUCCESS;
 
-    if (mm->mm == (void *)-1)
-        return APR_ENOENT;
-      
-    if ((rv = mmap_cleanup(mm)) == APR_SUCCESS) {
+    if (mm->is_owner && ((rv = mmap_cleanup(mm)) == APR_SUCCESS)) {
         apr_pool_cleanup_kill(mm->cntxt, mm, mmap_cleanup);
         return APR_SUCCESS;
     }
