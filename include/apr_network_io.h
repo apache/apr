@@ -372,7 +372,7 @@ apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t* 
 
 /**
  * Associate a local port with a socket.
- * @param sock The socket to set
+ * @param sock The socket to set.
  * @param port The local port this socket will be dealing with.
  * @tip This does not bind the two together, it is just telling apr 
  *      that this socket is going to use this port if possible.  If
@@ -381,8 +381,8 @@ apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t* 
 apr_status_t apr_set_local_port(apr_socket_t *sock, apr_uint32_t port);
 
 /**
- * Assocaite a remote port with a socket.
- * @param sock The socket to enquire about.
+ * Associate a remote port with a socket.
+ * @param sock The socket to set.
  * @param port The local port this socket will be dealing with.
  * @tip This does not make a connection to the remote port, it is just 
  *      telling apr which port apr_connect() should attempt to connect to.
@@ -404,7 +404,7 @@ apr_status_t apr_get_local_port(apr_uint32_t *port, apr_socket_t *sock);
 apr_status_t apr_get_remote_port(apr_uint32_t *port, apr_socket_t *sock);
 
 /**
- * Assocaite a local socket addr with an apr socket.
+ * Associate a local socket addr with an apr socket.
  * @param sock The socket to use 
  * @param addr The IP address to attach to the socket.
  *             Use APR_ANYADDR to use any IP addr on the machine.
@@ -414,7 +414,7 @@ apr_status_t apr_get_remote_port(apr_uint32_t *port, apr_socket_t *sock);
 apr_status_t apr_set_local_ipaddr(apr_socket_t *sock, const char *addr);
 
 /**
- * Assocaite a remote socket addr with an apr socket.
+ * Associate a remote socket addr with an apr socket.
  * @param sock The socket to use 
  * @param addr The IP address to attach to the socket.
  * @tip This does not make a connection to the remote address, it is just
