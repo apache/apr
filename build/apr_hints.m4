@@ -335,13 +335,13 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         APR_SETIFNULL(apr_process_lock_is_global, [yes])
         case $PLATOSVERS in
             5.0.4)
-                APR_ADDTO(LDFLAGS, [-L/boot/develop/lib/x86 -L/boot/beos/system/lib -lbind -lsocket])
-                APR_ADDTO(LIBS, [-lbind -lbe -lroot])
+                APR_ADDTO(LDFLAGS, [-L/boot/beos/system/lib])
+                APR_ADDTO(LIBS, [-lbind -lsocket])
                 APR_ADDTO(CPPFLAGS,[-DBONE7])
                 ;;
             5.1)
-                APR_ADDTO(LDFLAGS, [-L/boot/develop/lib/x86 -L/boot/beos/system/lib -lbind -lsocket])
-                APR_ADDTO(LIBS, [-lbind -lbe -lroot])
+                APR_ADDTO(LDFLAGS, [-L/boot/beos/system/lib])
+                APR_ADDTO(LIBS, [-lbind -lsocket])
                 ;;
 	esac
 	APR_ADDTO(CPPFLAGS, [-DSIGPROCMASK_SETS_THREAD_MASK -DAP_AUTH_DBM_USE_APR])
