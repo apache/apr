@@ -75,6 +75,7 @@ APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **aprdso,
 {
     *aprdso = apr_pcalloc(pool, sizeof **aprdso);
     (*aprdso)->handle = *osdso;
+    (*aprdso)->cont = pool;
     return APR_SUCCESS;
 }
 
