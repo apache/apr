@@ -26,6 +26,9 @@ EOF
   if test -n "$LDFLAGS"; then
     echo "LDFLAGS=\"$LDFLAGS\"; export LDFLAGS" >> $1
   fi
+  if test -n "$LTFLAGS"; then
+    echo "LTFLAGS=\"$LTFLAGS\"; export LTFLAGS" >> $1
+  fi
   if test -n "$LIBS"; then
     echo "LIBS=\"$LIBS\"; export LIBS" >> $1
   fi
