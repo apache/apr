@@ -254,10 +254,10 @@ static void string_strtoff(abts_case *tc, void *data)
                 apr_strtoff(&off, "999999999999999999999999999999",
                             NULL, 10) != APR_SUCCESS);
 
-    ABTS_ASSERT(tc, "strtoff does not fail on 1234",
+    ABTS_ASSERT(tc, "strtoff failed for 1234",
                 apr_strtoff(&off, "1234", NULL, 10) == APR_SUCCESS);
 
-    ABTS_ASSERT(tc, "strtoff parsed 1234 correctly,", off == 1234);
+    ABTS_ASSERT(tc, "strtoff failed to parse 1234", off == 1234);
 }
 
 abts_suite *teststr(abts_suite *suite)
