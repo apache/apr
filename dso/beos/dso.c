@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "beos/apr_arch_dso.h"
+#include "apr_arch_dso.h"
 #include "apr_portable.h"
 
 #if APR_HAS_DSO
