@@ -54,11 +54,6 @@
 
 /* Some simple functions to make the test apps easier to write and
  * a bit more consistent...
- *
- * These still need more work...
- *
- * It'd be nice to get proper error reporting in here...
- *
  */
  
 #include <string.h>
@@ -85,5 +80,6 @@
 	    printf("%s\n", good); \
 	}
 
-#define STD_TEST(str, func) \
+#define STD_TEST_NEQ(str, func) \
 	TEST_NEQ(str, func, APR_SUCCESS, "OK", "Failed");
+
