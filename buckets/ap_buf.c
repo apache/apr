@@ -303,13 +303,13 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
     }
     
     for (k = 0;;) {
-        r = ap_bucket_new(AP_BUCKET_rmem);
+        r = ap_bucket_new(AP_BUCKET_rwmem);
         x = va_arg(va, const char *);
         if (x == NULL)
             break;
         j = strlen(x);
        
-        rv = ap_rmem_write(r->data, x, j, &i);
+        rv = ap_rwmem_write(r->data, x, j, &i);
         if (i != j) {
             /* Do we need better error reporting?  */
             return -1;
@@ -355,8 +355,8 @@ APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_lis
 
     res = ap_vsnprintf(buf, 4096, fmt, va);
 
-    r = ap_bucket_new(AP_BUCKET_rmem);
-    res = ap_rmem_write(r->data, buf, strlen(buf), &i);
+    r = ap_bucket_new(AP_BUCKET_rwmem);
+    res = ap_rwmem_write(r->data, buf, strlen(buf), &i);
 
     /* This really requires an API.  Basically we are just adding
      * a bucket to a bucket list.
