@@ -52,169 +52,133 @@
  * <http://www.apache.org/>.
  */
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "apr_network_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
-#if APR_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#include "test_apr.h"
 
-static void failure(apr_socket_t *sock)
+static apr_socket_t *sock = NULL;
+
+static void create_socket(CuTest *tc)
 {
-    apr_socket_close(sock);
-    printf("Failed!\n");
-    exit(-1);
+    apr_status_t rv;
+
+    rv = apr_socket_create(&sock, APR_INET, SOCK_STREAM, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, sock);
 }
 
-static void failureno(apr_socket_t *sock)
+static void set_keepalive(CuTest *tc)
 {
-    apr_socket_close(sock);
-    printf("No!\n");
-    exit(-1);
-}
-
-int main(void)
-{
-    apr_pool_t *context;
-    apr_pool_t *cont2;
-    apr_socket_t *sock = NULL;
-    apr_status_t stat = 0;
+    apr_status_t rv;
     apr_int32_t ck;
 
-    if (apr_initialize() != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't initialize.");
-        exit(-1);
-    }
-    atexit(apr_terminate);
-    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't allocate context.");
-        exit(-1);
-    }
-    if (apr_pool_create(&cont2, context) != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't allocate context.");
-        exit(-1);
-    }
+    rv = apr_socket_opt_set(sock, APR_SO_KEEPALIVE, 1);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    printf("Testing socket option functions.\n");
+    rv = apr_socket_opt_get(sock, APR_SO_KEEPALIVE, &ck);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, 1, ck);
+}
 
-    printf("\tCreating socket..........................");
-    if ((stat = apr_socket_create(&sock, APR_INET, SOCK_STREAM, context))
-         != APR_SUCCESS){
-        printf("Failed to create a socket!\n");
-        exit(-1);
-    }
-    printf("OK\n");
+static void set_debug(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_int32_t ck;
 
-    printf ("\tTrying to set APR_SO_KEEPALIVE...........");
-    if (apr_socket_opt_set(sock, APR_SO_KEEPALIVE, 1) != APR_SUCCESS){
-        apr_socket_close(sock);
-        printf("Failed!\n");
-        exit (-1);
-    }
-    printf ("OK\n");
-
-    printf("\tChecking if we recorded it...............");
-    if (apr_socket_opt_get(sock, APR_SO_KEEPALIVE, &ck) != APR_SUCCESS){
-        apr_socket_close(sock);
-        fprintf(stderr,"Failed\n");
-        exit(-1);
-    }
-    if (ck != 1){ 
-        apr_socket_close(sock);
-        printf("No (%d)\n", ck);
-        exit(-1);
-    }
-    printf("Yes\n");
-
-    printf("\tTrying to set APR_SO_DEBUG...............");
-    if (apr_socket_opt_set(sock, APR_SO_DEBUG, 1) != APR_SUCCESS){
-        printf("Failed (ignored)\n");
-    }
-    else {
-        printf ("OK\n");
-
-        printf("\tChecking if we recorded it...............");
-        if (apr_socket_opt_get(sock, APR_SO_DEBUG, &ck) != APR_SUCCESS){
-            apr_socket_close(sock);
-            printf("Failed!\n");
-            exit (-1);
-        }
-        if (ck != 1){
-            printf ("No (%d)\n", ck);
-            apr_socket_close(sock);
-            exit (-1);
-        }
-        printf ("Yes\n");
-    }
-
-    printf ("\tTrying to remove APR_SO_KEEPALIVE........");
-    if (apr_socket_opt_set(sock, APR_SO_KEEPALIVE, 0) != APR_SUCCESS){
-        apr_socket_close(sock);
-        printf("Failed!\n");
-        exit (-1);
-    }
-    printf ("OK\n");
-
-    printf ("\tDid we record the removal................");
-    if (apr_socket_opt_get(sock, APR_SO_KEEPALIVE, &ck) != APR_SUCCESS){
-        apr_socket_close(sock);
-        printf("Didn't get value!\n");
-        exit(-1);
-    }
-    if (ck != 0){
-        failureno(sock);
-    }
-    printf ("Yes\n");
-
-#if APR_HAVE_CORKABLE_TCP
-    printf ("\tTesting APR_TCP_NOPUSH!\n");
-    printf("\t\tSetting APR_TCP_NODELAY..........");
-    if (apr_socket_opt_set(sock, APR_TCP_NODELAY, 1) != APR_SUCCESS){
-        failure(sock);
-    }
-    printf("OK\n");
-    printf("\t\tSetting APR_TCP_NOPUSH...........");
-    if (apr_socket_opt_set(sock, APR_TCP_NOPUSH, 1) != APR_SUCCESS){
-        failure(sock);
-    }
-    printf("OK\n");
-    printf("\t\tChecking on APR_TCP_NODELAY......");
-    if (apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck) != APR_SUCCESS){
-        failure(sock);
-    }
-    if (ck != 0){
-        failureno(sock);
-    }
-    printf("Yes (not set)\n");
-    printf("\t\tUnsetting APR_TCP_NOPUSH.........");
-    if (apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0) != APR_SUCCESS){
-        failure(sock);
-    }
-    printf("OK\n");
-    
-    printf("\t\tChecking on APR_TCP_NODELAY......");
-    if (apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck) != APR_SUCCESS){
-        failure(sock);
-    }
-    if (ck != 1){
-        failureno(sock);
-    }
-    printf("Yes (set)\n");
-
-    printf ("\tSeems OK!\n");
+    rv = apr_socket_opt_set(sock, APR_SO_DEBUG, 1);
+    /* Grrrr, this is annoying, but APR_SO_DEBUG is only valid if the program
+     * is running as root.  Rather than add all the logic to determine who
+     * the program is running as, I have just added a simple compile time
+     * check.
+     */
+#if RUN_AS_ROOT
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+#else
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_EACCES(rv));
 #endif
 
-    printf("\tTrying to close the socket...............");
-    if ((stat = apr_socket_close(sock)) != APR_SUCCESS){
-        printf("Failed to close the socket!\n");
-        exit(-1);
-    }
-    printf("OK\n");
-
-    return 0;
+    rv = apr_socket_opt_get(sock, APR_SO_DEBUG, &ck);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+#if RUN_AS_ROOT
+    CuAssertIntEquals(tc, 1, ck);
+#else
+    CuAssertIntEquals(tc, 0, ck);
+#endif
 }
+
+static void remove_keepalive(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_int32_t ck;
+
+    rv = apr_socket_opt_get(sock, APR_SO_KEEPALIVE, &ck);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, 1, ck);
+
+    rv = apr_socket_opt_set(sock, APR_SO_KEEPALIVE, 0);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_socket_opt_get(sock, APR_SO_KEEPALIVE, &ck);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, 0, ck);
+}
+
+static void corkable(CuTest *tc)
+{
+#if !APR_HAVE_CORKABLE_TCP
+    CuNotImpl(tc, "TCP isn't corkable");
+#else
+    apr_status_t rv;
+    apr_int32_t ck;
+
+    rv = apr_socket_opt_set(sock, APR_TCP_NODELAY, 1);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, 1, ck);
+
+    rv = apr_socket_opt_set(sock, APR_TCP_NOPUSH, 1);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_socket_opt_get(sock, APR_TCP_NOPUSH, &ck);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, 1, ck);
+
+    rv = apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, 0, ck);
+
+    rv = apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    
+    rv = apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, 1, ck);
+#endif
+}
+
+static void close_socket(CuTest *tc)
+{
+    apr_status_t rv;
+
+    rv = apr_socket_close(sock);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+}
+
+CuSuite *testsockopt(void)
+{
+    CuSuite *suite = CuSuiteNew("Socket Options");
+
+    SUITE_ADD_TEST(suite, create_socket);
+    SUITE_ADD_TEST(suite, set_keepalive);
+    SUITE_ADD_TEST(suite, set_debug);
+    SUITE_ADD_TEST(suite, remove_keepalive);
+    SUITE_ADD_TEST(suite, corkable);
+    SUITE_ADD_TEST(suite, close_socket);
+
+    return suite;
+}
+

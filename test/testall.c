@@ -82,6 +82,7 @@ static const struct testlist {
     {"testdso", testdso},
     {"testoc", testoc},
     {"testsockets", testsockets},
+    {"testsockopt", testsockopt},
     {"testproc", testproc},
     {"testpoll", testpoll},
     {"testlock", testlock},
