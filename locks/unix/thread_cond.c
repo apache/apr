@@ -133,8 +133,8 @@ APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
     struct timespec abstime;
 
     then = apr_time_now() + timeout;
-    abstime.tv_sec = then / APR_USEC_PER_SEC;
-    abstime.tv_nsec = (then % APR_USEC_PER_SEC) * 1000; /* nanoseconds */
+    abstime.tv_sec = apr_time_sec(then);
+    abstime.tv_nsec = apr_time_usec(then) * 1000; /* nanoseconds */
 
     rv = pthread_cond_timedwait(cond->cond, &mutex->mutex, &abstime);
 #ifdef PTHREAD_SETS_ERRNO
