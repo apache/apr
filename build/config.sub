@@ -77,6 +77,14 @@ case $maybe_os in
     os=-$maybe_os
     basic_machine=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\1/'`
     ;;
+  tpf | os390 | vmcms)
+    os=-$maybe_os
+    basic_machine=s390;
+    ;;
+  mvs)
+    os=-mvs
+    basic_machine=i370;
+    ;;
   *)
     basic_machine=`echo $1 | sed 's/-[^-]*$//'`
     if [ $basic_machine != $1 ]
@@ -680,6 +688,9 @@ case $basic_machine in
 		basic_machine=a29k-amd
 		os=-udi
 		;;
+	s390*)
+		basic_machine=s390-ibm
+		;; 
 	sequent)
 		basic_machine=i386-sequent
 		;;
@@ -939,7 +950,7 @@ case $os in
 	      | -cygwin* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
 	      | -mingw32* | -linux-gnu* | -uxpv* | -beos* | -mpeix* | -udk* \
 	      | -interix* | -uwin* | -rhapsody* | -darwin* | -opened* \
-	      | -openstep* | -oskit*)
+	      | -openstep* | -oskit* | -tpf* | -os390* | -vmcms* )
 	# Remember, each alternative MUST END IN *, to match a version number.
 		;;
 	-qnx*)
@@ -1108,7 +1119,17 @@ case $basic_machine in
 		os=-beos
 		;;
 	*-ibm)
-		os=-aix
+		case $basic_machine in
+		    s390*)
+			os=-os390;
+			;;
+		    i370*)
+			os=-mvs;
+			;;
+		    *)
+			os=-aix
+			;;
+		esac
 		;;
 	*-wec)
 		os=-proelf
