@@ -78,14 +78,12 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     apr_size_t pagesize;
     area_id newid;
     char *addr;
-    char area_name[32];
     
     (*m) = (apr_shm_t *)apr_pcalloc(p, sizeof(apr_shm_t));
     /* we MUST allocate in pages, so calculate how big an area we need... */
     pagesize = ((reqsize + B_PAGE_SIZE - 1) / B_PAGE_SIZE) * B_PAGE_SIZE;
-    sprintf(area_name, "apr_shm:%ld:%ld",find_thread(NULL), pagesize);
      
-    newid = create_area(area_name, (void*)&addr, B_ANY_ADDRESS,
+    newid = create_area(file, (void*)&addr, B_ANY_ADDRESS,
                         pagesize, B_CONTIGUOUS, B_READ_AREA|B_WRITE_AREA);
 
     if (newid < 0)
@@ -116,20 +114,40 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
 {
     area_info ai;
     thread_info ti;
-    area_id deleteme = (*m)->aid;
-    int offs = ((char*)(*m)->ptr) - ((char*)(*m)->memblock);
+    area_id deleteme;
+    apr_shm_t *new_m;
     
+    deleteme = find_area(filename);
+    if (deleteme == B_NAME_NOT_FOUND)
+        return APR_EINVAL;
+
+    new_m = (apr_shm_t*)apr_palloc(pool, sizeof(apr_shm_t*));
+    if (new_m == NULL)
+        return APR_ENOMEM;
+    new_m->pool = pool;
+
     get_area_info(deleteme, &ai);
     get_thread_info(find_thread(NULL), &ti);
-    
+
     if (ti.team != ai.team) {
-        delete_area(deleteme);
-        (*m)->aid = clone_area(ai.name, &(ai.address), B_CLONE_ADDRESS,
-                               B_READ_AREA | B_WRITE_AREA, ai.area);
-        get_area_info((*m)->aid, &ai);
-        (*m)->memblock = ai.address;
-        (*m)->ptr = (void*)ai.address + offs;
+        area_id narea;
+        
+        narea = clone_area(ai.name, &(ai.address), B_CLONE_ADDRESS,
+                           B_READ_AREA|B_WRITE_AREA, ai.area);
+
+        if (narea < B_OK)
+            return narea;
+            
+        get_area_info(narea, &ai);
+        new_m->aid = narea;
+        new_m->memblock = ai.address;
+        new_m->ptr = (void*)ai.address;
+        new_m->avail = ai.size;
+        new_m->reqsize = ai.size;
     }
+
+    (*m) = new_m;
+    
     return APR_SUCCESS;
 }
 
