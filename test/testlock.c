@@ -60,40 +60,25 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_getopt.h"
-#include "errno.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include "test_apr.h"
 
-#if !APR_HAS_THREADS
-int main(void)
-{
-    printf("This program won't work on this platform because there is no "
-           "support for threads.\n");
-    return 0;
-}
-#else /* !APR_HAS_THREADS */
+#if APR_HAS_THREADS
 
 #define MAX_ITER 40000
 #define MAX_COUNTER 100000
 #define MAX_RETRY 5
 
-void * APR_THREAD_FUNC thread_rwlock_func(apr_thread_t *thd, void *data);
-void * APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data);
-void * APR_THREAD_FUNC thread_cond_producer(apr_thread_t *thd, void *data);
-void * APR_THREAD_FUNC thread_cond_consumer(apr_thread_t *thd, void *data);
-apr_status_t test_thread_mutex(void);
-apr_status_t test_thread_rwlock(void);
-apr_status_t test_cond(void);
-apr_status_t test_timeoutcond(void);
+static void *APR_THREAD_FUNC thread_rwlock_func(apr_thread_t *thd, void *data);
+static void *APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data);
+static void *APR_THREAD_FUNC thread_cond_producer(apr_thread_t *thd, void *data);
+static void *APR_THREAD_FUNC thread_cond_consumer(apr_thread_t *thd, void *data);
 
-apr_file_t *in, *out, *err;
-apr_thread_mutex_t *thread_mutex;
-apr_thread_rwlock_t *rwlock;
-apr_pool_t *pool;
-int i = 0, x = 0;
+static apr_thread_mutex_t *thread_mutex;
+static apr_thread_rwlock_t *rwlock;
+static int i = 0, x = 0;
 
-int buff[MAX_COUNTER];
+static int buff[MAX_COUNTER];
+
 struct {
     apr_thread_mutex_t *mutex;
     int                nput;
@@ -106,10 +91,10 @@ struct {
     int                nready;
 } nready;
 
-apr_thread_mutex_t *timeout_mutex;
-apr_thread_cond_t *timeout_cond;
+static apr_thread_mutex_t *timeout_mutex;
+static apr_thread_cond_t *timeout_cond;
 
-void * APR_THREAD_FUNC thread_rwlock_func(apr_thread_t *thd, void *data)
+static void *APR_THREAD_FUNC thread_rwlock_func(apr_thread_t *thd, void *data)
 {
     int exitLoop = 1;
 
@@ -134,7 +119,7 @@ void * APR_THREAD_FUNC thread_rwlock_func(apr_thread_t *thd, void *data)
     return NULL;
 } 
 
-void * APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data)
+static void *APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data)
 {
     int exitLoop = 1;
 
@@ -159,7 +144,7 @@ void * APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data)
     return NULL;
 } 
 
-void * APR_THREAD_FUNC thread_cond_producer(apr_thread_t *thd, void *data)
+static void *APR_THREAD_FUNC thread_cond_producer(apr_thread_t *thd, void *data)
 {
     for (;;) {
         apr_thread_mutex_lock(put.mutex);
@@ -184,7 +169,7 @@ void * APR_THREAD_FUNC thread_cond_producer(apr_thread_t *thd, void *data)
     return NULL;
 }
 
-void * APR_THREAD_FUNC thread_cond_consumer(apr_thread_t *thd, void *data)
+static void *APR_THREAD_FUNC thread_cond_consumer(apr_thread_t *thd, void *data)
 {
     int i;
 
@@ -202,132 +187,82 @@ void * APR_THREAD_FUNC thread_cond_consumer(apr_thread_t *thd, void *data)
     return NULL;
 }
 
-apr_status_t test_thread_mutex(void)
+static void test_thread_mutex(CuTest *tc)
 {
     apr_thread_t *t1, *t2, *t3, *t4;
     apr_status_t s1, s2, s3, s4;
 
-    printf("thread_mutex test\n");
-    printf("%-60s", "    Initializing the mutex");
-    s1 = apr_thread_mutex_create(&thread_mutex, APR_THREAD_MUTEX_DEFAULT, pool);
-
-    if (s1 != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s1;
-    }
-    printf("OK\n");
+    s1 = apr_thread_mutex_create(&thread_mutex, APR_THREAD_MUTEX_DEFAULT, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s1);
+    CuAssertPtrNotNull(tc, thread_mutex);
 
     i = 0;
     x = 0;
 
-    printf("%-60s", "    Starting all the threads"); 
-    s1 = apr_thread_create(&t1, NULL, thread_mutex_function, NULL, pool);
-    s2 = apr_thread_create(&t2, NULL, thread_mutex_function, NULL, pool);
-    s3 = apr_thread_create(&t3, NULL, thread_mutex_function, NULL, pool);
-    s4 = apr_thread_create(&t4, NULL, thread_mutex_function, NULL, pool);
-    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
-        s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s1;
-    }
-    printf("OK\n");
+    s1 = apr_thread_create(&t1, NULL, thread_mutex_function, NULL, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s1);
+    s2 = apr_thread_create(&t2, NULL, thread_mutex_function, NULL, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s2);
+    s3 = apr_thread_create(&t3, NULL, thread_mutex_function, NULL, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s3);
+    s4 = apr_thread_create(&t4, NULL, thread_mutex_function, NULL, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s4);
 
-    printf("%-60s", "    Waiting for threads to exit");
     apr_thread_join(&s1, t1);
     apr_thread_join(&s2, t2);
     apr_thread_join(&s3, t3);
     apr_thread_join(&s4, t4);
-    printf("OK\n");
 
-    if (x != MAX_ITER) {
-        fprintf(stderr, "pthread_mutex don't appear to work!"
-                        "  x = %d instead of %d\n",
-                x, MAX_ITER);
-    }
-    else {
-        printf("Test passed\n");
-    }
-    return APR_SUCCESS;
+    CuAssertIntEquals(tc, MAX_ITER, x);
 }
 
-apr_status_t test_thread_rwlock(void)
+static void test_thread_rwlock(CuTest *tc)
 {
     apr_thread_t *t1, *t2, *t3, *t4;
     apr_status_t s1, s2, s3, s4;
 
-    printf("thread_rwlock Tests\n");
-    printf("%-60s", "    Initializing the apr_thread_rwlock_t");
-    s1 = apr_thread_rwlock_create(&rwlock, pool);
-    if (s1 != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s1;
-    }
-    printf("OK\n");
+    s1 = apr_thread_rwlock_create(&rwlock, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s1);
+    CuAssertPtrNotNull(tc, rwlock);
 
     i = 0;
     x = 0;
 
-    printf("%-60s","    Starting all the threads"); 
-    s1 = apr_thread_create(&t1, NULL, thread_rwlock_func, NULL, pool);
-    s2 = apr_thread_create(&t2, NULL, thread_rwlock_func, NULL, pool);
-    s3 = apr_thread_create(&t3, NULL, thread_rwlock_func, NULL, pool);
-    s4 = apr_thread_create(&t4, NULL, thread_rwlock_func, NULL, pool);
-    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
-        s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s1;
-    }
-    printf("OK\n");
+    s1 = apr_thread_create(&t1, NULL, thread_rwlock_func, NULL, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s1);
+    s2 = apr_thread_create(&t2, NULL, thread_rwlock_func, NULL, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s2);
+    s3 = apr_thread_create(&t3, NULL, thread_rwlock_func, NULL, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s3);
+    s4 = apr_thread_create(&t4, NULL, thread_rwlock_func, NULL, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s4);
 
-    printf("%-60s", "    Waiting for threads to exit");
     apr_thread_join(&s1, t1);
     apr_thread_join(&s2, t2);
     apr_thread_join(&s3, t3);
     apr_thread_join(&s4, t4);
-    printf("OK\n");
 
-    if (x != MAX_ITER) {
-        fprintf(stderr, "thread_rwlock didn't work as expected. x = %d instead of %d\n",
-                x, MAX_ITER);
-    }
-    else {
-        printf("Test passed\n");
-    }
-    
-    return APR_SUCCESS;
+    CuAssertIntEquals(tc, MAX_ITER, x);
 }
 
-apr_status_t test_cond(void)
+static void test_cond(CuTest *tc)
 {
     apr_thread_t *p1, *p2, *p3, *p4, *c1;
     apr_status_t s0, s1, s2, s3, s4;
     int count1, count2, count3, count4;
     int sum;
 
-    printf("thread_cond Tests\n");
-    printf("%-60s", "    Initializing the first apr_thread_mutex_t");
-    s1 = apr_thread_mutex_create(&put.mutex, APR_THREAD_MUTEX_DEFAULT, pool);
-    if (s1 != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s1;
-    }
-    printf("OK\n");
+    s1 = apr_thread_mutex_create(&put.mutex, APR_THREAD_MUTEX_DEFAULT, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s1);
+    CuAssertPtrNotNull(tc, put.mutex);
 
-    printf("%-60s", "    Initializing the second apr_thread_mutex_t");
-    s1 = apr_thread_mutex_create(&nready.mutex, APR_THREAD_MUTEX_DEFAULT, pool);
-    if (s1 != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s1;
-    }
-    printf("OK\n");
+    s1 = apr_thread_mutex_create(&nready.mutex, APR_THREAD_MUTEX_DEFAULT, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s1);
+    CuAssertPtrNotNull(tc, nready.mutex);
 
-    printf("%-60s", "    Initializing the apr_thread_cond_t");
-    s1 = apr_thread_cond_create(&nready.cond, pool);
-    if (s1 != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s1;
-    }
-    printf("OK\n");
+    s1 = apr_thread_cond_create(&nready.cond, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s1);
+    CuAssertPtrNotNull(tc, nready.cond);
 
     count1 = count2 = count3 = count4 = 0;
     put.nput = put.nval = 0;
@@ -335,177 +270,89 @@ apr_status_t test_cond(void)
     i = 0;
     x = 0;
 
-    printf("%-60s","    Starting all the threads"); 
-    s0 = apr_thread_create(&p1, NULL, thread_cond_producer, &count1, pool);
-    s1 = apr_thread_create(&p2, NULL, thread_cond_producer, &count2, pool);
-    s2 = apr_thread_create(&p3, NULL, thread_cond_producer, &count3, pool);
-    s3 = apr_thread_create(&p4, NULL, thread_cond_producer, &count4, pool);
-    s4 = apr_thread_create(&c1, NULL, thread_cond_consumer, NULL, pool);
-    if (s0 != APR_SUCCESS || s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
-        s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s1;
-    }
-    printf("OK\n");
+    s0 = apr_thread_create(&p1, NULL, thread_cond_producer, &count1, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s0);
+    s1 = apr_thread_create(&p2, NULL, thread_cond_producer, &count2, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s1);
+    s2 = apr_thread_create(&p3, NULL, thread_cond_producer, &count3, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s2);
+    s3 = apr_thread_create(&p4, NULL, thread_cond_producer, &count4, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s3);
+    s4 = apr_thread_create(&c1, NULL, thread_cond_consumer, NULL, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s4);
 
-    printf("%-60s", "    Waiting for threads to exit");
     apr_thread_join(&s0, p1);
     apr_thread_join(&s1, p2);
     apr_thread_join(&s2, p3);
     apr_thread_join(&s3, p4);
     apr_thread_join(&s4, c1);
-    printf("OK\n");
 
     sum = count1 + count2 + count3 + count4;
     /*
     printf("count1 = %d count2 = %d count3 = %d count4 = %d\n",
             count1, count2, count3, count4);
     */
-    if (sum != MAX_COUNTER) {
-        fprintf(stderr, "thread_cond didn't work as expected. sum = %d, instead of %d\n", sum, MAX_COUNTER);
-    }
-    else {
-        printf("Test passed\n");
-    }
-    
-    return APR_SUCCESS;
+    CuAssertIntEquals(tc, MAX_COUNTER, sum);
 }
 
-apr_status_t test_timeoutcond(void)
+static void test_timeoutcond(CuTest *tc)
 {
     apr_status_t s;
     apr_interval_time_t timeout;
     apr_time_t begin, end;
     int i;
 
-    printf("thread_cond_timedwait Tests\n");
-    printf("%-60s", "    Initializing the first apr_thread_mutex_t");
-    s = apr_thread_mutex_create(&timeout_mutex, APR_THREAD_MUTEX_DEFAULT, pool);
-    if (s != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s;
-    }
-    printf("OK\n");
+    s = apr_thread_mutex_create(&timeout_mutex, APR_THREAD_MUTEX_DEFAULT, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s);
+    CuAssertPtrNotNull(tc, timeout_mutex);
 
-    printf("%-60s", "    Initializing the apr_thread_cond_t");
-    s = apr_thread_cond_create(&timeout_cond, pool);
-    if (s != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s;
-    }
-    printf("OK\n");
+    s = apr_thread_cond_create(&timeout_cond, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, s);
+    CuAssertPtrNotNull(tc, timeout_cond);
 
     timeout = apr_time_from_sec(5);
 
     for (i = 0; i < MAX_RETRY; i++) {
         apr_thread_mutex_lock(timeout_mutex);
-        printf("%-60s","    Waiting for condition for 5 seconds"); 
 
         begin = apr_time_now();
         s = apr_thread_cond_timedwait(timeout_cond, timeout_mutex, timeout);
         end = apr_time_now();
         apr_thread_mutex_unlock(timeout_mutex);
         
-        /* If we slept for more than 100ms over the timeout. */
-        if (end - begin - timeout > 100000) {
-            if (APR_STATUS_IS_TIMEUP(s)) {
-                printf("Failed (late TIMEUP)!\n");
-                printf("    The timer returned in %" APR_TIME_T_FMT " usec!\n",
-                    end - begin);
-                return s;
-            }
-            else if (s != APR_SUCCESS) {
-                printf("Failed!\n");
-                return s;
-            }
-        }
-        /* else, everything is ok */
-        else if (APR_STATUS_IS_TIMEUP(s)) {
-            printf("OK\n");
-            return APR_SUCCESS;
-        }
-        /* else, we were within the time limit, and something broke. */
-        else if (s != APR_SUCCESS) {
-            printf("Failed! (bad timer)\n");
-            return s;
-        }
-        /* else, spurious wakeup, just try again. */
-        else {
-            printf("Spurious wakeup...retrying\n");
+        if (s != APR_SUCCESS && !APR_STATUS_IS_TIMEUP(s)) {
             continue;
         }
+        CuAssertIntEquals(tc, 1, APR_STATUS_IS_TIMEUP(s));
+        CuAssert(tc, "Timer returned too late", end - begin - timeout < 100000);
+        break;
     }
-    printf("Too many spurious wakeups, unable to complete test.\n");
-
-    return APR_EGENERAL;
-}
-
-int main(int argc, const char * const *argv)
-{
-    apr_status_t rv;
-    char errmsg[200];
-    const char *lockname = "multi.lock";
-    apr_getopt_t *opt;
-    char optchar;
-    const char *optarg;
-
-    printf("APR Locks Test\n==============\n\n");
-        
-    apr_initialize();
-    atexit(apr_terminate);
-
-    if (apr_pool_create(&pool, NULL) != APR_SUCCESS)
-        exit(-1);
-
-    if ((rv = apr_getopt_init(&opt, pool, argc, argv)) != APR_SUCCESS) {
-        fprintf(stderr, "Could not set up to parse options: [%d] %s\n",
-                rv, apr_strerror(rv, errmsg, sizeof errmsg));
-        exit(-1);
-    }
-        
-    while ((rv = apr_getopt(opt, "f:", &optchar, &optarg)) == APR_SUCCESS) {
-        if (optchar == 'f') {
-            lockname = optarg;
-        }
-    }
-
-    if (rv != APR_SUCCESS && rv != APR_EOF) {
-        fprintf(stderr, "Could not parse options: [%d] %s\n",
-                rv, apr_strerror(rv, errmsg, sizeof errmsg));
-        exit(-1);
-    }
-
-    if ((rv = test_thread_mutex()) != APR_SUCCESS) {
-        fprintf(stderr,"thread_mutex test failed : [%d] %s\n",
-                rv, apr_strerror(rv, (char*)errmsg, 200));
-        exit(-5);
-    }
-
-    if ((rv = test_thread_rwlock()) != APR_SUCCESS) {
-        if (rv == APR_ENOTIMPL) {
-            fprintf(stderr, "read/write locks aren't implemented on this "
-                    "platform... skipping those tests...\n");
-        }
-        else {
-            fprintf(stderr,"thread_rwlock test failed : [%d] %s\n",
-                    rv, apr_strerror(rv, (char*)errmsg, 200));
-            exit(-6);
-        }
-    }
-
-    if ((rv = test_cond()) != APR_SUCCESS) {
-        fprintf(stderr,"thread_cond test failed : [%d] %s\n",
-                rv, apr_strerror(rv, (char*)errmsg, 200));
-        exit(-7);
-    }
-
-    if ((rv = test_timeoutcond()) != APR_SUCCESS) {
-        fprintf(stderr,"thread_cond_timedwait test failed : [%d] %s\n",
-                rv, apr_strerror(rv, (char*)errmsg, 200));
-        exit(-8);
-    }
-
-    return 0;
+    CuAssert(tc, "Too many retries", i < MAX_RETRY);
 }
 
 #endif /* !APR_HAS_THREADS */
+
+#if !APR_HAS_THREADS
+static void threads_not_impl(CuTest *tc)
+{
+    CuNotImpl(tc, "Threads not implemented on this platform");
+}
+#endif
+
+
+CuSuite *testlock(void)
+{
+    CuSuite *suite = CuSuiteNew("Thread Locks");
+
+#if !APR_HAS_THREADS
+    SUITE_ADD_TEST(suite, threads_not_impl);
+#else
+    SUITE_ADD_TEST(suite, test_thread_mutex);
+    SUITE_ADD_TEST(suite, test_thread_rwlock);
+    SUITE_ADD_TEST(suite, test_cond);
+    SUITE_ADD_TEST(suite, test_timeoutcond);
+#endif
+
+    return suite;
+}
+
