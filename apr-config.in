@@ -59,6 +59,8 @@ prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 bindir="@bindir@"
 libdir="@libdir@"
+datadir="@datadir@"
+installbuilddir="@installbuilddir@"
 includedir="@includedir@"
 
 CC="@CC@"
@@ -92,6 +94,7 @@ Known values for OPTION are:
   --apr-la-file     print the path to the .la file, if available
   --apr-so-ext      print the extensions of shared objects on this platform
   --apr-lib-target  print the libtool target information
+  --apr-libtool     print the path to APR's libtool
   --help            print this help
 
 When linking with libtool, an application should do something like:
@@ -197,6 +200,14 @@ while test $# -gt 0; do
     ;;
     --apr-lib-target)
     echo "$APR_LIB_TARGET"
+    exit 0
+    ;;
+    --apr-libtool)
+    if test "$location" = "installed"; then
+        echo "${SHELL} ${installbuilddir}/libtool"
+    else
+        echo "${SHELL} $thisdir/libtool"
+    fi
     exit 0
     ;;
     --help)
