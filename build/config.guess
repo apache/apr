@@ -301,12 +301,6 @@ EOF
 #########################
 # Apache changes
 #
-#   *:OS/390:*:*)
-#      echo i370-ibm-openedition
-#      exit 0 ;;
-    *:OS390:*:* | *:OS/390:*:*)
-       echo s390-ibm-os390
-       exit 0 ;; 
     *:OS400:*:* | *:OS/400:*:*) 
        echo as400-ibm-os400
        exit 0 ;;

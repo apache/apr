@@ -130,17 +130,9 @@ case $maybe_os in
 ########################
 # changes for Apache
 #
-  tpf | os390 | vmcms)
-    os=-$maybe_os
-    basic_machine=s390;
-    ;;
   os400)
     os=-$maybe_os
     basic_machine=as400;
-    ;;
-  mvs)
-    os=-mvs
-    basic_machine=i370;
     ;;
 #
 # end Apache changes
@@ -1103,7 +1095,7 @@ case $os in
 ########################
 # changes for Apache
 #
-	-os2_emx | -tpf* | -os390* | -vmcms* | -os400* )
+	-os2_emx | -os400* )
         	;;
 #
 # end Apache changes
@@ -1320,12 +1312,6 @@ case $basic_machine in
 #
 	*-ibm)
 		case $basic_machine in
-			s390*)
-				os=-os390;
-				;;
-			i370*)
-				os=-mvs;
-				;;
 			as400*)
 				os=-os400;
 				;;
