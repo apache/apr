@@ -1,4 +1,19 @@
 @echo off
+
+if not "%NovellNDK%" == "" goto CheckNDK
+set NovellNDK=\novell\ndk\libc
+@echo Could not find the NovellNDK environment variable
+@echo Setting NovellNDK = %NovellNDK%
+@echo ---------------------  
+
+:CheckNDK
+if exist %NovellNDK%\include\netware.h goto NDKOK
+@echo The path to the NDK "%NovellNDK%" is invalid.
+@echo Please set then NovellNDK environment variable to the location of the NDK
+@echo ---------------------  
+goto Done
+
+:NDKOK
 @echo # As part of the pre-build process, the utility GenURI.NLM
 @echo #  (Gen URI Delims) must be built, copied to a NetWare server 
 @echo #  and run using the following command:
@@ -23,5 +38,9 @@ copy ..\..\pcre\config.hw ..\..\pcre\config.h
 copy ..\..\pcre\pcre.hw ..\..\pcre\pcre.h
 
 @echo Generating the import list...
-awk -f make_nw_export.awk ..\include\*.h |sort > ..\aprlib.imp
-awk -f make_nw_export.awk ..\..\apr-util\include\*.h |sort >> ..\aprlib.imp
+set MWCIncludes=..\include;..\include\arch\netware;..\include\arch\unix;..\..\apr-util\include;+%NovellNDK%
+mwccnlm -P nw_export.inc -d NETWARE -EP
+awk -f make_nw_export.awk nw_export.i |sort >..\aprlib.imp
+
+:Done
+pause
