@@ -115,8 +115,7 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setprocattr_dir(struct procattr_t *attr, 
-                                 char *dir) 
+ap_status_t ap_setprocattr_dir(struct procattr_t *attr, const char *dir)
 {
     attr->currdir = ap_pstrdup(attr->cntxt, dir);
     if (attr->currdir) {
@@ -159,7 +158,7 @@ ap_status_t ap_fork(struct proc_t **proc, ap_context_t *cont)
     return APR_INPARENT;
 }
 
-ap_status_t ap_create_process(struct proc_t **new, char *progname,
+ap_status_t ap_create_process(struct proc_t **new, const char *progname,
                               char *const args[], char **env,
                               struct procattr_t *attr, ap_context_t *cont)
 {
