@@ -60,9 +60,11 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_sms.h"
 
 struct apr_lock_t {
     apr_pool_t *cntxt;
+    apr_sms_t *mem_sys;
     apr_locktype_e type;
     apr_lockscope_e scope;
     /* Inter proc */
@@ -86,6 +88,9 @@ apr_status_t destroy_inter_lock(struct apr_lock_t *lock);
 apr_status_t child_init_lock(struct apr_lock_t **lock, apr_pool_t *cont, 
                             const char *fname);
 
+apr_status_t apr_lock_sms_create(apr_lock_t **lock, apr_locktype_e type,
+                                 apr_lockscope_e scope, const_char *fname,
+                                 apr_sms_t *mem_sys);
 
 #endif  /* LOCKS_H */
 
