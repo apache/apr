@@ -71,6 +71,7 @@ struct file_t {
     int buffered;
     FILESTATUS3 status;
     int validstatus;
+    int eof_hit;
 };
 
 struct dir_t {
@@ -82,11 +83,11 @@ struct dir_t {
 };
 
 struct iovec_t {
-    struct iovec *iovec;
+    ap_context_t *cntxt;
+    struct iovec *theiov;
 };
 
 ap_status_t file_cleanup(void *);
-mode_t get_fileperms(ap_fileperms_t);
 long os2date2unix( FDATE os2date, FTIME os2time );
 int os2errno( ULONG oserror );
 

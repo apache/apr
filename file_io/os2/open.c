@@ -82,6 +82,7 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
     dafile->cntxt = cntxt;
     dafile->isopen = FALSE;
     dafile->validstatus = FALSE;
+    dafile->eof_hit = FALSE;
     
     if ((flag & APR_READ) && (flag & APR_WRITE)) {
         mflags |= OPEN_ACCESS_READWRITE;
@@ -111,9 +112,11 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
 
     if (flag & APR_TRUNCATE) {
         oflags |= OPEN_ACTION_REPLACE_IF_EXISTS;
+    } else {
+        oflags |= OPEN_ACTION_OPEN_IF_EXISTS;
     }
     
-    rv = DosOpen(fname, (HFILE *)&(dafile->filedes), &action, 0, 0, oflags, mflags, NULL);
+    rv = DosOpen(fname, &(dafile->filedes), &action, 0, 0, oflags, mflags, NULL);
     
     if (rv == 0 && (flag & APR_APPEND)) {
         ULONG newptr;
@@ -185,3 +188,12 @@ ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile, ap_conte
     return APR_SUCCESS;
 }    
 
+
+
+ap_status_t ap_eof(ap_file_t *fptr)
+{
+    if (!fptr->isopen || fptr->eof_hit == 1) {
+        return APR_EOF;
+    }
+    return APR_SUCCESS;
+}   
