@@ -322,6 +322,8 @@ ifndef DEST
 	@echo rem copying the docs directories > xc.bat
 	@echo xcopy docs $(INSTALLBASE)\docs\*.* /E /Y >> xc.bat
 	$(CMD) xc.bat
+	$(DEL) xc.bat
+	
 endif	
 	
 $(INSTDIRS) ::
