@@ -62,20 +62,22 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_portable.h"
+#include "apr_ring.h"
 
-struct waiter {
-    apr_pool_t *pool;
+struct waiter_t {
+    APR_RING_ENTRY(waiter_t) link;
     sem_id sem;
-    struct waiter *next;
 };
- 
+
 struct apr_thread_cond_t {
     apr_pool_t *pool;
     sem_id lock;
     apr_thread_mutex_t *condlock;
     thread_id owner;
-    struct waiter *list;
-    struct waiter *tail;
+    /* active list */
+    APR_RING_HEAD(active_list, waiter_t) alist;
+    /* free list */
+    APR_RING_HEAD(free_list,   waiter_t) flist;
 };
 
 #endif  /* THREAD_COND_H */
