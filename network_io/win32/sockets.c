@@ -118,8 +118,10 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
 }
 
 APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int ofamily,
-                                            int type, apr_pool_t *cont)
+                                            int type, apr_int32_t inherit,
+                                            apr_pool_t *cont)
 {
+    /* XXX: Todo: process the inherit value */
     int family = ofamily;
 
     if (family == AF_UNSPEC) {
@@ -365,8 +367,10 @@ APR_DECLARE(apr_status_t) apr_os_sock_get(apr_os_sock_t *thesock,
 
 APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
                                            apr_os_sock_info_t *os_sock_info,
+                                           apr_int32_t inherit,
                                            apr_pool_t *cont)
 {
+    /* XXX: Todo: process the inherit value */
     alloc_socket(apr_sock, cont);
     set_socket_vars(*apr_sock, os_sock_info->family, os_sock_info->type);
     (*apr_sock)->timeout = -1;

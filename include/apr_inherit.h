@@ -60,28 +60,32 @@ extern "C" {
 #endif /* __cplusplus */
 
 #define APR_NO_INHERIT 0
-#define APR_INHERIT    1
+#define APR_INHERIT    (2^24)    /* Outside of conflicts with other bits */
 
 #define APR_DECLARE_SET_INHERIT(name) \
     void apr_##name##_set_inherit(apr_##name##_t *name)
 
-#define APR_SET_INHERIT(name, pool, cleanup, field_exists)          \
+#define APR_IMPLEMENT_SET_INHERIT(name, pool, cleanup)              \
 void apr_##name##_set_inherit(apr_##name##_t *name)                 \
 {                                                                   \
-    name->inherit = 1;                                              \
-    apr_pool_cleanup_register(name->##pool, (void *)##name##, NULL, \
-                              cleanup);                             \
+    if (!name->inherit) {                                           \
+        name->inherit = 1;                                          \
+        apr_pool_cleanup_register(name->##pool, (void *)##name##,   \
+                                  NULL, cleanup);                   \
+    }                                                               \
 }
 
 #define APR_DECLARE_UNSET_INHERIT(name) \
     void apr_##name##_unset_inherit(apr_##name##_t *name)
 
-#define APR_UNSET_INHERIT(name, pool, cleanup, field_exists)          \
-void apr_##name##_unset_inherit(apr_##name##_t *name)                 \
+#define APR_IMPLEMENT_UNSET_INHERIT(name, pool, cleanup)            \
+void apr_##name##_unset_inherit(apr_##name##_t *name)               \
 {                                                                   \
-    name->inherit = 0;                                              \
-    apr_pool_cleanup_kill(name->##pool, (void *)##name##, NULL, \
-                              cleanup);                             \
+    if (name->inherit) {                                            \
+        name->inherit = 0;                                          \
+        apr_pool_cleanup_kill(name->##pool, (void *)##name##,       \
+                              NULL, cleanup);                       \
+    }                                                               \
 }
 
 #ifdef __cplusplus
