@@ -176,6 +176,9 @@ int main(int argc, const char * const argv[])
     fprintf(stdout, "Server socket: %s:%u -> %s:%u\n", local_ipaddr, 
             local_port, remote_ipaddr, remote_port);
 
+    APR_TEST_SUCCESS(rv, "Setting timeout on client socket",
+        apr_socket_timeout_set(sock2, apr_time_from_sec(3)));
+
     length = STRLEN;
     APR_TEST_BEGIN(rv, "Receiving data from socket",
         apr_socket_recv(sock2, datasend, &length))
