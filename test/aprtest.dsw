@@ -30,6 +30,21 @@ Package=<4>
 
 ###############################################################################
 
+Project: "aprtest"=".\aprtest.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name apr
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "libapr"="..\libapr.dsp" - Package Owner=<4>
 
 Package=<5>
@@ -57,7 +72,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "aprtest"=".\aprtest.dsp" - Package Owner=<4>
+Project: "testapp"=".\testapp.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -67,6 +82,27 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name apr
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name apr_app
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "testappnt"=".\testappnt.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name apr
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name apr_app
     End Project Dependency
 }}}
 
