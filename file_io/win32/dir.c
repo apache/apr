@@ -82,7 +82,7 @@ ap_status_t dir_cleanup(void *thedir)
 ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cont)
 {
     char * temp;
-    (*new) = ap_palloc(cont, sizeof(ap_dir_t));
+    (*new) = ap_pcalloc(cont, sizeof(ap_dir_t));
     (*new)->cntxt = cont;
     (*new)->entry = NULL;
     temp = canonical_filename((*new)->cntxt, dirname);
@@ -110,7 +110,7 @@ ap_status_t ap_closedir(ap_dir_t *thedir)
 ap_status_t ap_readdir(ap_dir_t *thedir)
 {
     if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-        thedir->entry = ap_palloc(thedir->cntxt, sizeof(WIN32_FIND_DATA));
+        thedir->entry = ap_pcalloc(thedir->cntxt, sizeof(WIN32_FIND_DATA));
         thedir->dirhand = FindFirstFile(thedir->dirname, thedir->entry);
         if (thedir->dirhand == INVALID_HANDLE_VALUE) {
             return GetLastError();
@@ -216,7 +216,7 @@ ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir, ap_pool_t *cont)
         return APR_ENOCONT;
     }
     if ((*dir) == NULL) {
-        (*dir) = (ap_dir_t *)ap_palloc(cont, sizeof(ap_dir_t));
+        (*dir) = (ap_dir_t *)ap_pcalloc(cont, sizeof(ap_dir_t));
         (*dir)->cntxt = cont;
     }
     (*dir)->dirhand = thedir;

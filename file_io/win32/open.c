@@ -82,7 +82,7 @@ ap_status_t ap_open(ap_file_t **dafile, const char *fname,
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
     ap_oslevel_e level;
 
-    (*dafile) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
+    (*dafile) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
 
     (*dafile)->cntxt = cont;
 
@@ -201,7 +201,7 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
         if (cont == NULL) {
             return APR_ENOCONT;
         }
-        (*file) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
+        (*file) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
         (*file)->cntxt = cont;
     }
     (*file)->filehand = *thefile;

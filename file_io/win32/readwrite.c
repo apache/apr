@@ -92,7 +92,7 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     FILETIME atime, mtime, ctime;
 	
     if (WriteFile(thefile->filehand, buf, *nbytes, &bwrote, NULL)) {
-        if (strcmp(thefile->fname, "PIPE")) {
+        if (!thefile->pipe) {
             FlushFileBuffers(thefile->filehand);
             thefile->size = GetFileSize(thefile->filehand, NULL);
             GetFileTime(thefile->filehand, &ctime, &atime, &mtime);
