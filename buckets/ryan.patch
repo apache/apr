@@ -1,18 +1,14 @@
-? src/build.log
-? src/build.err
-? src/.inslog2
-? src/include/util_filter.h
-? src/lib/apr/buckets/Makefile.in
-? src/main/build.log
-? src/main/build.err
-? src/main/util_filter.c
-Index: src/ap/Makefile.in
+? include/util_filter.h
+? lib/apr/buckets/Makefile.in
+? lib/apr/include/apr_buf.h
+? main/util_filter.c
+Index: ap/Makefile.in
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/ap/Makefile.in,v
 retrieving revision 1.4
 diff -u -d -b -w -u -r1.4 Makefile.in
---- src/ap/Makefile.in	2000/06/12 20:41:13	1.4
-+++ src/ap/Makefile.in	2000/07/20 16:17:56
+--- ap/Makefile.in	2000/06/12 20:41:13	1.4
++++ ap/Makefile.in	2000/07/20 21:16:23
 @@ -1,5 +1,5 @@
  
  LTLIBRARY_NAME    = libap.la
@@ -20,13 +16,13 @@ diff -u -d -b -w -u -r1.4 Makefile.in
 +LTLIBRARY_SOURCES = ap_cache.c ap_base64.c ap_sha1.c ap_hooks.c 
  
  include $(top_srcdir)/build/ltlib.mk
-Index: src/include/ap_iol.h
+Index: include/ap_iol.h
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/include/ap_iol.h,v
 retrieving revision 1.19
 diff -u -d -b -w -u -r1.19 ap_iol.h
---- src/include/ap_iol.h	2000/05/29 04:22:02	1.19
-+++ src/include/ap_iol.h	2000/07/20 16:17:56
+--- include/ap_iol.h	2000/05/29 04:22:02	1.19
++++ include/ap_iol.h	2000/07/20 21:16:23
 @@ -58,6 +58,7 @@
  #define AP_IOL_H
  
@@ -35,37 +31,29 @@ diff -u -d -b -w -u -r1.19 ap_iol.h
  #include "apr_errno.h" /* For ap_status_t and the APR_errnos */
  
  typedef struct ap_iol ap_iol;
-Index: src/include/http_protocol.h
+Index: include/http_protocol.h
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/include/http_protocol.h,v
 retrieving revision 1.19
 diff -u -d -b -w -u -r1.19 http_protocol.h
---- src/include/http_protocol.h	2000/07/11 03:48:17	1.19
-+++ src/include/http_protocol.h	2000/07/20 16:17:56
-@@ -89,8 +89,15 @@
+--- include/http_protocol.h	2000/07/11 03:48:17	1.19
++++ include/http_protocol.h	2000/07/20 21:16:23
+@@ -89,7 +89,7 @@
  API_EXPORT(void) ap_basic_http_header(request_rec *r);
  
  /* Send the Status-Line and header fields for HTTP response */
+-
 +API_EXPORT(void) ap_send_http_header_real(request_rec *l);
- 
--API_EXPORT(void) ap_send_http_header(request_rec *l);
-+/* this is the old function that used to send headers to the network.  We
-+ * don't want handlers using it anymore, becuase the filter that actually
-+ * writes to the network has to send the headers.  I am defining it to be
-+ * NULL, because everybody seems to want to not break existing modules.
-+ * The new function ap_send_http_header_real() actually sends the data.
-+ */
-+#define ap_send_http_header(l)   /* No-op*/ 
+ API_EXPORT(void) ap_send_http_header(request_rec *l);
  
  /* Send the response to special method requests */
- 
-Index: src/include/httpd.h
+Index: include/httpd.h
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/include/httpd.h,v
 retrieving revision 1.64
 diff -u -d -b -w -u -r1.64 httpd.h
---- src/include/httpd.h	2000/06/30 21:18:13	1.64
-+++ src/include/httpd.h	2000/07/20 16:17:56
+--- include/httpd.h	2000/06/30 21:18:13	1.64
++++ include/httpd.h	2000/07/20 21:16:23
 @@ -596,6 +596,11 @@
  				 * pointer back to the main request.
  				 */
@@ -78,13 +66,13 @@ diff -u -d -b -w -u -r1.64 httpd.h
      /* Info about the request itself... we begin with stuff that only
       * protocol.c should ever touch...
       */
-Index: src/lib/apr/configure.in
+Index: lib/apr/configure.in
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/lib/apr/configure.in,v
 retrieving revision 1.136
 diff -u -d -b -w -u -r1.136 configure.in
---- src/lib/apr/configure.in	2000/07/15 15:39:05	1.136
-+++ src/lib/apr/configure.in	2000/07/20 16:17:57
+--- lib/apr/configure.in	2000/07/15 15:39:05	1.136
++++ lib/apr/configure.in	2000/07/20 21:16:24
 @@ -682,8 +682,8 @@
  AC_SUBST(EXEEXT)
  
@@ -96,13 +84,13 @@ diff -u -d -b -w -u -r1.136 configure.in
  for dir in $MODULES
  do
      test -d $dir || $MKDIR -p $dir
-Index: src/main/Makefile.in
+Index: main/Makefile.in
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/main/Makefile.in,v
 retrieving revision 1.16
 diff -u -d -b -w -u -r1.16 Makefile.in
---- src/main/Makefile.in	2000/07/01 14:14:15	1.16
-+++ src/main/Makefile.in	2000/07/20 16:18:04
+--- main/Makefile.in	2000/07/01 14:14:15	1.16
++++ main/Makefile.in	2000/07/20 21:16:29
 @@ -8,7 +8,7 @@
  	http_protocol.c http_request.c http_vhost.c util.c util_date.c \
  	util_script.c util_uri.c util_md5.c util_cfgtree.c util_ebcdic.c \
@@ -112,13 +100,13 @@ diff -u -d -b -w -u -r1.16 Makefile.in
  
  include $(top_srcdir)/build/ltlib.mk
  
-Index: src/main/http_core.c
+Index: main/http_core.c
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/main/http_core.c,v
 retrieving revision 1.88
 diff -u -d -b -w -u -r1.88 http_core.c
---- src/main/http_core.c	2000/07/11 03:48:18	1.88
-+++ src/main/http_core.c	2000/07/20 16:18:04
+--- main/http_core.c	2000/07/11 03:48:18	1.88
++++ main/http_core.c	2000/07/20 21:16:29
 @@ -71,6 +71,8 @@
  #include "util_md5.h"
  #include "apr_fnmatch.h"
@@ -139,7 +127,7 @@ diff -u -d -b -w -u -r1.88 http_core.c
  /* Allow Apache to use ap_mmap */
  #ifdef USE_MMAP_FILES
  #include "apr_mmap.h"
-@@ -2872,6 +2878,73 @@
+@@ -2872,6 +2878,76 @@
      return OK;
  }
  
@@ -158,8 +146,11 @@ diff -u -d -b -w -u -r1.88 http_core.c
 +        dptr = dptr->next;
 +    }
 +     
-+    ap_brigade_printf(c, "%d\r\n", len);
++    ap_brigade_printf(c, "%x\r\n", len);
 +    ap_bucket_brigade_catenate(c, b);
++    dptr = ap_bucket_rwmem_create();
++    dptr->insert(dptr, "\r\n", 2, &len);
++    ap_bucket_brigade_append_buckets(c, dptr);
 +
 +    return ap_pass_brigade(r, f, c);
 +}
@@ -213,22 +204,22 @@ diff -u -d -b -w -u -r1.88 http_core.c
  static const handler_rec core_handlers[] = {
  { "*/*", default_handler },
  { "default-handler", default_handler },
-@@ -2894,6 +2967,14 @@
+@@ -2894,6 +2970,14 @@
  static unsigned short core_port(const request_rec *r)
      { return DEFAULT_HTTP_PORT; }
  
 +static void core_register_filter(request_rec *r)
 +{
-+#if 0
-+    ap_hook_filter(chunk_filter, r, NULL, NULL, AP_HOOK_TRANSPORT);
-+#endif
++    if (r->chunked) {
++        ap_hook_filter(chunk_filter, r, NULL, NULL, AP_HOOK_TRANSPORT);
++    }
 +    ap_hook_filter(core_filter, r, NULL, NULL, AP_HOOK_TRANSPORT_LAST);
 +}
 +
  static void register_hooks(void)
  {
      ap_hook_post_config(core_post_config,NULL,NULL,AP_HOOK_REALLY_FIRST);
-@@ -2906,6 +2987,8 @@
+@@ -2906,6 +2990,8 @@
      /* FIXME: I suspect we can eliminate the need for these - Ben */
      ap_hook_type_checker(do_nothing,NULL,NULL,AP_HOOK_REALLY_LAST);
      ap_hook_access_checker(do_nothing,NULL,NULL,AP_HOOK_REALLY_LAST);
@@ -237,13 +228,13 @@ diff -u -d -b -w -u -r1.88 http_core.c
  }
  
  API_VAR_EXPORT module core_module = {
-Index: src/main/http_protocol.c
+Index: main/http_protocol.c
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/main/http_protocol.c,v
 retrieving revision 1.96
 diff -u -d -b -w -u -r1.96 http_protocol.c
---- src/main/http_protocol.c	2000/07/13 16:26:42	1.96
-+++ src/main/http_protocol.c	2000/07/20 16:18:04
+--- main/http_protocol.c	2000/07/13 16:26:42	1.96
++++ main/http_protocol.c	2000/07/20 21:16:29
 @@ -64,6 +64,8 @@
   */
  
@@ -253,16 +244,19 @@ diff -u -d -b -w -u -r1.96 http_protocol.c
  #include "ap_config.h"
  #include "httpd.h"
  #include "http_config.h"
-@@ -1720,7 +1722,7 @@
+@@ -1812,7 +1814,11 @@
+         ap_rfc822_date(date, r->request_time);
+         ap_table_addn(r->headers_out, "Expires", date);
      }
- }
++}
  
--API_EXPORT(void) ap_send_http_header(request_rec *r)
 +API_EXPORT(void) ap_send_http_header_real(request_rec *r)
- {
-     int i;
-     const long int zero = 0L;
-@@ -2443,15 +2445,23 @@
++{
++    const long int zero = 0L;
+     /* Send the entire ap_table_t of header fields, terminated by an empty line. */
+ 
+     ap_table_do((int (*) (void *, const char *, const char *)) ap_send_header_field,
+@@ -2443,15 +2449,23 @@
                               size_t length)
  {
      size_t total_bytes_sent = 0;
@@ -290,7 +284,7 @@ diff -u -d -b -w -u -r1.96 http_protocol.c
      while (!r->connection->aborted && offset < length) {
          if (length - offset > MMAP_SEGMENT_SIZE) {
              n = MMAP_SEGMENT_SIZE;
-@@ -2467,76 +2477,132 @@
+@@ -2467,76 +2481,132 @@
          total_bytes_sent += w;
          offset += w;
      }
@@ -455,7 +449,7 @@ diff -u -d -b -w -u -r1.96 http_protocol.c
  API_EXPORT_NONSTD(int) ap_rprintf(request_rec *r, const char *fmt, ...)
  {
      va_list va;
-@@ -2546,46 +2612,58 @@
+@@ -2546,46 +2616,58 @@
          return EOF;
  
      va_start(va, fmt);
@@ -535,13 +529,13 @@ diff -u -d -b -w -u -r1.96 http_protocol.c
      return 0;
  }
  
-Index: src/main/http_request.c
+Index: main/http_request.c
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/main/http_request.c,v
 retrieving revision 1.35
 diff -u -d -b -w -u -r1.35 http_request.c
---- src/main/http_request.c	2000/06/24 17:33:57	1.35
-+++ src/main/http_request.c	2000/07/20 16:18:04
+--- main/http_request.c	2000/06/24 17:33:57	1.35
++++ main/http_request.c	2000/07/20 21:16:29
 @@ -1263,6 +1263,12 @@
          return;
      }
