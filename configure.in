@@ -974,11 +974,18 @@ case $ac_decision in
         ;;
 esac
 
+if test "$flockser$sysvser$fcntlser$procpthreadser" = "0000"; then
+  lockcreatenp="0"
+else
+  lockcreatenp="1"
+fi
+
 AC_SUBST(flockser)
 AC_SUBST(sysvser)
 AC_SUBST(fcntlser)
 AC_SUBST(procpthreadser)
 AC_SUBST(pthreadser)
+AC_SUBST(lockcreatenp)
 
 AC_MSG_CHECKING(if interprocess lock affects threads)
 if test "x$apr_process_lock_is_global" = "xyes"; then
