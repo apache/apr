@@ -373,7 +373,6 @@ case $host in
                     ASFLAGS="-xarch=v8plus -K PIC"
                     ASCPPFLAGS="-D_ASM -D__STDC__=0"
                     ASCPP="gcc -E"
-                    APR_ADDTO(CFLAGS, [-Wa,-xarch=v8plus])
                     ;;
                 esac
             else
@@ -386,7 +385,6 @@ case $host in
                     ASFLAGS="-K pic -P -D_ASM -D__STDC__=0 -xarch=v8plus"
                     ASCPPFLAGS=""
                     ASCPP="cat"
-                    APR_ADDTO(CFLAGS, [-Wa,-xarch=v8plus])
                     ;;
                 esac
             fi
