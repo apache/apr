@@ -147,7 +147,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *pollfdset, apr_int32_t *nsds,
         for (i=0; i<pollfdset->num_total; i++) {
             pollfdset->r_socket_list[i] = -1;
         }
-        return APR_TIMEUP;
+        return timeout < 0 ? APR_EINTR : APR_TIMEUP;
     }
 
     (*nsds) = rv;
