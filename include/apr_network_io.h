@@ -280,15 +280,6 @@ apr_status_t apr_accept(apr_socket_t **new_sock, apr_socket_t *sock,
 apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa);
 
 /**
- * Get name of a machine we are currently connected to.
- * @param name A buffer to store the hostname in.
- * @param which Which interface do we wnt the hostname for?
- * @param sock The socket to examine.
- */
-apr_status_t apr_get_hostname(char **name, apr_interface_e which,
-                              apr_socket_t *sock);
-
-/**
  * Create apr_sockaddr_t from hostname, address family, and port.
  * @param sa The new apr_sockaddr_t.
  * @param hostname The hostname or numeric address string to resolve/parse.

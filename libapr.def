@@ -62,7 +62,6 @@ EXPORTS
 	apr_listen
 	apr_accept
 	apr_connect
-	apr_get_hostname
 	apr_gethostname
 	apr_send
 	apr_recv
