@@ -64,6 +64,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/**
+ * @package APR MMAP library
+ */
+
 typedef struct ap_mmap_t            ap_mmap_t;
 /* As far as I can tell the only really sane way to store an MMAP is as a
  * void * and a length.  BeOS requires this area_id, but that's just a little
@@ -82,46 +86,28 @@ struct ap_mmap_t {
 
 /*   Function definitions */
 
-/* 
-
-=head1 ap_status_t ap_mmap_create(ap_mmap_t **new, ap_file_t *file, ap_off_t offset)
-
-B<Create a new mmap'ed file out of an existing APR file.>
-
-    arg 1) The newly created mmap'ed file.
-    arg 2) The file turn into an mmap.
-    arg 3) The offset into the file to start the data pointer at.
-    arg 4) The size of the file
-    arg 5) The pool to use when creating the mmap.
-
-=cut
+/** 
+ * Create a new mmap'ed file out of an existing APR file.
+ * @param newmmap The newly created mmap'ed file.
+ * @param file The file turn into an mmap.
+ * @param offset The offset into the file to start the data pointer at.
+ * @param size The size of the file
+ * @param cntxt The pool to use when creating the mmap.
  */
 ap_status_t ap_mmap_create(ap_mmap_t ** newmmap, ap_file_t *file, ap_off_t offset,
                  ap_size_t size, ap_pool_t *cntxt);
 
-/* 
-
-=head1 ap_status_t ap_mmap_delete(ap_mmap_t *mmap)
-
-B<Remove a mmap'ed.>
-
-    arg 1) The mmap'ed file.
-
-=cut
+/**
+ * Remove a mmap'ed.
+ * @param mmap The mmap'ed file.
  */
 ap_status_t ap_mmap_delete(ap_mmap_t *mmap);
 
-/* 
-
-=head1 ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_offset_t offset)
-
-B<Move the pointer into the mmap'ed file to the specified offset.>
-
-    arg 1) The pointer to the offset specified.
-    arg 2) The mmap'ed file.
-    arg 3) The offset to move to.
-
-=cut
+/** 
+ * Move the pointer into the mmap'ed file to the specified offset.
+ * @param addr The pointer to the offset specified.
+ * @param mmap The mmap'ed file.
+ * @param offset The offset to move to.
  */
 ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_off_t offset);
 
