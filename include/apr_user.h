@@ -70,14 +70,24 @@ extern "C" {
  */
 
 /***
- * Get the home directory for a specified userid.
- * @param dirname Pointer to new string containing directory name (on output)
+ * Get the user name for a specified userid
+ * @param dirname Pointer to new string containing user name (on output)
  * @param userid The userid
+ * @param p The pool from which to allocate the string
+ * @deffunc apr_status_t apr_get_username(char **username, apr_uid_t userid, apr_pool_t *p)
+ * @tip This function is available only if APR_HAS_USER is defined.
+ */
+APR_DECLARE(apr_status_t) apr_get_userid(char **username, apr_uid_t userid, apr_pool_t *p);
+
+/***
+ * Get the home directory for the named user
+ * @param dirname Pointer to new string containing directory name (on output)
+ * @param userid The named user
  * @param p The pool from which to allocate the string
  * @deffunc apr_status_t apr_get_home_directory(char **dirname, const char *userid, apr_pool_t *p)
  * @tip This function is available only if APR_HAS_USER is defined.
  */
-apr_status_t apr_get_home_directory(char **dirname, const char *userid, apr_pool_t *p);
+APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *userid, apr_pool_t *p);
 
 #ifdef __cplusplus
 }

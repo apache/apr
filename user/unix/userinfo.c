@@ -63,24 +63,37 @@
 #include <sys/types.h>
 #endif
 
-apr_status_t apr_get_home_directory(char **dirname, const char *userid, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *userid, apr_pool_t *p)
 {
     struct passwd *pw;
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETPWNAM_R)
     struct passwd pwd;
     char pwbuf[512];
-#endif
 
-#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETPWNAM_R)
-    if (!getpwnam_r(userid, &pwd, pwbuf, sizeof(pwbuf), &pw)) {
+    if (getpwnam_r(userid, &pwd, pwbuf, sizeof(pwbuf), &pw)) {
 #else
-    if ((pw = getpwnam(userid)) != NULL) {
+    if ((pw = getpwnam(userid)) == NULL) {
 #endif
-        *dirname = apr_pstrdup(p, pw->pw_dir);
-    }
-    else {
         return errno;
     }
+    *dirname = apr_pstrdup(p, pw->pw_dir);
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, apr_pool_t *p)
+{
+    struct passwd *pw;
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETPWNAM_R)
+    struct passwd pwd;
+    char pwbuf[512];
+
+    if (getpwuid_r(userid, &pwd, pwbuf, sizeof(pwbuf), &pw)) {
+#else
+    if ((pw = getpwuid(userid)) == NULL) {
+#endif
+        return errno;
+    }
+    *username = apr_pstrdup(p, pw->pw_name);
     return APR_SUCCESS;
 }
   
