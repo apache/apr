@@ -826,13 +826,11 @@ APR_DECLARE(apr_status_t) apr_pool_alloc_init(apr_pool_t *globalp)
     status = apr_lock_create(&alloc_mutex, APR_MUTEX, APR_INTRAPROCESS,
                    NULL, globalp);
     if (status != APR_SUCCESS) {
-        apr_lock_destroy(alloc_mutex); 
         return status;
     }
     status = apr_lock_create(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
                    NULL, globalp);
     if (status != APR_SUCCESS) {
-        apr_lock_destroy(spawn_mutex); 
         return status;
     }
 #endif
