@@ -317,3 +317,43 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
     return k;
 }
 
+APR_EXPORT(int) ap_brigade_printf(ap_bucket_brigade *b, const char *fmt, ...)
+{
+    va_list ap;
+    int res;
+
+    va_start(ap, fmt);
+    res = ap_brigade_vprintf(b, fmt, ap);
+    va_end(ap);
+    return res;
+}
+
+APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_list va)
+{
+    /* THIS IS A HACK.  This needs to be replaced with a function to printf
+     * directly into a bucket.  I'm being lazy right now.  RBB
+     */
+    char buf[4096];
+    ap_bucket *r;
+    int res, i;
+
+    res = ap_vsnprintf(buf, 4096, fmt, va);
+
+    r = ap_bucket_new(AP_BUCKET_rmem);
+    res = ap_rmem_write(r->data, buf, strlen(buf), &i);
+
+    /* This really requires an API.  Basically we are just adding
+     * a bucket to a bucket list.
+     */
+    if (b->tail->bucket == NULL) {
+        b->tail->bucket = r;
+    }
+    else {
+        b->tail->next = ap_bucket_list_create();
+        b->tail->next->prev = b->tail;
+        b->tail = b->tail->next;
+        b->tail->bucket = r;
+    }
+    return res;
+}
+
