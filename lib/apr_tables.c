@@ -284,9 +284,7 @@ API_EXPORT(char *) ap_array_pstrcat(struct context_t *p,
 static ap_table_entry_t *table_push(ap_table_t *t)
 {
     if (t->a.nelts == t->a.nalloc) {
-	fprintf(stderr,
-		"table_push: ap_table_t created by %p hit limit of %u\n",
-		t->creator, t->a.nalloc);
+        return NULL;
     }
     return (ap_table_entry_t *) ap_push_array(&t->a);
 }
