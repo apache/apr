@@ -220,7 +220,7 @@ extern apr_int32_t CpuCurrentProcessor; /* system variable */
 int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *pool)
 {
     apr_hash_t *statCache = (apr_hash_t *)getStatCache(CpuCurrentProcessor);
-    apr_pool_t *gPool = (apr_pool_t *)getGlobalPool();
+    apr_pool_t *gPool = (apr_pool_t *)getGlobalPool(CpuCurrentProcessor);
     apr_stat_entry_t *stat_entry;
     struct stat *info;
     apr_time_t now = apr_time_now();
@@ -233,10 +233,19 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
     /* If there isn't a global pool then just stat the file
        and return */
     if (!gPool) {
-        ret = stat(path, buf);
-        if (ret == 0)
-            *casedName = case_filename(pool, path);
-        return ret;
+        char poolname[50];
+
+        if (apr_pool_create(&gPool, NULL) != APR_SUCCESS) {
+            ret = stat(path, buf);
+            if (ret == 0)
+                *casedName = case_filename(pool, path);
+            return ret;
+        }
+
+        sprintf (poolname, "cstat_mem_pool_%d", CpuCurrentProcessor);
+        apr_pool_tag(gPool, poolname);
+
+        setGlobalPool(gPool, CpuCurrentProcessor);
     }
 
     /* If we have a statCache hash table then use it.
