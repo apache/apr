@@ -64,7 +64,7 @@
 #include "apr_thread_proc.h"
 
 #if !APR_HAS_THREADS
-static int main(void)
+int main(void)
 {
     printf("This test requires APR thread support.\n");
     return 0;
