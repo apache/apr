@@ -213,7 +213,7 @@ ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir)
 ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir, ap_pool_t *cont)
 {
     if (cont == NULL) {
-        return APR_ENOCONT;
+        return APR_ENOPOOL;
     }
     if ((*dir) == NULL) {
         (*dir) = (ap_dir_t *)ap_pcalloc(cont, sizeof(ap_dir_t));

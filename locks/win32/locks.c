@@ -190,7 +190,7 @@ ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *thelock,
                            ap_pool_t *cont)
 {
     if (cont == NULL) {
-        return APR_ENOCONT;
+        return APR_ENOPOOL;
     }
     if ((*lock) == NULL) {
         (*lock) = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));

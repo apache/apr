@@ -114,7 +114,7 @@ ap_status_t ap_set_userdata(void *data, char *key,
         ap_register_cleanup(cont, dptr->data, cleanup, cleanup);
         return APR_SUCCESS;
     }
-    return APR_ENOCONT;
+    return APR_ENOPOOL;
 }
 
 ap_status_t ap_get_userdata(void **data, char *key, ap_pool_t *cont)
@@ -136,7 +136,7 @@ ap_status_t ap_get_userdata(void **data, char *key, ap_pool_t *cont)
         }
         return APR_SUCCESS;
     }
-    return APR_ENOCONT;
+    return APR_ENOPOOL;
 }
 
 ap_status_t ap_initialize(void)

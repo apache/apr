@@ -89,7 +89,6 @@ const char *ap_strerror(ap_status_t err);
 #define APR_ENOPOOL        (APR_OS_START_ERROR + 2)
 #define APR_ENOFILE        (APR_OS_START_ERROR + 3)
 #define APR_EBADDATE       (APR_OS_START_ERROR + 4)
-#define APR_ENOCONT        (APR_OS_START_ERROR + 5)
 #define APR_ENOPROC        (APR_OS_START_ERROR + 6)
 #define APR_ENOTIME        (APR_OS_START_ERROR + 7)
 #define APR_ENODIR         (APR_OS_START_ERROR + 8)

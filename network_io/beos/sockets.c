@@ -222,7 +222,7 @@ ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock,
                            ap_pool_t *cont)
 {
     if (cont == NULL) {
-        return APR_ENOCONT;
+        return APR_ENOPOOL;
     }
     if ((*sock) == NULL) {
         (*sock) = (ap_socket_t *)ap_palloc(cont, sizeof(ap_socket_t));

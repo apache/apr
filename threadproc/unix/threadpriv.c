@@ -139,7 +139,7 @@ ap_status_t ap_put_os_threadkey(ap_threadkey_t **key,
                                 ap_os_threadkey_t *thekey, ap_pool_t *cont)
 {
     if (cont == NULL) {
-        return APR_ENOCONT;
+        return APR_ENOPOOL;
     }
     if ((*key) == NULL) {
         (*key) = (ap_threadkey_t *)ap_palloc(cont, sizeof(ap_threadkey_t));

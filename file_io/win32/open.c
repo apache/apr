@@ -199,7 +199,7 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
 {
     if ((*file) == NULL) {
         if (cont == NULL) {
-            return APR_ENOCONT;
+            return APR_ENOPOOL;
         }
         (*file) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
         (*file)->cntxt = cont;
