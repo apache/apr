@@ -243,7 +243,7 @@ int main(void)
     printf("OK\n");
 
     printf("\nTest 1: No descriptors signalled.......");
-    if ((apr_pollset_poll(pollset, 0, &num, &descriptors_out) != APR_SUCCESS) ||
+    if ((apr_pollset_poll(pollset, 0, &num, &descriptors_out) != APR_TIMEUP) ||
         (num != 0)) {
         printf("FAILED\n");
         exit(-1);
