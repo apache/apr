@@ -1,5 +1,7 @@
 Changes with APR 0.9.0
 
+  *) Add apr_array_pop().  [Justin Erenkrantz]
+
   *) Fixed the native SPARC v8plus version of apr_atomic_dec
      to match the semantics of the default C version [Brian Pane]
 
