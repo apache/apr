@@ -119,16 +119,18 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
             os_handle = LoadLibraryEx(path, NULL, 0);
         if (!os_handle)
             rv = apr_get_os_error();
+        else
+            rv = APR_SUCCESS;
         SetErrorMode(em);
     }
     *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
+    (*res_handle)->cont = ctx;
 
     if (rv) {
         return ((*res_handle)->load_error = rv);
     }
 
     (*res_handle)->handle = (void*)os_handle;
-    (*res_handle)->cont = ctx;
     (*res_handle)->load_error = APR_SUCCESS;
 
     apr_pool_cleanup_register(ctx, *res_handle, dso_cleanup, apr_pool_cleanup_null);
