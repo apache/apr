@@ -57,8 +57,6 @@
 static ap_status_t pipenonblock(ap_file_t *thepipe)
 {
 #if !BEOS /* this code won't work on BeOS */
-      int fd_flags;
-
       int fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
 
   #if defined(O_NONBLOCK)
