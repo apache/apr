@@ -309,7 +309,8 @@ APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
 }
 
 APR_INLINE
-APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
+APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
+                                     apr_memnode_t *node)
 {
     apr_memnode_t *next;
     apr_uint32_t index, max_index;
@@ -332,8 +333,9 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator, apr_memnode_t *
             /* Add the node to the appropiate 'size' bucket.  Adjust
              * the max_index when appropiate.
              */
-            if ((node->next = allocator->free[index]) == NULL && index > max_index) {
-                 max_index = index;
+            if ((node->next = allocator->free[index]) == NULL
+                && index > max_index) {
+                max_index = index;
             }
             allocator->free[index] = node;
         }
@@ -344,8 +346,7 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator, apr_memnode_t *
             node->next = allocator->free[0];
             allocator->free[0] = node;
         }
-    }
-    while ((node = next) != NULL);
+    } while ((node = next) != NULL);
 
     allocator->max_index = max_index;
 
@@ -708,7 +709,8 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     if (allocator == NULL)
         allocator = parent->allocator;
 
-    if ((node = apr_allocator_alloc(allocator, MIN_ALLOC - SIZEOF_MEMNODE_T)) == NULL) {
+    if ((node = apr_allocator_alloc(allocator,
+                                    MIN_ALLOC - SIZEOF_MEMNODE_T)) == NULL) {
         if (abort_fn)
             abort_fn(APR_ENOMEM);
 
@@ -1432,8 +1434,8 @@ static int pool_find(apr_pool_t *pool, void *data)
 
     while (node) {
         for (index = 0; index < node->index; index++) {
-             if (node->beginp[index] <= *pmem &&
-                 node->endp[index] > *pmem) {
+             if (node->beginp[index] <= *pmem
+                 && node->endp[index] > *pmem) {
                  *pmem = pool;
                  return 1;
              }
@@ -1584,9 +1586,10 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_set(const void *data, const char *ke
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_pool_userdata_setn(const void *data, const char *key,
-                                                 apr_status_t (*cleanup) (void *),
-                                                 apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_pool_userdata_setn(const void *data,
+                              const char *key,
+                              apr_status_t (*cleanup)(void *),
+                              apr_pool_t *pool)
 {
 #if APR_POOL_DEBUG
     apr_pool_check_integrity(pool);
@@ -1603,7 +1606,8 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_setn(const void *data, const char *k
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key, apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
+                                                apr_pool_t *pool)
 {
 #if APR_POOL_DEBUG
     apr_pool_check_integrity(pool);
@@ -1650,7 +1654,7 @@ APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
 }
 
 APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
-                    apr_status_t (*cleanup_fn)(void *))
+                      apr_status_t (*cleanup_fn)(void *))
 {
     cleanup_t *c, **lastp;
 
@@ -1675,8 +1679,8 @@ APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
 }
 
 APR_DECLARE(void) apr_pool_child_cleanup_set(apr_pool_t *p, const void *data,
-                                       apr_status_t (*plain_cleanup_fn) (void *),
-                                       apr_status_t (*child_cleanup_fn) (void *))
+                      apr_status_t (*plain_cleanup_fn)(void *),
+                      apr_status_t (*child_cleanup_fn)(void *))
 {
     cleanup_t *c;
 
@@ -1699,7 +1703,7 @@ APR_DECLARE(void) apr_pool_child_cleanup_set(apr_pool_t *p, const void *data,
 }
 
 APR_DECLARE(apr_status_t) apr_pool_cleanup_run(apr_pool_t *p, void *data,
-                                       apr_status_t (*cleanup_fn) (void *))
+                              apr_status_t (*cleanup_fn)(void *))
 {
     apr_pool_cleanup_kill(p, data, cleanup_fn);
     return (*cleanup_fn)(data);
@@ -1798,8 +1802,8 @@ static void free_proc_chain(struct process_chain *procs)
 #endif /* !defined(NEED_WAITPID) */
 
     for (pc = procs; pc; pc = pc->next) {
-        if ((pc->kill_how == APR_KILL_AFTER_TIMEOUT) ||
-            (pc->kill_how == APR_KILL_ONLY_ONCE)) {
+        if ((pc->kill_how == APR_KILL_AFTER_TIMEOUT)
+            || (pc->kill_how == APR_KILL_ONLY_ONCE)) {
             /*
              * Subprocess may be dead already.  Only need the timeout if not.
              * Note: apr_proc_kill on Windows is TerminateProcess(), which is
