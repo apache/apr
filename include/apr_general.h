@@ -54,7 +54,10 @@
 
 #ifndef APR_GENERAL_H
 #define APR_GENERAL_H
-
+/**
+ * @file apr_general.h
+ * @brief APR Misc routines
+ */
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
@@ -66,6 +69,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+/**
+ * @defgroup APR_Misc Misc routines
+ * @ingroup APR
+ * @{
+ */
 
 #ifndef FALSE
 #define FALSE 0
@@ -83,7 +92,8 @@ extern "C" {
 
 typedef int               apr_signum_t;
 
-/* Finding offsets of elements within structures.
+/**
+ * Finding offsets of elements within structures.
  * Taken from the X code... they've sweated portability of this stuff
  * so we don't have to.  Sigh...
  */
@@ -116,7 +126,8 @@ typedef int               apr_signum_t;
 #endif
 
 
-/* A couple of prototypes for functions in case some platform doesn't 
+/**
+ * A couple of prototypes for functions in case some platform doesn't 
  * have it
  */
 #if (!APR_HAVE_STRCASECMP) && (APR_HAVE_STRICMP) 
@@ -131,7 +142,7 @@ int strcasecmp(const char *a, const char *b);
 int strncasecmp(const char *a, const char *b, size_t n);
 #endif
 
-/*
+/**
  * String and memory functions
  */
 
@@ -144,24 +155,6 @@ void *memchr(const void *s, int c, size_t n);
 #endif
 
 /**
- * @package APR Random Functions
- */
-
-#if APR_HAS_RANDOM
-
-/* TODO: I'm not sure this is the best place to put this prototype...*/
-/**
- * Generate a string of random bytes.
- * @param buf Random bytes go here
- * @param length size of the buffer
- * @deffunc apr_status_t apr_generate_random_bytes(unsigned char * buf, int length)
- */
-APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf, 
-                                                    int length);
-
-#endif
-
-/**
  * Setup any APR internal data structures.  This MUST be the first function 
  * called for any APR program.
  * @deffunc apr_status_t apr_initialize(void)
@@ -171,26 +164,46 @@ APR_DECLARE(apr_status_t) apr_initialize(void);
 /**
  * Tear down any APR internal data structures which aren't torn down 
  * automatically.
- * @tip An APR program must call this function at termination once it 
- *      has stopped using APR services.  The APR developers suggest using
- *      atexit to ensure this is called.  When using APR from a language
- *      other than C that has problems with the calling convention, use
- *      apr_terminate2() instead.
- * @deffunc void apr_terminate(void)
+ * @remark An APR program must call this function at termination once it 
+ *         has stopped using APR services.  The APR developers suggest using
+ *         atexit to ensure this is called.  When using APR from a language
+ *         other than C that has problems with the calling convention, use
+ *         apr_terminate2() instead.
  */
 APR_DECLARE_NONSTD(void) apr_terminate(void);
 
 /**
  * Tear down any APR internal data structures which aren't torn down 
  * automatically, same as apr_terminate
- * @tip An APR program must call either the apr_terminate or apr_terminate2 
- *      function once it it has finished using APR services.  The APR 
- *      developers suggest using atexit(apr_terminate) to ensure this is done.
- *      apr_terminate2 exists to allow non-c language apps to tear down apr, 
- *      while apr_terminate is recommended from c language applications.
- * @deffunc void apr_terminate2(void)
+ * @remark An APR program must call either the apr_terminate or apr_terminate2 
+ *         function once it it has finished using APR services.  The APR 
+ *         developers suggest using atexit(apr_terminate) to ensure this is done.
+ *         apr_terminate2 exists to allow non-c language apps to tear down apr, 
+ *         while apr_terminate is recommended from c language applications.
  */
 APR_DECLARE(void) apr_terminate2(void);
+
+/** @} */
+
+/**
+ * @defgroup APR_Random Random Functions
+ * @ingroup APR
+ * @{
+ */
+
+#if APR_HAS_RANDOM
+
+/* TODO: I'm not sure this is the best place to put this prototype...*/
+/**
+ * Generate a string of random bytes.
+ * @param buf Random bytes go here
+ * @param length size of the buffer
+ */
+APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf, 
+                                                    int length);
+
+#endif
+/** @} */
 
 #ifdef __cplusplus
 }
