@@ -52,107 +52,89 @@
  * <http://www.apache.org/>.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-
+#include "test_apr.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_user.h"
 
-#if !APR_HAS_USER
-int main(void)
+#if APR_HAS_USER
+static void uid_current(CuTest *tc)
 {
-    fprintf(stderr,
-            "This program won't work on this platform because !APR_HAS_USER.\n");
-    return 0;
+    apr_uid_t uid = -1;
+    apr_gid_t gid = -1;
+    apr_status_t rv;
+
+    rv = apr_uid_current(&uid, &gid, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssert(tc, "uid not modified", uid != -1);
+    CuAssert(tc, "gid not modified", gid != -1);
+}
+
+static void username(CuTest *tc)
+{
+    apr_uid_t uid = -1;
+    apr_gid_t gid = -1;
+    apr_uid_t retreived_uid = -1;
+    apr_gid_t retreived_gid = -1;
+    apr_status_t rv;
+    char *uname = NULL;
+
+    rv = apr_uid_current(&uid, &gid, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssert(tc, "uid not modified", uid != -1);
+    CuAssert(tc, "gid not modified", gid != -1);
+
+    rv = apr_uid_name_get(&uname, uid, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, uname);
+
+    rv = apr_uid_get(&retreived_uid, &retreived_gid, uname, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    CuAssertIntEquals(tc, uid, retreived_uid);
+    CuAssertIntEquals(tc, gid, retreived_gid);
+}
+
+static void groupname(CuTest *tc)
+{
+    apr_uid_t uid = -1;
+    apr_gid_t gid = -1;
+    apr_gid_t retreived_gid = -1;
+    apr_status_t rv;
+    char *gname = NULL;
+
+    rv = apr_uid_current(&uid, &gid, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssert(tc, "uid not modified", uid != -1);
+    CuAssert(tc, "gid not modified", gid != -1);
+
+    rv = apr_gid_name_get(&gname, gid, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, gname);
+
+    rv = apr_gid_get(&retreived_gid, gname, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    CuAssertIntEquals(tc, gid, retreived_gid);
 }
 #else
-int main(int argc, char *argv[])
+static void threads_not_impl(CuTest *tc)
 {
-    apr_pool_t *p;
-    apr_status_t rv;
-    char msgbuf[80];
-    char *groupname;
-    char *username;
-    char *homedir;
-    apr_uid_t userid;
-    apr_gid_t groupid, newgroupid;
-
-    if (apr_initialize() != APR_SUCCESS) {
-        fprintf(stderr, "Something went wrong\n");
-        exit(-1);
-    }
-    atexit(apr_terminate);
-
-    if (apr_pool_create(&p, NULL) != APR_SUCCESS) {
-        fprintf(stderr, "Something went wrong\n");
-        exit(-1);
-    }
-
-    if (argc != 2) {
-        fprintf(stderr,
-                "optional: %s username\n",
-                argv[0]);
-        if ((rv = apr_uid_current(&userid, &groupid, p)) != APR_SUCCESS) {
-            fprintf(stderr, "apr_uid_current failed: %s\n",
-                    apr_strerror(rv, msgbuf, sizeof(msgbuf)));
-            exit(-1);
-        }
-        apr_uid_name_get(&username, userid, p);
-        if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_uid_name_get(,,) failed: %s\n",
-                    apr_strerror(rv, msgbuf, sizeof(msgbuf)));
-            exit(-1);
-        }
-    }
-    else {
-        username = argv[1];
-
-        rv = apr_uid_get(&userid, &groupid, username, p);
-        if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_uid_get(,,%s,) failed: %s\n",
-                    username,
-                    apr_strerror(rv, msgbuf, sizeof(msgbuf)));
-            exit(-1);
-        }
-    }
-
-    rv = apr_gid_name_get(&groupname, groupid, p);
-    if (rv != APR_SUCCESS)
-        groupname = "(none)";
-
-    rv = apr_gid_get(&newgroupid, groupname, p);
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_gid_get(,%s,) failed: %s\n",
-                groupname,
-                apr_strerror(rv, msgbuf, sizeof msgbuf));
-        exit(-1);
-    }
-
-    if (groupid != newgroupid) {
-        fprintf(stderr, "oops, we got a different result for the "
-                "group name/id mapping\n");
-        /* whoever hits this problem gets to figure out how to 
-         * portably display groupid and newgroupid :) 
-         */
-        fprintf(stderr, "group: %s\n",
-                groupname);
-    }
-
-    printf("user/group ids for %s: %d/%d\n",
-           username,
-           (int)userid, (int)groupid);
-
-    rv = apr_uid_homepath_get(&homedir, username, p);
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_uid_homepath_get(,%s,) failed: %s\n",
-                username,
-                apr_strerror(rv, msgbuf, sizeof(msgbuf)));
-        exit(-1);
-    }
-    printf("home directory for %s (member of %s) is:\n`%s'\n",
-           username, groupname, homedir);
-
-    return 0;
+    CuNotImpl(tc, "Users not implemented on this platform");
 }
-#endif /* APR_HAS_USER */
+#endif
+
+CuSuite *testuser(void)
+{
+    CuSuite *suite = CuSuiteNew("Users");
+
+#if !APR_HAS_USER
+    SUITE_ADD_TEST(suite, users_not_impl);
+#else
+    SUITE_ADD_TEST(suite, uid_current);
+    SUITE_ADD_TEST(suite, username);
+    SUITE_ADD_TEST(suite, groupname);
+#endif
+
+    return suite;
+}

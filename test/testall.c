@@ -101,6 +101,7 @@ static const struct testlist {
     {"testthread", testthread},
     {"testargs", testgetopt},
     {"testnames", testnames},
+    {"testuser", testuser},
     {"LastTest", NULL}
 };
 

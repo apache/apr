@@ -15,7 +15,6 @@ PROGRAMS = \
 	testlockperf@EXEEXT@ \
 	testshmproducer@EXEEXT@ \
 	testshmconsumer@EXEEXT@ \
-	testuser@EXEEXT@ \
 	testatomic@EXEEXT@ \
 	testmutexscope@EXEEXT@ \
 	testall@EXEEXT@
@@ -88,9 +87,6 @@ testshmproducer@EXEEXT@: testshmproducer.lo $(LOCAL_LIBS)
 testshmconsumer@EXEEXT@: testshmconsumer.lo $(LOCAL_LIBS)
 	$(LINK) testshmconsumer.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testuser@EXEEXT@: testuser.lo $(LOCAL_LIBS)
-	$(LINK) testuser.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
 testprocmutex@EXEEXT@: testprocmutex.lo $(LOCAL_LIBS)
 	$(LINK) testprocmutex.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
@@ -108,7 +104,7 @@ TESTS = testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
 	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
 	testpoll.lo testlock.lo testsockopt.lo testpipe.lo testthread.lo \
-	testhash.lo testargs.lo testnames.lo
+	testhash.lo testargs.lo testnames.lo testuser.lo
 
 testall: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
 	 CuTest.lo proc_child@EXEEXT@ $(LOCAL_LIBS)
