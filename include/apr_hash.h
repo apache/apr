@@ -92,6 +92,7 @@ B<Associate a value with a key in a hash table.>
     arg 1) The hash table
     arg 2) Pointer to the key
     arg 3) Length of the key
+           If the length is 0 it is assumed to be strlen(key)+1
     arg 4) Value to associate with the key
 
 If the value is NULL the hash entry is deleted.
@@ -109,6 +110,7 @@ B<Look up the value associated with a key in a hash table.>
     arg 1) The hash table
     arg 2) Pointer to the key
     arg 3) Length of the key
+           If the length is 0 it is assumed to be strlen(key)+1
 
 Returns NULL if the key is not present.
 
