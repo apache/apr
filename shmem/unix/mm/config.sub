@@ -850,7 +850,7 @@ case $basic_machine in
 		basic_machine=c4x-none
 		os=-coff
 		;;
-	BS2000-siemens)
+	bs2000-siemens)
 		;;
 	*)
 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
