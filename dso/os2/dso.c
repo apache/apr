@@ -58,6 +58,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#if APR_HAS_DSO
+
 ap_status_t ap_dso_init() 
 {
     return APR_SUCCESS;
@@ -141,3 +143,5 @@ char *ap_dso_error(ap_dso_handle_t *dso, char *buffer, ap_size_t buflen)
     ap_cpystrn(buffer, message, buflen);
     return buffer;
 }
+
+#endif

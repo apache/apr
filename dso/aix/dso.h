@@ -59,6 +59,9 @@
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_dso.h"
+#include "apr.h"
+
+#if APR_HAS_DSO
 
 void *dlopen(const char *path, int mode);
 void *dlsym(void *handle, const char *symbol);
@@ -69,5 +72,7 @@ struct ap_dso_handle_t {
     ap_pool_t  *cont;
     void          *handle;
 };
+
+#endif
 
 #endif
