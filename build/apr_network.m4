@@ -48,6 +48,60 @@ if test "$ac_cv_working_getaddrinfo" = "yes"; then
 fi
 ])
 
+dnl
+dnl check for working getnameinfo()
+dnl
+AC_DEFUN(APR_CHECK_WORKING_GETNAMEINFO,[
+  AC_CACHE_CHECK(for working getnameinfo, ac_cv_working_getnameinfo,[
+  AC_TRY_RUN( [
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
+void main(void) {
+    struct sockaddr_in sa;
+    char hbuf[256];
+    int error;
+
+    sa.sin_family = AF_INET;
+    sa.sin_port = 0;
+    sa.sin_addr.s_addr = inet_addr("127.0.0.1");
+#ifdef SIN6_LEN
+    sa.sin_len = sizeof(sa);
+#endif
+
+    error = getnameinfo((const struct sockaddr *)&sa, sizeof(sa),
+                        hbuf, 256, NULL, 0,
+                        NI_NAMEREQD);
+    if (error) {
+        exit(1);
+    } else {
+        exit(0);
+    }
+}
+],[
+  ac_cv_working_getnameinfo="yes"
+],[
+  ac_cv_working_getnameinfo="no"
+],[
+  ac_cv_working_getnameinfo="yes"
+])])
+if test "$ac_cv_working_getnameinfo"="yes"; then
+  AC_DEFINE(HAVE_GETNAMEINFO, 1, [Define if getnameinfo exists])
+fi
+])
 
 dnl
 dnl check for gethostbyname() which handles numeric address strings
