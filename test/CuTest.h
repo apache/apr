@@ -130,3 +130,4 @@ void CuSuiteListRun(CuSuiteList* testSuite);
 void CuSuiteListSummary(CuSuiteList* testSuite, CuString* summary);
 void CuSuiteListDetails(CuSuiteList* testSuite, CuString* details);
 #endif /* CU_TEST_H */
+
