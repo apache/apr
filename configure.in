@@ -110,8 +110,8 @@ case "$OS" in
        ;;
 esac
 
-if test $enable_apr_threads="system_threads"; then
-    ac_cv_enable_threads="yes"
+if test "$enable_apr_threads" = "system_threads"; then
+   ac_cv_enable_threads="yes"
 fi
 
 dnl #----------------------------- Checking for Shared Memory Support 
