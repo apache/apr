@@ -89,7 +89,6 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     DWORD bwrote;
-    FILETIME atime, mtime, ctime;
     
     if (WriteFile(thefile->filehand, buf, *nbytes, &bwrote, NULL)) {
         *nbytes = bwrote;
