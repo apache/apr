@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/12/27 17:04:16 $]
+Last modified at [$Date: 2002/01/04 08:50:12 $]
 
 Release:
 
@@ -43,6 +43,14 @@ RELEASE SHOWSTOPPERS:
       Unix: apr_thread_rwlock_*() for platforms w/o rwlocks in pthread
       Win32: apr_thread_rwlock_try*lock(), apr_thread_cond_timedwait(),
              apr_proc_mutex_*() (Is proc_mutex unnecessary on Win32?)
+
+    * Deal with largefiles properly on those platforms that support 
+      it.
+      Justin says: We may be able to get away with setting 
+                   FILE_OFFSET_BITS=64 on most current Unices.
+                   The other question remains if this should be turned
+                   on by default (i.e. pass O_LARGEFILE or whatnot on
+                   that platform).  I think so.
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
