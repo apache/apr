@@ -83,7 +83,10 @@ typedef struct apr_memnode_t apr_memnode_t;
 /** basic memory node structure
  * @note The next, ref and first_avail fields are available for use by the
  *       caller of apr_allocator_alloc(), the remaining fields are read-only.
- *       The next, ref and first_avail fields will be properly restored by
+ *       The next field has to be used with caution and sensibly set when the
+ *       memnode is passed back to apr_allocator_free().  See apr_allocator_free()
+ *       for details.  
+ *       The ref and first_avail fields will be properly restored by
  *       apr_allocator_free().
  */
 struct apr_memnode_t {
@@ -126,7 +129,9 @@ APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
                                                  apr_size_t size);
 
 /**
- * Free a block of mem, giving it back to the allocator
+ * Free a list of blocks of mem, giving them back to the allocator.
+ * The list is typically terminated by a memnode with its next field
+ * set to NULL.
  * @param allocator The allocator to give the mem back to
  * @param memnode The memory node to return
  */
