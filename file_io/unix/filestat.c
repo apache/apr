@@ -97,13 +97,19 @@ static apr_status_t fill_out_finfo(apr_finfo_t *finfo, struct stat info,
     apr_ansi_time_to_apr_time(&finfo->atime, info.st_atime);
     apr_ansi_time_to_apr_time(&finfo->mtime, info.st_mtime);
     apr_ansi_time_to_apr_time(&finfo->ctime, info.st_ctime);
-    if (wanted & APR_FINFO_CSIZE) {
-        finfo->csize = info.st_blocks * 512;
-        finfo->valid |= APR_FINFO_CSIZE;
-    }
+    /* ### needs to be revisited  
+     * if (wanted & APR_FINFO_CSIZE) {
+     *   finfo->csize = info.st_blocks * 512;
+     *   finfo->valid |= APR_FINFO_CSIZE;
+     * }
+     */
     if (finfo->filetype == APR_LNK) {
         finfo->valid |= APR_FINFO_LINK;
     }
+
+    if (wanted & ~finfo->valid)
+        return APR_INCOMPLETE;
+
     return APR_SUCCESS;
 }
 
