@@ -145,7 +145,7 @@ typedef struct apr_file_t         apr_file_t;
 
 /**
  * Open the specified file.
- * @param new_file The opened file descriptor.
+ * @param newf The opened file descriptor.
  * @param fname The full path to the file (using / on all systems)
  * @param flag Or'ed value of:
  * <PRE>
@@ -173,14 +173,14 @@ typedef struct apr_file_t         apr_file_t;
  *                               apr_sendfile does not check this flag.
  * </PRE>
  * @param perm Access permissions for file.
- * @param cont The pool to use.
+ * @param pool The pool to use.
  * @remark If perm is APR_OS_DEFAULT and the file is being created, appropriate 
  *      default permissions will be used.  *arg1 must point to a valid file_t, 
  *      or NULL (in which case it will be allocated)
  */
-APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new_file, const char *fname,
+APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **newf, const char *fname,
                                    apr_int32_t flag, apr_fileperms_t perm,
-                                   apr_pool_t *cont);
+                                   apr_pool_t *pool);
 
 /**
  * Close the specified file.
