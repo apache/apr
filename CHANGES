@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Fixup the --with-libtool option.  This allows the test directory
+     to compile again.  The test directory still doesn't work when
+     APR is configured without libtool.  [Ryan Bloom]
+
   *) If we don't have sigwait() in the system, see if sigsuspend() is
      available, and use that instead. [Wilfredo Sanchez]
 
