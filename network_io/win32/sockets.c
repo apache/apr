@@ -58,8 +58,6 @@
 #include "apr_lib.h"
 #include "apr_portable.h"
 #include <string.h>
-#include <winsock2.h>
-#include <windows.h>
 
 
 static ap_status_t socket_cleanup(void *sock)
