@@ -184,9 +184,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_unlock(apr_thread_rwlock_t *rwlock)
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock)
 {
-    apr_status_t stat = thread_rwlock_cleanup(rwlock);
-    apr_pool_cleanup_kill(rwlock->pool, rwlock, thread_rwlock_cleanup);
-    return stat;
+    return apr_pool_cleanup_run(rwlock->pool, rwlock, thread_rwlock_cleanup);
 }
 
 #else  /* HAVE_PTHREAD_RWLOCK_INIT */
