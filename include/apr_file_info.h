@@ -373,6 +373,11 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
  * @param flags the desired APR_FILEPATH_ rules to apply when merging
  * @param p the pool to allocate the new path string from
  * @deffunc apr_status_t apr_filepath_merge(char **newpath, const char *rootpath, const char *addpath, apr_int32_t flags, apr_pool_t *p)
+ * @remark if the flag APR_FILEPATH_TRUENAME is given, and the addpath 
+ * contains wildcard characters ('*', '?') on platforms that don't support 
+ * such characters within filenames, the paths will be merged, but the 
+ * result code will be APR_EPATHWILD, and all further segments will not
+ * reflect the true filenames including the wildcard and following segments.
  */                        
 APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath, 
                                              const char *rootpath,
