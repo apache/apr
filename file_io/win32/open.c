@@ -339,11 +339,19 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
          */
         attributes |= FILE_FLAG_OVERLAPPED;
     }
-
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
         apr_wchar_t wfname[APR_PATH_MAX];
+
+        if (flag & APR_OPEN_FOR_SENDFILE) {    
+            /* This feature is required to enable sendfile operations
+             * against the file on Win32. Also implies APR_XTHREAD.
+             */
+            flag |= APR_XTHREAD;
+            attributes |= FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_OVERLAPPED;
+        }
+
         if (rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
                                                / sizeof(apr_wchar_t), fname))
             return rv;
@@ -352,9 +360,16 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     }
 #endif
 #if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
+    ELSE_WIN_OS_IS_ANSI {
         handle = CreateFileA(fname, oflags, sharemode,
                              NULL, createflags, attributes, 0);
+        if (flag & APR_OPEN_FOR_SENDFILE) {    
+            /* This feature is not supported on this platform.
+             */
+            flag &= ~APR_OPEN_FOR_SENDFILE;
+        }
+
+    }
 #endif
     if (handle == INVALID_HANDLE_VALUE) {
         return apr_get_os_error();
