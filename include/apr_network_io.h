@@ -324,7 +324,7 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len);
 
 /*
 
-=head1 ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, ap_int32_t nvec, ap_int32_t *len)
+=head1 ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, ap_int32_t nvec, ap_ssize_t *len)
 
 B<Send multiple packets of data over a network.>
 
@@ -344,7 +344,7 @@ B<NOTE>:  This functions acts like a blocking write by default.  To change
 =cut
  */
 ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, 
-                     ap_int32_t nvec, ap_int32_t *len);
+                     ap_int32_t nvec, ap_ssize_t *len);
 
 #if APR_HAS_SENDFILE
 /*
