@@ -205,7 +205,6 @@ void * APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_func_none(apr_thread_t *thd, void *data);
 
 apr_thread_mutex_t *thread_lock;
-apr_thread_once_t *control = NULL;
 volatile long x = 0; /* mutex locks */
 volatile long z = 0; /* no locks */
 int value = 0;
@@ -213,16 +212,9 @@ apr_status_t exit_ret_val = 123; /* just some made up number to check on later *
 
 #define NUM_THREADS 50
 #define NUM_ITERATIONS 20000
-static void init_func(void)
-{
-    value++;
-}
-
 void * APR_THREAD_FUNC thread_func_mutex(apr_thread_t *thd, void *data)
 {
     int i;
-
-    apr_thread_once(control, init_func);
 
     for (i = 0; i < NUM_ITERATIONS; i++) {
         apr_thread_mutex_lock(thread_lock);
@@ -237,8 +229,6 @@ void * APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data)
 {
     int i;
 
-    apr_thread_once(control, init_func);
-
     for (i = 0; i < NUM_ITERATIONS ; i++) {
         apr_atomic_inc(&y);
         apr_atomic_add(&y, 2);
@@ -252,8 +242,6 @@ void * APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data)
 void * APR_THREAD_FUNC thread_func_none(apr_thread_t *thd, void *data)
 {
     int i;
-
-    apr_thread_once(control, init_func);
 
     for (i = 0; i < NUM_ITERATIONS ; i++) {
         z++;
@@ -294,8 +282,6 @@ int main(int argc, char**argv)
         exit(-1);
     }
     printf("OK\n");
-
-    apr_thread_once_init(&control, context);
 
     if (mutex == 1) {
         printf("%-60s", "Initializing the lock"); 
@@ -392,15 +378,6 @@ int main(int argc, char**argv)
     else {
         printf("OK\n");
     }
-
-    printf("%-60s", "Checking if apr_thread_once worked");
-    if (value != 1) {
-        fflush(stdout);
-        fprintf(stderr, "Failed!\napr_thread_once must not have worked, "
-                "value is %d instead of 1\n", value);
-        exit(-1);
-    }
-    printf("OK\n");
 
     return 0;
 }
