@@ -315,7 +315,7 @@ API_EXPORT(ap_table_t *) ap_copy_table(struct context_t *p, const ap_table_t *t)
      * have a life span at least as long as p
      */
     if (!ap_pool_is_ancestor(t->a.pool, p)) {
-	fprintf(stderr, "copy_table: t's ap_context_t is not an ancestor of p\n");
+	fprintf(stderr, "copy_table: t's pool is not an ancestor of p\n");
 	abort();
     }
 #endif
@@ -392,11 +392,11 @@ API_EXPORT(void) ap_table_setn(ap_table_t *t, const char *key,
 #ifdef POOL_DEBUG
     {
 	if (!ap_pool_is_ancestor(ap_find_pool(key), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor ap_context_t of t\n");
+	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
 	if (!ap_pool_is_ancestor(ap_find_pool(val), t->a.pool)) {
-	    fprintf(stderr, "table_set: val not in ancestor ap_context_t of t\n");
+	    fprintf(stderr, "table_set: val not in ancestor pool of t\n");
 	    abort();
 	}
     }
@@ -481,11 +481,11 @@ API_EXPORT(void) ap_table_mergen(ap_table_t *t, const char *key,
 #ifdef POOL_DEBUG
     {
 	if (!ap_pool_is_ancestor(ap_find_pool(key), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor ap_context_t of t\n");
+	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
 	if (!ap_pool_is_ancestor(ap_find_pool(val), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor ap_context_t of t\n");
+	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
     }
@@ -521,11 +521,11 @@ API_EXPORT(void) ap_table_addn(ap_table_t *t, const char *key,
 #ifdef POOL_DEBUG
     {
 	if (!ap_pool_is_ancestor(ap_find_pool(key), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor ap_context_t of t\n");
+	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
 	if (!ap_pool_is_ancestor(ap_find_pool(val), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor ap_context_t of t\n");
+	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
     }
@@ -549,12 +549,12 @@ API_EXPORT(ap_table_t *) ap_overlay_tables(struct context_t *p,
      */
     if (!ap_pool_is_ancestor(overlay->a.pool, p->pool)) {
 	fprintf(stderr,
-		"overlay_tables: overlay's ap_context_t is not an ancestor of p\n");
+		"overlay_tables: overlay's pool is not an ancestor of p\n");
 	abort();
     }
     if (!ap_pool_is_ancestor(base->a.pool, p->pool)) {
 	fprintf(stderr,
-		"overlay_tables: base's ap_context_t is not an ancestor of p\n");
+		"overlay_tables: base's pool is not an ancestor of p\n");
 	abort();
     }
 #endif
@@ -662,7 +662,7 @@ API_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
 	cat_keys = cat_keys_buf;
     }
     else {
-	/* XXX: could use scratch free space in a or b's ap_context_t instead...
+	/* XXX: could use scratch free space in a or b's pool instead...
 	 * which could save an allocation in b's pool.
 	 */
 	cat_keys = ap_palloc(b->a.cont, sizeof(overlap_key) * nkeys);
