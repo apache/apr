@@ -1,5 +1,8 @@
 Changes for APR 1.1.0
 
+  *) Added apr_procattr_user_set and apr_procattr_group_set
+     setting the user and group for new processes.  [Mladen Turk]
+
   *) Add APR Multicast functions; including support for
      Source-Specific Multicast from Colm MacCarthaigh.  [Paul Querna]
 
