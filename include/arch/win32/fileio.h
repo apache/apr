@@ -107,9 +107,9 @@ struct ap_file_t {
     int append; 
     int eof_hit;
     off_t size;
-    time_t atime;
-    time_t mtime;
-    time_t ctime;
+    ap_time_t atime;
+    ap_time_t mtime;
+    ap_time_t ctime;
 };
 
 struct ap_dir_t {

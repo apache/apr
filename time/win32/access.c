@@ -57,7 +57,7 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 
-ap_status_t ap_get_curtime(struct atime_t *time, ap_int64_t *rv)
+ap_status_t ap_get_curtime(struct atime_t *time, ap_time_t *rv)
 {
     if (time) {
         (*rv) = time->currtime;

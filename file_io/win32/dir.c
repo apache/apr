@@ -68,6 +68,7 @@
 #include "apr_file_io.h"
 #include "apr_lib.h"
 #include "apr_portable.h"
+#include "atime.h"
 
 ap_status_t dir_cleanup(void *thedir)
 {
@@ -167,7 +168,7 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dir_entry_mtime(time_t *time, ap_dir_t *thedir)
+ap_status_t ap_dir_entry_mtime(ap_time_t *time, ap_dir_t *thedir)
 {
     if (thedir == NULL || thedir->entry == NULL) {
         return APR_ENODIR;
