@@ -61,6 +61,7 @@
 #include "apr_lib.h"
 #include "apr_portable.h"
 #include <errno.h>
+#include <winbase.h>
 #include <string.h>
 #include <sys/stat.h>
 
@@ -202,7 +203,7 @@ ap_status_t ap_eof(ap_file_t *fptr)
 
 ap_status_t ap_open_stderr(struct file_t **thefile, ap_context_t *cont)
 {
-    (*thefile) = ap_pcalloc(cont, sizeof(ap_os_file_t *));
+    (*thefile) = ap_pcalloc(cont, sizeof(struct file_t *));
     if ((*thefile) == NULL) {
         return APR_ENOMEM;
     }
