@@ -125,7 +125,7 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
         oflags = O_RDONLY;
     }
     else if (flag & APR_WRITE) {
-        buf_oflags = ap_pstrdup(cont, "r");
+        buf_oflags = ap_pstrdup(cont, "w");
         oflags = O_WRONLY;
     }
     else {
