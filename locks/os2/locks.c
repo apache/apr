@@ -63,12 +63,6 @@
 #define CurrentTid (lock->tib->tib_ptib2->tib2_ultid)
 
 
-void setup_lock()
-{
-}
-
-
-
 static apr_status_t lock_cleanup(void *thelock)
 {
     apr_lock_t *lock = thelock;
