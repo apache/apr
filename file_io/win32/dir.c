@@ -86,122 +86,122 @@ ap_status_t dir_cleanup(void *thedir)
 
 ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *cont)
 {
-	char * temp;
-	(*new) = ap_palloc(cont, sizeof(struct dir_t));
+    char * temp;
+    (*new) = ap_palloc(cont, sizeof(struct dir_t));
     (*new)->cntxt = cont;
-	(*new)->entry = NULL;
+    (*new)->entry = NULL;
     temp = canonical_filename((*new)->cntxt, dirname);
     if (temp[strlen(temp)] == '/') {
     	(*new)->dirname = ap_pstrcat(cont, dirname, "*", NULL);
-	}
-	else {
+    }
+    else {
         (*new)->dirname = ap_pstrcat(cont, dirname, "/*", NULL);
-	}
-	(*new)->dirhand = INVALID_HANDLE_VALUE;
-	ap_register_cleanup((*new)->cntxt, (void *)(*new), dir_cleanup,
-	                    ap_null_cleanup);
+    }
+    (*new)->dirhand = INVALID_HANDLE_VALUE;
+    ap_register_cleanup((*new)->cntxt, (void *)(*new), dir_cleanup,
+                        ap_null_cleanup);
     return APR_SUCCESS;
 }
 
 ap_status_t ap_closedir(struct dir_t *thedir)
 {
-	if (FindClose(thedir->dirhand)) {
-		ap_kill_cleanup(thedir->cntxt, thedir, dir_cleanup);
-		return APR_SUCCESS;
-	}
-	return APR_EEXIST;
+    if (FindClose(thedir->dirhand)) {
+        ap_kill_cleanup(thedir->cntxt, thedir, dir_cleanup);
+        return APR_SUCCESS;
+    }
+    return APR_EEXIST;
 }
 
 ap_status_t ap_readdir(struct dir_t *thedir)
 {
-	if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-		thedir->entry = ap_palloc(thedir->cntxt, sizeof(WIN32_FIND_DATA));
-		thedir->dirhand = FindFirstFile(thedir->dirname, thedir->entry);
-		if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-			return APR_EEXIST;
-		}
-		return APR_SUCCESS;
-	}
-	if (FindNextFile(thedir->dirhand, thedir->entry)) {
-		return APR_SUCCESS;
-	}
-	return APR_EEXIST;
+    if (thedir->dirhand == INVALID_HANDLE_VALUE) {
+        thedir->entry = ap_palloc(thedir->cntxt, sizeof(WIN32_FIND_DATA));
+        thedir->dirhand = FindFirstFile(thedir->dirname, thedir->entry);
+        if (thedir->dirhand == INVALID_HANDLE_VALUE) {
+            return APR_EEXIST;
+        }
+        return APR_SUCCESS;
+    }
+    if (FindNextFile(thedir->dirhand, thedir->entry)) {
+        return APR_SUCCESS;
+    }
+    return APR_EEXIST;
 }
 
 ap_status_t ap_rewinddir(struct dir_t *thedir)
 {
-	ap_status_t stat;
-	ap_context_t *cont = thedir->cntxt;
+    ap_status_t stat;
+    ap_context_t *cont = thedir->cntxt;
     char *temp = ap_pstrdup(cont, thedir->dirname);
-	temp[strlen(temp) - 2] = '\0';   /*remove the \* at the end */
-	if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-		return APR_SUCCESS;
-	}
+    temp[strlen(temp) - 2] = '\0';   /*remove the \* at the end */
+    if (thedir->dirhand == INVALID_HANDLE_VALUE) {
+        return APR_SUCCESS;
+    }
     if ((stat = ap_closedir(thedir)) == APR_SUCCESS) {
-		if ((stat = ap_opendir(&thedir, temp, cont)) == APR_SUCCESS) {
-			ap_readdir(thedir);
-			return APR_SUCCESS;
-		}
-	}
-	return stat;	
+        if ((stat = ap_opendir(&thedir, temp, cont)) == APR_SUCCESS) {
+            ap_readdir(thedir);
+            return APR_SUCCESS;
+        }
+    }
+    return stat;	
 }
 
 ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *cont)
 {
     if (CreateDirectory(path, NULL)) {
-		return APR_SUCCESS;
-	}
+        return APR_SUCCESS;
+    }
     return APR_EEXIST;
 }
 
 ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
 {
-DWORD huh;
+    DWORD huh;
     char *temp = canonical_filename(cont, path);
-	if (RemoveDirectory(temp)) {
-		return APR_SUCCESS;
-	}
-	huh = GetLastError();
-	return APR_EEXIST;
+    if (RemoveDirectory(temp)) {
+        return APR_SUCCESS;
+    }
+    huh = GetLastError();
+    return APR_EEXIST;
 }
 
 ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct dir_t *thedir)
 {
     if (thedir == NULL || thedir->entry == NULL) {
-		return APR_ENODIR;
-	}
-	(*size) = (thedir->entry->nFileSizeHigh * MAXDWORD) + 
-		       thedir->entry->nFileSizeLow;
+        return APR_ENODIR;
+    }
+    (*size) = (thedir->entry->nFileSizeHigh * MAXDWORD) + 
+        thedir->entry->nFileSizeLow;
     return APR_SUCCESS;
 }
 
 ap_status_t ap_dir_entry_mtime(time_t *time, struct dir_t *thedir)
 {
     if (thedir == NULL || thedir->entry == NULL) {
-		return APR_ENODIR;
-	}
-
-	*time = WinTimeToUnixTime(&thedir->entry->ftLastWriteTime);
+        return APR_ENODIR;
+    }
+    
+    *time = WinTimeToUnixTime(&thedir->entry->ftLastWriteTime);
  
     return APR_SUCCESS;
 }
  
 ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct dir_t *thedir)
 {
-	switch(thedir->entry->dwFileAttributes) {
-	case FILE_ATTRIBUTE_DIRECTORY: {
-		(*type) = APR_DIR;
-		return APR_SUCCESS;
-								   }
-	case FILE_ATTRIBUTE_NORMAL: {
-		(*type) = APR_REG;
-		return APR_SUCCESS;
-								}
-	default: {
-		(*type) = APR_REG;     /* As valid as anything else.*/
-		return APR_SUCCESS;
-			 }
-	}
+    switch(thedir->entry->dwFileAttributes) {
+    case FILE_ATTRIBUTE_DIRECTORY: {
+        (*type) = APR_DIR;
+        return APR_SUCCESS;
+    }
+    case FILE_ATTRIBUTE_NORMAL: {
+        (*type) = APR_REG;
+        return APR_SUCCESS;
+    }
+    default: {
+        (*type) = APR_REG;     /* As valid as anything else.*/
+        return APR_SUCCESS;
+    }
+    }
 }
 
 ap_status_t ap_get_dir_filename(char **new, struct dir_t *thedir)
