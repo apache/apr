@@ -60,9 +60,24 @@
  * May 2001
  */
  
+/**
+ * @file apr_sms.h
+ * @brief APR SMS Memory routines
+ */
+/**
+ * @defgroup SMS SMS Shared Memory allocation system
+ * @ingroup APR
+ * @{
+ */
+
 #ifndef APR_SMS_H
 #define APR_SMS_H
 
+/**
+ * @typedef apr_sms_t
+ * @brief holds the internal details required to implement a SMS
+ * @see sms_private.h
+ */
 typedef struct apr_sms_t    apr_sms_t;
 
 #include "apr.h"
@@ -419,6 +434,6 @@ APR_DECLARE(void) apr_sms_dump_stats(apr_sms_t *sms);
 #ifdef __cplusplus
 }
 #endif
-
+/** @} */
 #endif /* !APR_SMS_H */
 
