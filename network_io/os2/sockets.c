@@ -128,6 +128,7 @@ apr_status_t apr_create_socket(apr_socket_t **new, int ofamily, int type,
 {
     int family = ofamily;
 
+    if (family == AF_UNSPEC) {
 #if APR_HAVE_IPV6
         family = AF_INET6;
 #else
@@ -191,7 +192,7 @@ apr_status_t apr_close_socket(apr_socket_t *thesocket)
 apr_status_t apr_bind(apr_socket_t *sock)
 {
     if (bind(sock->socketdes, 
-             (struct sockaddr *)sock->local_addr->sa, 
+             (struct sockaddr *)&sock->local_addr->sa,
              sock->local_addr->sa_len) == -1)
         return APR_OS2_STATUS(sock_errno());
     else
