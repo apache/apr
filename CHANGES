@@ -1,11 +1,18 @@
 Changes with APR 0.9.4
 
+  *) win32: fix apr_file_dup() and apr_file_dup2() to dup the
+     ungetchar member [Stas Bekman]
+
+  *) Preserve leading '../' segments as when merging to an empty and
+     unrooted path - fixes a bug observed in SVN with Win32/Netware/OS2.
+     [Mike Pilato <cmpilato@collab.net>, William Rowe]
+
   *) Work around a bug in Darwin when calling getnameinfo() on IPv4-mapped
      IPv6-addresses.  [Colm MacCárthaigh <colm@stdlib.net>, Jeff Trawick,
      Justin Erenkrantz]
 
   *) Add apr_temp_dir_get() for getting the most suitable temp directory
-     [CMike Pilato <cmpilato@collab.net>, Thom May]
+     [Mike Pilato <cmpilato@collab.net>, Thom May]
 
   *) Modify apr_sockaddr_info_get to call the resolver when we
      do not have a hostname.  Also, fix bugs in the getaddrinfo()
@@ -1399,7 +1406,7 @@ Changes with APR 0.9.0
      [Mike Pilato <cmpilato@collab.net>] 
   
   *) Add apr_open_stdout.  This mirrors apr_open_stderr, except it works
-     on stdout.  [cmpilato@collab.net]
+     on stdout.  [Mike Pilato <cmpilato@collab.net>]
 
   *) Fix bug in file_io/unix/dir.c.  There is no such thing as a dirent,
      it must be a struct dirent.  

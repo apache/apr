@@ -81,6 +81,7 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
     (*new_file)->fname = apr_pstrdup(p, old_file->fname);
     (*new_file)->append = old_file->append;
     (*new_file)->buffered = FALSE;
+    (*new_file)->ungetchar = old_file->ungetchar;
 
     apr_pool_cleanup_register((*new_file)->pool, (void *)(*new_file), file_cleanup,
                         apr_pool_cleanup_null);
@@ -150,6 +151,7 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
     new_file->fname = apr_pstrdup(new_file->pool, old_file->fname);
     new_file->append = old_file->append;
     new_file->buffered = FALSE;
+    new_file->ungetchar = old_file->ungetchar;
 
     return APR_SUCCESS;
 #endif /* !defined(_WIN32_WCE) */
