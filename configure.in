@@ -36,12 +36,10 @@ if test "$abs_builddir" != "$abs_srcdir"; then
   USE_VPATH=1
 fi
 
-dnl Libtool needs this symbol
-if test -n "$BUILD_BASE"; then
-  top_builddir="$BUILD_BASE"
-else
-  top_builddir="$abs_builddir"
-fi
+dnl Libtool might need this symbol -- it must point to the location of
+dnl the generated libtool script (not necessarily the "top" build dir).
+dnl
+top_builddir="$abs_builddir"
 AC_SUBST(top_builddir)
 
 dnl Directory containing apr build macros, helpers, and make rules
