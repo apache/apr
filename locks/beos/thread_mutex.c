@@ -96,6 +96,10 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
     new_m->LockCount = 0;
     new_m->Lock = stat;  
     new_m->pool  = pool;
+
+    /* Optimal default is APR_THREAD_MUTEX_UNNESTED, 
+     * no additional checks required for either flag.
+     */
     new_m->nested = flags & APR_THREAD_MUTEX_NESTED;
 
     apr_pool_cleanup_register(new_m->pool, (void *)new_m, _thread_mutex_cleanup,

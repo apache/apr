@@ -79,6 +79,7 @@ typedef struct apr_thread_mutex_t apr_thread_mutex_t;
 
 #define APR_THREAD_MUTEX_DEFAULT  0x0
 #define APR_THREAD_MUTEX_NESTED   0x1
+#define APR_THREAD_MUTEX_UNNESTED 0x2
 
 /* Delayed the include to avoid a circular reference */
 #include "apr_pools.h"
@@ -89,10 +90,14 @@ typedef struct apr_thread_mutex_t apr_thread_mutex_t;
  *        stored.
  * @param flags Or'ed value of:
  * <PRE>
- *           APR_THREAD_MUTEX_DEFAULT   normal lock behavior (non-recursive).
+ *           APR_THREAD_MUTEX_DEFAULT   platform-optimal lock behavior.
  *           APR_THREAD_MUTEX_NESTED    enable nested (recursive) locks.
+ *           APR_THREAD_MUTEX_UNNESTED  disable nested locks (non-recursive).
  * </PRE>
  * @param pool the pool from which to allocate the mutex.
+ * @tip Be cautious in using APR_THREAD_MUTEX_DEFAULT.  While this is the
+ * most optimial mutex based on a given platform's performance charateristics,
+ * it will behave as either a nested or an unnested lock.
  */
 APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
                                                   unsigned int flags,

@@ -69,6 +69,9 @@ static apr_status_t thread_mutex_cleanup(void *themutex)
 
 
 
+/* XXX: Need to respect APR_THREAD_MUTEX_[UN]NESTED flags argument
+ *      or return APR_ENOTIMPL!!!
+ */
 APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
                                                   unsigned int flags,
                                                   apr_pool_t *pool)

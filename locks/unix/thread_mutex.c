@@ -89,6 +89,10 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
     }
 
     new_mutex->pool = pool;
+
+    /* Optimal default is APR_THREAD_MUTEX_UNNESTED, 
+     * no additional checks required for either flag.
+     */
     new_mutex->nested = flags & APR_THREAD_MUTEX_NESTED;
 
     if ((rv = pthread_mutexattr_init(&mattr))) {
