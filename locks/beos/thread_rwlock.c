@@ -17,7 +17,7 @@
  * Stephen Beaulieu <hippo@be.com>
  */
  
-#include "beos/apr_arch_thread_rwlock.h"
+#include "apr_arch_thread_rwlock.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
 

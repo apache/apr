@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "beos/apr_arch_thread_mutex.h"
-#include "beos/apr_arch_thread_cond.h"
+#include "apr_arch_thread_mutex.h"
+#include "apr_arch_thread_cond.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
 
