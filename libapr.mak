@@ -54,8 +54,10 @@ CLEAN :
 	-@erase "$(INTDIR)\apr_pools.obj"
 	-@erase "$(INTDIR)\apr_signal.obj"
 	-@erase "$(INTDIR)\apr_sms.obj"
+	-@erase "$(INTDIR)\apr_sms_blocks.obj"
 	-@erase "$(INTDIR)\apr_sms_std.obj"
 	-@erase "$(INTDIR)\apr_sms_tracking.obj"
+	-@erase "$(INTDIR)\apr_sms_trivial.obj"
 	-@erase "$(INTDIR)\apr_snprintf.obj"
 	-@erase "$(INTDIR)\apr_strings.obj"
 	-@erase "$(INTDIR)\apr_strnatcmp.obj"
@@ -169,8 +171,10 @@ LINK32_OBJS= \
 	"$(INTDIR)\apr_pools.obj" \
 	"$(INTDIR)\apr_signal.obj" \
 	"$(INTDIR)\apr_sms.obj" \
+	"$(INTDIR)\apr_sms_blocks.obj" \
 	"$(INTDIR)\apr_sms_std.obj" \
 	"$(INTDIR)\apr_sms_tracking.obj" \
+	"$(INTDIR)\apr_sms_trivial.obj" \
 	"$(INTDIR)\apr_snprintf.obj" \
 	"$(INTDIR)\apr_strings.obj" \
 	"$(INTDIR)\apr_strnatcmp.obj" \
@@ -252,8 +256,10 @@ CLEAN :
 	-@erase "$(INTDIR)\apr_pools.obj"
 	-@erase "$(INTDIR)\apr_signal.obj"
 	-@erase "$(INTDIR)\apr_sms.obj"
+	-@erase "$(INTDIR)\apr_sms_blocks.obj"
 	-@erase "$(INTDIR)\apr_sms_std.obj"
 	-@erase "$(INTDIR)\apr_sms_tracking.obj"
+	-@erase "$(INTDIR)\apr_sms_trivial.obj"
 	-@erase "$(INTDIR)\apr_snprintf.obj"
 	-@erase "$(INTDIR)\apr_strings.obj"
 	-@erase "$(INTDIR)\apr_strnatcmp.obj"
@@ -368,8 +374,10 @@ LINK32_OBJS= \
 	"$(INTDIR)\apr_pools.obj" \
 	"$(INTDIR)\apr_signal.obj" \
 	"$(INTDIR)\apr_sms.obj" \
+	"$(INTDIR)\apr_sms_blocks.obj" \
 	"$(INTDIR)\apr_sms_std.obj" \
 	"$(INTDIR)\apr_sms_tracking.obj" \
+	"$(INTDIR)\apr_sms_trivial.obj" \
 	"$(INTDIR)\apr_snprintf.obj" \
 	"$(INTDIR)\apr_strings.obj" \
 	"$(INTDIR)\apr_strnatcmp.obj" \
@@ -455,6 +463,7 @@ DEP_CPP_TIME_=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
@@ -478,6 +487,7 @@ DEP_CPP_TIMES=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
@@ -663,6 +673,7 @@ DEP_CPP_ERROR=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
@@ -690,6 +701,7 @@ DEP_CPP_GETOP=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
@@ -729,6 +741,7 @@ DEP_CPP_MISC_=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
@@ -775,6 +788,7 @@ DEP_CPP_OTHER=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
@@ -820,6 +834,7 @@ DEP_CPP_START=\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
 	".\include\apr_signal.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
@@ -859,6 +874,7 @@ DEP_CPP_DIR_C=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
@@ -890,6 +906,7 @@ DEP_CPP_FILEA=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
@@ -921,6 +938,7 @@ DEP_CPP_FILED=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
@@ -952,6 +970,7 @@ DEP_CPP_FILEP=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
@@ -983,6 +1002,7 @@ DEP_CPP_FILES=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
@@ -1015,6 +1035,7 @@ DEP_CPP_FLOCK=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
@@ -1062,6 +1083,7 @@ DEP_CPP_OPEN_=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
@@ -1092,6 +1114,7 @@ DEP_CPP_PIPE_=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
@@ -1123,6 +1146,7 @@ DEP_CPP_READW=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
@@ -1155,6 +1179,7 @@ DEP_CPP_SEEK_=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
@@ -1183,6 +1208,7 @@ DEP_CPP_LOCKS=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
@@ -1275,6 +1301,7 @@ DEP_CPP_SENDR=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
@@ -1329,6 +1356,7 @@ DEP_CPP_SOCKE=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
@@ -1375,6 +1403,7 @@ DEP_CPP_PROC_=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
@@ -1406,6 +1435,7 @@ DEP_CPP_SIGNA=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
@@ -1437,6 +1467,7 @@ DEP_CPP_THREA=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
@@ -1463,6 +1494,7 @@ DEP_CPP_THREAD=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
@@ -1489,6 +1521,7 @@ DEP_CPP_DSO_C=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
@@ -1504,33 +1537,6 @@ DEP_CPP_DSO_C=\
 	
 
 "$(INTDIR)\dso.obj" : $(SOURCE) $(DEP_CPP_DSO_C) "$(INTDIR)" ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\lib\apr_pools.c
-DEP_CPP_APR_P=\
-	".\include\apr.h"\
-	".\include\apr_dso.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_info.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_hash.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_pools.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_strings.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_user.h"\
-	".\include\apr_want.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\apr_pools.obj" : $(SOURCE) $(DEP_CPP_APR_P) "$(INTDIR)"\
- ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -1596,6 +1602,7 @@ DEP_CPP_MMAP_=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
@@ -1623,6 +1630,7 @@ DEP_CPP_GROUP=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
@@ -1649,6 +1657,7 @@ DEP_CPP_USERI=\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
@@ -1667,14 +1676,54 @@ DEP_CPP_USERI=\
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
+SOURCE=.\memory\unix\apr_pools.c
+DEP_CPP_APR_P=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_hash.h"\
+	".\include\apr_lib.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	
+
+"$(INTDIR)\apr_pools.obj" : $(SOURCE) $(DEP_CPP_APR_P) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
 SOURCE=.\memory\unix\apr_sms.c
 DEP_CPP_APR_SM=\
 	".\include\apr.h"\
+	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_hash.h"\
 	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
 	".\include\apr_sms.h"\
+	".\include\apr_strings.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\memory\unix\sms_private.h"\
 	
 
 "$(INTDIR)\apr_sms.obj" : $(SOURCE) $(DEP_CPP_APR_SM) "$(INTDIR)"\
@@ -1682,34 +1731,108 @@ DEP_CPP_APR_SM=\
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=.\memory\unix\apr_sms_std.c
+SOURCE=.\memory\unix\apr_sms_blocks.c
 DEP_CPP_APR_SMS=\
 	".\include\apr.h"\
+	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
 	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
 	".\include\apr_sms.h"\
+	".\include\apr_sms_blocks.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
+	".\memory\unix\sms_private.h"\
 	
 
-"$(INTDIR)\apr_sms_std.obj" : $(SOURCE) $(DEP_CPP_APR_SMS) "$(INTDIR)"\
+"$(INTDIR)\apr_sms_blocks.obj" : $(SOURCE) $(DEP_CPP_APR_SMS) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\memory\unix\apr_sms_std.c
+DEP_CPP_APR_SMS_=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	".\memory\unix\sms_private.h"\
+	
+
+"$(INTDIR)\apr_sms_std.obj" : $(SOURCE) $(DEP_CPP_APR_SMS_) "$(INTDIR)"\
  ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
 SOURCE=.\memory\unix\apr_sms_tracking.c
-DEP_CPP_APR_SMS_=\
+DEP_CPP_APR_SMS_T=\
 	".\include\apr.h"\
+	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
 	".\include\apr_sms.h"\
 	".\include\apr_sms_tracking.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
+	".\memory\unix\sms_private.h"\
 	
 
-"$(INTDIR)\apr_sms_tracking.obj" : $(SOURCE) $(DEP_CPP_APR_SMS_) "$(INTDIR)"\
+"$(INTDIR)\apr_sms_tracking.obj" : $(SOURCE) $(DEP_CPP_APR_SMS_T) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\memory\unix\apr_sms_trivial.c
+DEP_CPP_APR_SMS_TR=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_sms_trivial.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	".\memory\unix\sms_private.h"\
+	
+
+"$(INTDIR)\apr_sms_trivial.obj" : $(SOURCE) $(DEP_CPP_APR_SMS_TR) "$(INTDIR)"\
  ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
