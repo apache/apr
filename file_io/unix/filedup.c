@@ -64,20 +64,11 @@ static apr_status_t _file_dup(apr_file_t **new_file,
 {
     int rv;
     
-    if ((*new_file) == NULL) {
-        if (which_dup == 1) {
-            (*new_file) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
-            if ((*new_file) == NULL) {
-                return APR_ENOMEM;
-            }
-            (*new_file)->pool = p;
-        } else {
+    if (which_dup == 2) {
+        if ((*new_file) == NULL) {
             /* We can't dup2 unless we have a valid new_file */
             return APR_EINVAL;
         }
-    }
-
-    if (which_dup == 2) {
 #ifdef NETWARE
         /* Apparently Netware doesn't support dup2... instead
          * close() then dup()
@@ -88,12 +79,21 @@ static apr_status_t _file_dup(apr_file_t **new_file,
         rv = dup2(old_file->filedes, (*new_file)->filedes);
 #endif
     } else {
-        rv = ((*new_file)->filedes = dup(old_file->filedes)); 
+        rv = dup(old_file->filedes);
     }
 
     if (rv == -1)
         return errno;
     
+    if (which_dup == 1) {
+        (*new_file) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
+        if ((*new_file) == NULL) {
+            return APR_ENOMEM;
+        }
+        (*new_file)->pool = p;
+        (*new_file)->filedes = rv;
+    }
+
     (*new_file)->fname = apr_pstrdup(p, old_file->fname);
     (*new_file)->buffered = old_file->buffered;
 
