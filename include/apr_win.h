@@ -120,7 +120,8 @@ typedef  int         ap_size_t;
 typedef  int         ap_ssize_t;
 typedef  _off_t      ap_off_t;
 typedef  int         pid_t;
-
+typedef  int         uid_t;
+typedef  int         gid_t;
 
 /* Definitions that APR programs need to work properly. */
 #define APR_SSIZE_T_FMT          "d"
@@ -128,6 +129,7 @@ typedef  int         pid_t;
 #define API_EXPORT(type)         type
 #define API_EXPORT_NONSTD(type)  type
 #define API_VAR_IMPORT           extern _declspec(dllimport)
+#define API_VAR_EXPORT
 
 /* struct iovec is needed to emulate Unix writev */
 struct iovec {
