@@ -96,7 +96,7 @@ SOURCE=.\time\win32\access.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\time\win32\atime.h
+SOURCE=.\include\arch\win32\atime.h
 # End Source File
 # Begin Source File
 
@@ -180,7 +180,7 @@ SOURCE=.\misc\win32\misc.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\misc\unix\misc.h
+SOURCE=.\include\arch\unix\misc.h
 # End Source File
 # Begin Source File
 
@@ -221,7 +221,7 @@ SOURCE=.\file_io\win32\filedup.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\file_io\win32\fileio.h
+SOURCE=.\include\arch\win32\fileio.h
 # End Source File
 # Begin Source File
 
@@ -257,7 +257,7 @@ SOURCE=.\locks\win32\locks.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\locks\win32\locks.h
+SOURCE=.\include\arch\win32\locks.h
 # End Source File
 # End Group
 # Begin Group "network_io"
@@ -265,7 +265,7 @@ SOURCE=.\locks\win32\locks.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\network_io\win32\networkio.h
+SOURCE=.\include\arch\win32\networkio.h
 # End Source File
 # Begin Source File
 
@@ -314,7 +314,7 @@ SOURCE=.\threadproc\win32\threadpriv.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\threadproc\win32\threadproc.h
+SOURCE=.\include\arch\win32\threadproc.h
 # End Source File
 # End Group
 # Begin Group "dso"
@@ -326,7 +326,7 @@ SOURCE=.\dso\win32\dso.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\dso\win32\dso.h
+SOURCE=.\include\arch\win32\dso.h
 # End Source File
 # End Group
 # Begin Group "lib"
@@ -346,7 +346,7 @@ SOURCE=.\lib\apr_signal.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\i18n\unix\i18n.h
+SOURCE=.\include\arch\unix\i18n.h
 # End Source File
 # Begin Source File
 
