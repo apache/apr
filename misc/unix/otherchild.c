@@ -194,8 +194,8 @@ APR_DECLARE(void) apr_proc_other_child_check(void)
         if (ocr->proc == NULL)
             continue;
 
-        waitret = waitpid(ocr->proc, &status, WNOHANG);
-        if (waitret == ocr->proc) {
+        waitret = waitpid(ocr->proc->pid, &status, WNOHANG);
+        if (waitret == ocr->proc->pid) {
             ocr->proc = NULL;
             (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
         }
