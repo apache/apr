@@ -59,7 +59,7 @@
 #include "errno.h"
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef BEOS
+#if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
