@@ -79,7 +79,7 @@ mbox *boxes;
 
 static void msgput(int boxnum, char *msg)
 {
-    fprintf(stdout, "Sending message to box %d\n", boxnum);
+    fprintf(stdout, "Producer: Sending message to box %d\n", boxnum);
     apr_cpystrn(boxes[boxnum].msg, msg, strlen(msg));
     boxes[boxnum].msgavail = 1;
 }
@@ -103,12 +103,15 @@ int main(void)
     }
     printf("OK\n");
 
+    printf("Producer attaching to name-based shared memory....");
     rv = apr_shm_attach(&shm, SHARED_FILENAME, pool);
     if (rv != APR_SUCCESS) {
-        printf("Unable to attach to name-based shared memory segment: "
-               "[%d] %s \n", rv, apr_strerror(rv, errmsg, sizeof(errmsg)));
+        printf("Producer unable to attach to name-based shared memory "
+               "segment: [%d] %s \n", rv,
+               apr_strerror(rv, errmsg, sizeof(errmsg)));
         exit(-2);
     }
+    printf("OK\n");
 
     boxes = apr_shm_baseaddr_get(shm);
 
@@ -118,12 +121,15 @@ int main(void)
         apr_sleep(1*APR_USEC_PER_SEC);
     }
 
+    printf("Producer detaching from name-based shared memory....");
     rv = apr_shm_detach(shm);
     if (rv != APR_SUCCESS) {
-        printf("Unable to detach from name-based shared memory segment: "
-               "[%d] %s \n", rv, apr_strerror(rv, errmsg, sizeof(errmsg)));
+        printf("Producer unable to detach from name-based shared memory "
+               "segment: [%d] %s \n", rv,
+               apr_strerror(rv, errmsg, sizeof(errmsg)));
         exit(-3);
     }
+    printf("OK\n");
 
     return 0;
 }

@@ -84,14 +84,14 @@ static void msgwait(int sleep_sec, int first_box, int last_box)
     while (apr_time_now() - start < sleep_sec * APR_USEC_PER_SEC) {
         for (i = first_box; i < last_box; i++) {
             if (boxes[i].msgavail) {
-                fprintf(stdout, "received a message in box %d, message was: %s\n", 
+                fprintf(stdout, "Consumer: received a message in box %d, message was: %s\n", 
                         i, boxes[i].msg); 
                 boxes[i].msgavail = 0; /* reset back to 0 */
             }
         }
         apr_sleep(1*APR_USEC_PER_SEC);
     }
-    fprintf(stdout, "done waiting on mailboxes...\n");
+    fprintf(stdout, "Consumer: done waiting on mailboxes...\n");
 }
 
 int main(void)
@@ -112,24 +112,30 @@ int main(void)
     }
     printf("OK\n");
 
+    printf("Consumer attaching to name-based shared memory....");
     rv = apr_shm_attach(&shm, SHARED_FILENAME, pool);
     if (rv != APR_SUCCESS) {
-        printf("Unable to attach to name-based shared memory segment: "
-               "[%d] %s \n", rv, apr_strerror(rv, errmsg, sizeof(errmsg)));
+        printf("Consumer unable to attach to name-based shared memory "
+               "segment: [%d] %s \n", rv,
+               apr_strerror(rv, errmsg, sizeof(errmsg)));
         exit(-2);
     }
+    printf("OK\n");
 
     boxes = apr_shm_baseaddr_get(shm);
 
     /* consume messages on all of the boxes */
     msgwait(30, 0, N_BOXES); /* wait for 30 seconds for messages */
 
+    printf("Consumer detaching from name-based shared memory....");
     rv = apr_shm_detach(shm);
     if (rv != APR_SUCCESS) {
-        printf("Unable to detach from name-based shared memory segment: "
-               "[%d] %s \n", rv, apr_strerror(rv, errmsg, sizeof(errmsg)));
+        printf("Consumer unable to detach from name-based shared memory "
+               "segment: [%d] %s \n", rv,
+               apr_strerror(rv, errmsg, sizeof(errmsg)));
         exit(-3);
     }
+    printf("OK\n");
 
     return 0;
 }

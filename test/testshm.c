@@ -170,6 +170,14 @@ static apr_status_t test_anon(apr_pool_t *parpool)
         return errno;
     }
 
+    printf("Destroying shared memory segment...");
+    rv = apr_shm_destroy(shm);
+    if (rv != APR_SUCCESS) {
+        printf("FAILED\n");
+        return rv;
+    }
+    printf("OK\n");
+
     apr_pool_destroy(pool);
 
     return APR_SUCCESS;
@@ -261,6 +269,14 @@ static apr_status_t test_named(apr_pool_t *parpool)
         printf("Consumer was unsuccessful.\n");
         return APR_EGENERAL;
     }
+
+    printf("Destroying shared memory segment...");
+    rv = apr_shm_destroy(shm);
+    if (rv != APR_SUCCESS) {
+        printf("FAILED\n");
+        return rv;
+    }
+    printf("OK\n");
 
     apr_pool_destroy(pool);
 
