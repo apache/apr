@@ -343,5 +343,59 @@ else
 fi
 ])
 
+AC_DEFUN(APR_CHECK_SOCKADDR_IN6,[
+AC_CACHE_CHECK(for sockaddr_in6, ac_cv_define_sockaddr_in6,[
+AC_TRY_COMPILE([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+],[
+struct sockaddr_in6 sa;
+],[
+    ac_cv_define_sockaddr_in6=yes
+],[
+    ac_cv_define_sockaddr_in6=no
+])
+])
+
+if test "$ac_cv_define_sockaddr_in6" = "yes"; then
+  have_sockaddr_in6=1
+else
+  have_sockaddr_in6=0
+fi
+])
+
+#
+# Check to see if this platform includes sa_len in it's
+# struct sockaddr.  If it does it changes the length of sa_family
+# which could cause us problems
+#
+AC_DEFUN(APR_CHECK_SOCKADDR_SA_LEN,[
+AC_CACHE_CHECK(for sockaddr sa_len, ac_cv_define_sockaddr_sa_len,[
+AC_TRY_COMPILE([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+],[
+struct sockaddr_in sai;
+int i = sai.sin_len;
+],[
+  ac_cv_define_sockaddr_sa_len=yes
+],[
+  ac_cv_define_sockaddr_sa_len=no
+])
+])
+
+if test "$ac_cv_define_sockaddr_sa_len" = "yes"; then
+  AC_DEFINE(HAVE_SOCKADDR_SA_LEN, 1 ,[Define if we have length field in sockaddr_in])
+fi
+])
+
 sinclude(apr_common.m4)
 sinclude(hints.m4)
