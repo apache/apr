@@ -102,7 +102,8 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name)
     subsuite->next = NULL;
     p = strchr(suite_name, '.');
     if (p)
-        subsuite->name = strndup(suite_name, p - suite_name);
+        subsuite->name = memcpy(calloc(p - suite_name + 1, 1),
+                                suite_name, p - suite_name);
     else
         subsuite->name = suite_name;
     subsuite->not_run = 0;
