@@ -409,6 +409,22 @@ SOURCE=.\user\win32\groupinfo.c
 SOURCE=.\user\win32\userinfo.c
 # End Source File
 # End Group
+# Begin Group "memory"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\memory\unix\apr_sms.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\memory\unix\apr_sms_std.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\memory\unix\apr_sms_tracking.c
+# End Source File
+# End Group
 # End Group
 # Begin Group "Generated Header Files"
 
