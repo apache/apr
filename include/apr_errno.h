@@ -173,7 +173,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  */
 #define APR_OS_START_SYSERR    (APR_OS_START_EAIERR + 500)
 
-/** no error */
+/** no error. @see APR_STATUS_IS_SUCCESS */
 #define APR_SUCCESS 0
 
 /* APR ERROR VALUES */
@@ -542,95 +542,98 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EBUSY(s)          ((s) == APR_EBUSY)
 /** @} */
 /**
- * @defgroup aprerrcanonical APR Canonical Error Values
+ * @defgroup aprerrcanonical Canonical Errors
  * @{
  */
 /* APR CANONICAL ERROR VALUES */
-/** permission denied */
+/** @see APR_STATUS_IS_EACCES */
 #ifdef EACCES
 #define APR_EACCES EACCES
 #else
 #define APR_EACCES         (APR_OS_START_CANONERR + 1)
 #endif
 
-/** file exists */
+/** @see APR_STATUS_IS_EXIST */
 #ifdef EEXIST
 #define APR_EEXIST EEXIST
 #else
 #define APR_EEXIST         (APR_OS_START_CANONERR + 2)
 #endif
 
-/** path name is too long */
+/** @see APR_STATUS_IS_ENAMETOOLONG */
 #ifdef ENAMETOOLONG
 #define APR_ENAMETOOLONG ENAMETOOLONG
 #else
 #define APR_ENAMETOOLONG   (APR_OS_START_CANONERR + 3)
 #endif
 
-/** no such file or directory */
+/** @see APR_STATUS_IS_ENOENT */
 #ifdef ENOENT
 #define APR_ENOENT ENOENT
 #else
 #define APR_ENOENT         (APR_OS_START_CANONERR + 4)
 #endif
 
-/** not a directory */
+/** @see APR_STATUS_IS_ENOTDIR */
 #ifdef ENOTDIR
 #define APR_ENOTDIR ENOTDIR
 #else
 #define APR_ENOTDIR        (APR_OS_START_CANONERR + 5)
 #endif
 
-/** no space left on device */
+/** @see APR_STATUS_IS_ENOSPC */
 #ifdef ENOSPC
 #define APR_ENOSPC ENOSPC
 #else
 #define APR_ENOSPC         (APR_OS_START_CANONERR + 6)
 #endif
 
-/** not enough memory */
+/** @see APR_STATUS_IS_ENOMEM */
 #ifdef ENOMEM
 #define APR_ENOMEM ENOMEM
 #else
 #define APR_ENOMEM         (APR_OS_START_CANONERR + 7)
 #endif
 
-/** too many open files */
+/** @see APR_STATUS_IS_EMFILE */
 #ifdef EMFILE
 #define APR_EMFILE EMFILE
 #else
 #define APR_EMFILE         (APR_OS_START_CANONERR + 8)
 #endif
 
-/** file table overflow */
+/** @see APR_STATUS_IS_ENFILE */
 #ifdef ENFILE
 #define APR_ENFILE ENFILE
 #else
 #define APR_ENFILE         (APR_OS_START_CANONERR + 9)
 #endif
 
-/** bad file # */
+/** @see APR_STATUS_IS_EBADF */
 #ifdef EBADF
 #define APR_EBADF EBADF
 #else
 #define APR_EBADF          (APR_OS_START_CANONERR + 10)
 #endif
 
-/** invalid argument */
+/** @see APR_STATUS_IS_EINVAL */
 #ifdef EINVAL
 #define APR_EINVAL EINVAL
 #else
 #define APR_EINVAL         (APR_OS_START_CANONERR + 11)
 #endif
 
-/** illegal seek */
+/** @see APR_STATUS_IS_ESPIPE */
 #ifdef ESPIPE
 #define APR_ESPIPE ESPIPE
 #else
 #define APR_ESPIPE         (APR_OS_START_CANONERR + 12)
 #endif
 
-/** operation would block */
+/** 
+ * @see APR_STATUS_IS_EAGAIN 
+ * @warning use APR_STATUS_IS_EAGAIN instead of just testing this value
+ */
 #ifdef EAGAIN
 #define APR_EAGAIN EAGAIN
 #elif defined(EWOULDBLOCK)
@@ -639,30 +642,38 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EAGAIN         (APR_OS_START_CANONERR + 13)
 #endif
 
-/** interrupted system call */
+/** @see APR_STATUS_IS_EINTR */
 #ifdef EINTR
 #define APR_EINTR EINTR
 #else
 #define APR_EINTR          (APR_OS_START_CANONERR + 14)
 #endif
 
+/** @see APR_STATUS_IS_ENOTSOCK */
 #ifdef ENOTSOCK
 #define APR_ENOTSOCK ENOTSOCK
 #else
 #define APR_ENOTSOCK       (APR_OS_START_CANONERR + 15)
 #endif
 
+/** @see APR_STATUS_IS_ECONNREFUSED */
 #ifdef ECONNREFUSED
 #define APR_ECONNREFUSED ECONNREFUSED
 #else
 #define APR_ECONNREFUSED   (APR_OS_START_CANONERR + 16)
 #endif
 
+/** @see APR_STATUS_IS_EINPROGRESS */
 #ifdef EINPROGRESS
 #define APR_EINPROGRESS EINPROGRESS
 #else
 #define APR_EINPROGRESS    (APR_OS_START_CANONERR + 17)
 #endif
+
+/** 
+ * @see APR_STATUS_IS_ECONNABORTED
+ * @warning use APR_STATUS_IS_ECONNABORTED instead of just testing this value
+ */
 
 #ifdef ECONNABORTED
 #define APR_ECONNABORTED ECONNABORTED
@@ -670,48 +681,56 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_ECONNABORTED   (APR_OS_START_CANONERR + 18)
 #endif
 
+/** @see APR_STATUS_IS_ECONNRESET */
 #ifdef ECONNRESET
 #define APR_ECONNRESET ECONNRESET
 #else
 #define APR_ECONNRESET     (APR_OS_START_CANONERR + 19)
 #endif
 
+/** @see APR_STATUS_IS_ETIMEDOUT */
 #ifdef ETIMEDOUT
 #define APR_ETIMEDOUT ETIMEDOUT
 #else
 #define APR_ETIMEDOUT      (APR_OS_START_CANONERR + 20)
 #endif
 
+/** @see APR_STATUS_IS_EHOSTUNREACH */
 #ifdef EHOSTUNREACH
 #define APR_EHOSTUNREACH EHOSTUNREACH
 #else
 #define APR_EHOSTUNREACH   (APR_OS_START_CANONERR + 21)
 #endif
 
+/** @see APR_STATUS_IS_ENETUNREACH */
 #ifdef ENETUNREACH
 #define APR_ENETUNREACH ENETUNREACH
 #else
 #define APR_ENETUNREACH    (APR_OS_START_CANONERR + 22)
 #endif
 
+/** @see APR_STATUS_IS_EFTYPE */
 #ifdef EFTYPE
 #define APR_EFTYPE EFTYPE
 #else
 #define APR_EFTYPE        (APR_OS_START_CANONERR + 23)
 #endif
 
+/** @see APR_STATUS_IS_EPIPE */
 #ifdef EPIPE
 #define APR_EPIPE EPIPE
 #else
 #define APR_EPIPE         (APR_OS_START_CANONERR + 24)
 #endif
 
+/** @see APR_STATUS_IS_EXDEV */
 #ifdef EXDEV
 #define APR_EXDEV EXDEV
 #else
 #define APR_EXDEV         (APR_OS_START_CANONERR + 25)
 #endif
 
+/** @see APR_STATUS_IS_ENOTEMPTY */
 #ifdef ENOTEMPTY
 #define APR_ENOTEMPTY ENOTEMPTY
 #else
@@ -1069,22 +1088,36 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + WSAENETUNREACH)
 #endif
 
+/** no error */
 #define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS)
 
 /* APR CANONICAL ERROR TESTS */
+/** permission denied */
 #define APR_STATUS_IS_EACCES(s)         ((s) == APR_EACCES)
+/** file exists */
 #define APR_STATUS_IS_EEXIST(s)         ((s) == APR_EEXIST)
+/** path name is too long */
 #define APR_STATUS_IS_ENAMETOOLONG(s)   ((s) == APR_ENAMETOOLONG)
+/** no such file or directory */
 #define APR_STATUS_IS_ENOENT(s)         ((s) == APR_ENOENT)
+/** not a directory */
 #define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR)
+/** no space left on device */
 #define APR_STATUS_IS_ENOSPC(s)         ((s) == APR_ENOSPC)
+/** not enough memory */
 #define APR_STATUS_IS_ENOMEM(s)         ((s) == APR_ENOMEM)
+/** too many open files */
 #define APR_STATUS_IS_EMFILE(s)         ((s) == APR_EMFILE)
+/** file table overflow */
 #define APR_STATUS_IS_ENFILE(s)         ((s) == APR_ENFILE)
+/** bad file # */
 #define APR_STATUS_IS_EBADF(s)          ((s) == APR_EBADF)
+/** invalid argument */
 #define APR_STATUS_IS_EINVAL(s)         ((s) == APR_EINVAL)
+/** illegal seek */
 #define APR_STATUS_IS_ESPIPE(s)         ((s) == APR_ESPIPE)
 
+/** operation would block */
 #if !defined(EWOULDBLOCK) || !defined(EAGAIN)
 #define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN)
 #elif (EWOULDBLOCK == EAGAIN)
@@ -1094,12 +1127,19 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                                       || (s) == EWOULDBLOCK)
 #endif
 
+/** interrupted system call */
 #define APR_STATUS_IS_EINTR(s)          ((s) == APR_EINTR)
+/** socket operation on a non-socket */
 #define APR_STATUS_IS_ENOTSOCK(s)       ((s) == APR_ENOTSOCK)
+/** Connection Refused */
 #define APR_STATUS_IS_ECONNREFUSED(s)   ((s) == APR_ECONNREFUSED)
+/** operation now in progress */
 #define APR_STATUS_IS_EINPROGRESS(s)    ((s) == APR_EINPROGRESS)
 
-/* EPROTO on certain older kernels really means ECONNABORTED, so we need to 
+/** 
+ * Software caused connection abort 
+ * @remark
+ * EPROTO on certain older kernels really means ECONNABORTED, so we need to 
  * ignore it for them.  See discussion in new-httpd archives nh.9701 & nh.9603
  *
  * There is potentially a bug in Solaris 2.x x<6, and other boxes that 
@@ -1114,13 +1154,21 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ECONNABORTED(s)    ((s) == APR_ECONNABORTED)
 #endif
 
+/** Connection Reset by peer */
 #define APR_STATUS_IS_ECONNRESET(s)      ((s) == APR_ECONNRESET)
+/** Operation timed out */
 #define APR_STATUS_IS_ETIMEDOUT(s)       ((s) == APR_ETIMEDOUT)    
+/** no route to host */
 #define APR_STATUS_IS_EHOSTUNREACH(s)    ((s) == APR_EHOSTUNREACH)
+/** network is unreachable */
 #define APR_STATUS_IS_ENETUNREACH(s)     ((s) == APR_ENETUNREACH)
+/** inappropiate file type or format */
 #define APR_STATUS_IS_EFTYPE(s)          ((s) == APR_EFTYPE)
+/** broken pipe */
 #define APR_STATUS_IS_EPIPE(s)           ((s) == APR_EPIPE)
+/** cross device link */
 #define APR_STATUS_IS_EXDEV(s)           ((s) == APR_EXDEV)
+/** Directory Not Empty */
 #define APR_STATUS_IS_ENOTEMPTY(s)       ((s) == APR_ENOTEMPTY)
 
 #endif /* !def OS2 || WIN32 */
