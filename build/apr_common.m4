@@ -601,7 +601,8 @@ struct dirent de; de.d_ino;
 fi
 ])
 if test "$apr_cv_dirent_inode" != "no"; then
-  AC_DEFINE_UNQUOTED(DIRENT_INODE, $apr_cv_dirent_inode)
+  AC_DEFINE_UNQUOTED(DIRENT_INODE, $apr_cv_dirent_inode, 
+    [Define if struct dirent has an inode member])
 fi
 ])
 
@@ -624,7 +625,8 @@ struct dirent de; de.d_type = DT_REG;
 ], apr_cv_dirent_type=d_type)
 ])
 if test "$apr_cv_dirent_type" != "no"; then
-  AC_DEFINE_UNQUOTED(DIRENT_TYPE, $apr_cv_dirent_type) 
+  AC_DEFINE_UNQUOTED(DIRENT_TYPE, $apr_cv_dirent_type, 
+    [Define if struct dirent has a d_type member]) 
 fi
 ])
 

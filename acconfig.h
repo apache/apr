@@ -7,8 +7,6 @@
 #undef USE_THREADS
 #undef EGD_DEFAULT_SOCKET
 #undef HAVE_isascii
-#undef DIRENT_INODE
-#undef DIRENT_TYPE
 
 /* Cross process serialization techniques */
 #undef USE_FLOCK_SERIALIZE
