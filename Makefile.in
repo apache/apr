@@ -42,7 +42,9 @@ LIBAPR = @LIBPREFIX@apr.a
 #
 all: Makefile $(LIBAPR)
 
-$(LIBAPR): $(MODULES) subdirs
+$(MODULES): subdirs
+
+$(LIBAPR): $(MODULES)
 	@rm -rf objs
 	@mkdir objs
 	@rm -f $@
