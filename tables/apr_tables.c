@@ -361,7 +361,7 @@ APR_DECLARE(char *) apr_array_pstrcat(apr_pool_t *p,
 struct apr_table_t {
     /* This has to be first to promote backwards compatibility with
      * older modules which cast a apr_table_t * to an apr_array_header_t *...
-     * they should use the table_elts() function for most of the
+     * they should use the apr_table_elts() function for most of the
      * cases they do this for.
      */
     /** The underlying array for the table */
