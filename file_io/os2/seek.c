@@ -100,7 +100,7 @@ ap_status_t ap_seek(struct file_t *thefile, ap_seek_where_t where, ap_off_t *off
 
     if (thefile->buffered) {
         int rc = EINVAL;
-        ap_ssize_t filesize;
+        ap_finfo_t finfo;
 
         switch (where) {
         case APR_SET:
@@ -112,9 +112,9 @@ ap_status_t ap_seek(struct file_t *thefile, ap_seek_where_t where, ap_off_t *off
             break;
 
         case APR_END:
-            rc = ap_get_filesize(&filesize, thefile);
+            rc = ap_getfileinfo(&finfo, thefile);
             if (rc == APR_SUCCESS)
-                rc = setptr(thefile, filesize - *offset);
+                rc = setptr(thefile, finfo.size - *offset);
             break;
         }
 

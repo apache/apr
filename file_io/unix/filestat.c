@@ -58,6 +58,28 @@
 #include "apr_general.h"
 #include "apr_errno.h"
 
+static ap_filetype_e filetype_from_mode(int mode)
+{
+    ap_filetype_e type = APR_NOFILE;
+
+    if (S_ISREG(mode))
+        type = APR_REG;
+    if (S_ISDIR(mode))
+        type = APR_DIR;
+    if (S_ISCHR(mode))
+        type = APR_CHR;
+    if (S_ISBLK(mode))
+        type = APR_BLK;
+    if (S_ISFIFO(mode))
+        type = APR_PIPE;
+    if (S_ISLNK(mode))
+        type = APR_LNK;
+#ifndef BEOS
+    if (S_ISSOCK(mode))
+        type = APR_SOCK;
+#endif
+}
+
 /* ***APRDOC********************************************************
  * ap_status_t ap_getfileinfo(ap_file_t *)
  *    get the specified file's stats..
@@ -71,6 +93,7 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct file_t *thefile)
 
     if (rv == 0) {
         finfo->protection = info.st_mode;
+        finfo->filetype = filetype_from_mode(info.st_mode);
         finfo->user = info.st_uid;
         finfo->group = info.st_gid;
         finfo->size = info.st_size;
@@ -100,6 +123,7 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
 
     if (rv == 0) {
         finfo->protection = info.st_mode;
+        finfo->filetype = filetype_from_mode(info.st_mode);
         finfo->user = info.st_uid;
         finfo->group = info.st_gid;
         finfo->size = info.st_size;
