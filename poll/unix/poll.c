@@ -240,7 +240,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
         if (aprset[i].desc_type == APR_POLL_SOCKET) {
             fd = aprset[i].desc.s->socketdes;
         }
-        else if (aprset[i].desc_type == APR_POLL_FILE) {
+        else {
             fd = aprset[i].desc.f->filedes;
         }
         aprset[i].rtnevents = 0;
@@ -264,7 +264,12 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
 struct apr_pollset_t {
     apr_uint32_t nelts;
     apr_uint32_t nalloc;
+#ifdef HAVE_POLL
     struct pollfd *pollset;
+#else
+    fd_set readset, writeset, exceptset;
+    int maxfd;
+#endif
     apr_pollfd_t *query_set;
     apr_pollfd_t *result_set;
     apr_pool_t *pool;
@@ -277,7 +282,14 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
     *pollset = apr_palloc(p, sizeof(**pollset));
     (*pollset)->nelts = 0;
     (*pollset)->nalloc = size;
+#ifdef HAVE_POLL
     (*pollset)->pollset = apr_palloc(p, size * sizeof(struct pollfd));
+#else
+    FD_ZERO(&((*pollset)->readset));
+    FD_ZERO(&((*pollset)->writeset));
+    FD_ZERO(&((*pollset)->exceptset));
+    (*pollset)->maxfd = 0;
+#endif
     (*pollset)->query_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
     (*pollset)->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
     (*pollset)->pool = p;
@@ -295,18 +307,36 @@ APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t *pollset)
 APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
                                           const apr_pollfd_t *descriptor)
 {
+    int fd;
     if (pollset->nelts == pollset->nalloc) {
         return APR_ENOMEM;
     }
 
     pollset->query_set[pollset->nelts] = *descriptor;
     if (descriptor->desc_type == APR_POLL_SOCKET) {
-        pollset->pollset[pollset->nelts].fd = descriptor->desc.s->socketdes;
+        fd = descriptor->desc.s->socketdes;
     }
     else {
-        pollset->pollset[pollset->nelts].fd = descriptor->desc.f->filedes;
+        fd = descriptor->desc.f->filedes;
     }
+#ifdef HAVE_POLL
+    pollset->pollset[pollset->nelts].fd = fd;
     pollset->pollset[pollset->nelts].events = get_event(descriptor->reqevents);
+#else
+    if (descriptor->reqevents & APR_POLLIN) {
+        FD_SET(fd, &(pollset->readset));
+    }
+    if (descriptor->reqevents & APR_POLLOUT) {
+        FD_SET(fd, &(pollset->writeset));
+    }
+    if (descriptor->reqevents &
+        (APR_POLLPRI | APR_POLLERR | APR_POLLHUP | APR_POLLNVAL)) {
+        FD_SET(fd, &(pollset->exceptset));
+    }
+    if (fd > pollset->maxfd) {
+        pollset->maxfd = fd;
+    }
+#endif
     pollset->nelts++;
     return APR_SUCCESS;
 }
@@ -324,6 +354,7 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
         fd = descriptor->desc.f->filedes;
     }
 
+#ifdef HAVE_POLL
     for (i = 0; i < pollset->nelts; i++) {
         if (fd == pollset->pollset[i].fd) {
             /* Found an instance of the fd: remove this and any other copies */
@@ -336,14 +367,49 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
                 }
                 else {
                     pollset->pollset[dst] = pollset->pollset[i];
+                    pollset->query_set[dst] = pollset->query_set[i];
                 }
             }
             return APR_SUCCESS;
         }
     }
+
+#else /* no poll */
+    for (i = 0; i < pollset->nelts; i++) {
+        if (((pollset->query_set[i].desc_type == APR_POLL_SOCKET) &&
+             (fd == pollset->query_set[i].desc.s->socketdes)) ||
+            ((pollset->query_set[i].desc_type == APR_POLL_FILE) &&
+             (fd == pollset->query_set[i].desc.f->filedes))) {
+            /* Found an instance of the fd: remove this and any other copies */
+            apr_uint32_t dst = i;
+            apr_uint32_t old_nelts = pollset->nelts;
+            pollset->nelts--;
+            for (i++; i < old_nelts; i++) {
+                if (((pollset->query_set[i].desc_type == APR_POLL_SOCKET) &&
+                     (fd == pollset->query_set[i].desc.s->socketdes)) ||
+                    ((pollset->query_set[i].desc_type == APR_POLL_FILE) &&
+                     (fd == pollset->query_set[i].desc.f->filedes))) {
+                    pollset->nelts--;
+                }
+                else {
+                    pollset->query_set[dst] = pollset->query_set[i];
+                }
+            }
+            FD_CLR(fd, &(pollset->readset));
+            FD_CLR(fd, &(pollset->writeset));
+            FD_CLR(fd, &(pollset->exceptset));
+            if ((fd == pollset->maxfd) && (pollset->maxfd > 0)) {
+                pollset->maxfd--;
+            }
+            return APR_SUCCESS;
+        }
+    }
+#endif /* no poll */
+
     return APR_NOTFOUND;
 }
 
+#ifdef HAVE_POLL
 APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                                            apr_interval_time_t timeout,
                                            apr_int32_t *num,
@@ -360,6 +426,9 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     if (rv < 0) {
         return errno;
     }
+    if (rv == 0) {
+        return APR_TIMEUP;
+    }
     j = 0;
     for (i = 0; i < pollset->nelts; i++) {
         if (pollset->pollset[i].revents != 0) {
@@ -372,3 +441,68 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     *descriptors = pollset->result_set;
     return APR_SUCCESS;
 }
+
+#else /* no poll */
+
+APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
+                                           apr_interval_time_t timeout,
+                                           apr_int32_t *num,
+                                           const apr_pollfd_t **descriptors)
+{
+    int rv;
+    apr_uint32_t i, j;
+    struct timeval tv, *tvptr;
+    fd_set readset, writeset, exceptset;
+
+    if (timeout < 0) {
+        tvptr = NULL;
+    }
+    else {
+        tv.tv_sec = (long)apr_time_sec(timeout);
+        tv.tv_usec = (long)apr_time_usec(timeout);
+        tvptr = &tv;
+    }
+
+    memcpy(&readset, &(pollset->readset), sizeof(fd_set));
+    memcpy(&writeset, &(pollset->writeset), sizeof(fd_set));
+    memcpy(&exceptset, &(pollset->exceptset), sizeof(fd_set));
+
+    rv = select(pollset->maxfd + 1, &readset, &writeset, &exceptset, tvptr);
+
+    (*num) = rv;
+    if (rv < 0) {
+        return errno;
+    }
+    if (rv == 0) {
+        return APR_TIMEUP;
+    }
+    j = 0;
+    for (i = 0; i < pollset->nelts; i++) {
+        int fd;
+        if (pollset->query_set[i].desc_type == APR_POLL_SOCKET) {
+            fd = pollset->query_set[i].desc.s->socketdes;
+        }
+        else {
+            fd = pollset->query_set[i].desc.s->socketdes;
+        }
+        if (FD_ISSET(fd, &readset) || FD_ISSET(fd, &writeset) ||
+            FD_ISSET(fd, &exceptset)) {
+            pollset->result_set[j] = pollset->query_set[i];
+            pollset->result_set[j].rtnevents = 0;
+            if (FD_ISSET(fd, &readset)) {
+                pollset->result_set[j].rtnevents |= APR_POLLIN;
+            }
+            if (FD_ISSET(fd, &writeset)) {
+                pollset->result_set[j].rtnevents |= APR_POLLOUT;
+            }
+            if (FD_ISSET(fd, &exceptset)) {
+                pollset->result_set[j].rtnevents |= APR_POLLERR;
+            }
+            j++;
+        }
+    }
+
+    return APR_SUCCESS;
+}
+
+#endif /* no poll */
