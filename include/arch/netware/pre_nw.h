@@ -21,8 +21,10 @@
 
 /* if we have wchar_t enabled in C++, predefine this type to avoid
    a conflict in Novell's header files */
+#ifndef DOXYGEN
 #if (__option(cplusplus) && __option(wchar_type))
 #define _WCHAR_T
+#endif
 #endif
 
 /* C9X defintion used by MSL C++ library */

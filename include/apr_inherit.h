@@ -54,13 +54,30 @@
 
 #ifndef APR_INHERIT_H
 #define APR_INHERIT_H
+/**
+ * @file apr_inherit.h
+ * @brief APR File Handle Inheritance
+ */
+/**
+ * @defgroup APR_File_Inheritance Inheritance Of File/Sockets
+ * @ingroup APR_File_Handle
+ * Sets/Unsets inheritance for File descriptor inheritance in children
+ * processes.
+ *
+ * @{
+ */
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
+/**
+ * @param name Set Inheritance for this Socket/File Handle
+ */
 #define APR_DECLARE_SET_INHERIT(name) \
     APR_DECLARE(void) apr_##name##_set_inherit(apr_##name##_t *name)
+/**
+ * @param name Unset Inheritance for this Socket/File Handle
+ */
 
 #define APR_DECLARE_UNSET_INHERIT(name) \
     APR_DECLARE(void) apr_##name##_unset_inherit(apr_##name##_t *name)
@@ -68,5 +85,6 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+/** @} */
 
 #endif	/* ! APR_INHERIT_H */
