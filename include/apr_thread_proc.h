@@ -117,7 +117,7 @@ typedef void *(APR_THREAD_FUNC *ap_thread_start_t)(void *);
 
 /*
 
-=head1 ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
+=head1 ap_status_t ap_create_threadattr(ap_threadattr_t **new_attr, ap_pool_t *cont)
 
 B<Create and initialize a new threadattr variable>
 
@@ -126,7 +126,7 @@ B<Create and initialize a new threadattr variable>
 
 =cut
  */
-ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont);
+ap_status_t ap_create_threadattr(ap_threadattr_t **new_attr, ap_pool_t *cont);
 
 /*
 
@@ -151,11 +151,11 @@ B<Get the detach mode for this threadattr.>
 
 =cut
  */
-ap_status_t ap_getthreadattr_detach(ap_threadattr_t *iattr);
+ap_status_t ap_getthreadattr_detach(ap_threadattr_t *attr);
 
 /*
 
-=head1 ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr, ap_thread_start_t func, void *data, ap_pool_t *cont)
+=head1 ap_status_t ap_create_thread(ap_thread_t **new_thread, ap_threadattr_t *attr, ap_thread_start_t func, void *data, ap_pool_t *cont)
 
 B<Create a new thread of execution> 
 
@@ -167,7 +167,7 @@ B<Create a new thread of execution>
 
 =cut
  */
-ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr, 
+ap_status_t ap_create_thread(ap_thread_t **new_thread, ap_threadattr_t *attr, 
                              ap_thread_start_t func, void *data, 
                              ap_pool_t *cont);
 
@@ -257,7 +257,7 @@ ap_status_t ap_create_thread_private(ap_threadkey_t **key, void (*dest)(void *),
 
 /*
 
-=head1 ap_status_t ap_get_thread_private(void **new, ap_threadkey_t *key)
+=head1 ap_status_t ap_get_thread_private(void **new_mem, ap_threadkey_t *key)
 
 B<Get a pointer to the thread private memory>
 
@@ -266,7 +266,7 @@ B<Get a pointer to the thread private memory>
 
 =cut
  */
-ap_status_t ap_get_thread_private(void **new, ap_threadkey_t *key);
+ap_status_t ap_get_thread_private(void **new_mem, ap_threadkey_t *key);
 
 /*
 
@@ -327,7 +327,7 @@ ap_status_t ap_set_threadkeydata(void *data, char *key,
 /* Process Function definitions */
 /*
 
-=head1 ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_pool_t *cont)
+=head1 ap_status_t ap_createprocattr_init(ap_procattr_t **new_attr, ap_pool_t *cont)
 
 B<Create and initialize a new procattr variable> 
 
@@ -336,7 +336,7 @@ B<Create and initialize a new procattr variable>
 
 =cut
  */
-ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_pool_t *cont);
+ap_status_t ap_createprocattr_init(ap_procattr_t **new_attr, ap_pool_t *cont);
 
 /*
 
@@ -498,7 +498,7 @@ ap_status_t ap_fork(ap_proc_t *proc, ap_pool_t *cont);
 
 /*
 
-=head1 ap_status_t ap_create_process(ap_proc_t *new, const char *progname, char *const args[], char **env, ap_procattr_t *attr, ap_pool_t *cont) 
+=head1 ap_status_t ap_create_process(ap_proc_t *new_proc, const char *progname, char *const args[], char **env, ap_procattr_t *attr, ap_pool_t *cont) 
 
 B<Create a new process and execute a new program within that process.>
 
@@ -514,7 +514,7 @@ B<Create a new process and execute a new program within that process.>
 
 =cut
  */
-ap_status_t ap_create_process(ap_proc_t *new, const char *progname, 
+ap_status_t ap_create_process(ap_proc_t *new_proc, const char *progname, 
                               char *const args[], char **env, 
                               ap_procattr_t *attr, ap_pool_t *cont);
 
@@ -565,7 +565,7 @@ ap_status_t ap_wait_all_procs(ap_proc_t *proc, ap_wait_t *status,
 
 /*
 
-=head1 ap_status_t ap_detach(ap_proc_t *new, ap_pool_t *cont)
+=head1 ap_status_t ap_detach(ap_proc_t *new_proc, ap_pool_t *cont)
 
 B<Detach the process from the controlling terminal.>
 
@@ -574,7 +574,7 @@ B<Detach the process from the controlling terminal.>
 
 =cut
  */
-ap_status_t ap_detach(ap_proc_t *new, ap_pool_t *cont);
+ap_status_t ap_detach(ap_proc_t *new_proc, ap_pool_t *cont);
 
 #if APR_HAS_OTHER_CHILD
 /*
