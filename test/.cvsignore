@@ -17,6 +17,7 @@ testoc
 testpipe
 testpoll
 testpools
+testrand
 testshm
 testshmconsumer
 testshmproducer
