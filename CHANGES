@@ -1,6 +1,8 @@
 Changes with APR b1  
 
-  *) Use getpwnam_r() and getgrgid_r() instead of getpwnam() and getgrgid()
+  *) Fix a possible data corruption problem with the use of getpwnam_r() on 
+     all platforms where that function is used.
+     Use getpwnam_r() and getgrgid_r() instead of getpwnam() and getgrgid()
      with threaded builds on glibc (2.1, at least) to avoid thread safety
      issues.  [Jeff Trawick]
 

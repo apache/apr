@@ -66,17 +66,22 @@
 #include <unistd.h> /* for _POSIX_THREAD_SAFE_FUNCTIONS */
 #endif
 
-static apr_status_t getpwnam_safe(const char *username,
-                                  struct passwd **pw)
-{
-#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETPWNAM_R)
-    struct passwd pwd;
-    char pwbuf[512];
+#define PWBUF_SIZE 512
 
-    if (getpwnam_r(username, &pwd, pwbuf, sizeof(pwbuf), pw)) {
+static apr_status_t getpwnam_safe(const char *username,
+                                  struct passwd *pw,
+                                  char pwbuf[PWBUF_SIZE])
+{
+    struct passwd *pwptr;
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETPWNAM_R)
+    if (!getpwnam_r(username, pw, pwbuf, PWBUF_SIZE, &pwptr)) {
+        /* nothing extra to do on success */
 #else
-    if ((*pw = getpwnam(username)) == NULL) {
+    if ((pwptr = getpwnam(username)) != NULL) {
+        memcpy(pw, pwptr, sizeof *pw);
 #endif
+    }
+    else {
         if (errno == 0) {
             /* this can happen with getpwnam() on FreeBSD 4.3 */
             return APR_EGENERAL;
@@ -90,17 +95,18 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname,
                                                  const char *username,
                                                  apr_pool_t *p)
 {
-    struct passwd *pw;
+    struct passwd pw;
+    char pwbuf[PWBUF_SIZE];
     apr_status_t rv;
 
-    if ((rv = getpwnam_safe(username, &pw)) != APR_SUCCESS)
+    if ((rv = getpwnam_safe(username, &pw, pwbuf)) != APR_SUCCESS)
         return rv;
 
 #ifdef OS2
     /* Need to manually add user name for OS/2 */
-    *dirname = apr_pstrcat(p, pw->pw_dir, pw->pw_name, NULL);
+    *dirname = apr_pstrcat(p, pw.pw_dir, pw.pw_name, NULL);
 #else
-    *dirname = apr_pstrdup(p, pw->pw_dir);
+    *dirname = apr_pstrdup(p, pw.pw_dir);
 #endif
     return APR_SUCCESS;
 }
@@ -108,14 +114,15 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname,
 APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
                                          const char *username, apr_pool_t *p)
 {
-    struct passwd *pw;
+    struct passwd pw;
+    char pwbuf[PWBUF_SIZE];
     apr_status_t rv;
         
-    if ((rv = getpwnam_safe(username, &pw)) != APR_SUCCESS)
+    if ((rv = getpwnam_safe(username, &pw, pwbuf)) != APR_SUCCESS)
         return rv;
 
-    *uid = pw->pw_uid;
-    *gid = pw->pw_gid;
+    *uid = pw.pw_uid;
+    *gid = pw.pw_gid;
 
     return APR_SUCCESS;
 }
@@ -125,7 +132,7 @@ APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, ap
     struct passwd *pw;
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETPWUID_R)
     struct passwd pwd;
-    char pwbuf[512];
+    char pwbuf[PWBUF_SIZE];
 
     if (getpwuid_r(userid, &pwd, pwbuf, sizeof(pwbuf), &pw)) {
 #else
@@ -140,16 +147,17 @@ APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, ap
 APR_DECLARE(apr_status_t) apr_get_user_passwd(char **passwd,
                                          const char *username, apr_pool_t *p)
 {
-    struct passwd *pw;
+    struct passwd pw;
+    char pwbuf[PWBUF_SIZE];
     apr_status_t rv;
         
-    if ((rv = getpwnam_safe(username, &pw)) != APR_SUCCESS)
+    if ((rv = getpwnam_safe(username, &pw, pwbuf)) != APR_SUCCESS)
         return rv;
 
 #if defined(__MVS__) /* silly hack, but this function will be replaced soon anyway */
     *passwd = "x"; /* same as many Linux (and Solaris and more) boxes these days */
 #else
-    *passwd = apr_pstrdup(p, pw->pw_passwd);
+    *passwd = apr_pstrdup(p, pw.pw_passwd);
 #endif
 
     return APR_SUCCESS;
