@@ -1,3 +1,5 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
 
 TARGETS = \
 	start.lo getopt.lo otherchild.lo errorcodes.lo rand.lo \

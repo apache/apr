@@ -1,3 +1,5 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
 
 TARGETS = \
 	apr_cpystrn.lo \

@@ -1717,13 +1717,7 @@ changequote({,})
 
 if test -n "$USE_VPATH"; then
   for makefile in $MAKEFILE1 $MAKEFILE2 $MAKEFILE3; do
-    dir=`echo $makefile|sed 's%/*[^/][^/]*$%%'`
-    (cat <<EOF
-srcdir = $apr_srcdir/$dir
-VPATH  = $apr_srcdir/$dir
-
-EOF
-)    |  cat - $makefile | \
+    cat $makefile | \
         sed \
 		-e 's#-I\($(INCDIR[0-9]*)\)#-I\1 -I$(srcdir)/\1#g' \
 		-e 's#-I\($(OSDIR[0-9]*)\)#-I\1 -I$(srcdir)/\1#g' \
