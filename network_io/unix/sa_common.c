@@ -393,7 +393,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
         apr_sockaddr_t *cursa;
         int curaddr;
 #if APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
-    defined(HAVE_GETHOSTBYNAME_R)
+    defined(HAVE_GETHOSTBYNAME_R) && !defined(BEOS)
         char tmp[GETHOSTBYNAME_BUFLEN];
         int hosterror;
         struct hostent hs;
@@ -414,7 +414,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
         else {
 #endif
 #if APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
-    defined(HAVE_GETHOSTBYNAME_R)
+    defined(HAVE_GETHOSTBYNAME_R) && !defined(BEOS)
         hp = gethostbyname_r(hostname, &hs, tmp, GETHOSTBYNAME_BUFLEN - 1, 
                              &hosterror);
 #else
@@ -425,7 +425,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
 #ifdef WIN32
             apr_get_netos_error();
 #elif APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
-    defined(HAVE_GETHOSTBYNAME_R)
+    defined(HAVE_GETHOSTBYNAME_R) && !defined(BEOS)
             /* If you see ERANGE, that means GETHOSBYNAME_BUFLEN needs to be
              * bumped. */
             return (hosterror + APR_OS_START_SYSERR);
