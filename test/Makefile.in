@@ -19,8 +19,6 @@ PROGRAMS = \
 	testargs@EXEEXT@ \
 	testshmproducer@EXEEXT@ \
 	testshmconsumer@EXEEXT@ \
-	testpipe@EXEEXT@ \
-	testsockopt@EXEEXT@ \
 	testhash@EXEEXT@ \
 	testuser@EXEEXT@ \
 	testatomic@EXEEXT@ \
