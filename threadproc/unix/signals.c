@@ -321,10 +321,10 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
     sigset_t sig_mask;
     int rv;
 
-    /* All threads should mask signals out, accoring to sigwait(2) man page */
+    /* All threads should mask signals out, according to sigwait(2) man page */
     sigfillset(&sig_mask);
 
-#if !APR_HAS_THREADS || defined(SIGPROCMASK_SETS_THREAD_MASK)
+#if defined(SIGPROCMASK_SETS_THREAD_MASK)
     rv = sigprocmask(SIG_SETMASK, &sig_mask, NULL);
 #else
     if ((rv = pthread_sigmask(SIG_SETMASK, &sig_mask, NULL)) != 0) {
