@@ -28,7 +28,6 @@ while ($t = <$srcfl>) {
     }
     $t =~ s|\@CC\@|cl|;
     $t =~ s|\@RANLIB\@||;
-    $t =~ s|\@OPTIM\@||;
     $t =~ s|-I\$\(INCDIR\)|\/I "\$\(INCDIR\)"|;
     $t =~ s|\.\.\/libapr\.a|\.\./LibD/apr\.lib|;
     if ($t =~ s|\@EXEEXT\@|\.exe|) {

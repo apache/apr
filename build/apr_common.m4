@@ -2,6 +2,10 @@ dnl -----------------------------------------------------------------
 dnl apr_common.m4: APR's general-purpose autoconf macros
 dnl
 
+dnl APR_CONFIG_NICE(filename)
+dnl
+dnl Saves a snapshot of the configure command-line for later reuse
+dnl
 AC_DEFUN(APR_CONFIG_NICE,[
   rm -f $1
   cat >$1<<EOF
@@ -10,8 +14,35 @@ AC_DEFUN(APR_CONFIG_NICE,[
 # Created by configure
 
 EOF
-  if test -n "$OPTIM"; then
-    echo "OPTIM=\"$OPTIM\"; export OPTIM" >> $1
+  if test -n "$MAKE"; then
+    echo "MAKE=\"$MAKE\"; export MAKE" >> $1
+  fi
+  if test -n "$CFLAGS"; then
+    echo "CFLAGS=\"$CFLAGS\"; export CFLAGS" >> $1
+  fi
+  if test -n "$CPPFLAGS"; then
+    echo "CPPFLAGS=\"$CPPFLAGS\"; export CPPFLAGS" >> $1
+  fi
+  if test -n "$LDFLAGS"; then
+    echo "LDFLAGS=\"$LDFLAGS\"; export LDFLAGS" >> $1
+  fi
+  if test -n "$LIBS"; then
+    echo "LIBS=\"$LIBS\"; export LIBS" >> $1
+  fi
+  if test -n "$INCLUDES"; then
+    echo "INCLUDES=\"$INCLUDES\"; export INCLUDES" >> $1
+  fi
+  if test -n "$NOTEST_CFLAGS"; then
+    echo "NOTEST_CFLAGS=\"$NOTEST_CFLAGS\"; export NOTEST_CFLAGS" >> $1
+  fi
+  if test -n "$NOTEST_CPPFLAGS"; then
+    echo "NOTEST_CPPFLAGS=\"$NOTEST_CPPFLAGS\"; export NOTEST_CPPFLAGS" >> $1
+  fi
+  if test -n "$NOTEST_LDFLAGS"; then
+    echo "NOTEST_LDFLAGS=\"$NOTEST_LDFLAGS\"; export NOTEST_LDFLAGS" >> $1
+  fi
+  if test -n "$NOTEST_LIBS"; then
+    echo "NOTEST_LIBS=\"$NOTEST_LIBS\"; export NOTEST_LIBS" >> $1
   fi
 
   for arg in [$]0 "[$]@"; do
@@ -19,7 +50,7 @@ EOF
   done
   echo '"[$]@"' >> $1
   chmod +x $1
-])
+])dnl
 
 dnl
 dnl APR_SUBDIR_CONFIG(dir [, sub-package-cmdline-args])
@@ -62,37 +93,39 @@ changequote([, ])dnl
   AC_CACHE_LOAD
 ])dnl
 
+dnl
+dnl APR_SAVE_THE_ENVIRONMENT(variable_name)
+dnl
+dnl Stores the variable (usually a Makefile macro) for later restoration
+dnl
+AC_DEFUN(APR_SAVE_THE_ENVIRONMENT,[
+  apr_ste_save_$1="$$1"
+])dnl
 
 dnl
-dnl APR_DOEXTRA
+dnl APR_RESTORE_THE_ENVIRONMENT(variable_name, prefix_)
 dnl
-dnl  Handle the use of EXTRA_* variables.
-dnl  Basically, EXTRA_* vars are added to the
-dnl  current settings of their "parents". We
-dnl  can expand as needed for additional
-dnl  EXTRA_* variables by adding them to the
-dnl  "for i in..." line.
+dnl Uses the previously saved variable content to figure out what configure
+dnl has added to the variable, moving the new bits to prefix_variable_name
+dnl and restoring the original variable contents.  This makes it possible
+dnl for a user to override configure when it does something stupid.
 dnl
-dnl  To handle recursive configures, the 1st time
-dnl  through we need to null out EXTRA_* and then
-dnl  export the lot of them, since we want/need
-dnl  them to exist in the sub-configures' environment.
-dnl  The nasty eval's allow us to use the 'for'
-dnl  construct and save some lines of code.
-dnl
-AC_DEFUN(APR_DOEXTRA, [
-  for i in CFLAGS CPPFLAGS LDFLAGS LIBS
-  do
-    eval APR_TMP=\$EXTRA_$i
-    if test -n "$APR_TMP"; then
-      eval $i=\"\$$i $APR_TMP\"
-      eval export $i
-      eval unset EXTRA_${i}
-      eval export EXTRA_${i}
-    fi
-  done
-])
-
+AC_DEFUN(APR_RESTORE_THE_ENVIRONMENT,[
+if test "x$apr_ste_save_$1" = "x"; then
+  $2$1="$$1"
+  $1=
+else
+  if test "x$apr_ste_save_$1" = "x$$1"; then
+    $2$1=
+  else
+    $2$1=`echo $$1 | sed -e "s%${apr_ste_save_$1}%%"`
+    $1="$apr_ste_save_$1"
+  fi
+fi
+echo "  restoring $1 to \"$$1\""
+echo "  setting $2$1 to \"$$2$1\""
+AC_SUBST($2$1)
+])dnl
 
 dnl
 dnl APR_SETIFNULL(variable, value)
@@ -101,11 +134,10 @@ dnl  Set variable iff it's currently null
 dnl
 AC_DEFUN(APR_SETIFNULL,[
   if test -z "$$1"; then
-    echo "  Setting $1 to \"$2\""
-    $1="$2"; export $1
+    echo "  setting $1 to \"$2\""
+    $1="$2"
   fi
-])
-
+])dnl
 
 dnl
 dnl APR_SETVAR(variable, value)
@@ -113,10 +145,9 @@ dnl
 dnl  Set variable no matter what
 dnl
 AC_DEFUN(APR_SETVAR,[
-  echo "  Forcing $1 to \"$2\""
-  $1="$2"; export $1
-])
-
+  echo "  forcing $1 to \"$2\""
+  $1="$2"
+])dnl
 
 dnl
 dnl APR_ADDTO(variable, value)
@@ -124,10 +155,26 @@ dnl
 dnl  Add value to variable
 dnl
 AC_DEFUN(APR_ADDTO,[
-  echo "  Adding \"$2\" to $1"
-  $1="$$1 $2"; export $1
-])
-
+  if test "x$$1" = "x"; then
+    echo "  setting $1 to \"$2\""
+    $1="$2"
+  else
+    apr_addto_bugger="$2"
+    for i in $apr_addto_bugger; do
+      apr_addto_duplicate="0"
+      for j in $$1; do
+        if test "x$i" = "x$j"; then
+          apr_addto_duplicate="1"
+          break
+        fi
+      done
+      if test $apr_addto_duplicate = "0"; then
+        echo "  adding \"$i\" to $1"
+        $1="$$1 $i"
+      fi
+    done
+  fi
+])dnl
 
 dnl
 dnl APR_CHECK_DEFINE_FILES( symbol, header_file [header_file ...] )
