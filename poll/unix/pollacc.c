@@ -169,7 +169,7 @@ APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_
         if (curr->reqevents & events) {
             curr->reqevents &= ~events;
         }
-        curr++
+        curr++;
     }
     return APR_SUCCESS;
 }
