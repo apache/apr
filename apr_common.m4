@@ -22,7 +22,7 @@ int main(int argc, const char * const argv[]) {
 ; return 0; }
 EOTEST
 changequote([, ])
-if ${CC-cc} -c $CFLAGS $CPPFLAGS $apr_tcnw_flags conftest.$ac_ext 1>&AC_FD_CC ; then
+if ${CC-cc} -c $CFLAGS $CPPFLAGS $apr_tcnw_flags conftest.$ac_ext 2>&AC_FD_CC ; then
   ifelse([$3], , :, [rm -rf conftest*
   $3])
 else
