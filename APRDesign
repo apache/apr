@@ -19,6 +19,32 @@ considered for inclusion.
 This document will discuss the structure of APR, and how best to contribute
 code to the effort.
 
+APR Features
+
+One of the goals of APR is to provide a common set of features across all 
+platforms.  This is an admirable goal, it is also not realisitic.  We cannot
+expect to be able to implement ALL features on ALL platforms.  So we are
+going to do the next best thing.  Provide a common interface to ALL APR 
+features on MOST platforms.
+
+APR developers should create FEATURE MACROS for any feature that is not
+available on ALL platforms.  This should be a simple definition which has
+the form:
+
+APR_HAS_FEATURE
+
+This macro should evaluate to true if APR has this feature on this platform.
+For example, Linux and Windows have mmap'ed files, and APR is providing an
+interface for mmapp'ing a file.  On both Linux and Windows, APR_HAS_MMAP
+should evaluate to one, and the ap_mmap_* functions should map files into
+memory and return the appropriate status codes.
+
+If your OS of choice does not have mmap'ed files, APR_HAS_MMAP should evaluate 
+to zero, and all ap_mmap_* functions should automatically return APR_ENOTIMPL.
+The second step is a precaution.  We will not break at compile time, just
+because a programmer tried to write code that uses functions which may not be
+there, but we will make sure the programmer knows he isn't doing anything.
+
 APR types
 
 The base types in APR
