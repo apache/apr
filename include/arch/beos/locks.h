@@ -56,6 +56,7 @@
 #define LOCKS_H
 
 #include <kernel/OS.h>
+#include "apr_pools.h"
 #include "apr_lock.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
