@@ -182,7 +182,7 @@ void main(void) {
     addr32[3] = ipv4.s_addr;
 
 #ifdef SIN6_LEN
-    sa.sin_len = sizeof(sa);
+    sa.sin6_len = sizeof(sa);
 #endif
 
     error = getnameinfo((const struct sockaddr *)&sa, sizeof(sa),
