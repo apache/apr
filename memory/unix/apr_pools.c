@@ -1153,6 +1153,7 @@ static void apr_pool_log_event(apr_pool_t *pool, const char *event,
 }
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL) */
 
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_LIFETIME)
 static int pool_is_child_of(apr_pool_t *parent, void *data)
 {
     apr_pool_t *pool = (apr_pool_t *)data;
@@ -1167,6 +1168,7 @@ static int apr_pool_is_child_of(apr_pool_t *pool, apr_pool_t *parent)
 
     return apr_pool_walk_tree(parent, pool_is_child_of, pool);
 }
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_LIFETIME) */
 
 static void apr_pool_check_integrity(apr_pool_t *pool)
 {
