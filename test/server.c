@@ -108,7 +108,7 @@ int main(int argc, const char * const argv[])
          */
         APR_TEST_SUCCESS(rv, "Preparing sockaddr", 
             apr_sockaddr_info_get(&localsa, bind_to_ipaddr, APR_UNSPEC, 8021, 0, context))
-        family = localsa->sa.sin.sin_family;
+        family = localsa->family;
     }
 
     APR_TEST_SUCCESS(rv, "Creating new socket", 

@@ -132,7 +132,7 @@ static void apr_setup(apr_pool_t **p, apr_socket_t **sock, int *family)
                     apr_strerror(rv, buf, sizeof buf));
             exit(1);
         }
-        *family = localsa->sa.sin.sin_family;
+        *family = localsa->family;
     }
 }
 
