@@ -119,7 +119,7 @@ APR_DECLARE(void) apr_hash_set(apr_hash_t *ht, const void *key,
  * @param key Pointer to the key
  * @param klen Length of the key. Can be APR_HASH_KEY_STRING to use the string length.
  * @return Returns NULL if the key is not present.
- * @deffunc void *apr_hash_get(apr_hash_t *ht, const void *key, apr_size_t klen)
+ * @deffunc void *apr_hash_get(apr_hash_t *ht, const void *key, apr_ssize_t klen)
  */
 APR_DECLARE(void *) apr_hash_get(apr_hash_t *ht, const void *key,
                                  apr_ssize_t klen);
@@ -168,10 +168,10 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi);
  * @param val Return pointer for the associated value.
  * @tip The return pointers should point to a variable that will be set to the
  *      corresponding data, or they may be NULL if the data isn't interesting.
- * @deffunc void apr_hash_this(apr_hash_index_t *hi, const void **key, apr_size_t *klen, void **val);
+ * @deffunc void apr_hash_this(apr_hash_index_t *hi, const void **key, apr_ssize_t *klen, void **val);
  */
 APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi, const void **key, 
-                                apr_size_t *klen, void **val);
+                                apr_ssize_t *klen, void **val);
 
 /**
  * Get the number of key/value pairs in the hash table.

@@ -102,7 +102,8 @@ apr_status_t conv_utf8_to_ucs2(const char *in, apr_size_t *inbytes,
                                apr_wchar_t *out, apr_size_t *outwords)
 {
     apr_int64_t newch, mask;
-    int ch, expect, eating;
+    apr_size_t expect, eating;
+    int ch;
     
     while (*inbytes && *outwords) 
     {
@@ -167,7 +168,10 @@ apr_status_t conv_utf8_to_ucs2(const char *in, apr_size_t *inbytes,
                             return APR_EINVAL;
                     }
                 }
-                if (*outwords < (expect > 2) + 1) 
+                /* Where the boolean (expect > 2) is true, we will need
+                 * an extra word for the output.
+                 */
+                if (*outwords < (apr_size_t)(expect > 2) + 1) 
                     break; /* buffer full */
                 while (expect--)
                 {
@@ -207,8 +211,9 @@ apr_status_t conv_ucs2_to_utf8(const apr_wchar_t *in, apr_size_t *inwords,
                                char *out, apr_size_t *outbytes)
 {
     apr_int64_t newch, require;
+    apr_size_t need;
     char *invout;
-    int ch, need;
+    int ch;
     
     while (*inwords && *outbytes) 
     {

@@ -239,7 +239,7 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
 	p = os->argv[os->ind++] + 1;
 	if (*p == '-' && p[1] != '\0') {        /* Long option */
 	    /* Search for the long option name in the caller's table. */
-	    int len = 0;
+	    apr_size_t len = 0;
 
 	    p++;
 	    for (i = 0; ; i++) {
