@@ -306,7 +306,7 @@ apr_uint32_t apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
         prev = *mem;
         *mem = val;
         apr_thread_mutex_unlock(lock);
-        return val;
+        return prev;
     }
     return *mem;
 #else
