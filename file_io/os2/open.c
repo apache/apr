@@ -197,6 +197,8 @@ ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile, ap_conte
     (*file)->filedes = *dafile;
     (*file)->isopen = TRUE;
     (*file)->buffered = FALSE;
+    (*file)->validstatus = FALSE;
+    (*file)->eof_hit = FALSE;
     return APR_SUCCESS;
 }    
 
