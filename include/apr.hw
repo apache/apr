@@ -139,7 +139,9 @@
 
 #define APR_INLINE __inline
 #define APR_HAS_INLINE          1
+#ifndef __attribute__
 #define __attribute__(__x)
+#endif
 
 #define NO_USE_SIGACTION
 
