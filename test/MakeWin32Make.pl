@@ -19,6 +19,7 @@ while ($t = <$srcfl>) {
         $t =~ s|-g ||;
     }
     $t =~ s|\@LDFLAGS\@||;
+    $t =~ s|\.\./libapr\.la|../LibD/apr.lib|;
 
     $t =~ s|\@RM\@|del|;
     if ($t =~ s|(\$\(RM\)) -f|$1|) {
