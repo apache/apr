@@ -53,6 +53,7 @@
  */
 
 #include "fileio.h"
+#include "apr_strings.h"
 
 static ap_status_t pipeblock(ap_file_t *thepipe)
 {

@@ -53,6 +53,7 @@
  */
 
 #include "networkio.h"
+#include "apr_strings.h"
 
 static ap_status_t soblock(int sd)
 {

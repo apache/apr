@@ -55,6 +55,7 @@
 #include "apr_private.h"
 
 #include "apr_lib.h"
+#include "apr_strings.h"
 #include "apr_xlate.h"
 
 /* If no implementation is available, don't generate code here since

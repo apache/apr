@@ -53,6 +53,7 @@
  */
 
 #include "fileio.h"
+#include "apr_strings.h"
 #include "apr_portable.h"
 
 ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)

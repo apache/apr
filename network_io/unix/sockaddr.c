@@ -53,6 +53,7 @@
  */
 
 #include "networkio.h"
+#include "apr_strings.h"
 
 ap_status_t ap_set_local_port(ap_socket_t *sock, ap_uint32_t port)
 {

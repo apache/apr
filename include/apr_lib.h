@@ -368,28 +368,6 @@ B<Register a process to be killed when a pool dies.>
 APR_EXPORT(void) ap_note_subprocess(struct ap_pool_t *a, ap_proc_t *pid,
 				     enum kill_conditions how);
 
-/*
-
-=head1 char *ap_cpystrn(char *dst, const char *src, size_t dst_size)
-
-B<copy n characters from src to dest>
-
-    arg 1) The destination string 
-    arg 2) The source string
-    arg 3) The number of characters to copy
-
-B<NOTE>:  We re-implement this function to implement these specific changes:
-	1) strncpy() doesn't always null terminate and we want it to.
-	2) strncpy() null fills, which is bogus, esp. when copy 8byte strings
-	   into 8k blocks.
-	3) Instead of returning the pointer to the beginning of the
-	   destination string, we return a pointer to the terminating '\0'
-	   to allow us to check for truncation.
-
-=cut
- */
-APR_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size);
-
 #ifdef __cplusplus
 }
 #endif
