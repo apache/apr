@@ -356,7 +356,7 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
                 (status == APR_FROM_OS_ERROR(WSA_IO_PENDING))) {
                 rv = WaitForSingleObject(wait_event, 
                                          (DWORD)(sock->timeout >= 0 
-                                                 ? sock->timeout : INFINITE));
+                                                 ? sock->timeout_ms : INFINITE));
                 if (rv == WAIT_OBJECT_0) {
                     status = APR_SUCCESS;
                     if (!disconnected) {
