@@ -90,7 +90,6 @@ else
 	;;
     *os2_emx*)
 	APR_SETVAR(SHELL, [sh])
-        APR_SETIFNULL(file_as_socket, [0])
 	;;
     *-hi-hiux)
 	APR_ADDTO(CFLAGS, [-DHIUX])
@@ -336,10 +335,6 @@ dnl	;;
                 APR_ADDTO(CPPFLAGS, [-I/boot/develop/headers/bone])
                 APR_ADDTO(LDFLAGS, [-nodefaultlibs -L/boot/develop/lib/x86 -L/boot/beos/system/lib])
                 APR_ADDTO(EXTRA_LIBS, [-lbind -lsocket -lbe -lroot])
-                APR_SETIFNULL(file_as_socket, [0])
-                ;;
-            default)
-                APR_SETIFNULL(file_as_socket, [0])
                 ;;
 	esac
 	;;
