@@ -62,7 +62,10 @@ install: $(TARGET_LIB)
 	    $(top_srcdir)/build/mkdir.sh $(includedir); \
 	fi;
 	cp $(top_srcdir)/include/*.h $(includedir);
-	cp $(top_blddir)/include/*.h $(includedir);
+
+	if test -n "$(top_blddir)"; then \
+	    cp $(top_blddir)/include/*.h $(includedir); \
+	fi;
 	if [ ! -d $(libdir) ]; then \
 	    $(top_srcdir)/build/mkdir.sh $(libdir); \
 	fi;
