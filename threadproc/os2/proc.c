@@ -64,6 +64,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <process.h>
 #define INCL_DOS
 #include <os2.h>
 
