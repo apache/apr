@@ -17,7 +17,7 @@ TARGETS = \
 	testdso@EXEEXT@ \
 	testoc@EXEEXT@ \
 	testuuid@EXEEXT@ \
-	occhild.so \
+	occhild@EXEEXT@ \
 	mod_test.so
 
 # bring in rules.mk for standard functionality
@@ -46,7 +46,7 @@ testdso@EXEEXT@: testdso.lo
 testoc@EXEEXT@: testoc.lo
 	$(LINK) testoc.lo $(ALL_LIBS)
 
-occhild.so: occhild.lo
+occhild@EXEEXT@: occhild.lo
 	$(LINK) --module occhild.lo
 
 mod_test.so: mod_test.lo
