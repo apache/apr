@@ -95,7 +95,11 @@ static void set_xt_gmtoff_from_tm(apr_exploded_time_t *xt, struct tm *tm,
     {
         struct tm t;
         int days = 0, hours = 0, minutes = 0;
+#ifdef HAVE_GMTIME_R
         gmtime_r(tt, &t);
+#else
+        t = *gmtime(tt);
+#endif
         days = xt->tm_yday - t.tm_yday;
         hours = ((days < -1 ? 24 : 1 < days ? -24 : days * 24) +
                  xt->tm_hour - t.tm_hour);
@@ -145,6 +149,10 @@ apr_status_t apr_explode_gmt(apr_exploded_time_t *result, apr_time_t input)
 
 apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input)
 {
+#if defined(__EMX__)
+    /* EMX gcc (OS/2) has a timezone global we can use */
+    return apr_explode_time(result, input, -timezone);
+#else
     time_t mango = input / APR_USEC_PER_SEC;
     apr_int32_t offs = 0;
 
@@ -163,6 +171,7 @@ apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input
     offs = mangotm->tm_gmtoff;
 #endif
     return apr_explode_time(result, input, offs);
+#endif /* __EMX__ */
 }
 
 apr_status_t apr_implode_time(apr_time_t *t, apr_exploded_time_t *xt)
@@ -246,7 +255,7 @@ void apr_sleep(apr_interval_time_t t)
 {
 #ifdef OS2
     DosSleep(t/1000);
-#elseif defined(BEOS)
+#elif defined(BEOS)
     snooze(t);
 #else
     struct timeval tv;
