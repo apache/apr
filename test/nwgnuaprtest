@@ -198,10 +198,10 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testuser.o \
 	$(OBJDIR)/testvsn.o \
 	$(OBJDIR)/nw_misc.o \
+	$(OBJDIR)/testpipe.o \
 	$(EOLIST)
 
 # Pending tests
-#	$(OBJDIR)/testpipe.o \
 	
 #
 # These are the LIB files needed to create the NLM target above.
