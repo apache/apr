@@ -85,6 +85,20 @@ APR_DECLARE(const char *) apr_signal_description_get(int signum);
  */
 void apr_signal_init(apr_pool_t *pglobal);
 
+/**
+ * Block the delivery of a particular signal
+ * @param signum The signal number
+ * @return status
+ */
+APR_DECLARE(apr_status_t) apr_signal_block(int signum);
+
+/**
+ * Enable the delivery of a particular signal
+ * @param signum The signal number
+ * @return status
+ */
+APR_DECLARE(apr_status_t) apr_signal_unblock(int signum);
+
 /** @} */
 
 #ifdef __cplusplus
