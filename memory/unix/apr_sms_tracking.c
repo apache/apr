@@ -66,6 +66,7 @@
 #include "apr_sms.h"
 #include "apr_sms_tracking.h"
 #include "apr_lock.h"
+#include <stddef.h> /* for NULL */
 
 static const char *module_identity = "TRACKING";
 
