@@ -276,7 +276,7 @@ apr_status_t apr_xlate_get_sb(apr_xlate_t *convset, int *onoff)
     return APR_SUCCESS;
 } 
 
-apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, char *inbuf,
+apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf,
                                    apr_size_t *inbytes_left, char *outbuf,
                                    apr_size_t *outbytes_left)
 {
@@ -285,7 +285,7 @@ apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, char *inbuf,
     size_t translated;
 
     if (convset->ich != (iconv_t)-1) {
-        char *inbufptr = inbuf;
+        char *inbufptr = (char *)inbuf;
         char *outbufptr = outbuf;
         
         translated = iconv(convset->ich, &inbufptr, 

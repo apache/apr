@@ -126,10 +126,10 @@ APR_DECLARE(apr_status_t) apr_xlate_get_sb(apr_xlate_t *convset, int *onoff);
  * @param outbuf The address of the destination buffer
  * @param outbytes_left Input: the size of the output buffer
  *                      Output: the amount of the output buffer not yet used
- * @deffunc apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, char *inbuf, apr_size_t *inbytes_left, char *outbuf, apr_size_t *outbytes_left)
+ * @deffunc apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf, apr_size_t *inbytes_left, char *outbuf, apr_size_t *outbytes_left)
  */
 APR_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset, 
-                                                char *inbuf, 
+                                                const char *inbuf, 
                                                 apr_size_t *inbytes_left, 
                                                 char *outbuf,
                                                 apr_size_t *outbytes_left);
