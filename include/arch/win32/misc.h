@@ -104,16 +104,26 @@ struct apr_other_child_rec_t {
  * export new kernel or winsock functions or behavior.
  */
 typedef enum {
-        APR_WIN_UNK = 0,
-        APR_WIN_95 = 2,
-        APR_WIN_98 = 4,
-        APR_WIN_NT = 8,
-        APR_WIN_NT_4 = 12,
-        APR_WIN_NT_4_SP2 = 14,
-        APR_WIN_NT_4_SP3 = 15,
-        APR_WIN_NT_4_SP4 = 16,
-        APR_WIN_NT_4_SP6 = 18,
-        APR_WIN_2000 = 24
+        APR_WIN_UNK =       0,
+        APR_WIN_UNSUP =     1,
+        APR_WIN_95 =       10,
+        APR_WIN_95_B =     11,
+        APR_WIN_95_OSR2 =  12,
+        APR_WIN_98 =       14,
+        APR_WIN_98_SE =    16,
+        APR_WIN_ME =       18,
+        APR_WIN_NT_3_5 =   35,
+        APR_WIN_NT_3_51 =  36,
+        APR_WIN_NT_4 =     40,
+        APR_WIN_NT_4_SP2 = 42,
+        APR_WIN_NT_4_SP3 = 43,
+        APR_WIN_NT_4_SP4 = 44,
+        APR_WIN_NT_4_SP5 = 45,
+        APR_WIN_NT_4_SP6 = 46,
+        APR_WIN_2000 =     50,
+        APR_WIN_2000_SP1 = 51,
+        APR_WIN_2000_SP2 = 52,
+        APR_WIN_XP =       60
 } apr_oslevel_e;
 
 extern apr_oslevel_e apr_os_level;
