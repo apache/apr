@@ -619,7 +619,7 @@ InputPath=.\build\win32ver.awk
 InputPath=.\build\win32ver.awk
 
 ".\libapr.rc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	awk -f ./build/win32ver.awk libapr "Apache Portability Runtime Library"  ../../include/ap_release.h > .\libapr.rc
+	awk -f ./build/win32ver.awk libapr.dll "Apache Portability Runtime Library"  ../../include/ap_release.h > .\libapr.rc
 
 # End Custom Build
 
