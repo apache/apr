@@ -49,7 +49,9 @@ clean: subdirs_clean
 
 depend: subdirs_depend
 
-distclean: clean
+distclean: subdirs_distclean
+	-$(RM) -f *.o *.a *.so
+	-$(RM) -f config.cache config.status config.log
 	-$(RM) -f Makefile
 
 subdirs:
@@ -73,6 +75,14 @@ subdirs_clean:
 	@for i in $(SUBDIRS); do \
 	    echo "===> $(SDP)lib/apr/$$i"; \
 	    ( cd $$i && $(MAKE) $(MFLAGS_STATIC) SDP='$(SDP)' clean ) \
+		|| exit 1; \
+	    echo "<=== $(SDP)lib/apr/$$i"; \
+	done;
+
+subdirs_distclean:
+	@for i in $(SUBDIRS); do \
+	    echo "===> $(SDP)lib/apr/$$i"; \
+	    ( cd $$i && $(MAKE) $(MFLAGS_STATIC) SDP='$(SDP)' distclean ) \
 		|| exit 1; \
 	    echo "<=== $(SDP)lib/apr/$$i"; \
 	done;
