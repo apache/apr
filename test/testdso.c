@@ -31,12 +31,6 @@ int main (int argc, char ** argv)
         exit(-1);
     }
 
-    fprintf(stdout,"Initializing DSO's.........................");
-    if (ap_dso_init() != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't initialize DSO's !");
-        exit (-1);
-    }
-    fprintf(stdout,"OK\n");
     fprintf(stdout,"Trying to load DSO now.....................");
     fflush(stdout);
     if ((status = ap_dso_load(&h, filename, cont)) != APR_SUCCESS){
