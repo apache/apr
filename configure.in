@@ -2,19 +2,19 @@ dnl ##
 dnl ## Autoconf configuration file for APR
 dnl ##
 
-echo "Configuring APR library"
-echo "Platform: ${OS}"
-echo "(Default will be ${DEFAULT_OSDIR})"
 
 AC_CONFIG_AUX_DIR(./helpers)
+echo "Configuring APR library"
 OS=`./config.guess`
 OS=`./config.sub $OS`
+echo "Platform: ${OS}"
 
 dnl # Some initial steps for configuration.  We setup the default directory
 dnl # and which files are to be configured.
 
 # These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
+echo "(Default will be ${DEFAULT_OSDIR})"
 MODULES="file_io network_io threadproc misc locks time mmap shmem"
 
 dnl Process this file with autoconf to produce a configure script.
@@ -177,6 +177,8 @@ AC_CHECK_HEADERS(sys/socket.h)
 AC_CHECK_HEADERS(sys/stat.h)
 AC_CHECK_HEADERS(sys/types.h, sys_typesh="1", sys_typesh="0")
 AC_CHECK_HEADERS(sys/wait.h)
+AC_CHECK_HEADERS(dlfcn.h)
+AC_CHECK_HEADERS(dl.h)
 
 AC_CHECK_HEADERS(kernel/OS.h)
 
