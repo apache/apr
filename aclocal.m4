@@ -161,3 +161,29 @@ undefine([AC_TYPE_NAME])dnl
 undefine([AC_CV_NAME])dnl
 ])
 
+dnl 
+dnl check for socklen_t, fall back to unsigned int
+dnl
+
+AC_DEFUN(APR_CHECK_SOCKLEN_T,[
+AC_CACHE_CHECK(for socklen_t, ac_cv_socklen_t,[
+AC_TRY_COMPILE([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+],[
+socklen_t foo = (socklen_t) 0;
+],[
+    ac_cv_socklen_t=yes
+],[
+    ac_cv_socklen_t=no
+])
+])
+
+if test "$ac_cv_socklen_t" = "no"; then
+  AC_DEFINE(socklen_t, unsigned int, [Whether you have socklen_t])
+fi
+])

@@ -306,6 +306,8 @@ AC_TYPE_SIZE_T
 AC_FUNC_MMAP
 AC_FUNC_SETPGRP
 
+APR_CHECK_SOCKLEN_T
+
 if test "$ac_cv_func_mmap_fixed_mapped" = "yes"; then 
     mmap="1"
     AC_SUBST(mmap)
