@@ -66,8 +66,8 @@ extern "C" {
 #define SAFETY_LOCK(func_name, name_str) \
     { \
     if (lock_##func_name == NULL) \
-        if (ap_create_lock(&lock_##func_name, APR_MUTEX, APR_INTRAPROCESS, name_
-str, NULL) != APR_SUCCESS) \
+        if (ap_create_lock(&lock_##func_name, APR_MUTEX, APR_INTRAPROCESS, \
+        name_str, NULL) != APR_SUCCESS) \
             return APR_NOTTHREADSAFE; \
     if (ap_lock(lock_##func_name) != APR_SUCCESS) \
         return APR_NOTTHREADSAFE; \
