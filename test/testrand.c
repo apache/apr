@@ -63,7 +63,6 @@ static void rand_exists(CuTest *tc)
 #if !APR_HAS_RANDOM
     CuNotImpl(tc, "apr_generate_random_bytes");
 #else
-    apr_pool_t *p;
     apr_status_t rv;
     unsigned char c[2048];
     int i;
