@@ -128,6 +128,10 @@ SOURCE=.\testmmap.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testnames.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\testoc.c
 # End Source File
 # Begin Source File
@@ -166,6 +170,10 @@ SOURCE=.\testuuid.c
 # Begin Source File
 
 SOURCE=.\aprtest.win
+# End Source File
+# Begin Source File
+
+SOURCE=.\Makefile
 # End Source File
 # Begin Source File
 
