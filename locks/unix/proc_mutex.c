@@ -882,72 +882,17 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex)
 {
-    apr_status_t rv;
-
-#if APR_HAS_THREADS
-    if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
-        mutex->owner_ref++;
-        return APR_SUCCESS;
-    }
-#endif
-
-    if ((rv = mutex->meth->acquire(mutex)) != APR_SUCCESS) {
-        return rv;
-    }
-
-#if APR_HAS_THREADS
-    mutex->owner = apr_os_thread_current();
-    mutex->owner_ref = 1;
-#endif
-
-    return APR_SUCCESS;
+    return mutex->meth->acquire(mutex);
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
 {
-    apr_status_t rv;
-
-#if APR_HAS_THREADS
-    if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
-        mutex->owner_ref++;
-        return APR_SUCCESS;
-    }
-#endif
-
-    if ((rv = mutex->meth->tryacquire(mutex)) != APR_SUCCESS) {
-        return rv;
-    }
-
-#if APR_HAS_THREADS
-    mutex->owner = apr_os_thread_current();
-    mutex->owner_ref = 1;
-#endif
-
-    return APR_SUCCESS;
+    return mutex->meth->tryacquire(mutex);
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex)
 {
-    apr_status_t rv;
-
-#if APR_HAS_THREADS
-    if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
-        mutex->owner_ref--;
-        if (mutex->owner_ref > 0)
-            return APR_SUCCESS;
-    }
-#endif
-
-    if ((rv = mutex->meth->release(mutex)) != APR_SUCCESS) {
-        return rv;
-    }
-
-#if APR_HAS_THREADS
-    memset(&mutex->owner, 0, sizeof mutex->owner);
-    mutex->owner_ref = 0;
-#endif
-    
-    return APR_SUCCESS;
+    return mutex->meth->release(mutex);
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
