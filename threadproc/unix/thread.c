@@ -260,6 +260,7 @@ APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
 {
     static const pthread_once_t once_init = PTHREAD_ONCE_INIT;
 
+    *control = apr_palloc(p, sizeof(**control));
     (*control)->once = once_init;
     return APR_SUCCESS;
 }
