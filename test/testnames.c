@@ -70,11 +70,12 @@ static void closeapr(void)
     apr_terminate();
 }
 
-static void root_result(char *path)
+static void root_result(const char *path)
 {
     apr_status_t status;
     char errmsg[256];
-    char *root = NULL;
+    const char *root = NULL;
+
     status = apr_filepath_root(&root, &path, APR_FILEPATH_NATIVE, context);
     apr_strerror(status, errmsg, sizeof(errmsg));
     if (root)
