@@ -173,6 +173,41 @@ APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
 APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
                                            apr_int32_t opt, apr_int32_t *on)
 {
+#ifdef NETWARE
+    int sol_opt = 0;
+
+    switch (opt) {
+    case APR_SO_TIMEOUT: 
+        /* Convert from milliseconds (windows units) to microseconds 
+         * (APR units) */
+        *on = (apr_int32_t)(sock->timeout * 1000);
+        break;
+    case APR_SO_DISCONNECTED:
+        *on = sock->disconnected;
+        break;
+    case APR_SO_KEEPALIVE:
+        sol_opt = SO_KEEPALIVE;
+        break;
+    case APR_SO_DEBUG:
+        sol_opt = SO_DEBUG;
+        break;
+    case APR_SO_REUSEADDR:
+        sol_opt = SO_REUSEADDR;
+        break;
+    case APR_SO_NONBLOCK:
+    case APR_SO_LINGER:
+    default:
+        return APR_ENOTIMPL;
+        break;
+    }
+    if (sol_opt) {
+        int sz = sizeof(apr_int32_t);
+
+        if (getsockopt(sock->sock, SOL_SOCKET, sol_opt, (char *)on, &sz) == -1) {
+            return apr_get_netos_error();
+        }
+    }
+#else
     switch (opt) {
     case APR_SO_TIMEOUT: 
         /* Convert from milliseconds (windows units) to microseconds 
@@ -191,6 +226,7 @@ APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
         return APR_ENOTIMPL;
         break;
     }
+#endif
     return APR_SUCCESS;
 }
 
