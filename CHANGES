@@ -1,5 +1,9 @@
 Changes with APR 0.9.2
 
+  *) Disable IPv6 support on Darwin.  The current IPv6 support has a
+     problem in getnameinfo() which breaks certain applications.
+     [Sander Temme <sctemme@covalent.net>, Jeff Trawick]
+
   *) Support for SCO OpenServer Release 5 [Kean Johnston <jkj@caldera.com>]
 
   *) Faster (inline and mutex-free) implementations of all apr_atomic
