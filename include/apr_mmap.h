@@ -183,21 +183,6 @@ APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
                                        apr_mmap_t *old_mmap,
                                        apr_pool_t *p);
 
-#if defined(DOXYGEN)
-/**
- * Transfer the specified MMAP to a different pool
- * @param new_mmap The structure to duplicate into.
- * @param old_mmap The file to transfer.
- * @param p The pool to use for new_mmap.
- *  go away soon anyway.
- */
-APR_DECLARE(apr_status_t) apr_mmap_setaside(apr_mmap_t **new_mmap,
-                                            apr_mmap_t *old_mmap,
-                                            apr_pool_t *p);
-#else
-#define apr_mmap_setaside(new_mmap, old_mmap, p) apr_mmap_dup(new_mmap, old_mmap, p, 1)
-#endif /* DOXYGEN */
-
 /**
  * Remove a mmap'ed.
  * @param mm The mmap'ed file.
