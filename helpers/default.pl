@@ -498,7 +498,11 @@ sub variable {
 
 sub processDescription {
   local ($_) = @_;
-  
+
+  # handle HTML markup issues.
+  s/</&lt;/g;
+  s/>/&gt;/g;
+
   s/^\s+//;				# Remove whitespace from beginning
   s/\s+$/\n/;				# Remove whitespace from end
   s/\n\n/<p>\n/g;			# Replace multiple CR's with paragraph markers
