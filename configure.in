@@ -450,7 +450,6 @@ APR_FLAG_HEADERS(
     kernel/OS.h		\
     net/errno.h		\
     netinet/in.h	\
-    netinet/tcp.h	\
     sys/file.h		\
     sys/mman.h		\
     sys/poll.h		\
@@ -466,6 +465,22 @@ APR_FLAG_HEADERS(
     sys/types.h		\
     sys/uio.h		\
     sys/wait.h)
+
+dnl IRIX 6.5 has a problem in <netinet/tcp.h> which prevents it from
+dnl being included by itself.  Check for <netinet/tcp.h> manually,
+dnl including another header file first.
+AC_MSG_CHECKING(for netinet/tcp.h)
+AC_TRY_CPP([
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#include <netinet/tcp.h>
+], netinet_tcph="1", netinet_tcph="0")
+if test $netinet_tcph = 1; then
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
 
 AC_SUBST(arpa_ineth)
 AC_SUBST(conioh)
