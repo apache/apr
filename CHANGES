@@ -1,8 +1,11 @@
 Changes with APR b1  
 
+  *) Fix a few attempts to add to a void * ptr in the Unix shared
+     memory support code.  PR #9710  Per Ekman [pek@pdc.kth.se]
+
   *) In the Linux apr_sendfile(), fix the types of some parameters 
      to apr_send() and apr_recv().  Breakage was seen in 64-bit mode
-     on s/390.  [Neale.Ferguson@SoftwareAG-usa.coom]
+     on s/390.  PR #9712  [Neale.Ferguson@SoftwareAG-usa.coom]
 
   *) added APR_PROGRAM_ENV and APR_PROGRAM_PATH options for starting
      processes via apr_proc_create() [Greg Stein]
