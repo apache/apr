@@ -99,6 +99,8 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
         return APR_ENOPOOL;
     }
 
+    apr_pool_tag(pool, "apr_initilialize");
+
 #ifdef WIN32
     /* Initialize apr_os_level global */
     if (apr_get_oslevel(pool, &osver) != APR_SUCCESS) {
