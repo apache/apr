@@ -18,6 +18,7 @@ include $(APR_WORK)\build\NWGNUhead.inc
 FILES_prebuild_headers = \
 	$(APR)/include/apr.h \
 	$(APRUTIL)/include/apu.h \
+	$(APRUTIL)/include/apu_want.h \
 	$(APRUTIL)/include/apr_ldap.h \
 	$(APRUTIL)/include/private/apu_config.h \
 	$(APRUTIL)/include/private/apu_select_dbm.h \
