@@ -274,9 +274,11 @@ typedef  int               apr_socklen_t;
 /* Mechanisms to properly type numeric literals */
 
 #ifdef __GNUC__
-#define APR_INT64_C(val) (val)
+#define APR_INT64_C(val) (val##LL)
+#define APR_UINT64_C(val) (val##ULL)
 #else
 #define APR_INT64_C(val) (val##i64)
+#define APR_UINT64_C(val) (val##Ui64)
 #endif
 
 /* PROC mutex is a GLOBAL mutex on Netware */

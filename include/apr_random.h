@@ -79,15 +79,19 @@ APR_DECLARE(apr_crypto_hash_t *) apr_crypto_sha256_new(apr_pool_t *p);
 typedef struct apr_random_t apr_random_t;
 
 APR_DECLARE(void) apr_random_init(apr_random_t *g,apr_pool_t *p,
-                     apr_crypto_hash_t *pool_hash,apr_crypto_hash_t *key_hash,
-                     apr_crypto_hash_t *prng_hash);
+                                  apr_crypto_hash_t *pool_hash,
+                                  apr_crypto_hash_t *key_hash,
+                                  apr_crypto_hash_t *prng_hash);
 APR_DECLARE(apr_random_t *) apr_random_standard_new(apr_pool_t *p);
-APR_DECLARE(void) apr_random_add_entropy(apr_random_t *g,const void *entropy_,
-                            apr_size_t bytes);
-APR_DECLARE(apr_status_t) apr_random_insecure_bytes(apr_random_t *g,void *random,
-                                       apr_size_t bytes);
-APR_DECLARE(apr_status_t) apr_random_secure_bytes(apr_random_t *g,void *random,
-                                     apr_size_t bytes);
+APR_DECLARE(void) apr_random_add_entropy(apr_random_t *g,
+                                         const void *entropy_,
+                                         apr_size_t bytes);
+APR_DECLARE(apr_status_t) apr_random_insecure_bytes(apr_random_t *g,
+                                                    void *random,
+                                                    apr_size_t bytes);
+APR_DECLARE(apr_status_t) apr_random_secure_bytes(apr_random_t *g,
+                                                  void *random,
+                                                  apr_size_t bytes);
 APR_DECLARE(void) apr_random_barrier(apr_random_t *g);
 APR_DECLARE(apr_status_t) apr_random_secure_ready(apr_random_t *r);
 APR_DECLARE(apr_status_t) apr_random_insecure_ready(apr_random_t *r);
