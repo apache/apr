@@ -217,7 +217,7 @@ apr_status_t apr_os_thread_get(apr_os_thread_t **thethd, apr_thread_t *thd)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_os_thread_pupt(apr_thread_t **thd, apr_os_thread_t *thethd, 
+apr_status_t apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd, 
                              apr_pool_t *cont)
 {
     if (cont == NULL) {

@@ -351,9 +351,9 @@ APR_DECLARE(apr_status_t) apr_os_imp_time_put(apr_time_t *aprtime,
  * @param aprtime the APR time format
  * @param ostime the time to convert
  * @param cont the pool to use if necessary
- * @deffunc apr_status_t apr_os_exp_time_pupt(apr_exploded_time_t *aprtime, apr_os_exp_time_t **ostime, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_os_exp_time_put(apr_exploded_time_t *aprtime, apr_os_exp_time_t **ostime, apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_os_exp_time_pupt(apr_exploded_time_t *aprtime,
+APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_exploded_time_t *aprtime,
                                               apr_os_exp_time_t **ostime,
                                               apr_pool_t *cont); 
 
@@ -364,9 +364,9 @@ APR_DECLARE(apr_status_t) apr_os_exp_time_pupt(apr_exploded_time_t *aprtime,
  * @param thd The apr thread we are converting to.
  * @param thethd The os specific thread to convert
  * @param cont The pool to use if it is needed.
- * @deffunc apr_status_t apr_os_thread_pupt(apr_thread_t **thd, apr_os_thread_t *thethd,
+ * @deffunc apr_status_t apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd,
  */
-APR_DECLARE(apr_status_t) apr_os_thread_pupt(apr_thread_t **thd,
+APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd,
                                             apr_os_thread_t *thethd,
                                             apr_pool_t *cont);
 

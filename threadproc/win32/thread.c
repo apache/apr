@@ -187,7 +187,7 @@ APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_os_thread_pupt(apr_thread_t **thd,
+APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd,
                                             apr_os_thread_t *thethd,
                                             apr_pool_t *cont)
 {
