@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Fix spelling mistakes in APRDesign.  
+     [Blair Zajac <blair@orcaware.com>]
+
   *) Ensure that apr_file_mktemp creates the temp file if it isn't there.
      [John Sterling <sterling@covalent.net>]
 
