@@ -340,8 +340,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     DWORD dwCreationFlags = 0;
 
     new->in = attr->parent_in;
-    new->err = attr->parent_err;
     new->out = attr->parent_out;
+    new->err = attr->parent_err;
 
     if (attr->detached) {
         /* If we are creating ourselves detached, Then we should hide the
