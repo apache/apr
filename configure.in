@@ -4,7 +4,7 @@ OS=`./config.sub $OS`
 
 # These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
-MODULES="file_io network_io threadproc misc signal locks time" 
+MODULES="file_io network_io threadproc misc signal locks time mmap" 
 
 echo "Configuring APR library"
 echo "Platform: ${OS}"

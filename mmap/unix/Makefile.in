@@ -10,7 +10,7 @@ CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../../inc
-INCDIR1=../../include
+INCDIR1=../../include -I../../file_io/@OSDIR@
 INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
 
 LIB=libmmap.a

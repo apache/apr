@@ -54,6 +54,7 @@
  */
 
 #include "mmap_h.h"
+#include "fileio.h"
 #include "apr_mmap.h"
 #include "apr_general.h"
 #include "apr_portable.h"
@@ -83,13 +84,7 @@ ap_status_t ap_mmap_create(ap_mmap_t **new, const char * fname,
     struct stat st;
     int fd;
     caddr_t mm;
-    ap_mmap_t next;
-    
-    /* before we go blindly in and create an mmap, we should probably check
-     * to make sure we haven't already mmap'd the file.
-     * I'll add this once I've got the basics working.
-     */
-    
+   
     (*new) = (struct mmap_t *)ap_palloc(cont, sizeof(struct mmap_t));
     
     if (stat(fname, &st) == -1) {
@@ -120,6 +115,52 @@ ap_status_t ap_mmap_create(ap_mmap_t **new, const char * fname,
              ap_null_cleanup);
     return APR_SUCCESS;
 }
+
+ap_status_t ap_mmap_open_create(struct mmap_t **new, ap_file_t *file, 
+               ap_context_t *cont)
+{
+    caddr_t mm;
+
+    if (file->buffered)
+        /* we don't yet mmap buffered files... */
+        return APR_EBADF;
+    if (file->filedes == -1)
+        /* there isn't a file handle so how can we mmap?? */
+        return APR_EBADF;
+    (*new) = (struct mmap_t*)ap_palloc(file->cntxt, sizeof(struct mmap_t));
+    
+    if (!file->stated) {
+        /* hmmmm... we need to stat the file now */
+        struct stat st;
+        if (stat(file->fname, &st) == -1) {
+            /* hmm, is this fatal?? */
+            return APR_EBADF;
+        }
+        file->stated = 1;
+        file->size = st.st_size;
+        file->atime = st.st_atime;
+        file->mtime = st.st_mtime;
+        file->ctime = st.st_ctime;
+        (*new)->sinfo = st;
+    }
+
+    mm = mmap(NULL, file->size, PROT_READ, MAP_SHARED, file->filedes ,0);
+    if (mm == (caddr_t)-1) {
+        /* we failed to get an mmap'd file... */
+        return APR_ENOMEM;
+    }
+
+    (*new)->filename = ap_pstrdup(cont, file->fname);
+    (*new)->mm = mm;
+    (*new)->size = file->size;
+    (*new)->cntxt = cont;
+           
+    /* register the cleanup... */
+    ap_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
+             ap_null_cleanup);
+    return APR_SUCCESS;
+}
+
 
 ap_status_t ap_mmap_delete(struct mmap_t *mmap)
 {
