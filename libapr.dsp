@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib /nologo /base:"0x6EE00000" /subsystem:windows /dll /map /machine:I386 /OPT:NOREF
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib /nologo /base:"0x6EE00000" /subsystem:windows /dll /map /machine:I386 /OPT:NOREF
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EE00000" /subsystem:windows /dll /map /machine:I386 /OPT:NOREF
 
 !ELSEIF  "$(CFG)" == "libapr - Win32 Debug"
 
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib /nologo /base:"0x6EE00000" /subsystem:windows /dll /incremental:no /map /debug /machine:I386 /OPT:NOREF
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib /nologo /base:"0x6EE00000" /subsystem:windows /dll /incremental:no /map /debug /machine:I386 /OPT:NOREF
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EE00000" /subsystem:windows /dll /incremental:no /map /debug /machine:I386 /OPT:NOREF
 
 !ENDIF 
 

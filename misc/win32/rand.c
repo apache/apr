@@ -93,9 +93,12 @@ APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
      * possible misuse/abuse since uuid is based on the NIC address, and
      * is therefore not only a uniqifier, but an identity (which might not
      * be appropriate in all cases.
+     *
+     * Note that Win2000, XP and later no longer suffer from this problem,
+     * a scrambling fix is only needed for (apr_os_level < APR_WIN_2000)
      */
-    if (FAILED(CoCreateGuid((LPGUID)uuid_data))) {
-	return APR_EGENERAL;
+    if (FAILED(UuidCreate((UUID *)uuid_data))) {
+        return APR_EGENERAL;
     }
     return APR_SUCCESS;
 }
