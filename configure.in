@@ -15,7 +15,6 @@ sinclude(build/apr_common.m4)
 sinclude(build/apr_network.m4)
 sinclude(build/apr_threads.m4)
 sinclude(build/apr_hints.m4)
-sinclude(build/libtool.m4)
 
 AC_CANONICAL_SYSTEM
 echo "Configuring APR library"
@@ -79,18 +78,7 @@ dnl
 dnl prep libtool
 dnl
 echo "performing libtool configuration..."
-
-case "$host_alias" in
-*os2*)
-    # Use a custom made libtool replacement
-    echo "using aplibtool"
-    LIBTOOL="$srcdir/build/aplibtool"
-    gcc -o $LIBTOOL.exe $LIBTOOL.c
-    ;;
-*)
-    AC_PROG_LIBTOOL
-    ;;
-esac
+AC_PROG_LIBTOOL
 
 dnl #----------------------------- Checks for compiler flags
 nl='

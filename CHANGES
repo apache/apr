@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Make it easier to replace libtool on OS/2 via aclocal.m4.
+     [Roy Fielding]
+
   *) Add apr_ipsubnet_create() and apr_ipsubnet_test() for testing
      whether or not an address is within a subnet.  [Jeff Trawick]
 
