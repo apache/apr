@@ -56,9 +56,10 @@
  * Note: This is a NetWare specific version of apr.h. It is renamed to
  * apr.h at the start of a Windows build.
  */
+#ifdef NETWARE
 /**
- * @file apr.h
- * @brief Basic APR header
+ * @file netware/apr.h netware/apr.h
+ * @brief APR header for NetWare
  */
 
 /**
@@ -67,7 +68,6 @@
  */
 
 
-#ifdef NETWARE
 #ifndef APR_H
 #define APR_H
 
@@ -332,6 +332,6 @@ typedef int apr_wait_t;
 //typedef int apr_wait_t;
 
 #endif /* APR_H */
-#endif /* NETWARE */
 /** @} */
+#endif /* NETWARE */
 
