@@ -676,6 +676,12 @@ APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
  * Setup socket timeout for the specified socket
  * @param sock The socket to set up.
  * @param t Value for the timeout.
+ * <PRE>
+ *   t > 0  -- read and write calls return APR_TIMEUP if specified time
+ *             elapsess with no data read or written
+ *   t == 0 -- read and write calls never block
+ *   t < 0  -- read and write calls block
+ * </PRE>
  */
 APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock,
                                                  apr_interval_time_t t);
