@@ -79,7 +79,7 @@ void get_sid_string(char *buf, int blen, apr_uid_t id)
      */
     psia = GetSidIdentifierAuthority(id);
     nsa =  (DWORD)(psia->Value[5])        + ((DWORD)(psia->Value[4]) <<  8)
-        + ((DWORD)(psia->Value[3])) << 16 + ((DWORD)(psia->Value[2]) << 24);
+        + ((DWORD)(psia->Value[3]) << 16) + ((DWORD)(psia->Value[2]) << 24);
     sa  =  (DWORD)(psia->Value[1])        + ((DWORD)(psia->Value[0]) <<  8);
     if (sa) {
         slen = apr_snprintf(buf, blen, "S-%lu-0x%04x%08x",
