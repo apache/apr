@@ -78,7 +78,15 @@ static apr_status_t _file_dup(apr_file_t **new_file,
     }
 
     if (which_dup == 2) {
+#ifdef NETWARE
+        /* Apparently Netware doesn't support dup2... instead
+         * close() then dup()
+         */
+        close((*new_file)->filedes);
+        rv = ((*new_file)->filedes = dup(old_file->filedes)); 
+#else
         rv = dup2(old_file->filedes, (*new_file)->filedes);
+#endif
     } else {
         rv = ((*new_file)->filedes = dup(old_file->filedes)); 
     }
@@ -141,11 +149,7 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
 APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                                         apr_file_t *old_file, apr_pool_t *p)
 {
-#ifdef NETWARE
-    return _file_dup(&new_file, old_file, p, 1);
-#else
     return _file_dup(&new_file, old_file, p, 2);
-#endif
 }
 
 APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
