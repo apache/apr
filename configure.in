@@ -107,7 +107,7 @@ AC_PROG_LIBTOOL
     ;;
 esac
 
-AC_ARG_ENABLE(libtool, [--with-libtool   use libtool to link the library],
+AC_ARG_WITH(libtool, [  --without-libtool       avoid using libtool to link the library],
   [ use_libtool=$withval ], [ use_libtool="yes" ] )
 
 if test "x$use_libtool" = "xyes"; then
@@ -134,7 +134,7 @@ nl='
 '
 echo $ac_n "${nl}Check for compiler flags...${nl}"
 
-AC_ARG_ENABLE(debug,[  --enable-debug            Turn on debugging and compile time warnings],
+AC_ARG_ENABLE(debug,[  --enable-debug          Turn on debugging and compile time warnings],
   [APR_ADDTO(CFLAGS,-g)
    if test "$GCC" = "yes"; then
      APR_ADDTO(CFLAGS,-Wall)
@@ -149,15 +149,15 @@ AC_ARG_ENABLE(maintainer-mode,[  --enable-maintainer-mode  Turn on debugging and
    fi
 ])dnl
 
-AC_ARG_ENABLE(assert-memory,[ --enable-assert-memory  Turn on asserts in the APR memory code],
+AC_ARG_ENABLE(assert-memory,[  --enable-assert-memory  Turn on asserts in the APR memory code],[
   APR_ADDTO(NOTEST_CPPFLAGS,-DAPR_ASSERT_MEMORY)
-)dnl
+])dnl
 
-AC_ARG_ENABLE(profile,[ --enable-profile Turn on profiling for the build (GCC)],
+AC_ARG_ENABLE(profile,[  --enable-profile        Turn on profiling for the build (GCC)],[
   if test "$GCC" = "yes"; then
     APR_ADDTO(CFLAGS, -pg)
   fi
-)dnl
+])dnl
 
 dnl # this is the place to put specific options for platform/compiler
 dnl # combinations
@@ -453,7 +453,7 @@ dnl THIS MUST COME AFTER THE THREAD TESTS - FreeBSD doesn't always have a
 dnl threaded poll() and we don't want to use sendfile on early FreeBSD 
 dnl systems if we are also using threads.
 
-AC_ARG_WITH(sendfile, [  --with-sendfile  Force sendfile to be on or off],
+AC_ARG_WITH(sendfile, [  --with-sendfile         Override decision to use sendfile],
   [ if test "$withval" = "yes"; then
         sendfile="1"
     else
