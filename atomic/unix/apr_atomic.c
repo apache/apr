@@ -63,7 +63,7 @@
 
 #define NUM_ATOMIC_HASH 7
 /* shift by 2 to get rid of alignment issues */
-#define ATOMIC_HASH(x) (unsigned int)(((unsigned long)(x))%(unsigned int)NUM_ATOMIC_HASH)
+#define ATOMIC_HASH(x) (unsigned int)(((unsigned long)(x)>>2)%(unsigned int)NUM_ATOMIC_HASH)
 static apr_thread_mutex_t **hash_mutex;
 
 apr_status_t apr_atomic_init(apr_pool_t *p )
