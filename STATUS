@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/01/29 06:21:36 $]
+Last modified at [$Date: 2001/02/04 21:37:49 $]
 
 Release:
 
@@ -111,6 +111,10 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
     * add the rest of the pool accessor declare/impl macros.
       Status: Greg volunteers
+
+    * I think apr_open_stderr() and friends dup() the descriptor. That
+      would allow the new/returned file to be closed (via pool cleanup
+      or manually) without accidentally closing stderr/out.
 
 Documentation that needs writing:
 
