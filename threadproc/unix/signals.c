@@ -62,9 +62,9 @@
 #include <string.h>
 #include <sys/wait.h>
 
-ap_status_t ap_kill(struct proc_t *proc, int signal)
+ap_status_t ap_kill(struct proc_t *proc, int sig)
 {
-    if (kill(proc->pid, signal) == -1) {
+    if (kill(proc->pid, sig) == -1) {
         return errno;
     }
     return APR_SUCCESS;

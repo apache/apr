@@ -63,7 +63,7 @@
 #include "apr_lib.h"
 #include "apr_portable.h"
 
-ap_status_t dir_cleanup(void *thedir)
+static ap_status_t dir_cleanup(void *thedir)
 {
     struct dir_t *dir = thedir;
     if (closedir(dir->dirstruct) == 0) {
@@ -208,24 +208,24 @@ ap_status_t ap_dir_entry_size(struct dir_t *thedir, ap_ssize_t *size)
  * arg 1) the currently open directory.
  * arg 2) the last modified time of the directory entry. 
  */                        
-ap_status_t ap_dir_entry_mtime(struct dir_t *thedir, time_t *time)
+ap_status_t ap_dir_entry_mtime(struct dir_t *thedir, time_t *mtime)
 {
     struct stat filestat;
     char *fname = NULL;
 
     if (thedir->entry == NULL) {
-        *time = -1;
+        *mtime = -1;
         return APR_ENOFILE;
     }
 
     fname = ap_pstrcat(thedir->cntxt, thedir->dirname, "/", 
                        thedir->entry->d_name, NULL);
     if (stat(fname, &filestat) == -1) {
-        *time = -1;
+        *mtime = -1;
         return APR_ENOSTAT;
     }
     
-    *time = filestat.st_mtime;
+    *mtime = filestat.st_mtime;
     return APR_SUCCESS;
 }
  

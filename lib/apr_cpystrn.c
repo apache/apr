@@ -59,6 +59,7 @@
 #else
 #include "apr_win.h"
 #endif
+#include "apr_lib.h"
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>

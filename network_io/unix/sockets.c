@@ -66,7 +66,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-ap_status_t socket_cleanup(void *sock)
+static ap_status_t socket_cleanup(void *sock)
 {
     struct socket_t *thesocket = sock;
     if (close(thesocket->socketdes) == 0) {
@@ -327,10 +327,10 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
  * arg 1) The currently open socket.
  * arg 2) The user data associated with the socket.
  */
-ap_status_t ap_get_socketdata(struct socket_t *socket, char *key, void *data)
+ap_status_t ap_get_socketdata(struct socket_t *sock, char *key, void *data)
 {
-    if (socket != NULL) {
-        return ap_get_userdata(socket->cntxt, key, &data);
+    if (sock != NULL) {
+        return ap_get_userdata(sock->cntxt, key, &data);
     }
     else {
         data = NULL;
@@ -345,11 +345,11 @@ ap_status_t ap_get_socketdata(struct socket_t *socket, char *key, void *data)
  * arg 1) The currently open socket.
  * arg 2) The user data to associate with the socket.
  */
-ap_status_t ap_set_socketdata(struct socket_t *socket, void *data, char *key,
+ap_status_t ap_set_socketdata(struct socket_t *sock, void *data, char *key,
                               ap_status_t (*cleanup) (void *))
 {
-    if (socket != NULL) {
-        return ap_set_userdata(socket->cntxt, data, key, cleanup);
+    if (sock != NULL) {
+        return ap_set_userdata(sock->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;

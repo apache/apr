@@ -552,7 +552,7 @@ ap_pool_t *ap_init_alloc(void)
 
 void ap_destroy_real_pool(ap_pool_t *);
 
-void ap_clear_real_pool(ap_pool_t *a)
+static void ap_clear_real_pool(ap_pool_t *a)
 {
     ap_block_alarms();
 

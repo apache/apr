@@ -230,7 +230,7 @@ ap_status_t child_init_lock(ap_context_t *cont, char *fname, struct lock_t **loc
 
 #elif defined (USE_FCNTL_SERIALIZE)  
 
-ap_status_t lock_cleanup(void *lock_)
+static ap_status_t lock_cleanup(void *lock_)
 {
     struct lock_t *lock=lock_;
 

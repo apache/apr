@@ -157,17 +157,17 @@ ap_status_t ap_get_fileperms(struct file_t *file, ap_fileperms_t *perm)
  * arg 1) The currently open file.
  * arg 2) The last access time of the file.  
  */                     
-ap_status_t ap_get_fileatime(struct file_t *file, time_t *time)
+ap_status_t ap_get_fileatime(struct file_t *file, time_t *atime)
 {    
     if (file != NULL) {
         if (!file->stated) {
             ap_getfileinfo(file);
         }
-        *time = file->atime;
+        *atime = file->atime;
         return APR_SUCCESS;
     }
     else {
-        *time = -1;
+        *atime = -1;
         return APR_ENOFILE;
     }
 }
@@ -178,17 +178,17 @@ ap_status_t ap_get_fileatime(struct file_t *file, time_t *time)
  * arg 1) The currently open file.
  * arg 2) The last change time of the file.  
  */                     
-ap_status_t ap_get_filectime(struct file_t *file, time_t *time)
+ap_status_t ap_get_filectime(struct file_t *file, time_t *ptime)
 {    
     if (file != NULL) {
         if (!file->stated) {
             ap_getfileinfo(file);
         }
-        *time = file->ctime;
+        *ptime = file->ctime;
         return APR_SUCCESS;
     }
     else {
-        *time = -1;
+        *ptime = -1;
         return APR_ENOFILE;
     }
 }
@@ -199,17 +199,17 @@ ap_status_t ap_get_filectime(struct file_t *file, time_t *time)
  * arg 1) The currently open file.
  * arg 2) The last modified time of the file.  
  */                     
-ap_status_t ap_get_filemtime(struct file_t *file, time_t *time)
+ap_status_t ap_get_filemtime(struct file_t *file, time_t *mtime)
 {    
     if (file != NULL) {
         if (!file->stated) {
             ap_getfileinfo(file);
         }
-        *time = file->mtime;
+        *mtime = file->mtime;
         return APR_SUCCESS;
     }
     else {
-        *time = -1;
+        *mtime = -1;
         return APR_ENOFILE;
     }
 }
