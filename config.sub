@@ -162,7 +162,7 @@ esac
 case $basic_machine in
 	# Recognize the basic CPU types without company name.
 	# Some are omitted here because they have special meanings below.
-	tahoe | i860 | ia64 | m32r | m68k | m68000 | m88k | ns32k | arc | arm \
+	tahoe | i860 | m32r | m68k | m68000 | m88k | ns32k | arc | arm \
 		| arme[lb] | pyramid | mn10200 | mn10300 | tron | a29k \
 		| 580 | i960 | h8300 \
 		| hppa | hppa1.0 | hppa1.1 | hppa2.0 | hppa2.0w | hppa2.0n \
@@ -171,8 +171,8 @@ case $basic_machine in
 		| 1750a | dsp16xx | pdp11 | mips16 | mips64 | mipsel | mips64el \
 		| mips64orion | mips64orionel | mipstx39 | mipstx39el \
 		| mips64vr4300 | mips64vr4300el | mips64vr4100 | mips64vr4100el \
-		| mips64vr5000 | miprs64vr5000el | mcore \
-		| sparc | sparclet | sparclite | sparc64 | sparcv9 | v850 | c4x \
+		| mips64vr5000 | miprs64vr5000el \
+		| armv[34][lb] | sparc | sparclet | sparclite | sparc64 | sparcv9 | v850 | c4x \
 		| thumb | d10v)
 		basic_machine=$basic_machine-unknown
 		;;
@@ -191,8 +191,7 @@ case $basic_machine in
 		exit 1
 		;;
 	# Recognize the basic CPU types with company name.
-	# FIXME: clean up the formatting here.
-	vax-* | tahoe-* | i[34567]86-* | i860-* | ia64-* | m32r-* | m68k-* | m68000-* \
+	vax-* | tahoe-* | i[34567]86-* | i860-* | m32r-* | m68k-* | m68000-* \
 	      | m88k-* | sparc-* | ns32k-* | fx80-* | arc-* | arm-* | c[123]* \
 	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* \
 	      | power-* | none-* | 580-* | cray2-* | h8300-* | h8500-* | i960-* \
@@ -205,7 +204,8 @@ case $basic_machine in
 	      | sparc64-* | sparcv9-* | sparc86x-* | mips16-* | mips64-* | mipsel-* \
 	      | mips64el-* | mips64orion-* | mips64orionel-* \
 	      | mips64vr4100-* | mips64vr4100el-* | mips64vr4300-* | mips64vr4300el-* \
-	      | mipstx39-* | mipstx39el-* | mcore-* \
+	      | mipstx39-* | mipstx39el-* \
+	      | armv[34][lb]-* \
 	      | f301-* | armv*-* | t3e-* \
 	      | m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | d10v-* \
 	      | thumb-* | v850-* | d30v-* | tic30-* | c30-* )
@@ -890,8 +890,6 @@ case $os in
 		;;
 	-gnu/linux*)
 		os=`echo $os | sed -e 's|gnu/linux|linux-gnu|'`
-		;;
-	-os2_emx)
 		;;
 	# First accept the basic system types.
 	# The portable systems comes first.
