@@ -182,6 +182,10 @@ SOURCE=.\threadproc\win32\proc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\misc\win32\rand.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\file_io\win32\readwrite.c
 # End Source File
 # Begin Source File
