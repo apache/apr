@@ -655,7 +655,7 @@ static char *conv_p2_quad(u_widest_int num, register int nbits,
 /*
  * Do format conversion placing the output in buffer
  */
-API_EXPORT(int) ap_vformatter(int (*flush_func)(ap_vformatter_buff_t *),
+APR_EXPORT(int) ap_vformatter(int (*flush_func)(ap_vformatter_buff_t *),
     ap_vformatter_buff_t *vbuff, const char *fmt, va_list ap)
 {
     register char *sp;
@@ -1157,7 +1157,7 @@ static int snprintf_flush(ap_vformatter_buff_t *vbuff)
 }
 
 
-API_EXPORT(int) ap_snprintf(char *buf, size_t len, const char *format,...)
+APR_EXPORT(int) ap_snprintf(char *buf, size_t len, const char *format,...)
 {
     int cc;
     va_list ap;
@@ -1177,7 +1177,7 @@ API_EXPORT(int) ap_snprintf(char *buf, size_t len, const char *format,...)
 }
 
 
-API_EXPORT(int) ap_vsnprintf(char *buf, size_t len, const char *format,
+APR_EXPORT(int) ap_vsnprintf(char *buf, size_t len, const char *format,
 			     va_list ap)
 {
     int cc;

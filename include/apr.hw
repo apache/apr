@@ -163,11 +163,25 @@ typedef  int         gid_t;
 
 /* Definitions that APR programs need to work properly. */
 #define APR_SSIZE_T_FMT          "d"
-#define API_THREAD_FUNC          __stdcall
-#define API_EXPORT(type)         type
-#define API_EXPORT_NONSTD(type)  type
-#define API_VAR_IMPORT           extern _declspec(dllimport)
-#define API_VAR_EXPORT
+#define APR_THREAD_FUNC          __stdcall
+
+#if defined(APR_EXPORT_SYMBOLS)
+#define APR_EXPORT(type)         __declspec(dllexport) type 
+#define APR_EXPORT_NONSTD(type)  __declspec(dllexport) type 
+#define APR_EXPORT_VAR           __declspec(dllexport)
+#define APR_IMPORT_VAR           extern __declspec(dllexport)
+#elif defined(APR_STATIC)
+#define APR_EXPORT(type)         type
+#define APR_EXPORT_NONSTD(type)  type
+#define APR_EXPORT_VAR
+#define APR_IMPORT_VAR           extern
+#else
+/* Default behavior is to import the shared .dll */
+#define APR_EXPORT(type)         __declspec(dllimport) type 
+#define APR_EXPORT_NONSTD(type)  __declspec(dllimport) type 
+#define APR_EXPORT_VAR           __declspec(dllimport)
+#define APR_IMPORT_VAR           extern __declspec(dllimport)
+#endif
 
 #define ap_signal(a,b) signal(a,b)
 

@@ -93,11 +93,11 @@ typedef  @off_t_value@           ap_off_t;
 
 /* Definitions that APR programs need to work properly. */
 
-#define API_THREAD_FUNC
-#define API_EXPORT(type)         type
-#define API_EXPORT_NONSTD(type)  type
-#define API_VAR_IMPORT           extern
-#define API_VAR_EXPORT           
+#define APR_THREAD_FUNC
+#define APR_EXPORT(type)         type
+#define APR_EXPORT_NONSTD(type)  type
+#define APR_IMPORT_VAR           extern
+#define APR_EXPORT_VAR
 
 /* Define APR_SSIZE_T_FMT.  
  * If ssize_t is an integer we define it to be "d",

@@ -203,7 +203,7 @@ static char *getpass(const char *prompt)
  * but the caller is *not* made aware of it.
  */
 
-API_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsiz)
+APR_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsiz)
 {
     char *pw_got = NULL;
     int result = 0;

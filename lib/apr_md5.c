@@ -185,7 +185,7 @@ static ap_xlate_t *xlate_ebcdic_to_ascii; /* used in ap_MD5Encode() */
 
 /* MD5 initialization. Begins an MD5 operation, writing a new context.
  */
-API_EXPORT(ap_status_t) ap_MD5Init(ap_md5_ctx_t *context)
+APR_EXPORT(ap_status_t) ap_MD5Init(ap_md5_ctx_t *context)
 {
     context->count[0] = context->count[1] = 0;
     /* Load magic initialization constants. */
@@ -204,7 +204,7 @@ API_EXPORT(ap_status_t) ap_MD5Init(ap_md5_ctx_t *context)
  * to be used for translating the content before calculating the
  * digest.
  */
-API_EXPORT(ap_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate)
+APR_EXPORT(ap_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate)
 {
     ap_status_t rv;
     int is_sb;
@@ -227,7 +227,7 @@ API_EXPORT(ap_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate)
    operation, processing another message block, and updating the
    context.
  */
-API_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
+APR_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
                                      const unsigned char *input,
                                      unsigned int inputLen)
 {
@@ -308,7 +308,7 @@ API_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
-API_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
+APR_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
                                     ap_md5_ctx_t *context)
 {
     unsigned char bits[8];
@@ -458,7 +458,7 @@ static void Decode(UINT4 *output, const unsigned char *input, unsigned int len)
 }
 
 #ifdef CHARSET_EBCDIC
-API_EXPORT(ap_status_t) ap_MD5InitEBCDIC(ap_xlate_t *xlate)
+APR_EXPORT(ap_status_t) ap_MD5InitEBCDIC(ap_xlate_t *xlate)
 {
     xlate_ebcdic_to_ascii = xlate;
     return APR_SUCCESS;
@@ -488,7 +488,7 @@ static void to64(char *s, unsigned long v, int n)
     }
 }
 
-API_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
+APR_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
                              char *result, size_t nbytes)
 {
     /*
@@ -648,7 +648,7 @@ API_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
  * APR_EMISMATCH if they don't.
  */
 
-API_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *hash)
+APR_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *hash)
 {
     char sample[120];
 #ifndef WIN32

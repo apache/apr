@@ -127,7 +127,7 @@ static ap_hash_entry_t **alloc_array(ap_hash_t *ht)
    return ap_pcalloc(ht->pool, sizeof(*ht->array) * (ht->max + 1));
 }
 
-API_EXPORT(ap_hash_t *) ap_make_hash(ap_pool_t *pool)
+APR_EXPORT(ap_hash_t *) ap_make_hash(ap_pool_t *pool)
 {
     ap_hash_t *ht;
     ht = ap_palloc(pool, sizeof(ap_hash_t));
@@ -143,7 +143,7 @@ API_EXPORT(ap_hash_t *) ap_make_hash(ap_pool_t *pool)
  * Hash iteration functions.
  */
 
-API_EXPORT(ap_hash_index_t *) ap_hash_next(ap_hash_index_t *hi)
+APR_EXPORT(ap_hash_index_t *) ap_hash_next(ap_hash_index_t *hi)
 {
     hi->this = hi->next;
     while (!hi->this) {
@@ -155,7 +155,7 @@ API_EXPORT(ap_hash_index_t *) ap_hash_next(ap_hash_index_t *hi)
     return hi;
 }
 
-API_EXPORT(ap_hash_index_t *) ap_hash_first(ap_hash_t *ht)
+APR_EXPORT(ap_hash_index_t *) ap_hash_first(ap_hash_t *ht)
 {
     ap_hash_index_t *hi;
     hi = ap_palloc(ht->pool, sizeof(*hi));
@@ -166,7 +166,7 @@ API_EXPORT(ap_hash_index_t *) ap_hash_first(ap_hash_t *ht)
     return ap_hash_next(hi);
 }
 
-API_EXPORT(void) ap_hash_this(ap_hash_index_t *hi,
+APR_EXPORT(void) ap_hash_this(ap_hash_index_t *hi,
 			      void  **key,
 			      size_t *klen,
 			      void  **val)
@@ -253,7 +253,7 @@ static ap_hash_entry_t **find_entry(ap_hash_t *ht,
     return hep;
 }
 
-API_EXPORT(void *) ap_hash_get(ap_hash_t *ht,
+APR_EXPORT(void *) ap_hash_get(ap_hash_t *ht,
 			       void *key,
 			       size_t klen)
 {
@@ -265,7 +265,7 @@ API_EXPORT(void *) ap_hash_get(ap_hash_t *ht,
 	return NULL;
 }
 
-API_EXPORT(void) ap_hash_set(ap_hash_t *ht,
+APR_EXPORT(void) ap_hash_set(ap_hash_t *ht,
 			     void *key,
 			     size_t klen,
 			     void *val)

@@ -63,17 +63,17 @@
 #endif
 
 
-void * API_THREAD_FUNC thread_func1(void *data);
-void * API_THREAD_FUNC thread_func2(void *data);
-void * API_THREAD_FUNC thread_func3(void *data);
-void * API_THREAD_FUNC thread_func4(void *data);
+void * APR_THREAD_FUNC thread_func1(void *data);
+void * APR_THREAD_FUNC thread_func2(void *data);
+void * APR_THREAD_FUNC thread_func3(void *data);
+void * APR_THREAD_FUNC thread_func4(void *data);
 
 
 ap_lock_t *thread_lock;
 ap_pool_t *context;
 int x = 0;
 
-void * API_THREAD_FUNC thread_func1(void *data)
+void * APR_THREAD_FUNC thread_func1(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
@@ -84,7 +84,7 @@ void * API_THREAD_FUNC thread_func1(void *data)
     return NULL;
 } 
 
-void * API_THREAD_FUNC thread_func2(void *data)
+void * APR_THREAD_FUNC thread_func2(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
@@ -95,7 +95,7 @@ void * API_THREAD_FUNC thread_func2(void *data)
     return NULL;
 } 
 
-void * API_THREAD_FUNC thread_func3(void *data)
+void * APR_THREAD_FUNC thread_func3(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
@@ -106,7 +106,7 @@ void * API_THREAD_FUNC thread_func3(void *data)
     return NULL;
 } 
 
-void * API_THREAD_FUNC thread_func4(void *data)
+void * APR_THREAD_FUNC thread_func4(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {

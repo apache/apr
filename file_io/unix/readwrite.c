@@ -393,7 +393,7 @@ static int printf_flush(ap_vformatter_buff_t *vbuff)
 }
 #endif
 
-API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
+APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
 {
     int cc;
     va_list ap;

@@ -51,11 +51,11 @@ extern "C" {
 /* This flag is an Apache addition */
 #define FNM_CASE_BLIND  0x08    /* Compare characters case ap_pool_t nsensitively. */
 
-API_EXPORT(ap_status_t) ap_fnmatch(const char *pattern, const char *strings,
+APR_EXPORT(ap_status_t) ap_fnmatch(const char *pattern, const char *strings,
 			    int flags);
 
 /* this function is an Apache addition */
-API_EXPORT(int) ap_is_fnmatch(const char *pattern);
+APR_EXPORT(int) ap_is_fnmatch(const char *pattern);
 
 #ifdef __cplusplus
 }

@@ -103,7 +103,7 @@ typedef struct ap_threadkey_t        ap_threadkey_t;
 typedef struct ap_other_child_rec_t  ap_other_child_rec_t;
 #endif /* APR_HAS_OTHER_CHILD */
 
-typedef void *(API_THREAD_FUNC *ap_thread_start_t)(void *);
+typedef void *(APR_THREAD_FUNC *ap_thread_start_t)(void *);
 
 /* Thread Function definitions */
 

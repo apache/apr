@@ -492,7 +492,7 @@ static ap_pool_t *permanent_pool;
 #define POOL_HDR_CLICKS (1 + ((sizeof(struct ap_pool_t) - 1) / CLICK_SZ))
 #define POOL_HDR_BYTES (POOL_HDR_CLICKS * CLICK_SZ)
 
-API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retcode))
+APR_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retcode))
 {
     union block_hdr *blok;
     ap_pool_t *new_pool;
@@ -573,7 +573,7 @@ struct cleanup {
     struct cleanup *next;
 };
 
-API_EXPORT(void) ap_register_cleanup(ap_pool_t *p, void *data,
+APR_EXPORT(void) ap_register_cleanup(ap_pool_t *p, void *data,
 				      ap_status_t (*plain_cleanup) (void *),
 				      ap_status_t (*child_cleanup) (void *))
 {
@@ -589,7 +589,7 @@ API_EXPORT(void) ap_register_cleanup(ap_pool_t *p, void *data,
     }
 }
 
-API_EXPORT(void) ap_kill_cleanup(ap_pool_t *p, void *data,
+APR_EXPORT(void) ap_kill_cleanup(ap_pool_t *p, void *data,
 				  ap_status_t (*cleanup) (void *))
 {
     struct cleanup *c;
@@ -610,7 +610,7 @@ API_EXPORT(void) ap_kill_cleanup(ap_pool_t *p, void *data,
     }
 }
 
-API_EXPORT(ap_status_t) ap_run_cleanup(ap_pool_t *p, void *data,
+APR_EXPORT(ap_status_t) ap_run_cleanup(ap_pool_t *p, void *data,
 				 ap_status_t (*cleanup) (void *))
 {
     ap_kill_cleanup(p, data, cleanup);
@@ -643,7 +643,7 @@ static void cleanup_pool_for_exec(ap_pool_t *p)
     }
 }
 
-API_EXPORT(void) ap_cleanup_for_exec(void)
+APR_EXPORT(void) ap_cleanup_for_exec(void)
 {
 #if !defined(WIN32) && !defined(OS2)
     /*
@@ -659,7 +659,7 @@ API_EXPORT(void) ap_cleanup_for_exec(void)
 #endif /* ndef WIN32 */
 }
 
-API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data)
+APR_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data)
 {
     /* do nothing cleanup routine */
     return APR_SUCCESS;
@@ -712,7 +712,7 @@ void ap_term_alloc(void)
  * This way, we are garaunteed that we only lock this mutex once when calling
  * either one of these functions.
  */
-API_EXPORT(void) ap_clear_pool(ap_pool_t *a)
+APR_EXPORT(void) ap_clear_pool(ap_pool_t *a)
 {
     while (a->sub_pools) {
 	ap_destroy_pool(a->sub_pools);
@@ -747,7 +747,7 @@ API_EXPORT(void) ap_clear_pool(ap_pool_t *a)
 #endif
 }
 
-API_EXPORT(void) ap_destroy_pool(ap_pool_t *a)
+APR_EXPORT(void) ap_destroy_pool(ap_pool_t *a)
 {
     ap_clear_pool(a);
 #if APR_HAS_THREADS
@@ -771,11 +771,11 @@ API_EXPORT(void) ap_destroy_pool(ap_pool_t *a)
     free_blocks(a->first);
 }
 
-API_EXPORT(long) ap_bytes_in_pool(ap_pool_t *p)
+APR_EXPORT(long) ap_bytes_in_pool(ap_pool_t *p)
 {
     return bytes_in_block_list(p->first);
 }
-API_EXPORT(long) ap_bytes_in_free_blocks(void)
+APR_EXPORT(long) ap_bytes_in_free_blocks(void)
 {
     return bytes_in_block_list(block_freelist);
 }
@@ -798,7 +798,7 @@ extern char _end;
 /* Find the pool that ts belongs to, return NULL if it doesn't
  * belong to any pool.
  */
-API_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (apr_abort)(int retcode))
+APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (apr_abort)(int retcode))
 {
     const char *s = ts;
     union block_hdr **pb;
@@ -842,7 +842,7 @@ API_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (apr_abort)(int retcode
 /* return TRUE iff a is an ancestor of b
  * NULL is considered an ancestor of all pools
  */
-API_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b)
+APR_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b)
 {
     if (a == NULL) {
 	return 1;
@@ -864,7 +864,7 @@ API_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b)
  * instead.  This is a guarantee by the caller that sub will not
  * be destroyed before p is.
  */
-API_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub, 
+APR_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub, 
                               int (*apr_abort)(int retcode))
 {
     union block_hdr *b;
@@ -979,14 +979,14 @@ void * ap_palloc(ap_pool_t *a, int reqsize)
 #endif
 }
 
-API_EXPORT(void *) ap_pcalloc(ap_pool_t *a, int size)
+APR_EXPORT(void *) ap_pcalloc(ap_pool_t *a, int size)
 {
     void *res = ap_palloc(a, size);
     memset(res, '\0', size);
     return res;
 }
 
-API_EXPORT(char *) ap_pstrdup(ap_pool_t *a, const char *s)
+APR_EXPORT(char *) ap_pstrdup(ap_pool_t *a, const char *s)
 {
     char *res;
     size_t len;
@@ -1000,7 +1000,7 @@ API_EXPORT(char *) ap_pstrdup(ap_pool_t *a, const char *s)
     return res;
 }
 
-API_EXPORT(char *) ap_pstrndup(ap_pool_t *a, const char *s, int n)
+APR_EXPORT(char *) ap_pstrndup(ap_pool_t *a, const char *s, int n)
 {
     char *res;
 
@@ -1013,7 +1013,7 @@ API_EXPORT(char *) ap_pstrndup(ap_pool_t *a, const char *s, int n)
     return res;
 }
 
-API_EXPORT_NONSTD(char *) ap_pstrcat(ap_pool_t *a, ...)
+APR_EXPORT_NONSTD(char *) ap_pstrcat(ap_pool_t *a, ...)
 {
     char *cp, *argp, *res;
 
@@ -1138,7 +1138,7 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
 #endif
 }
 
-API_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap)
+APR_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap)
 {
 #ifdef ALLOC_USE_MALLOC
     struct psprintf_data ps;
@@ -1197,7 +1197,7 @@ API_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap)
 #endif
 }
 
-API_EXPORT_NONSTD(char *) ap_psprintf(ap_pool_t *p, const char *fmt, ...)
+APR_EXPORT_NONSTD(char *) ap_psprintf(ap_pool_t *p, const char *fmt, ...)
 {
     va_list ap;
     char *res;
@@ -1220,7 +1220,7 @@ API_EXPORT_NONSTD(char *) ap_psprintf(ap_pool_t *p, const char *fmt, ...)
  * generic interface, but for now, it's a special case
  */
 
-API_EXPORT(void) ap_note_subprocess(ap_pool_t *a, ap_proc_t *pid,
+APR_EXPORT(void) ap_note_subprocess(ap_pool_t *a, ap_proc_t *pid,
 				     enum kill_conditions how)
 {
     struct process_chain *new =
