@@ -93,6 +93,7 @@ ap_status_t file_cleanup(void *thefile)
  *          APR_BINARY           not a text file (This flag is ignored on UNIX because it has no meaning)
  *          APR_BUFFERED         buffer the data.  Default is non-buffered
  *          APR_EXCL             return error if APR_CREATE and file exists
+ *          APR_DELONCLOSE       delete the file after closing.
  * arg 4) Access permissions for file.
  * arg 5) The opened file descriptor.
  * NOTE:  If mode is APR_OS_DEFAULT, the system open command will be 
@@ -167,9 +168,12 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
     if ((*new)->filedes < 0 && (*new)->filehand == NULL) {
        (*new)->filedes = -1;
        (*new)->eof_hit = 1;
-        return errno;
+       return errno;
     }
 
+    if (flag & APR_DELONCLOSE) {
+        unlink(fname);
+    }
     (*new)->stated = 0;  /* we haven't called stat for this file yet. */
     (*new)->timeout = -1;
     (*new)->eof_hit = 0;
