@@ -96,7 +96,7 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
         return APR_ENOPOOL;
     }
 
-    apr_pool_tag(pool, "apr_initilialize");
+    apr_pool_tag(pool, "apr_initialize");
 
     apr_signal_init(pool);
 
