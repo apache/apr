@@ -81,28 +81,6 @@ static void rwmem_destroy(void *e)
     free(d->alloc_addr);
 }
 
-APR_EXPORT(ap_bucket *) ap_rwmem_create(void)
-{
-    ap_bucket *newbuf;
-    ap_bucket_rwmem *b;
-
-    newbuf = malloc(sizeof(*newbuf));
-    b = malloc(sizeof(*b));
-    
-    b->alloc_addr = calloc(DEFAULT_RWBUF_SIZE, 1);
-    b->alloc_len  = DEFAULT_RWBUF_SIZE;
-    b->start      = b->alloc_addr;
-    b->end        = b->alloc_addr;
-
-    newbuf->color      = AP_BUCKET_rwmem;
-    newbuf->getstr     = rwmem_get_str;
-    newbuf->getlen     = rwmem_get_len;
-    newbuf->free       = rwmem_destroy;
-    newbuf->data       = b;
-
-    return newbuf;
-}
-
 /*
  * save nbyte bytes to the bucket.
  * Only returns fewer than nbyte if an error occurred.
@@ -110,14 +88,15 @@ APR_EXPORT(ap_bucket *) ap_rwmem_create(void)
  * It is worth noting that if an error occurs, the buffer is in an unknown
  * state.
  */
-APR_EXPORT(int) ap_rwmem_write(ap_bucket_rwmem *b, const void *buf,
-                               ap_size_t nbyte, ap_ssize_t *bytes_written)
+static ap_status_t rwmem_insert(ap_bucket *e, const void *buf,
+                                ap_size_t nbyte, ap_ssize_t *w)
 {
     int amt;
     int total;
+    ap_bucket_rwmem *b = (ap_bucket_rwmem *)e->data;
 
     if (nbyte == 0) {
-        *bytes_written = 0;
+        *w = 0;
         return APR_SUCCESS;
     }
 
@@ -136,29 +115,30 @@ APR_EXPORT(int) ap_rwmem_write(ap_bucket_rwmem *b, const void *buf,
     /* now we know that nbyte < b->alloc_len */
     memcpy(b->end, buf, nbyte);
     b->end = (char *)b->end + nbyte;
-    *bytes_written = total + nbyte;
+    *w = total + nbyte;
     return APR_SUCCESS;
 }
 
-APR_EXPORT(int) ap_rwmem_vputstrs(ap_bucket_rwmem *b, va_list va)
+APR_EXPORT(ap_bucket *) ap_rwmem_create(void)
 {
-    int j, k;
-    ap_ssize_t i;
-    const char *x;
-    int rv;
+    ap_bucket *newbuf;
+    ap_bucket_rwmem *b;
 
-    for (k = 0;;) {
-        x = va_arg(va, const char *);
-        if (x == NULL)
-            break;
-        j = strlen(x);
-        rv = ap_rwmem_write(b, x, j, &i);
-        if (i != j) {
-            /* Do we need better error reporting?  */
-            return -1;
-        }
-        k += i;
-    }
+    newbuf = malloc(sizeof(*newbuf));
+    b = malloc(sizeof(*b));
+    
+    b->alloc_addr = calloc(DEFAULT_RWBUF_SIZE, 1);
+    b->alloc_len  = DEFAULT_RWBUF_SIZE;
+    b->start      = b->alloc_addr;
+    b->end        = b->alloc_addr;
 
-    return k;
+    newbuf->color      = AP_BUCKET_rwmem;
+    newbuf->getstr     = rwmem_get_str;
+    newbuf->getlen     = rwmem_get_len;
+    newbuf->insert     = rwmem_insert;
+    newbuf->free       = rwmem_destroy;
+    newbuf->data       = b;
+
+    return newbuf;
 }
+

@@ -56,14 +56,15 @@
  */
 
 #include "apr_private.h"
+#include "apr_pools.h"
 #include "apr_lib.h"
 #include "apr_errno.h"
 #include <stdlib.h>
 #include <sys/uio.h>
 #include "apr_buf.h"
 
-/* We are creating a new bucket here.  We could replace the switch with a
- * function pointer if we want to.  I'm not sure it's a real win though.
+/* We are creating a new bucket here.  The buckets that are created
+ * have the correct function pointers and types when they are created. 
  */
 APR_EXPORT(ap_bucket *) ap_bucket_new(ap_bucket_color_e color)
 {
@@ -110,7 +111,7 @@ APR_EXPORT(ap_bucket_brigade *) ap_bucket_brigade_create(ap_pool_t *p)
 {
     ap_bucket_brigade *b;
 
-    b = malloc(sizeof(*b));
+    b = ap_palloc(p, sizeof(*b));
     b->p = p;
     b->head = b->tail = NULL;
 
@@ -276,15 +277,29 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
 
     if (b->tail && b->tail->bucket && 
         b->tail->bucket->color == AP_BUCKET_rwmem) {
-        ap_bucket_rwmem *rw;
-        rw = b->tail->bucket->data;
+        ap_bucket *rw;
+        rw = b->tail->bucket;
         /* I have no idea if this is a good idea or not.  Probably not.
          * Basically, if the last bucket in the list is a rwmem bucket,
          * then we just add to it instead of allocating a new read only
          * bucket.  This is incredibly easy to take out if it is a bad 
          * idea.  RBB
          */
-        ap_rwmem_vputstrs(rw, va);
+        for (k = 0;;) {
+            x = va_arg(va, const char *);
+            if (x == NULL)
+                break;
+            j = strlen(x);
+           
+            rv = rw->insert(rw, x, j, &i);
+            if (i != j) {
+                /* Do we need better error reporting?  */
+                return -1;
+            }
+            k += i;
+
+            ap_bucket_brigade_append_bucket(b, rw);
+        }        
     }
     
     for (k = 0;;) {
@@ -294,7 +309,7 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
             break;
         j = strlen(x);
        
-        rv = ap_rwmem_write(r->data, x, j, &i);
+        rv = r->insert(r, x, j, &i);
         if (i != j) {
             /* Do we need better error reporting?  */
             return -1;
@@ -330,7 +345,7 @@ APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_lis
     res = ap_vsnprintf(buf, 4096, fmt, va);
 
     r = ap_bucket_new(AP_BUCKET_rwmem);
-    res = ap_rwmem_write(r->data, buf, strlen(buf), &i);
+    res = r->insert(r, buf, strlen(buf), &i);
     ap_bucket_brigade_append_bucket(b, r);
 
     return res;

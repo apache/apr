@@ -86,6 +86,15 @@ struct ap_bucket {
     void *data;				  /* for use by free() */
     const char *(*getstr)(ap_bucket *e);  /* Get the string */
     int (*getlen)(ap_bucket *e);          /* Get the length of the string */
+    /* Insert into a bucket.  The buf is a different type based on the
+     * bucket type used.  For example, with AP_BUCKET_mmap it is an ap_mmap_t
+     * for AP_BUCKET_file it is an ap_file_t, and for AP_BUCKET_rwmem it is
+     * a char *.  The nbytes is the amount of actual data in buf.  This is
+     * not the sizeof(buf), it is the actual number of bytes in the char *
+     * that buf resolves to.  written is how much of that data was inserted
+     * into the bucket.
+     */ 
+    int (*insert)(ap_bucket *e, const void *buf, ap_size_t nbytes, ap_ssize_t *w);
 };
 
 typedef struct ap_bucket_list ap_bucket_list;
@@ -104,6 +113,35 @@ struct ap_bucket_brigade {
                                            lifetime. */
     ap_bucket_list *head;               /* The start of the brigade */
     ap_bucket_list *tail;               /* The end of the brigade */
+};
+
+/*    ******  Different bucket types   *****/
+
+typedef struct ap_bucket_rmem ap_bucket_rmem;
+struct ap_bucket_rmem {
+    size_t  alloc_len;                  /* how much was allocated */
+    const void    *start;               /* Where does the actual data start
+                                           in the alloc'ed block */
+    const void    *end;                 /* where does the data actually end? */
+};
+
+typedef struct ap_bucket_rwmem ap_bucket_rwmem;
+struct ap_bucket_rwmem {
+    void    *alloc_addr;                /* Where does the data start */
+    size_t  alloc_len;                  /* how much was allocated */
+    void    *start;                     /* Where does the actual data start
+                                           in the alloc'ed block */
+    void    *end;                       /* where does the data actually end? */
+};
+
+typedef struct ap_bucket_mmap ap_bucket_mmap;
+struct ap_bucket_mmap {
+    const ap_mmap_t *data;
+    int       len;           /* The amount of data in the mmap that we are 
+                              * referencing with this bucket.  This may be 
+                              * smaller than the length in the data object, 
+                              * but it may not be bigger.
+                              */
 };
 
 /*   ******  Bucket Brigade Functions  *****  */
@@ -173,56 +211,14 @@ APR_EXPORT(const char *) ap_get_bucket_char_str(ap_bucket *b);
 /* get the length of the data in the bucket */
 APR_EXPORT(int) ap_get_bucket_len(ap_bucket *b);
 
-/*   ******  RWMEM Functions  *****  */
-
-typedef struct ap_bucket_rwmem ap_bucket_rwmem;
-struct ap_bucket_rwmem {
-    void    *alloc_addr;                /* Where does the data start */
-    size_t  alloc_len;                  /* how much was allocated */
-    void    *start;                     /* Where does the actual data start
-                                           in the alloc'ed block */
-    void    *end;                       /* where does the data actually end? */
-};
-
 /* Create a read/write memory bucket */
 APR_EXPORT(ap_bucket *) ap_rwmem_create(void);
-
-APR_EXPORT(int) ap_rwmem_write(ap_bucket_rwmem *b, const void *buf,
-                               ap_size_t nbyte, ap_ssize_t *bytes_written);
-
-APR_EXPORT(int) ap_rwmem_vputstrs(ap_bucket_rwmem *b, va_list va);
-
-/*   ******  MMAP Functions  *****  */
-
-typedef struct ap_bucket_mmap ap_bucket_mmap;
-struct ap_bucket_mmap {
-    ap_mmap_t *data;
-};
 
 /* Create a mmap memory bucket */
 APR_EXPORT(ap_bucket *) ap_mmap_bucket_create(void);
 
-APR_EXPORT(void) ap_mmap_bucket_insert(ap_bucket_mmap *b, ap_mmap_t *mm);
-
-/*   ******  RMEM Functions  *****  */
-
-typedef struct ap_bucket_rmem ap_bucket_rmem;
-struct ap_bucket_rmem {
-    size_t  alloc_len;                  /* how much was allocated */
-    const void    *start;               /* Where does the actual data start
-                                           in the alloc'ed block */
-    const void    *end;                 /* where does the data actually end? */
-};
-
-/* Create a read only memory bucket */
+/* Create a read only memory bucket. */
 APR_EXPORT(ap_bucket *) ap_rmem_create(void);
-
-APR_EXPORT(int) ap_rmem_write(ap_bucket_rmem *b, const void *buf,
-                               ap_size_t nbyte, ap_ssize_t *bytes_written);
-
-APR_EXPORT(int) ap_rmem_vputstrs(ap_bucket_rmem *b, va_list va);
-
-/*   ******  RMEM Functions  *****  */
 
 /* Create an End of Stream bucket */
 APR_EXPORT(ap_bucket *) ap_eos_create(void);
