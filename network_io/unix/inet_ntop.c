@@ -150,15 +150,23 @@ inet_ntop6(const unsigned char *src, char *dst, apr_size_t size)
 	struct { int base, len; } best, cur;
 	unsigned int words[IN6ADDRSZ / INT16SZ];
 	int i;
+        const unsigned char *next_src, *src_end;
+        unsigned int *next_dest;
 
 	/*
 	 * Preprocess:
 	 *	Copy the input (bytewise) array into a wordwise array.
 	 *	Find the longest run of 0x00's in src[] for :: shorthanding.
 	 */
-	memset(words, '\0', sizeof words);
-	for (i = 0; i < IN6ADDRSZ; i++)
-		words[i / 2] |= (src[i] << ((1 - (i % 2)) << 3));
+        next_src = src;
+        src_end = src + IN6ADDRSZ;
+        next_dest = words;
+        do {
+            unsigned int next_word = (unsigned int)*next_src++;
+            next_word <<= 8;
+            next_word |= (unsigned int)*next_src++;
+            *next_dest++ = next_word;
+        } while (next_src < src_end);
 	best.base = -1;
 	cur.base = -1;
 	for (i = 0; i < (IN6ADDRSZ / INT16SZ); i++) {
