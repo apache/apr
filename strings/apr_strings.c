@@ -57,14 +57,12 @@
 #include "apr_general.h"
 #include "apr_private.h"
 #include "apr_lib.h"
+#define APR_WANT_STDIO
+#define APR_WANT_STRFUNC
+#include "apr_want.h"
+
 #ifdef HAVE_STDDEF_H
 #include <stddef.h> /* NULL */
-#endif
-#if APR_HAVE_STRING_H
-#include <string.h>
-#endif
-#if APR_HAVE_STRINGS_H
-#include <strings.h>
 #endif
 
 APR_DECLARE(char *) apr_pstrdup(apr_pool_t *a, const char *s)
@@ -246,7 +244,7 @@ APR_DECLARE(char *) apr_strfsize(apr_off_t size, char *buf)
         return strcpy(buf, "  - ");
     }
     if (size < 973) {
-        sprintf(buf, "%3d ", (int) size, o);
+        sprintf(buf, "%3d ", (int) size);
         return buf;
     }
     do {
