@@ -31,10 +31,10 @@ while ($srcfile = shift(@ARGV)) {
     
         s/^\s*//;
         
-        if (/\#if (APR_HAS.*)/) {
+        if (/\#if(def)? (APR_.*)/) {
             $count++;
             $found++;
-            $macro = $1;
+            $macro = $2;
             $line = "$macro\n";
             next;
         }
@@ -53,14 +53,14 @@ while ($srcfile = shift(@ARGV)) {
         elsif (/\#endif/) {
             if ($count > 0) {
                 $count--;
-                $line .= "\\$macro\n";
+                $line .= "\/$macro\n";
             }
-            if ($found == 1) {
-                $found = 0;
+            if ($found == $count + 1) {
+                $found--;
                 $line = "";
                 next;
             }
-            elsif ($found > 1) {
+            elsif ($found > $count + 1) {
                 $found = 0;
             }
         }
