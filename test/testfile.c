@@ -71,20 +71,20 @@ struct view_fileinfo
     apr_int32_t bits;
     char *description;
 } vfi[] = {
-    APR_FINFO_MTIME,  "MTIME",
-    APR_FINFO_CTIME,  "CTIME",
-    APR_FINFO_ATIME,  "ATIME",
-    APR_FINFO_SIZE,   "SIZE",
-    APR_FINFO_DEV,    "DEV",
-    APR_FINFO_INODE,  "INODE",
-    APR_FINFO_NLINK,  "NLINK",
-    APR_FINFO_TYPE,   "TYPE",
-    APR_FINFO_USER,   "USER", 
-    APR_FINFO_GROUP,  "GROUP", 
-    APR_FINFO_UPROT,  "UPROT", 
-    APR_FINFO_GPROT,  "GPROT",
-    APR_FINFO_WPROT,  "WPROT",
-    0,                NULL
+    {APR_FINFO_MTIME,  "MTIME"},
+    {APR_FINFO_CTIME,  "CTIME"},
+    {APR_FINFO_ATIME,  "ATIME"},
+    {APR_FINFO_SIZE,   "SIZE"},
+    {APR_FINFO_DEV,    "DEV"},
+    {APR_FINFO_INODE,  "INODE"},
+    {APR_FINFO_NLINK,  "NLINK"},
+    {APR_FINFO_TYPE,   "TYPE"},
+    {APR_FINFO_USER,   "USER"}, 
+    {APR_FINFO_GROUP,  "GROUP"}, 
+    {APR_FINFO_UPROT,  "UPROT"}, 
+    {APR_FINFO_GPROT,  "GPROT"},
+    {APR_FINFO_WPROT,  "WPROT"},
+    {0,                NULL}
 }; 
 
 int test_filedel(apr_pool_t *);
