@@ -5,6 +5,13 @@ Changes for APR 1.1.0
      and upgrading it to do SHA-256. Not yet ready for prime time.
      [Ben Laurie]
 
+  *) Added the APR_POLLSET_THREADSAFE flag. This allows multiple threads
+     to call the Pollset Add or Remove functions in a thread safe manner.
+     Currently only EPoll and KQueue support this flag. [Paul Querna]
+
+  *) Split poll/unix/poll.c into separate files for each Poll or Pollset 
+     implementation. [Paul Querna]
+
   *) Rewrite apr_file_printf to handle arbitrary length strings.
      PR 28029.  [Chris Knight <Christopher.D.Knight nasa.gov>,
      Garrett Rooney <rooneg electricjellyfish.net>]
