@@ -60,7 +60,7 @@ proc.o: proc.c threadproc.h $(INCDIR1)/apr_thread_proc.h \
  $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_general.h \
  $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
  $(INCDIR1)/apr_win.h $(INCDIR2)/fileio.h \
- $(INCDIR1)/apr_lib.h $(INCDIR1)/hsregex.h
+ $(INCDIR1)/apr_lib.h
 signals.o: signals.c threadproc.h $(INCDIR1)/apr_thread_proc.h \
  $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_general.h \
  $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
@@ -69,7 +69,7 @@ thread.o: thread.c threadproc.h $(INCDIR1)/apr_thread_proc.h \
  $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_general.h \
  $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
  $(INCDIR1)/apr_win.h $(INCDIR1)/apr_lib.h \
- $(INCDIR1)/hsregex.h $(INCDIR2)/fileio.h
+ $(INCDIR2)/fileio.h
 threadcancel.o: threadcancel.c threadproc.h \
  $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_file_io.h \
  $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
@@ -79,5 +79,4 @@ threadpriv.o: threadpriv.c threadproc.h \
  $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_file_io.h \
  $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
  $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_win.h \
- $(INCDIR1)/apr_lib.h $(INCDIR1)/hsregex.h \
- $(INCDIR2)/fileio.h
+ $(INCDIR1)/apr_lib.h $(INCDIR2)/fileio.h
