@@ -1255,7 +1255,7 @@ msg=yes ] , [ have_in_addr="0"
 msg=no ])
 AC_MSG_RESULT([$msg])
 
-AC_MSG_CHECKING("if fd == socket on this platform")
+AC_MSG_CHECKING([if fd == socket on this platform])
 if test "x$file_as_socket" = "x" ; then
     file_as_socket="1";
     echo "yes"
