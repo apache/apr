@@ -88,7 +88,12 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    BOOL status;
+    status = TryEnterCriticalSection(&mutex->section);
+    if (status) {
+        return APR_SUCCESS;
+    }
+    return APR_EBUSY;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
