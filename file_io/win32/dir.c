@@ -216,8 +216,8 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         int dirlen = strlen(thedir->dirname);
         if (dirlen >= sizeof(fspec))
             dirlen = sizeof(fspec) - 1;
-        apr_cpystrn(fspec, sizeof(fspec), thedir->dirname);
-        apr_cpystrn(fspec + dirlen, sizeof(fspec) - dirlen, fname);
+        apr_cpystrn(fspec, thedir->dirname, sizeof(fspec));
+        apr_cpystrn(fspec + dirlen, fname, sizeof(fspec) - dirlen);
         rv = apr_stat(finfo, fspec, wanted, thedir->cntxt);
         if (rv == APR_SUCCESS || rv == APR_INCOMPLETE) {
             finfo->valid |= APR_FINFO_NAME;
@@ -254,8 +254,14 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     FileTimeToAprTime(&finfo->ctime, &thedir->n.entry->ftCreationTime);
     FileTimeToAprTime(&finfo->mtime, &thedir->n.entry->ftLastWriteTime);
     FileTimeToAprTime(&finfo->atime, &thedir->n.entry->ftLastAccessTime);
-    finfo->size = (thedir->n.entry->nFileSizeHigh * MAXDWORD)
-                +  thedir->n.entry->nFileSizeLow;
+#if APR_HAS_LARGE_FILES
+    finfo->size = ((apr_off_t)thedir->n.entry->nFileSizeHigh << 32)
+                |  (apr_off_t)thedir->n.entry->nFileSizeLow;
+#else
+    finfo->size = (apr_off_t)thedir->n.entry->nFileSizeLow;
+    if (finfo->size < 0 || FileInformation.nFileSizeHigh)
+        finfo->size = 0x7fffffff;
+#endif
     return (wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;
 }
 
