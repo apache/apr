@@ -168,7 +168,7 @@ ap_status_t create_inter_lock(ap_lock_t *new)
     new->interproc = (pthread_mutex_t *)mmap((caddr_t) 0, 
                               sizeof(pthread_mutex_t), 
                               PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); 
-    if (new->interproc = (pthread_mutex_t *) (caddr_t) -1) {
+    if (new->interproc == (pthread_mutex_t *) (caddr_t) -1) {
         return errno;
     }
     close(fd);
