@@ -176,7 +176,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
             return errno;
         }
 
-        if ((new_m->base = shmat(shmid, NULL, 0)) < 0) {
+        if ((new_m->base = shmat(shmid, NULL, 0)) == (void *)-1) {
             return errno;
         }
 
