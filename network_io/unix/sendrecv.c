@@ -805,24 +805,42 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         sfv[curvec].sfv_len = hdtr->trailers[i].iov_len;
     }
  
-    /* If we are in non-blocking mode, we need to make sure we wait until
-     * the other side says it is okay. */ 
-    if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) == 1 ||
-        apr_is_option_set(sock->netmask, APR_SO_TIMEOUT) == 1)
-    { 
-        rv = apr_wait_for_io_or_timeout(sock, 0);
-    }
-
     /* Actually do the sendfilev */
     do {
         /* socket, vecs, number of vecs, bytes written */
         rv = sendfilev(sock->socketdes, sfv, vecs, &nbytes);
     } while (rv == -1 && errno == EINTR);
 
-    /* Solaris returns EAGAIN even though it sent bytes on a non-block sock */
-    if (rv == -1 && errno != EAGAIN) {
-        rv = errno;
-        return rv;
+    /* Solaris returns EAGAIN even though it sent bytes on a non-block sock.
+     * However, if we are on a TIMEOUT socket, we want to block until the 
+     * other side has read the data. 
+     */
+    if (rv == -1)
+    {
+        if (errno == EAGAIN) {
+            if (apr_is_option_set(sock->netmask, APR_SO_TIMEOUT) == 1)
+            {
+                /* If the wait fails for some reason, we're going to lie to our
+                 * caller and say that we didn't write any bytes.  That's 
+                 * untrue.
+                 */
+                rv = apr_wait_for_io_or_timeout(sock, 0);
+
+                /* Indicate that we sent zero bytes.  */
+                if (rv != APR_SUCCESS)
+                {
+                    *len = 0;
+                    return rv;
+                }
+            }
+        }
+        else
+        {
+            /* Indicate that we sent zero bytes.  */
+            rv = errno;
+            *len = 0;
+            return rv;
+        }
     }
 
     /* Update how much we sent */
