@@ -78,7 +78,6 @@ static void table_make(CuTest *tc)
 
 static void table_get(CuTest *tc)
 {
-    apr_status_t rv;
     const char *val;
 
     apr_table_set(t1, "foo", "bar");
@@ -88,7 +87,6 @@ static void table_get(CuTest *tc)
 
 static void table_set(CuTest *tc)
 {
-    apr_status_t rv;
     const char *val;
 
     apr_table_set(t1, "setkey", "bar");
