@@ -104,11 +104,8 @@ struct process_chain {
     struct process_chain *next;
 };
 
-ap_status_t ap_init_alloc(void);	/* Set up everything */
-void        ap_term_alloc(void);        /* Tear down everything */
-
-/* used to guarantee to the ap_pool_t debugging code that the sub ap_pool_t will not be
- * destroyed before the parent pool
+/* used to guarantee to the ap_pool_t debugging code that the sub ap_pool_t 
+ * will not be destroyed before the parent pool
  */
 #ifndef POOL_DEBUG
 APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts);
@@ -116,56 +113,6 @@ APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts);
 APR_EXPORT(int) ap_pool_join(ap_pool_t *p, ap_pool_t *sub, int (apr_abort)(int retcode));
 APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (apr_abort)(int retcode));
 #endif /* POOL_DEBUG */
-
-
-/* Clearing out EVERYTHING in an pool... destroys any sub-pools */
-
-/* Preparing for exec() --- close files, etc., but *don't* flush I/O
- * buffers, *don't* wait for subprocesses, and *don't* free any memory.
- */
-
-/* array and alist management... keeping lists of things.
- * Common enough to want common support code ...
- */
-
-/* ap_array_pstrcat generates a new string from the ap_pool_t containing
- * the concatenated sequence of substrings referenced as elements within
- * the array.  The string will be empty if all substrings are empty or null,
- * or if there are no elements in the array.
- * If sep is non-NUL, it will be inserted between elements as a separator.
- */
-
-/* copy_array copies the *entire* array.  copy_array_hdr just copies
- * the header, and arranges for the elements to be copied if (and only
- * if) the code subsequently does a push or arraycat.
- */
-
-
-
-/* Conceptually, ap_overlap_tables does this:
-
-    ap_array_header_t *barr = ap_table_elts(b);
-    ap_table_entry_t *belt = (ap_table_entry_t *)barr->elts;
-    int i;
-
-    for (i = 0; i < barr->nelts; ++i) {
-	if (flags & ap_OVERLAP_TABLES_MERGE) {
-	    ap_table_mergen(a, belt[i].key, belt[i].val);
-	}
-	else {
-	    ap_table_setn(a, belt[i].key, belt[i].val);
-	}
-    }
-
-    Except that it is more efficient (less space and cpu-time) especially
-    when b has many elements.
-
-    Notice the assumptions on the keys and values in b -- they must be
-    in an ancestor of a's pool.  In practice b and a are usually from
-    the same pool.
-*/
-#define ap_OVERLAP_TABLES_SET	(0)
-#define ap_OVERLAP_TABLES_MERGE	(1)
 
 #ifdef ULTRIX_BRAIN_DEATH
 #define ap_fdopen(d,m) fdopen((d), (char *)(m))
@@ -186,6 +133,32 @@ APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (apr_abort)(int retcode
 /*
  * APR memory structure manipulators (pools, tables, and arrays).
  */
+
+/*
+
+=head1 ap_status_t ap_init_alloc(void)
+
+B<Setup all of the internal structures required to use pools>
+
+B<NOTE>:  Programs do B<NOT> need to call this directly.  APR will call this
+          automatically from ap_initialize. 
+=cut
+ */
+ap_status_t ap_init_alloc(void);	/* Set up everything */
+
+/*
+
+=head1 void ap_term_alloc(void)
+
+B<Tear down all of the internal structures required to use pools>
+
+B<NOTE>:  Programs do B<NOT> need to call this directly.  APR will call this
+          automatically from ap_terminate. 
+
+=cut
+ */
+void        ap_term_alloc(void);        /* Tear down everything */
+
 /*
 
 =head1 ap_pool_t *ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retcode))
@@ -428,6 +401,9 @@ APR_EXPORT(ap_status_t) ap_run_cleanup(struct ap_pool_t *p, void *data,
 B<Run all of the child_cleanups, so that any unnecessary files are closed because we are about to exec a new program>
 
 =cut
+ */
+/* Preparing for exec() --- close files, etc., but *don't* flush I/O
+ * buffers, *don't* wait for subprocesses, and *don't* free any memory.
  */
 APR_EXPORT(void) ap_cleanup_for_exec(void);
 APR_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
