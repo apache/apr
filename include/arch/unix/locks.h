@@ -109,7 +109,7 @@ union semun {
 #endif
 
 struct apr_lock_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     apr_sms_t *mem_sys;
     apr_locktype_e type;
     apr_lockscope_e scope;
