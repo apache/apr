@@ -57,6 +57,7 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_strings.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>

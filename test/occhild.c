@@ -10,4 +10,5 @@ int main()
     while (rc == 1) {
         read(STDERR_FILENO, buf, 256);
     }
+    return 0; /* just to keep the compiler happy */
 }
