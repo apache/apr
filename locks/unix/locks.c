@@ -62,7 +62,7 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
     ap_lock_t *new;
     ap_status_t stat;
 
-    new = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));
+    new = (ap_lock_t *)ap_pcalloc(cont, sizeof(ap_lock_t));
 
     new->cntxt = cont;
     new->type  = type;
@@ -216,7 +216,7 @@ ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *thelock,
         return APR_ENOPOOL;
     }
     if ((*lock) == NULL) {
-        (*lock) = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));
+        (*lock) = (ap_lock_t *)ap_pcalloc(cont, sizeof(ap_lock_t));
         (*lock)->cntxt = cont;
     }
     (*lock)->interproc = thelock->crossproc;

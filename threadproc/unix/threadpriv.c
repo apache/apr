@@ -62,7 +62,7 @@ ap_status_t ap_create_thread_private(ap_threadkey_t **key,
                                      void (*dest)(void *), ap_pool_t *cont)
 {
     ap_status_t stat;
-    (*key) = (ap_threadkey_t *)ap_palloc(cont, sizeof(ap_threadkey_t));
+    (*key) = (ap_threadkey_t *)ap_pcalloc(cont, sizeof(ap_threadkey_t));
 
     if ((*key) == NULL) {
         return APR_ENOMEM;
@@ -142,7 +142,7 @@ ap_status_t ap_put_os_threadkey(ap_threadkey_t **key,
         return APR_ENOPOOL;
     }
     if ((*key) == NULL) {
-        (*key) = (ap_threadkey_t *)ap_palloc(cont, sizeof(ap_threadkey_t));
+        (*key) = (ap_threadkey_t *)ap_pcalloc(cont, sizeof(ap_threadkey_t));
         (*key)->cntxt = cont;
     }
     (*key)->key = *thekey;
