@@ -169,8 +169,10 @@ APR_DECLARE(void) apr_proc_other_child_refresh(apr_other_child_rec_t *ocr,
         return;
 
     if (!ocr->proc->hproc) {
-        /* Already mopped up, perhaps we apr_proc_kill'ed it */
-        (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, -1);
+        /* Already mopped up, perhaps we apr_proc_kill'ed it,
+         * they should have already unregistered!
+         */
+        (*ocr->maintenance) (APR_OC_REASON_LOST, ocr->data, -1);
     }
     else if (!GetExitCodeProcess(ocr->proc->hproc, &status)) {
         CloseHandle(ocr->proc->hproc);
