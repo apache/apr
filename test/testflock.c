@@ -81,10 +81,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define TESTFILE "testfile.tmp"
+const char *testfile = "testfile.tmp";
 
 static apr_pool_t *pool = NULL;
-
 
 static void errmsg(const char *msg)
 {
@@ -111,7 +110,7 @@ static void do_read(void)
     apr_file_t *file;
     apr_status_t status;
 
-    if (apr_file_open(&file, TESTFILE, APR_WRITE,
+    if (apr_file_open(&file, testfile, APR_WRITE,
                  APR_OS_DEFAULT, pool) != APR_SUCCESS)
         errmsg("Could not open test file.\n");
     printf("Test file opened.\n");
@@ -138,7 +137,7 @@ static void do_write(void)
     apr_file_t *file;
     apr_status_t rv;
 
-    if (apr_file_open(&file, TESTFILE, APR_WRITE|APR_CREATE, APR_OS_DEFAULT,
+    if (apr_file_open(&file, testfile, APR_WRITE|APR_CREATE, APR_OS_DEFAULT,
                  pool) != APR_SUCCESS)
         errmsg("Could not create file.\n");
     printf("Test file created.\n");
@@ -172,9 +171,18 @@ int main(int argc, const char * const *argv)
     if (apr_getopt_init(&opt, pool, argc, argv) != APR_SUCCESS)
         errmsg("Could not parse options.\n");
 
-    while ((status = apr_getopt(opt, "r", &optchar, &optarg)) == APR_SUCCESS) {
+    while ((status = apr_getopt(opt, "rf:", &optchar, &optarg)) == APR_SUCCESS) {
         if (optchar == 'r')
             ++reader;
+        else if (optchar == 'f')
+            testfile = optarg;
+    }
+    if (status != APR_SUCCESS && status != APR_EOF) {
+        char msgbuf[80];
+
+        fprintf(stderr, "error: %s\n",
+                apr_strerror(status, msgbuf, sizeof msgbuf));
+        exit(1);
     }
 
     if (reader)
