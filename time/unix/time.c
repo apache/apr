@@ -146,8 +146,8 @@ static void explode_time(apr_time_exp_t *xt, apr_time_t t,
     xt->tm_gmtoff = get_offset(&tm);
 }
 
-APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result,
-                                           apr_time_t input, apr_int32_t offs)
+APR_DECLARE(apr_status_t) apr_time_exp_tz(apr_time_exp_t *result,
+                                          apr_time_t input, apr_int32_t offs)
 {
     explode_time(result, input, offs, 0);
     result->tm_gmtoff = offs;
@@ -157,7 +157,7 @@ APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result,
 APR_DECLARE(apr_status_t) apr_time_exp_gmt(apr_time_exp_t *result,
                                            apr_time_t input)
 {
-    return apr_explode_time(result, input, 0);
+    return apr_time_exp_tz(result, input, 0);
 }
 
 APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
@@ -165,7 +165,7 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
 {
 #if defined(__EMX__)
     /* EMX gcc (OS/2) has a timezone global we can use */
-    return apr_explode_time(result, input, -timezone);
+    return apr_time_exp_tz(result, input, -timezone);
 #else
     explode_time(result, input, 0, 1);
     return APR_SUCCESS;
