@@ -70,7 +70,7 @@ ap_status_t lock_cleanup(void *thelock)
 
 
 
-ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type, char *fname, ap_context_t *cont)
+ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type, ap_lockscope_e scope, char *fname, ap_context_t *cont)
 {
     struct lock_t *new;
     ULONG rc;
