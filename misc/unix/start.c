@@ -99,9 +99,12 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
 
     apr_pool_tag(pool, "apr_initialize");
 
-    if ((status = apr_atomic_init(pool)) != APR_SUCCESS) {
-        return status;
-    }
+    /* apr_atomic_init() used to be called from here aswell.
+     * Pools rely on mutexes though, which can be backed by
+     * atomics.  Due to this circular dependency
+     * apr_pool_initialize() is taking care of calling
+     * apr_atomic_init() at the correct time.
+     */
 
     apr_signal_init(pool);
 
