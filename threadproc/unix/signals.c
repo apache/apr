@@ -167,8 +167,14 @@ const char *apr_signal_description_get(int signum)
 static const char *signal_description[APR_NUMSIG];
 
 #define store_desc(index, string) \
-	(assert(index < APR_NUMSIG), \
-         signal_description[index] = string)
+        do { \
+            if (index >= APR_NUMSIG) { \
+                assert(index < APR_NUMSIG); \ 
+            } \
+            else { \
+                signal_description[index] = string; \
+            } \
+        } while (0)
 
 void apr_signal_init(apr_pool_t *pglobal)
 {
