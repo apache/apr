@@ -267,7 +267,7 @@ const char *apr_signal_get_description(int signum)
 
 #endif /* SYS_SIGLIST_DECLARED */
 
-#if APR_HAS_THREADS
+#if APR_HAS_THREADS && !defined(OS2)
 static void *signal_thread_func(void *signal_handler)
 {
     sigset_t sig_mask;
