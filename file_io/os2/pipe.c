@@ -72,13 +72,13 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     rc = DosCreateNPipe(pipename, filedes, NP_ACCESS_INBOUND, NP_NOWAIT|1, 4096, 4096, 0);
 
     if (rc)
-        return APR_OS2_STATUS(rc);
+        return APR_FROM_OS_ERROR(rc);
 
     rc = DosConnectNPipe(filedes[0]);
 
     if (rc && rc != ERROR_PIPE_NOT_CONNECTED) {
         DosClose(filedes[0]);
-        return APR_OS2_STATUS(rc);
+        return APR_FROM_OS_ERROR(rc);
     }
 
     rc = DosOpen (pipename, filedes+1, &action, 0, FILE_NORMAL,
@@ -88,7 +88,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
 
     if (rc) {
         DosClose(filedes[0]);
-        return APR_OS2_STATUS(rc);
+        return APR_FROM_OS_ERROR(rc);
     }
 
     (*in) = (apr_file_t *)apr_palloc(pool, sizeof(apr_file_t));
@@ -97,7 +97,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     if (rc) {
         DosClose(filedes[0]);
         DosClose(filedes[1]);
-        return APR_OS2_STATUS(rc);
+        return APR_FROM_OS_ERROR(rc);
     }
 
     rc = DosSetNPipeSem(filedes[0], (HSEM)(*in)->pipeSem, 1);
@@ -110,7 +110,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
         DosClose(filedes[0]);
         DosClose(filedes[1]);
         DosCloseEventSem((*in)->pipeSem);
-        return APR_OS2_STATUS(rc);
+        return APR_FROM_OS_ERROR(rc);
     }
 
     (*in)->pool = pool;
@@ -157,13 +157,13 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_int
         if (thepipe->timeout >= 0) {
             if (thepipe->blocking != BLK_OFF) {
                 thepipe->blocking = BLK_OFF;
-                return APR_OS2_STATUS(DosSetNPHState(thepipe->filedes, NP_NOWAIT));
+                return APR_FROM_OS_ERROR(DosSetNPHState(thepipe->filedes, NP_NOWAIT));
             }
         }
         else if (thepipe->timeout == -1) {
             if (thepipe->blocking != BLK_ON) {
                 thepipe->blocking = BLK_ON;
-                return APR_OS2_STATUS(DosSetNPHState(thepipe->filedes, NP_WAIT));
+                return APR_FROM_OS_ERROR(DosSetNPHState(thepipe->filedes, NP_WAIT));
             }
         }
     }

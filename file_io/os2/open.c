@@ -135,7 +135,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     }
     
     if (rv != 0)
-        return APR_OS2_STATUS(rv);
+        return APR_FROM_OS_ERROR(rv);
     
     dafile->isopen = TRUE;
     dafile->fname = apr_pstrdup(pool, fname);
@@ -167,10 +167,10 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
             status = APR_SUCCESS;
 
             if (file->flags & APR_DELONCLOSE) {
-                status = APR_OS2_STATUS(DosDelete(file->fname));
+                status = APR_FROM_OS_ERROR(DosDelete(file->fname));
             }
         } else {
-            return APR_OS2_STATUS(rc);
+            return APR_FROM_OS_ERROR(rc);
         }
     }
 
@@ -185,7 +185,7 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
 APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *pool)
 {
     ULONG rc = DosDelete(path);
-    return APR_OS2_STATUS(rc);
+    return APR_FROM_OS_ERROR(rc);
 }
 
 
@@ -203,7 +203,7 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *from_path, const char *to_
         }
     }
 
-    return APR_OS2_STATUS(rc);
+    return APR_FROM_OS_ERROR(rc);
 }
 
 

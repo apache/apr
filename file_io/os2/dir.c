@@ -101,7 +101,7 @@ APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *thedir)
         }
     }
 
-    return APR_OS2_STATUS(rv);
+    return APR_FROM_OS_ERROR(rv);
 } 
 
 
@@ -154,7 +154,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     thedir->validentry = FALSE;
 
     if (rv)
-        return APR_OS2_STATUS(rv);
+        return APR_FROM_OS_ERROR(rv);
 
     return APR_ENOENT;
 }
@@ -170,7 +170,7 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir)
 
 APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm, apr_pool_t *pool)
 {
-    return APR_OS2_STATUS(DosCreateDir(path, NULL));
+    return APR_FROM_OS_ERROR(DosCreateDir(path, NULL));
 }
 
 
@@ -185,7 +185,7 @@ apr_status_t apr_dir_make_recursive(const char *path, apr_fileperms_t perm,
 
 APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *pool)
 {
-    return APR_OS2_STATUS(DosDeleteDir(path));
+    return APR_FROM_OS_ERROR(DosDeleteDir(path));
 }
 
 
