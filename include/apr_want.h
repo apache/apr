@@ -77,39 +77,47 @@
 /* --------------------------------------------------------------------- */
 
 #ifdef APR_WANT_STRFUNC
+
 #if APR_HAVE_STRING_H
 #include <string.h>
 #endif
 #if APR_HAVE_STRINGS_H
 #include <strings.h>
 #endif
+
 #undef APR_WANT_STRFUNC
 #endif
 
 /* --------------------------------------------------------------------- */
 
 #ifdef APR_WANT_MEMFUNC
+
 #if APR_HAVE_STRING_H
 #include <string.h>
 #endif
+
 #undef APR_WANT_MEMFUNC
 #endif
 
 /* --------------------------------------------------------------------- */
 
 #ifdef APR_WANT_STDIO
+
 #if APR_HAVE_STDIO_H
 #include <stdio.h>
 #endif
+
 #undef APR_WANT_STDIO
 #endif
 
 /* --------------------------------------------------------------------- */
 
 #ifdef APR_WANT_IOVEC
+
 #if APR_HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
+
 #undef APR_WANT_IOVEC
 #endif
 
