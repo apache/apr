@@ -155,7 +155,7 @@ static void resolve_prot(apr_finfo_t *finfo, apr_int32_t wanted, PACL dacl)
 }
 
 static apr_status_t resolve_ident(apr_finfo_t *finfo, const char *fname,
-                                  apr_int32_t wanted, apr_pool_t *cont)
+                                  apr_int32_t wanted, apr_pool_t *pool)
 {
     apr_file_t *thefile = NULL;
     apr_status_t rv;
@@ -172,7 +172,7 @@ static apr_status_t resolve_ident(apr_finfo_t *finfo, const char *fname,
                        ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0)
                      | ((wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
                            ? APR_READCONTROL : 0),
-                       APR_OS_DEFAULT, cont)) == APR_SUCCESS) {
+                       APR_OS_DEFAULT, pool)) == APR_SUCCESS) {
         rv = apr_file_info_get(finfo, wanted, thefile);
         finfo->filehand = NULL;
         apr_file_close(thefile);
@@ -184,7 +184,7 @@ static apr_status_t resolve_ident(apr_finfo_t *finfo, const char *fname,
          */
         if ((rv = apr_file_open(&thefile, fname, 
                            ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0),
-                           APR_OS_DEFAULT, cont)) == APR_SUCCESS) {
+                           APR_OS_DEFAULT, pool)) == APR_SUCCESS) {
             rv = apr_file_info_get(finfo, wanted & ~(APR_FINFO_PROT 
                                                  | APR_FINFO_OWNER),
                                  thefile);
@@ -281,7 +281,7 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
         else
             return APR_INCOMPLETE;
         if (rv == ERROR_SUCCESS)
-            apr_pool_cleanup_register(finfo->cntxt, pdesc, free_localheap, 
+            apr_pool_cleanup_register(finfo->pool, pdesc, free_localheap, 
                                  apr_pool_cleanup_null);
         else
             user = grp = dacl = NULL;
@@ -414,7 +414,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
         }
     }
 
-    finfo->cntxt = thefile->cntxt;
+    finfo->pool = thefile->pool;
  
     /* Extra goodies known only by GetFileInformationByHandle() */
     finfo->inode  =  (apr_ino_t)FileInfo.nFileIndexLow
@@ -440,7 +440,7 @@ APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
 }
 
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
-                                   apr_int32_t wanted, apr_pool_t *cont)
+                                   apr_int32_t wanted, apr_pool_t *pool)
 {
     /* XXX: is constant - needs testing - which requires a lighter-weight root test fn */
     int isroot = 0;
@@ -474,7 +474,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
          * to the get file info by handle method.  If we fail, or the user
          * also asks for the file name, continue by our usual means.
          */
-        if ((ident_rv = resolve_ident(finfo, fname, wanted, cont)) 
+        if ((ident_rv = resolve_ident(finfo, fname, wanted, pool)) 
                 == APR_SUCCESS)
             return ident_rv;
         else if (ident_rv == APR_INCOMPLETE)
@@ -509,7 +509,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
                                      FileInfo.w.cFileName)) {
                 return APR_ENAMETOOLONG;
             }
-            filename = apr_pstrdup(cont, tmpname);
+            filename = apr_pstrdup(pool, tmpname);
         }
     }
 #endif
@@ -530,7 +530,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
          */
         if (GetDriveType(fname) != DRIVE_UNKNOWN) 
         {
-            finfo->cntxt = cont;
+            finfo->pool = pool;
             finfo->filetype = 0;
             finfo->mtime = apr_time_now();
             finfo->protection |= APR_WREAD | APR_WEXECUTE | APR_WWRITE;
@@ -556,7 +556,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
             return apr_get_os_error();
     	} 
         FindClose(hFind);
-        filename = apr_pstrdup(cont, FileInfo.n.cFileName);
+        filename = apr_pstrdup(pool, FileInfo.n.cFileName);
     }
 #endif
 
@@ -592,7 +592,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
 #endif
             }
         }
-        finfo->cntxt = cont;
+        finfo->pool = pool;
     }
 
     if (filename && !isroot) {
@@ -613,15 +613,15 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
 }
 
 APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
-                                    apr_int32_t wanted, apr_pool_t *cont)
+                                    apr_int32_t wanted, apr_pool_t *pool)
 {
-    return apr_stat(finfo, fname, wanted | APR_FINFO_LINK, cont);
+    return apr_stat(finfo, fname, wanted | APR_FINFO_LINK, pool);
 }
 
 APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
                                              apr_fileattrs_t attributes,
                                              apr_fileattrs_t attr_mask,
-                                             apr_pool_t *cont)
+                                             apr_pool_t *pool)
 {
     DWORD flags;
     apr_status_t rv;

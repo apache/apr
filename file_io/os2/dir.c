@@ -67,15 +67,15 @@ static apr_status_t dir_cleanup(void *thedir)
 
 
 
-APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cntxt)
+APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *pool)
 {
-    apr_dir_t *thedir = (apr_dir_t *)apr_palloc(cntxt, sizeof(apr_dir_t));
+    apr_dir_t *thedir = (apr_dir_t *)apr_palloc(pool, sizeof(apr_dir_t));
     
     if (thedir == NULL)
         return APR_ENOMEM;
     
-    thedir->cntxt = cntxt;
-    thedir->dirname = apr_pstrdup(cntxt, dirname);
+    thedir->pool = pool;
+    thedir->dirname = apr_pstrdup(pool, dirname);
 
     if (thedir->dirname == NULL)
         return APR_ENOMEM;
@@ -83,7 +83,7 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname, apr
     thedir->handle = 0;
     thedir->validentry = FALSE;
     *new = thedir;
-    apr_pool_cleanup_register(cntxt, thedir, dir_cleanup, apr_pool_cleanup_null);
+    apr_pool_cleanup_register(pool, thedir, dir_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -114,14 +114,14 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     
     if (thedir->handle == 0) {
         thedir->handle = HDIR_CREATE;
-        rv = DosFindFirst(apr_pstrcat(thedir->cntxt, thedir->dirname, "/*", NULL), &thedir->handle, 
+        rv = DosFindFirst(apr_pstrcat(thedir->pool, thedir->dirname, "/*", NULL), &thedir->handle, 
                           FILE_ARCHIVED|FILE_DIRECTORY|FILE_SYSTEM|FILE_HIDDEN|FILE_READONLY, 
                           &thedir->entry, sizeof(thedir->entry), &entries, FIL_STANDARD);
     } else {
         rv = DosFindNext(thedir->handle, &thedir->entry, sizeof(thedir->entry), &entries);
     }
 
-    finfo->cntxt = thedir->cntxt;
+    finfo->pool = thedir->pool;
     finfo->fname = NULL;
     finfo->valid = 0;
 
@@ -168,14 +168,14 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir)
 
 
 
-APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm, apr_pool_t *pool)
 {
     return APR_OS2_STATUS(DosCreateDir(path, NULL));
 }
 
 
 
-APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *pool)
 {
     return APR_OS2_STATUS(DosDeleteDir(path));
 }
@@ -194,11 +194,11 @@ APR_DECLARE(apr_status_t) apr_os_dir_get(apr_os_dir_t **thedir, apr_dir_t *dir)
 
 
 APR_DECLARE(apr_status_t) apr_os_dir_put(apr_dir_t **dir, apr_os_dir_t *thedir,
-                                         apr_pool_t *cont)
+                                         apr_pool_t *pool)
 {
     if ((*dir) == NULL) {
-        (*dir) = (apr_dir_t *)apr_pcalloc(cont, sizeof(apr_dir_t));
-        (*dir)->cntxt = cont;
+        (*dir) = (apr_dir_t *)apr_pcalloc(pool, sizeof(apr_dir_t));
+        (*dir)->pool = pool;
     }
     (*dir)->handle = *thedir;
     return APR_SUCCESS;

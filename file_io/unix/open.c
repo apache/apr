@@ -90,15 +90,15 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
                                         const char *fname, 
                                         apr_int32_t flag, 
                                         apr_fileperms_t perm, 
-                                        apr_pool_t *cont)
+                                        apr_pool_t *pool)
 {
     int oflags = 0;
 #if APR_HAS_THREADS
     apr_status_t rv;
 #endif
 
-    (*new) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
-    (*new)->cntxt = cont;
+    (*new) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
+    (*new)->pool = pool;
     (*new)->flags = flag;
     (*new)->filedes = -1;
 
@@ -115,17 +115,17 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
         return APR_EACCES; 
     }
 
-    (*new)->fname = apr_pstrdup(cont, fname);
+    (*new)->fname = apr_pstrdup(pool, fname);
 
     (*new)->blocking = BLK_ON;
     (*new)->buffered = (flag & APR_BUFFERED) > 0;
 
     if ((*new)->buffered) {
-        (*new)->buffer = apr_palloc(cont, APR_FILE_BUFSIZE);
+        (*new)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
 #if APR_HAS_THREADS
         if ((*new)->flags & APR_XTHREAD) {
             rv = apr_thread_mutex_create(&((*new)->thlock),
-                                         APR_THREAD_MUTEX_DEFAULT, cont);
+                                         APR_THREAD_MUTEX_DEFAULT, pool);
             if (rv) {
                 return rv;
             }
@@ -176,7 +176,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     (*new)->direction = 0;
 
     if (!(flag & APR_FILE_NOCLEANUP)) {
-        apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), 
+        apr_pool_cleanup_register((*new)->pool, (void *)(*new), 
                                   apr_unix_file_cleanup, apr_unix_file_cleanup);
     }
     return APR_SUCCESS;
@@ -184,10 +184,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
 
 APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
 {
-    return apr_pool_cleanup_run(file->cntxt, file, apr_unix_file_cleanup);
+    return apr_pool_cleanup_run(file->pool, file, apr_unix_file_cleanup);
 }
 
-APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *pool)
 {
     if (unlink(path) == 0) {
         return APR_SUCCESS;
@@ -216,12 +216,12 @@ APR_DECLARE(apr_status_t) apr_os_file_get(apr_os_file_t *thefile,
 
 APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, 
                                           apr_os_file_t *thefile,
-                                          apr_int32_t flags, apr_pool_t *cont)
+                                          apr_int32_t flags, apr_pool_t *pool)
 {
     int *dafile = thefile;
     
-    (*file) = apr_pcalloc(cont, sizeof(apr_file_t));
-    (*file)->cntxt = cont;
+    (*file) = apr_pcalloc(pool, sizeof(apr_file_t));
+    (*file)->pool = pool;
     (*file)->eof_hit = 0;
     (*file)->buffered = 0;
     (*file)->blocking = BLK_UNKNOWN; /* in case it is a pipe */
@@ -244,31 +244,31 @@ APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr)
 }   
 
 APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, 
-                                               apr_pool_t *cont)
+                                               apr_pool_t *pool)
 {
     int fd = STDERR_FILENO;
 
-    return apr_os_file_put(thefile, &fd, 0, cont);
+    return apr_os_file_put(thefile, &fd, 0, pool);
 }
 
 APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, 
-                                               apr_pool_t *cont)
+                                               apr_pool_t *pool)
 {
     int fd = STDOUT_FILENO;
 
-    return apr_os_file_put(thefile, &fd, 0, cont);
+    return apr_os_file_put(thefile, &fd, 0, pool);
 }
 
 APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, 
-                                              apr_pool_t *cont)
+                                              apr_pool_t *pool)
 {
     int fd = STDIN_FILENO;
 
-    return apr_os_file_put(thefile, &fd, 0, cont);
+    return apr_os_file_put(thefile, &fd, 0, pool);
 }
 
-APR_IMPLEMENT_SET_INHERIT(file, flags, cntxt, apr_unix_file_cleanup)
+APR_IMPLEMENT_SET_INHERIT(file, flags, pool, apr_unix_file_cleanup)
 
-APR_IMPLEMENT_UNSET_INHERIT(file, flags, cntxt, apr_unix_file_cleanup)
+APR_IMPLEMENT_UNSET_INHERIT(file, flags, pool, apr_unix_file_cleanup)
 
-APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt)
+APR_POOL_IMPLEMENT_ACCESSOR(file)

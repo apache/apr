@@ -107,7 +107,7 @@
 #define APR_FILE_BUFSIZE 4096
 
 struct apr_file_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     int filedes;
     char *fname;
     apr_int32_t flags;
@@ -130,7 +130,7 @@ struct apr_file_t {
 };
 
 struct apr_dir_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     char *dirname;
     DIR *dirstruct;
     struct dirent *entry;

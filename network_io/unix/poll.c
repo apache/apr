@@ -401,9 +401,9 @@ apr_status_t apr_poll_data_set(apr_pollfd_t *pollfd, void *data, const char *key
  */
 apr_status_t apr_socket_from_file(apr_socket_t **newsock, apr_file_t *file)
 {
-    (*newsock) = apr_pcalloc(file->cntxt, sizeof(**newsock));
+    (*newsock) = apr_pcalloc(file->pool, sizeof(**newsock));
     (*newsock)->socketdes = file->filedes;
-    (*newsock)->cntxt = file->cntxt;
+    (*newsock)->cntxt = file->pool;
     (*newsock)->timeout = file->timeout;
     return APR_SUCCESS;
 }
