@@ -60,6 +60,7 @@
 #include "apr_private.h"
 
 #include "apr_lib.h"
+#include "apr_strings.h"
 #include "apr_network_io.h"
 #include <math.h>
 #ifdef HAVE_CTYPE_H

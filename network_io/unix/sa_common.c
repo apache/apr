@@ -65,6 +65,7 @@
 
 #include "apr.h"
 #include "apr_lib.h"
+#include "apr_strings.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
