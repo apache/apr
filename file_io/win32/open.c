@@ -111,9 +111,6 @@ apr_status_t apr_open(apr_file_t **new, const char *fname,
 
     (*new)->fname = apr_pstrdup(cont, fname);
 
-    (*new)->demonfname = canonical_filename((*new)->cntxt, fname);
-    (*new)->lowerdemonfname = strlwr((*new)->demonfname);
- 
     if (apr_get_oslevel(cont, &level) == APR_SUCCESS && level >= APR_WIN_NT) {
         sharemode |= FILE_SHARE_DELETE;
     }
@@ -196,40 +193,18 @@ apr_status_t apr_close(apr_file_t *file)
 
 apr_status_t apr_remove_file(const char *path, apr_pool_t *cont)
 {
-    char *temp = canonical_filename(cont, path);
-
-    if (DeleteFile(temp)) {
+    if (DeleteFile(path))
         return APR_SUCCESS;
-    }
-    else {
-        return apr_get_os_error();
-    }
+    return apr_get_os_error();
 }
 
 apr_status_t apr_rename_file(const char *from_path, const char *to_path,
                            apr_pool_t *p)
 {
-    const char *from_canon = canonical_filename(p, from_path);
-    const char *to_canon = canonical_filename(p, to_path);
-    DWORD err;
-
-    /* TODO: would be nice to use MoveFileEx() here, but it isn't available
-     * on Win95/98. MoveFileEx could theoretically help prevent the
-     * case where we delete the target but don't move the file(!).
-     * it can also copy across devices...
-     */
-
-    if (MoveFile(from_canon, to_canon)) {
+    if (MoveFileEx(from_path, to_path, MOVEFILE_REPLACE_EXISTING |
+                                        MOVEFILE_COPY_ALLOWED))
         return APR_SUCCESS;
-    }
-    err = apr_get_os_error();
-    if (APR_STATUS_IS_EEXIST(err)) {
-        (void) DeleteFile(to_canon);
-        if (MoveFile(from_canon, to_canon))
-            return APR_SUCCESS;
-        err = apr_get_os_error();
-    }
-    return err;
+    return apr_get_os_error();
 }
 
 apr_status_t apr_get_os_file(apr_os_file_t *thefile, apr_file_t *file)
