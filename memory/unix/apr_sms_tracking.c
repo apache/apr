@@ -291,6 +291,7 @@ APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **sms,
                     new_sms->pool);
 
     apr_sms_assert(new_sms);
+    apr_sms_post_init(new_sms);
 
     *sms = new_sms;
     return APR_SUCCESS;

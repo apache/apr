@@ -186,6 +186,13 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms,
                                        apr_sms_t *parent_sms);
 
 /**
+ * Do post init work that needs the sms to have been fully
+ * initialised.
+ * @param sms The memory system to use
+ */
+APR_DECLARE(apr_status_t) apr_sms_post_init(apr_sms_t *sms);
+
+/**
  * Check if a memory system is obeying all rules. 
  * @caution Call this function as the last statement before returning a new
  *          memory system from your apr_xxx_sms_create.
