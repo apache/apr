@@ -89,6 +89,43 @@ extern "C" {
 /** The fundamental pool type */
 typedef struct apr_pool_t apr_pool_t;
 
+
+/**
+ * Pool accessor functions.
+ *
+ * These standardized function are used by opaque (APR) data types to return
+ * the apr_pool_t that is associated with the data type.
+ *
+ * APR_POOL_DECLARE_ACCESSOR() is used in a header file to declare the
+ * accessor function. A typical usage and result would be:
+ *
+ *    APR_POOL_DECLARE_ACCESSOR(file);
+ * becomes:
+ *    APR_DECLARE(apr_pool_t *) apr_file_pool_get(apr_file_t *ob);
+ *
+ * In the implementation, the APR_POOL_IMPLEMENT_ACCESSOR() is used to
+ * actually define the function. It assumes the field is named "pool". For
+ * data types with a different field name (e.g. "cont" or "cntxt") the
+ * APR_POOL_IMPLEMENT_ACCESSOR_X() macro should be used.
+ *
+ * Note: the linkage is specified for APR. It would be possible to expand
+ *       the macros to support other linkages.
+ */
+
+#define APR_POOL_DECLARE_ACCESSOR(typename) \
+    APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
+        (const apr_##typename##_t *ob)
+
+/** used to implement the pool accessor */
+#define APR_POOL_IMPLEMENT_ACCESSOR(typename) \
+    APR_POOL_IMPLEMENT_ACCESSOR_X(typename, pool)
+
+/** used to implement the pool accessor */
+#define APR_POOL_IMPLEMENT_ACCESSOR_X(typename, fieldname) \
+    APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
+        (const apr_##typename##_t *ob) { return ob->fieldname; }
+
+
 #include "apr_allocator.h"
 
 /**
@@ -636,41 +673,6 @@ APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag);
 
 #endif /* APR_POOL_DEBUG or DOXYGEN */
 
-
-/**
- * Pool accessor functions.
- *
- * These standardized function are used by opaque (APR) data types to return
- * the apr_pool_t that is associated with the data type.
- *
- * APR_POOL_DECLARE_ACCESSOR() is used in a header file to declare the
- * accessor function. A typical usage and result would be:
- *
- *    APR_POOL_DECLARE_ACCESSOR(file);
- * becomes:
- *    APR_DECLARE(apr_pool_t *) apr_file_pool_get(apr_file_t *ob);
- *
- * In the implementation, the APR_POOL_IMPLEMENT_ACCESSOR() is used to
- * actually define the function. It assumes the field is named "pool". For
- * data types with a different field name (e.g. "cont" or "cntxt") the
- * APR_POOL_IMPLEMENT_ACCESSOR_X() macro should be used.
- *
- * Note: the linkage is specified for APR. It would be possible to expand
- *       the macros to support other linkages.
- */
-
-#define APR_POOL_DECLARE_ACCESSOR(typename) \
-    APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
-        (const apr_##typename##_t *ob)
-
-/** used to implement the pool accessor */
-#define APR_POOL_IMPLEMENT_ACCESSOR(typename) \
-    APR_POOL_IMPLEMENT_ACCESSOR_X(typename, pool)
-
-/** used to implement the pool accessor */
-#define APR_POOL_IMPLEMENT_ACCESSOR_X(typename, fieldname) \
-    APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
-        (const apr_##typename##_t *ob) { return ob->fieldname; }
 
 /** @} */
 #ifdef __cplusplus
