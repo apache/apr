@@ -57,6 +57,127 @@
 #include "proc_mutex.h"
 #include "fileio.h" /* for apr_mkstemp() */
 
+#if APR_HAS_POSIXSEM_SERIALIZE
+
+#ifndef SEM_FAILED
+#define SEM_FAILED (-1)
+#endif
+
+static void proc_mutex_posix_setup(void)
+{
+}
+
+static apr_status_t proc_mutex_posix_cleanup(void *mutex_)
+{
+    apr_proc_mutex_t *mutex=mutex_;
+    apr_status_t stat = APR_SUCCESS;
+    
+    if (mutex->interproc->filedes != -1) {
+        if (sem_close((sem_t *)mutex->interproc->filedes) < 0) {
+            stat = errno;
+        }
+    }
+    return stat;
+}    
+
+static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
+                                            const char *fname)
+{
+    sem_t *psem;
+    apr_status_t stat;
+    char semname[14];
+    unsigned long epoch;
+    
+    new_mutex->interproc = apr_palloc(new_mutex->pool,
+                                      sizeof(*new_mutex->interproc));
+    /*
+     * This bogusness is to follow what appears to be the
+     * lowest common denominator in Posix semaphore naming:
+     *   - start with '/'
+     *   - be at most 14 chars
+     *   - be unique and not match anything on the filesystem
+     *
+     * Because of this, we ignore fname and craft our own.
+     *
+     * FIXME: if we try to create another semaphore within a second
+     * of creating this on, we won't get a new one but another
+     * reference to this one.
+     */
+    epoch = apr_time_now() / APR_USEC_PER_SEC;
+    apr_snprintf(semname, sizeof(semname), "/ApR.%lx", epoch);
+    psem = sem_open((const char *) semname, O_CREAT, 0644, 1);
+
+    if (psem == (sem_t *)SEM_FAILED) {
+        stat = errno;
+        proc_mutex_posix_cleanup(new_mutex);
+        return stat;
+    }
+    /* Ahhh. The joys of Posix sems. Predelete it... */
+    sem_unlink((const char *) semname);
+    new_mutex->interproc->filedes = (int)psem;	/* Ugg */
+    apr_pool_cleanup_register(new_mutex->pool, (void *)new_mutex,
+                              proc_mutex_posix_cleanup, 
+                              apr_pool_cleanup_null);
+    return APR_SUCCESS;
+}
+
+static apr_status_t proc_mutex_posix_acquire(apr_proc_mutex_t *mutex)
+{
+    int rc;
+
+    if ((rc = sem_wait((sem_t *)mutex->interproc->filedes)) < 0) {
+        return errno;
+    }
+    mutex->curr_locked = 1;
+    return APR_SUCCESS;
+}
+
+static apr_status_t proc_mutex_posix_release(apr_proc_mutex_t *mutex)
+{
+    int rc;
+
+    if ((rc = sem_post((sem_t *)mutex->interproc->filedes)) < 0) {
+        return errno;
+    }
+    mutex->curr_locked = 0;
+    return APR_SUCCESS;
+}
+
+static apr_status_t proc_mutex_posix_destroy(apr_proc_mutex_t *mutex)
+{
+    apr_status_t stat;
+
+    if ((stat = proc_mutex_posix_cleanup(mutex)) == APR_SUCCESS) {
+        apr_pool_cleanup_kill(mutex->pool, mutex, proc_mutex_posix_cleanup);
+        return APR_SUCCESS;
+    }
+    return stat;
+}
+
+static apr_status_t proc_mutex_posix_child_init(apr_proc_mutex_t **mutex,
+                                                apr_pool_t *cont,
+                                                const char *fname)
+{
+    return APR_SUCCESS;
+}
+
+const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_posix_methods =
+{
+#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS
+    APR_PROCESS_LOCK_MECH_IS_GLOBAL,
+#else
+    0,
+#endif
+    proc_mutex_posix_create,
+    proc_mutex_posix_acquire,
+    NULL, /* no tryacquire */
+    proc_mutex_posix_release,
+    proc_mutex_posix_destroy,
+    proc_mutex_posix_child_init
+};
+
+#endif /* Posix sem implementation */
+
 #if APR_HAS_SYSVSEM_SERIALIZE
 
 static struct sembuf proc_mutex_op_on;
@@ -612,6 +733,9 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_flock_methods =
 
 void apr_proc_mutex_unix_setup_lock(void)
 {
+#if APR_HAS_POSIXSEM_SERIALIZE
+    proc_mutex_posix_setup();
+#endif
 #if APR_HAS_SYSVSEM_SERIALIZE
     proc_mutex_sysv_setup();
 #endif
@@ -650,6 +774,13 @@ static apr_status_t proc_mutex_choose_method(apr_proc_mutex_t *new_mutex, apr_lo
         return APR_ENOTIMPL;
 #endif
         break;
+    case APR_LOCK_POSIXSEM:
+#if APR_HAS_POSIXSEM_SERIALIZE
+        new_mutex->inter_meth = &apr_proc_mutex_unix_posix_methods;
+#else
+        return APR_ENOTIMPL;
+#endif
+        break;
     case APR_LOCK_PROC_PTHREAD:
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
         new_mutex->inter_meth = &apr_proc_mutex_unix_proc_pthread_methods;
@@ -666,6 +797,8 @@ static apr_status_t proc_mutex_choose_method(apr_proc_mutex_t *new_mutex, apr_lo
         new_mutex->inter_meth = &apr_proc_mutex_unix_fcntl_methods;
 #elif APR_USE_PROC_PTHREAD_SERIALIZE
         new_mutex->inter_meth = &apr_proc_mutex_unix_proc_pthread_methods;
+#elif APR_USE_POSIXSEM_SERIALIZE
+        new_mutex->inter_meth = &apr_proc_mutex_unix_posix_methods;
 #else
         return APR_ENOTIMPL;
 #endif
@@ -707,7 +840,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
                                                 sizeof(apr_proc_mutex_t));
 
     new_mutex->pool  = pool;
-#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
+#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE || APR_HAS_POSIXSEM_SERIALIZE
     new_mutex->interproc = NULL;
 #endif
 
@@ -807,7 +940,7 @@ APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 APR_DECLARE(apr_status_t) apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex,
                                                 apr_proc_mutex_t *pmutex)
 {
-#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
+#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE || APR_HAS_POSIXSEM_SERIALIZE
     ospmutex->crossproc = pmutex->interproc->filedes;
 #endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
@@ -828,7 +961,7 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
                                                     sizeof(apr_proc_mutex_t));
         (*pmutex)->pool = pool;
     }
-#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
+#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE || APR_HAS_POSIXSEM_SERIALIZE
     apr_os_file_put(&(*pmutex)->interproc, &ospmutex->crossproc, 0, pool);
 #endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE

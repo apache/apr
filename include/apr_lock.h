@@ -80,7 +80,8 @@ typedef enum {APR_MUTEX, APR_READWRITE} apr_locktype_e;
 
 typedef enum {APR_READER, APR_WRITER} apr_readerwriter_e;
 
-typedef enum {APR_LOCK_FCNTL, APR_LOCK_FLOCK, APR_LOCK_SYSVSEM, APR_LOCK_PROC_PTHREAD,
+typedef enum {APR_LOCK_FCNTL, APR_LOCK_FLOCK, APR_LOCK_SYSVSEM,
+              APR_LOCK_PROC_PTHREAD, APR_LOCK_POSIXSEM,
               APR_LOCK_DEFAULT} apr_lockmech_e;
 
 typedef struct apr_lock_t    apr_lock_t;
@@ -107,6 +108,7 @@ typedef struct apr_lock_t    apr_lock_t;
  *            APR_LOCK_FCNTL
  *            APR_LOCK_FLOCK
  *            APR_LOCK_SYSVSEM
+ *            APR_LOCK_POSIXSEM
  *            APR_LOCK_PROC_PTHREAD
  *            APR_LOCK_DEFAULT     pick the default mechanism for the platform
  * </PRE>
