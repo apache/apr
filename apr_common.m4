@@ -1,29 +1,35 @@
-dnl APR_TRY_GCC_WARNING(INCLUDES, FUNCTION-BODY,
+dnl APR_TRY_COMPILE_NO_WARNING(INCLUDES, FUNCTION-BODY,
 dnl             [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
-AC_DEFUN(APR_TRY_GCC_WARNING,
-[if test "$GCC" = "yes"; then 
-  changequote(', ')
-  cat > conftest.$ac_ext <<EOTEST
+dnl
+dnl Tries a compile test with warnings activated so that the result
+dnl is false if the code doesn't compile cleanly.
+dnl
+AC_DEFUN(APR_TRY_COMPILE_NO_WARNING,
+[if test "x$CFLAGS_WARN" = "x"; then
+  apr_tcnw_flags=""
+else
+  apr_tcnw_flags=$CFLAGS_WARN
+fi
+if test "$GCC" = "yes"; then 
+  apr_tcnw_flags="$apr_tcnw_flags -Werror"
+fi
+changequote(', ')
+cat > conftest.$ac_ext <<EOTEST
 #include "confdefs.h"
 '$1'
 int main(int argc, const char * const argv[]) {
 '$2'
 ; return 0; }
 EOTEST
-  changequote([, ])
-  if ${CC-cc} -c -Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations -Werror $CFLAGS $CPPFLAGS conftest.$ac_ext 1>&AC_FD_CC ; then
-    ifelse([$3], , :, [rm -rf conftest*
-    $3])
-  else
-    echo "configure: warning on program:" >&AC_FD_CC
-    cat conftest.$ac_ext >&AC_FD_CC
-    ifelse([$4], , , [rm -rf conftest*
-    $4])
-  fi
+changequote([, ])
+if ${CC-cc} -c $CFLAGS $CPPFLAGS $apr_tcnw_flags conftest.$ac_ext 1>&AC_FD_CC ; then
+  ifelse([$3], , :, [rm -rf conftest*
+  $3])
 else
-    # Not using gcc -- assume everything is okay
-    ifelse([$3], , :, [rm -rf conftest*
-    $3])
+  echo "configure: failed or warning program:" >&AC_FD_CC
+  cat conftest.$ac_ext >&AC_FD_CC
+  ifelse([$4], , , [rm -rf conftest*
+  $4])
 fi
 rm -f conftest*])
 
@@ -329,7 +335,7 @@ dnl
 AC_DEFUN(APR_CHECK_ICONV_INBUF,[
 AC_MSG_CHECKING(for type of inbuf parameter to iconv)
 if test "x$apr_iconv_inbuf_const" = "x"; then
-    APR_TRY_GCC_WARNING([
+    APR_TRY_COMPILE_NO_WARNING([
     #include <stddef.h>
     #include <iconv.h>
     ],[
