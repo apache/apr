@@ -216,7 +216,7 @@ EXPORTS
 	ap_cleanup_for_exec   @195
 	ap_null_cleanup   @196
 	ap_note_subprocess   @197
-	ap_slack   @198
+;	ap_slack   @198
 	ap_vformatter   @199
 	ap_snprintf   @200
 	ap_vsnprintf   @201
