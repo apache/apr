@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     char *args[3];
     char *teststr;
 
-    ap_create_context(NULL, NULL, &context);
+    ap_create_context(NULL, &context);
 
     teststr = ap_pstrdup(context, "Whooo Hoooo\0");
 

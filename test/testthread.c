@@ -129,7 +129,7 @@ int main()
     ap_status_t s4;
 
     fprintf(stdout, "Initializing the context......."); 
-    if (ap_create_context(NULL, NULL, &context) != APR_SUCCESS) {
+    if (ap_create_context(NULL, &context) != APR_SUCCESS) {
         fprintf(stderr, "could not initialize\n");
         exit(-1);
     }

@@ -77,8 +77,7 @@
  *        inherit the data from it's parent.
  * arg 3) The context we have just created.
  */
-ap_status_t ap_create_context(struct context_t *cont, void *data, 
-                              struct context_t **newcont)
+ap_status_t ap_create_context(struct context_t *cont, struct context_t **newcont)
 {
     struct context_t *new;
     ap_pool_t *pool;
@@ -102,12 +101,7 @@ ap_status_t ap_create_context(struct context_t *cont, void *data,
     }
 
     new->pool = pool;
-    if (data == NULL && cont) {
-        new->prog_data = cont->prog_data;
-    }
-    else {
-        new->prog_data = data;
-    }
+    new->prog_data = NULL;
  
     *newcont = new;
     return APR_SUCCESS;
@@ -129,11 +123,35 @@ ap_status_t ap_destroy_context(struct context_t *cont)
  *    Set the data associated with the current context.
  * arg 1) The current context.
  * arg 2) The user data associated with the context.
+ * arg 3) The key to use for association
+ * arg 4) The cleanup program to use to cleanup the data;
  */
-ap_status_t ap_set_userdata(struct context_t *cont, void *data)
+ap_status_t ap_set_userdata(struct context_t *cont, void *data, char *key,
+                            ap_status_t (*cleanup) (void *))
 {
+    datastruct *dptr = NULL, *dptr2 = NULL;
     if (cont) { 
-        cont->prog_data = data;
+        dptr = cont->prog_data;
+        while (dptr) {
+            if (!strcmp(dptr->key, key))
+                break;
+            dptr2 = dptr;
+            dptr = dptr->next;
+        }
+        if (dptr == NULL) {
+            dptr = ap_palloc(cont, sizeof(datastruct));
+            dptr->next = dptr->prev = NULL;
+            dptr->key = strdup(key);
+            if (dptr2) {
+                dptr2->next = dptr;
+                dptr->prev = dptr2;
+            }
+            else {
+                cont->prog_data = dptr;
+            }
+        }
+        dptr->data = data;
+        ap_register_cleanup(cont, dptr->data, cleanup, cleanup);
         return APR_SUCCESS;
     }
     return APR_ENOCONT;
@@ -143,12 +161,26 @@ ap_status_t ap_set_userdata(struct context_t *cont, void *data)
  * ap_status_t ap_get_userdata(ap_context_t *, void **)
  *    Return the data associated with the current context.
  * arg 1) The current context.
- * arg 2) The user data associated with the context.
+ * arg 2) The key for the data to retrieve
+ * arg 3) The user data associated with the context.
  */
-ap_status_t ap_get_userdata(struct context_t *cont, void **data)
+ap_status_t ap_get_userdata(struct context_t *cont, char *key, void **data)
 {
+    datastruct *dptr = NULL;
     if (cont) { 
-        (*data) = cont->prog_data;
+        dptr = cont->prog_data;
+        while (dptr) {
+            if (!strcmp(dptr->key, key)) {
+                break;
+            }
+            dptr = dptr->next;
+        }
+        if (dptr) {
+            (*data) = dptr->data;
+        }
+        else {
+            (*data) = NULL;
+        }
         return APR_SUCCESS;
     }
     return APR_ENOCONT;

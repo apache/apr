@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 
     ap_initialize();
 
-    ap_create_context(NULL, NULL, &context);
+    ap_create_context(NULL, &context);
 
     if (argc > 1) {
 

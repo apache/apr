@@ -95,16 +95,18 @@ ap_status_t ap_thread_detach(ap_thread_t *);
 ap_status_t ap_cancel_thread(ap_thread_t *);
 ap_status_t ap_setcanceltype(ap_context_t *, ap_int32_t);
 ap_status_t ap_setcancelstate(ap_context_t *, ap_int32_t);
-ap_status_t ap_get_threaddata(ap_thread_t *, void *);
-ap_status_t ap_set_threaddata(ap_thread_t *, void *);
+ap_status_t ap_get_threaddata(ap_thread_t *, char *, void *);
+ap_status_t ap_set_threaddata(ap_thread_t *, void *, char *,
+                              ap_status_t (*cleanup) (void *));
 
 ap_status_t ap_create_thread_private(ap_context_t *, void (*dest)(void *), 
                                      ap_key_t **);
 ap_status_t ap_get_thread_private(ap_key_t *, void **);
 ap_status_t ap_set_thread_private(ap_key_t *, void *);
 ap_status_t ap_delete_thread_private(ap_key_t *);
-ap_status_t ap_get_threadkeydata(ap_key_t *, void *);
-ap_status_t ap_set_threadkeydata(ap_key_t *, void *);
+ap_status_t ap_get_threadkeydata(ap_key_t *, char *, void *);
+ap_status_t ap_set_threadkeydata(ap_key_t *, void *, char *,
+                                 ap_status_t (*cleanup) (void *));
 
 /* Process Function definitions */
 ap_status_t ap_createprocattr_init(ap_context_t *, ap_procattr_t **);
@@ -113,8 +115,9 @@ ap_status_t ap_setprocattr_io(ap_procattr_t *, ap_int32_t, ap_int32_t,
 ap_status_t ap_setprocattr_dir(ap_procattr_t *, char *);
 ap_status_t ap_setprocattr_cmdtype(ap_procattr_t *, ap_cmdtype_e);
 ap_status_t ap_setprocattr_detach(ap_procattr_t *, ap_int32_t);
-ap_status_t ap_get_procdata(ap_proc_t *, void *);
-ap_status_t ap_set_procdata(ap_proc_t *, void *);
+ap_status_t ap_get_procdata(ap_proc_t *, char *, void *);
+ap_status_t ap_set_procdata(ap_proc_t *, void *, char *,
+                            ap_status_t (*cleanup) (void *));
 
 ap_status_t ap_get_childin(ap_proc_t *, ap_file_t **);
 ap_status_t ap_get_childout(ap_proc_t *, ap_file_t **);

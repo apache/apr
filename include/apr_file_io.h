@@ -141,8 +141,9 @@ ap_status_t ap_create_namedpipe(ap_context_t *, char *, ap_fileperms_t, char **)
 /*accessor and general file_io functions. */
 ap_status_t ap_get_filename(ap_file_t *, char **);
 ap_status_t ap_get_dir_filename(ap_dir_t *, char **);
-ap_status_t ap_get_filedata(ap_file_t *, void *);
-ap_status_t ap_set_filedata(ap_file_t *, void *);
+ap_status_t ap_get_filedata(ap_file_t *, char *, void *);
+ap_status_t ap_set_filedata(ap_file_t *, void *, char *,
+                            ap_status_t (*cleanup) (void *));
 
 ap_status_t ap_dir_entry_size(ap_dir_t *, ap_ssize_t *);
 ap_status_t ap_dir_entry_mtime(ap_dir_t *, time_t *);

@@ -103,7 +103,7 @@ ap_status_t ap_create_thread(ap_context_t *cont, struct threadattr_t *attr,
 
     (*new)->cntxt = cont;
     
-    stat = ap_create_context(cont, NULL, &(*new)->cntxt);
+    stat = ap_create_context(cont, &(*new)->cntxt);
     if (stat != APR_SUCCESS) {
         return stat;
     }

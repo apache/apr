@@ -77,11 +77,11 @@ int main()
     char *buf;
     char *str;
     char *filename = "test.fil";
-    if (ap_create_context(NULL, NULL, &context) != APR_SUCCESS) {
+    if (ap_create_context(NULL, &context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
-    if (ap_create_context(context, NULL, &cont2) != APR_SUCCESS) {
+    if (ap_create_context(context, &cont2) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }

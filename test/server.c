@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     char datarecv[STRLEN] = "Recv data test";
 
     fprintf(stdout, "Creating context.......");
-    if (ap_create_context(NULL, NULL, &context) != APR_SUCCESS) {
+    if (ap_create_context(NULL, &context) != APR_SUCCESS) {
         fprintf(stderr, "Could not create a context\n");
         exit(-1);
     }

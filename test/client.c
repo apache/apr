@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     char datarecv[STRLEN];
 
     fprintf(stdout, "Creating context.......");
-    if (ap_create_context(NULL, NULL, &context) != APR_SUCCESS) {
+    if (ap_create_context(NULL, &context) != APR_SUCCESS) {
         fprintf(stderr, "Something went wrong\n");
         exit(-1);
     }

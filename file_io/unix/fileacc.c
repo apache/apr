@@ -249,15 +249,15 @@ ap_status_t ap_get_filetype(struct file_t *file, ap_filetype_e *type)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_filedata(ap_file_t *, void *)
+ * ap_status_t ap_get_filedata(ap_file_t *, char *key, void *)
  *    Return the data associated with the current file.
  * arg 1) The currently open file.
  * arg 2) The user data associated with the file.  
  */                     
-ap_status_t ap_get_filedata(struct file_t *file, void *data)
+ap_status_t ap_get_filedata(struct file_t *file, char *key, void *data)
 {    
     if (file != NULL) {
-        return ap_get_userdata(file->cntxt, &data);
+        return ap_get_userdata(file->cntxt, key, &data);
     }
     else {
         data = NULL;
@@ -266,15 +266,17 @@ ap_status_t ap_get_filedata(struct file_t *file, void *data)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_filedata(ap_file_t *, void *)
+ * ap_status_t ap_set_filedata(ap_file_t *, void *, char *key,
+                               ap_status (*cleanup) (void *))
  *    Set the data associated with the current file.
  * arg 1) The currently open file.
  * arg 2) The user data to associate with the file.  
  */                     
-ap_status_t ap_set_filedata(struct file_t *file, void *data)
+ap_status_t ap_set_filedata(struct file_t *file, void *data, char *key,
+                            ap_status_t (*cleanup) (void *))
 {    
     if (file != NULL) {
-        return ap_set_userdata(file->cntxt, data);
+        return ap_set_userdata(file->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;

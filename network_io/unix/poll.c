@@ -429,15 +429,15 @@ ap_status_t ap_clear_poll_sockets(struct pollfd_t *aprset, ap_int16_t event)
 #endif 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_polldata(ap_pollfd_t *, void *)
+ * ap_status_t ap_get_polldata(ap_pollfd_t *, char *, void *)
  *    Return the context associated with the current poll.
  * arg 1) The currently open pollfd.
  * arg 2) The user data associated with the pollfd.
  */
-ap_status_t ap_get_polldata(struct pollfd_t *pollfd, void *data)
+ap_status_t ap_get_polldata(struct pollfd_t *pollfd, char *key, void *data)
 {
     if (pollfd != NULL) {
-        return ap_get_userdata(pollfd->cntxt, &data);
+        return ap_get_userdata(pollfd->cntxt, key, &data);
     }
     else {
         data = NULL;
@@ -446,15 +446,17 @@ ap_status_t ap_get_polldata(struct pollfd_t *pollfd, void *data)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_polldata(ap_pollfd_t *, void *)
+ * ap_status_t ap_set_polldata(ap_pollfd_t *, void *, char *,
+                               ap_status_t (*cleanup) (void *))
  *    Return the context associated with the current poll.
  * arg 1) The currently open pollfd.
  * arg 2) The user data to associate with the pollfd.
  */
-ap_status_t ap_set_polldata(struct pollfd_t *pollfd, void *data)
+ap_status_t ap_set_polldata(struct pollfd_t *pollfd, void *data, char *key,
+                            ap_status_t (*cleanup) (void *))
 {
     if (pollfd != NULL) {
-        return ap_set_userdata(pollfd->cntxt, data);
+        return ap_set_userdata(pollfd->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;

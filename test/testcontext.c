@@ -52,44 +52,41 @@
  * project, please see <http://www.apache.org/>.
  *
  */
-
+#include <stdio.h>
 #include "apr_file_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
-#include <stdio.h>
 #ifdef BEOS
 #include <unistd.h>
 #endif
 
-API_VAR_IMPORT char *optarg;                        /* argument associated with option */
+ap_status_t string_cleanup(void *data)
+{
+    return APR_SUCCESS;
+}
 
-int main(int argc, char * const argv[])
+int main()
 {
     ap_context_t *context;
-    ap_int32_t data;
+    char *testdata;
+    char *retdata;
 
-    ap_create_context(NULL, &context);
-
-    while (ap_getopt(context, argc, argv, "abc:d::", &data) == APR_SUCCESS) {
-        switch(data) {
-            case 'a':
-            case 'b':
-                printf("option %c\n", data);
-                break;
-            case 'c':
-                printf("option %c with %s\n", data, optarg);
-                break;
-            case 'd':
-                printf("option %c", data);
-                if (optarg) {
-                    printf(" with %s\n", optarg);
-                }
-                else {
-                    printf("\n");
-                }
-                break;
-        }
+    if (ap_create_context(NULL, &context) != APR_SUCCESS) {
+        fprintf(stderr, "Couldn't allocate context.");
+        exit(-1);
     }
-    return 1;
+
+    testdata = ap_pstrdup(context, "This is a test\n");
+
+    ap_set_userdata(context, testdata, "TEST", string_cleanup);    
+
+    ap_get_userdata(context, "TEST", (void **)&retdata);
+
+    if (!strcmp(testdata, retdata)) {
+        fprintf(stdout, "User data is working ok\n");
+    }
+    else {
+        fprintf(stdout, "User data is not working\n");
+    } 
 }

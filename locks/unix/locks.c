@@ -193,15 +193,15 @@ ap_status_t ap_child_init_lock(ap_context_t *cont, char *fname, struct lock_t **
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_lockdata(ap_lock_t *, void *)
+ * ap_status_t ap_get_lockdata(ap_lock_t *, char *key, void *)
  *    Return the context associated with the current lock.
  * arg 1) The currently open lock.
  * arg 2) The user data associated with the lock.
  */
-ap_status_t ap_get_lockdata(struct lock_t *lock, void *data)
+ap_status_t ap_get_lockdata(struct lock_t *lock, char *key, void *data)
 {
     if (lock != NULL) {
-        return ap_get_userdata(lock->cntxt, &data);
+        return ap_get_userdata(lock->cntxt, key, &data);
     }
     else {
         data = NULL;
@@ -210,15 +210,17 @@ ap_status_t ap_get_lockdata(struct lock_t *lock, void *data)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_lockdata(ap_lock_t *, void *)
+ * ap_status_t ap_set_lockdata(ap_lock_t *, void *, char *,
+                               ap_status_t (*cleanup) (void *))
  *    Return the context associated with the current lock.
  * arg 1) The currently open lock.
  * arg 2) The user data to associate with the lock.
  */
-ap_status_t ap_set_lockdata(struct lock_t *lock, void *data)
+ap_status_t ap_set_lockdata(struct lock_t *lock, void *data, char *key,
+                            ap_status_t (*cleanup) (void *))
 {
     if (lock != NULL) {
-        return ap_set_userdata(lock->cntxt, data);
+        return ap_set_userdata(lock->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;
