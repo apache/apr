@@ -1,4 +1,8 @@
 Changes with APR 0.9.2
+  *) Win32: apr_shutdown was not honoring apr_shutdown_how_e and
+     always shutting down the socket for read. This could result
+     in Apache HTTPD 2.0 clients getting early connection closures
+     because lingering_close() was broken. [Bill Stoddard, Allan Edwards]
 
   *) Add apr_atomic_casptr() to support atomic compare-and-swap
      of pointers  [Brian Pane]

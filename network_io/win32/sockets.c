@@ -190,7 +190,7 @@ APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
 {
     int winhow = 0;
 
-#if SD_RECEIVE
+#ifdef SD_RECEIVE
     switch (how) {
         case APR_SHUTDOWN_READ: {
             winhow = SD_RECEIVE;
