@@ -100,7 +100,7 @@ dnl These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
 echo "(Default will be ${DEFAULT_OSDIR})"
 
-apr_modules="file_io network_io threadproc misc locks time mmap shmem user memory atomic poll support random"
+apr_modules="file_io network_io threadproc misc locks time mmap shmem user memory atomic poll support"
 
 dnl Checks for programs.
 AC_PROG_MAKE_SET
