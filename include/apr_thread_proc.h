@@ -130,7 +130,6 @@ typedef enum {
 /** @see apr_procattr_limit_set */
 #define APR_LIMIT_NOFILE     3
 
-#if APR_HAS_OTHER_CHILD || defined(DOXYGEN)
 /**
  * @defgroup Other_Child Other Child Flags
  * @{
@@ -152,7 +151,6 @@ typedef enum {
                                            * this is a no-op.
                                            */
 /** @} */
-#endif /* APR_HAS_OTHER_CHILD */
 
 /** @see apr_proc_t */
 typedef struct apr_proc_t apr_proc_t;
