@@ -1049,6 +1049,7 @@ DEP_CPP_INET_=\
 	".\include\apr_general.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_strings.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
