@@ -57,6 +57,7 @@
 #include "apr_lib.h"
 #include "apr_private.h"
 #include "apr_strings.h"
+
 /* System Headers required for time library */
 #if APR_HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -69,6 +70,28 @@
 #endif
 /* End System Headers */
 
+static apr_int32_t get_offset(struct tm *tm)
+{
+#ifdef HAVE_GMTOFF
+    return tm->tm_gmtoff;
+#elif defined(HAVE___OFFSET)
+    return tm->__tm_gmtoff;
+#else
+    /* we don't have an offset field to use, so calculate it */
+    {
+        time_t t1 = time(0), t2 = 0;
+        struct tm t;
+
+# if APR_HAS_THREADS && defined (_POSIX_THREAD_SAFE_FUNCTIONS)
+        gmtime_r(tt, &t);
+# else
+        t = *gmtime(tt);
+# endif
+        t2 = mktime(&t);
+        return (apr_int32_t) difftime(t1,t2);
+    }
+#endif
+}
 
 apr_status_t apr_ansi_time_to_apr_time(apr_time_t *result, time_t input)
 {
@@ -76,37 +99,12 @@ apr_status_t apr_ansi_time_to_apr_time(apr_time_t *result, time_t input)
     return APR_SUCCESS;
 }
 
-
+/* NB NB NB NB This returns GMT!!!!!!!!!! */
 apr_time_t apr_time_now(void)
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return tv.tv_sec * APR_USEC_PER_SEC + tv.tv_usec;
-}
-
-static void set_xt_gmtoff_from_tm(apr_exploded_time_t *xt, struct tm *tm,
-                                  time_t *tt)
-{
-#ifdef HAVE_GMTOFF
-    xt->tm_gmtoff = tm->tm_gmtoff;
-#elif defined(HAVE___OFFSET)
-    xt->tm_gmtoff = tm->__tm_gmtoff;
-#else
-    {
-        struct tm t;
-        int days = 0, hours = 0, minutes = 0;
-#if APR_HAS_THREADS && defined (_POSIX_THREAD_SAFE_FUNCTIONS)
-        gmtime_r(tt, &t);
-#else
-        t = *gmtime(tt);
-#endif
-        days = xt->tm_yday - t.tm_yday;
-        hours = ((days < -1 ? 24 : 1 < days ? -24 : days * 24) +
-                 xt->tm_hour - t.tm_hour);
-        minutes = hours * 60 + xt->tm_min - t.tm_min;
-        xt->tm_gmtoff = minutes * 60;
-    }
-#endif
 }
 
 static void explode_time(apr_exploded_time_t *xt, apr_time_t t,
@@ -137,7 +135,7 @@ static void explode_time(apr_exploded_time_t *xt, apr_time_t t,
     xt->tm_wday = tm.tm_wday;
     xt->tm_yday = tm.tm_yday;
     xt->tm_isdst = tm.tm_isdst;
-    set_xt_gmtoff_from_tm(xt,&tm,&tt);
+    xt->tm_gmtoff = get_offset(&tm);
 }
 
 apr_status_t apr_explode_time(apr_exploded_time_t *result, apr_time_t input,
@@ -214,7 +212,11 @@ apr_status_t apr_os_exp_time_get(apr_os_exp_time_t **ostime,
     (*ostime)->tm_wday = aprtime->tm_wday;
     (*ostime)->tm_yday = aprtime->tm_yday;
     (*ostime)->tm_isdst = aprtime->tm_isdst;
-    /* XXX - Need to handle gmt_offset's here ! */ 
+#if HAVE_GMTOFF
+    (*ostime)->tm_gmtoff = aprtime->tm_gmtoff;
+#else if defined(HAVE__OFFSET)
+    (*ostime)->__tm_gmtoff = aprtime->tm_gmtoff;
+#endif
     return APR_SUCCESS;
 }
 
@@ -237,7 +239,11 @@ apr_status_t apr_os_exp_time_put(apr_exploded_time_t *aprtime,
     aprtime->tm_wday = (*ostime)->tm_wday;
     aprtime->tm_yday = (*ostime)->tm_yday;
     aprtime->tm_isdst = (*ostime)->tm_isdst;
-    /* XXX - Need to handle gmt_offsets here */
+#if HAVE_GMTOFF
+    aprtime->tm_gmtoff = (*ostime)->tm_gmtoff;
+#else if defined(HAVE__OFFSET)
+    aprtime->tm_gmtoff = (*ostime)->__tm_gmtoff;
+#endif
     return APR_SUCCESS;
 }
 
