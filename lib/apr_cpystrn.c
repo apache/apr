@@ -210,7 +210,7 @@ APR_EXPORT(ap_status_t) ap_tokenize_to_argv(const char *arg_str,
  * Corrected Win32 to accept "a/b\\stuff", "a:stuff"
  */
 
-const char *ap_filename_of_pathname(const char *pathname)
+APR_EXPORT(const char *) ap_filename_of_pathname(const char *pathname)
 {
     const char path_separator = '/';
     const char *s = strrchr(pathname, path_separator);
