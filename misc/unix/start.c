@@ -55,6 +55,7 @@
 #include "misc.h"
 #include "locks.h"
 #include "apr_strings.h"
+#include "apr_hash.h"
 
 static int initialized=0;
 
@@ -81,59 +82,29 @@ apr_status_t apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont)
 }
 
 apr_status_t apr_set_userdata(const void *data, const char *key,
-                            apr_status_t (*cleanup) (void *),
-                            apr_pool_t *cont)
+			      apr_status_t (*cleanup) (void *),
+			      apr_pool_t *cont)
 {
-    datastruct *dptr = NULL, *dptr2 = NULL;
+    int keylen = strlen(key);
 
-    /* ### replace with an apr_hash_t */
+    if (!cont->prog_data)
+        cont->prog_data = apr_make_hash(cont);
 
-    dptr = cont->prog_data;
-    while (dptr) {
-        if (!strcmp(dptr->key, key))
-            break;
-        dptr2 = dptr;
-        dptr = dptr->next;
+    if (apr_hash_get(cont->prog_data, key, keylen) == NULL){
+        char *new_key = apr_pstrdup(cont, key);
+        apr_hash_set(cont->prog_data, new_key, keylen, data);
+    } 
+    else {
+        apr_hash_set(cont->prog_data, key, keylen, data);
     }
-    if (dptr == NULL) {
-        dptr = apr_pcalloc(cont, sizeof(datastruct));
-        dptr->next = dptr->prev = NULL;
-        dptr->key = apr_pstrdup(cont, key);
-        if (dptr2) {
-            dptr2->next = dptr;
-            dptr->prev = dptr2;
-        }
-        else {
-            cont->prog_data = dptr;
-        }
-    }
-    dptr->data = data;
-    apr_register_cleanup(cont, dptr->data, cleanup, cleanup);
+
+    apr_register_cleanup(cont, data, cleanup, cleanup);
     return APR_SUCCESS;
 }
 
 apr_status_t apr_get_userdata(void **data, const char *key, apr_pool_t *cont)
 {
-    datastruct *dptr = NULL;
-
-    /* ### replace with an apr_hash_t */
-
-    dptr = cont->prog_data;
-    while (dptr) {
-        if (!strcmp(dptr->key, key)) {
-            break;
-        }
-        dptr = dptr->next;
-    }
-    if (dptr) {
-        /* ->data is const because we never change it. however, we want to
-           cast because the caller may want to change the contents (and
-           it knows whether it can). */
-        (*data) = (void *)dptr->data;
-    }
-    else {
-        (*data) = NULL;
-    }
+    (*data) = apr_hash_get(cont->prog_data, key, strlen(key));
     return APR_SUCCESS;
 }
 
