@@ -216,7 +216,7 @@ APR_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context,
 
     /* TODO: remove the single-byte-only restriction from this code
      */
-    rv = apr_xlate_get_sb(xlate, &is_sb);
+    rv = apr_xlate_sb_get(xlate, &is_sb);
     if (rv != APR_SUCCESS) {
         return rv;
     }

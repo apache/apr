@@ -82,7 +82,6 @@ extern "C" {
  * APR_ENOTIMPL at run-time.
  */
 
-#if APR_HAS_XLATE
 typedef struct apr_xlate_t            apr_xlate_t;
 
 /**
@@ -130,7 +129,12 @@ APR_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset,
  *                parameters of conversion
  * @param onoff Output: whether or not the conversion is single-byte-only
  */
-APR_DECLARE(apr_status_t) apr_xlate_get_sb(apr_xlate_t *convset, int *onoff);
+APR_DECLARE(apr_status_t) apr_xlate_sb_get(apr_xlate_t *convset, int *onoff);
+
+/**
+ * Deprecated: Use apr_xlate_sb_get()
+ */
+APR_DECLARE(void) apr_xlate_get_sb(apr_xlate_t *convset, int *onoff);
 
 /**
  * Convert a buffer of text from one codepage to another.
@@ -180,38 +184,6 @@ APR_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset,
  * @param convset The codepage translation handle to close
  */
 APR_DECLARE(apr_status_t) apr_xlate_close(apr_xlate_t *convset);
-
-#else
-/** 
- * handle for the Translation routines
- * (currently not implemented)
- */
-typedef void                         apr_xlate_t;
-
-/**
- * For platforms where we don't bother with translating between charsets,
- * these are macros which always return failure.
- */
-
-#define apr_xlate_open(convset, topage, frompage, pool) APR_ENOTIMPL
-
-#define apr_xlate_get_sb(convset, onoff) APR_ENOTIMPL
-
-#define apr_xlate_conv_buffer(convset, inbuf, inbytes_left, outbuf, \
-                              outbytes_left) APR_ENOTIMPL
-
-#define apr_xlate_conv_byte(convset, inchar) (-1)
-
-/**
- * The purpose of apr_xlate_conv_char is to translate one character
- * at a time.  This needs to be written carefully so that it works
- * with double-byte character sets. 
- */
-#define apr_xlate_conv_char(convset, inchar, outchar) APR_ENOTIMPL
-
-#define apr_xlate_close(convset) APR_ENOTIMPL
-
-#endif  /* ! APR_HAS_XLATE */
 
 /** @} */
 #ifdef __cplusplus

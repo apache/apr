@@ -276,7 +276,7 @@ apr_status_t apr_xlate_open(apr_xlate_t **convset, const char *topage,
     return status;
 }
 
-apr_status_t apr_xlate_get_sb(apr_xlate_t *convset, int *onoff)
+apr_status_t apr_xlate_sb_get(apr_xlate_t *convset, int *onoff)
 {
     *onoff = convset->sbcs_table != NULL;
     return APR_SUCCESS;
@@ -360,4 +360,46 @@ apr_status_t apr_xlate_close(apr_xlate_t *convset)
     return apr_pool_cleanup_run(convset->pool, convset, apr_xlate_cleanup);
 }
 
+#else /* !APR_HAS_XLATE */
+
+APR_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset, 
+                                         const char *topage,
+                                         const char *frompage, 
+                                         apr_pool_t *pool)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_xlate_sb_get(apr_xlate_t *convset, int *onoff)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset, 
+                                             unsigned char inchar)
+{
+    return (-1);
+}
+
+APR_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset, 
+                                                const char *inbuf,
+                                                apr_size_t *inbytes_left, 
+                                                char *outbuf,
+                                                apr_size_t *outbytes_left)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_xlate_close(apr_xlate_t *convset)
+{
+    return APR_ENOTIMPL;
+}
+
 #endif /* APR_HAS_XLATE */
+
+/* Deprecated
+ */
+APR_DECLARE(apr_status_t) apr_xlate_get_sb(apr_xlate_t *convset, int *onoff)
+{
+    return apr_xlate_sb_get(convset, onoff);
+}
