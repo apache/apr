@@ -96,8 +96,10 @@
  *          char *bar;
  *      };
  * </pre>
- * An element struct may be put on more than one ring if it has
- * more than one APR_RING_ENTRY field.
+ *
+ * An element struct may be put on more than one ring if it has more
+ * than one APR_RING_ENTRY field. Each APR_RING_ENTRY has a corresponding
+ * APR_RING_HEAD declaration.
  *
  * @warning For strict C standards compliance you should put the APR_RING_ENTRY
  * first in the element struct unless the head is always part of a larger
@@ -139,6 +141,55 @@
  * the ring's head.  The head itself isn't an element, but in order to
  * get rid of all the special cases when dealing with the ends of the
  * ring, we play typecasting games to make it look like one.
+ *
+ * Here is a diagram to illustrate the arrangements of the next and
+ * prev pointers of each element in a single ring. Note that they point
+ * to the start of each element, not to the APR_RING_ENTRY structure.
+ *
+ * <pre>
+ *     +->+------+<-+  +->+------+<-+  +->+------+<-+
+ *     |  |struct|  |  |  |struct|  |  |  |struct|  |
+ *    /   | elem |   \/   | elem |   \/   | elem |  \
+ * ...    |      |   /\   |      |   /\   |      |   ...
+ *        +------+  |  |  +------+  |  |  +------+
+ *   ...--|prev  |  |  +--|ring  |  |  +--|prev  |
+ *        |  next|--+     | entry|--+     |  next|--...
+ *        +------+        +------+        +------+
+ *        | etc. |        | etc. |        | etc. |
+ *        :      :        :      :        :      :
+ * </pre>
+ *
+ * The APR_RING_HEAD is nothing but a bare APR_RING_ENTRY. The prev
+ * and next pointers in the first and last elements don't actually
+ * point to the head, they point to a phantom place called the
+ * sentinel. Its value is such that last->next->next == first because
+ * the offset from the sentinel to the head's next pointer is the same
+ * as the offset from the start of an element to its next pointer.
+ * This also works in the opposite direction.
+ *
+ * <pre>
+ *        last                            first
+ *     +->+------+<-+  +->sentinel<-+  +->+------+<-+
+ *     |  |struct|  |  |            |  |  |struct|  |
+ *    /   | elem |   \/              \/   | elem |  \
+ * ...    |      |   /\              /\   |      |   ...
+ *        +------+  |  |  +------+  |  |  +------+
+ *   ...--|prev  |  |  +--|ring  |  |  +--|prev  |
+ *        |  next|--+     |  head|--+     |  next|--...
+ *        +------+        +------+        +------+
+ *        | etc. |                        | etc. |
+ *        :      :                        :      :
+ * </pre>
+ *
+ * Note that the offset mentioned above is different for each kind of
+ * ring that the element may be on, and each kind of ring has a unique
+ * name for its APR_RING_ENTRY in each element, and has its own type
+ * for its APR_RING_HEAD.
+ *
+ * Note also that if the offset is non-zero (which is required if an
+ * element has more than one APR_RING_ENTRY), the unreality of the
+ * sentinel may have bad implications on very perverse implementations
+ * of C -- see the warning in APR_RING_ENTRY.
  *
  * @param hp   The head of the ring
  * @param elem The name of the element struct
