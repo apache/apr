@@ -887,6 +887,8 @@ AC_SUBST(mmap)
 AC_SUBST(have_memmove)
 
 APR_CHECK_SIGWAIT_ONE_ARG
+APR_CHECK_DIRENT_INODE
+APR_CHECK_DIRENT_TYPE
 
 dnl ----------------------------- Checks for Any required Headers
 AC_HEADER_STDC
