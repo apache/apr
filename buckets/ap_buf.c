@@ -68,38 +68,28 @@
 APR_EXPORT(ap_bucket *) ap_bucket_new(ap_bucket_color_e color)
 {
     /* TODO: keep a free list of ap_bufels... and allocate them in big chunks */
-    ap_bucket *newbuf;
-    newbuf = malloc(sizeof(*newbuf));
-    newbuf->color = color;
     switch (color) {
         case AP_BUCKET_rwmem:
-            newbuf->data = ap_rwmem_create();
-            newbuf->free = ap_rwmem_destroy;
-            break;
+            return ap_rwmem_create();
         case AP_BUCKET_mmap:
-            newbuf->data = ap_mmap_bucket_create();
-            newbuf->free = NULL;
-            break;
+            return ap_mmap_bucket_create();
         case AP_BUCKET_rmem:
-            newbuf->data = ap_rmem_create();
-            newbuf->free = NULL;
-            break;
+            return ap_rmem_create();
         case AP_BUCKET_eos:
-            newbuf->data = NULL;
-            newbuf->free = NULL;
+            return ap_eos_create();
         case AP_BUCKET_file:
         case AP_BUCKET_filename:
         case AP_BUCKET_cached_entity:
         case AP_BUCKET_URI:
             /* not implemented yet */
-            break;
+            return NULL;
     }
-    return newbuf;
+    return NULL;
 }
 
 APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e)
 {
-    if (e->free != NULL) {
+    if (e->free) {
         e->free(e);
     }
     free(e);
@@ -263,45 +253,17 @@ APR_EXPORT(ap_status_t) ap_destroy_bucket_list(ap_bucket_list *buf)
 
 APR_EXPORT(const char *) ap_get_bucket_char_str(ap_bucket *b)
 {
-    switch (b->color) {
-        case AP_BUCKET_rwmem:
-            return ap_rwmem_get_char_str(b->data);
-        case AP_BUCKET_mmap:
-            return ap_mmap_get_char_str(b->data);
-        case AP_BUCKET_rmem:
-            return ap_rmem_get_char_str(b->data);
-        case AP_BUCKET_eos:
-            return NULL;
-        case AP_BUCKET_file:
-        case AP_BUCKET_filename:
-        case AP_BUCKET_cached_entity:
-        case AP_BUCKET_URI:
-            /* not implemented yet */
-            return NULL;
+    if (b) {
+        return b->getstr(b);
     }
-    /* We should NEVER actually get here */
     return NULL;
 }    
 
 APR_EXPORT(int) ap_get_bucket_len(ap_bucket *b)
 {
-    switch (b->color) {
-        case AP_BUCKET_rwmem:
-            return ap_rwmem_get_len(b->data);
-        case AP_BUCKET_mmap:
-            return ap_mmap_get_len(b->data);
-        case AP_BUCKET_rmem:
-            return ap_rmem_get_len(b->data);
-        case AP_BUCKET_eos:
-            return 0;
-        case AP_BUCKET_file:
-        case AP_BUCKET_filename:
-        case AP_BUCKET_cached_entity:
-        case AP_BUCKET_URI:
-            /* not implemented yet */
-            return 0;
+    if (b) {
+        return b->getlen(b);
     }
-    /* We should NEVER actually get here */
     return 0;
 }    
 
