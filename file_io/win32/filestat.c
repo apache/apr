@@ -191,11 +191,11 @@ static apr_status_t resolve_ident(apr_finfo_t *finfo, const char *fname,
      * user, group or permissions.
      */
     
-    if ((rv = apr_file_open(&thefile, fname, 
-                       ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0)
-                     | ((wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
-                           ? APR_READCONTROL : 0),
-                       APR_OS_DEFAULT, pool)) == APR_SUCCESS) {
+    if ((rv = apr_file_open(&thefile, fname, APR_OPENINFO
+                          | ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0)
+                          | ((wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
+                                ? APR_READCONTROL : 0),
+                            APR_OS_DEFAULT, pool)) == APR_SUCCESS) {
         rv = apr_file_info_get(finfo, wanted, thefile);
         finfo->filehand = NULL;
         apr_file_close(thefile);
@@ -205,9 +205,9 @@ static apr_status_t resolve_ident(apr_finfo_t *finfo, const char *fname,
         /* We have a backup plan.  Perhaps we couldn't grab READ_CONTROL?
          * proceed without asking for that permission...
          */
-        if ((rv = apr_file_open(&thefile, fname, 
-                           ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0),
-                           APR_OS_DEFAULT, pool)) == APR_SUCCESS) {
+        if ((rv = apr_file_open(&thefile, fname, APR_OPENINFO
+                              | ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0),
+                                APR_OS_DEFAULT, pool)) == APR_SUCCESS) {
             rv = apr_file_info_get(finfo, wanted & ~(APR_FINFO_PROT 
                                                  | APR_FINFO_OWNER),
                                  thefile);
