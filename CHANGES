@@ -1,5 +1,8 @@
 Changes with APR 0.9.2
 
+  *) Allow apr_hash to have greater than int number of elements.
+     [Justin Erenkrantz]
+
   *) Allow generation of dependencies by non-GCC compilers.
      [Justin Erenkrantz]
 
