@@ -89,49 +89,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_int
 
 APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *p)
 {
-#ifdef _WIN32_WCE
-    return APR_ENOTIMPL;
-#else
-    SECURITY_ATTRIBUTES sa;
-
-    sa.nLength = sizeof(sa);
-    sa.bInheritHandle = TRUE;
-    sa.lpSecurityDescriptor = NULL;
-
-    (*in) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
-    (*in)->pool = p;
-    (*in)->fname = NULL;
-    (*in)->pipe = 1;
-    (*in)->timeout = -1;
-    (*in)->ungetchar = -1;
-    (*in)->eof_hit = 0;
-    (*in)->filePtr = 0;
-    (*in)->bufpos = 0;
-    (*in)->dataRead = 0;
-    (*in)->direction = 0;
-
-    (*out) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
-    (*out)->pool = p;
-    (*in)->fname = NULL;
-    (*out)->pipe = 1;
-    (*out)->timeout = -1;
-    (*out)->ungetchar = -1;
-    (*out)->eof_hit = 0;
-    (*out)->filePtr = 0;
-    (*out)->bufpos = 0;
-    (*out)->dataRead = 0;
-    (*out)->direction = 0;
-
-    if (!CreatePipe(&(*in)->filehand, &(*out)->filehand, &sa, 65536)) {
-        return apr_get_os_error();
-    }
-
-    apr_pool_cleanup_register((*in)->pool, (void *)(*in), file_cleanup,
-                        apr_pool_cleanup_null);
-    apr_pool_cleanup_register((*out)->pool, (void *)(*out), file_cleanup,
-                        apr_pool_cleanup_null);
-    return APR_SUCCESS;
-#endif
+    return apr_create_nt_pipe(in, out, TRUE, TRUE, p);
 }
 
 /* apr_create_nt_pipe()
