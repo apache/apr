@@ -113,9 +113,12 @@ static void send_msg(apr_socket_t **sockarray, apr_sockaddr_t **sas, int which)
 {
     apr_size_t len = 5;
     apr_status_t rv;
+    char errmsg[120];
+
     printf("\tSending message to socket %d............", which);
     if ((rv = apr_sendto(sockarray[which], sas[which], 0, "hello", &len)) != APR_SUCCESS){
-        printf("Failed! %s\n", strerror(rv));
+        apr_strerror(rv, errmsg, sizeof errmsg);
+        printf("Failed! %s\n", errmsg);
         exit(-1);
     }
     printf("OK\n");
@@ -127,13 +130,15 @@ static void recv_msg(apr_socket_t **sockarray, int which, apr_pool_t *p)
     char *buffer = apr_pcalloc(p, sizeof(char) * buflen);
     apr_sockaddr_t *recsa;
     apr_status_t rv;
+    char errmsg[120];
 
     apr_sockaddr_info_get(&recsa, "127.0.0.1", APR_UNSPEC, 7770, 0, p);
 
     printf("\tTrying to get message from socket %d....", which);
     if ((rv = apr_recvfrom(recsa, sockarray[which], 0, buffer, &buflen))
         != APR_SUCCESS){
-        printf("Failed! %s\n", strerror(rv));
+        apr_strerror(rv, errmsg, sizeof errmsg);
+        printf("Failed! %s\n", errmsg);
         exit (-1);
     }
     printf("OK\n");
