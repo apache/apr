@@ -22,7 +22,7 @@ static apr_status_t apr_file_transfer_contents(const char *from_path,
                                                apr_fileperms_t to_perms,
                                                apr_pool_t *pool)
 {
-    apr_file_t *s = NULL, *d = NULL;  /* init to null important for APR */
+    apr_file_t *s, *d;
     apr_status_t status;
     apr_finfo_t finfo;
     apr_fileperms_t perms;
