@@ -63,25 +63,53 @@
 #include <sys/types.h>
 #endif
 
-APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *userid, apr_pool_t *p)
+static apr_status_t getpwnam_safe(const char *username,
+                                  struct passwd **pw)
 {
-    struct passwd *pw;
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETPWNAM_R)
     struct passwd pwd;
     char pwbuf[512];
 
-    if (getpwnam_r(userid, &pwd, pwbuf, sizeof(pwbuf), &pw)) {
+    if (getpwnam_r(username, &pwd, pwbuf, sizeof(pwbuf), pw)) {
 #else
-    if ((pw = getpwnam(userid)) == NULL) {
+    if ((*pw = getpwnam(username)) == NULL) {
 #endif
         return errno;
     }
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname,
+                                                 const char *username,
+                                                 apr_pool_t *p)
+{
+    struct passwd *pw;
+    apr_status_t rv;
+
+    if ((rv = getpwnam_safe(username, &pw)) != APR_SUCCESS)
+        return rv;
+
 #ifdef OS2
     /* Need to manually add user name for OS/2 */
     *dirname = apr_pstrcat(p, pw->pw_dir, pw->pw_name, NULL);
 #else
     *dirname = apr_pstrdup(p, pw->pw_dir);
 #endif
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
+                                         const char *username)
+{
+    struct passwd *pw;
+    apr_status_t rv;
+        
+    if ((rv = getpwnam_safe(username, &pw)) != APR_SUCCESS)
+        return rv;
+
+    *uid = pw->pw_uid;
+    *gid = pw->pw_gid;
+
     return APR_SUCCESS;
 }
 
