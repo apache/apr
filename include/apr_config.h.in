@@ -100,6 +100,9 @@
 /* Define if you have the getpagesize function.  */
 #undef HAVE_GETPAGESIZE
 
+/* Define if you have the getpass function.  */
+#undef HAVE_GETPASS
+
 /* Define if you have the poll function.  */
 #undef HAVE_POLL
 
@@ -120,6 +123,9 @@
 
 /* Define if you have the <arpa/inet.h> header file.  */
 #undef HAVE_ARPA_INET_H
+
+/* Define if you have the <conio.h> header file.  */
+#undef HAVE_CONIO_H
 
 /* Define if you have the <crypt.h> header file.  */
 #undef HAVE_CRYPT_H
@@ -147,6 +153,9 @@
 
 /* Define if you have the <io.h> header file.  */
 #undef HAVE_IO_H
+
+/* Define if you have the <kernel/OS.h> header file.  */
+#undef HAVE_KERNEL_OS_H
 
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H
@@ -223,6 +232,9 @@
 /* Define if you have the <sys/select.h> header file.  */
 #undef HAVE_SYS_SELECT_H
 
+/* Define if you have the <sys/signal.h> header file.  */
+#undef HAVE_SYS_SIGNAL_H
+
 /* Define if you have the <sys/socket.h> header file.  */
 #undef HAVE_SYS_SOCKET_H
 
@@ -271,11 +283,14 @@
 /* Define if you have the dl library (-ldl).  */
 #undef HAVE_LIBDL
 
-/* Define if you have the kernel/OS.h header file (BEOS) */
-#undef HAVE_KERNEL_OS_H
-
 /* Define if you have the pthread library (-lpthread).  */
 #undef HAVE_LIBPTHREAD
+
+/* Define if you have the socket library (-lsocket).  */
+#undef HAVE_LIBSOCKET
+
+/* Define if you have the ufc library (-lufc).  */
+#undef HAVE_LIBUFC
 #define API_EXPORT(type) type
 #define API_EXPORT_NONSTD(type) type
 #define API_VAR_IMPORT extern

@@ -221,6 +221,42 @@ ap_status_t ap_getc(ap_file_t *thefile, char *ch)
     return APR_SUCCESS; 
 }
 
+/* ***APRDOC********************************************************
+ * ap_status_t ap_gets(ap_file_t *, char *, int)
+ *    Get a string from a specified file.
+ * arg 1) The file descriptor to read from
+ * arg 2) The buffer to store the string in. 
+ * arg 3) The length of the string
+ */
+ap_status_t ap_gets(ap_file_t *thefile, char *str, int len)
+{
+    ssize_t rv;
+    int i;    
+
+    if (thefile->buffered) {
+        if (fgets(str, len, thefile->filehand)) {
+            return APR_SUCCESS;
+        }
+        if (feof(thefile->filehand)) {
+            return APR_EOF;
+        }
+        return errno;
+    }
+    for (i = 0; i < len; i++) {
+        rv = read(thefile->filedes, &str[i], 1); 
+        if (rv == 0) {
+            thefile->eof_hit = TRUE;
+            return APR_EOF;
+        }
+        else if (rv != 1) {
+            return errno;
+        }
+        if (str[i] == '\n' || str[i] == '\r')
+            break;
+    }
+    return APR_SUCCESS; 
+}
+
 static int printf_flush(ap_vformatter_buff_t *vbuff)
 {
     /* I would love to print this stuff out to the file, but I will
