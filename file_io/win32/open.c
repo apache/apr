@@ -129,7 +129,8 @@ apr_status_t unicode_to_utf8_path(char* retstr, apr_size_t retlen,
             srcstr[6] == L'C' && srcstr[7] == L'\\') {
             srcremains -= 8;
             srcstr += 8;
-            strcpy(retstr, "//");
+            retstr[0] = '\\';
+            retstr[1] = '\\';
             retlen -= 2;
             t += 2;
         }
@@ -145,9 +146,6 @@ apr_status_t unicode_to_utf8_path(char* retstr, apr_size_t retlen,
     if (srcremains) {
         return APR_ENAMETOOLONG;
     }
-    for (; *t; ++t)
-        if (*t == L'/')
-            *t = L'\\';
     return APR_SUCCESS;
 }
 #endif
