@@ -114,7 +114,11 @@ fi
 
 thisdir="`dirname $0`"
 thisdir="`cd $thisdir && pwd`"
-tmpbindir="`cd $bindir && pwd`"
+if test -d $bindir; then
+  tmpbindir="`cd $bindir && pwd`"
+else
+  tmpbindir=""
+fi
 if test "$tmpbindir" = "$thisdir"; then
   location=installed
 elif test "$APR_SOURCE_DIR" = "$thisdir"; then
