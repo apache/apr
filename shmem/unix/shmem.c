@@ -230,10 +230,10 @@ APR_DECLARE(void *) apr_shm_malloc(apr_shmem_t *m, apr_size_t reqsize)
 
     apr_lock_acquire(m->lock);
     /* Do we have enough space? */
-    if ((m->curmem - m->mem + reqsize) <= m->length)
+    if (((char *)m->curmem - (char *)m->mem + reqsize) <= m->length)
     {
         new = m->curmem;
-        m->curmem += reqsize;
+        m->curmem = (char *)m->curmem + reqsize;
     }
     apr_lock_release(m->lock);
     return new;
@@ -310,7 +310,7 @@ APR_DECLARE(apr_status_t) apr_shm_avail(apr_shmem_t *m, apr_size_t *size)
 
     apr_lock_acquire(m->lock);
 
-    *size = m->length - (m->curmem - m->mem);
+    *size = m->length - ((char *)m->curmem - (char *)m->mem);
     if (*size)
         status = APR_SUCCESS;
 
