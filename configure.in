@@ -102,6 +102,60 @@ case "$OS" in
        ;;
 esac
 
+dnl #----------------------------- Checking for Shared Memory Support 
+echo $ac_n "${nl}Checking for Shared Memory Support...${nl}"
+
+# run the MM config script regardless of whether we are going to use
+# it or not.  When we have a much better idea of who is using MM, we can
+# run this on a more conditional basis.
+USE_MM=yes
+mm_dir=shmem/unix/mm
+RUN_SUBDIR_CONFIG_NOW($config_subdirs)
+
+AC_MSG_CHECKING(Checking for Shared memory support)
+AC_ARG_ENABLE(shmem,
+  [  --enable-shmem          Enable shared memory support in APR. ],
+  [ ],
+  ac_cv_enable_shmem="mm" )
+
+sharedmem="0"
+anonymous_shm="0"
+filebased_shm="0"
+keybased_shm="0"
+if test "$ac_cv_enable_shmem" = "mm"; then
+  sharedmem="1"
+  anonymous_shm="1"
+  AC_MSG_RESULT(anonymous)
+elif test "$ac_cv_enable_shmem" = "file"; then
+  sharedmem="1"
+  filebased_shm="1"
+  AC_MSG_RESULT(file based)
+elif test "$ac_cv_enable_shmem" = "key"; then
+  sharedmem="1"
+  keybased_shm="1"
+  AC_MSG_RESULT(key based)
+else
+  AC_MSG_RESULT(no)
+fi
+AC_SUBST(sharedmem)
+AC_SUBST(anonymous_shm)
+AC_SUBST(filebased_shm)
+AC_SUBST(keybased_shm)
+
+echo "$srcdir"
+AC_CHECK_DEFINE(MM_SHMT_MMFILE, $srcdir/shmem/unix/mm/mm_conf.h) 
+
+if test "ac_cv_define_MM_SHMT_MMFILE" = "yes"; then
+    file_based="1"
+    mem_based="0"
+else
+    file_based="0"
+    mem_based="1"
+fi
+
+AC_SUBST(mem_based)
+AC_SUBST(file_based)
+
 if test ".$SYS_SW" = ".AIX"; then
     CFLAGS="$CFLAGS -U__STR__"
     case "$SYS_KV" in
@@ -516,46 +570,6 @@ AC_SUBST(sysvser)
 AC_SUBST(fcntlser)
 AC_SUBST(procpthreadser)
 AC_SUBST(pthreadser)
-
-dnl #----------------------------- Checking for Shared Memory Support 
-echo $ac_n "${nl}Checking for Shared Memory Support...${nl}"
-
-# run the MM config script regardless of whether we are going to use
-# it or not.  When we have a much better idea of who is using MM, we can
-# run this on a more conditional basis.
-USE_MM=yes
-mm_dir=shmem/unix/mm
-AC_CONFIG_SUBDIRS($config_subdirs)
-
-AC_MSG_CHECKING(Checking for Shared memory support)
-AC_ARG_ENABLE(shmem,
-  [  --enable-shmem          Enable shared memory support in APR. ],
-  [ ],
-  ac_cv_enable_shmem="mm" )
-
-sharedmem="0"
-anonymous_shm="0"
-filebased_shm="0"
-keybased_shm="0"
-if test "$ac_cv_enable_shmem" = "mm"; then
-  sharedmem="1"
-  anonymous_shm="1"
-  AC_MSG_RESULT(anonymous)
-elif test "$ac_cv_enable_shmem" = "file"; then
-  sharedmem="1"
-  filebased_shm="1"
-  AC_MSG_RESULT(file based)
-elif test "$ac_cv_enable_shmem" = "key"; then
-  sharedmem="1"
-  keybased_shm="1"
-  AC_MSG_RESULT(key based)
-else
-  AC_MSG_RESULT(no)
-fi
-AC_SUBST(sharedmem)
-AC_SUBST(anonymous_shm)
-AC_SUBST(filebased_shm)
-AC_SUBST(keybased_shm)
 
 dnl #----------------------------- Checking for /dev/random 
 AC_MSG_CHECKING(for /dev/random)

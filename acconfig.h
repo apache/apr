@@ -53,6 +53,8 @@
 #undef SIZEOF_SSIZE_T
 #undef SIZEOF_OFF_T
 
+#undef HAVE_MM_SHMT_MMFILE
+
 @BOTTOM@
 
 /* Make sure we have ssize_t defined to be something */
