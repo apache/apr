@@ -183,6 +183,17 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
      */
     if(!ret && thedir->entry != retent)
         ret = APR_ENOENT;
+
+    /* Solaris is a bit strange, if there are no more entries in the
+     * directory, it returns EINVAL.  Since this is against POSIX, we
+     * hack around the problem here.  EINVAL is possible from other
+     * readdir implementations, but only if the result buffer is too small.
+     * since we control the size of that buffer, we should never have
+     * that problem.
+     */
+    if (ret == EINVAL) {
+        ret = ENOENT;
+    }
 #else
     /* We're about to call a non-thread-safe readdir() that may
        possibly set `errno', and the logic below actually cares about
