@@ -940,12 +940,6 @@ APR_DECLARE(void*) apr_palloc(apr_pool_t *a, apr_size_t reqsize)
     nclicks = 1 + ((reqsize - 1) / CLICK_SZ);
     size = nclicks * CLICK_SZ;
 
-
-    if (a == NULL) {
-        return malloc(reqsize);
-    }
-
-
     /* First, see if we have space in the block most recently
      * allocated to this pool
      */

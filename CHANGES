@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Remove the ability to allocate memory out of a NULL pool.
+     [Ryan Bloom]
+
   *) Add an APR_GET_POOL macro to get a pool from any APR type that has
      a pool.  This requires that ALL apr types put the pool as the first
      field in their structure. [Ryan Bloom]
