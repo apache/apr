@@ -65,7 +65,6 @@
  * @{
  */
 
-
 #ifdef WIN32
 #ifndef APR_H
 #define APR_H
@@ -74,59 +73,6 @@
  */
 #if defined(_MSC_VER) && _MSC_VER >= 1200
 #pragma warning(push, 3)
-#endif
-
-/* Has windows.h already been included?  If so, our preferences don't matter,
- * but we will still need the winsock things no matter what was included.
- * If not, include a restricted set of windows headers to our tastes.
- */
-#ifndef _WINDOWS_
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifndef _WIN32_WINNT
-
-/* Restrict the server to a subset of Windows NT 4.0 header files by default
- */
-#define _WIN32_WINNT 0x0400
-#endif
-#ifndef NOUSER
-#define NOUSER
-#endif
-#ifndef NOGDI
-#define NOGDI
-#endif
-#ifndef NONLS
-#define NONLS
-#endif
-#ifndef NOMCX
-#define NOMCX
-#endif
-#ifndef NOIME
-#define NOIME
-#endif
-#include <windows.h>
-/* 
- * Add a _very_few_ declarations missing from the restricted set of headers
- * (If this list becomes extensive, re-enable the required headers above!)
- * winsock headers were excluded by WIN32_LEAN_AND_MEAN, so include them now
- */
-#define SW_HIDE             0
-#include <winsock2.h>
-#include <mswsock.h>
-#endif /* !_WINDOWS_ */
-
-#include <sys/types.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <time.h>
-#include <process.h>
-#include <stdlib.h>
-
-/* Done with badly written headers
- */
-#if defined(_MSC_VER) && _MSC_VER >= 1200
-#pragma warning(pop)
 #endif
 
 /* disable or reduce the frequency of...
@@ -220,9 +166,59 @@
 #define APR_HAVE_UNION_SEMUN    0
 
 
+/* Has windows.h already been included?  If so, our preferences don't matter,
+ * but we will still need the winsock things no matter what was included.
+ * If not, include a restricted set of windows headers to our tastes.
+ */
+#ifndef _WINDOWS_
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef _WIN32_WINNT
+
+/* Restrict the server to a subset of Windows NT 4.0 header files by default
+ */
+#define _WIN32_WINNT 0x0400
+#endif
+#ifndef NOUSER
+#define NOUSER
+#endif
+#ifndef NOGDI
+#define NOGDI
+#endif
+#ifndef NONLS
+#define NONLS
+#endif
+#ifndef NOMCX
+#define NOMCX
+#endif
+#ifndef NOIME
+#define NOIME
+#endif
+#include <windows.h>
+/* 
+ * Add a _very_few_ declarations missing from the restricted set of headers
+ * (If this list becomes extensive, re-enable the required headers above!)
+ * winsock headers were excluded by WIN32_LEAN_AND_MEAN, so include them now
+ */
+#define SW_HIDE             0
+#include <winsock2.h>
+#include <mswsock.h>
+#endif /* !_WINDOWS_ */
+
+#if APR_HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if APR_HAVE_STDIO_H
+#include <stdio.h>
+#endif
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+
+#include <stddef.h>
+#include <time.h>
+#include <process.h>
 
 /*  APR Feature Macros */
 #define APR_HAS_SHARED_MEMORY     1
@@ -364,6 +360,12 @@ struct iovec {
 #define APR_PATH_MAX 8192
 #else /* !APR_HAS_UNICODE_FS */
 #define APR_PATH_MAX MAX_PATH
+#endif
+
+/* Done with badly written headers
+ */
+#if defined(_MSC_VER) && _MSC_VER >= 1200
+#pragma warning(pop)
 #endif
 
 #endif /* APR_H */
