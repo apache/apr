@@ -1,5 +1,5 @@
 # Microsoft Developer Studio Project File - Name="aprlib" - Package Owner=<4>
-# Microsoft Developer Studio Generated Build File, Format Version 6.00
+# Microsoft Developer Studio Generated Build File, Format Version 5.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
@@ -22,7 +22,6 @@ CFG=aprlib - Win32 Debug
 !MESSAGE 
 
 # Begin Project
-# PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
@@ -302,6 +301,10 @@ SOURCE=.\threadproc\win32\thread.c
 
 SOURCE=.\threadproc\win32\threadpriv.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\threadproc\win32\threadproc.h
+# End Source File
 # End Group
 # Begin Group "dso"
 
@@ -330,6 +333,23 @@ SOURCE=.\lib\apr_signal.c
 # Begin Group "i18n"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\i18n\unix\i18n.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\i18n\unix\utf8_ucs2.c
+
+!IF  "$(CFG)" == "aprlib - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
 # End Group
 # Begin Group "shmem"
 
@@ -348,51 +368,6 @@ SOURCE=.\shmem\win32\shmem.c
 
 SOURCE=.\include\apr.h
 # End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_private.h
-# End Source File
-# End Group
-# Begin Group "Internal Header Files"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=.\include\apr_private.hw
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
-# Begin Custom Build
-InputPath=.\include\apr_private.hw
-
-".\include\apr_private.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy .\include\apr_private.hw .\include\apr_private.h > nul 
-	echo Created apr_private.h from apr_private.hw 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-# Begin Custom Build
-InputPath=.\include\apr_private.hw
-
-".\include\apr_private.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy .\include\apr_private.hw .\include\apr_private.h > nul 
-	echo Created apr_private.h from apr_private.hw 
-	
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\threadproc\win32\threadproc.h
-# End Source File
-# End Group
-# Begin Group "External Header Files"
-
-# PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=.\include\apr.h.in
@@ -426,6 +401,43 @@ InputPath=.\include\apr.hw
 !ENDIF 
 
 # End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_private.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_private.hw
+
+!IF  "$(CFG)" == "aprlib - Win32 Release"
+
+# Begin Custom Build
+InputPath=.\include\apr_private.hw
+
+".\include\apr_private.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy .\include\apr_private.hw .\include\apr_private.h > nul 
+	echo Created apr_private.h from apr_private.hw 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
+
+# Begin Custom Build
+InputPath=.\include\apr_private.hw
+
+".\include\apr_private.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy .\include\apr_private.hw .\include\apr_private.h > nul 
+	echo Created apr_private.h from apr_private.hw 
+	
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# End Group
+# Begin Group "External Header Files"
+
+# PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=.\include\apr_compat.h
