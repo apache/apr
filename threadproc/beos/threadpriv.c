@@ -122,7 +122,7 @@ ap_status_t ap_set_thread_private(void *priv, ap_threadkey_t *key)
 	tid = find_thread(NULL);	
 	for (i=0; i < BEOS_MAX_DATAKEYS; i++){
 		if (beos_data[i]->data){
-			if (beos_data[i]->td = tid){index = i;}
+			if (beos_data[i]->td == tid){index = i;}
 		}
 	}
 	if (index==0){

@@ -59,10 +59,11 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_portable.h"
-#include  <kernel/OS.h>
+#include <kernel/OS.h>
 #include <signal.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <image.h>
 
 #ifndef THREAD_PROC_H
 #define THREAD_PROC_H
