@@ -1,5 +1,7 @@
 Changes with APR b1  
 
+  *) Initial support for cygwin.  [Stipe Tolj <tolj@wapme-systems.de>]
+
   *) Fix a problem with buffered files on Unix.  [Brian Havard]
 
   *) Fix the bungling of getaddrinfo() error codes.  [Jeff Trawick]
