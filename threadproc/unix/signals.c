@@ -268,7 +268,7 @@ const char *apr_signal_get_description(int signum)
 #endif /* SYS_SIGLIST_DECLARED */
 
 #if APR_HAS_THREADS && (HAVE_SIGSUSPEND || APR_HAVE_SIGWAIT) && !defined(OS2)
-static void *signal_thread_func(void *signal_handler)
+APR_DECLARE(apr_status_t) apr_signal_thread(int(*signal_handler)(int signum))
 {
     sigset_t sig_mask;
     int (*sig_func)(int signum) = (int (*)(int))signal_handler;
@@ -312,7 +312,7 @@ static void *signal_thread_func(void *signal_handler)
         }
         
         if (sig_func(signal_received) == 1) {
-            return NULL;
+            return APR_SUCCESS;
         }
 #elif HAVE_SIGSUSPEND
 	sigsuspend(&sig_mask);
@@ -340,14 +340,6 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
     }
 #endif
     return rv;
-}
-
-APR_DECLARE(apr_status_t) apr_create_signal_thread(apr_thread_t **td, 
-                                                   apr_threadattr_t *tattr,
-                                              int (*signal_handler)(int signum),
-                                                   apr_pool_t *p)
-{
-    return apr_thread_create(td, tattr, signal_thread_func, (void *)signal_handler, p);
 }
 
 #endif
