@@ -143,10 +143,20 @@ static void test_snprintf(apr_pool_t *p)
         fprintf(stderr, "OK\n");
     }
 
-    fprintf(stderr, "Testing 0 length ..........  ");
+    fprintf(stderr, "Testing 0 length with NULL ..........  ");
     rv = apr_snprintf(NULL, 0, "%sBAR", "FOO");
     if (rv != 6) {
         fprintf(stderr, "FAILED\n");
+    }
+    fprintf(stderr, "OK\n");
+
+    fprintf(stderr, "Testing 0 length with non-NULL ..........  ");
+    rv = apr_snprintf(buff, 0, "%sBAR", "FOO");
+    if (rv != 6) {
+        fprintf(stderr, "FAILED (return val)\n");
+    }
+    if (strcmp(buff, "FOOBAR") == 0) {
+        fprintf(stderr, "FAILED (mangled buff)\n");
     }
     fprintf(stderr, "OK\n");
 }
