@@ -102,7 +102,7 @@ inet_ntop4(const unsigned char *src, char *dst, apr_size_t size)
 	static const char fmt[] = "%u.%u.%u.%u";
 	char tmp[sizeof "255.255.255.255"];
 
-	if (apr_snprintf(tmp, sizeof tmp, fmt, src[0], src[1], src[2], src[3]) > size) {
+	if (apr_snprintf(tmp, sizeof tmp, fmt, src[0], src[1], src[2], src[3]) > (int)size) {
 		errno = ENOSPC;
 		return (NULL);
 	}
