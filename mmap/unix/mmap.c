@@ -105,13 +105,12 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
                              apr_off_t offset, apr_size_t size, 
                              apr_int32_t flag, apr_pool_t *cont)
 {
-    apr_int32_t native_flags = 0;
-#ifdef BEOS
     void *mm;
+#ifdef BEOS
     area_id aid = -1;
     uint32 pages = 0;
 #else
-    void *mm;
+    apr_int32_t native_flags = 0;
 #endif
    
     if (file == NULL || file->filedes == -1 || file->buffered)
@@ -121,15 +120,10 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
 #ifdef BEOS
     /* XXX: mmap shouldn't really change the seek offset */
     apr_file_seek(file, APR_SET, &offset);
-    if (flag & APR_MMAP_WRITE) {
-        native_flags |= B_WRITE_AREA;
-    }
-    if (flag & APR_MMAP_READ) {
-        native_flags |= B_READ_AREA;
-    }
 
     /* There seems to be some strange interactions that mean our area must
      * be set as READ & WRITE or writev will fail!  Go figure...
+     * So we ignore the value in flags and always ask for both READ and WRITE
      */
     pages = (size + B_PAGE_SIZE -1) / B_PAGE_SIZE;
     aid = create_area("apr_mmap", &mm , B_ANY_ADDRESS, pages * B_PAGE_SIZE,
@@ -153,7 +147,7 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
         native_flags |= PROT_READ;
     }
 
-    mm = mmap(NULL, size, PROT_READ, MAP_SHARED, file->filedes, offset);
+    mm = mmap(NULL, size, native_flags, MAP_SHARED, file->filedes, offset);
 
     if (mm == (void *)-1) {
         /* we failed to get an mmap'd file... */
