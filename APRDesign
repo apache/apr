@@ -1,0 +1,113 @@
+Design of APR
+
+The Apache Portable Run-time libraries have been designed to provide a common
+interface to low level routines across any platform.  The original goal of APR
+was to combine all code in Apache to one common code base.  This is not the
+correct approach however, so the goal of APR has changed.  
+
+There are places, where common code is not a good thing.  For example, how to
+map requests to either threads or processes, should be platform specific. 
+APR's place, is now to combine any code that can be safely combined, without
+sacrificing performance.
+
+To this end, we have created a set of operations that are required for cross
+platfrom development.  There may be other types that are desired, and those
+will be implemented in the future.  The first version of APR will focus on
+what Apache 2.0 needs.  Of course, anything that is submitted will be
+considered for inclusion.
+
+This document will discuss the structure of APR, and how best to contribute
+code to the effort.
+
+APR types
+
+The base types in APR
+file_io     File I/O, including pipes
+lib         A portable library originally used in Apache.  This contains
+            memory management, tables, and arrays.
+locks       Mutex and reader/writer locks
+misc        Any APR type which doesn't have any other place to belong
+network_io  Network I/O
+shmem       Shared Memory (Not currently implemented)   
+signal      Asynchronous Signals
+threadproc  Threads and Processes
+time        Time 
+
+Directory Structure
+
+Each type has a base directory.  Inside this base directory, are
+subdirectories, which contain the actual code.  These subdirectories are named
+after the platforms the are compiled on.  Unix is also used as a common
+directory.  If the code you are writing is POSIX based, you should look at the
+code in the unix directory.  A good rule of thumb, is that if more than half
+your code needs to be ifdef'ed out, and the structures required for your code
+are substantively different from the POSIX code, you should create a new
+directory.
+
+Currently, the APR code is written for Unix, BeOS, Windows, and OS/2.  An
+example of the directory structure is the file I/O directory:
+
+apr
+  |
+   ->  file_io
+          |
+           -> unix            The Unix and common base code
+          |
+           -> win32           The Windows code
+          | 
+           -> os2             The OS/2 code
+
+Obviously, BeOS does not have a directory.  This is because BeOS is currently
+using the Unix directory for it's file_io.  In the near future, it will be
+possible to use indiviual files from the Unix directory.
+
+There are a few special top level directories.  These are test, inc, include,
+and libs.  Test is a directory which stores all test programs.  It is expected
+that if a new type is developed, there will also be a new test program, to
+help people port this new type to different platforms.  Inc is a directory for
+internal header files.  This directory is likely to go away soon.  Include is
+a directory which stores all required APR header files for external use.  The
+distinction between internal and external header files will be made soon. 
+Finally, libs is a generated directory.  When APR finishes building, it will
+store it's library files in the libs directory.
+
+Creating an APR Type
+
+The current design of APR requires that APR types be incomplete.  It is not
+possible to write flexible portable code if programs can access the internals
+of APR types.  This is because different platforms are likely to define
+different native types.
+
+For this reason, each platform defines a structure in their own directories. 
+Those structures are then typedef'ed in an external header file.  For example
+in file_io/unix/fileio.h:
+
+    struct file_t {
+        ap_context_t *cntxt;
+        int filedes;
+        FILE *filehand;
+        ...
+    }
+
+In include/apr_file_io.h:
+    typedef struct file_t    ap_file_t;
+
+This will cause a compiler error if somebody tries to access the filedes field
+in this strcture.  Windows does not have a filedes field, so obviously, it is
+important that programs not be able to access these.
+
+The only exception to the incomplete type rule can be found in apr_portable.h.
+This file defines the native types for each platform.  Using these types, it
+is possible to extract native types for any APR type.
+
+You may notice the ap_context_t field.  All APR types have this field.  This
+type is used to allocate memory within APR.
+
+New Function
+
+When creating a new function, please try to adhere to these rules.
+
+1)  Result arguments should be the first arguments.
+2)  If a function needs a context, it should be the last argument.
+3)  These rules are flexible, especially if it makes the code easier
+    to understand because it mimics a standard function.
