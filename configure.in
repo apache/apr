@@ -131,12 +131,15 @@ else
 fi
 
 dnl On AIX, libraries need to be specified on the link of lib_target
+lib_target_libs=""
 case $host in
     *aix*)
         lib_target_libs="\$(EXTRA_LIBS)";
         ;;
+    *-solaris2*)
+        apr_platform_runtime_link_flag="-R"
+        ;;
     *)
-        lib_target_libs=""
         ;;
 esac
 
@@ -184,6 +187,23 @@ AC_ARG_ENABLE(profile,[  --enable-profile        Turn on profiling for the build
     fi
   fi
 )dnl
+
+dnl Electric Fence malloc checker.
+dnl --with-efence specifies the path to Electric Fence
+AC_ARG_WITH(efence, 
+  [  --with-efence[[=DIR]]     path to Electric Fence installation], 
+  [ apr_efence_dir="$withval"
+    if test "$apr_efence_dir" != "yes"; then
+      APR_ADDTO(LDFLAGS,[-L$apr_efence_dir/lib])
+      if test "x$apr_platform_runtime_link_flag" != "x"; then
+          APR_ADDTO(LDFLAGS, 
+                    [$apr_platform_runtime_link_flag$apr_efence_dir/lib])
+      fi
+    fi
+    AC_CHECK_LIB(efence, malloc, 
+                 [ APR_ADDTO(LIBS,-lefence) ],
+                 [ AC_MSG_ERROR(Electric Fence requested but not detected) ])
+  ])
 
 if test "$host" = "i586-pc-beos"; then
   AC_ARG_ENABLE(malloc-debug,[  --enable-malloc-debug   Switch on malloc_debug for BeOS],
