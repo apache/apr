@@ -57,7 +57,7 @@
 
 #include "test_apr.h"
 
-#define NUM_TESTS 5
+#define NUM_TESTS 255
 
 apr_pool_t *p;
 
@@ -68,7 +68,9 @@ testfunc *tests[NUM_TESTS] = {
     testtime,
     testvsn,
     testipsub,
-    testmmap
+    testmmap,
+    testud,
+    NULL
 };
 
 int main(int argc, char *argv[])
@@ -84,7 +86,7 @@ int main(int argc, char *argv[])
 
     apr_pool_create(&p, NULL);
 
-    for (i = 0; i < NUM_TESTS; i++) {
+    for (i = 0; tests[i]; i++) {
         CuSuiteListAdd(alltests, tests[i]());
     }
 

@@ -209,8 +209,8 @@ testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
 testtable@EXEEXT@: testtable.lo $(LOCAL_LIBS)
 	$(LINK) testtable.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testall: testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo testmmap.lo CuTest.lo $(LOCAL_LIBS)
-	$(LINK) testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo testmmap.lo CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
+testall: testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo testmmap.lo testud.lo CuTest.lo $(LOCAL_LIBS)
+	$(LINK) testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo testmmap.lo testud.lo CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 
 # DO NOT REMOVE
