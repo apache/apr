@@ -99,6 +99,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     apr_file_t *f;
     void *base;
     void *mapkey;
+    DWORD err;
 
     reqsize += sizeof(memblock_t);
 
@@ -128,12 +129,13 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
          * we discover we aren't the creator of the file map object.
          */
         rv = apr_file_open(&f, file,
-                           APR_READ | APR_WRITE | APR_BINARY,
+                           APR_READ | APR_WRITE | APR_BINARY | APR_CREATE,
                            APR_UREAD | APR_UWRITE, pool);
         if ((rv != APR_SUCCESS)
                 || ((rv = apr_os_file_get(&hFile, f)) != APR_SUCCESS)) {
             return rv;
         }
+        rv = apr_file_trunc(f, size);
         mapkey = res_name_from_filename(file, 1, pool);
         psec = NULL;
     }
@@ -141,30 +143,21 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 #if APR_HAS_UNICODE_FS
     if (apr_os_level >= APR_WIN_NT) 
     {
-        hMap = CreateFileMappingW(hFile,
-                                  psec,
-                                  PAGE_READWRITE,
-                                  (DWORD)(size >> 32),
-                                  (DWORD)size,
-                                  mapkey);
+        hMap = CreateFileMappingW(hFile, psec, PAGE_READWRITE, 0, 0, mapkey);
     }
     else
 #endif
     {
-        hMap = CreateFileMappingA(hFile,
-                                  psec,
-                                  PAGE_READWRITE,
-                                  (DWORD)(size >> 32),
-                                  (DWORD)size,
-                                  mapkey);
+        hMap = CreateFileMappingA(hFile, psec, PAGE_READWRITE, 0, 0, mapkey);
     }
+    err = apr_get_os_error();
     apr_file_close(f);
-    if (hMap && GetLastError() == ERROR_ALREADY_EXISTS) {
+    if (hMap && err == ERROR_ALREADY_EXISTS) {
         CloseHandle(hMap);
         return APR_EEXIST;
     }
     if (!hMap) {
-        return apr_get_os_error();
+        return err;
     }
     
     base = MapViewOfFile(hMap, FILE_MAP_READ | FILE_MAP_WRITE,
@@ -200,7 +193,6 @@ APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m)
 }
 
 APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
-                                         apr_size_t sz,
                                          const char *file,
                                          apr_pool_t *pool)
 {
