@@ -391,6 +391,7 @@ AC_HAVE_HEADERS(sys/ipc.h sys/shm.h sys/file.h)
 AC_HAVE_FUNCS(shmget shmat shmdt shmctl)
 AC_HAVE_HEADERS(kernel/OS.h)
 AC_HAVE_FUNCS(create_area)
+AC_HAVE_HEADERS(os2.h)
 
 dnl Now we determine which one is our preference.
 APR_BEGIN_DECISION([shared memory allocation method])
@@ -412,6 +413,8 @@ APR_IFALLYES(header:sys/mman.h func:mmap func:munmap,
              [Classical mmap() on temporary file]))
 APR_IFALLYES(header:kernel/OS.h func:create_area,
              APR_DECIDE(USE_SHMEM_BEOS, [BeOS areas]))
+APR_IFALLYES(header:os2.h,
+             APR_DECIDE(USE_SHMEM_OS2, [OS/2 DosAllocSharedMem()]))
 APR_END_DECISION
 AC_DEFINE_UNQUOTED($ac_decision)
 
@@ -421,6 +424,7 @@ usemmapzero="0"
 useshmget="0"
 usemmapanon="0"
 usebeosarea="0"
+useos2shm="0"
 mem_based="0"
 file_based="1"
 
@@ -449,10 +453,14 @@ case $ac_decision in
         usebeosarea="1"
         mem_based="1"
         ;;
+    USE_SHMEM_OS2 )
+        useos2shm="1"
+        file_based="0"
+        ;;
 esac
 
 dnl Do we have any shared memory support?
-if test "$usemmaptmp$usemmapshm$usemmapzero$useshmget$usemmapanon$usebeosarea" = "000000"; then
+if test "$usemmaptmp$usemmapshm$usemmapzero$useshmget$usemmapanon$usebeosarea$useos2shm" = "0000000"; then
   sharedmem="0"
 else
   sharedmem="1"
