@@ -50,7 +50,7 @@ AC_CHECK_TYPE(ssize_t, int)
 AC_C_INLINE
 
 # Use /bin/sh if it exists, otherwise go looking for sh in the path
-if (test -z "$SH" -a -e /bin/sh); then
+if (test -z "$SH" -a -x /bin/sh); then
   SH="/bin/sh"
 fi
 AC_CHECK_PROG(SH, sh, sh)
