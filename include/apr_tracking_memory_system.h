@@ -55,6 +55,7 @@
 #ifndef APR_TRACKING_MEMORY_SYSTEM_H
 #define APR_TRACKING_MEMORY_SYSTEM_H
 
+#include "apr.h"
 #include "apr_memory_system.h"
 
 #ifdef __cplusplus
