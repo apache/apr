@@ -319,8 +319,7 @@ APR_DECLARE(apr_status_t) apr_sms_post_init(apr_sms_t *sms)
     rv = APR_SUCCESS;
     
 #if APR_HAS_THREADS
-    if (sms->thread_register_fn)
-        rv = sms->thread_register_fn(sms, apr_os_thread_current());
+    apr_sms_thread_register(sms, apr_os_thread_current());
 #endif /* APR_HAS_THREADS */
     
 #if APR_DEBUG_SHOW_FUNCTIONS
@@ -612,7 +611,11 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
         sms->pre_destroy_fn(sms);
 
     if (sms->sms_lock)
+    {
         apr_lock_destroy(sms->sms_lock);
+        if (pms->free_fn)
+            return apr_sms_free(sms->parent, sms->sms_lock);
+    }
     
 #ifndef APR_POOLS_ARE_SMS
     /* XXX - This should eventually be removed */
@@ -856,38 +859,44 @@ APR_DECLARE(apr_status_t) apr_sms_thread_register(apr_sms_t *sms,
                                                   apr_os_thread_t thread)
 {
     apr_status_t rv;
-    
-    do {
+  
+    /* Before attempting to acquire a lock for us, we must ensure that our
+     * parent is lock-safe. 
+     */
+    if (sms->parent) 
+    {
+        apr_sms_thread_register(sms->parent, thread);
+
         if (!sms->sms_lock) {
             /* Create the sms framework lock we'll use. */
-            apr_lock_create(&sms->sms_lock, APR_MUTEX, APR_LOCKALL,
-                            NULL, sms->pool);
+            apr_lock_create(&sms->sms_lock, APR_MUTEX, APR_INTRAPROCESS,
+                            NULL, sms->parent->pool);
         }
+    }
 
+    if (sms->sms_lock)
         apr_lock_acquire(sms->sms_lock);
 
-        sms->threads++;
+    sms->threads++;
 
-        /* let the sms know about the thread if it is
-         * interested (so it can protect its private
-         * data with its own lock)
-         *
-         * if the sms is doesn't have a thread register
-         * function, or it wasn't able to register the
-         * thread, we should bomb out!
-         * XXX - not sure how to implement the bombing out
-         */
-        rv = APR_ENOTIMPL;
-        if (sms->thread_register_fn)
-            rv = sms->thread_register_fn(sms, thread);
+    /* let the sms know about the thread if it is
+     * interested (so it can protect its private
+     * data with its own lock)
+     *
+     * if the sms is doesn't have a thread register
+     * function, or it wasn't able to register the
+     * thread, we should bomb out!
+     * XXX - not sure how to implement the bombing out
+     */
+    rv = APR_ENOTIMPL;
+    if (sms->thread_register_fn)
+        rv = sms->thread_register_fn(sms, thread);
 
+    if (sms->sms_lock)
         apr_lock_release(sms->sms_lock);
 
-        if (rv != APR_SUCCESS)
-            return rv;
-
-        sms = sms->parent;
-    } while (sms);
+    if (rv != APR_SUCCESS)
+        return rv;
 
     return APR_SUCCESS;    
 }
