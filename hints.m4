@@ -140,6 +140,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 		;;
 	esac
 	APR_ADDTO(LIBS, [-lcrypt])
+        APR_SETIFNULL(enable_threads, [no])
 	;;
     *-next-nextstep*)
 	APR_SETIFNULL(OPTIM, [-O])
