@@ -221,7 +221,10 @@ APR_DECLARE(void) apr_sms_assert(apr_sms_t *mem_sys)
      * tracking ancestors, but in that specific case we issue a
      * warning.
      */
-    parent = mem_sys->parent_mem_sys;
+    if (!mem_sys->parent_mem_sys)
+        return;
+
+    parent = mem_sys;
     while (parent) {
         if (apr_sms_is_tracking(parent))
             return; /* Tracking memory system found, return satisfied ;-) */
