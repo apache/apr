@@ -184,6 +184,139 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem, long with, long cmp)
 }
 #endif /*!defined(apr_atomic_cas) && !defined(APR_OVERRIDE_ATOMIC_CAS) */
 
+#if !defined(apr_atomic_add32) && !defined(APR_OVERRIDE_ATOMIC_ADD32)
+void apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val) 
+{
+#if APR_HAS_THREADS
+    apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
+       
+    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
+        *mem += val;
+        apr_thread_mutex_unlock(lock);
+    }
+#else
+    *mem += val;
+#endif /* APR_HAS_THREADS */
+}
+#endif /*!defined(apr_atomic_sub32) && !defined(APR_OVERRIDE_ATOMIC_SUB32) */
+
+#if !defined(apr_atomic_sub32) && !defined(APR_OVERRIDE_ATOMIC_SUB32)
+void apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val) 
+{
+#if APR_HAS_THREADS
+    apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
+       
+    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
+        *mem -= val;
+        apr_thread_mutex_unlock(lock);
+    }
+#else
+    *mem -= val;
+#endif /* APR_HAS_THREADS */
+}
+#endif /*!defined(apr_atomic_sub32) && !defined(APR_OVERRIDE_ATOMIC_SUB32) */
+
+#if !defined(apr_atomic_set32) && !defined(APR_OVERRIDE_ATOMIC_SET32)
+void apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val) 
+{
+#if APR_HAS_THREADS
+    apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
+
+    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
+        *mem = val;
+        apr_thread_mutex_unlock(lock);
+    }
+#else
+    *mem = val;
+#endif /* APR_HAS_THREADS */
+}
+#endif /*!defined(apr_atomic_set32) && !defined(APR_OVERRIDE_ATOMIC_SET32) */
+
+#if !defined(apr_atomic_inc32) && !defined(APR_OVERRIDE_ATOMIC_INC32)
+void apr_atomic_inc32(volatile apr_uint32_t *mem) 
+{
+#if APR_HAS_THREADS
+    apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
+
+    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
+        (*mem)++;
+        apr_thread_mutex_unlock(lock);
+    }
+#else
+    (*mem)++;
+#endif /* APR_HAS_THREADS */
+}
+#endif /*!defined(apr_atomic_inc32) && !defined(APR_OVERRIDE_ATOMIC_INC32) */
+
+#if !defined(apr_atomic_dec32) && !defined(APR_OVERRIDE_ATOMIC_DEC32)
+int apr_atomic_dec32(volatile apr_uint32_t *mem) 
+{
+#if APR_HAS_THREADS
+    apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
+    apr_uint32_t new;
+
+    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
+        (*mem)--;
+        new = *mem;
+        apr_thread_mutex_unlock(lock);
+        return new; 
+    }
+#else
+    (*mem)--;
+#endif /* APR_HAS_THREADS */
+    return *mem; 
+}
+#endif /*!defined(apr_atomic_dec32) && !defined(APR_OVERRIDE_ATOMIC_DEC32) */
+
+#if !defined(apr_atomic_cas32) && !defined(APR_OVERRIDE_ATOMIC_CAS32)
+apr_uint32_t apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint32_t with,
+			      apr_uint32_t cmp)
+{
+    apr_uint32_t prev;
+#if APR_HAS_THREADS
+    apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
+
+    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
+        prev = *mem;
+        if (prev == cmp) {
+            *mem = with;
+        }
+        apr_thread_mutex_unlock(lock);
+        return prev;
+    }
+    return *mem;
+#else
+    prev = *mem;
+    if (prev == cmp) {
+        *mem = with;
+    }
+    return prev;
+#endif /* APR_HAS_THREADS */
+}
+#endif /*!defined(apr_atomic_cas32) && !defined(APR_OVERRIDE_ATOMIC_CAS32) */
+
+#if !defined(apr_atomic_xchg32) && !defined(APR_OVERRIDE_ATOMIC_XCHG32)
+apr_uint32_t apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    apr_uint32_t prev;
+#if APR_HAS_THREADS
+    apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
+
+    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
+        prev = *mem;
+        *mem = val;
+        apr_thread_mutex_unlock(lock);
+        return val;
+    }
+    return *mem;
+#else
+    prev = *mem;
+    *mem = val;
+    return prev;
+#endif /* APR_HAS_THREADS */
+}
+#endif /*!defined(apr_atomic_xchg32) && !defined(APR_OVERRIDE_ATOMIC_XCHG32) */
+
 #if !defined(apr_atomic_casptr) && !defined(APR_OVERRIDE_ATOMIC_CASPTR)
 void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
 {
@@ -208,4 +341,4 @@ void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
     return prev;
 #endif /* APR_HAS_THREADS */
 }
-#endif /*!defined(apr_atomic_cas) && !defined(APR_OVERRIDE_ATOMIC_CAS) */
+#endif /*!defined(apr_atomic_casptr) && !defined(APR_OVERRIDE_ATOMIC_CASPTR) */
