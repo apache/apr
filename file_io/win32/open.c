@@ -97,11 +97,6 @@ ap_status_t ap_open(ap_file_t **dafile, const char *fname,
         return APR_EACCES;
     }
 
-    if (flag & APR_BUFFERED) {
-        (*dafile)->buffered = TRUE;
-    } else {
-        (*dafile)->buffered = FALSE;
-    }
     (*dafile)->fname = ap_pstrdup(cont, fname);
 
     (*dafile)->demonfname = canonical_filename((*dafile)->cntxt, fname);
@@ -231,7 +226,6 @@ ap_status_t ap_open_stderr(ap_file_t **thefile, ap_context_t *cont)
     (*thefile)->cntxt = cont;
     (*thefile)->fname = NULL;
     (*thefile)->stated = 0;
-    (*thefile)->buffered = 0;
     (*thefile)->eof_hit = 0;
 
     return APR_SUCCESS;

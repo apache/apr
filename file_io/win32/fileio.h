@@ -102,7 +102,6 @@ struct ap_file_t {
     DWORD dwFileAttributes;
     char *demonfname; 
     char *lowerdemonfname; 
-    int buffered;
     int stated;
     int append; 
     int eof_hit;
