@@ -62,8 +62,6 @@
 
 struct context_t {
     struct ap_pool_t *pool;
-    ap_int16_t signal_safe;
-    ap_int16_t cancel_safe;
     void *prog_data;
 };
 

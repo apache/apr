@@ -141,13 +141,6 @@ struct ap_table_t {
  * currently being used...
  */
 
-typedef struct ap_table_entry_t {
-    char *key;		/* maybe NULL in future;
-			 * check when iterating thru table_elts
-			 */
-    char *val;
-} ap_table_entry_t;
-
 ap_pool_t *ap_init_alloc(void);		/* Set up everything */
 
 /* used to guarantee to the pool debugging code that the sub pool will not be

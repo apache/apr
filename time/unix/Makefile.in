@@ -13,7 +13,7 @@ INCDIR=../../inc
 INCDIR1=../../include
 INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
 
-LIB=../libtime.a
+LIB=libtime.a
 
 OBJS=time.o \
 	access.o

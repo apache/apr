@@ -105,50 +105,9 @@ ap_status_t ap_create_context(struct context_t *cont, void *data,
     else {
         new->prog_data = data;
     }
-    if (cont) { 
-        new->signal_safe = cont->signal_safe;
-        new->cancel_safe = cont->cancel_safe;
-    }
-    else {
-        new->signal_safe = 0;
-        new->cancel_safe = 0;
-    }
  
     *newcont = new;
     return APR_SUCCESS;
-}
-
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_signal_safe(ap_context_t *, ap_int16_t)
- *    Set the signal safe attribute of the program.  If this bit-is on, then
- *    any apr function which uses this context IS signal safe.
- * arg 1) The context to modify.
- * arg 2) Should functions be signal safe or not?
- */
-ap_status_t ap_set_signal_safe(struct context_t *cont, ap_int16_t safe)
-{
-    if (cont) { 
-        cont->signal_safe = safe;
-        return APR_SUCCESS;
-    }
-    return APR_ENOCONT;
-}
-
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_cancel_safe(ap_context_t *, ap_int16_t)
- *    Set the cancel safe attribute of the program.  If this bit-is off, then
- *    any thread which is in a function using this context IS NOT allowed
- *    to be cancelled.
- * arg 1) The context to modify.
- * arg 2) Should functions be cancellable or not?
- */
-ap_status_t ap_set_cancel_safe(struct context_t *cont, ap_int16_t safe)
-{
-    if (cont) {
-        cont->cancel_safe = safe;
-        return APR_SUCCESS;
-    }
-    return APR_ENOCONT;
 }
 
 /* ***APRDOC********************************************************

@@ -90,35 +90,9 @@ ap_status_t ap_create_context(struct context_t *cont, void *data, ap_context_t *
     else {
         new->prog_data = data;
     }
-    if (cont) { 
-        new->signal_safe = cont->signal_safe;
-        new->cancel_safe = cont->cancel_safe;
-    }
-    else {
-        new->signal_safe = 0;
-        new->cancel_safe = 0;
-    }
  
     *newcont = new;
     return APR_SUCCESS;
-}
-
-ap_status_t ap_set_signal_safe(struct context_t *cont, ap_int16_t safe)
-{
-    if (cont) { 
-        cont->signal_safe = safe;
-        return APR_SUCCESS;
-    }
-    return APR_ENOCONT;
-}
-
-ap_status_t ap_set_cancel_safe(struct context_t *cont, ap_int16_t safe)
-{
-    if (cont) {
-        cont->cancel_safe = safe;
-        return APR_SUCCESS;
-    }
-    return APR_ENOCONT;
 }
 
 ap_status_t ap_destroy_context(struct context_t *cont)

@@ -13,7 +13,7 @@ INCDIR1=../../include
 INCDIR2=../../file_io/os2
 INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I$(INCDIR2) -I.
 
-LIB=../threadproc.a
+LIB=threadproc.a
 
 OBJS=proc.o \
 	thread.o \

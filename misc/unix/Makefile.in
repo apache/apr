@@ -14,7 +14,7 @@ INCDIR1=../../include
 INCDIR2=../../file_io/unix
 INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I$(INCDIR2) -I.
 
-LIB=../libmisc.a
+LIB=libmisc.a
 
 OBJS=start.o getopt.o 
 
