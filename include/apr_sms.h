@@ -79,6 +79,7 @@ extern "C" {
  **********************************************************************/
 
 /* The various types of cleanup's we can offer */
+#define APR_ALL_CLEANUPS         0x0000
 #define APR_GENERAL_CLEANUP      0x0001
 #define APR_CHILD_CLEANUP        0x0002
 
@@ -87,7 +88,7 @@ extern "C" {
  * APR_ALIGN is only to be used to align on a power of 2 boundary
  */
 #define APR_ALIGN(size, boundary) \
-    (((size) + ((boundary) - 1)) & ~ ((boundary) -1))
+    (((size) + ((boundary) - 1)) & ~((boundary) - 1))
 
 #define APR_ALIGN_DEFAULT(size) APR_ALIGN(size, 8)
 
@@ -109,7 +110,7 @@ extern "C" {
  * using the APR_DEBUG_FILE define.  Normally this is set to setdout
  * and the output is simply printed there.
  */
-#define APR_DEBUG_TO_FILE            0
+#define APR_DEBUG_TO_FILE             0
 #define APR_DEBUG_FILE   "/tmp/sms_debug"
 
 /* APR_DEBUG_SHOW_STRUCTURE
@@ -403,7 +404,7 @@ APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction);
  * @param tag The tag to give the sms
  * @param sms The sms to apply the tag to
  */
-APR_DECLARE(void) apr_sms_tag(const char*tag, apr_sms_t *sms);
+APR_DECLARE(void) apr_sms_tag(const char *tag, apr_sms_t *sms);
 #endif /* APR_DEBUG_TAG_SMS */
 
 #ifdef __cplusplus
