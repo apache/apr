@@ -379,6 +379,10 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
        APR_SETIFNULL(CC, [cc])
        APR_ADDTO(CPPFLAGS, [-U_NO_PROTO -DPTHREAD_ATTR_SETDETACHSTATE_ARG2_ADDR -DPTHREAD_SETS_ERRNO -DPTHREAD_DETACH_ARG1_ADDR -DSIGPROCMASK_SETS_THREAD_MASK -DTCP_NODELAY=1])
        ;;
+    *cygwin*)
+	APR_ADDTO(CPPFLAGS, [-DCYGWIN])
+	APR_ADDTO(LIBS, [-lcrypt])
+	;;
   esac
 
 fi
