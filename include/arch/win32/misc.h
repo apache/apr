@@ -112,6 +112,7 @@ typedef enum {
         APR_WIN_98 =       14,
         APR_WIN_98_SE =    16,
         APR_WIN_ME =       18,
+        APR_WIN_NT =       30,
         APR_WIN_NT_3_5 =   35,
         APR_WIN_NT_3_51 =  36,
         APR_WIN_NT_4 =     40,
