@@ -77,7 +77,7 @@
 #define APR_HAVE_STRSTR         @have_strstr@
 #define APR_HAVE_MEMMOVE        @have_memmove@
 #define APR_HAVE_BZERO          @have_bzero@
-#define APR_HAVE_IPV6           @have_sockaddr_in6@
+#define APR_HAVE_IPV6           @have_ipv6@
 
 
 #if APR_HAVE_SYS_TYPES_H
