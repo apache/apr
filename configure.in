@@ -205,6 +205,7 @@ case $host in
    *-os2*)
        APR_ADDTO(CPPFLAGS,-DOS2)
        APR_ADDTO(CFLAGS,-Zmt)
+       AC_CHECK_LIB(bsd, random)
        OSDIR="os2"
        enable_threads="system_threads"
        eolstr="\\r\\n"
