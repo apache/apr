@@ -302,7 +302,7 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
             break;
         }
         
-        if (str[i] == '\r')
+        if (str[i] == '\r' || str[i] == '\x1A')
             i--;
         else if (str[i] == '\n')
             break;
