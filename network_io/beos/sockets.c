@@ -126,7 +126,6 @@ ap_status_t ap_close_socket(struct socket_t *thesocket)
 
 ap_status_t ap_bind(struct socket_t *sock) 
 { 
-    sock->local_addr->sin_addr.s_addr = INADDR_ANY;
     if (bind(sock->socketdes, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1) 
         return errno; 
     else 
