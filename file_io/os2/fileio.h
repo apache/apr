@@ -78,6 +78,7 @@ struct apr_file_t {
     int timeout;
     int pipe;
     HEV pipeSem;
+    enum { BLK_UNKNOWN, BLK_OFF, BLK_ON } blocking;
 
     /* Stuff for buffered mode */
     char *buffer;

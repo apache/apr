@@ -80,6 +80,7 @@ apr_status_t apr_open(apr_file_t **new, const char *fname, apr_int32_t flag,  ap
     dafile->eof_hit = FALSE;
     dafile->buffer = NULL;
     dafile->flags = flag;
+    dafile->blocking = BLK_ON;
     
     if ((flag & APR_READ) && (flag & APR_WRITE)) {
         mflags |= OPEN_ACCESS_READWRITE;
