@@ -344,22 +344,6 @@ APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **p,
                                             apr_pool_t *pparent,
                                             int (*apr_abort)(int retcode));
 
-#if defined(APR_POOL_DEBUG) || defined(DOXYGEN) 
-/**
- * Report the number of bytes currently in the pool
- * @param p The pool to inspect
- * @param recurse Recurse/include the subpools' sizes
- * @return The number of bytes
- */
-APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse);
-
-/**
- * Report the number of bytes currently in the list of free blocks
- * @return The number of bytes
- */
-APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void);
-#endif
-
 /**
  * Register a function to be called when a pool is cleared or destroyed
  * @param p The pool register the cleanup with 
