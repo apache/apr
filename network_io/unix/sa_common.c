@@ -338,7 +338,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
 
 #if defined(HAVE_GETADDRINFO)
     if (hostname != NULL) {
-        struct addrinfo hints, *ai;
+        struct addrinfo hints, *ai, *ai_list;
         apr_sockaddr_t *cursa;
         int error;
         char num[8];
@@ -349,7 +349,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = 0;
         apr_snprintf(num, sizeof(num), "%d", port);
-        error = getaddrinfo(hostname, num, &hints, &ai);
+        error = getaddrinfo(hostname, num, &hints, &ai_list);
         if (error) {
             if (error == EAI_SYSTEM) {
                 return errno;
@@ -366,6 +366,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
             }
         }
         cursa = *sa;
+        ai = ai_list;
         save_addrinfo(p, cursa, ai, port);
         while (ai->ai_next) { /* while more addresses to report */
             cursa->next = apr_pcalloc(p, sizeof(apr_sockaddr_t));
@@ -373,7 +374,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
             cursa = cursa->next;
             save_addrinfo(p, cursa, ai, port);
         }
-        freeaddrinfo(ai);
+        freeaddrinfo(ai_list);
     }
     else {
         if (family == APR_UNSPEC) {
