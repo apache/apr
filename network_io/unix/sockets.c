@@ -149,8 +149,7 @@ apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
 
 apr_status_t apr_socket_close(apr_socket_t *thesocket)
 {
-    apr_pool_cleanup_kill(thesocket->cntxt, thesocket, socket_cleanup);
-    return socket_cleanup(thesocket);
+    return apr_pool_cleanup_run(thesocket->cntxt, thesocket, socket_cleanup);
 }
 
 apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
