@@ -981,6 +981,7 @@ fi
 
 AC_SUBST(apr_tcp_nopush_flag)
 AC_SUBST(have_corkable_tcp)
+AC_SUBST(accept_filter)
 
 echo $ac_n "${nl}Checking for IPv6 Networking support...${nl}"
 dnl # Start of checking for IPv6 support...
