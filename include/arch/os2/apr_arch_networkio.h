@@ -58,7 +58,7 @@
 #include "apr_private.h"
 #include "apr_network_io.h"
 #include "apr_general.h"
-#include "os2calls.h"
+#include "apr_arch_os2calls.h"
 #if APR_HAVE_NETDB_H
 #include <netdb.h>
 #endif

@@ -64,7 +64,7 @@
 #include "apr_file_io.h"
 #include "apr_file_info.h"
 #include "apr_errno.h"
-#include "misc.h"
+#include "apr_arch_misc.h"
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -86,7 +86,7 @@
 #endif
 
 #if APR_HAS_UNICODE_FS
-#include "arch/win32/utf8.h"
+#include "arch/win32/apr_arch_utf8.h"
 #include <wchar.h>
 
 typedef apr_uint16_t apr_wchar_t;
