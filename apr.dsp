@@ -152,10 +152,6 @@ SOURCE=.\file_io\win32\readwrite.c
 SOURCE=.\file_io\win32\seek.c
 # End Source File
 # End Group
-# Begin Group "i18n"
-
-# PROP Default_Filter ""
-# End Group
 # Begin Group "locks"
 
 # PROP Default_Filter ""
