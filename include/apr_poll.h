@@ -219,6 +219,60 @@ APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event,
                                           apr_socket_t *sock,
                                           apr_pollfd_t *aprset);
 
+/* General-purpose poll API for arbitrarily large numbers of
+ * file descriptors
+ */
+
+typedef struct apr_pollset_t apr_pollset_t;
+
+/**
+ * Setup a pollset object
+ * @param pollset  The pointer in which to return the newly created object 
+ * @param size The maximum number of descriptors that this pollset can hold
+ * @param p The pool from which to allocate the pollset
+ */
+APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
+                                             apr_uint32_t size,
+                                             apr_pool_t *p);
+
+/**
+ * Destroy a pollset object
+ * @param pollset The pollset to destroy
+ * @param descriptors An initial set of descriptors to add to the pollset
+ *                    (may be NULL)
+ * @param num The number of elements in the descriptors array
+ * @param p The pool from which to allocate the pollset
+ */
+APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t *pollset);
+
+/**
+ * Add a socket or file descriptor to a pollset
+ * @param pollset The pollset to which to add the descriptor
+ * @param descriptor The descriptor to add
+ */
+APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
+                                          const apr_pollfd_t *descriptor);
+
+/**
+ * Remove a descriptor from a pollset
+ * @param pollset The pollset from which to remove the descriptor
+ * @param descriptor The descriptor to remove
+ */
+APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
+                                             const apr_pollfd_t *descriptor);
+
+/**
+ * Block for activity on the descriptor(s) in a pollset
+ * @param pollset The pollset to use
+ * @param timeout Timeout in microseconds
+ * @param num Number of signalled descriptors (output parameter)
+ * @param descriptors Array of signalled descriptors (output parameter)
+ */
+APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
+                                           apr_interval_time_t timeout,
+                                           apr_int32_t *num,
+                                           const apr_pollfd_t **descriptors);
+
 #ifdef __cplusplus
 }
 #endif
