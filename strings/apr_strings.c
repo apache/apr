@@ -130,7 +130,6 @@ APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
 
     res = (char *) apr_palloc(a, len + 1);
     cp = res;
-    *(cp + len) = '\0';
 
     /* Pass two --- copy the argument strings into the result space */
 
@@ -145,6 +144,8 @@ APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
     va_end(adummy);
 
     /* Return the result string */
+
+    *cp = '\0';
 
     return res;
 }
