@@ -72,13 +72,6 @@
 #include <string.h> /* for strerror() on HP-UX */
 #endif
 
-#ifdef NETWARE
-#include <library.h>
-#include <unistd.h>
-
-static int setautounloadflag (const char *path);
-#endif
-
 APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **aprdso,
                                                 apr_os_dso_handle_t osdso,
                                                 apr_pool_t *pool)
@@ -171,10 +164,6 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 
     apr_pool_cleanup_register(pool, *res_handle, dso_cleanup, apr_pool_cleanup_null);
 
-#ifdef NETWARE
-    setautounloadflag(path);
-#endif
-
     return APR_SUCCESS;
 }
     
@@ -255,15 +244,5 @@ APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer,
     }
     return "No Error";
 }
-
-#ifdef NETWARE
-static int setautounloadflag (const char *path)
-{
-    char name[256];
-
-    deconstruct(path, NULL, NULL, NULL, name, NULL, NULL, PATH_UNDEF);
-    SetAutoUnloadFlag(findnlmhandle(name, getaddressspace()));
-}
-#endif
 
 #endif
