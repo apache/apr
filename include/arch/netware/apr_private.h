@@ -156,6 +156,12 @@ void* getStatCache();
 #undef malloc
 #define malloc(x) library_malloc(gLibHandle,x)
 
+#if APR_HAS_LARGE_FILES
+#define APR_OFF_T_STRFN       strtoll
+#else
+#define APR_OFF_T_STRFN       strtol
+#endif
+
 /*
  * Include common private declarations.
  */

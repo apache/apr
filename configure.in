@@ -1222,6 +1222,7 @@ if test "${ac_cv_sizeof_off_t}${apr_cv_use_lfs64}" = "4yes"; then
     # LFS is go!
     off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
     off_t_value='off64_t'
+    off_t_strfn='apr_strtoi64'
 elif test "${ac_cv_sizeof_off_t}x${ac_cv_sizeof_long}" = "4x4"; then
     # Special case: off_t may change size with _FILE_OFFSET_BITS
     # on 32-bit systems with LFS support.  To avoid compatibility
@@ -1229,16 +1230,20 @@ elif test "${ac_cv_sizeof_off_t}x${ac_cv_sizeof_long}" = "4x4"; then
     # hard-code apr_off_t to long.
     off_t_value=long
     off_t_fmt='#define APR_OFF_T_FMT "ld"'
+    off_t_strfn='strtol'
 elif test "$ac_cv_type_off_t" = "yes"; then
     off_t_value=off_t
     # off_t is more commonly a long than an int; prefer that case
     # where int and long are the same size.
     if test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long"; then
         off_t_fmt='#define APR_OFF_T_FMT "ld"'
+        off_t_strfn='strtol'
     elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_int"; then
         off_t_fmt='#define APR_OFF_T_FMT "d"'
+        off_t_strfn='strtoi'
     elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long_long"; then
         off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
+        off_t_strfn='apr_strtoi64'
     else
         AC_ERROR([could not determine the size of off_t])
     fi
@@ -1246,6 +1251,7 @@ else
    # Fallback on int
    off_t_value=apr_int32_t
    off_t_fmt=d
+   off_t_strfn='strtoi'
 fi
 AC_MSG_RESULT($off_t_value)
 
@@ -1346,6 +1352,11 @@ AC_SUBST(have_strstr)
 AC_SUBST(have_memchr)
 AC_SUBST(have_int64_strfn)
 AC_SUBST(int64_strfn)
+if test "$off_t_strfn" = "apr_strtoi64" && test "$have_int64_strfn" = "1"; then
+    off_t_strfn=$int64_strfn
+fi
+AC_DEFINE_UNQUOTED(APR_OFF_T_STRFN, [$off_t_strfn],
+          [Define as function used for conversion of strings to apr_off_t])
 
 dnl ----------------------------- Checking for DSO support
 echo "${nl}Checking for DSO..."
