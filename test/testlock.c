@@ -251,17 +251,19 @@ static void test_cond(CuTest *tc)
     apr_status_t s0, s1, s2, s3, s4;
     int count1, count2, count3, count4;
     int sum;
-
-    s1 = apr_thread_mutex_create(&put.mutex, APR_THREAD_MUTEX_DEFAULT, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, s1);
+    
+    apr_assert_success(tc, "create put mutex",
+                       apr_thread_mutex_create(&put.mutex, 
+                                               APR_THREAD_MUTEX_DEFAULT, p));
     CuAssertPtrNotNull(tc, put.mutex);
 
-    s1 = apr_thread_mutex_create(&nready.mutex, APR_THREAD_MUTEX_DEFAULT, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, s1);
+    apr_assert_success(tc, "create nready mutex",
+                       apr_thread_mutex_create(&nready.mutex, 
+                                               APR_THREAD_MUTEX_DEFAULT, p));
     CuAssertPtrNotNull(tc, nready.mutex);
 
-    s1 = apr_thread_cond_create(&nready.cond, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, s1);
+    apr_assert_success(tc, "create condvar",
+                       apr_thread_cond_create(&nready.cond, p));
     CuAssertPtrNotNull(tc, nready.cond);
 
     count1 = count2 = count3 = count4 = 0;
@@ -286,6 +288,9 @@ static void test_cond(CuTest *tc)
     apr_thread_join(&s2, p3);
     apr_thread_join(&s3, p4);
     apr_thread_join(&s4, c1);
+
+    apr_assert_success(tc, "destroy condvar", 
+                       apr_thread_cond_destroy(nready.cond));
 
     sum = count1 + count2 + count3 + count4;
     /*
