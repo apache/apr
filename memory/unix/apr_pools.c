@@ -1199,8 +1199,7 @@ API_EXPORT(regex_t *) ap_pregcomp(ap_context_t *p, const char *pattern,
 	return NULL;
     }
 
-/*    ap_register_cleanup(p, (void *) preg, regex_cleanup, regex_cleanup);*/
-    ap_register_cleanup(p, (void *) preg, ap_null_cleanup, ap_null_cleanup);
+    ap_register_cleanup(p, (void *) preg, regex_cleanup, regex_cleanup);
 
     return preg;
 }
