@@ -48,6 +48,7 @@ if test "$ac_cv_working_getaddrinfo" = "yes"; then
 fi
 ])
 
+
 dnl
 dnl check for gethostbyname() which handles numeric address strings
 dnl
@@ -90,6 +91,7 @@ if test "$ac_cv_gethostbyname_nas" = "yes"; then
 fi
 ])
 
+
 dnl 
 dnl check for socklen_t, fall back to unsigned int
 dnl
@@ -115,7 +117,6 @@ if test "$ac_cv_socklen_t" = "yes"; then
   AC_DEFINE(HAVE_SOCKLEN_T, 1, [Whether you have socklen_t])
 fi
 ])
-
 
 
 AC_DEFUN(APR_CHECK_INET_ADDR,[
@@ -195,6 +196,7 @@ else
 fi
 ])
 
+
 dnl
 dnl Check to see if this platform includes sa_len in it's
 dnl struct sockaddr.  If it does it changes the length of sa_family
@@ -261,9 +263,7 @@ unsigned long foo = INADDR_NONE;
 
 
 dnl
-dnl APR_CHECK_H_ERRNO_FLAG
-dnl
-dnl checks which flags are necessary for <netdb.h> to define h_errno
+dnl APR_H_ERRNO_COMPILE_CHECK
 dnl
 AC_DEFUN(APR_H_ERRNO_COMPILE_CHECK,[
   if test x$1 != x; then
@@ -287,6 +287,13 @@ int h_e = h_errno;
 ],[
   ac_cv_h_errno_cflags=no
 ])])
+
+
+dnl
+dnl APR_CHECK_H_ERRNO_FLAG
+dnl
+dnl checks which flags are necessary for <netdb.h> to define h_errno
+dnl
 AC_DEFUN(APR_CHECK_H_ERRNO_FLAG,[
   AC_MSG_CHECKING([for h_errno in netdb.h])
   AC_CACHE_VAL(ac_cv_h_errno_cflags,[
@@ -335,3 +342,4 @@ int main(void) {
   fi
   AC_SUBST(apr_charset_ebcdic)
 ])
+

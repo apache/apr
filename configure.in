@@ -22,13 +22,17 @@ dnl Absolute source/build directory
 abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
 
-dnl Libtool needs this symbol
-top_builddir="$abs_builddir"
-AC_SUBST(top_builddir)
-
 if test "$abs_builddir" != "$abs_srcdir"; then
   USE_VPATH=1
 fi
+
+dnl Libtool needs this symbol
+if test -n "$BUILD_BASE"; then
+  top_builddir="$BUILD_BASE"
+else
+  top_builddir="$abs_builddir"
+fi
+AC_SUBST(top_builddir)
 
 dnl Directory containing apr build macros, helpers, and make rules
 apr_builders=$abs_srcdir/build
@@ -39,7 +43,8 @@ MKDIR=$apr_builders/mkdir.sh
 # These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
 echo "(Default will be ${DEFAULT_OSDIR})"
-MODULES="file_io network_io threadproc misc locks time mmap shmem i18n user"
+
+apr_modules="file_io network_io threadproc misc locks time mmap shmem i18n user"
 
 dnl # Checks for programs.
 AC_PROG_CC
@@ -107,7 +112,7 @@ case "$OS" in
        config_subdirs="shmem/unix/mm"
        native_mmap_emul="1"
        USE_MM=yes
-       AC_CHECK_DEFINE(BONE_VERSION, sys/socket.h)
+       APR_CHECK_DEFINE(BONE_VERSION, sys/socket.h)
        eolstr="\\n"
        file_as_socket="0"
        ;;
@@ -147,9 +152,17 @@ echo $ac_n "${nl}Checking for Shared Memory Support...${nl}"
 # run this on a more conditional basis.
 mm_dir=shmem/unix/mm
 
+dnl #----------------------------- Prepare mm directory for VPATH support
 if test "$USE_MM" = "yes"; then
-  APR_PREPARE_MM_DIR
-  RUN_SUBDIR_CONFIG_NOW($config_subdirs)
+  if test -n "$USE_VPATH"; then
+    test -d $mm_dir || $MKDIR $mm_dir
+
+    for i in shtool config.guess config.sub fbtool ltconfig \
+             ltmain.sh mm_vers.c; do
+      test -r $mm_dir/$i || ln -s $abs_srcdir/$mm_dir/$i $mm_dir/$i
+    done
+  fi
+  APR_SUBDIR_CONFIG($config_subdirs)
 fi
 
 AC_MSG_CHECKING(for Shared memory support)
@@ -185,7 +198,7 @@ AC_SUBST(anonymous_shm)
 AC_SUBST(filebased_shm)
 AC_SUBST(keybased_shm)
 
-AC_CHECK_DEFINE(MM_SHMT_MMFILE, $srcdir/shmem/unix/mm/mm_conf.h) 
+APR_CHECK_DEFINE(MM_SHMT_MMFILE, $srcdir/shmem/unix/mm/mm_conf.h) 
 
 if test "ac_cv_define_MM_SHMT_MMFILE" = "yes"; then
     file_based="1"
@@ -431,7 +444,7 @@ else
     socklen_t_value="int"
 fi
 
-AC_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], ssize_t, 8)
+APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], ssize_t, 8)
 
 if test "$ac_cv_sizeof_ssize_t" = "$ac_cv_sizeof_int"; then
     ssize_t_fmt='#define APR_SSIZE_T_FMT "d"'
@@ -441,7 +454,7 @@ else
     ssize_t_fmt='#error Can not determine the proper size for ssize_t'
 fi
 
-AC_CHECK_SIZEOF_EXTENDED([#include <stddef.h>], size_t, 8)
+APR_CHECK_SIZEOF_EXTENDED([#include <stddef.h>], size_t, 8)
 
 if test "$ac_cv_sizeof_size_t" = "$ac_cv_sizeof_int"; then
     size_t_fmt='#define APR_SIZE_T_FMT "d"'
@@ -451,7 +464,7 @@ else
     size_t_fmt='#error Can not determine the proper size for size_t'
 fi
 
-AC_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], off_t, 8)
+APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], off_t, 8)
 
 if test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_int"; then
     off_t_fmt='#define APR_OFF_T_FMT "d"'
@@ -535,7 +548,7 @@ if test "$tempdso" = "no"; then
     aprdso="0"
 else
     aprdso="1"
-    MODULES="$MODULES dso"
+    apr_modules="$apr_modules dso"
 fi
 
 AC_SUBST(aprdso)
@@ -545,10 +558,10 @@ echo $ac_n "${nl}Checking for Threads...${nl}"
 
 if test -z "$enable_threads"; then
 	AC_ARG_ENABLE(threads,
-    	[  --enable-threads        Enable threading support in APR.],
-    	[ enable_threads=$enableval] ,
-    	[ CHECK_PTHREADS_H([ enable_threads="pthread" ] ,
-        	           [ enable_threads="no" ] ) ] )
+	[  --enable-threads        Enable threading support in APR.],
+	[ enable_threads=$enableval] ,
+	[ APR_CHECK_PTHREADS_H([ enable_threads="pthread" ] ,
+	                       [ enable_threads="no" ] ) ] )
 fi
 
 if test "$enable_threads" = "no"; then
@@ -557,12 +570,22 @@ echo "Don't enable threads"
     pthreadh="0"
     pthreadser="0"
 else
-    REENTRANCY_FLAGS
+#
+#   Play with CPPFLAGS given what was learned from APR_PRELOAD.
+#
+#   [Roy: I don't like this because it messes up an environment
+#         variable that should remain pristine.  However, it is needed
+#         for compatibility until all flag handling can be rewritten.]
+#
+    apr_save_cppflags="$CPPFLAGS"
+    if test -n "$THREAD_CPPFLAGS"; then
+        CPPFLAGS="$CPPFLAGS $THREAD_CPPFLAGS"
+    fi
     if test "$enable_threads" = "pthread"; then
 # We have specified pthreads for our threading library, just make sure
 # that we have everything we need
-      PTHREADS_CHECK
-      CHECK_PTHREADS_H([
+      APR_PTHREADS_CHECK
+      APR_CHECK_PTHREADS_H([
           threads="1"
           pthreadh="1"
           pthreadser="1"
@@ -578,22 +601,22 @@ else
 # We basically specified that we wanted threads, but not how to implement
 # them.  In this case, just look for pthreads.  In the future, we can check
 # for other threading libraries as well.
-      PTHREADS_CHECK
-      CHECK_PTHREADS_H([
+      APR_PTHREADS_CHECK
+      APR_CHECK_PTHREADS_H([
           threads="1"
           pthreadh="1"
           pthreadser="1"
           AC_DEFINE(USE_THREADS) ], [
           threads="0"
           pthreadser="0"
-          pthreadh="0" ] )
+          pthreadh="0"
+          CPPFLAGS="$apr_save_cppflags" ] )
     fi
-fi
-
-if test "$pthreadh" = "1"; then
-    APR_CHECK_PTHREAD_GETSPECIFIC_TWO_ARGS
-    APR_CHECK_PTHREAD_ATTR_GETDETACHSTATE_ONE_ARG
-    AC_CHECK_FUNCS(pthread_key_delete)
+    if test "$pthreadh" = "1"; then
+        APR_CHECK_PTHREAD_GETSPECIFIC_TWO_ARGS
+        APR_CHECK_PTHREAD_ATTR_GETDETACHSTATE_ONE_ARG
+        AC_CHECK_FUNCS(pthread_key_delete)
+    fi
 fi
 
 ac_cv_define_READDIR_IS_THREAD_SAFE=no
@@ -693,33 +716,33 @@ AC_MSG_RESULT([$msg])
 AC_SUBST(have_union_semun)
 
 dnl Checks for libraries.
-AC_CHECK_DEFINE(LOCK_EX, sys/file.h)
-AC_CHECK_DEFINE(F_SETLK, fcntl.h)
-AC_CHECK_DEFINE(CODESET, langinfo.h)
+APR_CHECK_DEFINE(LOCK_EX, sys/file.h)
+APR_CHECK_DEFINE(F_SETLK, fcntl.h)
+APR_CHECK_DEFINE(CODESET, langinfo.h)
 
 # We are assuming that if the platform doesn't have POLLIN, it doesn't have
 # any POLL definitions.
-AC_CHECK_DEFINE_FILES(POLLIN, poll.h sys/poll.h)
+APR_CHECK_DEFINE_FILES(POLLIN, poll.h sys/poll.h)
 
 if test "$threads" = "1"; then
-    AC_CHECK_DEFINE(PTHREAD_PROCESS_SHARED, pthread.h)
+    APR_CHECK_DEFINE(PTHREAD_PROCESS_SHARED, pthread.h)
 fi
 
-# The last AC_DECIDE to execute sets the default
-AC_BEGIN_DECISION([apr_lock implementation method])
-AC_IFALLYES(func:semget func:semctl,
-            AC_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
-AC_IFALLYES(header:sys/file.h define:LOCK_EX,
-            AC_DECIDE(USE_FLOCK_SERIALIZE, [4.2BSD-style flock()]))
-AC_IFALLYES(header:fcntl.h define:F_SETLK,
-            AC_DECIDE(USE_FCNTL_SERIALIZE, [SVR4-style fcntl()]))
-AC_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
+# The last APR_DECIDE to execute sets the default
+APR_BEGIN_DECISION([apr_lock implementation method])
+APR_IFALLYES(func:semget func:semctl,
+            APR_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
+APR_IFALLYES(header:sys/file.h define:LOCK_EX,
+            APR_DECIDE(USE_FLOCK_SERIALIZE, [4.2BSD-style flock()]))
+APR_IFALLYES(header:fcntl.h define:F_SETLK,
+            APR_DECIDE(USE_FCNTL_SERIALIZE, [SVR4-style fcntl()]))
+APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
             custom:with_pthread_cross,
-            AC_DECIDE(USE_PROC_PTHREAD_SERIALIZE, [pthread mutex]))
+            APR_DECIDE(USE_PROC_PTHREAD_SERIALIZE, [pthread mutex]))
 if test "x$apr_lock_method" != "x"; then
-    AC_DECISION_FORCE($apr_lock_method)
+    APR_DECISION_FORCE($apr_lock_method)
 fi
-AC_END_DECISION
+APR_END_DECISION
 AC_DEFINE_UNQUOTED($ac_decision)
 
 flockser="0"
@@ -820,8 +843,8 @@ APR_CHECK_SOCKADDR_SA_LEN
 APR_CHECK_GETHOSTBYNAME_NAS
 
 dnl # Look for a way of corking TCP...
-AC_CHECK_DEFINE(TCP_CORK, netinet/tcp.h)
-AC_CHECK_DEFINE(TCP_NOPUSH, netinet/tcp.h)
+APR_CHECK_DEFINE(TCP_CORK, netinet/tcp.h)
+APR_CHECK_DEFINE(TCP_NOPUSH, netinet/tcp.h)
 apr_tcp_nopush_flag="0"
 have_corkable_tcp="0"
 if test "x$ac_cv_define_TCP_CORK" = "xyes"; then
@@ -894,7 +917,7 @@ AC_SUBST(LIBTOOL_LIBS)
 echo "${nl}Construct Makefiles and header files."
 MAKEFILE1="Makefile lib/Makefile strings/Makefile passwd/Makefile tables/Makefile"
 SUBDIRS="lib strings passwd tables "
-for dir in $MODULES
+for dir in $apr_modules
 do
     test -d $dir || $MKDIR $dir
     if test -f $srcdir/$dir/$OSDIR/Makefile.in; then
