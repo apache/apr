@@ -197,7 +197,7 @@ struct apr_finfo_t {
     /** The time the file was last changed */
     apr_time_t ctime;
     /** The full pathname of the file */
-    char *fname;
+    const char *fname;
     /** The file's name alone, in filesystem case */
     char *fcase;
     /** The file's handle, if accessed (can be submitted to apr_duphandle) */
