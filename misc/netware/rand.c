@@ -62,7 +62,7 @@
 #include <nks/plat.h>
 
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 
-                                                    int length) 
+                                                    apr_size_t length) 
 {
     return NXSeedRandom(length, buf);
 }
