@@ -72,8 +72,9 @@ static apr_status_t socket_cleanup(void *sock)
     }
 }
 
-static void set_socket_vars(apr_socket_t *sock, int family)
+static void set_socket_vars(apr_socket_t *sock, int family, int type)
 {
+    sock->type = type;
     sock->local_addr->sa.sin.sin_family = family;
     sock->remote_addr->sa.sin.sin_family = family;
 
@@ -152,7 +153,7 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
     if ((*new)->socketdes < 0) {
         return errno;
     }
-    set_socket_vars(*new, family);
+    set_socket_vars(*new, family, type);
 
     (*new)->timeout = -1;
     apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), 
@@ -198,7 +199,7 @@ apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *connection_context)
 {
     alloc_socket(new, connection_context);
-    set_socket_vars(*new, sock->local_addr->sa.sin.sin_family);
+    set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM);
 
 #ifndef HAVE_POLL
     (*new)->connected = 1;
@@ -305,7 +306,7 @@ apr_status_t apr_os_sock_make(apr_socket_t **apr_sock,
                               apr_pool_t *cont)
 {
     alloc_socket(apr_sock, cont);
-    set_socket_vars(*apr_sock, os_sock_info->family);
+    set_socket_vars(*apr_sock, os_sock_info->family, os_sock_info->type);
     (*apr_sock)->timeout = -1;
     (*apr_sock)->socketdes = *os_sock_info->os_sock;
     if (os_sock_info->local) {
@@ -337,7 +338,9 @@ apr_status_t apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock,
     if ((*sock) == NULL) {
         alloc_socket(sock, cont);
         /* XXX IPv6 figure out the family here! */
-        set_socket_vars(*sock, APR_INET);
+        /* XXX figure out the actual socket type here */
+        /* *or* just decide that apr_os_sock_put() has to be told the family and type */
+        set_socket_vars(*sock, APR_INET, SOCK_STREAM);
         (*sock)->timeout = -1;
     }
     (*sock)->local_port_unknown = (*sock)->local_interface_unknown = 1;
