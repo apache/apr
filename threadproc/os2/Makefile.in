@@ -58,25 +58,29 @@ depend:
 # DO NOT REMOVE
 proc.o: proc.c threadproc.h $(INCDIR1)/apr_thread_proc.h \
  $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_win.h $(INCDIR2)/fileio.h \
- $(INCDIR1)/apr_lib.h
+ $(INCDIR1)/apr.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_time.h $(INCDIR2)/fileio.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_portable.h $(INCDIR1)/apr_network_io.h \
+ $(INCDIR1)/apr_lock.h
 signals.o: signals.c threadproc.h $(INCDIR1)/apr_thread_proc.h \
  $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_win.h $(INCDIR2)/fileio.h
+ $(INCDIR1)/apr.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_time.h $(INCDIR2)/fileio.h \
+ $(INCDIR1)/apr_config.h
 thread.o: thread.c threadproc.h $(INCDIR1)/apr_thread_proc.h \
  $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_win.h $(INCDIR1)/apr_lib.h \
- $(INCDIR2)/fileio.h
+ $(INCDIR1)/apr.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR2)/fileio.h $(INCDIR1)/apr_config.h
 threadcancel.o: threadcancel.c threadproc.h \
  $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_file_io.h \
- $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
- $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_win.h \
- $(INCDIR2)/fileio.h
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_time.h \
+ $(INCDIR2)/fileio.h $(INCDIR1)/apr_config.h
 threadpriv.o: threadpriv.c threadproc.h \
  $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_file_io.h \
- $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
- $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_win.h \
- $(INCDIR1)/apr_lib.h $(INCDIR2)/fileio.h
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_time.h \
+ $(INCDIR1)/apr_lib.h $(INCDIR2)/fileio.h \
+ $(INCDIR1)/apr_config.h
