@@ -61,6 +61,9 @@
 #if HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
+#if HAVE_SYS_RESOURCE_H
+#include <sys/resource.h>
+#endif
 #if HAVE_SIGNAL_H
 #include <signal.h>
 #endif
@@ -109,6 +112,15 @@ struct ap_procattr_t {
     char *currdir;
     ap_int32_t cmdtype;
     ap_int32_t detached;
+#ifdef RLIMIT_CPU
+    struct rlimit *limit_cpu;
+#endif
+#if defined (RLIMIT_DATA) || defined (RLIMIT_VMEM) || defined(RLIMIT_AS)
+    struct rlimit *limit_mem;
+#endif
+#ifdef RLIMIT_NPROC
+    struct rlimit *limit_nproc;
+#endif
 };
 
 /*This will move to ap_threadproc.h in time, but I need to figure it out
