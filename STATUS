@@ -1,5 +1,5 @@
 Apache 2.0 STATUS:
-Last modified at [$Date: 2000/11/20 22:59:32 $]
+Last modified at [$Date: 2000/11/30 23:41:03 $]
 
 Release:
 
@@ -14,6 +14,8 @@ Release:
 
 RELEASE SHOWSTOPPERS:
 
+    * Rename Symbols:
+		apr_opendir   -->    apr_dir_open
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
