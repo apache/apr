@@ -75,13 +75,13 @@ extern "C" {
  * @param name Set Inheritance for this Socket/File Handle
  */
 #define APR_DECLARE_INHERIT_SET(name) \
-    APR_DECLARE(void) apr_##name##_inherit_set(apr_##name##_t *name)
+    APR_DECLARE(apr_status_t) apr_##name##_inherit_set(apr_##name##_t *name)
 
 /**
  * @param name Unset Inheritance for this Socket/File Handle
  */
 #define APR_DECLARE_INHERIT_UNSET(name) \
-    APR_DECLARE(void) apr_##name##_inherit_unset(apr_##name##_t *name)
+    APR_DECLARE(apr_status_t) apr_##name##_inherit_unset(apr_##name##_t *name)
 
 #ifdef __cplusplus
 }

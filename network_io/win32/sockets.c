@@ -430,22 +430,22 @@ APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock,
  * This is not trivial to implement.
  */
 
-APR_DECLARE(void) apr_socket_inherit_set(apr_socket_t *socket)    
+APR_DECLARE(apr_status_t) apr_socket_inherit_set(apr_socket_t *socket)    
 {    
-    return /* APR_ENOTIMPL */;
+    return APR_ENOTIMPL;
 }    
 /* Deprecated */    
 APR_DECLARE(void) apr_socket_set_inherit(apr_socket_t *socket)    
 {    
-    /* return */ apr_socket_inherit_set(socket);    
+    apr_socket_inherit_set(socket);    
 }
 
-APR_DECLARE(void) apr_socket_inherit_unset(apr_socket_t *socket)    
+APR_DECLARE(apr_status_t) apr_socket_inherit_unset(apr_socket_t *socket)    
 {    
-    return /* APR_ENOTIMPL */;
+    return APR_ENOTIMPL;
 }    
 /* Deprecated */    
 APR_DECLARE(void) apr_socket_unset_inherit(apr_socket_t *socket)    
 {    
-    /* return */ apr_socket_inherit_unset(socket);    
+    apr_socket_inherit_unset(socket);    
 }
