@@ -713,7 +713,7 @@ dnl that you surround the macro invocation with []s
 AC_DEFUN(APR_HELP_STRING,[ifelse(regexp(AC_ACVERSION, 2\.1), -1, AC_HELP_STRING([$1],[$2]),[  ][$1] substr([                       ],len($1))[$2])])
 
 dnl
-dnl APR_LAYOUT(configlayout, layoutname)
+dnl APR_LAYOUT(configlayout, layoutname [, extravars])
 dnl
 AC_DEFUN(APR_LAYOUT,[
   if test ! -f $srcdir/config.layout; then
@@ -723,19 +723,23 @@ AC_DEFUN(APR_LAYOUT,[
   fi
   pldconf=./config.pld
   changequote({,})
-  sed -e "1,/[ 	]*<[lL]ayout[ 	]*$2[ 	]*>[ 	]*/d" \
+  sed -e "1s/[ 	]*<[lL]ayout[ 	]*$2[ 	]*>[ 	]*//;t" \
+      -e "1,/[ 	]*<[lL]ayout[ 	]*$2[ 	]*>[ 	]*/d" \
       -e '/[ 	]*<\/Layout>[ 	]*/,$d' \
       -e "s/^[ 	]*//g" \
       -e "s/:[ 	]*/=\'/g" \
       -e "s/[ 	]*$/'/g" \
       $1 > $pldconf
   layout_name=$2
+  if test ! -s $pldconf; then
+    echo "** Error: unable to find layout $layout_name"
+    exit 1
+  fi
   . $pldconf
   rm $pldconf
   for var in prefix exec_prefix bindir sbindir libexecdir mandir \
-             sysconfdir datadir  \
-             includedir localstatedir runtimedir logfiledir libdir \
-             installbuilddir libsuffix; do
+             sysconfdir datadir includedir localstatedir runtimedir \
+             logfiledir libdir installbuilddir libsuffix $3; do
     eval "val=\"\$$var\""
     case $val in
       *+)
@@ -765,7 +769,7 @@ AC_DEFUN(APR_LAYOUT,[
 ])dnl
 
 dnl
-dnl APR_ENABLE_LAYOUT(default layout name)
+dnl APR_ENABLE_LAYOUT(default layout name [, extra vars])
 dnl
 AC_DEFUN(APR_ENABLE_LAYOUT,[
 AC_ARG_ENABLE(layout,
@@ -776,7 +780,7 @@ AC_ARG_ENABLE(layout,
 if test -z "$LAYOUT"; then
   LAYOUT="$1"
 fi
-APR_LAYOUT($srcdir/config.layout, $LAYOUT)
+APR_LAYOUT($srcdir/config.layout, $LAYOUT, $2)
 
 AC_MSG_CHECKING(for chosen layout)
 AC_MSG_RESULT($layout_name)
