@@ -272,7 +272,7 @@ SOURCE=.\network_io\unix\inet_pton.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\network_io\unix\poll.c
+SOURCE=.\poll\unix\poll.c
 # End Source File
 # Begin Source File
 
