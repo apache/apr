@@ -473,16 +473,16 @@ int main(int argc, char **argv)
         
     printf("Checking sms identities...\n");
     TEST_NEQ("    Checking identity of standard memory system",
-             strcmp(apr_sms_identity(ams), "STANDARD"), 0,
+             strcmp(apr_sms_get_identity(ams), "STANDARD"), 0,
              "OK","Not STANDARD")
     TEST_NEQ("    Checking the identity of tracking memory system",
-             strcmp(apr_sms_identity(bms), "TRACKING"), 0,
+             strcmp(apr_sms_get_identity(bms), "TRACKING"), 0,
              "OK", "Not TRACKING")
     TEST_NEQ("    Checking the identity of blocks memory system",
-             strcmp(apr_sms_identity(dms), "BLOCKS"), 0,
+             strcmp(apr_sms_get_identity(dms), "BLOCKS"), 0,
              "OK", "Not BLOCKS")
     TEST_NEQ("    Checking the identity of trivial memory system",
-             strcmp(apr_sms_identity(tms), "TRIVIAL"), 0,
+             strcmp(apr_sms_get_identity(tms), "TRIVIAL"), 0,
              "OK", "Not TRIVIAL")
 
     printf("Big allocation test...\n");
