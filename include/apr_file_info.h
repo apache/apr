@@ -78,8 +78,24 @@ extern "C" {
  * @{
  */
 
+/* Many applications use the type member to determine the
+ * existance of a file or initialization of the file info,
+ * so the APR_NOFILE value must be distinct from APR_UNKFILE.
+ */
+
+/** apr_filetype_e values for the filetype member of the 
+ * apr_file_info_t structure
+ * @warning: Not all of the filetypes below can be determined.
+ * For example, a given platform might not correctly report 
+ * a socket descriptor as APR_SOCK if that type isn't 
+ * well-identified on that platform.  In such cases where
+ * a filetype exists but cannot be described by the recognized
+ * flags below, the filetype will be APR_UNKFILE.  If the
+ * filetype member is not determined, the type will be APR_NOFILE.
+ */
+
 typedef enum {
-    APR_NOFILE = 0,     /**< the file exists, but APR doesn't know its type */
+    APR_NOFILE = 0,     /**< no file type determined */
     APR_REG,            /**< a regular file */
     APR_DIR,            /**< a directory */
     APR_CHR,            /**< a character device */
@@ -87,7 +103,7 @@ typedef enum {
     APR_PIPE,           /**< a FIFO / pipe */
     APR_LNK,            /**< a symbolic link */
     APR_SOCK,           /**< a [unix domain] socket */
-    APR_UNKFILE = 127   /**< a file of unknown type */
+    APR_UNKFILE = 127   /**< a file of some other unknown type */
 } apr_filetype_e; 
 
 /**
@@ -188,8 +204,9 @@ struct apr_finfo_t {
     apr_int32_t valid;
     /** The access permissions of the file.  Mimics Unix access rights. */
     apr_fileperms_t protection;
-    /** The type of file.  One of APR_NOFILE, APR_REG, APR_DIR, APR_CHR, 
-     *  APR_BLK, APR_PIPE, APR_LNK, APR_SOCK 
+    /** The type of file.  One of APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, 
+     * APR_LNK or APR_SOCK.  If the type is undetermined, the value is APR_NOFILE.
+     * If the type cannot be determined, the value is APR_UNKFILE.
      */
     apr_filetype_e filetype;
     /** The user id that owns the file */
