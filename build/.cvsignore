@@ -3,7 +3,6 @@ libtool.m4
 ltconfig
 ltmain.sh
 ltcf-c.sh
-rules.mk
 apr_rules.mk
 LibD
 LibR
