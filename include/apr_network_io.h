@@ -64,6 +64,10 @@
 #include "apr_errno.h"
 #include <time.h>
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -123,10 +127,20 @@ ap_status_t ap_send(ap_socket_t *, const char *, ap_ssize_t *);
 ap_status_t ap_recv(ap_socket_t *, char *, ap_ssize_t *);
 
 ap_status_t ap_setsocketopt(ap_socket_t *, ap_int32_t, ap_int32_t);
-ap_status_t ap_setport(ap_socket_t *, ap_uint32_t);
-ap_status_t ap_setipaddr(ap_socket_t *, const char *);
-ap_status_t ap_getport(ap_uint32_t *, ap_socket_t *);
-ap_status_t ap_getipaddr(char *buf, ap_ssize_t len, const ap_socket_t *sock);
+
+ap_status_t ap_set_local_port(ap_socket_t *sock, ap_uint32_t port);
+ap_status_t ap_set_remote_port(ap_socket_t *sock, ap_uint32_t port);
+ap_status_t ap_get_local_port(ap_uint32_t *port, ap_socket_t *sock);
+ap_status_t ap_get_remote_port(ap_uint32_t *port, ap_socket_t *sock);
+ap_status_t ap_set_local_ipaddr(ap_socket_t *sock, const char *addr);
+ap_status_t ap_set_remote_ipaddr(ap_socket_t *sock, const char *addr);
+ap_status_t ap_get_local_ipaddr(char **addr, const ap_socket_t *sock);
+ap_status_t ap_get_remote_ipaddr(char **addr, const ap_socket_t *sock);
+
+#ifdef HAVE_NETINET_IN_H
+ap_status_t ap_get_local_name(struct sockaddr_in **name, const ap_socket_t *sock);
+ap_status_t ap_get_remote_name(struct sockaddr_in **name, const ap_socket_t *sock);
+#endif
 
 ap_status_t ap_setup_poll(ap_pollfd_t **, ap_int32_t, ap_context_t *);
 ap_status_t ap_poll(ap_pollfd_t *, ap_int32_t *, ap_int32_t);
