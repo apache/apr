@@ -174,13 +174,13 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
 {
     SYSTEMTIME st;
     FILETIME ft, localft;
-    TIME_ZONE_INFORMATION *tz;
 
     AprTimeToFileTime(&ft, input);
 
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
+        TIME_ZONE_INFORMATION *tz;
         SYSTEMTIME localst;
         apr_time_t localtime;
 
@@ -219,6 +219,7 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
 #if APR_HAS_ANSI_FS
     ELSE_WIN_OS_IS_ANSI
     {
+        TIME_ZONE_INFORMATION tz;
 	/* XXX: This code is simply *wrong*.  The time converted will always
          * map to the *now current* status of daylight savings time.
          */
@@ -234,15 +235,15 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
                 /* Bias = UTC - local time in minutes
                  * tm_gmtoff is seconds east of UTC
                  */
-                result->tm_gmtoff = tz->Bias * -60;
+                result->tm_gmtoff = tz.Bias * -60;
                 break;
             case TIME_ZONE_ID_STANDARD:
                 result->tm_isdst = 0;
-                result->tm_gmtoff = (tz->Bias + tz->StandardBias) * -60;
+                result->tm_gmtoff = (tz.Bias + tz.StandardBias) * -60;
                 break;
             case TIME_ZONE_ID_DAYLIGHT:
                 result->tm_isdst = 1;
-                result->tm_gmtoff = (tz->Bias + tz->DaylightBias) * -60;
+                result->tm_gmtoff = (tz.Bias + tz.DaylightBias) * -60;
                 break;
             default:
                 /* noop */;
