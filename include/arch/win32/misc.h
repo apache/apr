@@ -141,7 +141,7 @@ typedef enum {
         APR_WIN_XP =       60
 } apr_oslevel_e;
 
-extern apr_oslevel_e apr_os_level;
+extern APR_DECLARE_DATA apr_oslevel_e apr_os_level;
 
 apr_status_t apr_get_oslevel(struct apr_pool_t *, apr_oslevel_e *);
 
