@@ -5,7 +5,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#if APR_HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #define LIB_NAME "mod_test.so"
 
