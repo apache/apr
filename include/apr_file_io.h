@@ -613,6 +613,16 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
 APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm, 
                         apr_pool_t *cont);
 
+/** Creates a new directory on the file system, but behaves like
+ * 'mkdir -p'. Creates intermediate directories as required. No error
+ * will be reported if PATH already exists.
+ * @param path the path for the directory to be created.  (use / on all systems)
+ * @param perm Permissions for the new direcoty.
+ * @param cont the pool to use.  */
+APR_DECLARE(apr_status_t) apr_dir_make_recursive(const char *path,
+                                                 apr_fileperms_t perm,
+                                                 apr_pool_t *pool);
+
 /**
  * Remove directory from the file system.
  * @param path the path for the directory to be removed.  (use / on all systems)

@@ -73,6 +73,39 @@ static apr_status_t dir_cleanup(void *thedir)
     }
 } 
 
+#define PATH_SEPARATOR '/'
+
+/* Remove trailing separators that don't affect the meaning of PATH. */
+static const char *path_canonicalize (const char *path, apr_pool_t *pool)
+{
+    /* At some point this could eliminate redundant components.  For
+     * now, it just makes sure there is no trailing slash. */
+    apr_size_t len = strlen (path);
+    apr_size_t orig_len = len;
+    
+    while ((len > 0) && (path[len - 1] == PATH_SEPARATOR))
+        len--;
+    
+    if (len != orig_len)
+        return apr_pstrndup (pool, path, len);
+    else
+        return path;
+}
+
+/* Remove one component off the end of PATH. */
+static char *path_remove_last_component (const char *path, apr_pool_t *pool)
+{
+    const char *newpath = path_canonicalize (path, pool);
+    int i;
+    
+    for (i = (strlen(newpath) - 1); i >= 0; i--) {
+        if (path[i] == PATH_SEPARATOR)
+            break;
+    }
+
+    return apr_pstrndup (pool, path, (i < 0) ? 0 : i);
+}
+
 apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *pool)
 {
     /* On some platforms (e.g., Linux+GNU libc), d_name[] in struct 
@@ -202,6 +235,29 @@ apr_status_t apr_dir_make(const char *path, apr_fileperms_t perm, apr_pool_t *po
     else {
         return errno;
     }
+}
+
+apr_status_t apr_dir_make_recursive(const char *path, apr_fileperms_t perm,
+                                           apr_pool_t *pool) 
+{
+    apr_status_t apr_err = 0;
+    
+    apr_err = apr_dir_make (path, perm, pool); /* Try to make PATH right out */
+    
+    if (apr_err == EEXIST) /* It's OK if PATH exists */
+        return APR_SUCCESS;
+    
+    if (apr_err == ENOENT) { /* Missing an intermediate dir */
+        char *dir;
+        
+        dir = path_remove_last_component(path, pool);
+        apr_err = apr_dir_make_recursive(dir, perm, pool);
+        
+        if (!apr_err) 
+            apr_err = apr_dir_make (path, perm, pool);
+    }
+
+    return apr_err;
 }
 
 apr_status_t apr_dir_remove(const char *path, apr_pool_t *pool)
