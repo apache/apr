@@ -1,5 +1,7 @@
 Changes with APR b1
 
+  *) Converted apr_pcalloc to a macro  [Brian Pane]
+
   *) Fixed APR_STATUS_IS_ETIMEDOUT macro.
      [Dagfinn Aarvaag <dagfinn.aarvaag@beepscience.com>]
 

@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/05/03 13:00:19 $]
+Last modified at [$Date: 2002/05/05 02:06:48 $]
 
 Release:
 
@@ -101,12 +101,6 @@ CURRENT VOTES:
                   hubub was going on. 
                   The other alternative for non-native support is maybe to turn 
                   it into a spin lock
-
-    * Turn apr_pcalloc into a macro that does apr_palloc+memset, to take
-      advantage of compiler optimizations when the size of the block being
-      passed to memset is known at compile time.
-
-      +1: BrianP, Justin, Sander, Cliff, Ian, BillS
 
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:

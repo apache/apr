@@ -384,7 +384,11 @@ APR_DECLARE(void *) apr_palloc_debug(apr_pool_t *p, apr_size_t size,
  * @param size The amount of memory to allocate
  * @return The allocated memory
  */
+#if defined(DOXYGEN)
 APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
+#else
+#define apr_pcalloc(p, size) memset(apr_palloc(p, size), 0, size)
+#endif
 
 /**
  * Debug version of apr_pcalloc
