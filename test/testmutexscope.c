@@ -125,7 +125,7 @@ static void lock_release(test_mode_e test_mode)
     }
 }
 
-static void *eachThread(apr_thread_t *id, void *p)
+static void * APR_THREAD_FUNC eachThread(apr_thread_t *id, void *p)
 {
     test_mode_e test_mode = (test_mode_e)p;
 
