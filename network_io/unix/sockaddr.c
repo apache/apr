@@ -64,6 +64,8 @@ static apr_status_t get_local_addr(apr_socket_t *sock)
     }
     else {
         sock->local_port_unknown = sock->local_interface_unknown = 0;
+        /* XXX assumes sin_port and sin6_port at same offset */
+        sock->local_addr->port = ntohs(sock->local_addr->sa.sin.sin_port);
         return APR_SUCCESS;
     }
 }
