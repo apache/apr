@@ -138,15 +138,35 @@ static apr_status_t check_basic_atomics32(void)
 
     printf("%-60s", "testing apr_atomic_add32");
     apr_atomic_set32(&y32, 23);
-    apr_atomic_add32(&y32, 4);
+    if ((oldval = apr_atomic_add32(&y32, 4)) != 23) {
+        fprintf(stderr,
+                "Failed\noldval problem =%d should be 23\n",
+                oldval);
+        return APR_EGENERAL;
+    }
     if ((oldval = apr_atomic_read32(&y32)) != 27) {
         fprintf(stderr,
                 "Failed\nAtomic Add doesn't add up ;( expected 27 got %d\n",
                 oldval);
         return APR_EGENERAL;
     }
- 
     printf("OK\n");
+
+    printf("%-60s", "testing apr_atomic_inc32");
+    if ((oldval = apr_atomic_inc32(&y32)) != 27) {
+        fprintf(stderr,
+                "Failed\noldval problem =%d should be 27\n",
+                oldval);
+        return APR_EGENERAL;
+    }
+    if ((oldval = apr_atomic_read32(&y32)) != 28) {
+        fprintf(stderr,
+                "Failed\nAtomic Inc didn't increment ;( expected 28 got %d\n",
+                oldval);
+        return APR_EGENERAL;
+    }
+    printf("OK\n");
+
     printf("%-60s", "testing add32/inc32/sub32");
     apr_atomic_set32(&y32, 0);
     apr_atomic_add32(&y32, 20);
