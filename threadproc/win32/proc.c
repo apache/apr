@@ -441,7 +441,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         apr_size_t ncwd = 0, nwcwd = 0;
         apr_wchar_t *wcwd = NULL;
 
-        if (((rv = utf8_to_unicode_path(wprg, nwprg, progname))
+        if (((rv = conv_utf8_to_ucs2(progname, &nprg, wprg, &nwprg))
                  != APR_SUCCESS)
          || ((rv = conv_utf8_to_ucs2(cmdline, &ncmd, wcmd, &nwcmd))
                  != APR_SUCCESS)) {
