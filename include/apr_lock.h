@@ -114,6 +114,14 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
 APR_DECLARE(apr_status_t) apr_lock_acquire(apr_lock_t *lock);
 
 /**
+ * Tries to lock a protected region.  
+ * If it fails, returns APR_EBUSY.  Otherwise, it returns APR_SUCCESS.
+ * @param lock The lock to set.
+ * @deffunc apr_status_t apr_lock_tryacquire(apr_lock_t *lock)
+ */
+APR_DECLARE(apr_status_t) apr_lock_tryacquire(apr_lock_t *lock);
+
+/**
  * Lock a region with either a reader or writer lock.
  * @param lock The lock to set.
  * @param type The type of lock to acquire.
