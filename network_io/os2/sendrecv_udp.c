@@ -101,9 +101,10 @@ APR_DECLARE(apr_status_t) apr_socket_sendto(apr_socket_t *sock,
 
 
 
-APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
-                                       apr_int32_t flags, char *buf, 
-                                       apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from,
+                                              apr_socket_t *sock,
+                                              apr_int32_t flags, char *buf,
+                                              apr_size_t *len)
 {
     apr_ssize_t rv;
     int serrno;
@@ -146,4 +147,14 @@ APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
                                      apr_size_t *len)
 {
     return apr_socket_sendto(sock, where, flags, buf, len);
+}
+
+
+
+APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from,
+                                       apr_socket_t *sock,
+                                       apr_int32_t flags, char *buf,
+                                       apr_size_t *len)
+{
+    return apr_socket_recvfrom(from, sock, flags, buf, len);
 }
