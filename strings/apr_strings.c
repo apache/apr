@@ -212,7 +212,7 @@ APR_DECLARE(char *) apr_ltoa(apr_pool_t *p, long n)
     return start;
 }
 
-APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, long n)
+APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n)
 {
     const int BUFFER_SIZE = sizeof(apr_off_t) * 3 + 2;
     char *buf = apr_palloc(p, BUFFER_SIZE);
