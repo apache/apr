@@ -47,7 +47,7 @@ apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen,
      * Note that the \\?\ form only works for local drive paths, and
      * \\?\UNC\ is needed UNC paths.
      */
-    int srcremains = strlen(srcstr) + 1;
+    apr_size_t srcremains = strlen(srcstr) + 1;
     apr_wchar_t *t = retstr;
     apr_status_t rv;
 
@@ -101,7 +101,7 @@ apr_status_t unicode_to_utf8_path(char* retstr, apr_size_t retlen,
      * then transform \\'s back into /'s since the \\?\ form never
      * allows '/' path seperators, and APR always uses '/'s.
      */
-    int srcremains = wcslen(srcstr) + 1;
+    apr_size_t srcremains = wcslen(srcstr) + 1;
     apr_status_t rv;
     char *t = retstr;
     if (srcstr[0] == L'\\' && srcstr[1] == L'\\' && 
