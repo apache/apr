@@ -278,5 +278,11 @@ struct iovec {
     char* iov_base;
     int   iov_len;
 };
+
+/* Nasty Win32 .h ommissions we really need */
+#define STDIN_FILENO  0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
+
 #endif /* APR_H */
 #endif /* WIN32 */
