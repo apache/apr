@@ -54,7 +54,6 @@
 
 #include "apr.h"
 #include "apr_arch_file_io.h"
-#include "apr_arch_utf8.h"
 #include "apr_strings.h"
 #include "apr_lib.h"
 #include <string.h>
