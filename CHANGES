@@ -1,5 +1,10 @@
 Changes with APR 0.9.0
 
+  *) If the length argument to apr_snprintf is 0, then we should return the
+     length that the string would be if we actually were going to fill it out.
+     However, if the length argument is 0, we can also accept a NULL string.
+     Also, added a test case for this.  [Ryan Bloom]
+
   *) Printing a string with apr_snprintf can seg fault, if a precision is
      specified for the string, and the string being printed doesn't have a
      trailing '\0'.  Fix that seg fault by not calling strlen if a precision
