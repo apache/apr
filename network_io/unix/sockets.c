@@ -261,7 +261,7 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
 
 apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
-    int rc;
+    int rc;        
 
     do {
         rc = connect(sock->socketdes,
@@ -273,19 +273,24 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
      * socket; if called again, we can see EALREADY
      */
     if (rc == -1 && (errno == EINPROGRESS || errno == EALREADY) && sock->timeout != 0) {
-        int error;
-        apr_socklen_t len = sizeof(error);
-
         rc = apr_wait_for_io_or_timeout(sock, 0);
         if (rc != APR_SUCCESS) {
             return rc;
         }
-        if ((rc = getsockopt(sock->socketdes, SOL_SOCKET, SO_ERROR, (char *)&error, &len)) < 0) {
-            return errno;
+
+#ifdef SO_ERROR
+        {
+            int error;
+            apr_socklen_t len = sizeof(error);
+            if ((rc = getsockopt(sock->socketdes, SOL_SOCKET, SO_ERROR, 
+                                 (char *)&error, &len)) < 0) {
+                return errno;
+            }
+            if (error) {
+                return error;
+            }
         }
-        if (error) {
-            return error;
-        }
+#endif /* SO_ERROR */
     }
 
     if (rc == -1) {
