@@ -121,7 +121,7 @@ EXPORTS
 	ap_os_systemcase_filename   @112
 	canonical_filename   @113
 	ap_create_pool   @114
-	ap_destroy_context   @115
+	ap_destroy_pool   @115
 ;	WinTimeToUnixTime   @116
 ;	ap_get_oslevel   @117
 	ap_get_userdata   @118
