@@ -241,7 +241,7 @@ apr_status_t apr_ungetc(char ch, apr_file_t *thefile)
 apr_status_t apr_getc(char *ch, apr_file_t *thefile)
 {
     ULONG rc;
-    int bytesread;
+    apr_size_t bytesread;
 
     if (!thefile->isopen) {
         return APR_EBADF;
