@@ -73,7 +73,7 @@ int main(int argc, char * const argv[])
     const char *bind_to_ipaddr = NULL;
     char *local_ipaddr, *remote_ipaddr;
     apr_port_t local_port, remote_port;
-    apr_sockaddr_t *localsa = NULL;
+    apr_sockaddr_t *localsa = NULL, *remotesa;
     apr_status_t stat;
     int family = APR_UNSPEC;
     char buf[128];
@@ -155,8 +155,8 @@ int main(int argc, char * const argv[])
     fprintf(stdout, "OK\n");
 
     if (!localsa) {
-        apr_set_port(sock, APR_LOCAL, 8021);
         apr_get_sockaddr(&localsa, APR_LOCAL, sock);
+        apr_set_port(localsa, 8021);
     }
 
     fprintf(stdout, "\tServer:  Binding socket to port.......");
@@ -203,10 +203,12 @@ int main(int argc, char * const argv[])
     }
     fprintf(stdout, "OK\n");
 
-    apr_get_ipaddr(&remote_ipaddr, APR_REMOTE, sock2);
-    apr_get_port(&remote_port, APR_REMOTE, sock2);
-    apr_get_ipaddr(&local_ipaddr, APR_LOCAL, sock2);
-    apr_get_port(&local_port, APR_LOCAL, sock2);
+    apr_get_sockaddr(&remotesa, APR_REMOTE, sock2);
+    apr_get_ipaddr(&remote_ipaddr, remotesa);
+    apr_get_port(&remote_port, remotesa);
+    apr_get_sockaddr(&localsa, APR_LOCAL, sock2);
+    apr_get_ipaddr(&local_ipaddr, localsa);
+    apr_get_port(&local_port, localsa);
     fprintf(stdout, "\tServer socket: %s:%u -> %s:%u\n", local_ipaddr, local_port, remote_ipaddr, remote_port);
 
     length = STRLEN;
