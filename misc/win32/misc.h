@@ -60,6 +60,13 @@
 #include "apr_file_io.h"
 #include "apr_errno.h"
 
+typedef struct datastruct {
+    void *data;
+    char *key;
+    struct datastruct *next;
+    struct datastruct *prev;
+} datastruct;
+
 struct context_t {
     struct ap_pool_t *pool;
     void *prog_data;
