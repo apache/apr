@@ -373,18 +373,17 @@ dnl	;;
 	;;
     *beos*)
         APR_SETIFNULL(CFLAGS, [-DBEOS])
+        APR_SETVAR(APACHE_MPM, [beos])
         PLATOSVERS=`uname -r`
         case $PLATOSVERS in
             5.1)
                 APR_ADDTO(CPPFLAGS, [-I/boot/develop/headers/bone])
                 APR_ADDTO(LDFLAGS, [-nodefaultlibs -L/boot/develop/lib/x86 -L/boot/beos/system/lib])
                 APR_SETIFNULL(EXTRA_LIBS, [-lbind -lsocket -lbe -lroot])
-                APR_SETVAR(APACHE_MPM, [beos])
                 APR_SETIFNULL(file_as_socket, [1])
                 ;;
             default)
                 APR_SETIFNULL(file_as_socket, [0])
-                APR_SETVAR(APACHE_MPM, [mpmt_beos])
                 ;;
 	esac
 	;;
