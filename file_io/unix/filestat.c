@@ -78,6 +78,7 @@ static ap_filetype_e filetype_from_mode(int mode)
     if (S_ISSOCK(mode))
         type = APR_SOCK;
 #endif
+    return type;
 }
 
 /* ***APRDOC********************************************************
