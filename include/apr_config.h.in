@@ -103,6 +103,12 @@
 /* Define if you have the getpass function.  */
 #undef HAVE_GETPASS
 
+/* Define if you have the gmtime_r function.  */
+#undef HAVE_GMTIME_R
+
+/* Define if you have the localtime_r function.  */
+#undef HAVE_LOCALTIME_R
+
 /* Define if you have the poll function.  */
 #undef HAVE_POLL
 
@@ -317,5 +323,39 @@ typedef void Sigfunc(int);
 Sigfunc *signal(int signo, Sigfunc * func);
 #endif
 
+#ifndef _POSIX_THREAD_SAFE_FUNCTIONS
+#define SAFETY_LOCK(func_name, cnt, name_str) \
+    { \
+    struct lock_t *funclock = lock_##func_name; \
+    if (funclock == NULL) \
+        if (ap_create_lock(cnt, APR_MUTEX, APR_LOCKALL, name_str, &funclock) != APR_SUCCESS) \
+            return APR_NOTTHREADSAFE; \
+    if (ap_lock(funclock) != APR_SUCCESS) \
+        return APR_NOTTHREADSAFE; \
+    }
+#else
+#define SAFETY_LOCK(func_name, cnt)
+#endif 
+        
+#ifndef _POSIX_THREAD_SAFE_FUNCTIONS
+#define SAFETY_UNLOCK(func_name) \
+    if (ap_unlock(lock_##func_name) != APR_SUCCESS) { \
+        return APR_NOTTHREADSAFE; \
+    }
+#else
+#define SAFETY_UNLOCK(func_name, cnt)
+#endif 
+
+#ifdef HAVE_GMTIME_R
+#define GMTIME_R(x, y) gmtime_r(x, y)
+#else
+#define GMTIME_R(x, y) memcpy(y, gmtime(x), sizeof(y))
+#endif
+
+#ifdef HAVE_LOCALTIME_R
+#define LOCALTIME_R(x, y) localtime_r(x, y)
+#else
+#define LOCALTIME_R(x, y) memcpy(y, localtime(x), sizeof(y))
+#endif
 
 #endif /* APR_CONFIG_H */

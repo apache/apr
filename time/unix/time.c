@@ -62,6 +62,10 @@
 #include <errno.h>
 #include <string.h>
 
+static ap_lock_t *lock_gmtime = NULL;
+static ap_lock_t *lock_localtime = NULL;
+
+
 /* ***APRDOC********************************************************
  * ap_status_t ap_make_time(ap_context_t *, ap_time_t *)
  *    Create a time entity.
@@ -107,11 +111,15 @@ ap_status_t ap_explode_time(struct atime_t *atime, ap_timetype_e type)
 {
     switch (type) {
     case APR_LOCALTIME: {
-        atime->explodedtime = localtime(&atime->currtime->tv_sec);
+        SAFETY_LOCK(localtime, atime->cntxt, "localtimefile");
+        LOCALTIME_R(&atime->currtime->tv_sec, atime->explodedtime);
+        SAFETY_UNLOCK(localtime);
         break;
     }
     case APR_UTCTIME: {
-        atime->explodedtime = gmtime(&atime->currtime->tv_sec);
+        SAFETY_LOCK(gmtime, atime->cntxt, "gmtimefile");
+        GMTIME_R(&atime->currtime->tv_sec, atime->explodedtime);
+        SAFETY_UNLOCK(gmtime);
         break;
     }
     }
