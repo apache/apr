@@ -61,6 +61,7 @@
 #include "apr_lib.h"
 #include "apr_lock.h"
 #include "apr_sms.h"
+#include "apr_portable.h"
 
 /* System headers required by Locks library */
 #if APR_HAVE_SYS_TYPES_H
@@ -110,11 +111,11 @@ union semun {
 
 struct apr_lock_t {
     apr_pool_t *pool;
-    apr_sms_t *mem_sys;
     apr_locktype_e type;
     apr_lockscope_e scope;
     int curr_locked;
     char *fname;
+
 #if APR_USE_SYSVSEM_SERIALIZE
     int interproc;
 #elif APR_USE_FCNTL_SERIALIZE
@@ -129,6 +130,10 @@ struct apr_lock_t {
 #if APR_HAS_THREADS
     /* APR doesn't have threads, no sense in having an thread lock mechanism.
      */
+
+    apr_os_thread_t owner;
+    int owner_ref;
+
 #if APR_USE_PTHREAD_SERIALIZE
     pthread_mutex_t *intraproc;
 #endif
@@ -156,10 +161,6 @@ apr_status_t apr_unix_destroy_inter_lock(struct apr_lock_t *lock);
 
 apr_status_t apr_unix_child_init_lock(struct apr_lock_t **lock, 
                                       apr_pool_t *cont, const char *fname);
-
-apr_status_t apr_lock_sms_create(apr_lock_t **lock, apr_locktype_e type,
-                                 apr_lockscope_e scope, const char *fname,
-                                 apr_sms_t *mem_sys);
 
 #endif  /* LOCKS_H */
 

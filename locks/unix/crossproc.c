@@ -100,7 +100,8 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
         return errno;
     }
     new->curr_locked = 0;
-    APR_CLEANUP_REGISTER(new, (void *)new, lock_cleanup, apr_pool_cleanup_null);
+    apr_pool_cleanup_register(new->pool, (void *)new, lock_cleanup, 
+                              apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -137,7 +138,7 @@ apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
     apr_status_t stat;
 
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        APR_CLEANUP_REMOVE(lock, lock, lock_cleanup);
+        apr_pool_cleanup_kill(lock->pool, lock, lock_cleanup);
         return APR_SUCCESS;
     }
     return stat;
@@ -223,7 +224,8 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
     }
 
     new->curr_locked = 0;
-    APR_CLEANUP_REGISTER(new, (void *)new, lock_cleanup, apr_pool_cleanup_null);
+    apr_pool_register_cleanup(new->pool, (void *)new, lock_cleanup, 
+                              apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -259,7 +261,7 @@ apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
 {
     apr_status_t stat;
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        APR_CLEANUP_REMOVE(lock, lock, lock_cleanup);
+        apr_pool_cleanup_kill(lock->pool, lock, lock_cleanup);
         return APR_SUCCESS;
     }
     return stat;
@@ -305,7 +307,7 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
         new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0644);
     }
     else {
-        APR_MEM_PSTRDUP(new, new->fname, "/tmp/aprXXXXXX")
+        new->fname = apr_pstrdup(new->pool, "/tmp/aprXXXXXX");
         new->interproc = apr_mkstemp(new->fname);
     }
 
@@ -316,7 +318,8 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
 
     new->curr_locked=0;
     unlink(new->fname);
-    APR_CLEANUP_REGISTER(new, new, lock_cleanup, apr_pool_cleanup_null);
+    apr_pool_cleanup_register(new->pool, (void*)new, lock_cleanup, 
+                              apr_pool_cleanup_null);
     return APR_SUCCESS; 
 }
 
@@ -352,7 +355,7 @@ apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
 {
     apr_status_t stat;
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        APR_CLEANUP_REMOVE(lock, lock, lock_cleanup);
+        apr_pool_cleanup_kill(lock->pool, lock, lock_cleanup);
         return APR_SUCCESS;
     }
     return stat;
@@ -388,7 +391,7 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
         new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0600);
     }
     else {
-        APR_MEM_PSTRDUP(new, new->fname, "/tmp/aprXXXXXX")
+        new->fname = apr_pstrdup(new->pool, "/tmp/aprXXXXXX");
         new->interproc = apr_mkstemp(new->fname);
     }
 
@@ -397,7 +400,8 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
         return errno;
     }
     new->curr_locked = 0;
-    APR_CLEANUP_REGISTER(new, (void *)new, lock_cleanup, apr_pool_cleanup_null);
+    apr_pool_cleanup_register(new->pool, (void *)new, lock_cleanup,
+                              apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -433,7 +437,7 @@ apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
 {
     apr_status_t stat;
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        APR_CLEANUP_REMOVE(lock, lock, lock_cleanup);
+        apr_pool_cleanup_kill(lock->new, lock, lock_cleanup);
         return APR_SUCCESS;
     }
     return stat;
