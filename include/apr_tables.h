@@ -441,6 +441,16 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
 APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
                                      unsigned flags);
 
+/**
+ * Eliminate redunandant entries in a table by either overwriting
+ * or merging duplicates
+ *
+ * @param t Table.
+ * @param flags APR_OVERLAP_TABLES_MERGE to merge, or
+ *              APR_OVERLAP_TABLES_SET to overwrite
+ */
+APR_DECLARE(void) apr_table_compress(apr_table_t *t, unsigned flags);
+
 /** @} */
 
 #ifdef __cplusplus
