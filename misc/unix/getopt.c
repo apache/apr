@@ -33,12 +33,12 @@
 
 #include "misc.h"
 
-APR_EXPORT_VAR int
+APR_VAR_EXPORT int
     ap_opterr = 1,                      /* if error message should be printed */
     ap_optind = 1,                      /* index into parent argv vector */
     ap_optopt,                          /* character checked for validity */
     ap_optreset;                        /* reset getopt */
-APR_EXPORT_VAR char *ap_optarg = "";    /* argument associated with option */
+APR_VAR_EXPORT char *ap_optarg = "";    /* argument associated with option */
 
 #define EMSG    ""
 
