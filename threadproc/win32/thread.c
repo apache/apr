@@ -38,6 +38,9 @@ APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new,
     }
 
     (*new)->pool = pool;
+    (*new)->detach = 0;
+    (*new)->stacksize = 0;
+
     return APR_SUCCESS;
 }
 
@@ -53,6 +56,13 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
     if (attr->detach == 1)
         return APR_DETACH;
     return APR_NOTDETACH;
+}
+
+APR_DECLARE(apr_status_t) apr_threadattr_stacksize_set(apr_threadattr_t *attr,
+                                                       apr_size_t stacksize)
+{
+    attr->stacksize = stacksize;
+    return APR_SUCCESS;
 }
 
 static void *dummy_worker(void *opaque)
@@ -89,13 +99,15 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
      * same size as the calling thread. 
      */
 #ifndef _WIN32_WCE
-    if (((*new)->td = (HANDLE)_beginthreadex(NULL, 0, 
+    if (((*new)->td = (HANDLE)_beginthreadex(NULL,
+                        attr && attr->stacksize > 0 ? attr->stacksize : 0,
                         (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
                         (*new), 0, &temp)) == 0) {
         return APR_FROM_OS_ERROR(_doserrno);
     }
 #else
-   if (((*new)->td = CreateThread(NULL, 0, 
+   if (((*new)->td = CreateThread(NULL,
+                        attr && attr->stacksize > 0 ? attr->stacksize : 0,
                         (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
                         (*new), 0, &temp)) == 0) {
         return apr_get_os_error();

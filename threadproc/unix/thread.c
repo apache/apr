@@ -78,6 +78,22 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
     return APR_NOTDETACH;
 }
 
+APR_DECLARE(apr_status_t) apr_threadattr_stacksize_set(apr_threadattr_t *attr,
+                                                       apr_size_t stacksize)
+{
+    int stat;
+
+    stat = pthread_attr_setstacksize(&attr->attr, stacksize);
+    if (stat == 0) {
+        return APR_SUCCESS;
+    }
+#ifdef PTHREAD_SETS_ERRNO
+    stat = errno;
+#endif
+
+    return stat;
+}
+
 static void *dummy_worker(void *opaque)
 {
     apr_thread_t *thread = (apr_thread_t*)opaque;
