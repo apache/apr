@@ -187,29 +187,29 @@ int main(void)
     printf("OK\n");
     printf("Starting Tests\n");
 
-    apr_poll(pollset, 3, &srv, 10);
+    apr_poll(pollset, 3, &srv, 10 * APR_USEC_PER_SEC);
     check_sockets(pollset, s);
     
     send_msg(s, sa, 2);
 
-    apr_poll(pollset, 3, &srv, 10); 
+    apr_poll(pollset, 3, &srv, 10 * APR_USEC_PER_SEC); 
     check_sockets(pollset, s);
 
     recv_msg(s, 2, context);
     send_msg(s, sa, 1);
 
-    apr_poll(pollset, 3, &srv, 10); 
+    apr_poll(pollset, 3, &srv, 10 * APR_USEC_PER_SEC); 
     check_sockets(pollset, s);
 
     send_msg(s, sa, 2);
 
-    apr_poll(pollset, 3, &srv, 10); 
+    apr_poll(pollset, 3, &srv, 10 * APR_USEC_PER_SEC); 
     check_sockets(pollset, s);
      
     recv_msg(s, 1, context);
     send_msg(s, sa, 0);
     
-    apr_poll(pollset, 3, &srv, 10); 
+    apr_poll(pollset, 3, &srv, 10 * APR_USEC_PER_SEC); 
     check_sockets(pollset, s);
         
     printf("Tests completed.\n");
