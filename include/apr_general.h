@@ -53,6 +53,9 @@
  *
  */
 
+#ifndef APR_GENERAL_H
+#define APR_GENERAL_H
+
 #ifdef WIN32
 #include "apr_win.h"
 #else
@@ -65,10 +68,10 @@
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+#if APR_HAVE_SIGNAL_H
+#include <signal.h>
+#endif
 #include "apr_errno.h"
-
-#ifndef APR_GENERAL_H
-#define APR_GENERAL_H
 
 #ifdef __cplusplus
 extern "C" {
