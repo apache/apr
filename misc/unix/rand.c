@@ -49,7 +49,7 @@ APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
 
     uuid_create(&g, NULL);
 
-    memcpy( (void*)uuid_data, (const void *)&g, sizeof( uuid_t ) );
+    memcpy(uuid_data, &g, sizeof(uuid_t));
 
     return APR_SUCCESS;
 }
@@ -64,7 +64,7 @@ APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
 
     uuid_generate(g);
 
-    memcpy((void*)uuid_data, (const void *)g, sizeof( uuid_t ) );
+    memcpy(uuid_data, g, sizeof(uuid_t));
 
     return APR_SUCCESS;
 }
