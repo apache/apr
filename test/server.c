@@ -102,6 +102,14 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "OK\n");
 
+    fprintf(stdout, "\tServer:  Setting socket option REUSEADDR.......");
+    if (ap_setsocketopt(sock, APR_SO_REUSEADDR, 1) != APR_SUCCESS) {
+        ap_close_socket(sock);
+        fprintf(stderr, "Couldn't set socket option\n");
+        exit(-1);
+    }
+    fprintf(stdout, "OK\n");
+
     fprintf(stdout, "\tServer:  Setting port for socket.......");
     if (ap_set_local_port(sock, 8021) != APR_SUCCESS) {
         ap_close_socket(sock);
