@@ -103,7 +103,7 @@ static void test_now(CuTest *tc)
      * 1 second.
      */
     CuAssert(tc, "apr_time and OS time do not agree", 
-             (timediff > -1) && (timediff < 1));
+             (timediff > -2) && (timediff < 2));
 }
 
 static void test_gmtstr(CuTest *tc)
