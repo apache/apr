@@ -126,7 +126,7 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
 {
     const char *cp;
     const char *ct;
-    int isquoted, numargs = 0;
+    int isquoted, numargs = 0, argnum;
 
 #define SKIP_WHITESPACE(cp) \
     for ( ; *cp == ' ' || *cp == '\t'; ) { \
@@ -171,25 +171,25 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
     while (*ct != '\0') {
         CHECK_QUOTATION(ct, isquoted);
         DETERMINE_NEXTSTRING(ct, isquoted);
-        ct++;
+        if (*ct != '\0') {
+            ct++;
+        }
         numargs++;
         SKIP_WHITESPACE(ct);
     }
     *argv_out = apr_palloc(token_context, numargs * sizeof(char*));
 
     /*  determine first argument */
-    numargs = 0;
-    while (*cp != '\0') {
+    for (argnum = 0; argnum < (numargs-1); argnum++) {
         CHECK_QUOTATION(cp, isquoted);
         ct = cp;
         DETERMINE_NEXTSTRING(cp, isquoted);
         cp++;
-        (*argv_out)[numargs] = apr_palloc(token_context, cp - ct);
-        apr_cpystrn((*argv_out)[numargs], ct, cp - ct);
-        numargs++;
+        (*argv_out)[argnum] = apr_palloc(token_context, cp - ct);
+        apr_cpystrn((*argv_out)[argnum], ct, cp - ct);
         SKIP_WHITESPACE(cp);
     }
-    (*argv_out)[numargs] = NULL;
+    (*argv_out)[argnum] = NULL;
 
     return APR_SUCCESS;
 }
