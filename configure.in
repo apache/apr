@@ -1364,6 +1364,7 @@ AC_SUBST(OSDIR)
 AC_SUBST(DEFAULT_OSDIR)
 AC_SUBST(EXEEXT)
 AC_SUBST(LIBTOOL_LIBS)
+AC_SUBST(shlibpath_var)
 
 echo "${nl}Construct Makefiles and header files."
 MAKEFILE1="Makefile strings/Makefile passwd/Makefile tables/Makefile build/Makefile"
