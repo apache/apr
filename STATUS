@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/06/28 05:14:28 $]
+Last modified at [$Date: 2001/06/29 08:00:48 $]
 
 Release:
 
@@ -163,6 +163,17 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       ALLOC_USE_MALLOC would be faster than the current pool code for 
       a threaded APR (but, I'm not sure).
         Status: Justin volunteers
+                David and Sander are working on some stuff that 
+                should be ready Real Soon Now (TM).  Sander has
+                posted a "trivial" SMS (what a bad name) - see:
+                <JLEGKKNELMHCJPNMOKHOEEAFEBAA.striker@samba-tng.org>
+                which uses the same memory management as the current 
+                pool implementation (freelist that allocates any size).  
+                David is finishing up prototyping a replacement for 
+                apr_pool_t that is defined as an SMS (I believe it is
+                API-compatible).  Not ready for prime-time, but ready 
+                for us to start working out the kinks and actually 
+                starting to use SMS.
 
 Documentation that needs writing:
 
