@@ -149,6 +149,47 @@ typedef void (Sigfunc)(int);
 
 unsigned __stdcall SignalHandling(void *);
 int thread_ready(void);
+/* Macros to deal with using either a pool or an sms
+ * to do memory stuff...
+ */
+#define APR_CLEANUP_REGISTER(struct, data, func, scope) \
+    if (struct->pool) { \
+        apr_pool_cleanup_register(struct->pool, data, func, scope); \
+    } else { \
+        apr_sms_cleanup_register(struct->mem_sys, APR_CHILD_CLEANUP, \
+                                 data, func); \
+    }
+
+#define APR_CLEANUP_REMOVE(struct, data, func) \
+    if (struct->pool) { \
+        apr_pool_cleanup_kill(struct->pool, data, func); \
+    } else { \
+        apr_sms_cleanup_unregister(struct->mem_sys, APR_CHILD_CLEANUP, \
+                                   data, func); \
+    }
+
+#define APR_MEM_PSTRDUP(struct, ptr, str) \
+    if (struct->pool) { \
+        ptr = apr_pstrdup(struct->pool, str); \
+    } else { \
+        size_t len = strlen(str) + 1; \
+        ptr = (char*) apr_sms_calloc(struct->mem_sys, len); \
+        memcpy(ptr, str, len); \
+    }
+
+#define APR_MEM_MALLOC(ptr, struct, type) \
+    if (struct->pool) { \
+        ptr = (type *)apr_palloc(struct->pool, sizeof(type)); \
+    } else { \
+        ptr = (type *)apr_sms_malloc(struct->mem_sys, sizeof(type)); \
+    }
+
+#define APR_MEM_CALLOC(ptr, struct, type) \
+    if (struct->pool) { \
+        ptr = (type *)apr_pcalloc(struct->pool, sizeof(type)); \
+    } else { \
+        ptr = (type *)apr_sms_calloc(struct->mem_sys, sizeof(type)); \
+    }
 
 #endif  /*APR_PRIVATE_H*/
 #endif  /*WIN32*/
