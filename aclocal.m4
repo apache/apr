@@ -197,3 +197,4 @@ AC_DEFUN(AC_PROG_RANLIB_NC,
 [AC_CHECK_PROG(RANLIB, ranlib, ranlib, true)])
 
 sinclude(threads.m4)
+sinclude(hints.m4)
