@@ -163,7 +163,7 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
 
     if (mm == (void *)-1) {
         /* we failed to get an mmap'd file... */
-        return APR_ENOMEM;
+        return errno;
     }
 #endif
 
