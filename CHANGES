@@ -1,4 +1,7 @@
 Changes with APR b1
+  
+  *) configure now checks to see if we can change timeout values
+     [Ian Holsman]
 
   *) Small table performance optimization: eliminate the
      zero-fill of newly allocated elements when expanding
