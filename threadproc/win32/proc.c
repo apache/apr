@@ -550,7 +550,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
     if (!proc)
         return APR_ENOPROC;
 
-    if (wait == APR_WAIT)
+    if (waithow == APR_WAIT)
         time = INFINITE;
     else
         time = 0;
