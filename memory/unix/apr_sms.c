@@ -869,4 +869,10 @@ APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction)
 }
 #endif /* DEBUG_SHOW_STRUCTURE */
 
+#if DEBUG_TAG_SMS
+APR_DECLARE(void) apr_sms_tag(const char *tag, apr_sms_t *sms)
+{
+    sms->tag = tag;
+}
+#endif
 
