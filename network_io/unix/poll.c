@@ -53,6 +53,7 @@
  */
 
 #include "networkio.h"
+#include "../../file_io/unix/fileio.h"
 
 #ifdef HAVE_POLL    /* We can just use poll to do our socket polling. */
 
@@ -395,3 +396,16 @@ ap_status_t ap_set_polldata(ap_pollfd_t *pollfd, void *data, char *key,
     }
 }
 
+#if APR_FILES_AS_SOCKETS
+/* I'm not sure if this needs to return an ap_status_t or not, but
+ * for right now, we'll leave it this way, and change it later if
+ * necessary.
+ */
+ap_status_t ap_socket_from_file(ap_socket_t **newsock, ap_file_t *file)
+{
+    (*newsock) = ap_pcalloc(file->cntxt, sizeof(**newsock));
+    (*newsock)->socketdes = file->filedes;
+    (*newsock)->cntxt = file->cntxt;
+    return APR_SUCCESS;
+}
+#endif
