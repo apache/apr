@@ -215,7 +215,6 @@ APR_DECLARE(apr_status_t) apr_time_exp_get(apr_time_t *t,
     if (days < 0) {
         return APR_EBADDATE;
     }
-    days -= xt->tm_gmtoff;
     *t = days * APR_USEC_PER_SEC + xt->tm_usec;
     return APR_SUCCESS;
 }
@@ -225,7 +224,8 @@ APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *t,
 {
     apr_status_t status = apr_time_exp_get(t, xt);
     if (status == APR_SUCCESS)
-        *t -= (apr_time_t) xt->tm_gmtoff * APR_USEC_PER_SEC;
+        *t -= (apr_time_t) (xt->tm_isdst * 3600 
+                          + xt->tm_gmtoff) * APR_USEC_PER_SEC;
     return status;
 }
 
