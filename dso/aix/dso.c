@@ -54,6 +54,8 @@
 
 /*
  *  dso.c -- DSO system function emulation for AIX
+ *
+ *  This is *only* intended for AIX < 4.3.
  */
 
 /*
