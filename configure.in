@@ -304,6 +304,14 @@ dnl we are using for the more up to date cpu/OS
 dnl  (ie.. old sparcs)
 apr_force_atomic_generic=0
 proc_mutex_is_global=0
+user_disabled_atomics=0
+
+AC_ARG_ENABLE(atomics,
+  [  --disable-atomics            Turn off optimized atomic code],
+  [ if test "$enableval" = "no"; then
+        user_disabled_atomics=1
+    fi ], [] )
+
 
 config_subdirs="none"
 INSTALL_SUBDIRS="none"
@@ -356,43 +364,39 @@ case $host in
        ;;
    *sun*)
        case $host_cpu in
-        *sparc*)
+         *sparc*)
             OSDIR="solaris_sparc"
             eolstr="\\n"
-            apr_atomic_sparc_compile=apr_atomic_sparc.lo
-            sparc_arch=`uname -m`
-            is_gnu_as=`${AS} --help 2>/dev/null | grep gnu.org`
-            if test -n "$is_gnu_as" 
-            then
-                case "$sparc_arch" in
-                 sun4c|sun4m|sun4d|sun4t|sun4)
-                    apr_force_atomic_generic=1
-                    apr_atomic_sparc_compile=apr_atomic_sparc_no_support.lo
-                    ;;
-                 *)
+            if test "$user_disabled_atomics" = 0; then
+              apr_atomic_sparc_compile=apr_atomic_sparc.lo
+              sparc_arch=`uname -m`
+              is_gnu_as=`${AS} --help 2>/dev/null | grep gnu.org`
+              case "$sparc_arch" in
+                sun4c|sun4m|sun4d|sun4t|sun4)
+                  apr_force_atomic_generic=1
+                  apr_atomic_sparc_compile=apr_atomic_sparc_no_support.lo
+                  ;;
+                *)
+                  if test -n "$is_gnu_as"; then
                     ASFLAGS="-xarch=v8plus -K PIC"
                     ASCPPFLAGS="-traditional-cpp -D_ASM -D__STDC__=0"
                     ASCPP="gcc -E"
-                    ;;
-                esac
-            else
-                case "$sparc_arch" in
-                 sun4c|sun4m|sun4d|sun4t|sun4)
-                    apr_force_atomic_generic=1
-                    apr_atomic_sparc_compile=apr_atomic_sparc_no_support.lo
-                    ;;
-                 *)
+                  else 
                     ASFLAGS="-K pic -P -D_ASM -D__STDC__=0 -xarch=v8plus"
                     ASCPPFLAGS=""
                     ASCPP="cat"
-                    ;;
+                  fi
+                  ;;
                 esac
+            else
+              apr_force_atomic_generic=1
+              apr_atomic_sparc_compile=apr_atomic_sparc_no_support.lo
             fi
             AC_SUBST(ASCPPFLAGS)
             AC_SUBST(ASFLAGS)
             AC_SUBST(apr_atomic_sparc_compile)
             ;;
-        *)
+         *)
             OSDIR="unix"
             eolstr="\\n"
             ;;
