@@ -54,6 +54,7 @@
 
 #include "fileio.h"
 #include "apr_strings.h"
+#include "apr_portable.h"
 
 /* Figure out how to get pipe block/nonblock on BeOS...
  * Basically, BONE7 changed things again so that ioctl didn't work,
@@ -166,6 +167,28 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_int
         return APR_SUCCESS;
     }
     return APR_EINVAL;
+}
+
+APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
+                                          apr_os_file_t *thefile,
+                                          apr_pool_t *pool)
+{
+    int *dafile = thefile;
+    
+    (*file) = apr_pcalloc(pool, sizeof(apr_file_t));
+    (*file)->pool = pool;
+    (*file)->eof_hit = 0;
+    (*file)->is_pipe = 1;
+    (*file)->blocking = BLK_UNKNOWN; /* app needs to make a timeout call */
+    (*file)->timeout = -1;
+    (*file)->ungetchar = -1; /* no char avail */
+    (*file)->filedes = *dafile;
+    (*file)->flags = 0;
+    (*file)->buffered = 0;
+#if APR_HAS_THREADS
+    (*file)->thlock = NULL;
+#endif
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *pool)
