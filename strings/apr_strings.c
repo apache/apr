@@ -59,6 +59,9 @@
 #ifdef HAVE_STDDEF_H
 #include <stddef.h> /* NULL */
 #endif
+#if APR_HAVE_STRING_H
+#include <string.h>
+#endif
 #if APR_HAVE_STRINGS_H
 #include <strings.h>
 #endif
