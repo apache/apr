@@ -29,7 +29,8 @@ TARGETS = $(PROGRAMS)
 LOCAL_LIBS=../lib@APR_LIBNAME@.la
 
 CLEAN_TARGETS = testfile.tmp mod_test.slo proc_child@EXEEXT@ occhild@EXEEXT@ \
-readchild@EXEEXT@ tryread@EXEEXT@ sockchid@EXEEXT@
+	readchild@EXEEXT@ tryread@EXEEXT@ sockchild@EXEEXT@ \
+	globalmutexchild@EXEEXT@ lfstests/large.bin
 CLEAN_SUBDIRS = internal
 
 INCDIR=../include
