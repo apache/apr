@@ -2,6 +2,25 @@ dnl -----------------------------------------------------------------
 dnl apr_common.m4: APR's general-purpose autoconf macros
 dnl
 
+AC_DEFUN(APR_CONFIG_NICE,[
+  rm -f $1
+  cat >$1<<EOF
+#! /bin/sh
+#
+# Created by configure
+
+EOF
+  if test -n "$OPTIM"; then
+    echo "OPTIM=\"$OPTIM\"; export OPTIM" >> $1
+  fi
+
+  for arg in [$]0 "[$]@"; do
+    echo "\"[$]arg\" \\" >> $1
+  done
+  echo '"[$]@"' >> $1
+  chmod +x $1
+])
+
 dnl
 dnl APR_SUBDIR_CONFIG(dir [, sub-package-cmdline-args])
 dnl
