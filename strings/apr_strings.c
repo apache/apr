@@ -144,7 +144,6 @@ APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
 
     nargs = 0;
     while ((argp = va_arg(adummy, char *)) != NULL) {
-        len = strlen(argp);
         if (nargs < MAX_SAVED_LENGTHS) {
             len = saved_lengths[nargs++];
         }
