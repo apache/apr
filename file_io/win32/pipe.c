@@ -101,6 +101,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     (*in)->pipe = 1;
     (*in)->fname = ap_pstrdup(cont, "PIPE");
     (*in)->timeout = -1;
+    (*in)->ungetchar = -1;
 
     (*out) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
     (*out)->cntxt = cont;
