@@ -123,14 +123,15 @@ void SystemTimeToAprExpTime(apr_exploded_time_t *xt, SYSTEMTIME *tm)
     return;
 }
 
-apr_status_t apr_ansi_time_to_apr_time(apr_time_t *result, time_t input)
+APR_DECLARE(apr_status_t) apr_ansi_time_to_apr_time(apr_time_t *result, 
+                                                    time_t input)
 {
     *result = (apr_time_t) input * APR_USEC_PER_SEC;
     return APR_SUCCESS;
 }
 
 /* Return micro-seconds since the Unix epoch (jan. 1, 1970) UTC */
-apr_time_t apr_now(void)
+APR_DECLARE(apr_time_t) apr_now(void)
 {
     LONGLONG aprtime = 0;
     FILETIME time;
@@ -139,7 +140,8 @@ apr_time_t apr_now(void)
     return aprtime; 
 }
 
-apr_status_t apr_explode_gmt(apr_exploded_time_t *result, apr_time_t input)
+APR_DECLARE(apr_status_t) apr_explode_gmt(apr_exploded_time_t *result,
+                                          apr_time_t input)
 {
     FILETIME ft;
     SYSTEMTIME st;
@@ -149,7 +151,8 @@ apr_status_t apr_explode_gmt(apr_exploded_time_t *result, apr_time_t input)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input)
+APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result,
+                                                apr_time_t input)
 {
     SYSTEMTIME st;
     FILETIME ft, localft;
@@ -161,7 +164,8 @@ apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input
     return APR_SUCCESS;
 }
 
-apr_status_t apr_implode_time(apr_time_t *t, apr_exploded_time_t *xt)
+APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *t,
+                                           apr_exploded_time_t *xt)
 {
     int year;
     time_t days;
@@ -195,15 +199,16 @@ apr_status_t apr_implode_time(apr_time_t *t, apr_exploded_time_t *xt)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_os_imp_time(apr_os_imp_time_t **ostime, apr_time_t *aprtime)
+APR_DECLARE(apr_status_t) apr_get_os_imp_time(apr_os_imp_time_t **ostime,
+                                              apr_time_t *aprtime)
 {
     /* TODO: Consider not passing in pointer to apr_time_t (e.g., call by value) */
     AprTimeToFileTime(*ostime, *aprtime);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_os_exp_time(apr_os_exp_time_t **ostime, 
-                                 apr_exploded_time_t *aprexptime)
+APR_DECLARE(apr_status_t) apr_get_os_exp_time(apr_os_exp_time_t **ostime, 
+                                              apr_exploded_time_t *aprexptime)
 {
     (*ostime)->wYear = aprexptime->tm_year + 1900;
     (*ostime)->wMonth = aprexptime->tm_mon + 1;
@@ -216,21 +221,23 @@ apr_status_t apr_get_os_exp_time(apr_os_exp_time_t **ostime,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_put_os_imp_time(apr_time_t *aprtime, apr_os_imp_time_t **ostime,
-                               apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_put_os_imp_time(apr_time_t *aprtime,
+                                              apr_os_imp_time_t **ostime,
+                                              apr_pool_t *cont)
 {
     FileTimeToAprTime(aprtime, *ostime);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_put_os_exp_time(apr_exploded_time_t *aprtime,
-                                 apr_os_exp_time_t **ostime, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_put_os_exp_time(apr_exploded_time_t *aprtime,
+                                              apr_os_exp_time_t **ostime,
+                                              apr_pool_t *cont)
 {
     SystemTimeToAprExpTime(aprtime, *ostime);
     return APR_SUCCESS;
 }
 
-void apr_sleep(apr_interval_time_t t)
+APR_DECLARE(void) apr_sleep(apr_interval_time_t t)
 {
     Sleep(t/1000);
 }

@@ -112,8 +112,8 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
                                                         sizeof(apr_sockaddr_t));
 }
 
-apr_status_t apr_create_socket(apr_socket_t **new, int ofamily, int type,
-                               apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_create_socket(apr_socket_t **new, int ofamily,
+                                            int type, apr_pool_t *cont)
 {
     int family = ofamily;
 
@@ -159,7 +159,8 @@ apr_status_t apr_create_socket(apr_socket_t **new, int ofamily, int type,
     return APR_SUCCESS;
 } 
 
-apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
+APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
+                                       apr_shutdown_how_e how)
 {
     int winhow;
 
@@ -185,13 +186,13 @@ apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
     }
 }
 
-apr_status_t apr_close_socket(apr_socket_t *thesocket)
+APR_DECLARE(apr_status_t) apr_close_socket(apr_socket_t *thesocket)
 {
     apr_kill_cleanup(thesocket->cntxt, thesocket, socket_cleanup);
     return socket_cleanup(thesocket);
 }
 
-apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
+APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
     if (bind(sock->sock, 
              (struct sockaddr *)&sa->sa, 
@@ -207,7 +208,7 @@ apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
     }
 }
 
-apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
+APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 {
     if (listen(sock->sock, backlog) == SOCKET_ERROR)
         return apr_get_netos_error();
@@ -215,7 +216,8 @@ apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
         return APR_SUCCESS;
 }
 
-apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *connection_context)
+APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock,
+                                     apr_pool_t *connection_context)
 {
     alloc_socket(new, connection_context);
     set_socket_vars(*new, sock->local_addr->sa.sin.sin_family);
@@ -263,7 +265,7 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
     return APR_SUCCESS;
 }
 
-apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
+APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
     apr_status_t lasterror;
     fd_set temp;
@@ -297,26 +299,29 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_socketdata(void **data, const char *key, apr_socket_t *socket)
+APR_DECLARE(apr_status_t) apr_get_socketdata(void **data, const char *key,
+                                             apr_socket_t *socket)
 {
     return apr_get_userdata(data, key, socket->cntxt);
 }
 
-apr_status_t apr_set_socketdata(apr_socket_t *socket, void *data, const char *key, 
-                              apr_status_t (*cleanup) (void *))
+APR_DECLARE(apr_status_t) apr_set_socketdata(apr_socket_t *socket, void *data,
+                                             const char *key,
+                                             apr_status_t (*cleanup)(void *))
 {
     return apr_set_userdata(data, key, cleanup, socket->cntxt);
 }
 
-apr_status_t apr_get_os_sock(apr_os_sock_t *thesock, apr_socket_t *sock)
+APR_DECLARE(apr_status_t) apr_get_os_sock(apr_os_sock_t *thesock,
+                                          apr_socket_t *sock)
 {
     *thesock = sock->sock;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_make_os_sock(apr_socket_t **apr_sock, 
-                              apr_os_sock_info_t *os_sock_info, 
-                              apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_make_os_sock(apr_socket_t **apr_sock,
+                                           apr_os_sock_info_t *os_sock_info,
+                                           apr_pool_t *cont)
 {
     alloc_socket(apr_sock, cont);
     set_socket_vars(*apr_sock, os_sock_info->family);
@@ -345,8 +350,9 @@ apr_status_t apr_make_os_sock(apr_socket_t **apr_sock,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_put_os_sock(apr_socket_t **sock, apr_os_sock_t *thesock, 
-                           apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_put_os_sock(apr_socket_t **sock,
+                                          apr_os_sock_t *thesock,
+                                          apr_pool_t *cont)
 {
     if ((*sock) == NULL) {
         alloc_socket(sock, cont);

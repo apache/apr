@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "LibR"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /O2 /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fd"LibR\apr" /FD /c
+# ADD CPP /nologo /MD /W3 /O2 /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fd"LibR\apr" /FD /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -64,8 +64,8 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "LibD"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fd"LibD\apr" /FD /c
+# ADD BASE CPP /nologo /MDd /W3 /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
+# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fd"LibD\apr" /FD /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -518,9 +518,5 @@ SOURCE=.\include\apr_uuid.h
 SOURCE=.\include\apr_xlate.h
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=.\libapr.def
-# End Source File
 # End Target
 # End Project

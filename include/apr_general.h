@@ -253,20 +253,25 @@ int strncasecmp(const char *a, const char *b, size_t n);
  */
 
 #if APR_HAS_RANDOM
+
+/* TODO: I'm not sure this is the best place to put this prototype...*/
 /**
  * Generate a string of random bytes.
  * @param buf Random bytes go here
  * @param length size of the buffer
+ * @deffunc apr_status_t apr_generate_random_bytes(unsigned char * buf, int length)
  */
-/* TODO: I'm not sure this is the best place to put this prototype...*/
-apr_status_t apr_generate_random_bytes(unsigned char * buf, int length);
+APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf, 
+                                                    int length);
+
 #endif
 
 /**
  * Setup any APR internal data structures.  This MUST be the first function 
  * called for any APR program.
+ * @deffunc apr_status_t apr_initialize(void)
  */
-apr_status_t apr_initialize(void);
+APR_DECLARE(apr_status_t) apr_initialize(void);
 
 /**
  * Tear down any APR internal data structures which aren't torn down 
@@ -274,8 +279,9 @@ apr_status_t apr_initialize(void);
  * @tip An APR program must call this function at termination once it 
  *      has stopped using APR services.  The APR developers suggest using
  *      atexit to ensure this is called.
+ * @deffunc void apr_terminate(void)
  */
-void apr_terminate(void);
+APR_DECLARE(void) apr_terminate(void);
 
 /**
  * Set the APR_ABORT function.
@@ -285,8 +291,10 @@ void apr_terminate(void);
  *      to actually exit the program.  If this function is not called,
  *      then APR will return an error and expect the calling program to
  *      deal with the error accordingly.
+ * @deffunc apr_status_t apr_set_abort(int (*apr_abort)(int retcode), apr_pool_t *cont)
  */
-apr_status_t apr_set_abort(int (*apr_abort)(int retcode), apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_set_abort(int (*apr_abort)(int retcode),
+                                        apr_pool_t *cont);
 
 #ifdef __cplusplus
 }

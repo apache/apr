@@ -99,7 +99,8 @@ BOOLEAN is_exe(const char* fname, apr_pool_t *cont) {
     return FALSE;
 }
 
-apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo,
+                                          apr_file_t *thefile)
 {
     BY_HANDLE_FILE_INFORMATION FileInformation;
     DWORD FileType;
@@ -191,12 +192,14 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms)
+APR_DECLARE(apr_status_t) apr_setfileperms(const char *fname,
+                                           apr_fileperms_t perms)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
+                                   apr_pool_t *cont)
 {
     apr_oslevel_e os_level;
     /*
@@ -324,7 +327,8 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
+                                    apr_pool_t *cont)
 {
     apr_oslevel_e os_level;
     if (apr_get_oslevel(cont, &os_level) || os_level < APR_WIN_2000)

@@ -78,7 +78,8 @@ apr_status_t sononblock(SOCKET sd)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t on)
+APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
+                                           apr_int32_t opt, apr_int32_t on)
 {
     int one;
     apr_status_t stat;
@@ -169,7 +170,8 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
     return APR_SUCCESS;
 }
 
-apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t *on)
+APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
+                                           apr_int32_t opt, apr_int32_t *on)
 {
     switch (opt) {
     case APR_SO_TIMEOUT: 
@@ -193,7 +195,8 @@ apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t *
 }
 
 
-apr_status_t apr_gethostname(char *buf, int len, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_gethostname(char *buf, int len,
+                                          apr_pool_t *cont)
 {
     if (gethostname(buf, len) == -1)
         return apr_get_netos_error();

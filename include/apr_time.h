@@ -90,8 +90,9 @@ typedef apr_int32_t apr_interval_time_t;
 
 /**
  * return the current time
+ * @deffunc apr_time_t apr_now(void)
  */
-apr_time_t apr_now(void);
+APR_DECLARE(apr_time_t) apr_now(void);
 
 typedef struct apr_exploded_time_t apr_exploded_time_t;
 /**
@@ -128,37 +129,46 @@ struct apr_exploded_time_t {
  * convert an ansi time_t to an apr_time_t
  * @param result the resulting apr_time_t
  * @param input the time_t to convert
+ * @deffunc apr_status_t apr_ansi_time_to_apr_time(apr_time_t *result, time_t input)
  */
-apr_status_t apr_ansi_time_to_apr_time(apr_time_t *result, time_t input);
+APR_DECLARE(apr_status_t) apr_ansi_time_to_apr_time(apr_time_t *result, 
+                                                    time_t input);
 
 /**
  * convert a time to its human readable components in GMT timezone
  * @param result the exploded time
  * @param input the time to explode
+ * @deffunc apr_status_t apr_explode_gmt(apr_exploded_time_t *result, apr_time_t input)
  */
-apr_status_t apr_explode_gmt(apr_exploded_time_t *result, apr_time_t input);
+APR_DECLARE(apr_status_t) apr_explode_gmt(apr_exploded_time_t *result, 
+                                          apr_time_t input);
 
 /**
  * convert a time to its human readable components in local timezone
  * @param result the exploded time
  * @param input the time to explode
+ * @deffunc apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input)
  */
-apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input);
+APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result, 
+                                                apr_time_t input);
 
 /**
  * Convert time value from human readable format to number of seconds 
  * since epoch
  * @param result the resulting imploded time
  * @param input the input exploded time
+ * @deffunc apr_status_t apr_implode_time(apr_time_t *result, apr_exploded_time_t *input)
  */
-apr_status_t apr_implode_time(apr_time_t *result, apr_exploded_time_t *input);
+APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *result, 
+                                           apr_exploded_time_t *input);
 
 /**
  * Sleep for the specified number of micro-seconds.
  * @param t desired amount of time to sleep.
+ * @deffunc void apr_sleep(apr_interval_time_t t)
  * @tip May sleep for longer than the specified time. 
  */
-void apr_sleep(apr_interval_time_t t);
+APR_DECLARE(void) apr_sleep(apr_interval_time_t t);
 
 #define APR_RFC822_DATE_LEN (30)
 /**
@@ -168,8 +178,9 @@ void apr_sleep(apr_interval_time_t t);
  * including trailing \0
  * @param date_str String to write to.
  * @param t the time to convert 
+ * @deffunc apr_status_t apr_rfc822_date(char *date_str, apr_time_t t)
  */
-apr_status_t apr_rfc822_date(char *date_str, apr_time_t t);
+APR_DECLARE(apr_status_t) apr_rfc822_date(char *date_str, apr_time_t t);
 
 #define APR_CTIME_LEN (25)
 /**
@@ -179,8 +190,9 @@ apr_status_t apr_rfc822_date(char *date_str, apr_time_t t);
  * including trailing \0 
  * @param date_str String to write to.
  * @param t the time to convert 
+ * @deffunc apr_status_t apr_ctime(char *date_str, apr_time_t t)
  */
-apr_status_t apr_ctime(char *date_str, apr_time_t t);
+APR_DECLARE(apr_status_t) apr_ctime(char *date_str, apr_time_t t);
 
 /**
  * formats the exploded time according to the format specified
@@ -189,8 +201,11 @@ apr_status_t apr_ctime(char *date_str, apr_time_t t);
  * @param max The maximum length of the string
  * @param format The format for the time string
  * @param tm The time to convert
+ * @deffunc apr_status_t apr_strftime(char *s, apr_size_t *retsize, apr_size_t max, const char *format, apr_exploded_time_t *tm)
  */
-apr_status_t apr_strftime(char *s, apr_size_t *retsize, apr_size_t max, const char *format, apr_exploded_time_t *tm);
+APR_DECLARE(apr_status_t) apr_strftime(char *s, apr_size_t *retsize, 
+                                       apr_size_t max, const char *format, 
+                                       apr_exploded_time_t *tm);
 
 #ifdef __cplusplus
 }

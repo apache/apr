@@ -86,7 +86,7 @@ static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
 
 
 
-apr_status_t apr_seek(apr_file_t *thefile, apr_seek_where_t where, apr_off_t *offset)
+APR_DECLARE(apr_status_t) apr_seek(apr_file_t *thefile, apr_seek_where_t where, apr_off_t *offset)
 {
     DWORD howmove;
     DWORD rv;

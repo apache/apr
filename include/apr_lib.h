@@ -205,8 +205,8 @@ APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname);
  * @deffunc int apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b), apr_vformatter_buff_t *c, const char *fmt, va_list ap)
  */
 APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
-			       apr_vformatter_buff_t *c, const char *fmt,
-			       va_list ap);
+			        apr_vformatter_buff_t *c, const char *fmt,
+			        va_list ap);
 
 /**
  * Validate any password encypted with any algorithm that APR understands
@@ -214,7 +214,8 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
  * @param hash The password to validate against
  * @deffunc apr_status_t apr_validate_password(const char *passwd, const char *hash)
  */
-APR_DECLARE(apr_status_t) apr_validate_password(const char *passwd, const char *hash);
+APR_DECLARE(apr_status_t) apr_validate_password(const char *passwd, 
+                                                const char *hash);
 
 /*
  * These are snprintf implementations based on apr_vformatter().
@@ -243,7 +244,7 @@ APR_DECLARE(apr_status_t) apr_validate_password(const char *passwd, const char *
  * @deffunc int apr_snprintf(char *buf, size_t len, const char *format, ...)
  */
 APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, size_t len, 
-                                   const char *format, ...)
+                                     const char *format, ...)
 	__attribute__((format(printf,3,4)));
 
 /**
@@ -256,7 +257,7 @@ APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, size_t len,
  * @deffunc int apr_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
  */
 APR_DECLARE(int) apr_vsnprintf(char *buf, size_t len, const char *format,
-			      va_list ap);
+			       va_list ap);
 
 /**
  * Display a prompt and read in the password from stdin.
@@ -265,7 +266,8 @@ APR_DECLARE(int) apr_vsnprintf(char *buf, size_t len, const char *format,
  * @param bufsize The length of the password string.
  * @deffunc apr_status_t apr_getpass(const char *prompt, char *pwbuf, size_t *bufsize)
  */
-APR_DECLARE(apr_status_t) apr_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
+APR_DECLARE(apr_status_t) apr_getpass(const char *prompt, char *pwbuf, 
+                                      size_t *bufsize);
 
 #ifdef __cplusplus
 }

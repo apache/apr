@@ -148,7 +148,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
     return rv;
 }
 
-apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_read(apr_file_t *thefile, void *buf, apr_size_t *len)
 {
     apr_size_t rv;
     DWORD bytes_read = 0;
@@ -221,7 +221,7 @@ apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_size_t *len)
     return rv;
 }
 
-apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
+APR_DECLARE(apr_status_t) apr_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
 {
     apr_status_t rv;
     DWORD bwrote;
@@ -275,8 +275,10 @@ apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
 /*
  * Too bad WriteFileGather() is not supported on 95&98 (or NT prior to SP2)
  */
-apr_status_t apr_writev(apr_file_t *thefile, const struct iovec *vec, apr_size_t nvec, 
-                      apr_size_t *nbytes)
+APR_DECLARE(apr_status_t) apr_writev(apr_file_t *thefile,
+                                     const struct iovec *vec,
+                                     apr_size_t nvec, 
+                                     apr_size_t *nbytes)
 {
     apr_status_t rv = APR_SUCCESS;
     int i;
@@ -296,20 +298,20 @@ apr_status_t apr_writev(apr_file_t *thefile, const struct iovec *vec, apr_size_t
     return rv;
 }
 
-apr_status_t apr_putc(char ch, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_putc(char ch, apr_file_t *thefile)
 {
     DWORD len = 1;
 
     return apr_write(thefile, &ch, &len);
 }
 
-apr_status_t apr_ungetc(char ch, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_ungetc(char ch, apr_file_t *thefile)
 {
     thefile->ungetchar = (unsigned char) ch;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_getc(char *ch, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_getc(char *ch, apr_file_t *thefile)
 {
     apr_status_t rc;
     int bread;
@@ -328,14 +330,14 @@ apr_status_t apr_getc(char *ch, apr_file_t *thefile)
     return APR_SUCCESS; 
 }
 
-apr_status_t apr_puts(const char *str, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_puts(const char *str, apr_file_t *thefile)
 {
     DWORD len = strlen(str);
 
     return apr_write(thefile, str, &len);
 }
 
-apr_status_t apr_fgets(char *str, int len, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_fgets(char *str, int len, apr_file_t *thefile)
 {
     apr_size_t readlen;
     apr_status_t rv = APR_SUCCESS;
@@ -361,7 +363,7 @@ apr_status_t apr_fgets(char *str, int len, apr_file_t *thefile)
     return rv;
 }
 
-apr_status_t apr_flush(apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_flush(apr_file_t *thefile)
 {
     if (thefile->buffered) {
         DWORD written = 0;

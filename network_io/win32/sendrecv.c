@@ -69,7 +69,8 @@
  * bytes.
  */
 #define MAX_SEGMENT_SIZE 65536
-apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
+                                   apr_size_t *len)
 {
     apr_ssize_t rv;
     WSABUF wsaData;
@@ -90,7 +91,8 @@ apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len) 
+APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf,
+                                   apr_size_t *len) 
 {
     apr_ssize_t rv;
     WSABUF wsaData;
@@ -113,8 +115,9 @@ apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
 
 }
 
-apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec,
-                     apr_int32_t nvec, apr_int32_t *nbytes)
+APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
+                                    const struct iovec *vec,
+                                    apr_int32_t nvec, apr_int32_t *nbytes)
 {
     apr_ssize_t rv;
     int i;
@@ -189,9 +192,9 @@ static void collapse_iovec(char **buf, int *len, struct iovec *iovec, int numvec
  * arg 5) Number of bytes to send out of the file
  * arg 6) APR flags that are mapped to OS specific flags
  */
-apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
-                          apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
-                          apr_int32_t flags) 
+APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
+                                       apr_hdtr_t *hdtr, apr_off_t *offset,
+                                       apr_size_t *len, apr_int32_t flags) 
 {
     apr_status_t status = APR_SUCCESS;
     apr_ssize_t rv;
