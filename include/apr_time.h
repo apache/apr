@@ -66,8 +66,8 @@ extern "C" {
  * @package APR Time library
  */
 
-APR_VAR_IMPORT const char apr_month_snames[12][4];
-APR_VAR_IMPORT const char apr_day_snames[7][4];
+APR_DECLARE_DATA const char apr_month_snames[12][4];
+APR_DECLARE_DATA const char apr_day_snames[7][4];
 
 /* number of microseconds since 00:00:00 january 1, 1970 UTC */
 typedef apr_int64_t apr_time_t;
