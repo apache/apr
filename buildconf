@@ -83,4 +83,20 @@ rm -rf autom4te*.cache
 echo "Generating 'make' outputs ..."
 build/gen-build.py make
 
+# Create RPM Spec file
+if [ -f `which cut` ]; then
+  echo rebuilding rpm spec file
+  ( REVISION=`build/get-version.sh all include/apr_version.h APR`
+    VERSION=`echo $REVISION | cut -d- -s -f1`
+    RELEASE=`echo $REVISION | cut -d- -s -f2`
+    if [ "x$VERSION" = "x" ]; then
+      VERSION=$REVISION
+      RELEASE=1
+    fi
+    cat ./build/rpm/apr.spec.in | \
+    sed -e "s/APR_VERSION/$VERSION/" \
+        -e "s/APR_RELEASE/$RELEASE/" \
+    > apr.spec )
+fi
+
 exit 0
