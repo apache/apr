@@ -152,7 +152,7 @@ static void test_recv(CuTest *tc)
     apr_socket_protocol_get(sock2, &protocol);
     CuAssertIntEquals(tc, APR_PROTO_TCP, protocol);
     
-    length = strlen(DATASTR);
+    memset(datastr, 0, STRLEN);
     apr_socket_recv(sock2, datastr, &length);
 
     /* Make sure that the server received the data we sent */
