@@ -52,96 +52,48 @@
  * <http://www.apache.org/>.
  */
 
-/* 
- * Note: This is a Windows specific version of apr.h. It is renamed to
- * apr.h at the start of a Windows build.
- */
-
-#ifdef WIN32
-#ifndef APR_H
-#define APR_H
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifndef _WIN32_WINNT
-/* 
- * Compile the server including all the Windows NT 4.0 header files by 
- * default.
- */
-#define _WIN32_WINNT 0x0400
-#endif
-#include <windows.h>
-#include <winsock2.h>
-#include <mswsock.h>
+#include "misc.h"
 #include <sys/types.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <time.h>
-#include <process.h>
-#include <signal.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-#define ap_inline
-#define __attribute__(__x)
-#define ENUM_BITFIELD(e,n,w)  signed int n : w
+#if APR_HAS_RANDOM
 
-#define APR_HAVE_ERRNO_H        1
-#define APR_HAVE_DIRENT_H       0
-#define APR_HAVE_FCNTL_H        0
-#define APR_HAVE_NETINET_IN_H   0
-#define APR_HAVE_PTHREAD_H      0
-#define APR_HAVE_STDARG_H       1
-#define APR_HAVE_STDIO_H        1
-#define APR_HAVE_SYS_TYPES_H    1
-#define APR_HAVE_SYS_UIO_H      0
-#define APR_HAVE_IN_ADDR        1
+#define	XSTR(x)	#x
+#define	STR(x)	XSTR(x)
 
-#define APR_USE_FLOCK_SERIALIZE           0 
-#define APR_USE_SYSVSEM_SERIALIZE         0
-#define APR_USE_FCNTL_SERIALIZE           0
-#define APR_USE_PROC_PTHREAD_SERIALIZE    0 
-#define APR_USE_PTHREAD_SERIALIZE         0 
+ap_status_t ap_generate_random_bytes(unsigned char * buf, int length) 
+{
+#ifdef	DEV_RANDOM
 
-#if APR_HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+    int rnd;
+    size_t got, tot;
 
-/*  APR Feature Macros */
-#define APR_HAS_THREADS  1
-#define APR_HAS_SENDFILE 1
-#define APR_HAS_MMAP     0
-#define APR_HAS_RANDOM   1
+    if ((rnd = open(STR(DEV_RANDOM), O_RDONLY)) == -1) 
+	return errno;
 
-/* Typedefs that APR needs. */
+    for (tot=0; tot<length; tot += got)
+	if ((got = read(rnd, buf+tot, length-tot)) < 0) 
+	    return errno;
 
-typedef  short           ap_int16_t;
-typedef  unsigned short  ap_uint16_t;
-                                               
-typedef  int           ap_int32_t;
-typedef  unsigned int  ap_uint32_t;
-                                               
-typedef  __int64           ap_int64_t;
-typedef  unsigned __int64  ap_uint64_t;
+    close(rnd);
 
-typedef  int         ap_size_t;
-typedef  int         ap_ssize_t;
-typedef  _off_t      ap_off_t;
-typedef  int         pid_t;
-typedef  int         uid_t;
-typedef  int         gid_t;
+#else  /* use truerand */
 
-/* Definitions that APR programs need to work properly. */
-#define APR_SSIZE_T_FMT          "d"
-#define API_THREAD_FUNC          __stdcall
-#define API_EXPORT(type)         type
-#define API_EXPORT_NONSTD(type)  type
-#define API_VAR_IMPORT           extern _declspec(dllimport)
-#define API_VAR_EXPORT
+    extern int randbyte(void);	/* from the truerand library */
+    unsigned int idx;
 
-/* struct iovec is needed to emulate Unix writev */
-struct iovec {
-    char* iov_base;
-    int   iov_len;
-};
-#endif /* APR_H */
-#endif /* WIN32 */
+    /* this will increase the startup time of the server, unfortunately...
+     * (generating 20 bytes takes about 8 seconds)
+     */
+    for (idx=0; idx<length; idx++)
+	buf[idx] = (unsigned char) randbyte();
+
+#endif	/* DEV_RANDOM */
+
+    return APR_SUCCESS;
+}
+
+#undef	STR
+#undef	XSTR
+#endif /* APR_HAS_RANDOM */

@@ -109,6 +109,7 @@ AC_CHECK_LIB(nsl,gethostname)
 AC_CHECK_LIB(socket,socket)
 AC_CHECK_LIB(crypt,crypt)
 AC_CHECK_LIB(ufc,crypt)
+AC_CHECK_LIB(truerand,main)
 
 dnl #----------------------------- Checks for Any required Functions
 dnl Checks for library functions.
@@ -454,7 +455,28 @@ AC_SUBST(sharedmem)
 AC_SUBST(anonymous_shm)
 AC_SUBST(filebased_shm)
 AC_SUBST(keybased_shm)
+ 
+dnl #----------------------------- Checking for /dev/random 
+AC_MSG_CHECKING(for /dev/random)
 
+if test -r "/dev/random"; then
+    AC_DEFINE(DEV_RANDOM, [/dev/random])
+    AC_MSG_RESULT(/dev/random)
+    rand="1"
+elif test -f "/dev/urandom"; then
+    AC_DEFINE(DEV_RANDOM, [/dev/urandom])
+    AC_MSG_RESULT(/dev/urandom)
+    rand="1"
+else
+    AC_MSG_RESULT(not found);
+    if test "$ac_cv_lib_truerand_main" = "yes"; then
+        rand="1"
+    else
+        rand="0"
+    fi
+fi
+
+AC_SUBST(rand)
 dnl #----------------------------- Checking for Time Support 
 echo $ac_n "${nl}Checking for Time Support..."
 AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
