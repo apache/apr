@@ -324,7 +324,7 @@ apr_status_t apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
 apr_status_t apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock, 
                            apr_pool_t *pool)
 {
-    if (cont == NULL) {
+    if (pool == NULL) {
         return APR_ENOPOOL;
     }
     if ((*lock) == NULL) {
