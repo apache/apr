@@ -193,7 +193,7 @@ ap_status_t ap_put_os_thread(ap_thread_t **thd, ap_os_thread_t *thethd,
                              ap_pool_t *cont)
 {
     if (cont == NULL) {
-        return APR_ENOCONT;
+        return APR_ENOPOOL;
     }
     if ((*thd) == NULL) {
         (*thd) = (ap_thread_t *)ap_palloc(cont, sizeof(ap_thread_t));

@@ -371,7 +371,7 @@ ap_status_t ap_put_os_proc(ap_proc_t **proc, ap_os_proc_t *theproc,
                            ap_pool_t *cont)
 {
     if (cont == NULL) {
-        return APR_ENOCONT;
+        return APR_ENOPOOL;
     }
     if ((*proc) == NULL) {
         (*proc) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
