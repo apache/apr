@@ -96,7 +96,7 @@
  * ----------------------------------------------------------------------------
  */
 #ifndef WIN32
-#include "apr_config.h"
+#include "apr_private.h"
 #endif
 #include "apr_md5.h"
 #include "apr_lib.h"

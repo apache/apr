@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "apr_config.h"
+#include "apr_private.h"
 #include "apr_general.h"
 #include <wincrypt.h>
 

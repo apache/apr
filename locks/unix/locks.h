@@ -55,7 +55,7 @@
 #ifndef LOCKS_H
 #define LOCKS_H
 
-#include "apr_config.h"
+#include "apr_private.h"
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_lock.h"

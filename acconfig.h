@@ -1,5 +1,5 @@
-#ifndef APR_CONFIG_H
-#define APR_CONFIG_H
+#ifndef APR_PRIVATE_H
+#define APR_PRIVATE_H
 
 /* So that we can use inline on some critical functions, and use
  * GNUC attributes (such as to get -Wall warnings for printf-like
@@ -68,4 +68,4 @@
 typedef int socklen_t;
 #endif
 
-#endif /* APR_CONFIG_H */
+#endif /* APR_PRIVATE_H */

@@ -19,7 +19,7 @@ MODULES="file_io network_io threadproc misc locks time mmap shmem dso i18n"
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(configure.in)
-AC_CONFIG_HEADER(include/apr_config.h)
+AC_CONFIG_HEADER(include/apr_private.h)
 
 # Most platforms use a prefix of 'lib' on their library files.
 LIBPREFIX='lib'

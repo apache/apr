@@ -56,4 +56,4 @@ locks.o: locks.c $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
  $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_lib.h \
  $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_time.h \
  $(INCDIR1)/apr_thread_proc.h locks.h $(INCDIR1)/apr_lock.h \
- $(INCDIR2)/fileio.h $(INCDIR1)/apr_config.h
+ $(INCDIR2)/fileio.h $(INCDIR1)/apr_private.h

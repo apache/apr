@@ -87,7 +87,7 @@
  * SUCH DAMAGE.
  */
 #ifndef WIN32
-#include "apr_config.h"
+#include "apr_private.h"
 #endif
 /*---------------------------------------------------------------*/
 
