@@ -7,7 +7,6 @@ struct pipefd {
 	int in;
 	int out;
 	int err;
-	char ** envp;
 };
 
 int main(int argc, char *argv[]) {
@@ -23,15 +22,9 @@ int main(int argc, char *argv[]) {
 	struct pipefd *pfd;
 	thread_id sender;
 	void *buffer;
-	int indes[2];
-	int outdes[2];
-	int errdes[2];
 	char ** newargs;
 	int i = 0;
-	char * readbuffer;
-	size_t readbuf = 100;
 	
-	readbuffer = (char*)malloc(sizeof(char) * readbuf);
 	newargs = (char**)malloc(sizeof(char*) * (argc - 1));
   
 	buffer = (void*)malloc(sizeof(struct pipefd));
@@ -40,19 +33,16 @@ int main(int argc, char *argv[]) {
 	pfd = (struct pipefd*)buffer;
 	
 	if (pfd->in > STDERR_FILENO) {
-		if (pipe(indes) == -1)return (-1);
-		if (dup2(pfd->in, indes[0]) != indes[0]) return (-1);
-		if (dup2(indes[0], STDIN_FILENO) != STDIN_FILENO) return (-1);
+		if (dup2(pfd->in, STDIN_FILENO) != STDIN_FILENO) return (-1);
+	    close (pfd->in);
 	}
 	if (pfd->out > STDERR_FILENO) {
-		if (pipe(outdes) == -1)return (-1);
-		if (dup2(pfd->out, outdes[1]) != outdes[1]) return (-1);
-		if (dup2(outdes[1], STDOUT_FILENO) != STDOUT_FILENO) return (-1);
+		if (dup2(pfd->out, STDOUT_FILENO) != STDOUT_FILENO) return (-1);
+	    close (pfd->out);
 	}
 	if (pfd->err > STDERR_FILENO) {
-		if (pipe(errdes) == -1)return (-1);
-		if (dup2(pfd->err, errdes[1]) != errdes[1]) return (-1);
-		if (dup2(errdes[1], STDERR_FILENO) != STDERR_FILENO) return (-1);
+		if (dup2(pfd->err, STDERR_FILENO) != STDERR_FILENO) return (-1);
+	    close (pfd->err);
 	}
 
 	for	(i=3;i<=argc;i++){
@@ -64,7 +54,7 @@ int main(int argc, char *argv[]) {
 
 	if (directory != NULL)
 		chdir(directory);
-	execve (progname, newargs, NULL);
+	execve (progname, newargs, environ);
 
 	return (-1);
 }
