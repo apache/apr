@@ -17,17 +17,19 @@ EXPORTS
     ap_send   @10
     ap_recv   @11
     ap_setsocketopt   @12
-    ap_setport   @13
-    ap_setup_poll   @14
-    ap_poll   @15
-    ap_add_poll_socket   @16
-    ap_get_revents   @17
-    ap_get_socketdata   @18
-    ap_set_socketdata   @19
-    ap_get_polldata   @20
-    ap_set_polldata   @21
-    ap_put_os_sock @22
-    ap_get_os_sock   @23
-    ap_remove_poll_socket   @24
-    ap_clear_poll_sockets   @25
-
+    ap_getport @13
+    ap_setport   @14
+    ap_setup_poll   @15
+    ap_poll   @16
+    ap_add_poll_socket   @17
+    ap_get_revents   @18
+    ap_get_socketdata   @19
+    ap_set_socketdata   @20
+    ap_get_polldata   @21
+    ap_set_polldata   @22
+    ap_put_os_sock @23
+    ap_get_os_sock   @24
+    ap_remove_poll_socket   @25
+    ap_clear_poll_sockets   @26
+    ap_setipaddr @27
+    ap_getipaddr @28

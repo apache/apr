@@ -146,7 +146,29 @@ ap_status_t ap_setport(struct socket_t *sock, ap_uint32_t port)
     sock->addr->sin_port = htons((short)port);
     return APR_SUCCESS;
 }
+ap_status_t ap_getport(struct socket_t *sock, ap_uint32_t *port)
+{
+    *port = ntohs(sock->addr->sin_port);
+    return APR_SUCCESS;
+}
+ap_status_t ap_setipaddr(struct socket_t *sock, const char *addr)
+{
+    if (!strcmp(addr, APR_ANYADDR)) {
+        sock->addr->sin_addr.s_addr = htonl(INADDR_ANY);
+        return APR_SUCCESS;
+    }
 
+    sock->addr->sin_addr.s_addr = inet_addr(addr);
+
+    return APR_SUCCESS;
+}
+ap_status_t ap_getipaddr(char *addr, ap_ssize_t len,
+			 const struct socket_t *sock)
+{
+    char *temp = inet_ntoa(sock->addr->sin_addr);
+    ap_cpystrn(addr,temp,len-1);
+    return APR_SUCCESS;
+}
 ap_status_t ap_bind(struct socket_t *sock)
 {
     sock->addr->sin_addr.s_addr = INADDR_ANY;
