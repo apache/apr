@@ -213,43 +213,11 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         fname = thedir->n.entry->cFileName;
     }
 
-    memset(finfo, '\0', sizeof(*finfo));
-    finfo->name = fname;
-    finfo->valid = APR_FINFO_WIN32_DIR;
+    fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) thedir->w.entry, 0);
     finfo->cntxt = thedir->cntxt;
 
-    /* Do the best job we can determining the file type.
-     * Win32 only returns device names in a directory in response to a specific
-     * request (e.g. FindFirstFile("CON"), not to wildcards, so we will ignore
-     * the BLK, CHR, and other oddballs, since they should -not- occur in this
-     * context.
-     */
-    if (thedir->n.entry->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
-        finfo->filetype = APR_LNK;
-        finfo->valid |= APR_FINFO_TYPE;
-    }
-    else if (thedir->n.entry->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-        finfo->filetype = APR_DIR;
-        finfo->valid |= APR_FINFO_TYPE;
-    }
-    else {
-        finfo->filetype = APR_REG;
-        finfo->valid |= APR_FINFO_TYPE;
-    }
-    FileTimeToAprTime(&finfo->ctime, &thedir->n.entry->ftCreationTime);
-    FileTimeToAprTime(&finfo->mtime, &thedir->n.entry->ftLastWriteTime);
-    FileTimeToAprTime(&finfo->atime, &thedir->n.entry->ftLastAccessTime);
-#if APR_HAS_LARGE_FILES
-    finfo->size = ((apr_off_t)thedir->n.entry->nFileSizeHigh << 32)
-                |  (apr_off_t)thedir->n.entry->nFileSizeLow;
-#else
-    finfo->size = (apr_off_t)thedir->n.entry->nFileSizeLow;
-    if (finfo->size < 0 || FileInformation.nFileSizeHigh)
-        finfo->size = 0x7fffffff;
-#endif
-
-    if (thedir->n.entry->dwFileAttributes & FILE_ATTRIBUTE_READONLY)
-        finfo->protection = APR_FREADONLY;
+    finfo->valid |= APR_FINFO_NAME;
+    finfo->name = fname;
 
     if (wanted &= ~finfo->valid) {
         /* Go back and get more_info if we can't answer the whole inquiry
