@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/14 20:01:39 $]
+Last modified at [$Date: 2002/07/14 20:32:34 $]
 
 Release:
 
@@ -81,8 +81,8 @@ CURRENT VOTES:
          +1: aaron, brianp, ianh,
              fielding [prefers apr_utime_t and apr_utimediff_t (64bit)]
 	 +0.5: jim
-         -0: jerenkrantz, striker, dreid
-         -0.5: rbb, jwoolley
+         -0: jerenkrantz, dreid
+         -0.5: rbb, jwoolley, striker
                wrowe [prefers apr_utime_t and apr_uspan_t where u==undefined]
 
       3) Renaming the function to get rid of apr_time_t vs time_t confusion,
@@ -91,8 +91,8 @@ CURRENT VOTES:
          +0.5: wrowe,  [prefers apr_time_busec_t and apr_span_busec_t]
                brianp, [can live with apr_time_busec_t and apr_span_busec_t]
                fielding [me too]
-         -0: striker, jerenkrantz
-         -0.5: rbb, ianh, dreid, jim, jwoolley
+         -0: jerenkrantz
+         -0.5: rbb, ianh, dreid, jim, jwoolley, striker
 
       4) Using time_t and struct timeval/tm
          +1: fielding (if apr_time is not an ADT)
