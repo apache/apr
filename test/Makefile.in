@@ -21,7 +21,6 @@ PROGRAMS = \
 	testshmconsumer@EXEEXT@ \
 	testpipe@EXEEXT@ \
 	testsockopt@EXEEXT@ \
-	testpoll@EXEEXT@ \
 	testhash@EXEEXT@ \
 	testuser@EXEEXT@ \
 	testatomic@EXEEXT@ \
@@ -116,9 +115,6 @@ testpipe@EXEEXT@: testpipe.lo $(LOCAL_LIBS)
 testsockopt@EXEEXT@: testsockopt.lo $(LOCAL_LIBS)
 	$(LINK) testsockopt.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testpoll@EXEEXT@: testpoll.lo $(LOCAL_LIBS)
-	$(LINK) testpoll.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
 testhash@EXEEXT@: testhash.lo $(LOCAL_LIBS)
 	$(LINK) testhash.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
@@ -141,13 +137,13 @@ testall: testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
          testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
          testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
          testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
-         CuTest.lo mod_test.la libmod_test.la occhild@EXEEXT@ \
+         testpoll.lo CuTest.lo mod_test.la libmod_test.la occhild@EXEEXT@ \
          proc_child@EXEEXT@ $(LOCAL_LIBS)
 	$(LINK) testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo      \
 	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo     \
 	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo 	  \
-	CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
+	testpoll.lo CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 
 # DO NOT REMOVE
