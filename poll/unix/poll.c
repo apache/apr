@@ -157,6 +157,9 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
     int rv, i;
     int maxfd = -1;
     struct timeval tv, *tvptr;
+#ifdef NETWARE
+    int is_pipe = 0;
+#endif
 
     if (timeout < 0) {
         tvptr = NULL;
@@ -179,6 +182,9 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
         }
         else if (aprset[i].desc_type == APR_POLL_FILE) {
             fd = aprset[i].desc.f->filedes;
+#ifdef NETWARE
+            is_pipe = aprset[i].desc.f->is_pipe;
+#endif
         }
         if (aprset[i].reqevents & APR_POLLIN) {
             FD_SET(fd, &readset);
@@ -195,7 +201,18 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
         }
     }
 
+#ifdef NETWARE
+    if (is_pipe) {
+        rv = pipe_select(maxfd + 1, &readset, &writeset, &exceptset, tvptr);
+    }
+    else {
+#endif
+
     rv = select(maxfd + 1, &readset, &writeset, &exceptset, tvptr);
+
+#ifdef NETWARE
+    }
+#endif
 
     (*nsds) = rv;
     if ((*nsds) == 0) {
