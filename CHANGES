@@ -1,5 +1,8 @@
 Changes for APR 1.1.1
 
+  *) Use APR_RING_CONCAT for moving dead list in KQueue, sys_epoll, and 
+     Event Ports. [Paul Querna]
+
   *) find_apr.m4: Try installed APR before bundled copy if --with-apr not
      passed to configure.  [Justin Erenkrantz]
 

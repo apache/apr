@@ -328,11 +328,7 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     pollset_lock_rings();
 
     /* Shift all PFDs in the Dead Ring to be Free Ring */
-    while (!APR_RING_EMPTY(&(pollset->dead_ring), pfd_elem_t, link)) {
-        ep = APR_RING_FIRST(&(pollset->dead_ring));
-        APR_RING_REMOVE(ep, link);
-        APR_RING_INSERT_TAIL(&(pollset->free_ring), ep, pfd_elem_t, link);
-    }
+    APR_RING_CONCAT(&(pollset->free_ring), &(pollset->dead_ring), pfd_elem_t, link);
 
     pollset_unlock_rings();
 
