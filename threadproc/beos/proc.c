@@ -67,7 +67,6 @@ struct send_pipe {
 	int in;
 	int out;
 	int err;
-	char ** envp;
 };
 
 ap_status_t ap_createprocattr_init(struct procattr_t **new, ap_context_t *cont)
@@ -192,10 +191,9 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
 	sp->in  = attr->child_in?attr->child_in->filedes:-1;
 	sp->out = attr->child_out?attr->child_out->filedes:-1;
 	sp->err = attr->child_err?attr->child_err->filedes:-1;
-	sp->envp = env;
-	
+
     i = 0;
-    while (args[i]) {
+    while (args && args[i]) {
         i++;
     }
 
@@ -212,7 +210,8 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
 	}
 	newargs[2] = strdup(progname);
 	i=0;nargs = 3;
-	while (args[i]) {
+
+	while (args && args[i]) {
 		newargs[nargs] = args[i];
 		i++;nargs++;
 	}
