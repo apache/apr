@@ -210,6 +210,20 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
             apr_set_option(&sock->netmask, APR_TCP_NODELAY, on);
         }
         break;
+    case APR_IPV6_V6ONLY:
+#if APR_HAVE_IPV6 && defined(IPV6_V6ONLY)
+        /* we don't know the initial setting of this option,
+         * so don't check/set sock->netmask since that optimization
+         * won't work
+         */
+        if (setsockopt(sock->socketdes, IPPROTO_IPV6, IPV6_V6ONLY,
+                       (void *)&on, sizeof(int)) == -1) {
+            return apr_get_netos_error();
+        }
+#else
+        return APR_ENOTIMPL;
+#endif
+        break;
     default:
         return APR_EINVAL;
         break;

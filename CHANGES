@@ -1,4 +1,7 @@
 Changes with APR 0.9.2
+
+  *) Add APR_IPV6_V6ONLY socket option.  [Jeff Trawick]
+
   *) Update timeout algorithm in free_proc_chain. If a subprocess
      did not exit immediately, the thread would sleep for 3 seconds
      before checking the subprocess exit status again. In a very

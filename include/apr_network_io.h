@@ -130,6 +130,9 @@ extern "C" {
 #define APR_INCOMPLETE_WRITE 8192 /**< like APR_INCOMPLETE_READ, but for write
                                    * @see APR_INCOMPLETE_READ
                                    */
+#define APR_IPV6_V6ONLY     16384 /**< Don't accept IPv4 connections on an
+                                   * IPv6 listening socket.
+                                   */
 
 /** @} */
 
