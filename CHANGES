@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Make the apr_pool_is_ancestor logic public.  This is required for 
+     some new logic that is going into HTTPD.  I have left the join logic
+     in that function debug only.  [Ryan Bloom]
+
   *) Clean up Win32 locks when the pool goes away.
      [Justin Erenkrantz, Jeff Trawick]
 

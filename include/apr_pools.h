@@ -156,6 +156,15 @@ APR_DECLARE(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub);
  */
 APR_DECLARE(apr_pool_t *) apr_find_pool(const void *ts);
 
+/* @} */
+
+#else
+# ifdef apr_pool_join
+#  undef apr_pool_join
+# endif
+# define apr_pool_join(a,b)
+#endif
+
 /**
  * Determine if pool a is an ancestor of pool b
  * @param a The pool to search 
@@ -165,14 +174,6 @@ APR_DECLARE(apr_pool_t *) apr_find_pool(const void *ts);
  */
 APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
 
-/* @} */
-
-#else
-# ifdef apr_pool_join
-#  undef apr_pool_join
-# endif
-# define apr_pool_join(a,b)
-#endif
 
 /*
  * APR memory structure manipulators (pools, tables, and arrays).
