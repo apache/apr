@@ -67,10 +67,19 @@
 #endif
 
 #if APR_HAS_THREADS
+#if HAVE_PTHREAD_RWLOCK_INIT
+
 struct apr_thread_rwlock_t {
     apr_pool_t *pool;
     pthread_rwlock_t *rwlock;
 };
+
+#else
+
+struct apr_thread_rwlock_t {
+};
+#endif
+
 #endif
 
 #endif  /* THREAD_RWLOCK_H */

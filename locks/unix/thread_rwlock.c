@@ -53,8 +53,11 @@
  */
 
 #include "thread_rwlock.h"
+#include "apr_private.h"
 
 #if APR_HAS_THREADS
+
+#ifdef HAVE_PTHREAD_RWLOCK_INIT
 
 static apr_status_t thread_rwlock_cleanup(void *data)
 {
@@ -188,5 +191,50 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock)
     }
     return stat;
 }
+
+#else  /* HAVE_PTHREAD_RWLOCK_INIT */
+
+APR_DECLARE(apr_status_t) apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
+                                                   apr_pool_t *pool)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_rwlock_rdlock(apr_thread_rwlock_t *rwlock)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_rwlock_tryrdlock(apr_thread_rwlock_t *rwlock)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_rwlock_wrlock(apr_thread_rwlock_t *rwlock)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_rwlock_trywrlock(apr_thread_rwlock_t *rwlock)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_rwlock_lock(apr_thread_rwlock_t *rwlock)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_rwlock_unlock(apr_thread_rwlock_t *rwlock)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock)
+{
+    return APR_ENOTIMPL;
+}
+
+#endif /* HAVE_PTHREAD_RWLOCK_INIT */
 
 #endif /* APR_HAS_THREADS */
