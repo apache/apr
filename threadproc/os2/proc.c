@@ -159,9 +159,9 @@ ap_status_t ap_fork(struct proc_t **proc, ap_context_t *cont)
     return APR_INPARENT;
 }
 
-ap_status_t ap_create_process(ap_context_t *cont, char *progname,
+ap_status_t ap_create_process(struct proc_t **new, char *progname,
                               char *const args[], char **env,
-                              struct procattr_t *attr, struct proc_t **new)
+                              struct procattr_t *attr, ap_context_t *cont)
 {
     int i;
     ap_status_t stat;

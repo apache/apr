@@ -166,9 +166,9 @@ ap_status_t ap_fork(struct proc_t **proc, ap_context_t *cont)
 }
 
 
-ap_status_t ap_create_process(ap_context_t *cont, char *progname, 
-                               char *const args[], char **env, 
-                               struct procattr_t *attr, struct proc_t **new)
+ap_status_t ap_create_process(struct proc_t **new, char *progname, 
+                              char *const args[], char **env, 
+                              struct procattr_t *attr, ap_context_t *cont)
 {
     int i=0,nargs=0;
     char **newargs = NULL;

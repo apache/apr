@@ -60,8 +60,8 @@
 #include "apr_lib.h"
 #include "fileio.h"
 
-ap_status_t ap_create_thread_private(ap_context_t *cont, void (*dest)(void *),
-                                     struct threadkey_t **key)
+ap_status_t ap_create_thread_private(struct threadkey_t **key,
+                                     void (*dest)(void *), ap_context_t *cont)
 {
     (*key) = (struct threadkey_t *)ap_palloc(cont, sizeof(struct threadkey_t));
 
@@ -79,7 +79,7 @@ ap_status_t ap_get_thread_private(void **new, struct threadkey_t *key)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_thread_private(struct threadkey_t *key, void *priv)
+ap_status_t ap_set_thread_private(void *priv, struct threadkey_t *key)
 {
     *(key->key) = (ULONG)priv;
     return APR_SUCCESS;

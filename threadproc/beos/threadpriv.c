@@ -62,8 +62,8 @@ static struct beos_key key_table[BEOS_MAX_DATAKEYS];
 static struct beos_private_data *beos_data[BEOS_MAX_DATAKEYS];
 static sem_id lock;
 
-ap_status_t ap_create_thread_private(ap_context_t *cont,
-                                void (*dest)(void *), struct threadkey_t **key)
+ap_status_t ap_create_thread_private(struct threadkey_t **key,
+                                void (*dest)(void *), ap_context_t *cont)
 {
     (*key) = (struct threadkey_t *)ap_palloc(cont, sizeof(struct threadkey_t));
     if ((*key) == NULL) {
@@ -118,7 +118,7 @@ ap_status_t ap_get_thread_private(void **new, struct threadkey_t *key)
 	return APR_SUCCESS;
 }
 
-ap_status_t ap_set_thread_private(struct threadkey_t *key, void *priv)
+ap_status_t ap_set_thread_private(void *priv, struct threadkey_t *key)
 {
 	thread_id tid;
 	int i,index = 0, ret;

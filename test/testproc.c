@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     args[2] = NULL;
     
     fprintf(stdout, "Creating a new process.......");
-    if (ap_create_process(context, "../testproc", args, NULL, attr, &newproc) != APR_SUCCESS) {
+    if (ap_create_process(&newproc, "../testproc", args, NULL, attr, context) != APR_SUCCESS) {
         fprintf(stderr, "Could not create the new process\n");
         exit(-1);
     }

@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     args[1] = ap_pstrdup(context, "-X");
     args[2] = NULL;
     
-    if (ap_create_process(context, "./testsig", args, NULL, attr, &newproc) != APR_SUCCESS) {
+    if (ap_create_process(&newproc, "./testsig", args, NULL, attr, context) != APR_SUCCESS) {
         fprintf(stderr, "Could not create the new process\n");
         exit(-1);
     }

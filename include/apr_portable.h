@@ -183,11 +183,11 @@ typedef struct timeval        ap_os_time_t;
 ap_status_t ap_get_os_file(ap_os_file_t *, ap_file_t *);     
 ap_status_t ap_get_os_dir(ap_os_dir_t *, ap_dir_t *);      
 ap_status_t ap_get_os_sock(ap_os_sock_t *, ap_socket_t *);
-ap_status_t ap_get_os_lock(ap_lock_t *, ap_os_lock_t *);     
-ap_status_t ap_get_os_thread(ap_thread_t *, ap_os_thread_t *);
-ap_status_t ap_get_os_proc(ap_proc_t *, ap_os_proc_t *);     
+ap_status_t ap_get_os_lock(ap_os_lock_t *, ap_lock_t *);     
+ap_status_t ap_get_os_thread(ap_os_thread_t *, ap_thread_t *);
+ap_status_t ap_get_os_proc(ap_os_proc_t *, ap_proc_t *);     
 ap_status_t ap_get_os_time(ap_os_time_t **, ap_time_t *);     
-ap_status_t ap_get_os_threadkey(ap_key_t *, ap_os_threadkey_t *);
+ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *, ap_key_t *);
 
 ap_status_t ap_put_os_file(ap_file_t **, ap_os_file_t *, ap_context_t *); 
 ap_status_t ap_put_os_dir(ap_dir_t **, ap_os_dir_t *, ap_context_t *); 

@@ -299,9 +299,9 @@ ap_status_t ap_fork(struct proc_t **proc, ap_context_t *cont)
  *        process
  * arg 6) The resulting process handle.
  */
-ap_status_t ap_create_process(struct proc_t **new, ap_context_t *cont, 
-                              const char *progname, char *const args[],
-                              char **env, struct procattr_t *attr)
+ap_status_t ap_create_process(struct proc_t **new, const char *progname, 
+                              char *const args[], char **env,
+                              struct procattr_t *attr, ap_context_t *cont)
 {
     int i;
     char **newargs;
@@ -460,12 +460,12 @@ ap_status_t ap_wait_proc(struct proc_t *proc,
 } 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_proc(ap_proc_t *, ap_os_proc_t *)
+ * ap_status_t ap_get_os_proc(ap_os_proc_t *, ap_proc_t *)
  *    convert the proc from os specific type to apr type.
  * arg 1) The apr proc to converting
  * arg 2) The os specific proc we are converting to
  */
-ap_status_t ap_get_os_proc(ap_proc_t *proc, ap_os_proc_t *theproc)
+ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
 {
     if (proc == NULL) {
         return APR_ENOPROC;

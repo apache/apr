@@ -81,7 +81,7 @@ ap_status_t ap_make_time(struct atime_t **new, ap_context_t *cont)
     }
 
     (*new)->cntxt = cont;
-    (*new)->explodedtime = NULL;
+    (*new)->explodedtime = ap_palloc(cont, sizeof(struct tm));
     (*new)->currtime = NULL;
     return APR_SUCCESS;
 }
