@@ -154,7 +154,11 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     wanted &= ~(APR_FINFO_NAME);
     if (wanted)
     {
+#if defined(PATH_MAX)
         char fspec[PATH_MAX];
+#elif defined(_POSIX_PATH_MAX)
+        char fspec[_POSIX_PATH_MAX];
+#endif
         int off;
         apr_cpystrn(fspec, thedir->dirname, sizeof(fspec));
         off = strlen(fspec);
