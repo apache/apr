@@ -196,8 +196,6 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     }
     path = (char *)apr_palloc(p, maxlen);
 
-
-
     if (addpath[0] == '/') 
     {
         /* Ignore the given root path, strip off leading 
