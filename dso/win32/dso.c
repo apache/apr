@@ -54,6 +54,8 @@
 
 #include "dso.h"
 #include "apr_strings.h"
+#include "apr_private.h"
+#include "fileio.h"
 
 #if APR_HAS_DSO
 
@@ -61,25 +63,44 @@ apr_status_t apr_dso_load(struct apr_dso_handle_t **res_handle, const char *path
                         apr_pool_t *ctx)
 {
     HINSTANCE os_handle;
-    char fspec[MAX_PATH], *p = fspec;
     UINT em;
 
-    /* Must convert path from / to \ notation.
-     * Per PR2555, the LoadLibraryEx function is very picky about slashes.
-     * Debugging on NT 4 SP 6a reveals First Chance Exception within NTDLL.
-     * LoadLibrary in the MS PSDK also reveals that it -explicitly- states
-     * that backslashes must be used for the LoadLibrary family of calls.
-     */
-    apr_cpystrn(fspec, path, MAX_PATH);
-    while (p = strchr(p, '/'))
-        *p = '\\';
+#if APR_HAS_UNICODE_FS
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(ctx, &os_level) && os_level >= APR_WIN_NT) 
+    {
+        apr_wchar_t *wpath = utf8_to_unicode_path(path, ctx);
+        if (!wpath)
+            return APR_ENAMETOOLONG;
+
+        /* Prevent ugly popups from killing our app */
+        em = SetErrorMode(SEM_FAILCRITICALERRORS);
+        os_handle = LoadLibraryExW(wpath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+        if (!os_handle)
+            os_handle = LoadLibraryExW(wpath, NULL, 0);
+        SetErrorMode(em);
+    }
+    else
+#endif
+    {
+        char fspec[MAX_PATH], *p = fspec;
+        /* Must convert path from / to \ notation.
+         * Per PR2555, the LoadLibraryEx function is very picky about slashes.
+         * Debugging on NT 4 SP 6a reveals First Chance Exception within NTDLL.
+         * LoadLibrary in the MS PSDK also reveals that it -explicitly- states
+         * that backslashes must be used for the LoadLibrary family of calls.
+         */
+        apr_cpystrn(fspec, path, MAX_PATH);
+        while (p = strchr(p, '/'))
+            *p = '\\';
         
-    /* Prevent ugly popups from killing our app */
-    em = SetErrorMode(SEM_FAILCRITICALERRORS);
-    os_handle = LoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
-    if (!os_handle)
-        os_handle = LoadLibraryEx(path, NULL, 0);
-    SetErrorMode(em);
+        /* Prevent ugly popups from killing our app */
+        em = SetErrorMode(SEM_FAILCRITICALERRORS);
+        os_handle = LoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+        if (!os_handle)
+            os_handle = LoadLibraryEx(path, NULL, 0);
+        SetErrorMode(em);
+    }
     *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
 
     if(os_handle == NULL) {

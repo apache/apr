@@ -243,17 +243,43 @@ apr_status_t apr_rewinddir(apr_dir_t *dir)
 
 apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
 {
-    if (!CreateDirectory(path, NULL)) {
-        return apr_get_os_error();
+#if APR_HAS_UNICODE_FS
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
+    {
+        apr_wchar_t *wpath = utf8_to_unicode_path(path, cont);
+        if (!wpath)
+            return APR_ENAMETOOLONG;
+        if (!CreateDirectoryW(wpath, NULL)) {
+            return apr_get_os_error();
+        }
     }
+    else
+#endif
+        if (!CreateDirectory(path, NULL)) {
+            return apr_get_os_error();
+        }
     return APR_SUCCESS;
 }
 
 apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
 {
-    if (!RemoveDirectory(path)) {
-        return apr_get_os_error();
+#if APR_HAS_UNICODE_FS
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
+    {
+        apr_wchar_t *wpath = utf8_to_unicode_path(path, cont);
+        if (!wpath)
+            return APR_ENAMETOOLONG;
+        if (!RemoveDirectoryW(wpath)) {
+            return apr_get_os_error();
+        }
     }
+    else
+#endif
+        if (!RemoveDirectory(path)) {
+            return apr_get_os_error();
+        }
     return APR_SUCCESS;
 }
 
@@ -320,6 +346,13 @@ apr_status_t apr_get_os_dir(apr_os_dir_t **thedir, apr_dir_t *dir)
     return APR_SUCCESS;
 }
 
+/* XXX: This is sort of blinkin stupid on win32... consider,
+ * our open doesn't open the dir, it sets up the apr_dir_t,
+ * and on the first apr_readdir it actually does a FindFirstFile
+ * if the handle is closed, or else a FindNextFile that is based 
+ * on cached info that we simply don't have our hands on when
+ * we use this function.  Maybe APR_ENOTIMPL would be better?
+ */
 apr_status_t apr_put_os_dir(apr_dir_t **dir, apr_os_dir_t *thedir, apr_pool_t *cont)
 {
     if (cont == NULL) {
@@ -329,6 +362,7 @@ apr_status_t apr_put_os_dir(apr_dir_t **dir, apr_os_dir_t *thedir, apr_pool_t *c
         (*dir) = (apr_dir_t *)apr_pcalloc(cont, sizeof(apr_dir_t));
         (*dir)->cntxt = cont;
     }
+    (*dir)->dirhand = thedir;
     (*dir)->dirhand = thedir;
     return APR_SUCCESS;
 }
