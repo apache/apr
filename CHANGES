@@ -1,4 +1,11 @@
 Changes with APR b1
+  *) Add the APR_FILE_NOCLEANUP flag to apr_file_open().
+     Adding the flag will prevent the file from being closed 
+     when the pool passed in on apr_file_open() is destroyed.
+     This feature is useful when using apr_os_file_get|put()
+     to manage the apr_os_file_t in apr_file_t (ie, file handle
+     caching in the HTTP server) [Bill Stoddard]
+
   *) Win32: Fix APR_XTHREAD problems in apr_file_read()
      and apr_file_write(). Multiple threads were using the
      same overlapped structure and io event handle created

@@ -172,8 +172,11 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     (*new)->bufpos = 0;
     (*new)->dataRead = 0;
     (*new)->direction = 0;
-    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), 
-                              apr_unix_file_cleanup, apr_unix_file_cleanup);
+
+    if (!(flag & APR_FILE_NOCLEANUP)) {
+        apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), 
+                                  apr_unix_file_cleanup, apr_unix_file_cleanup);
+    }
     return APR_SUCCESS;
 }
 
