@@ -76,7 +76,7 @@ def resolve_deps(header_deps):
   while altered:
     altered = 0
     for hdr, deps in header_deps.items():
-      print hdr, deps
+      # print hdr, deps
       start = len(deps)
       for dep in deps.keys():
         deps.update(header_deps.get(dep, {}))
