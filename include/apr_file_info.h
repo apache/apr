@@ -251,7 +251,7 @@ APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *thedir);
  * @param finfo the file info structure and filled in by apr_dir_read
  * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_ values 
  * @param thedir the directory descriptor returned from apr_dir_open
- * @remark All systems return . and .. as the first two files.
+ * @remark No ordering is guaranteed for the entries read.
  */                        
 APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                                        apr_dir_t *thedir);
