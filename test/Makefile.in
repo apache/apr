@@ -10,8 +10,6 @@ PROGRAMS = \
 	client@EXEEXT@ \
 	sendfile@EXEEXT@ \
 	server@EXEEXT@ \
-	testfile@EXEEXT@ \
-	testdir@EXEEXT@ \
 	testnames@EXEEXT@ \
 	testflock@EXEEXT@ \
 	testproc@EXEEXT@ \
@@ -50,8 +48,6 @@ INCDIR=../include
 INCLUDES=-I$(INCDIR)
 
 CFLAGS=$(MY_CFLAGS)
-
-all: $(PROGRAMS) $(NONPORTABLE)
 
 check: $(PROGRAMS) $(NONPORTABLE)
 	for prog in $(PROGRAMS) $(NONPORTABLE); do \
