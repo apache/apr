@@ -65,6 +65,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#define APR_WANT_MEMFUNC
+#include "apr_want.h"
 #include "test_apr.h"
 
 #define LUMPS       10
