@@ -1,0 +1,46 @@
+Apache 2.0 STATUS:
+Last modified at [$Date: 2000/11/20 22:59:32 $]
+
+Release:
+
+    2.0a8   : released November 20, 2000
+    2.0a7   : released October 8, 2000
+    2.0a6   : released August 18, 2000
+    2.0a5   : released August 4, 2000
+    2.0a4   : released June 7, 2000
+    2.0a3   : released April 28, 2000
+    2.0a2   : released March 31, 2000
+    2.0a1   : released March 10, 2000
+
+RELEASE SHOWSTOPPERS:
+
+
+RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
+
+    * Build scripts do not recognise AIX 4.2.1 pthreads
+
+    * Win32: Implement ap_shm_ functions 
+
+    * Bill says we need a new procattr, APR_CREATE_SUSPENDED (or
+      something similar) to direct ap_create_process to create the
+      process suspended. We also need a call to wake up the suspended 
+      process This may not be able to be implemented everywhere though.
+
+    * Replace tables with a proper opaque ADT that has pluggable
+      implementations (including something like the existing data type,
+      plus hash tables for speed, with options for more later).
+	Status: fanf is working on this.
+
+    * add a version number to apr_initialize() as an extra failsafe against
+      (APR) library version skew.
+      MsgID: <Pine.LNX.4.10.10005231712380.31927-100000@nebula.lyra.org>
+      Status: Greg +1 (volunteers), Jeff +1, Ryan +1, Tony -0(?)
+
+    * The MM library is built as static and shared library. This should
+      be set up to build only the required version.
+
+Documentation that needs writing:
+
+    * API documentation
+        Status: Ben Laurie has written some hooks documentation
+        (apache-2.0/htdocs/hooks.html)
