@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Specify APR_DECLARE to some of the APR functions.  This helps linking
+     on some operating systems.  [Gregory Nicholls <gnicholls@level8.com>]
+
   *) Libtool'ized APR and converted all the makefiles to share rules
      from helpers/rules.mk. [Greg Stein]
 

@@ -214,8 +214,9 @@ APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
  *               ever be used outside of APR.
  * @tip Programs do NOT need to call this directly.  APR will call this
  *      automatically from apr_initialize. 
+ * @deffunc apr_status_t apr_init_alloc(apr_pool_t *globalp)
  */
-apr_status_t apr_init_alloc(apr_pool_t *globalp);	/* Set up everything */
+APR_DECLARE(apr_status_t) apr_init_alloc(apr_pool_t *globalp);
 
 /**
  * Tear down all of the internal structures required to use pools
@@ -224,8 +225,9 @@ apr_status_t apr_init_alloc(apr_pool_t *globalp);	/* Set up everything */
  *               ever be used outside of APR.
  * @tip Programs do NOT need to call this directly.  APR will call this
  *      automatically from apr_terminate. 
+ * @deffunc void apr_term_alloc(apr_pool_t *globalp)
  */
-void apr_term_alloc(apr_pool_t *globalp);        /* Tear down everything */
+APR_DECLARE(void) apr_term_alloc(apr_pool_t *globalp); 
  
 /* pool functions */
 
@@ -236,8 +238,9 @@ void apr_term_alloc(apr_pool_t *globalp);        /* Tear down everything */
  *        pool.  If it is non-NULL, the new pool will inherit all
  *        of it's parent pool's attributes, except the apr_pool_t will 
  *        be a sub-pool.
+ * @deffunc apr_status_t apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont)
  */
-apr_status_t apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont);
 
 /**
  * Set the data associated with the current pool
@@ -253,8 +256,9 @@ apr_status_t apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont);
  *      data by choosing a key that another part of the program is using
  *      It is advised that steps are taken to ensure that a unique
  *      key is used at all times.
+ * @deffunc apr_status_t apr_set_userdata(const void *data, const char *key, apr_status_t (*cleanup) (void *), apr_pool_t *cont)
  */
-apr_status_t apr_set_userdata(const void *data, const char *key, 
+APR_DECLARE(apr_status_t) apr_set_userdata(const void *data, const char *key, 
                             apr_status_t (*cleanup) (void *), 
                             apr_pool_t *cont);
 
@@ -263,8 +267,9 @@ apr_status_t apr_set_userdata(const void *data, const char *key,
  * @param data The key for the data to retrieve
  * @param key The user data associated with the pool.
  * @param cont The current pool.
+ * @deffunc apr_status_t apr_get_userdata(void **data, const char *key, apr_pool_t *cont)
  */
-apr_status_t apr_get_userdata(void **data, const char *key, apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_get_userdata(void **data, const char *key, apr_pool_t *cont);
 
 /**
  * make a sub pool from the current pool
