@@ -180,6 +180,7 @@ while test $# -gt 0; do
     elif test "$location" = "source"; then
         flags="$flags -I$APR_SOURCE_DIR/include $EXTRA_INCLUDES"
     else
+        # this is for VPATH builds
         flags="$flags -I$thisdir/include -I$APR_SOURCE_DIR/include $EXTRA_INCLUDES"
     fi
     ;;
