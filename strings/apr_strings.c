@@ -54,6 +54,7 @@
 
 #include "apr.h"
 #include "apr_strings.h"
+#include "apr_general.h"
 #include "apr_private.h"
 #include "apr_lib.h"
 #ifdef HAVE_STDDEF_H
@@ -83,14 +84,14 @@ APR_DECLARE(char *) apr_pstrdup(apr_pool_t *a, const char *s)
 APR_DECLARE(char *) apr_pstrndup(apr_pool_t *a, const char *s, apr_size_t n)
 {
     char *res;
-    apr_size_t len;
+    const char *end;
 
     if (s == NULL) {
         return NULL;
     }
-    len = strlen(s);
-    if (len < n)
-        n = len;
+    end = memchr(s, '\0', n);
+    if (end != NULL)
+        n = end - s;
     res = apr_palloc(a, n + 1);
     memcpy(res, s, n);
     res[n] = '\0';
@@ -147,3 +148,16 @@ APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
     return res;
 }
 
+#if (!APR_HAVE_MEMCHR)
+void *memchr(const void *s, int c, size_t n)
+{
+    const char *cp;
+
+    for (cp = s; n > 0; n--, cp++) {
+        if (*cp == c)
+            return (char *) cp; /* Casting away the const here */
+    }
+
+    return NULL;
+}
+#endif
