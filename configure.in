@@ -1,12 +1,16 @@
-dnl ##
-dnl ## Autoconf configuration file for APR
-dnl ##
+dnl #
+dnl # Autoconf configuration file for APR
+dnl #
+dnl # Process this file with autoconf to produce a configure script.
+dnl # Use ./buildconf to prepare build files and run autoconf for APR.
 
-dnl Process this file with autoconf to produce a configure script.
 AC_INIT(build/apr_common.m4)
 AC_CONFIG_HEADER(include/arch/unix/apr_private.h)
 AC_CONFIG_AUX_DIR(build)
 
+dnl #
+dnl # Include our own M4 macros along with those for libtool
+dnl #
 sinclude(build/apr_common.m4)
 sinclude(build/apr_network.m4)
 sinclude(build/apr_threads.m4)
