@@ -100,8 +100,10 @@ static char *apr_error_string(ap_status_t statcode)
         return "No thread key structure was provided and one was required.";
     case APR_ENOSHMAVAIL:
         return "No shared memory is currently available";
+#ifndef WIN32
     case APR_EDSOOPEN:
         return dlerror();
+#endif
     case APR_INCHILD:
         return
 	    "Your code just forked, and you are currently executing in the "
