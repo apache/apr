@@ -59,6 +59,7 @@
 #include <socket.h>
 #include <netdb.h>
 #include "apr_general.h"
+#include <ByteOrder.h> /* for the ntohs definition */
 
 #define POLLIN	 1
 #define POLLPRI  2
@@ -73,6 +74,7 @@ struct socket_t {
     char *remote_hostname;
     struct sockaddr_in * addr;
     int addr_len;
+    int timeout;
 };
 
 struct pollfd_t {
@@ -85,6 +87,8 @@ struct pollfd_t {
 };
 
 ap_int16_t get_event(ap_int16_t);
+
+int inet_aton(const char *cp, struct in_addr *addr);
 
 #endif  /* ! NETWORK_IO_H */
 
