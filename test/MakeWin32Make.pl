@@ -9,14 +9,18 @@ while ($t = <$srcfl>) {
         $t = "ALL: \$(TARGETS)\n\n"
            . "CL = cl.exe\n"
            . "LINK = link.exe /nologo /debug /machine:I386\n\n"
-           . "#.c.obj::\n"
-           . "#\t\$(CL) -c \$*.c \$(CFLAGS)\n";
+           . "CFLAGS = /nologo /c /MDd /W3 /Gm /GX /Zi /Od /D _DEBUG /D WIN32 /D APR_DECLARE_STATIC /FD \n\n"
+           . ".c.obj::\n"
+           . "\t\$(CL) -c \$*.c \$(CFLAGS) \$(INCLUDES)\n";
     }
     if ($t =~ m|^ALL_LIBS=|) {
-        $t = "ALL_LIBS=../LibD/apr.lib kernel32\.lib user32\.lib advapi32\.lib ws2_32\.lib wsock32\.lib ole32\.lib";
+        $t = "";
     }
-    if ($t =~ s|\@CFLAGS\@|\/nologo \/c \/MDd \/W3 \/Gm \/GX \/Zi \/Od \/D "_DEBUG" \/D "WIN32" \/D APR_DECLARE_STATIC \/FD|) {
-        $t =~ s|-g ||;
+    if ($t =~ m|^LOCAL_LIBS=|) {
+        $t = "ALL_LIBS=../LibD/apr.lib kernel32\.lib user32\.lib advapi32\.lib ws2_32\.lib wsock32\.lib ole32\.lib\n";
+    }
+    if ($t =~ s|\@CFLAGS\@||) {
+        $t = "";
     }
     $t =~ s|\$\{LD_FLAGS\}||;
     $t =~ s|\.\./libapr\.la|../LibD/apr.lib|;
