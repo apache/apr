@@ -158,6 +158,8 @@ static void init_state(void)
 
 static void get_current_time(apr_uint64_t *timestamp)
 {
+    /* ### this needs to be made thread-safe! */
+
     apr_uint64_t time_now;
     static apr_uint64_t time_last = 0;
     static int fudge = 0;
