@@ -65,6 +65,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include "test_apr.h"
 
 int test_filedel(void);
 int testdirs(void);
@@ -76,7 +77,7 @@ static void closeapr(void)
 
 int main(int argc, char *argv[])
 {
-    apr_pool_t *context;
+    apr_pool_t *pool;
     apr_proc_t newproc;
     apr_procattr_t *attr;
     apr_file_t *testfile = NULL;
@@ -85,108 +86,71 @@ int main(int argc, char *argv[])
     const char *args[3];
     char *teststr;
 
-    if (apr_initialize() != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't initialize.");
+    if (apr_initialize() != APR_SUCCESS){
+        printf("Failed to initialize APR\n");
         exit(-1);
-    }
+    }   
     atexit(closeapr);
-    apr_pool_create(&context, NULL);
-
+    apr_pool_create(&pool, NULL);
 
     if (argc > 1) {
-        teststr = apr_palloc(context, 256);
+        teststr = apr_palloc(pool, 256);
         teststr = fgets(teststr, 256, stdin);      
-        fprintf(stdout, "%s", teststr);      
+        printf("%s", teststr);      
         exit(1);
     }
-    teststr = apr_pstrdup(context, "Whooo Hoooo\0");
-
-    fprintf(stdout, "Creating directory for later use.......");
-    if (apr_dir_make("proctest", APR_UREAD | APR_UWRITE | APR_UEXECUTE, context) != APR_SUCCESS) {
-        fprintf(stderr, "Could not create dir\n");
-        exit(-1);
-    }
-    fprintf(stdout, "OK\n");
-
-    fprintf(stdout, "Creating procattr.......");
-    if (apr_procattr_create(&attr, context) != APR_SUCCESS) {
-        fprintf(stderr, "Could not create attr\n");
-        exit(-1);;
-    }
-    fprintf(stdout, "OK.\n");
-
-    fprintf(stdout, "Setting attr pipes, all three.......");
-    if (apr_procattr_io_set(attr, APR_FULL_BLOCK, 
-                          APR_CHILD_BLOCK, APR_NO_PIPE) != APR_SUCCESS) {
-        fprintf(stderr, "Could not set pipes attr\n");
-        exit(-1);
-    }
-    fprintf(stdout, "OK.\n");
+    teststr = apr_pstrdup(pool, "Whooo Hoooo\0");
     
-    fprintf(stdout, "Setting attr dir.......");
-    if (apr_procattr_dir_set(attr, "proctest") != APR_SUCCESS) {
-        fprintf(stderr, "Could not set directory attr\n");
-        exit(-1);
-    }
-    fprintf(stdout, "OK.\n");
-
-    fprintf(stdout, "Setting attr cmd type.......");
-    if (apr_procattr_cmdtype_set(attr, APR_PROGRAM) != APR_SUCCESS) {
-        fprintf(stderr, "Could not set cmd type attr\n");
-        exit(-1);
-    }
-    fprintf(stdout, "OK.\n");
+    printf("APR Process Test\n================\n\n");
+    
+    STD_TEST_NEQ("Creating directory for later use", 
+                 apr_dir_make("proctest", APR_UREAD | APR_UWRITE | APR_UEXECUTE, pool))
+    STD_TEST_NEQ("Creating procattr", apr_procattr_create(&attr, pool))
+    STD_TEST_NEQ("Setting attr pipes, all three", apr_procattr_io_set(attr, APR_FULL_BLOCK, 
+                 APR_CHILD_BLOCK, APR_NO_PIPE))
+    STD_TEST_NEQ("Setting attr dir", apr_procattr_dir_set(attr, "proctest"))
+    STD_TEST_NEQ("Setting attr cmd type", apr_procattr_cmdtype_set(attr, APR_PROGRAM))
 
     args[0] = "testproc";
     args[1] = "-X";
     args[2] = NULL;
     
-    fprintf(stdout, "Creating a new process.......");
-    if (apr_proc_create(&newproc, "../testproc", args, NULL, attr, context) != APR_SUCCESS) {
-        fprintf(stderr, "Could not create the new process\n");
-        exit(-1);
-    }
-    fprintf(stdout, "OK.\n");
+    STD_TEST_NEQ("Creating a new process", apr_proc_create(&newproc,
+                 "../testproc", args, NULL, attr, pool))
 
-    fprintf(stdout, "Grabbing child's stdin.......");
+    printf("%-60s","Grabbing child's stdin");
     testfile = newproc.in;
-    fprintf(stdout, "OK.\n");
+    printf("OK\n");
 
     length = 256;
-    fprintf(stdout, "Writing the data to child.......");
+    printf("%-60s", "Writing the data to child");
     if (apr_file_write(testfile, teststr, &length) == APR_SUCCESS) {
-        fprintf(stdout,"OK\n");
+        printf("OK\n");
     }
-    else fprintf(stderr, "Write failed.\n");
+    else printf("Write failed.\n");
 
-    fprintf(stdout, "Grabbing child's stdout.......");
+    printf("%-60s", "Grabbing child's stdout");
     testfile = newproc.out;
-    fprintf(stdout, "OK.\n");
+    printf("OK\n");
 
     length = 256;
-    fprintf(stdout, "Checking the data read from pipe to child.......");
-    buf = apr_pcalloc(context, length);
+    printf("%-60s", "Checking the data read from pipe to child");
+    buf = apr_pcalloc(pool, length);
     if (apr_file_read(testfile, buf, &length) == APR_SUCCESS) {
         if (!strcmp(buf, teststr))
-            fprintf(stdout,"OK\n");
-        else fprintf(stderr, "Uh-Oh\n");
+            printf("OK\n");
+        else {
+            printf( "Uh-Oh\n", buf);
+            printf("  (I actually got %s_\n", buf);
+        }
     }
-    else fprintf(stderr, "Read failed.\n");
+    else printf( "Read failed.\n");
 
-    fprintf(stdout, "Waiting for child to die.......");
-    if (apr_proc_wait(&newproc, APR_WAIT) != APR_CHILD_DONE) {
-        fprintf(stderr, "Wait for child failed\n");
-        exit(-1);
-    }
-    fprintf(stdout, "OK\n");
-    
-    fprintf(stdout, "Removing directory.......");
-    if (apr_dir_remove("proctest", context) != APR_SUCCESS) {
-        fprintf(stderr, "Could not remove directory.\n");
-        exit(-1);
-    }
-    fprintf(stdout, "OK\n");
+    TEST_NEQ("Waiting for child to die", apr_proc_wait(&newproc, APR_WAIT),
+             APR_CHILD_DONE, "OK", "Failed")   
+    STD_TEST_NEQ("Removing directory", apr_dir_remove("proctest", pool))
 
+    printf("\nTest completed succesfully\n");
     return(1);
 }
 
