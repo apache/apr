@@ -1,7 +1,7 @@
 
 TARGETS = apr_memory_system.lo \
-                    apr_tracking_memory.lo \
-                    apr_standard_memory_system.lo
+          apr_tracking_memory_system.lo \
+          apr_standard_memory_system.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
