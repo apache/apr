@@ -9,7 +9,8 @@ TARGETS = \
 	open.lo \
 	pipe.lo \
 	readwrite.lo \
-	seek.lo
+	seek.lo \
+	mktemp.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
