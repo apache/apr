@@ -217,6 +217,12 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
                                           apr_thread_t *thd); 
 
 /**
+ * force the current thread to yield the processor
+ * @deffunc void apr_thread_yield()
+ */
+APR_DECLARE(void) apr_thread_yield();
+
+/**
  * detach a thread
  * @param thd The thread to detach 
  * @deffunc apr_status_t apr_thread_detach(apr_thread_t *thd)
