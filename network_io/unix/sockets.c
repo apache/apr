@@ -103,10 +103,11 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
     (*new)->remote_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->cntxt,
                                                         sizeof(apr_sockaddr_t));
     (*new)->remote_addr->pool = p;
-
+#ifndef WAITIO_USES_POLL
     /* Create a pollset with room for one descriptor. */
     /* ### check return codes */
     (void) apr_pollset_create(&(*new)->pollset, 1, p, 0);
+#endif
 }
 
 apr_status_t apr_socket_protocol_get(apr_socket_t *sock, int *protocol)

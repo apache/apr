@@ -61,7 +61,9 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#ifndef WAITIO_USES_POLL
 #include "apr_poll.h"
+#endif
 
 /* System headers the network I/O library needs */
 #if APR_HAVE_SYS_TYPES_H
@@ -153,9 +155,10 @@ struct apr_socket_t {
     apr_int32_t options;
     apr_int32_t inherit;
     sock_userdata_t *userdata;
-
+#ifndef WAITIO_USES_POLL
     /* if there is a timeout set, then this pollset is used */
     apr_pollset_t *pollset;
+#endif
 };
 
 const char *apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size);
