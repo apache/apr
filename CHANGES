@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Introduce a new --disable-ipv6 option to disable IPv6 support.
+     [Sterling Hughes <sterling@designmultimedia.com>, Jeff
+     Trawick]
+
   *) Fix the new shared memory code.  We need to pass a pointer to
      an apr_file_t to apr_file_open.  Also, apr_os_file_get returns
      a status value, not the OS file descriptor.  [Ryan Bloom]
