@@ -1,5 +1,11 @@
 Changes with APR 0.9.4
 
+  *) Define _THREAD_SAFE for all compilations on AIX.  Previously
+     those of us who used the vendor compiler had it defined
+     implicitly and others did not.  The difference became obvious
+     with the recent thread safety fixes to apr_password_validate().
+     PR 20420  [Jeff Trawick]
+
   *) For apr_proc_detach(APR_PROC_DETACH_FOREGROUND), don't treat
      a setsid() failure as fatal, as the usual cause is that the
      caller is already a process group leader.  PR 18519
