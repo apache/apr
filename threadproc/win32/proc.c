@@ -82,7 +82,7 @@ ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_pool_t *cont)
     (*new)->child_err = NULL;
     (*new)->currdir = NULL; 
     (*new)->cmdtype = APR_PROGRAM;
-    (*new)->detached = APR_TRUE;
+    (*new)->detached = TRUE;
 
     memset(&(*new)->si, 0, sizeof((*new)->si));
 

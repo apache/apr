@@ -82,11 +82,11 @@ typedef enum {
     NO = 0, YES = 1
 } boolean_e;
 
-#ifndef APR_FALSE
-#define APR_FALSE			0
+#ifndef FALSE
+#define FALSE			0
 #endif
-#ifndef APR_TRUE
-#define APR_TRUE			1
+#ifndef TRUE
+#define TRUE			1
 #endif
 #ifndef AP_LONGEST_LONG
 #define AP_LONGEST_LONG		long
@@ -352,8 +352,8 @@ static char *ap_gcvt(double number, int ndigit, char *buf, boolean_e altform)
  * Return value:
  *   - a pointer to a string containing the number (no sign)
  *   - len contains the length of the string
- *   - is_negative is set to APR_TRUE or APR_FALSE depending on the sign
- *     of the number (always set to APR_FALSE if is_unsigned is APR_TRUE)
+ *   - is_negative is set to TRUE or FALSE depending on the sign
+ *     of the number (always set to FALSE if is_unsigned is TRUE)
  *
  * The caller provides a buffer for the string: that is the buf_end argument
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
@@ -372,7 +372,7 @@ static char *conv_10(register wide_int num, register bool_int is_unsigned,
 
     if (is_unsigned) {
 	magnitude = (u_wide_int) num;
-	*is_negative = APR_FALSE;
+	*is_negative = FALSE;
     }
     else {
 	*is_negative = (num < 0);
@@ -428,7 +428,7 @@ static char *conv_10_quad(widest_int num, register bool_int is_unsigned,
 
     if (is_unsigned) {
 	magnitude = (u_widest_int) num;
-	*is_negative = APR_FALSE;
+	*is_negative = FALSE;
     }
     else {
 	*is_negative = (num < 0);
@@ -475,13 +475,13 @@ static char *conv_in_addr(struct in_addr *ia, char *buf_end, int *len)
     bool_int is_negative;
     int sub_len;
 
-    p = conv_10((addr & 0x000000FF)      , APR_TRUE, &is_negative, p, &sub_len);
+    p = conv_10((addr & 0x000000FF)      , TRUE, &is_negative, p, &sub_len);
     *--p = '.';
-    p = conv_10((addr & 0x0000FF00) >>  8, APR_TRUE, &is_negative, p, &sub_len);
+    p = conv_10((addr & 0x0000FF00) >>  8, TRUE, &is_negative, p, &sub_len);
     *--p = '.';
-    p = conv_10((addr & 0x00FF0000) >> 16, APR_TRUE, &is_negative, p, &sub_len);
+    p = conv_10((addr & 0x00FF0000) >> 16, TRUE, &is_negative, p, &sub_len);
     *--p = '.';
-    p = conv_10((addr & 0xFF000000) >> 24, APR_TRUE, &is_negative, p, &sub_len);
+    p = conv_10((addr & 0xFF000000) >> 24, TRUE, &is_negative, p, &sub_len);
 
     *len = buf_end - p;
     return (p);
@@ -495,7 +495,7 @@ static char *conv_sockaddr_in(struct sockaddr_in *si, char *buf_end, int *len)
     bool_int is_negative;
     int sub_len;
 
-    p = conv_10(ntohs(si->sin_port), APR_TRUE, &is_negative, p, &sub_len);
+    p = conv_10(ntohs(si->sin_port), TRUE, &is_negative, p, &sub_len);
     *--p = ':';
     p = conv_in_addr(&si->sin_addr, p, &sub_len);
 
@@ -530,7 +530,7 @@ static char *conv_fp(register char format, register double num,
      */
     if (ap_isalpha(*p)) {
 	*len = strlen(strcpy(buf, p));
-	*is_negative = APR_FALSE;
+	*is_negative = FALSE;
 	return (buf);
     }
 
@@ -572,7 +572,7 @@ static char *conv_fp(register char format, register double num,
 	*s++ = format;		/* either e or E */
 	decimal_point--;
 	if (decimal_point != 0) {
-	    p = conv_10((wide_int) decimal_point, APR_FALSE, &exponent_is_negative,
+	    p = conv_10((wide_int) decimal_point, FALSE, &exponent_is_negative,
 			&temp[EXPONENT_LENGTH], &t_len);
 	    *s++ = exponent_is_negative ? '-' : '+';
 

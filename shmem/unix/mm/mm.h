@@ -92,11 +92,11 @@ extern int   flock(int, int);
 extern char *strerror(int);
 #endif
 
-#if !defined(APR_FALSE)
-#define APR_FALSE 0
+#if !defined(FALSE)
+#define FALSE 0
 #endif
-#if !defined(APR_TRUE)
-#define APR_TRUE !APR_FALSE
+#if !defined(TRUE)
+#define TRUE !FALSE
 #endif
 #if !defined(NULL)
 #define NULL (void *)0
