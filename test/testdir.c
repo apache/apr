@@ -308,6 +308,10 @@ CuSuite *testdir(void)
     SUITE_ADD_TEST(suite, test_remove_notthere);
     SUITE_ADD_TEST(suite, test_mkdir_twice);
 
+    SUITE_ADD_TEST(suite, test_readdir_onedot);
+    SUITE_ADD_TEST(suite, test_readdir_twodot);
+    SUITE_ADD_TEST(suite, test_rewind);
+
     SUITE_ADD_TEST(suite, test_opendir);
     SUITE_ADD_TEST(suite, test_opendir_notthere);
     SUITE_ADD_TEST(suite, test_closedir);
