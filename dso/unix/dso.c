@@ -75,7 +75,7 @@ APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **aprdso,
 {
     *aprdso = apr_pcalloc(pool, sizeof **aprdso);
     (*aprdso)->handle = osdso;
-    (*aprdso)->cont = pool;
+    (*aprdso)->pool = pool;
     return APR_SUCCESS;
 }
 
@@ -107,7 +107,7 @@ static apr_status_t dso_cleanup(void *thedso)
 }
 
 APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
-                                       const char *path, apr_pool_t *ctx)
+                                       const char *path, apr_pool_t *pool)
 {
 #if defined(DSO_USE_SHL)
     shl_t os_handle = shl_load(path, BIND_IMMEDIATE|BIND_VERBOSE|BIND_NOSTART, 0L);
@@ -139,7 +139,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 #endif    
 #endif /* DSO_USE_x */
 
-    *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
+    *res_handle = apr_pcalloc(pool, sizeof(**res_handle));
 
     if(os_handle == NULL) {
 #if defined(DSO_USE_SHL)
@@ -155,17 +155,17 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     }
 
     (*res_handle)->handle = (void*)os_handle;
-    (*res_handle)->cont = ctx;
+    (*res_handle)->pool = pool;
     (*res_handle)->errormsg = NULL;
 
-    apr_pool_cleanup_register(ctx, *res_handle, dso_cleanup, apr_pool_cleanup_null);
+    apr_pool_cleanup_register(pool, *res_handle, dso_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }
     
 APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
 {
-    return apr_pool_cleanup_run(handle->cont, handle, dso_cleanup);
+    return apr_pool_cleanup_run(handle->pool, handle, dso_cleanup);
 }
 
 APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
@@ -231,7 +231,8 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
 #endif /* DSO_USE_x */
 }
 
-APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
+APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, 
+                                        apr_size_t buflen)
 {
     if (dso->errormsg) {
         apr_cpystrn(buffer, dso->errormsg, buflen);
