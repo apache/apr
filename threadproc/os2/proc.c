@@ -411,16 +411,18 @@ apr_status_t apr_proc_create(apr_proc_t *proc, const char *progname,
     for (i=0; i<numargs; i++)
         cmdlen += strlen(newargs[i]) + 3;
 
-    cmdline = apr_pstrndup(cont, newargs[0], cmdlen + 2);
-    cmdline_pos = cmdline + strlen(cmdline);
+    cmdline = apr_palloc(cont, cmdlen + 2);
+    cmdline_pos = cmdline;
 
-    for (i=1; i<numargs; i++) {
+    for (i=0; i<numargs; i++) {
         const char *a = newargs[i];
 
         if (strpbrk(a, "&|<>\" "))
             a = apr_pstrcat(cont, "\"", double_quotes(cont, a), "\"", NULL);
 
-        *(cmdline_pos++) = ' ';
+        if (i)
+            *(cmdline_pos++) = ' ';
+
         strcpy(cmdline_pos, a);
         cmdline_pos += strlen(cmdline_pos);
     }
