@@ -158,6 +158,7 @@ if test "$ac_cv_enable_shmem" = "mm"; then
   sharedmem="1"
   anonymous_shm="1"
   AC_MSG_RESULT(anonymous)
+  LIBTOOL_LIBS="$abs_srcdir/shmem/unix/mm/libmm.la"
 elif test "$ac_cv_enable_shmem" = "file"; then
   sharedmem="1"
   filebased_shm="1"
@@ -865,6 +866,7 @@ AC_SUBST(LIBPREFIX)
 AC_SUBST(EXEEXT)
 AC_SUBST(THREAD_CPPFLAGS)
 AC_SUBST(THREAD_CFLAGS)
+AC_SUBST(LIBTOOL_LIBS)
 
 echo "${nl}Construct Makefiles and header files."
 MAKEFILE1="Makefile lib/Makefile strings/Makefile passwd/Makefile tables/Makefile"
