@@ -246,7 +246,7 @@ APR_DECLARE(apr_status_t) apr_open(apr_file_t **new, const char *fname,
     }
     else
 #endif
-        handle = CreateFileA((*new)->fname, oflags, sharemode,
+        handle = CreateFileA(fname, oflags, sharemode,
                              NULL, createflags, attributes, 0);
 
     if (handle == INVALID_HANDLE_VALUE) {
