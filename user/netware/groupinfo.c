@@ -71,3 +71,7 @@ APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid,
     return APR_ENOTIMPL;
 }
   
+APR_DECLARE(apr_status_t) apr_get_groupid(apr_gid_t *groupid, const char *groupname, apr_pool_t *p)
+{
+    return APR_ENOTIMPL;
+}
