@@ -203,7 +203,7 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
 
     res = port_dissociate(pollset->port_fd, PORT_SOURCE_FD, fd);
 
-    if(res < 0) {
+    if (res < 0) {
         rv = APR_NOTFOUND;
     }
 
@@ -284,13 +284,14 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 
     pollset_unlock_rings();
 
-    ret = port_getn(pollset->port_fd, pollset->port_set,  pollset->nalloc, &nget, tvptr);
+    ret = port_getn(pollset->port_fd, pollset->port_set, pollset->nalloc,
+                    &nget, tvptr);
 
     (*num) = nget;
 
     if (ret == -1) {
         (*num) = 0;
-        if(errno == ETIME || errno == EINTR) {
+        if (errno == ETIME || errno == EINTR) {
             rv = APR_TIMEUP;
         }
         else {
@@ -309,7 +310,7 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                 get_revent(pollset->port_set[i].portev_events);
 
             APR_RING_INSERT_TAIL(&(pollset->add_ring), 
-                                 ((pfd_elem_t*)(pollset->port_set[i].portev_user)), 
+                                 (pfd_elem_t*)pollset->port_set[i].portev_user,
                                  pfd_elem_t, link);
         }
 
