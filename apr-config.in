@@ -90,6 +90,8 @@ Known values for OPTION are:
   --link-ld         print link switch(es) for linking to APR
   --link-libtool    print the libtool inputs for linking to APR
   --apr-la-file     print the path to the .la file, if available
+  --apr-so-ext      print the extensions of shared objects on this platform
+  --apr-lib-target  print the libtool target information
   --help            print this help
 
 When linking with libtool, an application should do something like:
@@ -188,6 +190,12 @@ while test $# -gt 0; do
     if test -f "$LA_FILE"; then
         flags="$flags $LA_FILE"
     fi
+    ;;
+    --apr-so-ext)
+    flags="$flags $APR_SO_EXT"
+    ;;
+    --apr-lib-target)
+    flags="$flags $APR_LIB_TARGET"
     ;;
     --help)
     show_usage
