@@ -57,9 +57,6 @@
 #include "apr_file_io.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
-#if APR_HAS_UNICODE_FS
-#include "i18n.h"
-#endif
 #include "atime.h"
 
 #if APR_HAVE_ERRNO_H
@@ -94,16 +91,17 @@ apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
     {
         apr_status_t rv;
         int lremains = len;
-        int dremains = (len + 3) * 2;
+        int dremains = len;
         (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
         (*new)->w.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
-        (*new)->w.dirname = apr_palloc(cont, dremains);
+        (*new)->w.dirname = apr_palloc(cont, dremains + 7);
+        wcscpy((*new)->w.dirname, L"//?/");
         if ((rv = conv_utf8_to_ucs2(dirname, &lremains,
-                                     (*new)->w.dirname, &dremains)))
+                                     (*new)->w.dirname + 4, &dremains)))
             return rv;
         if (lremains)
             return APR_ENAMETOOLONG;
-        len = (len + 3) * 2 - dremains;
+        len = len + 4 -  dremains;
         if (len && (*new)->w.dirname[len - 1] != '/') {
     	    (*new)->w.dirname[len++] = '/';
         }
