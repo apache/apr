@@ -3,7 +3,7 @@
 echo "buildconf: checking installation..."
 
 # autoconf 2.13 or newer
-ac_version=`${AUTOCONF:-autoconf} --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+ac_version=`${AUTOCONF:-autoconf} --version 2>/dev/null|sed -e 's/^[^0-9]*//;s/[a-z]* *$//;q'`
 if test -z "$ac_version"; then
 echo "buildconf: autoconf not found."
 echo "           You need autoconf version 2.13 or newer installed"
