@@ -57,6 +57,7 @@
 #include "apr_errno.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
+#include "apr_portable.h"
 
 struct apr_shm_t {
     apr_pool_t *pool;
@@ -149,13 +150,27 @@ APR_POOL_IMPLEMENT_ACCESSOR(shm)
 APR_DECLARE(apr_status_t) apr_os_shm_get(apr_os_shm_t *osshm,
                                          apr_shm_t *shm)
 {
-    return APR_ENOTIMPL;
+    *osshm = shm->memblock;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_os_shm_put(apr_shm_t **m,
                                          apr_os_shm_t *osshm,
                                          apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    int rc;
+    apr_shm_t *newm = (apr_shm_t *)apr_palloc(pool, sizeof(apr_shm_t));
+    ULONG flags = PAG_COMMIT|PAG_READ|PAG_WRITE;
+
+    newm->pool = pool;
+
+    rc = DosGetSharedMem(&(newm->memblock), flags);
+
+    if (rc) {
+        return APR_FROM_OS_ERROR(rc);
+    }
+
+    *m = newm;
+    return APR_SUCCESS;
 }    
 
