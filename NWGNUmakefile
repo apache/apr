@@ -4,7 +4,7 @@
 
 SUBDIRS = \
 		build \
-		..\apr-util \
+		$(APU_WORK) \
 		$(EOLIST) 
 
 #
