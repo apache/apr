@@ -213,7 +213,7 @@ APR_DECLARE(apr_status_t) apr_os_file_get(apr_os_file_t *thefile, apr_file_t *fi
 
 
 
-APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, apr_os_file_t *thefile, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, apr_os_file_t *thefile, apr_int32_t flags, apr_pool_t *cont)
 {
     apr_os_file_t *dafile = thefile;
 
@@ -223,7 +223,7 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, apr_os_file_t *thef
     (*file)->isopen = TRUE;
     (*file)->buffered = FALSE;
     (*file)->eof_hit = FALSE;
-    (*file)->flags = 0;
+    (*file)->flags = flags;
     (*file)->pipe = FALSE;
     return APR_SUCCESS;
 }    
@@ -242,7 +242,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t 
 {
     apr_os_file_t fd = 2;
 
-    return apr_os_file_put(thefile, &fd, cont);
+    return apr_os_file_put(thefile, &fd, 0, cont);
 }
 
 
@@ -251,7 +251,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t 
 {
     apr_os_file_t fd = 1;
 
-    return apr_os_file_put(thefile, &fd, cont);
+    return apr_os_file_put(thefile, &fd, 0, cont);
 }
 
 
@@ -259,7 +259,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *
 {
     apr_os_file_t fd = 0;
 
-    return apr_os_file_put(thefile, &fd, cont);
+    return apr_os_file_put(thefile, &fd, 0, cont);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);
