@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Rename apr_get_groupname to apr_group_name_get.
+     [Thom May <thom@planetarytramp.net>]
+     
   *) Allow VPATH builds to properly build dependencies and switch to
      a .deps dependency model to mimic httpd-2.0.  [Justin Erenkrantz]
 

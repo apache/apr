@@ -154,7 +154,7 @@ APR_DECLARE(apr_status_t) apr_compare_users(apr_uid_t left, apr_uid_t right);
  * @param p The pool from which to allocate the string
  * @remark This function is available only if APR_HAS_USER is defined.
  */
-APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid, apr_pool_t *p);
+APR_DECLARE(apr_status_t) apr_group_name_get(char **groupname, apr_gid_t groupid, apr_pool_t *p);
 
 /**
  * Get the groupid for a specified group name

@@ -1,7 +1,5 @@
 Symbol renames for APR 
 
-apr_group_name_get               from apr_get_groupname
-
 apr_user_homedir_get             from apr_get_home_directory
 apr_user_id_get                  from apr_get_userid
 apr_user_name_get                from apr_get_username
