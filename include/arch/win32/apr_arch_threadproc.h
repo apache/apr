@@ -54,6 +54,8 @@ struct apr_procattr_t {
     char *currdir;
     apr_int32_t cmdtype;
     apr_int32_t detached;
+    apr_child_errfn_t *errfn;
+    apr_int32_t errchk;
 };
 
 struct apr_thread_once_t {
