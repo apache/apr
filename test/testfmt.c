@@ -99,6 +99,7 @@ static void more_int64_fmts(CuTest *tc)
 {
     char buf[100];
     apr_int64_t i = APR_INT64_C(-42);
+    apr_int64_t ibig = APR_INT64_C(-314159265358979323);
     apr_uint64_t ui = APR_UINT64_C(42);
     apr_uint64_t big = APR_UINT64_C(3141592653589793238);
 
@@ -110,6 +111,9 @@ static void more_int64_fmts(CuTest *tc)
 
     apr_snprintf(buf, sizeof buf, "%" APR_UINT64_T_FMT, big);
     CuAssertStrEquals(tc, buf, "3141592653589793238");
+
+    apr_snprintf(buf, sizeof buf, "%" APR_INT64_T_FMT, ibig);
+    CuAssertStrEquals(tc, buf, "-314159265358979323");
 }
 
 CuSuite *testfmt(void)
