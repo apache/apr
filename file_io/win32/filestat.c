@@ -59,6 +59,7 @@
 #include "apr_errno.h"
 #include "apr_time.h"
 #include <sys/stat.h>
+#include "atime.h"
 
 #define S_ISLNK(m)  (0)
 #define S_ISREG(m)  (((m) & (S_IFMT))  == S_IFREG)
