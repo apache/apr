@@ -9,7 +9,11 @@
 #include <unistd.h>
 #endif
 
+#ifdef NETWARE
+#define LIB_NAME "mod_test.nlm"
+#else
 #define LIB_NAME "mod_test.so"
+#endif
 
 int main (int argc, char ** argv)
 {
