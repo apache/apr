@@ -257,39 +257,60 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
 
 apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
+    int rc;
+
     if ((sock->socketdes < 0) || (!sock->remote_addr)) {
         return APR_ENOTSOCK;
     }
 
-    if ((connect(sock->socketdes,
-                 (const struct sockaddr *)&sa->sa.sin,
-                 sa->salen) < 0) &&
-        (errno != EINPROGRESS)) {
+    do {
+        rc = connect(sock->socketdes,
+                     (const struct sockaddr *)&sa->sa.sin,
+                     sa->salen);
+    } while (rc == -1 && errno == EINTR);
+
+    /* we can see EINPROGRESS the first time connect is called on a non-blocking
+     * socket; if called again, we can see EALREADY
+     */
+    if (rc == -1 && (errno == EINPROGRESS || errno == EALREADY) && sock->timeout != 0) {
+        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
+        if (arv != APR_SUCCESS) {
+            return arv;
+        }
+        else {
+            do {
+                rc = connect(sock->socketdes,
+                             (const struct sockaddr *)&sa->sa.sin,
+                             sa->salen);
+            } while (rc == -1 && errno == EINTR);
+        }
+    }
+
+    if (rc == -1) {
         return errno;
     }
-    else {
-        sock->remote_addr = sa;
-        /* XXX IPv6 assumes sin_port and sin6_port at same offset */
-        if (sock->local_addr->sa.sin.sin_port == 0) {
-            /* connect() got us an ephemeral port */
-            sock->local_port_unknown = 1;
-        }
-        /* XXX IPv6 to be handled better later... */
-        if (
-#if APR_HAVE_IPV6
-            sock->local_addr->sa.sin.sin_family == APR_INET6 ||
-#endif
-            sock->local_addr->sa.sin.sin_addr.s_addr == 0) {
-            /* not bound to specific local interface; connect() had to assign
-             * one for the socket
-             */
-            sock->local_interface_unknown = 1;
-        }
-#ifndef HAVE_POLL
-        sock->connected=1;
-#endif
-        return APR_SUCCESS;
+
+    sock->remote_addr = sa;
+    /* XXX IPv6 assumes sin_port and sin6_port at same offset */
+    if (sock->local_addr->sa.sin.sin_port == 0) {
+        /* connect() got us an ephemeral port */
+        sock->local_port_unknown = 1;
     }
+    /* XXX IPv6 to be handled better later... */
+    if (
+#if APR_HAVE_IPV6
+        sock->local_addr->sa.sin.sin_family == APR_INET6 ||
+#endif
+        sock->local_addr->sa.sin.sin_addr.s_addr == 0) {
+        /* not bound to specific local interface; connect() had to assign
+         * one for the socket
+         */
+        sock->local_interface_unknown = 1;
+    }
+#ifndef HAVE_POLL
+    sock->connected=1;
+#endif
+    return APR_SUCCESS;
 }
 
 apr_status_t apr_socket_data_get(void **data, const char *key, apr_socket_t *sock)

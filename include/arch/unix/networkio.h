@@ -159,6 +159,7 @@ struct apr_pollfd_t {
 
 const char *apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size);
 int apr_inet_pton(int af, const char *src, void *dst);
+apr_status_t apr_wait_for_io_or_timeout(apr_socket_t *sock, int for_read);
 
 #define apr_is_option_set(mask, option)  ((mask & option) ==option)
 
