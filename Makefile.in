@@ -51,6 +51,7 @@ depend: subdirs_depend
 
 distclean: clean
 	-$(RM) -f Makefile
+	-$(RM) -f config.log config.status config.cache
 
 subdirs:
 	@for i in $(SUBDIRS); do \
