@@ -618,7 +618,7 @@ if test "$ac_cv_func_mmap" = "yes" &&
             return 3;
         }
         return 0;
-    }], [], [ac_cv_file__dev_zero=no])
+    }], [], [ac_cv_file__dev_zero=no], [ac_cv_file__dev_zero=no])
 
     AC_MSG_RESULT($ac_cv_file__dev_zero)
 fi
