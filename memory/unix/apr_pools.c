@@ -416,9 +416,9 @@ static union block_hdr *new_block(int min_size, int (*apr_abort)(int retcode))
 
 /* Accounting */
 
-static long bytes_in_block_list(union block_hdr *blok)
+static ap_size_t bytes_in_block_list(union block_hdr *blok)
 {
-    long size = 0;
+    ap_size_t size = 0;
 
     while (blok) {
 	size += blok->h.endp - (char *) (blok + 1);
@@ -734,11 +734,11 @@ APR_EXPORT(void) ap_destroy_pool(ap_pool_t *a)
     free_blocks(a->first);
 }
 
-APR_EXPORT(long) ap_bytes_in_pool(ap_pool_t *p)
+APR_EXPORT(ap_size_t) ap_bytes_in_pool(ap_pool_t *p)
 {
     return bytes_in_block_list(p->first);
 }
-APR_EXPORT(long) ap_bytes_in_free_blocks(void)
+APR_EXPORT(ap_size_t) ap_bytes_in_free_blocks(void)
 {
     return bytes_in_block_list(block_freelist);
 }
@@ -761,7 +761,8 @@ extern char _end;
 /* Find the pool that ts belongs to, return NULL if it doesn't
  * belong to any pool.
  */
-APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (apr_abort)(int retcode))
+APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts,
+                                     int (*apr_abort)(int retcode))
 {
     const char *s = ts;
     union block_hdr **pb;
@@ -828,7 +829,7 @@ APR_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b)
  * be destroyed before p is.
  */
 APR_EXPORT(int) ap_pool_join(ap_pool_t *p, ap_pool_t *sub, 
-                              int (*apr_abort)(int retcode))
+                             int (*apr_abort)(int retcode))
 {
     union block_hdr *b;
 
@@ -853,10 +854,10 @@ APR_EXPORT(int) ap_pool_join(ap_pool_t *p, ap_pool_t *sub,
  * Allocating stuff...
  */
 
-void * ap_palloc(ap_pool_t *a, int reqsize)
+void * ap_palloc(ap_pool_t *a, ap_size_t reqsize)
 {
 #ifdef ALLOC_USE_MALLOC
-    int size = reqsize + CLICK_SZ;
+    ap_size_t size = reqsize + CLICK_SZ;
     void *ptr;
 
     if (a == NULL) {
@@ -880,8 +881,8 @@ void * ap_palloc(ap_pool_t *a, int reqsize)
      * Round up requested size to an even number of alignment units
      * (core clicks)
      */
-    int nclicks;
-    int size;
+    ap_size_t nclicks;
+    ap_size_t size;
 
     /* First, see if we have space in the block most recently
      * allocated to this pool
@@ -945,7 +946,7 @@ void * ap_palloc(ap_pool_t *a, int reqsize)
 #endif
 }
 
-APR_EXPORT(void *) ap_pcalloc(ap_pool_t *a, int size)
+APR_EXPORT(void *) ap_pcalloc(ap_pool_t *a, ap_size_t size)
 {
     void *res = ap_palloc(a, size);
     memset(res, '\0', size);
@@ -966,7 +967,7 @@ APR_EXPORT(char *) ap_pstrdup(ap_pool_t *a, const char *s)
     return res;
 }
 
-APR_EXPORT(char *) ap_pstrndup(ap_pool_t *a, const char *s, int n)
+APR_EXPORT(char *) ap_pstrndup(ap_pool_t *a, const char *s, ap_size_t n)
 {
     char *res;
 
@@ -985,7 +986,7 @@ APR_EXPORT_NONSTD(char *) ap_pstrcat(ap_pool_t *a, ...)
 
     /* Pass one --- find length of required string */
 
-    int len = 0;
+    ap_size_t len = 0;
     va_list adummy;
 
     va_start(adummy, a);
@@ -1046,7 +1047,7 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
 {
     struct psprintf_data *ps = (struct psprintf_data *)vbuff;
 #ifdef ALLOC_USE_MALLOC
-    int size;
+    ap_size_t size;
     char *ptr;
 
     size = (char *)ps->vbuff.curpos - ps->base;
@@ -1062,7 +1063,7 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
 #else
     union block_hdr *blok;
     union block_hdr *nblok;
-    size_t cur_len;
+    ap_size_t cur_len;
     char *strp;
 
     blok = ps->blok;
@@ -1133,7 +1134,7 @@ APR_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap)
 #else
     struct psprintf_data ps;
     char *strp;
-    int size;
+    ap_size_t size;
 
     ps.blok = p->last;
     ps.vbuff.curpos = ps.blok->h.first_avail;
@@ -1187,7 +1188,7 @@ APR_EXPORT_NONSTD(char *) ap_psprintf(ap_pool_t *p, const char *fmt, ...)
  */
 
 APR_EXPORT(void) ap_note_subprocess(ap_pool_t *a, ap_proc_t *pid,
-				     enum kill_conditions how)
+                                    enum kill_conditions how)
 {
     struct process_chain *new =
     (struct process_chain *) ap_palloc(a, sizeof(struct process_chain));
