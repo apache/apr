@@ -63,6 +63,7 @@
 #include "apr_general.h"
 #include "apr_lock.h"
 #include "apr_file_io.h"
+#include "apr_file_info.h"
 #include "apr_errno.h"
 
 #define APR_FILE_BUFSIZE 4096

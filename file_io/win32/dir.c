@@ -129,7 +129,7 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_closedir(apr_dir_t *dir)
+APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *dir)
 {
     if (dir->dirhand != INVALID_HANDLE_VALUE && !FindClose(dir->dirhand)) {
         return apr_get_os_error();
@@ -138,7 +138,8 @@ APR_DECLARE(apr_status_t) apr_closedir(apr_dir_t *dir)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_readdir(apr_dir_t *thedir)
+APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
+                                       apr_dir_t *thedir)
 {
     /* The while loops below allow us to skip all invalid file names, so that
      * we aren't reporting any files where their absolute paths are too long.
@@ -147,6 +148,7 @@ APR_DECLARE(apr_status_t) apr_readdir(apr_dir_t *thedir)
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(thedir->cntxt, &os_level) && os_level >= APR_WIN_NT)
     {
+        apr_status_t rv;
         if (thedir->dirhand == INVALID_HANDLE_VALUE) 
         {
             apr_wchar_t wdirname[8192];
@@ -171,6 +173,10 @@ APR_DECLARE(apr_status_t) apr_readdir(apr_dir_t *thedir)
                 return apr_get_os_error();
             }
         }
+        if (rv = unicode_to_utf8_path(thedir->name, MAX_PATH * 3 + 1, 
+                                      thedir->w.entry->cFileName))
+            return rv;
+        finfo->name = thedir->name;
     }
     else
 #endif
@@ -192,11 +198,31 @@ APR_DECLARE(apr_status_t) apr_readdir(apr_dir_t *thedir)
                 return apr_get_os_error();
             }
         }
+        finfo->name = thedir->n.entry->cFileName;
+    }
+
+    finfo->valid = APR_FINFO_NAME | APR_FINFO_SIZE | APR_FINFO_MTIME;    
+    finfo->fname = NULL;
+    finfo->size = (thedir->n.entry->nFileSizeHigh * MAXDWORD) + 
+                  thedir->n.entry->nFileSizeLow;
+    FileTimeToAprTime(&finfo->mtime, &thedir->n.entry->ftLastWriteTime);
+    if (thedir->n.entry->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        finfo->filetype = APR_DIR;
+        finfo->valid |= APR_FINFO_TYPE;
+    }
+    else if (thedir->n.entry->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+        finfo->filetype = APR_LNK;
+        finfo->valid |= APR_FINFO_TYPE | APR_FINFO_LINK;
+    }
+    else {
+        /* XXX: Not good logic.  No devices here, but what might we find? */
+        finfo->filetype = APR_REG;
+        finfo->valid |= APR_FINFO_TYPE;
     }
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_rewinddir(apr_dir_t *dir)
+APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *dir)
 {
     dir_cleanup(dir);
     if (!FindClose(dir->dirhand)) {
@@ -255,64 +281,10 @@ APR_DECLARE(apr_status_t) apr_remove_dir(const char *path, apr_pool_t *cont)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_dir_entry_size(apr_ssize_t *size,
-                                             apr_dir_t *thedir)
-{
-    if (thedir == NULL || thedir->n.entry == NULL) {
-        return APR_ENODIR;
-    }
-    (*size) = (thedir->n.entry->nFileSizeHigh * MAXDWORD) + 
-        thedir->n.entry->nFileSizeLow;
-    return APR_SUCCESS;
-}
 
-APR_DECLARE(apr_status_t) apr_dir_entry_mtime(apr_time_t *time,
-                                              apr_dir_t *thedir)
-{
-    if (thedir == NULL || thedir->n.entry == NULL) {
-        return APR_ENODIR;
-    }
-    FileTimeToAprTime(time, &thedir->n.entry->ftLastWriteTime);
-    return APR_SUCCESS;
-}
- 
-APR_DECLARE(apr_status_t) apr_dir_entry_ftype(apr_filetype_e *type,
-                                              apr_dir_t *thedir)
-{
-    switch(thedir->n.entry->dwFileAttributes) {
-        case FILE_ATTRIBUTE_DIRECTORY: {
-            (*type) = APR_DIR;
-            return APR_SUCCESS;
-        }
-        case FILE_ATTRIBUTE_NORMAL: {
-            (*type) = APR_REG;
-            return APR_SUCCESS;
-        }
-        default: {
-            (*type) = APR_REG;     /* As valid as anything else.*/
-            return APR_SUCCESS;
-        }
-    }
-}
 
-APR_DECLARE(apr_status_t) apr_get_dir_filename(const char **new,
-                                               apr_dir_t *thedir)
-{
-#if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(thedir->cntxt, &os_level) && os_level >= APR_WIN_NT)
-    {
-        apr_status_t rv;
-        if (rv = unicode_to_utf8_path(thedir->name, MAX_PATH * 3 + 1, 
-                                      thedir->w.entry->cFileName))
-            return rv;
-        (*new) = thedir->name;
-    }
-    else
-#endif
-        (*new) = thedir->n.entry->cFileName;
-    return APR_SUCCESS;
-}
+
+
 
 APR_DECLARE(apr_status_t) apr_get_os_dir(apr_os_dir_t **thedir,
                                          apr_dir_t *dir)
@@ -324,26 +296,9 @@ APR_DECLARE(apr_status_t) apr_get_os_dir(apr_os_dir_t **thedir,
     return APR_SUCCESS;
 }
 
-/* XXX: This is sort of blinkin stupid on win32... consider,
- * our open doesn't open the dir, it sets up the apr_dir_t,
- * and on the first apr_readdir it actually does a FindFirstFile
- * if the handle is closed, or else a FindNextFile that is based 
- * on cached info that we simply don't have our hands on when
- * we use this function.  Maybe APR_ENOTIMPL would be better?
- */
 APR_DECLARE(apr_status_t) apr_put_os_dir(apr_dir_t **dir,
                                          apr_os_dir_t *thedir,
                                          apr_pool_t *cont)
 {
-    if (cont == NULL) {
-        return APR_ENOPOOL;
-    }
-    if ((*dir) == NULL) {
-        (*dir) = (apr_dir_t *)apr_pcalloc(cont, sizeof(apr_dir_t));
-        (*dir)->cntxt = cont;
-    }
-    else
-        (*dir)->rootlen = 0; /* We don't know, don't care */
-    (*dir)->dirhand = thedir;
-    return APR_SUCCESS;
+    return APR_ENOTIMPL;
 }
