@@ -50,6 +50,11 @@ extern "C" {
 #define APR_POLLHUP   0x020     /**< Hangup occurred */
 #define APR_POLLNVAL  0x040     /**< Descriptior invalid */
 
+/**
+ * Pollset Flags
+ */
+#define APR_POLLSET_THREADSAFE 0x001 /**< Adding or Removing a Descriptor is thread safe */
+
 /** Used in apr_pollfd_t to determine what the apr_descriptor is */
 typedef enum { 
     APR_NO_DESC,                /**< nothing here */
