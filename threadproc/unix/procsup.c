@@ -72,7 +72,7 @@ APR_DECLARE(apr_status_t) apr_proc_detach(void)
     }
 /*    RAISE_SIGSTOP(DETACH);*/
 #endif
-#if APR_HAVE_SETSID
+#ifdef HAVE_SETSID
     if ((pgrp = setsid()) == -1) {
         return errno;
     }
