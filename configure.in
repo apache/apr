@@ -26,7 +26,7 @@ AC_CHECK_PROG(AR, ar, ar)
 dnl # this is the place to put specific options for platform/compiler
 dnl # combinations
 case "$OS:$CC" in
-    *-hp-hpux*:cc ) CFAGS="$CFLAGS -Ae +DAportable" ;;
+    *-hp-hpux*:cc ) CFLAGS="$CFLAGS -Ae +DAportable" ;;
 esac
 
 
