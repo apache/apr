@@ -106,7 +106,6 @@ ap_status_t file_cleanup(void *thefile)
 ap_status_t ap_open(ap_context_t *cont, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, struct file_t **new)
 {
     int oflags = 0;
-    struct stat info;
     mode_t mode = get_fileperms(perm);    
     char *buf_oflags;
 
@@ -266,7 +265,6 @@ ap_status_t ap_put_os_file(ap_context_t *cont, struct file_t **file,
  */
 ap_status_t ap_eof(ap_file_t *fptr)
 {
-    char ch;
     if (fptr->buffered) {
         if (feof(fptr->filehand) == 0) {
             return APR_SUCCESS;
@@ -276,6 +274,6 @@ ap_status_t ap_eof(ap_file_t *fptr)
     if (fptr->eof_hit == 1) {
         return APR_EOF;
     }
-    APR_SUCCESS;
+    return APR_SUCCESS;
 }   
 

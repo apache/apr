@@ -194,8 +194,6 @@ ap_status_t ap_putc(ap_file_t *thefile, char ch)
  */
 ap_status_t ap_ungetc(ap_file_t *thefile, char ch)
 {
-    ssize_t rv;
-    
     if (thefile->buffered) {
         if (ungetc(ch, thefile->filehand) == ch) {
             thefile->stated = 0;

@@ -48,6 +48,9 @@ static char sccsid[] = "@(#)fnmatch.c	8.2 (Berkeley) 4/16/94";
 #include "apr_fnmatch.h"
 #include "apr_lib.h"
 #include <string.h>
+#ifdef HAVE_CTYPE_H
+# include <ctype.h>
+#endif
 
 #define	EOS	'\0'
 

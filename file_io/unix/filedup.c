@@ -86,6 +86,8 @@ ap_status_t ap_dupfile(struct file_t *old_file, struct file_t **new_file)
             case O_RDWR:
                 buf_oflags = "r+";
                 break;
+	    default:
+		return APR_BADARG;
         }
         (*new_file)->filehand = freopen(old_file->fname, buf_oflags, 
                                         old_file->filehand); 
