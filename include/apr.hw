@@ -154,18 +154,18 @@
 
 /* Typedefs that APR needs. */
 
-typedef  short           ap_int16_t;
-typedef  unsigned short  ap_uint16_t;
+typedef  short           apr_int16_t;
+typedef  unsigned short  apr_uint16_t;
                                                
-typedef  int           ap_int32_t;
-typedef  unsigned int  ap_uint32_t;
+typedef  int           apr_int32_t;
+typedef  unsigned int  apr_uint32_t;
                                                
-typedef  __int64           ap_int64_t;
-typedef  unsigned __int64  ap_uint64_t;
+typedef  __int64           apr_int64_t;
+typedef  unsigned __int64  apr_uint64_t;
 
-typedef  int         ap_size_t;
-typedef  int         ap_ssize_t;
-typedef  _off_t      ap_off_t;
+typedef  int         apr_size_t;
+typedef  int         apr_ssize_t;
+typedef  _off_t      apr_off_t;
 typedef  int         pid_t;
 typedef  int         uid_t;
 typedef  int         gid_t;
@@ -197,7 +197,7 @@ typedef  int         gid_t;
 #define APR_VAR_IMPORT           extern __declspec(dllimport)
 #endif
 
-#define ap_signal(a,b) signal(a,b)
+#define apr_signal(a,b) signal(a,b)
 
 typedef int ap_wait_t;
 
