@@ -242,7 +242,7 @@ APR_DECLARE(apr_status_t) apr_shm_destroy(struct shmem_t *m)
     return APR_SUCCESS;
 }
 
-APR_DEClARE(void *) apr_shm_malloc(struct shmem_t *m, apr_size_t reqsize)
+APR_DECLARE(void *) apr_shm_malloc(struct shmem_t *m, apr_size_t reqsize)
 {
     struct block_t *b;
     if ((b = alloc_block(m, reqsize)) != NULL)
