@@ -265,6 +265,10 @@ typedef  ssize_t           apr_ssize_t;
 typedef  off64_t           apr_off_t;
 typedef  int               apr_socklen_t;
 
+/* Are we big endian? */
+/* XXX: Fatal assumption on Alpha platforms */
+#define APR_IS_BIGENDIAN	0
+
 #ifdef UNKNOWN_NETWARE_64BIT_FLAG_NEEDED
 #define APR_SIZEOF_VOIDP   8
 #else
