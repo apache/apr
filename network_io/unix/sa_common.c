@@ -119,7 +119,7 @@ apr_status_t apr_get_ipaddr(char **addr, apr_sockaddr_t *sockaddr)
                   sockaddr->addr_str_len);
 #if APR_HAVE_IPV6
     if (sockaddr->sa.sin.sin_family == AF_INET6 &&
-        IN6_IS_ADDR_V4MAPPED(sockaddr->ipaddr_ptr)) {
+        IN6_IS_ADDR_V4MAPPED((struct in6_addr *)sockaddr->ipaddr_ptr)) {
         /* This is an IPv4-mapped IPv6 address; drop the leading
          * part of the address string so we're left with the familiar
          * IPv4 format.
