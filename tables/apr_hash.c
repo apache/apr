@@ -245,7 +245,7 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
         return hep;
 
     /* add a new entry for non-NULL values */
-    if (he = ht->free)
+    if ((he = ht->free) != NULL)
         ht->free = he->next;
     else
         he = apr_palloc(ht->pool, sizeof(*he));
