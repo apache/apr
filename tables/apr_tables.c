@@ -695,16 +695,17 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
  *
  * So to make mod_file_cache easier to maintain, it's a good thing
  */
-APR_DECLARE(void) apr_table_do(int (*comp) (void *, const char *, const char *),
-			      void *rec, const apr_table_t *t, ...)
+APR_DECLARE_NONSTD(void) apr_table_do(apr_table_do_callback_fn_t *comp,
+                                      void *rec, const apr_table_t *t, ...)
 {
     va_list vp;
     va_start(vp, t);
     apr_table_vdo(comp, rec, t, vp);
     va_end(vp);  
 } 
-APR_DECLARE(void) apr_table_vdo(int (*comp) (void *, const char *, const char *),
-				void *rec, const apr_table_t *t, va_list vp)
+
+APR_DECLARE(void) apr_table_vdo(apr_table_do_callback_fn_t *comp,
+                                void *rec, const apr_table_t *t, va_list vp)
 {
     char *argp;
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
