@@ -1,5 +1,5 @@
-Apache 2.0 STATUS:
-Last modified at [$Date: 2000/12/12 12:01:12 $]
+APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
+Last modified at [$Date: 2000/12/14 11:10:05 $]
 
 Release:
 
@@ -58,6 +58,15 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       crypt() function is available, and a way to call it (whether it is
       located in libc, libcrypt, or libufc)
         Status: Greg +1 (volunteers)
+
+    * apr_dso_load() should (uniformly) add a cleanup to unload the DSO.
+      Currently, the per-platform DSO loading is inconsistent in this
+      regard.
+
+    * apr_create_lock() changes:
+      - It ignores the "type" parameter, so toss it.
+      - The fname param is allowed to be NULL on the Unix platform.
+        Change it to always use the passed value, and check callers.
 
 
 Documentation that needs writing:
