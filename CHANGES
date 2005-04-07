@@ -1,5 +1,7 @@
 Changes for APR 1.2.0
 
+   *) Include the C preprocessor flags in --cflags for pkg-config.
+      [Paul Querna]
 
 Changes for APR 1.1.1
 
