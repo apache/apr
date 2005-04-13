@@ -883,7 +883,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + SOCECONNABORTED)
 #define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
                 || (s) == APR_OS_START_SYSERR + SOCECONNRESET)
-// XXX deprecated
+/* XXX deprecated */
 #define APR_STATUS_IS_ETIMEDOUT(s)         ((s) == APR_ETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + SOCETIMEDOUT)    
 #undef APR_STATUS_IS_TIMEUP
@@ -1019,7 +1019,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
                 || (s) == APR_OS_START_SYSERR + ERROR_NETNAME_DELETED \
                 || (s) == APR_OS_START_SYSERR + WSAECONNRESET)
-// XXX deprecated
+/* XXX deprecated */
 #define APR_STATUS_IS_ETIMEDOUT(s)         ((s) == APR_ETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
@@ -1087,7 +1087,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + WSAECONNABORTED)
 #define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
                 || (s) == APR_OS_START_SYSERR + WSAECONNRESET)
-// XXX deprecated
+/* XXX deprecated */
 #define APR_STATUS_IS_ETIMEDOUT(s)       ((s) == APR_ETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
