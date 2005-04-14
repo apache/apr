@@ -46,6 +46,10 @@
 #define HAVE_SIGNAL_H   1
 #define HAVE_STDDEF_H   1
 #define HAVE_STDLIB_H   1
+#ifndef USE_WINSOCK
+#define HAVE_SYS_SELECT_H 1
+#define HAVE_WRITEV       1
+#endif
 #define HAVE_SYS_STAT_H 1
 #define HAVE_SYS_MMAN_H 1
 #define HAVE_FCNTL_H    1

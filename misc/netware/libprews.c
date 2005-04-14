@@ -16,7 +16,9 @@
 #include <netware.h>
 #include <library.h>
 #include <nks/synch.h>
+#ifdef USE_WINSOCK
 #include "novsock2.h"
+#endif
 
 #include "apr_pools.h"
 #include "apr_private.h"
@@ -58,7 +60,9 @@ int _NonAppStart
 #pragma unused(messageCount)
 #pragma unused(messages)
 
+#ifdef USE_WINSOCK
     WSADATA wsaData;
+#endif
     apr_status_t status;
     
     gLibId = register_library(DisposeLibraryData);
@@ -84,14 +88,20 @@ int _NonAppStart
     if ((status = apr_pool_initialize()) != APR_SUCCESS)
         return status;
 
+#ifdef USE_WINSOCK
     return WSAStartup((WORD) MAKEWORD(2, 0), &wsaData);
+#else
+    return 0;
+#endif
 }
 
 void _NonAppStop( void )
 {
     apr_pool_terminate();
 
+#ifdef USE_WINSOCK
     WSACleanup();
+#endif
 
     unregister_library(gLibId);
     NXMutexFree(gLibLock);

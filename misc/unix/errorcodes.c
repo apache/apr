@@ -183,7 +183,7 @@ static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
   return stuffbuffer(buf, bufsize, result);  
 }
 
-#elif defined(WIN32) || defined(NETWARE)
+#elif defined(WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
 
 static const struct {
     apr_status_t code;

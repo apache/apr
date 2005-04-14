@@ -23,6 +23,7 @@
 #include "apr_arch_proc_mutex.h" /* for apr_proc_mutex_unix_setup_lock() */
 #include "apr_arch_internal_time.h"
 
+#ifdef USE_WINSOCK
 /*
 ** Resource tag signatures for using NetWare WinSock 2. These will no longer
 ** be needed by anyone once the new WSAStartupWithNlmHandle() is available
@@ -103,6 +104,7 @@ static int RegisterAppWithWinSock (void *nlm_handle)
 
     return err;
 }
+#endif
 
 
 
@@ -140,11 +142,13 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
 
     apr_pool_tag(pool, "apr_initilialize");
 
+#ifdef USE_WINSOCK
     err = RegisterAppWithWinSock (nlmhandle);
     
     if (err) {
         return err;
     }
+#endif
 
     apr_signal_init(pool);
 
@@ -173,7 +177,9 @@ APR_DECLARE_NONSTD(void) apr_terminate(void)
         away. */
     netware_pool_proc_cleanup ();
 
+#ifdef USE_WINSOCK
     UnregisterAppWithWinSock (app_data->gs_nlmhandle);
+#endif
 }
 
 APR_DECLARE(void) apr_terminate2(void)

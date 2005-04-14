@@ -51,7 +51,11 @@
 #include <nks/synch.h>
 #include <nks/time.h>
 #include <signal.h>
+#ifdef USE_WINSOCK
 #include <novsock2.h>
+#else
+#include <sys/socket.h>
+#endif
 #include <sys/types.h>
 
 #ifdef NW_BUILD_IPV6
@@ -89,8 +93,15 @@ extern "C" {
 #define APR_HAVE_FCNTL_H        1
 #define APR_HAVE_IO_H           0
 #define APR_HAVE_LIMITS_H       1
+#ifdef USE_WINSOCK
+#define APR_HAVE_ARPA_INET_H    0
 #define APR_HAVE_NETDB_H        0
 #define APR_HAVE_NETINET_IN_H   0
+#else
+#define APR_HAVE_ARPA_INET_H    1
+#define APR_HAVE_NETDB_H        1
+#define APR_HAVE_NETINET_IN_H   1
+#endif
 #define APR_HAVE_NETINET_SCTP_H 0
 #define APR_HAVE_NETINET_SCTP_UIO_H 0
 #define APR_HAVE_NETINET_TCP_H  0
@@ -104,15 +115,21 @@ extern "C" {
 #define APR_HAVE_STRINGS_H      0
 #define APR_HAVE_STRTOLL	1
 #define APR_HAVE_SYS_SENDFILE_H 0
-#define APR_HAVE_SYS_SIGNAL_H   0
+#define APR_HAVE_SYS_SYSLIMITS_H 0
+#ifdef USE_WINSOCK
 #define APR_HAVE_SYS_SOCKET_H   0
 #define APR_HAVE_SYS_SOCKIO_H   0
-#define APR_HAVE_SYS_SYSLIMITS_H 0
 #define APR_HAVE_SYS_TIME_H     0
+#else
+#define APR_HAVE_SYS_SOCKET_H   1
+#define APR_HAVE_SYS_SOCKIO_H   1
+#define APR_HAVE_SYS_TIME_H     1
+#endif
+#define APR_HAVE_SYS_SIGNAL_H   1
 #define APR_HAVE_SYS_TYPES_H    1
 #define APR_HAVE_SYS_UIO_H      1
-#define APR_HAVE_SYS_UN_H       0
-#define APR_HAVE_SYS_WAIT_H     0
+#define APR_HAVE_SYS_UN_H       1
+#define APR_HAVE_SYS_WAIT_H     1
 #define APR_HAVE_TIME_H         1
 #define APR_HAVE_UNISTD_H       1
 
@@ -232,7 +249,11 @@ typedef  off64_t           apr_off_t;
 #else
 typedef  off_t             apr_off_t;
 #endif
+#ifdef USE_WINSOCK
 typedef  int               apr_socklen_t;
+#else
+typedef  size_t            apr_socklen_t;
+#endif
 
 /* Are we big endian? */
 /* XXX: Fatal assumption on Alpha platforms */

@@ -234,6 +234,7 @@ else
 endif
 	@echo -l $(APR)/$(OBJDIR) >> $@
 	@echo -l $(APRUTIL)/$(OBJDIR) >> $@
+	@echo -l $(APULDAP)/$(OBJDIR) >> $@
 	@echo -l $(XML)/$(OBJDIR) >> $@
 	@echo -l "$(METROWERKS)/Novell Support/Metrowerks Support/Libraries/Runtime" >> $@
 	@echo -l "$(METROWERKS)/Novell Support/Metrowerks Support/Libraries/MSL C++" >> $@

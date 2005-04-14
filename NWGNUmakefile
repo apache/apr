@@ -188,6 +188,7 @@ FILES_nlm_libs = \
 	libcpre.o \
 	$(APRLIB) \
 	$(APRUTLIB) \
+	$(APULDAPLIB) \
 	$(XMLLIB) \
 	$(EOLIST)
 
@@ -197,9 +198,14 @@ FILES_nlm_libs = \
 #
 FILES_nlm_modules = \
 	Libc \
-	ws2_32 \
 	$(EOLIST)
-	
+
+# Include the Winsock libraries if Winsock is being used
+ifndef USE_STDSOCKETS
+FILES_nlm_modules += ws2_32 \
+	       $(EOLIST)
+endif
+
 #If the LDAP support is defined then add the auto-load modules
 ifneq "$(LDAPSDK)" ""
 FILES_nlm_modules += \
@@ -208,7 +214,6 @@ FILES_nlm_modules += \
 	lldapx \
 	$(EOLIST)
 endif
- 
 
 #
 # If the nlm has a msg file, put it's path here
@@ -230,11 +235,17 @@ FILE_nlm_copyright =
 #
 FILES_nlm_Ximports = \
 	@libc.imp \
-	@ws2nlm.imp \
 	@netware.imp \
+	$(EOLIST)
+	
+# Include the Winsock imports if Winsock is being used
+ifndef USE_STDSOCKETS
+FILES_nlm_Ximports +=  \
+	@ws2nlm.imp \
 	WSAStartupRTags \
 	WSACleanupRTag \
 	$(EOLIST)
+endif
 
 #If the LDAP support is defined then add the imports
 ifneq "$(LDAPSDK)" ""
@@ -370,8 +381,15 @@ endif
 
 vpath %.c atomic/netware:strings:tables:passwd:lib:time/unix
 vpath %.c file_io/unix:locks/netware:misc/netware:misc/unix:threadproc/netware
-vpath %.c dso/netware:memory/unix:mmap/unix:user/netware:network_io/win32
-vpath %.c network_io/unix:poll/unix:shmem\unix:support/unix:random/unix
+vpath %.c poll/unix:shmem\unix:support/unix:random/unix
+vpath %.c dso/netware:memory/unix:mmap/unix:user/netware
+
+# Use the win32 network_io if Winsock is being used
+ifdef USE_STDSOCKETS
+vpath %.c network_io/unix
+else
+vpath %.c network_io/win32:network_io/unix
+endif
 
 $(OBJDIR)/%.o: file_io/netware/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<

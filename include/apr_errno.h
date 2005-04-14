@@ -1046,7 +1046,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ENOTEMPTY(s)      ((s) == APR_ENOTEMPTY \
                 || (s) == APR_OS_START_SYSERR + ERROR_DIR_NOT_EMPTY)
 
-#elif defined(NETWARE) && !defined(DOXYGEN) /* !defined(OS2) && !defined(WIN32) */
+#elif defined(NETWARE) && defined(USE_WINSOCK) && !defined(DOXYGEN) /* !defined(OS2) && !defined(WIN32) */
 
 #define APR_FROM_OS_ERROR(e) (e == 0 ? APR_SUCCESS : e + APR_OS_START_SYSERR)
 #define APR_TO_OS_ERROR(e)   (e == 0 ? APR_SUCCESS : e - APR_OS_START_SYSERR)
