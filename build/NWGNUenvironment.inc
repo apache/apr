@@ -116,6 +116,9 @@ NOVI	= $(NOVELLLIBC)\imports
 INCDIRS 	= $(NOVELLLIBC)\include;$(NOVELLLIBC)\include\nks;$(NOVELLLIBC)\include\winsock;
 
 DEFINES		= -DNETWARE
+ifndef USE_STDSOCKETS
+DEFINES += -DUSE_WINSOCK
+endif
 
 #
 # MetroWerks static Libraries
@@ -262,10 +265,11 @@ endif
 # Common directories
 #
 
-APR			= $(APR_WORK)
+APR		= $(APR_WORK)
 APRTEST		= $(APR_WORK)/test
 APRUTIL		= $(APU_WORK)
-XML			= $(APRUTIL)/xml
+APULDAP		= $(APU_WORK)/ldap
+XML		= $(APRUTIL)/xml
 
 #
 # Internal Libraries
@@ -273,6 +277,7 @@ XML			= $(APRUTIL)/xml
 
 APRLIB		= $(APR)/$(OBJDIR)/aprlib.lib
 APRUTLIB	= $(APRUTIL)/$(OBJDIR)/aprutil.lib
+APULDAPLIB	= $(APULDAP)/$(OBJDIR)/apuldap.lib
 XMLLIB		= $(XML)/$(OBJDIR)/xmllib.lib
 
 #

@@ -16,12 +16,16 @@
 
 #ifndef NETWORK_IO_H
 
+#ifdef USE_WINSOCK
 /* Making sure that we include the correct networkio.h since the
     the project file is configured to first look for headers in
     arch/netware and then arch/unix. But in this specific case we 
     want arch/win32.
 */
 #include <../win32/apr_arch_networkio.h>
+#else
+#include <../unix/apr_arch_networkio.h>
+#endif
 
 #endif  /* ! NETWORK_IO_H */
 
