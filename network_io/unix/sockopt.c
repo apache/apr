@@ -355,7 +355,11 @@ apr_status_t apr_socket_atmark(apr_socket_t *sock, int *atmark)
 
 apr_status_t apr_gethostname(char *buf, apr_int32_t len, apr_pool_t *cont)
 {
-    if (gethostname(buf, len) == -1) {
+#ifdef BEOS_R5
+    if (gethostname(buf, len) == 0) {
+#else
+    if (gethostname(buf, len) != 0) {
+#endif  
         buf[0] = '\0';
         return errno;
     }
