@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+#ifdef WIN32
+/* POSIX defines 1024 for the FD_SETSIZE */
+#define FD_SETSIZE 1024
+#endif
+
 #include "apr.h"
 #include "apr_poll.h"
 #include "apr_time.h"
