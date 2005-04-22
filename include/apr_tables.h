@@ -214,7 +214,7 @@ APR_DECLARE(void) apr_table_clear(apr_table_t *t);
  * The data is still in the table
  * @param t The table to search for the key
  * @param key The key to search for
- * @return The value associated with the key
+ * @return The value associated with the key, or NULL if the key does not exist. 
  */
 APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key);
 
