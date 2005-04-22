@@ -86,8 +86,6 @@
  */
 #define SW_HIDE             0
 #ifndef _WIN32_WCE
-/* POSIX defines 1024 for the FD_SETSIZE */
-#define FD_SETSIZE 1024
 #include <winsock2.h>
 #include <mswsock.h>
 #include <ws2tcpip.h>
