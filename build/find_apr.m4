@@ -61,7 +61,7 @@ dnl
 AC_DEFUN([APR_FIND_APR], [
   apr_found="no"
 
-  if test "$ac_cv_emxos2" = "yes"; then
+  if test "$target_os" = "os2-emx"; then
     # Scripts don't pass test -x on OS/2
     TEST_X="test -f"
   else
