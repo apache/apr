@@ -116,6 +116,9 @@ NOVI	= $(NOVELLLIBC)\imports
 INCDIRS 	= $(NOVELLLIBC)\include;$(NOVELLLIBC)\include\nks;$(NOVELLLIBC)\include\winsock;
 
 DEFINES		= -DNETWARE
+ifndef DEBUG
+DEFINES += -DNDEBUG
+endif
 
 #
 # MetroWerks static Libraries
