@@ -125,6 +125,9 @@ DEFINES		= -DNETWARE
 ifndef USE_STDSOCKETS
 DEFINES += -DUSE_WINSOCK
 endif
+ifndef DEBUG
+DEFINES += -DNDEBUG
+endif
 
 #
 # MetroWerks static Libraries
