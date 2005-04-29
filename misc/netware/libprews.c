@@ -48,6 +48,11 @@ int _NonAppStart
     const char  **messages
 )
 {
+#ifdef USE_WINSOCK
+    WSADATA wsaData;
+#endif
+    apr_status_t status;
+    
     NX_LOCK_INFO_ALLOC(liblock, "Per-Application Data Lock", 0);
 
 #pragma unused(cmdLine)
@@ -60,11 +65,6 @@ int _NonAppStart
 #pragma unused(messageCount)
 #pragma unused(messages)
 
-#ifdef USE_WINSOCK
-    WSADATA wsaData;
-#endif
-    apr_status_t status;
-    
     gLibId = register_library(DisposeLibraryData);
 
     if (gLibId < -1)
