@@ -101,6 +101,8 @@
 #define APR_HAVE_SYS_WAIT_H      @sys_waith@
 #define APR_HAVE_TIME_H          @timeh@
 #define APR_HAVE_UNISTD_H        @unistdh@
+#define APR_HAVE_UUID_UUID_H     @uuid_uuidh@
+#define APR_HAVE_UUID_H          @uuidh@
 
 /** @} */
 
