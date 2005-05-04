@@ -1,5 +1,8 @@
 Changes for APR 1.2.0
 
+   *) Fix apr_table_overlap()'s handling of tables allocated from
+      different pools.  [Joe Schaefer <joe+gmane@sunstarsys.com>]
+
    *) Add support for uuid_generate on OS X 10.4. [Paul Querna]
 
    *) Include the C preprocessor flags in --cflags for pkg-config.
