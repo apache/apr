@@ -584,16 +584,14 @@ APR_DECLARE(void) apr_pool_cleanup_for_exec(void);
  * structures.
  *
  * However, sometimes this ancestor requirement is inconvenient --
- * sometimes we're forced to create a sub pool (such as through
- * apr_sub_req_lookup_uri), and the sub pool is guaranteed to have
- * the same lifetime as the parent pool.  This is a guarantee implemented
- * by the *caller*, not by the pool code.  That is, the caller guarantees
- * they won't destroy the sub pool individually prior to destroying the
- * parent pool.
+ * sometimes it's necessary to create a sub pool where the sub pool is
+ * guaranteed to have the same lifetime as the parent pool.  This is a
+ * guarantee implemented by the *caller*, not by the pool code.  That
+ * is, the caller guarantees they won't destroy the sub pool
+ * individually prior to destroying the parent pool.
  *
  * In this case the caller must call apr_pool_join() to indicate this
- * guarantee to the APR_POOL_DEBUG code.  There are a few examples spread
- * through the standard modules.
+ * guarantee to the APR_POOL_DEBUG code.
  *
  * These functions are only implemented when #APR_POOL_DEBUG is set.
  *
