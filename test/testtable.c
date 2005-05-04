@@ -149,6 +149,27 @@ static void table_overlap(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, val, "7");
 }
 
+static void table_overlap2(abts_case *tc, void *data)
+{
+    apr_pool_t *subp;
+    apr_table_t *t1, *t2;
+
+    apr_pool_create(&subp, p);
+
+    t1 = apr_table_make(subp, 1);
+    t2 = apr_table_make(p, 1);
+    apr_table_addn(t1, "t1", "one");
+    apr_table_addn(t2, "t2", "two");
+    
+    apr_table_overlap(t1, t2, APR_OVERLAP_TABLES_SET);
+    
+    ABTS_INT_EQUAL(tc, 2, apr_table_elts(t1)->nelts);
+    
+    ABTS_STR_EQUAL(tc, apr_table_get(t1, "t1"), "one");
+    ABTS_STR_EQUAL(tc, apr_table_get(t1, "t2"), "two");
+
+}
+
 abts_suite *testtable(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -162,6 +183,7 @@ abts_suite *testtable(abts_suite *suite)
     abts_run_test(suite, table_clear, NULL);
     abts_run_test(suite, table_unset, NULL);
     abts_run_test(suite, table_overlap, NULL);
+    abts_run_test(suite, table_overlap2, NULL);
 
     return suite;
 }
