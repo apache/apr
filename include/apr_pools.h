@@ -392,11 +392,15 @@ APR_DECLARE(apr_abortfunc_t) apr_pool_abort_get(apr_pool_t *pool);
 APR_DECLARE(apr_pool_t *) apr_pool_parent_get(apr_pool_t *pool);
 
 /**
- * Determine if pool a is an ancestor of pool b
+ * Determine if pool a is an ancestor of pool b.
  * @param a The pool to search
  * @param b The pool to search for
  * @return True if a is an ancestor of b, NULL is considered an ancestor
  *         of all pools.
+ * @remark if compiled with APR_POOL_DEBUG, this function will also
+ * return true if A is a pool which has been guaranteed by the caller
+ * (using apr_pool_join) to have a lifetime at least as long as some
+ * ancestor of pool B.
  */
 APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
 
