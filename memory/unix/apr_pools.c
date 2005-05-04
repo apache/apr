@@ -456,6 +456,8 @@ struct apr_pool_t {
     char                 *self_first_avail;
 
 #else /* APR_POOL_DEBUG */
+    apr_pool_t           *joined; /* the caller has guaranteed that this pool
+                                   * will survive as long as ->joined */
     debug_node_t         *nodes;
     const char           *file_line;
     apr_uint32_t          creation_flags;
@@ -1655,6 +1657,12 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
 
 APR_DECLARE(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub)
 {
+#if APR_POOL_DEBUG
+    if (sub->parent != p) {
+        abort();
+    }
+    sub->joined = p;
+#endif
 }
 
 static int pool_find(apr_pool_t *pool, void *data)
@@ -1804,6 +1812,14 @@ APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
 {
     if (a == NULL)
         return 1;
+
+#if APR_POOL_DEBUG
+    /* Find the pool with the longest lifetime guaranteed by the
+     * caller: */
+    while (a->joined) {
+        a = a->joined;
+    }
+#endif
 
     while (b) {
         if (a == b)
