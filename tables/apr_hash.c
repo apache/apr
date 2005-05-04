@@ -28,6 +28,9 @@
 #include <string.h>
 #endif
 
+#if APR_POOL_DEBUG && APR_HAVE_STDIO_H
+#include <stdio.h>
+#endif
 
 /*
  * The internal form of a hash table.
@@ -387,19 +390,19 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
     apr_hash_entry_t *ent;
     unsigned int i,j,k;
 
-#ifdef POOL_DEBUG
+#if APR_POOL_DEBUG
     /* we don't copy keys and values, so it's necessary that
      * overlay->a.pool and base->a.pool have a life span at least
      * as long as p
      */
     if (!apr_pool_is_ancestor(overlay->pool, p)) {
         fprintf(stderr,
-                "apr_hash_overlay: overlay's pool is not an ancestor of p\n");
+                "apr_hash_merge: overlay's pool is not an ancestor of p\n");
         abort();
     }
     if (!apr_pool_is_ancestor(base->pool, p)) {
         fprintf(stderr,
-                "apr_hash_overlay: base's pool is not an ancestor of p\n");
+                "apr_hash_merge: base's pool is not an ancestor of p\n");
         abort();
     }
 #endif
