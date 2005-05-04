@@ -1,4 +1,3 @@
-#include <stdio.h>
 /* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
  * applicable.
  *
@@ -37,6 +36,10 @@
 #endif
 #if APR_HAVE_STRINGS_H
 #include <strings.h>
+#endif
+
+#if APR_POOL_DEBUG && APR_HAVE_STDIO_H
+#include <stdio.h>
 #endif
 
 /*****************************************************************
@@ -392,12 +395,12 @@ APR_DECLARE(apr_table_t *) apr_table_copy(apr_pool_t *p, const apr_table_t *t)
 {
     apr_table_t *new = apr_palloc(p, sizeof(apr_table_t));
 
-#ifdef POOL_DEBUG
+#if APR_POOL_DEBUG
     /* we don't copy keys and values, so it's necessary that t->a.pool
      * have a life span at least as long as p
      */
     if (!apr_pool_is_ancestor(t->a.pool, p)) {
-	fprintf(stderr, "copy_table: t's pool is not an ancestor of p\n");
+	fprintf(stderr, "apr_table_copy: t's pool is not an ancestor of p\n");
 	abort();
     }
 #endif
@@ -705,14 +708,14 @@ APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
     apr_uint32_t checksum;
     int hash;
 
-#ifdef POOL_DEBUG
+#if APR_POOL_DEBUG
     {
 	if (!apr_pool_is_ancestor(apr_pool_find(key), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
+	    fprintf(stderr, "apr_table_mergen: key not in ancestor pool of t\n");
 	    abort();
 	}
 	if (!apr_pool_is_ancestor(apr_pool_find(val), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
+	    fprintf(stderr, "apr_table_mergen: key not in ancestor pool of t\n");
 	    abort();
 	}
     }
@@ -774,14 +777,14 @@ APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
     apr_uint32_t checksum;
     int hash;
 
-#ifdef POOL_DEBUG
+#if APR_POOL_DEBUG
     {
 	if (!apr_pool_is_ancestor(apr_pool_find(key), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
+	    fprintf(stderr, "apr_table_addn: key not in ancestor pool of t\n");
 	    abort();
 	}
 	if (!apr_pool_is_ancestor(apr_pool_find(val), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
+	    fprintf(stderr, "apr_table_addn: key not in ancestor pool of t\n");
 	    abort();
 	}
     }
@@ -806,19 +809,19 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
 {
     apr_table_t *res;
 
-#ifdef POOL_DEBUG
+#if APR_POOL_DEBUG
     /* we don't copy keys and values, so it's necessary that
      * overlay->a.pool and base->a.pool have a life span at least
      * as long as p
      */
     if (!apr_pool_is_ancestor(overlay->a.pool, p)) {
 	fprintf(stderr,
-		"overlay_tables: overlay's pool is not an ancestor of p\n");
+		"apr_table_overlay: overlay's pool is not an ancestor of p\n");
 	abort();
     }
     if (!apr_pool_is_ancestor(base->a.pool, p)) {
 	fprintf(stderr,
-		"overlay_tables: base's pool is not an ancestor of p\n");
+		"apr_table_overlay: base's pool is not an ancestor of p\n");
 	abort();
     }
 #endif
