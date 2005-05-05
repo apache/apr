@@ -35,10 +35,10 @@
 #if APR_HAVE_SYS_UN_H
 #include <sys/un.h>
 #endif
-#if HAVE_UUID_UUID_H
+#ifdef HAVE_UUID_UUID_H
 #include <uuid/uuid.h>
 #endif
-#if HAVE_UUID_H
+#ifdef HAVE_UUID_H
 #include <uuid.h>
 #endif
 
@@ -46,7 +46,7 @@
 #define SHUT_RDWR 2
 #endif
 
-#if HAVE_UUID_CREATE
+#if defined(HAVE_UUID_CREATE)
 
 APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
 {
@@ -59,7 +59,7 @@ APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
     return APR_SUCCESS;
 }
 
-#elif HAVE_UUID_GENERATE
+#elif defined(HAVE_UUID_GENERATE)
 
 APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
 {
