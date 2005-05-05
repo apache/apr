@@ -1819,16 +1819,11 @@ osuuid="0"
 
 AC_CHECK_HEADERS(uuid/uuid.h uuid.h)
 
-AC_CHECK_FUNCS(uuid_create, [osuuid="1"
-    AC_DEFINE([HAVE_UUID_CREATE], 1, [Define if libc has uuid_create])], [])
+# Check for uuid_generate in libc or libuuid
+AC_SEARCH_LIBS(uuid_generate, uuid)
 
-AC_CHECK_FUNCS(uuid_generate, [osuuid="1"
-    AC_DEFINE([HAVE_UUID_GENERATE], 1, [Define if libc has uuid_generate])], [])
+AC_CHECK_FUNCS([uuid_generate uuid_create], [osuuid=1; break])
 
-AC_CHECK_LIB(uuid, uuid_generate, 
-    [osuuid="1"
-     APR_ADDTO(LIBS,-luuid)
-     AC_DEFINE([HAVE_UUID_GENERATE], 1, [Define if libuuid is present])], [])
 AC_SUBST(osuuid)
 
 
