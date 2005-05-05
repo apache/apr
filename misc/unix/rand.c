@@ -35,10 +35,10 @@
 #if APR_HAVE_SYS_UN_H
 #include <sys/un.h>
 #endif
-#if APR_HAVE_UUID_UUID_H
+#if HAVE_UUID_UUID_H
 #include <uuid/uuid.h>
 #endif
-#if APR_HAVE_UUID_H
+#if HAVE_UUID_H
 #include <uuid.h>
 #endif
 

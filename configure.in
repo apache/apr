@@ -1005,7 +1005,6 @@ APR_FLAG_HEADERS(
     tpfio.h		\
     unistd.h		\
     unix.h		\
-    uuid.h		\
     arpa/inet.h		\
     kernel/OS.h		\
     net/errno.h		\
@@ -1030,8 +1029,7 @@ APR_FLAG_HEADERS(
     sys/types.h		\
     sys/uio.h		\
     sys/un.h		\
-    sys/wait.h          \
-    uuid/uuid.h)
+    sys/wait.h)
 
 # IRIX 6.5 has a problem in <netinet/tcp.h> which prevents it from
 # being included by itself.  Check for <netinet/tcp.h> manually,
@@ -1083,8 +1081,6 @@ AC_SUBST(timeh)
 AC_SUBST(unistdh)
 AC_SUBST(signalh)
 AC_SUBST(sys_waith)
-AC_SUBST(uuidh)
-AC_SUBST(uuid_uuidh)
 AC_SUBST(pthreadh)
 AC_SUBST(semaphoreh)
 
@@ -1820,6 +1816,9 @@ AC_SUBST(rand)
 dnl ----------------------------- Checking for UUID Support 
 echo "${nl}Checking for OS UUID Support..."
 osuuid="0"
+
+AC_CHECK_HEADERS(uuid/uuid.h uuid.h)
+
 AC_CHECK_FUNCS(uuid_create, [osuuid="1"
     AC_DEFINE([HAVE_UUID_CREATE], 1, [Define if libc has uuid_create])], [])
 
