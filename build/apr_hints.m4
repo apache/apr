@@ -137,6 +137,8 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-netbsd*)
 	APR_ADDTO(CPPFLAGS, [-DNETBSD])
+        # fcntl() lies about O_NONBLOCK on an accept()ed socket (PR kern/26950)
+        APR_SETIFNULL(ac_cv_o_nonblock_inherited, [yes])
 	;;
     *-freebsd*)
         APR_SETIFNULL(apr_lock_method, [USE_FLOCK_SERIALIZE])
