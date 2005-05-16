@@ -970,7 +970,7 @@ static apr_table_entry_t **table_mergesort(apr_pool_t *pool,
      */
     apr_table_entry_t **values_tmp =
         (apr_table_entry_t **)apr_palloc(pool, n * sizeof(apr_table_entry_t*));
-    int i;
+    apr_size_t i;
     int blocksize;
 
     /* First pass: sort pairs of elements (blocksize=1) */
@@ -1156,7 +1156,7 @@ APR_DECLARE(void) apr_table_compress(apr_table_t *t, unsigned flags)
                 *dst++ = *src;
             }
         } while (++src < last_elt);
-        t->a.nelts -= (last_elt - dst);
+        t->a.nelts -= (int)(last_elt - dst);
     }
 
     table_reindex(t);
