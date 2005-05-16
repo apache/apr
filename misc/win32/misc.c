@@ -209,7 +209,7 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
         (sprintf)(sbuf, "%08x %08x %08x %s() %s:%d\n",
                   (DWORD)ha, seq, GetCurrentThreadId(), fn, fl, ln);
         (EnterCriticalSection)(&cs);
-        (WriteFile)(fh, sbuf, strlen(sbuf), &wrote, NULL);
+        (WriteFile)(fh, sbuf, (DWORD)strlen(sbuf), &wrote, NULL);
         (LeaveCriticalSection)(&cs);
     } 
     else {
@@ -236,7 +236,7 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
             (sprintf)(sbuf, "%08x %08x %08x %s(%s) %s:%d\n",
                       (DWORD*)*hv, seq, GetCurrentThreadId(), 
                       fn, dsc, fl, ln);
-            (WriteFile)(fh, sbuf, strlen(sbuf), &wrote, NULL);
+            (WriteFile)(fh, sbuf, (DWORD)strlen(sbuf), &wrote, NULL);
         } while (--nh);
         (LeaveCriticalSection)(&cs);
         va_end(a);
