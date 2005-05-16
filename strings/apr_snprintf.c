@@ -338,7 +338,7 @@ while (width > len)
  */
 static char *conv_10(register wide_int num, register bool_int is_unsigned,
                      register bool_int *is_negative, char *buf_end,
-                     register int *len)
+                     register apr_size_t *len)
 {
     register char *p = buf_end;
     register u_wide_int magnitude;
@@ -385,7 +385,7 @@ static char *conv_10(register wide_int num, register bool_int is_unsigned,
 
 static char *conv_10_quad(widest_int num, register bool_int is_unsigned,
                      register bool_int *is_negative, char *buf_end,
-                     register int *len)
+                     register apr_size_t *len)
 {
     register char *p = buf_end;
     u_widest_int magnitude;
@@ -442,12 +442,12 @@ static char *conv_10_quad(widest_int num, register bool_int is_unsigned,
 
 
 
-static char *conv_in_addr(struct in_addr *ia, char *buf_end, int *len)
+static char *conv_in_addr(struct in_addr *ia, char *buf_end, apr_size_t *len)
 {
     unsigned addr = ntohl(ia->s_addr);
     char *p = buf_end;
     bool_int is_negative;
-    int sub_len;
+    apr_size_t sub_len;
 
     p = conv_10((addr & 0x000000FF)      , TRUE, &is_negative, p, &sub_len);
     *--p = '.';
@@ -463,11 +463,11 @@ static char *conv_in_addr(struct in_addr *ia, char *buf_end, int *len)
 
 
 
-static char *conv_apr_sockaddr(apr_sockaddr_t *sa, char *buf_end, int *len)
+static char *conv_apr_sockaddr(apr_sockaddr_t *sa, char *buf_end, apr_size_t *len)
 {
     char *p = buf_end;
     bool_int is_negative;
-    int sub_len;
+    apr_size_t sub_len;
     char *ipaddr_str;
 
     p = conv_10(sa->port, TRUE, &is_negative, p, &sub_len);
@@ -496,7 +496,7 @@ static char *conv_apr_sockaddr(apr_sockaddr_t *sa, char *buf_end, int *len)
 
 
 #if APR_HAS_THREADS
-static char *conv_os_thread_t(apr_os_thread_t *tid, char *buf_end, int *len)
+static char *conv_os_thread_t(apr_os_thread_t *tid, char *buf_end, apr_size_t *len)
 {
     union {
         apr_os_thread_t tid;
@@ -527,7 +527,7 @@ static char *conv_os_thread_t(apr_os_thread_t *tid, char *buf_end, int *len)
  */
 static char *conv_fp(register char format, register double num,
     boolean_e add_dp, int precision, bool_int *is_negative,
-    char *buf, int *len)
+    char *buf, apr_size_t *len)
 {
     register char *s = buf;
     register char *p;
@@ -581,7 +581,7 @@ static char *conv_fp(register char format, register double num,
 
     if (format != 'f') {
         char temp[EXPONENT_LENGTH];        /* for exponent conversion */
-        int t_len;
+        apr_size_t t_len;
         bool_int exponent_is_negative;
 
         *s++ = format;                /* either e or E */
@@ -625,7 +625,7 @@ static char *conv_fp(register char format, register double num,
  * the number isn't quad size.
  */
 static char *conv_p2(register u_wide_int num, register int nbits,
-                     char format, char *buf_end, register int *len)
+                     char format, char *buf_end, register apr_size_t *len)
 {
     register int mask = (1 << nbits) - 1;
     register char *p = buf_end;
@@ -644,7 +644,7 @@ static char *conv_p2(register u_wide_int num, register int nbits,
 }
 
 static char *conv_p2_quad(u_widest_int num, register int nbits,
-                     char format, char *buf_end, register int *len)
+                     char format, char *buf_end, register apr_size_t *len)
 {
     register int mask = (1 << nbits) - 1;
     register char *p = buf_end;
@@ -675,11 +675,11 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
     register char *sp;
     register char *bep;
     register int cc = 0;
-    register int i;
+    register apr_size_t i;
 
     register char *s = NULL;
     char *q;
-    int s_len;
+    apr_size_t s_len;
 
     register int min_width = 0;
     int precision = 0;
