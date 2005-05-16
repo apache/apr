@@ -109,13 +109,19 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
-        hMap = CreateFileMappingW(hFile, NULL, PAGE_READWRITE, 0, size, mapkey);
+        DWORD sizelo = (DWORD)size;
+        DWORD sizehi = (DWORD)(size >> 32);
+        hMap = CreateFileMappingW(hFile, NULL, PAGE_READWRITE, 
+                                  sizehi, sizelo, mapkey);
     }
 #endif
 #if APR_HAS_ANSI_FS
     ELSE_WIN_OS_IS_ANSI
     {
-        hMap = CreateFileMappingA(hFile, NULL, PAGE_READWRITE, 0, size, mapkey);
+        DWORD sizelo = (DWORD)size;
+        DWORD sizehi = (DWORD)(size >> 32);
+        hMap = CreateFileMappingA(hFile, NULL, PAGE_READWRITE, 
+                                  sizehi, sizelo, mapkey);
     }
 #endif
     err = apr_get_os_error();
