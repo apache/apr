@@ -120,15 +120,15 @@ APR_DECLARE(apr_status_t) apr_ctime(char *date_str, apr_time_t t)
 
 #ifndef _WIN32_WCE
 
-int win32_strftime_extra(char *s, size_t max, const char *format,
-                         const struct tm *tm) 
+apr_size_t win32_strftime_extra(char *s, size_t max, const char *format,
+                                const struct tm *tm) 
 {
    /* If the new format string is bigger than max, the result string won't fit
     * anyway. If format strings are added, made sure the padding below is
     * enough */
     char *new_format = (char *) malloc(max + 11);
     size_t i, j, format_length = strlen(format);
-    int return_value;
+    apr_size_t return_value;
     int length_written;
 
     for (i = 0, j = 0; (i < format_length && j < max);) {
