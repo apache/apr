@@ -63,17 +63,29 @@ APR_DECLARE(void) apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
 APR_DECLARE(apr_uint32_t) apr_atomic_inc32(volatile apr_uint32_t *mem)
 {
     /* we return old value, win32 returns new value :( */
+#if (defined(_M_IA64) || defined(_M_AMD64)) && !defined(RC_INVOKED)
+    return InterlockedIncrement(mem) - 1;
+#else
     return ((apr_atomic_win32_ptr_fn)InterlockedIncrement)(mem) - 1;
+#endif
 }
 
 APR_DECLARE(int) apr_atomic_dec32(volatile apr_uint32_t *mem)
 {
+#if (defined(_M_IA64) || defined(_M_AMD64)) && !defined(RC_INVOKED)
+    return InterlockedDecrement(mem);
+#else
     return ((apr_atomic_win32_ptr_fn)InterlockedDecrement)(mem);
+#endif
 }
 
 APR_DECLARE(void) apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
+#if (defined(_M_IA64) || defined(_M_AMD64)) && !defined(RC_INVOKED)
+    InterlockedExchange(mem, val);
+#else
     ((apr_atomic_win32_ptr_val_fn)InterlockedExchange)(mem, val);
+#endif
 }
 
 APR_DECLARE(apr_uint32_t) apr_atomic_read32(volatile apr_uint32_t *mem)
@@ -84,7 +96,11 @@ APR_DECLARE(apr_uint32_t) apr_atomic_read32(volatile apr_uint32_t *mem)
 APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint32_t with,
                                            apr_uint32_t cmp)
 {
+#if (defined(_M_IA64) || defined(_M_AMD64)) && !defined(RC_INVOKED)
+    return InterlockedCompareExchange(mem, with, cmp);
+#else
     return ((apr_atomic_win32_ptr_val_val_fn)InterlockedCompareExchange)(mem, with, cmp);
+#endif
 }
 
 APR_DECLARE(void *) apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
@@ -99,5 +115,9 @@ APR_DECLARE(void *) apr_atomic_casptr(volatile void **mem, void *with, const voi
 
 APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
+#if (defined(_M_IA64) || defined(_M_AMD64)) && !defined(RC_INVOKED)
+    return InterlockedExchange(mem, val);
+#else
     return ((apr_atomic_win32_ptr_val_fn)InterlockedExchange)(mem, val);
+#endif
 }
