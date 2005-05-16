@@ -30,7 +30,7 @@
  * depends on IsValidSid(), which internally we better test long
  * before we get here!
  */
-void get_sid_string(char *buf, int blen, apr_uid_t id)
+void get_sid_string(char *buf, apr_size_t blen, apr_uid_t id)
 {
     PSID_IDENTIFIER_AUTHORITY psia;
     DWORD nsa;
@@ -88,15 +88,14 @@ APR_DECLARE(apr_status_t) apr_uid_homepath_get(char **dirname,
 
         strcpy(regkey, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\"
                        "ProfileList\\");
-        keylen = strlen(regkey);
+        keylen = (DWORD)strlen(regkey);
         get_sid_string(regkey + keylen, sizeof(regkey) - keylen, uid);
     }
     else {
         strcpy(regkey, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\"
                        "ProfileList\\");
-        keylen = strlen(regkey);
+        keylen = (DWORD)strlen(regkey);
         apr_cpystrn(regkey + keylen, username, sizeof(regkey) - keylen);
-
     }
 
     if ((rv = RegOpenKeyEx(HKEY_LOCAL_MACHINE, regkey, 0, 
@@ -106,7 +105,6 @@ APR_DECLARE(apr_status_t) apr_uid_homepath_get(char **dirname,
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
-
         keylen = sizeof(regkey);
         rv = RegQueryValueExW(key, L"ProfileImagePath", NULL, &type,
                                    (void*)regkey, &keylen);
