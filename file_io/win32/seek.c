@@ -21,12 +21,13 @@
 
 static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
 {
-    apr_off_t newbufpos;
+    apr_size_t newbufpos;
     DWORD rc;
 
     if (thefile->direction == 1) {
         apr_file_flush(thefile);
-        thefile->bufpos = thefile->direction = thefile->dataRead = 0;
+        thefile->bufpos = thefile->dataRead = 0;
+        thefile->direction = 0;
     }
 
     newbufpos = pos - (thefile->filePtr - thefile->dataRead);
@@ -44,7 +45,8 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
         else
             rc = APR_SUCCESS;
         if (rc == APR_SUCCESS) {
-            thefile->eof_hit = thefile->bufpos = thefile->dataRead = 0;
+            thefile->eof_hit = 0;
+            thefile->bufpos = thefile->dataRead = 0;
             thefile->filePtr = pos;
         }
     }
