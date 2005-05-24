@@ -1297,6 +1297,17 @@ void parse_args(int argc, char *argv[], command_t *cmd_data)
                 if (arg[1] == 'o' && !arg[2]) {
                     arg = argv[++a];
                     argused = parse_output_file_name(arg, cmd_data);
+                } else if (strcmp(arg+1, "MT") == 0) {
+                    if (!cmd_data->options.silent) {
+                        printf("Adding: %s", arg);
+                    }
+                    push_count_chars(cmd_data->arglist, arg);
+                    arg = argv[++a];
+                    if (!cmd_data->options.silent) {
+                        printf(" %s\n", arg);
+                    }
+                    push_count_chars(cmd_data->arglist, arg);
+                    argused = 1;
                 } else if (strcmp(arg+1, "rpath") == 0) {
                     /* Aha, we should try to link both! */
                     cmd_data->install_path = argv[++a];
