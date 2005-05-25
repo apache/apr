@@ -189,6 +189,8 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-apple-darwin*)
 	APR_ADDTO(CPPFLAGS, [-DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK -no-cpp-precomp])
 	APR_SETIFNULL(apr_posixsem_is_global, [yes])
+        # http://issues.apache.org/bugzilla/show_bug.cgi?id=34332
+        APR_SETIFNULL(ac_cv_func_poll, [no])
 	;;
     *-dec-osf*)
 	APR_ADDTO(CPPFLAGS, [-DOSF1])
