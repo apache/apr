@@ -8,6 +8,9 @@ Changes for APR 1.2.0
    *) Include the C preprocessor flags in --cflags for pkg-config.
       [Paul Querna]
 
+   *) Fix issue with poll() followed by net I/O yielding EAGAIN on
+      Mac OS 10.4 (Darwin 8). [Wilfredo Sanchez]
+
 Changes for APR 1.1.1
 
   *) Disable sendfile support for S/390 only in kernel versions < 2.4.0. 
