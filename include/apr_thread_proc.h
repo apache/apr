@@ -300,7 +300,7 @@ APR_DECLARE(apr_status_t) apr_thread_data_get(void **data, const char *key,
 /**
  * Return the pool associated with the current thread.
  * @param data The user data to associate with the thread.
- * @param key The key to use for associating the data with the tread
+ * @param key The key to use for associating the data with the thread
  * @param cleanup The cleanup routine to use when the thread is destroyed.
  * @param thread The currently open thread.
  */
