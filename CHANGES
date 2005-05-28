@@ -17,6 +17,9 @@ Changes for APR 1.1.1
   *) find_apr.m4: Try installed APR before bundled copy if --with-apr not
      passed to configure.  [Justin Erenkrantz]
 
+  *) Fix issue with poll() followed by net I/O yielding EAGAIN on
+     Mac OS 10.4 (Darwin 8). [Wilfredo Sanchez]
+
 Changes for APR 1.1.0
 
   *) Added apr_procattr_user_set and apr_procattr_group_set
