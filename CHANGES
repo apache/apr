@@ -11,6 +11,9 @@ Changes for APR 1.0.2
      locks/netware/thread_mutex.c that prevented APR from building with the
      latest release of the LibC SDK. [Brad Nicholes]
      
+  *) Fix issue with poll() followed by net I/O yielding EAGAIN on
+     Mac OS 10.4 (Darwin 8). [Wilfredo Sanchez]
+
 Changes for APR 1.0.1
 
   *) Fix HUP return codes in pollset when using KQueue.
