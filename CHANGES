@@ -2,6 +2,9 @@ Changes with APR 0.9.7
 
   *) Fix detection of rwlocks on Mac OS X. [Aaron Bannert]
 
+  *) Fix issue with poll() followed by net I/O yielding EAGAIN on
+     Mac OS 10.4 (Darwin 8). [Wilfredo Sanchez]
+
 Changes with APR 0.9.6
 
   *) Add apr_threadattr_stacksize_set() for overriding the default
