@@ -235,7 +235,6 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                                            const apr_pollfd_t **descriptors)
 {
     int ret, i;
-    pfd_elem_t *ep;
     struct timespec tv, *tvptr;
     apr_status_t rv = APR_SUCCESS;
 
