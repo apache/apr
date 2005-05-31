@@ -364,6 +364,7 @@ const char *flatten_count_chars(count_chars *cc)
 
 char *shell_esc(const char *str)
 {
+    int in_quote = 0;
     char *cmd;
     unsigned char *d;
     const unsigned char *s;
@@ -373,7 +374,11 @@ char *shell_esc(const char *str)
     s = (const unsigned char *)str;
 
     for (; *s; ++s) {
-        if (*s == '"' || *s == '\\') {
+        if (*s == '"') {
+            *d++ = '\\';
+            in_quote++;
+        }
+        else if (*s == '\\' || (*s == ' ' && (in_quote % 2))) {
             *d++ = '\\';
         }
         *d++ = *s;
