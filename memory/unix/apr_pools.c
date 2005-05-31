@@ -500,6 +500,9 @@ static void run_cleanups(cleanup_t **c);
 static void run_child_cleanups(cleanup_t **c);
 static void free_proc_chain(struct process_chain *procs);
 
+#if APR_POOL_DEBUG
+static void pool_destroy_debug(apr_pool_t *pool, const char *file_line);
+#endif
 
 #if !APR_POOL_DEBUG
 /*
@@ -1361,7 +1364,7 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
      * this pool thus this loop is safe and easy.
      */
     while (pool->child)
-        apr_pool_destroy_debug(pool->child, file_line);
+        pool_destroy_debug(pool->child, file_line);
 
     /* Run cleanups */
     run_cleanups(&pool->cleanups);
@@ -1436,8 +1439,7 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
 #endif /* APR_HAS_THREADS */
 }
 
-APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
-                                         const char *file_line)
+static void pool_destroy_debug(apr_pool_t *pool, const char *file_line)
 {
     apr_pool_check_integrity(pool);
 
@@ -1472,6 +1474,22 @@ APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
 
     /* Free the pool itself */
     free(pool);
+}
+
+APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
+                                         const char *file_line)
+{
+    if (pool->joined) {
+        /* Joined pools must not be explicitly destroyed; the caller
+         * has broken the guarantee. */
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
+        apr_pool_log_event(pool, "LIFE",
+                           __FILE__ ":apr_pool_destroy abort on joined", 0);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL) */
+
+        abort();
+    }
+    pool_destroy_debug(pool, file_line);
 }
 
 APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
