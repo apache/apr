@@ -623,7 +623,8 @@ dnl APR_CHECK_SCTP
 dnl
 dnl check for presence of SCTP protocol support
 dnl
-AC_DEFUN(APR_CHECK_SCTP,[
+AC_DEFUN([APR_CHECK_SCTP],
+[
   AC_CACHE_CHECK([whether SCTP is supported], [apr_cv_sctp], [
   AC_TRY_RUN([
 #ifdef HAVE_SYS_TYPES_H
@@ -634,6 +635,12 @@ AC_DEFUN(APR_CHECK_SCTP,[
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_SCTP_H
+#include <netinet/sctp.h>
+#endif
+#ifdef HAVE_NETINET_SCTP_UIO_H
+#include <netinet/sctp_uio.h>
 #endif
 #include <stdlib.h>
 int main(void) {
