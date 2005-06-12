@@ -305,7 +305,7 @@ APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *th
 
 APR_POOL_IMPLEMENT_ACCESSOR(socket);
 
-APR_IMPLEMENT_INHERIT_SET(socket, inherit, cntxt, socket_cleanup)
+APR_IMPLEMENT_INHERIT_SET(socket, inherit, pool, socket_cleanup)
 
-APR_IMPLEMENT_INHERIT_UNSET(socket, inherit, cntxt, socket_cleanup)
+APR_IMPLEMENT_INHERIT_UNSET(socket, inherit, pool, socket_cleanup)
 
