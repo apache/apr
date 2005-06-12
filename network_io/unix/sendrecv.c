@@ -578,7 +578,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         }  
 
         /* XXX:  BUHHH? wow, what a memory leak! */
-        headerbuf = hdtrarray[0].iov_base = apr_palloc(sock->cntxt, headerlen);
+        headerbuf = hdtrarray[0].iov_base = apr_palloc(sock->pool, headerlen);
         hdtrarray[0].iov_len = headerlen;
 
         for (i = 0; i < hdtr->numheaders; i++) {
@@ -603,7 +603,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         }
 
         /* XXX:  BUHHH? wow, what a memory leak! */
-        trailerbuf = hdtrarray[1].iov_base = apr_palloc(sock->cntxt, trailerlen);
+        trailerbuf = hdtrarray[1].iov_base = apr_palloc(sock->pool, trailerlen);
         hdtrarray[1].iov_len = trailerlen;
 
         for (i = 0; i < hdtr->numtrailers; i++) {
@@ -714,7 +714,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
             /* but headers are small, so maybe we can hold on to the
              * memory for the life of the socket...
              */
-            hbuf = apr_palloc(sock->cntxt, parms.header_length);
+            hbuf = apr_palloc(sock->pool, parms.header_length);
 #endif
             ptr = 0;
             for (i = 0; i < hdtr->numheaders; i++) {
@@ -740,7 +740,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
             /* Keepalives make apr_palloc a bad idea */
             tbuf = malloc(parms.trailer_length);
 #else
-            tbuf = apr_palloc(sock->cntxt, parms.trailer_length);
+            tbuf = apr_palloc(sock->pool, parms.trailer_length);
 #endif
             ptr = 0;
             for (i = 0; i < hdtr->numtrailers; i++) {
@@ -853,7 +853,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
 
     /* Calculate how much space we need. */
     vecs = hdtr->numheaders + hdtr->numtrailers + 1;
-    sfv = apr_palloc(sock->cntxt, sizeof(sendfilevec_t) * vecs);
+    sfv = apr_palloc(sock->pool, sizeof(sendfilevec_t) * vecs);
 
     curvec = 0;
 

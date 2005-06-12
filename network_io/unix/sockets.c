@@ -59,11 +59,11 @@ static void set_socket_vars(apr_socket_t *sock, int family, int type, int protoc
 static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
 {
     *new = (apr_socket_t *)apr_pcalloc(p, sizeof(apr_socket_t));
-    (*new)->cntxt = p;
-    (*new)->local_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->cntxt,
+    (*new)->pool = p;
+    (*new)->local_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->pool,
                                                        sizeof(apr_sockaddr_t));
     (*new)->local_addr->pool = p;
-    (*new)->remote_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->cntxt,
+    (*new)->remote_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->pool,
                                                         sizeof(apr_sockaddr_t));
     (*new)->remote_addr->pool = p;
 #ifndef WAITIO_USES_POLL
@@ -131,7 +131,7 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
 
     (*new)->timeout = -1;
     (*new)->inherit = 0;
-    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), socket_cleanup,
+    apr_pool_cleanup_register((*new)->pool, (void *)(*new), socket_cleanup,
                               socket_cleanup);
 
     return APR_SUCCESS;
@@ -145,7 +145,7 @@ apr_status_t apr_socket_shutdown(apr_socket_t *thesocket,
 
 apr_status_t apr_socket_close(apr_socket_t *thesocket)
 {
-    return apr_pool_cleanup_run(thesocket->cntxt, thesocket, socket_cleanup);
+    return apr_pool_cleanup_run(thesocket->pool, thesocket, socket_cleanup);
 }
 
 apr_status_t apr_socket_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
@@ -245,7 +245,7 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
     }
 
     (*new)->inherit = 0;
-    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), socket_cleanup,
+    apr_pool_cleanup_register((*new)->pool, (void *)(*new), socket_cleanup,
                               socket_cleanup);
     return APR_SUCCESS;
 }
@@ -334,15 +334,15 @@ apr_status_t apr_socket_data_get(void **data, const char *key, apr_socket_t *soc
 apr_status_t apr_socket_data_set(apr_socket_t *sock, void *data, const char *key,
                                  apr_status_t (*cleanup) (void *))
 {
-    sock_userdata_t *new = apr_palloc(sock->cntxt, sizeof(sock_userdata_t));
+    sock_userdata_t *new = apr_palloc(sock->pool, sizeof(sock_userdata_t));
 
-    new->key = apr_pstrdup(sock->cntxt, key);
+    new->key = apr_pstrdup(sock->pool, key);
     new->data = data;
     new->next = sock->userdata;
     sock->userdata = new;
 
     if (cleanup) {
-        apr_pool_cleanup_register(sock->cntxt, data, cleanup, cleanup);
+        apr_pool_cleanup_register(sock->pool, data, cleanup, cleanup);
     }
 
     return APR_SUCCESS;
@@ -387,7 +387,7 @@ apr_status_t apr_os_sock_make(apr_socket_t **apr_sock,
     }
         
     (*apr_sock)->inherit = 0;
-    apr_pool_cleanup_register((*apr_sock)->cntxt, (void *)(*apr_sock), 
+    apr_pool_cleanup_register((*apr_sock)->pool, (void *)(*apr_sock), 
                               socket_cleanup, socket_cleanup);
     return APR_SUCCESS;
 }
@@ -410,6 +410,4 @@ apr_status_t apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock,
     return APR_SUCCESS;
 }
 
-APR_IMPLEMENT_INHERIT_SET(socket, inherit, cntxt, socket_cleanup)
-
-APR_IMPLEMENT_INHERIT_UNSET(socket, inherit, cntxt, socket_cleanup)
+APR_POOL_IMPLEMENT_ACCESSOR(socket);

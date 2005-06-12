@@ -29,7 +29,7 @@ struct sock_userdata_t {
 };
 
 struct apr_socket_t {
-    apr_pool_t         *cntxt;
+    apr_pool_t         *pool;
     SOCKET              socketdes;
     int                 type; /* SOCK_STREAM, SOCK_DGRAM */
     int                 protocol;
