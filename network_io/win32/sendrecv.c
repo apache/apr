@@ -318,7 +318,7 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
     /* Initialize the overlapped structure used on TransmitFile
      */
     if (!sock->overlapped) {
-        sock->overlapped = apr_pcalloc(sock->cntxt, sizeof(OVERLAPPED));
+        sock->overlapped = apr_pcalloc(sock->pool, sizeof(OVERLAPPED));
         sock->overlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
     }
     while (bytes_to_send) {

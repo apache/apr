@@ -739,6 +739,11 @@ APR_DECLARE(apr_status_t) apr_socket_protocol_get(apr_socket_t *sock,
                                                   int *protocol);
 
 /**
+ * Get the pool used by the socket.
+ */
+APR_POOL_DECLARE_ACCESSOR(socket);
+
+/**
  * Set a socket to be inherited by child processes.
  */
 APR_DECLARE_INHERIT_SET(socket);

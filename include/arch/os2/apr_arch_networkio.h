@@ -35,7 +35,7 @@ struct sock_userdata_t {
 };
 
 struct apr_socket_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     int socketdes;
     int type;
     int protocol;
