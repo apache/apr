@@ -49,7 +49,7 @@ else
                    < $libtoolize`"
    ltfile=${LIBTOOL_M4-`eval "$ltfindcmd"`}
    # Expecting the code above to be very portable, but just in case...
-   if [ -e "$ltfile" -o ! -f "$ltfile" ]; then
+   if [ -z "$ltfile" -o ! -f "$ltfile" ]; then
      ltpath=`dirname $libtoolize`
      ltfile=`cd $ltpath/../share/aclocal ; pwd`/libtool.m4
    fi
