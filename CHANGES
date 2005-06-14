@@ -1,5 +1,8 @@
 Changes for APR 1.0.2
 
+  *) Support APR_SO_SNDBUF and APR_SO_RCVBUF on Windows.  PR 32177.
+     [Sim <sgobbi datamanagement.it>, Jeff Trawick]
+
   *) Make install passed a shell expanded list of header files to the
      build/install.sh script, which can only install one file at a time.
      Changed to install one header file at a time. [Justin Erenkrantz,
