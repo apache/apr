@@ -1,5 +1,8 @@
 Changes for APR 1.1.1
 
+  *) Support APR_SO_SNDBUF and APR_SO_RCVBUF on Windows.  PR 32177.
+     [Sim <sgobbi datamanagement.it>, Jeff Trawick]
+
   *) Disable sendfile support for S/390 only in kernel versions < 2.4.0. 
      [Joe Orton]
 
