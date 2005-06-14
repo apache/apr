@@ -113,6 +113,18 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
             apr_set_option(sock, APR_SO_DEBUG, on);
         }
         break;
+    case APR_SO_SNDBUF:
+        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF,
+                       (void *)&on, sizeof(int)) == -1) {
+            return apr_get_netos_error();
+        }
+        break;
+    case APR_SO_RCVBUF:
+        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_RCVBUF,
+                       (void *)&on, sizeof(int)) == -1) {
+            return apr_get_netos_error();
+        }
+        break;
     case APR_SO_REUSEADDR:
         if (on != apr_is_option_set(sock, APR_SO_REUSEADDR)) {
             if (setsockopt(sock->socketdes, SOL_SOCKET, SO_REUSEADDR, 
