@@ -1,5 +1,8 @@
 Changes with APR 0.9.7
 
+  *) Support APR_SO_SNDBUF and APR_SO_RCVBUF on Windows.  PR 32177.
+     [Sim <sgobbi datamanagement.it>, Jeff Trawick]
+
   *) Fix detection of rwlocks on Mac OS X. [Aaron Bannert]
 
   *) Fix issue with poll() followed by net I/O yielding EAGAIN on
