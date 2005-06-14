@@ -163,6 +163,7 @@ inet_ntop6(const unsigned char *src, char *dst, apr_size_t size)
     next_dest = words;
     best.base = -1;
     cur.base = -1;
+    cur.len = best.len = 0; /* silence gcc4 warning */
     i = 0;
     do {
         unsigned int next_word = (unsigned int)*next_src++;
