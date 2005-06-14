@@ -151,11 +151,8 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
         break;
     case APR_SO_SNDBUF:
 #ifdef SO_SNDBUF
-        if (apr_is_option_set(sock, APR_SO_SNDBUF) != on) {
-            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF, (void *)&on, sizeof(int)) == -1) {
-                return errno;
-            }
-            apr_set_option(sock, APR_SO_SNDBUF, on);
+        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF, (void *)&on, sizeof(int)) == -1) {
+            return errno;
         }
 #else
         return APR_ENOTIMPL;
@@ -163,11 +160,8 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
         break;
     case APR_SO_RCVBUF:
 #ifdef SO_RCVBUF
-        if (apr_is_option_set(sock, APR_SO_RCVBUF) != on) {
-            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_RCVBUF, (void *)&on, sizeof(int)) == -1) {
-                return errno;
-            }
-            apr_set_option(sock, APR_SO_RCVBUF, on);
+        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_RCVBUF, (void *)&on, sizeof(int)) == -1) {
+            return errno;
         }
 #else
         return APR_ENOTIMPL;
