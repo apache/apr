@@ -1,5 +1,8 @@
 Changes for APR 1.2.0
 
+  *) Add %pt support to apr_snprintf() for printing an apr_os_thread_t
+     in hex format.  [Jeff Trawick]
+
    *) Support APR_SO_SNDBUF and APR_SO_RCVBUF on Windows.  PR 32177.
       [Sim <sgobbi datamanagement.it>, Jeff Trawick]
 
