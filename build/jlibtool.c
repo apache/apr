@@ -350,7 +350,7 @@ const char *flatten_count_chars(count_chars *cc)
     }
 
     newval = (char*)malloc(size + 1);
-    newval[size] = 0;
+    newval[0] = 0;
 
     for (i = 0; i < cc->num; i++) {
         if (cc->vals[i]) {
