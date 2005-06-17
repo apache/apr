@@ -665,6 +665,27 @@ static char *conv_p2_quad(u_widest_int num, register int nbits,
     return (p);
 }
 
+#if APR_HAS_THREADS
+static char *conv_os_thread_t_hex(apr_os_thread_t *tid, char *buf_end, apr_size_t *len)
+{
+    union {
+        apr_os_thread_t tid;
+        apr_uint64_t alignme;
+    } u;
+    int is_negative;
+
+    u.tid = *tid;
+    switch(sizeof(u.tid)) {
+    case sizeof(apr_int32_t):
+        return conv_p2(*(apr_uint32_t *)&u.tid, 4, 'x', buf_end, len);
+    case sizeof(apr_int64_t):
+        return conv_p2_quad(*(apr_uint64_t *)&u.tid, 4, 'x', buf_end, len);
+    default:
+        /* not implemented; stick 0 in the buffer */
+        return conv_10(0, TRUE, &is_negative, buf_end, len);
+    }
+}
+#endif
 
 /*
  * Do format conversion placing the output in buffer
@@ -1153,6 +1174,31 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
                     tid = va_arg(ap, apr_os_thread_t *);
                     if (tid != NULL) {
                         s = conv_os_thread_t(tid, &num_buf[NUM_BUF_SIZE], &s_len);
+                        if (adjust_precision && precision < s_len)
+                            s_len = precision;
+                    }
+                    else {
+                        s = S_NULL;
+                        s_len = S_NULL_LEN;
+                    }
+                    pad_char = ' ';
+                }
+#else
+                    char_buf[0] = '0';
+                    s = &char_buf[0];
+                    s_len = 1;
+                    pad_char = ' ';
+#endif
+                    break;
+
+                case 't':
+#if APR_HAS_THREADS
+                {
+                    apr_os_thread_t *tid;
+
+                    tid = va_arg(ap, apr_os_thread_t *);
+                    if (tid != NULL) {
+                        s = conv_os_thread_t_hex(tid, &num_buf[NUM_BUF_SIZE], &s_len);
                         if (adjust_precision && precision < s_len)
                             s_len = precision;
                     }
