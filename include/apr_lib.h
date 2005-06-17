@@ -116,6 +116,8 @@ APR_DECLARE(const char *) apr_filepath_name_get(const char *pathname);
  *      [ipv6-address]:port
  * %%pT takes an apr_os_thread_t * and prints it in decimal
  *      ('0' is printed if !APR_HAS_THREADS)
+ * %%pt takes an apr_os_thread_t * and prints it in hexadecimal
+ *      ('0' is printed if !APR_HAS_THREADS)
  * %%pp takes a void * and outputs it in hex
  *
  * The %%p hacks are to force gcc's printf warning code to skip
