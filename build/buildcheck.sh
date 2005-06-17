@@ -7,7 +7,7 @@ python=`build/PrintPath python`
 if test -z "$python"; then
 echo "buildconf: python not found."
 echo "           You need python installed"
-echo "           to build APR from CVS."
+echo "           to build APR from SVN."
 exit 1
 else
 py_version=`python -c 'import sys; print sys.version' 2>&1|sed 's/ .*//;q'`
@@ -19,14 +19,14 @@ ac_version=`${AUTOCONF:-autoconf} --version 2>/dev/null|sed -e 's/^[^0-9]*//;s/[
 if test -z "$ac_version"; then
 echo "buildconf: autoconf not found."
 echo "           You need autoconf version 2.50 or newer installed"
-echo "           to build APR from CVS."
+echo "           to build APR from SVN."
 exit 1
 fi
 IFS=.; set $ac_version; IFS=' '
 if test "$1" = "2" -a "$2" -lt "50" || test "$1" -lt "2"; then
 echo "buildconf: autoconf version $ac_version found."
 echo "           You need autoconf version 2.50 or newer installed"
-echo "           to build APR from CVS."
+echo "           to build APR from SVN."
 exit 1
 else
 echo "buildconf: autoconf version $ac_version (ok)"
@@ -43,7 +43,7 @@ lt_pversion=`$libtool --version 2>/dev/null|sed -e 's/([^)]*)//g;s/^[^0-9]*//;s/
 if test -z "$lt_pversion"; then
 echo "buildconf: libtool not found."
 echo "           You need libtool version 1.4 or newer installed"
-echo "           to build APR from CVS."
+echo "           to build APR from SVN."
 exit 1
 fi
 lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$/.\1/'`
@@ -61,6 +61,6 @@ fi
 
 echo "buildconf: libtool version $lt_pversion found."
 echo "           You need libtool version 1.4 or newer installed"
-echo "           to build APR from CVS."
+echo "           to build APR from SVN."
 
 exit 1
