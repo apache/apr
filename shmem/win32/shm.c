@@ -19,6 +19,7 @@
 #include "apr_file_io.h"
 #include "apr_shm.h"
 #include "apr_arch_file_io.h"
+#include "limits.h"
 
 typedef struct memblock_t {
     apr_size_t size;
@@ -63,7 +64,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     apr_file_t *f;
     void *base;
     void *mapkey;
-    DWORD err;
+    DWORD err, sizelo, sizehi;
 
     reqsize += sizeof(memblock_t);
 
@@ -76,6 +77,12 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 
     /* Compute the granualar multiple of the pagesize */
     size = memblock * (1 + (reqsize - 1) / memblock);
+    sizelo = (DWORD)size;
+#ifdef WIN64
+    sizehi = (DWORD)(size >> 32);
+#else
+    sizehi = 0;
+#endif
 
     if (!file) {
         /* Do Anonymous, which must be passed as a duplicated handle */
@@ -109,8 +116,6 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
-        DWORD sizelo = (DWORD)size;
-        DWORD sizehi = (DWORD)(size >> 32);
         hMap = CreateFileMappingW(hFile, NULL, PAGE_READWRITE, 
                                   sizehi, sizelo, mapkey);
     }
@@ -118,8 +123,6 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 #if APR_HAS_ANSI_FS
     ELSE_WIN_OS_IS_ANSI
     {
-        DWORD sizelo = (DWORD)size;
-        DWORD sizehi = (DWORD)(size >> 32);
         hMap = CreateFileMappingA(hFile, NULL, PAGE_READWRITE, 
                                   sizehi, sizelo, mapkey);
     }
