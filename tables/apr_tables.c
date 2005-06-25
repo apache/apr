@@ -337,14 +337,13 @@ struct apr_table_t {
     void *creator;
 #endif
     /* An index to speed up table lookups.  The way this works is:
-     *   - Take the requested key and compute its checksum
-     *   - Hash the checksum into the index:
-     *     - index_first[TABLE_HASH(checksum)] is the offset within
-     *       the table of the first entry with that key checksum
-     *     - index_last[TABLE_HASH(checksum)] is the offset within
-     *       the table of the first entry with that key checksum
+     *   - Hash the key into the index:
+     *     - index_first[TABLE_HASH(key)] is the offset within
+     *       the table of the first entry with that key
+     *     - index_last[TABLE_HASH(key)] is the offset within
+     *       the table of the last entry with that key
      *   - If (and only if) there is no entry in the table whose
-     *     checksum hashes to index element i, then the i'th bit
+     *     key hashes to index element i, then the i'th bit
      *     of index_initialized will be zero.  (Check this before
      *     trying to use index_first[i] or index_last[i]!)
      */
