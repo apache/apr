@@ -311,6 +311,22 @@ SOURCE=.\network_io\win32\sockopt.c
 SOURCE=.\passwd\apr_getpass.c
 # End Source File
 # End Group
+# Begin Group "random"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\random\unix\apr_random.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\random\unix\sha2.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\random\unix\sha2_glue.c
+# End Source File
+# End Group
 # Begin Group "shmem"
 
 # PROP Default_Filter ""
