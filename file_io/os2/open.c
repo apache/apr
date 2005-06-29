@@ -156,7 +156,7 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *from_path, const char *to_
 {
     ULONG rc = DosMove(from_path, to_path);
 
-    if (rc == ERROR_ACCESS_DENIED) {
+    if (rc == ERROR_ACCESS_DENIED || rc == ERROR_ALREADY_EXISTS) {
         rc = DosDelete(to_path);
 
         if (rc == 0 || rc == ERROR_FILE_NOT_FOUND) {
