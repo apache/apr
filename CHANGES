@@ -1,5 +1,7 @@
 Changes for APR 1.2.0
 
+  *) Fix Pollset corruption on Solaris 10. [Paul Querna]
+
   *) Add %pt support to apr_snprintf() for printing an apr_os_thread_t
      in hex format.  [Jeff Trawick]
 
