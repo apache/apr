@@ -282,6 +282,8 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
         port_associate(pollset->port_fd, PORT_SOURCE_FD, 
                            fd, get_event(ep->pfd.reqevents), ep);
 
+        APR_RING_INSERT_TAIL(&(pollset->query_ring), ep, pfd_elem_t, link);
+
     }
 
     pollset_unlock_rings();
@@ -312,6 +314,8 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                 (((pfd_elem_t*)(pollset->port_set[i].portev_user))->pfd);
             pollset->result_set[i].rtnevents =
                 get_revent(pollset->port_set[i].portev_events);
+
+            APR_RING_REMOVE((pfd_elem_t*)pollset->port_set[i].portev_user, link);
 
             APR_RING_INSERT_TAIL(&(pollset->add_ring), 
                                  (pfd_elem_t*)pollset->port_set[i].portev_user,
