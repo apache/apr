@@ -375,8 +375,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
                     interpreter[0] = 0;
                 }
             }
+
+            apr_file_close(progfile);
         }
-        apr_file_close(progfile);
     }
 
     i = 0;
