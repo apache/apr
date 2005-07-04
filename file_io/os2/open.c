@@ -67,12 +67,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     }
 
     if (flag & APR_CREATE) {
-        oflags |= OPEN_ACTION_CREATE_IF_NEW; 
-        if (!(flag & APR_EXCL)) {
-            if (flag & APR_APPEND)
-                oflags |= OPEN_ACTION_OPEN_IF_EXISTS;
-            else
-                oflags |= OPEN_ACTION_REPLACE_IF_EXISTS;
+        oflags |= OPEN_ACTION_CREATE_IF_NEW;
+
+        if (!(flag & APR_EXCL) && !(flag & APR_TRUNCATE)) {
+            oflags |= OPEN_ACTION_OPEN_IF_EXISTS;
         }
     }
     
