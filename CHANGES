@@ -5,19 +5,19 @@ Changes for APR 1.2.0
   *) Add %pt support to apr_snprintf() for printing an apr_os_thread_t
      in hex format.  [Jeff Trawick]
 
-   *) Support APR_SO_SNDBUF and APR_SO_RCVBUF on Windows.  PR 32177.
-      [Sim <sgobbi datamanagement.it>, Jeff Trawick]
+  *) Support APR_SO_SNDBUF and APR_SO_RCVBUF on Windows.  PR 32177.
+     [Sim <sgobbi datamanagement.it>, Jeff Trawick]
 
-   *) Fix apr_table_overlap()'s handling of tables allocated from
-      different pools.  [Joe Schaefer <joe+gmane@sunstarsys.com>]
+  *) Fix apr_table_overlap()'s handling of tables allocated from
+     different pools.  [Joe Schaefer <joe+gmane@sunstarsys.com>]
 
-   *) Add support for uuid_generate on OS X 10.4. [Paul Querna]
+  *) Add support for uuid_generate on OS X 10.4. [Paul Querna]
 
-   *) Include the C preprocessor flags in --cflags for pkg-config.
-      [Paul Querna]
+  *) Include the C preprocessor flags in --cflags for pkg-config.
+     [Paul Querna]
 
-   *) Fix issue with poll() followed by net I/O yielding EAGAIN on
-      Mac OS 10.4 (Darwin 8). [Wilfredo Sanchez]
+  *) Fix issue with poll() followed by net I/O yielding EAGAIN on
+     Mac OS 10.4 (Darwin 8). [Wilfredo Sanchez]
 
 Changes for APR 1.1.1
 
