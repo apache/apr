@@ -63,6 +63,9 @@ typedef struct _WSABUF {
     char FAR *  buf;     /* the pointer to the buffer */
 } WSABUF, FAR * LPWSABUF;
 #endif
+#else
+/* Not sure if this is the right place to define this */
+#define HAVE_STRUCT_IPMREQ
 #endif
 
 apr_status_t status_from_res_error(int);
