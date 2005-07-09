@@ -1,5 +1,11 @@
 Changes for APR 1.2.0
 
+  *) Switch to lazy initialization of the pollset that's used within
+     apr_file_t on platforms where apr_wait_for_io_or_timeout() doesn't
+     use poll(2).  (This fixes a performance problem observed in httpd-2.x
+     on OS X due to the use of poll now being disabled by default on that
+     platform.)  [Brian Pane]
+
   *) Fix Pollset corruption on Solaris 10. [Paul Querna]
 
   *) Add %pt support to apr_snprintf() for printing an apr_os_thread_t
