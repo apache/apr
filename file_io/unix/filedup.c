@@ -93,9 +93,10 @@ static apr_status_t file_dup(apr_file_t **new_file,
                               apr_unix_file_cleanup, 
                               apr_unix_file_cleanup);
 #ifndef WAITIO_USES_POLL
-    /* Create a pollset with room for one descriptor. */
-    /* ### check return codes */
-    (void) apr_pollset_create(&(*new_file)->pollset, 1, p, 0);
+    /* Start out with no pollset.  apr_wait_for_io_or_timeout() will
+     * initialize the pollset if needed.
+     */
+    (*new_file)->pollset = NULL;
 #endif
     return APR_SUCCESS;
 }
@@ -150,9 +151,7 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
     apr_pool_cleanup_kill(old_file->pool, (void *)old_file,
                           apr_unix_file_cleanup);
 #ifndef WAITIO_USES_POLL
-    /* Create a pollset with room for one descriptor. */
-    /* ### check return codes */
-    (void) apr_pollset_create(&(*new_file)->pollset, 1, p, 0);
+    (*new_file)->pollset = NULL;
 #endif
     return APR_SUCCESS;
 }
