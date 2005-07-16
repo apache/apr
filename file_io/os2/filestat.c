@@ -225,5 +225,16 @@ APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
                                               apr_time_t mtime,
                                               apr_pool_t *pool)
 {
-  return APR_ENOTIMPL;
+    FILESTATUS3 fs3;
+    ULONG rc;
+    rc = DosQueryPathInfo(fname, FIL_STANDARD, &fs3, sizeof(fs3));
+
+    if (rc) {
+        return APR_FROM_OS_ERROR(rc);
+    }
+
+    apr_apr_time_to_os2_time(&fs3.fdateLastWrite, &fs3.ftimeLastWrite, mtime);
+
+    rc = DosSetPathInfo(fname, FIL_STANDARD, &fs3, sizeof(fs3), 0);
+    return APR_FROM_OS_ERROR(rc);
 }

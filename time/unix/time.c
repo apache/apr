@@ -267,6 +267,23 @@ APR_DECLARE(apr_status_t) apr_os2_time_to_apr_time(apr_time_t *result,
   *result = mktime(&tmpdate) * APR_USEC_PER_SEC;
   return APR_SUCCESS;
 }
+
+APR_DECLARE(apr_status_t) apr_apr_time_to_os2_time(FDATE *os2date,
+                                                   FTIME *os2time,
+                                                   apr_time_t aprtime)
+{
+    time_t ansitime = aprtime / APR_USEC_PER_SEC;
+    struct tm *lt;
+    lt = localtime(&ansitime);
+    os2time->hours    = lt->tm_hour;
+    os2time->minutes  = lt->tm_min;
+    os2time->twosecs  = lt->tm_sec / 2;
+
+    os2date->day      = lt->tm_mday;
+    os2date->month    = lt->tm_mon + 1;
+    os2date->year     = lt->tm_year - 80;
+    return APR_SUCCESS;
+}
 #endif
 
 #ifdef NETWARE
