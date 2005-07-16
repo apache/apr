@@ -66,6 +66,8 @@ struct apr_dir_t {
 apr_status_t apr_file_cleanup(void *);
 apr_status_t apr_os2_time_to_apr_time(apr_time_t *result, FDATE os2date, 
                                       FTIME os2time);
+apr_status_t apr_apr_time_to_os2_time(FDATE *os2date, FTIME *os2time,
+                                      apr_time_t aprtime);
 
 /* see win32/fileio.h for description of these */
 extern const char c_is_fnchar[256];
