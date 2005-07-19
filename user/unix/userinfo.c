@@ -114,13 +114,22 @@ APR_DECLARE(apr_status_t) apr_uid_name_get(char **username, apr_uid_t userid,
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETPWUID_R)
     struct passwd pwd;
     char pwbuf[PWBUF_SIZE];
+    apr_status_t rv;
 
-    if (getpwuid_r(userid, &pwd, pwbuf, sizeof(pwbuf), &pw) || pw == NULL) {
+    rv = getpwuid_r(userid, &pwd, pwbuf, sizeof(pwbuf), &pw);
+    if (rv) {
+        return rv;
+    }
+
+    if (pw == NULL) {
+        return APR_ENOENT;
+    }
+
 #else
     if ((pw = getpwuid(userid)) == NULL) {
-#endif
         return errno;
     }
+#endif
     *username = apr_pstrdup(p, pw->pw_name);
     return APR_SUCCESS;
 }
