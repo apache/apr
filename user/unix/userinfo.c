@@ -115,7 +115,7 @@ APR_DECLARE(apr_status_t) apr_uid_name_get(char **username, apr_uid_t userid,
     struct passwd pwd;
     char pwbuf[PWBUF_SIZE];
 
-    if (getpwuid_r(userid, &pwd, pwbuf, sizeof(pwbuf), &pw)) {
+    if (getpwuid_r(userid, &pwd, pwbuf, sizeof(pwbuf), &pw) || pw == NULL) {
 #else
     if ((pw = getpwuid(userid)) == NULL) {
 #endif
