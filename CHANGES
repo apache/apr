@@ -1,5 +1,8 @@
 Changes for APR 1.2.0
 
+  *) If getpwuid_r or getgrgid_r set their results to NULL, it is an error.
+     PR 34053. [Paul Querna]
+
   *) Switch to lazy initialization of the pollset that's used within
      apr_file_t on platforms where apr_wait_for_io_or_timeout() doesn't
      use poll(2).  (This fixes a performance problem observed in httpd-2.x

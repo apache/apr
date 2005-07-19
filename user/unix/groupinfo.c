@@ -37,7 +37,7 @@ APR_DECLARE(apr_status_t) apr_gid_name_get(char **groupname, apr_gid_t groupid,
     struct group grp;
     char grbuf[512];
 
-    if (getgrgid_r(groupid, &grp, grbuf, sizeof(grbuf), &gr)) {
+    if (getgrgid_r(groupid, &grp, grbuf, sizeof(grbuf), &gr) || gr == NULL) {
 #else
     if ((gr = getgrgid(groupid)) == NULL) {
 #endif
