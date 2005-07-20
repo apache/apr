@@ -49,6 +49,17 @@ apr_status_t apr_unix_file_cleanup(void *thefile)
         /* Are there any error conditions other than EINTR or EBADF? */
         rv = errno;
     }
+#ifndef WAITIO_USES_POLL
+    if (file->pollset != NULL) {
+        apr_status_t pollset_rv = apr_pollset_destroy(file->pollset);
+        /* If the file close failed, return its error value,
+         * not apr_pollset_destroy()'s.
+         */
+        if (rv == APR_SUCCESS) {
+            rv = pollset_rv;
+        }
+    }
+#endif /* !WAITIO_USES_POLL */
     return rv != APR_SUCCESS ? rv : flush_rv;
 }
 
@@ -159,9 +170,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     (*new)->dataRead = 0;
     (*new)->direction = 0;
 #ifndef WAITIO_USES_POLL
-    /* Create a pollset with room for one descriptor. */
-    /* ### check return codes */
-    (void) apr_pollset_create(&(*new)->pollset, 1, pool, 0);
+    /* Start out with no pollset.  apr_wait_for_io_or_timeout() will
+     * initialize the pollset if needed.
+     */
+    (*new)->pollset = NULL;
 #endif
     if (!(flag & APR_FILE_NOCLEANUP)) {
         apr_pool_cleanup_register((*new)->pool, (void *)(*new), 
@@ -220,9 +232,10 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     (*file)->buffered = (flags & APR_BUFFERED) > 0;
 
 #ifndef WAITIO_USES_POLL
-    /* Create a pollset with room for one descriptor. */
-    /* ### check return codes */
-    (void) apr_pollset_create(&(*file)->pollset, 1, pool, 0);
+    /* Start out with no pollset.  apr_wait_for_io_or_timeout() will
+     * initialize the pollset if needed.
+     */
+    (*file)->pollset = NULL;
 #endif
 
     if ((*file)->buffered) {

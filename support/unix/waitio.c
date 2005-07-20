@@ -61,7 +61,7 @@ apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
     }
 }
 
-#else
+#else /* !WAITIO_USES_POLL */
 
 apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
                                         int for_read)
@@ -78,6 +78,13 @@ apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
         pfd.desc.f = f;
 
         pollset = f->pollset;
+        if (pollset == NULL) {
+            status = apr_pollset_create(&(f->pollset), 1, f->pool, 0);
+            if (status != APR_SUCCESS) {
+                return status;
+            }
+            pollset = f->pollset;
+        }
         timeout = f->timeout;
     }
     else {
