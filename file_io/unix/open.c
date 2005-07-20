@@ -51,7 +51,7 @@ apr_status_t apr_unix_file_cleanup(void *thefile)
     }
 #ifndef WAITIO_USES_POLL
     if (file->pollset != NULL) {
-        int pollset_rv = apr_pollset_destroy(file->pollset);
+        apr_status_t pollset_rv = apr_pollset_destroy(file->pollset);
         /* If the file close failed, return its error value,
          * not apr_pollset_destroy()'s.
          */
