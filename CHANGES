@@ -1,5 +1,8 @@
 Changes with APR 0.9.7
 
+  *) Refactor Win32 condition variables code to address bugs 27654, 34336.
+     [Henry Jen <henryjen ztune.net>, E Holyat <eholyat yahoo.com>]
+
   *) Support APR_SO_SNDBUF and APR_SO_RCVBUF on Windows.  PR 32177.
      [Sim <sgobbi datamanagement.it>, Jeff Trawick]
 
