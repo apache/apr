@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +43,7 @@ static apr_status_t pipeblock(apr_file_t *thepipe)
       fd_flags &= ~O_NONBLOCK;
 #  elif defined(O_NDELAY)
       fd_flags &= ~O_NDELAY;
-#  elif defined(FNDELAY)
+#  elif defined(O_FNDELAY)
       fd_flags &= ~O_FNDELAY;
 #  else 
       /* XXXX: this breaks things, but an alternative isn't obvious...*/
@@ -77,7 +78,7 @@ static apr_status_t pipenonblock(apr_file_t *thepipe)
       fd_flags |= O_NONBLOCK;
 #  elif defined(O_NDELAY)
       fd_flags |= O_NDELAY;
-#  elif defined(FNDELAY)
+#  elif defined(O_FNDELAY)
       fd_flags |= O_FNDELAY;
 #  else
       /* XXXX: this breaks things, but an alternative isn't obvious...*/
@@ -160,9 +161,10 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put_ex(apr_file_t **file,
                                   apr_pool_cleanup_null);
     }
 #ifndef WAITIO_USES_POLL
-    /* Create a pollset with room for one descriptor. */
-    /* ### check return codes */
-    (void) apr_pollset_create(&(*file)->pollset, 1, pool, 0);
+    /* Start out with no pollset.  apr_wait_for_io_or_timeout() will
+     * initialize the pollset if needed.
+     */
+    (*file)->pollset = NULL;
 #endif
     return APR_SUCCESS;
 }
@@ -196,7 +198,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*in)->thlock = NULL;
 #endif
 #ifndef WAITIO_USES_POLL
-    (void) apr_pollset_create(&(*in)->pollset, 1, pool, 0);
+    (*in)->pollset = NULL;
 #endif
     (*out) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
     (*out)->pool = pool;
@@ -211,7 +213,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*out)->thlock = NULL;
 #endif
 #ifndef WAITIO_USES_POLL
-    (void) apr_pollset_create(&(*out)->pollset, 1, pool, 0);
+    (*out)->pollset = NULL;
 #endif
     apr_pool_cleanup_register((*in)->pool, (void *)(*in), apr_unix_file_cleanup,
                          apr_pool_cleanup_null);
