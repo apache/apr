@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,9 +93,10 @@ static apr_status_t file_dup(apr_file_t **new_file,
                               apr_unix_file_cleanup, 
                               apr_unix_file_cleanup);
 #ifndef WAITIO_USES_POLL
-    /* Create a pollset with room for one descriptor. */
-    /* ### check return codes */
-    (void) apr_pollset_create(&(*new_file)->pollset, 1, p, 0);
+    /* Start out with no pollset.  apr_wait_for_io_or_timeout() will
+     * initialize the pollset if needed.
+     */
+    (*new_file)->pollset = NULL;
 #endif
     return APR_SUCCESS;
 }
@@ -149,9 +151,7 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
     apr_pool_cleanup_kill(old_file->pool, (void *)old_file,
                           apr_unix_file_cleanup);
 #ifndef WAITIO_USES_POLL
-    /* Create a pollset with room for one descriptor. */
-    /* ### check return codes */
-    (void) apr_pollset_create(&(*new_file)->pollset, 1, p, 0);
+    (*new_file)->pollset = NULL;
 #endif
     return APR_SUCCESS;
 }
