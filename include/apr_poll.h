@@ -123,6 +123,15 @@ APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t *pollset);
  * @remark If you set client_data in the descriptor, that value
  *         will be returned in the client_data field whenever this
  *         descriptor is signalled in apr_pollset_poll().
+ * @remark If the pollset has been created with APR_POLLSET_THREADSAFE
+ *         and thread T1 is blocked in a call to apr_pollset_poll() for
+ *         this same pollset that is being modified via apr_pollset_add()
+ *         in thread T2, the currently executing apr_pollset_poll() call in
+ *         T1 will either: (1) automatically include the newly added descriptor
+ *         in the set of descriptors it is watching or (2) return immediately
+ *         with APR_EINTR.  Option (1) is recommended, but option (2) is
+ *         allowed for implementations where option (1) is impossible
+ *         or impractical.
  */
 APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
                                           const apr_pollfd_t *descriptor);
@@ -131,6 +140,15 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
  * Remove a descriptor from a pollset
  * @param pollset The pollset from which to remove the descriptor
  * @param descriptor The descriptor to remove
+ * @remark If the pollset has been created with APR_POLLSET_THREADSAFE
+ *         and thread T1 is blocked in a call to apr_pollset_poll() for
+ *         this same pollset that is being modified via apr_pollset_remove()
+ *         in thread T2, the currently executing apr_pollset_poll() call in
+ *         T1 will either: (1) automatically exclude the newly added descriptor
+ *         in the set of descriptors it is watching or (2) return immediately
+ *         with APR_EINTR.  Option (1) is recommended, but option (2) is
+ *         allowed for implementations where option (1) is impossible
+ *         or impractical.
  */
 APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
                                              const apr_pollfd_t *descriptor);
