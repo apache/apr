@@ -1,3 +1,8 @@
+Changes for APR 1.2.1
+
+  *) Refactor Win32 condition variables code to address bugs 27654, 34336.
+     [Henry Jen <henryjen ztune.net>, E Holyat <eholyat yahoo.com>]
+
 Changes for APR 1.2.0
 
   *) If getpwuid_r or getgrgid_r set their results to NULL, it is an error.
