@@ -66,7 +66,7 @@
  * "development" copies of APR.  It is undefined for released versions
  * of APR.
  */
-#define APR_IS_DEV_VERSION
+/* #define APR_IS_DEV_VERSION */
 
 
 #if defined(APR_IS_DEV_VERSION) || defined(DOXYGEN)
