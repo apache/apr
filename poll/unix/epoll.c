@@ -91,6 +91,13 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                                              apr_uint32_t flags)
 {
     apr_status_t rv;
+    int fd;
+
+    fd = epoll_create(size);
+    if (fd < 0) {
+        *pollset = NULL;
+        return errno;
+    }
 
     *pollset = apr_palloc(p, sizeof(**pollset));
 #if APR_HAS_THREADS
@@ -111,10 +118,9 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
     (*pollset)->nalloc = size;
     (*pollset)->flags = flags;
     (*pollset)->pool = p;
-    (*pollset)->epoll_fd = epoll_create(size);
+    (*pollset)->epoll_fd = fd;
     (*pollset)->pollset = apr_palloc(p, size * sizeof(struct epoll_event));
-    apr_pool_cleanup_register(p, (void *) (*pollset), backend_cleanup,
-                              apr_pool_cleanup_null);
+    apr_pool_cleanup_register(p, *pollset, backend_cleanup, backend_cleanup);
     (*pollset)->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
 
     APR_RING_INIT(&(*pollset)->query_ring, pfd_elem_t, link);
