@@ -1,3 +1,11 @@
+Changes for APR 1.3.0
+
+  *) Add %pm support to apr_snprintf() for printing the error string
+     corresponding to an apr_status_t value.  [Joe Orton]
+
+  *) Add APR_ARRAY_IDX() and APR_ARRAY_PUSH() convenience macros to
+     apr_tables.h.  [Garrett Rooney]
+
 Changes for APR 1.2.1
 
   *) Refactor Win32 condition variables code to address bugs 27654, 34336.
