@@ -120,6 +120,25 @@ APR_DECLARE(apr_array_header_t *) apr_array_make(apr_pool_t *p,
  */
 APR_DECLARE(void *) apr_array_push(apr_array_header_t *arr);
 
+/** A helper macro for accessing a member of an APR array.
+ *
+ * @param ary the array
+ * @param i the index into the array to return
+ * @param type the type of the objects stored in the array
+ *
+ * @return the item at index i
+ */
+#define APR_ARRAY_IDX(ary,i,type) (((type *)(ary)->elts)[i])
+
+/** A helper macro for pushing elements into an APR array.
+ *
+ * @param ary the array
+ * @param type the type of the objects stored in the array
+ *
+ * @return the location where the new object should be placed
+ */
+#define APR_ARRAY_PUSH(ary,type) (*((type *)apr_array_push(ary)))
+
 /**
  * Remove an element from an array (as a first-in, last-out stack)
  * @param arr The array to remove an element from.
