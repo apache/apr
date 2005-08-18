@@ -118,8 +118,13 @@ APR_DECLARE(const char *) apr_filepath_name_get(const char *pathname);
  *      ('0' is printed if !APR_HAS_THREADS)
  * %%pt takes an apr_os_thread_t * and prints it in hexadecimal
  *      ('0' is printed if !APR_HAS_THREADS)
+ * %%pm takes an apr_status_t * and prints the appropriate error
+ *      string (from apr_strerror) corresponding to that error code.
  * %%pp takes a void * and outputs it in hex
  *
+ * %%pt is only available from APR 1.2.0 onwards.
+ * %%pm is only available from APR 1.3.0 onwards.
+ * 
  * The %%p hacks are to force gcc's printf warning code to skip
  * over a pointer argument without complaining.  This does
  * mean that the ANSI-style %%p (output a void * in hex format) won't

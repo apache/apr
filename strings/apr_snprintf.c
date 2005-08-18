@@ -21,6 +21,7 @@
 #include "apr_strings.h"
 #include "apr_network_io.h"
 #include "apr_portable.h"
+#include "apr_errno.h"
 #include <math.h>
 #if APR_HAVE_CTYPE_H
 #include <ctype.h>
@@ -1157,6 +1158,24 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
                         s = conv_in_addr(ia, &num_buf[NUM_BUF_SIZE], &s_len);
                         if (adjust_precision && precision < s_len)
                             s_len = precision;
+                    }
+                    else {
+                        s = S_NULL;
+                        s_len = S_NULL_LEN;
+                    }
+                    pad_char = ' ';
+                }
+                break;
+
+                /* print the error for an apr_status_t */
+                case 'm':
+                {
+                    apr_status_t *mrv;
+
+                    mrv = va_arg(ap, apr_status_t *);
+                    if (mrv != NULL) {
+                        s = apr_strerror(*mrv, num_buf, NUM_BUF_SIZE-1);
+                        s_len = strlen(s);
                     }
                     else {
                         s = S_NULL;
