@@ -68,7 +68,7 @@ APR_DECLARE(apr_status_t) apr_file_writev_full(apr_file_t *thefile,
                                                apr_size_t *bytes_written)
 {
     apr_status_t rv = APR_SUCCESS;
-    int i;
+    apr_size_t i;
     apr_size_t amt = 0;
     apr_size_t total = 0;
 
