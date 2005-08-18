@@ -117,6 +117,24 @@ static void more_int64_fmts(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, buf, "-314159265358979323");
 }
 
+static void error_fmt(abts_case *tc, void *data)
+{
+    char ebuf[150], sbuf[150], *s;
+    apr_status_t rv;
+
+    rv = APR_SUCCESS;
+    apr_strerror(rv, ebuf, sizeof ebuf);
+    apr_snprintf(sbuf, sizeof sbuf, "%pm", &rv);
+    ABTS_STR_EQUAL(tc, sbuf, ebuf);
+
+    rv = APR_ENOTIMPL;
+    s = apr_pstrcat(p, "foo-",
+                    apr_strerror(rv, ebuf, sizeof ebuf),
+                    "-bar", NULL);
+    apr_snprintf(sbuf, sizeof sbuf, "foo-%pm-bar", &rv);
+    ABTS_STR_EQUAL(tc, sbuf, s);
+}
+
 abts_suite *testfmt(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -129,6 +147,7 @@ abts_suite *testfmt(abts_suite *suite)
     abts_run_test(suite, uint64_t_fmt, NULL);
     abts_run_test(suite, uint64_t_hex_fmt, NULL);
     abts_run_test(suite, more_int64_fmts, NULL);
+    abts_run_test(suite, error_fmt, NULL);
 
     return suite;
 }
