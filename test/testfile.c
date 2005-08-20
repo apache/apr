@@ -703,6 +703,37 @@ static void test_bigfprintf(abts_case *tc, void *data)
     free(to_write);
 }
 
+static void test_fail_write_flush(abts_case *tc, void *data)
+{
+    apr_file_t *f;
+    const char *fname = "data/testflush.dat";
+    apr_status_t rv;
+    char buf[APR_BUFFERSIZE];
+    int n;
+
+    apr_file_remove(fname, p);
+
+    APR_ASSERT_SUCCESS(tc, "open test file",
+                       apr_file_open(&f, fname,
+                                     APR_CREATE|APR_READ|APR_BUFFERED,
+                                     APR_UREAD|APR_UWRITE, p));
+
+    memset(buf, 'A', sizeof buf);
+
+    /* Try three writes.  One of these should fail when it exceeds the
+     * internal buffer and actually tries to write to the file, which
+     * was opened read-only and hence should be unwritable. */
+    for (n = 0, rv = APR_SUCCESS; n < 4 && rv == APR_SUCCESS; n++) {
+        apr_size_t bytes = sizeof buf;
+        rv = apr_file_write(f, buf, &bytes);
+    }
+
+    ABTS_ASSERT(tc, "failed to write to read-only buffered fd",
+                rv != APR_SUCCESS);
+
+    apr_file_close(f);
+}
+
 abts_suite *testfile(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -733,6 +764,7 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_mod_neg, NULL);
     abts_run_test(suite, test_truncate, NULL);
     abts_run_test(suite, test_bigfprintf, NULL);
+    abts_run_test(suite, test_fail_write_flush, NULL);
 
     return suite;
 }
