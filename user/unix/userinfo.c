@@ -38,13 +38,23 @@ static apr_status_t getpwnam_safe(const char *username,
 {
     struct passwd *pwptr;
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETPWNAM_R)
-    /* IRIX getpwnam_r() returns 0 and sets pwptr to NULL on failure */
-    if (!getpwnam_r(username, pw, pwbuf, PWBUF_SIZE, &pwptr) && pwptr) {
-        /* nothing extra to do on success */
+    apr_status_t rv;
+
+    /* POSIX defines getpwnam_r() et al to return the error number
+     * rather than set errno, and requires pwptr to be set to NULL if
+     * the entry is not found, imply that "not found" is not an error
+     * condition; some implementations do return 0 with pwptr set to
+     * NULL. */
+    rv = getpwnam_r(username, pw, pwbuf, PWBUF_SIZE, &pwptr);
+    if (rv) {
+        return rv;
+    }
+    if (pwptr == NULL) {
+        return APR_ENOENT;
+    }
 #else
     if ((pwptr = getpwnam(username)) != NULL) {
         memcpy(pw, pwptr, sizeof *pw);
-#endif
     }
     else {
         if (errno == 0) {
@@ -53,6 +63,7 @@ static apr_status_t getpwnam_safe(const char *username,
         }
         return errno;
     }
+#endif
     return APR_SUCCESS;
 }
 
