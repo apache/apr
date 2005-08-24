@@ -803,16 +803,16 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
      * is still within given basepath.  Note that the root path 
      * segment is thoroughly tested prior to path parsing.
      */
-    if (flags & APR_FILEPATH_NOTABOVEROOT) {
-        if (memcmp(basepath, path + rootlen, baselen))
+    if ((flags & APR_FILEPATH_NOTABOVEROOT) && (baselen || rootlen)) {
+        if (baselen && memcmp(basepath, path + rootlen, baselen) &&
+            basepath[baselen - 1] != '/' && basepath[baselen - 1] != '\\')
             return APR_EABOVEROOT;
 
         /* Ahem... if we weren't given a trailing slash on the basepath,
          * we better be sure that /foo wasn't replaced with /foobar!
          */
-        if (basepath[baselen - 1] != '/' && basepath[baselen - 1] != '\\'
-                && path[rootlen + baselen] && path[rootlen + baselen] != '/' 
-                                           && path[rootlen + baselen] != '\\')
+        if (path[rootlen + baselen] && path[rootlen + baselen] != '/' 
+            && path[rootlen + baselen] != '\\')
             return APR_EABOVEROOT;
     }
 
