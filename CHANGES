@@ -1,5 +1,9 @@
 Changes for APR 1.3.0
 
+  *) If apr_proc_create() fails to exec in the fork()ed child, call
+     _exit() not exit() to avoid running atexit()-registered functions
+     in the child.  PR 30913.  [Joe Orton]
+
   *) Fix error handling where apr_uid_* and apr_gid_* could return
      APR_SUCCESS in failure cases.  [Joe Orton]
 
