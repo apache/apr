@@ -1,3 +1,8 @@
+Changes for APR 1.2.2
+
+  *) Fix error handling where apr_uid_* and apr_gid_* could return
+     APR_SUCCESS in failure cases.  PR 34053 continued.  [Joe Orton]
+
 Changes for APR 1.2.1
 
   *) Refactor Win32 condition variables code to address bugs 27654, 34336.
