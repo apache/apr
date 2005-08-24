@@ -1974,6 +1974,15 @@ APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
     c = p->cleanups;
     lastp = &p->cleanups;
     while (c) {
+#if APR_POOL_DEBUG
+        /* Some cheap loop detection to catch a corrupt list: */
+        if (c == c->next
+            || (c->next && c == c->next->next)
+            || (c->next && c->next->next && c == c->next->next->next)) {
+            abort();
+        }
+#endif
+
         if (c->data == data && c->plain_cleanup_fn == cleanup_fn) {
             *lastp = c->next;
             /* move to freelist */
