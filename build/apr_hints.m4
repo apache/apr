@@ -415,7 +415,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
        ;;
     *cygwin*)
 	APR_ADDTO(CPPFLAGS, [-DCYGWIN])
-	APR_ADDTO(LIBS, [-lcrypt])
 	;;
   esac
 
