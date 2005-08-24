@@ -47,8 +47,9 @@ APR_DECLARE(apr_status_t) apr_gid_name_get(char **groupname, apr_gid_t groupid,
         return APR_ENOENT;
     }
 #else
+    errno = 0;
     if ((gr = getgrgid(groupid)) == NULL) {
-        return errno;
+        return errno ? errno : APR_ENOENT;
     }
 #endif
     *groupname = apr_pstrdup(p, gr->gr_name);
@@ -74,8 +75,9 @@ APR_DECLARE(apr_status_t) apr_gid_get(apr_gid_t *groupid,
         return APR_ENOENT;
     }
 #else
+    errno = 0;
     if ((gr = getgrnam(groupname)) == NULL) {
-        return errno;
+        return errno ? errno : APR_ENOENT;
     }
 #endif
     *groupid = gr->gr_gid;

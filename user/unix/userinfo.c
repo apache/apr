@@ -53,15 +53,14 @@ static apr_status_t getpwnam_safe(const char *username,
         return APR_ENOENT;
     }
 #else
+    /* Some platforms (e.g. FreeBSD 4.x) do not set errno on NULL "not
+     * found" return values for the non-threadsafe function either. */
+    errno = 0;
     if ((pwptr = getpwnam(username)) != NULL) {
         memcpy(pw, pwptr, sizeof *pw);
     }
     else {
-        if (errno == 0) {
-            /* this can happen with getpwnam() on FreeBSD 4.3 */
-            return APR_EGENERAL;
-        }
-        return errno;
+        return errno ? errno : APR_ENOENT;
     }
 #endif
     return APR_SUCCESS;
@@ -137,8 +136,9 @@ APR_DECLARE(apr_status_t) apr_uid_name_get(char **username, apr_uid_t userid,
     }
 
 #else
+    errno = 0;
     if ((pw = getpwuid(userid)) == NULL) {
-        return errno;
+        return errno ? errno : APR_ENOENT;
     }
 #endif
     *username = apr_pstrdup(p, pw->pw_name);
