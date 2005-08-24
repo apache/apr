@@ -883,7 +883,10 @@ AC_SUBST(sharedmem)
 
 dnl ----------------------------- Checks for Any required Functions
 dnl Checks for library functions. (N.B. poll is further down)
-AC_CHECK_FUNCS([alloca calloc setsid isinf isnan \
+
+AC_FUNC_ALLOCA
+
+AC_CHECK_FUNCS([calloc setsid isinf isnan \
                 getenv putenv setenv unsetenv \
                 writev getifaddrs utime utimes])
 AC_CHECK_FUNCS(setrlimit, [ have_setrlimit="1" ], [ have_setrlimit="0" ]) 
@@ -973,7 +976,6 @@ dnl ----------------------------- Checks for Any required Headers
 AC_HEADER_STDC
 
 APR_FLAG_HEADERS(
-    alloca.h            \
     ByteOrder.h		\
     conio.h		\
     crypt.h		\
