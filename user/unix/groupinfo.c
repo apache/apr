@@ -37,13 +37,22 @@ APR_DECLARE(apr_status_t) apr_gid_name_get(char **groupname, apr_gid_t groupid,
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETGRGID_R)
     struct group grp;
     char grbuf[512];
+    apr_status_t rv;
 
-    if (getgrgid_r(groupid, &grp, grbuf, sizeof(grbuf), &gr)) {
-#else
-    if ((gr = getgrgid(groupid)) == NULL) {
-#endif
-        return errno;
+    /* See comment in getpwnam_safe on error handling. */
+    rv = getgrgid_r(groupid, &grp, grbuf, sizeof(grbuf), &gr);
+    if (rv) {
+        return rv;
     }
+    if (gr == NULL) {
+        return APR_ENOENT;
+    }
+#else
+    errno = 0;
+    if ((gr = getgrgid(groupid)) == NULL) {
+        return errno ? errno : APR_ENOENT;
+    }
+#endif
     *groupname = apr_pstrdup(p, gr->gr_name);
 #endif
     return APR_SUCCESS;
@@ -58,13 +67,22 @@ APR_DECLARE(apr_status_t) apr_gid_get(apr_gid_t *groupid,
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETGRNAM_R)
     struct group grp;
     char grbuf[512];
+    apr_status_t rv;
 
-    if (getgrnam_r(groupname, &grp, grbuf, sizeof(grbuf), &gr)) {
-#else
-    if ((gr = getgrnam(groupname)) == NULL) {
-#endif
-        return errno;
+    /* See comment in getpwnam_safe on error handling. */
+    rv = getgrnam_r(groupname, &grp, grbuf, sizeof(grbuf), &gr);
+    if (rv) {
+        return rv;
     }
+    if (gr == NULL) {
+        return APR_ENOENT;
+    }
+#else
+    errno = 0;
+    if ((gr = getgrnam(groupname)) == NULL) {
+        return errno ? errno : APR_ENOENT;
+    }
+#endif
     *groupid = gr->gr_gid;
 #endif
     return APR_SUCCESS;

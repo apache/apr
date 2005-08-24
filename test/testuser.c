@@ -93,6 +93,51 @@ static void groupname(CuTest *tc)
 
     CuAssertIntEquals(tc, APR_SUCCESS, apr_gid_compare(gid, retreived_gid));
 }
+
+static void fail_userinfo(CuTest *tc)
+{
+    apr_uid_t uid;
+    apr_gid_t gid;
+    apr_status_t rv;
+    char *tmp;
+
+    errno = 0;
+    gid = uid = 9999999;
+    tmp = NULL;
+    rv = apr_uid_name_get(&tmp, uid, p);
+    CuAssert(tc, "apr_uid_name_get should fail or "
+                "return a user name",
+                rv != APR_SUCCESS || tmp != NULL);
+
+    errno = 0;
+    tmp = NULL;
+    rv = apr_gid_name_get(&tmp, gid, p);
+    CuAssert(tc, "apr_gid_name_get should fail or "
+             "return a group name",
+             rv != APR_SUCCESS || tmp != NULL);
+    
+    gid = 424242;
+    errno = 0;
+    rv = apr_gid_get(&gid, "I_AM_NOT_A_GROUP", p);
+    CuAssert(tc, "apr_gid_get should fail or "
+             "set a group number",
+             rv != APR_SUCCESS || gid == 424242);
+
+    gid = uid = 424242;
+    errno = 0;
+    rv = apr_uid_get(&uid, &gid, "I_AM_NOT_A_USER", p);
+    CuAssert(tc, "apr_gid_get should fail or "
+             "set a user and group number",
+             rv != APR_SUCCESS || uid == 424242 || gid == 4242442);
+
+    errno = 0;
+    tmp = NULL;
+    rv = apr_uid_homepath_get(&tmp, "I_AM_NOT_A_USER", p);
+    CuAssert(tc, "apr_uid_homepath_get should fail or "
+             "set a path name",
+             rv != APR_SUCCESS || tmp != NULL);
+}
+
 #else
 static void users_not_impl(CuTest *tc)
 {
@@ -110,6 +155,7 @@ CuSuite *testuser(void)
     SUITE_ADD_TEST(suite, uid_current);
     SUITE_ADD_TEST(suite, username);
     SUITE_ADD_TEST(suite, groupname);
+    SUITE_ADD_TEST(suite, fail_userinfo);
 #endif
 
     return suite;
