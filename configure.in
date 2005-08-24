@@ -319,23 +319,6 @@ AC_ARG_ENABLE(pool-debug,
     fi
   ])
 
-dnl Electric Fence malloc checker.
-dnl --with-efence specifies the path to Electric Fence
-AC_ARG_WITH(efence, 
-  [  --with-efence[[=DIR]]     path to Electric Fence installation], 
-  [ apr_efence_dir="$withval"
-    if test "$apr_efence_dir" != "yes"; then
-      APR_ADDTO(LDFLAGS,[-L$apr_efence_dir/lib])
-      if test "x$apr_platform_runtime_link_flag" != "x"; then
-          APR_ADDTO(LDFLAGS, 
-                    [$apr_platform_runtime_link_flag$apr_efence_dir/lib])
-      fi
-    fi
-    AC_CHECK_LIB(efence, malloc, 
-                 [ APR_ADDTO(LIBS,-lefence) ],
-                 [ AC_MSG_ERROR(Electric Fence requested but not detected) ])
-  ])
-
 if test "$host" = "i586-pc-beos"; then
   AC_ARG_ENABLE(malloc-debug,[  --enable-malloc-debug   Switch on malloc_debug for BeOS],
     APR_REMOVEFROM(CFLAGS, -O2)
@@ -642,6 +625,25 @@ if test "$threads" = "1"; then
 else
     echo "APR will be non-threaded"
 fi
+
+dnl Electric Fence malloc checker.
+dnl --with-efence specifies the path to Electric Fence.
+dnl This test should remain after the threads checks since libefence
+dnl may depend on libpthread.
+AC_ARG_WITH(efence, 
+  [  --with-efence[[=DIR]]     path to Electric Fence installation], 
+  [ apr_efence_dir="$withval"
+    if test "$apr_efence_dir" != "yes"; then
+      APR_ADDTO(LDFLAGS,[-L$apr_efence_dir/lib])
+      if test "x$apr_platform_runtime_link_flag" != "x"; then
+          APR_ADDTO(LDFLAGS, 
+                    [$apr_platform_runtime_link_flag$apr_efence_dir/lib])
+      fi
+    fi
+    AC_CHECK_LIB(efence, malloc, 
+                 [ APR_ADDTO(LIBS,-lefence) ],
+                 [ AC_MSG_ERROR(Electric Fence requested but not detected) ])
+  ])
 
 AC_CHECK_FUNCS(sigsuspend, [ have_sigsuspend="1" ], [ have_sigsuspend="0" ])
 AC_CHECK_FUNCS(sigwait, [ have_sigwait="1" ], [ have_sigwait="0" ]) 
