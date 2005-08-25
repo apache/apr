@@ -18,6 +18,10 @@
 
 #if defined(POLL_USES_POLL) || defined(POLLSET_USES_POLL)
 
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
+
 static apr_int16_t get_event(apr_int16_t event)
 {
     apr_int16_t rv = 0;
