@@ -242,7 +242,13 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
         break;
     case APR_TCP_NOPUSH:
 #if APR_TCP_NOPUSH_FLAG
+        /* TCP_NODELAY and TCP_CORK are mutually exclusive on Linux
+         * kernels < 2.6; on newer kernels they can be used together
+         * and TCP_CORK takes preference, which is the desired
+         * behaviour.  On older kernels, TCP_NODELAY must be toggled
+         * to "off" whilst TCP_CORK is in effect. */
         if (apr_is_option_set(sock, APR_TCP_NOPUSH) != on) {
+#ifndef HAVE_TCP_NODELAY_WITH_CORK
             int optlevel = IPPROTO_TCP;
             int optname = TCP_NODELAY;
 
@@ -253,11 +259,9 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
             }
 #endif
             /* OK we're going to change some settings here... */
-            /* TCP_NODELAY is mutually exclusive, so do we have it set? */
             if (apr_is_option_set(sock, APR_TCP_NODELAY) == 1 && on) {
-                /* If we want to set NOPUSH then if we have the TCP_NODELAY
-                 * flag set we need to switch it off...
-                 */
+                /* Now toggle TCP_NODELAY to off, if TCP_CORK is being
+                 * turned on: */
                 int tmpflag = 0;
                 if (setsockopt(sock->socketdes, optlevel, optname,
                                (void*)&tmpflag, sizeof(int)) == -1) {
@@ -268,13 +272,20 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
             } else if (on) {
                 apr_set_option(sock, APR_RESET_NODELAY, 0);
             }
+#warning fish
+#endif /* HAVE_TCP_NODELAY_WITH_CORK */
+
             /* OK, now we can just set the TCP_NOPUSH flag accordingly...*/
             if (setsockopt(sock->socketdes, IPPROTO_TCP, APR_TCP_NOPUSH_FLAG,
                            (void*)&on, sizeof(int)) == -1) {
                 return errno;
             }
             apr_set_option(sock, APR_TCP_NOPUSH, on);
+#ifndef HAVE_TCP_NODELAY_WITH_CORK
             if (!on && apr_is_option_set(sock, APR_RESET_NODELAY)) {
+                /* Now, if TCP_CORK was just turned off, turn
+                 * TCP_NODELAY back on again if it was earlier toggled
+                 * to off: */
                 int tmpflag = 1;
                 if (setsockopt(sock->socketdes, optlevel, optname,
                                (void*)&tmpflag, sizeof(int)) == -1) {
@@ -283,6 +294,7 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
                 apr_set_option(sock, APR_RESET_NODELAY,0);
                 apr_set_option(sock, APR_TCP_NODELAY, 1);
             }
+#endif /* HAVE_TCP_NODELAY_WITH_CORK */
         }
 #else
         return APR_ENOTIMPL;
