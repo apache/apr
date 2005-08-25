@@ -188,6 +188,12 @@ enum pic_mode_e {
     pic_AVOID,
 };
 
+enum shared_mode_e {
+    share_UNSET,
+    share_STATIC,
+    share_SHARED,
+};
+
 enum lib_type {
     type_UNKNOWN,
     type_DYNAMIC_LIB,
@@ -214,7 +220,7 @@ typedef struct {
 
 typedef struct {
     int silent;
-    int shared;
+    enum shared_mode_e shared;
     int export_all;
     int dry_run;
     enum pic_mode_e pic_mode;
@@ -510,7 +516,7 @@ int parse_long_opt(char *arg, command_t *cmd_data)
         if (cmd_data->mode == mLink) {
             cmd_data->output = otDynamicLibraryOnly;
         }
-        cmd_data->options.shared = 1;
+        cmd_data->options.shared = share_SHARED;
     } else if (strcmp(var, "export-all") == 0) {
         cmd_data->options.export_all = 1;
     } else if (strcmp(var, "dry-run") == 0) {
@@ -568,7 +574,7 @@ int parse_short_opt(char *arg, command_t *cmd_data)
     }
 
     if (strcmp(arg, "static") == 0) {
-        /* Don't respect it for now. */
+        cmd_data->options.shared = share_STATIC;
         return 1;
     }
 
@@ -807,12 +813,14 @@ char *check_library_exists(command_t *cmd, const char *arg, int pathlen,
 
         switch (pass) {
         case 0:
-            if (cmd->options.pic_mode != pic_AVOID || cmd->options.shared) {
+            if (cmd->options.pic_mode != pic_AVOID &&
+                cmd->options.shared != share_STATIC) {
                 strcpy(ext, DYNAMIC_LIB_EXT);
                 *libtype = type_DYNAMIC_LIB;
                 break;
             }
             pass = 1;
+            /* Fall through */
         case 1:
             strcpy(ext, STATIC_LIB_EXT);
             *libtype = type_STATIC_LIB;
@@ -1011,8 +1019,8 @@ void add_minus_l(count_chars *cc, const char *arg)
         file = name;
         file = file+4;
         push_count_chars(cc, "-L");
-	push_count_chars(cc, arg);
-	/* we need one argument like -lapr-1 */
+        push_count_chars(cc, arg);
+        /* we need one argument like -lapr-1 */
         newarg = malloc(strlen(file) + 3);
         strcpy(newarg, "-l");
         strcat(newarg, file);
@@ -1250,12 +1258,10 @@ int parse_output_file_name(char *arg, command_t *cmd_data)
     return 0;
 }
 
-/* returns just a file's name without path or extension */
-char *nameof(char *fullpath)
+/* returns just a file's name without the path */
+const char *basename(const char *fullpath)
 {
-    char buffer[1024];
-    char *ext;
-    char *name = strrchr(fullpath, '/');
+    const char *name = strrchr(fullpath, '/');
 
     if (name == NULL) {
         name = strrchr(fullpath, '\\');
@@ -1267,12 +1273,24 @@ char *nameof(char *fullpath)
         name++;
     }
 
-    strcpy(buffer, name);
-    ext = strrchr(buffer, '.');
+    return name;
+}
+
+/* returns just a file's name without path or extension */
+const char *nameof(const char *fullpath)
+{
+    const char *name;
+    const char *ext;
+
+    name = basename(fullpath);
+    ext = strrchr(name, '.');
 
     if (ext) {
-        *ext = 0;
-        return strdup(buffer);
+        char *trimmed;
+        trimmed = malloc(ext - name + 1);
+        strncpy(trimmed, name, ext - name);
+        trimmed[ext-name] = 0;
+        return trimmed;
     }
 
     return name;
@@ -1635,6 +1653,41 @@ int run_mode(command_t *cmd_data)
             if (rv) {
                 return rv;
             }
+#if defined(__APPLE__) && defined(RANLIB)
+            /* From the Apple libtool(1) manpage on Tiger/10.4:
+             * ----
+             * With  the way libraries used to be created, errors were possible
+             * if the library was modified with ar(1) and  the  table  of
+             * contents  was  not updated  by  rerunning ranlib(1).  Thus the
+             * link editor, ld, warns when the modification date of a library
+             * is more  recent  than  the  creation date  of its table of
+             * contents.  Unfortunately, this means that you get the warning
+             * even if you only copy the library.
+             * ----
+             *
+             * This means that when we install the static archive, we need to
+             * rerun ranlib afterwards.
+             */
+            const char *lib_args[3], *static_lib_name;
+            char *tmp;
+            size_t len1, len2;
+            len1 = strlen(cmd_data->arglist->vals[cmd_data->arglist->num - 1]);
+
+            static_lib_name = basename(cmd_data->static_name.install);
+            len2 = strlen(static_lib_name);
+
+            tmp = malloc(len1 + len2 + 2);
+
+            snprintf(tmp, len1 + len2 + 2, "%s/%s",
+                    cmd_data->arglist->vals[cmd_data->arglist->num - 1],
+                    static_lib_name);
+
+            lib_args[0] = RANLIB;
+            lib_args[1] = tmp;
+            lib_args[2] = NULL;
+            external_spawn(cmd_data, RANLIB, lib_args);
+            free(tmp);
+#endif
             clear_count_chars(cctemp);
         }
         if (cmd_data->shared_name.install) {

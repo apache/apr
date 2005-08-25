@@ -1,5 +1,8 @@
 Changes for APR 1.3.0
 
+  *) jlibtool: Teach to use static libraries with -static.
+     [Justin Erenkrantz]
+
   *) Fix checks for alloca() support in configure.  PR 13037.
      [Noah Misch <noah cs.caltech.edu>]
 
