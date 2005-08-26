@@ -273,7 +273,6 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
             } else if (on) {
                 apr_set_option(sock, APR_RESET_NODELAY, 0);
             }
-#warning fish
 #endif /* HAVE_TCP_NODELAY_WITH_CORK */
 
             /* OK, now we can just set the TCP_NOPUSH flag accordingly...*/
