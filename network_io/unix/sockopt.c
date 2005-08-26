@@ -210,6 +210,7 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
 #else
         return APR_ENOTIMPL;
 #endif
+        break;
     case APR_TCP_NODELAY:
 #if defined(TCP_NODELAY)
         if (apr_is_option_set(sock, APR_TCP_NODELAY) != on) {
