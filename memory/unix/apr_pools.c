@@ -1264,7 +1264,8 @@ APR_DECLARE(void) apr_pool_terminate(void)
     if (!apr_pools_initialized)
         return;
 
-    apr_pools_initialized = 0;
+    if (--apr_pools_initialized)
+        return;
 
     apr_pool_destroy(global_pool); /* This will also destroy the mutex */
     global_pool = NULL;
