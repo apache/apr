@@ -476,8 +476,8 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
                                                 apr_pool_t *pool);
 
 
-/*
- * Cleanup
+/**
+ * @defgroup PoolCleanup  Pool Cleanup Functions
  *
  * Cleanups are performed in the reverse order they were registered.  That is:
  * Last In, First Out.  A cleanup function can safely allocate memory from
@@ -486,6 +486,8 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
  * terminates.  Cleanups have to take caution in calling functions that
  * create subpools. Subpools, created during cleanup will NOT automatically
  * be cleaned up.  In other words, cleanups are to clean up after themselves.
+ *
+ * @{
  */
 
 /**
@@ -504,9 +506,13 @@ APR_DECLARE(void) apr_pool_cleanup_register(
     apr_status_t (*child_cleanup)(void *));
 
 /**
- * Remove a previously registered cleanup function
- * @param p The pool remove the cleanup from
- * @param data The data to remove from cleanup
+ * Remove a previously registered cleanup function.
+ * 
+ * The cleanup most recently registered with @a p having the same values of
+ * @a data and @a cleanup will be removed.
+ *
+ * @param p The pool to remove the cleanup from
+ * @param data The data of the registered cleanup
  * @param cleanup The function to remove from cleanup
  * @remarks For some strange reason only the plain_cleanup is handled by this
  *          function
@@ -515,7 +521,12 @@ APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
                                         apr_status_t (*cleanup)(void *));
 
 /**
- * Replace the child cleanup of a previously registered cleanup
+ * Replace the child cleanup function of a previously registered cleanup.
+ * 
+ * The cleanup most recently registered with @a p having the same values of
+ * @a data and @a plain_cleanup will have the registered child cleanup
+ * function replaced with @a child_cleanup.
+ *
  * @param p The pool of the registered cleanup
  * @param data The data of the registered cleanup
  * @param plain_cleanup The plain cleanup function of the registered cleanup
@@ -528,9 +539,13 @@ APR_DECLARE(void) apr_pool_child_cleanup_set(
     apr_status_t (*child_cleanup)(void *));
 
 /**
- * Run the specified cleanup function immediately and unregister it. Use
- * @a data instead of the data that was registered with the cleanup.
- * @param p The pool remove the cleanup from
+ * Run the specified cleanup function immediately and unregister it.
+ *
+ * The cleanup most recently registered with @a p having the same values of
+ * @a data and @a cleanup will be removed and @a cleanup will be called
+ * with @a data as the argument.
+ *
+ * @param p The pool to remove the cleanup from
  * @param data The data to remove from cleanup
  * @param cleanup The function to remove from cleanup
  */
@@ -540,20 +555,23 @@ APR_DECLARE(apr_status_t) apr_pool_cleanup_run(
     apr_status_t (*cleanup)(void *));
 
 /**
- * An empty cleanup function
- * @param data The data to cleanup
+ * An empty cleanup function.
+ * 
+ * Passed to apr_pool_cleanup_register() when no cleanup is required.
+ *
+ * @param data The data to cleanup, will not be used by this function.
  */
 APR_DECLARE_NONSTD(apr_status_t) apr_pool_cleanup_null(void *data);
 
-/* Preparing for exec() --- close files, etc., but *don't* flush I/O
- * buffers, *don't* wait for subprocesses, and *don't* free any memory.
- */
 /**
- * Run all of the child_cleanups, so that any unnecessary files are
- * closed because we are about to exec a new program
+ * Run all registered child cleanups, in preparation for an exec()
+ * call in a forked child -- close files, etc., but *don't* flush I/O
+ * buffers, *don't* wait for subprocesses, and *don't* free any
+ * memory.
  */
 APR_DECLARE(void) apr_pool_cleanup_for_exec(void);
 
+/** @} */
 
 /**
  * @defgroup PoolDebug Pool Debugging functions.
