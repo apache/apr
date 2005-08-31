@@ -403,6 +403,8 @@ API Changes Postponed for APR 2.0:
 
     * apr_hash_count() should take a const apr_hash_t * argument.
 
+    * apr_ino_t should be an ino64_t in LFS builds.
+
 Stuff for post 1.0:
 
     * Almost every API in APR depends on pools, but pool semantics

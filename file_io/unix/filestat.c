@@ -77,9 +77,18 @@ static void fill_out_finfo(apr_finfo_t *finfo, struct_stat *info,
     finfo->user = info->st_uid;
     finfo->group = info->st_gid;
     finfo->size = info->st_size;
-    finfo->inode = info->st_ino;
     finfo->device = info->st_dev;
     finfo->nlink = info->st_nlink;
+
+    /* Check for overflow if storing a 64-bit st_ino in a 32-bit
+     * apr_ino_t for LFS builds: */
+    if (sizeof(apr_ino_t) >= sizeof(info->st_ino)
+        || (apr_ino_t)info->st_ino == info->st_ino) {
+        finfo->inode = info->st_ino;
+    } else {
+        finfo->valid &= ~APR_FINFO_INODE;
+    }
+
     apr_time_ansi_put(&finfo->atime, info->st_atime);
     apr_time_ansi_put(&finfo->mtime, info->st_mtime);
     apr_time_ansi_put(&finfo->ctime, info->st_ctime);

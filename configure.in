@@ -1258,7 +1258,7 @@ APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], off_t, 8)
 if test "${ac_cv_sizeof_off_t}${apr_cv_use_lfs64}" = "4yes"; then
     # Enable LFS
     aprlfs=1
-    AC_CHECK_FUNCS([mmap64 sendfile64 sendfilev64 mkstemp64])
+    AC_CHECK_FUNCS([mmap64 sendfile64 sendfilev64 mkstemp64 readdir64_r])
 else
     aprlfs=0     
 fi

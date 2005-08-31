@@ -125,7 +125,11 @@ struct apr_dir_t {
     apr_pool_t *pool;
     char *dirname;
     DIR *dirstruct;
+#ifdef HAVE_READDIR64_R
+    struct dirent64 *entry;
+#else
     struct dirent *entry;
+#endif
 };
 
 apr_status_t apr_unix_file_cleanup(void *);
