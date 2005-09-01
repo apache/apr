@@ -221,8 +221,10 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
              * inode if the stat call fails. */
             retent->DIRENT_INODE = 0;
         }
-    }
+#else
+        wanted &= ~APR_FINFO_INODE;
 #endif /* HAVE_READDIR64_R */
+    }
 #endif /* DIRENT_INODE */
 
     wanted &= ~APR_FINFO_NAME;
