@@ -232,6 +232,9 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     	PLATOSVERS=`echo $host | sed 's/^.*solaris2.//'`
 	APR_ADDTO(CPPFLAGS, [-DSOLARIS2=$PLATOSVERS -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT])
         APR_SETIFNULL(apr_lock_method, [USE_FCNTL_SERIALIZE])
+        # readdir64_r error handling seems broken on Solaris (at least
+        # up till 2.8) -- it will return -1 at end-of-directory.
+        APR_SETIFNULL(ac_cv_func_readdir64_r, [no])
 	;;
     *-sunos4*)
 	APR_ADDTO(CPPFLAGS, [-DSUNOS4])
