@@ -405,6 +405,15 @@ API Changes Postponed for APR 2.0:
 
     * apr_ino_t should be an ino64_t in LFS builds.
 
+    * possible type renames:
+
+        apr_file_info_t                  from apr_finfo_t 
+        apr_file_attrs_t                 from apr_fileattrs_t
+        apr_file_seek_where_t            from apr_seek_where_t
+        apr_lock_mech_e                  from apr_lockmech_e
+        apr_time_interval_t              from apr_interval_time_t
+        apr_time_interval_short_t        from apr_short_interval_time_t
+
 Stuff for post 1.0:
 
     * Almost every API in APR depends on pools, but pool semantics
