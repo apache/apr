@@ -528,6 +528,74 @@ static void test_truncate(CuTest *tc)
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 }
 
+static void test_fail_write_flush(CuTest *tc)
+{
+    apr_file_t *f;
+    const char *fname = "data/testflush.dat";
+    apr_status_t rv;
+    char buf[APR_BUFFERSIZE];
+    int n;
+
+    apr_file_remove(fname, p);
+
+    apr_assert_success(tc, "open test file",
+                       apr_file_open(&f, fname,
+                                     APR_CREATE|APR_READ|APR_BUFFERED,
+                                     APR_UREAD|APR_UWRITE, p));
+
+    memset(buf, 'A', sizeof buf);
+
+    /* Try three writes.  One of these should fail when it exceeds the
+     * internal buffer and actually tries to write to the file, which
+     * was opened read-only and hence should be unwritable. */
+    for (n = 0, rv = APR_SUCCESS; n < 4 && rv == APR_SUCCESS; n++) {
+        apr_size_t bytes = sizeof buf;
+        rv = apr_file_write(f, buf, &bytes);
+    }
+
+    CuAssert(tc, "failed to write to read-only buffered fd",
+             rv != APR_SUCCESS);
+
+    apr_file_close(f);
+    apr_file_remove(fname, p);
+}
+
+static void test_fail_read_flush(CuTest *tc)
+{
+    apr_file_t *f;
+    const char *fname = "data/testflush.dat";
+    apr_status_t rv;
+    char buf[2];
+
+    apr_file_remove(fname, p);
+
+    apr_assert_success(tc, "open test file",
+                       apr_file_open(&f, fname,
+                                     APR_CREATE|APR_READ|APR_BUFFERED,
+                                     APR_UREAD|APR_UWRITE, p));
+
+    /* this write should be buffered. */
+    apr_assert_success(tc, "buffered write should succeed",
+                       apr_file_puts("hello", f));
+
+    /* Now, trying a read should fail since the write must be flushed,
+     * and should fail with something other than EOF since the file is
+     * opened read-only. */
+    rv = apr_file_read_full(f, buf, 2, NULL);
+
+    CuAssert(tc, "read should flush buffered write and fail",
+             rv != APR_SUCCESS && rv != APR_EOF);
+
+    /* Likewise for gets */
+    rv = apr_file_gets(buf, 2, f);
+
+    CuAssert(tc, "gets should flush buffered write and fail",
+             rv != APR_SUCCESS && rv != APR_EOF);
+
+    apr_file_close(f);
+    apr_file_remove(fname, p);
+}
+
 CuSuite *testfile(void)
 {
     CuSuite *suite = CuSuiteNew("File I/O");
@@ -553,6 +621,8 @@ CuSuite *testfile(void)
     SUITE_ADD_TEST(suite, test_bigread);
     SUITE_ADD_TEST(suite, test_mod_neg);
     SUITE_ADD_TEST(suite, test_truncate);
+    SUITE_ADD_TEST(suite, test_fail_write_flush);
+    SUITE_ADD_TEST(suite, test_fail_read_flush);
 
     return suite;
 }
