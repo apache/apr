@@ -290,7 +290,8 @@ static char *apr_gcvt(double number, int ndigit, char *buf, boolean_e altform)
  */
 #define FIX_PRECISION(adjust, precision, s, s_len)  \
     if (adjust) {                                   \
-        int p = precision < NUM_BUF_SIZE - 1 ? precision : NUM_BUF_SIZE - 1; \
+        apr_size_t p = (precision + 1 < NUM_BUF_SIZE) \
+                     ? precision : NUM_BUF_SIZE - 1;  \
         while (s_len < p)                           \
         {                                           \
             *--s = '0';                             \
@@ -703,8 +704,8 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
     char *q;
     apr_size_t s_len;
 
-    register int min_width = 0;
-    int precision = 0;
+    register apr_size_t min_width = 0;
+    apr_size_t precision = 0;
     enum {
         LEFT, RIGHT
     } adjust;
@@ -784,13 +785,15 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
                     adjust_width = YES;
                 }
                 else if (*fmt == '*') {
-                    min_width = va_arg(ap, int);
+                    int v = va_arg(ap, int);
                     fmt++;
                     adjust_width = YES;
-                    if (min_width < 0) {
+                    if (v < 0) {
                         adjust = LEFT;
-                        min_width = -min_width;
+                        min_width = (apr_size_t)(-v);
                     }
+                    else
+                        min_width = (apr_size_t)v;
                 }
                 else
                     adjust_width = NO;
@@ -805,10 +808,9 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
                         STR_TO_DEC(fmt, precision);
                     }
                     else if (*fmt == '*') {
-                        precision = va_arg(ap, int);
+                        int v = va_arg(ap, int);
                         fmt++;
-                        if (precision < 0)
-                            precision = 0;
+                        precision = (v < 0) ? 0 : (apr_size_t)v;
                     }
                     else
                         precision = 0;
