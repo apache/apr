@@ -162,11 +162,11 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     ret = readdir_r(thedir->dirstruct, thedir->entry, &retent);
 #endif
 
-    /* Avoid the Linux problem where at end-of-directory thedir->entry
-     * is set to NULL, but ret = APR_SUCCESS.
-     */
-    if(!ret && thedir->entry != retent)
+    /* POSIX treats "end of directory" as a non-error case, so ret
+     * will be zero and retent will be set to NULL in that case. */
+    if (!ret && retent == NULL) {
         ret = APR_ENOENT;
+    }
 
     /* Solaris is a bit strange, if there are no more entries in the
      * directory, it returns EINVAL.  Since this is against POSIX, we
