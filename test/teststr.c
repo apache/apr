@@ -349,6 +349,20 @@ static void string_strfsize(abts_case *tc, void *data)
     }
 }
 
+static void string_cpystrn(abts_case *tc, void *data)
+{
+    char buf[6], *ret;
+    
+    buf[5] = 'Z';
+
+    ret = apr_cpystrn(buf, "123456", 5);
+
+    ABTS_STR_EQUAL(tc, buf, "1234");
+    ABTS_PTR_EQUAL(tc, ret, buf + 4);
+    ABTS_TRUE(tc, *ret == '\0');
+    ABTS_TRUE(tc, ret[1] == 'Z');
+}
+
 abts_suite *teststr(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -364,6 +378,7 @@ abts_suite *teststr(abts_suite *suite)
     abts_run_test(suite, string_strtoff, NULL);
     abts_run_test(suite, overflow_strfsize, NULL);
     abts_run_test(suite, string_strfsize, NULL);
+    abts_run_test(suite, string_cpystrn, NULL);
 
     return suite;
 }
