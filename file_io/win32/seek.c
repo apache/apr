@@ -30,7 +30,11 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
         thefile->direction = 0;
     }
 
-    newbufpos = pos - (thefile->filePtr - thefile->dataRead);
+    /* We may be truncating to size here. 
+     * XXX: testing an 'unsigned' as >= 0 below indicates a bug
+     */
+    newbufpos = (apr_size_t)(pos - (thefile->filePtr 
+                                  - thefile->dataRead));
 
     if (newbufpos >= 0 && newbufpos <= thefile->dataRead) {
         thefile->bufpos = (apr_size_t)newbufpos;
