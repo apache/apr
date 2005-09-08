@@ -98,25 +98,35 @@ static apr_status_t get_remote_addr(apr_socket_t *sock)
     }
 }
 
-APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
-                                         apr_sockaddr_t *sockaddr)
+APR_DECLARE(apr_status_t) apr_sockaddr_ip_getbuf(char *buf, apr_size_t buflen,
+                                                 apr_sockaddr_t *sockaddr)
 {
-    *addr = apr_palloc(sockaddr->pool, sockaddr->addr_str_len);
-    apr_inet_ntop(sockaddr->family,
-                  sockaddr->ipaddr_ptr,
-                  *addr,
-                  sockaddr->addr_str_len);
+    if (!apr_inet_ntop(sockaddr->family, sockaddr->ipaddr_ptr, buf, buflen)) {
+        return APR_ENOSPC;
+    }
+
 #if APR_HAVE_IPV6
-    if (sockaddr->family == AF_INET6 &&
-        IN6_IS_ADDR_V4MAPPED((struct in6_addr *)sockaddr->ipaddr_ptr)) {
+    if (sockaddr->family == AF_INET6 
+        && IN6_IS_ADDR_V4MAPPED((struct in6_addr *)sockaddr->ipaddr_ptr)
+        && buflen > strlen("::ffff:")) {
         /* This is an IPv4-mapped IPv6 address; drop the leading
          * part of the address string so we're left with the familiar
          * IPv4 format.
          */
-        *addr += strlen("::ffff:");
+        memmove(buf, buf + strlen("::ffff:"),
+                strlen(buf + strlen("::ffff:")));
     }
 #endif
+    /* ensure NUL termination if the buffer is too short */
+    buf[buflen-1] = '\0';
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
+                                              apr_sockaddr_t *sockaddr)
+{
+    *addr = apr_palloc(sockaddr->pool, sockaddr->addr_str_len);
+    return apr_sockaddr_ip_getbuf(*addr, sockaddr->addr_str_len, sockaddr);
 }
 
 void apr_sockaddr_vars_set(apr_sockaddr_t *addr, int family, apr_port_t port)

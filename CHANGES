@@ -1,5 +1,9 @@
 Changes for APR 1.3.0
 
+  *) Add apr_sockaddr_ip_getbuf() function. [Joe Orton]
+
+  *) Fix handling of %pI in apr_psprintf. [Joe Orton]
+
   *) Provide APR_VERSION_AT_LEAST() macro for applications which 
      want to enable features based on a required level of APR.
      [Jeff Trawick]
