@@ -232,12 +232,16 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     if (wanted)
     {
         char fspec[APR_PATH_MAX];
-        int off;
-        apr_cpystrn(fspec, thedir->dirname, sizeof(fspec));
-        off = strlen(fspec);
-        if ((fspec[off - 1] != '/') && (off + 1 < sizeof(fspec)))
-            fspec[off++] = '/';
-        apr_cpystrn(fspec + off, thedir->entry->d_name, sizeof(fspec) - off);
+        char *end;
+
+        end = apr_cpystrn(fspec, thedir->dirname, sizeof fspec);
+
+        if (end > fspec && end[-1] != '/' && (end < fspec + APR_PATH_MAX))
+            *end++ = '/';
+
+        apr_cpystrn(end, thedir->entry->d_name, 
+                    sizeof fspec - (end - fspec));
+
         ret = apr_stat(finfo, fspec, APR_FINFO_LINK | wanted, thedir->pool);
         /* We passed a stack name that will disappear */
         finfo->fname = NULL;
