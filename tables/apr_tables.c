@@ -962,7 +962,8 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
 }
 
 static apr_table_entry_t **table_mergesort(apr_pool_t *pool,
-                                           apr_table_entry_t **values, int n)
+                                           apr_table_entry_t **values, 
+                                           apr_size_t n)
 {
     /* Bottom-up mergesort, based on design in Sedgewick's "Algorithms
      * in C," chapter 8
@@ -970,7 +971,7 @@ static apr_table_entry_t **table_mergesort(apr_pool_t *pool,
     apr_table_entry_t **values_tmp =
         (apr_table_entry_t **)apr_palloc(pool, n * sizeof(apr_table_entry_t*));
     apr_size_t i;
-    int blocksize;
+    apr_size_t blocksize;
 
     /* First pass: sort pairs of elements (blocksize=1) */
     for (i = 0; i + 1 < n; i += 2) {
@@ -985,7 +986,7 @@ static apr_table_entry_t **table_mergesort(apr_pool_t *pool,
     blocksize = 2;
     while (blocksize < n) {
         apr_table_entry_t **dst = values_tmp;
-        int next_start;
+        apr_size_t next_start;
         apr_table_entry_t **swap;
 
         /* Merge consecutive pairs blocks of the next blocksize.
@@ -995,10 +996,10 @@ static apr_table_entry_t **table_mergesort(apr_pool_t *pool,
         for (next_start = 0; next_start + blocksize < n;
              next_start += (blocksize + blocksize)) {
 
-            int block1_start = next_start;
-            int block2_start = block1_start + blocksize;
-            int block1_end = block2_start;
-            int block2_end = block2_start + blocksize;
+            apr_size_t block1_start = next_start;
+            apr_size_t block2_start = block1_start + blocksize;
+            apr_size_t block1_end = block2_start;
+            apr_size_t block2_end = block2_start + blocksize;
             if (block2_end > n) {
                 /* The last block may be smaller than blocksize */
                 block2_end = n;
