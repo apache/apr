@@ -669,6 +669,15 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
                                               apr_sockaddr_t *sockaddr);
 
 /**
+ * Write the IP address (in numeric address string format) of the APR
+ * socket address @a sockaddr into the buffer @a buf (of size @a buflen).
+ * @param addr The IP address.
+ * @param sockaddr The socket address to reference.
+ */
+APR_DECLARE(apr_status_t) apr_sockaddr_ip_getbuf(char *buf, apr_size_t buflen,
+                                                 apr_sockaddr_t *sockaddr);
+
+/**
  * See if the IP addresses in two APR socket addresses are
  * equivalent.  Appropriate logic is present for comparing
  * IPv4-mapped IPv6 addresses with IPv4 addresses.

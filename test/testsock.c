@@ -203,6 +203,19 @@ static void test_timeout(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "Problem closing socket", rv);
 }
 
+static void test_print_addr(abts_case *tc, void *data)
+{
+    apr_sockaddr_t *sa;
+    char *s;
+
+    APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr",
+                       apr_sockaddr_info_get(&sa, "0.0.0.0", APR_INET, 80, 0, p));
+
+    s = apr_psprintf(p, "foo %pI bar", sa);
+
+    ABTS_STR_EQUAL(tc, "foo 0.0.0.0:80 bar", s);
+}
+
 abts_suite *testsock(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -212,6 +225,7 @@ abts_suite *testsock(abts_suite *suite)
     abts_run_test(suite, test_send, NULL);
     abts_run_test(suite, test_recv, NULL);
     abts_run_test(suite, test_timeout, NULL);
+    abts_run_test(suite, test_print_addr, NULL);
 
     return suite;
 }
