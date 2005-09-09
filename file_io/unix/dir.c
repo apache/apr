@@ -79,22 +79,22 @@ apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname,
     apr_size_t dirent_size = 
         (sizeof((*new)->entry->d_name) > 1 ? 
          sizeof(struct dirent) : sizeof (struct dirent) + 255);
+    DIR *dir = opendir(dirname);
+
+    if (!dir) {
+        return errno;
+    }
 
     (*new) = (apr_dir_t *)apr_palloc(pool, sizeof(apr_dir_t));
 
     (*new)->pool = pool;
     (*new)->dirname = apr_pstrdup(pool, dirname);
-    (*new)->dirstruct = opendir(dirname);
+    (*new)->dirstruct = dir;
     (*new)->entry = apr_pcalloc(pool, dirent_size);
 
-    if ((*new)->dirstruct == NULL) {
-        return errno;
-    }    
-    else {
-        apr_pool_cleanup_register((*new)->pool, (void *)(*new), dir_cleanup,
-	                          apr_pool_cleanup_null);
-        return APR_SUCCESS;
-    }
+    apr_pool_cleanup_register((*new)->pool, *new, dir_cleanup,
+                              apr_pool_cleanup_null);
+    return APR_SUCCESS;
 }
 
 apr_status_t apr_dir_close(apr_dir_t *thedir)
