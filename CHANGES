@@ -1,5 +1,11 @@
 Changes for APR 1.2.2
 
+  *) Fix apr_socket_opt_set() issue where TCP_NODELAY would be
+     set when TCP_DEFER_ACCEPT was set.  [Brian Pane]
+
+  *) Allow TCP_NODELAY and TCP_CORK to be set concurrently on
+     Linux 2.6 and later.  [Joe Orton]
+
   *) Fix apr_socket_addr_get(,APR_REMOTE,) after a non-blocking
      connection is completed.  PR 32737.  [Joe Orton]
 

@@ -102,7 +102,9 @@ static void corkable(abts_case *tc, void *data)
 
     rv = apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, 0, ck);
+    /* TCP_NODELAY is now in an unknown state; it may be zero if
+     * TCP_NOPUSH and TCP_NODELAY are mutually exclusive on this
+     * platform, e.g. Linux < 2.6. */
 
     rv = apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
