@@ -22,6 +22,7 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
+#include "apr_poll.h"
 
 static void launch_child(abts_case *tc, apr_proc_t *proc, const char *arg1, apr_pool_t *p)
 {
@@ -216,6 +217,64 @@ static void test_print_addr(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, "foo 0.0.0.0:80 bar", s);
 }
 
+static void test_get_addr(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_socket_t *ld, *sd, *cd;
+    apr_sockaddr_t *sa, *ca;
+    char *a, *b;
+
+    ld = setup_socket(tc);
+
+    APR_ASSERT_SUCCESS(tc,
+                       "get local address of bound socket",
+                       apr_socket_addr_get(&sa, APR_LOCAL, ld));
+
+    rv = apr_socket_create(&cd, sa->family, SOCK_STREAM,
+                           APR_PROTO_TCP, p);
+    APR_ASSERT_SUCCESS(tc, "create client socket", rv);
+
+    APR_ASSERT_SUCCESS(tc, "enable non-block mode",
+                       apr_socket_opt_set(cd, APR_SO_NONBLOCK, 1));
+    
+    /* initiate connection */
+    apr_socket_connect(cd, sa);
+
+    APR_ASSERT_SUCCESS(tc, "accept connection",
+                       apr_socket_accept(&sd, ld, p));
+    
+    {
+        /* wait for writability */
+        apr_pollfd_t pfd;
+        int n;
+
+        pfd.p = p;
+        pfd.desc_type = APR_POLL_SOCKET;
+        pfd.reqevents = APR_POLLOUT|APR_POLLHUP;
+        pfd.desc.s = cd;
+        pfd.client_data = NULL;
+
+        APR_ASSERT_SUCCESS(tc, "poll for connect completion",
+                           apr_poll(&pfd, 1, &n, 5 * APR_USEC_PER_SEC));
+
+    }
+
+    APR_ASSERT_SUCCESS(tc, "get local address of server socket",
+                       apr_socket_addr_get(&sa, APR_LOCAL, sd));
+
+    APR_ASSERT_SUCCESS(tc, "get remote address of client socket",
+                       apr_socket_addr_get(&ca, APR_REMOTE, cd));
+    
+    a = apr_psprintf(p, "%pI", sa);
+    b = apr_psprintf(p, "%pI", ca);
+
+    ABTS_STR_EQUAL(tc, a, b);
+                       
+    apr_socket_close(cd);
+    apr_socket_close(sd);
+    apr_socket_close(ld);
+}
+
 abts_suite *testsock(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -226,6 +285,7 @@ abts_suite *testsock(abts_suite *suite)
     abts_run_test(suite, test_recv, NULL);
     abts_run_test(suite, test_timeout, NULL);
     abts_run_test(suite, test_print_addr, NULL);
+    abts_run_test(suite, test_get_addr, NULL);
 
     return suite;
 }

@@ -66,6 +66,7 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
     (*new)->remote_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->pool,
                                                         sizeof(apr_sockaddr_t));
     (*new)->remote_addr->pool = p;
+    (*new)->remote_addr_unknown = 1;
 #ifndef WAITIO_USES_POLL
     /* Create a pollset with room for one descriptor. */
     /* ### check return codes */
@@ -197,6 +198,8 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
     }
 #endif
 
+    (*new)->remote_addr_unknown = 0;
+
     *(*new)->local_addr = *sock->local_addr;
 
     /* The above assignment just overwrote the pool entry. Setting the local_addr 
@@ -289,7 +292,16 @@ apr_status_t apr_socket_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
         return errno;
     }
 
-    sock->remote_addr = sa;
+    if (memcmp(sa->ipaddr_ptr, generic_inaddr_any, sa->ipaddr_len)) {
+        /* A real remote address was passed in.  If the unspecified
+         * address was used, the actual remote addr will have to be
+         * determined using getpeername() if required. */
+        /* ### this should probably be a structure copy + fixup as per
+         * _accept()'s handling of local_addr */
+        sock->remote_addr = sa;
+        sock->remote_addr_unknown = 0;
+    }
+
     if (sock->local_addr->port == 0) {
         /* connect() got us an ephemeral port */
         sock->local_port_unknown = 1;
