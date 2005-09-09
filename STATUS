@@ -67,6 +67,9 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
     * Someone needs to port testucs to Unix. Right now it only works
       on Windows.
+        OtherBill asks; should we have a test/arch/xxx tree?
+                        The ucs implementation is an internal for
+                        unicode/utf-8 win32isms.
 
     * The return type of a thread function (void *) is inconsistent with
       the type used in apr_thread_exit()/apr_thread_join() (apr_status_t).
