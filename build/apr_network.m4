@@ -368,6 +368,60 @@ fi
 ])
 
 dnl
+dnl Determine whether TCP_NODELAY and TCP_CORK can both be set
+dnl on a TCP socket.
+dnl
+AC_DEFUN([APR_CHECK_TCP_NODELAY_WITH_CORK], [
+AC_CACHE_CHECK([whether TCP_NODELAY and TCP_CORK can both be enabled],
+[apr_cv_tcp_nodelay_with_cork],
+[AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+]], [[
+    int fd, flag, rc;
+
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0) {
+       exit(1);
+    }
+
+    flag = 1;
+    rc = setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof flag);
+    if (rc < 0) {
+        perror("setsockopt TCP_NODELAY");
+        exit(2);
+    }
+
+    flag = 1;
+    rc = setsockopt(fd, IPPROTO_TCP, TCP_CORK, &flag, sizeof flag);
+    if (rc < 0) {
+        perror("setsockopt TCP_CORK");
+        exit(3);
+    }
+
+    exit(0);
+]])], [apr_cv_tcp_nodelay_with_cork=yes], [apr_cv_tcp_nodelay_with_cork=no])])
+
+if test "$apr_cv_tcp_nodelay_with_cork" = "yes"; then
+  AC_DEFINE([HAVE_TCP_NODELAY_WITH_CORK], 1,
+            [Define if TCP_NODELAY and TCP_CORK can be enabled at the same time])
+fi
+])
+
+
+dnl
 dnl see if O_NONBLOCK setting is inherited from listening sockets
 dnl
 AC_DEFUN(APR_CHECK_O_NONBLOCK_INHERITED,[
