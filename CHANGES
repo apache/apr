@@ -1,5 +1,8 @@
 Changes for APR 1.2.2
 
+  *) Fix apr_socket_addr_get(,APR_REMOTE,) after a non-blocking
+     connection is completed.  PR 32737.  [Joe Orton]
+
   *) Fix apr_file_gets() and apr_file_read() to catch write failures
      when flushing pending writes for a buffered file.  [Joe Orton]
 
