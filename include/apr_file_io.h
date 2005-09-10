@@ -309,7 +309,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile,
  * @param thefile The apr file to use as stdout.
  * @param pool The pool to allocate the file out of.
  * 
- * @remark See remarks for apr_file_open_stdout.
+ * @remark See remarks for apr_file_open_stderr.
  */
 APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile,
                                                apr_pool_t *pool);
@@ -319,7 +319,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile,
  * @param thefile The apr file to use as stdin.
  * @param pool The pool to allocate the file out of.
  * 
- * @remark See remarks for apr_file_open_stdout.
+ * @remark See remarks for apr_file_open_stderr.
  */
 APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile,
                                               apr_pool_t *pool);
