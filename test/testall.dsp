@@ -83,11 +83,43 @@ CFG=testall - Win32 Debug
 
 # Begin Source File
 
+SOURCE=.\abts.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\globalmutexchild.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Makefile.win
 # End Source File
 # Begin Source File
 
-SOURCE=.\testall.c
+SOURCE=.\mod_test.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\nw_misc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\occhild.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\proc_child.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\readchild.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\sendfile.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\sockchild.c
 # End Source File
 # Begin Source File
 
@@ -115,7 +147,15 @@ SOURCE=.\testdup.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testenv.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\testfile.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testfilecopy.c
 # End Source File
 # Begin Source File
 
@@ -131,6 +171,10 @@ SOURCE=.\testfmt.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testfnmatch.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\testglobalmutex.c
 # End Source File
 # Begin Source File
@@ -140,6 +184,10 @@ SOURCE=.\testhash.c
 # Begin Source File
 
 SOURCE=.\testipsub.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testlfs.c
 # End Source File
 # Begin Source File
 
@@ -231,7 +279,15 @@ SOURCE=.\teststr.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\teststrnatcmp.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\testtable.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testtemp.c
 # End Source File
 # Begin Source File
 
@@ -251,7 +307,15 @@ SOURCE=.\testuser.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testutil.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\testvsn.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tryread.c
 # End Source File
 # End Target
 # End Project
