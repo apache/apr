@@ -30,8 +30,10 @@
 
 #ifdef NETWARE
 # define MOD_NAME "mod_test.nlm"
-#elif defined(BEOS) || defined(WIN32)
+#elif defined(BEOS)
 # define MOD_NAME "mod_test.so"
+#elif defined(WIN32)
+# define MOD_NAME "mod_test.dll"
 #elif defined(DARWIN)
 # define MOD_NAME ".libs/mod_test.so" 
 # define LIB_NAME ".libs/libmod_test.dylib" 
@@ -78,9 +80,11 @@ static void test_dso_sym(abts_case *tc, void *data)
     ABTS_ASSERT(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
     ABTS_PTR_NOTNULL(tc, func1);
 
-    function = (void (*)(char *))func1;
-    (*function)(teststr);
-    ABTS_STR_EQUAL(tc, "Hello - I'm a DSO!\n", teststr);
+    if (!tc->failed) {
+        function = (void (*)(char *))func1;
+        (*function)(teststr);
+        ABTS_STR_EQUAL(tc, "Hello - I'm a DSO!\n", teststr);
+    }
 
     apr_dso_unload(h);
 }
@@ -101,9 +105,11 @@ static void test_dso_sym_return_value(abts_case *tc, void *data)
     ABTS_ASSERT(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
     ABTS_PTR_NOTNULL(tc, func1);
 
-    function = (int (*)(int))func1;
-    status = (*function)(5);
-    ABTS_INT_EQUAL(tc, 5, status);
+    if (!tc->failed) {
+        function = (int (*)(int))func1;
+        status = (*function)(5);
+        ABTS_INT_EQUAL(tc, 5, status);
+    }
 
     apr_dso_unload(h);
 }
@@ -160,9 +166,11 @@ static void test_dso_sym_library(abts_case *tc, void *data)
     ABTS_ASSERT(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
     ABTS_PTR_NOTNULL(tc, func1);
 
-    function = (void (*)(char *))func1;
-    (*function)(teststr);
-    ABTS_STR_EQUAL(tc, "Hello - I'm a DSO!\n", teststr);
+    if (!tc->failed) {
+        function = (void (*)(char *))func1;
+        (*function)(teststr);
+        ABTS_STR_EQUAL(tc, "Hello - I'm a DSO!\n", teststr);
+    }
 
     apr_dso_unload(h);
 }
@@ -183,9 +191,11 @@ static void test_dso_sym_return_value_library(abts_case *tc, void *data)
     ABTS_ASSERT(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
     ABTS_PTR_NOTNULL(tc, func1);
 
-    function = (int (*)(int))func1;
-    status = (*function)(5);
-    ABTS_INT_EQUAL(tc, 5, status);
+    if (!tc->failed) {
+        function = (int (*)(int))func1;
+        status = (*function)(5);
+        ABTS_INT_EQUAL(tc, 5, status);
+    }
 
     apr_dso_unload(h);
 }
