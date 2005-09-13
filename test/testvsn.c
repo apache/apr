@@ -26,6 +26,12 @@ static void test_strings(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, APR_VERSION_STRING, apr_version_string());
 }
 
+#ifdef APR_IS_DEV_VERSION
+# define IS_DEV 1
+#else
+# define IS_DEV 0
+#endif
+
 static void test_ints(abts_case *tc, void *data)
 {
     apr_version_t vsn;
@@ -35,6 +41,7 @@ static void test_ints(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_MAJOR_VERSION, vsn.major);
     ABTS_INT_EQUAL(tc, APR_MINOR_VERSION, vsn.minor);
     ABTS_INT_EQUAL(tc, APR_PATCH_VERSION, vsn.patch);
+    ABTS_INT_EQUAL(tc, IS_DEV,            vsn.is_dev);
 }
 
 abts_suite *testvsn(abts_suite *suite)
