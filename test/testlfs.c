@@ -26,7 +26,12 @@
 
 /* Only enable these tests by default on platforms which support sparse
  * files... just Unixes? */
-#if APR_HAS_LARGE_FILES && !defined(WIN32) && !defined(OS2) && !defined(NETWARE)
+#if defined(WIN32) || !defined(OS2) || !defined(NETWARE)
+static void test_nolfs(abts_case *tc, void *data)
+{
+    ABTS_NOT_IMPL(tc, "Large Files tests require Sparse file support");
+}
+#elif APR_HAS_LARGE_FILES && 
 #define USE_LFS_TESTS
 
 /* Tests which create an 8Gb sparse file and then check it can be used
