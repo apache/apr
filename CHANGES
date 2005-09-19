@@ -1,8 +1,5 @@
 Changes for APR 1.3.0
 
-  *) Fix apr_socket_addr_get(,APR_REMOTE,) after a non-blocking
-     connection is completed.  PR 32737.  [Joe Orton]
-
   *) Add apr_sockaddr_ip_getbuf() function.  [Joe Orton]
 
   *) Fix handling of %pI in apr_psprintf.  [Joe Orton]
@@ -21,8 +18,16 @@ Changes for APR 1.3.0
      _exit() not exit() to avoid running atexit()-registered functions
      in the child.  PR 30913.  [Joe Orton]
 
-  *) Fix error handling where apr_uid_* and apr_gid_* could return
-     APR_SUCCESS in failure cases.  [Joe Orton]
+  *) Add %pm support to apr_snprintf() for printing the error string
+     corresponding to an apr_status_t value.  [Joe Orton]
+
+  *) Add APR_ARRAY_IDX() and APR_ARRAY_PUSH() convenience macros to
+     apr_tables.h.  [Garrett Rooney]
+
+Changes for APR 1.2.2
+
+  *) Fix apr_socket_addr_get(,APR_REMOTE,) after a non-blocking
+     connection is completed.  PR 32737.  [Joe Orton]
 
   *) Fix apr_file_gets() and apr_file_read() to catch write failures
      when flushing pending writes for a buffered file.  [Joe Orton]
@@ -30,11 +35,8 @@ Changes for APR 1.3.0
   *) Fix apr_file_write() infinite loop on write failure for buffered
      files.  [Erik Huelsmann <ehuels gmail.com>]
 
-  *) Add %pm support to apr_snprintf() for printing the error string
-     corresponding to an apr_status_t value.  [Joe Orton]
-
-  *) Add APR_ARRAY_IDX() and APR_ARRAY_PUSH() convenience macros to
-     apr_tables.h.  [Garrett Rooney]
+  *) Fix error handling where apr_uid_* and apr_gid_* could return
+     APR_SUCCESS in failure cases.  PR 34053 continued.  [Joe Orton]
 
 Changes for APR 1.2.1
 
