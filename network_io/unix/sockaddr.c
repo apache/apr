@@ -114,7 +114,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_getbuf(char *buf, apr_size_t buflen,
          * IPv4 format.
          */
         memmove(buf, buf + strlen("::ffff:"),
-                strlen(buf + strlen("::ffff:")));
+                strlen(buf + strlen("::ffff:"))+1);
     }
 #endif
     /* ensure NUL termination if the buffer is too short */
