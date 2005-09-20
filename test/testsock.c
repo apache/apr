@@ -215,6 +215,20 @@ static void test_print_addr(abts_case *tc, void *data)
     s = apr_psprintf(p, "foo %pI bar", sa);
 
     ABTS_STR_EQUAL(tc, "foo 0.0.0.0:80 bar", s);
+
+#if APR_HAVE_IPV6
+    if (apr_sockaddr_info_get(&sa, "::ffff:0.0.0.0", APR_INET6, 80, 0, p) == APR_SUCCESS) {
+        /* sa should now be a v4-mapped IPv6 address. */
+        char buf[128];
+
+        memset(buf, 'z', sizeof buf);
+        
+        APR_ASSERT_SUCCESS(tc, "could not get IP address",
+                           apr_sockaddr_ip_getbuf(buf, 22, sa));
+        
+        ABTS_STR_EQUAL(tc, "0.0.0.0", buf);
+    }
+#endif
 }
 
 static void test_get_addr(abts_case *tc, void *data)
