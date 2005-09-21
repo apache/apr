@@ -61,6 +61,7 @@
 #include "apr_base64.h"
 #include "apr_buckets.h"
 #include "apr_date.h"
+#include "apr_dbd.h"
 #include "apr_dbm.h"
 #include "apr_hooks.h"
 #include "apr_ldap.h"
