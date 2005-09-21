@@ -505,6 +505,16 @@ APR_DECLARE(apr_status_t) apr_procattr_child_errfn_set(apr_procattr_t *attr,
 APR_DECLARE(apr_status_t) apr_procattr_error_check_set(apr_procattr_t *attr,
                                                        apr_int32_t chk);
 
+/**
+ * Determine if the child should start in its own address space or using the 
+ * current one from its parent
+ * @param attr The procattr we care about. 
+ * @param addrspace Should the child start in its own address space?  Default
+ *                  is no on NetWare and yes on other platforms.
+ */
+APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
+                                                       apr_int32_t addrspace);
+
 #if APR_HAS_FORK
 /**
  * This is currently the only non-portable call in APR.  This executes 
