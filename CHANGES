@@ -1,5 +1,8 @@
 Changes for APR 1.2.2
 
+  *) Win32: fix apr_proc_mutex_trylock() to handle WAIT_TIMEOUT,
+     returning APR_EBUSY.  [Ronen Mizrahi <ronen@tversity.com>]
+
   *) Fix apr_socket_opt_set() issue where TCP_NODELAY would be
      set when TCP_DEFER_ACCEPT was set.  [Brian Pane]
 
