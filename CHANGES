@@ -1,5 +1,8 @@
 Changes with APR 0.9.7
 
+  *) Win32: fix apr_proc_mutex_trylock() to handle WAIT_TIMEOUT,
+     returning APR_EBUSY.  [Ronen Mizrahi <ronen@tversity.com>]
+
   *) Fix apr_file_read() to catch write failures when flushing pending
      writes for a buffered file.  [Joe Orton]
 
