@@ -312,6 +312,11 @@ apr_status_t apr_dir_make_recursive(const char *path, apr_fileperms_t perm,
         char *dir;
         
         dir = path_remove_last_component(path, pool);
+        /* If there is no path left, give up. */
+        if (dir[0] == '\0') {
+            return apr_err;
+        }
+
         apr_err = apr_dir_make_recursive(dir, perm, pool);
         
         if (!apr_err) 
