@@ -219,6 +219,30 @@ static void test_uncleared_errno(abts_case *tc, void *data)
 
 }
 
+static void test_rmkdir_nocwd(abts_case *tc, void *data)
+{
+    char *cwd, *path;
+
+    APR_ASSERT_SUCCESS(tc, "make temp dir",
+                       apr_dir_make("dir3", APR_OS_DEFAULT, p));
+
+    APR_ASSERT_SUCCESS(tc, "obtain cwd", apr_filepath_get(&cwd, 0, p));
+
+    APR_ASSERT_SUCCESS(tc, "determine path to temp dir",
+                       apr_filepath_merge(&path, cwd, "dir3", 0, p));
+
+    APR_ASSERT_SUCCESS(tc, "change to temp dir", apr_filepath_set(path, p));
+
+    APR_ASSERT_SUCCESS(tc, "remove temp dir", apr_dir_remove(path, p));
+
+    ABTS_ASSERT(tc, "fail to create dir",
+                apr_dir_make_recursive("foobar", APR_OS_DEFAULT, 
+                                       p) != APR_SUCCESS);
+
+    APR_ASSERT_SUCCESS(tc, "restore cwd", apr_filepath_set(cwd, p));
+}
+
+
 abts_suite *testdir(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -230,6 +254,7 @@ abts_suite *testdir(abts_suite *suite)
     abts_run_test(suite, test_removeall, NULL);
     abts_run_test(suite, test_remove_notthere, NULL);
     abts_run_test(suite, test_mkdir_twice, NULL);
+    abts_run_test(suite, test_rmkdir_nocwd, NULL);
 
     abts_run_test(suite, test_rewind, NULL);
 
