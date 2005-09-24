@@ -219,6 +219,29 @@ static void test_uncleared_errno(CuTest *tc)
 
 }
 
+static void test_rmkdir_nocwd(CuTest *tc)
+{
+    char *cwd, *path;
+
+    apr_assert_success(tc, "make temp dir",
+                       apr_dir_make("dir3", APR_OS_DEFAULT, p));
+
+    apr_assert_success(tc, "obtain cwd", apr_filepath_get(&cwd, 0, p));
+
+    apr_assert_success(tc, "determine path to temp dir",
+                       apr_filepath_merge(&path, cwd, "dir3", 0, p));
+
+    apr_assert_success(tc, "change to temp dir", apr_filepath_set(path, p));
+
+    apr_assert_success(tc, "remove temp dir", apr_dir_remove(path, p));
+
+    CuAssert(tc, "fail to create dir",
+             apr_dir_make_recursive("foobar", APR_OS_DEFAULT, 
+                                    p) != APR_SUCCESS);
+
+    apr_assert_success(tc, "restore cwd", apr_filepath_set(cwd, p));
+}
+
 CuSuite *testdir(void)
 {
     CuSuite *suite = CuSuiteNew("Directory");
@@ -230,6 +253,7 @@ CuSuite *testdir(void)
     SUITE_ADD_TEST(suite, test_removeall);
     SUITE_ADD_TEST(suite, test_remove_notthere);
     SUITE_ADD_TEST(suite, test_mkdir_twice);
+    SUITE_ADD_TEST(suite, test_rmkdir_nocwd);
 
     SUITE_ADD_TEST(suite, test_rewind);
 
