@@ -4,11 +4,13 @@ Last modified at [$Date$]
 Releases:
 
 Standalone
-    1.2.1     : released August 17, 2005
-    1.2.0     : tagged July 19, 2005
+    1.3.0     : in development
+    1.2.2     : tagged September 26, 2005
+    1.2.1     : released August 18, 2005
+    1.2.0     : not released
     1.1.1     : released March 17, 2005
     1.1.0     : released January 25, 2005
-    1.0.1     : released November 18, 2004
+    1.0.1     : released November 19, 2004
     1.0.0     : released September 1, 2004
     0.9.5     : released November 19, 2004
     0.9.4     : released September 25, 2003
@@ -29,7 +31,7 @@ Bundled with httpd
     2.0a1     : released March 10, 2000
 
 
-RELEASE 1.0.1 SHOWSTOPPERS:
+RELEASE SHOWSTOPPERS:
 
 
 CURRENT VOTES:
