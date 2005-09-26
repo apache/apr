@@ -1,3 +1,7 @@
+Changes with APR 0.9.8-dev
+
+
+
 Changes with APR 0.9.7
 
   *) Fix crash in apr_dir_make_recursive() for relative path
