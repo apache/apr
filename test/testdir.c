@@ -222,6 +222,7 @@ static void test_uncleared_errno(abts_case *tc, void *data)
 static void test_rmkdir_nocwd(abts_case *tc, void *data)
 {
     char *cwd, *path;
+    apr_status_t rv;
 
     APR_ASSERT_SUCCESS(tc, "make temp dir",
                        apr_dir_make("dir3", APR_OS_DEFAULT, p));
@@ -233,13 +234,20 @@ static void test_rmkdir_nocwd(abts_case *tc, void *data)
 
     APR_ASSERT_SUCCESS(tc, "change to temp dir", apr_filepath_set(path, p));
 
-    APR_ASSERT_SUCCESS(tc, "remove temp dir", apr_dir_remove(path, p));
-
-    ABTS_ASSERT(tc, "fail to create dir",
-                apr_dir_make_recursive("foobar", APR_OS_DEFAULT, 
-                                       p) != APR_SUCCESS);
+    rv = apr_dir_remove(path, p);
+    /* Some platforms cannot remove a directory which is in use. */
+    if (rv == APR_SUCCESS) {
+        ABTS_ASSERT(tc, "fail to create dir",
+                    apr_dir_make_recursive("foobar", APR_OS_DEFAULT, 
+                                           p) != APR_SUCCESS);
+    }
 
     APR_ASSERT_SUCCESS(tc, "restore cwd", apr_filepath_set(cwd, p));
+
+    if (rv) {
+        apr_dir_remove(path, p);
+        ABTS_NOT_IMPL(tc, "cannot remove in-use directory");
+    }
 }
 
 
