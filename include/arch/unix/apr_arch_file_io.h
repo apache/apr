@@ -121,11 +121,17 @@ typedef struct stat64 struct_stat;
 typedef struct stat struct_stat;
 #endif
 
+/* readdir64_r is only used in specific cases: */
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
+    && !defined(READDIR_IS_THREAD_SAFE) && defined(HAVE_READDIR64_R)
+#define APR_USE_READDIR64_R
+#endif
+
 struct apr_dir_t {
     apr_pool_t *pool;
     char *dirname;
     DIR *dirstruct;
-#ifdef HAVE_READDIR64_R
+#ifdef APR_USE_READDIR64_R
     struct dirent64 *entry;
 #else
     struct dirent *entry;

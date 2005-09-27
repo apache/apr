@@ -139,7 +139,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
 #endif
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
                     && !defined(READDIR_IS_THREAD_SAFE)
-#ifdef HAVE_READDIR64_R
+#ifdef APR_USE_READDIR64_R
     struct dirent64 *retent;
 
     /* If LFS is enabled and readdir64_r is available, readdir64_r is
@@ -210,7 +210,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
 #endif
 #ifdef DIRENT_INODE
     if (thedir->entry->DIRENT_INODE && thedir->entry->DIRENT_INODE != -1) {
-#ifdef HAVE_READDIR64_R
+#ifdef APR_USE_READDIR64_R
         /* If readdir64_r is used, check for the overflow case of trying
          * to fit a 64-bit integer into a 32-bit integer. */
         if (sizeof(apr_ino_t) >= sizeof(retent->DIRENT_INODE)
@@ -223,7 +223,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         }
 #else
         wanted &= ~APR_FINFO_INODE;
-#endif /* HAVE_READDIR64_R */
+#endif /* APR_USE_READDIR64_R */
     }
 #endif /* DIRENT_INODE */
 
