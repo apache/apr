@@ -167,17 +167,19 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 
 
 /**
- * Poll the sockets in the poll structure
+ * Poll the descriptors in the poll structure
  * @param aprset The poll structure we will be using. 
- * @param numsock The number of sockets we are polling
- * @param nsds The number of sockets signalled.
+ * @param numsock The number of descriptors we are polling
+ * @param nsds The number of descriptors signalled.
  * @param timeout The amount of time in microseconds to wait.  This is 
- *                a maximum, not a minimum.  If a socket is signalled, we 
+ *                a maximum, not a minimum.  If a descriptor is signalled, we 
  *                will wake up before this time.  A negative number means 
- *                wait until a socket is signalled.
- * @remark The number of sockets signalled is returned in the third argument. 
+ *                wait until a descriptor is signalled.
+ * @remark The number of descriptors signalled is returned in the third argument. 
  *         This is a blocking call, and it will not return until either a 
- *         socket has been signalled, or the timeout has expired. 
+ *         descriptor has been signalled, or the timeout has expired. 
+ * @remark The rtnevents field in the apr_pollfd_t array will only be filled-
+ *         in if the return value is APR_SUCCESS.
  */
 APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t numsock,
                                    apr_int32_t *nsds, 

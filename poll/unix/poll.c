@@ -121,8 +121,13 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
     i = poll(pollset, num_to_poll, timeout);
     (*nsds) = i;
 
-    for (i = 0; i < num; i++) {
-        aprset[i].rtnevents = get_revent(pollset[i].revents);
+    if (i > 0) { /* poll() sets revents only if an event was signalled;
+                  * we don't promise to set rtnevents unless an event
+                  * was signalled
+                  */
+        for (i = 0; i < num; i++) {
+            aprset[i].rtnevents = get_revent(pollset[i].revents);
+        }
     }
     
 #if !defined(HAVE_VLA) && !defined(HAVE_ALLOCA)
