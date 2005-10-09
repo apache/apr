@@ -32,7 +32,7 @@
 
 apr_global_mutex_t *global_lock;
 apr_pool_t *pool;
-int *x;
+volatile int *x;
 
 static int make_child(apr_proc_t **proc, apr_pool_t *p)
 {
@@ -43,6 +43,10 @@ static int make_child(apr_proc_t **proc, apr_pool_t *p)
     apr_sleep (1);
 
     if (apr_proc_fork(*proc, p) == APR_INCHILD) {
+        apr_initialize();
+        
+        apr_global_mutex_child_init(&global_lock, NULL, p);
+
         while (1) {
             apr_global_mutex_lock(global_lock); 
             if (i == MAX_ITER) {
