@@ -292,6 +292,14 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           apr_pool_t *pool)
 {
     int i;
+    const char * const empty_envp[] = {NULL};
+
+    if (!env) { /* Specs require an empty array instead of NULL;
+                 * Purify will trigger a failure, even if many
+                 * implementations don't.
+                 */
+        env = empty_envp;
+    }
 
     new->in = attr->parent_in;
     new->err = attr->parent_err;
