@@ -26,25 +26,6 @@
 #endif
 
 #ifdef HAVE_STRUCT_IPMREQ
-/* Only UDP and Raw Sockets can be used for Multicast */
-static apr_status_t mcast_check_type(apr_socket_t *sock)
-{
-    int type;
-    apr_status_t rv;
-
-    rv = apr_socket_type_get(sock, &type);
-
-    if (rv != APR_SUCCESS) {
-        return rv;
-    }
-    else if (type == SOCK_DGRAM || type == SOCK_RAW) {
-        return APR_SUCCESS;
-    }
-    else {
-        return APR_ENOTIMPL;
-    }
-}
-
 static void fill_mip_v4(struct ip_mreq *mip, apr_sockaddr_t *mcast,
                         apr_sockaddr_t *iface)
 {
@@ -138,12 +119,6 @@ static apr_status_t do_mcast(int type, apr_socket_t *sock,
     int ip_proto;
 #endif
 
-    rv = mcast_check_type(sock);
-
-    if (rv != APR_SUCCESS) {
-        return rv;
-    }
-
     if (source != NULL) {
 #if MCAST_JOIN_SOURCE_GROUP
         if (sock_is_ipv6(sock))
@@ -214,12 +189,6 @@ static apr_status_t do_mcast_opt(int type, apr_socket_t *sock,
                                  apr_byte_t value)
 {
     apr_status_t rv = APR_SUCCESS;
-
-    rv = mcast_check_type(sock);
-
-    if (rv != APR_SUCCESS) {
-        return rv;
-    }
 
     if (sock_is_ipv4(sock)) {
         if (setsockopt(sock->socketdes, IPPROTO_IP, type,
