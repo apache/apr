@@ -612,6 +612,7 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
         IN6_IS_ADDR_V4MAPPED(&sockaddr->sa.sin6.sin6_addr)) {
         struct sockaddr_in tmpsa;
         tmpsa.sin_family = AF_INET;
+        tmpsa.sin_port = 0;
         tmpsa.sin_addr.s_addr = ((apr_uint32_t *)sockaddr->ipaddr_ptr)[3];
 #ifdef SIN6_LEN
         tmpsa.sin_len = sizeof(tmpsa);
