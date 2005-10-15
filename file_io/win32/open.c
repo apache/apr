@@ -564,7 +564,9 @@ APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile, 
+                                                     apr_int32_t flags, 
+                                                     apr_pool_t *pool)
 {
 #ifdef _WIN32_WCE
     return APR_ENOTIMPL;
@@ -581,11 +583,13 @@ APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t 
         return rv;
     }
 
-    return apr_os_file_put(thefile, &file_handle, 0, pool);
+    return apr_os_file_put(thefile, &file_handle, flags | APR_WRITE, pool);
 #endif
 }
 
-APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile, 
+                                                     apr_int32_t flags,
+                                                     apr_pool_t *pool)
 {
 #ifdef _WIN32_WCE
     return APR_ENOTIMPL;
@@ -602,11 +606,13 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t 
         return rv;
     }
 
-    return apr_os_file_put(thefile, &file_handle, 0, pool);
+    return apr_os_file_put(thefile, &file_handle, flags | APR_WRITE, pool);
 #endif
 }
 
-APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_file_open_flags_stdin(apr_file_t **thefile, 
+                                                    apr_int32_t flags,
+                                                    apr_pool_t *pool)
 {
 #ifdef _WIN32_WCE
     return APR_ENOTIMPL;
@@ -623,8 +629,23 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *
         return rv;
     }
 
-    return apr_os_file_put(thefile, &file_handle, 0, pool);
+    return apr_os_file_put(thefile, &file_handle, flags | APR_READ, pool);
 #endif
+}
+
+APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *pool)
+{
+    return apr_file_open_flags_stderr(thefile, 0, pool);
+}
+
+APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *pool)
+{
+    return apr_file_open_flags_stdout(thefile, 0, pool);
+}
+
+APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *pool)
+{
+    return apr_file_open_flags_stdin(thefile, 0, pool);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(file);
