@@ -213,28 +213,51 @@ APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr)
 }   
 
 
-APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile, 
+                                                     apr_int32_t flags,
+                                                     apr_pool_t *pool)
 {
     apr_os_file_t fd = 2;
 
-    return apr_os_file_put(thefile, &fd, 0, pool);
+    return apr_os_file_put(thefile, &fd, flags | APR_WRITE, pool);
 }
 
+
+APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile, 
+                                                     apr_int32_t flags,
+                                                     apr_pool_t *pool)
+{
+    apr_os_file_t fd = 1;
+
+    return apr_os_file_put(thefile, &fd, flags | APR_WRITE, pool);
+}
+
+
+APR_DECLARE(apr_status_t) apr_file_open_flags_stdin(apr_file_t **thefile, 
+                                                    apr_int32_t flags,
+                                                    apr_pool_t *pool)
+{
+    apr_os_file_t fd = 0;
+
+    return apr_os_file_put(thefile, &fd, flags | APR_READ, pool);
+}
+
+
+APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *pool)
+{
+    return apr_file_open_flags_stderr(thefile, 0, pool);
+}
 
 
 APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *pool)
 {
-    apr_os_file_t fd = 1;
-
-    return apr_os_file_put(thefile, &fd, 0, pool);
+    return apr_file_open_flags_stdout(thefile, 0, pool);
 }
 
 
 APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *pool)
 {
-    apr_os_file_t fd = 0;
-
-    return apr_os_file_put(thefile, &fd, 0, pool);
+    return apr_file_open_flags_stdin(thefile, 0, pool);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(file);

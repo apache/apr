@@ -325,6 +325,51 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile,
                                               apr_pool_t *pool);
 
 /**
+ * open standard error as an apr file pointer, with flags.
+ * @param thefile The apr file to use as stderr.
+ * @param flags The flags to open the file with. Only the APR_EXCL,
+ *              APR_BUFFERED, APR_XTHREAD, APR_SHARELOCK, 
+ *              APR_SENDFILE_ENABLED and APR_LARGEFILE flags should
+ *              be used. The APR_WRITE flag will be set unconditionally.
+ * @param pool The pool to allocate the file out of.
+ * 
+ * @remark See remarks for apr_file_open_stderr.
+ */
+APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile,
+                                                     apr_int32_t flags,
+                                                     apr_pool_t *pool);
+
+/**
+ * open standard output as an apr file pointer, with flags.
+ * @param thefile The apr file to use as stdout.
+ * @param flags The flags to open the file with. Only the APR_EXCL,
+ *              APR_BUFFERED, APR_XTHREAD, APR_SHARELOCK, 
+ *              APR_SENDFILE_ENABLED and APR_LARGEFILE flags should
+ *              be used. The APR_WRITE flag will be set unconditionally.
+ * @param pool The pool to allocate the file out of.
+ * 
+ * @remark See remarks for apr_file_open_stderr.
+ */
+APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile,
+                                                     apr_int32_t flags,
+                                                     apr_pool_t *pool);
+
+/**
+ * open standard input as an apr file pointer, with flags.
+ * @param thefile The apr file to use as stdin.
+ * @param flags The flags to open the file with. Only the APR_EXCL,
+ *              APR_BUFFERED, APR_XTHREAD, APR_SHARELOCK, 
+ *              APR_SENDFILE_ENABLED and APR_LARGEFILE flags should
+ *              be used. The APR_READ flag will be set unconditionally.
+ * @param pool The pool to allocate the file out of.
+ * 
+ * @remark See remarks for apr_file_open_stderr.
+ */
+APR_DECLARE(apr_status_t) apr_file_open_flags_stdin(apr_file_t **thefile,
+                                                     apr_int32_t flags,
+                                                     apr_pool_t *pool);
+
+/**
  * Read data from the specified file.
  * @param thefile The file descriptor to read from.
  * @param buf The buffer to store the data to.
