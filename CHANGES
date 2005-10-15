@@ -1,5 +1,11 @@
 Changes for APR 1.3.0
 
+  *) Add apr_file_open_flags_std[err|out|in]() functions.
+     [Colm MacCarthaigh]
+
+  *) stdio: apr_file_open_std[err|out|in]() functions now set the APR_WRITE
+     or APR_READ flag as appropriate. [Colm MacCarthaigh]
+
   *) multicast: apr_mcast_*() no longer return APR_ENOTIMPL when invoked
      for non-UDP/RAW sockets. The caller is expected to ensure that the
      socket-type is suitable for multicast. [Colm MacCarthaigh]
