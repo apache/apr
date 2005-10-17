@@ -60,7 +60,7 @@ To run it, run:
     ./testall
 
 Running individual tests
----------------------------------
+------------------------
 
 It is not possible to build individual tests, however it is possible to
 run individual tests.  When running the test suite, specify the name of the
@@ -146,8 +146,107 @@ To add a new Suite to the full driver, you must make a couple of modifications.
 Once those four things are done, your tests will automatically be added
 to the suite.
 
-Writing tests
--------------
+Writting an ABTS unit test
+--------------------------
+
+The aim of this quick and dirty Howto is to give a short introduction
+to APR (Apache Portable Runtime) unit tests, and how to write
+one. During my Google's Summer of Code 2005 project, I discovered a
+small bug in the APR-Util's date parsing routines, and I needed to
+write a unit test for the fixed code. I decided to write this
+documentation because I did not find any. Thanks to Garrett Rooney for
+his help on writing the unit test !
+
+The APR and APR-Util libraries provide a platform independent API for
+software developers. They contain a lot of modules, including network
+programming, threads, string and memory management, etc. All these
+functions need to be heavily tested so that developers can be sure the
+library is reliable.
+
+The ABTS give APR developers the ability to build a complete test
+suite for the bunch of tests they wrote, which can then be ran under
+various platforms. In this Howto, I will try teach you how to write an
+ABTS unit test.
+
+As you may probably know, a unit test is a simple routine which tests
+a very specific feature of the tested software or library. To build a
+unit test, you need three different things :
+
+ * the to-be-tested function,
+ * the input data that will be given to the function,
+ * the expected output data.
+
+The principle of a unit test is very simple : for each entry in your
+set of input data, we pass it to our function, fetch what the function
+returned and compare it to the corresponding expected output data. Of
+course, the more edge cases you can test, the better your input data
+set is.
+
+The ABTS aims to quicken the write of unit test, and make them
+available to the whole test suite by providing a set of preprocessor
+macros. Adding a unit test to a test suite can be easily done by the
+following piece of code :
+
+abts_suite *testdaterfc(abts_suite *suite)
+{
+    suite = ADD_SUITE(suite);
+    abts_run_test(suite, test_date_rfc, NULL);
+
+    return suite;
+}
+
+Where test_date_rfc is the name of the function performing the
+test. Writing such a function is, in the light of the explanation I
+just gave, pretty much easy too. As I said, we need to check every
+entry of our input data set. That gives us a loop. For each loop
+iteration, we call our to-be-tested function, grab its result and
+compare the returned value with the expected one.
+
+Test functions must have the following prototype :
+
+static void my_test_function(abts_case *tc, void *data);
+
+The comparison step is performed by the ABTS, thus giving the
+whole test suite the correct behavior if your unit test fails. Here
+comes a list of the available test methods :
+
+ABTS_INT_EQUAL(tc, a, b)
+ABTS_INT_NEQUAL(tc, a, b)
+ABTS_STR_EQUAL(tc, a, b)
+ABTS_STR_NEQUAL(tc, a, b, c)
+ABTS_PTR_NOTNULL(tc, b)
+ABTS_PTR_EQUAL(tc, a, b)
+ABTS_TRUE(tc, b)
+ABTS_FAIL(tc, b)
+ABTS_NOT_IMPL(tc, b)
+ABTS_ASSERT(tc, a, b)
+
+The first argument, tc is a reference to the unit test currently
+processed by the test suite (passed to your test function). The other
+parameters are the data to be tested. For example, the following line
+will never make your unit test fail :
+
+ABTS_INT_EQUAL(tc, 1, 1);
+
+See, it's easy ! Let's take a look at the complete example :
+testdaterfc. We want to test our date string parser. For this, we will
+use some chosen date strings (from mail headers for example) written
+in various formats but that should all be handled by our function, and
+their equivalents in correct RFC822 format.
+
+The function we want to test returns an apr_time_t}, which will be
+directly given as input to the apr_rfc822_date() function, thus
+producing the corresponding RFC822 date string. All we need to do
+after this is to call the correct test method from the ABTS macros !
+
+You can take a look at the apr-util/test/testdaterfc.c file for the
+complete source code of this unit test.
+
+Although this Howto is very small and mostly dedicated to the
+testdaterfc unit test, I hope you'll find it useful. Good luck !
+
+Writing tests for CuTest (no longer used)
+-----------------------------------------
 
 There are a couple of rules for writing good tests for the test suite.
 
