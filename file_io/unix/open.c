@@ -150,7 +150,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     (*new)->buffered = (flag & APR_BUFFERED) > 0;
 
     if ((*new)->buffered) {
-        (*new)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
+        (*new)->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
+        (*new)->bufsize = APR_FILE_DEFAULT_BUFSIZE;
 #if APR_HAS_THREADS
         if ((*new)->flags & APR_XTHREAD) {
             (*new)->thlock = thlock;
@@ -239,7 +240,8 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
 #endif
 
     if ((*file)->buffered) {
-        (*file)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
+        (*file)->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
+        (*file)->bufsize = APR_FILE_DEFAULT_BUFSIZE;
 #if APR_HAS_THREADS
         if ((*file)->flags & APR_XTHREAD) {
             apr_status_t rv;

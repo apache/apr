@@ -62,7 +62,8 @@ static apr_status_t file_dup(apr_file_t **new_file,
      * got one.
      */
     if ((*new_file)->buffered && !(*new_file)->buffer) {
-        (*new_file)->buffer = apr_palloc(p, APR_FILE_BUFSIZE);
+        (*new_file)->buffer = apr_palloc(p, old_file->bufsize);
+        (*new_file)->bufsize = old_file->bufsize;
     }
 
     /* this is the way dup() works */
@@ -121,7 +122,8 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
     memcpy(*new_file, old_file, sizeof(apr_file_t));
     (*new_file)->pool = p;
     if (old_file->buffered) {
-        (*new_file)->buffer = apr_palloc(p, APR_FILE_BUFSIZE);
+        (*new_file)->buffer = apr_palloc(p, old_file->bufsize);
+        (*new_file)->bufsize = old_file->bufsize;
         if (old_file->direction == 1) {
             memcpy((*new_file)->buffer, old_file->buffer, old_file->bufpos);
         }
