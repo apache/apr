@@ -52,7 +52,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
             if (thefile->bufpos >= thefile->dataRead) {
                 ULONG bytesread;
                 rc = DosRead(thefile->filedes, thefile->buffer,
-                             APR_FILE_BUFSIZE, &bytesread);
+                             thefile->bufsize, &bytesread);
 
                 if (bytesread == 0) {
                     if (rc == 0)
@@ -143,10 +143,10 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         }
 
         while (rc == 0 && size > 0) {
-            if (thefile->bufpos == APR_FILE_BUFSIZE)   // write buffer is full
+            if (thefile->bufpos == thefile->bufsize)   // write buffer is full
                 rc = apr_file_flush(thefile);
 
-            blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? APR_FILE_BUFSIZE - thefile->bufpos : size;
+            blocksize = size > thefile->bufsize - thefile->bufpos ? thefile->bufsize - thefile->bufpos : size;
             memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);
             thefile->bufpos += blocksize;
             pos += blocksize;

@@ -59,7 +59,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     dafile->buffered = (flag & APR_BUFFERED) > 0;
 
     if (dafile->buffered) {
-        dafile->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
+        dafile->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
+        dafile->bufsize = APR_FILE_DEFAULT_BUFSIZE;
         rv = apr_thread_mutex_create(&dafile->mutex, 0, pool);
 
         if (rv)
@@ -193,7 +194,8 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, apr_os_file_t *thef
     if ((*file)->buffered) {
         apr_status_t rv;
 
-        (*file)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
+        (*file)->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
+        (*file)->bufsize = APR_FILE_DEFAULT_BUFSIZE;
         rv = apr_thread_mutex_create(&(*file)->mutex, 0, pool);
 
         if (rv)
