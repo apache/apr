@@ -386,7 +386,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     }
     if (flag & APR_BUFFERED) {
         (*new)->buffered = 1;
-        (*new)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
+        (*new)->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
+        (*new)->bufsize = APR_FILE_DEFAULT_BUFSIZE;
     }
     /* Need the mutex to handled buffered and O_APPEND style file i/o */
     if ((*new)->buffered || (*new)->append) {
@@ -528,7 +529,8 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     }
     if (flags & APR_BUFFERED) {
         (*file)->buffered = 1;
-        (*file)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
+        (*file)->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
+        (*file)->bufsize = APR_FILE_DEFAULT_BUFSIZE;
     }
 
     if ((*file)->append || (*file)->buffered) {

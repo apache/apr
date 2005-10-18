@@ -84,7 +84,9 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool);
 
 #define APR_FILE_MAX MAX_PATH
 
-#define APR_FILE_BUFSIZE 4096
+#define APR_FILE_DEFAULT_BUFSIZE 4096
+/* For backwards-compat */
+#define APR_FILE_BUFSIZE APR_FILE_DEFAULT_BUFSIZE
 
 /* obscure ommissions from msvc's sys/stat.h */
 #ifdef _MSC_VER
@@ -173,6 +175,7 @@ struct apr_file_t {
     /* Stuff for buffered mode */
     char *buffer;
     apr_size_t bufpos;         // Read/Write position in buffer
+    apr_size_t bufsize;        // The size of the buffer
     apr_size_t dataRead;       // amount of valid data read into buffer
     int direction;             // buffer being used for 0 = read, 1 = write
     apr_off_t filePtr;         // position in file of handle
