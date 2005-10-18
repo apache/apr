@@ -69,7 +69,9 @@
 
 /* End System headers */
 
-#define APR_FILE_BUFSIZE 4096
+#define APR_FILE_DEFAULT_BUFSIZE 4096
+/* For backwards compat */
+#define APR_FILE_BUFSIZE APR_FILE_DEFAULT_BUFSIZE
 
 #if APR_HAS_LARGE_FILES
 #define lseek(f,o,w) lseek64(f,o,w)
@@ -95,7 +97,8 @@ struct apr_file_t {
 
     /* Stuff for buffered mode */
     char *buffer;
-    int bufpos;               /* Read/Write position in buffer */
+    apr_size_t bufpos;    /* Read/Write position in buffer */
+    apr_size_t bufsize;   /* The buffer size */
     apr_off_t dataRead;   /* amount of valid data read into buffer */
     int direction;            /* buffer being used for 0 = read, 1 = write */
     apr_off_t filePtr;    /* position in file of handle */
