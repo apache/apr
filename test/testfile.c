@@ -326,6 +326,35 @@ static void test_userdata_getnokey(abts_case *tc, void *data)
     apr_file_close(filetest);
 }
 
+static void test_buffer_set_get(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *filetest = NULL;
+    char   * buffer;
+
+    rv = apr_file_open(&filetest, FILENAME, 
+                       APR_WRITE | APR_BUFFERED, 
+                       APR_UREAD | APR_UWRITE | APR_GREAD, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_file_buffer_size_get(filetest);
+    ABTS_INT_EQUAL(tc, APR_BUFFERSIZE, rv);
+ 
+    buffer = apr_pcalloc(p, 10240);
+    rv = apr_file_buffer_set(filetest, buffer, 10240);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    
+    rv = apr_file_buffer_size_get(filetest);
+    ABTS_INT_EQUAL(tc, 10240, rv);
+    
+    rv = apr_file_buffer_set(filetest, buffer, 12);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    
+    rv = apr_file_buffer_size_get(filetest);
+    ABTS_INT_EQUAL(tc, 12, rv);
+    
+    apr_file_close(filetest);
+}
 static void test_getc(abts_case *tc, void *data)
 {
     apr_file_t *f = NULL;
@@ -802,6 +831,7 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_bigfprintf, NULL);
     abts_run_test(suite, test_fail_write_flush, NULL);
     abts_run_test(suite, test_fail_read_flush, NULL);
+    abts_run_test(suite, test_buffer_set_get, NULL);
 
     return suite;
 }

@@ -576,6 +576,27 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
                                             apr_pool_t *p);
 
 /**
+ * Give the specified apr file handle a new buffer 
+ * @param thefile  The file handle that is to be modified
+ * @param buffer   The buffer
+ * @param bufsize  The size of the buffer
+ * @remark It is possible to add a buffer to previously unbuffered
+ *         file handles, the APR_BUFFERED flag will be added to
+ *         the file handle's flags. Likewise, with buffer=NULL and
+ *         bufsize=0 arguments it is possible to make a previously
+ *         buffered file handle unbuffered.
+ */
+APR_DECLARE(apr_status_t) apr_file_buffer_set(apr_file_t *thefile,
+                                              char * buffer,
+                                              apr_size_t bufsize);
+
+/**
+ * Get the size of any buffer for the specified apr file handle 
+ * @param thefile  The file handle 
+ */
+APR_DECLARE(apr_size_t) apr_file_buffer_size_get(apr_file_t *thefile);
+
+/**
  * Move the read/write file offset to a specified byte within a file.
  * @param thefile The file descriptor
  * @param where How to move the pointer, one of:

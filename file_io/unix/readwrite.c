@@ -70,7 +70,8 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         }
         while (rv == 0 && size > 0) {
             if (thefile->bufpos >= thefile->dataRead) {
-                int bytesread = read(thefile->filedes, thefile->buffer, APR_FILE_BUFSIZE);
+                int bytesread = read(thefile->filedes, thefile->buffer, 
+                                     thefile->bufsize);
                 if (bytesread == 0) {
                     thefile->eof_hit = TRUE;
                     rv = APR_EOF;
@@ -177,11 +178,11 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
 
         rv = 0;
         while (rv == 0 && size > 0) {
-            if (thefile->bufpos == APR_FILE_BUFSIZE)   /* write buffer is full*/
+            if (thefile->bufpos == thefile->bufsize)   /* write buffer is full*/
                 rv = apr_file_flush(thefile);
 
-            blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? 
-                        APR_FILE_BUFSIZE - thefile->bufpos : size;
+            blocksize = size > thefile->bufsize - thefile->bufpos ? 
+                        thefile->bufsize - thefile->bufpos : size;
             memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);                      
             thefile->bufpos += blocksize;
             pos += blocksize;
