@@ -31,7 +31,8 @@
  */
 #undef HAVE_MKSTEMP
 
-#define APR_FILE_BUFSIZE 4096
+#define APR_FILE_DEFAULT_BUFSIZE 4096
+#define APR_FILE_BUFSIZE APR_FILE_DEFAULT_BUFSIZE
 
 struct apr_file_t {
     apr_pool_t *pool;
@@ -48,7 +49,8 @@ struct apr_file_t {
 
     /* Stuff for buffered mode */
     char *buffer;
-    int bufpos;               // Read/Write position in buffer
+    apr_size_t bufsize;       // Read/Write position in buffer
+    apr_size_t bufpos;        // Read/Write position in buffer
     unsigned long dataRead;   // amount of valid data read into buffer
     int direction;            // buffer being used for 0 = read, 1 = write
     unsigned long filePtr;    // position in file of handle
