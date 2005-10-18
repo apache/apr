@@ -111,6 +111,10 @@ SOURCE=.\dso\win32\dso.c
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\file_io\win32\buffer.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\file_io\unix\copy.c
 # End Source File
 # Begin Source File
