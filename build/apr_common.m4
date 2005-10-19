@@ -471,40 +471,29 @@ undefine([AC_CV_NAME])dnl
 
 dnl
 dnl APR_TRY_COMPILE_NO_WARNING(INCLUDES, FUNCTION-BODY,
-dnl             [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
+dnl             [ACTIONS-IF-NO-WARNINGS], [ACTIONS-IF-WARNINGS])
 dnl
 dnl Tries a compile test with warnings activated so that the result
-dnl is false if the code doesn't compile cleanly.
+dnl is false if the code doesn't compile cleanly.  For compilers
+dnl where it is not known how to activate a "fail-on-error" mode,
+dnl it is undefined which of the sets of actions will be run.
 dnl
-AC_DEFUN(APR_TRY_COMPILE_NO_WARNING,
-[if test "x$CFLAGS_WARN" = "x"; then
-  apr_tcnw_flags=""
-else
-  apr_tcnw_flags=$CFLAGS_WARN
-fi
-if test "$ac_cv_prog_gcc" = "yes"; then 
-  apr_tcnw_flags="$apr_tcnw_flags -Werror"
-fi
-changequote(', ')
-cat > conftest.$ac_ext <<EOTEST
-#include "confdefs.h"
-'$1'
-int main(int argc, const char * const argv[]) {
-'$2'
-; return 0; }
-EOTEST
-changequote([, ])
-if ${CC-cc} -c $CFLAGS $CPPFLAGS $apr_tcnw_flags conftest.$ac_ext 2>&AC_FD_CC ; then
-  ifelse([$3], , :, [rm -rf conftest*
-  $3])
-else
-  echo "configure: failed or warning program:" >&AC_FD_CC
-  cat conftest.$ac_ext >&AC_FD_CC
-  ifelse([$4], , , [rm -rf conftest*
-  $4])
-fi
-rm -f conftest*
-])dnl
+AC_DEFUN([APR_TRY_COMPILE_NO_WARNING],
+[apr_save_CFLAGS=$CFLAGS
+ CFLAGS="$CFLAGS $CFLAGS_WARN"
+ if test "$ac_cv_prog_gcc" = "yes"; then 
+   CFLAGS="$CFLAGS -Werror"
+ fi
+ AC_COMPILE_IFELSE(
+  [#include "confdefs.h"
+  ]
+  [[$1]]
+  [int main(int argc, const char *const *argv) {]
+  [[$2]]
+  [   return 0; }],
+  [$3], [$4])
+ CFLAGS=$apr_save_CFLAGS
+])
 
 dnl
 dnl APR_CHECK_STRERROR_R_RC
