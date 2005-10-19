@@ -19,12 +19,12 @@
 static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
 {
     apr_off_t newbufpos;
-    int rc;
+    apr_status_t rv;
 
     if (thefile->direction == 1) {
-        rc = apr_file_flush(thefile);
-        if (rc) {
-            return rc;
+        rv = apr_file_flush(thefile);
+        if (rv) {
+            return rv;
         }
         thefile->bufpos = thefile->direction = thefile->dataRead = 0;
     }
@@ -32,22 +32,20 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
     newbufpos = pos - (thefile->filePtr - thefile->dataRead);
     if (newbufpos >= 0 && newbufpos <= thefile->dataRead) {
         thefile->bufpos = newbufpos;
-        rc = 0;
+        rv = APR_SUCCESS;
     } 
     else {
-        rc = lseek(thefile->filedes, pos, SEEK_SET);
-
-        if (rc != -1 ) {
+        if (lseek(thefile->filedes, pos, SEEK_SET) != -1) {
             thefile->bufpos = thefile->dataRead = 0;
             thefile->filePtr = pos;
-            rc = 0;
+            rv = APR_SUCCESS;
         }
         else {
-            rc = errno;
+            rv = errno;
         }
     }
 
-    return rc;
+    return rv;
 }
 
 
