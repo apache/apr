@@ -766,6 +766,16 @@ static void test_fail_read_flush(abts_case *tc, void *data)
     ABTS_ASSERT(tc, "gets should flush buffered write and fail",
                 rv != APR_SUCCESS && rv != APR_EOF);
 
+    /* Likewise for seek. */
+    {
+        apr_off_t offset = 0;
+
+        rv = apr_file_seek(f, APR_SET, &offset);
+    }
+
+    ABTS_ASSERT(tc, "seek should flush buffered write and fail",
+                rv != APR_SUCCESS && rv != APR_EOF);
+
     apr_file_close(f);
 }
 

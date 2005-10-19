@@ -1,6 +1,7 @@
 Changes for APR 1.2.3-dev
 
-
+  *) Fix apr_file_seek() to catch write failures when flushing
+     pending writes for a buffered file.  [Joe Orton]
 
 Changes for APR 1.2.2
 
