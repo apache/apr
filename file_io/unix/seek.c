@@ -22,7 +22,10 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
     int rc;
 
     if (thefile->direction == 1) {
-        apr_file_flush(thefile);
+        rc = apr_file_flush(thefile);
+        if (rc) {
+            return rc;
+        }
         thefile->bufpos = thefile->direction = thefile->dataRead = 0;
     }
 
