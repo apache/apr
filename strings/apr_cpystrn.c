@@ -169,6 +169,7 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
 
     /*  determine first argument */
     for (argnum = 0; argnum < (numargs-1); argnum++) {
+        SKIP_WHITESPACE(cp);
         CHECK_QUOTATION(cp, isquoted);
         ct = cp;
         DETERMINE_NEXTSTRING(cp, isquoted);
@@ -177,7 +178,6 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
         apr_cpystrn((*argv_out)[argnum], ct, cp - ct);
         cleaned = dirty = (*argv_out)[argnum];
         REMOVE_ESCAPE_CHARS(cleaned, dirty, escaped);
-        SKIP_WHITESPACE(cp);
     }
     (*argv_out)[argnum] = NULL;
 
