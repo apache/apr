@@ -55,6 +55,7 @@ extern "C" {
  * Pollset Flags
  */
 #define APR_POLLSET_THREADSAFE 0x001 /**< Adding or Removing a Descriptor is thread safe */
+#define APR_POLLSET_NOCOPY     0x002 /**< Descriptors passed to apr_pollset_create() are not copied */
 
 /** Used in apr_pollfd_t to determine what the apr_descriptor is */
 typedef enum { 
