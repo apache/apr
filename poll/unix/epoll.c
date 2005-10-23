@@ -101,7 +101,8 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
 
     *pollset = apr_palloc(p, sizeof(**pollset));
 #if APR_HAS_THREADS
-    if (flags & APR_POLLSET_THREADSAFE &&
+    if ((flags & APR_POLLSET_THREADSAFE) &&
+        !(flags & APR_POLLSET_NOCOPY) &&
         ((rv = apr_thread_mutex_create(&(*pollset)->ring_lock,
                                        APR_THREAD_MUTEX_DEFAULT,
                                        p) != APR_SUCCESS))) {
@@ -123,10 +124,11 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
     apr_pool_cleanup_register(p, *pollset, backend_cleanup, backend_cleanup);
     (*pollset)->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
 
-    APR_RING_INIT(&(*pollset)->query_ring, pfd_elem_t, link);
-    APR_RING_INIT(&(*pollset)->free_ring, pfd_elem_t, link);
-    APR_RING_INIT(&(*pollset)->dead_ring, pfd_elem_t, link);
-
+    if (!(flags & APR_POLLSET_NOCOPY)) {
+        APR_RING_INIT(&(*pollset)->query_ring, pfd_elem_t, link);
+        APR_RING_INIT(&(*pollset)->free_ring, pfd_elem_t, link);
+        APR_RING_INIT(&(*pollset)->dead_ring, pfd_elem_t, link);
+    }
     return APR_SUCCESS;
 }
 
@@ -140,23 +142,28 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
 {
     struct epoll_event ev;
     int ret = -1;
-    pfd_elem_t *elem;
+    pfd_elem_t *elem = NULL;
     apr_status_t rv = APR_SUCCESS;
 
-    pollset_lock_rings();
+    ev.events = get_epoll_event(descriptor->reqevents);
 
-    if (!APR_RING_EMPTY(&(pollset->free_ring), pfd_elem_t, link)) {
-        elem = APR_RING_FIRST(&(pollset->free_ring));
-        APR_RING_REMOVE(elem, link);
+    if (pollset->flags & APR_POLLSET_NOCOPY) {
+        ev.data.ptr = (void *)descriptor;
     }
     else {
-        elem = (pfd_elem_t *) apr_palloc(pollset->pool, sizeof(pfd_elem_t));
-        APR_RING_ELEM_INIT(elem, link);
-    }
-    elem->pfd = *descriptor;
+        pollset_lock_rings();
 
-    ev.events = get_epoll_event(descriptor->reqevents);
-    ev.data.ptr = elem;
+        if (!APR_RING_EMPTY(&(pollset->free_ring), pfd_elem_t, link)) {
+            elem = APR_RING_FIRST(&(pollset->free_ring));
+            APR_RING_REMOVE(elem, link);
+        }
+        else {
+            elem = (pfd_elem_t *) apr_palloc(pollset->pool, sizeof(pfd_elem_t));
+            APR_RING_ELEM_INIT(elem, link);
+        }
+        elem->pfd = *descriptor;
+        ev.data.ptr = elem;
+    }
     if (descriptor->desc_type == APR_POLL_SOCKET) {
         ret = epoll_ctl(pollset->epoll_fd, EPOLL_CTL_ADD,
                         descriptor->desc.s->socketdes, &ev);
@@ -166,16 +173,22 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
                         descriptor->desc.f->filedes, &ev);
     }
 
-    if (0 != ret) {
-        rv = APR_EBADF;
-        APR_RING_INSERT_TAIL(&(pollset->free_ring), elem, pfd_elem_t, link);
+    if (pollset->flags & APR_POLLSET_NOCOPY) {
+        if (0 != ret) {
+            rv = APR_EBADF;
+        }
     }
     else {
-        pollset->nelts++;
-        APR_RING_INSERT_TAIL(&(pollset->query_ring), elem, pfd_elem_t, link);
+        if (0 != ret) {
+            rv = APR_EBADF;
+            APR_RING_INSERT_TAIL(&(pollset->free_ring), elem, pfd_elem_t, link);
+        }
+        else {
+            pollset->nelts++;
+            APR_RING_INSERT_TAIL(&(pollset->query_ring), elem, pfd_elem_t, link);
+        }
+        pollset_unlock_rings();
     }
-
-    pollset_unlock_rings();
 
     return rv;
 }
@@ -187,8 +200,6 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
     apr_status_t rv = APR_SUCCESS;
     struct epoll_event ev;
     int ret = -1;
-
-    pollset_lock_rings();
 
     ev.events = get_epoll_event(descriptor->reqevents);
 
@@ -204,22 +215,26 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
         rv = APR_NOTFOUND;
     }
 
-    if (!APR_RING_EMPTY(&(pollset->query_ring), pfd_elem_t, link)) {
-        for (ep = APR_RING_FIRST(&(pollset->query_ring));
-             ep != APR_RING_SENTINEL(&(pollset->query_ring),
-                                     pfd_elem_t, link);
-             ep = APR_RING_NEXT(ep, link)) {
+    if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
+        pollset_lock_rings();
 
-            if (descriptor->desc.s == ep->pfd.desc.s) {
-                APR_RING_REMOVE(ep, link);
-                APR_RING_INSERT_TAIL(&(pollset->dead_ring),
-                                     ep, pfd_elem_t, link);
-                break;
+        if (!APR_RING_EMPTY(&(pollset->query_ring), pfd_elem_t, link)) {
+            for (ep = APR_RING_FIRST(&(pollset->query_ring));
+                 ep != APR_RING_SENTINEL(&(pollset->query_ring),
+                                         pfd_elem_t, link);
+                 ep = APR_RING_NEXT(ep, link)) {
+                
+                if (descriptor->desc.s == ep->pfd.desc.s) {
+                    APR_RING_REMOVE(ep, link);
+                    APR_RING_INSERT_TAIL(&(pollset->dead_ring),
+                                         ep, pfd_elem_t, link);
+                    break;
+                }
             }
         }
-    }
 
-    pollset_unlock_rings();
+        pollset_unlock_rings();
+    }
 
     return rv;
 }
@@ -247,11 +262,21 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
         rv = APR_TIMEUP;
     }
     else {
-        for (i = 0; i < ret; i++) {
-            pollset->result_set[i] =
-                (((pfd_elem_t *) (pollset->pollset[i].data.ptr))->pfd);
-            pollset->result_set[i].rtnevents =
-                get_epoll_revent(pollset->pollset[i].events);
+        if (pollset->flags & APR_POLLSET_NOCOPY) {
+            for (i = 0; i < ret; i++) {
+                pollset->result_set[i] =
+                    *((apr_pollfd_t *) (pollset->pollset[i].data.ptr));
+                pollset->result_set[i].rtnevents =
+                    get_epoll_revent(pollset->pollset[i].events);
+            }
+        }
+        else {
+            for (i = 0; i < ret; i++) {
+                pollset->result_set[i] =
+                    (((pfd_elem_t *) (pollset->pollset[i].data.ptr))->pfd);
+                pollset->result_set[i].rtnevents =
+                    get_epoll_revent(pollset->pollset[i].events);
+            }
         }
 
         if (descriptors) {
@@ -259,12 +284,14 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
         }
     }
 
-    pollset_lock_rings();
+    if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
+        pollset_lock_rings();
 
-    /* Shift all PFDs in the Dead Ring to be Free Ring */
-    APR_RING_CONCAT(&(pollset->free_ring), &(pollset->dead_ring), pfd_elem_t, link);
+        /* Shift all PFDs in the Dead Ring to be Free Ring */
+        APR_RING_CONCAT(&(pollset->free_ring), &(pollset->dead_ring), pfd_elem_t, link);
 
-    pollset_unlock_rings();
+        pollset_unlock_rings();
+    }
 
     return rv;
 }
