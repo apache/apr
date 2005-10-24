@@ -1259,7 +1259,7 @@ int parse_output_file_name(char *arg, command_t *cmd_data)
 }
 
 /* returns just a file's name without the path */
-const char *basename(const char *fullpath)
+const char *jlibtool_basename(const char *fullpath)
 {
     const char *name = strrchr(fullpath, '/');
 
@@ -1282,7 +1282,7 @@ const char *nameof(const char *fullpath)
     const char *name;
     const char *ext;
 
-    name = basename(fullpath);
+    name = jlibtool_basename(fullpath);
     ext = strrchr(name, '.');
 
     if (ext) {
@@ -1673,7 +1673,7 @@ int run_mode(command_t *cmd_data)
             size_t len1, len2;
             len1 = strlen(cmd_data->arglist->vals[cmd_data->arglist->num - 1]);
 
-            static_lib_name = basename(cmd_data->static_name.install);
+            static_lib_name = jlibtool_basename(cmd_data->static_name.install);
             len2 = strlen(static_lib_name);
 
             tmp = malloc(len1 + len2 + 2);
