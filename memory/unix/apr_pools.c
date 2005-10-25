@@ -1356,6 +1356,8 @@ APR_DECLARE(void *) apr_pcalloc_debug(apr_pool_t *pool, apr_size_t size,
  * Pool creation/destruction (debug)
  */
 
+#define POOL_POISON_BYTE 'A'
+
 static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
 {
     debug_node_t *node;
@@ -1383,13 +1385,18 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
     /* Clear the user data. */
     pool->user_data = NULL;
 
-    /* Free the blocks */
+    /* Free the blocks, scribbling over them first to help highlight
+     * use-after-free issues. */
     while ((node = pool->nodes) != NULL) {
         pool->nodes = node->next;
 
-        for (index = 0; index < node->index; index++)
+        for (index = 0; index < node->index; index++) {
+            memset(node->beginp[index], POOL_POISON_BYTE,
+                   node->endp[index] - node->beginp[index]);
             free(node->beginp[index]);
+        }
 
+        memset(node, POOL_POISON_BYTE, SIZEOF_DEBUG_NODE_T);
         free(node);
     }
 
