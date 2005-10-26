@@ -73,6 +73,7 @@ function add_symbol (sym_name) {
 }
 
 
-#END {
+END {
+   add_symbol("apr_wait_for_io_or_timeout");
 #	printf(" %s", line)
-#}
+}
