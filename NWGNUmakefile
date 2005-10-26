@@ -279,6 +279,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/apr_strnatcmp.o \
 	$(OBJDIR)/apr_strtok.o \
 	$(OBJDIR)/apr_tables.o \
+	$(OBJDIR)/buffer.o \
 	$(OBJDIR)/charset.o \
 	$(OBJDIR)/copy.o \
 	$(OBJDIR)/common.o \
