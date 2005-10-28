@@ -32,7 +32,7 @@ $(APR)/aprlib.imp : make_nw_export.awk nw_export.i
 	@echo Generating $(subst /,\,$@)
 	awk -f make_nw_export.awk nw_export.i | sort >$(APR)/aprlib.imp
     
-nw_export.i : nw_export.inc $(FILES_prebuild_headers) $(NLM_NAME)_cc.opt
+nw_export.i : nw_export.inc $(APRUTIL)/build/nw_apu_export.inc $(FILES_prebuild_headers) $(NLM_NAME)_cc.opt
 	@echo Generating $(subst /,\,$@)
 	$(CC) $< @$(NLM_NAME)_cc.opt
 
@@ -47,6 +47,7 @@ $(NLM_NAME)_cc.opt : NWGNUmakefile $(APR_WORK)\build\NWGNUenvironment.inc $(APR_
 	@echo -I$(APR)\include\arch\netware >> $@
 	@echo -I$(APR)\include\arch\unix >> $@
 	@echo -I$(APRUTIL)\include >> $@
+	@echo -I$(APRUTIL)\build >> $@
 	@echo -ir $(NOVELLLIBC) >> $@
 ifneq "$(LDAPSDK)" ""
 	@echo -ir $(LDAPSDK) >> $@
