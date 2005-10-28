@@ -68,6 +68,7 @@
 #include "apr_ldap_url.h"
 #include "apr_md4.h"
 #include "apr_md5.h"
+#include "apr_memcache.h"
 #include "apr_optional.h"
 #include "apr_optional_hooks.h"
 #include "apr_queue.h"
