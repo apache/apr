@@ -211,7 +211,6 @@ ifneq "$(LDAPSDK)" ""
 FILES_nlm_modules += \
 	lldapsdk \
 	lldapssl \
-	lldapx \
 	$(EOLIST)
 endif
 
