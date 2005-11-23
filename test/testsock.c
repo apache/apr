@@ -84,6 +84,9 @@ static apr_socket_t *setup_socket(abts_case *tc)
 
     rv = apr_socket_create(&sock, sa->family, SOCK_STREAM, APR_PROTO_TCP, p);
     APR_ASSERT_SUCCESS(tc, "Problem creating socket", rv);
+
+    rv = apr_socket_opt_set(sock, APR_SO_REUSEADDR, 1);
+    APR_ASSERT_SUCCESS(tc, "Could not set REUSEADDR on socket", rv);
     
     rv = apr_socket_bind(sock, sa);
     APR_ASSERT_SUCCESS(tc, "Problem binding to port", rv);
