@@ -290,6 +290,43 @@ static void setup_pollset(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
+static void multi_event_pollset(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_pollfd_t socket_pollfd;
+    int lrv;
+    const apr_pollfd_t *descs = NULL;
+
+    ABTS_PTR_NOTNULL(tc, s[0]);
+    socket_pollfd.desc_type = APR_POLL_SOCKET;
+    socket_pollfd.reqevents = APR_POLLIN | APR_POLLOUT;
+    socket_pollfd.desc.s = s[0];
+    socket_pollfd.client_data = s[0];
+    rv = apr_pollset_add(pollset, &socket_pollfd);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    send_msg(s, sa, 0, tc);
+
+    rv = apr_pollset_poll(pollset, 0, &lrv, &descs);
+    ABTS_INT_EQUAL(tc, 0, APR_STATUS_IS_TIMEUP(rv));
+    ABTS_INT_EQUAL(tc, 1, lrv);
+    ABTS_PTR_EQUAL(tc, s[0], descs[0].desc.s);
+    ABTS_INT_EQUAL(tc, APR_POLLIN | APR_POLLOUT, descs[0].rtnevents);
+    ABTS_PTR_EQUAL(tc, s[0],  descs[0].client_data);
+
+    recv_msg(s, 0, p, tc);
+
+    rv = apr_pollset_poll(pollset, 0, &lrv, &descs);
+    ABTS_INT_EQUAL(tc, 0, APR_STATUS_IS_TIMEUP(rv));
+    ABTS_INT_EQUAL(tc, 1, lrv);
+    ABTS_PTR_EQUAL(tc, s[0], descs[0].desc.s);
+    ABTS_INT_EQUAL(tc, APR_POLLOUT, descs[0].rtnevents);
+    ABTS_PTR_EQUAL(tc, s[0],  descs[0].client_data);
+
+    rv = apr_pollset_remove(pollset, &socket_pollfd);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
+                         
 static void add_sockets_pollset(abts_case *tc, void *data)
 {
     apr_status_t rv;
@@ -520,6 +557,7 @@ abts_suite *testpoll(abts_suite *suite)
 #endif
 
     abts_run_test(suite, setup_pollset, NULL);
+    abts_run_test(suite, multi_event_pollset, NULL);
     abts_run_test(suite, add_sockets_pollset, NULL);
     abts_run_test(suite, nomessage_pollset, NULL);
     abts_run_test(suite, send0_pollset, NULL);
