@@ -1,6 +1,7 @@
 Changes with APR 0.9.8-dev
 
-
+  *) Fix warning when compiling on FreeBSD by correcting the type of
+     the final argument passed to sysctlbyname. [Garrett Rooney]
 
 Changes with APR 0.9.7
 

@@ -406,7 +406,7 @@ static int include_hdrs_in_length(void)
     kernel_version = 0;    /* silence compiler warning */
     kernel_version_size = sizeof(kernel_version);
     if (sysctlbyname("kern.osreldate", &kernel_version, 
-                     &kernel_version_size, NULL, NULL) == 0 &&
+                     &kernel_version_size, NULL, 0) == 0 &&
         kernel_version < KERNEL_WITH_SENDFILE_LENGTH_FIX) {
         api = OLD;
         return 1;
