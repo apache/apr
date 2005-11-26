@@ -131,6 +131,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num,
         return apr_get_netos_error();
     }
 
+    (*nsds) = 0;
     for (i = 0; i < num; i++) {
         apr_os_sock_t fd;
 
@@ -155,6 +156,9 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num,
         }
         if (FD_ISSET(fd, &exceptset)) {
             aprset[i].rtnevents |= APR_POLLERR;
+        }
+        if (aprset[i].rtnevents) {
+            (*nsds)++;
         }
     }
 
