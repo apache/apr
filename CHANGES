@@ -1,5 +1,10 @@
 Changes for APR 1.2.3-dev
 
+  *) Bugfix for apr_pollset_poll() on systems that implement pollsets
+     using select(2): properly compute the number of signalled desciptors
+     when one or more of them are both readable and writable.
+     [Dror Shilo <Dror.Shilo ericom.com>, Gerry <gerry everythingsucks.co.uk>]
+
   *) Fix apr_file_seek() to catch write failures when flushing
      pending writes for a buffered file.  [Joe Orton]
 
