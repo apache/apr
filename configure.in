@@ -508,9 +508,6 @@ case $host in
     *linux*)
         os_version=`uname -r | sed -e 's/\(.\)\.\(.\)\.\(.\).*/\1\2\3/'`
         ;;
-    *darwin*)
-        os_version=`uname -r | sed -e 's/\(.\)\.\(.\).*/\1\2/'`
-        ;;
     *)
         os_version=OS_VERSION_IS_NOT_SET
         ;;
