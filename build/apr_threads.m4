@@ -121,7 +121,7 @@ dnl
 dnl Try to find a way to enable POSIX threads.  Sets the 
 dnl pthreads_working variable to "yes" on success.
 dnl
-AC_DEFUN(APR_PTHREADS_CHECK,[
+AC_DEFUN([APR_PTHREADS_CHECK], [
 
 AC_CACHE_CHECK([for CFLAGS needed for pthreads], [apr_cv_pthreads_cflags],
 [apr_ptc_cflags=$CFLAGS
@@ -194,7 +194,7 @@ AC_DEFUN(APR_PTHREADS_CHECK_RESTORE, [
 dnl
 dnl APR_CHECK_SIGWAIT_ONE_ARG
 dnl
-AC_DEFUN(APR_CHECK_SIGWAIT_ONE_ARG,[
+AC_DEFUN([APR_CHECK_SIGWAIT_ONE_ARG], [
   AC_CACHE_CHECK(whether sigwait takes one argument,ac_cv_sigwait_one_arg,[
   AC_TRY_COMPILE([
 #if defined(__NETBSD__) || defined(DARWIN)

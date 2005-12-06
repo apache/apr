@@ -22,7 +22,7 @@ dnl APR_CONFIG_NICE(filename)
 dnl
 dnl Saves a snapshot of the configure command-line for later reuse
 dnl
-AC_DEFUN(APR_CONFIG_NICE,[
+AC_DEFUN([APR_CONFIG_NICE], [
   rm -f $1
   cat >$1<<EOF
 #! /bin/sh
@@ -74,7 +74,7 @@ EOF
 
 dnl APR_MKDIR_P_CHECK(fallback-mkdir-p)
 dnl checks whether mkdir -p works
-AC_DEFUN(APR_MKDIR_P_CHECK,[
+AC_DEFUN([APR_MKDIR_P_CHECK], [
   AC_CACHE_CHECK(for working mkdir -p, ac_cv_mkdir_p,[
     test -d conftestdir && rm -rf conftestdir
     mkdir -p conftestdir/somedir >/dev/null 2>&1
@@ -112,7 +112,7 @@ dnl
 dnl Trying to optimize this is left as an exercise to the reader who wants
 dnl to put up with more autoconf craziness.  I give up.
 dnl
-AC_DEFUN(APR_SUBDIR_CONFIG, [
+AC_DEFUN([APR_SUBDIR_CONFIG], [
   # save our work to this point; this allows the sub-package to use it
   AC_CACHE_SAVE
 
@@ -180,7 +180,7 @@ dnl APR_SAVE_THE_ENVIRONMENT(variable_name)
 dnl
 dnl Stores the variable (usually a Makefile macro) for later restoration
 dnl
-AC_DEFUN(APR_SAVE_THE_ENVIRONMENT,[
+AC_DEFUN([APR_SAVE_THE_ENVIRONMENT], [
   apr_ste_save_$1="$$1"
 ])dnl
 
@@ -192,7 +192,7 @@ dnl has added to the variable, moving the new bits to prefix_variable_name
 dnl and restoring the original variable contents.  This makes it possible
 dnl for a user to override configure when it does something stupid.
 dnl
-AC_DEFUN(APR_RESTORE_THE_ENVIRONMENT,[
+AC_DEFUN([APR_RESTORE_THE_ENVIRONMENT], [
 if test "x$apr_ste_save_$1" = "x"; then
   $2$1="$$1"
   $1=
@@ -216,7 +216,7 @@ dnl APR_SETIFNULL(variable, value)
 dnl
 dnl  Set variable iff it's currently null
 dnl
-AC_DEFUN(APR_SETIFNULL,[
+AC_DEFUN([APR_SETIFNULL], [
   if test -z "$$1"; then
     test "x$silent" != "xyes" && echo "  setting $1 to \"$2\""
     $1="$2"
@@ -228,7 +228,7 @@ dnl APR_SETVAR(variable, value)
 dnl
 dnl  Set variable no matter what
 dnl
-AC_DEFUN(APR_SETVAR,[
+AC_DEFUN([APR_SETVAR], [
   test "x$silent" != "xyes" && echo "  forcing $1 to \"$2\""
   $1="$2"
 ])dnl
@@ -238,7 +238,7 @@ dnl APR_ADDTO(variable, value)
 dnl
 dnl  Add value to variable
 dnl
-AC_DEFUN(APR_ADDTO,[
+AC_DEFUN([APR_ADDTO], [
   if test "x$$1" = "x"; then
     test "x$silent" != "xyes" && echo "  setting $1 to \"$2\""
     $1="$2"
@@ -265,7 +265,7 @@ dnl APR_REMOVEFROM(variable, value)
 dnl
 dnl Remove a value from a variable
 dnl
-AC_DEFUN(APR_REMOVEFROM,[
+AC_DEFUN([APR_REMOVEFROM], [
   if test "x$$1" = "x$2"; then
     test "x$silent" != "xyes" && echo "  nulling $1"
     $1=""
@@ -289,7 +289,7 @@ AC_DEFUN(APR_REMOVEFROM,[
 dnl
 dnl APR_CHECK_DEFINE_FILES( symbol, header_file [header_file ...] )
 dnl
-AC_DEFUN(APR_CHECK_DEFINE_FILES,[
+AC_DEFUN([APR_CHECK_DEFINE_FILES], [
   AC_CACHE_CHECK([for $1 in $2],ac_cv_define_$1,[
     ac_cv_define_$1=no
     for curhdr in $2
@@ -311,7 +311,7 @@ YES_IS_DEFINED
 dnl
 dnl APR_CHECK_DEFINE(symbol, header_file)
 dnl
-AC_DEFUN(APR_CHECK_DEFINE,[
+AC_DEFUN([APR_CHECK_DEFINE], [
   AC_CACHE_CHECK([for $1 in $2],ac_cv_define_$1,[
     AC_EGREP_CPP(YES_IS_DEFINED, [
 #include <$2>
@@ -328,7 +328,7 @@ YES_IS_DEFINED
 dnl
 dnl APR_CHECK_APR_DEFINE( symbol )
 dnl
-AC_DEFUN(APR_CHECK_APR_DEFINE,[
+AC_DEFUN([APR_CHECK_APR_DEFINE], [
 apr_old_cppflags=$CPPFLAGS
 CPPFLAGS="$CPPFLAGS $INCLUDES"
 AC_EGREP_CPP(YES_IS_DEFINED, [
@@ -443,7 +443,7 @@ dnl
 dnl A variant of AC_CHECK_SIZEOF which allows the checking of
 dnl sizes of non-builtin types
 dnl
-AC_DEFUN(APR_CHECK_SIZEOF_EXTENDED,
+AC_DEFUN([APR_CHECK_SIZEOF_EXTENDED],
 [changequote(<<,>>)dnl
 dnl The name to #define
 define(<<AC_TYPE_NAME>>, translit(sizeof_$2, [a-z *], [A-Z_P]))dnl
@@ -504,7 +504,7 @@ dnl  for failure), or it returns a pointer to the error
 dnl  string.
 dnl
 dnl
-AC_DEFUN(APR_CHECK_STRERROR_R_RC,[
+AC_DEFUN([APR_CHECK_STRERROR_R_RC], [
 AC_MSG_CHECKING(for type of return code from strerror_r)
 AC_TRY_RUN([
 #include <errno.h>
@@ -539,7 +539,7 @@ dnl  Decide if d_fileno or d_ino are available in the dirent
 dnl  structure on this platform.  Single UNIX Spec says d_ino,
 dnl  BSD uses d_fileno.  Undef to find the real beast.
 dnl
-AC_DEFUN(APR_CHECK_DIRENT_INODE, [
+AC_DEFUN([APR_CHECK_DIRENT_INODE], [
 AC_CACHE_CHECK([for inode member of struct dirent], apr_cv_dirent_inode, [
 apr_cv_dirent_inode=no
 AC_TRY_COMPILE([
@@ -577,7 +577,7 @@ dnl  on this platform.  Not part of the Single UNIX Spec.
 dnl  Note that this is worthless without DT_xxx macros, so
 dnl  look for one while we are at it.
 dnl
-AC_DEFUN(APR_CHECK_DIRENT_TYPE,[
+AC_DEFUN([APR_CHECK_DIRENT_TYPE], [
 AC_CACHE_CHECK([for file type member of struct dirent], apr_cv_dirent_type,[
 apr_cv_dirent_type=no
 AC_TRY_COMPILE([
@@ -626,7 +626,7 @@ dnl  by changing all "/" to "_" in the HEADER-FILE and dropping
 dnl  all "." and "-" chars. If the 3rd parameter is "yes" then instead of
 dnl  setting to 1 or 0, we set FLAG-TO-SET to yes or no.
 dnl  
-AC_DEFUN(APR_FLAG_HEADERS,[
+AC_DEFUN([APR_FLAG_HEADERS], [
 AC_CHECK_HEADERS($1)
 for aprt_i in $1
 do
@@ -647,7 +647,7 @@ dnl  we use what's provided as FLAG-TO-SET. If the 3rd parameter
 dnl  is "yes" then instead of setting to 1 or 0, we set FLAG-TO-SET
 dnl  to yes or no.
 dnl
-AC_DEFUN(APR_FLAG_FUNCS,[
+AC_DEFUN([APR_FLAG_FUNCS], [
 AC_CHECK_FUNCS($1)
 for aprt_j in $1
 do
@@ -672,7 +672,7 @@ dnl baz='${bar}/3'
 dnl APR_EXPAND_VAR(fraz, $baz)
 dnl   $fraz is now "1/2/3"
 dnl 
-AC_DEFUN(APR_EXPAND_VAR,[
+AC_DEFUN([APR_EXPAND_VAR], [
 ap_last=
 ap_cur="$2"
 while test "x${ap_cur}" != "x${ap_last}";
@@ -691,7 +691,7 @@ dnl Example:
 dnl orig_path="${prefix}/bar"
 dnl APR_PATH_RELATIVE(final_path, $orig_path, $prefix)
 dnl    $final_path now contains "bar"
-AC_DEFUN(APR_PATH_RELATIVE,[
+AC_DEFUN([APR_PATH_RELATIVE], [
 ap_stripped=`echo $2 | sed -e "s#^$3##"`
 # check if the stripping was successful
 if test "x$2" != "x${ap_stripped}"; then
@@ -709,12 +709,12 @@ dnl AC_HELP_STRING, so let's try to call it if we can.
 dnl Note: this define must be on one line so that it can be properly returned
 dnl as the help string.  When using this macro with a multi-line RHS, ensure
 dnl that you surround the macro invocation with []s
-AC_DEFUN(APR_HELP_STRING,[ifelse(regexp(AC_ACVERSION, 2\.1), -1, AC_HELP_STRING([$1],[$2]),[  ][$1] substr([                       ],len($1))[$2])])
+AC_DEFUN([APR_HELP_STRING], [ifelse(regexp(AC_ACVERSION, 2\.1), -1, AC_HELP_STRING([$1],[$2]),[  ][$1] substr([                       ],len($1))[$2])])
 
 dnl
 dnl APR_LAYOUT(configlayout, layoutname [, extravars])
 dnl
-AC_DEFUN(APR_LAYOUT,[
+AC_DEFUN([APR_LAYOUT], [
   if test ! -f $srcdir/config.layout; then
     echo "** Error: Layout file $srcdir/config.layout not found"
     echo "** Error: Cannot use undefined layout '$LAYOUT'"
@@ -770,7 +770,7 @@ AC_DEFUN(APR_LAYOUT,[
 dnl
 dnl APR_ENABLE_LAYOUT(default layout name [, extra vars])
 dnl
-AC_DEFUN(APR_ENABLE_LAYOUT,[
+AC_DEFUN([APR_ENABLE_LAYOUT], [
 AC_ARG_ENABLE(layout,
 [  --enable-layout=LAYOUT],[
   LAYOUT=$enableval
@@ -791,7 +791,7 @@ dnl APR_PARSE_ARGUMENTS
 dnl a reimplementation of autoconf's argument parser,
 dnl used here to allow us to co-exist layouts and argument based
 dnl set ups.
-AC_DEFUN(APR_PARSE_ARGUMENTS,[
+AC_DEFUN([APR_PARSE_ARGUMENTS], [
 ac_prev=
 for ac_option
 do
@@ -913,7 +913,7 @@ dnl APR_CHECK_DEPEND
 dnl
 dnl Determine what program we can use to generate .deps-style dependencies
 dnl
-AC_DEFUN(APR_CHECK_DEPEND,[
+AC_DEFUN([APR_CHECK_DEPEND], [
 dnl Try to determine what depend program we can use
 dnl All GCC-variants should have -MM.
 dnl If not, then we can check on those, too.
