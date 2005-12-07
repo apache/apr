@@ -5,18 +5,18 @@
 
 static void sha256_init(apr_crypto_hash_t *h)
     {
-    SHA256_Init(h->data);
+    apr__SHA256_Init(h->data);
     }
 
 static void sha256_add(apr_crypto_hash_t *h,const void *data,
 			  apr_size_t bytes)
     {
-    SHA256_Update(h->data,data,bytes);
+    apr__SHA256_Update(h->data,data,bytes);
     }
 
 static void sha256_finish(apr_crypto_hash_t *h,unsigned char *result)
     {
-    SHA256_Final(result,h->data);
+    apr__SHA256_Final(result,h->data);
     }
 
 APR_DECLARE(apr_crypto_hash_t *) apr_crypto_sha256_new(apr_pool_t *p)
