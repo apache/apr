@@ -121,12 +121,17 @@ static apr_status_t do_mcast(int type, apr_socket_t *sock,
 
     if (source != NULL) {
 #if MCAST_JOIN_SOURCE_GROUP
-        if (sock_is_ipv6(sock))
+        if (sock_is_ipv4(sock)) {
             ip_proto = IPPROTO_IP;
-        else if (sock_is_ipv6(sock))
+        } 
+#if APR_HAVE_IPV6
+        else if (sock_is_ipv6(sock)) {
             ip_proto = IPPROTO_IPV6;
-        else
+        }
+#endif
+        else {
             return APR_ENOTIMPL;
+        }
 
         if (type == IP_ADD_MEMBERSHIP)
             type = MCAST_JOIN_SOURCE_GROUP;
