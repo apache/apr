@@ -2,7 +2,10 @@ Changes for APR ???
 
   *) Only include uuid/uuid.h if we haven't already included uuid.h, since
      doing so can result in type conflicts.
-     [Craig Rodrigues <rodrigc at crodrigues.org>]
+     [Craig Rodrigues <rodrigc crodrigues.org>]
+
+  *) Fix EOF handling for unbuffered reads on win32.
+     [Konstantin Sharenkov <Konstantin.Sharenkov enterra-inc.com>]
 
 Changes for APR 1.3.0
 
