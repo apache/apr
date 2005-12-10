@@ -1,4 +1,8 @@
-Changes for APR ???
+Changes for APR 1.3.0
+
+  *) Cause apr_file_write_full on win32 to consider the timeout value set by 
+     apr_file_pipe_timeout_set.  PR 30182
+     [<eholyat olf.com>]
 
   *) Only include uuid/uuid.h if we haven't already included uuid.h, since
      doing so can result in type conflicts.
@@ -10,8 +14,6 @@ Changes for APR ???
   *) Fix passing "" as an argument to the program started by apr_proc_create
      on Win32.
      [Philip Martin <philip codematters.co.uk>
-
-Changes for APR 1.3.0
 
   *) Bugfix for apr_pollset_poll() on systems that implement pollsets
      using select(2): properly compute the number of signalled desciptors
