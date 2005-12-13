@@ -115,7 +115,7 @@ Changes for APR 1.2.0
      [Sim <sgobbi datamanagement.it>, Jeff Trawick]
 
   *) Fix apr_table_overlap()'s handling of tables allocated from
-     different pools.  [Joe Schaefer <joe+gmane@sunstarsys.com>]
+     different pools.  [Joe Schaefer <joe+gmane sunstarsys.com>]
 
   *) Add support for uuid_generate on OS X 10.4. [Paul Querna]
 
@@ -278,7 +278,7 @@ Changes with APR 1.0
      the delivery of a particular signal.  [Madhusudan Mathihalli]
 
   *) Add support for developers to use their own hashing function with
-     apr_hash_make_custom.  [Ami Ganguli <hse_ami@yahoo.co.uk>]
+     apr_hash_make_custom.  [Ami Ganguli <hse_ami yahoo.co.uk>]
 
   *) Support "large files" by default on 32-bit Unix platforms which
      implement the LFS standard.  [Joe Orton]
@@ -474,19 +474,19 @@ Changes with APR 0.9.4
 
   *) Preserve leading '../' segments as when merging to an empty and
      unrooted path - fixes a bug observed in SVN with Win32/Netware/OS2.
-     [Mike Pilato <cmpilato@collab.net>, William Rowe]
+     [Mike Pilato <cmpilato collab.net>, William Rowe]
 
   *) Work around a bug in Darwin when calling getnameinfo() on IPv4-mapped
-     IPv6-addresses.  [Colm MacCárthaigh <colm@stdlib.net>, Jeff Trawick,
+     IPv6-addresses.  [Colm MacCárthaigh <colm stdlib.net>, Jeff Trawick,
      Justin Erenkrantz]
 
   *) Add apr_temp_dir_get() for getting the most suitable temp directory
-     [Mike Pilato <cmpilato@collab.net>, Thom May]
+     [Mike Pilato <cmpilato collab.net>, Thom May]
 
   *) Modify apr_sockaddr_info_get to call the resolver when we
      do not have a hostname.  Also, fix bugs in the getaddrinfo()
      implementation.
-     [Colm MacCárthaigh <colm@stdlib.net>, Justin Erenkrantz]
+     [Colm MacCárthaigh <colm stdlib.net>, Justin Erenkrantz]
 
   *) Change the behavior of unix process 'trylock's to return
      APR_ENOTIMPL instead of segfaulting, consistent with the
@@ -502,7 +502,7 @@ Changes with APR 0.9.4
 
   *) Add new table function apr_table_compress() and replace
      red-black trees with mergesort in apr_table_overlap()
-     [Joe Schaefer <joe+gmane@sunstarsys.com>, Brian Pane]
+     [Joe Schaefer <joe+gmane sunstarsys.com>, Brian Pane]
 
   *) Win32: Adopt Brian Havard's OS/2 rwlock implementation for
      Windows [Marc Adkins, Bill Stoddard]
@@ -531,7 +531,7 @@ Changes with APR 0.9.4
      write <= PIPE_BUF bytes gets EAGAIN.  APR will now write whatever
      data will fit.  APR applications that relied on the atomic nature
      of relatively small pipe write requests may be affected.
-     PR 20295  [Mark Street <mark@faime.demon.co.uk>, Jeff Trawick]
+     PR 20295  [Mark Street <mark faime.demon.co.uk>, Jeff Trawick]
 
   *) Define _THREAD_SAFE for all compilations on AIX.  Previously
      those of us who used the vendor compiler had it defined
@@ -551,7 +551,7 @@ Changes with APR 0.9.4
 
   *) Fix a bug in socket timeout handling on unix that left the
      socket non-blocking after disabling the timeout.
-     [Jacob Craig Lewallen <jlewalle@cs.ucr.edu>]
+     [Jacob Craig Lewallen <jlewalle cs.ucr.edu>]
 
   *) Added flag APR_FILE_ATTR_HIDDEN for manipulating the "hidden"
      file attribute on Windows and OS/2.  [Branko Cibej]
@@ -559,8 +559,8 @@ Changes with APR 0.9.4
   *) SECURITY [CAN-2003-0245]: Fixed a bug that could be triggered
      remotely through mod_dav and possibly other mechanisms, causing
      an Apache child process to crash.  The crash was first reported
-     by David Endler <DEndler@iDefense.com> and was researched and
-     fixed by Joe Orton <jorton@redhat.com>.  Details will be released
+     by David Endler <DEndler iDefense.com> and was researched and
+     fixed by Joe Orton <jorton redhat.com>.  Details will be released
      on 30 May 2003.
 
   *) apr_proc_wait(): Handle interrupted waitpid(2) calls by calling
@@ -599,7 +599,7 @@ Changes with APR 0.9.4
      [Jeff Trawick, Justin Erenkrantz]
 
   *) Implement APR_SO_RCVBUF socket option on Unix.  
-     [Adam Sussman <myddryn@vishnu.vidya.com>]
+     [Adam Sussman <myddryn vishnu.vidya.com>]
 
   *) Don't add the math library (-lm) if the modf() function
      is already available via libc.  [Roy Fielding]
@@ -607,7 +607,7 @@ Changes with APR 0.9.4
   *) Solaris cc: Don't use the -mt option for threaded builds.  That
      is for non-Posix threading, and the use of it prevented us from
      linking with -lpthread, which in turn caused weird problems for
-     APR applications.  [Kristofer Spinka <kspinka@style.net>]
+     APR applications.  [Kristofer Spinka <kspinka style.net>]
 
   *) OS/2: apr_stat() fixes - When a character device is stat'ed, 
      fill in finfo.name if it was asked for.  Return APR_INCOMPLETE 
@@ -619,7 +619,7 @@ Changes with APR 0.9.3
   *) Don't enable posixsem, at build time, on systems where sem_t *
      won't "fit" into an int (sizeof-wise). Also, better error handling
      when we fail to create a posixsem. PR 17186 [Scott Herod
-     <sherod@pillardata.com>, Jim Jagielski]
+     <sherod pillardata.com>, Jim Jagielski]
 
   *) Default hpux 10.x to disable threading, since if it exists at all
      the pthread implementation should not be trusted, while hpux 10 
@@ -627,14 +627,14 @@ Changes with APR 0.9.3
      PR 9457 [William Rowe]
 
   *) Fix error in apr-config when symlinks are involved.
-     [Garrett Rooney <rooneg@electricjellyfish.net>]
+     [Garrett Rooney <rooneg electricjellyfish.net>]
 
 Changes with APR 0.9.2
 
   *) Numerous bug fixes for file and socket inheritence by child
      processes on Unix, correcting bugs that affected the correct 
      behavior of apr_[file|socket]_inherit_[un]set() API.
-     [Bjoern A. Zeeb <bz@zabbadoz.net>, William Rowe, Joe Orton]
+     [Bjoern A. Zeeb <bz zabbadoz.net>, William Rowe, Joe Orton]
 
   *) Define APR_UINT64_T_FMT and APR_UINT64_T_FMT_LEN.
      Define APR_INT64_T_FMT_LEN on Windows and Netware.  [Branko Cibej]
