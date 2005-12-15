@@ -97,8 +97,8 @@ AC_DEFUN([APR_FIND_APR], [
 
   AC_MSG_CHECKING(for APR)
   AC_ARG_WITH(apr,
-  [  --with-apr=PATH         prefix for installed APR, path to APR build tree,
-                          or the full path to apr-config],
+  [  --with-apr=PATH         prefix for installed APR or the full path to 
+                             apr-config],
   [
     if test "$withval" = "no" || test "$withval" = "yes"; then
       AC_MSG_ERROR([--with-apr requires a directory or file to be provided])
