@@ -1,5 +1,8 @@
 Changes for APR 1.3.0
 
+  *) APR_FIND_APR macro now supports customisable detailed checks on
+     each installed apr. [Justin Erenkrantz, Colm MacCarthaigh]
+
   *) APR_FIND_APR macro no longer checks /usr/local/apache2/
      [Colm MacCarthaigh]
 
