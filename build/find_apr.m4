@@ -114,7 +114,7 @@ AC_DEFUN([APR_FIND_APR], [
           apr_acceptable="yes"
           $5
           if test "$apr_acceptable" != "yes"; then
-            AC_MSG_WARN([Found APR in $apr_config, but we think it is considered unacceptable)
+            AC_MSG_WARN([Found APR in $apr_config, but we think it is considered unacceptable])
             continue
           fi])
           apr_found="yes"
