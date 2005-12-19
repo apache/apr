@@ -55,6 +55,14 @@
  */
 #pragma warning(disable: 4100 4127 4201 4514; once: 4057 4075 4244)
 
+/* Ignore Microsoft's interpretation of secure development
+ * and the POSIX string handling API
+ */
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+#define _CRT_SECURE_NO_DEPRECATE
+#pragma warning(disable: 4996)
+#endif
+
 /* Has windows.h already been included?  If so, our preferences don't matter,
  * but we will still need the winsock things no matter what was included.
  * If not, include a restricted set of windows headers to our tastes.
@@ -515,6 +523,14 @@ struct iovec {
  */
 #if defined(_MSC_VER) && _MSC_VER >= 1200
 #pragma warning(pop)
+#endif
+
+/* Ignore Microsoft's interpretation of secure development 
+ * and their opinion of the POSIX standard string handling API
+ */
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+#define _CRT_SECURE_NO_DEPRECATE
+#pragma warning(disable: 4996)
 #endif
 
 #endif /* WIN32 */
