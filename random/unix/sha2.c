@@ -150,7 +150,7 @@ typedef apr_uint64_t sha2_word64;       /* Exactly 8 bytes */
  * library -- they are intended for private internal visibility/use
  * only.
  */
-void SHA512_Last(SHA512_CTX*);
+void apr__SHA512_Last(SHA512_CTX*);
 void apr__SHA256_Transform(SHA256_CTX*, const sha2_word32*);
 void apr__SHA512_Transform(SHA512_CTX*, const sha2_word64*);
 
@@ -561,7 +561,7 @@ void apr__SHA256_Final(sha2_byte digest[], SHA256_CTX* context) {
         usedspace = 0;
 }
 
-char *SHA256_End(SHA256_CTX* context, char buffer[]) {
+char *apr__SHA256_End(SHA256_CTX* context, char buffer[]) {
         sha2_byte       digest[SHA256_DIGEST_LENGTH], *d = digest;
         int             i;
 
@@ -584,12 +584,12 @@ char *SHA256_End(SHA256_CTX* context, char buffer[]) {
         return buffer;
 }
 
-char* SHA256_Data(const sha2_byte* data, size_t len, char digest[SHA256_DIGEST_STRING_LENGTH]) {
+char* apr__SHA256_Data(const sha2_byte* data, size_t len, char digest[SHA256_DIGEST_STRING_LENGTH]) {
         SHA256_CTX      context;
 
         apr__SHA256_Init(&context);
         apr__SHA256_Update(&context, data, len);
-        return SHA256_End(&context, digest);
+        return apr__SHA256_End(&context, digest);
 }
 
 
@@ -821,7 +821,7 @@ void apr__SHA512_Update(SHA512_CTX* context, const sha2_byte *data, size_t len) 
         usedspace = freespace = 0;
 }
 
-void SHA512_Last(SHA512_CTX* context) {
+void apr__SHA512_Last(SHA512_CTX* context) {
         unsigned int    usedspace;
 
         usedspace = (unsigned int)((context->bitcount[0] >> 3) 
@@ -871,7 +871,7 @@ void apr__SHA512_Final(sha2_byte digest[], SHA512_CTX* context) {
 
         /* If no digest buffer is passed, we don't bother doing this: */
         if (digest != (sha2_byte*)0) {
-                SHA512_Last(context);
+                apr__SHA512_Last(context);
 
                 /* Save the hash data for output: */
 #if !APR_IS_BIGENDIAN
@@ -892,7 +892,7 @@ void apr__SHA512_Final(sha2_byte digest[], SHA512_CTX* context) {
         MEMSET_BZERO(context, sizeof(context));
 }
 
-char *SHA512_End(SHA512_CTX* context, char buffer[]) {
+char *apr__SHA512_End(SHA512_CTX* context, char buffer[]) {
         sha2_byte       digest[SHA512_DIGEST_LENGTH], *d = digest;
         int             i;
 
@@ -915,12 +915,12 @@ char *SHA512_End(SHA512_CTX* context, char buffer[]) {
         return buffer;
 }
 
-char* SHA512_Data(const sha2_byte* data, size_t len, char digest[SHA512_DIGEST_STRING_LENGTH]) {
+char* apr__SHA512_Data(const sha2_byte* data, size_t len, char digest[SHA512_DIGEST_STRING_LENGTH]) {
         SHA512_CTX      context;
 
         apr__SHA512_Init(&context);
         apr__SHA512_Update(&context, data, len);
-        return SHA512_End(&context, digest);
+        return apr__SHA512_End(&context, digest);
 }
 
 
@@ -946,7 +946,7 @@ void apr__SHA384_Final(sha2_byte digest[], SHA384_CTX* context) {
 
         /* If no digest buffer is passed, we don't bother doing this: */
         if (digest != (sha2_byte*)0) {
-                SHA512_Last((SHA512_CTX*)context);
+                apr__SHA512_Last((SHA512_CTX*)context);
 
                 /* Save the hash data for output: */
 #if !APR_IS_BIGENDIAN
@@ -967,7 +967,7 @@ void apr__SHA384_Final(sha2_byte digest[], SHA384_CTX* context) {
         MEMSET_BZERO(context, sizeof(context));
 }
 
-char *SHA384_End(SHA384_CTX* context, char buffer[]) {
+char *apr__SHA384_End(SHA384_CTX* context, char buffer[]) {
         sha2_byte       digest[SHA384_DIGEST_LENGTH], *d = digest;
         int             i;
 
@@ -990,11 +990,11 @@ char *SHA384_End(SHA384_CTX* context, char buffer[]) {
         return buffer;
 }
 
-char* SHA384_Data(const sha2_byte* data, size_t len, char digest[SHA384_DIGEST_STRING_LENGTH]) {
+char* apr__SHA384_Data(const sha2_byte* data, size_t len, char digest[SHA384_DIGEST_STRING_LENGTH]) {
         SHA384_CTX      context;
 
         apr__SHA384_Init(&context);
         apr__SHA384_Update(&context, data, len);
-        return SHA384_End(&context, digest);
+        return apr__SHA384_End(&context, digest);
 }
 
