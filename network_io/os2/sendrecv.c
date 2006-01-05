@@ -27,6 +27,10 @@ APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
     apr_ssize_t rv;
     int fds, err = 0;
 
+    if (*len > 65536) {
+        *len = 65536;
+    }
+
     do {
         if (!sock->nonblock || err == SOCEWOULDBLOCK) {
             fds = sock->socketdes;
