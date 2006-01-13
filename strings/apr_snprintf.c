@@ -1036,7 +1036,7 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 #endif
                 if (!s) {
                     s = conv_fp(*fmt, fp_num, alternate_form,
-                            (adjust_precision == NO) ? FLOAT_DIGITS : precision,
+                                (int)((adjust_precision == NO) ? FLOAT_DIGITS : precision),
                                 &is_negative, &num_buf[1], &s_len);
                     if (is_negative)
                         prefix_char = '-';
@@ -1057,7 +1057,7 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
                 /*
                  * * We use &num_buf[ 1 ], so that we have room for the sign
                  */
-                s = apr_gcvt(va_arg(ap, double), precision, &num_buf[1],
+                s = apr_gcvt(va_arg(ap, double), (int) precision, &num_buf[1],
                             alternate_form);
                 if (*s == '-')
                     prefix_char = *s++;
