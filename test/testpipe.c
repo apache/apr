@@ -90,9 +90,11 @@ static void read_write(abts_case *tc, void *data)
     rv = apr_file_pipe_timeout_set(readp, apr_time_from_sec(1));
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    rv = apr_file_read(readp, buf, &nbytes);
-    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
-    ABTS_INT_EQUAL(tc, 0, nbytes);
+    if (!rv) {
+        rv = apr_file_read(readp, buf, &nbytes);
+        ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+        ABTS_INT_EQUAL(tc, 0, nbytes);
+    }
 }
 
 static void read_write_notimeout(abts_case *tc, void *data)
