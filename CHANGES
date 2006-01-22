@@ -1,5 +1,7 @@
 Changes for APR 1.3.0
 
+  *) Keep testpipe.c from hanging on win32. [Garrett Rooney]
+
   *) Fix assertion from double close of a handle with a rwlock on win32.
      [Evgueni Brevnov <evgueni.brevnov gmail.com>]
 
