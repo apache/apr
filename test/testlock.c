@@ -209,6 +209,8 @@ static void test_thread_rwlock(abts_case *tc, void *data)
     apr_thread_join(&s4, t4);
 
     ABTS_INT_EQUAL(tc, MAX_ITER, x);
+
+    apr_thread_rwlock_destroy(rwlock);
 }
 
 static void test_cond(abts_case *tc, void *data)
