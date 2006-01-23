@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl"?>
+<rdf:RDF xmlns="http://usefulinc.com/ns/doap#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:asfext="http://projects.apache.org/ns/asfext#" xml:lang="en">
+  <Project rdf:about="http://apr.apache.org/">
+    <name>Apache Portable Runtime</name>
+    <homepage rdf:resource="http://apr.apache.org/"/>
+    <programming-language>C</programming-language>
+    <category rdf:resource="http://projects.apache.org/category/library"/>
+    <license rdf:resource="http://usefulinc.com/doap/licenses/asl20"/>
+    <bug-database rdf:resource="http://issues.apache.org/bugzilla/"/>
+    <download-page rdf:resource="http://apr.apache.org/download.cgi"/>
+    <asfext:pmc rdf:resource="http://apr.apache.org/"/>
+
+    <shortdesc xml:lang="en">
+    Cross-platform library easing many progamming tasks in C. 
+    </shortdesc>
+
+    <description xml:lang="en">
+The mission of the Apache Portable Runtime (APR) project is to create
+and maintain software libraries that provide a predictable and
+consistent interface to underlying platform-specific implementations.
+The primary goal is to provide an API to which software developers may
+code and be assured of predictable if not identical behaviour
+regardless of the platform on which their software is built, relieving
+them of the need to code special-case conditions to work around or
+take advantage of platform-specific deficiencies or features.
+    </description>
+
+    <repository>
+      <SVNRepository>
+        <browse rdf:resource="http://svn.apache.org/viewcvs.cgi/apr/"/>
+        <location rdf:resource="http://svn.apache.org/repos/asf/apr/"/>
+      </SVNRepository>
+    </repository>
+
+    <mailing-list rdf:resource="http://apr.apache.org/mailing-lists.html"/>
+
+    
+    <release>
+      <Version>
+        <name>APR current release</name>
+        <created>2005-10-12</created>
+        <revision>1.2.2</revision>
+      </Version>
+    </release>
+    <release>
+      <Version>
+        <name>APR-util current release</name>
+        <created>2005-10-12</created>
+        <revision>1.2.2</revision>
+      </Version>
+    </release>
+    <release>
+      <Version>
+        <name>APR-iconv current release</name>
+        <created>2004-11-18</created>
+        <revision>1.0.1</revision>
+      </Version>
+    </release>
+    <release>
+      <Version>
+        <name>APR old release</name>
+        <created>2005-10-4</created>
+        <revision>0.9.7</revision>
+      </Version>
+    </release>
+    <release>
+      <Version>
+        <name>APR-util old release</name>
+        <created>2005-10-4</created>
+        <revision>0.9.7</revision>
+      </Version>
+    </release>
+    <release>
+      <Version>
+        <name>APR-iconv old release</name>
+        <created>2004-11-4</created>
+        <revision>0.9.7</revision>
+      </Version>
+    </release>
+
+  </Project>
+
+</rdf:RDF>
