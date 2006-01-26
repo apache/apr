@@ -13,6 +13,10 @@ Changes with APR 0.9.8-dev
      used in such a case.
      [Garrett Rooney]
 
+  *) Fix passing "" as an argument to the program started by apr_proc_create
+     on Win32.
+     [Philip Martin <philip codematters.co.uk>
+
   *) Fix warning when compiling on FreeBSD by correcting the type of
      the final argument passed to sysctlbyname. [Garrett Rooney]
 
