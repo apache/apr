@@ -206,6 +206,8 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         /* Unbuffered i/o */
         apr_size_t nbytes;
         rv = read_with_timeout(thefile, buf, *len, &nbytes);
+        if (rv == APR_EOF)
+            thefile->eof_hit = TRUE;
         *len = nbytes;
     }
 
