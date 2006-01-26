@@ -460,7 +460,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     /* Handle the args, seperate from argv0 */
     cmdline = "";
     for (i = 1; args && args[i]; ++i) {
-        if (has_space(args[i])) {
+        if (has_space(args[i]) || !args[i][0]) {
             cmdline = apr_pstrcat(pool, cmdline, " \"", args[i], "\"", NULL);
         }
         else {
