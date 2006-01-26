@@ -224,8 +224,13 @@ struct apr_finfo_t {
  * @param finfo Where to store the information about the file, which is
  * never touched if the call fails.
  * @param fname The name of the file to stat.
- * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_ values 
+ * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_
+                 values 
  * @param pool the pool to use to allocate the new file. 
+ *
+ * @note If @c APR_INCOMPLETE is returned all the fields in @a finfo may
+ *       not be filled in, and you need to check the @c finfo->valid bitmask
+ *       to verify that what you're looking for is there.
  */ 
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
                                    apr_int32_t wanted, apr_pool_t *pool);
@@ -255,9 +260,14 @@ APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *thedir);
 /**
  * Read the next entry from the specified directory. 
  * @param finfo the file info structure and filled in by apr_dir_read
- * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_ values 
+ * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_
+                 values 
  * @param thedir the directory descriptor returned from apr_dir_open
  * @remark No ordering is guaranteed for the entries read.
+ *
+ * @note If @c APR_INCOMPLETE is returned all the fields in @a finfo may
+ *       not be filled in, and you need to check the @c finfo->valid bitmask
+ *       to verify that what you're looking for is there.
  */                        
 APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                                        apr_dir_t *thedir);

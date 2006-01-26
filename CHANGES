@@ -1,5 +1,10 @@
 Changes for APR 1.2.3-dev
 
+  *) Documented that apr_stat and apr_dir_read can return APR_INCOMPLETE,
+     and how to determine which parts of the resulting apr_finfo_t can be
+     used in such a case.
+     [Garrett Rooney]
+
   *) Bugfix for apr_pollset_poll() on systems that implement pollsets
      using select(2): properly compute the number of signalled desciptors
      when one or more of them are both readable and writable.
