@@ -23,7 +23,15 @@
 
 static apr_status_t thread_rwlock_cleanup(void *data)
 {
-    return apr_thread_rwlock_destroy((apr_thread_rwlock_t *) data);
+    apr_thread_rwlock_t *rwlock = data;
+    
+    if (! CloseHandle(rwlock->read_event))
+        return apr_get_os_error();
+
+    if (! CloseHandle(rwlock->write_mutex))
+        return apr_get_os_error();
+    
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t)apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
@@ -151,13 +159,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_unlock(apr_thread_rwlock_t *rwlock)
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock)
 {
-    if (! CloseHandle(rwlock->read_event))
-        return apr_get_os_error();
-
-    if (! CloseHandle(rwlock->write_mutex))
-        return apr_get_os_error();
-    
-    return APR_SUCCESS;
+    return apr_pool_cleanup_run(rwlock->pool, rwlock, thread_rwlock_cleanup);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(thread_rwlock)
