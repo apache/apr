@@ -462,8 +462,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  */
 #define APR_STATUS_IS_TIMEUP(s)         ((s) == APR_TIMEUP)
 /** 
- * The character conversion stopped because of an incomplete character or 
- * shift sequence at the end  of the input buffer.
+ * The operation was incomplete although some processing was performed
+ * and the results are partially valid.
  * @warning
  * always use this test, as platform-specific variances may meet this
  * more than one error code 

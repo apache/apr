@@ -1,5 +1,10 @@
 Changes with APR 0.9.8-dev
 
+  *) Documented that apr_stat and apr_dir_read can return APR_INCOMPLETE,
+     and how to determine which parts of the resulting apr_finfo_t can be
+     used in such a case.
+     [Garrett Rooney]
+
   *) Fix warning when compiling on FreeBSD by correcting the type of
      the final argument passed to sysctlbyname. [Garrett Rooney]
 
