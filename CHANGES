@@ -13,6 +13,10 @@ Changes for APR 1.2.3-dev
      used in such a case.
      [Garrett Rooney]
 
+  *) Fix passing "" as an argument to the program started by apr_proc_create
+     on Win32.
+     [Philip Martin <philip codematters.co.uk>
+
   *) Bugfix for apr_pollset_poll() on systems that implement pollsets
      using select(2): properly compute the number of signalled desciptors
      when one or more of them are both readable and writable.
