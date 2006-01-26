@@ -310,8 +310,20 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             (*nbytes) = 0;
             rv = apr_get_os_error();
             if (rv == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
-                /* Wait for the pending i/o (put a timeout here?) */
-                rv = WaitForSingleObject(thefile->pOverlapped->hEvent, INFINITE);
+ 
+                DWORD timeout_ms;
+
+                if (thefile->timeout == 0) {
+                    timeout_ms = 0;
+                }
+                else if (thefile->timeout < 0) {
+                    timeout_ms = INFINITE;
+                }
+                else {
+                    timeout_ms = thefile->timeout / 1000;
+                }
+	       
+                rv = WaitForSingleObject(thefile->pOverlapped->hEvent, timemilliseconds);
                 switch (rv) {
                     case WAIT_OBJECT_0:
                         GetOverlappedResult(thefile->filehand, thefile->pOverlapped, (LPDWORD)nbytes, TRUE);
