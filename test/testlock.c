@@ -205,6 +205,8 @@ static void test_thread_rwlock(CuTest *tc)
     apr_thread_join(&s4, t4);
 
     CuAssertIntEquals(tc, MAX_ITER, x);
+
+    apr_thread_rwlock_destroy(rwlock);
 }
 
 static void test_cond(CuTest *tc)
