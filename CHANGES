@@ -2,6 +2,10 @@ Changes with APR 0.9.8-dev
 
   *) Keep testpipe.c from hanging on win32. [Garrett Rooney]
 
+  *) Cause apr_file_write_full on win32 to consider the timeout value set by 
+     apr_file_pipe_timeout_set.  PR 30182
+     [<eholyat olf.com>]
+
   *) Fix assertion from double close of a handle with a rwlock on win32.
      [Evgueni Brevnov <evgueni.brevnov gmail.com>]
 
