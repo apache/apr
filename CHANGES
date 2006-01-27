@@ -1,4 +1,4 @@
-Changes with APR 0.9.8-dev
+Changes with APR 0.9.8
 
   *) Keep testpipe.c from hanging on win32. [Garrett Rooney]
 
