@@ -1,4 +1,4 @@
-Changes for APR 1.2.3-dev
+Changes for APR 1.2.3
 
   *) Keep testpipe.c from hanging on win32. [Garrett Rooney]
 
