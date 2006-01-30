@@ -779,6 +779,56 @@ static void test_fail_read_flush(abts_case *tc, void *data)
     apr_file_close(f);
 }
 
+static void test_xthread(abts_case *tc, void *data)
+{
+    apr_file_t *f;
+    const char *fname = "data/testxthread.dat";
+    apr_status_t rv;
+    apr_int32_t flags = APR_CREATE|APR_READ|APR_WRITE|APR_APPEND|APR_XTHREAD;
+    char buf[128] = { 0 };
+
+    /* Test for bug 38438, opening file with append + xthread and seeking to 
+       the end of the file resulted in writes going to the beginning not the
+       end. */
+
+    apr_file_remove(fname, p);
+
+    APR_ASSERT_SUCCESS(tc, "open test file",
+                       apr_file_open(&f, fname, flags,
+                                     APR_UREAD|APR_UWRITE, p));
+
+    APR_ASSERT_SUCCESS(tc, "write should succeed",
+                       apr_file_puts("hello", f));
+
+    apr_file_close(f);
+    
+    APR_ASSERT_SUCCESS(tc, "open test file",
+                       apr_file_open(&f, fname, flags,
+                                     APR_UREAD|APR_UWRITE, p));
+
+    /* Seek to the end. */
+    {
+        apr_off_t offset = 0;
+
+        rv = apr_file_seek(f, APR_END, &offset);
+    }
+
+    APR_ASSERT_SUCCESS(tc, "more writes should succeed",
+                       apr_file_puts("world", f));
+
+    /* Back to the beginning. */
+    {
+        apr_off_t offset = 0;
+        
+        rv = apr_file_seek(f, APR_SET, &offset);
+    }
+    
+    apr_file_read_full(f, buf, sizeof(buf), NULL);
+
+    ABTS_STR_EQUAL(tc, "helloworld", buf);
+
+    apr_file_close(f);
+}
 
 abts_suite *testfile(abts_suite *suite)
 {
@@ -812,6 +862,7 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_bigfprintf, NULL);
     abts_run_test(suite, test_fail_write_flush, NULL);
     abts_run_test(suite, test_fail_read_flush, NULL);
+    abts_run_test(suite, test_xthread, NULL);
 
     return suite;
 }

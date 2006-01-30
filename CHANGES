@@ -1,5 +1,8 @@
 Changes for APR 1.2.3
 
+  *) Fix seeks with files opened in xthread mode for append on win32.
+     [M Joonas Pihlaja <jpihlaja cc.helsinki.fi>, Garrett Rooney]
+
   *) Keep testpipe.c from hanging on win32. [Garrett Rooney]
 
   *) Cause apr_file_write_full on win32 to consider the timeout value set by 
