@@ -1,4 +1,4 @@
-Changes for APR 1.2.3
+Changes for APR 1.2.4
 
   *) Fix seeks with files opened in xthread mode for append on win32.
      [M Joonas Pihlaja <jpihlaja cc.helsinki.fi>, Garrett Rooney]
