@@ -139,6 +139,11 @@ static void sendto_receivefrom(abts_case *tc, void *data)
     rv = apr_sockaddr_info_get(&from, addr, APR_UNSPEC, 7771, 0, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
+    rv = apr_socket_opt_set(sock, APR_SO_REUSEADDR, 1);
+    APR_ASSERT_SUCCESS(tc, "Could not set REUSEADDR on socket", rv);
+    rv = apr_socket_opt_set(sock2, APR_SO_REUSEADDR, 1);
+    APR_ASSERT_SUCCESS(tc, "Could not set REUSEADDR on socket2", rv);
+
     rv = apr_socket_bind(sock, to);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_socket_bind(sock2, from);
