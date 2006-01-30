@@ -222,6 +222,7 @@ static void test_uncleared_errno(CuTest *tc)
 static void test_rmkdir_nocwd(CuTest *tc)
 {
     char *cwd, *path;
+    apr_status_t rv;
 
     apr_assert_success(tc, "make temp dir",
                        apr_dir_make("dir3", APR_OS_DEFAULT, p));
@@ -233,13 +234,20 @@ static void test_rmkdir_nocwd(CuTest *tc)
 
     apr_assert_success(tc, "change to temp dir", apr_filepath_set(path, p));
 
-    apr_assert_success(tc, "remove temp dir", apr_dir_remove(path, p));
-
-    CuAssert(tc, "fail to create dir",
-             apr_dir_make_recursive("foobar", APR_OS_DEFAULT, 
-                                    p) != APR_SUCCESS);
+    rv = apr_dir_remove(path, p);
+    /* Some platforms cannot remove a directory which is in use. */
+    if (rv == APR_SUCCESS) {
+        CuAssert(tc, "fail to create dir",
+                 apr_dir_make_recursive("foobar", APR_OS_DEFAULT, 
+                                        p) != APR_SUCCESS);
+    }
 
     apr_assert_success(tc, "restore cwd", apr_filepath_set(cwd, p));
+
+    if (rv) {
+        apr_dir_remove(path, p);
+        CuNotImpl(tc, "cannot remove in-use directory");
+    }
 }
 
 CuSuite *testdir(void)
