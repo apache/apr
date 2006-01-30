@@ -1,4 +1,4 @@
-Changes with APR 0.9.8
+Changes with APR 0.9.9
 
   *) Fix seeks with files opened in xthread mode for append on win32.
      [M Joonas Pihlaja <jpihlaja cc.helsinki.fi>, Garrett Rooney]
