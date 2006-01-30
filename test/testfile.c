@@ -596,6 +596,55 @@ static void test_fail_read_flush(CuTest *tc)
     apr_file_remove(fname, p);
 }
 
+static void test_xthread(CuTest *tc)
+{
+    apr_file_t *f;
+    const char *fname = "data/testxthread.dat";
+    apr_status_t rv;
+    apr_int32_t flags = APR_CREATE|APR_READ|APR_WRITE|APR_APPEND|APR_XTHREAD;
+    char buf[128] = { 0 };
+
+    /* Test for bug 38438, opening file with append + xthread and seeking to 
+       the end of the file resulted in writes going to the beginning not the
+       end. */
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname, flags, APR_UREAD|APR_UWRITE, p);
+    CuAssert(tc, "open test file", rv == APR_SUCCESS);
+
+    rv = apr_file_puts("hello", f);
+    CuAssert(tc, "write should succeed", rv == APR_SUCCESS);
+
+    apr_file_close(f);
+    
+    rv = apr_file_open(&f, fname, flags, APR_UREAD|APR_UWRITE, p);
+    CuAssert(tc, "open test file", rv == APR_SUCCESS);
+
+    /* Seek to the end. */
+    {
+        apr_off_t offset = 0;
+
+        rv = apr_file_seek(f, APR_END, &offset);
+    }
+
+    rv = apr_file_puts("world", f);
+    CuAssert(tc, "more writes should succeed", rv == APR_SUCCESS);
+
+    /* Back to the beginning. */
+    {
+        apr_off_t offset = 0;
+        
+        rv = apr_file_seek(f, APR_SET, &offset);
+    }
+    
+    apr_file_read_full(f, buf, sizeof(buf), NULL);
+
+    CuAssertStrEquals(tc, "helloworld", buf);
+
+    apr_file_close(f);
+}
+
 CuSuite *testfile(void)
 {
     CuSuite *suite = CuSuiteNew("File I/O");
@@ -623,6 +672,7 @@ CuSuite *testfile(void)
     SUITE_ADD_TEST(suite, test_truncate);
     SUITE_ADD_TEST(suite, test_fail_write_flush);
     SUITE_ADD_TEST(suite, test_fail_read_flush);
+    SUITE_ADD_TEST(suite, test_xthread);
 
     return suite;
 }
