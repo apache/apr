@@ -59,7 +59,7 @@
  * The Patch Level never includes API changes, simply bug fixes.
  * Reset to 0 when upgrading APR_MINOR_VERSION
  */
-#define APR_PATCH_VERSION       3
+#define APR_PATCH_VERSION       4
 
 /** 
  * The symbol APR_IS_DEV_VERSION is only defined for internal,
