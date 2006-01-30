@@ -318,10 +318,10 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                     timeout_ms = INFINITE;
                 }
                 else {
-                    timeout_ms = thefile->timeout / 1000;
+                    timeout_ms = (DWORD)(thefile->timeout / 1000);
                 }
 	       
-                rv = WaitForSingleObject(thefile->pOverlapped->hEvent, timemilliseconds);
+                rv = WaitForSingleObject(thefile->pOverlapped->hEvent, timeout_ms);
                 switch (rv) {
                     case WAIT_OBJECT_0:
                         GetOverlappedResult(thefile->filehand, thefile->pOverlapped, nbytes, TRUE);
