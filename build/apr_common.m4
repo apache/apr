@@ -720,6 +720,13 @@ AC_DEFUN(APR_LAYOUT,[
     echo "** Error: Cannot use undefined layout '$LAYOUT'"
     exit 1
   fi
+  # Catch layout names including a slash which will otherwise
+  # confuse the heck out of the sed script.
+  case $2 in
+  */*) 
+    echo "** Error: $2 is not a valid layout name"
+    exit 1 ;;
+  esac
   pldconf=./config.pld
   changequote({,})
   sed -e "1s/[ 	]*<[lL]ayout[ 	]*$2[ 	]*>[ 	]*//;1t" \
