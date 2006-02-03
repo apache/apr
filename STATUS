@@ -26,6 +26,9 @@ Release:
 
 RELEASE 0.9 SHOWSTOPPERS:
 
+  * MUST invert default selection of GPL, Sleepcat, BDB licensed plug
+    in detection to default to off, following clarification of the
+    ASF license compatibility
 
 
 RELEASE 1.0 SHOWSTOPPERS:
