@@ -55,6 +55,7 @@ APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
 #endif
     if (rv == SOCKET_ERROR) {
         lasterror = apr_get_netos_error();
+        *len = 0;
         return lasterror;
     }
 
