@@ -259,6 +259,52 @@ static void test_format(abts_case *tc, void *data)
              off == eightGb);
 }
 
+#define TESTBUFFN TESTDIR "/buffer.bin"
+
+static void test_buffered(abts_case *tc, void *data)
+{
+    apr_off_t off;
+    apr_file_t *f;
+
+    PRECOND;
+
+    APR_ASSERT_SUCCESS(tc, "open buffered file",
+                       apr_file_open(&f, TESTBUFFN,
+                                     APR_FOPEN_CREATE|APR_FOPEN_WRITE
+                                     |APR_FOPEN_TRUNCATE|APR_FOPEN_BUFFERED,
+                                     APR_OS_DEFAULT, p));
+
+    APR_ASSERT_SUCCESS(tc, "truncate to 8GB",
+                       apr_file_trunc(f, eightGb));
+
+    off = eightGb;
+    APR_ASSERT_SUCCESS(tc, "seek to 8GB",
+                       apr_file_seek(f, APR_SET, &off));
+    ABTS_ASSERT(tc, "returned seek position still 8GB",
+                off == eightGb);
+
+    off = 0;
+    APR_ASSERT_SUCCESS(tc, "relative seek",
+                       apr_file_seek(f, APR_CUR, &off));
+    ABTS_ASSERT(tc, "relative seek still at 8GB",
+                off == eightGb);
+
+    off = 0;
+    APR_ASSERT_SUCCESS(tc, "end-relative seek",
+                       apr_file_seek(f, APR_END, &off));
+    ABTS_ASSERT(tc, "end-relative seek still at 8GB",
+                off == eightGb);
+
+    off = -eightGb;
+    APR_ASSERT_SUCCESS(tc, "relative seek to beginning",
+                       apr_file_seek(f, APR_CUR, &off));
+    ABTS_ASSERT(tc, "seek to beginning got zero",
+                off == 0);
+
+    APR_ASSERT_SUCCESS(tc, "close buffered file",
+                       apr_file_close(f));
+}
+
 #else
 static void test_nolfs(abts_case *tc, void *data)
 {
@@ -282,6 +328,7 @@ abts_suite *testlfs(abts_suite *suite)
     abts_run_test(suite, test_mmap, NULL);
 #endif
     abts_run_test(suite, test_format, NULL);
+    abts_run_test(suite, test_buffered, NULL);
 #else
     abts_run_test(suite, test_nolfs, NULL);
 #endif
