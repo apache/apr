@@ -107,7 +107,7 @@ struct apr_file_t {
     apr_size_t bufsize;       /* The size of the buffer */
     unsigned long dataRead;   /* amount of valid data read into buffer */
     int direction;            /* buffer being used for 0 = read, 1 = write */
-    unsigned long filePtr;    /* position in file of handle */
+    apr_off_t filePtr;        /* position in file of handle */
 #if APR_HAS_THREADS
     struct apr_thread_mutex_t *thlock;
 #endif
