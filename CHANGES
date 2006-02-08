@@ -1,5 +1,9 @@
 Changes for APR 1.3.0
 
+  *) Make the filePtr in apr_file_t an apr_off_t on Unix, to avoid issues
+     truncating offsets down to 32 bits on large file systems.
+     [Garrett Rooney]
+
   *) Fix seeks with files opened in xthread mode for append on win32.
      [M Joonas Pihlaja <jpihlaja cc.helsinki.fi>, Garrett Rooney]
 
