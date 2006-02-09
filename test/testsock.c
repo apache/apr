@@ -255,8 +255,8 @@ static void test_get_addr(abts_case *tc, void *data)
                        apr_socket_opt_set(cd, APR_SO_NONBLOCK, 1));
 
     rv = apr_socket_connect(cd, sa);
-    APR_ASSERT_SUCCESS(tc, "make the connection", rv);
-    if (rv)
+    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_EINPROGRESS(rv));
+    if (rv && ! APR_STATUS_IS_EINPROGRESS(rv))
         return;
 
     APR_ASSERT_SUCCESS(tc, "accept connection",
