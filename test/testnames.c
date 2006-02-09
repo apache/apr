@@ -185,12 +185,24 @@ static void root_relative(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, "The given path is relative", errmsg);
 }
 
+static void root_from_slash(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    const char *root = NULL;
+    const char *path = "//";
 
-#if 0
-    root_result(rootpath);
-    root_result(addpath);
-}
+    rv = apr_filepath_root(&root, &path, APR_FILEPATH_TRUENAME, p);
+
+#if defined(WIN32) || defined(NETWARE) || defined(OS2)
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    ABTS_STR_EQUAL(tc, "//", root);
+#else
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, "/", root);
 #endif
+    ABTS_STR_EQUAL(tc, "", path);
+}
+
 
 abts_suite *testnames(abts_suite *suite)
 {
@@ -208,6 +220,7 @@ abts_suite *testnames(abts_suite *suite)
 
     abts_run_test(suite, root_absolute, NULL);
     abts_run_test(suite, root_relative, NULL);
+    abts_run_test(suite, root_from_slash, NULL);
 
     return suite;
 }
