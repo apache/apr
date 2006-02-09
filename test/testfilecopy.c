@@ -46,12 +46,12 @@ static void copy_helper(abts_case *tc, const char *from, const char * to,
     APR_ASSERT_SUCCESS(tc, "Couldn't stat copy file", rv);
 
     if (!append) {
-        ABTS_INT_EQUAL(tc, orig.size, copy.size);
+        ABTS_ASSERT(tc, "File size differs", orig.size == copy.size);
     }
     else {
-        ABTS_INT_EQUAL(tc, 
-                          ((dest_rv == APR_SUCCESS) ? dest.size : 0) + orig.size,
-                          copy.size);
+        ABTS_ASSERT(tc, "File size differs", 
+                                   ((dest_rv == APR_SUCCESS) 
+                                     ? dest.size : 0) + orig.size == copy.size);
     }
 }
 
