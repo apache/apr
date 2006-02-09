@@ -87,7 +87,6 @@ static void test_exp_lt(abts_case *tc, void *data)
     apr_status_t rv;
     apr_time_exp_t xt;
     time_t posix_secs = (time_t)apr_time_sec(now);
-    apr_time_t now_secs = apr_time_sec(now);
     struct tm *posix_exp = localtime(&posix_secs);
 
     rv = apr_time_exp_lt(&xt, now);
