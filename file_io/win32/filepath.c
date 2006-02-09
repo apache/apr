@@ -255,9 +255,6 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
             }
             else {
                 newpath = apr_pstrndup(p, testpath, delim1 - testpath);
-                if (flags & APR_FILEPATH_TRUENAME) {
-                    newpath[delim1 - testpath] = seperator[0];
-                }
             }
             if (flags & APR_FILEPATH_TRUENAME) {
                 newpath[0] = seperator[0];
