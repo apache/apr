@@ -485,7 +485,7 @@ static void test_mod_neg(abts_case *tc, void *data)
     cur = 0;
     rv = apr_file_seek(f, APR_CUR, &cur);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, 10, cur);
+    ABTS_ASSERT(tc, "File Pointer Mismatch, expected 10", cur == 10);
 
     nbytes = sizeof(buf);
     rv = apr_file_read(f, buf, &nbytes);
@@ -495,7 +495,7 @@ static void test_mod_neg(abts_case *tc, void *data)
     cur = -((apr_off_t)nbytes - 7980);
     rv = apr_file_seek(f, APR_CUR, &cur);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, 7990, cur);
+    ABTS_ASSERT(tc, "File Pointer Mismatch, expected 7990", cur == 7990);
 
     rv = apr_file_gets(buf, 11, f);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -665,7 +665,7 @@ static void test_truncate(abts_case *tc, void *data)
 
     rv = apr_stat(&finfo, fname, APR_FINFO_SIZE, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, 0, finfo.size);
+    ABTS_ASSERT(tc, "File size mismatch, expected 0 (empty)", finfo.size == 0);
 
     rv = apr_file_remove(fname, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
