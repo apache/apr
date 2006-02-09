@@ -94,6 +94,8 @@ static void groupname(abts_case *tc, void *data)
                        apr_gid_compare(gid, retreived_gid));
 }
 
+#ifdef APR_UID_GID_NUMERIC
+
 static void fail_userinfo(abts_case *tc, void *data)
 {
     apr_uid_t uid;
@@ -138,6 +140,8 @@ static void fail_userinfo(abts_case *tc, void *data)
                 rv != APR_SUCCESS || tmp != NULL);
 }
 
+#endif
+
 #else
 static void users_not_impl(abts_case *tc, void *data)
 {
@@ -155,7 +159,9 @@ abts_suite *testuser(abts_suite *suite)
     abts_run_test(suite, uid_current, NULL);
     abts_run_test(suite, username, NULL);
     abts_run_test(suite, groupname, NULL);
+#ifdef APR_UID_GID_NUMERIC
     abts_run_test(suite, fail_userinfo, NULL);
+#endif
 #endif
 
     return suite;
