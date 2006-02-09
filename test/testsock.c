@@ -253,9 +253,11 @@ static void test_get_addr(abts_case *tc, void *data)
 
     APR_ASSERT_SUCCESS(tc, "enable non-block mode",
                        apr_socket_opt_set(cd, APR_SO_NONBLOCK, 1));
-    
-    /* initiate connection */
-    apr_socket_connect(cd, sa);
+
+    rv = apr_socket_connect(cd, sa);
+    APR_ASSERT_SUCCESS(tc, "make the connection", rv);
+    if (rv)
+        return;
 
     APR_ASSERT_SUCCESS(tc, "accept connection",
                        apr_socket_accept(&sd, ld, p));
