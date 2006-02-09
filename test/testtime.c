@@ -86,8 +86,9 @@ static void test_exp_lt(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
-    struct tm *libc_exp;
-    time_t now_secs = apr_time_sec(now);
+    time_t posix_secs = (time_t)apr_time_sec(now);
+    apr_time_t now_secs = apr_time_sec(now);
+    struct tm *posix_exp = localtime(&posix_secs);
 
     rv = apr_time_exp_lt(&xt, now);
     if (rv == APR_ENOTIMPL) {
@@ -95,10 +96,8 @@ static void test_exp_lt(abts_case *tc, void *data)
     }
     ABTS_TRUE(tc, rv == APR_SUCCESS);
 
-    libc_exp = localtime(&now_secs);
-
 #define CHK_FIELD(f) \
-    ABTS_INT_EQUAL(tc, libc_exp->f, xt.f)
+    ABTS_ASSERT(tc, "Mismatch in " #f, posix_exp->f == xt.f)
 
     CHK_FIELD(tm_sec);
     CHK_FIELD(tm_min);
@@ -182,14 +181,15 @@ static void test_ctime(abts_case *tc, void *data)
     apr_status_t rv;
     char apr_str[STR_SIZE];
     char libc_str[STR_SIZE];
-    time_t now_sec = apr_time_sec(now);
+    apr_time_t now_sec = apr_time_sec(now);
+    time_t posix_sec = (time_t) now_sec;
 
     rv = apr_ctime(apr_str, now);
     if (rv == APR_ENOTIMPL) {
         ABTS_NOT_IMPL(tc, "apr_ctime");
     }
     ABTS_TRUE(tc, rv == APR_SUCCESS);
-    strcpy(libc_str, ctime(&now_sec));
+    strcpy(libc_str, ctime(&posix_sec));
     *strchr(libc_str, '\n') = '\0';
 
     ABTS_STR_EQUAL(tc, libc_str, apr_str);
