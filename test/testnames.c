@@ -193,7 +193,7 @@ static void root_from_slash(abts_case *tc, void *data)
 
     rv = apr_filepath_root(&root, &path, APR_FILEPATH_TRUENAME, p);
 
-#if defined(WIN32) || defined(NETWARE) || defined(OS2)
+#if defined(WIN32) || defined(OS2)
     ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
     ABTS_STR_EQUAL(tc, "//", root);
 #else
