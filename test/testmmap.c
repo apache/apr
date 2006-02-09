@@ -84,14 +84,15 @@ static void test_get_filesize(abts_case *tc, void *data)
 
     rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
     ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
-    ABTS_INT_EQUAL(tc, fsize, finfo.size);
+    ABTS_ASSERT(tc, "File size mismatch", fsize == finfo.size);
 }
 
 static void test_mmap_create(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
-    rv = apr_mmap_create(&themmap, thefile, 0, finfo.size, APR_MMAP_READ, p);
+    rv = apr_mmap_create(&themmap, thefile, 0, (apr_size_t) finfo.size, 
+                                APR_MMAP_READ, p);
     ABTS_PTR_NOTNULL(tc, themmap);
     ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
 }
