@@ -63,14 +63,15 @@ static void set_timeout(abts_case *tc, void *data)
 
     rv = apr_file_pipe_timeout_get(readp, &timeout);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, -1, timeout);
+    ABTS_ASSERT(tc, "Timeout mismatch, expected -1", timeout == -1);
 
     rv = apr_file_pipe_timeout_set(readp, apr_time_from_sec(1));
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_file_pipe_timeout_get(readp, &timeout);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, apr_time_from_sec(1), timeout);
+    ABTS_ASSERT(tc, "Timeout mismatch, expected 1 second", 
+		        timeout == apr_time_from_sec(1));
 }
 
 static void read_write(abts_case *tc, void *data)

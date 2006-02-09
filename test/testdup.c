@@ -81,7 +81,7 @@ static void test_file_readwrite(abts_case *tc, void *data)
     fpos = 0;
     rv = apr_file_seek(file1, APR_SET, &fpos);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, 0, fpos);
+    ABTS_ASSERT(tc, "File position mismatch, expected 0", fpos == 0);
 
     txtlen = 50;
     rv = apr_file_read(file1, buff, &txtlen);
@@ -166,7 +166,7 @@ static void test_dup2_readwrite(abts_case *tc, void *data)
     fpos = 0;
     rv = apr_file_seek(testfile, APR_SET, &fpos);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, 0, fpos);
+    ABTS_ASSERT(tc, "File position mismatch, expected 0", fpos == 0);
 
     txtlen = 50;
     rv = apr_file_read(testfile, buff, &txtlen);

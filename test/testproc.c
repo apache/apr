@@ -108,7 +108,7 @@ static void test_file_redir(abts_case *tc, void *data)
     offset = 0;
     rv = apr_file_seek(testfile, APR_SET, &offset);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, 0, offset);
+    ABTS_ASSERT(tc, "File position mismatch, expected 0", offset == 0);
 
     rv = apr_procattr_create(&attr, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
