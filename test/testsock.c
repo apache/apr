@@ -212,7 +212,7 @@ static void test_get_addr(abts_case *tc, void *data)
     apr_status_t rv;
     apr_socket_t *ld, *sd, *cd;
     apr_sockaddr_t *sa, *ca;
-    char a[128], b[128];
+    char *a, *b;
 
     ld = setup_socket(tc);
 
@@ -226,9 +226,11 @@ static void test_get_addr(abts_case *tc, void *data)
 
     APR_ASSERT_SUCCESS(tc, "enable non-block mode",
                        apr_socket_opt_set(cd, APR_SO_NONBLOCK, 1));
-    
-    /* initiate connection */
-    apr_socket_connect(cd, sa);
+
+    rv = apr_socket_connect(cd, sa);
+    APR_ASSERT_SUCCESS(tc, "make the connection", rv);
+    if (rv)
+        return;
 
     APR_ASSERT_SUCCESS(tc, "accept connection",
                        apr_socket_accept(&sd, ld, p));
@@ -255,8 +257,8 @@ static void test_get_addr(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "get remote address of client socket",
                        apr_socket_addr_get(&ca, APR_REMOTE, cd));
     
-    apr_snprintf(a, sizeof a, "%pI", sa);
-    apr_snprintf(b, sizeof b, "%pI", ca);
+    a = apr_psprintf(p, "%pI", sa);
+    b = apr_psprintf(p, "%pI", ca);
 
     ABTS_STR_EQUAL(tc, a, b);
                        
