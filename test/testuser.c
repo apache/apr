@@ -94,6 +94,8 @@ static void groupname(CuTest *tc)
     CuAssertIntEquals(tc, APR_SUCCESS, apr_gid_compare(gid, retreived_gid));
 }
 
+#ifndef WIN32
+
 static void fail_userinfo(CuTest *tc)
 {
     apr_uid_t uid;
@@ -137,6 +139,12 @@ static void fail_userinfo(CuTest *tc)
              "set a path name",
              rv != APR_SUCCESS || tmp != NULL);
 }
+
+#else
+static void fail_userinfo(CuTest *tc)
+    CuNotImpl(tc, "Intregal uid/gid not present on this platform");
+}
+#endif
 
 #else
 static void users_not_impl(CuTest *tc)
