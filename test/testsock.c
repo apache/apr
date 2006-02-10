@@ -212,7 +212,7 @@ static void test_get_addr(abts_case *tc, void *data)
     apr_status_t rv;
     apr_socket_t *ld, *sd, *cd;
     apr_sockaddr_t *sa, *ca;
-    char *a, *b;
+    char a[128], b[128];
 
     ld = setup_socket(tc);
 
@@ -257,8 +257,8 @@ static void test_get_addr(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "get remote address of client socket",
                        apr_socket_addr_get(&ca, APR_REMOTE, cd));
     
-    a = apr_psprintf(p, "%pI", sa);
-    b = apr_psprintf(p, "%pI", ca);
+    apr_snprintf(a, sizeof(a), "%pI", sa);
+    apr_snprintf(b, sizeof(b), "%pI", ca);
 
     ABTS_STR_EQUAL(tc, a, b);
                        
