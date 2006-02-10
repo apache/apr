@@ -449,8 +449,11 @@ AC_SUBST(INSTALL_SUBDIRS)
 # comparisons.
 case $host in
     *freebsd*)
-        # 3.4-RELEASE: 340   4.1.1-RELEASE: 411
-        os_version=`uname -r | sed -e 's/\(.\)\.\(.\)\.\(.\).*/\1\2\3/' | sed -e 's/\(.\)\.\(.\)\-.*/\1\20/'`
+        if test -x /sbin/sysctl; then
+            os_version=`/sbin/sysctl -n kern.osreldate`
+        else
+            os_version=000000
+        fi
         ;;
     *linux*)
         os_version=`uname -r | sed -e 's/\(.\)\.\(.\)\.\(.\).*/\1\2\3/'`
@@ -833,7 +836,8 @@ AC_ARG_WITH(sendfile, [  --with-sendfile         Override decision to use sendfi
     orig_sendfile=$sendfile
     case $host in
         *freebsd*)
-            if test $os_version -le "410"; then
+            # FreeBSD < 4.2 has issues with threads+sendfile
+            if test $os_version -le "401999"; then
                 if test "$threads" = "1"; then
                     sendfile="0"
                 fi
