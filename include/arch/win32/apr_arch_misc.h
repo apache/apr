@@ -133,7 +133,7 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *);
 #if APR_HAS_ANSI_FS && APR_HAS_UNICODE_FS
 #define IF_WIN_OS_IS_UNICODE if (apr_os_level >= APR_WIN_UNICODE)
 #define ELSE_WIN_OS_IS_ANSI else
-#else APR_HAS_UNICODE_FS
+#else /* APR_HAS_UNICODE_FS */
 #define IF_WIN_OS_IS_UNICODE
 #define ELSE_WIN_OS_IS_ANSI
 #endif /* WINNT */
