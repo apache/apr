@@ -84,14 +84,15 @@ static void test_get_filesize(CuTest *tc)
 
     rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
     CuAssertIntEquals(tc, rv, APR_SUCCESS);
-    CuAssertIntEquals(tc, fsize, finfo.size);
+    CuAssert(tc, "File size mismatch", fsize == finfo.size);
 }
 
 static void test_mmap_create(CuTest *tc)
 {
     apr_status_t rv;
 
-    rv = apr_mmap_create(&themmap, thefile, 0, finfo.size, APR_MMAP_READ, p);
+    rv = apr_mmap_create(&themmap, thefile, 0, (apr_size_t)finfo.size, 
+		                 APR_MMAP_READ, p);
     CuAssertPtrNotNull(tc, themmap);
     CuAssertIntEquals(tc, rv, APR_SUCCESS);
 }

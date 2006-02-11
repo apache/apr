@@ -117,7 +117,7 @@ static void test_file_redir(CuTest *tc)
     offset = 0;
     rv = apr_file_seek(testfile, APR_SET, &offset);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 0, offset);
+    CuAssert(tc, "File position mismatch, expected 0", offset == 0);
 
     rv = apr_procattr_create(&attr, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);

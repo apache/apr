@@ -86,8 +86,9 @@ static void test_exp_lt(CuTest *tc)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
-    struct tm *libc_exp;
-    time_t now_secs = apr_time_sec(now);
+    time_t posix_secs = (time_t)apr_time_sec(now);
+    apr_time_t now_secs = apr_time_sec(now);
+    struct tm *posix_exp = localtime(&posix_secs);
 
     rv = apr_time_exp_lt(&xt, now);
     if (rv == APR_ENOTIMPL) {
@@ -95,10 +96,8 @@ static void test_exp_lt(CuTest *tc)
     }
     CuAssertTrue(tc, rv == APR_SUCCESS);
 
-    libc_exp = localtime(&now_secs);
-
 #define CHK_FIELD(f) \
-    CuAssertIntEquals(tc, libc_exp->f, xt.f)
+    CuAssert(tc, "Mismatch in " #f, posix_exp->f == xt.f)
 
     CHK_FIELD(tm_sec);
     CHK_FIELD(tm_min);
@@ -182,14 +181,14 @@ static void test_ctime(CuTest *tc)
     apr_status_t rv;
     char apr_str[STR_SIZE];
     char libc_str[STR_SIZE];
-    time_t now_sec = apr_time_sec(now);
+    time_t posix_sec = (time_t)apr_time_sec(now);
 
     rv = apr_ctime(apr_str, now);
     if (rv == APR_ENOTIMPL) {
         CuNotImpl(tc, "apr_ctime");
     }
     CuAssertTrue(tc, rv == APR_SUCCESS);
-    strcpy(libc_str, ctime(&now_sec));
+    strcpy(libc_str, ctime(&posix_sec));
     *strchr(libc_str, '\n') = '\0';
 
     CuAssertStrEquals(tc, libc_str, apr_str);

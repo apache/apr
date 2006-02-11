@@ -466,7 +466,7 @@ static void test_mod_neg(CuTest *tc)
     cur = 0;
     rv = apr_file_seek(f, APR_CUR, &cur);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 10, cur);
+    CuAssert(tc, "File Pointer Mismatch, expected 10", cur == 10);
 
     nbytes = sizeof(buf);
     rv = apr_file_read(f, buf, &nbytes);
@@ -476,7 +476,7 @@ static void test_mod_neg(CuTest *tc)
     cur = -((apr_off_t)nbytes - 7980);
     rv = apr_file_seek(f, APR_CUR, &cur);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 7990, cur);
+    CuAssert(tc, "File Pointer Mismatch, expected 7990", cur == 7990);
 
     rv = apr_file_gets(buf, 11, f);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
@@ -522,7 +522,7 @@ static void test_truncate(CuTest *tc)
 
     rv = apr_stat(&finfo, fname, APR_FINFO_SIZE, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 0, finfo.size);
+    CuAssert(tc, "File size mismatch, expected 0 (empty)", finfo.size == 0);
 
     rv = apr_file_remove(fname, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);

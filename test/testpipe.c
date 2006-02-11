@@ -65,14 +65,15 @@ static void set_timeout(CuTest *tc)
 
     rv = apr_file_pipe_timeout_get(readp, &timeout);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, -1, timeout);
+    CuAssert(tc, "Timeout mismatch, expected -1", timeout == -1);
 
     rv = apr_file_pipe_timeout_set(readp, apr_time_from_sec(1));
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
     rv = apr_file_pipe_timeout_get(readp, &timeout);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, apr_time_from_sec(1), timeout);
+    CuAssert(tc, "Timeout mismatch, expected 1 second", 
+		     timeout == apr_time_from_sec(1));
 }
 
 static void read_write(CuTest *tc)

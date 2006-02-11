@@ -21,6 +21,7 @@
 #include "apr_errno.h"
 #include "apr_dso.h"
 #include "apr_strings.h"
+#include "apr_file_info.h"
 #include "apr.h"
 #if APR_HAVE_UNISTD_H
 #include <unistd.h>
@@ -223,9 +224,7 @@ CuSuite *testdso(void)
 {
     CuSuite *suite = CuSuiteNew("DSO");
 
-    modname = apr_pcalloc(p, 256);
-    getcwd(modname, 256);
-    modname = apr_pstrcat(p, modname, "/", MOD_NAME, NULL);
+    apr_filepath_merge(&modname, NULL, MOD_NAME, 0, p);
 
     SUITE_ADD_TEST(suite, test_load_module);
     SUITE_ADD_TEST(suite, test_dso_sym);
@@ -233,9 +232,7 @@ CuSuite *testdso(void)
     SUITE_ADD_TEST(suite, test_unload_module);
 
 #ifdef LIB_NAME
-    libname = apr_pcalloc(p, 256);
-    getcwd(libname, 256);
-    libname = apr_pstrcat(p, libname, "/", LIB_NAME, NULL);
+    apr_filepath_merge(&libname, NULL, LIB_NAME, 0, p);
 
     SUITE_ADD_TEST(suite, test_load_library);
     SUITE_ADD_TEST(suite, test_dso_sym_library);
