@@ -87,6 +87,10 @@ SOURCE=.\abts.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\abts.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\globalmutexchild.c
 # End Source File
 # Begin Source File
