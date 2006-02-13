@@ -171,7 +171,7 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
  * Poll the descriptors in the poll structure
  * @param aprset The poll structure we will be using. 
  * @param numsock The number of descriptors we are polling
- * @param nsds The number of descriptors signalled.
+ * @param nsds The number of descriptors signalled (output parameter)
  * @param timeout The amount of time in microseconds to wait.  This is 
  *                a maximum, not a minimum.  If a descriptor is signalled, we 
  *                will wake up before this time.  A negative number means 
