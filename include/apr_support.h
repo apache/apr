@@ -38,6 +38,12 @@ extern "C" {
 
 /**
  * Wait for IO to occur or timeout.
+ *
+ * @param f The file to wait on.
+ * @param s The socket to wait on if @a f is @c NULL.
+ * @param for_read If non-zero wait for data to be available to read,
+ *        otherwise wait for data to be able to be written. 
+ * @return APR_TIMEUP if we run out of time.
  */
 apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
                                         int for_read);
