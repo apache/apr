@@ -22,7 +22,7 @@
 #include "apr_pools.h"
 #include "apr_lib.h"
 
-#if WIN32
+#if defined(WIN32) || defined(OS2)
 #define ABS_ROOT "C:/"
 #elif defined(NETWARE)
 #define ABS_ROOT "SYS:/"
