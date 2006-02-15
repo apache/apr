@@ -78,7 +78,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
  * Why not use NamedPipes on NT which support setting pipe state to
  * non-blocking? On NT, even though you can set a pipe non-blocking, 
  * there is no clean way to set event driven non-zero timeouts (e.g select(),
- * WaitForSinglelObject, et. al. will not detect pipe i/o). On NT, you 
+ * WaitForSingleObject, et. al. will not detect pipe i/o). On NT, you 
  * have to poll the pipe to detect i/o on a non-blocking pipe.
  */
 apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out, 
