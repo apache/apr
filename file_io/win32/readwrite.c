@@ -459,10 +459,12 @@ APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
         }
 
         return rc;
-    } else {
-        FlushFileBuffers(thefile->filehand);
-        return APR_SUCCESS;
     }
+
+    /* There isn't anything to do if we aren't buffering the output
+     * so just return success.
+     */
+    return APR_SUCCESS; 
 }
 
 struct apr_file_printf_data {
