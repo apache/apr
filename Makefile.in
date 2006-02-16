@@ -36,7 +36,7 @@ INSTALL_DATA = @INSTALL_DATA@
 # Rules for building specific targets, starting with 'all' for
 # building the entire package.
 #
-TARGETS = $(TARGET_LIB) export_vars.c apr.exp
+TARGETS = $(TARGET_LIB) apr.exp apr-config.out build/apr_rules.out
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
@@ -66,7 +66,7 @@ apr-config.out: $(APR_CONFIG)
 build/apr_rules.out: build/apr_rules.mk
 	sed 's,^\(apr_build.*=\).*$$,\1$(installbuilddir),' < build/apr_rules.mk > $@
 
-install: $(TARGET_LIB) apr-config.out build/apr_rules.out
+install: $(TARGETS)
 	$(APR_MKDIR) $(DESTDIR)$(libdir) $(DESTDIR)$(bindir) $(DESTDIR)$(installbuilddir) \
 		     $(DESTDIR)$(libdir)/pkgconfig $(DESTDIR)$(includedir)
 	$(INSTALL_DATA) $(top_blddir)/include/apr.h $(DESTDIR)$(includedir)
