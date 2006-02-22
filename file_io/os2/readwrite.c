@@ -42,7 +42,13 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         apr_thread_mutex_lock(thefile->mutex);
 
         if (thefile->direction == 1) {
-            apr_file_flush(thefile);
+            int rv = apr_file_flush(thefile);
+
+            if (rv != APR_SUCCESS) {
+                apr_thread_mutex_unlock(thefile->mutex);
+                return rv;
+            }
+
             thefile->bufpos = 0;
             thefile->direction = 0;
             thefile->dataRead = 0;
@@ -299,6 +305,10 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
     for (i = 0; i < len-1; i++) {
         readlen = 1;
         rv = apr_file_read(thefile, str+i, &readlen);
+
+        if (rv != APR_SUCCESS) {
+            break;
+        }
 
         if (readlen != 1) {
             rv = APR_EOF;
