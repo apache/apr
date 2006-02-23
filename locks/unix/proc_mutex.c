@@ -325,7 +325,15 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         return rv;
     }
 
-#ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
+    /* It is strictly not necessary to only enable robust mutexes iff
+     * priority inheritance is supported, but historically this always
+     * has been the case.  glibc 2.3 supports robust mutexes, but not
+     * cross-process robust mutexes, so enabling the robust mutex
+     * support like this ensures it is only used on Solaris, for now.
+     * A (more complicated) configure check would be necessary
+     * otherwise. */
+#if defined(HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP) \
+    && defined(_POSIX_THREAD_PRIO_INHERIT) && _POSIX_THREAD_PRIO_INHERIT > 0
     if ((rv = pthread_mutexattr_setrobust_np(&mattr, 
                                                PTHREAD_MUTEX_ROBUST_NP))) {
 #ifdef PTHREAD_SETS_ERRNO
@@ -343,7 +351,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         pthread_mutexattr_destroy(&mattr);
         return rv;
     }
-#endif
+#endif /* HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP && _POSIX_THREAD_PRIO_INHERIT > 0 */
 
     if ((rv = pthread_mutex_init(new_mutex->pthread_interproc, &mattr))) {
 #ifdef PTHREAD_SETS_ERRNO
