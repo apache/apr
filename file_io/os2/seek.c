@@ -27,7 +27,12 @@ static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
     ULONG rc;
 
     if (thefile->direction == 1) {
-        apr_file_flush(thefile);
+        apr_status_t rv = apr_file_flush(thefile);
+
+        if (rv != APR_SUCCESS) {
+            return rv;
+        }
+
         thefile->bufpos = thefile->direction = thefile->dataRead = 0;
     }
 
