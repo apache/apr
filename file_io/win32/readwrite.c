@@ -71,7 +71,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
     }
 
     *nbytes = 0;
-    rv = ReadFile(file->filehand, buf, len, (LPDWORD)nbytes, file->pOverlapped);
+    rv = ReadFile(file->filehand, buf, len, nbytes, file->pOverlapped);
 
     if (!rv) {
         rv = apr_get_os_error();
@@ -88,7 +88,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
             switch (rv) {
                 case WAIT_OBJECT_0:
                     GetOverlappedResult(file->filehand, file->pOverlapped, 
-                                        (LPDWORD)nbytes, TRUE);
+                                        nbytes, TRUE);
                     rv = APR_SUCCESS;
                     break;
 
@@ -331,7 +331,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                 rv = WaitForSingleObject(thefile->pOverlapped->hEvent, timeout_ms);
                 switch (rv) {
                     case WAIT_OBJECT_0:
-                        GetOverlappedResult(thefile->filehand, thefile->pOverlapped, (LPDWORD)nbytes, TRUE);
+                        GetOverlappedResult(thefile->filehand, thefile->pOverlapped, nbytes, TRUE);
                         rv = APR_SUCCESS;
                         break;
                     case WAIT_TIMEOUT:
