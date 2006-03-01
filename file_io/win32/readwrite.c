@@ -84,23 +84,28 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
                 rv = WaitForSingleObject(file->pOverlapped->hEvent, INFINITE);
             }
             switch (rv) {
-            case WAIT_OBJECT_0:
-                GetOverlappedResult(file->filehand, file->pOverlapped, 
-                                    nbytes, TRUE);
-                rv = APR_SUCCESS;
-                break;
-            case WAIT_TIMEOUT:
-                rv = APR_TIMEUP;
-                break;
-            case WAIT_FAILED:
-                rv = apr_get_os_error();
-                break;
-            default:
-                break;
+                case WAIT_OBJECT_0:
+                    GetOverlappedResult(file->filehand, file->pOverlapped, 
+                                        nbytes, TRUE);
+                    rv = APR_SUCCESS;
+                    break;
+
+                case WAIT_TIMEOUT:
+                    rv = APR_TIMEUP;
+                    break;
+
+                case WAIT_FAILED:
+                    rv = apr_get_os_error();
+                    break;
+
+                default:
+                    break;
             }
+
             if (rv != APR_SUCCESS) {
-                if (apr_os_level >= APR_WIN_98)
+                if (apr_os_level >= APR_WIN_98) {
                     CancelIo(file->filehand);
+                }
             }
         }
         else if (rv == APR_FROM_OS_ERROR(ERROR_BROKEN_PIPE)) {
