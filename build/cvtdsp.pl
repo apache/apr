@@ -54,6 +54,12 @@ sub tovc5 {
 	    if ($src =~ s|^(# ADD BASE CPP .*)/ZI (.*)|$1/Zi $2|) {
 		$verchg = -1;
 	    }
+	    if ($src =~ s|^(# ADD CPP .*)/EHsc (.*)|$1/GX $2|) {
+		$verchg = -1;
+	    }
+	    if ($src =~ s|^(# ADD BASE CPP .*)/EHsc (.*)|$1/GX $2|) {
+		$verchg = -1;
+	    }
 	    if ($src !~ m|^# PROP AllowPerConfigDependencies|) {
 		print $dstfl $src; }
 	    else {
@@ -88,6 +94,12 @@ sub tovc6 {
 	    if ($src =~ s|^(!MESSAGE .*)\\\n|$1|) {
 		$cont = <$srcfl>;
 		$src = $src . $cont;
+		$verchg = -1;
+	    }
+	    if ($src =~ s|^(# ADD CPP .*)/GX (.*)|$1/EHsc $2|) {
+		$verchg = -1;
+	    }
+	    if ($src =~ s|^(# ADD BASE CPP .*)/GX (.*)|$1/EHsc $2|) {
 		$verchg = -1;
 	    }
             print $dstfl $src; 
