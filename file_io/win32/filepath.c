@@ -801,16 +801,17 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
      * segment is thoroughly tested prior to path parsing.
      */
     if ((flags & APR_FILEPATH_NOTABOVEROOT) && (baselen || rootlen)) {
-        if (baselen && memcmp(basepath, path + rootlen, baselen) &&
-            basepath[baselen - 1] != '/' && basepath[baselen - 1] != '\\')
-            return APR_EABOVEROOT;
+        if (basepath[baselen - 1] != '/' && basepath[baselen - 1] != '\\') {
+            if (baselen && memcmp(basepath, path + rootlen, baselen))
+                return APR_EABOVEROOT;
 
-        /* Ahem... if we weren't given a trailing slash on the basepath,
-         * we better be sure that /foo wasn't replaced with /foobar!
-         */
-        if (path[rootlen + baselen] && path[rootlen + baselen] != '/' 
-            && path[rootlen + baselen] != '\\')
-            return APR_EABOVEROOT;
+            /* Ahem... if we weren't given a trailing slash on the basepath,
+             * we better be sure that /foo wasn't replaced with /foobar!
+             */
+            if (path[rootlen + baselen] && path[rootlen + baselen] != '/' 
+                                        && path[rootlen + baselen] != '\\')
+                return APR_EABOVEROOT;
+        }
     }
 
     if (addpath && (flags & APR_FILEPATH_TRUENAME)) {
