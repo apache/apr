@@ -223,7 +223,7 @@ static void root_from_cwd_and_back(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, origpath + 3, path);
 #else
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_STR_EQUAL(tc, '/', root);
+    ABTS_STR_EQUAL(tc, "/", root);
     ABTS_STR_EQUAL(tc, origpath + 1, path);
 #endif
 
