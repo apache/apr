@@ -1603,7 +1603,7 @@ if test "$threads" = "1"; then
       ac_cv_func_pthread_mutexattr_setpshared=$apr_cv_process_shared_works])
 
     if test "$ac_cv_func_pthread_mutexattr_setpshared" = "yes"; then
-        AC_CHECK_FUNCS(pthread_mutexattr_setrobust_np)
+        APR_CHECK_PTHREAD_ROBUST_SHARED_MUTEX
     fi
 fi
 
