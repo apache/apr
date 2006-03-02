@@ -463,7 +463,7 @@ changequote(', ')
 cat > conftest.$ac_ext <<EOTEST
 #include "confdefs.h"
 '$1'
-int main(int argc, const char * const argv[]) {
+int main(int argc, const char * const *argv) {
 '$2'
 ; return 0; }
 EOTEST
