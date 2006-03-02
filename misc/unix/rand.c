@@ -59,7 +59,7 @@ APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
     uuid_create(&g, &rv);
 
     if (rv != uuid_s_ok)
-        APR_EGENERAL;
+        return APR_EGENERAL;
 
     memcpy(uuid_data, &g, sizeof(uuid_t));
 
