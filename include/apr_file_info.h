@@ -284,7 +284,11 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
  * @{
  */
 
-/** Cause apr_filepath_merge to fail if addpath is above rootpath */
+/** Cause apr_filepath_merge to fail if addpath is above rootpath 
+ * @bug in APR 0.9 and 1.x, this flag's behavior is undefined
+ * if the rootpath is NULL or empty.  In APR 2.0 this should be
+ * changed to imply NOTABSOLUTE if the rootpath is NULL or empty.
+ */
 #define APR_FILEPATH_NOTABOVEROOT   0x01
 
 /** internal: Only meaningful with APR_FILEPATH_NOTABOVEROOT */
