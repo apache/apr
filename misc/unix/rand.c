@@ -35,8 +35,10 @@
 #if APR_HAVE_SYS_UN_H
 #include <sys/un.h>
 #endif
-#ifdef HAVE_UUID_H
+#if defined(HAVE_UUID_H)
 #include <uuid.h>
+#elif defined(HAVE_SYS_UUID_H)
+#include <sys/uuid.h>
 #elif defined(HAVE_UUID_UUID_H)
 #include <uuid/uuid.h>
 #endif
@@ -44,6 +46,8 @@
 #ifndef SHUT_RDWR
 #define SHUT_RDWR 2
 #endif
+
+#if APR_HAS_OS_UUID
 
 #if defined(HAVE_UUID_CREATE)
 
@@ -71,6 +75,8 @@ APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
     return APR_SUCCESS;
 }
 #endif 
+
+#endif /* APR_HAS_OS_UUID */
 
 #if APR_HAS_RANDOM
 
