@@ -85,7 +85,15 @@ Changes for APR 1.3.0
   *) Add APR_ARRAY_IDX() and APR_ARRAY_PUSH() convenience macros to
      apr_tables.h.  [Garrett Rooney]
 
+Changes for APR 1.2.4
+
+  *) Fix apr_file_seek() to catch write failures when flushing
+     pending writes for a buffered file.  [Joe Orton]
+
 Changes for APR 1.2.2
+
+  *) Fix crash in apr_dir_make_recursive() for relative path
+     when the working directory has been deleted.  [Joe Orton]
 
   *) Win32: fix apr_proc_mutex_trylock() to handle WAIT_TIMEOUT,
      returning APR_EBUSY.  [Ronen Mizrahi <ronen@tversity.com>]
