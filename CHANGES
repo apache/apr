@@ -1,5 +1,10 @@
 Changes with APR 0.9.9
 
+  *) Install mkdir.sh, make_exports.awk, make_var_export.awk to the APR
+     installbuilddir, and provide working accessor variables in
+     apr_rules.mk.
+     [Max Bowsher]
+
   *) Fix seeks with files opened in xthread mode for append on win32.
      [M Joonas Pihlaja <jpihlaja cc.helsinki.fi>, Garrett Rooney]
 

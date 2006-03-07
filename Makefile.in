@@ -31,7 +31,8 @@ TARGETS = delete-lib $(TARGET_LIB) delete-exports export_vars.c apr.exp
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
 
-CLEAN_TARGETS = apr.exp exports.c export_vars.c apr-config.out
+CLEAN_TARGETS = apr.exp exports.c export_vars.c apr-config.out \
+	build/apr_rules.out
 DISTCLEAN_TARGETS = config.cache config.log config.status \
 	include/apr.h include/arch/unix/apr_private.h \
 	libtool apr-config
@@ -64,7 +65,11 @@ delete-lib:
 apr-config.out: apr-config
 	sed 's,^\(location=\).*$$,\1installed,' < apr-config > $@
 
-install: $(TARGET_LIB) apr-config.out
+# Create apr_rules.mk suitable for the install tree
+build/apr_rules.out: build/apr_rules.mk
+	sed 's,^\(apr_build.*=\).*$$,\1$(installbuilddir),' < build/apr_rules.mk > $@
+
+install: $(TARGET_LIB) apr-config.out build/apr_rules.out
 	if [ ! -d $(DESTDIR)$(includedir) ]; then \
 	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(includedir); \
 	fi;
@@ -87,10 +92,10 @@ install: $(TARGET_LIB) apr-config.out
 	if [ -f shlibtool ]; then \
 		$(LIBTOOL) --mode=install cp shlibtool $(DESTDIR)$(installbuilddir); \
 	fi;
-	if [ -f build/apr_rules.mk ]; then \
-		cp build/apr_rules.mk $(DESTDIR)$(installbuilddir); \
-	fi;
-
+	for f in mkdir.sh make_exports.awk make_var_export.awk; do \
+	        cp $(top_srcdir)/build/$${f} $(DESTDIR)$(installbuilddir); \
+	done
+	cp build/apr_rules.out $(DESTDIR)$(installbuilddir)/apr_rules.mk
 	if [ ! -d $(DESTDIR)$(bindir) ]; then \
 	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(bindir); \
 	fi;
@@ -119,10 +124,10 @@ delete-exports:
 	fi
 
 exports.c:
-	$(AWK) -f $(top_srcdir)/build/make_exports.awk $(EXPORT_FILES) > $@
+	$(APR_MKEXPORT) $(EXPORT_FILES) > $@
 
 export_vars.c:
-	$(AWK) -f $(top_srcdir)/build/make_var_export.awk $(EXPORT_FILES) > $@
+	$(APR_MKVAREXPORT) $(EXPORT_FILES) > $@
 
 apr.exp: exports.c export_vars.c
 	@echo "#! lib@APR_LIBNAME@.so" > $@
