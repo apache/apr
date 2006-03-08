@@ -1821,15 +1821,61 @@ AC_SUBST(rand)
 
 dnl ----------------------------- Checking for UUID Support 
 echo "${nl}Checking for OS UUID Support..."
-osuuid="0"
 
-AC_CHECK_HEADERS(uuid/uuid.h uuid.h)
+AC_CHECK_HEADERS(uuid.h sys/uuid.h uuid/uuid.h, break)
 
-# Check for uuid_generate in libc or libuuid
+apr_revert_save_LIBS=$LIBS
+
+# Prefer the flavor(s) that live in libc;
+AC_SEARCH_LIBS(uuid_create, uuid)
 AC_SEARCH_LIBS(uuid_generate, uuid)
+if test "$ac_cv_search_uuid_create" = "none required" -o \
+        "$ac_cv_search_uuid_generate" = "none required"; then
+ LIBS=$apr_revert_save_LIBS
+fi
 
-AC_CHECK_FUNCS([uuid_generate uuid_create], [osuuid=1; break])
+AC_CHECK_FUNCS(uuid_create uuid_generate)
 
+AC_CACHE_CHECK([for os uuid usability], [apr_cv_osuuid], [
+# Ensure this test closely mirrors misc/unix/rand.c!
+uuid_includes=" ${nl}
+#if defined(HAVE_SYS_TYPES_H) ${nl}
+#include <sys/types.h> ${nl}
+#endif ${nl}
+#if defined(HAVE_UNISTD_H) ${nl}
+#include <unistd.h> ${nl}
+#endif ${nl}
+#if defined(HAVE_UUID_H) ${nl}
+#include <uuid.h> ${nl}
+#elif defined(HAVE_SYS_UUID_H) ${nl}
+#include <sys/uuid.h> ${nl}
+#elif defined(HAVE_UUID_UUID_H) ${nl}
+#include <uuid/uuid.h> ${nl}
+#endif ${nl}
+"
+ apr_cv_osuuid=no
+ if test $ac_cv_func_uuid_create = yes; then
+  AC_TRY_LINK([$uuid_includes], [
+    uuid_t g;
+    uint32_t s;
+    uuid_create(&g, &s);
+    if (s == uuid_s_ok) s = 0;
+  ], [apr_cv_osuuid=yes], [apr_cv_func_uuid_create=no])
+ fi
+ if test $ac_cv_func_uuid_generate = yes; then
+  AC_TRY_LINK([$uuid_includes], [
+    uuid_t g;
+    uuid_generate(g);
+  ], [apr_cv_osuuid=yes], [apr_cv_func_uuid_generate=no])
+ fi 
+])
+
+if test $apr_cv_osuuid = yes; then
+  osuuid="1"
+else
+  osuuid="0"
+  LIBS=$apr_revert_save_LIBS
+fi
 AC_SUBST(osuuid)
 
 
