@@ -186,11 +186,38 @@ static void root_relative(CuTest *tc)
 }
 
 
-#if 0
-    root_result(rootpath);
-    root_result(addpath);
-}
+static void root_from_cwd_and_back(CuTest *tc)
+{
+    apr_status_t rv;
+    const char *root = NULL;
+    const char *path = "//";
+    char *origpath;
+    char *testpath;
+
+    CuAssertIntEquals(tc, APR_SUCCESS, apr_filepath_get(&origpath, 0, p));
+    path = origpath;
+    rv = apr_filepath_root(&root, &path, APR_FILEPATH_TRUENAME, p);
+
+#if defined(WIN32) || defined(OS2)
+    CuAssertIntEquals(tc, origpath[0], root[0]);
+    CuAssertIntEquals(tc, ':', root[1]);
+    CuAssertIntEquals(tc, '/', root[2]);
+    CuAssertIntEquals(tc, 0, root[3]);
+    CuAssertStrEquals(tc, origpath + 3, path);
+#else
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertStrEquals(tc, "/", root);
+    CuAssertStrEquals(tc, origpath + 1, path);
 #endif
+
+    rv = apr_filepath_merge(&testpath, root, path, 
+                            APR_FILEPATH_TRUENAME
+                          | APR_FILEPATH_NOTABOVEROOT
+                          | APR_FILEPATH_NOTRELATIVE, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertStrEquals(tc, origpath, testpath);
+}
+
 
 CuSuite *testnames(void)
 {
@@ -208,6 +235,7 @@ CuSuite *testnames(void)
 
     SUITE_ADD_TEST(suite, root_absolute);
     SUITE_ADD_TEST(suite, root_relative);
+    SUITE_ADD_TEST(suite, root_from_cwd_and_back);
 
     return suite;
 }
