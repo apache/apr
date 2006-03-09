@@ -791,7 +791,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     if (!parent)
         parent = global_pool;
 
-    if (!abort_fn && parent)
+    if (!abort_fn)
         abort_fn = parent->abort_fn;
 
     if (allocator == NULL)
