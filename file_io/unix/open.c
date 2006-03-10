@@ -32,6 +32,7 @@ apr_status_t apr_unix_file_cleanup(void *thefile)
     apr_status_t flush_rv = APR_SUCCESS, rv = APR_SUCCESS;
 
     if (file->buffered) {
+        /* XXX: flush here is not mutex protected */
         flush_rv = apr_file_flush(file);
     }
     if (close(file->filedes) == 0) {
