@@ -44,7 +44,7 @@ compare_right(char const *a, char const *b)
 	remember it in BIAS. */
      for (;; a++, b++) {
 	  if (!apr_isdigit(*a)  &&  !apr_isdigit(*b))
-	       return bias;
+	       break;
 	  else if (!apr_isdigit(*a))
 	       return -1;
 	  else if (!apr_isdigit(*b))
@@ -56,10 +56,10 @@ compare_right(char const *a, char const *b)
 	       if (!bias)
 		    bias = +1;
 	  } else if (!*a  &&  !*b)
-	       return bias;
+	       break;
      }
 
-     return 0;
+     return bias;
 }
 
 
@@ -70,7 +70,7 @@ compare_left(char const *a, char const *b)
         different value wins. */
      for (;; a++, b++) {
 	  if (!apr_isdigit(*a)  &&  !apr_isdigit(*b))
-	       return 0;
+	       break;
 	  else if (!apr_isdigit(*a))
 	       return -1;
 	  else if (!apr_isdigit(*b))
