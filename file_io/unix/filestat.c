@@ -107,6 +107,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo,
     struct_stat info;
 
     if (thefile->buffered) {
+        /* XXX: flush here is not mutex protected */
         apr_status_t rv = apr_file_flush(thefile);
         if (rv != APR_SUCCESS)
             return rv;
