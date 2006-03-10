@@ -121,16 +121,19 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
     apr_status_t status;
     
     if (file && file->isopen) {
-        apr_file_flush(file);
+        /* XXX: flush here is not mutex protected */
+        status = apr_file_flush(file);
         rc = DosClose(file->filedes);
     
         if (rc == 0) {
             file->isopen = FALSE;
-            status = APR_SUCCESS;
 
             if (file->flags & APR_DELONCLOSE) {
                 status = APR_FROM_OS_ERROR(DosDelete(file->fname));
             }
+            /* else we return the status of the flush attempt 
+             * when all else succeeds
+             */
         } else {
             return APR_FROM_OS_ERROR(rc);
         }
