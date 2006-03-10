@@ -22,6 +22,7 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
     apr_status_t rv;
 
     if (thefile->direction == 1) {
+        /* XXX: flush here is not mutex protected */
         rv = apr_file_flush(thefile);
         if (rv) {
             return rv;
