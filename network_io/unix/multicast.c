@@ -163,7 +163,7 @@ static apr_status_t do_mcast(int type, apr_socket_t *sock,
                 rv = errno;
             }
         }
-#if APR_HAVE_IPV6
+#if APR_HAVE_IPV6 && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
         else if (sock_is_ipv6(sock)) {
             if (type == IP_ADD_MEMBERSHIP) {
                 type = IPV6_JOIN_GROUP;
