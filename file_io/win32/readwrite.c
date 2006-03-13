@@ -440,8 +440,13 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
         readlen = 1;
         rv = apr_file_read(thefile, str+i, &readlen);
 
-        if (readlen != 1) {
-            rv = APR_EOF;
+        if (rv != APR_SUCCESS && rv != APR_EOF)
+            return rv;
+
+        if (readlen == 0) {
+            /* If we have bytes, defer APR_EOF to the next call */
+            if (i > 0)
+                rv = APR_SUCCESS;
             break;
         }
         
@@ -451,12 +456,6 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
         }
     }
     str[i] = 0;
-    if (i > 0) {
-        /* we stored chars; don't report EOF or any other errors;
-         * the app will find out about that on the next call
-         */
-        return APR_SUCCESS;
-    }
     return rv;
 }
 
