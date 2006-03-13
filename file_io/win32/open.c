@@ -242,6 +242,7 @@ apr_status_t file_cleanup(void *thefile)
         }
 
         if (file->buffered) {
+            /* XXX: flush here is not mutex protected */
             flush_rv = apr_file_flush((apr_file_t *)thefile);
         }
         CloseHandle(file->filehand);
