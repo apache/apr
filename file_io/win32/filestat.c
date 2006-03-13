@@ -375,6 +375,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
     BY_HANDLE_FILE_INFORMATION FileInfo;
 
     if (thefile->buffered) {
+        /* XXX: flush here is not mutex protected */
         apr_status_t rv = apr_file_flush(thefile);
         if (rv != APR_SUCCESS)
             return rv;
