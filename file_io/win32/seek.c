@@ -42,24 +42,23 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
 
     if (newbufpos >= 0 && newbufpos <= thefile->dataRead) {
         thefile->bufpos = (apr_size_t)newbufpos;
-        rc = 0;
+        rv = APR_SUCCESS;
     } else {
         DWORD offlo = (DWORD)pos;
         DWORD offhi = (DWORD)(pos >> 32);
         rc = SetFilePointer(thefile->filehand, offlo, &offhi, FILE_BEGIN);
 
         if (rc == 0xFFFFFFFF)
-            rc = apr_get_os_error();
-        else
-            rc = APR_SUCCESS;
-        if (rc == APR_SUCCESS) {
+            rv = apr_get_os_error();
+        else {
+            rv = APR_SUCCESS;
             thefile->eof_hit = 0;
             thefile->bufpos = thefile->dataRead = 0;
             thefile->filePtr = pos;
         }
     }
 
-    return rc;
+    return rv;
 }
 
 
