@@ -22,10 +22,14 @@
 static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
 {
     apr_size_t newbufpos;
+    apr_status_t rv;
     DWORD rc;
 
     if (thefile->direction == 1) {
-        apr_file_flush(thefile);
+        /* XXX: flush here is not mutex protected */
+        rv = apr_file_flush(thefile);
+        if (rv != APR_SUCCESS)
+            return rv;
         thefile->bufpos = thefile->dataRead = 0;
         thefile->direction = 0;
     }
