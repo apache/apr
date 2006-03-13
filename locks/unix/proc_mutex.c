@@ -24,11 +24,6 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
     return apr_pool_cleanup_run(mutex->pool, mutex, apr_proc_mutex_cleanup);
 }
 
-static apr_status_t proc_mutex_no_tryacquire(apr_proc_mutex_t *new_mutex)
-{
-    return APR_ENOTIMPL;
-}
-
 #if APR_HAS_POSIXSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || \
     APR_HAS_PROC_PTHREAD_SERIALIZE || APR_HAS_SYSVSEM_SERIALIZE
 static apr_status_t proc_mutex_no_child_init(apr_proc_mutex_t **mutex,
@@ -125,6 +120,18 @@ static apr_status_t proc_mutex_posix_acquire(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
+static apr_status_t proc_mutex_posix_tryacquire(apr_proc_mutex_t *mutex)
+{
+    if (sem_trywait(mutex->psem_interproc) < 0) {
+        if (errno == EAGAIN) {
+            return APR_EBUSY;
+        }
+        return errno;
+    }
+    mutex->curr_locked = 1;
+    return APR_SUCCESS;
+}
+
 static apr_status_t proc_mutex_posix_release(apr_proc_mutex_t *mutex)
 {
     mutex->curr_locked = 0;
@@ -145,7 +152,7 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_posixsem_methods =
 #endif
     proc_mutex_posix_create,
     proc_mutex_posix_acquire,
-    proc_mutex_no_tryacquire,
+    proc_mutex_posix_tryacquire,
     proc_mutex_posix_release,
     proc_mutex_posix_cleanup,
     proc_mutex_no_child_init,
@@ -157,6 +164,7 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_posixsem_methods =
 #if APR_HAS_SYSVSEM_SERIALIZE
 
 static struct sembuf proc_mutex_op_on;
+static struct sembuf proc_mutex_op_try;
 static struct sembuf proc_mutex_op_off;
 
 static void proc_mutex_sysv_setup(void)
@@ -164,6 +172,9 @@ static void proc_mutex_sysv_setup(void)
     proc_mutex_op_on.sem_num = 0;
     proc_mutex_op_on.sem_op = -1;
     proc_mutex_op_on.sem_flg = SEM_UNDO;
+    proc_mutex_op_try.sem_num = 0;
+    proc_mutex_op_try.sem_op = -1;
+    proc_mutex_op_try.sem_flg = SEM_UNDO | IPC_NOWAIT;
     proc_mutex_op_off.sem_num = 0;
     proc_mutex_op_off.sem_op = 1;
     proc_mutex_op_off.sem_flg = SEM_UNDO;
@@ -222,6 +233,23 @@ static apr_status_t proc_mutex_sysv_acquire(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
+static apr_status_t proc_mutex_sysv_tryacquire(apr_proc_mutex_t *mutex)
+{
+    int rc;
+
+    do {
+        rc = semop(mutex->interproc->filedes, &proc_mutex_op_try, 1);
+    } while (rc < 0 && errno == EINTR);
+    if (rc < 0) {
+        if (errno == EAGAIN) {
+            return APR_EBUSY;
+        }
+        return errno;
+    }
+    mutex->curr_locked = 1;
+    return APR_SUCCESS;
+}
+
 static apr_status_t proc_mutex_sysv_release(apr_proc_mutex_t *mutex)
 {
     int rc;
@@ -245,7 +273,7 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_sysv_methods =
 #endif
     proc_mutex_sysv_create,
     proc_mutex_sysv_acquire,
-    proc_mutex_no_tryacquire,
+    proc_mutex_sysv_tryacquire,
     proc_mutex_sysv_release,
     proc_mutex_sysv_cleanup,
     proc_mutex_no_child_init,
@@ -379,7 +407,7 @@ static apr_status_t proc_mutex_proc_pthread_acquire(apr_proc_mutex_t *mutex)
 #ifdef PTHREAD_SETS_ERRNO
         rv = errno;
 #endif
-#ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
+#ifdef HAVE_PTHREAD_MUTEX_ROBUST
         /* Okay, our owner died.  Let's try to make it consistent again. */
         if (rv == EOWNERDEAD) {
             pthread_mutex_consistent_np(mutex->pthread_interproc);
@@ -394,7 +422,32 @@ static apr_status_t proc_mutex_proc_pthread_acquire(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-/* TODO: Add proc_mutex_proc_pthread_tryacquire(apr_proc_mutex_t *mutex) */
+static apr_status_t proc_mutex_proc_pthread_tryacquire(apr_proc_mutex_t *mutex)
+{
+    apr_status_t rv;
+ 
+    if ((rv = pthread_mutex_trylock(mutex->pthread_interproc))) {
+#ifdef PTHREAD_SETS_ERRNO
+        rv = errno;
+#endif
+        if (rv == EBUSY) {
+            return APR_EBUSY;
+        }
+#ifdef HAVE_PTHREAD_MUTEX_ROBUST
+        /* Okay, our owner died.  Let's try to make it consistent again. */
+        if (rv == EOWNERDEAD) {
+            pthread_mutex_consistent_np(mutex->pthread_interproc);
+            rv = APR_SUCCESS;
+        }
+        else
+            return rv;
+#else
+        return rv;
+#endif
+    }
+    mutex->curr_locked = 1;
+    return rv;
+}
 
 static apr_status_t proc_mutex_proc_pthread_release(apr_proc_mutex_t *mutex)
 {
@@ -415,7 +468,7 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_proc_pthread_methods =
     APR_PROCESS_LOCK_MECH_IS_GLOBAL,
     proc_mutex_proc_pthread_create,
     proc_mutex_proc_pthread_acquire,
-    proc_mutex_no_tryacquire,
+    proc_mutex_proc_pthread_tryacquire,
     proc_mutex_proc_pthread_release,
     proc_mutex_proc_pthread_cleanup,
     proc_mutex_no_child_init,
@@ -505,6 +558,23 @@ static apr_status_t proc_mutex_fcntl_acquire(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
+static apr_status_t proc_mutex_fcntl_tryacquire(apr_proc_mutex_t *mutex)
+{
+    int rc;
+
+    do {
+        rc = fcntl(mutex->interproc->filedes, F_SETLK, &proc_mutex_lock_it);
+    } while (rc < 0 && errno == EINTR);
+    if (rc < 0) {
+        if (errno == EAGAIN) {
+            return APR_EBUSY;
+        }
+        return errno;
+    }
+    mutex->curr_locked = 1;
+    return APR_SUCCESS;
+}
+
 static apr_status_t proc_mutex_fcntl_release(apr_proc_mutex_t *mutex)
 {
     int rc;
@@ -528,7 +598,7 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_fcntl_methods =
 #endif
     proc_mutex_fcntl_create,
     proc_mutex_fcntl_acquire,
-    proc_mutex_no_tryacquire,
+    proc_mutex_fcntl_tryacquire,
     proc_mutex_fcntl_release,
     proc_mutex_fcntl_cleanup,
     proc_mutex_no_child_init,
@@ -602,6 +672,23 @@ static apr_status_t proc_mutex_flock_acquire(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
+static apr_status_t proc_mutex_flock_tryacquire(apr_proc_mutex_t *mutex)
+{
+    int rc;
+
+    do {
+        rc = flock(mutex->interproc->filedes, LOCK_EX | LOCK_NB);
+    } while (rc < 0 && errno == EINTR);
+    if (rc < 0) {
+        if (errno == EWOULDBLOCK) {
+            return APR_EBUSY;
+        }
+        return errno;
+    }
+    mutex->curr_locked = 1;
+    return APR_SUCCESS;
+}
+
 static apr_status_t proc_mutex_flock_release(apr_proc_mutex_t *mutex)
 {
     int rc;
@@ -649,7 +736,7 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_flock_methods =
 #endif
     proc_mutex_flock_create,
     proc_mutex_flock_acquire,
-    proc_mutex_no_tryacquire,
+    proc_mutex_flock_tryacquire,
     proc_mutex_flock_release,
     proc_mutex_flock_cleanup,
     proc_mutex_flock_child_init,
