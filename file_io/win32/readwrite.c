@@ -174,7 +174,11 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         apr_thread_mutex_lock(thefile->mutex);
 
         if (thefile->direction == 1) {
-            apr_file_flush(thefile);
+            rv = apr_file_flush(thefile);
+            if (rv != APR_SUCCESS) {
+                apr_thread_mutex_unlock(thefile->mutex);
+                return rv;
+            }
             thefile->bufpos = 0;
             thefile->direction = 0;
             thefile->dataRead = 0;
