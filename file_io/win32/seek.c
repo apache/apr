@@ -52,7 +52,7 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
         }
     }
 
-    return rc;
+    return rv;
 }
 
 
