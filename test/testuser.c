@@ -142,6 +142,7 @@ static void fail_userinfo(CuTest *tc)
 
 #else
 static void fail_userinfo(CuTest *tc)
+{
     CuNotImpl(tc, "Intregal uid/gid not present on this platform");
 }
 #endif
