@@ -555,6 +555,7 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 #endif
     rv = select(pollset->maxfd + 1, &readset, &writeset, &exceptset, tvptr);
 
+    /* Set initial *num now for expected -1 / 0 failures, or errors below */
     (*num) = rv;
     if (rv < 0) {
         return apr_get_netos_error();
@@ -592,6 +593,11 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
         }
     }
 
+    /* Reset computed *num to account for multiply-polled fd's which
+     * select() - on some platforms, treats as a single fd result.
+     * The *num returned must match the size of result_set[]
+     */
+    (*num) = j;
     *descriptors = pollset->result_set;
     return APR_SUCCESS;
 }
