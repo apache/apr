@@ -309,10 +309,25 @@ static void multi_event_pollset(abts_case *tc, void *data)
 
     rv = apr_pollset_poll(pollset, 0, &lrv, &descs);
     ABTS_INT_EQUAL(tc, 0, APR_STATUS_IS_TIMEUP(rv));
-    ABTS_INT_EQUAL(tc, 1, lrv);
-    ABTS_PTR_EQUAL(tc, s[0], descs[0].desc.s);
-    ABTS_INT_EQUAL(tc, APR_POLLIN | APR_POLLOUT, descs[0].rtnevents);
-    ABTS_PTR_EQUAL(tc, s[0],  descs[0].client_data);
+    if (lrv == 1) {
+        ABTS_PTR_EQUAL(tc, s[0], descs[0].desc.s);
+        ABTS_INT_EQUAL(tc, APR_POLLIN | APR_POLLOUT, descs[0].rtnevents);
+        ABTS_PTR_EQUAL(tc, s[0],  descs[0].client_data);
+    }
+    else if (lrv == 2) {
+        ABTS_PTR_EQUAL(tc, s[0], descs[0].desc.s);
+        ABTS_PTR_EQUAL(tc, s[0], descs[0].client_data);
+        ABTS_PTR_EQUAL(tc, s[0], descs[1].desc.s);
+        ABTS_PTR_EQUAL(tc, s[0], descs[1].client_data);
+        ABTS_ASSERT(tc, "returned events incorrect",
+                    ((descs[0].rtnevents | descs[1].rtnevents)
+                     == (APR_POLLIN | APR_POLLOUT))
+                    && descs[0].rtnevents != descs[1].rtnevents);
+    }
+    else {
+        ABTS_ASSERT(tc, "either one or two events returned",
+                    lrv == 1 || lrv == 2);
+    }
 
     recv_msg(s, 0, p, tc);
 
