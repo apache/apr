@@ -1,5 +1,9 @@
 Changes for APR 1.3.0
 
+  *) Correct bug in kqueue backend for apr_pollset where we would
+     erroneously indicate that a socket was readable or writeable.
+     [Garrett Rooney]
+
   *) Implement support for apr_proc_mutex_trylock() on Unix platforms.
      PR 38785.  [Chris Darroch <chrisd pearsoncmg.com>]
 
