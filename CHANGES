@@ -1,5 +1,8 @@
 Changes with APR 0.9.9
 
+  *) Prevent detection of robust mutex support with glibc 2.4,
+     fixing APR_LOCK_PROC_PTHREAD locks.  PR 38442.  [Joe Orton]
+
   *) Fix apr_strerror() with glibc 2.4.  [Joe Orton]
 
   *) Install mkdir.sh, make_exports.awk, make_var_export.awk to the APR

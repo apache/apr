@@ -329,7 +329,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         return rv;
     }
 
-#ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
+#ifdef HAVE_PTHREAD_MUTEX_ROBUST
     if ((rv = pthread_mutexattr_setrobust_np(&mattr, 
                                                PTHREAD_MUTEX_ROBUST_NP))) {
 #ifdef PTHREAD_SETS_ERRNO
@@ -345,7 +345,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         proc_mutex_proc_pthread_cleanup(new_mutex);
         return rv;
     }
-#endif
+#endif /* HAVE_PTHREAD_MUTEX_ROBUST */
 
     if ((rv = pthread_mutex_init(new_mutex->pthread_interproc, &mattr))) {
 #ifdef PTHREAD_SETS_ERRNO
@@ -379,7 +379,7 @@ static apr_status_t proc_mutex_proc_pthread_acquire(apr_proc_mutex_t *mutex)
 #ifdef PTHREAD_SETS_ERRNO
         rv = errno;
 #endif
-#ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
+#ifdef HAVE_PTHREAD_MUTEX_ROBUST
         /* Okay, our owner died.  Let's try to make it consistent again. */
         if (rv == EOWNERDEAD) {
             pthread_mutex_consistent_np(mutex->pthread_interproc);
