@@ -110,10 +110,10 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	    * )
 	           ;;
         esac
-	APR_ADDTO(CPPFLAGS, [-D_REENTRANT])
+	APR_ADDTO(CPPFLAGS, [-D_REENTRANT -D_GNU_SOURCE])
 	;;
     *-GNU*)
-	APR_ADDTO(CPPFLAGS, [-DHURD])
+	APR_ADDTO(CPPFLAGS, [-DHURD -D_GNU_SOURCE])
 	;;
     *-lynx-lynxos)
 	APR_ADDTO(CPPFLAGS, [-D__NO_INCLUDE_WARN__ -DLYNXOS])

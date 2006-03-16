@@ -1,5 +1,7 @@
 Changes with APR 0.9.9
 
+  *) Fix apr_strerror() with glibc 2.4.  [Joe Orton]
+
   *) Install mkdir.sh, make_exports.awk, make_var_export.awk to the APR
      installbuilddir, and provide working accessor variables in
      apr_rules.mk.

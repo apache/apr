@@ -543,29 +543,14 @@ crypt_r("passwd", "hash", &buffer);
 ], ac_cv_crypt_r_style=struct_crypt_data)
 fi
 dnl
-if test "$ac_cv_crypt_r_style" = "none"; then
-dnl same as previous test, but see if defining _GNU_SOURCE helps
-AC_TRY_COMPILE([
-#define _GNU_SOURCE
-#include <crypt.h>
-],[
-struct crypt_data buffer;
-crypt_r("passwd", "hash", &buffer);
-], ac_cv_crypt_r_style=struct_crypt_data_gnu_source)
-fi
-dnl
 ])
 if test "$ac_cv_crypt_r_style" = "cryptd"; then
     AC_DEFINE(CRYPT_R_CRYPTD, 1, [Define if crypt_r has uses CRYPTD])
 fi
 # if we don't combine these conditions, CRYPT_R_STRUCT_CRYPT_DATA
 # will end up defined twice
-if test "$ac_cv_crypt_r_style" = "struct_crypt_data" -o \
-   "$ac_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then
+if test "$ac_cv_crypt_r_style" = "struct_crypt_data"; then
     AC_DEFINE(CRYPT_R_STRUCT_CRYPT_DATA, 1, [Define if crypt_r uses struct crypt_data])
-fi
-if test "$ac_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then
-    APR_ADDTO(CPPFLAGS, [-D_GNU_SOURCE])
 fi
 ])
 
