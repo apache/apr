@@ -242,3 +242,41 @@ if test "$apr_cv_mutex_recursive" = "yes"; then
              [Define if recursive pthread mutexes are available])
 fi
 ])
+
+dnl Check for robust process-shared mutex support
+AC_DEFUN([APR_CHECK_PTHREAD_ROBUST_SHARED_MUTEX], [
+AC_CACHE_CHECK([for robust cross-process mutex support], 
+[apr_cv_mutex_robust_shared],
+[AC_TRY_RUN([
+#include <sys/types.h>
+#include <pthread.h>
+#include <stdlib.h>
+
+int main(int argc, char **argv)
+{
+    pthread_mutex_t mutex;
+    pthread_mutexattr_t attr;
+
+    if (pthread_mutexattr_init(&attr))
+        exit(1);
+    if (pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED))
+        exit(2);
+    if (pthread_mutexattr_setrobust_np(&attr, PTHREAD_MUTEX_ROBUST_NP))
+        exit(3);
+    if (pthread_mutexattr_setprotocol(&mattr, PTHREAD_PRIO_INHERIT))
+        exit(4);
+    if (pthread_mutex_init(&mutex, &attr))
+        exit(5);
+    if (pthread_mutexattr_destroy(&attr))
+        exit(6);
+    if (pthread_mutex_destroy(&mutex))
+        exit(7);
+
+    exit(0);
+}], [apr_cv_mutex_robust_shared=yes], [apr_cv_mutex_robust_shared=no])])
+
+if test "$apr_cv_mutex_robust_shared" = "yes"; then
+   AC_DEFINE([HAVE_PTHREAD_MUTEX_ROBUST], 1,
+             [Define if cross-process robust mutexes are available])
+fi
+])

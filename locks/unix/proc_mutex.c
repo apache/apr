@@ -325,7 +325,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         return rv;
     }
 
-#ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
+#ifdef HAVE_PTHREAD_MUTEX_ROBUST
     if ((rv = pthread_mutexattr_setrobust_np(&mattr, 
                                                PTHREAD_MUTEX_ROBUST_NP))) {
 #ifdef PTHREAD_SETS_ERRNO
@@ -343,7 +343,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         pthread_mutexattr_destroy(&mattr);
         return rv;
     }
-#endif
+#endif /* HAVE_PTHREAD_MUTEX_ROBUST */
 
     if ((rv = pthread_mutex_init(new_mutex->pthread_interproc, &mattr))) {
 #ifdef PTHREAD_SETS_ERRNO

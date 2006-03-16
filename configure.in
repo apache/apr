@@ -1604,24 +1604,7 @@ if test "$threads" = "1"; then
       ac_cv_func_pthread_mutexattr_setpshared=$apr_cv_process_shared_works])
 
     if test "$ac_cv_func_pthread_mutexattr_setpshared" = "yes"; then
-        AC_CHECK_FUNCS(pthread_mutexattr_setrobust_np)
-        if test "$ac_cv_func_pthread_mutexattr_setrobust_np" = "no"; then
-            AC_CACHE_CHECK([for pthread_mutexattr_setrobust_np with _POSIX_THREAD_PRIO_INHERIT],
-            [apr_cv_setrobust_with_prio_inherit], [
-            AC_TRY_COMPILE([#define _POSIX_THREAD_PRIO_INHERIT
-#include <sys/types.h>
-#include <pthread.h>],[
-            int main()
-            {
-                pthread_mutexattr_t attr;
-                pthread_mutexattr_setrobust_np(&attr, PTHREAD_MUTEX_ROBUST_NP);
-                return 0;
-            }], [apr_cv_setrobust_with_prio_inherit=yes], [apr_cv_setrobust_with_prio_inherit=no])])
-            if test "$apr_cv_setrobust_with_prio_inherit" = "yes"; then
-                ac_cv_func_pthread_mutexattr_setrobust_np=yes
-                APR_ADDTO(CPPFLAGS, -D_POSIX_THREAD_PRIO_INHERIT)
-            fi
-        fi
+        APR_CHECK_PTHREAD_ROBUST_SHARED_MUTEX
     fi
 fi
 

@@ -1,5 +1,8 @@
 Changes for APR 1.2.4
 
+  *) Prevent detection of robust mutex support with glibc 2.4,
+     fixing APR_LOCK_PROC_PTHREAD locks.  PR 38442.  [Joe Orton]
+
   *) Correct bug in kqueue backend for apr_pollset where we would
      erroneously indicate that a socket was readable or writeable.
      [Garrett Rooney]
