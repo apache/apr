@@ -1,4 +1,4 @@
-Changes for APR 1.2.4
+Changes for APR 1.2.5
 
   *) Prevent detection of robust mutex support with glibc 2.4,
      fixing APR_LOCK_PROC_PTHREAD locks.  PR 38442.  [Joe Orton]
