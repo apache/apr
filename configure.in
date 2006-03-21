@@ -2048,6 +2048,16 @@ AC_SUBST(DEFAULT_OSDIR)
 AC_SUBST(EXEEXT)
 AC_SUBST(LIBTOOL_LIBS)
 
+# Use -no-install to link the test programs on all platforms
+# but Darwin, where it would cause the programs to be linked
+# against installed versions of libapr instead of those just
+# built.
+case $host in
+*-apple-darwin*) LT_NO_INSTALL="" ;;
+*) LT_NO_INSTALL="-no-install" ;;
+esac
+AC_SUBST(LT_NO_INSTALL)
+
 #
 # BSD/OS (BSDi) needs to use a different include syntax in the Makefiles
 #
