@@ -187,21 +187,14 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(CPPFLAGS, [-DRHAPSODY])
 	;;
     *-apple-darwin*)
-        if test -x /usr/sbin/sysctl; then
-            os_version=`/usr/sbin/sysctl -n kern.osrelease | sed 's/\.//g'`
-        else
-            os_version=000
-        fi
-
 	APR_ADDTO(CPPFLAGS, [-DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK -no-cpp-precomp])
 	APR_SETIFNULL(apr_posixsem_is_global, [yes])
         APR_SETIFNULL(ac_cv_func_poll, [no]) # See issue 34332
 
-        # kqueue has been confirmed to work in OS X 10.4.5, its status in
-        # earlier OS X releases is not currently known, so it is disabled.
-        if test $os_version -lt "850"; then
-          APR_SETIFNULL(ac_cv_func_kqueue, [no]) 
-        fi
+        # kqueue is broken on OS X, the poll tests work, but the socket tests
+        # hang when it's turned on.  if you decide to reenable this please be
+        # sure to test that ALL the tests continue to work with it turned on.
+        APR_SETIFNULL(ac_cv_func_kqueue, [no]) 
 	;;
     *-dec-osf*)
 	APR_ADDTO(CPPFLAGS, [-DOSF1])
