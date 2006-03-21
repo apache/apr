@@ -39,7 +39,7 @@ INCLUDES=-I$(INCDIR) -I$(srcdir)/../include
 
 # link programs using -no-install to get real executables not
 # libtool wrapper scripts which link an executable when first run.
-LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE) -no-install $(ALL_LDFLAGS) -o $@
+LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE) @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
 
 check: $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
