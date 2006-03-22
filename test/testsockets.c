@@ -146,8 +146,13 @@ static void sendto_receivefrom(abts_case *tc, void *data)
 
     rv = apr_socket_bind(sock, to);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    if (rv != APR_SUCCESS)
+      return;
+
     rv = apr_socket_bind(sock2, from);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    if (rv != APR_SUCCESS)
+      return;
 
     len = STRLEN;
     rv = apr_socket_sendto(sock2, to, 0, sendbuf, &len);
