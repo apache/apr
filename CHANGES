@@ -1,5 +1,11 @@
 Changes for APR 1.2.5
 
+  *) Fully test the detected libuuid or libc based uuid_create or
+     uuid_generate function against the detected uuid.h, uuid/uuid.h,
+     or sys/uuid.h (using only the first-found .h examined in that order)
+     for correct compilation.  Resolves various apr_os_uuid issues on
+     multiple environments.  [William Rowe]
+
   *) Prevent detection of robust mutex support with glibc 2.4,
      fixing APR_LOCK_PROC_PTHREAD locks.  PR 38442.  [Joe Orton]
 
