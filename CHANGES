@@ -1,4 +1,4 @@
-Changes for APR 1.2.5
+Changes for APR 1.2.6
 
   *) Fully test the detected libuuid or libc based uuid_create or
      uuid_generate function against the detected uuid.h, uuid/uuid.h,
