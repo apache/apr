@@ -32,7 +32,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
 {
     apr_status_t rv;
     DWORD len = (DWORD)len_in;
-    *nbytes = 0;
+    DWORD bytesread = 0;
 
     /* Handle the zero timeout non-blocking case */
     if (file->timeout == 0) {
@@ -46,10 +46,12 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
                 if (rv == APR_FROM_OS_ERROR(ERROR_BROKEN_PIPE)) {
                     rv = APR_EOF;
                 }
+                *nbytes = 0;
                 return rv;
             }
             else {
                 if (bytes == 0) {
+                    *nbytes = 0;
                     return APR_EAGAIN;
                 }
                 if (len > bytes) {
@@ -70,8 +72,9 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
         file->pOverlapped->OffsetHigh = (DWORD)(file->filePtr >> 32);
     }
 
-    *nbytes = 0;
-    rv = ReadFile(file->filehand, buf, len, nbytes, file->pOverlapped);
+    rv = ReadFile(file->filehand, buf, len, 
+                  &bytesread, file->pOverlapped);
+    *nbytes = bytesread;
 
     if (!rv) {
         rv = apr_get_os_error();
@@ -88,7 +91,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
             switch (rv) {
                 case WAIT_OBJECT_0:
                     GetOverlappedResult(file->filehand, file->pOverlapped, 
-                                        nbytes, TRUE);
+                                        &bytesread, TRUE);
                     rv = APR_SUCCESS;
                     break;
 
@@ -335,7 +338,9 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                 rv = WaitForSingleObject(thefile->pOverlapped->hEvent, timeout_ms);
                 switch (rv) {
                     case WAIT_OBJECT_0:
-                        GetOverlappedResult(thefile->filehand, thefile->pOverlapped, nbytes, TRUE);
+                        GetOverlappedResult(thefile->filehand, thefile->pOverlapped, 
+                                            &bwrote, TRUE);
+                        *nbytes = bwrote;
                         rv = APR_SUCCESS;
                         break;
                     case WAIT_TIMEOUT:
