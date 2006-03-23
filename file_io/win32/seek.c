@@ -43,10 +43,16 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
         DWORD offhi = (DWORD)(pos >> 32);
         rc = SetFilePointer(thefile->filehand, offlo, &offhi, FILE_BEGIN);
 
-        if (rc == 0xFFFFFFFF)
+        if (rc == INVALID_SET_FILE_POINTER)
+            /* A legal value, perhaps?  MSDN implies prior SetLastError isn't 
+             * needed, googling for SetLastError SetFilePointer seems
+             * to confirm this.
+             */
             rv = apr_get_os_error();
-        else {
+        else
             rv = APR_SUCCESS;
+
+        if (rv == APR_SUCCESS) {
             thefile->eof_hit = thefile->bufpos = thefile->dataRead = 0;
             thefile->filePtr = pos;
         }
