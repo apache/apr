@@ -31,6 +31,7 @@
 static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t len_in, apr_size_t *nbytes)
 {
     apr_status_t rv;
+    DWORD res;
     DWORD len = (DWORD)len_in;
     DWORD bytesread = 0;
 
@@ -79,38 +80,43 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
     else {
         rv = apr_get_os_error();
         if (rv == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
-            /* Wait for the pending i/o */
-            if (file->timeout > 0) {
-                /* timeout in milliseconds... */
-                rv = WaitForSingleObject(file->pOverlapped->hEvent, 
-                                         (DWORD)(file->timeout/1000)); 
-            }
-            else if (file->timeout == -1) {
-                rv = WaitForSingleObject(file->pOverlapped->hEvent, INFINITE);
-            }
-            switch (rv) {
-                case WAIT_OBJECT_0:
-                    GetOverlappedResult(file->filehand, file->pOverlapped, 
-                                        &bytesread, TRUE);
-                    rv = APR_SUCCESS;
-                    break;
+            /* Wait for the pending i/o, timeout converted from us to ms
+             * Note that we loop if someone gives up the event, since
+             * folks suggest that WAIT_ABANDONED isn't actually a result
+             * but an alert that ownership of the event has passed from
+             * one owner to a new proc/thread.
+             */
+            do {
+                res = WaitForSingleObject(file->pOverlapped->hEvent, 
+                                          (file->timeout > 0)
+                                            ? (DWORD)(file->timeout/1000)
+                                            : ((file->timeout == -1) 
+                                                 ? INFINITE : 0));
+            } while (res == WAIT_ABANDONED);
 
-                case WAIT_TIMEOUT:
+            /* There is one case that represents entirely
+             * successful operations, otherwise we will cancel
+             * the operation in progress.
+             */
+            if (res != WAIT_OBJECT_0) {
+                CancelIo(file->filehand);
+            }
+
+            /* Ignore any failures above.  Attempt to complete
+             * the overlapped operation and use only _its_ result.
+             * For example, CancelIo or WaitForSingleObject can
+             * fail if the handle is closed, yet the read may have
+             * completed before we attempted to CancelIo...
+             */
+            if (GetOverlappedResult(file->filehand, file->pOverlapped, 
+                                    &bytesread, TRUE)) {
+                rv = APR_SUCCESS;
+            }
+            else {
+                rv = apr_get_os_error();
+                if (rv == APR_FROM_OS_ERROR(ERROR_IO_INCOMPLETE) 
+                       && res == WAIT_TIMEOUT)
                     rv = APR_TIMEUP;
-                    break;
-
-                case WAIT_FAILED:
-                    rv = apr_get_os_error();
-                    break;
-
-                default:
-                    break;
-            }
-
-            if (rv != APR_SUCCESS) {
-                if (apr_os_level >= APR_WIN_98) {
-                    CancelIo(file->filehand);
-                }
             }
         }
         if (rv == APR_FROM_OS_ERROR(ERROR_BROKEN_PIPE)) {
