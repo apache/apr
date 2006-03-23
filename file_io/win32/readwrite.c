@@ -72,11 +72,11 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
         file->pOverlapped->OffsetHigh = (DWORD)(file->filePtr >> 32);
     }
 
-    rv = ReadFile(file->filehand, buf, len, 
-                  &bytesread, file->pOverlapped);
-    *nbytes = bytesread;
-
-    if (!rv) {
+    if (ReadFile(file->filehand, buf, len, 
+                 &bytesread, file->pOverlapped)) {
+        rv = APR_SUCCESS;
+    }
+    else {
         rv = apr_get_os_error();
         if (rv == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
             /* Wait for the pending i/o */
@@ -117,16 +117,16 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
             /* Assume ERROR_BROKEN_PIPE signals an EOF reading from a pipe */
             rv = APR_EOF;
         }
-    } else {
-        /* OK and 0 bytes read ==> end of file */
-        if (*nbytes == 0)
-            rv = APR_EOF;
-        else
-            rv = APR_SUCCESS;
+    }
+    
+    /* OK and 0 bytes read ==> end of file */
+    if (rv == APR_SUCCESS && bytesread == 0)
+        rv = APR_EOF;
     }
     if (rv == APR_SUCCESS && file->pOverlapped && !file->pipe) {
-        file->filePtr += *nbytes;
+        file->filePtr += bytesread;
     }
+    *nbytes = bytesread;
     return rv;
 }
 
