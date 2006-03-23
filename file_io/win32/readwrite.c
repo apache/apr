@@ -122,7 +122,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
     /* OK and 0 bytes read ==> end of file */
     if (rv == APR_SUCCESS && bytesread == 0)
         rv = APR_EOF;
-    }
+    
     if (rv == APR_SUCCESS && file->pOverlapped && !file->pipe) {
         file->filePtr += bytesread;
     }
