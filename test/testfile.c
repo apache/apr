@@ -240,7 +240,7 @@ static void test_seek(CuTest *tc)
     offset = -5;
     rv = apr_file_seek(filetest, SEEK_END, &offset);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, strlen(TESTSTR) - 5, nbytes);
+    CuAssertIntEquals(tc, strlen(TESTSTR) - 5, offset);
 
     memset(str, 0, nbytes + 1);
     nbytes = 256;
