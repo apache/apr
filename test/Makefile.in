@@ -14,8 +14,6 @@ STDTEST_PORTABLE = \
 	testflock@EXEEXT@ \
 	testsock@EXEEXT@ \
 	testlockperf@EXEEXT@ \
-	testshmproducer@EXEEXT@ \
-	testshmconsumer@EXEEXT@ \
 	testatomic@EXEEXT@ \
 	testmutexscope@EXEEXT@ \
 	testall@EXEEXT@
