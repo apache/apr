@@ -1,3 +1,7 @@
+Changes with APR 0.9.12
+
+
+
 Changes with APR 0.9.11
 
   *) Synced get-version.sh to trunk to correctly retrieve 2 digit subversion,
