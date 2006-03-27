@@ -1,10 +1,20 @@
 Changes with APR 0.9.11
 
+  *) Synced get-version.sh to trunk to correctly retrieve 2 digit subversion,
+     which broke the 0.9.10 candidate.  [William Rowe]
 
+  *) Fixed 'make check' target to avoid invoking sub-programs of testshm,
+     testshmconsumer and testshmproducer.  [William Rowe]
+
+  *) Permit Win32 to seek to the point 2^32-1, by checking that result
+     against the actual error and continuing on success.  [William Rowe]
 
 Changes with APR 0.9.10
 
   *) Minor bug fixes to address various platform build and run time issues.
+
+  *) Permit 'make check' binaries to run on Darwin by omitting -no-install
+     flag [William Rowe, Joe Orton]
 
 Changes with APR 0.9.9
 
