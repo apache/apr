@@ -296,4 +296,128 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     return rv;
 }
 
+struct apr_pollcb_t {
+    apr_pool_t *pool;
+    apr_uint32_t nalloc;
+    struct epoll_event *pollset;
+    int epoll_fd;
+};
+
+static apr_status_t cb_cleanup(void *p_)
+{
+    apr_pollcb_t *pollcb = (apr_pollcb_t *) p_;
+    close(pollcb->epoll_fd);
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
+                                            apr_uint32_t size,
+                                            apr_pool_t *p,
+                                            apr_uint32_t flags)
+{
+    int fd;
+    
+    fd = epoll_create(size);
+    
+    if (fd < 0) {
+        *pollcb = NULL;
+        return apr_get_netos_error();
+    }
+    
+    *pollcb = apr_palloc(p, sizeof(**pollcb));
+    (*pollcb)->nalloc = size;
+    (*pollcb)->pool = p;
+    (*pollcb)->epoll_fd = fd;
+    (*pollcb)->pollset = apr_palloc(p, size * sizeof(struct epoll_event));
+    apr_pool_cleanup_register(p, *pollcb, cb_cleanup, cb_cleanup);
+
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
+                                         apr_pollfd_t *descriptor)
+{
+    struct epoll_event ev;
+    int ret;
+    
+    ev.events = get_epoll_event(descriptor->reqevents);
+    ev.data.ptr = (void *)descriptor;
+
+    if (descriptor->desc_type == APR_POLL_SOCKET) {
+        ret = epoll_ctl(pollcb->epoll_fd, EPOLL_CTL_ADD,
+                        descriptor->desc.s->socketdes, &ev);
+    }
+    else {
+        ret = epoll_ctl(pollcb->epoll_fd, EPOLL_CTL_ADD,
+                        descriptor->desc.f->filedes, &ev);
+    }
+    
+    if (ret == -1) {
+        return apr_get_netos_error();
+    }
+    
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pollcb_remove(apr_pollcb_t *pollcb,
+                                            apr_pollfd_t *descriptor)
+{
+    apr_status_t rv = APR_SUCCESS;
+    struct epoll_event ev;
+    int ret = -1;
+    
+    ev.events = get_epoll_event(descriptor->reqevents);
+    
+    if (descriptor->desc_type == APR_POLL_SOCKET) {
+        ret = epoll_ctl(pollcb->epoll_fd, EPOLL_CTL_DEL,
+                        descriptor->desc.s->socketdes, &ev);
+    }
+    else {
+        ret = epoll_ctl(pollcb->epoll_fd, EPOLL_CTL_DEL,
+                        descriptor->desc.f->filedes, &ev);
+    }
+    
+    if (ret < 0) {
+        rv = APR_NOTFOUND;
+    }
+    
+    return rv;
+}
+
+
+APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
+                                          apr_interval_time_t timeout,
+                                          apr_pollcb_cb_t func,
+                                          void *baton)
+{
+    int ret, i;
+    apr_status_t rv = APR_SUCCESS;
+    
+    if (timeout > 0) {
+        timeout /= 1000;
+    }
+    
+    ret = epoll_wait(pollcb->epoll_fd, pollcb->pollset, pollcb->nalloc,
+                     timeout);
+    if (ret < 0) {
+        rv = apr_get_netos_error();
+    }
+    else if (ret == 0) {
+        rv = APR_TIMEUP;
+    }
+    else {
+        for (i = 0; i < ret; i++) {
+            apr_pollfd_t *pollfd = (apr_pollfd_t *)(pollcb->pollset[i].data.ptr);
+            pollfd->rtnevents = get_epoll_revent(pollcb->pollset[i].events);
+
+            rv = func(baton, pollfd);
+            if (rv) {
+                return rv;
+            }
+        }
+    }
+    
+    return rv;
+}
+
 #endif /* POLLSET_USES_EPOLL */
