@@ -560,6 +560,44 @@ static void setup_pollcb(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
+typedef struct pollcb_baton_t {
+    abts_case *tc;
+    int count;
+} pollcb_baton_t;
+
+static apr_status_t trigger_pollcb_cb(void* baton, apr_pollfd_t *descriptor)
+{
+    pollcb_baton_t* pcb = (pollcb_baton_t*) baton;
+    ABTS_PTR_EQUAL(pcb->tc, s[0], descriptor->desc.s);
+    ABTS_PTR_EQUAL(pcb->tc, s[0], descriptor->client_data);
+    pcb->count++;
+    return APR_SUCCESS;
+}
+
+static void trigger_pollcb(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_pollfd_t socket_pollfd;
+    pollcb_baton_t pcb;
+    
+    ABTS_PTR_NOTNULL(tc, s[0]);
+    socket_pollfd.desc_type = APR_POLL_SOCKET;
+    socket_pollfd.reqevents = APR_POLLIN | APR_POLLOUT;
+    socket_pollfd.desc.s = s[0];
+    socket_pollfd.client_data = s[0];
+    rv = apr_pollcb_add(pollcb, &socket_pollfd);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    
+    send_msg(s, sa, 0, tc);
+    pcb.tc = tc;
+    pcb.count = 0;
+    rv = apr_pollcb_poll(pollcb, 0, trigger_pollcb_cb, &pcb);    
+    ABTS_INT_EQUAL(tc, 0, APR_STATUS_IS_TIMEUP(rv));
+    ABTS_INT_EQUAL(tc, 1, pcb.count);
+
+    rv = apr_pollcb_remove(pollcb, &socket_pollfd);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
 
 abts_suite *testpoll(abts_suite *suite)
 {
@@ -595,7 +633,10 @@ abts_suite *testpoll(abts_suite *suite)
     
     abts_run_test(suite, close_all_sockets, NULL);
 
+    abts_run_test(suite, create_all_sockets, NULL);
     abts_run_test(suite, setup_pollcb, NULL);
+    abts_run_test(suite, trigger_pollcb, NULL);
+    abts_run_test(suite, close_all_sockets, NULL);
 
     return suite;
 }
