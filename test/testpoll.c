@@ -599,6 +599,18 @@ static void trigger_pollcb(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
+static void timeout_pollcb(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    pollcb_baton_t pcb;
+    pcb.count = 0;
+    pcb.tc = tc;
+
+    rv = apr_pollcb_poll(pollcb, 1, trigger_pollcb_cb, &pcb);    
+    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+    ABTS_INT_EQUAL(tc, 0, pcb.count);
+}
+
 abts_suite *testpoll(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -636,6 +648,7 @@ abts_suite *testpoll(abts_suite *suite)
     abts_run_test(suite, create_all_sockets, NULL);
     abts_run_test(suite, setup_pollcb, NULL);
     abts_run_test(suite, trigger_pollcb, NULL);
+    abts_run_test(suite, timeout_pollcb, NULL);
     abts_run_test(suite, close_all_sockets, NULL);
 
     return suite;
