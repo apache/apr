@@ -32,6 +32,7 @@
 static apr_socket_t *s[LARGE_NUM_SOCKETS];
 static apr_sockaddr_t *sa[LARGE_NUM_SOCKETS];
 static apr_pollset_t *pollset;
+static apr_pollcb_t *pollcb;
 
 /* ###: tests surrounded by ifdef OLD_POLL_INTERFACE either need to be
  * converted to use the pollset interface or removed. */
@@ -552,6 +553,14 @@ static void pollset_remove(abts_case *tc, void *data)
              (hot_files[1].client_data == (void *)1)));
 }
 
+static void setup_pollcb(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    rv = apr_pollcb_create(&pollcb, LARGE_NUM_SOCKETS, p, 0);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
+
+
 abts_suite *testpoll(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -585,6 +594,8 @@ abts_suite *testpoll(abts_suite *suite)
     abts_run_test(suite, pollset_remove, NULL);
     
     abts_run_test(suite, close_all_sockets, NULL);
+
+    abts_run_test(suite, setup_pollcb, NULL);
 
     return suite;
 }
