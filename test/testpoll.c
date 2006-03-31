@@ -611,6 +611,33 @@ static void timeout_pollcb(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, 0, pcb.count);
 }
 
+static void timeout_pollin_pollcb(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    pollcb_baton_t pcb;
+    apr_pollfd_t socket_pollfd;
+
+    recv_msg(s, 0, p, tc);
+    
+    ABTS_PTR_NOTNULL(tc, s[0]);
+    socket_pollfd.desc_type = APR_POLL_SOCKET;
+    socket_pollfd.reqevents = APR_POLLIN;
+    socket_pollfd.desc.s = s[0];
+    socket_pollfd.client_data = s[0];
+    rv = apr_pollcb_add(pollcb, &socket_pollfd);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    
+    pcb.count = 0;
+    pcb.tc = tc;
+    
+    rv = apr_pollcb_poll(pollcb, 1, trigger_pollcb_cb, &pcb);    
+    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+    ABTS_INT_EQUAL(tc, 0, pcb.count);
+
+    rv = apr_pollcb_remove(pollcb, &socket_pollfd);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
+
 abts_suite *testpoll(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -649,6 +676,7 @@ abts_suite *testpoll(abts_suite *suite)
     abts_run_test(suite, setup_pollcb, NULL);
     abts_run_test(suite, trigger_pollcb, NULL);
     abts_run_test(suite, timeout_pollcb, NULL);
+    abts_run_test(suite, timeout_pollin_pollcb, NULL);
     abts_run_test(suite, close_all_sockets, NULL);
 
     return suite;
