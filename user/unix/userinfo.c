@@ -30,7 +30,7 @@
 #define APR_WANT_MEMFUNC
 #include "apr_want.h"
 
-#define PWBUF_SIZE 512
+#define PWBUF_SIZE 2048
 
 static apr_status_t getpwnam_safe(const char *username,
                                   struct passwd *pw,
