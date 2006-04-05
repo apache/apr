@@ -180,10 +180,10 @@ apr_status_t apr_socket_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
     return APR_SUCCESS;
 }
 
-#ifdef HAVE_WRITEV
 apr_status_t apr_socket_sendv(apr_socket_t * sock, const struct iovec *vec,
                               apr_int32_t nvec, apr_size_t *len)
 {
+#ifdef HAVE_WRITEV
     apr_ssize_t rv;
     apr_size_t requested_len = 0;
     apr_int32_t i;
@@ -225,8 +225,11 @@ do_select:
     }
     (*len) = rv;
     return APR_SUCCESS;
-}
+#else
+    *len = vec[0].iov_len;
+    return apr_socket_send(sock, vec[0].iov_base, len);
 #endif
+}
 
 #if APR_HAS_SENDFILE
 
