@@ -55,7 +55,7 @@ APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int signum)
 
 #if APR_HAVE_SIGACTION
 
-#ifdef DARWIN
+#if defined(__NetBSD__) || defined(DARWIN)
 static void avoid_zombies(int signo)
 {
     int exit_status;
@@ -91,7 +91,7 @@ APR_DECLARE(apr_sigfunc_t *) apr_signal(int signo, apr_sigfunc_t * func)
         act.sa_flags |= SA_NOCLDWAIT;
     }
 #endif
-#ifdef DARWIN
+#if defined(__NetBSD__) || defined(DARWIN)
     /* ignoring SIGCHLD or leaving the default disposition doesn't avoid zombies,
      * and there is no SA_NOCLDWAIT flag, so catch the signal and reap status in 
      * the handler to avoid zombies
