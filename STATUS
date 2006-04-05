@@ -203,24 +203,6 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
         Status: Greg +1 (volunteers)
 
-    * configure.in does post-processing on the AC_OUTPUT files (for
-      VPATH support). This means that config.status doesn't do the
-      right thing when you re-run it. We ought to revamp the makefiles 
-      to do the right AC_SUBST stuff rather than depend upon rewriting.
-
-      Sascha: As the rewriter is a crude hack, I would not worry too
-              much about it.  It is designed to go away once we have
-              a proper build system in place.
-              
-              One of the perceived deficiencies of automake is that it
-              uses AC_SUBST too often, thereby slowing down the task of
-              generating Makefiles significantly, because it applies
-              dozens of substitutions to each Makefile.  And why?  Make's
-              built-in macro processing is much more powerful, and
-              combined with the include facility, generating Makefiles
-              becomes simpler and faster.
-      Justin says: "I think this got fixed with Roy's build changes."
-
     * use os_(un)cork in network_io/unix/sendrecv.c for FreeBSD's
       sendfile implementation.
 
@@ -420,6 +402,20 @@ API Changes Postponed for APR 2.0:
         apr_lock_mech_e                  from apr_lockmech_e
         apr_time_interval_t              from apr_interval_time_t
         apr_time_interval_short_t        from apr_short_interval_time_t
+
+    * wrowe writes:
+      Looking at bug 32520, it occurs to me that exploding times using the
+      apr_time_exp_* functions; it would make more sense to split ->tm_usec into
+
+        ->tm_msec thousandths (milleseconds)
+        ->tm_usec millionths  (microseconds)
+
+      for most display purposes.  It's trivial to roll them together with the
+      format string %03d%03d if that's what's desired, or display simply
+      %02d.%03d if millisecond resolution is desired.  It would also shrink
+      the fields to int's so unpacking would be slightly slower, using them
+      would be slightly faster, for what's likely to be little impact on
+      performance.
 
 Stuff for post 1.0:
 
