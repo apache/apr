@@ -140,7 +140,7 @@ APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t *pollset)
 APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
                                           const apr_pollfd_t *descriptor)
 {
-    struct epoll_event ev;
+    struct epoll_event ev = {0};
     int ret = -1;
     pfd_elem_t *elem = NULL;
     apr_status_t rv = APR_SUCCESS;
