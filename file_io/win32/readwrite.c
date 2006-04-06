@@ -92,6 +92,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
                 case WAIT_OBJECT_0:
                     GetOverlappedResult(file->filehand, file->pOverlapped, 
                                         &bytesread, TRUE);
+                    *nbytes = bytesread;
                     rv = APR_SUCCESS;
                     break;
 
