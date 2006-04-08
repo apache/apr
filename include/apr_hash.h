@@ -67,7 +67,8 @@ typedef unsigned int (*apr_hashfunc_t)(const char *key, apr_ssize_t *klen);
 /**
  * The default hash function.
  */
-unsigned int apr_hashfunc_default(const char *key, apr_ssize_t *klen);
+APR_DECLARE_NONSTD(unsigned int) apr_hashfunc_default(const char *key,
+                                                      apr_ssize_t *klen);
 
 /**
  * Create a hash table.
