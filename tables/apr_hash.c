@@ -178,7 +178,8 @@ static void expand_array(apr_hash_t *ht)
     ht->max = new_max;
 }
 
-unsigned int apr_hashfunc_default(const char *char_key, apr_ssize_t *klen)
+APR_DECLARE_NONSTD(unsigned int) apr_hashfunc_default(const char *char_key,
+                                                      apr_ssize_t *klen)
 {
     unsigned int hash = 0;
     const unsigned char *key = (const unsigned char *)char_key;
