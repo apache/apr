@@ -1,6 +1,8 @@
 Changes with APR 0.9.12
 
-
+  *) Netware - add missing apu_version.c parsing for apu_version_string()
+     to the Netware specific builds.  Unix platforms supporte this API 
+     since 0.9.1.  [Brad Nicholes]
 
 Changes with APR 0.9.11
 
