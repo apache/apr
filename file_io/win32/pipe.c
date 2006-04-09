@@ -211,10 +211,10 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put_ex(apr_file_t **file,
     (*file)->timeout = -1;
     (*file)->ungetchar = -1;
     (*file)->filehand = *thefile;
-    (void) apr_pollset_create(&(*file)->pollset, 1, p, 0);
+    (void) apr_pollset_create(&(*file)->pollset, 1, pool, 0);
 
     if (register_cleanup) {
-        apr_pool_cleanup_register(pool, *file, apr_file_cleanup,
+        apr_pool_cleanup_register(pool, *file, file_cleanup,
                                   apr_pool_cleanup_null);
     }
 
