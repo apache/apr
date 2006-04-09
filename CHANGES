@@ -1,3 +1,7 @@
+Changes for APR 1.2.8
+
+
+
 Changes for APR 1.2.7
 
   *) Netware - add missing apu_version.c parsing for apu_version_string()
