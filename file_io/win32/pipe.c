@@ -178,3 +178,51 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
     return APR_SUCCESS;
 #endif /* _WIN32_WCE */
 }
+
+
+APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename,
+                                                    apr_fileperms_t perm,
+                                                    apr_pool_t *pool)
+{
+    /* Not yet implemented, interface not suitable.
+     * Win32 requires the named pipe to be *opened* at the time it's
+     * created, and to do so, blocking or non blocking must be elected.
+     */
+    return APR_ENOTIMPL;
+}
+
+
+/* XXX: Problem; we need to choose between blocking and nonblocking based
+ * on how *thefile was opened, and we don't have that information :-/
+ * Hack; assume a blocking socket, since the most common use for the fn
+ * would be to handle stdio-style or blocking pipes.  Win32 doesn't have
+ * select() blocking for pipes anyways :(
+ */
+APR_DECLARE(apr_status_t) apr_os_pipe_put_ex(apr_file_t **file,
+                                             apr_os_file_t *thefile,
+                                             int register_cleanup,
+                                             apr_pool_t *pool)
+{
+    (*file) = apr_pcalloc(pool, sizeof(apr_file_t));
+    (*file)->pool = pool;
+    (*file)->pipe = 1;
+    (*file)->timeout = -1;
+    (*file)->ungetchar = -1;
+    (*file)->filehand = *thefile;
+    (void) apr_pollset_create(&(*file)->pollset, 1, pool, 0);
+
+    if (register_cleanup) {
+        apr_pool_cleanup_register(pool, *file, file_cleanup,
+                                  apr_pool_cleanup_null);
+    }
+
+    return APR_SUCCESS;
+}
+
+
+APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
+                                          apr_os_file_t *thefile,
+                                          apr_pool_t *pool)
+{
+    return apr_os_pipe_put_ex(file, thefile, 0, pool);
+}
