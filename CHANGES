@@ -3,10 +3,6 @@ Changes for APR 1.3.0
   *) NetBSD: Avoid leaving zombie process when using apr_signal() 
      to ignore SIGCHLD.  PR 36750.  [Todd Vierling <tv pobox.com>]
 
-  *) Correct bug in kqueue backend for apr_pollset where we would
-     erroneously indicate that a socket was readable or writeable.
-     [Garrett Rooney]
-
   *) Implement support for apr_proc_mutex_trylock() on Unix platforms.
      PR 38785.  [Chris Darroch <chrisd pearsoncmg.com>]
 
@@ -15,10 +11,6 @@ Changes for APR 1.3.0
 
   *) APR_FIND_APR macro no longer checks /usr/local/apache2/
      [Colm MacCarthaigh]
-
-  *) Only include uuid/uuid.h if we haven't already included uuid.h, since
-     doing so can result in type conflicts.
-     [Craig Rodrigues <rodrigc crodrigues.org>]
 
   *) Add APR_POLLSET_NOCOPY option to apr_pollset API to eliminate
      O(n)-time lookup in apr_pollset_remove() (currently implemented
@@ -62,13 +54,30 @@ Changes for APR 1.3.0
   *) Add APR_ARRAY_IDX() and APR_ARRAY_PUSH() convenience macros to
      apr_tables.h.  [Garrett Rooney]
 
-Changes for APR 1.2.4
+Changes for APR 1.2.7
+
+  *) Netware - add missing apu_version.c parsing for apu_version_string()
+     to the Netware specific builds.  Unix platforms support this API 
+     since 0.9.1.  [Brad Nicholes]
+
+  *) Fix a regression in the updated win32 apr_file_read with timeouts
+     since 1.2.6 which would fail to return the bytes read in specific
+     edge cases.  [William Rowe]
+
+Changes for APR 1.2.6
 
   *) Fully test the detected libuuid or libc based uuid_create or
      uuid_generate function against the detected uuid.h, uuid/uuid.h,
      or sys/uuid.h (using only the first-found .h examined in that order)
      for correct compilation.  Resolves various apr_os_uuid issues on
      multiple environments.  [William Rowe]
+
+  *) Prevent detection of robust mutex support with glibc 2.4,
+     fixing APR_LOCK_PROC_PTHREAD locks.  PR 38442.  [Joe Orton]
+
+  *) Correct bug in kqueue backend for apr_pollset where we would
+     erroneously indicate that a socket was readable or writeable.
+     [Garrett Rooney]
 
   *) Make the filePtr in apr_file_t an apr_off_t on Unix, to avoid issues
      truncating offsets down to 32 bits on large file systems.
