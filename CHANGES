@@ -5,7 +5,7 @@ Changes for APR 1.2.8
 Changes for APR 1.2.7
 
   *) Netware - add missing apu_version.c parsing for apu_version_string()
-     to the Netware specific builds.  Unix platforms supporte this API 
+     to the Netware specific builds.  Unix platforms support this API 
      since 0.9.1.  [Brad Nicholes]
 
   *) Fix a regression in the updated win32 apr_file_read with timeouts
