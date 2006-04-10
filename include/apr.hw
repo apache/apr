@@ -525,13 +525,6 @@ struct iovec {
  */
 #if defined(_MSC_VER) && _MSC_VER >= 1200
 #pragma warning(pop)
-#endif
-
-/* Ignore Microsoft's interpretation of secure development 
- * and their opinion of the POSIX standard string handling API
- */
-#if defined(_MSC_VER) && _MSC_VER >= 1400
-#define _CRT_SECURE_NO_DEPRECATE
 #pragma warning(disable: 4996)
 #endif
 
