@@ -390,6 +390,7 @@ typedef  @socklen_t_value@       apr_socklen_t;
 #endif
 
 /** @} */
+/** @} */
 
 #ifdef __cplusplus
 }
