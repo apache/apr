@@ -276,7 +276,7 @@ struct apr_hdtr_t {
  * @param family The address family of the socket (e.g., APR_INET).
  * @param type The type of the socket (e.g., SOCK_STREAM).
  * @param protocol The protocol of the socket (e.g., APR_PROTO_TCP).
- * @param cont The pool to use
+ * @param cont The pool for the apr_socket_t and associated storage.
  */
 APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new_sock, 
                                             int family, int type,
