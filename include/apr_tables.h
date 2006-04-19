@@ -394,9 +394,9 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
  *          than a function that just loops through table b calling other functions.
  */
 /**
- *<PRE>
  * Conceptually, apr_table_overlap does this:
  *
+ * <pre>
  *  apr_array_header_t *barr = apr_table_elts(b);
  *  apr_table_entry_t *belt = (apr_table_entry_t *)barr->elts;
  *  int i;
@@ -409,6 +409,7 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
  *          apr_table_setn(a, belt[i].key, belt[i].val);
  *      }
  *  }
+ * </pre>
  *
  *  Except that it is more efficient (less space and cpu-time) especially
  *  when b has many elements.
@@ -416,7 +417,6 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
  *  Notice the assumptions on the keys and values in b -- they must be
  *  in an ancestor of a's pool.  In practice b and a are usually from
  *  the same pool.
- * </PRE>
  */
 
 APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
