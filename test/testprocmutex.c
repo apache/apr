@@ -31,6 +31,7 @@
 #define MAX_ITER 200
 #define CHILDREN 6
 #define MAX_COUNTER (MAX_ITER * CHILDREN)
+#define MAX_WAIT_USEC (1000*1000)
 
 static apr_proc_mutex_t *proc_lock;
 static volatile int *x;
@@ -42,7 +43,7 @@ static int increment(int n)
     return n+1;
 }
 
-static void make_child(abts_case *tc, apr_proc_t **proc, apr_pool_t *p)
+static void make_child(abts_case *tc, int trylock, apr_proc_t **proc, apr_pool_t *p)
 {
     apr_status_t rv;
 
@@ -68,8 +69,22 @@ static void make_child(abts_case *tc, apr_proc_t **proc, apr_pool_t *p)
             exit(1);
 
         do {
-            if (apr_proc_mutex_lock(proc_lock))
-                exit(1);
+            if (trylock) {
+                int wait_usec = 0;
+
+                while ((rv = apr_proc_mutex_trylock(proc_lock))) {
+                    if (!APR_STATUS_IS_EBUSY(rv))
+                        exit(1);
+                    if (++wait_usec >= MAX_WAIT_USEC)
+                        exit(1);
+                    apr_sleep(1);
+                }
+            }
+            else {
+                if (apr_proc_mutex_lock(proc_lock))
+                    exit(1);
+            }
+
             i++;
             *x = increment(*x);
             if (apr_proc_mutex_unlock(proc_lock))
@@ -106,12 +121,33 @@ static void test_exclusive(abts_case *tc, const char *lockname,
         return;
  
     for (n = 0; n < CHILDREN; n++)
-        make_child(tc, &child[n], p);
+        make_child(tc, 0, &child[n], p);
 
     for (n = 0; n < CHILDREN; n++)
         await_child(tc, child[n]);
     
     ABTS_ASSERT(tc, "Locks don't appear to work", *x == MAX_COUNTER);
+
+    rv = apr_proc_mutex_trylock(proc_lock);
+    if (rv == APR_ENOTIMPL) {
+        ABTS_NOT_IMPL(tc, "apr_proc_mutex_trylock not implemented");
+        return;
+    }
+    APR_ASSERT_SUCCESS(tc, "check for trylock", rv);
+
+    rv = apr_proc_mutex_unlock(proc_lock);
+    APR_ASSERT_SUCCESS(tc, "unlock after trylock check", rv);
+
+    *x = 0;
+
+    for (n = 0; n < CHILDREN; n++)
+        make_child(tc, 1, &child[n], p);
+
+    for (n = 0; n < CHILDREN; n++)
+        await_child(tc, child[n]);
+    
+    ABTS_ASSERT(tc, "Locks don't appear to work with trylock",
+                *x == MAX_COUNTER);
 }
 #endif
 
