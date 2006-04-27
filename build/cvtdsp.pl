@@ -7,6 +7,9 @@ if ($ARGV[0] eq '-6') {
 elsif ($ARGV[0] eq '-5') {
     find(\&tovc5, '.');
 }
+elsif ($ARGV[0] eq '-2005') {
+    find(\&tovc2005, '.');
+}
 elsif ($ARGV[0] eq '-w3') {
     find(\&tow3, '.');
 }
@@ -113,6 +116,36 @@ sub tovc6 {
 	    unlink $oname || die;
 	    rename $tname, $oname || die;
 	    print "Converted VC5 project " . $oname . " to VC6 in " . $File::Find::dir . "\n"; 
+	}
+	else {
+	    unlink $tname;
+	}
+    }
+}
+
+sub tovc2005 { 
+
+    if (m|\.dsp$| || m|\.mak$|) {
+        $oname = $_;
+	$tname = '.#' . $_;
+	$verchg = 0;
+	$srcfl = new IO::File $_, "r" || die;
+	$dstfl = new IO::File $tname, "w" || die;
+	while ($src = <$srcfl>) {
+	    if ($src =~ s|(\bCPP.*) /GX(.*)|$1 /EHsc$2|) {
+		$verchg = -1;
+	    }
+	    if ($src =~ s|(\bLINK32.*) /machine:I386(.*)|$1$2|) {
+		$verchg = -1;
+	    }
+            print $dstfl $src; 
+	}
+	undef $srcfl;
+	undef $dstfl;
+	if ($verchg) {
+	    unlink $oname || die;
+	    rename $tname, $oname || die;
+	    print "Converted project " . $oname . " to 2005 in " . $File::Find::dir . "\n"; 
 	}
 	else {
 	    unlink $tname;
