@@ -1,5 +1,8 @@
 Changes for APR 1.3.0
 
+  *) Make apr_socket_recvfrom initialize the port field in the from
+     sockaddr.  PR 39325 [Anthony Minessale <anthmct yahoo.com>]
+
   *) NetBSD: Avoid leaving zombie process when using apr_signal() 
      to ignore SIGCHLD.  PR 36750.  [Todd Vierling <tv pobox.com>]
 

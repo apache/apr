@@ -159,6 +159,9 @@ static void sendto_receivefrom(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_INT_EQUAL(tc, STRLEN, len);
 
+    /* Zero out the port so we can be sure it's been set by recvfrom. */
+    from->port = 0;
+
     len = 80;
     rv = apr_socket_recvfrom(from, sock, 0, recvbuf, &len);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);

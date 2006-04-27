@@ -172,6 +172,8 @@ apr_status_t apr_socket_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
         return errno;
     }
 
+    from->port = ntohs(from->sa.sin.sin_port);
+
     (*len) = rv;
     if (rv == 0 && sock->type == SOCK_STREAM) {
         return APR_EOF;
