@@ -203,7 +203,9 @@ APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from,
         (*len) = 0;
         return errno;
     }
-
+	
+    from->port = ntohs(from->sa.sin.sin_port);
+	
     (*len) = rv;
     if (rv == 0)
         return APR_EOF;
