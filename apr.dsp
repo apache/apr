@@ -19,6 +19,8 @@ CFG=apr - Win32 Debug
 !MESSAGE 
 !MESSAGE "apr - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "apr - Win32 Debug" (based on "Win32 (x86) Static Library")
+!MESSAGE "apr - Win32 ReleaseNT" (based on "Win32 (x86) Static Library")
+!MESSAGE "apr - Win32 DebugNT" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -41,7 +43,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "LibR"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /O2 /Oy- /Zi /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fd"LibR\apr_src" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fd"LibR\apr_src" /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -64,8 +66,8 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "LibD"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /EHsc /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MDd /W3 /EHsc /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fd"LibD\apr_src" /FD /c
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fd"LibD\apr_src" /FD /EHsc /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -75,12 +77,61 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo /out:"LibD\apr-1.lib"
 
+!ELSEIF  "$(CFG)" == "apr - Win32 ReleaseNT"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "LibNTR"
+# PROP BASE Intermediate_Dir "LibNTR"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "LibNTR"
+# PROP Intermediate_Dir "LibNTR"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fd"LibNTR\apr_src" /FD /c
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo
+# ADD LIB32 /nologo /out:"LibNTR\apr-1.lib"
+
+!ELSEIF  "$(CFG)" == "apr - Win32 DebugNT"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir "LibNTD"
+# PROP BASE Intermediate_Dir "LibNTD"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir "LibNTD"
+# PROP Intermediate_Dir "LibNTD"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fd"LibNTD\apr_src" /FD /EHsc /c
+# ADD BASE RSC /l 0x409 /d "_DEBUG"
+# ADD RSC /l 0x409 /d "_DEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo
+# ADD LIB32 /nologo /out:"LibNTD\apr-1.lib"
+
 !ENDIF 
 
 # Begin Target
 
 # Name "apr - Win32 Release"
 # Name "apr - Win32 Debug"
+# Name "apr - Win32 ReleaseNT"
+# Name "apr - Win32 DebugNT"
 # Begin Group "Source Files"
 
 # PROP Default_Filter ".c"
@@ -278,11 +329,11 @@ SOURCE=.\network_io\unix\inet_pton.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\poll\unix\select.c
+SOURCE=.\network_io\unix\multicast.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\network_io\unix\multicast.c
+SOURCE=.\poll\unix\select.c
 # End Source File
 # Begin Source File
 
@@ -511,6 +562,26 @@ InputPath=.\include\apr.hw
 
 # End Custom Build
 
+!ELSEIF  "$(CFG)" == "apr - Win32 ReleaseNT"
+
+# Begin Custom Build - Creating apr.h from apr.hw
+InputPath=.\include\apr.hw
+
+".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apr.hw > .\include\apr.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - Win32 DebugNT"
+
+# Begin Custom Build - Creating apr.h from apr.hw
+InputPath=.\include\apr.hw
+
+".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apr.hw > .\include\apr.h
+
+# End Custom Build
+
 !ENDIF 
 
 # End Source File
@@ -593,6 +664,10 @@ SOURCE=.\include\apr_portable.h
 # Begin Source File
 
 SOURCE=.\include\apr_proc_mutex.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_random.h
 # End Source File
 # Begin Source File
 

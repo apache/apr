@@ -19,6 +19,8 @@ CFG=libapr - Win32 Debug
 !MESSAGE 
 !MESSAGE "libapr - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "libapr - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "libapr - Win32 ReleaseNT" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "libapr - Win32 DebugNT" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -43,17 +45,17 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /O2 /Oy- /Zi /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fd"Release\libapr_src" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fd"Release\libapr_src" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
-# ADD RSC /l 0x409 /d "NDEBUG" /d "APR_VERSION_ONLY" /I "./include"
+# ADD RSC /l 0x409 /i "./include" /d "NDEBUG" /d "APR_VERSION_ONLY"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /machine:I386 /opt:ref
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /machine:I386 /out:"Release/libapr-1.dll" /opt:ref
+# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /opt:ref
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /out:"Release/libapr-1.dll" /opt:ref
 
 !ELSEIF  "$(CFG)" == "libapr - Win32 Debug"
 
@@ -68,18 +70,70 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /EHsc /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MDd /W3 /EHsc /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fd"Debug\libapr_src" /FD /c
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fd"Debug\libapr_src" /FD /EHsc /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
-# ADD RSC /l 0x409 /d "_DEBUG" /d "APR_VERSION_ONLY" /I "./include"
+# ADD RSC /l 0x409 /i "./include" /d "_DEBUG" /d "APR_VERSION_ONLY"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /machine:I386
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /machine:I386 /out:"Debug/libapr-1.dll"
+# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /out:"Debug/libapr-1.dll"
+
+!ELSEIF  "$(CFG)" == "libapr - Win32 ReleaseNT"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "ReleaseNT"
+# PROP BASE Intermediate_Dir "ReleaseNT"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "ReleaseNT"
+# PROP Intermediate_Dir "ReleaseNT"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fd"ReleaseNT\libapr_src" /FD /c
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /i "./include" /d "NDEBUG" /d "APR_VERSION_ONLY"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /opt:ref
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /out:"ReleaseNT/libapr-1.dll" /opt:ref
+
+!ELSEIF  "$(CFG)" == "libapr - Win32 DebugNT"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir "DebugNT"
+# PROP BASE Intermediate_Dir "DebugNT"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir "DebugNT"
+# PROP Intermediate_Dir "DebugNT"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fd"DebugNT\libapr_src" /FD /EHsc /c
+# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
+# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
+# ADD BASE RSC /l 0x409 /d "_DEBUG"
+# ADD RSC /l 0x409 /i "./include" /d "_DEBUG" /d "APR_VERSION_ONLY"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /out:"DebugNT/libapr-1.dll"
 
 !ENDIF 
 
@@ -87,6 +141,8 @@ LINK32=link.exe
 
 # Name "libapr - Win32 Release"
 # Name "libapr - Win32 Debug"
+# Name "libapr - Win32 ReleaseNT"
+# Name "libapr - Win32 DebugNT"
 # Begin Group "Source Files"
 
 # PROP Default_Filter ".c"
@@ -284,11 +340,11 @@ SOURCE=.\network_io\unix\inet_pton.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\poll\unix\select.c
+SOURCE=.\network_io\unix\multicast.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\network_io\unix\multicast.c
+SOURCE=.\poll\unix\select.c
 # End Source File
 # Begin Source File
 
@@ -517,6 +573,26 @@ InputPath=.\include\apr.hw
 
 # End Custom Build
 
+!ELSEIF  "$(CFG)" == "libapr - Win32 ReleaseNT"
+
+# Begin Custom Build - Creating apr.h from apr.hw
+InputPath=.\include\apr.hw
+
+".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apr.hw > .\include\apr.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libapr - Win32 DebugNT"
+
+# Begin Custom Build - Creating apr.h from apr.hw
+InputPath=.\include\apr.hw
+
+".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apr.hw > .\include\apr.h
+
+# End Custom Build
+
 !ENDIF 
 
 # End Source File
@@ -599,6 +675,10 @@ SOURCE=.\include\apr_portable.h
 # Begin Source File
 
 SOURCE=.\include\apr_proc_mutex.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_random.h
 # End Source File
 # Begin Source File
 
