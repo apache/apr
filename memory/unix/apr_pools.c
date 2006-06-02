@@ -1824,7 +1824,7 @@ APR_DECLARE(apr_pool_t *) apr_pool_parent_get(apr_pool_t *pool)
     /* On NetWare, don't return the global_pool, return the application pool 
        as the top most pool */
     if (pool->parent == global_pool)
-        return NULL;
+        return pool;
     else
 #endif
     return pool->parent;
