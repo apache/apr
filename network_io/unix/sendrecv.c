@@ -409,7 +409,10 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                                  apr_size_t * len, apr_int32_t flags)
 {
     off_t nbytes = 0;
-    int rv, i;
+    int rv;
+#if defined(__FreeBSD_version) && __FreeBSD_version < 460001
+    int i;
+#endif
     struct sf_hdtr headerstruct;
     apr_size_t bytes_to_send = *len;
 
