@@ -21,6 +21,9 @@
 #include "apr_private.h"
 
 #include <stdlib.h>
+#if (defined(SOLARIS2) && SOLARIS2 >= 10)
+#include <atomic.h>
+#endif
 
 #if defined(__GNUC__) && defined(__STRICT_ANSI__) && !defined(USE_GENERIC_ATOMICS)
 /* force use of generic atomics if building e.g. with -std=c89, which
@@ -161,6 +164,58 @@ APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem,
 #define APR_OVERRIDE_ATOMIC_ADD32
 
 #endif /* __PPC__ && __GNUC__ */
+
+#if (defined(SOLARIS2) && SOLARIS2 >= 10) \
+    && !defined(USE_GENERIC_ATOMICS)
+
+#if !defined(APR_OVERRIDE_ATOMIC_CAS32)
+APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem,
+                                           apr_uint32_t with,
+                                           apr_uint32_t cmp)
+{
+    return atomic_cas_32(mem, cmp, with);
+}
+#define APR_OVERRIDE_ATOMIC_CAS32
+#endif /* APR_OVERRIDE_ATOMIC_CAS32 */
+
+#if !defined(APR_OVERRIDE_ATOMIC_DEC32)
+APR_DECLARE(apr_uint32_t) apr_atomic_dec32(volatile apr_uint32_t *mem)
+{
+    apr_uint32_t prev = *mem;
+    atomic_dec_32(mem);
+    return prev != 1;
+}
+#define APR_OVERRIDE_ATOMIC_DEC32
+#endif /* APR_OVERRIDE_ATOMIC_DEC32 */
+
+#if !defined(APR_OVERRIDE_ATOMIC_INC32)
+APR_DECLARE(apr_uint32_t) apr_atomic_inc32(volatile apr_uint32_t *mem)
+{
+    apr_uint32_t prev = *mem;
+    atomic_inc_32(mem);
+    return prev;
+}
+#define APR_OVERRIDE_ATOMIC_INC32
+#endif /* APR_OVERRIDE_ATOMIC_INC32 */
+
+#if !defined(APR_OVERRIDE_ATOMIC_SET32)
+APR_DECLARE(void) apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    *mem = val;
+}
+#define APR_OVERRIDE_ATOMIC_SET32
+#endif /* APR_OVERRIDE_ATOMIC_SET32 */
+
+#if !defined(APR_OVERRIDE_ATOMIC_XCHG32)
+APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem,
+                                            apr_uint32_t val) 
+{
+    return atomic_swap_32(mem, val);
+}
+#define APR_OVERRIDE_ATOMIC_XCHG32
+#endif /* APR_OVERRIDE_ATOMIC_XCHG32 */
+
+#endif /* SOLARIS2 && SOLARIS2 >= 10 */
 
 #if !defined(APR_OVERRIDE_ATOMIC_INIT)
 
