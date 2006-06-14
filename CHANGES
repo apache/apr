@@ -1,6 +1,13 @@
 Changes for APR 1.2.8
 
+  *) NetBSD: Avoid leaving zombie process when using apr_signal() 
+     to ignore SIGCHLD.  PR 36750.  [Todd Vierling <tv pobox.com>]
 
+  *) Fix apr_socket_sendv() for platforms without writev.
+     PR 38822.  [Joe Orton]
+
+  *) Avoid issues using >2Gb of data per call with sendfile() on
+     64-bit Linux platforms.  [Joe Orton]
 
 Changes for APR 1.2.7
 
