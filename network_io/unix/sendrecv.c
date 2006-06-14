@@ -267,6 +267,14 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
 
 #else
     off_t off = *offset;
+
+    /* Multiple reports have shown sendfile failing with EINVAL if
+     * passed a >=2Gb count value on some 64-bit kernels.  It won't
+     * noticably hurt performance to limit each call to <2Gb at a
+     * time, so avoid that issue here: */
+    if (sizeof(off_t) == 8 && *len > INT_MAX) {
+        *len = INT_MAX;
+    }
 #endif
 
     if (!hdtr) {
