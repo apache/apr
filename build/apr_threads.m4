@@ -263,7 +263,7 @@ int main(int argc, char **argv)
         exit(2);
     if (pthread_mutexattr_setrobust_np(&attr, PTHREAD_MUTEX_ROBUST_NP))
         exit(3);
-    if (pthread_mutexattr_setprotocol(&mattr, PTHREAD_PRIO_INHERIT))
+    if (pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT))
         exit(4);
     if (pthread_mutex_init(&mutex, &attr))
         exit(5);
