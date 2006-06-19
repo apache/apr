@@ -1,5 +1,8 @@
 Changes for APR 1.2.8
 
+  *) Fix detection of pthread cross-process robust mutexes.
+     PR 39833.  [Tsuyoshi SASAMOTO <nazonazo miobox.jp>]
+
   *) NetBSD: Avoid leaving zombie process when using apr_signal() 
      to ignore SIGCHLD.  PR 36750.  [Todd Vierling <tv pobox.com>]
 
