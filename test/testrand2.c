@@ -17,7 +17,6 @@
 #include "apr_general.h"
 #include "apr_random.h"
 #include "apr_thread_proc.h"
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "testutil.h"
