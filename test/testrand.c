@@ -15,7 +15,6 @@
  */
 
 #include "apr_general.h"
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "testutil.h"
