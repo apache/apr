@@ -56,6 +56,12 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /opt:ref
 # ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /out:"Release/libapr-1.dll" /opt:ref
+# Begin Special Build Tool
+OutDir=.\Release
+SOURCE="$(InputPath)"
+PostBuild_Desc=Embed .manifest
+PostBuild_Cmds=echo if exist $(OUTDIR)\libapr-1.dll.manifest mt.exe -manifest $(OUTDIR)\libapr-1.dll.manifest -outputresource:$(OUTDIR)\libapr-1.dll;2
+# End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "libapr - Win32 Debug"
 
@@ -82,6 +88,12 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug
 # ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /out:"Debug/libapr-1.dll"
+# Begin Special Build Tool
+OutDir=.\Debug
+SOURCE="$(InputPath)"
+PostBuild_Desc=Embed .manifest
+PostBuild_Cmds=echo if exist $(OUTDIR)\libapr-1.dll.manifest mt.exe -manifest $(OUTDIR)\libapr-1.dll.manifest -outputresource:$(OUTDIR)\libapr-1.dll;2
+# End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "libapr - Win32 ReleaseNT"
 
@@ -106,8 +118,12 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /opt:ref
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /out:"ReleaseNT/libapr-1.dll" /opt:ref
+# Begin Special Build Tool
+OutDir=.\ReleaseNT
+SOURCE="$(InputPath)"
+PostBuild_Desc=Embed .manifest
+PostBuild_Cmds=echo if exist $(OUTDIR)\libapr-1.dll.manifest mt.exe -manifest $(OUTDIR)\libapr-1.dll.manifest -outputresource:$(OUTDIR)\libapr-1.dll;2
+# End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "libapr - Win32 DebugNT"
 
@@ -134,6 +150,12 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug
 # ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /out:"DebugNT/libapr-1.dll"
+# Begin Special Build Tool
+OutDir=.\DebugNT
+SOURCE="$(InputPath)"
+PostBuild_Desc=Embed .manifest
+PostBuild_Cmds=echo if exist $(OUTDIR)\libapr-1.dll.manifest mt.exe -manifest $(OUTDIR)\libapr-1.dll.manifest -outputresource:$(OUTDIR)\libapr-1.dll;2
+# End Special Build Tool
 
 !ENDIF 
 
