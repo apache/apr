@@ -60,7 +60,7 @@ LINK32=link.exe
 OutDir=.\Release
 SOURCE="$(InputPath)"
 PostBuild_Desc=Embed .manifest
-PostBuild_Cmds=echo if exist $(OUTDIR)\libapr-1.dll.manifest mt.exe -manifest $(OUTDIR)\libapr-1.dll.manifest -outputresource:$(OUTDIR)\libapr-1.dll;2
+PostBuild_Cmds=if exist $(OUTDIR)\libapr-1.dll.manifest mt.exe -manifest $(OUTDIR)\libapr-1.dll.manifest -outputresource:$(OUTDIR)\libapr-1.dll;2
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "libapr - Win32 Debug"
@@ -92,7 +92,7 @@ LINK32=link.exe
 OutDir=.\Debug
 SOURCE="$(InputPath)"
 PostBuild_Desc=Embed .manifest
-PostBuild_Cmds=echo if exist $(OUTDIR)\libapr-1.dll.manifest mt.exe -manifest $(OUTDIR)\libapr-1.dll.manifest -outputresource:$(OUTDIR)\libapr-1.dll;2
+PostBuild_Cmds=if exist $(OUTDIR)\libapr-1.dll.manifest mt.exe -manifest $(OUTDIR)\libapr-1.dll.manifest -outputresource:$(OUTDIR)\libapr-1.dll;2
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "libapr - Win32 ReleaseNT"
@@ -122,7 +122,7 @@ LINK32=link.exe
 OutDir=.\ReleaseNT
 SOURCE="$(InputPath)"
 PostBuild_Desc=Embed .manifest
-PostBuild_Cmds=echo if exist $(OUTDIR)\libapr-1.dll.manifest mt.exe -manifest $(OUTDIR)\libapr-1.dll.manifest -outputresource:$(OUTDIR)\libapr-1.dll;2
+PostBuild_Cmds=if exist $(OUTDIR)\libapr-1.dll.manifest mt.exe -manifest $(OUTDIR)\libapr-1.dll.manifest -outputresource:$(OUTDIR)\libapr-1.dll;2
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "libapr - Win32 DebugNT"
@@ -154,7 +154,7 @@ LINK32=link.exe
 OutDir=.\DebugNT
 SOURCE="$(InputPath)"
 PostBuild_Desc=Embed .manifest
-PostBuild_Cmds=echo if exist $(OUTDIR)\libapr-1.dll.manifest mt.exe -manifest $(OUTDIR)\libapr-1.dll.manifest -outputresource:$(OUTDIR)\libapr-1.dll;2
+PostBuild_Cmds=if exist $(OUTDIR)\libapr-1.dll.manifest mt.exe -manifest $(OUTDIR)\libapr-1.dll.manifest -outputresource:$(OUTDIR)\libapr-1.dll;2
 # End Special Build Tool
 
 !ENDIF 
