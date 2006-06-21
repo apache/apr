@@ -17,7 +17,6 @@
 #include "apr_thread_proc.h"
 #include "apr_errno.h"
 #include "apr_general.h"
-#include "errno.h"
 #include "apr_time.h"
 #include "testutil.h"
 
