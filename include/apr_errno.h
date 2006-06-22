@@ -131,6 +131,18 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  *     error immediately following this one is set ten times farther
  *     away than usual, so that users of apr have a lot of room in
  *     which to declare custom error codes.
+ *
+ * In general applications should try and create unique error codes. To try
+ * and assist in finding suitable ranges of numbers to use, the following
+ * ranges are known to be used by the listed applications. If your 
+ * application defines error codes please advise the range of numbers it
+ * uses to dev@apr.apache.org for inclusion in this list.
+ *
+ * Ranges shown are in relation to APR_OS_START_USERERR
+ *
+ * Subversion - Defined ranges, of less than 100, at intervals of 5000
+ *              starting at an offset of 5000, e.g.
+ *               +5000 to 5100,  +10000 to 10100
  */
 #define APR_OS_START_USERERR    (APR_OS_START_STATUS + APR_OS_ERRSPACE_SIZE)
 /**
@@ -154,6 +166,39 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  *     apr_status_t values.
  */
 #define APR_OS_START_SYSERR    (APR_OS_START_EAIERR + APR_OS_ERRSPACE_SIZE)
+
+/**
+ * @defgroup APR_ERROR_map APR Error Space
+ * <PRE>
+ * The following attempts to show the relation of the various constants
+ * used for mapping APR Status codes.
+ *
+ *       0          
+ *
+ *  20,000     APR_OS_START_ERROR
+ *
+ *         + APR_OS_ERRSPACE_SIZE (50,000)
+ *
+ *  70,000      APR_OS_START_STATUS
+ *
+ *         + APR_OS_ERRSPACE_SIZE (50,000)
+ *
+ * 120,000      APR_OS_START_USERERR
+ *
+ *         + 10 x APR_OS_ERRSPACE_SIZE (50,000 * 10)
+ *
+ * 620,000      APR_OS_START_CANONERR
+ *
+ *         + APR_OS_ERRSPACE_SIZE (50,000)
+ *
+ * 670,000      APR_OS_START_EAIERR
+ *
+ *         + APR_OS_ERRSPACE_SIZE (50,000)
+ *
+ * 720,000      APR_OS_START_SYSERR
+ *
+ * </PRE>
+ */
 
 /** no error. */
 #define APR_SUCCESS 0
@@ -575,7 +620,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EACCES         (APR_OS_START_CANONERR + 1)
 #endif
 
-/** @see APR_STATUS_IS_EXIST */
+/** @see APR_STATUS_IS_EEXIST */
 #ifdef EEXIST
 #define APR_EEXIST EEXIST
 #else
