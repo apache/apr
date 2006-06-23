@@ -122,9 +122,24 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  */
 #define APR_OS_ERRSPACE_SIZE 50000
 /**
+ * APR_UTIL_ERRSPACE_SIZE is the size of the space that is reserved for
+ * use within apr-util. This space is reserved above that used by APR
+ * internally.
+ * @note This number MUST be smaller than APR_OS_ERRSPACE_SIZE by a
+ *       large enough amount that APR has sufficient room for it's
+ *       codes.
+ */
+#define APR_UTIL_ERRSPACE_SIZE 20000
+/**
  * APR_OS_START_STATUS is where the APR specific status codes start.
  */
 #define APR_OS_START_STATUS    (APR_OS_START_ERROR + APR_OS_ERRSPACE_SIZE)
+/**
+ * APR_UTIL_START_STATUS is where APR-Util starts defining it's
+ * status codes.
+ */
+#define APR_UTIL_START_STATUS   (APR_OS_START_STATUS + \
+                           (APR_OS_ERRSPACE_SIZE - APR_UTIL_ERRSPACE_SIZE))
 /**
  * APR_OS_START_USERERR are reserved for applications that use APR that
  *     layer their own error codes along with APR's.  Note that the
@@ -181,7 +196,11 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  *
  *  70,000      APR_OS_START_STATUS
  *
- *         + APR_OS_ERRSPACE_SIZE (50,000)
+ *         + APR_OS_ERRSPACE_SIZE - APR_UTIL_ERRSPACE_SIZE (30,000)
+ *
+ * 100,000      APR_UTIL_START_STATUS
+ *
+ *         + APR_UTIL_ERRSPACE_SIZE (20,000)
  *
  * 120,000      APR_OS_START_USERERR
  *
