@@ -17,7 +17,9 @@ STDTEST_PORTABLE = \
 	testmutexscope@EXEEXT@ \
 	testall@EXEEXT@
 
-OTHER_PROGRAMS = sendfile@EXEEXT@ 
+OTHER_PROGRAMS = sendfile@EXEEXT@ \
+                 echod@EXEEXT@ \
+                 sockperf@EXEEXT@
 
 PROGRAMS = $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE) $(OTHER_PROGRAMS)
 
@@ -95,6 +97,12 @@ testprocmutex@EXEEXT@: testprocmutex.lo $(LOCAL_LIBS)
 
 testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
 	$(LINK_PROG) testmutexscope.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+echod@EXEEXT@: echod.lo $(LOCAL_LIBS)
+	$(LINK_PROG) echod.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+sockperf@EXEEXT@: sockperf.lo $(LOCAL_LIBS)
+	$(LINK_PROG) sockperf.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 TESTS = testutil.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
