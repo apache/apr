@@ -126,10 +126,10 @@ APR_DECLARE(void *) apr_hash_get(apr_hash_t *ht, const void *key,
  * an iteration (although the results may be unpredictable unless all you do
  * is delete the current entry) and multiple iterations can be in
  * progress at the same time.
-
- * @example
  */
 /**
+ * @example
+ *
  * <PRE>
  * 
  * int sum_values(apr_pool_t *p, apr_hash_t *ht)
