@@ -284,9 +284,11 @@ typedef  @socklen_t_value@       apr_socklen_t;
 /** 
  * Thread callbacks from APR functions must be declared with APR_THREAD_FUNC, 
  * so that they follow the platform's calling convention.
- * @example
- */
-/** void* APR_THREAD_FUNC my_thread_entry_fn(apr_thread_t *thd, void *data);
+ * <PRE>
+ *
+ * void* APR_THREAD_FUNC my_thread_entry_fn(apr_thread_t *thd, void *data);
+ *
+ * </PRE>
  */
 #define APR_THREAD_FUNC
 
@@ -296,9 +298,10 @@ typedef  @socklen_t_value@       apr_socklen_t;
  * variable arguments must use APR_DECLARE_NONSTD().
  *
  * @remark Both the declaration and implementations must use the same macro.
- * @example
- */
-/** APR_DECLARE(rettype) apr_func(args)
+ *
+ * <PRE>
+ * APR_DECLARE(rettype) apr_func(args)
+ * </PRE>
  * @see APR_DECLARE_NONSTD @see APR_DECLARE_DATA
  * @remark Note that when APR compiles the library itself, it passes the 
  * symbol -DAPR_DECLARE_EXPORT to the compiler on some platforms (e.g. Win32) 
@@ -317,9 +320,11 @@ typedef  @socklen_t_value@       apr_socklen_t;
  * APR_DECLARE_NONSTD(), as they must follow the C language calling convention.
  * @see APR_DECLARE @see APR_DECLARE_DATA
  * @remark Both the declaration and implementations must use the same macro.
- * @example
- */
-/** APR_DECLARE_NONSTD(rettype) apr_func(args, ...);
+ * <PRE>
+ *
+ * APR_DECLARE_NONSTD(rettype) apr_func(args, ...);
+ *
+ * </PRE>
  */
 #define APR_DECLARE_NONSTD(type)     type
 
@@ -329,10 +334,13 @@ typedef  @socklen_t_value@       apr_socklen_t;
  * @see APR_DECLARE @see APR_DECLARE_NONSTD
  * @remark Note that the declaration and implementations use different forms,
  * but both must include the macro.
- * @example
- */
-/** extern APR_DECLARE_DATA type apr_variable;\n
+ * 
+ * <PRE>
+ *
+ * extern APR_DECLARE_DATA type apr_variable;\n
  * APR_DECLARE_DATA type apr_variable = value;
+ *
+ * </PRE>
  */
 #define APR_DECLARE_DATA
 
