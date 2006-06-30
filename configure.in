@@ -580,7 +580,7 @@ else
         APR_CHECK_PTHREAD_ATTR_GETDETACHSTATE_ONE_ARG
         APR_CHECK_PTHREAD_RECURSIVE_MUTEX
         AC_CHECK_FUNCS([pthread_key_delete pthread_rwlock_init \
-                        pthread_attr_setguardsize])
+                        pthread_attr_setguardsize pthread_yield])
 
         if test "$ac_cv_func_pthread_rwlock_init" = "yes"; then
             dnl ----------------------------- Checking for pthread_rwlock_t
@@ -592,6 +592,12 @@ else
             if test "$apr_cv_type_rwlock_t" = "yes"; then
                AC_DEFINE(HAVE_PTHREAD_RWLOCKS, 1, [Define if pthread rwlocks are available])
             fi
+        fi
+
+        if test "$ac_cv_func_pthread_yield" = "no"; then
+            dnl ----------------------------- Checking for sched_yield
+            AC_CHECK_HEADERS([sched.h])
+            AC_CHECK_FUNCS([sched_yield])
         fi
     fi
 fi

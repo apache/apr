@@ -245,8 +245,15 @@ APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
     }
 }
 
-void apr_thread_yield()
+APR_DECLARE(void) apr_thread_yield(void)
 {
+#ifdef HAVE_PTHREAD_YIELD
+    pthread_yield();
+#else
+#ifdef HAVE_SCHED_YIELD
+    sched_yield();
+#endif
+#endif
 }
 
 APR_DECLARE(apr_status_t) apr_thread_data_get(void **data, const char *key,

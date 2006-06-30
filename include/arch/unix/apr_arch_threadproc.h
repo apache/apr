@@ -39,6 +39,9 @@
 #if APR_HAVE_STRING_H
 #include <string.h>
 #endif
+#if HAVE_SCHED_H
+#include <sched.h>
+#endif
 /* End System Headers */
 
 
