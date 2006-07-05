@@ -25,7 +25,7 @@ ALL: $(TARGETS)
 
 CL = cl.exe
 
-CFLAGS = /nologo /c /MDd /W3 /Gm /GX /Zi /Od /D _DEBUG /D WIN32 /D APR_DECLARE_STATIC /FD 
+CFLAGS = /nologo /c /MDd /W3 /Gm /EHsc /Zi /Od /D _DEBUG /D WIN32 /D APR_DECLARE_STATIC /FD 
 
 .c.obj::
 	$(CL) -c $< $(CFLAGS) $(INCLUDES)
@@ -46,8 +46,8 @@ INCLUDES=/I "$(INCDIR)"
 
 # link programs using -no-install to get real executables not
 # libtool wrapper scripts which link an executable when first run.
-LINK_PROG = link.exe /nologo /debug /machine:I386 /subsystem:console /incremental:no 
-LINK_LIB = link.exe /nologo /dll /debug /machine:I386 /subsystem:windows /incremental:no
+LINK_PROG = link.exe /nologo /debug /subsystem:console /incremental:no 
+LINK_LIB = link.exe /nologo /dll /debug /subsystem:windows /incremental:no
 
 check: $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
