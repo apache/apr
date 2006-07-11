@@ -20,7 +20,7 @@ import re
 
 #
 # legal platforms: aix, beos, netware, os2, os390, unix, win32
-# 'make' users: aix, beos, os2, os390, unix
+# 'make' users: aix, beos, os2, os390, unix, win32 (mingw)
 #
 PLATFORMS = [ 'aix', 'beos', 'netware', 'os2', 'os390', 'unix', 'win32' ]
 MAKE_PLATFORMS = [
@@ -29,6 +29,7 @@ MAKE_PLATFORMS = [
   ('beos', 'unix'),
   ('os2', 'unix'),
   ('os390', 'unix'),
+  ('win32', 'unix'),
   ]
 # note: MAKE_PLATFORMS is an ordered set. we want to generate unix symbols
 #       first, so that the later platforms can reference them.
@@ -65,6 +66,25 @@ def main():
     # record the object symbols to build for each platform
     group = [ '$(OBJECTS_all)' ]
 
+    # If we're doing win32, we're going to look in the libapr.dsp file
+    # for those files that we have to manually add to our list.
+    inherit_parent = { }
+    if platform == 'win32':
+      for line in open('libapr.dsp').readlines():
+        if line[:7] != 'SOURCE=':
+          continue
+        if line[7:].find('unix') != -1:
+          # skip the leading .\ and split it out
+          inherit_files = line[9:].strip().split('\\')
+          # change the .c to .lo
+          assert inherit_files[-1][-2:] == '.c'
+          inherit_files[-1] = inherit_files[-1][:-2] + '.lo'
+          # replace the \\'s with /'s
+          inherit_line = '/'.join(inherit_files)
+          if not inherit_parent.has_key(inherit_files[0]):
+            inherit_parent[inherit_files[0]] = []
+          inherit_parent[inherit_files[0]].append(inherit_line)
+
     for subdir in string.split(parser.get('options', 'platform_dirs')):
       path = '%s/%s' % (subdir, platform)
       if not os.path.exists(path):
@@ -80,6 +100,9 @@ def main():
       # write out the compilation lines for this subdir
       files = get_files(path + '/*.c')
       objects, _unused = write_objects(f, legal_deps, h_deps, files)
+
+      if inherit_parent.has_key(subdir):
+        objects = objects + inherit_parent[subdir]
 
       symname = 'OBJECTS_%s_%s' % (subdir, platform)
 
