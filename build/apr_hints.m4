@@ -422,6 +422,9 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *cygwin*)
 	APR_ADDTO(CPPFLAGS, [-DCYGWIN])
 	;;
+    *mingw*)
+	APR_ADDTO(LDFLAGS, [-Wl,--enable-auto-import,--subsystem,console])
+	;;
   esac
 
 fi
