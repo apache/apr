@@ -25,7 +25,7 @@ ALL: $(TARGETS)
 
 CL = cl.exe
 
-CFLAGS = /nologo /c /MDd /W3 /Gm /GX /Zi /Od /D _DEBUG /D WIN32 /D APR_DECLARE_STATIC /FD 
+CFLAGS = /nologo /c /MDd /W3 /Gm /EHsc /Zi /Od /D _DEBUG /D WIN32 /D APR_DECLARE_STATIC /FD 
 
 .c.obj::
 	$(CL) -c $< $(CFLAGS) $(INCLUDES)
