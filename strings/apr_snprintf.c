@@ -1360,7 +1360,7 @@ APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, apr_size_t len,
     if (len != 0) {
         *vbuff.curpos = '\0';
     }
-    return (cc == -1) ? (int)len : cc;
+    return (cc == -1) ? (int)len - 1 : cc;
 }
 
 
@@ -1383,5 +1383,5 @@ APR_DECLARE(int) apr_vsnprintf(char *buf, apr_size_t len, const char *format,
     if (len != 0) {
         *vbuff.curpos = '\0';
     }
-    return (cc == -1) ? (int)len : cc;
+    return (cc == -1) ? (int)len - 1 : cc;
 }
