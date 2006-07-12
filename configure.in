@@ -1930,17 +1930,12 @@ AC_CHECK_MEMBERS([struct tm.tm_gmtoff, struct tm.__tm_gmtoff],,,[
 
 dnl ----------------------------- Checking for Networking Support 
 echo "${nl}Checking for Networking support..."
-AC_MSG_CHECKING(for in_addr in netinet/in.h)
-AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <netinet/in.h>
-],[
-struct in_addr arg;
-arg.s_addr = htonl(INADDR_ANY);
-], [ have_in_addr="1" 
-msg=yes ] , [ have_in_addr="0"
-msg=no ])
-AC_MSG_RESULT([$msg])
+APR_TYPE_IN_ADDR
+if test "$ac_cv_type_in_addr" = "yes"; then
+  have_in_addr="1"
+else
+  have_in_addr="0"
+fi
 
 AC_MSG_CHECKING([if fd == socket on this platform])
 if test "x$file_as_socket" != "x0" ; then
