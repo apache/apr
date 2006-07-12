@@ -35,7 +35,6 @@
 
 #include "apr_general.h"
 #include "ShellAPI.h"
-#include "crtdbg.h"
 #include "wchar.h"
 #include "apr_arch_file_io.h"
 #include "assert.h"
@@ -57,8 +56,8 @@ int wmain(int argc, const wchar_t **wargv, const wchar_t **wenv)
 
     dupenv = apr_wastrtoastr(&env, wenv, -1);
 
-    _environ = _malloc_dbg((dupenv + 1) * sizeof (char *), 
-                           _CRT_BLOCK, __FILE__, __LINE__ );
+    _environ = apr_malloc_dbg((dupenv + 1) * sizeof (char *),
+                              __FILE__, __LINE__ );
     memcpy(_environ, env, (dupenv + 1) * sizeof (char *));
 
     /* MSVCRT will attempt to maintain the wide environment calls
