@@ -18,6 +18,29 @@ dnl apr_network.m4: APR's autoconf macros for testing network support
 dnl
 
 dnl
+dnl check for type in_addr
+dnl
+AC_DEFUN(APR_TYPE_IN_ADDR,[
+  AC_CACHE_CHECK(for type in_addr, ac_cv_type_in_addr,[
+  AC_TRY_COMPILE([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+],[
+ struct in_addr arg;
+ arg.s_addr = htonl(INADDR_ANY);
+], [ ac_cv_type_in_addr="yes"] , [
+ac_cv_type_in_addr="no"])
+])
+])
+
+dnl
 dnl check for working getaddrinfo()
 dnl
 dnl Note that if the system doesn't have gai_strerror(), we
