@@ -39,6 +39,11 @@ def main():
   parser = ConfigParser.ConfigParser()
   parser.read('build.conf')
 
+  if parser.has_option('options', 'dsp'):
+    dsp_file = parser.get('options', 'dsp')
+  else:
+    dsp_file = None
+
   headers = get_files(parser.get('options', 'headers'))
 
   # compute the relevant headers, along with the implied includes
@@ -69,8 +74,8 @@ def main():
     # If we're doing win32, we're going to look in the libapr.dsp file
     # for those files that we have to manually add to our list.
     inherit_parent = { }
-    if platform == 'win32':
-      for line in open('libapr.dsp').readlines():
+    if platform == 'win32' and dsp_file:
+      for line in open(dsp_file).readlines():
         if line[:7] != 'SOURCE=':
           continue
         if line[7:].find('unix') != -1:
