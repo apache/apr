@@ -487,10 +487,7 @@ typedef  int         gid_t;
 typedef int apr_wait_t;
 
 /* struct iovec is needed to emulate Unix writev */
-struct iovec {
-    char*      iov_base;
-    apr_size_t iov_len;
-};
+#define APR_HAVE_IOVEC 0
 
 /* Nasty Win32 .h ommissions we really need */
 #define STDIN_FILENO  0
