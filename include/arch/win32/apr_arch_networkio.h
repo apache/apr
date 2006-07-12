@@ -64,8 +64,9 @@ typedef struct _WSABUF {
 } WSABUF, FAR * LPWSABUF;
 #endif
 #else
-/* Not sure if this is the right place to define this */
+#ifdef _MSC_VER
 #define HAVE_STRUCT_IPMREQ
+#endif
 #endif
 
 apr_status_t status_from_res_error(int);
