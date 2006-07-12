@@ -138,6 +138,37 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *);
 #define ELSE_WIN_OS_IS_ANSI
 #endif /* WINNT */
 
+#if defined(_MSC_VER)
+#include "crtdbg.h"
+
+APR_INLINE void* apr_malloc_dbg(size_t size, const char* filename,
+                                int linenumber)
+{
+    return _malloc_dbg(size, _CRT_BLOCK, filename, linenumber);
+}
+
+APR_INLINE void* apr_realloc_dbg(void* userData, size_t newSize,
+                                 const char* filename, int linenumber)
+{
+    return _realloc_dbg(userData, newSize, _CRT_BLOCK, filename, linenumber);
+}
+
+#else
+
+APR_INLINE void* apr_malloc_dbg(size_t size, const char* filename,
+                                int linenumber)
+{
+    return malloc(size);
+}
+
+APR_INLINE void* apr_realloc_dbg(void* userData, size_t newSize,
+                                 const char* filename, int linenumber)
+{
+    return realloc(userData, newSize);
+}
+
+#endif  /* ! _MSC_VER */
+
 typedef enum {
     DLL_WINBASEAPI = 0,    // kernel32 From WinBase.h
     DLL_WINADVAPI = 1,     // advapi32 From WinBase.h
