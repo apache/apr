@@ -1406,6 +1406,13 @@ case $host in
         ;;
 esac
 
+APR_CHECK_SIZEOF_EXTENDED([#include <sys/uio.h>],struct iovec,0)
+if test "$ac_cv_sizeof_struct_iovec" = "0"; then
+    have_iovec=0
+else
+    have_iovec=1
+fi
+
 AC_SUBST(voidp_size)
 AC_SUBST(short_value)
 AC_SUBST(int_value)
@@ -1427,6 +1434,7 @@ AC_SUBST(uint64_literal)
 AC_SUBST(stdint) 
 AC_SUBST(bigendian)
 AC_SUBST(aprlfs)
+AC_SUBST(have_iovec)
 
 dnl ----------------------------- Checking for string functions
 AC_CHECK_FUNCS(strnicmp, have_strnicmp="1", have_strnicmp="0")

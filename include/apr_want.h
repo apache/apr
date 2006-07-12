@@ -81,9 +81,27 @@
 
 #ifdef APR_WANT_IOVEC
 
+#if APR_HAVE_IOVEC
+
 #if APR_HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
+
+#else
+
+struct iovec
+{
+    char *iov_base;
+    int iov_len;
+};
+
+#endif
+
+/* apr_want is included at several layers; redefining APR_HAVE_IOVEC
+ * now to ensure that our struct is not introduced several times.
+ */
+#undef APR_HAVE_IOVEC
+#define APR_HAVE_IOVEC 1
 
 #undef APR_WANT_IOVEC
 #endif
