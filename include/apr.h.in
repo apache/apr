@@ -232,7 +232,7 @@ extern "C" {
 #define APR_HAS_OTHER_CHILD       @oc@
 #define APR_HAS_DSO               @aprdso@
 #define APR_HAS_SO_ACCEPTFILTER   @acceptfilter@
-#define APR_HAS_UNICODE_FS        0
+#define APR_HAS_UNICODE_FS        @have_unicode_fs@
 #define APR_HAS_PROC_INVOKED      0
 #define APR_HAS_USER              1
 #define APR_HAS_LARGE_FILES       @aprlfs@
