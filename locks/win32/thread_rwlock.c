@@ -18,7 +18,7 @@
 #include "apr_private.h"
 #include "apr_general.h"
 #include "apr_strings.h"
-#include "win32/apr_arch_thread_rwlock.h"
+#include "apr_arch_thread_rwlock.h"
 #include "apr_portable.h"
 
 static apr_status_t thread_rwlock_cleanup(void *data)

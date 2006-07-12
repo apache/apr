@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "win32/apr_arch_file_io.h"
+#include "apr_arch_file_io.h"
 #include "apr_thread_mutex.h"
 
 APR_DECLARE(apr_status_t) apr_file_buffer_set(apr_file_t *file, 
