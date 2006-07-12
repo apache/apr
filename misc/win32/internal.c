@@ -18,7 +18,6 @@
 
 #include "apr_arch_misc.h"
 #include "apr_arch_file_io.h"
-#include <crtdbg.h>
 #include <assert.h>
 
 /* This module is the source of -static- helper functions that are
@@ -52,8 +51,8 @@ int apr_wastrtoastr(char const * const * *retarr,
             ;
     }
 
-    newarr = _malloc_dbg((args + 1) * sizeof(char *),
-                         _CRT_BLOCK, __FILE__, __LINE__);
+    newarr = apr_malloc_dbg((args + 1) * sizeof(char *),
+                            __FILE__, __LINE__);
 
     for (arg = 0; arg < args; ++arg) {
         newarr[arg] = (void*)(wcslen(arr[arg]) + 1);
@@ -66,8 +65,8 @@ int apr_wastrtoastr(char const * const * *retarr,
      * 4 ucs bytes will hold a wchar_t pair value (20 bits)
      */
     elesize = elesize * 3 + 1;
-    ele = elements = _malloc_dbg(elesize * sizeof(char), 
-                                 _CRT_BLOCK, __FILE__, __LINE__);
+    ele = elements = apr_malloc_dbg(elesize * sizeof(char),
+                                    __FILE__, __LINE__);
 
     for (arg = 0; arg < args; ++arg) {
         apr_size_t len = (apr_size_t)newarr[arg];
@@ -87,8 +86,8 @@ int apr_wastrtoastr(char const * const * *retarr,
 
     /* Return to the free store if the heap realloc is the least bit optimized
      */
-    ele = _realloc_dbg(elements, ele - elements, 
-                       _CRT_BLOCK, __FILE__, __LINE__);
+    ele = apr_realloc_dbg(elements, ele - elements,
+                          __FILE__, __LINE__);
 
     if (ele != elements) {
         apr_size_t diff = ele - elements;
