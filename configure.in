@@ -2084,6 +2084,17 @@ dnl Check for langinfo support
 AC_CHECK_HEADERS(langinfo.h)
 AC_CHECK_FUNCS(nl_langinfo)
 
+dnl Do we have a Win32-centric Unicode FS?
+
+have_unicode_fs="0"
+case "$host" in
+  *mingw* )
+    have_unicode_fs="1"
+    ;;
+esac
+
+AC_SUBST(have_unicode_fs)
+
 dnl ----------------------------- Finalize the variables
 
 echo "${nl}Restore user-defined environment settings..."
