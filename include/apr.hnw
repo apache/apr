@@ -193,6 +193,7 @@ extern "C" {
 #define APR_HAVE_STRUCT_RLIMIT  0
 #define APR_HAVE_UNION_SEMUN    0
 #define APR_HAVE_SCTP           0
+#define APR_HAVE_IOVEC          1
 
 /*  APR Feature Macros */
 #define APR_HAS_SHARED_MEMORY     0
