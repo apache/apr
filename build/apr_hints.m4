@@ -424,6 +424,8 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *mingw*)
 	APR_ADDTO(LDFLAGS, [-Wl,--enable-auto-import,--subsystem,console])
+	APR_SETIFNULL(apr_lock_method, [win32])
+	APR_SETIFNULL(have_unicode_fs, [1])
 	;;
   esac
 
