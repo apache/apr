@@ -426,6 +426,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(LDFLAGS, [-Wl,--enable-auto-import,--subsystem,console])
 	APR_SETIFNULL(apr_lock_method, [win32])
 	APR_SETIFNULL(have_unicode_fs, [1])
+	APR_SETIFNULL(have_proc_invoked, [1])
 	;;
   esac
 

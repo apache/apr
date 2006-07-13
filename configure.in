@@ -1550,6 +1550,12 @@ AC_ARG_ENABLE(other-child,
   
 AC_SUBST(oc) 
 
+if test -z "$have_proc_invoked"; then
+  have_proc_invoked="0"
+fi
+
+AC_SUBST(have_proc_invoked)
+
 AC_MSG_CHECKING(for Variable Length Arrays)
 APR_TRY_COMPILE_NO_WARNING([],
 [
