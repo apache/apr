@@ -1707,11 +1707,6 @@ APR_IFALLYES(header:OS.h func:create_sem,
 if test "x$apr_lock_method" != "x"; then
     APR_DECISION_FORCE($apr_lock_method)
 fi
-case "$host" in
-    *mingw* )
-        APR_DECISION_FORCE(win32)
-        ;;
-esac
 APR_END_DECISION
 AC_DEFINE_UNQUOTED($ac_decision)
 
@@ -2086,12 +2081,9 @@ AC_CHECK_FUNCS(nl_langinfo)
 
 dnl Do we have a Win32-centric Unicode FS?
 
-have_unicode_fs="0"
-case "$host" in
-  *mingw* )
-    have_unicode_fs="1"
-    ;;
-esac
+if test -z "$have_unicode_fs"; then
+  have_unicode_fs="0"
+fi
 
 AC_SUBST(have_unicode_fs)
 
