@@ -436,6 +436,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	fi
 	APR_ADDTO(LDFLAGS, [-Wl,--enable-auto-import,--subsystem,console])
 	APR_SETIFNULL(apr_lock_method, [win32])
+	APR_SETIFNULL(apr_process_lock_is_global, [yes])
 	APR_SETIFNULL(have_unicode_fs, [1])
 	APR_SETIFNULL(have_proc_invoked, [1])
 	APR_SETIFNULL(apr_cv_use_lfs64, [yes])

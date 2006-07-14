@@ -409,6 +409,7 @@ case $host in
        OSDIR="win32"
        enable_threads="system_threads"
        eolstr="\\n"
+       proc_mutex_is_global=1
        OBJECTS_PLATFORM='$(OBJECTS_win32)'
        ;;
    *cygwin*)
