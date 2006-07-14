@@ -1,5 +1,7 @@
 Changes for APR 1.3.0
 
+  *) Support MinGW.  [John Vandenberg, Justin Erenkrantz]
+
   *) Implement apr_thread_yield on Unix in terms of pthread_yield or
      sched_yield. [Keisuke Nishida <keisuke.nishida gmail.com>]
 
