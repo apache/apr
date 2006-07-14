@@ -427,6 +427,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_SETIFNULL(apr_lock_method, [win32])
 	APR_SETIFNULL(have_unicode_fs, [1])
 	APR_SETIFNULL(have_proc_invoked, [1])
+	APR_SETIFNULL(apr_cv_use_lfs64, [yes])
 	;;
   esac
 
