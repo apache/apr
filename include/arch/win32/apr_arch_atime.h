@@ -36,7 +36,7 @@ struct atime_t {
 #define APR_DELTA_EPOCH_IN_USEC   APR_TIME_C(11644473600000000);
 
 
-__inline void FileTimeToAprTime(apr_time_t *result, FILETIME *input)
+static APR_INLINE void FileTimeToAprTime(apr_time_t *result, FILETIME *input)
 {
     /* Convert FILETIME one 64 bit number so we can work with it. */
     *result = input->dwHighDateTime;
@@ -48,7 +48,7 @@ __inline void FileTimeToAprTime(apr_time_t *result, FILETIME *input)
 }
 
 
-__inline void AprTimeToFileTime(LPFILETIME pft, apr_time_t t)
+static APR_INLINE void AprTimeToFileTime(LPFILETIME pft, apr_time_t t)
 {
     LONGLONG ll;
     t += APR_DELTA_EPOCH_IN_USEC;

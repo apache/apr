@@ -141,28 +141,28 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *);
 #if defined(_MSC_VER)
 #include "crtdbg.h"
 
-APR_INLINE void* apr_malloc_dbg(size_t size, const char* filename,
-                                int linenumber)
+static APR_INLINE void* apr_malloc_dbg(size_t size, const char* filename,
+                                       int linenumber)
 {
     return _malloc_dbg(size, _CRT_BLOCK, filename, linenumber);
 }
 
-APR_INLINE void* apr_realloc_dbg(void* userData, size_t newSize,
-                                 const char* filename, int linenumber)
+static APR_INLINE void* apr_realloc_dbg(void* userData, size_t newSize,
+                                        const char* filename, int linenumber)
 {
     return _realloc_dbg(userData, newSize, _CRT_BLOCK, filename, linenumber);
 }
 
 #else
 
-APR_INLINE void* apr_malloc_dbg(size_t size, const char* filename,
-                                int linenumber)
+static APR_INLINE void* apr_malloc_dbg(size_t size, const char* filename,
+                                       int linenumber)
 {
     return malloc(size);
 }
 
-APR_INLINE void* apr_realloc_dbg(void* userData, size_t newSize,
-                                 const char* filename, int linenumber)
+static APR_INLINE void* apr_realloc_dbg(void* userData, size_t newSize,
+                                        const char* filename, int linenumber)
 {
     return realloc(userData, newSize);
 }
@@ -186,7 +186,7 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
 #define APR_DECLARE_LATE_DLL_FUNC(lib, rettype, calltype, fn, ord, args, names) \
     typedef rettype (calltype *apr_winapi_fpt_##fn) args; \
     static apr_winapi_fpt_##fn apr_winapi_pfn_##fn = NULL; \
-    __inline rettype apr_winapi_##fn args \
+    static APR_INLINE rettype apr_winapi_##fn args \
     {   if (!apr_winapi_pfn_##fn) \
             apr_winapi_pfn_##fn = (apr_winapi_fpt_##fn) \
                                       apr_load_dll_func(lib, #fn, ord); \
