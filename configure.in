@@ -538,6 +538,7 @@ case $host in
       APR_CHECK_DLL_FUNC(shell32, CommandLineToArgvW@8)
       APR_CHECK_DLL_FUNC(kernel32,[CreateFileMappingA@24],
          [ac_cv_func_CreateFileMapping=$ac_cv_lib_kernel32_CreateFileMappingA])
+      APR_CHECK_DLL_FUNC(rpcrt4,[UuidCreate@4])
       ;;
    *)
       AC_SEARCH_LIBS(gethostbyname, nsl)
