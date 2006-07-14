@@ -423,6 +423,17 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(CPPFLAGS, [-DCYGWIN])
 	;;
     *mingw*)
+	dnl gcc (3.4.2 at least) seems to mis-optimize at levels greater than
+	dnl -O0 producing link-time errors.  The user can override by
+	dnl explicitly passing a CFLAGS value to configure.
+	dnl 
+	dnl Example error messages:
+	dnl undefined reference to 'libmsvcrt_a_iname'
+	dnl undefined reference to '_nm___pctype'
+	if test "$ac_test_CFLAGS" != set; then
+		APR_REMOVEFROM(CFLAGS,-O2)
+		APR_ADDTO(CFLAGS,-O0)
+	fi
 	APR_ADDTO(LDFLAGS, [-Wl,--enable-auto-import,--subsystem,console])
 	APR_SETIFNULL(apr_lock_method, [win32])
 	APR_SETIFNULL(have_unicode_fs, [1])
