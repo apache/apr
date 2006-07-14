@@ -19,7 +19,9 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#if !defined(__MINGW32__)
 #include <sys/wait.h>
+#endif
 #include <unistd.h>
 #include <dirent.h>
 #include <errno.h>
@@ -143,6 +145,21 @@
 #  define NEED_SNPRINTF
 #  define LD_RUN_PATH "LD_RUN_PATH"
 #  define LD_LIBRARY_PATH "LD_LIBRARY_PATH"
+#endif
+
+#if defined(__MINGW32__)
+#  define SHELL_CMD "sh"
+#  define DYNAMIC_LIB_EXT "dll"
+#  define MODULE_LIB_EXT  "dll"
+#  define STATIC_LIB_EXT "a"
+#  define OBJECT_EXT     "o"
+#  define LIBRARIAN      "ar"
+#  define LIBRARIAN_OPTS "cr"
+#  define RANLIB "ranlib"
+#  define LINKER_FLAG_PREFIX "-Wl,"
+#  define SHARED_OPTS "-shared"
+#  define MODULE_OPTS "-shared"
+#  define MKDIR_NO_UMASK
 #endif
 
 #ifndef SHELL_CMD
@@ -375,9 +392,13 @@ char *shell_esc(const char *str)
     unsigned char *d;
     const unsigned char *s;
 
-    cmd = (char *)malloc(2 * strlen(str) + 1);
+    cmd = (char *)malloc(2 * strlen(str) + 3);
     d = (unsigned char *)cmd;
     s = (const unsigned char *)str;
+
+#ifdef __MINGW32__
+    *d++ = '\"';
+#endif
 
     for (; *s; ++s) {
         if (*s == '"') {
@@ -389,6 +410,10 @@ char *shell_esc(const char *str)
         }
         *d++ = *s;
     }
+
+#ifdef __MINGW32__
+    *d++ = '\"';
+#endif
 
     *d = '\0';
     return cmd;
@@ -409,8 +434,8 @@ int external_spawn(command_t *cmd, const char *file, const char **argv)
     if (cmd->options.dry_run) {
         return 0;
     }
-#ifdef __EMX__
-    return spawnvp(P_WAIT, file, argv);
+#if defined(__EMX__) || defined(__MINGW32__)
+    return spawnvp(P_WAIT, argv[0], argv);
 #else
     {
         pid_t pid;
@@ -1380,7 +1405,11 @@ int explode_static_lib(const char *lib, command_t *cmd_data)
     strcpy(tmpdir, lib);
     strcat(tmpdir, ".exploded");
 
+#ifdef MKDIR_NO_UMASK
+    mkdir(tmpdir);
+#else
     mkdir(tmpdir, 0);
+#endif
     push_count_chars(cmd_data->tmp_dirs, strdup(tmpdir));
     getcwd(savewd, sizeof(savewd));
 
@@ -1721,7 +1750,11 @@ int run_mode(command_t *cmd_data)
             old_umask = umask(0);
             umask(old_umask);
 
+#ifdef MKDIR_NO_UMASK
+            mkdir(".libs");
+#else
             mkdir(".libs", ~old_umask);
+#endif
         }
 
         if (cmd_data->output == otStaticLibraryOnly ||
