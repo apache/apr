@@ -160,6 +160,7 @@
 #  define SHARED_OPTS "-shared"
 #  define MODULE_OPTS "-shared"
 #  define MKDIR_NO_UMASK
+#  define EXE_EXT ".exe"
 #endif
 
 #ifndef SHELL_CMD
@@ -1230,7 +1231,11 @@ int parse_output_file_name(char *arg, command_t *cmd_data)
         }
     }
 
+#ifdef EXE_EXT
+    if (!ext || strcmp(ext, EXE_EXT) == 0) {
+#else
     if (!ext) {
+#endif
         cmd_data->basename = arg;
         cmd_data->output = otProgram;
 #if defined(_OSD_POSIX)
@@ -1239,7 +1244,9 @@ int parse_output_file_name(char *arg, command_t *cmd_data)
         newarg = (char *)malloc(strlen(arg) + 5);
         strcpy(newarg, arg);
 #ifdef EXE_EXT
+	if (!ext) {
         strcat(newarg, EXE_EXT);
+	}
 #endif
         cmd_data->output_name = newarg;
         return 1;
