@@ -283,10 +283,6 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
     {
         apr_status_t rv;
         /* Validate that D:\ drive exists, test must be rooted
-         * Note that posix/win32 insists a drive letter is upper case,
-         * so who are we to argue with a 'feature'.
-         * It is a safe fold, since only A-Z is legal, and has no
-         * side effects of legal mis-mapped non-us-ascii codes.
          */
         newpath = apr_palloc(p, 4);
         newpath[0] = testpath[0];
@@ -294,7 +290,6 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
         newpath[2] = seperator[0];
         newpath[3] = '\0';
         if (flags & APR_FILEPATH_TRUENAME) {
-            newpath[0] = apr_toupper(newpath[0]);
             rv = filepath_root_test(newpath, p);
             if (rv)
                 return rv;
