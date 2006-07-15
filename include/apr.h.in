@@ -402,6 +402,13 @@ typedef  @socklen_t_value@       apr_socklen_t;
 typedef int apr_wait_t;
 #endif /* HAVE_SYS_WAIT_H */
 
+/* XXXX: These don't belong here, but it is replicating what apr.hw does. */
+#ifdef __MINGW32__
+typedef  int         pid_t;
+typedef  int         uid_t;
+typedef  int         gid_t;
+#endif
+
 #if defined(PATH_MAX)
 #define APR_PATH_MAX       PATH_MAX
 #elif defined(_POSIX_PATH_MAX)
