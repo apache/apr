@@ -398,6 +398,8 @@ typedef  @socklen_t_value@       apr_socklen_t;
 #define WEXITSTATUS(status)    (int)((status).w_retcode)
 #define WTERMSIG(status)       (int)((status).w_termsig)
 #endif /* !WEXITSTATUS */
+#elif defined(__MINGW32__)
+typedef int apr_wait_t;
 #endif /* HAVE_SYS_WAIT_H */
 
 #if defined(PATH_MAX)
