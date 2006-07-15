@@ -188,11 +188,13 @@ def resolve_deps(header_deps):
       if len(deps) != start:
         altered = 1
 
+def clean_path(path):
+    return path.replace("\\", "/")
 
 def get_files(patterns):
   files = [ ]
   for pat in string.split(patterns):
-    files.extend(glob.glob(pat))
+    files.extend(map(clean_path, glob.glob(pat)))
   return files
 
 
