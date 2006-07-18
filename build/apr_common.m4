@@ -444,11 +444,11 @@ dnl A variant of AC_CHECK_SIZEOF which allows the checking of
 dnl sizes of non-builtin types
 dnl
 AC_DEFUN([APR_CHECK_SIZEOF_EXTENDED],
-[changequote(<<,>>)dnl
-dnl The name to #define
-define(<<AC_TYPE_NAME>>, translit(sizeof_$2, [a-z ], [A-Z_]))dnl
-dnl The cache variable
-define(<<AC_CV_NAME>>, translit(ac_cv_sizeof_$2, [A-Z ],[a-z_]))dnl
+[changequote(<<, >>)dnl
+dnl The name to #define.
+define(<<AC_TYPE_NAME>>, translit(sizeof_$2, [a-z *], [A-Z_P]))dnl
+dnl The cache variable name.
+define(<<AC_CV_NAME>>, translit(ac_cv_sizeof_$2, [ *], [_p]))dnl
 changequote([, ])dnl
 AC_MSG_CHECKING(size of $2)
 AC_CACHE_VAL(AC_CV_NAME,
@@ -456,7 +456,7 @@ AC_CACHE_VAL(AC_CV_NAME,
 $1
 main()
 {
-  FILE *f=fopen("conftestval","w");
+  FILE *f=fopen("conftestval", "w");
   if (!f) exit(1);
   fprintf(f, "%d\n", sizeof($2));
   exit(0);
