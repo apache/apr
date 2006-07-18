@@ -1408,7 +1408,8 @@ case $host in
         ;;
 esac
 
-APR_CHECK_SIZEOF_EXTENDED([#include <sys/uio.h>],struct iovec,0)
+APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>
+#include <sys/uio.h>],struct iovec,0)
 if test "$ac_cv_sizeof_struct_iovec" = "0"; then
     have_iovec=0
 else
