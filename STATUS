@@ -379,6 +379,10 @@ Documentation that needs writing:
 
 API Changes Postponed for APR 2.0:
 
+    * apr_atomic_casptr() has the volatile qualifier in the wrong
+      place: should take "pointer to volatile pointer to void", not
+      "pointer to pointer to volatile void".
+
     * apr_socket_sendfile(): the offset parameter should not be
       pass-by-reference, or it should be updated to do something
       useful.
