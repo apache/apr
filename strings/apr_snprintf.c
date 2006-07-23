@@ -463,8 +463,7 @@ static char *conv_in_addr(struct in_addr *ia, char *buf_end, apr_size_t *len)
 }
 
 
-/* Must be passed a buffer of size NUM_BUF_SIZE where buf_end points
- * to 1 byte past the end of the buffer. */
+
 static char *conv_apr_sockaddr(apr_sockaddr_t *sa, char *buf_end, apr_size_t *len)
 {
     char *p = buf_end;
@@ -474,14 +473,7 @@ static char *conv_apr_sockaddr(apr_sockaddr_t *sa, char *buf_end, apr_size_t *le
 
     p = conv_10(sa->port, TRUE, &is_negative, p, &sub_len);
     *--p = ':';
-    ipaddr_str = buf_end - NUM_BUF_SIZE;
-    if (apr__sockaddr_ip_getbuf(ipaddr_str, sa->addr_str_len, sa)) {
-        /* Should only fail if the buffer is too small, which it
-         * should not be; but fail safe anyway: */
-        *--p = '?';
-        *len = buf_end - p;
-        return p;
-    }
+    apr_sockaddr_ip_get(&ipaddr_str, sa);
     sub_len = strlen(ipaddr_str);
 #if APR_HAVE_IPV6
     if (sa->family == APR_INET6 &&
