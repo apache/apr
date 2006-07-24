@@ -91,6 +91,24 @@ static void merge_dotdot(CuTest *tc)
     CuAssertStrEquals(tc, "../test", dstpath);
 }
 
+static void merge_dotdot_dotdot_dotdot(CuTest *tc)
+{
+    apr_status_t rv;
+    char *dstpath = NULL;
+
+    rv = apr_filepath_merge(&dstpath, "", 
+                            "../../..", APR_FILEPATH_TRUENAME, p);
+    CuAssertPtrNotNull(tc, dstpath);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertStrEquals(tc, "../../..", dstpath);
+
+    rv = apr_filepath_merge(&dstpath, "", 
+                            "../../../", APR_FILEPATH_TRUENAME, p);
+    CuAssertPtrNotNull(tc, dstpath);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertStrEquals(tc, "../../../", dstpath);
+}
+
 static void merge_secure(CuTest *tc)
 {
     apr_status_t rv;
@@ -232,6 +250,7 @@ CuSuite *testnames(void)
     SUITE_ADD_TEST(suite, merge_notrelfail);
     SUITE_ADD_TEST(suite, merge_notabs);
     SUITE_ADD_TEST(suite, merge_notabsfail);
+    SUITE_ADD_TEST(suite, merge_dotdot_dotdot_dotdot);
 
     SUITE_ADD_TEST(suite, root_absolute);
     SUITE_ADD_TEST(suite, root_relative);
