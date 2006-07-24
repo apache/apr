@@ -91,6 +91,24 @@ static void merge_dotdot(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, "../test", dstpath);
 }
 
+static void merge_dotdot_dotdot_dotdot(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    char *dstpath = NULL;
+
+    rv = apr_filepath_merge(&dstpath, "", 
+                            "../../..", APR_FILEPATH_TRUENAME, p);
+    ABTS_PTR_NOTNULL(tc, dstpath);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, "../../..", dstpath);
+
+    rv = apr_filepath_merge(&dstpath, "", 
+                            "../../../", APR_FILEPATH_TRUENAME, p);
+    ABTS_PTR_NOTNULL(tc, dstpath);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, "../../../", dstpath);
+}
+
 static void merge_secure(abts_case *tc, void *data)
 {
     apr_status_t rv;
@@ -249,6 +267,7 @@ abts_suite *testnames(abts_suite *suite)
     abts_run_test(suite, merge_notrelfail, NULL);
     abts_run_test(suite, merge_notabs, NULL);
     abts_run_test(suite, merge_notabsfail, NULL);
+    abts_run_test(suite, merge_dotdot_dotdot_dotdot, NULL);
 
     abts_run_test(suite, root_absolute, NULL);
     abts_run_test(suite, root_relative, NULL);
