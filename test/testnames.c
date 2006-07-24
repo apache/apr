@@ -100,7 +100,7 @@ static void merge_dotdot_dotdot_dotdot(abts_case *tc, void *data)
                             "../../..", APR_FILEPATH_TRUENAME, p);
     ABTS_PTR_NOTNULL(tc, dstpath);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_STR_EQUAL(tc, "../../../", dstpath);
+    ABTS_STR_EQUAL(tc, "../../..", dstpath);
 
     rv = apr_filepath_merge(&dstpath, "", 
                             "../../../", APR_FILEPATH_TRUENAME, p);
