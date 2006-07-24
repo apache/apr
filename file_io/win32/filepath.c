@@ -677,16 +677,22 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 /* Otherwise this is simply a noop, above root is root.
                  */
             }
-            else if (pathlen == 0 ||
-                     (pathlen >= 3 && (pathlen == 3
-                                    || path[pathlen - 4] == ':')
-                                   &&  path[pathlen - 3] == '.' 
-                                   &&  path[pathlen - 2] == '.' 
-                                   && (path[pathlen - 1] == '/' 
-                                    || path[pathlen - 1] == '\\')))
+            else if (pathlen == 0 
+                      || (pathlen >= 3 
+                           && (pathlen == 3
+                                || path[pathlen - 4] == ':'
+                                || path[pathlen - 4] == '/' 
+                                || path[pathlen - 4] == '\\')
+                           &&  path[pathlen - 3] == '.' 
+                           &&  path[pathlen - 2] == '.' 
+                           && (path[pathlen - 1] == '/' 
+                                || path[pathlen - 1] == '\\')))
             {
-                /* Path is already backpathed or empty, if the
-                 * APR_FILEPATH_SECUREROOTTEST.was given die now.
+                /* Verified path is empty, exactly "..[/\]", or ends
+                 * in "[:/\]..[/\]" - these patterns we will not back
+                 * over since they aren't 'prior segements'.
+                 * 
+                 * If APR_FILEPATH_SECUREROOTTEST.was given, die now.
                  */
                 if (flags & APR_FILEPATH_SECUREROOTTEST)
                     return APR_EABOVEROOT;
@@ -695,9 +701,13 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                  */
                 if (pathlen + 3 >= sizeof(path))
                     return APR_ENAMETOOLONG;
-                memcpy(path + pathlen, ((flags & APR_FILEPATH_NATIVE) 
-                                          ? "..\\" : "../"), 3);
-                pathlen += 3;
+                path[pathlen++] = '.';
+                path[pathlen++] = '.';
+                if (addpath[segend]) {
+                    path[pathlen++] = ((flags & APR_FILEPATH_NATIVE) 
+                                    ? '\\' : ((flags & APR_FILEPATH_TRUENAME)
+                                           ? '/' : addpath[segend]));
+                }
                 /* The 'root' part of this path now includes the ../ path,
                  * because that backpath will not be parsed by the truename
                  * code below.
