@@ -242,8 +242,8 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
             }
             rv = GetNamedSecurityInfoW(wfile + fix, 
                                  SE_FILE_OBJECT, sinf,
-                                 ((wanted & APR_FINFO_USER) ? &user : NULL),
-                                 ((wanted & APR_FINFO_GROUP) ? &grp : NULL),
+                                 ((wanted & (APR_FINFO_USER | APR_FINFO_UPROT)) ? &user : NULL),
+                                 ((wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT)) ? &grp : NULL),
                                  ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
                                  NULL, &pdesc);
             if (fix == 6)
@@ -252,15 +252,15 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
         else if (whatfile == MORE_OF_FSPEC)
             rv = GetNamedSecurityInfoA((char*)ufile, 
                                  SE_FILE_OBJECT, sinf,
-                                 ((wanted & APR_FINFO_USER) ? &user : NULL),
-                                 ((wanted & APR_FINFO_GROUP) ? &grp : NULL),
+                                 ((wanted & (APR_FINFO_USER | APR_FINFO_UPROT)) ? &user : NULL),
+                                 ((wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT)) ? &grp : NULL),
                                  ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
                                  NULL, &pdesc);
         else if (whatfile == MORE_OF_HANDLE)
             rv = GetSecurityInfo((HANDLE)ufile, 
                                  SE_FILE_OBJECT, sinf,
-                                 ((wanted & APR_FINFO_USER) ? &user : NULL),
-                                 ((wanted & APR_FINFO_GROUP) ? &grp : NULL),
+                                 ((wanted & (APR_FINFO_USER | APR_FINFO_UPROT)) ? &user : NULL),
+                                 ((wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT)) ? &grp : NULL),
                                  ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
                                  NULL, &pdesc);
         else
