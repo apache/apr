@@ -326,6 +326,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         else {
             return APR_EACCES;
         }
+        if (flag & APR_READCONTROL)
+            oflags |= READ_CONTROL;
     }
 
     if (flag & APR_XTHREAD) {
