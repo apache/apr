@@ -63,6 +63,9 @@ sub tovc5 {
 	    if ($src =~ s|^(# ADD BASE CPP .*)/EHsc (.*)|$1/GX $2|) {
 		$verchg = -1;
 	    }
+	    while ($src =~ s|^(# ADD RSC .*)/d "([^ ="]+)=([^"]+)"|$1/d $2="$3"|) {
+		$verchg = -1;
+	    }
 	    if ($src !~ m|^# PROP AllowPerConfigDependencies|) {
 		print $dstfl $src; }
 	    else {
@@ -105,6 +108,9 @@ sub tovc6 {
 	    if ($src =~ s|^(# ADD BASE CPP .*)/GX (.*)|$1/EHsc $2|) {
 		$verchg = -1;
 	    }
+	    while ($src =~ s|^(# ADD RSC .*)/d "([^ ="]+)=([^"]+)"|$1/d $2="$3"|) {
+		$verchg = -1;
+	    }
             print $dstfl $src; 
 	    if ($verchg && $src =~ m|^# Begin Project|) {
 		print $dstfl "# PROP AllowPerConfigDependencies 0\n"; 
@@ -136,6 +142,9 @@ sub tovc2005 {
 		$verchg = -1;
 	    }
 	    if ($src =~ s|(\bLINK32.*) /machine:I386(.*)|$1$2|) {
+		$verchg = -1;
+	    }
+	    if ($src =~ s|^(# ADD RSC .*)/d ([^ ="]+)="([^"]+)"|$1/d "$2=$3"|) {
 		$verchg = -1;
 	    }
             print $dstfl $src; 
