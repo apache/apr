@@ -144,7 +144,7 @@ sub tovc2005 {
 	    if ($src =~ s|(\bLINK32.*) /machine:I386(.*)|$1$2|) {
 		$verchg = -1;
 	    }
-	    if ($src =~ s|^(# ADD RSC .*)/d ([^ ="]+)="([^"]+)"|$1/d "$2=$3"|) {
+	    while ($src =~ s|^(# ADD RSC .*)/d ([^ ="]+)="([^"]+)"|$1/d "$2=$3"|) {
 		$verchg = -1;
 	    }
             print $dstfl $src; 
