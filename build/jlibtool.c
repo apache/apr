@@ -65,7 +65,8 @@
 #  define PIC_FLAG "-fPIC -fno-common"
 #  define SHARED_OPTS "-dynamiclib"
 #  define MODULE_OPTS "-bundle"
-#  define DYNAMIC_LINK_OPTS "-flat_namespace -undefined suppress"
+#  define DYNAMIC_LINK_OPTS "-flat_namespace"
+#  define DYNAMIC_LINK_UNDEFINED "-undefined suppress"
 #  define dynamic_link_version_func darwin_dynamic_link_function
 #  define DYNAMIC_INSTALL_NAME "-install_name"
 #  define DYNAMIC_LINK_NO_INSTALL "-dylib_file"
@@ -274,6 +275,7 @@ typedef struct {
     library_opts shared_opts;
 
     const char *version_info;
+    const char *undefined_flag;
 } command_t;
 
 #ifdef RPATH
@@ -932,6 +934,38 @@ char * load_noinstall_path(const char *arg, int pathlen)
     return expanded_path;
 }
 
+void add_dynamic_link_opts(command_t *cmd_data)
+{
+#ifdef DYNAMIC_LINK_OPTS
+    if (cmd_data->options.pic_mode != pic_AVOID) {
+        push_count_chars(cmd_data->program_opts,
+                         DYNAMIC_LINK_OPTS);
+        if (cmd_data->undefined_flag) {
+            push_count_chars(cmd_data->program_opts, "-undefined");
+#if defined(__APPLE__)
+            /* -undefined dynamic_lookup is used by the bundled Python in
+             * 10.4, but if we don't set MACOSX_DEPLOYMENT_TARGET to 10.3+,
+             * we'll get a linker error if we pass this flag.
+             */
+            if (strcasecmp(cmd_data->undefined_flag,
+                           "dynamic_lookup") == 0) {
+                insert_count_chars(cmd_data->program_opts,
+                                   "MACOSX_DEPLOYMENT_TARGET=10.3", 0);
+            }
+#endif
+            push_count_chars(cmd_data->program_opts,
+                             cmd_data->undefined_flag);
+        }
+        else {
+#ifdef DYNAMIC_LINK_UNDEFINED
+            push_count_chars(cmd_data->program_opts,
+                             DYNAMIC_LINK_UNDEFINED);
+#endif
+        }
+    }
+#endif
+}
+
 /* Read the final install location and add it to runtime library search path. */
 #ifdef RPATH
 void add_rpath(count_chars *cc, const char *path)
@@ -1375,6 +1409,9 @@ void parse_args(int argc, char *argv[], command_t *cmd_data)
                     /* Skip the argument. */
                     ++a;
                     argused = 1;
+                } else if (strcmp(arg+1, "undefined") == 0) {
+                    cmd_data->undefined_flag = argv[++a];
+                    argused = 1;
                 } else if (arg[1] == 'R' && !arg[2]) {
                     /* -R dir Add dir to runtime library search path. */
                     add_runtimedirlib(argv[++a], cmd_data);
@@ -1588,11 +1625,7 @@ void link_fixup(command_t *c)
             push_count_chars(c->arglist, c->output_name);
             append_count_chars(c->arglist, c->obj_files);
             append_count_chars(c->arglist, c->shared_opts.dependencies);
-#ifdef DYNAMIC_LINK_OPTS
-            if (c->options.pic_mode != pic_AVOID) {
-                push_count_chars(c->arglist, DYNAMIC_LINK_OPTS);
-            }
-#endif
+            add_dynamic_link_opts(c);
         }
     }
 }
@@ -1809,12 +1842,8 @@ int run_mode(command_t *cmd_data)
                 push_count_chars(cmd_data->program_opts, MODULE_OPTS);
 #endif
             }
-#ifdef DYNAMIC_LINK_OPTS
-            if (cmd_data->options.pic_mode != pic_AVOID) {
-                push_count_chars(cmd_data->program_opts,
-                                 DYNAMIC_LINK_OPTS);
-            }
-#endif
+            add_dynamic_link_opts(cmd_data);
+
             rv = run_command(cmd_data, cmd_data->shared_opts.normal);
             if (rv) {
                 return rv;
