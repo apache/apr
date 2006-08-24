@@ -934,14 +934,16 @@ char * load_noinstall_path(const char *arg, int pathlen)
     return expanded_path;
 }
 
-void add_dynamic_link_opts(command_t *cmd_data)
+void add_dynamic_link_opts(command_t *cmd_data, count_chars *args)
 {
 #ifdef DYNAMIC_LINK_OPTS
     if (cmd_data->options.pic_mode != pic_AVOID) {
-        push_count_chars(cmd_data->program_opts,
-                         DYNAMIC_LINK_OPTS);
+        if (!cmd_data->options.silent) {
+           printf("Adding: %s\n", DYNAMIC_LINK_OPTS);
+        }
+        push_count_chars(args, DYNAMIC_LINK_OPTS);
         if (cmd_data->undefined_flag) {
-            push_count_chars(cmd_data->program_opts, "-undefined");
+            push_count_chars(args, "-undefined");
 #if defined(__APPLE__)
             /* -undefined dynamic_lookup is used by the bundled Python in
              * 10.4, but if we don't set MACOSX_DEPLOYMENT_TARGET to 10.3+,
@@ -953,13 +955,14 @@ void add_dynamic_link_opts(command_t *cmd_data)
                                    "MACOSX_DEPLOYMENT_TARGET=10.3", 0);
             }
 #endif
-            push_count_chars(cmd_data->program_opts,
-                             cmd_data->undefined_flag);
+            push_count_chars(args, cmd_data->undefined_flag);
         }
         else {
 #ifdef DYNAMIC_LINK_UNDEFINED
-            push_count_chars(cmd_data->program_opts,
-                             DYNAMIC_LINK_UNDEFINED);
+            if (!cmd_data->options.silent) {
+                printf("Adding: %s\n", DYNAMIC_LINK_UNDEFINED);
+            }
+            push_count_chars(args, DYNAMIC_LINK_UNDEFINED);
 #endif
         }
     }
@@ -1388,7 +1391,7 @@ void parse_args(int argc, char *argv[], command_t *cmd_data)
                     argused = parse_output_file_name(arg, cmd_data);
                 } else if (strcmp(arg+1, "MT") == 0) {
                     if (!cmd_data->options.silent) {
-                        printf("Adding: %s", arg);
+                        printf("Adding: %s\n", arg);
                     }
                     push_count_chars(cmd_data->arglist, arg);
                     arg = argv[++a];
@@ -1625,7 +1628,7 @@ void link_fixup(command_t *c)
             push_count_chars(c->arglist, c->output_name);
             append_count_chars(c->arglist, c->obj_files);
             append_count_chars(c->arglist, c->shared_opts.dependencies);
-            add_dynamic_link_opts(c);
+            add_dynamic_link_opts(c, c->arglist);
         }
     }
 }
@@ -1842,7 +1845,7 @@ int run_mode(command_t *cmd_data)
                 push_count_chars(cmd_data->program_opts, MODULE_OPTS);
 #endif
             }
-            add_dynamic_link_opts(cmd_data);
+            add_dynamic_link_opts(cmd_data, cmd_data->program_opts);
 
             rv = run_command(cmd_data, cmd_data->shared_opts.normal);
             if (rv) {
