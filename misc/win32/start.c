@@ -234,7 +234,12 @@ static void threadkey_detach()
         void *data;
         apr_hash_this(hi, &key, NULL, (void **)&dest);
         data = TlsGetValue(*key);
-        (*dest)(data);
+        if (data != NULL || GetLastError() == ERROR_SUCCESS) {
+            /* NULL data is a valid TLS value if explicitly set
+             * by the TlsSetValue
+             */
+            (*dest)(data);
+        }
     }
 }
 
