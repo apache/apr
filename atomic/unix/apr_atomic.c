@@ -179,7 +179,7 @@ APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem,
 #endif /* APR_OVERRIDE_ATOMIC_CAS32 */
 
 #if !defined(APR_OVERRIDE_ATOMIC_DEC32)
-APR_DECLARE(apr_uint32_t) apr_atomic_dec32(volatile apr_uint32_t *mem)
+APR_DECLARE(int) apr_atomic_dec32(volatile apr_uint32_t *mem)
 {
     apr_uint32_t prev = *mem;
     atomic_dec_32(mem);
