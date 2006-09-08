@@ -617,7 +617,7 @@ AC_CHECK_HEADERS([sys/mman.h sys/ipc.h sys/mutex.h sys/shm.h sys/file.h kernel/O
 AC_CHECK_FUNCS([mmap munmap shm_open shm_unlink shmget shmat shmdt shmctl \
                 create_area])
 APR_CHECK_DEFINE(MAP_ANON, sys/mman.h)
-APR_CHECK_FILE(/dev/zero)
+AC_CHECK_FILE(/dev/zero)
 
 # Not all systems can mmap /dev/zero (such as HP-UX).  Check for that.
 if test "$ac_cv_func_mmap" = "yes" &&
