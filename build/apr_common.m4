@@ -348,6 +348,7 @@ CPPFLAGS=$apr_old_cppflags
 
 dnl APR_CHECK_FILE(filename); set ac_cv_file_filename to
 dnl "yes" if 'filename' is readable, else "no".
+dnl @deprecated! - use AC_CHECK_FILE instead
 AC_DEFUN([APR_CHECK_FILE], [
 dnl Pick a safe variable name
 define([apr_cvname], ac_cv_file_[]translit([$1], [./+-], [__p_]))
