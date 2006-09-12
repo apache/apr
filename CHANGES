@@ -1,4 +1,5 @@
 Changes for APR 1.3.0
+  *) Add apr_hash_clear.  [Daniel L. Rall <dlr apache.org>]
 
   *) Don't try to build apr_app.c on MinGW.
      [Matthias Miller <Blog outofhanwell.com>]

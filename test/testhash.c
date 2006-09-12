@@ -152,6 +152,24 @@ static void key_space(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, "value", result);
 }
 
+static void hash_clear(abts_case *tc, void *data)
+{
+    apr_hash_t *h;
+    int i, *e;
+
+    h = apr_hash_make(p);
+    ABTS_PTR_NOTNULL(tc, h);
+
+    for (i = 1; i <= 10; i++) {
+        e = apr_palloc(p, sizeof(int));
+        *e = i;
+        apr_hash_set(h, e, sizeof(*e), e);
+    }
+    apr_hash_clear(h);
+    i = apr_hash_count(h);
+    ABTS_INT_EQUAL(tc, 0, i);
+}
+
 /* This is kind of a hack, but I am just keeping an existing test.  This is
  * really testing apr_hash_first, apr_hash_next, and apr_hash_this which 
  * should be tested in three separate tests, but this will do for now.
@@ -419,6 +437,7 @@ abts_suite *testhash(abts_suite *suite)
     abts_run_test(suite, hash_count_1, NULL);
     abts_run_test(suite, hash_count_5, NULL);
 
+    abts_run_test(suite, hash_clear, NULL);
     abts_run_test(suite, hash_traverse, NULL);
     abts_run_test(suite, summation_test, NULL);
 
