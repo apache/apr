@@ -146,6 +146,8 @@ def write_objects(f, legal_deps, h_deps, files):
   objects = [ ]
 
   for file in files:
+    if file[-10:] == '/apr_app.c':
+      continue
     assert file[-2:] == '.c'
     obj = file[:-2] + '.lo'
     objects.append(obj)
