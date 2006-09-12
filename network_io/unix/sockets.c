@@ -153,6 +153,22 @@ apr_status_t apr_socket_listen(apr_socket_t *sock, apr_int32_t backlog)
 apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
                                apr_pool_t *connection_context)
 {
+    int s;
+    apr_sockaddr_t sa;
+
+    apr_sockaddr_vars_set(&sa, sock->local_addr->sa.sin.sin_family, 0);
+    sa.pool = connection_context;
+    s = accept(sock->socketdes, (struct sockaddr *)&sa.sa, &sa.salen);
+
+    if (s < 0) {
+        return errno;
+    }
+#ifdef TPF
+    if (s == 0) { 
+        /* 0 is an invalid socket for TPF */
+        return APR_EINTR;
+    }
+#endif
     alloc_socket(new, connection_context);
     set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM, sock->protocol);
 
@@ -160,20 +176,11 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
     (*new)->connected = 1;
 #endif
     (*new)->timeout = -1;
-    
-    (*new)->socketdes = accept(sock->socketdes, 
-                               (struct sockaddr *)&(*new)->remote_addr->sa,
-                               &(*new)->remote_addr->salen);
 
-    if ((*new)->socketdes < 0) {
-        return errno;
-    }
-#ifdef TPF
-    if ((*new)->socketdes == 0) { 
-        /* 0 is an invalid socket for TPF */
-        return APR_EINTR;
-    }
-#endif
+    (*new)->remote_addr_unknown = 0;
+
+    (*new)->socketdes = s;
+    *(*new)->remote_addr = sa;
 
     *(*new)->local_addr = *sock->local_addr;
 
