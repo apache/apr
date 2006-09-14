@@ -179,6 +179,7 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
     int s;
     apr_sockaddr_t sa;
 
+    memset(&sa, 0, sizeof(apr_sockaddr_t));
     apr_sockaddr_vars_set(&sa, sock->local_addr->sa.sin.sin_family, 0);
     sa.pool = connection_context;
     s = accept(sock->socketdes, (struct sockaddr *)&sa.sa, &sa.salen);
