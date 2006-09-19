@@ -179,9 +179,8 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
     int s;
     apr_sockaddr_t sa;
 
-    memset(&sa, 0, sizeof(apr_sockaddr_t));
-    apr_sockaddr_vars_set(&sa, sock->local_addr->sa.sin.sin_family, 0);
-    sa.pool = connection_context;
+    sa.salen = sizeof(sa.sa);
+
     s = accept(sock->socketdes, (struct sockaddr *)&sa.sa, &sa.salen);
 
     if (s < 0) {
@@ -204,7 +203,10 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
     (*new)->remote_addr_unknown = 0;
 
     (*new)->socketdes = s;
-    *(*new)->remote_addr = sa;
+
+    /* Copy in peer's address. */
+    (*new)->remote_addr->sa = sa.sa;
+    (*new)->remote_addr->salen = sa.salen;
 
     *(*new)->local_addr = *sock->local_addr;
 
