@@ -239,6 +239,18 @@ static void root_from_cwd_and_back(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, '/', root[2]);
     ABTS_INT_EQUAL(tc, 0, root[3]);
     ABTS_STR_EQUAL(tc, origpath + 3, path);
+#elif defined(NETWARE)
+    ABTS_INT_EQUAL(tc, origpath[0], root[0]);
+    {
+    char *pt = strchr(root, ':');
+    ABTS_PTR_NOTNULL(tc, pt);
+    ABTS_INT_EQUAL(tc, ':', pt[0]);
+    ABTS_INT_EQUAL(tc, '/', pt[1]);
+    ABTS_INT_EQUAL(tc, 0, pt[2]);
+    pt = strchr(origpath, ':');
+    ABTS_PTR_NOTNULL(tc, pt);
+    ABTS_STR_EQUAL(tc, (pt+2), path);
+    }
 #else
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_STR_EQUAL(tc, "/", root);
