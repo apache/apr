@@ -225,10 +225,11 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                     return APR_EABOVEROOT;
                 }
 
-                /* Otherwise append another backpath.
+                /* Otherwise append another backpath, including
+                 * trailing slash if present.
                  */
-                memcpy(path + pathlen, "../", 3);
-                pathlen += 3;
+                memcpy(path + pathlen, "../", *next ? 3 : 2);
+                pathlen += *next ? 3 : 2;
             }
             else {
                 /* otherwise crop the prior segment
