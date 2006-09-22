@@ -1347,7 +1347,15 @@ case $host in
         size_t_fmt='#define APR_SIZE_T_FMT "ld"'
         ;;
     *apple-darwin*)
-        ssize_t_fmt='#define APR_SSIZE_T_FMT "d"'
+        osver=`uname -r`
+        case $osver in
+           [0-7].*)
+              ssize_t_fmt='#define APR_SSIZE_T_FMT "d"'
+              ;;
+           *)
+              ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
+              ;;
+        esac
         size_t_fmt='#define APR_SIZE_T_FMT "lu"'
         ;;
 esac
