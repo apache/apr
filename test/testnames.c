@@ -222,6 +222,18 @@ static void root_from_cwd_and_back(CuTest *tc)
     CuAssertIntEquals(tc, '/', root[2]);
     CuAssertIntEquals(tc, 0, root[3]);
     CuAssertStrEquals(tc, origpath + 3, path);
+#elif defined(NETWARE)
+    CuAssertIntEquals(tc, origpath[0], root[0]);
+    {
+    char *pt = strchr(root, ':');
+    CuAssertPtrNotNull(tc, pt);
+    CuAssertIntEquals(tc, ':', pt[0]);
+    CuAssertIntEquals(tc, '/', pt[1]);
+    CuAssertIntEquals(tc, 0, pt[2]);
+    pt = strchr(origpath, ':');
+    CuAssertPtrNotNull(tc, pt);
+    CuAssertStrEquals(tc, (pt+2), path);
+    }
 #else
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertStrEquals(tc, "/", root);
