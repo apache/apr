@@ -225,7 +225,7 @@ APR_DECLARE(int) apr_fnmatch_test(const char *pattern)
 	    return 1;
 
 	case '\\':
-	    if (*pattern++ == '\0') {
+	    if (*++pattern == '\0') {
 		return 0;
 	    }
 	    break;
