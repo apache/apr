@@ -105,7 +105,7 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
         !(flags & APR_POLLSET_NOCOPY) &&
         ((rv = apr_thread_mutex_create(&(*pollset)->ring_lock,
                                        APR_THREAD_MUTEX_DEFAULT,
-                                       p) != APR_SUCCESS))) {
+                                       p)) != APR_SUCCESS)) {
         *pollset = NULL;
         return rv;
     }
