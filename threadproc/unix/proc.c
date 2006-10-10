@@ -355,7 +355,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
              * caller can choose to pass full path for other
              * values of cmdtype
              */
-            if (access(progname, R_OK|X_OK) == -1) {
+            if (access(progname, X_OK) == -1) {
                 /* exec*() in child wouldn't have worked */
                 return errno;
             }
