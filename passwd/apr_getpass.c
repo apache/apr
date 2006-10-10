@@ -48,6 +48,12 @@
 #include <strings.h>
 #endif
 
+/* Disable getpass() support when PASS_MAX is defined and is "small",
+ * for an arbitrary definition of "small". */
+#if defined(HAVE_GETPASS) && defined(PASS_MAX) && PASS_MAX < 32
+#undef HAVE_GETPASS
+#endif
+
 #if defined(HAVE_TERMIOS_H) && !defined(HAVE_GETPASS)
 #include <termios.h>
 #endif
