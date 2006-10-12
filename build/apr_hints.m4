@@ -176,6 +176,9 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
           APR_SETIFNULL(ac_cv_func_kqueue, no)
         fi
 	;;
+    *-k*bsd*-gnu)
+        APR_ADDTO(CPPFLAGS, [-D_REENTRANT -D_GNU_SOURCE])
+        ;;
     *-next-nextstep*)
 	APR_SETIFNULL(CFLAGS, [-O])
 	APR_ADDTO(CPPFLAGS, [-DNEXT])
