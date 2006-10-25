@@ -159,8 +159,9 @@ static void sendto_receivefrom(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_INT_EQUAL(tc, STRLEN, len);
 
-    /* Zero out the port so we can be sure it's been set by recvfrom. */
-    from->port = 0;
+    /* fill the "from" sockaddr with a random address to ensure that
+     * recvfrom sets it up properly. */
+    apr_sockaddr_info_get(&from, "127.1.2.3", APR_INET, 4242, 0, p);
 
     len = 80;
     rv = apr_socket_recvfrom(from, sock, 0, recvbuf, &len);

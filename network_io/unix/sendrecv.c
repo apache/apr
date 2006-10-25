@@ -148,6 +148,8 @@ apr_status_t apr_socket_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
                                  apr_size_t *len)
 {
     apr_ssize_t rv;
+    
+    from->salen = sizeof(from->sa);
 
     do {
         rv = recvfrom(sock->socketdes, buf, (*len), flags, 
@@ -172,7 +174,7 @@ apr_status_t apr_socket_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
         return errno;
     }
 
-    from->port = ntohs(from->sa.sin.sin_port);
+    apr_sockaddr_vars_set(from, from->sa.sin.sin_family, ntohs(from->sa.sin.sin_port));
 
     (*len) = rv;
     if (rv == 0 && sock->type == SOCK_STREAM) {
