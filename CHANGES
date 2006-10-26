@@ -1,4 +1,6 @@
 Changes for APR 1.2.8
+  *) Portably check for EEXIST in mktemp code.  PR 40818
+     [Kenneth Golomb <KGolomb TradeCard.com>]
 
   *) Fix apr_snprintf/apr_vsnprintf return value to not count the
      NUL terminator in the overflow case.  PR 39996.
