@@ -1,4 +1,6 @@
 Changes for APR 1.3.0
+  *) Portably check for EEXIST in mktemp code.  PR 40818
+     [Kenneth Golomb <KGolomb TradeCard.com>]
 
   *) Fix apr_socket_recvfrom() to ensure the peer's address is returned
      through the "from" parameter.  [Joe Orton]
