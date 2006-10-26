@@ -142,7 +142,7 @@ static int gettemp(char *path, apr_file_t **doopen, apr_int32_t flags, apr_pool_
         if ((rv = apr_file_open(doopen, path, flags,
                                 APR_UREAD | APR_UWRITE, p)) == APR_SUCCESS)
             return APR_SUCCESS;
-        if (rv != APR_EEXIST)
+        if (!APR_STATUS_IS_EEXIST(rv))
             return rv;
 
         /* If we have a collision, cycle through the space of filenames */

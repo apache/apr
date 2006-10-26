@@ -1,4 +1,6 @@
 Changes with APR 0.9.13
+  *) Portably check for EEXIST in mktemp code.  PR 40818
+     [Kenneth Golomb <KGolomb TradeCard.com>]
 
   *) Fix apr_atomic_cas on platforms with 64 bit longs.
      [Philip Martin <philip codematters.co.uk>]
