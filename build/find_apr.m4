@@ -129,7 +129,7 @@ AC_DEFUN([APR_FIND_APR], [
           break
         else
           dnl look in some standard places
-          for lookdir in /usr /usr/local /usr/local/apr /opt/apr /usr/local/apache2; do
+          for lookdir in /usr /usr/local /usr/local/apr /opt/apr; do
             if $TEST_X "$lookdir/bin/$apr_temp_apr_config_file"; then
               apr_found="yes"
               apr_config="$lookdir/bin/$apr_temp_apr_config_file"
