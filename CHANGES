@@ -1,4 +1,8 @@
 Changes for APR 1.2.8
+
+  *) APR_FIND_APR macro no longer checks /usr/local/apache2/.
+     [Colm MacCarthaigh]
+
   *) Portably check for EEXIST in mktemp code.  PR 40818
      [Kenneth Golomb <KGolomb TradeCard.com>]
 
