@@ -22,6 +22,7 @@
 #include "apr_env.h"
 #include "apr_errno.h"
 #include "apr_pools.h"
+#include "apr_strings.h"
 
 
 #if APR_HAS_UNICODE_FS
@@ -61,10 +62,17 @@ APR_DECLARE(apr_status_t) apr_env_get(char **value,
         if (status)
             return status;
 
+        SetLastError(0);
         size = GetEnvironmentVariableW(wenvvar, &dummy, 0);
-        if (size == 0)
+        if (GetLastError() == ERROR_ENVVAR_NOT_FOUND)
             /* The environment variable doesn't exist. */
             return APR_ENOENT;
+
+        if (size == 0) {
+            /* The environment value exists, but is zero-length. */
+            *value = apr_pstrdup(pool, "");
+            return APR_SUCCESS;
+        }
 
         wvalue = apr_palloc(pool, size * sizeof(*wvalue));
         size = GetEnvironmentVariableW(wenvvar, wvalue, size);
@@ -85,10 +93,17 @@ APR_DECLARE(apr_status_t) apr_env_get(char **value,
     {
         char dummy;
 
+        SetLastError(0);
         size = GetEnvironmentVariableA(envvar, &dummy, 0);
-        if (size == 0)
+        if (GetLastError() == ERROR_ENVVAR_NOT_FOUND)
             /* The environment variable doesn't exist. */
             return APR_ENOENT;
+
+        if (size == 0) {
+            /* The environment value exists, but is zero-length. */
+            *value = apr_pstrdup(pool, "");
+            return APR_SUCCESS;
+        }
 
         val = apr_palloc(pool, size);
         size = GetEnvironmentVariableA(envvar, val, size);

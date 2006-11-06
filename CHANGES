@@ -1,5 +1,9 @@
 Changes for APR 1.2.8
 
+  *) Correctly retrieve 'empty' environment values with apr_env_get
+     on Win32 (e.g. "VAR="), and added validation to testall suite.  
+     PR 40764.  [Issac Goldstand <margol beamartyr.net>]
+
   *) APR_FIND_APR macro no longer checks /usr/local/apache2/.
      PR 40842.  [Colm MacCarthaigh]
 
