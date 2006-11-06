@@ -1,4 +1,9 @@
 Changes for APR 1.3.0
+
+  *) Correctly retrieve 'empty' environment values with apr_env_get
+     on Win32 (e.g. "VAR="), and added validation to testall suite.  
+     PR 40764.  [Issac Goldstand <margol beamartyr.net>]
+
   *) Portably check for EEXIST in mktemp code.  PR 40818
      [Kenneth Golomb <KGolomb TradeCard.com>]
 
