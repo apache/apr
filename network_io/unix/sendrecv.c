@@ -879,7 +879,9 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
     for (i = 0; i < hdtr->numheaders; i++, curvec++) {
         sfv[curvec].sfv_fd = SFV_FD_SELF;
         sfv[curvec].sfv_flag = 0;
-        sfv[curvec].sfv_off = (apr_off_t)hdtr->headers[i].iov_base;
+        /* Cast to unsigned long to prevent sign extension of the
+         * pointer value for the LFS case; see PR 39463. */
+        sfv[curvec].sfv_off = (unsigned long)hdtr->headers[i].iov_base;
         sfv[curvec].sfv_len = hdtr->headers[i].iov_len;
         requested_len += sfv[curvec].sfv_len;
     }
@@ -903,7 +905,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
     for (i = 0; i < hdtr->numtrailers; i++, curvec++) {
         sfv[curvec].sfv_fd = SFV_FD_SELF;
         sfv[curvec].sfv_flag = 0;
-        sfv[curvec].sfv_off = (apr_off_t)hdtr->trailers[i].iov_base;
+        sfv[curvec].sfv_off = (unsigned long)hdtr->trailers[i].iov_base;
         sfv[curvec].sfv_len = hdtr->trailers[i].iov_len;
         requested_len += sfv[curvec].sfv_len;
     }
