@@ -57,17 +57,7 @@ APR_DECLARE(apr_status_t) apr_env_set(const char *envvar,
 
 #elif defined(HAVE_PUTENV)
 
-    apr_size_t elen = strlen(envvar);
-    apr_size_t vlen = strlen(value);
-    char *env = apr_palloc(pool, elen + vlen + 2);
-    char *p = env + elen;
-
-    memcpy(env, envvar, elen);
-    *p++ = '=';
-    memcpy(p, value, vlen);
-    p[vlen] = '\0';
-
-    if (0 > putenv(env))
+    if (0 > putenv(apr_pstrcat(pool, envvar, "=", value, NULL))
         return APR_ENOMEM;
     return APR_SUCCESS;
 
