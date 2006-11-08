@@ -1,5 +1,8 @@
 Changes with APR 0.9.13
 
+  *) Fix detection of pthread cross-process robust mutexes.
+     PR 39833.  [Tsuyoshi SASAMOTO <nazonazo miobox.jp>]
+
   *) Correctly retrieve 'empty' environment values with apr_env_get
      on Win32 (e.g. "VAR="), and added validation to testall suite.  
      PR 40764.  [Issac Goldstand <margol beamartyr.net>]
