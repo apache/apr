@@ -109,12 +109,14 @@ APR_DECLARE(char *) apr_pstrdup(apr_pool_t *p, const char *s);
 APR_DECLARE(char *) apr_pstrmemdup(apr_pool_t *p, const char *s, apr_size_t n);
 
 /**
- * duplicate the first n characters of a string into memory allocated 
- * out of a pool; the new string will be null-terminated
+ * Duplicate at most n characters of a string into memory allocated 
+ * out of a pool; the new string will be NUL-terminated
  * @param p The pool to allocate out of
  * @param s The string to duplicate
- * @param n The number of characters to duplicate
+ * @param n The maximum number of characters to duplicate
  * @return The new string
+ * @remark The amount of memory allocated from the pool is the length
+ *         of the returned string including the NUL terminator
  */
 APR_DECLARE(char *) apr_pstrndup(apr_pool_t *p, const char *s, apr_size_t n);
 
