@@ -17,7 +17,6 @@
 #include "apr_private.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
-#include "apr_hash.h"
 
 #ifndef THREAD_PROC_H
 #define THREAD_PROC_H
@@ -68,11 +67,6 @@ struct apr_procattr_t {
 struct apr_thread_once_t {
     long value;
 };
-
-#if defined(APR_DECLARE_EXPORT)
-/* Provide to win32/start.c */
-extern apr_hash_t *apr_tls_threadkeys;
-#endif
 
 #endif  /* ! THREAD_PROC_H */
 

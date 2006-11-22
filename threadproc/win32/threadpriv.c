@@ -16,15 +16,10 @@
 
 #include "apr_arch_threadproc.h"
 #include "apr_thread_proc.h"
-#include "apr_hash.h"
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_errno.h"
 #include "apr_portable.h"
-
-#if defined(APR_DECLARE_EXPORT)
-apr_hash_t *apr_tls_threadkeys = NULL;
-#endif
 
 APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key,
                                                     void (*dest)(void *),
@@ -38,10 +33,6 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key,
     (*key)->pool = pool;
 
     if (((*key)->key = TlsAlloc()) != 0xFFFFFFFF) {
-#if defined(APR_DECLARE_EXPORT)
-        apr_hash_set(apr_tls_threadkeys, &((*key)->key),
-                     sizeof(DWORD), dest);
-#endif
         return APR_SUCCESS;
     }
     return apr_get_os_error();
@@ -68,11 +59,7 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_set(void *priv,
 APR_DECLARE(apr_status_t) apr_threadkey_private_delete(apr_threadkey_t *key)
 {
     if (TlsFree(key->key)) {
-#if defined(APR_DECLARE_EXPORT)
-        apr_hash_set(apr_tls_threadkeys, &(key->key),
-                     sizeof(DWORD), NULL);
-#endif
-        return APR_SUCCESS;
+        return APR_SUCCESS; 
     }
     return apr_get_os_error();
 }
@@ -110,5 +97,5 @@ APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key,
     }
     (*key)->key = *thekey;
     return APR_SUCCESS;
-}
+}           
 
