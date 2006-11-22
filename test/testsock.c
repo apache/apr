@@ -231,12 +231,18 @@ static void test_get_addr(abts_case *tc, void *data)
      * succeed (if the connection can be established synchronously),
      * but if it does, this test cannot proceed.  */
     rv = apr_socket_connect(cd, sa);
+    if (rv == APR_SUCCESS) {
+        apr_socket_close(ld);
+        apr_socket_close(cd);
+        ABTS_NOT_IMPL(tc, "Cannot test if connect completes "
+                      "synchronously");
+        return;
+    }
+
     if (!APR_STATUS_IS_EINPROGRESS(rv)) {
         apr_socket_close(ld);
         apr_socket_close(cd);
         APR_ASSERT_SUCCESS(tc, "connect to listener", rv);
-        ABTS_NOT_IMPL(tc, "Cannot test if connect completes "
-                      "synchronously");
         return;
     }
 
