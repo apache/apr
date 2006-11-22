@@ -18,13 +18,11 @@
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_signal.h"
-#include "apr_hash.h"
 #include "ShellAPI.h"
 
 #include "apr_arch_misc.h"       /* for WSAHighByte / WSALowByte */
 #include "wchar.h"
 #include "apr_arch_file_io.h"
-#include "apr_arch_threadproc.h"
 #include "assert.h"
 
 /* This symbol is _private_, although it must be exported.
@@ -189,11 +187,6 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
 
     apr_pool_tag(pool, "apr_initialize");
 
-#if defined(APR_DECLARE_EXPORT)
-    /* Initialize threadpriv table */
-    apr_tls_threadkeys = apr_hash_make(pool);
-#endif
-
     iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
     err = WSAStartup((WORD) iVersionRequested, &wsaData);
     if (err) {
@@ -210,68 +203,12 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
     return APR_SUCCESS;
 }
 
-#if defined(APR_DECLARE_EXPORT)
-typedef (apr_thredkey_destfn_t)(void *data);
-
-static void threadkey_terminate()
-{
-    apr_hash_index_t *hi = apr_hash_first(NULL, apr_tls_threadkeys);
-
-    for (; hi != NULL; hi = apr_hash_next(hi)) {
-        LPDWORD key;
-        apr_hash_this(hi, &key, NULL, NULL);
-        TlsFree(*key);
-    }
-}
-
-static void threadkey_detach()
-{
-    apr_hash_index_t *hi = apr_hash_first(NULL, apr_tls_threadkeys);
-
-    for (; hi != NULL; hi = apr_hash_next(hi)) {
-        apr_thredkey_destfn_t *dest = NULL;
-        LPDWORD key;
-        void *data;
-        apr_hash_this(hi, &key, NULL, (void **)&dest);
-        data = TlsGetValue(*key);
-        if (data != NULL || GetLastError() == ERROR_SUCCESS) {
-            /* NULL data is a valid TLS value if explicitly set
-             * by the TlsSetValue
-             */
-            (*dest)(data);
-        }
-    }
-}
-
-BOOL APIENTRY DllMain(HINSTANCE instance,
-                      DWORD  reason_for_call,
-                      LPVOID lpReserved)
-{
-    switch (reason_for_call) {
-        case DLL_PROCESS_ATTACH:
-        break;
-        case DLL_THREAD_ATTACH:
-        break;
-        case DLL_THREAD_DETACH:
-            threadkey_detach();
-        break;
-        case DLL_PROCESS_DETACH:
-        break;
-    }
-    return TRUE;
-}
-
-#endif /* APR_DECLARE_EXPORT */
-
 APR_DECLARE_NONSTD(void) apr_terminate(void)
 {
     initialized--;
     if (initialized) {
         return;
     }
-#if defined(APR_DECLARE_EXPORT)
-    threadkey_terminate();
-#endif
     apr_pool_terminate();
 
     WSACleanup();
