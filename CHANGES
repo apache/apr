@@ -25,10 +25,6 @@ Changes for APR 1.3.0
   *) Fix the timeout converstion in apr_pollset with the KQueue
      backend. [Marco Molteni <mmolteni cisco.com>]
 
-  *) Implement apr_threadkey_private destructors on WIN32
-     instead silently ignoring them, so that they behave like on
-     the pthreads powered platforms. [Mladen Turk]
-
   *) Support MinGW.  [John Vandenberg, Justin Erenkrantz]
 
   *) Implement apr_thread_yield on Unix in terms of pthread_yield or
