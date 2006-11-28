@@ -79,7 +79,7 @@ static apr_socket_t *setup_socket(abts_case *tc)
     apr_sockaddr_t *sa;
     apr_socket_t *sock;
 
-    rv = apr_sockaddr_info_get(&sa, NULL, APR_INET, 8021, 0, p);
+    rv = apr_sockaddr_info_get(&sa, "127.0.0.1", APR_INET, 8021, 0, p);
     APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
 
     rv = apr_socket_create(&sock, sa->family, SOCK_STREAM, APR_PROTO_TCP, p);
