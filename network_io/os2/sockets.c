@@ -62,9 +62,11 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
     (*new)->local_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->pool,
                                                        sizeof(apr_sockaddr_t));
     (*new)->local_addr->pool = p;
+
     (*new)->remote_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->pool,
                                                         sizeof(apr_sockaddr_t));
     (*new)->remote_addr->pool = p;
+    (*new)->remote_addr_unknown = 1;
 
     /* Create a pollset with room for one descriptor. */
     /* ### check return codes */
@@ -140,6 +142,10 @@ APR_DECLARE(apr_status_t) apr_socket_bind(apr_socket_t *sock,
         return APR_OS2_STATUS(sock_errno());
     else {
         sock->local_addr = sa;
+        /* XXX IPv6 - this assumes sin_port and sin6_port at same offset */
+        if (sock->local_addr->sa.sin.sin_port == 0) { /* no need for ntohs() when comparing w/ 0 */
+            sock->local_port_unknown = 1; /* kernel got us an ephemeral port */
+        }
         return APR_SUCCESS;
     }
 }
