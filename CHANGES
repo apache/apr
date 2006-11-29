@@ -1,5 +1,9 @@
 Changes with APR 0.9.13
 
+
+
+Changes with APR 0.9.13
+
   *) Fix detection of pthread cross-process robust mutexes.
      PR 39833.  [Tsuyoshi SASAMOTO <nazonazo miobox.jp>]
 

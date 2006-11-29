@@ -61,13 +61,13 @@ extern "C" {
 #define APR_MINOR_VERSION       9
 
 /** patch level */
-#define APR_PATCH_VERSION       13
+#define APR_PATCH_VERSION       14
 
 /** 
  *  This symbol is defined for internal, "development" copies of APR. This
  *  symbol will be #undef'd for releases. 
  */
-/* #define APR_IS_DEV_VERSION */
+#define APR_IS_DEV_VERSION
 
 
 /** The formatted string of APR's version */
