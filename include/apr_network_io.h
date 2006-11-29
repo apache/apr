@@ -164,7 +164,8 @@ struct in_addr {
 /** @} */
 
 /**
- * Enum to tell us if we're interested in remote or local socket
+ * Enum used to denote either the local and remote endpoint of a
+ * connection.
  */
 typedef enum {
     APR_LOCAL,
@@ -653,9 +654,11 @@ APR_DECLARE(apr_status_t) apr_socket_atmark(apr_socket_t *sock,
                                             int *atmark);
 
 /**
- * Return an apr_sockaddr_t from an apr_socket_t
+ * Return an address associated with a socket; either the address to
+ * which the socket is bound locally or the the address of the peer
+ * to which the socket is connected.
  * @param sa The returned apr_sockaddr_t.
- * @param which Which interface do we want the apr_sockaddr_t for?
+ * @param which Whether to retrieve the local or remote address
  * @param sock The socket to use
  */
 APR_DECLARE(apr_status_t) apr_socket_addr_get(apr_sockaddr_t **sa,
