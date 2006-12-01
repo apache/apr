@@ -145,12 +145,12 @@ static void sendto_receivefrom(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "Could not set REUSEADDR on socket2", rv);
 
     rv = apr_socket_bind(sock, to);
-    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    APR_ASSERT_SUCCESS(tc, "Could not bind socket", rv);
     if (rv != APR_SUCCESS)
       return;
 
     rv = apr_socket_bind(sock2, from);
-    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    APR_ASSERT_SUCCESS(tc, "Could not bind second socket", rv);
     if (rv != APR_SUCCESS)
       return;
 
