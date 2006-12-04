@@ -120,18 +120,6 @@ static void snprintf_0NULL(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, 6, rv);
 }
 
-static void snprintf_status_t(abts_case *tc, void *data)
-{
-    char buf[128];
-    int rv;
-    apr_status_t t = APR_ENOPOOL;
-
-    rv = apr_snprintf(buf, sizeof buf, "%pm", t);
-
-    ABTS_INT_EQUAL(tc,  32, rv);
-    ABTS_STR_EQUAL(tc, "A new pool could not be created.", buf);
-}     
-
 static void snprintf_0nonNULL(abts_case *tc, void *data)
 {
     int rv;
@@ -173,7 +161,7 @@ static void string_error(abts_case *tc, void *data)
      rv = apr_strerror(APR_TIMEUP, buf, sizeof buf);
      ABTS_PTR_EQUAL(tc, buf, rv);
      ABTS_STR_EQUAL(tc, "The timeout specified has expired", buf);
-
+     
      /* throw some randomish numbers at it to check for robustness */
      for (n = 1; n < 1000000; n *= 2) {
          apr_strerror(n, buf, sizeof buf);
@@ -399,7 +387,6 @@ abts_suite *teststr(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
 
-    abts_run_test(suite, snprintf_status_t, NULL);
     abts_run_test(suite, snprintf_0NULL, NULL);
     abts_run_test(suite, snprintf_0nonNULL, NULL);
     abts_run_test(suite, snprintf_noNULL, NULL);
