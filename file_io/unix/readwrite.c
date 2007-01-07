@@ -240,7 +240,7 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
                                           apr_size_t nvec, apr_size_t *nbytes)
 {
 #ifdef HAVE_WRITEV
-    int bytes;
+    apr_ssize_t bytes;
 
     if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
         *nbytes = 0;
@@ -253,8 +253,8 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
 #else
     /**
      * The problem with trying to output the entire iovec is that we cannot
-     * maintain the behavoir that a real writev would have.  If we iterate
-     * over the iovec one at a time, we loose the atomic properties of 
+     * maintain the behaviour that a real writev would have.  If we iterate
+     * over the iovec one at a time, we lose the atomic properties of 
      * writev().  The other option is to combine the entire iovec into one
      * buffer that we could then send in one call to write().  This is not 
      * reasonable since we do not know how much data an iovec could contain.
