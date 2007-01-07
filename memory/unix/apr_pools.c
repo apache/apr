@@ -1419,7 +1419,7 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
 
         for (index = 0; index < node->index; index++) {
             memset(node->beginp[index], POOL_POISON_BYTE,
-                   node->endp[index] - node->beginp[index]);
+                   (char *)node->endp[index] - (char *)node->beginp[index]);
             free(node->beginp[index]);
         }
 
