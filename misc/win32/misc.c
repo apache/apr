@@ -80,7 +80,7 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
                         apr_os_level = APR_WIN_2000_SP2;
                 }
                 else if (oslev.dwMinorVersion == 2) {
-                    apr_os_level = APR_WIN_2003;                    
+                    apr_os_level = APR_WIN_2003;
                 }
                 else {
                     if (servpack < 1)
@@ -90,6 +90,9 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
                     else
                         apr_os_level = APR_WIN_XP_SP2;
                 }
+            }
+            else if (oslev.dwMajorVersion == 6) {
+                apr_os_level = APR_WIN_VISTA;
             }
             else {
                 apr_os_level = APR_WIN_XP;
