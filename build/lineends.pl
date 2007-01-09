@@ -26,16 +26,16 @@ $ignore .= "gif-jpg-jpeg-png-ico-bmp-";
 $ignore .= "tar-gz-z-zip-jar-war-bz2-tgz-";
 
 # Many document formats
-$ignore .= "eps-psd-pdf-ai-";
+$ignore .= "eps-psd-pdf-chm-ai-";
 
 # Some encodings
 $ignore .= "ucs2-ucs4-";
 
 # Some binary objects
-$ignore .= "class-so-dll-exe-obj-a-o-lo-slo-sl-dylib-";
+$ignore .= "class-so-dll-exe-obj-lib-a-o-lo-slo-sl-dylib-";
 
 # Some build env files 
-$ignore .= "mcp-xdc-ncb-opt-pdb-ilk-sbr-";
+$ignore .= "mcp-xdc-ncb-opt-pdb-ilk-exp-res-pch-idb-sbr-";
 
 $preservedate = 1;
 
