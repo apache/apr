@@ -102,13 +102,14 @@ sub totxt {
                 }
 	    }
         }
+        return if ($File::Find::dir =~ m|^(.+/)?.svn(/.+)?$|);
 	@ostat = stat($oname);
         $srcfl = new IO::File $oname, "r" or die;
 	$dstfl = new IO::File $tname, "w" or die;
         binmode $srcfl; 
 	if ($notnative) {
             binmode $dstfl;
-	} 
+	}
 	undef $t;
         while (<$srcfl>) { 
             if (s/(\r*)\n$/\n/) {
