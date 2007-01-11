@@ -76,7 +76,7 @@ sub addmt {
                 print $dstfl 'TargetPath=' . $outpath . "\n";
                 print $dstfl 'SOURCE="$(InputPath)"' . "\n";
                 print $dstfl 'PostBuild_Desc=Embed .manifest' . "\n";
-                print $dstfl 'PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath) .manifest -outputresource:$(TargetPath);2' . "\n";
+                print $dstfl 'PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath).manifest -outputresource:$(TargetPath);2' . "\n";
                 print $dstfl '# End Special Build Tool' . "\n";
                 $verchg = -1;
                 undef $outpath;
