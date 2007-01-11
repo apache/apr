@@ -39,6 +39,7 @@ else {
     print "Specify -w3 or -w4 for .dsp build with warning level 3 or 4 (strict)\n\n";
     print "Specify -ia64 for build targeted at Itanium (req's psdk tools)\n\n";
     print "Specify -p for extreme pool debugging\n\n";
+    print "Specify -mt to add .manifest embedding\n\n";
     die "Missing argument";
 }
 
@@ -62,11 +63,13 @@ sub addmt {
                 $outdir = $1;
                 $outpath = $oname;
                 $outpath =~ s|\.dsp||;
-                $outpath =  "./" . $outdir . "/" . $outpath . $outtype;
+                $outpath =  ".\\" . $outdir . "\\" . $outpath . $outtype;
 	    }
-	    if ($src =~ m|^# ADD LINK32 .+ /out:"([^"]+)"|) {
-                $outpath = $1;
-                $outpath = "./" . $outpath if (!($outpath =~ m|^\.|));
+	    if ($src =~ m|^# ADD (BASE )?LINK32 .+ /out:"([^"]+)"|) {
+	        $outpath = $2;
+                $outpath =~ s|/|\\|;
+                $outpath = ".\\" . $outpath if (!($outpath =~ m|^\.|));
+                $src =~ s|/out:"([^"]+)"|/out:"$outpath"|;
 	    }
 	    if (defined($outpath) && ($src =~ m|^# Begin Special Build Tool|)) {
                 undef $outpath;
