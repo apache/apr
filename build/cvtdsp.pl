@@ -25,6 +25,9 @@ elsif ($ARGV[0] eq '-d') {
 elsif ($ARGV[0] eq '-b') {
     find(\&tobrowse, '.');
 }
+elsif ($ARGV[0] eq '-mt') {
+    find(\&addmt, '.');
+}
 elsif ($ARGV[0] eq '-m') {
 	## 0 - conapp, 1 - dll lib, 2 - static lib
 	$dsptype = 2;
@@ -39,6 +42,61 @@ else {
     die "Missing argument";
 }
 
+sub addmt { 
+    my $outpath, $outtype;
+
+    if (m|\.dsp$|) {
+        $oname = $_;
+	$tname = '.#' . $_;
+        $verchg = 0;
+        $srcfl = new IO::File $oname, "r" || die;
+	$dstfl = new IO::File $tname, "w" || die;
+	while ($src = <$srcfl>) {
+	    if ($src =~ m|^# TARGTYPE .+ Application|) {
+                $outtype = ".exe"
+	    }
+	    if ($src =~ m|^# TARGTYPE .+ Dynamic-Link|) {
+                $outtype = ".dll"
+	    }
+	    if ($src =~ m|^# PROP Output_Dir "(.+)"|) {
+                $outdir = $1;
+                $outpath = $oname;
+                $outpath =~ s|\.dsp||;
+                $outpath =  "./" . $outdir . "/" . $outpath . $outtype;
+	    }
+	    if ($src =~ m|^# ADD LINK32 .+ /out:"([^"]+)"|) {
+                $outpath = $1;
+                $outpath = "./" . $outpath if (!($outpath =~ m|^\.|));
+	    }
+	    if (defined($outpath) && ($src =~ m|^# Begin Special Build Tool|)) {
+                undef $outpath;
+            }
+	    if (defined($outpath) && defined($outtype) && ($src =~ m|^\s*$|)) {
+                print $dstfl '# Begin Special Build Tool' . "\n";
+                print $dstfl 'TargetPath=' . $outpath . "\n";
+                print $dstfl 'SOURCE="$(InputPath)"' . "\n";
+                print $dstfl 'PostBuild_Desc=Embed .manifest' . "\n";
+                print $dstfl 'PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath) .manifest -outputresource:$(TargetPath);2' . "\n";
+                print $dstfl '# End Special Build Tool' . "\n";
+                $verchg = -1;
+                undef $outpath;
+            }
+            print $dstfl $src;
+	}
+        undef $outtype if (defined($outtype));
+        undef $outpath if (defined($outpath));
+	undef $srcfl;
+	undef $dstfl;
+	if ($verchg) {
+	    unlink $oname || die;
+	    rename $tname, $oname || die;
+	    print "Added manifest to " . $oname . " in " . $File::Find::dir . "\n"; 
+	}
+	else {
+	    unlink $tname;
+	}
+    }
+}
 sub tovc5 { 
 
     if (m|\.dsp$|) {
