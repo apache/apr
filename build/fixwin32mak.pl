@@ -14,9 +14,7 @@ $root = cwd;
 # ignore our own direcory (allowing us to move into any parallel tree)
 $root =~ s|^.:(.*)?$|cd "$1|;
 $root =~ s|/|\\\\|g;
-$altroot = $root;
-$altroot =~ s| ".:| "|;
-print "Stripping " . $root . " and " . $altroot . "\n";
+print "Testing " . $root . "\n";
 find(\&fixcwd, '.');
 
 sub fixcwd { 
@@ -25,29 +23,26 @@ sub fixcwd {
 	$thisroot =~ s|^./(.*)$|$1|;
 	$thisroot =~ s|/|\\\\|g;
         $thisroot = $root . "\\\\" . $thisroot;
-        $thisaltroot = $altroot . "\\\\" . $thisroot;
         $oname = $_;
 	$tname = '.#' . $_;
 	$verchg = 0;
+#print "Processing " . $thisroot . " of " . $_ . "\n";
 	$srcfl = new IO::File $_, "r" || die;
 	$dstfl = new IO::File $tname, "w" || die;
 	while ($src = <$srcfl>) {
 	    if ($src =~ m|^\s*($root[^\"]*)\".*$|) {
+#print "Found " . $1 . "\"\n";
 		$orig = $thisroot;
-            } elsif ($src =~ m|^\s*($altroot[^\"]*)\".*$|) {
-		$orig = $thisaltroot;
-            }
-            if (defined($orig)) {
                 $repl = "cd \".";
                 while (!($src =~ s|$orig|$repl|)) {
+#print "Tried replacing " . $orig . " with " . $repl . "\n";
 		   if (!($orig =~ s|^(.*)\\\\[^\\]+$|$1|)) {
                        break;
                    }
 		   $repl .= "\\..";
 		}
-print "Replaced " . $orig . " with " . $repl . "\n";
+#print "Replaced " . $orig . " with " . $repl . "\n";
 		$verchg = -1;
-                undef $orig;
 	    }
             print $dstfl $src; 
 	}
