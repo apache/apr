@@ -1127,7 +1127,7 @@ static void apr_pool_log_event(apr_pool_t *pool, const char *event,
                 "] "
                 "%7s "
                 "(%10lu/%10lu/%10lu) "
-                "0x%08X \"%s\" "
+                "0x%pp \"%s\" "
                 "<%s> "
                 "(%u/%u/%u) "
                 "\n",
@@ -1139,7 +1139,7 @@ static void apr_pool_log_event(apr_pool_t *pool, const char *event,
                 (unsigned long)apr_pool_num_bytes(pool, 0),
                 (unsigned long)apr_pool_num_bytes(pool, 1),
                 (unsigned long)apr_pool_num_bytes(global_pool, 1),
-                (unsigned int)pool, pool->tag,
+                pool, pool->tag,
                 file_line,
                 pool->stat_alloc, pool->stat_total_alloc, pool->stat_clear);
         }
@@ -1153,7 +1153,7 @@ static void apr_pool_log_event(apr_pool_t *pool, const char *event,
                 "] "
                 "%7s "
                 "                                   "
-                "0x%08X "
+                "0x%pp "
                 "<%s> "
                 "\n",
                 (unsigned long)getpid(),
@@ -1161,7 +1161,7 @@ static void apr_pool_log_event(apr_pool_t *pool, const char *event,
                 (unsigned long)apr_os_thread_current(),
 #endif /* APR_HAS_THREADS */
                 event,
-                (unsigned int)pool,
+                pool,
                 file_line);
         }
     }
