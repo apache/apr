@@ -434,6 +434,20 @@ API Changes Postponed for APR 2.0:
       would be slightly faster, for what's likely to be little impact on
       performance.
 
+    * The other-child API doesn't allow the apr_exit_why_e to be passed to the
+      application's maintenance function.  The expected usage is that the
+      application calls apr_proc_wait[_all_procs]() and is given back
+      apr_exit_why_e and exit_code_or_signal_num, thus losing the original
+      (on Unix, at least) representation which held both pieces of information
+      in an int.  Both pieces of data should be available to the maintenance 
+      function so that it has the opportunity to take different actions.  An
+      example would be to issue messages about probable misconfiguration when
+      receiving a certain exit code and trying to restart otherwise.  Thus, 
+      apr_proc_other_child_alert() should take an additional apr_exit_why_e 
+      parameter, as should the application-provided maintenance function.  The 
+      exit-why value would be ignored in the same circumstances as the existing 
+      status parameter: reason != APR_OC_REASON_DEATH.
+
 Stuff for post 1.0:
 
     * Almost every API in APR depends on pools, but pool semantics
