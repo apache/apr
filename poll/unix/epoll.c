@@ -219,18 +219,10 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
         pollset_lock_rings();
 
         if (!APR_RING_EMPTY(&(pollset->query_ring), pfd_elem_t, link)) {
-            for (ep = APR_RING_FIRST(&(pollset->query_ring));
-                 ep != APR_RING_SENTINEL(&(pollset->query_ring),
-                                         pfd_elem_t, link);
-                 ep = APR_RING_NEXT(ep, link)) {
+            ep = (pfd_elem_t *) descriptor;
                 
-                if (descriptor->desc.s == ep->pfd.desc.s) {
-                    APR_RING_REMOVE(ep, link);
-                    APR_RING_INSERT_TAIL(&(pollset->dead_ring),
-                                         ep, pfd_elem_t, link);
-                    break;
-                }
-            }
+            APR_RING_REMOVE(ep, link);
+            APR_RING_INSERT_TAIL(&(pollset->dead_ring), ep, pfd_elem_t, link);
         }
 
         pollset_unlock_rings();
