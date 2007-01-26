@@ -91,8 +91,8 @@
 typedef struct pfd_elem_t pfd_elem_t;
 
 struct pfd_elem_t {
-    APR_RING_ENTRY(pfd_elem_t) link;
     apr_pollfd_t pfd;
+    APR_RING_ENTRY(pfd_elem_t) link;
 };
 
 #endif
