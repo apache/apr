@@ -58,14 +58,18 @@ APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new,
     return stat;
 }
 
+#if defined(PTHREAD_CREATE_DETACHED)
 #define DETACH_ARG(v) ((v) ? PTHREAD_CREATE_DETACHED : PTHREAD_CREATE_JOINABLE)
+#else
+#define DETACH_ARG(v) ((v) ? 1 : 0)
+#endif
 
 APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr,
                                                     apr_int32_t on)
 {
     apr_status_t stat;
 #ifdef PTHREAD_ATTR_SETDETACHSTATE_ARG2_ADDR
-    int arg = DETACH_ARG(v);
+    int arg = DETACH_ARG(on);
 
     if ((stat = pthread_attr_setdetachstate(&attr->attr, &arg)) == 0) {
 #else
