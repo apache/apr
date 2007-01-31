@@ -214,7 +214,12 @@ endif
 endif
 
 ifdef DEST
-INSTALLBASE := $(INSTALL)\Apache2
+
+ifndef BASEDIR
+BASEDIR = Apache2
+endif
+
+INSTALLBASE := $(INSTALL)\$(BASEDIR)
 
 INSTDEVDIRS := \
     $(INSTDIRS) \
