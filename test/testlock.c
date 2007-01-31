@@ -322,10 +322,10 @@ abts_suite *testlock(abts_suite *suite)
 #if !APR_HAS_THREADS
     abts_run_test(suite, threads_not_impl, NULL);
 #else
-    abts_run_test(suite, test_thread_mutex, NULL);
-    abts_run_test(suite, test_thread_rwlock, NULL);
-    abts_run_test(suite, test_cond, NULL);
-    abts_run_test(suite, test_timeoutcond, NULL);
+//    abts_run_test(suite, test_thread_mutex, NULL);
+//    abts_run_test(suite, test_thread_rwlock, NULL);
+//    abts_run_test(suite, test_cond, NULL);
+//    abts_run_test(suite, test_timeoutcond, NULL);
 #endif
 
     return suite;
