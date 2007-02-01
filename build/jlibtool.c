@@ -341,6 +341,11 @@ void push_count_chars(count_chars *cc, const char *newval)
     cc->vals[cc->num++] = newval;
 }
 
+void pop_count_chars(count_chars *cc)
+{
+    cc->num--;
+}
+
 void insert_count_chars(count_chars *cc, const char *newval, int position)
 {
     int i;
@@ -363,7 +368,7 @@ void append_count_chars(count_chars *cc, count_chars *cctoadd)
     }
 }
 
-const char *flatten_count_chars(count_chars *cc)
+const char *flatten_count_chars(count_chars *cc, int space)
 {
     int i, size;
     char *newval;
@@ -372,6 +377,9 @@ const char *flatten_count_chars(count_chars *cc)
     for (i = 0; i < cc->num; i++) {
         if (cc->vals[i]) {
             size += strlen(cc->vals[i]) + 1;
+            if (space) {
+              size++;
+            }
         }
     }
 
@@ -381,7 +389,9 @@ const char *flatten_count_chars(count_chars *cc)
     for (i = 0; i < cc->num; i++) {
         if (cc->vals[i]) {
             strcat(newval, cc->vals[i]);
-            strcat(newval, " ");
+            if (space) {
+                strcat(newval, " ");
+            }
         }
     }
 
@@ -474,7 +484,7 @@ int run_command(command_t *cmd_data, count_chars *cc)
 
     append_count_chars(&tmpcc, cc);
 
-    command = shell_esc(flatten_count_chars(&tmpcc));
+    command = shell_esc(flatten_count_chars(&tmpcc, 1));
 
     spawn_args[0] = SHELL_CMD;
     spawn_args[1] = "-c";
@@ -663,6 +673,20 @@ long safe_strtol(const char *nptr, const char **endptr, int base)
     }
 
     return rv; 
+}
+
+void safe_mkdir(const char *path)
+{
+    mode_t old_umask;
+
+    old_umask = umask(0);
+    umask(old_umask);
+
+#ifdef MKDIR_NO_UMASK
+    mkdir(path);
+#else
+    mkdir(path, ~old_umask);
+#endif
 }
 
 /* version_info is in the form of MAJOR:MINOR:PATCH */
@@ -1106,6 +1130,119 @@ void add_linker_flag_prefix(count_chars *cc, const char *arg)
 #endif
 }
 
+/* returns just a file's name without the path */
+const char *jlibtool_basename(const char *fullpath)
+{
+    const char *name = strrchr(fullpath, '/');
+
+    if (name == NULL) {
+        name = strrchr(fullpath, '\\');
+    }
+
+    if (name == NULL) {
+        name = fullpath;
+    } else {
+        name++;
+    }
+
+    return name;
+}
+
+/* returns just a file's name without path or extension */
+const char *nameof(const char *fullpath)
+{
+    const char *name;
+    const char *ext;
+
+    name = jlibtool_basename(fullpath);
+    ext = strrchr(name, '.');
+
+    if (ext) {
+        char *trimmed;
+        trimmed = malloc(ext - name + 1);
+        strncpy(trimmed, name, ext - name);
+        trimmed[ext-name] = 0;
+        return trimmed;
+    }
+
+    return name;
+}
+
+int explode_static_lib(command_t *cmd_data, const char *lib)
+{
+    count_chars tmpdir_cc, libname_cc;
+    const char *tmpdir, *libname;
+    char savewd[PATH_MAX];
+    const char *name;
+    DIR *dir;
+    struct dirent *entry;
+    const char *lib_args[4];
+
+    /* Bah! */
+    if (cmd_data->options.dry_run) {
+        return 0;
+    }
+
+    name = jlibtool_basename(lib);
+
+    init_count_chars(&tmpdir_cc);
+    push_count_chars(&tmpdir_cc, ".libs/");
+    push_count_chars(&tmpdir_cc, name);
+    push_count_chars(&tmpdir_cc, ".exploded/");
+    tmpdir = flatten_count_chars(&tmpdir_cc, 0);
+
+    if (!cmd_data->options.silent) {
+        printf("Making: %s\n", tmpdir);
+    }
+    safe_mkdir(tmpdir);
+
+    push_count_chars(cmd_data->tmp_dirs, tmpdir);
+
+    getcwd(savewd, sizeof(savewd));
+
+    if (chdir(tmpdir) != 0) {
+        if (!cmd_data->options.silent) {
+            printf("Warning: could not explode %s\n", lib);
+        }
+        return 1;
+    }
+
+    if (lib[0] == '/') {
+        libname = lib;
+    }
+    else {
+        init_count_chars(&libname_cc);
+        push_count_chars(&libname_cc, "../../");
+        push_count_chars(&libname_cc, lib);
+        libname = flatten_count_chars(&libname_cc, 0);
+    }
+
+    lib_args[0] = LIBRARIAN;
+    lib_args[1] = "x";
+    lib_args[2] = libname;
+    lib_args[3] = NULL;
+
+    external_spawn(cmd_data, LIBRARIAN, lib_args);
+
+    chdir(savewd);
+    dir = opendir(tmpdir);
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_name[0] != '.') {
+            push_count_chars(&tmpdir_cc, entry->d_name);
+            name = flatten_count_chars(&tmpdir_cc, 0);
+            if (!cmd_data->options.silent) {
+                printf("Adding: %s\n", name);
+            }
+            push_count_chars(cmd_data->obj_files, name);
+            pop_count_chars(&tmpdir_cc);
+        }
+    }
+
+    closedir(dir);
+    return 0;
+}
+
 int parse_input_file_name(char *arg, command_t *cmd_data)
 {
     char *ext = strrchr(arg, '.');
@@ -1170,11 +1307,19 @@ int parse_input_file_name(char *arg, command_t *cmd_data)
 #ifdef ADD_MINUS_L
             if (libtype == type_DYNAMIC_LIB) {
                  add_minus_l(cmd_data->shared_opts.dependencies, newarg);
+            } else if (cmd_data->output == otLibrary &&
+                       libtype == type_STATIC_LIB) {
+                explode_static_lib(cmd_data, newarg);
             } else {
                  push_count_chars(cmd_data->shared_opts.dependencies, newarg);
             }
 #else
-            push_count_chars(cmd_data->shared_opts.dependencies, newarg);
+            if (cmd_data->output == otLibrary && libtype == type_STATIC_LIB) {
+                explode_static_lib(cmd_data, newarg);
+            }
+            else {
+                push_count_chars(cmd_data->shared_opts.dependencies, newarg);
+            }
 #endif
             if (libtype == type_DYNAMIC_LIB) {
                 if (cmd_data->options.no_install) {
@@ -1327,44 +1472,6 @@ int parse_output_file_name(char *arg, command_t *cmd_data)
     return 0;
 }
 
-/* returns just a file's name without the path */
-const char *jlibtool_basename(const char *fullpath)
-{
-    const char *name = strrchr(fullpath, '/');
-
-    if (name == NULL) {
-        name = strrchr(fullpath, '\\');
-    }
-
-    if (name == NULL) {
-        name = fullpath;
-    } else {
-        name++;
-    }
-
-    return name;
-}
-
-/* returns just a file's name without path or extension */
-const char *nameof(const char *fullpath)
-{
-    const char *name;
-    const char *ext;
-
-    name = jlibtool_basename(fullpath);
-    ext = strrchr(name, '.');
-
-    if (ext) {
-        char *trimmed;
-        trimmed = malloc(ext - name + 1);
-        strncpy(trimmed, name, ext - name);
-        trimmed[ext-name] = 0;
-        return trimmed;
-    }
-
-    return name;
-}
-
 void parse_args(int argc, char *argv[], command_t *cmd_data)
 {
     int a;
@@ -1433,62 +1540,6 @@ void parse_args(int argc, char *argv[], command_t *cmd_data)
         }
     }
 
-}
-
-int explode_static_lib(const char *lib, command_t *cmd_data)
-{
-    char tmpdir[1024];
-    char savewd[1024];
-    char cmd[1024];
-    const char *name;
-    DIR *dir;
-    struct dirent *entry;
-
-    /* Bah! */
-    if (cmd_data->options.dry_run) {
-        return 0;
-    }
-
-    strcpy(tmpdir, lib);
-    strcat(tmpdir, ".exploded");
-
-#ifdef MKDIR_NO_UMASK
-    mkdir(tmpdir);
-#else
-    mkdir(tmpdir, 0);
-#endif
-    push_count_chars(cmd_data->tmp_dirs, strdup(tmpdir));
-    getcwd(savewd, sizeof(savewd));
-
-    if (chdir(tmpdir) != 0)
-        return 1;
-
-    strcpy(cmd, LIBRARIAN " x ");
-    name = strrchr(lib, '/');
-
-    if (name) {
-        name++;
-    } else {
-        name = lib;
-    }
-
-    strcat(cmd, "../");
-    strcat(cmd, name);
-    system(cmd);
-    chdir(savewd);
-    dir = opendir(tmpdir);
-
-    while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_name[0] != '.') {
-            strcpy(cmd, tmpdir);
-            strcat(cmd, "/");
-            strcat(cmd, entry->d_name);
-            push_count_chars(cmd_data->arglist, strdup(cmd));
-        }
-    }
-
-    closedir(dir);
-    return 0;
 }
 
 #ifdef GEN_EXPORTS
@@ -1788,16 +1839,7 @@ int run_mode(command_t *cmd_data)
     case mLink:
         if (!cmd_data->options.dry_run) {
             /* Check first to see if the dir already exists! */
-            mode_t old_umask;
-
-            old_umask = umask(0);
-            umask(old_umask);
-
-#ifdef MKDIR_NO_UMASK
-            mkdir(".libs");
-#else
-            mkdir(".libs", ~old_umask);
-#endif
+            safe_mkdir(".libs");
         }
 
         if (cmd_data->output == otStaticLibraryOnly ||
@@ -1904,6 +1946,9 @@ int ensure_fake_uptodate(command_t *cmd_data)
     const char *touch_args[3];
 
     if (cmd_data->mode == mInstall) {
+        return 0;
+    }
+    if (!cmd_data->fake_output_name) {
         return 0;
     }
 
