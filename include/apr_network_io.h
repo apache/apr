@@ -168,8 +168,8 @@ struct in_addr {
  * connection.
  */
 typedef enum {
-    APR_LOCAL,
-    APR_REMOTE
+    APR_LOCAL,   /**< Socket information for local end of connection */
+    APR_REMOTE   /**< Socket information for remote end of connection */
 } apr_interface_e;
 
 /**
