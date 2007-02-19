@@ -281,4 +281,158 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     return rv;
 }
 
+
+struct apr_pollcb_t {
+    apr_pool_t *pool;
+    apr_uint32_t nalloc;
+    struct kevent *pollset;
+    int kqfd;
+};
+
+static apr_status_t cb_cleanup(void *b_)
+{
+    apr_pollcb_t *pollcb = (apr_pollcb_t *) b_;
+    close(pollcb->kqfd);
+    return APR_SUCCESS;
+}
+
+
+APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
+                                            apr_uint32_t size,
+                                            apr_pool_t *p,
+                                            apr_uint32_t flags)
+{
+    int fd;
+    
+    fd = kqueue();
+    if (fd < 0) {
+        *pollcb = NULL;
+        return apr_get_netos_error();
+    }
+    
+    *pollcb = apr_palloc(p, sizeof(**pollcb));
+    (*pollcb)->nalloc = size;
+    (*pollcb)->pool = p;
+    (*pollcb)->kqfd = fd;
+    (*pollcb)->pollset = (struct kevent *)apr_pcalloc(p, size * sizeof(struct kevent));
+    apr_pool_cleanup_register(p, *pollcb, cb_cleanup, cb_cleanup);
+    
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
+                                         apr_pollfd_t *descriptor)
+{
+    apr_os_sock_t fd;
+    struct kevent ev;
+    apr_status_t rv = APR_SUCCESS;
+    
+    if (descriptor->desc_type == APR_POLL_SOCKET) {
+        fd = descriptor->desc.s->socketdes;
+    }
+    else {
+        fd = descriptor->desc.f->filedes;
+    }
+    
+    if (descriptor->reqevents & APR_POLLIN) {
+        EV_SET(&ev, fd, EVFILT_READ, EV_ADD, 0, 0, descriptor);
+        
+        if (kevent(pollcb->kqfd, &ev, 1, NULL, 0, NULL) == -1) {
+            rv = apr_get_netos_error();
+        }
+    }
+    
+    if (descriptor->reqevents & APR_POLLOUT && rv == APR_SUCCESS) {
+        EV_SET(&ev, fd, EVFILT_WRITE, EV_ADD, 0, 0, descriptor);
+        
+        if (kevent(pollcb->kqfd, &ev, 1, NULL, 0, NULL) == -1) {
+            rv = apr_get_netos_error();
+        }
+    }
+    
+    return rv;
+}
+
+APR_DECLARE(apr_status_t) apr_pollcb_remove(apr_pollcb_t *pollcb,
+                                            apr_pollfd_t *descriptor)
+{
+    apr_status_t rv = APR_SUCCESS;
+    struct kevent ev;
+    apr_os_sock_t fd;
+    
+    if (descriptor->desc_type == APR_POLL_SOCKET) {
+        fd = descriptor->desc.s->socketdes;
+    }
+    else {
+        fd = descriptor->desc.f->filedes;
+    }
+    
+    if (descriptor->reqevents & APR_POLLIN) {
+        EV_SET(&ev, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+        
+        if (kevent(pollcb->kqfd, &ev, 1, NULL, 0, NULL) == -1) {
+            rv = APR_NOTFOUND;
+        }
+    }
+    
+    if (descriptor->reqevents & APR_POLLOUT && rv == APR_SUCCESS) {
+        /* XXXX: this is less than optimal, shouldn't we still try to 
+         *        remove the FD even if it wasn't in the readset?
+         */
+        EV_SET(&ev, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+        
+        if (kevent(pollcb->kqfd, &ev, 1, NULL, 0, NULL) == -1) {
+            rv = APR_NOTFOUND;
+        }
+    }
+    
+    return rv;
+}
+
+
+APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
+                                          apr_interval_time_t timeout,
+                                          apr_pollcb_cb_t func,
+                                          void *baton)
+{
+    int ret, i;
+    struct timespec tv, *tvptr;
+    apr_status_t rv = APR_SUCCESS;
+    
+    if (timeout < 0) {
+        tvptr = NULL;
+    }
+    else {
+        tv.tv_sec = (long) apr_time_sec(timeout);
+        tv.tv_nsec = (long) apr_time_usec(timeout) * 1000;
+        tvptr = &tv;
+    }
+    
+    ret = kevent(pollcb->kqfd, NULL, 0, pollcb->pollset, pollcb->nalloc,
+                 tvptr);
+
+    if (ret < 0) {
+        rv = apr_get_netos_error();
+    }
+    else if (ret == 0) {
+        rv = APR_TIMEUP;
+    }
+    else {
+        for (i = 0; i < ret; i++) {
+            apr_pollfd_t *pollfd = (apr_pollfd_t *)(pollcb->pollset[i].udata);
+            
+            pollfd->rtnevents = get_kqueue_revent(pollcb->pollset[i].filter,
+                                                  pollcb->pollset[i].flags);
+            
+            rv = func(baton, pollfd);
+            
+            if (rv) {
+                return rv;
+            }
+        }
+    }
+
+    return rv;
+}
+
 #endif /* POLLSET_USES_KQUEUE */
