@@ -98,7 +98,7 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
     (*pollset)->kqueue_fd = kqueue();
 
     if ((*pollset)->kqueue_fd == -1) {
-        return APR_ENOMEM;
+        return apr_get_netos_error();
     }
 
     apr_pool_cleanup_register(p, (void *) (*pollset), backend_cleanup,
@@ -149,7 +149,7 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
 
         if (kevent(pollset->kqueue_fd, &pollset->kevent, 1, NULL, 0,
                    NULL) == -1) {
-            rv = APR_ENOMEM;
+            rv = apr_get_netos_error();
         }
     }
 
@@ -158,7 +158,7 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
 
         if (kevent(pollset->kqueue_fd, &pollset->kevent, 1, NULL, 0,
                    NULL) == -1) {
-            rv = APR_ENOMEM;
+            rv = apr_get_netos_error();
         }
     }
 
