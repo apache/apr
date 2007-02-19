@@ -188,7 +188,27 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t numsock,
 
 /** @} */
 
+/** Opaque structure used for pollset API */
+typedef struct apr_pollcb_t apr_pollcb_t;
 
+APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
+                                            apr_uint32_t size,
+                                            apr_pool_t *pool,
+                                            apr_uint32_t flags);
+
+
+APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
+                                         apr_pollfd_t *descriptor);
+
+APR_DECLARE(apr_status_t) apr_pollcb_remove(apr_pollcb_t *pollcb,
+                                            apr_pollfd_t *descriptor);
+
+typedef apr_status_t(*apr_pollcb_cb_t)(void* baton, apr_pollfd_t *descriptor);
+
+APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
+                                          apr_interval_time_t timeout,
+                                          apr_pollcb_cb_t func,
+                                          void *baton); 
 #ifdef __cplusplus
 }
 #endif
