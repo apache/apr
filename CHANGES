@@ -1,5 +1,8 @@
 Changes for APR 1.3.0
 
+  *) Add the apr_pollcb API as an alternative more efficient method
+     of polling sockets, compared to apr_pollset. [Paul Querna]
+
   *) Fix possible crash in apr_pool_initialize() when built with 
      verbose pool debugging.  PR 41063.  
      [Peter Steiner <peter.steiner+apache hugwi.ch>]
