@@ -186,29 +186,67 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t numsock,
                                    apr_int32_t *nsds, 
                                    apr_interval_time_t timeout);
 
-/** @} */
-
 /** Opaque structure used for pollset API */
 typedef struct apr_pollcb_t apr_pollcb_t;
 
+/**
+ * Setup a pollcb object
+ * @param pollcb  The pointer in which to return the newly created object 
+ * @param size The maximum number of descriptors that a single _poll can return.
+ * @param p The pool from which to allocate the pollcb
+ * @param flags Optional flags to modify the operation of the pollcb.
+ *
+ * @remark Pollcb is only supported on some platforms; the apr_pollcb_create()
+ * call will fail with APR_ENOTIMPL on platforms where it is not supported.
+ */
 APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
                                             apr_uint32_t size,
                                             apr_pool_t *pool,
                                             apr_uint32_t flags);
 
-
+/**
+ * Add a socket or file descriptor to a pollcb
+ * @param pollcb The pollcb to which to add the descriptor
+ * @param descriptor The descriptor to add
+ * @remark If you set client_data in the descriptor, that value
+ *         will be returned in the client_data field whenever this
+ *         descriptor is signalled in apr_pollcb_poll().
+ * @remark Unlike the apr_pollset API, the descriptor is not copied, and users 
+ *         must retain the memory used by descriptor, as the same pointer will be 
+ *         returned to them from apr_pollcb_poll.
+ */
 APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
                                          apr_pollfd_t *descriptor);
-
+/**
+ * Remove a descriptor from a pollcb
+ * @param pollcb The pollcb from which to remove the descriptor
+ * @param descriptor The descriptor to remove
+ */
 APR_DECLARE(apr_status_t) apr_pollcb_remove(apr_pollcb_t *pollcb,
                                             apr_pollfd_t *descriptor);
 
+/** Function prototype for pollcb handlers 
+ * @param baton Opaque baotn passed into apr_pollcb_poll
+ * @param descriptor Contains the notification for an active descriptor, 
+ *                   the rtnevents member contains what events were triggered
+ *                   for this descriptor.
+ */
 typedef apr_status_t(*apr_pollcb_cb_t)(void* baton, apr_pollfd_t *descriptor);
 
+/**
+ * Block for activity on the descriptor(s) in a pollcb
+ * @param pollcb The pollcb to use
+ * @param timeout Timeout in microseconds
+ * @param func Callback function to call for each active socket
+ * @param baton Opaque baton passed to the callback function.
+ */
 APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
                                           apr_interval_time_t timeout,
                                           apr_pollcb_cb_t func,
                                           void *baton); 
+
+/** @} */
+
 #ifdef __cplusplus
 }
 #endif
