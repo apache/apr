@@ -226,12 +226,12 @@ APR_DECLARE(apr_status_t) apr_pollcb_remove(apr_pollcb_t *pollcb,
                                             apr_pollfd_t *descriptor);
 
 /** Function prototype for pollcb handlers 
- * @param baton Opaque baotn passed into apr_pollcb_poll
+ * @param baton Opaque baton passed into apr_pollcb_poll
  * @param descriptor Contains the notification for an active descriptor, 
  *                   the rtnevents member contains what events were triggered
  *                   for this descriptor.
  */
-typedef apr_status_t(*apr_pollcb_cb_t)(void* baton, apr_pollfd_t *descriptor);
+typedef apr_status_t (*apr_pollcb_cb_t)(void *baton, apr_pollfd_t *descriptor);
 
 /**
  * Block for activity on the descriptor(s) in a pollcb
