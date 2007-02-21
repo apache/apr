@@ -553,11 +553,20 @@ static void pollset_remove(abts_case *tc, void *data)
              (hot_files[1].client_data == (void *)1)));
 }
 
+#define POLLCB_PREREQ do { if (pollcb == NULL) \
+ABTS_NOT_IMPL(tc, "pollcb interface not supported"); return; } while (0)
+
 static void setup_pollcb(abts_case *tc, void *data)
 {
     apr_status_t rv;
     rv = apr_pollcb_create(&pollcb, LARGE_NUM_SOCKETS, p, 0);
-    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    if (rv == APR_ENOTIMPL) {
+        pollcb = NULL;
+        ABTS_NOT_IMPL(tc, "pollcb interface not supported");
+    }
+    else {
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    }
 }
 
 typedef struct pollcb_baton_t {
@@ -580,6 +589,8 @@ static void trigger_pollcb(abts_case *tc, void *data)
     apr_pollfd_t socket_pollfd;
     pollcb_baton_t pcb;
     
+    POLLCB_PREREQ;
+
     ABTS_PTR_NOTNULL(tc, s[0]);
     socket_pollfd.desc_type = APR_POLL_SOCKET;
     socket_pollfd.reqevents = APR_POLLIN;
@@ -603,6 +614,9 @@ static void timeout_pollcb(abts_case *tc, void *data)
 {
     apr_status_t rv;
     pollcb_baton_t pcb;
+
+    POLLCB_PREREQ;
+
     pcb.count = 0;
     pcb.tc = tc;
 
@@ -616,6 +630,8 @@ static void timeout_pollin_pollcb(abts_case *tc, void *data)
     apr_status_t rv;
     pollcb_baton_t pcb;
     apr_pollfd_t socket_pollfd;
+
+    POLLCB_PREREQ;
 
     recv_msg(s, 0, p, tc);
     
