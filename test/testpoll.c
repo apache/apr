@@ -553,8 +553,13 @@ static void pollset_remove(abts_case *tc, void *data)
              (hot_files[1].client_data == (void *)1)));
 }
 
-#define POLLCB_PREREQ do { if (pollcb == NULL) \
-ABTS_NOT_IMPL(tc, "pollcb interface not supported"); return; } while (0)
+#define POLLCB_PREREQ \
+    do { \
+        if (pollcb == NULL) { \
+            ABTS_NOT_IMPL(tc, "pollcb interface not supported"); \
+            return; \
+        } \
+    } while (0)
 
 static void setup_pollcb(abts_case *tc, void *data)
 {
