@@ -239,6 +239,12 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
 APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iovec *vec,
                                           apr_size_t nvec, apr_size_t *nbytes)
 {
+    apr_status_t rv = apr_file_flush(thefile);
+
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+
 #ifdef HAVE_WRITEV
     apr_ssize_t bytes;
 
