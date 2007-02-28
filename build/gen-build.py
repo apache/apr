@@ -136,7 +136,7 @@ def main():
         target = parser.get(mod, 'target')
         f.write('MODULE_%s = %s\n' % (mod, target))
         f.write('%s: %s\n' % (target, flat_objects))
-        f.write('\t$(LINK_MODULE) -o $@ %s $(LDADD_%s)\n' % (flat_objects, mod))
+        f.write('\t$(LINK_MODULE) -o $@ $(OBJECTS_%s) $(LDADD_%s)\n' % (mod, mod))
 
       f.write('\n')
 
