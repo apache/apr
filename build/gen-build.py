@@ -95,6 +95,23 @@ def main():
   f.write('HEADERS = $(top_srcdir)/%s\n\n' % string.join(headers, ' $(top_srcdir)/'))
   f.write('SOURCE_DIRS = %s $(EXTRA_SOURCE_DIRS)\n\n' % string.join(dirs.keys()))
 
+  if parser.has_option('options', 'modules'):
+    modules = parser.get('options', 'modules')
+
+    for mod in string.split(modules):
+      files = get_files(parser.get(mod, 'paths'))
+      objects, _unused = write_objects(f, legal_deps, h_deps, files)
+      flat_objects = string.join(objects)
+      f.write('OBJECTS_%s = %s\n' % (mod, flat_objects))
+
+      if parser.has_option(mod, 'target'):
+        target = parser.get(mod, 'target')
+        f.write('MODULE_%s = %s\n' % (mod, target))
+        f.write('%s: %s\n' % (target, flat_objects))
+        f.write('\t$(LINK_MODULE) -o $@ $(OBJECTS_%s) $(LDADD_%s)\n' % (mod, mod))
+
+      f.write('\n')
+
   # Build a list of all necessary directories in build tree
   alldirs = { }
   for dir in dirs.keys():
