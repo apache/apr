@@ -666,7 +666,7 @@ static void test_writev_buffered(abts_case *tc, void *data)
     apr_file_t *f;
     apr_size_t nbytes;
     struct iovec vec[2];
-    const char *fname = "data/testwritev_buffered.txt";
+    const char *fname = "data/testwritev_buffered.dat";
 
     APR_ASSERT_SUCCESS(tc, "open file for writing",
                        apr_file_open(&f, fname,
