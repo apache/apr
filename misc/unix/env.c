@@ -19,6 +19,7 @@
 #include "apr.h"
 #include "apr_private.h"
 #include "apr_env.h"
+#include "apr_strings.h"
 
 #if APR_HAVE_UNISTD_H
 #include <unistd.h>
@@ -57,7 +58,7 @@ APR_DECLARE(apr_status_t) apr_env_set(const char *envvar,
 
 #elif defined(HAVE_PUTENV)
 
-    if (0 > putenv(apr_pstrcat(pool, envvar, "=", value, NULL))
+    if (0 > putenv(apr_pstrcat(pool, envvar, "=", value, NULL)))
         return APR_ENOMEM;
     return APR_SUCCESS;
 
