@@ -25,7 +25,8 @@
 #define USE_WAIT_FOR_IO
 #endif
 
-static apr_status_t apr_file_read_buffered(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
+static apr_status_t file_read_buffered(apr_file_t *thefile, void *buf,
+                                       apr_size_t *nbytes)
 {
     apr_ssize_t rv;
     char *pos = (char *)buf;
@@ -98,7 +99,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         }
 #endif
 
-        rv = apr_file_read_buffered(thefile, buf, nbytes);
+        rv = file_read_buffered(thefile, buf, nbytes);
 
 #if APR_HAS_THREADS
         if (thefile->thlock) {
@@ -377,7 +378,7 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
             }
             else {
                 nbytes = 1;
-                rv = apr_file_read_buffered(thefile, str, &nbytes);
+                rv = file_read_buffered(thefile, str, &nbytes);
                 if (rv != APR_SUCCESS) {
                     break;
                 }
