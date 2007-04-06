@@ -86,6 +86,7 @@ clean ::
 	$(CHK) NWGNUversion.inc                                         $(DEL) NWGNUversion.inc	
 	$(CHK) $(subst /,\,$(APR))\include\apr.h                        $(DEL) $(subst /,\,$(APR))\include\apr.h
 	$(CHK) $(subst /,\,$(APRUTIL))\include\apu.h                    $(DEL) $(subst /,\,$(APRUTIL))\include\apu.h
+	$(CHK) $(subst /,\,$(APRUTIL))\include\apu_want.h               $(DEL) $(subst /,\,$(APRUTIL))\include\apu_want.h
 	$(CHK) $(subst /,\,$(APRUTIL))\include\apr_ldap.h               $(DEL) $(subst /,\,$(APRUTIL))\include\apr_ldap.h
 	$(CHK) $(subst /,\,$(APRUTIL))\include\private\apu_config.h     $(DEL) $(subst /,\,$(APRUTIL))\include\private\apu_config.h
 	$(CHK) $(subst /,\,$(APRUTIL))\include\private\apu_select_dbm.h $(DEL) $(subst /,\,$(APRUTIL))\include\private\apu_select_dbm.h
