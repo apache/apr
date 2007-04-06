@@ -25,12 +25,13 @@ NLM_SCREEN_NAME = DEFAULT
 endif
 
 ifndef NLM_COPYRIGHT
-NLM_COPYRIGHT = Licensed to the Apache Software Foundation (ASF) under one or more
-NLM_COPYRIGHT = contributor license agreements.  See the NOTICE file distributed with
-NLM_COPYRIGHT = this work for additional information regarding copyright ownership.
-NLM_COPYRIGHT = The ASF licenses this file to You under the Apache License, Version 2.0
-NLM_COPYRIGHT = (the "License"); you may not use this file except in compliance with
-NLM_COPYRIGHT = the License.  You may obtain a copy of the License at
+NLM_COPYRIGHT = Licensed to the Apache Software Foundation (ASF) under one or more 
+NLM_COPYRIGHT += contributor license agreements.  See the NOTICE file distributed with 
+NLM_COPYRIGHT += this work for additional information regarding copyright ownership. 
+NLM_COPYRIGHT += The ASF licenses this file to You under the Apache License, Version 2.0 
+NLM_COPYRIGHT += (the "License"); you may not use this file except in compliance with 
+NLM_COPYRIGHT += the License.  You may obtain a copy of the License at 
+NLM_COPYRIGHT += http://www.apache.org/licenses/LICENSE-2.0
 endif
 
 #
@@ -324,4 +325,8 @@ $(TARGET_nlm):
 endif # NO_LICENSE_FILE
 
 endif # multiple targets
+
+$(INSTDIRS) ::
+	$(CHKNOT) $@\NUL mkdir $@
+
 
