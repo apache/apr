@@ -360,9 +360,6 @@ ifndef DEST
 	$(CMD) xc.bat
 	$(DEL) xc.bat
 endif	
-	
-$(INSTDIRS) ::
-	$(CHKNOT) $@\NUL mkdir $@
 
 ifndef DEST
 installdev :: $(INSTDEVDIRS) FORCE
