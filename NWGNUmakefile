@@ -5,7 +5,7 @@
 SUBDIRS = \
 		build \
 		$(APU_WORK) \
-		$(EOLIST) 
+		$(EOLIST)
 
 #
 # Get the 'head' of the build environment.  This includes default targets and
@@ -103,29 +103,29 @@ endif
 # This is used by the link 'name' directive to name the nlm.  If left blank
 # TARGET_nlm (see below) will be used.
 #
-NLM_NAME		= aprlib
+NLM_NAME	= aprlib
 
 #
-# This is used by the link '-desc ' directive. 
+# This is used by the link '-desc ' directive.
 # If left blank, NLM_NAME will be used.
 #
-NLM_DESCRIPTION	= Apache Portability Runtime Library $(VERSION_STR)
+NLM_DESCRIPTION	= Apache Portability Runtime Library $(VERSION_STR) $(VERSION_SKT)
 
 #
 # This is used by the '-threadname' directive.  If left blank,
 # NLM_NAME Thread will be used.
 #
-NLM_THREAD_NAME	= 
+NLM_THREAD_NAME	=
 #
-# If this is specified, it will override VERSION value in 
+# If this is specified, it will override VERSION value in
 # $(APR_WORK)\build\NWGNUenvironment.inc
 #
-NLM_VERSION		=
+NLM_VERSION	=
 
 #
 # If this is specified, it will override the default of 64K
 #
-NLM_STACK_SIZE	= 
+NLM_STACK_SIZE	=
 
 #
 # If this is specified it will be used by the link '-entry' directive
@@ -145,14 +145,14 @@ NLM_CHECK_SYM	=
 #
 # If this is specified it will be used by the link '-flags' directive
 #
-NLM_FLAGS		= AUTOUNLOAD, PSEUDOPREEMPTION
- 
+NLM_FLAGS	= AUTOUNLOAD, PSEUDOPREEMPTION
+
 #
-# If this is specified it will be linked in with the XDCData option in the def 
-# file instead of the default of $(APR)/misc/netware/apache.xdc.  XDCData can 
+# If this is specified it will be linked in with the XDCData option in the def
+# file instead of the default of $(APR)/misc/netware/apache.xdc.  XDCData can
 # be disabled by setting APACHE_UNIPROC in the environment
 #
-XDCDATA         = 
+XDCDATA		=
 
 #
 # Declare all target files (you must add your files here)
@@ -203,7 +203,7 @@ FILES_nlm_modules = \
 # Include the Winsock libraries if Winsock is being used
 ifndef USE_STDSOCKETS
 FILES_nlm_modules += ws2_32 \
-	       $(EOLIST)
+	$(EOLIST)
 endif
 
 #If the LDAP support is defined then add the auto-load modules
@@ -218,7 +218,7 @@ endif
 # If the nlm has a msg file, put it's path here
 #
 FILE_nlm_msg =
- 
+
 #
 # If the nlm has a hlp file put it's path here
 #
@@ -236,7 +236,7 @@ FILES_nlm_Ximports = \
 	@libc.imp \
 	@netware.imp \
 	$(EOLIST)
-	
+
 # Include the Winsock imports if Winsock is being used
 ifndef USE_STDSOCKETS
 FILES_nlm_Ximports +=  \
@@ -253,15 +253,15 @@ FILES_nlm_Ximports += \
 	@$(LDAPSDK)/imports/lldapssl.imp \
 	$(EOLIST)
 endif
- 
-#   
+
+#
 # Any symbols exported to here
 #
 FILES_nlm_exports = \
-	@aprlib.imp	\
+	@aprlib.imp \
 	$(EOLIST)
-	
-#   
+
+#
 # These are the OBJ files needed to create the LIB target above.
 # Paths must all use the '/' character
 #
@@ -344,7 +344,7 @@ libs :: $(OBJDIR) $(TARGET_lib)
 nlms :: libs $(TARGET_nlm)
 
 #
-# Updated this target to create necessary directories and copy files to the 
+# Updated this target to create necessary directories and copy files to the
 # correct place.  (See $(APR_WORK)\build\NWGNUhead.inc for examples)
 #
 install :: nlms $(INSTDIRS) FORCE
@@ -359,7 +359,7 @@ ifndef DEST
 	@echo xcopy docs $(INSTALLBASE)\docs\*.* $(XCOPYSW) >> xc.bat
 	$(CMD) xc.bat
 	$(DEL) xc.bat
-endif	
+endif
 
 ifndef DEST
 installdev :: $(INSTDEVDIRS) FORCE
@@ -367,10 +367,10 @@ installdev :: $(INSTDEVDIRS) FORCE
 	-copy $(subst /,\,$(APRUTIL))\include\*.h           $(INSTALLBASE)\include\*.*
 	-copy $(subst /,\,$(APR))\*.imp                     $(INSTALLBASE)\lib\*.*
 	-copy $(subst /,\,$(APR))\misc\netware\*.xdc        $(INSTALLBASE)\lib\*.*
-	
+
 $(INSTDEVDIRS) ::
 	$(CHKNOT) $@\NUL mkdir $@
-endif	
+endif
 
 #
 # Any specialized rules here
