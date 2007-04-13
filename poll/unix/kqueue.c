@@ -243,7 +243,7 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     }
     else {
         tv.tv_sec = (long) apr_time_sec(timeout);
-        tv.tv_nsec = (long) apr_time_msec(timeout);
+        tv.tv_nsec = (long) apr_time_usec(timeout) * 1000;
         tvptr = &tv;
     }
 
