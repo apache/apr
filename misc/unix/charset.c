@@ -75,7 +75,7 @@ APR_DECLARE(const char*) apr_os_locale_encoding (apr_pool_t *pool)
         /* Ignore the bogus information and use apr_os_default_encoding() */
         if (charset[0] != '^')
 #endif
-        return charset;
+        return apr_pstrdup(pool, charset);
     }
 #endif
 
