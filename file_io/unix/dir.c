@@ -176,7 +176,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
      * that problem.
      */
     if (ret == EINVAL) {
-        ret = ENOENT;
+        ret = APR_ENOENT;
     }
 #else
     /* We're about to call a non-thread-safe readdir() that may
