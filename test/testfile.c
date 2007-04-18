@@ -386,6 +386,29 @@ static void test_gets(abts_case *tc, void *data)
     apr_file_close(f);
 }
 
+static void test_gets_buffered(abts_case *tc, void *data)
+{
+    apr_file_t *f = NULL;
+    apr_status_t rv;
+    char *str = apr_palloc(p, 256);
+
+    /* This will deadlock gets before the r524355 fix. */
+    rv = apr_file_open(&f, FILENAME, APR_READ|APR_BUFFERED|APR_XTHREAD, 0, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_file_gets(str, 256, f);
+    /* Only one line in the test file, so APR will encounter EOF on the first
+     * call to gets, but we should get APR_SUCCESS on this call and
+     * APR_EOF on the next.
+     */
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, TESTSTR, str);
+    rv = apr_file_gets(str, 256, f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_STR_EQUAL(tc, "", str);
+    apr_file_close(f);
+}
+
 static void test_bigread(abts_case *tc, void *data)
 {
     apr_file_t *f = NULL;
@@ -853,6 +876,7 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_getc, NULL);
     abts_run_test(suite, test_ungetc, NULL);
     abts_run_test(suite, test_gets, NULL);
+    abts_run_test(suite, test_gets_buffered, NULL);
     abts_run_test(suite, test_puts, NULL);
     abts_run_test(suite, test_writev, NULL);
     abts_run_test(suite, test_writev_full, NULL);
