@@ -102,7 +102,7 @@ static void more_int64_fmts(abts_case *tc, void *data)
     apr_int64_t i = APR_INT64_C(-42);
     apr_int64_t ibig = APR_INT64_C(-314159265358979323);
     apr_uint64_t ui = APR_UINT64_C(42);
-    apr_uint64_t big = APR_UINT64_C(3141592653589793238);
+    apr_uint64_t big = APR_UINT64_C(10267677267010969076);
 
     apr_snprintf(buf, sizeof buf, "%" APR_INT64_T_FMT, i);
     ABTS_STR_EQUAL(tc, buf, "-42");
@@ -111,7 +111,7 @@ static void more_int64_fmts(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, buf, "42");
 
     apr_snprintf(buf, sizeof buf, "%" APR_UINT64_T_FMT, big);
-    ABTS_STR_EQUAL(tc, buf, "3141592653589793238");
+    ABTS_STR_EQUAL(tc, "10267677267010969076", buf);
 
     apr_snprintf(buf, sizeof buf, "%" APR_INT64_T_FMT, ibig);
     ABTS_STR_EQUAL(tc, buf, "-314159265358979323");
