@@ -1,5 +1,9 @@
 Changes for APR 1.2.9
 
+  *) Fix formatting of unsigned integers larger than 2^63 in the
+     vformatter/apr_*printf.  PR 42250.  
+     [Wynn Wilkes <wynn bungeelabs.com>]
+
   *) Fix possible EFAULT failures in apr_socket_sendfile() on 32-bit
      Solaris with LFS enabled.  PR 39463.  [Joe Orton, Joseph Tam
      <tam math.ubc.ca>]
