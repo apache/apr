@@ -28,6 +28,8 @@
 #include <unistd.h> /* for _POSIX_THREAD_SAFE_FUNCTIONS */
 #endif
 
+#define GRBUF_SIZE 8192
+
 APR_DECLARE(apr_status_t) apr_gid_name_get(char **groupname, apr_gid_t groupid,
                                            apr_pool_t *p)
 {
@@ -35,7 +37,7 @@ APR_DECLARE(apr_status_t) apr_gid_name_get(char **groupname, apr_gid_t groupid,
 
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETGRGID_R)
     struct group grp;
-    char grbuf[512];
+    char grbuf[GRBUF_SIZE];
     apr_status_t rv;
 
     /* See comment in getpwnam_safe on error handling. */
@@ -63,7 +65,7 @@ APR_DECLARE(apr_status_t) apr_gid_get(apr_gid_t *groupid,
 
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETGRNAM_R)
     struct group grp;
-    char grbuf[512];
+    char grbuf[GRBUF_SIZE];
     apr_status_t rv;
 
     /* See comment in getpwnam_safe on error handling. */
