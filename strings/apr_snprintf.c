@@ -397,7 +397,7 @@ static char *conv_10_quad(widest_int num, register bool_int is_unsigned,
      * number against the largest long value it can be. If <=, we
      * punt to the quicker version.
      */
-    if ((num <= ULONG_MAX && is_unsigned) 
+    if (((u_widest_int)num <= (u_widest_int)ULONG_MAX && is_unsigned) 
         || (num <= LONG_MAX && num >= LONG_MIN && !is_unsigned))
             return(conv_10( (wide_int)num, is_unsigned, is_negative,
                buf_end, len));
