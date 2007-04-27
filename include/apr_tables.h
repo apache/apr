@@ -342,16 +342,19 @@ typedef int (apr_table_do_callback_fn_t)(void *rec, const char *key,
 
 /** 
  * Iterate over a table running the provided function once for every
- * element in the table.  If there is data passed in as a vararg, then the 
- * function is only run on those elements whose key matches something in 
- * the vararg.  If the vararg is NULL, then every element is run through the
- * function.  Iteration continues while the function returns non-zero.
+ * element in the table.  The varargs array must be a list of zero or
+ * more (char *) keys followed by a NULL pointer.  If zero keys are
+ * given, the @param comp function will be invoked for every element
+ * in the table.  Otherwise, the function is invoked only for those
+ * elements matching the keys specified.
+ *
+ * If an invocation of the @param comp function returns zero,
+ * iteration will continue using the next specified key, if any.
+ *
  * @param comp The function to run
  * @param rec The data to pass as the first argument to the function
  * @param t The table to iterate over
- * @param ... The vararg.  If this is NULL, then all elements in the table are
- *            run through the function, otherwise only those whose key matches
- *            are run.
+ * @param ... A varargs array of zero or more (char *) keys followed by NULL
  * @return FALSE if one of the comp() iterations returned zero; TRUE if all
  *            iterations returned non-zero
  * @see apr_table_do_callback_fn_t
@@ -361,16 +364,19 @@ APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
 
 /** 
  * Iterate over a table running the provided function once for every
- * element in the table.  If there is data passed in as a vararg, then the 
- * function is only run on those element's whose key matches something in 
- * the vararg.  If the vararg is NULL, then every element is run through the
- * function.  Iteration continues while the function returns non-zero.
+ * element in the table.  The @param vp varargs paramater must be a
+ * list of zero or more (char *) keys followed by a NULL pointer.  If
+ * zero keys are given, the @param comp function will be invoked for
+ * every element in the table.  Otherwise, the function is invoked
+ * only for those elements matching the keys specified.
+ *
+ * If an invocation of the @param comp function returns zero,
+ * iteration will continue using the next specified key, if any.
+ *
  * @param comp The function to run
  * @param rec The data to pass as the first argument to the function
  * @param t The table to iterate over
- * @param vp The vararg table.  If this is NULL, then all elements in the 
- *                table are run through the function, otherwise only those 
- *                whose key matches are run.
+ * @param vp List of zero or more (char *) keys followed by NULL
  * @return FALSE if one of the comp() iterations returned zero; TRUE if all
  *            iterations returned non-zero
  * @see apr_table_do_callback_fn_t
