@@ -1202,7 +1202,7 @@ if test "$ac_cv_type_off_t" = "yes"; then
     if test "${ac_cv_sizeof_off_t}${ac_cv_sizeof_long}" = "44"; then
         # Special case: off_t may change size with _FILE_OFFSET_BITS
         # on 32-bit systems with LFS support.  To avoid compatibility
-        # with other software which may export _FILE_OFFSET_BITS,
+        # issues when other packages do define _FILE_OFFSET_BITS,
         # hard-code apr_off_t to long.
         off_t_value=long
         off_t_fmt='#define APR_OFF_T_FMT "ld"'
