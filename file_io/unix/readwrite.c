@@ -252,6 +252,15 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
         if (rv != APR_SUCCESS) {
             return rv;
         }
+        if (thefile->direction == 0) {
+            /* Position file pointer for writing at the offset we are
+             * logically reading from
+             */
+            apr_int64_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+            if (offset != thefile->filePtr)
+                lseek(thefile->filedes, offset, SEEK_SET);
+            thefile->bufpos = thefile->dataRead = 0;
+        }
     }
 
 #ifdef HAVE_WRITEV
