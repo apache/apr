@@ -407,6 +407,107 @@ static void test_bigread(CuTest *tc)
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 }
 
+/* Test that the contents of file FNAME are equal to data EXPECT of
+ * length EXPECTLEN. */
+static void file_contents_equal(CuTest *tc,
+                                const char *fname,
+                                const void *expect,
+                                apr_size_t expectlen)
+{
+    void *actual = apr_palloc(p, expectlen);
+    apr_file_t *f;
+    apr_status_t rv;
+    int rc;
+    
+    rv = apr_file_open(&f, fname, APR_READ|APR_BUFFERED, 0, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_file_read_full(f, actual, expectlen, NULL);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rc = memcmp(expect, actual, expectlen);
+    CuAssertIntEquals(tc, 0, rc);
+
+    rv = apr_file_close(f);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+}
+
+#define LINE1 "this is a line of text\n"
+#define LINE2 "this is a second line of text\n"
+
+static void test_writev_buffered(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    apr_size_t nbytes;
+    struct iovec vec[2];
+    const char *fname = "data/testwritev_buffered.dat";
+
+    rv = apr_file_open(&f, fname,
+                       APR_WRITE | APR_CREATE | APR_TRUNCATE |
+                       APR_BUFFERED, APR_OS_DEFAULT, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    nbytes = strlen(TESTSTR);
+    rv = apr_file_write(f, TESTSTR, &nbytes);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    vec[0].iov_base = LINE1;
+    vec[0].iov_len = strlen(LINE1);
+    vec[1].iov_base = LINE2;
+    vec[1].iov_len = strlen(LINE2);
+
+    rv = apr_file_writev(f, vec, 2, &nbytes);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_file_close(f);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    file_contents_equal(tc, fname, TESTSTR LINE1 LINE2,
+                        strlen(TESTSTR) + strlen(LINE1) + strlen(LINE2));
+}
+
+static void test_writev_buffered_seek(CuTest *tc)
+{
+    apr_file_t *f;
+    apr_status_t rv;
+    apr_off_t off = 0;
+    struct iovec vec[3];
+    apr_size_t nbytes = strlen(TESTSTR);
+    char *str = apr_pcalloc(p, nbytes+1);
+    const char *fname = "data/testwritev_buffered.dat";
+
+    rv = apr_file_open(&f, fname,
+                       APR_WRITE | APR_READ | APR_BUFFERED,
+                       APR_OS_DEFAULT, p);
+
+    rv = apr_file_read(f, str, &nbytes);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertStrEquals(tc, TESTSTR, str);
+
+    rv = apr_file_seek(f, APR_SET, &off);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    vec[0].iov_base = LINE1;
+    vec[0].iov_len = strlen(LINE1);
+    vec[1].iov_base = LINE2;
+    vec[1].iov_len = strlen(LINE2);
+    vec[2].iov_base = TESTSTR;
+    vec[2].iov_len = strlen(TESTSTR);
+
+    rv = apr_file_writev(f, vec, 3, &nbytes);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_file_close(f);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    file_contents_equal(tc, fname, LINE1 LINE2 TESTSTR,
+                        strlen(LINE1) + strlen(LINE2) + strlen(TESTSTR));
+
+    rv = apr_file_remove(fname, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+}
+
 /* This is a horrible name for this function.  We are testing APR, not how
  * Apache uses APR.  And, this function tests _way_ too much stuff.
  */
@@ -668,6 +769,8 @@ CuSuite *testfile(void)
     SUITE_ADD_TEST(suite, test_ungetc);
     SUITE_ADD_TEST(suite, test_gets);
     SUITE_ADD_TEST(suite, test_bigread);
+    SUITE_ADD_TEST(suite, test_writev_buffered);
+    SUITE_ADD_TEST(suite, test_writev_buffered_seek);
     SUITE_ADD_TEST(suite, test_mod_neg);
     SUITE_ADD_TEST(suite, test_truncate);
     SUITE_ADD_TEST(suite, test_fail_write_flush);
