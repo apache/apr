@@ -93,19 +93,9 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
     }
 
     if (thefile->buffered) {
-#if APR_HAS_THREADS
-        if (thefile->thlock) {
-            apr_thread_mutex_lock(thefile->thlock);
-        }
-#endif
-
+        file_lock(thefile);
         rv = file_read_buffered(thefile, buf, nbytes);
-
-#if APR_HAS_THREADS
-        if (thefile->thlock) {
-            apr_thread_mutex_unlock(thefile->thlock);
-        }
-#endif
+        file_unlock(thefile);
         return rv;
     }
     else {
@@ -163,11 +153,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         int blocksize;
         int size = *nbytes;
 
-#if APR_HAS_THREADS
-        if (thefile->thlock) {
-            apr_thread_mutex_lock(thefile->thlock);
-        }
-#endif
+        file_lock(thefile);
 
         if ( thefile->direction == 0 ) {
             /* Position file pointer for writing at the offset we are 
@@ -193,11 +179,8 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             size -= blocksize;
         }
 
-#if APR_HAS_THREADS
-        if (thefile->thlock) {
-            apr_thread_mutex_unlock(thefile->thlock);
-        }
-#endif
+        file_unlock(thefile);
+
         return rv;
     }
     else {
@@ -243,13 +226,16 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
 APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iovec *vec,
                                           apr_size_t nvec, apr_size_t *nbytes)
 {
+    apr_status_t rv;
 #ifdef HAVE_WRITEV
     apr_ssize_t bytes;
-#endif
+
+    file_lock(thefile);
 
     if (thefile->buffered) {
-        apr_status_t rv = apr_file_flush(thefile);
+        rv = apr_file_flush(thefile);
         if (rv != APR_SUCCESS) {
+            file_unlock(thefile);
             return rv;
         }
         if (thefile->direction == 0) {
@@ -263,15 +249,17 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
         }
     }
 
-#ifdef HAVE_WRITEV
     if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
         *nbytes = 0;
-        return errno;
+        rv = errno;
     }
     else {
         *nbytes = bytes;
-        return APR_SUCCESS;
+        rv = APR_SUCCESS;
     }
+
+    file_unlock(thefile);
+    return rv;
 #else
     /**
      * The problem with trying to output the entire iovec is that we cannot
@@ -319,7 +307,10 @@ APR_DECLARE(apr_status_t) apr_file_puts(const char *str, apr_file_t *thefile)
 
 APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
 {
+    apr_status_t rv = APR_SUCCESS;
+
     if (thefile->buffered) {
+        file_lock(thefile);
         if (thefile->direction == 1 && thefile->bufpos) {
             apr_ssize_t written;
 
@@ -327,16 +318,18 @@ APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
                 written = write(thefile->filedes, thefile->buffer, thefile->bufpos);
             } while (written == -1 && errno == EINTR);
             if (written == -1) {
-                return errno;
+                rv = errno;
+            } else {
+                thefile->filePtr += written;
+                thefile->bufpos = 0;
             }
-            thefile->filePtr += written;
-            thefile->bufpos = 0;
         }
+        file_unlock(thefile);
     }
     /* There isn't anything to do if we aren't buffering the output
      * so just return success.
      */
-    return APR_SUCCESS; 
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
@@ -356,21 +349,12 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
      * and skip over the apr_file_read calls.
      */
     if (thefile->buffered) {
-
-#if APR_HAS_THREADS
-        if (thefile->thlock) {
-            apr_thread_mutex_lock(thefile->thlock);
-        }
-#endif
+        file_lock(thefile);
 
         if (thefile->direction == 1) {
             rv = apr_file_flush(thefile);
             if (rv) {
-#if APR_HAS_THREADS
-                if (thefile->thlock) {
-                    apr_thread_mutex_unlock(thefile->thlock);
-                }
-#endif
+                file_unlock(thefile);
                 return rv;
             }
 
@@ -398,12 +382,7 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
             }
             ++str;
         }
-
-#if APR_HAS_THREADS
-        if (thefile->thlock) {
-            apr_thread_mutex_unlock(thefile->thlock);
-        }
-#endif
+        file_unlock(thefile);
     }
     else {
         while (str < final) { /* leave room for trailing '\0' */

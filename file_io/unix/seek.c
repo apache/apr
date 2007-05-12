@@ -22,7 +22,6 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
     apr_status_t rv;
 
     if (thefile->direction == 1) {
-        /* XXX: flush here is not mutex protected */
         rv = apr_file_flush(thefile);
         if (rv) {
             return rv;
@@ -60,6 +59,8 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
         int rc = EINVAL;
         apr_finfo_t finfo;
 
+        file_lock(thefile);
+
         switch (where) {
         case APR_SET:
             rc = setptr(thefile, *offset);
@@ -77,6 +78,9 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
         }
 
         *offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+
+        file_unlock(thefile);
+
         return rc;
     }
     else {
