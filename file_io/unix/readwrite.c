@@ -226,8 +226,8 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
 APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iovec *vec,
                                           apr_size_t nvec, apr_size_t *nbytes)
 {
-    apr_status_t rv;
 #ifdef HAVE_WRITEV
+    apr_status_t rv;
     apr_ssize_t bytes;
 
     file_lock(thefile);
@@ -242,7 +242,8 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
             /* Position file pointer for writing at the offset we are
              * logically reading from
              */
-            apr_int64_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+            apr_int64_t offset = thefile->filePtr - thefile->dataRead +
+                                 thefile->bufpos;
             if (offset != thefile->filePtr)
                 lseek(thefile->filedes, offset, SEEK_SET);
             thefile->bufpos = thefile->dataRead = 0;
