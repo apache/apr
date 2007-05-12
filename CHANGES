@@ -1,5 +1,8 @@
 Changes for APR 1.2.9
 
+  *) Fix file pointer position calculation in apr_file_writev() on
+     buffered file.  PR 40963.  [Davi Arnaut <davi haxent.com.br>]
+
   *) Fix formatting of unsigned integers larger than 2^63 in the
      vformatter/apr_*printf.  PR 42250.  
      [Wynn Wilkes <wynn bungeelabs.com>]
