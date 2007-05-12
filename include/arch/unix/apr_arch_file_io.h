@@ -113,6 +113,14 @@ struct apr_file_t {
 #endif
 };
 
+#if APR_HAS_THREADS
+#define file_lock(f)   {if ((f)->thlock) apr_thread_mutex_lock((f)->thlock);}
+#define file_unlock(f) {if ((f)->thlock) apr_thread_mutex_unlock((f)->thlock);}
+#else
+#define file_lock(f)   {} 
+#define file_unlock(f) {}
+#endif
+
 #if APR_HAS_LARGE_FILES && defined(_LARGEFILE64_SOURCE)
 #define stat(f,b) stat64(f,b)
 #define lstat(f,b) lstat64(f,b)

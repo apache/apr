@@ -24,21 +24,13 @@ APR_DECLARE(apr_status_t) apr_file_buffer_set(apr_file_t *file,
 {
     apr_status_t rv;
 
-#if APR_HAS_THREADS
-     if (file->thlock) {
-         apr_thread_mutex_lock(file->thlock);
-     }
-#endif
- 
+    file_lock(file);
+
     if(file->buffered) {
         /* Flush the existing buffer */
         rv = apr_file_flush(file);
         if (rv != APR_SUCCESS) {
-#if APR_HAS_THREADS
-            if (file->thlock) {
-                apr_thread_mutex_unlock(file->thlock);
-            }
-#endif
+            file_unlock(file);
             return rv;
         }
     }
@@ -56,12 +48,8 @@ APR_DECLARE(apr_status_t) apr_file_buffer_set(apr_file_t *file,
              */
             file->buffered = 0;
     }
-    
-#if APR_HAS_THREADS
-    if (file->thlock) {
-        apr_thread_mutex_unlock(file->thlock);
-    }
-#endif
+
+    file_unlock(file);
 
     return APR_SUCCESS;
 }
