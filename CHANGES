@@ -1,6 +1,7 @@
-Changes with APR 0.9.13
+Changes with APR 0.9.14
 
-
+  *) Fix file pointer position calculation in apr_file_writev() on
+     buffered file.  PR 40963.  [Davi Arnaut <davi haxent.com.br>]
 
 Changes with APR 0.9.13
 
