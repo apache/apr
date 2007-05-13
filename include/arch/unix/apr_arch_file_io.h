@@ -104,6 +104,20 @@ struct apr_file_t {
 #endif
 };
 
+#if APR_HAS_THREADS
+#define file_lock(f)   do { \
+                           if ((f)->thlock) \
+                               apr_thread_mutex_lock((f)->thlock); \
+                       } while (0)
+#define file_unlock(f) do { \
+                           if ((f)->thlock) \
+                               apr_thread_mutex_unlock((f)->thlock); \
+                       } while (0)
+#else
+#define file_lock(f)   do {} while (0)
+#define file_unlock(f) do {} while (0)
+#endif
+
 struct apr_dir_t {
     apr_pool_t *pool;
     char *dirname;

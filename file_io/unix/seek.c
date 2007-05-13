@@ -58,6 +58,8 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
         int rc = EINVAL;
         apr_finfo_t finfo;
 
+        file_lock(thefile);
+
         switch (where) {
         case APR_SET:
             rc = setptr(thefile, *offset);
@@ -75,6 +77,9 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
         }
 
         *offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+
+        file_unlock(thefile);
+
         return rc;
     } else {
 

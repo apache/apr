@@ -43,20 +43,12 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         apr_uint64_t blocksize;
         apr_uint64_t size = *nbytes;
 
-#if APR_HAS_THREADS
-        if (thefile->thlock) {
-            apr_thread_mutex_lock(thefile->thlock);
-        }
-#endif
+        file_lock(thefile);
 
         if (thefile->direction == 1) {
             rv = apr_file_flush(thefile);
             if (rv) {
-#if APR_HAS_THREADS
-                if (thefile->thlock) {
-                    apr_thread_mutex_unlock(thefile->thlock);
-                }
-#endif
+                file_unlock(thefile);
                 return rv;
             }
             thefile->bufpos = 0;
@@ -99,11 +91,9 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         if (*nbytes) {
             rv = 0;
         }
-#if APR_HAS_THREADS
-        if (thefile->thlock) {
-            apr_thread_mutex_unlock(thefile->thlock);
-        }
-#endif
+
+        file_unlock(thefile);
+
         return rv;
     }
     else {
@@ -161,11 +151,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         int blocksize;
         int size = *nbytes;
 
-#if APR_HAS_THREADS
-        if (thefile->thlock) {
-            apr_thread_mutex_lock(thefile->thlock);
-        }
-#endif
+        file_lock(thefile);
 
         if ( thefile->direction == 0 ) {
             /* Position file pointer for writing at the offset we are 
@@ -191,11 +177,8 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             size -= blocksize;
         }
 
-#if APR_HAS_THREADS
-        if (thefile->thlock) {
-            apr_thread_mutex_unlock(thefile->thlock);
-        }
-#endif
+        file_unlock(thefile);
+
         return rv;
     }
     else {
@@ -242,12 +225,15 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
                                           apr_size_t nvec, apr_size_t *nbytes)
 {
 #ifdef HAVE_WRITEV
+    apr_status_t rv;
     int bytes;
-#endif
+
+    file_lock(thefile);
 
     if (thefile->buffered) {
         apr_status_t rv = apr_file_flush(thefile);
         if (rv != APR_SUCCESS) {
+            file_unlock(thefile);
             return rv;
         }
         if (thefile->direction == 0) {
@@ -262,15 +248,17 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
         }
     }
 
-#ifdef HAVE_WRITEV
     if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
         *nbytes = 0;
-        return errno;
+        rv = errno;
     }
     else {
         *nbytes = bytes;
-        return APR_SUCCESS;
+        rv = APR_SUCCESS;
     }
+
+    file_unlock(thefile);
+    return rv;
 #else
     *nbytes = vec[0].iov_len;
     return apr_file_write(thefile, vec[0].iov_base, nbytes);
@@ -306,24 +294,29 @@ APR_DECLARE(apr_status_t) apr_file_puts(const char *str, apr_file_t *thefile)
 
 APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
 {
+    apr_status_t rv = APR_SUCCESS;
+
     if (thefile->buffered) {
-        apr_int64_t written = 0;
+        file_lock(thefile);
 
         if (thefile->direction == 1 && thefile->bufpos) {
+            apr_int64_t written = 0;
             do {
                 written = write(thefile->filedes, thefile->buffer, thefile->bufpos);
             } while (written == (apr_int64_t)-1 && errno == EINTR);
             if (written == (apr_int64_t)-1) {
-                return errno;
+                rv = errno;
+            } else {
+                thefile->filePtr += written;
+                thefile->bufpos = 0;
             }
-            thefile->filePtr += written;
-            thefile->bufpos = 0;
         }
+        file_unlock(thefile);
     }
     /* There isn't anything to do if we aren't buffering the output
      * so just return success.
      */
-    return APR_SUCCESS; 
+    return rv; 
 }
 
 APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)

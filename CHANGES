@@ -1,5 +1,8 @@
 Changes with APR 0.9.14
 
+  *) Improve thread safety of assorted file_io functions.
+     PR 42400.  [Davi Arnaut <davi haxent.com.br>]
+
   *) Fix file pointer position calculation in apr_file_writev() on
      buffered file.  PR 40963.  [Davi Arnaut <davi haxent.com.br>]
 
