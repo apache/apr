@@ -122,7 +122,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
 #if APR_HAS_THREADS
     if ((flag & APR_BUFFERED) && (flag & APR_XTHREAD)) {
         rv = apr_thread_mutex_create(&thlock,
-                                     APR_THREAD_MUTEX_NESTED, pool);
+                                     APR_THREAD_MUTEX_DEFAULT, pool);
         if (rv) {
             return rv;
         }
@@ -246,7 +246,7 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
         if ((*file)->flags & APR_XTHREAD) {
             apr_status_t rv;
             rv = apr_thread_mutex_create(&((*file)->thlock),
-                                         APR_THREAD_MUTEX_NESTED, pool);
+                                         APR_THREAD_MUTEX_DEFAULT, pool);
             if (rv) {
                 return rv;
             }
