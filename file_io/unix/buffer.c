@@ -28,7 +28,7 @@ APR_DECLARE(apr_status_t) apr_file_buffer_set(apr_file_t *file,
 
     if(file->buffered) {
         /* Flush the existing buffer */
-        rv = apr_file_flush(file);
+        rv = apr_file_flush_locked(file);
         if (rv != APR_SUCCESS) {
             file_unlock(file);
             return rv;

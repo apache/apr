@@ -55,7 +55,7 @@ static apr_status_t file_dup(apr_file_t **new_file,
 #if APR_HAS_THREADS
     if ((*new_file)->buffered && !(*new_file)->thlock && old_file->thlock) {
         apr_thread_mutex_create(&((*new_file)->thlock),
-                                APR_THREAD_MUTEX_NESTED, p);
+                                APR_THREAD_MUTEX_DEFAULT, p);
     }
 #endif
     /* As above, only create the buffer if we haven't already
@@ -133,7 +133,7 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
 #if APR_HAS_THREADS
         if (old_file->thlock) {
             apr_thread_mutex_create(&((*new_file)->thlock),
-                                    APR_THREAD_MUTEX_NESTED, p);
+                                    APR_THREAD_MUTEX_DEFAULT, p);
             apr_thread_mutex_destroy(old_file->thlock);
         }
 #endif /* APR_HAS_THREADS */
