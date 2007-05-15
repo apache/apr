@@ -34,7 +34,7 @@ static apr_status_t file_read_buffered(apr_file_t *thefile, void *buf,
     apr_uint64_t size = *nbytes;
 
     if (thefile->direction == 1) {
-        rv = apr_file_flush(thefile);
+        rv = apr_file_flush_locked(thefile);
         if (rv) {
             return rv;
         }
@@ -169,7 +169,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         rv = 0;
         while (rv == 0 && size > 0) {
             if (thefile->bufpos == APR_FILE_BUFSIZE)   /* write buffer is full*/
-                rv = apr_file_flush(thefile);
+                rv = apr_file_flush_locked(thefile);
 
             blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? 
                         APR_FILE_BUFSIZE - thefile->bufpos : size;
@@ -230,10 +230,10 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
     apr_status_t rv;
     int bytes;
 
-    file_lock(thefile);
-
     if (thefile->buffered) {
-        apr_status_t rv = apr_file_flush(thefile);
+        file_lock(thefile);
+
+        apr_status_t rv = apr_file_flush_locked(thefile);
         if (rv != APR_SUCCESS) {
             file_unlock(thefile);
             return rv;
@@ -248,6 +248,8 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
                 lseek(thefile->filedes, offset, SEEK_SET);
             thefile->bufpos = thefile->dataRead = 0;
         }
+
+        file_unlock(thefile);
     }
 
     if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
@@ -258,8 +260,6 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
         *nbytes = bytes;
         rv = APR_SUCCESS;
     }
-
-    file_unlock(thefile);
     return rv;
 #else
     /**
@@ -306,25 +306,34 @@ APR_DECLARE(apr_status_t) apr_file_puts(const char *str, apr_file_t *thefile)
     return apr_file_write_full(thefile, str, strlen(str), NULL);
 }
 
+apr_status_t apr_file_flush_locked(apr_file_t *thefile)
+{
+    apr_status_t rv = APR_SUCCESS;
+
+    if (thefile->direction == 1 && thefile->bufpos) {
+        apr_ssize_t written;
+
+        do {
+            written = write(thefile->filedes, thefile->buffer, thefile->bufpos);
+        } while (written == -1 && errno == EINTR);
+        if (written == -1) {
+            rv = errno;
+        } else {
+            thefile->filePtr += written;
+            thefile->bufpos = 0;
+        }
+    }
+
+    return rv;
+}
+
 APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
 {
     apr_status_t rv = APR_SUCCESS;
 
     if (thefile->buffered) {
         file_lock(thefile);
-
-        if (thefile->direction == 1 && thefile->bufpos) {
-            apr_int64_t written = 0;
-            do {
-                written = write(thefile->filedes, thefile->buffer, thefile->bufpos);
-            } while (written == (apr_int64_t)-1 && errno == EINTR);
-            if (written == (apr_int64_t)-1) {
-                rv = errno;
-            } else {
-                thefile->filePtr += written;
-                thefile->bufpos = 0;
-            }
-        }
+        rv = apr_file_flush_locked(thefile);
         file_unlock(thefile);
     }
     /* There isn't anything to do if we aren't buffering the output
@@ -354,7 +363,7 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
         file_lock(thefile);
 
         if (thefile->direction == 1) {
-            rv = apr_file_flush(thefile);
+            rv = apr_file_flush_locked(thefile);
             if (rv) {
                 file_unlock(thefile);
                 return rv;
