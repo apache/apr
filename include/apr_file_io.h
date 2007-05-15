@@ -742,6 +742,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo,
  * Truncate the file's length to the specified offset
  * @param fp The file to truncate
  * @param offset The offset to truncate to.
+ * @remark The read/write file offset is repositioned to offset.
  */
 APR_DECLARE(apr_status_t) apr_file_trunc(apr_file_t *fp, apr_off_t offset);
 
