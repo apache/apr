@@ -18,33 +18,34 @@
 
 static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
 {
-    long newbufpos;
-    int rc;
+    apr_off_t newbufpos;
+    apr_status_t rv;
 
     if (thefile->direction == 1) {
-        apr_file_flush(thefile);
+        rv = apr_file_flush_locked(thefile);
+        if (rv) {
+            return rv;
+        }
         thefile->bufpos = thefile->direction = thefile->dataRead = 0;
     }
 
     newbufpos = pos - (thefile->filePtr - thefile->dataRead);
     if (newbufpos >= 0 && newbufpos <= thefile->dataRead) {
         thefile->bufpos = newbufpos;
-        rc = 0;
-    } 
+        rv = APR_SUCCESS;
+    }
     else {
-        rc = lseek(thefile->filedes, pos, SEEK_SET);
-
-        if (rc != -1 ) {
+        if (lseek(thefile->filedes, pos, SEEK_SET) != -1) {
             thefile->bufpos = thefile->dataRead = 0;
             thefile->filePtr = pos;
-            rc = 0;
+            rv = APR_SUCCESS;
         }
         else {
-            rc = errno;
+            rv = errno;
         }
     }
 
-    return rc;
+    return rv;
 }
 
 
@@ -70,7 +71,7 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
             break;
 
         case APR_END:
-            rc = apr_file_info_get(&finfo, APR_FINFO_SIZE, thefile);
+            rc = apr_file_info_get_locked(&finfo, APR_FINFO_SIZE, thefile);
             if (rc == APR_SUCCESS)
                 rc = setptr(thefile, finfo.size + *offset);
             break;
@@ -100,5 +101,5 @@ apr_status_t apr_file_trunc(apr_file_t *fp, apr_off_t offset)
     if (ftruncate(fp->filedes, offset) == -1) {
         return errno;
     }
-    return setptr(fp, offset);
+    return apr_file_seek(fp, APR_SET, &offset);
 }

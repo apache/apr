@@ -130,6 +130,10 @@ apr_status_t apr_unix_file_cleanup(void *);
 mode_t apr_unix_perms2mode(apr_fileperms_t perms);
 apr_fileperms_t apr_unix_mode2perms(mode_t mode);
 
+apr_status_t apr_file_flush_locked(apr_file_t *thefile);
+apr_status_t apr_file_info_get_locked(apr_finfo_t *finfo, apr_int32_t wanted,
+                                      apr_file_t *thefile);
+
 
 #endif  /* ! FILE_IO_H */
 
