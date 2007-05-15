@@ -93,6 +93,20 @@ struct apr_file_t {
 #endif
 };
 
+#if APR_HAS_THREADS
+#define file_lock(f)   do { \
+                           if ((f)->thlock) \
+                               apr_thread_mutex_lock((f)->thlock); \
+                       } while (0)
+#define file_unlock(f) do { \
+                           if ((f)->thlock) \
+                               apr_thread_mutex_unlock((f)->thlock); \
+                       } while (0)
+#else
+#define file_lock(f)   do {} while (0)
+#define file_unlock(f) do {} while (0)
+#endif
+
 struct apr_dir_t {
     apr_pool_t *pool;
     char *dirname;
@@ -135,6 +149,10 @@ apr_status_t filepath_has_drive(const char *rootpath, int only, apr_pool_t *p);
 apr_status_t filepath_compare_drive(const char *path1, const char *path2, apr_pool_t *p);
 
 apr_status_t apr_unix_file_cleanup(void *);
+
+apr_status_t apr_file_flush_locked(apr_file_t *thefile);
+apr_status_t apr_file_info_get_locked(apr_finfo_t *finfo, apr_int32_t wanted,
+                                      apr_file_t *thefile);
 
 #endif  /* ! FILE_IO_H */
 
