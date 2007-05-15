@@ -73,6 +73,20 @@
 /* For backwards compat */
 #define APR_FILE_BUFSIZE APR_FILE_DEFAULT_BUFSIZE
 
+#if APR_HAS_THREADS
+#define file_lock(f)   do { \
+                           if ((f)->thlock) \
+                               apr_thread_mutex_lock((f)->thlock); \
+                       } while (0)
+#define file_unlock(f) do { \
+                           if ((f)->thlock) \
+                               apr_thread_mutex_unlock((f)->thlock); \
+                       } while (0)
+#else
+#define file_lock(f)   do {} while (0)
+#define file_unlock(f) do {} while (0)
+#endif
+
 #if APR_HAS_LARGE_FILES
 #define lseek(f,o,w) lseek64(f,o,w)
 #define ftruncate(f,l) ftruncate64(f,l)
@@ -150,6 +164,10 @@ apr_status_t filepath_compare_drive(const char *path1, const char *path2, apr_po
 
 apr_status_t apr_unix_file_cleanup(void *);
 apr_status_t apr_unix_child_file_cleanup(void *);
+
+apr_status_t apr_file_flush_locked(apr_file_t *thefile);
+apr_status_t apr_file_info_get_locked(apr_finfo_t *finfo, apr_int32_t wanted,
+                                      apr_file_t *thefile);
 
 #endif  /* ! FILE_IO_H */
 
