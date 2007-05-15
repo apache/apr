@@ -233,7 +233,7 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
     if (thefile->buffered) {
         file_lock(thefile);
 
-        apr_status_t rv = apr_file_flush_locked(thefile);
+        rv = apr_file_flush_locked(thefile);
         if (rv != APR_SUCCESS) {
             file_unlock(thefile);
             return rv;
