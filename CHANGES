@@ -1,5 +1,8 @@
 Changes for APR 1.3.0
 
+  *) Discard file buffers when running cleanups for exec.
+     PR 41119.  [Davi Arnaut <davi haxent.com.br>, Bojan Smojver]
+ 
   *) Improve thread safety of assorted file_io functions.
      PR 42400.  [Davi Arnaut <davi haxent.com.br>]
 
