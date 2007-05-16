@@ -30,7 +30,17 @@
 #include <string.h>
 #endif
 
+static apr_array_header_t *a1 = NULL;
 static apr_table_t *t1 = NULL;
+
+static void array_clear(abts_case *tc, void *data)
+{
+    a1 = apr_array_make(p, 2, sizeof(const char *));
+    APR_ARRAY_PUSH(a1, const char *) = "foo";
+    APR_ARRAY_PUSH(a1, const char *) = "bar";
+    apr_array_clear(a1);
+    ABTS_INT_EQUAL(tc, 0, a1->nelts);
+}
 
 static void table_make(abts_case *tc, void *data)
 {
@@ -174,6 +184,7 @@ abts_suite *testtable(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
 
+    abts_run_test(suite, array_clear, NULL);
     abts_run_test(suite, table_make, NULL);
     abts_run_test(suite, table_get, NULL);
     abts_run_test(suite, table_set, NULL);
