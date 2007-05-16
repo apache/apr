@@ -148,6 +148,14 @@ APR_DECLARE(void *) apr_array_push(apr_array_header_t *arr);
 APR_DECLARE(void *) apr_array_pop(apr_array_header_t *arr);
 
 /**
+ * Remove all elements from an array.
+ * @param arr The array to remove all elements from.
+ * @remark As the underlying storage is allocated from a pool, no
+ * memory is freed by this operation, but is available for reuse.
+ */
+APR_DECLARE(void) apr_array_clear(apr_array_header_t *arr);
+
+/**
  * Concatenate two arrays together
  * @param dst The destination array, and the one to go first in the combined 
  *            array
