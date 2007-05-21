@@ -294,5 +294,10 @@ APR_DECLARE(apr_status_t) apr_file_inherit_unset(apr_file_t *thefile)
     }
     return APR_SUCCESS;
 }
+/* Deprecated */
+APR_DECLARE(void) apr_file_unset_inherit(apr_file_t *thefile)
+{
+    apr_file_inherit_unset(thefile);
+}
 
 APR_POOL_IMPLEMENT_ACCESSOR(file)
