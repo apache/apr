@@ -91,7 +91,7 @@ static apr_status_t _file_dup(apr_file_t **new_file,
 
     apr_pool_cleanup_register((*new_file)->pool, (void *)(*new_file),
                               apr_unix_file_cleanup, 
-                              apr_unix_file_cleanup);
+                              apr_unix_child_file_cleanup);
 
     return APR_SUCCESS;
 }
@@ -139,7 +139,7 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
                                   apr_unix_file_cleanup,
                                   ((*new_file)->flags & APR_INHERIT)
                                      ? apr_pool_cleanup_null
-                                     : apr_unix_file_cleanup);
+                                     : apr_unix_child_file_cleanup);
     }
 
     old_file->filedes = -1;

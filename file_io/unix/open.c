@@ -26,14 +26,10 @@
 #include "fsio.h"
 #endif
 
-apr_status_t apr_unix_file_cleanup(void *thefile)
+static apr_status_t file_cleanup(apr_file_t *file)
 {
-    apr_file_t *file = thefile;
-    apr_status_t flush_rv = APR_SUCCESS, rv = APR_SUCCESS;
+    apr_status_t rv = APR_SUCCESS;
 
-    if (file->buffered) {
-        flush_rv = apr_file_flush(file);
-    }
     if (close(file->filedes) == 0) {
         file->filedes = -1;
         if (file->flags & APR_DELONCLOSE) {
@@ -49,7 +45,26 @@ apr_status_t apr_unix_file_cleanup(void *thefile)
         /* Are there any error conditions other than EINTR or EBADF? */
         rv = errno;
     }
+    return rv;
+}
+
+apr_status_t apr_unix_file_cleanup(void *thefile)
+{
+    apr_file_t *file = thefile;
+    apr_status_t flush_rv = APR_SUCCESS, rv = APR_SUCCESS;
+
+    if (file->buffered) {
+        flush_rv = apr_file_flush(file);
+    }
+
+    rv = file_cleanup(file);
+
     return rv != APR_SUCCESS ? rv : flush_rv;
+}
+
+apr_status_t apr_unix_child_file_cleanup(void *thefile)
+{
+    return file_cleanup(thefile);
 }
 
 APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, 
@@ -159,7 +174,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     if (!(flag & APR_FILE_NOCLEANUP)) {
         apr_pool_cleanup_register((*new)->pool, (void *)(*new), 
                                   apr_unix_file_cleanup, 
-                                  apr_unix_file_cleanup);
+                                  apr_unix_child_file_cleanup);
     }
     return APR_SUCCESS;
 }
@@ -262,6 +277,22 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile,
 
 APR_IMPLEMENT_INHERIT_SET(file, flags, pool, apr_unix_file_cleanup)
 
-APR_IMPLEMENT_INHERIT_UNSET(file, flags, pool, apr_unix_file_cleanup)
+/* We need to do this by hand instead of using APR_IMPLEMENT_INHERIT_UNSET
+ * because the macro sets both cleanups to the same function, which is not
+ * suitable on Unix (see PR 41119). */
+APR_DECLARE(apr_status_t) apr_file_inherit_unset(apr_file_t *thefile)
+{
+    if (thefile->flags & APR_FILE_NOCLEANUP) {
+        return APR_EINVAL;
+    }
+    if (thefile->flags & APR_INHERIT) {
+        thefile->flags &= ~APR_INHERIT;
+        apr_pool_child_cleanup_set(thefile->pool,
+                                   (void *)thefile,
+                                   apr_unix_file_cleanup,
+                                   apr_unix_child_file_cleanup);
+    }
+    return APR_SUCCESS;
+}
 
 APR_POOL_IMPLEMENT_ACCESSOR(file)

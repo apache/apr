@@ -198,7 +198,8 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
     (*fp)->fname = apr_pstrdup(p, template);
 
     apr_pool_cleanup_register((*fp)->pool, (void *)(*fp),
-                              apr_unix_file_cleanup, apr_unix_file_cleanup);
+                              apr_unix_file_cleanup,
+                              apr_unix_child_file_cleanup);
 #endif
     return APR_SUCCESS;
 }
