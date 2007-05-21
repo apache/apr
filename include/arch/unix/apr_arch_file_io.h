@@ -143,6 +143,7 @@ struct apr_dir_t {
 };
 
 apr_status_t apr_unix_file_cleanup(void *);
+apr_status_t apr_unix_child_file_cleanup(void *);
 
 mode_t apr_unix_perms2mode(apr_fileperms_t perms);
 apr_fileperms_t apr_unix_mode2perms(mode_t mode);
