@@ -427,7 +427,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 if (attr->errfn) {
                     attr->errfn(pool, errno, "change of working directory failed");
                 }
-                exit(-1);   /* We have big problems, the child should exit. */
+                _exit(-1);   /* We have big problems, the child should exit. */
             }
         }
 
@@ -437,7 +437,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 if (attr->errfn) {
                     attr->errfn(pool, errno, "setting of group failed");
                 }
-                exit(-1);   /* We have big problems, the child should exit. */
+                _exit(-1);   /* We have big problems, the child should exit. */
             }
         }
 
@@ -446,7 +446,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 if (attr->errfn) {
                     attr->errfn(pool, errno, "setting of user failed");
                 }
-                exit(-1);   /* We have big problems, the child should exit. */
+                _exit(-1);   /* We have big problems, the child should exit. */
             }
         }
 
@@ -454,7 +454,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             if (attr->errfn) {
                 attr->errfn(pool, errno, "setting of resource limits failed");
             }
-            exit(-1);   /* We have big problems, the child should exit. */
+            _exit(-1);   /* We have big problems, the child should exit. */
         }
 
         if (attr->cmdtype == APR_SHELLCMD ||
@@ -546,8 +546,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             attr->errfn(pool, errno, desc);
         }
 
-        exit(-1);  /* if we get here, there is a problem, so exit with an
-                    * error code. */
+        _exit(-1);  /* if we get here, there is a problem, so exit with an
+                     * error code. */
     }
 
     /* Parent process */
