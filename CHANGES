@@ -3,6 +3,10 @@ Changes for APR 1.2.9
   *) Discard file buffers when running cleanups for exec.
      PR 41119.  [Davi Arnaut <davi haxent.com.br>, Bojan Smojver]
 
+  *) If apr_proc_create() fails to exec in the fork()ed child, call
+     _exit() not exit() to avoid running atexit()-registered functions
+     in the child.  PR 30913.  [Joe Orton]
+
   *) Improve thread safety of assorted file_io functions.
      PR 42400.  [Davi Arnaut <davi haxent.com.br>]
 
