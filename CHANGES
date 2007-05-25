@@ -6,9 +6,6 @@ Changes for APR 1.3.0
   *) Improve thread safety of assorted file_io functions.
      PR 42400.  [Davi Arnaut <davi haxent.com.br>]
 
-  *) Fix deadlock in apr_file_gets() for a file opened with both the
-     APR_BUFFERED and APR_XTHREAD flags.  [Bojan Smojver, Joe Orton]
-
   *) Add the apr_pollcb API as an alternative more efficient method
      of polling sockets, compared to apr_pollset. [Paul Querna]
 
@@ -101,10 +98,6 @@ Changes for APR 1.3.0
 
   *) Fix checks for alloca() support in configure.  PR 13037.
      [Noah Misch <noah cs.caltech.edu>]
-
-  *) If apr_proc_create() fails to exec in the fork()ed child, call
-     _exit() not exit() to avoid running atexit()-registered functions
-     in the child.  PR 30913.  [Joe Orton]
 
   *) Add %pm support to apr_snprintf() for printing the error string
      corresponding to an apr_status_t value.  [Joe Orton]
