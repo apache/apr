@@ -45,7 +45,12 @@ EOF
     echo "NOTEST_LIBS=\"$NOTEST_LIBS\"; export NOTEST_LIBS" >> $1
   fi
 
-  for arg in [$]0 "[$]@"; do
+  # Retrieve command-line arguments.
+  eval "set x $[0] $ac_configure_args"
+  shift
+
+  for arg
+  do
     APR_EXPAND_VAR(arg, $arg)
     echo "\"[$]arg\" \\" >> $1
   done
@@ -814,6 +819,10 @@ dnl used here to allow us to co-exist layouts and argument based
 dnl set ups.
 AC_DEFUN(APR_PARSE_ARGUMENTS,[
 ac_prev=
+# Retrieve the command-line arguments.  The eval is needed because
+# the arguments are quoted to preserve accuracy.
+eval "set x $ac_configure_args"
+shift
 for ac_option
 do
   # If the previous option needs an argument, assign it.
