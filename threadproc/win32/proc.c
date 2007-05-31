@@ -32,6 +32,10 @@
 #include <process.h>
 #endif
 
+#ifndef LOGON32_LOGON_NETWORK
+#define LOGON32_LOGON_NETWORK 3
+#endif
+
 #ifdef _WIN32_WCE
 #ifndef DETACHED_PROCESS
 #define DETACHED_PROCESS 0
