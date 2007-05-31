@@ -27,15 +27,27 @@ APR_DECLARE(const char*) apr_os_default_encoding (apr_pool_t *pool)
 
 APR_DECLARE(const char*) apr_os_locale_encoding (apr_pool_t *pool)
 {
+#ifdef _UNICODE
+    int i;
+#endif
+#if defined(_WIN32_WCE)
+    LCID locale = GetUserDefaultLCID();
+#else
     LCID locale = GetThreadLocale();
+#endif
     int len = GetLocaleInfo(locale, LOCALE_IDEFAULTANSICODEPAGE, NULL, 0);
-    char *cp = apr_palloc(pool, len + 2);
-    if (0 < GetLocaleInfo(locale, LOCALE_IDEFAULTANSICODEPAGE, cp + 2, len))
+    char *cp = apr_palloc(pool, (len * sizeof(TCHAR)) + 2);
+    if (0 < GetLocaleInfo(locale, LOCALE_IDEFAULTANSICODEPAGE, (TCHAR*) (cp + 2), len))
     {
         /* Fix up the returned number to make a valid codepage name of
           the form "CPnnnn". */
         cp[0] = 'C';
         cp[1] = 'P';
+#ifdef _UNICODE
+        for(i = 0; i < len; i++) {
+            cp[i + 2] = (char) ((TCHAR*) (cp + 2))[i];
+        }
+#endif
         return cp;
     }
 
