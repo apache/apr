@@ -143,7 +143,7 @@ APR_DECLARE_DATA int errno;
 #endif
 
 /* MSVC 7.0 introduced _strtoi64 */
-#if _MSC_VER >= 1300 && _INTEGRAL_MAX_BITS >= 64
+#if _MSC_VER >= 1300 && _INTEGRAL_MAX_BITS >= 64 && !defined(_WIN32_WCE)
 #define APR_INT64_STRFN	      _strtoi64
 #endif
 
@@ -154,7 +154,11 @@ APR_DECLARE_DATA int errno;
 #define APR_OFF_T_STRFN         apr_strtoi64
 #endif
 #else
+#if defined(_WIN32_WCE)
+#define APR_OFF_T_STRFN         strtol
+#else
 #define APR_OFF_T_STRFN         strtoi
+#endif
 #endif
 
 /* used to check for DWORD overflow in 64bit compiles */
