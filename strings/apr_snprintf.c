@@ -1086,7 +1086,7 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
                  * don't handle "%p".
                  */
                 case 'p':
-#ifdef APR_VOID_P_IS_QUAD
+#if APR_SIZEOF_VOIDP == 8
                     if (sizeof(void *) <= sizeof(u_widest_int)) {
                         ui_quad = (u_widest_int) va_arg(ap, void *);
                         s = conv_p2_quad(ui_quad, 4, 'x',
