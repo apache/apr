@@ -114,8 +114,6 @@
 #define SIGWINCH   30
 #define SIGIO      31
 
-#define __attribute__(__x) 
-
 /* APR COMPATABILITY FUNCTIONS
  * This section should be used to define functions and
  * macros which are need to make Windows features look
