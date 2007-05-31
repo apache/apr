@@ -201,6 +201,7 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
+#ifndef _WIN32_WCE
 static apr_status_t attr_cleanup(void *theattr)
 {
     apr_procattr_t *attr = (apr_procattr_t *)theattr;    
@@ -209,6 +210,7 @@ static apr_status_t attr_cleanup(void *theattr)
     attr->user_token = NULL;
     return APR_SUCCESS;
 }
+#endif
 
 APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr, 
                                                 const char *username,
