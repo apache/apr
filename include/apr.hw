@@ -358,13 +358,19 @@ typedef  int         apr_socklen_t;
 /* XXX These simply don't belong here, perhaps in apr_portable.h
  * based on some APR_HAVE_PID/GID/UID?
  */
+#ifndef __GNUC__
 typedef  int         pid_t;
+#endif
 typedef  int         uid_t;
 typedef  int         gid_t;
 
 /* Mechanisms to properly type numeric literals */
 
+#ifndef __GNUC__
 #define APR_INT64_C(val) (val##i64)
+#else
+#define APR_INT64_C(val) (val##LL)
+#endif
 
 
 #if APR_HAVE_IPV6
