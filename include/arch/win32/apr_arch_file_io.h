@@ -52,8 +52,6 @@
 #include "arch/win32/apr_arch_utf8.h"
 #include <wchar.h>
 
-typedef apr_uint16_t apr_wchar_t;
-
 /* Helper functions for the WinNT ApiW() functions.  APR treats all
  * resource identifiers (files, etc) by their UTF-8 name, to provide 
  * access to all named identifiers.  [UTF-8 completely maps Unicode 
