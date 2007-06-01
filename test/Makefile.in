@@ -12,14 +12,15 @@ VPATH = @srcdir@
 
 STDTEST_PORTABLE = \
 	testlockperf@EXEEXT@ \
-	testshmproducer@EXEEXT@ \
-	testshmconsumer@EXEEXT@ \
 	testmutexscope@EXEEXT@ \
 	testall@EXEEXT@
 
-OTHER_PROGRAMS = sendfile@EXEEXT@ \
-                 echod@EXEEXT@ \
-                 sockperf@EXEEXT@
+OTHER_PROGRAMS = \
+        sendfile@EXEEXT@ \
+	testshmproducer@EXEEXT@ \
+	testshmconsumer@EXEEXT@ \
+        echod@EXEEXT@ \
+        sockperf@EXEEXT@
 
 PROGRAMS = $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE) $(OTHER_PROGRAMS)
 
