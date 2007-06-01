@@ -41,9 +41,12 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
     if ((rv = apr_file_open(fp, template, flags|APR_FILE_NOCLEANUP,
                             APR_UREAD | APR_UWRITE, p)) == APR_SUCCESS) {
 
-        apr_pool_cleanup_register((*fp)->pool, (void *)(*fp),
-                                  apr_unix_file_cleanup,
-                                  apr_unix_child_file_cleanup);
+
+	if (!(flags & APR_FILE_NOCLEANUP)) {
+	    apr_pool_cleanup_register((*fp)->pool, (void *)(*fp),
+				      apr_unix_file_cleanup,
+				      apr_unix_child_file_cleanup);
+	}
     }
 
     return rv;
