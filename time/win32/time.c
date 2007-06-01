@@ -304,7 +304,13 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t)
     Sleep((DWORD)(t / 1000));
 }
 
-
+#if defined(_WIN32_WCE)
+/* A noop on WinCE, like Unix implementation */
+APR_DECLARE(void) apr_time_clock_hires(apr_pool_t *p)
+{
+    return;
+}
+#else
 static apr_status_t clock_restore(void *unsetres)
 {
     ULONG newRes;
@@ -324,3 +330,4 @@ APR_DECLARE(void) apr_time_clock_hires(apr_pool_t *p)
                                   apr_pool_cleanup_null);
     }
 }
+#endif
