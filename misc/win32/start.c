@@ -18,7 +18,7 @@
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_signal.h"
-#include "ShellAPI.h"
+#include "shellapi.h"
 
 #include "apr_arch_misc.h"       /* for WSAHighByte / WSALowByte */
 #include "wchar.h"
