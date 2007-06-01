@@ -139,7 +139,7 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *);
 #define ELSE_WIN_OS_IS_ANSI
 #endif /* WINNT */
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(_WIN32_WCE)
 #include "crtdbg.h"
 
 static APR_INLINE void* apr_malloc_dbg(size_t size, const char* filename,
