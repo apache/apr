@@ -139,7 +139,7 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
 
     AprTimeToFileTime(&ft, input);
 
-#if APR_HAS_UNICODE_FS
+#if APR_HAS_UNICODE_FS && !defined(_WIN32_WCE)
     IF_WIN_OS_IS_UNICODE
     {
         TIME_ZONE_INFORMATION *tz;
@@ -178,7 +178,7 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
                          - (-(tz->Bias + tz->StandardBias) / 60);
     }
 #endif
-#if APR_HAS_ANSI_FS
+#if APR_HAS_ANSI_FS || defined(_WIN32_WCE)
     ELSE_WIN_OS_IS_ANSI
     {
         TIME_ZONE_INFORMATION tz;
