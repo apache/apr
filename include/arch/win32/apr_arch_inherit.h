@@ -21,6 +21,33 @@
 
 #define APR_INHERIT (1 << 24)    /* Must not conflict with other bits */
 
+#if defined(_WIN32_WCE)
+#define APR_IMPLEMENT_INHERIT_SET(name, flag, pool, cleanup)        \
+APR_DECLARE(apr_status_t) apr_##name##_inherit_set(apr_##name##_t *the##name) \
+{                                                                   \
+        HANDLE temp, hproc = GetCurrentProcess();                   \
+        if (!DuplicateHandle(hproc, the##name->filehand,            \
+                             hproc, &temp, 0, TRUE,                 \
+                             DUPLICATE_SAME_ACCESS))                \
+            return apr_get_os_error();                              \
+        CloseHandle(the##name->filehand);                           \
+        the##name->filehand = temp;                                 \
+    return APR_SUCCESS;                                             \
+}
+
+#define APR_IMPLEMENT_INHERIT_UNSET(name, flag, pool, cleanup)      \
+APR_DECLARE(apr_status_t) apr_##name##_inherit_unset(apr_##name##_t *the##name)\
+{                                                                   \
+        HANDLE temp, hproc = GetCurrentProcess();                   \
+        if (!DuplicateHandle(hproc, the##name->filehand,            \
+                             hproc, &temp, 0, FALSE,                \
+                             DUPLICATE_SAME_ACCESS))                \
+            return apr_get_os_error();                              \
+        CloseHandle(the##name->filehand);                           \
+        the##name->filehand = temp;                                 \
+    return APR_SUCCESS;                                             \
+}
+#else
 #define APR_IMPLEMENT_INHERIT_SET(name, flag, pool, cleanup)        \
 APR_DECLARE(apr_status_t) apr_##name##_inherit_set(apr_##name##_t *the##name) \
 {                                                                   \
@@ -75,5 +102,6 @@ APR_DECLARE(void) apr_##name##_unset_inherit(apr_##name##_t *the##name) \
 {                                                                   \
     apr_##name##_inherit_unset(the##name);                          \
 }
+#endif
 
 #endif	/* ! INHERIT_H */
