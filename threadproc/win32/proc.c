@@ -390,6 +390,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     else 
 #endif
     {
+#if defined(_WIN32_WCE)
+        {
+#else
         /* Win32 is _different_ than unix.  While unix will find the given
          * program since it's already chdir'ed, Win32 cannot since the parent
          * attempts to open the program with it's own path.
@@ -447,6 +450,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             }
         }
         else {
+#endif
             /* A simple command we are directly invoking.  Do not pass
              * the first arg to CreateProc() for APR_PROGRAM_PATH
              * invocation, since it would need to be a literal and
