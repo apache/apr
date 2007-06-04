@@ -1,5 +1,13 @@
 Changes with APR 0.9.14
 
+  *) Register a cleanup only if APR_FILE_NOCLEANUP was not flagged in
+     apr_file_mktemp. [Brian J. France <list firehawksystems.com>]
+
+  *) Numerous build fixes for non-GCC builds and GCC builds on Win32,
+     as well as WinCE builds.  [Davi Arnaut <davi haxent.com.br>,
+     Curt Arnold <carnold apache.org>, John Mark Vandenberg, 
+     Kouhei Sutou <kou cozmixng.org>, William Rowe]
+
   *) Discard file buffers when running cleanups for exec.
      PR 41119.  [Davi Arnaut <davi haxent.com.br>, Bojan Smojver]
 
