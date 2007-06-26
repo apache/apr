@@ -1,6 +1,7 @@
 Changes for APR 1.2.10
 
-
+  *) Define the _HPUX_SOURCE feature test macro to obtain maximum
+     functionality.  PR 42261.  [Davi Arnaut]
 
 Changes for APR 1.2.9
 

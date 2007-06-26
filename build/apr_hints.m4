@@ -102,7 +102,7 @@ if test "x$apr_preload_done" != "xyes" ; then
 	APR_ADDTO(CPPFLAGS, [-DHIUX])
 	;;
     *-hp-hpux11.*)
-	APR_ADDTO(CPPFLAGS, [-DHPUX11 -D_REENTRANT -D_XOPEN_SOURCE_EXTENDED])
+	APR_ADDTO(CPPFLAGS, [-DHPUX11 -D_REENTRANT -D_HPUX_SOURCE])
 	;;
     *-hp-hpux10.*)
  	case $host in
