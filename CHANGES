@@ -1,5 +1,9 @@
 Changes for APR 1.3.0
 
+  *) Define the _HPUX_SOURCE feature test macro to obtain maximum
+     functionality.
+     PR 42261.  [Davi Arnaut]
+
   *) Stop invoking the testshm* helpers upon 'make test' invocation.
      [Kurt Miller <kurt intricatesoftware.com>]
 
