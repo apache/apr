@@ -226,6 +226,7 @@ APR_DECLARE(apr_table_t *) apr_table_make(apr_pool_t *p, int nelts);
  * @param p The pool to allocate the new table out of
  * @param t The table to copy
  * @return A copy of the table passed in
+ * @warning The table keys and respective values are not copied
  */
 APR_DECLARE(apr_table_t *) apr_table_copy(apr_pool_t *p,
                                           const apr_table_t *t);
