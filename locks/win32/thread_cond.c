@@ -22,22 +22,43 @@
 #include "apr_arch_thread_cond.h"
 #include "apr_portable.h"
 
+#include <limits.h>
+
 static apr_status_t thread_cond_cleanup(void *data)
 {
     apr_thread_cond_t *cond = data;
-    CloseHandle(cond->event);
+    CloseHandle(cond->semaphore);
+    DeleteCriticalSection(&cond->csection);
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,
                                                  apr_pool_t *pool)
 {
-    *cond = apr_palloc(pool, sizeof(**cond));
-    (*cond)->pool = pool;
-    (*cond)->event = CreateEvent(NULL, TRUE, FALSE, NULL);
-    (*cond)->signal_all = 0;
-    (*cond)->num_waiting = 0;
+    apr_thread_cond_t *cv;
+
+    cv = apr_pcalloc(pool, sizeof(**cond));
+    if (cv == NULL) {
+        return APR_ENOMEM;
+    }
+
+    cv->semaphore = CreateSemaphore(NULL, 0, LONG_MAX, NULL);
+    if (cv->semaphore == NULL) {
+        return apr_get_os_error();
+    }
+
+    *cond = cv;
+    cv->pool = pool;
+    InitializeCriticalSection(&cv->csection);
+    apr_pool_cleanup_register(cv->pool, cv, thread_cond_cleanup,
+                              apr_pool_cleanup_null);
+
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_cond_destroy(apr_thread_cond_t *cond)
+{
+    return apr_pool_cleanup_run(cond->pool, cond, thread_cond_cleanup);
 }
 
 static APR_INLINE apr_status_t _thread_cond_timedwait(apr_thread_cond_t *cond,
@@ -45,36 +66,34 @@ static APR_INLINE apr_status_t _thread_cond_timedwait(apr_thread_cond_t *cond,
                                                       DWORD timeout_ms )
 {
     DWORD res;
+    apr_status_t rv;
 
-    while (1) {
-        cond->num_waiting++;
+    EnterCriticalSection(&cond->csection);
+    cond->num_waiting++;
+    LeaveCriticalSection(&cond->csection);
 
-        apr_thread_mutex_unlock(mutex);
-        res = WaitForSingleObject(cond->event, timeout_ms);
-        apr_thread_mutex_lock(mutex);
-        cond->num_waiting--;
-        if (res != WAIT_OBJECT_0) {
-            apr_status_t rv = apr_get_os_error();
-            if (res == WAIT_TIMEOUT) {
-                return APR_TIMEUP;
-            }
-            return apr_get_os_error();
-        }
-        if (cond->signal_all) {
-            if (cond->num_waiting == 0) {
-                cond->signal_all = 0;
-                cond->signalled = 0;
-                ResetEvent(cond->event);
-            }
+    apr_thread_mutex_unlock(mutex);
+
+    do {
+        res = WaitForSingleObject(cond->semaphore, timeout_ms);
+        EnterCriticalSection(&cond->csection);
+        if (cond->num_wake) {
+            cond->num_wake--;
+            rv = APR_SUCCESS;
             break;
         }
-        else if (cond->signalled) {
-            cond->signalled = 0;
-            ResetEvent(cond->event);
+        else if (res != WAIT_OBJECT_0) {
+            cond->num_waiting--;
+            rv = APR_TIMEUP;
             break;
         }
-    }
-    return APR_SUCCESS;
+        LeaveCriticalSection(&cond->csection);
+    } while (1);
+
+    LeaveCriticalSection(&cond->csection);
+    apr_thread_mutex_lock(mutex);
+
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_cond_wait(apr_thread_cond_t *cond,
@@ -94,35 +113,39 @@ APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
 
 APR_DECLARE(apr_status_t) apr_thread_cond_signal(apr_thread_cond_t *cond)
 {
-    apr_status_t rv = APR_SUCCESS;
-    DWORD res;
+    unsigned int wake = 0;
 
-    cond->signalled = 1;
-    res = SetEvent(cond->event);
-    if (res == 0) {
-        rv = apr_get_os_error();
+    EnterCriticalSection(&cond->csection);
+    if (cond->num_waiting) {
+        wake = 1;
+        cond->num_wake++;
+        cond->num_waiting--;
     }
-    return rv;
+    LeaveCriticalSection(&cond->csection);
+
+    if (wake) {
+        ReleaseSemaphore(cond->semaphore, 1, NULL);
+    }
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_cond_broadcast(apr_thread_cond_t *cond)
 {
-    apr_status_t rv = APR_SUCCESS;
-    DWORD res;
+    unsigned long num_wake = 0;
 
-    cond->signalled = 1;
-    cond->signal_all = 1;
-    res = SetEvent(cond->event);
-    if (res == 0) {
-        rv = apr_get_os_error();
+    EnterCriticalSection(&cond->csection);
+    if (cond->num_waiting) {
+        cond->num_wake += num_wake = cond->num_waiting;
+        cond->num_waiting = 0;
     }
-    return rv;
-}
+    LeaveCriticalSection(&cond->csection);
 
-APR_DECLARE(apr_status_t) apr_thread_cond_destroy(apr_thread_cond_t *cond)
-{
-    return apr_pool_cleanup_run(cond->pool, cond, thread_cond_cleanup);
+    if (num_wake) {
+        ReleaseSemaphore(cond->semaphore, num_wake, NULL);
+    }
+
+    return APR_SUCCESS;
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(thread_cond)
-
