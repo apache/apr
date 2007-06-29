@@ -62,7 +62,7 @@ typedef enum {
     APR_NO_DESC,                /**< nothing here */
     APR_POLL_SOCKET,            /**< descriptor refers to a socket */
     APR_POLL_FILE,              /**< descriptor refers to a file */
-    APR_POLL_LASTDESC           /**< descriptor is the last one in the list */
+    APR_POLL_LASTDESC           /**< @deprecated descriptor is the last one in the list */
 } apr_datatype_e ;
 
 /** Union of either an APR file or socket. */
