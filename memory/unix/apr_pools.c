@@ -556,6 +556,9 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
 
     /* This has to happen here because mutexes might be backed by
      * atomics.  It used to be snug and safe in apr_initialize().
+     *
+     * Warning: apr_atomic_init() must always be called, by any
+     * means possible, from apr_initialize().
      */
     if ((rv = apr_atomic_init(global_pool)) != APR_SUCCESS) {
         return rv;

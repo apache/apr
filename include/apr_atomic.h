@@ -40,6 +40,9 @@ extern "C" {
  * atomic operation's internal structures
  * @param p pool
  * @return APR_SUCCESS on successful completion
+ * @remark Programs do NOT need to call this directly. APR will call this
+ *         automatically from apr_initialize.
+ * @internal
  */
 APR_DECLARE(apr_status_t) apr_atomic_init(apr_pool_t *p);
 
