@@ -1,5 +1,10 @@
 Changes for APR 1.2.10
 
+  *) The MinGW Windows headers effectively redefines WINADVAPI from
+     __stdcall to empty which results in a link failure when wincrypt.h
+     is placed after an include to apr_private.h.
+     PR 42293.  [Curt Arnold]
+
   *) Define SEM_FAILED if it isn't already defined, as the proc mutex
      code already does it. Also search for the sem_open function in
      the realtime library. (This fixes HP-UX sem_open detection).
