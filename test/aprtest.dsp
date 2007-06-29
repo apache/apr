@@ -108,6 +108,10 @@ SOURCE=.\testargs.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testcond.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\testcontext.c
 # End Source File
 # Begin Source File

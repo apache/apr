@@ -113,7 +113,7 @@ TESTS = testutil.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testhash.lo testargs.lo testnames.lo testuser.lo testpath.lo \
 	testenv.lo testprocmutex.lo testrand2.lo testfnmatch.lo \
         testatomic.lo testflock.lo testshm.lo testsock.lo testglobalmutex.lo \
-        teststrnatcmp.lo testfilecopy.lo testtemp.lo testlfs.lo
+        teststrnatcmp.lo testfilecopy.lo testtemp.lo testlfs.lo testcond.lo
 
 testall@EXEEXT@: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
 	 readchild@EXEEXT@ abts.lo proc_child@EXEEXT@ \
