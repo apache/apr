@@ -1,5 +1,13 @@
 Changes for APR 1.3.0
 
+  *) Rework the WIN32 CV code to signal the condition only if one or
+     more threads are blocked on the condition variable. If no threads
+     are waiting on the condition variable, nothing happens. The change
+     also eliminates the thundering-herd problem of the manual-reset
+     event, which (theoretically) wakes up all threads waiting on. Now
+     the behavior of the CV's should be the same on Unix and win32
+     platforms. PR 42305.  [Davi Arnaut]
+
   *) Define SEM_FAILED if it isn't already defined, as the proc mutex
      code already does it. Also search for the sem_open function in
      the realtime library. (This fixes HP-UX sem_open detection).
