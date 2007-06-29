@@ -79,23 +79,22 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
      * implementation. Versions previous to Darwin 6.2 had the 14
      * char limit, but later rev's allow up to 31 characters.
      *
-     * FIXME: There is a small window of opportunity where
-     * instead of getting a new semaphore descriptor, we get
-     * a previously obtained one. This can happen if the requests
-     * are made at the "same time" and in the small span of time between
-     * the sem_open and the sem_unlink. Use of O_EXCL does not
-     * help here however...
-     *
      */
     now = apr_time_now();
     sec = apr_time_sec(now);
     usec = apr_time_usec(now);
     apr_snprintf(semname, sizeof(semname), "/ApR.%lxZ%lx", sec, usec);
-    psem = sem_open(semname, O_CREAT, 0644, 1);
-    if ((psem == (sem_t *)SEM_FAILED) && (errno == ENAMETOOLONG)) {
-        /* Oh well, good try */
-        semname[13] = '\0';
-        psem = sem_open(semname, O_CREAT, 0644, 1);
+    psem = sem_open(semname, O_CREAT | O_EXCL, 0644, 1);
+    if ((psem == (sem_t *)SEM_FAILED)) {
+        if (errno == ENAMETOOLONG) {
+            /* Oh well, good try */
+            semname[13] = '\0';
+        } else if (errno == EEXIST) {
+            apr_snprintf(semname, sizeof(semname), "/ApR.%lxZ%lx", usec, sec);
+        } else {
+            return errno;
+        }
+        psem = sem_open(semname, O_CREAT | O_EXCL, 0644, 1);
     }
 
     if (psem == (sem_t *)SEM_FAILED) {
