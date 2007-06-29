@@ -1239,6 +1239,32 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 #endif
                     break;
 
+                case 'B':
+                case 'F':
+                case 'S':
+                {
+                    char buf[5];
+                    apr_off_t size = 0;
+
+                    if (*fmt == 'B') {
+                        apr_uint32_t *arg = va_arg(ap, apr_uint32_t *);
+                        size = (arg) ? *arg : 0;
+                    }
+                    else if (*fmt == 'F') {
+                        apr_off_t *arg = va_arg(ap, apr_off_t *);
+                        size = (arg) ? *arg : 0;
+                    }
+                    else {
+                        apr_size_t *arg = va_arg(ap, apr_size_t *);
+                        size = (arg) ? *arg : 0;
+                    }
+
+                    s = apr_strfsize(size, buf);
+                    s_len = strlen(s);
+                    pad_char = ' ';
+                }
+                break;
+
                 case NUL:
                     /* if %p ends the string, oh well ignore it */
                     continue;
