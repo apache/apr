@@ -85,7 +85,7 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
     usec = apr_time_usec(now);
     apr_snprintf(semname, sizeof(semname), "/ApR.%lxZ%lx", sec, usec);
     psem = sem_open(semname, O_CREAT | O_EXCL, 0644, 1);
-    if ((psem == (sem_t *)SEM_FAILED)) {
+    if (psem == (sem_t *)SEM_FAILED) {
         if (errno == ENAMETOOLONG) {
             /* Oh well, good try */
             semname[13] = '\0';
