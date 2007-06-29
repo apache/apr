@@ -121,6 +121,9 @@ APR_DECLARE(const char *) apr_filepath_name_get(const char *pathname);
  * %%pm takes an apr_status_t * and prints the appropriate error
  *      string (from apr_strerror) corresponding to that error code.
  * %%pp takes a void * and outputs it in hex
+ * %%pB takes a apr_uint32_t * as bytes and outputs it's apr_strfsize
+ * %%pF same as above, but takes a apr_off_t *
+ * %%pS same as above, but takes a apr_size_t *
  *
  * %%pt is only available from APR 1.2.0 onwards.
  * %%pm is only available from APR 1.3.0 onwards.
