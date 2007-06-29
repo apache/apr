@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-#include <windows.h>
-#include <wincrypt.h>
 #include "apr.h"
+#include <wincrypt.h>
 #include "apr_private.h"
 #include "apr_general.h"
 #include "apr_portable.h"
