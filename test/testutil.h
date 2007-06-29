@@ -62,6 +62,7 @@ abts_suite *testglobalmutex(abts_suite *suite);
 abts_suite *testhash(abts_suite *suite);
 abts_suite *testipsub(abts_suite *suite);
 abts_suite *testlock(abts_suite *suite);
+abts_suite *testcond(abts_suite *suite);
 abts_suite *testlfs(abts_suite *suite);
 abts_suite *testmmap(abts_suite *suite);
 abts_suite *testnames(abts_suite *suite);

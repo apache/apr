@@ -106,7 +106,7 @@ TESTS = testutil.obj testtime.obj teststr.obj testvsn.obj testipsub.obj \
 	testhash.obj testargs.obj testnames.obj testuser.obj testpath.obj \
 	testenv.obj testprocmutex.obj testrand2.obj testfnmatch.obj \
         testatomic.obj testflock.obj testshm.obj testsock.obj testglobalmutex.obj \
-        teststrnatcmp.obj testfilecopy.obj testtemp.obj testlfs.obj 
+        teststrnatcmp.obj testfilecopy.obj testtemp.obj testlfs.obj testcond.obj
 
 testall.exe: $(TESTS) mod_test.dll occhild.exe \
 	 readchild.exe abts.obj proc_child.exe \

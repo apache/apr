@@ -139,6 +139,10 @@ SOURCE=.\testatomic.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testcond.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\testdir.c
 # End Source File
 # Begin Source File

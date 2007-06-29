@@ -187,6 +187,7 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testipsub.o \
 	$(OBJDIR)/testlfs.o \
 	$(OBJDIR)/testlock.o \
+        $(OBJDIR)/testcond.o \
 	$(OBJDIR)/testmmap.o \
 	$(OBJDIR)/testnames.o \
 	$(OBJDIR)/testoc.o \
@@ -296,4 +297,5 @@ install :: nlms FORCE
 #
 
 include $(APR_WORK)\build\NWGNUtail.inc
+
 
