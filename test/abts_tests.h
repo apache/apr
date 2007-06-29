@@ -41,6 +41,7 @@ const struct testlist {
     {testhash},
     {testipsub},
     {testlock},
+    {testcond},
     {testlfs},
     {testmmap},
     {testnames},
