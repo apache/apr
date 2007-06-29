@@ -1,5 +1,10 @@
 Changes for APR 1.3.0
 
+  *) Define SEM_FAILED if it isn't already defined, as the proc mutex
+     code already does it. Also search for the sem_open function in
+     the realtime library. (This fixes HP-UX sem_open detection).
+     [Davi Arnaut]
+
   *) Define the _HPUX_SOURCE feature test macro to obtain maximum
      functionality.
      PR 42261.  [Davi Arnaut]
