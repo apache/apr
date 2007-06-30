@@ -103,7 +103,7 @@ static void udp6_socket(abts_case *tc, void *data)
 #endif
 }
 
-static void sendto_receivefrom(abts_case *tc, void *data)
+static void sendto_receivefrom_helper(abts_case *tc, const char *addr, int family)
 {
     apr_status_t rv;
     apr_socket_t *sock = NULL;
@@ -115,28 +115,19 @@ static void sendto_receivefrom(abts_case *tc, void *data)
     apr_sockaddr_t *from;
     apr_sockaddr_t *to;
     apr_size_t len = 30;
-    int family;
-    const char *addr;
 
-#if APR_HAVE_IPV6
-    family = APR_INET6;
-    addr = "::1";
     rv = apr_socket_create(&sock, family, SOCK_DGRAM, 0, p);
-    if (V6_NOT_ENABLED(rv)) {
-#endif
-        family = APR_INET;
-        addr = "127.0.0.1";
-        rv = apr_socket_create(&sock, family, SOCK_DGRAM, 0, p);
-#if APR_HAVE_IPV6
-    } 
-#endif
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    if (rv != APR_SUCCESS)
+        return;
     rv = apr_socket_create(&sock2, family, SOCK_DGRAM, 0, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    if (rv != APR_SUCCESS)
+        return;
 
-    rv = apr_sockaddr_info_get(&to, addr, APR_UNSPEC, 7772, 0, p);
+    rv = apr_sockaddr_info_get(&to, addr, family, 7772, 0, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    rv = apr_sockaddr_info_get(&from, addr, APR_UNSPEC, 7771, 0, p);
+    rv = apr_sockaddr_info_get(&from, addr, family, 7771, 0, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_socket_opt_set(sock, APR_SO_REUSEADDR, 1);
@@ -147,12 +138,12 @@ static void sendto_receivefrom(abts_case *tc, void *data)
     rv = apr_socket_bind(sock, to);
     APR_ASSERT_SUCCESS(tc, "Could not bind socket", rv);
     if (rv != APR_SUCCESS)
-      return;
+        return;
 
     rv = apr_socket_bind(sock2, from);
     APR_ASSERT_SUCCESS(tc, "Could not bind second socket", rv);
     if (rv != APR_SUCCESS)
-      return;
+        return;
 
     len = STRLEN;
     rv = apr_socket_sendto(sock2, to, 0, sendbuf, &len);
@@ -176,6 +167,14 @@ static void sendto_receivefrom(abts_case *tc, void *data)
 
     apr_socket_close(sock);
     apr_socket_close(sock2);
+}
+
+static void sendto_receivefrom(abts_case *tc, void *data)
+{
+#if APR_HAVE_IPV6
+    sendto_receivefrom_helper(tc, "::1", APR_INET6);
+#endif
+    sendto_receivefrom_helper(tc, "127.0.0.1", APR_INET);
 }
 
 static void socket_userdata(abts_case *tc, void *data)
