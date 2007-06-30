@@ -1,5 +1,8 @@
 Changes for APR 1.2.10
 
+  *) Avoid overwriting the hash_mutex table for applications that
+     incorrectly calls apr_atomic_init().  PR 42760.  [Davi Arnaut]
+
   *) Allow IPv6 connectivity test to fail, avoiding a potentially fatal
      error.  [Davi Arnaut]
 
