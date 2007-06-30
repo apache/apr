@@ -423,6 +423,20 @@ APR_DECLARE(apr_table_t *) apr_table_copy(apr_pool_t *p, const apr_table_t *t)
     return new;
 }
 
+APR_DECLARE(apr_table_t *) apr_table_clone(apr_pool_t *p, const apr_table_t *t)
+{
+    const apr_array_header_t *array = apr_table_elts(t);
+    apr_table_entry_t *elts = (apr_table_entry_t *) array->elts;
+    apr_table_t *new = apr_table_make(p, array->nelts);
+    int i;
+
+    for (i = 0; i < array->nelts; i++) {
+        apr_table_add(new, elts[i].key, elts[i].val);
+    }
+
+    return new;
+}
+
 static void table_reindex(apr_table_t *t)
 {
     int i;

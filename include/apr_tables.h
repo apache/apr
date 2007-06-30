@@ -232,6 +232,17 @@ APR_DECLARE(apr_table_t *) apr_table_copy(apr_pool_t *p,
                                           const apr_table_t *t);
 
 /**
+ * Create a new table whose contents are deep copied from the given
+ * table. A deep copy operation copies all fields, and makes copies
+ * of dynamically allocated memory pointed to by the fields.
+ * @param p The pool to allocate the new table out of
+ * @param t The table to clone
+ * @return A deep copy of the table passed in
+ */
+APR_DECLARE(apr_table_t *) apr_table_clone(apr_pool_t *p,
+                                           const apr_table_t *t);
+
+/**
  * Delete all of the elements from a table
  * @param t The table to clear
  */
