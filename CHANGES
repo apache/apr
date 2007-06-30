@@ -1,5 +1,8 @@
 Changes for APR 1.2.10
 
+  *) Allow IPv6 connectivity test to fail, avoiding a potentially fatal
+     error.  [Davi Arnaut]
+
   *) The MinGW Windows headers effectively redefines WINADVAPI from
      __stdcall to empty which results in a link failure when wincrypt.h
      is placed after an include to apr_private.h.
