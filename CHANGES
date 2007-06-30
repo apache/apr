@@ -1,5 +1,8 @@
 Changes for APR 1.3.0
 
+  *) Add table cloning (deep copy) convenience function.
+     [Davi Arnaut]
+
   *) Rework the WIN32 CV code to signal the condition only if one or
      more threads are blocked on the condition variable. If no threads
      are waiting on the condition variable, nothing happens. The change
