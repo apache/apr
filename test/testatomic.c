@@ -202,7 +202,7 @@ static void test_inc_neg1(abts_case *tc, void *data)
 
     rv = apr_atomic_inc32(&y32);
 
-    ABTS_ASSERT(tc, "apr_atomic_dec32 on zero returned zero.", rv == minus1);
+    ABTS_ASSERT(tc, "apr_atomic_inc32 didn't return the old value.", rv == minus1);
     str = apr_psprintf(p, "zero wrap failed: -1 + 1 = %d", y32);
     ABTS_ASSERT(tc, str, y32 == 0);
 }
