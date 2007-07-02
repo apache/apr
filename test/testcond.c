@@ -27,6 +27,8 @@
 
 #define ABTS_SUCCESS(rv)    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS)
 
+#if APR_HAS_THREADS
+
 typedef struct toolbox_t toolbox_t;
 
 struct toolbox_t {
@@ -37,7 +39,6 @@ struct toolbox_t {
     void (*func)(toolbox_t *box);
 };
 
-#if APR_HAS_THREADS
 static void lost_signal(abts_case *tc, void *data)
 {
     apr_status_t rv;
