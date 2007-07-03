@@ -340,4 +340,134 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     return rv;
 }
 
+struct apr_pollcb_t {
+    apr_pool_t *pool;
+    apr_uint32_t nalloc;
+    port_event_t *port_set;
+    int port_fd;
+};
+
+static apr_status_t cb_cleanup(void *p_)
+{
+    apr_pollcb_t *pollcb = (apr_pollcb_t *) p_;
+    close(pollcb->port_fd);
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
+                                            apr_uint32_t size,
+                                            apr_pool_t *p,
+                                            apr_uint32_t flags)
+{
+    int fd;
+
+    fd = port_create();
+
+    if (fd < 0) {
+        *pollcb = NULL;
+        return apr_get_netos_error();
+    }
+
+    *pollcb = apr_palloc(p, sizeof(**pollcb));
+    (*pollcb)->nalloc = size;
+    (*pollcb)->pool = p;
+    (*pollcb)->port_fd = fd;
+    (*pollcb)->port_set = apr_palloc(p, size * sizeof(port_event_t));
+    apr_pool_cleanup_register(p, *pollcb, cb_cleanup, cb_cleanup);
+
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
+                                         apr_pollfd_t *descriptor)
+{
+    int ret, fd;
+
+    if (descriptor->desc_type == APR_POLL_SOCKET) {
+        fd = descriptor->desc.s->socketdes;
+    }
+    else {
+        fd = descriptor->desc.f->filedes;
+    }
+
+    ret = port_associate(pollcb->port_fd, PORT_SOURCE_FD, fd,
+                         get_event(descriptor->reqevents), descriptor);
+
+    if (ret == -1) {
+        return apr_get_netos_error();
+    }
+
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pollcb_remove(apr_pollcb_t *pollcb,
+                                            apr_pollfd_t *descriptor)
+{
+    int fd, ret;
+
+    if (descriptor->desc_type == APR_POLL_SOCKET) {
+        fd = descriptor->desc.s->socketdes;
+    }
+    else {
+        fd = descriptor->desc.f->filedes;
+    }
+
+    ret = port_dissociate(pollcb->port_fd, PORT_SOURCE_FD, fd);
+
+    if (ret < 0) {
+        return APR_NOTFOUND;
+    }
+
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
+                                          apr_interval_time_t timeout,
+                                          apr_pollcb_cb_t func,
+                                          void *baton)
+{
+    int ret;
+    apr_pollfd_t *pollfd;
+    struct timespec tv, *tvptr;
+    apr_status_t rv = APR_SUCCESS;
+    unsigned int i, nget = pollcb->nalloc;
+
+    if (timeout < 0) {
+        tvptr = NULL;
+    }
+    else {
+        tv.tv_sec = (long) apr_time_sec(timeout);
+        tv.tv_nsec = (long) apr_time_usec(timeout) * 1000;
+        tvptr = &tv;
+    }
+
+    ret = port_getn(pollcb->port_fd, pollcb->port_set, pollcb->nalloc,
+                    &nget, tvptr);
+
+    if (ret == -1) {
+        if (errno == ETIME || errno == EINTR) {
+            rv = APR_TIMEUP;
+        }
+        else {
+            rv = APR_EGENERAL;
+        }
+    }
+    else if (nget == 0) {
+        rv = APR_TIMEUP;
+    }
+    else {
+        for (i = 0; i < nget; i++) {
+            pollfd = (apr_pollfd_t *)(pollcb->port_set[i].portev_user);
+            pollfd->rtnevents = get_revent(pollcb->port_set[i].portev_events);
+
+            rv = func(baton, pollfd);
+            if (rv) {
+                return rv;
+            }
+        }
+    }
+
+    return rv;
+}
+
 #endif /* POLLSET_USES_PORT */
