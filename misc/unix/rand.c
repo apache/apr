@@ -101,7 +101,10 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
             if ((fd = open(DEV_RANDOM, O_RDONLY)) == -1)
                 return errno;
         
-        rc = read(fd, buf, length);
+        do {
+            rc = read(fd, buf, length);
+        } while (rc == -1 && errno == EINTR);
+
         if (rc < 0) {
             int errnum = errno;
             close(fd);
