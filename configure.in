@@ -495,7 +495,7 @@ esac
 ])
 
 if test $force_generic_atomics = yes; then
-   AC_DEFINE([USE_GENERIC_ATOMICS], 1,
+   AC_DEFINE([USE_ATOMICS_GENERIC], 1,
              [Define if use of generic atomics is requested])
 fi
 
