@@ -30,6 +30,8 @@
 #   define USE_ATOMICS_GENERIC
 #elif HAVE_ATOMIC_BUILTINS
 #   define USE_ATOMICS_BUILTINS
+#elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+#   define USE_ATOMICS_IA32
 #else
 #   define USE_ATOMICS_GENERIC
 #endif
