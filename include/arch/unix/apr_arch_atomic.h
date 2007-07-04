@@ -28,6 +28,8 @@
 /* force use of generic atomics if building e.g. with -std=c89, which
  * doesn't allow inline asm */
 #   define USE_ATOMICS_GENERIC
+#elif HAVE_ATOMIC_BUILTINS
+#   define USE_ATOMICS_BUILTINS
 #else
 #   define USE_ATOMICS_GENERIC
 #endif
