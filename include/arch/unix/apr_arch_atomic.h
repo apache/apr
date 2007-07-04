@@ -34,6 +34,8 @@
 #   define USE_ATOMICS_IA32
 #elif defined(SOLARIS2) && SOLARIS2 >= 10
 #   define USE_ATOMICS_SOLARIS
+#elif defined(__GNUC__) && (defined(__PPC__) || defined(__ppc__))
+#   define USE_ATOMICS_PPC
 #else
 #   define USE_ATOMICS_GENERIC
 #endif
