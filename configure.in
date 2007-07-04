@@ -392,6 +392,15 @@ if test "$atomic_builtins" = "yes"; then
     AC_DEFINE(HAVE_ATOMIC_BUILTINS, 1, [Define if compiler provides atomic builtins])
 fi
 
+case $host in
+    powerpc-405-*)
+        # The IBM ppc405cr processor has a bugged stwcx instruction.
+        AC_DEFINE(PPC405_ERRATA, 1, [Define on PowerPC 405 where errata 77 applies])
+        ;;
+    *)
+        ;;
+esac
+
 dnl Check the depend program we can use
 APR_CHECK_DEPEND
 
