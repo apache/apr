@@ -32,6 +32,8 @@
 #   define USE_ATOMICS_BUILTINS
 #elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
 #   define USE_ATOMICS_IA32
+#elif defined(SOLARIS2) && SOLARIS2 >= 10
+#   define USE_ATOMICS_SOLARIS
 #else
 #   define USE_ATOMICS_GENERIC
 #endif
