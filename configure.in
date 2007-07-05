@@ -507,7 +507,7 @@ void main(void)
 
     if (sizeof(off64_t) != 8 || sizeof(off_t) != 4)
        exit(1);
-    if ((fd = open("conftest.lfs", O_LARGEFILE|O_CREAT|O_WRONLY)) < 0)
+    if ((fd = open("conftest.lfs", O_LARGEFILE|O_CREAT|O_WRONLY, 0644)) < 0)
        exit(2);
     if (ftruncate64(fd, off) != 0)
        ret = 3;
