@@ -220,6 +220,7 @@ apr_status_t exit_ret_val = 123; /* just some made up number to check on later *
 
 #define NUM_THREADS 40
 #define NUM_ITERATIONS 20000
+
 void *APR_THREAD_FUNC thread_func_mutex(apr_thread_t *thd, void *data)
 {
     int i;
@@ -280,6 +281,205 @@ static void test_atomics_threaded(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, mutex_locks, NUM_THREADS * NUM_ITERATIONS);
     ABTS_INT_EQUAL(tc, apr_atomic_read32(&atomic_ops),
                    NUM_THREADS * NUM_ITERATIONS);
+
+    rv = apr_thread_mutex_destroy(thread_lock);
+    ABTS_ASSERT(tc, "Failed creating threads", rv == APR_SUCCESS);
+}
+
+#undef NUM_THREADS
+#define NUM_THREADS 7
+
+typedef struct tbox_t tbox_t;
+
+struct tbox_t {
+    abts_case *tc;
+    apr_uint32_t *mem;
+    apr_uint32_t preval;
+    apr_uint32_t postval;
+    apr_uint32_t loop;
+    void (*func)(tbox_t *box);
+};
+
+static void busyloop_set32(tbox_t *tbox)
+{
+    apr_uint32_t val;
+
+    do {
+        do {
+            val = apr_atomic_read32(tbox->mem);
+        } while (val != tbox->preval);
+
+        apr_atomic_set32(tbox->mem, tbox->postval);
+    } while (--tbox->loop);
+}
+
+static void busyloop_add32(tbox_t *tbox)
+{
+    apr_uint32_t val;
+
+    do {
+        do {
+            val = apr_atomic_read32(tbox->mem);
+        } while (val != tbox->preval);
+
+        val = apr_atomic_add32(tbox->mem, tbox->postval);
+
+        apr_thread_mutex_lock(thread_lock);
+        ABTS_INT_EQUAL(tbox->tc, val, tbox->preval);
+        apr_thread_mutex_unlock(thread_lock);
+    } while (--tbox->loop);
+}
+
+static void busyloop_sub32(tbox_t *tbox)
+{
+    apr_uint32_t val;
+
+    do {
+        do {
+            val = apr_atomic_read32(tbox->mem);
+        } while (val != tbox->preval);
+
+        apr_atomic_sub32(tbox->mem, tbox->postval);
+    } while (--tbox->loop);
+}
+
+static void busyloop_inc32(tbox_t *tbox)
+{
+    apr_uint32_t val;
+
+    do {
+        do {
+            val = apr_atomic_read32(tbox->mem);
+        } while (val != tbox->preval);
+
+        val = apr_atomic_inc32(tbox->mem);
+
+        apr_thread_mutex_lock(thread_lock);
+        ABTS_INT_EQUAL(tbox->tc, val, tbox->preval);
+        apr_thread_mutex_unlock(thread_lock);
+    } while (--tbox->loop);
+}
+
+static void busyloop_dec32(tbox_t *tbox)
+{
+    apr_uint32_t val;
+
+    do {
+        do {
+            val = apr_atomic_read32(tbox->mem);
+        } while (val != tbox->preval);
+
+        val = apr_atomic_dec32(tbox->mem);
+
+        apr_thread_mutex_lock(thread_lock);
+        ABTS_INT_NEQUAL(tbox->tc, val, 0);
+        apr_thread_mutex_unlock(thread_lock);
+    } while (--tbox->loop);
+}
+
+static void busyloop_cas32(tbox_t *tbox)
+{
+    apr_uint32_t val;
+
+    do {
+        do {
+            val = apr_atomic_cas32(tbox->mem, tbox->postval, tbox->preval);
+        } while (val != tbox->preval);
+    } while (--tbox->loop);
+}
+
+static void busyloop_xchg32(tbox_t *tbox)
+{
+    apr_uint32_t val;
+
+    do {
+        do {
+            val = apr_atomic_read32(tbox->mem);
+        } while (val != tbox->preval);
+
+        val = apr_atomic_xchg32(tbox->mem, tbox->postval);
+
+        apr_thread_mutex_lock(thread_lock);
+        ABTS_INT_EQUAL(tbox->tc, val, tbox->preval);
+        apr_thread_mutex_unlock(thread_lock);
+    } while (--tbox->loop);
+}
+
+void *APR_THREAD_FUNC thread_func_busyloop(apr_thread_t *thd, void *data)
+{
+    tbox_t *tbox = data;
+
+    tbox->func(tbox);
+
+    return NULL;
+}
+
+static void test_atomics_busyloop_threaded(abts_case *tc, void *data)
+{
+    unsigned int i;
+    apr_status_t rv;
+    apr_uint32_t count = 0;
+    tbox_t tbox[NUM_THREADS];
+    apr_thread_t *thread[NUM_THREADS];
+
+    rv = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "Could not create lock", rv);
+
+    /* get ready */
+    for (i = 0; i < NUM_THREADS; i++) {
+        tbox[i].tc = tc;
+        tbox[i].mem = &count;
+        tbox[i].loop = 5;
+    }
+
+    tbox[0].preval = 98;
+    tbox[0].postval = 3891;
+    tbox[0].func = busyloop_add32;
+
+    tbox[1].preval = 3989;
+    tbox[1].postval = 1010;
+    tbox[1].func = busyloop_sub32;
+
+    tbox[2].preval = 2979;
+    tbox[2].postval = 0; /* not used */
+    tbox[2].func = busyloop_inc32;
+
+    tbox[3].preval = 2980;
+    tbox[3].postval = 16384;
+    tbox[3].func = busyloop_set32;
+
+    tbox[4].preval = 16384;
+    tbox[4].postval = 0; /* not used */
+    tbox[4].func = busyloop_dec32;
+
+    tbox[5].preval = 16383;
+    tbox[5].postval = 1048576;
+    tbox[5].func = busyloop_cas32;
+
+    tbox[6].preval = 1048576;
+    tbox[6].postval = 98; /* goto tbox[0] */
+    tbox[6].func = busyloop_xchg32;
+
+    /* get set */
+    for (i = 0; i < NUM_THREADS; i++) {
+        rv = apr_thread_create(&thread[i], NULL, thread_func_busyloop,
+                               &tbox[i], p);
+        ABTS_ASSERT(tc, "Failed creating thread", rv == APR_SUCCESS);
+    }
+
+    /* go! */
+    apr_atomic_set32(tbox->mem, 98);
+
+    for (i = 0; i < NUM_THREADS; i++) {
+        apr_status_t retval;
+        rv = apr_thread_join(&retval, thread[i]);
+        ABTS_ASSERT(tc, "Thread join failed", rv == APR_SUCCESS);
+    }
+
+    ABTS_INT_EQUAL(tbox->tc, count, 98);
+
+    rv = apr_thread_mutex_destroy(thread_lock);
+    ABTS_ASSERT(tc, "Failed creating threads", rv == APR_SUCCESS);
 }
 
 #endif /* !APR_HAS_THREADS */
@@ -307,6 +507,7 @@ abts_suite *testatomic(abts_suite *suite)
 
 #if APR_HAS_THREADS
     abts_run_test(suite, test_atomics_threaded, NULL);
+    abts_run_test(suite, test_atomics_busyloop_threaded, NULL);
 #endif
 
     return suite;
