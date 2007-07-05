@@ -411,6 +411,8 @@ void *APR_THREAD_FUNC thread_func_busyloop(apr_thread_t *thd, void *data)
 
     tbox->func(tbox);
 
+    apr_thread_exit(thd, 0);
+
     return NULL;
 }
 
@@ -474,6 +476,7 @@ static void test_atomics_busyloop_threaded(abts_case *tc, void *data)
         apr_status_t retval;
         rv = apr_thread_join(&retval, thread[i]);
         ABTS_ASSERT(tc, "Thread join failed", rv == APR_SUCCESS);
+        ABTS_ASSERT(tc, "Invalid return value from thread_join", retval == 0);
     }
 
     ABTS_INT_EQUAL(tbox->tc, count, 98);
