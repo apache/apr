@@ -1,5 +1,9 @@
 Changes for APR 1.2.10
 
+  *) Fix LFS detection when building over NFS. The mode must be
+     specified when O_CREAT is in the flags to open().
+     PR 42821.  [Rainer Jung <rainer.jung kippdata.de>]
+
   *) Avoid overwriting the hash_mutex table for applications that
      incorrectly calls apr_atomic_init().  PR 42760.  [Davi Arnaut]
 
