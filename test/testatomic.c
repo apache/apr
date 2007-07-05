@@ -210,51 +210,38 @@ static void test_inc_neg1(abts_case *tc, void *data)
 
 #if APR_HAS_THREADS
 
-void * APR_THREAD_FUNC thread_func_mutex(apr_thread_t *thd, void *data);
-void * APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data);
-void * APR_THREAD_FUNC thread_func_none(apr_thread_t *thd, void *data);
+void *APR_THREAD_FUNC thread_func_mutex(apr_thread_t *thd, void *data);
+void *APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data);
 
 apr_thread_mutex_t *thread_lock;
-volatile apr_uint32_t x = 0; /* mutex locks */
-volatile apr_uint32_t y = 0; /* atomic operations */
-volatile apr_uint32_t z = 0; /* no locks */
+volatile apr_uint32_t mutex_locks = 0;
+volatile apr_uint32_t atomic_ops = 0;
 apr_status_t exit_ret_val = 123; /* just some made up number to check on later */
 
 #define NUM_THREADS 40
 #define NUM_ITERATIONS 20000
-void * APR_THREAD_FUNC thread_func_mutex(apr_thread_t *thd, void *data)
+void *APR_THREAD_FUNC thread_func_mutex(apr_thread_t *thd, void *data)
 {
     int i;
 
     for (i = 0; i < NUM_ITERATIONS; i++) {
         apr_thread_mutex_lock(thread_lock);
-        x++;
+        mutex_locks++;
         apr_thread_mutex_unlock(thread_lock);
-    }
-    apr_thread_exit(thd, exit_ret_val);
-    return NULL;
-} 
-
-void * APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data)
-{
-    int i;
-
-    for (i = 0; i < NUM_ITERATIONS ; i++) {
-        apr_atomic_inc32(&y);
-        apr_atomic_add32(&y, 2);
-        apr_atomic_dec32(&y);
-        apr_atomic_dec32(&y);
     }
     apr_thread_exit(thd, exit_ret_val);
     return NULL;
 }
 
-void * APR_THREAD_FUNC thread_func_none(apr_thread_t *thd, void *data)
+void *APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data)
 {
     int i;
 
     for (i = 0; i < NUM_ITERATIONS ; i++) {
-        z++;
+        apr_atomic_inc32(&atomic_ops);
+        apr_atomic_add32(&atomic_ops, 2);
+        apr_atomic_dec32(&atomic_ops);
+        apr_atomic_dec32(&atomic_ops);
     }
     apr_thread_exit(thd, exit_ret_val);
     return NULL;
@@ -264,10 +251,6 @@ static void test_atomics_threaded(abts_case *tc, void *data)
 {
     apr_thread_t *t1[NUM_THREADS];
     apr_thread_t *t2[NUM_THREADS];
-    apr_thread_t *t3[NUM_THREADS];
-    apr_status_t s1[NUM_THREADS]; 
-    apr_status_t s2[NUM_THREADS];
-    apr_status_t s3[NUM_THREADS];
     apr_status_t rv;
     int i;
 
@@ -279,34 +262,24 @@ static void test_atomics_threaded(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "Could not create lock", rv);
 
     for (i = 0; i < NUM_THREADS; i++) {
-        apr_status_t r1, r2, r3;
+        apr_status_t r1, r2;
         r1 = apr_thread_create(&t1[i], NULL, thread_func_mutex, NULL, p);
         r2 = apr_thread_create(&t2[i], NULL, thread_func_atomic, NULL, p);
-        r3 = apr_thread_create(&t3[i], NULL, thread_func_none, NULL, p);
-        ABTS_ASSERT(tc, "Failed creating threads",
-                 r1 == APR_SUCCESS && r2 == APR_SUCCESS && 
-                 r3 == APR_SUCCESS);
+        ABTS_ASSERT(tc, "Failed creating threads", !r1 && !r2);
     }
 
     for (i = 0; i < NUM_THREADS; i++) {
-        apr_thread_join(&s1[i], t1[i]);
-        apr_thread_join(&s2[i], t2[i]);
-        apr_thread_join(&s3[i], t3[i]);
-                     
+        apr_status_t s1, s2;
+        apr_thread_join(&s1, t1[i]);
+        apr_thread_join(&s2, t2[i]);
+
         ABTS_ASSERT(tc, "Invalid return value from thread_join",
-                 s1[i] == exit_ret_val && s2[i] == exit_ret_val && 
-                 s3[i] == exit_ret_val);
+                    s1 == exit_ret_val && s2 == exit_ret_val);
     }
 
-    ABTS_INT_EQUAL(tc, x, NUM_THREADS * NUM_ITERATIONS);
-    ABTS_INT_EQUAL(tc, apr_atomic_read32(&y), NUM_THREADS * NUM_ITERATIONS);
-    /* Comment out this test, because I have no clue what this test is
-     * actually telling us.  We are checking something that may or may not
-     * be true, and it isn't really testing APR at all.
-    ABTS_ASSERT(tc, "We expect this to fail, because we tried to update "
-                 "an integer in a non-thread-safe manner.",
-             z != NUM_THREADS * NUM_ITERATIONS);
-     */
+    ABTS_INT_EQUAL(tc, mutex_locks, NUM_THREADS * NUM_ITERATIONS);
+    ABTS_INT_EQUAL(tc, apr_atomic_read32(&atomic_ops),
+                   NUM_THREADS * NUM_ITERATIONS);
 }
 
 #endif /* !APR_HAS_THREADS */
