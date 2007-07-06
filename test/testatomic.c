@@ -300,15 +300,26 @@ struct tbox_t {
     void (*func)(tbox_t *box);
 };
 
+static APR_INLINE void busyloop_read32(tbox_t *tbox)
+{
+    apr_uint32_t val;
+
+    do {
+        val = apr_atomic_read32(tbox->mem);
+
+        if (val != tbox->preval)
+            apr_thread_yield();
+        else
+            break;
+    } while (1);
+}
+
 static void busyloop_set32(tbox_t *tbox)
 {
     apr_uint32_t val;
 
     do {
-        do {
-            val = apr_atomic_read32(tbox->mem);
-        } while (val != tbox->preval);
-
+        busyloop_read32(tbox);
         apr_atomic_set32(tbox->mem, tbox->postval);
     } while (--tbox->loop);
 }
@@ -318,12 +329,8 @@ static void busyloop_add32(tbox_t *tbox)
     apr_uint32_t val;
 
     do {
-        do {
-            val = apr_atomic_read32(tbox->mem);
-        } while (val != tbox->preval);
-
+        busyloop_read32(tbox);
         val = apr_atomic_add32(tbox->mem, tbox->postval);
-
         apr_thread_mutex_lock(thread_lock);
         ABTS_INT_EQUAL(tbox->tc, val, tbox->preval);
         apr_thread_mutex_unlock(thread_lock);
@@ -335,10 +342,7 @@ static void busyloop_sub32(tbox_t *tbox)
     apr_uint32_t val;
 
     do {
-        do {
-            val = apr_atomic_read32(tbox->mem);
-        } while (val != tbox->preval);
-
+        busyloop_read32(tbox);
         apr_atomic_sub32(tbox->mem, tbox->postval);
     } while (--tbox->loop);
 }
@@ -348,12 +352,8 @@ static void busyloop_inc32(tbox_t *tbox)
     apr_uint32_t val;
 
     do {
-        do {
-            val = apr_atomic_read32(tbox->mem);
-        } while (val != tbox->preval);
-
+        busyloop_read32(tbox);
         val = apr_atomic_inc32(tbox->mem);
-
         apr_thread_mutex_lock(thread_lock);
         ABTS_INT_EQUAL(tbox->tc, val, tbox->preval);
         apr_thread_mutex_unlock(thread_lock);
@@ -365,12 +365,8 @@ static void busyloop_dec32(tbox_t *tbox)
     apr_uint32_t val;
 
     do {
-        do {
-            val = apr_atomic_read32(tbox->mem);
-        } while (val != tbox->preval);
-
+        busyloop_read32(tbox);
         val = apr_atomic_dec32(tbox->mem);
-
         apr_thread_mutex_lock(thread_lock);
         ABTS_INT_NEQUAL(tbox->tc, val, 0);
         apr_thread_mutex_unlock(thread_lock);
@@ -384,7 +380,12 @@ static void busyloop_cas32(tbox_t *tbox)
     do {
         do {
             val = apr_atomic_cas32(tbox->mem, tbox->postval, tbox->preval);
-        } while (val != tbox->preval);
+
+            if (val != tbox->preval)
+                apr_thread_yield();
+            else
+                break;
+        } while (1);
     } while (--tbox->loop);
 }
 
@@ -393,12 +394,8 @@ static void busyloop_xchg32(tbox_t *tbox)
     apr_uint32_t val;
 
     do {
-        do {
-            val = apr_atomic_read32(tbox->mem);
-        } while (val != tbox->preval);
-
+        busyloop_read32(tbox);
         val = apr_atomic_xchg32(tbox->mem, tbox->postval);
-
         apr_thread_mutex_lock(thread_lock);
         ABTS_INT_EQUAL(tbox->tc, val, tbox->preval);
         apr_thread_mutex_unlock(thread_lock);
@@ -431,7 +428,7 @@ static void test_atomics_busyloop_threaded(abts_case *tc, void *data)
     for (i = 0; i < NUM_THREADS; i++) {
         tbox[i].tc = tc;
         tbox[i].mem = &count;
-        tbox[i].loop = 5;
+        tbox[i].loop = 50;
     }
 
     tbox[0].preval = 98;
