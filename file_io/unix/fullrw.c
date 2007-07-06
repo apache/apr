@@ -72,10 +72,36 @@ APR_DECLARE(apr_status_t) apr_file_writev_full(apr_file_t *thefile,
     apr_size_t amt = 0;
     apr_size_t total = 0;
 
-    for (i = 0; i < nvec && rv == APR_SUCCESS; i++) {
-        rv = apr_file_write_full(thefile, vec[i].iov_base, 
+    for (i = 0; i < nvec; i++) {
+        total += vec[i].iov_len;
+    }
+
+    rv = apr_file_writev(thefile, vec, nvec, &amt);
+
+    if (bytes_written != NULL)
+        *bytes_written = amt;
+
+    if (rv != APR_SUCCESS || (amt == total)) {
+        return rv;
+    }
+
+    for (i = 0; i < nvec && amt; i++) {
+        if (amt >= vec[i].iov_len) {
+            amt -= vec[i].iov_len;
+        }
+        else {
+            break;
+        }
+    }
+
+    if (amt) {
+        rv = apr_file_write_full(thefile, vec[i].iov_base + amt,
+                                 vec[i].iov_len - amt, NULL);
+    }
+
+    for (; i < nvec && rv == APR_SUCCESS; i++) {
+        rv = apr_file_write_full(thefile, vec[i].iov_base,
                                  vec[i].iov_len, &amt);
-        total += amt;
     }
 
     if (bytes_written != NULL)
