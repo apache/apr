@@ -36,6 +36,8 @@
 #   define USE_ATOMICS_SOLARIS
 #elif defined(__GNUC__) && (defined(__PPC__) || defined(__ppc__))
 #   define USE_ATOMICS_PPC
+#elif defined(__GNUC__) && (defined(__s390__) || defined(__s390x__))
+#   define USE_ATOMICS_S390
 #else
 #   define USE_ATOMICS_GENERIC
 #endif
