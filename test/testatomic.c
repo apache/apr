@@ -316,8 +316,6 @@ static APR_INLINE void busyloop_read32(tbox_t *tbox)
 
 static void busyloop_set32(tbox_t *tbox)
 {
-    apr_uint32_t val;
-
     do {
         busyloop_read32(tbox);
         apr_atomic_set32(tbox->mem, tbox->postval);
@@ -339,8 +337,6 @@ static void busyloop_add32(tbox_t *tbox)
 
 static void busyloop_sub32(tbox_t *tbox)
 {
-    apr_uint32_t val;
-
     do {
         busyloop_read32(tbox);
         apr_atomic_sub32(tbox->mem, tbox->postval);
@@ -402,7 +398,7 @@ static void busyloop_xchg32(tbox_t *tbox)
     } while (--tbox->loop);
 }
 
-void *APR_THREAD_FUNC thread_func_busyloop(apr_thread_t *thd, void *data)
+static void *APR_THREAD_FUNC thread_func_busyloop(apr_thread_t *thd, void *data)
 {
     tbox_t *tbox = data;
 
