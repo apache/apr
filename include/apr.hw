@@ -326,10 +326,10 @@ typedef  unsigned char     apr_byte_t;
 
 typedef  short             apr_int16_t;
 typedef  unsigned short    apr_uint16_t;
-                                               
+
 typedef  int               apr_int32_t;
 typedef  unsigned int      apr_uint32_t;
-                                               
+
 typedef  __int64           apr_int64_t;
 typedef  unsigned __int64  apr_uint64_t;
 
@@ -373,6 +373,60 @@ typedef  int         gid_t;
 #else
 #define APR_INT64_C(val) (val##LL)
 #define APR_UINT64_C(val) (val##ULL)
+#endif
+
+#ifdef INT16_MIN
+#define APR_INT16_MIN   INT16_MIN
+#else
+#define APR_INT16_MIN   (-0x7fff - 1)
+#endif
+
+#ifdef INT16_MAX
+#define APR_INT16_MAX  INT16_MAX
+#else
+#define APR_INT16_MAX   (0x7fff)
+#endif
+
+#ifdef UINT16_MAX
+#define APR_UINT16_MAX  UINT16_MAX
+#else
+#define APR_UINT16_MAX  (0xffff)
+#endif
+
+#ifdef INT32_MIN
+#define APR_INT32_MIN   INT32_MIN
+#else
+#define APR_INT32_MIN   (-0x7fffffff - 1)
+#endif
+
+#ifdef INT32_MAX
+#define APR_INT32_MAX  INT32_MAX
+#else
+#define APR_INT32_MAX  0x7fffffff
+#endif
+
+#ifdef UINT32_MAX
+#define APR_UINT32_MAX  UINT32_MAX
+#else
+#define APR_UINT32_MAX  (0xffffffffU)
+#endif
+
+#ifdef INT64_MIN
+#define APR_INT64_MIN   INT64_MIN
+#else
+#define APR_INT64_MIN   (APR_INT64_C(-0x7fffffffffffffff) - 1)
+#endif
+
+#ifdef INT64_MAX
+#define APR_INT64_MAX   INT64_MAX
+#else
+#define APR_INT64_MAX   APR_INT64_C(0x7fffffffffffffff)
+#endif
+
+#ifdef UINT64_MAX
+#define APR_UINT64_MAX  UINT64_MAX
+#else
+#define APR_UINT64_MAX  APR_UINT64_C(0xffffffffffffffff)
 #endif
 
 #if APR_HAVE_IPV6
