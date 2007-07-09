@@ -381,9 +381,9 @@ static char *conv_10_quad(apr_int64_t num, register int is_unsigned,
      * number against the largest long value it can be. If <=, we
      * punt to the quicker version.
      */
-    if ((magnitude <= UINT32_MAX && is_unsigned)
-        || (num <= INT32_MAX && num >= INT32_MIN && !is_unsigned))
-            return(conv_10(num, is_unsigned, is_negative, buf_end, len));
+    if ((magnitude <= APR_UINT32_MAX && is_unsigned)
+        || (num <= APR_INT32_MAX && num >= APR_INT32_MIN && !is_unsigned))
+            return(conv_10((apr_int32_t)num, is_unsigned, is_negative, buf_end, len));
 
     if (is_unsigned) {
         *is_negative = FALSE;
@@ -640,7 +640,7 @@ static char *conv_p2_quad(apr_uint64_t num, register int nbits,
     static const char upper_digits[] = "0123456789ABCDEF";
     register const char *digits = (format == 'X') ? upper_digits : low_digits;
 
-    if (num <= UINT32_MAX)
+    if (num <= APR_UINT32_MAX)
         return(conv_p2((apr_uint32_t)num, nbits, format, buf_end, len));
 
     do {
