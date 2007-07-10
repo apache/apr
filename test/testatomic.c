@@ -81,6 +81,17 @@ static void test_xchg32(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, 50, y32);
 }
 
+static void test_xchgptr(abts_case *tc, void *data)
+{
+    int a;
+    volatile void *target_ptr = NULL;
+    void *old_ptr;
+
+    old_ptr = apr_atomic_xchgptr(&target_ptr, &a);
+    ABTS_PTR_EQUAL(tc, NULL, old_ptr);
+    ABTS_PTR_EQUAL(tc, &a, (void *) target_ptr);
+}
+
 static void test_cas_equal(abts_case *tc, void *data)
 {
     apr_uint32_t casval = 0;
@@ -489,6 +500,7 @@ abts_suite *testatomic(abts_suite *suite)
     abts_run_test(suite, test_read32, NULL);
     abts_run_test(suite, test_dec32, NULL);
     abts_run_test(suite, test_xchg32, NULL);
+    abts_run_test(suite, test_xchgptr, NULL);
     abts_run_test(suite, test_cas_equal, NULL);
     abts_run_test(suite, test_cas_equal_nonnull, NULL);
     abts_run_test(suite, test_cas_notequal, NULL);

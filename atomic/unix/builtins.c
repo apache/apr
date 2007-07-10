@@ -71,4 +71,11 @@ APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void
     return (void*) __sync_val_compare_and_swap(mem, cmp, with);
 }
 
+APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
+{
+    __sync_synchronize();
+
+    return (void*) __sync_lock_test_and_set(mem, with);
+}
+
 #endif /* USE_ATOMICS_BUILTINS */
