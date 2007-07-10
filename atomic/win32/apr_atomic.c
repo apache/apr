@@ -38,6 +38,9 @@ typedef WINBASEAPI apr_uint32_t (WINAPI * apr_atomic_win32_ptr_val_val_fn)
 typedef WINBASEAPI void * (WINAPI * apr_atomic_win32_ptr_ptr_ptr_fn)
     (volatile void **, 
      void *, const void *);
+typedef WINBASEAPI void * (WINAPI * apr_atomic_win32_ptr_ptr_fn)
+    (volatile void **,
+     void *);
 
 APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
@@ -133,5 +136,15 @@ APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint
     return InterlockedExchange((long *)mem, val);
 #else
     return ((apr_atomic_win32_ptr_val_fn)InterlockedExchange)(mem, val);
+#endif
+}
+
+APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
+{
+#if (defined(_M_IA64) || defined(_M_AMD64) || defined(__MINGW32__)) && !defined(RC_INVOKED)
+    return InterlockedExchangePointer((void**)mem, with);
+#else
+    /* Too many VC6 users have stale win32 API files, stub this */
+    return ((apr_atomic_win32_ptr_ptr_fn)InterlockedExchangePointer)(mem, with);
 #endif
 }

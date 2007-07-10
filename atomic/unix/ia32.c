@@ -108,4 +108,23 @@ APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void
     return prev;
 }
 
+APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
+{
+    void *prev;
+#if APR_SIZEOF_VOIDP == 4
+    asm volatile ("lock; xchgl %2, %1"
+                  : "=a" (prev), "=m" (*mem)
+                  : "r" (with), "m" (*mem)
+                  : "memory");
+#elif APR_SIZEOF_VOIDP == 8
+    asm volatile ("lock; xchgq %q2, %1"
+                  : "=a" (prev), "=m" (*mem)
+                  : "r" ((unsigned long)with), "m" (*mem)
+                  : "memory");
+#else
+#error APR_SIZEOF_VOIDP value not supported
+#endif
+    return prev;
+}
+
 #endif /* USE_ATOMICS_IA32 */

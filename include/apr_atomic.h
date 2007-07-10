@@ -123,6 +123,14 @@ APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint
  */
 APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void *cmp);
 
+/**
+ * exchange a pair of pointer values
+ * @param mem pointer to the pointer
+ * @param with what to swap it with
+ * @return the old value of the pointer
+ */
+APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with);
+
 /** @} */
 
 #ifdef __cplusplus
