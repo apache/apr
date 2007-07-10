@@ -1330,25 +1330,82 @@ else
     socklen_t_value="int"
 fi
 
+# Basically, we have tried to figure out the correct format strings
+# for APR types which vary between platforms, but we don't always get
+# it right.
+case $host in
+   s390*linux*)
+       # uniquely, the 31-bit Linux/s390 uses "unsigned long int"
+       # for size_t rather than "unsigned int":
+       size_t_fmt="lu"
+       ssize_t_fmt="ld"
+       ;;
+   *-os2*)
+       size_t_fmt="lu"
+       ;;
+   *-solaris*)
+       pid_t_fmt="ld"
+       ;;
+   *aix4*|*aix5*)
+       ssize_t_fmt="ld"
+       size_t_fmt="ld"
+       ;;
+    *beos*)
+        ssize_t_fmt="ld"
+        size_t_fmt="ld"
+        ;;
+    *apple-darwin*)
+        osver=`uname -r`
+        case $osver in
+           [[0-7]].*)
+              ssize_t_fmt="d"
+              ;;
+           *)
+              ssize_t_fmt="ld"
+              ;;
+        esac
+        size_t_fmt="lu"
+        ;;
+esac
+
+APR_CHECK_TYPES_COMPATIBLE(ssize_t, int, [ssize_t_fmt="d"])
+APR_CHECK_TYPES_COMPATIBLE(ssize_t, long, [ssize_t_fmt="ld"])
+APR_CHECK_TYPES_COMPATIBLE(size_t, unsigned int, [size_t_fmt="u"])
+APR_CHECK_TYPES_COMPATIBLE(size_t, unsigned long, [size_t_fmt="lu"])
+
 APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], ssize_t, 8)
 
-if test "$ac_cv_sizeof_ssize_t" = "$ac_cv_sizeof_int"; then
-    ssize_t_fmt='#define APR_SSIZE_T_FMT "d"'
+AC_MSG_CHECKING([which format to use for apr_ssize_t])
+if test -n "$ssize_t_fmt"; then
+    AC_MSG_RESULT(%$ssize_t_fmt)
+elif test "$ac_cv_sizeof_ssize_t" = "$ac_cv_sizeof_int"; then
+    ssize_t_fmt="d"
+    AC_MSG_RESULT(%d)
 elif test "$ac_cv_sizeof_ssize_t" = "$ac_cv_sizeof_long"; then
-    ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
+    ssize_t_fmt="ld"
+    AC_MSG_RESULT(%ld)
 else
-    ssize_t_fmt='#error Can not determine the proper size for ssize_t'
+    AC_ERROR([could not determine the proper format for apr_ssize_t])
 fi
+
+ssize_t_fmt="#define APR_SSIZE_T_FMT \"$ssize_t_fmt\""
 
 APR_CHECK_SIZEOF_EXTENDED([#include <stddef.h>], size_t, 8)
 
-if test "$ac_cv_sizeof_size_t" = "$ac_cv_sizeof_int"; then
-    size_t_fmt='#define APR_SIZE_T_FMT "d"'
+AC_MSG_CHECKING([which format to use for apr_size_t])
+if test -n "$size_t_fmt"; then
+    AC_MSG_RESULT(%$size_t_fmt)
+elif test "$ac_cv_sizeof_size_t" = "$ac_cv_sizeof_int"; then
+    size_t_fmt="d"
+    AC_MSG_RESULT(%d)
 elif test "$ac_cv_sizeof_size_t" = "$ac_cv_sizeof_long"; then
-    size_t_fmt='#define APR_SIZE_T_FMT "ld"'
+    size_t_fmt="ld"
+    AC_MSG_RESULT(%ld)
 else
-    size_t_fmt='#error Can not determine the proper size for size_t'
+    AC_ERROR([could not determine the proper format for apr_size_t])
 fi
+
+size_t_fmt="#define APR_SIZE_T_FMT \"$size_t_fmt\""
 
 APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], off_t, 8)
 
@@ -1419,45 +1476,6 @@ if test $ac_cv_c_bigendian = yes; then
 else
     bigendian=0
 fi
-
-# Basically, we have tried to figure out the correct format strings
-# for APR types which vary between platforms, but we don't always get 
-# it right.  If you find that we don't get it right for your platform, 
-# you can override our decision below.
-case $host in
-   s390*linux*)
-       # uniquely, the 31-bit Linux/s390 uses "unsigned long int"
-       # for size_t rather than "unsigned int":
-       size_t_fmt='#define APR_SIZE_T_FMT "lu"'
-       ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
-       ;;
-   *-os2*)
-       size_t_fmt='#define APR_SIZE_T_FMT "lu"'
-       ;;
-   *-solaris*)
-       pid_t_fmt='#define APR_PID_T_FMT "ld"'
-       ;;
-   *aix4*|*aix5*)
-       ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
-       size_t_fmt='#define APR_SIZE_T_FMT "ld"'
-       ;;
-    *beos*)
-        ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
-        size_t_fmt='#define APR_SIZE_T_FMT "ld"'
-        ;;
-    *apple-darwin*)
-        osver=`uname -r`
-        case $osver in
-           [[0-7]].*)
-              ssize_t_fmt='#define APR_SSIZE_T_FMT "d"'
-              ;;
-           *)
-              ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
-              ;;
-        esac
-        size_t_fmt='#define APR_SIZE_T_FMT "lu"'
-        ;;
-esac
 
 APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>
 #include <sys/uio.h>],struct iovec,0)
