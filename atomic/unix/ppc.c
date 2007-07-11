@@ -179,8 +179,7 @@ APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
 {
     void *prev;
 #if APR_SIZEOF_VOIDP == 4
-    asm volatile (PPC_SYNC
-                  "loop_%=:\n"                  /* lost reservation     */
+    asm volatile ("loop_%=:\n"                  /* lost reservation     */
                   "	lwarx   %0,0,%1\n"      /* load and reserve     */
                   PPC405_ERR77_SYNC             /* ppc405 Erratum 77    */
                   "	stwcx.  %2,0,%1\n"      /* store new value      */
@@ -190,8 +189,7 @@ APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
                   : "b" (mem), "r" (with)
                   : "cc", "memory");
 #elif APR_SIZEOF_VOIDP == 8
-    asm volatile (PPC_SYNC
-                  "loop_%=:\n"                  /* lost reservation     */
+    asm volatile ("loop_%=:\n"                  /* lost reservation     */
                   "	ldarx   %0,0,%1\n"      /* load and reserve     */
                   PPC405_ERR77_SYNC             /* ppc405 Erratum 77    */
                   "	stdcx.  %2,0,%1\n"      /* store new value      */
