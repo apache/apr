@@ -145,6 +145,6 @@ APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
     return InterlockedExchangePointer((void**)mem, with);
 #else
     /* Too many VC6 users have stale win32 API files, stub this */
-    return ((apr_atomic_win32_ptr_ptr_fn)InterlockedExchangePointer)(mem, with);
+    return ((apr_atomic_win32_ptr_ptr_fn)InterlockedExchange)(mem, with);
 #endif
 }
