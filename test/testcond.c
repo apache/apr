@@ -511,20 +511,19 @@ static void ping(toolbox_t *box)
     rv = apr_thread_mutex_lock(box->mutex);
     ABTS_SUCCESS(rv);
 
-    do {
-        state = PONG;
+    if (state == TOSS)
+        state = PING;
 
+    do {
         rv = apr_thread_cond_signal(box->cond);
         ABTS_SUCCESS(rv);
 
-        do {
-            rv = apr_thread_cond_wait(box->cond, box->mutex);
-            ABTS_SUCCESS(rv);
-            if (state == OVER) {
-                break;
-            }
-            ABTS_INT_EQUAL(tc, 1, (state == PING));
-        } while (state == PONG);
+        state = PONG;
+
+        rv = apr_thread_cond_wait(box->cond, box->mutex);
+        ABTS_SUCCESS(rv);
+
+        ABTS_TRUE(tc, state == PING || state == OVER);
     } while (state != OVER);
 
     rv = apr_thread_mutex_unlock(box->mutex);
@@ -542,20 +541,19 @@ static void pong(toolbox_t *box)
     rv = apr_thread_mutex_lock(box->mutex);
     ABTS_SUCCESS(rv);
 
-    do {
-        state = PING;
+    if (state == TOSS)
+        state = PONG;
 
+    do {
         rv = apr_thread_cond_signal(box->cond);
         ABTS_SUCCESS(rv);
 
-        do {
-            rv = apr_thread_cond_wait(box->cond, box->mutex);
-            ABTS_SUCCESS(rv);
-            if (state == OVER) {
-                break;
-            }
-            ABTS_INT_EQUAL(tc, 1, (state == PONG));
-        } while (state == PING);
+        state = PING;
+
+        rv = apr_thread_cond_wait(box->cond, box->mutex);
+        ABTS_SUCCESS(rv);
+
+        ABTS_TRUE(tc, state == PONG || state == OVER);
     } while (state != OVER);
 
     rv = apr_thread_mutex_unlock(box->mutex);
