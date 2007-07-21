@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 /*
- * See the paper "???" by Ben Laurie for an explanation of this PRNG.
+ * See the paper "On Randomness" by Ben Laurie for an explanation of this PRNG.
+ * http://www.apache-ssl.org/randomness.pdf
+ * XXX: Is there a formal proof of this PRNG? Couldn't we use the more popular
+ * Mersenne Twister PRNG (and BSD licensed)?
  */
 
 #include "apr.h"
