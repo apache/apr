@@ -53,7 +53,6 @@ const struct testlist {
     {testproc},
     {testprocmutex},
     {testrand},
-    {testrand2},
     {testsleep},
     {testshm},
     {testsock},

@@ -74,7 +74,6 @@ abts_suite *testpool(abts_suite *suite);
 abts_suite *testproc(abts_suite *suite);
 abts_suite *testprocmutex(abts_suite *suite);
 abts_suite *testrand(abts_suite *suite);
-abts_suite *testrand2(abts_suite *suite);
 abts_suite *testsleep(abts_suite *suite);
 abts_suite *testshm(abts_suite *suite);
 abts_suite *testsock(abts_suite *suite);

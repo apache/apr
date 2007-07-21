@@ -198,7 +198,6 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testproc.o \
 	$(OBJDIR)/testprocmutex.o \
 	$(OBJDIR)/testrand.o \
-	$(OBJDIR)/testrand2.o \
 	$(OBJDIR)/testshm.o \
 	$(OBJDIR)/testsleep.o \
 	$(OBJDIR)/testsock.o \
