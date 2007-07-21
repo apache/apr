@@ -111,9 +111,9 @@ TESTS = testutil.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
 	testpoll.lo testlock.lo testsockopt.lo testpipe.lo testthread.lo \
 	testhash.lo testargs.lo testnames.lo testuser.lo testpath.lo \
-	testenv.lo testprocmutex.lo testrand2.lo testfnmatch.lo \
-        testatomic.lo testflock.lo testshm.lo testsock.lo testglobalmutex.lo \
-        teststrnatcmp.lo testfilecopy.lo testtemp.lo testlfs.lo testcond.lo
+	testenv.lo testprocmutex.lo testfnmatch.lo testatomic.lo testflock.lo \
+	testshm.lo testsock.lo testglobalmutex.lo teststrnatcmp.lo testfilecopy.lo \
+	testtemp.lo testlfs.lo testcond.lo
 
 testall@EXEEXT@: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
 	 readchild@EXEEXT@ abts.lo proc_child@EXEEXT@ \
