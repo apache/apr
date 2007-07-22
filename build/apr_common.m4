@@ -161,8 +161,8 @@ changequote([, ])dnl
   # autoconf doesn't add --silent to ac_configure_args; explicitly pass it
   test "x$silent" = "xyes" && apr_configure_args="$apr_configure_args --silent"
 
-  dnl The eval makes quoting arguments work - specifically $2 where the
-  dnl quoting mechanisms used is "" rather than [].
+  dnl The eval makes quoting arguments work - specifically the second argument
+  dnl where the quoting mechanisms used is "" rather than [].
   dnl
   dnl We need to execute another shell because some autoconf/shell combinations
   dnl will choke after doing repeated APR_SUBDIR_CONFIG()s.  (Namely Solaris
