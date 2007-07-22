@@ -19,6 +19,7 @@
 #include "apr_arch_file_io.h"
 #include "assert.h"
 #include "apr_lib.h"
+#include "tchar.h"
 
 APR_DECLARE_DATA apr_oslevel_e apr_os_level = APR_WIN_UNK;
 
@@ -33,13 +34,17 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
         if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) 
         {
             static unsigned int servpack = 0;
-            char *pservpack;
+            TCHAR *pservpack;
             if (pservpack = oslev.szCSDVersion) {
                 while (*pservpack && !apr_isdigit(*pservpack)) {
                     pservpack++;
                 }
                 if (*pservpack)
+#ifdef _UNICODE
+                    servpack = _wtoi(pservpack);
+#else
                     servpack = atoi(pservpack);
+#endif
             }
 
             if (oslev.dwMajorVersion < 3) {
@@ -100,22 +105,22 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
         }
 #ifndef WINNT
         else if (oslev.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
-            char *prevision;
+            TCHAR *prevision;
             if (prevision = oslev.szCSDVersion) {
                 while (*prevision && !apr_isupper(*prevision)) {
                      prevision++;
                 }
             }
-            else prevision = "";
+            else prevision = _T("");
 
             if (oslev.dwMinorVersion < 10) {
-                if (*prevision < 'C')
+                if (*prevision < _T('C'))
                     apr_os_level = APR_WIN_95;
                 else
                     apr_os_level = APR_WIN_95_OSR2;
             }
             else if (oslev.dwMinorVersion < 90) {
-                if (*prevision < 'A')
+                if (*prevision < _T('A'))
                     apr_os_level = APR_WIN_98;
                 else
                     apr_os_level = APR_WIN_98_SE;
@@ -163,14 +168,21 @@ static HMODULE lateDllHandle[DLL_defined] = {
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
 {
     if (!lateDllHandle[fnLib]) { 
-        lateDllHandle[fnLib] = LoadLibrary(lateDllName[fnLib]);
+        lateDllHandle[fnLib] = LoadLibraryA(lateDllName[fnLib]);
         if (!lateDllHandle[fnLib])
             return NULL;
     }
+#if defined(_WIN32_WCE)
+    if (ordinal)
+        return GetProcAddressA(lateDllHandle[fnLib], (char *) ordinal);
+    else
+        return GetProcAddressA(lateDllHandle[fnLib], fnName);
+#else
     if (ordinal)
         return GetProcAddress(lateDllHandle[fnLib], (char *) ordinal);
     else
         return GetProcAddress(lateDllHandle[fnLib], fnName);
+#endif
 }
 
 /* Declared in include/arch/win32/apr_dbg_win32_handles.h
@@ -198,10 +210,10 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
         (TlsSetValue)(tlsid, sbuf);
         sbuf[1023] = '\0';
         if (!fh) {
-            (GetModuleFileName)(NULL, sbuf, 250);
+            (GetModuleFileNameA)(NULL, sbuf, 250);
             sprintf(strchr(sbuf, '\0'), ".%d",
                     (GetCurrentProcessId)());
-            fh = (CreateFile)(sbuf, GENERIC_WRITE, 0, NULL, 
+            fh = (CreateFileA)(sbuf, GENERIC_WRITE, 0, NULL, 
                             CREATE_ALWAYS, 0, NULL);
             (InitializeCriticalSection)(&cs);
         }
