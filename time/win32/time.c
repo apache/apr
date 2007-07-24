@@ -52,7 +52,7 @@ static DWORD get_local_timezone(TIME_ZONE_INFORMATION **tzresult)
 static void SystemTimeToAprExpTime(apr_time_exp_t *xt, SYSTEMTIME *tm)
 {
     static const int dayoffset[12] =
-    {0, 31, 59, 90, 120, 151, 182, 212, 243, 273, 304, 334};
+    {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
     /* Note; the caller is responsible for filling in detailed tm_usec,
      * tm_gmtoff and tm_isdst data when applicable.
