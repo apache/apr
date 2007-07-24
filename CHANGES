@@ -21,7 +21,8 @@ Changes for APR 1.2.10
      [Davi Arnaut]
 
   *) Define the _HPUX_SOURCE feature test macro to obtain maximum
-     functionality.  PR 42261.  [Davi Arnaut]
+     functionality. Fixes broken sendfile with LFS support on HP-UX.
+     PR 42261.  [Davi Arnaut]
 
 Changes for APR 1.2.9
 
