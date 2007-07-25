@@ -1,5 +1,8 @@
 Changes for APR 1.2.10
 
+  *) Fix day of year (tm_day) calculation for July. The bug only affects
+     Windows builds.  PR 42953.  [Davi Arnaut]
+
   *) Fix LFS detection when building over NFS. The mode must be
      specified when O_CREAT is in the flags to open().
      PR 42821.  [Rainer Jung <rainer.jung kippdata.de>]
