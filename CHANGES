@@ -1,6 +1,7 @@
 Changes with APR 0.9.15
 
-
+  *) Fix day of year (tm_day) calculation for July. The bug only affects
+     Windows builds.  PR 42953.  [Davi Arnaut]
 
 Changes with APR 0.9.14
 
