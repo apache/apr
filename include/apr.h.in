@@ -40,6 +40,9 @@
 /**
  * @defgroup apr_platform Platform Definitions
  * @{
+ * @warning
+ * <strong><em>The actual values of macros and typedefs on this page<br>
+ * are platform specific and should NOT be relied upon!</em></strong>
  */
 
 /* So that we can use inline on some critical functions, and use
