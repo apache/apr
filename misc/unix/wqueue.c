@@ -155,7 +155,7 @@ APR_DECLARE(apr_status_t) apr_wqueue_wait(apr_wqueue_t *wqueue, apr_interval_tim
 
     APR_RING_REMOVE(&entry, link);
 
-    queue_unlock(queue);
+    queue_unlock(wqueue);
 
     return rv;
 }
