@@ -69,6 +69,14 @@
 #define APR_HAS_INLINE		1
 #endif
 
+#ifdef __cplusplus
+#define APR_BEGIN_DECLS     extern "C" {
+#define APR_END_DECLS       }
+#else
+#define APR_BEGIN_DECLS
+#define APR_END_DECLS
+#endif
+
 #define APR_HAVE_ARPA_INET_H     @arpa_ineth@
 #define APR_HAVE_CONIO_H         @conioh@
 #define APR_HAVE_CRYPT_H         @crypth@
