@@ -48,7 +48,10 @@ typedef struct apr_eventset_t apr_eventset_t;
 /**
  * eventset flags
  */
-#define APR_EVENTSET 0x0001 /**< Runs a single iteration for the eventset loop. */
+typedef enum {
+    /** Runs a single iteration for the eventset loop. */
+    APR_EVENTSET_SINGLE     = (0 << 1),
+} apr_eventset_flags_e;
 
 /**
  * Supported event types (asynchronous operations)
@@ -172,7 +175,7 @@ APR_DECLARE(apr_status_t) apr_eventset_initialize(void);
  */
 APR_DECLARE(apr_status_t) apr_eventset_create(apr_eventset_t **eventset,
                                               apr_pool_t *pool, apr_uint32_t size,
-                                              apr_uint32_t flags);
+                                              apr_eventset_flags_e flags);
 
 /**
  * Destroy a eventset
@@ -205,7 +208,7 @@ APR_DECLARE(apr_status_t) apr_eventset_remove(apr_eventset_t *eventset,
  * @param flags Optional flags to modify the operation of the eventset
  */
 APR_DECLARE(apr_status_t) apr_eventset_loop(apr_eventset_t *eventset,
-                                            apr_uint32_t flags);
+                                            apr_eventset_flags_e flags);
 
 /**
  * Stops a eventset loop from running
