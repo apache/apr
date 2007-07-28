@@ -82,7 +82,7 @@ APR_DECLARE(apr_status_t) apr_wqueue_add(apr_wqueue_t *wqueue,
                                          apr_wqueue_entry_t *entry);
 
 /**
- * Remove an entry a wait queue
+ * Remove an entry from a wait queue
  * @param wqueue The wait queue to remove the entry from
  * @param entry The wait queue entry
  */
@@ -90,10 +90,10 @@ APR_DECLARE(apr_status_t) apr_wqueue_remove(apr_wqueue_t *wqueue,
                                             apr_wqueue_entry_t *entry);
 
 /**
- *
- * @param wqueue
+ * Wake up @nwake processes sleeping on the wait queue.
+ * @param wqueue The wait queue
  * @param nwake (input) Number of process to wake or 0 to wake up all
- * (output) - Number of
+ * (output) - Number of processes woken up
  * @remark The woken up entries are not removed from the wait queue
  */
 APR_DECLARE(apr_status_t) apr_wqueue_wake(apr_wqueue_t *wqueue,
