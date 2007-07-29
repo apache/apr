@@ -38,7 +38,11 @@ static apr_status_t check_basic_atomics(volatile apr_atomic_t*p)
     apr_atomic_t oldval;
     apr_uint32_t casval = 0;
     float object1, object2;
+#if !(defined NETWARE)
+    volatile void *casptr;
+#else
     void *casptr;
+#endif
     void *oldptr;
 
     apr_atomic_set(&y, 2);
