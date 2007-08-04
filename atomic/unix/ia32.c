@@ -83,10 +83,9 @@ APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint
 {
     apr_uint32_t prev = val;
 
-    asm volatile ("lock; xchgl %0, %1"
-                  : "=r" (prev)
-                  : "m" (*(mem)), "0"(prev)
-                  : "memory");
+    asm volatile ("xchgl %0, %1"
+                  : "=r" (prev), "+m" (*mem)
+                  : "0" (prev));
     return prev;
 }
 
@@ -112,15 +111,13 @@ APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
 {
     void *prev;
 #if APR_SIZEOF_VOIDP == 4
-    asm volatile ("lock; xchgl %2, %1"
-                  : "=a" (prev), "=m" (*mem)
-                  : "r" (with), "m" (*mem)
-                  : "memory");
+    asm volatile ("xchgl %2, %1"
+                  : "=a" (prev), "+m" (*mem)
+                  : "0" (with));
 #elif APR_SIZEOF_VOIDP == 8
-    asm volatile ("lock; xchgq %q2, %1"
-                  : "=a" (prev), "=m" (*mem)
-                  : "r" ((unsigned long)with), "m" (*mem)
-                  : "memory");
+    asm volatile ("xchgq %q2, %1"
+                  : "=a" (prev), "+m" (*mem)
+                  : "r" ((unsigned long)with));
 #else
 #error APR_SIZEOF_VOIDP value not supported
 #endif
