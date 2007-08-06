@@ -329,6 +329,17 @@ typedef  size_t            apr_socklen_t;
 
 /* Definitions that APR programs need to work properly. */
 
+/**
+ * APR public API wrap for C++ compilers.
+ */
+#ifdef __cplusplus
+#define APR_BEGIN_DECLS     extern "C" {
+#define APR_END_DECLS       }
+#else
+#define APR_BEGIN_DECLS
+#define APR_END_DECLS
+#endif
+
 /** 
  * Thread callbacks from APR functions must be declared with APR_THREAD_FUNC, 
  * so that they follow the platform's calling convention.
