@@ -305,6 +305,10 @@ APR_DECLARE(apr_status_t) apr_filepath_list_merge(char **liststr,
 
 APR_DECLARE(apr_status_t) apr_filepath_encoding(int *style, apr_pool_t *p)
 {
+#if defined(DARWIN)
+    *style = APR_FILEPATH_ENCODING_UTF8;
+#else
     *style = APR_FILEPATH_ENCODING_LOCALE;
+#endif
     return APR_SUCCESS;
 }
