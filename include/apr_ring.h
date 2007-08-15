@@ -69,8 +69,8 @@
  */
 #define APR_RING_ENTRY(elem)						\
     struct {								\
-	struct elem *next;						\
-	struct elem *prev;						\
+	struct elem * volatile next;					\
+	struct elem * volatile prev;					\
     }
 
 /**
