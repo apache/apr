@@ -90,8 +90,8 @@
  */
 #define APR_RING_HEAD(head, elem)					\
     struct head {							\
-	struct elem *next;						\
-	struct elem *prev;						\
+	struct elem * volatile next;					\
+	struct elem * volatile prev;					\
     }
 
 /**
