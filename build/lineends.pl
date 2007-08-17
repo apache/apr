@@ -26,16 +26,16 @@ $ignore .= "gif-jpg-jpeg-png-ico-bmp-";
 $ignore .= "tar-gz-z-zip-jar-war-bz2-tgz-";
 
 # Many document formats
-$ignore .= "eps-psd-pdf-ai-";
+$ignore .= "eps-psd-pdf-chm-ai-";
 
 # Some encodings
 $ignore .= "ucs2-ucs4-";
 
 # Some binary objects
-$ignore .= "class-so-dll-exe-obj-a-o-lo-slo-sl-dylib-";
+$ignore .= "class-so-dll-exe-obj-lib-a-o-lo-slo-sl-dylib-";
 
 # Some build env files 
-$ignore .= "mcp-xdc-ncb-opt-pdb-ilk-sbr-";
+$ignore .= "mcp-xdc-ncb-opt-pdb-ilk-exp-res-pch-idb-sbr-";
 
 $preservedate = 1;
 
@@ -63,22 +63,22 @@ while (defined @ARGV[0]) {
     }
     elsif (@ARGV[0] =~ m/^-/) {
         die "What is " . @ARGV[0] . " supposed to mean?\n\n" 
-	  . "Syntax:\t$0 [option()s] [path(s)]\n\n" . <<'OUTCH'
-Where:	paths specifies the top level directory to convert (default of '.')
-	options are;
+          . "Syntax:\t$0 [option()s] [path(s)]\n\n" . <<'OUTCH'
+Where:  paths specifies the top level directory to convert (default of '.')
+        options are;
 
-	  --cr     keep/add one ^M
-	  --nocr   remove ^M's
-	  --touch  the datestamp (default: keeps date/attribs)
-	  --force  mismatched corrections (unbalanced ^M's)
-	  --FORCE  all files regardless of file name!
+          --cr     keep/add one ^M
+          --nocr   remove ^M's
+          --touch  the datestamp (default: keeps date/attribs)
+          --force  mismatched corrections (unbalanced ^M's)
+          --FORCE  all files regardless of file name!
 
 OUTCH
     }
     else {
         find(\&totxt, @ARGV[0]);
-	print "scanned " . @ARGV[0] . "\n";
-	$givenpaths = 1;
+        print "scanned " . @ARGV[0] . "\n";
+        $givenpaths = 1;
     }
     shift @ARGV;
 }
@@ -90,49 +90,50 @@ if (!$givenpaths) {
 
 sub totxt {
         $oname = $_;
-	$tname = '.#' . $_;
+        $tname = '.#' . $_;
         if (!-f) {
             return;
         }
-	@exts = split /\./;
-	if ($forceending < 2) {
+        @exts = split /\./;
+        if ($forceending < 2) {
             while ($#exts && ($ext = pop(@exts))) {
                 if ($ignore =~ m|-$ext-|i) {
                     return;
                 }
-	    }
+            }
         }
-	@ostat = stat($oname);
+        return if ($File::Find::dir =~ m|^(.+/)?.svn(/.+)?$|);
+        @ostat = stat($oname);
         $srcfl = new IO::File $oname, "r" or die;
-	$dstfl = new IO::File $tname, "w" or die;
+        $dstfl = new IO::File $tname, "w" or die;
         binmode $srcfl; 
-	if ($notnative) {
+        if ($notnative) {
             binmode $dstfl;
-	} 
-	undef $t;
+        }
+        undef $t;
         while (<$srcfl>) { 
             if (s/(\r*)\n$/\n/) {
-		$n = length $1;
-		if (!defined $t) { 
-		    $t = $n; 
-		}
-		if (!$forceending && (($n != $t) || m/\r/)) {
-		    print "mismatch in " .$oname. ":" .$n. " expected " .$t. "\n";
-		    undef $t;
-		    last;
-		}
-	        elsif ($notnative > 0) {
+                $n = length $1;
+                if (!defined $t) { 
+                    $t = $n; 
+                }
+                if (!$forceending && (($n != $t) || m/\r/)) {
+                    print "mismatch in " .$oname. ":" .$n. " expected " .$t. "\n";
+                    undef $t;
+                    last;
+                }
+                elsif ($notnative > 0) {
                     s/\n$/\r\n/; 
                 }
             }
-	    print $dstfl $_; 
-	}
-	if (defined $t && (tell $srcfl == tell $dstfl)) {
-	    undef $t;
-	}
-	undef $srcfl;
-	undef $dstfl;
-	if (defined $t) {
+            print $dstfl $_; 
+        }
+        if (defined $t && (tell $srcfl == tell $dstfl)) {
+            undef $t;
+        }
+        undef $srcfl;
+        undef $dstfl;
+        if (defined $t) {
             unlink $oname or die;
             rename $tname, $oname or die;
             @anames = ($oname);
@@ -142,8 +143,8 @@ sub totxt {
             chmod $ostat[2] & 07777, @anames;
             chown $ostat[5], $ostat[6], @anames;
             print "Converted file " . $oname . " to text in " . $File::Find::dir . "\n"; 
-	}
-	else {
-	    unlink $tname or die;
-	}
+        }
+        else {
+            unlink $tname or die;
+        }
 }
