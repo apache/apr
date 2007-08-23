@@ -728,15 +728,15 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
             si.hStdInput = (attr->child_in) 
                               ? attr->child_in->filehand
-                              : INVALID_HANDLE_VALUE;
+                              : GetStdHandle(STD_INPUT_HANDLE);
 
             si.hStdOutput = (attr->child_out)
                               ? attr->child_out->filehand
-                              : INVALID_HANDLE_VALUE;
+                              : GetStdHandle(STD_OUTPUT_HANDLE);
 
             si.hStdError = (attr->child_err)
                               ? attr->child_err->filehand
-                              : INVALID_HANDLE_VALUE;
+                              : GetStdHandle(STD_ERROR_HANDLE);
         }
         if (attr->user_token) {
             si.lpDesktop = L"Winsta0\\Default";
@@ -800,15 +800,15 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
             si.hStdInput = (attr->child_in) 
                               ? attr->child_in->filehand
-                              : INVALID_HANDLE_VALUE;
+                              : GetStdHandle(STD_INPUT_HANDLE);
 
             si.hStdOutput = (attr->child_out)
                               ? attr->child_out->filehand
-                              : INVALID_HANDLE_VALUE;
+                              : GetStdHandle(STD_OUTPUT_HANDLE);
 
             si.hStdError = (attr->child_err)
                               ? attr->child_err->filehand
-                              : INVALID_HANDLE_VALUE;
+                              : GetStdHandle(STD_ERROR_HANDLE);
         }
 
         rv = CreateProcessA(progname, cmdline, /* Command line */
