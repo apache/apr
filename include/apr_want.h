@@ -92,7 +92,7 @@
 struct iovec
 {
     char *iov_base;
-    int iov_len;
+    size_t iov_len;
 };
 
 #endif
