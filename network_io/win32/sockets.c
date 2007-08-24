@@ -128,9 +128,13 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
         SetHandleInformation((HANDLE) (*new)->socketdes, 
                              HANDLE_FLAG_INHERIT, 0);
     }
+#if APR_HAS_ANSI_FS
+    /* only if APR_HAS_ANSI_FS && APR_HAS_UNICODE_FS */
+    ELSE_WIN_OS_IS_ANSI
+#endif
 #endif
 #if APR_HAS_ANSI_FS || defined(_WIN32_WCE)
-    ELSE_WIN_OS_IS_ANSI {
+    {
         HANDLE hProcess = GetCurrentProcess();
         HANDLE dup;
         if (DuplicateHandle(hProcess, (HANDLE) (*new)->socketdes, hProcess, 
