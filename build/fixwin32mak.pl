@@ -57,8 +57,8 @@ sub fixcwd {
         $srcfl = new IO::File $_, "r" || die;
         $dstfl = new IO::File $tname, "w" || die;
         while ($src = <$srcfl>) {
-            if ($src =~ m|^(DS_POSTBUILD_DEP=.+)$|) {
-                $postdepval = $1 . "\n\n";
+            if ($src =~ m|^DS_POSTBUILD_DEP=.+$|) {
+                $postdepval = $src;
             }
             if ($src =~ s|^ALL : \$\(DS_POSTBUILD_DEP\)||) {
                 $postdep = -1;
@@ -95,8 +95,9 @@ sub fixcwd {
                 $srcfl = new IO::File $tname, "r" || die;
                 $dstfl = new IO::File $oname, "w" || die;
                 while ($src = <$srcfl>) {
-                    if ($src =~ m|^\!IF "\$\(RECURSE\)" == "0".*$|) {
-                        print $dstfl $postdepval;
+                    if ($src =~ m|^INTDIR=|) {
+                        print $dstfl $src;
+                        $src = $postdepval;
                     }
                     $src =~ s|^(ALL : .+)$|$1 "\$\(DS_POSTBUILD_DEP\)"|;
                     print $dstfl $src;
