@@ -19,6 +19,30 @@ $altroot =~ s| ".:| "|;
 print "Stripping " . $root . " and " . $altroot . "\n";
 find(\&fixcwd, '.');
 
+# Given this pattern that disregarded the RECURSE flag...
+#
+# !IF "$(RECURSE)" == "0" 
+# 
+# ALL : "$(OUTDIR)\mod_charset_lite.so"
+# 
+# !ELSE 
+# 
+# ALL : "libhttpd - Win32 Release" "libaprutil - Win32 Release" "libapr - Win32 Release" "$(OUTDIR)\mod_charset_lite.so"
+# 
+# !ENDIF 
+#...
+# DS_POSTBUILD_DEP=$(INTDIR)\postbld.dep
+#...
+# ALL : $(DS_POSTBUILD_DEP)
+#
+# $(DS_POSTBUILD_DEP) : "libhttpd - Win32 Release" "libaprutil - Win32 Release" "libapr - Win32 Release" "$(OUTDIR)\mod_charset_lite.so"
+#
+# we will axe the final ALL : clause,
+# strip all but the final element from $(DS_POSTBUILD_DEP) : clause
+# move the DS_POSTBUILD_DEP assignment above the IF (for true ALL : targets)
+# and in pass 2, append the $(DS_POSTBUILD_DEP) to the valid ALL : targets
+
+
 sub fixcwd { 
     if (m|.mak$|) {
         $thisroot = $File::Find::dir;
@@ -29,9 +53,22 @@ sub fixcwd {
         $oname = $_;
         $tname = '.#' . $_;
         $verchg = 0;
+        $postdep = 0;
         $srcfl = new IO::File $_, "r" || die;
         $dstfl = new IO::File $tname, "w" || die;
         while ($src = <$srcfl>) {
+            if ($src =~ m|^(DS_POSTBUILD_DEP=.+)$|) {
+                $postdepval = $1 . "\n\n";
+            }
+            if ($src =~ s|^ALL : \$\(DS_POSTBUILD_DEP\)||) {
+                $postdep = -1;
+                $verchg = -1;
+                $src = <$srcfl>;
+                $src = <$srcfl> if ($src =~ m|^$|);
+            }
+            if ($postdep) {
+                $src =~ s|^(\$\(DS_POSTBUILD_DEP\)) :.+(\"[^\"]+\")$|"$1" : $2|;
+            }
             if ($src =~ m|^\s*($root[^\"]*)\".*$|) {
                 $orig = $thisroot;
             } elsif ($src =~ m|^\s*($altroot[^\"]*)\".*$|) {
@@ -54,9 +91,26 @@ sub fixcwd {
         undef $srcfl;
         undef $dstfl;
         if ($verchg) {
-            unlink $oname || die;
-            rename $tname, $oname || die;
-            print "Corrected absolute paths within " . $oname . " in " . $File::Find::dir . "\n"; 
+            if ($postdep) {
+                $srcfl = new IO::File $tname, "r" || die;
+                $dstfl = new IO::File $oname, "w" || die;
+                while ($src = <$srcfl>) {
+                    if ($src =~ m|^\!IF "\$\(RECURSE\)" == "0".*$|) {
+                        print $dstfl $postdepval;
+                    }
+                    $src =~ s|^(ALL : .+)$|$1 "\$\(DS_POSTBUILD_DEP\)"|;
+                    print $dstfl $src;
+                }
+                undef $srcfl;
+                undef $dstfl;
+                unlink $tname || die;
+                print "Corrected post-dependency within " . $oname . " in " . $File::Find::dir . "\n"; 
+            }
+            else {
+                unlink $oname || die;
+                rename $tname, $oname || die;
+                print "Corrected absolute paths within " . $oname . " in " . $File::Find::dir . "\n"; 
+            }
         }
         else {
             unlink $tname;
