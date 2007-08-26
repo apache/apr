@@ -95,7 +95,15 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
     char name[50];
 
     sa.nLength = sizeof(sa);
-    sa.bInheritHandle = TRUE;
+    
+#if APR_HAS_UNICODE_FS
+    IF_WIN_OS_IS_UNICODE
+        sa.bInheritHandle = FALSE;
+#endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
+        sa.bInheritHandle = TRUE;
+#endif
     sa.lpSecurityDescriptor = NULL;
 
     (*in) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
