@@ -767,7 +767,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         /* LOCK CRITICAL SECTION 
          * before we begin to manipulate the inherited handles
          */
-        EnterCriticalSection(&proc_lock);
+        LeaveCriticalSection(&proc_lock);
 
         if ((attr->child_in && attr->child_in->filehand)
             || (attr->child_out && attr->child_out->filehand)
