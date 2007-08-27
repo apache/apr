@@ -1,3 +1,4 @@
+                                                     -*- coding: utf-8 -*-
 Changes with APR 0.9.15
 
   *) Fix day of year (tm_day) calculation for July. The bug only affects
@@ -198,10 +199,10 @@ Changes with APR 0.9.5
 
   *) Don't assume getnameinfo() can handle IPv4-mapped IPv6 addresses
      on any platforms.
-     [Jeff Trawick, Joe Orton, Colm MacC�rthaigh <colm stdlib.net>]
+     [Jeff Trawick, Joe Orton, Colm MacCárthaigh <colm stdlib.net>]
 
   *) Support setuid, setgid and sticky file permissions bits on Unix.
-     [Andr� Malo]
+     [André Malo]
 
   *) Fix sign error in apr_file_seek(APR_END).
      [Greg Hudson <ghudson MIT.EDU>]
@@ -273,7 +274,7 @@ Changes with APR 0.9.4
      [Mike Pilato <cmpilato@collab.net>, William Rowe]
 
   *) Work around a bug in Darwin when calling getnameinfo() on IPv4-mapped
-     IPv6-addresses.  [Colm MacC�rthaigh <colm@stdlib.net>, Jeff Trawick,
+     IPv6-addresses.  [Colm MacCárthaigh <colm@stdlib.net>, Jeff Trawick,
      Justin Erenkrantz]
 
   *) Add apr_temp_dir_get() for getting the most suitable temp directory
@@ -282,7 +283,7 @@ Changes with APR 0.9.4
   *) Modify apr_sockaddr_info_get to call the resolver when we
      do not have a hostname.  Also, fix bugs in the getaddrinfo()
      implementation.
-     [Colm MacC�rthaigh <colm@stdlib.net>, Justin Erenkrantz]
+     [Colm MacCárthaigh <colm@stdlib.net>, Justin Erenkrantz]
 
   *) Change the behavior of unix process 'trylock's to return
      APR_ENOTIMPL instead of segfaulting, consistent with the
@@ -350,7 +351,7 @@ Changes with APR 0.9.4
      [Jacob Craig Lewallen <jlewalle@cs.ucr.edu>]
 
   *) Added flag APR_FILE_ATTR_HIDDEN for manipulating the "hidden"
-     file attribute on Windows and OS/2.  [Branko Cibej]
+     file attribute on Windows and OS/2.  [Branko Čibej]
 
   *) SECURITY [CAN-2003-0245]: Fixed a bug that could be triggered
      remotely through mod_dav and possibly other mechanisms, causing
@@ -433,7 +434,7 @@ Changes with APR 0.9.2
      [Bjoern A. Zeeb <bz@zabbadoz.net>, William Rowe, Joe Orton]
 
   *) Define APR_UINT64_T_FMT and APR_UINT64_T_FMT_LEN.
-     Define APR_INT64_T_FMT_LEN on Windows and Netware.  [Branko Cibej]
+     Define APR_INT64_T_FMT_LEN on Windows and Netware.  [Branko Čibej]
 
   *) Correct apr_file_gets() on OS2 and Win32 so that '\r's are no longer
      eaten, and apr_file_gets() -> apr_file_puts() moves the contents
@@ -453,14 +454,14 @@ Changes with APR 0.9.2
      be a little more robust (and unique). [Jim Jagielski]
 
   *) Add functions apr_env_get, apr_env_set and apr_env_delete for
-     manipulating the environment.  [Branko Cibej]
+     manipulating the environment.  [Branko Čibej]
 
   *) Fix APR_LAYOUT to work with layout files with no preceding blank lines
      and emit errors when layout is not found.  PR 15679.
      [Justin Erenkrantz]
 
   *) Add functions apr_filepath_list_split and apr_filepath_list_merge
-     for managing search paths.  [Branko Cibej]
+     for managing search paths.  [Branko Čibej]
 
   *) Introduce Release mode debugging symbols for Win32 builds of apr.
      All library builds gain /Zi for debug symbols (which are discarded
@@ -494,7 +495,7 @@ Changes with APR 0.9.2
      [Thom May]
 
   *) Add function apr_filepath_encoding and associated constants.
-     [Branko Cibej]
+     [Branko Čibej]
 
   *) Allow apr_hash to have greater than int number of elements.
      [Justin Erenkrantz]
