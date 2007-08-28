@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.2.10
 
+  *) Define the Mac OS/X filesystem_encoding as utf-8 (in previous
+     releases the interpretation would vary).  [Branko Čibej]
+
   *) Fix day of year (tm_day) calculation for July. The bug only affects
      Windows builds.  PR 42953.  [Davi Arnaut]
 
