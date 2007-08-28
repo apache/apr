@@ -133,7 +133,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         apr_file_close(f);
     }
 
-    if (hMap && err == ERROR_ALREADY_EXISTS) {
+    if (hMap && APR_STATUS_IS_EEXIST(err)) {
         CloseHandle(hMap);
         return APR_EEXIST;
     }
