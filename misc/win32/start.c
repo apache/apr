@@ -22,7 +22,8 @@
 
 #include "apr_arch_misc.h"       /* for WSAHighByte / WSALowByte */
 #include "wchar.h"
-#include "apr_arch_file_io.h"
+#include "apr_arch_file_io.h"    /* bring in unicode-ness */
+#include "apr_arch_threadproc.h" /* bring in apr_threadproc_init */
 #include "crtdbg.h"
 #include "assert.h"
 
@@ -204,6 +205,8 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
     }
     
     apr_signal_init(pool);
+
+    apr_threadproc_init(pool);
 
     return APR_SUCCESS;
 }

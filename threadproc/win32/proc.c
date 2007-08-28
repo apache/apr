@@ -268,6 +268,47 @@ APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
+#if APR_HAS_UNICODE_FS && !defined(_WIN32_WCE)
+
+/* Used only for the NT code path, a critical section is the fastest
+ * implementation available.
+ */
+static CRITICAL_SECTION proc_lock;
+
+static apr_status_t threadproc_global_cleanup(void *ignored)
+{
+    DeleteCriticalSection(&proc_lock);
+    return APR_SUCCESS;
+}
+
+/* Called from apr_initialize, we need a critical section to handle
+ * the pipe inheritance on win32.  This will mutex any process create
+ * so as we change our inherited pipes, we prevent another process from
+ * also inheriting those alternate handles, and prevent the other process
+ * from failing to inherit our standard handles.
+ */
+apr_status_t apr_threadproc_init(apr_pool_t *pool)
+{
+    IF_WIN_OS_IS_UNICODE
+    {
+        InitializeCriticalSection(&proc_lock);
+        /* register the cleanup */
+        apr_pool_cleanup_register(pool, &proc_lock,
+                                  threadproc_global_cleanup,
+                                  apr_pool_cleanup_null);
+    }
+    return APR_SUCCESS;
+}
+
+#else /* !APR_HAS_UNICODE_FS || defined(_WIN32_WCE) */
+
+apr_status_t apr_threadproc_init(apr_pool_t *pool)
+{
+    return APR_SUCCESS;
+}
+
+#endif
+
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           const char *progname,
                                           const char * const *args,
@@ -542,6 +583,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     IF_WIN_OS_IS_UNICODE
     {
         STARTUPINFOW si;
+        DWORD stdin_reset = 0;
+        DWORD stdout_reset = 0;
+        DWORD stderr_reset = 0;
         apr_wchar_t *wprg = NULL;
         apr_wchar_t *wcmd = NULL;
         apr_wchar_t *wcwd = NULL;
@@ -605,23 +649,58 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
 
 #ifndef _WIN32_WCE
+        /* LOCK CRITICAL SECTION 
+         * before we begin to manipulate the inherited handles
+         */
+        EnterCriticalSection(&proc_lock);
+
         if ((attr->child_in && attr->child_in->filehand)
             || (attr->child_out && attr->child_out->filehand)
             || (attr->child_err && attr->child_err->filehand))
         {
             si.dwFlags |= STARTF_USESTDHANDLES;
 
-            si.hStdInput = (attr->child_in) 
-                              ? attr->child_in->filehand
-                              : GetStdHandle(STD_INPUT_HANDLE);
+            si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+            if (attr->child_in && attr->child_in->filehand)
+            {
+                if (GetHandleInformation(si.hStdInput,
+                                         &stdin_reset)
+                        && (stdin_reset &= HANDLE_FLAG_INHERIT))
+                    SetHandleInformation(si.hStdInput,
+                                         HANDLE_FLAG_INHERIT, 0);
 
-            si.hStdOutput = (attr->child_out)
-                              ? attr->child_out->filehand
-                              : GetStdHandle(STD_OUTPUT_HANDLE);
+                si.hStdInput = attr->child_in->filehand;
+                SetHandleInformation(si.hStdInput, HANDLE_FLAG_INHERIT,
+                                                   HANDLE_FLAG_INHERIT);
+            }
+            
+            si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+            if (attr->child_out && attr->child_out->filehand)
+            {
+                if (GetHandleInformation(si.hStdOutput,
+                                         &stdout_reset)
+                        && (stdout_reset &= HANDLE_FLAG_INHERIT))
+                    SetHandleInformation(si.hStdOutput,
+                                         HANDLE_FLAG_INHERIT, 0);
 
-            si.hStdError = (attr->child_err)
-                              ? attr->child_err->filehand
-                              : GetStdHandle(STD_ERROR_HANDLE);
+                si.hStdOutput = attr->child_out->filehand;
+                SetHandleInformation(si.hStdInput, HANDLE_FLAG_INHERIT,
+                                                   HANDLE_FLAG_INHERIT);
+            }
+
+            si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+            if (attr->child_err && attr->child_err->filehand)
+            {
+                if (GetHandleInformation(si.hStdError,
+                                         &stderr_reset)
+                        && (stderr_reset &= HANDLE_FLAG_INHERIT))
+                    SetHandleInformation(si.hStdError,
+                                         HANDLE_FLAG_INHERIT, 0);
+
+                si.hStdError = attr->child_err->filehand;
+                SetHandleInformation(si.hStdError, HANDLE_FLAG_INHERIT,
+                                                   HANDLE_FLAG_INHERIT);
+            }
         }
         rv = CreateProcessW(wprg, wcmd,        /* Executable & Command line */
                             NULL, NULL,        /* Proc & thread security attributes */
@@ -630,6 +709,29 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                             pEnvBlock,         /* Environment block */
                             wcwd,              /* Current directory name */
                             &si, &pi);
+
+        if ((attr->child_in && attr->child_in->filehand)
+            || (attr->child_out && attr->child_out->filehand)
+            || (attr->child_err && attr->child_err->filehand))
+        {
+            if (stdin_reset)
+                SetHandleInformation(GetStdHandle(STD_INPUT_HANDLE),
+                                     stdin_reset, stdin_reset);
+
+            if (stdout_reset)
+                SetHandleInformation(GetStdHandle(STD_OUTPUT_HANDLE),
+                                     stdout_reset, stdout_reset);
+
+            if (stderr_reset)
+                SetHandleInformation(GetStdHandle(STD_ERROR_HANDLE),
+                                     stderr_reset, stderr_reset);
+        }
+        /* RELEASE CRITICAL SECTION 
+         * The state of the inherited handles has been restored.
+         */
+        LeaveCriticalSection(&proc_lock);
+
+#else /* defined(_WIN32_WCE) */
 #else
         rv = CreateProcessW(wprg, wcmd,        /* Executable & Command line */
                             NULL, NULL,        /* Proc & thread security attributes */

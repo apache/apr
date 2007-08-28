@@ -1,6 +1,12 @@
                                                      -*- coding: utf-8 -*-
 Changes with APR 0.9.15
 
+  *) Solve winNT inherited pipe leaks by mutexing apr_proc_create calls,
+     on WinNT (not WinCE, nor 9x) so that we toggle the inherited state 
+     of the stdin/out/err pipes.  All other file handles are treated as
+     not-inherited until apr_file_dup2'ed a std handle of this process, 
+     or while they are used by apr_proc_create.  [William Rowe]
+
   *) Define the Mac OS/X filesystem_encoding as utf-8 (in previous
      releases the interpretation would vary).  [Branko Čibej]
 
