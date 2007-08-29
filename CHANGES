@@ -1,4 +1,8 @@
                                                      -*- coding: utf-8 -*-
+Changes for APR 1.2.11
+
+
+
 Changes for APR 1.2.10
 
   *) Solve winNT inherited pipe leaks by mutexing apr_proc_create calls,
