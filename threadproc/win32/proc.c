@@ -732,7 +732,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         LeaveCriticalSection(&proc_lock);
 
 #else /* defined(_WIN32_WCE) */
-#else
         rv = CreateProcessW(wprg, wcmd,        /* Executable & Command line */
                             NULL, NULL,        /* Proc & thread security attributes */
                             FALSE,             /* must be 0 */
