@@ -767,7 +767,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         /* LOCK CRITICAL SECTION 
          * before we begin to manipulate the inherited handles
          */
-        LeaveCriticalSection(&proc_lock);
+        EnterCriticalSection(&proc_lock);
 
         if ((attr->child_in && attr->child_in->filehand)
             || (attr->child_out && attr->child_out->filehand)
@@ -872,7 +872,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         /* RELEASE CRITICAL SECTION 
          * The state of the inherited handles has been restored.
          */
-        EnterCriticalSection(&proc_lock);
+        LeaveCriticalSection(&proc_lock);
 
 #else /* defined(_WIN32_WCE) */
         rv = CreateProcessW(wprg, wcmd,        /* Executable & Command line */
