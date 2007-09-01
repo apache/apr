@@ -122,6 +122,9 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
         if (rv == APR_FROM_OS_ERROR(ERROR_BROKEN_PIPE)) {
             /* Assume ERROR_BROKEN_PIPE signals an EOF reading from a pipe */
             rv = APR_EOF;
+        } else if (rv == APR_FROM_OS_ERROR(ERROR_HANDLE_EOF)) {
+            /* Did we hit EOF reading from the handle? */
+            rv = APR_EOF;
         }
     }
     
