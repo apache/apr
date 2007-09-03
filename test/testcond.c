@@ -425,7 +425,7 @@ static void pipe_producer_consumer(abts_case *tc, void *data)
     apr_thread_cond_t *cond = NULL;
     apr_thread_mutex_t *mutex = NULL;
     apr_file_t *in = NULL, *out = NULL;
-    apr_uint32_t i, ncons = (NTHREADS * 0.70);
+    apr_uint32_t i, ncons = (apr_uint32_t)(NTHREADS * 0.70);
 
     rv = apr_file_pipe_create(&in, &out, p);
     ABTS_SUCCESS(rv);
