@@ -1,4 +1,8 @@
                                                      -*- coding: utf-8 -*-
+Changes with APR 0.9.17
+
+
+
 Changes with APR 0.9.16
 
   *) Win32 apr_file_read; Correctly handle completion-based read-to-EOF.
