@@ -684,8 +684,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                          HANDLE_FLAG_INHERIT, 0);
 
                 si.hStdOutput = attr->child_out->filehand;
-                SetHandleInformation(si.hStdInput, HANDLE_FLAG_INHERIT,
-                                                   HANDLE_FLAG_INHERIT);
+                SetHandleInformation(si.hStdOutput, HANDLE_FLAG_INHERIT,
+                                                    HANDLE_FLAG_INHERIT);
             }
 
             si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
