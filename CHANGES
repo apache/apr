@@ -1,7 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.2.11
 
+  *) Win32 apr_file_read; Correctly handle completion-based read-to-EOF.
+     [Steven Naim <steven.naim googlemail.com>]
 
+  *) Fixed Win32 regression of stdout inheritance in apr_proc_create.
+     [William Rowe]
 
 Changes for APR 1.2.10
 
