@@ -84,6 +84,10 @@ CURRENT test/testall -v EXCEPTIONS:
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
+    * "testlfs: Line 32: Large Files tests require Sparse file support"
+      In order to portably implement LFS-Sparse files, we would have
+      to actually flag that upon create (open), to be portable to win32.
+
     * Someone needs to port testucs to Unix. Right now it only works
       on Windows.
         OtherBill asks; should we have a test/arch/xxx tree?
