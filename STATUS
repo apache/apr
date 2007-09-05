@@ -84,6 +84,15 @@ CURRENT test/testall -v EXCEPTIONS:
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
+    * testpipe: Line 69: expected <0>, but saw <22>
+                Line 92: expected <0>, but saw <22>
+      In order to use apr_file_pipe_timeout_set on Win32 we need to
+      create that end of the pipe as nonblocking; currently win32 
+      has assumed blocking pipes on apr_file_pipe_create.  Inverting
+      this assumption would break stdhandles, the most common use case.
+      We must add a flag to set the reader/writer end to explicitly
+      blocking or nonblocking, and the choice isn't volatile.
+
     * "testlfs: Line 32: Large Files tests require Sparse file support"
       In order to portably implement LFS-Sparse files, we would have
       to actually flag that upon create (open), to be portable to win32.
