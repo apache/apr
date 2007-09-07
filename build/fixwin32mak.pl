@@ -86,6 +86,15 @@ sub fixcwd {
                 $verchg = -1;
                 undef $orig;
             }
+            # With modern LINK.EXE linkers, there is a different LINK for
+            # each platform, and it's determined by the file path.  Best
+            # that here, after we compiled the code to the default CPU,
+            # that we also link here to the default CPU.  Omitting the
+            # /machine spec from the .dsp was not enough, MSVC put it back.
+            #
+            if ($src =~ s#^(LINK32_FLAGS=.*) /machine:(x|IX|I3)86 #$1 #) {
+                $verchg = -1;
+            }
             print $dstfl $src; 
         }
         undef $srcfl;
