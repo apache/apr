@@ -147,7 +147,7 @@ inet_ntop6(const unsigned char *src, char *dst, apr_size_t size)
      * to use pointer overlays.  All the world's not a VAX.
      */
     char tmp[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"], *tp;
-    struct { int base, len; } best, cur;
+    struct { int base, len; } best = {-1, 0}, cur = {-1, 0};
     unsigned int words[IN6ADDRSZ / INT16SZ];
     int i;
     const unsigned char *next_src, *src_end;
@@ -161,9 +161,6 @@ inet_ntop6(const unsigned char *src, char *dst, apr_size_t size)
     next_src = src;
     src_end = src + IN6ADDRSZ;
     next_dest = words;
-    best.base = -1;
-    cur.base = -1;
-    cur.len = best.len = 0; /* silence gcc4 warning */
     i = 0;
     do {
         unsigned int next_word = (unsigned int)*next_src++;
