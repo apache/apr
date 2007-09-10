@@ -47,11 +47,13 @@ LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE) @LT_NO_IN
 check: $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
 		./$$prog; \
-		if test $$? = 255; then \
+		status=$$?; \
+		if test $$status != 0; then \
 			echo "$$prog failed"; \
 			break; \
 		fi; \
-	done
+	done; \
+	exit $$status
 
 occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)
 	$(LINK_PROG) occhild.lo $(LOCAL_LIBS) $(ALL_LIBS)
