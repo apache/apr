@@ -45,15 +45,20 @@ INCLUDES=-I$(INCDIR) -I$(srcdir)/../include
 LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE) @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
 
 check: $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
+	teststatus=0; \
+	progfailed=""; \
 	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
 		./$$prog; \
 		status=$$?; \
 		if test $$status != 0; then \
-			echo "$$prog failed"; \
-			break; \
+			teststatus=$$status; \
+			progfailed="$$progfailed $$prog"; \
 		fi; \
 	done; \
-	exit $$status
+	if test $$teststatus != 0; then \
+		echo "Programs failed:$$progfailed"; \
+	fi; \
+	exit $$teststatus
 
 occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)
 	$(LINK_PROG) occhild.lo $(LOCAL_LIBS) $(ALL_LIBS)
