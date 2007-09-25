@@ -38,6 +38,8 @@ INSTALL_DATA = @INSTALL_DATA@
 #
 TARGETS = $(TARGET_LIB) apr.exp apr-config.out build/apr_rules.out
 
+LT_VERSION = @LT_VERSION@
+
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
 @INCLUDE_OUTPUTS@
