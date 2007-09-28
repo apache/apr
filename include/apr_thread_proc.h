@@ -88,11 +88,7 @@ typedef enum {
 #define APR_CHILD_BLOCK      4
 
 /** @see apr_procattr_io_set 
- * @note introduced strictly for Win32 to apr revision 1.2.12 (to restore
- * the non-portable default behavior of 1.2.9 and prior versions on Win32).
- * This becomes portable to all platforms effective revision 1.3.0, ensuring
- * the standard files specified in the call to apr_procattr_io_set are not
- * open in the created process (on Win32 as INVALID_HANDLE_VALUEs).
+ * @note Win32 only effective with version 1.2.12, portably introduced in 1.3.0
  */
 #define APR_NO_FILE          8
 
@@ -401,6 +397,11 @@ APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new_attr,
  * @param in Should stdin be a pipe back to the parent?
  * @param out Should stdout be a pipe back to the parent?
  * @param err Should stderr be a pipe back to the parent?
+ * @note If APR_NO_PIPE, there will be no special channel, the child
+ * inherit's the parent's stdio stream.  If APR_NO_FILE is specified,
+ * that stdio stream is closed in the child (and will be INVALID_HANDLE_VALUE
+ * if inspected on Win32); warning this can have the ugly side effect
+ * that the next file opened may fall into the stdio stream role on Unix.
  */
 APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr, 
                                              apr_int32_t in, apr_int32_t out,
