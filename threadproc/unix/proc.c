@@ -130,19 +130,11 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr,
     if (attr->child_in == NULL && attr->parent_in == NULL)
         rv = apr_file_pipe_create(&attr->child_in, &attr->parent_in, attr->pool);
     
-    if (child_in != NULL && rv == APR_SUCCESS) {
-        if (!attr->child_in || attr->child_in->filedes == -1)
-            rv = apr_file_dup(&attr->child_in, child_in, attr->pool);
-        else
-            rv = apr_file_dup2(attr->child_in, child_in, attr->pool);
-    }
+    if (child_in != NULL && rv == APR_SUCCESS)
+        rv = apr_file_dup2(attr->child_in, child_in, attr->pool);
 
-    if (parent_in != NULL && rv == APR_SUCCESS) {
-        if (!attr->parent_in || attr->parent_in->filedes == -1)
-            rv = apr_file_dup(&attr->parent_in, parent_in, attr->pool);
-        else
-            rv = apr_file_dup2(attr->parent_in, parent_in, attr->pool);
-    }
+    if (parent_in != NULL && rv == APR_SUCCESS)
+        rv = apr_file_dup2(attr->parent_in, parent_in, attr->pool);
 
     return rv;
 }
@@ -157,19 +149,11 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr,
     if (attr->child_out == NULL && attr->parent_out == NULL)
         rv = apr_file_pipe_create(&attr->child_out, &attr->parent_out, attr->pool);
 
-    if (child_out != NULL && rv == APR_SUCCESS) {
-        if (!attr->child_out || attr->child_out->filedes == -1)
-            rv = apr_file_dup(&attr->child_out, child_out, attr->pool);
-        else
-            rv = apr_file_dup2(attr->child_out, child_out, attr->pool);
-    }
+    if (child_out != NULL && rv == APR_SUCCESS)
+        rv = apr_file_dup2(attr->child_out, child_out, attr->pool);
 
-    if (parent_out != NULL && rv == APR_SUCCESS) {
-        if (!attr->parent_out || attr->parent_out->filedes == -1)
-            rv = apr_file_dup(&attr->parent_out, parent_out, attr->pool);
-        else
-            rv = apr_file_dup2(attr->parent_out, parent_out, attr->pool);
-    }
+    if (parent_out != NULL && rv == APR_SUCCESS)
+        rv = apr_file_dup2(attr->parent_out, parent_out, attr->pool);
 
     return rv;
 }
@@ -184,19 +168,11 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr,
     if (attr->child_err == NULL && attr->parent_err == NULL)
         rv = apr_file_pipe_create(&attr->child_err, &attr->parent_err, attr->pool);
 
-    if (child_out != NULL && rv == APR_SUCCESS) {
-        if (!attr->child_out || attr->child_out->filedes == -1)
-            rv = apr_file_dup(&attr->child_out, child_out, attr->pool);
-        else
-            rv = apr_file_dup2(attr->child_out, child_out, attr->pool);
-    }
+    if (child_err != NULL && rv == APR_SUCCESS)
+        rv = apr_file_dup2(attr->child_err, child_err, attr->pool);
 
-    if (parent_out != NULL && rv == APR_SUCCESS) {
-        if (!attr->parent_out || attr->parent_out->filedes == -1)
-            rv = apr_file_dup(&attr->parent_out, parent_out, attr->pool);
-        else
-            rv = apr_file_dup2(attr->parent_out, parent_out, attr->pool);
-    }
+    if (parent_err != NULL && rv == APR_SUCCESS)
+        rv = apr_file_dup2(attr->parent_err, parent_err, attr->pool);
 
     return rv;
 }
