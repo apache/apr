@@ -550,8 +550,7 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     /* ### check return codes */
     (void) apr_pollset_create(&(*file)->pollset, 1, pool, 0);
 
-    /* XXX... we pcalloc above so all others are zeroed.
-     * Should we be testing if thefile is a handle to 
+    /* Should we be testing if thefile is a handle to 
      * a PIPE and set up the mechanics appropriately?
      *
      *  (*file)->pipe;
@@ -578,15 +577,11 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile,
 
     apr_set_os_error(APR_SUCCESS);
     file_handle = GetStdHandle(STD_ERROR_HANDLE);
-    if (!file_handle || (file_handle == INVALID_HANDLE_VALUE)) {
-        apr_status_t rv = apr_get_os_error();
-        if (rv == APR_SUCCESS) {
-            return APR_EINVAL;
-        }
-        return rv;
-    }
+    if (!file_handle)
+        file_handle = INVALID_HANDLE_VALUE;
 
-    return apr_os_file_put(thefile, &file_handle, flags | APR_WRITE, pool);
+    return apr_os_file_put(thefile, &file_handle,
+                           flags | APR_WRITE | APR_STDERR_FLAG, pool);
 #endif
 }
 
@@ -601,15 +596,11 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile,
 
     apr_set_os_error(APR_SUCCESS);
     file_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (!file_handle || (file_handle == INVALID_HANDLE_VALUE)) {
-        apr_status_t rv = apr_get_os_error();
-        if (rv == APR_SUCCESS) {
-            return APR_EINVAL;
-        }
-        return rv;
-    }
+    if (!file_handle)
+        file_handle = INVALID_HANDLE_VALUE;
 
-    return apr_os_file_put(thefile, &file_handle, flags | APR_WRITE, pool);
+    return apr_os_file_put(thefile, &file_handle,
+                           flags | APR_WRITE | APR_STDOUT_FLAG, pool);
 #endif
 }
 
@@ -624,15 +615,11 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stdin(apr_file_t **thefile,
 
     apr_set_os_error(APR_SUCCESS);
     file_handle = GetStdHandle(STD_INPUT_HANDLE);
-    if (!file_handle || (file_handle == INVALID_HANDLE_VALUE)) {
-        apr_status_t rv = apr_get_os_error();
-        if (rv == APR_SUCCESS) {
-            return APR_EINVAL;
-        }
-        return rv;
-    }
+    if (!file_handle)
+        file_handle = INVALID_HANDLE_VALUE;
 
-    return apr_os_file_put(thefile, &file_handle, flags | APR_READ, pool);
+    return apr_os_file_put(thefile, &file_handle,
+                           flags | APR_READ | APR_STDIN_FLAG, pool);
 #endif
 }
 
