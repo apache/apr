@@ -574,15 +574,15 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     }
 
     /* Parent process */
-    if ((attr->child_in && (attr->child_in->filedes == -1))) {
+    if (attr->child_in && (attr->child_in->filedes == -1)) {
         apr_file_close(attr->child_in);
     }
 
-    if ((attr->child_out) && (attr->child_out->filedes == -1)) {
+    if (attr->child_out && (attr->child_out->filedes == -1)) {
         apr_file_close(attr->child_out);
     }
 
-    if ((attr->child_err) && (attr->child_err->filedes == -1)) {
+    if (attr->child_err && (attr->child_err->filedes == -1)) {
         apr_file_close(attr->child_err);
     }
 
