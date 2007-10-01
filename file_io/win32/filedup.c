@@ -20,6 +20,8 @@
 #include "apr_strings.h"
 #include <string.h>
 #include "apr_arch_inherit.h"
+#include <io.h> /* for [_open/_get]_osfhandle */
+
 
 APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
                                        apr_file_t *old_file, apr_pool_t *p)
@@ -59,10 +61,6 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
 #endif /* !defined(_WIN32_WCE) */
 }
 
-#define stdin_handle 0x01
-#define stdout_handle 0x02
-#define stderr_handle 0x04
-
 APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                                         apr_file_t *old_file, apr_pool_t *p)
 {
@@ -73,32 +71,88 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
     HANDLE hproc = GetCurrentProcess();
     HANDLE newhand = NULL;
     apr_int32_t newflags;
+    int fd;
 
-    /* dup2 is not supported literaly with native Windows handles.
-     * We can, however, emulate dup2 for the standard i/o handles,
-     * and close and replace other handles with duped handles.
-     * The os_handle will change, however.
-     */
-    if (new_file->filehand == GetStdHandle(STD_ERROR_HANDLE)) {
-        stdhandle |= stderr_handle;
-    }
-    if (new_file->filehand == GetStdHandle(STD_OUTPUT_HANDLE)) {
-        stdhandle |= stdout_handle;
-    }
-    if (new_file->filehand == GetStdHandle(STD_INPUT_HANDLE)) {
-        stdhandle |= stdin_handle;
-    }
+    if (new_file->flags & APR_STD_FLAGS) {
+        /* if (!DuplicateHandle(hproc, old_file->filehand, 
+         *                      hproc, &newhand, 0,
+         *                      TRUE, DUPLICATE_SAME_ACCESS)) {
+         *     return apr_get_os_error();
+         * }
+         * if (((stdhandle & stderr_handle) && !SetStdHandle(STD_ERROR_HANDLE, newhand)) ||
+         *     ((stdhandle & stdout_handle) && !SetStdHandle(STD_OUTPUT_HANDLE, newhand)) ||
+         *     ((stdhandle & stdin_handle) && !SetStdHandle(STD_INPUT_HANDLE, newhand))) {
+         *     return apr_get_os_error();
+         * }
+         * newflags = old_file->flags | APR_INHERIT;
+         */
 
-    if (stdhandle) {
-        if (!DuplicateHandle(hproc, old_file->filehand, 
-                             hproc, &newhand, 0,
-                             TRUE, DUPLICATE_SAME_ACCESS)) {
-            return apr_get_os_error();
+        if ((new_file->flags & APR_STD_FLAGS) == APR_STDERR_FLAG) {
+            /* Flush stderr and unset its buffer, then commit the fd-based buffer.
+             * This is typically a noop for Win2K/XP since services with NULL std
+             * handles [but valid FILE *'s, oddly enough], but is required
+             * for NT 4.0 and to use this code outside of services.
+             */
+            fflush(stderr);
+            setvbuf(stderr, NULL, _IONBF, 0);
+            _commit(2 /* stderr */);
+
+            /* Clone a handle can _close() without harming the source handle,
+             * open an MSVCRT-based pseudo-fd for the file handle, then dup2
+             * and close our temporary pseudo-fd once it's been duplicated.
+             * This will incidently keep the FILE-based stderr in sync.
+             * Note the apparently redundant _O_BINARY coersions are required.
+             */
+            if (!DuplicateHandle(hproc, old_file->filehand, hproc, &newhand,
+                                 0, FALSE, DUPLICATE_SAME_ACCESS)) {
+                return apr_get_os_error();
+            }
+            fd = _open_osfhandle((INT_PTR)newhand, _O_WRONLY | _O_BINARY);
+            _dup2(fd, 2);
+            _close(fd);
+            _setmode(2, _O_BINARY);
+
+            /* hPipeWrite was _close()'ed above, and _dup2()'ed
+             * to fd 2 creating a new, inherited Win32 handle.
+             * Recover that real handle from fd 2.  Note that
+             * SetStdHandle(STD_ERROR_HANDLE, _get_osfhandle(2))
+             * is implicit in the dup2() call above
+             */
+            newhand = (HANDLE)_get_osfhandle(2);
         }
-        if (((stdhandle & stderr_handle) && !SetStdHandle(STD_ERROR_HANDLE, newhand)) ||
-            ((stdhandle & stdout_handle) && !SetStdHandle(STD_OUTPUT_HANDLE, newhand)) ||
-            ((stdhandle & stdin_handle) && !SetStdHandle(STD_INPUT_HANDLE, newhand))) {
-            return apr_get_os_error();
+
+        if ((new_file->flags & APR_STD_FLAGS) == APR_STDOUT_FLAG) {
+            /* For the process flow see the stderr case above */
+            fflush(stdout);
+            setvbuf(stdout, NULL, _IONBF, 0);
+            _commit(1 /* stdout */);
+
+            if (!DuplicateHandle(hproc, old_file->filehand, hproc, &newhand,
+                                 0, FALSE, DUPLICATE_SAME_ACCESS)) {
+                return apr_get_os_error();
+            }
+            fd = _open_osfhandle((INT_PTR)newhand, _O_WRONLY | _O_BINARY);
+            _dup2(fd, 1);
+            _close(fd);
+            _setmode(1, _O_BINARY);
+            newhand = (HANDLE)_get_osfhandle(1);
+        }
+
+        if ((new_file->flags & APR_STD_FLAGS) == APR_STDIN_FLAG) {
+            /* For the process flow see the stderr case above */
+            fflush(stdin);
+            setvbuf(stdin, NULL, _IONBF, 0);
+            _commit(0 /* stdin */);
+
+            if (!DuplicateHandle(hproc, old_file->filehand, hproc, &newhand,
+                                 0, FALSE, DUPLICATE_SAME_ACCESS)) {
+                return apr_get_os_error();
+            }
+            fd = _open_osfhandle((INT_PTR)newhand, _O_RDONLY | _O_BINARY);
+            _dup2(fd, 0);
+            _close(fd);
+            _setmode(0, _O_BINARY);
+            newhand = (HANDLE)_get_osfhandle(0);
         }
         newflags = old_file->flags | APR_INHERIT;
     }

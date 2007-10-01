@@ -98,6 +98,10 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool);
 #define APR_READCONTROL  0x00400000 /* Read the file's owner/perms */
 #define APR_WRITECONTROL 0x00800000 /* Modifythe file's owner/perms */
 #define APR_WRITEATTRS   0x01000000 /* Modify the file's attributes */
+#define APR_STDIN_FLAG   0x02000000 /* Obtained via apr_file_open_stdin() */
+#define APR_STDOUT_FLAG  0x04000000 /* Obtained via apr_file_open_stdout() */
+#define APR_STDERR_FLAG  0x06000000 /* Obtained via apr_file_open_stderr() */
+#define APR_STD_FLAGS    (APR_STDIN_FLAG | APR_STDOUT_FLAG | APR_STDERR_FLAG)
 
 /* Entries missing from the MSVC 5.0 Win32 SDK:
  */

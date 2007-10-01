@@ -566,15 +566,11 @@ APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t 
 
     apr_set_os_error(APR_SUCCESS);
     file_handle = GetStdHandle(STD_ERROR_HANDLE);
-    if (!file_handle || (file_handle == INVALID_HANDLE_VALUE)) {
-        apr_status_t rv = apr_get_os_error();
-        if (rv == APR_SUCCESS) {
-            return APR_EINVAL;
-        }
-        return rv;
-    }
+    if (!file_handle)
+        file_handle = INVALID_HANDLE_VALUE;
 
-    return apr_os_file_put(thefile, &file_handle, 0, pool);
+    return apr_os_file_put(thefile, &file_handle,
+                           APR_WRITE | APR_STDERR_FLAG, pool);
 #endif
 }
 
@@ -587,15 +583,11 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t 
 
     apr_set_os_error(APR_SUCCESS);
     file_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (!file_handle || (file_handle == INVALID_HANDLE_VALUE)) {
-        apr_status_t rv = apr_get_os_error();
-        if (rv == APR_SUCCESS) {
-            return APR_EINVAL;
-        }
-        return rv;
-    }
+    if (!file_handle)
+        file_handle = INVALID_HANDLE_VALUE;
 
-    return apr_os_file_put(thefile, &file_handle, 0, pool);
+    return apr_os_file_put(thefile, &file_handle,
+                           APR_WRITE | APR_STDOUT_FLAG, pool);
 #endif
 }
 
@@ -608,15 +600,11 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *
 
     apr_set_os_error(APR_SUCCESS);
     file_handle = GetStdHandle(STD_INPUT_HANDLE);
-    if (!file_handle || (file_handle == INVALID_HANDLE_VALUE)) {
-        apr_status_t rv = apr_get_os_error();
-        if (rv == APR_SUCCESS) {
-            return APR_EINVAL;
-        }
-        return rv;
-    }
+    if (!file_handle)
+        file_handle = INVALID_HANDLE_VALUE;
 
-    return apr_os_file_put(thefile, &file_handle, 0, pool);
+    return apr_os_file_put(thefile, &file_handle,
+                           APR_READ | APR_STDIN_FLAG, pool);
 #endif
 }
 
