@@ -1,6 +1,9 @@
 ﻿                                                     -*- coding: utf-8 -*-
 Changes for APR 1.2.12
 
+  *) Cause apr_file_dup2() on Win32 to update the MSVCRT psuedo-stdio
+     handles for fd-based and FILE * based I/O.  [William Rowe]
+
   *) Introduce APR_NO_FILE as an option to apr_procattr_io_set() for any 
      of the three stdio streams to cause the corresponding streams to NOT
      be inherited to a WIN32 child process (passes INVALID_HANDLE_VALUE).
