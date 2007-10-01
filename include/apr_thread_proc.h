@@ -77,7 +77,6 @@ typedef enum {
 
 /** @see apr_procattr_io_set */
 #define APR_NO_PIPE          0
-
 /** @see apr_procattr_io_set */
 #define APR_FULL_BLOCK       1
 /** @see apr_procattr_io_set */
@@ -86,6 +85,8 @@ typedef enum {
 #define APR_PARENT_BLOCK     3
 /** @see apr_procattr_io_set */
 #define APR_CHILD_BLOCK      4
+/** @see apr_procattr_io_set */
+#define APR_NO_FILE          8
 
 /** @see apr_procattr_io_set 
  * @note Win32 only effective with version 1.2.12, portably introduced in 1.3.0
@@ -398,10 +399,11 @@ APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new_attr,
  * @param out Should stdout be a pipe back to the parent?
  * @param err Should stderr be a pipe back to the parent?
  * @note If APR_NO_PIPE, there will be no special channel, the child
- * inherit's the parent's stdio stream.  If APR_NO_FILE is specified,
- * that stdio stream is closed in the child (and will be INVALID_HANDLE_VALUE
- * if inspected on Win32); warning this can have the ugly side effect
- * that the next file opened may fall into the stdio stream role on Unix.
+ * inherits the parent's corresponding stdio stream.  If APR_NO_FILE is 
+ * specified, that corresponding stream is closed in the child (and will
+ * be INVALID_HANDLE_VALUE when inspected on Win32). This can have ugly 
+ * side effects, as the next file opened in the child on Unix will fall
+ * into the stdio stream fd slot on Unix!
  */
 APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr, 
                                              apr_int32_t in, apr_int32_t out,
