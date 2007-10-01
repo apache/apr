@@ -403,7 +403,7 @@ APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new_attr,
  * specified, that corresponding stream is closed in the child (and will
  * be INVALID_HANDLE_VALUE when inspected on Win32). This can have ugly 
  * side effects, as the next file opened in the child on Unix will fall
- * into the stdio stream fd slot on Unix!
+ * into the stdio stream fd slot!
  */
 APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr, 
                                              apr_int32_t in, apr_int32_t out,
