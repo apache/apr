@@ -152,6 +152,11 @@ Changes for APR 1.3.0
   *) Add APR_ARRAY_IDX() and APR_ARRAY_PUSH() convenience macros to
      apr_tables.h.  [Garrett Rooney]
 
+Changes for APR 1.2.12
+
+  *) Cause apr_file_dup2() on Win32 to update the MSVCRT psuedo-stdio
+     handles for fd-based and FILE * based I/O.  [William Rowe]
+
 Changes for APR 1.2.7
 
   *) Netware - add missing apu_version.c parsing for apu_version_string()
