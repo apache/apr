@@ -7,7 +7,7 @@ Changes for APR 1.3.0
      platforms (equivilant to APR_NO_PIPE in 1.2.x except on Win32.)
      [William Rowe]
 
-  *) Solve winNT inherited pipe leaks by mutexing apr_proc_create calls,
+  *) Solve WinNT inherited pipe leaks by mutexing apr_proc_create calls,
      on WinNT (not WinCE, nor 9x) so that we toggle the inherited state 
      of the stdin/out/err pipes.  All other file handles are treated as
      not-inherited until apr_file_dup2'ed a std handle of this process, 
