@@ -32,8 +32,8 @@
 
 APR_DECLARE(apr_status_t) apr_mmap_offset(void **addr, apr_mmap_t *mmap,
                                           apr_off_t offset)
-{  
-    if (offset < 0 || offset > mmap->size)
+{
+    if (offset < 0 || (apr_size_t)offset > mmap->size)
         return APR_EINVAL;
     
     (*addr) = (char *) mmap->mm + offset;
