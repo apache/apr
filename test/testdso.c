@@ -31,7 +31,7 @@
 
 #ifdef NETWARE
 # define MOD_NAME "mod_test.nlm"
-#elif defined(BEOS)
+#elif defined(BEOS) || defined(__MVS__)
 # define MOD_NAME "mod_test.so"
 #elif defined(WIN32)
 # define MOD_NAME "mod_test.dll"
