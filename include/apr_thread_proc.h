@@ -87,15 +87,6 @@ typedef enum {
 /** @see apr_procattr_io_set */
 #define APR_CHILD_BLOCK      4
 
-/** @see apr_procattr_io_set 
- * @note introduced strictly for Win32 to apr revision 1.2.12 (to restore
- * the non-portable default behavior of 1.2.9 and prior versions on Win32).
- * This becomes portable to all platforms effective revision 1.3.0, ensuring
- * the standard files specified in the call to apr_procattr_io_set are not
- * open in the created process (on Win32 as INVALID_HANDLE_VALUEs).
- */
-#define APR_NO_FILE          8
-
 /** @see apr_procattr_limit_set */
 #define APR_LIMIT_CPU        0
 /** @see apr_procattr_limit_set */

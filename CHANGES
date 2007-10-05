@@ -4,16 +4,15 @@ Changes with APR 0.9.17
   *) Cause apr_file_dup2() on Win32 to update the MSVCRT psuedo-stdio
      handles for fd-based and FILE * based I/O.  [William Rowe]
 
-  *) Introduce APR_NO_FILE as an option to apr_procattr_io_set() for any 
-     of the three stdio streams to cause the corresponding streams to NOT
-     be inherited to a WIN32 child process (passes INVALID_HANDLE_VALUE).
-     This is of little importance to most developers, except those who had
-     exploited an inconsistency between Unix and Win32 that was corrected
-     on Win32 with APR version 0.9.16.  The feature to have NO_FILE work
-     across platforms and leave a specified std stream closed becomes 
-     portable in APR version 1.3.0 (it remains equivilant to APR_NO_PIPE 
-     on non-Windows platforms throughout APR versions 0.9.x and 1.2.x).
-     [William Rowe]
+  *) Revert Win32 to the 0.9.14 behavior of apr_proc_create() for any 
+     of the three stdio streams which are not initialized, through either
+     apr_procattr_io_set() or apr_procattr_stdXXX_set(), when given a
+     procattr_t with one or two streams which were initialized through
+     apr_procattr_stdXXX_set().  Once again, these do not inherit the 
+     parent process stdio stream to WIN32 child processes (passing 
+     INVALID_HANDLE_VALUE instead) as on Unix.  Note APR 1.3.0 adopts 
+     the unix behavior of inheriting any uninitialed streams as the 
+     parent's corresponding stdio stream, in such cases.  [William Rowe]
 
 Changes with APR 0.9.16
 

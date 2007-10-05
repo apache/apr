@@ -32,11 +32,6 @@
 #include <process.h>
 #endif
 
-/* Heavy on no'ops, here's what we want to pass if there is APR_NO_FILE
- * requested for a specific child handle;
- */
-static apr_file_t no_file = { NULL, INVALID_HANDLE_VALUE, };
-
 /* We have very carefully excluded volumes of definitions from the
  * Microsoft Platform SDK, which kill the build time performance.
  * These the sole constants we borrow from WinBase.h and WinUser.h
@@ -93,29 +88,20 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
         else if (in == APR_PARENT_BLOCK)
             in = APR_WRITE_BLOCK;
 
-        if (in == APR_NO_FILE)
-            attr->child_in = &no_file;
-        else
-            stat = apr_create_nt_pipe(&attr->child_in, &attr->parent_in,
-                                      in, attr->pool);
+        stat = apr_create_nt_pipe(&attr->child_in, &attr->parent_in,
+                                  in, attr->pool);
         if (stat == APR_SUCCESS)
             stat = apr_file_inherit_unset(attr->parent_in);
     }
     if (out && stat == APR_SUCCESS) {
-        if (out == APR_NO_FILE)
-            attr->child_out = &no_file;
-        else
-            stat = apr_create_nt_pipe(&attr->parent_out, &attr->child_out,
-                                      out, attr->pool);
+        stat = apr_create_nt_pipe(&attr->parent_out, &attr->child_out,
+                                  out, attr->pool);
         if (stat == APR_SUCCESS)
             stat = apr_file_inherit_unset(attr->parent_out);
     }
     if (err && stat == APR_SUCCESS) {
-        if (err == APR_NO_FILE)
-            attr->child_err = &no_file;
-        else
-            stat = apr_create_nt_pipe(&attr->parent_err, &attr->child_err,
-                                      err, attr->pool);
+        stat = apr_create_nt_pipe(&attr->parent_err, &attr->child_err,
+                                  err, attr->pool);
         if (stat == APR_SUCCESS)
             stat = apr_file_inherit_unset(attr->parent_err);
     }
@@ -129,7 +115,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr,
     apr_status_t rv = APR_SUCCESS;
 
     if (child_in) {
-        if ((attr->child_in == NULL) || (attr->child_in == &no_file))
+        if (attr->child_in == NULL)
             rv = apr_file_dup(&attr->child_in, child_in, attr->pool);
         else
             rv = apr_file_dup2(attr->child_in, child_in, attr->pool);
@@ -155,7 +141,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr,
     apr_status_t rv = APR_SUCCESS;
 
     if (child_out) {
-        if ((attr->child_out == NULL) || (attr->child_out == &no_file))
+        if (attr->child_out == NULL)
             rv = apr_file_dup(&attr->child_out, child_out, attr->pool);
         else
             rv = apr_file_dup2(attr->child_out, child_out, attr->pool);
@@ -181,7 +167,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr,
     apr_status_t rv = APR_SUCCESS;
 
     if (child_err) {
-        if ((attr->child_err == NULL) || (attr->child_err == &no_file))
+        if (attr->child_err == NULL)
             rv = apr_file_dup(&attr->child_err, child_err, attr->pool);
         else
             rv = apr_file_dup2(attr->child_err, child_err, attr->pool);
@@ -680,49 +666,49 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             si.dwFlags |= STARTF_USESTDHANDLES;
 
             si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+            if (GetHandleInformation(si.hStdInput, &stdin_reset)
+                    && (stdin_reset &= HANDLE_FLAG_INHERIT))
+                SetHandleInformation(si.hStdInput,
+                                     HANDLE_FLAG_INHERIT, 0);
+
             if (attr->child_in && attr->child_in->filehand)
             {
-                if (GetHandleInformation(si.hStdInput,
-                                         &stdin_reset)
-                        && (stdin_reset &= HANDLE_FLAG_INHERIT))
-                    SetHandleInformation(si.hStdInput,
-                                         HANDLE_FLAG_INHERIT, 0);
-
-                if ( (si.hStdInput = attr->child_in->filehand) 
-                                   != INVALID_HANDLE_VALUE )
-                    SetHandleInformation(si.hStdInput, HANDLE_FLAG_INHERIT,
-                                                       HANDLE_FLAG_INHERIT);
+                si.hStdInput = attr->child_in->filehand;
+                SetHandleInformation(si.hStdInput, HANDLE_FLAG_INHERIT,
+                                                   HANDLE_FLAG_INHERIT);
             }
+            else
+                si.hStdInput = INVALID_HANDLE_VALUE;
             
             si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+            if (GetHandleInformation(si.hStdOutput, &stdout_reset)
+                    && (stdout_reset &= HANDLE_FLAG_INHERIT))
+                SetHandleInformation(si.hStdOutput,
+                                     HANDLE_FLAG_INHERIT, 0);
+
             if (attr->child_out && attr->child_out->filehand)
             {
-                if (GetHandleInformation(si.hStdOutput,
-                                         &stdout_reset)
-                        && (stdout_reset &= HANDLE_FLAG_INHERIT))
-                    SetHandleInformation(si.hStdOutput,
-                                         HANDLE_FLAG_INHERIT, 0);
-
-                if ( (si.hStdOutput = attr->child_out->filehand) 
-                                   != INVALID_HANDLE_VALUE )
-                    SetHandleInformation(si.hStdOutput, HANDLE_FLAG_INHERIT,
-                                                        HANDLE_FLAG_INHERIT);
+                si.hStdOutput = attr->child_out->filehand;
+                SetHandleInformation(si.hStdOutput, HANDLE_FLAG_INHERIT,
+                                                    HANDLE_FLAG_INHERIT);
             }
+            else
+                si.hStdOutput = INVALID_HANDLE_VALUE;
 
             si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+            if (GetHandleInformation(si.hStdError, &stderr_reset)
+                    && (stderr_reset &= HANDLE_FLAG_INHERIT))
+                SetHandleInformation(si.hStdError,
+                                     HANDLE_FLAG_INHERIT, 0);
+
             if (attr->child_err && attr->child_err->filehand)
             {
-                if (GetHandleInformation(si.hStdError,
-                                         &stderr_reset)
-                        && (stderr_reset &= HANDLE_FLAG_INHERIT))
-                    SetHandleInformation(si.hStdError,
-                                         HANDLE_FLAG_INHERIT, 0);
-
-                if ( (si.hStdError = attr->child_err->filehand) 
-                                   != INVALID_HANDLE_VALUE )
-                    SetHandleInformation(si.hStdError, HANDLE_FLAG_INHERIT,
-                                                       HANDLE_FLAG_INHERIT);
+                si.hStdError = attr->child_err->filehand;
+                SetHandleInformation(si.hStdError, HANDLE_FLAG_INHERIT,
+                                                   HANDLE_FLAG_INHERIT);
             }
+            else
+                si.hStdError = INVALID_HANDLE_VALUE;
         }
         rv = CreateProcessW(wprg, wcmd,        /* Executable & Command line */
                             NULL, NULL,        /* Proc & thread security attributes */
@@ -816,13 +802,13 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     new->hproc = pi.hProcess;
     new->pid = pi.dwProcessId;
 
-    if ((attr->child_in) && (attr->child_in != &no_file)) {
+    if (attr->child_in) {
         apr_file_close(attr->child_in);
     }
-    if ((attr->child_out) && (attr->child_out != &no_file)) {
+    if (attr->child_out) {
         apr_file_close(attr->child_out);
     }
-    if ((attr->child_err) && (attr->child_err != &no_file)) {
+    if (attr->child_err) {
         apr_file_close(attr->child_err);
     }
     CloseHandle(pi.hThread);
