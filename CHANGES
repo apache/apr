@@ -11,12 +11,12 @@ Changes with APR 0.9.17
      apr_procattr_child_XXX_set().  Once again, these do not inherit the 
      parent process stdio stream to WIN32 child processes (passing 
      INVALID_HANDLE_VALUE instead) as on Unix.  Note APR 1.3.0 adopts 
-     the unix behavior of inheriting any uninitialed streams as the 
+     the Unix behavior of inheriting any uninitialized streams as the 
      parent's corresponding stdio stream, in such cases.  [William Rowe]
 
 Changes with APR 0.9.16
 
-  *) Win32 apr_file_read; Correctly handle completion-based read-to-EOF.
+  *) Win32 apr_file_read: Correctly handle completion-based read-to-EOF.
      [Steven Naim <steven.naim googlemail.com>]
 
   *) Fixed Win32 regression of StdOutput inheritance in apr_proc_create.
@@ -24,7 +24,7 @@ Changes with APR 0.9.16
 
 Changes with APR 0.9.15
 
-  *) Solve winNT inherited pipe leaks by mutexing apr_proc_create calls,
+  *) Solve WinNT inherited pipe leaks by mutexing apr_proc_create calls,
      on WinNT (not WinCE, nor 9x) so that we toggle the inherited state 
      of the stdin/out/err pipes.  All other file handles are treated as
      not-inherited until apr_file_dup2'ed a std handle of this process, 
