@@ -76,7 +76,7 @@ static void test_file_readwrite(abts_case *tc, void *data)
 
     rv = apr_file_write(file3, TEST, &txtlen);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, sizeof(TEST), txtlen);
+    ABTS_SIZE_EQUAL(tc, sizeof(TEST), txtlen);
 
     fpos = 0;
     rv = apr_file_seek(file1, APR_SET, &fpos);
@@ -161,7 +161,7 @@ static void test_dup2_readwrite(abts_case *tc, void *data)
     txtlen = sizeof(TEST2);
     rv = apr_file_write(errfile, TEST2, &txtlen);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, sizeof(TEST2), txtlen);
+    ABTS_SIZE_EQUAL(tc, sizeof(TEST2), txtlen);
 
     fpos = 0;
     rv = apr_file_seek(testfile, APR_SET, &fpos);
