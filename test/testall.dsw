@@ -30,7 +30,22 @@ Package=<4>
 
 ###############################################################################
 
-Project: "testall"=".\testall.dsp" - Package Owner=<4>
+Project: "testdll"=".\testdll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libapr
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "testlib"=".\testlib.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
