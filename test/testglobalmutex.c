@@ -41,7 +41,7 @@ static void launch_child(abts_case *tc, apr_lockmech_e mech,
     args[0] = "globalmutexchild" EXTENSION;
     args[1] = (const char*)apr_itoa(p, (int)mech);
     args[2] = NULL;
-    rv = apr_proc_create(proc, "./globalmutexchild" EXTENSION, args, NULL,
+    rv = apr_proc_create(proc, TESTBINPATH "globalmutexchild" EXTENSION, args, NULL,
             procattr, p);
     APR_ASSERT_SUCCESS(tc, "Couldn't launch program", rv);
 }

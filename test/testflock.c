@@ -44,7 +44,7 @@ static int launch_reader(abts_case *tc)
 
     args[0] = "tryread" EXTENSION;
     args[1] = NULL;
-    rv = apr_proc_create(&proc, "./tryread" EXTENSION, args, NULL, procattr, p);
+    rv = apr_proc_create(&proc, TESTBINPATH "tryread" EXTENSION, args, NULL, procattr, p);
     APR_ASSERT_SUCCESS(tc, "Couldn't launch program", rv);
 
     ABTS_ASSERT(tc, "wait for child process",

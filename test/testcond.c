@@ -375,8 +375,8 @@ static void pipe_consumer(toolbox_t *box)
 
         rv = apr_file_read_full(out, &ch, 1, &nbytes);
         ABTS_SUCCESS(rv);
-        ABTS_INT_EQUAL(tc, 1, nbytes);
-        ABTS_INT_EQUAL(tc, 1, (ch == '.'));
+        ABTS_SIZE_EQUAL(tc, 1, nbytes);
+        ABTS_TRUE(tc, ch == '.');
     } while (1);
 
     /* naive fairness test */
@@ -392,7 +392,7 @@ static void pipe_write(toolbox_t *box, char ch)
 
     rv = apr_file_write_full(in, &ch, 1, &nbytes);
     ABTS_SUCCESS(rv);
-    ABTS_INT_EQUAL(tc, 1, nbytes);
+    ABTS_SIZE_EQUAL(tc, 1, nbytes);
 
     rv = apr_thread_mutex_lock(box->mutex);
     ABTS_SUCCESS(rv);

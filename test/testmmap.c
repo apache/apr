@@ -40,7 +40,7 @@ static apr_mmap_t *themmap = NULL;
 static apr_file_t *thefile = NULL;
 static char *file1;
 static apr_finfo_t finfo;
-static int fsize;
+static apr_size_t fsize;
 
 static void create_filename(abts_case *tc, void *data)
 {
@@ -102,7 +102,7 @@ static void test_mmap_contents(abts_case *tc, void *data)
     
     ABTS_PTR_NOTNULL(tc, themmap);
     ABTS_PTR_NOTNULL(tc, themmap->mm);
-    ABTS_INT_EQUAL(tc, fsize, themmap->size);
+    ABTS_SIZE_EQUAL(tc, fsize, themmap->size);
 
     /* Must use nEquals since the string is not guaranteed to be NULL terminated */
     ABTS_STR_NEQUAL(tc, themmap->mm, TEST_STRING, fsize);

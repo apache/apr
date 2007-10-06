@@ -94,7 +94,7 @@ static void read_write(abts_case *tc, void *data)
     if (!rv) {
         rv = apr_file_read(readp, buf, &nbytes);
         ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
-        ABTS_INT_EQUAL(tc, 0, nbytes);
+        ABTS_SIZE_EQUAL(tc, 0, nbytes);
     }
 }
 
@@ -113,14 +113,14 @@ static void read_write_notimeout(abts_case *tc, void *data)
     ABTS_PTR_NOTNULL(tc, writep);
 
     rv = apr_file_write(writep, buf, &nbytes);
-    ABTS_INT_EQUAL(tc, strlen("this is a test"), nbytes);
+    ABTS_SIZE_EQUAL(tc, strlen("this is a test"), nbytes);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     nbytes = 256;
     input = apr_pcalloc(p, nbytes + 1);
     rv = apr_file_read(readp, input, &nbytes);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, strlen("this is a test"), nbytes);
+    ABTS_SIZE_EQUAL(tc, strlen("this is a test"), nbytes);
     ABTS_STR_EQUAL(tc, "this is a test", input);
 }
 
@@ -151,7 +151,7 @@ static void test_pipe_writefull(abts_case *tc, void *data)
 
     args[0] = "readchild" EXTENSION;
     args[1] = NULL;
-    rv = apr_proc_create(&proc, "./readchild" EXTENSION, args, NULL, procattr, p);
+    rv = apr_proc_create(&proc, TESTBINPATH "readchild" EXTENSION, args, NULL, procattr, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_file_pipe_timeout_set(proc.in, apr_time_from_sec(10));
