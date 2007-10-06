@@ -111,6 +111,39 @@ static void test_cas_notequal(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, 12, casval);
 }
 
+static void test_casptr_equal(abts_case *tc, void *data)
+{
+    int a;
+    volatile void *target_ptr = NULL;
+    void *old_ptr;
+
+    old_ptr = apr_atomic_casptr(&target_ptr, &a, NULL);
+    ABTS_PTR_EQUAL(tc, NULL, old_ptr);
+    ABTS_PTR_EQUAL(tc, &a, (void *) target_ptr);
+}
+
+static void test_casptr_equal_nonnull(abts_case *tc, void *data)
+{
+    int a, b;
+    volatile void *target_ptr = &a;
+    void *old_ptr;
+
+    old_ptr = apr_atomic_casptr(&target_ptr, &b, &a);
+    ABTS_PTR_EQUAL(tc, &a, old_ptr);
+    ABTS_PTR_EQUAL(tc, &b, (void *) target_ptr);
+}
+
+static void test_casptr_notequal(abts_case *tc, void *data)
+{
+    int a, b;
+    volatile void *target_ptr = &a;
+    void *old_ptr;
+
+    old_ptr = apr_atomic_casptr(&target_ptr, &a, &b);
+    ABTS_PTR_EQUAL(tc, &a, old_ptr);
+    ABTS_PTR_EQUAL(tc, &a, (void *) target_ptr);
+}
+
 static void test_add32(abts_case *tc, void *data)
 {
     apr_uint32_t oldval;
@@ -169,7 +202,7 @@ static void test_inc_neg1(abts_case *tc, void *data)
 
     rv = apr_atomic_inc32(&y32);
 
-    ABTS_ASSERT(tc, "apr_atomic_dec32 on zero returned zero.", rv == minus1);
+    ABTS_ASSERT(tc, "apr_atomic_inc32 on zero returned zero.", rv == minus1);
     str = apr_psprintf(p, "zero wrap failed: -1 + 1 = %d", y32);
     ABTS_ASSERT(tc, str, y32 == 0);
 }
@@ -290,6 +323,9 @@ abts_suite *testatomic(abts_suite *suite)
     abts_run_test(suite, test_cas_equal, NULL);
     abts_run_test(suite, test_cas_equal_nonnull, NULL);
     abts_run_test(suite, test_cas_notequal, NULL);
+    abts_run_test(suite, test_casptr_equal, NULL);
+    abts_run_test(suite, test_casptr_equal_nonnull, NULL);
+    abts_run_test(suite, test_casptr_notequal, NULL);
     abts_run_test(suite, test_add32, NULL);
     abts_run_test(suite, test_inc32, NULL);
     abts_run_test(suite, test_set_add_inc_sub, NULL);
