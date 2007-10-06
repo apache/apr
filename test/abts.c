@@ -369,6 +369,9 @@ int main(int argc, const char *const argv[]) {
     abts_suite *suite = NULL;
    
     initialize();
+
+    quiet = !isatty(STDOUT_FILENO);
+
     for (i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-v")) {
             verbose = 1;
