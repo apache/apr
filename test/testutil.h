@@ -26,7 +26,7 @@
  */
 
 #ifdef WIN32
-ifdef BINPATH
+#ifdef BINPATH
 #define TESTBINPATH APR_STRINGIFY(BINPATH) "/"
 #else
 #define TESTBINPATH ""

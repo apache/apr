@@ -22,7 +22,18 @@ OTHER_PROGRAMS = \
         echod@EXEEXT@ \
         sockperf@EXEEXT@
 
-PROGRAMS = $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE) $(OTHER_PROGRAMS)
+TESTALL_COMPONENTS = \
+	mod_test.la \
+	libmod_test.la \
+	occhild@EXEEXT@ \
+	readchild@EXEEXT@  
+	proc_child@EXEEXT@ \
+        tryread@EXEEXT@ \
+	sockchild@EXEEXT@ \
+	globalmutexchild@EXEEXT@ 
+
+
+PROGRAMS = $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE) $(OTHER_PROGRAMS)
 
 TARGETS = $(PROGRAMS)
 
@@ -44,7 +55,7 @@ INCLUDES=-I$(INCDIR) -I$(srcdir)/../include
 # libtool wrapper scripts which link an executable when first run.
 LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE) @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
 
-check: $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
+check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	teststatus=0; \
 	progfailed=""; \
 	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
@@ -122,10 +133,7 @@ TESTS = testutil.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testshm.lo testsock.lo testglobalmutex.lo teststrnatcmp.lo testfilecopy.lo \
 	testtemp.lo testlfs.lo testcond.lo
 
-testall@EXEEXT@: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
-	 readchild@EXEEXT@ abts.lo proc_child@EXEEXT@ \
-         tryread@EXEEXT@ sockchild@EXEEXT@ globalmutexchild@EXEEXT@ \
-         $(LOCAL_LIBS)
+testall@EXEEXT@: $(TESTS) abts.lo
 	$(LINK_PROG) $(TESTS) abts.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 
