@@ -7,113 +7,165 @@
 #   programs such as sendfile, that have to be invoked in a special sequence
 #   or with special parameters
 
+!IFNDEF MODEL
+MODEL=dynamic
+!ENDIF
+
+INCDIR=../include
+
+!IFNDEF OUTDIR
+!IF "$(MODEL)" == "static"
+OUTDIR=LibR
+!ELSE
+OUTDIR=Release
+!ENDIF
+
+!IF [$(COMSPEC) /c cl /nologo /? | find "x64" >NUL ] == 0
+OUTDIR=x64\$(OUTDIR)
+!ENDIF
+!ENDIF
+
+!IF !EXIST("$(OUTDIR)\.")
+!IF ([$(COMSPEC) /C mkdir $(OUTDIR)] == 0)
+!ENDIF
+!ENDIF
+
+!IFNDEF INTDIR
+INTDIR=$(OUTDIR)
+!ELSE
+!IF !EXIST("$(INTDIR)\.")
+!IF ([$(COMSPEC) /C mkdir $(INTDIR)] == 0)
+!ENDIF
+!ENDIF
+!ENDIF
+
+!MESSAGE Building tests into $(OUTDIR) for $(MODEL)
+
 STDTEST_PORTABLE = \
-	testlockperf.exe \
-	testshmproducer.exe \
-	testshmconsumer.exe \
-	testmutexscope.exe \
-	testall.exe
+	$(OUTDIR)\testapp.exe \
+	$(OUTDIR)\testall.exe \
+	$(OUTDIR)\testlockperf.exe \
+	$(OUTDIR)\testmutexscope.exe
 
-OTHER_PROGRAMS = sendfile.exe 
+OTHER_PROGRAMS = \
+	$(OUTDIR)\sendfile.exe 
 
-PROGRAMS = $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE) $(OTHER_PROGRAMS)
+TESTALL_COMPONENTS = \
+	$(OUTDIR)\mod_test.dll \
+	$(OUTDIR)\occhild.exe \
+	$(OUTDIR)\readchild.exe \
+	$(OUTDIR)\proc_child.exe \
+        $(OUTDIR)\tryread.exe \
+	$(OUTDIR)\sockchild.exe \
+	$(OUTDIR)\testshmproducer.exe \
+	$(OUTDIR)\testshmconsumer.exe \
+	$(OUTDIR)\globalmutexchild.exe
+
+ALL_TESTS = $(INTDIR)\testutil.obj $(INTDIR)\testtime.obj $(INTDIR)\teststr.obj \
+	$(INTDIR)\testvsn.obj $(INTDIR)\testipsub.obj $(INTDIR)\testmmap.obj \
+	$(INTDIR)\testud.obj $(INTDIR)\testtable.obj $(INTDIR)\testsleep.obj \
+	$(INTDIR)\testpools.obj $(INTDIR)\testfmt.obj $(INTDIR)\testfile.obj \
+	$(INTDIR)\testdir.obj $(INTDIR)\testfileinfo.obj $(INTDIR)\testrand.obj \
+	$(INTDIR)\testdso.obj $(INTDIR)\testoc.obj $(INTDIR)\testdup.obj \
+	$(INTDIR)\testsockets.obj $(INTDIR)\testproc.obj $(INTDIR)\testpoll.obj \
+	$(INTDIR)\testlock.obj $(INTDIR)\testsockopt.obj $(INTDIR)\testpipe.obj \
+	$(INTDIR)\testthread.obj $(INTDIR)\testhash.obj $(INTDIR)\testargs.obj \
+	$(INTDIR)\testnames.obj $(INTDIR)\testuser.obj $(INTDIR)\testpath.obj \
+	$(INTDIR)\testenv.obj $(INTDIR)\testprocmutex.obj $(INTDIR)\testfnmatch.obj \
+	$(INTDIR)\testatomic.obj $(INTDIR)\testflock.obj $(INTDIR)\testshm.obj \
+	$(INTDIR)\testsock.obj $(INTDIR)\testglobalmutex.obj $(INTDIR)\teststrnatcmp.obj \
+	$(INTDIR)\testfilecopy.obj $(INTDIR)\testtemp.obj $(INTDIR)\testlfs.obj \
+	$(INTDIR)\testcond.obj
+
+CLEAN_TARGETS = testfile.tmp lfstests/large.bin \
+	data/testputs.txt data/testbigfprintf.dat \
+	data/testwritev.txt data/testwritev_full.txt
+
+PROGRAMS = $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE) $(OTHER_PROGRAMS)
 
 TARGETS = $(PROGRAMS)
 
 # bring in rules.mk for standard functionality
 ALL: $(TARGETS)
 
+clean:
+
 CL = cl.exe
+LD = link.exe 
 
-CFLAGS = /nologo /c /MDd /W3 /Gm /EHsc /Zi /Od /D _DEBUG /D WIN32 /D APR_DECLARE_STATIC /FD 
+!IF "$(MODEL)" == "static"
+LOCAL_LIB= ..\$(OUTDIR)\apr-1.lib 
+APP_LIB= ..\build\$(OUTDIR)\apr_app-1.lib 
+STATIC_CFLAGS = /D APR_DECLARE_STATIC
+!ELSE
+LOCAL_LIB= ..\$(OUTDIR)\libapr-1.lib 
+APP_LIB= ..\build\$(OUTDIR)\libapr_app-1.lib 
+STATIC_CFLAGS = 
+!ENDIF
 
-.c.obj::
-	$(CL) -c $< $(CFLAGS) $(INCLUDES)
+!IFDEF _DEBUG
+DEBUG_CFLAGS = /MDd
+!ELSE
+DEBUG_CFLAGS = /MD 
+!ENDIF
 
-LOCAL_LIBS= ../LibD/apr-1.lib 
-ALL_LIBS= kernel32.lib user32.lib advapi32.lib Rpcrt4.lib ws2_32.lib wsock32.lib ole32.lib 
-
-
-CLEAN_TARGETS = testfile.tmp mod_test.dll proc_child.exe occhild.exe \
-	readchild.exe tryread.exe sockchild.exe \
-	globalmutexchild.exe lfstests/large.bin \
-	data/testputs.txt data/testbigfprintf.dat data/testwritev.txt \
-        data/testwritev_full.txt
-CLEAN_SUBDIRS = internal
-
-INCDIR=../include
 INCLUDES=/I "$(INCDIR)"
 
-# link programs using -no-install to get real executables not
-# libtool wrapper scripts which link an executable when first run.
-LINK_PROG = link.exe /nologo /debug /machine:I386 /subsystem:console /incremental:no 
-LINK_LIB = link.exe /nologo /dll /debug /machine:I386 /subsystem:windows /incremental:no
+CFLAGS = /nologo /c /W3 /Gm /EHsc /Zi /Od $(INCLUDES) \
+	 $(STATIC_CFLAGS) $(DEBUG_CFLAGS) /D "BINPATH=$(OUTDIR:\=/)" \
+	 /D _DEBUG /D WIN32 /Fo"$(INTDIR)/" /FD
 
-check: $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
-	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
-		./$$prog; \
-		if test $$? = 255; then \
-			echo "$$prog failed"; \
-			break; \
-		fi; \
-	done
+LD_LIBS = $(LOCAL_LIB) kernel32.lib advapi32.lib ws2_32.lib wsock32.lib \
+	  ole32.lib shell32.lib rpcrt4.lib
 
-occhild.exe: occhild.obj $(LOCAL_LIBS)
-	$(LINK_PROG) occhild.obj $(LOCAL_LIBS) $(ALL_LIBS)
+LDFLAGS = /nologo /debug /subsystem:console /incremental:no 
+SHLDFLAGS = /nologo /dll /debug /subsystem:windows /incremental:no
 
-sockchild.exe: sockchild.obj $(LOCAL_LIBS)
-	$(LINK_PROG) sockchild.obj $(LOCAL_LIBS) $(ALL_LIBS)
+.c{$(INTDIR)}.obj::
+	$(CL) $(CFLAGS) -c $< -Fd$(INTDIR)\ $(INCLUDES)
 
-readchild.exe: readchild.obj $(LOCAL_LIBS)
-	$(LINK_PROG) readchild.obj $(LOCAL_LIBS) $(ALL_LIBS)
+.c{$(OUTDIR)}.exe:
+	$(CL) $(CFLAGS) -c $** -Fd$(INTDIR)\ $(INCLUDES) 
+	$(LD) $(LDFLAGS) /out:"$@" $*.obj $(LD_LIBS)
+	if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
 
-globalmutexchild.exe: globalmutexchild.obj $(LOCAL_LIBS)
-	$(LINK_PROG) globalmutexchild.obj $(LOCAL_LIBS) $(ALL_LIBS)
+{$(INTDIR)}.obj{$(OUTDIR)}.exe:
+	$(LD) $(LDFLAGS) /out:"$@" $*.obj $(LD_LIBS)
+	if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
 
-tryread.exe: tryread.obj $(LOCAL_LIBS)
-	$(LINK_PROG) tryread.obj $(LOCAL_LIBS) $(ALL_LIBS)
+$(OUTDIR)\mod_test.dll: $(INTDIR)/mod_test.obj
+	$(LD) $(SHLDFLAGS) /out:"$@" $** \
+	       /export:print_hello /export:count_reps $(LD_LIBS)
+	if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;2
 
-proc_child.exe: proc_child.obj $(LOCAL_LIBS)
-	$(LINK_PROG) proc_child.obj $(LOCAL_LIBS) $(ALL_LIBS)
+$(OUTDIR)\testapp.exe: $(INTDIR)/testapp.obj
+	$(LD) $(LDFLAGS) /out:"$@" $** \
+	      /entry:wmainCRTStartup $(APP_LIB) $(LD_LIBS)
+	if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;2
 
-# FIXME: -prefer-pic is only supported with libtool-1.4+
-mod_test.dll: mod_test.obj
-	$(LINK_LIB) mod_test.obj /export:print_hello /export:count_reps $(LOCAL_LIBS) $(ALL_LIBS)
+$(OUTDIR)\testall.exe: $(ALL_TESTS) $(INTDIR)\abts.obj
+	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
+	if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
 
-testlockperf.exe: testlockperf.obj $(LOCAL_LIBS)
-	$(LINK_PROG) testlockperf.obj $(LOCAL_LIBS) $(ALL_LIBS)
 
-sendfile.exe: sendfile.obj $(LOCAL_LIBS)
-	$(LINK_PROG) sendfile.obj $(LOCAL_LIBS) $(ALL_LIBS)
+clean:
+	for %f in ($(CLEAN_TARGETS)) do del /f %f
+	rmdir /s /q $(OUTDIR)
+!IF "$(OUTDIR)" != "$(INTDIR)"
+	rmdir /s /q $(OUTDIR)
+!ENDIF
 
-testshmproducer.exe: testshmproducer.obj $(LOCAL_LIBS)
-	$(LINK_PROG) testshmproducer.obj $(LOCAL_LIBS) $(ALL_LIBS)
 
-testshmconsumer.exe: testshmconsumer.obj $(LOCAL_LIBS)
-	$(LINK_PROG) testshmconsumer.obj $(LOCAL_LIBS) $(ALL_LIBS)
+PATH=$(OUTDIR);..\$(OUTDIR);$(PATH)
 
-testprocmutex.exe: testprocmutex.obj $(LOCAL_LIBS)
-	$(LINK_PROG) testprocmutex.obj $(LOCAL_LIBS) $(ALL_LIBS)
-
-testmutexscope.exe: testmutexscope.obj $(LOCAL_LIBS)
-	$(LINK_PROG) testmutexscope.obj $(LOCAL_LIBS) $(ALL_LIBS)
-
-TESTS = testutil.obj testtime.obj teststr.obj testvsn.obj testipsub.obj \
-	testmmap.obj testud.obj testtable.obj testsleep.obj testpools.obj \
-	testfmt.obj testfile.obj testdir.obj testfileinfo.obj testrand.obj \
-	testdso.obj testoc.obj testdup.obj testsockets.obj testproc.obj \
-	testpoll.obj testlock.obj testsockopt.obj testpipe.obj testthread.obj \
-	testhash.obj testargs.obj testnames.obj testuser.obj testpath.obj \
-	testenv.obj testprocmutex.obj testfnmatch.obj testatomic.obj \
-	testflock.obj testshm.obj testsock.obj testglobalmutex.obj \
-	teststrnatcmp.obj testfilecopy.obj testtemp.obj testlfs.obj \
-	testcond.obj
-
-testall.exe: $(TESTS) mod_test.dll occhild.exe \
-	 readchild.exe abts.obj proc_child.exe \
-         tryread.exe sockchild.exe globalmutexchild.exe \
-         $(LOCAL_LIBS)
-	$(LINK_PROG) /out:testall.exe $(TESTS) abts.obj $(LOCAL_LIBS) $(ALL_LIBS)
-
+check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
+	for %p in ($(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)) do @( \
+	    echo Testing %p && %p || echo "%p failed" \
+	)
 
 # DO NOT REMOVE
