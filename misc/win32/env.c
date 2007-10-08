@@ -78,12 +78,9 @@ APR_DECLARE(apr_status_t) apr_env_get(char **value,
 
         wvalue = apr_palloc(pool, size * sizeof(*wvalue));
         size = GetEnvironmentVariableW(wenvvar, wvalue, size);
-        if (size == 0)
-            /* Mid-air collision?. Somebody must've changed the env. var. */
-            return APR_INCOMPLETE;
 
         inchars = wcslen(wvalue) + 1;
-        outchars = 3 * inchars; /* Enougn for any UTF-8 representation */
+        outchars = 3 * inchars; /* Enough for any UTF-8 representation */
         val = apr_palloc(pool, outchars);
         status = apr_conv_ucs2_to_utf8(wvalue, &inchars, val, &outchars);
         if (status)
