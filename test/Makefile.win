@@ -77,9 +77,11 @@ ALL_TESTS = $(INTDIR)\testutil.obj $(INTDIR)\testtime.obj $(INTDIR)\teststr.obj 
 	$(INTDIR)\testfilecopy.obj $(INTDIR)\testtemp.obj $(INTDIR)\testlfs.obj \
 	$(INTDIR)\testcond.obj
 
-CLEAN_TARGETS = testfile.tmp lfstests/large.bin \
-	data/testputs.txt data/testbigfprintf.dat \
-	data/testwritev.txt data/testwritev_full.txt
+CLEAN_DATA = testfile.tmp lfstests\large.bin \
+	data\testputs.txt data\testbigfprintf.dat \
+	data\testwritev.txt data\testwritev_full.txt
+CLEAN_SUBDIRS = internal
+CLEAN_BUILDDIRS = Debug Release LibD LibR 9x x64
 
 PROGRAMS = $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE) $(OTHER_PROGRAMS)
 
@@ -87,8 +89,6 @@ TARGETS = $(PROGRAMS)
 
 # bring in rules.mk for standard functionality
 ALL: $(TARGETS)
-
-clean:
 
 CL = cl.exe
 LD = link.exe 
@@ -127,45 +127,57 @@ SHLDFLAGS = /nologo /dll /debug /subsystem:windows /incremental:no
 .c{$(OUTDIR)}.exe:
 	$(CL) $(CFLAGS) -c $** -Fd$(INTDIR)\ $(INCLUDES) 
 	$(LD) $(LDFLAGS) /out:"$@" $*.obj $(LD_LIBS)
-	if exist "$@.manifest" \
+	@if exist "$@.manifest" \
 	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
 
 {$(INTDIR)}.obj{$(OUTDIR)}.exe:
 	$(LD) $(LDFLAGS) /out:"$@" $*.obj $(LD_LIBS)
-	if exist "$@.manifest" \
+	@if exist "$@.manifest" \
 	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
 
 $(OUTDIR)\mod_test.dll: $(INTDIR)/mod_test.obj
 	$(LD) $(SHLDFLAGS) /out:"$@" $** \
 	       /export:print_hello /export:count_reps $(LD_LIBS)
-	if exist "$@.manifest" \
+	@if exist "$@.manifest" \
 	    mt.exe -manifest "$@.manifest" -outputresource:$@;2
 
 $(OUTDIR)\testapp.exe: $(INTDIR)/testapp.obj
 	$(LD) $(LDFLAGS) /out:"$@" $** \
 	      /entry:wmainCRTStartup $(APP_LIB) $(LD_LIBS)
-	if exist "$@.manifest" \
+	@if exist "$@.manifest" \
 	    mt.exe -manifest "$@.manifest" -outputresource:$@;2
 
 $(OUTDIR)\testall.exe: $(ALL_TESTS) $(INTDIR)\abts.obj
 	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
-	if exist "$@.manifest" \
+	@if exist "$@.manifest" \
 	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
 
 
-clean:
-	for %f in ($(CLEAN_TARGETS)) do del /f %f
-	rmdir /s /q $(OUTDIR)
-!IF "$(OUTDIR)" != "$(INTDIR)"
-	rmdir /s /q $(OUTDIR)
-!ENDIF
+cleandata:
+	@for %f in ($(CLEAN_DATA)) do @if EXIST %f del /f %f
+
+clean: cleandata
+	@if EXIST $(INTDIR)\. rmdir /s /q $(INTDIR)
+	@if EXIST $(OUTDIR)\. rmdir /s /q $(OUTDIR)
+	@for %d in ($(CLEAN_SUBDIRS)) do \
+	    %COMSPEC% /c "cd %%d && $(MAKE) -f Makefile.win clean" \
+
+cleanall: 
+	@for %d in ($(CLEAN_BUILDDIRS) $(INTDIR) $(OUTDIR)) do \
+	    @if EXIST %d\. rmdir /s /q %d
+	@for %d in ($(CLEAN_SUBDIRS)) do \
+	    %COMSPEC% /c "cd %%d & $(MAKE) -f Makefile.win cleanall" \
 
 
 PATH=$(OUTDIR);..\$(OUTDIR);$(PATH)
 
 check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
-	for %p in ($(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)) do @( \
-	    echo Testing %p && %p || echo "%p failed" \
+	@for %p in ($(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)) do @( \
+	    echo Testing %p && %p || echo %p failed \
 	)
+
+checkall: check
+	@for %d in ($(CLEAN_SUBDIRS)) do \
+	    %COMSPEC% /c "cd %%d && $(MAKE) -f Makefile.win check" \
 
 # DO NOT REMOVE
