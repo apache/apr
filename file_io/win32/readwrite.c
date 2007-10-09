@@ -348,7 +348,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                         rv = APR_SUCCESS;
                         break;
                     case WAIT_TIMEOUT:
-                        rv = APR_TIMEUP;
+                        rv = (timeout_ms == 0) ? APR_EAGAIN : APR_TIMEUP;
                         break;
                     case WAIT_FAILED:
                         rv = apr_get_os_error();
