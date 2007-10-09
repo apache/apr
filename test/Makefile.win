@@ -80,7 +80,7 @@ ALL_TESTS = $(INTDIR)\testutil.obj $(INTDIR)\testtime.obj $(INTDIR)\teststr.obj 
 CLEAN_DATA = testfile.tmp lfstests\large.bin \
 	data\testputs.txt data\testbigfprintf.dat \
 	data\testwritev.txt data\testwritev_full.txt
-CLEAN_SUBDIRS = internal
+TEST_SUBDIRS = internal
 CLEAN_BUILDDIRS = Debug Release LibD LibR 9x x64
 
 PROGRAMS = $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE) $(OTHER_PROGRAMS)
@@ -159,13 +159,13 @@ cleandata:
 clean: cleandata
 	@if EXIST $(INTDIR)\. rmdir /s /q $(INTDIR)
 	@if EXIST $(OUTDIR)\. rmdir /s /q $(OUTDIR)
-	@for %d in ($(CLEAN_SUBDIRS)) do \
+	@for %d in ($(TEST_SUBDIRS)) do \
 	    %COMSPEC% /c "cd %%d && $(MAKE) -f Makefile.win clean" \
 
 cleanall: 
 	@for %d in ($(CLEAN_BUILDDIRS) $(INTDIR) $(OUTDIR)) do \
 	    @if EXIST %d\. rmdir /s /q %d
-	@for %d in ($(CLEAN_SUBDIRS)) do \
+	@for %d in ($(TEST_SUBDIRS)) do \
 	    %COMSPEC% /c "cd %%d & $(MAKE) -f Makefile.win cleanall" \
 
 
@@ -177,7 +177,7 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	)
 
 checkall: check
-	@for %d in ($(CLEAN_SUBDIRS)) do \
+	@for %d in ($(TEST_SUBDIRS)) do \
 	    %COMSPEC% /c "cd %%d && $(MAKE) -f Makefile.win check" \
 
 # DO NOT REMOVE
