@@ -18,6 +18,7 @@
 #include "arch/win32/apr_arch_utf8.h"
 #include <wchar.h>
 #include <string.h>
+#include <assert.h>
 
 struct testval {
     unsigned char n[8];
@@ -32,17 +33,18 @@ void displaynw(struct testval *f, struct testval *l)
     int i;
     for (i = 0; i < f->nl; ++i)
         t += sprintf(t, "%02X ", f->n[i]);
-    *(t++) = '-';
+    *(t++) = '-'; 
     for (i = 0; i < l->nl; ++i)
         t += sprintf(t, " %02X", l->n[i]);
     *(t++) = ' ';
     *(t++) = '=';
-    *(t++) = ' '; 
+    *(t++) = ' ';
     for (i = 0; i < f->wl; ++i)
         t += sprintf(t, "%04X ", f->w[i]);
     *(t++) = '-';
     for (i = 0; i < l->wl; ++i)
         t += sprintf(t, " %04X", l->w[i]);
+    *t = '\0';
     puts(x);
 }
 
@@ -155,22 +157,143 @@ void test_wrange(struct testval *p)
 }
 
 /*
+ *  Test every possible byte value. 
+ *  If the test passes or fails at this byte value we are done.
+ *  Otherwise iterate test_nrange again, appending another byte.
+ */
+void test_ranges()
+{
+    struct testval ntest, wtest;
+    apr_status_t nrc, wrc;
+    apr_size_t inlen;
+    unsigned long matches = 0;
+
+    memset(&ntest, 0, sizeof(ntest));
+    ++ntest.nl;
+
+    memset(&wtest, 0, sizeof(wtest));
+    ++wtest.wl;
+
+    do {
+        do {
+            inlen = ntest.nl;
+            ntest.wl = sizeof(ntest.w) / 2;
+            nrc = apr_conv_utf8_to_ucs2(ntest.n, &inlen, ntest.w, &ntest.wl);
+            if (nrc == APR_SUCCESS) {
+                ntest.wl = (sizeof(ntest.w) / 2) - ntest.wl;
+                break;
+            }
+            if (nrc == APR_INCOMPLETE) {
+                ++ntest.nl;
+                if (ntest.nl > 6) {
+                    printf ("\n\nUnexpected utf8 sequence of >6 bytes;\n");
+                    exit(255);
+                }
+                continue;
+            }
+            else {
+                while (!(++ntest.n[ntest.nl - 1])) {
+                    if (!(--ntest.nl))
+                        break;
+                }
+            }
+        } while (ntest.nl);
+
+        do {
+            inlen = wtest.wl;
+            wtest.nl = sizeof(wtest.n);
+            wrc = apr_conv_ucs2_to_utf8(wtest.w, &inlen, wtest.n, &wtest.nl);
+            if (wrc == APR_SUCCESS) {
+                wtest.nl = sizeof(wtest.n) - wtest.nl;
+                break;
+            }
+            else {
+                if (!(++wtest.w[wtest.wl - 1])) {
+                    if (wtest.wl == 1)
+                        ++wtest.wl;
+                    else
+                        ++wtest.w[0];
+
+                    /* On the second pass, ensure lead word is incomplete */
+                    do {
+                        inlen = 1;
+                        wtest.nl = sizeof(wtest.n);
+                        if (apr_conv_ucs2_to_utf8(wtest.w, &inlen, wtest.n, &wtest.nl)
+                                == APR_INCOMPLETE)
+                            break;
+                        if (!(++wtest.w[0])) {
+                            wtest.wl = 0;
+                            break;
+                        }
+                    } while (1);
+                }
+            }
+        } while (wtest.wl);
+
+        if (!ntest.nl && !wtest.wl)
+            break;
+
+        /* Identical? */
+        if ((wtest.nl != ntest.nl)
+         || (memcmp(wtest.n, ntest.n, ntest.nl) != 0)
+         || (wtest.wl != ntest.wl)
+         || (memcmp(ntest.w, wtest.w, wtest.wl * 2) != 0)) {
+            printf ("\n\nMismatch of w/n conversion at;\n");
+            displaynw(&ntest, &wtest);
+            exit(255);
+        }
+        ++matches;
+
+        while (!(++ntest.n[ntest.nl - 1])) {
+            if (!(--ntest.nl))
+                break;
+        }
+
+        if (!(++wtest.w[wtest.wl - 1])) {
+            if (wtest.wl == 1)
+                ++wtest.wl;
+            else
+                ++wtest.w[0];
+
+            /* On the second pass, ensure lead word is incomplete */
+            do {
+                inlen = 1;
+                wtest.nl = sizeof(wtest.n);
+                if (apr_conv_ucs2_to_utf8(wtest.w, &inlen, wtest.n, &wtest.nl)
+                        == APR_INCOMPLETE)
+                    break;
+                if (!(++wtest.w[0])) {
+                    wtest.wl = 0;
+                    break;
+                }
+            } while (1);
+        }
+    } while (wtest.wl || ntest.nl);
+
+    printf ("\n\nutf8 and ucs2 sequences of %lu transformations matched OK.\n",
+            matches);
+}
+
+/*
  *  Syntax: testucs [w|n]
  *
- *  If arg is not recognized, run both tests.
+ *  If no arg or arg is not recognized, run equality sequence test.
  */
 int main(int argc, char **argv)
 {
     struct testval s;
     memset (&s, 0, sizeof(s));
 
-    if (argc < 2 || apr_tolower(*argv[1]) != 'w') {
+    if (argc >= 2 && apr_tolower(*argv[1]) != 'w') {
         printf ("\n\nTesting Narrow Char Ranges\n");
         test_nrange(&s);
     }
-    if (argc < 2 || apr_tolower(*argv[1]) != 'n') {
+    else if (argc >= 2 && apr_tolower(*argv[1]) != 'n') {
         printf ("\n\nTesting Wide Char Ranges\n");
         test_wrange(&s);
+    }
+    else {
+        test_ranges();
     }
     return 0;
 }
