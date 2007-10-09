@@ -45,7 +45,8 @@ LOCAL_LIBS=../lib@APR_LIBNAME@.la
 CLEAN_TARGETS = testfile.tmp mod_test.slo proc_child@EXEEXT@ occhild@EXEEXT@ \
 	readchild@EXEEXT@ tryread@EXEEXT@ sockchild@EXEEXT@ \
 	globalmutexchild@EXEEXT@ lfstests/*.bin \
-	data/test*.txt data/test*.dat
+	data/test*.txt data/test*.dat data/apr.testshm.shm
+
 CLEAN_SUBDIRS = internal
 
 INCDIR=../include
