@@ -1,6 +1,10 @@
 ﻿                                                     -*- coding: utf-8 -*-
 Changes for APR 1.2.12
 
+  *) apr_file_write() on Windows: Fix return code when writing to a non-
+     blocking pipe would have blocked.  PR 43563.
+     [Eric Covener <covener gmail.com>]
+
   *) Cause apr_file_dup2() on Win32 to update the MSVCRT psuedo-stdio
      handles for fd-based and FILE * based I/O.  [William Rowe]
 
