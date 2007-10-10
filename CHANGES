@@ -20,6 +20,9 @@ Changes for APR 1.2.12
 
 Changes for APR 1.2.11
 
+  *) Fix handling of EINTR from read() in apr_generate_random_bytes()
+     on platforms with /dev/random.  PR 39790.  [Joe Orton]
+
   *) Win32 apr_file_read: Correctly handle completion-based read-to-EOF.
      [Steven Naim <steven.naim googlemail.com>]
 
