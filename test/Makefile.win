@@ -119,7 +119,7 @@ CFLAGS = /nologo /c /W3 /Gm /EHsc /Zi /Od $(INCLUDES) \
 	 $(STATIC_CFLAGS) $(DEBUG_CFLAGS) /D "BINPATH=$(OUTDIR:\=/)" \
 	 /D _DEBUG /D WIN32 /Fo"$(INTDIR)/" /FD
 
-LD_LIBS = $(LOCAL_LIB) kernel32.lib advapi32.lib ws2_32.lib wsock32.lib \
+LD_LIBS = kernel32.lib advapi32.lib ws2_32.lib wsock32.lib \
 	  ole32.lib shell32.lib rpcrt4.lib
 
 LDFLAGS = /nologo /debug /subsystem:console /incremental:no 
@@ -128,30 +128,68 @@ SHLDFLAGS = /nologo /dll /debug /subsystem:windows /incremental:no
 .c{$(INTDIR)}.obj::
 	$(CL) $(CFLAGS) -c $< -Fd$(INTDIR)\ $(INCLUDES)
 
-.c{$(OUTDIR)}.exe:
-	$(CL) $(CFLAGS) -c $** -Fd$(INTDIR)\ $(INCLUDES) 
-	$(LD) $(LDFLAGS) /out:"$@" $*.obj $(LD_LIBS)
+$(OUTDIR)\testall.exe: $(ALL_TESTS) $(INTDIR)\abts.obj $(LOCAL_LIB)
+	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
 	@if exist "$@.manifest" \
 	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
 
-{$(INTDIR)}.obj{$(OUTDIR)}.exe:
-	$(LD) $(LDFLAGS) /out:"$@" $*.obj $(LD_LIBS)
+$(OUTDIR)\testapp.exe: $(INTDIR)/testapp.obj $(LOCAL_LIB) $(APP_LIB) 
+	$(LD) $(LDFLAGS) /entry:wmainCRTStartup /out:"$@" $** $(LD_LIBS)
+	@if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;2
+
+$(OUTDIR)\testlockperf.exe: $(INTDIR)\testlockperf.obj $(LOCAL_LIB)
+	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
 	@if exist "$@.manifest" \
 	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
 
-$(OUTDIR)\mod_test.dll: $(INTDIR)/mod_test.obj
+$(OUTDIR)\testmutexscope.exe: $(INTDIR)\testmutexscope.obj $(LOCAL_LIB)
+	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
+	@if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
+
+$(OUTDIR)\globalmutexchild.exe: $(INTDIR)\globalmutexchild.obj $(LOCAL_LIB)
+	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
+	@if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
+
+$(OUTDIR)\mod_test.dll: $(INTDIR)/mod_test.obj $(LOCAL_LIB) 
 	$(LD) $(SHLDFLAGS) /out:"$@" $** \
 	       /export:print_hello /export:count_reps $(LD_LIBS)
 	@if exist "$@.manifest" \
 	    mt.exe -manifest "$@.manifest" -outputresource:$@;2
 
-$(OUTDIR)\testapp.exe: $(INTDIR)/testapp.obj
-	$(LD) $(LDFLAGS) /out:"$@" $** \
-	      /entry:wmainCRTStartup $(APP_LIB) $(LD_LIBS)
+$(OUTDIR)\occhild.exe: $(INTDIR)\occhild.obj $(LOCAL_LIB)
+	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
 	@if exist "$@.manifest" \
-	    mt.exe -manifest "$@.manifest" -outputresource:$@;2
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
 
-$(OUTDIR)\testall.exe: $(ALL_TESTS) $(INTDIR)\abts.obj
+$(OUTDIR)\proc_child.exe: $(INTDIR)\proc_child.obj $(LOCAL_LIB)
+	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
+	@if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
+
+$(OUTDIR)\readchild.exe: $(INTDIR)\readchild.obj $(LOCAL_LIB)
+	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
+	@if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
+
+$(OUTDIR)\sockchild.exe: $(INTDIR)\sockchild.obj $(LOCAL_LIB)
+	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
+	@if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
+
+$(OUTDIR)\testshmconsumer.exe: $(INTDIR)\testshmconsumer.obj $(LOCAL_LIB)
+	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
+	@if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
+
+$(OUTDIR)\testshmproducer.exe: $(INTDIR)\testshmproducer.obj $(LOCAL_LIB)
+	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
+	@if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
+
+$(OUTDIR)\tryread.exe: $(INTDIR)\tryread.obj $(LOCAL_LIB)
 	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
 	@if exist "$@.manifest" \
 	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
