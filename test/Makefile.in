@@ -26,7 +26,7 @@ TESTALL_COMPONENTS = \
 	mod_test.la \
 	libmod_test.la \
 	occhild@EXEEXT@ \
-	readchild@EXEEXT@  
+	readchild@EXEEXT@ \
 	proc_child@EXEEXT@ \
         tryread@EXEEXT@ \
 	sockchild@EXEEXT@ \
