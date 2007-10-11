@@ -1,6 +1,10 @@
 ﻿                                                     -*- coding: utf-8 -*-
 Changes for APR 1.2.12
 
+  *) apr_procattr_io_set() on Windows: Set pipe handles non-blocking as
+     appropriate based on the input parameters.  PR 43522.
+     [Eric Covener <covener gmail.com>]
+
   *) apr_file_write() on Windows: Fix return code when writing to a non-
      blocking pipe would have blocked.  PR 43563.
      [Eric Covener <covener gmail.com>]
