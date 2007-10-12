@@ -31,6 +31,7 @@
 #endif
 #include "apr_arch_misc.h"
 #include "apr_arch_inherit.h"
+#include <io.h>
 
 #if APR_HAS_UNICODE_FS
 apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen, 
@@ -227,25 +228,34 @@ apr_status_t file_cleanup(void *thefile)
 
     if (file->filehand != INVALID_HANDLE_VALUE) {
 
-        /* In order to avoid later segfaults with handle 'reuse',
-         * we must protect against the case that a dup2'ed handle
-         * is being closed, and invalidate the corresponding StdHandle 
-         */
-        if (file->filehand == GetStdHandle(STD_ERROR_HANDLE)) {
-            SetStdHandle(STD_ERROR_HANDLE, INVALID_HANDLE_VALUE);
-        }
-        if (file->filehand == GetStdHandle(STD_OUTPUT_HANDLE)) {
-            SetStdHandle(STD_OUTPUT_HANDLE, INVALID_HANDLE_VALUE);
-        }
-        if (file->filehand == GetStdHandle(STD_INPUT_HANDLE)) {
-            SetStdHandle(STD_INPUT_HANDLE, INVALID_HANDLE_VALUE);
-        }
-
         if (file->buffered) {
             /* XXX: flush here is not mutex protected */
             flush_rv = apr_file_flush((apr_file_t *)thefile);
         }
-        CloseHandle(file->filehand);
+
+        /* In order to avoid later segfaults with handle 'reuse',
+         * we must protect against the case that a dup2'ed handle
+         * is being closed, and invalidate the corresponding StdHandle 
+         * We also tell msvcrt when stdhandles are closed.
+         */
+        if (file->flags & APR_STD_FLAGS)
+        {
+            if ((file->flags & APR_STD_FLAGS) == APR_STDERR_FLAG) {
+                _close(2);
+                SetStdHandle(STD_ERROR_HANDLE, INVALID_HANDLE_VALUE);
+            }
+            else if ((file->flags & APR_STD_FLAGS) == APR_STDOUT_FLAG) {
+                _close(1);
+                SetStdHandle(STD_OUTPUT_HANDLE, INVALID_HANDLE_VALUE);
+            }
+            else if ((file->flags & APR_STD_FLAGS) == APR_STDIN_FLAG) {
+                _close(0);
+                SetStdHandle(STD_INPUT_HANDLE, INVALID_HANDLE_VALUE);
+            }
+        }
+        else
+            CloseHandle(file->filehand);
+
         file->filehand = INVALID_HANDLE_VALUE;
     }
     if (file->pOverlapped && file->pOverlapped->hEvent) {
