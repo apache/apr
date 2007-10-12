@@ -971,5 +971,6 @@ define([apr_cvname], apr_cv_typematch_[]translit([$1], [ ], [_])_[]translit([$2]
 AC_CACHE_CHECK([whether $1 and $2 are the same], apr_cvname, [
 AC_TRY_COMPILE(AC_INCLUDES_DEFAULT, [
     int foo[0 - !__builtin_types_compatible_p($1, $2)];
-], [apr_cvname=yes $3], [apr_cvname=no])])
+], [apr_cvname=yes
+$3], [apr_cvname=no])])
 ])
