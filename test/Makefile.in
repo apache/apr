@@ -16,21 +16,21 @@ STDTEST_PORTABLE = \
 	testall@EXEEXT@
 
 OTHER_PROGRAMS = \
-        sendfile@EXEEXT@ \
-	testshmproducer@EXEEXT@ \
-	testshmconsumer@EXEEXT@ \
-        echod@EXEEXT@ \
-        sockperf@EXEEXT@
+	sendfile@EXEEXT@ \
+	echod@EXEEXT@ \
+	sockperf@EXEEXT@
 
 TESTALL_COMPONENTS = \
-	mod_test.la \
+	globalmutexchild@EXEEXT@ \
 	libmod_test.la \
+	mod_test.la \
 	occhild@EXEEXT@ \
-	readchild@EXEEXT@ \
 	proc_child@EXEEXT@ \
-        tryread@EXEEXT@ \
+	readchild@EXEEXT@ \
 	sockchild@EXEEXT@ \
-	globalmutexchild@EXEEXT@ 
+	testshmproducer@EXEEXT@ \
+	testshmconsumer@EXEEXT@ \
+	tryread@EXEEXT@
 
 
 PROGRAMS = $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE) $(OTHER_PROGRAMS)
