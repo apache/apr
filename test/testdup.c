@@ -128,6 +128,8 @@ static void test_dup2(abts_case *tc, void *data)
     rv = apr_file_dup2(errfile, saveerr, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, errfile);
+
+    apr_file_close(saveerr);
 }
 
 static void test_dup2_readwrite(abts_case *tc, void *data)
@@ -178,6 +180,8 @@ static void test_dup2_readwrite(abts_case *tc, void *data)
     rv = apr_file_dup2(errfile, saveerr, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, errfile);
+
+    apr_file_close(saveerr);
 }
 
 abts_suite *testdup(abts_suite *suite)
