@@ -43,7 +43,7 @@ static void launch_child(abts_case *tc, apr_proc_t *proc, const char *arg1, apr_
     args[0] = "sockchild" EXTENSION;
     args[1] = arg1;
     args[2] = NULL;
-    rv = apr_proc_create(proc, "./sockchild" EXTENSION, args, NULL,
+    rv = apr_proc_create(proc, TESTBINPATH "sockchild" EXTENSION, args, NULL,
                          procattr, p);
     APR_ASSERT_SUCCESS(tc, "Couldn't launch program", rv);
 }
@@ -133,7 +133,7 @@ static void test_send(abts_case *tc, void *data)
     apr_socket_send(sock2, DATASTR, &length);
 
     /* Make sure that the client received the data we sent */
-    ABTS_INT_EQUAL(tc, strlen(DATASTR), wait_child(tc, &proc));
+    ABTS_SIZE_EQUAL(tc, strlen(DATASTR), wait_child(tc, &proc));
 
     rv = apr_socket_close(sock2);
     APR_ASSERT_SUCCESS(tc, "Problem closing connected socket", rv);
@@ -167,7 +167,7 @@ static void test_recv(abts_case *tc, void *data)
 
     /* Make sure that the server received the data we sent */
     ABTS_STR_EQUAL(tc, DATASTR, datastr);
-    ABTS_INT_EQUAL(tc, strlen(datastr), wait_child(tc, &proc));
+    ABTS_SIZE_EQUAL(tc, strlen(datastr), wait_child(tc, &proc));
 
     rv = apr_socket_close(sock2);
     APR_ASSERT_SUCCESS(tc, "Problem closing connected socket", rv);

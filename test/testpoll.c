@@ -90,7 +90,7 @@ static void send_msg(apr_socket_t **sockarray, apr_sockaddr_t **sas, int which,
 
     rv = apr_socket_sendto(sockarray[which], sas[which], 0, "hello", &len);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, strlen("hello"), len);
+    ABTS_SIZE_EQUAL(tc, strlen("hello"), len);
 }
 
 static void recv_msg(apr_socket_t **sockarray, int which, apr_pool_t *p, 
@@ -107,7 +107,7 @@ static void recv_msg(apr_socket_t **sockarray, int which, apr_pool_t *p,
 
     rv = apr_socket_recvfrom(recsa, sockarray[which], 0, buffer, &buflen);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, strlen("hello"), buflen);
+    ABTS_SIZE_EQUAL(tc, strlen("hello"), buflen);
     ABTS_STR_EQUAL(tc, "hello", buffer);
 }
 

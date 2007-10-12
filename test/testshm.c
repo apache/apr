@@ -83,7 +83,7 @@ static void test_check_size(abts_case *tc, void *data)
     ABTS_PTR_NOTNULL(tc, shm);
 
     retsize = apr_shm_size_get(shm);
-    ABTS_INT_EQUAL(tc, SHARED_SIZE, retsize);
+    ABTS_SIZE_EQUAL(tc, SHARED_SIZE, retsize);
 
     rv = apr_shm_destroy(shm);
     APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
@@ -177,7 +177,7 @@ static void test_named(abts_case *tc, void *data)
     ABTS_PTR_NOTNULL(tc, shm);
 
     retsize = apr_shm_size_get(shm);
-    ABTS_INT_EQUAL(tc, SHARED_SIZE, retsize);
+    ABTS_SIZE_EQUAL(tc, SHARED_SIZE, retsize);
 
     boxes = apr_shm_baseaddr_get(shm);
     ABTS_PTR_NOTNULL(tc, boxes);
@@ -187,7 +187,7 @@ static void test_named(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "Couldn't create attr1", rv);
     args[0] = apr_pstrdup(p, "testshmproducer" EXTENSION);
     args[1] = NULL;
-    rv = apr_proc_create(&pidproducer, "./testshmproducer" EXTENSION, args,
+    rv = apr_proc_create(&pidproducer, TESTBINPATH "testshmproducer" EXTENSION, args,
                          NULL, attr1, p);
     APR_ASSERT_SUCCESS(tc, "Couldn't launch producer", rv);
 
@@ -195,7 +195,7 @@ static void test_named(abts_case *tc, void *data)
     ABTS_PTR_NOTNULL(tc, attr2);
     APR_ASSERT_SUCCESS(tc, "Couldn't create attr2", rv);
     args[0] = apr_pstrdup(p, "testshmconsumer" EXTENSION);
-    rv = apr_proc_create(&pidconsumer, "./testshmconsumer" EXTENSION, args, 
+    rv = apr_proc_create(&pidconsumer, TESTBINPATH "testshmconsumer" EXTENSION, args, 
                          NULL, attr2, p);
     APR_ASSERT_SUCCESS(tc, "Couldn't launch consumer", rv);
 
