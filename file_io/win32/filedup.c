@@ -40,7 +40,7 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
 
     (*new_file) = (apr_file_t *) apr_pcalloc(p, sizeof(apr_file_t));
     (*new_file)->filehand = newhand;
-    (*new_file)->flags = old_file->flags & ~APR_INHERIT;
+    (*new_file)->flags = old_file->flags & ~(APR_STD_FLAGS | APR_INHERIT);
     (*new_file)->pool = p;
     (*new_file)->fname = apr_pstrdup(p, old_file->fname);
     (*new_file)->append = old_file->append;
@@ -73,21 +73,10 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
     apr_int32_t newflags;
     int fd;
 
-    if (new_file->flags & APR_STD_FLAGS) {
-        /* if (!DuplicateHandle(hproc, old_file->filehand, 
-         *                      hproc, &newhand, 0,
-         *                      TRUE, DUPLICATE_SAME_ACCESS)) {
-         *     return apr_get_os_error();
-         * }
-         * if (((stdhandle & stderr_handle) && !SetStdHandle(STD_ERROR_HANDLE, newhand)) ||
-         *     ((stdhandle & stdout_handle) && !SetStdHandle(STD_OUTPUT_HANDLE, newhand)) ||
-         *     ((stdhandle & stdin_handle) && !SetStdHandle(STD_INPUT_HANDLE, newhand))) {
-         *     return apr_get_os_error();
-         * }
-         * newflags = old_file->flags | APR_INHERIT;
-         */
-
-        if ((new_file->flags & APR_STD_FLAGS) == APR_STDERR_FLAG) {
+    if (new_file->flags & APR_STD_FLAGS)
+    {
+        if ((new_file->flags & APR_STD_FLAGS) == APR_STDERR_FLAG)
+        {
             /* Flush stderr and unset its buffer, then commit the fd-based buffer.
              * This is typically a noop for Win2K/XP since services with NULL std
              * handles [but valid FILE *'s, oddly enough], but is required
@@ -102,6 +91,7 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
              * and close our temporary pseudo-fd once it's been duplicated.
              * This will incidently keep the FILE-based stderr in sync.
              * Note the apparently redundant _O_BINARY coersions are required.
+             * Note the _dup2 will close the previous std Win32 handle.
              */
             if (!DuplicateHandle(hproc, old_file->filehand, hproc, &newhand,
                                  0, FALSE, DUPLICATE_SAME_ACCESS)) {
@@ -120,8 +110,7 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
              */
             newhand = (HANDLE)_get_osfhandle(2);
         }
-
-        if ((new_file->flags & APR_STD_FLAGS) == APR_STDOUT_FLAG) {
+        else if ((new_file->flags & APR_STD_FLAGS) == APR_STDOUT_FLAG) {
             /* For the process flow see the stderr case above */
             fflush(stdout);
             setvbuf(stdout, NULL, _IONBF, 0);
@@ -137,8 +126,7 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
             _setmode(1, _O_BINARY);
             newhand = (HANDLE)_get_osfhandle(1);
         }
-
-        if ((new_file->flags & APR_STD_FLAGS) == APR_STDIN_FLAG) {
+        else if ((new_file->flags & APR_STD_FLAGS) == APR_STDIN_FLAG) {
             /* For the process flow see the stderr case above */
             fflush(stdin);
             setvbuf(stdin, NULL, _IONBF, 0);
@@ -154,7 +142,10 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
             _setmode(0, _O_BINARY);
             newhand = (HANDLE)_get_osfhandle(0);
         }
-        newflags = old_file->flags | APR_INHERIT;
+        newflags = (new_file->flags & APR_STD_FLAGS) 
+                 | (old_file->flags & ~APR_STD_FLAGS) | APR_INHERIT;
+
+        /* No need  to close the old file, _dup2() above did that for us */
     }
     else {
         if (!DuplicateHandle(hproc, old_file->filehand, 
@@ -162,11 +153,12 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                              FALSE, DUPLICATE_SAME_ACCESS)) {
             return apr_get_os_error();
         }
-        newflags = old_file->flags & ~APR_INHERIT;
-    }
+        newflags = old_file->flags & ~(APR_STD_FLAGS | APR_INHERIT);
 
-    if (new_file->filehand && (new_file->filehand != INVALID_HANDLE_VALUE)) {
-        CloseHandle(new_file->filehand);
+        if (new_file->filehand
+                && (new_file->filehand != INVALID_HANDLE_VALUE)) {
+            CloseHandle(new_file->filehand);
+        }
     }
 
     new_file->flags = newflags;
