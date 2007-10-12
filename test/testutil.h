@@ -15,12 +15,22 @@
  */
 
 #include "apr_pools.h"
+#include "apr_general.h"
 #include "abts.h"
 
 #ifndef APR_TEST_UTIL
 #define APR_TEST_UTIL
 
-/* XXX FIXME */
+#ifdef WIN32
+#ifdef BINPATH
+#define TESTBINPATH APR_STRINGIFY(BINPATH) "/"
+#else
+#define TESTBINPATH ""
+#endif
+#else
+#define TESTBINPATH "./"
+#endif
+
 #ifdef WIN32
 #define EXTENSION ".exe"
 #elif NETWARE
