@@ -148,12 +148,12 @@ static void sendto_receivefrom_helper(abts_case *tc, const char *addr, int famil
     len = STRLEN;
     rv = apr_socket_sendto(sock2, to, 0, sendbuf, &len);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, STRLEN, len);
+    ABTS_SIZE_EQUAL(tc, STRLEN, len);
 
     len = 80;
     rv = apr_socket_recvfrom(from, sock, 0, recvbuf, &len);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, STRLEN, len);
+    ABTS_SIZE_EQUAL(tc, STRLEN, len);
     ABTS_STR_EQUAL(tc, "APR_INET, SOCK_DGRAM", recvbuf);
 
     apr_sockaddr_ip_get(&ip_addr, from);
