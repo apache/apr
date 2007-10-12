@@ -1,24 +1,28 @@
-# Microsoft Developer Studio Project File - Name="testall" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="testlib" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) External Target" 0x0106
 
-CFG=testall - Win32 Debug
+CFG=testlib - Win32 Release
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "testall.mak".
+!MESSAGE NMAKE /f "testlib.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "testall.mak" CFG="testall - Win32 Debug"
+!MESSAGE NMAKE /f "testlib.mak" CFG="testlib - Win32 Release"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "testall - Win32 Release" (based on "Win32 (x86) External Target")
-!MESSAGE "testall - Win32 Debug" (based on "Win32 (x86) External Target")
+!MESSAGE "testlib - Win32 Release" (based on "Win32 (x86) External Target")
+!MESSAGE "testlib - Win32 Debug" (based on "Win32 (x86) External Target")
+!MESSAGE "testlib - Win32 ReleaseNT" (based on "Win32 (x86) External Target")
+!MESSAGE "testlib - Win32 DebugNT" (based on "Win32 (x86) External Target")
+!MESSAGE "testlib - x64 Release" (based on "Win32 (x86) External Target")
+!MESSAGE "testlib - x64 Debug" (based on "Win32 (x86) External Target")
 !MESSAGE 
 
 # Begin Project
@@ -26,45 +30,129 @@ CFG=testall - Win32 Debug
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 
-!IF  "$(CFG)" == "testall - Win32 Release"
+!IF  "$(CFG)" == "testlib - Win32 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir ""
 # PROP BASE Intermediate_Dir ""
-# PROP BASE Cmd_Line "NMAKE /f Makefile.win all"
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=LibR OUTDIR=LibR MODEL=static check"
 # PROP BASE Rebuild_Opt "/a"
-# PROP BASE Target_File "testall.exe"
-# PROP BASE Bsc_Name "testall.bsc"
+# PROP BASE Target_File "LibR\testall.exe"
+# PROP BASE Bsc_Name ""
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""
-# PROP Cmd_Line "NMAKE /f Makefile.win all"
+# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=LibR OUTDIR=LibR MODEL=static check"
 # PROP Rebuild_Opt "/a"
-# PROP Target_File "testall.exe"
+# PROP Target_File "LibR\testall.exe"
 # PROP Bsc_Name ""
 # PROP Target_Dir ""
 
-!ELSEIF  "$(CFG)" == "testall - Win32 Debug"
+!ELSEIF  "$(CFG)" == "testlib - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
 # PROP BASE Output_Dir ""
 # PROP BASE Intermediate_Dir ""
-# PROP BASE Cmd_Line "NMAKE /f Makefile.win all"
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=LibD OUTDIR=LibD MODEL=static _DEBUG=1 check"
 # PROP BASE Rebuild_Opt "/a"
-# PROP BASE Target_File "testall.exe"
-# PROP BASE Bsc_Name "testall.bsc"
+# PROP BASE Target_File "LibD\testall.exe"
+# PROP BASE Bsc_Name ""
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""
-# PROP Cmd_Line "NMAKE /f Makefile.win all"
+# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=LibD OUTDIR=LibD MODEL=static _DEBUG=1 check"
 # PROP Rebuild_Opt "/a"
-# PROP Target_File "testall.exe"
+# PROP Target_File "LibD\testall.exe"
+# PROP Bsc_Name ""
+# PROP Target_Dir ""
+
+!IF  "$(CFG)" == "testlib - Win32 ReleaseNT"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir ""
+# PROP BASE Intermediate_Dir ""
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\LibR OUTDIR=NT\LibR MODEL=static check"
+# PROP BASE Rebuild_Opt "/a"
+# PROP BASE Target_File "NT\LibR\testall.exe"
+# PROP BASE Bsc_Name ""
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir ""
+# PROP Intermediate_Dir ""
+# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\LibR OUTDIR=NT\LibR MODEL=static check"
+# PROP Rebuild_Opt "/a"
+# PROP Target_File "NT\LibR\testall.exe"
+# PROP Bsc_Name ""
+# PROP Target_Dir ""
+
+!ELSEIF  "$(CFG)" == "testlib - Win32 DebugNT"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir ""
+# PROP BASE Intermediate_Dir ""
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\LibD OUTDIR=NT\LibD MODEL=static _DEBUG=1 check"
+# PROP BASE Rebuild_Opt "/a"
+# PROP BASE Target_File "NT\LibD\testall.exe"
+# PROP BASE Bsc_Name ""
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir ""
+# PROP Intermediate_Dir ""
+# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\LibD OUTDIR=NT\LibD MODEL=static _DEBUG=1 check"
+# PROP Rebuild_Opt "/a"
+# PROP Target_File "NT\LibD\testall.exe"
+# PROP Bsc_Name ""
+# PROP Target_Dir ""
+
+!IF  "$(CFG)" == "testlib - x64 Release"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir ""
+# PROP BASE Intermediate_Dir ""
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=x64\LibR OUTDIR=x64\LibR MODEL=static check"
+# PROP BASE Rebuild_Opt "/a"
+# PROP BASE Target_File "x64\LibR\testall.exe"
+# PROP BASE Bsc_Name ""
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir ""
+# PROP Intermediate_Dir ""
+# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=x64\LibR OUTDIR=x64\LibR MODEL=static check"
+# PROP Rebuild_Opt "/a"
+# PROP Target_File "x64\LibR\testall.exe"
+# PROP Bsc_Name ""
+# PROP Target_Dir ""
+
+!ELSEIF  "$(CFG)" == "testlib - x64 Debug"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir ""
+# PROP BASE Intermediate_Dir ""
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=x64\LibD OUTDIR=x64\LibD MODEL=static _DEBUG=1 check"
+# PROP BASE Rebuild_Opt "/a"
+# PROP BASE Target_File "x64\LibD\testall.exe"
+# PROP BASE Bsc_Name ""
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir ""
+# PROP Intermediate_Dir ""
+# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=x64\LibD OUTDIR=x64\LibD MODEL=static _DEBUG=1 check"
+# PROP Rebuild_Opt "/a"
+# PROP Target_File "x64\LibD\testall.exe"
 # PROP Bsc_Name ""
 # PROP Target_Dir ""
 
@@ -72,54 +160,26 @@ CFG=testall - Win32 Debug
 
 # Begin Target
 
-# Name "testall - Win32 Release"
-# Name "testall - Win32 Debug"
+# Name "testlib - Win32 Release"
+# Name "testlib - Win32 Debug"
+# Name "testlib - Win32 ReleaseNT"
+# Name "testlib - Win32 DebugNT"
+# Name "testlib - x64 Release"
+# Name "testlib - x64 Debug"
+# Begin Group "testall Source Files"
 
-!IF  "$(CFG)" == "testall - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "testall - Win32 Debug"
-
-!ENDIF 
-
+# PROP Default_Filter ".c"
 # Begin Source File
 
 SOURCE=.\abts.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\globalmutexchild.c
+SOURCE=.\abts.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Makefile.win
-# End Source File
-# Begin Source File
-
-SOURCE=.\mod_test.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\nw_misc.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\occhild.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\proc_child.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\readchild.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\sendfile.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\sockchild.c
+SOURCE=.\abts_tests.h
 # End Source File
 # Begin Source File
 
@@ -167,6 +227,10 @@ SOURCE=.\testflock.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testflock.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\testfmt.c
 # End Source File
 # Begin Source File
@@ -176,6 +240,10 @@ SOURCE=.\testfnmatch.c
 # Begin Source File
 
 SOURCE=.\testglobalmutex.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testglobalmutex.h
 # End Source File
 # Begin Source File
 
@@ -195,15 +263,7 @@ SOURCE=.\testlock.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\testlockperf.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\testmmap.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\testmutexscope.c
 # End Source File
 # Begin Source File
 
@@ -235,10 +295,6 @@ SOURCE=.\testproc.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\testprocmutex.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\testrand.c
 # End Source File
 # Begin Source File
@@ -251,11 +307,7 @@ SOURCE=.\testshm.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\testshmconsumer.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\testshmproducer.c
+SOURCE=.\testshm.h
 # End Source File
 # Begin Source File
 
@@ -264,6 +316,10 @@ SOURCE=.\testsleep.c
 # Begin Source File
 
 SOURCE=.\testsock.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testsock.h
 # End Source File
 # Begin Source File
 
@@ -311,11 +367,76 @@ SOURCE=.\testutil.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testutil.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\testvsn.c
+# End Source File
+# End Group
+# Begin Group "Other Source Files"
+
+# PROP Default_Filter ".c"
+# Begin Source File
+
+SOURCE=.\globalmutexchild.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\mod_test.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\nw_misc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\occhild.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\proc_child.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\readchild.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\sendfile.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\sockchild.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testlockperf.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testmutexscope.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testprocmutex.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testshmconsumer.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testshmproducer.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\tryread.c
+# End Source File
+# End Group
+# Begin Source File
+
+SOURCE=.\Makefile.win
 # End Source File
 # End Target
 # End Project
