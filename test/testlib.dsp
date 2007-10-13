@@ -36,7 +36,7 @@ CFG=testlib - Win32 Release
 # PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir ""
 # PROP BASE Intermediate_Dir ""
-# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=LibR OUTDIR=LibR MODEL=static check"
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=LibR OUTDIR=LibR MODEL=static all check"
 # PROP BASE Rebuild_Opt "/a"
 # PROP BASE Target_File "LibR\testall.exe"
 # PROP BASE Bsc_Name ""
@@ -45,7 +45,7 @@ CFG=testlib - Win32 Release
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""
-# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=LibR OUTDIR=LibR MODEL=static check"
+# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=LibR OUTDIR=LibR MODEL=static all check"
 # PROP Rebuild_Opt "/a"
 # PROP Target_File "LibR\testall.exe"
 # PROP Bsc_Name ""
@@ -57,7 +57,7 @@ CFG=testlib - Win32 Release
 # PROP BASE Use_Debug_Libraries 1
 # PROP BASE Output_Dir ""
 # PROP BASE Intermediate_Dir ""
-# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=LibD OUTDIR=LibD MODEL=static _DEBUG=1 check"
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=LibD OUTDIR=LibD MODEL=static _DEBUG=1 all check"
 # PROP BASE Rebuild_Opt "/a"
 # PROP BASE Target_File "LibD\testall.exe"
 # PROP BASE Bsc_Name ""
@@ -66,7 +66,7 @@ CFG=testlib - Win32 Release
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""
-# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=LibD OUTDIR=LibD MODEL=static _DEBUG=1 check"
+# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=LibD OUTDIR=LibD MODEL=static _DEBUG=1 all check"
 # PROP Rebuild_Opt "/a"
 # PROP Target_File "LibD\testall.exe"
 # PROP Bsc_Name ""
@@ -78,7 +78,7 @@ CFG=testlib - Win32 Release
 # PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir ""
 # PROP BASE Intermediate_Dir ""
-# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\LibR OUTDIR=NT\LibR MODEL=static check"
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\LibR OUTDIR=NT\LibR MODEL=static all check"
 # PROP BASE Rebuild_Opt "/a"
 # PROP BASE Target_File "NT\LibR\testall.exe"
 # PROP BASE Bsc_Name ""
@@ -87,7 +87,7 @@ CFG=testlib - Win32 Release
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""
-# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\LibR OUTDIR=NT\LibR MODEL=static check"
+# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\LibR OUTDIR=NT\LibR MODEL=static all check"
 # PROP Rebuild_Opt "/a"
 # PROP Target_File "NT\LibR\testall.exe"
 # PROP Bsc_Name ""
@@ -99,7 +99,7 @@ CFG=testlib - Win32 Release
 # PROP BASE Use_Debug_Libraries 1
 # PROP BASE Output_Dir ""
 # PROP BASE Intermediate_Dir ""
-# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\LibD OUTDIR=NT\LibD MODEL=static _DEBUG=1 check"
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\LibD OUTDIR=NT\LibD MODEL=static _DEBUG=1 all check"
 # PROP BASE Rebuild_Opt "/a"
 # PROP BASE Target_File "NT\LibD\testall.exe"
 # PROP BASE Bsc_Name ""
@@ -108,7 +108,7 @@ CFG=testlib - Win32 Release
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""
-# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\LibD OUTDIR=NT\LibD MODEL=static _DEBUG=1 check"
+# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\LibD OUTDIR=NT\LibD MODEL=static _DEBUG=1 all check"
 # PROP Rebuild_Opt "/a"
 # PROP Target_File "NT\LibD\testall.exe"
 # PROP Bsc_Name ""
@@ -120,7 +120,7 @@ CFG=testlib - Win32 Release
 # PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir ""
 # PROP BASE Intermediate_Dir ""
-# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=x64\LibR OUTDIR=x64\LibR MODEL=static check"
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=x64\LibR OUTDIR=x64\LibR MODEL=static all check"
 # PROP BASE Rebuild_Opt "/a"
 # PROP BASE Target_File "x64\LibR\testall.exe"
 # PROP BASE Bsc_Name ""
@@ -129,7 +129,7 @@ CFG=testlib - Win32 Release
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""
-# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=x64\LibR OUTDIR=x64\LibR MODEL=static check"
+# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=x64\LibR OUTDIR=x64\LibR MODEL=static all check"
 # PROP Rebuild_Opt "/a"
 # PROP Target_File "x64\LibR\testall.exe"
 # PROP Bsc_Name ""
@@ -141,7 +141,7 @@ CFG=testlib - Win32 Release
 # PROP BASE Use_Debug_Libraries 1
 # PROP BASE Output_Dir ""
 # PROP BASE Intermediate_Dir ""
-# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=x64\LibD OUTDIR=x64\LibD MODEL=static _DEBUG=1 check"
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=x64\LibD OUTDIR=x64\LibD MODEL=static _DEBUG=1 all check"
 # PROP BASE Rebuild_Opt "/a"
 # PROP BASE Target_File "x64\LibD\testall.exe"
 # PROP BASE Bsc_Name ""
@@ -150,7 +150,7 @@ CFG=testlib - Win32 Release
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""
-# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=x64\LibD OUTDIR=x64\LibD MODEL=static _DEBUG=1 check"
+# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=x64\LibD OUTDIR=x64\LibD MODEL=static _DEBUG=1 all check"
 # PROP Rebuild_Opt "/a"
 # PROP Target_File "x64\LibD\testall.exe"
 # PROP Bsc_Name ""
