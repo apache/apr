@@ -47,9 +47,6 @@ STDTEST_PORTABLE = \
 	$(OUTDIR)\testlockperf.exe \
 	$(OUTDIR)\testmutexscope.exe
 
-OTHER_PROGRAMS = \
-	$(OUTDIR)\sendfile.exe 
-
 TESTALL_COMPONENTS = \
 	$(OUTDIR)\mod_test.dll \
 	$(OUTDIR)\occhild.exe \
