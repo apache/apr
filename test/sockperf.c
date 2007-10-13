@@ -38,7 +38,7 @@
 
 struct testSet {
     char c;
-    int size;
+    apr_size_t size;
     int iters;
 } testRuns[] = {
     { 'a', 1, 3 },
@@ -75,7 +75,7 @@ static closeConnection(apr_socket_t *sock)
 }
 
 static apr_status_t sendRecvBuffer(apr_time_t *t, const char *buf, 
-                                   int size, apr_pool_t *pool)
+                                   apr_size_t size, apr_pool_t *pool)
 {
     apr_socket_t *sock;
     apr_status_t rv;
@@ -175,7 +175,8 @@ static apr_status_t runTest(struct testSet *ts, struct testResult *res,
 {
     char *buffer;
     apr_status_t rv;
-    int i, sz = ts->size * TEST_SIZE;
+    int i;
+    apr_size_t sz = ts->size * TEST_SIZE;
     
     buffer = apr_palloc(pool, sz);
     if (!buffer) {
