@@ -88,7 +88,6 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
         return APR_ENOMEM;
     }
 
-    thread->pool = pool;
     thread->attr = attr;
     thread->func = func;
     thread->data = data;
