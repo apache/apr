@@ -1,6 +1,10 @@
 ﻿                                                     -*- coding: utf-8 -*-
 Changes for APR 1.2.12
 
+  *) The WIN32 cleanup routine for shared memory segments could wrongly
+     return unknown errors and leak a open handle.
+     [Joe Mudd <Joe.Mudd sas.com>]
+
   *) apr_procattr_io_set() on Windows: Set pipe handles non-blocking as
      appropriate based on the input parameters.  PR 43522.
      [Eric Covener <covener gmail.com>]
