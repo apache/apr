@@ -103,7 +103,6 @@ apr_status_t apr_thread_create(apr_thread_t **new,
         return APR_ENOMEM;
     }
     
-    (*new)->pool = pool;
     (*new)->data = data;
     (*new)->func = func;
     (*new)->thread_name = (char*)apr_pstrdup(pool, threadName);
