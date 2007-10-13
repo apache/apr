@@ -181,7 +181,7 @@ static apr_status_t do_mcast(int type, apr_socket_t *sock,
             fill_mip_v6(&mip6, mcast, iface);
 
             if (setsockopt(sock->socketdes, IPPROTO_IPV6, type,
-                           &mip6, sizeof(mip6)) == -1) {
+                           (const void *) &mip6, sizeof(mip6)) == -1) {
                 rv = errno;
             }
         }
@@ -209,7 +209,7 @@ static apr_status_t do_mcast_opt(int type, apr_socket_t *sock,
         unsigned int loopopt = value;
         type = IPV6_MULTICAST_LOOP;
         if (setsockopt(sock->socketdes, IPPROTO_IPV6, type,
-                       &loopopt, sizeof(loopopt)) == -1) {
+                       (const void *) &loopopt, sizeof(loopopt)) == -1) {
             rv = errno;
         }
     }
@@ -295,7 +295,7 @@ APR_DECLARE(apr_status_t) apr_mcast_interface(apr_socket_t *sock,
     else if (sock_is_ipv6(sock)) {
         unsigned int idx = find_if_index(iface);
         if (setsockopt(sock->socketdes, IPPROTO_IPV6, IPV6_MULTICAST_IF,
-                       &idx, sizeof(idx)) == -1) {
+                       (const void *) &idx, sizeof(idx)) == -1) {
             rv = errno;
         }
     }
