@@ -425,6 +425,9 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
  *          process invocations - such as a log file. You can save some 
  *          extra function calls by not creating your own pipe since this
  *          creates one in the process space for you.
+ * @bug Note that calling this function with two NULL files on some platforms
+ * creates an APR_FULL_BLOCK pipe, but this behavior is neither portable nor
+ * is it supported.  @see apr_procattr_io_set instead for simple pipes.
  */
 APR_DECLARE(apr_status_t) apr_procattr_child_in_set(struct apr_procattr_t *attr,
                                                   apr_file_t *child_in,
@@ -439,6 +442,9 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(struct apr_procattr_t *attr,
  *         useful if you have already opened a pipe (or multiple files)
  *         that you wish to use, perhaps persistently across multiple
  *         process invocations - such as a log file. 
+ * @bug Note that calling this function with two NULL files on some platforms
+ * creates an APR_FULL_BLOCK pipe, but this behavior is neither portable nor
+ * is it supported.  @see apr_procattr_io_set instead for simple pipes.
  */
 APR_DECLARE(apr_status_t) apr_procattr_child_out_set(struct apr_procattr_t *attr,
                                                    apr_file_t *child_out,
@@ -453,6 +459,9 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(struct apr_procattr_t *attr
  *         useful if you have already opened a pipe (or multiple files)
  *         that you wish to use, perhaps persistently across multiple
  *         process invocations - such as a log file. 
+ * @bug Note that calling this function with two NULL files on some platforms
+ * creates an APR_FULL_BLOCK pipe, but this behavior is neither portable nor
+ * is it supported.  @see apr_procattr_io_set instead for simple pipes.
  */
 APR_DECLARE(apr_status_t) apr_procattr_child_err_set(struct apr_procattr_t *attr,
                                                    apr_file_t *child_err,
