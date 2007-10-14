@@ -103,7 +103,8 @@ static void udp6_socket(abts_case *tc, void *data)
 #endif
 }
 
-static void sendto_receivefrom_helper(abts_case *tc, const char *addr, int family)
+static void sendto_receivefrom_helper(abts_case *tc, const char *addr, 
+                                      const char *junkaddr, int family)
 {
     apr_status_t rv;
     apr_socket_t *sock = NULL;
@@ -150,6 +151,11 @@ static void sendto_receivefrom_helper(abts_case *tc, const char *addr, int famil
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_SIZE_EQUAL(tc, STRLEN, len);
 
+    /* fill the "from" sockaddr with a random address to ensure that
+     * recvfrom sets it up properly. */
+    rv = apr_sockaddr_info_get(&from, junkaddr, family, 4242, 0, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
     len = 80;
     rv = apr_socket_recvfrom(from, sock, 0, recvbuf, &len);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -167,10 +173,10 @@ static void sendto_receivefrom_helper(abts_case *tc, const char *addr, int famil
 
 static void sendto_receivefrom(abts_case *tc, void *data)
 {
+    sendto_receivefrom_helper(tc, "127.0.0.1",  "127.1.2.3", APR_INET);
 #if APR_HAVE_IPV6
-    sendto_receivefrom_helper(tc, "::1", APR_INET6);
+    sendto_receivefrom_helper(tc, "::1", "FA0E::1234:127.1.2.3", APR_INET6);
 #endif
-    sendto_receivefrom_helper(tc, "127.0.0.1", APR_INET);
 }
 
 static void socket_userdata(abts_case *tc, void *data)
