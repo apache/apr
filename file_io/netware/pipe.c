@@ -184,10 +184,8 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
 {
     apr_status_t status;
 
-    if ((status = apr_file_pipe_create(in, out, attr->pool)) 
-               != APR_SUCCESS) {
+    if ((status = apr_file_pipe_create(in, out, pool)) != APR_SUCCESS)
         return status;
-    }
 
     switch (blocking) {
         case APR_FULL_BLOCK:
