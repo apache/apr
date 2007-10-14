@@ -59,10 +59,16 @@ static void udp_socket(abts_case *tc, void *data)
 /* On recent Linux systems, whilst IPv6 is always supported by glibc,
  * socket(AF_INET6, ...) calls will fail with EAFNOSUPPORT if the
  * "ipv6" kernel module is not loaded.  */
-#ifdef EAFNOSUPPORT
+#if defined(WSAEAFNOSUPPORT)
+#define V6_NOT_ENABLED(e) ((e) == APR_OS_START_SYSERR + WSAEAFNOSUPPORT)
+#elif defined(SOCEAFNOSUPPORT)
+#define V6_NOT_ENABLED(e) ((e) == APR_OS_START_SYSERR + SOCEAFNOSUPPORT)
+#elif defined(EAFNOSUPPORT)
 #define V6_NOT_ENABLED(e) ((e) == EAFNOSUPPORT)
+#elif !APR_HAVE_IPV6
+#define V6_NOT_ENABLED(e) (1)
 #else
-#define V6_NOT_ENABLED(e) (0)
+#error MUST have an EAFNOSUPPORT class of error code to enable IPv6!
 #endif
 
 static void tcp6_socket(abts_case *tc, void *data)
@@ -118,6 +124,10 @@ static void sendto_receivefrom_helper(abts_case *tc, const char *addr,
     apr_size_t len = 30;
 
     rv = apr_socket_create(&sock, family, SOCK_DGRAM, 0, p);
+    if ((family == APR_INET6) && V6_NOT_ENABLED(rv)) {
+        ABTS_NOT_IMPL(tc, "IPv6 not enabled");
+        return;
+    }
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     if (rv != APR_SUCCESS)
         return;
@@ -173,6 +183,7 @@ static void sendto_receivefrom_helper(abts_case *tc, const char *addr,
 
 static void sendto_receivefrom(abts_case *tc, void *data)
 {
+    apr_status_t rv;
     sendto_receivefrom_helper(tc, "127.0.0.1",  "127.1.2.3", APR_INET);
 #if APR_HAVE_IPV6
     sendto_receivefrom_helper(tc, "::1", "FA0E::1234:127.1.2.3", APR_INET6);
