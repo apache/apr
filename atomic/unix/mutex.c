@@ -192,7 +192,7 @@ APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void
 APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
 {
     void *prev;
-    DECLARE_MUTEX_LOCKED(mutex, mem);
+    DECLARE_MUTEX_LOCKED(mutex, *mem);
 
     prev = *mem;
     *mem = with;
