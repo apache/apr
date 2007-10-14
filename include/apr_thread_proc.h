@@ -77,9 +77,9 @@ typedef enum {
 
 /** @see apr_procattr_io_set */
 #define APR_NO_PIPE          0
-/** @see apr_procattr_io_set */
+/** @see apr_procattr_io_set and apr_file_pipe_create_ex */
 #define APR_FULL_BLOCK       1
-/** @see apr_procattr_io_set */
+/** @see apr_procattr_io_set and apr_file_pipe_create_ex */
 #define APR_FULL_NONBLOCK    2
 /** @see apr_procattr_io_set */
 #define APR_PARENT_BLOCK     3
@@ -87,6 +87,11 @@ typedef enum {
 #define APR_CHILD_BLOCK      4
 /** @see apr_procattr_io_set */
 #define APR_NO_FILE          8
+
+/** @see apr_file_pipe_create_ex */
+#define APR_READ_BLOCK       3
+/** @see apr_file_pipe_create_ex */
+#define APR_WRITE_BLOCK      4
 
 /** @see apr_procattr_io_set 
  * @note Win32 only effective with version 1.2.12, portably introduced in 1.3.0

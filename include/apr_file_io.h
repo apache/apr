@@ -633,16 +633,45 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile,
 
 /**
  * Create an anonymous pipe.
- * @param in The file descriptor to use as input to the pipe.
- * @param out The file descriptor to use as output from the pipe.
+ * @param in The newly created pipe's file for writing.
+ * @param out The newly created pipe's file for reading.
  * @param pool The pool to operate on.
  * @remark By default, the returned file descriptors will be inherited
  * by child processes created using apr_proc_create().  This can be
  * changed using apr_file_inherit_unset().
+ * @bug  Some platforms cannot toggle between blocking and nonblocking,
+ * and when passing a pipe as a standard handle to an application which
+ * does not expect it, a non-blocking stream will fluxor the client app.
+ * @deprecated @see apr_file_pipe_create_ex
  */
 APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, 
                                                apr_file_t **out,
                                                apr_pool_t *pool);
+
+/**
+ * Create an anonymous pipe which portably supports async timeout options.
+ * @param in The newly created pipe's file for writing.
+ * @param out The newly created pipe's file for reading.
+ * @param blocking one of these values defined in apr_thread_proc.h;
+ * <pre>
+ *       APR_FULL_BLOCK
+ *       APR_READ_BLOCK
+ *       APR_WRITE_BLOCK
+ *       APR_FULL_NONBLOCK
+ * </pre>
+ * @remark By default, the returned file descriptors will be inherited
+ * by child processes created using apr_proc_create().  This can be
+ * changed using apr_file_inherit_unset().
+ * @remark Some platforms cannot toggle between blocking and nonblocking,
+ * and when passing a pipe as a standard handle to an application which
+ * does not expect it, a non-blocking stream will fluxor the client app.
+ * Use this function rather than apr_file_pipe_create to create pipes 
+ * where one or both ends require non-blocking semantics.
+ */
+APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in, 
+                                                  apr_file_t **out, 
+                                                  apr_int32_t blocking, 
+                                                  apr_pool_t *p);
 
 /**
  * Create a named pipe.
