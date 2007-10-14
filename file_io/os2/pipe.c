@@ -127,6 +127,8 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
             apr_file_pipe_timeout_set(*out, 0);
             apr_file_pipe_timeout_set(*in, 0);
     }
+
+    return APR_SUCCESS;
 }
 
     
