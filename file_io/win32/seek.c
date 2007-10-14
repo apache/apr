@@ -39,7 +39,7 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
      */
     newbufpos = pos - (thefile->filePtr - thefile->dataRead);
 
-    if (newbufpos >= 0 && newbufpos <= thefile->dataRead) {
+    if (newbufpos >= 0 && newbufpos <= (apr_off_t)thefile->dataRead) {
         thefile->bufpos = (apr_size_t)newbufpos;
         rv = APR_SUCCESS;
     } else {
