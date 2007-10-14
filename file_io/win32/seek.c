@@ -21,7 +21,7 @@
 
 static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
 {
-    apr_size_t newbufpos;
+    apr_off_t newbufpos;
     apr_status_t rv;
     DWORD rc;
 
@@ -37,8 +37,7 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
     /* We may be truncating to size here. 
      * XXX: testing an 'unsigned' as >= 0 below indicates a bug
      */
-    newbufpos = (apr_size_t)(pos - (thefile->filePtr 
-                                  - thefile->dataRead));
+    newbufpos = pos - (thefile->filePtr - thefile->dataRead);
 
     if (newbufpos >= 0 && newbufpos <= thefile->dataRead) {
         thefile->bufpos = (apr_size_t)newbufpos;
