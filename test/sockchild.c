@@ -67,14 +67,14 @@ int main(int argc, char *argv[])
             exit(-1);
         }
         
-        exit(length);
+        exit((int)length);
     }
     else if (!strcmp("write", argv[1])) {
         apr_size_t length = strlen(DATASTR);
         apr_socket_send(sock, DATASTR, &length);
 
         apr_socket_close(sock);
-        exit(length);
+        exit((int)length);
     }
     exit(-1);
 }
