@@ -83,10 +83,9 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
 
     if (in) {
         /* APR_CHILD_BLOCK maps to APR_WRITE_BLOCK, while
-         * APR_PARENT_BLOCK maps to APR_READ_BLOCK, so we
-         * must transpose the CHILD/PARENT blocking flags
-         * only for the stdin pipe.  stdout/stderr naturally
-         * map to the correct mode.
+         * APR_PARENT_BLOCK maps to APR_READ_BLOCK, so transpose 
+         * the CHILD/PARENT blocking flags for the stdin pipe.
+         * stdout/stderr map to the correct mode by default.
          */
         if (in == APR_CHILD_BLOCK)
             in = APR_READ_BLOCK;
@@ -96,23 +95,8 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
         if (in == APR_NO_FILE)
             attr->child_in = &no_file;
         else { 
-            stat = apr_create_nt_pipe(&attr->child_in, &attr->parent_in,
-                                      in, attr->pool);
-            if (stat == APR_SUCCESS) { 
-                switch (in) { 
-                    case APR_FULL_BLOCK:
-                        break;
-                    case APR_READ_BLOCK:
-                        apr_file_pipe_timeout_set(attr->parent_in, 0);
-                        break;
-                    case APR_WRITE_BLOCK:
-                        apr_file_pipe_timeout_set(attr->child_in, 0);
-                        break;
-                    default:
-                        apr_file_pipe_timeout_set(attr->child_in, 0);
-                        apr_file_pipe_timeout_set(attr->parent_in, 0);
-                }
-            }
+            stat = apr_file_pipe_create_ex(&attr->child_in, &attr->parent_in,
+                                           in, attr->pool);
         }
         if (stat == APR_SUCCESS)
             stat = apr_file_inherit_unset(attr->parent_in);
@@ -121,23 +105,8 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
         if (out == APR_NO_FILE)
             attr->child_out = &no_file;
         else { 
-            stat = apr_create_nt_pipe(&attr->parent_out, &attr->child_out,
-                                      out, attr->pool);
-            if (stat == APR_SUCCESS) { 
-                switch (out) {
-                    case APR_FULL_BLOCK:
-                        break;
-                    case APR_PARENT_BLOCK:
-                        apr_file_pipe_timeout_set(attr->child_out, 0);
-                        break;
-                    case APR_CHILD_BLOCK:
-                        apr_file_pipe_timeout_set(attr->parent_out, 0);
-                        break;
-                    default:
-                        apr_file_pipe_timeout_set(attr->child_out, 0);
-                        apr_file_pipe_timeout_set(attr->parent_out, 0);
-                }
-            }
+            stat = apr_file_pipe_create_ex(&attr->parent_out, &attr->child_out,
+                                           out, attr->pool);
         }
         if (stat == APR_SUCCESS)
             stat = apr_file_inherit_unset(attr->parent_out);
@@ -146,23 +115,8 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
         if (err == APR_NO_FILE)
             attr->child_err = &no_file;
         else { 
-            stat = apr_create_nt_pipe(&attr->parent_err, &attr->child_err,
-                                      err, attr->pool);
-            if (stat == APR_SUCCESS) { 
-                switch (err) {
-                    case APR_FULL_BLOCK:
-                        break;
-                    case APR_PARENT_BLOCK:
-                        apr_file_pipe_timeout_set(attr->child_err, 0);
-                        break;
-                    case APR_CHILD_BLOCK:
-                        apr_file_pipe_timeout_set(attr->parent_err, 0);
-                        break;
-                    default:
-                        apr_file_pipe_timeout_set(attr->child_err, 0);
-                        apr_file_pipe_timeout_set(attr->parent_err, 0);
-                }
-            }
+            stat = apr_file_pipe_create_ex(&attr->parent_err, &attr->child_err,
+                                           err, attr->pool);
         }
         if (stat == APR_SUCCESS)
             stat = apr_file_inherit_unset(attr->parent_err);
