@@ -222,6 +222,33 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in, 
+                                                  apr_file_t **out, 
+                                                  apr_int32_t blocking,
+                                                  apr_pool_t *pool)
+{
+    apr_status_t status;
+
+    if ((status = apr_file_pipe_create(in, out, attr->pool)) 
+               != APR_SUCCESS) {
+        return status;
+    }
+
+    switch (blocking) {
+        case APR_FULL_BLOCK:
+            break;
+        case APR_READ_BLOCK:
+            apr_file_pipe_timeout_set(*in, 0);
+            break;
+        case APR_WRITE_BLOCK:
+            apr_file_pipe_timeout_set(*out, 0);
+            break;
+        default:
+            apr_file_pipe_timeout_set(*in, 0);
+            apr_file_pipe_timeout_set(*out, 0);
+    }
+}
+
 APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, 
                                                     apr_fileperms_t perm, apr_pool_t *pool)
 {

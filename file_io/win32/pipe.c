@@ -31,7 +31,8 @@
 #endif
 #include "apr_arch_misc.h"
 
-APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
+APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe,
+                                            apr_interval_time_t timeout)
 {
     /* Always OK to unset timeouts */
     if (timeout == -1) {
@@ -50,40 +51,26 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_int
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_interval_time_t *timeout)
+APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe,
+                                           apr_interval_time_t *timeout)
 {
     /* Always OK to get the timeout (even if it's unset ... -1) */
     *timeout = thepipe->timeout;
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in,
+                                               apr_file_t **out,
+                                               apr_pool_t *p)
 {
     /* Unix creates full blocking pipes. */
-    return apr_create_nt_pipe(in, out, APR_FULL_BLOCK, p);
+    return apr_file_pipe_create_ex(in, out, APR_FULL_BLOCK, p);
 }
 
-/* apr_create_nt_pipe()
- * An internal (for now) APR function used by apr_proc_create() 
- * when setting up pipes to communicate with the child process. 
- * apr_create_nt_pipe() allows setting the blocking mode of each end of 
- * the pipe when the pipe is created (rather than after the pipe is created). 
- * A pipe handle must be opened in full async i/o mode in order to 
- * emulate Unix non-blocking pipes with timeouts. 
- *
- * In general, we don't want to enable child side pipe handles for async i/o.
- * This prevents us from enabling both ends of the pipe for async i/o in 
- * apr_file_pipe_create.
- *
- * Why not use NamedPipes on NT which support setting pipe state to
- * non-blocking? On NT, even though you can set a pipe non-blocking, 
- * there is no clean way to set event driven non-zero timeouts (e.g select(),
- * WaitForSingleObject, et. al. will not detect pipe i/o). On NT, you 
- * have to poll the pipe to detect i/o on a non-blocking pipe.
- */
-apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out, 
-                                apr_int32_t blocking_mode, 
-                                apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
+                                                  apr_file_t **out,
+                                                  apr_int32_t blocking,
+                                                  apr_pool_t *p)
 {
 #ifdef _WIN32_WCE
     return APR_ENOTIMPL;
@@ -137,11 +124,12 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
     if (apr_os_level >= APR_WIN_NT) {
         /* Create the read end of the pipe */
         dwOpenMode = PIPE_ACCESS_INBOUND;
-        if (blocking_mode == APR_WRITE_BLOCK /* READ_NONBLOCK */
-               || blocking_mode == APR_FULL_NONBLOCK) {
+        if (blocking == APR_WRITE_BLOCK /* READ_NONBLOCK */
+               || blocking == APR_FULL_NONBLOCK) {
             dwOpenMode |= FILE_FLAG_OVERLAPPED;
             (*in)->pOverlapped = (OVERLAPPED*) apr_pcalloc(p, sizeof(OVERLAPPED));
             (*in)->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+            (*in)->timeout = 0;
         }
 
         dwPipeMode = 0;
@@ -159,11 +147,12 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
 
         /* Create the write end of the pipe */
         dwOpenMode = FILE_ATTRIBUTE_NORMAL;
-        if (blocking_mode == APR_READ_BLOCK /* WRITE_NONBLOCK */
-                || blocking_mode == APR_FULL_NONBLOCK) {
+        if (blocking == APR_READ_BLOCK /* WRITE_NONBLOCK */
+                || blocking == APR_FULL_NONBLOCK) {
             dwOpenMode |= FILE_FLAG_OVERLAPPED;
             (*out)->pOverlapped = (OVERLAPPED*) apr_pcalloc(p, sizeof(OVERLAPPED));
             (*out)->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+            (*out)->timeout = 0;
         }
         
         (*out)->filehand = CreateFile(name,

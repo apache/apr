@@ -251,33 +251,4 @@ apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p);
 
 apr_status_t file_cleanup(void *);
 
-/**
- * Internal function to create a Win32/NT pipe that respects some async
- * timeout options.
- * @param in new read end of the created pipe
- * @param out new write end of the created pipe
- * @param blocking_mode one of
- * <pre>
- *       APR_FULL_BLOCK
- *       APR_READ_BLOCK
- *       APR_WRITE_BLOCK
- *       APR_FULL_NONBLOCK
- * </pre>
- * @remark It so happens that APR_FULL_BLOCK and APR_FULL_NONBLOCK
- * are common to apr_procattr_io_set() in, out and err modes.
- * Because APR_CHILD_BLOCK and APR_WRITE_BLOCK share the same value,
- * as do APR_PARENT_BLOCK and APR_READ_BLOCK, it's possible to use
- * that value directly for creating the stdout/stderr pipes.  When
- * creating the stdin pipe, the values must be transposed.
- * @see apr_procattr_io_set
- */
-apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out, 
-                                apr_int32_t blocking_mode, 
-                                apr_pool_t *p);
-
-/** @see apr_create_nt_pipe */
-#define APR_READ_BLOCK     3
-/** @see apr_create_nt_pipe */
-#define APR_WRITE_BLOCK      4
-
 #endif  /* ! FILE_IO_H */
