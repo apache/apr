@@ -38,6 +38,7 @@ int main(void)
 #define MAX_COUNTER 1000000
 #define MAX_THREADS 6
 
+static verbose = 0;
 static long mutex_counter;
 
 static apr_thread_mutex_t *thread_lock;
@@ -244,7 +245,10 @@ int main(int argc, const char * const *argv)
         exit(-1);
     }
         
-    while ((rv = apr_getopt(opt, "f:", &optchar, &optarg)) == APR_SUCCESS) {
+    while ((rv = apr_getopt(opt, "vf:", &optchar, &optarg)) == APR_SUCCESS) {
+        if (optchar == 'v') {
+            verbose = 1;
+        }
         if (optchar == 'f') {
             lockname = optarg;
         }
