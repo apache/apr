@@ -58,7 +58,9 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
             in = APR_WRITE_BLOCK;
 
         if ((rv = apr_file_pipe_create_ex(&attr->child_in, &attr->parent_in,
-                                          in, attr->pool)) != APR_SUCCESS)
+                                          in, attr->pool)) == APR_SUCCESS)
+            rv = apr_file_inherit_unset(attr->parent_in);
+        if (rv != APR_SUCCESS)
             return rv;
     }
     else if (in == APR_NO_FILE)
@@ -66,7 +68,9 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
 
     if ((out != APR_NO_PIPE) && (out != APR_NO_FILE)) {
         if ((rv = apr_file_pipe_create_ex(&attr->parent_out, &attr->child_out,
-                                          out, attr->pool)) != APR_SUCCESS)
+                                          out, attr->pool)) == APR_SUCCESS)
+            rv = apr_file_inherit_unset(attr->parent_out);
+        if (rv != APR_SUCCESS)
             return rv;
     }
     else if (out == APR_NO_FILE)
@@ -75,6 +79,8 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
     if ((err != APR_NO_PIPE) && (err != APR_NO_FILE)) {
         if ((rv = apr_file_pipe_create_ex(&attr->parent_err, &attr->child_err,
                                           err, attr->pool)) != APR_SUCCESS)
+            rv = apr_file_inherit_unset(attr->parent_err);
+        if (rv != APR_SUCCESS)
             return rv;
     }
     else if (err == APR_NO_FILE)
@@ -92,9 +98,10 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr,
 
     if (attr->child_in == NULL && attr->parent_in == NULL
            && child_in == NULL && parent_in == NULL)
-        rv = apr_file_pipe_create(&attr->child_in, &attr->parent_in,
-                                  attr->pool);
-    
+        if ((rv = apr_file_pipe_create(&attr->child_in, &attr->parent_in,
+                                       attr->pool)) == APR_SUCCESS)
+            rv = apr_file_inherit_unset(attr->parent_in);
+
     if (child_in != NULL && rv == APR_SUCCESS) {
         if (attr->child_in && (attr->child_in->filedes != -1))
             rv = apr_file_dup2(attr->child_in, child_in, attr->pool);
@@ -125,8 +132,9 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr,
 
     if (attr->child_out == NULL && attr->parent_out == NULL
            && child_out == NULL && parent_out == NULL)
-        rv = apr_file_pipe_create(&attr->parent_out, &attr->child_out,
-                                  attr->pool);
+        if ((rv = apr_file_pipe_create(&attr->parent_out, &attr->child_out,
+                                       attr->pool)) == APR_SUCCESS)
+            rv = apr_file_inherit_unset(attr->parent_out);
 
     if (child_out != NULL && rv == APR_SUCCESS) {
         if (attr->child_out && (attr->child_out->filedes != -1))
@@ -158,8 +166,9 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr,
 
     if (attr->child_err == NULL && attr->parent_err == NULL
            && child_err == NULL && parent_err == NULL)
-        rv = apr_file_pipe_create(&attr->parent_err, &attr->child_err,
-                                  attr->pool);
+        if ((rv = apr_file_pipe_create(&attr->parent_err, &attr->child_err,
+                                      attr->pool)) == APR_SUCCESS)
+            rv = apr_file_inherit_unset(attr->parent_err);
 
     if (child_err != NULL && rv == APR_SUCCESS) {
         if (attr->child_err && (attr->child_err->filedes != -1))
@@ -424,8 +433,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             close(STDIN_FILENO);
         }
         else if (attr->child_in) {
-            if (attr->parent_in)
-                apr_file_close(attr->parent_in);
             dup2(attr->child_in->filedes, STDIN_FILENO);
             apr_file_close(attr->child_in);
         }
@@ -434,8 +441,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             close(STDOUT_FILENO);
         }
         else if (attr->child_out) {
-            if (attr->parent_out)
-                apr_file_close(attr->parent_out);
             dup2(attr->child_out->filedes, STDOUT_FILENO);
             apr_file_close(attr->child_out);
         }
@@ -444,8 +449,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             close(STDERR_FILENO);
         }
         else if (attr->child_err) {
-            if (attr->parent_err)
-                apr_file_close(attr->parent_err);
             dup2(attr->child_err->filedes, STDERR_FILENO);
             apr_file_close(attr->child_err);
         }
