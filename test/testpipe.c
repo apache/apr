@@ -56,12 +56,12 @@ static void set_timeout(abts_case *tc, void *data)
     apr_status_t rv;
     apr_interval_time_t timeout;
 
-    rv = apr_file_pipe_create(&readp, &writep, p);
+    rv = apr_file_pipe_create_ex(&readp, &writep, APR_WRITE_BLOCK, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, readp);
     ABTS_PTR_NOTNULL(tc, writep);
 
-    rv = apr_file_pipe_timeout_get(readp, &timeout);
+    rv = apr_file_pipe_timeout_get(writep, &timeout);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_ASSERT(tc, "Timeout mismatch, expected -1", timeout == -1);
 
@@ -83,7 +83,7 @@ static void read_write(abts_case *tc, void *data)
     nbytes = strlen("this is a test");
     buf = (char *)apr_palloc(p, nbytes + 1);
 
-    rv = apr_file_pipe_create(&readp, &writep, p);
+    rv = apr_file_pipe_create_ex(&readp, &writep, APR_WRITE_BLOCK, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, readp);
     ABTS_PTR_NOTNULL(tc, writep);
