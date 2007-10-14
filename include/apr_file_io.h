@@ -633,8 +633,8 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile,
 
 /**
  * Create an anonymous pipe.
- * @param in The newly created pipe's file for writing.
- * @param out The newly created pipe's file for reading.
+ * @param in The newly created pipe's file for reading.
+ * @param out The newly created pipe's file for writing.
  * @param pool The pool to operate on.
  * @remark By default, the returned file descriptors will be inherited
  * by child processes created using apr_proc_create().  This can be
@@ -650,8 +650,8 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in,
 
 /**
  * Create an anonymous pipe which portably supports async timeout options.
- * @param in The newly created pipe's file for writing.
- * @param out The newly created pipe's file for reading.
+ * @param in The newly created pipe's file for reading.
+ * @param out The newly created pipe's file for writing.
  * @param blocking one of these values defined in apr_thread_proc.h;
  * <pre>
  *       APR_FULL_BLOCK

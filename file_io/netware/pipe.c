@@ -193,14 +193,14 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
         case APR_FULL_BLOCK:
             break;
         case APR_READ_BLOCK:
-            apr_file_pipe_timeout_set(*in, 0);
+            apr_file_pipe_timeout_set(*out, 0);
             break;
         case APR_WRITE_BLOCK:
-            apr_file_pipe_timeout_set(*out, 0);
+            apr_file_pipe_timeout_set(*in, 0);
             break;
         default:
-            apr_file_pipe_timeout_set(*in, 0);
             apr_file_pipe_timeout_set(*out, 0);
+            apr_file_pipe_timeout_set(*in, 0);
     }
 }
 
