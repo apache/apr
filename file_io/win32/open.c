@@ -32,6 +32,7 @@
 #include "apr_arch_misc.h"
 #include "apr_arch_inherit.h"
 #include <io.h>
+#include <WinIoCtl.h>
 
 #if APR_HAS_UNICODE_FS
 apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen, 
@@ -220,6 +221,55 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
 #endif
 }
 
+static apr_status_t make_sparse_file(apr_file_t *file)
+{
+    BY_HANDLE_FILE_INFORMATION info;
+    apr_status_t rv;
+    DWORD bytesread = 0;
+    DWORD res;
+
+    /* test */
+
+    if (GetFileInformationByHandle(file->filehand, &info)
+            && (info.dwFileAttributes & FILE_ATTRIBUTE_SPARSE_FILE))
+        return APR_SUCCESS;
+
+    if (file->pOverlapped) {
+        file->pOverlapped->Offset     = 0;
+        file->pOverlapped->OffsetHigh = 0;
+    }
+
+    if (DeviceIoControl(file->filehand, FSCTL_SET_SPARSE, NULL, 0, NULL, 0,
+                        &bytesread, file->pOverlapped)) {
+        rv = APR_SUCCESS;
+    }
+    else 
+    {
+        rv = apr_get_os_error();
+
+        if (rv == APR_FROM_OS_ERROR(ERROR_IO_PENDING))
+        {
+            do {
+                res = WaitForSingleObject(file->pOverlapped->hEvent, 
+                                          (file->timeout > 0)
+                                            ? (DWORD)(file->timeout/1000)
+                                            : ((file->timeout == -1) 
+                                                 ? INFINITE : 0));
+            } while (res == WAIT_ABANDONED);
+
+            if (res != WAIT_OBJECT_0) {
+                CancelIo(file->filehand);
+            }
+
+            if (GetOverlappedResult(file->filehand, file->pOverlapped, 
+                                    &bytesread, TRUE))
+                rv = APR_SUCCESS;
+            else
+                rv = apr_get_os_error();
+        }
+    }
+    return rv;
+}
 
 apr_status_t file_cleanup(void *thefile)
 {
@@ -371,12 +421,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     ELSE_WIN_OS_IS_ANSI {
         handle = CreateFileA(fname, oflags, sharemode,
                              NULL, createflags, attributes, 0);
-        if (flag & APR_SENDFILE_ENABLED) {    
-            /* This feature is not supported on this platform.
-             */
-            flag &= ~APR_SENDFILE_ENABLED;
-        }
-
+        /* These features are not supported on this platform. */
+        flag &= ~(APR_SENDFILE_ENABLED | APR_FOPEN_SPARSE);
     }
 #endif
     if (handle == INVALID_HANDLE_VALUE) {
@@ -410,6 +456,15 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
             }
             return rv;
         }
+    }
+
+    if ((*new)->flags & APR_FOPEN_SPARSE) {
+        if ((rv = make_sparse_file(*new)) != APR_SUCCESS)
+            /* The great mystery; do we close the file and return an error?
+             * Do we add a new APR_INCOMPLETE style error saying opened, but
+             * NOTSPARSE?  For now let's simply mark the file as not-sparse.
+             */
+            (*new)->flags &= ~APR_FOPEN_SPARSE;
     }
 
     /* Create a pollset with room for one descriptor. */
