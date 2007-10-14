@@ -96,6 +96,7 @@ static void * APR_THREAD_FUNC eachThread(apr_thread_t *id, void *p)
     assert(apr_thread_mutex_lock(thread_mutex) == APR_SUCCESS);
     assert(apr_thread_mutex_unlock(thread_mutex) == APR_SUCCESS);
     lock_release(test_mode);
+    apr_thread_exit(id, 0);
     return NULL;
 }
 
