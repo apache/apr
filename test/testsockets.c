@@ -56,9 +56,9 @@ static void udp_socket(abts_case *tc, void *data)
     apr_socket_close(sock);
 }
 
+#if APR_HAVE_IPV6
 static void tcp6_socket(abts_case *tc, void *data)
 {
-#if APR_HAVE_IPV6
     apr_status_t rv;
     apr_socket_t *sock = NULL;
 
@@ -70,14 +70,10 @@ static void tcp6_socket(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, sock);
     apr_socket_close(sock);
-#else
-    ABTS_NOT_IMPL(tc, "IPv6");
-#endif
 }
 
 static void udp6_socket(abts_case *tc, void *data)
 {
-#if APR_HAVE_IPV6
     apr_status_t rv;
     apr_socket_t *sock = NULL;
 
@@ -89,10 +85,8 @@ static void udp6_socket(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, sock);
     apr_socket_close(sock);
-#else
-    ABTS_NOT_IMPL(tc, "IPv6");
-#endif
 }
+#endif
 
 static void sendto_receivefrom_helper(abts_case *tc, const char *addr, 
                                       const char *junkaddr, int family)
@@ -109,10 +103,12 @@ static void sendto_receivefrom_helper(abts_case *tc, const char *addr,
     apr_size_t len = 30;
 
     rv = apr_socket_create(&sock, family, SOCK_DGRAM, 0, p);
+#if APR_HAVE_IPV6
     if ((family == APR_INET6) && APR_STATUS_IS_EAFNOSUPPORT(rv)) {
         ABTS_NOT_IMPL(tc, "IPv6 not enabled");
         return;
     }
+#endif
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     if (rv != APR_SUCCESS)
         return;
@@ -169,10 +165,16 @@ static void sendto_receivefrom_helper(abts_case *tc, const char *addr,
 static void sendto_receivefrom(abts_case *tc, void *data)
 {
     sendto_receivefrom_helper(tc, "127.0.0.1",  "127.1.2.3", APR_INET);
-#if APR_HAVE_IPV6
-    sendto_receivefrom_helper(tc, "::1", "FA0E::1234:127.1.2.3", APR_INET6);
-#endif
+    ABTS_TRUE(tc, !tc->failed);
 }
+
+#if APR_HAVE_IPV6
+static void sendto_receivefrom6(abts_case *tc, void *data)
+{
+    sendto_receivefrom_helper(tc, "::1", "FA0E::1234:127.1.2.3", APR_INET6);
+    ABTS_TRUE(tc, !tc->failed);
+}
+#endif
 
 static void socket_userdata(abts_case *tc, void *data)
 {
@@ -206,10 +208,14 @@ abts_suite *testsockets(abts_suite *suite)
     abts_run_test(suite, tcp_socket, NULL);
     abts_run_test(suite, udp_socket, NULL);
 
+    abts_run_test(suite, sendto_receivefrom, NULL);
+
+#if APR_HAVE_IPV6
     abts_run_test(suite, tcp6_socket, NULL);
     abts_run_test(suite, udp6_socket, NULL);
 
-    abts_run_test(suite, sendto_receivefrom, NULL);
+    abts_run_test(suite, sendto_receivefrom6, NULL);
+#endif
 
     abts_run_test(suite, socket_userdata, NULL);
     
