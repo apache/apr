@@ -190,6 +190,8 @@ APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from,
 {
     apr_ssize_t rv;
 
+    from->salen = sizeof(from->sa);
+
     rv = recvfrom(sock->socketdes, buf, (int)*len, flags, 
                   (struct sockaddr*)&from->sa, &from->salen);
     if (rv == SOCKET_ERROR) {
@@ -197,7 +199,8 @@ APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from,
         return apr_get_netos_error();
     }
 
-    from->port = ntohs(from->sa.sin.sin_port);
+    apr_sockaddr_vars_set(from, from->sa.sin.sin_family, 
+                          ntohs(from->sa.sin.sin_port));
 
     (*len) = rv;
     if (rv == 0 && sock->type == SOCK_STREAM)
