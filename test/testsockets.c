@@ -56,21 +56,6 @@ static void udp_socket(abts_case *tc, void *data)
     apr_socket_close(sock);
 }
 
-/* On recent Linux systems, whilst IPv6 is always supported by glibc,
- * socket(AF_INET6, ...) calls will fail with EAFNOSUPPORT if the
- * "ipv6" kernel module is not loaded.  */
-#if defined(WSAEAFNOSUPPORT)
-#define V6_NOT_ENABLED(e) ((e) == APR_OS_START_SYSERR + WSAEAFNOSUPPORT)
-#elif defined(SOCEAFNOSUPPORT)
-#define V6_NOT_ENABLED(e) ((e) == APR_OS_START_SYSERR + SOCEAFNOSUPPORT)
-#elif defined(EAFNOSUPPORT)
-#define V6_NOT_ENABLED(e) ((e) == EAFNOSUPPORT)
-#elif !APR_HAVE_IPV6
-#define V6_NOT_ENABLED(e) (1)
-#else
-#error MUST have an EAFNOSUPPORT class of error code to enable IPv6!
-#endif
-
 static void tcp6_socket(abts_case *tc, void *data)
 {
 #if APR_HAVE_IPV6
@@ -78,7 +63,7 @@ static void tcp6_socket(abts_case *tc, void *data)
     apr_socket_t *sock = NULL;
 
     rv = apr_socket_create(&sock, APR_INET6, SOCK_STREAM, 0, p);
-    if (V6_NOT_ENABLED(rv)) {
+    if (APR_STATUS_IS_EAFNOSUPPORT(rv)) {
         ABTS_NOT_IMPL(tc, "IPv6 not enabled");
         return;
     }
@@ -97,7 +82,7 @@ static void udp6_socket(abts_case *tc, void *data)
     apr_socket_t *sock = NULL;
 
     rv = apr_socket_create(&sock, APR_INET6, SOCK_DGRAM, 0, p);
-    if (V6_NOT_ENABLED(rv)) {
+    if (APR_STATUS_IS_EAFNOSUPPORT(rv)) {
         ABTS_NOT_IMPL(tc, "IPv6 not enabled");
         return;
     }
@@ -124,7 +109,7 @@ static void sendto_receivefrom_helper(abts_case *tc, const char *addr,
     apr_size_t len = 30;
 
     rv = apr_socket_create(&sock, family, SOCK_DGRAM, 0, p);
-    if ((family == APR_INET6) && V6_NOT_ENABLED(rv)) {
+    if ((family == APR_INET6) && APR_STATUS_IS_EAFNOSUPPORT(rv)) {
         ABTS_NOT_IMPL(tc, "IPv6 not enabled");
         return;
     }
@@ -183,7 +168,6 @@ static void sendto_receivefrom_helper(abts_case *tc, const char *addr,
 
 static void sendto_receivefrom(abts_case *tc, void *data)
 {
-    apr_status_t rv;
     sendto_receivefrom_helper(tc, "127.0.0.1",  "127.1.2.3", APR_INET);
 #if APR_HAVE_IPV6
     sendto_receivefrom_helper(tc, "::1", "FA0E::1234:127.1.2.3", APR_INET6);

@@ -824,6 +824,13 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_ENOTEMPTY     (APR_OS_START_CANONERR + 26)
 #endif
 
+/** @see APR_STATUS_IS_EAFNOSUPPORT */
+#ifdef EAFNOSUPPORT
+#define APR_EAFNOSUPPORT EAFNOSUPPORT
+#else
+#define APR_EAFNOSUPPORT  (APR_OS_START_CANONERR + 27)
+#endif
+
 /** @} */
 
 #if defined(OS2) && !defined(DOXYGEN)
@@ -966,6 +973,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ENOTEMPTY(s)      ((s) == APR_ENOTEMPTY \
                 || (s) == APR_OS_START_SYSERR + ERROR_DIR_NOT_EMPTY \
                 || (s) == APR_OS_START_SYSERR + ERROR_ACCESS_DENIED)
+#define APR_STATUS_IS_EAFNOSUPPORT(s)   ((s) == APR_AFNOSUPPORT \
+                || (s) == APR_OS_START_SYSERR + SOCEAFNOSUPPORT)
 
 /*
     Sorry, too tired to wrap this up for OS2... feel free to
@@ -981,7 +990,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
     { SOCESOCKTNOSUPPORT,       ESOCKTNOSUPPORT },
     { SOCEOPNOTSUPP,            EOPNOTSUPP      },
     { SOCEPFNOSUPPORT,          EPFNOSUPPORT    },
-    { SOCEAFNOSUPPORT,          EAFNOSUPPORT    },
     { SOCEADDRINUSE,            EADDRINUSE      },
     { SOCEADDRNOTAVAIL,         EADDRNOTAVAIL   },
     { SOCENETDOWN,              ENETDOWN        },
@@ -1109,6 +1117,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + ERROR_NOT_SAME_DEVICE)
 #define APR_STATUS_IS_ENOTEMPTY(s)      ((s) == APR_ENOTEMPTY \
                 || (s) == APR_OS_START_SYSERR + ERROR_DIR_NOT_EMPTY)
+#define APR_STATUS_IS_EAFNOSUPPORT(s)   ((s) == APR_EAFNOSUPPORT \
+                || (s) == APR_OS_START_SYSERR + WSAEAFNOSUPPORT)
 
 #elif defined(NETWARE) && defined(USE_WINSOCK) && !defined(DOXYGEN) /* !defined(OS2) && !defined(WIN32) */
 
@@ -1168,6 +1178,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EPIPE(s)          ((s) == APR_EPIPE)
 #define APR_STATUS_IS_EXDEV(s)          ((s) == APR_EXDEV)
 #define APR_STATUS_IS_ENOTEMPTY(s)      ((s) == APR_ENOTEMPTY)
+#define APR_STATUS_IS_EAFNOSUPPORT(s)   ((s) == APR_EAFNOSUPPORT \
+                || (s) == APR_OS_START_SYSERR + WSAEAFNOSUPPORT)
 
 #else /* !defined(NETWARE) && !defined(OS2) && !defined(WIN32) */
 
@@ -1285,6 +1297,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 /** Directory Not Empty */
 #define APR_STATUS_IS_ENOTEMPTY(s)       ((s) == APR_ENOTEMPTY || \
                                           (s) == APR_EEXIST)
+/** Address Family not supported */
+#define APR_STATUS_IS_EAFNOSUPPORT(s)    ((s) == APR_EAFNOSUPPORT)
 /** @} */
 
 #endif /* !defined(NETWARE) && !defined(OS2) && !defined(WIN32) */
