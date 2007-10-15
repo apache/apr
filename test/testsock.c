@@ -210,17 +210,22 @@ static void test_timeout(abts_case *tc, void *data)
 static void test_print_addr(abts_case *tc, void *data)
 {
     apr_sockaddr_t *sa;
+    apr_status_t rv;
     char *s;
 
-    APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr",
-                       apr_sockaddr_info_get(&sa, "0.0.0.0", APR_INET, 80, 0, p));
+    rv = apr_sockaddr_info_get(&sa, "0.0.0.0", APR_INET, 80, 0, p);
+    APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
 
     s = apr_psprintf(p, "foo %pI bar", sa);
 
     ABTS_STR_EQUAL(tc, "foo 0.0.0.0:80 bar", s);
 
 #if APR_HAVE_IPV6
-    if (apr_sockaddr_info_get(&sa, "::ffff:0.0.0.0", APR_INET6, 80, 0, p) == APR_SUCCESS) {
+    rv = apr_sockaddr_info_get(&sa, "::ffff:0.0.0.0", APR_INET6, 80, 0, p);
+    APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
+    if (rv == APR_SUCCESS)
+        ABTS_TRUE(tc, sa != NULL);
+    if (rv == APR_SUCCESS && sa) {
         /* sa should now be a v4-mapped IPv6 address. */
         char buf[128];
 
