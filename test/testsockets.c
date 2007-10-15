@@ -167,7 +167,7 @@ static void sendto_receivefrom(abts_case *tc, void *data)
     int failed;
     sendto_receivefrom_helper(tc, "127.0.0.1",  "127.1.2.3", APR_INET);
     failed = tc->failed; tc->failed = 0;
-    ABTS_TRUE(tc, failed);
+    ABTS_TRUE(tc, !failed);
 }
 
 #if APR_HAVE_IPV6
@@ -176,7 +176,7 @@ static void sendto_receivefrom6(abts_case *tc, void *data)
     int failed;
     sendto_receivefrom_helper(tc, "::1", "FA0E::1234:127.1.2.3", APR_INET6);
     failed = tc->failed; tc->failed = 0;
-    ABTS_TRUE(tc, failed);
+    ABTS_TRUE(tc, !failed);
 }
 #endif
 
