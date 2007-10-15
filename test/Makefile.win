@@ -47,6 +47,9 @@ STDTEST_PORTABLE = \
 	$(OUTDIR)\testlockperf.exe \
 	$(OUTDIR)\testmutexscope.exe
 
+OTHER_PROGRAMS = \
+	$(OUTDIR)\sendfile.exe
+
 TESTALL_COMPONENTS = \
 	$(OUTDIR)\mod_test.dll \
 	$(OUTDIR)\occhild.exe \
@@ -125,6 +128,8 @@ SHLDFLAGS = /nologo /dll /debug /subsystem:windows /incremental:no
 .c{$(INTDIR)}.obj::
 	$(CL) $(CFLAGS) -c $< -Fd$(INTDIR)\ $(INCLUDES)
 
+# STDTEST_PORTABLE;
+
 $(OUTDIR)\testall.exe: $(ALL_TESTS) $(INTDIR)\abts.obj $(LOCAL_LIB)
 	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
 	@if exist "$@.manifest" \
@@ -144,6 +149,15 @@ $(OUTDIR)\testmutexscope.exe: $(INTDIR)\testmutexscope.obj $(LOCAL_LIB)
 	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
 	@if exist "$@.manifest" \
 	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
+
+# OTHER_PROGRAMS;
+
+$(OUTDIR)\sendfile.exe: $(INTDIR)\sendfile.obj $(LOCAL_LIB)
+	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
+	@if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
+
+# TESTALL_COMPONENTS;
 
 $(OUTDIR)\globalmutexchild.exe: $(INTDIR)\globalmutexchild.obj $(LOCAL_LIB)
 	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
