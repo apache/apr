@@ -507,7 +507,11 @@ APR_DECLARE(apr_status_t) apr_socket_sendto(apr_socket_t *sock,
                                             apr_size_t *len);
 
 /**
- * @param from The apr_sockaddr_t to fill in the recipient info
+ * Read data from a socket.  On success, the address of the peer from
+ * which the data was sent is copied into the @param from parameter,
+ * and the @param len parameter is updated to give the number of bytes
+ * written to @param buf.
+ * @param from Updated with the address from which the data was received
  * @param sock The socket to use
  * @param flags The flags to use
  * @param buf  The buffer to use

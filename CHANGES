@@ -1,6 +1,10 @@
 ﻿                                                     -*- coding: utf-8 -*-
 Changes for APR 1.2.12
 
+  *) Fix apr_socket_recvfrom() to ensure the peer's port and address
+     is returned through the "from" parameter on Unix and Win32.  
+     [Joe Orton, William Rowe]
+
   *) The WIN32 cleanup routine for shared memory segments could wrongly
      return unknown errors and leak a open handle.
      [Joe Mudd <Joe.Mudd sas.com>]
