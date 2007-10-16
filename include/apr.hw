@@ -217,7 +217,7 @@
 #define APR_HAVE_IN_ADDR        1
 #define APR_HAVE_INET_ADDR      1
 #define APR_HAVE_INET_NETWORK   0
-#define APR_HAVE_IPV6           0
+#define APR_HAVE_IPV6           1
 #define APR_HAVE_MEMMOVE        1
 #define APR_HAVE_SETRLIMIT      0
 #define APR_HAVE_SIGACTION      0
