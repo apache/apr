@@ -110,7 +110,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
 APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr, apr_file_t *child_in,
                                    apr_file_t *parent_in)
 {
-    apr_status_t rv;
+    apr_status_t rv = APR_SUCCESS;
 
     if (attr->child_in == NULL && attr->parent_in == NULL
             && child_in == NULL && parent_in == NULL)
@@ -127,9 +127,11 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr, apr_fi
                     == APR_SUCCESS)
                 rv = apr_file_inherit_set(attr->child_in);
         }
+    }
 
     if (parent_in != NULL && rv == APR_SUCCESS) {
         rv = apr_file_dup(&attr->parent_in, parent_in, attr->pool);
+    }
 
     return rv;
 }
@@ -138,7 +140,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr, apr_fi
 APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr, apr_file_t *child_out,
                                                      apr_file_t *parent_out)
 {
-    apr_status_t rv;
+    apr_status_t rv = APR_SUCCESS;
 
     if (attr->child_out == NULL && attr->parent_out == NULL
            && child_out == NULL && parent_out == NULL)
@@ -159,6 +161,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr, apr_f
   
     if (parent_out != NULL && rv == APR_SUCCESS) {
         rv = apr_file_dup(&attr->parent_out, parent_out, attr->pool);
+    }
 
     return rv;
 }
@@ -167,7 +170,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr, apr_f
 APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr, apr_file_t *child_err,
                                                      apr_file_t *parent_err)
 {
-    apr_status_t rv;
+    apr_status_t rv = APR_SUCCESS;
 
     if (attr->child_err == NULL && attr->parent_err == NULL
            && child_err == NULL && parent_err == NULL)
@@ -188,6 +191,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr, apr_f
   
     if (parent_err != NULL && rv == APR_SUCCESS) {
         rv = apr_file_dup(&attr->parent_err, parent_err, attr->pool);
+    }
 
     return rv;
 }
@@ -315,15 +319,15 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
     wire.infd  = attr->child_in  
                ? (attr->child_in->filedes != -1 ? attr->child_in->filedes 
                                                 : FD_UNUSED)
-               : FILENO_STDIN;
+               : fileno(stdin);
     wire.outfd  = attr->child_out
                 ? (attr->child_out->filedes != -1 ? attr->child_out->filedes 
                                                   : FD_UNUSED)
-                : FILENO_STDOUT;
+                : fileno(stdout);
     wire.errfd  = attr->child_err
                 ? (attr->child_err->filedes != -1 ? attr->child_err->filedes 
                                                   : FD_UNUSED)
-                : FILENO_STDERR;
+                : fileno(stderr);
 
     newproc->in = attr->parent_in;
     newproc->out = attr->parent_out;
