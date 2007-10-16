@@ -38,7 +38,7 @@ int main(void)
 #define MAX_COUNTER 1000000
 #define MAX_THREADS 6
 
-static verbose = 0;
+static int verbose = 0;
 static long mutex_counter;
 
 static apr_thread_mutex_t *thread_lock;
