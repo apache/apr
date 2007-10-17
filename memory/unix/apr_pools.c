@@ -368,7 +368,10 @@ void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
                 max_index = index;
             }
             allocator->free[index] = node;
-            current_free_index -= index;
+            if (current_free_index >= index)
+                current_free_index -= index;
+            else
+                current_free_index = 0;
         }
         else {
             /* This node is too large to keep in a specific size bucket,
@@ -376,7 +379,10 @@ void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
              */
             node->next = allocator->free[0];
             allocator->free[0] = node;
-            current_free_index -= index;
+            if (current_free_index >= index)
+                current_free_index -= index;
+            else
+                current_free_index = 0;
         }
     } while ((node = next) != NULL);
 
