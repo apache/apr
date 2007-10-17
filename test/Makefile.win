@@ -61,20 +61,27 @@ TESTALL_COMPONENTS = \
 	$(OUTDIR)\testshmconsumer.exe \
 	$(OUTDIR)\globalmutexchild.exe
 
-ALL_TESTS = $(INTDIR)\testutil.obj $(INTDIR)\testtime.obj $(INTDIR)\teststr.obj \
-	$(INTDIR)\testvsn.obj $(INTDIR)\testipsub.obj $(INTDIR)\testmmap.obj \
-	$(INTDIR)\testud.obj $(INTDIR)\testtable.obj $(INTDIR)\testsleep.obj \
-	$(INTDIR)\testpools.obj $(INTDIR)\testfmt.obj $(INTDIR)\testfile.obj \
-	$(INTDIR)\testdir.obj $(INTDIR)\testfileinfo.obj $(INTDIR)\testrand.obj \
-	$(INTDIR)\testdso.obj $(INTDIR)\testoc.obj $(INTDIR)\testdup.obj \
-	$(INTDIR)\testsockets.obj $(INTDIR)\testproc.obj $(INTDIR)\testpoll.obj \
-	$(INTDIR)\testlock.obj $(INTDIR)\testsockopt.obj $(INTDIR)\testpipe.obj \
-	$(INTDIR)\testthread.obj $(INTDIR)\testhash.obj $(INTDIR)\testargs.obj \
-	$(INTDIR)\testnames.obj $(INTDIR)\testuser.obj $(INTDIR)\testpath.obj \
-	$(INTDIR)\testenv.obj $(INTDIR)\testprocmutex.obj $(INTDIR)\testfnmatch.obj \
-	$(INTDIR)\testatomic.obj $(INTDIR)\testflock.obj $(INTDIR)\testshm.obj \
-	$(INTDIR)\testsock.obj $(INTDIR)\testglobalmutex.obj $(INTDIR)\teststrnatcmp.obj \
-	$(INTDIR)\testfilecopy.obj $(INTDIR)\testtemp.obj $(INTDIR)\testlfs.obj \
+ALL_TESTS = $(INTDIR)\testutil.obj $(INTDIR)\testtime.obj \
+	$(INTDIR)\teststr.obj $(INTDIR)\testvsn.obj \
+	$(INTDIR)\testipsub.obj $(INTDIR)\testmmap.obj \
+	$(INTDIR)\testud.obj $(INTDIR)\testtable.obj \
+	$(INTDIR)\testsleep.obj $(INTDIR)\testpools.obj \
+	$(INTDIR)\testfmt.obj $(INTDIR)\testfile.obj \
+	$(INTDIR)\testdir.obj $(INTDIR)\testfileinfo.obj \
+	$(INTDIR)\testrand.obj $(INTDIR)\testdso.obj \
+	$(INTDIR)\testoc.obj $(INTDIR)\testdup.obj \
+	$(INTDIR)\testsockets.obj $(INTDIR)\testproc.obj \
+	$(INTDIR)\testpoll.obj $(INTDIR)\testlock.obj \
+	$(INTDIR)\testsockopt.obj $(INTDIR)\testpipe.obj \
+	$(INTDIR)\testthread.obj $(INTDIR)\testhash.obj \
+	$(INTDIR)\testargs.obj $(INTDIR)\testnames.obj \
+	$(INTDIR)\testuser.obj $(INTDIR)\testpath.obj \
+	$(INTDIR)\testenv.obj $(INTDIR)\testprocmutex.obj \
+	$(INTDIR)\testfnmatch.obj $(INTDIR)\testatomic.obj \
+	$(INTDIR)\testflock.obj $(INTDIR)\testshm.obj \
+	$(INTDIR)\testsock.obj $(INTDIR)\testglobalmutex.obj \
+	$(INTDIR)\teststrnatcmp.obj $(INTDIR)\testfilecopy.obj \
+	$(INTDIR)\testtemp.obj $(INTDIR)\testlfs.obj \
 	$(INTDIR)\testrand2.obj
 
 CLEAN_DATA = testfile.tmp lfstests\large.bin \
@@ -226,7 +233,7 @@ PATH=$(OUTDIR);..\$(OUTDIR);$(PATH)
 
 check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	@for %p in ($(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)) do @( \
-	    echo Testing %p && %p || echo %p failed \
+	    echo Testing %p && %p -v || echo %p failed \
 	)
 
 checkall: check
