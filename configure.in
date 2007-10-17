@@ -1822,7 +1822,8 @@ dnl ----------------------------- Checking for File Info Support
 echo "${nl}Checking for File Info Support..."
 AC_CHECK_MEMBERS([struct stat.st_blocks, struct stat.st_atimensec,
 struct stat.st_ctimensec, struct stat.st_mtimensec, struct stat.st_atim.tv_nsec,
-struct stat.st_ctim.tv_nsec, struct stat.st_mtim.tv_nsec],,,[
+struct stat.st_ctim.tv_nsec, struct stat.st_mtim.tv_nsec,
+struct stat.st_atime_n, struct stat.st_ctime_n, struct stat.st_mtime_n],,,[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
