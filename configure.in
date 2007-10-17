@@ -966,8 +966,6 @@ AC_SUBST(mmap)
 AC_SUBST(have_memmove)
 
 APR_CHECK_SIGWAIT_ONE_ARG
-APR_CHECK_DIRENT_INODE
-APR_CHECK_DIRENT_TYPE
 
 dnl ----------------------------- Checks for Any required Headers
 AC_HEADER_STDC
@@ -1020,6 +1018,7 @@ APR_FLAG_HEADERS(
     sys/file.h		\
     sys/ioctl.h         \
     sys/mman.h		\
+    sys/param.h         \
     sys/poll.h		\
     sys/resource.h	\
     sys/select.h	\
@@ -1818,6 +1817,24 @@ if test "$rand" != "1"; then
 fi
 
 AC_SUBST(rand)
+
+dnl ----------------------------- Checking for File Info Support 
+echo "${nl}Checking for File Info Support..."
+AC_CHECK_MEMBERS([struct stat.st_blocks, struct stat.st_atimensec,
+struct stat.st_ctimensec, struct stat.st_mtimensec, struct stat.st_atim.tv_nsec,
+struct stat.st_ctim.tv_nsec, struct stat.st_mtim.tv_nsec],,,[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif])
+
+APR_CHECK_DIRENT_INODE
+APR_CHECK_DIRENT_TYPE
 
 dnl ----------------------------- Checking for UUID Support 
 echo "${nl}Checking for OS UUID Support..."

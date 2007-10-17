@@ -70,6 +70,10 @@
 #ifdef BEOS
 #include <kernel/OS.h>
 #endif
+/* Hunting down DEV_BSIZE if not from dirent.h, sys/stat.h etc */
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 
 #if BEOS_BONE
 # ifndef BONE7
