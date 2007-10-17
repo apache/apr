@@ -62,16 +62,39 @@
 
 /*
  * Allocator
+ *
+ * @note The max_free_index and current_free_index fields are not really
+ * indices, but quantities of BOUNDARY_SIZE big memory blocks.
  */
 
 struct apr_allocator_t {
+    /** largest used index into free[], always < MAX_INDEX */
     apr_uint32_t        max_index;
+    /** Total size (in BOUNDARY_SIZE multiples) of unused memory before
+     * blocks are given back. @see apr_allocator_max_free_set().
+     * @note Initialized to APR_ALLOCATOR_MAX_FREE_UNLIMITED,
+     * which means to never give back blocks.
+     */
     apr_uint32_t        max_free_index;
+    /**
+     * Memory size (in BOUNDARY_SIZE multiples) that currently must be freed
+     * before blocks are given back. Range: 0..max_free_index
+     */
     apr_uint32_t        current_free_index;
 #if APR_HAS_THREADS
     apr_thread_mutex_t *mutex;
 #endif /* APR_HAS_THREADS */
     apr_pool_t         *owner;
+    /**
+     * Lists of free nodes. Slot 0 is used for oversized nodes,
+     * and the slots 1..MAX_INDEX-1 contain nodes of sizes
+     * (i+1) * BOUNDARY_SIZE. Example for BOUNDARY_INDEX == 12:
+     * slot  0: nodes larger than 81920
+     * slot  1: size  8192
+     * slot  2: size 12288
+     * ...
+     * slot 19: size 81920
+     */
     apr_memnode_t      *free[MAX_INDEX];
 };
 
@@ -345,7 +368,10 @@ void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
                 max_index = index;
             }
             allocator->free[index] = node;
-            current_free_index -= index;
+            if (current_free_index >= index)
+                current_free_index -= index;
+            else
+                current_free_index = 0;
         }
         else {
             /* This node is too large to keep in a specific size bucket,
@@ -353,7 +379,10 @@ void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
              */
             node->next = allocator->free[0];
             allocator->free[0] = node;
-            current_free_index -= index;
+            if (current_free_index >= index)
+                current_free_index -= index;
+            else
+                current_free_index = 0;
         }
     } while ((node = next) != NULL);
 
