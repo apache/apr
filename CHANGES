@@ -1,6 +1,9 @@
 ﻿                                                     -*- coding: utf-8 -*-
 Changes for APR 1.2.12
 
+  *) Implement apr_atomic_casptr() for z/OS.
+     [David Jones <oscaremma gmail.com>]
+
   *) Fill in apr_fileinfo_t member st_csize on Netware and Unix (PR 41678),
      and refine the file times down to apr_time_t resolution if supported
      by a st_atimensec or st_atim.tv_nsec value by the OS.  Additional
