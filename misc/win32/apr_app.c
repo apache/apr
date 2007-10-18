@@ -16,18 +16,20 @@
 
 /* Usage Notes:
  *
- *   this module, and the misc/win32/utf8.c modules must be 
+ *   this module, and the misc/win32/utf8.c modules must be
  *   compiled APR_EXPORT_STATIC and linked to an application with
- *   the /entry:wmainCRTStartup flag.  This module becomes the true
- *   wmain entry point, and passes utf-8 reformatted argv and env
- *   arrays to the application's main function.
+ *   the /entry:wmainCRTStartup flag (which this module kindly
+ *   provides to the developer who links to libaprapp-1.lib).
+ *   This module becomes the true wmain entry point, and passes
+ *   utf-8 reformatted argv and env arrays to the application's
+ *   main() function as if nothing happened.
  *
- *   This module is only compatible with Unicode-only executables.
+ *   This module is only compatible with Unicode operating systems.
  *   Mixed (Win9x backwards compatible) binaries should refer instead
  *   to the apr_startup.c module.
  *
  *   _dbg_malloc/realloc is used in place of the usual API, in order
- *   to convince the MSVCRT that they created these entities.  If we
+ *   to convince the MSVCRT that it created these entities.  If we
  *   do not create them as _CRT_BLOCK entities, the crt will fault
  *   on an assert.  We are not worrying about the crt's locks here, 
  *   since we are single threaded [so far].
@@ -41,8 +43,7 @@
 #include "apr_private.h"
 #include "apr_arch_misc.h"
 
-/* This symbol is _private_, although it must be exported.
- */
+#pragma comment(linker,"/ENTRY:wmainCRTStartup")
 
 extern int main(int argc, const char **argv, const char **env);
 
