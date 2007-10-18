@@ -82,6 +82,30 @@ apr_uint32_t apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint32_t swap,
     return old; /* old is automatically updated from mem on cs failure */
 }
 
+#if APR_SIZEOF_VOIDP == 4
+void *apr_atomic_casptr(volatile void **mem_ptr,
+                        void *swap_ptr,
+                        const void *cmp_ptr)
+{
+     __cs1(&cmp_ptr,     /* automatically updated from mem on __cs1 failure  */
+           mem_ptr,      /* set from swap when __cs1 succeeds                */
+           &swap_ptr);
+     return (void *)cmp_ptr;
+}
+#elif APR_SIZEOF_VOIDP == 8
+void *apr_atomic_casptr(volatile void **mem_ptr,
+                        void *swap_ptr,
+                        const void *cmp_ptr)
+{
+     __csg(&cmp_ptr,     /* automatically updated from mem on __csg failure  */
+           mem_ptr,      /* set from swap when __csg succeeds                */
+           &swap_ptr);  
+     return (void *)cmp_ptr;
+}
+#else
+#error APR_SIZEOF_VOIDP value not supported
+#endif /* APR_SIZEOF_VOIDP */
+
 apr_uint32_t apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
     apr_uint32_t old, new_val; 
