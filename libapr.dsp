@@ -466,6 +466,7 @@ SOURCE=.\passwd\apr_getpass.c
 
 SOURCE=.\poll\unix\select.c
 # End Source File
+# End Group
 # Begin Group "random"
 
 # PROP Default_Filter ""
