@@ -72,7 +72,7 @@ CFG=testdll - Win32 Release
 # PROP Bsc_Name ""
 # PROP Target_Dir ""
 
-!IF  "$(CFG)" == "testdll - Win32 Release9x"
+!ELSEIF  "$(CFG)" == "testdll - Win32 Release9x"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -114,7 +114,7 @@ CFG=testdll - Win32 Release
 # PROP Bsc_Name ""
 # PROP Target_Dir ""
 
-!IF  "$(CFG)" == "testdll - x64 Release"
+!ELSEIF  "$(CFG)" == "testdll - x64 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
