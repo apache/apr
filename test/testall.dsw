@@ -15,7 +15,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "apr_app"="..\build\apr_app.dsp" - Package Owner=<4>
+Project: "aprapp"="..\build\aprapp.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -24,7 +24,7 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name apr
+    Project_Dep_Name preaprapp
     End Project Dependency
 }}}
 
@@ -42,7 +42,37 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libapr_app"="..\build\libapr_app.dsp" - Package Owner=<4>
+Project: "libaprapp"="..\build\libaprapp.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name prelibaprapp
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "preaprapp"="..\build\preaprapp.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name apr
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "prelibaprapp"="..\build\prelibaprapp.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -69,7 +99,7 @@ Package=<4>
     Project_Dep_Name libapr
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name libapr_app
+    Project_Dep_Name libaprapp
     End Project Dependency
 }}}
 
@@ -87,7 +117,7 @@ Package=<4>
     Project_Dep_Name apr
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name apr_app
+    Project_Dep_Name aprapp
     End Project Dependency
 }}}
 
