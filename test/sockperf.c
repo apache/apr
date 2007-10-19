@@ -220,7 +220,7 @@ int main(int argc, char **argv)
 
     for(i = 0; i < nTests; i++) {
         printf("Test -> %c\n", testRuns[i].c);
-        results[i].size = testRuns[i].size * TEST_SIZE;
+        results[i].size = testRuns[i].size * (apr_size_t)TEST_SIZE;
         rv = runTest(&testRuns[i], &results[i], pool);
     }
 
