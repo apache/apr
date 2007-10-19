@@ -88,6 +88,9 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 
 testall@EXEEXT@: $(TESTS) abts.lo testutil.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $? $(ALL_LIBS)
+# For VPATH builds; where we have no ./data, copy us some data
+# if we wait until 'make check', then 'make; ./testall' fails;
+	if test ! -d "./data"; then cp -r $(srcdir)/data data; fi
 
 testlockperf@EXEEXT@: testlockperf.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $? $(ALL_LIBS)
