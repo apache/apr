@@ -72,7 +72,7 @@ CFG=testlib - Win32 Release
 # PROP Bsc_Name ""
 # PROP Target_Dir ""
 
-!IF  "$(CFG)" == "testlib - Win32 ReleaseNT"
+!ELSEIF  "$(CFG)" == "testlib - Win32 ReleaseNT"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -114,7 +114,7 @@ CFG=testlib - Win32 Release
 # PROP Bsc_Name ""
 # PROP Target_Dir ""
 
-!IF  "$(CFG)" == "testlib - x64 Release"
+!ELSEIF  "$(CFG)" == "testlib - x64 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0

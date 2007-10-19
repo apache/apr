@@ -380,10 +380,6 @@ SOURCE=.\network_io\unix\multicast.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\poll\unix\select.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\network_io\win32\sendrecv.c
 # End Source File
 # Begin Source File
@@ -405,6 +401,14 @@ SOURCE=.\network_io\win32\sockopt.c
 # Begin Source File
 
 SOURCE=.\passwd\apr_getpass.c
+# End Source File
+# End Group
+# Begin Group "poll"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\poll\unix\select.c
 # End Source File
 # End Group
 # Begin Group "random"
