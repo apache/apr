@@ -68,22 +68,6 @@ INCLUDES=-I$(INCDIR) -I$(srcdir)/../include
 # libtool wrapper scripts which link an executable when first run.
 LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE) @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
 
-check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
-	teststatus=0; \
-	progfailed=""; \
-	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
-		./$$prog; \
-		status=$$?; \
-		if test $$status != 0; then \
-			teststatus=$$status; \
-			progfailed="$$progfailed $$prog"; \
-		fi; \
-	done; \
-	if test $$teststatus != 0; then \
-		echo "Programs failed:$$progfailed"; \
-	fi; \
-	exit $$teststatus
-
 # STDTEST_PORTABLE;
 
 testall@EXEEXT@: $(TESTS) abts.lo testutil.lo $(LOCAL_LIBS)
@@ -146,5 +130,21 @@ testshmproducer@EXEEXT@: testshmproducer.lo $(LOCAL_LIBS)
 
 tryread@EXEEXT@: tryread.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $+ $(ALL_LIBS)
+
+check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
+	teststatus=0; \
+	progfailed=""; \
+	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
+		./$$prog; \
+		status=$$?; \
+		if test $$status != 0; then \
+			teststatus=$$status; \
+			progfailed="$$progfailed $$prog"; \
+		fi; \
+	done; \
+	if test $$teststatus != 0; then \
+		echo "Programs failed:$$progfailed"; \
+	fi; \
+	exit $$teststatus
 
 # DO NOT REMOVE
