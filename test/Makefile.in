@@ -84,60 +84,64 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	fi; \
 	exit $$teststatus
 
-occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)
-	$(LINK_PROG) occhild.lo $(LOCAL_LIBS) $(ALL_LIBS)
+# STDTEST_PORTABLE;
 
-sockchild@EXEEXT@: sockchild.lo $(LOCAL_LIBS)
-	$(LINK_PROG) sockchild.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-readchild@EXEEXT@: readchild.lo $(LOCAL_LIBS)
-	$(LINK_PROG) readchild.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-globalmutexchild@EXEEXT@: globalmutexchild.lo $(LOCAL_LIBS)
-	$(LINK_PROG) globalmutexchild.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-tryread@EXEEXT@: tryread.lo $(LOCAL_LIBS)
-	$(LINK_PROG) tryread.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-proc_child@EXEEXT@: proc_child.lo $(LOCAL_LIBS)
-	$(LINK_PROG) proc_child.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-# FIXME: -prefer-pic is only supported with libtool-1.4+
-mod_test.slo: $(srcdir)/mod_test.c
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -prefer-pic -c $(srcdir)/mod_test.c && touch $@
-
-mod_test.la: mod_test.slo $(LOCAL_LIBS)
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -avoid-version -module mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
-
-libmod_test.la: mod_test.slo $(LOCAL_LIBS)
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -avoid-version mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ $(LOCAL_LIBS) $(ALL_LIBS)
+testall@EXEEXT@: $(TESTS) abts.lo testutil.lo $(LOCAL_LIBS)
+	$(LINK_PROG) $? $(ALL_LIBS)
 
 testlockperf@EXEEXT@: testlockperf.lo $(LOCAL_LIBS)
-	$(LINK_PROG) testlockperf.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-sendfile@EXEEXT@: sendfile.lo $(LOCAL_LIBS)
-	$(LINK_PROG) sendfile.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-testshmproducer@EXEEXT@: testshmproducer.lo $(LOCAL_LIBS)
-	$(LINK_PROG) testshmproducer.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-testshmconsumer@EXEEXT@: testshmconsumer.lo $(LOCAL_LIBS)
-	$(LINK_PROG) testshmconsumer.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-testprocmutex@EXEEXT@: testprocmutex.lo $(LOCAL_LIBS)
-	$(LINK_PROG) testprocmutex.lo $(LOCAL_LIBS) $(ALL_LIBS)
+	$(LINK_PROG) $? $(ALL_LIBS)
 
 testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
-	$(LINK_PROG) testmutexscope.lo $(LOCAL_LIBS) $(ALL_LIBS)
+	$(LINK_PROG) $? $(ALL_LIBS)
+
+# OTHER_PROGRAMS;
 
 echod@EXEEXT@: echod.lo $(LOCAL_LIBS)
-	$(LINK_PROG) echod.lo $(LOCAL_LIBS) $(ALL_LIBS)
+	$(LINK_PROG) $? $(ALL_LIBS)
+
+sendfile@EXEEXT@: sendfile.lo $(LOCAL_LIBS)
+	$(LINK_PROG) $? $(LOCAL_LIBS) $(ALL_LIBS)
 
 sockperf@EXEEXT@: sockperf.lo $(LOCAL_LIBS)
-	$(LINK_PROG) sockperf.lo $(LOCAL_LIBS) $(ALL_LIBS)
+	$(LINK_PROG) $? $(ALL_LIBS)
 
-testall@EXEEXT@: $(TESTS) abts.lo
-	$(LINK_PROG) $(TESTS) abts.lo $(LOCAL_LIBS) $(ALL_LIBS)
+# TESTALL_COMPONENTS;
 
+globalmutexchild@EXEEXT@: globalmutexchild.lo $(LOCAL_LIBS)
+	$(LINK_PROG) $? $(ALL_LIBS)
+
+# Note -prefer-pic is only supported with libtool-1.4+
+mod_test.lo: $(srcdir)/mod_test.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -prefer-pic -c $?
+
+mod_test.la: mod_test.lo $(LOCAL_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -module \
+	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ $? $(ALL_LIBS)
+
+libmod_test.la: mod_test.lo $(LOCAL_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` \
+	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ $? $(ALL_LIBS)
+
+occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)
+	$(LINK_PROG) $? $(ALL_LIBS)
+
+proc_child@EXEEXT@: proc_child.lo $(LOCAL_LIBS)
+	$(LINK_PROG) $? $(ALL_LIBS)
+
+readchild@EXEEXT@: readchild.lo $(LOCAL_LIBS)
+	$(LINK_PROG) $? $(ALL_LIBS)
+
+sockchild@EXEEXT@: sockchild.lo $(LOCAL_LIBS)
+	$(LINK_PROG) $? $(ALL_LIBS)
+
+testshmconsumer@EXEEXT@: testshmconsumer.lo $(LOCAL_LIBS)
+	$(LINK_PROG) $? $(ALL_LIBS)
+
+testshmproducer@EXEEXT@: testshmproducer.lo $(LOCAL_LIBS)
+	$(LINK_PROG) $? $(ALL_LIBS)
+
+tryread@EXEEXT@: tryread.lo $(LOCAL_LIBS)
+	$(LINK_PROG) $? $(ALL_LIBS)
 
 # DO NOT REMOVE
