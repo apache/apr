@@ -4,6 +4,8 @@ VPATH = @srcdir@
 # PROGRAMS includes all test programs built on this platform.
 # STDTEST_PORTABLE
 #   test programs invoked via standard user interface, run on all platforms
+# TESTS
+#   test modules invoked through the abts suite (./testall)
 # STDTEST_NONPORTABLE
 #   test programs invoked via standard user interface, not portable
 # OTHER_PROGRAMS
@@ -14,6 +16,16 @@ STDTEST_PORTABLE = \
 	testlockperf@EXEEXT@ \
 	testmutexscope@EXEEXT@ \
 	testall@EXEEXT@
+
+TESTS = testtime.lo teststr.lo testvsn.lo testipsub.lo testshm.lo \
+	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
+	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
+	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
+	testpoll.lo testlock.lo testsockopt.lo testpipe.lo testthread.lo \
+	testhash.lo testargs.lo testnames.lo testuser.lo testpath.lo \
+	testenv.lo testprocmutex.lo testfnmatch.lo testatomic.lo testflock.lo \
+	testsock.lo testglobalmutex.lo teststrnatcmp.lo testfilecopy.lo \
+	testtemp.lo testlfs.lo testcond.lo
 
 OTHER_PROGRAMS = \
 	sendfile@EXEEXT@ \
@@ -32,8 +44,8 @@ TESTALL_COMPONENTS = \
 	testshmconsumer@EXEEXT@ \
 	tryread@EXEEXT@
 
-
-PROGRAMS = $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE) $(OTHER_PROGRAMS)
+PROGRAMS = $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE) \
+	   $(OTHER_PROGRAMS)
 
 TARGETS = $(PROGRAMS)
 
@@ -123,16 +135,6 @@ echod@EXEEXT@: echod.lo $(LOCAL_LIBS)
 
 sockperf@EXEEXT@: sockperf.lo $(LOCAL_LIBS)
 	$(LINK_PROG) sockperf.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-TESTS = testutil.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
-	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
-	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
-	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
-	testpoll.lo testlock.lo testsockopt.lo testpipe.lo testthread.lo \
-	testhash.lo testargs.lo testnames.lo testuser.lo testpath.lo \
-	testenv.lo testprocmutex.lo testfnmatch.lo testatomic.lo testflock.lo \
-	testshm.lo testsock.lo testglobalmutex.lo teststrnatcmp.lo testfilecopy.lo \
-	testtemp.lo testlfs.lo testcond.lo
 
 testall@EXEEXT@: $(TESTS) abts.lo
 	$(LINK_PROG) $(TESTS) abts.lo $(LOCAL_LIBS) $(ALL_LIBS)
