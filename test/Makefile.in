@@ -87,64 +87,64 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 # STDTEST_PORTABLE;
 
 testall@EXEEXT@: $(TESTS) abts.lo testutil.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $? $(ALL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
 # For VPATH builds; where we have no ./data, copy us some data
 # if we wait until 'make check', then 'make; ./testall' fails;
 	if test ! -d "./data"; then cp -r $(srcdir)/data data; fi
 
 testlockperf@EXEEXT@: testlockperf.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $? $(ALL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
 
 testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $? $(ALL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
 
 # OTHER_PROGRAMS;
 
 echod@EXEEXT@: echod.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $? $(ALL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
 
 sendfile@EXEEXT@: sendfile.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $? $(LOCAL_LIBS) $(ALL_LIBS)
+	$(LINK_PROG) $+ $(LOCAL_LIBS) $(ALL_LIBS)
 
 sockperf@EXEEXT@: sockperf.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $? $(ALL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
 
 # TESTALL_COMPONENTS;
 
 globalmutexchild@EXEEXT@: globalmutexchild.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $? $(ALL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
 
 # Note -prefer-pic is only supported with libtool-1.4+
 mod_test.lo: $(srcdir)/mod_test.c
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -prefer-pic -c $?
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -prefer-pic -o $@ -c $<
 
 mod_test.la: mod_test.lo $(LOCAL_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -module \
-	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ $? $(ALL_LIBS)
+	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ $+ $(ALL_LIBS)
 
 libmod_test.la: mod_test.lo $(LOCAL_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` \
-	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ $? $(ALL_LIBS)
+	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ $+ $(ALL_LIBS)
 
 occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $? $(ALL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
 
 proc_child@EXEEXT@: proc_child.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $? $(ALL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
 
 readchild@EXEEXT@: readchild.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $? $(ALL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
 
 sockchild@EXEEXT@: sockchild.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $? $(ALL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
 
 testshmconsumer@EXEEXT@: testshmconsumer.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $? $(ALL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
 
 testshmproducer@EXEEXT@: testshmproducer.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $? $(ALL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
 
 tryread@EXEEXT@: tryread.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $? $(ALL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
 
 # DO NOT REMOVE
