@@ -118,3 +118,20 @@ apr_uint32_t apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
     return old;
 }
 
+APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem_ptr, void *new_ptr)
+{
+    void *old_ptr;
+
+    old_ptr = *(void **)mem_ptr; /* old is automatically updated on cs failure */
+#if APR_SIZEOF_VOIDP == 4
+    do {
+    } while (__cs1(&old_ptr, mem_ptr, &new_ptr)); 
+#elif APR_SIZEOF_VOIDP == 8
+    do { 
+    } while (__csg(&old_ptr, mem_ptr, &new_ptr)); 
+#else
+#error APR_SIZEOF_VOIDP value not supported
+#endif /* APR_SIZEOF_VOIDP */
+
+    return old_ptr;
+}
