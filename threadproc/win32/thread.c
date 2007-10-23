@@ -108,7 +108,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
      */
 #ifndef _WIN32_WCE
     if ((handle = (HANDLE)_beginthreadex(NULL,
-                        attr && attr->stacksize > 0 ? attr->stacksize : 0,
+                        (DWORD) (attr ? attr->stacksize : 0),
                         (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
                         (*new), 0, &temp)) == 0) {
         return APR_FROM_OS_ERROR(_doserrno);
