@@ -219,7 +219,7 @@ APR_DECLARE(void) apr_random_add_entropy(apr_random_t *g,const void *entropy_,
         p->pool[p->bytes++] = entropy[n];
 
         if (p->bytes == g->rehash_size) {
-            unsigned int r;
+            apr_size_t r;
 
             for (r = 0; r < p->bytes/2; r+=g->pool_hash->size)
                 hash(g->pool_hash,p->pool+r,p->pool+r*2,g->pool_hash->size*2);
@@ -246,7 +246,7 @@ static void apr_random_bytes(apr_random_t *g,unsigned char *random,
     apr_size_t n;
 
     for (n = 0; n < bytes; ) {
-        int l;
+        apr_size_t l;
 
         if (g->random_bytes == 0) {
             apr_random_block(g,g->randomness);
