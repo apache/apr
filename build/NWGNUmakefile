@@ -65,6 +65,10 @@ $(APRUTIL)/include/private/%.h: $(subst /,\,$(APRUTIL))\include\private\%.hnw
 	@echo Creating $(subst /,\,$@)
 	copy $< $(subst /,\,$(APRUTIL))\include\private\$(@F)
 
+$(APRUTIL)/include/private/%.h: $(subst /,\,$(APRUTIL))\include\private\%.hw
+	@echo Creating $(subst /,\,$@)
+	copy $< $(subst /,\,$(APRUTIL))\include\private\$(@F)
+
 $(APRUTIL)/xml/expat/lib/%.h: $(subst /,\,$(APRUTIL))\xml\expat\lib\%.hnw
 	@echo Creating $(subst /,\,$@)
 	copy $< $(subst /,\,$(APRUTIL))\xml\expat\lib\$(@F)
