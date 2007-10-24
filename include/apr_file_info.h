@@ -125,21 +125,23 @@ typedef struct apr_dir_t          apr_dir_t;
 typedef apr_int32_t               apr_fileperms_t;
 #if (defined WIN32) || (defined NETWARE)
 /**
- * Structure for determining the inode of the file.
- */
-typedef apr_uint64_t              apr_ino_t;
-/**
  * Structure for determining the device the file is on.
  */
 typedef apr_uint32_t              apr_dev_t;
 #else
-/** The inode of the file. */
-typedef ino_t                     apr_ino_t;
 /**
  * Structure for determining the device the file is on.
  */
 typedef dev_t                     apr_dev_t;
 #endif
+
+/* See apr.h.in (.hw or .hnw) for the declaration of apr_ino_t,
+ * but as we don't want to break users who author for 1.2.x, we
+ * can't present this type until they have included apr_file_info.h
+ * where it was originally declared in release 1.2.0.
+ * Unmask it for use here.
+ */
+#undef apr_ino_t
 
 /**
  * @defgroup apr_file_stat Stat Functions

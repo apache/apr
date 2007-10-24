@@ -1,5 +1,9 @@
-﻿                                                     -*- coding: utf-8 -*-
+                                                     -*- coding: utf-8 -*-
 Changes for APR 1.2.12
+
+  *) Define apr_ino_t in such a way that it doesn't change definition
+     based on the library consumer's -D'efines to the filesystem.
+     [Lucian Adrian Grijincu <lucian.grijincu gmail.com>]
 
   *) Implement apr_atomic_casptr() for z/OS.
      [David Jones <oscaremma gmail.com>]
