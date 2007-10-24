@@ -325,6 +325,8 @@ typedef  apr_uint64_t      apr_ino_t;
 #define APR_UINT64_MAX  APR_UINT64_C(0xffffffffffffffff)
 #endif
 
+#define APR_SIZE_MAX    (~((apr_size_t)0))
+
 /* PROC mutex is a GLOBAL mutex on Netware */
 #define APR_PROC_MUTEX_IS_GLOBAL      1
 
