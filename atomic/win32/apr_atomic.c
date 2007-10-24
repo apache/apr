@@ -122,7 +122,7 @@ APR_DECLARE(void *) apr_atomic_casptr(volatile void **mem, void *with, const voi
 {
 #if (defined(_M_IA64) || defined(_M_AMD64)) && !defined(RC_INVOKED)
     return InterlockedCompareExchangePointer((void* volatile*)mem, with, (void*)cmp);
-#elseif defined(__MINGW32__)
+#elif defined(__MINGW32__)
     return InterlockedCompareExchangePointer((void**)mem, with, (void*)cmp);
 #else
     /* Too many VC6 users have stale win32 API files, stub this */
