@@ -1,5 +1,9 @@
-﻿                                                     -*- coding: utf-8 -*-
+                                                     -*- coding: utf-8 -*-
 Changes with APR 0.9.17
+
+  *) Define apr_ino_t in such a way that it doesn't change definition
+     based on the library consumer's -D'efines to the filesystem.
+     [Lucian Adrian Grijincu <lucian.grijincu gmail.com>]
 
   *) Cause apr_file_dup2() on Win32 to update the MSVCRT psuedo-stdio
      handles for fd-based and FILE * based I/O.  [William Rowe]

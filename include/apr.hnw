@@ -234,6 +234,8 @@ typedef  ssize_t           apr_ssize_t;
 typedef  off_t             apr_off_t;
 typedef  int               apr_socklen_t;
 
+typedef apr_uint64_t       apr_ino_t;
+
 #ifdef UNKNOWN_NETWARE_64BIT_FLAG_NEEDED
 #define APR_SIZEOF_VOIDP   8
 #else

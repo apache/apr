@@ -971,3 +971,17 @@ fi
 
 AC_SUBST(MKDEP)
 ])
+
+dnl
+dnl APR_CHECK_TYPES_COMPATIBLE(TYPE-1, TYPE-2, [ACTION-IF-TRUE])
+dnl
+dnl Try to determine whether two types are the same. Only works
+dnl for gcc and icc.
+dnl
+AC_DEFUN([APR_CHECK_TYPES_COMPATIBLE], [
+define([apr_cvname], apr_cv_typematch_[]translit([$1], [ ], [_])_[]translit([$2], [ ], [_]))
+AC_CACHE_CHECK([whether $1 and $2 are the same], apr_cvname, [
+AC_TRY_COMPILE(AC_INCLUDES_DEFAULT, [
+    int foo[0 - !__builtin_types_compatible_p($1, $2)];
+], [apr_cvname=yes $3], [apr_cvname=no])])
+])

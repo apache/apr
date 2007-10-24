@@ -1221,6 +1221,14 @@ if test "$ac_cv_type_off_t" = "yes"; then
         fi
     fi
     AC_MSG_RESULT([$off_t_value])
+    
+    dnl define apr_ino_t in a manner independent of _FILE_OFFSET_BITS setting
+    dnl default fallback
+    ino_t_value=ino_t
+    APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned long long, ino_t_value="unsigned long long")
+    APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned long, ino_t_value="unsigned long")
+    APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned int, ino_t_value="unsigned int")
+
 else
     off_t_value='apr_int32_t'
     off_t_fmt='#define APR_OFF_T_FMT "d"'
@@ -1300,6 +1308,7 @@ AC_SUBST(off_t_fmt)
 AC_SUBST(pid_t_fmt)
 AC_SUBST(int64_literal) 
 AC_SUBST(stdint) 
+AC_SUBST(ino_t_value)
 
 dnl ----------------------------- Checking for string functions
 AC_CHECK_FUNCS(strnicmp, have_strnicmp="1", have_strnicmp="0")

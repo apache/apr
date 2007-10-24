@@ -349,6 +349,8 @@ typedef  int         apr_off_t;
 #endif
 typedef  int         apr_socklen_t;
 
+typedef apr_uint64_t       apr_ino_t;
+
 #ifdef WIN64
 #define APR_SIZEOF_VOIDP   8
 #else
