@@ -255,6 +255,14 @@ typedef  int               apr_socklen_t;
 #else
 typedef  size_t            apr_socklen_t;
 #endif
+typedef  apr_uint64_t      apr_ino_t;
+
+/* As we don't want to break users who author for 1.2.x, we can't
+ * present this type until they have included apr_file_info.h
+ * where it was originally declared in release 1.2.0.
+ * Mask it from accedental misuse here.
+ */
+#define apr_ino_t apr_ino_t__requires__apr_file_info_h
 
 /* Are we big endian? */
 /* XXX: Fatal assumption on Alpha platforms */

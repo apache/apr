@@ -470,6 +470,14 @@ void main(void)
    if test "$apr_cv_use_lfs64" = "yes"; then
       APR_ADDTO(CPPFLAGS, [-D_LARGEFILE64_SOURCE])
    fi
+
+
+   dnl define apr_ino_t in a manner independent of _FILE_OFFSET_BITS setting
+   dnl default fallback
+   ino_t_value=ino_t
+   APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned long long, ino_t_value="unsigned long long")
+   APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned long, ino_t_value="unsigned long")
+   APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned int, ino_t_value="unsigned int")
 fi
 
 AC_ARG_ENABLE(nonportable-atomics,
@@ -1380,6 +1388,7 @@ AC_SUBST(uint64_literal)
 AC_SUBST(stdint) 
 AC_SUBST(bigendian)
 AC_SUBST(aprlfs)
+AC_SUBST(ino_t_value)
 
 dnl ----------------------------- Checking for string functions
 AC_CHECK_FUNCS(strnicmp, have_strnicmp="1", have_strnicmp="0")
