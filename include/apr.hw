@@ -345,6 +345,7 @@ typedef  __int64     apr_off_t;
 typedef  int         apr_off_t;
 #endif
 typedef  int         apr_socklen_t;
+typedef  apr_uint64_t      apr_ino_t;
 
 /* Are we big endian? */
 /* XXX: Fatal assumption on Alpha platforms */

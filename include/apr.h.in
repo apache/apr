@@ -283,6 +283,7 @@ typedef  @size_t_value@          apr_size_t;
 typedef  @ssize_t_value@         apr_ssize_t;
 typedef  @off_t_value@           apr_off_t;
 typedef  @socklen_t_value@       apr_socklen_t;
+typedef  @ino_t_value@           apr_ino_t;
 
 #define APR_SIZEOF_VOIDP @voidp_size@
 

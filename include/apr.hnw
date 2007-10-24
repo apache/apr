@@ -255,6 +255,7 @@ typedef  int               apr_socklen_t;
 #else
 typedef  size_t            apr_socklen_t;
 #endif
+typedef  apr_uint64_t      apr_ino_t;
 
 /* Are we big endian? */
 /* XXX: Fatal assumption on Alpha platforms */
