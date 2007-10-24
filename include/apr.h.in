@@ -348,6 +348,9 @@ typedef  @ino_t_value@           apr_ino_t;
 #define APR_UINT64_MAX  APR_UINT64_C(0xffffffffffffffff)
 #endif
 
+#define APR_SIZE_MAX    (~((apr_size_t)0))
+
+
 /* Definitions that APR programs need to work properly. */
 
 /**
