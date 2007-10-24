@@ -430,6 +430,8 @@ typedef  int         gid_t;
 #define APR_UINT64_MAX  APR_UINT64_C(0xffffffffffffffff)
 #endif
 
+#define APR_SIZE_MAX    (~((apr_size_t)0))
+
 #if APR_HAVE_IPV6
 
 /* Appears in later flavors, not the originals. */
