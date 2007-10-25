@@ -403,6 +403,109 @@ do_select:
     return rv < 0 ? errno : APR_SUCCESS;
 }
 
+#elif defined(DARWIN)
+
+/* OS/X Release 10.5 or greater */
+apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
+                                 apr_hdtr_t * hdtr, apr_off_t * offset,
+                                 apr_size_t * len, apr_int32_t flags)
+{
+    apr_off_t nbytes = *len;
+    int rv;
+    struct sf_hdtr headerstruct;
+
+    /* Ignore flags for now. */
+    flags = 0;
+
+    if (!hdtr) {
+        hdtr = &no_hdtr;
+    }
+
+    headerstruct.headers = hdtr->headers;
+    headerstruct.hdr_cnt = hdtr->numheaders;
+    headerstruct.trailers = hdtr->trailers;
+    headerstruct.trl_cnt = hdtr->numtrailers;
+
+    /* BSD can send the headers/footers as part of the system call */
+    do {
+        if (sock->options & APR_INCOMPLETE_WRITE) {
+            apr_status_t arv;
+            sock->options &= ~APR_INCOMPLETE_WRITE;
+            arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
+            if (arv != APR_SUCCESS) {
+                *len = 0;
+                return arv;
+            }
+        }
+        if (nbytes) {
+            /* We won't dare call sendfile() if we don't have
+             * header or file bytes to send because nbytes == 0
+             * means send the remaining file to EOF.
+             */
+            rv = sendfile(file->filedes, /* file to be sent */
+                          sock->socketdes, /* socket */
+                          *offset,       /* where in the file to start */
+                          &nbytes,       /* number of bytes to write/written */
+                          &headerstruct, /* Headers/footers */
+                          flags);        /* undefined, set to 0 */
+
+            if (rv == -1) {
+                if (errno == EAGAIN) {
+                    if (sock->timeout > 0) {
+                        sock->options |= APR_INCOMPLETE_WRITE;
+                    }
+                    /* BSD's sendfile can return -1/EAGAIN even if it
+                     * sent bytes.  Sanitize the result so we get normal EAGAIN
+                     * semantics w.r.t. bytes sent.
+                     */
+                    if (nbytes) {
+                        /* normal exit for a big file & non-blocking io */
+                        (*len) = nbytes;
+                        return APR_SUCCESS;
+                    }
+                }
+            }
+            else {       /* rv == 0 (or the kernel is broken) */
+                if (nbytes == 0) {
+                    /* Most likely the file got smaller after the stat.
+                     * Return an error so the caller can do the Right Thing.
+                     */
+                    (*len) = nbytes;
+                    return APR_EOF;
+                }
+            }
+        }    
+        else {
+            /* just trailer bytes... use writev()
+             */
+            rv = writev(sock->socketdes,
+                        hdtr->trailers,
+                        hdtr->numtrailers);
+            if (rv > 0) {
+                nbytes = rv;
+                rv = 0;
+            }
+            else {
+                nbytes = 0;
+            }
+        }
+        if ((rv == -1) && (errno == EAGAIN) 
+                       && (sock->timeout > 0)) {
+            apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
+            if (arv != APR_SUCCESS) {
+                *len = 0;
+                return arv;
+            }
+        }
+    } while (rv == -1 && (errno == EINTR || errno == EAGAIN));
+
+    (*len) = nbytes;
+    if (rv == -1) {
+        return errno;
+    }
+    return APR_SUCCESS;
+}
+
 #elif defined(__FreeBSD__) || defined(__DragonFly__)
 
 /* Release 3.1 or greater */
