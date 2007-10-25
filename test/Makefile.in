@@ -54,9 +54,7 @@ TARGETS = $(PROGRAMS)
 
 LOCAL_LIBS=../lib@APR_LIBNAME@.la
 
-CLEAN_TARGETS = testfile.tmp mod_test.slo proc_child@EXEEXT@ occhild@EXEEXT@ \
-	readchild@EXEEXT@ tryread@EXEEXT@ sockchild@EXEEXT@ \
-	globalmutexchild@EXEEXT@ lfstests/*.bin \
+CLEAN_TARGETS = testfile.tmp lfstests/*.bin \
 	data/test*.txt data/test*.dat data/apr.testshm.shm
 
 CLEAN_SUBDIRS = internal
@@ -66,7 +64,7 @@ INCLUDES=-I$(INCDIR) -I$(srcdir)/../include
 
 # link programs using -no-install to get real executables not
 # libtool wrapper scripts which link an executable when first run.
-LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE)\
+LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE) \
 	    @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
 
 # STDTEST_PORTABLE;
@@ -109,7 +107,7 @@ globalmutexchild@EXEEXT@: globalmutexchild.lo $(LOCAL_LIBS)
 mod_test.lo: $(srcdir)/mod_test.c
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -prefer-pic -o $@ -c $<
 
-mod_test.la: mod_test.lo $(LOCAL_LIBS)
+mod_test.la: mod_test.lo
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -module \
 	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ $+ $(ALL_LIBS)
 
