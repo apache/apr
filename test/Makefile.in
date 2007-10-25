@@ -17,6 +17,16 @@ STDTEST_PORTABLE = \
 	testmutexscope@EXEEXT@ \
 	testall@EXEEXT@
 
+TESTS = testtime.lo teststr.lo testvsn.lo testipsub.lo \
+	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
+	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
+	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
+	testpoll.lo testlock.lo testsockopt.lo testpipe.lo testthread.lo \
+	testhash.lo testargs.lo testnames.lo testuser.lo testpath.lo \
+	testenv.lo testprocmutex.lo testrand2.lo testfnmatch.lo \
+        testatomic.lo testflock.lo testshm.lo testsock.lo testglobalmutex.lo \
+        teststrnatcmp.lo testfilecopy.lo testtemp.lo testlfs.lo
+
 OTHER_PROGRAMS = \
         sendfile@EXEEXT@ \
 	testshmproducer@EXEEXT@ \
@@ -56,14 +66,7 @@ INCLUDES=-I$(INCDIR) -I$(srcdir)/../include
 LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE) \
 	@LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
 
-check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
-	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
-		./$$prog; \
-		if test $$? = 255; then \
-			echo "$$prog failed"; \
-			break; \
-		fi; \
-	done
+# STDTEST_PORTABLE;
 
 abts.lo: $(srcdir)/abts.c $(srcdir)/abts.h $(srcdir)/abts_tests.h \
 	 $(srcdir)/testutil.h
@@ -71,22 +74,26 @@ abts.lo: $(srcdir)/abts.c $(srcdir)/abts.h $(srcdir)/abts_tests.h \
 testutil.lo: $(srcdir)/abts.c $(srcdir)/abts.h $(srcdir)/abts_tests.h \
 	     $(srcdir)/testutil.h
 
-occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)
+testall@EXEEXT@: $(TESTS) abts.lo testutil.lo $(LOCAL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
+# For VPATH builds; where we have no ./data, copy us some data
+# if we wait until 'make check', then 'make; ./testall' fails;
+	if test ! -d "./data"; then cp -r $(srcdir)/data data; fi
+
+testlockperf@EXEEXT@: testlockperf.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $+ $(ALL_LIBS)
 
-sockchild@EXEEXT@: sockchild.lo $(LOCAL_LIBS)
+testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $+ $(ALL_LIBS)
 
-readchild@EXEEXT@: readchild.lo $(LOCAL_LIBS)
+# OTHER_PROGRAMS;
+
+sendfile@EXEEXT@: sendfile.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $+ $(ALL_LIBS)
+
+# TESTALL_COMPONENTS;
 
 globalmutexchild@EXEEXT@: globalmutexchild.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
-
-tryread@EXEEXT@: tryread.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
-
-proc_child@EXEEXT@: proc_child.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $+ $(ALL_LIBS)
 
 # Note: -prefer-pic is only supported with libtool-1.4+
@@ -101,38 +108,34 @@ libmod_test.la: mod_test.lo $(LOCAL_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` \
 	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ $+ $(ALL_LIBS)
 
-testlockperf@EXEEXT@: testlockperf.lo $(LOCAL_LIBS)
+occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $+ $(ALL_LIBS)
 
-sendfile@EXEEXT@: sendfile.lo $(LOCAL_LIBS)
+proc_child@EXEEXT@: proc_child.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $+ $(ALL_LIBS)
 
-testshmproducer@EXEEXT@: testshmproducer.lo $(LOCAL_LIBS)
+readchild@EXEEXT@: readchild.lo $(LOCAL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
+
+sockchild@EXEEXT@: sockchild.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $+ $(ALL_LIBS)
 
 testshmconsumer@EXEEXT@: testshmconsumer.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $+ $(ALL_LIBS)
 
-testprocmutex@EXEEXT@: testprocmutex.lo $(LOCAL_LIBS)
+testshmproducer@EXEEXT@: testshmproducer.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $+ $(ALL_LIBS)
 
-testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
+tryread@EXEEXT@: tryread.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $+ $(ALL_LIBS)
 
-TESTS = testtime.lo teststr.lo testvsn.lo testipsub.lo \
-	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
-	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
-	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
-	testpoll.lo testlock.lo testsockopt.lo testpipe.lo testthread.lo \
-	testhash.lo testargs.lo testnames.lo testuser.lo testpath.lo \
-	testenv.lo testprocmutex.lo testrand2.lo testfnmatch.lo \
-        testatomic.lo testflock.lo testshm.lo testsock.lo testglobalmutex.lo \
-        teststrnatcmp.lo testfilecopy.lo testtemp.lo testlfs.lo
-
-testall@EXEEXT@: $(TESTS) abts.lo testutil.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
-# For VPATH builds; where we have no ./data, copy us some data
-# if we wait until 'make check', then 'make; ./testall' fails;
-	if test ! -d "./data"; then cp -r $(srcdir)/data data; fi
+check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
+	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
+		./$$prog; \
+		if test $$? = 255; then \
+			echo "$$prog failed"; \
+			break; \
+		fi; \
+	done
 
 # DO NOT REMOVE
