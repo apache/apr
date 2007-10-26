@@ -93,7 +93,7 @@ echod@EXEEXT@: echod.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $+ $(ALL_LIBS)
 
 sendfile@EXEEXT@: sendfile.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(LOCAL_LIBS) $(ALL_LIBS)
+	$(LINK_PROG) $+ $(ALL_LIBS)
 
 sockperf@EXEEXT@: sockperf.lo $(LOCAL_LIBS)
 	$(LINK_PROG) $+ $(ALL_LIBS)
