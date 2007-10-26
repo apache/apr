@@ -28,9 +28,7 @@ TESTS = testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	teststrnatcmp.lo testfilecopy.lo testtemp.lo testlfs.lo
 
 OTHER_PROGRAMS = \
-	sendfile@EXEEXT@ \
-	testshmproducer@EXEEXT@ \
-	testshmconsumer@EXEEXT@
+	sendfile@EXEEXT@
 
 TESTALL_COMPONENTS = \
 	globalmutexchild@EXEEXT@ \
@@ -39,6 +37,8 @@ TESTALL_COMPONENTS = \
 	proc_child@EXEEXT@ \
 	readchild@EXEEXT@ \
 	sockchild@EXEEXT@ \
+	testshmproducer@EXEEXT@ \
+	testshmconsumer@EXEEXT@ \
 	tryread@EXEEXT@
 
 PROGRAMS = $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE) \
