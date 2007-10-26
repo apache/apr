@@ -109,7 +109,7 @@ mod_test.lo: $(srcdir)/mod_test.c
 
 mod_test.la: mod_test.lo
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -module \
-	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ $+ $(ALL_LIBS)
+	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ $+
 
 libmod_test.la: mod_test.lo $(LOCAL_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` \
