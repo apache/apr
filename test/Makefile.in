@@ -11,6 +11,9 @@ VPATH = @srcdir@
 # OTHER_PROGRAMS
 #   programs such as sendfile, that have to be invoked in a special sequence
 #   or with special parameters
+# TESTALL_COMPONENTS
+#   programs such as globalmutexchild which the various TESTS will invoke
+#   to validate process creation, pipes, dso mechansims and so forth
 
 STDTEST_PORTABLE = \
 	testlockperf@EXEEXT@ \
