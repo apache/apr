@@ -1,11 +1,24 @@
 # PROGRAMS includes all test programs built on this platform.
 # STDTEST_PORTABLE
 #   test programs invoked via standard user interface, run on all platforms
+# TESTS
+#   test modules invoked through the abts suite (./testall)
 # STDTEST_NONPORTABLE
 #   test programs invoked via standard user interface, not portable
 # OTHER_PROGRAMS
 #   programs such as sendfile, that have to be invoked in a special sequence
 #   or with special parameters
+# TESTALL_COMPONENTS
+#   programs such as globalmutexchild which the various TESTS will invoke
+#   to validate process creation, pipes, dso mechansims and so forth
+
+# Windows Specific;
+# MODEL
+#   dynamic or static - refers to which set of bindings are desired
+#   and controls which libraries (apr-1 or libapr-1) will be linked.
+# OUTDIR
+#   the library path of the libraries, and also the path within test/
+#   where all of the tests for that library will be built
 
 !IFNDEF MODEL
 MODEL=dynamic
@@ -242,7 +255,9 @@ cleanall:
 	    %COMSPEC% /c "cd %%d & $(MAKE) -f Makefile.win cleanall" \
 
 
+!IF "$(MODEL)" != "static"
 PATH=$(OUTDIR);..\$(OUTDIR);$(PATH)
+!ENDIF
 
 check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	@for %p in ($(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)) do @( \
