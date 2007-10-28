@@ -35,7 +35,8 @@ OTHER_PROGRAMS = \
 
 TESTALL_COMPONENTS = \
 	globalmutexchild@EXEEXT@ \
-	mod_test.slo \
+	libmod_test.la \
+	mod_test.la \
 	occhild@EXEEXT@ \
 	proc_child@EXEEXT@ \
 	readchild@EXEEXT@ \
