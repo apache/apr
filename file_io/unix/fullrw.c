@@ -95,7 +95,7 @@ APR_DECLARE(apr_status_t) apr_file_writev_full(apr_file_t *thefile,
     }
 
     if (amt) {
-        rv = apr_file_write_full(thefile, vec[i].iov_base + amt,
+        rv = apr_file_write_full(thefile, (const char *)vec[i].iov_base + amt,
                                  vec[i].iov_len - amt, NULL);
     }
 
