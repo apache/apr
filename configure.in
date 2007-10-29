@@ -1413,6 +1413,10 @@ if test "${ac_cv_sizeof_off_t}${apr_cv_use_lfs64}" = "4yes"; then
     # Enable LFS
     aprlfs=1
     AC_CHECK_FUNCS([mmap64 sendfile64 sendfilev64 mkstemp64 readdir64_r])
+elif test "${ac_cv_sizeof_off_t}" != "${ac_cv_sizeof_size_t}"; then
+    # unsure of using -gt above is as portable, can can't forsee where
+    # off_t can legitimately be smaller than size_t
+    aprlfs=1
 else
     aprlfs=0     
 fi

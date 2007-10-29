@@ -1,6 +1,12 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.0
 
+  *) Corrected for Darwin and others to toggle APR_HAS_LARGE_FILES
+     where large off_t's are enabled without any extra defines, hints
+     or additional functions.  This is binary compatible, but apps
+     may need to be recompiled to take full advantage depending on how
+     they detect this feature.  [William Rowe]
+
   *) Implement apr_atomic_casptr() and apr_atomic_xchgptr() for z/OS.
      [David Jones <oscaremma gmail.com>]
 
