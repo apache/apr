@@ -68,7 +68,7 @@ static void reportError(const char *msg, apr_status_t rv,
     
 }
 
-static closeConnection(apr_socket_t *sock)
+static void closeConnection(apr_socket_t *sock)
 {
     apr_size_t len = 0;
     apr_socket_send(sock, NULL, &len);
