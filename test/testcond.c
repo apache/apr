@@ -39,6 +39,12 @@ struct toolbox_t {
     void (*func)(toolbox_t *box);
 };
 
+typedef struct toolbox_fnptr_t toolbox_fnptr_t;
+
+struct toolbox_fnptr_t {
+    void (*func)(toolbox_t *box);
+};
+
 static void lost_signal(abts_case *tc, void *data)
 {
     apr_status_t rv;
@@ -296,6 +302,7 @@ static void nested_lock_and_unlock(toolbox_t *box)
 
 static void nested_wait(abts_case *tc, void *data)
 {
+    toolbox_fnptr_t *fnptr = data;
     toolbox_t box;
     apr_status_t rv, retval;
     apr_thread_cond_t *cond = NULL;
@@ -316,7 +323,7 @@ static void nested_wait(abts_case *tc, void *data)
     box.tc = tc;
     box.cond = cond;
     box.mutex = mutex;
-    box.func = data;
+    box.func = fnptr->func;
 
     rv = apr_thread_create(&thread, NULL, thread_routine, &box, p);
     ABTS_SUCCESS(rv);
@@ -502,7 +509,7 @@ volatile enum {
     TOSS,
     PING,
     PONG,
-    OVER,
+    OVER
 } state;
 
 static void ping(toolbox_t *box)
@@ -640,6 +647,9 @@ static void threads_not_impl(abts_case *tc, void *data)
 
 abts_suite *testcond(abts_suite *suite)
 {
+#if APR_HAS_THREADS
+    toolbox_fnptr_t fnptr;
+#endif
     suite = ADD_SUITE(suite)
 
 #if !APR_HAS_THREADS
@@ -648,8 +658,10 @@ abts_suite *testcond(abts_suite *suite)
     abts_run_test(suite, lost_signal, NULL);
     abts_run_test(suite, dynamic_binding, NULL);
     abts_run_test(suite, broadcast_threads, NULL);
-    abts_run_test(suite, nested_wait, nested_lock_and_wait);
-    abts_run_test(suite, nested_wait, nested_lock_and_unlock);
+    fnptr.func = nested_lock_and_wait;
+    abts_run_test(suite, nested_wait, &fnptr);
+    fnptr.func = nested_lock_and_unlock;
+    abts_run_test(suite, nested_wait, &fnptr);
     abts_run_test(suite, pipe_producer_consumer, NULL);
     abts_run_test(suite, ping_pong, NULL);
 #endif
