@@ -1348,7 +1348,7 @@ case $host in
        ;;
    *aix4*|*aix5*)
        ssize_t_fmt="ld"
-       size_t_fmt="ld"
+       size_t_fmt="lu"
        ;;
     *beos*)
         ssize_t_fmt="ld"
