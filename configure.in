@@ -470,14 +470,6 @@ void main(void)
    if test "$apr_cv_use_lfs64" = "yes"; then
       APR_ADDTO(CPPFLAGS, [-D_LARGEFILE64_SOURCE])
    fi
-
-
-   dnl define apr_ino_t in a manner independent of _FILE_OFFSET_BITS setting
-   dnl default fallback
-   ino_t_value=ino_t
-   APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned long long, ino_t_value="unsigned long long")
-   APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned long, ino_t_value="unsigned long")
-   APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned int, ino_t_value="unsigned int")
 fi
 
 AC_ARG_ENABLE(nonportable-atomics,
@@ -1305,6 +1297,24 @@ else
    off_t_strfn='strtoi'
 fi
 AC_MSG_RESULT($off_t_value)
+
+# Regardless of whether _LARGEFILE64_SOURCE is used, on 32-bit
+# platforms _FILE_OFFSET_BITS will affect the size of ino_t and hence
+# the build-time ABI may be different from the apparent ABI when using
+# APR with another package which *does* define _FILE_OFFSET_BITS.
+# (Exactly as per the case above with off_t where LFS is *not* used)
+#
+# To be safe, hard-code apr_ino_t as 'unsigned long' iff that is
+# exactly the size of ino_t here; otherwise use ino_t as existing
+# releases did.  To be correct, apr_ino_t should have been made an
+# ino64_t as apr_off_t is off64_t, but this can't be done now without
+# breaking ABI.
+ino_t_value=ino_t
+if test "$ac_cv_sizeof_long" = "4"; then
+    APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned long, 
+                               ino_t_value="unsigned long")
+fi
+AC_MSG_NOTICE([using $ino_t_value for ino_t])
 
 APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], pid_t, 8)
 
