@@ -33,7 +33,7 @@ apr_status_t apr_file_cleanup(void *thefile)
 APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr_int32_t flag,  apr_fileperms_t perm, apr_pool_t *pool)
 {
     int oflags = 0;
-    int mflags = OPEN_FLAGS_FAIL_ON_ERROR|OPEN_SHARE_DENYNONE;
+    int mflags = OPEN_FLAGS_FAIL_ON_ERROR|OPEN_SHARE_DENYNONE|OPEN_FLAGS_NOINHERIT;
     int rv;
     ULONG action;
     apr_file_t *dafile = (apr_file_t *)apr_palloc(pool, sizeof(apr_file_t));
@@ -267,7 +267,34 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *
 
 APR_POOL_IMPLEMENT_ACCESSOR(file);
 
-APR_IMPLEMENT_INHERIT_SET(file, flags, pool, apr_file_cleanup)
 
-APR_IMPLEMENT_INHERIT_UNSET(file, flags, pool, apr_file_cleanup)
 
+APR_DECLARE(apr_status_t) apr_file_inherit_set(apr_file_t *thefile)
+{
+    int rv;
+    ULONG state;
+
+    rv = DosQueryFHState(thefile->filedes, &state);
+
+    if (rv == 0 && (state & OPEN_FLAGS_NOINHERIT) != 0) {
+        rv = DosSetFHState(thefile->filedes, state & ~OPEN_FLAGS_NOINHERIT);
+    }
+
+    return APR_FROM_OS_ERROR(rv);
+}
+
+
+
+APR_DECLARE(apr_status_t) apr_file_inherit_unset(apr_file_t *thefile)
+{
+    int rv;
+    ULONG state;
+
+    rv = DosQueryFHState(thefile->filedes, &state);
+
+    if (rv == 0 && (state & OPEN_FLAGS_NOINHERIT) == 0) {
+        rv = DosSetFHState(thefile->filedes, state | OPEN_FLAGS_NOINHERIT);
+    }
+
+    return APR_FROM_OS_ERROR(rv);
+}
