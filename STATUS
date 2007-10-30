@@ -409,7 +409,7 @@ Documentation that needs writing:
              should we ever start using any other form of md5 (e.g.
              openssl) then errors would become a distinct possibility.
 
-API Changes Postponed for APR 2.0:
+Interface Changes Postponed for APR 2.0:
 
     * apr_atomic_casptr() has the volatile qualifier in the wrong
       place: should take "pointer to volatile pointer to void", not
@@ -466,6 +466,17 @@ API Changes Postponed for APR 2.0:
       parameter, as should the application-provided maintenance function.  The 
       exit-why value would be ignored in the same circumstances as the existing 
       status parameter: reason != APR_OC_REASON_DEATH.
+
+    * apr_file_gets() should take an apr_size_t size parameter?
+
+    * apr_table_vdo should not continue iterating through the keys
+      list once the callback function returns non-zero; see JCW's
+      comment in apr_tables.c.
+
+    * The library SONAME should vary for the different library ABIs - 
+      i.e. LFS support, IPv6 support or not.
+
+    * remove APR_POLL_LASTDESC from apr_datatype_e.
 
 Stuff for post 1.0:
 
