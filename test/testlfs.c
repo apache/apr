@@ -56,7 +56,6 @@ static void test_open(abts_case *tc, void *data)
     }
 
     /* First attempt a 1MB sparse file so we don't tax the poor test box */
-
     rv = apr_file_open(&f, TESTFN, APR_FOPEN_CREATE | APR_FOPEN_WRITE
                                  | APR_FOPEN_TRUNCATE | APR_FOPEN_SPARSE,
                        APR_OS_DEFAULT, p);
@@ -73,17 +72,14 @@ static void test_open(abts_case *tc, void *data)
      * or if it's not an obviously small allocation but the allocation
      * unit doesn't appear insanely large
      */
-    if ((rv != APR_SUCCESS) || ((testsize.csize > oneMB)
-                             && (testsize.csize < oneMB * 2)))
-    {
+    if (rv != APR_SUCCESS || (testsize.csize > oneMB
+                              && testsize.csize < oneMB * 2)) {
         ABTS_NOT_IMPL(tc, "Creation of large file (apparently not sparse)");
 
         madefile = 0;
-    }
-    else
-    {
+    } 
+    else {
         /* Proceed with our 8GB sparse file now */
-
         rv = apr_file_trunc(f, eightGB);
 
         /* 8GB may pass rlimits or filesystem limits */
