@@ -130,9 +130,11 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr, apr_fi
                     == APR_SUCCESS)
                 rv = apr_file_inherit_set(attr->child_in);
         }
+    }
 
     if (parent_in != NULL && rv == APR_SUCCESS) {
         rv = apr_file_dup(&attr->parent_in, parent_in, attr->pool);
+    }
 
     return rv;
 }
@@ -161,6 +163,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr, apr_f
   
     if (parent_out != NULL && rv == APR_SUCCESS) {
         rv = apr_file_dup(&attr->parent_out, parent_out, attr->pool);
+    }
 
     return rv;
 }
@@ -189,6 +192,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr, apr_f
   
     if (parent_err != NULL && rv == APR_SUCCESS) {
         rv = apr_file_dup(&attr->parent_err, parent_err, attr->pool);
+    }
 
     return rv;
 }
@@ -499,25 +503,22 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
         chdir(savedir);
     }
 
-    if (attr->child_in) {
-        (attr->child_in->filedes != -1)
-            apr_file_close(attr->child_in);
+    if (attr->child_in && (attr->child_in->filedes != -1)) {
+        apr_file_close(attr->child_in);
         dup = STDIN_FILENO;
         DosDupHandle(save_in, &dup);
         DosClose(save_in);
     }
     
-    if (attr->child_out) {
-        (attr->child_err->filedes != -1)
-            apr_file_close(attr->child_out);
+    if (attr->child_out && attr->child_err->filedes != -1) {
+        apr_file_close(attr->child_out);
         dup = STDOUT_FILENO;
         DosDupHandle(save_out, &dup);
         DosClose(save_out);
     }
     
-    if (attr->child_err) {
-        (attr->child_err->filedes != -1)
-            apr_file_close(attr->child_err);
+    if (attr->child_err && attr->child_err->filedes != -1) {
+        apr_file_close(attr->child_err);
         dup = STDERR_FILENO;
         DosDupHandle(save_err, &dup);
         DosClose(save_err);
