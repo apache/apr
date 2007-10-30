@@ -1268,7 +1268,7 @@ case $host in
        ;;
    *aix4*|*aix5*)
        ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
-       size_t_fmt='#define APR_SIZE_T_FMT "ld"'
+       size_t_fmt='#define APR_SIZE_T_FMT "lu"'
        ;;
     *beos*)
         ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
