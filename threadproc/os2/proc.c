@@ -514,7 +514,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
     }
     
     if (attr->child_out) {
-        if  (attr->child_err->filedes != -1) {
+        if  (attr->child_out->filedes != -1) {
             apr_file_close(attr->child_out);
         }
 
