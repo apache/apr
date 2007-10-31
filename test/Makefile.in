@@ -78,66 +78,85 @@ abts.lo: $(srcdir)/abts.c $(srcdir)/abts.h $(srcdir)/abts_tests.h \
 testutil.lo: $(srcdir)/abts.c $(srcdir)/abts.h $(srcdir)/abts_tests.h \
 	     $(srcdir)/testutil.h
 
-testall@EXEEXT@: $(TESTS) abts.lo testutil.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
+OBJECTS_testall = abts.lo testutil.lo $(TESTS) $(LOCAL_LIBS)
+testall@EXEEXT@: $(OBJECTS_testall)
+	$(LINK_PROG) $(OBJECTS_testall) $(ALL_LIBS)
 # For VPATH builds; where we have no ./data, copy us some data
 # if we wait until 'make check', then 'make; ./testall' fails;
 	if test ! -d "./data"; then cp -r $(srcdir)/data data; fi
 
-testlockperf@EXEEXT@: testlockperf.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
+OBJECTS_testlockperf = testlockperf.lo $(LOCAL_LIBS)
+testlockperf@EXEEXT@: $(OBJECTS_testlockperf)
+	$(LINK_PROG) $(OBJECTS_testlockperf) $(ALL_LIBS)
 
-testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
+OBJECTS_testmutexscope = testmutexscope.lo $(LOCAL_LIBS)
+testmutexscope@EXEEXT@: $(OBJECTS_testmutexscope)
+	$(LINK_PROG) $(OBJECTS_testmutexscope) $(ALL_LIBS)
 
 # OTHER_PROGRAMS;
 
-echod@EXEEXT@: echod.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
+OBJECTS_echod = echod.lo $(LOCAL_LIBS)
+echod@EXEEXT@: $(OBJECTS_echod)
+	$(LINK_PROG) $(OBJECTS_echod) $(ALL_LIBS)
 
-sendfile@EXEEXT@: sendfile.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
+OBJECTS_sendfile = sendfile.lo $(LOCAL_LIBS)
+sendfile@EXEEXT@: $(OBJECTS_sendfile)
+	$(LINK_PROG) $(OBJECTS_sendfile) $(ALL_LIBS)
 
-sockperf@EXEEXT@: sockperf.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
+OBJECTS_sockperf = sockperf.lo $(LOCAL_LIBS)
+sockperf@EXEEXT@: $(OBJECTS_sockperf)
+	$(LINK_PROG) $(OBJECTS_sockperf) $(ALL_LIBS)
 
 # TESTALL_COMPONENTS;
 
-globalmutexchild@EXEEXT@: globalmutexchild.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
+OBJECTS_globalmutexchild = globalmutexchild.lo $(LOCAL_LIBS)
+globalmutexchild@EXEEXT@: $(OBJECTS_globalmutexchild)
+	$(LINK_PROG) $(OBJECTS_globalmutexchild) $(ALL_LIBS)
 
 # Note -prefer-pic is only supported with libtool-1.4+
 mod_test.lo: $(srcdir)/mod_test.c
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -prefer-pic -o $@ -c $<
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -prefer-pic -o $@ \
+	  -c $(srcdir)/mod_test.c
 
-mod_test.la: mod_test.lo
+OBJECTS_mod_test = mod_test.lo
+mod_test.la: $(OBJECTS_mod_test)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -module \
-	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ $+
+	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ \
+	  $(OBJECTS_mod_test)
 
-libmod_test.la: mod_test.lo $(LOCAL_LIBS)
+OBJECTS_libmod_test = mod_test.lo $(LOCAL_LIBS)
+libmod_test.la: $(OBJECTS_libmod_test)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` \
-	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ $+ $(ALL_LIBS)
+	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ \
+	  $(OBJECTS_libmod_test) $(ALL_LIBS)
 
-occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
+OBJECTS_occhild = occhild.lo $(LOCAL_LIBS)
+occhild@EXEEXT@: $(OBJECTS_occhild)
+	$(LINK_PROG) $(OBJECTS_occhild) $(ALL_LIBS)
 
-proc_child@EXEEXT@: proc_child.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
+OBJECTS_proc_child = proc_child.lo $(LOCAL_LIBS)
+proc_child@EXEEXT@: $(OBJECTS_proc_child)
+	$(LINK_PROG) $(OBJECTS_proc_child) $(ALL_LIBS)
 
-readchild@EXEEXT@: readchild.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
+OBJECTS_readchild = readchild.lo $(LOCAL_LIBS)
+readchild@EXEEXT@: $(OBJECTS_readchild)
+	$(LINK_PROG) $(OBJECTS_readchild) $(ALL_LIBS)
 
-sockchild@EXEEXT@: sockchild.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
+OBJECTS_sockchild = sockchild.lo $(LOCAL_LIBS)
+sockchild@EXEEXT@: $(OBJECTS_sockchild)
+	$(LINK_PROG) $(OBJECTS_sockchild) $(ALL_LIBS)
 
-testshmconsumer@EXEEXT@: testshmconsumer.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
+OBJECTS_testshmconsumer = testshmconsumer.lo $(LOCAL_LIBS)
+testshmconsumer@EXEEXT@: $(OBJECTS_testshmconsumer) $(LOCAL_LIBS)
+	$(LINK_PROG) $(OBJECTS_testshmconsumer) $(ALL_LIBS)
 
-testshmproducer@EXEEXT@: testshmproducer.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
+OBJECTS_testshmproducer = testshmproducer.lo $(LOCAL_LIBS)
+testshmproducer@EXEEXT@: $(OBJECTS_testshmproducer)
+	$(LINK_PROG) $(OBJECTS_testshmproducer) $(ALL_LIBS)
 
-tryread@EXEEXT@: tryread.lo $(LOCAL_LIBS)
-	$(LINK_PROG) $+ $(ALL_LIBS)
+OBJECTS_tryread = tryread.lo $(LOCAL_LIBS)
+tryread@EXEEXT@: $(OBJECTS_tryread)
+	$(LINK_PROG) $(OBJECTS_tryread) $(ALL_LIBS)
 
 check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	teststatus=0; \
