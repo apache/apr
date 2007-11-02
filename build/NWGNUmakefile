@@ -60,7 +60,7 @@ $(APRUTIL)/include/%.h: $(subst /,\,$(APRUTIL))\include\%.hnw
 	@echo Creating $(subst /,\,$@)
 	copy $< $(subst /,\,$(APRUTIL))\include\$(@F)
 
-$(APRUTIL)/include/private/%.h: $(subst /,\,$(APRUTIL))\include\private\%.hw
+$(APRUTIL)/include/private/%.h: $(subst /,\,$(APRUTIL))\include\private\%.hnw
 	@echo Creating $(subst /,\,$@)
 	copy $< $(subst /,\,$(APRUTIL))\include\private\$(@F)
 
