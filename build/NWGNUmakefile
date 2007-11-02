@@ -57,10 +57,6 @@ $(APR)/include/%.h: $(subst /,\,$(APR))\include\%.hnw
 	@echo Creating $(subst /,\,$@)
 	copy $< $(subst /,\,$(APR))\include\$(@F)
 
-$(APRUTIL)/include/%.h: $(subst /,\,$(APRUTIL))\include\%.hnw
-	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APRUTIL))\include\$(@F)
-
 $(APRUTIL)/include/private/%.h: $(subst /,\,$(APRUTIL))\include\private\%.hnw
 	@echo Creating $(subst /,\,$@)
 	copy $< $(subst /,\,$(APRUTIL))\include\private\$(@F)
@@ -68,6 +64,10 @@ $(APRUTIL)/include/private/%.h: $(subst /,\,$(APRUTIL))\include\private\%.hnw
 $(APRUTIL)/include/private/%.h: $(subst /,\,$(APRUTIL))\include\private\%.hw
 	@echo Creating $(subst /,\,$@)
 	copy $< $(subst /,\,$(APRUTIL))\include\private\$(@F)
+
+$(APRUTIL)/include/%.h: $(subst /,\,$(APRUTIL))\include\%.hnw
+	@echo Creating $(subst /,\,$@)
+	copy $< $(subst /,\,$(APRUTIL))\include\$(@F)
 
 $(APRUTIL)/xml/expat/lib/%.h: $(subst /,\,$(APRUTIL))\xml\expat\lib\%.hnw
 	@echo Creating $(subst /,\,$@)
