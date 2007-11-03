@@ -359,7 +359,7 @@ INSTALL_SUBDIRS="none"
 OBJECTS_PLATFORM='$(OBJECTS_unix)'
 
 case $host in
-   i386-ibm-aix* | *-ibm-aix[1-2].* | *-ibm-aix3.* | *-ibm-aix4.1 | *-ibm-aix4.1.* | *-ibm-aix4.2 | *-ibm-aix4.2.*)
+   i386-ibm-aix* | *-ibm-aix[[1-2]].* | *-ibm-aix3.* | *-ibm-aix4.1 | *-ibm-aix4.1.* | *-ibm-aix4.2 | *-ibm-aix4.2.*)
        OSDIR="aix"
        APR_ADDTO(LDFLAGS,-lld)
        eolstr="\\n"
@@ -1453,10 +1453,10 @@ AC_ARG_ENABLE(dso,
 if test "$dsotype" = "any"; then
     if test "$dsotype" = "any"; then
       case $host in
-        *darwin[0-8]\.*) 
+        *darwin[[0-8]]\.*) 
           # Original Darwin, not for 9.0!:
           AC_CHECK_FUNC(NSLinkModule, [dsotype=dyld]);;
-        *-hpux[1-9]\.*|*-hpux1[01]*)
+        *-hpux[[1-9]]\.*|*-hpux1[[01]]*)
           # shl is specific to hpux(?), and is suboptimal for 64 bit builds,
           # and most unlikely to be the choice of 12.x developers.
           AC_CHECK_LIB(dld, shl_load, [have_shl=1])
