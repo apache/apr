@@ -1277,7 +1277,7 @@ case $host in
     *apple-darwin*)
         osver=`uname -r`
         case $osver in
-           [0-7].*)
+           [[0-7]].*)
               ssize_t_fmt='#define APR_SSIZE_T_FMT "d"'
               ;;
            *)
