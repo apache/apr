@@ -370,7 +370,7 @@ AC_ARG_ENABLE(nonportable-atomics,
 config_subdirs="none"
 INSTALL_SUBDIRS="none"
 case $host in
-   i386-ibm-aix* | *-ibm-aix[1-2].* | *-ibm-aix3.* | *-ibm-aix4.1 | *-ibm-aix4.1.* | *-ibm-aix4.2 | *-ibm-aix4.2.*)
+   i386-ibm-aix* | *-ibm-aix[[1-2]].* | *-ibm-aix3.* | *-ibm-aix4.1 | *-ibm-aix4.1.* | *-ibm-aix4.2 | *-ibm-aix4.2.*)
        OSDIR="aix"
        APR_ADDTO(LDFLAGS,-lld)
        eolstr="\\n"
