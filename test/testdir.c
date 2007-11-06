@@ -222,7 +222,6 @@ static void test_uncleared_errno(abts_case *tc, void *data)
 static void test_rmkdir_nocwd(abts_case *tc, void *data)
 {
     char *cwd, *path;
-    apr_status_t rv;
 
     APR_ASSERT_SUCCESS(tc, "make temp dir",
                        apr_dir_make("dir3", APR_OS_DEFAULT, p));
