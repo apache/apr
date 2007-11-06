@@ -43,15 +43,19 @@ CURRENT test/testall -v EXCEPTIONS:
       ...) segfaulting.
 
     * Win32 Not Implemented tests 
-        Pipes: set_timeout/read_write; can't timeout blocking pipes
-        Socket Creation: tcp6_socket and udp6_socket (at least by default)
-        Socket Options: corkable: TCP isn't corkable
-        Users: username: Groups from apr_uid_get not implemented
+        lfs: fixed in 1.3.x by a new API feature
+        pipe: set_timeout/read_write; fixed in 1.3.x by a new API feature
+        procmutex: lacks fork() support
+        sock : Sync behavior causes us to skip one test
+        sockets: tcp6_socket/udp6_socket skipped for no IPv6 adapter
+        sockopt: TCP isn't corkable
+        user: username: Groups from apr_uid_get not implemented
 
-    * Win32 tests are known to crash when APR_HAVE_IPV6 but there is no
+    * Win32 tests are known to fail when APR_HAVE_IPV6 but there is no
       ipv6 adapter is loaded (even loopback is sufficient).  There are
       obnoxious getaddrinfo() missing results from looking up a fixed
-      IPv4-IPv6 mixed notation address that reflect a Winsock bug.
+      IPv4-IPv6 mixed notation address, which reflect a Win32 bug.
+        ipsub: One test fails for IPv6 with no IPv6 adapter configured
 
 
 SEE svn.apache.org:/repos/asf/apr/apr/trunk/STATUS for all other open
