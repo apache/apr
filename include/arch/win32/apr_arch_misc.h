@@ -213,6 +213,7 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
  */
 
 #if !defined(_WIN32_WCE) && !defined(WINNT)
+/* This group is available to all versions of WINNT 4.0 SP6 and later */
 
 #ifdef GetFileAttributesExA
 #undef GetFileAttributesExA
@@ -308,6 +309,30 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_SHSTDAPI, LPWSTR *, WINAPI, CommandLineToArgvW, 0,
 #endif /* !defined(_WIN32_WCE) && !defined(WINNT) */
 
 #if !defined(_WIN32_WCE)
+/* This group is NOT available to all versions of WinNT,
+ * these we must always look up
+ */
+
+#ifdef GetCompressedFileSizeA
+#undef GetCompressedFileSizeA
+#endif
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, DWORD, WINAPI, GetCompressedFileSizeA, 0, (
+    IN LPCSTR lpFileName,
+    OUT LPDWORD lpFileSizeHigh),
+    (lpFileName, lpFileSizeHigh));
+#define GetCompressedFileSizeA apr_winapi_GetCompressedFileSizeA
+#undef GetCompressedFileSize
+#define GetCompressedFileSize apr_winapi_GetCompressedFileSizeA
+
+#ifdef GetCompressedFileSizeW
+#undef GetCompressedFileSizeW
+#endif
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, DWORD, WINAPI, GetCompressedFileSizeW, 0, (
+    IN LPCWSTR lpFileName,
+    OUT LPDWORD lpFileSizeHigh),
+    (lpFileName, lpFileSizeHigh));
+#define GetCompressedFileSizeW apr_winapi_GetCompressedFileSizeW
+
 
 APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, DWORD, WINAPI, NtQueryTimerResolution, 0, (
     ULONG *pMaxRes,  /* Minimum NS Resolution */
