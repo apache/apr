@@ -149,6 +149,8 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
         library? It is perfectly legitimate to have apps needing
         both versions (threaded/reentrant and non-threaded/non-reentrant)
         on the same machine.
+        Wrowe chuckles, uhm, it already is.  And seems most have shifted
+        to shipping threaded builds, of at least apr itself.
 
     * Pools debugging
         - Find a way to do check if a pool is used in multiple
@@ -248,6 +250,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
          'loadable module' names, so be careful with Apache's directive.
          AIX, HPUX may use similar (.so for a 'module's name while the
          defaults .a or .sl are used for libs.)
+
     * Possible gmtime_r replacement in explode_time
       On Solaris (and possibly others), the gmtime_r libc function obtains
       a mutex.  We have seen 21/25 threads being blocked in this mutex on 
@@ -358,6 +361,8 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
         usefulness, perhaps hidden, generic read-only [immutable],
         effective current user permissions, etc.
 
+    * dso getsym implementation are becoming very strict about returning
+      a fn pointer v.s. a data pointer, this should be split in apr_dso.
 
 Interface Changes Postponed for APR 2.0:
 
