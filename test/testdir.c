@@ -236,7 +236,7 @@ static void test_rmkdir_nocwd(abts_case *tc, void *data)
 
     APR_ASSERT_SUCCESS(tc, "restore cwd", apr_filepath_set(cwd, p));
 
-    APR_ASSERT_SUCCESS(tc, "remove cwd", rv = apr_dir_remove(path, p));
+    APR_ASSERT_SUCCESS(tc, "remove cwd", apr_dir_remove(path, p));
 }
 
 
