@@ -232,18 +232,14 @@ static void test_named_remove(abts_case *tc, void *data)
     }
     ABTS_PTR_NOTNULL(tc, shm);
 
-    rv = apr_shm_create(&shm, SHARED_SIZE, SHARED_FILENAME, p);
-    APR_ASSERT_SUCCESS(tc, "Error allocating shared memory block", rv);
-    if (rv != APR_SUCCESS) {
-        return;
-    }
-    ABTS_PTR_NOTNULL(tc, shm);
-
     rv = apr_shm_destroy(shm);
     APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
 
     rv = apr_shm_remove(SHARED_FILENAME, p);
     APR_ASSERT_SUCCESS(tc, "Error removing shared memory block", rv);
+
+    rv = apr_shm_attach(&shm, SHARED_FILENAME, p);
+    ABTS_TRUE(tc, rv != 0);
 }
 
 #endif
