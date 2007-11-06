@@ -234,20 +234,9 @@ static void test_rmkdir_nocwd(abts_case *tc, void *data)
 
     APR_ASSERT_SUCCESS(tc, "change to temp dir", apr_filepath_set(path, p));
 
-    rv = apr_dir_remove(path, p);
-    /* Some platforms cannot remove a directory which is in use. */
-    if (rv == APR_SUCCESS) {
-        ABTS_ASSERT(tc, "fail to create dir",
-                    apr_dir_make_recursive("foobar", APR_OS_DEFAULT, 
-                                           p) != APR_SUCCESS);
-    }
-
     APR_ASSERT_SUCCESS(tc, "restore cwd", apr_filepath_set(cwd, p));
 
-    if (rv) {
-        apr_dir_remove(path, p);
-        ABTS_NOT_IMPL(tc, "cannot remove in-use directory");
-    }
+    APR_ASSERT_SUCCESS(tc, "remove cwd", rv = apr_dir_remove(path, p));
 }
 
 
