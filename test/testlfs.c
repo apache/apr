@@ -66,6 +66,8 @@ static void test_open(abts_case *tc, void *data)
 
     if (rv == APR_SUCCESS) {
         rv = apr_file_info_get(&testsize, APR_FINFO_CSIZE, f);
+        if (rv == APR_INCOMPLETE)
+            rv = apr_stat(&testsize, TESTFN, APR_FINFO_CSIZE, p);
     }
 
     /* give up if we can't determine the allocation size of the file,
