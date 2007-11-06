@@ -724,7 +724,7 @@ APR_DECLARE(apr_status_t) apr_dir_make_recursive(const char *path,
  * Remove directory from the file system.
  * @param path the path for the directory to be removed. (use / on all systems)
  * @param pool the pool to use.
- * @tip removing a directory which is in-use (e.g., the current working
+ * @remark Removing a directory which is in-use (e.g., the current working
  * directory, or during apr_dir_read, or with an open file) is not portable.
  */                        
 APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *pool);
