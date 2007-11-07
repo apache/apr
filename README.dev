@@ -1,30 +1,66 @@
 Apache Portable Runtime
 =======================
 
-If you are building APR from SVN, you need to use a slightly non-standard
-build process.  You must have autoconf and libtool installed for this to
-work.  There are three steps:
 
-1) ./buildconf
-2) ./configure
-3) make
+Using a Subversion Checkout on Unix
+===================================
 
-If you are building APR from a distribution tarball, buildconf will have
-already been run for you, and you therefore do not need to have either
-autoconf or libtool installed, and you do not need to run buildconf.  Skip
-step one above and just run configure then make.
+If you are building APR from SVN, you need to perform a prerequisite
+step.  You must have autoconf, libtool and python installed for this 
+to work.  The prerequisite is simply;
 
-Generating Test Coverage information
+  ./buildconf
+
+If you are building APR from a distribution tarball, buildconf is
+already run for you, and you do not need autoconf, libtool or python
+installed or to run buildconf unless you have patched APR's buildconf 
+inputs (such as configure.in, build.conf, virtually any file within 
+the build/ tree, or you add or remove source files).
+
+Remember when updating from svn that you must rerun ./buildconf again 
+to effect any changes made to the build schema in your fresh update.
+
+
+Configuring and Building APR on Unix
 ====================================
+
+Simply;
+
+   ./configure --prefix=/desired/path/of/apr
+   make
+   make test
+   make install
+
+Configure has additional options, ./configure --help will offer you
+those choices.  You may also add CC=compiler CFLAGS="compiler flags"
+etc. prior to the ./configure statement (on the same line).  Please
+be warned, some flags must be passed as part of the CC command,
+itself, in order for autoconf to make the right determinations. Eg.;
+
+  CC="gcc -m64" ./configure --prefix=/desired/path/of/apr
+
+will inform APR that you are compiling to a 64 bit CPU, and autoconf
+must consider that when setting up all of APR's internal and external
+type declarations.
+
+For more verbose output from testall, you may wish to invoke testall
+with the flag;
+
+   cd test
+   ./testall -v
+
+
+Generating Test Coverage information with gcc
+=============================================
 
 If you want to generate test coverage data, use the following steps:
 
-1) ./buildconf
-2) CFLAGS="-fprofile-arcs -ftest-coverage" ./configure
-3) make
-4) cd test
-5) make
-6) ./testall
-7) cd ..
-8) make gcov
+  ./buildconf
+  CFLAGS="-fprofile-arcs -ftest-coverage" ./configure
+  make
+  cd test
+  make
+  ./testall
+  cd ..
+  make gcov
 
