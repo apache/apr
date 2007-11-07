@@ -43,6 +43,7 @@ CURRENT test/testall -v EXCEPTIONS:
       ...) segfaulting.
 
     * Win32 Not Implemented tests 
+        dir: cannot remove in-use directory (corrected on trunk)
         lfs: fixed in 1.3.x by a new API feature
         pipe: set_timeout/read_write; fixed in 1.3.x by a new API feature
         procmutex: lacks fork() support
