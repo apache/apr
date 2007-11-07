@@ -42,6 +42,9 @@ CURRENT test/testall -v EXCEPTIONS:
     * 'testdso' fails on older versions of OpenBSD due to dlsym(NULL,
       ...) segfaulting.
 
+    * 'testshm' fails on unices, demonstrating our cleanup should not 
+      attempt to re-remove an already-removed, shm-backing named store.
+
     * Win32 Not Implemented tests 
         dir: cannot remove in-use directory (corrected on trunk)
         lfs: fixed in 1.3.x by a new API feature
@@ -52,7 +55,7 @@ CURRENT test/testall -v EXCEPTIONS:
         sockopt: TCP isn't corkable
         user: username: Groups from apr_uid_get not implemented
 
-    * Win32 tests are known to fail when APR_HAVE_IPV6 but there is no
+    * Win32 tests are known to fail when APR_HAVE_IPV6, but there is no
       ipv6 adapter is loaded (even loopback is sufficient).  There are
       obnoxious getaddrinfo() missing results from looking up a fixed
       IPv4-IPv6 mixed notation address, which reflect a Win32 bug.
