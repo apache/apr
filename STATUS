@@ -80,7 +80,7 @@ CURRENT test/testall -v EXCEPTIONS:
         sockopt: TCP isn't corkable
         users: username: Groups from apr_uid_get not implemented
 
-    * Win32 tests are known to fail when APR_HAVE_IPV6 but there is no
+    * Win32 tests are known to fail when APR_HAVE_IPV6, but there is no
       ipv6 adapter is loaded (even loopback is sufficient).  There are
       obnoxious getaddrinfo() missing results from looking up a fixed
       IPv4-IPv6 mixed notation address, which reflect a Win32 bug.
