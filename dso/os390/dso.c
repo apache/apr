@@ -63,7 +63,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     dllhandle *handle;
     int rc;
 
-    *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
+    *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
     (*res_handle)->pool = ctx;
     if ((handle = dllload(path)) != NULL) {
         (*res_handle)->handle  = handle;
