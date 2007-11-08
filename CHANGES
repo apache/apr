@@ -1,5 +1,15 @@
-                                                     -*- coding: utf-8 -*-
+﻿                                                     -*- coding: utf-8 -*-
 Changes for APR 1.3.0
+
+  *) Implement Darwin-semantic (9.0.0 and later) sendfile support.
+     [William Rowe]
+
+  *) Implemented the APR_FOPEN_SPARSE flag, permits win32 to create
+     sparse data files.  Also bestow apr_fileinfo_t csize field for
+     Windows versions 2000 and later, which helps in the detection
+     that a sparse file is truly in use (see test/testlfs.c for an
+     example, because different filesystems can vary in behavior
+     even on an OS supporting sparse files).  [William Rowe]
 
   *) Corrected for Darwin and others to toggle APR_HAS_LARGE_FILES
      where large off_t's are enabled without any extra defines, hints
