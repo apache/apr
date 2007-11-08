@@ -222,8 +222,6 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
 }
 
 #if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
 static apr_status_t make_sparse_file(apr_file_t *file)
 {
     BY_HANDLE_FILE_INFORMATION info;
@@ -464,13 +462,12 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
 
 #if APR_HAS_UNICODE_FS
     if ((apr_os_level >= APR_WIN_2000) && ((*new)->flags & APR_FOPEN_SPARSE)) {
-            if ((rv = make_sparse_file(*new)) != APR_SUCCESS)
-                /* The great mystery; do we close the file and return an error?
-                 * Do we add a new APR_INCOMPLETE style error saying opened, but
-                 * NOTSPARSE?  For now let's simply mark the file as not-sparse.
-                 */
-                (*new)->flags &= ~APR_FOPEN_SPARSE;
-        }
+        if ((rv = make_sparse_file(*new)) != APR_SUCCESS)
+            /* The great mystery; do we close the file and return an error?
+             * Do we add a new APR_INCOMPLETE style error saying opened, but
+             * NOTSPARSE?  For now let's simply mark the file as not-sparse.
+             */
+            (*new)->flags &= ~APR_FOPEN_SPARSE;
     }
     else
 #endif
