@@ -304,7 +304,14 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
              *   http://go.microsoft.com/fwlink/?linkid=84083
              * you probably understand why APR chooses not to implement.
              */
-            ;
+            IOSB sb;
+            FSI fi;
+            if ((ZwQueryInformationFile((HANDLE)ufile, &sb, 
+                                       &fi, sizeof(fi), 5) == 0) 
+                    && (sb.Status == 0)) {
+                finfo->csize = fi.AllocationSize;
+                finfo->valid |= APR_FINFO_CSIZE;
+            }
         }
         else {
             SetLastError(NO_ERROR);

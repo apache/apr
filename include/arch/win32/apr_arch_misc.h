@@ -375,6 +375,31 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, DWORD, WINAPI, NtQueryObject, 0, (
     (hObject, info, pOI, LenOI, pSizeOI));
 #define QueryObject apr_winapi_NtQueryObject
 
+typedef struct IOSB {
+    union {
+    UINT Status;
+    PVOID reserved;
+    };
+    ULONG_PTR Information; /* Varies by op, consumed buffer size for FSI below */
+} IOSB, *PIOSB;
+
+typedef struct FSI {
+    LONGLONG AllocationSize;
+    LONGLONG EndOfFile;
+    ULONG    NumberOfLinks;
+    BOOL     DeletePending;
+    BOOL     Directory;
+} FSI, *PFSI;
+
+APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, ZwQueryInformationFile, 0, (
+    HANDLE hObject,    /* Obvious */
+    PVOID  pIOSB,      /* Point to the IOSB buffer for detailed return results */
+    PVOID  pFI,        /* The buffer, using FIB above */
+    ULONG  LenFI,      /* Use sizeof(FI) */
+    ULONG  info),      /* Use 5 for FSI documented above*/
+    (hObject, pIOSB, pFI, LenFI, info));
+#define ZwQueryInformationFile apr_winapi_ZwQueryInformationFile
+
 #endif /* !defined(_WIN32_WCE) */
 
 #endif  /* ! MISC_H */

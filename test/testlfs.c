@@ -66,13 +66,12 @@ static void test_open(abts_case *tc, void *data)
 
     if (rv == APR_SUCCESS) {
         rv = apr_file_info_get(&testsize, APR_FINFO_CSIZE, f);
-        if (rv == APR_INCOMPLETE)
-            rv = apr_stat(&testsize, TESTFN, APR_FINFO_CSIZE, p);
     }
 
     /* give up if we can't determine the allocation size of the file,
      * or if it's not an obviously small allocation but the allocation
-     * unit doesn't appear insanely large
+     * unit doesn't appear insanely large - on most platforms, it's just
+     * zero physical bytes at this point.
      */
     if (rv != APR_SUCCESS || (testsize.csize > oneMB
                               && testsize.csize < oneMB * 2)) {
