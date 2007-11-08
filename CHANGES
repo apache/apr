@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes with APR 0.9.17
 
+  *) Fix DSO-related crash on z/OS caused by incorrect memory
+     allocation.  [David Jones <oscaremma gmail.com>]
+
   *) Define apr_ino_t in such a way that it doesn't change definition
      based on the library consumer's -D'efines to the filesystem.
      [Lucian Adrian Grijincu <lucian.grijincu gmail.com>]
