@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.2.12
 
+  *) Fix --disable-ipv6 build on platforms with getifaddrs().
+     PR 39199.  [Joe Orton]
+
   *) Fix DSO-related crash on z/OS caused by incorrect memory
      allocation.  [David Jones <oscaremma gmail.com>]
 
