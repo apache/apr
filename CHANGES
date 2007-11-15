@@ -1,6 +1,13 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.2.12
 
+  *) Numerous fixes to the test/ framework, including better handling of
+     long size_t comparisons and more consistent Makefile.(in|win) setup
+     for authoring new tests.  [William Rowe]
+
+  *) Win32 build fixes including a Makefile.win scheme, fixes for 64P
+     model x86_64 compiles and VC8 builds.  [William Rowe]
+
   *) Fix --disable-ipv6 build on platforms with getifaddrs().
      PR 39199.  [Joe Orton]
 
