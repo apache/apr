@@ -1,4 +1,8 @@
                                                      -*- coding: utf-8 -*-
+Changes with APR 0.9.18
+
+
+
 Changes with APR 0.9.17
 
   *) Fix DSO-related crash on z/OS caused by incorrect memory
