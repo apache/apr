@@ -69,7 +69,7 @@ static void parent_pool(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_pool_create(&pmain, NULL);
-    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, pmain);
 }
 
@@ -78,7 +78,7 @@ static void child_pool(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_pool_create(&pchild, pmain);
-    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, pchild);
 }
 
