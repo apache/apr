@@ -38,7 +38,7 @@ static void set_userdata(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_pool_userdata_set(testdata, "TEST", string_cleanup, pool);
-    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
 static void get_userdata(abts_case *tc, void *data)
@@ -47,8 +47,8 @@ static void get_userdata(abts_case *tc, void *data)
     void *retdata;
 
     rv = apr_pool_userdata_get(&retdata, "TEST", pool);
-    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
-    ABTS_STR_EQUAL(tc, retdata, testdata);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, testdata, retdata);
 }
 
 static void get_nonexistkey(abts_case *tc, void *data)
@@ -57,8 +57,8 @@ static void get_nonexistkey(abts_case *tc, void *data)
     void *retdata;
 
     rv = apr_pool_userdata_get(&retdata, "DOESNTEXIST", pool);
-    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
-    ABTS_PTR_EQUAL(tc, retdata, NULL);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_EQUAL(tc, NULL, retdata);
 }
 
 static void post_pool_clear(abts_case *tc, void *data)
@@ -67,8 +67,8 @@ static void post_pool_clear(abts_case *tc, void *data)
     void *retdata;
 
     rv = apr_pool_userdata_get(&retdata, "DOESNTEXIST", pool);
-    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
-    ABTS_PTR_EQUAL(tc, retdata, NULL);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_EQUAL(tc, NULL, retdata);
 }
 
 abts_suite *testud(abts_suite *suite)

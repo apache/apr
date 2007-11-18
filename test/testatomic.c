@@ -289,9 +289,9 @@ static void test_atomics_threaded(abts_case *tc, void *data)
                     s1 == exit_ret_val && s2 == exit_ret_val);
     }
 
-    ABTS_INT_EQUAL(tc, mutex_locks, NUM_THREADS * NUM_ITERATIONS);
-    ABTS_INT_EQUAL(tc, apr_atomic_read32(&atomic_ops),
-                   NUM_THREADS * NUM_ITERATIONS);
+    ABTS_INT_EQUAL(tc, NUM_THREADS * NUM_ITERATIONS, mutex_locks);
+    ABTS_INT_EQUAL(tc, NUM_THREADS * NUM_ITERATIONS,
+                   apr_atomic_read32(&atomic_ops));
 
     rv = apr_thread_mutex_destroy(thread_lock);
     ABTS_ASSERT(tc, "Failed creating threads", rv == APR_SUCCESS);
@@ -375,7 +375,7 @@ static void busyloop_dec32(tbox_t *tbox)
         busyloop_read32(tbox);
         val = apr_atomic_dec32(tbox->mem);
         apr_thread_mutex_lock(thread_lock);
-        ABTS_INT_NEQUAL(tbox->tc, val, 0);
+        ABTS_INT_NEQUAL(tbox->tc, 0, val);
         apr_thread_mutex_unlock(thread_lock);
     } while (--tbox->loop);
 }
@@ -483,7 +483,7 @@ static void test_atomics_busyloop_threaded(abts_case *tc, void *data)
         ABTS_ASSERT(tc, "Invalid return value from thread_join", retval == 0);
     }
 
-    ABTS_INT_EQUAL(tbox->tc, count, 98);
+    ABTS_INT_EQUAL(tbox->tc, 98, count);
 
     rv = apr_thread_mutex_destroy(thread_lock);
     ABTS_ASSERT(tc, "Failed creating threads", rv == APR_SUCCESS);

@@ -39,7 +39,7 @@ static void test_glob(abts_case *tc, void *data)
     list = (char **)result->elts;
     for (i = 0; i < result->nelts; i++) {
         char *dot = strrchr(list[i], '.');
-        ABTS_STR_EQUAL(tc, dot, ".txt");
+        ABTS_STR_EQUAL(tc, ".txt", dot);
     }
 }
 
@@ -59,7 +59,7 @@ static void test_glob_currdir(abts_case *tc, void *data)
     list = (char **)result->elts;
     for (i = 0; i < result->nelts; i++) {
         char *dot = strrchr(list[i], '.');
-        ABTS_STR_EQUAL(tc, dot, ".txt");
+        ABTS_STR_EQUAL(tc, ".txt", dot);
     }
     apr_filepath_set("..", p);
 }
