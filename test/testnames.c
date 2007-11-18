@@ -78,7 +78,7 @@ static void merge_dotdot(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, ABS_ROOT"foo/baz", dstpath);
 
     rv = apr_filepath_merge(&dstpath, "", "../test", 0, p);
-    ABTS_INT_EQUAL(tc, 0, APR_SUCCESS);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_STR_EQUAL(tc, "../test", dstpath);
 
     /* Very dangerous assumptions here about what the cwd is.  However, let's assume
@@ -87,7 +87,7 @@ static void merge_dotdot(abts_case *tc, void *data)
      * the case of the test directory:
      */
     rv = apr_filepath_merge(&dstpath, "", "../test", APR_FILEPATH_TRUENAME, p);
-    ABTS_INT_EQUAL(tc, 0, APR_SUCCESS);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_STR_EQUAL(tc, "../test", dstpath);
 }
 
