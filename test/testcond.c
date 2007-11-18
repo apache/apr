@@ -25,7 +25,7 @@
 
 #define NTHREADS 10
 
-#define ABTS_SUCCESS(rv)    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS)
+#define ABTS_SUCCESS(rv)    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv)
 
 #if APR_HAS_THREADS
 
@@ -249,7 +249,7 @@ static void broadcast_threads(abts_case *tc, void *data)
         ABTS_SUCCESS(rv);
     }
 
-    ABTS_INT_EQUAL(tc, count, 0);
+    ABTS_INT_EQUAL(tc, 0, count);
 
     rv = apr_thread_cond_destroy(cond);
     ABTS_SUCCESS(rv);

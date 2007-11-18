@@ -66,7 +66,7 @@ static void test_file_close(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_file_close(thefile);
-    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
    
 static void test_file_open(abts_case *tc, void *data)
@@ -74,7 +74,7 @@ static void test_file_open(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_file_open(&thefile, file1, APR_READ, APR_UREAD | APR_GREAD, p);
-    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, thefile);
 }
    
@@ -83,7 +83,7 @@ static void test_get_filesize(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_file_info_get(&thisfinfo, APR_FINFO_NORM, thefile);
-    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_ASSERT(tc, "File size mismatch", thisfsize == thisfinfo.size);
 }
 
@@ -94,7 +94,7 @@ static void test_mmap_create(abts_case *tc, void *data)
     rv = apr_mmap_create(&themmap, thefile, 0, (apr_size_t) thisfinfo.size, 
 		                 APR_MMAP_READ, p);
     ABTS_PTR_NOTNULL(tc, themmap);
-    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
 static void test_mmap_contents(abts_case *tc, void *data)
@@ -114,7 +114,7 @@ static void test_mmap_delete(abts_case *tc, void *data)
 
     ABTS_PTR_NOTNULL(tc, themmap);
     rv = apr_mmap_delete(themmap);
-    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
 static void test_mmap_offset(abts_case *tc, void *data)

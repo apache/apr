@@ -68,7 +68,7 @@ static void test_bad_input(abts_case *tc, void *data)
 
     for (i = 0; i < (sizeof testcases / sizeof testcases[0]); i++) {
         rv = apr_ipsubnet_create(&ipsub, testcases[i].ipstr, testcases[i].mask, p);
-        ABTS_INT_EQUAL(tc, rv, testcases[i].expected_rv);
+        ABTS_INT_EQUAL(tc, testcases[i].expected_rv, rv);
     }
 }
 
