@@ -26,7 +26,7 @@ static apr_status_t thread_mutex_cleanup(void *data)
     apr_status_t rv;
 
     rv = pthread_mutex_destroy(&mutex->mutex);
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
     if (rv) {
         rv = errno;
     }
@@ -71,7 +71,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
         rv = pthread_mutex_init(&new_mutex->mutex, NULL);
 
     if (rv) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
         return rv;
@@ -90,7 +90,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
     apr_status_t rv;
 
     rv = pthread_mutex_lock(&mutex->mutex);
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
     if (rv) {
         rv = errno;
     }
@@ -105,7 +105,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 
     rv = pthread_mutex_trylock(&mutex->mutex);
     if (rv) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
         return (rv == EBUSY) ? APR_EBUSY : rv;
@@ -119,7 +119,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
     apr_status_t status;
 
     status = pthread_mutex_unlock(&mutex->mutex);
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
     if (status) {
         status = errno;
     }
