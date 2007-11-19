@@ -511,6 +511,9 @@ case $host in
     *darwin*)
         os_version=`uname -r | sed -e 's/\(.\)\.\(.\).*/\1\2/'`
         ;;
+    *os390)
+        os_version=`uname -r | sed -e 's/\.//g'`
+        ;;
     *)
         os_version=OS_VERSION_IS_NOT_SET
         ;;
@@ -1796,6 +1799,8 @@ fi
 dnl ----------------------------- Checking for /dev/random 
 AC_MSG_CHECKING(for entropy source)
 
+why_no_rand=""
+
 AC_ARG_WITH(egd, 
   [  --with-egd[[=DIR]]        use EGD-compatible socket],
   [ AC_DEFINE(HAVE_EGD, 1, [Define if EGD is supported])
@@ -1833,6 +1838,17 @@ if test "$rand" != "1"; then
   fi
 
   if test "$rand" = "1"; then
+    case $host in
+      *os390)
+        if test $os_version -lt 1700; then
+          rand="0"
+          why_no_rand=" ($apr_devrandom unusable on z/OS before V1R7)"
+        fi
+        ;;
+    esac
+  fi
+
+  if test "$rand" = "1"; then
     AC_DEFINE_UNQUOTED(DEV_RANDOM, ["$apr_devrandom"], [Define to path of random device])
     AC_MSG_RESULT([$apr_devrandom])
   fi
@@ -1852,7 +1868,7 @@ if test "$rand" != "1"; then
                 AC_MSG_RESULT(truerand)
                 rand="1"
               else
-                AC_MSG_RESULT(not found)
+                AC_MSG_RESULT(not found$why_no_rand)
                 rand="0"
               fi
             fi
