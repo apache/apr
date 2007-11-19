@@ -29,7 +29,7 @@ static apr_status_t thread_rwlock_cleanup(void *data)
     apr_status_t stat;
 
     stat = pthread_rwlock_destroy(&rwlock->rwlock);
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
     if (stat) {
         stat = errno;
     }
@@ -47,7 +47,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
     new_rwlock->pool = pool;
 
     if ((stat = pthread_rwlock_init(&new_rwlock->rwlock, NULL))) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         stat = errno;
 #endif
         return stat;
@@ -66,7 +66,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_rdlock(apr_thread_rwlock_t *rwlock)
     apr_status_t stat;
 
     stat = pthread_rwlock_rdlock(&rwlock->rwlock);
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
     if (stat) {
         stat = errno;
     }
@@ -79,7 +79,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_tryrdlock(apr_thread_rwlock_t *rwloc
     apr_status_t stat;
 
     stat = pthread_rwlock_tryrdlock(&rwlock->rwlock);
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
     if (stat) {
         stat = errno;
     }
@@ -95,7 +95,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_wrlock(apr_thread_rwlock_t *rwlock)
     apr_status_t stat;
 
     stat = pthread_rwlock_wrlock(&rwlock->rwlock);
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
     if (stat) {
         stat = errno;
     }
@@ -108,7 +108,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_trywrlock(apr_thread_rwlock_t *rwloc
     apr_status_t stat;
 
     stat = pthread_rwlock_trywrlock(&rwlock->rwlock);
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
     if (stat) {
         stat = errno;
     }
@@ -124,7 +124,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_unlock(apr_thread_rwlock_t *rwlock)
     apr_status_t stat;
 
     stat = pthread_rwlock_unlock(&rwlock->rwlock);
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
     if (stat) {
         stat = errno;
     }

@@ -290,7 +290,7 @@ static apr_status_t proc_mutex_proc_pthread_cleanup(void *mutex_)
 
     if (mutex->curr_locked == 1) {
         if ((rv = pthread_mutex_unlock(mutex->pthread_interproc))) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
             rv = errno;
 #endif
             return rv;
@@ -299,7 +299,7 @@ static apr_status_t proc_mutex_proc_pthread_cleanup(void *mutex_)
     /* curr_locked is set to -1 until the mutex has been created */
     if (mutex->curr_locked != -1) {
         if ((rv = pthread_mutex_destroy(mutex->pthread_interproc))) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
             rv = errno;
 #endif
             return rv;
@@ -337,14 +337,14 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
     new_mutex->curr_locked = -1; /* until the mutex has been created */
 
     if ((rv = pthread_mutexattr_init(&mattr))) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
         return rv;
     }
     if ((rv = pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED))) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
@@ -355,7 +355,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
 #ifdef HAVE_PTHREAD_MUTEX_ROBUST
     if ((rv = pthread_mutexattr_setrobust_np(&mattr, 
                                                PTHREAD_MUTEX_ROBUST_NP))) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
@@ -363,7 +363,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         return rv;
     }
     if ((rv = pthread_mutexattr_setprotocol(&mattr, PTHREAD_PRIO_INHERIT))) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
@@ -373,7 +373,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
 #endif /* HAVE_PTHREAD_MUTEX_ROBUST */
 
     if ((rv = pthread_mutex_init(new_mutex->pthread_interproc, &mattr))) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
@@ -384,7 +384,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
     new_mutex->curr_locked = 0; /* mutex created now */
 
     if ((rv = pthread_mutexattr_destroy(&mattr))) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
@@ -403,7 +403,7 @@ static apr_status_t proc_mutex_proc_pthread_acquire(apr_proc_mutex_t *mutex)
     apr_status_t rv;
 
     if ((rv = pthread_mutex_lock(mutex->pthread_interproc))) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
 #ifdef HAVE_PTHREAD_MUTEX_ROBUST
@@ -426,7 +426,7 @@ static apr_status_t proc_mutex_proc_pthread_tryacquire(apr_proc_mutex_t *mutex)
     apr_status_t rv;
  
     if ((rv = pthread_mutex_trylock(mutex->pthread_interproc))) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS 
         rv = errno;
 #endif
         if (rv == EBUSY) {
@@ -454,7 +454,7 @@ static apr_status_t proc_mutex_proc_pthread_release(apr_proc_mutex_t *mutex)
 
     mutex->curr_locked = 0;
     if ((rv = pthread_mutex_unlock(mutex->pthread_interproc))) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
         return rv;

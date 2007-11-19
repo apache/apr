@@ -422,7 +422,7 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
     }
 #else
     if ((rv = pthread_sigmask(SIG_SETMASK, &sig_mask, NULL)) != 0) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
     }
@@ -448,7 +448,7 @@ APR_DECLARE(apr_status_t) apr_signal_block(int signum)
     }
 #else
     if ((rv = pthread_sigmask(SIG_BLOCK, &sig_mask, NULL)) != 0) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
     }
@@ -475,7 +475,7 @@ APR_DECLARE(apr_status_t) apr_signal_unblock(int signum)
     }
 #else
     if ((rv = pthread_sigmask(SIG_UNBLOCK, &sig_mask, NULL)) != 0) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
     }
