@@ -27,7 +27,7 @@ static apr_status_t thread_cond_cleanup(void *data)
     apr_status_t rv;
 
     rv = pthread_cond_destroy(&cond->cond);
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
     if (rv) {
         rv = errno;
     }
@@ -46,7 +46,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,
     new_cond->pool = pool;
 
     if ((rv = pthread_cond_init(&new_cond->cond, NULL))) {
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
         return rv;
@@ -66,7 +66,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_wait(apr_thread_cond_t *cond,
     apr_status_t rv;
 
     rv = pthread_cond_wait(&cond->cond, &mutex->mutex);
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
     if (rv) {
         rv = errno;
     }
@@ -87,7 +87,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
     abstime.tv_nsec = apr_time_usec(then) * 1000; /* nanoseconds */
 
     rv = pthread_cond_timedwait(&cond->cond, &mutex->mutex, &abstime);
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
     if (rv) {
         rv = errno;
     }
@@ -104,7 +104,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_signal(apr_thread_cond_t *cond)
     apr_status_t rv;
 
     rv = pthread_cond_signal(&cond->cond);
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
     if (rv) {
         rv = errno;
     }
@@ -117,7 +117,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_broadcast(apr_thread_cond_t *cond)
     apr_status_t rv;
 
     rv = pthread_cond_broadcast(&cond->cond);
-#ifdef PTHREAD_SETS_ERRNO
+#ifdef HAVE_ZOS_PTHREADS
     if (rv) {
         rv = errno;
     }
