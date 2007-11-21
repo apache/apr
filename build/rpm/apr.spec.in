@@ -46,7 +46,7 @@ make %{?_smp_mflags} && make dox
 %check
 # Run non-interactive tests
 pushd test
-make %{?_smp_mflags} testall CFLAGS=-fno-strict-aliasing
+make %{?_smp_mflags} all CFLAGS=-fno-strict-aliasing
 ./testall -v || exit 1
 popd
 
