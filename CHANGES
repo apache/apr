@@ -1,7 +1,7 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.2.13
 
-
+  *) Fix the make test target in the spec file. [Graham Leggett]
 
 Changes for APR 1.2.12
 
