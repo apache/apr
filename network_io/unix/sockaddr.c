@@ -344,6 +344,11 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
         servname = apr_itoa(p, port);
 #endif /* OSF1 */
     }
+#if APR_HAVE_IPV6 && defined(AI_V4MAPPED)
+    else if (family == APR_INET6) {
+        hints.ai_flags |= AI_V4MAPPED;
+    }
+#endif
     error = getaddrinfo(hostname, servname, &hints, &ai_list);
 #ifdef HAVE_GAI_ADDRCONFIG
     if (error == EAI_BADFLAGS && family == APR_UNSPEC) {
