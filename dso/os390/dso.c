@@ -72,7 +72,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     }
 
     (*res_handle)->failing_errno = errno;
-    return errno;
+    return APR_EDSOOPEN;
 }
 
 APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
@@ -96,7 +96,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
         return APR_SUCCESS;
     }
     handle->failing_errno = errno;
-    return errno;
+    return APR_ESYMNOTFOUND;
 }
 
 APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *handle, char *buffer, 
