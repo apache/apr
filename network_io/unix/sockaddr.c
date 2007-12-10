@@ -422,7 +422,7 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
 #if APR_HAVE_IPV6
     if (flags & APR_IPV4_ADDR_OK && family == APR_INET6) {
         apr_status_t error = call_resolver(sa, hostname, family, port, flags, p);
-    else
+    } else
 #endif
     if (flags & APR_IPV4_ADDR_OK) {
         apr_status_t error = call_resolver(sa, hostname, AF_INET, port, flags, p);
