@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.2.13
 
+  *) z/OS: return standard apr_status_t codes from apr_dso_load()
+     and apr_dso_sym().  [David Jones <oscaremma gmail.com>]
+
   *) Fix the make test target in the spec file. [Graham Leggett]
 
 Changes for APR 1.2.12
