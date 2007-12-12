@@ -88,14 +88,14 @@ struct apr_table_entry_t {
 APR_DECLARE(const apr_array_header_t *) apr_table_elts(const apr_table_t *t);
 
 /**
- * Determine if the table is empty
+ * Determine if the table is empty (either NULL or having no elements)
  * @param t The table to check
  * @return True if empty, False otherwise
  */
 APR_DECLARE(int) apr_is_empty_table(const apr_table_t *t);
 
 /**
- * Determine if the array is empty
+ * Determine if the array is empty (either NULL or having no elements)
  * @param a The array to check
  * @return True if empty, False otherwise
  */
