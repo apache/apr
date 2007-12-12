@@ -345,7 +345,7 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
 #endif /* OSF1 */
     }
 #if APR_HAVE_IPV6 && defined(AI_V4MAPPED)
-    if (flags & APR_IPV4_ADDR_OK && family == APR_INET6) {
+    if (flags & APR_IPV6_V4MAPPED_OK && family == APR_INET6) {
         hints.ai_flags |= AI_V4MAPPED;
     }
 #endif
