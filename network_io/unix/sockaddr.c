@@ -344,11 +344,6 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
         servname = apr_itoa(p, port);
 #endif /* OSF1 */
     }
-#if APR_HAVE_IPV6 && defined(AI_V4MAPPED)
-    if (flags & APR_IPV6_V4MAPPED_OK && family == APR_INET6) {
-        hints.ai_flags |= AI_V4MAPPED;
-    }
-#endif
     error = getaddrinfo(hostname, servname, &hints, &ai_list);
 #ifdef HAVE_GAI_ADDRCONFIG
     if (error == EAI_BADFLAGS && family == APR_UNSPEC) {
@@ -419,12 +414,6 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
                                    apr_port_t port, apr_int32_t flags, 
                                    apr_pool_t *p)
 {
-#if APR_HAVE_IPV6
-    if (flags & APR_IPV6_V4MAPPED_OK && family == APR_INET6) {
-        return call_resolver(sa, hostname, family, port, flags, p);
-    }
-#endif
-
     if (flags & APR_IPV4_ADDR_OK) {
         apr_status_t error = call_resolver(sa, hostname, AF_INET, port, flags, p);
 
