@@ -111,7 +111,6 @@ typedef enum {
 
 #define APR_IPV4_ADDR_OK  0x01  /**< @see apr_sockaddr_info_get() */
 #define APR_IPV6_ADDR_OK  0x02  /**< @see apr_sockaddr_info_get() */
-#define APR_IPV6_V4MAPPED_OK 0x04 /**< @see apr_sockaddr_info_get() */
 
 #if (!APR_HAVE_IN_ADDR)
 /**
@@ -368,9 +367,6 @@ APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock,
  *                                 only valid if family is APR_UNSPEC and hostname
  *                                 isn't NULL and APR_HAVE_IPV6; mutually exclusive
  *                                 with APR_IPV4_ADDR_OK
- *       APR_IPV6_V4MAPPED_OK      Used with family APR_INET6, if no matching
- *                                 IPv6 addresses could be matched, then 
- *                                 accept IPv4 addresses as mapped matches.
  * </PRE>
  * @param p The pool for the apr_sockaddr_t and associated storage.
  */
