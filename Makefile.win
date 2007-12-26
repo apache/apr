@@ -45,7 +45,8 @@ USEDSW=1
 
 PREFIX=..\apr-dist
 
-!IF [$(COMSPEC) /c cl /nologo /? | find "x64" >NUL ] == 0
+!IF [$(COMSPEC) /c cl /nologo /? \
+	| $(SystemRoot)\System32\find.exe "x64" >NUL ] == 0
 ARCH=x64 Release
 !ELSE
 ARCH=Win32 Release
