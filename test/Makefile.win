@@ -33,7 +33,8 @@ OUTDIR=LibR
 OUTDIR=Release
 !ENDIF
 
-!IF [$(COMSPEC) /c cl /nologo /? | find "x64" >NUL ] == 0
+!IF [$(COMSPEC) /c cl /nologo /? \
+	| $(SystemRoot)\System32\find.exe "x64" >NUL ] == 0
 OUTDIR=x64\$(OUTDIR)
 !ENDIF
 !ENDIF
