@@ -136,7 +136,7 @@ static apr_status_t do_mcast(int type, apr_socket_t *sock,
 #if APR_HAVE_IPV6
     struct ipv6_mreq mip6;
 #endif
-#if MCAST_JOIN_SOURCE_GROUP
+#ifdef GROUP_FILTER_SIZE
     struct group_source_req mip;
     int ip_proto;
 #endif
@@ -148,7 +148,7 @@ static apr_status_t do_mcast(int type, apr_socket_t *sock,
     }
 
     if (source != NULL) {
-#if MCAST_JOIN_SOURCE_GROUP
+#ifdef GROUP_FILTER_SIZE
         if (sock_is_ipv4(sock)) {
             ip_proto = IPPROTO_IP;
         } 
