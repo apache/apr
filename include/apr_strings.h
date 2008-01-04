@@ -311,6 +311,8 @@ APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n);
  *   or 0.  If base is zero, buf will be treated as base ten unless its
  *   digits are prefixed with '0x', in which case it will be treated as
  *   base 16.
+ * @bug *end breaks type safety; where *buf is const, *end needs to be
+ * declared as const in APR 2.0
  */
 APR_DECLARE(apr_status_t) apr_strtoff(apr_off_t *offset, const char *buf, 
                                       char **end, int base);
