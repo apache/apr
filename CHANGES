@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.0
 
+  *) Add missing semi-colon in Win9x code path of apr_file_open that breaks
+     Win9X Debug builds. PR 44329. [Curt Arnold]
+
   *) z/OS: return standard apr_status_t codes from apr_dso_load()
      and apr_dso_sym().  [David Jones <oscaremma gmail.com>]
 

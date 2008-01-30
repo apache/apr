@@ -424,7 +424,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         handle = CreateFileA(fname, oflags, sharemode,
                              NULL, createflags, attributes, 0);
         /* This feature is not supported on this platform. */
-        flag &= ~APR_SENDFILE_ENABLED
+        flag &= ~APR_SENDFILE_ENABLED;
     }
 #endif
     if (handle == INVALID_HANDLE_VALUE) {
