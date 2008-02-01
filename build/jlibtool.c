@@ -322,7 +322,7 @@ static int snprintf( char *str, size_t n, const char *fmt, ... )
 
 void init_count_chars(count_chars *cc)
 {
-    cc->vals = (const char**)malloc(PATH_MAX);
+    cc->vals = (const char**)malloc(PATH_MAX*sizeof(char*));
     cc->num = 0;
 }
 
