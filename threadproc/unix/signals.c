@@ -116,7 +116,7 @@ void apr_signal_init(apr_pool_t *pglobal)
 }
 const char *apr_signal_description_get(int signum)
 {
-    return sys_siglist[signum];
+    return (signum >= 0) ? sys_siglist[signum] : "unknown signal (number)";
 }
 
 #else /* !(SYS_SIGLIST_DECLARED || HAVE_DECL_SYS_SIGLIST) */
@@ -262,7 +262,7 @@ void apr_signal_init(apr_pool_t *pglobal)
 const char *apr_signal_description_get(int signum)
 {
     return
-        signum < APR_NUMSIG
+        (signum >= 0 && signum < APR_NUMSIG)
         ? signal_description[signum]
         : "unknown signal (number)";
 }
