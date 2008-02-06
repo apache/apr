@@ -1228,6 +1228,15 @@ int explode_static_lib(command_t *cmd_data, const char *lib)
     dir = opendir(tmpdir);
 
     while ((entry = readdir(dir)) != NULL) {
+#if defined(__APPLE__) && defined(RANLIB)
+        /* Apple inserts __.SYMDEF which isn't needed.
+         * Leopard (10.5+) can also add '__.SYMDEF SORTED' which isn't
+         * much fun either.  Just skip them.
+         */
+        if (strstr(entry->d_name, "__.SYMDEF") != NULL) {
+            continue;
+        }
+#endif
         if (entry->d_name[0] != '.') {
             push_count_chars(&tmpdir_cc, entry->d_name);
             name = flatten_count_chars(&tmpdir_cc, 0);
