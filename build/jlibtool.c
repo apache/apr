@@ -55,7 +55,7 @@
 #if defined(__APPLE__)
 #  define SHELL_CMD  "/bin/sh"
 #  define DYNAMIC_LIB_EXT "dylib"
-#  define MODULE_LIB_EXT  "so"
+#  define MODULE_LIB_EXT  "bundle"
 #  define STATIC_LIB_EXT "a"
 #  define OBJECT_EXT     "o"
 #  define LIBRARIAN      "ar"
@@ -590,6 +590,14 @@ int parse_short_opt(char *arg, command_t *cmd_data)
 
     if (strcmp(arg, "module") == 0) {
         cmd_data->output = otModule;
+        return 1;
+    }
+
+    if (strcmp(arg, "shared") == 0) {
+        if (cmd_data->mode == mLink) {
+            cmd_data->output = otDynamicLibraryOnly;
+        }
+        cmd_data->options.shared = share_SHARED;
         return 1;
     }
 
