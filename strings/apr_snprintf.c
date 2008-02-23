@@ -689,7 +689,7 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 
     register char *s = NULL;
     char *q;
-    apr_size_t s_len;
+    apr_size_t s_len = 0;
 
     register apr_size_t min_width = 0;
     apr_size_t precision = 0;
