@@ -379,7 +379,7 @@ static apr_status_t proc_mutex_proc_pthread_acquire(apr_proc_mutex_t *mutex)
 #ifdef PTHREAD_SETS_ERRNO
         rv = errno;
 #endif
-#ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
+#ifdef HAVE_PTHREAD_MUTEX_ROBUST
         /* Okay, our owner died.  Let's try to make it consistent again. */
         if (rv == EOWNERDEAD) {
             pthread_mutex_consistent_np(mutex->pthread_interproc);
