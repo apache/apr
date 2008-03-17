@@ -121,7 +121,8 @@ APR_DECLARE(apr_status_t) apr_uid_homepath_get(char **dirname,
         else if (type == REG_EXPAND_SZ) {
             apr_wchar_t path[MAX_PATH];
             char retdir[MAX_PATH];
-            ExpandEnvironmentStringsW((apr_wchar_t*)regkey, path, sizeof(path));
+            ExpandEnvironmentStringsW((apr_wchar_t*)regkey, path, 
+                                      sizeof(path) / 2);
             if ((rv = unicode_to_utf8_path(retdir, sizeof(retdir), path))
                     != APR_SUCCESS)
                 return rv;
