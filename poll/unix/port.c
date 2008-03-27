@@ -295,12 +295,7 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 
     if (ret == -1) {
         (*num) = 0;
-        if (errno == ETIME || errno == EINTR) {
-            rv = APR_TIMEUP;
-        }
-        else {
-            rv = APR_EGENERAL;
-        }
+        rv = apr_get_netos_error();
     }
     else if (nget == 0) {
         rv = APR_TIMEUP;
