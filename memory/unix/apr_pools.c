@@ -619,6 +619,9 @@ APR_DECLARE(void) apr_pool_terminate(void)
     node->next->ref = node->ref;                \
 } while (0)
 
+/* Returns the amount of free space in the given node. */
+#define node_free_space(node_) ((apr_size_t)(node_->endp - node_->first_avail))
+
 /*
  * Memory allocation
  */
@@ -633,7 +636,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
     active = pool->active;
 
     /* If the active node has enough bytes left, use it. */
-    if (size < (apr_size_t)(active->endp - active->first_avail)) {
+    if (size <= node_free_space(active)) {
         mem = active->first_avail;
         active->first_avail += size;
 
@@ -641,7 +644,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
     }
 
     node = active->next;
-    if (size < (apr_size_t)(node->endp - node->first_avail)) {
+    if (size <= node_free_space(node)) {
         list_remove(node);
     }
     else {
@@ -943,8 +946,7 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
         size = APR_PSPRINTF_MIN_STRINGSIZE;
 
     node = active->next;
-    if (!ps->got_a_new_node
-        && size < (apr_size_t)(node->endp - node->first_avail)) {
+    if (!ps->got_a_new_node && size <= node_free_space(node)) {
 
         list_remove(node);
         list_insert(node, active);
