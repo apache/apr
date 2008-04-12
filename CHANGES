@@ -1,6 +1,14 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.0
 
+  *) Introduce apr_pool_create_core_ex() for creation of standalone
+     pools without parent. This function should be used for short
+     living pools, usually ones that are created and destroyed
+     either in a loop or inside function call. Since the pools
+     created with this function doesn't have a parent they must
+     be explicitly destroyed when done.
+     [Mladen Turk]
+
   *) Fix return value when apr_pollset_poll interrupted.
      PR 42580 [Basant Kumar Kukreja <basant.kukreja sun.com>]
 
