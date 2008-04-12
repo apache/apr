@@ -276,7 +276,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
  *         apr_pool_create_core_ex in a wrapper, trust the macro
  *         and don't call apr_pool_create_core_ex_debug directly.
  */
-APR_DECLARE(apr_status_t) apr_pool_create_ex_core_debug(apr_pool_t **newpool,
+APR_DECLARE(apr_status_t) apr_pool_create_core_ex_debug(apr_pool_t **newpool,
                                                    apr_abortfunc_t abort_fn,
                                                    apr_allocator_t *allocator,
                                                    const char *file_line);
