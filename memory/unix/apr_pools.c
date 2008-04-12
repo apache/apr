@@ -501,6 +501,8 @@ struct apr_pool_t {
 #ifdef NETWARE
     apr_os_proc_t         owner_proc;
 #endif /* defined(NETWARE) */
+    cleanup_t            *pre_cleanups;
+    cleanup_t            *free_pre_cleanups;
 };
 
 #define SIZEOF_POOL_T       APR_ALIGN_DEFAULT(sizeof(apr_pool_t))
@@ -714,6 +716,11 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
 {
     apr_memnode_t *active;
 
+    /* Run pre destroy cleanups */
+    run_cleanups(&pool->pre_cleanups);
+    pool->pre_cleanups = NULL;
+    pool->free_pre_cleanups = NULL;
+
     /* Destroy the subpools.  The subpools will detach themselves from
      * this pool thus this loop is safe and easy.
      */
@@ -751,6 +758,11 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
 {
     apr_memnode_t *active;
     apr_allocator_t *allocator;
+
+    /* Run pre destroy cleanups */
+    run_cleanups(&pool->pre_cleanups);
+    pool->pre_cleanups = NULL;
+    pool->free_pre_cleanups = NULL;
 
     /* Destroy the subpools.  The subpools will detach themselve from
      * this pool thus this loop is safe and easy.
@@ -856,6 +868,8 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     pool->child = NULL;
     pool->cleanups = NULL;
     pool->free_cleanups = NULL;
+    pool->pre_cleanups = NULL;
+    pool->free_pre_cleanups = NULL;
     pool->subprocesses = NULL;
     pool->user_data = NULL;
     pool->tag = NULL;
@@ -935,6 +949,8 @@ APR_DECLARE(apr_status_t) apr_pool_create_core_ex(apr_pool_t **newpool,
     pool->child = NULL;
     pool->cleanups = NULL;
     pool->free_cleanups = NULL;
+    pool->pre_cleanups = NULL;
+    pool->free_pre_cleanups = NULL;
     pool->subprocesses = NULL;
     pool->user_data = NULL;
     pool->tag = NULL;
@@ -1466,6 +1482,11 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
 {
     debug_node_t *node;
     apr_uint32_t index;
+
+    /* Run pre destroy cleanups */
+    run_cleanups(&pool->pre_cleanups);
+    pool->pre_cleanups = NULL;
+    pool->free_pre_cleanups = NULL;
 
     /* Destroy the subpools.  The subpools will detach themselves from
      * this pool thus this loop is safe and easy.
@@ -2175,6 +2196,32 @@ APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
         lastp = &c->next;
         c = c->next;
     }
+
+    /* Remove any pre-cleanup as well */
+    c = p->pre_cleanups;
+    lastp = &p->pre_cleanups;
+    while (c) {
+#if APR_POOL_DEBUG
+        /* Some cheap loop detection to catch a corrupt list: */
+        if (c == c->next
+            || (c->next && c == c->next->next)
+            || (c->next && c->next->next && c == c->next->next->next)) {
+            abort();
+        }
+#endif
+
+        if (c->data == data && c->plain_cleanup_fn == cleanup_fn) {
+            *lastp = c->next;
+            /* move to freelist */
+            c->next = p->free_pre_cleanups;
+            p->free_pre_cleanups = c;
+            break;
+        }
+
+        lastp = &c->next;
+        c = c->next;
+    }
+
 }
 
 APR_DECLARE(void) apr_pool_child_cleanup_set(apr_pool_t *p, const void *data,
