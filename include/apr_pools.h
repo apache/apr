@@ -560,6 +560,23 @@ APR_DECLARE(void) apr_pool_cleanup_register(
     apr_status_t (*child_cleanup)(void *));
 
 /**
+ * Register a function to be called when a pool is cleared or destroyed.
+ *
+ * Unlike apr_pool_cleanup_register which register a cleanup
+ * that is called AFTER all subpools are destroyed this function register
+ * a function that will be called before any of the subpool is destoryed.
+ *
+ * @param p The pool register the cleanup with
+ * @param data The data to pass to the cleanup function.
+ * @param plain_cleanup The function to call when the pool is cleared
+ *                      or destroyed
+ */
+APR_DECLARE(void) apr_pool_pre_cleanup_register(
+    apr_pool_t *p,
+    const void *data,
+    apr_status_t (*plain_cleanup)(void *));
+
+/**
  * Remove a previously registered cleanup function.
  * 
  * The cleanup most recently registered with @a p having the same values of
