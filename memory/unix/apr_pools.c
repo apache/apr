@@ -893,6 +893,64 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_pool_create_core_ex(apr_pool_t **newpool,
+                                                  apr_abortfunc_t abort_fn,
+                                                  apr_allocator_t *allocator)
+{
+    apr_pool_t *pool;
+    apr_memnode_t *node;
+    apr_allocator_t *pool_allocator;
+
+    *newpool = NULL;
+
+    if (!apr_pools_initialized)
+        return APR_ENOPOOL;
+    if ((pool_allocator = allocator) == NULL) {
+        if ((pool_allocator = malloc(SIZEOF_ALLOCATOR_T)) == NULL) {
+            if (abort_fn)
+                abort_fn(APR_ENOMEM);
+
+            return APR_ENOMEM;
+        }
+        memset(pool_allocator, 0, SIZEOF_ALLOCATOR_T);
+        pool_allocator->max_free_index = APR_ALLOCATOR_MAX_FREE_UNLIMITED;
+    }
+    if ((node = allocator_alloc(pool_allocator,
+                                MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
+        if (abort_fn)
+            abort_fn(APR_ENOMEM);
+
+        return APR_ENOMEM;
+    }
+
+    node->next = node;
+    node->ref = &node->next;
+
+    pool = (apr_pool_t *)node->first_avail;
+    node->first_avail = pool->self_first_avail = (char *)pool + SIZEOF_POOL_T;
+
+    pool->allocator = pool_allocator;
+    pool->active = pool->self = node;
+    pool->abort_fn = abort_fn;
+    pool->child = NULL;
+    pool->cleanups = NULL;
+    pool->free_cleanups = NULL;
+    pool->subprocesses = NULL;
+    pool->user_data = NULL;
+    pool->tag = NULL;
+    pool->parent = NULL;
+    pool->sibling = NULL;
+    pool->ref = NULL;
+
+#ifdef NETWARE
+    pool->owner_proc = (apr_os_proc_t)getnlmhandle();
+#endif /* defined(NETWARE) */
+    if (!allocator)
+        pool_allocator->owner = pool;
+    *newpool = pool;
+
+    return APR_SUCCESS;
+}
 
 /*
  * "Print" functions
@@ -1647,6 +1705,75 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_pool_create_core_ex_debug(apr_pool_t **newpool,
+                                                   apr_abortfunc_t abort_fn,
+                                                   apr_allocator_t *allocator,
+                                                   const char *file_line)
+{
+    apr_pool_t *pool;
+    apr_allocator_t *pool_allocator;
+
+    *newpool = NULL;
+
+    if ((pool = malloc(SIZEOF_POOL_T)) == NULL) {
+        if (abort_fn)
+            abort_fn(APR_ENOMEM);
+
+         return APR_ENOMEM;
+    }
+
+    memset(pool, 0, SIZEOF_POOL_T);
+
+    pool->abort_fn = abort_fn;
+    pool->tag = file_line;
+    pool->file_line = file_line;
+
+#if APR_HAS_THREADS
+    pool->owner = apr_os_thread_current();
+#endif /* APR_HAS_THREADS */
+#ifdef NETWARE
+    pool->owner_proc = (apr_os_proc_t)getnlmhandle();
+#endif /* defined(NETWARE) */
+
+    if ((pool_allocator = allocator) == NULL) {
+        apr_status_t rv;
+        if ((rv = apr_allocator_create(&pool_allocator)) != APR_SUCCESS) {
+            if (abort_fn)
+                abort_fn(rv);
+            return rv;
+        }
+        pool_allocator->owner = pool;
+    }
+    pool->allocator = pool_allocator;
+
+    if (pool->allocator != allocator) {
+#if APR_HAS_THREADS
+        apr_status_t rv;
+
+        /* No matter what the creation flags say, always create
+         * a lock.  Without it integrity_check and apr_pool_num_bytes
+         * blow up (because they traverse pools child lists that
+         * possibly belong to another thread, in combination with
+         * the pool having no lock).  However, this might actually
+         * hide problems like creating a child pool of a pool
+         * belonging to another thread.
+         */
+        if ((rv = apr_thread_mutex_create(&pool->mutex,
+                APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
+            free(pool);
+            return rv;
+        }
+#endif /* APR_HAS_THREADS */
+    }
+
+    *newpool = pool;
+
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
+    apr_pool_log_event(pool, "CREATE", file_line, 1);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
+
+    return APR_SUCCESS;
+}
 
 /*
  * "Print" functions (debug)
@@ -2288,6 +2415,14 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     return apr_pool_create_ex(newpool, parent, abort_fn, allocator);
 }
 
+APR_DECLARE(apr_status_t) apr_pool_create_core_ex_debug(apr_pool_t **newpool,
+                                                   apr_abortfunc_t abort_fn,
+                                                   apr_allocator_t *allocator,
+                                                   const char *file_line)
+{
+    return apr_pool_create_core_ex(newpool, abort_fn, allocator);
+}
+
 #else /* APR_POOL_DEBUG */
 
 #undef apr_palloc
@@ -2336,6 +2471,19 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     return apr_pool_create_ex_debug(newpool, parent,
                                     abort_fn, allocator,
                                     "undefined");
+}
+
+#undef apr_pool_create_core_ex
+APR_DECLARE(apr_status_t) apr_pool_create_core_ex(apr_pool_t **newpool,
+                                                  apr_abortfunc_t abort_fn,
+                                                  apr_allocator_t *allocator);
+
+APR_DECLARE(apr_status_t) apr_pool_create_core_ex(apr_pool_t **newpool,
+                                                  apr_abortfunc_t abort_fn,
+                                                  apr_allocator_t *allocator)
+{
+    return apr_pool_create_core_ex_debug(newpool, abort_fn,
+                                         allocator, "undefined");
 }
 
 #endif /* APR_POOL_DEBUG */
