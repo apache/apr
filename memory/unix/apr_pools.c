@@ -2224,6 +2224,30 @@ APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
     }
 }
 
+APR_DECLARE(void) apr_pool_pre_cleanup_register(apr_pool_t *p, const void *data,
+                      apr_status_t (*plain_cleanup_fn)(void *data))
+{
+    cleanup_t *c;
+
+#if APR_POOL_DEBUG
+    apr_pool_check_integrity(p);
+#endif /* APR_POOL_DEBUG */
+
+    if (p != NULL) {
+        if (p->free_pre_cleanups) {
+            /* reuse a cleanup structure */
+            c = p->free_pre_cleanups;
+            p->free_pre_cleanups = c->next;
+        } else {
+            c = apr_palloc(p, sizeof(cleanup_t));
+        }
+        c->data = data;
+        c->plain_cleanup_fn = plain_cleanup_fn;
+        c->next = p->cleanups;
+        p->cleanups = c;
+    }
+}
+
 APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
                       apr_status_t (*cleanup_fn)(void *))
 {
