@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.0
 
+  *) Introduce apr_pollset_wakeup() for interrupting
+     the blocking apr_pollset_poll call.
+     [Mladen Turk]
+
   *) Introduce apr_pool_sys_allocator_set() for registering
      application provided memory allocation functions that
      will APR use internally whenever malloc/free is needed.

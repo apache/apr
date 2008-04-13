@@ -68,6 +68,8 @@ struct apr_pollset_t
 #if APR_HAS_THREADS
     /* A thread mutex to protect operations on the rings */
     apr_thread_mutex_t *ring_lock;
+    /* Pipe descriptors used for wakeup */
+    apr_file_t *wakeup_pipe[2];    
 #endif
     /* A ring containing all of the pollfd_t that are active */
     APR_RING_HEAD(pfd_query_ring_t, pfd_elem_t) query_ring;
@@ -80,10 +82,60 @@ struct apr_pollset_t
 
 static apr_status_t backend_cleanup(void *p_)
 {
+    apr_status_t rv = APR_SUCCESS;
     apr_pollset_t *pollset = (apr_pollset_t *) p_;
+
     close(pollset->epoll_fd);
-    return APR_SUCCESS;
+#if APR_HAS_THREADS
+    if (pollset->flags & APR_POLLSET_WAKEABLE) {
+        /* Close both sides of the wakeup pipe */
+        rv |= apr_file_close(pollset->wakeup_pipe[0]);
+        rv |= apr_file_close(pollset->wakeup_pipe[1]);
+    }
+#endif
+    return rv;
 }
+
+#if APR_HAS_THREADS
+
+/* Create a dummy wakeup pipe for interrupting the poller
+ */
+static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
+{
+    apr_status_t rv;
+    apr_pollfd_t fd;
+
+    if ((rv = apr_file_pipe_create(&pollset->wakeup_pipe[0],
+                                   &pollset->wakeup_pipe[1],
+                                   pollset->pool)) != APR_SUCCESS)
+        return rv;
+    fd.reqevents = APR_POLLIN;
+    fd.desc_type = APR_POLL_FILE;
+    fd.desc.f = pollset->wakeup_pipe[0];
+    /* Add the pipe to the pollset
+     */
+    return apr_pollset_add(pollset, &fd);
+}
+
+/* Read and discard what's ever in the wakeup pipe.
+ */
+static void drain_wakeup_pipe(apr_pollset_t *pollset)
+{
+    char rb[512];
+    apr_size_t nr = sizeof(rb);
+
+    while (apr_file_read(pollset->wakeup_pipe[0], rb, &nr) == APR_SUCCESS) {
+        /* Although we write just one byte to the other end of the pipe
+         * during wakeup, multiple treads could call the wakeup.
+         * So simply drain out from the input side of the pipe all
+         * the data.
+         */
+        if (nr != sizeof(rb))
+            break;
+    }
+}
+
+#endif
 
 APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                                              apr_uint32_t size,
@@ -92,6 +144,13 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
 {
     apr_status_t rv;
     int fd;
+
+#if APR_HAS_THREADS
+    if (flags & APR_POLLSET_WAKEABLE) {
+        /* Add room for wakeup descriptor */
+        size++;
+    }
+#endif
 
     fd = epoll_create(size);
     if (fd < 0) {
@@ -110,7 +169,8 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
         return rv;
     }
 #else
-    if (flags & APR_POLLSET_THREADSAFE) {
+    if (flags & APR_POLLSET_THREADSAFE ||
+        flags & APR_POLLSET_WAKEABLE) {
         *pollset = NULL;
         return APR_ENOTIMPL;
     }
@@ -121,7 +181,6 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
     (*pollset)->pool = p;
     (*pollset)->epoll_fd = fd;
     (*pollset)->pollset = apr_palloc(p, size * sizeof(struct epoll_event));
-    apr_pool_cleanup_register(p, *pollset, backend_cleanup, backend_cleanup);
     (*pollset)->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
 
     if (!(flags & APR_POLLSET_NOCOPY)) {
@@ -129,6 +188,18 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
         APR_RING_INIT(&(*pollset)->free_ring, pfd_elem_t, link);
         APR_RING_INIT(&(*pollset)->dead_ring, pfd_elem_t, link);
     }
+#if APR_HAS_THREADS
+    if (flags & APR_POLLSET_WAKEABLE) {
+        /* Create wakeup pipe */
+        if ((rv = create_wakeup_pipe(*pollset)) != APR_SUCCESS) {
+            close(fd);
+            *pollset = NULL;
+            return rv;
+        }
+    }
+#endif
+    apr_pool_cleanup_register(p, *pollset, backend_cleanup, backend_cleanup);
+
     return APR_SUCCESS;
 }
 
@@ -244,8 +315,9 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                                            apr_int32_t *num,
                                            const apr_pollfd_t **descriptors)
 {
-    int ret, i;
+    int ret, i, j;
     apr_status_t rv = APR_SUCCESS;
+    apr_pollfd_t fd;
 
     if (timeout > 0) {
         timeout /= 1000;
@@ -263,23 +335,59 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     }
     else {
         if (pollset->flags & APR_POLLSET_NOCOPY) {
-            for (i = 0; i < ret; i++) {
-                pollset->result_set[i] =
-                    *((apr_pollfd_t *) (pollset->pollset[i].data.ptr));
-                pollset->result_set[i].rtnevents =
-                    get_epoll_revent(pollset->pollset[i].events);
+            for (i = 0, j = 0; i < ret; i++) {
+                fd = *((apr_pollfd_t *) (pollset->pollset[i].data.ptr));
+#if APR_HAS_THREADS
+                /* Check if the polled descriptor is our
+                 * wakeup pipe. In that case do not put it result set.
+                 */
+                if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
+                    fd.desc_type == APR_POLL_FILE &&
+                    fd.desc.f == pollset->wakeup_pipe[0]) {
+                        drain_wakeup_pipe(pollset);
+                        /* XXX: Is this a correct return value ?
+                         * We might simply return APR_SUCEESS.
+                         */
+                        rv = APR_EINTR;
+                }
+                else
+#endif
+                {
+                    pollset->result_set[j] = fd;
+                    pollset->result_set[j].rtnevents =
+                        get_epoll_revent(pollset->pollset[i].events);
+
+                    j++;
+                }
             }
+            (*num) = j;
         }
         else {
-            for (i = 0; i < ret; i++) {
-                pollset->result_set[i] =
-                    (((pfd_elem_t *) (pollset->pollset[i].data.ptr))->pfd);
-                pollset->result_set[i].rtnevents =
-                    get_epoll_revent(pollset->pollset[i].events);
+            for (i = 0, j = 0; i < ret; i++) {
+                fd = (((pfd_elem_t *) (pollset->pollset[i].data.ptr))->pfd);
+#if APR_HAS_THREADS
+                if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
+                    fd.desc_type == APR_POLL_FILE &&
+                    fd.desc.f == pollset->wakeup_pipe[0]) {
+                        drain_wakeup_pipe(pollset);
+                        /* XXX: Is this a correct return value ?
+                         * We might simply return APR_SUCEESS.
+                         */
+                        rv = APR_EINTR;
+                }
+                else
+#endif
+                {
+                    pollset->result_set[j] = fd;
+                    pollset->result_set[j].rtnevents =
+                        get_epoll_revent(pollset->pollset[i].events);
+                    j++;
+                }
             }
+            (*num) = j;
         }
 
-        if (descriptors) {
+        if (descriptors && (*num)) {
             *descriptors = pollset->result_set;
         }
     }
@@ -294,6 +402,22 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     }
 
     return rv;
+}
+
+APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset)
+{
+#if APR_HAS_THREADS
+    if (pollset->flags & APR_POLLSET_WAKEABLE)
+        return apr_file_putc(1, pollset->wakeup_pipe[1]);
+    else
+        return APR_EINIT;
+#else
+    /* In case APR was compiled without thread support
+     * makes no sense to have wakeup operation usable
+     * only in multithreading environment.
+     */
+    return APR_ENOTIMPL;
+#endif
 }
 
 struct apr_pollcb_t {
