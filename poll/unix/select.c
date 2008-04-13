@@ -175,7 +175,6 @@ struct apr_pollset_t
 
     apr_uint32_t nelts;
     apr_uint32_t nalloc;
-    apr_uint32_t flags;
     fd_set readset, writeset, exceptset;
     int maxfd;
     apr_pollfd_t *query_set;
@@ -204,7 +203,6 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
     (*pollset)->nelts = 0;
     (*pollset)->nalloc = size;
     (*pollset)->pool = p;
-    (*pollset)->flags = flags;
     FD_ZERO(&((*pollset)->readset));
     FD_ZERO(&((*pollset)->writeset));
     FD_ZERO(&((*pollset)->exceptset));
@@ -406,22 +404,6 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     if (descriptors)
         *descriptors = pollset->result_set;
     return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset)
-{
-#if APR_HAS_THREADS
-    if (pollset->flags & APR_POLLSET_WAKEABLE)
-        return APR_ENOTIMPL;
-    else
-        return APR_EINIT;
-#else
-    /* In case APR was compiled without thread support
-     * makes no sense to have wakeup operation usable
-     * only in multithreading environment.
-     */
-    return APR_ENOTIMPL;
-#endif
 }
 
 APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,

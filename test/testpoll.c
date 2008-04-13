@@ -659,22 +659,6 @@ static void timeout_pollin_pollcb(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
-static void test_wakeup(abts_case *tc, void *data)
-{
-    apr_status_t rv;
-    int i, lrv;
-    const apr_pollfd_t *descs = NULL;
-
-    for (i = 0; i < 1000; i++) {
-        rv = apr_pollset_wakeup(pollset);
-        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    }
-    rv = apr_pollset_poll(pollset, 0, &lrv, &descs);
-    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_EINTR(rv));
-    ABTS_INT_EQUAL(tc, 0, lrv);
-    ABTS_PTR_EQUAL(tc, NULL, descs);
-}
-
 abts_suite *testpoll(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -704,7 +688,6 @@ abts_suite *testpoll(abts_suite *suite)
     abts_run_test(suite, clear_middle_pollset, NULL);
     abts_run_test(suite, send_last_pollset, NULL);
     abts_run_test(suite, clear_last_pollset, NULL);
-    abts_run_test(suite, test_wakeup, NULL);
 
     abts_run_test(suite, pollset_remove, NULL);
     
