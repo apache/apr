@@ -281,21 +281,6 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     return rv;
 }
 
-APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset)
-{
-#if APR_HAS_THREADS
-    if (pollset->flags & APR_POLLSET_WAKEABLE)
-        return APR_ENOTIMPL;
-    else
-        return APR_EINIT;
-#else
-    /* In case APR was compiled without thread support
-     * makes no sense to have wakeup operation usable
-     * only in multithreading environment.
-     */
-    return APR_ENOTIMPL;
-#endif
-}
 
 struct apr_pollcb_t {
     apr_pool_t *pool;

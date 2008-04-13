@@ -56,7 +56,6 @@ extern "C" {
  */
 #define APR_POLLSET_THREADSAFE 0x001 /**< Adding or Removing a Descriptor is thread safe */
 #define APR_POLLSET_NOCOPY     0x002 /**< Descriptors passed to apr_pollset_create() are not copied */
-#define APR_POLLSET_WAKEABLE   0x004 /**< Pollset poll operation is interruptable */
 
 /** Used in apr_pollfd_t to determine what the apr_descriptor is */
 typedef enum { 
@@ -167,11 +166,6 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                                            apr_int32_t *num,
                                            const apr_pollfd_t **descriptors);
 
-/**
- * Interrupt the blocked apr_pollset_poll call.
- * @param pollset The pollset to use
- */
-APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset);
 
 /**
  * Poll the descriptors in the poll structure
