@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.2.13
 
+  *) Fix return value when apr_pollset_poll interrupted.
+     PR 42580 [Basant Kumar Kukreja <basant.kukreja sun.com>]
+
   *) z/OS: return standard apr_status_t codes from apr_dso_load()
      and apr_dso_sym().  [David Jones <oscaremma gmail.com>]
 
