@@ -117,7 +117,7 @@ gcov:
 
 test: check
 check: $(TARGET_LIB)
-	(cd test && $(MAKE) all check)
+	cd test && $(MAKE) all check
 
 etags:
 	etags `find . -name '*.[ch]'`
