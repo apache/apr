@@ -149,40 +149,6 @@ typedef int (*apr_abortfunc_t)(int retcode);
  * Initialization
  */
 
-/** A function that allocates memory from the system. */
-typedef void* (*apr_sys_alloc_t)(apr_size_t size, void *data);
-
-/** A function that allocates memory from the system. */
-typedef void* (*apr_sys_realloc_t)(void *mem, apr_size_t new_size, void *data);
-
-/** A function that frees memory. */
-typedef void (*apr_sys_free_t)(void *memory, void *data);
-
-/**
- * Setup system memory alloc and free functions.
- *
- * If set APR will use those functions whenever it internally
- * needs to allocate or free the memory.
- *
- * @param alloc_fn A function to use for allocating memory.
- * @param alloc_data The data to pass to the alloc function.
- * @param realloc_fn A function to use for reallocating memory.
- * @param realloc_data The data to pass to the realloc function.
- * @param free_fn A function to use for freeing memory.
- * @param free_data The data to pass to the free function. 
- * @return APR_EINVAL if one of the functions is not provided.
- *      APR_EINIT if apr_pool_initialize was already called.
- * @remark This function MUST be called before pool initializtion.
- *      If application don't set those functions the system
- *      will use malloc/realloc/free instead.
- */
-APR_DECLARE(apr_status_t) apr_pool_sys_allocator_set(apr_sys_alloc_t alloc_fn,
-                                                     void *alloc_data,
-                                                     apr_sys_realloc_t realloc_fn,
-                                                     void *realloc_data,
-                                                     apr_sys_free_t free_fn,
-                                                     void *free_data);
-
 /**
  * Setup all of the internal structures required to use pools
  * @remark Programs do NOT need to call this directly.  APR will call this
