@@ -100,44 +100,6 @@ struct apr_allocator_t {
 
 #define SIZEOF_ALLOCATOR_T  APR_ALIGN_DEFAULT(sizeof(apr_allocator_t))
 
-/* Global system allocator functions */
-static apr_sys_alloc_t global_allocfn = NULL;
-static apr_sys_realloc_t global_reallocfn = NULL;
-static apr_sys_free_t  global_freefn  = NULL;
-static void *global_allocdata = NULL;
-static void *global_reallocdata = NULL;
-static void *global_freedata  = NULL;
-
-/*
- * System memory allocator
- */
-
-static APR_INLINE
-void *APR_MALLOC(apr_size_t size)
-{
-    if (global_allocfn)
-        return (*global_allocfn)(size, global_allocdata);
-    else
-        return malloc(size);    
-}
-
-static APR_INLINE
-void APR_FREE(void *mem)
-{
-    if (global_freefn)
-        (*global_freefn)(mem, global_freedata);
-    else
-        free(mem);    
-}
-
-static APR_INLINE
-void *APR_REALLOC(void *mem, apr_size_t new_size)
-{
-    if (global_reallocfn)
-        return (*global_reallocfn)(mem, new_size, global_reallocdata);
-    else
-        return realloc(mem, new_size);    
-}
 
 /*
  * Allocator
@@ -149,7 +111,7 @@ APR_DECLARE(apr_status_t) apr_allocator_create(apr_allocator_t **allocator)
 
     *allocator = NULL;
 
-    if ((new_allocator = APR_MALLOC(SIZEOF_ALLOCATOR_T)) == NULL)
+    if ((new_allocator = malloc(SIZEOF_ALLOCATOR_T)) == NULL)
         return APR_ENOMEM;
 
     memset(new_allocator, 0, SIZEOF_ALLOCATOR_T);
@@ -169,11 +131,11 @@ APR_DECLARE(void) apr_allocator_destroy(apr_allocator_t *allocator)
         ref = &allocator->free[index];
         while ((node = *ref) != NULL) {
             *ref = node->next;
-            APR_FREE(node);
+            free(node);
         }
     }
 
-    APR_FREE(allocator);
+    free(allocator);
 }
 
 #if APR_HAS_THREADS
@@ -358,7 +320,7 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t size)
     /* If we haven't got a suitable node, malloc a new one
      * and initialize it.
      */
-    if ((node = APR_MALLOC(size)) == NULL)
+    if ((node = malloc(size)) == NULL)
         return NULL;
 
     node->next = NULL;
@@ -435,7 +397,7 @@ void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
     while (freelist != NULL) {
         node = freelist;
         freelist = node->next;
-        APR_FREE(node);
+        free(node);
     }
 }
 
@@ -560,31 +522,6 @@ static apr_allocator_t *global_allocator = NULL;
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
 static apr_file_t *file_stderr = NULL;
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL) */
-
-APR_DECLARE(apr_status_t) apr_pool_sys_allocator_set(apr_sys_alloc_t alloc_fn,
-                                                     void *alloc_data,
-                                                     apr_sys_realloc_t realloc_fn,
-                                                     void *realloc_data,
-                                                     apr_sys_free_t free_fn,
-                                                     void *free_data)
-{
-    if (apr_pools_initialized) {
-        /* We cannot intermix memory allocation functions */
-        return APR_EINIT;
-    }
-    if (alloc_fn && realloc_fn && free_fn) {
-        global_allocfn   = alloc_fn;
-        global_reallocfn = realloc_fn;
-        global_freefn    = free_fn;
-        global_allocdata = alloc_data;
-        global_reallocdata = realloc_data;
-        global_freedata  = free_data;
-
-        return APR_SUCCESS;
-    }
-    else
-        return APR_EINVAL;
-}
 
 /*
  * Local functions
@@ -983,7 +920,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_core_ex(apr_pool_t **newpool,
     if (!apr_pools_initialized)
         return APR_ENOPOOL;
     if ((pool_allocator = allocator) == NULL) {
-        if ((pool_allocator = APR_MALLOC(SIZEOF_ALLOCATOR_T)) == NULL) {
+        if ((pool_allocator = malloc(SIZEOF_ALLOCATOR_T)) == NULL) {
             if (abort_fn)
                 abort_fn(APR_ENOMEM);
 
@@ -1468,7 +1405,7 @@ static void *pool_alloc(apr_pool_t *pool, apr_size_t size)
     debug_node_t *node;
     void *mem;
 
-    if ((mem = APR_MALLOC(size)) == NULL) {
+    if ((mem = malloc(size)) == NULL) {
         if (pool->abort_fn)
             pool->abort_fn(APR_ENOMEM);
 
@@ -1477,7 +1414,7 @@ static void *pool_alloc(apr_pool_t *pool, apr_size_t size)
 
     node = pool->nodes;
     if (node == NULL || node->index == 64) {
-        if ((node = APR_MALLOC(SIZEOF_DEBUG_NODE_T)) == NULL) {
+        if ((node = malloc(SIZEOF_DEBUG_NODE_T)) == NULL) {
             if (pool->abort_fn)
                 pool->abort_fn(APR_ENOMEM);
 
@@ -1581,11 +1518,11 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
         for (index = 0; index < node->index; index++) {
             memset(node->beginp[index], POOL_POISON_BYTE,
                    (char *)node->endp[index] - (char *)node->beginp[index]);
-            APR_FREE(node->beginp[index]);
+            free(node->beginp[index]);
         }
 
         memset(node, POOL_POISON_BYTE, SIZEOF_DEBUG_NODE_T);
-        APR_FREE(node);
+        free(node);
     }
 
     pool->stat_alloc = 0;
@@ -1669,7 +1606,7 @@ static void pool_destroy_debug(apr_pool_t *pool, const char *file_line)
     }
 
     /* Free the pool itself */
-    APR_FREE(pool);
+    free(pool);
 }
 
 APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
@@ -1711,7 +1648,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     if (!abort_fn && parent)
         abort_fn = parent->abort_fn;
 
-    if ((pool = APR_MALLOC(SIZEOF_POOL_T)) == NULL) {
+    if ((pool = malloc(SIZEOF_POOL_T)) == NULL) {
         if (abort_fn)
             abort_fn(APR_ENOMEM);
 
@@ -1768,7 +1705,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
          */
         if ((rv = apr_thread_mutex_create(&pool->mutex,
                 APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
-            APR_FREE(pool);
+            free(pool);
             return rv;
         }
 #endif /* APR_HAS_THREADS */
@@ -1799,7 +1736,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_core_ex_debug(apr_pool_t **newpool,
 
     *newpool = NULL;
 
-    if ((pool = APR_MALLOC(SIZEOF_POOL_T)) == NULL) {
+    if ((pool = malloc(SIZEOF_POOL_T)) == NULL) {
         if (abort_fn)
             abort_fn(APR_ENOMEM);
 
@@ -1844,7 +1781,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_core_ex_debug(apr_pool_t **newpool,
          */
         if ((rv = apr_thread_mutex_create(&pool->mutex,
                 APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
-            APR_FREE(pool);
+            free(pool);
             return rv;
         }
 #endif /* APR_HAS_THREADS */
@@ -1877,7 +1814,7 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
     size = ps->vbuff.curpos - ps->mem;
 
     ps->size <<= 1;
-    if ((ps->mem = APR_REALLOC(ps->mem, ps->size)) == NULL)
+    if ((ps->mem = realloc(ps->mem, ps->size)) == NULL)
         return -1;
 
     ps->vbuff.curpos = ps->mem + size;
@@ -1894,7 +1831,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     apr_pool_check_integrity(pool);
 
     ps.size = 64;
-    ps.mem = APR_MALLOC(ps.size);
+    ps.mem = malloc(ps.size);
     ps.vbuff.curpos  = ps.mem;
 
     /* Save a byte for the NUL terminator */
@@ -1914,7 +1851,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
      */
     node = pool->nodes;
     if (node == NULL || node->index == 64) {
-        if ((node = APR_MALLOC(SIZEOF_DEBUG_NODE_T)) == NULL) {
+        if ((node = malloc(SIZEOF_DEBUG_NODE_T)) == NULL) {
             if (pool->abort_fn)
                 pool->abort_fn(APR_ENOMEM);
 
