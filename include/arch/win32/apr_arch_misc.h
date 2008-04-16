@@ -182,7 +182,9 @@ typedef enum {
 
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
 
-/* The apr_load_dll_func call WILL fault if the function cannot be loaded */
+/* The apr_load_dll_func call WILL return 0 set error to
+ * ERROR_INVALID_FUNCTION if the function cannot be loaded
+ */
 
 #define APR_DECLARE_LATE_DLL_FUNC(lib, rettype, calltype, fn, ord, args, names) \
     typedef rettype (calltype *apr_winapi_fpt_##fn) args; \
@@ -191,7 +193,9 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
     {   if (!apr_winapi_pfn_##fn) \
             apr_winapi_pfn_##fn = (apr_winapi_fpt_##fn) \
                                       apr_load_dll_func(lib, #fn, ord); \
-        return (*(apr_winapi_pfn_##fn)) names; }; \
+        if (apr_winapi_pfn_##fn) \
+            return (*(apr_winapi_pfn_##fn)) names; \
+        else { SetLastError(ERROR_INVALID_FUNCTION); return 0;} }; \
 
 /* Provide late bound declarations of every API function missing from
  * one or more supported releases of the Win32 API
