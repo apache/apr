@@ -180,7 +180,7 @@ typedef enum {
     DLL_defined = 6        // must define as last idx_ + 1
 } apr_dlltoken_e;
 
-FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
+FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, const char *fnName, int ordinal);
 
 /* The apr_load_dll_func call WILL return 0 set error to
  * ERROR_INVALID_FUNCTION if the function cannot be loaded
