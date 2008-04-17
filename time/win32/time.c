@@ -314,7 +314,7 @@ APR_DECLARE(void) apr_time_clock_hires(apr_pool_t *p)
 static apr_status_t clock_restore(void *unsetres)
 {
     ULONG newRes;
-    SetTimerResolution((ULONG)unsetres, FALSE, &newRes);
+    SetTimerResolution((ULONG)(apr_ssize_t)unsetres, FALSE, &newRes);
     return APR_SUCCESS;
 }
 
