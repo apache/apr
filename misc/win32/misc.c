@@ -165,7 +165,7 @@ static const char* const lateDllName[DLL_defined] = {
 static HMODULE lateDllHandle[DLL_defined] = {
      NULL,       NULL,       NULL,       NULL,     NULL,       NULL       };
 
-FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, const char* fnName, int ordinal)
+FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
 {
     if (!lateDllHandle[fnLib]) { 
         lateDllHandle[fnLib] = LoadLibraryA(lateDllName[fnLib]);
