@@ -975,21 +975,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
-                                                  int *exitcode,
-                                                  apr_exit_why_e *exitwhy,
-                                                  apr_wait_how_e waithow,
-                                                  apr_pool_t *p)
-{
-    /* Unix does apr_proc_wait(proc(-1), exitcode, exitwhy, waithow)
-     * but Win32's apr_proc_wait won't work that way.  We can either
-     * register all APR created processes in some sort of AsyncWait
-     * thread, or simply walk from the global process pool for all 
-     * apr_pool_note_subprocess()es registered with APR.
-     */
-    return APR_ENOTIMPL;
-}
-
 static apr_exit_why_e why_from_exit_code(DWORD exit) {
     /* See WinNT.h STATUS_ACCESS_VIOLATION and family for how
      * this class of failures was determined
@@ -1001,6 +986,132 @@ static apr_exit_why_e why_from_exit_code(DWORD exit) {
         return APR_PROC_EXIT;
 
     /* ### No way to tell if Dr Watson grabbed a core, AFAICT. */
+}
+
+APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
+                                                  int *exitcode,
+                                                  apr_exit_why_e *exitwhy,
+                                                  apr_wait_how_e waithow,
+                                                  apr_pool_t *p)
+{
+#if APR_HAS_UNICODE_FS
+#ifndef _WIN32_WCE
+    IF_WIN_OS_IS_UNICODE
+    {
+        DWORD  dwId    = GetCurrentProcessId();
+        DWORD  i;
+        DWORD  nChilds = 0;
+        DWORD  nActive = 0;
+        HANDLE ps32;
+        PROCESSENTRY32W pe32;
+        BOOL   bHasMore = FALSE;
+        DWORD  dwFlags  = PROCESS_QUERY_INFORMATION;
+        apr_status_t rv = APR_EGENERAL;
+
+        if (waithow == APR_WAIT)
+            dwFlags |= SYNCHRONIZE;
+        if (!(ps32 = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0))) {
+            return apr_get_os_error();
+        }
+        pe32.dwSize = sizeof(PROCESSENTRY32W);
+        if (!Process32FirstW(ps32, &pe32)) {
+            if (GetLastError() == ERROR_NO_MORE_FILES)
+                return APR_EOF;
+            else
+                return apr_get_os_error();
+        }
+        do {
+            DWORD  dwRetval = 0;
+            DWORD  nHandles = 0;
+            HANDLE hProcess = NULL;
+            HANDLE pHandles[MAXIMUM_WAIT_OBJECTS];
+            do {
+                if (pe32.th32ParentProcessID == dwId) {
+                    nChilds++;
+                    if ((hProcess = OpenProcess(dwFlags, FALSE,
+                                                pe32.th32ProcessID)) != NULL) {
+                        if (GetExitCodeProcess(hProcess, &dwRetval)) {
+                            if (dwRetval == STILL_ACTIVE) {
+                                nActive++;
+                                if (waithow == APR_WAIT)
+                                    pHandles[nHandles++] = hProcess;
+                                else
+                                    CloseHandle(hProcess);
+                            }
+                            else {                                
+                                /* Process has exited.
+                                 * No need to wait for its termination.
+                                 */
+                                CloseHandle(hProcess);
+                                if (exitcode)
+                                    *exitcode = dwRetval;
+                                if (exitwhy)
+                                    *exitwhy  = why_from_exit_code(dwRetval);
+                                proc->pid = pe32.th32ProcessID;
+                            }
+                        }
+                        else {
+                            /* Unexpected error code.
+                             * Cleanup and return;
+                             */
+                            rv = apr_get_os_error();
+                            CloseHandle(hProcess);
+                            for (i = 0; i < nHandles; i++)
+                                CloseHandle(pHandles[i]);
+                            return rv;
+                        }
+                    }
+                    else {
+                        /* This is our child, so it shouldn't happen
+                         * that we cannot open our child's process handle.
+                         * However if the child process increased the
+                         * security token it might fail.
+                         */
+                    }
+                }
+            } while ((bHasMore = Process32NextW(ps32, &pe32)) &&
+                     nHandles < MAXIMUM_WAIT_OBJECTS);
+            if (nHandles) {
+                /* Wait for all collected processes to finish */
+                DWORD waitStatus = WaitForMultipleObjects(nHandles, pHandles,
+                                                          TRUE, INFINITE);
+                for (i = 0; i < nHandles; i++)
+                    CloseHandle(pHandles[i]);
+                if (waitStatus == WAIT_OBJECT_0) {
+                    /* Decrease active count by the number of awaited
+                     * processes.
+                     */
+                    nActive -= nHandles;
+                }
+                else {
+                    /* Broken from the infinite loop */
+                    break;
+                }
+            }
+        } while (bHasMore);
+        CloseHandle(ps32);
+        if (waithow != APR_WAIT) {
+            if (nChilds && nChilds == nActive) {
+                /* All child processes are running */
+                rv = APR_CHILD_NOTDONE;
+                proc->pid = -1;
+            }
+            else {
+                /* proc->pid contains the pid of the
+                 * exited processes
+                 */
+                rv = APR_CHILD_DONE;
+            }
+        }
+        if (nActive == 0) {
+            rv = APR_CHILD_DONE;
+            proc->pid = -1;
+        }
+        return rv;
+    }
+#endif /* _WIN32_WCE */
+#endif /* APR_HAS_UNICODE_FS */
+    return APR_ENOTIMPL;
 }
 
 APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
