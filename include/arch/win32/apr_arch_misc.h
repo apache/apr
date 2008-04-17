@@ -338,14 +338,14 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, DWORD, WINAPI, GetCompressedFileSizeW,
 #define GetCompressedFileSizeW apr_winapi_GetCompressedFileSizeW
 
 
-APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, DWORD, WINAPI, NtQueryTimerResolution, 0, (
+APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, NtQueryTimerResolution, 0, (
     ULONG *pMaxRes,  /* Minimum NS Resolution */
     ULONG *pMinRes,  /* Maximum NS Resolution */
     ULONG *pCurRes), /* Current NS Resolution */
     (pMaxRes, pMinRes, pCurRes));
 #define QueryTimerResolution apr_winapi_NtQueryTimerResolution
 
-APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, DWORD, WINAPI, NtSetTimerResolution, 0, (
+APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, NtSetTimerResolution, 0, (
     ULONG ReqRes,    /* Requested NS Clock Resolution */
     BOOL  Acquire,   /* Aquire (1) or Release (0) our interest */
     ULONG *pNewRes), /* The NS Clock Resolution granted */
@@ -361,7 +361,7 @@ typedef struct PBI {
     ULONG_PTR InheritedFromUniqueProcessId;
 } PBI, *PPBI;
 
-APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, DWORD, WINAPI, NtQueryInformationProcess, 0, (
+APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, NtQueryInformationProcess, 0, (
     HANDLE hProcess,  /* Obvious */
     INT   info,       /* Use 0 for PBI documented above */
     PVOID pPI,        /* The PIB buffer */
@@ -370,7 +370,7 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, DWORD, WINAPI, NtQueryInformationProcess, 0
     (hProcess, info, pPI, LenPI, pSizePI));
 #define QueryInformationProcess apr_winapi_NtQueryInformationProcess
 
-APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, DWORD, WINAPI, NtQueryObject, 0, (
+APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, NtQueryObject, 0, (
     HANDLE hObject,   /* Obvious */
     INT   info,       /* Use 0 for PBI documented above */
     PVOID pOI,        /* The PIB buffer */
