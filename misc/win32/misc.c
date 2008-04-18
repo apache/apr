@@ -174,12 +174,14 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
     }
 #if defined(_WIN32_WCE)
     if (ordinal)
-        return GetProcAddressA(lateDllHandle[fnLib], (char *) ordinal);
+        return GetProcAddressA(lateDllHandle[fnLib], (const char *)
+                                                     (apr_ssize_t)ordinal);
     else
         return GetProcAddressA(lateDllHandle[fnLib], fnName);
 #else
     if (ordinal)
-        return GetProcAddress(lateDllHandle[fnLib], (char *) ordinal);
+        return GetProcAddress(lateDllHandle[fnLib], (const char *)
+                                                    (apr_ssize_t)ordinal);
     else
         return GetProcAddress(lateDllHandle[fnLib], fnName);
 #endif
@@ -220,8 +222,8 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
     }
 
     if (!nh) {
-        (sprintf)(sbuf, "%08x %08x %08x %s() %s:%d\n",
-                  (DWORD)ha, seq, GetCurrentThreadId(), fn, fl, ln);
+        (sprintf)(sbuf, "%p %08x %08x %s() %s:%d\n",
+                  ha, seq, GetCurrentThreadId(), fn, fl, ln);
         (EnterCriticalSection)(&cs);
         (WriteFile)(fh, sbuf, (DWORD)strlen(sbuf), &wrote, NULL);
         (LeaveCriticalSection)(&cs);
@@ -234,21 +236,21 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
             HANDLE *hv = va_arg(a, HANDLE*);
             char *dsc = va_arg(a, char*);
             if (strcmp(dsc, "Signaled") == 0) {
-                if ((DWORD)ha >= STATUS_WAIT_0 
-                       && (DWORD)ha < STATUS_ABANDONED_WAIT_0) {
-                    hv += (DWORD)ha;
+                if ((apr_ssize_t)ha >= STATUS_WAIT_0 
+                       && (apr_ssize_t)ha < STATUS_ABANDONED_WAIT_0) {
+                    hv += (apr_ssize_t)ha;
                 }
-                else if ((DWORD)ha >= STATUS_ABANDONED_WAIT_0
-                            && (DWORD)ha < STATUS_USER_APC) {
-                    hv += (DWORD)ha - STATUS_ABANDONED_WAIT_0;
+                else if ((apr_ssize_t)ha >= STATUS_ABANDONED_WAIT_0
+                            && (apr_ssize_t)ha < STATUS_USER_APC) {
+                    hv += (apr_ssize_t)ha - STATUS_ABANDONED_WAIT_0;
                     dsc = "Abandoned";
                 }
-                else if ((DWORD)ha == WAIT_TIMEOUT) {
+                else if ((apr_ssize_t)ha == WAIT_TIMEOUT) {
                     dsc = "Timed Out";
                 }
             }
-            (sprintf)(sbuf, "%08x %08x %08x %s(%s) %s:%d\n",
-                      (DWORD*)*hv, seq, GetCurrentThreadId(), 
+            (sprintf)(sbuf, "%p %08x %08x %s(%s) %s:%d\n",
+                      *hv, seq, GetCurrentThreadId(), 
                       fn, dsc, fl, ln);
             (WriteFile)(fh, sbuf, (DWORD)strlen(sbuf), &wrote, NULL);
         } while (--nh);
