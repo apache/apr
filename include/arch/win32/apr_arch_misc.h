@@ -404,6 +404,33 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, ZwQueryInformationFile, 0, (
     (hObject, pIOSB, pFI, LenFI, info));
 #define ZwQueryInformationFile apr_winapi_ZwQueryInformationFile
 
+#ifdef CreateToolhelp32Snapshot
+#undef CreateToolhelp32Snapshot
+#endif
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, HANDLE, WINAPI, CreateToolhelp32Snapshot, 0, (
+    DWORD dwFlags,
+    DWORD th32ProcessID),
+    (dwFlags, th32ProcessID));
+#define CreateToolhelp32Snapshot apr_winapi_CreateToolhelp32Snapshot
+
+#ifdef Process32FirstW
+#undef Process32FirstW
+#endif
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, Process32FirstW, 0, (
+    HANDLE hSnapshot,
+    LPPROCESSENTRY32W lppe),
+    (hSnapshot, lppe));
+#define Process32FirstW apr_winapi_Process32FirstW
+
+#ifdef Process32NextW
+#undef Process32NextW
+#endif
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, Process32NextW, 0, (
+    HANDLE hSnapshot,
+    LPPROCESSENTRY32W lppe),
+    (hSnapshot, lppe));
+#define Process32NextW apr_winapi_Process32NextW
+
 #endif /* !defined(_WIN32_WCE) */
 
 #endif  /* ! MISC_H */
