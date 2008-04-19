@@ -56,6 +56,7 @@ extern "C" {
  */
 #define APR_POLLSET_THREADSAFE 0x001 /**< Adding or Removing a Descriptor is thread safe */
 #define APR_POLLSET_NOCOPY     0x002 /**< Descriptors passed to apr_pollset_create() are not copied */
+#define APR_POLLSET_WAKEABLE   0x004 /**< Pollset poll operation is interruptable */
 
 /** Used in apr_pollfd_t to determine what the apr_descriptor is */
 typedef enum { 
@@ -100,11 +101,17 @@ typedef struct apr_pollset_t apr_pollset_t;
  * @param flags Optional flags to modify the operation of the pollset.
  *
  * @remark If flags equals APR_POLLSET_THREADSAFE, then a pollset is
- * created on which it is safe to make concurrent calls to
- * apr_pollset_add(), apr_pollset_remove() and apr_pollset_poll() from
- * separate threads.  This feature is only supported on some
- * platforms; the apr_pollset_create() call will fail with
- * APR_ENOTIMPL on platforms where it is not supported.
+ *         created on which it is safe to make concurrent calls to
+ *         apr_pollset_add(), apr_pollset_remove() and apr_pollset_poll()
+ *         from separate threads.  This feature is only supported on some
+ *         platforms; the apr_pollset_create() call will fail with
+ *         APR_ENOTIMPL on platforms where it is not supported.
+ * @remark If flags contain APR_POLLSET_WAKEABLE, then a pollset is
+ *         created with additional internal pipe object used for
+ *         apr_pollset_wakeup() call. The actual size of pollset is
+ *         in that case size + 1. This feature is only supported on some
+ *         platforms; the apr_pollset_create() call will fail with
+ *         APR_ENOTIMPL on platforms where it is not supported.
  */
 APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                                              apr_uint32_t size,
@@ -160,12 +167,23 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
  * @param timeout Timeout in microseconds
  * @param num Number of signalled descriptors (output parameter)
  * @param descriptors Array of signalled descriptors (output parameter)
+ * @remark If the pollset has been created with APR_POLLSET_WAKEABLE
+ *         and the wakeup has been called while waiting for activity
+ *         return value is APR_EINTR and num is set to number of signalled
+ *         descriptors at the time of wakeup call.
  */
 APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                                            apr_interval_time_t timeout,
                                            apr_int32_t *num,
                                            const apr_pollfd_t **descriptors);
 
+/**
+ * Interrupt the blocked apr_pollset_poll call.
+ * @param pollset The pollset to use
+ * @remark If the pollset was not created with APR_POLLSET_WAKEABLE the
+ *         return value is APR_EINIT.
+ */
+APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset);
 
 /**
  * Poll the descriptors in the poll structure

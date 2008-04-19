@@ -68,6 +68,8 @@ struct apr_pollset_t
     port_event_t *port_set;
     apr_pollfd_t *result_set;
     apr_uint32_t flags;
+    /* Pipe descriptors used for wakeup */
+    apr_file_t *wakeup_pipe[2];
 #if APR_HAS_THREADS
     /* A thread mutex to protect operations on the rings */
     apr_thread_mutex_t *ring_lock;
@@ -86,7 +88,55 @@ static apr_status_t backend_cleanup(void *p_)
 {
     apr_pollset_t *pollset = (apr_pollset_t *) p_;
     close(pollset->port_fd);
+    if (pollset->flags & APR_POLLSET_WAKEABLE) {
+        /* Close both sides of the wakeup pipe */
+        if (pollset->wakeup_pipe[0]) {
+            apr_file_close(pollset->wakeup_pipe[0]);
+            pollset->wakeup_pipe[0] = NULL;
+        }
+        if (pollset->wakeup_pipe[1]) {
+            apr_file_close(pollset->wakeup_pipe[1]);
+            pollset->wakeup_pipe[1] = NULL;
+        }
+    }
     return APR_SUCCESS;
+}
+
+/* Create a dummy wakeup pipe for interrupting the poller
+ */
+static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
+{
+    apr_status_t rv;
+    apr_pollfd_t fd;
+
+    if ((rv = apr_file_pipe_create(&pollset->wakeup_pipe[0],
+                                   &pollset->wakeup_pipe[1],
+                                   pollset->pool)) != APR_SUCCESS)
+        return rv;
+    fd.reqevents = APR_POLLIN;
+    fd.desc_type = APR_POLL_FILE;
+    fd.desc.f = pollset->wakeup_pipe[0];
+    /* Add the pipe to the pollset
+     */
+    return apr_pollset_add(pollset, &fd);
+}
+
+/* Read and discard what's ever in the wakeup pipe.
+ */
+static void drain_wakeup_pipe(apr_pollset_t *pollset)
+{
+    char rb[512];
+    apr_size_t nr = sizeof(rb);
+
+    while (apr_file_read(pollset->wakeup_pipe[0], rb, &nr) == APR_SUCCESS) {
+        /* Although we write just one byte to the other end of the pipe
+         * during wakeup, multiple treads could call the wakeup.
+         * So simply drain out from the input side of the pipe all
+         * the data.
+         */
+        if (nr != sizeof(rb))
+            break;
+    }
 }
 
 APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
@@ -110,6 +160,10 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
         return APR_ENOTIMPL;
     }
 #endif
+    if (flags & APR_POLLSET_WAKEABLE) {
+        /* Add room for wakeup descriptor */
+        size++;
+    }
     (*pollset)->nelts = 0;
     (*pollset)->nalloc = size;
     (*pollset)->flags = flags;
@@ -123,15 +177,23 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
         return APR_ENOMEM;
     }
 
-    apr_pool_cleanup_register(p, (void *) (*pollset), backend_cleanup,
-                              apr_pool_cleanup_null);
-
     (*pollset)->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
 
     APR_RING_INIT(&(*pollset)->query_ring, pfd_elem_t, link);
     APR_RING_INIT(&(*pollset)->add_ring, pfd_elem_t, link);
     APR_RING_INIT(&(*pollset)->free_ring, pfd_elem_t, link);
     APR_RING_INIT(&(*pollset)->dead_ring, pfd_elem_t, link);
+
+    if (flags & APR_POLLSET_WAKEABLE) {
+        /* Create wakeup pipe */
+        if ((rv = create_wakeup_pipe(*pollset)) != APR_SUCCESS) {
+            close((*pollset)->port_fd);
+            *pollset = NULL;
+            return rv;
+        }
+    }
+    apr_pool_cleanup_register(p, (void *) (*pollset), backend_cleanup,
+                              apr_pool_cleanup_null);
 
     return rv;
 }
@@ -249,11 +311,12 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                                            const apr_pollfd_t **descriptors)
 {
     apr_os_sock_t fd;
-    int ret, i;
+    int ret, i, j;
     unsigned int nget;
     pfd_elem_t *ep;
     struct timespec tv, *tvptr;
     apr_status_t rv = APR_SUCCESS;
+    apr_pollfd_t fp;
 
     if (timeout < 0) {
         tvptr = NULL;
@@ -304,21 +367,32 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 
         pollset_lock_rings();
 
-        for (i = 0; i < nget; i++) {
-            pollset->result_set[i] =
-                (((pfd_elem_t*)(pollset->port_set[i].portev_user))->pfd);
-            pollset->result_set[i].rtnevents =
-                get_revent(pollset->port_set[i].portev_events);
+        for (i = 0, j = 0; i < nget; i++) {
+            fp = (((pfd_elem_t*)(pollset->port_set[i].portev_user))->pfd);
+            if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
+                fd.desc_type == APR_POLL_FILE &&
+                fd.desc.f == pollset->wakeup_pipe[0]) {
+                drain_wakeup_pipe(pollset);
+                /* XXX: Is this a correct return value ?
+                 * We might simply return APR_SUCEESS.
+                 */
+                rv = APR_EINTR;
+            }
+            else {
+                pollset->result_set[j] = fp;            
+                pollset->result_set[j].rtnevents =
+                    get_revent(pollset->port_set[i].portev_events);
 
-            APR_RING_REMOVE((pfd_elem_t*)pollset->port_set[i].portev_user, link);
-
-            APR_RING_INSERT_TAIL(&(pollset->add_ring), 
-                                 (pfd_elem_t*)pollset->port_set[i].portev_user,
-                                 pfd_elem_t, link);
+                APR_RING_REMOVE((pfd_elem_t*)pollset->port_set[i].portev_user,
+                                link);
+                APR_RING_INSERT_TAIL(&(pollset->add_ring), 
+                                (pfd_elem_t*)pollset->port_set[i].portev_user,
+                                pfd_elem_t, link);
+                j++;
+            }
         }
-
         pollset_unlock_rings();
-
+        (*num) = j;
         if (descriptors) {
             *descriptors = pollset->result_set;
         }
@@ -333,6 +407,14 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     pollset_unlock_rings();
 
     return rv;
+}
+
+APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset)
+{
+    if (pollset->flags & APR_POLLSET_WAKEABLE)
+        return apr_file_putc(1, pollset->wakeup_pipe[1]);
+    else
+        return APR_EINIT;
 }
 
 struct apr_pollcb_t {
