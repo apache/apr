@@ -179,10 +179,103 @@ struct apr_pollset_t
     int maxfd;
     apr_pollfd_t *query_set;
     apr_pollfd_t *result_set;
+    apr_uint32_t flags;
+    /* Pipe descriptors used for wakeup */
+    apr_file_t *wakeup_pipe[2];
 #ifdef NETWARE
     int set_type;
 #endif
 };
+
+#if !APR_FILES_AS_SOCKETS
+#if defined (WIN32)
+
+extern apr_status_t
+apr_file_socket_pipe_create(apr_file_t **in,
+                            apr_file_t **out,
+                            apr_pool_t *p);
+
+/* Create a dummy wakeup socket pipe for interrupting the poller
+ */
+static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
+{
+    apr_status_t rv;
+    apr_pollfd_t fd;
+
+    if ((rv = apr_file_socket_pipe_create(&pollset->wakeup_pipe[0],
+                                          &pollset->wakeup_pipe[1],
+                                          pollset->pool)) != APR_SUCCESS)
+        return rv;
+    fd.reqevents = APR_POLLIN;
+    fd.desc_type = APR_POLL_FILE;
+    fd.desc.f = pollset->wakeup_pipe[0];
+    /* Add the pipe to the pollset
+     */
+    return apr_pollset_add(pollset, &fd);
+}
+#else  /* !WIN32 */
+static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
+{
+    return APR_ENOTIMPL;
+}
+#endif /* WIN32 */
+#else  /* APR_FILES_AS_SOCKETS */
+
+/* Create a dummy wakeup pipe for interrupting the poller
+ */
+static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
+{
+    apr_status_t rv;
+    apr_pollfd_t fd;
+
+    if ((rv = apr_file_pipe_create(&pollset->wakeup_pipe[0],
+                                   &pollset->wakeup_pipe[1],
+                                   pollset->pool)) != APR_SUCCESS)
+        return rv;
+    fd.reqevents = APR_POLLIN;
+    fd.desc_type = APR_POLL_FILE;
+    fd.desc.f = pollset->wakeup_pipe[0];
+    /* Add the pipe to the pollset
+     */
+    return apr_pollset_add(pollset, &fd);
+}
+#endif /* !APR_FILES_AS_SOCKETS */
+
+/* Read and discard what's ever in the wakeup pipe.
+ */
+static void drain_wakeup_pipe(apr_pollset_t *pollset)
+{
+    char rb[512];
+    apr_size_t nr = sizeof(rb);
+
+    while (apr_file_read(pollset->wakeup_pipe[0], rb, &nr) == APR_SUCCESS) {
+        /* Although we write just one byte to the other end of the pipe
+         * during wakeup, multiple treads could call the wakeup.
+         * So simply drain out from the input side of the pipe all
+         * the data.
+         */
+        if (nr != sizeof(rb))
+            break;
+    }
+}
+
+static apr_status_t wakeup_pipe_cleanup(void *p)
+{
+    apr_pollset_t *pollset = (apr_pollset_t *) p;
+    if (pollset->flags & APR_POLLSET_WAKEABLE) {
+        /* Close both sides of the wakeup pipe */
+        if (pollset->wakeup_pipe[0]) {
+            apr_file_close(pollset->wakeup_pipe[0]);
+            pollset->wakeup_pipe[0] = NULL;
+        }
+        if (pollset->wakeup_pipe[1]) {
+            apr_file_close(pollset->wakeup_pipe[1]);
+            pollset->wakeup_pipe[1] = NULL;
+        }
+    }
+
+    return APR_SUCCESS;
+}
 
 APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                                              apr_uint32_t size,
@@ -192,6 +285,10 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
     if (flags & APR_POLLSET_THREADSAFE) {                
         *pollset = NULL;
         return APR_ENOTIMPL;
+    }
+    if (flags & APR_POLLSET_WAKEABLE) {
+        /* Add room for wakeup descriptor */
+        size++;
     }
 #ifdef FD_SETSIZE
     if (size > FD_SETSIZE) {
@@ -203,6 +300,7 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
     (*pollset)->nelts = 0;
     (*pollset)->nalloc = size;
     (*pollset)->pool = p;
+    (*pollset)->flags = flags;
     FD_ZERO(&((*pollset)->readset));
     FD_ZERO(&((*pollset)->writeset));
     FD_ZERO(&((*pollset)->exceptset));
@@ -213,12 +311,26 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
     (*pollset)->query_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
     (*pollset)->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
 
+    if (flags & APR_POLLSET_WAKEABLE) {
+        apr_status_t rv;
+        /* Create wakeup pipe */
+        if ((rv = create_wakeup_pipe(*pollset)) != APR_SUCCESS) {
+            *pollset = NULL;
+            return rv;
+        }
+        apr_pool_cleanup_register(p, *pollset, wakeup_pipe_cleanup,
+                                  apr_pool_cleanup_null);
+    }
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t * pollset)
 {
-    return APR_SUCCESS;
+    if (pollset->flags & APR_POLLSET_WAKEABLE) 
+        return apr_pool_cleanup_run(pollset->pool, pollset,
+                                    wakeup_pipe_cleanup);
+    else
+        return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
@@ -335,10 +447,11 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                                            apr_int32_t *num,
                                            const apr_pollfd_t **descriptors)
 {
-    int rv;
+    int rs;
     apr_uint32_t i, j;
     struct timeval tv, *tvptr;
     fd_set readset, writeset, exceptset;
+    apr_status_t rv = APR_SUCCESS;
 
     if (timeout < 0) {
         tvptr = NULL;
@@ -355,19 +468,19 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 
 #ifdef NETWARE
     if (HAS_PIPES(pollset->set_type)) {
-        rv = pipe_select(pollset->maxfd + 1, &readset, &writeset, &exceptset,
+        rs = pipe_select(pollset->maxfd + 1, &readset, &writeset, &exceptset,
                          tvptr);
     }
     else
 #endif
-        rv = select(pollset->maxfd + 1, &readset, &writeset, &exceptset,
+        rs = select(pollset->maxfd + 1, &readset, &writeset, &exceptset,
                     tvptr);
 
-    (*num) = rv;
-    if (rv < 0) {
+    (*num) = rs;
+    if (rs < 0) {
         return apr_get_netos_error();
     }
-    if (rv == 0) {
+    if (rs == 0) {
         return APR_TIMEUP;
     }
     j = 0;
@@ -377,11 +490,22 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
             fd = pollset->query_set[i].desc.s->socketdes;
         }
         else {
+            if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
+                pollset->query_set[i].desc.f == pollset->wakeup_pipe[0]) {
+                drain_wakeup_pipe(pollset);
+                /* XXX: Is this a correct return value ?
+                 * We might simply return APR_SUCEESS.
+                 */
+                rv = APR_EINTR;
+                continue;
+            }
+            else {
 #if !APR_FILES_AS_SOCKETS
-            return APR_EBADF;
+                return APR_EBADF;
 #else
-            fd = pollset->query_set[i].desc.f->filedes;
+                fd = pollset->query_set[i].desc.f->filedes;
 #endif
+            }
         }
         if (FD_ISSET(fd, &readset) || FD_ISSET(fd, &writeset) ||
             FD_ISSET(fd, &exceptset)) {
@@ -403,7 +527,15 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 
     if (descriptors)
         *descriptors = pollset->result_set;
-    return APR_SUCCESS;
+    return rv;
+}
+
+APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset)
+{
+    if (pollset->flags & APR_POLLSET_WAKEABLE)
+        return apr_file_putc(1, pollset->wakeup_pipe[1]);
+    else
+        return APR_EINIT;
 }
 
 APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,

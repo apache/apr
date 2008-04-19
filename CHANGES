@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
 
+  *) Introduce apr_pollset_wakeup() for interrupting
+     the blocking apr_pollset_poll call.
+     [Mladen Turk]
+
   *) Implement apr_proc_wait_all_procs for windows.
      [Mladen Turk]
 
