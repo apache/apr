@@ -326,9 +326,6 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                 fd.desc_type == APR_POLL_FILE &&
                 fd.desc.f == pollset->wakeup_pipe[0]) {
                 drain_wakeup_pipe(pollset);
-                /* XXX: Is this a correct return value ?
-                 * We might simply return APR_SUCEESS.
-                 */
                 rv = APR_EINTR;
             }
             else {
@@ -339,7 +336,8 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                 j++;
             }
         }
-        (*num) = j;
+        if ((*num) = j)
+            rv = APR_SUCCESS;
         if (descriptors) {
             *descriptors = pollset->result_set;
         }
