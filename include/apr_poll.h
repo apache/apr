@@ -169,7 +169,7 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
  * @param descriptors Array of signalled descriptors (output parameter)
  * @remark If the pollset has been created with APR_POLLSET_WAKEABLE
  *         and the wakeup has been called while waiting for activity
- *         return value is APR_EINTR and num is set to number of signalled
+ *         return value is APR_EINTR in case there was no signaled
  *         descriptors at the time of wakeup call.
  */
 APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
