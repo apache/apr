@@ -411,8 +411,9 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                                  apr_size_t * len, apr_int32_t flags)
 {
     apr_off_t nbytes = *len;
+    apr_off_t bytes_to_send = *len;
+    apr_size_t header_bytes_written = 0;
     int rv;
-    struct sf_hdtr headerstruct;
 
     /* Ignore flags for now. */
     flags = 0;
@@ -421,12 +422,10 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
         hdtr = &no_hdtr;
     }
 
-    headerstruct.headers = hdtr->headers;
-    headerstruct.hdr_cnt = hdtr->numheaders;
-    headerstruct.trailers = hdtr->trailers;
-    headerstruct.trl_cnt = hdtr->numtrailers;
-
-    /* BSD can send the headers/footers as part of the system call */
+    /* OS X can send the headers/footers as part of the system call, 
+     * but how it counts bytes isn't documented properly. We use 
+     * writev() instead.
+     */
     do {
         if (sock->options & APR_INCOMPLETE_WRITE) {
             apr_status_t arv;
@@ -437,18 +436,33 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                 return arv;
             }
         }
-        if (nbytes) {
+        
+        if (hdtr->numheaders) {
+            rv = writev(sock->socketdes,
+                        hdtr->headers,
+                        hdtr->numheaders);
+            if (rv > 0) {
+                header_bytes_written = rv;
+                rv = 0;
+            }
+            else {
+                header_bytes_written = 0;
+            }
+        }
+        else if (bytes_to_send) {
             /* We won't dare call sendfile() if we don't have
              * header or file bytes to send because nbytes == 0
              * means send the remaining file to EOF.
              */
+            nbytes = bytes_to_send;
             rv = sendfile(file->filedes, /* file to be sent */
                           sock->socketdes, /* socket */
                           *offset,       /* where in the file to start */
                           &nbytes,       /* number of bytes to write/written */
-                          &headerstruct, /* Headers/footers */
+                          NULL,          /* Headers/footers */
                           flags);        /* undefined, set to 0 */
 
+            bytes_to_send -= nbytes;
             if (rv == -1) {
                 if (errno == EAGAIN) {
                     if (sock->timeout > 0) {
@@ -460,7 +474,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                      */
                     if (nbytes) {
                         /* normal exit for a big file & non-blocking io */
-                        (*len) = nbytes;
+                        (*len) = nbytes + header_bytes_written;
                         return APR_SUCCESS;
                     }
                 }
@@ -470,11 +484,11 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                     /* Most likely the file got smaller after the stat.
                      * Return an error so the caller can do the Right Thing.
                      */
-                    (*len) = nbytes;
+                    (*len) = nbytes + header_bytes_written;
                     return APR_EOF;
                 }
             }
-        }    
+        }
         else {
             /* just trailer bytes... use writev()
              */
