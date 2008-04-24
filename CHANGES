@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.0
 
+  *) Support OS/X sendfile by using writev in lieu of hdtr vecs
+     miscounted by the OS.  [Geoff Greer <angryparsley mipsisrisc.com>]
+
   *) Implement apr_proc_wait_all_procs for windows.
      The implementation uses tool help library present
      on Windows 2000 and later. APR_ENOTIMPL is returned
