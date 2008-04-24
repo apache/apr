@@ -54,7 +54,7 @@ static apr_status_t apr_file_transfer_contents(const char *from_path,
 
     /* Copy bytes till the cows come home. */
     while (1) {
-        char buf[BUFSIZ];
+        char buf[APR_BUFSIZ];
         apr_size_t bytes_this_time = sizeof(buf);
         apr_status_t read_err;
         apr_status_t write_err;
