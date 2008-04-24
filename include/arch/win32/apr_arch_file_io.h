@@ -86,6 +86,12 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool);
 /* For backwards-compat */
 #define APR_FILE_BUFSIZE APR_FILE_DEFAULT_BUFSIZE
 
+#if BUFSIZ > APR_FILE_DEFAULT_BUFSIZE
+#define APR_BUFSIZ BUFSIZ
+#else
+#define APR_BUFSIZ APR_FILE_DEFAULT_BUFSIZE
+#endif
+
 /* obscure ommissions from msvc's sys/stat.h */
 #ifdef _MSC_VER
 #define S_IFIFO        _S_IFIFO /* pipe */
