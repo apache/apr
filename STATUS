@@ -54,8 +54,7 @@ Bundled with httpd:
 
 RELEASE SHOWSTOPPERS:
 
-    * Either fix 1.3.x to disable sendfile on *darwin* as on 1.2.x branch,
-      or fix sendfile on trunk and 1.3.x branch to send hdtr vecs alone.
+    * Resolve licensing citation
 
 CURRENT VOTES:
 
