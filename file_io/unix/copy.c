@@ -63,10 +63,15 @@ static apr_status_t apr_file_transfer_contents(const char *from_path,
         return status;
     }
 
+#if BUFSIZ > APR_FILE_DEFAULT_BUFSIZE
+#define COPY_BUFSIZ BUFSIZ
+#else
+#define COPY_BUFSIZ APR_FILE_DEFAULT_BUFSIZE
+#endif
+
     /* Copy bytes till the cows come home. */
     while (1) {
-        char buf[BUFSIZ > APR_FILE_DEFAULT_BUFSIZE ? BUFSIZ
-                                                   : APR_FILE_DEFAULT_BUFSIZE];
+        char buf[COPY_BUFSIZ];
         apr_size_t bytes_this_time = sizeof(buf);
         apr_status_t read_err;
         apr_status_t write_err;
