@@ -410,7 +410,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                                  apr_hdtr_t * hdtr, apr_off_t * offset,
                                  apr_size_t * len, apr_int32_t flags)
 {
-    apr_off_t nbytes = *len;
+    apr_off_t nbytes = 0;
     apr_off_t bytes_to_send = *len;
     apr_size_t header_bytes_written = 0;
     int rv;
@@ -444,9 +444,6 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
             if (rv > 0) {
                 header_bytes_written = rv;
                 rv = 0;
-            }
-            else {
-                header_bytes_written = 0;
             }
         }
         else if (bytes_to_send) {
@@ -513,7 +510,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
         }
     } while (rv == -1 && (errno == EINTR || errno == EAGAIN));
 
-    (*len) = nbytes;
+    (*len) = nbytes + header_bytes_written;
     if (rv == -1) {
         return errno;
     }
