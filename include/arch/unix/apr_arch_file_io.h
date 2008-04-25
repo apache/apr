@@ -90,12 +90,6 @@
 /* For backwards-compat */
 #define APR_FILE_BUFSIZE  APR_FILE_DEFAULT_BUFSIZE
 
-#if BUFSIZ > APR_FILE_DEFAULT_BUFSIZE
-#define APR_BUFSIZ BUFSIZ
-#else
-#define APR_BUFSIZ APR_FILE_DEFAULT_BUFSIZE
-#endif
-
 struct apr_file_t {
     apr_pool_t *pool;
     int filedes;
