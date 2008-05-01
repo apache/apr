@@ -413,7 +413,8 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
     apr_off_t nbytes = 0;
     apr_off_t bytes_to_send = *len;
     apr_size_t header_bytes_written = 0;
-    int rv;
+    int rv = 0;
+    int sent_headers = 0;
 
     /* Ignore flags for now. */
     flags = 0;
@@ -436,17 +437,24 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                 return arv;
             }
         }
-        
-        if (hdtr->numheaders) {
-            rv = writev(sock->socketdes,
-                        hdtr->headers,
-                        hdtr->numheaders);
-            if (rv > 0) {
-                header_bytes_written = rv;
-                rv = 0;
+
+        if (!sent_headers) {
+            if (hdtr->numheaders) {
+                rv = writev(sock->socketdes,
+                            hdtr->headers,
+                            hdtr->numheaders);
+                if (rv > 0) {
+                    header_bytes_written = rv;
+                    sent_headers = 1;
+                    rv = 0;
+                }
+            }
+            else {
+                sent_headers = 1;
             }
         }
-        else if (bytes_to_send) {
+
+        if (bytes_to_send && sent_headers) {
             /* We won't dare call sendfile() if we don't have
              * header or file bytes to send because nbytes == 0
              * means send the remaining file to EOF.
@@ -464,12 +472,13 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                 if (errno == EAGAIN) {
                     if (sock->timeout > 0) {
                         sock->options |= APR_INCOMPLETE_WRITE;
+                        rv = 0;
                     }
                     /* BSD's sendfile can return -1/EAGAIN even if it
                      * sent bytes.  Sanitize the result so we get normal EAGAIN
                      * semantics w.r.t. bytes sent.
                      */
-                    if (nbytes) {
+                    else if (nbytes) {
                         /* normal exit for a big file & non-blocking io */
                         (*len) = nbytes + header_bytes_written;
                         return APR_SUCCESS;
@@ -486,18 +495,16 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                 }
             }
         }
-        else {
+
+        if (sent_headers && !bytes_to_send) {
             /* just trailer bytes... use writev()
              */
             rv = writev(sock->socketdes,
                         hdtr->trailers,
                         hdtr->numtrailers);
             if (rv > 0) {
-                nbytes = rv;
+                nbytes += rv;
                 rv = 0;
-            }
-            else {
-                nbytes = 0;
             }
         }
         if ((rv == -1) && (errno == EAGAIN) 
