@@ -507,13 +507,9 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                 rv = 0;
             }
         }
-        if ((rv == -1) && (errno == EAGAIN) 
-                       && (sock->timeout > 0)) {
-            apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
-            if (arv != APR_SUCCESS) {
-                *len = 0;
-                return arv;
-            }
+
+        if ((rv == -1) && (errno == EAGAIN) && (sock->timeout > 0)) {
+            sock->options |= APR_INCOMPLETE_WRITE;
         }
     } while (rv == -1 && (errno == EINTR || errno == EAGAIN));
 
