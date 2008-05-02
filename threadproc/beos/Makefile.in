@@ -19,7 +19,7 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR)/arch -I$(OSDIR) -I$(DEFOSDIR)
 CLEAN_TARGETS = apr_proc_stub /boot/home/config/bin/apr_proc_stub
 
 apr_proc_stub:
-	$(CC) apr_proc_stub.c \
+	$(CC) $(srcdir)/apr_proc_stub.c \
 	&& cp apr_proc_stub /boot/home/config/bin
 
 # DO NOT REMOVE
