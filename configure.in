@@ -1347,7 +1347,11 @@ case $host in
        size_t_fmt="lu"
        ;;
    *-solaris*)
-       pid_t_fmt="ld"
+       if test "$ac_cv_sizeof_long" = "8"; then
+         pid_t_fmt="d"
+       else
+         pid_t_fmt="ld"
+       fi
        ;;
    *aix4*|*aix5*)
        ssize_t_fmt="ld"
