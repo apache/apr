@@ -18,7 +18,7 @@ APR_MAJOR_VERSION=@APR_MAJOR_VERSION@
 INCDIR=./include
 OSDIR=$(top_srcdir)/include/arch/@OSDIR@
 DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
-INCLUDES=-I$(INCDIR) -I$(OSDIR) -I$(DEFOSDIR) -I$(top_srcdir)/include
+INCLUDES=-I$(INCDIR) -I$(OSDIR) -I$(DEFOSDIR) -I$(top_srcdir)/include/arch/@DEFAULT_OSDIR@ -I$(top_srcdir)/include
 
 #
 # Macros for target determination
