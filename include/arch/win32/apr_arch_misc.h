@@ -355,10 +355,10 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, NtSetTimerResolution, 0, (
 typedef struct PBI {
     LONG      ExitStatus;
     PVOID     PebBaseAddress;
-    ULONG_PTR AffinityMask;
+    apr_uintptr_t AffinityMask;
     LONG      BasePriority;
-    ULONG_PTR UniqueProcessId;
-    ULONG_PTR InheritedFromUniqueProcessId;
+    apr_uintptr_t UniqueProcessId;
+    apr_uintptr_t InheritedFromUniqueProcessId;
 } PBI, *PPBI;
 
 APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, NtQueryInformationProcess, 0, (
@@ -384,7 +384,7 @@ typedef struct IOSB {
     UINT Status;
     PVOID reserved;
     };
-    ULONG_PTR Information; /* Varies by op, consumed buffer size for FSI below */
+    apr_uintptr_t Information; /* Varies by op, consumed buffer size for FSI below */
 } IOSB, *PIOSB;
 
 typedef struct FSI {

@@ -287,6 +287,12 @@ typedef  @ino_t_value@           apr_ino_t;
 
 #define APR_SIZEOF_VOIDP @voidp_size@
 
+#if APR_SIZEOF_VOIDP == 8
+typedef  apr_uint64_t            apr_uintptr_t;
+#else
+typedef  apr_uint32_t            apr_uintptr_t;
+#endif
+
 /* Are we big endian? */
 #define APR_IS_BIGENDIAN	@bigendian@
 
