@@ -68,8 +68,8 @@ typedef enum {
 #define NUM_BUF_SIZE 512
 
 /*
- * cvt.c - IEEE floating point formatting routines for FreeBSD
- * from GNU libc-4.6.27.  Modified to be thread safe.
+ * cvt - IEEE floating point formatting routines.
+ *       Derived from UNIX V7, Copyright(C) Caldera International Inc.
  */
 
 /*
