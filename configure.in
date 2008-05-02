@@ -1959,7 +1959,7 @@ if test "$rand" != "1"; then
   if test "$apr_devrandom" = "yes"; then
     # /dev/random on OpenBSD doesn't provide random data, so
     # prefer /dev/arandom, which does; see random(4).
-    for f in /dev/arandom /dev/random /dev/urandom; do
+    for f in /dev/arandom /dev/urandom /dev/random; do
       if test -r $f; then
         apr_devrandom=$f
         rand=1
