@@ -358,6 +358,13 @@ typedef  apr_uint64_t      apr_ino_t;
 #define APR_SIZEOF_VOIDP   4
 #endif
 
+#if APR_SIZEOF_VOIDP == 8
+typedef  apr_uint64_t            apr_uintptr_t;
+#else
+typedef  apr_uint32_t            apr_uintptr_t;
+#endif
+
+
 /* XXX These simply don't belong here, perhaps in apr_portable.h
  * based on some APR_HAVE_PID/GID/UID?
  */
