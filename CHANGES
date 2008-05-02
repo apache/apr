@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
 
+  *) apr_getservbyname(): Use proper method for converting port
+     to host byte order.  PR 44903.
+     [Chris Taylor <ctaylor wadeford.plus.com>]
+
   *) Introduce apr_pollset_wakeup() for interrupting
      the blocking apr_pollset_poll call.
      [Mladen Turk]
