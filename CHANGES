@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.0
 
+  *) apr_getservbyname(): Use proper method for converting port
+     to host byte order.  PR 44903.
+     [Chris Taylor <ctaylor wadeford.plus.com>]
+
   *) Use /dev/urandom in preference to /dev/random as entropy source
      for apr_generate_random_bytes.  PR 44881.  [Bojan Smojver]
 
