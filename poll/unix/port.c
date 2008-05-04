@@ -370,8 +370,8 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
         for (i = 0, j = 0; i < nget; i++) {
             fp = (((pfd_elem_t*)(pollset->port_set[i].portev_user))->pfd);
             if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
-                fd.desc_type == APR_POLL_FILE &&
-                fd.desc.f == pollset->wakeup_pipe[0]) {
+                fp.desc_type == APR_POLL_FILE &&
+                fp.desc.f == pollset->wakeup_pipe[0]) {
                 drain_wakeup_pipe(pollset);
                 rv = APR_EINTR;
             }
