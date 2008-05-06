@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
 
+  *) Fix Solaris poll failure.  PR 43000
+     [Henry Jen <henryjen ztune.net>]
+
   *) Introduce apr_pollset_wakeup() for interrupting
      the blocking apr_pollset_poll call.
      [Mladen Turk]
