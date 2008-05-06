@@ -55,17 +55,20 @@ apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen,
     apr_status_t rv;
 
     /* This is correct, we don't twist the filename if it is will
-     * definately be shorter than MAX_PATH.  It merits some 
+     * definately be shorter than 248 characters.  It merits some 
      * performance testing to see if this has any effect, but there
      * seem to be applications that get confused by the resulting
      * Unicode \\?\ style file names, especially if they use argv[0]
      * or call the Win32 API functions such as GetModuleName, etc.
      * Not every application is prepared to handle such names.
+     * 
+     * Note also this is shorter than MAX_PATH, as directory paths 
+     * are actually limited to 248 characters. 
      *
      * Note that a utf-8 name can never result in more wide chars
      * than the original number of utf-8 narrow chars.
      */
-    if (srcremains > MAX_PATH) {
+    if (srcremains > 248) {
         if (srcstr[1] == ':' && (srcstr[2] == '/' || srcstr[2] == '\\')) {
             wcscpy (retstr, L"\\\\?\\");
             retlen -= 4;
