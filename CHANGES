@@ -47,7 +47,7 @@ Changes for APR 1.3.0
      allocation.  [David Jones <oscaremma gmail.com>]
 
   *) Implement Darwin-semantic (9.0.0 and later) sendfile support.
-     [William Rowe]
+     [William Rowe, Jim Jagielski]
 
   *) Implemented the APR_FOPEN_SPARSE flag, permits win32 to create
      sparse data files.  Also bestow apr_fileinfo_t csize field for
