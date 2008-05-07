@@ -406,9 +406,9 @@ do_select:
 #elif defined(DARWIN)
 
 /* OS/X Release 10.5 or greater */
-apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
-                                 apr_hdtr_t * hdtr, apr_off_t * offset,
-                                 apr_size_t * len, apr_int32_t flags)
+apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
+                                 apr_hdtr_t *hdtr, apr_off_t *offset,
+                                 apr_size_t *len, apr_int32_t flags)
 {
     apr_off_t nbytes = 0;
     apr_off_t bytes_to_send = *len;
@@ -468,6 +468,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                           flags);        /* undefined, set to 0 */
 
             bytes_to_send -= nbytes;
+            (*offset) += nbytes;
             if (rv == -1) {
                 if (errno == EAGAIN) {
                     if (sock->timeout > 0) {
