@@ -468,6 +468,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                           flags);        /* undefined, set to 0 */
 
             bytes_to_send -= nbytes;
+            (*offset) += nbytes;
             if (rv == -1) {
                 if (errno == EAGAIN) {
                     if (sock->timeout > 0) {
