@@ -472,7 +472,6 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                 if (errno == EAGAIN) {
                     if (sock->timeout > 0) {
                         sock->options |= APR_INCOMPLETE_WRITE;
-                        rv = 0;
                     }
                     /* BSD's sendfile can return -1/EAGAIN even if it
                      * sent bytes.  Sanitize the result so we get normal EAGAIN
