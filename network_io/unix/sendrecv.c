@@ -451,6 +451,9 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
     }
 
     do {
+        if (!bytes_to_send) {
+            break;
+        }
         if (sock->options & APR_INCOMPLETE_WRITE) {
             apr_status_t arv;
             sock->options &= ~APR_INCOMPLETE_WRITE;
