@@ -472,9 +472,6 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                       NULL,          /* Headers/footers */
                       flags);        /* undefined, set to 0 */
 
-        bytes_sent += nbytes;
-        bytes_to_send -= nbytes;
-        (*offset) += nbytes;
         if (rv == -1) {
             if (errno == EAGAIN) {
                 if (sock->timeout > 0) {
@@ -484,7 +481,8 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                  * sent bytes.  Sanitize the result so we get normal EAGAIN
                  * semantics w.r.t. bytes sent.
                  */
-                else if (nbytes) {
+                if (nbytes) {
+                    bytes_sent += nbytes;
                     /* normal exit for a big file & non-blocking io */
                     (*len) = bytes_sent;
                     return APR_SUCCESS;
@@ -492,6 +490,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
             }
         }
         else {       /* rv == 0 (or the kernel is broken) */
+            bytes_sent += nbytes;
             if (nbytes == 0) {
                 /* Most likely the file got smaller after the stat.
                  * Return an error so the caller can do the Right Thing.
@@ -499,10 +498,6 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                 (*len) = bytes_sent;
                 return APR_EOF;
             }
-        }
-
-        if ((rv == -1) && (errno == EAGAIN) && (sock->timeout > 0)) {
-            sock->options |= APR_INCOMPLETE_WRITE;
         }
     } while (rv == -1 && (errno == EINTR || errno == EAGAIN));
 
