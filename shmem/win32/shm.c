@@ -175,7 +175,7 @@ APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m)
 APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
                                          apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    return apr_file_remove(filename, pool);
 }
 
 APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
