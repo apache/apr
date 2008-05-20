@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
 
+  *) Make sure WIN32 behaves the same as posix for file backed
+     shared memory by removing the file on cleanup/remove.
+     [Mladen Turk]
+
   *) Fix Solaris poll failure.  PR 43000
      [Henry Jen <henryjen ztune.net>]
 
