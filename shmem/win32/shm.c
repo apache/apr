@@ -18,6 +18,7 @@
 #include "apr_errno.h"
 #include "apr_file_io.h"
 #include "apr_shm.h"
+#include "apr_strings.h"
 #include "apr_arch_file_io.h"
 #include "limits.h"
 
@@ -33,6 +34,7 @@ struct apr_shm_t {
     apr_size_t  size;
     apr_size_t  length;
     HANDLE      hMap;
+    const char *filename;
 };
 
 static apr_status_t shm_cleanup(void* shm)
@@ -44,11 +46,13 @@ static apr_status_t shm_cleanup(void* shm)
         rv = apr_get_os_error();
     }
     if (!CloseHandle(m->hMap)) {
-        return (rv != APR_SUCCESS) ? rv : apr_get_os_error();
+        rv = rv != APR_SUCCESS ? rv : apr_get_os_error();
     }
-    /* ### Do we want to make a point of unlinking m->file here? 
-     * Need to add the fname to the apr_shm_t, in that case.
-     */
+    if (m->filename) {
+        /* Remove file if file backed */
+        apr_status_t rc = apr_file_remove(m->filename, m->pool);
+        rv = rv != APR_SUCCESS ? rv : rc;
+    }
     return rv;
 }
 
@@ -159,6 +163,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     
     (*m)->memblk->length = (*m)->length;
     (*m)->memblk->size = (*m)->size;
+    (*m)->filename = file ? apr_pstrdup(pool, file) : NULL;
 
     apr_pool_cleanup_register((*m)->pool, *m, 
                               shm_cleanup, apr_pool_cleanup_null);
@@ -252,6 +257,8 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
     (*m)->hMap = hMap;
     (*m)->length = (*m)->memblk->length;
     (*m)->usrmem = (char*)base + sizeof(memblock_t);
+    (*m)->filename = NULL;
+
     apr_pool_cleanup_register((*m)->pool, *m, 
                               shm_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
@@ -301,6 +308,7 @@ APR_DECLARE(apr_status_t) apr_os_shm_put(apr_shm_t **m,
     /* Real (*m)->mem->size could be recovered with VirtualQuery */
     (*m)->size = (*m)->memblk->size;
     (*m)->length = (*m)->memblk->length;
+    (*m)->filename = NULL;
 
     apr_pool_cleanup_register((*m)->pool, *m, 
                               shm_cleanup, apr_pool_cleanup_null);
