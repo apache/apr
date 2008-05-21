@@ -159,8 +159,6 @@ tryread@EXEEXT@: $(OBJECTS_tryread)
 	$(LINK_PROG) $(OBJECTS_tryread) $(ALL_LIBS)
 
 check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
-	@shlibpath_var@=../.libs:$$(@shlibpath_var@);\
-	export @shlibpath_var@
 	teststatus=0; \
 	progfailed=""; \
 	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
