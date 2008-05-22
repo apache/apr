@@ -245,10 +245,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * APR_EBADIP       The specified IP address is invalid
  * APR_EBADMASK     The specified netmask is invalid
  * APR_ESYMNOTFOUND Could not find the requested symbol
- * APR_ENOCIPHER    Could not find the cipher specified
- * APR_ENODIGEST    Could not find the digest specified
- * APR_ENOCERT      Could not find the certificate specified
- * APR_ENOENGINE    Could not find the engine specified
+ * APR_ENOTENOUGHENTROPY Not enough entropy to continue
  * </PRE>
  *
  * <PRE>
@@ -339,14 +336,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EPROC_UNKNOWN  (APR_OS_START_ERROR + 27)
 /** @see APR_STATUS_IS_ENOTENOUGHENTROPY */
 #define APR_ENOTENOUGHENTROPY (APR_OS_START_ERROR + 28)
-/** @see APR_STATUS_IS_ENOCIPHER */
-#define APR_ENOCIPHER      (APR_OS_START_ERROR + 29)
-/** @see APR_STATUS_IS_ENODIGEST */
-#define APR_ENODIGEST      (APR_OS_START_ERROR + 30)
-/** @see APR_STATUS_IS_ENOCERT */
-#define APR_ENOCERT        (APR_OS_START_ERROR + 31)
-/** @see APR_STATUS_IS_ENOENGINE */
-#define APR_ENOENGINE      (APR_OS_START_ERROR + 32)
 /** @} */
 
 /** 
@@ -434,17 +423,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #endif
 /** The given process was not recognized by APR. */
 #define APR_STATUS_IS_EPROC_UNKNOWN(s)  ((s) == APR_EPROC_UNKNOWN)
-
 /** APR could not gather enough entropy to continue. */
 #define APR_STATUS_IS_ENOTENOUGHENTROPY(s) ((s) == APR_ENOTENOUGHENTROPY)
-/** APR not find the cipher specified. */
-#define APR_STATUS_IS_ENOCIPHER(s)      ((s) == APR_ENOCIPHER)
-/** APR not find the digest specified. */
-#define APR_STATUS_IS_ENODIGEST(s)      ((s) == APR_ENODIGEST)
-/** APR not find the certificate specified. */
-#define APR_STATUS_IS_ENOCERT(s)        ((s) == APR_ENOCERT)
-/** APR not find the engine specified. */
-#define APR_STATUS_IS_ENOENGINE(s)      ((s) == APR_ENOENGINE)
 
 /** @} */
 
