@@ -65,7 +65,8 @@ typedef apr_uint64_t u_widest_int;
 #endif
 typedef int bool_int;
 
-#define S_NULL "(null)"
+static const char null_string[] = "(null)";
+#define S_NULL ((char *)null_string)
 #define S_NULL_LEN 6
 
 #define FLOAT_DIGITS 6
