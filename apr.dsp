@@ -19,8 +19,8 @@ CFG=apr - Win32 Release
 !MESSAGE 
 !MESSAGE "apr - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "apr - Win32 Debug" (based on "Win32 (x86) Static Library")
-!MESSAGE "apr - Win32 Release9x" (based on "Win32 (x86) Static Library")
-!MESSAGE "apr - Win32 Debug9x" (based on "Win32 (x86) Static Library")
+!MESSAGE "apr - Win32 ReleaseNT" (based on "Win32 (x86) Static Library")
+!MESSAGE "apr - Win32 DebugNT" (based on "Win32 (x86) Static Library")
 !MESSAGE "apr - x64 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "apr - x64 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE 
@@ -45,7 +45,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "LibR"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -69,7 +69,7 @@ LIB32=link.exe -lib
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /EHsc /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -79,20 +79,20 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo /out:"LibD\apr-1.lib"
 
-!ELSEIF  "$(CFG)" == "apr - Win32 Release9x"
+!ELSEIF  "$(CFG)" == "apr - Win32 ReleaseNT"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "9x\LibR"
-# PROP BASE Intermediate_Dir "9x\LibR"
+# PROP BASE Output_Dir "NT\LibR"
+# PROP BASE Intermediate_Dir "NT\LibR"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "9x\LibR"
-# PROP Intermediate_Dir "9x\LibR"
+# PROP Output_Dir "NT\LibR"
+# PROP Intermediate_Dir "NT\LibR"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WINNT" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -100,23 +100,23 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"9x\LibR\apr-1.lib"
+# ADD LIB32 /nologo /out:"NT\LibR\apr-1.lib"
 
-!ELSEIF  "$(CFG)" == "apr - Win32 Debug9x"
+!ELSEIF  "$(CFG)" == "apr - Win32 DebugNT"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "9x\LibD"
-# PROP BASE Intermediate_Dir "9x\LibD"
+# PROP BASE Output_Dir "NT\LibD"
+# PROP BASE Intermediate_Dir "NT\LibD"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "9x\LibD"
-# PROP Intermediate_Dir "9x\LibD"
+# PROP Output_Dir "NT\LibD"
+# PROP Intermediate_Dir "NT\LibD"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WINNT" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /EHsc /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -124,7 +124,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"9x\LibD\apr-1.lib"
+# ADD LIB32 /nologo /out:"NT\LibD\apr-1.lib"
 
 !ELSEIF  "$(CFG)" == "apr - x64 Release"
 
@@ -139,7 +139,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "x64\LibR"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WINNT" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -163,7 +163,7 @@ LIB32=link.exe -lib
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WINNT" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /EHsc /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -179,8 +179,8 @@ LIB32=link.exe -lib
 
 # Name "apr - Win32 Release"
 # Name "apr - Win32 Debug"
-# Name "apr - Win32 Release9x"
-# Name "apr - Win32 Debug9x"
+# Name "apr - Win32 ReleaseNT"
+# Name "apr - Win32 DebugNT"
 # Name "apr - x64 Release"
 # Name "apr - x64 Debug"
 # Begin Group "Source Files"
@@ -617,7 +617,7 @@ InputPath=.\include\apr.hw
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "apr - Win32 Release9x"
+!ELSEIF  "$(CFG)" == "apr - Win32 ReleaseNT"
 
 # Begin Custom Build - Creating apr.h from apr.hw
 InputPath=.\include\apr.hw
@@ -627,7 +627,7 @@ InputPath=.\include\apr.hw
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "apr - Win32 Debug9x"
+!ELSEIF  "$(CFG)" == "apr - Win32 DebugNT"
 
 # Begin Custom Build - Creating apr.h from apr.hw
 InputPath=.\include\apr.hw

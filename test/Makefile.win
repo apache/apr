@@ -123,11 +123,11 @@ LD = link.exe
 
 !IF "$(MODEL)" == "static"
 LOCAL_LIB= ..\$(OUTDIR)\apr-1.lib 
-APP_LIB= ..\$(OUTDIR)\aprapp-1.lib 
+APP_LIB= ..\build\$(OUTDIR)\apr_app-1.lib 
 STATIC_CFLAGS = /D APR_DECLARE_STATIC
 !ELSE
 LOCAL_LIB= ..\$(OUTDIR)\libapr-1.lib 
-APP_LIB= ..\$(OUTDIR)\libaprapp-1.lib 
+APP_LIB= ..\build\$(OUTDIR)\libapr_app-1.lib 
 STATIC_CFLAGS = 
 !ENDIF
 

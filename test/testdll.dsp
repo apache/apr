@@ -19,8 +19,8 @@ CFG=testdll - Win32 Release
 !MESSAGE 
 !MESSAGE "testdll - Win32 Release" (based on "Win32 (x86) External Target")
 !MESSAGE "testdll - Win32 Debug" (based on "Win32 (x86) External Target")
-!MESSAGE "testdll - Win32 Release9x" (based on "Win32 (x86) External Target")
-!MESSAGE "testdll - Win32 Debug9x" (based on "Win32 (x86) External Target")
+!MESSAGE "testdll - Win32 ReleaseNT" (based on "Win32 (x86) External Target")
+!MESSAGE "testdll - Win32 DebugNT" (based on "Win32 (x86) External Target")
 !MESSAGE "testdll - x64 Release" (based on "Win32 (x86) External Target")
 !MESSAGE "testdll - x64 Debug" (based on "Win32 (x86) External Target")
 !MESSAGE 
@@ -72,45 +72,45 @@ CFG=testdll - Win32 Release
 # PROP Bsc_Name ""
 # PROP Target_Dir ""
 
-!ELSEIF  "$(CFG)" == "testdll - Win32 Release9x"
+!ELSEIF  "$(CFG)" == "testdll - Win32 ReleaseNT"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir ""
 # PROP BASE Intermediate_Dir ""
-# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=9x\Release OUTDIR=9x\Release MODEL=dynamic all check"
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\Release OUTDIR=NT\Release MODEL=dynamic all check"
 # PROP BASE Rebuild_Opt "/a"
-# PROP BASE Target_File "9x\Release\testall.exe"
+# PROP BASE Target_File "NT\Release\testall.exe"
 # PROP BASE Bsc_Name ""
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""
-# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=9x\Release OUTDIR=9x\Release MODEL=dynamic all check"
+# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\Release OUTDIR=NT\Release MODEL=dynamic all check"
 # PROP Rebuild_Opt "/a"
-# PROP Target_File "9x\Release\testall.exe"
+# PROP Target_File "NT\Release\testall.exe"
 # PROP Bsc_Name ""
 # PROP Target_Dir ""
 
-!ELSEIF  "$(CFG)" == "testdll - Win32 Debug9x"
+!ELSEIF  "$(CFG)" == "testdll - Win32 DebugNT"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
 # PROP BASE Output_Dir ""
 # PROP BASE Intermediate_Dir ""
-# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=9x\Debug OUTDIR=9x\Debug MODEL=dynamic _DEBUG=1 all check"
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\Debug OUTDIR=NT\Debug MODEL=dynamic _DEBUG=1 all check"
 # PROP BASE Rebuild_Opt "/a"
-# PROP BASE Target_File "9x\Debug\testall.exe"
+# PROP BASE Target_File "NT\Debug\testall.exe"
 # PROP BASE Bsc_Name ""
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""
-# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=9x\Debug OUTDIR=9x\Debug MODEL=dynamic _DEBUG=1 all check"
+# PROP Cmd_Line "NMAKE /f Makefile.win INTDIR=NT\Debug OUTDIR=NT\Debug MODEL=dynamic _DEBUG=1 all check"
 # PROP Rebuild_Opt "/a"
-# PROP Target_File "9x\Debug\testall.exe"
+# PROP Target_File "NT\Debug\testall.exe"
 # PROP Bsc_Name ""
 # PROP Target_Dir ""
 
@@ -162,8 +162,8 @@ CFG=testdll - Win32 Release
 
 # Name "testdll - Win32 Release"
 # Name "testdll - Win32 Debug"
-# Name "testdll - Win32 Release9x"
-# Name "testdll - Win32 Debug9x"
+# Name "testdll - Win32 ReleaseNT"
+# Name "testdll - Win32 DebugNT"
 # Name "testdll - x64 Release"
 # Name "testdll - x64 Debug"
 # Begin Group "testall Source Files"

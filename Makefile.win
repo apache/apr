@@ -18,8 +18,8 @@
 #
 #     ARCH="Win32 Release"
 #     ARCH="Win32 Debug"
-#     ARCH="Win32 Release9x"
-#     ARCH="Win32 Debug9x"
+#     ARCH="Win32 ReleaseNT"
+#     ARCH="Win32 DebugNT"
 #     ARCH="x64 Release"
 #     ARCH="x64 Debug"
 #
@@ -66,14 +66,14 @@ LIBSOSPATH=LibR
 SLNARCH=Debug|Win32
 ARCHOSPATH=Debug
 LIBSOSPATH=LibD
-!ELSEIF "$(ARCH)" == "Win32 Release9x"
-SLNARCH=Release9x|Win32
-ARCHOSPATH=9x\Release
-LIBSOSPATH=9x\LibR
-!ELSEIF "$(ARCH)" == "Win32 Debug9x"
-SLNARCH=Debug9x|Win32
-ARCHOSPATH=9x\Debug
-LIBSOSPATH=9x\LibD
+!ELSEIF "$(ARCH)" == "Win32 ReleaseNT"
+SLNARCH=ReleaseNT|Win32
+ARCHOSPATH=NT\Release
+LIBSOSPATH=NT\LibR
+!ELSEIF "$(ARCH)" == "Win32 DebugNT"
+SLNARCH=DebugNT|Win32
+ARCHOSPATH=NT\Debug
+LIBSOSPATH=NT\LibD
 !ELSEIF "$(ARCH)" == "x64 Release"
 SLNARCH=Release|x64
 ARCHOSPATH=x64\Release
@@ -108,38 +108,38 @@ buildall:
 	$(MAKE) $(MAKEOPT) -f apr.mak         CFG="apr - $(ARCH)" RECURSE=0 $(CTARGET)
 	$(MAKE) $(MAKEOPT) -f libapr.mak      CFG="libapr - $(ARCH)" RECURSE=0 $(CTARGET)
 	cd build
-	 $(MAKE) $(MAKEOPT) -f aprapp.mak     CFG="aprapp - $(ARCH)" RECURSE=0 $(CTARGET)
-	 $(MAKE) $(MAKEOPT) -f libaprapp.mak  CFG="libaprapp - $(ARCH)" RECURSE=0 $(CTARGET)
+	 $(MAKE) $(MAKEOPT) -f apr_app.mak    CFG="apr_app - $(ARCH)" RECURSE=0 $(CTARGET)
+	 $(MAKE) $(MAKEOPT) -f libapr_app.mak CFG="libapr_app - $(ARCH)" RECURSE=0 $(CTARGET)
 	cd ..
 
 !ELSEIF $(USESLN) == 1
 
 clean:
-	-devenv apr.sln /useenv /clean "$(SLNARCH)" /project libaprapp
+	-devenv apr.sln /useenv /clean "$(SLNARCH)" /project libapr_app
 	-devenv apr.sln /useenv /clean "$(SLNARCH)" /project libapr
-	-devenv apr.sln /useenv /clean "$(SLNARCH)" /project aprapp
+	-devenv apr.sln /useenv /clean "$(SLNARCH)" /project apr_app
 	-devenv apr.sln /useenv /clean "$(SLNARCH)" /project apr
 
 buildall:
 	devenv apr.sln /useenv /build "$(SLNARCH)" /project apr
-	devenv apr.sln /useenv /build "$(SLNARCH)" /project aprapp
+	devenv apr.sln /useenv /build "$(SLNARCH)" /project apr_app
 	devenv apr.sln /useenv /build "$(SLNARCH)" /project libapr
-	devenv apr.sln /useenv /build "$(SLNARCH)" /project libaprapp
+	devenv apr.sln /useenv /build "$(SLNARCH)" /project libapr_app
 
 !ELSE
 #	$(USEDSP) == 1
 
 clean:
-	-msdev apr.dsw /USEENV /MAKE "libaprapp - $(ARCH)" /CLEAN
+	-msdev apr.dsw /USEENV /MAKE "libapr_app - $(ARCH)" /CLEAN
 	-msdev apr.dsw /USEENV /MAKE "libapr - $(ARCH)" /CLEAN
-	-msdev apr.dsw /USEENV /MAKE "aprapp - $(ARCH)" /CLEAN
+	-msdev apr.dsw /USEENV /MAKE "apr_app - $(ARCH)" /CLEAN
 	-msdev apr.dsw /USEENV /MAKE "apr - $(ARCH)" /CLEAN
 
 buildall:
 	@msdev apr.dsw /USEENV /MAKE "apr - $(ARCH)"
-	@msdev apr.dsw /USEENV /MAKE "aprapp - $(ARCH)"
+	@msdev apr.dsw /USEENV /MAKE "apr_app - $(ARCH)"
 	@msdev apr.dsw /USEENV /MAKE "libapr - $(ARCH)"
-	@msdev apr.dsw /USEENV /MAKE "libaprapp - $(ARCH)"
+	@msdev apr.dsw /USEENV /MAKE "libapr_app - $(ARCH)"
 
 !ENDIF
 
@@ -168,10 +168,6 @@ install:
 	xcopy include\*.h		"$(PREFIX)\include\" /d < .a
 	copy $(LIBSOSPATH)\apr-1.lib		"$(PREFIX)\lib\" <.y
 	copy $(LIBSOSPATH)\apr-1.pdb		"$(PREFIX)\lib\" <.y
-	copy $(LIBSOSPATH)\aprapp-1.lib		"$(PREFIX)\lib\" <.y
-	copy $(LIBSOSPATH)\aprapp-1.pdb		"$(PREFIX)\lib\" <.y
-	copy $(LIBSOSPATH)\libaprapp-1.lib	"$(PREFIX)\lib\" <.y
-	copy $(LIBSOSPATH)\libaprapp-1.pdb	"$(PREFIX)\lib\" <.y
 	copy $(ARCHOSPATH)\libapr-1.lib		"$(PREFIX)\lib\" <.y
 	copy $(ARCHOSPATH)\libapr-1.exp		"$(PREFIX)\lib\" <.y
 	copy $(ARCHOSPATH)\libapr-1.dll		"$(PREFIX)\bin\" <.y

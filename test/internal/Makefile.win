@@ -44,7 +44,7 @@ INTDIR=$(OUTDIR)
 NONPORTABLE = \
 	$(OUTDIR)\testucs.exe
 
-CLEAN_BUILDDIRS = Release Debug 9x x64
+CLEAN_BUILDDIRS = Release Debug NT x64
 
 PROGRAMS = 
 
