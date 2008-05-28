@@ -27,6 +27,9 @@
 #include "apr_network_io.h"
 #include "apr_portable.h"
 
+#if APR_HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
