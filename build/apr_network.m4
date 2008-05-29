@@ -244,6 +244,8 @@ APR_TRY_COMPILE_NO_WARNING([
 ],[
 int tmp = gethostbyname_r((const char *) 0, (struct hostent *) 0, 
                           (char *) 0, 0, (struct hostent **) 0, &tmp);
+/* use tmp to suppress the warning */
+tmp=0;
 ], ac_cv_gethostbyname_r_style=glibc2, ac_cv_gethostbyname_r_style=none))
 
 if test "$ac_cv_gethostbyname_r_style" = "glibc2"; then
@@ -269,8 +271,10 @@ APR_TRY_COMPILE_NO_WARNING([
 #endif
 ],[
 int tmp = gethostbyname_r((const char *) 0, (struct hostent *) 0, 
-                          (struct hostent_data *) 0);],
-ac_cv_gethostbyname_r_arg=hostent_data, ac_cv_gethostbyname_r_arg=char))
+                          (struct hostent_data *) 0);
+/* use tmp to suppress the warning */
+tmp=0;
+], ac_cv_gethostbyname_r_arg=hostent_data, ac_cv_gethostbyname_r_arg=char))
 
 if test "$ac_cv_gethostbyname_r_arg" = "hostent_data"; then
     AC_DEFINE(GETHOSTBYNAME_R_HOSTENT_DATA, 1, [Define if gethostbyname_r has the hostent_data for the third argument])
