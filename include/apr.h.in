@@ -109,6 +109,7 @@
 #define APR_HAVE_WINSOCK2_H      @winsock2h@
 
 /** @} */
+/** @} */
 
 /* We don't include our conditional headers within the doxyblocks 
  * or the extern "C" namespace 
@@ -467,7 +468,6 @@ typedef  apr_uint32_t            apr_uintptr_t;
 /* Local machine definition for console and log output. */
 #define APR_EOL_STR              "@eolstr@"
 
-
 #if APR_HAVE_SYS_WAIT_H
 #ifdef WEXITSTATUS
 #define apr_wait_t       int
@@ -480,13 +480,6 @@ typedef  apr_uint32_t            apr_uintptr_t;
 typedef int apr_wait_t;
 #endif /* HAVE_SYS_WAIT_H */
 
-/* XXXX: These don't belong here, but it is replicating what apr.hw does. */
-#ifdef __MINGW32__
-typedef  int         pid_t;
-typedef  int         uid_t;
-typedef  int         gid_t;
-#endif
-
 #if defined(PATH_MAX)
 #define APR_PATH_MAX       PATH_MAX
 #elif defined(_POSIX_PATH_MAX)
@@ -498,7 +491,19 @@ typedef  int         gid_t;
 #define APR_DSOPATH "@shlibpath_var@"
 
 /** @} */
-/** @} */
+
+/* Definitions that only Win32 programs need to compile properly. */
+
+/* XXX These simply don't belong here, perhaps in apr_portable.h
+ * based on some APR_HAVE_PID/GID/UID?
+ */
+#ifdef __MINGW32__
+#ifndef __GNUC__
+typedef  int         pid_t;
+#endif
+typedef  int         uid_t;
+typedef  int         gid_t;
+#endif
 
 #ifdef __cplusplus
 }
