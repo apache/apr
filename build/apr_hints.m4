@@ -97,6 +97,7 @@ if test "x$apr_preload_done" != "xyes" ; then
 	APR_SETVAR(SHELL, [sh])
 	APR_SETIFNULL(apr_gethostbyname_is_thread_safe, [yes])
 	APR_SETIFNULL(apr_gethostbyaddr_is_thread_safe, [yes])
+	APR_SETIFNULL(apr_getservbyname_is_thread_safe, [yes])
 	;;
     *-hi-hiux)
 	APR_ADDTO(CPPFLAGS, [-DHIUX])
@@ -419,6 +420,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         APR_SETIFNULL(apr_sysvsem_is_global, [yes])
         APR_SETIFNULL(apr_gethostbyname_is_thread_safe, [yes])
         APR_SETIFNULL(apr_gethostbyaddr_is_thread_safe, [yes])
+        APR_SETIFNULL(apr_getservbyname_is_thread_safe, [yes])
         AC_DEFINE(HAVE_ZOS_PTHREADS, 1, [Define for z/OS pthread API nuances])
         APR_ADDTO(CPPFLAGS, [-U_NO_PROTO -DSIGPROCMASK_SETS_THREAD_MASK -DTCP_NODELAY=1])
         ;;
@@ -427,6 +429,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         APR_SETIFNULL(apr_process_lock_is_global, [yes])
         APR_SETIFNULL(apr_gethostbyname_is_thread_safe, [yes])
         APR_SETIFNULL(apr_gethostbyaddr_is_thread_safe, [yes])
+        APR_SETIFNULL(apr_getservbyname_is_thread_safe, [yes])
         ;;
     *cygwin*)
 	APR_ADDTO(CPPFLAGS, [-DCYGWIN])
