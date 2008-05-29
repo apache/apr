@@ -705,17 +705,63 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
 APR_DECLARE(apr_status_t) apr_getservbyname(apr_sockaddr_t *sockaddr,
                                             const char *servname)
 {
+#if APR_HAS_THREADS && !defined(GETSERVBYNAME_IS_THREAD_SAFE) && \
+    defined(HAVE_GETSERVBYNAME_R) && \
+    (defined(GETSERVBYNAME_R_GLIBC2) || defined(GETSERVBYNAME_R_SOLARIS) || \
+     defined(GETSERVBYNAME_R_OSF1))
+    struct servent se;
+#if defined(GETSERVBYNAME_R_OSF1)
+    struct servent_data sed;
+
+    memset(&sed, 0, sizeof(sed)); /* must zero fill before use */
+#else
+#if defined(GETSERVBYNAME_R_GLIBC2)
+    struct servent *res;
+#endif
+    char buf[1024];
+#endif
+#else
     struct servent *se;
+#endif
 
     if (servname == NULL)
         return APR_EINVAL;
 
+#if APR_HAS_THREADS && !defined(GETSERVBYNAME_IS_THREAD_SAFE) && \
+    defined(HAVE_GETSERVBYNAME_R) && \
+    (defined(GETSERVBYNAME_R_GLIBC2) || defined(GETSERVBYNAME_R_SOLARIS) || \
+     defined(GETSERVBYNAME_R_OSF1))
+#if defined(GETSERVBYNAME_R_GLIBC2)
+    if (getservbyname_r(servname, NULL,
+                        &se, buf, sizeof(buf), &res) == 0 && res != NULL) {
+        sockaddr->port = ntohs(res->s_port);
+        sockaddr->servname = apr_pstrdup(sockaddr->pool, servname);
+        sockaddr->sa.sin.sin_port = res->s_port;
+        return APR_SUCCESS;
+    }
+#elif defined(GETSERVBYNAME_R_SOLARIS)
+    if (getservbyname_r(servname, NULL, &se, buf, sizeof(buf)) != NULL) {
+        sockaddr->port = ntohs(se.s_port);
+        sockaddr->servname = apr_pstrdup(sockaddr->pool, servname);
+        sockaddr->sa.sin.sin_port = se.s_port;
+        return APR_SUCCESS;
+    }
+#elif defined(GETSERVBYNAME_R_OSF1)
+    if (getservbyname_r(servname, NULL, &se, &sed) == 0) {
+        sockaddr->port = ntohs(se.s_port);
+        sockaddr->servname = apr_pstrdup(sockaddr->pool, servname);
+        sockaddr->sa.sin.sin_port = se.s_port;
+        return APR_SUCCESS;
+    }
+#endif
+#else
     if ((se = getservbyname(servname, NULL)) != NULL){
         sockaddr->port = ntohs(se->s_port);
         sockaddr->servname = apr_pstrdup(sockaddr->pool, servname);
         sockaddr->sa.sin.sin_port = se->s_port;
         return APR_SUCCESS;
     }
+#endif
     return APR_ENOENT;
 }
 
