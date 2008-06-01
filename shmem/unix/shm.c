@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <unistd.h>
 #include "apr_arch_shm.h"
 
 #include "apr_general.h"
@@ -69,7 +70,7 @@ static apr_status_t shm_cleanup_owner(void *m_)
         /* Indicate that the segment is to be destroyed as soon
          * as all processes have detached. This also disallows any
          * new attachments to the segment. */
-        if (shmctl(m->shmid, IPC_RMID, NULL) == -1) {
+        if (shmctl(m->shmid, IPC_RMID, NULL) == -1 && errno != EINVAL) {
             return errno;
         }
         if (shmdt(m->base) == -1) {
