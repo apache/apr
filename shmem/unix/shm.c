@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <unistd.h>
 #include "apr_arch_shm.h"
 
 #include "apr_general.h"
