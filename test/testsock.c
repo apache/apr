@@ -73,6 +73,26 @@ static void test_addr_info(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, "127.0.0.1", sa->hostname);
 }
 
+static void test_serv_by_name(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_sockaddr_t *sa;
+
+    rv = apr_sockaddr_info_get(&sa, NULL, APR_UNSPEC, 0, 0, p);
+    APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
+
+    rv = apr_getservbyname(sa, "ftp");
+    APR_ASSERT_SUCCESS(tc, "Problem getting ftp service", rv);
+    ABTS_INT_EQUAL(tc, 21, sa->port);
+
+    rv = apr_getservbyname(sa, "complete_and_utter_rubbish");
+    APR_ASSERT_SUCCESS(tc, "Problem getting non-existent service", !rv);
+
+    rv = apr_getservbyname(sa, "http");
+    APR_ASSERT_SUCCESS(tc, "Problem getting http service", rv);
+    ABTS_INT_EQUAL(tc, 80, sa->port);
+}
+
 static apr_socket_t *setup_socket(abts_case *tc)
 {
     apr_status_t rv;
@@ -318,6 +338,7 @@ abts_suite *testsock(abts_suite *suite)
     suite = ADD_SUITE(suite)
 
     abts_run_test(suite, test_addr_info, NULL);
+    abts_run_test(suite, test_serv_by_name, NULL);
     abts_run_test(suite, test_create_bind_listen, NULL);
     abts_run_test(suite, test_send, NULL);
     abts_run_test(suite, test_recv, NULL);
