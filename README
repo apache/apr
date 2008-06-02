@@ -1,0 +1,57 @@
+Apache Portable Runtime Library (APR)
+-------------------------------------
+
+   The Apache Portable Runtime Library provides a predictable and
+   consistent interface to underlying platform-specific
+   implementations, with an API to which software developers may code
+   and be assured of predictable if not identical behavior regardless
+   of the platform on which their software is built, relieving them of
+   the need to code special-case conditions to work around or take
+   advantage of platform-specific deficiencies or features.
+
+   APR and its companion libraries are implemented entirely in C
+   and provide a common programming interface across a wide variety
+   of operating system platforms without sacrificing performance.
+   Currently supported platforms include:
+
+     UNIX variants
+     Windows
+     Netware
+     Mac OS X
+     OS/2
+
+   To give a brief overview, the primary core
+   subsystems of APR 1.3 include the following:
+
+     Atomic operations
+     Dynamic Shared Object loading
+     File I/O
+     Locks (mutexes, condition variables, etc)
+     Memory management (high performance allocators)
+     Memory-mapped files
+     Multicast Sockets
+     Network I/O
+     Shared memory
+     Thread and Process management
+     Various data structures (tables, hashes, priority queues, etc)
+
+   For a more complete list, please refer to the following URLs:
+
+     http://apr.apache.org/docs/apr/modules.html
+
+   Users of APR 0.9 should be aware that migrating to the APR 1.x
+   programming interfaces may require some adjustments; APR 1.x is
+   neither source nor binary compatible with earlier APR 0.9 releases.
+   Users of APR 1.x can expect consistent interfaces and binary backwards
+   compatibility throughout the entire APR 1.x release cycle, as defined
+   in our versioning rules:
+
+     http://apr.apache.org/versioning.html
+
+   APR is already used extensively by the Apache HTTP Server
+   version 2 and the Subversion revision control system, to
+   name but a few.  We list all known projects using APR at
+   http://apr.apache.org/projects.html -- so please let us know
+   if you find our libraries useful in your own projects!
+
+
