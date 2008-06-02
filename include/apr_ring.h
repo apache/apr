@@ -157,7 +157,7 @@
  * @param link The name of the APR_RING_ENTRY in the element struct
  */
 #define APR_RING_SENTINEL(hp, elem, link)				\
-    (struct elem *)((char *)(hp) - APR_OFFSETOF(struct elem, link))
+    (struct elem *)((char *)(&(hp)->next) - APR_OFFSETOF(struct elem, link))
 
 /**
  * The first element of the ring
