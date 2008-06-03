@@ -49,7 +49,12 @@ static apr_status_t shm_cleanup_owner(void *m_)
         if (munmap(m->base, m->realsize) == -1) {
             return errno;
         }
-        return apr_file_remove(m->filename, m->pool);
+        if (access(m->filename, F_OK)) {
+            return APR_SUCCESS;
+        }
+        else {
+            return apr_file_remove(m->filename, m->pool);
+        }
 #endif
 #if APR_USE_SHMEM_MMAP_SHM
         if (munmap(m->base, m->realsize) == -1) {
@@ -64,13 +69,18 @@ static apr_status_t shm_cleanup_owner(void *m_)
         /* Indicate that the segment is to be destroyed as soon
          * as all processes have detached. This also disallows any
          * new attachments to the segment. */
-        if (shmctl(m->shmid, IPC_RMID, NULL) == -1) {
+        if (shmctl(m->shmid, IPC_RMID, NULL) == -1 && errno != EINVAL) {
             return errno;
         }
         if (shmdt(m->base) == -1) {
             return errno;
         }
-        return apr_file_remove(m->filename, m->pool);
+        if (access(m->filename, F_OK)) {
+            return APR_SUCCESS;
+        }
+        else {
+            return apr_file_remove(m->filename, m->pool);
+        }
 #endif
     }
 
