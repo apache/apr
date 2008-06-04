@@ -68,7 +68,7 @@ APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint
 
 APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
 {
-    return atomic_cas_ptr(mem, cmp, (void*) with);
+    return atomic_cas_ptr(mem, (void*) cmp, with);
 }
 
 APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
