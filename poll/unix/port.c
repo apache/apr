@@ -202,7 +202,7 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
     pfd_elem_t *ep;
     apr_status_t rv = APR_SUCCESS;
     int res;
-    int err;
+    int err = 0;
 
     pollset_lock_rings();
 
