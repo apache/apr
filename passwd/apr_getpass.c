@@ -70,7 +70,7 @@
 
 #define ERR_OVERFLOW 5
 
-#ifndef HAVE_GETPASS
+#if !defined(HAVE_GETPASS) && !defined(HAVE_GETPASSPHRASE)
 
 /* MPE, Win32, NetWare and BeOS all lack a native getpass() */
 
