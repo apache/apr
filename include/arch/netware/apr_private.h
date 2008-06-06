@@ -70,6 +70,15 @@
 
 #define HAVE_WRITEV     1
 
+#define HAVE_GETPASS_R  1
+/*
+ * check for older NDKs which have only the getpassword() function.
+ */
+#include <ndkvers.h>
+#if (CURRENT_NDK_THRESHOLD < 709060000)
+#define getpass_r getpassword
+#endif
+
 /* 64-bit integer conversion function */
 #define APR_INT64_STRFN	      strtoll
 
