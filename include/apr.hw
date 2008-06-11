@@ -229,9 +229,6 @@
 #if APR_HAVE_PROCESS_H
 #include <process.h>
 #endif
-#if APR_HAVE_IPV6
-#include <ws2tcpip.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -280,7 +277,7 @@ extern "C" {
 #define APR_HAVE_IN_ADDR        1
 #define APR_HAVE_INET_ADDR      1
 #define APR_HAVE_INET_NETWORK   0
-#define APR_HAVE_IPV6           1
+#define APR_HAVE_IPV6           0
 #define APR_HAVE_MEMMOVE        1
 #define APR_HAVE_SETRLIMIT      0
 #define APR_HAVE_SIGACTION      0
@@ -611,6 +608,7 @@ typedef  int         gid_t;
 #define STDERR_FILENO 2
 
 #if APR_HAVE_IPV6
+#include <ws2tcpip.h>
 
 /* Appears in later flavors, not the originals. */
 #ifndef in_addr6
