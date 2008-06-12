@@ -608,7 +608,6 @@ typedef  int         gid_t;
 #define STDERR_FILENO 2
 
 #if APR_HAVE_IPV6
-#include <ws2tcpip.h>
 
 /* Appears in later flavors, not the originals. */
 #ifndef in_addr6
