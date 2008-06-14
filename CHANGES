@@ -1,7 +1,15 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.1
 
+  *) Fix win32 apr.hw to pick up XP/2003 TCP/IP multicast constants and
+     revert to IPV6 disabled-by-default (a change present only in 1.3.0).
+     [William Rowe]
 
+  *) Fix autoconf cached detection of atomic builtins.  [Jim Jagielski]
+
+  *) Use thread safe versions of getservbyname().  [Bojan Smojver]
+
+  *) Use thread safe getpass_r on Netware.  [Guenter Knauf]
 
 Changes for APR 1.3.0
 
