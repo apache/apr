@@ -70,7 +70,7 @@
 
 #define ERR_OVERFLOW 5
 
-#if !defined(HAVE_GETPASS) && !defined(HAVE_GETPASSPHRASE)
+#if !defined(HAVE_GETPASS) && !defined(HAVE_GETPASSPHRASE) && !defined(HAVE_GETPASS_R)
 
 /* MPE, Win32, NetWare and BeOS all lack a native getpass() */
 
@@ -202,7 +202,7 @@ static char *get_password(const char *prompt)
 
 #endif /* no getchar or _getch */
 
-#endif /* no getpass */
+#endif /* no getpass or getpassphrase or getpass_r */
 
 /*
  * Use the OS getpass() routine (or our own) to obtain a password from
@@ -221,6 +221,11 @@ static char *get_password(const char *prompt)
 
 APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, apr_size_t *bufsiz)
 {
+    apr_status_t rv = APR_SUCCESS;
+#if defined(HAVE_GETPASS_R)
+    if (getpass_r(prompt, pwbuf, *bufsiz) == NULL)
+        return APR_EINVAL;
+#else
 #if defined(HAVE_GETPASSPHRASE)
     char *pw_got = getpassphrase(prompt);
 #elif defined(HAVE_GETPASS)
@@ -228,7 +233,6 @@ APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, apr_
 #else /* use the replacement implementation above */
     char *pw_got = get_password(prompt);
 #endif
-    apr_status_t rv = APR_SUCCESS;
 
     if (!pw_got)
         return APR_EINVAL;
@@ -237,5 +241,6 @@ APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, apr_
     }
     apr_cpystrn(pwbuf, pw_got, *bufsiz);
     memset(pw_got, 0, strlen(pw_got));
+#endif /* HAVE_GETPASS_R */
     return rv;
 }
