@@ -292,7 +292,7 @@ AC_DEFUN([APR_CHECK_GETSERVBYNAME_R_STYLE], [
 
 dnl Try and compile a glibc2 getservbyname_r piece of code, and set the
 dnl style of the routines to glibc2 on success
-AC_CACHE_CHECK([style of getservbyname_r routine], ac_cv_getservbyname_r_style,
+AC_CACHE_CHECK([style of getservbyname_r routine], ac_cv_getservbyname_r_style, [
 APR_TRY_COMPILE_NO_WARNING([
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -315,59 +315,62 @@ int tmp = getservbyname_r((const char *) 0, (const char *) 0,
                           (struct servent **) 0);
 /* use tmp to suppress the warning */
 tmp=0;
-], ac_cv_getservbyname_r_style=glibc2, [
+], ac_cv_getservbyname_r_style=glibc2, ac_cv_getservbyname_r_style=none)
 
-dnl Try and compile a Solaris getservbyname_r piece of code, and set the
-dnl style of the routines to solaris on success
-AC_CACHE_VAL(ac_cv_getservbyname_r_style,
-APR_TRY_COMPILE_NO_WARNING([
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-],[
-struct servent tmp = getservbyname_r((const char *) 0, (const char *) 0,
-                                     (struct servent *) 0, (char *) 0, 0);
-/* use tmp to suppress the warning */
-tmp=NULL;
-], ac_cv_getservbyname_r_style=solaris, [
+if test "$ac_cv_getservbyname_r_style" = "none"; then
+    dnl Try and compile a Solaris getservbyname_r piece of code, and set the
+    dnl style of the routines to solaris on success
+    APR_TRY_COMPILE_NO_WARNING([
+    #ifdef HAVE_SYS_TYPES_H
+    #include <sys/types.h>
+    #endif
+    #ifdef HAVE_NETINET_IN_H
+    #include <netinet/in.h>
+    #endif
+    #ifdef HAVE_ARPA_INET_H
+    #include <arpa/inet.h>
+    #endif
+    #ifdef HAVE_NETDB_H
+    #include <netdb.h>
+    #endif
+    #ifdef HAVE_STDLIB_H
+    #include <stdlib.h>
+    #endif
+    ],[
+    struct servent *tmp = getservbyname_r((const char *) 0, (const char *) 0,
+                                          (struct servent *) 0, (char *) 0, 0);
+    /* use tmp to suppress the warning */
+    tmp=NULL;
+    ], ac_cv_getservbyname_r_style=solaris, ac_cv_getservbyname_r_style=none)
+fi
 
-dnl Try and compile a OSF/1 getservbyname_r piece of code, and set the
-dnl style of the routines to osf1 on success
-AC_CACHE_VAL( ac_cv_getservbyname_r_style,
-APR_TRY_COMPILE_NO_WARNING([
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-],[
-int tmp = getservbyname_r((const char *) 0, (const char *) 0,
-                          (struct servent *) 0, (struct servent_data *) 0);
-/* use tmp to suppress the warning */
-tmp=0;
-], ac_cv_getservbyname_r_style=osf1, ac_cv_getservbyname_r_style=none))]))]))
+if test "$ac_cv_getservbyname_r_style" = "none"; then
+    dnl Try and compile a OSF/1 getservbyname_r piece of code, and set the
+    dnl style of the routines to osf1 on success
+    APR_TRY_COMPILE_NO_WARNING([
+    #ifdef HAVE_SYS_TYPES_H
+    #include <sys/types.h>
+    #endif
+    #ifdef HAVE_NETINET_IN_H
+    #include <netinet/in.h>
+    #endif
+    #ifdef HAVE_ARPA_INET_H
+    #include <arpa/inet.h>
+    #endif
+    #ifdef HAVE_NETDB_H
+    #include <netdb.h>
+    #endif
+    #ifdef HAVE_STDLIB_H
+    #include <stdlib.h>
+    #endif
+    ],[
+    int tmp = getservbyname_r((const char *) 0, (const char *) 0,
+                              (struct servent *) 0, (struct servent_data *) 0);
+    /* use tmp to suppress the warning */
+    tmp=0;
+    ], ac_cv_getservbyname_r_style=osf1, ac_cv_getservbyname_r_style=none)
+fi
+])
 
 if test "$ac_cv_getservbyname_r_style" = "glibc2"; then
     AC_DEFINE(GETSERVBYNAME_R_GLIBC2, 1, [Define if getservbyname_r has the glibc style])
