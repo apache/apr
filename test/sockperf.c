@@ -231,11 +231,12 @@ int main(int argc, char **argv)
         printf("%10d byte block:\n", results[i].size);
         printf("\t%2d iterations : ", results[i].iters);
         for (j = 0; j < results[i].iters; j++) {
-            printf("%6Ld ", results[i].msecs[j]);
+            printf("%6" APR_TIME_T_FMT, results[i].msecs[j]);
             totTime += results[i].msecs[j];
         }
         printf("<\n");
-        printf("\t  Average: %6Ld\n", totTime / results[i].iters);
+        printf("\t  Average: %6" APR_TIME_T_FMT "\n",
+               totTime / results[i].iters);
     }
 
     return 0;
