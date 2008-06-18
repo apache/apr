@@ -251,7 +251,7 @@ static void test_mmap(abts_case *tc, void *data)
 {
     apr_mmap_t *map;
     apr_file_t *fh;
-    apr_size_t len = 16384; /* hopefully a multiple of the page size */
+    apr_size_t len = 65536; /* hopefully a multiple of the page size */
     apr_off_t off = eightGB - len; 
     apr_status_t rv;
     void *ptr;
@@ -267,7 +267,7 @@ static void test_mmap(abts_case *tc, void *data)
 
     APR_ASSERT_SUCCESS(tc, "close file", apr_file_close(fh));
 
-    ABTS_ASSERT(tc, "mapped a 16K block", map->size == len);
+    ABTS_ASSERT(tc, "mapped a 64K block", map->size == len);
     
     APR_ASSERT_SUCCESS(tc, "get pointer into mmaped region",
                        apr_mmap_offset(&ptr, map, len - 4));
