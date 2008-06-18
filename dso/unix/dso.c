@@ -178,9 +178,9 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     int status;
 
     errno = 0;
-    status = shl_findsym((shl_t *)&handle->handle, symname, TYPE_PROCEDURE, &symaddr);
+    status = shl_findsym((void *)&handle->handle, symname, TYPE_PROCEDURE, &symaddr);
     if (status == -1 && errno == 0) /* try TYPE_DATA instead */
-        status = shl_findsym((shl_t *)&handle->handle, symname, TYPE_DATA, &symaddr);
+        status = shl_findsym((void *)&handle->handle, symname, TYPE_DATA, &symaddr);
     if (status == -1)
         return APR_ESYMNOTFOUND;
     *ressym = symaddr;
