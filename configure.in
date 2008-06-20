@@ -120,10 +120,14 @@ AC_CHECK_PROG(ASCPP, cpp, cpp)
 AC_CHECK_TOOL(AR, ar, ar)
 
 dnl Various OS checks that apparently set required flags
+ifdef([AC_USE_SYSTEM_EXTENSIONS], [
+AC_USE_SYSTEM_EXTENSIONS
+], [
 AC_AIX
-AC_ISC_POSIX
 AC_MINIX
+])
 
+AC_ISC_POSIX
 APR_EBCDIC
 
 dnl this is our library name
