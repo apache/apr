@@ -138,6 +138,12 @@ changequote([, ])dnl
   done
   ])
 
+  dnl autoconf doesn't add --silent to ac_configure_args; explicitly pass it
+  test "x$silent" = "xyes" && apr_configure_args="$apr_configure_args --silent"
+
+  dnl AC_CONFIG_SUBDIRS silences option warnings, emulate this for 2.62
+  apr_configure_args="--disable-option-checking $apr_configure_args" 
+
   dnl The eval makes quoting arguments work - specifically $2 where the
   dnl quoting mechanisms used is "" rather than [].
   dnl
