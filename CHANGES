@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
 
+  *) Use proper return code for fcntl-based apr_proc_mutex_trylock() 
+     on platforms that return EACCES instead of EAGAIN when the lock
+     is already held (AIX, HP-UX).
+     [Eric Covener]
+ 
   *) Make sure WIN32 behaves the same as posix for file backed
      shared memory by removing the file on cleanup/remove.
      [Mladen Turk]
