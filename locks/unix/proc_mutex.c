@@ -565,7 +565,11 @@ static apr_status_t proc_mutex_fcntl_tryacquire(apr_proc_mutex_t *mutex)
         rc = fcntl(mutex->interproc->filedes, F_SETLK, &proc_mutex_lock_it);
     } while (rc < 0 && errno == EINTR);
     if (rc < 0) {
+#if FCNTL_TRYACQUIRE_EACCES
+        if (errno == EACCES) {
+#else
         if (errno == EAGAIN) {
+#endif
             return APR_EBUSY;
         }
         return errno;
