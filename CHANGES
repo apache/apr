@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.3
 
+  *) Use proper return code for fcntl-based apr_proc_mutex_trylock() 
+     on platforms that return EACCES instead of EAGAIN when the lock
+     is already held (AIX, HP-UX).
+     [Eric Covener]
 
 
 Changes for APR 1.3.2

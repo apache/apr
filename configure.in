@@ -1886,6 +1886,70 @@ case $ac_decision in
         ;;
 esac
 
+if test $hasfcntlser = "1"; then
+AC_MSG_CHECKING(if fcntl returns EACCES when F_SETLK is already held)
+AC_TRY_RUN([
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+#if defined(HAVE_UNISTD_H)
+#include <unistd.h>
+#endif
+#include <fcntl.h>
+#include <errno.h>
+
+int fd;
+struct flock proc_mutex_lock_it = {0};
+const char *fname = "conftest.fcntl";
+
+int main()
+{
+    int rc, status;;
+    proc_mutex_lock_it.l_whence = SEEK_SET;   /* from current point */
+    proc_mutex_lock_it.l_type = F_WRLCK;      /* set exclusive/write lock */
+
+    fd = creat(fname, S_IRWXU);
+    unlink(fname);
+
+    if (rc = lockit()) {
+        exit(-1);
+    }
+
+    if (fork()) {
+        wait(&status);
+    }
+    else {
+      return(lockit());
+    }
+
+    close(fd);
+    exit(WEXITSTATUS(status) != EACCES);
+}
+
+int lockit() {
+    int rc;
+    do {
+        rc = fcntl(fd, F_SETLK, &proc_mutex_lock_it);
+    } while ( rc < 0 && errno == EINTR);
+
+    return (rc < 0) ? errno : 0;
+}], [apr_fcntl_tryacquire_eacces=1], [apr_fcntl_tryacquire_eacces=0], [apr_fcntl_tryacquire_eacces=0])
+fi
+
+if test "$apr_fcntl_tryacquire_eacces" = "1"; then
+  AC_DEFINE(FCNTL_TRYACQUIRE_EACCES, 1, [Define if fcntl returns EACCES when F_SETLK is already held])
+fi
+
+
 AC_SUBST(hasflockser)
 AC_SUBST(hassysvser)
 AC_SUBST(hasposixser)
