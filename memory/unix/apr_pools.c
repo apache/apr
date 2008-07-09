@@ -907,7 +907,16 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     return APR_SUCCESS;
 }
 
+/* Deprecated. Renamed to apr_pool_create_unmanaged_ex
+ */
 APR_DECLARE(apr_status_t) apr_pool_create_core_ex(apr_pool_t **newpool,
+                                                  apr_abortfunc_t abort_fn,
+                                                  apr_allocator_t *allocator)
+{
+    return apr_pool_create_unmanaged_ex(newpool, abort_fn, allocator);
+}
+
+APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
                                                   apr_abortfunc_t abort_fn,
                                                   apr_allocator_t *allocator)
 {
@@ -1731,6 +1740,15 @@ APR_DECLARE(apr_status_t) apr_pool_create_core_ex_debug(apr_pool_t **newpool,
                                                    apr_allocator_t *allocator,
                                                    const char *file_line)
 {
+    return apr_pool_create_unmanaged_ex_debug(newpool, abort_fn, allocator,
+                                              file_line);
+}
+
+APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpool,
+                                                   apr_abortfunc_t abort_fn,
+                                                   apr_allocator_t *allocator,
+                                                   const char *file_line)
+{
     apr_pool_t *pool;
     apr_allocator_t *pool_allocator;
 
@@ -2491,7 +2509,15 @@ APR_DECLARE(apr_status_t) apr_pool_create_core_ex_debug(apr_pool_t **newpool,
                                                    apr_allocator_t *allocator,
                                                    const char *file_line)
 {
-    return apr_pool_create_core_ex(newpool, abort_fn, allocator);
+    return apr_pool_create_unmanaged_ex(newpool, abort_fn, allocator);
+}
+
+APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpool,
+                                                   apr_abortfunc_t abort_fn,
+                                                   apr_allocator_t *allocator,
+                                                   const char *file_line)
+{
+    return apr_pool_create_unmanaged_ex(newpool, abort_fn, allocator);
 }
 
 #else /* APR_POOL_DEBUG */
@@ -2553,7 +2579,20 @@ APR_DECLARE(apr_status_t) apr_pool_create_core_ex(apr_pool_t **newpool,
                                                   apr_abortfunc_t abort_fn,
                                                   apr_allocator_t *allocator)
 {
-    return apr_pool_create_core_ex_debug(newpool, abort_fn,
+    return apr_pool_create_unmanaged_ex_debug(newpool, abort_fn,
+                                         allocator, "undefined");
+}
+
+#undef apr_pool_create_unmanaged_ex
+APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
+                                                  apr_abortfunc_t abort_fn,
+                                                  apr_allocator_t *allocator);
+
+APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
+                                                  apr_abortfunc_t abort_fn,
+                                                  apr_allocator_t *allocator)
+{
+    return apr_pool_create_unmanaged_ex_debug(newpool, abort_fn,
                                          allocator, "undefined");
 }
 
