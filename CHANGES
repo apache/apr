@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.3
 
+  *) Rename apr_pool_create_core to apr_pool_create_unmanaged and
+     deprecate the old API name. It better reflects the scope and usage
+     of this function. [Mladen Turk]
+
   *) Use proper return code for fcntl-based apr_proc_mutex_trylock() 
      on platforms that return EACCES instead of EAGAIN when the lock
      is already held (AIX, HP-UX).
