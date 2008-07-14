@@ -200,12 +200,13 @@ APR_DECLARE(apr_status_t) apr_pool_create_core_ex(apr_pool_t **newpool,
  * Create a new unmanaged pool.
  * @param newpool The pool we have just created.
  * @param abort_fn A function to use if the pool cannot allocate more memory.
- * @param allocator The allocator to use with the new pool.  If NULL the
+ * @param allocator The allocator to use with the new pool.  If NULL a
  *        new allocator will be crated with newpool as owner.
- * @remark Unmanaged pool is special pool that does not have parent pool
- *         and is NOT destroyed upon apr_terminate call.
- *         It must be explicitly destroyed by calling apr_pool_destroy,
- *         otherwise the memory will leek.
+ * @remark An unmanaged pool is a special pool without a parent; it will
+ *         NOT be destroyed upon apr_terminate.  It must be explicitly
+ *         destroyed by calling apr_pool_destroy, to prevent memory leaks.
+ *         Use of this function is discouraged, think twice about whether
+ *         you really really need it.
  */
 APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
                                                    apr_abortfunc_t abort_fn,
@@ -270,7 +271,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
 
 #if APR_POOL_DEBUG
 #define apr_pool_create_core_ex(newpool, abort_fn, allocator)  \
-    apr_pool_create_core_ex_debug(newpool, abort_fn, allocator, \
+    apr_pool_create_unmanaged_ex_debug(newpool, abort_fn, allocator, \
                                   APR_POOL__FILE_LINE__)
 
 #define apr_pool_create_unmanaged_ex(newpool, abort_fn, allocator)  \
@@ -311,14 +312,14 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged(apr_pool_t **newpool);
 #else
 #if APR_POOL_DEBUG
 #define apr_pool_create_core(newpool) \
-    apr_pool_create_core_ex_debug(newpool, NULL, NULL, \
+    apr_pool_create_unmanaged_ex_debug(newpool, NULL, NULL, \
                                   APR_POOL__FILE_LINE__)
 #define apr_pool_create_unmanaged(newpool) \
     apr_pool_create_unmanaged_ex_debug(newpool, NULL, NULL, \
                                   APR_POOL__FILE_LINE__)
 #else
 #define apr_pool_create_core(newpool) \
-    apr_pool_create_core_ex(newpool, NULL, NULL)
+    apr_pool_create_unmanaged_ex(newpool, NULL, NULL)
 #define apr_pool_create_unmanaged(newpool) \
     apr_pool_create_unmanaged_ex(newpool, NULL, NULL)
 #endif
