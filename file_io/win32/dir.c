@@ -195,13 +195,13 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
              */
             thedir->bof = 0; 
         }
-        else if (!FindNextFile(thedir->dirhand, thedir->n.entry)) {
+        else if (!FindNextFileA(thedir->dirhand, thedir->n.entry)) {
             return apr_get_os_error();
         }
         while (thedir->rootlen &&
                thedir->rootlen + strlen(thedir->n.entry->cFileName) >= MAX_PATH)
         {
-            if (!FindNextFileW(thedir->dirhand, thedir->w.entry)) {
+            if (!FindNextFileA(thedir->dirhand, thedir->n.entry)) {
                 return apr_get_os_error();
             }
         }
