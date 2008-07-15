@@ -474,4 +474,37 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
     return res;
 }
 
+/* This is basically the following...
+ * for every element in hash table {
+ *    comp elemeny.key, element.value
+ * }
+ *
+ * Like with apr_table_do, the comp callback is called for each and every
+ * element of the hash table.
+ */
+APR_DECLARE(int) apr_hash_do(apr_hash_do_callback_fn_t *comp,
+                             void *rec, const apr_hash_t *ht)
+{
+    apr_hash_index_t  hix;
+    apr_hash_index_t *hi;
+    int rv, dorv  = 1;
+
+    hix.ht    = (apr_hash_t *)ht;
+    hix.index = 0;
+    hix.this  = NULL;
+    hix.next  = NULL;
+
+    if ((hi = apr_hash_next(&hix))) {
+        /* Scan the entire table */
+        do {
+            rv = (*comp)(rec, hi->this->key, hi->this->klen, hi->this->val);
+        } while ((hi = apr_hash_next(hi)));
+
+        if (rv == 0) {
+            dorv = 0;
+        }
+    }   
+    return dorv;
+}
+
 APR_POOL_IMPLEMENT_ACCESSOR(hash)
