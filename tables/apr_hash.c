@@ -498,12 +498,12 @@ APR_DECLARE(int) apr_hash_do(apr_hash_do_callback_fn_t *comp,
         /* Scan the entire table */
         do {
             rv = (*comp)(rec, hi->this->key, hi->this->klen, hi->this->val);
-        } while ((hi = apr_hash_next(hi)));
+        } while (rv && (hi = apr_hash_next(hi)));
 
         if (rv == 0) {
             dorv = 0;
         }
-    }   
+    }
     return dorv;
 }
 
