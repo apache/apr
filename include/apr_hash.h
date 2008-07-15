@@ -219,6 +219,36 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
                                          const void *data);
 
 /**
+ * Declaration prototype for the iterator callback function of apr_hash_do().
+ *
+ * @param rec The data passed as the first argument to apr_hash_[v]do()
+ * @param key The key from this iteration of the hash table
+ * @param klen The key length from this iteration of the hash table
+ * @param value The value from this iteration of the hash table
+ * @remark Iteration continues while this callback function returns non-zero.
+ * To export the callback function for apr_hash_do() it must be declared 
+ * in the _NONSTD convention.
+ */
+typedef int (apr_hash_do_callback_fn_t)(void *rec, const void *key,
+                                                   apr_ssize_t klen,
+                                                   const void *value);
+
+/** 
+ * Iterate over a hash table running the provided function once for every
+ * element in the hash table. The @param comp function will be invoked for
+ * every element in the hash table.
+ *
+ * @param comp The function to run
+ * @param rec The data to pass as the first argument to the function
+ * @param ht The hash table to iterate over
+ * @return FALSE if one of the comp() iterations returned zero; TRUE if all
+ *            iterations returned non-zero
+ * @see apr_hash_do_callback_fn_t
+ */
+APR_DECLARE(int) apr_hash_do(apr_hash_do_callback_fn_t *comp,
+                             void *rec, const apr_hash_t *ht);
+
+/**
  * Get a pointer to the pool which the hash table was created in
  */
 APR_POOL_DECLARE_ACCESSOR(hash);

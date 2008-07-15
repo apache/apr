@@ -1,5 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
+  *) Intruduce apr_hash_do for iterating over a hash table.
+     [Mladen Turk]
+
   *) Rename apr_pool_create_core to apr_pool_create_unmanaged and
      deprecate the old API name. It better reflects the scope and usage
      of this function. [Mladen Turk]
