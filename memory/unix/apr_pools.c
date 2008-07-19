@@ -2198,8 +2198,8 @@ APR_DECLARE(void) apr_pool_pre_cleanup_register(apr_pool_t *p, const void *data,
         }
         c->data = data;
         c->plain_cleanup_fn = plain_cleanup_fn;
-        c->next = p->cleanups;
-        p->cleanups = c;
+        c->next = p->pre_cleanups;
+        p->pre_cleanups = c;
     }
 }
 
