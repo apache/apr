@@ -581,6 +581,36 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
     return apr_get_os_error();
 }
 
+APR_DECLARE(apr_status_t) apr_file_link(const char *from_path, 
+                                           const char *to_path)
+{
+    apr_status_t rv;
+
+#if APR_HAS_UNICODE_FS
+    IF_WIN_OS_IS_UNICODE
+    {
+        apr_wchar_t wfrom_path[APR_PATH_MAX];
+        apr_wchar_t wto_path[APR_PATH_MAX];
+
+        if (rv = utf8_to_unicode_path(wfrom_path, sizeof(wfrom_path) 
+                                               / sizeof(apr_wchar_t), from_path))
+            return rv;
+        if (rv = utf8_to_unicode_path(wto_path, sizeof(wto_path) 
+                                               / sizeof(apr_wchar_t), to_path))
+            return rv;
+
+        if (!CreateHardLinkW(wto_path, wfrom_path))
+                return apr_get_os_error()
+    }
+#endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI {
+        if (!CreateHardLinkA(wto_path, wfrom_path))
+                return apr_get_os_error()
+    }
+#endif
+}
+
 APR_DECLARE(apr_status_t) apr_os_file_get(apr_os_file_t *thefile,
                                           apr_file_t *file)
 {
