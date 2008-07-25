@@ -345,3 +345,13 @@ APR_DECLARE(apr_status_t) apr_file_inherit_unset(apr_file_t *thefile)
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(file)
+
+APR_DECLARE(apr_status_t) apr_file_link(const char *from_path, 
+                                          const char *to_path)
+{
+    if (link(from_path, to_path) == -1) {
+        return errno;
+    }
+
+    return APR_SUCCESS;
+}

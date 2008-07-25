@@ -116,13 +116,3 @@ APR_DECLARE(apr_status_t) apr_file_append(const char *from_path,
                                       perms,
                                       pool);
 }
-
-APR_DECLARE(apr_status_t) apr_file_link(const char *from_path, 
-                                          const char *to_path)
-{
-    if (link(from_path, to_path) == -1) {
-        return errno;
-    }
-
-    return APR_SUCCESS;
-}
