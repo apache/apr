@@ -123,6 +123,23 @@ static void append_exist(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "Couldn't remove copy file", rv);
 }
 
+static void link_existing(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    
+    rv = apr_file_link("data/file_datafile.txt", "data/file_datafile2.txt");
+    apr_file_remove("data/file_datafile2.txt", p);
+    ABTS_ASSERT(tc, "Couldn't create hardlink to file", rv == APR_SUCCESS);
+}
+
+static void link_nonexisting(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    
+    rv = apr_file_link("data/does_not_exist.txt", "data/fake.txt");
+    ABTS_ASSERT(tc, "", rv != APR_SUCCESS);
+}
+
 abts_suite *testfilecopy(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -132,6 +149,9 @@ abts_suite *testfilecopy(abts_suite *suite)
 
     abts_run_test(suite, append_nonexist, NULL);
     abts_run_test(suite, append_exist, NULL);
+
+    abts_run_test(suite, link_existing, NULL);
+    abts_run_test(suite, link_nonexisting, NULL);
 
     return suite;
 }
