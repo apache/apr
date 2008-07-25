@@ -71,6 +71,23 @@ static void test_open_read(abts_case *tc, void *data)
     apr_file_close(filetest);
 }
 
+static void link_existing(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    
+    rv = apr_file_link("data/file_datafile.txt", "data/file_datafile2.txt");
+    apr_file_remove("data/file_datafile2.txt", p);
+    ABTS_ASSERT(tc, "Couldn't create hardlink to file", rv == APR_SUCCESS);
+}
+
+static void link_nonexisting(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    
+    rv = apr_file_link("data/does_not_exist.txt", "data/fake.txt");
+    ABTS_ASSERT(tc, "", rv != APR_SUCCESS);
+}
+
 static void test_read(abts_case *tc, void *data)
 {
     apr_status_t rv;
@@ -960,6 +977,8 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_open_excl, NULL);
     abts_run_test(suite, test_open_read, NULL);
     abts_run_test(suite, test_open_readwrite, NULL);
+    abts_run_test(suite, link_existing, NULL);
+    abts_run_test(suite, link_nonexisting, NULL);
     abts_run_test(suite, test_read, NULL); 
     abts_run_test(suite, test_readzero, NULL); 
     abts_run_test(suite, test_seek, NULL);
