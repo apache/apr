@@ -584,7 +584,7 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
 APR_DECLARE(apr_status_t) apr_file_link(const char *from_path, 
                                            const char *to_path)
 {
-    apr_status_t rv;
+    apr_status_t rv = APR_SUCCESS;
 
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
@@ -599,8 +599,8 @@ APR_DECLARE(apr_status_t) apr_file_link(const char *from_path,
                                                / sizeof(apr_wchar_t), to_path))
             return rv;
 
-        if (!CreateHardLinkW(wto_path, wfrom_path))
-                return apr_get_os_error()
+        if (!CreateHardLinkW(wto_path, wfrom_path, NULL))
+                return apr_get_os_error();
     }
 #endif
 #if APR_HAS_ANSI_FS
@@ -609,6 +609,7 @@ APR_DECLARE(apr_status_t) apr_file_link(const char *from_path,
                 return apr_get_os_error()
     }
 #endif
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_os_file_get(apr_os_file_t *thefile,
