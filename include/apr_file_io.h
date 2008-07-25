@@ -265,6 +265,15 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *from_path,
                                           apr_pool_t *pool);
 
 /**
+ * Create a hard link to the specified file.
+ * @param from_path The full path to the original file (using / on all systems)
+ * @param to_path The full path to the new file (using / on all systems)
+ * @remark Both files must reside on the same device.
+ */
+APR_DECLARE(apr_status_t) apr_file_link(const char *from_path, 
+                                          const char *to_path);
+
+/**
  * Copy the specified file to another file.
  * @param from_path The full path to the original file (using / on all systems)
  * @param to_path The full path to the new file (using / on all systems)

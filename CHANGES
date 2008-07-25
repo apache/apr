@@ -26,6 +26,8 @@ Changes for APR 1.4.0
   *) Implement apr_proc_wait_all_procs for windows.
      [Mladen Turk]
 
+  *) Add apr_file_link() function. PR 44841 
+     [Mark Heily <mark heily.com>]
 
 Changes for APR 1.3.0
 
