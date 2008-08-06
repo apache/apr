@@ -380,7 +380,11 @@ typedef int (apr_table_do_callback_fn_t)(void *rec, const char *key,
  * @see apr_table_do_callback_fn_t
  */
 APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
-                                     void *rec, const apr_table_t *t, ...);
+                                     void *rec, const apr_table_t *t, ...)
+#if defined(__GNUC__) && __GNUC__ >= 4
+    __attribute__((sentinel))
+#endif
+    ;
 
 /** 
  * Iterate over a table running the provided function once for every
