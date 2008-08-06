@@ -136,7 +136,11 @@ APR_DECLARE(void *) apr_pmemdup(apr_pool_t *p, const void *m, apr_size_t n);
  * @param ... The strings to concatenate.  The final string must be NULL
  * @return The new string
  */
-APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *p, ...);
+APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *p, ...)
+#if defined(__GNUC__) && __GNUC__ >= 4
+    __attribute__((sentinel))
+#endif
+    ;
 
 /**
  * Concatenate multiple strings specified in a writev-style vector
