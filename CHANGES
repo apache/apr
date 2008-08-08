@@ -10,6 +10,8 @@ Changes for APR 1.3.3
      is already held (AIX, HP-UX).
      [Eric Covener]
 
+  *) Fix APR_PID_T_FMT detection on Solaris.  PR 45513
+     [Rainer Jung <rainer.jung kippdata.de>]
 
 Changes for APR 1.3.2
 
