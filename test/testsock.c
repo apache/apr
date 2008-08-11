@@ -88,9 +88,9 @@ static void test_serv_by_name(abts_case *tc, void *data)
     rv = apr_getservbyname(sa, "complete_and_utter_rubbish");
     APR_ASSERT_SUCCESS(tc, "Problem getting non-existent service", !rv);
 
-    rv = apr_getservbyname(sa, "http");
-    APR_ASSERT_SUCCESS(tc, "Problem getting http service", rv);
-    ABTS_INT_EQUAL(tc, 80, sa->port);
+    rv = apr_getservbyname(sa, "telnet");
+    APR_ASSERT_SUCCESS(tc, "Problem getting telnet service", rv);
+    ABTS_INT_EQUAL(tc, 23, sa->port);
 }
 
 static apr_socket_t *setup_socket(abts_case *tc)
