@@ -90,7 +90,9 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                                              apr_pool_t *p,
                                              apr_uint32_t flags)
 {
+#if APR_HAS_THREADS
     apr_status_t rv;
+#endif
     int fd;
 
     fd = epoll_create(size);
