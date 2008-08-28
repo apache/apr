@@ -1,5 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
+
+  *) Win32: Do not error out on apr_pollset_poll() when there are no sockets.
+     [Justin Erenkrantz]
+
   *) Intruduce apr_hash_do for iterating over a hash table.
      [Mladen Turk]
 
