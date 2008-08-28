@@ -340,6 +340,17 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     struct timeval tv, *tvptr;
     fd_set readset, writeset, exceptset;
 
+#ifdef WIN32
+    /* On Win32, select() must be presented with at least one socket to
+     * poll on, or select() will return WSAEINVAL.  So, we'll just
+     * short-circuit and bail now.
+     */
+    if (pollset->nelts == 0) {
+        (*num) = 0;
+        return APR_SUCCESS;
+    }
+#endif
+
     if (timeout < 0) {
         tvptr = NULL;
     }
