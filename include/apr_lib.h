@@ -125,9 +125,10 @@ APR_DECLARE(const char *) apr_filepath_name_get(const char *pathname);
  * %%pF same as above, but takes a apr_off_t *
  * %%pS same as above, but takes a apr_size_t *
  *
+ * %%pA, %%pI, %%pT, %%pp are available from APR 1.0.0 onwards (and in 0.9.x).
  * %%pt is only available from APR 1.2.0 onwards.
  * %%pm, %%pB, %%pF and %%pS are only available from APR 1.3.0 onwards.
- * 
+ *
  * The %%p hacks are to force gcc's printf warning code to skip
  * over a pointer argument without complaining.  This does
  * mean that the ANSI-style %%p (output a void * in hex format) won't
