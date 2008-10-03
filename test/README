@@ -53,7 +53,7 @@ Building the full driver
 
 All you need to do to build the full driver is run:
 
-    make testall
+    make
 
 To run it, run:
 
