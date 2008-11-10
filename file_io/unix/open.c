@@ -26,13 +26,15 @@
 #include "fsio.h"
 #endif
 
-static apr_status_t file_cleanup(apr_file_t *file)
+static apr_status_t file_cleanup(apr_file_t *file, int is_child)
 {
     apr_status_t rv = APR_SUCCESS;
 
     if (close(file->filedes) == 0) {
         file->filedes = -1;
-        if (file->flags & APR_DELONCLOSE) {
+
+        /* Only the parent process should delete the file! */
+        if (!is_child && (file->flags & APR_DELONCLOSE)) {
             unlink(file->fname);
         }
 #if APR_HAS_THREADS
@@ -68,14 +70,14 @@ apr_status_t apr_unix_file_cleanup(void *thefile)
         flush_rv = apr_file_flush(file);
     }
 
-    rv = file_cleanup(file);
+    rv = file_cleanup(file, 0);
 
     return rv != APR_SUCCESS ? rv : flush_rv;
 }
 
 apr_status_t apr_unix_child_file_cleanup(void *thefile)
 {
-    return file_cleanup(thefile);
+    return file_cleanup(thefile, 1);
 }
 
 APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, 
