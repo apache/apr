@@ -4,6 +4,9 @@ Changes for APR 1.3.4
   *) Win32: Do not error out on apr_pollset_poll() when there are no sockets.
      [Justin Erenkrantz]
 
+  *) Fix apr_tokenize_to_argv parsing.  PR 46128
+     [Edward Rudd <eddie omegaware.com>]
+
 Changes for APR 1.3.3
 
   *) Rename apr_pool_create_core to apr_pool_create_unmanaged and
