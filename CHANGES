@@ -4,6 +4,9 @@ Changes with APR 0.9.18
   *) z/OS: return standard apr_status_t codes from apr_dso_load()
      and apr_dso_sym().  [David Jones <oscaremma gmail.com>]
 
+  *) Fix apr_tokenize_to_argv parsing.  PR 46128
+     [Edward Rudd <eddie omegaware.com>]
+
 Changes with APR 0.9.17
 
   *) Fix DSO-related crash on z/OS caused by incorrect memory
