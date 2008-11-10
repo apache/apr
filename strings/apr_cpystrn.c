@@ -114,8 +114,7 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
  */
 #define DETERMINE_NEXTSTRING(cp,isquoted) \
     for ( ; *cp != '\0'; cp++) { \
-        if (   (isquoted    && (*cp     == ' ' || *cp     == '\t')) \
-            || (*cp == '\\' && (*(cp+1) == ' ' || *(cp+1) == '\t' || \
+        if (   (*cp == '\\' && (*(cp+1) == ' ' || *(cp+1) == '\t' || \
                                 *(cp+1) == '"' || *(cp+1) == '\''))) { \
             cp++; \
             continue; \
