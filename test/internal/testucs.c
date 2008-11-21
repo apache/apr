@@ -22,10 +22,55 @@
 
 struct testval {
     unsigned char n[8];
-    wchar_t w[4];
     int nl;
+    wchar_t w[4];
     int wl;
 };
+
+/* For reference; a table of invalid utf-8 encoded ucs-2/ucs-4 sequences.
+ * The table consists of start, end pairs for all invalid ranges.
+ * NO_UCS2_PAIRS will pass the reservered D800-DFFF values, halting at FFFF
+ * FULL_UCS4_MAPPER represents all 31 bit values to 7FFF FFFF
+ *
+ * We already tested these, because we ensure there is a 1:1 mapping across
+ * the entire range of byte values in each position of 1 to 6 byte sequences.
+ */
+struct testval malformed[] = [
+    [[0x80,], 1,],      /* 10000000  64 invalid leading continuation values */
+    [[0xBF,], 1,],      /* 10111111  64 invalid leading continuation values */
+    [[0xC0,0x80], 2,],                         /* overshort mapping of 0000 */
+    [[0xC1,0xBF], 2,],                         /* overshort mapping of 007F */
+    [[0xE0,0x80,0x80,], 3,],                   /* overshort mapping of 0000 */
+    [[0xE0,0x9F,0xBF,], 3,],                   /* overshort mapping of 07FF */
+#ifndef NO_UCS2_PAIRS
+    [[0xED,0xA0,0x80,], 3,],    /* unexpected mapping of UCS-2 literal D800 */
+    [[0xED,0xBF,0xBF,], 3,],    /* unexpected mapping of UCS-2 literal DFFF */
+#endif
+    [[0xF0,0x80,0x80,0x80,], 4,],              /* overshort mapping of 0000 */
+    [[0xF0,0x8F,0xBF,0xBF,], 4,],              /* overshort mapping of FFFF */
+#ifdef NO_UCS2_PAIRS
+    [[0xF0,0x90,0x80,0x80,], 4,],      /* invalid too large value 0001 0000 */
+    [[0xF4,0x8F,0xBF,0xBF,], 4,],      /* invalid too large value 0010 FFFF */
+#endif
+#ifndef FULL_UCS4_MAPPER
+    [[0xF4,0x90,0x80,0x80,], 4,],      /* invalid too large value 0011 0000 */
+    [[0xF7,0xBF,0xBF,0xBF,], 4,],      /* invalid too large value 001F FFFF */
+#endif
+    [[0xF8,0x80,0x80,0x80,0x80,], 5,],    /* overshort mapping of 0000 0000 */
+    [[0xF8,0x87,0xBF,0xBF,0xBF,], 5,],    /* overshort mapping of 001F FFFF */
+#ifndef FULL_UCS4_MAPPER
+    [[0xF8,0x88,0x80,0x80,0x80,], 5,], /* invalid too large value 0020 0000 */
+    [[0xFB,0xBF,0xBF,0xBF,0xBF,], 5,], /* invalid too large value 03FF FFFF */
+#endif
+    [[0xFC,0x80,0x80,0x80,0x80,0x80,], 6,],  /* overshort mapping 0000 0000 */
+    [[0xFC,0x83,0xBF,0xBF,0xBF,0xBF,], 6,],  /* overshort mapping 03FF FFFF */
+#ifndef FULL_UCS4_MAPPER
+    [[0xFC,0x84,0x80,0x80,0x80,0x80,], 6,],  /* overshort mapping 0400 0000 */
+    [[0xFD,0xBF,0xBF,0xBF,0xBF,0xBF,], 6,],  /* overshort mapping 7FFF FFFF */
+#endif
+    [[0xFE,], 1,],    /* 11111110  invalid "too large" value, no 7 byte seq */
+    [[0xFF,], 1,],    /* 11111111  invalid "too large" value, no 8 byte seq */
+];
 
 void displaynw(struct testval *f, struct testval *l)
 {
