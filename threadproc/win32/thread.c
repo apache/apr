@@ -102,8 +102,8 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
         return stat;
     }
 
-    /* Use 0 for Thread Stack Size, because that will default the stack to the
-     * same size as the calling thread. 
+    /* Use 0 for default Thread Stack Size, because that will
+     * default the stack to the same size as the calling thread.
      */
 #ifndef _WIN32_WCE
     if ((handle = (HANDLE)_beginthreadex(NULL,
