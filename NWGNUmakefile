@@ -259,7 +259,6 @@ endif
 #
 FILES_nlm_exports = \
 	@aprlib.imp \
-	apr__ldap_fns \
 	$(EOLIST)
 
 #
