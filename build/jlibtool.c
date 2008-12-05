@@ -1536,6 +1536,10 @@ void parse_args(int argc, char *argv[], command_t *cmd_data)
                     /* Skip the argument. */
                     ++a;
                     argused = 1;
+                } else if (strcmp(arg+1, "release") == 0) {
+                    /* Skip the argument. */
+                    ++a;
+                    argused = 1;
                 } else if (strcmp(arg+1, "undefined") == 0) {
                     cmd_data->undefined_flag = argv[++a];
                     argused = 1;
