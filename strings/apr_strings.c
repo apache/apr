@@ -245,6 +245,7 @@ APR_DECLARE(apr_status_t) apr_strtoff(apr_off_t *offset, const char *nptr,
 APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
 {
 #ifdef APR_INT64_STRFN
+    errno = 0;
     return APR_INT64_STRFN(nptr, endptr, base);
 #else
     const char *s;
@@ -253,6 +254,7 @@ APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
     int neg, any;
     char c;
 
+    errno = 0;
     /*
      * Skip white space and pick up leading +/- sign if any.
      * If base is 0, allow 0x for hex and 0 for octal, else
