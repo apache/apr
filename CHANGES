@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.4
 
+  *) Reset errno to zero in apr_strtoi64 to prevent returning an errno not
+     equal zero in cases where the operation worked fine. [Ruediger Pluem]
+
   *) Win32: Do not error out on apr_pollset_poll() when there are no sockets.
      [Justin Erenkrantz]
 
