@@ -47,13 +47,13 @@
  * programs such as structure size changes.  No binary compatibility is
  * possible across a change in the major version.
  */
-#define APR_MAJOR_VERSION       1
+#define APR_MAJOR_VERSION       2
 
 /** minor version
  * Minor API changes that do not cause binary compatibility problems.
  * Reset to 0 when upgrading APR_MAJOR_VERSION
  */
-#define APR_MINOR_VERSION       4
+#define APR_MINOR_VERSION       0
 
 /** patch level 
  * The Patch Level never includes API changes, simply bug fixes.
