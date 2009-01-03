@@ -5,7 +5,7 @@ from SCons.Environment import Environment
 from os.path import join as pjoin
 import re
 import os
-
+import traceback
 
 _platforms = [ 'aix', 'beos', 'netware', 'os2', 'os390', 'unix', 'win32' ]
 
@@ -93,11 +93,67 @@ class APREnv(Environment):
     if self['PLATFORM'] == 'darwin':
       self.AppendUnique(CPPFLAGS=['-DDARWIN', '-DSIGPROCMASK_SETS_THREAD_MASK', '-no-cpp-precomp'])
 
+
+  def Check_apr_atomic_builtins(self, context):
+    context.Message('Checking whether the compiler provides atomic builtins...')
+    source = """
+int main()
+{
+    unsigned long val = 1010, tmp, *mem = &val;
+
+    if (__sync_fetch_and_add(&val, 1010) != 1010 || val != 2020)
+        return 1;
+
+    tmp = val;
+
+    if (__sync_fetch_and_sub(mem, 1010) != tmp || val != 1010)
+        return 1;
+
+    if (__sync_sub_and_fetch(&val, 1010) != 0 || val != 0)
+        return 1;
+
+    tmp = 3030;
+
+    if (__sync_val_compare_and_swap(mem, 0, tmp) != 0 || val != tmp)
+        return 1;
+
+    if (__sync_lock_test_and_set(&val, 4040) != 3030)
+        return 1;
+
+    mem = &tmp;
+
+    if (__sync_val_compare_and_swap(&mem, &tmp, &val) != &tmp)
+        return 1;
+
+    __sync_synchronize();
+
+    if (mem != &val)
+        return 1;
+
+    return 0;
+}
+    """
+    result = context.TryLink(source, '.c')
+    context.Result(result)
+    return result
+  
+  def critical(self, f, *args):
+    rv = f(*args)
+
+    if not rv:
+      traceback.print_stack()
+      print "Critial Test failed."
+      self.Exit(1)
+
   def APRAutoconf(self):
-    if self.GetOption('clean'):
-      return
+    if self.GetOption('clean') or self.GetOption('help'):
+      return self
 
     # TODO Port header detection here etc
-    conf = self.Configure()
-    conf.Finish()
+    conf = self.Configure(custom_tests = {'Check_apr_atomic_builtins': self.Check_apr_atomic_builtins},
+                          config_h = 'include/arch/%s/apr_private.h' % (self['APR_PLATFORM']))
 
+    if conf.Check_apr_atomic_builtins():
+      conf.Define('HAVE_ATOMIC_BUILTINS', 1)
+
+    return conf.Finish()

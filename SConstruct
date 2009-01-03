@@ -18,7 +18,7 @@ Help(vars.GenerateHelpText(env))
 
 env.APRHints()
 
-env.APRAutoconf()
+env = env.APRAutoconf()
 
 if env['maintainer_mode']:
   if env.is_gcc():
