@@ -183,6 +183,18 @@ void main(void)
     context.Result(result[0])
     return result[0]
 
+  def Check_apr_big_endian(self, context):
+    context.Message("Checking for big endianess... ")
+    import struct
+    array = struct.pack('cccc', '\x01', '\x02', '\x03', '\x04')
+    i = struct.unpack('i', array)
+    if i == struct.unpack('>i', array):
+      context.Result('yes')
+      return 1
+    else:
+      context.Result('no')
+      return 0
+
   def critical_value(self, f, value, *args):
     rv = f(*args)
 
@@ -209,11 +221,13 @@ void main(void)
     conf = self.Configure(custom_tests = {
                             'Check_apr_atomic_builtins': self.Check_apr_atomic_builtins,
                             'Check_apr_largefile64': self.Check_apr_largefile64,
+                            'Check_apr_big_endian': self.Check_apr_big_endian,
                             },
                           config_h = 'include/arch/%s/apr_private.h' % (self['APR_PLATFORM']))
 
     # Do we have a working C Compiler?
     self.critical(conf.CheckCC)
+
     flag_headers = self.Split("""ByteOrder.h
     conio.h
     crypt.h
@@ -300,6 +314,10 @@ void main(void)
     sizeof_off_t = conf.CheckTypeSize('off_t', includes='#include <sys/types.h>')
     sizeof_size_t = conf.CheckTypeSize('size_t')
 
+    if conf.Check_apr_big_endian():
+      subst['@bigendian@'] = 1
+    else:
+      subst['@bigendian@'] = 0
     # Now we need to find what apr_int64_t (sizeof == 8) will be.
     # The first match is our preference.
     if sizeof_int == 8:
