@@ -183,6 +183,20 @@ void main(void)
     context.Result(result[0])
     return result[0]
 
+  def CheckTypesCompatible(self, context, t1, t2, includes):
+    context.Message('Checking %s is the same as %s... ' % (t1, t2))
+    source = """
+    %s
+void main(void)
+{
+    int foo[0 - !__builtin_types_compatible_p(%s, %s)];
+}
+    """  % (includes, t1, t2)
+    result = context.TryCompile(source, '.c')
+    self.Filter(CPPFLAGS = '-D_LARGEFILE64_SOURCE')
+    context.Result(result)
+    return result
+
   def Check_apr_big_endian(self, context):
     context.Message("Checking for big endianess... ")
     import struct
@@ -219,6 +233,7 @@ void main(void)
       return self
     # TODO Port header detection here etc
     conf = self.Configure(custom_tests = {
+                            'CheckTypesCompatible': self.CheckTypesCompatible,
                             'Check_apr_atomic_builtins': self.Check_apr_atomic_builtins,
                             'Check_apr_largefile64': self.Check_apr_largefile64,
                             'Check_apr_big_endian': self.Check_apr_big_endian,
@@ -305,14 +320,27 @@ void main(void)
         
 
     sizeof_char = conf.CheckTypeSize('char')
-    sizeof_int = conf.CheckTypeSize('int')
+    sizeof_int = self.critical_value(conf.CheckTypeSize, 4, 'int')
+    subst['@int_value@'] = 'int'
     sizeof_long = conf.CheckTypeSize('long')
     sizeof_short = self.critical_value(conf.CheckTypeSize, 2, 'short')
+    subst['@short_value@'] = 'short'
     sizeof_long_long = conf.CheckTypeSize('long long')
     sizeof_longlong = conf.CheckTypeSize('longlong')
     sizeof_pid_t = conf.CheckTypeSize('pid_t', includes='#include <sys/types.h>')
     sizeof_off_t = conf.CheckTypeSize('off_t', includes='#include <sys/types.h>')
-    sizeof_size_t = conf.CheckTypeSize('size_t')
+    sizeof_size_t = conf.CheckTypeSize('size_t', includes='#include <sys/types.h>')
+    sizeof_ssize_t = conf.CheckTypeSize('ssize_t', includes='#include <sys/types.h>')
+
+    if sizeof_size_t:
+      subst['@size_t_value@'] = 'size_t'
+    else:
+      subst['@size_t_value@'] = 'apr_int32_t'
+
+    if sizeof_ssize_t:
+      subst['@ssize_t_value@'] = 'ssize_t'
+    else:
+      subst['@ssize_t_value@'] = 'apr_int32_t'
 
     if conf.Check_apr_big_endian():
       subst['@bigendian@'] = 1
@@ -394,6 +422,39 @@ void main(void)
     elif sizeof_off_t == sizeof_size_t:
       aprlfs=1
 
+    if aprlfs and sizeof_off_t == 4:
+      # LFS is go!
+      subst['@off_t_fmt@'] = '#define APR_OFF_T_FMT APR_INT64_T_FMT'
+      subst['@off_t_value@'] = 'off64_t'
+      subst['@off_t_strfn@'] = 'apr_strtoi64'
+    elif sizeof_off_t == 4 and sizeof_long == 4:
+      # Special case: off_t may change size with _FILE_OFFSET_BITS
+      # on 32-bit systems with LFS support.  To avoid compatibility
+      # issues when other packages do define _FILE_OFFSET_BITS,
+      # hard-code apr_off_t to long.
+      subst['@off_t_fmt@'] = '#define APR_OFF_T_FMT "ld"'
+      subst['@off_t_value@'] = 'long'
+      subst['@off_t_strfn@'] = 'strtol'
+    elif sizeof_off_t != 0:
+      subst['@off_t_value@'] = 'off_t'
+      if sizeof_off_t == sizeof_long:
+        subst['@off_t_fmt@'] = '#define APR_OFF_T_FMT "ld"'
+        subst['@off_t_strfn@'] = 'strtol'
+      elif sizeof_off_t == sizeof_int:
+        subst['@off_t_fmt@'] = '#define APR_OFF_T_FMT "d"'
+        subst['@off_t_strfn@'] = 'strtoi'
+      elif sizeof_off_t == sizeof_long_long:
+        subst['@off_t_fmt@'] = '#define APR_OFF_T_FMT APR_INT64_T_FMT'
+        subst['@off_t_strfn@'] = 'apr_strtoi64'
+      else:
+        print("could not determine the size of off_t")
+        self.Exit(1)
+    else:
+      # Fallback on int
+      subst['@off_t_fmt@'] = '#define APR_OFF_T_FMT "d"'
+      subst['@off_t_value@'] = 'apr_int32_t'
+      subst['@off_t_strfn@'] = 'strtoi'
+
     if conf.Check_apr_atomic_builtins():
       conf.Define('HAVE_ATOMIC_BUILTINS', 1)
 
@@ -413,7 +474,24 @@ void main(void)
         # This will result in many compile warnings,
         # but we're functionally busted otherwise.
         subst['@socklen_t_value@'] = 'int'
+      else:
+        subst['@socklen_t_value@'] = 'socklen_t'
         
+    # Regardless of whether _LARGEFILE64_SOURCE is used, on 32-bit
+    # platforms _FILE_OFFSET_BITS will affect the size of ino_t and hence
+    # the build-time ABI may be different from the apparent ABI when using
+    # APR with another package which *does* define _FILE_OFFSET_BITS.
+    # (Exactly as per the case above with off_t where LFS is *not* used)
+    #
+    # To be safe, hard-code apr_ino_t as 'unsigned long' iff that is
+    # exactly the size of ino_t here; otherwise use ino_t as existing
+    # releases did.  To be correct, apr_ino_t should have been made an
+    # ino64_t as apr_off_t is off64_t, but this can't be done now without
+    # breaking ABI.
+    subst['@ino_t_value@'] = 'ino_t'
+    if sizeof_long == 4 and conf.CheckTypesCompatible('ino_t', 'unsigned long', '#include <fts.h>'):
+      subst['@ino_t_value@'] = 'unsigned long'
+
     self.SubstFile('include/apr.h', 'include/apr.h.in', SUBST_DICT = subst)
 
     return conf.Finish()
