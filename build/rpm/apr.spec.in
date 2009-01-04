@@ -1,5 +1,5 @@
 
-%define aprver 1
+%define aprver 2
 
 Summary: Apache Portable Runtime library
 Name: apr
