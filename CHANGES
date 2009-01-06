@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
 
+  *) Add AC_MSG_RESULT after AC_MSG_CHECKING.
+     PR 46427  [Rainer Jung <rainer.jung kippdata.de>]
+
   *) Win32: Do not error out on apr_pollset_poll() when there are no sockets.
      [Justin Erenkrantz]
 
