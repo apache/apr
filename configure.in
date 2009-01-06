@@ -1947,6 +1947,9 @@ fi
 
 if test "$apr_fcntl_tryacquire_eacces" = "1"; then
   AC_DEFINE(FCNTL_TRYACQUIRE_EACCES, 1, [Define if fcntl returns EACCES when F_SETLK is already held])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
 fi
 
 
