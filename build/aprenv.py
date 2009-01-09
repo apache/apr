@@ -3,31 +3,42 @@
 
 from SCons.Environment import Environment
 from os.path import join as pjoin
+import aprconf
 import re
 import os
 import traceback
 
-_platforms = [ 'aix', 'beos', 'netware', 'os2', 'os390', 'unix', 'win32' ]
+_platforms = [ 
+    'aix', 
+    'beos', 
+    'netware', 
+    'os2', 
+    'os390', 
+    'unix', 
+    'win32' 
+]
 
-_platform_dirs = ['atomic',
-              'dso',
-              'file_io',
-              'helpers',
-              'locks',
-              'memory',
-              'misc',
-              'mmap',
-              'network_io',
-              'passwd',
-              'poll',
-              'random',
-              'shmem',
-              'strings',
-              'support',
-              'tables',
-              'threadproc',
-              'time',
-              'user']
+_platform_dirs = [
+    'atomic',
+    'dso',
+    'file_io',
+    'helpers',
+    'locks',
+    'memory',
+    'misc',
+    'mmap',
+    'network_io',
+    'passwd',
+    'poll',
+    'random',
+    'shmem',
+    'strings',
+    'support',
+    'tables',
+    'threadproc',
+    'time',
+    'user'
+]
 
 _simple_dirs = ['tables', 'strings']
 
@@ -49,6 +60,7 @@ class APREnv(Environment):
     self['APR_FALLBACK_PLATFORM'] = 'unix'
 
     self.AppendUnique(CPPPATH = ['include', 'include/arch/'+self['APR_PLATFORM']])
+    self.autoconf = aprconf.APRConfigure(self)
 
   def is_gcc(self):
     # TOOD: This detection should be smarter, need look at SCons Internals
@@ -97,118 +109,6 @@ class APREnv(Environment):
       self.AppendUnique(CPPFLAGS=['-DDARWIN', '-DSIGPROCMASK_SETS_THREAD_MASK', '-no-cpp-precomp'])
 
 
-  def Check_apr_atomic_builtins(self, context):
-    context.Message('Checking whether the compiler provides atomic builtins... ')
-    source = """
-int main()
-{
-    unsigned long val = 1010, tmp, *mem = &val;
-
-    if (__sync_fetch_and_add(&val, 1010) != 1010 || val != 2020)
-        return 1;
-
-    tmp = val;
-
-    if (__sync_fetch_and_sub(mem, 1010) != tmp || val != 1010)
-        return 1;
-
-    if (__sync_sub_and_fetch(&val, 1010) != 0 || val != 0)
-        return 1;
-
-    tmp = 3030;
-
-    if (__sync_val_compare_and_swap(mem, 0, tmp) != 0 || val != tmp)
-        return 1;
-
-    if (__sync_lock_test_and_set(&val, 4040) != 3030)
-        return 1;
-
-    mem = &tmp;
-
-    if (__sync_val_compare_and_swap(&mem, &tmp, &val) != &tmp)
-        return 1;
-
-    __sync_synchronize();
-
-    if (mem != &val)
-        return 1;
-
-    return 0;
-}
-    """
-    result = context.TryRun(source, '.c')
-    context.Result(result[0])
-    return result[0]
-
-  def Check_apr_largefile64(self, context):
-    context.Message('Checking whether to enable -D_LARGEFILE64_SOURCE... ')
-    self.AppendUnique(CPPFLAGS = '-D_LARGEFILE64_SOURCE')
-    source = """
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-
-void main(void)
-{
-    int fd, ret = 0;
-    struct stat64 st;
-    off64_t off = 4242;
-
-    if (sizeof(off64_t) != 8 || sizeof(off_t) != 4)
-       exit(1);
-    if ((fd = open("conftest.lfs", O_LARGEFILE|O_CREAT|O_WRONLY, 0644)) < 0)
-       exit(2);
-    if (ftruncate64(fd, off) != 0)
-       ret = 3;
-    else if (fstat64(fd, &st) != 0 || st.st_size != off)
-       ret = 4;
-    else if (lseek64(fd, off, SEEK_SET) != off)
-       ret = 5;
-    else if (close(fd) != 0)
-       ret = 6;
-    else if (lstat64("conftest.lfs", &st) != 0 || st.st_size != off)
-       ret = 7;
-    else if (stat64("conftest.lfs", &st) != 0 || st.st_size != off)
-       ret = 8;
-    unlink("conftest.lfs");
-
-    exit(ret);
-}
-    """
-    result = context.TryRun(source, '.c')
-    self.Filter(CPPFLAGS = '-D_LARGEFILE64_SOURCE')
-    context.Result(result[0])
-    return result[0]
-
-  def CheckTypesCompatible(self, context, t1, t2, includes):
-    context.Message('Checking %s is the same as %s... ' % (t1, t2))
-    source = """
-    %s
-void main(void)
-{
-    int foo[0 - !__builtin_types_compatible_p(%s, %s)];
-}
-    """  % (includes, t1, t2)
-    result = context.TryCompile(source, '.c')
-    self.Filter(CPPFLAGS = '-D_LARGEFILE64_SOURCE')
-    context.Result(result)
-    return result
-
-  def Check_apr_big_endian(self, context):
-    context.Message("Checking for big endianess... ")
-    import struct
-    array = struct.pack('cccc', '\x01', '\x02', '\x03', '\x04')
-    i = struct.unpack('i', array)
-    if i == struct.unpack('>i', array):
-      context.Result('yes')
-      return 1
-    else:
-      context.Result('no')
-      return 0
-
   def critical_value(self, f, value, *args):
     rv = f(*args)
 
@@ -231,14 +131,23 @@ void main(void)
 
     if self.GetOption('clean') or self.GetOption('help'):
       return self
+
     # TODO Port header detection here etc
     conf = self.Configure(custom_tests = {
-                            'CheckTypesCompatible': self.CheckTypesCompatible,
-                            'Check_apr_atomic_builtins': self.Check_apr_atomic_builtins,
-                            'Check_apr_largefile64': self.Check_apr_largefile64,
-                            'Check_apr_big_endian': self.Check_apr_big_endian,
-                            },
-                          config_h = 'include/arch/%s/apr_private.h' % (self['APR_PLATFORM']))
+        'CheckTypesCompatible': 
+            self.autoconf.CheckTypesCompatible,
+        'Check_apr_atomic_builtins': 
+            self.autoconf.Check_apr_atomic_builtins,
+        'Check_apr_largefile64': 
+            self.autoconf.Check_apr_largefile64,
+        'Check_apr_big_endian': 
+            self.autoconf.Check_apr_big_endian,
+        'Check_apr_mmap_mapping_dev_zero': 
+            self.autoconf.Check_apr_mmap_mapping_dev_zero,
+        'Check_apr_semaphores':
+            self.autoconf.Check_apr_semaphores,
+        },
+        config_h = 'include/arch/%s/apr_private.h' % (self['APR_PLATFORM']))
 
     # Do we have a working C Compiler?
     self.critical(conf.CheckCC)
@@ -331,16 +240,21 @@ void main(void)
     sizeof_off_t = conf.CheckTypeSize('off_t', includes='#include <sys/types.h>')
     sizeof_size_t = conf.CheckTypeSize('size_t', includes='#include <sys/types.h>')
     sizeof_ssize_t = conf.CheckTypeSize('ssize_t', includes='#include <sys/types.h>')
+    subst['@voidp_size@'] = conf.CheckTypeSize('void*')
 
     if sizeof_size_t:
       subst['@size_t_value@'] = 'size_t'
+      subst['@size_t_fmt@'] = '#define APR_SIZE_T_FMT "%lu"'
     else:
       subst['@size_t_value@'] = 'apr_int32_t'
+      subst['@size_t_fmt@'] = '#define APR_SIZE_T_FMT "%u"'
 
     if sizeof_ssize_t:
       subst['@ssize_t_value@'] = 'ssize_t'
+      subst['@ssize_t_fmt@'] = '#define APR_SSIZE_T_FMT "%ld"'
     else:
       subst['@ssize_t_value@'] = 'apr_int32_t'
+      subst['@ssize_t_fmt@'] = '#define APR_SSIZE_T_FMT "%d"'
 
     if conf.Check_apr_big_endian():
       subst['@bigendian@'] = 1
@@ -411,7 +325,7 @@ void main(void)
     # TODO: Per OS changing of these
 
     if conf.Check_apr_largefile64():
-      self.AppendUnique(CPPFLAGS = '-D_LARGEFILE64_SOURCE')
+      self.AppendUnique(CPPFLAGS = ['-D_LARGEFILE64_SOURCE'])
 
     aprlfs=0
     if self['lfs'] and sizeof_off_t == 4:
@@ -491,6 +405,36 @@ void main(void)
     subst['@ino_t_value@'] = 'ino_t'
     if sizeof_long == 4 and conf.CheckTypesCompatible('ino_t', 'unsigned long', '#include <fts.h>'):
       subst['@ino_t_value@'] = 'unsigned long'
+
+    # check for mmap functions
+    # store the results into mmap_results dictionary for use later
+    mmap_funcs = ['mmap', 'mmap', 'shm_open', 'shm_unlink', 'shm_get',
+            'shmat', 'shmdt', 'shmctl']
+    mmap_results = dict([[k, conf.CheckFunc(k)] for k in mmap_funcs])
+
+    # check for mmap mapping dev zero
+    if mmap_results['mmap'] and \
+       self.autoconf.CheckFile("/dev/zero") and \
+       conf.Check_apr_mmap_mapping_dev_zero():
+           subst['@havemmapzero@'] = '1'
+    else:
+        subst['@havemmapzero@'] = '0'
+
+    # check for locking mechanisms
+    if conf.Check_apr_semaphores():
+        subst['@hassysvser@'] = "1"
+    else:
+        subst['@hassysvser@'] = "0"
+
+    if conf.CheckDeclaration('F_SETLK', '#include <fcntl.h>'):
+        subst['@hasfcntlser@'] = '1'
+    else:
+        subst['@hasfcntlser@'] = '0'
+
+    if conf.CheckFunc('flock'):
+        subst['@hasflockser@'] = "1"
+    else:
+        subst['@hasflockser@'] = "0"
 
     self.SubstFile('include/apr.h', 'include/apr.h.in', SUBST_DICT = subst)
 
