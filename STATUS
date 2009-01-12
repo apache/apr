@@ -373,6 +373,14 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
 Interface Changes Postponed for APR 2.0:
 
+    * apr_proc_other_child_register()'s write_fd argument should be removed
+      or made used.  The comment in the API previously said:
+
+         write_fd duplicates the proc->out stream, it's really
+         redundant and should be replaced in the APR 1.0 API with a
+         bitflag of which proc->in/out/err handles should be health
+         checked.  no platform currently tests the pipes health.
+
     * apr_atomic_casptr() has the volatile qualifier in the wrong
       place: should take "pointer to volatile pointer to void", not
       "pointer to pointer to volatile void".

@@ -113,7 +113,7 @@ typedef enum {
  */
 #define APR_OC_REASON_DEATH         0     /**< child has died, caller must call
                                            * unregister still */
-#define APR_OC_REASON_UNWRITABLE    1     /**< write_fd is unwritable */
+#define APR_OC_REASON_UNWRITABLE    1     /**< currently unused. */
 #define APR_OC_REASON_RESTART       2     /**< a restart is occuring, perform
                                            * any necessary cleanup (including
                                            * sending a special signal to child)
@@ -693,14 +693,9 @@ APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize);
  * @param maintenance maintenance is a function that is invoked with a 
  *                    reason and the data pointer passed here.
  * @param data Opaque context data passed to the maintenance function.
- * @param write_fd An fd that is probed for writing.  If it is ever unwritable
- *                 then the maintenance is invoked with reason 
- *                 OC_REASON_UNWRITABLE.
+ * @param write_fd This argument is currently unused and should be passed 
+ *                 as NULL.
  * @param p The pool to use for allocating memory.
- * @bug write_fd duplicates the proc->out stream, it's really redundant
- * and should be replaced in the APR 1.0 API with a bitflag of which
- * proc->in/out/err handles should be health checked.
- * @bug no platform currently tests the pipes health.
  */
 APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *proc, 
                                            void (*maintenance) (int reason, 
