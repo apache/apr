@@ -336,7 +336,7 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                 j++;
             }
         }
-        if ((*num) = j)
+        if ((*num = j))
             rv = APR_SUCCESS;
         if (descriptors) {
             *descriptors = pollset->result_set;
