@@ -157,7 +157,10 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
 /**
  * Block for activity on the descriptor(s) in a pollset
  * @param pollset The pollset to use
- * @param timeout Timeout in microseconds
+ * @param timeout The amount of time in microseconds to wait.  This is 
+ *                a maximum, not a minimum.  If a descriptor is signalled, we 
+ *                will wake up before this time.  A negative number means 
+ *                wait until a descriptor is signalled.
  * @param num Number of signalled descriptors (output parameter)
  * @param descriptors Array of signalled descriptors (output parameter)
  */
@@ -236,7 +239,10 @@ typedef apr_status_t (*apr_pollcb_cb_t)(void *baton, apr_pollfd_t *descriptor);
 /**
  * Block for activity on the descriptor(s) in a pollcb
  * @param pollcb The pollcb to use
- * @param timeout Timeout in microseconds
+ * @param timeout The amount of time in microseconds to wait.  This is 
+ *                a maximum, not a minimum.  If a descriptor is signalled, we 
+ *                will wake up before this time.  A negative number means 
+ *                wait until a descriptor is signalled.
  * @param func Callback function to call for each active socket
  * @param baton Opaque baton passed to the callback function.
  */
