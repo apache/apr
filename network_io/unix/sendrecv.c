@@ -1083,6 +1083,14 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
 
     /* Update how much we sent */
     *len = nbytes;
+
+    if (nbytes == 0) {
+        /* Most likely the file got smaller after the stat.
+         * Return an error so the caller can do the Right Thing.
+         */
+        return APR_EOF;
+    }
+
     if ((sock->timeout > 0) && (*len < requested_len)) {
         sock->options |= APR_INCOMPLETE_WRITE;
     }

@@ -1,4 +1,10 @@
                                                      -*- coding: utf-8 -*-
+Changes for APR 2.0.0
+
+  *) apr_socket_sendfile() on Solaris: Fix handling of files truncated
+     after the sender determines the length.  (This fixes a busy loop in 
+     httpd when a file being served is truncated.)  [Jeff Trawick]
+
 Changes for APR 1.4.0
 
   *) Win32: Do not error out on apr_pollset_poll() when there are no sockets.
