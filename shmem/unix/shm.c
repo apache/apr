@@ -15,6 +15,7 @@
  */
 
 #include "apr_arch_shm.h"
+#include "apr_arch_file_io.h"
 
 #include "apr_general.h"
 #include "apr_errno.h"
