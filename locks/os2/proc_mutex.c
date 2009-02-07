@@ -199,7 +199,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
     return APR_FROM_OS_ERROR(rc);
 }
 
-
+APR_PERMS_SET_ENOTIMPL(proc_mutex)
 
 APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 

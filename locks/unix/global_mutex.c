@@ -175,4 +175,13 @@ APR_DECLARE(apr_status_t) apr_global_mutex_destroy(apr_global_mutex_t *mutex)
     return apr_pool_cleanup_run(mutex->pool, mutex, global_mutex_cleanup);
 }
 
+APR_PERMS_SET_IMPLEMENT(global_mutex)
+{
+    apr_status_t rv;
+    apr_global_mutex_t *mutex = (apr_global_mutex_t *)theglobal_mutex;
+
+    rv = apr_proc_mutex_set_perms(mutex->proc_mutex, perms, uid, gid);
+    return rv;
+}
+
 APR_POOL_IMPLEMENT_ACCESSOR(global_mutex)
