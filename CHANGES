@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Intruduce APR_PERMS_SET macros for setting the owner/group on
+     objects. Currently only implemented for shm, proc and global
+     mutexes on posix platforms.
+     [Mladen Turk]
+
 Changes for APR 1.4.0
 
   *) Win32: Do not error out on apr_pollset_poll() when there are no sockets.

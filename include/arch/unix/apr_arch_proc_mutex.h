@@ -75,6 +75,7 @@ struct apr_proc_mutex_unix_lock_methods_t {
     apr_status_t (*release)(apr_proc_mutex_t *);
     apr_status_t (*cleanup)(void *);
     apr_status_t (*child_init)(apr_proc_mutex_t **, apr_pool_t *, const char *);
+    apr_status_t (*perms_set)(apr_proc_mutex_t *, apr_fileperms_t, apr_uid_t, apr_gid_t);
     const char *name;
 };
 typedef struct apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_lock_methods_t;
