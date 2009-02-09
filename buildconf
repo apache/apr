@@ -45,6 +45,14 @@ $libtoolize --copy --automake
 
 if [ -f libtool.m4 ]; then 
    ltfile=`pwd`/libtool.m4
+elif grep all_pkgmacro_files $libtoolize > /dev/null; then
+    # libtool 2.x
+   aclocal_dir=`sed -n '/^aclocaldir=/{s/.*=//;p;q;}' < $libtoolize`
+   ltfiles=`sed -n '/^all_pkgmacro_files=/{s/.*=//;;s/"//;p;q;}' < $libtoolize`
+   for f in $ltfiles; do
+       test -f "$aclocal_dir/$f" && cp "$aclocal_dir/$f" build
+   done
+   ltfile=$aclocal_dir/libtool.m4
 else
    ltfindcmd="`sed -n \"/=[^\\\`]/p;/libtool_m4=/{s/.*=/echo /p;q;}\" \
                    < $libtoolize`"
