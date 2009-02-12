@@ -349,22 +349,9 @@ static apr_status_t socket_pipe_cleanup(void *thefile)
     return APR_SUCCESS;
 }
 
-#if 0
-/* XXX Do we need this as public API or APR private ?
- * It's main usage is for interrupting pollset because
- * of !APR_FILES_AS_SOCKETS.
- * Duplicating sockets in child requires WSADuplicateSocket
- * and passing WSAPROTOCOL_INFO data to the child, so we
- * would need some sort of IPC instead DuplicateHandle used
- * for files and pipes.
- */
-APR_DECLARE(apr_status_t)
-#else
-apr_status_t
-#endif
-apr_file_socket_pipe_create(apr_file_t **in,
-                            apr_file_t **out,
-                            apr_pool_t *p)
+apr_status_t apr_file_socket_pipe_create(apr_file_t **in,
+                                         apr_file_t **out,
+                                         apr_pool_t *p)
 {
     apr_status_t rv;
     SOCKET rd;
@@ -407,4 +394,21 @@ apr_file_socket_pipe_create(apr_file_t **in,
                               apr_pool_cleanup_null);
 
     return rv;
+}
+
+apr_status_t apr_file_socket_pipe_close(apr_file_t *file)
+{
+    apr_status_t stat;
+    if (!file->pipe)
+        return apr_file_close(file);
+    if ((stat = socket_pipe_cleanup(file)) == APR_SUCCESS) {
+        apr_pool_cleanup_kill(file->pool, file, socket_pipe_cleanup);
+
+        if (file->mutex) {
+            apr_thread_mutex_destroy(file->mutex);
+        }
+
+        return APR_SUCCESS;
+    }
+    return stat;
 }
