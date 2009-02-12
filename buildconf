@@ -23,7 +23,7 @@
 #
 build/buildcheck.sh || exit 1
 
-libtoolize=`build/PrintPath glibtoolize libtoolize15 libtoolize14 libtoolize`
+libtoolize=`build/PrintPath glibtoolize1 glibtoolize libtoolize15 libtoolize14 libtoolize`
 if [ "x$libtoolize" = "x" ]; then
     echo "libtoolize not found in path"
     exit 1
