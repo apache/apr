@@ -195,6 +195,9 @@ apr_file_socket_pipe_create(apr_file_t **in,
                             apr_file_t **out,
                             apr_pool_t *p);
 
+extern apr_status_t
+apr_file_socket_pipe_close(apr_file_t *file);
+
 /* Create a dummy wakeup socket pipe for interrupting the poller
  */
 static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
@@ -218,6 +221,12 @@ static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
 {
     return APR_ENOTIMPL;
 }
+
+static apr_status_t apr_file_socket_pipe_close(apr_file_t *file)
+{
+    return APR_ENOTIMPL;
+}
+
 #endif /* WIN32 */
 #else  /* APR_FILES_AS_SOCKETS */
 
@@ -265,11 +274,19 @@ static apr_status_t wakeup_pipe_cleanup(void *p)
     if (pollset->flags & APR_POLLSET_WAKEABLE) {
         /* Close both sides of the wakeup pipe */
         if (pollset->wakeup_pipe[0]) {
+#if APR_FILES_AS_SOCKETS
             apr_file_close(pollset->wakeup_pipe[0]);
+#else
+            apr_file_socket_pipe_close(pollset->wakeup_pipe[0]);
+#endif
             pollset->wakeup_pipe[0] = NULL;
         }
         if (pollset->wakeup_pipe[1]) {
+#if APR_FILES_AS_SOCKETS
             apr_file_close(pollset->wakeup_pipe[1]);
+#else
+            apr_file_socket_pipe_close(pollset->wakeup_pipe[1]);
+#endif
             pollset->wakeup_pipe[1] = NULL;
         }
     }
