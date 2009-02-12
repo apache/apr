@@ -184,17 +184,23 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
 /* The apr_load_dll_func call WILL return 0 set error to
  * ERROR_INVALID_FUNCTION if the function cannot be loaded
  */
-
 #define APR_DECLARE_LATE_DLL_FUNC(lib, rettype, calltype, fn, ord, args, names) \
     typedef rettype (calltype *apr_winapi_fpt_##fn) args; \
     static apr_winapi_fpt_##fn apr_winapi_pfn_##fn = NULL; \
-    static APR_INLINE rettype apr_winapi_##fn args \
-    {   if (!apr_winapi_pfn_##fn) \
+    static int apr_winapi_chk_##fn = 0; \
+    static APR_INLINE int apr_winapi_ld_##fn() \
+    {   if (apr_winapi_pfn_##fn) return 1; \
+        if (apr_winapi_chk_##fn ++) return 0; \
+        if (!apr_winapi_pfn_##fn) \
             apr_winapi_pfn_##fn = (apr_winapi_fpt_##fn) \
                                       apr_load_dll_func(lib, #fn, ord); \
-        if (apr_winapi_pfn_##fn) \
+        if (apr_winapi_pfn_##fn) return 1; else return 0; }; \
+    static APR_INLINE rettype apr_winapi_##fn args \
+    {   if (apr_winapi_ld_##fn()) \
             return (*(apr_winapi_pfn_##fn)) names; \
         else { SetLastError(ERROR_INVALID_FUNCTION); return 0;} }; \
+
+#define APR_HAVE_LATE_DLL_FUNC(fn) apr_winapi_ld_##fn()
 
 /* Provide late bound declarations of every API function missing from
  * one or more supported releases of the Win32 API
