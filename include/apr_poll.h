@@ -57,6 +57,19 @@ extern "C" {
 #define APR_POLLSET_THREADSAFE 0x001 /**< Adding or Removing a Descriptor is thread safe */
 #define APR_POLLSET_NOCOPY     0x002 /**< Descriptors passed to apr_pollset_create() are not copied */
 #define APR_POLLSET_WAKEABLE   0x004 /**< Pollset poll operation is interruptable */
+#define APR_POLLSET_NODEFAULT  0x010 /**< Do not try default method if non default fails */
+
+/**
+ * Pollset Methods
+ */
+typedef enum {
+    APR_POLLSET_DEFAULT,        /**< Platform default poll method */
+    APR_POLLSET_SELECT,         /**< Poll uses select method */
+    APR_POLLSET_KQUEUE,
+    APR_POLLSET_PORT,
+    APR_POLLSET_EPOLL,
+    APR_POLLSET_POLL
+} apr_pollset_method_e;
 
 /** Used in apr_pollfd_t to determine what the apr_descriptor is */
 typedef enum { 
@@ -117,6 +130,33 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                                              apr_uint32_t size,
                                              apr_pool_t *p,
                                              apr_uint32_t flags);
+
+/**
+ * Setup a pollset object
+ * @param pollset  The pointer in which to return the newly created object 
+ * @param size The maximum number of descriptors that this pollset can hold
+ * @param p The pool from which to allocate the pollset
+ * @param flags Optional flags to modify the operation of the pollset.
+ * @param method Poll method to use. See @apr_pollset_method_e.
+ *
+ * @remark If flags equals APR_POLLSET_THREADSAFE, then a pollset is
+ *         created on which it is safe to make concurrent calls to
+ *         apr_pollset_add(), apr_pollset_remove() and apr_pollset_poll()
+ *         from separate threads.  This feature is only supported on some
+ *         platforms; the apr_pollset_create() call will fail with
+ *         APR_ENOTIMPL on platforms where it is not supported.
+ * @remark If flags contain APR_POLLSET_WAKEABLE, then a pollset is
+ *         created with additional internal pipe object used for
+ *         apr_pollset_wakeup() call. The actual size of pollset is
+ *         in that case size + 1. This feature is only supported on some
+ *         platforms; the apr_pollset_create() call will fail with
+ *         APR_ENOTIMPL on platforms where it is not supported.
+ */
+APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **pollset,
+                                                apr_uint32_t size,
+                                                apr_pool_t *p,
+                                                apr_uint32_t flags,
+                                                apr_pollset_method_e method);
 
 /**
  * Destroy a pollset object
@@ -207,6 +247,18 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t numsock,
                                    apr_int32_t *nsds, 
                                    apr_interval_time_t timeout);
 
+/**
+ * Display the name of the pollset method, as it relates to the actual
+ * method used.
+ * @param pollset the name of the pollset.
+ */
+APR_DECLARE(const char *) apr_pollset_method_name(apr_pollset_t *pollset);
+
+/**
+ * Display the name of the default poll method: APR_POLLSET_DEFAULT
+ */
+APR_DECLARE(const char *) apr_poll_method_defname(void);
+
 /** Opaque structure used for pollset API */
 typedef struct apr_pollcb_t apr_pollcb_t;
 
@@ -224,6 +276,23 @@ APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
                                             apr_uint32_t size,
                                             apr_pool_t *pool,
                                             apr_uint32_t flags);
+
+/**
+ * Setup a pollcb object
+ * @param pollcb  The pointer in which to return the newly created object 
+ * @param size The maximum number of descriptors that a single _poll can return.
+ * @param p The pool from which to allocate the pollcb
+ * @param flags Optional flags to modify the operation of the pollcb.
+ * @param method Poll method to use. See @apr_pollset_method_e.
+ *
+ * @remark Pollcb is only supported on some platforms; the apr_pollcb_create()
+ * call will fail with APR_ENOTIMPL on platforms where it is not supported.
+ */
+APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **pollcb,
+                                               apr_uint32_t size,
+                                               apr_pool_t *pool,
+                                               apr_uint32_t flags,
+                                               apr_pollset_method_e method);
 
 /**
  * Add a socket or file descriptor to a pollcb
