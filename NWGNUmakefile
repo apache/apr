@@ -311,6 +311,8 @@ FILES_lib_objs = \
 	$(OBJDIR)/rand.o \
 	$(OBJDIR)/readwrite.o \
 	$(OBJDIR)/seek.o \
+	$(OBJDIR)/pollcb.o \
+	$(OBJDIR)/pollset.o \
 	$(OBJDIR)/select.o \
 	$(OBJDIR)/sendrecv.o \
 	$(OBJDIR)/sha2.o \
