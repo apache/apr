@@ -167,6 +167,11 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
     if (flags & APR_POLLSET_THREADSAFE) {                
         return APR_ENOTIMPL;
     }
+#ifdef WIN32
+    if (!APR_HAVE_LATE_DLL_FUNC(WSAPoll)) {
+        return APR_ENOTIMPL;
+    }
+#endif
     pollset->p = apr_palloc(p, sizeof(apr_pollset_private_t));
     pollset->p->pollset = apr_palloc(p, size * sizeof(struct pollfd));
     pollset->p->query_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
@@ -188,9 +193,16 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
         pollset->p->pollset[pollset->nelts].fd = descriptor->desc.s->socketdes;
     }
     else {
+#if APR_FILES_AS_SOCKETS
         pollset->p->pollset[pollset->nelts].fd = descriptor->desc.f->filedes;
+#else
+        if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
+            descriptor->desc.f == pollset->wakeup_pipe[0])
+            pollset->p->pollset[pollset->nelts].fd = (SOCKET)descriptor->desc.f->filedes;
+        else
+            return APR_EBADF;
+#endif
     }
-
     pollset->p->pollset[pollset->nelts].events =
         get_event(descriptor->reqevents);
     pollset->nelts++;
@@ -238,7 +250,11 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     if (timeout > 0) {
         timeout /= 1000;
     }
+#ifdef WIN32
+    ret = WSAPoll(pollset->p->pollset, pollset->nelts, (int)timeout);
+#else
     ret = poll(pollset->p->pollset, pollset->nelts, timeout);
+#endif
     (*num) = ret;
     if (ret < 0) {
         return apr_get_netos_error();
@@ -311,7 +327,11 @@ static apr_status_t impl_pollcb_add(apr_pollcb_t *pollcb,
         pollcb->pollset.ps[pollcb->nelts].fd = descriptor->desc.s->socketdes;
     }
     else {
+#if APR_FILES_AS_SOCKETS
         pollcb->pollset.ps[pollcb->nelts].fd = descriptor->desc.f->filedes;
+#else
+        return APR_EBADF;
+#endif
     }
 
     pollcb->pollset.ps[pollcb->nelts].events =
@@ -357,12 +377,16 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
 {
     int ret;
     apr_status_t rv = APR_SUCCESS;
-    apr_uint32_t i, j;
+    apr_uint32_t i;
 
     if (timeout > 0) {
         timeout /= 1000;
     }
+#ifdef WIN32
+    ret = WSAPoll(pollcb->pollset.ps, pollcb->nelts, (int)timeout);
+#else
     ret = poll(pollcb->pollset.ps, pollcb->nelts, timeout);
+#endif
     if (ret < 0) {
         return apr_get_netos_error();
     }

@@ -63,10 +63,14 @@
 #define POLLSET_DEFAULT_METHOD APR_POLLSET_SELECT
 #endif
 
+#ifdef WIN32
+#define POLL_USES_SELECT
+#else
 #ifdef HAVE_POLL
 #define POLL_USES_POLL
 #else
 #define POLL_USES_SELECT
+#endif
 #endif
 
 #if defined(POLLSET_USES_KQUEUE) || defined(POLLSET_USES_EPOLL) || defined(POLLSET_USES_PORT)
