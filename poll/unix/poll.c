@@ -280,7 +280,7 @@ static apr_pollset_provider_t impl = {
     impl_pollset_remove,
     impl_pollset_poll,
     NULL,
-    "pool"
+    "poll"
 };
 
 apr_pollset_provider_t *apr_pollset_provider_poll = &impl;
