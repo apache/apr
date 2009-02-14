@@ -266,7 +266,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
                 }
             }
         }
-        if ((*num) = j)
+        if (((*num) = j) > 0)
             rv = APR_SUCCESS;
     }
     if (descriptors && (*num))
