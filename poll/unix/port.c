@@ -393,11 +393,9 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
                                        apr_pool_t *p,
                                        apr_uint32_t flags)
 {
-    int fd;
+    pollcb->fd = port_create();
 
-    fd = port_create();
-
-    if (fd < 0) {
+    if (pollcb->fd < 0) {
         return apr_get_netos_error();
     }
 
