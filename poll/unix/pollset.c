@@ -312,8 +312,11 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                                              apr_pool_t *p,
                                              apr_uint32_t flags)
 {
-    return apr_pollset_create_ex(pollset, size, p, flags,
-                                 APR_POLLSET_DEFAULT);
+    apr_pollset_method_e method = APR_POLLSET_DEFAULT;
+ #ifdef WIN32
+    method = APR_POLLSET_POLL;
+ #endif   
+    return apr_pollset_create_ex(pollset, size, p, flags, method);
 }
 
 APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t * pollset)
