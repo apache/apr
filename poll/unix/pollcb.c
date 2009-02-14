@@ -75,6 +75,9 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **pollcb,
                 provider = apr_pollcb_provider_poll;
 #endif
             break;
+            case APR_POLLSET_SELECT:
+            case APR_POLLSET_DEFAULT:
+            break;
         }
         if (!provider) {
             *pollcb = NULL;
@@ -119,6 +122,9 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **pollcb,
 #if defined(HAVE_POLL)
                 provider = apr_pollcb_provider_poll;
 #endif
+            break;
+            case APR_POLLSET_SELECT:
+            case APR_POLLSET_DEFAULT:
             break;
         }
         if (!provider)
