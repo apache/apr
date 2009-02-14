@@ -233,7 +233,11 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
     }
     else {
 #if !APR_FILES_AS_SOCKETS
-        return APR_EBADF;
+        if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
+            descriptor->desc.f == pollset->wakeup_pipe[0])
+            fd = (apr_os_sock_t)descriptor->desc.f->filedes;
+        else
+            return APR_EBADF;
 #else
 #ifdef NETWARE
         /* NetWare can't handle mixed descriptor types in select() */

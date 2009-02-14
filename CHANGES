@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Win32: Use WSAPoll as default pollset method if supported and
+     found inside winsock dll.
+     [Mladen Turk]
+
   *) Make apr_pollset and apr_pollcb implementations using providers.
      Added apr_pollset_create_ex and apr_pollcb_create_ex that allows
      choosing non-default providers.

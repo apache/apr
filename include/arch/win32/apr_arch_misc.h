@@ -436,6 +436,40 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, Process32NextW, 0, (
     (hSnapshot, lppe));
 #define Process32NextW apr_winapi_Process32NextW
 
+#if !defined(POLLERR)
+/* Event flag definitions for WSAPoll(). */
+#define POLLRDNORM  0x0100
+#define POLLRDBAND  0x0200
+#define POLLIN      (POLLRDNORM | POLLRDBAND)
+#define POLLPRI     0x0400
+
+#define POLLWRNORM  0x0010
+#define POLLOUT     (POLLWRNORM)
+#define POLLWRBAND  0x0020
+
+#define POLLERR     0x0001
+#define POLLHUP     0x0002
+#define POLLNVAL    0x0004
+
+typedef struct pollfd {
+    SOCKET  fd;
+    SHORT   events;
+    SHORT   revents;
+
+} WSAPOLLFD, *PWSAPOLLFD, FAR *LPWSAPOLLFD;
+
+#endif /* !defined(POLLERR) */
+#ifdef WSAPoll
+#undef WSAPoll
+#endif
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINSOCK2API, int, WSAAPI, WSAPoll, 0, (
+    IN OUT LPWSAPOLLFD fdArray,
+    IN ULONG fds,
+    IN INT timeout),
+    (fdArray, fds, timeout));
+#define WSAPoll apr_winapi_WSAPoll
+#define HAVE_POLL   1
+
 #endif /* !defined(_WIN32_WCE) */
 
 #endif  /* ! MISC_H */
