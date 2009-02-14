@@ -145,8 +145,11 @@ APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
                                             apr_pool_t *p,
                                             apr_uint32_t flags)
 {
-    return apr_pollcb_create_ex(pollcb, size, p, flags,
-                                APR_POLLSET_DEFAULT);
+    apr_pollset_method_e method = APR_POLLSET_DEFAULT;
+ #ifdef WIN32
+    method = APR_POLLSET_POLL;
+ #endif       
+    return apr_pollcb_create_ex(pollcb, size, p, flags, method);
 }
 
 APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
