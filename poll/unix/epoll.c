@@ -324,7 +324,7 @@ static apr_pollset_provider_t impl = {
     impl_pollset_remove,
     impl_pollset_poll,
     impl_pollset_cleanup,
-    "epool"
+    "epoll"
 };
 
 apr_pollset_provider_t *apr_pollset_provider_epoll = &impl;
