@@ -190,6 +190,8 @@ APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **pollset,
             case APR_POLLSET_SELECT:
                 provider = apr_pollset_provider_select;
             break;
+            case APR_POLLSET_DEFAULT:
+            break;
         }
         if (!provider) {
             if ((flags & APR_POLLSET_NODEFAULT) == APR_POLLSET_NODEFAULT)
@@ -242,6 +244,8 @@ APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **pollset,
             break;
             case APR_POLLSET_SELECT:
                 provider = apr_pollset_provider_select;
+            break;
+            case APR_POLLSET_DEFAULT:
             break;
         }
         if (!provider)
@@ -296,6 +300,8 @@ APR_DECLARE(const char *) apr_poll_method_defname()
         break;
         case APR_POLLSET_SELECT:
             return apr_pollset_provider_select->name;
+        break;
+        case APR_POLLSET_DEFAULT:
         break;
     }
     return "unknown";
