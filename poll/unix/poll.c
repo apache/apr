@@ -325,13 +325,7 @@ static apr_status_t impl_pollcb_add(apr_pollcb_t *pollcb,
 static apr_status_t impl_pollcb_remove(apr_pollcb_t *pollcb,
                                        apr_pollfd_t *descriptor)
 {
-    int fd;
     apr_uint32_t i;
-
-    if (descriptor->desc_type == APR_POLL_SOCKET)
-        fd = descriptor->desc.s->socketdes;
-    else
-        fd = descriptor->desc.f->filedes;
 
     for (i = 0; i < pollcb->nelts; i++) {
         if (descriptor->desc.s == pollcb->copyset[i]->desc.s) {
