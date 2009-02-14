@@ -472,6 +472,10 @@ SOURCE=.\poll\unix\pollset.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\poll\unix\poll.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\poll\unix\select.c
 # End Source File
 # End Group
