@@ -275,8 +275,13 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
 {
     apr_pollset_method_e method = APR_POLLSET_DEFAULT;
  #ifdef WIN32
+    /* Favor WSAPoll if supported.
+     * This will work only if ws2_32.dll has WSAPoll funtion.
+     * In other cases it will fall back to select() method unless
+     * the APR_POLLSET_NODEFAULT is added to the flags.
+     */
     method = APR_POLLSET_POLL;
- #endif   
+ #endif
     return apr_pollset_create_ex(pollset, size, p, flags, method);
 }
 
