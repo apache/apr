@@ -201,6 +201,7 @@ APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **pollset,
     while (provider == NULL) {
         provider = pollset_provider(method);
         if (!provider) {
+            *pollset = NULL;
             if ((flags & APR_POLLSET_NODEFAULT) == APR_POLLSET_NODEFAULT)
                 return APR_ENOTIMPL;
             if (method == pollset_default_method)
@@ -226,9 +227,11 @@ APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **pollset,
             *pollset = NULL;
             return rv;
         }
-        provider = pollset_provider(method);
-        if (!provider)
+        provider = pollset_provider(pollset_default_method);
+        if (!provider) {
+            *pollset = NULL;
             return APR_ENOTIMPL;
+        }
         rv = (*provider->create)(*pollset, size, p, flags);
         if (rv != APR_SUCCESS) {
             *pollset = NULL;
