@@ -130,8 +130,13 @@ APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
 {
     apr_pollset_method_e method = APR_POLLSET_DEFAULT;
  #ifdef WIN32
+    /* This will work only if ws2_32.dll has WSAPoll funtion.
+     * We could check the presence of the function here,
+     * but someone might implement other pollcb method in
+     * the future.
+     */
     method = APR_POLLSET_POLL;
- #endif       
+ #endif
     return apr_pollcb_create_ex(pollcb, size, p, flags, method);
 }
 
