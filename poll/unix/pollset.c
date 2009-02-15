@@ -154,6 +154,39 @@ extern apr_pollset_provider_t *apr_pollset_provider_poll;
 #endif
 extern apr_pollset_provider_t *apr_pollset_provider_select;
 
+static apr_pollset_provider_t *pollset_provider(apr_pollset_method_e method)
+{
+    apr_pollset_provider_t *provider = NULL;
+    switch (method) {
+        case APR_POLLSET_KQUEUE:
+#if defined(HAVE_KQUEUE)
+            provider = apr_pollset_provider_kqueue;
+#endif
+        break;
+        case APR_POLLSET_PORT:
+#if defined(HAVE_PORT_CREATE)
+            provider = apr_pollset_provider_port;
+#endif
+        break;
+        case APR_POLLSET_EPOLL:
+#if defined(HAVE_EPOLL)
+            provider = apr_pollset_provider_epoll;
+#endif
+        break;
+        case APR_POLLSET_POLL:
+#if defined(HAVE_POLL)
+            provider = apr_pollset_provider_poll;
+#endif
+        break;
+        case APR_POLLSET_SELECT:
+            provider = apr_pollset_provider_select;
+        break;
+        case APR_POLLSET_DEFAULT:
+        break;
+    }
+    return provider;
+}
+
 APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **pollset,
                                                 apr_uint32_t size,
                                                 apr_pool_t *p,
@@ -166,33 +199,7 @@ APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **pollset,
     if (method == APR_POLLSET_DEFAULT)
         method = pollset_default_method;
     while (provider == NULL) {
-        switch (method) {
-            case APR_POLLSET_KQUEUE:
-#if defined(HAVE_KQUEUE)
-                provider = apr_pollset_provider_kqueue;
-#endif
-            break;
-            case APR_POLLSET_PORT:
-#if defined(HAVE_PORT_CREATE)
-                provider = apr_pollset_provider_port;
-#endif
-            break;
-            case APR_POLLSET_EPOLL:
-#if defined(HAVE_EPOLL)
-                provider = apr_pollset_provider_epoll;
-#endif
-            break;
-            case APR_POLLSET_POLL:
-#if defined(HAVE_POLL)
-                provider = apr_pollset_provider_poll;
-#endif
-            break;
-            case APR_POLLSET_SELECT:
-                provider = apr_pollset_provider_select;
-            break;
-            case APR_POLLSET_DEFAULT:
-            break;
-        }
+        provider = pollset_provider(method);
         if (!provider) {
             if ((flags & APR_POLLSET_NODEFAULT) == APR_POLLSET_NODEFAULT)
                 return APR_ENOTIMPL;
@@ -214,40 +221,12 @@ APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **pollset,
     (*pollset)->provider = provider;
 
     rv = (*provider->create)(*pollset, size, p, flags);
-    if (rv != APR_SUCCESS) {
+    if (rv == APR_ENOTIMPL) {
         if (method == pollset_default_method) {
             *pollset = NULL;
             return rv;
         }
-        provider = NULL;
-        /* Try with default provider */
-        switch (pollset_default_method) {
-            case APR_POLLSET_KQUEUE:
-#if defined(HAVE_KQUEUE)
-                provider = apr_pollset_provider_kqueue;
-#endif
-            break;
-            case APR_POLLSET_PORT:
-#if defined(HAVE_PORT_CREATE)
-                provider = apr_pollset_provider_port;
-#endif
-            break;
-            case APR_POLLSET_EPOLL:
-#if defined(HAVE_EPOLL)
-                provider = apr_pollset_provider_epoll;
-#endif
-            break;
-            case APR_POLLSET_POLL:
-#if defined(HAVE_POLL)
-                provider = apr_pollset_provider_poll;
-#endif
-            break;
-            case APR_POLLSET_SELECT:
-                provider = apr_pollset_provider_select;
-            break;
-            case APR_POLLSET_DEFAULT:
-            break;
-        }
+        provider = pollset_provider(method);
         if (!provider)
             return APR_ENOTIMPL;
         rv = (*provider->create)(*pollset, size, p, flags);
@@ -277,34 +256,13 @@ APR_DECLARE(const char *) apr_pollset_method_name(apr_pollset_t *pollset)
 
 APR_DECLARE(const char *) apr_poll_method_defname()
 {
-    switch (pollset_default_method) {
-        case APR_POLLSET_KQUEUE:
-#if defined(HAVE_KQUEUE)
-            return apr_pollset_provider_kqueue->name;
-#endif
-        break;
-        case APR_POLLSET_PORT:
-#if defined(HAVE_PORT_CREATE)
-            return apr_pollset_provider_port->name;
-#endif
-        break;
-        case APR_POLLSET_EPOLL:
-#if defined(HAVE_EPOLL)
-            return apr_pollset_provider_epoll->name;
-#endif
-        break;
-        case APR_POLLSET_POLL:
-#if defined(HAVE_POLL)
-            return apr_pollset_provider_poll->name;
-#endif
-        break;
-        case APR_POLLSET_SELECT:
-            return apr_pollset_provider_select->name;
-        break;
-        case APR_POLLSET_DEFAULT:
-        break;
-    }
-    return "unknown";
+    apr_pollset_provider_t *provider = NULL;
+
+    provider = pollset_provider(pollset_default_method);
+    if (provider)
+        return provider->name;
+    else
+        return "unknown";
 }
 
 APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
