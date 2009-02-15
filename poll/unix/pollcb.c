@@ -108,8 +108,10 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **pollcb,
         }
         /* Try with default provider */
         provider = pollcb_provider(pollset_default_method);
-        if (!provider)
+        if (!provider) {
+            *pollcb = NULL;
             return APR_ENOTIMPL;
+        }
         rv = (*provider->create)(*pollcb, size, p, flags);
         if (rv != APR_SUCCESS) {
             *pollcb = NULL;
