@@ -84,9 +84,9 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
             rv = apr_get_os_error();
             if (GetFullPathNameW(wpath, sizeof(fpath) / sizeof(apr_wchar_t), fpath, &ignored)) {
                 if (SetDllDirectoryW(fpath)) {
-                    os_handle = LoadLibraryExW(fpath, NULL, 0);
+                    os_handle = LoadLibraryExW(wpath, NULL, 0);
                     if (!os_handle)
-                        os_handle = LoadLibraryExW(fpath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+                        os_handle = LoadLibraryExW(wpath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
                     if (os_handle)
                         rv = APR_SUCCESS;
                  }
