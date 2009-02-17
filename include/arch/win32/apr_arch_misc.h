@@ -470,6 +470,14 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_WINSOCK2API, int, WSAAPI, WSAPoll, 0, (
 #define WSAPoll apr_winapi_WSAPoll
 #define HAVE_POLL   1
 
+#ifdef SetDllDirectoryW
+#undef SetDllDirectoryW
+#endif
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, SetDllDirectoryW, 0, (
+    IN LPCWSTR lpPathName),
+    (lpPathName));
+#define SetDllDirectoryW apr_winapi_SetDllDirectoryW
+
 #endif /* !defined(_WIN32_WCE) */
 
 #endif  /* ! MISC_H */
