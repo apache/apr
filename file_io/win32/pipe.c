@@ -229,8 +229,9 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
 static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
 {
     static int id = 0;
-
+    FD_SET rs;    
     SOCKET ls;
+    struct timeval socktm;
     struct sockaddr_in pa;
     struct sockaddr_in la;
     struct sockaddr_in ca;
@@ -290,10 +291,27 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
         goto cleanup;
     }
     for (;;) {
+        int ns;
         /* Listening socket is nonblocking by now.
-         * The accept must create the socket
-         * immediatelly because we connected already.
+         * The accept should create the socket
+         * immediatelly because we are connected already.
+         * However on buys systems this can take a while
+         * until winsock gets a chance to handle the events.
          */
+        FD_ZERO(&rs);
+        FD_SET(ls, &rs);
+
+        socktm.tv_sec  = 1;
+        socktm.tv_usec = 0;
+        if ((ns = select(0, &rs, NULL, NULL, &socktm)) == SOCKET_ERROR) {
+            /* Accept still not signaled */
+            Sleep(100);
+            continue;
+        }
+        if (ns == 0) {
+            /* No connections in the last second */
+            continue;
+        }
         if ((*rd = accept(ls, (SOCKADDR *)&ca, &lc)) == INVALID_SOCKET) {
             rv =  apr_get_netos_error();
             goto cleanup;
