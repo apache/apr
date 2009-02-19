@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Added Unix domain socket support.
+     [Mladen Turk]
+
   *) Win32: Use WSAPoll as default pollset method if supported and
      found inside winsock dll.
      [Mladen Turk]
