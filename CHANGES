@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.4
 
+  *) Fix compilation error on systems that do not have IPV6.
+     PR 46601 [Julien Charbon <jch 4js.com>]
+
   *) apr_socket_sendfile() on Solaris: Fix handling of files truncated
      after the sender determines the length.  (This fixes a busy loop in 
      httpd when a file being served is truncated.)  [Jeff Trawick]
