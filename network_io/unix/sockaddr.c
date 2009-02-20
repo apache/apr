@@ -580,7 +580,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
         family = APR_UNIX;
     if (family == APR_UNIX) {
 #if APR_HAVE_SOCKADDR_UN
-        if (hostname && *hostname == '/') {
+        if (hostname) {
             *sa = apr_pcalloc(p, sizeof(apr_sockaddr_t));
             (*sa)->pool = p;
             apr_cpystrn((*sa)->sa.unx.sun_path, hostname,
@@ -656,7 +656,7 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
     }
 #if APR_HAVE_SOCKADDR_UN
     else if (sockaddr->family == APR_UNIX) {
-        *hostname = sockaddr->hostname;
+        *hostname = apr_pstrdup(sockaddr->pool, sockaddr->hostname);
         return APR_SUCCESS;
     }
 #endif
