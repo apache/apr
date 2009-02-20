@@ -380,7 +380,11 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
         /* Ignore anything bogus: getaddrinfo in some old versions of
          * glibc will return AF_UNIX entries for APR_UNSPEC+AI_PASSIVE
          * lookups. */
+#if APR_HAVE_IPV6
         if (ai->ai_family != AF_INET && ai->ai_family != AF_INET6) {
+#else
+        if (ai->ai_family != AF_INET) {
+#endif
             ai = ai->ai_next;
             continue;
         }

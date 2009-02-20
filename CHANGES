@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
 
+  *) Fix compilation error on systems that do not have IPV6.
+     PR 46601 [Julien Charbon <jch 4js.com>]
+
   *) apr_pollset_wakeup() on Windows: Fix core caused by closing the
      file_socket_pipe with standard file_close. 
      [Arsen Chaloyan, Mladen Turk]
