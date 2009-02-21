@@ -979,7 +979,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                             &pi);
 #endif
 
-        if (rv && attr->ipc_data, attr->ipc_size) {
+        if (rv && attr->ipc_data && attr->ipc_size) {
             char shmname[APR_PATH_MAX];
             const char *tmpdir = NULL;
     
