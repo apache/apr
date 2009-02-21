@@ -55,7 +55,7 @@ extern "C" {
  * Pollset Flags
  */
 #define APR_POLLSET_THREADSAFE 0x001 /**< Adding or Removing a Descriptor is thread safe */
-#define APR_POLLSET_NOCOPY     0x002 /**< Descriptors passed to apr_pollset_create() are not copied */
+#define APR_POLLSET_NOCOPY     0x002 /**< Descriptors passed to apr_pollset_add() are not copied */
 #define APR_POLLSET_WAKEABLE   0x004 /**< Pollset poll operation is interruptable */
 #define APR_POLLSET_NODEFAULT  0x010 /**< Do not try default method if non default fails */
 
@@ -113,18 +113,21 @@ typedef struct apr_pollset_t apr_pollset_t;
  * @param p The pool from which to allocate the pollset
  * @param flags Optional flags to modify the operation of the pollset.
  *
- * @remark If flags equals APR_POLLSET_THREADSAFE, then a pollset is
+ * @remark If flags contains APR_POLLSET_THREADSAFE, then a pollset is
  *         created on which it is safe to make concurrent calls to
  *         apr_pollset_add(), apr_pollset_remove() and apr_pollset_poll()
  *         from separate threads.  This feature is only supported on some
  *         platforms; the apr_pollset_create() call will fail with
  *         APR_ENOTIMPL on platforms where it is not supported.
- * @remark If flags contain APR_POLLSET_WAKEABLE, then a pollset is
+ * @remark If flags contains APR_POLLSET_WAKEABLE, then a pollset is
  *         created with additional internal pipe object used for
  *         apr_pollset_wakeup() call. The actual size of pollset is
  *         in that case size + 1. This feature is only supported on some
  *         platforms; the apr_pollset_create() call will fail with
  *         APR_ENOTIMPL on platforms where it is not supported.
+ * @remark If flags contains APR_POLLSET_NOCOPY, then the apr_pollfd_t
+ *         structures passed to apr_pollset_add() are not copied and
+ *         must have a lifetime at least as long as the pollset.
  */
 APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                                              apr_uint32_t size,
@@ -180,6 +183,9 @@ APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t *pollset);
  *         with APR_EINTR.  Option (1) is recommended, but option (2) is
  *         allowed for implementations where option (1) is impossible
  *         or impractical.
+ * @remark If the pollset has been created with APR_POLLSET_NOCOPY, the 
+ *         apr_pollfd_t structure referenced by descriptor will not be copied
+ *         and must have a lifetime at least as long as the pollset.
  */
 APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
                                           const apr_pollfd_t *descriptor);
