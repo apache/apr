@@ -114,10 +114,6 @@ static apr_status_t impl_pollset_create(apr_pollset_t **pollset,
         return APR_ENOTIMPL;
     }
 #endif
-    if (flags & APR_POLLSET_WAKEABLE) {
-        /* Add room for wakeup descriptor */
-        size++;
-    }
     pollset->p->waiting = 0;
 
     pollset->p->port_set = apr_palloc(p, size * sizeof(port_event_t));
