@@ -95,10 +95,6 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
     apr_status_t rv;
     int fd;
 
-    if (flags & APR_POLLSET_WAKEABLE) {
-        /* Add room for wakeup descriptor */
-        size++;
-    }
     fd = epoll_create(size);
     if (fd < 0) {
         pollset->p = NULL;
