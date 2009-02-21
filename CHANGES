@@ -13,12 +13,29 @@ Changes for APR 2.0.0
      choosing non-default providers.
      [Mladen Turk]
 
-  *) Intruduce APR_PERMS_SET macros for setting the owner/group on
+  *) Introduce APR_PERMS_SET macros for setting the owner/group on
      objects. Currently only implemented for shm, proc and global
      mutexes on posix platforms.
      [Mladen Turk]
 
 Changes for APR 1.4.0
+
+  *) Fix compilation error on systems that do not have IPV6.
+     PR 46601 [Julien Charbon <jch 4js.com>]
+
+  *) apr_pollset_wakeup() on Windows: Fix core caused by closing the
+     file_socket_pipe with standard file_close. 
+     [Arsen Chaloyan, Mladen Turk]
+
+  *) apr_socket_sendfile() on Solaris: Fix handling of files truncated
+     after the sender determines the length.  (This fixes a busy loop in 
+     httpd when a file being served is truncated.)  [Jeff Trawick]
+
+  *) Fix documentation for apr_temp_dir_get().
+     PR 46303  [Carlo Marcelo Arenas Belon <carenas sajinet.com.pe>]
+
+  *) Add AC_MSG_RESULT after AC_MSG_CHECKING.
+     PR 46427  [Rainer Jung <rainer.jung kippdata.de>]
 
   *) Win32: Do not error out on apr_pollset_poll() when there are no sockets.
      [Justin Erenkrantz]
