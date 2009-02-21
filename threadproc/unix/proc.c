@@ -19,6 +19,7 @@
 #include "apr_portable.h"
 #include "apr_signal.h"
 #include "apr_random.h"
+#include "apr_arch_proc_mutex.h"
 
 /* Heavy on no'ops, here's what we want to pass if there is APR_NO_FILE
  * requested for a specific child handle;
@@ -216,6 +217,69 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_procattr_ipc_data_set(apr_procattr_t *attr,
+                                                    const void *data,
+                                                    apr_size_t size)
+{
+    attr->ipc_data = data;
+    attr->ipc_size = size;
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_procattr_ipc_data_get(apr_procattr_t *attr,
+                                                    void **data,
+                                                    apr_size_t *size)
+{
+    if (attr->ipc_shm && attr->ipc_size) {
+        *data = apr_shm_baseaddr_get(attr->ipc_shm);
+        *size = attr->ipc_size;
+        return APR_SUCCESS;
+    }
+    else
+        return APR_EINIT;
+}
+
+/* Global ipc data setup if we are child
+ * of the process that used child_data_set
+ * TODO: This can probably be some struct.
+ */
+static void *ipc_shm_data = NULL;
+static apr_size_t ipc_shm_size = 0;
+static int ipc_shm_init = 0;
+
+apr_status_t apr_proc_ipc_init(apr_pool_t *pool)
+{
+    apr_status_t rv;
+    char shmname[64];
+    const char *tmpdir = NULL;
+    apr_shm_t *shm;
+    
+    if (ipc_shm_init++)
+        return APR_SUCCESS;
+    apr_temp_dir_get(&tmpdir, pool);
+    apr_snprintf(shmname, sizeof(shmname), "%s/.apripc.%" APR_PID_T_FMT,
+                 tmpdir, getpid());
+
+    if ((rv = apr_shm_attach(&shm, shmname, pool)) != APR_SUCCESS)
+        return rv;
+    ipc_shm_data = apr_shm_baseaddr_get(shm);
+    ipc_shm_size = apr_shm_size_get(shm);
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_proc_parent_ipc_data_get(void **data,
+                                                       apr_size_t *size)
+{
+    if (!ipc_shm_init)
+        return APR_EINIT;
+    if (!ipc_shm_data)
+        return APR_ENOMEM;
+
+    *data = ipc_shm_data;
+    *size = ipc_shm_size;
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
 {
     int pid;
@@ -353,7 +417,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           apr_pool_t *pool)
 {
     int i;
+    apr_status_t rc;
     const char * const empty_envp[] = {NULL};
+    apr_proc_mutex_t *ipc_mutex = NULL;
 
     if (!env) { /* Specs require an empty array instead of NULL;
                  * Purify will trigger a failure, even if many
@@ -392,6 +458,22 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
     }
 
+    if (attr->ipc_data && attr->ipc_size) {
+        /* Create startup ipc mutex.
+         * The purpose of this mutex is to enable
+         * the 'start suspended' process behaviour.
+         * We need to create the shared memory after
+         * fork() and we don't know in advance what
+         * the child pid will be. Mutex locks the child
+         * until we create the shared memory which
+         * can be then attached at child's apr_initialize.
+         */
+        if ((rc = apr_proc_mutex_create(&ipc_mutex, NULL,
+                        APR_LOCK_DEFAULT, attr->pool)) != APR_SUCCESS) {
+            return rc;
+        }
+        apr_proc_mutex_lock(ipc_mutex);
+    }
     if ((new->pid = fork()) < 0) {
         return errno;
     }
@@ -399,6 +481,33 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         int status;
         /* child process */
 
+        if (ipc_mutex) {
+            if ((rc = apr_proc_mutex_child_init(&ipc_mutex,
+                                          NULL, pool)) != APR_SUCCESS) {
+                /* This should never happen.
+                 * We cannot continue.
+                 */
+                if (attr->errfn) {
+                    attr->errfn(pool, rc, "ipc mutex init failed");
+                }
+                _exit(-1);
+            }
+            /* Wait util the parent initializes shared memory.
+             */
+            if ((rc = apr_proc_mutex_lock(ipc_mutex)) != APR_SUCCESS) {
+                /* Locking failed.
+                 * Probably the parent ended prematurely
+                 */
+                if (attr->errfn) {
+                    attr->errfn(pool, rc, "ipc mutex lock failed");
+                }
+                _exit(-1);
+            }
+            /* By now we should have the ipc shared memory set up.
+             * We don't need the mutex any more.
+             */
+            apr_proc_mutex_destroy(ipc_mutex);
+        }
         /*
          * If we do exec cleanup before the dup2() calls to set up pipes
          * on 0-2, we accidentally close the pipes used by programs like
@@ -454,6 +563,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
 
         apr_signal(SIGCHLD, SIG_DFL); /* not sure if this is needed or not */
+
 
         if (attr->currdir != NULL) {
             if (chdir(attr->currdir) == -1) {
@@ -593,6 +703,35 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
         _exit(-1);  /* if we get here, there is a problem, so exit with an
                      * error code. */
+    }
+    if (ipc_mutex) {
+        char shmname[64];
+        const char *tmpdir = NULL;
+
+        apr_temp_dir_get(&tmpdir, pool);
+        apr_snprintf(shmname, sizeof(shmname), "%s/.apripc.%" APR_PID_T_FMT,
+                     tmpdir, new->pid);        
+        rc = apr_shm_create(&attr->ipc_shm, attr->ipc_size,
+                            shmname, attr->pool);
+        if (rc == APR_SUCCESS) {
+            if (!geteuid()) {
+                /* Set ipc shared memory permissions for
+                 * our child process.
+                 */
+                APR_PERMS_SET_FN(shm)(attr->ipc_shm,
+                                      APR_FPROT_UREAD | APR_FPROT_UWRITE,
+                                      attr->uid, attr->gid);
+            }
+            /* Fill in shared memory with ipc data */
+            memcpy(apr_shm_baseaddr_get(attr->ipc_shm),
+                   attr->ipc_data, attr->ipc_size);
+        }
+        /* Unlock the ipc startup mutex.
+         * This mutex is destroyed when attr->pool is cleared
+         * or destroyed because it might not yet be initialised
+         * inside the child.
+         */
+        apr_proc_mutex_unlock(ipc_mutex);
     }
 
     /* Parent process */

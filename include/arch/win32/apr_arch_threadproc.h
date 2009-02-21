@@ -17,6 +17,8 @@
 #include "apr_private.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
+#include "apr_arch_shm.h"
+#include "apr_perms_set.h"
 
 #ifndef THREAD_PROC_H
 #define THREAD_PROC_H
@@ -62,6 +64,9 @@ struct apr_procattr_t {
     LPSECURITY_ATTRIBUTES   sa;
     LPVOID                  sd;
 #endif
+    apr_shm_t *ipc_shm;
+    const void *ipc_data;
+    apr_size_t ipc_size;    
 };
 
 struct apr_thread_once_t {
@@ -69,6 +74,7 @@ struct apr_thread_once_t {
 };
 
 extern apr_status_t apr_threadproc_init(apr_pool_t *pool);
+extern apr_status_t apr_proc_ipc_init(apr_pool_t *pool);
 
 #endif  /* ! THREAD_PROC_H */
 
