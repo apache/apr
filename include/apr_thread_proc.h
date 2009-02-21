@@ -590,6 +590,41 @@ APR_DECLARE(apr_status_t) apr_procattr_perms_set_register(apr_procattr_t *attr,
                                                  void *data,
                                                  apr_fileperms_t perms);
 
+/**
+ * Set the ipc data for child process
+ * @param attr The procattr we care about. 
+ * @param data Data to pass to child process
+ * @param size Data size
+ */
+APR_DECLARE(apr_status_t) apr_procattr_ipc_data_set(apr_procattr_t *attr,
+                                                    const void *data,
+                                                    apr_size_t size);
+
+/**
+ * Set the shared memory ipc data for child process
+ * @param attr The procattr we care about. 
+ * @param data Shared memory data pointer
+ * @param size Shared memory data size
+ * @remark data points to the shared memory segment created by the
+ * parent process and initially contains the copy of the data set by
+ * apr_procattr_ipc_data_set function. The data is valid only after
+ * the child process was created.
+ */
+APR_DECLARE(apr_status_t) apr_procattr_ipc_data_get(apr_procattr_t *attr,
+                                                    void **data,
+                                                    apr_size_t *size);
+
+/**
+ * Get the shared memory ipc data segment pointer
+ * @param data Shared memory data pointer
+ * @param size Shared memory data size
+ * @remark data points to the shared memory segment created by the
+ * parent process. If the parent process didn't create ipc data
+ * the function returns APR_ENOMEM.
+ */
+APR_DECLARE(apr_status_t) apr_proc_parent_ipc_data_get(void **data,
+                                                       apr_size_t *size);
+
 #if APR_HAS_FORK
 /**
  * This is currently the only non-portable call in APR.  This executes 
