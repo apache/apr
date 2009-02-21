@@ -190,10 +190,10 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
 {
     pfd_elem_t *ep;
     apr_status_t rv = APR_SUCCESS;
-    struct epoll_event ev;
+    struct epoll_event ev = {0}; /* ignored, but must be passed with
+                                  * kernel < 2.6.9
+                                  */
     int ret = -1;
-
-    ev.events = get_epoll_event(descriptor->reqevents);
 
     if (descriptor->desc_type == APR_POLL_SOCKET) {
         ret = epoll_ctl(pollset->p->epoll_fd, EPOLL_CTL_DEL,
@@ -381,10 +381,10 @@ static apr_status_t impl_pollcb_remove(apr_pollcb_t *pollcb,
                                        apr_pollfd_t *descriptor)
 {
     apr_status_t rv = APR_SUCCESS;
-    struct epoll_event ev;
+    struct epoll_event ev = {0}; /* ignored, but must be passed with
+                                  * kernel < 2.6.9
+                                  */
     int ret = -1;
-    
-    ev.events = get_epoll_event(descriptor->reqevents);
     
     if (descriptor->desc_type == APR_POLL_SOCKET) {
         ret = epoll_ctl(pollcb->fd, EPOLL_CTL_DEL,
