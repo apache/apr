@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Added simple interprocess data exchange API between
+     parent and child APR based processes.
+     [Mladen Turk]
+
   *) Added Unix domain socket support.
      [Mladen Turk]
 
