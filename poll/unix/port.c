@@ -93,7 +93,7 @@ static apr_status_t impl_pollset_cleanup(apr_pollset_t *pollset)
     return APR_SUCCESS;
 }
 
-static apr_status_t impl_pollset_create(apr_pollset_t **pollset,
+static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
                                              apr_uint32_t size,
                                              apr_pool_t *p,
                                              apr_uint32_t flags)
@@ -348,7 +348,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
             }
         }
         pollset_unlock_rings();
-        if ((*num) = j)
+        if ((*num = j))
             rv = APR_SUCCESS;
         if (descriptors) {
             *descriptors = pollset->p->result_set;
