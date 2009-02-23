@@ -121,7 +121,5 @@ struct apr_procattr_t {
     apr_size_t ipc_size;
 };
 
-apr_status_t apr_proc_ipc_init(apr_pool_t *pool);
-
 #endif  /* ! THREAD_PROC_H */
 
