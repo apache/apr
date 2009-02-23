@@ -370,8 +370,9 @@ APR_DECLARE(apr_status_t) apr_procattr_ipc_data_get(apr_procattr_t *attr,
 static void *ipc_shm_data = NULL;
 static apr_size_t ipc_shm_size = 0;
 static int ipc_shm_init = 0;
+static apr_pool_t *ipc_pool = NULL;
 
-apr_status_t apr_proc_ipc_init(apr_pool_t *pool)
+static apr_status_t proc_ipc_init(apr_pool_t *pool)
 {
     apr_status_t rv;
     char shmname[APR_PATH_MAX];
@@ -380,11 +381,12 @@ apr_status_t apr_proc_ipc_init(apr_pool_t *pool)
     
     if (ipc_shm_init++)
         return APR_SUCCESS;
-    apr_temp_dir_get(&tmpdir, pool);
+    apr_pool_create(&ipc_pool, NULL);
+    apr_temp_dir_get(&tmpdir, ipc_pool);
     apr_snprintf(shmname, sizeof(shmname), "%s\\APRIPC_%d",
                  tmpdir, GetCurrentProcessId());
 
-    if ((rv = apr_shm_attach(&shm, shmname, pool)) != APR_SUCCESS)
+    if ((rv = apr_shm_attach(&shm, shmname, ipc_pool)) != APR_SUCCESS)
         return rv;
     ipc_shm_data = apr_shm_baseaddr_get(shm);
     ipc_shm_size = apr_shm_size_get(shm);
@@ -394,8 +396,10 @@ apr_status_t apr_proc_ipc_init(apr_pool_t *pool)
 APR_DECLARE(apr_status_t) apr_proc_parent_ipc_data_get(void **data,
                                                        apr_size_t *size)
 {
-    if (!ipc_shm_init)
-        return APR_EINIT;
+    if (!ipc_shm_init) {
+        if (proc_ipc_init() != APR_SUCCESS)
+            return APR_ENOMEM;
+    }
     if (!ipc_shm_data)
         return APR_ENOMEM;
 

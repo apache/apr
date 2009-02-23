@@ -246,21 +246,23 @@ APR_DECLARE(apr_status_t) apr_procattr_ipc_data_get(apr_procattr_t *attr,
 static void *ipc_shm_data = NULL;
 static apr_size_t ipc_shm_size = 0;
 static int ipc_shm_init = 0;
+static apr_pool_t *ipc_pool = NULL;
 
-apr_status_t apr_proc_ipc_init(apr_pool_t *pool)
+static apr_status_t proc_ipc_init()
 {
     apr_status_t rv;
-    char shmname[64];
-    const char *tmpdir = NULL;
+    char envname[64];
+    const char *shmname = NULL;
     apr_shm_t *shm;
     
     if (ipc_shm_init++)
         return APR_SUCCESS;
-    apr_temp_dir_get(&tmpdir, pool);
-    apr_snprintf(shmname, sizeof(shmname), "%s/.apripc.%" APR_PID_T_FMT,
-                 tmpdir, getpid());
-
-    if ((rv = apr_shm_attach(&shm, shmname, pool)) != APR_SUCCESS)
+    apr_pool_create(&ipc_pool, NULL);
+    apr_snprintf(envname, sizeof(envname), "_APRIPC%" APR_PID_T_FMT, getpid());
+    shmname = getenv(envname);
+    if (!shmname)
+        return APR_ENOMEM;
+    if ((rv = apr_shm_attach(&shm, shmname, ipc_pool)) != APR_SUCCESS)
         return rv;
     ipc_shm_data = apr_shm_baseaddr_get(shm);
     ipc_shm_size = apr_shm_size_get(shm);
@@ -269,9 +271,11 @@ apr_status_t apr_proc_ipc_init(apr_pool_t *pool)
 
 APR_DECLARE(apr_status_t) apr_proc_parent_ipc_data_get(void **data,
                                                        apr_size_t *size)
-{
-    if (!ipc_shm_init)
-        return APR_EINIT;
+{    
+    if (!ipc_shm_init) {
+        if (proc_ipc_init() != APR_SUCCESS)
+            return APR_ENOMEM;
+    }
     if (!ipc_shm_data)
         return APR_ENOMEM;
 
@@ -417,9 +421,11 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           apr_pool_t *pool)
 {
     int i;
-    apr_status_t rc;
+    apr_status_t rc = APR_SUCCESS;
     const char * const empty_envp[] = {NULL};
     apr_proc_mutex_t *ipc_mutex = NULL;
+    const char *shmname = NULL;
+    apr_file_t *shmfile = NULL;
 
     if (!env) { /* Specs require an empty array instead of NULL;
                  * Purify will trigger a failure, even if many
@@ -459,6 +465,24 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     }
 
     if (attr->ipc_data && attr->ipc_size) {
+        const char *tempdir;
+        char *template;
+
+        rc = apr_temp_dir_get(&tempdir, pool);
+        if (rc != APR_SUCCESS) {
+            return rc;
+        }
+        apr_filepath_merge(&template, tempdir,
+                           "apr.ipc.XXXXXX",
+                           APR_FILEPATH_NATIVE, pool);
+        rc = apr_file_mktemp(&shmfile, template, 0, pool);
+        if (rc != APR_SUCCESS) {
+            return rc;
+        }
+        rc = apr_file_name_get(&shmname, shmfile);
+        if (rc != APR_SUCCESS) {
+            return rc;
+        }
         /* Create startup ipc mutex.
          * The purpose of this mutex is to enable
          * the 'start suspended' process behaviour.
@@ -482,6 +506,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         /* child process */
 
         if (ipc_mutex) {
+            char *env0;
             if ((rc = apr_proc_mutex_child_init(&ipc_mutex,
                                           NULL, pool)) != APR_SUCCESS) {
                 /* This should never happen.
@@ -503,6 +528,30 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 }
                 _exit(-1);
             }
+            env0 = apr_psprintf(pool, "_APRIPC%" APR_PID_T_FMT "=%s",
+                                getpid(), shmname);
+            putenv(env0);
+            if (!env) {
+                const char const *newenv[2];
+                newenv[0] = env0;
+                newenv[1] = NULL;
+                env = newenv;
+            }
+			else {
+                const char **newenv;
+                i = 0;
+                while (env[i])
+                    i++;
+                newenv = apr_palloc(pool, sizeof(char *) * (i + 1));
+                newenv[0] = env0;
+                i = 0;
+                while (env[i]) {
+                    newenv[i + 1] = env[i];
+                    i++;
+                }
+                env = newenv;
+            }
+            
             /* By now we should have the ipc shared memory set up.
              * We don't need the mutex any more.
              */
@@ -705,12 +754,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                      * error code. */
     }
     if (ipc_mutex) {
-        char shmname[64];
-        const char *tmpdir = NULL;
-
-        apr_temp_dir_get(&tmpdir, pool);
-        apr_snprintf(shmname, sizeof(shmname), "%s/.apripc.%" APR_PID_T_FMT,
-                     tmpdir, new->pid);        
+        apr_file_close(shmfile);
         rc = apr_shm_create(&attr->ipc_shm, attr->ipc_size,
                             shmname, attr->pool);
         if (rc == APR_SUCCESS) {
@@ -725,13 +769,19 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             /* Fill in shared memory with ipc data */
             memcpy(apr_shm_baseaddr_get(attr->ipc_shm),
                    attr->ipc_data, attr->ipc_size);
+            /* Unlock the ipc startup mutex.
+             * This mutex is destroyed when attr->pool is cleared
+             * or destroyed because it might not yet be initialised
+             * inside the child.
+             */
+            apr_proc_mutex_unlock(ipc_mutex);
         }
-        /* Unlock the ipc startup mutex.
-         * This mutex is destroyed when attr->pool is cleared
-         * or destroyed because it might not yet be initialised
-         * inside the child.
-         */
-        apr_proc_mutex_unlock(ipc_mutex);
+        else {
+            /* Destroy the mutex.
+             * This will cause the forked child to exit.
+             */
+            apr_proc_mutex_destroy(ipc_mutex);
+        }
     }
 
     /* Parent process */
@@ -747,7 +797,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         apr_file_close(attr->child_err);
     }
 
-    return APR_SUCCESS;
+    return rc;
 }
 
 APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,

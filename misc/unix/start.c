@@ -71,9 +71,6 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
 
     apr_signal_init(pool);
 
-    /* Try to initialize the shared memory if this is a child process.
-     */
-    apr_proc_ipc_init(pool);
     return APR_SUCCESS;
 }
 
