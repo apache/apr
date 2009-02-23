@@ -685,11 +685,6 @@ APR_DECLARE(apr_status_t) apr_procattr_ipc_data_get(apr_procattr_t *attr,
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_proc_ipc_init(apr_pool_t *pool)
-{
-    return APR_ENOTIMPL;
-}
-
 APR_DECLARE(apr_status_t) apr_proc_parent_ipc_data_get(void **data,
                                                        apr_size_t *size)
 {
