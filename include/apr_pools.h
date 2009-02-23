@@ -207,6 +207,10 @@ APR_DECLARE(apr_status_t) apr_pool_create_core_ex(apr_pool_t **newpool,
  *         destroyed by calling apr_pool_destroy, to prevent memory leaks.
  *         Use of this function is discouraged, think twice about whether
  *         you really really need it.
+ * @warning Any child cleanups registered against the new pool, or
+ *         against sub-pools thereof, will not be executed during an
+ *         invocation of apr_proc_create(), so resources created in an
+ *         "unmanaged" pool heirarchy will leak to child processes.
  */
 APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
                                                    apr_abortfunc_t abort_fn,
