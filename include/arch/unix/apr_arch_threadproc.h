@@ -19,8 +19,6 @@
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
 #include "apr_arch_file_io.h"
-#include "apr_arch_proc_mutex.h"
-#include "apr_arch_shm.h"
 #include "apr_perms_set.h"
 
 /* System headers required for thread/process library */
@@ -115,10 +113,6 @@ struct apr_procattr_t {
     apr_uid_t   uid;
     apr_gid_t   gid;
     apr_procattr_pscb_t *perms_set_callbacks;
-
-    apr_shm_t *ipc_shm;
-    const void *ipc_data;
-    apr_size_t ipc_size;
 };
 
 #endif  /* ! THREAD_PROC_H */
