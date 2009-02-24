@@ -22,7 +22,6 @@
 
 #include "apr_arch_proc_mutex.h" /* for apr_proc_mutex_unix_setup_lock() */
 #include "apr_arch_internal_time.h"
-#include "apr_arch_threadproc.h" /* for apr_procattr_ipc_after_init() */
 
 
 APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, 

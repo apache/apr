@@ -670,23 +670,3 @@ APR_DECLARE(apr_status_t) apr_procattr_perms_set_register(apr_procattr_t *attr,
 {
     return APR_ENOTIMPL;
 }
-
-APR_DECLARE(apr_status_t) apr_procattr_ipc_data_set(apr_procattr_t *attr,
-                                                    const void *data,
-                                                    apr_size_t size)
-{
-    return APR_ENOTIMPL;
-}
-
-APR_DECLARE(apr_status_t) apr_procattr_ipc_data_get(apr_procattr_t *attr,
-                                                    void **data,
-                                                    apr_size_t *size)
-{
-    return APR_ENOTIMPL;
-}
-
-APR_DECLARE(apr_status_t) apr_proc_parent_ipc_data_get(void **data,
-                                                       apr_size_t *size)
-{
-    return APR_ENOTIMPL;
-}
