@@ -341,73 +341,6 @@ APR_DECLARE(apr_status_t) apr_procattr_group_set(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_procattr_ipc_data_set(apr_procattr_t *attr,
-                                                    const void *data,
-                                                    apr_size_t size)
-{
-    attr->ipc_data = data;
-    attr->ipc_size = size;
-    return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_procattr_ipc_data_get(apr_procattr_t *attr,
-                                                    void **data,
-                                                    apr_size_t *size)
-{
-    if (attr->ipc_shm && attr->ipc_size) {
-        *data = apr_shm_baseaddr_get(attr->ipc_shm);
-        *size = attr->ipc_size;
-        return APR_SUCCESS;
-    }
-    else
-        return APR_EINIT;
-}
-
-/* Global ipc data setup if we are child
- * of the process that used child_data_set
- * TODO: This can probably be some struct.
- */
-static void *ipc_shm_data = NULL;
-static apr_size_t ipc_shm_size = 0;
-static int ipc_shm_init = 0;
-static apr_pool_t *ipc_pool = NULL;
-
-static apr_status_t proc_ipc_init(apr_pool_t *pool)
-{
-    apr_status_t rv;
-    char shmname[APR_PATH_MAX];
-    const char *tmpdir = NULL;
-    apr_shm_t *shm;
-    
-    if (ipc_shm_init++)
-        return APR_SUCCESS;
-    apr_pool_create(&ipc_pool, NULL);
-    apr_temp_dir_get(&tmpdir, ipc_pool);
-    apr_snprintf(shmname, sizeof(shmname), "%s\\APRIPC_%d",
-                 tmpdir, GetCurrentProcessId());
-
-    if ((rv = apr_shm_attach(&shm, shmname, ipc_pool)) != APR_SUCCESS)
-        return rv;
-    ipc_shm_data = apr_shm_baseaddr_get(shm);
-    ipc_shm_size = apr_shm_size_get(shm);
-    return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_proc_parent_ipc_data_get(void **data,
-                                                       apr_size_t *size)
-{
-    if (!ipc_shm_init) {
-        if (proc_ipc_init() != APR_SUCCESS)
-            return APR_ENOMEM;
-    }
-    if (!ipc_shm_data)
-        return APR_ENOMEM;
-
-    *data = ipc_shm_data;
-    *size = ipc_shm_size;
-    return APR_SUCCESS;
-}
-
 static const char* has_space(const char *str)
 {
     const char *ch;
@@ -520,7 +453,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           apr_pool_t *pool)
 {
     apr_status_t rv;
-    apr_status_t rc;
     apr_size_t i;
     const char *argv0;
     char *cmdline;
@@ -850,12 +782,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         if (attr->detached) {
             si.dwFlags |= STARTF_USESHOWWINDOW;
             si.wShowWindow = SW_HIDE;
-        }        
-        if (attr->ipc_data && attr->ipc_size) {
-            /* Child will be suspended until
-             * we create the shared memory
-             */
-            dwCreationFlags |= CREATE_SUSPENDED;
         }
 
 #ifndef _WIN32_WCE
@@ -982,23 +908,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                             NULL,              /* STARTUPINFO not supported */
                             &pi);
 #endif
-
-        if (rv && attr->ipc_data && attr->ipc_size) {
-            char shmname[APR_PATH_MAX];
-            const char *tmpdir = NULL;
-    
-            apr_temp_dir_get(&tmpdir, pool);
-            apr_snprintf(shmname, sizeof(shmname), "%s\\APRIPC_%d",
-                         tmpdir, pi.dwProcessId);        
-            rc = apr_shm_create(&attr->ipc_shm, attr->ipc_size,
-                                shmname, attr->pool);
-            if (rc == APR_SUCCESS) {
-                /* Fill in shared memory with ipc data */
-                memcpy(apr_shm_baseaddr_get(attr->ipc_shm),
-                       attr->ipc_data, attr->ipc_size);
-            }
-            ResumeThread(pi.hThread);
-        }
     }
 #endif /* APR_HAS_UNICODE_FS */
 #if APR_HAS_ANSI_FS
