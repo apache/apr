@@ -24,14 +24,25 @@ static apr_status_t file_dup(apr_file_t **new_file,
                              apr_file_t *old_file, apr_pool_t *p,
                              int which_dup)
 {
-    int rv;
+    int rv, flags = 0;
     
     if (which_dup == 2) {
         if ((*new_file) == NULL) {
             /* We can't dup2 unless we have a valid new_file */
             return APR_EINVAL;
         }
+#ifdef HAVE_DUP3
+        if (!(old_file->flags & APR_INHERIT))
+            flags |= O_CLOEXEC;
+        rv = dup3(old_file->filedes, (*new_file)->filedes, flags);
+#else
         rv = dup2(old_file->filedes, (*new_file)->filedes);
+        if (!(old_file->flags & APR_INHERIT)) {
+            if (rv == -1)
+                return errno;
+            APR_SET_FD_CLOEXEC((*new_file)->filedes);
+        }
+#endif
     } else {
         rv = dup(old_file->filedes);
     }
