@@ -21,6 +21,7 @@
 #include "apr_arch_file_io.h"
 #include "apr_arch_networkio.h"
 #include "apr_arch_poll_private.h"
+#include "apr_arch_inherit.h"
 
 #if defined(HAVE_EPOLL)
 
@@ -95,11 +96,19 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
     apr_status_t rv;
     int fd;
 
+#ifdef HAVE_EPOLL_CREATE1
+    fd = epoll_create1(EPOLL_CLOEXEC);
+#else
     fd = epoll_create(size);
+#endif
     if (fd < 0) {
         pollset->p = NULL;
         return apr_get_netos_error();
     }
+
+#ifndef HAVE_EPOLL_CREATE1
+    APR_SET_FD_CLOEXEC(fd);
+#endif
 
     pollset->p = apr_palloc(p, sizeof(apr_pollset_private_t));
 #if APR_HAS_THREADS
@@ -319,15 +328,23 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
 {
     int fd;
     
+#ifdef HAVE_EPOLL_CREATE1
+    fd = epoll_create1(EPOLL_CLOEXEC);
+#else
     fd = epoll_create(size);
+#endif
     
     if (fd < 0) {
         return apr_get_netos_error();
     }
+
+#ifndef HAVE_EPOLL_CREATE1
+    APR_SET_FD_CLOEXEC(fd);
+#endif
     
     pollcb->fd = fd;
     pollcb->pollset.epoll = apr_palloc(p, size * sizeof(struct epoll_event));
-    apr_pool_cleanup_register(p, pollcb, cb_cleanup, cb_cleanup);
+    apr_pool_cleanup_register(p, pollcb, cb_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }

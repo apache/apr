@@ -51,6 +51,7 @@
 #include "apr_strings.h" /* prototype of apr_mkstemp() */
 #include "apr_arch_file_io.h" /* prototype of apr_mkstemp() */
 #include "apr_portable.h" /* for apr_os_file_put() */
+#include "apr_arch_inherit.h"
 
 #ifndef HAVE_MKSTEMP
 
@@ -203,6 +204,7 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
     (*fp)->fname = apr_pstrdup(p, template);
 
     if (!(flags & APR_FILE_NOCLEANUP)) {
+        APR_SET_FD_CLOEXEC(fd);
         apr_pool_cleanup_register((*fp)->pool, (void *)(*fp),
                                   apr_unix_file_cleanup,
                                   apr_unix_child_file_cleanup);
