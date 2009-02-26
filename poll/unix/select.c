@@ -241,8 +241,8 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
 #else
 #ifdef NETWARE
         /* NetWare can't handle mixed descriptor types in select() */
-        if (descriptor->desc.f->is_pipe && !HAS_SOCKETS(pollset->set_type)) {
-            pollset->set_type = APR_POLL_FILE;
+        if (descriptor->desc.f->is_pipe && !HAS_SOCKETS(pollset->p->set_type)) {
+            pollset->p->set_type = APR_POLL_FILE;
             fd = descriptor->desc.f->filedes;
         }
         else {
@@ -357,7 +357,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     memcpy(&exceptset, &(pollset->p->exceptset), sizeof(fd_set));
 
 #ifdef NETWARE
-    if (HAS_PIPES(ppollset->p->set_type)) {
+    if (HAS_PIPES(pollset->p->set_type)) {
         rs = pipe_select(pollset->p->maxfd + 1, &readset, &writeset, &exceptset,
                          tvptr);
     }

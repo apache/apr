@@ -8,6 +8,8 @@ BEGIN {
 # List of functions that we don't support, yet??
 #/apr_##name##_set_inherit/{next}
 #/apr_##name##_unset_inherit/{next}
+#/apr_##name##_perms_set/{next}
+/apr_socket_perms_set/{next}
 
 
 function add_symbol (sym_name) {
@@ -64,6 +66,13 @@ function add_symbol (sym_name) {
     add_symbol("apr_" $0 "_inherit_unset")
     next
 }
+
+#/^[ \t]*APR_PERMS_SET_IMPLEMENT[^(]*[(][^)]*[)]/ {
+#    sub("[ \t]*APR_PERMS_SET_IMPLEMENT[^(]*[(]", "", $0)
+#    sub("[)].*$", "", $0)
+#    add_symbol("apr_" $0 "_perms_set")
+#    next
+#}
 
 /^[ \t]*AP[RUI]?_DECLARE_DATA .*;$/ {
        varname = $NF;
