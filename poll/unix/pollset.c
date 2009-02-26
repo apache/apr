@@ -26,6 +26,7 @@
 #include "apr_arch_file_io.h"
 #include "apr_arch_networkio.h"
 #include "apr_arch_poll_private.h"
+#include "apr_arch_inherit.h"
 
 static apr_pollset_method_e pollset_default_method = POLLSET_DEFAULT_METHOD;
 
@@ -87,6 +88,10 @@ static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
     fd.reqevents = APR_POLLIN;
     fd.desc_type = APR_POLL_FILE;
     fd.desc.f = pollset->wakeup_pipe[0];
+
+    APR_SET_FD_CLOEXEC(pollset->wakeup_pipe[0]->filedes);
+    APR_SET_FD_CLOEXEC(pollset->wakeup_pipe[1]->filedes);
+
     /* Add the pipe to the pollset
      */
     return apr_pollset_add(pollset, &fd);

@@ -21,6 +21,7 @@
 #include "apr_arch_file_io.h"
 #include "apr_arch_networkio.h"
 #include "apr_arch_poll_private.h"
+#include "apr_arch_inherit.h"
 
 #ifdef HAVE_KQUEUE
 
@@ -97,6 +98,8 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
     if (pollset->p->kqueue_fd == -1) {
         return apr_get_netos_error();
     }
+
+    APR_SET_FD_CLOEXEC(pollset->p->kqueue_fd);
 
     pollset->p->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
 
@@ -312,10 +315,12 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
     if (fd < 0) {
         return apr_get_netos_error();
     }
-    
+
+    APR_SET_FD_CLOEXEC(fd);
+ 
     pollcb->fd = fd;
     pollcb->pollset.ke = (struct kevent *)apr_pcalloc(p, size * sizeof(struct kevent));
-    apr_pool_cleanup_register(p, pollcb, cb_cleanup, cb_cleanup);
+    apr_pool_cleanup_register(p, pollcb, cb_cleanup, apr_pool_cleanup_null);
     
     return APR_SUCCESS;
 }

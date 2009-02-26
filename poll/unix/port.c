@@ -22,6 +22,7 @@
 #include "apr_arch_file_io.h"
 #include "apr_arch_networkio.h"
 #include "apr_arch_poll_private.h"
+#include "apr_arch_inherit.h"
 
 #if defined(HAVE_PORT_CREATE)
 
@@ -124,6 +125,8 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
         pollset->p = NULL;
         return APR_ENOMEM;
     }
+
+    APR_SET_FD_CLOEXEC(pollset->p->port_fd);
 
     pollset->p->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
 
@@ -395,8 +398,10 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
         return apr_get_netos_error();
     }
 
+    APR_SET_FD_CLOEXEC(fd);
+
     pollcb->pollset.port = apr_palloc(p, size * sizeof(port_event_t));
-    apr_pool_cleanup_register(p, pollcb, cb_cleanup, cb_cleanup);
+    apr_pool_cleanup_register(p, pollcb, cb_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }
