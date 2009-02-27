@@ -41,23 +41,18 @@ apr_status_t apr_##name##_inherit_set(apr_##name##_t *the##name)    \
     return APR_SUCCESS;                                             \
 }
 
-#define APR_SET_FD_CLOEXEC(fd)                                      \
-do {                                                                \
-    int flags;                                                      \
-    if ((flags = fcntl(fd, F_GETFD)) == -1)                         \
-        return errno;                                               \
-    flags |= FD_CLOEXEC;                                            \
-    if (fcntl(fd, F_SETFD, flags) == -1)                            \
-        return errno;                                               \
-} while (0)
-
 #define APR_IMPLEMENT_INHERIT_UNSET(name, flag, pool, cleanup)      \
 apr_status_t apr_##name##_inherit_unset(apr_##name##_t *the##name)  \
 {                                                                   \
     if (the##name->flag & APR_FILE_NOCLEANUP)                       \
         return APR_EINVAL;                                          \
     if (the##name->flag & APR_INHERIT) {                            \
-        APR_SET_FD_CLOEXEC(the##name->name##des);                   \
+        int flags;                                                  \
+        if ((flags = fcntl(the##name->name##des, F_GETFD)) == -1)   \
+            return errno;                                           \
+        flags |= FD_CLOEXEC;                                        \
+        if (fcntl(the##name->name##des, F_SETFD, flags) == -1)      \
+            return errno;                                           \
         the##name->flag &= ~APR_INHERIT;                            \
         apr_pool_child_cleanup_set(the##name->pool,                 \
                                    (void *)the##name,               \

@@ -89,8 +89,26 @@ static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
     fd.desc_type = APR_POLL_FILE;
     fd.desc.f = pollset->wakeup_pipe[0];
 
-    APR_SET_FD_CLOEXEC(pollset->wakeup_pipe[0]->filedes);
-    APR_SET_FD_CLOEXEC(pollset->wakeup_pipe[1]->filedes);
+    {
+        int flags;
+
+        if ((flags = fcntl(pollset->wakeup_pipe[0]->filedes, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl(pollset->wakeup_pipe[0]->filedes, F_SETFD, flags) == -1)
+            return errno;
+    }
+    {
+        int flags;
+
+        if ((flags = fcntl(pollset->wakeup_pipe[1]->filedes, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl(pollset->wakeup_pipe[1]->filedes, F_SETFD, flags) == -1)
+            return errno;
+    }
 
     /* Add the pipe to the pollset
      */
