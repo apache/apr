@@ -126,7 +126,16 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
         return APR_ENOMEM;
     }
 
-    APR_SET_FD_CLOEXEC(pollset->p->port_fd);
+    {
+        int flags;
+
+        if ((flags = fcntl(pollset->p->port_fd, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl(pollset->p->port_fd, F_SETFD, flags) == -1)
+            return errno;
+    }
 
     pollset->p->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
 
@@ -398,7 +407,16 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
         return apr_get_netos_error();
     }
 
-    APR_SET_FD_CLOEXEC(fd);
+    {
+        int flags;
+
+        if ((flags = fcntl(fd, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl(fd, F_SETFD, flags) == -1)
+            return errno;
+    }
 
     pollcb->pollset.port = apr_palloc(p, size * sizeof(port_event_t));
     apr_pool_cleanup_register(p, pollcb, cb_cleanup, apr_pool_cleanup_null);

@@ -44,7 +44,15 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
 
 
 	if (!(flags & APR_FILE_NOCLEANUP)) {
-            APR_SET_FD_CLOEXEC((*fp)->filedes);
+            int flags;
+
+            if ((flags = fcntl((*fp)->filedes, F_GETFD)) == -1)
+                return errno;
+
+            flags |= FD_CLOEXEC;
+            if (fcntl((*fp)->filedes, F_SETFD, flags) == -1)
+                return errno;
+
 	    apr_pool_cleanup_register((*fp)->pool, (void *)(*fp),
 				      apr_unix_file_cleanup,
 				      apr_unix_child_file_cleanup);

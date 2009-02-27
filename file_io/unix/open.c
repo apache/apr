@@ -164,7 +164,14 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
        return errno;
     }
     if (!(flag & APR_FILE_NOCLEANUP)) {
-	APR_SET_FD_CLOEXEC(fd);
+        int flags;
+
+        if ((flags = fcntl(fd, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl(fd, F_SETFD, flags) == -1)
+            return errno;
     }
 
     (*new) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
@@ -348,7 +355,15 @@ APR_DECLARE(apr_status_t) apr_file_inherit_unset(apr_file_t *thefile)
         return APR_EINVAL;
     }
     if (thefile->flags & APR_INHERIT) {
-        APR_SET_FD_CLOEXEC(thefile->filedes);
+        int flags;
+
+        if ((flags = fcntl(thefile->filedes, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl(thefile->filedes, F_SETFD, flags) == -1)
+            return errno;
+
         thefile->flags &= ~APR_INHERIT;
         apr_pool_child_cleanup_set(thefile->pool,
                                    (void *)thefile,
