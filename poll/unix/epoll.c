@@ -292,18 +292,19 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
                 j++;
             }
         }
-        if (((*num) = j))
+        if (((*num) = j)) { /* any event besides wakeup pipe? */
             rv = APR_SUCCESS;
 
-        if (descriptors) {
-            *descriptors = pollset->p->result_set;
+            if (descriptors) {
+                *descriptors = pollset->p->result_set;
+            }
         }
     }
 
     if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
         pollset_lock_rings();
 
-        /* Shift all PFDs in the Dead Ring to be Free Ring */
+        /* Shift all PFDs in the Dead Ring to the Free Ring */
         APR_RING_CONCAT(&(pollset->p->free_ring), &(pollset->p->dead_ring), pfd_elem_t, link);
 
         pollset_unlock_rings();
