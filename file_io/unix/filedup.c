@@ -28,7 +28,7 @@ static apr_status_t file_dup(apr_file_t **new_file,
 #ifdef HAVE_DUP3
     int flags = 0;
 #endif
-    
+
     if (which_dup == 2) {
         if ((*new_file) == NULL) {
             /* We can't dup2 unless we have a valid new_file */
@@ -41,9 +41,18 @@ static apr_status_t file_dup(apr_file_t **new_file,
 #else
         rv = dup2(old_file->filedes, (*new_file)->filedes);
         if (!(old_file->flags & APR_INHERIT)) {
+            int flags;
+
             if (rv == -1)
                 return errno;
-            APR_SET_FD_CLOEXEC((*new_file)->filedes);
+
+            if ((flags = fcntl((*new_file)->filedes, F_GETFD)) == -1)
+                return errno;
+
+            flags |= FD_CLOEXEC;
+            if (fcntl((*new_file)->filedes, F_SETFD, flags) == -1)
+                return errno;
+
         }
 #endif
     } else {
