@@ -165,7 +165,16 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
     set_socket_vars(*new, family, type, oprotocol);
 
 #ifndef HAVE_SOCK_CLOEXEC
-    APR_SET_FD_CLOEXEC((*new)->socketdes);
+    {
+        int flags;
+
+        if ((flags = fcntl((*new)->socketdes, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl((*new)->socketdes, F_SETFD, flags) == -1)
+            return errno;
+    }
 #endif
 
     (*new)->timeout = -1;
@@ -313,7 +322,16 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
     }
 
 #ifndef HAVE_ACCEPT4
-    APR_SET_FD_CLOEXEC((*new)->socketdes);
+    {
+        int flags;
+
+        if ((flags = fcntl((*new)->socketdes, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl((*new)->socketdes, F_SETFD, flags) == -1)
+            return errno;
+    }
 #endif
 
     (*new)->inherit = 0;
