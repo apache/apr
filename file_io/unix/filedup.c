@@ -24,7 +24,10 @@ static apr_status_t file_dup(apr_file_t **new_file,
                              apr_file_t *old_file, apr_pool_t *p,
                              int which_dup)
 {
-    int rv, flags = 0;
+    int rv;
+#ifdef HAVE_DUP3
+    int flags = 0;
+#endif
     
     if (which_dup == 2) {
         if ((*new_file) == NULL) {
