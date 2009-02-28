@@ -64,7 +64,7 @@
 #  define RANLIB "ranlib"
 #  define PIC_FLAG "-fPIC -fno-common"
 #  define SHARED_OPTS "-dynamiclib"
-#  define MODULE_OPTS "-bundle"
+#  define MODULE_OPTS "-bundle -dynamic"
 #  define DYNAMIC_LINK_OPTS "-flat_namespace"
 #  define DYNAMIC_LINK_UNDEFINED "-undefined suppress"
 #  define dynamic_link_version_func darwin_dynamic_link_function
@@ -697,6 +697,44 @@ void safe_mkdir(const char *path)
 #endif
 }
 
+/* returns just a file's name without the path */
+const char *jlibtool_basename(const char *fullpath)
+{
+    const char *name = strrchr(fullpath, '/');
+
+    if (name == NULL) {
+        name = strrchr(fullpath, '\\');
+    }
+
+    if (name == NULL) {
+        name = fullpath;
+    } else {
+        name++;
+    }
+
+    return name;
+}
+
+/* returns just a file's name without path or extension */
+const char *nameof(const char *fullpath)
+{
+    const char *name;
+    const char *ext;
+
+    name = jlibtool_basename(fullpath);
+    ext = strrchr(name, '.');
+
+    if (ext) {
+        char *trimmed;
+        trimmed = malloc(ext - name + 1);
+        strncpy(trimmed, name, ext - name);
+        trimmed[ext-name] = 0;
+        return trimmed;
+    }
+
+    return name;
+}
+
 /* version_info is in the form of MAJOR:MINOR:PATCH */
 const char *darwin_dynamic_link_function(const char *version_info)
 {
@@ -749,14 +787,19 @@ char *gen_library_name(const char *name, int genlib)
 {
     char *newarg, *newext;
 
-    newarg = (char *)malloc(strlen(name) + 10);
+    newarg = (char *)malloc(strlen(name) + 11);
     strcpy(newarg, ".libs/");
 
     if (genlib == 2 && strncmp(name, "lib", 3) == 0) {
         name += 3;
     }
 
-    strcat(newarg, name);
+    if (genlib == 2) {
+        strcat(newarg, jlibtool_basename(name));
+    }
+    else {
+        strcat(newarg, name);
+    }
 
     newext = strrchr(newarg, '.') + 1;
 
@@ -1138,44 +1181,6 @@ void add_linker_flag_prefix(count_chars *cc, const char *arg)
 #endif
 }
 
-/* returns just a file's name without the path */
-const char *jlibtool_basename(const char *fullpath)
-{
-    const char *name = strrchr(fullpath, '/');
-
-    if (name == NULL) {
-        name = strrchr(fullpath, '\\');
-    }
-
-    if (name == NULL) {
-        name = fullpath;
-    } else {
-        name++;
-    }
-
-    return name;
-}
-
-/* returns just a file's name without path or extension */
-const char *nameof(const char *fullpath)
-{
-    const char *name;
-    const char *ext;
-
-    name = jlibtool_basename(fullpath);
-    ext = strrchr(name, '.');
-
-    if (ext) {
-        char *trimmed;
-        trimmed = malloc(ext - name + 1);
-        strncpy(trimmed, name, ext - name);
-        trimmed[ext-name] = 0;
-        return trimmed;
-    }
-
-    return name;
-}
-
 int explode_static_lib(command_t *cmd_data, const char *lib)
 {
     count_chars tmpdir_cc, libname_cc;
@@ -1527,6 +1532,10 @@ void parse_args(int argc, char *argv[], command_t *cmd_data)
                 } else if (strcmp(arg+1, "rpath") == 0) {
                     /* Aha, we should try to link both! */
                     cmd_data->install_path = argv[++a];
+                    argused = 1;
+                } else if (strcmp(arg+1, "release") == 0) {
+                    /* Store for later deciphering */
+                    cmd_data->version_info = argv[++a];
                     argused = 1;
                 } else if (strcmp(arg+1, "version-info") == 0) {
                     /* Store for later deciphering */
@@ -1894,18 +1903,17 @@ int run_mode(command_t *cmd_data)
             clear_count_chars(cmd_data->program_opts);
 
             append_count_chars(cmd_data->program_opts, cmd_data->arglist);
-            if (cmd_data->output != otModule) {
+            if (cmd_data->output == otModule) {
+#ifdef MODULE_OPTS
+                push_count_chars(cmd_data->program_opts, MODULE_OPTS);
+#endif
+            } else {
 #ifdef SHARED_OPTS
                 push_count_chars(cmd_data->program_opts, SHARED_OPTS);
 #endif
 #ifdef dynamic_link_version_func
                 push_count_chars(cmd_data->program_opts,
                              dynamic_link_version_func(cmd_data->version_info));
-#endif
-            }
-            if (cmd_data->output == otModule) {
-#ifdef MODULE_OPTS
-                push_count_chars(cmd_data->program_opts, MODULE_OPTS);
 #endif
             }
             add_dynamic_link_opts(cmd_data, cmd_data->program_opts);
