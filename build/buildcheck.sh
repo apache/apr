@@ -55,9 +55,6 @@ if test "$1" = "1"; then
       lt_status="bad"
    fi
 fi
-if test "$1" = "2"; then
-  lt_status="bad"
-fi
 if test $lt_status = "good"; then
    echo "buildconf: libtool version $lt_pversion (ok)"
    exit 0
