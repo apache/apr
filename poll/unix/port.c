@@ -410,11 +410,11 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
     {
         int flags;
 
-        if ((flags = fcntl(fd, F_GETFD)) == -1)
+        if ((flags = fcntl(pollcb->fd, F_GETFD)) == -1)
             return errno;
 
         flags |= FD_CLOEXEC;
-        if (fcntl(fd, F_SETFD, flags) == -1)
+        if (fcntl(pollcb->fd, F_SETFD, flags) == -1)
             return errno;
     }
 
