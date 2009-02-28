@@ -200,6 +200,12 @@ APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t *pollset);
  * @remark If the pollset has been created with APR_POLLSET_NOCOPY, the 
  *         apr_pollfd_t structure referenced by descriptor will not be copied
  *         and must have a lifetime at least as long as the pollset.
+ * @remark Do not add the same socket or file descriptor to the same pollset
+ *         multiple times, even if the requested events differ for the 
+ *         different calls to apr_pollset_add().  If the events of interest
+ *         for a descriptor change, you must first remove the descriptor 
+ *         from the pollset with apr_pollset_remove(), then add it again 
+ *         specifying all requested events.
  */
 APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
                                           const apr_pollfd_t *descriptor);
