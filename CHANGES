@@ -1,6 +1,12 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Set CLOEXEC flags where appropriate. Either use new O_CLOEXEC flag and
+     associated functions, such as dup3(), accept4(), epoll_create1() etc.,
+     or simply set CLOEXEC flag using fcntl().
+     [Stefan Fritsch <sf sfritsch.de>, 
+      Arkadiusz Miskiewicz <arekm pld-linux.org>] PR 46425.
+
   *) Added Unix domain socket support.
      [Mladen Turk]
 
