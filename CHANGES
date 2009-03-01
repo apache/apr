@@ -3,26 +3,21 @@ Changes for APR 2.0.0
 
   *) Set CLOEXEC flags where appropriate. Either use new O_CLOEXEC flag and
      associated functions, such as dup3(), accept4(), epoll_create1() etc.,
-     or simply set CLOEXEC flag using fcntl().
-     [Stefan Fritsch <sf sfritsch.de>, 
-      Arkadiusz Miskiewicz <arekm pld-linux.org>] PR 46425.
+     or simply set CLOEXEC flag using fcntl().  PR 46425.  [Stefan Fritsch
+     <sf sfritsch.de>, Arkadiusz Miskiewicz <arekm pld-linux.org>]
 
-  *) Added Unix domain socket support.
-     [Mladen Turk]
+  *) Added Unix domain socket support.  [Mladen Turk]
 
-  *) Win32: Use WSAPoll as default pollset method if supported and
-     found inside winsock dll.
-     [Mladen Turk]
+  *) Win32: Use WSAPoll as default pollset method if supported and found
+     inside winsock dll.  [Mladen Turk]
 
   *) Make apr_pollset and apr_pollcb implementations using providers.
      Added apr_pollset_create_ex and apr_pollcb_create_ex that allows
-     choosing non-default providers.
-     [Mladen Turk]
+     choosing non-default providers.  [Mladen Turk]
 
-  *) Introduce APR_PERMS_SET macros for setting the owner/group on
-     objects. Currently only implemented for shm, proc and global
-     mutexes on posix platforms.
-     [Mladen Turk]
+  *) Introduce APR_PERMS_SET macros for setting the owner/group on objects
+     Currently only implemented for shm, proc and global mutexes on posix
+     platforms.  [Mladen Turk]
 
 Changes for APR 1.4.0
 
