@@ -223,6 +223,9 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
  *         with APR_EINTR.  Option (1) is recommended, but option (2) is
  *         allowed for implementations where option (1) is impossible
  *         or impractical.
+ * @remark apr_pollset_remove() cannot be used to remove a subset of requested
+ *         events for a descriptor.  The reqevents field in the apr_pollfd_t
+ *         parameter must contain the same value when removing as when adding.
  */
 APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
                                              const apr_pollfd_t *descriptor);
@@ -318,7 +321,7 @@ APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
  *         method cannot be used, the default method will be used unless the
  *         APR_POLLSET_NODEFAULT flag has been specified.
  *
- * @remark Pollcb is only supported on some platforms; the apr_pollcb_create()
+ * @remark Pollcb is only supported on some platforms; the apr_pollcb_create_ex()
  * call will fail with APR_ENOTIMPL on platforms where it is not supported.
  */
 APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **pollcb,
@@ -337,6 +340,12 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **pollcb,
  * @remark Unlike the apr_pollset API, the descriptor is not copied, and users 
  *         must retain the memory used by descriptor, as the same pointer will
  *         be returned to them from apr_pollcb_poll.
+ * @remark Do not add the same socket or file descriptor to the same pollcb
+ *         multiple times, even if the requested events differ for the 
+ *         different calls to apr_pollcb_add().  If the events of interest
+ *         for a descriptor change, you must first remove the descriptor 
+ *         from the pollcb with apr_pollcb_remove(), then add it again 
+ *         specifying all requested events.
  */
 APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
                                          apr_pollfd_t *descriptor);
@@ -344,6 +353,9 @@ APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
  * Remove a descriptor from a pollcb
  * @param pollcb The pollcb from which to remove the descriptor
  * @param descriptor The descriptor to remove
+ * @remark apr_pollcb_remove() cannot be used to remove a subset of requested
+ *         events for a descriptor.  The reqevents field in the apr_pollfd_t
+ *         parameter must contain the same value when removing as when adding.
  */
 APR_DECLARE(apr_status_t) apr_pollcb_remove(apr_pollcb_t *pollcb,
                                             apr_pollfd_t *descriptor);
@@ -366,6 +378,9 @@ typedef apr_status_t (*apr_pollcb_cb_t)(void *baton, apr_pollfd_t *descriptor);
  *                signalled.
  * @param func Callback function to call for each active descriptor.
  * @param baton Opaque baton passed to the callback function.
+ * @remark Multiple signalled conditions for the same descriptor may be reported
+ *         in one or more calls to the callback function, depending on the
+ *         implementation.
  */
 APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
                                           apr_interval_time_t timeout,
