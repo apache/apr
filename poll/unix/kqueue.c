@@ -288,10 +288,11 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
                 j++;
             }
         }
-        if ((*num = j))
+        if ((*num = j)) { /* any event besides wakeup pipe? */
             rv = APR_SUCCESS;
-        if (descriptors) {
-            *descriptors = pollset->p->result_set;
+            if (descriptors) {
+                *descriptors = pollset->p->result_set;
+            }
         }
     }
 
