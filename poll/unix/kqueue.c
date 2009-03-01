@@ -31,7 +31,7 @@ static apr_int16_t get_kqueue_revent(apr_int16_t event, apr_int16_t flags)
 
     if (event == EVFILT_READ)
         rv |= APR_POLLIN;
-    if (event == EVFILT_WRITE)
+    else if (event == EVFILT_WRITE)
         rv |= APR_POLLOUT;
     if (flags & EV_EOF)
         rv |= APR_POLLHUP;
@@ -74,7 +74,7 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
                                         apr_pool_t *p,
                                         apr_uint32_t flags)
 {
-    apr_status_t rv = APR_SUCCESS;
+    apr_status_t rv;
     pollset->p = apr_palloc(p, sizeof(apr_pollset_private_t));
 #if APR_HAS_THREADS
     if (flags & APR_POLLSET_THREADSAFE &&
@@ -108,6 +108,7 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
     pollset->p->kqueue_fd = kqueue();
 
     if (pollset->p->kqueue_fd == -1) {
+        pollset->p = NULL;
         return apr_get_netos_error();
     }
 
@@ -128,7 +129,7 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
     APR_RING_INIT(&pollset->p->free_ring, pfd_elem_t, link);
     APR_RING_INIT(&pollset->p->dead_ring, pfd_elem_t, link);
 
-    return rv;
+    return APR_SUCCESS;
 }
 
 static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
@@ -223,18 +224,16 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
         }
     }
 
-    if (!APR_RING_EMPTY(&(pollset->p->query_ring), pfd_elem_t, link)) {
-        for (ep = APR_RING_FIRST(&(pollset->p->query_ring));
-             ep != APR_RING_SENTINEL(&(pollset->p->query_ring),
-                                     pfd_elem_t, link);
-             ep = APR_RING_NEXT(ep, link)) {
+    for (ep = APR_RING_FIRST(&(pollset->p->query_ring));
+         ep != APR_RING_SENTINEL(&(pollset->p->query_ring),
+                                 pfd_elem_t, link);
+         ep = APR_RING_NEXT(ep, link)) {
 
-            if (descriptor->desc.s == ep->pfd.desc.s) {
-                APR_RING_REMOVE(ep, link);
-                APR_RING_INSERT_TAIL(&(pollset->p->dead_ring),
-                                     ep, pfd_elem_t, link);
-                break;
-            }
+        if (descriptor->desc.s == ep->pfd.desc.s) {
+            APR_RING_REMOVE(ep, link);
+            APR_RING_INSERT_TAIL(&(pollset->p->dead_ring),
+                                 ep, pfd_elem_t, link);
+            break;
         }
     }
 
@@ -299,7 +298,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
 
     pollset_lock_rings();
 
-    /* Shift all PFDs in the Dead Ring to be Free Ring */
+    /* Shift all PFDs in the Dead Ring to the Free Ring */
     APR_RING_CONCAT(&(pollset->p->free_ring), &(pollset->p->dead_ring),
                     pfd_elem_t, link);
 
@@ -325,7 +324,6 @@ static apr_status_t cb_cleanup(void *b_)
     close(pollcb->fd);
     return APR_SUCCESS;
 }
-
 
 static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
                                        apr_uint32_t size,
