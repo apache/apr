@@ -190,7 +190,7 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
                                         const apr_pollfd_t *descriptor)
 {
     pfd_elem_t *ep;
-    apr_status_t rv = APR_SUCCESS;
+    apr_status_t rv;
     apr_os_sock_t fd;
 
     pollset_lock_rings();
@@ -202,21 +202,22 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
         fd = descriptor->desc.f->filedes;
     }
 
+    rv = APR_NOTFOUND; /* unless at least one of the specified conditions is */
     if (descriptor->reqevents & APR_POLLIN) {
         EV_SET(&pollset->p->kevent, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
 
         if (kevent(pollset->p->kqueue_fd, &pollset->p->kevent, 1, NULL, 0,
-                   NULL) == -1) {
-            rv = APR_NOTFOUND;
+                   NULL) != -1) {
+            rv = APR_SUCCESS;
         }
     }
 
-    if (descriptor->reqevents & APR_POLLOUT && rv == APR_SUCCESS) {
+    if (descriptor->reqevents & APR_POLLOUT) {
         EV_SET(&pollset->p->kevent, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 
         if (kevent(pollset->p->kqueue_fd, &pollset->p->kevent, 1, NULL, 0,
-                   NULL) == -1) {
-            rv = APR_NOTFOUND;
+                   NULL) != -1) {
+            rv = APR_SUCCESS;
         }
     }
 
@@ -389,7 +390,7 @@ static apr_status_t impl_pollcb_add(apr_pollcb_t *pollcb,
 static apr_status_t impl_pollcb_remove(apr_pollcb_t *pollcb,
                                        apr_pollfd_t *descriptor)
 {
-    apr_status_t rv = APR_SUCCESS;
+    apr_status_t rv;
     struct kevent ev;
     apr_os_sock_t fd;
     
@@ -399,23 +400,21 @@ static apr_status_t impl_pollcb_remove(apr_pollcb_t *pollcb,
     else {
         fd = descriptor->desc.f->filedes;
     }
-    
+
+    rv = APR_NOTFOUND; /* unless at least one of the specified conditions is */
     if (descriptor->reqevents & APR_POLLIN) {
         EV_SET(&ev, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
         
-        if (kevent(pollcb->fd, &ev, 1, NULL, 0, NULL) == -1) {
-            rv = APR_NOTFOUND;
+        if (kevent(pollcb->fd, &ev, 1, NULL, 0, NULL) != -1) {
+            rv = APR_SUCCESS;
         }
     }
     
-    if (descriptor->reqevents & APR_POLLOUT && rv == APR_SUCCESS) {
-        /* XXXX: this is less than optimal, shouldn't we still try to 
-         *        remove the FD even if it wasn't in the readset?
-         */
+    if (descriptor->reqevents & APR_POLLOUT) {
         EV_SET(&ev, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
         
-        if (kevent(pollcb->fd, &ev, 1, NULL, 0, NULL) == -1) {
-            rv = APR_NOTFOUND;
+        if (kevent(pollcb->fd, &ev, 1, NULL, 0, NULL) != -1) {
+            rv = APR_SUCCESS;
         }
     }
     
