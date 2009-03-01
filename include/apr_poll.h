@@ -241,6 +241,9 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
  *         APR_POLLSET_WAKEABLE, apr_pollset_wakeup() has been called while
  *         waiting for activity, and there were no signalled descriptors at the
  *         time of the wakeup call.
+ * @remark Multiple signalled conditions for the same descriptor may be reported
+ *         in one or more returned apr_pollfd_t structures, depending on the
+ *         implementation.
  */
 APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                                            apr_interval_time_t timeout,

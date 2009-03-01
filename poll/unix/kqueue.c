@@ -44,7 +44,9 @@ static apr_int16_t get_kqueue_revent(apr_int16_t event, apr_int16_t flags)
 struct apr_pollset_private_t
 {
     int kqueue_fd;
-    struct kevent kevent;
+    struct kevent in_kevent;
+    struct kevent out_kevent;
+    apr_uint32_t setsize;
     struct kevent *ke_set;
     apr_pollfd_t *result_set;
 #if APR_HAS_THREADS
@@ -88,10 +90,19 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
     }
 #endif
 
-    pollset->p->ke_set =
-        (struct kevent *) apr_palloc(p, size * sizeof(struct kevent));
+    /* POLLIN and POLLOUT are represented in different returned
+     * events, so we need 2 entries per descriptor in the result set,
+     * both for what is returned by kevent() and what is returned to
+     * the caller of apr_pollset_poll() (since it doesn't spend the
+     * CPU to coalesce separate APR_POLLIN and APR_POLLOUT events
+     * for the same descriptor)
+     */
+    pollset->p->setsize = 2 * size;
 
-    memset(pollset->p->ke_set, 0, size * sizeof(struct kevent));
+    pollset->p->ke_set =
+        (struct kevent *) apr_palloc(p, pollset->p->setsize * sizeof(struct kevent));
+
+    memset(pollset->p->ke_set, 0, pollset->p->setsize * sizeof(struct kevent));
 
     pollset->p->kqueue_fd = kqueue();
 
@@ -110,7 +121,7 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
             return errno;
     }
 
-    pollset->p->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
+    pollset->p->result_set = apr_palloc(p, pollset->p->setsize * sizeof(apr_pollfd_t));
 
     APR_RING_INIT(&pollset->p->query_ring, pfd_elem_t, link);
     APR_RING_INIT(&pollset->p->free_ring, pfd_elem_t, link);
@@ -146,18 +157,18 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
     }
 
     if (descriptor->reqevents & APR_POLLIN) {
-        EV_SET(&pollset->p->kevent, fd, EVFILT_READ, EV_ADD, 0, 0, elem);
+        EV_SET(&pollset->p->in_kevent, fd, EVFILT_READ, EV_ADD, 0, 0, elem);
 
-        if (kevent(pollset->p->kqueue_fd, &pollset->p->kevent, 1, NULL, 0,
+        if (kevent(pollset->p->kqueue_fd, &pollset->p->in_kevent, 1, NULL, 0,
                    NULL) == -1) {
             rv = apr_get_netos_error();
         }
     }
 
     if (descriptor->reqevents & APR_POLLOUT && rv == APR_SUCCESS) {
-        EV_SET(&pollset->p->kevent, fd, EVFILT_WRITE, EV_ADD, 0, 0, elem);
+        EV_SET(&pollset->p->out_kevent, fd, EVFILT_WRITE, EV_ADD, 0, 0, elem);
 
-        if (kevent(pollset->p->kqueue_fd, &pollset->p->kevent, 1, NULL, 0,
+        if (kevent(pollset->p->kqueue_fd, &pollset->p->out_kevent, 1, NULL, 0,
                    NULL) == -1) {
             rv = apr_get_netos_error();
         }
@@ -193,18 +204,18 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
     }
 
     if (descriptor->reqevents & APR_POLLIN) {
-        EV_SET(&pollset->p->kevent, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+        EV_SET(&pollset->p->in_kevent, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
 
-        if (kevent(pollset->p->kqueue_fd, &pollset->p->kevent, 1, NULL, 0,
+        if (kevent(pollset->p->kqueue_fd, &pollset->p->in_kevent, 1, NULL, 0,
                    NULL) == -1) {
             rv = APR_NOTFOUND;
         }
     }
 
     if (descriptor->reqevents & APR_POLLOUT && rv == APR_SUCCESS) {
-        EV_SET(&pollset->p->kevent, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+        EV_SET(&pollset->p->out_kevent, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 
-        if (kevent(pollset->p->kqueue_fd, &pollset->p->kevent, 1, NULL, 0,
+        if (kevent(pollset->p->kqueue_fd, &pollset->p->out_kevent, 1, NULL, 0,
                    NULL) == -1) {
             rv = APR_NOTFOUND;
         }
@@ -250,7 +261,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     }
 
     ret = kevent(pollset->p->kqueue_fd, NULL, 0, pollset->p->ke_set,
-                 pollset->nalloc, tvptr);
+                 pollset->p->setsize, tvptr);
     (*num) = ret;
     if (ret < 0) {
         rv = apr_get_netos_error();
@@ -337,7 +348,7 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
     }
  
     pollcb->fd = fd;
-    pollcb->pollset.ke = (struct kevent *)apr_pcalloc(p, size * sizeof(struct kevent));
+    pollcb->pollset.ke = (struct kevent *)apr_pcalloc(p, 2 * size * sizeof(struct kevent));
     apr_pool_cleanup_register(p, pollcb, cb_cleanup, apr_pool_cleanup_null);
     
     return APR_SUCCESS;
@@ -431,7 +442,7 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
         tvptr = &tv;
     }
     
-    ret = kevent(pollcb->fd, NULL, 0, pollcb->pollset.ke, pollcb->nalloc,
+    ret = kevent(pollcb->fd, NULL, 0, pollcb->pollset.ke, 2 * pollcb->nalloc,
                  tvptr);
 
     if (ret < 0) {
