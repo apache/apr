@@ -44,8 +44,7 @@ static apr_int16_t get_kqueue_revent(apr_int16_t event, apr_int16_t flags)
 struct apr_pollset_private_t
 {
     int kqueue_fd;
-    struct kevent in_kevent;
-    struct kevent out_kevent;
+    struct kevent kevent;
     apr_uint32_t setsize;
     struct kevent *ke_set;
     apr_pollfd_t *result_set;
@@ -157,18 +156,18 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
     }
 
     if (descriptor->reqevents & APR_POLLIN) {
-        EV_SET(&pollset->p->in_kevent, fd, EVFILT_READ, EV_ADD, 0, 0, elem);
+        EV_SET(&pollset->p->kevent, fd, EVFILT_READ, EV_ADD, 0, 0, elem);
 
-        if (kevent(pollset->p->kqueue_fd, &pollset->p->in_kevent, 1, NULL, 0,
+        if (kevent(pollset->p->kqueue_fd, &pollset->p->kevent, 1, NULL, 0,
                    NULL) == -1) {
             rv = apr_get_netos_error();
         }
     }
 
     if (descriptor->reqevents & APR_POLLOUT && rv == APR_SUCCESS) {
-        EV_SET(&pollset->p->out_kevent, fd, EVFILT_WRITE, EV_ADD, 0, 0, elem);
+        EV_SET(&pollset->p->kevent, fd, EVFILT_WRITE, EV_ADD, 0, 0, elem);
 
-        if (kevent(pollset->p->kqueue_fd, &pollset->p->out_kevent, 1, NULL, 0,
+        if (kevent(pollset->p->kqueue_fd, &pollset->p->kevent, 1, NULL, 0,
                    NULL) == -1) {
             rv = apr_get_netos_error();
         }
@@ -204,18 +203,18 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
     }
 
     if (descriptor->reqevents & APR_POLLIN) {
-        EV_SET(&pollset->p->in_kevent, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+        EV_SET(&pollset->p->kevent, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
 
-        if (kevent(pollset->p->kqueue_fd, &pollset->p->in_kevent, 1, NULL, 0,
+        if (kevent(pollset->p->kqueue_fd, &pollset->p->kevent, 1, NULL, 0,
                    NULL) == -1) {
             rv = APR_NOTFOUND;
         }
     }
 
     if (descriptor->reqevents & APR_POLLOUT && rv == APR_SUCCESS) {
-        EV_SET(&pollset->p->out_kevent, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+        EV_SET(&pollset->p->kevent, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 
-        if (kevent(pollset->p->kqueue_fd, &pollset->p->out_kevent, 1, NULL, 0,
+        if (kevent(pollset->p->kqueue_fd, &pollset->p->kevent, 1, NULL, 0,
                    NULL) == -1) {
             rv = APR_NOTFOUND;
         }
