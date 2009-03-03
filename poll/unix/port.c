@@ -36,15 +36,7 @@ static apr_int16_t get_event(apr_int16_t event)
         rv |= POLLPRI;
     if (event & APR_POLLOUT)
         rv |= POLLOUT;
-    /* TODO: Confirm that the set of return-only events is the same as with 
-     * poll(), and axe these checks:
-     */
-    if (event & APR_POLLERR)
-        rv |= POLLERR;
-    if (event & APR_POLLHUP)
-        rv |= POLLHUP;
-    if (event & APR_POLLNVAL)
-        rv |= POLLNVAL;
+    /* POLLERR, POLLHUP, and POLLNVAL aren't valid as requested events */
 
     return rv;
 }
