@@ -315,6 +315,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
                              fd, get_event(ep->pfd.reqevents), ep);
         if (ret < 0) {
             rv = apr_get_netos_error();
+            APR_RING_INSERT_TAIL(&(pollset->p->free_ring), ep, pfd_elem_t, link);
             break;
         }
 
