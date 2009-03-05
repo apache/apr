@@ -206,6 +206,7 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
     apr_status_t rv = APR_SUCCESS;
     int res;
     int err = 0;
+    int found;
 
     pollset_lock_rings();
 
@@ -223,12 +224,21 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
         rv = APR_NOTFOUND;
     }
 
-    for (ep = APR_RING_FIRST(&(pollset->p->query_ring));
-         ep != APR_RING_SENTINEL(&(pollset->p->query_ring),
+    /* Search the add ring first.  This ring is often shorter,
+     * and it often contains the descriptor being removed.  
+     * (For the common scenario where apr_pollset_poll() 
+     * returns activity for the descriptor and the descriptor
+     * is then removed from the pollset, it will have just 
+     * been moved to the add ring by apr_pollset_poll().)
+     */
+    found = 0;
+    for (ep = APR_RING_FIRST(&(pollset->p->add_ring));
+         ep != APR_RING_SENTINEL(&(pollset->p->add_ring),
                                  pfd_elem_t, link);
          ep = APR_RING_NEXT(ep, link)) {
 
         if (descriptor->desc.s == ep->pfd.desc.s) {
+            found = 1;
             APR_RING_REMOVE(ep, link);
             APR_RING_INSERT_TAIL(&(pollset->p->dead_ring),
                                  ep, pfd_elem_t, link);
@@ -239,19 +249,21 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
         }
     }
 
-    for (ep = APR_RING_FIRST(&(pollset->p->add_ring));
-         ep != APR_RING_SENTINEL(&(pollset->p->add_ring),
-                                 pfd_elem_t, link);
-         ep = APR_RING_NEXT(ep, link)) {
+    if (!found) {
+        for (ep = APR_RING_FIRST(&(pollset->p->query_ring));
+             ep != APR_RING_SENTINEL(&(pollset->p->query_ring),
+                                     pfd_elem_t, link);
+             ep = APR_RING_NEXT(ep, link)) {
 
-        if (descriptor->desc.s == ep->pfd.desc.s) {
-            APR_RING_REMOVE(ep, link);
-            APR_RING_INSERT_TAIL(&(pollset->p->dead_ring),
-                                 ep, pfd_elem_t, link);
-            if (ENOENT == err) {
-                rv = APR_SUCCESS;
+            if (descriptor->desc.s == ep->pfd.desc.s) {
+                APR_RING_REMOVE(ep, link);
+                APR_RING_INSERT_TAIL(&(pollset->p->dead_ring),
+                                     ep, pfd_elem_t, link);
+                if (ENOENT == err) {
+                    rv = APR_SUCCESS;
+                }
+                break;
             }
-            break;
         }
     }
 
