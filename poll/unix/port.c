@@ -217,19 +217,15 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
         fd = descriptor->desc.f->filedes;
     }
 
-    res = port_dissociate(pollset->p->port_fd, PORT_SOURCE_FD, fd);
-
-    if (res < 0) {
-        err = errno;
-        rv = APR_NOTFOUND;
-    }
-
     /* Search the add ring first.  This ring is often shorter,
      * and it often contains the descriptor being removed.  
      * (For the common scenario where apr_pollset_poll() 
      * returns activity for the descriptor and the descriptor
      * is then removed from the pollset, it will have just 
      * been moved to the add ring by apr_pollset_poll().)
+     *
+     * If it is on the add ring, it isn't associated with the
+     * event port yet/anymore.
      */
     found = 0;
     for (ep = APR_RING_FIRST(&(pollset->p->add_ring));
@@ -240,16 +236,20 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
         if (descriptor->desc.s == ep->pfd.desc.s) {
             found = 1;
             APR_RING_REMOVE(ep, link);
-            APR_RING_INSERT_TAIL(&(pollset->p->dead_ring),
+            APR_RING_INSERT_TAIL(&(pollset->p->free_ring),
                                  ep, pfd_elem_t, link);
-            if (ENOENT == err) {
-                rv = APR_SUCCESS;
-            }
             break;
         }
     }
 
     if (!found) {
+        res = port_dissociate(pollset->p->port_fd, PORT_SOURCE_FD, fd);
+
+        if (res < 0) {
+            err = errno;
+            rv = APR_NOTFOUND;
+        }
+
         for (ep = APR_RING_FIRST(&(pollset->p->query_ring));
              ep != APR_RING_SENTINEL(&(pollset->p->query_ring),
                                      pfd_elem_t, link);
