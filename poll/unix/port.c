@@ -162,6 +162,7 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
     else {
         elem = (pfd_elem_t *) apr_palloc(pollset->pool, sizeof(pfd_elem_t));
         APR_RING_ELEM_INIT(elem, link);
+        elem->on_query_ring = 0;
     }
     elem->pfd = *descriptor;
 
@@ -185,6 +186,7 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
         }
         else {
             pollset->nelts++;
+            elem->on_query_ring = 1;
             APR_RING_INSERT_TAIL(&(pollset->p->query_ring), elem, pfd_elem_t, link);
         }
     } 
@@ -246,6 +248,12 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
         res = port_dissociate(pollset->p->port_fd, PORT_SOURCE_FD, fd);
 
         if (res < 0) {
+            /* The expected case for this failure is that another
+             * thread's call to port_getn() returned this fd and
+             * disassociated the fd from the event port, and 
+             * impl_pollset_poll() is blocked on the ring lock,
+             * which this thread holds.
+             */
             err = errno;
             rv = APR_NOTFOUND;
         }
@@ -257,6 +265,7 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
 
             if (descriptor->desc.s == ep->pfd.desc.s) {
                 APR_RING_REMOVE(ep, link);
+                ep->on_query_ring = 0;
                 APR_RING_INSERT_TAIL(&(pollset->p->dead_ring),
                                      ep, pfd_elem_t, link);
                 if (ENOENT == err) {
@@ -319,6 +328,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
             break;
         }
 
+        ep->on_query_ring = 1;
         APR_RING_INSERT_TAIL(&(pollset->p->query_ring), ep, pfd_elem_t, link);
     }
 
@@ -366,11 +376,18 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
                 pollset->p->result_set[j].rtnevents =
                     get_revent(pollset->p->port_set[i].portev_events);
 
-                APR_RING_REMOVE((pfd_elem_t*)pollset->p->port_set[i].portev_user,
-                                link);
-                APR_RING_INSERT_TAIL(&(pollset->p->add_ring), 
-                                (pfd_elem_t*)pollset->p->port_set[i].portev_user,
-                                pfd_elem_t, link);
+                /* If the ring element is still on the query ring, move it
+                 * to the add ring for re-association with the event port
+                 * later.  (It may have already been moved to the dead ring
+                 * by a call to pollset_remove on another thread.)
+                 */
+                ep = (pfd_elem_t *)pollset->p->port_set[i].portev_user;
+                if (ep->on_query_ring) {
+                    APR_RING_REMOVE(ep, link);
+                    ep->on_query_ring = 0;
+                    APR_RING_INSERT_TAIL(&(pollset->p->add_ring), ep,
+                                         pfd_elem_t, link);
+                }
                 j++;
             }
         }
