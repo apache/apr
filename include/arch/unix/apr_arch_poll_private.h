@@ -97,6 +97,9 @@ typedef struct pfd_elem_t pfd_elem_t;
 struct pfd_elem_t {
     APR_RING_ENTRY(pfd_elem_t) link;
     apr_pollfd_t pfd;
+#ifdef HAVE_PORT_CREATE
+   int on_query_ring;
+#endif
 };
 
 #endif
