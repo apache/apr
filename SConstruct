@@ -10,6 +10,7 @@ vars = Variables('build.py')
 vars.Add('maintainer_mode', 'Turn on debugging and compile time warnings', 0)
 vars.Add('profile', 'Turn on profiling for the build (GCC)', 0)
 vars.Add('lfs', 'Large file support on 32-bit platforms', 1)
+vars.Add('ipv6', 'IPv6 support', 1)
 vars.Add(EnumVariable('pool_debug', 'Turn on pools debugging', 'no',
                       allowed_values=('yes', 'no', 'verbose', 'verbose-alloc', 'lifetime', 'owner', 'all')))
 

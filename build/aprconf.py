@@ -70,8 +70,118 @@ int main()
 }
     """
         result = context.TryRun(source, '.c')
+        context.Result(result[0] == 0)
+        return result[0] == 0
+
+    def Check_apr_ebcdic(self, context):
+        context.Message('Checking whether system uses EBCDIC.. ')
+        source = """
+int main(void) { 
+  return (unsigned char)'A' != (unsigned char)0xC1; 
+}"""
+        result = context.TryRun(source, '.c')
         context.Result(result[0])
         return result[0]
+        
+    def Check_apr_nonblock_inherited(self, context):
+        context.Message('Checking whether O_NONBLOCK setting is inherited from listening sockets... ')
+        source = """
+#include <stdio.h>
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
+#ifndef HAVE_SOCKLEN_T
+typedef int socklen_t;
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+int main(void) {
+    int listen_s, connected_s, client_s;
+    int listen_port, rc;
+    struct sockaddr_in sa;
+    socklen_t sa_len;
+
+    listen_s = socket(AF_INET, SOCK_STREAM, 0);
+    if (listen_s < 0) {
+        perror("socket");
+        exit(1);
+    }
+    memset(&sa, 0, sizeof sa);
+    sa.sin_family = AF_INET;
+#ifdef BEOS
+    sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+#endif
+    /* leave port 0 to get ephemeral */
+    rc = bind(listen_s, (struct sockaddr *)&sa, sizeof sa);
+    if (rc < 0) {
+        perror("bind for ephemeral port");
+        exit(1);
+    }
+    /* find ephemeral port */
+    sa_len = sizeof(sa);
+    rc = getsockname(listen_s, (struct sockaddr *)&sa, &sa_len);
+    if (rc < 0) {
+        perror("getsockname");
+        exit(1);
+    }
+    listen_port = sa.sin_port;
+    rc = listen(listen_s, 5);
+    if (rc < 0) {
+        perror("listen");
+        exit(1);
+    }
+    rc = fcntl(listen_s, F_SETFL, O_NONBLOCK);
+    if (rc < 0) {
+        perror("fcntl(F_SETFL)");
+        exit(1);
+    }
+    client_s = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_s < 0) {
+        perror("socket");
+        exit(1);
+    }
+    memset(&sa, 0, sizeof sa);
+    sa.sin_family = AF_INET;
+    sa.sin_port   = listen_port;
+#ifdef BEOS
+    sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+#endif
+    /* leave sin_addr all zeros to use loopback */
+    rc = connect(client_s, (struct sockaddr *)&sa, sizeof sa);
+    if (rc < 0) {
+        perror("connect");
+        exit(1);
+    }
+    sa_len = sizeof sa;
+    connected_s = accept(listen_s, (struct sockaddr *)&sa, &sa_len);
+    if (connected_s < 0) {
+        perror("accept");
+        exit(1);
+    }
+    rc = fcntl(connected_s, F_GETFL, 0);
+    if (rc < 0) {
+        perror("fcntl(F_GETFL)");
+        exit(1);
+    }
+    if (!(rc & O_NONBLOCK)) {
+        fprintf(stderr, "O_NONBLOCK is not set in the child.\n");
+        exit(1);
+    }
+    return 0;
+}"""
+        result = context.TryRun(source, '.c')
+        context.Result(result[0] == 0)
+        return result[0] == 0
 
     def Check_apr_largefile64(self, context):
         context.Message('Checking whether to enable -D_LARGEFILE64_SOURCE... ')
@@ -112,8 +222,8 @@ void main(void)
 }"""
         result = context.TryRun(source, '.c')
         self.env.Filter(CPPFLAGS = ['-D_LARGEFILE64_SOURCE'])
-        context.Result(result[0])
-        return result[0]
+        context.Result(result[0] == 0)
+        return result[0] == 0
 
 
     def Check_apr_mmap_mapping_dev_zero(self, context):
@@ -142,8 +252,8 @@ void main(void)
     }
         """
         result = context.TryRun(source, '.c')
-        context.Result(result[0])
-        return result[0]
+        context.Result(result[0] == 0)
+        return result[0] == 0
 
     def Check_apr_semaphores(self, context):
         context.Message('Checking for sem_open, sem_close, sem_unlink... ')
@@ -171,6 +281,113 @@ main()
         exit(1);
     }
     sem_unlink(sem_name);
+    exit(0);
+}
+        """
+        result = context.TryCompile(source, '.c')
+        context.Result(result)
+        return result
+
+    def Check_apr_check_tcp_nodelay_inherited(self, context):
+        context.Message('Checking for tcp nodelay inherited... ')
+        source = """
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+int main(void) {
+    int listen_s, connected_s, client_s;
+    int listen_port, rc;
+    struct sockaddr_in sa;
+    socklen_t sa_len;
+    socklen_t option_len;
+    int option;
+
+    listen_s = socket(AF_INET, SOCK_STREAM, 0);
+    if (listen_s < 0) {
+        perror("socket");
+        exit(1);
+    }
+    option = 1;
+    rc = setsockopt(listen_s, IPPROTO_TCP, TCP_NODELAY, &option, sizeof option);
+    if (rc < 0) {
+        perror("setsockopt TCP_NODELAY");
+        exit(1);
+    }
+    memset(&sa, 0, sizeof sa);
+    sa.sin_family = AF_INET;
+#ifdef BEOS
+    sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+#endif
+    /* leave port 0 to get ephemeral */
+    rc = bind(listen_s, (struct sockaddr *)&sa, sizeof sa);
+    if (rc < 0) {
+        perror("bind for ephemeral port");
+        exit(1);
+    }
+    /* find ephemeral port */
+    sa_len = sizeof(sa);
+    rc = getsockname(listen_s, (struct sockaddr *)&sa, &sa_len);
+    if (rc < 0) {
+        perror("getsockname");
+        exit(1);
+    }
+    listen_port = sa.sin_port;
+    rc = listen(listen_s, 5);
+    if (rc < 0) {
+        perror("listen");
+        exit(1);
+    }
+    client_s = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_s < 0) {
+        perror("socket");
+        exit(1);
+    }
+    memset(&sa, 0, sizeof sa);
+    sa.sin_family = AF_INET;
+    sa.sin_port   = listen_port;
+#ifdef BEOS
+    sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+#endif
+    /* leave sin_addr all zeros to use loopback */
+    rc = connect(client_s, (struct sockaddr *)&sa, sizeof sa);
+    if (rc < 0) {
+        perror("connect");
+        exit(1);
+    }
+    sa_len = sizeof sa;
+    connected_s = accept(listen_s, (struct sockaddr *)&sa, &sa_len);
+    if (connected_s < 0) {
+        perror("accept");
+        exit(1);
+    }
+    option_len = sizeof option;
+    rc = getsockopt(connected_s, IPPROTO_TCP, TCP_NODELAY, &option, &option_len);
+    if (rc < 0) {
+        perror("getsockopt");
+        exit(1);
+    }
+    if (!option) {
+        fprintf(stderr, "TCP_NODELAY is not set in the child.\n");
+        exit(1);
+    }
+    return 0;
+} """ 
+        result = context.TryRun(source, '.c') 
+        context.Result(result[0] == 0)
+        return result[0] == 0
+
+    def Check_apr_semun(self, context):
+        context.Message('Checking for semun... ')
+        source = """
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+main()
+{
+    union semun arg;
+    semctl(0, 0, 0, arg);
     exit(0);
 }
         """

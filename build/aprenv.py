@@ -146,6 +146,14 @@ class APREnv(Environment):
             self.autoconf.Check_apr_mmap_mapping_dev_zero,
         'Check_apr_semaphores':
             self.autoconf.Check_apr_semaphores,
+        'Check_apr_semun':
+            self.autoconf.Check_apr_semun,
+        'Check_apr_check_tcp_nodelay_inherited':
+            self.autoconf.Check_apr_check_tcp_nodelay_inherited,
+        'Check_apr_nonblock_inherited':
+            self.autoconf.Check_apr_nonblock_inherited,
+        'Check_apr_ebcdic':
+            self.autoconf.Check_apr_ebcdic,
         },
         config_h = 'include/arch/%s/apr_private.h' % (self['APR_PLATFORM']))
 
@@ -227,7 +235,6 @@ class APREnv(Environment):
       else:
         subst['@%s@' % (s)] = 0
         
-
     sizeof_char = conf.CheckTypeSize('char')
     sizeof_int = self.critical_value(conf.CheckTypeSize, 4, 'int')
     subst['@int_value@'] = 'int'
@@ -416,25 +423,149 @@ class APREnv(Environment):
     if mmap_results['mmap'] and \
        self.autoconf.CheckFile("/dev/zero") and \
        conf.Check_apr_mmap_mapping_dev_zero():
-           subst['@havemmapzero@'] = '1'
+           subst['@havemmapzero@'] = 1
     else:
-        subst['@havemmapzero@'] = '0'
+        subst['@havemmapzero@'] = 0
 
     # check for locking mechanisms
     if conf.Check_apr_semaphores():
-        subst['@hassysvser@'] = "1"
+        subst['@hassysvser@'] = 1
     else:
-        subst['@hassysvser@'] = "0"
+        subst['@hassysvser@'] = 0
 
     if conf.CheckDeclaration('F_SETLK', '#include <fcntl.h>'):
-        subst['@hasfcntlser@'] = '1'
+        subst['@hasfcntlser@'] = 1
     else:
-        subst['@hasfcntlser@'] = '0'
+        subst['@hasfcntlser@'] = 0
 
     if conf.CheckFunc('flock'):
-        subst['@hasflockser@'] = "1"
+        subst['@hasflockser@'] = 1
     else:
-        subst['@hasflockser@'] = "0"
+        subst['@hasflockser@'] = 0
+
+    apr_tcp_nopush_flag="0"
+    if conf.CheckDeclaration('TCP_CORK', '#include <netinet/tcp.h>'):
+        subst['@have_corkable_tcp@'] = 1
+        apr_tcp_nopush_flag="TCP_CORK"
+    else:
+        subst['@have_corkable_tcp@'] = 0
+
+    if conf.CheckDeclaration('TCP_NOPUSH', '#include <netinet/tcp.h>'):
+        subst['@apr_tcp_nopush_flag@'] = 3
+        subst['@have_corkable_tcp@'] = 1
+
+    subst['@apr_tcp_nopush_flag@'] = apr_tcp_nopush_flag
+
+    if conf.CheckFunc('flock'):
+        subst['@hasflockser@'] = 1
+    else:
+        subst['@hasflockser@'] = 0
+
+    if conf.CheckFunc('getrlimit'):
+        subst['@have_getrlimit@'] = 1
+    else:
+        subst['@have_getrlimit@'] = 0
+
+    if conf.CheckFunc('setrlimit'):
+        subst['@have_setrlimit@'] = 1
+    else:
+        subst['@have_setrlimit@'] = 0
+
+    if conf.CheckType('struct in_addr', includes='#include <netinet/in.h>'):
+        subst['@have_in_addr@'] = 1
+    else:
+        subst['@have_in_addr@'] = 0
+
+    if conf.CheckType('struct sockaddr_storage', includes='#include <netinet/in.h>'):
+        subst['@have_sa_storage@'] = 1
+    else:
+        subst['@have_sa_storage@'] = 0
+
+    if conf.CheckType('struct rlimit', includes='#include <sys/resource.h>'):
+        subst['@struct_rlimit@'] = 1
+    else:
+        subst['@struct_rlimit@'] = 0
+
+    if conf.Check_apr_semun():
+        subst['@have_union_semun@'] = 1
+    else:
+        subst['@have_union_semun@'] = 0
+
+    check_functions = [
+        'inet_addr',
+        'inet_network',
+        'memmove',
+        'sigaction',
+        'sigsuspend',
+        'sigwait',
+        'strdup',
+        'stricmp',
+        'strcasecmp',
+        'strncasecmp',
+        'strnicmp',
+        'strstr',
+        'memchr',
+        'iovec'
+    ]
+
+    for func in check_functions:
+        if conf.CheckFunc(func):
+            subst['@have_%s@' % func] = 1
+        else:
+            subst['@have_%s@' % func] = 0
+
+    # Set Features
+    # TODO: Not done yet
+    subst['@sharedmem@'] = 0
+    subst['@threads@'] = 0
+    subst['@sendfile@'] = 0
+    subst['@mmap@'] = 0
+    subst['@fork@'] = 0
+    subst['@rand@'] = 0
+    subst['@oc@'] = 0
+    subst['@aprdso@'] = 0
+    subst['@acceptfilter@'] = 0
+    subst['@have_unicode_fs@'] = 0
+    subst['@have_proc_invoked@'] = 0
+    subst['@aprlfs@'] = 0
+    subst['@osuuid@'] = 0
+    subst['@file_as_socket@'] = 1
+
+    # check for IPv6 (the user is allowed to disable this via commandline
+    # options
+    if self['ipv6']:
+        if conf.CheckType('struct sockaddr_in6', 
+                          includes='#include <netinet/in.h>') and \
+           conf.CheckFunc('getaddrinfo') and \
+           conf.CheckFunc('getnameinfo'):
+            subst['@have_ipv6@'] = 1
+    else:
+        subst['@have_ipv6@'] = 0
+
+    if conf.CheckDeclaration('IPPROTO_SCTP', '#include <netinet/in.h>'):
+        subst['@have_sctp@'] = 1
+    else:
+        subst['@have_sctp@'] = 0
+
+    if conf.CheckDeclaration('SO_ACCEPTFILTER', '#include <sys/socket.h>'):
+        subst['@acceptfilter@'] = 1
+    else:
+        subst['@acceptfilter@'] = 0
+
+    if conf.Check_apr_check_tcp_nodelay_inherited():
+        subst['@tcp_nodelay_inherited@'] = 1
+    else:
+        subst['@tcp_nodelay_inherited@'] = 0
+
+    if conf.Check_apr_nonblock_inherited():
+        subst['@o_nonblock_inherited@'] = 1
+    else:
+        subst['@o_nonblock_inherited@'] = 0
+
+    if conf.Check_apr_ebcdic():
+        subst['@apr_charset_ebcdic@'] = 1
+    else:
+        subst['@apr_charset_ebcdic@'] = 0
 
     self.SubstFile('include/apr.h', 'include/apr.h.in', SUBST_DICT = subst)
 
