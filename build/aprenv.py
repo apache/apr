@@ -601,5 +601,7 @@ class APREnv(Environment):
     self.SubstFile('include/apr.h', 'include/apr.h.in', SUBST_DICT = subst)
 
     if hasattr(conf, "config_h_text"):
+      conf.Define("APR_OFF_T_STRFN", subst['@off_t_strfn@'])
       conf.config_h_text = conf.config_h_text + '#include "arch/apr_private_common.h"\n'
+ 
     return conf.Finish()
