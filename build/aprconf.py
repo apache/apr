@@ -1,4 +1,5 @@
 import os
+import sys
 
 class APRConfigureBase:
     def __init__(self, env):
@@ -70,8 +71,8 @@ int main()
 }
     """
         result = context.TryRun(source, '.c')
-        context.Result(result[0] == 0)
-        return result[0] == 0
+        context.Result(result[0] == 1)
+        return result[0] == 1
 
     def Check_apr_ebcdic(self, context):
         context.Message('Checking whether system uses EBCDIC.. ')
@@ -80,8 +81,8 @@ int main(void) {
   return (unsigned char)'A' != (unsigned char)0xC1; 
 }"""
         result = context.TryRun(source, '.c')
-        context.Result(result[0])
-        return result[0]
+        context.Result(result[0] == 1)
+        return result[0] == 1
         
     def Check_apr_nonblock_inherited(self, context):
         context.Message('Checking whether O_NONBLOCK setting is inherited from listening sockets... ')
@@ -180,8 +181,8 @@ int main(void) {
     return 0;
 }"""
         result = context.TryRun(source, '.c')
-        context.Result(result[0] == 0)
-        return result[0] == 0
+        context.Result(result[0] == 1)
+        return result[0] == 1
 
     def Check_apr_largefile64(self, context):
         context.Message('Checking whether to enable -D_LARGEFILE64_SOURCE... ')
@@ -222,8 +223,8 @@ void main(void)
 }"""
         result = context.TryRun(source, '.c')
         self.env.Filter(CPPFLAGS = ['-D_LARGEFILE64_SOURCE'])
-        context.Result(result[0] == 0)
-        return result[0] == 0
+        context.Result(result[0] == 1)
+        return result[0] == 1
 
 
     def Check_apr_mmap_mapping_dev_zero(self, context):
@@ -252,8 +253,8 @@ void main(void)
     }
         """
         result = context.TryRun(source, '.c')
-        context.Result(result[0] == 0)
-        return result[0] == 0
+        context.Result(result[0] == 1)
+        return result[0] == 1
 
     def Check_apr_semaphores(self, context):
         context.Message('Checking for sem_open, sem_close, sem_unlink... ')
@@ -375,8 +376,8 @@ int main(void) {
     return 0;
 } """ 
         result = context.TryRun(source, '.c') 
-        context.Result(result[0] == 0)
-        return result[0] == 0
+        context.Result(result[0] == 1)
+        return result[0] == 1
 
     def Check_apr_semun(self, context):
         context.Message('Checking for semun... ')
