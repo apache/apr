@@ -567,6 +567,39 @@ class APREnv(Environment):
     else:
         subst['@apr_charset_ebcdic@'] = 0
 
+    subst['@have_iovec@'] = 1
+    subst['@have_sockaddr_un@'] = 0
+    subst['@proc_mutex_is_global@'] = 0
+    subst['@hasprocpthreadser@'] = 0
+    
+    subst['@havemmaptmp@'] = 0
+    subst['@havemmapshm@'] = 0
+    subst['@haveshmgetanon@'] = 0
+    subst['@haveshmget@'] = 0
+    subst['@havemmapanon@'] = 0
+    subst['@havebeosarea@'] = 0
+
+    subst['@usemmaptmp@'] = 0
+    subst['@usemmapshm@'] = 0
+    subst['@usemmapzero@'] = 0
+    subst['@useshmgetanon@'] = 0
+    subst['@useshmget@'] = 0
+    subst['@usemmapanon@'] = 0
+    subst['@usebeosarea@'] = 0
+
+    subst['@flockser@'] = 0
+    subst['@sysvser@'] = 0
+    subst['@posixser@'] = 0
+    subst['@fcntlser@'] = 0
+    subst['@procpthreadser@'] = 0 
+    subst['@pthreadser@'] = 0
+    subst['@hasposixser@'] = 0
+    subst['@proclockglobal@'] = 0
+    subst['@eolstr@'] = "\\\\n"
+    subst['@shlibpath_var@'] = ""
+
     self.SubstFile('include/apr.h', 'include/apr.h.in', SUBST_DICT = subst)
 
+    if hasattr(conf, "config_h_text"):
+      conf.config_h_text = conf.config_h_text + '#include "arch/apr_private_common.h"\n'
     return conf.Finish()
