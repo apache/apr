@@ -567,8 +567,17 @@ class APREnv(Environment):
     else:
         subst['@apr_charset_ebcdic@'] = 0
 
-    subst['@have_iovec@'] = 1
-    subst['@have_sockaddr_un@'] = 0
+    if conf.CheckType('struct iovec', includes='#include <sys/types.h>\n#include <sys/uio.h>'):
+      subst['@have_iovec@'] = 1
+    else:
+      subst['@have_iovec@'] = 0
+    
+
+    if conf.CheckType('struct sockaddr_un', includes='#include <sys/un.h>'):
+      subst['@have_sockaddr_un@'] = 1
+    else:
+      subst['@have_sockaddr_un@'] = 0
+
     subst['@proc_mutex_is_global@'] = 0
     subst['@hasprocpthreadser@'] = 0
     
