@@ -941,7 +941,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
         node->next  = NULL;
         node->index = 1;
         node->first_avail = (char *)node + APR_MEMNODE_T_SIZE;
-        node->endp = (char *)node + MIN_ALLOC;
+        node->endp = (char *)pool_allocator + MIN_ALLOC;
     }
     else if ((node = allocator_alloc(pool_allocator,
                                      MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
