@@ -929,7 +929,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
     if (!apr_pools_initialized)
         return APR_ENOPOOL;
     if ((pool_allocator = allocator) == NULL) {
-        if ((pool_allocator = malloc(SIZEOF_ALLOCATOR_T)) == NULL) {
+        if ((pool_allocator = malloc(MIN_ALLOC + SIZEOF_ALLOCATOR_T)) == NULL) {
             if (abort_fn)
                 abort_fn(APR_ENOMEM);
 
@@ -937,9 +937,14 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
         }
         memset(pool_allocator, 0, SIZEOF_ALLOCATOR_T);
         pool_allocator->max_free_index = APR_ALLOCATOR_MAX_FREE_UNLIMITED;
+        node = (apr_memnode_t *)((char *)pool_allocator + SIZEOF_ALLOCATOR_T);
+        node->next  = NULL;
+        node->index = 1;
+        node->first_avail = (char *)node + APR_MEMNODE_T_SIZE;
+        node->endp = (char *)node + MIN_ALLOC;
     }
-    if ((node = allocator_alloc(pool_allocator,
-                                MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
+    else if ((node = allocator_alloc(pool_allocator,
+                                     MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
         if (abort_fn)
             abort_fn(APR_ENOMEM);
 
