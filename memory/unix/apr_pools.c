@@ -929,7 +929,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
     if (!apr_pools_initialized)
         return APR_ENOPOOL;
     if ((pool_allocator = allocator) == NULL) {
-        if ((pool_allocator = malloc(MIN_ALLOC + SIZEOF_ALLOCATOR_T)) == NULL) {
+        if ((pool_allocator = malloc(MIN_ALLOC)) == NULL) {
             if (abort_fn)
                 abort_fn(APR_ENOMEM);
 
