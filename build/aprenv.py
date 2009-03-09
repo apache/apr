@@ -579,6 +579,9 @@ class APREnv(Environment):
       subst['@have_sockaddr_un@'] = 0
 
     subst['@proc_mutex_is_global@'] = 0
+    if self['PLATFORM'] in ['os2', 'beos', 'win32', 'cygwin']:
+      subst['@proc_mutex_is_global@'] = 1
+  
     subst['@hasprocpthreadser@'] = 0
     
     subst['@havemmaptmp@'] = 0
