@@ -185,13 +185,11 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
             APR_RING_INSERT_TAIL(&(pollset->p->free_ring), elem, pfd_elem_t, link);
         }
         else {
-            pollset->nelts++;
             elem->on_query_ring = 1;
             APR_RING_INSERT_TAIL(&(pollset->p->query_ring), elem, pfd_elem_t, link);
         }
     } 
     else {
-        pollset->nelts++;
         APR_RING_INSERT_TAIL(&(pollset->p->add_ring), elem, pfd_elem_t, link);
     }
 
