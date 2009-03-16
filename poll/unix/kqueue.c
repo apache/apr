@@ -177,7 +177,6 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
     }
 
     if (rv == APR_SUCCESS) {
-        pollset->nelts++;
         APR_RING_INSERT_TAIL(&(pollset->p->query_ring), elem, pfd_elem_t, link);
     }
     else {
