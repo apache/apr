@@ -396,6 +396,28 @@ main()
         context.Result(result)
         return result
 
+    def Check_apr_sctp(self, context):
+        context.Message('Checking for sctp support... ')
+        source = """
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/sctp.h>
+#include <netinet/sctp_uio.h>
+#include <stdlib.h>
+int main(void) {
+    int s, opt = 1;
+    if ((s = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP)) < 0)
+       exit(1);
+    if (setsockopt(s, IPPROTO_SCTP, SCTP_NODELAY, &opt, sizeof(int)) < 0)
+       exit(2);
+    exit(0);
+}
+"""
+        result = context.TryRun(source, '.c') 
+        context.Result(result[0] == 1)
+        return result[0] == 1
+
     def CheckFile(self, filename):
         return os.path.exists(filename)
 
