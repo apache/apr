@@ -154,6 +154,8 @@ class APREnv(Environment):
             self.autoconf.Check_apr_nonblock_inherited,
         'Check_apr_ebcdic':
             self.autoconf.Check_apr_ebcdic,
+        'Check_apr_sctp':
+            self.autoconf.Check_apr_sctp,
         },
         config_h = 'include/arch/%s/apr_private.h' % (self['APR_PLATFORM']))
 
