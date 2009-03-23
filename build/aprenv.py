@@ -134,6 +134,8 @@ class APREnv(Environment):
 
     # TODO Port header detection here etc
     conf = self.Configure(custom_tests = {
+        'CheckFile':
+            self.autoconf.CheckFile,
         'CheckTypesCompatible': 
             self.autoconf.CheckTypesCompatible,
         'Check_apr_atomic_builtins': 
@@ -423,7 +425,7 @@ class APREnv(Environment):
 
     # check for mmap mapping dev zero
     if mmap_results['mmap'] and \
-       self.autoconf.CheckFile("/dev/zero") and \
+       conf.CheckFile("/dev/zero") and \
        conf.Check_apr_mmap_mapping_dev_zero():
            subst['@havemmapzero@'] = 1
     else:
@@ -585,7 +587,14 @@ class APREnv(Environment):
     if self['PLATFORM'] in ['os2', 'beos', 'win32', 'cygwin']:
       subst['@proc_mutex_is_global@'] = 1
   
-    subst['@hasprocpthreadser@'] = 0
+    # note: the current APR use of shared mutex requires /dev/zero
+    if conf.CheckFile('/dev/zero') and \
+        conf.CheckDeclaration('PTHREAD_PROCESS_SHARED', includes='#include <pthread.h>') and \
+        conf.CheckFunc('pthread_mutexattr_setpshared'):
+      subst['@hasprocpthreadser@'] = 1
+    else:
+      subst['@hasprocpthreadser@'] = 0
+    
     
     subst['@havemmaptmp@'] = 0
     subst['@havemmapshm@'] = 0
