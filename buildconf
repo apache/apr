@@ -68,6 +68,10 @@ if test "$1" = "1"; then
 fi
 if test "$1" = "2"; then
   $libtoolize --copy
+  # Wouldn't it just be better to define top_builddir??
+  mv build/libtool.m4 build/libtool.m4.$$
+  cat build/libtool.m4.$$ | sed -e 's/LIBTOOL=\(.*\)top_build/LIBTOOL=\1apr_build/' > build/libtool.m4
+  rm build/libtool.m4.$$
 fi
 
 # Clean up any leftovers
