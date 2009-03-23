@@ -545,7 +545,7 @@ class APREnv(Environment):
         subst['@have_ipv6@'] = 0
 
     if conf.CheckDeclaration('IPPROTO_SCTP', '#include <netinet/in.h>') and \
-        self.Check_apr_sctp():
+        conf.Check_apr_sctp():
         subst['@have_sctp@'] = 1
     else:
         subst['@have_sctp@'] = 0
