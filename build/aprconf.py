@@ -17,6 +17,15 @@ class APRConfigureBase:
             context.Result('no')
             return 0
 
+    def CheckFile(self, context, path):
+        context.Message("Checking if %s exists... " % (path))
+        if os.path.exists(path):
+            context.Result('yes')
+            return 1
+        else:
+            context.Result('no')
+            return 0
+
     def CheckTypesCompatible(self, context, t1, t2, includes):
         context.Message('Checking %s is the same as %s... ' % (t1, t2))
         source = """
@@ -417,9 +426,6 @@ int main(void) {
         result = context.TryRun(source, '.c') 
         context.Result(result[0] == 1)
         return result[0] == 1
-
-    def CheckFile(self, filename):
-        return os.path.exists(filename)
 
 class APRConfigure(APRConfigureBase):
     def __init__(self, env):
