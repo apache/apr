@@ -18,19 +18,19 @@ dnl
 dnl DSO module
 dnl
 
-AC_DEFUN([APU_CHECK_UTIL_DSO], [
+AC_DEFUN([APR_MODULAR_DSO], [
 
-  AC_ARG_ENABLE([util-dso], 
-     APR_HELP_STRING([--disable-util-dso],
-       [disable DSO build of modular components (crypto, dbd, dbm, ldap)]))
+  AC_ARG_ENABLE([modular-dso], 
+     APR_HELP_STRING([--disable-modular-dso],
+       [disable DSO build of modular components]))
 
-  if test "$enable_util_dso" = "no"; then
-     apu_dso_build="0"
+  if test "$enable_modular_dso" = "no"; then
+     apr_modular_dso="0"
   else
-     apu_dso_build=$aprdso
+     apr_modular_dso=$aprdso
   fi
 
-  if test "$apu_dso_build" = "0"; then
+  if test "$apr_modular_dso" = "0"; then
 
      # Statically link the drivers:
      objs=
@@ -65,10 +65,10 @@ AC_DEFUN([APU_CHECK_UTIL_DSO], [
        done
      fi
 
-     APRUTIL_LIBS="$APRUTIL_LIBS $LDADD_crypto_openssl $LDADD_crypto_nss"
-     APRUTIL_LIBS="$APRUTIL_LIBS $LDADD_dbd_pgsql $LDADD_dbd_sqlite2 $LDADD_dbd_sqlite3 $LDADD_dbd_oracle $LDADD_dbd_mysql $LDADD_dbd_freetds $LDADD_dbd_odbc"
-     APRUTIL_LIBS="$APRUTIL_LIBS $LDADD_dbm_db $LDADD_dbm_gdbm $LDADD_dbm_ndbm"
-     APRUTIL_LIBS="$APRUTIL_LIBS $LDADD_ldap"
+     LIBS="$LIBS $LDADD_crypto_openssl $LDADD_crypto_nss"
+     LIBS="$LIBS $LDADD_dbd_pgsql $LDADD_dbd_sqlite2 $LDADD_dbd_sqlite3 $LDADD_dbd_oracle $LDADD_dbd_mysql $LDADD_dbd_freetds $LDADD_dbd_odbc"
+     LIBS="$LIBS $LDADD_dbm_db $LDADD_dbm_gdbm $LDADD_dbm_ndbm"
+     LIBS="$LIBS $LDADD_ldap"
      APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_crypto_openssl $LDADD_crypto_nss"
      APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_dbd_pgsql $LDADD_dbd_sqlite2 $LDADD_dbd_sqlite3 $LDADD_dbd_oracle $LDADD_dbd_mysql $LDADD_dbd_freetds $LDADD_dbd_odbc"
      APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_dbm_db $LDADD_dbm_gdbm $LDADD_dbm_ndbm"
@@ -93,11 +93,12 @@ AC_DEFUN([APU_CHECK_UTIL_DSO], [
      test $apu_has_ldap = 1 && dsos="$dsos ldap/apr_ldap.la"
 
      if test -n "$dsos"; then
-        APU_MODULES="$APU_MODULES $dsos"
+        APR_DSO_MODULES="$APR_DSO_MODULES $dsos"
      fi
 
+     AC_MSG_NOTICE([Using modular DSO build])
   fi
 
-  AC_DEFINE_UNQUOTED([APU_DSO_BUILD], $apu_dso_build,
+  AC_DEFINE_UNQUOTED([APR_HAVE_MODULAR_DSO], $apr_modular_dso,
      [Define to 1 if modular components are built as DSOs])
 ])
