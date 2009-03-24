@@ -41,8 +41,6 @@ if env['pool_debug'] != 'no':
             'all': 31}
   env.AppendUnique(CPPFLAGS = "-DAPR_POOL_DEBUG=%d" % flags[env['pool_debug']])
 
-env.AlwaysBuild(env.Command(env.apu_config_h, [], Copy("$TARGET", env.apr_config_h)))
-
 Export("env")
 
 # TODO: Support debug/release builds
