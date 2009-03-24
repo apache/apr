@@ -31,7 +31,7 @@
 #include "apu_internal.h"
 #include "apu_version.h"
 
-#if APU_DSO_BUILD
+#if APR_DSO_BUILD
 
 #if APR_HAS_THREADS
 static apr_thread_mutex_t* mutex = NULL;
@@ -126,11 +126,11 @@ apr_status_t apu_dso_load(apr_dso_handle_t **dlhandleptr,
           || (apr_filepath_list_split(&paths, pathlist, pool) != APR_SUCCESS))
         paths = apr_array_make(pool, 1, sizeof(char*));
 
-#if defined(APU_DSO_LIBDIR)
+#if defined(APR_DSO_LIBDIR)
     /* Always search our prefix path, but on some platforms such as
      * win32 this may be left undefined
      */
-    (*((char **)apr_array_push(paths))) = APU_DSO_LIBDIR;
+    (*((char **)apr_array_push(paths))) = APR_DSO_LIBDIR;
 #endif
 
     for (i = 0; i < paths->nelts; ++i)
@@ -159,14 +159,14 @@ apr_status_t apu_dso_load(apr_dso_handle_t **dlhandleptr,
         if (rv == APR_SUCCESS) { /* APR_EDSOOPEN */
             break;
         }
-#if defined(APU_DSO_LIBDIR)
+#if defined(APR_DSO_LIBDIR)
         else if (i < paths->nelts - 1) {
 #else
-        else {   /* No APU_DSO_LIBDIR to skip */
+        else {   /* No APR_DSO_LIBDIR to skip */
 #endif
-             /* try with apr-util-APU_MAJOR_VERSION appended */
+             /* try with apr-APR_MAJOR_VERSION appended */
             eos = apr_cpystrn(eos,
-                              "apr-util-" APU_STRINGIFY(APU_MAJOR_VERSION) "/",
+                              "apr-" APR_STRINGIFY(APR_MAJOR_VERSION) "/",
                               sizeof(path) - (eos - path));
 
             apr_cpystrn(eos, module, sizeof(path) - (eos - path));
@@ -195,5 +195,5 @@ apr_status_t apu_dso_load(apr_dso_handle_t **dlhandleptr,
     return rv;
 }
 
-#endif /* APU_DSO_BUILD */
+#endif /* APR_DSO_BUILD */
 

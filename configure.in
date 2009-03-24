@@ -2472,20 +2472,20 @@ APRUTIL_LIBNAME="aprutil${libsuffix}"
 AC_SUBST(APRUTIL_LIBNAME)
 
 # Set up destination directory for DSOs.
-APU_DSO_LIBDIR="\${libdir}/apr-util-${APR_MAJOR_VERSION}"
+APR_DSO_LIBDIR="\${libdir}/apr-${APR_MAJOR_VERSION}"
 # Set APU_HAVE_MODULES appropriately for the Makefile
-if test -n "$APU_MODULES"; then 
-   APU_HAVE_MODULES=yes
+if test -n "$APR_MODULES"; then 
+   APR_HAVE_MODULES=yes
 else
-   APU_HAVE_MODULES=no
+   APR_HAVE_MODULES=no
 fi
 # Define expanded libdir for apu_config.h
-APR_EXPAND_VAR(abs_dso_libdir, $APU_DSO_LIBDIR)
-AC_DEFINE_UNQUOTED([APU_DSO_LIBDIR], ["$abs_dso_libdir"],
+APR_EXPAND_VAR(abs_dso_libdir, $APR_DSO_LIBDIR)
+AC_DEFINE_UNQUOTED([APR_DSO_LIBDIR], ["$abs_dso_libdir"],
                    [Define to be absolute path to DSO directory])
-AC_SUBST(APU_HAVE_MODULES)
-AC_SUBST(APU_DSO_LIBDIR)
-AC_SUBST(APU_MODULES)
+AC_SUBST(APR_HAVE_MODULES)
+AC_SUBST(APR_DSO_LIBDIR)
+AC_SUBST(APR_MODULES)
 AC_SUBST(EXTRA_OBJECTS)
 
 dnl
