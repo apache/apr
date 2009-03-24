@@ -44,6 +44,7 @@ _simple_dirs = [
     'buckets',
     'dbd',
     'dbm',
+    'dbm/sdbm',
     'encoding',
     'hooks',
     'hooks',
@@ -70,7 +71,7 @@ class APREnv(Environment):
     # using this fallback platform.
     self['APR_FALLBACK_PLATFORM'] = 'unix'
 
-    self.AppendUnique(CPPPATH = ['include', 'include/arch/'+self['APR_PLATFORM']])
+    self.AppendUnique(CPPPATH = ['include', 'include/private', 'include/arch/'+self['APR_PLATFORM']])
     self.autoconf = aprconf.APRConfigure(self)
 
   def is_gcc(self):
@@ -137,6 +138,8 @@ class APREnv(Environment):
       self.Exit(1)
 
   def APRAutoconf(self):
+    self.apr_config_h = 'include/arch/%s/apr_private.h' % (self['APR_PLATFORM'])
+    self.apu_config_h = 'include/private/apu_config.h'
     subst = {}
 
     if self.GetOption('clean') or self.GetOption('help'):
@@ -169,7 +172,7 @@ class APREnv(Environment):
         'Check_apr_sctp':
             self.autoconf.Check_apr_sctp,
         },
-        config_h = 'include/arch/%s/apr_private.h' % (self['APR_PLATFORM']))
+        config_h = self.apr_config_h)
 
     # Do we have a working C Compiler?
     self.critical(conf.CheckCC)
@@ -648,9 +651,32 @@ class APREnv(Environment):
 
     subst['@shlibpath_var@'] = pjoin(self['prefix'], 'lib')
 
+    # APR Util things to fix:
+    subst['@apu_have_sdbm@'] = 1
+    subst['@apu_have_gdbm@'] = 0
+    subst['@apu_have_ndbm@'] = 0
+    subst['@apu_have_db@'] = 0
+
+    subst['@apu_db_version@'] = 0
+
+    subst['@apu_have_pgsql@'] = 0
+    subst['@apu_have_mysql@'] = 0
+    subst['@apu_have_sqlite3@'] = 0
+    subst['@apu_have_sqlite2@'] = 0
+    subst['@apu_have_oracle@'] = 0
+    subst['@apu_have_freetds@'] = 0
+    subst['@apu_have_odbc@'] = 0
+
+
+    subst['@apu_have_crypto@'] = 0
+    subst['@apu_have_openssl@'] = 0
+    subst['@apu_have_nss@'] = 0
+
+    subst['@have_apr_iconv@'] = 0
+    subst['@have_iconv@'] = 0
+
     self.SubstFile('include/apr.h', 'include/apr.h.in', SUBST_DICT = subst)
     self.SubstFile('include/apu.h', 'include/apu.h.in', SUBST_DICT = subst)
-
     if hasattr(conf, "config_h_text"):
       conf.Define("APR_OFF_T_STRFN", subst['@off_t_strfn@'])
       conf.config_h_text = conf.config_h_text + '#include "arch/apr_private_common.h"\n'
