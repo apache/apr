@@ -17,6 +17,7 @@ vars.Add(EnumVariable('pool_debug', 'Turn on pools debugging', 'no',
 
 env = APREnv(args=ARGUMENTS, variables=vars)
 
+
 Help(vars.GenerateHelpText(env))
 
 env.APRHints()
@@ -40,12 +41,9 @@ if env['pool_debug'] != 'no':
             'all': 31}
   env.AppendUnique(CPPFLAGS = "-DAPR_POOL_DEBUG=%d" % flags[env['pool_debug']])
 
-files = env.core_lib_files()
+Export("env")
 
-(major, minor, patch) = env.APRVersion()
-
-libapr = env.SharedLibrary('apr-%d' % (major), files)
-
-targets = [libapr]
+# TODO: Support debug/release builds
+targets = SConscript("SConscript", variant_dir='builds/default', duplicate=0)
 
 env.Default(targets)
