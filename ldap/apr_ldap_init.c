@@ -26,7 +26,7 @@
 #include "apu.h"
 #include "apu_config.h"
 
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
 #define APU_DSO_LDAP_BUILD
 #endif
 
@@ -197,7 +197,7 @@ APU_DECLARE_LDAP(int) apr_ldap_info(apr_pool_t *pool,
     
 }
 
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
 
 /* For DSO builds, export the table of entry points into the apr_ldap DSO
  * See include/private/apu_internal.h for the corresponding declarations
@@ -214,6 +214,6 @@ APU_MODULE_DECLARE_DATA struct apr__ldap_dso_fntable apr__ldap_fns = {
     apr_ldap_rebind_remove
 };
 
-#endif /* APU_DSO_BUILD */
+#endif /* APR_HAVE_MODULAR_DSO */
 
 #endif /* APR_HAS_LDAP */

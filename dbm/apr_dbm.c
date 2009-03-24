@@ -56,7 +56,7 @@
 #error a DBM implementation was not specified
 #endif
 
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
 
 static apr_hash_t *drivers = NULL;
 
@@ -71,13 +71,13 @@ static apr_status_t dbm_term(void *ptr)
     return APR_SUCCESS;
 }
 
-#endif /* APU_DSO_BUILD */
+#endif /* APR_HAVE_MODULAR_DSO */
 
 static apr_status_t dbm_open_type(apr_dbm_type_t const* * vtable,
                                   const char *type, 
                                   apr_pool_t *pool)
 {
-#if !APU_DSO_BUILD
+#if !APR_HAVE_MODULAR_DSO
 
     *vtable = NULL;
     if (!strcasecmp(type, "default"))     *vtable = &DBM_VTABLE;
@@ -100,7 +100,7 @@ static apr_status_t dbm_open_type(apr_dbm_type_t const* * vtable,
         return APR_SUCCESS;
     return APR_ENOTIMPL;
 
-#else /* APU_DSO_BUILD */
+#else /* APR_HAVE_MODULAR_DSO */
 
     char modname[32];
     char symname[34];
@@ -176,7 +176,7 @@ static apr_status_t dbm_open_type(apr_dbm_type_t const* * vtable,
     apu_dso_mutex_unlock();
     return rv;
 
-#endif /* APU_DSO_BUILD */
+#endif /* APR_HAVE_MODULAR_DSO */
 }
 
 APU_DECLARE(apr_status_t) apr_dbm_open_ex(apr_dbm_t **pdb, const char *type, 
