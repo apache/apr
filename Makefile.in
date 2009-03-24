@@ -87,7 +87,7 @@ apr-config.out: $(APR_CONFIG)
 build/apr_rules.out: build/apr_rules.mk
 	sed 's,^\(apr_build.*=\).*$$,\1$(installbuilddir),' < build/apr_rules.mk > $@
 
-install: $(TARGETS)
+install: install-modules $(TARGETS)
 	$(APR_MKDIR) $(DESTDIR)$(libdir) $(DESTDIR)$(bindir) $(DESTDIR)$(installbuilddir) \
 		     $(DESTDIR)$(libdir)/pkgconfig $(DESTDIR)$(includedir)
 	$(INSTALL_DATA) $(top_blddir)/include/apr.h $(DESTDIR)$(includedir)
@@ -116,7 +116,7 @@ install: $(TARGETS)
 $(TARGET_LIB): $(OBJECTS)
 	$(LINK) @lib_target@ $(ALL_LIBS)
 
-install-modules: install-modules-@APU_HAVE_MODULES@
+install-modules: install-modules-@APR_HAVE_MODULES@
 
 install-modules-no:
 
