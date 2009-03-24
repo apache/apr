@@ -47,7 +47,6 @@ _simple_dirs = [
     'dbm/sdbm',
     'encoding',
     'hooks',
-    'hooks',
     'memcache',
     'tables',
     'strings',
