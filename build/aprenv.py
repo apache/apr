@@ -42,6 +42,7 @@ _platform_dirs = [
 
 _simple_dirs = [
     'buckets',
+    'crypto',
     'dbd',
     'dbm',
     'dbm/sdbm',
@@ -50,7 +51,10 @@ _simple_dirs = [
     'memcache',
     'tables',
     'strings',
+    'strmatch',
     'util-misc',
+    'xlate',
+    'xml'
 ]
 
 class APREnv(Environment):
@@ -72,6 +76,7 @@ class APREnv(Environment):
 
     self.AppendUnique(CPPPATH = ['include', 'include/private', 'include/arch/'+self['APR_PLATFORM']])
     self.autoconf = aprconf.APRConfigure(self)
+    self.AppendUnique(LIBS = ['expat'])
 
   def is_gcc(self):
     # TOOD: This detection should be smarter, need look at SCons Internals
