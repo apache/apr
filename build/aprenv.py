@@ -523,6 +523,9 @@ class APREnv(Environment):
         else:
             subst['@have_%s@' % func] = 0
 
+    if self['PLATFORM'] in ['sunos']:
+      conf.Define("SIGWAIT_TAKES_ONE_ARG")
+
     # Set Features
     # TODO: Not done yet
     subst['@sharedmem@'] = 1
