@@ -511,7 +511,9 @@ class APREnv(Environment):
         'memchr',
         'iovec',
         'fork',
-        'mmap'
+        'mmap',
+        'uuid_create',
+        'uuid_generate',
     ]
 
     for func in check_functions:
@@ -533,7 +535,7 @@ class APREnv(Environment):
     subst['@have_unicode_fs@'] = 0
     subst['@have_proc_invoked@'] = 0
     subst['@aprlfs@'] = 0
-    subst['@osuuid@'] = 0
+    subst['@osuuid@'] = subst['@have_uuid_generate@'] or subst['@have_uuid_create@']
     subst['@file_as_socket@'] = 1
 
     # check for IPv6 (the user is allowed to disable this via commandline
