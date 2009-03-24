@@ -32,11 +32,16 @@ APR_CONFIG = apr-$(APR_MAJOR_VERSION)-config
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 
+APU_MODULES = @APU_MODULES@
+LINK_MODULE = $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LT_LDFLAGS) $(ALL_CFLAGS) $(ALL_LDFLAGS) $(APRUTIL_LDFLAGS) -release $(APR_MAJOR_VERSION) -module -rpath $(APU_DSO_LIBDIR)
+APU_DSO_LIBDIR = @APU_DSO_LIBDIR@
+
 #
 # Rules for building specific targets, starting with 'all' for
 # building the entire package.
 #
-TARGETS = $(TARGET_LIB) apr.exp apr-config.out build/apr_rules.out
+TARGETS = $(TARGET_LIB) $(APU_MODULES) \
+	apr.exp apr-config.out build/apr_rules.out
 
 LT_VERSION = @LT_VERSION@
 
@@ -95,6 +100,14 @@ install: $(TARGETS)
 
 $(TARGET_LIB): $(OBJECTS)
 	$(LINK) @lib_target@ $(ALL_LIBS)
+
+install-modules: install-modules-@APU_HAVE_MODULES@
+
+install-modules-no:
+
+install-modules-yes: $(APU_MODULES)
+	$(APR_MKDIR) $(DESTDIR)$(APU_DSO_LIBDIR)
+	@for m in $(APU_MODULES); do $(LIBTOOL) $(LT_LTFLAGS) $(LTFLAGS) --mode=install $(INSTALL) -m 755 $$m $(DESTDIR)$(APU_DSO_LIBDIR); done
 
 exports.c: $(HEADERS)
 	$(APR_MKEXPORT) $(HEADERS) > $@
