@@ -31,7 +31,7 @@
 #include "apu_internal.h"
 #include "apu_version.h"
 
-#if APR_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
 
 #if APR_HAS_THREADS
 static apr_thread_mutex_t* mutex = NULL;

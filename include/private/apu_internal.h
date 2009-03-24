@@ -21,7 +21,7 @@
 #ifndef APU_INTERNAL_H
 #define APU_INTERNAL_H
 
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,7 +67,7 @@ struct apr__ldap_dso_fntable {
 }
 #endif
 
-#endif /* APU_DSO_BUILD */
+#endif /* APR_HAVE_MODULAR_DSO */
 
 #endif /* APU_INTERNAL_H */
 

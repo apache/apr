@@ -2451,7 +2451,7 @@ if test $enable_dtrace = "yes" -a "$ac_cv_header_sys_sdt_h" = "yes"; then
 fi
 
 dnl Enable DSO build; must be last:
-APU_CHECK_UTIL_DSO
+APR_MODULAR_DSO
 
 AC_SEARCH_LIBS(crypt, crypt ufc)
 AC_MSG_CHECKING(if system crypt() function is threadsafe)
@@ -2485,7 +2485,7 @@ AC_DEFINE_UNQUOTED([APR_DSO_LIBDIR], ["$abs_dso_libdir"],
                    [Define to be absolute path to DSO directory])
 AC_SUBST(APR_HAVE_MODULES)
 AC_SUBST(APR_DSO_LIBDIR)
-AC_SUBST(APR_MODULES)
+AC_SUBST(APR_DSO_MODULES)
 AC_SUBST(EXTRA_OBJECTS)
 
 dnl
