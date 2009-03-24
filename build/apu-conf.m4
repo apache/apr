@@ -111,8 +111,8 @@ AC_DEFUN([APU_SYSTEM_EXPAT], [
  
     APU_TRY_EXPAT_LINK([Expat 1.95.x in /usr/local], 
        apu_cv_expat_usrlocal, [expat.h], [-lexpat],
-       [APR_ADDTO(APRUTIL_INCLUDES, [-I/usr/local/include])
-        APR_ADDTO(APRUTIL_LDFLAGS, [-L/usr/local/lib])],[
+       [APR_ADDTO(INCLUDES, [-I/usr/local/include])
+        APR_ADDTO(LDFLAGS, [-L/usr/local/lib])],[
        APR_REMOVEFROM(LDFLAGS, [-L/usr/local/lib])
        APR_REMOVEFROM(CPPFLAGS, [-I/usr/local/include])
       ])
@@ -147,8 +147,7 @@ AC_ARG_WITH([expat],
     if test "$withval" != "/usr"; then
       APR_ADDTO(LDFLAGS, [-L$withval/lib])
       APR_ADDTO(CPPFLAGS, [-I$withval/include])
-      APR_ADDTO(APRUTIL_INCLUDES, [-I$withval/include])
-      APR_ADDTO(APRUTIL_LDFLAGS, [-L$withval/lib])
+      APR_ADDTO(INCLUDES, [-I$withval/include])
     fi
     # ...and refuse to fall back on the builtin expat.
     apu_try_builtin_expat=0
@@ -164,13 +163,13 @@ if test "${apu_has_expat}${apu_try_builtin_expat}" = "01"; then
   dnl we are working with the bundled version of the software.
   bundled_subdir="xml/expat"
   APR_SUBDIR_CONFIG($bundled_subdir, [--prefix=$prefix --exec-prefix=$exec_prefix --libdir=$libdir --includedir=$includedir --bindir=$bindir])
-  APR_ADDTO(APRUTIL_INCLUDES, [-I$top_builddir/$bundled_subdir/lib])
+  APR_ADDTO(INCLUDES, [-I$top_builddir/$bundled_subdir/lib])
   APR_ADDTO(LDFLAGS, [-L$top_builddir/$bundled_subdir/lib])
   apu_expat_libs="$top_builddir/$bundled_subdir/lib/libexpat.la"
 fi
 
 APR_ADDTO(APRUTIL_EXPORT_LIBS, [$apu_expat_libs])
-APR_ADDTO(APRUTIL_LIBS, [$apu_expat_libs])
+APR_ADDTO(LIBS, [$apu_expat_libs])
 
 APR_XML_DIR=$bundled_subdir
 AC_SUBST(APR_XML_DIR)
@@ -256,11 +255,10 @@ AC_ARG_WITH(ldap,[  --with-ldap=library     ldap library to use],
     save_libs="$LIBS"
     if test -n "$with_ldap_include"; then
       CPPFLAGS="$CPPFLAGS -I$with_ldap_include"
-      APR_ADDTO(APRUTIL_INCLUDES, [-I$with_ldap_include])
+      APR_ADDTO(INCLUDES, [-I$with_ldap_include])
     fi
     if test -n "$with_ldap_lib"; then
-      LDFLAGS="$LDFLAGS -L$with_ldap_lib"
-      APR_ADDTO(APRUTIL_LDFLAGS, [-L$with_ldap_lib])
+      APR_ADDTO(LDFLAGS, [-L$with_ldap_lib])
     fi
 
     LIBLDAP="$withval"
@@ -378,8 +376,7 @@ if test "$apu_has_ldap_openldap" = "1"; then
     save_ldflags="$LDFLAGS"
     save_libs="$LIBS"
 
-    CPPFLAGS="$CPPFLAGS $APRUTIL_INCLUDES"
-    LDFLAGS="$LDFLAGS $APRUTIL_LDFLAGS"
+    CPPFLAGS="$CPPFLAGS $INCLUDES"
     AC_CACHE_CHECK([style of ldap_set_rebind_proc routine], ac_cv_ldap_set_rebind_proc_style,
     APR_TRY_COMPILE_NO_WARNING([
     #ifdef HAVE_LBER_H

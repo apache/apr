@@ -175,15 +175,15 @@ AC_DEFUN([APU_CHECK_BERKELEY_DB], [
     header="`echo $found | sed -e 's/:.*$//'`"
     lib="`echo $found | sed -e 's/^.*://'`"
 
-    APR_ADDTO(APRUTIL_INCLUDES, [-I$header])
-    APR_ADDTO(APRUTIL_LDFLAGS, [-L$lib])
+    APR_ADDTO(INCLUDES, [-I$header])
+    APR_ADDTO(LDFLAGS, [-L$lib])
     apu_db_header=$bdb_header
     apu_db_lib=$bdb_libname
     apu_have_db=1
     ;;
   *)
-    APR_ADDTO(APRUTIL_INCLUDES, [-I$found/include])
-    APR_ADDTO(APRUTIL_LDFLAGS, [-L$found/lib])
+    APR_ADDTO(INCLUDES, [-I$found/include])
+    APR_ADDTO(LDFLAGS, [-L$found/lib])
     apu_db_header=$bdb_header
     apu_db_lib=$bdb_libname
     apu_have_db=1
@@ -707,8 +707,8 @@ AC_DEFUN([APU_CHECK_DBM], [
       AC_MSG_CHECKING(checking for gdbm in $withval)
       AC_CHECK_HEADER(gdbm.h, AC_CHECK_LIB(gdbm, gdbm_open, [apu_have_gdbm=1]))
       if test "$apu_have_gdbm" != "0"; then
-        APR_ADDTO(APRUTIL_LDFLAGS, [-L$withval/lib])
-        APR_ADDTO(APRUTIL_INCLUDES, [-I$withval/include])
+        APR_ADDTO(LDFLAGS, [-L$withval/lib])
+        APR_ADDTO(INCLUDES, [-I$withval/include])
       fi
       CPPFLAGS="$saved_cppflags"
       LDFLAGS="$saved_ldflags"
@@ -763,8 +763,8 @@ AC_DEFUN([APU_CHECK_DBM], [
       )
       if test "$apu_have_ndbm" != "0";  then
         if test "$withval" != "yes"; then
-          APR_ADDTO(APRUTIL_INCLUDES, [$NDBM_INC])
-          APR_ADDTO(APRUTIL_LDFLAGS, [$NDBM_LDFLAGS])
+          APR_ADDTO(INCLUDES, [$NDBM_INC])
+          APR_ADDTO(LDFLAGS, [$NDBM_LDFLAGS])
         fi
       elif test "$withval" != "yes"; then
         AC_ERROR( NDBM not found in the specified directory)

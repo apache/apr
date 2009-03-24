@@ -77,8 +77,8 @@ AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
       AC_CHECK_LIB(crypto, BN_init, AC_CHECK_LIB(ssl, SSL_accept, [openssl_have_libs=1],,-lcrypto))
       if test "$openssl_have_headers" != "0" && test "$openssl_have_libs" != "0"; then
         apu_have_openssl=1
-        APR_ADDTO(APRUTIL_LDFLAGS, [-L$withval/lib])
-        APR_ADDTO(APRUTIL_INCLUDES, [-I$withval/include])
+        APR_ADDTO(LDFLAGS, [-L$withval/lib])
+        APR_ADDTO(INCLUDES, [-I$withval/include])
       fi
 
       if test "$apu_have_openssl" != "1"; then
@@ -86,8 +86,8 @@ AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
         AC_CHECK_LIB(crypto, BN_init, AC_CHECK_LIB(ssl, SSL_accept, [openssl_have_libs=1],,-lcrypto))
         if test "$openssl_have_headers" != "0" && test "$openssl_have_libs" != "0"; then
           apu_have_openssl=1
-          APR_ADDTO(APRUTIL_LDFLAGS, [-L$withval/lib])
-          APR_ADDTO(APRUTIL_INCLUDES, [-I$withval/include])
+          APR_ADDTO(LDFLAGS, [-L$withval/lib])
+          APR_ADDTO(INCLUDES, [-I$withval/include])
         fi
       fi
 
