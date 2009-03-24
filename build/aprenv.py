@@ -540,14 +540,13 @@ class APREnv(Environment):
 
     # check for IPv6 (the user is allowed to disable this via commandline
     # options
+    subst['@have_ipv6@'] = 0
     if self['ipv6']:
         if conf.CheckType('struct sockaddr_in6', 
                           includes='#include <netinet/in.h>') and \
            conf.CheckFunc('getaddrinfo') and \
            conf.CheckFunc('getnameinfo'):
             subst['@have_ipv6@'] = 1
-    else:
-        subst['@have_ipv6@'] = 0
 
     if conf.CheckDeclaration('SO_ACCEPTFILTER', '#include <sys/socket.h>'):
         subst['@acceptfilter@'] = 1
