@@ -656,6 +656,10 @@ class APREnv(Environment):
     subst['@apu_have_gdbm@'] = 0
     subst['@apu_have_ndbm@'] = 0
     subst['@apu_have_db@'] = 0
+    subst['@apu_use_sdbm@'] = 1
+    subst['@apu_use_ndbm@'] = 0
+    subst['@apu_use_gdbm@'] = 0
+    subst['@apu_use_db@'] = 0
 
     subst['@apu_db_version@'] = 0
 
@@ -677,6 +681,8 @@ class APREnv(Environment):
 
     self.SubstFile('include/apr.h', 'include/apr.h.in', SUBST_DICT = subst)
     self.SubstFile('include/apu.h', 'include/apu.h.in', SUBST_DICT = subst)
+    self.SubstFile('include/apu_want.h', 'include/apu_want.h.in', SUBST_DICT = subst)
+    self.SubstFile('include/private/apu_select_dbm.h', 'include/private/apu_select_dbm.h.in', SUBST_DICT = subst)
     if hasattr(conf, "config_h_text"):
       conf.Define("APR_OFF_T_STRFN", subst['@off_t_strfn@'])
       conf.config_h_text = conf.config_h_text + '#include "arch/apr_private_common.h"\n'
