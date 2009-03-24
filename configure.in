@@ -26,6 +26,14 @@ sinclude(build/ltoptions.m4)
 sinclude(build/ltversion.m4)
 sinclude(build/lt~obsolete.m4)
 
+sinclude(build/apu-conf.m4)
+sinclude(build/apu-iconv.m4)
+sinclude(build/apu-hints.m4)
+sinclude(build/crypto.m4)
+sinclude(build/dbm.m4)
+sinclude(build/dbd.m4)
+sinclude(build/dso.m4)
+
 dnl Hard-coded inclusion at the tail end of apr_private.h:
 AH_BOTTOM([
 /* switch this on if we have a BeOS version below BONE */
@@ -2371,6 +2379,129 @@ fi
 
 AC_SUBST(have_unicode_fs)
 
+dnl ------------------------------ APR-util stuff 
+
+APU_PRELOAD
+
+dnl
+dnl  Find the APR-ICONV directory.
+dnl
+AC_ARG_WITH(apr-iconv,
+            [  --with-apr-iconv=DIR    relative path to apr-iconv source],
+  [ apu_apriconv_dir="$withval"
+    if test "$apu_apriconv_dir" != "no"; then
+      if test -d "$apu_apriconv_dir"; then
+        APR_SUBDIR_CONFIG("$apu_apriconv_dir",
+                          [$apache_apr_flags \
+                             --prefix=$prefix \
+                             --exec-prefix=$exec_prefix \
+                             --libdir=$libdir \
+                             --includedir=$includedir \
+                             --bindir=$bindir \
+                             --datadir=$datadir \
+                             --with-installbuilddir=$installbuilddir],
+                          [--enable-layout=*|\'--enable-layout=*])
+        APRUTIL_EXPORT_LIBS="$abs_srcdir/$apu_apriconv_dir/lib/libapriconv.la \
+                             $APRUTIL_EXPORT_LIBS"
+        APRUTIL_INCLUDES="-I$abs_srcdir/$apu_apriconv_dir/include \
+                          $APRUTIL_INCLUDES"
+        APR_ICONV_DIR="$apu_apriconv_dir"
+      else
+       APR_ICONV_DIR=""
+      fi
+    else
+      APR_ICONV_DIR=""
+    fi
+  ])
+AC_SUBST(APR_ICONV_DIR)
+
+dnl Find LDAP library
+dnl Determine what DBM backend type to use.
+dnl Find Expat
+dnl Find an iconv library
+APU_CHECK_CRYPTO
+APU_CHECK_CRYPTO_OPENSSL
+APU_CHECK_CRYPTO_NSS
+APU_FIND_LDAP
+APU_CHECK_DBM
+APU_CHECK_DBD
+APU_CHECK_DBD_MYSQL
+APU_CHECK_DBD_SQLITE3
+APU_CHECK_DBD_SQLITE2
+APU_CHECK_DBD_ORACLE
+APU_CHECK_DBD_FREETDS
+APU_CHECK_DBD_ODBC
+APU_FIND_EXPAT
+APU_FIND_ICONV
+
+AC_CHECK_HEADERS( \
+sys/sdt.h
+)
+
+AC_ARG_ENABLE(dtrace,APR_HELP_STRING(--enable-dtrace, Enable DTrace probes),
+[
+  enable_dtrace=$enableval
+],
+[
+  enable_dtrace=no
+])
+
+if test $enable_dtrace = "yes" -a "$ac_cv_header_sys_sdt_h" = "yes"; then
+    APR_ADDTO(CPPFLAGS, -DAPR_DTRACE_PROVIDER)
+fi
+
+dnl Enable DSO build; must be last:
+APU_CHECK_UTIL_DSO
+
+AC_SEARCH_LIBS(crypt, crypt ufc)
+AC_MSG_CHECKING(if system crypt() function is threadsafe)
+if test "x$apu_crypt_threadsafe" = "x1"; then
+  AC_DEFINE(APU_CRYPT_THREADSAFE, 1, [Define if the system crypt() function is threadsafe])
+  msg="yes"
+else
+  msg="no"
+fi
+AC_MSG_RESULT([$msg])
+
+AC_CHECK_FUNCS(crypt_r, [ crypt_r="1" ], [ crypt_r="0" ])
+if test "$crypt_r" = "1"; then
+  APU_CHECK_CRYPT_R_STYLE
+fi
+
+APRUTIL_LIBNAME="aprutil${libsuffix}"
+AC_SUBST(APRUTIL_LIBNAME)
+
+# Set up destination directory for DSOs.
+APU_DSO_LIBDIR="\${libdir}/apr-util-${APRUTIL_MAJOR_VERSION}"
+# Set APU_HAVE_MODULES appropriately for the Makefile
+if test -n "$APU_MODULES"; then 
+   APU_HAVE_MODULES=yes
+else
+   APU_HAVE_MODULES=no
+fi
+# Define expanded libdir for apu_config.h
+APR_EXPAND_VAR(abs_dso_libdir, $APU_DSO_LIBDIR)
+AC_DEFINE_UNQUOTED([APU_DSO_LIBDIR], ["$abs_dso_libdir"],
+                   [Define to be absolute path to DSO directory])
+AC_SUBST(APU_HAVE_MODULES)
+AC_SUBST(APU_DSO_LIBDIR)
+AC_SUBST(APU_MODULES)
+AC_SUBST(EXTRA_OBJECTS)
+
+dnl
+dnl Prep all the flags and stuff for compilation and export to other builds
+dnl
+APR_ADDTO(APRUTIL_LIBS, [$APR_LIBS])
+
+AC_SUBST(APRUTIL_EXPORT_LIBS)
+AC_SUBST(APRUTIL_PRIV_INCLUDES)
+AC_SUBST(APRUTIL_INCLUDES)
+AC_SUBST(APRUTIL_LDFLAGS)
+AC_SUBST(APRUTIL_LIBS)
+AC_SUBST(LDFLAGS)
+
+
+
 dnl ----------------------------- Finalize the variables
 
 echo "${nl}Restore user-defined environment settings..."
@@ -2440,6 +2571,10 @@ AC_CONFIG_FILES([Makefile
 if test -d $srcdir/test; then
    AC_CONFIG_FILES([test/Makefile test/internal/Makefile])
 fi
+
+AC_CONFIG_FILES([include/private/apu_select_dbm.h
+                 include/apr_ldap.h
+                 include/apu.h include/apu_want.h])
 
 dir=include/arch/unix
 test -d $dir || $MKDIR $dir
