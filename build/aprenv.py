@@ -40,7 +40,18 @@ _platform_dirs = [
     'user'
 ]
 
-_simple_dirs = ['tables', 'strings']
+_simple_dirs = [
+    'buckets',
+    'dbd',
+    'dbm',
+    'encoding',
+    'hooks',
+    'hooks',
+    'memcache',
+    'tables',
+    'strings',
+    'util-misc',
+]
 
 class APREnv(Environment):
   def __init__(self, parent=None, args=None, **kw):
@@ -85,18 +96,17 @@ class APREnv(Environment):
 
   def APRVersion(self):
     if not self.has_key('APR_VERSION'):
-      self['APR_VERSION'] = self.read_version('APR', 'include/apr_version.h')
+      self['APR_VERSION'] = self.read_version('APR', '#include/apr_version.h')
     return self['APR_VERSION']
 
   def read_version(self, prefix, path):
     version_re = re.compile("(.*)%s_(?P<id>MAJOR|MINOR|PATCH)_VERSION(\s+)(?P<num>\d)(.*)" % prefix)
     versions = {}
-    fp = open(path, 'rb')
-    for line in fp.readlines():
+    fp = self.File(path).get_contents()
+    for line in fp.splitlines():
       m = version_re.match(line)
       if m:
         versions[m.group('id')] = int(m.group('num'))
-    fp.close()
     return (versions['MAJOR'], versions['MINOR'], versions['PATCH'])
 
   def Filter(self, **kw):
@@ -639,6 +649,7 @@ class APREnv(Environment):
     subst['@shlibpath_var@'] = pjoin(self['prefix'], 'lib')
 
     self.SubstFile('include/apr.h', 'include/apr.h.in', SUBST_DICT = subst)
+    self.SubstFile('include/apu.h', 'include/apu.h.in', SUBST_DICT = subst)
 
     if hasattr(conf, "config_h_text"):
       conf.Define("APR_OFF_T_STRFN", subst['@off_t_strfn@'])
