@@ -630,8 +630,13 @@ class APREnv(Environment):
     subst['@pthreadser@'] = 0
     subst['@hasposixser@'] = 0
     subst['@proclockglobal@'] = 0
-    subst['@eolstr@'] = "\\\\n"
-    subst['@shlibpath_var@'] = ""
+
+    if self['APR_PLATFORM'] in ['win32']:
+      subst['@eolstr@'] = "\\\\r\\\\n"
+    else:
+      subst['@eolstr@'] = "\\\\n"
+
+    subst['@shlibpath_var@'] = pjoin(self['prefix'], 'lib')
 
     self.SubstFile('include/apr.h', 'include/apr.h.in', SUBST_DICT = subst)
 
