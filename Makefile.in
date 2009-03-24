@@ -77,7 +77,8 @@ install: $(TARGETS)
 	$(APR_MKDIR) $(DESTDIR)$(libdir) $(DESTDIR)$(bindir) $(DESTDIR)$(installbuilddir) \
 		     $(DESTDIR)$(libdir)/pkgconfig $(DESTDIR)$(includedir)
 	$(INSTALL_DATA) $(top_blddir)/include/apr.h $(DESTDIR)$(includedir)
-	for f in $(top_srcdir)/include/apr_*.h; do \
+	$(INSTALL_DATA) $(top_blddir)/include/apu.h $(DESTDIR)$(includedir)
+	for f in $(top_srcdir)/include/apr_*.h $(top_srcdir)/include/apu_*.h; do \
 	    $(INSTALL_DATA) $${f} $(DESTDIR)$(includedir); \
 	done
 	$(LIBTOOL) --mode=install $(INSTALL) -m 755 $(TARGET_LIB) $(DESTDIR)$(libdir)
