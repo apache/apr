@@ -509,7 +509,9 @@ class APREnv(Environment):
         'strnicmp',
         'strstr',
         'memchr',
-        'iovec'
+        'iovec',
+        'fork',
+        'mmap'
     ]
 
     for func in check_functions:
@@ -520,15 +522,14 @@ class APREnv(Environment):
 
     # Set Features
     # TODO: Not done yet
-    subst['@sharedmem@'] = 0
-    subst['@threads@'] = 0
+    subst['@sharedmem@'] = 1
+    subst['@threads@'] = 1
     subst['@sendfile@'] = 0
-    subst['@mmap@'] = 0
-    subst['@fork@'] = 0
+    subst['@mmap@'] = subst['@have_mmap@']
+    subst['@fork@'] = subst['@have_fork@']
     subst['@rand@'] = 0
     subst['@oc@'] = 0
     subst['@aprdso@'] = 0
-    subst['@acceptfilter@'] = 0
     subst['@have_unicode_fs@'] = 0
     subst['@have_proc_invoked@'] = 0
     subst['@aprlfs@'] = 0
@@ -545,6 +546,11 @@ class APREnv(Environment):
             subst['@have_ipv6@'] = 1
     else:
         subst['@have_ipv6@'] = 0
+
+    if conf.CheckDeclaration('SO_ACCEPTFILTER', '#include <sys/socket.h>'):
+        subst['@acceptfilter@'] = 1
+    else:
+        subst['@acceptfilter@'] = 0
 
     if conf.CheckDeclaration('IPPROTO_SCTP', '#include <netinet/in.h>') and \
         conf.Check_apr_sctp():
