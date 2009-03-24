@@ -2472,7 +2472,7 @@ APRUTIL_LIBNAME="aprutil${libsuffix}"
 AC_SUBST(APRUTIL_LIBNAME)
 
 # Set up destination directory for DSOs.
-APU_DSO_LIBDIR="\${libdir}/apr-util-${APRUTIL_MAJOR_VERSION}"
+APU_DSO_LIBDIR="\${libdir}/apr-util-${APR_MAJOR_VERSION}"
 # Set APU_HAVE_MODULES appropriately for the Makefile
 if test -n "$APU_MODULES"; then 
    APU_HAVE_MODULES=yes
