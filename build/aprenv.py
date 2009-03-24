@@ -514,6 +514,7 @@ class APREnv(Environment):
         'mmap',
         'uuid_create',
         'uuid_generate',
+        'waitpid'
     ]
 
     for func in check_functions:
