@@ -2474,7 +2474,7 @@ AC_SUBST(APRUTIL_LIBNAME)
 # Set up destination directory for DSOs.
 APR_DSO_LIBDIR="\${libdir}/apr-${APR_MAJOR_VERSION}"
 # Set APU_HAVE_MODULES appropriately for the Makefile
-if test -n "$APR_MODULES"; then 
+if test -n "$APR_DSO_MODULES"; then 
    APR_HAVE_MODULES=yes
 else
    APR_HAVE_MODULES=no
