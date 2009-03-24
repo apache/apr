@@ -65,6 +65,20 @@ libdir=@libdir@
 includedir=@includedir@
 installbuilddir=@installbuilddir@
 
+LDADD_dbd_pgsql = @LDADD_dbd_pgsql@
+LDADD_dbd_oracle = @LDADD_dbd_oracle@
+LDADD_dbd_sqlite2 = @LDADD_dbd_sqlite2@
+LDADD_dbd_sqlite3 = @LDADD_dbd_sqlite3@
+LDADD_dbd_mysql = @LDADD_dbd_mysql@
+LDADD_dbd_freetds = @LDADD_dbd_freetds@
+LDADD_dbd_odbc = @LDADD_dbd_odbc@
+LDADD_dbm_db = @LDADD_dbm_db@
+LDADD_dbm_gdbm = @LDADD_dbm_gdbm@
+LDADD_dbm_ndbm = @LDADD_dbm_ndbm@
+LDADD_ldap = @LDADD_ldap@
+LDADD_crypto_openssl = @LDADD_crypto_openssl@
+LDADD_crypto_nss = @LDADD_crypto_nss@
+
 # Create apr-config script suitable for the install tree
 apr-config.out: $(APR_CONFIG)
 	sed 's,^\(location=\).*$$,\1installed,' < $(APR_CONFIG) > $@
