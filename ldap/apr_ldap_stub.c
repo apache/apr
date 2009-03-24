@@ -27,7 +27,7 @@
 
 #if APR_HAS_LDAP
 
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
 
 static struct apr__ldap_dso_fntable *lfn = NULL;
 
@@ -139,7 +139,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_remove(LDAP *ld)
     return lfn->rebind_remove(ld);
 }
 
-#endif /* APU_DSO_BUILD */
+#endif /* APR_HAVE_MODULAR_DSO */
 
 #endif /* APR_HAS_LDAP */
 

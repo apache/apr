@@ -40,7 +40,7 @@ static apr_hash_t *drivers = NULL;
 
 #define CLEANUP_CAST (apr_status_t (*)(void*))
 
-#if !APU_DSO_BUILD
+#if !APR_HAVE_MODULAR_DSO
 #define DRIVER_LOAD(name,driver,pool,params) \
     {   \
         extern const apr_crypto_driver_t driver; \
@@ -73,13 +73,13 @@ APU_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool,
     /* Top level pool scope, need process-scope lifetime */
     for (parent = pool; parent; parent = apr_pool_parent_get(pool))
         pool = parent;
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
     /* deprecate in 2.0 - permit implicit initialization */
     apu_dso_init(pool);
 #endif
     drivers = apr_hash_make(pool);
 
-#if !APU_DSO_BUILD
+#if !APR_HAVE_MODULAR_DSO
     /* Load statically-linked drivers: */
 #if APU_HAVE_OPENSSL
     DRIVER_LOAD("openssl", apr_crypto_openssl_driver, pool, params);
@@ -93,7 +93,7 @@ APU_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool,
 #if APU_HAVE_MSCNG
     DRIVER_LOAD("mscng", apr_crypto_mscng_driver, pool, params);
 #endif
-#endif /* APU_DSO_BUILD */
+#endif /* APR_HAVE_MODULAR_DSO */
 
     apr_pool_cleanup_register(pool, NULL, apr_crypto_term,
             apr_pool_cleanup_null);
@@ -104,7 +104,7 @@ APU_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool,
 APU_DECLARE(apr_status_t) apr_crypto_get_driver(apr_pool_t *pool, const char *name,
         const apr_crypto_driver_t **driver, const apr_array_header_t *params,
         const apu_err_t **result) {
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
     char modname[32];
     char symname[34];
     apr_dso_handle_t *dso;
@@ -113,7 +113,7 @@ APU_DECLARE(apr_status_t) apr_crypto_get_driver(apr_pool_t *pool, const char *na
     apr_status_t rv;
     int rc = 0;
 
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
     rv = apu_dso_mutex_lock();
     if (rv) {
         return rv;
@@ -121,13 +121,13 @@ APU_DECLARE(apr_status_t) apr_crypto_get_driver(apr_pool_t *pool, const char *na
 #endif
     *driver = apr_hash_get(drivers, name, APR_HASH_KEY_STRING);
     if (*driver) {
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
         apu_dso_mutex_unlock();
 #endif
         return APR_SUCCESS;
     }
 
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
     /* The driver DSO must have exactly the same lifetime as the
      * drivers hash table; ignore the passed-in pool */
     pool = apr_hash_pool_get(drivers);

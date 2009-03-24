@@ -63,7 +63,7 @@ APU_DECLARE(apr_status_t) apr_dbd_mutex_unlock() {
 }
 #endif
 
-#if !APU_DSO_BUILD
+#if !APR_HAVE_MODULAR_DSO
 #define DRIVER_LOAD(name,driver,pool) \
     {   \
         extern const apr_dbd_driver_t driver; \
@@ -97,7 +97,7 @@ APU_DECLARE(apr_status_t) apr_dbd_init(apr_pool_t *pool)
     /* Top level pool scope, need process-scope lifetime */
     for (parent = pool;  parent; parent = apr_pool_parent_get(pool))
          pool = parent;
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
     /* deprecate in 2.0 - permit implicit initialization */
     apu_dso_init(pool);
 #endif
@@ -109,7 +109,7 @@ APU_DECLARE(apr_status_t) apr_dbd_init(apr_pool_t *pool)
     /* This already registers a pool cleanup */
 #endif
 
-#if !APU_DSO_BUILD
+#if !APR_HAVE_MODULAR_DSO
 
     /* Load statically-linked drivers: */
 #if APU_HAVE_MYSQL
@@ -136,7 +136,7 @@ APU_DECLARE(apr_status_t) apr_dbd_init(apr_pool_t *pool)
 #if APU_HAVE_SOME_OTHER_BACKEND
     DRIVER_LOAD("firebird", apr_dbd_other_driver, pool);
 #endif
-#endif /* APU_DSO_BUILD */
+#endif /* APR_HAVE_MODULAR_DSO */
 
     apr_pool_cleanup_register(pool, NULL, apr_dbd_term,
                               apr_pool_cleanup_null);
@@ -147,14 +147,14 @@ APU_DECLARE(apr_status_t) apr_dbd_init(apr_pool_t *pool)
 APU_DECLARE(apr_status_t) apr_dbd_get_driver(apr_pool_t *pool, const char *name,
                                              const apr_dbd_driver_t **driver)
 {
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
     char modname[32];
     char symname[34];
     apr_dso_handle_sym_t symbol;
 #endif
     apr_status_t rv;
 
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
     rv = apu_dso_mutex_lock();
     if (rv) {
         return rv;
@@ -162,13 +162,13 @@ APU_DECLARE(apr_status_t) apr_dbd_get_driver(apr_pool_t *pool, const char *name,
 #endif
     *driver = apr_hash_get(drivers, name, APR_HASH_KEY_STRING);
     if (*driver) {
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
         apu_dso_mutex_unlock();
 #endif
         return APR_SUCCESS;
     }
 
-#if APU_DSO_BUILD
+#if APR_HAVE_MODULAR_DSO
     /* The driver DSO must have exactly the same lifetime as the
      * drivers hash table; ignore the passed-in pool */
     pool = apr_hash_pool_get(drivers);
