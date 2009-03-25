@@ -2492,6 +2492,7 @@ dnl
 dnl Prep all the flags and stuff for compilation and export to other builds
 dnl
 APR_ADDTO(LIBS, [$APRUTIL_LIBS])
+APR_ADDTO(INCLUDES, [$APRUTIL_PRIV_INCLUDES])
 
 AC_SUBST(APRUTIL_PRIV_INCLUDES)
 AC_SUBST(APRUTIL_INCLUDES)
