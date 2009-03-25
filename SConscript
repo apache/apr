@@ -21,7 +21,7 @@ tests = Split("""
 	testxlate.c testdbd.c testrmm.c testldap.c testmd4.c
 	teststrmatch.c testpass.c testcrypto.c testqueue.c
 	testbuckets.c testxml.c testdbm.c testuuid.c testmd5.c
-	testreslist.c
+	testreslist.c dbd.c
 """)
 
 tenv = env.Clone()
