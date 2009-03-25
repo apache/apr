@@ -18,7 +18,8 @@ VPATH = @srcdir@
 STDTEST_PORTABLE = \
 	testlockperf@EXEEXT@ \
 	testmutexscope@EXEEXT@ \
-	testall@EXEEXT@
+	testall@EXEEXT@ \
+	dbd@EXEEXT@ \
 
 TESTS = testtime.lo teststr.lo testvsn.lo testipsub.lo testshm.lo	\
 	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo	\
@@ -163,15 +164,32 @@ OBJECTS_tryread = tryread.lo $(LOCAL_LIBS)
 tryread@EXEEXT@: $(OBJECTS_tryread)
 	$(LINK_PROG) $(OBJECTS_tryread) $(ALL_LIBS)
 
+OBJECTS_dbd = dbd.lo $(LOCAL_LIBS)
+dbd@EXEEXT@: $(OBJECTS_dbd)
+	$(LINK_PROG) $(OBJECTS_dbd) $(APRUTIL_LIBS)
+
 check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	teststatus=0; \
 	progfailed=""; \
 	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
-		./$$prog; \
-		status=$$?; \
-		if test $$status != 0; then \
-			teststatus=$$status; \
-			progfailed="$$progfailed $$prog"; \
+	        if test "$$prog" = 'dbd'; then \
+			for driver in @apu_dbd_tests@; do \
+				@shlibpath_var@="`echo "../dbd/.libs:../ldap/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
+				./$$prog $$driver; \
+				status=$$?; \
+				if test $$status != 0; then \
+					teststatus=$$status; \
+					progfailed="$$progfailed '$$prog $$driver'"; \
+				fi; \
+			done; \
+	        else \
+			@shlibpath_var@="`echo "../dbd/.libs:../ldap/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
+			./$$prog; \
+			status=$$?; \
+			if test $$status != 0; then \
+				teststatus=$$status; \
+				progfailed="$$progfailed $$prog"; \
+			fi; \
 		fi; \
 	done; \
 	if test $$teststatus != 0; then \
