@@ -103,4 +103,23 @@ abts_suite *testud(abts_suite *suite);
 abts_suite *testuser(abts_suite *suite);
 abts_suite *testvsn(abts_suite *suite);
 
+abts_suite *teststrmatch(abts_suite *suite);
+abts_suite *testuri(abts_suite *suite);
+abts_suite *testuuid(abts_suite *suite);
+abts_suite *testbuckets(abts_suite *suite);
+abts_suite *testpass(abts_suite *suite);
+abts_suite *testmd4(abts_suite *suite);
+abts_suite *testmd5(abts_suite *suite);
+abts_suite *testcrypto(abts_suite *suite);
+abts_suite *testldap(abts_suite *suite);
+abts_suite *testdbd(abts_suite *suite);
+abts_suite *testdate(abts_suite *suite);
+abts_suite *testmemcache(abts_suite *suite);
+abts_suite *testreslist(abts_suite *suite);
+abts_suite *testqueue(abts_suite *suite);
+abts_suite *testxml(abts_suite *suite);
+abts_suite *testxlate(abts_suite *suite);
+abts_suite *testrmm(abts_suite *suite);
+abts_suite *testdbm(abts_suite *suite);
+
 #endif /* APR_TEST_INCLUDES */
