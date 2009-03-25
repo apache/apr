@@ -2403,8 +2403,7 @@ AC_ARG_WITH(apr-iconv,
                           [--enable-layout=*|\'--enable-layout=*])
         APRUTIL_EXPORT_LIBS="$abs_srcdir/$apu_apriconv_dir/lib/libapriconv.la \
                              $APRUTIL_EXPORT_LIBS"
-        APRUTIL_INCLUDES="-I$abs_srcdir/$apu_apriconv_dir/include \
-                          $APRUTIL_INCLUDES"
+        APR_ADDTO(INCLUDES, [-I$abs_srcdir/$apu_apriconv_dir/include])
         APR_ICONV_DIR="$apu_apriconv_dir"
       else
        APR_ICONV_DIR=""
@@ -2492,10 +2491,7 @@ dnl
 dnl Prep all the flags and stuff for compilation and export to other builds
 dnl
 APR_ADDTO(LIBS, [$APRUTIL_LIBS])
-APR_ADDTO(INCLUDES, [$APRUTIL_PRIV_INCLUDES])
 
-AC_SUBST(APRUTIL_PRIV_INCLUDES)
-AC_SUBST(APRUTIL_INCLUDES)
 AC_SUBST(LDFLAGS)
 
 

@@ -83,7 +83,6 @@ if test "$want_iconv" = "1" -a "$apu_iconv_dir" != "unknown"; then
     fi
   fi
   APR_REMOVEFROM(CPPFLAGS,[-I$apu_iconv_dir/include])
-  APR_REMOVEFROM(LDFLAGS,[-L$apu_iconv_dir/lib])
   APR_ADDTO(INCLUDES,[-I$apu_iconv_dir/include])
   APR_ADDTO(LDFLAGS,[-L$apu_iconv_dir/lib])
 fi
