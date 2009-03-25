@@ -140,6 +140,23 @@ def main():
 
       f.write('\n')
 
+  if parser.has_option('options', 'libraries'):
+    libs = parser.get('options', 'libraries')
+
+    for lib in string.split(libs):
+      files = get_files(parser.get(lib, 'paths'))
+      objects, _unused = write_objects(f, legal_deps, h_deps, files)
+      flat_objects = string.join(objects)
+      f.write('OBJECTS_%s = %s\n' % (lib, flat_objects))
+
+      if parser.has_option(lib, 'target'):
+        target = parser.get(lib, 'target')
+        f.write('MODULE_%s = %s\n' % (lib, target))
+        f.write('%s: $(OBJECTS_%s)\n' % (target, lib))
+        f.write('\t$(LINK_LIBRARY) -o $@ $(OBJECTS_%s) $(LDADD_%s)\n' % (lib, lib))
+
+      f.write('\n')
+
   # Build a list of all necessary directories in build tree
   alldirs = { }
   for dir in dirs.keys():
