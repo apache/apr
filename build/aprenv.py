@@ -53,6 +53,7 @@ _simple_dirs = [
     'strings',
     'strmatch',
     'util-misc',
+    'uri',
     'xlate',
     'xml'
 ]
@@ -682,9 +683,23 @@ class APREnv(Environment):
 
     subst['@have_apr_iconv@'] = 0
     subst['@have_iconv@'] = 0
+    
+    # ldap stuff, remove soon.
+    subst['@apu_has_ldap@'] = 0
+    
+    subst['@apu_has_ldap_netscape@'] = 0
+    subst['@apu_has_ldap_solaris@'] = 0
+    subst['@apu_has_ldap_novell@'] = 0
+    subst['@apu_has_ldap_mozilla@'] = 0
+    subst['@apu_has_ldap_openldap@'] = 0
+    subst['@apu_has_ldap_microsoft@'] = 0
+    subst['@apu_has_ldap_tivoli@'] = 0
+    subst['@apu_has_ldap_zos@'] = 0
+    subst['@apu_has_ldap_other@'] = 0
 
     self.SubstFile('include/apr.h', 'include/apr.h.in', SUBST_DICT = subst)
     self.SubstFile('include/apu.h', 'include/apu.h.in', SUBST_DICT = subst)
+    self.SubstFile('include/apr_ldap.h', 'include/apr_ldap.h.in', SUBST_DICT = subst)
     self.SubstFile('include/apu_want.h', 'include/apu_want.h.in', SUBST_DICT = subst)
     self.SubstFile('include/private/apu_select_dbm.h', 'include/private/apu_select_dbm.h.in', SUBST_DICT = subst)
     if hasattr(conf, "config_h_text"):
