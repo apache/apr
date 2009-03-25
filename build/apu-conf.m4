@@ -146,6 +146,7 @@ AC_ARG_WITH([expat],
     # Add given path to standard search paths if appropriate:
     if test "$withval" != "/usr"; then
       APR_ADDTO(INCLUDES, [-I$withval/include])
+      APR_ADDTO(LDFLAGS, [-L$withval/lib])
     fi
     # ...and refuse to fall back on the builtin expat.
     apu_try_builtin_expat=0
