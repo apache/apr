@@ -273,17 +273,17 @@ class APREnv(Environment):
 
     if sizeof_size_t:
       subst['@size_t_value@'] = 'size_t'
-      subst['@size_t_fmt@'] = '#define APR_SIZE_T_FMT "%lu"'
+      subst['@size_t_fmt@'] = '#define APR_SIZE_T_FMT "lu"'
     else:
       subst['@size_t_value@'] = 'apr_int32_t'
-      subst['@size_t_fmt@'] = '#define APR_SIZE_T_FMT "%u"'
+      subst['@size_t_fmt@'] = '#define APR_SIZE_T_FMT "u"'
 
     if sizeof_ssize_t:
       subst['@ssize_t_value@'] = 'ssize_t'
-      subst['@ssize_t_fmt@'] = '#define APR_SSIZE_T_FMT "%ld"'
+      subst['@ssize_t_fmt@'] = '#define APR_SSIZE_T_FMT "ld"'
     else:
       subst['@ssize_t_value@'] = 'apr_int32_t'
-      subst['@ssize_t_fmt@'] = '#define APR_SSIZE_T_FMT "%d"'
+      subst['@ssize_t_fmt@'] = '#define APR_SSIZE_T_FMT "d"'
 
     if conf.Check_apr_big_endian():
       subst['@bigendian@'] = 1
