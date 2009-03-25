@@ -20,15 +20,20 @@ STDTEST_PORTABLE = \
 	testmutexscope@EXEEXT@ \
 	testall@EXEEXT@
 
-TESTS = testtime.lo teststr.lo testvsn.lo testipsub.lo testshm.lo \
-	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
-	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
-	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
-	testpoll.lo testlock.lo testsockopt.lo testpipe.lo testthread.lo \
-	testhash.lo testargs.lo testnames.lo testuser.lo testpath.lo \
-	testenv.lo testprocmutex.lo testfnmatch.lo testatomic.lo testflock.lo \
-	testsock.lo testglobalmutex.lo teststrnatcmp.lo testfilecopy.lo \
-	testtemp.lo testlfs.lo testcond.lo
+TESTS = testtime.lo teststr.lo testvsn.lo testipsub.lo testshm.lo	\
+	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo	\
+	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo	\
+	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo	\
+	testpoll.lo testlock.lo testsockopt.lo testpipe.lo		\
+	testthread.lo testhash.lo testargs.lo testnames.lo testuser.lo	\
+	testpath.lo testenv.lo testprocmutex.lo testfnmatch.lo		\
+	testatomic.lo testflock.lo testsock.lo testglobalmutex.lo	\
+	teststrnatcmp.lo testfilecopy.lo testtemp.lo testlfs.lo		\
+	testcond.lo testuri.lo testmemcache.lo testdate.lo		\
+	testxlate.lo testdbd.lo testrmm.lo testldap.lo testmd4.lo	\
+	teststrmatch.lo testpass.lo testcrypto.lo testqueue.lo		\
+	testbuckets.lo testxml.lo testdbm.lo testuuid.lo testmd5.lo	\
+	testreslist.lo
 
 OTHER_PROGRAMS = \
 	sendfile@EXEEXT@ \
