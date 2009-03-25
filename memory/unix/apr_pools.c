@@ -460,12 +460,12 @@ struct debug_node_t {
 
 #endif /* APR_POOL_DEBUG */
 
-typedef struct malloc_list_t malloc_list_t;
-#define MALLOC_LIST_ENTRIES_MAX (2048)
-struct malloc_list_t {
-    malloc_list_t *next;
+typedef struct block_list_t block_list_t;
+#define BLOCK_LIST_ENTRIES_MAX (2048)
+struct block_list_t {
+    block_list_t *next;
     size_t offset;
-    void *entries[MALLOC_LIST_ENTRIES_MAX];
+    void *entries[BLOCK_LIST_ENTRIES_MAX];
 };
 
 /* The ref field in the apr_pool_t struct holds a
@@ -485,7 +485,7 @@ struct apr_pool_t {
     apr_abortfunc_t       abort_fn;
     apr_hash_t           *user_data;
     const char           *tag;
-    malloc_list_t        *malloced;
+    block_list_t        *blocks;
 
 #if APR_HAS_THREADS
     apr_thread_mutex_t   *mutex;
@@ -636,19 +636,19 @@ APR_DECLARE(void) apr_pool_terminate(void)
  * Memory allocation
  */
 
-static void malloc_list_add_entry(apr_pool_t *pool, void *mem)
+static void block_list_add_entry(apr_pool_t *pool, void *mem, apr_size_t size)
 {
-    if (pool->malloced->offset == MALLOC_LIST_ENTRIES_MAX) {
-        malloc_list_t *ml = pool->malloced;
-        pool->malloced = calloc(1, sizeof(malloc_list_t));
-        pool->malloced->next = ml;
+    if (pool->blocks->offset == BLOCK_LIST_ENTRIES_MAX) {
+        block_list_t *ml = pool->blocks;
+        pool->blocks = calloc(1, sizeof(block_list_t));
+        pool->blocks->next = ml;
     }
     
-    pool->malloced->entries[pool->malloced->offset] = mem;
-    pool->malloced->offset++;
+    pool->blocks->entries[pool->blocks->offset] = mem;
+    pool->blocks->offset++;
 }
 
-static void malloc_list_clear(malloc_list_t *ml)
+static void block_list_clear(block_list_t *ml)
 {
     apr_size_t i;
     for (i = 0; i < ml->offset; i++) {
@@ -658,36 +658,37 @@ static void malloc_list_clear(malloc_list_t *ml)
 }
 
 
-static void malloc_list_clear_all(malloc_list_t *ml)
+static void block_list_clear_all(block_list_t *ml)
 {
     while (ml != NULL) {
-        malloc_list_clear(ml);
+        block_list_clear(ml);
         ml = ml->next;
     }
 }
 
-static void malloc_list_destroy(malloc_list_t *ml)
+static void block_list_destroy(block_list_t *ml)
 {
     apr_size_t i;
+
     for (i = 0; i < ml->offset; i++) {
         free(ml->entries[i]);
     }
     free(ml);
 }
 
-static void malloc_list_destroy_all(malloc_list_t *ml)
+static void block_list_destroy_all(block_list_t *ml)
 {
-    malloc_list_t *i, *j;
+    block_list_t *i, *j;
     for (i = ml; i != NULL; i = j) {
         j = i->next;
-        malloc_list_destroy(i);
+        block_list_destroy(i);
     }
 }
 
 APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
 {
     void *mem = malloc(size);
-    malloc_list_add_entry(pool, mem);
+    block_list_add_entry(pool, mem, size);
     return mem;
 }
 
@@ -703,7 +704,7 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size);
 APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
 {
     void *mem = calloc(1, size);
-    malloc_list_add_entry(pool, mem);
+    block_list_add_entry(pool, mem, size);
     return mem;
 }
 
@@ -737,7 +738,7 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
     /* Clear the user data. */
     pool->user_data = NULL;
 
-    malloc_list_clear_all(pool->malloced);
+    block_list_clear_all(pool->blocks);
 }
 
 APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
@@ -777,7 +778,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
 #endif /* APR_HAS_THREADS */
     }
 
-    malloc_list_destroy_all(pool->malloced);
+    block_list_destroy_all(pool->blocks);
     free(pool);
 }
 
@@ -810,7 +811,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     pool->subprocesses = NULL;
     pool->user_data = NULL;
     pool->tag = NULL;
-    pool->malloced = calloc(1, sizeof(malloc_list_t));
+    pool->blocks = calloc(1, sizeof(block_list_t));
 
     (void)apr_thread_mutex_create(&pool->mutex,
                                   APR_THREAD_MUTEX_NESTED, pool);
@@ -895,7 +896,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
 
     *ps.vbuff.curpos++ = '\0';
     
-    malloc_list_add_entry(pool, ps.mem);
+    block_list_add_entry(pool, ps.mem, ps.size);
     return ps.mem;
 }
 
