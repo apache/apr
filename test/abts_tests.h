@@ -66,7 +66,25 @@ const struct testlist {
     {testtime},
     {testud},
     {testuser},
-    {testvsn}
+    {testvsn},
+    {teststrmatch},
+    {testuri},
+    {testuuid},
+    {testbuckets},
+    {testpass},
+    {testmd4},
+    {testmd5},
+    {testcrypto},
+    {testldap},
+    {testdbd},
+    {testdate},
+    {testmemcache},
+    {testxml},
+    {testxlate},
+    {testrmm},
+    {testdbm},
+    {testqueue},
+    {testreslist}
 };
 
 #endif /* APR_TEST_INCLUDES */
