@@ -58,17 +58,12 @@ static apr_status_t alloc_cleanup(void *data)
 
 APU_DECLARE_NONSTD(apr_bucket_alloc_t *) apr_bucket_alloc_create(apr_pool_t *p)
 {
-    apr_allocator_t *allocator = apr_pool_allocator_get(p);
+    apr_allocator_t *allocator;
     apr_bucket_alloc_t *list;
 
-#if APR_POOL_DEBUG
-    /* may be NULL for debug mode. */
-    if (allocator == NULL) {
-        if (apr_allocator_create(&allocator) != APR_SUCCESS) {
-            abort();
-        }
+    if (apr_allocator_create(&allocator) != APR_SUCCESS) {
+        abort();
     }
-#endif
 
     list = apr_bucket_alloc_create_ex(allocator);
     list->pool = p;
