@@ -43,8 +43,8 @@ static dbm_table_t *generate_table(void)
         apr_uuid_get(&uuid);
         table[i].key.dptr = apr_pmemdup(p, uuid.data, sizeof(uuid.data));
         table[i].key.dsize = sizeof(uuid.data);
-        table[i].val.dptr = apr_palloc(p, APR_UUID_FORMATTED_LENGTH);
-        table[i].val.dsize = APR_UUID_FORMATTED_LENGTH;
+        table[i].val.dptr = apr_palloc(p, APR_UUID_FORMATTED_LENGTH + 1);
+        table[i].val.dsize = APR_UUID_FORMATTED_LENGTH + 1;
         apr_uuid_format(table[i].val.dptr, &uuid);
     }
 
@@ -52,8 +52,8 @@ static dbm_table_t *generate_table(void)
         apr_uuid_get(&uuid);
         table[i].val.dptr = apr_pmemdup(p, uuid.data, sizeof(uuid.data));
         table[i].val.dsize = sizeof(uuid.data);
-        table[i].key.dptr = apr_palloc(p, APR_UUID_FORMATTED_LENGTH);
-        table[i].key.dsize = APR_UUID_FORMATTED_LENGTH;
+        table[i].key.dptr = apr_palloc(p, APR_UUID_FORMATTED_LENGTH + 1);
+        table[i].key.dsize = APR_UUID_FORMATTED_LENGTH + 1;
         apr_uuid_format(table[i].key.dptr, &uuid);
     }
 
