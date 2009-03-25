@@ -85,7 +85,7 @@ testutil.lo: $(srcdir)/abts.c $(srcdir)/abts.h $(srcdir)/abts_tests.h \
 
 OBJECTS_testall = abts.lo testutil.lo $(TESTS) $(LOCAL_LIBS)
 testall@EXEEXT@: $(OBJECTS_testall)
-	$(LINK_PROG) $(OBJECTS_testall) $(ALL_LIBS)
+	$(LINK_PROG) $(OBJECTS_testall) $(ALL_LIBS) @LDADD_ldap@
 # For VPATH builds; where we have no ./data, copy us some data
 # if we wait until 'make check', then 'make; ./testall' fails;
 	if test ! -d "./data"; then cp -r $(srcdir)/data data; fi
