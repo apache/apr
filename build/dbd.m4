@@ -63,7 +63,7 @@ AC_DEFUN([APU_CHECK_DBD], [
         ])
       fi
       if test "$apu_have_pgsql" != "0" && test "x$PGSQL_CONFIG" != 'x'; then
-        APR_ADDTO(APRUTIL_PRIV_INCLUDES, [$pgsql_CPPFLAGS])
+        APR_ADDTO(INCLUDES, [$pgsql_CPPFLAGS])
       fi
     elif test "$withval" = "no"; then
       :
@@ -104,7 +104,7 @@ AC_DEFUN([APU_CHECK_DBD], [
         ])
       fi
       if test "$apu_have_pgsql" != "0"; then
-        APR_ADDTO(APRUTIL_PRIV_INCLUDES, [$pgsql_CPPFLAGS])
+        APR_ADDTO(INCLUDES, [$pgsql_CPPFLAGS])
       fi
     fi
   ], [
@@ -140,7 +140,7 @@ AC_DEFUN([APU_CHECK_DBD], [
       ])
     fi
     if test "$apu_have_pgsql" != "0" && test "x$PGSQL_CONFIG" != 'x'; then
-      APR_ADDTO(APRUTIL_PRIV_INCLUDES, [$pgsql_CPPFLAGS])
+      APR_ADDTO(INCLUDES, [$pgsql_CPPFLAGS])
     fi
   ])
   AC_SUBST(apu_have_pgsql)
@@ -187,7 +187,7 @@ AC_DEFUN([APU_CHECK_DBD_MYSQL], [
                          [#include <mysql/my_global.h>])
       fi
       if test "$apu_have_mysql" != "0" && test "x$MYSQL_CONFIG" != 'x'; then
-        APR_ADDTO(APRUTIL_PRIV_INCLUDES, [$mysql_CPPFLAGS])
+        APR_ADDTO(INCLUDES, [$mysql_CPPFLAGS])
       fi
     elif test "$withval" = "no"; then
       :
@@ -219,7 +219,7 @@ AC_DEFUN([APU_CHECK_DBD_MYSQL], [
                          [#include <mysql/my_global.h>])
       fi
       if test "$apu_have_mysql" != "0"; then
-        APR_ADDTO(APRUTIL_PRIV_INCLUDES, [$mysql_CPPFLAGS])
+        APR_ADDTO(INCLUDES, [$mysql_CPPFLAGS])
       fi
     fi
   ])
@@ -261,7 +261,7 @@ AC_DEFUN([APU_CHECK_DBD_SQLITE3], [
       AC_MSG_NOTICE(checking for sqlite3 in $withval)
       AC_CHECK_HEADERS(sqlite3.h, AC_CHECK_LIB(sqlite3, sqlite3_open, [apu_have_sqlite3=1]))
       if test "$apu_have_sqlite3" != "0"; then
-        APR_ADDTO(APRUTIL_PRIV_INCLUDES, [-I$withval/include])
+        APR_ADDTO(INCLUDES, [-I$withval/include])
       fi
     fi
   ], [
@@ -305,7 +305,7 @@ AC_DEFUN([APU_CHECK_DBD_SQLITE2], [
       AC_MSG_NOTICE(checking for sqlite2 in $withval)
       AC_CHECK_HEADERS(sqlite.h, AC_CHECK_LIB(sqlite, sqlite_open, [apu_have_sqlite2=1]))
       if test "$apu_have_sqlite2" != "0"; then
-        APR_ADDTO(APRUTIL_PRIV_INCLUDES, [-I$withval/include])
+        APR_ADDTO(INCLUDES, [-I$withval/include])
       fi
     fi
   ], [
@@ -341,7 +341,7 @@ AC_DEFUN([APU_CHECK_DBD_ORACLE], [
     if test "$withval" = "yes"; then
       if test -n "$with_oracle_include"; then
         oracle_CPPFLAGS="$CPPFLAGS -I$with_oracle_include"
-        APR_ADDTO(APRUTIL_PRIV_INCLUDES, [-I$with_oracle_include])
+        APR_ADDTO(INCLUDES, [-I$with_oracle_include])
       fi
 
       APR_ADDTO(CPPFLAGS, [$oracle_CPPFLAGS])
@@ -363,7 +363,7 @@ AC_DEFUN([APU_CHECK_DBD_ORACLE], [
     else
       if test -n "$with_oracle_include"; then
         oracle_CPPFLAGS="$CPPFLAGS -I$with_oracle_include"
-        APR_ADDTO(APRUTIL_PRIV_INCLUDES, [-I$with_oracle_include])
+        APR_ADDTO(INCLUDES, [-I$with_oracle_include])
       else
         oracle_CPPFLAGS="-I$withval/rdbms/demo -I$withval/rdbms/public"
       fi
@@ -388,8 +388,7 @@ AC_DEFUN([APU_CHECK_DBD_ORACLE], [
       if test "$apu_have_oracle" != "0"; then
         oracle_LDFLAGS="$oracle_LDFLAGS -R$withval/lib"
         if test -z "$with_oracle_include"; then
-          APR_ADDTO(APRUTIL_PRIV_INCLUDES, [-I$withval/rdbms/demo])
-          APR_ADDTO(APRUTIL_PRIV_INCLUDES, [-I$withval/rdbms/public])
+          APR_ADDTO(INCLUDES, [-I$withval/rdbms/demo -I$withval/rdbms/public])
         fi
       fi
     fi
@@ -440,7 +439,7 @@ AC_DEFUN([APU_CHECK_DBD_FREETDS], [
         AC_CHECK_HEADERS(freetds/sybdb.h, AC_CHECK_LIB(sybdb, tdsdbopen, [apu_have_freetds=1]))
       fi
       if test "$apu_have_freetds" != "0"; then
-        APR_ADDTO(APRUTIL_PRIV_INCLUDES, [-I$withval/include])
+        APR_ADDTO(INCLUDES, [-I$withval/include])
       fi
     fi
   ], [
@@ -494,7 +493,7 @@ AC_DEFUN([APU_CHECK_DBD_ODBC], [
         AC_CHECK_HEADERS(odbc/sql.h, AC_CHECK_LIB(odbc, SQLAllocHandle, [apu_have_odbc=1]))
       fi
       if test "$apu_have_odbc" != "0" && test "x$ODBC_CONFIG" != 'x'; then
-        APR_ADDTO(APRUTIL_PRIV_INCLUDES, [$odbc_CPPFLAGS])
+        APR_ADDTO(INCLUDES, [$odbc_CPPFLAGS])
       fi
     elif test "$withval" = "no"; then
       :
@@ -519,7 +518,7 @@ AC_DEFUN([APU_CHECK_DBD_ODBC], [
         AC_CHECK_HEADERS(odbc/sql.h, AC_CHECK_LIB(odbc, SQLAllocHandle, [apu_have_odbc=1]))
       fi
       if test "$apu_have_odbc" != "0" && test "x$ODBC_CONFIG" != 'x'; then
-        APR_ADDTO(APRUTIL_PRIV_INCLUDES, [$odbc_CPPFLAGS])
+        APR_ADDTO(INCLUDES, [$odbc_CPPFLAGS])
       fi
     fi
   ], [
@@ -539,7 +538,7 @@ AC_DEFUN([APU_CHECK_DBD_ODBC], [
       AC_CHECK_HEADERS(odbc/sql.h, AC_CHECK_LIB(odbc, SQLAllocHandle, [apu_have_odbc=1]))
     fi
     if test "$apu_have_odbc" != "0" && test "x$ODBC_CONFIG" != 'x'; then
-      APR_ADDTO(APRUTIL_PRIV_INCLUDES, [$odbc_CPPFLAGS])
+      APR_ADDTO(INCLUDES, [$odbc_CPPFLAGS])
     fi
   ])
   AC_SUBST(apu_have_odbc)

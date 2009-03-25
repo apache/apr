@@ -178,7 +178,7 @@ AC_DEFUN([APU_CHECK_CRYPTO_NSS], [
 
     fi
     if test "$apu_have_nss" != "0"; then
-      APR_ADDTO(APRUTIL_PRIV_INCLUDES, [$nss_CPPFLAGS])
+      APR_ADDTO(INCLUDES, [$nss_CPPFLAGS])
     fi
   ], [
     apu_have_nss=0
