@@ -59,11 +59,14 @@ dnl
 AC_DEFUN([APU_TRY_EXPAT_LINK], [
 AC_CACHE_CHECK([$1], [$2], [
   apu_expat_LIBS=$LIBS
+  apu_expat_CPPFLAGS=$CPPFLAGS
   LIBS="$LIBS $4"
+  CPPFLAGS="$CPPFLAGS $INCLUDES"
   AC_TRY_LINK([#include <stdlib.h>
 #include <$3>], [XML_ParserCreate(NULL);],
     [$2=yes], [$2=no])
   LIBS=$apu_expat_LIBS
+  CPPFLAGS=$apu_expat_CPPFLAGS
 ])
 
 if test $[$2] = yes; then
@@ -107,14 +110,12 @@ AC_DEFUN([APU_SYSTEM_EXPAT], [
 
   if test $apu_has_expat = 0; then
     APR_ADDTO(LDFLAGS, [-L/usr/local/lib])
-    APR_ADDTO(CPPFLAGS, [-I/usr/local/include])
+    APR_ADDTO(INCLUDES, [-I/usr/local/include])
  
     APU_TRY_EXPAT_LINK([Expat 1.95.x in /usr/local], 
-       apu_cv_expat_usrlocal, [expat.h], [-lexpat],
-       [APR_ADDTO(INCLUDES, [-I/usr/local/include])
-        APR_ADDTO(LDFLAGS, [-L/usr/local/lib])],[
+       apu_cv_expat_usrlocal, [expat.h], [-lexpat], [], [
        APR_REMOVEFROM(LDFLAGS, [-L/usr/local/lib])
-       APR_REMOVEFROM(CPPFLAGS, [-I/usr/local/include])
+       APR_REMOVEFROM(INCLUDES, [-I/usr/local/include])
       ])
   fi
 ])
@@ -126,7 +127,6 @@ dnl
 AC_DEFUN([APU_FIND_EXPAT], [
 
 save_cppflags="$CPPFLAGS"
-save_ldflags="$LDFLAGS"
 
 apu_has_expat=0
 
@@ -145,8 +145,6 @@ AC_ARG_WITH([expat],
   else
     # Add given path to standard search paths if appropriate:
     if test "$withval" != "/usr"; then
-      APR_ADDTO(LDFLAGS, [-L$withval/lib])
-      APR_ADDTO(CPPFLAGS, [-I$withval/include])
       APR_ADDTO(INCLUDES, [-I$withval/include])
     fi
     # ...and refuse to fall back on the builtin expat.
@@ -175,7 +173,6 @@ APR_XML_DIR=$bundled_subdir
 AC_SUBST(APR_XML_DIR)
 
 CPPFLAGS=$save_cppflags
-LDFLAGS=$save_ldflags
 ])
 
 
