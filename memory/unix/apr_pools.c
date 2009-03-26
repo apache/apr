@@ -640,7 +640,8 @@ static void block_list_add_entry(apr_pool_t *pool, void *mem, apr_size_t size)
 {
     if (pool->blocks->offset == BLOCK_LIST_ENTRIES_MAX) {
         block_list_t *ml = pool->blocks;
-        pool->blocks = calloc(1, sizeof(block_list_t));
+        pool->blocks = malloc(sizeof(block_list_t));
+        pool->blocks->offset = 0;
         pool->blocks->next = ml;
     }
     
@@ -801,7 +802,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     if (!abort_fn && parent)
         abort_fn = parent->abort_fn;
 
-    pool = calloc(1, sizeof(apr_pool_t));
+    pool = malloc(sizeof(apr_pool_t));
     pool->abort_fn = abort_fn;
     pool->child = NULL;
     pool->cleanups = NULL;
@@ -811,8 +812,9 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     pool->subprocesses = NULL;
     pool->user_data = NULL;
     pool->tag = NULL;
-    pool->blocks = calloc(1, sizeof(block_list_t));
-
+    pool->blocks = malloc(sizeof(block_list_t));
+    pool->blocks->offset = 0;
+    pool->blocks->next = NULL;
     (void)apr_thread_mutex_create(&pool->mutex,
                                   APR_THREAD_MUTEX_NESTED, pool);
     
