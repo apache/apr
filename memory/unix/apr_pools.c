@@ -511,6 +511,8 @@ struct apr_pool_t {
 #endif /* defined(NETWARE) */
     cleanup_t            *pre_cleanups;
     cleanup_t            *free_pre_cleanups;
+    cleanup_t            *final_cleanups;
+    block_list_t         *final_blocks;
 };
 
 #define SIZEOF_POOL_T       APR_ALIGN_DEFAULT(sizeof(apr_pool_t))
@@ -780,6 +782,8 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
     }
 
     block_list_destroy_all(pool->blocks);
+    run_cleanups(&pool->final_cleanups);
+    block_list_destroy_all(pool->final_blocks);
     free(pool);
 }
 
@@ -817,6 +821,10 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     pool->blocks->next = NULL;
     (void)apr_thread_mutex_create(&pool->mutex,
                                   APR_THREAD_MUTEX_NESTED, pool);
+    pool->final_blocks = pool->blocks;
+    pool->final_cleanups = pool->cleanups;
+    pool->blocks = calloc(1, sizeof(block_list_t));
+    pool->cleanups = NULL;
     
     
 #ifdef NETWARE
