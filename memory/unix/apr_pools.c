@@ -823,7 +823,9 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
                                   APR_THREAD_MUTEX_NESTED, pool);
     pool->final_blocks = pool->blocks;
     pool->final_cleanups = pool->cleanups;
-    pool->blocks = calloc(1, sizeof(block_list_t));
+    pool->blocks = malloc(sizeof(block_list_t));
+    pool->blocks->offset = 0;
+    pool->blocks->next = NULL;
     pool->cleanups = NULL;
     
     
