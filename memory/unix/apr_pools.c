@@ -461,7 +461,7 @@ struct debug_node_t {
 #endif /* APR_POOL_DEBUG */
 
 typedef struct block_list_t block_list_t;
-#define BLOCK_LIST_ENTRIES_MAX (2048)
+#define BLOCK_LIST_ENTRIES_MAX (512)
 struct block_list_t {
     block_list_t *next;
     size_t offset;
