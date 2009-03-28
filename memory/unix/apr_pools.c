@@ -812,7 +812,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     pool = malloc(sizeof(apr_pool_t));
     pool->abort_fn = abort_fn;
     pool->child = NULL;
-    pool->cleanups = NULL;
     pool->free_cleanups = NULL;
     pool->pre_cleanups = NULL;
     pool->free_pre_cleanups = NULL;
@@ -820,12 +819,21 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     pool->user_data = NULL;
     pool->tag = NULL;
 
-    pool->blocks = &pool->final_block;
-    pool->blocks->offset = 0;
-    pool->blocks->next = NULL;
-    (void)apr_thread_mutex_create(&pool->mutex,
-                                  APR_THREAD_MUTEX_NESTED, pool);
-    pool->final_cleanups = pool->cleanups;
+    if (allocator) {
+        pool->blocks = &pool->final_block;
+        pool->blocks->offset = 0;
+        pool->blocks->next = NULL;
+        pool->cleanups = NULL;
+        (void)apr_thread_mutex_create(&pool->mutex,
+                                      APR_THREAD_MUTEX_NESTED, pool);
+        pool->final_cleanups = pool->cleanups;
+    }
+    else {
+        pool->final_cleanups = NULL;
+        pool->final_block.offset = 0;
+        pool->final_block.next = NULL;
+        pool->mutex = parent->mutex;
+    }
     pool->blocks = &pool->first_block;
     pool->blocks->offset = 0;
     pool->blocks->next = NULL;
