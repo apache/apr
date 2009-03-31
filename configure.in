@@ -130,7 +130,11 @@ dnl can only be used once within a configure script, so this prevents a
 dnl preload section from invoking the macro to get compiler info.
 AC_PROG_CC
 
-AC_PROG_SED
+dnl AC_PROG_SED is only avaliable in recent autoconf versions.
+dnl Use AC_CHECK_PROG instead if AC_PROG_SED is not present.
+ifdef([AC_PROG_SED],
+      [AC_PROG_SED],
+      [AC_CHECK_PROG(SED, sed, sed)])
 
 dnl Preload
 APR_PRELOAD
