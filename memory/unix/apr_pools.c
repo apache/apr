@@ -540,6 +540,7 @@ static apr_file_t *file_stderr = NULL;
 
 static void run_cleanups(cleanup_t **c);
 static void run_child_cleanups(cleanup_t **c);
+static void free_cleanups(cleanup_t **c);
 static void free_proc_chain(struct process_chain *procs);
 
 #if APR_POOL_DEBUG
@@ -724,6 +725,7 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
     /* Run pre destroy cleanups */
     run_cleanups(&pool->pre_cleanups);
     pool->pre_cleanups = NULL;
+    free_cleanups(&pool->free_pre_cleanups);
     pool->free_pre_cleanups = NULL;
 
     /* Destroy the subpools.  The subpools will detach themselves from
@@ -735,6 +737,7 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
     /* Run cleanups */
     run_cleanups(&pool->cleanups);
     pool->cleanups = NULL;
+    free_cleanups(&pool->free_cleanups);
     pool->free_cleanups = NULL;
 
     /* Free subprocesses */
@@ -752,6 +755,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
     /* Run pre destroy cleanups */
     run_cleanups(&pool->pre_cleanups);
     pool->pre_cleanups = NULL;
+    free_cleanups(&pool->free_pre_cleanups);
     pool->free_pre_cleanups = NULL;
 
     /* Destroy the subpools.  The subpools will detach themselve from
@@ -762,6 +766,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
 
     /* Run cleanups */
     run_cleanups(&pool->cleanups);
+    free_cleanups(&pool->free_cleanups);
 
     /* Free subprocesses */
     free_proc_chain(pool->subprocesses);
@@ -786,6 +791,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
 
     block_list_destroy_all(pool->blocks);
     run_cleanups(&pool->final_cleanups);
+    free_cleanups(&pool->final_cleanups);
     block_list_destroy(&pool->final_block);
     free(pool);
 }
@@ -1849,7 +1855,7 @@ APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
             c = p->free_cleanups;
             p->free_cleanups = c->next;
         } else {
-            c = apr_palloc(p, sizeof(cleanup_t));
+            c = malloc(sizeof(cleanup_t));
         }
         c->data = data;
         c->plain_cleanup_fn = plain_cleanup_fn;
@@ -1874,7 +1880,7 @@ APR_DECLARE(void) apr_pool_pre_cleanup_register(apr_pool_t *p, const void *data,
             c = p->free_pre_cleanups;
             p->free_pre_cleanups = c->next;
         } else {
-            c = apr_palloc(p, sizeof(cleanup_t));
+            c = malloc(sizeof(cleanup_t));
         }
         c->data = data;
         c->plain_cleanup_fn = plain_cleanup_fn;
@@ -1984,6 +1990,18 @@ static void run_cleanups(cleanup_t **cref)
     while (c) {
         *cref = c->next;
         (*c->plain_cleanup_fn)((void *)c->data);
+        free(c);
+        c = *cref;
+    }
+}
+
+static void free_cleanups(cleanup_t **cref)
+{
+    cleanup_t *c = *cref;
+
+    while (c) {
+        *cref = c->next;
+        free(c);
         c = *cref;
     }
 }
@@ -1995,6 +2013,7 @@ static void run_child_cleanups(cleanup_t **cref)
     while (c) {
         *cref = c->next;
         (*c->child_cleanup_fn)((void *)c->data);
+        free(c);
         c = *cref;
     }
 }
