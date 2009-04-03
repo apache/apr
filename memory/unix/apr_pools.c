@@ -825,6 +825,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
         pool->blocks = &pool->final_block;
         pool->blocks->offset = 0;
         pool->blocks->next = NULL;
+        pool->blocks->size = BLOCK_LIST_ENTRIES_MIN;
         pool->cleanups = NULL;
         (void)apr_thread_mutex_create(&pool->mutex,
                                       APR_THREAD_MUTEX_NESTED, pool);
