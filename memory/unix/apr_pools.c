@@ -486,8 +486,8 @@ struct apr_pool_t {
     apr_abortfunc_t       abort_fn;
     apr_hash_t           *user_data;
     const char           *tag;
-    block_list_t         first_block, final_block;
-    
+    block_list_t         first_block;
+    block_list_t        *final_block;    
     block_list_t        *blocks;
 
 #if APR_HAS_THREADS
@@ -789,7 +789,10 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
 
     block_list_destroy_all(pool->blocks);
     run_cleanups(&pool->final_cleanups);
-    block_list_destroy(&pool->final_block);
+    if (pool->final_block) {
+        block_list_destroy(pool->final_block);
+        free(pool->final_block);
+    }
     free(pool);
 }
 
@@ -820,28 +823,28 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     pool->subprocesses = NULL;
     pool->user_data = NULL;
     pool->tag = NULL;
+    pool->cleanups = NULL;
+    pool->final_block = NULL;
+    pool->final_cleanups = NULL;
 
     if (allocator) {
-        pool->blocks = &pool->final_block;
+        pool->blocks = malloc(sizeof(block_list_t));
         pool->blocks->offset = 0;
         pool->blocks->next = NULL;
         pool->blocks->size = BLOCK_LIST_ENTRIES_MIN;
-        pool->cleanups = NULL;
         (void)apr_thread_mutex_create(&pool->mutex,
                                       APR_THREAD_MUTEX_NESTED, pool);
         pool->final_cleanups = pool->cleanups;
+        pool->final_block = pool->blocks;
+        pool->cleanups = NULL;
     }
     else {
-        pool->final_cleanups = NULL;
-        pool->final_block.offset = 0;
-        pool->final_block.next = NULL;
         pool->mutex = parent->mutex;
     }
     pool->blocks = &pool->first_block;
     pool->blocks->offset = 0;
     pool->blocks->next = NULL;
     pool->blocks->size = BLOCK_LIST_ENTRIES_MIN;
-    pool->cleanups = NULL;
     
     
 #ifdef NETWARE
