@@ -461,11 +461,12 @@ struct debug_node_t {
 #endif /* APR_POOL_DEBUG */
 
 typedef struct block_list_t block_list_t;
-#define BLOCK_LIST_ENTRIES_MAX (512)
+#define BLOCK_LIST_ENTRIES_MIN (13)
 struct block_list_t {
+    int offset;
+    int size;
     block_list_t *next;
-    size_t offset;
-    void *entries[BLOCK_LIST_ENTRIES_MAX];
+    void *entries[BLOCK_LIST_ENTRIES_MIN];
 };
 
 /* The ref field in the apr_pool_t struct holds a
@@ -641,10 +642,12 @@ APR_DECLARE(void) apr_pool_terminate(void)
 
 static void block_list_add_entry(apr_pool_t *pool, void *mem, apr_size_t size)
 {
-    if (pool->blocks->offset == BLOCK_LIST_ENTRIES_MAX) {
-        block_list_t *ml = pool->blocks;
-        pool->blocks = malloc(sizeof(block_list_t));
+    if (pool->blocks->offset == pool->blocks->size) {
+        size_t size = APR_ALIGN((pool->blocks->size << 1), 16);
+        block_list_t *ml = pool->blocks;        
+        pool->blocks = malloc(sizeof(block_list_t) + (sizeof(void *) * size));
         pool->blocks->offset = 0;
+        pool->blocks->size = BLOCK_LIST_ENTRIES_MIN + size;
         pool->blocks->next = ml;
     }
     
@@ -654,7 +657,7 @@ static void block_list_add_entry(apr_pool_t *pool, void *mem, apr_size_t size)
 
 static void block_list_clear(block_list_t *ml)
 {
-    apr_size_t i;
+    int i;
     for (i = 0; i < ml->offset; i++) {
         free(ml->entries[i]);
     }
@@ -672,7 +675,7 @@ static void block_list_clear_all(block_list_t *ml)
 
 static void block_list_destroy(block_list_t *ml)
 {
-    apr_size_t i;
+    int i;
 
     for (i = 0; i < ml->offset; i++) {
         free(ml->entries[i]);
@@ -836,6 +839,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     pool->blocks = &pool->first_block;
     pool->blocks->offset = 0;
     pool->blocks->next = NULL;
+    pool->blocks->size = BLOCK_LIST_ENTRIES_MIN;
     pool->cleanups = NULL;
     
     
