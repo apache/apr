@@ -72,6 +72,7 @@ const struct testlist {
     {testuuid},
     {testbuckets},
     {testpass},
+    {testbase64},
     {testmd4},
     {testmd5},
     {testcrypto},
