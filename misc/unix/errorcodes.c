@@ -162,7 +162,7 @@ static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
       pos = result;
   
       if (len >= sizeof(result))
-        len = sizeof(result-1);
+        len = sizeof(result) - 1;
 
       for (c=0; c<len; c++) {
 	  /* skip multiple whitespace */
