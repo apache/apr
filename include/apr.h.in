@@ -420,7 +420,7 @@ typedef  apr_uint32_t            apr_uintptr_t;
 #define APR_DECLARE_NONSTD(type)     type
 
 /**
- * The public APR variables are declared with AP_MODULE_DECLARE_DATA.
+ * The public APR variables are declared with APR_DECLARE_DATA.
  * This assures the appropriate indirection is invoked at compile time.
  * @see APR_DECLARE @see APR_DECLARE_NONSTD
  * @remark Note that the declaration and implementations use different forms,
