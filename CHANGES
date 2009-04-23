@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_thread_cond_*wait() on BeOS: Fix broken logic.  PR 45800.
+     [Jochen Voss (no e-mail)]
+
   *) Set CLOEXEC flags where appropriate. Either use new O_CLOEXEC flag and
      associated functions, such as dup3(), accept4(), epoll_create1() etc.,
      or simply set CLOEXEC flag using fcntl().  PR 46425.  [Stefan Fritsch
