@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Fix off by one overflow in apr_brigade_vprintf.
+     [C. Michael Pilato <cmpilato collab.net>]
+
   *) apr_thread_cond_*wait() on BeOS: Fix broken logic.  PR 45800.
      [Jochen Voss (no e-mail)]
 
