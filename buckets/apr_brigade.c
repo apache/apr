@@ -689,9 +689,6 @@ APU_DECLARE(apr_status_t) apr_brigade_vprintf(apr_bucket_brigade *b,
       return -1;
     }
 
-    /* tack on null terminator to remaining string */
-    *(vd.vbuff.curpos) = '\0';
-
     /* write out what remains in the buffer */
     return apr_brigade_write(b, flush, ctx, buf, vd.vbuff.curpos - buf);
 }
