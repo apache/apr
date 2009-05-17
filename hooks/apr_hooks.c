@@ -265,6 +265,10 @@ APU_DECLARE(void) apr_hook_deregister_all(void)
 #endif
     int n;    
 
+    if (!s_aHooksToSort) {
+        return;
+    }
+
     for(n=0 ; n < s_aHooksToSort->nelts ; ++n) {
         HookSortEntry *pEntry=&((HookSortEntry *)s_aHooksToSort->elts)[n];
         *pEntry->paHooks=NULL;
