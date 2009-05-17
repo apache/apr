@@ -74,6 +74,7 @@ abts_suite *testfnmatch(abts_suite *suite);
 abts_suite *testgetopt(abts_suite *suite);
 abts_suite *testglobalmutex(abts_suite *suite);
 abts_suite *testhash(abts_suite *suite);
+abts_suite *testhooks(abts_suite *suite);
 abts_suite *testipsub(abts_suite *suite);
 abts_suite *testlock(abts_suite *suite);
 abts_suite *testcond(abts_suite *suite);

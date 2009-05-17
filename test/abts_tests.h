@@ -39,6 +39,7 @@ const struct testlist {
     {testglobalmutex},
 #endif
     {testhash},
+    {testhooks},
     {testipsub},
     {testlock},
     {testcond},
