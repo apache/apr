@@ -721,6 +721,9 @@ APU_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
         CRYPTD buffer;
 
         crypt_pw = crypt_r(passwd, hash, &buffer);
+        if (!crypt_pw) {
+            return APR_EMISMATCH;
+        }
         apr_cpystrn(sample, crypt_pw, sizeof(sample) - 1);
 #elif defined(CRYPT_R_STRUCT_CRYPT_DATA)
         struct crypt_data buffer;
@@ -732,6 +735,9 @@ APU_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
          */
         memset(&buffer, 0, sizeof(buffer));
         crypt_pw = crypt_r(passwd, hash, &buffer);
+        if (!crypt_pw) {
+            return APR_EMISMATCH;
+        }
         apr_cpystrn(sample, crypt_pw, sizeof(sample) - 1);
 #else
         /* Do a bit of sanity checking since we know that crypt_r()
@@ -748,6 +754,10 @@ APU_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
          */
         crypt_mutex_lock();
         crypt_pw = crypt(passwd, hash);
+        if (!crypt_pw) {
+            crypt_mutex_unlock();
+            return APR_EMISMATCH;
+        }
         apr_cpystrn(sample, crypt_pw, sizeof(sample) - 1);
         crypt_mutex_unlock();
 #endif
