@@ -103,13 +103,13 @@ APU_DECLARE(const apr_strmatch_pattern *) apr_strmatch_precompile(
     if (case_sensitive) {
         pattern->compare = match_boyer_moore_horspool;
         for (i = 0; i < pattern->length - 1; i++) {
-            shift[(int)s[i]] = pattern->length - i - 1;
+            shift[(unsigned char)s[i]] = pattern->length - i - 1;
         }
     }
     else {
         pattern->compare = match_boyer_moore_horspool_nocase;
         for (i = 0; i < pattern->length - 1; i++) {
-            shift[apr_tolower(s[i])] = pattern->length - i - 1;
+            shift[(unsigned char)apr_tolower(s[i])] = pattern->length - i - 1;
         }
     }
     pattern->context = shift;
