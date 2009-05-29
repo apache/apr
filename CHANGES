@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Fix underflow in apr_strmatch_precompile.
+     [Matthew Palmer <mpalmer debian.org>]
+
   *) Fix off by one overflow in apr_brigade_vprintf.
      [C. Michael Pilato <cmpilato collab.net>]
 
