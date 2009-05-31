@@ -173,13 +173,15 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	progfailed=""; \
 	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
 	        if test "$$prog" = 'dbd'; then \
-			for driver in @apu_dbd_tests@; do \
-				@shlibpath_var@="`echo "../dbd/.libs:../ldap/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
-				./$$prog $$driver; \
-				status=$$?; \
-				if test $$status != 0; then \
-					teststatus=$$status; \
-					progfailed="$$progfailed '$$prog $$driver'"; \
+			for driver in none @apu_dbd_tests@; do \
+				if test "$$driver" != 'none'; then \
+					@shlibpath_var@="`echo "../dbd/.libs:../ldap/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
+					./$$prog $$driver; \
+					status=$$?; \
+					if test $$status != 0; then \
+						teststatus=$$status; \
+						progfailed="$$progfailed '$$prog $$driver'"; \
+					fi; \
 				fi; \
 			done; \
 	        else \
