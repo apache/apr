@@ -175,7 +175,7 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	        if test "$$prog" = 'dbd'; then \
 			for driver in none @apu_dbd_tests@; do \
 				if test "$$driver" != 'none'; then \
-					@shlibpath_var@="`echo "../dbd/.libs:../ldap/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
+					@shlibpath_var@="`echo "../dbm/.libs:../dbd/.libs:../ldap/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
 					./$$prog $$driver; \
 					status=$$?; \
 					if test $$status != 0; then \
@@ -185,7 +185,7 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 				fi; \
 			done; \
 	        else \
-			@shlibpath_var@="`echo "../dbd/.libs:../ldap/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
+			@shlibpath_var@="`echo "../dbm/.libs:../dbd/.libs:../ldap/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
 			./$$prog; \
 			status=$$?; \
 			if test $$status != 0; then \
