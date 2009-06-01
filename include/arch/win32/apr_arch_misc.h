@@ -37,14 +37,14 @@
 #if APR_HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
-
-/* ### create APR_HAVE_* macros for these? */
 #if APR_HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #if APR_HAVE_STRING_H
 #include <string.h>
 #endif
+
+#include <tlhelp32.h>
 
 struct apr_other_child_rec_t {
     apr_pool_t *p;
