@@ -74,7 +74,7 @@ static const char *match_boyer_moore_horspool_nocase(
             }
             s_tmp--;
         }
-        s_next += shift[apr_tolower(*s_next)];
+        s_next += shift[(unsigned char)apr_tolower(*s_next)];
     }
     return NULL;
 }
