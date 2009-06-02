@@ -100,7 +100,6 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <mswsock.h>
-#include <tlhelp32.h>
 #else
 #include <winsock.h>
 #endif

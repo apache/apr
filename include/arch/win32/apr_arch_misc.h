@@ -43,8 +43,9 @@
 #if APR_HAVE_STRING_H
 #include <string.h>
 #endif
-
+#ifndef _WIN32_WCE
 #include <tlhelp32.h>
+#endif
 
 struct apr_other_child_rec_t {
     apr_pool_t *p;
