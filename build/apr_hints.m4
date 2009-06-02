@@ -194,9 +194,10 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-apple-darwin*)
         APR_ADDTO(CPPFLAGS, [-DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK -no-cpp-precomp])
         APR_SETIFNULL(apr_posixsem_is_global, [yes])
-        # kqueue works in 10.5/Darwin 9.x. Disable on all older versions.
+        # kqueue appeared to work in 10.5/Darwin 9.x and was entirely broken in 
+        # previous versions.  disable it in any case for now until resolved;
         case $host in
-            *-apple-darwin[[0-8]].*)
+            *-apple-darwin*)
             # kqueue is broken on OS X, the poll tests work, but the socket tests
             # hang when it's turned on.  if you decide to reenable this please be
             # sure to test that ALL the tests continue to work with it turned on.
