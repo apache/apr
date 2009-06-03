@@ -36,8 +36,7 @@ static apr_status_t create_dummy_file_error(abts_case *tc, apr_pool_t *p,
         return rv;
 
     rv = apr_file_puts("<?xml version=\"1.0\" ?>\n<maryx>"
-                       "<had a=\"little\"/><lamb its='fleece "
-                       "was white as snow' />\n", *fd);
+                       "<had a=\"little\"/><lamb/>\n", *fd);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     for (i = 0; i < 5000; i++) {
@@ -75,7 +74,7 @@ static apr_status_t create_dummy_file(abts_case *tc, apr_pool_t *p,
 
     for (i = 0; i < 5000; i++) {
         rv = apr_file_puts("<hmm roast=\"lamb\" "
-                           "for=\"dinner\">yummy</hmm>\n", *fd);
+                           "for=\"dinner &lt;&gt;&#x3D;\">yummy</hmm>\n", *fd);
         ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     }
 
@@ -103,7 +102,7 @@ static void dump_xml(abts_case *tc, apr_xml_elem *e, int level)
         a = e->attr;
         ABTS_PTR_NOTNULL(tc, a);
         ABTS_STR_EQUAL(tc, "for", a->name);
-        ABTS_STR_EQUAL(tc, "dinner", a->value);
+        ABTS_STR_EQUAL(tc, "dinner <>=", a->value);
         a = a->next;
         ABTS_PTR_NOTNULL(tc, a);
         ABTS_STR_EQUAL(tc, "roast", a->name);
@@ -149,11 +148,29 @@ static void test_xml_parser(abts_case *tc, void *data)
     ABTS_TRUE(tc, rv != APR_SUCCESS);
 }
 
+static void test_billion_laughs(abts_case *tc, void *data)
+{
+    apr_file_t *fd;
+    apr_xml_parser *parser;
+    apr_xml_doc *doc;
+    apr_status_t rv;
+
+    rv = apr_file_open(&fd, "billion-laughs.xml", 
+                       APR_FOPEN_READ, 0, p);
+    apr_assert_success(tc, "open billion-laughs.xml", rv);
+
+    rv = apr_xml_parse_file(p, &parser, &doc, fd, 2000);
+    ABTS_TRUE(tc, rv != APR_SUCCESS);
+
+    apr_file_close(fd);
+}
+
 abts_suite *testxml(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
 
     abts_run_test(suite, test_xml_parser, NULL);
+    abts_run_test(suite, test_billion_laughs, NULL);
 
     return suite;
 }
