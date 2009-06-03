@@ -1,4 +1,8 @@
                                                      -*- coding: utf-8 -*-
+Changes with APR 0.9.19
+
+
+
 Changes with APR 0.9.18
 
   *) z/OS: return standard apr_status_t codes from apr_dso_load()
