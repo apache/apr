@@ -347,6 +347,25 @@ static apr_status_t cleanup_parser(void *ctx)
     return APR_SUCCESS;
 }
 
+#if XML_MAJOR_VERSION > 1
+/* Stop the parser if an entity declaration is hit. */
+static void entity_declaration(void *userData, const XML_Char *entityName,
+                               int is_parameter_entity, const XML_Char *value,
+                               int value_length, const XML_Char *base,
+                               const XML_Char *systemId, const XML_Char *publicId,
+                               const XML_Char *notationName)
+{
+    apr_xml_parser *parser = userData;
+
+    XML_StopParser(parser->xp, XML_FALSE);
+}
+#else
+/* A noop default_handler. */
+static void default_handler(void *userData, const XML_Char *s, int len)
+{
+}
+#endif
+
 APU_DECLARE(apr_xml_parser *) apr_xml_parser_create(apr_pool_t *pool)
 {
     apr_xml_parser *parser = apr_pcalloc(pool, sizeof(*parser));
@@ -371,6 +390,19 @@ APU_DECLARE(apr_xml_parser *) apr_xml_parser_create(apr_pool_t *pool)
     XML_SetUserData(parser->xp, parser);
     XML_SetElementHandler(parser->xp, start_handler, end_handler);
     XML_SetCharacterDataHandler(parser->xp, cdata_handler);
+
+    /* Prevent the "billion laughs" attack against expat by disabling
+     * internal entity expansion.  With 2.x, forcibly stop the parser
+     * if an entity is declared - this is safer and a more obvious
+     * failure mode.  With older versions, installing a noop
+     * DefaultHandler means that internal entities will be expanded as
+     * the empty string, which is also sufficient to prevent the
+     * attack. */
+#if XML_MAJOR_VERSION > 1
+    XML_SetEntityDeclHandler(parser->xp, entity_declaration);
+#else
+    XML_SetDefaultHandler(parser->xp, default_handler);
+#endif
 
     return parser;
 }
