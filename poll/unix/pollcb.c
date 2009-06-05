@@ -96,6 +96,7 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **pollcb,
     }
 
     *pollcb = apr_palloc(p, sizeof(**pollcb));
+    (*pollcb)->nelts = 0;
     (*pollcb)->nalloc = size;
     (*pollcb)->pool = p;
     (*pollcb)->provider = provider;
