@@ -248,125 +248,127 @@ AC_ARG_WITH(ldap-include,[  --with-ldap-include=path  path to ldap include files
 AC_ARG_WITH(ldap-lib,[  --with-ldap-lib=path    path to ldap lib file])
 AC_ARG_WITH(ldap,[  --with-ldap=library     ldap library to use],
   [
-    save_cppflags="$CPPFLAGS"
-    save_ldflags="$LDFLAGS"
-    save_libs="$LIBS"
-    if test -n "$with_ldap_include"; then
-      CPPFLAGS="$CPPFLAGS -I$with_ldap_include"
-      APR_ADDTO(INCLUDES, [-I$with_ldap_include])
+    if test "$with_ldap" != "no"; then
+      save_cppflags="$CPPFLAGS"
+      save_ldflags="$LDFLAGS"
+      save_libs="$LIBS"
+      if test -n "$with_ldap_include"; then
+        CPPFLAGS="$CPPFLAGS -I$with_ldap_include"
+        APR_ADDTO(INCLUDES, [-I$with_ldap_include])
+      fi
+      if test -n "$with_ldap_lib"; then
+        APR_ADDTO(LDFLAGS, [-L$with_ldap_lib])
+      fi
+
+      LIBLDAP="$withval"
+      if test "$LIBLDAP" = "yes"; then
+        dnl The iPlanet C SDK 5.0 is as yet untested... 
+        APU_FIND_LDAPLIB("ldap50", "-lnspr4 -lplc4 -lplds4 -liutil50 -llber50 -lldif50 -lnss3 -lprldap50 -lssl3 -lssldap50")
+        APU_FIND_LDAPLIB("ldapssl41", "-lnspr3 -lplc3 -lplds3")
+        APU_FIND_LDAPLIB("ldapssl40")
+        APU_FIND_LDAPLIB("ldapssl30")
+        APU_FIND_LDAPLIB("ldapssl20")
+        APU_FIND_LDAPLIB("ldapsdk", "-lldapx -lldapssl -lldapgss -lgssapi_krb5")
+        APU_FIND_LDAPLIB("ldapsdk", "-lldapx -lldapssl -lldapgss -lgss -lresolv -lsocket")
+        APU_FIND_LDAPLIB("ldap", "-llber")
+        APU_FIND_LDAPLIB("ldap", "-llber -lresolv")
+        APU_FIND_LDAPLIB("ldap", "-llber -lresolv -lsocket -lnsl")
+        APU_FIND_LDAPLIB("ldap", "-ldl -lpthread")
+      else
+        APU_FIND_LDAPLIB($LIBLDAP)
+        APU_FIND_LDAPLIB($LIBLDAP, "-lresolv")
+        APU_FIND_LDAPLIB($LIBLDAP, "-lresolv -lsocket -lnsl")
+        APU_FIND_LDAPLIB($LIBLDAP, "-ldl -lpthread")
+      fi
+
+      test ${apu_has_ldap} != "1" && AC_MSG_ERROR(could not find an LDAP library)
+      AC_CHECK_LIB($apu_liblber_name, ber_init,
+        [LDADD_ldap="${LDADD_ldap} -l${apu_liblber_name}"])
+
+      AC_CHECK_HEADERS(lber.h, lber_h=["#include <lber.h>"])
+
+      # Solaris has a problem in <ldap.h> which prevents it from
+      # being included by itself.  Check for <ldap.h> manually,
+      # including lber.h first.
+      AC_CACHE_CHECK([for ldap.h], [apr_cv_hdr_ldap_h],
+      [AC_TRY_CPP(
+      [#ifdef HAVE_LBER_H
+      #include <lber.h>
+      #endif
+      #include <ldap.h>
+      ], [apr_cv_hdr_ldap_h=yes], [apr_cv_hdr_ldap_h=no])])
+      if test "$apr_cv_hdr_ldap_h" = "yes"; then
+        ldap_h=["#include <ldap.h>"]
+        AC_DEFINE([HAVE_LDAP_H], 1, [Defined if ldap.h is present])
+      fi
+
+      AC_CHECK_HEADERS(ldap_ssl.h, ldap_ssl_h=["#include <ldap_ssl.h>"])
+
+      if test "$apr_cv_hdr_ldap_h" = "yes"; then
+        AC_CACHE_CHECK([for LDAP toolkit],
+                       [apr_cv_ldap_toolkit], [
+          if test "x$apr_cv_ldap_toolkit" = "x"; then
+            AC_EGREP_CPP([OpenLDAP], [$lber_h
+                         $ldap_h 
+                         LDAP_VENDOR_NAME], [apu_has_ldap_openldap="1"
+                                             apr_cv_ldap_toolkit="OpenLDAP"])
+          fi
+          if test "x$apr_cv_ldap_toolkit" = "x"; then
+            AC_EGREP_CPP([Sun Microsystems Inc.], [$lber_h
+                         $ldap_h
+                         LDAP_VENDOR_NAME], [apu_has_ldap_solaris="1"
+                                             apr_cv_ldap_toolkit="Solaris"])
+          fi
+          if test "x$apr_cv_ldap_toolkit" = "x"; then
+            AC_EGREP_CPP([Novell], [$lber_h
+                         $ldap_h
+                         LDAP_VENDOR_NAME], [apu_has_ldap_novell="1"
+                                             apr_cv_ldap_toolkit="Novell"])
+          fi
+          if test "x$apr_cv_ldap_toolkit" = "x"; then
+            AC_EGREP_CPP([Microsoft Corporation.], [$lber_h
+                         $ldap_h
+                         LDAP_VENDOR_NAME], [apu_has_ldap_microsoft="1"
+                                             apr_cv_ldap_toolkit="Microsoft"])
+          fi
+          if test "x$apr_cv_ldap_toolkit" = "x"; then
+            AC_EGREP_CPP([Netscape Communications Corp.], [$lber_h
+                         $ldap_h
+                         LDAP_VENDOR_NAME], [apu_has_ldap_netscape="1"
+                                             apr_cv_ldap_toolkit="Netscape"])
+          fi
+          if test "x$apr_cv_ldap_toolkit" = "x"; then
+            AC_EGREP_CPP([mozilla.org], [$lber_h
+                         $ldap_h
+                         LDAP_VENDOR_NAME], [apu_has_ldap_mozilla="1"
+                                             apr_cv_ldap_toolkit="Mozilla"])
+          fi
+          if test "x$apr_cv_ldap_toolkit" = "x"; then
+            AC_EGREP_CPP([International Business Machines], [$lber_h
+                         $ldap_h
+                         LDAP_VENDOR_NAME], [apu_has_ldap_tivoli="1"
+                                             apr_cv_ldap_toolkit="Tivoli"])
+          fi
+          if test "x$apr_cv_ldap_toolkit" = "x"; then
+            case "$host" in
+            *-ibm-os390)
+              AC_EGREP_CPP([IBM], [$lber_h
+                                   $ldap_h], [apu_has_ldap_zos="1"
+                                              apr_cv_ldap_toolkit="z/OS"])
+              ;;
+            esac
+          fi
+          if test "x$apr_cv_ldap_toolkit" = "x"; then
+            apu_has_ldap_other="1"
+            apr_cv_ldap_toolkit="unknown"
+          fi
+        ])
+      fi
+
+      CPPFLAGS=$save_cppflags
+      LDFLAGS=$save_ldflags
+      LIBS=$save_libs
     fi
-    if test -n "$with_ldap_lib"; then
-      APR_ADDTO(LDFLAGS, [-L$with_ldap_lib])
-    fi
-
-    LIBLDAP="$withval"
-    if test "$LIBLDAP" = "yes"; then
-dnl The iPlanet C SDK 5.0 is as yet untested... 
-      APU_FIND_LDAPLIB("ldap50", "-lnspr4 -lplc4 -lplds4 -liutil50 -llber50 -lldif50 -lnss3 -lprldap50 -lssl3 -lssldap50")
-      APU_FIND_LDAPLIB("ldapssl41", "-lnspr3 -lplc3 -lplds3")
-      APU_FIND_LDAPLIB("ldapssl40")
-      APU_FIND_LDAPLIB("ldapssl30")
-      APU_FIND_LDAPLIB("ldapssl20")
-      APU_FIND_LDAPLIB("ldapsdk", "-lldapx -lldapssl -lldapgss -lgssapi_krb5")
-      APU_FIND_LDAPLIB("ldapsdk", "-lldapx -lldapssl -lldapgss -lgss -lresolv -lsocket")
-      APU_FIND_LDAPLIB("ldap", "-llber")
-      APU_FIND_LDAPLIB("ldap", "-llber -lresolv")
-      APU_FIND_LDAPLIB("ldap", "-llber -lresolv -lsocket -lnsl")
-      APU_FIND_LDAPLIB("ldap", "-ldl -lpthread")
-    else
-      APU_FIND_LDAPLIB($LIBLDAP)
-      APU_FIND_LDAPLIB($LIBLDAP, "-lresolv")
-      APU_FIND_LDAPLIB($LIBLDAP, "-lresolv -lsocket -lnsl")
-      APU_FIND_LDAPLIB($LIBLDAP, "-ldl -lpthread")
-    fi
-
-    test ${apu_has_ldap} != "1" && AC_MSG_ERROR(could not find an LDAP library)
-    AC_CHECK_LIB($apu_liblber_name, ber_init,
-      [LDADD_ldap="${LDADD_ldap} -l${apu_liblber_name}"])
-
-    AC_CHECK_HEADERS(lber.h, lber_h=["#include <lber.h>"])
-
-    # Solaris has a problem in <ldap.h> which prevents it from
-    # being included by itself.  Check for <ldap.h> manually,
-    # including lber.h first.
-    AC_CACHE_CHECK([for ldap.h], [apr_cv_hdr_ldap_h],
-    [AC_TRY_CPP(
-    [#ifdef HAVE_LBER_H
-    #include <lber.h>
-    #endif
-    #include <ldap.h>
-    ], [apr_cv_hdr_ldap_h=yes], [apr_cv_hdr_ldap_h=no])])
-    if test "$apr_cv_hdr_ldap_h" = "yes"; then
-      ldap_h=["#include <ldap.h>"]
-      AC_DEFINE([HAVE_LDAP_H], 1, [Defined if ldap.h is present])
-    fi
-
-    AC_CHECK_HEADERS(ldap_ssl.h, ldap_ssl_h=["#include <ldap_ssl.h>"])
-
-    if test "$apr_cv_hdr_ldap_h" = "yes"; then
-      AC_CACHE_CHECK([for LDAP toolkit],
-                     [apr_cv_ldap_toolkit], [
-        if test "x$apr_cv_ldap_toolkit" = "x"; then
-          AC_EGREP_CPP([OpenLDAP], [$lber_h
-                       $ldap_h 
-                       LDAP_VENDOR_NAME], [apu_has_ldap_openldap="1"
-                                           apr_cv_ldap_toolkit="OpenLDAP"])
-        fi
-        if test "x$apr_cv_ldap_toolkit" = "x"; then
-          AC_EGREP_CPP([Sun Microsystems Inc.], [$lber_h
-                       $ldap_h
-                       LDAP_VENDOR_NAME], [apu_has_ldap_solaris="1"
-                                           apr_cv_ldap_toolkit="Solaris"])
-        fi
-        if test "x$apr_cv_ldap_toolkit" = "x"; then
-          AC_EGREP_CPP([Novell], [$lber_h
-                       $ldap_h
-                       LDAP_VENDOR_NAME], [apu_has_ldap_novell="1"
-                                           apr_cv_ldap_toolkit="Novell"])
-        fi
-        if test "x$apr_cv_ldap_toolkit" = "x"; then
-          AC_EGREP_CPP([Microsoft Corporation.], [$lber_h
-                       $ldap_h
-                       LDAP_VENDOR_NAME], [apu_has_ldap_microsoft="1"
-                                           apr_cv_ldap_toolkit="Microsoft"])
-        fi
-        if test "x$apr_cv_ldap_toolkit" = "x"; then
-          AC_EGREP_CPP([Netscape Communications Corp.], [$lber_h
-                       $ldap_h
-                       LDAP_VENDOR_NAME], [apu_has_ldap_netscape="1"
-                                           apr_cv_ldap_toolkit="Netscape"])
-        fi
-        if test "x$apr_cv_ldap_toolkit" = "x"; then
-          AC_EGREP_CPP([mozilla.org], [$lber_h
-                       $ldap_h
-                       LDAP_VENDOR_NAME], [apu_has_ldap_mozilla="1"
-                                           apr_cv_ldap_toolkit="Mozilla"])
-        fi
-        if test "x$apr_cv_ldap_toolkit" = "x"; then
-          AC_EGREP_CPP([International Business Machines], [$lber_h
-                       $ldap_h
-                       LDAP_VENDOR_NAME], [apu_has_ldap_tivoli="1"
-                                           apr_cv_ldap_toolkit="Tivoli"])
-        fi
-        if test "x$apr_cv_ldap_toolkit" = "x"; then
-          case "$host" in
-          *-ibm-os390)
-            AC_EGREP_CPP([IBM], [$lber_h
-                                 $ldap_h], [apu_has_ldap_zos="1"
-                                            apr_cv_ldap_toolkit="z/OS"])
-            ;;
-          esac
-        fi
-        if test "x$apr_cv_ldap_toolkit" = "x"; then
-          apu_has_ldap_other="1"
-          apr_cv_ldap_toolkit="unknown"
-        fi
-      ])
-    fi
-
-    CPPFLAGS=$save_cppflags
-    LDFLAGS=$save_ldflags
-    LIBS=$save_libs
   ])
 
 if test "$apu_has_ldap_openldap" = "1"; then
