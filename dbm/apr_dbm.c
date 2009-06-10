@@ -24,6 +24,7 @@
 #define APR_WANT_STRFUNC
 #include "apr_want.h"
 #include "apr_general.h"
+#include "apr_atomic.h"
 
 #include "apu_config.h"
 #include "apu.h"
@@ -59,6 +60,7 @@
 #if APR_HAVE_MODULAR_DSO
 
 static apr_hash_t *drivers = NULL;
+static apr_uint32_t initialised = 0, in_init = 1;
 
 static apr_status_t dbm_term(void *ptr)
 {
@@ -117,8 +119,13 @@ static apr_status_t dbm_open_type(apr_dbm_type_t const* * vtable,
     }
     else usertype = 1;
 
-    if (!drivers)
-    {
+    if (apr_atomic_inc32(&initialised)) {
+        apr_atomic_set32(&initialised, 1); /* prevent wrap-around */
+
+        while (apr_atomic_read32(&in_init)) /* wait until we get fully inited */
+            ;
+    }
+    else {
         apr_pool_t *parent;
 
         /* Top level pool scope, need process-scope lifetime */
@@ -133,6 +140,8 @@ static apr_status_t dbm_open_type(apr_dbm_type_t const* * vtable,
 
         apr_pool_cleanup_register(pool, NULL, dbm_term,
                                   apr_pool_cleanup_null);
+
+        apr_atomic_dec32(&in_init);
     }
 
     rv = apu_dso_mutex_lock();

@@ -27,6 +27,7 @@
 #include "apr_hash.h"
 #include "apr_file_io.h"
 #include "apr_env.h"
+#include "apr_atomic.h"
 
 #include "apu_internal.h"
 #include "apu_version.h"
@@ -37,6 +38,7 @@
 static apr_thread_mutex_t* mutex = NULL;
 #endif
 static apr_hash_t *dsos = NULL;
+static apr_uint32_t initialised = 0, in_init = 1;
 
 #if APR_HAS_THREADS
 apr_status_t apu_dso_mutex_lock()
@@ -76,7 +78,12 @@ apr_status_t apu_dso_init(apr_pool_t *pool)
     apr_pool_t *global;
     apr_pool_t *parent;
 
-    if (dsos != NULL) {
+    if (apr_atomic_inc32(&initialised)) {
+        apr_atomic_set32(&initialised, 1); /* prevent wrap-around */
+
+        while (apr_atomic_read32(&in_init)) /* wait until we get fully inited */
+            ;
+
         return APR_SUCCESS;
     }
 
@@ -93,6 +100,8 @@ apr_status_t apu_dso_init(apr_pool_t *pool)
 
     apr_pool_cleanup_register(global, NULL, apu_dso_term,
                               apr_pool_cleanup_null);
+
+    apr_atomic_dec32(&in_init);
 
     return ret;
 }
