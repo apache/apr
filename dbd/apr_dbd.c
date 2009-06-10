@@ -26,6 +26,7 @@
 #include "apr_hash.h"
 #include "apr_thread_mutex.h"
 #include "apr_lib.h"
+#include "apr_atomic.h"
 
 #include "apu_internal.h"
 #include "apr_dbd_internal.h"
@@ -33,6 +34,7 @@
 #include "apu_version.h"
 
 static apr_hash_t *drivers = NULL;
+static apr_uint32_t initialised = 0, in_init = 1;
 
 #define CLEANUP_CAST (apr_status_t (*)(void*))
 
@@ -90,7 +92,12 @@ APU_DECLARE(apr_status_t) apr_dbd_init(apr_pool_t *pool)
     apr_status_t ret = APR_SUCCESS;
     apr_pool_t *parent;
 
-    if (drivers != NULL) {
+    if (apr_atomic_inc32(&initialised)) {
+        apr_atomic_set32(&initialised, 1); /* prevent wrap-around */
+
+        while (apr_atomic_read32(&in_init)) /* wait until we get fully inited */
+            ;
+
         return APR_SUCCESS;
     }
 
@@ -140,6 +147,8 @@ APU_DECLARE(apr_status_t) apr_dbd_init(apr_pool_t *pool)
 
     apr_pool_cleanup_register(pool, NULL, apr_dbd_term,
                               apr_pool_cleanup_null);
+
+    apr_atomic_dec32(&in_init);
 
     return ret;
 }

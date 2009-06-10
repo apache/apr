@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Fix race conditions in initialisation of DBD, DBM and DSO.
+     [Bojan Smojver]
+
   *) SECURITY: CVE-2009-0023 (cve.mitre.org)
      Fix underflow in apr_strmatch_precompile.
      [Matthew Palmer <mpalmer debian.org>]
