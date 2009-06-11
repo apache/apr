@@ -95,7 +95,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
 
     if ((err != APR_NO_PIPE) && (err != APR_NO_FILE)) {
         if ((rv = apr_file_pipe_create_ex(&attr->parent_err, &attr->child_err,
-                                          err, attr->pool)) != APR_SUCCESS)
+                                          err, attr->pool)) == APR_SUCCESS)
             rv = apr_file_inherit_unset(attr->parent_err);
         if (rv != APR_SUCCESS)
             return rv;
