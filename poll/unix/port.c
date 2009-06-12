@@ -16,6 +16,7 @@
 
 #include "apr_arch_poll_private.h"
 #include "apr_atomic.h"
+#include "apr_arch_inherit.h"
 
 #ifdef POLLSET_USES_PORT
 
@@ -179,6 +180,17 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
 
     if ((*pollset)->port_fd < 0) {
         return APR_ENOMEM;
+    }
+
+    {
+        int flags;
+
+        if ((flags = fcntl((*pollset)->port_fd, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl((*pollset)->port_fd, F_SETFD, flags) == -1)
+            return errno;
     }
 
     (*pollset)->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
@@ -472,6 +484,17 @@ APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
     if (fd < 0) {
         *pollcb = NULL;
         return apr_get_netos_error();
+    }
+
+    {
+        int flags;
+
+        if ((flags = fcntl(fd, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl(fd, F_SETFD, flags) == -1)
+            return errno;
     }
 
     *pollcb = apr_palloc(p, sizeof(**pollcb));
