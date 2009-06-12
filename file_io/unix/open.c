@@ -127,7 +127,15 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
         oflags |= O_BINARY;
     }
 #endif
-    
+
+#ifdef O_CLOEXEC
+    /* Introduced in Linux 2.6.23. Silently ignored on earlier Linux kernels.
+     */
+    if (!(flag & APR_FILE_NOCLEANUP)) {
+        oflags |= O_CLOEXEC;
+}
+#endif
+ 
 #if APR_HAS_LARGE_FILES && defined(_LARGEFILE64_SOURCE)
     oflags |= O_LARGEFILE;
 #elif defined(O_LARGEFILE)
@@ -154,6 +162,16 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     } 
     if (fd < 0) {
        return errno;
+    }
+    if (!(flag & APR_FILE_NOCLEANUP)) {
+        int flags;
+
+        if ((flags = fcntl(fd, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl(fd, F_SETFD, flags) == -1)
+            return errno;
     }
 
     (*new) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
@@ -337,6 +355,15 @@ APR_DECLARE(apr_status_t) apr_file_inherit_unset(apr_file_t *thefile)
         return APR_EINVAL;
     }
     if (thefile->flags & APR_INHERIT) {
+        int flags;
+
+        if ((flags = fcntl(thefile->filedes, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl(thefile->filedes, F_SETFD, flags) == -1)
+            return errno;
+
         thefile->flags &= ~APR_INHERIT;
         apr_pool_child_cleanup_set(thefile->pool,
                                    (void *)thefile,
