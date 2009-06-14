@@ -202,9 +202,9 @@ APU_DECLARE(apr_status_t) apr_queue_push(apr_queue_t *queue, void *data)
 }
 
 /**
- * Push new data onto the queue. Blocks if the queue is full. Once
- * the push operation has completed, it signals other threads waiting
- * in apr_queue_pop() that they may continue consuming sockets.
+ * Push new data onto the queue. If the queue is full, return APR_EAGAIN. If
+ * the push operation completes successfully, it signals other threads
+ * waiting in apr_queue_pop() that they may continue consuming sockets.
  */
 APU_DECLARE(apr_status_t) apr_queue_trypush(apr_queue_t *queue, void *data)
 {
