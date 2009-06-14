@@ -342,6 +342,54 @@ APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
     return rv;
 }
 
+APR_DECLARE(apr_status_t) apr_file_sync(apr_file_t *thefile)
+{
+    apr_status_t rv = APR_SUCCESS;
+
+    file_lock(thefile);
+
+    if (thefile->buffered) {
+        rv = apr_file_flush_locked(thefile);
+
+        if (rv != APR_SUCCESS) {
+            file_unlock(thefile);
+            return rv;
+        }
+    }
+
+    if (fsync(thefile->filedes)) {
+        rv = apr_get_os_error();
+    }
+
+    file_unlock(thefile);
+
+    return rv;
+}
+
+APR_DECLARE(apr_status_t) apr_file_datasync(apr_file_t *thefile)
+{
+    apr_status_t rv = APR_SUCCESS;
+
+    file_lock(thefile);
+
+    if (thefile->buffered) {
+        rv = apr_file_flush_locked(thefile);
+
+        if (rv != APR_SUCCESS) {
+            file_unlock(thefile);
+            return rv;
+        }
+    }
+
+    if (fdatasync(thefile->filedes)) {
+        rv = apr_get_os_error();
+    }
+
+    file_unlock(thefile);
+
+    return rv;
+}
+
 APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
 {
     apr_status_t rv = APR_SUCCESS; /* get rid of gcc warning */
