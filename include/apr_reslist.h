@@ -77,7 +77,7 @@ typedef apr_status_t (*apr_reslist_destructor)(void *resource, void *params,
  * @param con Constructor routine that is called to create a new resource.
  * @param de Destructor routine that is called to destroy an expired resource.
  * @param params Passed to constructor and deconstructor
- * @param pool The pool from which to create this resoure list. Also the
+ * @param pool The pool from which to create this resource list. Also the
  *             same pool that is passed to the constructor and destructor
  *             routines.
  * @remark If APR has been compiled without thread support, hmax will be
@@ -123,7 +123,7 @@ APU_DECLARE(apr_status_t) apr_reslist_release(apr_reslist_t *reslist,
  * Set the timeout the acquire will wait for a free resource
  * when the maximum number of resources is exceeded.
  * @param reslist The resource list.
- * @param timeout Timeout to wait. The zero waits forewer.
+ * @param timeout Timeout to wait. The zero waits forever.
  */
 APU_DECLARE(void) apr_reslist_timeout_set(apr_reslist_t *reslist,
                                           apr_interval_time_t timeout);
