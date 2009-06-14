@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Add apr_file_sync() and apr_file_datasync() calls.
+     [Bojan Smojver]
+
   *) Fix race conditions in initialisation of DBD, DBM and DSO.
      [Bojan Smojver]
 
