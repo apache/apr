@@ -516,6 +516,25 @@ APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
     return APR_SUCCESS; 
 }
 
+APR_DECLARE(apr_status_t) apr_file_sync(apr_file_t *thefile){
+    apr_status_t rv;
+
+    rv = apr_file_flush(thefile);
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+
+    if (!FlushFileBuffers(thefile->filehand)) {
+        rv = apr_get_os_error();
+    }
+
+    return rv;
+}
+
+APR_DECLARE(apr_status_t) apr_file_datasync(apr_file_t *thefile){
+    return apr_file_sync(thefile);
+}
+
 struct apr_file_printf_data {
     apr_vformatter_buff_t vbuff;
     apr_file_t *fptr;
