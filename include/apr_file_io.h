@@ -565,6 +565,18 @@ APR_DECLARE(apr_status_t) apr_file_puts(const char *str, apr_file_t *thefile);
 APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile);
 
 /**
+ * Transfer all file modified data and metadata to disk.
+ * @param thefile The file descriptor to sync
+ */
+APR_DECLARE(apr_status_t) apr_file_sync(apr_file_t *thefile);
+
+/**
+ * Transfer all file modified data to disk.
+ * @param thefile The file descriptor to sync
+ */
+APR_DECLARE(apr_status_t) apr_file_datasync(apr_file_t *thefile);
+
+/**
  * Duplicate the specified file descriptor.
  * @param new_file The structure to duplicate into. 
  * @param old_file The file to duplicate.
