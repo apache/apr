@@ -15,6 +15,7 @@
  */
 
 #include "apr_arch_poll_private.h"
+#include "apr_arch_inherit.h"
 
 #ifdef POLLSET_USES_EPOLL
 
@@ -95,11 +96,28 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
 #endif
     int fd;
 
+#ifdef HAVE_EPOLL_CREATE1
+    fd = epoll_create1(EPOLL_CLOEXEC);
+#else
     fd = epoll_create(size);
+#endif
     if (fd < 0) {
         *pollset = NULL;
         return errno;
     }
+
+#ifndef HAVE_EPOLL_CREATE1
+    {
+        int flags;
+
+        if ((flags = fcntl(fd, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl(fd, F_SETFD, flags) == -1)
+            return errno;
+    }
+#endif
 
     *pollset = apr_palloc(p, sizeof(**pollset));
 #if APR_HAS_THREADS
@@ -319,12 +337,29 @@ APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
 {
     int fd;
     
+#ifdef HAVE_EPOLL_CREATE1
+    fd = epoll_create1(EPOLL_CLOEXEC);
+#else
     fd = epoll_create(size);
+#endif
     
     if (fd < 0) {
         *pollcb = NULL;
         return apr_get_netos_error();
     }
+
+#ifndef HAVE_EPOLL_CREATE1
+    {
+        int flags;
+
+        if ((flags = fcntl(fd, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl(fd, F_SETFD, flags) == -1)
+            return errno;
+    }
+#endif
     
     *pollcb = apr_palloc(p, sizeof(**pollcb));
     (*pollcb)->nalloc = size;
