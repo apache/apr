@@ -32,7 +32,7 @@
 #include "apr_arch_misc.h"
 #include "apr_arch_inherit.h"
 #include <io.h>
-#include <WinIoCtl.h>
+#include <winioctl.h>
 
 #if APR_HAS_UNICODE_FS
 apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen, 
