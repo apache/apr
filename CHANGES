@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
 
+  *) On Linux/hppa flock() returns EAGAIN instead of EWOULDBLOCK. This
+     causes proc mutex failures.
+     [Stefan Fritsch <sf sfritsch.de>]
+
   *) Add apr_file_sync() and apr_file_datasync() calls.
      [Bojan Smojver]
 
