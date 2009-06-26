@@ -683,7 +683,7 @@ static apr_status_t proc_mutex_flock_tryacquire(apr_proc_mutex_t *mutex)
         rc = flock(mutex->interproc->filedes, LOCK_EX | LOCK_NB);
     } while (rc < 0 && errno == EINTR);
     if (rc < 0) {
-        if (errno == EWOULDBLOCK) {
+        if (errno == EWOULDBLOCK || errno == EAGAIN) {
             return APR_EBUSY;
         }
         return errno;
