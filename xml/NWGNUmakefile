@@ -18,19 +18,19 @@ include $(APR_WORK)\build\NWGNUhead.inc
 #
 # Make sure all needed macro's are defined
 #
+V_PATH = \
+	$(EXPAT_SRC)/lib \
+	$(EOLIST)
 
 #
 # These directories will be at the beginning of the include list, followed by
 # INCDIRS
 #
 XINCDIRS	+= \
+			$(V_PATH) \
 			$(APR)/include \
+			$(APR)/include/private \
 			$(APR)/include/arch/NetWare \
-			$(APRUTIL)/include \
-			$(APRUTIL)/uri \
-			$(APRUTIL)/dbm/sdbm \
-			$(APRUTIL)/include/private \
-			$(APRUTIL)/xml/expat/lib \
 			$(EOLIST)
 
 #
@@ -43,6 +43,7 @@ XCFLAGS		+= \
 # These defines will come after DEFINES
 #
 XDEFINES	+= \
+			-DHAVE_EXPAT_CONFIG_H \
 			$(EOLIST)
 
 #
@@ -167,7 +168,7 @@ TARGET_nlm = \
 # If there is an LIB target, put it here
 #
 TARGET_lib = \
-	$(OBJDIR)/xmllib.lib \
+	$(OBJDIR)/xml.lib \
 	$(EOLIST)
 
 #
@@ -247,7 +248,7 @@ install :: nlms FORCE
 # Any specialized rules here
 #
 
-vpath %.c expat/lib
+vpath %.c $(V_PATH) 
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined

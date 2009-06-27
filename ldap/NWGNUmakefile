@@ -26,8 +26,7 @@ include $(APR_WORK)\build\NWGNUhead.inc
 XINCDIRS	+= \
 			$(APR)/include \
 			$(APR)/include/arch/NetWare \
-			$(APRUTIL)/include \
-			$(APRUTIL)/include/private \
+			$(APR)/include/private \
 			$(LDAPSDK)/inc \
 			$(EOLIST)
 
@@ -173,7 +172,7 @@ TARGET_nlm = \
 # If there is an LIB target, put it here
 #
 TARGET_lib = \
-	$(OBJDIR)/apuldap.lib \
+	$(OBJDIR)/ldap.lib \
 	$(EOLIST)
 
 #
