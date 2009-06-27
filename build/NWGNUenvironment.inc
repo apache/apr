@@ -119,11 +119,12 @@ endif
 
 NOVI	= $(NOVELLLIBC)\imports
 
-INCDIRS	= $(NOVELLLIBC)\include;$(NOVELLLIBC)\include\nks;$(NOVELLLIBC)\include\winsock;
+INCDIRS	= $(NOVELLLIBC)\include;$(NOVELLLIBC)\include\nks;
 
 DEFINES	= -DNETWARE
 ifndef USE_STDSOCKETS
 DEFINES	+= -DUSE_WINSOCK
+INCDIRS	+= $(NOVELLLIBC)\include\winsock;
 endif
 ifndef DEBUG
 DEFINES	+= -DNDEBUG
@@ -224,31 +225,22 @@ ifdef DEST
 ifndef BASEDIR
 BASEDIR = Apache2
 endif
-
 INSTALLBASE := $(INSTALL)\$(BASEDIR)
 
-INSTDEVDIRS := \
-    $(INSTDIRS) \
-	$(INSTALLBASE) \
-	$(INSTALLBASE)\include \
-	$(INSTALLBASE)\lib \
-
-INSTDIRS += \
-	$(INSTALLBASE) \
-	
 else
+
 INSTALLBASE := $(INSTALL)\apr
 
+endif
+
 INSTDEVDIRS := \
-    $(INSTDIRS) \
+	$(INSTDIRS) \
 	$(INSTALLBASE) \
 	$(INSTALLBASE)\include \
 	$(INSTALLBASE)\lib \
 
 INSTDIRS += \
-	$(INSTALLBASE) \
-	
-endif	
+	$(INSTALLBASE)
 
 #
 # Declare Command and tool macros here
@@ -260,21 +252,19 @@ OS = Windows_NT
 endif
 
 ifeq "$(OS)" "Windows_NT"
-CMD=cmd /C
-CHK=cmd /C if exist
-CHKNOT=cmd /C if not exist
-DEL = del /F
-DELTREE = cmd /C rd /s/q
-WINNT=1
+CMD	= cmd /C
+DEL	= del /F
+DELTREE	= $(CMD) rd /s/q
+WINNT	= 1
 XCOPYSW = /E
 else
-CMD=command /C
-CHK=command /C if exist
-CHKNOT=command /C if not exist
-DEL = del
-DELTREE = deltree /y
-XCOPYSW = /E /Y
+CMD	= command /C
+DEL	= del
+DELTREE	= deltree /y
+XCOPYSW	= /E /Y
 endif
+CHK	= $(CMD) if exist
+CHKNOT	= $(CMD) if not exist
 
 
 #
@@ -287,18 +277,18 @@ endif
 
 APR		= $(APR_WORK)
 APRTEST		= $(APR_WORK)/test
-APRUTIL		= $(APU_WORK)
-APULDAP		= $(APU_WORK)/ldap
-XML		= $(APRUTIL)/xml
+APRBUCKETS	= $(APR_WORK)/buckets
+APRLDAP		= $(APR_WORK)/ldap
+APRXML		= $(APR_WORK)/xml
 
 #
 # Internal Libraries
 #
 
 APRLIB		= $(APR)/$(OBJDIR)/aprlib.lib
-APRUTLIB	= $(APRUTIL)/$(OBJDIR)/aprutil.lib
-APULDAPLIB	= $(APULDAP)/$(OBJDIR)/apuldap.lib
-XMLLIB		= $(XML)/$(OBJDIR)/xmllib.lib
+APRBUCKETSLIB	= $(APRBUCKETS)/$(OBJDIR)/buckets.lib
+APRLDAPLIB	= $(APRLDAP)/$(OBJDIR)/ldap.lib
+APRXMLLIB	= $(APRXML)/$(OBJDIR)/xml.lib
 
 #
 # Additional general defines

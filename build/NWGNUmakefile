@@ -17,14 +17,14 @@ include $(APR_WORK)\build\NWGNUhead.inc
 
 FILES_prebuild_headers = \
 	$(APR)/include/apr.h \
-	$(APRUTIL)/include/apu.h \
-	$(APRUTIL)/include/apu_want.h \
-	$(APRUTIL)/include/apr_ldap.h \
-	$(APRUTIL)/include/private/apu_config.h \
-	$(APRUTIL)/include/private/apu_select_dbm.h \
-	$(APRUTIL)/xml/expat/lib/expat.h \
-	$(APRUTIL)/xml/expat/lib/config.h \
-	$(EOLIST) 
+	$(APR)/include/apu.h \
+	$(APR)/include/apu_want.h \
+	$(APR)/include/apr_ldap.h \
+	$(APR)/include/private/apu_config.h \
+	$(APR)/include/private/apu_select_dbm.h \
+	$(APR)/xml/expat_config.h \
+	$(EOLIST)
+#	$(APR)/xml/expat/lib/expat.h \
     
 nlms :: $(APR)/aprlib.imp
 
@@ -32,7 +32,7 @@ $(APR)/aprlib.imp : make_nw_export.awk nw_export.i
 	@echo Generating $(subst /,\,$@)
 	awk -f make_nw_export.awk nw_export.i | sort >$(APR)/aprlib.imp
     
-nw_export.i : nw_export.inc $(APRUTIL)/build/nw_apu_export.inc $(FILES_prebuild_headers) $(NLM_NAME)_cc.opt
+nw_export.i : nw_export.inc $(FILES_prebuild_headers) $(NLM_NAME)_cc.opt
 	@echo Generating $(subst /,\,$@)
 	$(CC) $< @$(NLM_NAME)_cc.opt
 
@@ -46,8 +46,7 @@ $(NLM_NAME)_cc.opt : NWGNUmakefile $(APR_WORK)\build\NWGNUenvironment.inc $(APR_
 	@echo -I$(APR)\include >> $@
 	@echo -I$(APR)\include\arch\netware >> $@
 	@echo -I$(APR)\include\arch\unix >> $@
-	@echo -I$(APRUTIL)\include >> $@
-	@echo -I$(APRUTIL)\build >> $@
+	@echo -I$(APR)\build >> $@
 	@echo -ir $(NOVELLLIBC) >> $@
 ifneq "$(LDAPSDK)" ""
 	@echo -ir $(LDAPSDK) >> $@
@@ -57,25 +56,21 @@ $(APR)/include/%.h: $(subst /,\,$(APR))\include\%.hnw
 	@echo Creating $(subst /,\,$@)
 	copy $< $(subst /,\,$(APR))\include\$(@F)
 
-$(APRUTIL)/include/private/%.h: $(subst /,\,$(APRUTIL))\include\private\%.hnw
+$(APR)/include/private/%.h: $(subst /,\,$(APR))\include\private\%.hnw
 	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APRUTIL))\include\private\$(@F)
+	copy $< $(subst /,\,$(APR))\include\private\$(@F)
 
-$(APRUTIL)/include/private/%.h: $(subst /,\,$(APRUTIL))\include\private\%.hw
+$(APR)/include/private/%.h: $(subst /,\,$(APR))\include\private\%.hw
 	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APRUTIL))\include\private\$(@F)
+	copy $< $(subst /,\,$(APR))\include\private\$(@F)
 
-$(APRUTIL)/include/%.h: $(subst /,\,$(APRUTIL))\include\%.hnw
+$(APR)/xml/%.h: $(subst /,\,$(APR))\xml\%.hnw
 	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APRUTIL))\include\$(@F)
+	copy $< $(subst /,\,$(APR))\xml\$(@F)
 
-$(APRUTIL)/xml/expat/lib/%.h: $(subst /,\,$(APRUTIL))\xml\expat\lib\%.hnw
+$(APR)/xml/expat/lib/%.h: $(subst /,\,$(APR))\xml\expat\lib\%.h.in
 	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APRUTIL))\xml\expat\lib\$(@F)
-
-$(APRUTIL)/xml/expat/lib/%.h: $(subst /,\,$(APRUTIL))\xml\expat\lib\%.h.in
-	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APRUTIL))\xml\expat\lib\$(@F)
+	copy $< $(subst /,\,$(APR))\xml\expat\lib\$(@F)
 
 #
 # You can use this target if all that is needed is to copy files to the
@@ -85,16 +80,16 @@ install :: nlms FORCE
 	
 
 clean ::
-	$(CHK) nw_export.i                                              $(DEL) nw_export.i
-	$(CHK) $(NLM_NAME)_cc.opt                                       $(DEL) $(NLM_NAME)_cc.opt
-	$(CHK) NWGNUversion.inc                                         $(DEL) NWGNUversion.inc	
-	$(CHK) $(subst /,\,$(APR))\include\apr.h                        $(DEL) $(subst /,\,$(APR))\include\apr.h
-	$(CHK) $(subst /,\,$(APRUTIL))\include\apu.h                    $(DEL) $(subst /,\,$(APRUTIL))\include\apu.h
-	$(CHK) $(subst /,\,$(APRUTIL))\include\apu_want.h               $(DEL) $(subst /,\,$(APRUTIL))\include\apu_want.h
-	$(CHK) $(subst /,\,$(APRUTIL))\include\apr_ldap.h               $(DEL) $(subst /,\,$(APRUTIL))\include\apr_ldap.h
-	$(CHK) $(subst /,\,$(APRUTIL))\include\private\apu_config.h     $(DEL) $(subst /,\,$(APRUTIL))\include\private\apu_config.h
-	$(CHK) $(subst /,\,$(APRUTIL))\include\private\apu_select_dbm.h $(DEL) $(subst /,\,$(APRUTIL))\include\private\apu_select_dbm.h
-	$(CHK) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat.h            $(DEL) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat.h
-	$(CHK) $(subst /,\,$(APRUTIL))\xml\expat\lib\config.h           $(DEL) $(subst /,\,$(APRUTIL))\xml\expat\lib\config.h
-	$(CHK) $(subst /,\,$(APR))\aprlib.imp                           $(DEL) $(subst /,\,$(APR))\aprlib.imp
+	$(CHK) nw_export.i                                          $(DEL) nw_export.i
+	$(CHK) $(NLM_NAME)_cc.opt                                   $(DEL) $(NLM_NAME)_cc.opt
+	$(CHK) NWGNUversion.inc                                     $(DEL) NWGNUversion.inc	
+	$(CHK) $(subst /,\,$(APR))\include\apr.h                    $(DEL) $(subst /,\,$(APR))\include\apr.h
+	$(CHK) $(subst /,\,$(APR))\include\apu.h                    $(DEL) $(subst /,\,$(APR))\include\apu.h
+	$(CHK) $(subst /,\,$(APR))\include\apu_want.h               $(DEL) $(subst /,\,$(APR))\include\apu_want.h
+	$(CHK) $(subst /,\,$(APR))\include\apr_ldap.h               $(DEL) $(subst /,\,$(APR))\include\apr_ldap.h
+	$(CHK) $(subst /,\,$(APR))\include\private\apu_config.h     $(DEL) $(subst /,\,$(APR))\include\private\apu_config.h
+	$(CHK) $(subst /,\,$(APR))\include\private\apu_select_dbm.h $(DEL) $(subst /,\,$(APR))\include\private\apu_select_dbm.h
+	$(CHK) $(subst /,\,$(APR))\xml\expat_config.h               $(DEL) $(subst /,\,$(APR))\xml\expat_config.h
+#	$(CHK) $(subst /,\,$(APR))\xml\expat.h                      $(DEL) $(subst /,\,$(APR))\xml\expat.h
+	$(CHK) $(subst /,\,$(APR))\aprlib.imp                       $(DEL) $(subst /,\,$(APR))\aprlib.imp
     

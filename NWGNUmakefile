@@ -3,9 +3,17 @@
 #
 
 SUBDIRS = \
-		build \
-		$(APU_WORK) \
-		$(EOLIST)
+	build \
+	buckets \
+	ldap \
+	xml \
+	$(EOLIST)
+
+ifdef WITH_APR_DBD
+SUBDIRS += \
+	dbd \
+	$(EOLIST) 
+endif
 
 #
 # Get the 'head' of the build environment.  This includes default targets and
@@ -29,9 +37,12 @@ XINCDIRS	+= \
 			$(APR)/include \
 			$(APR)/include/arch/NetWare \
 			$(APR)/include/arch/unix \
+			$(APR)/include/private \
+			$(APR)/dbm/sdbm \
+			$(APR)/uri \
 			$(APR)/memory/unix \
 			$(APR)/random/unix \
-			$(APRUTIL)/xml \
+			$(APR)/xml \
 			$(EOLIST)
 
 #
@@ -187,9 +198,9 @@ FILES_nlm_objs = \
 FILES_nlm_libs = \
 	libcpre.o \
 	$(APRLIB) \
-	$(APRUTLIB) \
-	$(APULDAPLIB) \
-	$(XMLLIB) \
+	$(APRBUCKETSLIB) \
+	$(APRLDAPLIB) \
+	$(APRXMLLIB) \
 	$(EOLIST)
 
 #
@@ -267,25 +278,43 @@ FILES_nlm_exports = \
 #
 FILES_lib_objs = \
 	$(OBJDIR)/apr_atomic.o \
+	$(OBJDIR)/apr_base64.o \
 	$(OBJDIR)/apr_cpystrn.o \
+	$(OBJDIR)/apr_date.o \
+	$(OBJDIR)/apr_dbd.o \
+	$(OBJDIR)/apr_dbm.o \
+	$(OBJDIR)/apr_dbm_berkeleydb.o \
+	$(OBJDIR)/apr_dbm_sdbm.o \
 	$(OBJDIR)/apr_fnmatch.o \
 	$(OBJDIR)/apr_getpass.o \
 	$(OBJDIR)/apr_hash.o \
+	$(OBJDIR)/apr_hooks.o \
+	$(OBJDIR)/apr_md4.o \
+	$(OBJDIR)/apr_md5.o \
+	$(OBJDIR)/apr_memcache.o \
 	$(OBJDIR)/apr_pools.o \
+	$(OBJDIR)/apr_queue.o \
 	$(OBJDIR)/apr_random.o \
+	$(OBJDIR)/apr_reslist.o \
+	$(OBJDIR)/apr_rmm.o \
+	$(OBJDIR)/apr_sha1.o \
 	$(OBJDIR)/apr_snprintf.o \
 	$(OBJDIR)/apr_strings.o \
+	$(OBJDIR)/apr_strmatch.o \
 	$(OBJDIR)/apr_strnatcmp.o \
 	$(OBJDIR)/apr_strtok.o \
 	$(OBJDIR)/apr_tables.o \
+	$(OBJDIR)/apr_uri.o \
+	$(OBJDIR)/apu_dso.o \
+	$(OBJDIR)/apu_version.o \
 	$(OBJDIR)/buffer.o \
 	$(OBJDIR)/charset.o \
-	$(OBJDIR)/copy.o \
 	$(OBJDIR)/common.o \
+	$(OBJDIR)/copy.o \
 	$(OBJDIR)/dir.o \
 	$(OBJDIR)/dso.o \
-	$(OBJDIR)/errorcodes.o \
 	$(OBJDIR)/env.o \
+	$(OBJDIR)/errorcodes.o \
 	$(OBJDIR)/fileacc.o \
 	$(OBJDIR)/filedup.o \
 	$(OBJDIR)/filepath.o \
@@ -295,24 +324,29 @@ FILES_lib_objs = \
 	$(OBJDIR)/flock.o \
 	$(OBJDIR)/fullrw.o \
 	$(OBJDIR)/getopt.o \
+	$(OBJDIR)/getuuid.o \
 	$(OBJDIR)/groupinfo.o \
-	$(OBJDIR)/inet_pton.o \
 	$(OBJDIR)/inet_ntop.o \
+	$(OBJDIR)/inet_pton.o \
 	$(OBJDIR)/libprews.o \
 	$(OBJDIR)/mktemp.o \
 	$(OBJDIR)/mmap.o \
 	$(OBJDIR)/multicast.o \
 	$(OBJDIR)/open.o \
-	$(OBJDIR)/pipe.o \
 	$(OBJDIR)/otherchild.o \
-	$(OBJDIR)/proc.o \
-	$(OBJDIR)/procsup.o \
-	$(OBJDIR)/proc_mutex.o \
-	$(OBJDIR)/rand.o \
-	$(OBJDIR)/readwrite.o \
-	$(OBJDIR)/seek.o \
+	$(OBJDIR)/pipe.o \
 	$(OBJDIR)/pollcb.o \
 	$(OBJDIR)/pollset.o \
+	$(OBJDIR)/proc.o \
+	$(OBJDIR)/proc_mutex.o \
+	$(OBJDIR)/procsup.o \
+	$(OBJDIR)/rand.o \
+	$(OBJDIR)/readwrite.o \
+	$(OBJDIR)/sdbm.o \
+	$(OBJDIR)/sdbm_hash.o \
+	$(OBJDIR)/sdbm_lock.o \
+	$(OBJDIR)/sdbm_pair.o \
+	$(OBJDIR)/seek.o \
 	$(OBJDIR)/select.o \
 	$(OBJDIR)/sendrecv.o \
 	$(OBJDIR)/sha2.o \
@@ -332,10 +366,11 @@ FILES_lib_objs = \
 	$(OBJDIR)/time.o \
 	$(OBJDIR)/timestr.o \
 	$(OBJDIR)/userinfo.o \
+	$(OBJDIR)/uuid.o \
 	$(OBJDIR)/version.o \
 	$(OBJDIR)/waitio.o \
+	$(OBJDIR)/xlate.o \
 	$(EOLIST)
-
 
 #
 # implement targets and dependancies (leave this section alone)
@@ -355,8 +390,6 @@ ifndef DEST
 	-copy $(subst /,\,$(APR))\STATUS                   $(INSTALLBASE)\*.apr
 	-copy $(subst /,\,$(APR))\LICENSE                  $(INSTALLBASE)\*
 	-copy $(subst /,\,$(APR))\CHANGES                  $(INSTALLBASE)\*.apr
-	-copy $(subst /,\,$(APRUTIL))\STATUS               $(INSTALLBASE)\*.apu
-	-copy $(subst /,\,$(APRUTIL))\CHANGES              $(INSTALLBASE)\*.apu
 	@echo rem copying the docs directories > xc.bat
 	@echo xcopy docs $(INSTALLBASE)\docs\*.* $(XCOPYSW) >> xc.bat
 	$(CMD) xc.bat
@@ -366,7 +399,6 @@ endif
 ifndef DEST
 installdev :: $(INSTDEVDIRS) FORCE
 	-copy $(subst /,\,$(APR))\include\*.h               $(INSTALLBASE)\include\*.*
-	-copy $(subst /,\,$(APRUTIL))\include\*.h           $(INSTALLBASE)\include\*.*
 	-copy $(subst /,\,$(APR))\*.imp                     $(INSTALLBASE)\lib\*.*
 	-copy $(subst /,\,$(APR))\misc\netware\*.xdc        $(INSTALLBASE)\lib\*.*
 
@@ -382,6 +414,8 @@ vpath %.c atomic/netware:strings:tables:passwd:lib:time/unix
 vpath %.c file_io/unix:locks/netware:misc/netware:misc/unix:threadproc/netware
 vpath %.c poll/unix:shmem\unix:support/unix:random/unix
 vpath %.c dso/netware:memory/unix:mmap/unix:user/netware
+vpath %.c crypto:dbd:dbm:dbm/sdbm:encoding:hooks:ldap:memcache:misc:strmatch:uri:xlate
+vpath %.c util-misc
 
 # Use the win32 network_io if Winsock is being used
 ifdef USE_STDSOCKETS

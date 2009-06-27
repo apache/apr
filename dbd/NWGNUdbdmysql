@@ -38,8 +38,7 @@ MYSQL_NLM = libmysql
 XINCDIRS	+= \
 			$(APR)/include/arch/netware \
 			$(APR)/include \
-			$(APRUTIL)/include \
-			$(APRUTIL)/include/private \
+			$(APR)/include/private \
 			$(APR) \
 			$(MYSQL_INC) \
 			$(EOLIST)
