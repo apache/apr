@@ -38,8 +38,7 @@ FREETDS_NLM = libfreetds
 XINCDIRS	+= \
 			$(APR)/include/arch/netware \
 			$(APR)/include \
-			$(APRUTIL)/include \
-			$(APRUTIL)/include/private \
+			$(APR)/include/private \
 			$(APR) \
 			$(FREETDS_INC) \
 			$(EOLIST)

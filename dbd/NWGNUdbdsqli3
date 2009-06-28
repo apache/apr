@@ -38,8 +38,7 @@ SQLITE3_NLM = lsqlite3
 XINCDIRS	+= \
 			$(APR)/include/arch/netware \
 			$(APR)/include \
-			$(APRUTIL)/include \
-			$(APRUTIL)/include/private \
+			$(APR)/include/private \
 			$(APR) \
 			$(SQLITE3_INC) \
 			$(EOLIST)
