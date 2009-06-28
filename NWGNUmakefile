@@ -174,7 +174,7 @@ XDCDATA		=
 # If there is an NLM target, put it here
 #
 TARGET_nlm = \
-	$(OBJDIR)/aprlib.nlm \
+	$(OBJDIR)/$(NLM_NAME).nlm \
 	$(EOLIST)
 
 #
@@ -397,21 +397,21 @@ nlms :: libs $(TARGET_nlm)
 # correct place.  (See $(APR_WORK)/build/NWGNUhead.inc for examples)
 #
 install :: nlms $(INSTDIRS) FORCE
-	copy $(TARGET_nlm)                                 $(INSTALLBASE)\*.*
+	$(CP) $(subst /,\,$(APR)\$(TARGET_nlm))             $(INSTALLBASE)\*.*
 ifndef DEST
-	-copy $(subst /,\,$(APR))\STATUS                   $(INSTALLBASE)\*.apr
-	-copy $(subst /,\,$(APR))\LICENSE                  $(INSTALLBASE)\*
-	-copy $(subst /,\,$(APR))\CHANGES                  $(INSTALLBASE)\*.apr
-	@-xcopy $(XCOPYSW) docs                            $(INSTALLBASE)\docs\*.*
+	-$(CP) $(subst /,\,$(APR))\STATUS                   $(INSTALLBASE)\*.apr
+	-$(CP) $(subst /,\,$(APR))\LICENSE                  $(INSTALLBASE)\*
+	-$(CP) $(subst /,\,$(APR))\CHANGES                  $(INSTALLBASE)\*.apr
+	@-$(XCP) $(subst /,\,$(APR))\docs                   $(INSTALLBASE)\docs\*.*
 endif
 
 ifndef DEST
 installdev :: $(INSTDEVDIRS) FORCE
-	copy $(subst /,\,$(APR))\include\*.h               $(INSTALLBASE)\include\*.*
-	copy $(subst /,\,$(APR))\*.imp                     $(INSTALLBASE)\lib\*.*
-	copy $(subst /,\,$(APR))\misc\netware\*.xdc        $(INSTALLBASE)\lib\*.*
-	copy $(TARGET_lib)                                 $(INSTALLBASE)\lib\*.*
-	copy $(TARGET_nlm)                                 $(INSTALLBASE)\bin\*.*
+	$(CP) $(subst /,\,$(APR))\include\*.h               $(INSTALLBASE)\include\*.*
+	$(CP) $(subst /,\,$(APR))\*.imp                     $(INSTALLBASE)\lib\*.*
+	$(CP) $(subst /,\,$(APR))\misc\netware\*.xdc        $(INSTALLBASE)\lib\*.*
+	$(CP) $(subst /,\,$(APR)\$(TARGET_lib))             $(INSTALLBASE)\lib\*.*
+	$(CP) $(subst /,\,$(APR)\$(TARGET_nlm))             $(INSTALLBASE)\bin\*.*
 
 $(INSTDEVDIRS) ::
 	$(CHKNOT) $@\NUL mkdir $@
