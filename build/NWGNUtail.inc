@@ -112,7 +112,7 @@ $(OBJDIR)/%.o: %.c $(OBJDIR)/$(NLM_NAME)_cc.opt
 
 $(OBJDIR)/$(NLM_NAME)_cc.opt: $(CCOPT_DEPENDS)
 	$(CHK) $(subst /,\,$@) $(DEL) $(subst /,\,$@)
-	@echo CCOPT_DEPENDS=$<
+	@echo CCOPT_DEPENDS=$^
 	@echo Generating $@
 ifneq "$(strip $(CFLAGS))" ""
 	@echo $(CFLAGS) >> $@
@@ -139,7 +139,7 @@ $(OBJDIR)/%.o: %.cpp $(OBJDIR)/cpp.opt
 
 $(OBJDIR)/cpp.opt: $(CPPOPT_DEPENDS)
 	$(CHK) $(subst /,\,$@) $(DEL) $(subst /,\,$@)
-	@echo CPPOPT_DEPENDS=$<
+	@echo CPPOPT_DEPENDS=$^
 	@echo Generating $@
 ifneq "$(strip $(CFLAGS))" ""
 	@echo $(CFLAGS) >> $@
