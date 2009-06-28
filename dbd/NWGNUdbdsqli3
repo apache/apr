@@ -11,10 +11,10 @@ SUBDIRS = \
 #
 
 ifndef EnvironmentDefined
-include $(APR_WORK)\build\NWGNUhead.inc
+include $(APR_WORK)/build/NWGNUhead.inc
 endif
 
-#include $(APR)\build\NWGNUcustom.inc
+#include $(APR)/build/NWGNUcustom.inc
 
 #
 # build this level's files
@@ -36,10 +36,9 @@ SQLITE3_NLM = lsqlite3
 # INCDIRS
 #
 XINCDIRS	+= \
-			$(APR)/include/arch/netware \
 			$(APR)/include \
 			$(APR)/include/private \
-			$(APR) \
+			$(APR)/include/arch/netware \
 			$(SQLITE3_INC) \
 			$(EOLIST)
 
@@ -291,7 +290,7 @@ install :: nlms FORCE
 # in this makefile
 #
 
-include $(APR_WORK)\build\NWGNUtail.inc
+include $(APR_WORK)/build/NWGNUtail.inc
 
 
 

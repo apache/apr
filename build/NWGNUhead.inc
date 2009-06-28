@@ -2,7 +2,7 @@
 # Obtain the global build environment
 #
 
-include $(APR_WORK)\build\NWGNUenvironment.inc
+include $(APR_WORK)/build/NWGNUenvironment.inc
 
 #
 # Define base targets and rules
