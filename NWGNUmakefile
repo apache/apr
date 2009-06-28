@@ -408,12 +408,11 @@ endif
 # Any specialized rules here
 #
 
-vpath %.c atomic/netware:strings:tables:passwd:lib:time/unix
+vpath %.c atomic/netware:strings:tables:passwd:time/unix
 vpath %.c file_io/unix:locks/netware:misc/netware:misc/unix:threadproc/netware
-vpath %.c poll/unix:shmem\unix:support/unix:random/unix
-vpath %.c dso/netware:memory/unix:mmap/unix:user/netware
+vpath %.c poll/unix:shmem/unix:support/unix:random/unix
+vpath %.c dso/netware:memory/unix:mmap/unix:user/netware:util-misc
 vpath %.c crypto:dbd:dbm:dbm/sdbm:encoding:hooks:ldap:memcache:misc:strmatch:uri:xlate
-vpath %.c util-misc
 
 # Use the win32 network_io if Winsock is being used
 ifdef USE_STDSOCKETS
