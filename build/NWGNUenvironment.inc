@@ -192,6 +192,7 @@ endif
 ifndef INSTALL
 INSTALL = $(APR_WORK)\Dist
 INSTDIRS = $(APR_WORK)\Dist
+BASEDIR = Apr
 endif
 
 # Add support for building IPV6 alongside
@@ -218,20 +219,17 @@ ifdef DEST
 ifndef BASEDIR
 BASEDIR = Apache2
 endif
-INSTALLBASE := $(INSTALL)\$(BASEDIR)
-
-else
-
-INSTALLBASE := $(INSTALL)\apr
 
 endif
+
+INSTALLBASE := $(INSTALL)\$(BASEDIR)
 
 INSTDEVDIRS := \
 	$(INSTDIRS) \
 	$(INSTALLBASE) \
 	$(INSTALLBASE)\include \
 	$(INSTALLBASE)\lib \
-	$(INSTALLBASE)\bin
+	$(INSTALLBASE)\bin 
 
 INSTDIRS += \
 	$(INSTALLBASE)
