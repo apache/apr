@@ -33,38 +33,38 @@ endif
 #
 
 
-CCOPT_DEPENDS 	= \
-				$(APR_WORK)\build\NWGNUhead.inc \
-				$(APR_WORK)\build\NWGNUenvironment.inc \
-				$(APR_WORK)\build\NWGNUtail.inc \
+CCOPT_DEPENDS			= \
+				$(APR)/build/NWGNUhead.inc \
+				$(APR)/build/NWGNUenvironment.inc \
+				$(APR)/build/NWGNUtail.inc \
 				NWGNUmakefile \
 				$(CUSTOM_INI) \
 				$(EOLIST)
 
-CPPOPT_DEPENDS	= \
-				$(APR_WORK)\build\NWGNUhead.inc \
-				$(APR_WORK)\build\NWGNUenvironment.inc \
-				$(APR_WORK)\build\NWGNUtail.inc \
+CPPOPT_DEPENDS			= \
+				$(APR)/build/NWGNUhead.inc \
+				$(APR)/build/NWGNUenvironment.inc \
+				$(APR)/build/NWGNUtail.inc \
 				NWGNUmakefile \
 				$(CUSTOM_INI) \
 				$(EOLIST)
 
 $(NLM_NAME)_LINKOPT_DEPENDS	= \
 				$(TARGET_lib) \
-				$(APR_WORK)\build\NWGNUenvironment.inc \
+				$(APR)/build/NWGNUenvironment.inc \
 				NWGNUmakefile \
-				$(APR_WORK)\build\NWGNUtail.inc \
+				$(APR)/build/NWGNUtail.inc \
 				$(CUSTOM_INI) \
 				$(VERSION_INC) \
 				$(EOLIST)
 
 ifeq "$(words $(strip $(TARGET_lib)))" "1"
-LIB_NAME					= $(basename $(notdir $(TARGET_lib)))
+LIB_NAME			= $(basename $(notdir $(TARGET_lib)))
 $(LIB_NAME)_LIBLST_DEPENDS	= \
 				$(FILES_lib_objs) \
-				$(APR_WORK)\build\NWGNUenvironment.inc \
+				$(APR)/build/NWGNUenvironment.inc \
 				NWGNUmakefile \
-				$(APR_WORK)\build\NWGNUtail.inc \
+				$(APR)/build/NWGNUtail.inc \
 				$(CUSTOM_INI) \
 				$(EOLIST)
 endif
@@ -83,14 +83,14 @@ endif
 # Generic compiler rules
 #
 
-$(APR_WORK)\build\NWGNUversion.inc : $(APR_WORK)\include\apr_version.h $(APR_WORK)\build\nw_ver.awk
-	@echo Generating $(subst /,\,$@)
-	awk -f $(APR_WORK)\build\nw_ver.awk $(APR_WORK)\include\apr_version.h > $(APR_WORK)\build\NWGNUversion.inc
+$(APR)/build/NWGNUversion.inc : $(APR)/build/nw_ver.awk $(APR)/include/apr_version.h
+	@echo Generating $@
+	$(AWK) -f $^ > $@
 
--include $(APR_WORK)\build\NWGNUversion.inc
+-include $(APR)/build/NWGNUversion.inc
 
 ifneq "$(strip $(VERSION_STR))" ""
-VERSION_INC = $(APR_WORK)\build\NWGNUversion.inc
+VERSION_INC = $(APR)/build/NWGNUversion.inc
 else
 VERSION		= 1,0,0
 VERSION_STR	= 1.0.0
@@ -106,13 +106,13 @@ endif
 
 ifeq "$(INCLUDE_BLDCMDS)" "1"
 
-$(OBJDIR)/%.o: %.c $(OBJDIR)\$(NLM_NAME)_cc.opt
+$(OBJDIR)/%.o: %.c $(OBJDIR)/$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) $< -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
+	$(CC) $< -o $@ @$(OBJDIR)/$(NLM_NAME)_cc.opt
 
-$(OBJDIR)\$(NLM_NAME)_cc.opt: $(CCOPT_DEPENDS)
-	@echo CCOPT_DEPENDS=$(CCOPT_DEPENDS)
-	$(CHK) $@ $(DEL) $@
+$(OBJDIR)/$(NLM_NAME)_cc.opt: $(CCOPT_DEPENDS)
+	$(CHK) $(subst /,\,$@) $(DEL) $(subst /,\,$@)
+	@echo CCOPT_DEPENDS=$<
 	@echo Generating $@
 ifneq "$(strip $(CFLAGS))" ""
 	@echo $(CFLAGS) >> $@
@@ -133,12 +133,13 @@ ifneq "$(strip $(XDEFINES))" ""
 	@echo $(XDEFINES) >> $@
 endif
 
-$(OBJDIR)/%.o: %.cpp $(OBJDIR)\cpp.opt
+$(OBJDIR)/%.o: %.cpp $(OBJDIR)/cpp.opt
 	@echo Compiling $<
-	$(CPP) $< -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cpp.opt
+	$(CPP) $< -o $@ @$(OBJDIR)/cpp.opt
 
-$(OBJDIR)\cpp.opt: $(CPPOPT_DEPENDS)
-	$(CHK) $@ $(DEL) $@
+$(OBJDIR)/cpp.opt: $(CPPOPT_DEPENDS)
+	$(CHK) $(subst /,\,$@) $(DEL) $(subst /,\,$@)
+	@echo CPPOPT_DEPENDS=$<
 	@echo Generating $@
 ifneq "$(strip $(CFLAGS))" ""
 	@echo $(CFLAGS) >> $@
@@ -169,13 +170,13 @@ endif # one target nlm
 
 ifeq "$(words $(strip $(TARGET_lib)))" "1"
 
-$(TARGET_lib) : $(OBJDIR)\$(LIB_NAME)_lib.lst
+$(TARGET_lib) : $(OBJDIR)/$(LIB_NAME)_lib.lst
+	$(CHK) $(subst /,\,$@) $(DEL) $(subst /,\,$@)
 	@echo Generating $@
-	$(CHK) $(OBJDIR)\$(@F) $(DEL) $(OBJDIR)\$(@F)
-	$(LIB) -o $(OBJDIR)\$(@F) @$?
+	$(LIB) -o $(OBJDIR)/$(@F) @$?
 
-$(OBJDIR)\$(LIB_NAME)_lib.lst: $($(LIB_NAME)_LIBLST_DEPENDS)
-	$(CHK) $@ $(DEL) $@
+$(OBJDIR)/$(LIB_NAME)_lib.lst: $($(LIB_NAME)_LIBLST_DEPENDS)
+	$(CHK) $(subst /,\,$@) $(DEL) $(subst /,\,$@)
 	@echo Generating $@
 ifneq "$(strip $(FILES_lib_objs))" ""
 	@echo $(foreach objfile,$(FILES_lib_objs),$(subst /,\,$(objfile)) ) >> $@
@@ -183,7 +184,7 @@ endif
 
 else # We must have more than one target library so load the individual makefiles
 
-$(OBJDIR)/%.lib: NWGNU% $(APR_WORK)\build\NWGNUhead.inc $(APR_WORK)\build\NWGNUtail.inc $(APR_WORK)\build\NWGNUenvironment.inc FORCE
+$(OBJDIR)/%.lib: NWGNU% $(APR_WORK)/build/NWGNUhead.inc $(APR_WORK)/build/NWGNUtail.inc $(APR_WORK)/build/NWGNUenvironment.inc FORCE
 	@echo Calling $<
 	$(MAKE) -f $< $(MAKECMDGOALS) RELEASE=$(RELEASE)
 
@@ -193,19 +194,19 @@ endif
 # Rules to build nlms.
 #
 
-vpath libcpre.o $(NOVELLLIBC)\imports
+vpath libcpre.o $(NOVELLLIBC)/imports
 
 # If we only have one target NLM then build it
 ifeq "$(words $(strip $(TARGET_nlm)))" "1"
 
-$(TARGET_nlm) : $(FILES_nlm_objs) $(FILES_nlm_libs) $(OBJDIR)\$(NLM_NAME)_link.opt
+$(TARGET_nlm) : $(FILES_nlm_objs) $(FILES_nlm_libs) $(OBJDIR)/$(NLM_NAME)_link.opt
 	@echo Linking $@
-	$(LINK) @$(OBJDIR)\$(NLM_NAME)_link.opt
+	$(LINK) @$(OBJDIR)/$(NLM_NAME)_link.opt
 
 # This will force the link option file to be rebuilt if we change the
 # corresponding makefile
 
-$(OBJDIR)\$(NLM_NAME)_link.opt : $($(NLM_NAME)_LINKOPT_DEPENDS)
+$(OBJDIR)/$(NLM_NAME)_link.opt : $($(NLM_NAME)_LINKOPT_DEPENDS)
 	$(CHK) $(OBJDIR)\$(@F) $(DEL) $(OBJDIR)\$(@F)
 	$(CHK) $(OBJDIR)\$(NLM_NAME)_link.def $(DEL) $(OBJDIR)\$(NLM_NAME)_link.def
 	@echo Generating $@
@@ -230,14 +231,14 @@ endif
 	@echo -l "$(METROWERKS)/Novell Support/Metrowerks Support/Libraries/Runtime" >> $@
 	@echo -l "$(METROWERKS)/Novell Support/Metrowerks Support/Libraries/MSL C++" >> $@
 ifneq "$(IPV6)" ""
-	@echo -l $(NOVELLLIBC)\include\winsock\IPV6 >> $@
+	@echo -l $(NOVELLLIBC)/include/winsock/IPV6 >> $@
 endif
 	@echo -l $(NOVELLLIBC)/imports >> $@
 ifneq "$(LDAPSDK)" ""
 	@echo -l $(LDAPSDK)/lib/nlm >> $@
 endif
 	@echo -nodefaults >> $@
-	@echo -map $(OBJDIR)\$(NLM_NAME).map>> $@
+	@echo -map $(OBJDIR)/$(NLM_NAME).map>> $@
 ifneq "$(strip $(XLFLAGS))" ""
 	@echo $(XLFLAGS) >> $@
 endif
@@ -310,7 +311,7 @@ else # more than one target so look for individual makefiles.
 
 ifndef NO_LICENSE_FILE
 
-$(OBJDIR)/%.nlm: NWGNU% $(APR_WORK)\build\NWGNUhead.inc $(APR_WORK)\build\NWGNUtail.inc $(APR_WORK)\build\NWGNUenvironment.inc $(CUSTOM_INI) $(VERSION_INC) FORCE
+$(OBJDIR)/%.nlm: NWGNU% $(APR_WORK)/build/NWGNUhead.inc $(APR_WORK)/build/NWGNUtail.inc $(APR_WORK)/build/NWGNUenvironment.inc $(CUSTOM_INI) $(VERSION_INC) FORCE
 	@echo Calling $<
 	$(MAKE) -f $< $(MAKECMDGOALS) RELEASE=$(RELEASE)
 	$(CMD) echo.

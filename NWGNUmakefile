@@ -20,7 +20,7 @@ endif
 # paths to tools
 #
 
-include $(APR_WORK)\build\NWGNUhead.inc
+include $(APR_WORK)/build/NWGNUhead.inc
 
 #
 # build this level's files
@@ -35,9 +35,9 @@ include $(APR_WORK)\build\NWGNUhead.inc
 #
 XINCDIRS	+= \
 			$(APR)/include \
+			$(APR)/include/private \
 			$(APR)/include/arch/NetWare \
 			$(APR)/include/arch/unix \
-			$(APR)/include/private \
 			$(APR)/dbm/sdbm \
 			$(APR)/uri \
 			$(APR)/memory/unix \
@@ -129,7 +129,7 @@ NLM_DESCRIPTION	= Apache Portability Runtime Library $(VERSION_STR) $(VERSION_SK
 NLM_THREAD_NAME	=
 #
 # If this is specified, it will override VERSION value in
-# $(APR_WORK)\build\NWGNUenvironment.inc
+# $(APR_WORK)/build/NWGNUenvironment.inc
 #
 NLM_VERSION	=
 
@@ -381,7 +381,7 @@ nlms :: libs $(TARGET_nlm)
 
 #
 # Updated this target to create necessary directories and copy files to the
-# correct place.  (See $(APR_WORK)\build\NWGNUhead.inc for examples)
+# correct place.  (See $(APR_WORK)/build/NWGNUhead.inc for examples)
 #
 install :: nlms $(INSTDIRS) FORCE
 	copy $(TARGET_nlm)                                 $(INSTALLBASE)\*.*
@@ -415,21 +415,20 @@ vpath %.c dso/netware:memory/unix:mmap/unix:user/netware:util-misc
 vpath %.c crypto:dbd:dbm:dbm/sdbm:encoding:hooks:ldap:memcache:misc:strmatch:uri:xlate
 
 # Use the win32 network_io if Winsock is being used
-ifdef USE_STDSOCKETS
-vpath %.c network_io/unix
-else
-vpath %.c network_io/win32:network_io/unix
+ifndef USE_STDSOCKETS
+vpath %.c network_io/win32
 endif
+vpath %.c network_io/unix
 
-$(OBJDIR)/%.o: file_io/netware/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
+$(OBJDIR)/%.o: file_io/netware/%.c $(OBJDIR)/$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) file_io\netware\$(<F) -cwd source -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
+	$(CC) -cwd source -o $@ $< @$(OBJDIR)/$(NLM_NAME)_cc.opt
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined
 # in this makefile
 #
 
-include $(APR_WORK)\build\NWGNUtail.inc
+include $(APR_WORK)/build/NWGNUtail.inc
 
 

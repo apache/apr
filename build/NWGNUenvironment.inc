@@ -2,9 +2,9 @@
 # Setup needed Tools and Libraries
 #
 
-ifeq "$(wildcard $(APR_WORK)\build\NWGNUcustom.inc)" "$(APR_WORK)\build\NWGNUcustom.inc"
-include $(APR_WORK)\build\NWGNUcustom.inc
-CUSTOM_INI = $(AP_WORK)\NWGNUcustom.ini
+ifeq "$(wildcard $(APR_WORK)/build/NWGNUcustom.inc)" "$(APR_WORK)/build/NWGNUcustom.inc"
+include $(APR_WORK)/build/NWGNUcustom.inc
+CUSTOM_INI = $(AP_WORK)/NWGNUcustom.ini
 endif
 
 ifndef VERBOSE
@@ -111,20 +111,23 @@ CPP	= mwccnlm
 LINK	= mwldnlm
 LIB	= mwldnlm -type library -w nocmdline
 
+# Setup build tools
+AWK	= awk
+
 ifdef IPV6
 ifndef USE_STDSOCKETS
 USE_STDSOCKETS=1
 endif
 endif
 
-NOVI	= $(NOVELLLIBC)\imports
+NOVI	= $(NOVELLLIBC)/imports
 
-INCDIRS	= $(NOVELLLIBC)\include;$(NOVELLLIBC)\include\nks;
+INCDIRS	= $(NOVELLLIBC)/include;$(NOVELLLIBC)/include/nks;
 
 DEFINES	= -DNETWARE
 ifndef USE_STDSOCKETS
 DEFINES	+= -DUSE_WINSOCK
-INCDIRS	+= $(NOVELLLIBC)\include\winsock;
+INCDIRS	+= $(NOVELLLIBC)/include/winsock;
 endif
 ifndef DEBUG
 DEFINES	+= -DNDEBUG
@@ -139,9 +142,9 @@ endif
 #
 # MetroWerks static Libraries
 
-CLIB3S	= $(METROWERKS)\Novell Support\Metrowerks Support\Libraries\Runtime\mwcrtl.lib
+CLIB3S	= $(METROWERKS)/Novell Support/Metrowerks Support/Libraries/Runtime/mwcrtl.lib
 MATH3S	=
-PLIB3S	= $(METROWERKS)\Novell Support\Metrowerks Support\Libraries\MSL C++\MWCPP.lib
+PLIB3S	= $(METROWERKS)/Novell Support/Metrowerks Support/Libraries/MSL C++/MWCPP.lib
 
 # Base compile flags
 # and prefix or precompiled header added here.
@@ -276,11 +279,11 @@ CHKNOT	= $(CMD) if not exist
 # Common directories
 #
 
-APR		= $(APR_WORK)
-APRTEST		= $(APR_WORK)/test
-APRBUCKETS	= $(APR_WORK)/buckets
-APRLDAP		= $(APR_WORK)/ldap
-APRXML		= $(APR_WORK)/xml
+APR		= $(subst \,/,$(APR_WORK))
+APRTEST		= $(APR)/test
+APRBUCKETS	= $(APR)/buckets
+APRLDAP		= $(APR)/ldap
+APRXML		= $(APR)/xml
 
 #
 # Internal Libraries
