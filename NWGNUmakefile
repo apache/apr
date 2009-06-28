@@ -328,7 +328,6 @@ FILES_lib_objs = \
 	$(OBJDIR)/groupinfo.o \
 	$(OBJDIR)/inet_ntop.o \
 	$(OBJDIR)/inet_pton.o \
-	$(OBJDIR)/libprews.o \
 	$(OBJDIR)/mktemp.o \
 	$(OBJDIR)/mmap.o \
 	$(OBJDIR)/multicast.o \
