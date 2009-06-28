@@ -385,22 +385,21 @@ nlms :: libs $(TARGET_nlm)
 # correct place.  (See $(APR_WORK)\build\NWGNUhead.inc for examples)
 #
 install :: nlms $(INSTDIRS) FORCE
-	copy $(OBJDIR)\aprlib.nlm                          $(INSTALLBASE)\*.*
+	copy $(TARGET_nlm)                                 $(INSTALLBASE)\*.*
 ifndef DEST
 	-copy $(subst /,\,$(APR))\STATUS                   $(INSTALLBASE)\*.apr
 	-copy $(subst /,\,$(APR))\LICENSE                  $(INSTALLBASE)\*
 	-copy $(subst /,\,$(APR))\CHANGES                  $(INSTALLBASE)\*.apr
-	@echo rem copying the docs directories > xc.bat
-	@echo xcopy docs $(INSTALLBASE)\docs\*.* $(XCOPYSW) >> xc.bat
-	$(CMD) xc.bat
-	$(DEL) xc.bat
+	@-xcopy $(XCOPYSW) docs                            $(INSTALLBASE)\docs\*.*
 endif
 
 ifndef DEST
 installdev :: $(INSTDEVDIRS) FORCE
-	-copy $(subst /,\,$(APR))\include\*.h               $(INSTALLBASE)\include\*.*
-	-copy $(subst /,\,$(APR))\*.imp                     $(INSTALLBASE)\lib\*.*
-	-copy $(subst /,\,$(APR))\misc\netware\*.xdc        $(INSTALLBASE)\lib\*.*
+	copy $(subst /,\,$(APR))\include\*.h               $(INSTALLBASE)\include\*.*
+	copy $(subst /,\,$(APR))\*.imp                     $(INSTALLBASE)\lib\*.*
+	copy $(subst /,\,$(APR))\misc\netware\*.xdc        $(INSTALLBASE)\lib\*.*
+	copy $(TARGET_lib)                                 $(INSTALLBASE)\lib\*.*
+	copy $(TARGET_nlm)                                 $(INSTALLBASE)\bin\*.*
 
 $(INSTDEVDIRS) ::
 	$(CHKNOT) $@\NUL mkdir $@
