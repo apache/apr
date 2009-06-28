@@ -10,7 +10,7 @@ SUBDIRS = \
 # paths to tools
 #
 
-include $(APR_WORK)\build\NWGNUhead.inc
+include $(APR_WORK)/build/NWGNUhead.inc
 
 #
 # build this level's files
@@ -22,50 +22,50 @@ FILES_prebuild_headers = \
 	$(APR)/include/apr_ldap.h \
 	$(APR)/include/private/apu_config.h \
 	$(APR)/include/private/apu_select_dbm.h \
-	$(APR)/xml/expat_config.h \
+	$(APRXML)/expat_config.h \
 	$(EOLIST)
-#	$(APR)/xml/expat/lib/expat.h \
+#	$(APRXML)/expat/lib/expat.h \
     
 nlms :: $(APR)/aprlib.imp
 
 $(APR)/aprlib.imp : make_nw_export.awk nw_export.i
-	@echo Generating $(subst /,\,$@)
-	awk -f make_nw_export.awk nw_export.i | sort >$(APR)/aprlib.imp
+	@echo Generating $@
+	$(AWK) -f $^ | sort >$@
     
 nw_export.i : nw_export.inc $(FILES_prebuild_headers) $(NLM_NAME)_cc.opt
-	@echo Generating $(subst /,\,$@)
+	@echo Generating $@
 	$(CC) $< @$(NLM_NAME)_cc.opt
 
-$(NLM_NAME)_cc.opt : NWGNUmakefile $(APR_WORK)\build\NWGNUenvironment.inc $(APR_WORK)\build\NWGNUhead.inc $(APR_WORK)\build\NWGNUtail.inc $(CUSTOM_INI)
+$(NLM_NAME)_cc.opt : NWGNUmakefile $(APR)/build/NWGNUenvironment.inc $(APR)/build/NWGNUhead.inc $(APR)/build/NWGNUtail.inc $(CUSTOM_INI)
 	$(CHK) $@ $(DEL) $@
 	@echo -P >> $@
 	@echo -EP >> $@
 	@echo -nosyspath >> $@
 	@echo -w nocmdline >> $@
 	@echo $(DEFINES) -DGENEXPORTS >> $@
-	@echo -I$(APR)\include >> $@
-	@echo -I$(APR)\include\arch\netware >> $@
-	@echo -I$(APR)\include\arch\unix >> $@
-	@echo -I$(APR)\build >> $@
+	@echo -I$(APR)/include >> $@
+	@echo -I$(APR)/include/arch/netware >> $@
+	@echo -I$(APR)/include/arch/unix >> $@
+	@echo -I$(APR)/build >> $@
 	@echo -ir $(NOVELLLIBC) >> $@
 ifneq "$(LDAPSDK)" ""
 	@echo -ir $(LDAPSDK) >> $@
 endif
 
 $(APR)/include/%.h: $(APR)/include/%.hnw
-	@echo Creating $(subst /,\,$@)
+	@echo Creating $@
 	copy $(subst /,\,$<) $(subst /,\,$@)
 
 $(APR)/include/private/%.h: $(APR)/include/private/%.hnw
-	@echo Creating $(subst /,\,$@)
+	@echo Creating $@
 	copy $(subst /,\,$<) $(subst /,\,$@)
 
 $(APR)/include/private/%.h: $(APR)/include/private/%.hw
-	@echo Creating $(subst /,\,$@)
+	@echo Creating $@
 	copy $(subst /,\,$<) $(subst /,\,$@)
 
 $(APRXML)/%.h: $(APRXML)/%.hnw
-	@echo Creating $(subst /,\,$@)
+	@echo Creating $@
 	copy $(subst /,\,$<) $(subst /,\,$@)
 
 $(APRXML)/expat/lib/%.h: $(APRXML)/expat/lib/%.h.in
@@ -77,7 +77,7 @@ $(APRXML)/expat/lib/%.h: $(APRXML)/expat/lib/%.h.in
 # installation area
 #
 install :: nlms FORCE
-	
+
 
 clean ::
 	$(CHK) nw_export.i                                          $(DEL) nw_export.i
@@ -89,7 +89,7 @@ clean ::
 	$(CHK) $(subst /,\,$(APR))\include\apr_ldap.h               $(DEL) $(subst /,\,$(APR))\include\apr_ldap.h
 	$(CHK) $(subst /,\,$(APR))\include\private\apu_config.h     $(DEL) $(subst /,\,$(APR))\include\private\apu_config.h
 	$(CHK) $(subst /,\,$(APR))\include\private\apu_select_dbm.h $(DEL) $(subst /,\,$(APR))\include\private\apu_select_dbm.h
-	$(CHK) $(subst /,\,$(APR))\xml\expat_config.h               $(DEL) $(subst /,\,$(APR))\xml\expat_config.h
-#	$(CHK) $(subst /,\,$(APR))\xml\expat.h                      $(DEL) $(subst /,\,$(APR))\xml\expat.h
 	$(CHK) $(subst /,\,$(APR))\aprlib.imp                       $(DEL) $(subst /,\,$(APR))\aprlib.imp
+	$(CHK) $(subst /,\,$(APRXML))\expat_config.h                $(DEL) $(subst /,\,$(APRXML))\expat_config.h
+#	$(CHK) $(subst /,\,$(APRXML))\expat.h                       $(DEL) $(subst /,\,$(APRXML))\expat.h
     

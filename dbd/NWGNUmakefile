@@ -10,7 +10,7 @@ SUBDIRS = \
 # paths to tools
 #
 
-include $(APR_WORK)\build\NWGNUhead.inc
+include $(APR_WORK)/build/NWGNUhead.inc
 
 #
 # build this level's files
@@ -155,9 +155,7 @@ TARGET_nlm = \
 	$(EOLIST)
 
 ifeq "$(APU_HAVE_MYSQL)" "1"
-ifeq "$(wildcard apr_dbd_mysql.c)" "apr_dbd_mysql.c"
 TARGET_nlm += $(OBJDIR)/dbdmysql.nlm $(OBJDIR)/dbdmysql.nlm $(EOLIST)
-endif
 endif
 ifeq "$(APU_HAVE_PGSQL)" "1"
 TARGET_nlm += $(OBJDIR)/dbdpgsql.nlm $(OBJDIR)/dbdpgsql.nlm $(EOLIST)
@@ -257,6 +255,6 @@ install :: nlms $(INSTDIRS) FORCE
 # in this makefile
 #
 
-include $(APR_WORK)\build\NWGNUtail.inc
+include $(APR_WORK)/build/NWGNUtail.inc
 
 
