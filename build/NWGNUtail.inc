@@ -175,11 +175,28 @@ $(TARGET_lib) : $(OBJDIR)/$(LIB_NAME)_lib.lst
 	@echo Generating $@
 	$(LIB) -o $(OBJDIR)/$(@F) @$?
 
-$(OBJDIR)/$(LIB_NAME)_lib.lst: $($(LIB_NAME)_LIBLST_DEPENDS)
+$(OBJDIR)/aprlib_lib.lst: $(aprlib_LIBLST_DEPENDS)
 	$(CHK) $(subst /,\,$@) $(DEL) $(subst /,\,$@)
 	@echo Generating $@
 ifneq "$(strip $(FILES_lib_objs))" ""
-	@echo $(foreach objfile,$(FILES_lib_objs),$(subst /,\,$(objfile)) ) >> $@
+	@echo $(wordlist 1, 10, $(FILES_lib_objs)) >> $@
+	@echo $(wordlist 11, 20, $(FILES_lib_objs)) >> $@
+	@echo $(wordlist 21, 30, $(FILES_lib_objs)) >> $@
+	@echo $(wordlist 31, 40, $(FILES_lib_objs)) >> $@
+	@echo $(wordlist 41, 50, $(FILES_lib_objs)) >> $@
+	@echo $(wordlist 51, 60, $(FILES_lib_objs)) >> $@
+	@echo $(wordlist 61, 70, $(FILES_lib_objs)) >> $@
+	@echo $(wordlist 71, 80, $(FILES_lib_objs)) >> $@
+	@echo $(wordlist 81, 90, $(FILES_lib_objs)) >> $@
+	@echo $(wordlist 91, 100, $(FILES_lib_objs)) >> $@
+	@echo $(wordlist 101, 110, $(FILES_lib_objs)) >> $@
+endif
+
+$(OBJDIR)/%_lib.lst: $($(LIB_NAME)_LIBLST_DEPENDS)
+	$(CHK) $(subst /,\,$@) $(DEL) $(subst /,\,$@)
+	@echo Generating $@
+ifneq "$(strip $(FILES_lib_objs))" ""
+	@echo $(FILES_lib_objs) >> $@
 endif
 
 else # We must have more than one target library so load the individual makefiles

@@ -4,7 +4,6 @@
 
 SUBDIRS = \
 	build \
-	buckets \
 	ldap \
 	xml \
 	$(EOLIST)
@@ -19,7 +18,9 @@ endif
 # Get the 'head' of the build environment.  This includes default targets and
 # paths to tools
 #
-
+ifndef APR_WORK
+export APR_WORK := $(strip $(shell pwd))
+endif
 include $(APR_WORK)/build/NWGNUhead.inc
 
 #
@@ -198,7 +199,6 @@ FILES_nlm_objs = \
 FILES_nlm_libs = \
 	libcpre.o \
 	$(APRLIB) \
-	$(APRBUCKETSLIB) \
 	$(APRLDAPLIB) \
 	$(APRXMLLIB) \
 	$(EOLIST)
@@ -279,6 +279,19 @@ FILES_nlm_exports = \
 FILES_lib_objs = \
 	$(OBJDIR)/apr_atomic.o \
 	$(OBJDIR)/apr_base64.o \
+	$(OBJDIR)/apr_brigade.o \
+	$(OBJDIR)/apr_buckets.o \
+	$(OBJDIR)/apr_buckets_alloc.o \
+	$(OBJDIR)/apr_buckets_eos.o \
+	$(OBJDIR)/apr_buckets_file.o \
+	$(OBJDIR)/apr_buckets_flush.o \
+	$(OBJDIR)/apr_buckets_heap.o \
+	$(OBJDIR)/apr_buckets_mmap.o \
+	$(OBJDIR)/apr_buckets_pipe.o \
+	$(OBJDIR)/apr_buckets_pool.o \
+	$(OBJDIR)/apr_buckets_refcount.o \
+	$(OBJDIR)/apr_buckets_simple.o \
+	$(OBJDIR)/apr_buckets_socket.o \
 	$(OBJDIR)/apr_cpystrn.o \
 	$(OBJDIR)/apr_date.o \
 	$(OBJDIR)/apr_dbd.o \
@@ -412,7 +425,7 @@ vpath %.c atomic/netware:strings:tables:passwd:time/unix
 vpath %.c file_io/unix:locks/netware:misc/netware:misc/unix:threadproc/netware
 vpath %.c poll/unix:shmem/unix:support/unix:random/unix
 vpath %.c dso/netware:memory/unix:mmap/unix:user/netware:util-misc
-vpath %.c crypto:dbd:dbm:dbm/sdbm:encoding:hooks:ldap:memcache:misc:strmatch:uri:xlate
+vpath %.c buckets:crypto:dbd:dbm:dbm/sdbm:encoding:hooks:memcache:misc:strmatch:uri:xlate
 
 # Use the win32 network_io if Winsock is being used
 ifndef USE_STDSOCKETS
