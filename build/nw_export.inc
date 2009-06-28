@@ -1,6 +1,6 @@
-/* Must include apr.h first so that we can undefine
-    the standard prototypes macros after it messes with
-    them. */
+/* Must include apr.h / apu.h first so that we can undefine
+** the standard prototypes macros after it messes with them.
+*/
 #include "apr.h"
 #include "apu.h"
 

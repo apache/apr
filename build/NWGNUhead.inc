@@ -55,8 +55,8 @@ help :
 	@echo Multiple targets can be used on a single nmake command line -
 	@echo (i.e. $(MAKE) clean all)
 	@$(CMD) echo.
-	@echo You can also specify RELEASE=debug, RELEASE=noopt, or RELEASE=optimized
-	@echo The default is RELEASE=optimized
+	@echo You can also specify RELEASE=debug, RELEASE=noopt, or RELEASE=release
+	@echo The default is RELEASE=release
 
 clobber_all :: clean clobber_install
 
@@ -88,7 +88,6 @@ clean :: $(SUBDIRS)
 	$(CHK) *.map $(DEL) *.map
 	$(CHK) *.d $(DEL) *.d
 	$(CHK) *.tmp $(DEL) *.tmp
-	$(CHK) xc.bat $(DEL) xc.bat
 	-$(DELTREE) $(OBJDIR) 2> NUL
 
 $(OBJDIR) ::
