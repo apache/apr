@@ -38,8 +38,7 @@ PGSQL_NLM = libpq
 XINCDIRS	+= \
 			$(APR)/include/arch/netware \
 			$(APR)/include \
-			$(APRUTIL)/include \
-			$(APRUTIL)/include/private \
+			$(APR)/include/private \
 			$(APR) \
 			$(PGSQL_INC) \
 			$(EOLIST)
