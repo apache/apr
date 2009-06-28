@@ -8,7 +8,7 @@
 #
 
 ifndef EnvironmentDefined
-include $(APR_WORK)\build\NWGNUhead.inc
+include $(APR_WORK)/build/NWGNUhead.inc
 endif
 
 #
@@ -110,7 +110,7 @@ NLM_SCREEN_NAME = aprtest
 
 #
 # If this is specified, it will override VERSION value in 
-# $(APR_WORK)\build\NWGNUenvironment.inc
+# $(APR_WORK)/build/NWGNUenvironment.inc
 #
 NLM_VERSION		= 1,0,0
 
@@ -255,7 +255,7 @@ FILE_nlm_copyright =
 #
 FILES_nlm_Ximports = \
 	@libc.imp \
-	@$(APR)/aprlib.imp	\
+	@$(APR)/aprlib.imp \
 	$(EOLIST)
  
 #   
@@ -263,7 +263,7 @@ FILES_nlm_Ximports = \
 #
 FILES_nlm_exports = \
 	$(EOLIST)
-	
+
 #   
 # These are the OBJ files needed to create the LIB target above.
 # Paths must all use the '/' character
@@ -281,7 +281,7 @@ nlms :: libs $(TARGET_nlm)
 
 #
 # Updated this target to create necessary directories and copy files to the 
-# correct place.  (See $(APR_WORK)\build\NWGNUhead.inc for examples)
+# correct place.  (See $(APR_WORK)/build/NWGNUhead.inc for examples)
 #
 install :: nlms FORCE
 
@@ -295,6 +295,6 @@ install :: nlms FORCE
 # in this makefile
 #
 
-include $(APR_WORK)\build\NWGNUtail.inc
+include $(APR_WORK)/build/NWGNUtail.inc
 
 

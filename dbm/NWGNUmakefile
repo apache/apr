@@ -10,7 +10,7 @@ SUBDIRS = \
 # paths to tools
 #
 
-include $(APR_WORK)\build\NWGNUhead.inc
+include $(APR_WORK)/build/NWGNUhead.inc
 
 #
 # build this level's files
@@ -111,7 +111,7 @@ NLM_THREAD_NAME	=
 
 #
 # If this is specified, it will override VERSION value in
-# $(AP_WORK)\build\NWGNUenvironment.inc
+# $(APR_WORK)/build/NWGNUenvironment.inc
 #
 NLM_VERSION	=
 
@@ -232,7 +232,7 @@ nlms :: libs $(TARGET_nlm)
 
 #
 # Updated this target to create necessary directories and copy files to the
-# correct place.  (See $(AP_WORK)\build\NWGNUhead.inc for examples)
+# correct place.  (See $(APR_WORK)/build/NWGNUhead.inc for examples)
 #
 install :: nlms $(INSTDIRS) FORCE
 	copy $(OBJDIR)\*.nlm $(INSTALLBASE)
@@ -246,6 +246,6 @@ install :: nlms $(INSTDIRS) FORCE
 # in this makefile
 #
 
-include $(APR_WORK)\build\NWGNUtail.inc
+include $(APR_WORK)/build/NWGNUtail.inc
 
 

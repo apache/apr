@@ -11,7 +11,7 @@ SUBDIRS = \
 #
 
 ifndef EnvironmentDefined
-include $(APR_WORK)\build\NWGNUhead.inc
+include $(APR_WORK)/build/NWGNUhead.inc
 endif
 
 #include $(APR)\build\NWGNUcustom.inc
@@ -137,7 +137,7 @@ NLM_THREAD_NAME	= dbmgdbm
 
 #
 # If this is specified, it will override VERSION value in
-# $(AP_WORK)\build\NWGNUenvironment.inc
+# $(APR_WORK)/build/NWGNUenvironment.inc
 #
 NLM_VERSION	=
 
@@ -277,7 +277,7 @@ nlms :: libs $(TARGET_nlm)
 
 #
 # Updated this target to create necessary directories and copy files to the
-# correct place.  (See $(AP_WORK)\build\NWGNUhead.inc for examples)
+# correct place.  (See $(APR_WORK)/build/NWGNUhead.inc for examples)
 #
 install :: nlms FORCE
 
@@ -290,7 +290,7 @@ install :: nlms FORCE
 # in this makefile
 #
 
-include $(APR_WORK)\build\NWGNUtail.inc
+include $(APR_WORK)/build/NWGNUtail.inc
 
 
 
