@@ -59,7 +59,7 @@ endif
 #
 #  debug	- full debug switches are set
 #  noopt	- normal switches are set
-#  optimized	- optimization switches are set (default)
+#  release	- optimization switches are set (default)
 
 ifdef reltype
 RELEASE = $(reltype)
@@ -78,28 +78,18 @@ RELEASE = debug
 endif
 
 ifdef optimized
-RELEASE = optimized
+RELEASE = release
 endif
 
 ifdef OPTIMIZED
-RELEASE = optimized
+RELEASE = release
 endif
 
 ifndef RELEASE
-RELEASE = optimized
+RELEASE = release
 endif
 
-ifeq "$(RELEASE)" "debug"
-OBJDIR = Debug
-endif
-
-ifeq "$(RELEASE)" "noopt"
-OBJDIR = Noopt
-endif
-
-ifeq "$(RELEASE)" "optimized"
-OBJDIR = Release
-endif
+OBJDIR = obj_$(RELEASE)
 
 #
 # Setup compiler information
@@ -170,7 +160,7 @@ CFLAGS += -g -O0
 endif
 
 # -O4,p                 level 4 optimizations, optimize for speed
-ifeq "$(RELEASE)" "optimized"
+ifeq "$(RELEASE)" "release"
 CFLAGS += -O4,p
 endif
 
@@ -281,7 +271,6 @@ CHKNOT	= $(CMD) if not exist
 
 APR		= $(subst \,/,$(APR_WORK))
 APRTEST		= $(APR)/test
-APRBUCKETS	= $(APR)/buckets
 APRLDAP		= $(APR)/ldap
 APRXML		= $(APR)/xml
 
@@ -290,7 +279,6 @@ APRXML		= $(APR)/xml
 #
 
 APRLIB		= $(APR)/$(OBJDIR)/aprlib.lib
-APRBUCKETSLIB	= $(APRBUCKETS)/$(OBJDIR)/buckets.lib
 APRLDAPLIB	= $(APRLDAP)/$(OBJDIR)/ldap.lib
 APRXMLLIB	= $(APRXML)/$(OBJDIR)/xml.lib
 
