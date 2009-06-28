@@ -54,23 +54,23 @@ endif
 
 $(APR)/include/%.h: $(APR)/include/%.hnw
 	@echo Creating $@
-	copy $(subst /,\,$<) $(subst /,\,$@)
+	$(CP) $(subst /,\,$<) $(subst /,\,$@)
 
 $(APR)/include/private/%.h: $(APR)/include/private/%.hnw
 	@echo Creating $@
-	copy $(subst /,\,$<) $(subst /,\,$@)
+	$(CP) $(subst /,\,$<) $(subst /,\,$@)
 
 $(APR)/include/private/%.h: $(APR)/include/private/%.hw
 	@echo Creating $@
-	copy $(subst /,\,$<) $(subst /,\,$@)
+	$(CP) $(subst /,\,$<) $(subst /,\,$@)
 
 $(APRXML)/%.h: $(APRXML)/%.hnw
 	@echo Creating $@
-	copy $(subst /,\,$<) $(subst /,\,$@)
+	$(CP) $(subst /,\,$<) $(subst /,\,$@)
 
 $(APRXML)/expat/lib/%.h: $(APRXML)/expat/lib/%.h.in
 	@echo Creating $@
-	copy $(subst /,\,$<) $(subst /,\,$@)
+	$(CP) $(subst /,\,$<) $(subst /,\,$@)
 
 #
 # You can use this target if all that is needed is to copy files to the

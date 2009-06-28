@@ -250,13 +250,13 @@ CMD	= cmd /C
 DEL	= del /F
 DELTREE	= $(CMD) rd /s/q
 WINNT	= 1
-XCOPYSW = /E
 else
 CMD	= command /C
 DEL	= del
 DELTREE	= deltree /y
-XCOPYSW	= /E /Y
 endif
+CP	= copy /Y
+XCP	= xcopy /E /Y
 CHK	= $(CMD) if exist
 CHKNOT	= $(CMD) if not exist
 
