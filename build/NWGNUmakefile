@@ -52,25 +52,25 @@ ifneq "$(LDAPSDK)" ""
 	@echo -ir $(LDAPSDK) >> $@
 endif
 
-$(APR)/include/%.h: $(subst /,\,$(APR))\include\%.hnw
+$(APR)/include/%.h: $(APR)/include/%.hnw
 	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APR))\include\$(@F)
+	copy $(subst /,\,$<) $(subst /,\,$@)
 
-$(APR)/include/private/%.h: $(subst /,\,$(APR))\include\private\%.hnw
+$(APR)/include/private/%.h: $(APR)/include/private/%.hnw
 	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APR))\include\private\$(@F)
+	copy $(subst /,\,$<) $(subst /,\,$@)
 
-$(APR)/include/private/%.h: $(subst /,\,$(APR))\include\private\%.hw
+$(APR)/include/private/%.h: $(APR)/include/private/%.hw
 	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APR))\include\private\$(@F)
+	copy $(subst /,\,$<) $(subst /,\,$@)
 
-$(APR)/xml/%.h: $(subst /,\,$(APR))\xml\%.hnw
+$(APRXML)/%.h: $(APRXML)/%.hnw
 	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APR))\xml\$(@F)
+	copy $(subst /,\,$<) $(subst /,\,$@)
 
-$(APR)/xml/expat/lib/%.h: $(subst /,\,$(APR))\xml\expat\lib\%.h.in
-	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APR))\xml\expat\lib\$(@F)
+$(APRXML)/expat/lib/%.h: $(APRXML)/expat/lib/%.h.in
+	@echo Creating $@
+	copy $(subst /,\,$<) $(subst /,\,$@)
 
 #
 # You can use this target if all that is needed is to copy files to the
@@ -82,7 +82,7 @@ install :: nlms FORCE
 clean ::
 	$(CHK) nw_export.i                                          $(DEL) nw_export.i
 	$(CHK) $(NLM_NAME)_cc.opt                                   $(DEL) $(NLM_NAME)_cc.opt
-	$(CHK) NWGNUversion.inc                                     $(DEL) NWGNUversion.inc	
+	$(CHK) NWGNUversion.inc                                     $(DEL) NWGNUversion.inc
 	$(CHK) $(subst /,\,$(APR))\include\apr.h                    $(DEL) $(subst /,\,$(APR))\include\apr.h
 	$(CHK) $(subst /,\,$(APR))\include\apu.h                    $(DEL) $(subst /,\,$(APR))\include\apu.h
 	$(CHK) $(subst /,\,$(APR))\include\apu_want.h               $(DEL) $(subst /,\,$(APR))\include\apu_want.h

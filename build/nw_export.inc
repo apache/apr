@@ -2,12 +2,16 @@
     the standard prototypes macros after it messes with
     them. */
 #include "apr.h"
+#include "apu.h"
 
 #undef APR_DECLARE
 #undef APR_DECLARE_NONSTD
 #undef APR_DECLARE_HOOK
 #undef APR_POOL_DECLARE_ACCESSOR
 #undef APR_DECLARE_DATA
+#undef APU_DECLARE
+#undef APU_DECLARE_NONSTD
+#undef APU_DECLARE_DATA
 
 /* Preprocess all of the standard APR headers. */
 #include "apr_allocator.h"
