@@ -97,11 +97,6 @@ APU_DECLARE_NONSTD(void) apr_bucket_alloc_destroy(apr_bucket_alloc_t *list)
 
     apr_allocator_free(list->allocator, list->blocks);
 
-#if APR_POOL_DEBUG
-    if (list->pool && list->allocator != apr_pool_allocator_get(list->pool)) {
-        apr_allocator_destroy(list->allocator);
-    }
-#endif
 }
 
 APU_DECLARE_NONSTD(void *) apr_bucket_alloc(apr_size_t size, 
