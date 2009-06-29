@@ -66,6 +66,7 @@
 #include "apr_tables.h"
 #include "apr_thread_cond.h"
 #include "apr_thread_mutex.h"
+#include "apr_thread_pool.h"
 #include "apr_thread_proc.h"
 #include "apr_thread_rwlock.h"
 #include "apr_time.h"
