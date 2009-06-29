@@ -260,10 +260,9 @@ APU_DECLARE(apr_status_t) apr_memcache_getp(apr_memcache_t *mc,
  * @param values hash of keys and values that this key will be added to
  * @return
  */
-APU_DECLARE(void) 
-apr_memcache_add_multget_key(apr_pool_t *data_pool,
-                             const char* key,
-                             apr_hash_t **values);
+APU_DECLARE(void) apr_memcache_add_multget_key(apr_pool_t *data_pool,
+                                               const char* key,
+                                               apr_hash_t **values);
 
 /**
  * Gets multiple values from the server, allocating the values out of p
@@ -275,11 +274,10 @@ apr_memcache_add_multget_key(apr_pool_t *data_pool,
  *        result of the multiget call.
  * @return
  */
-APU_DECLARE(apr_status_t)
-apr_memcache_multgetp(apr_memcache_t *mc,
-                      apr_pool_t *temp_pool,
-                      apr_pool_t *data_pool,
-                      apr_hash_t *values);
+APU_DECLARE(apr_status_t) apr_memcache_multgetp(apr_memcache_t *mc,
+                                                apr_pool_t *temp_pool,
+                                                apr_pool_t *data_pool,
+                                                apr_hash_t *values);
 
 /**
  * Sets a value by key on the server
