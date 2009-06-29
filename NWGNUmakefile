@@ -317,6 +317,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/apr_strnatcmp.o \
 	$(OBJDIR)/apr_strtok.o \
 	$(OBJDIR)/apr_tables.o \
+	$(OBJDIR)/apr_thread_pool.o \
 	$(OBJDIR)/apr_uri.o \
 	$(OBJDIR)/apu_dso.o \
 	$(OBJDIR)/apu_version.o \
