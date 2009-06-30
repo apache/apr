@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Use locally scoped variables in PostgreSQL driver to avoid stomping
+     on return codes. PR 47431
+     [Wayne Jensen <wayne_jensen trendmicro.com>]
+
   *) On Linux/hppa flock() returns EAGAIN instead of EWOULDBLOCK. This
      causes proc mutex failures.
      [Stefan Fritsch <sf sfritsch.de>]
