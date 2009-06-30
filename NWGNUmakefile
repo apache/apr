@@ -19,7 +19,7 @@ endif
 # paths to tools
 #
 ifndef APR_WORK
-export APR_WORK := $(strip $(shell pwd))
+export APR_WORK = $(CURDIR)
 endif
 include $(APR_WORK)/build/NWGNUhead.inc
 
@@ -417,9 +417,6 @@ installdev :: $(INSTDEVDIRS) FORCE
 $(INSTDEVDIRS) ::
 	$(CHKNOT) $@\NUL mkdir $@
 endif
-
-test :: nlms FORCE
-	$(MAKE) -C $(APRTEST) -f NWGNUmakefile
 
 #
 # Any specialized rules here
