@@ -268,9 +268,10 @@ CHKNOT	= $(CMD) if not exist
 #
 
 APR		= $(subst \,/,$(APR_WORK))
-APRTEST		= $(APR)/test
+APRBUILD	= $(APR)/build
 APRLDAP		= $(APR)/ldap
 APRXML		= $(APR)/xml
+APRTEST		= $(APR)/test
 
 #
 # Internal Libraries
