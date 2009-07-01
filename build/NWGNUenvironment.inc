@@ -111,6 +111,9 @@ CPP	= mwccnlm
 LINK	= mwldnlm
 LIB	= mwldnlm -type library -w nocmdline
 
+# Setup build tools
+AWK	= awk
+
 ifdef IPV6
 ifndef USE_STDSOCKETS
 USE_STDSOCKETS=1
@@ -227,28 +230,19 @@ endif
 
 INSTALLBASE := $(INSTALL)\$(BASEDIR)
 
-INSTDEVDIRS := \
-    $(INSTDIRS) \
-	$(INSTALLBASE) \
-	$(INSTALLBASE)\include \
-	$(INSTALLBASE)\lib \
-
-INSTDIRS += \
-	$(INSTALLBASE) \
-	
 else
+
 INSTALLBASE := $(INSTALL)\apr
 
-INSTDEVDIRS := \
-    $(INSTDIRS) \
-	$(INSTALLBASE) \
-	$(INSTALLBASE)\include \
-	$(INSTALLBASE)\lib \
+endif
 
 INSTDIRS += \
-	$(INSTALLBASE) \
-	
-endif	
+	$(INSTALLBASE)
+
+INSTDEVDIRS := \
+	$(INSTDIRS) \
+	$(INSTALLBASE)\include \
+	$(INSTALLBASE)\lib
 
 #
 # Declare Command and tool macros here

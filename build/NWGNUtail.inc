@@ -83,9 +83,10 @@ endif
 # Generic compiler rules
 #
 
-$(APR_WORK)\build\NWGNUversion.inc : $(APR_WORK)\include\apr_version.h $(APR_WORK)\build\nw_ver.awk
+ifneq ($(MAKECMDGOALS),clean)
+$(APR_WORK)\build\NWGNUversion.inc : $(APR_WORK)\build\nw_ver.awk $(APR_WORK)\include\apr_version.h
 	@echo Generating $(subst /,\,$@)
-	awk -f $(APR_WORK)\build\nw_ver.awk $(APR_WORK)\include\apr_version.h > $(APR_WORK)\build\NWGNUversion.inc
+	@$(AWK) -f $^ > $@
 
 -include $(APR_WORK)\build\NWGNUversion.inc
 
@@ -94,6 +95,7 @@ VERSION_INC = $(APR_WORK)\build\NWGNUversion.inc
 else
 VERSION		= 1,0,0
 VERSION_STR	= 1.0.0
+endif
 endif
 
 ifeq "$(words $(strip $(TARGET_nlm)))" "1"
