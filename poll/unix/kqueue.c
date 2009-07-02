@@ -15,6 +15,7 @@
  */
 
 #include "apr_arch_poll_private.h"
+#include "apr_arch_inherit.h"
 
 #ifdef POLLSET_USES_KQUEUE
 
@@ -99,6 +100,17 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
 
     if ((*pollset)->kqueue_fd == -1) {
         return apr_get_netos_error();
+    }
+
+    {
+        int flags;
+
+        if ((flags = fcntl((*pollset)->kqueue_fd, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl((*pollset)->kqueue_fd, F_SETFD, flags) == -1)
+            return errno;
     }
 
     apr_pool_cleanup_register(p, (void *) (*pollset), backend_cleanup,
@@ -309,7 +321,18 @@ APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
         *pollcb = NULL;
         return apr_get_netos_error();
     }
-    
+
+    {
+        int flags;
+
+        if ((flags = fcntl(fd, F_GETFD)) == -1)
+            return errno;
+
+        flags |= FD_CLOEXEC;
+        if (fcntl(fd, F_SETFD, flags) == -1)
+            return errno;
+    }
+ 
     *pollcb = apr_palloc(p, sizeof(**pollcb));
     (*pollcb)->nalloc = size;
     (*pollcb)->pool = p;

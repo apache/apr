@@ -467,6 +467,9 @@ case $host in
        ;;
    *mingw*)
        OSDIR="win32"
+       ac_cv_file__dev_zero="no"
+       ac_cv_func_setpgrp_void="no"
+       apr_cv_tcp_nodelay_with_cork="no"
        enable_threads="system_threads"
        eolstr="\\n"
        proc_mutex_is_global=1
@@ -773,6 +776,23 @@ int main()
 
 if test "$apr_cv_epoll" = "yes"; then
    AC_DEFINE([HAVE_EPOLL], 1, [Define if the epoll interface is supported])
+fi
+
+dnl ----------------------------- Checking for extended file descriptor handling
+AC_CHECK_FUNCS(dup3 accept4 epoll_create1)
+
+AC_CACHE_CHECK([for SOCK_CLOEXEC support], [apr_cv_sock_cloexec],
+[AC_TRY_RUN([
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int main()
+{
+    return socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC, 0) == -1;
+}], [apr_cv_sock_cloexec=yes], [apr_cv_sock_cloexec=no], [apr_cv_sock_cloexec=no])])
+
+if test "$apr_cv_sock_cloexec" = "yes"; then
+   AC_DEFINE([HAVE_SOCK_CLOEXEC], 1, [Define if the SOCK_CLOEXEC flag is supported])
 fi
 
 dnl ----------------------------- Checking for missing POSIX thread functions

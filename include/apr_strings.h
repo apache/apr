@@ -196,11 +196,11 @@ APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src,
                                 apr_size_t dst_size);
 
 /**
- * Strip spaces from a string
+ * Remove all whitespace from a string
  * @param dest The destination string.  It is okay to modify the string
  *             in place.  Namely dest == src
  * @param src The string to rid the spaces from.
- * @return The destination string, dest.
+ * @return A pointer to the destination string's null terminator.
  */
 APR_DECLARE(char *) apr_collapse_spaces(char *dest, const char *src);
 
