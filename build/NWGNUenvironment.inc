@@ -106,16 +106,19 @@ endif
 #
 
 # MetroWerks NLM tools
-CC		= mwccnlm
-CPP		= mwccnlm
+CC	= mwccnlm
+CPP	= mwccnlm
 LINK	= mwldnlm
-LIB		= mwldnlm -type library -w nocmdline
+LIB	= mwldnlm -type library -w nocmdline
+
+# Setup build tools
+AWK	= awk
 
 NOVI	= $(NOVELLLIBC)\imports
 
-INCDIRS 	= $(NOVELLLIBC)\include;$(NOVELLLIBC)\include\nks;$(NOVELLLIBC)\include\winsock;
+INCDIRS	= $(NOVELLLIBC)\include;$(NOVELLLIBC)\include\nks;$(NOVELLLIBC)\include\winsock;
 
-DEFINES		= -DNETWARE
+DEFINES	= -DNETWARE
 ifndef DEBUG
 DEFINES += -DNDEBUG
 endif
