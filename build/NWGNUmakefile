@@ -24,7 +24,12 @@ FILES_prebuild_headers = \
 	$(APRUTIL)/include/private/apu_select_dbm.h \
 	$(APRUTIL)/xml/expat/lib/expat.h \
 	$(APRUTIL)/xml/expat/lib/config.h \
+	$(APRUTIL)/uri/uri_delims.h \
 	$(EOLIST) 
+
+ifneq "$(BUILDTOOL_AS_NLM)" "1"
+FILES_prebuild_headers += $(APRUTIL)/uri/uri_delims.h
+endif
     
 nlms :: $(APR)/aprlib.imp
 
@@ -46,7 +51,7 @@ $(NLM_NAME)_cc.opt : NWGNUmakefile $(APR_WORK)\build\NWGNUenvironment.inc $(APR_
 	@echo -I..\include >> $@
 	@echo -I..\include\arch\netware >> $@
 	@echo -I..\include\arch\unix >> $@
-	@echo -I..\..\apr-util\include >> $@
+	@echo -I$(APRUTIL)\include >> $@
 	@echo -ir $(NOVELLLIBC)\include >> $@
 
 $(APR)/include/%.h: $(subst /,\,$(APR))\include\%.hnw
@@ -69,6 +74,24 @@ $(APRUTIL)/xml/expat/lib/%.h: $(subst /,\,$(APRUTIL))\xml\expat\lib\%.h.in
 	@echo Creating $(subst /,\,$@)
 	copy $< $(subst /,\,$(APRUTIL))\xml\expat\lib\$(@F)
 
+ifneq "$(BUILDTOOL_AS_NLM)" "1"
+
+$(APRUTIL)/uri/uri_delims.h: gen_uri_delims.exe $(APRUTIL)/uri/gen_uri_delims.c
+	@echo Creating $(subst /,\,$@)
+	@$< > $@
+
+%.exe: $(APRUTIL)/uri/%.c
+	@echo Creating $@
+	@$(WIN_CC) $(WIN_CFLAGS) $< -o $@
+
+else
+
+ifneq "$(wildcard $(APRUTIL)/uri/uri_delims.h)" "$(APRUTIL)/uri/uri_delims.h"
+$(error Error: required header $(abspath $(APRUTIL)/uri/uri_delims.h) not found!)
+endif
+
+endif
+
 #
 # You can use this target if all that is needed is to copy files to the
 # installation area
@@ -88,4 +111,8 @@ clean ::
 	$(CHK) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat.h            $(DEL) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat.h
 	$(CHK) $(subst /,\,$(APRUTIL))\xml\expat\lib\config.h           $(DEL) $(subst /,\,$(APRUTIL))\xml\expat\lib\config.h
 	$(CHK) $(subst /,\,$(APR))\aprlib.imp                           $(DEL) $(subst /,\,$(APR))\aprlib.imp
+ifneq "$(BUILDTOOL_AS_NLM)" "1"
+	$(CHK) $(subst /,\,$(APRUTIL))\uri\uri_delims.h                 $(DEL) $(subst /,\,$(APRUTIL))\uri\uri_delims.h
+	$(CHK) gen_uri_delims.exe                                       $(DEL) gen_uri_delims.exe
+endif
     
