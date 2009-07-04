@@ -106,7 +106,7 @@ ifeq "$(words $(strip $(TARGET_lib)))" "1"
 INCLUDE_BLDCMDS=1
 endif
 
-ifeq "$(words $(strip $(TARGET_nlm)))" "1"
+ifeq "$(INCLUDE_BLDCMDS)" "1"
 
 $(OBJDIR)/%.o: %.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<

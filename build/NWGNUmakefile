@@ -47,7 +47,7 @@ $(NLM_NAME)_cc.opt : NWGNUmakefile $(APR_WORK)\build\NWGNUenvironment.inc $(APR_
 	@echo -I..\include\arch\netware >> $@
 	@echo -I..\include\arch\unix >> $@
 	@echo -I..\..\apr-util\include >> $@
-	@echo -ir $(NOVELLLIBC) >> $@
+	@echo -ir $(NOVELLLIBC)\include >> $@
 
 $(APR)/include/%.h: $(subst /,\,$(APR))\include\%.hnw
 	@echo Creating $(subst /,\,$@)
@@ -74,7 +74,7 @@ $(APRUTIL)/xml/expat/lib/%.h: $(subst /,\,$(APRUTIL))\xml\expat\lib\%.h.in
 # installation area
 #
 install :: nlms FORCE
-	
+
 
 clean ::
 	$(CHK) nw_export.i                                              $(DEL) nw_export.i
