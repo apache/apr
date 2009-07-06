@@ -3,7 +3,7 @@
 #
 
 SUBDIRS = \
-	$(EOLIST) 
+	$(EOLIST)
 
 #
 # Get the 'head' of the build environment.  This includes default targets and
@@ -26,13 +26,13 @@ FILES_prebuild_headers = \
 	$(EXPAT_SRC)/lib/expat.h \
 	$(EOLIST)
 #	$(APRXML)/expat_config.h \
-    
+
 nlms :: $(APR)/aprlib.imp
 
 $(APR)/aprlib.imp : make_nw_export.awk nw_export.i
 	@echo Generating $@
 	$(AWK) -v EXPPREFIX=APR$(VERSION_MAJMIN) -f $^ | sort >$@
-    
+
 nw_export.i : nw_export.inc $(FILES_prebuild_headers) $(NLM_NAME)_cc.opt
 	@echo Generating $@
 	$(CC) $< @$(NLM_NAME)_cc.opt
@@ -61,7 +61,7 @@ $(APR)/include/private/%.h: $(APR)/include/private/%.hnw
 	@echo Creating $@
 	$(CP) $(subst /,\,$<) $(subst /,\,$@)
 
-$(APR)/include/private/%.h: $(APR)/include/private/%.hw 
+$(APR)/include/private/%.h: $(APR)/include/private/%.hw
 	@echo Creating $@
 	$(CP) $(subst /,\,$<) $(subst /,\,$@)
 
@@ -107,4 +107,4 @@ clean ::
 #
 
 include $(AP_WORK)\build\NWGNUtail.inc
-    
+
