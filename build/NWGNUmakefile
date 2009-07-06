@@ -31,7 +31,7 @@ nlms :: $(APR)/aprlib.imp
 
 $(APR)/aprlib.imp : make_nw_export.awk nw_export.i
 	@echo Generating $@
-	$(AWK) -f $^ | sort >$@
+	$(AWK) -v EXPPREFIX=APR$(VERSION_MAJMIN) -f $^ | sort >$@
     
 nw_export.i : nw_export.inc $(FILES_prebuild_headers) $(NLM_NAME)_cc.opt
 	@echo Generating $@
@@ -98,4 +98,11 @@ clean ::
 	$(CHK) $(subst /,\,$(EXPAT_SRC))\config.h                   $(DEL) $(subst /,\,$(EXPAT_SRC))\config.h
 	$(CHK) $(subst /,\,$(EXPAT_SRC))\expat.h                    $(DEL) $(subst /,\,$(EXPAT_SRC))\expat.h
 #	$(CHK) $(subst /,\,$(APRXML))\expat_config.h                $(DEL) $(subst /,\,$(APRXML))\expat_config.h
+
+#
+# Include the 'tail' makefile that has targets that depend on variables defined
+# in this makefile
+#
+
+include $(AP_WORK)\build\NWGNUtail.inc
     
