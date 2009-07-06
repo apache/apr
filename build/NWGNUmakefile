@@ -61,7 +61,7 @@ $(APR)/include/private/%.h: $(APR)/include/private/%.hnw
 	@echo Creating $@
 	$(CP) $(subst /,\,$<) $(subst /,\,$@)
 
-$(APR)/include/private/%.h: $(APR)/include/private/%.hw
+$(APR)/include/private/%.h: $(APR)/include/private/%.hw 
 	@echo Creating $@
 	$(CP) $(subst /,\,$<) $(subst /,\,$@)
 
@@ -76,6 +76,8 @@ $(EXPAT_SRC)/lib/%.h: $(EXPAT_SRC)/lib/%.hnw
 $(EXPAT_SRC)/lib/%.h: $(EXPAT_SRC)/lib/%.h.in
 	@echo Creating $@
 	$(CP) $(subst /,\,$<) $(subst /,\,$@)
+
+$(APR)/include/private/apu_config.h: FORCE
 
 #
 # You can use this target if all that is needed is to copy files to the
