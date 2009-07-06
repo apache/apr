@@ -77,6 +77,14 @@ ifdef DEBUG
 RELEASE = debug
 endif
 
+ifdef noopt
+RELEASE = noopt
+endif
+
+ifdef NOOPT
+RELEASE = noopt
+endif
+
 ifdef optimized
 RELEASE = release
 endif

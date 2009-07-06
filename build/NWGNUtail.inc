@@ -83,6 +83,7 @@ endif
 # Generic compiler rules
 #
 
+ifneq ($(MAKECMDGOALS),clean)
 $(APRBUILD)/NWGNUversion.inc : $(APRBUILD)/nw_ver.awk $(APR)/include/apr_version.h
 	@echo Generating $@
 	@$(AWK) -f $^ > $@
@@ -92,8 +93,10 @@ $(APRBUILD)/NWGNUversion.inc : $(APRBUILD)/nw_ver.awk $(APR)/include/apr_version
 ifneq "$(strip $(VERSION_STR))" ""
 VERSION_INC = $(APRBUILD)/NWGNUversion.inc
 else
-VERSION		= 1,0,0
-VERSION_STR	= 1.0.0
+VERSION		= 2,0,0
+VERSION_STR	= 2.0.0
+endif
+VERSION_MAJMIN	= 20
 endif
 
 ifeq "$(words $(strip $(TARGET_nlm)))" "1"
