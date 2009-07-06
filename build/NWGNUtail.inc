@@ -95,8 +95,8 @@ VERSION_INC = $(APRBUILD)/NWGNUversion.inc
 else
 VERSION		= 2,0,0
 VERSION_STR	= 2.0.0
-endif
 VERSION_MAJMIN	= 20
+endif
 endif
 
 ifeq "$(words $(strip $(TARGET_nlm)))" "1"
