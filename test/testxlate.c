@@ -71,6 +71,33 @@ static void one_test(abts_case *tc, const char *cs1, const char *cs2,
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
+#if APU_HAVE_APR_ICONV
+/* it is a bug if iconv_open() fails */
+static int is_transform_supported(abts_case *tc, const char *cs1,
+                                  const char *cs2, apr_pool_t *pool) {
+    return 1;
+}
+#else
+/* some iconv implementations don't support all tested transforms;
+ * example: 8859-1 <-> 8859-2 using native Solaris iconv
+ */
+static int is_transform_supported(abts_case *tc, const char *cs1,
+                                  const char *cs2, apr_pool_t *pool) {
+    apr_status_t rv;
+    apr_xlate_t *convset;
+
+    rv = apr_xlate_open(&convset, cs2, cs1, pool);
+    if (rv != APR_SUCCESS) {
+        return 0;
+    }
+
+    rv = apr_xlate_close(convset);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    return 1;
+}
+#endif
+
 static void test_transformation(abts_case *tc, void *data)
 {
     /* 1. Identity transformation: UTF-8 -> UTF-8 */
@@ -81,8 +108,12 @@ static void test_transformation(abts_case *tc, void *data)
     one_test(tc, "ISO-8859-1", "UTF-8", test_latin1, test_utf8, p);
 
     /* 3. ISO-8859-1 <-> ISO-8859-2, identity */
-    one_test(tc, "ISO-8859-1", "ISO-8859-2", test_latin1, test_latin2, p);
-    one_test(tc, "ISO-8859-2", "ISO-8859-1", test_latin2, test_latin1, p);
+    if (is_transform_supported(tc, "ISO-8859-1", "ISO-8859-2", p)) {
+        one_test(tc, "ISO-8859-1", "ISO-8859-2", test_latin1, test_latin2, p);
+    }
+    if (is_transform_supported(tc, "ISO-8859-2", "ISO-8859-1", p)) {
+        one_test(tc, "ISO-8859-2", "ISO-8859-1", test_latin2, test_latin1, p);
+    }
 
     /* 4. Transformation using charset aliases */
     one_test(tc, "UTF-8", "UTF-7", test_utf8, test_utf7, p);
