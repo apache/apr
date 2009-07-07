@@ -36,7 +36,6 @@ static struct {
     {"Hello", "SGVsbG8="},
     {"Hello World", "SGVsbG8gV29ybGQ="},
     {"\xff\xff\xff\xff", "/////w=="},
-    {"A\u00ea\u00f1\u00fcC", "QcOqw7HDvEM="},
 };
 static int num_base64 = sizeof(base64_tbl) / sizeof(base64_tbl[0]);
 
