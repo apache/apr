@@ -97,6 +97,10 @@ ifndef RELEASE
 RELEASE = release
 endif
 
+ifeq "$(RELEASE)" "optimized"
+RELEASE = release
+endif
+
 OBJDIR = obj_$(RELEASE)
 
 #
