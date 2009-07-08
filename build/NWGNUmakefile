@@ -106,5 +106,5 @@ clean ::
 # in this makefile
 #
 
-include $(AP_WORK)\build\NWGNUtail.inc
+include $(APR_WORK)\build\NWGNUtail.inc
 
