@@ -39,14 +39,35 @@ ifndef NOVELLLIBC
 NOVELLLIBC = C:/novell/ndk/libc
 endif
 ifneq "$(wildcard $(NOVELLLIBC)/include/ndkvers.h)" "$(NOVELLLIBC)/include/ndkvers.h"
-$(error NOVELLLIBC does not point to a valid LIBC SDK) 
+$(error NOVELLLIBC does not point to a valid Novell LIBC SDK) 
 endif
 
 ifndef LDAPSDK
-LDAPSDK = C:/novell/ndk/cldapsdk
+LDAPSDK = C:/novell/ndk/cldapsdk/NetWare/libc
 endif
-ifneq "$(wildcard $(LDAPSDK)/NetWare/libc/inc/ldap.h)" "$(LDAPSDK)/NetWare/libc/inc/ldap.h"
-$(error LDAPSDK does not point to a valid CLDAP SDK) 
+ifneq "$(wildcard $(LDAPSDK)/inc/ldap.h)" "$(LDAPSDK)/inc/ldap.h"
+$(error LDAPSDK does not point to a valid Novell CLDAP SDK) 
+endif
+
+ifdef EXPATSDK
+ifeq "$(wildcard $(EXPATSDK)/include/expat.h)" "$(EXPATSDK)/include/expat.h"
+EXPATINC = $(EXPATSRC)/include
+EXPATIMP = $(EXPATSRC)/imports/expatlbc.imp
+EXPATNLM = EXPATLBC
+else
+$(error EXPATSDK does not point to a valid EXPAT SDK) 
+endif
+endif
+ifdef EXPATSRC
+ifeq "$(wildcard $(EXPATSRC)/lib/expat.h.in)" "$(EXPATSRC)/lib/expat.h.in"
+EXPATINC = $(EXPATSRC)/lib
+EXPATLIB = $(EXPATSRC)/lib/$(OBJDIR)/expat.lib
+else
+$(error EXPATSRC does not point to a valid EXPAT source tree) 
+endif
+endif
+ifndef EXPATINC
+$(error neither EXPATSDK nor EXPATSRC defined - cant compile without EXPAT SDK or source tree) 
 endif
 
 ifndef METROWERKS
