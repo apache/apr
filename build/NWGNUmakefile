@@ -22,10 +22,7 @@ FILES_prebuild_headers = \
 	$(APR)/include/apr_ldap.h \
 	$(APR)/include/private/apu_config.h \
 	$(APR)/include/private/apu_select_dbm.h \
-	$(EXPAT_SRC)/lib/config.h \
-	$(EXPAT_SRC)/lib/expat.h \
 	$(EOLIST)
-#	$(APRXML)/expat_config.h \
 
 nlms :: $(APR)/aprlib.imp
 
@@ -65,18 +62,6 @@ $(APR)/include/private/%.h: $(APR)/include/private/%.hw
 	@echo Creating $@
 	$(CP) $(subst /,\,$<) $(subst /,\,$@)
 
-#$(APRXML)/%.h: $(APRXML)/%.hnw
-#	@echo Creating $@
-#	$(CP) $(subst /,\,$<) $(subst /,\,$@)
-
-$(EXPAT_SRC)/lib/%.h: $(EXPAT_SRC)/lib/%.hnw
-	@echo Creating $@
-	$(CP) $(subst /,\,$<) $(subst /,\,$@)
-
-$(EXPAT_SRC)/lib/%.h: $(EXPAT_SRC)/lib/%.h.in
-	@echo Creating $@
-	$(CP) $(subst /,\,$<) $(subst /,\,$@)
-
 $(APR)/include/private/apu_config.h: FORCE
 
 #
@@ -97,9 +82,6 @@ clean ::
 	$(CHK) $(subst /,\,$(APR))\include\private\apu_config.h     $(DEL) $(subst /,\,$(APR))\include\private\apu_config.h
 	$(CHK) $(subst /,\,$(APR))\include\private\apu_select_dbm.h $(DEL) $(subst /,\,$(APR))\include\private\apu_select_dbm.h
 	$(CHK) $(subst /,\,$(APR))\aprlib.imp                       $(DEL) $(subst /,\,$(APR))\aprlib.imp
-	$(CHK) $(subst /,\,$(EXPAT_SRC))\config.h                   $(DEL) $(subst /,\,$(EXPAT_SRC))\config.h
-	$(CHK) $(subst /,\,$(EXPAT_SRC))\expat.h                    $(DEL) $(subst /,\,$(EXPAT_SRC))\expat.h
-#	$(CHK) $(subst /,\,$(APRXML))\expat_config.h                $(DEL) $(subst /,\,$(APRXML))\expat_config.h
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined
