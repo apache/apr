@@ -18,16 +18,31 @@ include $(APR_WORK)/build/NWGNUhead.inc
 #
 # Make sure all needed macro's are defined
 #
-V_PATH = \
-	$(EXPAT_SRC)/lib \
+ifdef EXPATSRC
+
+FILES_prebuild_headers = \
+	$(EXPATSRC)/lib/config.h \
+	$(EXPATSRC)/lib/expat.h \
 	$(EOLIST)
+
+$(EXPATSRC)/lib/%.h: $(EXPATSRC)/lib/%.hnw
+	@echo Creating $@
+	$(CP) $(subst /,\,$<) $(subst /,\,$@)
+
+$(EXPATSRC)/lib/%.h: $(EXPATSRC)/lib/%.h.in
+	@echo Creating $@
+	$(CP) $(subst /,\,$<) $(subst /,\,$@)
+
+vpath %.c $(EXPATSRC)/lib
+
+endif
 
 #
 # These directories will be at the beginning of the include list, followed by
 # INCDIRS
 #
 XINCDIRS	+= \
-			$(V_PATH) \
+			$(EXPATINC) \
 			$(APR)/include \
 			$(APR)/include/private \
 			$(APR)/include/arch/NetWare \
@@ -225,16 +240,21 @@ FILES_nlm_exports = \
 #
 FILES_lib_objs = \
 	$(OBJDIR)/apr_xml.o \
+	$(EOLIST)
+
+ifdef EXPATSRC
+FILES_lib_objs += \
 	$(OBJDIR)/xmlparse.o \
 	$(OBJDIR)/xmlrole.o \
 	$(OBJDIR)/xmltok.o \
 	$(EOLIST)
+endif
 
 #
 # implement targets and dependancies (leave this section alone)
 #
 
-libs :: $(OBJDIR) $(TARGET_lib)
+libs :: $(OBJDIR) $(FILES_prebuild_headers) $(TARGET_lib)
 
 nlms :: libs $(TARGET_nlm)
 
@@ -244,11 +264,13 @@ nlms :: libs $(TARGET_nlm)
 #
 install :: nlms FORCE
 
+clean ::
+	$(CHK) $(subst /,\,$(EXPATSRC))\config.h                    $(DEL) $(subst /,\,$(EXPATSRC))\config.h
+	$(CHK) $(subst /,\,$(EXPATSRC))\expat.h                     $(DEL) $(subst /,\,$(EXPATSRC))\expat.h
+
 #
 # Any specialized rules here
 #
-
-vpath %.c $(V_PATH) 
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined
