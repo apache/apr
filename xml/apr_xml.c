@@ -47,18 +47,18 @@ static const char APR_KW_DAV[] = { 0x44, 0x41, 0x56, 0x3A, '\0' };
 
 /* test for a namespace prefix that begins with [Xx][Mm][Ll] */
 #define APR_XML_NS_IS_RESERVED(name) \
-	( (name[0] == 0x58 || name[0] == 0x78) && \
-	  (name[1] == 0x4D || name[1] == 0x6D) && \
-	  (name[2] == 0x4C || name[2] == 0x6C) )
+        ( (name[0] == 0x58 || name[0] == 0x78) && \
+          (name[1] == 0x4D || name[1] == 0x6D) && \
+          (name[2] == 0x4C || name[2] == 0x6C) )
 
 
 /* the real (internal) definition of the parser context */
 struct apr_xml_parser {
-    apr_xml_doc *doc;		/* the doc we're parsing */
-    apr_pool_t *p;		/* the pool we allocate from */
-    apr_xml_elem *cur_elem;	/* current element */
+    apr_xml_doc *doc;           /* the doc we're parsing */
+    apr_pool_t *p;              /* the pool we allocate from */
+    apr_xml_elem *cur_elem;     /* current element */
 
-    int error;			/* an error has occurred */
+    int error;                  /* an error has occurred */
 #define APR_XML_ERROR_EXPAT             1
 #define APR_XML_ERROR_PARSE_DONE        2
 /* also: public APR_XML_NS_ERROR_* values (if any) */
@@ -69,10 +69,10 @@ struct apr_xml_parser {
 
 /* struct for scoping namespace declarations */
 typedef struct apr_xml_ns_scope {
-    const char *prefix;		/* prefix used for this ns */
-    int ns;			/* index into namespace table */
-    int emptyURI;		/* the namespace URI is the empty string */
-    struct apr_xml_ns_scope *next;	/* next scoped namespace */
+    const char *prefix;         /* prefix used for this ns */
+    int ns;                     /* index into namespace table */
+    int emptyURI;               /* the namespace URI is the empty string */
+    struct apr_xml_ns_scope *next;      /* next scoped namespace */
 } apr_xml_ns_scope;
 
 
@@ -86,23 +86,23 @@ static int find_prefix(apr_xml_parser *parser, const char *prefix)
     ** prefix.
     */
     for (; elem; elem = elem->parent) {
-	apr_xml_ns_scope *ns_scope = elem->ns_scope;
+        apr_xml_ns_scope *ns_scope = elem->ns_scope;
 
-	for (ns_scope = elem->ns_scope; ns_scope; ns_scope = ns_scope->next) {
-	    if (strcmp(prefix, ns_scope->prefix) == 0) {
-		if (ns_scope->emptyURI) {
-		    /*
-		    ** It is possible to set the default namespace to an
-		    ** empty URI string; this resets the default namespace
-		    ** to mean "no namespace." We just found the prefix
-		    ** refers to an empty URI, so return "no namespace."
-		    */
-		    return APR_XML_NS_NONE;
-		}
+        for (ns_scope = elem->ns_scope; ns_scope; ns_scope = ns_scope->next) {
+            if (strcmp(prefix, ns_scope->prefix) == 0) {
+                if (ns_scope->emptyURI) {
+                    /*
+                    ** It is possible to set the default namespace to an
+                    ** empty URI string; this resets the default namespace
+                    ** to mean "no namespace." We just found the prefix
+                    ** refers to an empty URI, so return "no namespace."
+                    */
+                    return APR_XML_NS_NONE;
+                }
 
-		return ns_scope->ns;
-	    }
-	}
+                return ns_scope->ns;
+            }
+        }
     }
 
     /*
@@ -113,7 +113,7 @@ static int find_prefix(apr_xml_parser *parser, const char *prefix)
      * has "no namespace". We have a reserved value for this.
      */
     if (*prefix == '\0') {
-	return APR_XML_NS_NONE;
+        return APR_XML_NS_NONE;
     }
 
     /* not found */
@@ -132,7 +132,7 @@ static void start_handler(void *userdata, const char *name, const char **attrs)
 
     /* punt once we find an error */
     if (parser->error)
-	return;
+        return;
 
     elem = apr_pcalloc(parser->p, sizeof(*elem));
 
@@ -141,96 +141,96 @@ static void start_handler(void *userdata, const char *name, const char **attrs)
 
     /* fill in the attributes (note: ends up in reverse order) */
     while (*attrs) {
-	attr = apr_palloc(parser->p, sizeof(*attr));
-	attr->name = apr_pstrdup(parser->p, *attrs++);
-	attr->value = apr_pstrdup(parser->p, *attrs++);
-	attr->next = elem->attr;
-	elem->attr = attr;
+        attr = apr_palloc(parser->p, sizeof(*attr));
+        attr->name = apr_pstrdup(parser->p, *attrs++);
+        attr->value = apr_pstrdup(parser->p, *attrs++);
+        attr->next = elem->attr;
+        elem->attr = attr;
     }
 
     /* hook the element into the tree */
     if (parser->cur_elem == NULL) {
-	/* no current element; this also becomes the root */
-	parser->cur_elem = parser->doc->root = elem;
+        /* no current element; this also becomes the root */
+        parser->cur_elem = parser->doc->root = elem;
     }
     else {
-	/* this element appeared within the current elem */
-	elem->parent = parser->cur_elem;
+        /* this element appeared within the current elem */
+        elem->parent = parser->cur_elem;
 
-	/* set up the child/sibling links */
-	if (elem->parent->last_child == NULL) {
-	    /* no first child either */
-	    elem->parent->first_child = elem->parent->last_child = elem;
-	}
-	else {
-	    /* hook onto the end of the parent's children */
-	    elem->parent->last_child->next = elem;
-	    elem->parent->last_child = elem;
-	}
+        /* set up the child/sibling links */
+        if (elem->parent->last_child == NULL) {
+            /* no first child either */
+            elem->parent->first_child = elem->parent->last_child = elem;
+        }
+        else {
+            /* hook onto the end of the parent's children */
+            elem->parent->last_child->next = elem;
+            elem->parent->last_child = elem;
+        }
 
-	/* this element is now the current element */
-	parser->cur_elem = elem;
+        /* this element is now the current element */
+        parser->cur_elem = elem;
     }
 
     /* scan the attributes for namespace declarations */
     for (prev = NULL, attr = elem->attr;
-	 attr;
-	 attr = attr->next) {
-	if (strncmp(attr->name, APR_KW_xmlns, 5) == 0) {
-	    const char *prefix = &attr->name[5];
-	    apr_xml_ns_scope *ns_scope;
+         attr;
+         attr = attr->next) {
+        if (strncmp(attr->name, APR_KW_xmlns, 5) == 0) {
+            const char *prefix = &attr->name[5];
+            apr_xml_ns_scope *ns_scope;
 
-	    /* test for xmlns:foo= form and xmlns= form */
-	    if (*prefix == 0x3A) {
+            /* test for xmlns:foo= form and xmlns= form */
+            if (*prefix == 0x3A) {
                 /* a namespace prefix declaration must have a
                    non-empty value. */
                 if (attr->value[0] == '\0') {
                     parser->error = APR_XML_NS_ERROR_INVALID_DECL;
                     return;
                 }
-		++prefix;
+                ++prefix;
             }
-	    else if (*prefix != '\0') {
-		/* advance "prev" since "attr" is still present */
-		prev = attr;
-		continue;
-	    }
+            else if (*prefix != '\0') {
+                /* advance "prev" since "attr" is still present */
+                prev = attr;
+                continue;
+            }
 
-	    /* quote the URI before we ever start working with it */
-	    quoted = apr_xml_quote_string(parser->p, attr->value, 1);
+            /* quote the URI before we ever start working with it */
+            quoted = apr_xml_quote_string(parser->p, attr->value, 1);
 
-	    /* build and insert the new scope */
-	    ns_scope = apr_pcalloc(parser->p, sizeof(*ns_scope));
-	    ns_scope->prefix = prefix;
-	    ns_scope->ns = apr_xml_insert_uri(parser->doc->namespaces, quoted);
-	    ns_scope->emptyURI = *quoted == '\0';
-	    ns_scope->next = elem->ns_scope;
-	    elem->ns_scope = ns_scope;
+            /* build and insert the new scope */
+            ns_scope = apr_pcalloc(parser->p, sizeof(*ns_scope));
+            ns_scope->prefix = prefix;
+            ns_scope->ns = apr_xml_insert_uri(parser->doc->namespaces, quoted);
+            ns_scope->emptyURI = *quoted == '\0';
+            ns_scope->next = elem->ns_scope;
+            elem->ns_scope = ns_scope;
 
-	    /* remove this attribute from the element */
-	    if (prev == NULL)
-		elem->attr = attr->next;
-	    else
-		prev->next = attr->next;
+            /* remove this attribute from the element */
+            if (prev == NULL)
+                elem->attr = attr->next;
+            else
+                prev->next = attr->next;
 
-	    /* Note: prev will not be advanced since we just removed "attr" */
-	}
-	else if (strcmp(attr->name, APR_KW_xmlns_lang) == 0) {
-	    /* save away the language (in quoted form) */
-	    elem->lang = apr_xml_quote_string(parser->p, attr->value, 1);
+            /* Note: prev will not be advanced since we just removed "attr" */
+        }
+        else if (strcmp(attr->name, APR_KW_xmlns_lang) == 0) {
+            /* save away the language (in quoted form) */
+            elem->lang = apr_xml_quote_string(parser->p, attr->value, 1);
 
-	    /* remove this attribute from the element */
-	    if (prev == NULL)
-		elem->attr = attr->next;
-	    else
-		prev->next = attr->next;
+            /* remove this attribute from the element */
+            if (prev == NULL)
+                elem->attr = attr->next;
+            else
+                prev->next = attr->next;
 
-	    /* Note: prev will not be advanced since we just removed "attr" */
-	}
-	else {
-	    /* advance "prev" since "attr" is still present */
-	    prev = attr;
-	}
+            /* Note: prev will not be advanced since we just removed "attr" */
+        }
+        else {
+            /* advance "prev" since "attr" is still present */
+            prev = attr;
+        }
     }
 
     /*
@@ -240,30 +240,30 @@ static void start_handler(void *userdata, const char *name, const char **attrs)
     ** NOTE: elem_size() *depends* upon this pointer equality.
     */
     if (elem->lang == NULL && elem->parent != NULL)
-	elem->lang = elem->parent->lang;
+        elem->lang = elem->parent->lang;
 
     /* adjust the element's namespace */
     colon = strchr(elem_name, 0x3A);
     if (colon == NULL) {
-	/*
-	 * The element is using the default namespace, which will always
-	 * be found. Either it will be "no namespace", or a default
-	 * namespace URI has been specified at some point.
-	 */
-	elem->ns = find_prefix(parser, "");
+        /*
+         * The element is using the default namespace, which will always
+         * be found. Either it will be "no namespace", or a default
+         * namespace URI has been specified at some point.
+         */
+        elem->ns = find_prefix(parser, "");
     }
     else if (APR_XML_NS_IS_RESERVED(elem->name)) {
-	elem->ns = APR_XML_NS_NONE;
+        elem->ns = APR_XML_NS_NONE;
     }
     else {
-	*colon = '\0';
-	elem->ns = find_prefix(parser, elem->name);
-	elem->name = colon + 1;
+        *colon = '\0';
+        elem->ns = find_prefix(parser, elem->name);
+        elem->name = colon + 1;
 
-	if (APR_XML_NS_IS_ERROR(elem->ns)) {
-	    parser->error = elem->ns;
-	    return;
-	}
+        if (APR_XML_NS_IS_ERROR(elem->ns)) {
+            parser->error = elem->ns;
+            return;
+        }
     }
 
     /* adjust all remaining attributes' namespaces */
@@ -275,27 +275,27 @@ static void start_handler(void *userdata, const char *name, const char **attrs)
          */
         char *attr_name = (char *)attr->name;
 
-	colon = strchr(attr_name, 0x3A);
-	if (colon == NULL) {
-	    /*
-	     * Attributes do NOT use the default namespace. Therefore,
-	     * we place them into the "no namespace" category.
-	     */
-	    attr->ns = APR_XML_NS_NONE;
-	}
-	else if (APR_XML_NS_IS_RESERVED(attr->name)) {
-	    attr->ns = APR_XML_NS_NONE;
-	}
-	else {
-	    *colon = '\0';
-	    attr->ns = find_prefix(parser, attr->name);
-	    attr->name = colon + 1;
+        colon = strchr(attr_name, 0x3A);
+        if (colon == NULL) {
+            /*
+             * Attributes do NOT use the default namespace. Therefore,
+             * we place them into the "no namespace" category.
+             */
+            attr->ns = APR_XML_NS_NONE;
+        }
+        else if (APR_XML_NS_IS_RESERVED(attr->name)) {
+            attr->ns = APR_XML_NS_NONE;
+        }
+        else {
+            *colon = '\0';
+            attr->ns = find_prefix(parser, attr->name);
+            attr->name = colon + 1;
 
-	    if (APR_XML_NS_IS_ERROR(attr->ns)) {
-		parser->error = attr->ns;
-		return;
-	    }
-	}
+            if (APR_XML_NS_IS_ERROR(attr->ns)) {
+                parser->error = attr->ns;
+                return;
+            }
+        }
     }
 }
 
@@ -305,7 +305,7 @@ static void end_handler(void *userdata, const char *name)
 
     /* punt once we find an error */
     if (parser->error)
-	return;
+        return;
 
     /* pop up one level */
     parser->cur_elem = parser->cur_elem->parent;
@@ -320,18 +320,18 @@ static void cdata_handler(void *userdata, const char *data, int len)
 
     /* punt once we find an error */
     if (parser->error)
-	return;
+        return;
 
     elem = parser->cur_elem;
     s = apr_pstrndup(parser->p, data, len);
 
     if (elem->last_child == NULL) {
-	/* no children yet. this cdata follows the start tag */
-	hdr = &elem->first_cdata;
+        /* no children yet. this cdata follows the start tag */
+        hdr = &elem->first_cdata;
     }
     else {
-	/* child elements exist. this cdata follows the last child. */
-	hdr = &elem->last_child->following_cdata;
+        /* child elements exist. this cdata follows the last child. */
+        hdr = &elem->last_child->following_cdata;
     }
 
     apr_text_append(parser->p, hdr, s);
@@ -540,13 +540,13 @@ APU_DECLARE(void) apr_text_append(apr_pool_t * p, apr_text_header *hdr,
     t->next = NULL;
 
     if (hdr->first == NULL) {
-	/* no text elements yet */
-	hdr->first = hdr->last = t;
+        /* no text elements yet */
+        hdr->first = hdr->last = t;
     }
     else {
-	/* append to the last text element */
-	hdr->last->next = t;
-	hdr->last = t;
+        /* append to the last text element */
+        hdr->last->next = t;
+        hdr->last = t;
     }
 }
 
@@ -576,50 +576,50 @@ APU_DECLARE(const char *) apr_xml_quote_string(apr_pool_t *p, const char *s,
     char c;
 
     for (scan = s; (c = *scan) != '\0'; ++scan, ++len) {
-	if (c == '<' || c == '>')
-	    extra += 3;		/* &lt; or &gt; */
-	else if (c == '&')
-	    extra += 4;		/* &amp; */
-	else if (quotes && c == '"')
-	    extra += 5;		/* &quot; */
+        if (c == '<' || c == '>')
+            extra += 3;         /* &lt; or &gt; */
+        else if (c == '&')
+            extra += 4;         /* &amp; */
+        else if (quotes && c == '"')
+            extra += 5;         /* &quot; */
     }
 
     /* nothing to do? */
     if (extra == 0)
-	return s;
+        return s;
 
     qstr = apr_palloc(p, len + extra + 1);
     for (scan = s, qscan = qstr; (c = *scan) != '\0'; ++scan) {
-	if (c == '<') {
-	    *qscan++ = '&';
-	    *qscan++ = 'l';
-	    *qscan++ = 't';
-	    *qscan++ = ';';
-	}
-	else if (c == '>') {
-	    *qscan++ = '&';
-	    *qscan++ = 'g';
-	    *qscan++ = 't';
-	    *qscan++ = ';';
-	}
-	else if (c == '&') {
-	    *qscan++ = '&';
-	    *qscan++ = 'a';
-	    *qscan++ = 'm';
-	    *qscan++ = 'p';
-	    *qscan++ = ';';
-	}
-	else if (quotes && c == '"') {
-	    *qscan++ = '&';
-	    *qscan++ = 'q';
-	    *qscan++ = 'u';
-	    *qscan++ = 'o';
-	    *qscan++ = 't';
-	    *qscan++ = ';';
-	}
-	else {
-	    *qscan++ = c;
-	}
+        if (c == '<') {
+            *qscan++ = '&';
+            *qscan++ = 'l';
+            *qscan++ = 't';
+            *qscan++ = ';';
+        }
+        else if (c == '>') {
+            *qscan++ = '&';
+            *qscan++ = 'g';
+            *qscan++ = 't';
+            *qscan++ = ';';
+        }
+        else if (c == '&') {
+            *qscan++ = '&';
+            *qscan++ = 'a';
+            *qscan++ = 'm';
+            *qscan++ = 'p';
+            *qscan++ = ';';
+        }
+        else if (quotes && c == '"') {
+            *qscan++ = '&';
+            *qscan++ = 'q';
+            *qscan++ = 'u';
+            *qscan++ = 'o';
+            *qscan++ = 't';
+            *qscan++ = ';';
+        }
+        else {
+            *qscan++ = c;
+        }
     }
 
     *qscan = '\0';
@@ -637,7 +637,7 @@ static apr_size_t text_size(const apr_text *t)
     apr_size_t size = 0;
 
     for (; t; t = t->next)
-	size += strlen(t->text);
+        size += strlen(t->text);
     return size;
 }
 
@@ -647,94 +647,94 @@ static apr_size_t elem_size(const apr_xml_elem *elem, int style,
     apr_size_t size;
 
     if (style == APR_XML_X2T_FULL || style == APR_XML_X2T_FULL_NS_LANG) {
-	const apr_xml_attr *attr;
+        const apr_xml_attr *attr;
 
-	size = 0;
+        size = 0;
 
-	if (style == APR_XML_X2T_FULL_NS_LANG) {
-	    int i;
+        if (style == APR_XML_X2T_FULL_NS_LANG) {
+            int i;
 
-	    /*
-	    ** The outer element will contain xmlns:ns%d="%s" attributes
-	    ** and an xml:lang attribute, if applicable.
-	    */
+            /*
+            ** The outer element will contain xmlns:ns%d="%s" attributes
+            ** and an xml:lang attribute, if applicable.
+            */
 
-	    for (i = namespaces->nelts; i--;) {
-		/* compute size of: ' xmlns:ns%d="%s"' */
-		size += (9 + APR_XML_NS_LEN(i) + 2 +
-			 strlen(APR_XML_GET_URI_ITEM(namespaces, i)) + 1);
-	    }
+            for (i = namespaces->nelts; i--;) {
+                /* compute size of: ' xmlns:ns%d="%s"' */
+                size += (9 + APR_XML_NS_LEN(i) + 2 +
+                         strlen(APR_XML_GET_URI_ITEM(namespaces, i)) + 1);
+            }
 
-	    if (elem->lang != NULL) {
-		/* compute size of: ' xml:lang="%s"' */
-		size += 11 + strlen(elem->lang) + 1;
-	    }
-	}
+            if (elem->lang != NULL) {
+                /* compute size of: ' xml:lang="%s"' */
+                size += 11 + strlen(elem->lang) + 1;
+            }
+        }
 
-	if (elem->ns == APR_XML_NS_NONE) {
-	    /* compute size of: <%s> */
-	    size += 1 + strlen(elem->name) + 1;
-	}
-	else {
-	    int ns = ns_map ? ns_map[elem->ns] : elem->ns;
+        if (elem->ns == APR_XML_NS_NONE) {
+            /* compute size of: <%s> */
+            size += 1 + strlen(elem->name) + 1;
+        }
+        else {
+            int ns = ns_map ? ns_map[elem->ns] : elem->ns;
 
-	    /* compute size of: <ns%d:%s> */
-	    size += 3 + APR_XML_NS_LEN(ns) + 1 + strlen(elem->name) + 1;
-	}
+            /* compute size of: <ns%d:%s> */
+            size += 3 + APR_XML_NS_LEN(ns) + 1 + strlen(elem->name) + 1;
+        }
 
-	if (APR_XML_ELEM_IS_EMPTY(elem)) {
-	    /* insert a closing "/" */
-	    size += 1;
-	}
-	else {
-	    /*
-	     * two of above plus "/":
-	     *     <ns%d:%s> ... </ns%d:%s>
-	     * OR  <%s> ... </%s>
-	     */
-	    size = 2 * size + 1;
-	}
+        if (APR_XML_ELEM_IS_EMPTY(elem)) {
+            /* insert a closing "/" */
+            size += 1;
+        }
+        else {
+            /*
+             * two of above plus "/":
+             *     <ns%d:%s> ... </ns%d:%s>
+             * OR  <%s> ... </%s>
+             */
+            size = 2 * size + 1;
+        }
 
-	for (attr = elem->attr; attr; attr = attr->next) {
-	    if (attr->ns == APR_XML_NS_NONE) {
-		/* compute size of: ' %s="%s"' */
-		size += 1 + strlen(attr->name) + 2 + strlen(attr->value) + 1;
-	    }
-	    else {
-		/* compute size of: ' ns%d:%s="%s"' */
+        for (attr = elem->attr; attr; attr = attr->next) {
+            if (attr->ns == APR_XML_NS_NONE) {
+                /* compute size of: ' %s="%s"' */
+                size += 1 + strlen(attr->name) + 2 + strlen(attr->value) + 1;
+            }
+            else {
+                /* compute size of: ' ns%d:%s="%s"' */
                 int ns = ns_map ? ns_map[attr->ns] : attr->ns;
                 size += 3 + APR_XML_NS_LEN(ns) + 1 + strlen(attr->name) + 2 + strlen(attr->value) + 1;
-	    }
-	}
+            }
+        }
 
-	/*
-	** If the element has an xml:lang value that is *different* from
-	** its parent, then add the thing in: ' xml:lang="%s"'.
-	**
-	** NOTE: we take advantage of the pointer equality established by
-	** the parsing for "inheriting" the xml:lang values from parents.
-	*/
-	if (elem->lang != NULL &&
-	    (elem->parent == NULL || elem->lang != elem->parent->lang)) {
-	    size += 11 + strlen(elem->lang) + 1;
-	}
+        /*
+        ** If the element has an xml:lang value that is *different* from
+        ** its parent, then add the thing in: ' xml:lang="%s"'.
+        **
+        ** NOTE: we take advantage of the pointer equality established by
+        ** the parsing for "inheriting" the xml:lang values from parents.
+        */
+        if (elem->lang != NULL &&
+            (elem->parent == NULL || elem->lang != elem->parent->lang)) {
+            size += 11 + strlen(elem->lang) + 1;
+        }
     }
     else if (style == APR_XML_X2T_LANG_INNER) {
-	/*
-	 * This style prepends the xml:lang value plus a null terminator.
-	 * If a lang value is not present, then we insert a null term.
-	 */
-	size = elem->lang ? strlen(elem->lang) + 1 : 1;
+        /*
+         * This style prepends the xml:lang value plus a null terminator.
+         * If a lang value is not present, then we insert a null term.
+         */
+        size = elem->lang ? strlen(elem->lang) + 1 : 1;
     }
     else
-	size = 0;
+        size = 0;
 
     size += text_size(elem->first_cdata.first);
 
     for (elem = elem->first_child; elem; elem = elem->next) {
-	/* the size of the child element plus the CDATA that follows it */
-	size += (elem_size(elem, APR_XML_X2T_FULL, NULL, ns_map) +
-		 text_size(elem->following_cdata.first));
+        /* the size of the child element plus the CDATA that follows it */
+        size += (elem_size(elem, APR_XML_X2T_FULL, NULL, ns_map) +
+                 text_size(elem->following_cdata.first));
     }
 
     return size;
@@ -743,99 +743,99 @@ static apr_size_t elem_size(const apr_xml_elem *elem, int style,
 static char *write_text(char *s, const apr_text *t)
 {
     for (; t; t = t->next) {
-	apr_size_t len = strlen(t->text);
-	memcpy(s, t->text, len);
-	s += len;
+        apr_size_t len = strlen(t->text);
+        memcpy(s, t->text, len);
+        s += len;
     }
     return s;
 }
 
 static char *write_elem(char *s, const apr_xml_elem *elem, int style,
-			apr_array_header_t *namespaces, int *ns_map)
+                        apr_array_header_t *namespaces, int *ns_map)
 {
     const apr_xml_elem *child;
     apr_size_t len;
     int ns;
 
     if (style == APR_XML_X2T_FULL || style == APR_XML_X2T_FULL_NS_LANG) {
-	int empty = APR_XML_ELEM_IS_EMPTY(elem);
-	const apr_xml_attr *attr;
+        int empty = APR_XML_ELEM_IS_EMPTY(elem);
+        const apr_xml_attr *attr;
 
-	if (elem->ns == APR_XML_NS_NONE) {
-	    len = sprintf(s, "<%s", elem->name);
-	}
-	else {
-	    ns = ns_map ? ns_map[elem->ns] : elem->ns;
-	    len = sprintf(s, "<ns%d:%s", ns, elem->name);
-	}
-	s += len;
+        if (elem->ns == APR_XML_NS_NONE) {
+            len = sprintf(s, "<%s", elem->name);
+        }
+        else {
+            ns = ns_map ? ns_map[elem->ns] : elem->ns;
+            len = sprintf(s, "<ns%d:%s", ns, elem->name);
+        }
+        s += len;
 
-	for (attr = elem->attr; attr; attr = attr->next) {
-	    if (attr->ns == APR_XML_NS_NONE)
-		len = sprintf(s, " %s=\"%s\"", attr->name, attr->value);
+        for (attr = elem->attr; attr; attr = attr->next) {
+            if (attr->ns == APR_XML_NS_NONE)
+                len = sprintf(s, " %s=\"%s\"", attr->name, attr->value);
             else {
                 ns = ns_map ? ns_map[attr->ns] : attr->ns;
                 len = sprintf(s, " ns%d:%s=\"%s\"", ns, attr->name, attr->value);
             }
-	    s += len;
-	}
+            s += len;
+        }
 
-	/* add the xml:lang value if necessary */
-	if (elem->lang != NULL &&
-	    (style == APR_XML_X2T_FULL_NS_LANG ||
-	     elem->parent == NULL ||
-	     elem->lang != elem->parent->lang)) {
-	    len = sprintf(s, " xml:lang=\"%s\"", elem->lang);
-	    s += len;
-	}
+        /* add the xml:lang value if necessary */
+        if (elem->lang != NULL &&
+            (style == APR_XML_X2T_FULL_NS_LANG ||
+             elem->parent == NULL ||
+             elem->lang != elem->parent->lang)) {
+            len = sprintf(s, " xml:lang=\"%s\"", elem->lang);
+            s += len;
+        }
 
-	/* add namespace definitions, if required */
-	if (style == APR_XML_X2T_FULL_NS_LANG) {
-	    int i;
+        /* add namespace definitions, if required */
+        if (style == APR_XML_X2T_FULL_NS_LANG) {
+            int i;
 
-	    for (i = namespaces->nelts; i--;) {
-		len = sprintf(s, " xmlns:ns%d=\"%s\"", i,
-			      APR_XML_GET_URI_ITEM(namespaces, i));
-		s += len;
-	    }
-	}
+            for (i = namespaces->nelts; i--;) {
+                len = sprintf(s, " xmlns:ns%d=\"%s\"", i,
+                              APR_XML_GET_URI_ITEM(namespaces, i));
+                s += len;
+            }
+        }
 
-	/* no more to do. close it up and go. */
-	if (empty) {
-	    *s++ = '/';
-	    *s++ = '>';
-	    return s;
-	}
+        /* no more to do. close it up and go. */
+        if (empty) {
+            *s++ = '/';
+            *s++ = '>';
+            return s;
+        }
 
-	/* just close it */
-	*s++ = '>';
+        /* just close it */
+        *s++ = '>';
     }
     else if (style == APR_XML_X2T_LANG_INNER) {
-	/* prepend the xml:lang value */
-	if (elem->lang != NULL) {
-	    len = strlen(elem->lang);
-	    memcpy(s, elem->lang, len);
-	    s += len;
-	}
-	*s++ = '\0';
+        /* prepend the xml:lang value */
+        if (elem->lang != NULL) {
+            len = strlen(elem->lang);
+            memcpy(s, elem->lang, len);
+            s += len;
+        }
+        *s++ = '\0';
     }
 
     s = write_text(s, elem->first_cdata.first);
 
     for (child = elem->first_child; child; child = child->next) {
-	s = write_elem(s, child, APR_XML_X2T_FULL, NULL, ns_map);
-	s = write_text(s, child->following_cdata.first);
+        s = write_elem(s, child, APR_XML_X2T_FULL, NULL, ns_map);
+        s = write_text(s, child->following_cdata.first);
     }
 
     if (style == APR_XML_X2T_FULL || style == APR_XML_X2T_FULL_NS_LANG) {
-	if (elem->ns == APR_XML_NS_NONE) {
-	    len = sprintf(s, "</%s>", elem->name);
-	}
-	else {
-	    ns = ns_map ? ns_map[elem->ns] : elem->ns;
-	    len = sprintf(s, "</ns%d:%s>", ns, elem->name);
-	}
-	s += len;
+        if (elem->ns == APR_XML_NS_NONE) {
+            len = sprintf(s, "</%s>", elem->name);
+        }
+        else {
+            ns = ns_map ? ns_map[elem->ns] : elem->ns;
+            len = sprintf(s, "</ns%d:%s>", ns, elem->name);
+        }
+        s += len;
     }
 
     return s;
@@ -849,28 +849,28 @@ APU_DECLARE(void) apr_xml_quote_elem(apr_pool_t *p, apr_xml_elem *elem)
 
     /* convert the element's text */
     for (scan_txt = elem->first_cdata.first;
-	 scan_txt != NULL;
-	 scan_txt = scan_txt->next) {
-	scan_txt->text = apr_xml_quote_string(p, scan_txt->text, 0);
+         scan_txt != NULL;
+         scan_txt = scan_txt->next) {
+        scan_txt->text = apr_xml_quote_string(p, scan_txt->text, 0);
     }
     for (scan_txt = elem->following_cdata.first;
-	 scan_txt != NULL;
-	 scan_txt = scan_txt->next) {
-	scan_txt->text = apr_xml_quote_string(p, scan_txt->text, 0);
+         scan_txt != NULL;
+         scan_txt = scan_txt->next) {
+        scan_txt->text = apr_xml_quote_string(p, scan_txt->text, 0);
     }
 
     /* convert the attribute values */
     for (scan_attr = elem->attr;
-	 scan_attr != NULL;
-	 scan_attr = scan_attr->next) {
-	scan_attr->value = apr_xml_quote_string(p, scan_attr->value, 1);
+         scan_attr != NULL;
+         scan_attr = scan_attr->next) {
+        scan_attr->value = apr_xml_quote_string(p, scan_attr->value, 1);
     }
 
     /* convert the child elements */
     for (scan_elem = elem->first_child;
-	 scan_elem != NULL;
-	 scan_elem = scan_elem->next) {
-	apr_xml_quote_elem(p, scan_elem);
+         scan_elem != NULL;
+         scan_elem = scan_elem->next) {
+        apr_xml_quote_elem(p, scan_elem);
     }
 }
 
@@ -889,18 +889,18 @@ APU_DECLARE(void) apr_xml_to_text(apr_pool_t * p, const apr_xml_elem *elem,
 
     *pbuf = s;
     if (psize)
-	*psize = size;
+        *psize = size;
 }
 
 APU_DECLARE(const char *) apr_xml_empty_elem(apr_pool_t * p,
                                              const apr_xml_elem *elem)
 {
     if (elem->ns == APR_XML_NS_NONE) {
-	/*
-	 * The prefix (xml...) is already within the prop name, or
-	 * the element simply has no prefix.
-	 */
-	return apr_psprintf(p, "<%s/>" DEBUG_CR, elem->name);
+        /*
+         * The prefix (xml...) is already within the prop name, or
+         * the element simply has no prefix.
+         */
+        return apr_psprintf(p, "<%s/>" DEBUG_CR, elem->name);
     }
 
     return apr_psprintf(p, "<ns%d:%s/>" DEBUG_CR, elem->ns, elem->name);
@@ -915,15 +915,15 @@ APU_DECLARE(int) apr_xml_insert_uri(apr_array_header_t *uri_array,
 
     /* never insert an empty URI; this index is always APR_XML_NS_NONE */
     if (*uri == '\0')
-        return APR_XML_NS_NONE;  
+        return APR_XML_NS_NONE;
 
     for (i = uri_array->nelts; i--;) {
-	if (strcmp(uri, APR_XML_GET_URI_ITEM(uri_array, i)) == 0)
-	    return i;
+        if (strcmp(uri, APR_XML_GET_URI_ITEM(uri_array, i)) == 0)
+            return i;
     }
 
     pelt = apr_array_push(uri_array);
-    *pelt = uri;		/* assume uri is const or in a pool */
+    *pelt = uri;                /* assume uri is const or in a pool */
     return uri_array->nelts - 1;
 }
 
