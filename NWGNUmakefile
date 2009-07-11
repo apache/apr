@@ -40,10 +40,8 @@ XINCDIRS	+= \
 			$(APR)/include/arch/NetWare \
 			$(APR)/include/arch/unix \
 			$(APR)/dbm/sdbm \
-			$(APR)/uri \
 			$(APR)/memory/unix \
 			$(APR)/random/unix \
-			$(APR)/xml \
 			$(EOLIST)
 
 #
