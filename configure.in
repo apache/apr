@@ -799,7 +799,7 @@ if test "$apr_cv_epoll" = "yes"; then
 fi
 
 dnl ----------------------------- Checking for extended file descriptor handling
-AC_CHECK_FUNCS(dup3 accept4 epoll_create1)
+AC_CHECK_FUNCS(dup3 accept4 epoll_create1 fdatasync)
 
 AC_CACHE_CHECK([for SOCK_CLOEXEC support], [apr_cv_sock_cloexec],
 [AC_TRY_RUN([
