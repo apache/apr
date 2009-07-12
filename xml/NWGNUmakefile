@@ -52,7 +52,7 @@ endif
 # INCDIRS
 #
 XINCDIRS	+= \
-			$(EXPATINC) \
+			$(EXPAT_INC) \
 			$(APR)/include \
 			$(APR)/include/private \
 			$(APR)/include/arch/NetWare \
@@ -274,10 +274,7 @@ nlms :: libs $(TARGET_nlm)
 #
 install :: nlms FORCE
 
-#del_file = $(shell if exist $(subst /,\,$(1)) $(DEL) $(subst /,\,$(1)))
-
 clean ::
-#	$(foreach file,$(EXPAT_prebuild_headers),$(call del_file,$(file)))
 	$(foreach file,$(EXPAT_prebuild_headers),$(shell if exist $(subst /,\,$(file)) $(DEL) $(subst /,\,$(file))))
 
 #
