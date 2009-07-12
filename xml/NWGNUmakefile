@@ -18,18 +18,28 @@ include $(APR_WORK)/build/NWGNUhead.inc
 #
 # Make sure all needed macro's are defined
 #
+
 ifdef EXPATSRC
 
-FILES_prebuild_headers = \
-	$(EXPATSRC)/lib/config.h \
-	$(EXPATSRC)/lib/expat.h \
-	$(EOLIST)
+ifeq "$(wildcard $(EXPATSRC)/lib/expat.h.in)" "$(EXPATSRC)/lib/expat.h.in"
+EXPAT_prebuild_headers += $(EXPATSRC)/lib/expat.h
+endif
+ifeq "$(wildcard $(EXPATSRC)/lib/config.hnw)" "$(EXPATSRC)/lib/config.hnw"
+EXPAT_prebuild_headers += $(EXPATSRC)/lib/config.h
+endif
+ifeq "$(wildcard $(EXPATSRC)/expat_config.h.in)" "$(EXPATSRC)/expat_config.h.in"
+EXPAT_prebuild_headers += $(EXPATSRC)/lib/expat_config.h
+endif
 
 $(EXPATSRC)/lib/%.h: $(EXPATSRC)/lib/%.hnw
 	@echo Creating $@
 	$(CP) $(subst /,\,$<) $(subst /,\,$@)
 
 $(EXPATSRC)/lib/%.h: $(EXPATSRC)/lib/%.h.in
+	@echo Creating $@
+	$(CP) $(subst /,\,$<) $(subst /,\,$@)
+
+$(EXPATSRC)/lib/%.h: $(CURDIR)/%.hnw
 	@echo Creating $@
 	$(CP) $(subst /,\,$<) $(subst /,\,$@)
 
@@ -254,7 +264,7 @@ endif
 # implement targets and dependancies (leave this section alone)
 #
 
-libs :: $(OBJDIR) $(FILES_prebuild_headers) $(TARGET_lib)
+libs :: $(OBJDIR) $(EXPAT_prebuild_headers) $(TARGET_lib)
 
 nlms :: libs $(TARGET_nlm)
 
@@ -264,9 +274,11 @@ nlms :: libs $(TARGET_nlm)
 #
 install :: nlms FORCE
 
+#del_file = $(shell if exist $(subst /,\,$(1)) $(DEL) $(subst /,\,$(1)))
+
 clean ::
-	$(CHK) $(subst /,\,$(EXPATSRC))\config.h                    $(DEL) $(subst /,\,$(EXPATSRC))\config.h
-	$(CHK) $(subst /,\,$(EXPATSRC))\expat.h                     $(DEL) $(subst /,\,$(EXPATSRC))\expat.h
+#	$(foreach file,$(EXPAT_prebuild_headers),$(call del_file,$(file)))
+	$(foreach file,$(EXPAT_prebuild_headers),$(shell if exist $(subst /,\,$(file)) $(DEL) $(subst /,\,$(file))))
 
 #
 # Any specialized rules here
