@@ -201,6 +201,14 @@ FILES_nlm_libs = \
 	$(APRXMLLIB) \
 	$(EOLIST)
 
+ifdef EXPATSDK
+ifdef EXPAT_LINK_STATIC
+FILES_nlm_libs += \
+	$(EXPAT_LIB) \
+	$(EOLIST)
+endif
+endif
+
 #
 # These are the modules that the above NLM target depends on to load.
 # These will be added as a module command in the link.opt file.
@@ -221,6 +229,14 @@ FILES_nlm_modules += \
 	lldapsdk \
 	lldapssl \
 	$(EOLIST)
+endif
+
+ifdef EXPATSDK
+ifndef EXPAT_LINK_STATIC
+FILES_nlm_modules += \
+	$(EXPAT_NLM) \
+	$(EOLIST)
+endif
 endif
 
 #
@@ -261,6 +277,14 @@ FILES_nlm_Ximports += \
 	@$(LDAPSDK)/imports/lldapsdk.imp \
 	@$(LDAPSDK)/imports/lldapssl.imp \
 	$(EOLIST)
+endif
+
+ifdef EXPATSDK
+ifndef EXPAT_LINK_STATIC
+FILES_nlm_Ximports += \
+	@$(EXPAT_IMP) \
+	$(EOLIST)
+endif
 endif
 
 #

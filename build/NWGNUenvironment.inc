@@ -51,22 +51,23 @@ endif
 
 ifdef EXPATSDK
 ifeq "$(wildcard $(EXPATSDK)/include/expat.h)" "$(EXPATSDK)/include/expat.h"
-EXPATINC = $(EXPATSRC)/include
-EXPATIMP = $(EXPATSRC)/imports/expatlbc.imp
-EXPATNLM = EXPATLBC
+EXPAT_IMP = $(EXPATSDK)/imports/expatlbc.imp
+EXPAT_INC = $(EXPATSDK)/include
+EXPAT_LIB = $(EXPATSDK)/lib/expat.lib
+EXPAT_NLM = EXPATLBC
 else
 $(error EXPATSDK does not point to a valid EXPAT SDK) 
 endif
 endif
 ifdef EXPATSRC
 ifeq "$(wildcard $(EXPATSRC)/lib/xmlparse.c)" "$(EXPATSRC)/lib/xmlparse.c"
-EXPATINC = $(EXPATSRC)/lib
-EXPATLIB = $(EXPATSRC)/lib/$(OBJDIR)/expat.lib
+EXPAT_INC = $(EXPATSRC)/lib
+EXPAT_LIB = $(EXPATSRC)/lib/$(OBJDIR)/expat.lib
 else
 $(error EXPATSRC does not point to a valid EXPAT source tree) 
 endif
 endif
-ifndef EXPATINC
+ifndef EXPAT_INC
 $(error neither EXPATSDK nor EXPATSRC defined - cant compile without EXPAT SDK or source tree) 
 endif
 
