@@ -59,7 +59,7 @@ $(error EXPATSDK does not point to a valid EXPAT SDK)
 endif
 endif
 ifdef EXPATSRC
-ifeq "$(wildcard $(EXPATSRC)/lib/expat.h.in)" "$(EXPATSRC)/lib/expat.h.in"
+ifeq "$(wildcard $(EXPATSRC)/lib/xmlparse.h)" "$(EXPATSRC)/lib/xmlparse.h"
 EXPATINC = $(EXPATSRC)/lib
 EXPATLIB = $(EXPATSRC)/lib/$(OBJDIR)/expat.lib
 else
