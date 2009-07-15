@@ -15,7 +15,7 @@
 
 BEGIN {
 
-  # fetch APR version numbers from input file and writes them to STDOUT
+  # fetch APR version numbers from input file and write them to STDOUT
 
   while ((getline < ARGV[1]) > 0) {
     if (match ($0, /^#define APR_MAJOR_VERSION/)) {
