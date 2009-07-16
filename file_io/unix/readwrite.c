@@ -381,7 +381,11 @@ APR_DECLARE(apr_status_t) apr_file_datasync(apr_file_t *thefile)
         }
     }
 
+#ifdef HAVE_FDATASYNC
     if (fdatasync(thefile->filedes)) {
+#else
+    if (fsync(thefile->filedes)) {
+#endif
         rv = apr_get_os_error();
     }
 

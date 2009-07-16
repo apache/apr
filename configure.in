@@ -795,6 +795,9 @@ if test "$apr_cv_sock_cloexec" = "yes"; then
    AC_DEFINE([HAVE_SOCK_CLOEXEC], 1, [Define if the SOCK_CLOEXEC flag is supported])
 fi
 
+dnl ----------------------------- Checking for fdatasync: OS X doesn't have it
+AC_CHECK_FUNCS(fdatasync)
+
 dnl ----------------------------- Checking for missing POSIX thread functions
 AC_CHECK_FUNCS([getpwnam_r getpwuid_r getgrnam_r getgrgid_r])
 
