@@ -209,7 +209,7 @@ APU_DECLARE(apr_status_t) apr_memcache_disable_server(apr_memcache_t *mc,
  * @param min  minimum number of client sockets to open
  * @param smax soft maximum number of client connections to open
  * @param max  hard maximum number of client connections
- * @param ttl  time to live in seconds of a client connection
+ * @param ttl  time to live in microseconds of a client connection
  * @param ns   location of the new server object
  * @see apr_reslist_create
  * @remark min, smax, and max are only used when APR_HAS_THREADS
