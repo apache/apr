@@ -45,7 +45,7 @@ extern "C" {
  */
 
 
-APU_DECLARE(void) apr_optional_hook_add(const char *szName,void (*pfn)(void),
+APR_DECLARE(void) apr_optional_hook_add(const char *szName,void (*pfn)(void),
 					const char * const *aszPre,
 					const char * const *aszSucc,
 					int nOrder);
@@ -71,7 +71,7 @@ APU_DECLARE(void) apr_optional_hook_add(const char *szName,void (*pfn)(void),
  * @param szName - the name of the function
  * @return the hook structure for a given hook
  */
-APU_DECLARE(apr_array_header_t *) apr_optional_hook_get(const char *szName);
+APR_DECLARE(apr_array_header_t *) apr_optional_hook_get(const char *szName);
 
 /**
  * Implement an optional hook that runs until one of the functions

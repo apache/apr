@@ -152,7 +152,7 @@ static apr_xlate_t *xlate_ebcdic_to_ascii; /* used in apr_md5_encode() */
 
 /* MD5 initialization. Begins an MD5 operation, writing a new context.
  */
-APU_DECLARE(apr_status_t) apr_md5_init(apr_md5_ctx_t *context)
+APR_DECLARE(apr_status_t) apr_md5_init(apr_md5_ctx_t *context)
 {
     context->count[0] = context->count[1] = 0;
     
@@ -170,7 +170,7 @@ APU_DECLARE(apr_status_t) apr_md5_init(apr_md5_ctx_t *context)
  * to be used for translating the content before calculating the
  * digest.
  */
-APU_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context, 
+APR_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context, 
                                             apr_xlate_t *xlate)
 {
 #if APR_HAS_XLATE
@@ -285,7 +285,7 @@ static apr_status_t md5_update_buffer(apr_md5_ctx_t *context,
 /* MD5 block update operation. API with the default setting 
  * for EBCDIC translations
  */  
-APU_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
+APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
                                          const void *input,
                                          apr_size_t inputLen)
 {
@@ -295,7 +295,7 @@ APU_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
  * the message digest and zeroizing the context.
  */
-APU_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[APR_MD5_DIGESTSIZE],
+APR_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[APR_MD5_DIGESTSIZE],
                                         apr_md5_ctx_t *context)
 {
     unsigned char bits[8];
@@ -328,7 +328,7 @@ APU_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[APR_MD5_DIGESTSIZE]
 
 /* MD5 in one step (init, update, final)
  */
-APU_DECLARE(apr_status_t) apr_md5(unsigned char digest[APR_MD5_DIGESTSIZE],
+APR_DECLARE(apr_status_t) apr_md5(unsigned char digest[APR_MD5_DIGESTSIZE],
                                   const void *_input,
                                   apr_size_t inputLen)
 {
@@ -467,7 +467,7 @@ static void Decode(apr_uint32_t *output, const unsigned char *input,
 }
 
 #if APR_CHARSET_EBCDIC
-APU_DECLARE(apr_status_t) apr_MD5InitEBCDIC(apr_xlate_t *xlate)
+APR_DECLARE(apr_status_t) apr_MD5InitEBCDIC(apr_xlate_t *xlate)
 {
     xlate_ebcdic_to_ascii = xlate;
     return APR_SUCCESS;
@@ -497,7 +497,7 @@ static void to64(char *s, unsigned long v, int n)
     }
 }
 
-APU_DECLARE(apr_status_t) apr_md5_encode(const char *pw, const char *salt,
+APR_DECLARE(apr_status_t) apr_md5_encode(const char *pw, const char *salt,
                              char *result, apr_size_t nbytes)
 {
     /*
@@ -695,7 +695,7 @@ static void crypt_mutex_unlock(void)
  * they match, or APR_EMISMATCH if they don't.  If the platform doesn't
  * support crypt, then the default check is against a clear text string.
  */
-APU_DECLARE(apr_status_t) apr_password_validate(const char *passwd, 
+APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd, 
                                                 const char *hash)
 {
     char sample[120];

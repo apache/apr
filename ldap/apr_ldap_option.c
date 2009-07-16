@@ -48,7 +48,7 @@ static void option_set_tls(apr_pool_t *pool, LDAP *ldap, const void *invalue,
  * This function gets option values from a given LDAP session if
  * one was specified.
  */
-APU_DECLARE_LDAP(int) apr_ldap_get_option(apr_pool_t *pool,
+APR_DECLARE_LDAP(int) apr_ldap_get_option(apr_pool_t *pool,
                                           LDAP *ldap,
                                           int option,
                                           void *outvalue,
@@ -86,7 +86,7 @@ APU_DECLARE_LDAP(int) apr_ldap_get_option(apr_pool_t *pool,
  * will try and apply legacy functions to achieve the same effect,
  * depending on the platform.
  */
-APU_DECLARE_LDAP(int) apr_ldap_set_option(apr_pool_t *pool,
+APR_DECLARE_LDAP(int) apr_ldap_set_option(apr_pool_t *pool,
                                           LDAP *ldap,
                                           int option,
                                           const void *invalue,

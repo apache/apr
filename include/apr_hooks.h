@@ -247,30 +247,30 @@ link##_DECLARE(ret) ns##_run_##name args_decl \
 /**
  * The global pool used to allocate any memory needed by the hooks.
  */ 
-APU_DECLARE_DATA extern apr_pool_t *apr_hook_global_pool;
+APR_DECLARE_DATA extern apr_pool_t *apr_hook_global_pool;
 
 /**
  * A global variable to determine if debugging information about the
  * hooks functions should be printed
  */ 
-APU_DECLARE_DATA extern int apr_hook_debug_enabled;
+APR_DECLARE_DATA extern int apr_hook_debug_enabled;
 
 /**
  * The name of the module that is currently registering a function
  */ 
-APU_DECLARE_DATA extern const char *apr_hook_debug_current;
+APR_DECLARE_DATA extern const char *apr_hook_debug_current;
 
 /**
  * Register a hook function to be sorted
  * @param szHookName The name of the Hook the function is registered for
  * @param aHooks The array which stores all of the functions for this hook
  */
-APU_DECLARE(void) apr_hook_sort_register(const char *szHookName, 
+APR_DECLARE(void) apr_hook_sort_register(const char *szHookName, 
                                         apr_array_header_t **aHooks);
 /**
  * Sort all of the registerd functions for a given hook
  */
-APU_DECLARE(void) apr_hook_sort_all(void);
+APR_DECLARE(void) apr_hook_sort_all(void);
 
 /**
  * Print all of the information about the current hook.  This is used for
@@ -279,14 +279,14 @@ APU_DECLARE(void) apr_hook_sort_all(void);
  * @param aszPre All of the functions in the predecessor array
  * @param aszSucc All of the functions in the successor array
  */
-APU_DECLARE(void) apr_hook_debug_show(const char *szName,
+APR_DECLARE(void) apr_hook_debug_show(const char *szName,
                                       const char * const *aszPre,
                                       const char * const *aszSucc);
 
 /**
  * Remove all currently registered functions.
  */
-APU_DECLARE(void) apr_hook_deregister_all(void);
+APR_DECLARE(void) apr_hook_deregister_all(void);
 
 /** @} */
 #ifdef __cplusplus

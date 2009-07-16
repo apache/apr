@@ -34,7 +34,7 @@ static apr_status_t brigade_cleanup(void *data)
     return apr_brigade_cleanup(data);
 }
 
-APU_DECLARE(apr_status_t) apr_brigade_cleanup(void *data)
+APR_DECLARE(apr_status_t) apr_brigade_cleanup(void *data)
 {
     apr_bucket_brigade *b = data;
     apr_bucket *e;
@@ -47,13 +47,13 @@ APU_DECLARE(apr_status_t) apr_brigade_cleanup(void *data)
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_status_t) apr_brigade_destroy(apr_bucket_brigade *b)
+APR_DECLARE(apr_status_t) apr_brigade_destroy(apr_bucket_brigade *b)
 {
     apr_pool_cleanup_kill(b->p, b, brigade_cleanup);
     return apr_brigade_cleanup(b);
 }
 
-APU_DECLARE(apr_bucket_brigade *) apr_brigade_create(apr_pool_t *p,
+APR_DECLARE(apr_bucket_brigade *) apr_brigade_create(apr_pool_t *p,
                                                      apr_bucket_alloc_t *list)
 {
     apr_bucket_brigade *b;
@@ -68,7 +68,7 @@ APU_DECLARE(apr_bucket_brigade *) apr_brigade_create(apr_pool_t *p,
     return b;
 }
 
-APU_DECLARE(apr_bucket_brigade *) apr_brigade_split_ex(apr_bucket_brigade *b,
+APR_DECLARE(apr_bucket_brigade *) apr_brigade_split_ex(apr_bucket_brigade *b,
                                                        apr_bucket *e,
                                                        apr_bucket_brigade *a)
 {
@@ -95,13 +95,13 @@ APU_DECLARE(apr_bucket_brigade *) apr_brigade_split_ex(apr_bucket_brigade *b,
     return a;
 }
 
-APU_DECLARE(apr_bucket_brigade *) apr_brigade_split(apr_bucket_brigade *b,
+APR_DECLARE(apr_bucket_brigade *) apr_brigade_split(apr_bucket_brigade *b,
                                                     apr_bucket *e)
 {
     return apr_brigade_split_ex(b, e, NULL);
 }
 
-APU_DECLARE(apr_status_t) apr_brigade_partition(apr_bucket_brigade *b,
+APR_DECLARE(apr_status_t) apr_brigade_partition(apr_bucket_brigade *b,
                                                 apr_off_t point,
                                                 apr_bucket **after_point)
 {
@@ -187,7 +187,7 @@ APU_DECLARE(apr_status_t) apr_brigade_partition(apr_bucket_brigade *b,
     return APR_INCOMPLETE;
 }
 
-APU_DECLARE(apr_status_t) apr_brigade_length(apr_bucket_brigade *bb,
+APR_DECLARE(apr_status_t) apr_brigade_length(apr_bucket_brigade *bb,
                                              int read_all, apr_off_t *length)
 {
     apr_off_t total = 0;
@@ -220,7 +220,7 @@ APU_DECLARE(apr_status_t) apr_brigade_length(apr_bucket_brigade *bb,
     return status;
 }
 
-APU_DECLARE(apr_status_t) apr_brigade_flatten(apr_bucket_brigade *bb,
+APR_DECLARE(apr_status_t) apr_brigade_flatten(apr_bucket_brigade *bb,
                                               char *c, apr_size_t *len)
 {
     apr_size_t actual = 0;
@@ -265,7 +265,7 @@ APU_DECLARE(apr_status_t) apr_brigade_flatten(apr_bucket_brigade *bb,
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_status_t) apr_brigade_pflatten(apr_bucket_brigade *bb,
+APR_DECLARE(apr_status_t) apr_brigade_pflatten(apr_bucket_brigade *bb,
                                                char **c,
                                                apr_size_t *len,
                                                apr_pool_t *pool)
@@ -301,7 +301,7 @@ APU_DECLARE(apr_status_t) apr_brigade_pflatten(apr_bucket_brigade *bb,
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_status_t) apr_brigade_split_line(apr_bucket_brigade *bbOut,
+APR_DECLARE(apr_status_t) apr_brigade_split_line(apr_bucket_brigade *bbOut,
                                                  apr_bucket_brigade *bbIn,
                                                  apr_read_type_e block,
                                                  apr_off_t maxbytes)
@@ -343,7 +343,7 @@ APU_DECLARE(apr_status_t) apr_brigade_split_line(apr_bucket_brigade *bbOut,
 }
 
 
-APU_DECLARE(apr_status_t) apr_brigade_to_iovec(apr_bucket_brigade *b, 
+APR_DECLARE(apr_status_t) apr_brigade_to_iovec(apr_bucket_brigade *b, 
                                                struct iovec *vec, int *nvec)
 {
     int left = *nvec;
@@ -375,7 +375,7 @@ APU_DECLARE(apr_status_t) apr_brigade_to_iovec(apr_bucket_brigade *b,
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_status_t) apr_brigade_vputstrs(apr_bucket_brigade *b, 
+APR_DECLARE(apr_status_t) apr_brigade_vputstrs(apr_bucket_brigade *b, 
                                                apr_brigade_flush flush,
                                                void *ctx,
                                                va_list va)
@@ -395,14 +395,14 @@ APU_DECLARE(apr_status_t) apr_brigade_vputstrs(apr_bucket_brigade *b,
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_status_t) apr_brigade_putc(apr_bucket_brigade *b,
+APR_DECLARE(apr_status_t) apr_brigade_putc(apr_bucket_brigade *b,
                                            apr_brigade_flush flush, void *ctx,
                                            const char c)
 {
     return apr_brigade_write(b, flush, ctx, &c, 1);
 }
 
-APU_DECLARE(apr_status_t) apr_brigade_write(apr_bucket_brigade *b,
+APR_DECLARE(apr_status_t) apr_brigade_write(apr_bucket_brigade *b,
                                             apr_brigade_flush flush,
                                             void *ctx, 
                                             const char *str, apr_size_t nbyte)
@@ -456,7 +456,7 @@ APU_DECLARE(apr_status_t) apr_brigade_write(apr_bucket_brigade *b,
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_status_t) apr_brigade_writev(apr_bucket_brigade *b,
+APR_DECLARE(apr_status_t) apr_brigade_writev(apr_bucket_brigade *b,
                                              apr_brigade_flush flush,
                                              void *ctx,
                                              const struct iovec *vec,
@@ -576,7 +576,7 @@ APU_DECLARE(apr_status_t) apr_brigade_writev(apr_bucket_brigade *b,
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_status_t) apr_brigade_puts(apr_bucket_brigade *bb,
+APR_DECLARE(apr_status_t) apr_brigade_puts(apr_bucket_brigade *bb,
                                            apr_brigade_flush flush, void *ctx,
                                            const char *str)
 {
@@ -605,7 +605,7 @@ APU_DECLARE(apr_status_t) apr_brigade_puts(apr_bucket_brigade *bb,
     return apr_brigade_write(bb, flush, ctx, str, len);
 }
 
-APU_DECLARE_NONSTD(apr_status_t) apr_brigade_putstrs(apr_bucket_brigade *b, 
+APR_DECLARE_NONSTD(apr_status_t) apr_brigade_putstrs(apr_bucket_brigade *b, 
                                                      apr_brigade_flush flush,
                                                      void *ctx, ...)
 {
@@ -618,7 +618,7 @@ APU_DECLARE_NONSTD(apr_status_t) apr_brigade_putstrs(apr_bucket_brigade *b,
     return rv;
 }
 
-APU_DECLARE_NONSTD(apr_status_t) apr_brigade_printf(apr_bucket_brigade *b, 
+APR_DECLARE_NONSTD(apr_status_t) apr_brigade_printf(apr_bucket_brigade *b, 
                                                     apr_brigade_flush flush,
                                                     void *ctx, 
                                                     const char *fmt, ...)
@@ -666,7 +666,7 @@ static apr_status_t brigade_flush(apr_vformatter_buff_t *buff)
     return res;
 }
 
-APU_DECLARE(apr_status_t) apr_brigade_vprintf(apr_bucket_brigade *b,
+APR_DECLARE(apr_status_t) apr_brigade_vprintf(apr_bucket_brigade *b,
                                               apr_brigade_flush flush,
                                               void *ctx,
                                               const char *fmt, va_list va)
@@ -696,7 +696,7 @@ APU_DECLARE(apr_status_t) apr_brigade_vprintf(apr_bucket_brigade *b,
 /* A "safe" maximum bucket size, 1Gb */
 #define MAX_BUCKET_SIZE (0x40000000)
 
-APU_DECLARE(apr_bucket *) apr_brigade_insert_file(apr_bucket_brigade *bb,
+APR_DECLARE(apr_bucket *) apr_brigade_insert_file(apr_bucket_brigade *bb,
                                                   apr_file_t *f,
                                                   apr_off_t start,
                                                   apr_off_t length,

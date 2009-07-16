@@ -52,7 +52,7 @@ static apr_status_t alloc_cleanup(void *data)
     return APR_SUCCESS;
 }
 
-APU_DECLARE_NONSTD(apr_bucket_alloc_t *) apr_bucket_alloc_create(apr_pool_t *p)
+APR_DECLARE_NONSTD(apr_bucket_alloc_t *) apr_bucket_alloc_create(apr_pool_t *p)
 {
     apr_allocator_t *allocator;
     apr_bucket_alloc_t *list;
@@ -69,7 +69,7 @@ APU_DECLARE_NONSTD(apr_bucket_alloc_t *) apr_bucket_alloc_create(apr_pool_t *p)
     return list;
 }
 
-APU_DECLARE_NONSTD(apr_bucket_alloc_t *) apr_bucket_alloc_create_ex(
+APR_DECLARE_NONSTD(apr_bucket_alloc_t *) apr_bucket_alloc_create_ex(
                                              apr_allocator_t *allocator)
 {
     apr_bucket_alloc_t *list;
@@ -89,7 +89,7 @@ APU_DECLARE_NONSTD(apr_bucket_alloc_t *) apr_bucket_alloc_create_ex(
     return list;
 }
 
-APU_DECLARE_NONSTD(void) apr_bucket_alloc_destroy(apr_bucket_alloc_t *list)
+APR_DECLARE_NONSTD(void) apr_bucket_alloc_destroy(apr_bucket_alloc_t *list)
 {
     if (list->pool) {
         apr_pool_cleanup_kill(list->pool, list, alloc_cleanup);
@@ -99,7 +99,7 @@ APU_DECLARE_NONSTD(void) apr_bucket_alloc_destroy(apr_bucket_alloc_t *list)
 
 }
 
-APU_DECLARE_NONSTD(void *) apr_bucket_alloc(apr_size_t size, 
+APR_DECLARE_NONSTD(void *) apr_bucket_alloc(apr_size_t size, 
                                             apr_bucket_alloc_t *list)
 {
     node_header_t *node;
@@ -163,7 +163,7 @@ static void check_not_already_free(node_header_t *node)
 #define check_not_already_free(node)
 #endif
 
-APU_DECLARE_NONSTD(void) apr_bucket_free(void *mem)
+APR_DECLARE_NONSTD(void) apr_bucket_free(void *mem)
 {
     node_header_t *node = (node_header_t *)((char *)mem - SIZEOF_NODE_HEADER_T);
     apr_bucket_alloc_t *list = node->alloc;

@@ -142,9 +142,9 @@ typedef struct apr_ldap_err_t {
 #define apr_ldap_rebind_add apr__ldap_rebind_add
 #define apr_ldap_rebind_remove apr__ldap_rebind_remove
 
-#define APU_DECLARE_LDAP(type) type
+#define APR_DECLARE_LDAP(type) type
 #else
-#define APU_DECLARE_LDAP(type) APU_DECLARE(type)
+#define APR_DECLARE_LDAP(type) APR_DECLARE(type)
 #endif
 
 #include "apr_ldap_url.h"

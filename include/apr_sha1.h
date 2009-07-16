@@ -79,13 +79,13 @@ struct apr_sha1_ctx_t {
  *     will always generate the same hash, making it easier
  *     to break since the search space is smaller.
  */
-APU_DECLARE(void) apr_sha1_base64(const char *clear, int len, char *out);
+APR_DECLARE(void) apr_sha1_base64(const char *clear, int len, char *out);
 
 /**
  * Initialize the SHA digest
  * @param context The SHA context to initialize
  */
-APU_DECLARE(void) apr_sha1_init(apr_sha1_ctx_t *context);
+APR_DECLARE(void) apr_sha1_init(apr_sha1_ctx_t *context);
 
 /**
  * Update the SHA digest
@@ -93,7 +93,7 @@ APU_DECLARE(void) apr_sha1_init(apr_sha1_ctx_t *context);
  * @param input The buffer to add to the SHA digest
  * @param inputLen The length of the input buffer
  */
-APU_DECLARE(void) apr_sha1_update(apr_sha1_ctx_t *context, const char *input,
+APR_DECLARE(void) apr_sha1_update(apr_sha1_ctx_t *context, const char *input,
                                 unsigned int inputLen);
 
 /**
@@ -102,7 +102,7 @@ APU_DECLARE(void) apr_sha1_update(apr_sha1_ctx_t *context, const char *input,
  * @param input The buffer to add to the SHA digest
  * @param inputLen The length of the input buffer
  */
-APU_DECLARE(void) apr_sha1_update_binary(apr_sha1_ctx_t *context,
+APR_DECLARE(void) apr_sha1_update_binary(apr_sha1_ctx_t *context,
                                        const unsigned char *input,
                                        unsigned int inputLen);
 
@@ -111,7 +111,7 @@ APU_DECLARE(void) apr_sha1_update_binary(apr_sha1_ctx_t *context,
  * @param digest the output buffer in which to store the digest
  * @param context The context to finalize
  */
-APU_DECLARE(void) apr_sha1_final(unsigned char digest[APR_SHA1_DIGESTSIZE],
+APR_DECLARE(void) apr_sha1_final(unsigned char digest[APR_SHA1_DIGESTSIZE],
                                apr_sha1_ctx_t *context);
 
 #ifdef __cplusplus

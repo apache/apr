@@ -16,7 +16,7 @@
 
 #include "apr_buckets.h"
 
-APU_DECLARE_NONSTD(apr_status_t) apr_bucket_simple_copy(apr_bucket *a,
+APR_DECLARE_NONSTD(apr_status_t) apr_bucket_simple_copy(apr_bucket *a,
                                                         apr_bucket **b)
 {
     *b = apr_bucket_alloc(sizeof(**b), a->list); /* XXX: check for failure? */
@@ -25,7 +25,7 @@ APU_DECLARE_NONSTD(apr_status_t) apr_bucket_simple_copy(apr_bucket *a,
     return APR_SUCCESS;
 }
 
-APU_DECLARE_NONSTD(apr_status_t) apr_bucket_simple_split(apr_bucket *a,
+APR_DECLARE_NONSTD(apr_status_t) apr_bucket_simple_split(apr_bucket *a,
                                                          apr_size_t point)
 {
     apr_bucket *b;
@@ -53,7 +53,7 @@ static apr_status_t simple_bucket_read(apr_bucket *b, const char **str,
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_bucket *) apr_bucket_immortal_make(apr_bucket *b,
+APR_DECLARE(apr_bucket *) apr_bucket_immortal_make(apr_bucket *b,
                                                    const char *buf,
                                                    apr_size_t length)
 {
@@ -65,7 +65,7 @@ APU_DECLARE(apr_bucket *) apr_bucket_immortal_make(apr_bucket *b,
     return b;
 }
 
-APU_DECLARE(apr_bucket *) apr_bucket_immortal_create(const char *buf,
+APR_DECLARE(apr_bucket *) apr_bucket_immortal_create(const char *buf,
                                                      apr_size_t length,
                                                      apr_bucket_alloc_t *list)
 {
@@ -95,7 +95,7 @@ static apr_status_t transient_bucket_setaside(apr_bucket *b, apr_pool_t *pool)
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_bucket *) apr_bucket_transient_make(apr_bucket *b,
+APR_DECLARE(apr_bucket *) apr_bucket_transient_make(apr_bucket *b,
                                                     const char *buf,
                                                     apr_size_t length)
 {
@@ -106,7 +106,7 @@ APU_DECLARE(apr_bucket *) apr_bucket_transient_make(apr_bucket *b,
     return b;
 }
 
-APU_DECLARE(apr_bucket *) apr_bucket_transient_create(const char *buf,
+APR_DECLARE(apr_bucket *) apr_bucket_transient_create(const char *buf,
                                                       apr_size_t length,
                                                       apr_bucket_alloc_t *list)
 {
@@ -127,7 +127,7 @@ const apr_bucket_type_t apr_bucket_type_immortal = {
     apr_bucket_simple_copy
 };
 
-APU_DECLARE_DATA const apr_bucket_type_t apr_bucket_type_transient = {
+APR_DECLARE_DATA const apr_bucket_type_t apr_bucket_type_transient = {
     "TRANSIENT", 5, APR_BUCKET_DATA,
     apr_bucket_destroy_noop, 
     simple_bucket_read,

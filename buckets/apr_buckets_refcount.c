@@ -16,7 +16,7 @@
 
 #include "apr_buckets.h"
 
-APU_DECLARE_NONSTD(apr_status_t) apr_bucket_shared_split(apr_bucket *a,
+APR_DECLARE_NONSTD(apr_status_t) apr_bucket_shared_split(apr_bucket *a,
                                                          apr_size_t point)
 {
     apr_bucket_refcount *r = a->data;
@@ -30,7 +30,7 @@ APU_DECLARE_NONSTD(apr_status_t) apr_bucket_shared_split(apr_bucket *a,
     return APR_SUCCESS;
 }
 
-APU_DECLARE_NONSTD(apr_status_t) apr_bucket_shared_copy(apr_bucket *a,
+APR_DECLARE_NONSTD(apr_status_t) apr_bucket_shared_copy(apr_bucket *a,
                                                         apr_bucket **b)
 {
     apr_bucket_refcount *r = a->data;
@@ -41,14 +41,14 @@ APU_DECLARE_NONSTD(apr_status_t) apr_bucket_shared_copy(apr_bucket *a,
     return APR_SUCCESS;
 }
 
-APU_DECLARE(int) apr_bucket_shared_destroy(void *data)
+APR_DECLARE(int) apr_bucket_shared_destroy(void *data)
 {
     apr_bucket_refcount *r = data;
     r->refcount--;
     return (r->refcount == 0);
 }
 
-APU_DECLARE(apr_bucket *) apr_bucket_shared_make(apr_bucket *b, void *data,
+APR_DECLARE(apr_bucket *) apr_bucket_shared_make(apr_bucket *b, void *data,
                                                  apr_off_t start,
                                                  apr_size_t length)
 {

@@ -210,7 +210,7 @@ static void move_block(apr_rmm_t *rmm, apr_rmm_off_t this, int free)
     }
 }
 
-APU_DECLARE(apr_status_t) apr_rmm_init(apr_rmm_t **rmm, apr_anylock_t *lock, 
+APR_DECLARE(apr_status_t) apr_rmm_init(apr_rmm_t **rmm, apr_anylock_t *lock, 
                                        void *base, apr_size_t size,
                                        apr_pool_t *p)
 {
@@ -245,7 +245,7 @@ APU_DECLARE(apr_status_t) apr_rmm_init(apr_rmm_t **rmm, apr_anylock_t *lock,
     return APR_ANYLOCK_UNLOCK(lock);
 }
 
-APU_DECLARE(apr_status_t) apr_rmm_destroy(apr_rmm_t *rmm)
+APR_DECLARE(apr_status_t) apr_rmm_destroy(apr_rmm_t *rmm)
 {
     apr_status_t rv;
     rmm_block_t *blk;
@@ -278,7 +278,7 @@ APU_DECLARE(apr_status_t) apr_rmm_destroy(apr_rmm_t *rmm)
     return APR_ANYLOCK_UNLOCK(&rmm->lock);
 }
 
-APU_DECLARE(apr_status_t) apr_rmm_attach(apr_rmm_t **rmm, apr_anylock_t *lock,
+APR_DECLARE(apr_status_t) apr_rmm_attach(apr_rmm_t **rmm, apr_anylock_t *lock,
                                          void *base, apr_pool_t *p)
 {
     apr_anylock_t nulllock;
@@ -298,13 +298,13 @@ APU_DECLARE(apr_status_t) apr_rmm_attach(apr_rmm_t **rmm, apr_anylock_t *lock,
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_status_t) apr_rmm_detach(apr_rmm_t *rmm) 
+APR_DECLARE(apr_status_t) apr_rmm_detach(apr_rmm_t *rmm) 
 {
     /* A noop until we introduce locked/refcounts */
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_rmm_off_t) apr_rmm_malloc(apr_rmm_t *rmm, apr_size_t reqsize)
+APR_DECLARE(apr_rmm_off_t) apr_rmm_malloc(apr_rmm_t *rmm, apr_size_t reqsize)
 {
     apr_rmm_off_t this;
     
@@ -323,7 +323,7 @@ APU_DECLARE(apr_rmm_off_t) apr_rmm_malloc(apr_rmm_t *rmm, apr_size_t reqsize)
     return this;
 }
 
-APU_DECLARE(apr_rmm_off_t) apr_rmm_calloc(apr_rmm_t *rmm, apr_size_t reqsize)
+APR_DECLARE(apr_rmm_off_t) apr_rmm_calloc(apr_rmm_t *rmm, apr_size_t reqsize)
 {
     apr_rmm_off_t this;
         
@@ -343,7 +343,7 @@ APU_DECLARE(apr_rmm_off_t) apr_rmm_calloc(apr_rmm_t *rmm, apr_size_t reqsize)
     return this;
 }
 
-APU_DECLARE(apr_rmm_off_t) apr_rmm_realloc(apr_rmm_t *rmm, void *entity,
+APR_DECLARE(apr_rmm_off_t) apr_rmm_realloc(apr_rmm_t *rmm, void *entity,
                                            apr_size_t reqsize)
 {
     apr_rmm_off_t this;
@@ -372,7 +372,7 @@ APU_DECLARE(apr_rmm_off_t) apr_rmm_realloc(apr_rmm_t *rmm, void *entity,
     return this;
 }
 
-APU_DECLARE(apr_status_t) apr_rmm_free(apr_rmm_t *rmm, apr_rmm_off_t this)
+APR_DECLARE(apr_status_t) apr_rmm_free(apr_rmm_t *rmm, apr_rmm_off_t this)
 {
     apr_status_t rv;
     struct rmm_block_t *blk;
@@ -420,14 +420,14 @@ APU_DECLARE(apr_status_t) apr_rmm_free(apr_rmm_t *rmm, apr_rmm_off_t this)
     return APR_ANYLOCK_UNLOCK(&rmm->lock);
 }
 
-APU_DECLARE(void *) apr_rmm_addr_get(apr_rmm_t *rmm, apr_rmm_off_t entity) 
+APR_DECLARE(void *) apr_rmm_addr_get(apr_rmm_t *rmm, apr_rmm_off_t entity) 
 {
     /* debug-sanity checking here would be good
      */
     return (void*)((char*)rmm->base + entity);
 }
 
-APU_DECLARE(apr_rmm_off_t) apr_rmm_offset_get(apr_rmm_t *rmm, void* entity)
+APR_DECLARE(apr_rmm_off_t) apr_rmm_offset_get(apr_rmm_t *rmm, void* entity)
 {
     /* debug, or always, sanity checking here would be good
      * since the primitive is apr_rmm_off_t, I don't mind penalizing
@@ -437,7 +437,7 @@ APU_DECLARE(apr_rmm_off_t) apr_rmm_offset_get(apr_rmm_t *rmm, void* entity)
     return ((char*)entity - (char*)rmm->base);
 }
 
-APU_DECLARE(apr_size_t) apr_rmm_overhead_get(int n) 
+APR_DECLARE(apr_size_t) apr_rmm_overhead_get(int n) 
 {
     /* overhead per block is at most APR_ALIGN_DEFAULT(1) wasted bytes
      * for alignment overhead, plus the size of the rmm_block_t

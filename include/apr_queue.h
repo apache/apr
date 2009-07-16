@@ -52,7 +52,7 @@ typedef struct apr_queue_t apr_queue_t;
  * @param queue_capacity maximum size of the queue
  * @param a pool to allocate queue from
  */
-APU_DECLARE(apr_status_t) apr_queue_create(apr_queue_t **queue, 
+APR_DECLARE(apr_status_t) apr_queue_create(apr_queue_t **queue, 
                                            unsigned int queue_capacity, 
                                            apr_pool_t *a);
 
@@ -65,7 +65,7 @@ APU_DECLARE(apr_status_t) apr_queue_create(apr_queue_t **queue,
  * @returns APR_EOF the queue has been terminated
  * @returns APR_SUCCESS on a successful push
  */
-APU_DECLARE(apr_status_t) apr_queue_push(apr_queue_t *queue, void *data);
+APR_DECLARE(apr_status_t) apr_queue_push(apr_queue_t *queue, void *data);
 
 /**
  * pop/get an object from the queue, blocking if the queue is already empty
@@ -76,7 +76,7 @@ APU_DECLARE(apr_status_t) apr_queue_push(apr_queue_t *queue, void *data);
  * @returns APR_EOF if the queue has been terminated
  * @returns APR_SUCCESS on a successful pop
  */
-APU_DECLARE(apr_status_t) apr_queue_pop(apr_queue_t *queue, void **data);
+APR_DECLARE(apr_status_t) apr_queue_pop(apr_queue_t *queue, void **data);
 
 /**
  * push/add an object to the queue, returning immediately if the queue is full
@@ -88,7 +88,7 @@ APU_DECLARE(apr_status_t) apr_queue_pop(apr_queue_t *queue, void **data);
  * @returns APR_EOF the queue has been terminated
  * @returns APR_SUCCESS on a successful push
  */
-APU_DECLARE(apr_status_t) apr_queue_trypush(apr_queue_t *queue, void *data);
+APR_DECLARE(apr_status_t) apr_queue_trypush(apr_queue_t *queue, void *data);
 
 /**
  * pop/get an object to the queue, returning immediately if the queue is empty
@@ -100,7 +100,7 @@ APU_DECLARE(apr_status_t) apr_queue_trypush(apr_queue_t *queue, void *data);
  * @returns APR_EOF the queue has been terminated
  * @returns APR_SUCCESS on a successful push
  */
-APU_DECLARE(apr_status_t) apr_queue_trypop(apr_queue_t *queue, void **data);
+APR_DECLARE(apr_status_t) apr_queue_trypop(apr_queue_t *queue, void **data);
 
 /**
  * returns the size of the queue.
@@ -110,14 +110,14 @@ APU_DECLARE(apr_status_t) apr_queue_trypop(apr_queue_t *queue, void **data);
  * @param queue the queue
  * @returns the size of the queue
  */
-APU_DECLARE(unsigned int) apr_queue_size(apr_queue_t *queue);
+APR_DECLARE(unsigned int) apr_queue_size(apr_queue_t *queue);
 
 /**
  * interrupt all the threads blocking on this queue.
  *
  * @param queue the queue
  */
-APU_DECLARE(apr_status_t) apr_queue_interrupt_all(apr_queue_t *queue);
+APR_DECLARE(apr_status_t) apr_queue_interrupt_all(apr_queue_t *queue);
 
 /**
  * terminate the queue, sending an interrupt to all the
@@ -125,7 +125,7 @@ APU_DECLARE(apr_status_t) apr_queue_interrupt_all(apr_queue_t *queue);
  *
  * @param queue the queue
  */
-APU_DECLARE(apr_status_t) apr_queue_term(apr_queue_t *queue);
+APR_DECLARE(apr_status_t) apr_queue_term(apr_queue_t *queue);
 
 #ifdef __cplusplus
 }

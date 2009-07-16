@@ -65,7 +65,7 @@ static int apr_ldap_rebind_set_callback(LDAP *ld);
 static apr_status_t apr_ldap_rebind_remove_helper(void *data);
 
 /* APR utility routine used to create the xref_lock. */
-APU_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_init(apr_pool_t *pool)
+APR_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_init(apr_pool_t *pool)
 {
     apr_status_t retcode = APR_SUCCESS;
 
@@ -83,7 +83,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_init(apr_pool_t *pool)
 }
 
 
-APU_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_add(apr_pool_t *pool,
+APR_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_add(apr_pool_t *pool,
                                                    LDAP *ld, 
                                                    const char *bindDN, 
                                                    const char *bindPW)
@@ -135,7 +135,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_add(apr_pool_t *pool,
 }
 
 
-APU_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_remove(LDAP *ld)
+APR_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_remove(LDAP *ld)
 {
     apr_ldap_rebind_entry_t *tmp_xref, *prev = NULL;
 

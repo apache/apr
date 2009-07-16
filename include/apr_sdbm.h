@@ -83,7 +83,7 @@ typedef struct {
  * @remark The sdbm name is not a true file name, as sdbm appends suffixes 
  * for seperate data and index files.
  */
-APU_DECLARE(apr_status_t) apr_sdbm_open(apr_sdbm_t **db, const char *name, 
+APR_DECLARE(apr_status_t) apr_sdbm_open(apr_sdbm_t **db, const char *name, 
                                         apr_int32_t mode, 
                                         apr_fileperms_t perms, apr_pool_t *p);
 
@@ -91,7 +91,7 @@ APU_DECLARE(apr_status_t) apr_sdbm_open(apr_sdbm_t **db, const char *name,
  * Close an sdbm file previously opened by apr_sdbm_open
  * @param db The database to close
  */
-APU_DECLARE(apr_status_t) apr_sdbm_close(apr_sdbm_t *db);
+APR_DECLARE(apr_status_t) apr_sdbm_close(apr_sdbm_t *db);
 
 /**
  * Lock an sdbm database for concurency of multiple operations
@@ -108,13 +108,13 @@ APU_DECLARE(apr_status_t) apr_sdbm_close(apr_sdbm_t *db);
  * The apr_sdbm_lock call requires the database to be opened with the
  * APR_SHARELOCK mode value.
  */
-APU_DECLARE(apr_status_t) apr_sdbm_lock(apr_sdbm_t *db, int type);
+APR_DECLARE(apr_status_t) apr_sdbm_lock(apr_sdbm_t *db, int type);
 
 /**
  * Release an sdbm lock previously aquired by apr_sdbm_lock
  * @param db The database to unlock
  */
-APU_DECLARE(apr_status_t) apr_sdbm_unlock(apr_sdbm_t *db);
+APR_DECLARE(apr_status_t) apr_sdbm_unlock(apr_sdbm_t *db);
 
 /**
  * Fetch an sdbm record value by key
@@ -122,7 +122,7 @@ APU_DECLARE(apr_status_t) apr_sdbm_unlock(apr_sdbm_t *db);
  * @param value The value datum retrieved for this record
  * @param key The key datum to find this record
  */
-APU_DECLARE(apr_status_t) apr_sdbm_fetch(apr_sdbm_t *db, 
+APR_DECLARE(apr_status_t) apr_sdbm_fetch(apr_sdbm_t *db, 
                                          apr_sdbm_datum_t *value, 
                                          apr_sdbm_datum_t key);
 
@@ -137,7 +137,7 @@ APU_DECLARE(apr_status_t) apr_sdbm_fetch(apr_sdbm_t *db,
  *           APR_SDBM_REPLACE    overwrite any existing record for key
  * </PRE>
  */
-APU_DECLARE(apr_status_t) apr_sdbm_store(apr_sdbm_t *db, apr_sdbm_datum_t key,
+APR_DECLARE(apr_status_t) apr_sdbm_store(apr_sdbm_t *db, apr_sdbm_datum_t key,
                                          apr_sdbm_datum_t value, int opt);
 
 /**
@@ -146,7 +146,7 @@ APU_DECLARE(apr_status_t) apr_sdbm_store(apr_sdbm_t *db, apr_sdbm_datum_t key,
  * @param key The key datum of the record to delete
  * @remark It is not an error to delete a non-existent record.
  */
-APU_DECLARE(apr_status_t) apr_sdbm_delete(apr_sdbm_t *db, 
+APR_DECLARE(apr_status_t) apr_sdbm_delete(apr_sdbm_t *db, 
                                           const apr_sdbm_datum_t key);
 
 /**
@@ -158,19 +158,19 @@ APU_DECLARE(apr_status_t) apr_sdbm_delete(apr_sdbm_t *db,
  * prior to retrieving the first record, and hold the lock until after the
  * last call to apr_sdbm_nextkey.
  */
-APU_DECLARE(apr_status_t) apr_sdbm_firstkey(apr_sdbm_t *db, apr_sdbm_datum_t *key);
+APR_DECLARE(apr_status_t) apr_sdbm_firstkey(apr_sdbm_t *db, apr_sdbm_datum_t *key);
 
 /**
  * Retrieve the next record key from an sdbm
  * @param db The database 
  * @param key The key datum of the next record
  */
-APU_DECLARE(apr_status_t) apr_sdbm_nextkey(apr_sdbm_t *db, apr_sdbm_datum_t *key);
+APR_DECLARE(apr_status_t) apr_sdbm_nextkey(apr_sdbm_t *db, apr_sdbm_datum_t *key);
 
 /**
  * Returns true if the sdbm database opened for read-only access
  * @param db The database to test
  */
-APU_DECLARE(int) apr_sdbm_rdonly(apr_sdbm_t *db);
+APR_DECLARE(int) apr_sdbm_rdonly(apr_sdbm_t *db);
 /** @} */
 #endif /* APR_SDBM_H */
