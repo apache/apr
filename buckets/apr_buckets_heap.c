@@ -40,7 +40,7 @@ static void heap_bucket_destroy(void *data)
 
 /* Warning: if you change this function, be sure to
  * change apr_bucket_pool_make() too! */
-APU_DECLARE(apr_bucket *) apr_bucket_heap_make(apr_bucket *b, const char *buf,
+APR_DECLARE(apr_bucket *) apr_bucket_heap_make(apr_bucket *b, const char *buf,
                                                apr_size_t length,
                                                void (*free_func)(void *data))
 {
@@ -73,7 +73,7 @@ APU_DECLARE(apr_bucket *) apr_bucket_heap_make(apr_bucket *b, const char *buf,
     return b;
 }
 
-APU_DECLARE(apr_bucket *) apr_bucket_heap_create(const char *buf,
+APR_DECLARE(apr_bucket *) apr_bucket_heap_create(const char *buf,
                                                  apr_size_t length,
                                                  void (*free_func)(void *data),
                                                  apr_bucket_alloc_t *list)
@@ -86,7 +86,7 @@ APU_DECLARE(apr_bucket *) apr_bucket_heap_create(const char *buf,
     return apr_bucket_heap_make(b, buf, length, free_func);
 }
 
-APU_DECLARE_DATA const apr_bucket_type_t apr_bucket_type_heap = {
+APR_DECLARE_DATA const apr_bucket_type_t apr_bucket_type_heap = {
     "HEAP", 5, APR_BUCKET_DATA,
     heap_bucket_destroy,
     heap_bucket_read,

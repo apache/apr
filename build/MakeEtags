@@ -29,7 +29,6 @@ etags=${ETAGS-etags}
 # that obscure the function signatures.
 
 ignore=AP_DECLARE,AP_DECLARE_NONSTD,__declspec,APR_DECLARE,APR_DECLARE_NONSTD
-ignore=$ignore,APU_DECLARE,APU_DECLARE_NONSTD
 
 # Create an etags file at the root of the source
 # tree, then create symbol links to it from each

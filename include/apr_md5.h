@@ -88,7 +88,7 @@ struct apr_md5_ctx_t {
  * MD5 Initialize.  Begins an MD5 operation, writing a new context.
  * @param context The MD5 context to initialize.
  */
-APU_DECLARE(apr_status_t) apr_md5_init(apr_md5_ctx_t *context);
+APR_DECLARE(apr_status_t) apr_md5_init(apr_md5_ctx_t *context);
 
 /**
  * MD5 translation setup.  Provides the APR translation handle to be used 
@@ -96,7 +96,7 @@ APU_DECLARE(apr_status_t) apr_md5_init(apr_md5_ctx_t *context);
  * @param context The MD5 content to set the translation for.
  * @param xlate The translation handle to use for this MD5 context 
  */
-APU_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context,
+APR_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context,
                                             apr_xlate_t *xlate);
 
 /**
@@ -106,7 +106,7 @@ APU_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context,
  * @param input next message block to update
  * @param inputLen The length of the next message block
  */
-APU_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
+APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
                                          const void *input,
                                          apr_size_t inputLen);
 
@@ -116,7 +116,7 @@ APU_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
  * @param digest The final MD5 digest
  * @param context The MD5 content we are finalizing.
  */
-APU_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[APR_MD5_DIGESTSIZE],
+APR_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[APR_MD5_DIGESTSIZE],
                                         apr_md5_ctx_t *context);
 
 /**
@@ -125,7 +125,7 @@ APU_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[APR_MD5_DIGESTSIZE]
  * @param input The message block to use
  * @param inputLen The length of the message block
  */
-APU_DECLARE(apr_status_t) apr_md5(unsigned char digest[APR_MD5_DIGESTSIZE],
+APR_DECLARE(apr_status_t) apr_md5(unsigned char digest[APR_MD5_DIGESTSIZE],
                                   const void *input,
                                   apr_size_t inputLen);
 
@@ -136,7 +136,7 @@ APU_DECLARE(apr_status_t) apr_md5(unsigned char digest[APR_MD5_DIGESTSIZE],
  * @param result The string to store the encoded password in
  * @param nbytes The size of the result buffer
  */
-APU_DECLARE(apr_status_t) apr_md5_encode(const char *password, const char *salt,
+APR_DECLARE(apr_status_t) apr_md5_encode(const char *password, const char *salt,
                                          char *result, apr_size_t nbytes);
 
 
@@ -150,7 +150,7 @@ APU_DECLARE(apr_status_t) apr_md5_encode(const char *password, const char *salt,
  * @param passwd The password to validate
  * @param hash The password to validate against
  */
-APU_DECLARE(apr_status_t) apr_password_validate(const char *passwd, 
+APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd, 
                                                 const char *hash);
 
 

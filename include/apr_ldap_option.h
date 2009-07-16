@@ -214,7 +214,7 @@ struct apr_ldap_opt_tls_cert_t {
  * @param result_err The apr_ldap_err_t structure contained detailed results
  *        of the operation.
  */
-APU_DECLARE_LDAP(int) apr_ldap_get_option(apr_pool_t *pool,
+APR_DECLARE_LDAP(int) apr_ldap_get_option(apr_pool_t *pool,
                                           LDAP *ldap,
                                           int option,
                                           void *outvalue,
@@ -236,7 +236,7 @@ APU_DECLARE_LDAP(int) apr_ldap_get_option(apr_pool_t *pool,
  * @param result_err The apr_ldap_err_t structure contained detailed results
  *        of the operation.
  */
-APU_DECLARE_LDAP(int) apr_ldap_set_option(apr_pool_t *pool,
+APR_DECLARE_LDAP(int) apr_ldap_set_option(apr_pool_t *pool,
                                           LDAP *ldap,
                                           int option,
                                           const void *invalue,

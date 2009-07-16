@@ -74,7 +74,7 @@ typedef struct apr_thread_pool apr_thread_pool_t;
  * @return APR_SUCCESS if the thread pool was created successfully. Otherwise,
  * the error code.
  */
-APU_DECLARE(apr_status_t) apr_thread_pool_create(apr_thread_pool_t **me,
+APR_DECLARE(apr_status_t) apr_thread_pool_create(apr_thread_pool_t **me,
                                                  apr_size_t init_threads,
                                                  apr_size_t max_threads,
                                                  apr_pool_t *pool);
@@ -83,7 +83,7 @@ APU_DECLARE(apr_status_t) apr_thread_pool_create(apr_thread_pool_t **me,
  * Destroy the thread pool and stop all the threads
  * @return APR_SUCCESS if all threads are stopped.
  */
-APU_DECLARE(apr_status_t) apr_thread_pool_destroy(apr_thread_pool_t *me);
+APR_DECLARE(apr_status_t) apr_thread_pool_destroy(apr_thread_pool_t *me);
 
 /**
  * Schedule a task to the bottom of the tasks of same priority.
@@ -94,7 +94,7 @@ APU_DECLARE(apr_status_t) apr_thread_pool_destroy(apr_thread_pool_t *me);
  * @param owner Owner of this task.
  * @return APR_SUCCESS if the task had been scheduled successfully
  */
-APU_DECLARE(apr_status_t) apr_thread_pool_push(apr_thread_pool_t *me,
+APR_DECLARE(apr_status_t) apr_thread_pool_push(apr_thread_pool_t *me,
                                                apr_thread_start_t func,
                                                void *param,
                                                apr_byte_t priority,
@@ -108,7 +108,7 @@ APU_DECLARE(apr_status_t) apr_thread_pool_push(apr_thread_pool_t *me,
  * @param owner Owner of this task.
  * @return APR_SUCCESS if the task had been scheduled successfully
  */
-APU_DECLARE(apr_status_t) apr_thread_pool_schedule(apr_thread_pool_t *me,
+APR_DECLARE(apr_status_t) apr_thread_pool_schedule(apr_thread_pool_t *me,
                                                    apr_thread_start_t func,
                                                    void *param,
                                                    apr_interval_time_t time,
@@ -123,7 +123,7 @@ APU_DECLARE(apr_status_t) apr_thread_pool_schedule(apr_thread_pool_t *me,
  * @param owner Owner of this task.
  * @return APR_SUCCESS if the task had been scheduled successfully
  */
-APU_DECLARE(apr_status_t) apr_thread_pool_top(apr_thread_pool_t *me,
+APR_DECLARE(apr_status_t) apr_thread_pool_top(apr_thread_pool_t *me,
                                               apr_thread_start_t func,
                                               void *param,
                                               apr_byte_t priority,
@@ -138,7 +138,7 @@ APU_DECLARE(apr_status_t) apr_thread_pool_top(apr_thread_pool_t *me,
  * @note The task function should not be calling cancel, otherwise the function
  * may get stuck forever. The function assert if it detect such a case.
  */
-APU_DECLARE(apr_status_t) apr_thread_pool_tasks_cancel(apr_thread_pool_t *me,
+APR_DECLARE(apr_status_t) apr_thread_pool_tasks_cancel(apr_thread_pool_t *me,
                                                        void *owner);
 
 /**
@@ -146,35 +146,35 @@ APU_DECLARE(apr_status_t) apr_thread_pool_tasks_cancel(apr_thread_pool_t *me,
  * @param me The thread pool
  * @return Number of tasks in the queue
  */
-APU_DECLARE(apr_size_t) apr_thread_pool_tasks_count(apr_thread_pool_t *me);
+APR_DECLARE(apr_size_t) apr_thread_pool_tasks_count(apr_thread_pool_t *me);
 
 /**
  * Get the current number of scheduled tasks waiting in the queue
  * @param me The thread pool
  * @return Number of scheduled tasks in the queue
  */
-APU_DECLARE(apr_size_t) apr_thread_pool_scheduled_tasks_count(apr_thread_pool_t *me);
+APR_DECLARE(apr_size_t) apr_thread_pool_scheduled_tasks_count(apr_thread_pool_t *me);
 
 /**
  * Get the current number of threads
  * @param me The thread pool
  * @return Total number of threads
  */
-APU_DECLARE(apr_size_t) apr_thread_pool_threads_count(apr_thread_pool_t *me);
+APR_DECLARE(apr_size_t) apr_thread_pool_threads_count(apr_thread_pool_t *me);
 
 /**
  * Get the current number of busy threads
  * @param me The thread pool
  * @return Number of busy threads
  */
-APU_DECLARE(apr_size_t) apr_thread_pool_busy_count(apr_thread_pool_t *me);
+APR_DECLARE(apr_size_t) apr_thread_pool_busy_count(apr_thread_pool_t *me);
 
 /**
  * Get the current number of idle threads
  * @param me The thread pool
  * @return Number of idle threads
  */
-APU_DECLARE(apr_size_t) apr_thread_pool_idle_count(apr_thread_pool_t *me);
+APR_DECLARE(apr_size_t) apr_thread_pool_idle_count(apr_thread_pool_t *me);
 
 /**
  * Access function for the maximum number of idle threads. Number of current
@@ -183,7 +183,7 @@ APU_DECLARE(apr_size_t) apr_thread_pool_idle_count(apr_thread_pool_t *me);
  * @param cnt The number
  * @return The number of threads that were stopped.
  */
-APU_DECLARE(apr_size_t) apr_thread_pool_idle_max_set(apr_thread_pool_t *me,
+APR_DECLARE(apr_size_t) apr_thread_pool_idle_max_set(apr_thread_pool_t *me,
                                                      apr_size_t cnt);
 
 /**
@@ -191,7 +191,7 @@ APU_DECLARE(apr_size_t) apr_thread_pool_idle_max_set(apr_thread_pool_t *me,
  * @param me The thread pool
  * @return Number of tasks that have run
  */
-APU_DECLARE(apr_size_t)
+APR_DECLARE(apr_size_t)
     apr_thread_pool_tasks_run_count(apr_thread_pool_t * me);
 
 /**
@@ -199,7 +199,7 @@ APU_DECLARE(apr_size_t)
  * @param me The thread pool
  * @return High water mark of tasks waiting to run
  */
-APU_DECLARE(apr_size_t)
+APR_DECLARE(apr_size_t)
     apr_thread_pool_tasks_high_count(apr_thread_pool_t * me);
 
 /**
@@ -207,7 +207,7 @@ APU_DECLARE(apr_size_t)
  * @param me The thread pool
  * @return High water mark of threads in thread pool
  */
-APU_DECLARE(apr_size_t)
+APR_DECLARE(apr_size_t)
     apr_thread_pool_threads_high_count(apr_thread_pool_t * me);
 
 /**
@@ -215,7 +215,7 @@ APU_DECLARE(apr_size_t)
  * @param me The thread pool
  * @return Number of idle threads that timed out
  */
-APU_DECLARE(apr_size_t)
+APR_DECLARE(apr_size_t)
     apr_thread_pool_threads_idle_timeout_count(apr_thread_pool_t * me);
 
 /**
@@ -223,7 +223,7 @@ APU_DECLARE(apr_size_t)
  * @param me The thread pool
  * @return The current maximum number
  */
-APU_DECLARE(apr_size_t) apr_thread_pool_idle_max_get(apr_thread_pool_t *me);
+APR_DECLARE(apr_size_t) apr_thread_pool_idle_max_get(apr_thread_pool_t *me);
 
 /**
  * Access function for the maximum number of threads.
@@ -231,7 +231,7 @@ APU_DECLARE(apr_size_t) apr_thread_pool_idle_max_get(apr_thread_pool_t *me);
  * @param cnt Number of threads
  * @return The original maximum number of threads
  */
-APU_DECLARE(apr_size_t) apr_thread_pool_thread_max_set(apr_thread_pool_t *me,
+APR_DECLARE(apr_size_t) apr_thread_pool_thread_max_set(apr_thread_pool_t *me,
                                                        apr_size_t cnt);
 
 /**
@@ -244,7 +244,7 @@ APU_DECLARE(apr_size_t) apr_thread_pool_thread_max_set(apr_thread_pool_t *me,
  * till it reaps itself
  * @return The original maximum wait time
  */
-APU_DECLARE(apr_interval_time_t)
+APR_DECLARE(apr_interval_time_t)
     apr_thread_pool_idle_wait_set(apr_thread_pool_t * me,
                                   apr_interval_time_t timeout);
 
@@ -254,7 +254,7 @@ APU_DECLARE(apr_interval_time_t)
  * @param me The thread pool
  * @return The current maximum wait time
  */
-APU_DECLARE(apr_interval_time_t)
+APR_DECLARE(apr_interval_time_t)
     apr_thread_pool_idle_wait_get(apr_thread_pool_t * me);
 
 /**
@@ -262,7 +262,7 @@ APU_DECLARE(apr_interval_time_t)
  * @param me The thread pool
  * @return The current maximum number
  */
-APU_DECLARE(apr_size_t) apr_thread_pool_thread_max_get(apr_thread_pool_t *me);
+APR_DECLARE(apr_size_t) apr_thread_pool_thread_max_get(apr_thread_pool_t *me);
 
 /**
  * Access function for the threshold of tasks in queue to trigger a new thread.
@@ -270,7 +270,7 @@ APU_DECLARE(apr_size_t) apr_thread_pool_thread_max_get(apr_thread_pool_t *me);
  * @param cnt The new threshold
  * @return The original threshold
  */
-APU_DECLARE(apr_size_t) apr_thread_pool_threshold_set(apr_thread_pool_t *me,
+APR_DECLARE(apr_size_t) apr_thread_pool_threshold_set(apr_thread_pool_t *me,
                                                       apr_size_t val);
 
 /**
@@ -278,7 +278,7 @@ APU_DECLARE(apr_size_t) apr_thread_pool_threshold_set(apr_thread_pool_t *me,
  * @param me The thread pool
  * @return The current threshold
  */
-APU_DECLARE(apr_size_t) apr_thread_pool_threshold_get(apr_thread_pool_t * me);
+APR_DECLARE(apr_size_t) apr_thread_pool_threshold_get(apr_thread_pool_t * me);
 
 /**
  * Get owner of the task currently been executed by the thread.
@@ -286,7 +286,7 @@ APU_DECLARE(apr_size_t) apr_thread_pool_threshold_get(apr_thread_pool_t * me);
  * @param owner Pointer to receive owner of the task.
  * @return APR_SUCCESS if the owner is retrieved successfully
  */
-APU_DECLARE(apr_status_t) apr_thread_pool_task_owner_get(apr_thread_t *thd,
+APR_DECLARE(apr_status_t) apr_thread_pool_task_owner_get(apr_thread_t *thd,
                                                          void **owner);
 
 /** @} */

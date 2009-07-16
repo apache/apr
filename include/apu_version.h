@@ -120,10 +120,10 @@ extern "C" {
  *  @param pvsn Pointer to a version structure for returning the version
  *              information.
  */
-APU_DECLARE(void) apu_version(apr_version_t *pvsn);
+APR_DECLARE(void) apu_version(apr_version_t *pvsn);
 
 /** Return APU's version information as a string. */
-APU_DECLARE(const char *) apu_version_string(void);
+APR_DECLARE(const char *) apu_version_string(void);
 
 #ifdef __cplusplus
 }

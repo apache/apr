@@ -63,7 +63,7 @@ typedef struct apr_xlate_t            apr_xlate_t;
  *  if charset transcoding is not available in this instance of
  *  apr-util at all (i.e., APR_HAS_XLATE is undefined).
  */
-APU_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset, 
+APR_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset, 
                                          const char *topage, 
                                          const char *frompage, 
                                          apr_pool_t *pool);
@@ -90,7 +90,7 @@ APU_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset,
  *  Return APR_ENOTIMPL if charset transcoding is not available
  *  in this instance of apr-util (i.e., APR_HAS_XLATE is undefined).
  */
-APU_DECLARE(apr_status_t) apr_xlate_sb_get(apr_xlate_t *convset, int *onoff);
+APR_DECLARE(apr_status_t) apr_xlate_sb_get(apr_xlate_t *convset, int *onoff);
 
 /**
  * Convert a buffer of text from one codepage to another.
@@ -114,7 +114,7 @@ APU_DECLARE(apr_status_t) apr_xlate_sb_get(apr_xlate_t *convset, int *onoff);
  * the inbuf and inbytes_left parameters as NULL.  (Note that this
  * mode only works from version 1.1.0 onwards)
  */
-APU_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset, 
+APR_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset, 
                                                 const char *inbuf, 
                                                 apr_size_t *inbytes_left, 
                                                 char *outbuf,
@@ -131,7 +131,7 @@ APU_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset,
  * @param inchar The character to convert
  * @param outchar The converted character
  */
-APU_DECLARE(apr_status_t) apr_xlate_conv_char(apr_xlate_t *convset, 
+APR_DECLARE(apr_status_t) apr_xlate_conv_char(apr_xlate_t *convset, 
                                               char inchar, char outchar);
 #endif
 
@@ -143,7 +143,7 @@ APU_DECLARE(apr_status_t) apr_xlate_conv_char(apr_xlate_t *convset,
  * @warning This only works when converting between single-byte character sets.
  *          -1 will be returned if the conversion can't be performed.
  */
-APU_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset, 
+APR_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset, 
                                              unsigned char inchar);
 
 /**
@@ -153,7 +153,7 @@ APU_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset,
  *  Return APR_ENOTIMPL if charset transcoding is not available
  *  in this instance of apr-util (i.e., APR_HAS_XLATE is undefined).
  */
-APU_DECLARE(apr_status_t) apr_xlate_close(apr_xlate_t *convset);
+APR_DECLARE(apr_status_t) apr_xlate_close(apr_xlate_t *convset);
 
 /** @} */
 #ifdef __cplusplus

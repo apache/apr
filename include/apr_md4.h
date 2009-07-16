@@ -81,7 +81,7 @@ struct apr_md4_ctx_t {
  * MD4 Initialize.  Begins an MD4 operation, writing a new context.
  * @param context The MD4 context to initialize.
  */
-APU_DECLARE(apr_status_t) apr_md4_init(apr_md4_ctx_t *context);
+APR_DECLARE(apr_status_t) apr_md4_init(apr_md4_ctx_t *context);
 
 #if APR_HAS_XLATE
 /**
@@ -90,7 +90,7 @@ APU_DECLARE(apr_status_t) apr_md4_init(apr_md4_ctx_t *context);
  * @param context The MD4 content to set the translation for.
  * @param xlate The translation handle to use for this MD4 context 
  */
-APU_DECLARE(apr_status_t) apr_md4_set_xlate(apr_md4_ctx_t *context,
+APR_DECLARE(apr_status_t) apr_md4_set_xlate(apr_md4_ctx_t *context,
                                             apr_xlate_t *xlate);
 #else
 #define apr_md4_set_xlate(context, xlate) APR_ENOTIMPL
@@ -103,7 +103,7 @@ APU_DECLARE(apr_status_t) apr_md4_set_xlate(apr_md4_ctx_t *context,
  * @param input next message block to update
  * @param inputLen The length of the next message block
  */
-APU_DECLARE(apr_status_t) apr_md4_update(apr_md4_ctx_t *context,
+APR_DECLARE(apr_status_t) apr_md4_update(apr_md4_ctx_t *context,
                                          const unsigned char *input,
                                          apr_size_t inputLen);
 
@@ -113,7 +113,7 @@ APU_DECLARE(apr_status_t) apr_md4_update(apr_md4_ctx_t *context,
  * @param digest The final MD4 digest
  * @param context The MD4 content we are finalizing.
  */
-APU_DECLARE(apr_status_t) apr_md4_final(
+APR_DECLARE(apr_status_t) apr_md4_final(
                                     unsigned char digest[APR_MD4_DIGESTSIZE],
                                     apr_md4_ctx_t *context);
 
@@ -123,7 +123,7 @@ APU_DECLARE(apr_status_t) apr_md4_final(
  * @param input message block to use
  * @param inputLen The length of the message block
  */
-APU_DECLARE(apr_status_t) apr_md4(unsigned char digest[APR_MD4_DIGESTSIZE],
+APR_DECLARE(apr_status_t) apr_md4(unsigned char digest[APR_MD4_DIGESTSIZE],
                                   const unsigned char *input,
                                   apr_size_t inputLen);
 

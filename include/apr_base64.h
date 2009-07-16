@@ -56,7 +56,7 @@ extern "C" {
  * @param len the length of an unencrypted string.
  * @return the length of the string after it is encrypted
  */ 
-APU_DECLARE(int) apr_base64_encode_len(int len);
+APR_DECLARE(int) apr_base64_encode_len(int len);
 
 /**
  * Encode a text string using base64encoding.
@@ -65,7 +65,7 @@ APU_DECLARE(int) apr_base64_encode_len(int len);
  * @param len_plain_src The length of the plain text string
  * @return the length of the encoded string
  */ 
-APU_DECLARE(int) apr_base64_encode(char * coded_dst, const char *plain_src, 
+APR_DECLARE(int) apr_base64_encode(char * coded_dst, const char *plain_src, 
                                  int len_plain_src);
 
 /**
@@ -75,7 +75,7 @@ APU_DECLARE(int) apr_base64_encode(char * coded_dst, const char *plain_src,
  * @param len_plain_src The length of the plain text string
  * @return the length of the encoded string
  */ 
-APU_DECLARE(int) apr_base64_encode_binary(char * coded_dst, 
+APR_DECLARE(int) apr_base64_encode_binary(char * coded_dst, 
                                         const unsigned char *plain_src,
                                         int len_plain_src);
 
@@ -85,7 +85,7 @@ APU_DECLARE(int) apr_base64_encode_binary(char * coded_dst,
  * @param coded_src The encoded string
  * @return the maximum required buffer length for the plain text string
  */ 
-APU_DECLARE(int) apr_base64_decode_len(const char * coded_src);
+APR_DECLARE(int) apr_base64_decode_len(const char * coded_src);
 
 /**
  * Decode a string to plain text
@@ -93,7 +93,7 @@ APU_DECLARE(int) apr_base64_decode_len(const char * coded_src);
  * @param coded_src The encoded string 
  * @return the length of the plain text string
  */ 
-APU_DECLARE(int) apr_base64_decode(char * plain_dst, const char *coded_src);
+APR_DECLARE(int) apr_base64_decode(char * plain_dst, const char *coded_src);
 
 /**
  * Decode an EBCDIC string to plain text
@@ -101,7 +101,7 @@ APU_DECLARE(int) apr_base64_decode(char * plain_dst, const char *coded_src);
  * @param coded_src The encoded string 
  * @return the length of the plain text string
  */ 
-APU_DECLARE(int) apr_base64_decode_binary(unsigned char * plain_dst, 
+APR_DECLARE(int) apr_base64_decode_binary(unsigned char * plain_dst, 
                                         const char *coded_src);
 
 /** @} */

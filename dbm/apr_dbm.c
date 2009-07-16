@@ -188,7 +188,7 @@ static apr_status_t dbm_open_type(apr_dbm_type_t const* * vtable,
 #endif /* APR_HAVE_MODULAR_DSO */
 }
 
-APU_DECLARE(apr_status_t) apr_dbm_open_ex(apr_dbm_t **pdb, const char *type, 
+APR_DECLARE(apr_status_t) apr_dbm_open_ex(apr_dbm_t **pdb, const char *type, 
                                           const char *pathname, 
                                           apr_int32_t mode,
                                           apr_fileperms_t perm,
@@ -203,56 +203,56 @@ APU_DECLARE(apr_status_t) apr_dbm_open_ex(apr_dbm_t **pdb, const char *type,
     return rv;
 } 
 
-APU_DECLARE(apr_status_t) apr_dbm_open(apr_dbm_t **pdb, const char *pathname, 
+APR_DECLARE(apr_status_t) apr_dbm_open(apr_dbm_t **pdb, const char *pathname, 
                                        apr_int32_t mode, apr_fileperms_t perm,
                                        apr_pool_t *pool)
 {
     return apr_dbm_open_ex(pdb, DBM_NAME, pathname, mode, perm, pool);
 }
 
-APU_DECLARE(void) apr_dbm_close(apr_dbm_t *dbm)
+APR_DECLARE(void) apr_dbm_close(apr_dbm_t *dbm)
 {
     (*dbm->type->close)(dbm);
 }
 
-APU_DECLARE(apr_status_t) apr_dbm_fetch(apr_dbm_t *dbm, apr_datum_t key,
+APR_DECLARE(apr_status_t) apr_dbm_fetch(apr_dbm_t *dbm, apr_datum_t key,
                                         apr_datum_t *pvalue)
 {
     return (*dbm->type->fetch)(dbm, key, pvalue);
 }
 
-APU_DECLARE(apr_status_t) apr_dbm_store(apr_dbm_t *dbm, apr_datum_t key,
+APR_DECLARE(apr_status_t) apr_dbm_store(apr_dbm_t *dbm, apr_datum_t key,
                                         apr_datum_t value)
 {
     return (*dbm->type->store)(dbm, key, value);
 }
 
-APU_DECLARE(apr_status_t) apr_dbm_delete(apr_dbm_t *dbm, apr_datum_t key)
+APR_DECLARE(apr_status_t) apr_dbm_delete(apr_dbm_t *dbm, apr_datum_t key)
 {
     return (*dbm->type->del)(dbm, key);
 }
 
-APU_DECLARE(int) apr_dbm_exists(apr_dbm_t *dbm, apr_datum_t key)
+APR_DECLARE(int) apr_dbm_exists(apr_dbm_t *dbm, apr_datum_t key)
 {
     return (*dbm->type->exists)(dbm, key);
 }
 
-APU_DECLARE(apr_status_t) apr_dbm_firstkey(apr_dbm_t *dbm, apr_datum_t *pkey)
+APR_DECLARE(apr_status_t) apr_dbm_firstkey(apr_dbm_t *dbm, apr_datum_t *pkey)
 {
     return (*dbm->type->firstkey)(dbm, pkey);
 }
 
-APU_DECLARE(apr_status_t) apr_dbm_nextkey(apr_dbm_t *dbm, apr_datum_t *pkey)
+APR_DECLARE(apr_status_t) apr_dbm_nextkey(apr_dbm_t *dbm, apr_datum_t *pkey)
 {
     return (*dbm->type->nextkey)(dbm, pkey);
 }
 
-APU_DECLARE(void) apr_dbm_freedatum(apr_dbm_t *dbm, apr_datum_t data)
+APR_DECLARE(void) apr_dbm_freedatum(apr_dbm_t *dbm, apr_datum_t data)
 {
     (*dbm->type->freedatum)(dbm, data);
 }
 
-APU_DECLARE(char *) apr_dbm_geterror(apr_dbm_t *dbm, int *errcode,
+APR_DECLARE(char *) apr_dbm_geterror(apr_dbm_t *dbm, int *errcode,
                                      char *errbuf, apr_size_t errbufsize)
 {
     if (errcode != NULL)
@@ -267,7 +267,7 @@ APU_DECLARE(char *) apr_dbm_geterror(apr_dbm_t *dbm, int *errcode,
     return errbuf;
 }
 
-APU_DECLARE(apr_status_t) apr_dbm_get_usednames_ex(apr_pool_t *p, 
+APR_DECLARE(apr_status_t) apr_dbm_get_usednames_ex(apr_pool_t *p, 
                                                    const char *type, 
                                                    const char *pathname,
                                                    const char **used1,
@@ -283,7 +283,7 @@ APU_DECLARE(apr_status_t) apr_dbm_get_usednames_ex(apr_pool_t *p,
     return rv;
 } 
 
-APU_DECLARE(void) apr_dbm_get_usednames(apr_pool_t *p,
+APR_DECLARE(void) apr_dbm_get_usednames(apr_pool_t *p,
                                         const char *pathname,
                                         const char **used1,
                                         const char **used2)
@@ -294,7 +294,7 @@ APU_DECLARE(void) apr_dbm_get_usednames(apr_pool_t *p,
 /* Most DBM libraries take a POSIX mode for creating files.  Don't trust
  * the mode_t type, some platforms may not support it, int is safe.
  */
-APU_DECLARE(int) apr_posix_perms2mode(apr_fileperms_t perm)
+APR_DECLARE(int) apr_posix_perms2mode(apr_fileperms_t perm)
 {
     int mode = 0;
 

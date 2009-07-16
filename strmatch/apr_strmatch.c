@@ -79,7 +79,7 @@ static const char *match_boyer_moore_horspool_nocase(
     return NULL;
 }
 
-APU_DECLARE(const apr_strmatch_pattern *) apr_strmatch_precompile(
+APR_DECLARE(const apr_strmatch_pattern *) apr_strmatch_precompile(
                                               apr_pool_t *p, const char *s,
                                               int case_sensitive)
 {

@@ -195,7 +195,7 @@ static void make_identity_table(apr_xlate_t *convset)
       convset->sbcs_table[i] = i;
 }
 
-APU_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset,
+APR_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset,
                                          const char *topage,
                                          const char *frompage,
                                          apr_pool_t *pool)
@@ -274,13 +274,13 @@ APU_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset,
     return rv;
 }
 
-APU_DECLARE(apr_status_t) apr_xlate_sb_get(apr_xlate_t *convset, int *onoff)
+APR_DECLARE(apr_status_t) apr_xlate_sb_get(apr_xlate_t *convset, int *onoff)
 {
     *onoff = convset->sbcs_table != NULL;
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset,
+APR_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset,
                                                 const char *inbuf,
                                                 apr_size_t *inbytes_left,
                                                 char *outbuf,
@@ -404,7 +404,7 @@ APU_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset,
     return status;
 }
 
-APU_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset,
+APR_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset,
                                              unsigned char inchar)
 {
     if (convset->sbcs_table) {
@@ -415,14 +415,14 @@ APU_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset,
     }
 }
 
-APU_DECLARE(apr_status_t) apr_xlate_close(apr_xlate_t *convset)
+APR_DECLARE(apr_status_t) apr_xlate_close(apr_xlate_t *convset)
 {
     return apr_pool_cleanup_run(convset->pool, convset, apr_xlate_cleanup);
 }
 
 #else /* !APR_HAS_XLATE */
 
-APU_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset,
+APR_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset,
                                          const char *topage,
                                          const char *frompage,
                                          apr_pool_t *pool)
@@ -430,18 +430,18 @@ APU_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset,
     return APR_ENOTIMPL;
 }
 
-APU_DECLARE(apr_status_t) apr_xlate_sb_get(apr_xlate_t *convset, int *onoff)
+APR_DECLARE(apr_status_t) apr_xlate_sb_get(apr_xlate_t *convset, int *onoff)
 {
     return APR_ENOTIMPL;
 }
 
-APU_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset,
+APR_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset,
                                              unsigned char inchar)
 {
     return (-1);
 }
 
-APU_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset,
+APR_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset,
                                                 const char *inbuf,
                                                 apr_size_t *inbytes_left,
                                                 char *outbuf,
@@ -450,7 +450,7 @@ APU_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset,
     return APR_ENOTIMPL;
 }
 
-APU_DECLARE(apr_status_t) apr_xlate_close(apr_xlate_t *convset)
+APR_DECLARE(apr_status_t) apr_xlate_close(apr_xlate_t *convset)
 {
     return APR_ENOTIMPL;
 }

@@ -84,7 +84,7 @@
 #if APR_CHARSET_EBCDIC
 static apr_xlate_t *ebcdic2ascii_xlate;
 
-APU_DECLARE(apr_status_t) apr_SHA1InitEBCDIC(apr_xlate_t *x)
+APR_DECLARE(apr_status_t) apr_SHA1InitEBCDIC(apr_xlate_t *x)
 {
     apr_status_t rv;
     int onoff;
@@ -203,7 +203,7 @@ static void maybe_byte_reverse(apr_uint32_t *buffer, int count)
 
 /* initialize the SHA digest */
 
-APU_DECLARE(void) apr_sha1_init(apr_sha1_ctx_t *sha_info)
+APR_DECLARE(void) apr_sha1_init(apr_sha1_ctx_t *sha_info)
 {
     sha_info->digest[0] = 0x67452301L;
     sha_info->digest[1] = 0xefcdab89L;
@@ -217,7 +217,7 @@ APU_DECLARE(void) apr_sha1_init(apr_sha1_ctx_t *sha_info)
 
 /* update the SHA digest */
 
-APU_DECLARE(void) apr_sha1_update_binary(apr_sha1_ctx_t *sha_info,
+APR_DECLARE(void) apr_sha1_update_binary(apr_sha1_ctx_t *sha_info,
                                      const unsigned char *buffer,
                                      unsigned int count)
 {
@@ -256,7 +256,7 @@ APU_DECLARE(void) apr_sha1_update_binary(apr_sha1_ctx_t *sha_info,
     sha_info->local = count;
 }
 
-APU_DECLARE(void) apr_sha1_update(apr_sha1_ctx_t *sha_info, const char *buf,
+APR_DECLARE(void) apr_sha1_update(apr_sha1_ctx_t *sha_info, const char *buf,
                               unsigned int count)
 {
 #if APR_CHARSET_EBCDIC
@@ -310,7 +310,7 @@ APU_DECLARE(void) apr_sha1_update(apr_sha1_ctx_t *sha_info, const char *buf,
 
 /* finish computing the SHA digest */
 
-APU_DECLARE(void) apr_sha1_final(unsigned char digest[APR_SHA1_DIGESTSIZE],
+APR_DECLARE(void) apr_sha1_final(unsigned char digest[APR_SHA1_DIGESTSIZE],
                              apr_sha1_ctx_t *sha_info)
 {
     int count, i, j;
@@ -345,7 +345,7 @@ APU_DECLARE(void) apr_sha1_final(unsigned char digest[APR_SHA1_DIGESTSIZE],
 }
 
 
-APU_DECLARE(void) apr_sha1_base64(const char *clear, int len, char *out)
+APR_DECLARE(void) apr_sha1_base64(const char *clear, int len, char *out)
 {
     int l;
     apr_sha1_ctx_t context;

@@ -75,7 +75,7 @@ static apr_status_t pipe_bucket_read(apr_bucket *a, const char **str,
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_bucket *) apr_bucket_pipe_make(apr_bucket *b, apr_file_t *p)
+APR_DECLARE(apr_bucket *) apr_bucket_pipe_make(apr_bucket *b, apr_file_t *p)
 {
     /*
      * A pipe is closed when the end is reached in pipe_bucket_read().  If
@@ -98,7 +98,7 @@ APU_DECLARE(apr_bucket *) apr_bucket_pipe_make(apr_bucket *b, apr_file_t *p)
     return b;
 }
 
-APU_DECLARE(apr_bucket *) apr_bucket_pipe_create(apr_file_t *p,
+APR_DECLARE(apr_bucket *) apr_bucket_pipe_create(apr_file_t *p,
                                                  apr_bucket_alloc_t *list)
 {
     apr_bucket *b = apr_bucket_alloc(sizeof(*b), list);
@@ -109,7 +109,7 @@ APU_DECLARE(apr_bucket *) apr_bucket_pipe_create(apr_file_t *p,
     return apr_bucket_pipe_make(b, p);
 }
 
-APU_DECLARE_DATA const apr_bucket_type_t apr_bucket_type_pipe = {
+APR_DECLARE_DATA const apr_bucket_type_t apr_bucket_type_pipe = {
     "PIPE", 5, APR_BUCKET_DATA, 
     apr_bucket_destroy_noop,
     pipe_bucket_read,

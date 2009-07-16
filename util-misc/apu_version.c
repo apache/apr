@@ -19,7 +19,7 @@
 #include "apu.h"
 #include "apu_version.h"
 
-APU_DECLARE(void) apu_version(apr_version_t *pvsn)
+APR_DECLARE(void) apu_version(apr_version_t *pvsn)
 {
     pvsn->major = APU_MAJOR_VERSION;
     pvsn->minor = APU_MINOR_VERSION;
@@ -31,7 +31,7 @@ APU_DECLARE(void) apu_version(apr_version_t *pvsn)
 #endif
 }
 
-APU_DECLARE(const char *) apu_version_string(void)
+APR_DECLARE(const char *) apu_version_string(void)
 {
     return APU_VERSION_STRING;
 }

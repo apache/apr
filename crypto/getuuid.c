@@ -172,7 +172,7 @@ static void get_current_time(apr_uint64_t *timestamp)
     *timestamp = time_now + fudge;
 }
 
-APU_DECLARE(void) apr_uuid_get(apr_uuid_t *uuid)
+APR_DECLARE(void) apr_uuid_get(apr_uuid_t *uuid)
 {
     apr_uint64_t timestamp;
     unsigned char *d = uuid->data;

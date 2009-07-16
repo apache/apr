@@ -33,18 +33,18 @@
 #define apr_palloc(pool,size)	malloc(size)
 #endif
 
-APU_DECLARE_DATA apr_pool_t *apr_hook_global_pool = NULL;
-APU_DECLARE_DATA int apr_hook_debug_enabled = 0;
-APU_DECLARE_DATA const char *apr_hook_debug_current = NULL;
+APR_DECLARE_DATA apr_pool_t *apr_hook_global_pool = NULL;
+APR_DECLARE_DATA int apr_hook_debug_enabled = 0;
+APR_DECLARE_DATA const char *apr_hook_debug_current = NULL;
 
 /** @deprecated @see apr_hook_global_pool */
-APU_DECLARE_DATA apr_pool_t *apr_global_hook_pool = NULL;
+APR_DECLARE_DATA apr_pool_t *apr_global_hook_pool = NULL;
 
 /** @deprecated @see apr_hook_debug_enabled */
-APU_DECLARE_DATA int apr_debug_module_hooks = 0;
+APR_DECLARE_DATA int apr_debug_module_hooks = 0;
 
 /** @deprecated @see apr_hook_debug_current */
-APU_DECLARE_DATA const char *apr_current_hooking_module = NULL;
+APR_DECLARE_DATA const char *apr_current_hooking_module = NULL;
 
 /* NB: This must echo the LINK_##name structure */
 typedef struct
@@ -221,7 +221,7 @@ typedef struct
     apr_array_header_t **paHooks;
 } HookSortEntry;
 
-APU_DECLARE(void) apr_hook_sort_register(const char *szHookName,
+APR_DECLARE(void) apr_hook_sort_register(const char *szHookName,
 					apr_array_header_t **paHooks)
 {
 #ifdef NETWARE
@@ -236,7 +236,7 @@ APU_DECLARE(void) apr_hook_sort_register(const char *szHookName,
     pEntry->paHooks=paHooks;
 }
 
-APU_DECLARE(void) apr_hook_sort_all(void)
+APR_DECLARE(void) apr_hook_sort_all(void)
 {
 #ifdef NETWARE
     get_apd
@@ -258,7 +258,7 @@ static apr_hash_t *s_phOptionalHooks;
 static apr_hash_t *s_phOptionalFunctions;
 #endif
 
-APU_DECLARE(void) apr_hook_deregister_all(void)
+APR_DECLARE(void) apr_hook_deregister_all(void)
 {
 #ifdef NETWARE
     get_apd
@@ -278,7 +278,7 @@ APU_DECLARE(void) apr_hook_deregister_all(void)
     s_phOptionalFunctions=NULL;
 }
 
-APU_DECLARE(void) apr_hook_debug_show(const char *szName,
+APR_DECLARE(void) apr_hook_debug_show(const char *szName,
                                       const char * const *aszPre,
 			              const char * const *aszSucc)
 {
@@ -316,7 +316,7 @@ APU_DECLARE(void) apr_hook_debug_show(const char *szName,
 
 APR_DECLARE_EXTERNAL_HOOK(apr,APU,void,_optional,(void))
 
-APU_DECLARE(apr_array_header_t *) apr_optional_hook_get(const char *szName)
+APR_DECLARE(apr_array_header_t *) apr_optional_hook_get(const char *szName)
 {
 #ifdef NETWARE
     get_apd
@@ -331,7 +331,7 @@ APU_DECLARE(apr_array_header_t *) apr_optional_hook_get(const char *szName)
     return *ppArray;
 }
 
-APU_DECLARE(void) apr_optional_hook_add(const char *szName,void (*pfn)(void),
+APR_DECLARE(void) apr_optional_hook_add(const char *szName,void (*pfn)(void),
 					const char * const *aszPre,
 					const char * const *aszSucc,int nOrder)
 {
@@ -365,7 +365,7 @@ APU_DECLARE(void) apr_optional_hook_add(const char *szName,void (*pfn)(void),
 
 /* optional function support */
 
-APU_DECLARE(apr_opt_fn_t *) apr_dynamic_fn_retrieve(const char *szName)
+APR_DECLARE(apr_opt_fn_t *) apr_dynamic_fn_retrieve(const char *szName)
 {
 #ifdef NETWARE
     get_apd
@@ -376,7 +376,7 @@ APU_DECLARE(apr_opt_fn_t *) apr_dynamic_fn_retrieve(const char *szName)
 }
 
 /* Deprecated */
-APU_DECLARE_NONSTD(void) apr_dynamic_fn_register(const char *szName,
+APR_DECLARE_NONSTD(void) apr_dynamic_fn_register(const char *szName,
                                                   apr_opt_fn_t *pfn)
 {
 #ifdef NETWARE

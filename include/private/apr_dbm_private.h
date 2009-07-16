@@ -39,7 +39,7 @@ extern "C" {
  * Most DBM libraries take a POSIX mode for creating files.  Don't trust
  * the mode_t type, some platforms may not support it, int is safe.
  */
-APU_DECLARE(int) apr_posix_perms2mode(apr_fileperms_t perm);
+APR_DECLARE(int) apr_posix_perms2mode(apr_fileperms_t perm);
 
 /**
  * Structure to describe the operations of the DBM

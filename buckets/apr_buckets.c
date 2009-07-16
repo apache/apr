@@ -16,31 +16,31 @@
 
 #include "apr_buckets.h"
 
-APU_DECLARE_NONSTD(apr_status_t) apr_bucket_setaside_noop(apr_bucket *data,
+APR_DECLARE_NONSTD(apr_status_t) apr_bucket_setaside_noop(apr_bucket *data,
                                                           apr_pool_t *pool)
 {
     return APR_SUCCESS;
 }
 
-APU_DECLARE_NONSTD(apr_status_t) apr_bucket_setaside_notimpl(apr_bucket *data,
+APR_DECLARE_NONSTD(apr_status_t) apr_bucket_setaside_notimpl(apr_bucket *data,
                                                              apr_pool_t *pool)
 {
     return APR_ENOTIMPL;
 }
 
-APU_DECLARE_NONSTD(apr_status_t) apr_bucket_split_notimpl(apr_bucket *data,
+APR_DECLARE_NONSTD(apr_status_t) apr_bucket_split_notimpl(apr_bucket *data,
                                                           apr_size_t point)
 {
     return APR_ENOTIMPL;
 }
 
-APU_DECLARE_NONSTD(apr_status_t) apr_bucket_copy_notimpl(apr_bucket *e,
+APR_DECLARE_NONSTD(apr_status_t) apr_bucket_copy_notimpl(apr_bucket *e,
                                                          apr_bucket **c)
 {
     return APR_ENOTIMPL;
 }
 
-APU_DECLARE_NONSTD(void) apr_bucket_destroy_noop(void *data)
+APR_DECLARE_NONSTD(void) apr_bucket_destroy_noop(void *data)
 {
     return;
 }

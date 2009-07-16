@@ -86,7 +86,7 @@ typedef struct
  * the correct case (lower case for all bundled providers)
  */
 
-APU_DECLARE(apr_status_t) apr_dbm_open_ex(apr_dbm_t **dbm, const char* type, 
+APR_DECLARE(apr_status_t) apr_dbm_open_ex(apr_dbm_t **dbm, const char* type, 
                                        const char *name, 
                                        apr_int32_t mode, apr_fileperms_t perm,
                                        apr_pool_t *cntxt);
@@ -108,7 +108,7 @@ APU_DECLARE(apr_status_t) apr_dbm_open_ex(apr_dbm_t **dbm, const char* type,
  * @remark The dbm name may not be a true file name, as many dbm packages
  * append suffixes for seperate data and index files.
  */
-APU_DECLARE(apr_status_t) apr_dbm_open(apr_dbm_t **dbm, const char *name, 
+APR_DECLARE(apr_status_t) apr_dbm_open(apr_dbm_t **dbm, const char *name, 
                                        apr_int32_t mode, apr_fileperms_t perm,
                                        apr_pool_t *cntxt);
 
@@ -116,7 +116,7 @@ APU_DECLARE(apr_status_t) apr_dbm_open(apr_dbm_t **dbm, const char *name,
  * Close a dbm file previously opened by apr_dbm_open
  * @param dbm The database to close
  */
-APU_DECLARE(void) apr_dbm_close(apr_dbm_t *dbm);
+APR_DECLARE(void) apr_dbm_close(apr_dbm_t *dbm);
 
 /**
  * Fetch a dbm record value by key
@@ -124,7 +124,7 @@ APU_DECLARE(void) apr_dbm_close(apr_dbm_t *dbm);
  * @param key The key datum to find this record
  * @param pvalue The value datum retrieved for this record
  */
-APU_DECLARE(apr_status_t) apr_dbm_fetch(apr_dbm_t *dbm, apr_datum_t key,
+APR_DECLARE(apr_status_t) apr_dbm_fetch(apr_dbm_t *dbm, apr_datum_t key,
                                         apr_datum_t *pvalue);
 /**
  * Store a dbm record value by key
@@ -132,7 +132,7 @@ APU_DECLARE(apr_status_t) apr_dbm_fetch(apr_dbm_t *dbm, apr_datum_t key,
  * @param key The key datum to store this record by
  * @param value The value datum to store in this record
  */
-APU_DECLARE(apr_status_t) apr_dbm_store(apr_dbm_t *dbm, apr_datum_t key, 
+APR_DECLARE(apr_status_t) apr_dbm_store(apr_dbm_t *dbm, apr_datum_t key, 
                                         apr_datum_t value);
 
 /**
@@ -141,35 +141,35 @@ APU_DECLARE(apr_status_t) apr_dbm_store(apr_dbm_t *dbm, apr_datum_t key,
  * @param key The key datum of the record to delete
  * @remark It is not an error to delete a non-existent record.
  */
-APU_DECLARE(apr_status_t) apr_dbm_delete(apr_dbm_t *dbm, apr_datum_t key);
+APR_DECLARE(apr_status_t) apr_dbm_delete(apr_dbm_t *dbm, apr_datum_t key);
 
 /**
  * Search for a key within the dbm
  * @param dbm The database 
  * @param key The datum describing a key to test
  */
-APU_DECLARE(int) apr_dbm_exists(apr_dbm_t *dbm, apr_datum_t key);
+APR_DECLARE(int) apr_dbm_exists(apr_dbm_t *dbm, apr_datum_t key);
 
 /**
  * Retrieve the first record key from a dbm
  * @param dbm The database 
  * @param pkey The key datum of the first record
  */
-APU_DECLARE(apr_status_t) apr_dbm_firstkey(apr_dbm_t *dbm, apr_datum_t *pkey);
+APR_DECLARE(apr_status_t) apr_dbm_firstkey(apr_dbm_t *dbm, apr_datum_t *pkey);
 
 /**
  * Retrieve the next record key from a dbm
  * @param dbm The database 
  * @param pkey The key datum of the next record
  */
-APU_DECLARE(apr_status_t) apr_dbm_nextkey(apr_dbm_t *dbm, apr_datum_t *pkey);
+APR_DECLARE(apr_status_t) apr_dbm_nextkey(apr_dbm_t *dbm, apr_datum_t *pkey);
 
 /**
  * Proactively toss any memory associated with the apr_datum_t.
  * @param dbm The database 
  * @param data The datum to free.
  */
-APU_DECLARE(void) apr_dbm_freedatum(apr_dbm_t *dbm, apr_datum_t data);
+APR_DECLARE(void) apr_dbm_freedatum(apr_dbm_t *dbm, apr_datum_t data);
 
 /**
  * Report more information when an apr_dbm function fails.
@@ -180,7 +180,7 @@ APU_DECLARE(void) apr_dbm_freedatum(apr_dbm_t *dbm, apr_datum_t data);
  * @param errbufsize The size of the provided buffer
  * @return The errbuf parameter, for convenience.
  */
-APU_DECLARE(char *) apr_dbm_geterror(apr_dbm_t *dbm, int *errcode,
+APR_DECLARE(char *) apr_dbm_geterror(apr_dbm_t *dbm, int *errcode,
                                      char *errbuf, apr_size_t errbufsize);
 /**
  * If the specified file/path were passed to apr_dbm_open(), return the
@@ -196,7 +196,7 @@ APU_DECLARE(char *) apr_dbm_geterror(apr_dbm_t *dbm, int *errcode,
  * @remark The dbm file(s) don't need to exist. This function only manipulates
  *      the pathnames.
  */
-APU_DECLARE(apr_status_t) apr_dbm_get_usednames_ex(apr_pool_t *pool,
+APR_DECLARE(apr_status_t) apr_dbm_get_usednames_ex(apr_pool_t *pool,
                                                    const char *type,
                                                    const char *pathname,
                                                    const char **used1,
@@ -214,7 +214,7 @@ APU_DECLARE(apr_status_t) apr_dbm_get_usednames_ex(apr_pool_t *pool,
  * @remark The dbm file(s) don't need to exist. This function only manipulates
  *      the pathnames.
  */
-APU_DECLARE(void) apr_dbm_get_usednames(apr_pool_t *pool,
+APR_DECLARE(void) apr_dbm_get_usednames(apr_pool_t *pool,
                                         const char *pathname,
                                         const char **used1,
                                         const char **used2);
