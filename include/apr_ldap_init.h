@@ -86,7 +86,7 @@ extern "C" {
  * apr_ldap_set_option() APR_LDAP_OPT_TLS_CERT option for details.
  * @param result_err The returned result
  */
-APU_DECLARE_LDAP(int) apr_ldap_ssl_init(apr_pool_t *pool,
+APR_DECLARE_LDAP(int) apr_ldap_ssl_init(apr_pool_t *pool,
                                         const char *cert_auth_file,
                                         int cert_file_type,
                                         apr_ldap_err_t **result_err);
@@ -100,7 +100,7 @@ APU_DECLARE_LDAP(int) apr_ldap_ssl_init(apr_pool_t *pool,
  * @todo currently we do not check whether apr_ldap_ssl_init()
  * has been called first - we probably should.
  */
-APU_DECLARE_LDAP(int) apr_ldap_ssl_deinit(void);
+APR_DECLARE_LDAP(int) apr_ldap_ssl_deinit(void);
 
 /**
  * APR LDAP initialise function
@@ -136,7 +136,7 @@ APU_DECLARE_LDAP(int) apr_ldap_ssl_deinit(void);
  * @param secure The security mode to set
  * @param result_err The returned result
  */
-APU_DECLARE_LDAP(int) apr_ldap_init(apr_pool_t *pool,
+APR_DECLARE_LDAP(int) apr_ldap_init(apr_pool_t *pool,
                                     LDAP **ldap,
                                     const char *hostname,
                                     int portno,
@@ -151,7 +151,7 @@ APU_DECLARE_LDAP(int) apr_ldap_init(apr_pool_t *pool,
  * @param pool The pool to use
  * @param result_err The returned result
  */
-APU_DECLARE_LDAP(int) apr_ldap_info(apr_pool_t *pool,
+APR_DECLARE_LDAP(int) apr_ldap_info(apr_pool_t *pool,
                                     apr_ldap_err_t **result_err);
 
 #ifdef __cplusplus

@@ -22,7 +22,7 @@
 #include "apr_lib.h"
 
 
-APU_DECLARE(void) apr_uuid_format(char *buffer, const apr_uuid_t *uuid)
+APR_DECLARE(void) apr_uuid_format(char *buffer, const apr_uuid_t *uuid)
 {
     const unsigned char *d = uuid->data;
 
@@ -91,7 +91,7 @@ static unsigned char parse_hexpair(const char *s)
 }
 #endif
 
-APU_DECLARE(apr_status_t) apr_uuid_parse(apr_uuid_t *uuid,
+APR_DECLARE(apr_status_t) apr_uuid_parse(apr_uuid_t *uuid,
                                          const char *uuid_str)
 {
     int i;

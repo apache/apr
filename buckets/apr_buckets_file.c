@@ -153,7 +153,7 @@ static apr_status_t file_bucket_read(apr_bucket *e, const char **str,
     return rv;
 }
 
-APU_DECLARE(apr_bucket *) apr_bucket_file_make(apr_bucket *b, apr_file_t *fd,
+APR_DECLARE(apr_bucket *) apr_bucket_file_make(apr_bucket *b, apr_file_t *fd,
                                                apr_off_t offset,
                                                apr_size_t len, apr_pool_t *p)
 {
@@ -172,7 +172,7 @@ APU_DECLARE(apr_bucket *) apr_bucket_file_make(apr_bucket *b, apr_file_t *fd,
     return b;
 }
 
-APU_DECLARE(apr_bucket *) apr_bucket_file_create(apr_file_t *fd,
+APR_DECLARE(apr_bucket *) apr_bucket_file_create(apr_file_t *fd,
                                                  apr_off_t offset,
                                                  apr_size_t len, apr_pool_t *p,
                                                  apr_bucket_alloc_t *list)
@@ -185,7 +185,7 @@ APU_DECLARE(apr_bucket *) apr_bucket_file_create(apr_file_t *fd,
     return apr_bucket_file_make(b, fd, offset, len, p);
 }
 
-APU_DECLARE(apr_status_t) apr_bucket_file_enable_mmap(apr_bucket *e,
+APR_DECLARE(apr_status_t) apr_bucket_file_enable_mmap(apr_bucket *e,
                                                       int enabled)
 {
 #if APR_HAS_MMAP
@@ -218,7 +218,7 @@ static apr_status_t file_bucket_setaside(apr_bucket *data, apr_pool_t *reqpool)
     return APR_SUCCESS;
 }
 
-APU_DECLARE_DATA const apr_bucket_type_t apr_bucket_type_file = {
+APR_DECLARE_DATA const apr_bucket_type_t apr_bucket_type_file = {
     "FILE", 5, APR_BUCKET_DATA,
     file_bucket_destroy,
     file_bucket_read,

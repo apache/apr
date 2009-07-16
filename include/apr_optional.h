@@ -58,7 +58,7 @@ typedef ret (APR_OPTIONAL_FN_TYPE(name)) args
 
 typedef void (apr_opt_fn_t)(void);
 /** @internal */
-APU_DECLARE_NONSTD(void) apr_dynamic_fn_register(const char *szName, 
+APR_DECLARE_NONSTD(void) apr_dynamic_fn_register(const char *szName, 
                                                   apr_opt_fn_t *pfn);
 
 /**
@@ -75,7 +75,7 @@ APU_DECLARE_NONSTD(void) apr_dynamic_fn_register(const char *szName,
 /** @internal
  * Private function! DO NOT USE! 
  */
-APU_DECLARE(apr_opt_fn_t *) apr_dynamic_fn_retrieve(const char *szName);
+APR_DECLARE(apr_opt_fn_t *) apr_dynamic_fn_retrieve(const char *szName);
 
 /**
  * Retrieve an optional function. Returns NULL if the function is not present.

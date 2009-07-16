@@ -124,7 +124,7 @@ struct apr_uri_t {
  * @param scheme_str The string that contains the current scheme
  * @return The default port for this scheme
  */ 
-APU_DECLARE(apr_port_t) apr_uri_port_of_scheme(const char *scheme_str);
+APR_DECLARE(apr_port_t) apr_uri_port_of_scheme(const char *scheme_str);
 
 /**
  * Unparse a apr_uri_t structure to an URI string.  Optionally 
@@ -143,7 +143,7 @@ APU_DECLARE(apr_port_t) apr_uri_port_of_scheme(const char *scheme_str);
  * </PRE>
  * @return The uri as a string
  */
-APU_DECLARE(char *) apr_uri_unparse(apr_pool_t *p, 
+APR_DECLARE(char *) apr_uri_unparse(apr_pool_t *p, 
                                     const apr_uri_t *uptr,
                                     unsigned flags);
 
@@ -156,7 +156,7 @@ APU_DECLARE(char *) apr_uri_unparse(apr_pool_t *p,
  * @param uptr The apr_uri_t to fill out
  * @return APR_SUCCESS for success or error code
  */
-APU_DECLARE(apr_status_t) apr_uri_parse(apr_pool_t *p, const char *uri, 
+APR_DECLARE(apr_status_t) apr_uri_parse(apr_pool_t *p, const char *uri, 
                                         apr_uri_t *uptr);
 
 /**
@@ -166,7 +166,7 @@ APU_DECLARE(apr_status_t) apr_uri_parse(apr_pool_t *p, const char *uri,
  * @param uptr The apr_uri_t to fill out
  * @return APR_SUCCESS for success or error code
  */
-APU_DECLARE(apr_status_t) apr_uri_parse_hostinfo(apr_pool_t *p, 
+APR_DECLARE(apr_status_t) apr_uri_parse_hostinfo(apr_pool_t *p, 
                                                  const char *hostinfo, 
                                                  apr_uri_t *uptr);
 

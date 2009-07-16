@@ -114,7 +114,7 @@ static char **apr_ldap_str2charray(apr_pool_t *pool,
  * Is this URL an ldap url?
  *
  */
-APU_DECLARE(int) apr_ldap_is_ldap_url(const char *url)
+APR_DECLARE(int) apr_ldap_is_ldap_url(const char *url)
 {
     int enclosed;
     const char * scheme;
@@ -134,7 +134,7 @@ APU_DECLARE(int) apr_ldap_is_ldap_url(const char *url)
  * Is this URL a secure ldap url?
  *
  */
-APU_DECLARE(int) apr_ldap_is_ldaps_url(const char *url)
+APR_DECLARE(int) apr_ldap_is_ldaps_url(const char *url)
 {
     int enclosed;
     const char * scheme;
@@ -154,7 +154,7 @@ APU_DECLARE(int) apr_ldap_is_ldaps_url(const char *url)
  * Is this URL an ldap socket url?
  *
  */
-APU_DECLARE(int) apr_ldap_is_ldapi_url(const char *url)
+APR_DECLARE(int) apr_ldap_is_ldapi_url(const char *url)
 {
     int enclosed;
     const char * scheme;
@@ -256,7 +256,7 @@ static int str2scope(const char *p)
  * The LDAP result code and reason string is returned in the
  * apr_ldap_err_t structure.
  */
-APU_DECLARE(int) apr_ldap_url_parse_ext(apr_pool_t *pool,
+APR_DECLARE(int) apr_ldap_url_parse_ext(apr_pool_t *pool,
                                         const char *url_in,
                                         apr_ldap_url_desc_t **ludpp,
                                         apr_ldap_err_t **result_err)
@@ -579,7 +579,7 @@ APU_DECLARE(int) apr_ldap_url_parse_ext(apr_pool_t *pool,
  * The LDAP result code and reason string is returned in the
  * apr_ldap_err_t structure.
  */
-APU_DECLARE(int) apr_ldap_url_parse(apr_pool_t *pool,
+APR_DECLARE(int) apr_ldap_url_parse(apr_pool_t *pool,
                                     const char *url_in,
                                     apr_ldap_url_desc_t **ludpp,
                                     apr_ldap_err_t **result_err)

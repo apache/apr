@@ -52,7 +52,7 @@
  *   * - swallow remaining characters 
  *  <x> - exact match for any other character
  */
-APU_DECLARE(int) apr_date_checkmask(const char *data, const char *mask)
+APR_DECLARE(int) apr_date_checkmask(const char *data, const char *mask)
 {
     int i;
     char d;
@@ -142,7 +142,7 @@ APU_DECLARE(int) apr_date_checkmask(const char *data, const char *mask)
  * but many changes since then.
  *
  */
-APU_DECLARE(apr_time_t) apr_date_parse_http(const char *date)
+APR_DECLARE(apr_time_t) apr_date_parse_http(const char *date)
 {
     apr_time_exp_t ds;
     apr_time_t result;
@@ -316,7 +316,7 @@ APU_DECLARE(apr_time_t) apr_date_parse_http(const char *date)
                       timstr[6],timstr[7]);                 \
     }
 
-APU_DECLARE(apr_time_t) apr_date_parse_rfc(const char *date)
+APR_DECLARE(apr_time_t) apr_date_parse_rfc(const char *date)
 {
     apr_time_exp_t ds;
     apr_time_t result;

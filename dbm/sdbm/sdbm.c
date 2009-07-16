@@ -167,7 +167,7 @@ error:
     return status;
 }
 
-APU_DECLARE(apr_status_t) apr_sdbm_open(apr_sdbm_t **db, const char *file, 
+APR_DECLARE(apr_status_t) apr_sdbm_open(apr_sdbm_t **db, const char *file, 
                                         apr_int32_t flags, 
                                         apr_fileperms_t perms, apr_pool_t *p)
 {
@@ -177,12 +177,12 @@ APU_DECLARE(apr_status_t) apr_sdbm_open(apr_sdbm_t **db, const char *file,
     return prep(db, dirname, pagname, flags, perms, p);
 }
 
-APU_DECLARE(apr_status_t) apr_sdbm_close(apr_sdbm_t *db)
+APR_DECLARE(apr_status_t) apr_sdbm_close(apr_sdbm_t *db)
 {
     return apr_pool_cleanup_run(db->pool, db, database_cleanup);
 }
 
-APU_DECLARE(apr_status_t) apr_sdbm_fetch(apr_sdbm_t *db, apr_sdbm_datum_t *val,
+APR_DECLARE(apr_status_t) apr_sdbm_fetch(apr_sdbm_t *db, apr_sdbm_datum_t *val,
                                          apr_sdbm_datum_t key)
 {
     apr_status_t status;
@@ -214,7 +214,7 @@ static apr_status_t write_page(apr_sdbm_t *db, const char *buf, long pagno)
     return status;
 }
 
-APU_DECLARE(apr_status_t) apr_sdbm_delete(apr_sdbm_t *db, 
+APR_DECLARE(apr_status_t) apr_sdbm_delete(apr_sdbm_t *db, 
                                           const apr_sdbm_datum_t key)
 {
     apr_status_t status;
@@ -240,7 +240,7 @@ APU_DECLARE(apr_status_t) apr_sdbm_delete(apr_sdbm_t *db,
     return status;
 }
 
-APU_DECLARE(apr_status_t) apr_sdbm_store(apr_sdbm_t *db, apr_sdbm_datum_t key,
+APR_DECLARE(apr_status_t) apr_sdbm_store(apr_sdbm_t *db, apr_sdbm_datum_t key,
                                          apr_sdbm_datum_t val, int flags)
 {
     int need;
@@ -399,7 +399,7 @@ static apr_status_t read_from(apr_file_t *f, void *buf,
  * the following two routines will break if
  * deletions aren't taken into account. (ndbm bug)
  */
-APU_DECLARE(apr_status_t) apr_sdbm_firstkey(apr_sdbm_t *db, 
+APR_DECLARE(apr_status_t) apr_sdbm_firstkey(apr_sdbm_t *db, 
                                             apr_sdbm_datum_t *key)
 {
     apr_status_t status;
@@ -423,7 +423,7 @@ APU_DECLARE(apr_status_t) apr_sdbm_firstkey(apr_sdbm_t *db,
     return status;
 }
 
-APU_DECLARE(apr_status_t) apr_sdbm_nextkey(apr_sdbm_t *db, 
+APR_DECLARE(apr_status_t) apr_sdbm_nextkey(apr_sdbm_t *db, 
                                            apr_sdbm_datum_t *key)
 {
     apr_status_t status;
@@ -574,7 +574,7 @@ static apr_status_t getnext(apr_sdbm_datum_t *key, apr_sdbm_t *db)
 }
 
 
-APU_DECLARE(int) apr_sdbm_rdonly(apr_sdbm_t *db)
+APR_DECLARE(int) apr_sdbm_rdonly(apr_sdbm_t *db)
 {
     /* ### Should we return true if the first lock is a share lock,
      *     to reflect that apr_sdbm_store and apr_sdbm_delete will fail?

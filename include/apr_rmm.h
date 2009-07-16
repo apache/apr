@@ -53,7 +53,7 @@ typedef apr_size_t   apr_rmm_off_t;
  * @remark Both @param membuf and @param memsize must be aligned
  * (for instance using APR_ALIGN_DEFAULT).
  */
-APU_DECLARE(apr_status_t) apr_rmm_init(apr_rmm_t **rmm, apr_anylock_t *lock,
+APR_DECLARE(apr_status_t) apr_rmm_init(apr_rmm_t **rmm, apr_anylock_t *lock,
                                        void *membuf, apr_size_t memsize, 
                                        apr_pool_t *cont);
 
@@ -61,7 +61,7 @@ APU_DECLARE(apr_status_t) apr_rmm_init(apr_rmm_t **rmm, apr_anylock_t *lock,
  * Destroy a managed memory block.
  * @param rmm The relocatable memory block to destroy
  */
-APU_DECLARE(apr_status_t) apr_rmm_destroy(apr_rmm_t *rmm);
+APR_DECLARE(apr_status_t) apr_rmm_destroy(apr_rmm_t *rmm);
 
 /**
  * Attach to a relocatable memory block already managed by the apr_rmm API.
@@ -70,21 +70,21 @@ APU_DECLARE(apr_status_t) apr_rmm_destroy(apr_rmm_t *rmm);
  * @param membuf The block of relocatable memory already under management
  * @param cont The pool to use for local storage and management
  */
-APU_DECLARE(apr_status_t) apr_rmm_attach(apr_rmm_t **rmm, apr_anylock_t *lock,
+APR_DECLARE(apr_status_t) apr_rmm_attach(apr_rmm_t **rmm, apr_anylock_t *lock,
                                          void *membuf, apr_pool_t *cont);
 
 /**
  * Detach from the managed block of memory.
  * @param rmm The relocatable memory block to detach from
  */
-APU_DECLARE(apr_status_t) apr_rmm_detach(apr_rmm_t *rmm);
+APR_DECLARE(apr_status_t) apr_rmm_detach(apr_rmm_t *rmm);
 
 /**
  * Allocate memory from the block of relocatable memory.
  * @param rmm The relocatable memory block
  * @param reqsize How much memory to allocate
  */
-APU_DECLARE(apr_rmm_off_t) apr_rmm_malloc(apr_rmm_t *rmm, apr_size_t reqsize);
+APR_DECLARE(apr_rmm_off_t) apr_rmm_malloc(apr_rmm_t *rmm, apr_size_t reqsize);
 
 /**
  * Realloc memory from the block of relocatable memory.
@@ -92,21 +92,21 @@ APU_DECLARE(apr_rmm_off_t) apr_rmm_malloc(apr_rmm_t *rmm, apr_size_t reqsize);
  * @param entity The memory allocation to realloc
  * @param reqsize The new size
  */
-APU_DECLARE(apr_rmm_off_t) apr_rmm_realloc(apr_rmm_t *rmm, void *entity, apr_size_t reqsize);
+APR_DECLARE(apr_rmm_off_t) apr_rmm_realloc(apr_rmm_t *rmm, void *entity, apr_size_t reqsize);
 
 /**
  * Allocate memory from the block of relocatable memory and initialize it to zero.
  * @param rmm The relocatable memory block
  * @param reqsize How much memory to allocate
  */
-APU_DECLARE(apr_rmm_off_t) apr_rmm_calloc(apr_rmm_t *rmm, apr_size_t reqsize);
+APR_DECLARE(apr_rmm_off_t) apr_rmm_calloc(apr_rmm_t *rmm, apr_size_t reqsize);
 
 /**
  * Free allocation returned by apr_rmm_malloc or apr_rmm_calloc.
  * @param rmm The relocatable memory block
  * @param entity The memory allocation to free
  */
-APU_DECLARE(apr_status_t) apr_rmm_free(apr_rmm_t *rmm, apr_rmm_off_t entity);
+APR_DECLARE(apr_status_t) apr_rmm_free(apr_rmm_t *rmm, apr_rmm_off_t entity);
 
 /**
  * Retrieve the physical address of a relocatable allocation of memory
@@ -114,20 +114,20 @@ APU_DECLARE(apr_status_t) apr_rmm_free(apr_rmm_t *rmm, apr_rmm_off_t entity);
  * @param entity The memory allocation to free
  * @return address The address, aligned with APR_ALIGN_DEFAULT.
  */
-APU_DECLARE(void *) apr_rmm_addr_get(apr_rmm_t *rmm, apr_rmm_off_t entity);
+APR_DECLARE(void *) apr_rmm_addr_get(apr_rmm_t *rmm, apr_rmm_off_t entity);
 
 /**
  * Compute the offset of a relocatable allocation of memory
  * @param rmm The relocatable memory block
  * @param entity The physical address to convert to an offset
  */
-APU_DECLARE(apr_rmm_off_t) apr_rmm_offset_get(apr_rmm_t *rmm, void *entity);
+APR_DECLARE(apr_rmm_off_t) apr_rmm_offset_get(apr_rmm_t *rmm, void *entity);
 
 /**
  * Compute the required overallocation of memory needed to fit n allocs
  * @param n The number of alloc/calloc regions desired
  */
-APU_DECLARE(apr_size_t) apr_rmm_overhead_get(int n);
+APR_DECLARE(apr_size_t) apr_rmm_overhead_get(int n);
 
 #ifdef __cplusplus
 }

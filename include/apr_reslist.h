@@ -84,7 +84,7 @@ typedef apr_status_t (*apr_reslist_destructor)(void *resource, void *params,
  *         automatically set to 1 and values of min and smax will be forced to
  *         1 for any non-zero value.
  */
-APU_DECLARE(apr_status_t) apr_reslist_create(apr_reslist_t **reslist,
+APR_DECLARE(apr_status_t) apr_reslist_create(apr_reslist_t **reslist,
                                              int min, int smax, int hmax,
                                              apr_interval_time_t ttl,
                                              apr_reslist_constructor con,
@@ -103,20 +103,20 @@ APU_DECLARE(apr_status_t) apr_reslist_create(apr_reslist_t **reslist,
  *        have been released to the list before calling this function.
  * @param reslist The reslist to destroy
  */
-APU_DECLARE(apr_status_t) apr_reslist_destroy(apr_reslist_t *reslist);
+APR_DECLARE(apr_status_t) apr_reslist_destroy(apr_reslist_t *reslist);
 
 /**
  * Retrieve a resource from the list, creating a new one if necessary.
  * If we have met our maximum number of resources, we will block
  * until one becomes available.
  */
-APU_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
+APR_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
                                               void **resource);
 
 /**
  * Return a resource back to the list of available resources.
  */
-APU_DECLARE(apr_status_t) apr_reslist_release(apr_reslist_t *reslist,
+APR_DECLARE(apr_status_t) apr_reslist_release(apr_reslist_t *reslist,
                                               void *resource);
 
 /**
@@ -125,21 +125,21 @@ APU_DECLARE(apr_status_t) apr_reslist_release(apr_reslist_t *reslist,
  * @param reslist The resource list.
  * @param timeout Timeout to wait. The zero waits forever.
  */
-APU_DECLARE(void) apr_reslist_timeout_set(apr_reslist_t *reslist,
+APR_DECLARE(void) apr_reslist_timeout_set(apr_reslist_t *reslist,
                                           apr_interval_time_t timeout);
 
 /**
  * Return the number of outstanding resources.
  * @param reslist The resource list.
  */
-APU_DECLARE(apr_uint32_t) apr_reslist_acquired_count(apr_reslist_t *reslist);
+APR_DECLARE(apr_uint32_t) apr_reslist_acquired_count(apr_reslist_t *reslist);
 
 /**
  * Invalidate a resource in the pool - e.g. a database connection
  * that returns a "lost connection" error and can't be restored.
  * Use this instead of apr_reslist_release if the resource is bad.
  */
-APU_DECLARE(apr_status_t) apr_reslist_invalidate(apr_reslist_t *reslist,
+APR_DECLARE(apr_status_t) apr_reslist_invalidate(apr_reslist_t *reslist,
                                                  void *resource);
 
 /**
@@ -147,7 +147,7 @@ APU_DECLARE(apr_status_t) apr_reslist_invalidate(apr_reslist_t *reslist,
  * may instantiate new resources or expire old resources.
  * @param reslist The resource list.
  */
-APU_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist);
+APR_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist);
 
 /**
  * Set reslist cleanup order.
@@ -162,7 +162,7 @@ APU_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist);
  * are destroyed. This allows to explicitly destroy the child pools
  * inside reslist destructors.
  */
-APU_DECLARE(void) apr_reslist_cleanup_order_set(apr_reslist_t *reslist,
+APR_DECLARE(void) apr_reslist_cleanup_order_set(apr_reslist_t *reslist,
                                                 apr_uint32_t mode);
 
 #ifdef __cplusplus

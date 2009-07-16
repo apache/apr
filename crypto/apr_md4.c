@@ -110,7 +110,7 @@ static apr_xlate_t *xlate_ebcdic_to_ascii; /* used in apr_md4_encode() */
 
 /* MD4 initialization. Begins an MD4 operation, writing a new context.
  */
-APU_DECLARE(apr_status_t) apr_md4_init(apr_md4_ctx_t *context)
+APR_DECLARE(apr_status_t) apr_md4_init(apr_md4_ctx_t *context)
 {
     context->count[0] = context->count[1] = 0;
 
@@ -132,7 +132,7 @@ APU_DECLARE(apr_status_t) apr_md4_init(apr_md4_ctx_t *context)
  * to be used for translating the content before calculating the
  * digest.
  */
-APU_DECLARE(apr_status_t) apr_md4_set_xlate(apr_md4_ctx_t *context, 
+APR_DECLARE(apr_status_t) apr_md4_set_xlate(apr_md4_ctx_t *context, 
                                             apr_xlate_t *xlate)
 {
     apr_status_t rv;
@@ -156,7 +156,7 @@ APU_DECLARE(apr_status_t) apr_md4_set_xlate(apr_md4_ctx_t *context,
  * operation, processing another message block, and updating the
  * context.
  */
-APU_DECLARE(apr_status_t) apr_md4_update(apr_md4_ctx_t *context,
+APR_DECLARE(apr_status_t) apr_md4_update(apr_md4_ctx_t *context,
                                          const unsigned char *input,
                                          apr_size_t inputLen)
 {
@@ -242,7 +242,7 @@ APU_DECLARE(apr_status_t) apr_md4_update(apr_md4_ctx_t *context,
 /* MD4 finalization. Ends an MD4 message-digest operation, writing the
  * the message digest and zeroizing the context.
  */
-APU_DECLARE(apr_status_t) apr_md4_final(
+APR_DECLARE(apr_status_t) apr_md4_final(
                                     unsigned char digest[APR_MD4_DIGESTSIZE],
                                     apr_md4_ctx_t *context)
 {
@@ -276,7 +276,7 @@ APU_DECLARE(apr_status_t) apr_md4_final(
 
 /* MD4 computation in one step (init, update, final)
  */
-APU_DECLARE(apr_status_t) apr_md4(unsigned char digest[APR_MD4_DIGESTSIZE],
+APR_DECLARE(apr_status_t) apr_md4(unsigned char digest[APR_MD4_DIGESTSIZE],
                                   const unsigned char *input,
                                   apr_size_t inputLen)
 {
@@ -396,7 +396,7 @@ static void Decode(apr_uint32_t *output, const unsigned char *input,
 }
 
 #if APR_CHARSET_EBCDIC
-APU_DECLARE(apr_status_t) apr_MD4InitEBCDIC(apr_xlate_t *xlate)
+APR_DECLARE(apr_status_t) apr_MD4InitEBCDIC(apr_xlate_t *xlate)
 {
     xlate_ebcdic_to_ascii = xlate;
     return APR_SUCCESS;

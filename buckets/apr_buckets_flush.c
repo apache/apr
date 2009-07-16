@@ -24,7 +24,7 @@ static apr_status_t flush_bucket_read(apr_bucket *b, const char **str,
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_bucket *) apr_bucket_flush_make(apr_bucket *b)
+APR_DECLARE(apr_bucket *) apr_bucket_flush_make(apr_bucket *b)
 {
     b->length      = 0;
     b->start       = 0;
@@ -34,7 +34,7 @@ APU_DECLARE(apr_bucket *) apr_bucket_flush_make(apr_bucket *b)
     return b;
 }
 
-APU_DECLARE(apr_bucket *) apr_bucket_flush_create(apr_bucket_alloc_t *list)
+APR_DECLARE(apr_bucket *) apr_bucket_flush_create(apr_bucket_alloc_t *list)
 {
     apr_bucket *b = apr_bucket_alloc(sizeof(*b), list);
 
@@ -44,7 +44,7 @@ APU_DECLARE(apr_bucket *) apr_bucket_flush_create(apr_bucket_alloc_t *list)
     return apr_bucket_flush_make(b);
 }
 
-APU_DECLARE_DATA const apr_bucket_type_t apr_bucket_type_flush = {
+APR_DECLARE_DATA const apr_bucket_type_t apr_bucket_type_flush = {
     "FLUSH", 5, APR_BUCKET_METADATA, 
     apr_bucket_destroy_noop,
     flush_bucket_read,

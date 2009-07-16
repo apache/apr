@@ -173,7 +173,7 @@ static apr_status_t reslist_cleanup(void *data_)
  * Perform routine maintenance on the resource list. This call
  * may instantiate new resources or expire old resources.
  */
-APU_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist)
+APR_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist)
 {
     apr_time_t now;
     apr_status_t rv;
@@ -248,7 +248,7 @@ APU_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist)
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_status_t) apr_reslist_create(apr_reslist_t **reslist,
+APR_DECLARE(apr_status_t) apr_reslist_create(apr_reslist_t **reslist,
                                              int min, int smax, int hmax,
                                              apr_interval_time_t ttl,
                                              apr_reslist_constructor con,
@@ -318,12 +318,12 @@ APU_DECLARE(apr_status_t) apr_reslist_create(apr_reslist_t **reslist,
     return APR_SUCCESS;
 }
 
-APU_DECLARE(apr_status_t) apr_reslist_destroy(apr_reslist_t *reslist)
+APR_DECLARE(apr_status_t) apr_reslist_destroy(apr_reslist_t *reslist)
 {
     return apr_pool_cleanup_run(reslist->pool, reslist, reslist_cleanup);
 }
 
-APU_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
+APR_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
                                               void **resource)
 {
     apr_status_t rv;
@@ -405,7 +405,7 @@ APU_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
     }
 }
 
-APU_DECLARE(apr_status_t) apr_reslist_release(apr_reslist_t *reslist,
+APR_DECLARE(apr_status_t) apr_reslist_release(apr_reslist_t *reslist,
                                               void *resource)
 {
     apr_res_t *res;
@@ -424,13 +424,13 @@ APU_DECLARE(apr_status_t) apr_reslist_release(apr_reslist_t *reslist,
     return apr_reslist_maintain(reslist);
 }
 
-APU_DECLARE(void) apr_reslist_timeout_set(apr_reslist_t *reslist,
+APR_DECLARE(void) apr_reslist_timeout_set(apr_reslist_t *reslist,
                                           apr_interval_time_t timeout)
 {
     reslist->timeout = timeout;
 }
 
-APU_DECLARE(apr_uint32_t) apr_reslist_acquired_count(apr_reslist_t *reslist)
+APR_DECLARE(apr_uint32_t) apr_reslist_acquired_count(apr_reslist_t *reslist)
 {
     apr_uint32_t count;
 
@@ -445,7 +445,7 @@ APU_DECLARE(apr_uint32_t) apr_reslist_acquired_count(apr_reslist_t *reslist)
     return count;
 }
 
-APU_DECLARE(apr_status_t) apr_reslist_invalidate(apr_reslist_t *reslist,
+APR_DECLARE(apr_status_t) apr_reslist_invalidate(apr_reslist_t *reslist,
                                                  void *resource)
 {
     apr_status_t ret;
@@ -461,7 +461,7 @@ APU_DECLARE(apr_status_t) apr_reslist_invalidate(apr_reslist_t *reslist,
     return ret;
 }
 
-APU_DECLARE(void) apr_reslist_cleanup_order_set(apr_reslist_t *rl,
+APR_DECLARE(void) apr_reslist_cleanup_order_set(apr_reslist_t *rl,
                                                 apr_uint32_t mode)
 {
     apr_pool_cleanup_kill(rl->pool, rl, reslist_cleanup);

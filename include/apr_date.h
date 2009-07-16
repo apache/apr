@@ -57,7 +57,7 @@ extern "C" {
  * @remark The mask tests for an exact match for any other character
  * @return 1 if the string matches, 0 otherwise
  */
-APU_DECLARE(int) apr_date_checkmask(const char *data, const char *mask);
+APR_DECLARE(int) apr_date_checkmask(const char *data, const char *mask);
 
 /**
  * Parses an HTTP date in one of three standard forms:
@@ -70,7 +70,7 @@ APU_DECLARE(int) apr_date_checkmask(const char *data, const char *mask);
  * @return the apr_time_t number of microseconds since 1 Jan 1970 GMT, or
  *         0 if this would be out of range or if the date is invalid.
  */
-APU_DECLARE(apr_time_t) apr_date_parse_http(const char *date);
+APR_DECLARE(apr_time_t) apr_date_parse_http(const char *date);
 
 /**
  * Parses a string resembling an RFC 822 date.  This is meant to be
@@ -96,7 +96,7 @@ APU_DECLARE(apr_time_t) apr_date_parse_http(const char *date);
  * @return the apr_time_t number of microseconds since 1 Jan 1970 GMT, or
  *         0 if this would be out of range or if the date is invalid.
  */
-APU_DECLARE(apr_time_t) apr_date_parse_rfc(const char *date);
+APR_DECLARE(apr_time_t) apr_date_parse_rfc(const char *date);
 
 /** @} */
 #ifdef __cplusplus

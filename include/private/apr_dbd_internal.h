@@ -355,8 +355,8 @@ struct apr_dbd_driver_t {
  * deprecated; create a per-dbd mutex within the (*init) function
  * to avoid blocking other providers running on other threads
  */
-APU_DECLARE(apr_status_t) apr_dbd_mutex_lock(void);
-APU_DECLARE(apr_status_t) apr_dbd_mutex_unlock(void);
+APR_DECLARE(apr_status_t) apr_dbd_mutex_lock(void);
+APR_DECLARE(apr_status_t) apr_dbd_mutex_unlock(void);
 
 #ifdef __cplusplus
 }
