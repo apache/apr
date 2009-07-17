@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) More elaborate detection for dup3(), accept4() and epoll_create1().
+     [Chetan Reddy <chetanreddy gmail.com>, Bojan Smojver]
+
   *) Use locally scoped variables in PostgreSQL driver to avoid stomping
      on return codes. PR 47431
      [Wayne Jensen <wayne_jensen trendmicro.com>]
