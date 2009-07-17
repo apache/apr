@@ -779,7 +779,112 @@ if test "$apr_cv_epoll" = "yes"; then
 fi
 
 dnl ----------------------------- Checking for extended file descriptor handling
-AC_CHECK_FUNCS(dup3 accept4 epoll_create1)
+# test for epoll_create1
+AC_CACHE_CHECK([for epoll_create1 support], [apr_cv_epoll_create1],
+[AC_TRY_RUN([
+#include <sys/epoll.h>
+#include <unistd.h>
+
+int main()
+{
+    return epoll_create1(0) == -1;
+}], [apr_cv_epoll_create1=yes], [apr_cv_epoll_create1=no], [apr_cv_epoll_create1=no])])
+
+if test "$apr_cv_epoll_create1" = "yes"; then
+   AC_DEFINE([HAVE_EPOLL_CREATE1], 1, [Define if epoll_create1 function is supported])
+fi
+
+# test for dup3
+AC_CACHE_CHECK([for dup3 support], [apr_cv_dup3],
+[AC_TRY_RUN([
+#include <unistd.h>
+
+int main()
+{
+    return dup3(STDOUT_FILENO, STDERR_FILENO, 0) == -1;
+}], [apr_cv_dup3=yes], [apr_cv_dup3=no], [apr_cv_dup3=no])])
+
+if test "$apr_cv_dup3" = "yes"; then
+   AC_DEFINE([HAVE_DUP3], 1, [Define if dup3 function is supported])
+fi
+
+# test for accept4
+AC_CACHE_CHECK([for accept4 support], [apr_cv_accept4],
+[AC_TRY_RUN([
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <errno.h>
+
+#define A4_SOCK "./apr_accept4_test_socket"
+
+int main()
+{
+    pid_t pid;
+    int fd;
+    struct sockaddr_un loc, rem;
+    socklen_t rem_sz;
+
+    if ((pid = fork())) {
+        int status;
+
+        unlink(A4_SOCK);
+
+        if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
+            goto cleanup_failure2;
+
+        loc.sun_family = AF_UNIX;
+        strncpy(loc.sun_path, A4_SOCK, sizeof(loc.sun_path) - 1);
+
+        if (bind(fd, (struct sockaddr *) &loc,
+                 sizeof(struct sockaddr_un)) == -1)
+            goto cleanup_failure;
+
+        if (listen(fd, 5) == -1)
+            goto cleanup_failure;
+
+        rem_sz = sizeof(struct sockaddr_un);
+        if (accept4(fd, (struct sockaddr *) &rem, &rem_sz, 0) == -1) {
+            goto cleanup_failure;
+        }
+        else {
+            close(fd);
+            waitpid(pid, &status, 0);
+            unlink(A4_SOCK);
+            return 0;
+        }
+
+cleanup_failure:
+        close(fd);
+cleanup_failure2:
+        kill(pid, SIGKILL);
+        waitpid(pid, &status, 0);
+        unlink(A4_SOCK);
+        return 1;
+    }
+    else {
+        if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
+            return 1; /* this will be bad: we'll hang */
+
+        loc.sun_family = AF_UNIX;
+        strncpy(loc.sun_path, A4_SOCK, sizeof(loc.sun_path) - 1);
+
+        while(connect(fd, (struct sockaddr *) &loc,
+                      sizeof(struct sockaddr_un)) == -1 &&
+              (errno==ENOENT || errno==ECONNREFUSED))
+            ;
+
+        close(fd);
+        return 0;
+    }
+}], [apr_cv_accept4=yes], [apr_cv_accept4=no], [apr_cv_accept4=no])])
+
+if test "$apr_cv_accept4" = "yes"; then
+   AC_DEFINE([HAVE_ACCEPT4], 1, [Define if accept4 function is supported])
+fi
 
 AC_CACHE_CHECK([for SOCK_CLOEXEC support], [apr_cv_sock_cloexec],
 [AC_TRY_RUN([
