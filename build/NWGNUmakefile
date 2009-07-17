@@ -30,7 +30,7 @@ nlms :: $(APR)/aprlib.imp
 
 $(APR)/aprlib.imp : make_nw_export.awk nw_export.i
 	@echo Generating $(subst /,\,$@)
-	awk -f make_nw_export.awk nw_export.i | sort >$(APR)/aprlib.imp
+	$(AWK) -v EXPPREFIX=APR$(VERSION_MAJMIN) -f $^ | sort >$@
     
 nw_export.i : nw_export.inc $(APRUTIL)/build/nw_apu_export.inc $(FILES_prebuild_headers) $(NLM_NAME)_cc.opt
 	@echo Generating $(subst /,\,$@)
@@ -55,27 +55,27 @@ endif
 
 $(APR)/include/%.h: $(subst /,\,$(APR))\include\%.hnw
 	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APR))\include\$(@F)
+	$(CP) $< $(subst /,\,$(APR))\include\$(@F)
 
 $(APRUTIL)/include/private/%.h: $(subst /,\,$(APRUTIL))\include\private\%.hnw
 	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APRUTIL))\include\private\$(@F)
+	$(CP) $< $(subst /,\,$(APRUTIL))\include\private\$(@F)
 
 $(APRUTIL)/include/private/%.h: $(subst /,\,$(APRUTIL))\include\private\%.hw
 	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APRUTIL))\include\private\$(@F)
+	$(CP) $< $(subst /,\,$(APRUTIL))\include\private\$(@F)
 
 $(APRUTIL)/include/%.h: $(subst /,\,$(APRUTIL))\include\%.hnw
 	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APRUTIL))\include\$(@F)
+	$(CP) $< $(subst /,\,$(APRUTIL))\include\$(@F)
 
 $(APRUTIL)/xml/expat/lib/%.h: $(subst /,\,$(APRUTIL))\xml\expat\lib\%.hnw
 	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APRUTIL))\xml\expat\lib\$(@F)
+	$(CP) $< $(subst /,\,$(APRUTIL))\xml\expat\lib\$(@F)
 
 $(APRUTIL)/xml/expat/lib/%.h: $(subst /,\,$(APRUTIL))\xml\expat\lib\%.h.in
 	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APRUTIL))\xml\expat\lib\$(@F)
+	$(CP) $< $(subst /,\,$(APRUTIL))\xml\expat\lib\$(@F)
 
 #
 # You can use this target if all that is needed is to copy files to the
