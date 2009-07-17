@@ -97,4 +97,11 @@ clean ::
 	$(CHK) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat.h            $(DEL) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat.h
 	$(CHK) $(subst /,\,$(APRUTIL))\xml\expat\lib\config.h           $(DEL) $(subst /,\,$(APRUTIL))\xml\expat\lib\config.h
 	$(CHK) $(subst /,\,$(APR))\aprlib.imp                           $(DEL) $(subst /,\,$(APR))\aprlib.imp
+
+#
+# Include the 'tail' makefile that has targets that depend on variables defined
+# in this makefile
+#
+
+include $(APR_WORK)\build\NWGNUtail.inc
     
