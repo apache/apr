@@ -116,6 +116,9 @@ CPP	= mwccnlm
 LINK	= mwldnlm
 LIB	= mwldnlm -type library -w nocmdline
 
+# Setup build tools
+AWK	= awk
+
 ifdef IPV6
 ifndef USE_STDSOCKETS
 USE_STDSOCKETS=1
@@ -265,22 +268,19 @@ OS = Windows_NT
 endif
 
 ifeq "$(OS)" "Windows_NT"
-CMD=cmd /C
-CHK=cmd /C if exist
-CHKNOT=cmd /C if not exist
-DEL = del /F
-DELTREE = cmd /C rd /s/q
-WINNT=1
-XCOPYSW = /E
+CMD	= cmd /C
+DEL	= del /F
+DELTREE	= $(CMD) rd /s/q
+WINNT	= 1
 else
-CMD=command /C
-CHK=command /C if exist
-CHKNOT=command /C if not exist
-DEL = del
-DELTREE = deltree /y
-XCOPYSW = /E /Y
+CMD	= command /C
+DEL	= del
+DELTREE	= deltree /y
 endif
-
+CP	= copy /Y
+XCP	= xcopy /E /Y
+CHK	= $(CMD) if exist
+CHKNOT	= $(CMD) if not exist
 
 #
 # Setup base C compiler flags

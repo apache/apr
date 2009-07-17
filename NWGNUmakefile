@@ -350,23 +350,20 @@ nlms :: libs $(TARGET_nlm)
 install :: nlms $(INSTDIRS) FORCE
 	copy $(OBJDIR)\aprlib.nlm                          $(INSTALLBASE)\*.*
 ifndef DEST
-	-copy $(subst /,\,$(APR))\STATUS                   $(INSTALLBASE)\*.apr
-	-copy $(subst /,\,$(APR))\LICENSE                  $(INSTALLBASE)\*
-	-copy $(subst /,\,$(APR))\CHANGES                  $(INSTALLBASE)\*.apr
-	-copy $(subst /,\,$(APRUTIL))\STATUS               $(INSTALLBASE)\*.apu
-	-copy $(subst /,\,$(APRUTIL))\CHANGES              $(INSTALLBASE)\*.apu
-	@echo rem copying the docs directories > xc.bat
-	@echo xcopy docs $(INSTALLBASE)\docs\*.* $(XCOPYSW) >> xc.bat
-	$(CMD) xc.bat
-	$(DEL) xc.bat
+	-$(CP) $(subst /,\,$(APR))\STATUS                  $(INSTALLBASE)\*.apr
+	-$(CP) $(subst /,\,$(APR))\LICENSE                 $(INSTALLBASE)\*
+	-$(CP) $(subst /,\,$(APR))\CHANGES                 $(INSTALLBASE)\*.apr
+	-$(CP) $(subst /,\,$(APRUTIL))\STATUS              $(INSTALLBASE)\*.apu
+	-$(CP) $(subst /,\,$(APRUTIL))\CHANGES             $(INSTALLBASE)\*.apu
+	@-$(XCP) $(subst /,\,$(APR))\docs                  $(INSTALLBASE)\docs\*.*
 endif
 
 ifndef DEST
 installdev :: $(INSTDEVDIRS) FORCE
-	-copy $(subst /,\,$(APR))\include\*.h               $(INSTALLBASE)\include\*.*
-	-copy $(subst /,\,$(APRUTIL))\include\*.h           $(INSTALLBASE)\include\*.*
-	-copy $(subst /,\,$(APR))\*.imp                     $(INSTALLBASE)\lib\*.*
-	-copy $(subst /,\,$(APR))\misc\netware\*.xdc        $(INSTALLBASE)\lib\*.*
+	-$(CP) $(subst /,\,$(APR))\include\*.h             $(INSTALLBASE)\include\*.*
+	-$(CP) $(subst /,\,$(APRUTIL))\include\*.h         $(INSTALLBASE)\include\*.*
+	-$(CP) $(subst /,\,$(APR))\*.imp                   $(INSTALLBASE)\lib\*.*
+	-$(CP) $(subst /,\,$(APR))\misc\netware\*.xdc      $(INSTALLBASE)\lib\*.*
 
 $(INSTDEVDIRS) ::
 	$(CHKNOT) $@\NUL mkdir $@
@@ -382,11 +379,10 @@ vpath %.c poll/unix:shmem\unix:support/unix:random/unix
 vpath %.c dso/netware:memory/unix:mmap/unix:user/netware
 
 # Use the win32 network_io if Winsock is being used
-ifdef USE_STDSOCKETS
-vpath %.c network_io/unix
-else
-vpath %.c network_io/win32:network_io/unix
+ifndef USE_STDSOCKETS
+vpath %.c network_io/win32
 endif
+vpath %.c network_io/unix
 
 $(OBJDIR)/%.o: file_io/netware/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
