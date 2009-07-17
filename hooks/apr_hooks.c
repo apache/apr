@@ -314,7 +314,7 @@ APR_DECLARE(void) apr_hook_debug_show(const char *szName,
 
 /* Optional hook support */
 
-APR_DECLARE_EXTERNAL_HOOK(apr,APU,void,_optional,(void))
+APR_DECLARE_EXTERNAL_HOOK(apr,APR,void,_optional,(void))
 
 APR_DECLARE(apr_array_header_t *) apr_optional_hook_get(const char *szName)
 {
