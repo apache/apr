@@ -38,11 +38,16 @@ endif
 ifndef NOVELLLIBC
 NOVELLLIBC = C:/novell/ndk/libc
 endif
+ifneq "$(wildcard $(NOVELLLIBC)/include/ndkvers.h)" "$(NOVELLLIBC)/include/ndkvers.h"
+$(error NOVELLLIBC does not point to a valid Novell LIBC SDK) 
+endif
 
-# This is a placeholder
-# ifndef LDAPSDK
-# LDAPSDK = C:/novell/ndk/cldapsdk
-# endif
+ifndef LDAPSDK
+LDAPSDK = C:/novell/ndk/cldapsdk/NetWare/libc
+endif
+ifneq "$(wildcard $(LDAPSDK)/inc/ldap.h)" "$(LDAPSDK)/inc/ldap.h"
+$(error LDAPSDK does not point to a valid Novell CLDAP SDK) 
+endif
 
 ifndef METROWERKS
 METROWERKS = C:\Program Files\Metrowerks\CodeWarrior
@@ -254,22 +259,19 @@ OS = Windows_NT
 endif
 
 ifeq "$(OS)" "Windows_NT"
-CMD=cmd /C
-CHK=cmd /C if exist
-CHKNOT=cmd /C if not exist
-DEL = del /F
-DELTREE = cmd /C rd /s/q
-WINNT=1
-XCOPYSW = /E
+CMD	= cmd /C
+DEL	= del /F
+DELTREE	= $(CMD) rd /s/q
+WINNT	= 1
 else
-CMD=command /C
-CHK=command /C if exist
-CHKNOT=command /C if not exist
-DEL = del
-DELTREE = deltree /y
-XCOPYSW = /E /Y
+CMD	= command /C
+DEL	= del
+DELTREE	= deltree /y
 endif
-
+CP	= copy /Y
+XCP	= xcopy /E /Y
+CHK	= $(CMD) if exist
+CHKNOT	= $(CMD) if not exist
 
 #
 # Setup base C compiler flags
