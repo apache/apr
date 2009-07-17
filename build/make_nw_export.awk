@@ -2,7 +2,7 @@
 # based on Ryan Bloom's make_export.pl
 
 BEGIN {
-    printf(" (APRLIB)\n")
+    printf(" ("EXPPREFIX")\n")
 }
 
 # List of functions that we don't support, yet??
