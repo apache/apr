@@ -2237,6 +2237,14 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     return apr_pool_create_ex(newpool, parent, abort_fn, allocator);
 }
 
+APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpool,
+                                                    apr_abortfunc_t abort_fn,
+                                                    apr_allocator_t *allocator,
+                                                    const char *file_line)
+{
+    return apr_pool_create_unmanaged_ex(newpool, abort_fn, allocator);
+}
+
 #else /* APR_POOL_DEBUG */
 
 #undef apr_palloc
