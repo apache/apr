@@ -796,21 +796,14 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
     free(pool);
 }
 
-APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
-                                             apr_pool_t *parent,
-                                             apr_abortfunc_t abort_fn,
-                                             apr_allocator_t *allocator)
+static apr_status_t internal_pool_create_ex(apr_pool_t **newpool,
+                                            apr_pool_t *parent,
+                                            apr_abortfunc_t abort_fn,
+                                            apr_allocator_t *allocator)
 {
     apr_pool_t *pool;
 
     *newpool = NULL;
-
-    if (!parent)
-        parent = global_pool;
-
-    /* parent will always be non-NULL here except the first time a
-     * pool is created, in which case allocator is guaranteed to be
-     * non-NULL. */
 
     if (!abort_fn && parent)
         abort_fn = parent->abort_fn;
@@ -878,6 +871,28 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     *newpool = pool;
 
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
+                                             apr_pool_t *parent,
+                                             apr_abortfunc_t abort_fn,
+                                             apr_allocator_t *allocator)
+{
+    if (!parent)
+        parent = global_pool;
+
+    /* parent will always be non-NULL here except the first time a
+     * pool is created, in which case allocator is guaranteed to be
+     * non-NULL. */
+    return internal_pool_create_ex(newpool, parent, abort_fn, allocator);
+}
+
+APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
+                                                  apr_abortfunc_t abort_fn,
+                                                  apr_allocator_t *allocator)
+{
+    /* unmanaged pools have no parent. */
+    return internal_pool_create_ex(newpool, NULL, abort_fn, allocator);
 }
 
 /*
@@ -1405,25 +1420,15 @@ APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
     pool_destroy_debug(pool, file_line);
 }
 
-APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
-                                                   apr_pool_t *parent,
-                                                   apr_abortfunc_t abort_fn,
-                                                   apr_allocator_t *allocator,
-                                                   const char *file_line)
+static apr_status_t internal_pool_create_ex_debug(apr_pool_t **newpool,
+                                                  apr_pool_t *parent,
+                                                  apr_abortfunc_t abort_fn,
+                                                  apr_allocator_t *allocator,
+                                                  const char *file_line)
 {
     apr_pool_t *pool;
 
     *newpool = NULL;
-
-    if (!parent) {
-        parent = global_pool;
-    }
-    else {
-       apr_pool_check_integrity(parent);
-
-       if (!allocator)
-           allocator = parent->allocator;
-    }
 
     if (!abort_fn && parent)
         abort_fn = parent->abort_fn;
@@ -1504,6 +1509,34 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
 
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
+                                                   apr_pool_t *parent,
+                                                   apr_abortfunc_t abort_fn,
+                                                   apr_allocator_t *allocator,
+                                                   const char *file_line)
+{
+    if (!parent) {
+        parent = global_pool;
+    }
+    else {
+       apr_pool_check_integrity(parent);
+
+       if (!allocator)
+           allocator = parent->allocator;
+    }
+    return internal_pool_create_ex_debug(newpool, parent, abort_fn, allocator,
+                                         file_line);
+}
+
+APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpool,
+                                                   apr_abortfunc_t abort_fn,
+                                                   apr_allocator_t *allocator,
+                                                   const char *file_line)
+{
+    return internal_pool_create_ex_debug(newpool, NULL, abort_fn, allocator,
+                                         file_line);
 }
 
 /*
@@ -2252,6 +2285,22 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     return apr_pool_create_ex_debug(newpool, parent,
                                     abort_fn, allocator,
                                     "undefined");
+}
+
+#undef apr_pool_create_unmanaged_ex
+APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
+                                                    apr_pool_t *parent,
+                                                    apr_abortfunc_t abort_fn,
+                                                    apr_allocator_t *allocator);
+
+APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
+                                                    apr_pool_t *parent,
+                                                    apr_abortfunc_t abort_fn,
+                                                    apr_allocator_t *allocator)
+{
+    return apr_pool_create_unmanaged_ex_debug(newpool, parent,
+                                              abort_fn, allocator,
+                                              "undefined");
 }
 
 #endif /* APR_POOL_DEBUG */
