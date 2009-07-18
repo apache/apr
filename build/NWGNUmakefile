@@ -27,10 +27,6 @@ FILES_prebuild_headers = \
 	$(APRUTIL)/uri/uri_delims.h \
 	$(EOLIST) 
 
-ifneq "$(BUILDTOOL_AS_NLM)" "1"
-FILES_prebuild_headers += $(APRUTIL)/uri/uri_delims.h
-endif
-    
 nlms :: $(APR)/aprlib.imp
 
 $(APR)/aprlib.imp : make_nw_export.awk nw_export.i
@@ -97,7 +93,6 @@ endif
 # installation area
 #
 install :: nlms FORCE
-
 
 clean ::
 	$(CHK) nw_export.i                                              $(DEL) nw_export.i
