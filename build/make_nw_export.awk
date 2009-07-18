@@ -1,3 +1,19 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 # Based on apr's make_export.awk, which is
 # based on Ryan Bloom's make_export.pl
 
@@ -11,25 +27,10 @@ BEGIN {
 #/apr_##name##_perms_set/{next}
 /apr_socket_perms_set/{next}
 
-
-function add_symbol (sym_name) {
-	if (count) {
-		found++
-	}
-    gsub (/ /, "", sym_name)
-	line = line sym_name ",\n"
-
-	if (count == 0) {
-		printf(" %s", line)
-		line = ""
-	}
-}
-
 /^[ \t]*AP[RUI]?_DECLARE[^(]*[(][^)]*[)]([^ ]* )*[^(]+[(]/ {
     sub("[ \t]*AP[RUI]?_DECLARE[^(]*[(][^)]*[)][ \t]*", "")
     sub("[(].*", "")
     sub("([^ ]* (^([ \t]*[(])))+", "")
-
     add_symbol($0)
     next
 }
@@ -39,7 +40,6 @@ function add_symbol (sym_name) {
     symbol = args[2]
     sub("^[ \t]+", "", symbol)
     sub("[ \t]+$", "", symbol)
-
     add_symbol("ap_hook_" symbol)
     add_symbol("ap_hook_get_" symbol)
     add_symbol("ap_run_" symbol)
@@ -75,14 +75,22 @@ function add_symbol (sym_name) {
 #}
 
 /^[ \t]*AP[RUI]?_DECLARE_DATA .*;$/ {
-       varname = $NF;
-       gsub( /[*;]/, "", varname);
-       gsub( /\[.*\]/, "", varname);
-       add_symbol(varname);
+    varname = $NF;
+    gsub( /[*;]/, "", varname);
+    gsub( /\[.*\]/, "", varname);
+    add_symbol(varname);
 }
 
 
 END {
-   add_symbol("apr_wait_for_io_or_timeout");
-#	printf(" %s", line)
+    add_symbol("apr_wait_for_io_or_timeout");
+#    printf("\n\n#found: %d symbols.\n", found)
 }
+
+function add_symbol(sym_name) {
+    found++
+    sub (" ", "", sym_name)
+    printf(" %s,\n", sym_name)
+}
+
+
