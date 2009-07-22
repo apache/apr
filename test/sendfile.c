@@ -27,7 +27,7 @@
 #if !APR_HAS_SENDFILE
 int main(void)
 {
-    fprintf(stderr, 
+    fprintf(stderr,
             "This program won't work on this platform because there is no "
             "support for sendfile().\n");
     return 0;
@@ -108,7 +108,7 @@ static void create_testfile(apr_pool_t *p, const char *fname)
     apr_finfo_t finfo;
 
     printf("Creating a test file...\n");
-    rv = apr_file_open(&f, fname, 
+    rv = apr_file_open(&f, fname,
                  APR_CREATE | APR_WRITE | APR_TRUNCATE | APR_BUFFERED,
                  APR_UREAD | APR_UWRITE, p);
     if (rv) {
@@ -116,7 +116,7 @@ static void create_testfile(apr_pool_t *p, const char *fname)
                 rv, apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
-    
+
     buf[0] = FILE_DATA_CHAR;
     buf[1] = '\0';
     for (i = 0; i < FILE_LENGTH; i++) {
@@ -154,7 +154,7 @@ static void create_testfile(apr_pool_t *p, const char *fname)
     }
 
     if (finfo.size != FILE_LENGTH) {
-        fprintf(stderr, 
+        fprintf(stderr,
                 "test file %s should be %ld-bytes long\n"
                 "instead it is %ld-bytes long\n",
                 fname,
@@ -209,9 +209,9 @@ static int client(client_socket_mode_t socket_mode, char *host)
 
     rv = apr_socket_connect(sock, destsa);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_socket_connect()->%d/%s\n", 
+        fprintf(stderr, "apr_socket_connect()->%d/%s\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
@@ -223,7 +223,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
         /* set it non-blocking */
         rv = apr_socket_opt_set(sock, APR_SO_NONBLOCK, 1);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_socket_opt_set(APR_SO_NONBLOCK)->%d/%s\n", 
+            fprintf(stderr, "apr_socket_opt_set(APR_SO_NONBLOCK)->%d/%s\n",
                     rv,
                     apr_strerror(rv, buf, sizeof buf));
             exit(1);
@@ -233,7 +233,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
         /* set a timeout */
         rv = apr_socket_timeout_set(sock, 100 * APR_USEC_PER_SEC);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_socket_opt_set(APR_SO_NONBLOCK)->%d/%s\n", 
+            fprintf(stderr, "apr_socket_opt_set(APR_SO_NONBLOCK)->%d/%s\n",
                     rv,
                     apr_strerror(rv, buf, sizeof buf));
             exit(1);
@@ -267,11 +267,11 @@ static int client(client_socket_mode_t socket_mode, char *host)
     assert(hdtr.trailers[2].iov_base);
     hdtr.trailers[2].iov_len  = TRL3_LEN;
 
-    expected_len = 
+    expected_len =
         strlen(HDR1) + strlen(HDR2) + HDR3_LEN +
         strlen(TRL1) + strlen(TRL2) + TRL3_LEN +
         FILE_LENGTH;
-    
+
     if (socket_mode == BLK) {
         current_file_offset = 0;
         len = FILE_LENGTH;
@@ -282,13 +282,13 @@ static int client(client_socket_mode_t socket_mode, char *host)
                     apr_strerror(rv, buf, sizeof buf));
             exit(1);
         }
-        
+
         printf("apr_socket_sendfile() updated offset with %ld\n",
                (long int)current_file_offset);
-        
+
         printf("apr_socket_sendfile() updated len with %ld\n",
                (long int)len);
-        
+
         printf("bytes really sent: %" APR_SIZE_T_FMT "\n",
                expected_len);
 
@@ -313,7 +313,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
         pfd.desc.s = sock;
         pfd.client_data = NULL;
 
-        rv = apr_pollset_add(pset, &pfd);        
+        rv = apr_pollset_add(pset, &pfd);
         assert(!rv);
 
         total_bytes_sent = 0;
@@ -368,8 +368,8 @@ static int client(client_socket_mode_t socket_mode, char *host)
                 }
                 else {
                     hdtr.headers[0].iov_len -= tmplen;
-                    hdtr.headers[0].iov_base = 
-			(char*) hdtr.headers[0].iov_base + tmplen;
+                    hdtr.headers[0].iov_base =
+                        (char*) hdtr.headers[0].iov_base + tmplen;
                     tmplen = 0;
                 }
             }
@@ -401,14 +401,14 @@ static int client(client_socket_mode_t socket_mode, char *host)
                 }
                 else {
                     hdtr.trailers[0].iov_len -= tmplen;
-                    hdtr.trailers[0].iov_base = 
-			(char *)hdtr.trailers[0].iov_base + tmplen;
+                    hdtr.trailers[0].iov_base =
+                        (char *)hdtr.trailers[0].iov_base + tmplen;
                     tmplen = 0;
                 }
             }
 
         } while (total_bytes_sent < expected_len &&
-                 (rv == APR_SUCCESS || 
+                 (rv == APR_SUCCESS ||
                  (APR_STATUS_IS_EAGAIN(rv) && socket_mode != TIMEOUT)));
         if (total_bytes_sent != expected_len) {
             fprintf(stderr,
@@ -424,13 +424,13 @@ static int client(client_socket_mode_t socket_mode, char *host)
             exit(1);
         }
     }
-    
+
     current_file_offset = 0;
     rv = apr_file_seek(f, APR_CUR, &current_file_offset);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_file_seek()->%d/%s\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
@@ -442,7 +442,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_socket_shutdown()->%d/%s\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
@@ -453,16 +453,16 @@ static int client(client_socket_mode_t socket_mode, char *host)
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_socket_timeout_set()->%d/%s\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
-    
+
     bytes_read = 1;
     rv = apr_socket_recv(sock, buf, &bytes_read);
     if (rv != APR_EOF) {
         fprintf(stderr, "apr_socket_recv()->%d/%s (expected APR_EOF)\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     if (bytes_read != 0) {
@@ -478,7 +478,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_file_remove()->%d/%s\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
@@ -504,7 +504,7 @@ static int server(void)
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_socket_opt_set()->%d/%s\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
@@ -512,7 +512,7 @@ static int server(void)
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_sockaddr_info_get()->%d/%s\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
@@ -520,7 +520,7 @@ static int server(void)
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_socket_bind()->%d/%s\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
@@ -528,7 +528,7 @@ static int server(void)
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_socket_listen()->%d/%s\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
@@ -538,7 +538,7 @@ static int server(void)
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_socket_accept()->%d/%s\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
@@ -550,7 +550,7 @@ static int server(void)
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_socket_recv()->%d/%s\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     if (bytes_read != strlen(HDR1)) {
@@ -563,14 +563,14 @@ static int server(void)
                 (int)bytes_read, buf, HDR1);
         exit(1);
     }
-        
+
     assert(sizeof buf > strlen(HDR2));
     bytes_read = strlen(HDR2);
     rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_socket_recv()->%d/%s\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     if (bytes_read != strlen(HDR2)) {
@@ -608,7 +608,7 @@ static int server(void)
             exit(1);
         }
     }
-        
+
     for (i = 0; i < FILE_LENGTH; i++) {
         bytes_read = 1;
         rv = apr_socket_recv(newsock, buf, &bytes_read);
@@ -633,14 +633,14 @@ static int server(void)
             exit(1);
         }
     }
-        
+
     assert(sizeof buf > strlen(TRL1));
     bytes_read = strlen(TRL1);
     rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_socket_recv()->%d/%s\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     if (bytes_read != strlen(TRL1)) {
@@ -653,14 +653,14 @@ static int server(void)
                 (int)bytes_read, buf, TRL1);
         exit(1);
     }
-        
+
     assert(sizeof buf > strlen(TRL2));
     bytes_read = strlen(TRL2);
     rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_socket_recv()->%d/%s\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     if (bytes_read != strlen(TRL2)) {
@@ -698,13 +698,13 @@ static int server(void)
             exit(1);
         }
     }
-        
+
     bytes_read = 1;
     rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_EOF) {
         fprintf(stderr, "apr_socket_recv()->%d/%s (expected APR_EOF)\n",
                 rv,
-		apr_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     if (bytes_read != 0) {
@@ -725,14 +725,14 @@ int main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);
 #endif
 
-    /* Gee whiz this is goofy logic but I wanna drive sendfile right now, 
+    /* Gee whiz this is goofy logic but I wanna drive sendfile right now,
      * not dork around with the command line!
      */
     if (argc >= 3 && !strcmp(argv[1], "client")) {
         char *host = 0;
         if (argv[3]) {
             host = argv[3];
-        }	
+        }
         if (!strcmp(argv[2], "blocking")) {
             return client(BLK, host);
         }
@@ -747,7 +747,7 @@ int main(int argc, char *argv[])
         return server();
     }
 
-    fprintf(stderr, 
+    fprintf(stderr,
             "Usage: %s client {blocking|nonblocking|timeout}\n"
             "       %s server\n",
             argv[0], argv[0]);
