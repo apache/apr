@@ -54,7 +54,6 @@ XDEFINES	+= \
 
 XLFLAGS		+= \
 			$(EOLIST)
-						
 endif
 
 ifeq "$(RELEASE)" "noopt"
@@ -92,19 +91,19 @@ endif
 # This is used by the link 'name' directive to name the nlm.  If left blank
 # TARGET_nlm (see below) will be used.
 #
-NLM_NAME		=	globalmutexchild
+NLM_NAME	= globalmutexchild
 
 #
 # This is used by the link '-desc ' directive. 
 # If left blank, NLM_NAME will be used.
 #
-NLM_DESCRIPTION	=  child NLM to test the global Mutex layer
+NLM_DESCRIPTION	= child NLM to test the global Mutex layer
 
 #
 # This is used by the '-threadname' directive.  If left blank,
 # NLM_NAME Thread will be used.
 #
-NLM_THREAD_NAME	= globalmutexchild
+NLM_THREAD_NAME	= $(NLM_NAME)
 
 #
 # This is used by the '-screenname' directive.  If left blank,
@@ -116,7 +115,7 @@ NLM_SCREEN_NAME = DEFAULT
 # If this is specified, it will override VERSION value in 
 # $(APR_WORK)\build\NWGNUenvironment.inc
 #
-NLM_VERSION		= 1,0,0
+NLM_VERSION	=
 
 #
 # If this is specified, it will override the default of 64K
@@ -141,7 +140,7 @@ NLM_CHECK_SYM	=
 #
 # If this is specified it will be used by the link '-flags' directive
 #
-NLM_FLAGS		= AUTOUNLOAD, PSEUDOPREEMPTION, MULTIPLE
+NLM_FLAGS	= AUTOUNLOAD, PSEUDOPREEMPTION, MULTIPLE
  
 #
 # If this is specified it will be linked in with the XDCData option in the def 
@@ -158,7 +157,7 @@ XDCDATA         =
 # If there is an NLM target, put it here
 #
 TARGET_nlm = \
-	$(OBJDIR)/globalmutexchild.nlm \
+	$(OBJDIR)/$(NLM_NAME).nlm \
 	$(EOLIST)
 
 #
@@ -172,7 +171,7 @@ TARGET_lib = \
 # Paths must all use the '/' character
 #
 FILES_nlm_objs = \
-	$(OBJDIR)/globalmutexchild.o \
+	$(OBJDIR)/$(NLM_NAME).o \
 	$(EOLIST)
 
 #
@@ -220,7 +219,7 @@ FILES_nlm_Ximports = \
 #
 FILES_nlm_exports = \
 	$(EOLIST)
-	
+
 #   
 # These are the OBJ files needed to create the LIB target above.
 # Paths must all use the '/' character
