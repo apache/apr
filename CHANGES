@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Make sure the LD_LIBRARY_PATH is sensible when running the tests
+     from the RPM build, so that the crypto, dbd and dbm tests pass.
+     Transfer the apr-util spec file contents to apr.spec. [Graham
+     Leggett]
+
   *) Clarify the error messages within the dbd tests. [Graham Leggett]
 
   *) More elaborate detection for dup3(), accept4() and epoll_create1().
