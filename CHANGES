@@ -1,13 +1,14 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Make sure that "make check" is used in the RPM spec file, so that
+     the crypto, dbd and dbm tests pass. [Graham Leggett]
+
   *) Make sure the mysql version of dbd_mysql_get_entry() respects the
      rule that if the column number exceeds the number of columns, we
      return NULL. [Graham Leggett]
 
-  *) Make sure the LD_LIBRARY_PATH is sensible when running the tests
-     from the RPM build, so that the crypto, dbd and dbm tests pass.
-     Transfer the apr-util spec file contents to apr.spec. [Graham
+  *) Transfer the apr-util spec file contents to apr.spec. [Graham
      Leggett]
 
   *) Clarify the error messages within the dbd tests. [Graham Leggett]
