@@ -256,7 +256,7 @@ static int dbd_mysql_select(apr_pool_t *pool, apr_dbd_t *sql,
     } else {
         ret = mysql_errno(sql->conn);
     }
-    
+
     if (TXN_NOTICE_ERRORS(sql->trans)) {
         sql->trans->errnum = ret;
     }
@@ -333,6 +333,9 @@ static int dbd_mysql_get_entry(const apr_dbd_row_t *row, int n,
                                apr_dbd_datum_t *val)
 {
     MYSQL_BIND *bind;
+    if (dbd_mysql_num_cols(row->res) <= n) {
+    	return NULL;
+    }
     if (row->res->statement) {
         bind = &row->res->bind[n];
         if (mysql_stmt_fetch_column(row->res->statement, bind, n, 0) != 0) {
@@ -359,6 +362,9 @@ static int dbd_mysql_get_entry(const apr_dbd_row_t *row, int n,
 static const char *dbd_mysql_get_entry(const apr_dbd_row_t *row, int n)
 {
     MYSQL_BIND *bind;
+    if (dbd_mysql_num_cols(row->res) <= n) {
+    	return NULL;
+    }
     if (row->res->statement) {
         bind = &row->res->bind[n];
         if (mysql_stmt_fetch_column(row->res->statement, bind, n, 0) != 0) {
@@ -1100,7 +1106,7 @@ static apr_dbd_t *dbd_mysql_open(apr_pool_t *pool, const char *params,
 #endif
     MYSQL *real_conn;
     unsigned long flags = 0;
-    
+
     struct {
         const char *field;
         const char *value;
@@ -1176,7 +1182,7 @@ static apr_dbd_t *dbd_mysql_open(apr_pool_t *pool, const char *params,
     /* the MySQL manual says this should be BEFORE mysql_real_connect */
     mysql_options(sql->conn, MYSQL_OPT_RECONNECT, &do_reconnect);
 #endif
-    
+
     real_conn = mysql_real_connect(sql->conn, fields[0].value,
                                    fields[1].value, fields[2].value,
                                    fields[3].value, port,
@@ -1256,8 +1262,8 @@ static void dbd_mysql_init(apr_pool_t *pool)
 {
     my_init();
     mysql_thread_init();
-   
-    /* FIXME: this is a guess; find out what it really does */ 
+
+    /* FIXME: this is a guess; find out what it really does */
     apr_pool_cleanup_register(pool, NULL, thread_end, apr_pool_cleanup_null);
 }
 APU_MODULE_DECLARE_DATA const apr_dbd_driver_t apr_dbd_mysql_driver = {
