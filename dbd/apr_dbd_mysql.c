@@ -112,6 +112,7 @@ static apr_bucket *apr_bucket_lob_create(const apr_dbd_row_t *row, int col,
                                          apr_off_t offset,
                                          apr_size_t len, apr_pool_t *p,
                                          apr_bucket_alloc_t *list);
+static int dbd_mysql_num_cols(apr_dbd_results_t *res);
 
 static const apr_bucket_type_t apr_bucket_type_lob = {
     "LOB", 5, APR_BUCKET_DATA,
