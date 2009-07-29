@@ -44,7 +44,6 @@ APR_BUILD_DIR="@apr_builddir@"
 APR_SO_EXT="@so_ext@"
 APR_LIB_TARGET="@export_lib_target@"
 APR_LIBNAME="@APR_LIBNAME@"
-LDAP_LIBS="@LDADD_ldap@"
 
 # NOTE: the following line is modified during 'make install': alter with care!
 location=@APR_CONFIG_LOCATION@
@@ -65,7 +64,6 @@ Known values for OPTION are:
   --includes        print include information
   --ldflags         print linker flags
   --libs            print additional libraries to link against
-  --ldap-libs       print additional library information to link with ldap
   --srcdir          print APR source directory
   --installbuilddir print APR build helper directory
   --link-ld         print link switch(es) for linking to APR
@@ -149,9 +147,6 @@ while test $# -gt 0; do
     ;;
     --libs)
     flags="$flags $LIBS"
-    ;;
-    --ldap-libs)
-    flags="$flags $LDAP_LIBS"
     ;;
     --ldflags)
     flags="$flags $LDFLAGS"
