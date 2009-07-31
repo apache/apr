@@ -1,7 +1,7 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
-  *) Pass default environment to testflock and testoc.
+  *) Pass default environment to testflock and testoc children.
      [Bojan Smojver]
 
   *) Make sure that "make check" is used in the RPM spec file, so that
