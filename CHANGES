@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
 
+  *) Pass default environment to testflock and testoc.
+     [Bojan Smojver]
+
   *) More elaborate detection for dup3(), accept4() and epoll_create1().
      [Chetan Reddy <chetanreddy gmail.com>, Bojan Smojver]
 
