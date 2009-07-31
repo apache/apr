@@ -39,6 +39,9 @@ static int launch_reader(abts_case *tc)
             APR_NO_PIPE);
     APR_ASSERT_SUCCESS(tc, "Couldn't set io in procattr", rv);
 
+    rv = apr_procattr_cmdtype_set(procattr, APR_PROGRAM_ENV);
+    APR_ASSERT_SUCCESS(tc, "Couldn't set copy environment", rv);
+
     rv = apr_procattr_error_check_set(procattr, 1);
     APR_ASSERT_SUCCESS(tc, "Couldn't set error check in procattr", rv);
 
