@@ -1,6 +1,24 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:        -*- coding: utf-8 -*-
 Last modified at [$Date$]
 
+The current version of this file can be found at:
+
+  * http://svn.apache.org/repos/asf/apr/apr/trunk/STATUS
+
+Effective with version 2.0 , apr-util ceases to exist.  For reference,
+the final standalone apr-util can be found in subversion at:
+
+  * http://svn.apache.org/repos/asf/apr/apr-util/branches -r784519
+
+Patches considered for backport are noted in their branches' STATUS:
+
+  * http://svn.apache.org/repos/asf/apr/apr/branches/0.9.x/STATUS
+  * http://svn.apache.org/repos/asf/apr/apr/branches/1.3.x/STATUS
+  * http://svn.apache.org/repos/asf/apr/apr/branches/1.4.x/STATUS
+  * http://svn.apache.org/repos/asf/apr/apr-util/branches/0.9.x/STATUS
+  * http://svn.apache.org/repos/asf/apr/apr-util/branches/1.3.x/STATUS
+  * http://svn.apache.org/repos/asf/apr/apr-util/branches/1.4.x/STATUS
+
 Releases:
     2.0.0     : in development on trunk/
     1.4.0     : in development on branches/1.4.x/
@@ -58,8 +76,26 @@ Bundled with httpd:
     2.0a2     : released March 31, 2000
     2.0a1     : released March 10, 2000
 
+Contributors looking for a mission:
+
+  * Just do an egrep on "TODO" or "XXX" in the source.
+
+  * Review the bug database at: http://issues.apache.org/bugzilla/
+
+  * Review the "PatchAvailable" bugs in the bug database:
+
+    https://issues.apache.org/bugzilla/buglist.cgi?bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&product=APR&keywords=PatchAvailable
+
+    After testing, you can append a comment saying "Reviewed and tested".
+
+  * Open bugs in the bug database.
+
 
 RELEASE SHOWSTOPPERS:
+
+  * Refactor apr_ldap as a proper/complete API.  [Effective now, apr-2-config
+    no longer exports -lldap (-llber).]  Brownie points for making these
+    DSO pluggable providers against the various SDK's/Toolkits.
 
 
 CURRENT VOTES:
