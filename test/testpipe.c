@@ -146,6 +146,9 @@ static void test_pipe_writefull(abts_case *tc, void *data)
                              APR_CHILD_BLOCK);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
+    rv = apr_procattr_cmdtype_set(procattr, APR_PROGRAM_ENV);
+    APR_ASSERT_SUCCESS(tc, "Couldn't set copy environment", rv);
+
     rv = apr_procattr_error_check_set(procattr, 1);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
