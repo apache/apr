@@ -1,8 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
 
-  *) Pass default environment to testflock and testoc children, so that
-     tests run when APR is compiled with Intel C Compiler.
+  *) Pass default environment to testflock, testoc and testpipe children,
+     so that tests run when APR is compiled with Intel C Compiler.
      [Bojan Smojver]
 
   *) More elaborate detection for dup3(), accept4() and epoll_create1().
