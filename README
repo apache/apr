@@ -1,5 +1,5 @@
 Apache Portable Runtime Library (APR)
--------------------------------------
+=====================================
 
    The Apache Portable Runtime Library provides a predictable and
    consistent interface to underlying platform-specific
@@ -35,6 +35,26 @@ Apache Portable Runtime Library (APR)
      Thread and Process management
      Various data structures (tables, hashes, priority queues, etc)
 
+   APR 2.0 also provides a number of utility functions and library
+   compatibility interfaces.  These were formerly part of APR-util,
+   a seperate utility library in version 1 releases.  These include;
+
+     Hashing and UUID services
+     Multiple SQL DBD client interfaces
+     Multiple flat-database DBM client interfaces
+     Typesafe function Hooks abstraction
+     LDAP SSL connections for a variety of LDAP toolkits   
+     MemCache interface
+     Date parsing rourtines
+     Resource Lists
+     Thread Pools
+     Queues
+     Relocatable Memory Management functions
+     String filename-style pattern matching
+     URI Parsing
+     Charset translation (iconv based)
+     XML parsing (expat based)
+
    For a more complete list, please refer to the following URLs:
 
      http://apr.apache.org/docs/apr/modules.html
@@ -53,6 +73,20 @@ Apache Portable Runtime Library (APR)
    name but a few.  We list all known projects using APR at
    http://apr.apache.org/projects.html -- so please let us know
    if you find our libraries useful in your own projects!
+
+
+Database Providers
+==================
+Interfaces for copy-left licensed MySQL and gdbm DBD drivers, and 
+Berkeley DB DBM all ship as part of the distribution.  To avoid licensing
+incompatibilities, these are not built by default.  To enable support, 
+the corresponding use the --with-{provider} option, but be aware that 
+these licenses may introduce licensing implications for your compiled code.
+Similarly, the bindings for propritary drivers such as Oracle must also be 
+explicitly enabled.
+
+Whenever distributing apr-util in combination with database client 
+drivers, always review the license requirements of all components.
 
 
 Using a Subversion Checkout on Unix
@@ -133,6 +167,11 @@ simply link to libapr.lib.  To use it as a static library, simply
 define APR_DECLARE_STATIC before you include any apr header files 
 in your source, and link to apr.lib instead.
 
+On windows, selection of database drivers is via the environment values
+DBD_LIST (for freetds, mysql, oracle, pgsql, sqlite2 and/or sqlite3) 
+and DBM_LIST (db and/or gdbm).  DBD odbc and DBM sdbm are unconditionally
+compiled and installed, do not include these in the list.
+
 
 Generating Test Coverage information with gcc
 =============================================
@@ -148,4 +187,33 @@ If you want to generate test coverage data, use the following steps:
   cd ..
   make gcov
 
+
+Cryptographic Software Notice
+=============================
+This distribution includes cryptographic software.  The country in 
+which you currently reside may have restrictions on the import, 
+possession, use, and/or re-export to another country, of 
+encryption software.  BEFORE using any encryption software, please 
+check your country's laws, regulations and policies concerning the
+import, possession, or use, and re-export of encryption software, to 
+see if this is permitted.  See http://www.wassenaar.org/ for more
+information.
+
+The U.S. Government Department of Commerce, Bureau of Industry and
+Security (BIS), has classified this software as Export Commodity 
+Control Number (ECCN) 5D002.C.1, which includes information security
+software using or performing cryptographic functions with asymmetric
+algorithms.  The form and manner of this Apache Software Foundation
+distribution makes it eligible for export under the License Exception
+ENC Technology Software Unrestricted (TSU) exception (see the BIS 
+Export Administration Regulations, Section 740.13) for both object 
+code and source code.
+
+The following provides more details on the included cryptographic
+software:
+
+  APR-Util provides an abstract interface for SSL encrypted LDAP (ldaps
+  and STARTTLS style) connections, which can be powered by OpenLDAP, 
+  Netscape LDAP SDK, Mozilla LDAP SDK, or other platform specific ldap
+  interfaces.
 
