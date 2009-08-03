@@ -31,6 +31,12 @@
 #define APU_DSO_BUILD           1
 #endif
 
+/* Presume a standard, modern (5.x) mysql sdk/
+#define HAVE_MY_GLOBAL_H        1
+
+/* my_sys.h is broken on VC/Win32, and apparently not required */
+/* #undef HAVE_MY_SYS_H           0 */
+
 /*
  * Windows does not have GDBM, and we always use the bundled (new) Expat
  */
