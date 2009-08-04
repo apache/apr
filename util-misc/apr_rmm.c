@@ -306,13 +306,17 @@ APR_DECLARE(apr_status_t) apr_rmm_detach(apr_rmm_t *rmm)
 
 APR_DECLARE(apr_rmm_off_t) apr_rmm_malloc(apr_rmm_t *rmm, apr_size_t reqsize)
 {
+    apr_size_t size;
     apr_rmm_off_t this;
     
-    reqsize = APR_ALIGN_DEFAULT(reqsize) + RMM_BLOCK_SIZE;
+    size = APR_ALIGN_DEFAULT(reqsize) + RMM_BLOCK_SIZE;
+    if (size < reqsize) {
+        return 0;
+    }
 
     APR_ANYLOCK_LOCK(&rmm->lock);
 
-    this = find_block_of_size(rmm, reqsize);
+    this = find_block_of_size(rmm, size);
 
     if (this) {
         move_block(rmm, this, 0);
@@ -325,18 +329,22 @@ APR_DECLARE(apr_rmm_off_t) apr_rmm_malloc(apr_rmm_t *rmm, apr_size_t reqsize)
 
 APR_DECLARE(apr_rmm_off_t) apr_rmm_calloc(apr_rmm_t *rmm, apr_size_t reqsize)
 {
+    apr_size_t size;
     apr_rmm_off_t this;
         
-    reqsize = APR_ALIGN_DEFAULT(reqsize) + RMM_BLOCK_SIZE;
+    size = APR_ALIGN_DEFAULT(reqsize) + RMM_BLOCK_SIZE;
+    if (size < reqsize) {
+        return 0;
+    }
 
     APR_ANYLOCK_LOCK(&rmm->lock);
 
-    this = find_block_of_size(rmm, reqsize);
+    this = find_block_of_size(rmm, size);
 
     if (this) {
         move_block(rmm, this, 0);
         this += RMM_BLOCK_SIZE;
-        memset((char*)rmm->base + this, 0, reqsize - RMM_BLOCK_SIZE);
+        memset((char*)rmm->base + this, 0, size - RMM_BLOCK_SIZE);
     }
 
     APR_ANYLOCK_UNLOCK(&rmm->lock);
@@ -349,16 +357,19 @@ APR_DECLARE(apr_rmm_off_t) apr_rmm_realloc(apr_rmm_t *rmm, void *entity,
     apr_rmm_off_t this;
     apr_rmm_off_t old;
     struct rmm_block_t *blk;
-    apr_size_t oldsize;
+    apr_size_t size, oldsize;
 
     if (!entity) {
         return apr_rmm_malloc(rmm, reqsize);
     }
 
-    reqsize = APR_ALIGN_DEFAULT(reqsize);
+    size = APR_ALIGN_DEFAULT(reqsize);
+    if (size < reqsize) {
+        return 0;
+    }
     old = apr_rmm_offset_get(rmm, entity);
 
-    if ((this = apr_rmm_malloc(rmm, reqsize)) == 0) {
+    if ((this = apr_rmm_malloc(rmm, size)) == 0) {
         return 0;
     }
 
@@ -366,7 +377,7 @@ APR_DECLARE(apr_rmm_off_t) apr_rmm_realloc(apr_rmm_t *rmm, void *entity,
     oldsize = blk->size;
 
     memcpy(apr_rmm_addr_get(rmm, this),
-           apr_rmm_addr_get(rmm, old), oldsize < reqsize ? oldsize : reqsize);
+           apr_rmm_addr_get(rmm, old), oldsize < size ? oldsize : size);
     apr_rmm_free(rmm, old);
 
     return this;
