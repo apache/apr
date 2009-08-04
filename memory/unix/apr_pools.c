@@ -640,7 +640,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t in_size)
     if (size < in_size) {
         if (pool->abort_fn)
             pool->abort_fn(APR_ENOMEM);
-
+        return NULL;
     }
     active = pool->active;
 
