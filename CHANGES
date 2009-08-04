@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes with APR 0.9.19
 
+  *) SECURITY: CVE-2009-2412 (cve.mitre.org)
+     Fix overflow in pools and rmm, where size alignment was taking place.
+     [Matt Lewis <mattlewis@google.com>, Sander Striker]
+
 
 
 Changes with APR 0.9.18
