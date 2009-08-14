@@ -55,7 +55,7 @@ APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **pollset,
                                                 apr_uint32_t size,
                                                 apr_pool_t *p,
                                                 apr_uint32_t flags,
-                                                apr_pollset_method_e method);
+                                                apr_pollset_method_e method)
 {
     return apr_pollset_create(pollset, size, p, flags);
 }
