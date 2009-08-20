@@ -30,12 +30,7 @@ static apr_int16_t get_event(apr_int16_t event)
         rv |= POLLPRI;
     if (event & APR_POLLOUT)
         rv |= POLLOUT;
-    if (event & APR_POLLERR)
-        rv |= POLLERR;
-    if (event & APR_POLLHUP)
-        rv |= POLLHUP;
-    if (event & APR_POLLNVAL)
-        rv |= POLLNVAL;
+    /* POLLERR, POLLHUP, and POLLNVAL aren't valid as requested events */
 
     return rv;
 }
@@ -64,7 +59,6 @@ static apr_int16_t get_revent(apr_int16_t event)
 struct apr_pollset_t
 {
     apr_pool_t *pool;
-    apr_uint32_t nelts;
     apr_uint32_t nalloc;
     int port_fd;
     port_event_t *port_set;
@@ -76,6 +70,9 @@ struct apr_pollset_t
 #endif
     /* A ring containing all of the pollfd_t that are active */
     APR_RING_HEAD(pfd_query_ring_t, pfd_elem_t) query_ring;
+    /* A ring containing the pollfd_t that will be added on the
+     * next call to apr_pollset_poll().
+     */
     APR_RING_HEAD(pfd_add_ring_t, pfd_elem_t) add_ring;
     /* A ring of pollfd_t that have been used, and then _remove'd */
     APR_RING_HEAD(pfd_free_ring_t, pfd_elem_t) free_ring;
@@ -115,7 +112,6 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
     }
 #endif
     (*pollset)->waiting = 0;
-    (*pollset)->nelts = 0;
     (*pollset)->nalloc = size;
     (*pollset)->flags = flags;
     (*pollset)->pool = p;
@@ -125,7 +121,7 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
     (*pollset)->port_fd = port_create();
 
     if ((*pollset)->port_fd < 0) {
-        return APR_ENOMEM;
+        return apr_get_netos_error();
     }
 
     {
@@ -184,21 +180,22 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
         fd = descriptor->desc.f->filedes;
     }
 
+    /* If another thread is polling, notify the kernel immediately; otherwise,
+     * wait until the next call to apr_pollset_poll().
+     */
     if (apr_atomic_read32(&pollset->waiting)) {
         res = port_associate(pollset->port_fd, PORT_SOURCE_FD, fd, 
                              get_event(descriptor->reqevents), (void *)elem);
 
         if (res < 0) {
-            rv = APR_ENOMEM;
+            rv = apr_get_netos_error();
             APR_RING_INSERT_TAIL(&(pollset->free_ring), elem, pfd_elem_t, link);
         }
         else {
-            pollset->nelts++;
             APR_RING_INSERT_TAIL(&(pollset->query_ring), elem, pfd_elem_t, link);
         }
     } 
     else {
-        pollset->nelts++;
         APR_RING_INSERT_TAIL(&(pollset->add_ring), elem, pfd_elem_t, link);
     }
 
@@ -232,39 +229,35 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
         rv = APR_NOTFOUND;
     }
 
-    if (!APR_RING_EMPTY(&(pollset->query_ring), pfd_elem_t, link)) {
-        for (ep = APR_RING_FIRST(&(pollset->query_ring));
-             ep != APR_RING_SENTINEL(&(pollset->query_ring),
-                                     pfd_elem_t, link);
-             ep = APR_RING_NEXT(ep, link)) {
+    for (ep = APR_RING_FIRST(&(pollset->query_ring));
+         ep != APR_RING_SENTINEL(&(pollset->query_ring),
+                                 pfd_elem_t, link);
+         ep = APR_RING_NEXT(ep, link)) {
 
-            if (descriptor->desc.s == ep->pfd.desc.s) {
-                APR_RING_REMOVE(ep, link);
-                APR_RING_INSERT_TAIL(&(pollset->dead_ring),
-                                     ep, pfd_elem_t, link);
-                if (ENOENT == err) {
-                    rv = APR_SUCCESS;
-                }
-                break;
+        if (descriptor->desc.s == ep->pfd.desc.s) {
+            APR_RING_REMOVE(ep, link);
+            APR_RING_INSERT_TAIL(&(pollset->dead_ring),
+                                 ep, pfd_elem_t, link);
+            if (ENOENT == err) {
+                rv = APR_SUCCESS;
             }
+            break;
         }
     }
 
-    if (!APR_RING_EMPTY(&(pollset->add_ring), pfd_elem_t, link)) {
-        for (ep = APR_RING_FIRST(&(pollset->add_ring));
-             ep != APR_RING_SENTINEL(&(pollset->add_ring),
-                                     pfd_elem_t, link);
-             ep = APR_RING_NEXT(ep, link)) {
+    for (ep = APR_RING_FIRST(&(pollset->add_ring));
+         ep != APR_RING_SENTINEL(&(pollset->add_ring),
+                                 pfd_elem_t, link);
+         ep = APR_RING_NEXT(ep, link)) {
 
-            if (descriptor->desc.s == ep->pfd.desc.s) {
-                APR_RING_REMOVE(ep, link);
-                APR_RING_INSERT_TAIL(&(pollset->dead_ring),
-                                     ep, pfd_elem_t, link);
-                if (ENOENT == err) {
-                    rv = APR_SUCCESS;
-                }
-                break;
+        if (descriptor->desc.s == ep->pfd.desc.s) {
+            APR_RING_REMOVE(ep, link);
+            APR_RING_INSERT_TAIL(&(pollset->dead_ring),
+                                 ep, pfd_elem_t, link);
+            if (ENOENT == err) {
+                rv = APR_SUCCESS;
             }
+            break;
         }
     }
 
@@ -311,14 +304,23 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
             fd = ep->pfd.desc.f->filedes;
         }
 
-        port_associate(pollset->port_fd, PORT_SOURCE_FD, 
-                           fd, get_event(ep->pfd.reqevents), ep);
+        ret = port_associate(pollset->port_fd, PORT_SOURCE_FD, 
+                             fd, get_event(ep->pfd.reqevents), ep);
+        if (ret < 0) {
+            rv = apr_get_netos_error();
+            APR_RING_INSERT_TAIL(&(pollset->free_ring), ep, pfd_elem_t, link);
+            break;
+        }
 
         APR_RING_INSERT_TAIL(&(pollset->query_ring), ep, pfd_elem_t, link);
-
     }
 
     pollset_unlock_rings();
+
+    if (rv != APR_SUCCESS) {
+        apr_atomic_dec32(&pollset->waiting);
+        return rv;
+    }
 
     ret = port_getn(pollset->port_fd, pollset->port_set, pollset->nalloc,
                     &nget, tvptr);
@@ -330,14 +332,11 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 
     if (ret == -1) {
         (*num) = 0;
-        if (errno == EINTR) {
-            rv = APR_EINTR;
-        }
-        else if (errno == ETIME) {
+        if (errno == ETIME) {
             rv = APR_TIMEUP;
         }
         else {
-            rv = APR_EGENERAL;
+            rv = apr_get_netos_error();
         }
     }
     else if (nget == 0) {
@@ -367,10 +366,9 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
         }
     }
 
-
     pollset_lock_rings();
 
-    /* Shift all PFDs in the Dead Ring to be Free Ring */
+    /* Shift all PFDs in the Dead Ring to the Free Ring */
     APR_RING_CONCAT(&(pollset->free_ring), &(pollset->dead_ring), pfd_elem_t, link);
 
     pollset_unlock_rings();
@@ -494,11 +492,11 @@ APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
                     &nget, tvptr);
 
     if (ret == -1) {
-        if (errno == ETIME || errno == EINTR) {
+        if (errno == ETIME) {
             rv = APR_TIMEUP;
         }
         else {
-            rv = APR_EGENERAL;
+            rv = apr_get_netos_error();
         }
     }
     else if (nget == 0) {
