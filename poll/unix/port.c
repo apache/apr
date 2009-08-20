@@ -242,6 +242,9 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
                 APR_RING_REMOVE(ep, link);
                 APR_RING_INSERT_TAIL(&(pollset->dead_ring),
                                      ep, pfd_elem_t, link);
+                if (ENOENT == err) {
+                    rv = APR_SUCCESS;
+                }
                 break;
             }
         }
