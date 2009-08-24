@@ -1,8 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.9
 
-  *) Fix error handling in the Solaris poll support (Event Port).  [Jeff
-     Trawick]
+  *) Fix error handling in the Solaris pollset support (Event Port backend).
+     PR 47645.  [Jeff Trawick]
 
   *) Add the remainder of this fix from trunk:
      Fix Solaris poll failure.  PR 43000
