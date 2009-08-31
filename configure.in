@@ -1636,13 +1636,6 @@ elif test "$ac_cv_type_off_t" = "yes"; then
     else
         AC_ERROR([could not determine the size of off_t])
     fi
-    #
-    case $host in
-    *darwin10.0.0)
-        if test "$ac_cv_sizeof_long" = "$ac_cv_sizeof_long_long"; then
-            off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
-        fi ;;
-    esac
 else
    # Fallback on int
    off_t_value=apr_int32_t
