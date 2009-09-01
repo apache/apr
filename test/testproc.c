@@ -44,7 +44,7 @@ static void test_create_proc(abts_case *tc, void *data)
     rv = apr_procattr_dir_set(attr, "data");
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    rv = apr_procattr_cmdtype_set(attr, APR_PROGRAM);
+    rv = apr_procattr_cmdtype_set(attr, APR_PROGRAM_ENV);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     args[0] = "proc_child" EXTENSION;
@@ -120,7 +120,7 @@ static void test_file_redir(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_procattr_dir_set(attr, "data");
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    rv = apr_procattr_cmdtype_set(attr, APR_PROGRAM);
+    rv = apr_procattr_cmdtype_set(attr, APR_PROGRAM_ENV);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     args[0] = "proc_child";
