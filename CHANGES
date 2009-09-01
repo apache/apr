@@ -8,9 +8,9 @@ Changes for APR 1.4.0
      Fix overflow in pools and rmm, where size alignment was taking place.
      [Matt Lewis <mattlewis@google.com>, Sander Striker]
 
-  *) Pass default environment to testflock, testoc and testpipe children,
-     so that tests run when APR is compiled with Intel C Compiler.
-     [Bojan Smojver]
+  *) Pass default environment to testflock, testoc, testpipe, testsock,
+     testshm and testproc children, so that tests run when APR is compiled
+     with Intel C Compiler. [Bojan Smojver]
 
   *) More elaborate detection for dup3(), accept4() and epoll_create1().
      [Chetan Reddy <chetanreddy gmail.com>, Bojan Smojver]

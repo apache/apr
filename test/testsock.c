@@ -40,6 +40,9 @@ static void launch_child(abts_case *tc, apr_proc_t *proc, const char *arg1, apr_
     rv = apr_procattr_error_check_set(procattr, 1);
     APR_ASSERT_SUCCESS(tc, "Couldn't set error check in procattr", rv);
 
+    rv = apr_procattr_cmdtype_set(procattr, APR_PROGRAM_ENV);
+    APR_ASSERT_SUCCESS(tc, "Couldn't set copy environment", rv);
+
     args[0] = "sockchild" EXTENSION;
     args[1] = arg1;
     args[2] = NULL;
