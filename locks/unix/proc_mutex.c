@@ -69,7 +69,7 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
     #define APR_POSIXSEM_NAME_MAX 30
     #define APR_POSIXSEM_NAME_MIN 13
     sem_t *psem;
-    char semname[34];   /* APR_MD5_DIGESTSIZE*2 + 2 */
+    char semname[APR_MD5_DIGESTSIZE * 2 + 2];
     
     new_mutex->interproc = apr_palloc(new_mutex->pool,
                                       sizeof(*new_mutex->interproc));
