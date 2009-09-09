@@ -93,10 +93,9 @@ Contributors looking for a mission:
 
 RELEASE SHOWSTOPPERS:
 
-  * Refactor apr_ldap as a proper/complete API.  [Effective now, apr-2-config
-    no longer exports -lldap (-llber).]  Brownie points for making these
-    DSO pluggable providers against the various SDK's/Toolkits.
-
+  * Refactor apr_ldap as a proper/complete API.  Brownie points for making
+    these into DSO pluggable providers against the various SDK's/Toolkits.
+    Either re-apply r799085, or drop apr_ldap before 2.0.0, per vote on dev@
 
 CURRENT VOTES:
 
