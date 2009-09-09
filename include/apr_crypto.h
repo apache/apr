@@ -219,7 +219,7 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(apr_pool_t *pool, const char *na
  * @param driver - The driver in use.
  * @return The name of the driver.
  */
-APR_DECLARE(const char *)apr_crypto_driver_name (const apr_crypto_driver_t *driver);
+APR_DECLARE(const char *) apr_crypto_driver_name(const apr_crypto_driver_t *driver);
 
 /**
  * @brief Get the result of the last operation on a factory. If the result
