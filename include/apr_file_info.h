@@ -261,7 +261,8 @@ APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *thedir);
  *
  * @note If @c APR_INCOMPLETE is returned all the fields in @a finfo may
  *       not be filled in, and you need to check the @c finfo->valid bitmask
- *       to verify that what you're looking for is there.
+ *       to verify that what you're looking for is there. When no more
+ *       entries are available, APR_ENOENT is returned.
  */                        
 APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                                        apr_dir_t *thedir);
