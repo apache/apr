@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.9
 
+  *) Add comments describing the thread-safety properties of apr_pool_t.
+     [Neil Conway nrc cs.berkeley.edu]
+
   *) Pass default environment to testsock, testshm and testproc children, so
      that tests run when APR is compiled with Intel C Compiler.
      [Bojan Smojver]
