@@ -28,10 +28,16 @@
  * particularly in the presence of die()).
  *
  * Instead, we maintain pools, and allocate items (both memory and I/O
- * handlers) from the pools --- currently there are two, one for per
- * transaction info, and one for config info.  When a transaction is over,
- * we can delete everything in the per-transaction apr_pool_t without fear,
- * and without thinking too hard about it either.
+ * handlers) from the pools --- currently there are two, one for
+ * per-transaction info, and one for config info.  When a transaction is
+ * over, we can delete everything in the per-transaction apr_pool_t without
+ * fear, and without thinking too hard about it either.
+ *
+ * Note that most operations on pools are not thread-safe: a single pool
+ * should only be accessed by a single thread at any given time. The one
+ * exception to this rule is creating a subpool of a given pool: one or more
+ * threads can safely create subpools at the same time that another thread
+ * accesses the parent pool.
  */
 
 #include "apr.h"
@@ -182,6 +188,10 @@ APR_DECLARE(void) apr_pool_terminate(void);
  * @param abort_fn A function to use if the pool cannot allocate more memory.
  * @param allocator The allocator to use with the new pool.  If NULL the
  *        allocator of the parent pool will be used.
+ * @remark This function is thread-safe, in the sense that multiple threads
+ *         can safely create subpools of the same parent pool concurrently.
+ *         Similarly, a subpool can be created by one thread at the same
+ *         time that another thread accesses the parent pool.
  */
 APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
                                              apr_pool_t *parent,
@@ -287,6 +297,10 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
  *        pool.  If it is non-NULL, the new pool will inherit all
  *        of its parent pool's attributes, except the apr_pool_t will
  *        be a sub-pool.
+ * @remark This function is thread-safe, in the sense that multiple threads
+ *         can safely create subpools of the same parent pool concurrently.
+ *         Similarly, a subpool can be created by one thread at the same
+ *         time that another thread accesses the parent pool.
  */
 #if defined(DOXYGEN)
 APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
@@ -326,7 +340,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged(apr_pool_t **newpool);
 #endif
 
 /**
- * Find the pools allocator
+ * Find the pool's allocator
  * @param pool The pool to get the allocator from.
  */
 APR_DECLARE(apr_allocator_t *) apr_pool_allocator_get(apr_pool_t *pool);
