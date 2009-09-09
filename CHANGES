@@ -5,6 +5,9 @@ Changes for APR 2.0.0
      Fix overflow in pools and rmm, where size alignment was taking place.
      [Matt Lewis <mattlewis@google.com>, Sander Striker]
 
+  *) Add comments describing the thread-safety properties of apr_pool_t.
+     [Neil Conway nrc cs.berkeley.edu]
+
   *) Pass default environment to testflock, testoc, testpipe, testsock,
      testshm and testproc children, so that tests run when APR is compiled
      with Intel C Compiler. [Bojan Smojver]
