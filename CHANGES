@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.9
 
+  *) Better handling of APR_OFF_T_FMT for Darwin 10 depending on -arch
+     setting of compiler [Jim Jagielski]
+
   *) Add comments describing the thread-safety properties of apr_pool_t.
      [Neil Conway nrc cs.berkeley.edu]
 
