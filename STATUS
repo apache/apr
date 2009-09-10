@@ -64,6 +64,21 @@ RELEASE SHOWSTOPPERS:
 
 CURRENT VOTES:
 
+  * unix/proc_mutex.c: Allow for Posix-sems to be actually named.
+      Trunk Version:
+        http://svn.apache.org/viewvc?view=rev&revision=811455
+        http://svn.apache.org/viewvc?view=rev&revision=813063
+      1.4 Version:
+        trunk works
+      +1: jim
+
+  * configure.in: Fix APR_OFF_T_FMT for Darwin 10 (10.6)
+      Trunk Version:
+        http://svn.apache.org/viewvc?view=rev&revision=809745
+        http://svn.apache.org/viewvc?view=rev&revision=810472
+      1.4 Version:
+        trunk works
+      +1: jim
 
 CURRENT test/testall -v EXCEPTIONS:
 
