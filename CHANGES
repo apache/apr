@@ -5,6 +5,9 @@ Changes for APR 1.4.0
      Fix overflow in pools and rmm, where size alignment was taking place.
      [Matt Lewis <mattlewis@google.com>, Sander Striker]
 
+  *) Better handling of APR_OFF_T_FMT for Darwin 10 depending on -arch
+     setting of compiler [Jim Jagielski]
+
   *) Add comments describing the thread-safety properties of apr_pool_t.
      [Neil Conway nrc cs.berkeley.edu]
 
