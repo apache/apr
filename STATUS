@@ -72,13 +72,6 @@ CURRENT VOTES:
         trunk works
       +1: jim
 
-  * configure.in: Fix APR_OFF_T_FMT for Darwin 10 (10.6)
-      Trunk Version:
-        http://svn.apache.org/viewvc?view=rev&revision=809745
-        http://svn.apache.org/viewvc?view=rev&revision=810472
-      1.4 Version:
-        trunk works
-      +1: jim
 
 CURRENT test/testall -v EXCEPTIONS:
 
