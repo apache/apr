@@ -355,8 +355,9 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                 }
             }
         }
-        if ((*num) = j)
+        if (((*num) = j)) {
             rv = APR_SUCCESS;
+        }
     }
     if (descriptors && (*num))
         *descriptors = pollset->result_set;
