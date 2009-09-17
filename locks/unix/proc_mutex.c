@@ -18,7 +18,12 @@
 #include "apr_strings.h"
 #include "apr_arch_proc_mutex.h"
 #include "apr_arch_file_io.h" /* for apr_mkstemp() */
-#include "apr_md5.h" /* for apr_md5() */
+#ifndef APR_MD5_DIGESTSIZE
+#define APR_MD5_DIGESTSIZE 16
+extern apr_status_t apr_md5(unsigned char digest[APR_MD5_DIGESTSIZE],
+                            const void *input,
+                            apr_size_t inputLen);
+#endif
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 {
