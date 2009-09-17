@@ -18,12 +18,7 @@
 #include "apr_strings.h"
 #include "apr_arch_proc_mutex.h"
 #include "apr_arch_file_io.h" /* for apr_mkstemp() */
-#ifndef APR_MD5_DIGESTSIZE
-#define APR_MD5_DIGESTSIZE 16
-extern apr_status_t apr_md5(unsigned char digest[APR_MD5_DIGESTSIZE],
-                            const void *input,
-                            apr_size_t inputLen);
-#endif
+#include "apr_hash.h"
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 {
@@ -57,13 +52,19 @@ static apr_status_t proc_mutex_posix_cleanup(void *mutex_)
     return APR_SUCCESS;
 }    
 
+static void mix_it_up (char *p) {
+    int i;
+    for (i=0; p[i]; i++) {
+        p[i] = (i%2) ? p[i]>>1 : p[i]<<1;
+    }
+}
+
 static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
                                             const char *fname)
 {
-    #define APR_POSIXSEM_NAME_MAX 30
     #define APR_POSIXSEM_NAME_MIN 13
     sem_t *psem;
-    char semname[APR_MD5_DIGESTSIZE * 2 + 2];
+    char semname[32];
     
     new_mutex->interproc = apr_palloc(new_mutex->pool,
                                       sizeof(*new_mutex->interproc));
@@ -74,7 +75,7 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
      *   - be at most 14 chars
      *   - be unique and not match anything on the filesystem
      *
-     * Because of this, we use fname to generate an md5 hex checksum
+     * Because of this, we use fname to generate a (unique) hash
      * and use that as the name of the semaphore. If no filename was
      * given, we create one based on the time. We tuck the name
      * away, since it might be useful for debugging.
@@ -89,17 +90,15 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
      *
      */
     if (fname) {
-        unsigned char digest[APR_MD5_DIGESTSIZE];   /* note dependency on semname here */
-        const char *hex = "0123456789abcdef";
-        char *p = semname;
-        int i;
-        apr_md5(digest, fname, strlen(fname));
-        *p++ = '/';     /* must start with /, right? */
-        for (i = 0; i < sizeof(digest); i++) {
-            *p++ = hex[digest[i] >> 4];
-            *p++ = hex[digest[i] & 0xF];
-        }
-        semname[APR_POSIXSEM_NAME_MAX] = '\0';
+        apr_ssize_t flen = strlen(fname);
+        char *p = apr_pstrndup(new_mutex->pool, fname, strlen(fname));
+        unsigned int h1, h2, h3;
+        h1 = apr_hashfunc_default((const char *)p, &flen);
+        mix_it_up(p);
+        h2 = apr_hashfunc_default((const char *)p, &flen);
+        mix_it_up(p);
+        h3 = apr_hashfunc_default((const char *)p, &flen);
+        apr_snprintf(semname, sizeof(semname), "/ApR.%x%x%x", h1, h2, h3);
     } else {
         apr_time_t now;
         unsigned long sec;
