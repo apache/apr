@@ -5,6 +5,9 @@ Changes for APR 2.0.0
      Fix overflow in pools and rmm, where size alignment was taking place.
      [Matt Lewis <mattlewis@google.com>, Sander Striker]
 
+  *) Add support for Berkeley DB 4.8. [Arfrever Frehtes Taifersar Arahesis
+     <arfrever.fta gmail.com>]
+
   *) Add comments describing the thread-safety properties of apr_pool_t.
      [Neil Conway nrc cs.berkeley.edu]
 
