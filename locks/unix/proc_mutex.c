@@ -61,7 +61,7 @@ static unsigned int rshash (char *p) {
    for( ; *p; p++)
    {
       retval = retval * a + (*p);
-      a    = a * b;
+      a *= b;
    }
 
    return retval;
