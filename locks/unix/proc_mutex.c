@@ -52,11 +52,19 @@ static apr_status_t proc_mutex_posix_cleanup(void *mutex_)
     return APR_SUCCESS;
 }    
 
-static void mix_it_up (char *p) {
-    int i;
-    for (i=0; p[i]; i++) {
-        p[i] = (i%2) ? p[i]>>1 : p[i]<<1;
-    }
+static unsigned int rshash (char *p) {
+    /* hash function from Robert Sedgwicks 'Algorithms in C' book */
+   unsigned int b    = 378551;
+   unsigned int a    = 63689;
+   unsigned int retval = 0;
+
+   for( ; *p; p++)
+   {
+      retval = retval * a + (*p);
+      a    = a * b;
+   }
+
+   return retval;
 }
 
 static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
@@ -78,7 +86,8 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
      * Because of this, we use fname to generate a (unique) hash
      * and use that as the name of the semaphore. If no filename was
      * given, we create one based on the time. We tuck the name
-     * away, since it might be useful for debugging.
+     * away, since it might be useful for debugging. We use 2 hashing
+     * functions to try to avoid collisions.
      *
      * To  make this as robust as possible, we initially try something
      * larger (and hopefully more unique) and gracefully fail down to the
@@ -92,13 +101,10 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
     if (fname) {
         apr_ssize_t flen = strlen(fname);
         char *p = apr_pstrndup(new_mutex->pool, fname, strlen(fname));
-        unsigned int h1, h2, h3;
+        unsigned int h1, h2;
         h1 = apr_hashfunc_default((const char *)p, &flen);
-        mix_it_up(p);
-        h2 = apr_hashfunc_default((const char *)p, &flen);
-        mix_it_up(p);
-        h3 = apr_hashfunc_default((const char *)p, &flen);
-        apr_snprintf(semname, sizeof(semname), "/ApR.%x%x%x", h1, h2, h3);
+        h2 = rshash(p);
+        apr_snprintf(semname, sizeof(semname), "/ApR.%xH%x", h1, h2);
     } else {
         apr_time_t now;
         unsigned long sec;
