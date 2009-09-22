@@ -311,7 +311,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_copy(apr_pool_t *pool,
     apr_hash_entry_t *new_vals;
     unsigned int i, j;
 
-    if (apr_pool_create(&array_pool, ht->pool) != APR_SUCCESS)
+    if (apr_pool_create(&array_pool, pool) != APR_SUCCESS)
         return NULL;
 
     ht = apr_palloc(pool, sizeof(apr_hash_t) +
