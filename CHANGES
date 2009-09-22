@@ -5,6 +5,12 @@ Changes for APR 2.0.0
      Fix overflow in pools and rmm, where size alignment was taking place.
      [Matt Lewis <mattlewis@google.com>, Sander Striker]
 
+  *) The implementation of expand_array() in tables/apr_hash.c allocates
+     a new bucket array, without making any attempt to release the memory
+     allocated for the previous bucket array. That wastes memory: if the
+     hash table grows exponentially, this strategy wastes O(n) extra memory.
+     Use a subpool instead. [Neil Conway <nrc cs.berkeley.edu>]
+
   *) Add support for Berkeley DB 4.8. [Arfrever Frehtes Taifersar Arahesis
      <arfrever.fta gmail.com>]
 
