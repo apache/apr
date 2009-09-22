@@ -67,12 +67,15 @@ struct apr_hash_index_t {
 /*
  * The size of the array is always a power of two. We use the maximum
  * index rather than the size so that we can use bitwise-AND for
- * modular arithmetic.
- * The count of hash entries may be greater depending on the chosen
- * collision rate.
+ * modular arithmetic. The count of hash entries may be greater
+ * depending on the chosen collision rate.
+ *
+ * We allocate the bucket array in a sub-pool, "array_pool". This allows us
+ * to reclaim the old bucket array after an expansion.
  */
 struct apr_hash_t {
     apr_pool_t          *pool;
+    apr_pool_t          *array_pool;
     apr_hash_entry_t   **array;
     apr_hash_index_t     iterator;  /* For apr_hash_first(NULL, ...) */
     unsigned int         count, max;
@@ -89,14 +92,20 @@ struct apr_hash_t {
 
 static apr_hash_entry_t **alloc_array(apr_hash_t *ht, unsigned int max)
 {
-   return apr_pcalloc(ht->pool, sizeof(*ht->array) * (max + 1));
+   return apr_pcalloc(ht->array_pool, sizeof(*ht->array) * (max + 1));
 }
 
 APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool)
 {
+    apr_pool_t *array_pool;
     apr_hash_t *ht;
+
+    if (apr_pool_create(&array_pool, pool) != APR_SUCCESS)
+        return NULL;
+
     ht = apr_palloc(pool, sizeof(apr_hash_t));
     ht->pool = pool;
+    ht->array_pool = array_pool;
     ht->free = NULL;
     ht->count = 0;
     ht->max = INITIAL_MAX;
@@ -163,9 +172,16 @@ APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi,
 
 static void expand_array(apr_hash_t *ht)
 {
+    apr_pool_t *new_array_pool;
+    apr_pool_t *old_array_pool;
     apr_hash_index_t *hi;
     apr_hash_entry_t **new_array;
     unsigned int new_max;
+
+    if (apr_pool_create(&new_array_pool, ht->pool) != APR_SUCCESS)
+        return; /* Give up and don't try to expand the array */
+    old_array_pool = ht->array_pool;
+    ht->array_pool = new_array_pool;
 
     new_max = ht->max * 2 + 1;
     new_array = alloc_array(ht, new_max);
@@ -176,6 +192,8 @@ static void expand_array(apr_hash_t *ht)
     }
     ht->array = new_array;
     ht->max = new_max;
+
+    apr_pool_destroy(old_array_pool);
 }
 
 APR_DECLARE_NONSTD(unsigned int) apr_hashfunc_default(const char *char_key,
@@ -288,22 +306,25 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
 APR_DECLARE(apr_hash_t *) apr_hash_copy(apr_pool_t *pool,
                                         const apr_hash_t *orig)
 {
+    apr_pool_t *array_pool;
     apr_hash_t *ht;
     apr_hash_entry_t *new_vals;
     unsigned int i, j;
 
+    if (apr_pool_create(&array_pool, ht->pool) != APR_SUCCESS)
+        return NULL;
+
     ht = apr_palloc(pool, sizeof(apr_hash_t) +
-                    sizeof(*ht->array) * (orig->max + 1) +
                     sizeof(apr_hash_entry_t) * orig->count);
     ht->pool = pool;
+    ht->array_pool = array_pool;
     ht->free = NULL;
     ht->count = orig->count;
     ht->max = orig->max;
     ht->hash_func = orig->hash_func;
-    ht->array = (apr_hash_entry_t **)((char *)ht + sizeof(apr_hash_t));
+    ht->array = alloc_array(ht, ht->max);
 
-    new_vals = (apr_hash_entry_t *)((char *)(ht) + sizeof(apr_hash_t) +
-                                    sizeof(*ht->array) * (orig->max + 1));
+    new_vals = (apr_hash_entry_t *)((char *)(ht) + sizeof(apr_hash_t));
     j = 0;
     for (i = 0; i <= ht->max; i++) {
         apr_hash_entry_t **new_entry = &(ht->array[i]);
@@ -392,6 +413,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
                                                      const void *data),
                                          const void *data)
 {
+    apr_pool_t *array_pool;
     apr_hash_t *res;
     apr_hash_entry_t *new_vals = NULL;
     apr_hash_entry_t *iter;
@@ -415,8 +437,12 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
     }
 #endif
 
+    if (apr_pool_create(&array_pool, p) != APR_SUCCESS)
+        return NULL;
+
     res = apr_palloc(p, sizeof(apr_hash_t));
     res->pool = p;
+    res->array_pool = array_pool;
     res->free = NULL;
     res->hash_func = base->hash_func;
     res->count = base->count;
