@@ -267,7 +267,7 @@ APR_DECLARE(void) apr_memcache_add_multget_key(apr_pool_t *data_pool,
 /**
  * Gets multiple values from the server, allocating the values out of p
  * @param mc client to use
- * @param temp_pool Pool used for tempoary allocations. May be cleared inside this
+ * @param temp_pool Pool used for temporary allocations. May be cleared inside this
  *        call.
  * @param data_pool Pool used to allocate data for the returned values.
  * @param values hash of apr_memcache_value_t keyed by strings, contains the
@@ -345,7 +345,7 @@ APR_DECLARE(apr_status_t) apr_memcache_delete(apr_memcache_t *mc,
  * @param mc client to use
  * @param key   null terminated string containing the key
  * @param n     number to increment by
- * @param nv    new value after incrmenting
+ * @param nv    new value after incrementing
  */
 APR_DECLARE(apr_status_t) apr_memcache_incr(apr_memcache_t *mc, 
                                             const char *key,
