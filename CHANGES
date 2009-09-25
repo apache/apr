@@ -5,6 +5,15 @@ Changes for APR 2.0.0
      Fix overflow in pools and rmm, where size alignment was taking place.
      [Matt Lewis <mattlewis@google.com>, Sander Striker]
 
+  *) apr_temp_dir_get() now checks the TMPDIR environment variable
+     first, instead of third. [Jim Jagielski]
+
+  *) Posix semaphores can now be named and used as named semaphores.
+     [Jim Jagielski]
+
+  *) Better handling of APR_OFF_T_FMT for Darwin 10 depending on -arch
+     setting of compiler. [Jim Jagielski]
+
   *) The implementation of expand_array() in tables/apr_hash.c allocates
      a new bucket array, without making any attempt to release the memory
      allocated for the previous bucket array. That wastes memory: if the
