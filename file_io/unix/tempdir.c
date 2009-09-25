@@ -42,7 +42,7 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
 {
     apr_status_t apr_err;
     const char *try_dirs[] = { "/tmp", "/usr/tmp", "/var/tmp" };
-    const char *try_envs[] = { "TMP", "TEMP", "TMPDIR" };
+    const char *try_envs[] = { "TMPDIR", "TMP", "TEMP"};
     const char *dir;
     char *cwd;
     int i;
@@ -51,9 +51,9 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
        into.
        Here's the order in which we'll try various paths:
 
+          $TMPDIR
           $TMP
           $TEMP
-          $TMPDIR
           "C:\TEMP"     (windows only)
           "SYS:\TMP"    (netware only)
           "/tmp"
