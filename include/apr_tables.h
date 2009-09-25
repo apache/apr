@@ -261,7 +261,7 @@ APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key);
  * Add a key/value pair to a table, if another element already exists with the
  * same key, this will over-write the old data.
  * @param t The table to add the data to.
- * @param key The key fo use
+ * @param key The key to use
  * @param val The value to add
  * @remark When adding data, this function makes a copy of both the key and the
  *         value.
@@ -384,7 +384,7 @@ APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
 
 /** 
  * Iterate over a table running the provided function once for every
- * element in the table.  The @param vp varargs paramater must be a
+ * element in the table.  The @param vp varargs parameter must be a
  * list of zero or more (char *) keys followed by a NULL pointer.  If
  * zero keys are given, the @param comp function will be invoked for
  * every element in the table.  Otherwise, the function is invoked

@@ -113,7 +113,7 @@ extern "C" {
  * to decipher a sparse file, so it's critical that the sparse file
  * flag should only be used for files accessed only by APR or other
  * applications known to be able to decipher them.  APR does not
- * guarentee that it will compress the file into sparse segments
+ * guarantee that it will compress the file into sparse segments
  * if it was previously created and written without the sparse flag.
  * On platforms which do not understand, or on file systems which
  * cannot handle sparse files, the flag is ignored by apr_file_open().
@@ -732,7 +732,7 @@ APR_DECLARE(apr_status_t) apr_file_name_get(const char **new_path,
 /**
  * Return the data associated with the current file.
  * @param data The user data associated with the file.  
- * @param key The key to use for retreiving data associated with this file.
+ * @param key The key to use for retrieving data associated with this file.
  * @param file The currently open file.
  */                     
 APR_DECLARE(apr_status_t) apr_file_data_get(void **data, const char *key, 
@@ -742,7 +742,7 @@ APR_DECLARE(apr_status_t) apr_file_data_get(void **data, const char *key,
  * Set the data associated with the current file.
  * @param file The currently open file.
  * @param data The user data to associate with the file.  
- * @param key The key to use for assocaiteing data with the file.
+ * @param key The key to use for associating data with the file.
  * @param cleanup The cleanup routine to use when the file is destroyed.
  */                     
 APR_DECLARE(apr_status_t) apr_file_data_set(apr_file_t *file, void *data,
@@ -786,7 +786,7 @@ APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
  * </PRE>
  * @param attr_mask Mask of valid bits in attributes.
  * @param pool the pool to use.
- * @remark This function should be used in preference to explict manipulation
+ * @remark This function should be used in preference to explicit manipulation
  *      of the file permissions, because the operations to provide these
  *      attributes are platform specific and may involve more than simply
  *      setting permission bits.
@@ -813,7 +813,7 @@ APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
 /**
  * Create a new directory on the file system.
  * @param path the path for the directory to be created. (use / on all systems)
- * @param perm Permissions for the new direcoty.
+ * @param perm Permissions for the new directory.
  * @param pool the pool to use.
  */                        
 APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm, 
@@ -823,7 +823,7 @@ APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm,
  * 'mkdir -p'. Creates intermediate directories as required. No error
  * will be reported if PATH already exists.
  * @param path the path for the directory to be created. (use / on all systems)
- * @param perm Permissions for the new direcoty.
+ * @param perm Permissions for the new directory.
  * @param pool the pool to use.
  */
 APR_DECLARE(apr_status_t) apr_dir_make_recursive(const char *path,
