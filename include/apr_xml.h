@@ -218,7 +218,7 @@ APR_DECLARE(apr_xml_parser *) apr_xml_parser_create(apr_pool_t *pool);
  * Parse a File, producing a xml_doc
  * @param p      The pool for allocating the parse results.
  * @param parser A pointer to *parser (needed so calling function can get
- *               errors), will be set to NULL on successfull completion.
+ *               errors), will be set to NULL on successful completion.
  * @param ppdoc  A pointer to *apr_xml_doc (which has the parsed results in it)
  * @param xmlfd  A file to read from.
  * @param buffer_length Buffer length which would be suitable 
