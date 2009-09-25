@@ -16,7 +16,7 @@
 
 /* This header file is where you should put ANY platform specific information.
  * This should be the only header file that programs need to include that 
- * actually has platform dependant code which refers to the .
+ * actually has platform dependent code which refers to the .
  */
 #ifndef APR_PORTABLE_H
 #define APR_PORTABLE_H
@@ -145,7 +145,7 @@ struct apr_os_proc_mutex_t {
 typedef int                   apr_os_file_t;        /**< native file */
 typedef DIR                   apr_os_dir_t;         /**< native dir */
 typedef int                   apr_os_sock_t;        /**< native dir */
-typedef struct apr_os_proc_mutex_t  apr_os_proc_mutex_t; /**< native proces
+typedef struct apr_os_proc_mutex_t  apr_os_proc_mutex_t; /**< native process
                                                           *   mutex
                                                           */
 #if APR_HAS_THREADS && APR_HAVE_PTHREAD_H 
@@ -235,7 +235,7 @@ APR_DECLARE(apr_status_t) apr_os_dir_get(apr_os_dir_t **thedir,
 /**
  * Convert the socket from an apr type to an OS specific socket
  * @param thesock The socket to convert.
- * @param sock The os specifc equivelant of the apr socket..
+ * @param sock The os specific equivalent of the apr socket..
  */
 APR_DECLARE(apr_status_t) apr_os_sock_get(apr_os_sock_t *thesock,
                                           apr_socket_t *sock);
@@ -450,7 +450,7 @@ APR_DECLARE(apr_status_t) apr_os_shm_put(apr_shm_t **shm,
 
 #if APR_HAS_DSO || defined(DOXYGEN)
 /** 
- * @defgroup apr_os_dso DSO (Dynamic Loading) Portabiliity Routines
+ * @defgroup apr_os_dso DSO (Dynamic Loading) Portability Routines
  * @{
  */
 /**
@@ -483,7 +483,7 @@ APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data);
 
 
 /**
- * Get the name of the system default characer set.
+ * Get the name of the system default character set.
  * @param pool the pool to allocate the name from, if needed
  */
 APR_DECLARE(const char*) apr_os_default_encoding(apr_pool_t *pool);
@@ -493,7 +493,7 @@ APR_DECLARE(const char*) apr_os_default_encoding(apr_pool_t *pool);
  * Get the name of the current locale character set.
  * @param pool the pool to allocate the name from, if needed
  * @remark Defers to apr_os_default_encoding if the current locale's
- * data can't be retreved on this system.
+ * data can't be retrieved on this system.
  */
 APR_DECLARE(const char*) apr_os_locale_encoding(apr_pool_t *pool);
 
