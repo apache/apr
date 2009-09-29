@@ -72,6 +72,14 @@ RELEASE SHOWSTOPPERS:
 CURRENT VOTES:
 
 
+BACKPORT REMINDERS
+
+    This is just a reminder for backports, not for voting ...
+
+    * shmem/unix/shm.c: kill compiler warnings 'statement not reached'
+    trunk patch: http://svn.apache.org/viewvc?view=rev&revision=819897
+
+
 CURRENT test/testall -v EXCEPTIONS:
 
     Please add any platform anomilies to the following exception list.
