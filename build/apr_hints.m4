@@ -195,13 +195,12 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         APR_ADDTO(CPPFLAGS, [-DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK -no-cpp-precomp])
         APR_SETIFNULL(apr_posixsem_is_global, [yes])
         case $host in
-            *-apple-darwin*)
-	        # APR's use of kqueue has triggered kernel panics for some
+            *-apple-darwin[[1-9]].*)
+                # APR's use of kqueue has triggered kernel panics for some
                 # 10.5.x (Darwin 9.x) users when running the entire test suite.
                 # In 10.4.x, use of kqueue would cause the socket tests to hang.
+                # 10.6+ (Darwin 10.x is supposed to fix the KQueue issues
                 APR_SETIFNULL(ac_cv_func_kqueue, [no]) 
-                ;;
-            *-apple-darwin[[0-8]].*)
                 APR_SETIFNULL(ac_cv_func_poll, [no]) # See issue 34332
             ;;
         esac
