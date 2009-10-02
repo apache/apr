@@ -23,8 +23,8 @@
 #include "apr_poll.h"
 #include "apr_time.h"
 #include "apr_portable.h"
-#include "apr_arch_networkio.h"
 #include "apr_arch_file_io.h"
+#include "apr_arch_networkio.h"
 #include "apr_arch_poll_private.h"
 
 #ifdef POLL_USES_SELECT
@@ -167,191 +167,49 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num,
 
 #endif /* POLL_USES_SELECT */
 
-#ifdef POLLSET_USES_SELECT
-
-struct apr_pollset_t
+struct apr_pollset_private_t
 {
-    apr_pool_t *pool;
-
-    apr_uint32_t nelts;
-    apr_uint32_t nalloc;
     fd_set readset, writeset, exceptset;
     int maxfd;
     apr_pollfd_t *query_set;
     apr_pollfd_t *result_set;
     apr_uint32_t flags;
-    /* Pipe descriptors used for wakeup */
-    apr_file_t *wakeup_pipe[2];
 #ifdef NETWARE
     int set_type;
 #endif
 };
 
-#if !APR_FILES_AS_SOCKETS
-#if defined (WIN32)
-
-extern apr_status_t
-apr_file_socket_pipe_create(apr_file_t **in,
-                            apr_file_t **out,
-                            apr_pool_t *p);
-
-extern apr_status_t
-apr_file_socket_pipe_close(apr_file_t *file);
-
-/* Create a dummy wakeup socket pipe for interrupting the poller
- */
-static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
-{
-    apr_status_t rv;
-    apr_pollfd_t fd;
-
-    if ((rv = apr_file_socket_pipe_create(&pollset->wakeup_pipe[0],
-                                          &pollset->wakeup_pipe[1],
-                                          pollset->pool)) != APR_SUCCESS)
-        return rv;
-    fd.reqevents = APR_POLLIN;
-    fd.desc_type = APR_POLL_FILE;
-    fd.desc.f = pollset->wakeup_pipe[0];
-    /* Add the pipe to the pollset
-     */
-    return apr_pollset_add(pollset, &fd);
-}
-#else  /* !WIN32 */
-static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
-{
-    return APR_ENOTIMPL;
-}
-
-static apr_status_t apr_file_socket_pipe_close(apr_file_t *file)
-{
-    return APR_ENOTIMPL;
-}
-
-#endif /* WIN32 */
-#else  /* APR_FILES_AS_SOCKETS */
-
-/* Create a dummy wakeup pipe for interrupting the poller
- */
-static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
-{
-    apr_status_t rv;
-    apr_pollfd_t fd;
-
-    if ((rv = apr_file_pipe_create(&pollset->wakeup_pipe[0],
-                                   &pollset->wakeup_pipe[1],
-                                   pollset->pool)) != APR_SUCCESS)
-        return rv;
-    fd.reqevents = APR_POLLIN;
-    fd.desc_type = APR_POLL_FILE;
-    fd.desc.f = pollset->wakeup_pipe[0];
-    /* Add the pipe to the pollset
-     */
-    return apr_pollset_add(pollset, &fd);
-}
-#endif /* !APR_FILES_AS_SOCKETS */
-
-/* Read and discard what's ever in the wakeup pipe.
- */
-static void drain_wakeup_pipe(apr_pollset_t *pollset)
-{
-    char rb[512];
-    apr_size_t nr = sizeof(rb);
-
-    while (apr_file_read(pollset->wakeup_pipe[0], rb, &nr) == APR_SUCCESS) {
-        /* Although we write just one byte to the other end of the pipe
-         * during wakeup, multiple treads could call the wakeup.
-         * So simply drain out from the input side of the pipe all
-         * the data.
-         */
-        if (nr != sizeof(rb))
-            break;
-    }
-}
-
-static apr_status_t wakeup_pipe_cleanup(void *p)
-{
-    apr_pollset_t *pollset = (apr_pollset_t *) p;
-    if (pollset->flags & APR_POLLSET_WAKEABLE) {
-        /* Close both sides of the wakeup pipe */
-        if (pollset->wakeup_pipe[0]) {
-#if APR_FILES_AS_SOCKETS
-            apr_file_close(pollset->wakeup_pipe[0]);
-#else
-            apr_file_socket_pipe_close(pollset->wakeup_pipe[0]);
-#endif
-            pollset->wakeup_pipe[0] = NULL;
-        }
-        if (pollset->wakeup_pipe[1]) {
-#if APR_FILES_AS_SOCKETS
-            apr_file_close(pollset->wakeup_pipe[1]);
-#else
-            apr_file_socket_pipe_close(pollset->wakeup_pipe[1]);
-#endif
-            pollset->wakeup_pipe[1] = NULL;
-        }
-    }
-
-    return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
-                                             apr_uint32_t size,
-                                             apr_pool_t *p,
-                                             apr_uint32_t flags)
+static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
+                                        apr_uint32_t size,
+                                        apr_pool_t *p,
+                                        apr_uint32_t flags)
 {
     if (flags & APR_POLLSET_THREADSAFE) {                
-        *pollset = NULL;
+        pollset->p = NULL;
         return APR_ENOTIMPL;
-    }
-    if (flags & APR_POLLSET_WAKEABLE) {
-        /* Add room for wakeup descriptor */
-        size++;
     }
 #ifdef FD_SETSIZE
     if (size > FD_SETSIZE) {
-        *pollset = NULL;
+        pollset->p = NULL;
         return APR_EINVAL;
     }
 #endif
-    *pollset = apr_palloc(p, sizeof(**pollset));
-    (*pollset)->nelts = 0;
-    (*pollset)->nalloc = size;
-    (*pollset)->pool = p;
-    (*pollset)->flags = flags;
-    FD_ZERO(&((*pollset)->readset));
-    FD_ZERO(&((*pollset)->writeset));
-    FD_ZERO(&((*pollset)->exceptset));
-    (*pollset)->maxfd = 0;
+    pollset->p = apr_palloc(p, sizeof(apr_pollset_private_t));
+    FD_ZERO(&(pollset->p->readset));
+    FD_ZERO(&(pollset->p->writeset));
+    FD_ZERO(&(pollset->p->exceptset));
+    pollset->p->maxfd = 0;
 #ifdef NETWARE
-    (*pollset)->set_type = APR_NO_DESC;
+    pollset->p->set_type = APR_NO_DESC;
 #endif
-    (*pollset)->query_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
-    (*pollset)->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
+    pollset->p->query_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
+    pollset->p->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
 
-    if (flags & APR_POLLSET_WAKEABLE) {
-        apr_status_t rv;
-        /* Create wakeup pipe */
-        if ((rv = create_wakeup_pipe(*pollset)) != APR_SUCCESS) {
-            *pollset = NULL;
-            return rv;
-        }
-        apr_pool_cleanup_register(p, *pollset, wakeup_pipe_cleanup,
-                                  apr_pool_cleanup_null);
-    }
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t * pollset)
-{
-    if (pollset->flags & APR_POLLSET_WAKEABLE) 
-        return apr_pool_cleanup_run(pollset->pool, pollset,
-                                    wakeup_pipe_cleanup);
-    else
-        return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
-                                          const apr_pollfd_t *descriptor)
+static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
+                                     const apr_pollfd_t *descriptor)
 {
     apr_os_sock_t fd;
 
@@ -359,16 +217,16 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
         return APR_ENOMEM;
     }
 
-    pollset->query_set[pollset->nelts] = *descriptor;
+    pollset->p->query_set[pollset->nelts] = *descriptor;
 
     if (descriptor->desc_type == APR_POLL_SOCKET) {
 #ifdef NETWARE
         /* NetWare can't handle mixed descriptor types in select() */
-        if (HAS_PIPES(pollset->set_type)) {
+        if (HAS_PIPES(pollset->p->set_type)) {
             return APR_EBADF;
         }
         else {
-            pollset->set_type = APR_POLL_SOCKET;
+            pollset->p->set_type = APR_POLL_SOCKET;
         }
 #endif
         fd = descriptor->desc.s->socketdes;
@@ -376,16 +234,15 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
     else {
 #if !APR_FILES_AS_SOCKETS
         if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
-            descriptor->desc.f == pollset->wakeup_pipe[0]) {
+            descriptor->desc.f == pollset->wakeup_pipe[0])
             fd = (apr_os_sock_t)descriptor->desc.f->filedes;
-        }
         else
             return APR_EBADF;
 #else
 #ifdef NETWARE
         /* NetWare can't handle mixed descriptor types in select() */
-        if (descriptor->desc.f->is_pipe && !HAS_SOCKETS(pollset->set_type)) {
-            pollset->set_type = APR_POLL_FILE;
+        if (descriptor->desc.f->is_pipe && !HAS_SOCKETS(pollset->p->set_type)) {
+            pollset->p->set_type = APR_POLL_FILE;
             fd = descriptor->desc.f->filedes;
         }
         else {
@@ -403,24 +260,24 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
     }
 #endif
     if (descriptor->reqevents & APR_POLLIN) {
-        FD_SET(fd, &(pollset->readset));
+        FD_SET(fd, &(pollset->p->readset));
     }
     if (descriptor->reqevents & APR_POLLOUT) {
-        FD_SET(fd, &(pollset->writeset));
+        FD_SET(fd, &(pollset->p->writeset));
     }
     if (descriptor->reqevents &
         (APR_POLLPRI | APR_POLLERR | APR_POLLHUP | APR_POLLNVAL)) {
-        FD_SET(fd, &(pollset->exceptset));
+        FD_SET(fd, &(pollset->p->exceptset));
     }
-    if ((int) fd > pollset->maxfd) {
-        pollset->maxfd = (int) fd;
+    if ((int) fd > pollset->p->maxfd) {
+        pollset->p->maxfd = (int) fd;
     }
     pollset->nelts++;
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t * pollset,
-                                             const apr_pollfd_t * descriptor)
+static apr_status_t impl_pollset_remove(apr_pollset_t * pollset,
+                                        const apr_pollfd_t * descriptor)
 {
     apr_uint32_t i;
     apr_os_sock_t fd;
@@ -437,25 +294,25 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t * pollset,
     }
 
     for (i = 0; i < pollset->nelts; i++) {
-        if (descriptor->desc.s == pollset->query_set[i].desc.s) {
+        if (descriptor->desc.s == pollset->p->query_set[i].desc.s) {
             /* Found an instance of the fd: remove this and any other copies */
             apr_uint32_t dst = i;
             apr_uint32_t old_nelts = pollset->nelts;
             pollset->nelts--;
             for (i++; i < old_nelts; i++) {
-                if (descriptor->desc.s == pollset->query_set[i].desc.s) {
+                if (descriptor->desc.s == pollset->p->query_set[i].desc.s) {
                     pollset->nelts--;
                 }
                 else {
-                    pollset->query_set[dst] = pollset->query_set[i];
+                    pollset->p->query_set[dst] = pollset->p->query_set[i];
                     dst++;
                 }
             }
-            FD_CLR(fd, &(pollset->readset));
-            FD_CLR(fd, &(pollset->writeset));
-            FD_CLR(fd, &(pollset->exceptset));
-            if (((int) fd == pollset->maxfd) && (pollset->maxfd > 0)) {
-                pollset->maxfd--;
+            FD_CLR(fd, &(pollset->p->readset));
+            FD_CLR(fd, &(pollset->p->writeset));
+            FD_CLR(fd, &(pollset->p->exceptset));
+            if (((int) fd == pollset->p->maxfd) && (pollset->p->maxfd > 0)) {
+                pollset->p->maxfd--;
             }
             return APR_SUCCESS;
         }
@@ -464,10 +321,10 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t * pollset,
     return APR_NOTFOUND;
 }
 
-APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
-                                           apr_interval_time_t timeout,
-                                           apr_int32_t *num,
-                                           const apr_pollfd_t **descriptors)
+static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
+                                      apr_interval_time_t timeout,
+                                      apr_int32_t *num,
+                                      const apr_pollfd_t **descriptors)
 {
     int rs;
     apr_uint32_t i, j;
@@ -495,18 +352,18 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
         tvptr = &tv;
     }
 
-    memcpy(&readset, &(pollset->readset), sizeof(fd_set));
-    memcpy(&writeset, &(pollset->writeset), sizeof(fd_set));
-    memcpy(&exceptset, &(pollset->exceptset), sizeof(fd_set));
+    memcpy(&readset, &(pollset->p->readset), sizeof(fd_set));
+    memcpy(&writeset, &(pollset->p->writeset), sizeof(fd_set));
+    memcpy(&exceptset, &(pollset->p->exceptset), sizeof(fd_set));
 
 #ifdef NETWARE
-    if (HAS_PIPES(pollset->set_type)) {
-        rs = pipe_select(pollset->maxfd + 1, &readset, &writeset, &exceptset,
+    if (HAS_PIPES(pollset->p->set_type)) {
+        rs = pipe_select(pollset->p->maxfd + 1, &readset, &writeset, &exceptset,
                          tvptr);
     }
     else
 #endif
-        rs = select(pollset->maxfd + 1, &readset, &writeset, &exceptset,
+        rs = select(pollset->p->maxfd + 1, &readset, &writeset, &exceptset,
                     tvptr);
 
     (*num) = rs;
@@ -519,13 +376,13 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     j = 0;
     for (i = 0; i < pollset->nelts; i++) {
         apr_os_sock_t fd;
-        if (pollset->query_set[i].desc_type == APR_POLL_SOCKET) {
-            fd = pollset->query_set[i].desc.s->socketdes;
+        if (pollset->p->query_set[i].desc_type == APR_POLL_SOCKET) {
+            fd = pollset->p->query_set[i].desc.s->socketdes;
         }
         else {
             if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
-                pollset->query_set[i].desc.f == pollset->wakeup_pipe[0]) {
-                drain_wakeup_pipe(pollset);
+                pollset->p->query_set[i].desc.f == pollset->wakeup_pipe[0]) {
+                apr_pollset_drain_wakeup_pipe(pollset);
                 rv = APR_EINTR;
                 continue;
             }
@@ -533,22 +390,22 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 #if !APR_FILES_AS_SOCKETS
                 return APR_EBADF;
 #else
-                fd = pollset->query_set[i].desc.f->filedes;
+                fd = pollset->p->query_set[i].desc.f->filedes;
 #endif
             }
         }
         if (FD_ISSET(fd, &readset) || FD_ISSET(fd, &writeset) ||
             FD_ISSET(fd, &exceptset)) {
-            pollset->result_set[j] = pollset->query_set[i];
-            pollset->result_set[j].rtnevents = 0;
+            pollset->p->result_set[j] = pollset->p->query_set[i];
+            pollset->p->result_set[j].rtnevents = 0;
             if (FD_ISSET(fd, &readset)) {
-                pollset->result_set[j].rtnevents |= APR_POLLIN;
+                pollset->p->result_set[j].rtnevents |= APR_POLLIN;
             }
             if (FD_ISSET(fd, &writeset)) {
-                pollset->result_set[j].rtnevents |= APR_POLLOUT;
+                pollset->p->result_set[j].rtnevents |= APR_POLLOUT;
             }
             if (FD_ISSET(fd, &exceptset)) {
-                pollset->result_set[j].rtnevents |= APR_POLLERR;
+                pollset->p->result_set[j].rtnevents |= APR_POLLERR;
             }
             j++;
         }
@@ -557,45 +414,17 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
         rv = APR_SUCCESS;
 
     if (descriptors)
-        *descriptors = pollset->result_set;
+        *descriptors = pollset->p->result_set;
     return rv;
 }
 
-APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset)
-{
-    if (pollset->flags & APR_POLLSET_WAKEABLE)
-        return apr_file_putc(1, pollset->wakeup_pipe[1]);
-    else
-        return APR_EINIT;
-}
+static apr_pollset_provider_t impl = {
+    impl_pollset_create,
+    impl_pollset_add,
+    impl_pollset_remove,
+    impl_pollset_poll,
+    NULL,
+    "select"
+};
 
-APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
-                                            apr_uint32_t size,
-                                            apr_pool_t *p,
-                                            apr_uint32_t flags)
-{
-    return APR_ENOTIMPL;
-}
-
-APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
-                                         apr_pollfd_t *descriptor)
-{
-    return APR_ENOTIMPL;
-}
-
-APR_DECLARE(apr_status_t) apr_pollcb_remove(apr_pollcb_t *pollcb,
-                                            apr_pollfd_t *descriptor)
-{
-    return APR_ENOTIMPL;
-}
-
-
-APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
-                                          apr_interval_time_t timeout,
-                                          apr_pollcb_cb_t func,
-                                          void *baton)
-{
-    return APR_ENOTIMPL;
-}
-
-#endif /* POLLSET_USES_SELECT */
+apr_pollset_provider_t *apr_pollset_provider_select = &impl;
