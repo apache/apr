@@ -20,10 +20,6 @@ Changes for APR 2.0.0
      on return codes. PR 47431
      [Wayne Jensen <wayne_jensen trendmicro.com>]
 
-  *) On Linux/hppa flock() returns EAGAIN instead of EWOULDBLOCK. This
-     causes proc mutex failures.
-     [Stefan Fritsch <sf sfritsch.de>]
-
   *) Fix race conditions in initialisation of DBD, DBM and DSO.
      [Bojan Smojver]
 
