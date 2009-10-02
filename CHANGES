@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
 
+ *) Make apr_pollset and apr_pollcb implementations using providers.
+    Added apr_pollset_create_ex and apr_pollcb_create_ex that allows
+    choosing non-default providers.
+    [Mladen Turk]
+
   *) apr_temp_dir_get() now checks the TMPDIR environment variable first,
      instead of third.  [Jim Jagielski]
 

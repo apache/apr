@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
+#include "apr.h"
+#include "apr_poll.h"
+#include "apr_time.h"
+#include "apr_portable.h"
+#include "apr_arch_file_io.h"
+#include "apr_arch_networkio.h"
 #include "apr_arch_poll_private.h"
 #include "apr_arch_inherit.h"
 
-#ifdef POLLSET_USES_EPOLL
+#if defined(HAVE_EPOLL)
 
 static apr_int16_t get_epoll_event(apr_int16_t event)
 {
@@ -29,11 +35,7 @@ static apr_int16_t get_epoll_event(apr_int16_t event)
         rv |= EPOLLPRI;
     if (event & APR_POLLOUT)
         rv |= EPOLLOUT;
-    if (event & APR_POLLERR)
-        rv |= EPOLLERR;
-    if (event & APR_POLLHUP)
-        rv |= EPOLLHUP;
-    /* APR_POLLNVAL is not handled by epoll. */
+    /* APR_POLLNVAL is not handled by epoll.  EPOLLERR and EPOLLHUP are return-only */
 
     return rv;
 }
@@ -57,17 +59,11 @@ static apr_int16_t get_epoll_revent(apr_int16_t event)
     return rv;
 }
 
-struct apr_pollset_t
+struct apr_pollset_private_t
 {
-    apr_pool_t *pool;
-    apr_uint32_t nelts;
-    apr_uint32_t nalloc;
     int epoll_fd;
     struct epoll_event *pollset;
     apr_pollfd_t *result_set;
-    apr_uint32_t flags;
-    /* Pipe descriptors used for wakeup */
-    apr_file_t *wakeup_pipe[2];
 #if APR_HAS_THREADS
     /* A thread mutex to protect operations on the rings */
     apr_thread_mutex_t *ring_lock;
@@ -81,81 +77,29 @@ struct apr_pollset_t
     APR_RING_HEAD(pfd_dead_ring_t, pfd_elem_t) dead_ring;
 };
 
-static apr_status_t backend_cleanup(void *p_)
+static apr_status_t impl_pollset_cleanup(apr_pollset_t *pollset)
 {
-    apr_pollset_t *pollset = (apr_pollset_t *) p_;
-    close(pollset->epoll_fd);
-    if (pollset->flags & APR_POLLSET_WAKEABLE) {
-        /* Close both sides of the wakeup pipe */
-        if (pollset->wakeup_pipe[0]) {
-            apr_file_close(pollset->wakeup_pipe[0]);
-            pollset->wakeup_pipe[0] = NULL;
-        }
-        if (pollset->wakeup_pipe[1]) {
-            apr_file_close(pollset->wakeup_pipe[1]);
-            pollset->wakeup_pipe[1] = NULL;
-        }
-    }
+    close(pollset->p->epoll_fd);
     return APR_SUCCESS;
 }
 
-/* Create a dummy wakeup pipe for interrupting the poller
- */
-static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
-{
-    apr_status_t rv;
-    apr_pollfd_t fd;
 
-    if ((rv = apr_file_pipe_create(&pollset->wakeup_pipe[0],
-                                   &pollset->wakeup_pipe[1],
-                                   pollset->pool)) != APR_SUCCESS)
-        return rv;
-    fd.reqevents = APR_POLLIN;
-    fd.desc_type = APR_POLL_FILE;
-    fd.desc.f = pollset->wakeup_pipe[0];
-    /* Add the pipe to the pollset
-     */
-    return apr_pollset_add(pollset, &fd);
-}
-
-/* Read and discard what's ever in the wakeup pipe.
- */
-static void drain_wakeup_pipe(apr_pollset_t *pollset)
-{
-    char rb[512];
-    apr_size_t nr = sizeof(rb);
-
-    while (apr_file_read(pollset->wakeup_pipe[0], rb, &nr) == APR_SUCCESS) {
-        /* Although we write just one byte to the other end of the pipe
-         * during wakeup, multiple treads could call the wakeup.
-         * So simply drain out from the input side of the pipe all
-         * the data.
-         */
-        if (nr != sizeof(rb))
-            break;
-    }
-}
-
-APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
-                                             apr_uint32_t size,
-                                             apr_pool_t *p,
-                                             apr_uint32_t flags)
+static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
+                                        apr_uint32_t size,
+                                        apr_pool_t *p,
+                                        apr_uint32_t flags)
 {
     apr_status_t rv;
     int fd;
 
-    if (flags & APR_POLLSET_WAKEABLE) {
-        /* Add room for wakeup descriptor */
-        size++;
-    }
 #ifdef HAVE_EPOLL_CREATE1
     fd = epoll_create1(EPOLL_CLOEXEC);
 #else
     fd = epoll_create(size);
 #endif
     if (fd < 0) {
-        *pollset = NULL;
-        return errno;
+        pollset->p = NULL;
+        return apr_get_netos_error();
     }
 
 #ifndef HAVE_EPOLL_CREATE1
@@ -171,54 +115,36 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
     }
 #endif
 
-    *pollset = apr_palloc(p, sizeof(**pollset));
+    pollset->p = apr_palloc(p, sizeof(apr_pollset_private_t));
 #if APR_HAS_THREADS
     if ((flags & APR_POLLSET_THREADSAFE) &&
         !(flags & APR_POLLSET_NOCOPY) &&
-        ((rv = apr_thread_mutex_create(&(*pollset)->ring_lock,
+        ((rv = apr_thread_mutex_create(&pollset->p->ring_lock,
                                        APR_THREAD_MUTEX_DEFAULT,
                                        p)) != APR_SUCCESS)) {
-        *pollset = NULL;
+        pollset->p = NULL;
         return rv;
     }
 #else
     if (flags & APR_POLLSET_THREADSAFE) {
-        *pollset = NULL;
+        pollset->p = NULL;
         return APR_ENOTIMPL;
     }
 #endif
-    (*pollset)->nelts = 0;
-    (*pollset)->nalloc = size;
-    (*pollset)->flags = flags;
-    (*pollset)->pool = p;
-    (*pollset)->epoll_fd = fd;
-    (*pollset)->pollset = apr_palloc(p, size * sizeof(struct epoll_event));
-    (*pollset)->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
+    pollset->p->epoll_fd = fd;
+    pollset->p->pollset = apr_palloc(p, size * sizeof(struct epoll_event));
+    pollset->p->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
 
     if (!(flags & APR_POLLSET_NOCOPY)) {
-        APR_RING_INIT(&(*pollset)->query_ring, pfd_elem_t, link);
-        APR_RING_INIT(&(*pollset)->free_ring, pfd_elem_t, link);
-        APR_RING_INIT(&(*pollset)->dead_ring, pfd_elem_t, link);
+        APR_RING_INIT(&pollset->p->query_ring, pfd_elem_t, link);
+        APR_RING_INIT(&pollset->p->free_ring, pfd_elem_t, link);
+        APR_RING_INIT(&pollset->p->dead_ring, pfd_elem_t, link);
     }
-    if (flags & APR_POLLSET_WAKEABLE) {
-        /* Create wakeup pipe */
-        if ((rv = create_wakeup_pipe(*pollset)) != APR_SUCCESS) {
-            close(fd);
-            *pollset = NULL;
-            return rv;
-        }
-    }
-    apr_pool_cleanup_register(p, *pollset, backend_cleanup, backend_cleanup);
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t *pollset)
-{
-    return apr_pool_cleanup_run(pollset->pool, pollset, backend_cleanup);
-}
-
-APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
-                                          const apr_pollfd_t *descriptor)
+static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
+                                     const apr_pollfd_t *descriptor)
 {
     struct epoll_event ev = {0};
     int ret = -1;
@@ -233,8 +159,8 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
     else {
         pollset_lock_rings();
 
-        if (!APR_RING_EMPTY(&(pollset->free_ring), pfd_elem_t, link)) {
-            elem = APR_RING_FIRST(&(pollset->free_ring));
+        if (!APR_RING_EMPTY(&(pollset->p->free_ring), pfd_elem_t, link)) {
+            elem = APR_RING_FIRST(&(pollset->p->free_ring));
             APR_RING_REMOVE(elem, link);
         }
         else {
@@ -245,27 +171,24 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
         ev.data.ptr = elem;
     }
     if (descriptor->desc_type == APR_POLL_SOCKET) {
-        ret = epoll_ctl(pollset->epoll_fd, EPOLL_CTL_ADD,
+        ret = epoll_ctl(pollset->p->epoll_fd, EPOLL_CTL_ADD,
                         descriptor->desc.s->socketdes, &ev);
     }
     else {
-        ret = epoll_ctl(pollset->epoll_fd, EPOLL_CTL_ADD,
+        ret = epoll_ctl(pollset->p->epoll_fd, EPOLL_CTL_ADD,
                         descriptor->desc.f->filedes, &ev);
     }
 
-    if (pollset->flags & APR_POLLSET_NOCOPY) {
-        if (0 != ret) {
-            rv = APR_EBADF;
-        }
+    if (0 != ret) {
+        rv = apr_get_netos_error();
     }
-    else {
-        if (0 != ret) {
-            rv = APR_EBADF;
-            APR_RING_INSERT_TAIL(&(pollset->free_ring), elem, pfd_elem_t, link);
+
+    if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
+        if (rv != APR_SUCCESS) {
+            APR_RING_INSERT_TAIL(&(pollset->p->free_ring), elem, pfd_elem_t, link);
         }
         else {
-            pollset->nelts++;
-            APR_RING_INSERT_TAIL(&(pollset->query_ring), elem, pfd_elem_t, link);
+            APR_RING_INSERT_TAIL(&(pollset->p->query_ring), elem, pfd_elem_t, link);
         }
         pollset_unlock_rings();
     }
@@ -273,22 +196,22 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
     return rv;
 }
 
-APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
-                                             const apr_pollfd_t *descriptor)
+static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
+                                        const apr_pollfd_t *descriptor)
 {
     pfd_elem_t *ep;
     apr_status_t rv = APR_SUCCESS;
-    struct epoll_event ev;
+    struct epoll_event ev = {0}; /* ignored, but must be passed with
+                                  * kernel < 2.6.9
+                                  */
     int ret = -1;
 
-    ev.events = get_epoll_event(descriptor->reqevents);
-
     if (descriptor->desc_type == APR_POLL_SOCKET) {
-        ret = epoll_ctl(pollset->epoll_fd, EPOLL_CTL_DEL,
+        ret = epoll_ctl(pollset->p->epoll_fd, EPOLL_CTL_DEL,
                         descriptor->desc.s->socketdes, &ev);
     }
     else {
-        ret = epoll_ctl(pollset->epoll_fd, EPOLL_CTL_DEL,
+        ret = epoll_ctl(pollset->p->epoll_fd, EPOLL_CTL_DEL,
                         descriptor->desc.f->filedes, &ev);
     }
     if (ret < 0) {
@@ -298,18 +221,16 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
     if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
         pollset_lock_rings();
 
-        if (!APR_RING_EMPTY(&(pollset->query_ring), pfd_elem_t, link)) {
-            for (ep = APR_RING_FIRST(&(pollset->query_ring));
-                 ep != APR_RING_SENTINEL(&(pollset->query_ring),
-                                         pfd_elem_t, link);
-                 ep = APR_RING_NEXT(ep, link)) {
+        for (ep = APR_RING_FIRST(&(pollset->p->query_ring));
+             ep != APR_RING_SENTINEL(&(pollset->p->query_ring),
+                                     pfd_elem_t, link);
+             ep = APR_RING_NEXT(ep, link)) {
                 
-                if (descriptor->desc.s == ep->pfd.desc.s) {
-                    APR_RING_REMOVE(ep, link);
-                    APR_RING_INSERT_TAIL(&(pollset->dead_ring),
-                                         ep, pfd_elem_t, link);
-                    break;
-                }
+            if (descriptor->desc.s == ep->pfd.desc.s) {
+                APR_RING_REMOVE(ep, link);
+                APR_RING_INSERT_TAIL(&(pollset->p->dead_ring),
+                                     ep, pfd_elem_t, link);
+                break;
             }
         }
 
@@ -319,20 +240,20 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
     return rv;
 }
 
-APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
+static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
                                            apr_interval_time_t timeout,
                                            apr_int32_t *num,
                                            const apr_pollfd_t **descriptors)
 {
     int ret, i, j;
     apr_status_t rv = APR_SUCCESS;
-    apr_pollfd_t fd;
+    apr_pollfd_t *fdptr;
 
     if (timeout > 0) {
         timeout /= 1000;
     }
 
-    ret = epoll_wait(pollset->epoll_fd, pollset->pollset, pollset->nalloc,
+    ret = epoll_wait(pollset->p->epoll_fd, pollset->p->pollset, pollset->nalloc,
                      timeout);
     (*num) = ret;
 
@@ -343,58 +264,43 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
         rv = APR_TIMEUP;
     }
     else {
-        if (pollset->flags & APR_POLLSET_NOCOPY) {
-            for (i = 0, j = 0; i < ret; i++) {
-                fd = *((apr_pollfd_t *) (pollset->pollset[i].data.ptr));
-               /* Check if the polled descriptor is our
-                 * wakeup pipe. In that case do not put it result set.
-                 */
-                if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
-                    fd.desc_type == APR_POLL_FILE &&
-                    fd.desc.f == pollset->wakeup_pipe[0]) {
-                        drain_wakeup_pipe(pollset);
-                        rv = APR_EINTR;
-                }
-                else {
-                    pollset->result_set[j] = fd;
-                    pollset->result_set[j].rtnevents =
-                        get_epoll_revent(pollset->pollset[i].events);
-                    j++;
-                }
+        for (i = 0, j = 0; i < ret; i++) {
+            if (pollset->flags & APR_POLLSET_NOCOPY) {
+                fdptr = (apr_pollfd_t *)(pollset->p->pollset[i].data.ptr);
             }
-            if (((*num) = j))
-                rv = APR_SUCCESS;
-        }
-        else {
-            for (i = 0, j = 0; i < ret; i++) {
-                fd = (((pfd_elem_t *) (pollset->pollset[i].data.ptr))->pfd);
-                if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
-                    fd.desc_type == APR_POLL_FILE &&
-                    fd.desc.f == pollset->wakeup_pipe[0]) {
-                        drain_wakeup_pipe(pollset);
-                        rv = APR_EINTR;
-                }
-                else {
-                    pollset->result_set[j] = fd;
-                    pollset->result_set[j].rtnevents =
-                        get_epoll_revent(pollset->pollset[i].events);
-                    j++;
-                }
+            else {
+                fdptr = &(((pfd_elem_t *) (pollset->p->pollset[i].data.ptr))->pfd);
             }
-            if (((*num) = j))
-                rv = APR_SUCCESS;
+            /* Check if the polled descriptor is our
+             * wakeup pipe. In that case do not put it result set.
+             */
+            if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
+                fdptr->desc_type == APR_POLL_FILE &&
+                fdptr->desc.f == pollset->wakeup_pipe[0]) {
+                apr_pollset_drain_wakeup_pipe(pollset);
+                rv = APR_EINTR;
+            }
+            else {
+                pollset->p->result_set[j] = *fdptr;
+                pollset->p->result_set[j].rtnevents =
+                    get_epoll_revent(pollset->p->pollset[i].events);
+                j++;
+            }
         }
+        if (((*num) = j)) { /* any event besides wakeup pipe? */
+            rv = APR_SUCCESS;
 
-        if (descriptors) {
-            *descriptors = pollset->result_set;
+            if (descriptors) {
+                *descriptors = pollset->p->result_set;
+            }
         }
     }
 
     if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
         pollset_lock_rings();
 
-        /* Shift all PFDs in the Dead Ring to be Free Ring */
-        APR_RING_CONCAT(&(pollset->free_ring), &(pollset->dead_ring), pfd_elem_t, link);
+        /* Shift all PFDs in the Dead Ring to the Free Ring */
+        APR_RING_CONCAT(&(pollset->p->free_ring), &(pollset->p->dead_ring), pfd_elem_t, link);
 
         pollset_unlock_rings();
     }
@@ -402,32 +308,28 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     return rv;
 }
 
-APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset)
-{
-    if (pollset->flags & APR_POLLSET_WAKEABLE)
-        return apr_file_putc(1, pollset->wakeup_pipe[1]);
-    else
-        return APR_EINIT;
-}
-
-struct apr_pollcb_t {
-    apr_pool_t *pool;
-    apr_uint32_t nalloc;
-    struct epoll_event *pollset;
-    int epoll_fd;
+static apr_pollset_provider_t impl = {
+    impl_pollset_create,
+    impl_pollset_add,
+    impl_pollset_remove,
+    impl_pollset_poll,
+    impl_pollset_cleanup,
+    "epoll"
 };
+
+apr_pollset_provider_t *apr_pollset_provider_epoll = &impl;
 
 static apr_status_t cb_cleanup(void *p_)
 {
     apr_pollcb_t *pollcb = (apr_pollcb_t *) p_;
-    close(pollcb->epoll_fd);
+    close(pollcb->fd);
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
-                                            apr_uint32_t size,
-                                            apr_pool_t *p,
-                                            apr_uint32_t flags)
+static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
+                                       apr_uint32_t size,
+                                       apr_pool_t *p,
+                                       apr_uint32_t flags)
 {
     int fd;
     
@@ -438,7 +340,6 @@ APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
 #endif
     
     if (fd < 0) {
-        *pollcb = NULL;
         return apr_get_netos_error();
     }
 
@@ -455,18 +356,15 @@ APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
     }
 #endif
     
-    *pollcb = apr_palloc(p, sizeof(**pollcb));
-    (*pollcb)->nalloc = size;
-    (*pollcb)->pool = p;
-    (*pollcb)->epoll_fd = fd;
-    (*pollcb)->pollset = apr_palloc(p, size * sizeof(struct epoll_event));
-    apr_pool_cleanup_register(p, *pollcb, cb_cleanup, cb_cleanup);
+    pollcb->fd = fd;
+    pollcb->pollset.epoll = apr_palloc(p, size * sizeof(struct epoll_event));
+    apr_pool_cleanup_register(p, pollcb, cb_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
-                                         apr_pollfd_t *descriptor)
+static apr_status_t impl_pollcb_add(apr_pollcb_t *pollcb,
+                                    apr_pollfd_t *descriptor)
 {
     struct epoll_event ev;
     int ret;
@@ -475,11 +373,11 @@ APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
     ev.data.ptr = (void *)descriptor;
 
     if (descriptor->desc_type == APR_POLL_SOCKET) {
-        ret = epoll_ctl(pollcb->epoll_fd, EPOLL_CTL_ADD,
+        ret = epoll_ctl(pollcb->fd, EPOLL_CTL_ADD,
                         descriptor->desc.s->socketdes, &ev);
     }
     else {
-        ret = epoll_ctl(pollcb->epoll_fd, EPOLL_CTL_ADD,
+        ret = epoll_ctl(pollcb->fd, EPOLL_CTL_ADD,
                         descriptor->desc.f->filedes, &ev);
     }
     
@@ -490,21 +388,21 @@ APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_pollcb_remove(apr_pollcb_t *pollcb,
-                                            apr_pollfd_t *descriptor)
+static apr_status_t impl_pollcb_remove(apr_pollcb_t *pollcb,
+                                       apr_pollfd_t *descriptor)
 {
     apr_status_t rv = APR_SUCCESS;
-    struct epoll_event ev;
+    struct epoll_event ev = {0}; /* ignored, but must be passed with
+                                  * kernel < 2.6.9
+                                  */
     int ret = -1;
     
-    ev.events = get_epoll_event(descriptor->reqevents);
-    
     if (descriptor->desc_type == APR_POLL_SOCKET) {
-        ret = epoll_ctl(pollcb->epoll_fd, EPOLL_CTL_DEL,
+        ret = epoll_ctl(pollcb->fd, EPOLL_CTL_DEL,
                         descriptor->desc.s->socketdes, &ev);
     }
     else {
-        ret = epoll_ctl(pollcb->epoll_fd, EPOLL_CTL_DEL,
+        ret = epoll_ctl(pollcb->fd, EPOLL_CTL_DEL,
                         descriptor->desc.f->filedes, &ev);
     }
     
@@ -516,10 +414,10 @@ APR_DECLARE(apr_status_t) apr_pollcb_remove(apr_pollcb_t *pollcb,
 }
 
 
-APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
-                                          apr_interval_time_t timeout,
-                                          apr_pollcb_cb_t func,
-                                          void *baton)
+static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
+                                     apr_interval_time_t timeout,
+                                     apr_pollcb_cb_t func,
+                                     void *baton)
 {
     int ret, i;
     apr_status_t rv = APR_SUCCESS;
@@ -528,7 +426,7 @@ APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
         timeout /= 1000;
     }
     
-    ret = epoll_wait(pollcb->epoll_fd, pollcb->pollset, pollcb->nalloc,
+    ret = epoll_wait(pollcb->fd, pollcb->pollset.epoll, pollcb->nalloc,
                      timeout);
     if (ret < 0) {
         rv = apr_get_netos_error();
@@ -538,8 +436,8 @@ APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
     }
     else {
         for (i = 0; i < ret; i++) {
-            apr_pollfd_t *pollfd = (apr_pollfd_t *)(pollcb->pollset[i].data.ptr);
-            pollfd->rtnevents = get_epoll_revent(pollcb->pollset[i].events);
+            apr_pollfd_t *pollfd = (apr_pollfd_t *)(pollcb->pollset.epoll[i].data.ptr);
+            pollfd->rtnevents = get_epoll_revent(pollcb->pollset.epoll[i].events);
 
             rv = func(baton, pollfd);
             if (rv) {
@@ -551,4 +449,14 @@ APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
     return rv;
 }
 
-#endif /* POLLSET_USES_EPOLL */
+static apr_pollcb_provider_t impl_cb = {
+    impl_pollcb_create,
+    impl_pollcb_add,
+    impl_pollcb_remove,
+    impl_pollcb_poll,
+    "epoll"
+};
+
+apr_pollcb_provider_t *apr_pollcb_provider_epoll = &impl_cb;
+
+#endif /* HAVE_EPOLL */
