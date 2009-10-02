@@ -1,27 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
-  *) Add support for Berkeley DB 4.8. [Arfrever Frehtes Taifersar Arahesis
-     <arfrever.fta gmail.com>]
-
-  *) Make sure that "make check" is used in the RPM spec file, so that
-     the crypto, dbd and dbm tests pass. [Graham Leggett]
-
-  *) Make sure the mysql version of dbd_mysql_get_entry() respects the
-     rule that if the column number exceeds the number of columns, we
-     return NULL. [Graham Leggett]
-
   *) Transfer the apr-util spec file contents to apr.spec. [Graham
      Leggett]
-
-  *) Clarify the error messages within the dbd tests. [Graham Leggett]
-
-  *) Use locally scoped variables in PostgreSQL driver to avoid stomping
-     on return codes. PR 47431
-     [Wayne Jensen <wayne_jensen trendmicro.com>]
-
-  *) Fix race conditions in initialisation of DBD, DBM and DSO.
-     [Bojan Smojver]
 
   *) apr_thread_cond_*wait() on BeOS: Fix broken logic.  PR 45800.
      [Jochen Voss (no e-mail)]
