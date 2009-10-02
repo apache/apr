@@ -1,29 +1,24 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
 
-  *) apr_temp_dir_get() now checks the TMPDIR environment variable
-     first, instead of third. [Jim Jagielski]
+  *) apr_temp_dir_get() now checks the TMPDIR environment variable first,
+     instead of third.  [Jim Jagielski]
 
-  *) Add apr_file_sync() and apr_file_datasync() calls.
-     [Bojan Smojver]
+  *) Add apr_file_sync() and apr_file_datasync() calls.  [Bojan Smojver]
 
   *) apr_pollset_wakeup() on Windows: Fix core caused by closing the
      file_socket_pipe with standard file_close. 
      [Arsen Chaloyan, Mladen Turk]
 
-  *) Intruduce apr_hash_do for iterating over a hash table.
-     [Mladen Turk]
+  *) Introduce apr_hash_do() for iterating over a hash table.  [Mladen Turk]
 
-  *) Make sure WIN32 behaves the same as posix for file backed
-     shared memory by removing the file on cleanup/remove.
-     [Mladen Turk]
+  *) Make sure WIN32 behaves the same as posix for file-backed shared memory 
+     by removing the file on cleanup/remove.  [Mladen Turk]
 
-  *) Introduce apr_pollset_wakeup() for interrupting
-     the blocking apr_pollset_poll call.
-     [Mladen Turk]
+  *) Introduce apr_pollset_wakeup() for interrupting the blocking
+     apr_pollset_poll() call.  [Mladen Turk]
 
-  *) Add apr_file_link() function. PR 44841 
-     [Mark Heily <mark heily.com>]
+  *) Add apr_file_link() function.  PR 44841.  [Mark Heily <mark heily.com>]
 
 Changes for APR 1.3.x and later:
 
