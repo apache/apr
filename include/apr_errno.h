@@ -1046,7 +1046,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + ERROR_BAD_NETPATH \
                 || (s) == APR_OS_START_SYSERR + ERROR_BAD_NET_NAME \
                 || (s) == APR_OS_START_SYSERR + ERROR_BAD_PATHNAME \
-                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_DRIVE)
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_DRIVE \
+                || (s) == APR_OS_START_SYSERR + ERROR_DIRECTORY)
 #define APR_STATUS_IS_ENOSPC(s)         ((s) == APR_ENOSPC \
                 || (s) == APR_OS_START_SYSERR + ERROR_DISK_FULL)
 #define APR_STATUS_IS_ENOMEM(s)         ((s) == APR_ENOMEM \
