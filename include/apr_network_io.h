@@ -375,6 +375,12 @@ APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock,
                                              apr_sockaddr_t *sa);
 
 /**
+ * Check whether the remote side of a socket is still open.
+ * @param socket The socket to check
+ */
+APR_DECLARE(int) apr_socket_is_connected(apr_socket_t *socket);
+
+/**
  * Create apr_sockaddr_t from hostname, address family, and port.
  * @param sa The new apr_sockaddr_t.
  * @param hostname The hostname or numeric address string to resolve/parse, or
