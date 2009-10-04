@@ -389,6 +389,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/shm.o \
 	$(OBJDIR)/signals.o \
 	$(OBJDIR)/sockaddr.o \
+	$(OBJDIR)/socket_util.o \
 	$(OBJDIR)/sockets.o \
 	$(OBJDIR)/sockopt.o \
 	$(OBJDIR)/start.o \
