@@ -8,7 +8,7 @@
 #
 
 ifndef EnvironmentDefined
-include $(APR_WORK)\build\NWGNUhead.inc
+include $(APR_WORK)/build/NWGNUhead.inc
 endif
 
 #
@@ -89,13 +89,13 @@ endif
 # This is used by the link 'name' directive to name the nlm.  If left blank
 # TARGET_nlm (see below) will be used.
 #
-NLM_NAME	= proc_child
+NLM_NAME	= sockperf
 
 #
 # This is used by the link '-desc ' directive. 
 # If left blank, NLM_NAME will be used.
 #
-NLM_DESCRIPTION	= child NLM to test the proc layer
+NLM_DESCRIPTION	= socket NLM to test socket performance
 
 #
 # This is used by the '-threadname' directive.  If left blank,
@@ -107,11 +107,11 @@ NLM_THREAD_NAME	= $(NLM_NAME)
 # This is used by the '-screenname' directive.  If left blank,
 # 'Apache for NetWare' Thread will be used.
 #
-NLM_SCREEN_NAME = DEFAULT
+NLM_SCREEN_NAME = $(NLM_NAME)
 
 #
 # If this is specified, it will override VERSION value in 
-# $(APR_WORK)\build\NWGNUenvironment.inc
+# $(APR_WORK)/build/NWGNUenvironment.inc
 #
 NLM_VERSION	=
 
@@ -170,6 +170,7 @@ TARGET_lib = \
 #
 FILES_nlm_objs = \
 	$(OBJDIR)/$(NLM_NAME).o \
+	$(OBJDIR)/nw_misc.o \
 	$(EOLIST)
 
 #
@@ -235,7 +236,7 @@ nlms :: libs $(TARGET_nlm)
 
 #
 # Updated this target to create necessary directories and copy files to the 
-# correct place.  (See $(APR_WORK)\build\NWGNUhead.inc for examples)
+# correct place.  (See $(APR_WORK)/build/NWGNUhead.inc for examples)
 #
 install :: nlms FORCE
 
@@ -248,5 +249,5 @@ install :: nlms FORCE
 # in this makefile
 #
 
-include $(APR_WORK)\build\NWGNUtail.inc
+include $(APR_WORK)/build/NWGNUtail.inc
 
