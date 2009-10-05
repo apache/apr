@@ -101,13 +101,13 @@ NLM_DESCRIPTION	= NLM is to test the apr layer
 # This is used by the '-threadname' directive.  If left blank,
 # NLM_NAME Thread will be used.
 #
-NLM_THREAD_NAME	= aprtest
+NLM_THREAD_NAME	= $(NLM_NAME)
 
 #
 # This is used by the '-screenname' directive.  If left blank,
 # 'Apache for NetWare' Thread will be used.
 #
-NLM_SCREEN_NAME	= aprtest
+NLM_SCREEN_NAME	= $(NLM_NAME)
 
 #
 # If this is specified, it will override VERSION value in 
@@ -275,9 +275,8 @@ FILE_nlm_copyright =
 # Any additional imports go here
 #
 FILES_nlm_Ximports = \
-	@libc.imp \
-	@netware.imp \
 	@$(APR)/aprlib.imp \
+	@libc.imp \
 	$(EOLIST)
  
 # Include the Winsock imports if Winsock is being used

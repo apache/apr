@@ -100,13 +100,13 @@ NLM_DESCRIPTION	= NLM is to test the atomic functions
 # This is used by the '-threadname' directive.  If left blank,
 # NLM_NAME Thread will be used.
 #
-NLM_THREAD_NAME	= testatmc
+NLM_THREAD_NAME	= $(NLM_NAME)
 
 #
 # This is used by the '-screenname' directive.  If left blank,
 # 'Apache for NetWare' Thread will be used.
 #
-NLM_SCREEN_NAME = testatmc
+NLM_SCREEN_NAME = $(NLM_NAME)
 
 #
 # If this is specified, it will override VERSION value in 
@@ -154,7 +154,7 @@ XDCDATA		=
 # If there is an NLM target, put it here
 #
 TARGET_nlm = \
-	$(OBJDIR)/testatmc.nlm \
+	$(OBJDIR)/$(NLM_NAME).nlm \
 	$(EOLIST)
 
 #
@@ -210,8 +210,8 @@ FILE_nlm_copyright =
 # Any additional imports go here
 #
 FILES_nlm_Ximports = \
+	@$(APR)/aprlib.imp \
 	@libc.imp \
-	@$(APR)/aprlib.imp	\
 	$(EOLIST)
  
 #   
