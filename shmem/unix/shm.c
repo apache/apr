@@ -32,8 +32,7 @@ static apr_status_t shm_cleanup_owner(void *m_)
             return errno;
         }
         return APR_SUCCESS;
-#endif
-#if APR_USE_SHMEM_SHMGET_ANON
+#elif APR_USE_SHMEM_SHMGET_ANON
         if (shmdt(m->base) == -1) {
             return errno;
         }
@@ -55,8 +54,7 @@ static apr_status_t shm_cleanup_owner(void *m_)
         else {
             return apr_file_remove(m->filename, m->pool);
         }
-#endif
-#if APR_USE_SHMEM_MMAP_SHM
+#elif APR_USE_SHMEM_MMAP_SHM
         if (munmap(m->base, m->realsize) == -1) {
             return errno;
         }
@@ -64,8 +62,7 @@ static apr_status_t shm_cleanup_owner(void *m_)
             return errno;
         }
         return APR_SUCCESS;
-#endif
-#if APR_USE_SHMEM_SHMGET
+#elif APR_USE_SHMEM_SHMGET
         /* Indicate that the segment is to be destroyed as soon
          * as all processes have detached. This also disallows any
          * new attachments to the segment. */
@@ -81,10 +78,10 @@ static apr_status_t shm_cleanup_owner(void *m_)
         else {
             return apr_file_remove(m->filename, m->pool);
         }
+#else
+        return APR_ENOTIMPL;
 #endif
     }
-
-    return APR_ENOTIMPL;
 }
 
 APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
@@ -172,9 +169,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         return APR_SUCCESS;
 
 #endif /* APR_USE_SHMEM_MMAP_ZERO */
-#endif /* APR_USE_SHMEM_MMAP_ZERO || APR_USE_SHMEM_MMAP_ANON */
-#if APR_USE_SHMEM_SHMGET_ANON
-
+#elif APR_USE_SHMEM_SHMGET_ANON
         new_m = apr_palloc(pool, sizeof(apr_shm_t));
         new_m->pool = pool;
         new_m->reqsize = reqsize;
@@ -213,9 +208,10 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
                                   apr_pool_cleanup_null);
         *m = new_m;
         return APR_SUCCESS;
-#endif /* APR_USE_SHMEM_SHMGET_ANON */
+#else
         /* It is an error if they want anonymous memory but we don't have it. */
         return APR_ENOTIMPL; /* requested anonymous but we don't have it */
+#endif
     }
 
     /* Name-based shared memory */
@@ -303,9 +299,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         *m = new_m;
         return APR_SUCCESS;
 
-#endif /* APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM */
-
-#if APR_USE_SHMEM_SHMGET
+#elif APR_USE_SHMEM_SHMGET
         new_m->realsize = reqsize;
 
         /* FIXME: APR_OS_DEFAULT is too permissive, switch to 600 I think. */
@@ -359,10 +353,10 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         *m = new_m; 
         return APR_SUCCESS;
 
-#endif /* APR_USE_SHMEM_SHMGET */
+#else
+        return APR_ENOTIMPL;
+#endif
     }
-
-    return APR_ENOTIMPL;
 }
 
 APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
@@ -377,14 +371,12 @@ APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
 
 #if APR_USE_SHMEM_MMAP_TMP
     return apr_file_remove(filename, pool);
-#endif
-#if APR_USE_SHMEM_MMAP_SHM
+#elif APR_USE_SHMEM_MMAP_SHM
     if (shm_unlink(filename) == -1) {
         return errno;
     }
     return APR_SUCCESS;
-#endif
-#if APR_USE_SHMEM_SHMGET
+#elif APR_USE_SHMEM_SHMGET
     /* Presume that the file already exists; just open for writing */    
     status = apr_file_open(&file, filename, APR_WRITE,
                            APR_OS_DEFAULT, pool);
@@ -418,10 +410,11 @@ shm_remove_failed:
     /* ensure the file has been removed anyway. */
     apr_file_remove(filename, pool);
     return status;
-#endif
+#else
 
     /* No support for anonymous shm */
     return APR_ENOTIMPL;
+#endif
 } 
 
 APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m)
@@ -443,16 +436,15 @@ static apr_status_t shm_cleanup_attach(void *m_)
             return errno;
         }
         return APR_SUCCESS;
-#endif /* APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM */
-#if APR_USE_SHMEM_SHMGET
+#elif APR_USE_SHMEM_SHMGET
         if (shmdt(m->base) == -1) {
             return errno;
         }
         return APR_SUCCESS;
+#else
+        return APR_ENOTIMPL;
 #endif
     }
-
-    return APR_ENOTIMPL;
 }
 
 APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
@@ -520,8 +512,7 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
         *m = new_m;
         return APR_SUCCESS;
 
-#endif /* APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM */
-#if APR_USE_SHMEM_SHMGET
+#elif APR_USE_SHMEM_SHMGET
         apr_shm_t *new_m;
         apr_status_t status;
         apr_file_t *file;   /* file where metadata is stored */
@@ -567,10 +558,10 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
         *m = new_m;
         return APR_SUCCESS;
 
-#endif /* APR_USE_SHMEM_SHMGET */
+#else
+        return APR_ENOTIMPL;
+#endif
     }
-
-    return APR_ENOTIMPL;
 }
 
 APR_DECLARE(apr_status_t) apr_shm_detach(apr_shm_t *m)
