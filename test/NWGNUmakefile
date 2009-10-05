@@ -20,13 +20,15 @@ include $(APR_WORK)\build\NWGNUhead.inc
 #
 TARGET_nlm = \
 	$(OBJDIR)/aprtest.nlm \
+	$(OBJDIR)/echod.nlm \
+	$(OBJDIR)/globalmutexchild.nlm \
 	$(OBJDIR)/mod_test.nlm \
 	$(OBJDIR)/proc_child.nlm \
 	$(OBJDIR)/readchild.nlm \
-	$(OBJDIR)/globalmutexchild.nlm \
 	$(OBJDIR)/sockchild.nlm \
-	$(OBJDIR)/tryread.nlm \
+	$(OBJDIR)/sockperf.nlm \
 	$(OBJDIR)/testatmc.nlm \
+	$(OBJDIR)/tryread.nlm \
 	$(EOLIST)
 
 #
