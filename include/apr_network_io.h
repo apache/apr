@@ -375,8 +375,15 @@ APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock,
                                              apr_sockaddr_t *sa);
 
 /**
- * Check whether the remote side of a socket is still open.
+ * Check whether the receive part of the socket has been shut down by the
+ * peer and that the socket's read buffer is empty. If this is true the next
+ * read on the socket wil return APR_EOF.
  * @param socket The socket to check
+ * @remark
+ * <PRE>
+ * This function does not block on the socket but returns immediately in
+ * any case.
+ * </PRE>
  */
 APR_DECLARE(int) apr_socket_is_connected(apr_socket_t *socket);
 
