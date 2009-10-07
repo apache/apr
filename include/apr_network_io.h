@@ -375,9 +375,9 @@ APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock,
                                              apr_sockaddr_t *sa);
 
 /**
- * Check whether the receive part of the socket has been shut down by the
- * peer and that the socket's read buffer is empty. If this is true the next
- * read on the socket wil return APR_EOF.
+ * Check whether the send part of the socket is still open on the
+ * peer or that there is still data in the socket's read buffer.
+ * If this is false the next read on the socket will return APR_EOF.
  * @param socket The socket to check
  * @remark
  * <PRE>
