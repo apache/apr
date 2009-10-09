@@ -2,7 +2,7 @@
 Changes for APR 2.0.0
 
   *) Add apr_socket_is_connected to detect whether the remote side of
-     a socket is still open. [Ruediger Pluem]
+     a socket is still open. [Ruediger Pluem, Mladen Turk]
 
   *) Transfer the apr-util spec file contents to apr.spec. [Graham
      Leggett]
