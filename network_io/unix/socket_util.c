@@ -17,41 +17,58 @@
 #include "apr_network_io.h"
 #include "apr_poll.h"
 
-int apr_socket_is_connected(apr_socket_t *socket)
+apr_status_t apr_socket_atreadeof(apr_socket_t *sock, int *atreadeof)
 {
     apr_pollfd_t pfds[1];
-    apr_status_t status;
+    apr_status_t rv;
     apr_int32_t  nfds;
+
+    /* The purpose here is to return APR_SUCCESS only in cases in
+     * which it can be unambiguously determined whether or not the
+     * socket will return EOF on next read.  In case of an unexpected
+     * error, return that. */
 
     pfds[0].reqevents = APR_POLLIN;
     pfds[0].desc_type = APR_POLL_SOCKET;
-    pfds[0].desc.s = socket;
+    pfds[0].desc.s = sock;
 
     do {
-        status = apr_poll(&pfds[0], 1, &nfds, 0);
-    } while (APR_STATUS_IS_EINTR(status));
+        rv = apr_poll(&pfds[0], 1, &nfds, 0);
+    } while (APR_STATUS_IS_EINTR(rv));
 
-    if (status == APR_SUCCESS && nfds == 1 &&
-        pfds[0].rtnevents == APR_POLLIN) {
+    if (APR_STATUS_IS_TIMEUP(rv)) {
+        /* Read buffer empty -> subsequent reads would block, so,
+         * definitely not at EOF. */
+        *atreadeof = 0;
+        return APR_SUCCESS;
+    }
+    else if (rv) {
+        /* Some other error -> unexpected error. */
+        return rv;
+    }
+    else if (nfds == 1 && pfds[0].rtnevents == APR_POLLIN) {
         apr_sockaddr_t unused;
         apr_size_t len = 1;
-        char buf[1];
-        /* The socket might be closed in which case
-         * the poll will return POLLIN.
-         * If there is no data available the socket
-         * is closed.
-         */
-        status = apr_socket_recvfrom(&unused, socket, MSG_PEEK,
-                                     &buf[0], &len);
-        if (status == APR_SUCCESS && len)
-            return 1;
-        else
-            return 0;
-    }
-    else if (APR_STATUS_IS_EAGAIN(status) || APR_STATUS_IS_TIMEUP(status)) {
-        return 1;
-    }
-    return 0;
+        char buf;
 
+        /* The socket is readable - peek to see whether it returns EOF
+         * without consuming bytes from the socket buffer. */
+        rv = apr_socket_recvfrom(&unused, sock, MSG_PEEK, &buf, &len);
+        if (rv == APR_EOF) {
+            *atreadeof = 1;
+            return APR_SUCCESS;
+        }
+        else if (rv) {
+            /* Read error -> unexpected error. */
+            return rv;
+        }
+        else {
+            *atreadeof = 0;
+            return APR_SUCCESS;
+        }
+    }
+
+    /* Should not fall through here. */
+    return APR_EGENERAL;
 }
 
