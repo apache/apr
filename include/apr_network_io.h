@@ -375,17 +375,19 @@ APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock,
                                              apr_sockaddr_t *sa);
 
 /**
- * Check whether the send part of the socket is still open on the
- * peer or that there is still data in the socket's read buffer.
- * If this is false the next read on the socket will return APR_EOF.
+ * Determine whether the receive part of the socket has been closed by
+ * the peer (such that a subsequent call to apr_socket_read would
+ * return APR_EOF), if the socket's receive buffer is empty.  This
+ * function does not block waiting for I/O.
+ *
  * @param socket The socket to check
- * @remark
- * <PRE>
- * This function does not block on the socket but returns immediately in
- * any case.
- * </PRE>
+ * @param atreadeof If APR_SUCCESS is returned, *atreadeof is set to
+ *                  non-zero if a subsequent read would return APR_EOF
+ * @return an error is returned if it was not possible to determine the
+ *         status, in which case *atreadeof is not changed.
  */
-APR_DECLARE(int) apr_socket_is_connected(apr_socket_t *socket);
+APR_DECLARE(apr_status_t) apr_socket_atreadeof(apr_socket_t *sock,
+                                               int *atreadeof);
 
 /**
  * Create apr_sockaddr_t from hostname, address family, and port.
