@@ -306,7 +306,7 @@ void abts_ptr_notnull(abts_case *tc, const void *ptr, int lineno)
 
     tc->failed = TRUE;
     if (verbose) {
-        fprintf(stderr, "Line %d: Expected NULL, but saw <%p>\n", lineno, ptr);
+        fprintf(stderr, "Line %d: Expected non-NULL, but got NULL\n", lineno);
         fflush(stderr);
     }
 }
