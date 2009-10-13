@@ -203,6 +203,9 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
                 APR_SETIFNULL(ac_cv_func_kqueue, [no]) 
                 APR_SETIFNULL(ac_cv_func_poll, [no]) # See issue 34332
             ;;
+            *-apple-darwin10.*)
+                APR_ADDTO(CPPFLAGS, [-DDARWIN_10])
+            ;;
         esac
 	;;
     *-dec-osf*)

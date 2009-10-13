@@ -277,8 +277,18 @@ typedef  unsigned @short_value@  apr_uint16_t;
 typedef  @int_value@             apr_int32_t;
 typedef  unsigned @int_value@    apr_uint32_t;
 
+#ifdef DARWIN_10
+#ifdef __LP64__
+typedef  long            apr_int64_t;
+typedef  unsigned long   apr_uint64_t;
+#else
+typedef  long long            apr_int64_t;
+typedef  unsigned long long   apr_uint64_t;
+#endif
+#else
 typedef  @long_value@            apr_int64_t;
 typedef  unsigned @long_value@   apr_uint64_t;
+#endif
 
 typedef  @size_t_value@          apr_size_t;
 typedef  @ssize_t_value@         apr_ssize_t;
@@ -504,6 +514,8 @@ typedef  int         pid_t;
 typedef  int         uid_t;
 typedef  int         gid_t;
 #endif
+
+#include "apr_os_override.h"
 
 #ifdef __cplusplus
 }
