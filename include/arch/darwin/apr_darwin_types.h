@@ -58,7 +58,7 @@ extern "C" {
  * So off_t is always long long
  */
 #undef APR_OFF_T_STRFN
-#define APR_OFF_T_STRFN APR_INT64_STRFN
+#define APR_OFF_T_STRFN strtoll
  
 
 #undef SETPGRP_VOID
