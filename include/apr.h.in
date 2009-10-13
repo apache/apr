@@ -277,18 +277,8 @@ typedef  unsigned @short_value@  apr_uint16_t;
 typedef  @int_value@             apr_int32_t;
 typedef  unsigned @int_value@    apr_uint32_t;
 
-#ifdef DARWIN_10
-#ifdef __LP64__
- typedef  long            apr_int64_t;
- typedef  unsigned long   apr_uint64_t;
-#else
- typedef  long long            apr_int64_t;
- typedef  unsigned long long   apr_uint64_t;
-#endif
-#else
- typedef  @long_value@            apr_int64_t;
- typedef  unsigned @long_value@   apr_uint64_t;
-#endif
+typedef  @long_value@            apr_int64_t;
+typedef  unsigned @long_value@   apr_uint64_t;
 
 typedef  @size_t_value@          apr_size_t;
 typedef  @ssize_t_value@         apr_ssize_t;
@@ -308,18 +298,8 @@ typedef  apr_uint32_t            apr_uintptr_t;
 #define APR_IS_BIGENDIAN	@bigendian@
 
 /* Mechanisms to properly type numeric literals */
-#ifdef DARWIN_10
-#ifdef __LP64__
- #define APR_INT64_C(val) (val##L)
- #define APR_UINT64_C(val) (val##UL)
-#else
- #define APR_INT64_C(val) (val##LL)
- #define APR_UINT64_C(val) (val##ULL)
-#endif
-#else
- @int64_literal@
- @uint64_literal@
-#endif
+@int64_literal@
+@uint64_literal@
 
 #ifdef INT16_MIN
 #define APR_INT16_MIN   INT16_MIN
@@ -524,8 +504,6 @@ typedef  int         pid_t;
 typedef  int         uid_t;
 typedef  int         gid_t;
 #endif
-
-#include "apr_os_override.h"
 
 #ifdef __cplusplus
 }
