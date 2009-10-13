@@ -49,10 +49,6 @@ AH_BOTTOM([
 #define BEOS_BONE 1
 #endif
 
-#ifdef DARWIN_10
-#include "../darwin/apr_darwin_types.h"
-#endif
-
 /*
  * Include common private declarations.
  */
