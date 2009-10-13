@@ -25,6 +25,12 @@ sinclude(build/ltoptions.m4)
 sinclude(build/ltversion.m4)
 sinclude(build/lt~obsolete.m4)
 
+dnl Hard-coded top of apr_private.h:
+AH_TOP([
+#ifndef APR_PRIVATE_H
+#define APR_PRIVATE_H
+])
+
 dnl Hard-coded inclusion at the tail end of apr_private.h:
 AH_BOTTOM([
 /* switch this on if we have a BeOS version below BONE */
@@ -34,10 +40,15 @@ AH_BOTTOM([
 #define BEOS_BONE 1
 #endif
 
+#ifdef DARWIN_10
+#include "../darwin/apr_darwin_types.h"
+#endif
+
 /*
  * Include common private declarations.
  */
 #include "../apr_private_common.h"
+#endif /* APR_PRIVATE_H */
 ])
 
 dnl Save user-defined environment settings for later restoration
@@ -1738,15 +1749,6 @@ elif test "$ac_cv_type_off_t" = "yes"; then
     else
         AC_ERROR([could not determine the size of off_t])
     fi
-    # Per OS tuning...
-    case $host in
-    *apple-darwin10.*)
-        # off_t is a long long, but long == long long
-        if test "$ac_cv_sizeof_long" = "$ac_cv_sizeof_long_long"; then
-            off_t_fmt='#define APR_OFF_T_FMT "lld"'
-        fi
-        ;;
-    esac
 else
    # Fallback on int
    off_t_value=apr_int32_t
