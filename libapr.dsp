@@ -436,6 +436,10 @@ SOURCE=.\network_io\unix\multicast.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\network_io\unix\socket_util.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\network_io\win32\sendrecv.c
 # End Source File
 # Begin Source File

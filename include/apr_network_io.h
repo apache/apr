@@ -348,6 +348,21 @@ APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock,
                                              apr_sockaddr_t *sa);
 
 /**
+ * Determine whether the receive part of the socket has been closed by
+ * the peer (such that a subsequent call to apr_socket_read would
+ * return APR_EOF), if the socket's receive buffer is empty.  This
+ * function does not block waiting for I/O.
+ *
+ * @param socket The socket to check
+ * @param atreadeof If APR_SUCCESS is returned, *atreadeof is set to
+ *                  non-zero if a subsequent read would return APR_EOF
+ * @return an error is returned if it was not possible to determine the
+ *         status, in which case *atreadeof is not changed.
+ */
+APR_DECLARE(apr_status_t) apr_socket_atreadeof(apr_socket_t *sock,
+                                               int *atreadeof);
+
+/**
  * Create apr_sockaddr_t from hostname, address family, and port.
  * @param sa The new apr_sockaddr_t.
  * @param hostname The hostname or numeric address string to resolve/parse, or

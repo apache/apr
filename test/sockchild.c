@@ -76,5 +76,9 @@ int main(int argc, char *argv[])
         apr_socket_close(sock);
         exit((int)length);
     }
+    else if (!strcmp("close", argv[1])) {
+        apr_socket_close(sock);
+        exit(0);
+    }
     exit(-1);
 }
