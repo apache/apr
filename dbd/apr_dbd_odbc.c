@@ -1138,7 +1138,7 @@ static int odbc_start_transaction(apr_pool_t *pool, apr_dbd_t *handle,
     }
     handle->can_commit = APR_DBD_TRANSACTION_COMMIT;
     return APR_FROM_SQL_RESULT(rc);
-};
+}
 
 
 /** end_transaction: end a transaction **/
