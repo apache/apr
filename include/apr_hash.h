@@ -122,16 +122,15 @@ APR_DECLARE(void *) apr_hash_get(apr_hash_t *ht, const void *key,
  * @param p The pool to allocate the apr_hash_index_t iterator. If this
  *          pool is NULL, then an internal, non-thread-safe iterator is used.
  * @param ht The hash table
+ * @return The iteration state
  * @remark  There is no restriction on adding or deleting hash entries during
  * an iteration (although the results may be unpredictable unless all you do
  * is delete the current entry) and multiple iterations can be in
  * progress at the same time.
- */
-/**
- * @example
  *
- * <PRE>
- * 
+ * @par Example:
+ *
+ * @code
  * int sum_values(apr_pool_t *p, apr_hash_t *ht)
  * {
  *     apr_hash_index_t *hi;
@@ -143,7 +142,7 @@ APR_DECLARE(void *) apr_hash_get(apr_hash_t *ht, const void *key,
  *     }
  *     return sum;
  * }
- * </PRE>
+ * @endcode
  */
 APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_pool_t *p, apr_hash_t *ht);
 
