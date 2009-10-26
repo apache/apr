@@ -101,8 +101,11 @@ static apr_status_t call_port_getn(int port, port_event_t list[],
     }
 
     ret = port_getn(port, list, max, nget, tvptr);
+    /* Note: 32-bit port_getn() on Solaris 10 x86 returns large negative 
+     * values instead of 0 when returning immediately.
+     */
 
-    if (ret < 0) {
+    if (ret == -1) {
         rv = apr_get_netos_error();
 
         switch(rv) {

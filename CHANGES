@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.10
 
+  *) Solaris pollset support: Fix a 1.3.9 regression in apr_pollset_poll()
+     which resulted in invalid return codes from the APR function.  A work-
+     around was needed for bad return codes from 32-bit port_getn() on 
+     Solaris 10 x86.  PR 48029.  [Jeff Trawick]
+
   *) The implementation of expand_array() in tables/apr_hash.c allocates
      a new bucket array, without making any attempt to release the memory
      allocated for the previous bucket array. That wastes memory: if the
