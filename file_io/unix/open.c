@@ -29,10 +29,14 @@
 static apr_status_t file_cleanup(apr_file_t *file, int is_child)
 {
     apr_status_t rv = APR_SUCCESS;
+    int fd = file->filedes;
 
-    if (close(file->filedes) == 0) {
-        file->filedes = -1;
+    /* Set file descriptor to -1 before close(), so that there is no
+     * chance of returning an already closed FD from apr_os_file_get().
+     */
+    file->filedes = -1;
 
+    if (close(fd) == 0) {
         /* Only the parent process should delete the file! */
         if (!is_child && (file->flags & APR_DELONCLOSE)) {
             unlink(file->fname);
@@ -44,6 +48,9 @@ static apr_status_t file_cleanup(apr_file_t *file, int is_child)
 #endif
     }
     else {
+        /* Restore, close() was not successful. */
+        file->filedes = fd;
+
         /* Are there any error conditions other than EINTR or EBADF? */
         rv = errno;
     }
