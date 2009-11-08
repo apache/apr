@@ -247,9 +247,14 @@ static void test_atreadeof(abts_case *tc, void *data)
     rv = apr_socket_accept(&sock2, sock, p);
     APR_ASSERT_SUCCESS(tc, "Problem with receiving connection", rv);
 
-    /* The child closed the socket instantly */
+    /* The child closed the socket as soon as it could... */
     rv = apr_socket_atreadeof(sock2, &atreadeof);
     APR_ASSERT_SUCCESS(tc, "Determine whether at EOF, #3", rv);
+    if (!atreadeof) { /* ... but perhaps not yet; wait a moment */
+        apr_sleep(apr_time_from_msec(5));
+        rv = apr_socket_atreadeof(sock2, &atreadeof);
+        APR_ASSERT_SUCCESS(tc, "Determine whether at EOF, #4", rv);
+    }
     ABTS_INT_EQUAL(tc, 1, atreadeof);
     wait_child(tc, &proc);
 
