@@ -308,12 +308,14 @@ static void multi_event_pollset(abts_case *tc, void *data)
 
     send_msg(s, sa, 0, tc);
 
-    rv = apr_pollset_poll(pollset, 0, &lrv, &descs);
-    ABTS_INT_EQUAL(tc, 0, APR_STATUS_IS_TIMEUP(rv));
+    rv = apr_pollset_poll(pollset, -1, &lrv, &descs);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     if (lrv == 1) {
+        int ev = descs[0].rtnevents;
         ABTS_PTR_EQUAL(tc, s[0], descs[0].desc.s);
-        ABTS_INT_EQUAL(tc, APR_POLLIN | APR_POLLOUT, descs[0].rtnevents);
         ABTS_PTR_EQUAL(tc, s[0],  descs[0].client_data);
+        ABTS_ASSERT(tc, "either or both of APR_POLLIN, APR_POLLOUT returned",
+                    ((ev & APR_POLLIN) != 0) || ((ev & APR_POLLOUT) != 0));
     }
     else if (lrv == 2) {
         ABTS_PTR_EQUAL(tc, s[0], descs[0].desc.s);
@@ -381,7 +383,7 @@ static void send0_pollset(abts_case *tc, void *data)
     int num;
     
     send_msg(s, sa, 0, tc);
-    rv = apr_pollset_poll(pollset, 0, &num, &descs);
+    rv = apr_pollset_poll(pollset, -1, &num, &descs);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_INT_EQUAL(tc, 1, num);
     ABTS_PTR_NOTNULL(tc, descs);
@@ -411,14 +413,19 @@ static void send_middle_pollset(abts_case *tc, void *data)
     
     send_msg(s, sa, 2, tc);
     send_msg(s, sa, 5, tc);
-    rv = apr_pollset_poll(pollset, 0, &num, &descs);
+    rv = apr_pollset_poll(pollset, -1, &num, &descs);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_INT_EQUAL(tc, 2, num);
     ABTS_PTR_NOTNULL(tc, descs);
+    ABTS_ASSERT(tc, "either one or two events returned",
+                num == 1 || num == 2);
 
-    ABTS_ASSERT(tc, "Incorrect socket in result set",
-            ((descs[0].desc.s == s[2]) && (descs[1].desc.s == s[5])) ||
-            ((descs[0].desc.s == s[5]) && (descs[1].desc.s == s[2])));
+    /* The poll might only see the first sent message, in which
+     * case we just don't bother checking this assertion */
+    if (num == 2) {
+        ABTS_ASSERT(tc, "Incorrect socket in result set",
+                    ((descs[0].desc.s == s[2]) && (descs[1].desc.s == s[5])) ||
+                    ((descs[0].desc.s == s[5]) && (descs[1].desc.s == s[2])));
+    }
 }
 
 static void clear_middle_pollset(abts_case *tc, void *data)
@@ -443,7 +450,7 @@ static void send_last_pollset(abts_case *tc, void *data)
     int num;
     
     send_msg(s, sa, LARGE_NUM_SOCKETS - 1, tc);
-    rv = apr_pollset_poll(pollset, 0, &num, &descs);
+    rv = apr_pollset_poll(pollset, -1, &num, &descs);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_INT_EQUAL(tc, 1, num);
     ABTS_PTR_NOTNULL(tc, descs);
@@ -607,8 +614,8 @@ static void trigger_pollcb(abts_case *tc, void *data)
     send_msg(s, sa, 0, tc);
     pcb.tc = tc;
     pcb.count = 0;
-    rv = apr_pollcb_poll(pollcb, 0, trigger_pollcb_cb, &pcb);    
-    ABTS_INT_EQUAL(tc, 0, APR_STATUS_IS_TIMEUP(rv));
+    rv = apr_pollcb_poll(pollcb, -1, trigger_pollcb_cb, &pcb);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_INT_EQUAL(tc, 1, pcb.count);
 
     rv = apr_pollcb_remove(pollcb, &socket_pollfd);
