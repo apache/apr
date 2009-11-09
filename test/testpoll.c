@@ -53,7 +53,7 @@ static void make_socket(apr_socket_t **sock, apr_sockaddr_t **sa,
     rv = apr_socket_create(sock, (*sa)->family, SOCK_DGRAM, 0, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    rv =apr_socket_bind((*sock), (*sa));
+    rv = apr_socket_bind((*sock), (*sa));
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
@@ -381,7 +381,7 @@ static void send0_pollset(abts_case *tc, void *data)
     apr_status_t rv;
     const apr_pollfd_t *descs = NULL;
     int num;
-    
+
     send_msg(s, sa, 0, tc);
     rv = apr_pollset_poll(pollset, -1, &num, &descs);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -389,7 +389,7 @@ static void send0_pollset(abts_case *tc, void *data)
     ABTS_PTR_NOTNULL(tc, descs);
 
     ABTS_PTR_EQUAL(tc, s[0], descs[0].desc.s);
-    ABTS_PTR_EQUAL(tc, s[0],  descs[0].client_data);
+    ABTS_PTR_EQUAL(tc, s[0], descs[0].client_data);
 }
 
 static void recv0_pollset(abts_case *tc, void *data)
@@ -456,7 +456,7 @@ static void send_last_pollset(abts_case *tc, void *data)
     ABTS_PTR_NOTNULL(tc, descs);
 
     ABTS_PTR_EQUAL(tc, s[LARGE_NUM_SOCKETS - 1], descs[0].desc.s);
-    ABTS_PTR_EQUAL(tc, s[LARGE_NUM_SOCKETS - 1],  descs[0].client_data);
+    ABTS_PTR_EQUAL(tc, s[LARGE_NUM_SOCKETS - 1], descs[0].client_data);
 }
 
 static void clear_last_pollset(abts_case *tc, void *data)
@@ -695,11 +695,8 @@ abts_suite *testpoll(abts_suite *suite)
     abts_run_test(suite, clear_middle_pollset, NULL);
     abts_run_test(suite, send_last_pollset, NULL);
     abts_run_test(suite, clear_last_pollset, NULL);
-
     abts_run_test(suite, pollset_remove, NULL);
-    
     abts_run_test(suite, close_all_sockets, NULL);
-
     abts_run_test(suite, create_all_sockets, NULL);
     abts_run_test(suite, setup_pollcb, NULL);
     abts_run_test(suite, trigger_pollcb, NULL);
