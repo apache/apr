@@ -19,9 +19,14 @@
 # buildconf: Build the support scripts needed to compile from a
 #            checked-out version of the source code.
 
+if [ "$1" = "--verbose" -o "$1" = "-v" ]; then
+    verbose="--verbose"
+    shift
+fi
+
 # Verify that the builder has the right config tools installed
 #
-build/buildcheck.sh || exit 1
+build/buildcheck.sh $verbose || exit 1
 
 libtoolize=`build/PrintPath glibtoolize1 glibtoolize libtoolize15 libtoolize14 libtoolize`
 if [ "x$libtoolize" = "x" ]; then
@@ -41,7 +46,7 @@ echo "Copying libtool helper files ..."
 # and libtool 1.4 by simply rerunning the buildconf script.
 (cd build ; rm -f ltconfig ltmain.sh libtool.m4)
 
-$libtoolize --copy --automake
+$libtoolize --copy --automake --force $verbose
 
 if [ -f libtool.m4 ]; then 
    ltfile=`pwd`/libtool.m4
@@ -86,17 +91,17 @@ rm -f aclocal.m4 libtool.m4
 # Generate the autoconf header and ./configure
 #
 echo "Creating include/arch/unix/apr_private.h.in ..."
-${AUTOHEADER:-autoheader}
+${AUTOHEADER:-autoheader} $verbose
 
 echo "Creating configure ..."
 ### do some work to toss config.cache?
-${AUTOCONF:-autoconf}
+${AUTOCONF:-autoconf} $verbose
 
 # Remove autoconf 2.5x's cache directory
 rm -rf autom4te*.cache
 
 echo "Generating 'make' outputs ..."
-build/gen-build.py make
+build/gen-build.py $verbose make
 
 # Create RPM Spec file
 if [ -f `which cut` ]; then
