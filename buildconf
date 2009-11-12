@@ -19,9 +19,14 @@
 # buildconf: Build the support scripts needed to compile from a
 #            checked-out version of the source code.
 
+if [ "$1" = "--verbose" -o "$1" = "-v" ]; then
+    verbose="--verbose"
+    shift
+fi
+
 # Verify that the builder has the right config tools installed
 #
-build/buildcheck.sh || exit 1
+build/buildcheck.sh $verbose || exit 1
 
 libtoolize=`build/PrintPath glibtoolize1 glibtoolize libtoolize15 libtoolize14 libtoolize`
 if [ "x$libtoolize" = "x" ]; then
@@ -45,7 +50,7 @@ lt_pversion=`$libtoolize --version 2>/dev/null|sed -e 's/([^)]*)//g;s/^[^0-9]*//
 lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$/.\1/'`
 IFS=.; set $lt_version; IFS=' '
 if test "$1" = "1"; then
-  $libtoolize --copy --automake
+  $libtoolize --copy --automake --force $verbose
   if [ -f libtool.m4 ]; then 
     ltfile=`pwd`/libtool.m4
   else
@@ -67,7 +72,7 @@ if test "$1" = "1"; then
   cat $ltfile | sed -e 's/LIBTOOL=\(.*\)top_build/LIBTOOL=\1apr_build/' > build/libtool.m4
 fi
 if test "$1" = "2"; then
-  $libtoolize --copy
+  $libtoolize --copy --force $verbose
   # Wouldn't it just be better to define top_builddir??
   mv build/libtool.m4 build/libtool.m4.$$
   cat build/libtool.m4.$$ | sed -e 's/LIBTOOL=\(.*\)top_build/LIBTOOL=\1apr_build/' > build/libtool.m4
@@ -81,17 +86,17 @@ rm -f aclocal.m4 libtool.m4
 # Generate the autoconf header and ./configure
 #
 echo "buildconf: creating include/arch/unix/apr_private.h.in ..."
-${AUTOHEADER:-autoheader}
+${AUTOHEADER:-autoheader} $verbose
 
 echo "buildconf: creating configure ..."
 ### do some work to toss config.cache?
-${AUTOCONF:-autoconf}
+${AUTOCONF:-autoconf} $verbose
 
 # Remove autoconf 2.5x's cache directory
 rm -rf autom4te*.cache
 
 echo "buildconf: generating 'make' outputs ..."
-build/gen-build.py make
+build/gen-build.py $verbose make
 
 # Create RPM Spec file
 if [ -f `which cut` ]; then
