@@ -4,7 +4,7 @@ dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl Use ./buildconf to prepare build files and run autoconf for APR.
 
-AC_PREREQ(2.50)
+AC_PREREQ(2.59)
 
 AC_INIT(build/apr_common.m4)
 AC_CONFIG_HEADER(include/arch/unix/apr_private.h)
