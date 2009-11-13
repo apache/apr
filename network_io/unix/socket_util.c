@@ -17,7 +17,7 @@
 #include "apr_network_io.h"
 #include "apr_poll.h"
 
-apr_status_t apr_socket_atreadeof(apr_socket_t *sock, int *atreadeof)
+APR_DECLARE(apr_status_t) apr_socket_atreadeof(apr_socket_t *sock, int *atreadeof)
 {
     apr_pollfd_t pfds[1];
     apr_status_t rv;
