@@ -23,7 +23,7 @@ echo "           to build APR from SVN."
 exit 1
 fi
 IFS=.; set $ac_version; IFS=' '
-if test "$1" = "2" -a "$2" -lt "50" || test "$1" -lt "2"; then
+if test "$1" = "2" -a "$2" -lt "59" || test "$1" -lt "2"; then
 echo "buildconf: autoconf version $ac_version found."
 echo "           You need autoconf version 2.50 or newer installed"
 echo "           to build APR from SVN."
