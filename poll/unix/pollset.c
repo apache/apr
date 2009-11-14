@@ -210,21 +210,23 @@ static apr_pollset_provider_t *pollset_provider(apr_pollset_method_e method)
     return provider;
 }
 
-APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **pollset,
+APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **ret_pollset,
                                                 apr_uint32_t size,
                                                 apr_pool_t *p,
                                                 apr_uint32_t flags,
                                                 apr_pollset_method_e method)
 {
     apr_status_t rv;
+    apr_pollset_t *pollset;
     apr_pollset_provider_t *provider = NULL;
+
+    *ret_pollset = NULL;
 
     if (method == APR_POLLSET_DEFAULT)
         method = pollset_default_method;
     while (provider == NULL) {
         provider = pollset_provider(method);
         if (!provider) {
-            *pollset = NULL;
             if ((flags & APR_POLLSET_NODEFAULT) == APR_POLLSET_NODEFAULT)
                 return APR_ENOTIMPL;
             if (method == pollset_default_method)
@@ -237,41 +239,39 @@ APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **pollset,
         size++;
     }
 
-    *pollset = apr_palloc(p, sizeof(**pollset));
-    (*pollset)->nelts = 0;
-    (*pollset)->nalloc = size;
-    (*pollset)->pool = p;
-    (*pollset)->flags = flags;
-    (*pollset)->provider = provider;
+    pollset = apr_palloc(p, sizeof(*pollset));
+    pollset->nelts = 0;
+    pollset->nalloc = size;
+    pollset->pool = p;
+    pollset->flags = flags;
+    pollset->provider = provider;
 
-    rv = (*provider->create)(*pollset, size, p, flags);
+    rv = (*provider->create)(pollset, size, p, flags);
     if (rv == APR_ENOTIMPL) {
         if (method == pollset_default_method) {
-            *pollset = NULL;
             return rv;
         }
         provider = pollset_provider(pollset_default_method);
         if (!provider) {
-            *pollset = NULL;
             return APR_ENOTIMPL;
         }
-        rv = (*provider->create)(*pollset, size, p, flags);
+        rv = (*provider->create)(pollset, size, p, flags);
         if (rv != APR_SUCCESS) {
-            *pollset = NULL;
             return rv;
         }
-        (*pollset)->provider = provider;
+        pollset->provider = provider;
     }
     if (flags & APR_POLLSET_WAKEABLE) {
         /* Create wakeup pipe */
-        if ((rv = create_wakeup_pipe(*pollset)) != APR_SUCCESS) {
-            *pollset = NULL;
+        if ((rv = create_wakeup_pipe(pollset)) != APR_SUCCESS) {
             return rv;
         }
     }
     if ((flags & APR_POLLSET_WAKEABLE) || provider->cleanup)
-        apr_pool_cleanup_register(p, *pollset, pollset_cleanup,
+        apr_pool_cleanup_register(p, pollset, pollset_cleanup,
                                   apr_pool_cleanup_null);
+
+    *ret_pollset = pollset;
     return APR_SUCCESS;
 }
 

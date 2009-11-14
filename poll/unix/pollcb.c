@@ -72,21 +72,23 @@ static apr_pollcb_provider_t *pollcb_provider(apr_pollset_method_e method)
     return provider;
 }
 
-APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **pollcb,
+APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **ret_pollcb,
                                                apr_uint32_t size,
                                                apr_pool_t *p,
                                                apr_uint32_t flags,
                                                apr_pollset_method_e method)
 {
     apr_status_t rv;
+    apr_pollcb_t *pollcb;
     apr_pollcb_provider_t *provider = NULL;
+
+    *ret_pollcb = NULL;
 
     if (method == APR_POLLSET_DEFAULT)
         method = pollset_default_method;
     while (provider == NULL) {
         provider = pollcb_provider(method);
         if (!provider) {
-            *pollcb = NULL;
             if ((flags & APR_POLLSET_NODEFAULT) == APR_POLLSET_NODEFAULT)
                 return APR_ENOTIMPL;
             if (method == pollset_default_method)
@@ -95,15 +97,14 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **pollcb,
         }
     }
 
-    *pollcb = apr_palloc(p, sizeof(**pollcb));
-    (*pollcb)->nelts = 0;
-    (*pollcb)->nalloc = size;
-    (*pollcb)->pool = p;
-    (*pollcb)->provider = provider;
+    pollcb = apr_palloc(p, sizeof(*pollcb));
+    pollcb->nelts = 0;
+    pollcb->nalloc = size;
+    pollcb->pool = p;
+    pollcb->provider = provider;
 
-    rv = (*provider->create)(*pollcb, size, p, flags);
+    rv = (*provider->create)(pollcb, size, p, flags);
     if (rv == APR_ENOTIMPL) {
-        *pollcb = NULL;
         if (method == pollset_default_method) {
             return rv;
         }
@@ -117,13 +118,14 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **pollcb,
         if (!provider) {
             return APR_ENOTIMPL;
         }
-        rv = (*provider->create)(*pollcb, size, p, flags);
+        rv = (*provider->create)(pollcb, size, p, flags);
         if (rv != APR_SUCCESS) {
             return rv;
         }
-        (*pollcb)->provider = provider;
+        pollcb->provider = provider;
     }
 
+    *ret_pollcb = pollcb;
     return APR_SUCCESS;
 }
 
