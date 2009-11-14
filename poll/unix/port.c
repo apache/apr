@@ -537,7 +537,7 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
 {
     apr_pollfd_t *pollfd;
     apr_status_t rv;
-    unsigned int i, nget = pollcb->nalloc;
+    unsigned int i, nget = 1;
 
     rv = call_port_getn(pollcb->fd, pollcb->pollset.port, pollcb->nalloc,
                         &nget, timeout);
