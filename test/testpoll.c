@@ -666,6 +666,109 @@ static void timeout_pollin_pollcb(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
+static void pollset_default(abts_case *tc, void *data)
+{
+    apr_status_t rv1, rv2;
+    apr_pollset_t *pollset;
+
+    /* verify that APR will successfully create a pollset if an invalid method
+     * is specified as long as APR_POLLSET_NODEFAULT isn't specified
+     * (no platform has both APR_POLLSET_PORT and APR_POLLSET_KQUEUE, so at
+     * least one create call will succeed after having to switch to the default
+     * type)
+     */
+    rv1 = apr_pollset_create_ex(&pollset, 1, p, 0, APR_POLLSET_PORT);
+
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv1);
+    ABTS_PTR_NOTNULL(tc, pollset);
+    
+    rv1 = apr_pollset_create_ex(&pollset, 1, p, 0, APR_POLLSET_KQUEUE);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv1);
+    ABTS_PTR_NOTNULL(tc, pollset);
+
+    /* verify that APR will fail to create a pollset if an invalid method is
+     * specified along with APR_POLLSET_NODEFAULT
+     * (no platform has both APR_POLLSET_PORT and APR_POLLSET_KQUEUE, so at
+     * least one create call will fail since it can't switch to the default
+     * type)
+     */
+    rv1 = apr_pollset_create_ex(&pollset, 1, p, APR_POLLSET_NODEFAULT,
+                               APR_POLLSET_PORT);
+
+    if (rv1 == APR_SUCCESS) {
+        ABTS_PTR_NOTNULL(tc, pollset);
+    }
+    
+    rv2 = apr_pollset_create_ex(&pollset, 1, p, APR_POLLSET_NODEFAULT,
+                               APR_POLLSET_KQUEUE);
+    if (rv2 == APR_SUCCESS) {
+        ABTS_PTR_NOTNULL(tc, pollset);
+    }
+    
+    ABTS_ASSERT(tc,
+                "failure using APR_POLLSET_NODEFAULT with unsupported method",
+                rv1 != APR_SUCCESS || rv2 != APR_SUCCESS);
+}
+
+static void pollcb_default(abts_case *tc, void *data)
+{
+    apr_status_t rv1, rv2;
+    apr_pollcb_t *pollcb;
+
+    /* verify that APR will successfully create a pollcb if an invalid method
+     * is specified as long as APR_POLLSET_NODEFAULT isn't specified
+     * (no platform has both APR_POLLSET_PORT and APR_POLLSET_KQUEUE, so at
+     * least one create call will succeed after having to switch to the default
+     * type)
+     */
+    rv1 = apr_pollcb_create_ex(&pollcb, 1, p, 0, APR_POLLSET_PORT);
+    if (rv1 == APR_ENOTIMPL) {
+        ABTS_NOT_IMPL(tc, "pollcb interface not supported");
+        return;
+    }
+
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv1);
+    ABTS_PTR_NOTNULL(tc, pollcb);
+    
+    rv1 = apr_pollcb_create_ex(&pollcb, 1, p, 0, APR_POLLSET_KQUEUE);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv1);
+    ABTS_PTR_NOTNULL(tc, pollcb);
+
+    /* verify that APR will fail to create a pollcb if an invalid method is
+     * specified along with APR_POLLSET_NODEFAULT
+     * (no platform has both APR_POLLSET_PORT and APR_POLLSET_KQUEUE, so at
+     * least one create call will fail since it can't switch to the default
+     * type)
+     */
+    rv1 = apr_pollcb_create_ex(&pollcb, 1, p, APR_POLLSET_NODEFAULT,
+                               APR_POLLSET_PORT);
+
+    if (rv1 == APR_SUCCESS) {
+        ABTS_PTR_NOTNULL(tc, pollcb);
+    }
+    
+    rv2 = apr_pollcb_create_ex(&pollcb, 1, p, APR_POLLSET_NODEFAULT,
+                               APR_POLLSET_KQUEUE);
+    if (rv2 == APR_SUCCESS) {
+        ABTS_PTR_NOTNULL(tc, pollcb);
+    }
+    
+    ABTS_ASSERT(tc,
+                "failure using APR_POLLSET_NODEFAULT with unsupported method",
+                rv1 != APR_SUCCESS || rv2 != APR_SUCCESS);
+
+
+    /* verify basic behavior for another method fallback case (this caused
+     * APR to crash before r834029)
+     */
+
+    rv1 = apr_pollcb_create_ex(&pollcb, 1, p, 0, APR_POLLSET_POLL);
+    if (rv1 != APR_ENOTIMPL) {
+        ABTS_INT_EQUAL(tc, rv1, APR_SUCCESS);
+        ABTS_PTR_NOTNULL(tc, pollcb);
+    }
+}
+
 abts_suite *testpoll(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -703,7 +806,8 @@ abts_suite *testpoll(abts_suite *suite)
     abts_run_test(suite, timeout_pollcb, NULL);
     abts_run_test(suite, timeout_pollin_pollcb, NULL);
     abts_run_test(suite, close_all_sockets, NULL);
-
+    abts_run_test(suite, pollset_default, NULL);
+    abts_run_test(suite, pollcb_default, NULL);
     return suite;
 }
 
