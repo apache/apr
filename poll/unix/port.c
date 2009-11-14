@@ -508,7 +508,7 @@ APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
 {
     apr_pollfd_t *pollfd;
     apr_status_t rv;
-    unsigned int i, nget = pollcb->nalloc;
+    unsigned int i, nget = 1;
 
     rv = call_port_getn(pollcb->port_fd, pollcb->port_set, pollcb->nalloc,
                         &nget, timeout);
