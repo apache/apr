@@ -5,6 +5,10 @@ Changes for APR 1.3.10
      [Jeff Trawick]
 
   *) Solaris pollset support: Fix a 1.3.9 regression in apr_pollset_poll()
+     which could result in a crash when the call was interrupted by a
+     signal.  PR 48030.  [Jeff Trawick]
+
+  *) Solaris pollset support: Fix a 1.3.9 regression in apr_pollset_poll()
      which resulted in invalid return codes from the APR function.  A work-
      around was needed for bad return codes from 32-bit port_getn() on 
      Solaris 10 x86.  PR 48029.  [Jeff Trawick]
