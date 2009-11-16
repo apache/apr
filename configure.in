@@ -496,11 +496,13 @@ case $host in
        ;;
    *mingw*)
        OSDIR="win32"
+       APR_ADDTO(CPPFLAGS,-DWIN32)
        ac_cv_file__dev_zero="no"
        ac_cv_func_setpgrp_void="no"
        apr_cv_tcp_nodelay_with_cork="no"
        enable_threads="system_threads"
-       eolstr="\\n"
+       eolstr="\\r\\n"
+       file_as_socket="0"
        proc_mutex_is_global=1
        OBJECTS_PLATFORM='$(OBJECTS_win32)'
        ;;
