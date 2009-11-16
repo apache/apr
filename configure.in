@@ -482,7 +482,7 @@ case $host in
        ac_cv_func_setpgrp_void="no"
        apr_cv_tcp_nodelay_with_cork="no"
        enable_threads="system_threads"
-       eolstr="\\n"
+       eolstr="\\r\\n"
        file_as_socket=0
        proc_mutex_is_global=1
        OBJECTS_PLATFORM='$(OBJECTS_win32)'
