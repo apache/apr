@@ -364,6 +364,10 @@ installdev :: $(INSTDEVDIRS) FORCE
 	-$(CP) $(subst /,\,$(APRUTIL))\include\*.h         $(INSTALLBASE)\include\*.*
 	-$(CP) $(subst /,\,$(APR))\*.imp                   $(INSTALLBASE)\lib\*.*
 	-$(CP) $(subst /,\,$(APR))\misc\netware\*.xdc      $(INSTALLBASE)\lib\*.*
+	-$(CP) $(subst /,\,$(APRLIB))                      $(INSTALLBASE)\lib\*.*
+	-$(CP) $(subst /,\,$(APRUTLIB))                    $(INSTALLBASE)\lib\*.*
+	-$(CP) $(subst /,\,$(APULDAPLIB))                  $(INSTALLBASE)\lib\*.*
+	-$(CP) $(subst /,\,$(XMLLIB))                      $(INSTALLBASE)\lib\*.*
 
 $(INSTDEVDIRS) ::
 	$(CHKNOT) $@\NUL mkdir $@
