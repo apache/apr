@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Support connecttimeout, readtimeout and writetimeout MySQL options
+     PR 48251 [Marko Kevac <marko kevac.org>]
+
   *) Add apr_socket_atreadeof to determine whether the receive part of the
      socket has been closed by the peer.
      [Ruediger Pluem, Mladen Turk, Joe Orton]
