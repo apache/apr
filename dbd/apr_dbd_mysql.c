@@ -1122,7 +1122,12 @@ static apr_dbd_t *dbd_mysql_open(apr_pool_t *pool, const char *params,
         {"flags", NULL},
         {"fldsz", NULL},
         {"group", NULL},
+#if MYSQL_VERSION_ID >= 50013
         {"reconnect", NULL},
+        {"connecttimeout", NULL},
+        {"readtimeout", NULL},
+        {"writetimeout", NULL},
+#endif
         {NULL, NULL}
     };
     unsigned int port = 0;
@@ -1177,6 +1182,18 @@ static apr_dbd_t *dbd_mysql_open(apr_pool_t *pool, const char *params,
 #if MYSQL_VERSION_ID >= 50013
     if (fields[9].value != NULL) {
          do_reconnect = atoi(fields[9].value) ? 1 : 0;
+    }
+    if (fields[10].value != NULL) {
+         mysql_options(sql->conn, MYSQL_OPT_CONNECT_TIMEOUT,
+                       atoi(fields[10].value));
+    }
+    if (fields[11].value != NULL) {
+         mysql_options(sql->conn, MYSQL_OPT_READ_TIMEOUT,
+                       atoi(fields[11].value));
+    }
+    if (fields[12].value != NULL) {
+         mysql_options(sql->conn, MYSQL_OPT_WRITE_TIMEOUT,
+                       atoi(fields[12].value));
     }
 #endif
 
