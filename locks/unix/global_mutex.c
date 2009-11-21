@@ -175,4 +175,9 @@ APR_DECLARE(apr_status_t) apr_global_mutex_destroy(apr_global_mutex_t *mutex)
     return apr_pool_cleanup_run(mutex->pool, mutex, global_mutex_cleanup);
 }
 
+APR_DECLARE(const char *) apr_global_mutex_lockfile(apr_global_mutex_t *mutex)
+{
+    return apr_proc_mutex_lockfile(mutex->proc_mutex);
+}
+
 APR_POOL_IMPLEMENT_ACCESSOR(global_mutex)

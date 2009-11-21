@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.0
 
+  *) Add apr_global_mutex_lockfile() for finding the file, if any,
+     associated with the mutex.  [Jeff Trawick]
+
   *) Add apr_socket_atreadeof to determine whether the receive part of the
      socket has been closed by the peer.
      [Ruediger Pluem, Mladen Turk, Joe Orton]
