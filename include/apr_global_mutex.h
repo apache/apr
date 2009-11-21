@@ -121,6 +121,13 @@ APR_DECLARE(apr_status_t) apr_global_mutex_unlock(apr_global_mutex_t *mutex);
 APR_DECLARE(apr_status_t) apr_global_mutex_destroy(apr_global_mutex_t *mutex);
 
 /**
+ * Return the name of the lockfile for the mutex, or NULL
+ * if the mutex doesn't use a lock file
+ */
+
+APR_DECLARE(const char *) apr_global_mutex_lockfile(apr_global_mutex_t *mutex);
+
+/**
  * Set mutex permissions.
  */
 APR_PERMS_SET_IMPLEMENT(global_mutex);
@@ -145,6 +152,7 @@ APR_POOL_DECLARE_ACCESSOR(global_mutex);
 #define apr_global_mutex_trylock    apr_proc_mutex_trylock
 #define apr_global_mutex_unlock     apr_proc_mutex_unlock
 #define apr_global_mutex_destroy    apr_proc_mutex_destroy
+#define apr_global_mutex_lockfile   apr_proc_mutex_lockfile
 #define apr_global_mutex_pool_get   apr_proc_mutex_pool_get
 
 #endif
