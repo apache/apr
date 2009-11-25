@@ -180,6 +180,11 @@ APR_DECLARE(const char *) apr_global_mutex_lockfile(apr_global_mutex_t *mutex)
     return apr_proc_mutex_lockfile(mutex->proc_mutex);
 }
 
+APR_DECLARE(const char *) apr_global_mutex_name(apr_global_mutex_t *mutex)
+{
+    return apr_proc_mutex_name(mutex->proc_mutex);
+}
+
 APR_PERMS_SET_IMPLEMENT(global_mutex)
 {
     apr_status_t rv;
