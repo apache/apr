@@ -186,12 +186,12 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_cleanup(void *mutex)
 
 APR_DECLARE(const char *) apr_proc_mutex_lockfile(apr_proc_mutex_t *mutex)
 {
-    return NULL;
+    return mutex->fname;
 }
 
 APR_DECLARE(const char *) apr_proc_mutex_name(apr_proc_mutex_t *mutex)
 {
-    return mutex->fname;
+    return apr_proc_mutex_defname();
 }
 
 APR_DECLARE(const char *) apr_proc_mutex_defname(void)
