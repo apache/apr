@@ -1131,6 +1131,7 @@ static apr_dbd_t *dbd_mysql_open(apr_pool_t *pool, const char *params,
         {NULL, NULL}
     };
     unsigned int port = 0;
+    unsigned int timeout = 0;
     apr_dbd_t *sql = apr_pcalloc(pool, sizeof(apr_dbd_t));
     sql->fldsz = FIELDSIZE;
     sql->conn = mysql_init(sql->conn);
@@ -1184,16 +1185,19 @@ static apr_dbd_t *dbd_mysql_open(apr_pool_t *pool, const char *params,
          do_reconnect = atoi(fields[9].value) ? 1 : 0;
     }
     if (fields[10].value != NULL) {
-         mysql_options(sql->conn, MYSQL_OPT_CONNECT_TIMEOUT,
-                       atoi(fields[10].value));
+        timeout = atoi(fields[10].value);
+        mysql_options(sql->conn, MYSQL_OPT_CONNECT_TIMEOUT,
+                      (const void *)&timeout);
     }
     if (fields[11].value != NULL) {
-         mysql_options(sql->conn, MYSQL_OPT_READ_TIMEOUT,
-                       atoi(fields[11].value));
+        timeout = atoi(fields[11].value);
+        mysql_options(sql->conn, MYSQL_OPT_READ_TIMEOUT,
+                      (const void *)&timeout);
     }
     if (fields[12].value != NULL) {
-         mysql_options(sql->conn, MYSQL_OPT_WRITE_TIMEOUT,
-                       atoi(fields[12].value));
+        timeout = atoi(fields[12].value);
+        mysql_options(sql->conn, MYSQL_OPT_WRITE_TIMEOUT,
+                      (const void *)&timeout);
     }
 #endif
 
