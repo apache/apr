@@ -1131,7 +1131,9 @@ static apr_dbd_t *dbd_mysql_open(apr_pool_t *pool, const char *params,
         {NULL, NULL}
     };
     unsigned int port = 0;
+#if MYSQL_VERSION_ID >= 50013
     unsigned int timeout = 0;
+#endif
     apr_dbd_t *sql = apr_pcalloc(pool, sizeof(apr_dbd_t));
     sql->fldsz = FIELDSIZE;
     sql->conn = mysql_init(sql->conn);
