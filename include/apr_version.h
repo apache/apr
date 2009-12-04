@@ -53,7 +53,7 @@
  * Minor API changes that do not cause binary compatibility problems.
  * Reset to 0 when upgrading APR_MAJOR_VERSION
  */
-#define APR_MINOR_VERSION       4
+#define APR_MINOR_VERSION       5
 
 /** patch level 
  * The Patch Level never includes API changes, simply bug fixes.
