@@ -1,4 +1,8 @@
                                                      -*- coding: utf-8 -*-
+Changes for APR 1.4.2
+
+
+
 Changes for APR 1.4.1
 
   *) Win32: Properly handle the ERROR_DIRECTORY system error code.
