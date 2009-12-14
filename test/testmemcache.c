@@ -72,8 +72,8 @@ typedef struct {
  * if you wanted to use some external hashing library or functions for
  * consistent hashing, for example, this would be a good place to do it.
  */
-apr_uint32_t my_hash_func(void *baton, const char *data,
-                          apr_size_t data_len)
+static apr_uint32_t my_hash_func(void *baton, const char *data,
+                                 apr_size_t data_len)
 {
 
   return HASH_FUNC_RESULT;
@@ -85,9 +85,9 @@ apr_uint32_t my_hash_func(void *baton, const char *data,
  * and pulls some number from the *baton, which is a struct that has some 
  * kind of meaningful stuff in it.
  */
-apr_memcache_server_t *my_server_func(void *baton, 
-                                      apr_memcache_t *mc,
-                                      const apr_uint32_t hash)
+static apr_memcache_server_t *my_server_func(void *baton, 
+                                             apr_memcache_t *mc,
+                                             const apr_uint32_t hash)
 {
   apr_memcache_server_t *ms = NULL;
   my_hash_server_baton *mhsb = (my_hash_server_baton *)baton;
@@ -106,7 +106,7 @@ apr_memcache_server_t *my_server_func(void *baton,
 }
 
 apr_uint16_t firsttime = 0;
-int randval(apr_uint32_t high)
+static int randval(apr_uint32_t high)
 {
     apr_uint32_t i = 0;
     double d = 0;
@@ -177,7 +177,7 @@ static void test_memcache_create(abts_case * tc, void *data)
 
 /* install our own custom hashing and server selection routines. */
 
-int create_test_hash(apr_pool_t *p, apr_hash_t *h)
+static int create_test_hash(apr_pool_t *p, apr_hash_t *h)
 {
   int i;
   
@@ -539,7 +539,7 @@ static void test_memcache_setget(abts_case * tc, void *data)
 /* use apr_socket stuff to see if there is in fact a memcached server 
  * running on PORT. 
  */
-apr_status_t check_mc(void)
+static apr_status_t check_mc(void)
 {
   apr_pool_t *pool = p;
   apr_status_t rv;
