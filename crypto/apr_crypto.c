@@ -190,15 +190,15 @@ APR_DECLARE(const char *)apr_crypto_driver_name (const apr_crypto_driver_t *driv
 }
 
 /**
- * @brief Get the result of a previous operation on this context.
- * @param pool - process pool
- * @param params - array of key parameters
- * @param factory - factory pointer will be written here
+ * @brief Get the result of the last operation on a context. If the result
+ *        is NULL, the operation was successful.
+ * @param f - context pointer
+ * @param result - the result structure
+ * @return APR_SUCCESS for success
  */
-APR_DECLARE(apr_status_t) apr_crypto_error(const apr_crypto_t *f,
-        const apu_err_t **result) {
-    *result = f->result;
-    return APR_SUCCESS;
+APR_DECLARE(apr_status_t) apr_crypto_error(const apr_crypto_driver_t *driver,
+        const apr_crypto_t *f, const apu_err_t **result) {
+    return driver->error(f, result);
 }
 
 /**
@@ -206,11 +206,11 @@ APR_DECLARE(apr_status_t) apr_crypto_error(const apr_crypto_t *f,
  * @param driver - driver to use
  * @param pool - process pool
  * @param params - array of key parameters
- * @param factory - factory pointer will be written here
+ * @param f - context pointer will be written here
  */
-APR_DECLARE(apr_status_t) apr_crypto_factory(const apr_crypto_driver_t *driver,
+APR_DECLARE(apr_status_t) apr_crypto_make(const apr_crypto_driver_t *driver,
         apr_pool_t *pool, const apr_array_header_t *params, apr_crypto_t **f) {
-    return driver->factory(pool, params, f);
+    return driver->make(pool, params, f);
 }
 
 /**
@@ -257,7 +257,7 @@ APR_DECLARE(apr_status_t) apr_crypto_passphrase(const apr_crypto_driver_t *drive
  *       *ctx is not NULL, *ctx must point at a previously created structure.
  * @param driver - driver to use
  * @param p The pool to use.
- * @param f The block factory to use.
+ * @param f The block context to use.
  * @param key The key structure to use.
  * @param iv Optional initialisation vector. If the buffer pointed to is NULL,
  *           an IV will be created at random, in space allocated from the pool.
@@ -334,7 +334,7 @@ APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_finish(
  *       *ctx is not NULL, *ctx must point at a previously created structure.
  * @param driver - driver to use
  * @param p The pool to use.
- * @param f The block factory to use.
+ * @param f The block context to use.
  * @param key The key structure to use.
  * @param iv Optional initialisation vector.
  * @param ctx The block context returned, see note.
@@ -415,10 +415,10 @@ APR_DECLARE(apr_status_t) apr_crypto_block_cleanup(
 }
 
 /**
- * @brief Clean encryption / decryption factory.
- * @note After cleanup, a factory is free to be reused if necessary.
+ * @brief Clean encryption / decryption context.
+ * @note After cleanup, a context is free to be reused if necessary.
  * @param driver - driver to use
- * @param f The factory to use.
+ * @param f The context to use.
  * @return Returns APR_ENOTIMPL if not supported.
  */
 APR_DECLARE(apr_status_t) apr_crypto_cleanup(const apr_crypto_driver_t *driver,
