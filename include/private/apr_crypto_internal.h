@@ -41,6 +41,14 @@ struct apr_crypto_driver_t {
     apr_status_t (*init)(apr_pool_t *pool, const apr_array_header_t *params, int *rc);
 
     /**
+     * @brief: fetch the most recent error from this driver.
+     * @param f - context pointer
+     * @param result - the result structure
+     * @return APR_SUCCESS for success.
+     */
+    apr_status_t (*error)(const apr_crypto_t *f, const apu_err_t **result);
+
+    /**
      * @brief Create a context for supporting encryption. Keys, certificates,
      *        algorithms and other parameters will be set per context. More than
      *        one context can be created at one time. A cleanup will be automatically
@@ -52,7 +60,7 @@ struct apr_crypto_driver_t {
      * @return APR_ENOENGINE when the engine specified does not exist. APR_EINITENGINE
      * if the engine cannot be initialised.
      */
-    apr_status_t (*factory)(apr_pool_t *pool, const apr_array_header_t *params,
+    apr_status_t (*make)(apr_pool_t *pool, const apr_array_header_t *params,
             apr_crypto_t **f);
 
     /**
@@ -94,7 +102,7 @@ struct apr_crypto_driver_t {
      * @note If *ctx is NULL, a apr_crypto_block_t will be created from a pool. If
      *       *ctx is not NULL, *ctx must point at a previously created structure.
      * @param p The pool to use.
-     * @param f The block factory to use.
+     * @param f The block context to use.
      * @param key The key structure.
      * @param iv Optional initialisation vector. If the buffer pointed to is NULL,
      *           an IV will be created at random, in space allocated from the pool.
@@ -159,7 +167,7 @@ struct apr_crypto_driver_t {
      * @note If *ctx is NULL, a apr_crypto_block_t will be created from a pool. If
      *       *ctx is not NULL, *ctx must point at a previously created structure.
      * @param p The pool to use.
-     * @param f The block factory to use.
+     * @param f The block context to use.
      * @param key The key structure.
      * @param iv Optional initialisation vector. If the buffer pointed to is NULL,
      *           an IV will be created at random, in space allocated from the pool.
@@ -226,17 +234,17 @@ struct apr_crypto_driver_t {
     apr_status_t (*block_cleanup)(apr_crypto_block_t *ctx);
 
     /**
-     * @brief Clean encryption / decryption factory.
-     * @note After cleanup, a factory is free to be reused if necessary.
+     * @brief Clean encryption / decryption context.
+     * @note After cleanup, a context is free to be reused if necessary.
      * @param driver - driver to use
-     * @param f The factory to use.
+     * @param f The context to use.
      * @return Returns APR_ENOTIMPL if not supported.
      */
     apr_status_t (*cleanup)(apr_crypto_t *f);
 
     /**
-     * @brief Clean encryption / decryption factory.
-     * @note After cleanup, a factory is free to be reused if necessary.
+     * @brief Clean encryption / decryption context.
+     * @note After cleanup, a context is free to be reused if necessary.
      * @param pool The pool to use.
      * @return Returns APR_ENOTIMPL if not supported.
      */

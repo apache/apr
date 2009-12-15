@@ -46,6 +46,13 @@
 #include <pk11pub.h>
 #endif
 
+struct apr_crypto_t {
+    apr_pool_t *pool;
+    apu_err_t *result;
+    apr_array_header_t *keys;
+    apr_crypto_config_t *config;
+};
+
 struct apr_crypto_config_t {
 };
 
@@ -57,13 +64,20 @@ struct apr_crypto_key_t {
 };
 
 struct apr_crypto_block_t {
-    const apr_crypto_t *factory;
+    const apr_crypto_t *f;
     apr_pool_t *pool;
     PK11Context *ctx;
     apr_crypto_key_t *key;
     int blockSize;
 };
 
+/**
+ * Fetch the most recent error from this driver.
+ */
+static apr_status_t crypto_error(const apr_crypto_t *f, const apu_err_t **result) {
+	*result = f->result;
+	return APR_SUCCESS;
+}
 
 /**
  * Shutdown the crypto library and release resources.
@@ -175,10 +189,10 @@ static apr_status_t crypto_block_cleanup_helper(void *data)
 }
 
 /**
- * @brief Clean encryption / decryption factory.
- * @note After cleanup, a factory is free to be reused if necessary.
+ * @brief Clean encryption / decryption context.
+ * @note After cleanup, a context is free to be reused if necessary.
  * @param driver - driver to use
- * @param f The factory to use.
+ * @param f The context to use.
  * @return Returns APR_ENOTIMPL if not supported.
  */
 static apr_status_t crypto_cleanup(apr_crypto_t *f)
@@ -209,13 +223,13 @@ static apr_status_t crypto_cleanup_helper(void *data)
  * @param driver - driver to use
  * @param pool - process pool
  * @param params - array of key parameters
- * @param factory - factory pointer will be written here
+ * @param context - context pointer will be written here
  * @return APR_ENOENGINE when the engine specified does not exist. APR_EINITENGINE
  * if the engine cannot be initialised.
  */
-static apr_status_t crypto_factory(apr_pool_t *pool,
-                                   const apr_array_header_t *params,
-                                   apr_crypto_t **factory)
+static apr_status_t crypto_make(apr_pool_t *pool,
+                                const apr_array_header_t *params,
+                                apr_crypto_t **ff)
 {
     apr_crypto_config_t *config = NULL;
     /* struct apr_crypto_param_t *ents = params ? (struct apr_crypto_param_t *)params->elts : NULL; */
@@ -226,7 +240,7 @@ static apr_status_t crypto_factory(apr_pool_t *pool,
     if (!f) {
         return APR_ENOMEM;
     }
-    *factory = f;
+    *ff = f;
     f->pool = pool;
     config = f->config = apr_pcalloc(pool, sizeof(apr_crypto_config_t));
     if (!config) {
@@ -249,7 +263,7 @@ static apr_status_t crypto_factory(apr_pool_t *pool,
         default:
             f->result->rc = -1;
             f->result->reason = "The NSS module currently supports "
-                "no per factory initialisation parameters at this time, but "
+                "no per context initialisation parameters at this time, but "
                 "may do in future.";
             return APR_EINIT;
         }
@@ -412,7 +426,7 @@ static apr_status_t crypto_passphrase(apr_pool_t *p,
  * @note If *ctx is NULL, a apr_crypto_block_t will be created from a pool. If
  *       *ctx is not NULL, *ctx must point at a previously created structure.
  * @param p The pool to use.
- * @param f The block factory to use.
+ * @param f The block context to use.
  * @param key The key structure.
  * @param iv Optional initialisation vector. If the buffer pointed to is NULL,
  *           an IV will be created at random, in space allocated from the pool.
@@ -442,7 +456,7 @@ static apr_status_t crypto_block_encrypt_init(apr_pool_t *p,
     if (!block) {
         return APR_ENOMEM;
     }
-    block->factory = f;
+    block->f = f;
     block->pool = p;
 
     apr_pool_cleanup_register(p, block,
@@ -536,8 +550,8 @@ static apr_status_t crypto_block_encrypt(apr_crypto_block_t *block,
     if (s != SECSuccess) {
         PRErrorCode perr = PORT_GetError();
         if (perr) {
-            block->factory->result->rc = perr;
-            block->factory->result->msg = PR_ErrorToName(perr);
+            block->f->result->rc = perr;
+            block->f->result->msg = PR_ErrorToName(perr);
         }
         return APR_ECRYPT;
     }
@@ -579,8 +593,8 @@ static apr_status_t crypto_block_encrypt_finish(apr_crypto_block_t *block,
     if (s != SECSuccess) {
         PRErrorCode perr = PORT_GetError();
         if (perr) {
-            block->factory->result->rc = perr;
-            block->factory->result->msg = PR_ErrorToName(perr);
+            block->f->result->rc = perr;
+            block->f->result->msg = PR_ErrorToName(perr);
         }
         rv = APR_ECRYPT;
     }
@@ -595,7 +609,7 @@ static apr_status_t crypto_block_encrypt_finish(apr_crypto_block_t *block,
  * @note If *ctx is NULL, a apr_crypto_block_t will be created from a pool. If
  *       *ctx is not NULL, *ctx must point at a previously created structure.
  * @param p The pool to use.
- * @param f The block factory to use.
+ * @param f The block context to use.
  * @param key The key structure.
  * @param iv Optional initialisation vector. If the buffer pointed to is NULL,
  *           an IV will be created at random, in space allocated from the pool.
@@ -623,7 +637,7 @@ static apr_status_t crypto_block_decrypt_init(apr_pool_t *p,
     if (!block) {
         return APR_ENOMEM;
     }
-    block->factory = f;
+    block->f = f;
     block->pool = p;
 
     apr_pool_cleanup_register(p, block,
@@ -704,8 +718,8 @@ static apr_status_t crypto_block_decrypt(apr_crypto_block_t *block,
     if (s != SECSuccess) {
         PRErrorCode perr = PORT_GetError();
         if (perr) {
-            block->factory->result->rc = perr;
-            block->factory->result->msg = PR_ErrorToName(perr);
+            block->f->result->rc = perr;
+            block->f->result->msg = PR_ErrorToName(perr);
         }
         return APR_ECRYPT;
     }
@@ -747,8 +761,8 @@ static apr_status_t crypto_block_decrypt_finish(apr_crypto_block_t *block,
     if (s != SECSuccess) {
         PRErrorCode perr = PORT_GetError();
         if (perr) {
-            block->factory->result->rc = perr;
-            block->factory->result->msg = PR_ErrorToName(perr);
+            block->f->result->rc = perr;
+            block->f->result->msg = PR_ErrorToName(perr);
         }
         rv = APR_ECRYPT;
     }
@@ -764,7 +778,8 @@ static apr_status_t crypto_block_decrypt_finish(apr_crypto_block_t *block,
 APU_MODULE_DECLARE_DATA const apr_crypto_driver_t apr_crypto_nss_driver = {
     "nss",
     crypto_init,
-    crypto_factory,
+    crypto_error,
+    crypto_make,
     crypto_passphrase,
     crypto_block_encrypt_init,
     crypto_block_encrypt,

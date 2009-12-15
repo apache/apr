@@ -175,19 +175,10 @@ typedef struct apr_crypto_param_t {
 
 /* These are opaque structs.  Instantiation is up to each backend */
 typedef struct apr_crypto_driver_t apr_crypto_driver_t;
+typedef struct apr_crypto_t apr_crypto_t;
 typedef struct apr_crypto_config_t apr_crypto_config_t;
 typedef struct apr_crypto_key_t apr_crypto_key_t;
 typedef struct apr_crypto_block_t apr_crypto_block_t;
-
-/**
- * Public factory API, common to all backends.
- */
-typedef struct apr_crypto_t {
-    apr_pool_t *pool;
-    apu_err_t *result;
-    apr_array_header_t *keys;
-    apr_crypto_config_t *config;
-} apr_crypto_t;
 
 /**
  * @brief Perform once-only initialisation. Call once only.
@@ -222,15 +213,14 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(apr_pool_t *pool, const char *na
 APR_DECLARE(const char *) apr_crypto_driver_name(const apr_crypto_driver_t *driver);
 
 /**
- * @brief Get the result of the last operation on a factory. If the result
+ * @brief Get the result of the last operation on a context. If the result
  *        is NULL, the operation was successful.
- * @param driver - driver to use
- * @param factory - factory pointer will be written here
+ * @param f - context pointer
  * @param result - the result structure
  * @return APR_SUCCESS for success
  */
-APR_DECLARE(apr_status_t) apr_crypto_error(const apr_crypto_t *f,
-        const apu_err_t **result);
+APR_DECLARE(apr_status_t) apr_crypto_error(const apr_crypto_driver_t *driver,
+        const apr_crypto_t *f, const apu_err_t **result);
 
 /**
  * @brief Create a context for supporting encryption. Keys, certificates,
@@ -240,11 +230,11 @@ APR_DECLARE(apr_status_t) apr_crypto_error(const apr_crypto_t *f,
  * @param driver - driver to use
  * @param pool - process pool
  * @param params - array of key parameters
- * @param factory - factory pointer will be written here
+ * @param f - context pointer will be written here
  * @return APR_ENOENGINE when the engine specified does not exist. APR_EINITENGINE
  * if the engine cannot be initialised.
  */
-APR_DECLARE(apr_status_t) apr_crypto_factory(const apr_crypto_driver_t *driver,
+APR_DECLARE(apr_status_t) apr_crypto_make(const apr_crypto_driver_t *driver,
         apr_pool_t *pool, const apr_array_header_t *params, apr_crypto_t **f);
 
 /**
@@ -288,7 +278,7 @@ APR_DECLARE(apr_status_t) apr_crypto_passphrase(const apr_crypto_driver_t *drive
  *       *ctx is not NULL, *ctx must point at a previously created structure.
  * @param driver - driver to use
  * @param p The pool to use.
- * @param f The block factory to use.
+ * @param f The block context to use.
  * @param key The key structure to use.
  * @param iv Optional initialisation vector. If the buffer pointed to is NULL,
  *           an IV will be created at random, in space allocated from the pool.
@@ -359,7 +349,7 @@ APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_finish(
  *       *ctx is not NULL, *ctx must point at a previously created structure.
  * @param driver - driver to use
  * @param p The pool to use.
- * @param f The block factory to use.
+ * @param f The block context to use.
  * @param key The key structure to use.
  * @param iv Optional initialisation vector.
  * @param ctx The block context returned, see note.
@@ -432,10 +422,10 @@ APR_DECLARE(apr_status_t) apr_crypto_block_cleanup(
         const apr_crypto_driver_t *driver, apr_crypto_block_t *ctx);
 
 /**
- * @brief Clean encryption / decryption factory.
- * @note After cleanup, a factory is free to be reused if necessary.
+ * @brief Clean encryption / decryption context.
+ * @note After cleanup, a context is free to be reused if necessary.
  * @param driver - driver to use
- * @param f The factory to use.
+ * @param f The context to use.
  * @return Returns APR_ENOTIMPL if not supported.
  */
 APR_DECLARE(apr_status_t) apr_crypto_cleanup(const apr_crypto_driver_t *driver,
