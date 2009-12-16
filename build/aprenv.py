@@ -681,7 +681,6 @@ class APREnv(Environment):
     subst['@apu_have_openssl@'] = 0
     subst['@apu_have_nss@'] = 0
 
-    subst['@have_apr_iconv@'] = 0
     subst['@have_iconv@'] = 0
     
     # ldap stuff, remove soon.

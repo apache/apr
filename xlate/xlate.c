@@ -39,11 +39,8 @@
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
 #endif
-#if APU_HAVE_APR_ICONV
-#include <apr_iconv.h>
-#endif
 
-#if defined(APU_ICONV_INBUF_CONST) || APU_HAVE_APR_ICONV
+#if defined(APU_ICONV_INBUF_CONST)
 #define ICONV_INBUF_TYPE const char **
 #else
 #define ICONV_INBUF_TYPE char **
@@ -60,8 +57,6 @@ struct apr_xlate_t {
     char *sbcs_table;
 #if APU_HAVE_ICONV
     iconv_t ich;
-#elif APU_HAVE_APR_ICONV
-    apr_iconv_t ich;
 #endif
 };
 
@@ -83,12 +78,7 @@ static apr_status_t apr_xlate_cleanup(void *convset)
 {
     apr_xlate_t *old = convset;
 
-#if APU_HAVE_APR_ICONV
-    if (old->ich != (apr_iconv_t)-1) {
-        return apr_iconv_close(old->ich, old->pool);
-    }
-
-#elif APU_HAVE_ICONV
+#if APU_HAVE_ICONV
     if (old->ich != (iconv_t)-1) {
         if (iconv_close(old->ich)) {
             int rv = errno;
@@ -288,54 +278,7 @@ APR_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset,
 {
     apr_status_t status = APR_SUCCESS;
 
-#if APU_HAVE_APR_ICONV
-    if (convset->ich != (apr_iconv_t)-1) {
-        const char *inbufptr = inbuf;
-        apr_size_t translated;
-        char *outbufptr = outbuf;
-        status = apr_iconv(convset->ich, &inbufptr, inbytes_left,
-                           &outbufptr, outbytes_left, &translated);
-
-        /* If everything went fine but we ran out of buffer, don't
-         * report it as an error.  Caller needs to look at the two
-         * bytes-left values anyway.
-         *
-         * There are three expected cases where rc is -1.  In each of
-         * these cases, *inbytes_left != 0.
-         * a) the non-error condition where we ran out of output
-         *    buffer
-         * b) the non-error condition where we ran out of input (i.e.,
-         *    the last input character is incomplete)
-         * c) the error condition where the input is invalid
-         */
-        switch (status) {
-
-            case APR_BADARG:  /* out of space on output */
-                status = 0; /* change table lookup code below if you
-                               make this an error */
-                break;
-
-            case APR_EINVAL: /* input character not complete (yet) */
-                status = APR_INCOMPLETE;
-                break;
-
-            case APR_BADCH: /* bad input byte */
-                status = APR_EINVAL;
-                break;
-
-             /* Sometimes, iconv is not good about setting errno. */
-            case 0:
-                if (inbytes_left && *inbytes_left)
-                    status = APR_INCOMPLETE;
-                break;
-
-            default:
-                break;
-        }
-    }
-    else
-
-#elif APU_HAVE_ICONV
+#if APU_HAVE_ICONV
     if (convset->ich != (iconv_t)-1) {
         const char *inbufptr = inbuf;
         char *outbufptr = outbuf;

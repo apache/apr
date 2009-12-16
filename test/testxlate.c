@@ -71,13 +71,6 @@ static void one_test(abts_case *tc, const char *cs1, const char *cs2,
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
-#if APU_HAVE_APR_ICONV
-/* it is a bug if iconv_open() fails */
-static int is_transform_supported(abts_case *tc, const char *cs1,
-                                  const char *cs2, apr_pool_t *pool) {
-    return 1;
-}
-#else
 /* some iconv implementations don't support all tested transforms;
  * example: 8859-1 <-> 8859-2 using native Solaris iconv
  */
@@ -96,7 +89,6 @@ static int is_transform_supported(abts_case *tc, const char *cs1,
 
     return 1;
 }
-#endif
 
 static void test_transformation(abts_case *tc, void *data)
 {
