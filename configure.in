@@ -2533,22 +2533,6 @@ APU_CHECK_DBD_ODBC
 APU_FIND_EXPAT
 APU_FIND_ICONV
 
-AC_CHECK_HEADERS( \
-sys/sdt.h
-)
-
-AC_ARG_ENABLE(dtrace,APR_HELP_STRING(--enable-dtrace, Enable DTrace probes),
-[
-  enable_dtrace=$enableval
-],
-[
-  enable_dtrace=no
-])
-
-if test $enable_dtrace = "yes" -a "$ac_cv_header_sys_sdt_h" = "yes"; then
-    APR_ADDTO(CPPFLAGS, -DAPR_DTRACE_PROVIDER)
-fi
-
 dnl Enable DSO build; must be last:
 APR_MODULAR_DSO
 

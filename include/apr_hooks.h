@@ -21,23 +21,6 @@
 /* For apr_array_header_t */
 #include "apr_tables.h"
 
-#ifdef APR_DTRACE_PROVIDER
-#include <sys/sdt.h>
-#ifndef OLD_DTRACE_PROBE
-#define OLD_DTRACE_PROBE(name) __dtrace_ap___##name()
-#endif
-#ifndef OLD_DTRACE_PROBE1
-#define OLD_DTRACE_PROBE1(name,a) __dtrace_ap___##name(a)
-#endif
-#ifndef OLD_DTRACE_PROBE2
-#define OLD_DTRACE_PROBE2(name,a,b) __dtrace_ap___##name(a,b)
-#endif
-#else
-#define OLD_DTRACE_PROBE(a)
-#define OLD_DTRACE_PROBE1(a,b)
-#define OLD_DTRACE_PROBE2(a,b,c)
-#endif
-
 /**
  * @file apr_hooks.h
  * @brief Apache hook functions
@@ -51,6 +34,74 @@ extern "C" {
  * @ingroup APR_Util
  * @{
  */
+
+/**
+ * @defgroup apr_hook_probes Hook probe capability
+ * APR hooks provide a trace probe capability for capturing
+ * the flow of control and return values with hooks.
+ *
+ * In order to use this facility, the application must define
+ * the symbol APR_HOOK_PROBES_ENABLED and the four APR_HOOK_PROBE_
+ * macros described below before including apr_hooks.h in files
+ * that use the APR_IMPLEMENT_EXTERNAL_HOOK_* macros.
+ *
+ * This probe facility is not provided for APR optional hooks.
+ * @{
+ */
+
+#ifdef APR_HOOK_PROBES_ENABLED
+#define APR_HOOK_INT_DCL_UD void *ud = NULL
+#else
+/** internal implementation detail to avoid the ud declaration when
+ * hook probes are not used
+ */
+#define APR_HOOK_INT_DCL_UD
+/**
+ * User-defined hook probe macro that is invoked when the hook
+ * is run, before calling any hook functions.
+ * @param ud A void * user data field that should be filled in by
+ * this macro, and will be provided to the other hook probe macros.
+ * @param ns The namespace prefix of the hook functions
+ * @param name The name of the hook
+ */
+#define APR_HOOK_PROBE_ENTRY(ud,ns,name)
+/**
+ * User-defined hook probe macro that is invoked after the hook
+ * has run.
+ * @param ud A void * user data field that was filled in by the user-
+ * provided APR_HOOK_PROBE_ENTRY().
+ * @param ns The namespace prefix of the hook functions
+ * @param name The name of the hook
+ * @param rv The return value of the hook, or 0 if the hook is void.
+ */
+#define APR_HOOK_PROBE_RETURN(ud,ns,name,rv)
+/**
+ * User-defined hook probe macro that is invoked before calling a
+ * hook function.
+ * @param ud A void * user data field that was filled in by the user-
+ * provided APR_HOOK_PROBE_ENTRY().
+ * @param ns The namespace prefix of the hook functions
+ * @param name The name of the hook
+ * @param src The value of apr_hook_debug_current at the time the function
+ * was hooked (usually the source file implementing the hook function).
+ */
+#define APR_HOOK_PROBE_INVOKE(ud,ns,name,src)
+/**
+ * User-defined hook probe macro that is invoked before calling a
+ * hook function.
+ * @param ud A void * user data field that was filled in by the user-
+ * provided APR_HOOK_PROBE_ENTRY().
+ * @param ns The namespace prefix of the hook functions
+ * @param name The name of the hook
+ * @param src The value of apr_hook_debug_current at the time the function
+ * was hooked (usually the source file implementing the hook function).
+ * @param rv The return value of the hook function, or 0 if the hook is void.
+ */
+#define APR_HOOK_PROBE_COMPLETE(ud,ns,name,src,rv)
+#endif
+
+/** @} */
+
 /** macro to return the prototype of the hook function */    
 #define APR_IMPLEMENT_HOOK_GET_PROTO(ns,link,name) \
 link##_DECLARE(apr_array_header_t *) ns##_hook_get_##name(void)
@@ -123,21 +174,22 @@ link##_DECLARE(void) ns##_run_##name args_decl \
     { \
     ns##_LINK_##name##_t *pHook; \
     int n; \
+    APR_HOOK_INT_DCL_UD; \
 \
-    OLD_DTRACE_PROBE(name##__entry); \
+    APR_HOOK_PROBE_ENTRY(ud, ns, name); \
 \
     if(_hooks.link_##name) \
         { \
         pHook=(ns##_LINK_##name##_t *)_hooks.link_##name->elts; \
         for(n=0 ; n < _hooks.link_##name->nelts ; ++n) \
             { \
-            OLD_DTRACE_PROBE1(name##__dispatch__invoke, (char *)pHook[n].szName); \
+            APR_HOOK_PROBE_INVOKE(ud, ns, name, (char *)pHook[n].szName); \
 	    pHook[n].pFunc args_use; \
-            OLD_DTRACE_PROBE2(name##__dispatch__complete, (char *)pHook[n].szName, 0); \
+            APR_HOOK_PROBE_COMPLETE(ud, ns, name, (char *)pHook[n].szName, 0); \
             } \
         } \
 \
-    OLD_DTRACE_PROBE1(name##__return, 0); \
+    APR_HOOK_PROBE_RETURN(ud, ns, name, 0); \
 \
     }
 
@@ -166,24 +218,25 @@ link##_DECLARE(ret) ns##_run_##name args_decl \
     ns##_LINK_##name##_t *pHook; \
     int n; \
     ret rv = ok; \
+    APR_HOOK_INT_DCL_UD; \
 \
-    OLD_DTRACE_PROBE(name##__entry); \
+    APR_HOOK_PROBE_ENTRY(ud, ns, name); \
 \
     if(_hooks.link_##name) \
         { \
         pHook=(ns##_LINK_##name##_t *)_hooks.link_##name->elts; \
         for(n=0 ; n < _hooks.link_##name->nelts ; ++n) \
             { \
-            OLD_DTRACE_PROBE1(name##__dispatch__invoke, (char *)pHook[n].szName); \
+            APR_HOOK_PROBE_INVOKE(ud, ns, name, (char *)pHook[n].szName); \
             rv=pHook[n].pFunc args_use; \
-            OLD_DTRACE_PROBE2(name##__dispatch__complete, (char *)pHook[n].szName, rv); \
+            APR_HOOK_PROBE_COMPLETE(ud, ns, name, (char *)pHook[n].szName, rv); \
             if(rv != ok && rv != decline) \
                 break; \
             rv = ok; \
             } \
         } \
 \
-    OLD_DTRACE_PROBE1(name##__return, rv); \
+    APR_HOOK_PROBE_RETURN(ud, ns, name, rv); \
 \
     return rv; \
     }
@@ -210,24 +263,25 @@ link##_DECLARE(ret) ns##_run_##name args_decl \
     ns##_LINK_##name##_t *pHook; \
     int n; \
     ret rv = decline; \
+    APR_HOOK_INT_DCL_UD; \
 \
-    OLD_DTRACE_PROBE(name##__entry); \
+    APR_HOOK_PROBE_ENTRY(ud, ns, name); \
 \
     if(_hooks.link_##name) \
         { \
         pHook=(ns##_LINK_##name##_t *)_hooks.link_##name->elts; \
         for(n=0 ; n < _hooks.link_##name->nelts ; ++n) \
             { \
-            OLD_DTRACE_PROBE1(name##__dispatch__invoke, (char *)pHook[n].szName); \
+            APR_HOOK_PROBE_INVOKE(ud, ns, name, (char *)pHook[n].szName); \
             rv=pHook[n].pFunc args_use; \
-            OLD_DTRACE_PROBE2(name##__dispatch__complete, (char *)pHook[n].szName, rv); \
+            APR_HOOK_PROBE_COMPLETE(ud, ns, name, (char *)pHook[n].szName, rv); \
 \
             if(rv != decline) \
                 break; \
             } \
         } \
 \
-    OLD_DTRACE_PROBE1(name##__return, rv); \
+    APR_HOOK_PROBE_RETURN(ud, ns, name, rv); \
 \
     return rv; \
     }
