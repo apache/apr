@@ -27,7 +27,6 @@ sinclude(build/ltversion.m4)
 sinclude(build/lt~obsolete.m4)
 
 sinclude(build/apu-conf.m4)
-sinclude(build/apu-iconv.m4)
 sinclude(build/apu-hints.m4)
 sinclude(build/crypto.m4)
 sinclude(build/dbm.m4)
@@ -2483,45 +2482,15 @@ dnl ------------------------------ APR-util stuff
 
 APU_PRELOAD
 
-dnl
-dnl  Find the APR-ICONV directory.
-dnl
-AC_ARG_WITH(apr-iconv,
-            [  --with-apr-iconv=DIR    relative path to apr-iconv source],
-  [ apu_apriconv_dir="$withval"
-    if test "$apu_apriconv_dir" != "no"; then
-      if test -d "$apu_apriconv_dir"; then
-        APR_SUBDIR_CONFIG("$apu_apriconv_dir",
-                          [$apache_apr_flags \
-                             --prefix=$prefix \
-                             --exec-prefix=$exec_prefix \
-                             --libdir=$libdir \
-                             --includedir=$includedir \
-                             --bindir=$bindir \
-                             --datadir=$datadir \
-                             --with-installbuilddir=$installbuilddir],
-                          [--enable-layout=*|\'--enable-layout=*])
-        APRUTIL_EXPORT_LIBS="$abs_srcdir/$apu_apriconv_dir/lib/libapriconv.la \
-                             $APRUTIL_EXPORT_LIBS"
-        APR_ADDTO(INCLUDES, [-I$abs_srcdir/$apu_apriconv_dir/include])
-        APR_ICONV_DIR="$apu_apriconv_dir"
-      else
-       APR_ICONV_DIR=""
-      fi
-    else
-      APR_ICONV_DIR=""
-    fi
-  ])
-AC_SUBST(APR_ICONV_DIR)
-
-dnl Find LDAP library
-dnl Determine what DBM backend type to use.
-dnl Find Expat
-dnl Find an iconv library
+dnl Find crpyto libraries
 APU_CHECK_CRYPTO
 APU_CHECK_CRYPTO_OPENSSL
 APU_CHECK_CRYPTO_NSS
+
+dnl Find LDAP library
 APU_FIND_LDAP
+
+dnl Find DBM and DBD backends to use.
 APU_CHECK_DBM
 APU_CHECK_DBD
 APU_CHECK_DBD_MYSQL
@@ -2530,7 +2499,11 @@ APU_CHECK_DBD_SQLITE2
 APU_CHECK_DBD_ORACLE
 APU_CHECK_DBD_FREETDS
 APU_CHECK_DBD_ODBC
+
+dnl Find Expat
 APU_FIND_EXPAT
+
+dnl Find iconv implementations
 APU_FIND_ICONV
 
 dnl Enable DSO build; must be last:

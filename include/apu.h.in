@@ -106,7 +106,6 @@
 #define APU_HAVE_OPENSSL       @apu_have_openssl@
 #define APU_HAVE_NSS           @apu_have_nss@
 
-#define APU_HAVE_APR_ICONV     @have_apr_iconv@
 #define APU_HAVE_ICONV         @have_iconv@
 #define APR_HAS_XLATE          (APU_HAVE_APR_ICONV || APU_HAVE_ICONV)
 
