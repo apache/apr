@@ -209,7 +209,7 @@ SOURCE=..\include\private\apu_select_dbm.h
 # End Group
 # Begin Source File
 
-SOURCE=..\libaprutil.rc
+SOURCE=..\libapr.rc
 # End Source File
 # End Target
 # End Project
