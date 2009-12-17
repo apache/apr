@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "apu_config.h"
 #include "apu.h"
+#include "apr_private.h"
 #include "apr_strings.h"
 
 #if APR_HAVE_STDLIB_H
@@ -238,7 +238,7 @@ static void vt_gdbm_usednames(apr_pool_t *pool, const char *pathname,
     *used2 = NULL;
 }
 
-APU_MODULE_DECLARE_DATA const apr_dbm_type_t apr_dbm_type_gdbm = {
+APR_MODULE_DECLARE_DATA const apr_dbm_type_t apr_dbm_type_gdbm = {
     "gdbm",
     vt_gdbm_open,
     vt_gdbm_close,
