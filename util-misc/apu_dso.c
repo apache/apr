@@ -17,9 +17,8 @@
 #include <ctype.h>
 #include <stdio.h>
 
-#include "apu_config.h"
 #include "apu.h"
-
+#include "apr_private.h"
 #include "apr_pools.h"
 #include "apr_tables.h"
 #include "apr_dso.h"

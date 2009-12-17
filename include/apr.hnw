@@ -410,6 +410,27 @@ typedef  apr_uint32_t            apr_uintptr_t;
  */
 #define APR_DECLARE_DATA
 
+#if !defined(WIN32) || defined(APU_MODULE_DECLARE_STATIC)
+/**
+ * Declare a dso module's exported module structure as APR_MODULE_DECLARE_DATA.
+ *
+ * Unless APR_MODULE_DECLARE_STATIC is defined at compile time, symbols 
+ * declared with APR_MODULE_DECLARE_DATA are always exported.
+ * @code
+ * module APR_MODULE_DECLARE_DATA mod_tag
+ * @endcode
+ */
+#define APR_MODULE_DECLARE_DATA
+#else
+#define APR_MODULE_DECLARE_DATA           __declspec(dllexport)
+#endif
+
+/**
+ * @deprecated
+ * @see APR_MODULE_DECLARE_DATA
+ */
+#define APU_MODULE_DECLARE_DATA           APR_MODULE_DECLARE_DATA
+
 #define APR_SSIZE_T_FMT          "d"
 
 #define APR_SIZE_T_FMT           "d"

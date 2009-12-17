@@ -16,7 +16,7 @@
 
 #include "apr.h"
 #include "apu.h"
-#include "apu_config.h"
+#include "apr_private.h"
 #include "apr_ldap.h"
 #include "apu_internal.h"
 #include "apr_dso.h"

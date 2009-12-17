@@ -19,7 +19,7 @@
 #if APU_HAVE_MYSQL
 
 #include "apu_version.h"
-#include "apu_config.h"
+#include "apr_private.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -1291,7 +1291,7 @@ static void dbd_mysql_init(apr_pool_t *pool)
     /* FIXME: this is a guess; find out what it really does */
     apr_pool_cleanup_register(pool, NULL, thread_end, apr_pool_cleanup_null);
 }
-APU_MODULE_DECLARE_DATA const apr_dbd_driver_t apr_dbd_mysql_driver = {
+APR_MODULE_DECLARE_DATA const apr_dbd_driver_t apr_dbd_mysql_driver = {
     "mysql",
     dbd_mysql_init,
     dbd_mysql_native,
