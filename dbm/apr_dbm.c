@@ -26,8 +26,8 @@
 #include "apr_general.h"
 #include "apr_atomic.h"
 
-#include "apu_config.h"
 #include "apu.h"
+#include "apr_private.h"
 #include "apu_internal.h"
 #include "apu_version.h"
 #include "apr_dbm_private.h"
