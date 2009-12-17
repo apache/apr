@@ -19,8 +19,6 @@ CFG=apr - Win32 Release
 !MESSAGE 
 !MESSAGE "apr - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "apr - Win32 Debug" (based on "Win32 (x86) Static Library")
-!MESSAGE "apr - Win32 Release9x" (based on "Win32 (x86) Static Library")
-!MESSAGE "apr - Win32 Debug9x" (based on "Win32 (x86) Static Library")
 !MESSAGE "apr - x64 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "apr - x64 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE 
@@ -79,53 +77,6 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo /out:"LibD\apr-1.lib"
 
-!ELSEIF  "$(CFG)" == "apr - Win32 Release9x"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "9x\LibR"
-# PROP BASE Intermediate_Dir "9x\LibR"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "9x\LibR"
-# PROP Intermediate_Dir "9x\LibR"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /c
-# ADD BASE RSC /l 0x409 /d "NDEBUG"
-# ADD RSC /l 0x409 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"9x\LibR\apr-1.lib"
-
-!ELSEIF  "$(CFG)" == "apr - Win32 Debug9x"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "9x\LibD"
-# PROP BASE Intermediate_Dir "9x\LibD"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 1
-# PROP Output_Dir "9x\LibD"
-# PROP Intermediate_Dir "9x\LibD"
-# PROP Ignore_Export_Lib 0
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /EHsc /c
-# ADD BASE RSC /l 0x409 /d "_DEBUG"
-# ADD RSC /l 0x409 /d "_DEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"9x\LibD\apr-1.lib"
-
 !ELSEIF  "$(CFG)" == "apr - x64 Release"
 
 # PROP BASE Use_MFC 0
@@ -179,8 +130,6 @@ LIB32=link.exe -lib
 
 # Name "apr - Win32 Release"
 # Name "apr - Win32 Debug"
-# Name "apr - Win32 Release9x"
-# Name "apr - Win32 Debug9x"
 # Name "apr - x64 Release"
 # Name "apr - x64 Debug"
 # Begin Group "Source Files"
@@ -629,24 +578,6 @@ InputPath=.\include\apr.hw
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "apr - Win32 Release9x"
-
-# Begin Custom Build - Creating apr.h from apr.hw
-InputPath=.\include\apr.hw
-
-".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apr.hw > .\include\apr.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "apr - Win32 Debug9x"
-
-# Begin Custom Build - Creating apr.h from apr.hw
-InputPath=.\include\apr.hw
-
-".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apr.hw > .\include\apr.h
-
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "apr - x64 Release"
@@ -811,6 +742,273 @@ SOURCE=.\include\apr_version.h
 # Begin Source File
 
 SOURCE=.\include\apr_want.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_ldap.h.in
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_ldap.hnw
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_ldap.hw
+
+!IF  "$(CFG)" == "apr - Win32 Release"
+
+# Begin Custom Build - Creating apr_ldap.h from apr_ldap.hw
+InputPath=.\include\apr_ldap.hw
+
+".\include\apr_ldap.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apr_ldap.hw > .\include\apr_ldap.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - Win32 Debug"
+
+# Begin Custom Build - Creating apr_ldap.h from apr_ldap.hw
+InputPath=.\include\apr_ldap.hw
+
+".\include\apr_ldap.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apr_ldap.hw > .\include\apr_ldap.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - x64 Release"
+
+# Begin Custom Build - Creating apr_ldap.h from apr_ldap.hw
+InputPath=.\include\apr_ldap.hw
+
+".\include\apr_ldap.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apr_ldap.hw > .\include\apr_ldap.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - x64 Debug"
+
+# Begin Custom Build - Creating apr_ldap.h from apr_ldap.hw
+InputPath=.\include\apr_ldap.hw
+
+".\include\apr_ldap.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apr_ldap.hw > .\include\apr_ldap.h
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apu.h.in
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apu.hnw
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apu.hw
+
+!IF  "$(CFG)" == "apr - Win32 Release"
+
+# Begin Custom Build - Creating apu.h from apu.hw
+InputPath=.\include\apu.hw
+
+".\include\apu.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apu.hw > .\include\apu.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - Win32 Debug"
+
+# Begin Custom Build - Creating apu.h from apu.hw
+InputPath=.\include\apu.hw
+
+".\include\apu.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apu.hw > .\include\apu.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - x64 Release"
+
+# Begin Custom Build - Creating apu.h from apu.hw
+InputPath=.\include\apu.hw
+
+".\include\apu.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apu.hw > .\include\apu.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - x64 Debug"
+
+# Begin Custom Build - Creating apu.h from apu.hw
+InputPath=.\include\apu.hw
+
+".\include\apu.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apu.hw > .\include\apu.h
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\private\apu_config.h.in
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\private\apu_config.hw
+
+!IF  "$(CFG)" == "apr - Win32 Release"
+
+# Begin Custom Build - Creating apu_config.h from apu_config.hw
+InputPath=.\include\private\apu_config.hw
+
+".\include\private\apu_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\private\apu_config.hw > .\include\private\apu_config.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - Win32 Debug"
+
+# Begin Custom Build - Creating apu_config.h from apu_config.hw
+InputPath=.\include\private\apu_config.hw
+
+".\include\private\apu_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\private\apu_config.hw > .\include\private\apu_config.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - x64 Release"
+
+# Begin Custom Build - Creating apu_config.h from apu_config.hw
+InputPath=.\include\private\apu_config.hw
+
+".\include\private\apu_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\private\apu_config.hw > .\include\private\apu_config.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - x64 Debug"
+
+# Begin Custom Build - Creating apu_config.h from apu_config.hw
+InputPath=.\include\private\apu_config.hw
+
+".\include\private\apu_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\private\apu_config.hw > .\include\private\apu_config.h
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\private\apu_select_dbm.h.in
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\private\apu_select_dbm.hw
+
+!IF  "$(CFG)" == "apr - Win32 Release"
+
+# Begin Custom Build - Creating apu_select_dbm.h from apu_select_dbm.hw
+InputPath=.\include\private\apu_select_dbm.hw
+
+".\include\private\apu_select_dbm.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\private\apu_select_dbm.hw > .\include\private\apu_select_dbm.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - Win32 Debug"
+
+# Begin Custom Build - Creating apu_select_dbm.h from apu_select_dbm.hw
+InputPath=.\include\private\apu_select_dbm.hw
+
+".\include\private\apu_select_dbm.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\private\apu_select_dbm.hw > .\include\private\apu_select_dbm.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - x64 Release"
+
+# Begin Custom Build - Creating apu_select_dbm.h from apu_select_dbm.hw
+InputPath=.\include\private\apu_select_dbm.hw
+
+".\include\private\apu_select_dbm.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\private\apu_select_dbm.hw > .\include\private\apu_select_dbm.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - x64 Debug"
+
+# Begin Custom Build - Creating apu_select_dbm.h from apu_select_dbm.hw
+InputPath=.\include\private\apu_select_dbm.hw
+
+".\include\private\apu_select_dbm.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\private\apu_select_dbm.hw > .\include\private\apu_select_dbm.h
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apu_want.h.in
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apu_want.hnw
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apu_want.hw
+
+!IF  "$(CFG)" == "apr - Win32 Release"
+
+# Begin Custom Build - Creating apu_want.h from apu_want.hw
+InputPath=.\include\apu_want.hw
+
+".\include\apu_want.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apu_want.hw > .\include\apu_want.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - Win32 Debug"
+
+# Begin Custom Build - Creating apu_want.h from apu_want.hw
+InputPath=.\include\apu_want.hw
+
+".\include\apu_want.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apu_want.hw > .\include\apu_want.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - x64 Release"
+
+# Begin Custom Build - Creating apu_want.h from apu_want.hw
+InputPath=.\include\apu_want.hw
+
+".\include\apu_want.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apu_want.hw > .\include\apu_want.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "apr - x64 Debug"
+
+# Begin Custom Build - Creating apu_want.h from apu_want.hw
+InputPath=.\include\apu_want.hw
+
+".\include\apu_want.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	type .\include\apu_want.hw > .\include\apu_want.h
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # End Target
