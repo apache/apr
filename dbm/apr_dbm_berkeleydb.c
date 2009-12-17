@@ -25,8 +25,8 @@
 #include <stdlib.h> /* for abort() */
 #endif
 
-#include "apu_config.h"
 #include "apu.h"
+#include "apr_private.h"
 
 #if APU_HAVE_DB 
 #include "apr_dbm_private.h"
@@ -386,7 +386,7 @@ static void vt_db_usednames(apr_pool_t *pool, const char *pathname,
 }
 
 
-APU_MODULE_DECLARE_DATA const apr_dbm_type_t apr_dbm_type_db = {
+APR_MODULE_DECLARE_DATA const apr_dbm_type_t apr_dbm_type_db = {
     "db",
 
     vt_db_open,
