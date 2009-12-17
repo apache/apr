@@ -15,7 +15,7 @@
  */
 
 #include "apu.h"
-#include "apu_config.h"
+#include "apr_private.h"
 
 /* COMPILE_STUBS: compile stubs for unimplemented functions.
  *
@@ -764,7 +764,7 @@ static apr_status_t dbd_freetds_datum_get(const apr_dbd_row_t *row, int n,
 }
 #endif
 
-APU_MODULE_DECLARE_DATA const apr_dbd_driver_t apr_dbd_freetds_driver = {
+APR_MODULE_DECLARE_DATA const apr_dbd_driver_t apr_dbd_freetds_driver = {
     "freetds",
     dbd_freetds_init,
     dbd_freetds_native,

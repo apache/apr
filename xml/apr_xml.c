@@ -15,6 +15,7 @@
  */
 
 #include "apr.h"
+#include "apr_private.h"
 #include "apr_strings.h"
 
 #define APR_WANT_STDIO          /* for sprintf() */
@@ -22,8 +23,6 @@
 #include "apr_want.h"
 
 #include "apr_xml.h"
-
-#include "apu_config.h"
 
 #if defined(HAVE_XMLPARSE_XMLPARSE_H)
 #include <xmlparse/xmlparse.h>

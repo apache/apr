@@ -50,6 +50,7 @@
 #endif
 
 #include "apu.h"
+#include "apr_private.h"
 
 #if APU_HAVE_ORACLE
 
@@ -2184,7 +2185,7 @@ static int dbd_oracle_num_tuples(apr_dbd_results_t* res)
     return res->nrows;
 }
 
-APU_MODULE_DECLARE_DATA const apr_dbd_driver_t apr_dbd_oracle_driver = {
+APR_MODULE_DECLARE_DATA const apr_dbd_driver_t apr_dbd_oracle_driver = {
     "oracle",
     dbd_oracle_init,
     dbd_oracle_native,

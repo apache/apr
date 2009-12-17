@@ -15,10 +15,9 @@
  */
 
 #include "apu.h"
+#include "apr_private.h"
 
 #if APU_HAVE_PGSQL
-
-#include "apu_config.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -1279,7 +1278,7 @@ static int dbd_pgsql_num_tuples(apr_dbd_results_t* res)
     }
 }
 
-APU_MODULE_DECLARE_DATA const apr_dbd_driver_t apr_dbd_pgsql_driver = {
+APR_MODULE_DECLARE_DATA const apr_dbd_driver_t apr_dbd_pgsql_driver = {
     "pgsql",
     NULL,
     dbd_pgsql_native,

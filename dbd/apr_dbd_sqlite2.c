@@ -15,6 +15,7 @@
  */
 
 #include "apu.h"
+#include "apr_private.h"
 
 #if APU_HAVE_SQLITE2
 
@@ -530,7 +531,7 @@ static int dbd_sqlite_num_tuples(apr_dbd_results_t * res)
     return res->ntuples;
 }
 
-APU_MODULE_DECLARE_DATA const apr_dbd_driver_t apr_dbd_sqlite2_driver = {
+APR_MODULE_DECLARE_DATA const apr_dbd_driver_t apr_dbd_sqlite2_driver = {
     "sqlite2",
     NULL,
     dbd_sqlite_native,

@@ -23,7 +23,7 @@
 
 #include "apr.h"
 #include "apu.h"
-#include "apu_config.h"
+#include "apr_private.h"
 
 #if APR_HAVE_MODULAR_DSO
 #define APU_DSO_LDAP_BUILD
