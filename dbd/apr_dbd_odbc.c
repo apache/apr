@@ -15,6 +15,7 @@
  */
 
 #include "apu.h"
+#include "apr_private.h"
 #if APU_HAVE_ODBC
 
 #include "apr.h"
@@ -26,7 +27,6 @@
 #include "apr_dbd_internal.h"
 #include "apr_thread_proc.h"
 #include "apu_version.h"
-#include "apu_config.h"
 
 #include <stdlib.h>
 

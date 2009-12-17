@@ -15,7 +15,7 @@
  */
 
 #include "apu.h"
-#include "apu_config.h"
+#include "apr_private.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
