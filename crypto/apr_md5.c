@@ -60,7 +60,7 @@
 #include "apr_strings.h"
 #include "apr_md5.h"
 #include "apr_lib.h"
-#include "apu_config.h"
+#include "apr_private.h"
 #include "apr_sha1.h"
 
 #if APR_HAVE_STRING_H

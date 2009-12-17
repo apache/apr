@@ -1637,7 +1637,7 @@ static int odbc_pvbselect(apr_pool_t * pool, apr_dbd_t * handle,
     return odbc_pbselect(pool, handle, res, statement, random, (const void **) values);
 }
 
-APU_MODULE_DECLARE_DATA const apr_dbd_driver_t    ODBC_DRIVER_ENTRY = {
+APR_MODULE_DECLARE_DATA const apr_dbd_driver_t    ODBC_DRIVER_ENTRY = {
     ODBC_DRIVER_STRING,
     odbc_init,
     odbc_native_handle,
