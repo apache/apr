@@ -24,9 +24,12 @@
 #ifndef APU_CONFIG_H
 #define APU_CONFIG_H
 
-/* Compile win32 with DSO support for .dll builds */
+/* Compile win32 with DSO support for .dll builds
+ * Pair the static xml build for static apr-2.lib
+ */
 #ifdef APR_DECLARE_STATIC
 #define APU_DSO_BUILD           0
+#define XML_STATIC              1
 #else
 #define APU_DSO_BUILD           1
 #endif
@@ -36,6 +39,9 @@
 
 /* my_sys.h is broken on VC/Win32, and apparently not required */
 /* #undef HAVE_MY_SYS_H           0 */
+
+/* Windows ODBC sql.h is always present */
+#define HAVE_SQL_H              1
 
 /*
  * Windows does not have GDBM, and we always use the bundled (new) Expat

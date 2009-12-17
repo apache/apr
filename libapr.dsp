@@ -55,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /opt:ref
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib expat.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /libpath:"./srclib/expat/bin/Release" /out:"Release\libapr-2.dll" /pdb:"Release\libapr-2.pdb" /implib:"Release\libapr-2.lib" /MACHINE:X86 /opt:ref
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib libexpat.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /libpath:"..\expat\win32\bin\Release" /out:"Release\libapr-2.dll" /pdb:"Release\libapr-2.pdb" /implib:"Release\libapr-2.lib" /MACHINE:X86 /opt:ref
 # Begin Special Build Tool
 TargetPath=Release\libapr-2.dll
 SOURCE="$(InputPath)"
@@ -87,7 +87,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /libpath:"./srclib/expat/bin/Debug" /out:"Debug\libapr-2.dll" /pdb:"Debug\libapr-2.pdb" /implib:"Debug\libapr-2.lib" /MACHINE:X86
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib libexpat.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /libpath:"..\expat\win32\bin\Debug" /out:"Debug\libapr-2.dll" /pdb:"Debug\libapr-2.pdb" /implib:"Debug\libapr-2.lib" /MACHINE:X86
 # Begin Special Build Tool
 TargetPath=Debug\libapr-2.dll
 SOURCE="$(InputPath)"
@@ -119,7 +119,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /opt:ref
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /libpath:"./srclib/expat/bin/x64/Release" /out:"x64\Release\libapr-2.dll" /pdb:"x64\Release\libapr-2.pdb" /implib:"x64\Release\libapr-2.lib" /MACHINE:X64 /opt:ref
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib libexpat.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /libpath:"..\expat\win32\bin\x64\Release" /out:"x64\Release\libapr-2.dll" /pdb:"x64\Release\libapr-2.pdb" /implib:"x64\Release\libapr-2.lib" /MACHINE:X64 /opt:ref
 # Begin Special Build Tool
 TargetPath=x64\Release\libapr-2.dll
 SOURCE="$(InputPath)"
@@ -151,7 +151,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /libpath:"./srclib/expat/bin/x64/Debug" /out:"x64\Debug\libapr-2.dll" /pdb:"x64\Debug\libapr-2.pdb" /implib:"x64\Debug\libapr-2.lib" /MACHINE:X64
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib libexpat.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /libpath:"..\expat\win32\bin\x64\Debug" /out:"x64\Debug\libapr-2.dll" /pdb:"x64\Debug\libapr-2.pdb" /implib:"x64\Debug\libapr-2.lib" /MACHINE:X64
 # Begin Special Build Tool
 TargetPath=x64\Debug\libapr-2.dll
 SOURCE="$(InputPath)"
