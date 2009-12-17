@@ -109,10 +109,10 @@ struct apr_dbm_t
 
 
 /* Declare all of the DBM provider tables */
-APU_MODULE_DECLARE_DATA extern const apr_dbm_type_t apr_dbm_type_sdbm;
-APU_MODULE_DECLARE_DATA extern const apr_dbm_type_t apr_dbm_type_gdbm;
-APU_MODULE_DECLARE_DATA extern const apr_dbm_type_t apr_dbm_type_ndbm;
-APU_MODULE_DECLARE_DATA extern const apr_dbm_type_t apr_dbm_type_db;
+APR_MODULE_DECLARE_DATA extern const apr_dbm_type_t apr_dbm_type_sdbm;
+APR_MODULE_DECLARE_DATA extern const apr_dbm_type_t apr_dbm_type_gdbm;
+APR_MODULE_DECLARE_DATA extern const apr_dbm_type_t apr_dbm_type_ndbm;
+APR_MODULE_DECLARE_DATA extern const apr_dbm_type_t apr_dbm_type_db;
 
 #ifdef __cplusplus
 }
