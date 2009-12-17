@@ -32,6 +32,7 @@ sinclude(build/crypto.m4)
 sinclude(build/dbm.m4)
 sinclude(build/dbd.m4)
 sinclude(build/dso.m4)
+sinclude(build/iconv.m4)
 
 dnl Hard-coded top of apr_private.h:
 AH_TOP([
