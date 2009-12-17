@@ -15,8 +15,7 @@
  */
 
 #include "apu.h"
-
-#include "apu_config.h"
+#include "apr_private.h"
 #include "apu_errno.h"
 
 #include <ctype.h>
@@ -654,7 +653,7 @@ static apr_status_t crypto_block_decrypt_finish(apr_crypto_block_t *ctx,
 /**
  * OpenSSL module.
  */
-APU_MODULE_DECLARE_DATA const apr_crypto_driver_t apr_crypto_openssl_driver = {
+APR_MODULE_DECLARE_DATA const apr_crypto_driver_t apr_crypto_openssl_driver = {
         "openssl", crypto_init, crypto_error, crypto_make, crypto_passphrase,
         crypto_block_encrypt_init, crypto_block_encrypt,
         crypto_block_encrypt_finish, crypto_block_decrypt_init,
