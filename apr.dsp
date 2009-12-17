@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "LibR"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/private" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /I "../expat/lib" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-2" /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -51,7 +51,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"LibR\apr-1.lib"
+# ADD LIB32 /nologo /out:"LibR\apr-2.lib"
 
 !ELSEIF  "$(CFG)" == "apr - Win32 Debug"
 
@@ -67,7 +67,7 @@ LIB32=link.exe -lib
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/private" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /I "../expat/lib" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-2" /FD /EHsc /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -75,7 +75,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"LibD\apr-1.lib"
+# ADD LIB32 /nologo /out:"LibD\apr-2.lib"
 
 !ELSEIF  "$(CFG)" == "apr - x64 Release"
 
@@ -90,7 +90,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "x64\LibR"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/private" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /I "../expat/lib" /D "NDEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-2" /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -98,7 +98,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"x64\LibR\apr-1.lib"
+# ADD LIB32 /nologo /out:"x64\LibR\apr-2.lib"
 
 !ELSEIF  "$(CFG)" == "apr - x64 Debug"
 
@@ -114,7 +114,7 @@ LIB32=link.exe -lib
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-1" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/private" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /I "../expat/lib" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(OUTDIR)\apr-2" /FD /EHsc /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -122,7 +122,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"x64\LibD\apr-1.lib"
+# ADD LIB32 /nologo /out:"x64\LibD\apr-2.lib"
 
 !ENDIF 
 
@@ -143,12 +143,155 @@ LIB32=link.exe -lib
 SOURCE=.\atomic\win32\apr_atomic.c
 # End Source File
 # End Group
+# Begin Group "buckets"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\buckets\apr_brigade.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\buckets\apr_buckets.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\buckets\apr_buckets_alloc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\buckets\apr_buckets_eos.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\buckets\apr_buckets_file.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\buckets\apr_buckets_flush.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\buckets\apr_buckets_heap.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\buckets\apr_buckets_mmap.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\buckets\apr_buckets_pipe.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\buckets\apr_buckets_pool.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\buckets\apr_buckets_refcount.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\buckets\apr_buckets_simple.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\buckets\apr_buckets_socket.c
+# End Source File
+# End Group
+# Begin Group "crypto"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\crypto\apr_md4.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\crypto\apr_md5.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\crypto\apr_sha1.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\crypto\getuuid.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\crypto\uuid.c
+# End Source File
+# End Group
+# Begin Group "dbd"
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\dbd\apr_dbd.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbd\apr_dbd_freetds.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbd\apr_dbd_mysql.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbd\apr_dbd_odbc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbd\apr_dbd_oracle.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbd\apr_dbd_pgsql.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbd\apr_dbd_sqlite2.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbd\apr_dbd_sqlite3.c
+# End Source File
+# End Group
+# Begin Group "dbm"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\dbm\apr_dbm.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbm\apr_dbm_berkeleydb.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbm\apr_dbm_gdbm.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbm\apr_dbm_sdbm.c
+# End Source File
+# End Group
 # Begin Group "dso"
 
 # PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=.\dso\win32\dso.c
+# End Source File
+# End Group
+# Begin Group "encoding"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\encoding\apr_base64.c
 # End Source File
 # End Group
 # Begin Group "file_io"
@@ -223,6 +366,38 @@ SOURCE=.\file_io\win32\seek.c
 SOURCE=.\file_io\unix\tempdir.c
 # End Source File
 # End Group
+# Begin Group "hooks"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\hooks\apr_hooks.c
+# End Source File
+# End Group
+# Begin Group "ldap"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\ldap\apr_ldap_init.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ldap\apr_ldap_option.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ldap\apr_ldap_rebind.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ldap\apr_ldap_stub.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ldap\apr_ldap_url.c
+# End Source File
+# End Group
 # Begin Group "locks"
 
 # PROP Default_Filter ""
@@ -241,6 +416,14 @@ SOURCE=.\locks\win32\thread_mutex.c
 # Begin Source File
 
 SOURCE=.\locks\win32\thread_rwlock.c
+# End Source File
+# End Group
+# Begin Group "memcache"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\memcache\apr_memcache.c
 # End Source File
 # End Group
 # Begin Group "memory"
@@ -396,6 +579,38 @@ SOURCE=.\random\unix\sha2.c
 SOURCE=.\random\unix\sha2_glue.c
 # End Source File
 # End Group
+# Begin Group "sdbm"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\dbm\sdbm\sdbm.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbm\sdbm\sdbm_hash.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbm\sdbm\sdbm_lock.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbm\sdbm\sdbm_pair.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbm\sdbm\sdbm_pair.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbm\sdbm\sdbm_private.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbm\sdbm\sdbm_tune.h
+# End Source File
+# End Group
 # Begin Group "shmem"
 
 # PROP Default_Filter ""
@@ -430,6 +645,14 @@ SOURCE=.\strings\apr_strnatcmp.c
 # Begin Source File
 
 SOURCE=.\strings\apr_strtok.c
+# End Source File
+# End Group
+# Begin Group "strmatch"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\strmatch\apr_strmatch.c
 # End Source File
 # End Group
 # Begin Group "tables"
@@ -480,6 +703,14 @@ SOURCE=.\time\win32\time.c
 SOURCE=.\time\win32\timestr.c
 # End Source File
 # End Group
+# Begin Group "uri"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\uri\apr_uri.c
+# End Source File
+# End Group
 # Begin Group "user"
 
 # PROP Default_Filter ""
@@ -490,6 +721,54 @@ SOURCE=.\user\win32\groupinfo.c
 # Begin Source File
 
 SOURCE=.\user\win32\userinfo.c
+# End Source File
+# End Group
+# Begin Group "util-misc"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\util-misc\apr_date.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\util-misc\apu_dso.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\util-misc\apr_queue.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\util-misc\apr_reslist.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\util-misc\apr_rmm.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\util-misc\apr_thread_pool.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\util-misc\apu_version.c
+# End Source File
+# End Group
+# Begin Group "xlate"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\xlate\xlate.c
+# End Source File
+# End Group
+# Begin Group "xml"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\xml\apr_xml.c
 # End Source File
 # End Group
 # End Group
