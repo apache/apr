@@ -25,7 +25,6 @@
  * @{
  */
 
-
 #ifndef APU_H
 #define APU_H
 
@@ -46,7 +45,7 @@
 
 /* 
  * we always enable dynamic driver loads within apr_dbd
- * Win32 always has odbc (it's always installed)
+ * driver builds enable these flags individually
  */
 #ifndef APU_DSO_MODULE_BUILD
 #define APU_HAVE_PGSQL          0
@@ -55,7 +54,7 @@
 #define APU_HAVE_SQLITE2        0
 #define APU_HAVE_ORACLE         0
 #define APU_HAVE_FREETDS        0
-#define APU_HAVE_ODBC           1
+#define APU_HAVE_ODBC           0
 #endif
 
 #define APU_HAVE_CRYPTO         0

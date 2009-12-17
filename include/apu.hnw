@@ -25,10 +25,6 @@
 #ifdef NETWARE
 #ifndef APU_H
 #define APU_H
-/**
- * @defgroup APR_Util APR Utility Functions
- * @{
- */
 
 /*
  * we always have SDBM (it's in our codebase)
