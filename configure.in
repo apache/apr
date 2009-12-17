@@ -2483,7 +2483,7 @@ dnl ------------------------------ APR-util stuff
 
 APU_PRELOAD
 
-dnl Find crpyto libraries
+dnl Find crypto libraries
 APU_CHECK_CRYPTO
 APU_CHECK_CRYPTO_OPENSSL
 APU_CHECK_CRYPTO_NSS
