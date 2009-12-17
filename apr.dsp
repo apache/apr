@@ -345,6 +345,10 @@ SOURCE=.\network_io\win32\sockets.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\network_io\unix\socket_util.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\network_io\win32\sockopt.c
 # End Source File
 # End Group
