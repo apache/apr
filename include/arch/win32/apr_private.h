@@ -181,6 +181,8 @@ APR_DECLARE_DATA int errno;
 /* Windows ODBC sql.h is always present */
 #define HAVE_SQL_H              1
 
+#define HAVE_ICONV_H 1
+
 /*
  * Windows does not have GDBM, and we always use the bundled (new) Expat
  */
