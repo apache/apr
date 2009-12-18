@@ -93,6 +93,9 @@
 #if defined(_MSC_VER)
 #define APR_INLINE __inline
 #define APR_HAS_INLINE		1
+#ifndef __attribute__
+#define __attribute__(__x)
+#endif
 #elif !defined(__GNUC__) || __GNUC__ < 2 || \
     (__GNUC__ == 2 && __GNUC_MINOR__ < 7) ||\
     defined(NEXT)
