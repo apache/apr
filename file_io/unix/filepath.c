@@ -289,20 +289,6 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_filepath_list_split(apr_array_header_t **pathelts,
-                                                  const char *liststr,
-                                                  apr_pool_t *p)
-{
-    return apr_filepath_list_split_impl(pathelts, liststr, ':', p);
-}
-
-APR_DECLARE(apr_status_t) apr_filepath_list_merge(char **liststr,
-                                                  apr_array_header_t *pathelts,
-                                                  apr_pool_t *p)
-{
-    return apr_filepath_list_merge_impl(liststr, pathelts, ':', p);
-}
-
 APR_DECLARE(apr_status_t) apr_filepath_encoding(int *style, apr_pool_t *p)
 {
 #if defined(DARWIN)

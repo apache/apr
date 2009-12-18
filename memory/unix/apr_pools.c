@@ -39,6 +39,8 @@
 #include <unistd.h>     /* for getpid */
 #endif
 
+/* XXX Temporary Cast */
+#define APR_UINT32_TRUNC_CAST apr_uint32_t
 
 /*
  * Magic numbers

@@ -26,30 +26,35 @@
 
 #include "apr_private.h"
 
-apr_status_t apr_filepath_list_split_impl(apr_array_header_t **pathelts,
-                                          const char *liststr,
-                                          char separator,
-                                          apr_pool_t *p)
+#if defined(WIN32) || defined(OS2) || defined(NETWARE)
+#define PATH_SEPARATOR ';'
+#define PATH_SEPARATOR_STRING ";"
+#else
+#define PATH_SEPARATOR ':'
+#define PATH_SEPARATOR_STRING ":"
+#endif
+
+APR_DECLARE(apr_status_t) apr_filepath_list_split(apr_array_header_t **pathelts,
+                                                  const char *liststr,
+                                                  apr_pool_t *p)
 {
     char *path, *part, *ptr;
-    char separator_string[2] = { '\0', '\0' };
     apr_array_header_t *elts;
     int nelts;
 
-    separator_string[0] = separator;
     /* Count the number of path elements. We know there'll be at least
        one even if path is an empty string. */
     path = apr_pstrdup(p, liststr);
     for (nelts = 0, ptr = path; ptr != NULL; ++nelts)
     {
-        ptr = strchr(ptr, separator);
+        ptr = strchr(ptr, PATH_SEPARATOR);
         if (ptr)
             ++ptr;
     }
 
     /* Split the path into the array. */
     elts = apr_array_make(p, nelts, sizeof(char*));
-    while ((part = apr_strtok(path, separator_string, &ptr)) != NULL)
+    while ((part = apr_strtok(path, PATH_SEPARATOR_STR, &ptr)) != NULL)
     {
         if (*part == '\0')      /* Ignore empty path components. */
             continue;
@@ -63,10 +68,9 @@ apr_status_t apr_filepath_list_split_impl(apr_array_header_t **pathelts,
 }
 
 
-apr_status_t apr_filepath_list_merge_impl(char **liststr,
-                                          apr_array_header_t *pathelts,
-                                          char separator,
-                                          apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_filepath_list_merge(char **liststr,
+                                                  apr_array_header_t *pathelts,
+                                                  apr_pool_t *p)
 {
     apr_size_t path_size = 0;
     char *path;
@@ -102,7 +106,7 @@ apr_status_t apr_filepath_list_merge_impl(char **liststr,
             continue;
 
         if (i > 0)
-            *path++ = separator;
+            *path++ = PATH_SEPARATOR;
         memcpy(path, part, part_size);
         path += part_size;
     }

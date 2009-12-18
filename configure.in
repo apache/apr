@@ -49,10 +49,6 @@ AH_BOTTOM([
 #define BEOS_BONE 1
 #endif
 
-/*
- * Include common private declarations.
- */
-#include "../apr_private_common.h"
 #endif /* APR_PRIVATE_H */
 ])
 

@@ -193,10 +193,5 @@ void* getStatCache();
 /* used to check DWORD overflow for 64bit compiles */
 #define APR_DWORD_MAX 0xFFFFFFFFUL
 
-/*
- * Include common private declarations.
- */
-#include "../apr_private_common.h"
-
 #endif  /*APR_PRIVATE_H*/
 #endif  /*NETWARE*/
