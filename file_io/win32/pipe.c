@@ -242,7 +242,7 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
     apr_status_t rv = APR_SUCCESS;
     int ll = sizeof(la);
     int lc = sizeof(ca);
-    int bm = 1;
+    unsigned long bm = 1;
     int uid[2];
     int iid[2];
 
@@ -370,9 +370,9 @@ static apr_status_t socket_pipe_cleanup(void *thefile)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_file_socket_pipe_create(apr_file_t **in,
-                                         apr_file_t **out,
-                                         apr_pool_t *p)
+apr_status_t file_socket_pipe_create(apr_file_t **in,
+                                     apr_file_t **out,
+                                     apr_pool_t *p)
 {
     apr_status_t rv;
     SOCKET rd;
@@ -417,7 +417,7 @@ apr_status_t apr_file_socket_pipe_create(apr_file_t **in,
     return rv;
 }
 
-apr_status_t apr_file_socket_pipe_close(apr_file_t *file)
+apr_status_t file_socket_pipe_close(apr_file_t *file)
 {
     apr_status_t stat;
     if (!file->pipe)
