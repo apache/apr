@@ -854,10 +854,6 @@ SOURCE=.\include\arch\win32\apr_arch_utf8.h
 
 SOURCE=.\include\arch\win32\apr_private.h
 # End Source File
-# Begin Source File
-
-SOURCE=.\include\arch\apr_private_common.h
-# End Source File
 # End Group
 # Begin Group "Public Header Files"
 
@@ -1163,57 +1159,6 @@ InputPath=.\include\apu.hw
 
 ".\include\apu.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	type .\include\apu.hw > .\include\apu.h
-
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\private\apu_config.h.in
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\private\apu_config.hw
-
-!IF  "$(CFG)" == "libapr - Win32 Release"
-
-# Begin Custom Build - Creating apu_config.h from apu_config.hw
-InputPath=.\include\private\apu_config.hw
-
-".\include\private\apu_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\private\apu_config.hw > .\include\private\apu_config.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "libapr - Win32 Debug"
-
-# Begin Custom Build - Creating apu_config.h from apu_config.hw
-InputPath=.\include\private\apu_config.hw
-
-".\include\private\apu_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\private\apu_config.hw > .\include\private\apu_config.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "libapr - x64 Release"
-
-# Begin Custom Build - Creating apu_config.h from apu_config.hw
-InputPath=.\include\private\apu_config.hw
-
-".\include\private\apu_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\private\apu_config.hw > .\include\private\apu_config.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "libapr - x64 Debug"
-
-# Begin Custom Build - Creating apu_config.h from apu_config.hw
-InputPath=.\include\private\apu_config.hw
-
-".\include\private\apu_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\private\apu_config.hw > .\include\private\apu_config.h
 
 # End Custom Build
 
