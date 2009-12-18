@@ -31,15 +31,8 @@
 static apr_pollset_method_e pollset_default_method = POLLSET_DEFAULT_METHOD;
 
 #if !APR_FILES_AS_SOCKETS
-#if defined (WIN32)
 
-extern apr_status_t
-apr_file_socket_pipe_create(apr_file_t **in,
-                            apr_file_t **out,
-                            apr_pool_t *p);
-
-extern apr_status_t
-apr_file_socket_pipe_close(apr_file_t *file);
+#ifdef WIN32
 
 /* Create a dummy wakeup socket pipe for interrupting the poller
  */
@@ -48,9 +41,9 @@ static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
     apr_status_t rv;
     apr_pollfd_t fd;
 
-    if ((rv = apr_file_socket_pipe_create(&pollset->wakeup_pipe[0],
-                                          &pollset->wakeup_pipe[1],
-                                          pollset->pool)) != APR_SUCCESS)
+    if ((rv = file_socket_pipe_create(&pollset->wakeup_pipe[0],
+                                      &pollset->wakeup_pipe[1],
+                                      pollset->pool)) != APR_SUCCESS)
         return rv;
     fd.reqevents = APR_POLLIN;
     fd.desc_type = APR_POLL_FILE;
@@ -60,18 +53,33 @@ static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
     return apr_pollset_add(pollset, &fd);
 }
 
-#else  /* !WIN32 */
+static apr_status_t close_wakeup_pipe(apr_pollset_t *pollset)
+{
+    /* Close both sides of the wakeup pipe */
+    if (pollset->wakeup_pipe[0]) {
+        file_socket_pipe_close(pollset->wakeup_pipe[0]);
+        pollset->wakeup_pipe[0] = NULL;
+    }
+    if (pollset->wakeup_pipe[1]) {
+        file_socket_pipe_close(pollset->wakeup_pipe[1]);
+        pollset->wakeup_pipe[1] = NULL;
+    }
+}
+
+#else /* !WIN32 */
+
 static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
 {
     return APR_ENOTIMPL;
 }
 
-static apr_status_t apr_file_socket_pipe_close(apr_file_t *file)
+static apr_status_t close_wakeup_pipe(apr_pollset_t *pollset)
 {
     return APR_ENOTIMPL;
 }
 
-#endif /* WIN32 */
+#endif /* !WIN32 */
+
 #else  /* APR_FILES_AS_SOCKETS */
 
 /* Create a dummy wakeup pipe for interrupting the poller
@@ -114,7 +122,21 @@ static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
      */
     return apr_pollset_add(pollset, &fd);
 }
-#endif /* !APR_FILES_AS_SOCKETS */
+
+static apr_status_t close_wakeup_pipe(apr_pollset_t *pollset)
+{
+    /* Close both sides of the wakeup pipe */
+    if (pollset->wakeup_pipe[0]) {
+        apr_file_close(pollset->wakeup_pipe[0]);
+        pollset->wakeup_pipe[0] = NULL;
+    }
+    if (pollset->wakeup_pipe[1]) {
+        apr_file_close(pollset->wakeup_pipe[1]);
+        pollset->wakeup_pipe[1] = NULL;
+    }
+}
+
+#endif /* APR_FILES_AS_SOCKETS */
 
 /* Read and discard what's ever in the wakeup pipe.
  */
@@ -141,23 +163,7 @@ static apr_status_t pollset_cleanup(void *p)
         (*pollset->provider->cleanup)(pollset);
     }
     if (pollset->flags & APR_POLLSET_WAKEABLE) {
-        /* Close both sides of the wakeup pipe */
-        if (pollset->wakeup_pipe[0]) {
-#if APR_FILES_AS_SOCKETS
-            apr_file_close(pollset->wakeup_pipe[0]);
-#else
-            apr_file_socket_pipe_close(pollset->wakeup_pipe[0]);
-#endif
-            pollset->wakeup_pipe[0] = NULL;
-        }
-        if (pollset->wakeup_pipe[1]) {
-#if APR_FILES_AS_SOCKETS
-            apr_file_close(pollset->wakeup_pipe[1]);
-#else
-            apr_file_socket_pipe_close(pollset->wakeup_pipe[1]);
-#endif
-            pollset->wakeup_pipe[1] = NULL;
-        }
+        close_wakeup_pipe(pollset);
     }
 
     return APR_SUCCESS;
