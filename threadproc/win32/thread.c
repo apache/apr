@@ -20,7 +20,7 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_portable.h"
-#if APR_HAVE_PROCESS_H
+#ifdef HAVE_PROCESS_H
 #include <process.h>
 #endif
 #include "apr_arch_misc.h"   

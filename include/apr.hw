@@ -28,16 +28,6 @@
  * apr.hw by the apr.dsp and libapr.dsp projects. 
  */
 
-/**
- * @file apr.h
- * @brief APR Platform Definitions
- * @remark This is a generated header generated from include/apr.h.in by
- * ./configure, or copied from include/apr.hw or include/apr.hnw 
- * for Win32 or Netware by those build environments, respectively.
- */
-
-#if defined(WIN32) || defined(DOXYGEN)
-
 /* Ignore most warnings (back down to /W3) for poorly constructed headers
  */
 #if defined(_MSC_VER) && _MSC_VER >= 1200
@@ -66,44 +56,13 @@
 #pragma warning(disable: 4996)
 #endif
 
-/* Has windows.h already been included?  If so, our preferences don't matter,
- * but we will still need the winsock things no matter what was included.
- * If not, include a restricted set of windows headers to our tastes.
+/**
+ * @file apr.h
+ * @brief APR Platform Definitions
+ * @remark This is a generated header generated from include/apr.h.in by
+ * ./configure, or copied from include/apr.hw or include/apr.hnw 
+ * for Win32 or Netware by those build environments, respectively.
  */
-#ifndef _WINDOWS_
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifndef _WIN32_WINNT
-
-/* Restrict the server to a subset of Windows XP header files by default
- */
-#define _WIN32_WINNT 0x0501
-#endif
-#ifndef NOUSER
-#define NOUSER
-#endif
-#ifndef NOMCX
-#define NOMCX
-#endif
-#ifndef NOIME
-#define NOIME
-#endif
-#include <windows.h>
-/* 
- * Add a _very_few_ declarations missing from the restricted set of headers
- * (If this list becomes extensive, re-enable the required headers above!)
- * winsock headers were excluded by WIN32_LEAN_AND_MEAN, so include them now
- */
-#define SW_HIDE             0
-#ifndef _WIN32_WCE
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <mswsock.h>
-#else
-#include <winsock.h>
-#endif
-#endif /* !_WINDOWS_ */
 
 /**
  * @defgroup APR Apache Portability Runtime library
@@ -142,6 +101,7 @@
 #define APR_HAVE_SEMAPHORE_H    0
 #define APR_HAVE_SIGNAL_H       1
 #define APR_HAVE_STDARG_H       1
+#define APR_HAVE_STDDEF_H       1
 #define APR_HAVE_STDINT_H       0
 #define APR_HAVE_STDIO_H        1
 #define APR_HAVE_STDLIB_H       1
@@ -160,8 +120,8 @@
 #define APR_HAVE_SYS_WAIT_H     0
 #define APR_HAVE_TIME_H         1
 #define APR_HAVE_UNISTD_H       0
-#define APR_HAVE_STDDEF_H       1
-#define APR_HAVE_PROCESS_H      1
+#define APR_HAVE_WINDOWS_H      1
+#define APR_HAVE_WINSOCK2_H     1
 #else
 #define APR_HAVE_ARPA_INET_H    0
 #define APR_HAVE_CONIO_H        0
@@ -181,6 +141,7 @@
 #define APR_HAVE_SEMAPHORE_H    0
 #define APR_HAVE_SIGNAL_H       0
 #define APR_HAVE_STDARG_H       0
+#define APR_HAVE_STDDEF_H       0
 #define APR_HAVE_STDINT_H       0
 #define APR_HAVE_STDIO_H        1
 #define APR_HAVE_STDLIB_H       1
@@ -199,8 +160,8 @@
 #define APR_HAVE_SYS_WAIT_H     0
 #define APR_HAVE_TIME_H         0
 #define APR_HAVE_UNISTD_H       0
-#define APR_HAVE_STDDEF_H       0
-#define APR_HAVE_PROCESS_H      0
+#define APR_HAVE_WINDOWS_H      1
+#define APR_HAVE_WINSOCK2_H     0
 #endif
 
 /** @} */
@@ -210,23 +171,89 @@
  * or the extern "C" namespace 
  */
 
+/* If windows.h was already included, our preferences don't matter.
+ * If not, include a restricted set of windows headers to our tastes.
+ */
+#if APR_HAVE_WINDOWS_H
+#ifndef _WINDOWS_
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif
+
+#ifndef NOUSER
+#define NOUSER
+#endif
+#ifndef NOMCX
+#define NOMCX
+#endif
+#ifndef NOIME
+#define NOIME
+#endif
+
+#include <windows.h>
+#endif
+#endif
+
+#if APR_HAVE_WINSOCK2_H
+#include <winsock2.h>
+
+#if APR_HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+
+#if APR_HAVE_MSWSOCK_H
+#include <mswsock.h>
+#endif
+
+#else /* !APR_HAVE_WINSOCK2_H */
+
+#if APR_HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+
+#endif /* !APR_HAVE_WINSOCK2_H */
+
+#if APR_HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#if APR_HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+
+#if APR_HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
+#if APR_HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+
+/* header files for PATH_MAX, _POSIX_PATH_MAX */
+#if APR_HAVE_LIMITS_H
+#include <limits.h>
+#else
+#if APR_HAVE_SYS_SYSLIMITS_H
+#include <sys/syslimits.h>
+#endif
+#endif
+
 #if APR_HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #if APR_HAVE_STDIO_H
 #include <stdio.h>
 #endif
-#if APR_HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
 #if APR_HAVE_STDDEF_H
 #include <stddef.h>
 #endif
 #if APR_HAVE_TIME_H
 #include <time.h>
-#endif
-#if APR_HAVE_PROCESS_H
-#include <process.h>
 #endif
 
 #ifdef __cplusplus
@@ -686,13 +713,13 @@ typedef  int         gid_t;
 }
 #endif
 
-/* Done with badly written headers
+/* Done with badly written headers, leave 'deprecated CRT' undeprecated
  */
 #if defined(_MSC_VER) && _MSC_VER >= 1200
 #pragma warning(pop)
+#if _MSC_VER >= 1400
 #pragma warning(disable: 4996)
 #endif
-
-#endif /* WIN32 */
+#endif
 
 #endif /* APR_H */

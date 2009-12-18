@@ -169,4 +169,28 @@ void* getStatCache();
 /* used to check DWORD overflow for 64bit compiles */
 #define APR_DWORD_MAX 0xFFFFFFFFUL
 
+/* Always compile Netware with DSO support for .nlm builds */
+#define APU_DSO_BUILD           0
+
+/*
+ * NetWare does not have GDBM, and we always use the bundled (new) Expat
+ */
+
+/* Define if you have the gdbm library (-lgdbm). */
+/* #undef HAVE_LIBGDBM */
+
+/* define if Expat 1.0 or 1.1 was found */
+/* #undef APR_HAVE_OLD_EXPAT */
+
+/* NetWare uses its own ICONV implementation. */
+#define HAVE_ICONV_H 1
+
+/*
+ * check for newer NDKs which use now correctly 'const char*' with iconv.
+ */
+#include <ndkvers.h>
+#if (CURRENT_NDK_THRESHOLD >= 705110000)
+#define APU_ICONV_INBUF_CONST
+#endif
+
 #endif  /*APR_PRIVATE_H*/
