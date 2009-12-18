@@ -69,13 +69,10 @@
  */
 #define HAVE_LIMITS_H 1
 #define HAVE_MALLOC_H 1
+#define HAVE_PROCESS_H APR_NOT_IN_WCE
 #define HAVE_SIGNAL_H 1
+#define HAVE_STDDEF_H APR_NOT_IN_WCE
 #define HAVE_STDLIB_H 1
-
-#ifndef _WIN32_WCE
-#define HAVE_PROCESS_H 1
-#define HAVE_STDDEF_H 1
-#endif
 
 #define HAVE_STRICMP  1
 #define HAVE_STRNICMP 1
@@ -175,7 +172,7 @@ APR_DECLARE_DATA int errno;
 #define APU_DSO_BUILD           1
 #endif
 
-/* Presume a standard, modern (5.x) mysql sdk/
+/* Presume a standard, modern (5.x) mysql sdk */
 #define HAVE_MY_GLOBAL_H        1
 
 /* my_sys.h is broken on VC/Win32, and apparently not required */
@@ -199,4 +196,3 @@ APR_DECLARE_DATA int errno;
 #endif
 
 #endif  /*APR_PRIVATE_H*/
-#endif  /*WIN32*/
