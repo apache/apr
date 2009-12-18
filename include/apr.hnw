@@ -48,6 +48,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <netware.h>
+#include <library.h>
 #include <nks/thread.h>
 #include <nks/synch.h>
 #include <nks/time.h>
