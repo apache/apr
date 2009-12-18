@@ -55,15 +55,19 @@ static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
 
 static apr_status_t close_wakeup_pipe(apr_pollset_t *pollset)
 {
+    apr_status_t rv0 = APR_SUCCESS;
+    apr_status_t rv1 = APR_SUCCESS;
+
     /* Close both sides of the wakeup pipe */
     if (pollset->wakeup_pipe[0]) {
-        file_socket_pipe_close(pollset->wakeup_pipe[0]);
+        rv0 = file_socket_pipe_close(pollset->wakeup_pipe[0]);
         pollset->wakeup_pipe[0] = NULL;
     }
     if (pollset->wakeup_pipe[1]) {
-        file_socket_pipe_close(pollset->wakeup_pipe[1]);
+        rv1 = file_socket_pipe_close(pollset->wakeup_pipe[1]);
         pollset->wakeup_pipe[1] = NULL;
     }
+    return rv0 ? rv0 : rv1;
 }
 
 #else /* !WIN32 */
@@ -127,13 +131,14 @@ static apr_status_t close_wakeup_pipe(apr_pollset_t *pollset)
 {
     /* Close both sides of the wakeup pipe */
     if (pollset->wakeup_pipe[0]) {
-        apr_file_close(pollset->wakeup_pipe[0]);
+        rv0 = apr_file_close(pollset->wakeup_pipe[0]);
         pollset->wakeup_pipe[0] = NULL;
     }
     if (pollset->wakeup_pipe[1]) {
-        apr_file_close(pollset->wakeup_pipe[1]);
+        rv1 = apr_file_close(pollset->wakeup_pipe[1]);
         pollset->wakeup_pipe[1] = NULL;
     }
+    return rv0 ? rv0 : rv1;
 }
 
 #endif /* APR_FILES_AS_SOCKETS */
