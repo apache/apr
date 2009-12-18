@@ -16,27 +16,12 @@
 
 /*
  * Note: 
- * This is the windows specific autoconf-like config file
- * which unix would create at build time.
+ * This is the netware-specific autoconf-like config file
+ * which unix creates at ./configure time.
  */
-
-#ifdef NETWARE
 
 #ifndef APR_PRIVATE_H
 #define APR_PRIVATE_H
-
-/* Include the public APR symbols, include our idea of the 'right'
- * subset of the Windows.h header.  This saves us repetition.
- */
-#include "apr.h"
-
-#include <sys/types.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <library.h>
-#include <netware.h>
 
 /* Use this section to define all of the HAVE_FOO_H
  * that are required to build properly.
@@ -71,18 +56,9 @@
 #define HAVE_WRITEV     1
 
 #define HAVE_GETPASS_R  1
-/*
- * check for older NDKs which have only the getpassword() function.
- */
-#include <ndkvers.h>
-#if (CURRENT_NDK_THRESHOLD < 709060000)
-#define getpass_r getpassword
-#endif
 
 /* 64-bit integer conversion function */
 #define APR_INT64_STRFN	      strtoll
-
-/*#define DSO_USE_DLFCN */
 
 #ifdef NW_BUILD_IPV6
 #define HAVE_GETADDRINFO 1
@@ -194,4 +170,3 @@ void* getStatCache();
 #define APR_DWORD_MAX 0xFFFFFFFFUL
 
 #endif  /*APR_PRIVATE_H*/
-#endif  /*NETWARE*/
