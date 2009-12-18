@@ -1224,6 +1224,7 @@ APR_FLAG_HEADERS(
     mach-o/dyld.h	\
     malloc.h		\
     memory.h		\
+    mswsock.h		\
     netdb.h		\
     osreldate.h		\
     poll.h		\
@@ -1247,6 +1248,7 @@ APR_FLAG_HEADERS(
     unix.h		\
     windows.h		\
     winsock2.h		\
+    ws2tcpip.h		\
     arpa/inet.h		\
     kernel/OS.h		\
     net/errno.h		\
@@ -1300,8 +1302,8 @@ AC_SUBST(direnth)
 AC_SUBST(fcntlh)
 AC_SUBST(ioh)
 AC_SUBST(limitsh)
+AC_SUBST(mswsockh)
 AC_SUBST(netdbh)
-AC_SUBST(sys_syslimitsh)
 AC_SUBST(netinet_inh)
 AC_SUBST(netinet_sctph)
 AC_SUBST(netinet_sctp_uioh)
@@ -1317,6 +1319,7 @@ AC_SUBST(sys_sendfileh)
 AC_SUBST(sys_signalh)
 AC_SUBST(sys_socketh)
 AC_SUBST(sys_sockioh)
+AC_SUBST(sys_syslimitsh)
 AC_SUBST(sys_typesh)
 AC_SUBST(sys_timeh)
 AC_SUBST(sys_uioh)
@@ -1329,6 +1332,7 @@ AC_SUBST(pthreadh)
 AC_SUBST(semaphoreh)
 AC_SUBST(windowsh)
 AC_SUBST(winsock2h)
+AC_SUBST(ws2tcpiph)
 
 # Checking for h_errno in <netdb.h>
 if test "$netdbh" = "1"; then
