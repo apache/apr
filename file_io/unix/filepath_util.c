@@ -18,7 +18,7 @@
 #define APR_WANT_STRFUNC
 #define APR_WANT_MEMFUNC
 #include "apr_want.h"
-
+#include "apr_file_info.h"
 #include "apr_errno.h"
 #include "apr_pools.h"
 #include "apr_strings.h"
@@ -54,7 +54,7 @@ APR_DECLARE(apr_status_t) apr_filepath_list_split(apr_array_header_t **pathelts,
 
     /* Split the path into the array. */
     elts = apr_array_make(p, nelts, sizeof(char*));
-    while ((part = apr_strtok(path, PATH_SEPARATOR_STR, &ptr)) != NULL)
+    while ((part = apr_strtok(path, PATH_SEPARATOR_STRING, &ptr)) != NULL)
     {
         if (*part == '\0')      /* Ignore empty path components. */
             continue;
