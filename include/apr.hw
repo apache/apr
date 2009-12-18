@@ -663,11 +663,6 @@ typedef  int         pid_t;
 typedef  int         uid_t;
 typedef  int         gid_t;
 
-/* Win32 .h ommissions we really need */
-#define STDIN_FILENO  0
-#define STDOUT_FILENO 1
-#define STDERR_FILENO 2
-
 #if APR_HAVE_IPV6
 
 /* Appears in later flavors, not the originals. */
