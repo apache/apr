@@ -78,6 +78,7 @@
 #define APR_HAVE_FCNTL_H         @fcntlh@
 #define APR_HAVE_IO_H            @ioh@
 #define APR_HAVE_LIMITS_H        @limitsh@
+#define APR_HAVE_MSWSOCK_H       @mswsockh@
 #define APR_HAVE_NETDB_H         @netdbh@
 #define APR_HAVE_NETINET_IN_H    @netinet_inh@
 #define APR_HAVE_NETINET_SCTP_H  @netinet_sctph@
@@ -108,6 +109,7 @@
 #define APR_HAVE_UNISTD_H        @unistdh@
 #define APR_HAVE_WINDOWS_H       @windowsh@
 #define APR_HAVE_WINSOCK2_H      @winsock2h@
+#define APR_HAVE_WS2TCPIP_H      @ws2tcpiph@
 
 /** @} */
 /** @} */
@@ -138,6 +140,13 @@
 #endif
 #ifndef NOIME
 #define NOIME
+#endif
+
+/* Impossible to include winsock2.h after winsock.h, while windows.h
+ * attempts to load winsock.  Setting _WINSOCKAPI_ will dodge this.
+ */
+#if APR_HAVE_WINSOCK2_H
+#define _WINSOCKAPI_
 #endif
 
 #include <windows.h>

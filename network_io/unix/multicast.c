@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "apr.h"
 #include "apr_arch_networkio.h"
 #include "apr_network_io.h"
 #include "apr_support.h"
