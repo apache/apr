@@ -360,7 +360,12 @@ typedef  __int64           apr_int64_t;
 typedef  unsigned __int64  apr_uint64_t;
 
 typedef  size_t      apr_size_t;
-typedef  ssize_t     apr_ssize_t;
+#if APR_HAVE_STDDEF_H
+typedef  ptrdiff_t   apr_ssize_t;
+#else
+typedef  int         apr_ssize_t;
+#endif
+
 #if APR_HAS_LARGE_FILES
 typedef  __int64     apr_off_t;
 #else
