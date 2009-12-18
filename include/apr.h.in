@@ -56,7 +56,10 @@
  * means.  In particular it's missing inline and the __attribute__
  * stuff.  So we hack around it.  PR#1613. -djg
  */
-#if !defined(__GNUC__) || __GNUC__ < 2 || \
+#if defined(_MSC_VER)
+#define APR_INLINE __inline
+#define APR_HAS_INLINE		1
+#elif !defined(__GNUC__) || __GNUC__ < 2 || \
     (__GNUC__ == 2 && __GNUC_MINOR__ < 7) ||\
     defined(NEXT)
 #ifndef __attribute__
@@ -115,6 +118,9 @@
  * or the extern "C" namespace 
  */
 
+/* If windows.h was already included, our preferences don't matter.
+ * If not, include a restricted set of windows headers to our tastes.
+ */
 #if APR_HAVE_WINDOWS_H
 #ifndef _WINDOWS_
 
