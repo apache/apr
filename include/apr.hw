@@ -610,6 +610,45 @@ typedef int apr_wait_t;
 
 #define APR_DSOPATH "PATH"
 
+/*
+ * we always have SDBM (it's in our codebase)
+ */
+#define APU_HAVE_SDBM           1
+
+#ifndef APU_DSO_MODULE_BUILD
+#define APU_HAVE_GDBM           0
+#define APU_HAVE_NDBM           0
+#define APU_HAVE_DB             0
+
+#if APU_HAVE_DB
+#define APU_HAVE_DB_VERSION     0
+#endif
+#endif
+
+/* 
+ * we always enable dynamic driver loads within apr_dbd
+ * driver builds enable these flags individually
+ */
+#ifndef APU_DSO_MODULE_BUILD
+#define APU_HAVE_PGSQL          0
+#define APU_HAVE_MYSQL          0
+#define APU_HAVE_SQLITE3        0
+#define APU_HAVE_SQLITE2        0
+#define APU_HAVE_ORACLE         0
+#define APU_HAVE_FREETDS        0
+#define APU_HAVE_ODBC           0
+#endif
+
+#define APU_HAVE_CRYPTO         0
+
+#ifndef APU_DSO_MODULE_BUILD
+#define APU_HAVE_OPENSSL        0
+#define APU_HAVE_NSS            0
+#endif
+
+#define APU_HAVE_ICONV          0
+#define APR_HAS_XLATE           (APU_HAVE_ICONV)
+
 /** @} */
 
 /* Definitions that only Win32 programs need to compile properly. */
