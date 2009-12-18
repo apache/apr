@@ -1112,58 +1112,7 @@ SOURCE=.\include\apr_want.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\apu.h.in
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apu.hnw
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apu.hw
-
-!IF  "$(CFG)" == "libapr - Win32 Release"
-
-# Begin Custom Build - Creating apu.h from apu.hw
-InputPath=.\include\apu.hw
-
-".\include\apu.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apu.hw > .\include\apu.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "libapr - Win32 Debug"
-
-# Begin Custom Build - Creating apu.h from apu.hw
-InputPath=.\include\apu.hw
-
-".\include\apu.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apu.hw > .\include\apu.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "libapr - x64 Release"
-
-# Begin Custom Build - Creating apu.h from apu.hw
-InputPath=.\include\apu.hw
-
-".\include\apu.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apu.hw > .\include\apu.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "libapr - x64 Debug"
-
-# Begin Custom Build - Creating apu.h from apu.hw
-InputPath=.\include\apu.hw
-
-".\include\apu.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apu.hw > .\include\apu.h
-
-# End Custom Build
-
-!ENDIF 
-
+SOURCE=.\include\apu.h
 # End Source File
 # Begin Source File
 

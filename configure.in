@@ -2548,7 +2548,6 @@ if test -n "$APR_DSO_MODULES"; then
 else
    APR_HAVE_MODULES=no
 fi
-# Define expanded libdir for apu_config.h
 APR_EXPAND_VAR(abs_dso_libdir, $APR_DSO_LIBDIR)
 AC_DEFINE_UNQUOTED([APR_DSO_LIBDIR], ["$abs_dso_libdir"],
                    [Define to be absolute path to DSO directory])
@@ -2638,7 +2637,7 @@ fi
 
 AC_CONFIG_FILES([include/private/apu_select_dbm.h
                  include/apr_ldap.h
-                 include/apu.h include/apu_want.h])
+                 include/apu_want.h])
 
 dir=include/arch/unix
 test -d $dir || $MKDIR $dir
