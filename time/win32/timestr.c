@@ -18,6 +18,10 @@
 #include "apr_portable.h"
 #include "apr_strings.h"
 
+#if APR_HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 APR_DECLARE_DATA const char apr_month_snames[12][4] =
 {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
