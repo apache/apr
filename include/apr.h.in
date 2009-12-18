@@ -561,19 +561,6 @@ typedef int apr_wait_t;
 
 /** @} */
 
-/* Definitions that only Win32 programs need to compile properly. */
-
-/* XXX These simply don't belong here, perhaps in apr_portable.h
- * based on some APR_HAVE_PID/GID/UID?
- */
-#ifdef __MINGW32__
-#ifndef __GNUC__
-typedef  int         pid_t;
-#endif
-typedef  int         uid_t;
-typedef  int         gid_t;
-#endif
-
 /*
  * we always have SDBM (it's in our codebase)
  */
@@ -600,6 +587,19 @@ typedef  int         gid_t;
 
 #define APU_HAVE_ICONV         @have_iconv@
 #define APR_HAS_XLATE          (APU_HAVE_ICONV)
+
+/* Definitions that only Win32 programs need to compile properly. */
+
+/* XXX These simply don't belong here, perhaps in apr_portable.h
+ * based on some APR_HAVE_PID/GID/UID?
+ */
+#ifdef WIN32
+#ifndef __GNUC__
+typedef  int         pid_t;
+#endif
+typedef  int         uid_t;
+typedef  int         gid_t;
+#endif
 
 #ifdef __cplusplus
 }
