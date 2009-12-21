@@ -30,7 +30,6 @@
 #include "apu_internal.h"
 #include "apr_dbd_internal.h"
 #include "apr_dbd.h"
-#include "apu_version.h"
 
 static apr_hash_t *drivers = NULL;
 static apr_uint32_t initialised = 0, in_init = 1;
@@ -185,10 +184,10 @@ APR_DECLARE(apr_status_t) apr_dbd_get_driver(apr_pool_t *pool, const char *name,
     apr_snprintf(modname, sizeof(modname), "dbd%s.nlm", name);
 #elif defined(WIN32)
     apr_snprintf(modname, sizeof(modname),
-                 "apr_dbd_%s-" APU_STRINGIFY(APU_MAJOR_VERSION) ".dll", name);
+                 "apr_dbd_%s-" APR_STRINGIFY(APR_MAJOR_VERSION) ".dll", name);
 #else
     apr_snprintf(modname, sizeof(modname),
-                 "apr_dbd_%s-" APU_STRINGIFY(APU_MAJOR_VERSION) ".so", name);
+                 "apr_dbd_%s-" APR_STRINGIFY(APR_MAJOR_VERSION) ".so", name);
 #endif
     apr_snprintf(symname, sizeof(symname), "apr_dbd_%s_driver", name);
     rv = apu_dso_load(NULL, &symbol, modname, symname, pool);
