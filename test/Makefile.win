@@ -127,7 +127,7 @@ ALL_TESTS = \
 	$(INTDIR)\testsockets.obj \
 	$(INTDIR)\testsockopt.obj \
 	$(INTDIR)\teststr.obj \
-	$(INTDIR)\testmatch.obj \
+	$(INTDIR)\teststrmatch.obj \
 	$(INTDIR)\teststrnatcmp.obj \
 	$(INTDIR)\testtable.obj \
 	$(INTDIR)\testtemp.obj \
@@ -164,8 +164,8 @@ CL = cl.exe
 LD = link.exe 
 
 !IF "$(MODEL)" == "static"
-LOCAL_LIB= ..\$(OUTDIR)\apr-2.lib 
-APP_LIB= ..\$(OUTDIR)\aprapp-2.lib 
+LOCAL_LIB= ..\$(OUTDIR)\apr-2.lib ..\..\expat\win32\bin\Release\libexpatMT.lib
+APP_LIB= ..\$(OUTDIR)\aprapp-2.lib
 STATIC_CFLAGS = /D APR_DECLARE_STATIC
 !ELSE
 LOCAL_LIB= ..\$(OUTDIR)\libapr-2.lib 
@@ -188,7 +188,8 @@ CFLAGS = /nologo /c /W3 /Gm /EHsc /Zi /Od $(INCLUDES) \
 LD_LIBS = kernel32.lib advapi32.lib ws2_32.lib wsock32.lib \
 	  ole32.lib shell32.lib rpcrt4.lib
 
-LDFLAGS = /nologo /debug /subsystem:console /incremental:no 
+LDFLAGS = /nologo /debug /subsystem:console /incremental:no /nodefaultlib:libcmt
+
 SHLDFLAGS = /nologo /dll /debug /subsystem:windows /incremental:no
 
 .c{$(INTDIR)}.obj::
