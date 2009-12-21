@@ -34,9 +34,13 @@
 #include <unistd.h>
 #endif
 #if APR_HAVE_CONIO_H
+#ifdef _MSC_VER
 #pragma warning(disable: 4032)
 #include <conio.h>
 #pragma warning(default: 4032)
+#else
+#include <conio.h>
+#endif
 #endif
 #if APR_HAVE_STDLIB_H
 #include <stdlib.h>
@@ -75,9 +79,9 @@
 
 #if !defined(HAVE_GETPASS) && !defined(HAVE_GETPASSPHRASE) && !defined(HAVE_GETPASS_R)
 
-/* MPE, Win32, NetWare and BeOS all lack a native getpass() */
+/* MPE, Win32, and BeOS all lack a native getpass() */
 
-#if !defined(HAVE_TERMIOS_H) && !defined(WIN32) && !defined(NETWARE)
+#if !defined(HAVE_TERMIOS_H) && !defined(WIN32)
 /*
  * MPE lacks getpass() and a way to suppress stdin echo.  So for now, just
  * issue the prompt and read the results with echo.  (Ugh).
