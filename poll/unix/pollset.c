@@ -129,6 +129,9 @@ static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
 
 static apr_status_t close_wakeup_pipe(apr_pollset_t *pollset)
 {
+    apr_status_t rv0;
+    apr_status_t rv1;
+
     /* Close both sides of the wakeup pipe */
     if (pollset->wakeup_pipe[0]) {
         rv0 = apr_file_close(pollset->wakeup_pipe[0]);
