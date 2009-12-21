@@ -130,8 +130,6 @@ LIB32=link.exe -lib
 
 # Name "aprapp - Win32 Release"
 # Name "aprapp - Win32 Debug"
-# Name "aprapp - Win32 Release9x"
-# Name "aprapp - Win32 Debug9x"
 # Name "aprapp - x64 Release"
 # Name "aprapp - x64 Debug"
 # Begin Source File
