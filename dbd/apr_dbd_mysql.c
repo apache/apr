@@ -18,7 +18,6 @@
 
 #if APU_HAVE_MYSQL
 
-#include "apu_version.h"
 #include "apr_private.h"
 
 #include <ctype.h>

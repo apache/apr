@@ -1,7 +1,7 @@
 /* Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
+ * The ASF licenses this file to You under the Apache License, 3 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
@@ -31,7 +31,7 @@
 #include "apu_internal.h"
 #include "apr_crypto_internal.h"
 #include "apr_crypto.h"
-#include "apu_version.h"
+#include "apr_version.h"
 
 static apr_hash_t *drivers = NULL;
 
@@ -135,9 +135,9 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(apr_pool_t *pool, const char *na
     apr_snprintf(modname, sizeof(modname), "crypto%s.nlm", name);
 #elif defined(WIN32)
     apr_snprintf(modname, sizeof(modname),
-            "apr_crypto_%s-" APU_STRINGIFY(APU_MAJOR_VERSION) ".dll", name);
+            "apr_crypto_%s-" APR_STRINGIFY(APR_MAJOR_VERSION) ".dll", name);
 #else
-    apr_snprintf(modname, sizeof(modname), "apr_crypto_%s-" APU_STRINGIFY(APU_MAJOR_VERSION) ".so", name);
+    apr_snprintf(modname, sizeof(modname), "apr_crypto_%s-" APR_STRINGIFY(APR_MAJOR_VERSION) ".so", name);
 #endif
     apr_snprintf(symname, sizeof(symname), "apr_crypto_%s_driver", name);
     rv = apu_dso_load(&dso, &symbol, modname, symname, pool);
