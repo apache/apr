@@ -579,6 +579,11 @@ typedef  apr_uint32_t            apr_uintptr_t;
  */
 #define APU_MODULE_DECLARE_DATA           APR_MODULE_DECLARE_DATA
 
+/* Define APR_SSIZE_T_FMT.  
+ * If ssize_t is an integer we define it to be "d",
+ * if ssize_t is a long int we define it to be "ld",
+ * if ssize_t is 64-bit, we define it to be msvc specific "I64d"
+ */
 #ifdef WIN64
 #define APR_SSIZE_T_FMT          "I64d"
 #define APR_SIZE_T_FMT           "I64u"
