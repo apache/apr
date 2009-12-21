@@ -23,7 +23,7 @@
 #include "apr_errno.h"
 #include "apr_pools.h"
 #include "apr_strings.h"
-#include "apu_version.h"
+#include "apr_version.h"
 
 #if APR_HAS_LDAP
 
@@ -46,9 +46,9 @@ static apr_status_t load_ldap(apr_pool_t *pool)
     }
 
 #if defined(WIN32)
-    modname = "apr_ldap-" APU_STRINGIFY(APU_MAJOR_VERSION) ".dll";
+    modname = "apr_ldap-" APR_STRINGIFY(APR_MAJOR_VERSION) ".dll";
 #else
-    modname = "apr_ldap-" APU_STRINGIFY(APU_MAJOR_VERSION) ".so";
+    modname = "apr_ldap-" APR_STRINGIFY(APR_MAJOR_VERSION) ".so";
 #endif
     rv = apu_dso_load(NULL, &symbol, modname, "apr__ldap_fns", pool);
     if (rv == APR_SUCCESS) {
