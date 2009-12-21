@@ -130,8 +130,6 @@ LIB32=link.exe -lib
 
 # Name "libaprapp - Win32 Release"
 # Name "libaprapp - Win32 Debug"
-# Name "libaprapp - Win32 Release9x"
-# Name "libaprapp - Win32 Debug9x"
 # Name "libaprapp - x64 Release"
 # Name "libaprapp - x64 Debug"
 # Begin Source File

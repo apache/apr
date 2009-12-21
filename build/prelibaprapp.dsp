@@ -19,8 +19,6 @@ CFG=prelibaprapp - Win32 Release
 !MESSAGE 
 !MESSAGE "prelibaprapp - Win32 Release" (based on "Win32 (x86) External Target")
 !MESSAGE "prelibaprapp - Win32 Debug" (based on "Win32 (x86) External Target")
-!MESSAGE "prelibaprapp - Win32 Release9x" (based on "Win32 (x86) External Target")
-!MESSAGE "prelibaprapp - Win32 Debug9x" (based on "Win32 (x86) External Target")
 !MESSAGE "prelibaprapp - x64 Release" (based on "Win32 (x86) External Target")
 !MESSAGE "prelibaprapp - x64 Debug" (based on "Win32 (x86) External Target")
 !MESSAGE 
@@ -51,46 +49,6 @@ CFG=prelibaprapp - Win32 Release
 # PROP Target_Dir ""
 
 !ELSEIF  "$(CFG)" == "prelibaprapp - Win32 Debug"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir ""
-# PROP BASE Intermediate_Dir ""
-# PROP BASE Cmd_Line "NMAKE /nologo /f NUL"
-# PROP BASE Rebuild_Opt "/a"
-# PROP BASE Target_File "prelibaprapp.exe"
-# PROP BASE Bsc_Name "prelibaprapp.bsc"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 1
-# PROP Output_Dir ""
-# PROP Intermediate_Dir ""
-# PROP Cmd_Line "NMAKE /nologo /f NUL"
-# PROP Rebuild_Opt "/a"
-# PROP Bsc_Name ""
-# PROP Target_Dir ""
-
-!ELSEIF  "$(CFG)" == "prelibaprapp - Win32 Release9x"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir ""
-# PROP BASE Intermediate_Dir ""
-# PROP BASE Cmd_Line "NMAKE /nologo /f NUL"
-# PROP BASE Rebuild_Opt "/a"
-# PROP BASE Target_File "prelibaprapp.exe"
-# PROP BASE Bsc_Name "prelibaprapp.bsc"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir ""
-# PROP Intermediate_Dir ""
-# PROP Cmd_Line "NMAKE /nologo /f NUL"
-# PROP Rebuild_Opt "/a"
-# PROP Bsc_Name ""
-# PROP Target_Dir ""
-
-!ELSEIF  "$(CFG)" == "prelibaprapp - Win32 Debug9x"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -156,18 +114,12 @@ CFG=prelibaprapp - Win32 Release
 
 # Name "prelibaprapp - Win32 Release"
 # Name "prelibaprapp - Win32 Debug"
-# Name "prelibaprapp - Win32 Release9x"
-# Name "prelibaprapp - Win32 Debug9x"
 # Name "prelibaprapp - x64 Release"
 # Name "prelibaprapp - x64 Debug"
 
 !IF  "$(CFG)" == "prelibaprapp - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "prelibaprapp - Win32 Debug"
-
-!ELSEIF  "$(CFG)" == "prelibaprapp - Win32 Release9x"
-
-!ELSEIF  "$(CFG)" == "prelibaprapp - Win32 Debug9x"
 
 !ELSEIF  "$(CFG)" == "prelibaprapp - x64 Release"
 
