@@ -166,16 +166,16 @@ install:
 	copy LICENSE "$(PREFIX)\LICENSE.txt" <.y
 	copy NOTICE  "$(PREFIX)\NOTICE.txt"  <.y
 	xcopy include\*.h		"$(PREFIX)\include\" /d < .a
-	copy $(LIBSOSPATH)\apr-1.lib		"$(PREFIX)\lib\" <.y
-	copy $(LIBSOSPATH)\apr-1.pdb		"$(PREFIX)\lib\" <.y
-	copy $(LIBSOSPATH)\aprapp-1.lib		"$(PREFIX)\lib\" <.y
-	copy $(LIBSOSPATH)\aprapp-1.pdb		"$(PREFIX)\lib\" <.y
-	copy $(LIBSOSPATH)\libaprapp-1.lib	"$(PREFIX)\lib\" <.y
-	copy $(LIBSOSPATH)\libaprapp-1.pdb	"$(PREFIX)\lib\" <.y
-	copy $(ARCHOSPATH)\libapr-1.lib		"$(PREFIX)\lib\" <.y
-	copy $(ARCHOSPATH)\libapr-1.exp		"$(PREFIX)\lib\" <.y
-	copy $(ARCHOSPATH)\libapr-1.dll		"$(PREFIX)\bin\" <.y
-	copy $(ARCHOSPATH)\libapr-1.pdb		"$(PREFIX)\bin\" <.y
+	copy $(LIBSOSPATH)\apr-2.lib		"$(PREFIX)\lib\" <.y
+	copy $(LIBSOSPATH)\apr-2.pdb		"$(PREFIX)\lib\" <.y
+	copy $(LIBSOSPATH)\aprapp-2.lib		"$(PREFIX)\lib\" <.y
+	copy $(LIBSOSPATH)\aprapp-2.pdb		"$(PREFIX)\lib\" <.y
+	copy $(LIBSOSPATH)\libaprapp-2.lib	"$(PREFIX)\lib\" <.y
+	copy $(LIBSOSPATH)\libaprapp-2.pdb	"$(PREFIX)\lib\" <.y
+	copy $(ARCHOSPATH)\libapr-2.lib		"$(PREFIX)\lib\" <.y
+	copy $(ARCHOSPATH)\libapr-2.exp		"$(PREFIX)\lib\" <.y
+	copy $(ARCHOSPATH)\libapr-2.dll		"$(PREFIX)\bin\" <.y
+	copy $(ARCHOSPATH)\libapr-2.pdb		"$(PREFIX)\bin\" <.y
 	del .y
 	del .a
 
