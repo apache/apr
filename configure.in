@@ -38,6 +38,11 @@ dnl Hard-coded top of apr_private.h:
 AH_TOP([
 #ifndef APR_PRIVATE_H
 #define APR_PRIVATE_H
+
+/* Pick up publicly advertised headers and symbols before the
+ * APR internal private headers and symbols
+ */
+#include <apr.h>
 ])
 
 dnl Hard-coded inclusion at the tail end of apr_private.h:

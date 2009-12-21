@@ -23,6 +23,14 @@
 #ifndef APR_PRIVATE_H
 #define APR_PRIVATE_H
 
+/* Pick up publicly advertised headers and symbols before the
+ * APR internal private headers and symbols
+ */
+#include <apr.h>
+
+/* Pick up privately consumed headers */
+#include <ndkvers.h>
+
 /* Use this section to define all of the HAVE_FOO_H
  * that are required to build properly.
  */
@@ -60,7 +68,6 @@
  * Hack around older NDKs which have only the getpassword() function,
  * a threadsafe, API-equivilant of getpass_r().
  */
-#include <ndkvers.h>
 #if (CURRENT_NDK_THRESHOLD < 709060000)
 #define getpass_r getpassword
 #endif
@@ -196,7 +203,6 @@ void* getStatCache();
 /*
  * check for newer NDKs which use now correctly 'const char*' with iconv.
  */
-#include <ndkvers.h>
 #if (CURRENT_NDK_THRESHOLD >= 705110000)
 #define APU_ICONV_INBUF_CONST
 #endif
