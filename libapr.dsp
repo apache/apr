@@ -45,7 +45,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/private" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /I "../expat/lib" /D "NDEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(INTDIR)\libapr_src" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/private" /I "./include/arch/win32" /I "./include/arch/unix" /I "../expat/lib" /D "NDEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(INTDIR)\libapr_src" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -77,7 +77,7 @@ PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath).ma
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/private" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /I "../expat/lib" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(INTDIR)\libapr_src" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/private" /I "./include/arch/win32" /I "./include/arch/unix" /I "../expat/lib" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(INTDIR)\libapr_src" /FD /EHsc /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -109,7 +109,7 @@ PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath).ma
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/private" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /I "../expat/lib" /D "NDEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(INTDIR)\libapr_src" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "./include" /I "./include/private" /I "./include/arch/win32" /I "./include/arch/unix" /I "../expat/lib" /D "NDEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(INTDIR)\libapr_src" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -141,7 +141,7 @@ PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath).ma
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/private" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /I "../expat/lib" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(INTDIR)\libapr_src" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "./include" /I "./include/private" /I "./include/arch/win32" /I "./include/arch/unix" /I "../expat/lib" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "WINNT" /D "_WINDOWS" /Fo"$(INTDIR)\" /Fd"$(INTDIR)\libapr_src" /FD /EHsc /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
