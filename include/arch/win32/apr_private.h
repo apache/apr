@@ -23,10 +23,10 @@
 #ifndef APR_PRIVATE_H
 #define APR_PRIVATE_H
 
-/* Include the public APR symbols, include our idea of the 'right'
- * subset of the Windows.h header.  This saves us repetition.
+/* Pick up publicly advertised headers and symbols before the
+ * APR internal private headers and symbols
  */
-#include "apr.h"
+#include <apr.h>
 
 /* 
  * Add a _very_few_ declarations missing from the restricted set of headers
