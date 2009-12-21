@@ -15,7 +15,7 @@
 # Windows Specific;
 # MODEL
 #   dynamic or static - refers to which set of bindings are desired
-#   and controls which libraries (apr-1 or libapr-1) will be linked.
+#   and controls which libraries (apr-2 or libapr-2) will be linked.
 # OUTDIR
 #   the library path of the libraries, and also the path within test/
 #   where all of the tests for that library will be built
@@ -164,12 +164,12 @@ CL = cl.exe
 LD = link.exe 
 
 !IF "$(MODEL)" == "static"
-LOCAL_LIB= ..\$(OUTDIR)\apr-1.lib 
-APP_LIB= ..\$(OUTDIR)\aprapp-1.lib 
+LOCAL_LIB= ..\$(OUTDIR)\apr-2.lib 
+APP_LIB= ..\$(OUTDIR)\aprapp-2.lib 
 STATIC_CFLAGS = /D APR_DECLARE_STATIC
 !ELSE
-LOCAL_LIB= ..\$(OUTDIR)\libapr-1.lib 
-APP_LIB= ..\$(OUTDIR)\libaprapp-1.lib 
+LOCAL_LIB= ..\$(OUTDIR)\libapr-2.lib 
+APP_LIB= ..\$(OUTDIR)\libaprapp-2.lib 
 STATIC_CFLAGS = 
 !ENDIF
 
