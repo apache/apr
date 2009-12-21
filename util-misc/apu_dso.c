@@ -29,7 +29,6 @@
 #include "apr_atomic.h"
 
 #include "apu_internal.h"
-#include "apu_version.h"
 
 #if APR_HAVE_MODULAR_DSO
 
