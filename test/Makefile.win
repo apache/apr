@@ -77,28 +77,70 @@ TESTALL_COMPONENTS = \
 	$(OUTDIR)\testshmconsumer.exe \
 	$(OUTDIR)\globalmutexchild.exe
 
-ALL_TESTS = $(INTDIR)\testutil.obj $(INTDIR)\testtime.obj \
-	$(INTDIR)\teststr.obj $(INTDIR)\testvsn.obj \
-	$(INTDIR)\testipsub.obj $(INTDIR)\testmmap.obj \
-	$(INTDIR)\testud.obj $(INTDIR)\testtable.obj \
-	$(INTDIR)\testsleep.obj $(INTDIR)\testpools.obj \
-	$(INTDIR)\testfmt.obj $(INTDIR)\testfile.obj \
-	$(INTDIR)\testdir.obj $(INTDIR)\testfileinfo.obj \
-	$(INTDIR)\testrand.obj $(INTDIR)\testdso.obj \
-	$(INTDIR)\testoc.obj $(INTDIR)\testdup.obj \
-	$(INTDIR)\testsockets.obj $(INTDIR)\testproc.obj \
-	$(INTDIR)\testpoll.obj $(INTDIR)\testlock.obj \
-	$(INTDIR)\testsockopt.obj $(INTDIR)\testpipe.obj \
-	$(INTDIR)\testthread.obj $(INTDIR)\testhash.obj \
-	$(INTDIR)\testargs.obj $(INTDIR)\testnames.obj \
-	$(INTDIR)\testuser.obj $(INTDIR)\testpath.obj \
-	$(INTDIR)\testenv.obj $(INTDIR)\testprocmutex.obj \
-	$(INTDIR)\testfnmatch.obj $(INTDIR)\testatomic.obj \
-	$(INTDIR)\testflock.obj $(INTDIR)\testshm.obj \
-	$(INTDIR)\testsock.obj $(INTDIR)\testglobalmutex.obj \
-	$(INTDIR)\teststrnatcmp.obj $(INTDIR)\testfilecopy.obj \
-	$(INTDIR)\testtemp.obj $(INTDIR)\testlfs.obj \
-	$(INTDIR)\testcond.obj
+ALL_TESTS = \
+	$(INTDIR)\testargs.obj \
+	$(INTDIR)\testatomic.obj \
+	$(INTDIR)\testbase64.obj \
+	$(INTDIR)\testbuckets.obj \
+	$(INTDIR)\testcond.obj \
+	$(INTDIR)\testcrypto.obj \
+	$(INTDIR)\testdate.obj \
+	$(INTDIR)\testdbd.obj \
+	$(INTDIR)\testdbm.obj \
+	$(INTDIR)\testdir.obj \
+	$(INTDIR)\testdso.obj \
+	$(INTDIR)\testdup.obj \
+	$(INTDIR)\testenv.obj \
+	$(INTDIR)\testfile.obj \
+	$(INTDIR)\testfilecopy.obj \
+	$(INTDIR)\testfileinfo.obj \
+	$(INTDIR)\testflock.obj \
+	$(INTDIR)\testfmt.obj \
+	$(INTDIR)\testfnmatch.obj \
+	$(INTDIR)\testglobalmutex.obj \
+	$(INTDIR)\testhash.obj \
+	$(INTDIR)\testhooks.obj \
+	$(INTDIR)\testipsub.obj \
+	$(INTDIR)\testldap.obj \
+	$(INTDIR)\testlfs.obj \
+	$(INTDIR)\testlock.obj \
+	$(INTDIR)\testmd4.obj \
+	$(INTDIR)\testmd5.obj \
+	$(INTDIR)\testmemcache.obj \
+	$(INTDIR)\testmmap.obj \
+	$(INTDIR)\testnames.obj \
+	$(INTDIR)\testoc.obj \
+	$(INTDIR)\testpass.obj \
+	$(INTDIR)\testpath.obj \
+	$(INTDIR)\testpipe.obj \
+	$(INTDIR)\testpoll.obj \
+	$(INTDIR)\testpools.obj \
+	$(INTDIR)\testproc.obj \
+	$(INTDIR)\testprocmutex.obj \
+	$(INTDIR)\testqueue.obj \
+	$(INTDIR)\testrand.obj \
+	$(INTDIR)\testreslist.obj \
+	$(INTDIR)\testrmm.obj \
+	$(INTDIR)\testshm.obj \
+	$(INTDIR)\testsleep.obj \
+	$(INTDIR)\testsock.obj \
+	$(INTDIR)\testsockets.obj \
+	$(INTDIR)\testsockopt.obj \
+	$(INTDIR)\teststr.obj \
+	$(INTDIR)\testmatch.obj \
+	$(INTDIR)\teststrnatcmp.obj \
+	$(INTDIR)\testtable.obj \
+	$(INTDIR)\testtemp.obj \
+	$(INTDIR)\testthread.obj \
+	$(INTDIR)\testtime.obj \
+	$(INTDIR)\testud.obj\
+	$(INTDIR)\testuri.obj \
+	$(INTDIR)\testuser.obj \
+	$(INTDIR)\testutil.obj \
+	$(INTDIR)\testuuid.obj \
+	$(INTDIR)\testvsn.obj \
+	$(INTDIR)\testxlate.obj \
+	$(INTDIR)\testxml.obj
 
 CLEAN_DATA = testfile.tmp lfstests\large.bin \
 	data\testputs.txt data\testbigfprintf.dat \
