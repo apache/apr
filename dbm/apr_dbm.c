@@ -29,7 +29,7 @@
 #include "apu.h"
 #include "apr_private.h"
 #include "apu_internal.h"
-#include "apu_version.h"
+#include "apr_version.h"
 #include "apr_dbm_private.h"
 #include "apu_select_dbm.h"
 #include "apr_dbm.h"
@@ -164,10 +164,10 @@ static apr_status_t dbm_open_type(apr_dbm_type_t const* * vtable,
     apr_snprintf(modname, sizeof(modname), "dbm%s.nlm", type);
 #elif defined(WIN32)
     apr_snprintf(modname, sizeof(modname),
-                 "apr_dbm_%s-" APU_STRINGIFY(APU_MAJOR_VERSION) ".dll", type);
+                 "apr_dbm_%s-" APR_STRINGIFY(APR_MAJOR_VERSION) ".dll", type);
 #else
     apr_snprintf(modname, sizeof(modname),
-                 "apr_dbm_%s-" APU_STRINGIFY(APU_MAJOR_VERSION) ".so", type);
+                 "apr_dbm_%s-" APR_STRINGIFY(APR_MAJOR_VERSION) ".so", type);
 #endif
     apr_snprintf(symname, sizeof(symname), "apr_dbm_type_%s", type);
 
