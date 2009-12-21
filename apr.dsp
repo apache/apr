@@ -750,10 +750,6 @@ SOURCE=.\util-misc\apr_rmm.c
 
 SOURCE=.\util-misc\apr_thread_pool.c
 # End Source File
-# Begin Source File
-
-SOURCE=.\util-misc\apu_version.c
-# End Source File
 # End Group
 # Begin Group "xlate"
 

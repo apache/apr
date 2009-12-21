@@ -74,5 +74,4 @@
 #include "apr_want.h"
 #include "apr_xlate.h"
 #include "apr_xml.h"
-#include "apu_version.h"
 #include "apu_want.h"
