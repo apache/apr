@@ -192,6 +192,6 @@ typedef struct apr_ldap_err_t {
 #include "apr_ldap_option.h"
 #include "apr_ldap_rebind.h"
 
-/** @} */
 #endif /* APR_HAS_LDAP */
+/** @} */
 #endif /* APU_LDAP_H */
