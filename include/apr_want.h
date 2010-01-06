@@ -30,9 +30,9 @@
  *
  * Typical usage:
  *
- *   #define APR_WANT_STRFUNC
- *   #define APR_WANT_MEMFUNC
- *   #include "apr_want.h"
+ *   \#define APR_WANT_STRFUNC
+ *   \#define APR_WANT_MEMFUNC
+ *   \#include "apr_want.h"
  *
  * The appropriate headers will be included.
  *
