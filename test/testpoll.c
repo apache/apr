@@ -586,9 +586,9 @@ typedef struct pollcb_baton_t {
     int count;
 } pollcb_baton_t;
 
-static apr_status_t trigger_pollcb_cb(void* baton, apr_pollfd_t *descriptor)
+static apr_status_t trigger_pollcb_cb(void *baton, apr_pollfd_t *descriptor)
 {
-    pollcb_baton_t* pcb = (pollcb_baton_t*) baton;
+    pollcb_baton_t *pcb = (pollcb_baton_t *) baton;
     ABTS_PTR_EQUAL(pcb->tc, s[0], descriptor->desc.s);
     ABTS_PTR_EQUAL(pcb->tc, s[0], descriptor->client_data);
     pcb->count++;
@@ -769,6 +769,56 @@ static void pollcb_default(abts_case *tc, void *data)
     }
 }
 
+static void pollset_wakeup(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_pollset_t *pollset;
+    apr_int32_t num;
+    const apr_pollfd_t *descriptors;
+
+    rv = apr_pollset_create(&pollset, 1, p, APR_POLLSET_WAKEABLE);
+    if (rv == APR_ENOTIMPL) {
+        ABTS_NOT_IMPL(tc, "apr_pollset_wakeup() not supported");
+        return;
+    }
+
+    rv = apr_pollset_wakeup(pollset);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_pollset_poll(pollset, -1, &num, &descriptors);
+    ABTS_INT_EQUAL(tc, APR_EINTR, rv);
+}
+
+/* Should never be invoked */
+static apr_status_t wakeup_pollcb_cb(void *baton, apr_pollfd_t *descriptor)
+{
+    abts_case *tc = (abts_case *) baton;
+
+    ABTS_FAIL(tc, "pollcb callback invoked on apr_pollcb_wakeup()");
+    return APR_SUCCESS;
+}
+
+static void pollcb_wakeup(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_pollcb_t *pcb;
+
+    rv = apr_pollcb_create(&pcb, 1, p, APR_POLLSET_WAKEABLE);
+    if (rv == APR_ENOTIMPL) {
+        ABTS_NOT_IMPL(tc, "pollcb interface not supported");
+        return;
+    }
+    else {
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    }
+
+    rv = apr_pollcb_wakeup(pcb);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_pollcb_poll(pcb, -1, wakeup_pollcb_cb, tc);
+    ABTS_INT_EQUAL(tc, APR_EINTR, rv);
+}
+
 abts_suite *testpoll(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -808,6 +858,9 @@ abts_suite *testpoll(abts_suite *suite)
     abts_run_test(suite, close_all_sockets, NULL);
     abts_run_test(suite, pollset_default, NULL);
     abts_run_test(suite, pollcb_default, NULL);
+
+    abts_run_test(suite, pollset_wakeup, NULL);
+    abts_run_test(suite, pollcb_wakeup, NULL);
     return suite;
 }
 
