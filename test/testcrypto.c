@@ -107,16 +107,16 @@ static const apr_crypto_key_t *passphrase(abts_case *tc, apr_pool_t *pool,
     const char *salt = "salt";
     apr_status_t rv;
 
-    if (!driver || !f) {
+    if (!f) {
         return NULL;
     }
 
     /* init the passphrase */
-    rv = apr_crypto_passphrase(driver, pool, f, pass, strlen(pass),
+    rv = apr_crypto_passphrase(pool, f, pass, strlen(pass),
             (unsigned char *) salt, strlen(salt), type, mode, doPad, 4096,
             &key, NULL);
     if (APR_ENOCIPHER == rv) {
-        apr_crypto_error(driver, f, &result);
+        apr_crypto_error(f, &result);
         ABTS_NOT_IMPL(tc, apr_psprintf(pool,
                 "skipped: %s %s passphrase return APR_ENOCIPHER: error %d: %s (%s)\n",
                 description, apr_crypto_driver_name(driver), result->rc,
@@ -124,7 +124,7 @@ static const apr_crypto_key_t *passphrase(abts_case *tc, apr_pool_t *pool,
         return NULL;
     } else {
         if (APR_SUCCESS != rv) {
-            apr_crypto_error(driver, f, &result);
+            apr_crypto_error(f, &result);
             fprintf(stderr, "passphrase: %s %s native error %d: %s (%s)\n",
                     description, apr_crypto_driver_name(driver), result->rc,
                     result->reason ? result->reason : "",
@@ -160,13 +160,13 @@ static unsigned char *encrypt_block(abts_case *tc, apr_pool_t *pool,
     }
 
     /* init the encryption */
-    rv = apr_crypto_block_encrypt_init(driver, pool, f, key, iv, &block,
+    rv = apr_crypto_block_encrypt_init(pool, f, key, iv, &block,
             blockSize);
     if (APR_ENOTIMPL == rv) {
         ABTS_NOT_IMPL(tc, "apr_crypto_block_encrypt_init returned APR_ENOTIMPL");
     } else {
         if (APR_SUCCESS != rv) {
-            apr_crypto_error(driver, f, &result);
+            apr_crypto_error(f, &result);
             fprintf(stderr, "encrypt_init: %s %s native error %d: %s (%s)\n",
                     description, apr_crypto_driver_name(driver), result->rc,
                     result->reason ? result->reason : "",
@@ -184,10 +184,10 @@ static unsigned char *encrypt_block(abts_case *tc, apr_pool_t *pool,
     }
 
     /* encrypt the block */
-    rv = apr_crypto_block_encrypt(driver, block, cipherText,
+    rv = apr_crypto_block_encrypt(f, block, cipherText,
             cipherTextLen, in, inlen);
     if (APR_SUCCESS != rv) {
-        apr_crypto_error(driver, f, &result);
+        apr_crypto_error(f, &result);
         fprintf(stderr, "encrypt: %s %s native error %d: %s (%s)\n",
                 description, apr_crypto_driver_name(driver), result->rc,
                 result->reason ? result->reason : "",
@@ -201,10 +201,10 @@ static unsigned char *encrypt_block(abts_case *tc, apr_pool_t *pool,
     }
 
     /* finalise the encryption */
-    rv = apr_crypto_block_encrypt_finish(driver, block, *cipherText
+    rv = apr_crypto_block_encrypt_finish(f, block, *cipherText
             + *cipherTextLen, &len);
     if (APR_SUCCESS != rv) {
-        apr_crypto_error(driver, f, &result);
+        apr_crypto_error(f, &result);
         fprintf(stderr, "encrypt_finish: %s %s native error %d: %s (%s)\n",
                 description, apr_crypto_driver_name(driver), result->rc,
                 result->reason ? result->reason : "",
@@ -214,7 +214,7 @@ static unsigned char *encrypt_block(abts_case *tc, apr_pool_t *pool,
     ABTS_ASSERT(tc, "apr_crypto_block_encrypt_finish returned APR_EPADDING", rv != APR_EPADDING);
     ABTS_ASSERT(tc, "failed to apr_crypto_block_encrypt_finish", rv == APR_SUCCESS);
     *cipherTextLen += len;
-    apr_crypto_block_cleanup(driver, block);
+    apr_crypto_block_cleanup(f, block);
     if (rv) {
         return NULL;
     }
@@ -240,13 +240,13 @@ static unsigned char *decrypt_block(abts_case *tc, apr_pool_t *pool,
     }
 
     /* init the decryption */
-    rv = apr_crypto_block_decrypt_init(driver, pool, f, key, iv, &block,
+    rv = apr_crypto_block_decrypt_init(pool, f, key, iv, &block,
             blockSize);
     if (APR_ENOTIMPL == rv) {
         ABTS_NOT_IMPL(tc, "apr_crypto_block_decrypt_init returned APR_ENOTIMPL");
     } else {
         if (APR_SUCCESS != rv) {
-            apr_crypto_error(driver, f, &result);
+            apr_crypto_error(f, &result);
             fprintf(stderr, "decrypt_init: %s %s native error %d: %s (%s)\n",
                     description, apr_crypto_driver_name(driver), result->rc,
                     result->reason ? result->reason : "",
@@ -264,10 +264,10 @@ static unsigned char *decrypt_block(abts_case *tc, apr_pool_t *pool,
     }
 
     /* decrypt the block */
-    rv = apr_crypto_block_decrypt(driver, block, plainText, plainTextLen,
+    rv = apr_crypto_block_decrypt(f, block, plainText, plainTextLen,
             cipherText, cipherTextLen);
     if (APR_SUCCESS != rv) {
-        apr_crypto_error(driver, f, &result);
+        apr_crypto_error(f, &result);
         fprintf(stderr, "decrypt: %s %s native error %d: %s (%s)\n",
                 description, apr_crypto_driver_name(driver), result->rc,
                 result->reason ? result->reason : "",
@@ -281,10 +281,10 @@ static unsigned char *decrypt_block(abts_case *tc, apr_pool_t *pool,
     }
 
     /* finalise the decryption */
-    rv = apr_crypto_block_decrypt_finish(driver, block, *plainText
+    rv = apr_crypto_block_decrypt_finish(f, block, *plainText
             + *plainTextLen, &len);
     if (APR_SUCCESS != rv) {
-        apr_crypto_error(driver, f, &result);
+        apr_crypto_error(f, &result);
         fprintf(stderr, "decrypt_finish: %s %s native error %d: %s (%s)\n",
                 description, apr_crypto_driver_name(driver), result->rc,
                 result->reason ? result->reason : "",
@@ -298,7 +298,7 @@ static unsigned char *decrypt_block(abts_case *tc, apr_pool_t *pool,
     }
 
     *plainTextLen += len;
-    apr_crypto_block_cleanup(driver, block);
+    apr_crypto_block_cleanup(f, block);
 
     return *plainText;
 

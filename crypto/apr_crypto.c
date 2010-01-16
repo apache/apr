@@ -39,6 +39,11 @@ static apr_hash_t *drivers = NULL;
 
 #define CLEANUP_CAST (apr_status_t (*)(void*))
 
+APR_TYPEDEF_STRUCT(apr_crypto_t, \
+   apr_pool_t *pool; \
+   apr_crypto_driver_t *provider; \
+)
+
 #if !APR_HAVE_MODULAR_DSO
 #define DRIVER_LOAD(name,driver,pool,params) \
     {   \
@@ -195,9 +200,9 @@ APR_DECLARE(const char *)apr_crypto_driver_name (const apr_crypto_driver_t *driv
  * @param result - the result structure
  * @return APR_SUCCESS for success
  */
-APR_DECLARE(apr_status_t) apr_crypto_error(const apr_crypto_driver_t *driver,
+APR_DECLARE(apr_status_t) apr_crypto_error(
         const apr_crypto_t *f, const apu_err_t **result) {
-    return driver->error(f, result);
+    return f->provider->error(f, result);
 }
 
 /**
@@ -209,7 +214,7 @@ APR_DECLARE(apr_status_t) apr_crypto_error(const apr_crypto_driver_t *driver,
  */
 APR_DECLARE(apr_status_t) apr_crypto_make(const apr_crypto_driver_t *driver,
         apr_pool_t *pool, const apr_array_header_t *params, apr_crypto_t **f) {
-    return driver->make(pool, params, f);
+    return driver->make(pool, driver, params, f);
 }
 
 /**
@@ -240,13 +245,12 @@ APR_DECLARE(apr_status_t) apr_crypto_make(const apr_crypto_driver_t *driver,
  *         not known. APR_EPADDING if padding was requested but is not supported.
  *         APR_ENOTIMPL if not implemented.
  */
-APR_DECLARE(apr_status_t) apr_crypto_passphrase(const apr_crypto_driver_t *driver,
-        apr_pool_t *p, const apr_crypto_t *f, const char *pass,
-        apr_size_t passLen, const unsigned char * salt, apr_size_t saltLen,
-        const apr_crypto_block_key_type_e type,
+APR_DECLARE(apr_status_t) apr_crypto_passphrase(apr_pool_t *p, const apr_crypto_t *f,
+        const char *pass, apr_size_t passLen, const unsigned char * salt,
+        apr_size_t saltLen, const apr_crypto_block_key_type_e type,
         const apr_crypto_block_key_mode_e mode, const int doPad,
         const int iterations, apr_crypto_key_t **key, apr_size_t *ivSize) {
-    return driver->passphrase(p, f, pass, passLen, salt, saltLen, type, mode,
+    return f->provider->passphrase(p, f, pass, passLen, salt, saltLen, type, mode,
             doPad, iterations, key, ivSize);
 }
 
@@ -268,12 +272,11 @@ APR_DECLARE(apr_status_t) apr_crypto_passphrase(const apr_crypto_driver_t *drive
  *         Returns APR_EINIT if the backend failed to initialise the context. Returns
  *         APR_ENOTIMPL if not implemented.
  */
-APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_init(
-        const apr_crypto_driver_t *driver, apr_pool_t *p,
+APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_init(apr_pool_t *p,
         const apr_crypto_t *f, const apr_crypto_key_t *key,
         const unsigned char **iv, apr_crypto_block_t **ctx,
         apr_size_t *blockSize) {
-    return driver->block_encrypt_init(p, f, key, iv, ctx, blockSize);
+    return f->provider->block_encrypt_init(p, f, key, iv, ctx, blockSize);
 }
 
 /**
@@ -296,10 +299,10 @@ APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_init(
  *         not implemented.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_encrypt(
-        const apr_crypto_driver_t *driver, apr_crypto_block_t *ctx,
+        const apr_crypto_t *f, apr_crypto_block_t *ctx,
         unsigned char **out, apr_size_t *outlen, const unsigned char *in,
         apr_size_t inlen) {
-    return driver->block_encrypt(ctx, out, outlen, in, inlen);
+    return f->provider->block_encrypt(ctx, out, outlen, in, inlen);
 }
 
 /**
@@ -322,9 +325,9 @@ APR_DECLARE(apr_status_t) apr_crypto_block_encrypt(
  * @return APR_ENOTIMPL if not implemented.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_finish(
-        const apr_crypto_driver_t *driver, apr_crypto_block_t *ctx,
+        const apr_crypto_t *f, apr_crypto_block_t *ctx,
         unsigned char *out, apr_size_t *outlen) {
-    return driver->block_encrypt_finish(ctx, out, outlen);
+    return f->provider->block_encrypt_finish(ctx, out, outlen);
 }
 
 /**
@@ -342,12 +345,11 @@ APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_finish(
  *         Returns APR_EINIT if the backend failed to initialise the context. Returns
  *         APR_ENOTIMPL if not implemented.
  */
-APR_DECLARE(apr_status_t) apr_crypto_block_decrypt_init(
-        const apr_crypto_driver_t *driver, apr_pool_t *p,
+APR_DECLARE(apr_status_t) apr_crypto_block_decrypt_init(apr_pool_t *p,
         const apr_crypto_t *f, const apr_crypto_key_t *key,
         const unsigned char *iv, apr_crypto_block_t **ctx,
         apr_size_t *blockSize) {
-    return driver->block_decrypt_init(p, f, key, iv, ctx, blockSize);
+    return f->provider->block_decrypt_init(p, f, key, iv, ctx, blockSize);
 }
 
 /**
@@ -370,10 +372,10 @@ APR_DECLARE(apr_status_t) apr_crypto_block_decrypt_init(
  *         not implemented.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_decrypt(
-        const apr_crypto_driver_t *driver, apr_crypto_block_t *ctx,
+        const apr_crypto_t *f, apr_crypto_block_t *ctx,
         unsigned char **out, apr_size_t *outlen, const unsigned char *in,
         apr_size_t inlen) {
-    return driver->block_decrypt(ctx, out, outlen, in, inlen);
+    return f->provider->block_decrypt(ctx, out, outlen, in, inlen);
 }
 
 /**
@@ -396,9 +398,9 @@ APR_DECLARE(apr_status_t) apr_crypto_block_decrypt(
  * @return APR_ENOTIMPL if not implemented.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_decrypt_finish(
-        const apr_crypto_driver_t *driver, apr_crypto_block_t *ctx,
+        const apr_crypto_t *f, apr_crypto_block_t *ctx,
         unsigned char *out, apr_size_t *outlen) {
-    return driver->block_decrypt_finish(ctx, out, outlen);
+    return f->provider->block_decrypt_finish(ctx, out, outlen);
 }
 
 /**
@@ -409,8 +411,8 @@ APR_DECLARE(apr_status_t) apr_crypto_block_decrypt_finish(
  * @return Returns APR_ENOTIMPL if not supported.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_cleanup(
-        const apr_crypto_driver_t *driver, apr_crypto_block_t *ctx) {
-    return driver->block_cleanup(ctx);
+        const apr_crypto_t *f, apr_crypto_block_t *ctx) {
+    return f->provider->block_cleanup(ctx);
 }
 
 /**
@@ -420,9 +422,8 @@ APR_DECLARE(apr_status_t) apr_crypto_block_cleanup(
  * @param f The context to use.
  * @return Returns APR_ENOTIMPL if not supported.
  */
-APR_DECLARE(apr_status_t) apr_crypto_cleanup(const apr_crypto_driver_t *driver,
-        apr_crypto_t *f) {
-    return driver->cleanup(f);
+APR_DECLARE(apr_status_t) apr_crypto_cleanup(apr_crypto_t *f) {
+    return f->provider->cleanup(f);
 }
 
 /**
