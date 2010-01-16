@@ -37,6 +37,7 @@
 
 struct apr_crypto_t {
     apr_pool_t *pool;
+    const apr_crypto_driver_t *provider;
     apu_err_t *result;
     apr_array_header_t *keys;
     apr_crypto_config_t *config;
@@ -68,8 +69,8 @@ struct apr_crypto_block_t {
  * Fetch the most recent error from this driver.
  */
 static apr_status_t crypto_error(const apr_crypto_t *f, const apu_err_t **result) {
-	*result = f->result;
-	return APR_SUCCESS;
+    *result = f->result;
+    return APR_SUCCESS;
 }
 
 /**
@@ -163,7 +164,7 @@ static apr_status_t crypto_cleanup_helper(void *data) {
  * @return APR_ENOENGINE when the engine specified does not exist. APR_EINITENGINE
  * if the engine cannot be initialised.
  */
-static apr_status_t crypto_make(apr_pool_t *pool,
+static apr_status_t crypto_make(apr_pool_t *pool, const apr_crypto_driver_t *provider,
         const apr_array_header_t *params, apr_crypto_t **ff) {
     apr_crypto_config_t *config = NULL;
     struct apr_crypto_param_t *ents =
@@ -175,6 +176,7 @@ static apr_status_t crypto_make(apr_pool_t *pool,
     }
     *ff = f;
     f->pool = pool;
+    f->provider = provider;
     config = f->config = apr_pcalloc(pool, sizeof(apr_crypto_config_t));
     if (!config) {
         return APR_ENOMEM;
