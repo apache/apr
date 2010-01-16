@@ -147,7 +147,7 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
                                      const apr_pollfd_t *descriptor)
 {
     struct epoll_event ev = {0};
-    int ret = -1;
+    int ret;
     pfd_elem_t *elem = NULL;
     apr_status_t rv = APR_SUCCESS;
 
@@ -204,7 +204,7 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
     struct epoll_event ev = {0}; /* ignored, but must be passed with
                                   * kernel < 2.6.9
                                   */
-    int ret = -1;
+    int ret;
 
     if (descriptor->desc_type == APR_POLL_SOCKET) {
         ret = epoll_ctl(pollset->p->epoll_fd, EPOLL_CTL_DEL,
@@ -245,9 +245,8 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
                                            apr_int32_t *num,
                                            const apr_pollfd_t **descriptors)
 {
-    int ret, i, j;
+    int ret;
     apr_status_t rv = APR_SUCCESS;
-    apr_pollfd_t *fdptr;
 
     if (timeout > 0) {
         timeout /= 1000;
@@ -264,6 +263,9 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
         rv = APR_TIMEUP;
     }
     else {
+        int i, j;
+        apr_pollfd_t *fdptr;
+
         for (i = 0, j = 0; i < ret; i++) {
             if (pollset->flags & APR_POLLSET_NOCOPY) {
                 fdptr = (apr_pollfd_t *)(pollset->p->pollset[i].data.ptr);
@@ -277,7 +279,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
             if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
                 fdptr->desc_type == APR_POLL_FILE &&
                 fdptr->desc.f == pollset->wakeup_pipe[0]) {
-                apr_pollset_drain_wakeup_pipe(pollset);
+                drain_wakeup_pipe(pollset->wakeup_pipe);
                 rv = APR_EINTR;
             }
             else {
@@ -319,9 +321,8 @@ static apr_pollset_provider_t impl = {
 
 apr_pollset_provider_t *apr_pollset_provider_epoll = &impl;
 
-static apr_status_t cb_cleanup(void *p_)
+static apr_status_t impl_pollcb_cleanup(apr_pollcb_t *pollcb)
 {
-    apr_pollcb_t *pollcb = (apr_pollcb_t *) p_;
     close(pollcb->fd);
     return APR_SUCCESS;
 }
@@ -358,7 +359,6 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
     
     pollcb->fd = fd;
     pollcb->pollset.epoll = apr_palloc(p, size * sizeof(struct epoll_event));
-    apr_pool_cleanup_register(p, pollcb, cb_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }
@@ -370,7 +370,7 @@ static apr_status_t impl_pollcb_add(apr_pollcb_t *pollcb,
     int ret;
     
     ev.events = get_epoll_event(descriptor->reqevents);
-    ev.data.ptr = (void *)descriptor;
+    ev.data.ptr = (void *) descriptor;
 
     if (descriptor->desc_type == APR_POLL_SOCKET) {
         ret = epoll_ctl(pollcb->fd, EPOLL_CTL_ADD,
@@ -395,7 +395,7 @@ static apr_status_t impl_pollcb_remove(apr_pollcb_t *pollcb,
     struct epoll_event ev = {0}; /* ignored, but must be passed with
                                   * kernel < 2.6.9
                                   */
-    int ret = -1;
+    int ret;
     
     if (descriptor->desc_type == APR_POLL_SOCKET) {
         ret = epoll_ctl(pollcb->fd, EPOLL_CTL_DEL,
@@ -437,6 +437,14 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
     else {
         for (i = 0; i < ret; i++) {
             apr_pollfd_t *pollfd = (apr_pollfd_t *)(pollcb->pollset.epoll[i].data.ptr);
+
+            if ((pollcb->flags & APR_POLLSET_WAKEABLE) &&
+                pollfd->desc_type == APR_POLL_FILE &&
+                pollfd->desc.f == pollcb->wakeup_pipe[0]) {
+                drain_wakeup_pipe(pollcb->wakeup_pipe);
+                return APR_EINTR;
+            }
+
             pollfd->rtnevents = get_epoll_revent(pollcb->pollset.epoll[i].events);
 
             rv = func(baton, pollfd);
@@ -454,6 +462,7 @@ static apr_pollcb_provider_t impl_cb = {
     impl_pollcb_add,
     impl_pollcb_remove,
     impl_pollcb_poll,
+    impl_pollcb_cleanup,
     "epoll"
 };
 

@@ -382,7 +382,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
         else {
             if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
                 pollset->p->query_set[i].desc.f == pollset->wakeup_pipe[0]) {
-                apr_pollset_drain_wakeup_pipe(pollset);
+                drain_wakeup_pipe(pollset->wakeup_pipe);
                 rv = APR_EINTR;
                 continue;
             }

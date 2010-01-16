@@ -246,7 +246,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
                                       apr_int32_t *num,
                                       const apr_pollfd_t **descriptors)
 {
-    int ret, i, j;
+    int ret;
     struct timespec tv, *tvptr;
     apr_status_t rv = APR_SUCCESS;
     apr_pollfd_t fd;
@@ -270,12 +270,14 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
         rv = APR_TIMEUP;
     }
     else {
+        int i, j;
+
         for (i = 0, j = 0; i < ret; i++) {
-            fd = (((pfd_elem_t*)(pollset->p->ke_set[i].udata))->pfd);
+            fd = (((pfd_elem_t *)(pollset->p->ke_set[i].udata))->pfd);
             if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
                 fd.desc_type == APR_POLL_FILE &&
                 fd.desc.f == pollset->wakeup_pipe[0]) {
-                apr_pollset_drain_wakeup_pipe(pollset);
+                drain_wakeup_pipe(pollset->wakeup_pipe);
                 rv = APR_EINTR;
             }
             else {
@@ -293,7 +295,6 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
             }
         }
     }
-
 
     pollset_lock_rings();
 
@@ -317,9 +318,8 @@ static apr_pollset_provider_t impl = {
 
 apr_pollset_provider_t *apr_pollset_provider_kqueue = &impl;
 
-static apr_status_t cb_cleanup(void *b_)
+static apr_status_t impl_pollcb_cleanup(apr_pollcb_t *pollcb)
 {
-    apr_pollcb_t *pollcb = (apr_pollcb_t *) b_;
     close(pollcb->fd);
     return APR_SUCCESS;
 }
@@ -348,8 +348,7 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
     }
  
     pollcb->fd = fd;
-    pollcb->pollset.ke = (struct kevent *)apr_pcalloc(p, 2 * size * sizeof(struct kevent));
-    apr_pool_cleanup_register(p, pollcb, cb_cleanup, apr_pool_cleanup_null);
+    pollcb->pollset.ke = (struct kevent *) apr_pcalloc(p, 2 * size * sizeof(struct kevent));
     
     return APR_SUCCESS;
 }
@@ -452,7 +451,14 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
     else {
         for (i = 0; i < ret; i++) {
             apr_pollfd_t *pollfd = (apr_pollfd_t *)(pollcb->pollset.ke[i].udata);
-            
+
+            if ((pollcb->flags & APR_POLLSET_WAKEABLE) &&
+                pollfd->desc_type == APR_POLL_FILE &&
+                pollfd->desc.f == pollcb->wakeup_pipe[0]) {
+                drain_wakeup_pipe(pollcb->wakeup_pipe);
+                return APR_EINTR;
+            }
+
             pollfd->rtnevents = get_kqueue_revent(pollcb->pollset.ke[i].filter,
                                                   pollcb->pollset.ke[i].flags);
             
@@ -472,6 +478,7 @@ static apr_pollcb_provider_t impl_cb = {
     impl_pollcb_add,
     impl_pollcb_remove,
     impl_pollcb_poll,
+    impl_pollcb_cleanup,
     "kqueue"
 };
 
