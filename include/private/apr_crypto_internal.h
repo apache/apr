@@ -60,8 +60,8 @@ struct apr_crypto_driver_t {
      * @return APR_ENOENGINE when the engine specified does not exist. APR_EINITENGINE
      * if the engine cannot be initialised.
      */
-    apr_status_t (*make)(apr_pool_t *pool, const apr_array_header_t *params,
-            apr_crypto_t **f);
+    apr_status_t (*make)(apr_pool_t *pool, const apr_crypto_driver_t *provider,
+            const apr_array_header_t *params, apr_crypto_t **f);
 
     /**
      * @brief Create a key from the given passphrase. By default, the PBKDF2

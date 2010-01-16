@@ -160,6 +160,16 @@ int strncasecmp(const char *a, const char *b, size_t n);
 void *memchr(const void *s, int c, size_t n);
 #endif
 
+/**
+ * Macro to provide a way to turn an incomplete type into a complete
+ * type containing common pointers for a provider.
+ */
+#define APR_TYPEDEF_STRUCT(type, incompletion) \
+struct type { \
+   incompletion \
+   void *unk[]; \
+};
+
 /** @} */
 
 /**
