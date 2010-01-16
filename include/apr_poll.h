@@ -61,7 +61,7 @@ extern "C" {
                                       * are not copied
                                       */
 #define APR_POLLSET_WAKEABLE   0x004 /**< Poll operations are interruptable by
-                                      * apr_pollset_wakeup()
+                                      * apr_pollset_wakeup() or apr_pollcb_wakeup()
                                       */
 #define APR_POLLSET_NODEFAULT  0x010 /**< Do not try to use the default method if
                                       * the specified non-default method cannot be
@@ -131,7 +131,7 @@ typedef struct apr_pollset_t apr_pollset_t;
  * @remark If flags contains APR_POLLSET_WAKEABLE, then a pollset is
  *         created with an additional internal pipe object used for the
  *         apr_pollset_wakeup() call. The actual size of pollset is
- *         in that case size + 1. This feature is only supported on some
+ *         in that case @a size + 1. This feature is only supported on some
  *         platforms; the apr_pollset_create() call will fail with
  *         APR_ENOTIMPL on platforms where it is not supported.
  * @remark If flags contains APR_POLLSET_NOCOPY, then the apr_pollfd_t
@@ -226,6 +226,7 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
  * Remove a descriptor from a pollset
  * @param pollset The pollset from which to remove the descriptor
  * @param descriptor The descriptor to remove
+ * @remark If the descriptor is not found, APR_NOTFOUND is returned.
  * @remark If the pollset has been created with APR_POLLSET_THREADSAFE
  *         and thread T1 is blocked in a call to apr_pollset_poll() for
  *         this same pollset that is being modified via apr_pollset_remove()
@@ -305,7 +306,7 @@ APR_DECLARE(const char *) apr_pollset_method_name(apr_pollset_t *pollset);
  */
 APR_DECLARE(const char *) apr_poll_method_defname(void);
 
-/** Opaque structure used for pollset API */
+/** Opaque structure used for pollcb API */
 typedef struct apr_pollcb_t apr_pollcb_t;
 
 /**
@@ -315,8 +316,12 @@ typedef struct apr_pollcb_t apr_pollcb_t;
  * @param p The pool from which to allocate the pollcb
  * @param flags Optional flags to modify the operation of the pollcb.
  *
+ * @remark If flags contains APR_POLLSET_WAKEABLE, then a pollcb is
+ *         created with an additional internal pipe object used for the
+ *         apr_pollcb_wakeup() call. The actual size of pollcb is
+ *         in that case @a size + 1.
  * @remark Pollcb is only supported on some platforms; the apr_pollcb_create()
- * call will fail with APR_ENOTIMPL on platforms where it is not supported.
+ *         call will fail with APR_ENOTIMPL on platforms where it is not supported.
  */
 APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
                                             apr_uint32_t size,
@@ -333,8 +338,12 @@ APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
  *         method cannot be used, the default method will be used unless the
  *         APR_POLLSET_NODEFAULT flag has been specified.
  *
+ * @remark If flags contains APR_POLLSET_WAKEABLE, then a pollcb is
+ *         created with an additional internal pipe object used for the
+ *         apr_pollcb_wakeup() call. The actual size of pollcb is
+ *         in that case @a size + 1.
  * @remark Pollcb is only supported on some platforms; the apr_pollcb_create_ex()
- * call will fail with APR_ENOTIMPL on platforms where it is not supported.
+ *         call will fail with APR_ENOTIMPL on platforms where it is not supported.
  */
 APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **pollcb,
                                                apr_uint32_t size,
@@ -365,6 +374,7 @@ APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
  * Remove a descriptor from a pollcb
  * @param pollcb The pollcb from which to remove the descriptor
  * @param descriptor The descriptor to remove
+ * @remark If the descriptor is not found, APR_NOTFOUND is returned.
  * @remark apr_pollcb_remove() cannot be used to remove a subset of requested
  *         events for a descriptor.  The reqevents field in the apr_pollfd_t
  *         parameter must contain the same value when removing as when adding.
@@ -372,11 +382,14 @@ APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
 APR_DECLARE(apr_status_t) apr_pollcb_remove(apr_pollcb_t *pollcb,
                                             apr_pollfd_t *descriptor);
 
-/** Function prototype for pollcb handlers 
+/**
+ * Function prototype for pollcb handlers 
  * @param baton Opaque baton passed into apr_pollcb_poll()
- * @param descriptor Contains the notification for an active descriptor, 
- *                   the rtnevents member contains what events were triggered
+ * @param descriptor Contains the notification for an active descriptor. 
+ *                   The @a rtnevents member describes which events were triggered
  *                   for this descriptor.
+ * @remark If the pollcb handler does not return APR_SUCCESS, the apr_pollcb_poll()
+ *         call returns with the handler's return value.
  */
 typedef apr_status_t (*apr_pollcb_cb_t)(void *baton, apr_pollfd_t *descriptor);
 
@@ -387,17 +400,34 @@ typedef apr_status_t (*apr_pollcb_cb_t)(void *baton, apr_pollfd_t *descriptor);
  *                maximum, not a minimum.  If a descriptor is signalled, the
  *                function will return before this time.  If timeout is
  *                negative, the function will block until a descriptor is
- *                signalled.
+ *                signalled or until apr_pollcb_wakeup() has been called.
  * @param func Callback function to call for each active descriptor.
  * @param baton Opaque baton passed to the callback function.
  * @remark Multiple signalled conditions for the same descriptor may be reported
  *         in one or more calls to the callback function, depending on the
  *         implementation.
+ * @remark APR_EINTR will be returned if the pollset has been created with
+ *         APR_POLLSET_WAKEABLE and apr_pollcb_wakeup() has been called while
+ *         waiting for activity.
  */
 APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
                                           apr_interval_time_t timeout,
                                           apr_pollcb_cb_t func,
-                                          void *baton); 
+                                          void *baton);
+
+/**
+ * Interrupt the blocked apr_pollcb_poll() call.
+ * @param pollcb The pollcb to use
+ * @remark If the pollcb was not created with APR_POLLSET_WAKEABLE the
+ *         return value is APR_EINIT.
+ */
+APR_DECLARE(apr_status_t) apr_pollcb_wakeup(apr_pollcb_t *pollcb);
+
+/**
+ * Return a printable representation of the pollcb method.
+ * @param pollcb The pollcb to use
+ */
+APR_DECLARE(const char *) apr_pollcb_method_name(apr_pollcb_t *pollcb);
 
 /** @} */
 

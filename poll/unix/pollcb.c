@@ -72,6 +72,20 @@ static apr_pollcb_provider_t *pollcb_provider(apr_pollset_method_e method)
     return provider;
 }
 
+static apr_status_t pollcb_cleanup(void *p)
+{
+    apr_pollcb_t *pollcb = (apr_pollcb_t *) p;
+
+    if (pollcb->provider->cleanup) {
+        (*pollcb->provider->cleanup)(pollcb);
+    }
+    if (pollcb->flags & APR_POLLSET_WAKEABLE) {
+        close_wakeup_pipe(pollcb->wakeup_pipe);
+    }
+
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **ret_pollcb,
                                                apr_uint32_t size,
                                                apr_pool_t *p,
@@ -108,9 +122,15 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **ret_pollcb,
         }
     }
 
+    if (flags & APR_POLLSET_WAKEABLE) {
+        /* Add room for wakeup descriptor */
+        size++;
+    }
+
     pollcb = apr_palloc(p, sizeof(*pollcb));
     pollcb->nelts = 0;
     pollcb->nalloc = size;
+    pollcb->flags = flags;
     pollcb->pool = p;
     pollcb->provider = provider;
 
@@ -135,6 +155,21 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **ret_pollcb,
         }
         pollcb->provider = provider;
     }
+
+    if (flags & APR_POLLSET_WAKEABLE) {
+        /* Create wakeup pipe */
+        if ((rv = create_wakeup_pipe(pollcb->pool, &pollcb->wakeup_pfd,
+                                     pollcb->wakeup_pipe)) != APR_SUCCESS) {
+            return rv;
+        }
+
+        if ((rv = apr_pollcb_add(pollcb, &pollcb->wakeup_pfd)) != APR_SUCCESS) {
+            return rv;
+        }
+    }
+    if ((flags & APR_POLLSET_WAKEABLE) || provider->cleanup)
+        apr_pool_cleanup_register(p, pollcb, pollcb_cleanup,
+                                  apr_pool_cleanup_null);
 
     *ret_pollcb = pollcb;
     return APR_SUCCESS;
@@ -168,4 +203,17 @@ APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
                                           void *baton)
 {
     return (*pollcb->provider->poll)(pollcb, timeout, func, baton);
+}
+
+APR_DECLARE(apr_status_t) apr_pollcb_wakeup(apr_pollcb_t *pollcb)
+{
+    if (pollcb->flags & APR_POLLSET_WAKEABLE)
+        return apr_file_putc(1, pollcb->wakeup_pipe[1]);
+    else
+        return APR_EINIT;
+}
+
+APR_DECLARE(const char *) apr_pollcb_method_name(apr_pollcb_t *pollcb)
+{
+    return pollcb->provider->name;
 }
