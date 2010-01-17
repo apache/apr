@@ -41,14 +41,6 @@ struct apr_crypto_driver_t {
     apr_status_t (*init)(apr_pool_t *pool, const apr_array_header_t *params, int *rc);
 
     /**
-     * @brief: fetch the most recent error from this driver.
-     * @param f - context pointer
-     * @param result - the result structure
-     * @return APR_SUCCESS for success.
-     */
-    apr_status_t (*error)(const apr_crypto_t *f, const apu_err_t **result);
-
-    /**
      * @brief Create a context for supporting encryption. Keys, certificates,
      *        algorithms and other parameters will be set per context. More than
      *        one context can be created at one time. A cleanup will be automatically
@@ -249,6 +241,14 @@ struct apr_crypto_driver_t {
      * @return Returns APR_ENOTIMPL if not supported.
      */
     apr_status_t (*shutdown)(apr_pool_t *p);
+
+    /**
+     * @brief: fetch the most recent error from this driver.
+     * @param f - context pointer
+     * @param result - the result structure
+     * @return APR_SUCCESS for success.
+     */
+    apr_status_t (*error)(const apr_crypto_t *f, const apu_err_t **result);
 
 };
 
