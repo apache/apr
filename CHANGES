@@ -18,12 +18,6 @@ Changes for APR 1.3.10
      around was needed for bad return codes from 32-bit port_getn() on 
      Solaris 10 x86.  PR 48029.  [Jeff Trawick]
 
-  *) The implementation of expand_array() in tables/apr_hash.c allocates
-     a new bucket array, without making any attempt to release the memory
-     allocated for the previous bucket array. That wastes memory: if the
-     hash table grows exponentially, this strategy wastes O(n) extra memory.
-     Use a subpool instead. [Neil Conway <nrc cs.berkeley.edu>]
-
 Changes for APR 1.3.9
 
   *) Posix semaphores can now be named and used as named semaphores.
