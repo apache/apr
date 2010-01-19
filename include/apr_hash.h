@@ -73,7 +73,7 @@ APR_DECLARE_NONSTD(unsigned int) apr_hashfunc_default(const char *key,
 /**
  * Create a hash table.
  * @param pool The pool to allocate the hash table out of
- * @return The hash table just created, or NULL if memory allocation failed
+ * @return The hash table just created
   */
 APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool);
 
@@ -81,7 +81,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool);
  * Create a hash table with a custom hash function
  * @param pool The pool to allocate the hash table out of
  * @param hash_func A custom hash function.
- * @return The hash table just created, or NULL if memory allocation failed
+ * @return The hash table just created
   */
 APR_DECLARE(apr_hash_t *) apr_hash_make_custom(apr_pool_t *pool, 
                                                apr_hashfunc_t hash_func);
@@ -90,7 +90,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_make_custom(apr_pool_t *pool,
  * Make a copy of a hash table
  * @param pool The pool from which to allocate the new hash table
  * @param h The hash table to clone
- * @return The hash table just created, or NULL if memory allocation failed
+ * @return The hash table just created
  * @remark Makes a shallow copy
  */
 APR_DECLARE(apr_hash_t *) apr_hash_copy(apr_pool_t *pool,
@@ -186,8 +186,7 @@ APR_DECLARE(void) apr_hash_clear(apr_hash_t *ht);
  * @param p The pool to use for the new hash table
  * @param overlay The table to add to the initial table
  * @param base The table that represents the initial values of the new table
- * @return A new hash table containing all of the data from the two passed in,
- *         or NULL if memory allocation failed
+ * @return A new hash table containing all of the data from the two passed in
  */
 APR_DECLARE(apr_hash_t *) apr_hash_overlay(apr_pool_t *p,
                                            const apr_hash_t *overlay, 
@@ -205,8 +204,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_overlay(apr_pool_t *p,
  *  make values from h1 override values from h2 (same semantics as
  *  apr_hash_overlay())
  * @param data Client data to pass to the merger function
- * @return A new hash table containing all of the data from the two passed in,
- *         or NULL if memory allocation failed.
+ * @return A new hash table containing all of the data from the two passed in
  */
 APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
                                          const apr_hash_t *h1,
