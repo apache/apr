@@ -56,7 +56,7 @@ apr_status_t close_wakeup_pipe(apr_file_t **wakeup_pipe)
         rv1 = file_socket_pipe_close(wakeup_pipe[1]);
         wakeup_pipe[1] = NULL;
     }
-    return rv0 ? rv0 : rv1
+    return rv0 ? rv0 : rv1;
 }
 
 #else /* !WIN32 */
