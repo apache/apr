@@ -1,5 +1,9 @@
-                                                     -*- coding: utf-8 -*-
+﻿                                                     -*- coding: utf-8 -*-
 Changes for APR 1.3.10
+
+  *) Undo a crash-bug introduced in 1.3.9 affecting some applications of 
+     the apr hash and table structures, reported to affect Subversion
+     by Bert Huijben <bert qqmail.nl>.  [Graham Leggett]
 
   *) Solaris 10 and later: Change the default cross-mutex mechanism from
      fcntl to pthread to resolve EDEADLK failures with some multi-threaded,
