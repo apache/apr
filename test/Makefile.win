@@ -171,6 +171,7 @@ STATIC_CFLAGS = /D APR_DECLARE_STATIC
 LOCAL_LIB= ..\$(OUTDIR)\libapr-2.lib 
 APP_LIB= ..\$(OUTDIR)\libaprapp-2.lib 
 STATIC_CFLAGS = 
+PATH=$(OUTDIR);..\$(OUTDIR);..\..\expat\win32\bin\$(OUTDIR);$(PATH)
 !ENDIF
 
 !IFDEF _DEBUG
@@ -298,10 +299,6 @@ cleanall:
 	@for %d in ($(TEST_SUBDIRS)) do \
 	    %COMSPEC% /c "cd %%d & $(MAKE) -f Makefile.win cleanall" \
 
-
-!IF "$(MODEL)" != "static"
-PATH=$(OUTDIR);..\$(OUTDIR);$(PATH)
-!ENDIF
 
 check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	@for %p in ($(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)) do @( \
