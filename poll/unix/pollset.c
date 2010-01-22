@@ -37,7 +37,7 @@ static apr_status_t pollset_cleanup(void *p)
         (*pollset->provider->cleanup)(pollset);
     }
     if (pollset->flags & APR_POLLSET_WAKEABLE) {
-        close_wakeup_pipe(pollset->wakeup_pipe);
+        apr_poll_close_wakeup_pipe(pollset->wakeup_pipe);
     }
 
     return APR_SUCCESS;
@@ -156,8 +156,9 @@ APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **ret_pollset,
         apr_pollfd_t pfd;
 
         /* Create wakeup pipe */
-        if ((rv = create_wakeup_pipe(pollset->pool, &pfd,
-                                     pollset->wakeup_pipe)) != APR_SUCCESS) {
+        if ((rv = apr_poll_create_wakeup_pipe(pollset->pool, &pfd,
+                                              pollset->wakeup_pipe))
+                != APR_SUCCESS) {
             return rv;
         }
 

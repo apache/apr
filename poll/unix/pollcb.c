@@ -80,7 +80,7 @@ static apr_status_t pollcb_cleanup(void *p)
         (*pollcb->provider->cleanup)(pollcb);
     }
     if (pollcb->flags & APR_POLLSET_WAKEABLE) {
-        close_wakeup_pipe(pollcb->wakeup_pipe);
+        apr_poll_close_wakeup_pipe(pollcb->wakeup_pipe);
     }
 
     return APR_SUCCESS;
@@ -158,8 +158,9 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **ret_pollcb,
 
     if (flags & APR_POLLSET_WAKEABLE) {
         /* Create wakeup pipe */
-        if ((rv = create_wakeup_pipe(pollcb->pool, &pollcb->wakeup_pfd,
-                                     pollcb->wakeup_pipe)) != APR_SUCCESS) {
+        if ((rv = apr_poll_create_wakeup_pipe(pollcb->pool, &pollcb->wakeup_pfd,
+                                              pollcb->wakeup_pipe)) 
+                != APR_SUCCESS) {
             return rv;
         }
 

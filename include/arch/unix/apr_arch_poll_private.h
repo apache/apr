@@ -167,9 +167,13 @@ struct apr_pollcb_provider_t {
     const char *name;
 };
 
-/* Private functions */
-apr_status_t create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd, apr_file_t **wakeup_pipe);
-apr_status_t close_wakeup_pipe(apr_file_t **wakeup_pipe);
-void drain_wakeup_pipe(apr_file_t **wakeup_pipe);
+/* 
+ * Private functions used for the implementation of both apr_pollcb_* and 
+ * apr_pollset_*
+ */
+apr_status_t apr_poll_create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd, 
+                                         apr_file_t **wakeup_pipe);
+apr_status_t apr_poll_close_wakeup_pipe(apr_file_t **wakeup_pipe);
+void apr_poll_drain_wakeup_pipe(apr_file_t **wakeup_pipe);
 
 #endif /* APR_ARCH_POLL_PRIVATE_H */
