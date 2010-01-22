@@ -551,10 +551,10 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
         for (i = 0; i < nget; i++) {
             apr_pollfd_t *pollfd = (apr_pollfd_t *)(pollcb->pollset.port[i].portev_user);
 
-            if ((pollfd->flags & APR_POLLSET_WAKEABLE) &&
+            if ((pollcb->flags & APR_POLLSET_WAKEABLE) &&
                 pollfd->desc_type == APR_POLL_FILE &&
-                pollfd->desc.f == pollfd->wakeup_pipe[0]) {
-                drain_wakeup_pipe(pollfd->wakeup_pipe);
+                pollfd->desc.f == pollcb->wakeup_pipe[0]) {
+                drain_wakeup_pipe(pollcb->wakeup_pipe);
                 return APR_EINTR;
             }
 
