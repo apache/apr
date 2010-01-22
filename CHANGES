@@ -5,7 +5,7 @@ Changes for APR 1.4.3
 
 Changes for APR 1.4.2
 
-  *) Undo a crash-bug introduced in 1.3.9 affecting some applications of 
+  *) Undo a crash-bug introduced in 1.4.1 affecting some applications of 
      the apr hash and table structures, reported to affect Subversion
      by Bert Huijben <bert qqmail.nl>.  [Graham Leggett]
 
