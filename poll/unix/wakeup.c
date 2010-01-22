@@ -27,8 +27,8 @@
 
 #ifdef WIN32
 
-apr_status_t create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd,
-                                apr_file_t **wakeup_pipe)
+apr_status_t apr_poll_create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd,
+                                         apr_file_t **wakeup_pipe)
 {
     apr_status_t rv;
 
@@ -42,7 +42,7 @@ apr_status_t create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd,
     return APR_SUCCESS;
 }
 
-apr_status_t close_wakeup_pipe(apr_file_t **wakeup_pipe)
+apr_status_t apr_poll_close_wakeup_pipe(apr_file_t **wakeup_pipe)
 {
     apr_status_t rv0 = APR_SUCCESS;
     apr_status_t rv1 = APR_SUCCESS;
@@ -61,12 +61,12 @@ apr_status_t close_wakeup_pipe(apr_file_t **wakeup_pipe)
 
 #else /* !WIN32 */
 
-apr_status_t create_wakeup_pipe(apr_pollfd_t *pfd, apr_file_t **wakeup_pipe)
+apr_status_t apr_poll_create_wakeup_pipe(apr_pollfd_t *pfd, apr_file_t **wakeup_pipe)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t close_wakeup_pipe(apr_file_t **wakeup_pipe)
+apr_status_t apr_poll_close_wakeup_pipe(apr_file_t **wakeup_pipe)
 {
     return APR_ENOTIMPL;
 }
@@ -75,8 +75,8 @@ apr_status_t close_wakeup_pipe(apr_file_t **wakeup_pipe)
 
 #else  /* APR_FILES_AS_SOCKETS */
 
-apr_status_t create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd,
-                                apr_file_t **wakeup_pipe)
+apr_status_t apr_poll_create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd,
+                                         apr_file_t **wakeup_pipe)
 {
     apr_status_t rv;
 
@@ -113,7 +113,7 @@ apr_status_t create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd,
     return APR_SUCCESS;
 }
 
-apr_status_t close_wakeup_pipe(apr_file_t **wakeup_pipe)
+apr_status_t apr_poll_close_wakeup_pipe(apr_file_t **wakeup_pipe)
 {
     apr_status_t rv0 = APR_SUCCESS;
     apr_status_t rv1 = APR_SUCCESS;
@@ -134,7 +134,7 @@ apr_status_t close_wakeup_pipe(apr_file_t **wakeup_pipe)
 
 /* Read and discard whatever is in the wakeup pipe.
  */
-void drain_wakeup_pipe(apr_file_t **wakeup_pipe)
+void apr_poll_drain_wakeup_pipe(apr_file_t **wakeup_pipe)
 {
     char rb[512];
     apr_size_t nr = sizeof(rb);

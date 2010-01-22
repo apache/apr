@@ -279,7 +279,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
             if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
                 fdptr->desc_type == APR_POLL_FILE &&
                 fdptr->desc.f == pollset->wakeup_pipe[0]) {
-                drain_wakeup_pipe(pollset->wakeup_pipe);
+                apr_poll_drain_wakeup_pipe(pollset->wakeup_pipe);
                 rv = APR_EINTR;
             }
             else {
@@ -441,7 +441,7 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
             if ((pollcb->flags & APR_POLLSET_WAKEABLE) &&
                 pollfd->desc_type == APR_POLL_FILE &&
                 pollfd->desc.f == pollcb->wakeup_pipe[0]) {
-                drain_wakeup_pipe(pollcb->wakeup_pipe);
+                apr_poll_drain_wakeup_pipe(pollcb->wakeup_pipe);
                 return APR_EINTR;
             }
 
