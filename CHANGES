@@ -4,10 +4,6 @@ Changes for APR 2.0.0
   *) Support connecttimeout, readtimeout and writetimeout MySQL options
      PR 48251 [Marko Kevac <marko kevac.org>]
 
-  *) Add apr_socket_atreadeof to determine whether the receive part of the
-     socket has been closed by the peer.
-     [Ruediger Pluem, Mladen Turk, Joe Orton]
-
   *) Transfer the apr-util spec file contents to apr.spec. [Graham
      Leggett]
 
@@ -19,15 +15,16 @@ Changes for APR 2.0.0
   *) Win32: Use WSAPoll as default pollset method if supported and found
      inside winsock dll.  [Mladen Turk]
 
-  *) Make apr_pollset and apr_pollcb implementations using providers.
-     Added apr_pollset_create_ex and apr_pollcb_create_ex that allows
-     choosing non-default providers.  [Mladen Turk]
-
   *) Introduce APR_PERMS_SET macros for setting the owner/group on objects
      Currently only implemented for shm, proc and global mutexes on posix
      platforms.  [Mladen Turk]
 
   *) Merge APR-util into APR.  [various]
+
+Changes for APR and APR-util 1.5.x and later:
+
+  *) http://svn.apache.org/viewvc/apr/apr/branches/1.5.x/CHANGES?view=markup
+  *) http://svn.apache.org/viewvc/apr/apr-util/branches/1.5.x/CHANGES?view=markup
 
 Changes for APR and APR-util 1.4.x and later:
 
