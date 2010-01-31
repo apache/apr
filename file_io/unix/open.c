@@ -176,9 +176,11 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
         if ((flags = fcntl(fd, F_GETFD)) == -1)
             return errno;
 
-        flags |= FD_CLOEXEC;
-        if (fcntl(fd, F_SETFD, flags) == -1)
-            return errno;
+        if ((flags & FD_CLOEXEC) == 0) {
+            flags |= FD_CLOEXEC;
+            if (fcntl(fd, F_SETFD, flags) == -1)
+                return errno;
+        }
     }
 
     (*new) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
