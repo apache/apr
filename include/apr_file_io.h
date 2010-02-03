@@ -943,7 +943,7 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
 
 
 APR_DECLARE(apr_status_t) apr_file_rotating_check(apr_file_t *thefile);
-APR_DECLARE(apr_status_t) apr_file_rotating_manual_check(apr_file_t *thefile, apr_time_t time);
+APR_DECLARE(apr_status_t) apr_file_rotating_check_manual(apr_file_t *thefile, apr_time_t time);
 
 /** @} */
 
