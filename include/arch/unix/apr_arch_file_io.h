@@ -29,6 +29,8 @@
 #ifndef WAITIO_USES_POLL
 #include "apr_poll.h"
 #endif
+#include "apr_time.h"
+
 
 /* System headers the file I/O library needs */
 #if APR_HAVE_FCNTL_H
@@ -90,6 +92,15 @@
 /* For backwards-compat */
 #define APR_FILE_BUFSIZE  APR_FILE_DEFAULT_BUFSIZE
 
+typedef struct apr_rotating_info_t {
+    apr_finfo_t finfo;
+    apr_interval_time_t timeout;
+    apr_time_t lastcheck;
+    int oflags;
+    int manual;
+    apr_fileperms_t perm;
+} apr_rotating_info_t;
+
 struct apr_file_t {
     apr_pool_t *pool;
     int filedes;
@@ -115,6 +126,7 @@ struct apr_file_t {
 #if APR_HAS_THREADS
     struct apr_thread_mutex_t *thlock;
 #endif
+    apr_rotating_info_t *rotating;
 };
 
 #if APR_HAS_THREADS
