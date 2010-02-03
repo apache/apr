@@ -75,11 +75,17 @@ extern "C" {
                                              file should support
                                              apr_socket_sendfile operation */
 #define APR_FOPEN_LARGEFILE   0x04000 /**< Platform dependent flag to enable
-                                       * large file support, see WARNING below
+                                       * large file support, see WARNING below 
                                        */
+
 #define APR_FOPEN_SPARSE      0x08000 /**< Platform dependent flag to enable
                                        * sparse file support, see WARNING below
                                        */
+
+#define APR_FOPEN_ROTATING  0x10000 /**< Do file file rotation checking */
+ 
+#define APR_FOPEN_MANUAL_ROTATE  0x20000 /**< Enable Manual rotation */
+  
 
 /* backcompat */
 #define APR_READ             APR_FOPEN_READ       /**< @deprecated @see APR_FOPEN_READ */
@@ -935,7 +941,12 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *templ,
 APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir, 
                                            apr_pool_t *p);
 
+
+APR_DECLARE(apr_status_t) apr_file_rotating_check(apr_file_t *thefile);
+APR_DECLARE(apr_status_t) apr_file_rotating_manual_check(apr_file_t *thefile, apr_time_t time);
+
 /** @} */
+
 
 #ifdef __cplusplus
 }

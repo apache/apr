@@ -95,6 +95,17 @@ static apr_status_t file_dup(apr_file_t **new_file,
     /* make sure unget behavior is consistent */
     (*new_file)->ungetchar = old_file->ungetchar;
 
+    if (old_file->rotating != NULL) {
+        (*new_file)->rotating = (apr_rotating_info_t *)apr_pcalloc(p, sizeof(apr_rotating_info_t));
+
+        memcpy(&((*new_file)->rotating->finfo), &(old_file->rotating->finfo), sizeof(apr_finfo_t));
+        (*new_file)->rotating->timeout = old_file->rotating->timeout;
+        (*new_file)->rotating->lastcheck = old_file->rotating->lastcheck;
+        (*new_file)->rotating->oflags = old_file->rotating->oflags;
+        (*new_file)->rotating->perm = old_file->rotating->perm;
+        (*new_file)->rotating->manual = old_file->rotating->manual;
+    }
+
     /* apr_file_dup2() retains the original cleanup, reflecting 
      * the existing inherit and nocleanup flags.  This means, 
      * that apr_file_dup2() cannot be called against an apr_file_t
