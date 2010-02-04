@@ -215,7 +215,7 @@ APR_DECLARE(apr_status_t) apr_file_rotating_check(apr_file_t *thefile)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_file_rotating_check_manual(apr_file_t *thefile, apr_time_t n)
+APR_DECLARE(apr_status_t) apr_file_rotating_manual_check(apr_file_t *thefile, apr_time_t n)
 {
     if (thefile->rotating) {
         return do_rotating_check(thefile, n);
