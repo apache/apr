@@ -118,7 +118,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-hp-hpux*)
 	APR_ADDTO(CPPFLAGS, [-DHPUX -D_REENTRANT])
 	;;
-    *-linux-*)
+    *-linux*)
         case `uname -r` in
 	    2.* )  APR_ADDTO(CPPFLAGS, [-DLINUX=2])
 	           ;;
