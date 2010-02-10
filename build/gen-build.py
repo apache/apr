@@ -111,11 +111,15 @@ def main():
 
       symname = 'OBJECTS_%s_%s' % (subdir, platform)
 
+      objects.sort()
+
       # and write the symbol for the whole group
       f.write('\n%s = %s\n\n' % (symname, string.join(objects)))
 
       # and include that symbol in the group
       group.append('$(%s)' % symname)
+
+    group.sort()
 
     # write out a symbol which contains the necessary files
     f.write('OBJECTS_%s = %s\n\n' % (platform, string.join(group)))
@@ -176,7 +180,9 @@ def write_objects(f, legal_deps, h_deps, files):
     for hdr in deps.keys():
       deps.update(h_deps.get(hdr, {}))
 
-    f.write('%s: %s .make.dirs %s\n' % (obj, file, string.join(deps.values())))
+    f.write('%s: %s .make.dirs %s\n' % (obj, file, string.join(sorted(deps.values()))))
+
+  objects.sort()
 
   return objects, dirs
 
@@ -214,6 +220,7 @@ def get_files(patterns):
   files = [ ]
   for pat in string.split(patterns):
     files.extend(map(clean_path, glob.glob(pat)))
+  files.sort()
   return files
 
 
