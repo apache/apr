@@ -180,7 +180,9 @@ def write_objects(f, legal_deps, h_deps, files):
     for hdr in deps.keys():
       deps.update(h_deps.get(hdr, {}))
 
-    f.write('%s: %s .make.dirs %s\n' % (obj, file, string.join(sorted(deps.values()))))
+    vals = deps.values()
+    vals.sort()
+    f.write('%s: %s .make.dirs %s\n' % (obj, file, string.join(vals)))
 
   objects.sort()
 
