@@ -578,6 +578,15 @@ static void option_set_cert(apr_pool_t *pool, LDAP *ldap,
     /* OpenLDAP SDK */
 #if APR_HAS_OPENLDAP_LDAPSDK
 #ifdef LDAP_OPT_X_TLS_CACERTFILE
+#ifndef LDAP_OPT_X_TLS_NEWCTX 
+    if (ldap) {
+        result->reason = "LDAP: The OpenLDAP SDK cannot support the setting "
+                         "of certificates or keys on a per connection basis.";
+        result->rc = -1;
+        return; 
+    }
+#endif
+
     /* set one or more certificates */
     /* FIXME: make it support setting directories as well as files */
     for (i = 0; i < certs->nelts; i++) {
@@ -615,6 +624,15 @@ static void option_set_cert(apr_pool_t *pool, LDAP *ldap,
             break;
         }
     }
+    /*  Certificate settings are now configured, but we also need a new
+     *  TLS context to be created.  This applies to both gnuTLS and openssl
+     */
+    if (ldap && (result->rc == LDAP_SUCCESS)) {
+        int IS_SERVER = 0;
+        result->rc = ldap_set_option(ldap, LDAP_OPT_X_TLS_NEWCTX, &IS_SERVER);
+        result->msg = ldap_err2string(result->rc);
+    }
+
 #else
     result->reason = "LDAP: LDAP_OPT_X_TLS_CACERTFILE not "
                      "defined by this OpenLDAP SDK. Certificate "
