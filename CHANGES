@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Enable per-connection LDAP client certificates for
+     openldap by requesting a new SSL context. [Eric Covener]
+
   *) Support connecttimeout, readtimeout and writetimeout MySQL options
      PR 48251 [Marko Kevac <marko kevac.org>]
 
