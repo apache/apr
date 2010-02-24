@@ -624,6 +624,7 @@ static void option_set_cert(apr_pool_t *pool, LDAP *ldap,
             break;
         }
     }
+#ifdef LDAP_OPT_X_TLS_NEWCTX 
     /*  Certificate settings are now configured, but we also need a new
      *  TLS context to be created.  This applies to both gnuTLS and openssl
      */
@@ -632,6 +633,7 @@ static void option_set_cert(apr_pool_t *pool, LDAP *ldap,
         result->rc = ldap_set_option(ldap, LDAP_OPT_X_TLS_NEWCTX, &IS_SERVER);
         result->msg = ldap_err2string(result->rc);
     }
+#endif
 
 #else
     result->reason = "LDAP: LDAP_OPT_X_TLS_CACERTFILE not "
