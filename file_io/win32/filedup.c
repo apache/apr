@@ -208,7 +208,7 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
     if (old_file->fname) {
         (*new_file)->fname = apr_pstrdup(p, old_file->fname);
     }
-    if (!(old_file->flags & APR_FILE_NOCLEANUP)) {
+    if (!(old_file->flags & APR_FOPEN_NOCLEANUP)) {
         apr_pool_cleanup_register(p, (void *)(*new_file), 
                                   file_cleanup,
                                   file_cleanup);

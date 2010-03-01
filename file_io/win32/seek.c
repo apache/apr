@@ -100,10 +100,10 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
         *offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
         return rc;
     }
-    /* A file opened with APR_XTHREAD has been opened for overlapped i/o. 
+    /* A file opened with APR_FOPEN_XTHREAD has been opened for overlapped i/o.
      * APR must explicitly track the file pointer in this case.
      */
-    else if (thefile->pOverlapped || thefile->flags & APR_XTHREAD) {
+    else if (thefile->pOverlapped || thefile->flags & APR_FOPEN_XTHREAD) {
         switch(where) {
             case APR_SET:
                 thefile->filePtr = *offset;
