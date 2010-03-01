@@ -103,6 +103,22 @@ with the flag;
    ./testall -v
 
 
+Building APR RPM files on Linux
+===============================
+
+Run the following to create SRPMs:
+
+rpmbuild -ts apr-<version>.tar.bz2
+rpmbuild -ts apr-util-<version>.tar.bz2
+
+Run the following to create RPMs (or build from the SRPMs):
+
+rpmbuild -tb apr-<version>.tar.bz2
+rpmbuild -tb apr-util-<version>.tar.bz2
+
+Resolve dependencies as appropriate.
+
+
 Configuring and Building APR on Windows
 =======================================
 
