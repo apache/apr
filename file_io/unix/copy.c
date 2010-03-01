@@ -29,7 +29,7 @@ static apr_status_t apr_file_transfer_contents(const char *from_path,
     apr_fileperms_t perms;
 
     /* Open source file. */
-    status = apr_file_open(&s, from_path, APR_READ, APR_OS_DEFAULT, pool);
+    status = apr_file_open(&s, from_path, APR_FOPEN_READ, APR_OS_DEFAULT, pool);
     if (status)
         return status;
 
@@ -101,7 +101,7 @@ APR_DECLARE(apr_status_t) apr_file_copy(const char *from_path,
                                         apr_pool_t *pool)
 {
     return apr_file_transfer_contents(from_path, to_path,
-                                      (APR_WRITE | APR_CREATE | APR_TRUNCATE),
+                                      (APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_TRUNCATE),
                                       perms,
                                       pool);
 }
@@ -112,7 +112,7 @@ APR_DECLARE(apr_status_t) apr_file_append(const char *from_path,
                                           apr_pool_t *pool)
 {
     return apr_file_transfer_contents(from_path, to_path,
-                                      (APR_WRITE | APR_CREATE | APR_APPEND),
+                                      (APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_APPEND),
                                       perms,
                                       pool);
 }

@@ -163,7 +163,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         apr_thread_mutex_unlock(thefile->mutex);
         return APR_FROM_OS_ERROR(rc);
     } else {
-        if (thefile->flags & APR_APPEND) {
+        if (thefile->flags & APR_FOPEN_APPEND) {
             FILELOCK all = { 0, 0x7fffffff };
             ULONG newpos;
             rc = DosSetFileLocks(thefile->filedes, NULL, &all, -1, 0);
