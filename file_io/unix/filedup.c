@@ -35,12 +35,12 @@ static apr_status_t file_dup(apr_file_t **new_file,
             return APR_EINVAL;
         }
 #ifdef HAVE_DUP3
-        if (!((*new_file)->flags & (APR_FILE_NOCLEANUP|APR_INHERIT)))
+        if (!((*new_file)->flags & (APR_FOPEN_NOCLEANUP|APR_INHERIT)))
             flags |= O_CLOEXEC;
         rv = dup3(old_file->filedes, (*new_file)->filedes, flags);
 #else
         rv = dup2(old_file->filedes, (*new_file)->filedes);
-        if (!((*new_file)->flags & (APR_FILE_NOCLEANUP|APR_INHERIT))) {
+        if (!((*new_file)->flags & (APR_FOPEN_NOCLEANUP|APR_INHERIT))) {
             int flags;
 
             if (rv == -1)
@@ -106,12 +106,12 @@ static apr_status_t file_dup(apr_file_t **new_file,
     }
 
     /* apr_file_dup() retains all old_file flags with the exceptions
-     * of APR_INHERIT and APR_FILE_NOCLEANUP.
+     * of APR_INHERIT and APR_FOPEN_NOCLEANUP.
      * The user must call apr_file_inherit_set() on the dupped 
      * apr_file_t when desired.
      */
     (*new_file)->flags = old_file->flags
-                       & ~(APR_INHERIT | APR_FILE_NOCLEANUP);
+                       & ~(APR_INHERIT | APR_FOPEN_NOCLEANUP);
 
     apr_pool_cleanup_register((*new_file)->pool, (void *)(*new_file),
                               apr_unix_file_cleanup, 
@@ -164,7 +164,7 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
     if (old_file->fname) {
         (*new_file)->fname = apr_pstrdup(p, old_file->fname);
     }
-    if (!(old_file->flags & APR_FILE_NOCLEANUP)) {
+    if (!(old_file->flags & APR_FOPEN_NOCLEANUP)) {
         apr_pool_cleanup_register(p, (void *)(*new_file), 
                                   apr_unix_file_cleanup,
                                   ((*new_file)->flags & APR_INHERIT)
