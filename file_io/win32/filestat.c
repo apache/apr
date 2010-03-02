@@ -779,7 +779,7 @@ APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
     apr_status_t rv;
 
     rv = apr_file_open(&thefile, fname,
-                       APR_READ | APR_WRITEATTRS,
+                       APR_FOPEN_READ | APR_WRITEATTRS,
                        APR_OS_DEFAULT, pool);
     if (!rv)
     {

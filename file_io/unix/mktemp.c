@@ -178,8 +178,8 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
 #ifdef HAVE_MKSTEMP
     int fd;
 #endif
-    flags = (!flags) ? APR_CREATE | APR_READ | APR_WRITE | APR_EXCL | 
-                       APR_DELONCLOSE : flags;
+    flags = (!flags) ? APR_FOPEN_CREATE | APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_EXCL |
+                       APR_FOPEN_DELONCLOSE : flags;
 #ifndef HAVE_MKSTEMP
     return gettemp(template, fp, flags, p);
 #else
@@ -203,7 +203,7 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
     apr_os_file_put(fp, &fd, flags, p);
     (*fp)->fname = apr_pstrdup(p, template);
 
-    if (!(flags & APR_FILE_NOCLEANUP)) {
+    if (!(flags & APR_FOPEN_NOCLEANUP)) {
         int flags;
 
         if ((flags = fcntl(fd, F_GETFD)) == -1)

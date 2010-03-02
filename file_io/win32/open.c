@@ -331,10 +331,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
     apr_status_t rv;
 
-    if (flag & APR_READ) {
+    if (flag & APR_FOPEN_READ) {
         oflags |= GENERIC_READ;
     }
-    if (flag & APR_WRITE) {
+    if (flag & APR_FOPEN_WRITE) {
         oflags |= GENERIC_WRITE;
     }
     if (flag & APR_WRITEATTRS) {
@@ -344,18 +344,18 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     if (apr_os_level >= APR_WIN_NT) 
         sharemode |= FILE_SHARE_DELETE;
 
-    if (flag & APR_CREATE) {
-        if (flag & APR_EXCL) {
+    if (flag & APR_FOPEN_CREATE) {
+        if (flag & APR_FOPEN_EXCL) {
             /* only create new if file does not already exist */
             createflags = CREATE_NEW;
-        } else if (flag & APR_TRUNCATE) {
+        } else if (flag & APR_FOPEN_TRUNCATE) {
             /* truncate existing file or create new */
             createflags = CREATE_ALWAYS;
         } else {
             /* open existing but create if necessary */
             createflags = OPEN_ALWAYS;
         }
-    } else if (flag & APR_TRUNCATE) {
+    } else if (flag & APR_FOPEN_TRUNCATE) {
         /* only truncate if file already exists */
         createflags = TRUNCATE_EXISTING;
     } else {
@@ -363,11 +363,11 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         createflags = OPEN_EXISTING;
     }
 
-    if ((flag & APR_EXCL) && !(flag & APR_CREATE)) {
+    if ((flag & APR_FOPEN_EXCL) && !(flag & APR_FOPEN_CREATE)) {
         return APR_EACCES;
     }   
     
-    if (flag & APR_DELONCLOSE) {
+    if (flag & APR_FOPEN_DELONCLOSE) {
         attributes |= FILE_FLAG_DELETE_ON_CLOSE;
     }
 
@@ -382,7 +382,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
      * FILE_FLAG_BACKUP_SEMANTICS to allow us to open directories.
      * See the static resolve_ident() fn in file_io/win32/filestat.c
      */
-    if (!(flag & (APR_READ | APR_WRITE))) {
+    if (!(flag & (APR_FOPEN_READ | APR_FOPEN_WRITE))) {
         if (flag & APR_OPENINFO) {
             if (apr_os_level >= APR_WIN_NT) {
                 attributes |= FILE_FLAG_BACKUP_SEMANTICS;
@@ -395,7 +395,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
             oflags |= READ_CONTROL;
     }
 
-    if (flag & APR_XTHREAD) {
+    if (flag & APR_FOPEN_XTHREAD) {
         /* This win32 specific feature is required 
          * to allow multiple threads to work with the file.
          */
@@ -407,11 +407,11 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     {
         apr_wchar_t wfname[APR_PATH_MAX];
 
-        if (flag & APR_SENDFILE_ENABLED) {    
+        if (flag & APR_FOPEN_SENDFILE_ENABLED) {
             /* This feature is required to enable sendfile operations
-             * against the file on Win32. Also implies APR_XTHREAD.
+             * against the file on Win32. Also implies APR_FOPEN_XTHREAD.
              */
-            flag |= APR_XTHREAD;
+            flag |= APR_FOPEN_XTHREAD;
             attributes |= FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_OVERLAPPED;
         }
 
@@ -427,7 +427,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         handle = CreateFileA(fname, oflags, sharemode,
                              NULL, createflags, attributes, 0);
         /* This feature is not supported on this platform. */
-        flag &= ~APR_SENDFILE_ENABLED;
+        flag &= ~APR_FOPEN_SENDFILE_ENABLED;
     }
 #endif
     if (handle == INVALID_HANDLE_VALUE) {
@@ -442,11 +442,11 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     (*new)->timeout = -1;
     (*new)->ungetchar = -1;
 
-    if (flag & APR_APPEND) {
+    if (flag & APR_FOPEN_APPEND) {
         (*new)->append = 1;
         SetFilePointer((*new)->filehand, 0, NULL, FILE_END);
     }
-    if (flag & APR_BUFFERED) {
+    if (flag & APR_FOPEN_BUFFERED) {
         (*new)->buffered = 1;
         (*new)->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
         (*new)->bufsize = APR_FILE_DEFAULT_BUFSIZE;
@@ -481,7 +481,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     /* ### check return codes */
     (void) apr_pollset_create(&(*new)->pollset, 1, pool, 0);
 
-    if (!(flag & APR_FILE_NOCLEANUP)) {
+    if (!(flag & APR_FOPEN_NOCLEANUP)) {
         apr_pool_cleanup_register((*new)->pool, (void *)(*new), file_cleanup,
                                   apr_pool_cleanup_null);
     }
@@ -631,10 +631,10 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     (*file)->timeout = -1;
     (*file)->flags = flags;
 
-    if (flags & APR_APPEND) {
+    if (flags & APR_FOPEN_APPEND) {
         (*file)->append = 1;
     }
-    if (flags & APR_BUFFERED) {
+    if (flags & APR_FOPEN_BUFFERED) {
         (*file)->buffered = 1;
         (*file)->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
         (*file)->bufsize = APR_FILE_DEFAULT_BUFSIZE;
@@ -687,7 +687,7 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile,
         file_handle = INVALID_HANDLE_VALUE;
 
     return apr_os_file_put(thefile, &file_handle,
-                           flags | APR_WRITE | APR_STDERR_FLAG, pool);
+                           flags | APR_FOPEN_WRITE | APR_STDERR_FLAG, pool);
 #endif
 }
 
@@ -706,7 +706,7 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile,
         file_handle = INVALID_HANDLE_VALUE;
 
     return apr_os_file_put(thefile, &file_handle,
-                           flags | APR_WRITE | APR_STDOUT_FLAG, pool);
+                           flags | APR_FOPEN_WRITE | APR_STDOUT_FLAG, pool);
 #endif
 }
 
@@ -725,7 +725,7 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stdin(apr_file_t **thefile,
         file_handle = INVALID_HANDLE_VALUE;
 
     return apr_os_file_put(thefile, &file_handle,
-                           flags | APR_READ | APR_STDIN_FLAG, pool);
+                           flags | APR_FOPEN_READ | APR_STDIN_FLAG, pool);
 #endif
 }
 
