@@ -93,14 +93,14 @@ static apr_status_t file_bucket_read(apr_bucket *e, const char **str,
 #endif
 
 #if APR_HAS_THREADS && !APR_HAS_XTHREAD_FILES
-    if ((flags = apr_file_flags_get(f)) & APR_XTHREAD) {
+    if ((flags = apr_file_flags_get(f)) & APR_FOPEN_XTHREAD) {
         /* this file descriptor is shared across multiple threads and
          * this OS doesn't support that natively, so as a workaround
          * we must reopen the file into a->readpool */
         const char *fname;
         apr_file_name_get(&fname, f);
 
-        rv = apr_file_open(&f, fname, (flags & ~APR_XTHREAD), 0, a->readpool);
+        rv = apr_file_open(&f, fname, (flags & ~APR_FOPEN_XTHREAD), 0, a->readpool);
         if (rv != APR_SUCCESS)
             return rv;
 
