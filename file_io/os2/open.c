@@ -45,18 +45,18 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     dafile->flags = flag;
     dafile->blocking = BLK_ON;
     
-    if ((flag & APR_READ) && (flag & APR_WRITE)) {
+    if ((flag & APR_FOPEN_READ) && (flag & APR_FOPEN_WRITE)) {
         mflags |= OPEN_ACCESS_READWRITE;
-    } else if (flag & APR_READ) {
+    } else if (flag & APR_FOPEN_READ) {
         mflags |= OPEN_ACCESS_READONLY;
-    } else if (flag & APR_WRITE) {
+    } else if (flag & APR_FOPEN_WRITE) {
         mflags |= OPEN_ACCESS_WRITEONLY;
     } else {
         dafile->filedes = -1;
         return APR_EACCES;
     }
 
-    dafile->buffered = (flag & APR_BUFFERED) > 0;
+    dafile->buffered = (flag & APR_FOPEN_BUFFERED) > 0;
 
     if (dafile->buffered) {
         dafile->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
@@ -67,18 +67,18 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
             return rv;
     }
 
-    if (flag & APR_CREATE) {
+    if (flag & APR_FOPEN_CREATE) {
         oflags |= OPEN_ACTION_CREATE_IF_NEW;
 
-        if (!(flag & APR_EXCL) && !(flag & APR_TRUNCATE)) {
+        if (!(flag & APR_FOPEN_EXCL) && !(flag & APR_FOPEN_TRUNCATE)) {
             oflags |= OPEN_ACTION_OPEN_IF_EXISTS;
         }
     }
     
-    if ((flag & APR_EXCL) && !(flag & APR_CREATE))
+    if ((flag & APR_FOPEN_EXCL) && !(flag & APR_FOPEN_CREATE))
         return APR_EACCES;
 
-    if (flag & APR_TRUNCATE) {
+    if (flag & APR_FOPEN_TRUNCATE) {
         oflags |= OPEN_ACTION_REPLACE_IF_EXISTS;
     } else if ((oflags & 0xFF) == 0) {
         oflags |= OPEN_ACTION_OPEN_IF_EXISTS;
@@ -86,7 +86,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     
     rv = DosOpen(fname, &(dafile->filedes), &action, 0, 0, oflags, mflags, NULL);
     
-    if (rv == 0 && (flag & APR_APPEND)) {
+    if (rv == 0 && (flag & APR_FOPEN_APPEND)) {
         ULONG newptr;
         rv = DosSetFilePtr(dafile->filedes, 0, FILE_END, &newptr );
         
@@ -105,7 +105,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     dafile->direction = 0;
     dafile->pipe = FALSE;
 
-    if (!(flag & APR_FILE_NOCLEANUP)) { 
+    if (!(flag & APR_FOPEN_NOCLEANUP)) {
         apr_pool_cleanup_register(dafile->pool, dafile, apr_file_cleanup, apr_file_cleanup);
     }
 
@@ -128,7 +128,7 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
         if (rc == 0) {
             file->isopen = FALSE;
 
-            if (file->flags & APR_DELONCLOSE) {
+            if (file->flags & APR_FOPEN_DELONCLOSE) {
                 status = APR_FROM_OS_ERROR(DosDelete(file->fname));
             }
             /* else we return the status of the flush attempt 
@@ -192,7 +192,7 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, apr_os_file_t *thef
     (*file)->eof_hit = FALSE;
     (*file)->flags = flags;
     (*file)->pipe = FALSE;
-    (*file)->buffered = (flags & APR_BUFFERED) > 0;
+    (*file)->buffered = (flags & APR_FOPEN_BUFFERED) > 0;
 
     if ((*file)->buffered) {
         apr_status_t rv;
@@ -224,7 +224,7 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile,
 {
     apr_os_file_t fd = 2;
 
-    return apr_os_file_put(thefile, &fd, flags | APR_WRITE, pool);
+    return apr_os_file_put(thefile, &fd, flags | APR_FOPEN_WRITE, pool);
 }
 
 
@@ -234,7 +234,7 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile,
 {
     apr_os_file_t fd = 1;
 
-    return apr_os_file_put(thefile, &fd, flags | APR_WRITE, pool);
+    return apr_os_file_put(thefile, &fd, flags | APR_FOPEN_WRITE, pool);
 }
 
 
@@ -244,7 +244,7 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stdin(apr_file_t **thefile,
 {
     apr_os_file_t fd = 0;
 
-    return apr_os_file_put(thefile, &fd, flags | APR_READ, pool);
+    return apr_os_file_put(thefile, &fd, flags | APR_FOPEN_READ, pool);
 }
 
 

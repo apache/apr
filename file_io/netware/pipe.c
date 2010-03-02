@@ -114,7 +114,7 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put_ex(apr_file_t **file,
     (*file)->ungetchar = -1; /* no char avail */
     (*file)->filedes = *dafile;
     if (!register_cleanup) {
-        (*file)->flags = APR_FILE_NOCLEANUP;
+        (*file)->flags = APR_FOPEN_NOCLEANUP;
     }
     (*file)->buffered = 0;
 #if APR_HAS_THREADS
