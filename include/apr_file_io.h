@@ -85,7 +85,11 @@ extern "C" {
 #define APR_FOPEN_ROTATING  0x10000 /**< Do file file rotation checking */
  
 #define APR_FOPEN_MANUAL_ROTATE  0x20000 /**< Enable Manual rotation */
-  
+
+#define APR_FOPEN_NONBLOCK    0x40000 /**< Platform dependent flag to enable
+                                       * non blocking file io */
+
+ 
 
 /* backcompat */
 #define APR_READ             APR_FOPEN_READ       /**< @deprecated @see APR_FOPEN_READ */

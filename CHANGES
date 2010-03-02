@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Enable platform specific support for the opening of a file or
+     pipe in non blocking module through the APR_FOPEN_NONBLOCK flag.
+     [Graham Leggett]
+
   *) Enable per-connection LDAP client certificates for
      openldap by requesting a new SSL context. [Eric Covener]
 
