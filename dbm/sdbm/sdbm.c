@@ -101,7 +101,7 @@ static apr_status_t prep(apr_sdbm_t **pdb, const char *dirname, const char *pagn
      * as required by this package. Also set our internal
      * flag for RDONLY if needed.
      */
-    if (!(flags & APR_WRITE)) {
+    if (!(flags & APR_FOPEN_WRITE)) {
         db->flags |= SDBM_RDONLY;
     }
 
@@ -111,12 +111,12 @@ static apr_status_t prep(apr_sdbm_t **pdb, const char *dirname, const char *pagn
      * an apr_file_t, in case it's ever introduced, and set
      * our own flag.
      */
-    if (flags & APR_SHARELOCK) {
+    if (flags & APR_FOPEN_SHARELOCK) {
         db->flags |= SDBM_SHARED;
-        flags &= ~APR_SHARELOCK;
+        flags &= ~APR_FOPEN_SHARELOCK;
     }
 
-    flags |= APR_BINARY | APR_READ;
+    flags |= APR_FOPEN_BINARY | APR_FOPEN_READ;
 
     /*
      * open the files in sequence, and stat the dirfile.
