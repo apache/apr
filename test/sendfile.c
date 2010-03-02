@@ -109,7 +109,7 @@ static void create_testfile(apr_pool_t *p, const char *fname)
 
     printf("Creating a test file...\n");
     rv = apr_file_open(&f, fname, 
-                 APR_CREATE | APR_WRITE | APR_TRUNCATE | APR_BUFFERED,
+                 APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_TRUNCATE | APR_FOPEN_BUFFERED,
                  APR_UREAD | APR_UWRITE, p);
     if (rv) {
         fprintf(stderr, "apr_file_open()->%d/%s\n",
@@ -188,7 +188,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
     apr_setup(&p, &sock, &family);
     create_testfile(p, TESTFILE);
 
-    rv = apr_file_open(&f, TESTFILE, APR_READ, 0, p);
+    rv = apr_file_open(&f, TESTFILE, APR_FOPEN_READ, 0, p);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_file_open()->%d/%s\n",
                 rv,

@@ -28,8 +28,8 @@ static apr_status_t create_dummy_file_error(abts_case *tc, apr_pool_t *p,
     apr_off_t off = 0L;
     char template[] = "data/testxmldummyerrorXXXXXX";
 
-    rv = apr_file_mktemp(fd, template, APR_CREATE | APR_TRUNCATE | APR_DELONCLOSE |
-                         APR_READ | APR_WRITE | APR_EXCL, p);
+    rv = apr_file_mktemp(fd, template, APR_FOPEN_CREATE | APR_FOPEN_TRUNCATE | APR_FOPEN_DELONCLOSE |
+                         APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_EXCL, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     if (rv != APR_SUCCESS)
@@ -62,8 +62,8 @@ static apr_status_t create_dummy_file(abts_case *tc, apr_pool_t *p,
     apr_off_t off = 0L;
     char template[] = "data/testxmldummyXXXXXX";
 
-    rv = apr_file_mktemp(fd, template, APR_CREATE | APR_TRUNCATE | APR_DELONCLOSE |
-                         APR_READ | APR_WRITE | APR_EXCL, p);
+    rv = apr_file_mktemp(fd, template, APR_FOPEN_CREATE | APR_FOPEN_TRUNCATE | APR_FOPEN_DELONCLOSE |
+                         APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_EXCL, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     if (rv != APR_SUCCESS)
