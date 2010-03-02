@@ -33,7 +33,7 @@ int main(int argc, const char * const *argv)
     apr_initialize();
     apr_pool_create(&p, NULL);
 
-    if (apr_file_open(&file, TESTFILE, APR_WRITE, APR_OS_DEFAULT, p) 
+    if (apr_file_open(&file, TESTFILE, APR_FOPEN_WRITE, APR_OS_DEFAULT, p)
         != APR_SUCCESS) {
         
         exit(UNEXPECTED_ERROR);

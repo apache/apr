@@ -80,7 +80,7 @@ static int get_ldap_host(void)
 
     ldap_host[0] = '\0';
     rv = apr_file_open(&thefile, FILENAME, 
-                       APR_READ, 
+                       APR_FOPEN_READ,
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
     if (rv != APR_SUCCESS) {
         return 0;

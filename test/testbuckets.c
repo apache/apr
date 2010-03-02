@@ -368,7 +368,7 @@ static apr_file_t *make_test_file(abts_case *tc, const char *fname,
 
     ABTS_ASSERT(tc, "create test file",
                 apr_file_open(&f, fname,
-                              APR_READ|APR_WRITE|APR_TRUNCATE|APR_CREATE,
+                              APR_FOPEN_READ|APR_FOPEN_WRITE|APR_FOPEN_TRUNCATE|APR_FOPEN_CREATE,
                               APR_OS_DEFAULT, p) == APR_SUCCESS);
     
     ABTS_ASSERT(tc, "write test file contents",

@@ -180,7 +180,7 @@ static void test_uncleared_errno(abts_case *tc, void *data)
     rv = apr_dir_make("dir2", APR_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_file_open(&thefile, "dir1/file1",
-                       APR_READ | APR_WRITE | APR_CREATE, APR_OS_DEFAULT, p);
+                       APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE, APR_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_file_close(thefile);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
