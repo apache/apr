@@ -91,15 +91,15 @@ static void test_file_redir(abts_case *tc, void *data)
 
     testfile = NULL;
     rv = apr_file_open(&testfile, "data/stdin",
-                       APR_READ | APR_WRITE | APR_CREATE | APR_EXCL,
+                       APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_EXCL,
                        APR_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_file_open(&testout, "data/stdout",
-                       APR_READ | APR_WRITE | APR_CREATE | APR_EXCL,
+                       APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_EXCL,
                        APR_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_file_open(&testerr, "data/stderr",
-                       APR_READ | APR_WRITE | APR_CREATE | APR_EXCL,
+                       APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_EXCL,
                        APR_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
