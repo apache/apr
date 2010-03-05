@@ -40,25 +40,20 @@ fi
 # Note: APR supplies its own config.guess and config.sub -- we do not
 #       rely on libtool's versions
 #
-echo "Copying libtool helper files ..."
+echo "buildconf: copying libtool helper files using $libtoolize"
 
 # Remove any libtool files so one can switch between libtool 1.3
 # and libtool 1.4 by simply rerunning the buildconf script.
-(cd build ; rm -f ltconfig ltmain.sh libtool.m4)
+(cd build ; rm -f ltconfig ltmain.sh libtool.m4 ltoptions.m4 ltsugar.m4 ltversion.m4 lt~obsolete.m4)
 
-$libtoolize --copy --automake --force $verbose
-
-if [ -f libtool.m4 ]; then 
-   ltfile=`pwd`/libtool.m4
-elif grep all_pkgmacro_files $libtoolize > /dev/null; then
-    # libtool 2.x
-   aclocal_dir=`sed -n '/^aclocaldir=/{s/.*=//;p;q;}' < $libtoolize`
-   ltfiles=`sed -n '/^all_pkgmacro_files=/{s/.*=//;;s/"//;p;q;}' < $libtoolize`
-   for f in $ltfiles; do
-       test -f "$aclocal_dir/$f" && cp "$aclocal_dir/$f" build
-   done
-   ltfile=$aclocal_dir/libtool.m4
-else
+lt_pversion=`$libtoolize --version 2>/dev/null|sed -e 's/([^)]*)//g;s/^[^0-9]*//;s/[- ].*//g;q'`
+lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$/.\1/'`
+IFS=.; set $lt_version; IFS=' '
+if test "$1" = "1"; then
+  $libtoolize --copy --automake --force $verbose
+  if [ -f libtool.m4 ]; then 
+    ltfile=`pwd`/libtool.m4
+  else
    ltfindcmd="`sed -n \"/=[^\\\`]/p;/libtool_m4=/{s/.*=/echo /p;q;}\" \
                    < $libtoolize`"
    ltfile=${LIBTOOL_M4-`eval "$ltfindcmd"`}
@@ -67,21 +62,17 @@ else
      ltpath=`dirname $libtoolize`
      ltfile=`cd $ltpath/../share/aclocal ; pwd`/libtool.m4
    fi
-fi
-  
-if [ ! -f $ltfile ]; then
+  fi
+  if [ ! -f $ltfile ]; then
     echo "$ltfile not found"
     exit 1
+  fi
+  # Do we need this anymore?
+  echo "buildconf: Using libtool.m4 at ${ltfile}."
+  cat $ltfile | sed -e 's/LIBTOOL=\(.*\)top_build/LIBTOOL=\1apr_build/' > build/libtool.m4
 fi
-
-echo "buildconf: Using libtool.m4 at ${ltfile}."
-
-cat $ltfile | sed -e 's/LIBTOOL=\(.*\)top_build/LIBTOOL=\1apr_build/' > build/libtool.m4
-
-# libtool.m4 from 1.6 requires ltsugar.m4
-if [ -f ltsugar.m4 ]; then
-   rm -f build/ltsugar.m4
-   mv ltsugar.m4 build/ltsugar.m4
+if test "$1" = "2"; then
+  $libtoolize --copy --force $verbose
 fi
 
 # Clean up any leftovers
@@ -90,22 +81,22 @@ rm -f aclocal.m4 libtool.m4
 #
 # Generate the autoconf header and ./configure
 #
-echo "Creating include/arch/unix/apr_private.h.in ..."
+echo "buildconf: creating include/arch/unix/apr_private.h.in ..."
 ${AUTOHEADER:-autoheader} $verbose
 
-echo "Creating configure ..."
+echo "buildconf: creating configure ..."
 ### do some work to toss config.cache?
 ${AUTOCONF:-autoconf} $verbose
 
 # Remove autoconf 2.5x's cache directory
 rm -rf autom4te*.cache
 
-echo "Generating 'make' outputs ..."
+echo "buildconf: generating 'make' outputs ..."
 build/gen-build.py $verbose make
 
 # Create RPM Spec file
 if [ -f `which cut` ]; then
-  echo rebuilding rpm spec file
+  echo "buildconf: rebuilding rpm spec file"
   ( REVISION=`build/get-version.sh all include/apr_version.h APR`
     VERSION=`echo $REVISION | cut -d- -s -f1`
     RELEASE=`echo $REVISION | cut -d- -s -f2`
