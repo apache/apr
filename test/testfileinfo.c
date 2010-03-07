@@ -109,7 +109,7 @@ static void test_info_get(abts_case *tc, void *data)
     apr_finfo_t finfo;
     apr_status_t rv;
 
-    rv = apr_file_open(&thefile, FILENAME, APR_READ, APR_OS_DEFAULT, p);
+    rv = apr_file_open(&thefile, FILENAME, APR_FOPEN_READ, APR_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
@@ -155,7 +155,7 @@ static void test_stat_eq_finfo(abts_case *tc, void *data)
     apr_finfo_t stat_finfo;
     apr_status_t rv;
 
-    rv = apr_file_open(&thefile, FILENAME, APR_READ, APR_OS_DEFAULT, p);
+    rv = apr_file_open(&thefile, FILENAME, APR_FOPEN_READ, APR_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
 
@@ -180,8 +180,8 @@ static void test_buffered_write_size(abts_case *tc, void *data)
     apr_size_t bytes;
 
     rv = apr_file_open(&thefile, NEWFILENAME,
-                       APR_READ | APR_WRITE | APR_CREATE | APR_TRUNCATE
-                       | APR_BUFFERED | APR_DELONCLOSE,
+                       APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_TRUNCATE
+                       | APR_FOPEN_BUFFERED | APR_FOPEN_DELONCLOSE,
                        APR_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "open file", rv);
 
@@ -213,8 +213,8 @@ static void test_mtime_set(abts_case *tc, void *data)
      * the epoch.
      */
     rv = apr_file_open(&thefile, NEWFILENAME,
-                       APR_READ | APR_WRITE | APR_CREATE | APR_TRUNCATE
-                       | APR_BUFFERED | APR_DELONCLOSE,
+                       APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_TRUNCATE
+                       | APR_FOPEN_BUFFERED | APR_FOPEN_DELONCLOSE,
                        APR_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "open file", rv);
 
