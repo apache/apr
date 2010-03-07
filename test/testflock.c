@@ -63,7 +63,7 @@ static void test_withlock(abts_case *tc, void *data)
     apr_status_t rv;
     int code;
     
-    rv = apr_file_open(&file, TESTFILE, APR_WRITE|APR_CREATE, 
+    rv = apr_file_open(&file, TESTFILE, APR_FOPEN_WRITE|APR_FOPEN_CREATE,
                        APR_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "Could not create file.", rv);
     ABTS_PTR_NOTNULL(tc, file);
