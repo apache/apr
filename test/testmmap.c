@@ -73,7 +73,7 @@ static void test_file_open(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
-    rv = apr_file_open(&thefile, file1, APR_READ, APR_UREAD | APR_GREAD, p);
+    rv = apr_file_open(&thefile, file1, APR_FOPEN_READ, APR_UREAD | APR_GREAD, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, thefile);
 }
