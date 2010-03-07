@@ -80,6 +80,9 @@ extern "C" {
 #define APR_FOPEN_SPARSE      0x08000 /**< Platform dependent flag to enable
                                        * sparse file support, see WARNING below
                                        */
+#define APR_FOPEN_NONBLOCK    0x40000 /**< Platform dependent flag to enable
+                                       * non blocking file io */
+
 
 /* backcompat */
 #define APR_READ             APR_FOPEN_READ       /**< @deprecated @see APR_FOPEN_READ */
