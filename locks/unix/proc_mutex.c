@@ -547,14 +547,14 @@ static apr_status_t proc_mutex_fcntl_create(apr_proc_mutex_t *new_mutex,
     if (fname) {
         new_mutex->fname = apr_pstrdup(new_mutex->pool, fname);
         rv = apr_file_open(&new_mutex->interproc, new_mutex->fname,
-                           APR_CREATE | APR_WRITE | APR_EXCL, 
+                           APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_EXCL,
                            APR_UREAD | APR_UWRITE | APR_GREAD | APR_WREAD,
                            new_mutex->pool);
     }
     else {
         new_mutex->fname = apr_pstrdup(new_mutex->pool, "/tmp/aprXXXXXX");
         rv = apr_file_mktemp(&new_mutex->interproc, new_mutex->fname,
-                             APR_CREATE | APR_WRITE | APR_EXCL,
+                             APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_EXCL,
                              new_mutex->pool);
     }
  
@@ -667,14 +667,14 @@ static apr_status_t proc_mutex_flock_create(apr_proc_mutex_t *new_mutex,
     if (fname) {
         new_mutex->fname = apr_pstrdup(new_mutex->pool, fname);
         rv = apr_file_open(&new_mutex->interproc, new_mutex->fname,
-                           APR_CREATE | APR_WRITE | APR_EXCL, 
+                           APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_EXCL,
                            APR_UREAD | APR_UWRITE,
                            new_mutex->pool);
     }
     else {
         new_mutex->fname = apr_pstrdup(new_mutex->pool, "/tmp/aprXXXXXX");
         rv = apr_file_mktemp(&new_mutex->interproc, new_mutex->fname,
-                             APR_CREATE | APR_WRITE | APR_EXCL,
+                             APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_EXCL,
                              new_mutex->pool);
     }
  
@@ -750,7 +750,7 @@ static apr_status_t proc_mutex_flock_child_init(apr_proc_mutex_t **mutex,
     }
     new_mutex->fname = apr_pstrdup(pool, fname);
     rv = apr_file_open(&new_mutex->interproc, new_mutex->fname,
-                       APR_WRITE, 0, new_mutex->pool);
+                       APR_FOPEN_WRITE, 0, new_mutex->pool);
     if (rv != APR_SUCCESS) {
         return rv;
     }

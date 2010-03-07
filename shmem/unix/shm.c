@@ -304,7 +304,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 
         /* FIXME: APR_OS_DEFAULT is too permissive, switch to 600 I think. */
         status = apr_file_open(&file, filename, 
-                               APR_WRITE | APR_CREATE | APR_EXCL,
+                               APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_EXCL,
                                APR_OS_DEFAULT, pool);
         if (status != APR_SUCCESS) {
             return status;
@@ -378,7 +378,7 @@ APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
     return APR_SUCCESS;
 #elif APR_USE_SHMEM_SHMGET
     /* Presume that the file already exists; just open for writing */    
-    status = apr_file_open(&file, filename, APR_WRITE,
+    status = apr_file_open(&file, filename, APR_FOPEN_WRITE,
                            APR_OS_DEFAULT, pool);
     if (status) {
         return status;
@@ -522,7 +522,7 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
         new_m = apr_palloc(pool, sizeof(apr_shm_t));
 
         status = apr_file_open(&file, filename, 
-                               APR_READ, APR_OS_DEFAULT, pool);
+                               APR_FOPEN_READ, APR_OS_DEFAULT, pool);
         if (status != APR_SUCCESS) {
             return status;
         }
