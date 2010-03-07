@@ -135,6 +135,12 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     }
 #endif
 
+#ifdef O_NONBLOCK
+    if (flag & APR_FOPEN_NONBLOCK) {
+        oflags |= O_NONBLOCK;
+    }
+#endif
+
 #ifdef O_CLOEXEC
     /* Introduced in Linux 2.6.23. Silently ignored on earlier Linux kernels.
      */
