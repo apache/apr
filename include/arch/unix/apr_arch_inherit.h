@@ -24,7 +24,7 @@
 #define APR_IMPLEMENT_INHERIT_SET(name, flag, pool, cleanup)        \
 apr_status_t apr_##name##_inherit_set(apr_##name##_t *the##name)    \
 {                                                                   \
-    if (the##name->flag & APR_FILE_NOCLEANUP)                       \
+    if (the##name->flag & APR_FOPEN_NOCLEANUP)                      \
         return APR_EINVAL;                                          \
     if (!(the##name->flag & APR_INHERIT)) {                         \
         int flags = fcntl(the##name->name##des, F_GETFD);           \
@@ -44,7 +44,7 @@ apr_status_t apr_##name##_inherit_set(apr_##name##_t *the##name)    \
 #define APR_IMPLEMENT_INHERIT_UNSET(name, flag, pool, cleanup)      \
 apr_status_t apr_##name##_inherit_unset(apr_##name##_t *the##name)  \
 {                                                                   \
-    if (the##name->flag & APR_FILE_NOCLEANUP)                       \
+    if (the##name->flag & APR_FOPEN_NOCLEANUP)                      \
         return APR_EINVAL;                                          \
     if (the##name->flag & APR_INHERIT) {                            \
         int flags;                                                  \
