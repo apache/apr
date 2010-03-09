@@ -607,12 +607,12 @@ APR_DECLARE(apr_status_t) apr_file_link(const char *from_path,
         if (!CreateHardLinkW(wto_path, wfrom_path, NULL))
                 return apr_get_os_error();
     }
+#endif
 #if APR_HAS_ANSI_FS
     ELSE_WIN_OS_IS_ANSI {
         if (!CreateHardLinkA(wto_path, wfrom_path))
                 return apr_get_os_error()
     }
-#endif
 #endif
     return rv;
 }
