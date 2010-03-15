@@ -291,8 +291,12 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 
 APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset)
 {
-    apr_size_t len = 1;
-    return apr_socket_sendto(pollset->wake_sender, pollset->wake_address, 0, "", &len);
+    if (pollset->wake_sender) {
+        apr_size_t len = 1;
+        return apr_socket_sendto(pollset->wake_sender, pollset->wake_address, 0, "", &len);
+    }
+
+    return APR_EINIT;
 }
 
 
