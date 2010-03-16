@@ -22,8 +22,24 @@
 #include "apr_lib.h"
 #include <sys/time.h>
 
+static apr_status_t wait_socket_ready(apr_socket_t *sock, int readwrite)
+{
+    int pollsocket = sock->socketdes;
+    int wait_rc = select(&pollsocket, readwrite == 0, readwrite == 1, 0, sock->timeout / 1000);
 
-APR_DECLARE(apr_status_t) apr_socket_sendto(apr_socket_t *sock, 
+    if (wait_rc == 0) {
+        return APR_TIMEUP;
+    }
+    else if (wait_rc < 0) {
+        return APR_FROM_OS_ERROR(sock_errno());
+    }
+
+    return APR_SUCCESS;
+}
+
+
+
+APR_DECLARE(apr_status_t) apr_socket_sendto(apr_socket_t *sock,
                                             apr_sockaddr_t *where,
                                             apr_int32_t flags, const char *buf,
                                             apr_size_t *len)
@@ -35,30 +51,28 @@ APR_DECLARE(apr_status_t) apr_socket_sendto(apr_socket_t *sock,
         rv = sendto(sock->socketdes, buf, (*len), flags, 
                     (struct sockaddr*)&where->sa,
                     where->salen);
-    } while (rv == -1 && (serrno = sock_errno()) == EINTR);
 
-    if (rv == -1 && serrno == SOCEWOULDBLOCK && sock->timeout != 0) {
-        apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
+        if (rv == -1) {
+            serrno = sock_errno();
 
-        if (arv != APR_SUCCESS) {
-            *len = 0;
-            return arv;
-        } else {
-            do {
-                rv = sendto(sock->socketdes, buf, *len, flags,
-                            (const struct sockaddr*)&where->sa,
-                            where->salen);
-            } while (rv == -1 && (serrno = sock_errno()) == SOCEINTR);
+            if (serrno == SOCEWOULDBLOCK && sock->timeout != 0) {
+                apr_status_t wait_status = wait_socket_ready(sock, 1);
+
+                if (wait_status != APR_SUCCESS) {
+                    *len = 0;
+                    return wait_status;
+                }
+            }
+            else if (serrno != SOCEINTR) {
+                *len = 0;
+                return APR_FROM_OS_ERROR(serrno);
+            }
         }
-    }
-
-    if (rv == -1) {
-        *len = 0;
-        return APR_FROM_OS_ERROR(serrno);
-    }
-
-    *len = rv;
-    return APR_SUCCESS;
+        else {
+            *len = rv;
+            return APR_SUCCESS;
+        }
+    } while (1);
 }
 
 
@@ -72,33 +86,31 @@ APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from,
     int serrno;
 
     do {
-        rv = recvfrom(sock->socketdes, buf, (*len), flags, 
-                      (struct sockaddr*)&from->sa, &from->salen);
-    } while (rv == -1 && (serrno = sock_errno()) == EINTR);
+        from->salen = sizeof(from->sa);
+        rv = recvfrom(sock->socketdes, buf, (*len), flags,
+                      (struct sockaddr*)&from->sa,
+                      &from->salen);
 
-    if (rv == -1 && serrno == SOCEWOULDBLOCK && sock->timeout != 0) {
-        apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 1);
+        if (rv == -1) {
+            serrno = sock_errno();
 
-        if (arv != APR_SUCCESS) {
-            *len = 0;
-            return arv;
-        } else {
-            do {
-                rv = recvfrom(sock->socketdes, buf, *len, flags,
-                              (struct sockaddr*)&from->sa, &from->salen);
-                } while (rv == -1 && (serrno = sock_errno()) == EINTR);
+            if (serrno == SOCEWOULDBLOCK && sock->timeout != 0) {
+                apr_status_t wait_status = wait_socket_ready(sock, 0);
+
+                if (wait_status != APR_SUCCESS) {
+                    *len = 0;
+                    return wait_status;
+                }
+            }
+            else if (serrno != SOCEINTR) {
+                *len = 0;
+                return APR_FROM_OS_ERROR(serrno);
+            }
         }
-    }
-
-    if (rv == -1) {
-        (*len) = 0;
-        return APR_FROM_OS_ERROR(serrno);
-    }
-
-    (*len) = rv;
-
-    if (rv == 0 && sock->type == SOCK_STREAM)
-        return APR_EOF;
-
-    return APR_SUCCESS;
+        else {
+            *len = rv;
+            apr_sockaddr_vars_set(from, from->sa.sin.sin_family, ntohs(from->sa.sin.sin_port));
+            return (rv == 0 && sock->type == SOCK_STREAM) ? APR_EOF : APR_SUCCESS;
+        }
+    } while (1);
 }
