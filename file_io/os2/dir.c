@@ -31,6 +31,8 @@ static apr_status_t dir_cleanup(void *thedir)
 
 APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *pool)
 {
+    FILESTATUS3 filestatus;
+    int rv;
     apr_dir_t *thedir = (apr_dir_t *)apr_palloc(pool, sizeof(apr_dir_t));
     
     if (thedir == NULL)
@@ -46,6 +48,17 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname, apr
     thedir->validentry = FALSE;
     *new = thedir;
     apr_pool_cleanup_register(pool, thedir, dir_cleanup, apr_pool_cleanup_null);
+
+    rv = DosQueryPathInfo(dirname, FIL_STANDARD, &filestatus, sizeof(filestatus));
+
+    if (rv != 0) {
+        return APR_FROM_OS_ERROR(rv);
+    }
+
+    if ((filestatus.attrFile & FILE_DIRECTORY) == 0) {
+        return APR_ENOTDIR;
+    }
+
     return APR_SUCCESS;
 }
 
