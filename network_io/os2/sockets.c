@@ -84,6 +84,7 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family, int 
 {
     int downgrade = (family == AF_UNSPEC);
     apr_pollfd_t pfd;
+    int oprotocol = protocol;
 
     if (family == AF_UNSPEC) {
 #if APR_HAVE_IPV6
@@ -91,6 +92,10 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family, int 
 #else
         family = AF_INET;
 #endif
+    }
+
+    if (family == APR_UNIX) {
+        protocol = 0;
     }
 
     alloc_socket(new, cont);
@@ -106,7 +111,7 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family, int 
     if ((*new)->socketdes < 0) {
         return APR_OS2_STATUS(sock_errno());
     }
-    set_socket_vars(*new, family, type, protocol);
+    set_socket_vars(*new, family, type, oprotocol);
 
     (*new)->timeout = -1;
     (*new)->nonblock = FALSE;
