@@ -1448,9 +1448,9 @@ int parse_output_file_name(char *arg, command_t *cmd_data)
         newarg = (char *)malloc(strlen(arg) + 5);
         strcpy(newarg, arg);
 #ifdef EXE_EXT
-	if (!ext) {
-        strcat(newarg, EXE_EXT);
-	}
+        if (!ext) {
+            strcat(newarg, EXE_EXT);
+        }
 #endif
         cmd_data->output_name = newarg;
         return 1;
