@@ -68,7 +68,7 @@ static void get_random_info(unsigned char node[NODE_LENGTH])
     /* Leach & Salz use Linux-specific struct sysinfo;
      * replace with pid/tid for portability (in the spirit of mod_unique_id) */
     struct {
-	/* Add thread id here, if applicable, when we get to pthread or apr */
+        /* Add thread id here, if applicable, when we get to pthread or apr */
         pid_t pid;
 #ifdef NETWARE
         apr_uint64_t t;
