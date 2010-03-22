@@ -162,6 +162,13 @@ ONGOING REMINDERS FOR STYLE/SUBSTANCE OF CONTRIBUTING TO APR:
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
+    * Implement TOS for linux and solaris and bsd network API's.
+      The patches below implement only one of these API's, see the
+      pointer to mod_ftp in this bugzilla incident for hints to offer
+      all the necessary implementations, for starters.
+        http://qaix.com/apache-http-server/569-729-patch-add-ip-tos-support-read.shtml
+        https://issues.apache.org/bugzilla/show_bug.cgi?id=42848
+
     * Need a proper fragmentation control API for clearing apr_pool's,
       where the block alloc/clear/realloc sequence introduces more and
       more unusable spaces in the physical blocks.  APR must provide
