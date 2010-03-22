@@ -17,7 +17,7 @@
 /*
  * The exported function:
  *
- * 	 apr_sha1_base64(const char *clear, int len, char *out);
+ *     apr_sha1_base64(const char *clear, int len, char *out);
  *
  * provides a means to SHA1 crypt/encode a plaintext password in
  * a way which makes password files compatible with those commonly
@@ -38,10 +38,10 @@
  * This software also makes use of the following component:
  *
  * NIST Secure Hash Algorithm
- *  	heavily modified by Uwe Hollerbach uh@alumni.caltech edu
- *	from Peter C. Gutmann's implementation as found in
- *	Applied Cryptography by Bruce Schneier
- *	This code is hereby placed in the public domain
+ *      heavily modified by Uwe Hollerbach uh@alumni.caltech edu
+ *      from Peter C. Gutmann's implementation as found in
+ *      Applied Cryptography by Bruce Schneier
+ *      This code is hereby placed in the public domain
  */
 
 #include "apr_sha1.h"
@@ -60,23 +60,23 @@
 #define USE_MODIFIED_SHA
 
 /* SHA f()-functions */
-#define f1(x,y,z)	((x & y) | (~x & z))
-#define f2(x,y,z)	(x ^ y ^ z)
-#define f3(x,y,z)	((x & y) | (x & z) | (y & z))
-#define f4(x,y,z)	(x ^ y ^ z)
+#define f1(x,y,z)   ((x & y) | (~x & z))
+#define f2(x,y,z)   (x ^ y ^ z)
+#define f3(x,y,z)   ((x & y) | (x & z) | (y & z))
+#define f4(x,y,z)   (x ^ y ^ z)
 
 /* SHA constants */
-#define CONST1		0x5a827999L
-#define CONST2		0x6ed9eba1L
-#define CONST3		0x8f1bbcdcL
-#define CONST4		0xca62c1d6L
+#define CONST1      0x5a827999L
+#define CONST2      0x6ed9eba1L
+#define CONST3      0x8f1bbcdcL
+#define CONST4      0xca62c1d6L
 
 /* 32-bit rotate */
 
-#define ROT32(x,n)	((x << n) | (x >> (32 - n)))
+#define ROT32(x,n)  ((x << n) | (x >> (32 - n)))
 
-#define FUNC(n,i)						\
-    temp = ROT32(A,5) + f##n(B,C,D) + E + W[i] + CONST##n;	\
+#define FUNC(n,i) \
+    temp = ROT32(A,5) + f##n(B,C,D) + E + W[i] + CONST##n; \
     E = D; D = C; C = ROT32(B,30); B = A; A = temp
 
 #define SHA_BLOCKSIZE           64
@@ -110,12 +110,12 @@ static void sha_transform(apr_sha1_ctx_t *sha_info)
     apr_uint32_t temp, A, B, C, D, E, W[80];
 
     for (i = 0; i < 16; ++i) {
-	W[i] = sha_info->data[i];
+        W[i] = sha_info->data[i];
     }
     for (i = 16; i < 80; ++i) {
-	W[i] = W[i-3] ^ W[i-8] ^ W[i-14] ^ W[i-16];
+        W[i] = W[i-3] ^ W[i-8] ^ W[i-14] ^ W[i-16];
 #ifdef USE_MODIFIED_SHA
-	W[i] = ROT32(W[i], 1);
+        W[i] = ROT32(W[i], 1);
 #endif /* USE_MODIFIED_SHA */
     }
     A = sha_info->digest[0];
@@ -145,16 +145,16 @@ static void sha_transform(apr_sha1_ctx_t *sha_info)
     FUNC(4,75);  FUNC(4,76);  FUNC(4,77);  FUNC(4,78);  FUNC(4,79);
 #else /* !UNROLL_LOOPS */
     for (i = 0; i < 20; ++i) {
-	FUNC(1,i);
+        FUNC(1,i);
     }
     for (i = 20; i < 40; ++i) {
-	FUNC(2,i);
+        FUNC(2,i);
     }
     for (i = 40; i < 60; ++i) {
-	FUNC(3,i);
+        FUNC(3,i);
     }
     for (i = 60; i < 80; ++i) {
-	FUNC(4,i);
+        FUNC(4,i);
     }
 #endif /* !UNROLL_LOOPS */
     sha_info->digest[0] += A;
@@ -184,20 +184,20 @@ static void maybe_byte_reverse(apr_uint32_t *buffer, int count)
     int i;
     apr_byte_t ct[4], *cp;
 
-    if (isLittleEndian()) {	/* do the swap only if it is little endian */
-	count /= sizeof(apr_uint32_t);
-	cp = (apr_byte_t *) buffer;
-	for (i = 0; i < count; ++i) {
-	    ct[0] = cp[0];
-	    ct[1] = cp[1];
-	    ct[2] = cp[2];
-	    ct[3] = cp[3];
-	    cp[0] = ct[3];
-	    cp[1] = ct[2];
-	    cp[2] = ct[1];
-	    cp[3] = ct[0];
-	    cp += sizeof(apr_uint32_t);
-	}
+    if (isLittleEndian()) { /* do the swap only if it is little endian */
+        count /= sizeof(apr_uint32_t);
+        cp = (apr_byte_t *) buffer;
+        for (i = 0; i < count; ++i) {
+            ct[0] = cp[0];
+            ct[1] = cp[1];
+            ct[2] = cp[2];
+            ct[3] = cp[3];
+            cp[0] = ct[3];
+            cp[1] = ct[2];
+            cp[2] = ct[1];
+            cp[3] = ct[0];
+            cp += sizeof(apr_uint32_t);
+        }
     }
 }
 
@@ -224,33 +224,33 @@ APR_DECLARE(void) apr_sha1_update_binary(apr_sha1_ctx_t *sha_info,
     unsigned int i;
 
     if ((sha_info->count_lo + ((apr_uint32_t) count << 3)) < sha_info->count_lo) {
-	++sha_info->count_hi;
+        ++sha_info->count_hi;
     }
     sha_info->count_lo += (apr_uint32_t) count << 3;
     sha_info->count_hi += (apr_uint32_t) count >> 29;
     if (sha_info->local) {
-	i = SHA_BLOCKSIZE - sha_info->local;
-	if (i > count) {
-	    i = count;
-	}
-	memcpy(((apr_byte_t *) sha_info->data) + sha_info->local, buffer, i);
-	count -= i;
-	buffer += i;
-	sha_info->local += i;
-	if (sha_info->local == SHA_BLOCKSIZE) {
-	    maybe_byte_reverse(sha_info->data, SHA_BLOCKSIZE);
-	    sha_transform(sha_info);
-	}
-	else {
-	    return;
-	}
+        i = SHA_BLOCKSIZE - sha_info->local;
+        if (i > count) {
+            i = count;
+        }
+        memcpy(((apr_byte_t *) sha_info->data) + sha_info->local, buffer, i);
+        count -= i;
+        buffer += i;
+        sha_info->local += i;
+        if (sha_info->local == SHA_BLOCKSIZE) {
+            maybe_byte_reverse(sha_info->data, SHA_BLOCKSIZE);
+            sha_transform(sha_info);
+        }
+        else {
+            return;
+        }
     }
     while (count >= SHA_BLOCKSIZE) {
-	memcpy(sha_info->data, buffer, SHA_BLOCKSIZE);
-	buffer += SHA_BLOCKSIZE;
-	count -= SHA_BLOCKSIZE;
-	maybe_byte_reverse(sha_info->data, SHA_BLOCKSIZE);
-	sha_transform(sha_info);
+        memcpy(sha_info->data, buffer, SHA_BLOCKSIZE);
+        buffer += SHA_BLOCKSIZE;
+        count -= SHA_BLOCKSIZE;
+        maybe_byte_reverse(sha_info->data, SHA_BLOCKSIZE);
+        sha_transform(sha_info);
     }
     memcpy(sha_info->data, buffer, count);
     sha_info->local = count;
@@ -265,39 +265,39 @@ APR_DECLARE(void) apr_sha1_update(apr_sha1_ctx_t *sha_info, const char *buf,
     apr_size_t inbytes_left, outbytes_left;
 
     if ((sha_info->count_lo + ((apr_uint32_t) count << 3)) < sha_info->count_lo) {
-	++sha_info->count_hi;
+        ++sha_info->count_hi;
     }
     sha_info->count_lo += (apr_uint32_t) count << 3;
     sha_info->count_hi += (apr_uint32_t) count >> 29;
     /* Is there a remainder of the previous Update operation? */
     if (sha_info->local) {
-	i = SHA_BLOCKSIZE - sha_info->local;
-	if (i > count) {
-	    i = count;
-	}
+        i = SHA_BLOCKSIZE - sha_info->local;
+        if (i > count) {
+            i = count;
+        }
         inbytes_left = outbytes_left = i;
         apr_xlate_conv_buffer(ebcdic2ascii_xlate, buffer, &inbytes_left,
                               ((apr_byte_t *) sha_info->data) + sha_info->local,
                               &outbytes_left);
-	count -= i;
-	buffer += i;
-	sha_info->local += i;
-	if (sha_info->local == SHA_BLOCKSIZE) {
-	    maybe_byte_reverse(sha_info->data, SHA_BLOCKSIZE);
-	    sha_transform(sha_info);
-	}
-	else {
-	    return;
-	}
+        count -= i;
+        buffer += i;
+        sha_info->local += i;
+        if (sha_info->local == SHA_BLOCKSIZE) {
+            maybe_byte_reverse(sha_info->data, SHA_BLOCKSIZE);
+            sha_transform(sha_info);
+        }
+        else {
+            return;
+        }
     }
     while (count >= SHA_BLOCKSIZE) {
         inbytes_left = outbytes_left = SHA_BLOCKSIZE;
         apr_xlate_conv_buffer(ebcdic2ascii_xlate, buffer, &inbytes_left,
                               (apr_byte_t *) sha_info->data, &outbytes_left);
-	buffer += SHA_BLOCKSIZE;
-	count -= SHA_BLOCKSIZE;
-	maybe_byte_reverse(sha_info->data, SHA_BLOCKSIZE);
-	sha_transform(sha_info);
+        buffer += SHA_BLOCKSIZE;
+        count -= SHA_BLOCKSIZE;
+        maybe_byte_reverse(sha_info->data, SHA_BLOCKSIZE);
+        sha_transform(sha_info);
     }
     inbytes_left = outbytes_left = count;
     apr_xlate_conv_buffer(ebcdic2ascii_xlate, buffer, &inbytes_left,
@@ -321,14 +321,14 @@ APR_DECLARE(void) apr_sha1_final(unsigned char digest[APR_SHA1_DIGESTSIZE],
     count = (int) ((lo_bit_count >> 3) & 0x3f);
     ((apr_byte_t *) sha_info->data)[count++] = 0x80;
     if (count > SHA_BLOCKSIZE - 8) {
-	memset(((apr_byte_t *) sha_info->data) + count, 0, SHA_BLOCKSIZE - count);
-	maybe_byte_reverse(sha_info->data, SHA_BLOCKSIZE);
-	sha_transform(sha_info);
-	memset((apr_byte_t *) sha_info->data, 0, SHA_BLOCKSIZE - 8);
+        memset(((apr_byte_t *) sha_info->data) + count, 0, SHA_BLOCKSIZE - count);
+        maybe_byte_reverse(sha_info->data, SHA_BLOCKSIZE);
+        sha_transform(sha_info);
+        memset((apr_byte_t *) sha_info->data, 0, SHA_BLOCKSIZE - 8);
     }
     else {
-	memset(((apr_byte_t *) sha_info->data) + count, 0,
-	       SHA_BLOCKSIZE - 8 - count);
+        memset(((apr_byte_t *) sha_info->data) + count, 0,
+               SHA_BLOCKSIZE - 8 - count);
     }
     maybe_byte_reverse(sha_info->data, SHA_BLOCKSIZE);
     sha_info->data[14] = hi_bit_count;
@@ -336,11 +336,11 @@ APR_DECLARE(void) apr_sha1_final(unsigned char digest[APR_SHA1_DIGESTSIZE],
     sha_transform(sha_info);
 
     for (i = 0, j = 0; j < APR_SHA1_DIGESTSIZE; i++) {
-	k = sha_info->digest[i];
-	digest[j++] = (unsigned char) ((k >> 24) & 0xff);
-	digest[j++] = (unsigned char) ((k >> 16) & 0xff);
-	digest[j++] = (unsigned char) ((k >> 8) & 0xff);
-	digest[j++] = (unsigned char) (k & 0xff);
+        k = sha_info->digest[i];
+        digest[j++] = (unsigned char) ((k >> 24) & 0xff);
+        digest[j++] = (unsigned char) ((k >> 16) & 0xff);
+        digest[j++] = (unsigned char) ((k >> 8) & 0xff);
+        digest[j++] = (unsigned char) (k & 0xff);
     }
 }
 

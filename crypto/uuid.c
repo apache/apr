@@ -41,19 +41,19 @@ static unsigned char parse_hexpair(const char *s)
 
     result = s[0] - '0';
     if (result > 48)
-	result = (result - 39) << 4;
+        result = (result - 39) << 4;
     else if (result > 16)
-	result = (result - 7) << 4;
+        result = (result - 7) << 4;
     else
-	result = result << 4;
+        result = result << 4;
 
     temp = s[1] - '0';
     if (temp > 48)
-	result |= temp - 39;
+        result |= temp - 39;
     else if (temp > 16)
-	result |= temp - 7;
+        result |= temp - 7;
     else
-	result |= temp;
+        result |= temp;
 
     return (unsigned char)result;
 }
@@ -98,15 +98,15 @@ APR_DECLARE(apr_status_t) apr_uuid_parse(apr_uuid_t *uuid,
     unsigned char *d = uuid->data;
 
     for (i = 0; i < 36; ++i) {
-	char c = uuid_str[i];
-	if (!apr_isxdigit(c) &&
-	    !(c == '-' && (i == 8 || i == 13 || i == 18 || i == 23)))
+        char c = uuid_str[i];
+        if (!apr_isxdigit(c) &&
+            !(c == '-' && (i == 8 || i == 13 || i == 18 || i == 23)))
             /* ### need a better value */
-	    return APR_BADARG;
+            return APR_BADARG;
     }
     if (uuid_str[36] != '\0') {
         /* ### need a better value */
-	return APR_BADARG;
+        return APR_BADARG;
     }
 
     d[0] = parse_hexpair(&uuid_str[0]);
@@ -124,7 +124,7 @@ APR_DECLARE(apr_status_t) apr_uuid_parse(apr_uuid_t *uuid,
     d[9] = parse_hexpair(&uuid_str[21]);
 
     for (i = 6; i--;)
-	d[10 + i] = parse_hexpair(&uuid_str[i*2+24]);
+        d[10 + i] = parse_hexpair(&uuid_str[i*2+24]);
 
     return APR_SUCCESS;
 }
