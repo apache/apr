@@ -162,6 +162,17 @@ ONGOING REMINDERS FOR STYLE/SUBSTANCE OF CONTRIBUTING TO APR:
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
+    * Need a proper fragmentation control API for clearing apr_pool's,
+      where the block alloc/clear/realloc sequence introduces more and
+      more unusable spaces in the physical blocks.  APR must provide
+      a mechanism to recognize such fragmented conditions, free the
+      physical pages, and allocate a new single pool block.  See also
+        http://svn.haxx.se/dev/archive-2008-10/0070.shtml
+
+    * Implement apr_pool_realloc for consumers such as apr_vformatter,
+      where the possibility to extend an allocation exists.  Given that
+      an apr function does this, external consumers should be allowed to.
+
     * Need some architecture/OS specific versions of the atomic operations.
 	progress: generic, solaris Sparc, FreeBSD5, linux, and OS/390 done
 	need: AIX, AS400, HPUX
