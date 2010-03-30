@@ -196,8 +196,9 @@ case $host in
 *-os2*)
     # Use a custom-made libtool replacement
     echo "using aplibtool"
-    LIBTOOL="$srcdir/build/aplibtool"
-    gcc $CFLAGS $CPPFLAGS -o $LIBTOOL.exe $LIBTOOL.c
+    LIBTOOL="$apr_builddir/build/aplibtool"
+    LIBTOOL_SRC="$apr_srcdir/build/aplibtool.c"
+    $CC $CFLAGS $CPPFLAGS -o $LIBTOOL.exe $LIBTOOL_SRC
     ;;
 *)
     if test "x$LTFLAGS" = "x"; then
