@@ -36,7 +36,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     int mflags = OPEN_FLAGS_FAIL_ON_ERROR|OPEN_SHARE_DENYNONE|OPEN_FLAGS_NOINHERIT;
     int rv;
     ULONG action;
-    apr_file_t *dafile = (apr_file_t *)apr_palloc(pool, sizeof(apr_file_t));
+    apr_file_t *dafile = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
 
     dafile->pool = pool;
     dafile->isopen = FALSE;
@@ -61,10 +61,14 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     if (dafile->buffered) {
         dafile->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
         dafile->bufsize = APR_FILE_DEFAULT_BUFSIZE;
-        rv = apr_thread_mutex_create(&dafile->mutex, 0, pool);
 
-        if (rv)
-            return rv;
+        if (flag & APR_FOPEN_XTHREAD) {
+            rv = apr_thread_mutex_create(&dafile->mutex, 0, pool);
+
+            if (rv) {
+                return rv;
+            }
+        }
     }
 
     if (flag & APR_FOPEN_CREATE) {
