@@ -681,6 +681,32 @@ static void crypt_mutex_unlock(void)
     pthread_mutex_unlock(&crypt_mutex);
 }
 
+#elif defined(OS2)
+
+static HMTX crypt_mutex = 0;
+static void crypt_mutex_lock()
+{
+    if (crypt_mutex == 0) {
+        /* Prevent race condition where two threads could try to create the
+         * mutex concurrently
+         */
+        DosEnterCritSec();
+
+        if (crypt_mutex == 0) {
+            DosCreateMutexSem(NULL, &crypt_mutex, 0, FALSE);
+        }
+
+        DosExitCritSec();
+    }
+
+    DosRequestMutexSem(crypt_mutex, SEM_INDEFINITE_WAIT);
+}
+
+static void crypt_mutex_unlock()
+{
+    DosReleaseMutexSem(crypt_mutex);
+}
+
 #else
 
 #error apr_password_validate() is not threadsafe.  rebuild APR without thread support.
