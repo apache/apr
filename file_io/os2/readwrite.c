@@ -407,3 +407,17 @@ apr_status_t apr_file_check_read(apr_file_t *fd)
 
     return APR_FROM_OS_ERROR(rc);
 }
+
+
+
+APR_DECLARE(apr_status_t) apr_file_rotating_check(apr_file_t *thefile)
+{
+    return APR_ENOTIMPL;
+}
+
+
+
+APR_DECLARE(apr_status_t) apr_file_rotating_manual_check(apr_file_t *thefile, apr_time_t n)
+{
+    return APR_ENOTIMPL;
+}
