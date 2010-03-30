@@ -21,7 +21,7 @@ APR_DECLARE(apr_status_t) apr_file_buffer_set(apr_file_t *file,
                                               char * buffer,
                                               apr_size_t bufsize)
 {
-    apr_status_t rv;
+    apr_status_t rv = APR_SUCCESS;
     int do_locking = file->mutex != NULL && file->buffered;
 
     if (do_locking) {
