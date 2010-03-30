@@ -194,6 +194,7 @@ int parse_short_opt(char *arg, cmd_data_t *cmd_data)
     }
 
     if (strcmp(arg, "module") == 0) {
+        shared = true;
         return 1;
     }
 
@@ -219,6 +220,10 @@ int parse_short_opt(char *arg, cmd_data_t *cmd_data)
 
     if (strcmp(arg, "no-install") == 0) {
         return 1;
+    }
+
+    if (strcmp(arg, "release") == 0 ) {
+        return 2;
     }
 
     return 0;
@@ -338,12 +343,28 @@ bool parse_output_file_name(char *arg, cmd_data_t *cmd_data)
     ext++;
     pathlen = name - arg;
 
+    if (strcmp(ext, "exe") == 0) {
+        cmd_data->output_type = otProgram;
+        cmd_data->output_name = newarg;
+        return false;
+    }
+
+    if (strcmp(ext, "dll") == 0) {
+        cmd_data->output_type = otDynamicLibrary;
+        cmd_data->output_name = newarg;
+        return false;
+    }
+
     if (strcmp(ext, "la") == 0) {
         cmd_data->stub_name = arg;
         cmd_data->output_type = shared ? otDynamicLibrary : otStaticLibrary;
         newarg = (char *)malloc(strlen(arg) + 10);
         mkdir(".libs", 0);
         strcpy(newarg, ".libs/");
+
+        if (strrchr(arg, '/')) {
+          arg = strrchr(arg, '/') + 1;
+        }
 
         if (strncmp(arg, "lib", 3) == 0) {
             arg += 3;
