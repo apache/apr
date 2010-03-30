@@ -239,20 +239,9 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
 
 APR_DECLARE(apr_status_t) apr_file_putc(char ch, apr_file_t *thefile)
 {
-    ULONG rc;
-    ULONG byteswritten;
+    apr_size_t nbytes = 1;
 
-    if (!thefile->isopen) {
-        return APR_EBADF;
-    }
-
-    rc = DosWrite(thefile->filedes, &ch, 1, &byteswritten);
-
-    if (rc) {
-        return APR_FROM_OS_ERROR(rc);
-    }
-    
-    return APR_SUCCESS;
+    return apr_file_write(thefile, &ch, &nbytes);
 }
 
 
