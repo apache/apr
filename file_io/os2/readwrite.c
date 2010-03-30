@@ -317,12 +317,22 @@ APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
 
 APR_DECLARE(apr_status_t) apr_file_sync(apr_file_t *thefile)
 {
-    return APR_ENOTIMPL;
+    apr_status_t rv;
+    int rc;
+
+    rv = apr_file_flush(thefile);
+
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+
+    rc = DosResetBuffer(thefile->filedes);
+    return APR_FROM_OS_ERROR(rc);
 }
 
 APR_DECLARE(apr_status_t) apr_file_datasync(apr_file_t *thefile)
 {
-    return APR_ENOTIMPL;
+    return apr_file_sync(thefile);
 }
 
 APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
