@@ -31,7 +31,6 @@ static void FS3_to_finfo(apr_finfo_t *finfo, FILESTATUS3 *fstatus)
         finfo->filetype = APR_DIR;
     else
         finfo->filetype = APR_REG;
-    /* XXX: No other possible types from FS3? */
 
     finfo->user = 0;
     finfo->group = 0;
@@ -73,8 +72,7 @@ static apr_status_t handle_type(apr_filetype_e *ftype, HFILE file)
             break;
 
         default:
-            /* Brian, is this correct???
-             */
+            /* Values greater than 2 are reserved, this should never happen */
             *ftype = APR_UNKFILE;
             break;
         }
