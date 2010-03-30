@@ -24,6 +24,24 @@
 
 #include <malloc.h>
 
+static void file_lock(apr_file_t *thefile)
+{
+    if (thefile->mutex && thefile->buffered) {
+        apr_thread_mutex_lock(thefile->mutex);
+    }
+}
+
+
+
+static void file_unlock(apr_file_t *thefile)
+{
+    if (thefile->mutex && thefile->buffered) {
+        apr_thread_mutex_unlock(thefile->mutex);
+    }
+}
+
+
+
 APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
 {
     ULONG rc = 0;
@@ -39,13 +57,13 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         ULONG blocksize;
         ULONG size = *nbytes;
 
-        apr_thread_mutex_lock(thefile->mutex);
+        file_lock(thefile);
 
         if (thefile->direction == 1) {
             int rv = apr_file_flush(thefile);
 
             if (rv != APR_SUCCESS) {
-                apr_thread_mutex_unlock(thefile->mutex);
+                file_unlock(thefile);
                 return rv;
             }
 
@@ -79,7 +97,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         }
 
         *nbytes = rc == 0 ? pos - (char *)buf : 0;
-        apr_thread_mutex_unlock(thefile->mutex);
+        file_unlock(thefile);
 
         if (*nbytes == 0 && rc == 0 && thefile->eof_hit) {
             return APR_EOF;
@@ -137,7 +155,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         int blocksize;
         int size = *nbytes;
 
-        apr_thread_mutex_lock(thefile->mutex);
+        file_lock(thefile);
 
         if ( thefile->direction == 0 ) {
             // Position file pointer for writing at the offset we are logically reading from
@@ -160,7 +178,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             size -= blocksize;
         }
 
-        apr_thread_mutex_unlock(thefile->mutex);
+        file_unlock(thefile);
         return APR_FROM_OS_ERROR(rc);
     } else {
         if (thefile->flags & APR_FOPEN_APPEND) {
@@ -288,11 +306,15 @@ APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
         int rc = 0;
 
         if (thefile->direction == 1 && thefile->bufpos) {
+            file_lock(thefile);
+
             rc = DosWrite(thefile->filedes, thefile->buffer, thefile->bufpos, &written);
             thefile->filePtr += written;
 
             if (rc == 0)
                 thefile->bufpos = 0;
+
+            file_unlock(thefile);
         }
 
         return APR_FROM_OS_ERROR(rc);

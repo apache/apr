@@ -22,35 +22,45 @@ APR_DECLARE(apr_status_t) apr_file_buffer_set(apr_file_t *file,
                                               apr_size_t bufsize)
 {
     apr_status_t rv;
+    int do_locking = file->mutex != NULL && file->buffered;
 
-    apr_thread_mutex_lock(file->mutex);
+    if (do_locking) {
+        apr_thread_mutex_lock(file->mutex);
+    }
  
-    if(file->buffered) {
+    if (file->buffered) {
         /* Flush the existing buffer */
         rv = apr_file_flush(file);
         if (rv != APR_SUCCESS) {
-            apr_thread_mutex_unlock(file->mutex);
+            if (do_locking) {
+                apr_thread_mutex_unlock(file->mutex);
+            }
+
             return rv;
         }
     }
         
     file->buffer = buffer;
     file->bufsize = bufsize;
-    file->buffered = 1;
     file->bufpos = 0;
     file->direction = 0;
     file->dataRead = 0;
- 
-    if (file->bufsize == 0) {
-            /* Setting the buffer size to zero is equivalent to turning 
-             * buffering off. 
-             */
-            file->buffered = 0;
-    }
-    
-    apr_thread_mutex_unlock(file->mutex);
 
-    return APR_SUCCESS;
+    if (bufsize > 0 && file->mutex == NULL && (file->flags & APR_FOPEN_XTHREAD)) {
+        /* buffering is being turned on but we have no mutex, make one */
+        rv = apr_thread_mutex_create(&file->mutex, 0, file->pool);
+    }
+
+    /* Setting the buffer size to zero is equivalent to turning 
+     * buffering off. 
+     */
+    file->buffered = file->bufsize > 0;
+    
+    if (do_locking) {
+        apr_thread_mutex_unlock(file->mutex);
+    }
+
+    return rv;
 }
 
 APR_DECLARE(apr_size_t) apr_file_buffer_size_get(apr_file_t *file)
