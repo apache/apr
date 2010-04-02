@@ -55,7 +55,7 @@ static int os2_fn_link()
         rc = DosLoadModule(errorstr, sizeof(errorstr), "SO32DLL", &hSO32DLL);
 
         if (rc)
-            return APR_OS2_STATUS(rc);
+            return APR_FROM_OS_ERROR(rc);
 
         rc = DosQueryProcAddr(hSO32DLL, 0, "SOCKET", &apr_os2_socket);
 
@@ -114,7 +114,7 @@ static int os2_fn_link()
             rc = DosQueryProcAddr(hSO32DLL, 0, "RECVFROM", &apr_os2_recvfrom);
 
         if (rc)
-            return APR_OS2_STATUS(rc);
+            return APR_FROM_OS_ERROR(rc);
     }
 
     DosExitCritSec();

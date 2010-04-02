@@ -855,10 +855,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define apr_get_netos_error()   (APR_FROM_OS_ERROR(errno))
 #define apr_set_netos_error(e)  (errno = APR_TO_OS_ERROR(e))
 
-/* And this needs to be greped away for good:
- */
-#define APR_OS2_STATUS(e) (APR_FROM_OS_ERROR(e))
-
 /* These can't sit in a private header, so in spite of the extra size, 
  * they need to be made available here.
  */

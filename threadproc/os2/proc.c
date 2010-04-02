@@ -619,7 +619,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
         return APR_CHILD_NOTDONE;
     }
 
-    return APR_OS2_STATUS(rc);
+    return APR_FROM_OS_ERROR(rc);
 } 
 
 
@@ -640,7 +640,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
         return APR_CHILD_NOTDONE;
     }
 
-    return APR_OS2_STATUS(rc);
+    return APR_FROM_OS_ERROR(rc);
 } 
 
 

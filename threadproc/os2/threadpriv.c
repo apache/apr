@@ -33,7 +33,7 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key,
     }
 
     (*key)->pool = pool;
-    return APR_OS2_STATUS(DosAllocThreadLocalMemory(1, &((*key)->key)));
+    return APR_FROM_OS_ERROR(DosAllocThreadLocalMemory(1, &((*key)->key)));
 }
 
 APR_DECLARE(apr_status_t) apr_threadkey_private_get(void **new, apr_threadkey_t *key)
@@ -50,7 +50,7 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_set(void *priv, apr_threadkey_t 
 
 APR_DECLARE(apr_status_t) apr_threadkey_private_delete(apr_threadkey_t *key)
 {
-    return APR_OS2_STATUS(DosFreeThreadLocalMemory(key->key));
+    return APR_FROM_OS_ERROR(DosFreeThreadLocalMemory(key->key));
 }
 
 APR_DECLARE(apr_status_t) apr_threadkey_data_get(void **data, const char *key,
