@@ -50,27 +50,27 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
 
     if (opt & APR_SO_KEEPALIVE) {
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_KEEPALIVE, (void *)&one, sizeof(int)) == -1) {
-            return APR_OS2_STATUS(sock_errno());
+            return APR_FROM_OS_ERROR(sock_errno());
         }
     }
     if (opt & APR_SO_DEBUG) {
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_DEBUG, (void *)&one, sizeof(int)) == -1) {
-            return APR_OS2_STATUS(sock_errno());
+            return APR_FROM_OS_ERROR(sock_errno());
         }
     }
     if (opt & APR_SO_REUSEADDR) {
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_REUSEADDR, (void *)&one, sizeof(int)) == -1) {
-            return APR_OS2_STATUS(sock_errno());
+            return APR_FROM_OS_ERROR(sock_errno());
         }
     }
     if (opt & APR_SO_SNDBUF) {
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF, (void *)&on, sizeof(int)) == -1) {
-            return APR_OS2_STATUS(sock_errno());
+            return APR_FROM_OS_ERROR(sock_errno());
         }
     }
     if (opt & APR_SO_NONBLOCK) {
         if (ioctl(sock->socketdes, FIONBIO, (caddr_t)&one, sizeof(one)) == -1) {
-            return APR_OS2_STATUS(sock_errno());
+            return APR_FROM_OS_ERROR(sock_errno());
         } else {
             sock->nonblock = one;
         }
@@ -79,12 +79,12 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
         li.l_onoff = on;
         li.l_linger = APR_MAX_SECS_TO_LINGER;
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_LINGER, (char *) &li, sizeof(struct linger)) == -1) {
-            return APR_OS2_STATUS(sock_errno());
+            return APR_FROM_OS_ERROR(sock_errno());
         }
     }
     if (opt & APR_TCP_NODELAY) {
         if (setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(int)) == -1) {
-            return APR_OS2_STATUS(sock_errno());
+            return APR_FROM_OS_ERROR(sock_errno());
         }
     }
     return APR_SUCCESS;
@@ -115,7 +115,7 @@ APR_DECLARE(apr_status_t) apr_socket_atmark(apr_socket_t *sock, int *atmark)
     int oobmark;
 
     if (ioctl(sock->socketdes, SIOCATMARK, (void*)&oobmark, sizeof(oobmark)) < 0) {
-        return APR_OS2_STATUS(sock_errno());
+        return APR_FROM_OS_ERROR(sock_errno());
     }
 
     *atmark = (oobmark != 0);
@@ -129,7 +129,7 @@ APR_DECLARE(apr_status_t) apr_gethostname(char *buf, apr_int32_t len,
 {
     if (gethostname(buf, len) == -1) {
         buf[0] = '\0';
-        return APR_OS2_STATUS(sock_errno());
+        return APR_FROM_OS_ERROR(sock_errno());
     }
     else if (!memchr(buf, '\0', len)) { /* buffer too small */
         buf[0] = '\0';
