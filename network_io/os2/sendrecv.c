@@ -46,7 +46,7 @@ APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
                 if (err == SOCEINTR)
                     continue;
 
-                return APR_OS2_STATUS(err);
+                return APR_FROM_OS_ERROR(err);
             }
         }
 
@@ -56,7 +56,7 @@ APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
 
     if (err) {
         *len = 0;
-        return APR_OS2_STATUS(err);
+        return APR_FROM_OS_ERROR(err);
     }
 
     (*len) = rv;
@@ -86,7 +86,7 @@ APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock, char *buf,
                 if (err == SOCEINTR)
                     continue;
 
-                return APR_OS2_STATUS(err);
+                return APR_FROM_OS_ERROR(err);
             }
         }
 
@@ -96,7 +96,7 @@ APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock, char *buf,
 
     if (err) {
         *len = 0;
-        return APR_OS2_STATUS(err);
+        return APR_FROM_OS_ERROR(err);
     }
 
     (*len) = rv;
@@ -137,7 +137,7 @@ APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock,
                 if (err == SOCEINTR)
                     continue;
 
-                return APR_OS2_STATUS(err);
+                return APR_FROM_OS_ERROR(err);
             }
         }
 
@@ -147,7 +147,7 @@ APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock,
 
     if (err) {
         *len = 0;
-        return APR_OS2_STATUS(err);
+        return APR_FROM_OS_ERROR(err);
     }
 
     *len = rv;

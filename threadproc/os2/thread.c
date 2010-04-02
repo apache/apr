@@ -152,7 +152,7 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *th
         rc = 0; /* Thread had already terminated */
 
     *retval = thd->exitval;
-    return APR_OS2_STATUS(rc);
+    return APR_FROM_OS_ERROR(rc);
 }
 
 

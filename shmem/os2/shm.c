@@ -49,7 +49,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     rc = DosAllocSharedMem(&(newm->memblock), name, reqsize, flags);
 
     if (rc) {
-        return APR_OS2_STATUS(rc);
+        return APR_FROM_OS_ERROR(rc);
     }
 
     *m = newm;

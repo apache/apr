@@ -40,7 +40,7 @@ APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int signum)
      * call instead
      */
     if (signum == SIGTERM) {
-        return APR_OS2_STATUS(DosSendSignalException(proc->pid,
+        return APR_FROM_OS_ERROR(DosSendSignalException(proc->pid,
                                                      XCPT_SIGNAL_BREAK));
     }
 #endif /* OS2 */

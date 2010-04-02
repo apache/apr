@@ -50,7 +50,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
     if (!rc)
         apr_pool_cleanup_register(pool, new_mutex, thread_mutex_cleanup, apr_pool_cleanup_null);
 
-    return APR_OS2_STATUS(rc);
+    return APR_FROM_OS_ERROR(rc);
 }
 
 
@@ -58,7 +58,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
 APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 {
     ULONG rc = DosRequestMutexSem(mutex->hMutex, SEM_INDEFINITE_WAIT);
-    return APR_OS2_STATUS(rc);
+    return APR_FROM_OS_ERROR(rc);
 }
 
 
@@ -66,7 +66,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 {
     ULONG rc = DosRequestMutexSem(mutex->hMutex, SEM_IMMEDIATE_RETURN);
-    return APR_OS2_STATUS(rc);
+    return APR_FROM_OS_ERROR(rc);
 }
 
 
@@ -74,7 +74,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 {
     ULONG rc = DosReleaseMutexSem(mutex->hMutex);
-    return APR_OS2_STATUS(rc);
+    return APR_FROM_OS_ERROR(rc);
 }
 
 
