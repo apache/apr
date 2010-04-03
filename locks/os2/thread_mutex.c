@@ -66,6 +66,11 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 {
     ULONG rc = DosRequestMutexSem(mutex->hMutex, SEM_IMMEDIATE_RETURN);
+
+    if (rc == ERROR_TIMEOUT) {
+        return APR_EBUSY;
+    }
+
     return APR_FROM_OS_ERROR(rc);
 }
 
