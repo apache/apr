@@ -143,8 +143,10 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
         }
     }
 
-    if (file->buffered)
+    if (file->mutex) {
         apr_thread_mutex_destroy(file->mutex);
+        file->mutex = NULL;
+    }
 
     return APR_SUCCESS;
 }
