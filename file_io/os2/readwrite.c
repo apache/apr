@@ -53,6 +53,13 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         return APR_EBADF;
     }
 
+    if (thefile->ungetchar != -1 && req_nbytes >= 1) {
+        *(char *)buf = (char)thefile->ungetchar;
+        (char *)buf++;
+        (*nbytes)--;
+        thefile->ungetchar = -1;
+    }
+
     if (thefile->buffered) {
         char *pos = (char *)buf;
         ULONG blocksize;
@@ -249,8 +256,8 @@ APR_DECLARE(apr_status_t) apr_file_putc(char ch, apr_file_t *thefile)
 
 APR_DECLARE(apr_status_t) apr_file_ungetc(char ch, apr_file_t *thefile)
 {
-    apr_off_t offset = -1;
-    return apr_file_seek(thefile, APR_CUR, &offset);
+    thefile->ungetchar = (unsigned char)ch;
+    return APR_SUCCESS;
 }
 
 

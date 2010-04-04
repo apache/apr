@@ -85,6 +85,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*in)->pipe = 1;
     (*in)->timeout = -1;
     (*in)->blocking = BLK_ON;
+    (*in)->ungetchar = -1;
     apr_pool_cleanup_register(pool, *in, apr_file_cleanup, apr_pool_cleanup_null);
 
     (*out) = (apr_file_t *)apr_palloc(pool, sizeof(apr_file_t));
@@ -97,6 +98,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*out)->pipe = 1;
     (*out)->timeout = -1;
     (*out)->blocking = BLK_ON;
+    (*out)->ungetchar = -1;
     apr_pool_cleanup_register(pool, *out, apr_file_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
@@ -186,6 +188,7 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put_ex(apr_file_t **file,
     (*file)->pipe = 1;
     (*file)->blocking = BLK_UNKNOWN; /* app needs to make a timeout call */
     (*file)->timeout = -1;
+    (*file)->ungetchar = -1;
     (*file)->filedes = *thefile;
 
     if (register_cleanup) {

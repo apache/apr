@@ -49,6 +49,7 @@ static apr_status_t file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_po
     dup_file->buffered = old_file->buffered;
     dup_file->isopen = old_file->isopen;
     dup_file->flags = old_file->flags & ~APR_INHERIT;
+    dup_file->ungetchar = old_file->ungetchar;
     /* TODO - dup pipes correctly */
     dup_file->pipe = old_file->pipe;
 
