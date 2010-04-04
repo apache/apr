@@ -162,6 +162,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         char *pos = (char *)buf;
         int blocksize;
         int size = *nbytes;
+        apr_status_t rv = APR_SUCCESS;
 
         file_lock(thefile);
 
@@ -174,10 +175,11 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             thefile->direction = 1;
         }
 
-        while (rc == 0 && size > 0) {
-            if (thefile->bufpos == thefile->bufsize)   // write buffer is full
-                /* XXX bug; - rc is double-transformed os->apr below */
-                rc = apr_file_flush(thefile);
+        while (rv == APR_SUCCESS && size > 0) {
+            if (thefile->bufpos == thefile->bufsize) {
+                /* write buffer is full */
+                rv = apr_file_flush(thefile);
+            }
 
             blocksize = size > thefile->bufsize - thefile->bufpos ? thefile->bufsize - thefile->bufpos : size;
             memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);
@@ -187,7 +189,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         }
 
         file_unlock(thefile);
-        return APR_FROM_OS_ERROR(rc);
+        return rv;
     } else {
         if (thefile->flags & APR_FOPEN_APPEND) {
             FILELOCK all = { 0, 0x7fffffff };
