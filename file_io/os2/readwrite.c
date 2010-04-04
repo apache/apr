@@ -372,28 +372,6 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
 
 
 
-APR_DECLARE_NONSTD(int) apr_file_printf(apr_file_t *fptr, 
-                                        const char *format, ...)
-{
-    int cc;
-    va_list ap;
-    char *buf;
-    int len;
-
-    buf = malloc(HUGE_STRING_LEN);
-    if (buf == NULL) {
-        return 0;
-    }
-    va_start(ap, format);
-    len = apr_vsnprintf(buf, HUGE_STRING_LEN, format, ap);
-    cc = apr_file_puts(buf, fptr);
-    va_end(ap);
-    free(buf);
-    return (cc == APR_SUCCESS) ? len : -1;
-}
-
-
-
 apr_status_t apr_file_check_read(apr_file_t *fd)
 {
     int rc;
