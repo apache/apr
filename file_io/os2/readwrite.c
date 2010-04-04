@@ -219,29 +219,21 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
 
 
 
-#ifdef HAVE_WRITEV
-
 APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iovec *vec, apr_size_t nvec, apr_size_t *nbytes)
 {
-    int bytes;
+  int c;
+  apr_status_t rv = APR_SUCCESS;
+  apr_size_t written = 0;
 
-    if (thefile->buffered) {
-        apr_status_t rv = apr_file_flush(thefile);
-        if (rv != APR_SUCCESS) {
-            return rv;
-        }
-    }
+  for (c = 0; c < nvec && rv == APR_SUCCESS; c++) {
+      apr_size_t nbytes = vec[c].iov_len;
+      rv = apr_file_write(thefile, vec[c].iov_base, &nbytes);
+      written += nbytes;
+  }
 
-    if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
-        *nbytes = 0;
-        return errno;
-    }
-    else {
-        *nbytes = bytes;
-        return APR_SUCCESS;
-    }
+  *nbytes = written;
+  return rv;
 }
-#endif
 
 
 
