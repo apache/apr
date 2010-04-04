@@ -126,7 +126,6 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
     apr_status_t status;
     
     if (file && file->isopen) {
-        /* XXX: flush here is not mutex protected */
         status = apr_file_flush(file);
         rc = DosClose(file->filedes);
     
