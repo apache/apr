@@ -46,6 +46,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
 {
     ULONG rc = 0;
     ULONG bytesread;
+    apr_size_t req_nbytes = *nbytes;
 
     if (!thefile->isopen) {
         *nbytes = 0;
@@ -129,7 +130,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
 
         *nbytes = bytesread;
         
-        if (bytesread == 0) {
+        if (bytesread == 0 && req_nbytes > 0) {
             thefile->eof_hit = TRUE;
             return APR_EOF;
         }
