@@ -44,6 +44,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     dafile->buffer = NULL;
     dafile->flags = flag;
     dafile->blocking = BLK_ON;
+    dafile->ungetchar = -1;
     
     if ((flag & APR_FOPEN_READ) && (flag & APR_FOPEN_WRITE)) {
         mflags |= OPEN_ACCESS_READWRITE;
@@ -199,6 +200,7 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, apr_os_file_t *thef
     (*file)->flags = flags;
     (*file)->pipe = FALSE;
     (*file)->buffered = (flags & APR_FOPEN_BUFFERED) > 0;
+    (*file)->ungetchar = -1;
 
     if ((*file)->buffered) {
         apr_status_t rv;
