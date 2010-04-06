@@ -145,6 +145,8 @@ APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, apr_fi
 
 APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
 {
+    apr_status_t rv = APR_SUCCESS;
+
     if (thepipe->pipe == 1) {
         thepipe->timeout = timeout;
 
@@ -161,7 +163,11 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_int
             }
         }
     }
-    return APR_EINVAL;
+    else {
+        rv = APR_EINVAL;
+    }
+
+    return rv;
 }
 
 
