@@ -284,7 +284,8 @@ APR_DECLARE(apr_status_t) apr_file_inherit_set(apr_file_t *thefile)
     rv = DosQueryFHState(thefile->filedes, &state);
 
     if (rv == 0 && (state & OPEN_FLAGS_NOINHERIT) != 0) {
-        rv = DosSetFHState(thefile->filedes, state & ~OPEN_FLAGS_NOINHERIT);
+        state &= OPEN_FLAGS_WRITE_THROUGH|OPEN_FLAGS_FAIL_ON_ERROR|OPEN_FLAGS_NO_CACHE;
+        rv = DosSetFHState(thefile->filedes, state);
     }
 
     return APR_FROM_OS_ERROR(rv);
@@ -300,6 +301,7 @@ APR_DECLARE(apr_status_t) apr_file_inherit_unset(apr_file_t *thefile)
     rv = DosQueryFHState(thefile->filedes, &state);
 
     if (rv == 0 && (state & OPEN_FLAGS_NOINHERIT) == 0) {
+        state &= OPEN_FLAGS_WRITE_THROUGH|OPEN_FLAGS_FAIL_ON_ERROR|OPEN_FLAGS_NO_CACHE;
         rv = DosSetFHState(thefile->filedes, state | OPEN_FLAGS_NOINHERIT);
     }
 
