@@ -89,6 +89,25 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     apr_pool_cleanup_register(pool, *in, apr_file_cleanup, apr_pool_cleanup_null);
 
     (*out) = (apr_file_t *)apr_palloc(pool, sizeof(apr_file_t));
+    rc = DosCreateEventSem(NULL, &(*out)->pipeSem, DC_SEM_SHARED, FALSE);
+
+    if (rc) {
+        DosClose(filedes[0]);
+        DosClose(filedes[1]);
+        DosCloseEventSem((*in)->pipeSem);
+        return APR_FROM_OS_ERROR(rc);
+    }
+
+    rc = DosSetNPipeSem(filedes[1], (HSEM)(*out)->pipeSem, 1);
+
+    if (rc) {
+        DosClose(filedes[0]);
+        DosClose(filedes[1]);
+        DosCloseEventSem((*in)->pipeSem);
+        DosCloseEventSem((*out)->pipeSem);
+        return APR_FROM_OS_ERROR(rc);
+    }
+
     (*out)->pool = pool;
     (*out)->filedes = filedes[1];
     (*out)->fname = apr_pstrdup(pool, pipename);

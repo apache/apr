@@ -191,6 +191,10 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         file_unlock(thefile);
         return rv;
     } else {
+        if (thefile->pipe) {
+            DosResetEventSem(thefile->pipeSem, &rc);
+        }
+
         if (thefile->flags & APR_FOPEN_APPEND) {
             FILELOCK all = { 0, 0x7fffffff };
             ULONG newpos;
@@ -207,6 +211,21 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             }
         } else {
             rc = DosWrite(thefile->filedes, buf, *nbytes, &byteswritten);
+
+            if (thefile->pipe && rc == 0 && *nbytes > 0 && byteswritten == 0) {
+                /* Pipe is full, wait or timeout */
+                int rcwait = DosWaitEventSem(thefile->pipeSem, thefile->timeout >= 0 ? thefile->timeout / 1000 : SEM_INDEFINITE_WAIT);
+
+                if (rcwait == 0) {
+                    rc = DosWrite(thefile->filedes, buf, *nbytes, &byteswritten);
+                }
+                else if (rcwait == ERROR_TIMEOUT) {
+                    return APR_TIMEUP;
+                }
+                else {
+                    rc = rcwait;
+                }
+            }
         }
 
         if (rc) {
