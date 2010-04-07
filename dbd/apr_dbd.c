@@ -26,6 +26,7 @@
 #include "apr_thread_mutex.h"
 #include "apr_lib.h"
 #include "apr_atomic.h"
+#include "apr_version.h"
 
 #include "apu_internal.h"
 #include "apr_dbd_internal.h"
