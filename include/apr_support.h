@@ -45,9 +45,8 @@ extern "C" {
  *        otherwise wait for data to be able to be written. 
  * @return APR_TIMEUP if we run out of time.
  */
-APR_DECLARE(apr_status_t) apr_wait_for_io_or_timeout(apr_file_t *f,
-                                                     apr_socket_t *s,
-                                                     int for_read);
+apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
+                                        int for_read);
 
 /** @} */
 
