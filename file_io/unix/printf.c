@@ -18,6 +18,10 @@
 #include "apr_strings.h"
 #include "apr_lib.h"
 
+#if APR_HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 struct apr_file_printf_data {
     apr_vformatter_buff_t vbuff;
     apr_file_t *fptr;
