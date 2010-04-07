@@ -139,6 +139,34 @@ APR_DECLARE(void) apr_proc_other_child_refresh(apr_other_child_rec_t *ocr,
         (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
     }
 
+#elif defined(OS2)
+    int rc;
+    int status;
+    RESULTCODES proc_rc;
+    PID ended_pid;
+
+    if (ocr->proc == NULL) {
+        return;
+    }
+
+    rc = DosWaitChild(DCWA_PROCESS, DCWW_NOWAIT, &proc_rc, &ended_pid, ocr->proc->pid);
+
+    switch (rc) {
+    case 0:
+        ocr->proc = NULL;
+        status = (proc_rc.codeResult << 8) | proc_rc.codeTerminate;
+        (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
+        break;
+
+    case ERROR_CHILD_NOT_COMPLETE:
+        (*ocr->maintenance) (reason, ocr->data, -1);
+        break;
+
+    default:
+        ocr->proc = NULL;
+        (*ocr->maintenance) (APR_OC_REASON_LOST, ocr->data, -1);
+        break;
+    }
 #else /* ndef Win32 */
     pid_t waitret; 
     int status;
