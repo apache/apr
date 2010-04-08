@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Add apr_hash_this_key(), apr_hash_this_key_len(), and 
+     apr_hash_this_val() for easier access to those attributes from
+     a hash iterator.  [Hyrum K. Wright <hyrum_wright mail.utexas.edu>]
+
   *) Enable platform specific support for the opening of a file or
      pipe in non blocking module through the APR_FOPEN_NONBLOCK flag.
      [Graham Leggett]
