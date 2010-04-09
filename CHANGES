@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.3
 
+  *) apr_pollset_create*(): Fix memory lifetime problem with the wakeup
+     pipe when the pollset was created with APR_POLLSET_NOCOPY.
+     [Neil Conway <nrc cs.berkeley.edu>]
+
   *) Fix detection of some Linux variants when configure is built with
      recent GNU tools.  [Eric Covener]
 
