@@ -949,8 +949,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         }
     }
 
-    *newpath = apr_pmemdup(p, path, pathlen + 1);
-    (*newpath)[pathlen] = '\0';
+    *newpath = apr_pstrmemdup(p, path, pathlen);
     return APR_SUCCESS;
 }
 
