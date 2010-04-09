@@ -115,6 +115,7 @@ struct apr_pollset_t
     apr_uint32_t flags;
     /* Pipe descriptors used for wakeup */
     apr_file_t *wakeup_pipe[2];
+    apr_pollfd_t wakeup_pfd;
     apr_pollset_private_t *p;
     apr_pollset_provider_t *provider;
 };
