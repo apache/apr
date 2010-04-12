@@ -621,6 +621,16 @@ APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock,
                                    char *buf, apr_size_t *len);
 
 /**
+ * Wait for a socket to be ready for input or output
+ * @param sock the socket to wait on
+ * @param direction whether to wait for reading or writing to be ready
+ * @remark Will time out if socket has a time out set for it
+ * @remark direction can be either APR_WAIT_READ or APR_WAIT_WRITE
+ */
+APR_DECLARE(apr_status_t) apr_socket_wait(apr_socket_t *sock, 
+                                          apr_wait_type_t direction);
+
+/**
  * Setup socket options for the specified socket
  * @param sock The socket to set up.
  * @param opt The option we would like to configure.  One of:

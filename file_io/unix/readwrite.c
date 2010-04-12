@@ -562,3 +562,10 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
     }
     return rv;
 }
+
+
+
+APR_DECLARE(apr_status_t) apr_file_pipe_wait(apr_file_t *thepipe, apr_wait_type_t direction)
+{
+    return apr_wait_for_io_or_timeout(thepipe, NULL, direction == APR_WAIT_READ);
+}

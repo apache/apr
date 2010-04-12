@@ -67,6 +67,9 @@ extern "C" {
 /** signal numbers typedef */
 typedef int               apr_signum_t;
 
+/* Type of I/O to wait for */
+typedef enum { APR_WAIT_READ, APR_WAIT_WRITE } apr_wait_type_t;
+
 /**
  * Finding offsets of elements within structures.
  * Taken from the X code... they've sweated portability of this stuff
