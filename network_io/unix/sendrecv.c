@@ -235,6 +235,11 @@ do_select:
 #endif
 }
 
+apr_status_t apr_socket_wait(apr_socket_t *sock, apr_wait_type_t direction)
+{
+    return apr_wait_for_io_or_timeout(NULL, sock, direction == APR_WAIT_READ);
+}
+
 #if APR_HAS_SENDFILE
 
 /* TODO: Verify that all platforms handle the fd the same way,

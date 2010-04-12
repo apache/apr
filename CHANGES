@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Hide apr_wait_for_io_or_timeout() from public view and add instead
+     apr_socket_wait() and apr_file_pipe_wait(). [Brian Havard]
+
   *) Add apr_hash_this_key(), apr_hash_this_key_len(), and 
      apr_hash_this_val() for easier access to those attributes from
      a hash iterator.  [Hyrum K. Wright <hyrum_wright mail.utexas.edu>]
