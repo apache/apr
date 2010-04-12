@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.3
 
+  *) apr_pollset_create_ex(): Trap errors from pollset providers.
+     PR 49094.  [Sami Tolvanen <sami.tolvanen mywot.com>]
+
   *) apr_pollset_create*(): Fix memory lifetime problem with the wakeup
      pipe when the pollset was created with APR_POLLSET_NOCOPY.
      [Neil Conway <nrc cs.berkeley.edu>]
