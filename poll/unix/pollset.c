@@ -271,6 +271,9 @@ APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **ret_pollset,
         }
         pollset->provider = provider;
     }
+    else if (rv != APR_SUCCESS) {
+        return rv;
+    }
     if (flags & APR_POLLSET_WAKEABLE) {
         /* Create wakeup pipe */
         if ((rv = create_wakeup_pipe(pollset)) != APR_SUCCESS) {
