@@ -186,6 +186,35 @@ static void test_pipe_writefull(abts_case *tc, void *data)
     ABTS_ASSERT(tc, "child terminated normally", why == APR_PROC_EXIT);
 }
 
+static void wait_pipe(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_interval_time_t delay = 200000;
+    apr_time_t start_time;
+    apr_time_t end_time;
+    apr_size_t nbytes;
+
+    rv = apr_file_pipe_create(&readp, &writep, p);
+    APR_ASSERT_SUCCESS(tc, "Couldn't create pipe", rv);
+
+    rv = apr_file_pipe_timeout_set(readp, delay);
+    APR_ASSERT_SUCCESS(tc, "Couldn't set pipe timeout", rv);
+
+    start_time = apr_time_now();
+    rv = apr_file_pipe_wait(readp, APR_WAIT_READ);
+    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+
+    end_time = apr_time_now();
+    ABTS_ASSERT(tc, "apr_file_pipe_wait() waited for the time out", end_time - start_time >= delay);
+
+    nbytes = 4;
+    rv = apr_file_write(writep, "data", &nbytes);
+    APR_ASSERT_SUCCESS(tc, "Couldn't write to pipe", rv);
+
+    rv = apr_file_pipe_wait(readp, APR_WAIT_READ);
+    APR_ASSERT_SUCCESS(tc, "Wait for pipe failed", rv);
+}
+
 abts_suite *testpipe(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -199,6 +228,7 @@ abts_suite *testpipe(abts_suite *suite)
     abts_run_test(suite, read_write_notimeout, NULL);
     abts_run_test(suite, test_pipe_writefull, NULL);
     abts_run_test(suite, close_pipe, NULL);
+    abts_run_test(suite, wait_pipe, NULL);
 
     return suite;
 }

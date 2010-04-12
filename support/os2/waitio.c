@@ -19,51 +19,14 @@
 #include "apr_errno.h"
 #include "apr_support.h"
 
-static apr_status_t wait_for_file(apr_file_t *f, int for_read)
-{
-    int rc;
-
-    if (!f->pipe) {
-        /* No support for waiting on a regular file */
-        return APR_ENOTIMPL;
-    }
-
-    rc = DosWaitEventSem(f->pipeSem, f->timeout >= 0 ? f->timeout / 1000 : SEM_INDEFINITE_WAIT);
-
-    if (rc == ERROR_TIMEOUT) {
-        return APR_TIMEUP;
-    }
-
-    return APR_FROM_OS_ERROR(rc);
-}
-
-
-
-static apr_status_t wait_for_socket(apr_socket_t *s, int for_read)
-{
-    int pollsocket = s->socketdes;
-    int wait_rc = select(&pollsocket, for_read != 0, for_read == 0, 0, s->timeout / 1000);
-
-    if (wait_rc == 0) {
-        return APR_TIMEUP;
-    }
-    else if (wait_rc < 0) {
-        return APR_FROM_OS_ERROR(sock_errno());
-    }
-
-    return APR_SUCCESS;
-}
-
-
-
 apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
                                         int for_read)
 {
     if (f) {
-        return wait_for_file(f, for_read);
+        return apr_file_pipe_wait(f, for_read ? APR_WAIT_READ : APR_WAIT_WRITE);
     }
     else if (s) {
-        return wait_for_socket(s, for_read);
+        return apr_socket_wait(s, for_read ? APR_WAIT_READ : APR_WAIT_WRITE);
     }
 
     /* Didn't specify a file or socket */

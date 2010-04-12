@@ -81,7 +81,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*in)->fname = apr_pstrdup(pool, pipename);
     (*in)->isopen = TRUE;
     (*in)->buffered = FALSE;
-    (*in)->flags = 0;
+    (*in)->flags = APR_FOPEN_READ;
     (*in)->pipe = 1;
     (*in)->timeout = -1;
     (*in)->blocking = BLK_ON;
@@ -113,7 +113,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*out)->fname = apr_pstrdup(pool, pipename);
     (*out)->isopen = TRUE;
     (*out)->buffered = FALSE;
-    (*out)->flags = 0;
+    (*out)->flags = APR_FOPEN_WRITE;
     (*out)->pipe = 1;
     (*out)->timeout = -1;
     (*out)->blocking = BLK_ON;

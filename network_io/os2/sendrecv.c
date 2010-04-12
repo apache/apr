@@ -153,3 +153,21 @@ APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock,
     *len = rv;
     return APR_SUCCESS;
 }
+
+
+
+APR_DECLARE(apr_status_t) apr_socket_wait(apr_socket_t *sock, apr_wait_type_t direction)
+{
+    int pollsocket = sock->socketdes;
+    int wait_rc = select(&pollsocket, direction == APR_WAIT_READ, 
+                         direction == APR_WAIT_WRITE, 0, sock->timeout / 1000);
+
+    if (wait_rc == 0) {
+        return APR_TIMEUP;
+    }
+    else if (wait_rc < 0) {
+        return APR_FROM_OS_ERROR(sock_errno());
+    }
+
+    return APR_SUCCESS;
+}

@@ -403,6 +403,64 @@ static void test_get_addr(abts_case *tc, void *data)
     apr_socket_close(ld);
 }
 
+static void test_wait(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_socket_t *server;
+    apr_socket_t *server_connection;
+    apr_sockaddr_t *server_addr;
+    apr_socket_t *client;
+    apr_interval_time_t delay = 200000;
+    apr_time_t start_time;
+    apr_time_t end_time;
+    apr_size_t nbytes;
+    int connected = FALSE;
+
+    server = setup_socket(tc);
+    rv = apr_sockaddr_info_get(&server_addr, socket_name, socket_type, 8021, 0, p);
+    APR_ASSERT_SUCCESS(tc, "setting up sockaddr", rv);
+
+    rv = apr_socket_create(&client, server_addr->family, SOCK_STREAM, 0, p);
+    APR_ASSERT_SUCCESS(tc, "creating client socket", rv);
+
+    rv = apr_socket_timeout_set(client, 0);
+    APR_ASSERT_SUCCESS(tc, "setting client socket timeout", rv);
+
+    rv = apr_socket_connect(client, server_addr);
+
+    if (rv == APR_SUCCESS) {
+        connected = TRUE;
+    }
+    else {
+        ABTS_ASSERT(tc, "connecting client to server", APR_STATUS_IS_EINPROGRESS(rv));
+    }
+
+    rv = apr_socket_accept(&server_connection, server, p);
+    APR_ASSERT_SUCCESS(tc, "accepting client connection", rv);
+
+    if (!connected) {
+        rv = apr_socket_connect(client, server_addr);
+        APR_ASSERT_SUCCESS(tc, "connecting client to server", rv);
+    }
+
+    rv = apr_socket_timeout_set(client, delay);
+    APR_ASSERT_SUCCESS(tc, "setting client socket timeout", rv);
+
+    start_time = apr_time_now();
+    rv = apr_socket_wait(client, APR_WAIT_READ);
+    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+
+    end_time = apr_time_now();
+    ABTS_ASSERT(tc, "apr_socket_wait() waited for the time out", end_time - start_time >= delay);
+
+    nbytes = 4;
+    rv = apr_socket_send(server_connection, "data", &nbytes);
+    APR_ASSERT_SUCCESS(tc, "Couldn't write to client", rv);
+
+    rv = apr_socket_wait(client, APR_WAIT_READ);
+    APR_ASSERT_SUCCESS(tc, "Wait for socket failed", rv);
+}
+
 abts_suite *testsock(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -416,6 +474,7 @@ abts_suite *testsock(abts_suite *suite)
     abts_run_test(suite, test_timeout, NULL);
     abts_run_test(suite, test_print_addr, NULL);
     abts_run_test(suite, test_get_addr, NULL);
+    abts_run_test(suite, test_wait, NULL);
 #if APR_HAVE_SOCKADDR_UN
     socket_name = UNIX_SOCKET_NAME;
     socket_type = APR_UNIX;
@@ -423,6 +482,7 @@ abts_suite *testsock(abts_suite *suite)
     abts_run_test(suite, test_send, NULL);
     abts_run_test(suite, test_recv, NULL);
     abts_run_test(suite, test_timeout, NULL);
+    abts_run_test(suite, test_wait, NULL);
 #endif
     return suite;
 }

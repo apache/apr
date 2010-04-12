@@ -569,6 +569,16 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len,
 APR_DECLARE(apr_status_t) apr_file_puts(const char *str, apr_file_t *thefile);
 
 /**
+ * Wait for a pipe to be ready for input or output
+ * @param thepipe the pipe to wait on
+ * @param direction whether to wait for reading or writing to be ready
+ *        Can be either APR_WAIT_READ or APR_WAIT_WRITE
+ * @remark Will time out if thepipe has a time out set for it
+ */
+APR_DECLARE(apr_status_t) apr_file_pipe_wait(apr_file_t *thepipe,
+                                             apr_wait_type_t direction);
+
+/**
  * Flush the file's buffer.
  * @param thefile The file descriptor to flush
  */

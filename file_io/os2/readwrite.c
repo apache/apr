@@ -409,6 +409,31 @@ apr_status_t apr_file_check_read(apr_file_t *fd)
 
 
 
+APR_DECLARE(apr_status_t) apr_file_pipe_wait(apr_file_t *pipe, apr_wait_type_t direction)
+{
+    int rc;
+
+    if (!pipe->pipe) {
+        /* No support for waiting on a regular file */
+        return APR_ENOTIMPL;
+    }
+
+    if (((pipe->flags & APR_FOPEN_READ) > 0) != (direction == APR_WAIT_READ)) {
+        /* Attempt to wait for read from the write end of the pipe or vica versa */
+        return APR_EINVAL;
+    }
+
+    rc = DosWaitEventSem(pipe->pipeSem, pipe->timeout >= 0 ? pipe->timeout / 1000 : SEM_INDEFINITE_WAIT);
+
+    if (rc == ERROR_TIMEOUT) {
+        return APR_TIMEUP;
+    }
+
+    return APR_FROM_OS_ERROR(rc);
+}
+
+
+
 APR_DECLARE(apr_status_t) apr_file_rotating_check(apr_file_t *thefile)
 {
     return APR_ENOTIMPL;
