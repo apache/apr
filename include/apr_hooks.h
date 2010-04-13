@@ -87,7 +87,7 @@ extern "C" {
  */
 #define APR_HOOK_PROBE_INVOKE(ud,ns,name,src)
 /**
- * User-defined hook probe macro that is invoked before calling a
+ * User-defined hook probe macro that is invoked after calling a
  * hook function.
  * @param ud A void * user data field that was filled in by the user-
  * provided APR_HOOK_PROBE_ENTRY().
