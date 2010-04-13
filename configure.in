@@ -1632,12 +1632,6 @@ elif test "$ac_cv_type_off_t" = "yes"; then
     fi
     # Per OS tuning...
     case $host in
-    *apple-darwin10.*)
-        # off_t is a long long, but long == long long
-        if test "$ac_cv_sizeof_long" = "$ac_cv_sizeof_long_long"; then
-            off_t_fmt='#define APR_OFF_T_FMT "lld"'
-        fi
-        ;;
     *-mingw*)
         off_t_value=apr_int64_t
         off_t_fmt='#define APR_OFF_T_FMT "I64d"'
