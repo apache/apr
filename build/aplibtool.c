@@ -46,7 +46,7 @@ enum output_type_t { otGeneral, otObject, otProgram, otStaticLibrary, otDynamicL
      /* OMF is the native format under OS/2 */
 #    define STATIC_LIB_EXT "lib"
 #    define OBJECT_EXT     "obj"
-#    define LIBRARIAN      "emxomfar"
+#    define LIBRARIAN      "emxomfar -p256"
 #  else
      /* but the alternative, a.out, can fork() which is sometimes necessary */
 #    define STATIC_LIB_EXT "a"
@@ -67,6 +67,8 @@ typedef struct {
     int num_tmp_dirs;
     char *obj_files[1024];
     int num_obj_files;
+    char *dep_libs[1024];
+    int num_dep_libs;
 } cmd_data_t;
 
 void parse_args(int argc, char *argv[], cmd_data_t *cmd_data);
@@ -75,13 +77,16 @@ int parse_short_opt(char *arg, cmd_data_t *cmd_data);
 bool parse_input_file_name(char *arg, cmd_data_t *cmd_data);
 bool parse_output_file_name(char *arg, cmd_data_t *cmd_data);
 void post_parse_fixup(cmd_data_t *cmd_data);
-bool explode_static_lib(char *lib, cmd_data_t *cmd_data);
+void append_depenent_libs(cmd_data_t *cmd_data);
 int execute_command(cmd_data_t *cmd_data);
 char *shell_esc(const char *str);
 void cleanup_tmp_dirs(cmd_data_t *cmd_data);
 void generate_def_file(cmd_data_t *cmd_data);
 char *nameof(char *fullpath);
 char *truncate_dll_name(char *path);
+void add_dep_lib(char *lib, cmd_data_t *cmd_data);
+void add_lib_dep_libs(char *la_file, cmd_data_t *cmd_data);
+void write_dep_libs(FILE *stub_handle, cmd_data_t *cmd_data);
 
 
 int main(int argc, char *argv[])
@@ -97,7 +102,13 @@ int main(int argc, char *argv[])
     rc = execute_command(&cmd_data);
 
     if (rc == 0 && cmd_data.stub_name) {
-        fopen(cmd_data.stub_name, "w");
+        FILE *stub_handle = fopen(cmd_data.stub_name, "w");
+
+        if (cmd_data.output_type == otStaticLibrary) {
+            write_dep_libs(stub_handle, &cmd_data);
+        }
+
+        fclose(stub_handle);
     }
 
     cleanup_tmp_dirs(&cmd_data);
@@ -141,6 +152,10 @@ void parse_args(int argc, char *argv[], cmd_data_t *cmd_data)
     }
 
     post_parse_fixup(cmd_data);
+
+    if (cmd_data->output_type == otProgram || cmd_data->output_type == otDynamicLibrary) {
+        append_depenent_libs(cmd_data);
+    }
 }
 
 
@@ -159,7 +174,7 @@ bool parse_long_opt(char *arg, cmd_data_t *cmd_data)
         strcpy(var, arg);
     }
 
-    if (strcmp(var, "silent") == 0) {
+    if (strcmp(var, "silent") == 0 || strcmp(var, "quiet") == 0) {
         silent = true;
     } else if (strcmp(var, "mode") == 0) {
         if (strcmp(value, "compile") == 0) {
@@ -178,6 +193,8 @@ bool parse_long_opt(char *arg, cmd_data_t *cmd_data)
         shared = true;
     } else if (strcmp(var, "export-all") == 0) {
         export_all = true;
+    } else if (strcmp(var, "tag") == 0) {
+      // What's this for? Ignore for now
     } else {
         return false;
     }
@@ -226,7 +243,55 @@ int parse_short_opt(char *arg, cmd_data_t *cmd_data)
         return 2;
     }
 
+    if (strcmp(arg, "export-symbols-regex") == 0) {
+        return 2;
+    }
+
     return 0;
+}
+
+
+
+void parse_la_input_file_name(char *arg, cmd_data_t *cmd_data)
+{
+    char *name = strrchr(arg, '/');
+    char *ext;
+    char *newarg;
+    int pathlen;
+
+    if (name == NULL) {
+        name = strrchr(arg, '\\');
+
+        if (name == NULL) {
+            name = arg;
+        } else {
+            name++;
+        }
+    } else {
+        name++;
+    }
+
+    pathlen = name - arg;
+    newarg = (char *)malloc(strlen(arg) + 10);
+    strcpy(newarg, arg);
+    newarg[pathlen] = 0;
+    strcat(newarg, ".libs/");
+
+    if (strncmp(name, "lib", 3) == 0) {
+        name += 3;
+    }
+
+    strcat(newarg, name);
+    ext = strrchr(newarg, '.') + 1;
+
+    if (shared && cmd_data->mode == mInstall) {
+        strcpy(ext, DYNAMIC_LIB_EXT);
+        newarg = truncate_dll_name(newarg);
+    } else {
+        strcpy(ext, STATIC_LIB_EXT);
+    }
+
+    cmd_data->arglist[cmd_data->num_args++] = newarg;
 }
 
 
@@ -268,26 +333,8 @@ bool parse_input_file_name(char *arg, cmd_data_t *cmd_data)
     }
 
     if (strcmp(ext, "la") == 0) {
-        newarg = (char *)malloc(strlen(arg) + 10);
-        strcpy(newarg, arg);
-        newarg[pathlen] = 0;
-        strcat(newarg, ".libs/");
-
-        if (strncmp(name, "lib", 3) == 0) {
-            name += 3;
-        }
-
-        strcat(newarg, name);
-        ext = strrchr(newarg, '.') + 1;
-
-        if (shared && cmd_data->mode == mInstall) {
-          strcpy(ext, DYNAMIC_LIB_EXT);
-          newarg = truncate_dll_name(newarg);
-        } else {
-          strcpy(ext, STATIC_LIB_EXT);
-        }
-
-        cmd_data->arglist[cmd_data->num_args++] = newarg;
+        add_lib_dep_libs(arg, cmd_data);
+        parse_la_input_file_name(arg, cmd_data);
         return true;
     }
 
@@ -329,12 +376,16 @@ bool parse_output_file_name(char *arg, cmd_data_t *cmd_data)
         name++;
     }
 
-    if (!ext) {
-        cmd_data->stub_name = arg;
+    if (!ext || stricmp(ext, EXE_EXT) == 0) {
         cmd_data->output_type = otProgram;
         newarg = (char *)malloc(strlen(arg) + 5);
         strcpy(newarg, arg);
-        strcat(newarg, EXE_EXT);
+
+        if (!ext) {
+            strcat(newarg, EXE_EXT);
+            cmd_data->stub_name = arg;
+        }
+
         cmd_data->arglist[cmd_data->num_args++] = newarg;
         cmd_data->output_name = newarg;
         return true;
@@ -446,6 +497,10 @@ void post_parse_fixup(cmd_data_t *cmd_data)
                     if (strcmp(arg, "-o") == 0) {
                         a++;
                     }
+
+                    if (arg[1] == 'l') {
+                        add_dep_lib(arg, cmd_data);
+                    }
                 }
 
                 if (strcmp(arg, CC) == 0 || strcmp(arg, CC EXE_EXT) == 0) {
@@ -460,7 +515,6 @@ void post_parse_fixup(cmd_data_t *cmd_data)
 
                     if (strcmp(ext, STATIC_LIB_EXT) == 0) {
                         cmd_data->arglist[a] = NULL;
-                        explode_static_lib(arg, cmd_data);
                     }
                 }
             }
@@ -484,6 +538,19 @@ void post_parse_fixup(cmd_data_t *cmd_data)
         }
     }
 
+    if (cmd_data->output_type == otProgram || cmd_data->output_type == otGeneral) {
+        for (a=0; a < cmd_data->num_args; a++) {
+            arg = cmd_data->arglist[a];
+
+            if (arg) {
+                if (strcmp(arg, "-rpath") == 0 && a+1 < cmd_data->num_args) {
+                    cmd_data->arglist[a] = NULL;
+                    cmd_data->arglist[a+1] = NULL;
+                }
+            }
+        }
+    }
+
 #if USE_OMF
     if (cmd_data->output_type == otObject ||
         cmd_data->output_type == otProgram ||
@@ -494,6 +561,25 @@ void post_parse_fixup(cmd_data_t *cmd_data)
 
     if (shared && (cmd_data->output_type == otObject || cmd_data->output_type == otDynamicLibrary)) {
         cmd_data->arglist[cmd_data->num_args++] = SHARE_SW;
+    }
+}
+
+
+
+void append_depenent_libs(cmd_data_t *cmd_data)
+{
+    int l;
+
+    for (l = 0; l < cmd_data->num_dep_libs; l++) {
+        char *arg = cmd_data->dep_libs[l];
+        char *ext = strrchr(arg, '.');
+
+        if (ext && strcmp(ext, ".la") == 0) {
+            parse_la_input_file_name(cmd_data->dep_libs[l], cmd_data);
+        }
+        else {
+            cmd_data->arglist[cmd_data->num_args++] = arg;
+        }
     }
 }
 
@@ -564,51 +650,107 @@ char *shell_esc(const char *str)
 
 
 
-bool explode_static_lib(char *lib, cmd_data_t *cmd_data)
+void add_dep_lib(char *lib, cmd_data_t *cmd_data)
 {
-    char tmpdir[1024];
-    char savewd[1024];
-    char cmd[1024];
-    char *name;
-    DIR *dir;
-    struct dirent *entry;
+    int l;
 
-    strcpy(tmpdir, lib);
-    strcat(tmpdir, ".exploded");
-
-    mkdir(tmpdir, 0);
-    cmd_data->tmp_dirs[cmd_data->num_tmp_dirs++] = strdup(tmpdir);
-    getcwd(savewd, sizeof(savewd));
-
-    if (chdir(tmpdir) != 0)
-        return false;
-
-    strcpy(cmd, LIBRARIAN " x ");
-    name = strrchr(lib, '/');
-
-    if (name) {
-        name++;
-    } else {
-        name = lib;
+    while (isspace(*lib)) {
+        lib++;
     }
 
-    strcat(cmd, "../");
-    strcat(cmd, name);
-    system(cmd);
-    chdir(savewd);
-    dir = opendir(tmpdir);
-
-    while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_name[0] != '.') {
-            strcpy(cmd, tmpdir);
-            strcat(cmd, "/");
-            strcat(cmd, entry->d_name);
-            cmd_data->arglist[cmd_data->num_args++] = strdup(cmd);
+    if (*lib) {
+        for (l = 0; l < cmd_data->num_dep_libs; l++) {
+            if (stricmp(cmd_data->dep_libs[l], lib) == 0) {
+                return;
+            }
         }
     }
 
-    closedir(dir);
-    return true;
+    if (*lib) {
+        cmd_data->dep_libs[cmd_data->num_dep_libs++] = strdup(lib);
+    }
+}
+
+
+
+void write_dep_libs(FILE *stub_handle, cmd_data_t *cmd_data)
+{
+    int l;
+    char cwd[MAXPATHLEN];
+
+    getwd(cwd);
+    fputs("dependency_libs='", stub_handle);
+
+    for (l = 0; l < cmd_data->num_dep_libs; l++) {
+        if (l) {
+            fputs(" ", stub_handle);
+        }
+
+        if (cmd_data->dep_libs[l][0] != '/' && cmd_data->dep_libs[l][0] != '-') {
+            fprintf(stub_handle, "%s/%s", cwd, cmd_data->dep_libs[l]);
+        }
+        else {
+            fputs(cmd_data->dep_libs[l], stub_handle);
+        }
+    }
+
+    fputs("'\n", stub_handle);
+}
+
+
+
+void add_lib_dep_libs(char *la_file, cmd_data_t *cmd_data)
+{
+    FILE *hla;
+    char line[16384];
+
+    add_dep_lib(la_file, cmd_data);
+    hla = fopen(la_file, "r");
+
+    if (hla == NULL) {
+        fprintf(stderr, "warning: couldn't open %s\n", la_file);
+        return;
+    }
+
+    while (fgets(line, sizeof(line), hla) != NULL) {
+        char *pos = strchr(line, '=');
+
+        if (pos) {
+            *pos = 0;
+            pos++;
+
+            if (*pos == '\'') {
+                char *end;
+                pos++;
+                end = strchr(pos, '\'');
+
+                if (end != NULL) {
+                    *end = 0;
+                }
+            }
+
+            if (strcmp(line, "dependency_libs") == 0) {
+                while (*pos) {
+                    char *end = strchr(pos, ' ');
+
+                    if (end != NULL) {
+                        *end = 0;
+                    }
+
+                    add_dep_lib(pos, cmd_data);
+
+                    if (end) {
+                        pos = end + 1;
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    fclose(hla);
 }
 
 
