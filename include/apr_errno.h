@@ -397,6 +397,9 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #if defined(WIN32)
 #define APR_STATUS_IS_EDSOOPEN(s)       ((s) == APR_EDSOOPEN \
                        || APR_TO_OS_ERROR(s) == ERROR_MOD_NOT_FOUND)
+#elif defined(OS2)
+#define APR_STATUS_IS_EDSOOPEN(s)       ((s) == APR_EDSOOPEN \
+                       || APR_TO_OS_ERROR(s) == ERROR_FILE_NOT_FOUND)
 #else
 #define APR_STATUS_IS_EDSOOPEN(s)       ((s) == APR_EDSOOPEN)
 #endif
@@ -418,6 +421,9 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #if defined(WIN32)
 #define APR_STATUS_IS_ESYMNOTFOUND(s)   ((s) == APR_ESYMNOTFOUND \
                        || APR_TO_OS_ERROR(s) == ERROR_PROC_NOT_FOUND)
+#elif defined(OS2)
+#define APR_STATUS_IS_ESYMNOTFOUND(s)   ((s) == APR_ESYMNOTFOUND \
+                       || APR_TO_OS_ERROR(s) == ERROR_INVALID_NAME)
 #else
 #define APR_STATUS_IS_ESYMNOTFOUND(s)   ((s) == APR_ESYMNOTFOUND)
 #endif
