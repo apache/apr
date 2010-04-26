@@ -37,13 +37,13 @@
  * DB_185, DB2, DB3, and DB4.
  */
 
-#if   defined(DB_VERSION_MAJOR) && (DB_VERSION_MAJOR == 4)
+#if   defined(DB_VERSION_MAJOR) && (DB_VERSION_MAJOR >= 4)
 /* We will treat anything greater than 4.1 as DB4.
  * We can treat 4.0 as DB3.
  */
-#if   defined(DB_VERSION_MINOR) && (DB_VERSION_MINOR >= 1)
+#if   DB_VERSION_MAJOR > 4 || (defined(DB_VERSION_MINOR) && (DB_VERSION_MINOR >= 1))
 #define DB_VER 4
-#else
+#elif DB_VERSION_MAJOR == 4
 #define DB_VER 3
 #endif
 #elif defined(DB_VERSION_MAJOR) && (DB_VERSION_MAJOR == 3)
