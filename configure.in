@@ -1226,6 +1226,7 @@ APR_FLAG_HEADERS(
     fcntl.h		\
     grp.h		\
     io.h		\
+    ifaddrs.h           \
     limits.h		\
     mach-o/dyld.h	\
     malloc.h		\
@@ -1307,6 +1308,7 @@ AC_SUBST(errnoh)
 AC_SUBST(direnth)
 AC_SUBST(fcntlh)
 AC_SUBST(ioh)
+AC_SUBST(ifaddrsh)
 AC_SUBST(limitsh)
 AC_SUBST(mswsockh)
 AC_SUBST(netdbh)
