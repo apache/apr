@@ -1225,8 +1225,8 @@ APR_FLAG_HEADERS(
     errno.h		\
     fcntl.h		\
     grp.h		\
-    io.h		\
     ifaddrs.h           \
+    io.h		\
     limits.h		\
     mach-o/dyld.h	\
     malloc.h		\
