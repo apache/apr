@@ -605,7 +605,7 @@ APR_DECLARE(apr_status_t) apr_file_link(const char *from_path,
 #endif
 #if APR_HAS_ANSI_FS
     ELSE_WIN_OS_IS_ANSI {
-        if (!CreateHardLinkA(to_path, from_path))
+        if (!CreateHardLinkA(to_path, from_path, NULL))
                 return apr_get_os_error();
     }
 #endif
