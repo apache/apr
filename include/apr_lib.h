@@ -212,7 +212,7 @@ APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf,
 /** @see islower*/
 #define apr_islower(c) (islower(((unsigned char)(c))))
 /** @see isascii */
-#ifdef isascii
+#if APR_CHARSET_EBCDIC || defined(isascii)
 #define apr_isascii(c) (isascii(((unsigned char)(c))))
 #else
 #define apr_isascii(c) (((c) & ~0x7f)==0)
