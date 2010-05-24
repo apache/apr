@@ -383,20 +383,6 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
         what "reasonable" should be, so be conservative, only increase this as
         necessary.
 
-    * Generate a good bug report to send to the FreeBSD hackers that details
-      the problems we have seen with threads and system calls (specifically
-      sendfile data is corrupted).  From our analysis so far, we don't think 
-      that this is an APR issue, but rather a FreeBSD kernel issue.  Our
-      current solution is to just disable threads across the board on
-      FreeBSD.
-
-      MsgID: <20010828091959.D17570@ebuilt.com>
-        Status: Fixed in -CURRENT.  MFC in about a week.  Continuing
-                testing with threads on FreeBSD.
-
-                FreeBSD PR kern/32684:
-                  http://www.freebsd.org/cgi/query-pr.cgi?pr=kern/32684
-
     * There are some optimizations that can be done to the new
       apr_proc_*() functions (on UNIX). One that may reduce pointer
       indirection would be to make the apr_proc_mutex_unix_lock_methods_t
