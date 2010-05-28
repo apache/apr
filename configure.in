@@ -1260,6 +1260,7 @@ APR_FLAG_HEADERS(
     kernel/OS.h		\
     net/errno.h		\
     netinet/in.h	\
+    netinet/ip.h	\
     netinet/sctp.h      \
     netinet/sctp_uio.h  \
     sys/file.h		\
@@ -1300,6 +1301,12 @@ else
    netinet_tcph=0
 fi
 
+AC_CHECK_DECL(SOL_IP, , , [
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/ip.h>
+])
+
 AC_SUBST(arpa_ineth)
 AC_SUBST(conioh)
 AC_SUBST(ctypeh)
@@ -1313,6 +1320,7 @@ AC_SUBST(limitsh)
 AC_SUBST(mswsockh)
 AC_SUBST(netdbh)
 AC_SUBST(netinet_inh)
+AC_SUBST(netinet_inp)
 AC_SUBST(netinet_sctph)
 AC_SUBST(netinet_sctp_uioh)
 AC_SUBST(netinet_tcph)
@@ -1758,9 +1766,8 @@ if test "$dsotype" = "any"; then
         *darwin[[0-8]]\.*) 
           # Original Darwin, not for 9.0!:
           AC_CHECK_FUNC(NSLinkModule, [dsotype=dyld]);;
-        *-hpux[[1-9]]\.*|*-hpux1[[01]]*)
-          # shl is specific to hpux(?), and is suboptimal for 64 bit builds,
-          # and most unlikely to be the choice of 12.x developers.
+        hppa*-hpux[[1-9]]\.*|hppa*-hpux1[[01]]*)
+          # shl is specific to parisc hpux SOM binaries, not used for 64 bit
           AC_CHECK_LIB(dld, shl_load, [have_shl=1])
           if test "$ac_cv_sizeof_voidp$have_shl" = "41"; then
             dsotype=shl; APR_ADDTO(LIBS,-ldld)
