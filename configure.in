@@ -1889,9 +1889,8 @@ if test "$dsotype" = "any"; then
         *darwin[[0-8]]\.*) 
           # Original Darwin, not for 9.0!:
           AC_CHECK_FUNC(NSLinkModule, [dsotype=dyld]);;
-        *-hpux[[1-9]]\.*|*-hpux1[[01]]*)
-          # shl is specific to hpux(?), and is suboptimal for 64 bit builds,
-          # and most unlikely to be the choice of 12.x developers.
+        hppa*-hpux[[1-9]]\.*|hppa*-hpux1[[01]]*)
+          # shl is specific to parisc hpux SOM binaries, not used for 64 bit
           AC_CHECK_LIB(dld, shl_load, [have_shl=1])
           if test "$ac_cv_sizeof_voidp$have_shl" = "41"; then
             dsotype=shl; APR_ADDTO(LIBS,-ldld)
