@@ -30,8 +30,8 @@
 #include "apr_time.h"
 #include "apr_strings.h"
 #include "apr_network_io.h"
-#include "apr_ring.h"
 #include "apr_buckets.h"
+#include "apr_ring.h"
 #include "apr_reslist.h"
 #include "apr_hash.h"
 
