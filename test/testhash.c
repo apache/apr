@@ -35,7 +35,7 @@ static void dump_hash(apr_pool_t *p, apr_hash_t *h, char str[][MAX_LTH])
     int i = 0;
 
     for (hi = apr_hash_first(p, h); hi; hi = apr_hash_next(hi)) {
-        char *key = apr_hash_this_key(hi);
+        const char *key = apr_hash_this_key(hi);
         apr_ssize_t len = apr_hash_this_key_len(hi);
         char *val = apr_hash_this_val(hi);
 
