@@ -39,6 +39,8 @@ APR_DECLARE(apr_status_t) apr_brigade_cleanup(void *data)
     apr_bucket_brigade *b = data;
     apr_bucket *e;
 
+    APR_BRIGADE_CHECK_CONSISTENCY(b);
+
     while (!APR_BRIGADE_EMPTY(b)) {
         e = APR_BRIGADE_FIRST(b);
         apr_bucket_delete(e);
@@ -49,8 +51,22 @@ APR_DECLARE(apr_status_t) apr_brigade_cleanup(void *data)
 
 APR_DECLARE(apr_status_t) apr_brigade_destroy(apr_bucket_brigade *b)
 {
-    apr_pool_cleanup_kill(b->p, b, brigade_cleanup);
-    return apr_brigade_cleanup(b);
+#ifndef APR_BUCKET_DEBUG
+    return apr_pool_cleanup_run(b->p, b, brigade_cleanup);
+#else
+    apr_status_t rv;
+    
+    APR_BRIGADE_CHECK_CONSISTENCY(b);
+
+    rv = apr_pool_cleanup_run(b->p, b, brigade_cleanup);
+
+    /* Trigger consistency check failures if the brigade is
+     * re-used. */
+    b->p = NULL;
+    b->bucket_alloc = NULL;
+
+    return rv;
+#endif
 }
 
 APR_DECLARE(apr_bucket_brigade *) apr_brigade_create(apr_pool_t *p,
