@@ -288,8 +288,11 @@ typedef apr_status_t (*apr_brigade_flush)(apr_bucket_brigade *bb, void *ctx);
  */
 #ifdef APR_BUCKET_DEBUG
 
-#define APR_BRIGADE_CHECK_CONSISTENCY(b)				\
-        APR_RING_CHECK_CONSISTENCY(&(b)->list, apr_bucket, link)
+#define APR_BRIGADE_CHECK_CONSISTENCY(b) do {                   \
+    APR_RING_CHECK_CONSISTENCY(&(b)->list, apr_bucket, link);   \
+    assert(b->p != NULL);                                       \
+    assert(b->bucket_alloc != NULL);                            \
+} while (0)
 
 #define APR_BUCKET_CHECK_CONSISTENCY(e)					\
         APR_RING_CHECK_ELEM_CONSISTENCY((e), apr_bucket, link)
