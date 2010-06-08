@@ -31,6 +31,12 @@
 #include "apr_want.h"
 #include "apr_env.h"
 
+/*#define USE_POCORE*/
+#ifdef USE_POCORE
+#include "pc_memory.h"
+#include "pc_misc.h"
+#endif
+
 #if APR_HAVE_STDLIB_H
 #include <stdlib.h>     /* for malloc, free and abort */
 #endif
@@ -470,23 +476,31 @@ struct debug_node_t {
  * to see how it is used.
  */
 struct apr_pool_t {
+#ifdef USE_POCORE
+    pc_pool_t *pcpool;
+    pc_post_t *post;
+#else
     apr_pool_t           *parent;
     apr_pool_t           *child;
     apr_pool_t           *sibling;
     apr_pool_t          **ref;
+#endif
     cleanup_t            *cleanups;
     cleanup_t            *free_cleanups;
+#ifndef USE_POCORE
     apr_allocator_t      *allocator;
+#endif
     struct process_chain *subprocesses;
     apr_abortfunc_t       abort_fn;
     apr_hash_t           *user_data;
     const char           *tag;
 
 #if !APR_POOL_DEBUG
+#ifndef USE_POCORE
     apr_memnode_t        *active;
     apr_memnode_t        *self; /* The node containing the pool itself */
     char                 *self_first_avail;
-
+#endif
 #else /* APR_POOL_DEBUG */
     apr_pool_t           *joined; /* the caller has guaranteed that this pool
                                    * will survive as long as ->joined */
@@ -510,6 +524,13 @@ struct apr_pool_t {
 
 #define SIZEOF_POOL_T       APR_ALIGN_DEFAULT(sizeof(apr_pool_t))
 
+
+#ifdef USE_POCORE
+pc_pool_t *apr__get_pcpool(const apr_pool_t *pool)
+{
+    return pool->pcpool;
+}
+#endif
 
 /*
  * Variables
@@ -627,12 +648,30 @@ APR_DECLARE(void) apr_pool_terminate(void)
 /* Returns the amount of free space in the given node. */
 #define node_free_space(node_) ((apr_size_t)(node_->endp - node_->first_avail))
 
+#if 0
+static void
+log_action(const char *action,
+           void *pool,
+           void *parent,
+           apr_size_t amt)
+{
+    FILE *fp = fopen("/tmp/apr.log", "a");
+    fprintf(fp, "%s %p %p %ld\n", action, pool, parent, (long)amt);
+    fclose(fp);
+}
+#else
+#define log_action(a,b,c,d) ((void)0)
+#endif
+
 /*
  * Memory allocation
  */
 
 APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t in_size)
 {
+#ifdef USE_POCORE
+    return pc_alloc(pool->pcpool, in_size);
+#else
     apr_memnode_t *active, *node;
     void *mem;
     apr_size_t size, free_index;
@@ -645,6 +684,8 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t in_size)
         return NULL;
     }
     active = pool->active;
+
+    log_action("alloc", pool, NULL, in_size);
 
     /* If the active node has enough bytes left, use it. */
     if (size <= node_free_space(active)) {
@@ -693,6 +734,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t in_size)
     list_insert(active, node);
 
     return mem;
+#endif
 }
 
 /* Provide an implementation of apr_pcalloc for backward compatibility
@@ -722,18 +764,24 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
 
 APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
 {
+#ifndef USE_POCORE
     apr_memnode_t *active;
+#endif
+
+    log_action("clear", pool, NULL, 0);
 
     /* Run pre destroy cleanups */
     run_cleanups(&pool->pre_cleanups);
     pool->pre_cleanups = NULL;
     pool->free_pre_cleanups = NULL;
 
+#ifndef USE_POCORE
     /* Destroy the subpools.  The subpools will detach themselves from
      * this pool thus this loop is safe and easy.
      */
     while (pool->child)
         apr_pool_destroy(pool->child);
+#endif
 
     /* Run cleanups */
     run_cleanups(&pool->cleanups);
@@ -747,6 +795,9 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
     /* Clear the user data. */
     pool->user_data = NULL;
 
+#ifdef USE_POCORE
+    pc_post_recall(pool->post);
+#else
     /* Find the node attached to the pool structure, reset it, make
      * it the active node and free the rest of the nodes.
      */
@@ -760,23 +811,30 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
     allocator_free(pool->allocator, active->next);
     active->next = active;
     active->ref = &active->next;
+#endif
 }
 
 APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
 {
+#ifndef USE_POCORE
     apr_memnode_t *active;
     apr_allocator_t *allocator;
+#endif
+
+    log_action("destroy", pool, NULL, 0);
 
     /* Run pre destroy cleanups */
     run_cleanups(&pool->pre_cleanups);
     pool->pre_cleanups = NULL;
     pool->free_pre_cleanups = NULL;
 
+#ifndef USE_POCORE
     /* Destroy the subpools.  The subpools will detach themselve from
      * this pool thus this loop is safe and easy.
      */
     while (pool->child)
         apr_pool_destroy(pool->child);
+#endif
 
     /* Run cleanups */
     run_cleanups(&pool->cleanups);
@@ -784,6 +842,9 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
     /* Free subprocesses */
     free_proc_chain(pool->subprocesses);
 
+#ifdef USE_POCORE
+    pc_pool_destroy(pool->pcpool);
+#else
     /* Remove the pool from the parents child list */
     if (pool->parent) {
 #if APR_HAS_THREADS
@@ -831,6 +892,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
     if (apr_allocator_owner_get(allocator) == pool) {
         apr_allocator_destroy(allocator);
     }
+#endif
 }
 
 APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
@@ -839,7 +901,9 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
                                              apr_allocator_t *allocator)
 {
     apr_pool_t *pool;
+#ifndef USE_POCORE
     apr_memnode_t *node;
+#endif
 
     *newpool = NULL;
 
@@ -853,6 +917,30 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     if (!abort_fn && parent)
         abort_fn = parent->abort_fn;
 
+#ifdef USE_POCORE
+    {
+        pc_pool_t *pcpool;
+
+        if (parent == NULL)
+        {
+            pc_context_t *ctx = pc_context_create();
+
+            pcpool = pc_pool_root(ctx);
+        }
+        else
+        {
+            pcpool = pc_pool_create(parent->pcpool);
+        }
+
+        pool = pc_alloc(pcpool, sizeof(*pool));
+        pool->pcpool = pcpool;
+
+        /* The APR pool is allocated within the PoCore pool. We don't want
+           to clear the pool and toss the APR pool. Set a post that we can
+           use for "clearing the [APR] pool".  */
+        pool->post = pc_post_create(pcpool);
+    }
+#else
     if (allocator == NULL)
         allocator = parent->allocator;
 
@@ -872,8 +960,9 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
 
     pool->allocator = allocator;
     pool->active = pool->self = node;
-    pool->abort_fn = abort_fn;
     pool->child = NULL;
+#endif
+    pool->abort_fn = abort_fn;
     pool->cleanups = NULL;
     pool->free_cleanups = NULL;
     pool->pre_cleanups = NULL;
@@ -886,6 +975,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     pool->owner_proc = (apr_os_proc_t)getnlmhandle();
 #endif /* defined(NETWARE) */
 
+#ifndef USE_POCORE
     if ((pool->parent = parent) != NULL) {
 #if APR_HAS_THREADS
         apr_thread_mutex_t *mutex;
@@ -909,8 +999,11 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
         pool->sibling = NULL;
         pool->ref = NULL;
     }
+#endif
 
     *newpool = pool;
+
+    log_action("create", pool, parent, 0);
 
     return APR_SUCCESS;
 }
@@ -928,14 +1021,21 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
                                                   apr_abortfunc_t abort_fn,
                                                   apr_allocator_t *allocator)
 {
+#ifndef USE_POCORE
     apr_pool_t *pool;
     apr_memnode_t *node;
     apr_allocator_t *pool_allocator;
+#endif
 
     *newpool = NULL;
 
     if (!apr_pools_initialized)
         return APR_ENOPOOL;
+#ifdef USE_POCORE
+    /* ### unmanaged is simply not hooking it into a ctx-rooted tree
+       ### is this sufficient?  */
+    apr_pool_create_ex(newpool, NULL, abort_fn, allocator);
+#else
     if ((pool_allocator = allocator) == NULL) {
         if ((pool_allocator = malloc(SIZEOF_ALLOCATOR_T)) == NULL) {
             if (abort_fn)
@@ -980,7 +1080,9 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
 #endif /* defined(NETWARE) */
     if (!allocator)
         pool_allocator->owner = pool;
+
     *newpool = pool;
+#endif
 
     return APR_SUCCESS;
 }
@@ -1005,10 +1107,16 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
 
 struct psprintf_data {
     apr_vformatter_buff_t vbuff;
+#ifdef USE_POCORE
+    pc_pool_t *pcpool;
+    char *buf;
+    size_t buflen;
+#else
     apr_memnode_t   *node;
     apr_pool_t      *pool;
     apr_byte_t       got_a_new_node;
     apr_memnode_t   *free;
+#endif
 };
 
 #define APR_PSPRINTF_MIN_STRINGSIZE 32
@@ -1016,6 +1124,22 @@ struct psprintf_data {
 static int psprintf_flush(apr_vformatter_buff_t *vbuff)
 {
     struct psprintf_data *ps = (struct psprintf_data *)vbuff;
+#ifdef USE_POCORE
+
+    size_t oldlen = ps->vbuff.curpos - ps->buf;
+    size_t newlen = ps->buflen * 2;
+    char *newbuf = pc_alloc(ps->pcpool, newlen);
+
+    memcpy(newbuf, ps->buf, oldlen);
+
+    ps->vbuff.curpos = newbuf + oldlen;
+    ps->vbuff.endpos = newbuf + newlen - 1;  /* for NUL.  */
+
+    ps->buf = newbuf;
+    ps->buflen = newlen;
+
+    return 0;
+#else
     apr_memnode_t *node, *active;
     apr_size_t cur_len, size;
     char *strp;
@@ -1082,12 +1206,22 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
     ps->vbuff.endpos = node->endp - 1; /* Save a byte for NUL terminator */
 
     return 0;
+#endif
 }
 
 APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
 {
     struct psprintf_data ps;
     char *strp;
+#ifdef USE_POCORE
+
+    ps.pcpool = pool->pcpool;
+    ps.buflen = 1000;
+    ps.buf = pc_alloc(ps.pcpool, ps.buflen);
+
+    ps.vbuff.curpos = ps.buf;
+    ps.vbuff.endpos = ps.buf + ps.buflen - 1;  /* for NUL  */
+#else
     apr_size_t size;
     apr_memnode_t *active, *node;
     apr_size_t free_index;
@@ -1113,6 +1247,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
             return NULL;
         }
     }
+#endif
 
     if (apr_vformatter(psprintf_flush, &ps.vbuff, fmt, ap) == -1) {
         if (pool->abort_fn)
@@ -1124,6 +1259,9 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     strp = ps.vbuff.curpos;
     *strp++ = '\0';
 
+#ifdef USE_POCORE
+    strp = ps.buf;
+#else
     size = strp - ps.node->first_avail;
     size = APR_ALIGN_DEFAULT(size);
     strp = ps.node->first_avail;
@@ -1163,6 +1301,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
 
     list_remove(active);
     list_insert(active, node);
+#endif
 
     return strp;
 }
@@ -2036,6 +2175,10 @@ APR_DECLARE(apr_abortfunc_t) apr_pool_abort_get(apr_pool_t *pool)
 
 APR_DECLARE(apr_pool_t *) apr_pool_parent_get(apr_pool_t *pool)
 {
+#ifdef USE_POCORE
+    /* ### we don't have this API in PoCore. should it be added?  */
+    return NULL;
+#else
 #ifdef NETWARE
     /* On NetWare, don't return the global_pool, return the application pool 
        as the top most pool */
@@ -2044,11 +2187,17 @@ APR_DECLARE(apr_pool_t *) apr_pool_parent_get(apr_pool_t *pool)
     else
 #endif
     return pool->parent;
+#endif
 }
 
 APR_DECLARE(apr_allocator_t *) apr_pool_allocator_get(apr_pool_t *pool)
 {
+#ifdef USE_POCORE
+    /* ### we don't have allocators in PoCore. should it be added?  */
+    return global_allocator;
+#else
     return pool->allocator;
+#endif
 }
 
 /* return TRUE if a is an ancestor of b
@@ -2059,6 +2208,10 @@ APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
     if (a == NULL)
         return 1;
 
+#ifdef USE_POCORE
+    /* ### we can't do this in pocore.  */
+    return 0;
+#else
 #if APR_POOL_DEBUG
     /* Find the pool with the longest lifetime guaranteed by the
      * caller: */
@@ -2075,6 +2228,7 @@ APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
     }
 
     return 0;
+#endif
 }
 
 APR_DECLARE(void) apr_pool_tag(apr_pool_t *pool, const char *tag)
@@ -2331,8 +2485,12 @@ static void cleanup_pool_for_exec(apr_pool_t *p)
 {
     run_child_cleanups(&p->cleanups);
 
+#ifdef USE_POCORE
+    /* ### we can't do this right now.  */
+#else
     for (p = p->child; p; p = p->sibling)
         cleanup_pool_for_exec(p);
+#endif
 }
 
 APR_DECLARE(void) apr_pool_cleanup_for_exec(void)

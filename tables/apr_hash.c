@@ -32,6 +32,13 @@
 #include <stdio.h>
 #endif
 
+/*#define USE_POCORE*/
+#ifdef USE_POCORE
+#include "pc_types.h"
+#include "pc_memory.h"
+pc_pool_t *apr__get_pcpool(const apr_pool_t *pool);
+#endif
+
 /*
  * The internal form of a hash table.
  *
@@ -41,6 +48,7 @@
  * isn't too bad given that pools have a low allocation overhead.
  */
 
+#ifndef USE_POCORE
 typedef struct apr_hash_entry_t apr_hash_entry_t;
 
 struct apr_hash_entry_t {
@@ -50,6 +58,7 @@ struct apr_hash_entry_t {
     apr_ssize_t       klen;
     const void       *val;
 };
+#endif
 
 /*
  * Data structure for iterating through a hash table.
@@ -59,9 +68,13 @@ struct apr_hash_entry_t {
  * apr_hash_next().
  */
 struct apr_hash_index_t {
+#ifdef USE_POCORE
+    pc_hiter_t *hi;
+#else
     apr_hash_t         *ht;
     apr_hash_entry_t   *this, *next;
     unsigned int        index;
+#endif
 };
 
 /*
@@ -73,11 +86,15 @@ struct apr_hash_index_t {
  */
 struct apr_hash_t {
     apr_pool_t          *pool;
-    apr_hash_entry_t   **array;
     apr_hash_index_t     iterator;  /* For apr_hash_first(NULL, ...) */
+#ifdef USE_POCORE
+    pc_hash_t *hash;
+#else
+    apr_hash_entry_t   **array;
     unsigned int         count, max;
     apr_hashfunc_t       hash_func;
     apr_hash_entry_t    *free;  /* List of recycled entries */
+#endif
 };
 
 #define INITIAL_MAX 15 /* tunable == 2^n - 1 */
@@ -86,15 +103,22 @@ struct apr_hash_t {
 /*
  * Hash creation functions.
  */
-
+#ifndef USE_POCORE
 static apr_hash_entry_t **alloc_array(apr_hash_t *ht, unsigned int max)
 {
    return apr_pcalloc(ht->pool, sizeof(*ht->array) * (max + 1));
 }
+#endif
 
 APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool)
 {
     apr_hash_t *ht;
+#ifdef USE_POCORE
+    pc_pool_t *pcpool = apr__get_pcpool(pool);
+    ht = pc_alloc(pcpool, sizeof(*ht));
+    ht->pool = pool;
+    ht->hash = pc_hash_create(pcpool);
+#else
     ht = apr_palloc(pool, sizeof(apr_hash_t));
     ht->pool = pool;
     ht->free = NULL;
@@ -102,6 +126,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool)
     ht->max = INITIAL_MAX;
     ht->array = alloc_array(ht, ht->max);
     ht->hash_func = apr_hashfunc_default;
+#endif
     return ht;
 }
 
@@ -109,7 +134,9 @@ APR_DECLARE(apr_hash_t *) apr_hash_make_custom(apr_pool_t *pool,
                                                apr_hashfunc_t hash_func)
 {
     apr_hash_t *ht = apr_hash_make(pool);
+#ifndef USE_POCORE
     ht->hash_func = hash_func;
+#endif
     return ht;
 }
 
@@ -120,6 +147,10 @@ APR_DECLARE(apr_hash_t *) apr_hash_make_custom(apr_pool_t *pool,
 
 APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi)
 {
+#ifdef USE_POCORE
+    hi->hi = pc_hiter_next(hi->hi);
+    return hi->hi ? hi : NULL;
+#else
     hi->this = hi->next;
     while (!hi->this) {
         if (hi->index > hi->ht->max)
@@ -129,6 +160,7 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi)
     }
     hi->next = hi->this->next;
     return hi;
+#endif
 }
 
 APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_pool_t *p, apr_hash_t *ht)
@@ -139,11 +171,16 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_pool_t *p, apr_hash_t *ht)
     else
         hi = &ht->iterator;
 
+#ifdef USE_POCORE
+    hi->hi = pc_hiter_begin(ht->hash, apr__get_pcpool(p));
+    return hi->hi ? hi : NULL;
+#else
     hi->ht = ht;
     hi->index = 0;
     hi->this = NULL;
     hi->next = NULL;
     return apr_hash_next(hi);
+#endif
 }
 
 APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi,
@@ -151,16 +188,22 @@ APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi,
                                 apr_ssize_t *klen,
                                 void **val)
 {
+#ifdef USE_POCORE
+    if (key)  *key  = pc_hiter_key(hi->hi);
+    if (klen) *klen = pc_hiter_klen(hi->hi);
+    if (val)  *val  = pc_hiter_value(hi->hi);
+#else
     if (key)  *key  = hi->this->key;
     if (klen) *klen = hi->this->klen;
     if (val)  *val  = (void *)hi->this->val;
+#endif
 }
 
 
 /*
  * Expanding a hash table
  */
-
+#ifndef USE_POCORE
 static void expand_array(apr_hash_t *ht)
 {
     apr_hash_index_t *hi;
@@ -177,6 +220,7 @@ static void expand_array(apr_hash_t *ht)
     ht->array = new_array;
     ht->max = new_max;
 }
+#endif
 
 APR_DECLARE_NONSTD(unsigned int) apr_hashfunc_default(const char *char_key,
                                                       apr_ssize_t *klen)
@@ -248,7 +292,7 @@ APR_DECLARE_NONSTD(unsigned int) apr_hashfunc_default(const char *char_key,
  * there isn't already one there; it returns an updatable pointer so
  * that hash entries can be removed.
  */
-
+#ifndef USE_POCORE
 static apr_hash_entry_t **find_entry(apr_hash_t *ht,
                                      const void *key,
                                      apr_ssize_t klen,
@@ -284,11 +328,18 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
     ht->count++;
     return hep;
 }
+#endif
 
 APR_DECLARE(apr_hash_t *) apr_hash_copy(apr_pool_t *pool,
                                         const apr_hash_t *orig)
 {
     apr_hash_t *ht;
+#ifdef USE_POCORE
+    pc_pool_t *pcpool = apr__get_pcpool(pool);
+    ht = pc_alloc(pcpool, sizeof(*ht));
+    ht->pool = pool;
+    ht->hash = pc_hash_copy(orig->hash, pcpool);
+#else
     apr_hash_entry_t *new_vals;
     unsigned int i, j;
 
@@ -319,6 +370,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_copy(apr_pool_t *pool,
         }
         *new_entry = NULL;
     }
+#endif
     return ht;
 }
 
@@ -326,12 +378,18 @@ APR_DECLARE(void *) apr_hash_get(apr_hash_t *ht,
                                  const void *key,
                                  apr_ssize_t klen)
 {
+#ifdef USE_POCORE
+    if (klen == APR_HASH_KEY_STRING)
+        return pc_hash_gets(ht->hash, key);
+    return pc_hash_get(ht->hash, key, klen);
+#else
     apr_hash_entry_t *he;
     he = *find_entry(ht, key, klen, NULL);
     if (he)
         return (void *)he->val;
     else
         return NULL;
+#endif
 }
 
 APR_DECLARE(void) apr_hash_set(apr_hash_t *ht,
@@ -339,6 +397,12 @@ APR_DECLARE(void) apr_hash_set(apr_hash_t *ht,
                                apr_ssize_t klen,
                                const void *val)
 {
+#ifdef USE_POCORE
+    if (klen == APR_HASH_KEY_STRING)
+        pc_hash_sets(ht->hash, key, (void *)val);
+    else
+        pc_hash_set(ht->hash, key, klen, (void *)val);
+#else
     apr_hash_entry_t **hep;
     hep = find_entry(ht, key, klen, val);
     if (*hep) {
@@ -360,18 +424,27 @@ APR_DECLARE(void) apr_hash_set(apr_hash_t *ht,
         }
     }
     /* else key not present and val==NULL */
+#endif
 }
 
 APR_DECLARE(unsigned int) apr_hash_count(apr_hash_t *ht)
 {
+#ifdef USE_POCORE
+    return pc_hash_count(ht->hash);
+#else
     return ht->count;
+#endif
 }
 
 APR_DECLARE(void) apr_hash_clear(apr_hash_t *ht)
 {
+#ifdef USE_POCORE
+    pc_hash_clear(ht->hash);
+#else
     apr_hash_index_t *hi;
     for (hi = apr_hash_first(NULL, ht); hi; hi = apr_hash_next(hi))
         apr_hash_set(ht, hi->this->key, hi->this->klen, NULL);
+#endif
 }
 
 APR_DECLARE(apr_hash_t*) apr_hash_overlay(apr_pool_t *p,
@@ -392,6 +465,39 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
                                                      const void *data),
                                          const void *data)
 {
+#ifdef USE_POCORE
+    pc_pool_t *pcpool = apr__get_pcpool(p);
+    apr_hash_t *result;
+    pc_hiter_t *hi;
+
+    result = pc_alloc(pcpool, sizeof(*result));
+    result->pool = p;
+    result->hash = pc_hash_copy(base->hash, pcpool);
+
+    for (hi = pc_hiter_begin(overlay->hash, pcpool);
+         hi;
+         hi = pc_hiter_next(hi))
+    {
+        const void *key = pc_hiter_key(hi);
+        size_t klen = pc_hiter_klen(hi);
+        void *new_value = pc_hiter_value(hi);
+        void *old_value = pc_hash_get(result->hash, key, klen);
+
+        if (old_value == NULL || merger == NULL)
+        {
+            pc_hash_set(result->hash, key, klen, new_value);
+        }
+        else
+        {
+            pc_hash_set(result->hash, key, klen,
+                        (*merger)(p, key, klen,
+                                  new_value, old_value,
+                                  data));
+        }
+    }
+
+    return result;
+#else
     apr_hash_t *res;
     apr_hash_entry_t *new_vals = NULL;
     apr_hash_entry_t *iter;
@@ -472,6 +578,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
         }
     }
     return res;
+#endif
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(hash)
