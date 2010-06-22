@@ -55,9 +55,9 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
 
     if (thefile->ungetchar != -1 && req_nbytes >= 1) {
         *(char *)buf = (char)thefile->ungetchar;
-        (char *)buf++;
-        (*nbytes)--;
         thefile->ungetchar = -1;
+        (*nbytes) = 1;
+        return APR_SUCCESS;
     }
 
     if (thefile->buffered) {
