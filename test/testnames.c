@@ -21,6 +21,11 @@
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_lib.h"
+#include "apr_strings.h"
+
+#if defined(WIN32)
+#include <direct.h>
+#endif
 
 #if defined(WIN32) || defined(OS2)
 #define ABS_ROOT "C:/"
@@ -175,6 +180,42 @@ static void merge_notabs(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, "foo/baz", dstpath);
 }
 
+#if defined (WIN32)
+static void merge_lowercasedrive(abts_case *tc, void *data)
+{
+  char current_dir[1024];
+  char current_dir_on_C[1024];
+  char *dir_on_c;
+  char *testdir;
+  apr_status_t rv;
+
+  /* Change the current directory on C: from something like "C:\dir"
+     to something like "c:\dir" to replicate the failing case. */
+  ABTS_PTR_NOTNULL(tc, _getcwd(current_dir, sizeof(current_dir)));
+
+   /* 3 stands for drive C: */
+  ABTS_PTR_NOTNULL(tc, _getdcwd(3, current_dir_on_C,
+	                            sizeof(current_dir_on_C)));
+
+  /* Use the same path, but now with a lower case driveletter */
+  dir_on_c = apr_pstrdup(p, current_dir_on_C);
+  dir_on_c[0] = (char)tolower(dir_on_c[0]);
+
+  chdir(dir_on_c);
+
+  /* Now merge a drive relative path with an upper case drive letter. */
+  rv = apr_filepath_merge(&testdir, NULL, "C:hi",
+                          APR_FILEPATH_NOTRELATIVE, p);
+
+  /* Change back to original directory for next tests */
+  chdir("C:\\"); /* Switch to upper case */
+  chdir(current_dir_on_C); /* Switch cwd on C: */
+  chdir(current_dir); /* Switch back to original cwd */
+
+  ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
+#endif
+
 static void root_absolute(abts_case *tc, void *data)
 {
     apr_status_t rv;
@@ -294,6 +335,9 @@ abts_suite *testnames(abts_suite *suite)
     abts_run_test(suite, merge_notabs, NULL);
     abts_run_test(suite, merge_notabsfail, NULL);
     abts_run_test(suite, merge_dotdot_dotdot_dotdot, NULL);
+#if defined(WIN32)
+    abts_run_test(suite, merge_lowercasedrive, NULL);
+#endif
 
     abts_run_test(suite, root_absolute, NULL);
     abts_run_test(suite, root_relative, NULL);
