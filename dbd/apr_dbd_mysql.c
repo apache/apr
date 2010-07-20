@@ -363,6 +363,7 @@ static int dbd_mysql_get_entry(const apr_dbd_row_t *row, int n,
 static const char *dbd_mysql_get_entry(const apr_dbd_row_t *row, int n)
 {
     MYSQL_BIND *bind;
+    const char *result = NULL;
     if (dbd_mysql_num_cols(row->res) <= n) {
     	return NULL;
     }
@@ -375,13 +376,20 @@ static const char *dbd_mysql_get_entry(const apr_dbd_row_t *row, int n)
             return NULL;
         }
         else {
-            return bind->buffer;
+            result = bind->buffer;
         }
     }
     else {
-        return row->row[n];
+        result = row->row[n];
     }
-    return NULL;
+    if (result != NULL) {
+        /* need to copy this - PR 46421
+         * Don't know why, when it apparently came from an array
+         * in the first place.
+         */
+        result = apr_pstrdup(row->res->pool, result);
+    }
+    return result;
 }
 #endif
 
