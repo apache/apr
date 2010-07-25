@@ -650,10 +650,10 @@ static apr_status_t crypto_block_decrypt_finish(apr_crypto_block_t *ctx,
  * OpenSSL module.
  */
 APR_MODULE_DECLARE_DATA const apr_crypto_driver_t apr_crypto_openssl_driver = {
-        "openssl", crypto_init, crypto_error, crypto_make, crypto_passphrase,
+        "openssl", crypto_init, crypto_make, crypto_passphrase,
         crypto_block_encrypt_init, crypto_block_encrypt,
         crypto_block_encrypt_finish, crypto_block_decrypt_init,
         crypto_block_decrypt, crypto_block_decrypt_finish,
-        crypto_block_cleanup, crypto_cleanup, crypto_shutdown };
+        crypto_block_cleanup, crypto_cleanup, crypto_shutdown, crypto_error };
 
 #endif
