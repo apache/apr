@@ -37,6 +37,7 @@ struct apr_crypto_driver_t {
      * Called once only.
      * @param pool The pool to register the cleanup in.
      * @param params An array of optional init parameters.
+     * @param rc Driver-specific additional error code
      */
     apr_status_t (*init)(apr_pool_t *pool, const apr_array_header_t *params, int *rc);
 
@@ -45,7 +46,7 @@ struct apr_crypto_driver_t {
      *        algorithms and other parameters will be set per context. More than
      *        one context can be created at one time. A cleanup will be automatically
      *        registered with the given pool to guarantee a graceful shutdown.
-     * @param driver - driver to use
+     * @param provider - provider to use
      * @param pool - process pool
      * @param params - array of key parameters
      * @param f - context pointer will be written here
@@ -64,7 +65,6 @@ struct apr_crypto_driver_t {
      *        operations.
      * @note If *key is NULL, a apr_crypto_key_t will be created from a pool. If
      *       *key is not NULL, *key must point at a previously created structure.
-     * @param driver - driver to use
      * @param p The pool to use.
      * @param f The context to use.
      * @param pass The passphrase to use.
@@ -74,6 +74,7 @@ struct apr_crypto_driver_t {
      * @param type 3DES_192, AES_128, AES_192, AES_256.
      * @param mode Electronic Code Book / Cipher Block Chaining.
      * @param doPad Pad if necessary.
+     * @param iterations Iteration count
      * @param key The key returned, see note.
      * @param ivSize The size of the initialisation vector will be returned, based
      *               on whether an IV is relevant for this type of crypto.
@@ -101,8 +102,6 @@ struct apr_crypto_driver_t {
      *           If the buffer pointed to is not NULL, the IV in the buffer will be
      *           used.
      * @param ctx The block context returned, see note.
-     * @param ivSize The size of the initialisation vector will be returned, based
-     *               on whether an IV is relevant for this type of crypto.
      * @param blockSize The block size of the cipher.
      * @return Returns APR_ENOIV if an initialisation vector is required but not specified.
      *         Returns APR_EINIT if the backend failed to initialise the context. Returns
@@ -219,7 +218,6 @@ struct apr_crypto_driver_t {
     /**
      * @brief Clean encryption / decryption context.
      * @note After cleanup, a context is free to be reused if necessary.
-     * @param driver - driver to use
      * @param ctx The block context to use.
      * @return Returns APR_ENOTIMPL if not supported.
      */
@@ -228,7 +226,6 @@ struct apr_crypto_driver_t {
     /**
      * @brief Clean encryption / decryption context.
      * @note After cleanup, a context is free to be reused if necessary.
-     * @param driver - driver to use
      * @param f The context to use.
      * @return Returns APR_ENOTIMPL if not supported.
      */
