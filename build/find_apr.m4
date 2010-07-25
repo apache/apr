@@ -176,7 +176,7 @@ AC_DEFUN([APR_FIND_APR], [
     fi
     dnl if we have not found anything yet and have bundled source, use that
     if test "$apr_found" = "no" && test -d "$1"; then
-      apr_temp_abs_srcdir="`cd $1 && pwd`"
+      apr_temp_abs_srcdir="`cd \"$1\" && pwd`"
       apr_found="reconfig"
       apr_bundled_major="`sed -n '/#define.*APR_MAJOR_VERSION/s/^[^0-9]*\([0-9]*\).*$/\1/p' \"$1/include/apr_version.h\"`"
       case $apr_bundled_major in
