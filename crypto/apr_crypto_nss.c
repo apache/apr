@@ -772,12 +772,11 @@ static apr_status_t crypto_block_decrypt_finish(apr_crypto_block_t *block,
 }
 
 /**
- * OpenSSL module.
+ * NSS module.
  */
 APR_MODULE_DECLARE_DATA const apr_crypto_driver_t apr_crypto_nss_driver = {
     "nss",
     crypto_init,
-    crypto_error,
     crypto_make,
     crypto_passphrase,
     crypto_block_encrypt_init,
@@ -788,7 +787,8 @@ APR_MODULE_DECLARE_DATA const apr_crypto_driver_t apr_crypto_nss_driver = {
     crypto_block_decrypt_finish,
     crypto_block_cleanup,
     crypto_cleanup,
-    crypto_shutdown
+    crypto_shutdown,
+    crypto_error
 };
 
 #endif
