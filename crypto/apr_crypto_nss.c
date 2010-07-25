@@ -166,8 +166,7 @@ static apr_status_t crypto_init(apr_pool_t *pool, const apr_array_header_t *para
 /**
  * @brief Clean encryption / decryption context.
  * @note After cleanup, a context is free to be reused if necessary.
- * @param driver - driver to use
- * @param ctx The block context to use.
+ * @param block The block context to use.
  * @return Returns APR_ENOTIMPL if not supported.
  */
 static apr_status_t crypto_block_cleanup(apr_crypto_block_t *block)
@@ -191,7 +190,6 @@ static apr_status_t crypto_block_cleanup_helper(void *data)
 /**
  * @brief Clean encryption / decryption context.
  * @note After cleanup, a context is free to be reused if necessary.
- * @param driver - driver to use
  * @param f The context to use.
  * @return Returns APR_ENOTIMPL if not supported.
  */
@@ -220,10 +218,10 @@ static apr_status_t crypto_cleanup_helper(void *data)
  *        algorithms and other parameters will be set per context. More than
  *        one context can be created at one time. A cleanup will be automatically
  *        registered with the given pool to guarantee a graceful shutdown.
- * @param driver - driver to use
  * @param pool - process pool
+ * @param provider - provider to use
  * @param params - array of key parameters
- * @param context - context pointer will be written here
+ * @param ff - context pointer will be written here
  * @return APR_ENOENGINE when the engine specified does not exist. APR_EINITENGINE
  * if the engine cannot be initialised.
  */
@@ -284,7 +282,6 @@ static apr_status_t crypto_make(apr_pool_t *pool, const apr_crypto_driver_t *pro
  *        operations.
  * @note If *key is NULL, a apr_crypto_key_t will be created from a pool. If
  *       *key is not NULL, *key must point at a previously created structure.
- * @param driver - driver to use
  * @param p The pool to use.
  * @param f The context to use.
  * @param pass The passphrase to use.
@@ -294,6 +291,7 @@ static apr_status_t crypto_make(apr_pool_t *pool, const apr_crypto_driver_t *pro
  * @param type 3DES_192, AES_128, AES_192, AES_256.
  * @param mode Electronic Code Book / Cipher Block Chaining.
  * @param doPad Pad if necessary.
+ * @param iterations Iteration count
  * @param key The key returned, see note.
  * @param ivSize The size of the initialisation vector will be returned, based
  *               on whether an IV is relevant for this type of crypto.
@@ -517,7 +515,7 @@ static apr_status_t crypto_block_encrypt_init(apr_pool_t *p,
  *       to NULL, a buffer sufficiently large will be created from
  *       the pool provided. If *out points to a not-NULL value, this
  *       value will be used as a buffer instead.
- * @param ctx The block context to use.
+ * @param block The block context to use.
  * @param out Address of a buffer to which data will be written,
  *        see note.
  * @param outlen Length of the output will be written here.
@@ -570,7 +568,7 @@ static apr_status_t crypto_block_encrypt(apr_crypto_block_t *block,
  *       number of bytes returned as actually written by the
  *       apr_crypto_block_encrypt() call. After this call, the context
  *       is cleaned and can be reused by apr_crypto_block_encrypt_init().
- * @param ctx The block context to use.
+ * @param block The block context to use.
  * @param out Address of a buffer to which data will be written. This
  *            buffer must already exist, and is usually the same
  *            buffer used by apr_evp_crypt(). See note.
@@ -685,7 +683,7 @@ static apr_status_t crypto_block_decrypt_init(apr_pool_t *p,
  *       to NULL, a buffer sufficiently large will be created from
  *       the pool provided. If *out points to a not-NULL value, this
  *       value will be used as a buffer instead.
- * @param ctx The block context to use.
+ * @param block The block context to use.
  * @param out Address of a buffer to which data will be written,
  *        see note.
  * @param outlen Length of the output will be written here.
@@ -738,7 +736,7 @@ static apr_status_t crypto_block_decrypt(apr_crypto_block_t *block,
  *       bytes returned as actually written by the apr_evp_crypt()
  *       call. After this call, the context is cleaned and can be
  *       reused by apr_env_encrypt_init() or apr_env_decrypt_init().
- * @param ctx The block context to use.
+ * @param block The block context to use.
  * @param out Address of a buffer to which data will be written. This
  *            buffer must already exist, and is usually the same
  *            buffer used by apr_evp_crypt(). See note.
