@@ -14,6 +14,9 @@ Changes for APR 1.4.3
   *) Avoid a redundant fcntl() call in apr_file_open() where O_CLOEXEC
      is supported.  PR 46297.  [Joe Orton]
 
+  *) Improve platform detection by updating config.guess and config.sub.
+     [Rainer Jung]
+
 Changes for APR 1.4.2
 
   *) Undo a crash-bug introduced in 1.4.1 affecting some applications of 
