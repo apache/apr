@@ -148,7 +148,7 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
         file->mutex = NULL;
     }
 
-    return APR_SUCCESS;
+    return status;
 }
 
 

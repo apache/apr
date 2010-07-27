@@ -1758,8 +1758,8 @@ static int dbd_oracle_end_transaction(apr_dbd_transaction_t *trans)
 {
     int ret = 1;             /* no transaction is an error cond */
     sword status;
-    apr_dbd_t *handle = trans->handle;
     if (trans) {
+        apr_dbd_t *handle = trans->handle;
         switch (trans->status) {
         case TRANS_NONE:     /* No trans is an error here */
             status = OCI_ERROR;
