@@ -300,7 +300,6 @@ bool parse_input_file_name(char *arg, cmd_data_t *cmd_data)
 {
     char *ext = strrchr(arg, '.');
     char *name = strrchr(arg, '/');
-    int pathlen;
     char *newarg;
 
     if (!ext) {
@@ -320,8 +319,6 @@ bool parse_input_file_name(char *arg, cmd_data_t *cmd_data)
     } else {
         name++;
     }
-
-    pathlen = name - arg;
 
     if (strcmp(ext, "lo") == 0) {
         newarg = (char *)malloc(strlen(arg) + 10);
@@ -362,7 +359,6 @@ bool parse_output_file_name(char *arg, cmd_data_t *cmd_data)
     char *name = strrchr(arg, '/');
     char *ext = strrchr(arg, '.');
     char *newarg = NULL, *newext;
-    int pathlen;
 
     if (name == NULL) {
         name = strrchr(arg, '\\');
@@ -392,7 +388,6 @@ bool parse_output_file_name(char *arg, cmd_data_t *cmd_data)
     }
 
     ext++;
-    pathlen = name - arg;
 
     if (strcmp(ext, "exe") == 0) {
         cmd_data->output_type = otProgram;

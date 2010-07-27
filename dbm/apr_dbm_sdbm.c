@@ -193,7 +193,7 @@ static apr_status_t vt_sdbm_nextkey(apr_dbm_t *dbm, apr_datum_t *pkey)
     pkey->dsize = rd.dsize;
 
     /* store any error info into DBM, and return a status code. */
-    return set_error(dbm, APR_SUCCESS);
+    return set_error(dbm, rv);
 }
 
 static void vt_sdbm_freedatum(apr_dbm_t *dbm, apr_datum_t data)

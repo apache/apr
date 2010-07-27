@@ -26,7 +26,6 @@
 static apr_status_t pipeblock(apr_file_t *thepipe)
 {
 #ifdef USE_FLAGS
-    int				err;
 	unsigned long	flags;
 
 	if (fcntl(thepipe->filedes, F_GETFL, &flags) != -1)
@@ -49,7 +48,6 @@ static apr_status_t pipeblock(apr_file_t *thepipe)
 static apr_status_t pipenonblock(apr_file_t *thepipe)
 {
 #ifdef USE_FLAGS
-	int				err;
 	unsigned long	flags;
 
     errno = 0;
@@ -138,7 +136,6 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
 APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *pool)
 {
 	int     	filedes[2];
-	int 		err;
 
     if (pipe(filedes) == -1) {
         return errno;
