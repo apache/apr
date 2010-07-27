@@ -145,7 +145,6 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
         apr_wchar_t *wpre, *wfile, *ch;
         apr_size_t n = strlen(file) + 1;
         apr_size_t r, d;
-        apr_status_t rv;
 
         if (apr_os_level >= APR_WIN_2000) {
             if (global)
@@ -169,7 +168,7 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
         wfile = apr_palloc(pool, (r + n) * sizeof(apr_wchar_t));
         wcscpy(wfile, wpre);
         d = n;
-        if ((rv = apr_conv_utf8_to_ucs2(file, &n, wfile + r, &d))) {
+        if (apr_conv_utf8_to_ucs2(file, &n, wfile + r, &d)) {
             return NULL;
         }
         for (ch = wfile + r; *ch; ++ch) {
@@ -186,7 +185,6 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
         apr_size_t n = strlen(file) + 1;
 
 #if !APR_HAS_UNICODE_FS
-        apr_status_t rv;
         apr_size_t r, d;
         char *pre;
 

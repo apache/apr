@@ -18,8 +18,6 @@
 
 APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize)
 {
-    int x;
-
     if (chdir("/") == -1) {
         return errno;
     }
@@ -28,6 +26,8 @@ APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize)
     /* Don't detach for MPE because child processes can't survive the death of
      * the parent. */
     if (daemonize) {
+        int x;
+
         if ((x = fork()) > 0) {
             exit(0);
         }
