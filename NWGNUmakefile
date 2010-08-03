@@ -42,6 +42,7 @@ XINCDIRS	+= \
 			$(APR)/dbm/sdbm \
 			$(APR)/memory/unix \
 			$(APR)/random/unix \
+			$(LDAPSDK)/inc \
 			$(EOLIST)
 
 #
@@ -405,6 +406,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/uuid.o \
 	$(OBJDIR)/version.o \
 	$(OBJDIR)/waitio.o \
+	$(OBJDIR)/wakeup.o \
 	$(OBJDIR)/xlate.o \
 	$(EOLIST)
 
