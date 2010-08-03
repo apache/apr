@@ -17,7 +17,6 @@ include $(APR_WORK)/build/NWGNUhead.inc
 
 FILES_prebuild_headers = \
 	$(APR)/include/apr.h \
-	$(APR)/include/apu.h \
 	$(APR)/include/apu_want.h \
 	$(APR)/include/apr_ldap.h \
 	$(APR)/include/private/apu_config.h \
@@ -42,6 +41,7 @@ $(NLM_NAME)_cc.opt : NWGNUmakefile $(APR)/build/NWGNUenvironment.inc $(APR)/buil
 	@echo -w nocmdline >> $@
 	@echo $(DEFINES) -DGENEXPORTS >> $@
 	@echo -I$(APR)/include >> $@
+	@echo -I$(APR)/include/private >> $@
 	@echo -I$(APR)/include/arch/netware >> $@
 	@echo -I$(APR)/include/arch/unix >> $@
 	@echo -I$(APR)/build >> $@
@@ -76,7 +76,6 @@ clean ::
 	$(CHK) $(NLM_NAME)_cc.opt                                   $(DEL) $(NLM_NAME)_cc.opt
 	$(CHK) NWGNUversion.inc                                     $(DEL) NWGNUversion.inc
 	$(CHK) $(subst /,\,$(APR))\include\apr.h                    $(DEL) $(subst /,\,$(APR))\include\apr.h
-	$(CHK) $(subst /,\,$(APR))\include\apu.h                    $(DEL) $(subst /,\,$(APR))\include\apu.h
 	$(CHK) $(subst /,\,$(APR))\include\apu_want.h               $(DEL) $(subst /,\,$(APR))\include\apu_want.h
 	$(CHK) $(subst /,\,$(APR))\include\apr_ldap.h               $(DEL) $(subst /,\,$(APR))\include\apr_ldap.h
 	$(CHK) $(subst /,\,$(APR))\include\private\apu_config.h     $(DEL) $(subst /,\,$(APR))\include\private\apu_config.h

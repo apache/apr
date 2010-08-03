@@ -371,6 +371,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/pipe.o \
 	$(OBJDIR)/pollcb.o \
 	$(OBJDIR)/pollset.o \
+	$(OBJDIR)/printf.o \
 	$(OBJDIR)/proc.o \
 	$(OBJDIR)/proc_mutex.o \
 	$(OBJDIR)/procsup.o \
