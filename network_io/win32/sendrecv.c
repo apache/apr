@@ -455,3 +455,8 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
 
 #endif
 
+APR_DECLARE(apr_status_t) apr_socket_wait(apr_socket_t *sock, apr_wait_type_t direction)
+{
+    return APR_ENOTIMPL;
+}
+

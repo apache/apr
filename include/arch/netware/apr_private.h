@@ -89,8 +89,10 @@
 /* 7 is used for SIGPOLL on netware */
 
 #define SIGKILL         11
+#undef  SA_NOCLDSTOP
 #define SA_NOCLDSTOP    12
 #define SIGALRM         13
+#undef  SIGCHLD
 #define SIGCHLD         14 
 #define SIGCONT         15
 #define SIGHUP          16
@@ -105,6 +107,7 @@
     
 #define SIGTRAP         25
 #define SIGIOT          26
+#undef  SIGBUS
 #define SIGBUS          27
 #define SIGSTKFLT       28
 #define SIGURG          29
@@ -115,29 +118,15 @@
 #define SIGWINCH        34
 #define SIGIO           35
 
-#if 0
-#define __attribute__(__x) 
+#define _getch()               getcharacter()
 
-/* APR COMPATABILITY FUNCTIONS
- * This section should be used to define functions and
- * macros which are need to make Windows features look
- * like POSIX features.
- */
-typedef void (Sigfunc)(int);
-#endif
-
-#define strcasecmp(s1, s2)       stricmp(s1, s2)
-#define Sleep(t)                 delay(t)
-#define lstat(a,b)               stat(a,b)
-#define _getch()                 getcharacter()
-
+#define SIZEOF_CHAR            1
 #define SIZEOF_SHORT           2
 #define SIZEOF_INT             4
 #define SIZEOF_LONGLONG        8
-#define SIZEOF_CHAR            1
 #define SIZEOF_SSIZE_T         SIZEOF_INT
 
-void netware_pool_proc_cleanup ();
+void netware_pool_proc_cleanup();
 
 /* NLM registration routines for managing which NLMs
     are using the library. */

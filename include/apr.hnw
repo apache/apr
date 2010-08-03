@@ -38,6 +38,7 @@
 
 #if defined(NETWARE) || defined(DOXYGEN)
 
+#undef  FD_SETSIZE
 #define FD_SETSIZE 1024
 
 #include <sys/types.h>
