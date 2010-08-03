@@ -26,6 +26,7 @@
 #include "apr_errno.h"
 #include "apr_lib.h"
 #include "apr_poll.h"
+#include "apr_time.h"
 
 /* System headers the file I/O library needs */
 #if APR_HAVE_FCNTL_H
@@ -94,6 +95,15 @@
 
 typedef struct stat struct_stat;
 
+typedef struct apr_rotating_info_t {
+    apr_finfo_t finfo;
+    apr_interval_time_t timeout;
+    apr_time_t lastcheck;
+    int oflags;
+    int manual;
+    apr_fileperms_t perm;
+} apr_rotating_info_t;
+
 struct apr_file_t {
     apr_pool_t *pool;
     int filedes;
@@ -119,6 +129,7 @@ struct apr_file_t {
 #if APR_HAS_THREADS
     struct apr_thread_mutex_t *thlock;
 #endif
+    apr_rotating_info_t *rotating;
 };
 
 struct apr_dir_t {
@@ -164,6 +175,9 @@ apr_status_t filepath_compare_drive(const char *path1, const char *path2, apr_po
 
 apr_status_t apr_unix_file_cleanup(void *);
 apr_status_t apr_unix_child_file_cleanup(void *);
+
+mode_t apr_unix_perms2mode(apr_fileperms_t perms);
+apr_fileperms_t apr_unix_mode2perms(mode_t mode);
 
 apr_status_t apr_file_flush_locked(apr_file_t *thefile);
 apr_status_t apr_file_info_get_locked(apr_finfo_t *finfo, apr_int32_t wanted,
