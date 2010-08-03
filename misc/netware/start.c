@@ -22,8 +22,20 @@
 #include "apr_arch_misc.h"       /* for WSAHighByte / WSALowByte */
 #include "apr_arch_proc_mutex.h" /* for apr_proc_mutex_unix_setup_lock() */
 #include "apr_arch_internal_time.h"
+#include "apr_ldap.h"            /* for apr_ldap_rebind_init() */
 
 #ifdef USE_WINSOCK
+/* Prototypes missing from older NDKs */
+int WSAStartupRTags(WORD wVersionRequested,
+                    LPWSADATA lpWSAData,
+                    rtag_t WSAStartupRTag,
+                    rtag_t WSPSKTRTag,
+                    rtag_t lookUpServiceBeginRTag,
+                    rtag_t WSAEventRTag,
+                    rtag_t WSPCPRTag);
+
+int WSACleanupRTag(rtag_t rTag);
+
 /*
 ** Resource tag signatures for using NetWare WinSock 2. These will no longer
 ** be needed by anyone once the new WSAStartupWithNlmHandle() is available
@@ -38,7 +50,6 @@
 
 int (*WSAStartupWithNLMHandle)( WORD version, LPWSADATA data, void *handle ) = NULL;
 int (*WSACleanupWithNLMHandle)( void *handle ) = NULL;
-apr_status_t apr_ldap_rebind_init(apr_pool_t *pool);
 
 static int wsa_startup_with_handle (WORD wVersionRequested, LPWSADATA data, void *handle)
 {
@@ -124,7 +135,6 @@ APR_DECLARE(apr_status_t) apr_app_initialize(int *argc,
 APR_DECLARE(apr_status_t) apr_initialize(void)
 {
     apr_pool_t *pool;
-    int err;
     void *nlmhandle = getnlmhandle();
 
     /* Register the NLM as using APR. If it is already
@@ -144,15 +154,18 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
     apr_pool_tag(pool, "apr_initilialize");
 
 #ifdef USE_WINSOCK
-    err = RegisterAppWithWinSock (nlmhandle);
-    
-    if (err) {
-        return err;
+    {
+        int err;
+        if ((err = RegisterAppWithWinSock (nlmhandle))) {
+            return err;
+        }
     }
 #endif
 
     apr_signal_init(pool);
+#if APR_HAS_LDAP
     apr_ldap_rebind_init(pool);
+#endif
 
     return APR_SUCCESS;
 }
