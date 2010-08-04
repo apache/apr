@@ -787,10 +787,10 @@ apr_memcache_getp(apr_memcache_t *mc,
 
         length = apr_strtok(NULL, " ", &last);
         if (length) {
-            len = atoi(length);
+            len = strtol(length, (char **)NULL, 10);
         }
 
-        if (len < 0)  {
+        if (len != 0 )  {
             *new_length = 0;
             *baton = NULL;
         }
@@ -1358,14 +1358,14 @@ apr_memcache_multgetp(apr_memcache_t *mc,
 
                length = apr_strtok(NULL, " ", &last);
                if (length) {
-                   len = atoi(length);
+                   len = strtol(length, (char **) NULL, 10);
                }
 
                value = apr_hash_get(values, key, strlen(key));
 
                
                if (value) {
-                   if (len >= 0)  {
+                   if (len != 0)  {
                        apr_bucket_brigade *bbb;
                        apr_bucket *e;
                        
