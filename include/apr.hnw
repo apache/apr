@@ -25,15 +25,7 @@
  * And please, make an effort to stub apr.hw and apr.h.in in the process.
  *
  * This is the NetWare specific version of apr.h.  It is copied from
- * apr.hnw at the start of a NetWare build by prebuildNW.bat.
- */
-
-/**
- * @file apr.h
- * @brief APR Platform Definitions
- * @remark This is a generated header generated from include/apr.h.in by
- * ./configure, or copied from include/apr.hw or include/apr.hnw
- * for Win32 or Netware by those build environments, respectively.
+ * apr.hnw at the start of a NetWare build by the ./build/NWGNmakefile.
  */
 
 #if defined(NETWARE) || defined(DOXYGEN)
