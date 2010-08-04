@@ -163,6 +163,7 @@ void* getStatCache();
     and can be shared by the library. */
 #undef malloc
 #define malloc(x) library_malloc(gLibHandle,x)
+#define _alloca alloca
 
 #if APR_HAS_LARGE_FILES
 #define APR_OFF_T_STRFN       strtoll
