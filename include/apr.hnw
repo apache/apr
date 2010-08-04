@@ -111,15 +111,14 @@ extern "C" {
 #define APR_HAVE_STRTOLL                1
 #define APR_HAVE_SYS_SENDFILE_H         0
 #define APR_HAVE_SYS_SYSLIMITS_H        0
+#define APR_HAVE_SYS_TIME_H             1
 #ifdef USE_WINSOCK
 #define APR_HAVE_SYS_SOCKET_H           0
 #define APR_HAVE_SYS_SOCKIO_H           0
-#define APR_HAVE_SYS_TIME_H             1
 #define APR_HAVE_SYS_UN_H               0
 #else
 #define APR_HAVE_SYS_SOCKET_H           1
 #define APR_HAVE_SYS_SOCKIO_H           1
-#define APR_HAVE_SYS_TIME_H             1
 #define APR_HAVE_SYS_UN_H               1
 #endif
 #define APR_HAVE_SYS_SIGNAL_H           1
