@@ -60,7 +60,11 @@
 #define HAVE_LIMITS_H 1
 #define HAVE_MALLOC_H 1
 #define HAVE_PROCESS_H APR_NOT_IN_WCE
+#ifdef __WATCOMC__
+#define HAVE_SIGNAL_H 0
+#else
 #define HAVE_SIGNAL_H 1
+#endif
 #define HAVE_STDDEF_H APR_NOT_IN_WCE
 #define HAVE_STDLIB_H 1
 
