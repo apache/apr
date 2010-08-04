@@ -790,7 +790,7 @@ apr_memcache_getp(apr_memcache_t *mc,
             len = strtol(length, (char **)NULL, 10);
         }
 
-        if (len != 0 )  {
+        if (len == 0 )  {
             *new_length = 0;
             *baton = NULL;
         }
