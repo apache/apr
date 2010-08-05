@@ -772,11 +772,9 @@ apr_memcache_getp(apr_memcache_t *mc,
     if (strncmp(MS_VALUE, conn->buffer, MS_VALUE_LEN) == 0) {
         char *flags;
         char *length;
-        char *start;
         char *last;
         apr_size_t len = 0;
 
-        start = conn->buffer;
         flags = apr_strtok(conn->buffer, " ", &last);
         flags = apr_strtok(NULL, " ", &last);
         flags = apr_strtok(NULL, " ", &last);
@@ -1345,12 +1343,10 @@ apr_memcache_multgetp(apr_memcache_t *mc,
                char *key;
                char *flags;
                char *length;
-               char *start;
                char *last;
                char *data;
                apr_size_t len = 0;
 
-               start = conn->buffer;
                key = apr_strtok(conn->buffer, " ", &last); /* just the VALUE, ignore */
                key = apr_strtok(NULL, " ", &last);
                flags = apr_strtok(NULL, " ", &last);
