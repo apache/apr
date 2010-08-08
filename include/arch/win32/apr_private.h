@@ -114,6 +114,10 @@
 typedef void (Sigfunc)(int);
 
 #define sleep(t)                 Sleep((t) * 1000)
+/* For now workaround for Watcom'S lack of _commit() */
+#ifdef __WATCOMC__
+#define _commit                  fsync
+#endif
 
 #define SIZEOF_SHORT           2
 #define SIZEOF_INT             4
