@@ -2,7 +2,6 @@
 ** the standard prototypes macros after it messes with them.
 */
 #include "apr.h"
-#include "apu.h"
 
 #undef APR_DECLARE
 #undef APR_DECLARE_NONSTD
@@ -19,6 +18,7 @@
 #include "apr_date.h"
 #include "apr_dbd.h"
 #include "apr_dbm.h"
+#include "apr_dbm_private.h"
 #include "apr_dso.h"
 #include "apr_env.h"
 #include "apr_errno.h"
