@@ -25,7 +25,7 @@
  * And please, make an effort to stub apr.hnw and apr.h.in in the process.
  *
  * This is the Win32 specific version of apr.h.  It is copied from
- * apr.hw by the apr.dsp and libapr.dsp projects. 
+ * apr.hw by the apr.dsp and libapr.dsp projects.
  */
 
 /* Ignore most warnings (back down to /W3) for poorly constructed headers,
@@ -63,7 +63,7 @@
  * @file apr.h
  * @brief APR Platform Definitions
  * @remark This is a generated header generated from include/apr.h.in by
- * ./configure, or copied from include/apr.hw or include/apr.hnw 
+ * ./configure, or copied from include/apr.hw or include/apr.hnw
  * for Win32 or Netware by those build environments, respectively.
  */
 
@@ -92,7 +92,7 @@
  */
 #if defined(_MSC_VER)
 #define APR_INLINE __inline
-#define APR_HAS_INLINE		1
+#define APR_HAS_INLINE          1
 #ifndef __attribute__
 #define __attribute__(__x)
 #endif
@@ -103,10 +103,10 @@
 #define __attribute__(__x)
 #endif
 #define APR_INLINE
-#define APR_HAS_INLINE		0
+#define APR_HAS_INLINE          0
 #else
 #define APR_INLINE __inline__
-#define APR_HAS_INLINE		1
+#define APR_HAS_INLINE          1
 #endif
 
 #ifdef _WIN32_WCE
@@ -160,8 +160,8 @@
 /** @} */
 /** @} */
 
-/* We don't include our conditional headers within the doxyblocks 
- * or the extern "C" namespace 
+/* We don't include our conditional headers within the doxyblocks
+ * or the extern "C" namespace
  */
 
 /* If windows.h was already included, our preferences don't matter.
@@ -188,7 +188,7 @@
 #define NOIME
 #endif
 
-/* Impossible to include winsock2.h after winsock.h, while windows.h 
+/* Impossible to include winsock2.h after winsock.h, while windows.h
  * attempts to load winsock.  Setting _WINSOCKAPI_ will dodge this.
  */
 #if APR_HAVE_WINSOCK2_H
@@ -253,7 +253,7 @@ extern "C" {
 
 /**
  * @addtogroup apr_platform
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -273,12 +273,12 @@ extern "C" {
 #define APR_USE_SHMEM_MMAP_ANON    0
 #define APR_USE_SHMEM_BEOS         0
 
-#define APR_USE_FLOCK_SERIALIZE           0 
+#define APR_USE_FLOCK_SERIALIZE           0
 #define APR_USE_SYSVSEM_SERIALIZE         0
 #define APR_USE_POSIXSEM_SERIALIZE        0
 #define APR_USE_FCNTL_SERIALIZE           0
-#define APR_USE_PROC_PTHREAD_SERIALIZE    0 
-#define APR_USE_PTHREAD_SERIALIZE         0 
+#define APR_USE_PROC_PTHREAD_SERIALIZE    0
+#define APR_USE_PTHREAD_SERIALIZE         0
 
 #define APR_HAS_FLOCK_SERIALIZE           0
 #define APR_HAS_SYSVSEM_SERIALIZE         0
@@ -397,7 +397,7 @@ typedef  apr_uint32_t            apr_uintptr_t;
 
 /* Are we big endian? */
 /* XXX: Fatal assumption on Alpha platforms */
-#define APR_IS_BIGENDIAN	0
+#define APR_IS_BIGENDIAN        0
 
 /* Mechanisms to properly type numeric literals */
 
@@ -478,8 +478,8 @@ typedef  apr_uint32_t            apr_uintptr_t;
 #define APR_END_DECLS
 #endif
 
-/** 
- * Thread callbacks from APR functions must be declared with APR_THREAD_FUNC, 
+/**
+ * Thread callbacks from APR functions must be declared with APR_THREAD_FUNC,
  * so that they follow the platform's calling convention.
  * <PRE>
  *
@@ -494,7 +494,7 @@ typedef  apr_uint32_t            apr_uintptr_t;
 
 /**
  * The public APR functions are declared with APR_DECLARE(), so they may
- * use the most appropriate calling convention.  Public APR functions with 
+ * use the most appropriate calling convention.  Public APR functions with
  * variable arguments must use APR_DECLARE_NONSTD().
  *
  * @remark Both the declaration and implementations must use the same macro.
@@ -503,20 +503,20 @@ typedef  apr_uint32_t            apr_uintptr_t;
  * APR_DECLARE(rettype) apr_func(args)
  * </PRE>
  * @see APR_DECLARE_NONSTD @see APR_DECLARE_DATA
- * @remark Note that when APR compiles the library itself, it passes the 
- * symbol -DAPR_DECLARE_EXPORT to the compiler on some platforms (e.g. Win32) 
+ * @remark Note that when APR compiles the library itself, it passes the
+ * symbol -DAPR_DECLARE_EXPORT to the compiler on some platforms (e.g. Win32)
  * to export public symbols from the dynamic library build.\n
  * The user must define the APR_DECLARE_STATIC when compiling to target
- * the static APR library on some platforms (e.g. Win32.)  The public symbols 
+ * the static APR library on some platforms (e.g. Win32.)  The public symbols
  * are neither exported nor imported when APR_DECLARE_STATIC is defined.\n
  * By default, compiling an application and including the APR public
  * headers, without defining APR_DECLARE_STATIC, will prepare the code to be
  * linked to the dynamic library.
  */
-#define APR_DECLARE(type)            type 
+#define APR_DECLARE(type)            type
 
 /**
- * The public APR functions using variable arguments are declared with 
+ * The public APR functions using variable arguments are declared with
  * APR_DECLARE_NONSTD(), as they must follow the C language calling convention.
  * @see APR_DECLARE @see APR_DECLARE_DATA
  * @remark Both the declaration and implementations must use the same macro.
@@ -534,7 +534,7 @@ typedef  apr_uint32_t            apr_uintptr_t;
  * @see APR_DECLARE @see APR_DECLARE_NONSTD
  * @remark Note that the declaration and implementations use different forms,
  * but both must include the macro.
- * 
+ *
  * <PRE>
  *
  * extern APR_DECLARE_DATA type apr_variable;\n
@@ -562,7 +562,7 @@ typedef  apr_uint32_t            apr_uintptr_t;
 /**
  * Declare a dso module's exported module structure as APR_MODULE_DECLARE_DATA.
  *
- * Unless APR_MODULE_DECLARE_STATIC is defined at compile time, symbols 
+ * Unless APR_MODULE_DECLARE_STATIC is defined at compile time, symbols
  * declared with APR_MODULE_DECLARE_DATA are always exported.
  * @code
  * module APR_MODULE_DECLARE_DATA mod_tag
@@ -579,7 +579,7 @@ typedef  apr_uint32_t            apr_uintptr_t;
  */
 #define APU_MODULE_DECLARE_DATA           APR_MODULE_DECLARE_DATA
 
-/* Define APR_SSIZE_T_FMT.  
+/* Define APR_SSIZE_T_FMT.
  * If ssize_t is an integer we define it to be "d",
  * if ssize_t is a long int we define it to be "ld",
  * if ssize_t is 64-bit, we define it to be msvc specific "I64d"
@@ -636,7 +636,7 @@ typedef int apr_wait_t;
 #endif
 #endif
 
-/* 
+/*
  * we always enable dynamic driver loads within apr_dbd
  * driver builds enable these flags individually
  */
