@@ -60,11 +60,7 @@
 #define HAVE_LIMITS_H 1
 #define HAVE_MALLOC_H 1
 #define HAVE_PROCESS_H APR_NOT_IN_WCE
-#ifdef __WATCOMC__
-#define HAVE_SIGNAL_H 0
-#else
 #define HAVE_SIGNAL_H 1
-#endif
 #define HAVE_STDDEF_H APR_NOT_IN_WCE
 #define HAVE_STDLIB_H 1
 
@@ -74,6 +70,7 @@
 #define HAVE_STRSTR   1
 #define HAVE_MEMCHR   1
 
+#ifndef __WATCOMC__
 #define SIGHUP     1
 /* 2 is used for SIGINT on windows */
 #define SIGQUIT    3
@@ -86,6 +83,7 @@
 #define SIGUSR1    10
 /* 11 is used for SIGSEGV on windows */
 #define SIGUSR2    12
+#endif
 #define SIGPIPE    13
 #define SIGALRM    14
 /* 15 is used for SIGTERM on windows */
