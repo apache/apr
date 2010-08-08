@@ -132,11 +132,7 @@
 #define APR_HAVE_NETINET_TCP_H  0
 #define APR_HAVE_PTHREAD_H      0
 #define APR_HAVE_SEMAPHORE_H    0
-#ifdef __WATCOMC__
-#define APR_HAVE_SIGNAL_H       0
-#else
 #define APR_HAVE_SIGNAL_H        APR_NOT_IN_WCE
-#endif
 #define APR_HAVE_STDARG_H        APR_NOT_IN_WCE
 #define APR_HAVE_STDDEF_H        APR_NOT_IN_WCE
 #define APR_HAVE_STDINT_H       0
