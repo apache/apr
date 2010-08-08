@@ -49,14 +49,14 @@
 #include <signal.h>
 #ifdef USE_WINSOCK
 #include <novsock2.h>
-#else
-#include <sys/socket.h>
-#endif
-#include <sys/types.h>
-
 #ifdef NW_BUILD_IPV6
 #include <novtcpip.h>
 #endif
+#else
+#include <sys/socket.h>
+#include <sys/select.h>
+#endif
+#include <sys/types.h>
 
 #define _POSIX_THREAD_SAFE_FUNCTIONS    1
 #define READDIR_IS_THREAD_SAFE          1
