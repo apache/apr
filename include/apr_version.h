@@ -109,9 +109,9 @@
 
 /** An alternative formatted string of APR's version */
 /* macro for Win32 .rc files using numeric csv representation */
-#define APR_VERSION_STRING_CSV APR_MAJOR_VERSION ##, \
-                             ##APR_MINOR_VERSION ##, \
-                             ##APR_PATCH_VERSION
+#define APR_VERSION_STRING_CSV APR_MAJOR_VERSION, \
+                               APR_MINOR_VERSION, \
+                               APR_PATCH_VERSION
 
 
 #ifndef APR_VERSION_ONLY
