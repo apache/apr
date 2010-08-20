@@ -338,9 +338,6 @@ apr_status_t apr_socket_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 #endif /* SO_ERROR */
     }
 
-    if (rc == -1 && errno != EISCONN) {
-        return errno;
-    }
 
     if (memcmp(sa->ipaddr_ptr, generic_inaddr_any, sa->ipaddr_len)) {
         /* A real remote address was passed in.  If the unspecified
@@ -364,6 +361,11 @@ apr_status_t apr_socket_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
          */
         sock->local_interface_unknown = 1;
     }
+
+    if (rc == -1 && errno != EISCONN) {
+        return errno;
+    }
+
 #ifndef HAVE_POLL
     sock->connected=1;
 #endif
