@@ -343,10 +343,13 @@ apr_status_t apr_socket_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
         /* A real remote address was passed in.  If the unspecified
          * address was used, the actual remote addr will have to be
          * determined using getpeername() if required. */
-        /* ### this should probably be a structure copy + fixup as per
-         * _accept()'s handling of local_addr */
-        sock->remote_addr = sa;
         sock->remote_addr_unknown = 0;
+
+        /* Copy the address structure details in. */
+        sock->remote_addr->sa = sa->sa;
+        sock->remote_addr->salen = sa->salen;
+        /* Adjust ipaddr_ptr et al. */
+        apr_sockaddr_vars_set(sock->remote_addr, sa->family, sa->port);
     }
 
     if (sock->local_addr->port == 0) {
