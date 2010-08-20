@@ -307,8 +307,7 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
 {
 #if APR_HAS_THREADS
     return APR_ENOTIMPL;
-#endif
-
+#else
     pollcb->fd = -1;
 #ifdef WIN32
     if (!APR_HAVE_LATE_DLL_FUNC(WSAPoll)) {
@@ -320,6 +319,7 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
     pollcb->copyset = apr_palloc(p, size * sizeof(apr_pollfd_t *));
 
     return APR_SUCCESS;
+#endif
 }
 
 static apr_status_t impl_pollcb_add(apr_pollcb_t *pollcb,
