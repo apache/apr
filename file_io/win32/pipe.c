@@ -295,6 +295,7 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
     }
     for (;;) {
         int ns;
+        int nc = 0;
         /* Listening socket is nonblocking by now.
          * The accept should create the socket
          * immediatelly because we are connected already.
@@ -322,6 +323,8 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
         /* Verify the connection by reading the send identification.
          */
         do {
+            if (nc++)
+                Sleep(1);
             nrd = recv(*rd, (char *)iid, sizeof(iid), 0);
             rv = nrd == SOCKET_ERROR ? apr_get_netos_error() : APR_SUCCESS;
         } while (APR_STATUS_IS_EAGAIN(rv));
