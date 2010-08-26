@@ -229,8 +229,9 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
 static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
 {
     static int id = 0;
-
+    FD_SET rs;
     SOCKET ls;
+    struct timeval socktm;
     struct sockaddr_in pa;
     struct sockaddr_in la;
     struct sockaddr_in ca;
@@ -238,7 +239,7 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
     apr_status_t rv = APR_SUCCESS;
     int ll = sizeof(la);
     int lc = sizeof(ca);
-    int bm = 1;
+    unsigned long bm = 1;
     int uid[2];
     int iid[2];
 
@@ -290,17 +291,41 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
         goto cleanup;
     }
     for (;;) {
+        int ns;
+        int nc = 0;
         /* Listening socket is nonblocking by now.
-         * The accept must create the socket
-         * immediatelly because we connected already.
+         * The accept should create the socket
+         * immediatelly because we are connected already.
+         * However on buys systems this can take a while
+         * until winsock gets a chance to handle the events.
          */
+        FD_ZERO(&rs);
+        FD_SET(ls, &rs);
+
+        socktm.tv_sec  = 1;
+        socktm.tv_usec = 0;
+        if ((ns = select(0, &rs, NULL, NULL, &socktm)) == SOCKET_ERROR) {
+            /* Accept still not signaled */
+            Sleep(100);
+            continue;
+        }
+        if (ns == 0) {
+            /* No connections in the last second */
+            continue;
+        }
         if ((*rd = accept(ls, (SOCKADDR *)&ca, &lc)) == INVALID_SOCKET) {
             rv =  apr_get_netos_error();
             goto cleanup;
         }
         /* Verify the connection by reading the send identification.
          */
-        nrd = recv(*rd, (char *)iid, sizeof(iid), 0);
+        do {
+            if (nc++)
+                Sleep(1);
+            nrd = recv(*rd, (char *)iid, sizeof(iid), 0);
+            rv = nrd == SOCKET_ERROR ? apr_get_netos_error() : APR_SUCCESS;
+        } while (APR_STATUS_IS_EAGAIN(rv));
+
         if (nrd == sizeof(iid)) {
             if (memcmp(uid, iid, sizeof(uid)) == 0) {
                 /* Wow, we recived what we send.
@@ -316,7 +341,6 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
             }
         }
         else if (nrd == SOCKET_ERROR) {
-            rv =  apr_get_netos_error();
             goto cleanup;
         }
         closesocket(*rd);

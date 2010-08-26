@@ -186,17 +186,23 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
 /* The apr_load_dll_func call WILL return 0 set error to
  * ERROR_INVALID_FUNCTION if the function cannot be loaded
  */
-
 #define APR_DECLARE_LATE_DLL_FUNC(lib, rettype, calltype, fn, ord, args, names) \
     typedef rettype (calltype *apr_winapi_fpt_##fn) args; \
     static apr_winapi_fpt_##fn apr_winapi_pfn_##fn = NULL; \
-    static APR_INLINE rettype apr_winapi_##fn args \
-    {   if (!apr_winapi_pfn_##fn) \
+    static int apr_winapi_chk_##fn = 0; \
+    static APR_INLINE int apr_winapi_ld_##fn(void) \
+    {   if (apr_winapi_pfn_##fn) return 1; \
+        if (apr_winapi_chk_##fn ++) return 0; \
+        if (!apr_winapi_pfn_##fn) \
             apr_winapi_pfn_##fn = (apr_winapi_fpt_##fn) \
                                       apr_load_dll_func(lib, #fn, ord); \
-        if (apr_winapi_pfn_##fn) \
+        if (apr_winapi_pfn_##fn) return 1; else return 0; }; \
+    static APR_INLINE rettype apr_winapi_##fn args \
+    {   if (apr_winapi_ld_##fn()) \
             return (*(apr_winapi_pfn_##fn)) names; \
         else { SetLastError(ERROR_INVALID_FUNCTION); return 0;} }; \
+
+#define APR_HAVE_LATE_DLL_FUNC(fn) apr_winapi_ld_##fn()
 
 /* Provide late bound declarations of every API function missing from
  * one or more supported releases of the Win32 API
@@ -431,6 +437,48 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, Process32NextW, 0, (
     LPPROCESSENTRY32W lppe),
     (hSnapshot, lppe));
 #define Process32NextW apr_winapi_Process32NextW
+
+#if !defined(POLLERR)
+/* Event flag definitions for WSAPoll(). */
+#define POLLRDNORM  0x0100
+#define POLLRDBAND  0x0200
+#define POLLIN      (POLLRDNORM | POLLRDBAND)
+#define POLLPRI     0x0400
+
+#define POLLWRNORM  0x0010
+#define POLLOUT     (POLLWRNORM)
+#define POLLWRBAND  0x0020
+
+#define POLLERR     0x0001
+#define POLLHUP     0x0002
+#define POLLNVAL    0x0004
+
+typedef struct pollfd {
+    SOCKET  fd;
+    SHORT   events;
+    SHORT   revents;
+
+} WSAPOLLFD, *PWSAPOLLFD, FAR *LPWSAPOLLFD;
+
+#endif /* !defined(POLLERR) */
+#ifdef WSAPoll
+#undef WSAPoll
+#endif
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINSOCK2API, int, WSAAPI, WSAPoll, 0, (
+    IN OUT LPWSAPOLLFD fdArray,
+    IN ULONG fds,
+    IN INT timeout),
+    (fdArray, fds, timeout));
+#define WSAPoll apr_winapi_WSAPoll
+#define HAVE_POLL   1
+
+#ifdef SetDllDirectoryW
+#undef SetDllDirectoryW
+#endif
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, SetDllDirectoryW, 0, (
+    IN LPCWSTR lpPathName),
+    (lpPathName));
+#define SetDllDirectoryW apr_winapi_SetDllDirectoryW
 
 #endif /* !defined(_WIN32_WCE) */
 
