@@ -321,7 +321,11 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
         }
         /* Verify the connection by reading the send identification.
          */
-        nrd = recv(*rd, (char *)iid, sizeof(iid), 0);
+        do {
+            nrd = recv(*rd, (char *)iid, sizeof(iid), 0);
+            rv = nrd == SOCKET_ERROR ? apr_get_netos_error() : APR_SUCCESS;
+        } while (APR_STATUS_IS_EAGAIN(rv));
+
         if (nrd == sizeof(iid)) {
             if (memcmp(uid, iid, sizeof(uid)) == 0) {
                 /* Wow, we recived what we send.
@@ -337,7 +341,6 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
             }
         }
         else if (nrd == SOCKET_ERROR) {
-            rv =  apr_get_netos_error();
             goto cleanup;
         }
         closesocket(*rd);
