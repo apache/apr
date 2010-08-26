@@ -86,6 +86,7 @@ CLEAN :
 	-@erase "$(INTDIR)\open.obj"
 	-@erase "$(INTDIR)\otherchild.obj"
 	-@erase "$(INTDIR)\pipe.obj"
+	-@erase "$(INTDIR)\poll.obj"
 	-@erase "$(INTDIR)\pollcb.obj"
 	-@erase "$(INTDIR)\pollset.obj"
 	-@erase "$(INTDIR)\proc.obj"
@@ -213,6 +214,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\socket_util.obj" \
 	"$(INTDIR)\sockopt.obj" \
 	"$(INTDIR)\apr_getpass.obj" \
+	"$(INTDIR)\poll.obj" \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
 	"$(INTDIR)\select.obj" \
@@ -314,6 +316,7 @@ CLEAN :
 	-@erase "$(INTDIR)\open.obj"
 	-@erase "$(INTDIR)\otherchild.obj"
 	-@erase "$(INTDIR)\pipe.obj"
+	-@erase "$(INTDIR)\poll.obj"
 	-@erase "$(INTDIR)\pollcb.obj"
 	-@erase "$(INTDIR)\pollset.obj"
 	-@erase "$(INTDIR)\proc.obj"
@@ -442,6 +445,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\socket_util.obj" \
 	"$(INTDIR)\sockopt.obj" \
 	"$(INTDIR)\apr_getpass.obj" \
+	"$(INTDIR)\poll.obj" \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
 	"$(INTDIR)\select.obj" \
@@ -543,6 +547,7 @@ CLEAN :
 	-@erase "$(INTDIR)\open.obj"
 	-@erase "$(INTDIR)\otherchild.obj"
 	-@erase "$(INTDIR)\pipe.obj"
+	-@erase "$(INTDIR)\poll.obj"
 	-@erase "$(INTDIR)\pollcb.obj"
 	-@erase "$(INTDIR)\pollset.obj"
 	-@erase "$(INTDIR)\proc.obj"
@@ -671,6 +676,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\socket_util.obj" \
 	"$(INTDIR)\sockopt.obj" \
 	"$(INTDIR)\apr_getpass.obj" \
+	"$(INTDIR)\poll.obj" \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
 	"$(INTDIR)\select.obj" \
@@ -772,6 +778,7 @@ CLEAN :
 	-@erase "$(INTDIR)\open.obj"
 	-@erase "$(INTDIR)\otherchild.obj"
 	-@erase "$(INTDIR)\pipe.obj"
+	-@erase "$(INTDIR)\poll.obj"
 	-@erase "$(INTDIR)\pollcb.obj"
 	-@erase "$(INTDIR)\pollset.obj"
 	-@erase "$(INTDIR)\proc.obj"
@@ -900,6 +907,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\socket_util.obj" \
 	"$(INTDIR)\sockopt.obj" \
 	"$(INTDIR)\apr_getpass.obj" \
+	"$(INTDIR)\poll.obj" \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
 	"$(INTDIR)\select.obj" \
@@ -1001,6 +1009,7 @@ CLEAN :
 	-@erase "$(INTDIR)\open.obj"
 	-@erase "$(INTDIR)\otherchild.obj"
 	-@erase "$(INTDIR)\pipe.obj"
+	-@erase "$(INTDIR)\poll.obj"
 	-@erase "$(INTDIR)\pollcb.obj"
 	-@erase "$(INTDIR)\pollset.obj"
 	-@erase "$(INTDIR)\proc.obj"
@@ -1129,6 +1138,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\socket_util.obj" \
 	"$(INTDIR)\sockopt.obj" \
 	"$(INTDIR)\apr_getpass.obj" \
+	"$(INTDIR)\poll.obj" \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
 	"$(INTDIR)\select.obj" \
@@ -1230,6 +1240,7 @@ CLEAN :
 	-@erase "$(INTDIR)\open.obj"
 	-@erase "$(INTDIR)\otherchild.obj"
 	-@erase "$(INTDIR)\pipe.obj"
+	-@erase "$(INTDIR)\poll.obj"
 	-@erase "$(INTDIR)\pollcb.obj"
 	-@erase "$(INTDIR)\pollset.obj"
 	-@erase "$(INTDIR)\proc.obj"
@@ -1358,6 +1369,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\socket_util.obj" \
 	"$(INTDIR)\sockopt.obj" \
 	"$(INTDIR)\apr_getpass.obj" \
+	"$(INTDIR)\poll.obj" \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
 	"$(INTDIR)\select.obj" \
@@ -1689,6 +1701,12 @@ SOURCE=.\network_io\win32\sockopt.c
 SOURCE=.\passwd\apr_getpass.c
 
 "$(INTDIR)\apr_getpass.obj" : $(SOURCE) "$(INTDIR)" ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\poll\unix\poll.c
+
+"$(INTDIR)\poll.obj" : $(SOURCE) "$(INTDIR)" ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
