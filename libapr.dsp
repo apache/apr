@@ -468,6 +468,10 @@ SOURCE=.\passwd\apr_getpass.c
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\poll\unix\poll.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\poll\unix\pollcb.c
 # End Source File
 # Begin Source File
