@@ -505,7 +505,6 @@ struct apr_pool_t {
     apr_os_proc_t         owner_proc;
 #endif /* defined(NETWARE) */
     cleanup_t            *pre_cleanups;
-    cleanup_t            *free_pre_cleanups;
 };
 
 #define SIZEOF_POOL_T       APR_ALIGN_DEFAULT(sizeof(apr_pool_t))
@@ -726,7 +725,6 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
     /* Run pre destroy cleanups */
     run_cleanups(&pool->pre_cleanups);
     pool->pre_cleanups = NULL;
-    pool->free_pre_cleanups = NULL;
 
     /* Destroy the subpools.  The subpools will detach themselves from
      * this pool thus this loop is safe and easy.
@@ -769,7 +767,6 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
     /* Run pre destroy cleanups */
     run_cleanups(&pool->pre_cleanups);
     pool->pre_cleanups = NULL;
-    pool->free_pre_cleanups = NULL;
 
     /* Destroy the subpools.  The subpools will detach themselve from
      * this pool thus this loop is safe and easy.
@@ -876,7 +873,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     pool->cleanups = NULL;
     pool->free_cleanups = NULL;
     pool->pre_cleanups = NULL;
-    pool->free_pre_cleanups = NULL;
     pool->subprocesses = NULL;
     pool->user_data = NULL;
     pool->tag = NULL;
@@ -962,7 +958,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
     pool->cleanups = NULL;
     pool->free_cleanups = NULL;
     pool->pre_cleanups = NULL;
-    pool->free_pre_cleanups = NULL;
     pool->subprocesses = NULL;
     pool->user_data = NULL;
     pool->tag = NULL;
@@ -1499,7 +1494,6 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
     /* Run pre destroy cleanups */
     run_cleanups(&pool->pre_cleanups);
     pool->pre_cleanups = NULL;
-    pool->free_pre_cleanups = NULL;
 
     /* Destroy the subpools.  The subpools will detach themselves from
      * this pool thus this loop is safe and easy.
@@ -2184,10 +2178,10 @@ APR_DECLARE(void) apr_pool_pre_cleanup_register(apr_pool_t *p, const void *data,
 #endif /* APR_POOL_DEBUG */
 
     if (p != NULL) {
-        if (p->free_pre_cleanups) {
+        if (p->free_cleanups) {
             /* reuse a cleanup structure */
-            c = p->free_pre_cleanups;
-            p->free_pre_cleanups = c->next;
+            c = p->free_cleanups;
+            p->free_cleanups = c->next;
         } else {
             c = apr_palloc(p, sizeof(cleanup_t));
         }
@@ -2250,8 +2244,8 @@ APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
         if (c->data == data && c->plain_cleanup_fn == cleanup_fn) {
             *lastp = c->next;
             /* move to freelist */
-            c->next = p->free_pre_cleanups;
-            p->free_pre_cleanups = c;
+            c->next = p->free_cleanups;
+            p->free_cleanups = c;
             break;
         }
 
