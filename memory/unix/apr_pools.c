@@ -259,7 +259,7 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
                 allocator->max_index = max_index;
             }
 
-            allocator->current_free_index += node->index;
+            allocator->current_free_index += node->index + 1;
             if (allocator->current_free_index > allocator->max_free_index)
                 allocator->current_free_index = allocator->max_free_index;
 
@@ -299,7 +299,7 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
         if (node) {
             *ref = node->next;
 
-            allocator->current_free_index += node->index;
+            allocator->current_free_index += node->index + 1;
             if (allocator->current_free_index > allocator->max_free_index)
                 allocator->current_free_index = allocator->max_free_index;
 
@@ -358,7 +358,7 @@ void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
         index = node->index;
 
         if (max_free_index != APR_ALLOCATOR_MAX_FREE_UNLIMITED
-            && index > current_free_index) {
+            && index + 1 > current_free_index) {
             node->next = freelist;
             freelist = node;
         }
@@ -371,8 +371,8 @@ void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
                 max_index = index;
             }
             allocator->free[index] = node;
-            if (current_free_index >= index)
-                current_free_index -= index;
+            if (current_free_index >= index + 1)
+                current_free_index -= index + 1;
             else
                 current_free_index = 0;
         }
@@ -382,8 +382,8 @@ void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
              */
             node->next = allocator->free[0];
             allocator->free[0] = node;
-            if (current_free_index >= index)
-                current_free_index -= index;
+            if (current_free_index >= index + 1)
+                current_free_index -= index + 1;
             else
                 current_free_index = 0;
         }
