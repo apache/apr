@@ -36,7 +36,7 @@ apr_status_t apr_netware_proc_cleanup(void *theproc)
         waitpid(proc->pid, &exit_int, waitpid_options);
     }
 
-/*	NXVmDestroy(proc->pid); */
+/* NXVmDestroy(proc->pid); */
     return APR_SUCCESS;
 }
 
@@ -307,11 +307,11 @@ APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
 }
 
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
-									const char *progname, 
-									const char * const *args, 
-									const char * const *env,
-                              		apr_procattr_t *attr, 
-                              		apr_pool_t *pool)
+                                          const char *progname, 
+                                          const char * const *args, 
+                                          const char * const *env,
+                                          apr_procattr_t *attr, 
+                                          apr_pool_t *pool)
 {
     wiring_t wire;
     int      addr_space;
