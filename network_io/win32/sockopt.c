@@ -20,7 +20,7 @@
 #include "apr_strings.h"
 #include <string.h>
 
-apr_status_t soblock(SOCKET sd)
+static apr_status_t soblock(SOCKET sd)
 {
     u_long zero = 0;
 
@@ -30,7 +30,7 @@ apr_status_t soblock(SOCKET sd)
     return APR_SUCCESS;
 }
 
-apr_status_t sononblock(SOCKET sd)
+static apr_status_t sononblock(SOCKET sd)
 {
     u_long one = 1;
 
