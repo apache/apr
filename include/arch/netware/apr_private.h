@@ -31,9 +31,13 @@
 /* Pick up privately consumed headers */
 #include <ndkvers.h>
 
+/* Include alloca.h to get compiler-dependent defines */ 
+#include <alloca.h>
+
 /* Use this section to define all of the HAVE_FOO_H
  * that are required to build properly.
  */
+#define HAVE_ALLOCA_H   1
 #define HAVE_DLFCN_H    1
 #define HAVE_LIMITS_H   1
 #define HAVE_SIGNAL_H   1
@@ -163,7 +167,9 @@ void* getStatCache();
     and can be shared by the library. */
 #undef malloc
 #define malloc(x) library_malloc(gLibHandle,x)
+#ifndef __MWERKS__
 #define _alloca alloca
+#endif
 
 #if APR_HAS_LARGE_FILES
 #define APR_OFF_T_STRFN       strtoll
