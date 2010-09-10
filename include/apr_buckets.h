@@ -873,12 +873,16 @@ APR_DECLARE(apr_status_t) apr_brigade_putc(apr_bucket_brigade *b,
  * @param b The bucket brigade to add to
  * @param flush The flush function to use if the brigade is full
  * @param ctx The structure to pass to the flush function
- * @param ... The strings to add
+ * @param ... The strings to add. The final string must be NULL
  * @return APR_SUCCESS or error code
  */
 APR_DECLARE_NONSTD(apr_status_t) apr_brigade_putstrs(apr_bucket_brigade *b,
                                                      apr_brigade_flush flush,
-                                                     void *ctx, ...);
+                                                     void *ctx, ...)
+#if defined(__GNUC__) && __GNUC__ >= 4
+    __attribute__((sentinel))
+#endif
+    ;
 
 /**
  * Evaluate a printf and put the resulting string at the end 
