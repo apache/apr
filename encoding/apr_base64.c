@@ -139,8 +139,9 @@ APR_DECLARE(int) apr_base64_decode(char *bufplain, const char *bufcoded)
     return len;
 }
 
-/* This is the same as apr_base64_decode() except on EBCDIC machines, where
- * the conversion of the output to ebcdic is left out.
+/* This is the same as apr_base64_decode() except:
+ * - no \0 is appended
+ * - on EBCDIC machines, the conversion of the output to ebcdic is left out
  */
 APR_DECLARE(int) apr_base64_decode_binary(unsigned char *bufplain,
 				   const char *bufcoded)
