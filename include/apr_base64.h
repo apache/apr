@@ -43,10 +43,10 @@ extern "C" {
  * the incoming plain source. And return the length of what we decoded.
  *
  * The decoding function takes any non valid char (i.e. whitespace, \0
- * or anything non A-Z,0-9 etc as terminal.
+ * or anything non A-Z,0-9 etc) as terminal.
  * 
- * plain strings/binary sequences are not assumed '\0' terminated. Encoded
- * strings are neither. But probably should.
+ * The handling of terminating \0 characters differs from function to
+ * function.
  *
  */
 
@@ -54,26 +54,32 @@ extern "C" {
  * Given the length of an un-encrypted string, get the length of the 
  * encrypted string.
  * @param len the length of an unencrypted string.
- * @return the length of the string after it is encrypted
+ * @return the length of the string after it is encrypted, including the
+ * trailing \0
  */ 
 APR_DECLARE(int) apr_base64_encode_len(int len);
 
 /**
- * Encode a text string using base64encoding.
- * @param coded_dst The destination string for the encoded string.
+ * Encode a text string using base64encoding. On EBCDIC machines, the input
+ * is first converted to ASCII.
+ * @param coded_dst The destination string for the encoded string. A \0 is
+ * appended.
  * @param plain_src The original string in plain text
  * @param len_plain_src The length of the plain text string
- * @return the length of the encoded string
+ * @return the length of the encoded string, including the trailing \0
  */ 
 APR_DECLARE(int) apr_base64_encode(char * coded_dst, const char *plain_src, 
                                  int len_plain_src);
 
 /**
- * Encode an EBCDIC string using base64encoding.
- * @param coded_dst The destination string for the encoded string.
+ * Encode an text string using base64encoding. This is the same as
+ * apr_base64_encode() except on EBCDIC machines, where the conversion of the
+ * input to ASCII is left out.
+ * @param coded_dst The destination string for the encoded string. A \0 is
+ * appended.
  * @param plain_src The original string in plain text
  * @param len_plain_src The length of the plain text string
- * @return the length of the encoded string
+ * @return the length of the encoded string, including the trailing \0
  */ 
 APR_DECLARE(int) apr_base64_encode_binary(char * coded_dst, 
                                         const unsigned char *plain_src,
@@ -88,16 +94,21 @@ APR_DECLARE(int) apr_base64_encode_binary(char * coded_dst,
 APR_DECLARE(int) apr_base64_decode_len(const char * coded_src);
 
 /**
- * Decode a string to plain text
- * @param plain_dst The destination string for the plain text
+ * Decode a string to plain text. On EBCDIC machines, the result is then
+ * converted to EBCDIC.
+ * @param plain_dst The destination string for the plain text. A \0 is
+ * appended.
  * @param coded_src The encoded string 
- * @return the length of the plain text string
+ * @return the length of the plain text string (excluding the trailing \0)
  */ 
 APR_DECLARE(int) apr_base64_decode(char * plain_dst, const char *coded_src);
 
 /**
- * Decode an EBCDIC string to plain text
- * @param plain_dst The destination string for the plain text
+ * Decode an string to plain text. This is the same as apr_base64_decode()
+ * except no \0 is appended and on EBCDIC machines, the conversion of the
+ * output to EBCDIC is left out.
+ * @param plain_dst The destination string for the plain text. The string is
+ * not \0-terminated.
  * @param coded_src The encoded string 
  * @return the length of the plain text string
  */ 
