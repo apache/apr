@@ -754,12 +754,15 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
 #elif defined(CRYPT_R_STRUCT_CRYPT_DATA)
         struct crypt_data buffer;
 
-        /* having to clear this seems bogus... GNU doc is
-         * confusing...  user report found from google says
-         * the crypt_data struct had to be cleared to get
-         * the same result as plain crypt()
+#if defined(__GLIBC_PREREQ) && __GLIBC_PREREQ(2,4)
+        buffer.initialized = 0;
+#else
+        /*
+         * glibc before 2.3.2 had a bug that required clearing the
+         * whole struct
          */
         memset(&buffer, 0, sizeof(buffer));
+#endif
         crypt_pw = crypt_r(passwd, hash, &buffer);
         if (!crypt_pw) {
             return APR_EMISMATCH;
