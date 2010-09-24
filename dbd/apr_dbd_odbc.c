@@ -1323,7 +1323,7 @@ static apr_status_t odbc_datum_get(const apr_dbd_row_t * row, int col,
         return APR_ENOENT;          /* SQL NULL value */
     
     if (len < 0)
-        strcpy(data, p);
+       *(char**)data = (char *)p;
     else
         memcpy(data, p, len);
     
