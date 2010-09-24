@@ -69,11 +69,13 @@ typedef apr_status_t (*apr_reslist_destructor)(void *resource, void *params,
  *                list will be stored.
  * @param min Allowed minimum number of available resources. Zero
  *            creates new resources only when needed.
- * @param smax Resources will be destroyed to meet this maximum
- *             restriction as they expire.
+ * @param smax Resources will be destroyed during reslist maintenance to
+ *             meet this maximum restriction as they expire (reach their ttl).
  * @param hmax Absolute maximum limit on the number of total resources.
- * @param ttl If non-zero, sets the maximum amount of time in microseconds a
- *            resource may be available while exceeding the soft limit.
+ * @param ttl If non-zero, sets the maximum amount of time in microseconds an
+ *            unused resource is valid.  Any resource which has exceeded this
+ *            time will be destroyed, either when encountered by
+ *            apr_reslist_acquire() or during reslist maintenance.
  * @param con Constructor routine that is called to create a new resource.
  * @param de Destructor routine that is called to destroy an expired resource.
  * @param params Passed to constructor and deconstructor
