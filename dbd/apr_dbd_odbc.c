@@ -1451,9 +1451,9 @@ static int odbc_pvquery(apr_pool_t * pool, apr_dbd_t * handle, int *nrows,
 }
 
 /** pselect: select using a prepared statement + args **/
-int odbc_pselect(apr_pool_t * pool, apr_dbd_t * handle,
-                 apr_dbd_results_t ** res, apr_dbd_prepared_t * statement,
-                 int random, const char **args)
+static int odbc_pselect(apr_pool_t * pool, apr_dbd_t * handle,
+                        apr_dbd_results_t ** res, apr_dbd_prepared_t * statement,
+                        int random, const char **args)
 {
     SQLRETURN rc = SQL_SUCCESS;
     int i, argp;
