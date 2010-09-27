@@ -377,7 +377,13 @@ APR_DECLARE(apr_status_t) apr_thread_pool_create(apr_thread_pool_t ** me,
                               apr_pool_cleanup_null);
 
     while (init_threads) {
+        /* Grab the mutex as apr_thread_create() and thread_pool_func() will 
+         * allocate from (*me)->pool. This is dangerous if there are multiple 
+         * initial threads to create.
+         */
+        apr_thread_mutex_lock(tp->lock);
         rv = apr_thread_create(&t, NULL, thread_pool_func, tp, tp->pool);
+        apr_thread_mutex_unlock(tp->lock);
         if (APR_SUCCESS != rv) {
             break;
         }
