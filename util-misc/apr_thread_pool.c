@@ -72,7 +72,6 @@ struct apr_thread_pool
     struct apr_thread_list *busy_thds;
     struct apr_thread_list *idle_thds;
     apr_thread_mutex_t *lock;
-    apr_thread_mutex_t *cond_lock;
     apr_thread_cond_t *cond;
     volatile int terminated;
     struct apr_thread_pool_tasks *recycled_tasks;
@@ -95,16 +94,9 @@ static apr_status_t thread_pool_construct(apr_thread_pool_t * me,
     if (APR_SUCCESS != rv) {
         return rv;
     }
-    rv = apr_thread_mutex_create(&me->cond_lock, APR_THREAD_MUTEX_UNNESTED,
-                                 me->pool);
-    if (APR_SUCCESS != rv) {
-        apr_thread_mutex_destroy(me->lock);
-        return rv;
-    }
     rv = apr_thread_cond_create(&me->cond, me->pool);
     if (APR_SUCCESS != rv) {
         apr_thread_mutex_destroy(me->lock);
-        apr_thread_mutex_destroy(me->cond_lock);
         return rv;
     }
     me->tasks = apr_palloc(me->pool, sizeof(*me->tasks));
@@ -148,7 +140,6 @@ static apr_status_t thread_pool_construct(apr_thread_pool_t * me,
   CATCH_ENOMEM:
     rv = APR_ENOMEM;
     apr_thread_mutex_destroy(me->lock);
-    apr_thread_mutex_destroy(me->cond_lock);
     apr_thread_cond_destroy(me->cond);
   FINAL_EXIT:
     return rv;
@@ -321,16 +312,12 @@ static void *APR_THREAD_FUNC thread_pool_func(apr_thread_t * t, void *param)
         else
             wait = -1;
 
-        apr_thread_mutex_unlock(me->lock);
-        apr_thread_mutex_lock(me->cond_lock);
         if (wait >= 0) {
-            rv = apr_thread_cond_timedwait(me->cond, me->cond_lock, wait);
+            rv = apr_thread_cond_timedwait(me->cond, me->lock, wait);
         }
         else {
-            rv = apr_thread_cond_wait(me->cond, me->cond_lock);
+            rv = apr_thread_cond_wait(me->cond, me->lock);
         }
-        apr_thread_mutex_unlock(me->cond_lock);
-        apr_thread_mutex_lock(me->lock);
     }
 
     /* idle thread been asked to stop, will be joined */
@@ -350,7 +337,6 @@ static apr_status_t thread_pool_cleanup(void *me)
         apr_sleep(20 * 1000);   /* spin lock with 20 ms */
     }
     apr_thread_mutex_destroy(_myself->lock);
-    apr_thread_mutex_destroy(_myself->cond_lock);
     apr_thread_cond_destroy(_myself->cond);
     return APR_SUCCESS;
 }
@@ -530,10 +516,8 @@ static apr_status_t schedule_task(apr_thread_pool_t *me,
                 me->thd_high = me->thd_cnt;
         }
     }
-    apr_thread_mutex_unlock(me->lock);
-    apr_thread_mutex_lock(me->cond_lock);
     apr_thread_cond_signal(me->cond);
-    apr_thread_mutex_unlock(me->cond_lock);
+    apr_thread_mutex_unlock(me->lock);
     return rv;
 }
 
@@ -585,11 +569,9 @@ static apr_status_t add_task(apr_thread_pool_t *me, apr_thread_start_t func,
                 me->thd_high = me->thd_cnt;
         }
     }
-    apr_thread_mutex_unlock(me->lock);
 
-    apr_thread_mutex_lock(me->cond_lock);
     apr_thread_cond_signal(me->cond);
-    apr_thread_mutex_unlock(me->cond_lock);
+    apr_thread_mutex_unlock(me->lock);
 
     return rv;
 }
@@ -847,9 +829,9 @@ static apr_size_t trim_idle_threads(apr_thread_pool_t *me, apr_size_t cnt)
 
     elt = trim_threads(me, &cnt, 1);
 
-    apr_thread_mutex_lock(me->cond_lock);
+    apr_thread_mutex_lock(me->lock);
     apr_thread_cond_broadcast(me->cond);
-    apr_thread_mutex_unlock(me->cond_lock);
+    apr_thread_mutex_unlock(me->lock);
 
     n_dbg = 0;
     if (NULL != (head = elt)) {
