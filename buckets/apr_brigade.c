@@ -347,7 +347,18 @@ APR_DECLARE(apr_status_t) apr_brigade_split_line(apr_bucket_brigade *bbOut,
             return APR_SUCCESS;
         }
         APR_BUCKET_REMOVE(e);
-        APR_BRIGADE_INSERT_TAIL(bbOut, e);
+        if (APR_BUCKET_IS_METADATA(e) || len > APR_BUCKET_BUFF_SIZE/4) {
+            APR_BRIGADE_INSERT_TAIL(bbOut, e);
+        }
+        else {
+            if (len > 0) {
+                rv = apr_brigade_write(bbOut, NULL, NULL, str, len);
+                if (rv != APR_SUCCESS) {
+                    return rv;
+                }
+            }
+            apr_bucket_destroy(e);
+        }
         readbytes += len;
         /* We didn't find an APR_ASCII_LF within the maximum line length. */
         if (readbytes >= maxbytes) {
