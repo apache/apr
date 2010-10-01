@@ -22,8 +22,7 @@ FILES_prebuild_headers = \
 	$(APRUTIL)/include/apr_ldap.h \
 	$(APRUTIL)/include/private/apu_config.h \
 	$(APRUTIL)/include/private/apu_select_dbm.h \
-	$(APRUTIL)/xml/expat/lib/expat.h \
-	$(APRUTIL)/xml/expat/lib/config.h \
+	$(APRUTIL)/xml/expat/lib/expat_config.h \
 	$(EOLIST) 
     
 nlms :: $(APR)/aprlib.imp
@@ -73,10 +72,6 @@ $(APRUTIL)/xml/expat/lib/%.h: $(subst /,\,$(APRUTIL))\xml\expat\lib\%.hnw
 	@echo Creating $(subst /,\,$@)
 	$(CP) $< $(subst /,\,$(APRUTIL))\xml\expat\lib\$(@F)
 
-$(APRUTIL)/xml/expat/lib/%.h: $(subst /,\,$(APRUTIL))\xml\expat\lib\%.h.in
-	@echo Creating $(subst /,\,$@)
-	$(CP) $< $(subst /,\,$(APRUTIL))\xml\expat\lib\$(@F)
-
 #
 # You can use this target if all that is needed is to copy files to the
 # installation area
@@ -94,8 +89,7 @@ clean ::
 	$(CHK) $(subst /,\,$(APRUTIL))\include\apr_ldap.h               $(DEL) $(subst /,\,$(APRUTIL))\include\apr_ldap.h
 	$(CHK) $(subst /,\,$(APRUTIL))\include\private\apu_config.h     $(DEL) $(subst /,\,$(APRUTIL))\include\private\apu_config.h
 	$(CHK) $(subst /,\,$(APRUTIL))\include\private\apu_select_dbm.h $(DEL) $(subst /,\,$(APRUTIL))\include\private\apu_select_dbm.h
-	$(CHK) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat.h            $(DEL) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat.h
-	$(CHK) $(subst /,\,$(APRUTIL))\xml\expat\lib\config.h           $(DEL) $(subst /,\,$(APRUTIL))\xml\expat\lib\config.h
+	$(CHK) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat_config.h     $(DEL) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat_config.h
 	$(CHK) $(subst /,\,$(APR))\aprlib.imp                           $(DEL) $(subst /,\,$(APR))\aprlib.imp
 
 #
