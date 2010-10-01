@@ -1192,7 +1192,7 @@ DS_POSTBUILD_DEP=$(INTDIR)\postbld.dep
 OutDir=.\x64\Debug
 # End Custom Macros
 
-ALL : ".\include\apr.h" "$(OUTDIR)\libapr-1.dll" "$(DS_POSTBUILD_DEP)"
+ALL : "$(OUTDIR)\libapr-1.dll" "$(DS_POSTBUILD_DEP)"
 
 
 CLEAN :
@@ -1274,7 +1274,6 @@ CLEAN :
 	-@erase "$(OUTDIR)\libapr-1.exp"
 	-@erase "$(OUTDIR)\libapr-1.lib"
 	-@erase "$(OUTDIR)\libapr-1.pdb"
-	-@erase ".\include\apr.h"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
