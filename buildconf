@@ -50,7 +50,7 @@ lt_pversion=`$libtoolize --version 2>/dev/null|sed -e 's/([^)]*)//g;s/^[^0-9]*//
 lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$/.\1/'`
 IFS=.; set $lt_version; IFS=' '
 if test "$1" = "1"; then
-  $libtoolize --copy --automake --force $verbose
+  $libtoolize --copy --automake $verbose
   if [ -f libtool.m4 ]; then 
     ltfile=`pwd`/libtool.m4
   else
@@ -69,11 +69,11 @@ if test "$1" = "1"; then
   fi
   # Do we need this anymore?
   echo "buildconf: Using libtool.m4 at ${ltfile}."
+  rm -f build/libtool.m4
   cat $ltfile | sed -e 's/LIBTOOL=\(.*\)top_build/LIBTOOL=\1apr_build/' > build/libtool.m4
-  chmod u+w build/libtool.m4
 fi
 if test "$1" = "2"; then
-  $libtoolize --copy --automake --force $verbose
+  $libtoolize --copy --automake $verbose
   # Wouldn't it just be better to define top_builddir??
   mv build/libtool.m4 build/libtool.m4.$$
   cat build/libtool.m4.$$ | sed -e 's/LIBTOOL=\(.*\)top_build/LIBTOOL=\1apr_build/' > build/libtool.m4
