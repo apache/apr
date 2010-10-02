@@ -112,7 +112,7 @@ AC_DEFUN([APU_CHECK_BERKELEY_DB], [
         changequote([,])
         unset $cache_id
         AC_CHECK_HEADER([$bdb_header], [
-          if test "$1" = "3" -o "$1" = "4"; then
+          if test "$1" = "3" -o "$1" = "4" -o "$1" = "5"; then
             # We generate a separate cache variable for each prefix and libname
             # we search under.  That way, we avoid caching information that
             # changes if the user runs `configure' with a different set of
