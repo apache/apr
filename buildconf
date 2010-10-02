@@ -69,8 +69,8 @@ if test "$1" = "1"; then
   fi
   # Do we need this anymore?
   echo "buildconf: Using libtool.m4 at ${ltfile}."
-  chmod u+w build/libtool.m4
   cat $ltfile | sed -e 's/LIBTOOL=\(.*\)top_build/LIBTOOL=\1apr_build/' > build/libtool.m4
+  chmod u+w build/libtool.m4
 fi
 if test "$1" = "2"; then
   $libtoolize --copy --automake --force $verbose
