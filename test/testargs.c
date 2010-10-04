@@ -46,21 +46,21 @@ static void no_options_found(abts_case *tc, void *data)
     apr_getopt_t *opt;
     apr_status_t rv;
     char ch;
-    const char *optarg;
+    const char *opt_arg;
     char str[8196];
 
     str[0] = '\0';
     rv = apr_getopt_init(&opt, p, largc, largv);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
    
-    while (apr_getopt(opt, "abcd", &ch, &optarg) == APR_SUCCESS) {
+    while (apr_getopt(opt, "abcd", &ch, &opt_arg) == APR_SUCCESS) {
         switch (ch) {
             case 'a':
             case 'b':
             case 'c':
             case 'd':
             default:
-                format_arg(str, ch, optarg);
+                format_arg(str, ch, opt_arg);
         }
     }
     ABTS_STR_EQUAL(tc, "option: a\n"
@@ -76,7 +76,7 @@ static void no_options(abts_case *tc, void *data)
     apr_getopt_t *opt;
     apr_status_t rv;
     char ch;
-    const char *optarg;
+    const char *opt_arg;
     char str[8196];
 
     str[0] = '\0';
@@ -86,13 +86,13 @@ static void no_options(abts_case *tc, void *data)
     opt->errfn = unknown_arg;
     opt->errarg = str;
    
-    while (apr_getopt(opt, "efgh", &ch, &optarg) == APR_SUCCESS) {
+    while (apr_getopt(opt, "efgh", &ch, &opt_arg) == APR_SUCCESS) {
         switch (ch) {
             case 'a':
             case 'b':
             case 'c':
             case 'd':
-                format_arg(str, ch, optarg);
+                format_arg(str, ch, opt_arg);
                 break;
             default:
                 break;
@@ -108,7 +108,7 @@ static void required_option(abts_case *tc, void *data)
     apr_getopt_t *opt;
     apr_status_t rv;
     char ch;
-    const char *optarg;
+    const char *opt_arg;
     char str[8196];
 
     str[0] = '\0';
@@ -118,10 +118,10 @@ static void required_option(abts_case *tc, void *data)
     opt->errfn = unknown_arg;
     opt->errarg = str;
    
-    while (apr_getopt(opt, "a:", &ch, &optarg) == APR_SUCCESS) {
+    while (apr_getopt(opt, "a:", &ch, &opt_arg) == APR_SUCCESS) {
         switch (ch) {
             case 'a':
-                format_arg(str, ch, optarg);
+                format_arg(str, ch, opt_arg);
                 break;
             default:
                 break;
@@ -137,7 +137,7 @@ static void required_option_notgiven(abts_case *tc, void *data)
     apr_getopt_t *opt;
     apr_status_t rv;
     char ch;
-    const char *optarg;
+    const char *opt_arg;
     char str[8196];
 
     str[0] = '\0';
@@ -147,10 +147,10 @@ static void required_option_notgiven(abts_case *tc, void *data)
     opt->errfn = unknown_arg;
     opt->errarg = str;
    
-    while (apr_getopt(opt, "a:", &ch, &optarg) == APR_SUCCESS) {
+    while (apr_getopt(opt, "a:", &ch, &opt_arg) == APR_SUCCESS) {
         switch (ch) {
             case 'a':
-                format_arg(str, ch, optarg);
+                format_arg(str, ch, opt_arg);
                 break;
             default:
                 break;
@@ -166,7 +166,7 @@ static void optional_option(abts_case *tc, void *data)
     apr_getopt_t *opt;
     apr_status_t rv;
     char ch;
-    const char *optarg;
+    const char *opt_arg;
     char str[8196];
 
     str[0] = '\0';
@@ -176,10 +176,10 @@ static void optional_option(abts_case *tc, void *data)
     opt->errfn = unknown_arg;
     opt->errarg = str;
    
-    while (apr_getopt(opt, "a::", &ch, &optarg) == APR_SUCCESS) {
+    while (apr_getopt(opt, "a::", &ch, &opt_arg) == APR_SUCCESS) {
         switch (ch) {
             case 'a':
-                format_arg(str, ch, optarg);
+                format_arg(str, ch, opt_arg);
                 break;
             default:
                 break;
@@ -195,7 +195,7 @@ static void optional_option_notgiven(abts_case *tc, void *data)
     apr_getopt_t *opt;
     apr_status_t rv;
     char ch;
-    const char *optarg;
+    const char *opt_arg;
     char str[8196];
 
     str[0] = '\0';
@@ -205,10 +205,10 @@ static void optional_option_notgiven(abts_case *tc, void *data)
     opt->errfn = unknown_arg;
     opt->errarg = str;
    
-    while (apr_getopt(opt, "a::", &ch, &optarg) == APR_SUCCESS) {
+    while (apr_getopt(opt, "a::", &ch, &opt_arg) == APR_SUCCESS) {
         switch (ch) {
             case 'a':
-                format_arg(str, ch, optarg);
+                format_arg(str, ch, opt_arg);
                 break;
             default:
                 break;
