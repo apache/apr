@@ -333,7 +333,8 @@ static void test_get_addr(abts_case *tc, void *data)
 
     APR_ASSERT_SUCCESS(tc, "create subpool", apr_pool_create(&subp, p));
 
-    ld = setup_socket(tc);
+    if ((ld = setup_socket(tc)) != APR_SUCCESS)
+        return;
 
     APR_ASSERT_SUCCESS(tc,
                        "get local address of bound socket",
