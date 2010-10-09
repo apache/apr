@@ -112,7 +112,7 @@ NLM_SCREEN_NAME = $(NLM_NAME)
 # If this is specified, it will override VERSION value in 
 # $(APR_WORK)\build\NWGNUenvironment.inc
 #
-NLM_VERSION	= 1,0,0
+NLM_VERSION	=
 
 #
 # If this is specified, it will override the default of 64K
