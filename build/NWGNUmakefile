@@ -22,8 +22,7 @@ FILES_prebuild_headers = \
 	$(APRUTIL)/include/apr_ldap.h \
 	$(APRUTIL)/include/private/apu_config.h \
 	$(APRUTIL)/include/private/apu_select_dbm.h \
-	$(APRUTIL)/xml/expat/lib/expat.h \
-	$(APRUTIL)/xml/expat/lib/config.h \
+	$(APRUTIL)/xml/expat/lib/expat_config.h \
 	$(APRUTIL)/uri/uri_delims.h \
 	$(EOLIST) 
 
@@ -66,10 +65,6 @@ $(APRUTIL)/xml/expat/lib/%.h: $(subst /,\,$(APRUTIL))\xml\expat\lib\%.hnw
 	@echo Creating $(subst /,\,$@)
 	copy $< $(subst /,\,$(APRUTIL))\xml\expat\lib\$(@F)
 
-$(APRUTIL)/xml/expat/lib/%.h: $(subst /,\,$(APRUTIL))\xml\expat\lib\%.h.in
-	@echo Creating $(subst /,\,$@)
-	copy $< $(subst /,\,$(APRUTIL))\xml\expat\lib\$(@F)
-
 ifneq "$(BUILDTOOL_AS_NLM)" "1"
 
 $(APRUTIL)/uri/uri_delims.h: gen_uri_delims.exe $(APRUTIL)/uri/gen_uri_delims.c
@@ -103,8 +98,7 @@ clean ::
 	$(CHK) $(subst /,\,$(APRUTIL))\include\apr_ldap.h               $(DEL) $(subst /,\,$(APRUTIL))\include\apr_ldap.h
 	$(CHK) $(subst /,\,$(APRUTIL))\include\private\apu_config.h     $(DEL) $(subst /,\,$(APRUTIL))\include\private\apu_config.h
 	$(CHK) $(subst /,\,$(APRUTIL))\include\private\apu_select_dbm.h $(DEL) $(subst /,\,$(APRUTIL))\include\private\apu_select_dbm.h
-	$(CHK) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat.h            $(DEL) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat.h
-	$(CHK) $(subst /,\,$(APRUTIL))\xml\expat\lib\config.h           $(DEL) $(subst /,\,$(APRUTIL))\xml\expat\lib\config.h
+	$(CHK) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat_config.h     $(DEL) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat_config.h
 	$(CHK) $(subst /,\,$(APR))\aprlib.imp                           $(DEL) $(subst /,\,$(APR))\aprlib.imp
 ifneq "$(BUILDTOOL_AS_NLM)" "1"
 	$(CHK) $(subst /,\,$(APRUTIL))\uri\uri_delims.h                 $(DEL) $(subst /,\,$(APRUTIL))\uri\uri_delims.h
