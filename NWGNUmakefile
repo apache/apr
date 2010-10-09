@@ -1,4 +1,20 @@
 #
+# Define our macros with defaults if we dont got them already.
+#
+ifndef APR_WORK
+export APR_WORK = $(CURDIR)
+endif
+ifneq "$(wildcard $(APR_WORK)/include/apr_version.h)" "$(APR_WORK)/include/apr_version.h"
+$(error APR_WORK does not point to a valid APR source tree) 
+endif
+ifndef APU_WORK
+export APU_WORK = $(CURDIR)/../apr-util
+endif
+ifneq "$(wildcard $(APU_WORK)/include/apu_version.h)" "$(APU_WORK)/include/apu_version.h"
+$(error APU_WORK does not point to a valid APU source tree) 
+endif
+
+#
 # Declare the sub-directories to be built here
 #
 

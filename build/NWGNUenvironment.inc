@@ -234,14 +234,14 @@ endif
 INSTALLBASE := $(INSTALL)\$(BASEDIR)
 
 INSTDEVDIRS := \
-    $(INSTDIRS) \
+	$(INSTDIRS) \
 	$(INSTALLBASE) \
 	$(INSTALLBASE)\include \
 	$(INSTALLBASE)\lib \
 
 INSTDIRS += \
 	$(INSTALLBASE) \
-	
+
 else
 INSTALLBASE := $(INSTALL)\apr
 
@@ -254,7 +254,7 @@ INSTDEVDIRS := \
 INSTDIRS += \
 	$(INSTALLBASE) \
 	
-endif	
+endif
 
 #
 # Declare Command and tool macros here
@@ -289,9 +289,9 @@ CHKNOT	= $(CMD) if not exist
 #
 
 APR		= $(APR_WORK)
-APRTEST		= $(APR_WORK)/test
+APRTEST		= $(APR)/test
 APRUTIL		= $(APU_WORK)
-APULDAP		= $(APU_WORK)/ldap
+APULDAP		= $(APRUTIL)/ldap
 XML		= $(APRUTIL)/xml
 
 #
