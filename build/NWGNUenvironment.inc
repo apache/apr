@@ -274,10 +274,10 @@ endif
 # Common directories
 #
 
-APR			= $(APR_WORK)
-APRTEST		= $(APR_WORK)/test
-APRUTIL		= $(APR_WORK)/../apr-util
-XML			= $(APRUTIL)/xml
+APR		= $(APR_WORK)
+APRTEST		= $(APR)/test
+APRUTIL		= $(APU_WORK)
+XML		= $(APRUTIL)/xml
 
 #
 # Internal Libraries

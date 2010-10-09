@@ -1,10 +1,26 @@
 #
+# Define our macros with defaults if we dont got them already.
+#
+ifndef APR_WORK
+export APR_WORK = $(CURDIR)
+endif
+ifneq "$(wildcard $(APR_WORK)/include/apr_version.h)" "$(APR_WORK)/include/apr_version.h"
+$(error APR_WORK does not point to a valid APR source tree) 
+endif
+ifndef APU_WORK
+export APU_WORK = $(CURDIR)/../apr-util
+endif
+ifneq "$(wildcard $(APU_WORK)/include/apu_version.h)" "$(APU_WORK)/include/apu_version.h"
+$(error APU_WORK does not point to a valid APU source tree) 
+endif
+
+#
 # Declare the sub-directories to be built here
 #
 
 SUBDIRS = \
 		build \
-		..\apr-util \
+		$(APU_WORK) \
 		$(EOLIST) 
 
 #
@@ -26,10 +42,10 @@ include $(APR_WORK)\build\NWGNUhead.inc
 # INCDIRS
 #
 XINCDIRS	+= \
-			$(APR_WORK)/include \
-			$(APR_WORK)/include/arch/NetWare \
-			$(APR_WORK)/include/arch/unix \
-			$(APR_WORK)/memory/unix \
+			$(APR)/include \
+			$(APR)/include/arch/NetWare \
+			$(APR)/include/arch/unix \
+			$(APR)/memory/unix \
 			$(APRUTIL)/xml \
 			$(EOLIST)
 
@@ -102,7 +118,7 @@ endif
 # This is used by the link 'name' directive to name the nlm.  If left blank
 # TARGET_nlm (see below) will be used.
 #
-NLM_NAME		= aprlib
+NLM_NAME	= aprlib
 
 #
 # This is used by the link '-desc ' directive. 
@@ -119,7 +135,7 @@ NLM_THREAD_NAME	=
 # If this is specified, it will override VERSION value in 
 # $(APR_WORK)\build\NWGNUenvironment.inc
 #
-NLM_VERSION		=
+NLM_VERSION	=
 
 #
 # If this is specified, it will override the default of 64K
@@ -144,14 +160,14 @@ NLM_CHECK_SYM	=
 #
 # If this is specified it will be used by the link '-flags' directive
 #
-NLM_FLAGS		= AUTOUNLOAD, PSEUDOPREEMPTION
+NLM_FLAGS	= AUTOUNLOAD, PSEUDOPREEMPTION
  
 #
 # If this is specified it will be linked in with the XDCData option in the def 
 # file instead of the default of $(APR)/misc/netware/apache.xdc.  XDCData can 
 # be disabled by setting APACHE_UNIPROC in the environment
 #
-XDCDATA         = 
+XDCDATA		= 
 
 #
 # Declare all target files (you must add your files here)
@@ -229,9 +245,9 @@ FILES_nlm_Ximports = \
 # Any symbols exported to here
 #
 FILES_nlm_exports = \
-	@aprlib.imp	\
+	@aprlib.imp \
 	$(EOLIST)
-	
+
 #   
 # These are the OBJ files needed to create the LIB target above.
 # Paths must all use the '/' character
@@ -325,9 +341,8 @@ ifndef DEST
 	@echo xcopy docs $(INSTALLBASE)\docs\*.* $(XCOPYSW) >> xc.bat
 	$(CMD) xc.bat
 	$(DEL) xc.bat
-	
-endif	
-	
+endif
+
 $(INSTDIRS) ::
 	$(CHKNOT) $@\NUL mkdir $@
 
@@ -337,10 +352,10 @@ installdev :: $(INSTDEVDIRS) FORCE
 	-copy $(subst /,\,$(APRUTIL))\include\*.h           $(INSTALLBASE)\include\*.*
 	-copy $(subst /,\,$(APR))\*.imp                     $(INSTALLBASE)\lib\*.*
 	-copy $(subst /,\,$(APR))\misc\netware\*.xdc        $(INSTALLBASE)\lib\*.*
-	
+
 $(INSTDEVDIRS) ::
 	$(CHKNOT) $@\NUL mkdir $@
-endif	
+endif
 
 #
 # Any specialized rules here
