@@ -280,9 +280,9 @@ CHKNOT	= $(CMD) if not exist
 #
 
 APR		= $(APR_WORK)
-APRTEST		= $(APR_WORK)/test
+APRTEST		= $(APR)/test
 APRUTIL		= $(APU_WORK)
-APULDAP		= $(APU_WORK)/ldap
+APULDAP		= $(APRUTIL)/ldap
 XML		= $(APRUTIL)/xml
 
 #
