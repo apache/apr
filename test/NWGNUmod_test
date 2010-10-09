@@ -89,35 +89,36 @@ endif
 # This is used by the link 'name' directive to name the nlm.  If left blank
 # TARGET_nlm (see below) will be used.
 #
-NLM_NAME		=testatmc
+NLM_NAME	= mod_test
+
 #
 # This is used by the link '-desc ' directive. 
 # If left blank, NLM_NAME will be used.
 #
-NLM_DESCRIPTION	=  NLM is to test the atomic functions
+NLM_DESCRIPTION	=  DSO NLM to test the apr DSO loading layer
 
 #
 # This is used by the '-threadname' directive.  If left blank,
 # NLM_NAME Thread will be used.
 #
-NLM_THREAD_NAME	= testatmc
+NLM_THREAD_NAME	= $(NLM_NAME) Thread
 
 #
 # This is used by the '-screenname' directive.  If left blank,
 # 'Apache for NetWare' Thread will be used.
 #
-NLM_SCREEN_NAME = testatmc
+NLM_SCREEN_NAME = DEFAULT
 
 #
 # If this is specified, it will override VERSION value in 
 # $(APR_WORK)\build\NWGNUenvironment.inc
 #
-NLM_VERSION		= 1,0,0
+NLM_VERSION	=
 
 #
 # If this is specified, it will override the default of 64K
 #
-NLM_STACK_SIZE	=
+NLM_STACK_SIZE	= 
 
 #
 # If this is specified it will be used by the link '-entry' directive
@@ -137,14 +138,14 @@ NLM_CHECK_SYM	=
 #
 # If this is specified it will be used by the link '-flags' directive
 #
-NLM_FLAGS		= AUTOUNLOAD, PSEUDOPREEMPTION
+NLM_FLAGS	= AUTOUNLOAD, PSEUDOPREEMPTION
  
 #
 # If this is specified it will be linked in with the XDCData option in the def 
 # file instead of the default of $(APR)/misc/netware/apache.xdc.  XDCData can 
 # be disabled by setting APACHE_UNIPROC in the environment
 #
-XDCDATA         = 
+XDCDATA		= 
 
 #
 # Declare all target files (you must add your files here)
@@ -154,7 +155,7 @@ XDCDATA         =
 # If there is an NLM target, put it here
 #
 TARGET_nlm = \
-	$(OBJDIR)/testatmc.nlm \
+	$(OBJDIR)/mod_test.nlm \
 	$(EOLIST)
 
 #
@@ -168,12 +169,9 @@ TARGET_lib = \
 # Paths must all use the '/' character
 #
 FILES_nlm_objs = \
-	$(OBJDIR)/testatomic.o \
-	$(OBJDIR)/nw_misc.o \
+	$(OBJDIR)/mod_test.o \
 	$(EOLIST)
 
-# Pending tests
-	
 #
 # These are the LIB files needed to create the NLM target above.
 # These will be added as a library command in the link.opt file.
@@ -187,8 +185,8 @@ FILES_nlm_libs = \
 # These will be added as a module command in the link.opt file.
 #
 FILES_nlm_modules = \
+	aprlib \
 	Libc \
-	APRLIB \
 	$(EOLIST)
 
 #
@@ -210,16 +208,18 @@ FILE_nlm_copyright =
 # Any additional imports go here
 #
 FILES_nlm_Ximports = \
+	@$(APR)/aprlib.imp \
 	@libc.imp \
-	@$(APR)/aprlib.imp	\
 	$(EOLIST)
  
 #   
 # Any symbols exported to here
 #
 FILES_nlm_exports = \
+	print_hello \
+	count_reps \
 	$(EOLIST)
-	
+
 #   
 # These are the OBJ files needed to create the LIB target above.
 # Paths must all use the '/' character
@@ -244,7 +244,6 @@ install :: nlms FORCE
 #
 # Any specialized rules here
 #
-
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined
