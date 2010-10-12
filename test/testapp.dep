@@ -1,0 +1,11 @@
+# Microsoft Developer Studio Generated Dependency File, included by testapp.mak
+
+.\testapp.c : \
+	"..\include\apr.h"\
+	"..\include\apr_allocator.h"\
+	"..\include\apr_errno.h"\
+	"..\include\apr_general.h"\
+	"..\include\apr_pools.h"\
+	"..\include\apr_thread_mutex.h"\
+	"..\include\apr_want.h"\
+	
