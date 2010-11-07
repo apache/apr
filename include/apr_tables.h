@@ -36,8 +36,8 @@ extern "C" {
 /**
  * @defgroup apr_tables Table and Array Functions
  * @ingroup APR 
- * Tables are used to store entirely opaque structures 
- * for applications, while Arrays are usually used to
+ * Arrays are used to store entirely opaque structures 
+ * for applications, while Tables are usually used to
  * deal with string lists.
  * @{
  */
@@ -252,7 +252,7 @@ APR_DECLARE(void) apr_table_clear(apr_table_t *t);
  * Get the value associated with a given key from the table.  After this call,
  * the data is still in the table.
  * @param t The table to search for the key
- * @param key The key to search for
+ * @param key The key to search for (case does not matter)
  * @return The value associated with the key, or NULL if the key does not exist. 
  */
 APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key);
@@ -273,7 +273,7 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
  * Add a key/value pair to a table.  If another element already exists with the
  * same key, this will overwrite the old data.
  * @param t The table to add the data to.
- * @param key The key to use
+ * @param key The key to use (case does not matter)
  * @param val The value to add
  * @warning When adding data, this function does not make a copy of the key or 
  *          the value, so care should be taken to ensure that the values will 
@@ -285,15 +285,16 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
 /**
  * Remove data from the table.
  * @param t The table to remove data from
- * @param key The key of the data being removed
+ * @param key The key of the data being removed (case does not matter)
  */
 APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key);
 
 /**
  * Add data to a table by merging the value with data that has already been 
- * stored.
+ * stored. The merging is done by concatenating the two values, separated
+ * by the string ", ".
  * @param t The table to search for the data
- * @param key The key to merge data for
+ * @param key The key to merge data for (case does not matter)
  * @param val The data to add
  * @remark If the key is not found, then this function acts like apr_table_add
  */
@@ -302,9 +303,10 @@ APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
 
 /**
  * Add data to a table by merging the value with data that has already been 
- * stored.
+ * stored. The merging is done by concatenating the two values, separated
+ * by the string ", ".
  * @param t The table to search for the data
- * @param key The key to merge data for
+ * @param key The key to merge data for (case does not matter)
  * @param val The data to add
  * @remark If the key is not found, then this function acts like apr_table_addn
  */
