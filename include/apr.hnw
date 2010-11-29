@@ -79,7 +79,7 @@ extern "C" {
  */
 
 #define APR_INLINE 
-#define APR_HAS_INLINE		0
+#define APR_HAS_INLINE          0
 #ifndef __attribute__
 #define __attribute__(__x)
 #endif
@@ -113,7 +113,7 @@ extern "C" {
 #define APR_HAVE_STDLIB_H       1
 #define APR_HAVE_STRING_H       1
 #define APR_HAVE_STRINGS_H      0
-#define APR_HAVE_STRTOLL	1
+#define APR_HAVE_STRTOLL        1
 #define APR_HAVE_SYS_SENDFILE_H 0
 #define APR_HAVE_SYS_SYSLIMITS_H 0
 #ifdef USE_WINSOCK
@@ -167,7 +167,7 @@ extern "C" {
 
 #define APR_FILE_BASED_SHM      0
 
-#define APR_HAVE_CORKABLE_TCP	0
+#define APR_HAVE_CORKABLE_TCP   0
 #define APR_HAVE_GETRLIMIT      0
 #define APR_HAVE_ICONV          0
 #define APR_HAVE_IN_ADDR        1
@@ -259,7 +259,7 @@ typedef  apr_uint64_t      apr_ino_t;
 
 /* Are we big endian? */
 /* XXX: Fatal assumption on Alpha platforms */
-#define APR_IS_BIGENDIAN	0
+#define APR_IS_BIGENDIAN        0
 
 #ifdef UNKNOWN_NETWARE_64BIT_FLAG_NEEDED
 #define APR_SIZEOF_VOIDP   8
