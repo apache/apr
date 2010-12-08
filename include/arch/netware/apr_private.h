@@ -77,7 +77,7 @@
 #endif
 
 /* 64-bit integer conversion function */
-#define APR_INT64_STRFN	      strtoll
+#define APR_INT64_STRFN       strtoll
 
 #ifdef NW_BUILD_IPV6
 #define HAVE_GETADDRINFO 1
@@ -92,11 +92,9 @@
 /* 6 is used for SIGTERM on netware */
 /* 7 is used for SIGPOLL on netware */
 
+#if (CURRENT_NDK_THRESHOLD < 306030000)
 #define SIGKILL         11
-#undef  SA_NOCLDSTOP
-#define SA_NOCLDSTOP    12
 #define SIGALRM         13
-#undef  SIGCHLD
 #define SIGCHLD         14 
 #define SIGCONT         15
 #define SIGHUP          16
@@ -108,11 +106,10 @@
 #define SIGTTOU         22
 #define SIGUSR1         23
 #define SIGUSR2         24
-    
+#endif
+
 #define SIGTRAP         25
 #define SIGIOT          26
-#undef  SIGBUS
-#define SIGBUS          27
 #define SIGSTKFLT       28
 #define SIGURG          29
 #define SIGXCPU         30
@@ -121,6 +118,13 @@
 #define SIGPROF         33
 #define SIGWINCH        34
 #define SIGIO           35
+
+#undef  SA_NOCLDSTOP
+#define SA_NOCLDSTOP    12
+#ifdef  SIGBUS
+#undef  SIGBUS
+#endif
+#define SIGBUS          27
 
 #define _getch()               getcharacter()
 
