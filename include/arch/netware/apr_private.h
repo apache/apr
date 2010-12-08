@@ -73,11 +73,8 @@
  * a threadsafe, API-equivilant of getpass_r().
  */
 #if (CURRENT_NDK_THRESHOLD < 709060000)
-#define getpass_r getpassword
+#define getpass_r       getpassword
 #endif
-
-/* 64-bit integer conversion function */
-#define APR_INT64_STRFN       strtoll
 
 #ifdef NW_BUILD_IPV6
 #define HAVE_GETADDRINFO 1
@@ -173,20 +170,23 @@ void* getStatCache();
 #undef malloc
 #define malloc(x) library_malloc(gLibHandle,x)
 #ifndef __MWERKS__
-#define _alloca alloca
+#define _alloca         alloca
 #endif
 
+/* 64-bit integer conversion function */
+#define APR_INT64_STRFN strtoll
+
 #if APR_HAS_LARGE_FILES
-#define APR_OFF_T_STRFN       strtoll
+#define APR_OFF_T_STRFN strtoll
 #else
-#define APR_OFF_T_STRFN       strtol
+#define APR_OFF_T_STRFN strtol
 #endif
 
 /* used to check DWORD overflow for 64bit compiles */
-#define APR_DWORD_MAX 0xFFFFFFFFUL
+#define APR_DWORD_MAX   0xFFFFFFFFUL
 
 /* Always compile Netware with DSO support for .nlm builds */
-#define APU_DSO_BUILD           0
+#define APU_DSO_BUILD   0
 
 /*
  * NetWare does not have GDBM, and we always use the bundled (new) Expat
