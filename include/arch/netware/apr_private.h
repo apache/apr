@@ -16,8 +16,8 @@
 
 /*
  * Note: 
- * This is the windows specific autoconf-like config file
- * which unix would create at build time.
+ * This is the netware-specific autoconf-like config file
+ * which unix creates at ./configure time.
  */
 
 #ifdef NETWARE
@@ -25,10 +25,16 @@
 #ifndef APR_PRIVATE_H
 #define APR_PRIVATE_H
 
-/* Include the public APR symbols, include our idea of the 'right'
- * subset of the Windows.h header.  This saves us repetition.
+/* Pick up publicly advertised headers and symbols before the
+ * APR internal private headers and symbols
  */
-#include "apr.h"
+#include <apr.h>
+
+/* Pick up privately consumed headers */
+#include <ndkvers.h>
+
+/* Include alloca.h to get compiler-dependent defines */ 
+#include <alloca.h>
 
 #include <sys/types.h>
 #include <stddef.h>
@@ -72,15 +78,12 @@
 
 #define HAVE_GETPASS_R  1
 /*
- * check for older NDKs which have only the getpassword() function.
+ * Hack around older NDKs which have only the getpassword() function,
+ * a threadsafe, API-equivilant of getpass_r().
  */
-#include <ndkvers.h>
 #if (CURRENT_NDK_THRESHOLD < 709060000)
-#define getpass_r getpassword
+#define getpass_r       getpassword
 #endif
-
-/* 64-bit integer conversion function */
-#define APR_INT64_STRFN       strtoll
 
 /*#define DSO_USE_DLFCN */
 
@@ -132,15 +135,15 @@
 #define SIGBUS          SIGSEGV
 #endif
 
-#define _getch                 getcharacter
+#define _getch          getcharacter
 
-#define SIZEOF_SHORT           2
-#define SIZEOF_INT             4
-#define SIZEOF_LONGLONG        8
-#define SIZEOF_CHAR            1
-#define SIZEOF_SSIZE_T         SIZEOF_INT
+#define SIZEOF_SHORT    2
+#define SIZEOF_INT      4
+#define SIZEOF_LONGLONG 8
+#define SIZEOF_CHAR     1
+#define SIZEOF_SSIZE_T  SIZEOF_INT
 
-void netware_pool_proc_cleanup ();
+void netware_pool_proc_cleanup();
 
 /* NLM registration routines for managing which NLMs
     are using the library. */
@@ -177,15 +180,21 @@ void* getStatCache();
     and can be shared by the library. */
 #undef malloc
 #define malloc(x) library_malloc(gLibHandle,x)
+#ifndef __MWERKS__
+#define _alloca         alloca
+#endif
+
+/* 64-bit integer conversion function */
+#define APR_INT64_STRFN strtoll
 
 #if APR_HAS_LARGE_FILES
-#define APR_OFF_T_STRFN       strtoll
+#define APR_OFF_T_STRFN strtoll
 #else
-#define APR_OFF_T_STRFN       strtol
+#define APR_OFF_T_STRFN strtol
 #endif
 
 /* used to check DWORD overflow for 64bit compiles */
-#define APR_DWORD_MAX 0xFFFFFFFFUL
+#define APR_DWORD_MAX   0xFFFFFFFFUL
 
 /*
  * Include common private declarations.
