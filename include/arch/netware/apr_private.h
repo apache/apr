@@ -119,12 +119,13 @@
 #define SIGWINCH        34
 #define SIGIO           35
 
+#if (CURRENT_NDK_THRESHOLD < 406230000)
 #undef  SA_NOCLDSTOP
-#define SA_NOCLDSTOP    12
-#ifdef  SIGBUS
-#undef  SIGBUS
+#define SA_NOCLDSTOP    0x00000001
 #endif
-#define SIGBUS          27
+#ifndef SIGBUS
+#define SIGBUS          SIGSEGV
+#endif
 
 #define _getch()               getcharacter()
 
