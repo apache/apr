@@ -80,7 +80,7 @@
 #endif
 
 /* 64-bit integer conversion function */
-#define APR_INT64_STRFN	      strtoll
+#define APR_INT64_STRFN       strtoll
 
 /*#define DSO_USE_DLFCN */
 
@@ -97,8 +97,8 @@
 /* 6 is used for SIGTERM on netware */
 /* 7 is used for SIGPOLL on netware */
 
+#if (CURRENT_NDK_THRESHOLD < 306030000)
 #define SIGKILL         11
-#define SA_NOCLDSTOP    12
 #define SIGALRM         13
 #define SIGCHLD         14 
 #define SIGCONT         15
@@ -111,10 +111,10 @@
 #define SIGTTOU         22
 #define SIGUSR1         23
 #define SIGUSR2         24
-    
+#endif
+
 #define SIGTRAP         25
 #define SIGIOT          26
-#define SIGBUS          27
 #define SIGSTKFLT       28
 #define SIGURG          29
 #define SIGXCPU         30
@@ -124,21 +124,15 @@
 #define SIGWINCH        34
 #define SIGIO           35
 
-#if 0
-#define __attribute__(__x) 
-
-/* APR COMPATABILITY FUNCTIONS
- * This section should be used to define functions and
- * macros which are need to make Windows features look
- * like POSIX features.
- */
-typedef void (Sigfunc)(int);
+#if (CURRENT_NDK_THRESHOLD < 406230000)
+#undef  SA_NOCLDSTOP
+#define SA_NOCLDSTOP    0x00000001
+#endif
+#ifndef SIGBUS
+#define SIGBUS          SIGSEGV
 #endif
 
-#define strcasecmp(s1, s2)       stricmp(s1, s2)
-#define Sleep(t)                 delay(t)
-#define lstat(a,b)               stat(a,b)
-#define _getch()                 getcharacter()
+#define _getch                 getcharacter
 
 #define SIZEOF_SHORT           2
 #define SIZEOF_INT             4
