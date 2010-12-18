@@ -43,6 +43,66 @@ AH_BOTTOM([
 #endif
 
 /*
+ * Darwin 10's default compiler (gcc42) builds for both 64 and
+ * 32 bit architectures unless specifically told not to.
+ * In those cases, we need to override types depending on how
+ * we're being built at compile time.
+ * NOTE: This is an ugly work-around for Darwin's
+ * concept of universal binaries, a single package
+ * (executable, lib, etc...) which contains both 32
+ * and 64 bit versions. The issue is that if APR is
+ * built universally, if something else is compiled
+ * against it, some bit sizes will depend on whether
+ * it is 32 or 64 bit. This is determined by the __LP64__
+ * flag. Since we need to support both, we have to
+ * handle OS X unqiuely.
+ */
+#ifdef DARWIN_10
+
+#undef APR_OFF_T_STRFN
+#undef APR_INT64_STRFN
+#undef SIZEOF_LONG
+#undef SIZEOF_SIZE_T
+#undef SIZEOF_SSIZE_T
+#undef SIZEOF_VOIDP
+#undef SIZEOF_STRUCT_IOVEC
+
+#ifdef __LP64__
+ #define APR_INT64_STRFN strtol
+ #define SIZEOF_LONG    8
+ #define SIZEOF_SIZE_T  8
+ #define SIZEOF_SSIZE_T 8
+ #define SIZEOF_VOIDP   8
+ #define SIZEOF_STRUCT_IOVEC 16
+#else
+ #define APR_INT64_STRFN strtoll
+ #define SIZEOF_LONG    4
+ #define SIZEOF_SIZE_T  4
+ #define SIZEOF_SSIZE_T 4
+ #define SIZEOF_VOIDP   4
+ #define SIZEOF_STRUCT_IOVEC 8
+#endif
+
+/*
+ * ./i386/_types.h:typedef long long __int64_t;
+ * ./sys/_types.h:typedef __int64_t	__darwin_off_t;
+ * ./sys/types.h:typedef __darwin_off_t		off_t;
+ * So off_t is always long long
+ */
+#undef APR_OFF_T_STRFN
+#define APR_OFF_T_STRFN APR_INT64_STRFN
+ 
+
+#undef SETPGRP_VOID
+#ifdef __DARWIN_UNIX03
+ #define SETPGRP_VOID 1
+#else
+/* #undef SETPGRP_VOID */
+#endif
+ 
+#endif /* DARWIN_10 */
+
+/*
  * Include common private declarations.
  */
 #include "../apr_private_common.h"

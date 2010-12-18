@@ -277,16 +277,50 @@ typedef  unsigned @short_value@  apr_uint16_t;
 typedef  @int_value@             apr_int32_t;
 typedef  unsigned @int_value@    apr_uint32_t;
 
-typedef  @long_value@            apr_int64_t;
-typedef  unsigned @long_value@   apr_uint64_t;
+#define APR_SIZEOF_VOIDP @voidp_size@
+
+/*
+ * Darwin 10's default compiler (gcc42) builds for both 64 and
+ * 32 bit architectures unless specifically told not to.
+ * In those cases, we need to override types depending on how
+ * we're being built at compile time.
+ * NOTE: This is an ugly work-around for Darwin's
+ * concept of universal binaries, a single package
+ * (executable, lib, etc...) which contains both 32
+ * and 64 bit versions. The issue is that if APR is
+ * built universally, if something else is compiled
+ * against it, some bit sizes will depend on whether
+ * it is 32 or 64 bit. This is determined by the __LP64__
+ * flag. Since we need to support both, we have to
+ * handle OS X unqiuely.
+ */
+#ifdef DARWIN_10
+#undef APR_SIZEOF_VOIDP
+#undef INT64_C
+#undef UINT64_C
+#ifdef __LP64__
+ typedef  long            apr_int64_t;
+ typedef  unsigned long   apr_uint64_t;
+ #define APR_SIZEOF_VOIDP     8
+ #define INT64_C(v)   (v ## L)
+ #define UINT64_C(v)  (v ## UL)
+#else
+ typedef  long long            apr_int64_t;
+ typedef  unsigned long long   apr_uint64_t;
+ #define APR_SIZEOF_VOIDP     4
+ #define INT64_C(v)   (v ## LL)
+ #define UINT64_C(v)  (v ## ULL)
+#endif
+#else
+ typedef  @long_value@            apr_int64_t;
+ typedef  unsigned @long_value@   apr_uint64_t;
+#endif
 
 typedef  @size_t_value@          apr_size_t;
 typedef  @ssize_t_value@         apr_ssize_t;
 typedef  @off_t_value@           apr_off_t;
 typedef  @socklen_t_value@       apr_socklen_t;
 typedef  @ino_t_value@           apr_ino_t;
-
-#define APR_SIZEOF_VOIDP @voidp_size@
 
 #if APR_SIZEOF_VOIDP == 8
 typedef  apr_uint64_t            apr_uintptr_t;
@@ -442,6 +476,7 @@ typedef  apr_uint32_t            apr_uintptr_t;
  * to find the logic for this definition search for "ssize_t_fmt" in
  * configure.in.
  */
+
 @ssize_t_fmt@
 
 /* And APR_SIZE_T_FMT */
@@ -461,6 +496,49 @@ typedef  apr_uint32_t            apr_uintptr_t;
 
 /* And APR_UINT64_T_HEX_FMT */
 @uint64_t_hex_fmt@
+
+/*
+ * Ensure we work with universal binaries on Darwin
+ */
+#ifdef DARWIN_10
+
+#undef APR_HAS_LARGE_FILES
+#undef APR_SIZEOF_VOIDP
+#undef APR_INT64_T_FMT
+#undef APR_UINT64_T_FMT
+#undef APR_UINT64_T_HEX_FMT
+
+#ifdef __LP64__
+ #define APR_HAS_LARGE_FILES  0
+ #define APR_SIZEOF_VOIDP     8
+ #define APR_INT64_T_FMT      "ld"
+ #define APR_UINT64_T_FMT     "lu"
+ #define APR_UINT64_T_HEX_FMT "lx"
+#else
+ #define APR_HAS_LARGE_FILES  1
+ #define APR_SIZEOF_VOIDP     4
+ #define APR_INT64_T_FMT      "lld"
+ #define APR_UINT64_T_FMT     "llu"
+ #define APR_UINT64_T_HEX_FMT "llx"
+#endif
+
+#undef APR_IS_BIGENDIAN
+#ifdef __BIG_ENDIAN__
+ #define APR_IS_BIGENDIAN	1
+#else
+ #define APR_IS_BIGENDIAN	0
+#endif
+
+/*
+ * ./i386/_types.h:typedef long long __int64_t;
+ * ./sys/_types.h:typedef __int64_t	__darwin_off_t;
+ * ./sys/types.h:typedef __darwin_off_t		off_t;
+ * So off_t is always long long
+ */
+#undef APR_OFF_T_FMT
+#define APR_OFF_T_FMT "lld"
+
+#endif /* DARWIN_10 */
 
 /* Does the proc mutex lock threads too */
 #define APR_PROC_MUTEX_IS_GLOBAL      @proc_mutex_is_global@
