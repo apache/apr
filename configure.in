@@ -1586,24 +1586,15 @@ if test "$ac_cv_sizeof_int" = "4"; then
 fi
 # Now we need to find what apr_int64_t (sizeof == 8) will be.
 # The first match is our preference.
-if test "$ac_cv_sizeof_int" = "8"; then
-    int64_literal='#define APR_INT64_C(val) (val)'
-    uint64_literal='#define APR_UINT64_C(val) (val##U)'
-    int64_t_fmt='#define APR_INT64_T_FMT "d"'
-    uint64_t_fmt='#define APR_UINT64_T_FMT "u"'
-    uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "x"'
-    int64_value="int"
-    long_value=int
-    int64_strfn="strtoi"
-elif test "$ac_cv_sizeof_long" = "8"; then
-    int64_literal='#define APR_INT64_C(val) (val##L)'
-    uint64_literal='#define APR_UINT64_C(val) (val##UL)'
-    int64_t_fmt='#define APR_INT64_T_FMT "ld"'
-    uint64_t_fmt='#define APR_UINT64_T_FMT "lu"'
-    uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "lx"'
-    int64_value="long"
-    long_value=long
-    int64_strfn="strtol"
+if test "$ac_cv_sizeof_longlong" = "8"; then
+    int64_literal='#define APR_INT64_C(val) (val##LL)'
+    uint64_literal='#define APR_UINT64_C(val) (val##ULL)'
+    int64_t_fmt='#define APR_INT64_T_FMT "qd"'
+    uint64_t_fmt='#define APR_UINT64_T_FMT "qu"'
+    uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "qx"'
+    int64_value="__int64"
+    long_value="__int64"
+    int64_strfn="strtoll"
 elif test "$ac_cv_sizeof_long_long" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val##LL)'
     uint64_literal='#define APR_UINT64_C(val) (val##ULL)'
@@ -1617,15 +1608,24 @@ elif test "$ac_cv_sizeof_long_long" = "8"; then
     int64_value="long long"
     long_value="long long"
     int64_strfn="strtoll"
-elif test "$ac_cv_sizeof_longlong" = "8"; then
-    int64_literal='#define APR_INT64_C(val) (val##LL)'
-    uint64_literal='#define APR_UINT64_C(val) (val##ULL)'
-    int64_t_fmt='#define APR_INT64_T_FMT "qd"'
-    uint64_t_fmt='#define APR_UINT64_T_FMT "qu"'
-    uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "qx"'
-    int64_value="__int64"
-    long_value="__int64"
-    int64_strfn="strtoll"
+elif test "$ac_cv_sizeof_long" = "8"; then
+    int64_literal='#define APR_INT64_C(val) (val##L)'
+    uint64_literal='#define APR_UINT64_C(val) (val##UL)'
+    int64_t_fmt='#define APR_INT64_T_FMT "ld"'
+    uint64_t_fmt='#define APR_UINT64_T_FMT "lu"'
+    uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "lx"'
+    int64_value="long"
+    long_value=long
+    int64_strfn="strtol"
+elif test "$ac_cv_sizeof_int" = "8"; then
+    int64_literal='#define APR_INT64_C(val) (val)'
+    uint64_literal='#define APR_UINT64_C(val) (val##U)'
+    int64_t_fmt='#define APR_INT64_T_FMT "d"'
+    uint64_t_fmt='#define APR_UINT64_T_FMT "u"'
+    uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "x"'
+    int64_value="int"
+    long_value=int
+    int64_strfn="strtoi"
 else
     # int64_literal may be overriden if your compiler thinks you have
     # a 64-bit value but APR does not agree.
@@ -1809,28 +1809,20 @@ elif test "${ac_cv_sizeof_off_t}x${ac_cv_sizeof_long}" = "4x4"; then
 elif test "$ac_cv_type_off_t" = "yes"; then
     off_t_value=off_t
     # off_t is more commonly a long than an int; prefer that case
-    # where int and long are the same size.
-    if test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long"; then
+    # where int and long are the same size. Use the longest
+    # type that fits
+    if test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long_long"; then
+        off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
+        off_t_strfn='apr_strtoi64'
+    elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long"; then
         off_t_fmt='#define APR_OFF_T_FMT "ld"'
         off_t_strfn='strtol'
     elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_int"; then
         off_t_fmt='#define APR_OFF_T_FMT "d"'
         off_t_strfn='strtoi'
-    elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long_long"; then
-        off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
-        off_t_strfn='apr_strtoi64'
     else
         AC_ERROR([could not determine the size of off_t])
     fi
-    # Per OS tuning...
-    case $host in
-     *apple-darwin10.*)
-      # off_t is a long long, but long == long long
-      if test "$ac_cv_sizeof_long" = "$ac_cv_sizeof_long_long"; then
-       off_t_fmt='#define APR_OFF_T_FMT "lld"'
-      fi
-    ;;
-   esac
 else
    # Fallback on int
    off_t_value=apr_int32_t
