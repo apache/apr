@@ -1,16 +1,3 @@
-#ifndef __pre_nw__
-#define __pre_nw__
-
-#include <stdint.h>
-
-#ifndef __GNUC__
-#pragma precompile_target "precomp.mch"
-#endif
-
-#define NETWARE
-
-#define N_PLAT_NLM
-
 /* Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -26,6 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef __pre_nw__
+#define __pre_nw__
+
+#include <stdint.h>
+
+#ifndef __GNUC__
+#pragma precompile_target "precomp.mch"
+#endif
+
+#define NETWARE
+
+#define N_PLAT_NLM
+
 #define FAR
 #define far
 
@@ -50,16 +50,6 @@
 #ifndef __int64
 #define __int64 long long
 #endif
-
-/* expat version */
-#define VERSION "expat_1.95.1"
-#define EXPAT_MAJOR_VERSION     1
-#define EXPAT_MINOR_VERSION     95
-#define EXPAT_EDIT              2
-
-#define XML_MAJOR_VERSION       EXPAT_MAJOR_VERSION
-#define XML_MINOR_VERSION       EXPAT_MINOR_VERSION
-#define XML_MICRO_VERSION       EXPAT_EDIT
 
 #endif
 
