@@ -405,7 +405,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
                 APR_ADDTO(LIBS, [-lbind -lsocket])
                 ;;
 	esac
-	APR_ADDTO(CPPFLAGS, [-DSIGPROCMASK_SETS_THREAD_MASK -DAP_AUTH_DBM_USE_APR])
+	APR_ADDTO(CPPFLAGS, [-DSIGPROCMASK_SETS_THREAD_MASK])
         ;;
     4850-*.*)
 	APR_ADDTO(CPPFLAGS, [-DSVR4 -DMPRAS])
