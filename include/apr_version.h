@@ -38,7 +38,7 @@
  */
 
 
-#define APR_COPYRIGHT "Copyright (c) 2010 The Apache Software " \
+#define APR_COPYRIGHT "Copyright (c) 2011 The Apache Software " \
                       "Foundation or its licensors, as applicable."
 
 /* The numeric compile-time version constants. These constants are the
