@@ -36,9 +36,19 @@ extern "C" {
 /**
  * @defgroup apr_tables Table and Array Functions
  * @ingroup APR 
- * Arrays are used to store entirely opaque structures 
- * for applications, while Tables are usually used to
- * deal with string lists.
+ * Arrays are used to store data which is referenced sequentially or
+ * as a stack.  Functions are provided to push and pop individual
+ * elements as well as to operate on the entire array.
+ *
+ * Tables are used to store data which can be referenced by key.
+ * Limited capabilities are provided for tables with multiple elements
+ * which share a key; while key lookup will return only a single
+ * element, iteration is available.  Additionally, a table can be
+ * compressed to resolve duplicates.
+ *
+ * Both arrays and tables may store string or binary data; some features,
+ * such as concatenation or merging of elements, work only for string
+ * data.
  * @{
  */
 
@@ -422,6 +432,8 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
  * @param flags How to add the table to table a.  One of:
  *          APR_OVERLAP_TABLES_SET        Use apr_table_setn
  *          APR_OVERLAP_TABLES_MERGE      Use apr_table_mergen
+ * @remark  When merging duplicates, the two values are concatenated,
+ *          separated by the string ", ".
  * @remark  This function is highly optimized, and uses less memory and CPU cycles
  *          than a function that just loops through table b calling other functions.
  */
@@ -461,6 +473,8 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
  * @param t Table.
  * @param flags APR_OVERLAP_TABLES_MERGE to merge, or
  *              APR_OVERLAP_TABLES_SET to overwrite
+ * @remark When merging duplicates, the two values are concatenated,
+ *         separated by the string ", ".
  */
 APR_DECLARE(void) apr_table_compress(apr_table_t *t, unsigned flags);
 
