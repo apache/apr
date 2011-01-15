@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Fix address handling when accepting an AF_INET socket from a socket
+     bound as AF_INET6.   PR 49678.  [Joe Orton]     
+
   *) Hide apr_wait_for_io_or_timeout() from public view and add instead
      apr_socket_wait() and apr_file_pipe_wait(). [Brian Havard]
 
