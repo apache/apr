@@ -83,12 +83,6 @@ AH_BOTTOM([
  #define SIZEOF_STRUCT_IOVEC 8
 #endif
 
-/*
- * ./i386/_types.h:typedef long long __int64_t;
- * ./sys/_types.h:typedef __int64_t	__darwin_off_t;
- * ./sys/types.h:typedef __darwin_off_t		off_t;
- * So off_t is always long long
- */
 #undef APR_OFF_T_STRFN
 #define APR_OFF_T_STRFN APR_INT64_STRFN
  
