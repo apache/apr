@@ -529,14 +529,8 @@ typedef  apr_uint32_t            apr_uintptr_t;
  #define APR_IS_BIGENDIAN	0
 #endif
 
-/*
- * ./i386/_types.h:typedef long long __int64_t;
- * ./sys/_types.h:typedef __int64_t	__darwin_off_t;
- * ./sys/types.h:typedef __darwin_off_t		off_t;
- * So off_t is always long long
- */
 #undef APR_OFF_T_FMT
-#define APR_OFF_T_FMT "lld"
+#define APR_OFF_T_FMT APR_INT64_T_FMT
 
 #endif /* DARWIN_10 */
 
