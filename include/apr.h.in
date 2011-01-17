@@ -530,7 +530,7 @@ typedef  apr_uint32_t            apr_uintptr_t;
 #endif
 
 #undef APR_OFF_T_FMT
-#define APR_OFF_T_FMT APR_INT64_T_FMT
+#define APR_OFF_T_FMT "lld"
 
 #endif /* DARWIN_10 */
 
