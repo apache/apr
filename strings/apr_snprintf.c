@@ -810,10 +810,27 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
                 adjust_precision = adjust_width = NO;
 
             /*
-             * Modifier check.  Note that if APR_INT64_T_FMT is "d",
-             * the first if condition is never true.
+             * Modifier check.  In same cases, APR_OFF_T_FMT can be
+             * "lld" and APR_INT64_T_FMT can be "ld" (that is, off_t is
+             * "larger" than int64). Check that case 1st.
+             * Note that if APR_OFF_T_FMT is "d",
+             * the first if condition is never true. If APR_INT64_T_FMT
+             * is "d' then the second if condition is never true.
              */
-            if ((sizeof(APR_INT64_T_FMT) == 4 &&
+            if ((sizeof(APR_OFF_T_FMT) > sizeof(APR_INT64_T_FMT)) &&
+                (sizeof(APR_OFF_T_FMT) == 4 &&
+                 fmt[0] == APR_OFF_T_FMT[0] &&
+                 fmt[1] == APR_OFF_T_FMT[1]) ||
+                (sizeof(APR_OFF_T_FMT) == 3 &&
+                 fmt[0] == APR_OFF_T_FMT[0]) ||
+                (sizeof(APR_OFF_T_FMT) > 4 &&
+                 strncmp(fmt, APR_OFF_T_FMT, 
+                         sizeof(APR_OFF_T_FMT) - 2) == 0)) {
+                /* Need to account for trailing 'd' and null in sizeof() */
+                var_type = IS_QUAD;
+                fmt += (sizeof(APR_OFF_T_FMT) - 2);
+            }
+            else if ((sizeof(APR_INT64_T_FMT) == 4 &&
                  fmt[0] == APR_INT64_T_FMT[0] &&
                  fmt[1] == APR_INT64_T_FMT[1]) ||
                 (sizeof(APR_INT64_T_FMT) == 3 &&
