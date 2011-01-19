@@ -818,14 +818,14 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
              * is "d' then the second if condition is never true.
              */
             if ((sizeof(APR_OFF_T_FMT) > sizeof(APR_INT64_T_FMT)) &&
-                (sizeof(APR_OFF_T_FMT) == 4 &&
+                ((sizeof(APR_OFF_T_FMT) == 4 &&
                  fmt[0] == APR_OFF_T_FMT[0] &&
                  fmt[1] == APR_OFF_T_FMT[1]) ||
                 (sizeof(APR_OFF_T_FMT) == 3 &&
                  fmt[0] == APR_OFF_T_FMT[0]) ||
                 (sizeof(APR_OFF_T_FMT) > 4 &&
                  strncmp(fmt, APR_OFF_T_FMT, 
-                         sizeof(APR_OFF_T_FMT) - 2) == 0)) {
+                         sizeof(APR_OFF_T_FMT) - 2) == 0))) {
                 /* Need to account for trailing 'd' and null in sizeof() */
                 var_type = IS_QUAD;
                 fmt += (sizeof(APR_OFF_T_FMT) - 2);
