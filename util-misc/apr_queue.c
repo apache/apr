@@ -185,7 +185,9 @@ APR_DECLARE(apr_status_t) apr_queue_push(apr_queue_t *queue, void *data)
     }
 
     queue->data[queue->in] = data;
-    queue->in = (queue->in + 1) % queue->bounds;
+    queue->in++;
+    if (queue->in >= queue->bounds)
+        queue->in -= queue->bounds;
     queue->nelts++;
 
     if (queue->empty_waiters) {
@@ -225,7 +227,9 @@ APR_DECLARE(apr_status_t) apr_queue_trypush(apr_queue_t *queue, void *data)
     }
     
     queue->data[queue->in] = data;
-    queue->in = (queue->in + 1) % queue->bounds;
+    queue->in++;
+    if (queue->in >= queue->bounds)
+        queue->in -= queue->bounds;
     queue->nelts++;
 
     if (queue->empty_waiters) {
@@ -297,7 +301,9 @@ APR_DECLARE(apr_status_t) apr_queue_pop(apr_queue_t *queue, void **data)
     *data = queue->data[queue->out];
     queue->nelts--;
 
-    queue->out = (queue->out + 1) % queue->bounds;
+    queue->out++;
+    if (queue->out >= queue->bounds)
+        queue->out -= queue->bounds;
     if (queue->full_waiters) {
         Q_DBG("signal !full", queue);
         rv = apr_thread_cond_signal(queue->not_full);
@@ -337,7 +343,9 @@ APR_DECLARE(apr_status_t) apr_queue_trypop(apr_queue_t *queue, void **data)
     *data = queue->data[queue->out];
     queue->nelts--;
 
-    queue->out = (queue->out + 1) % queue->bounds;
+    queue->out++;
+    if (queue->out >= queue->bounds)
+        queue->out -= queue->bounds;
     if (queue->full_waiters) {
         Q_DBG("signal !full", queue);
         rv = apr_thread_cond_signal(queue->not_full);
