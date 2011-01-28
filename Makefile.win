@@ -170,8 +170,8 @@ install:
 	copy $(LIBSOSPATH)\apr-1.pdb		"$(PREFIX)\lib\" <.y
 	copy $(LIBSOSPATH)\aprapp-1.lib		"$(PREFIX)\lib\" <.y
 	copy $(LIBSOSPATH)\aprapp-1.pdb		"$(PREFIX)\lib\" <.y
-	copy $(LIBSOSPATH)\libaprapp-1.lib	"$(PREFIX)\lib\" <.y
-	copy $(LIBSOSPATH)\libaprapp-1.pdb	"$(PREFIX)\lib\" <.y
+	copy $(ARCHOSPATH)\libaprapp-1.lib	"$(PREFIX)\lib\" <.y
+	copy $(ARCHOSPATH)\libaprapp-1.pdb	"$(PREFIX)\lib\" <.y
 	copy $(ARCHOSPATH)\libapr-1.lib		"$(PREFIX)\lib\" <.y
 	copy $(ARCHOSPATH)\libapr-1.exp		"$(PREFIX)\lib\" <.y
 	copy $(ARCHOSPATH)\libapr-1.dll		"$(PREFIX)\bin\" <.y
