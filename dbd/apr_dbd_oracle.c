@@ -860,6 +860,7 @@ static int dbd_oracle_prepare(apr_pool_t *pool, apr_dbd_t *sql,
     int ret = 0;
     int i;
     apr_dbd_prepared_t *stmt ;
+    apr_int16_t type;
 
     if (*statement == NULL) {
         *statement = apr_pcalloc(pool, sizeof(apr_dbd_prepared_t));
@@ -895,11 +896,12 @@ static int dbd_oracle_prepare(apr_pool_t *pool, apr_dbd_t *sql,
                               apr_pool_cleanup_null);
 
     /* Perl gets statement type here */
-    sql->status = OCIAttrGet(stmt->stmt, OCI_HTYPE_STMT, &stmt->type, 0,
+    sql->status = OCIAttrGet(stmt->stmt, OCI_HTYPE_STMT, &type, 0,
                              OCI_ATTR_STMT_TYPE, sql->err);
     if (sql->status != OCI_SUCCESS) {
         return 1;
     }
+    stmt->type = type;
 
 /* Perl sets PREFETCH_MEMORY here, but the docs say there's a working default */
 #if 0
