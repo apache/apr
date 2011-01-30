@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_dbd_oracle: fix endianness issue in prepared statements
+     PR 50690 [Stefan Ruppert <sr myarm.com>]
+
   *) Fix address handling when accepting an AF_INET socket from a socket
      bound as AF_INET6.   PR 49678.  [Joe Orton]     
 
