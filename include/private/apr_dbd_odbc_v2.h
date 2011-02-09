@@ -23,7 +23,7 @@
 *
 */
 
-#define SQLHANDLE SQLHENV   // Presumes that ENV, DBC, and STMT handles are all the same datatype
+#define SQLHANDLE SQLHENV   /* Presumes that ENV, DBC, and STMT handles are all the same datatype */
 #define SQL_NULL_HANDLE 0
 #define SQL_HANDLE_STMT 1
 #define SQL_HANDLE_DBC  2
