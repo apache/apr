@@ -172,13 +172,13 @@ static APR_INLINE void* apr_realloc_dbg(void* userData, size_t newSize,
 #endif  /* ! _MSC_VER */
 
 typedef enum {
-    DLL_WINBASEAPI = 0,    // kernel32 From WinBase.h
-    DLL_WINADVAPI = 1,     // advapi32 From WinBase.h
-    DLL_WINSOCKAPI = 2,    // mswsock  From WinSock.h
-    DLL_WINSOCK2API = 3,   // ws2_32   From WinSock2.h
-    DLL_SHSTDAPI = 4,      // shell32  From ShellAPI.h
-    DLL_NTDLL = 5,         // shell32  From our real kernel
-    DLL_defined = 6        // must define as last idx_ + 1
+    DLL_WINBASEAPI = 0,    /* kernel32 From WinBase.h       */
+    DLL_WINADVAPI = 1,     /* advapi32 From WinBase.h       */
+    DLL_WINSOCKAPI = 2,    /* mswsock  From WinSock.h       */
+    DLL_WINSOCK2API = 3,   /* ws2_32   From WinSock2.h      */
+    DLL_SHSTDAPI = 4,      /* shell32  From ShellAPI.h      */
+    DLL_NTDLL = 5,         /* shell32  From our real kernel */
+    DLL_defined = 6        /* must define as last idx_ + 1  */
 } apr_dlltoken_e;
 
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);

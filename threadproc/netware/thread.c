@@ -134,10 +134,10 @@ apr_status_t apr_thread_create(apr_thread_t **new,
             /* long flags */                flags,
             /* NXThreadId_t *thread_id */   &(*new)->td);
 
-    if(stat==0)
+    if (stat == 0)
         return APR_SUCCESS;
         
-    return(stat);// if error    
+    return(stat); /* if error */    
 }
 
 apr_os_thread_t apr_os_thread_current()

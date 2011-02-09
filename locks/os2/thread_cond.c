@@ -24,7 +24,7 @@
 #include <string.h>
 
 #ifndef DCE_POSTONE
-#define DCE_POSTONE   0x0800 // Post one flag
+#define DCE_POSTONE   0x0800 /* Post one flag */
 #endif
 
 static apr_status_t thread_cond_cleanup(void *data)

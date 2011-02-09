@@ -141,10 +141,10 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
         (*in)->filehand = CreateNamedPipe(name,
                                           dwOpenMode,
                                           dwPipeMode,
-                                          1,            //nMaxInstances,
-                                          0,            //nOutBufferSize, 
-                                          65536,        //nInBufferSize,                   
-                                          1,            //nDefaultTimeOut,                
+                                          1,            /* nMaxInstances,   */
+                                          0,            /* nOutBufferSize,  */ 
+                                          65536,        /* nInBufferSize,   */                 
+                                          1,            /* nDefaultTimeOut, */                
                                           &sa);
 
         /* Create the write end of the pipe */
@@ -158,12 +158,12 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
         }
         
         (*out)->filehand = CreateFile(name,
-                                      GENERIC_WRITE,   // access mode
-                                      0,               // share mode
-                                      &sa,             // Security attributes
-                                      OPEN_EXISTING,   // dwCreationDisposition
-                                      dwOpenMode,      // Pipe attributes
-                                      NULL);           // handle to template file
+                                      GENERIC_WRITE,   /* access mode             */
+                                      0,               /* share mode              */
+                                      &sa,             /* Security attributes     */
+                                      OPEN_EXISTING,   /* dwCreationDisposition   */
+                                      dwOpenMode,      /* Pipe attributes         */
+                                      NULL);           /* handle to template file */
     }
     else {
         /* Pipes on Win9* are blocking. Live with it. */

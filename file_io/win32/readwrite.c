@@ -272,7 +272,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         }
 
         if (thefile->direction == 0) {
-            // Position file pointer for writing at the offset we are logically reading from
+            /* Position file pointer for writing at the offset we are logically reading from */
             apr_off_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
             DWORD offlo = (DWORD)offset;
             LONG  offhi = (LONG)(offset >> 32);
@@ -284,7 +284,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
 
         rv = 0;
         while (rv == 0 && size > 0) {
-            if (thefile->bufpos == thefile->bufsize)   // write buffer is full
+            if (thefile->bufpos == thefile->bufsize)   /* write buffer is full */
                 rv = apr_file_flush(thefile);
 
             blocksize = size > thefile->bufsize - thefile->bufpos ? 

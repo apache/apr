@@ -155,13 +155,13 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
  *           correctly when writing to a file with this flag set TRUE.
  */
 
-// for apr_poll.c;
+/* for apr_poll.c */
 #define filedes filehand
 
 struct apr_file_t {
     apr_pool_t *pool;
     HANDLE filehand;
-    BOOLEAN pipe;              // Is this a pipe of a file?
+    BOOLEAN pipe;              /* Is this a pipe of a file? */
     OVERLAPPED *pOverlapped;
     apr_interval_time_t timeout;
     apr_int32_t flags;
@@ -171,18 +171,19 @@ struct apr_file_t {
     char *fname;
     DWORD dwFileAttributes;
     int eof_hit;
-    BOOLEAN buffered;          // Use buffered I/O?
-    int ungetchar;             // Last char provided by an unget op. (-1 = no char)
+    BOOLEAN buffered;          /* Use buffered I/O? */
+    int ungetchar;             /* Last char provided by an unget op. (-1 = no char) */
     int append; 
 
     /* Stuff for buffered mode */
     char *buffer;
-    apr_size_t bufpos;         // Read/Write position in buffer
-    apr_size_t bufsize;        // The size of the buffer
-    apr_size_t dataRead;       // amount of valid data read into buffer
-    int direction;             // buffer being used for 0 = read, 1 = write
-    apr_off_t filePtr;         // position in file of handle
-    apr_thread_mutex_t *mutex; // mutex semaphore, must be owned to access the above fields
+    apr_size_t bufpos;         /* Read/Write position in buffer             */
+    apr_size_t bufsize;        /* The size of the buffer                    */
+    apr_size_t dataRead;       /* amount of valid data read into buffer     */
+    int direction;             /* buffer being used for 0 = read, 1 = write */
+    apr_off_t filePtr;         /* position in file of handle                */
+    apr_thread_mutex_t *mutex; /* mutex semaphore, must be owned to access
+                                  the above fields                          */
 
 #if APR_FILES_AS_SOCKETS
     /* if there is a timeout set, then this pollset is used */
