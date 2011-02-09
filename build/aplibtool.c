@@ -194,7 +194,7 @@ bool parse_long_opt(char *arg, cmd_data_t *cmd_data)
     } else if (strcmp(var, "export-all") == 0) {
         export_all = true;
     } else if (strcmp(var, "tag") == 0) {
-      // What's this for? Ignore for now
+      /* What's this for? Ignore for now */
     } else {
         return false;
     }
