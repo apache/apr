@@ -94,13 +94,13 @@ static char *getpass(const char *prompt)
     int n=0;
     fputs(prompt, stderr);
     fflush(stderr);
-	
+
     if (tcgetattr(STDIN_FILENO, &attr) != 0)
         return NULL;
     attr.c_lflag &= ~(ECHO);
 
     if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &attr) != 0)
-	    return NULL;
+        return NULL;
     while ((password[n] = getchar()) != '\n') {
         if (n < sizeof(password) - 1 && password[n] >= ' ' && password[n] <= '~') {
             n++;
@@ -174,7 +174,7 @@ static char *getpass(const char *prompt)
             fputs("^Z\n", stderr);
             return NULL;
         }
-	else if (ch == 27) /* ESC */ {
+        else if (ch == 27) /* ESC */ {
             fputc('\n', stderr);
             fputs(prompt, stderr);
             n = 0;
@@ -183,7 +183,7 @@ static char *getpass(const char *prompt)
             password[n++] = ch;
             fputc('*', stderr);
         }
-	else {
+        else {
             fputc('\a', stderr);
         }
     }
@@ -229,3 +229,4 @@ APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, apr_
     }
     return APR_SUCCESS; 
 }
+
