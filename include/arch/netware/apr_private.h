@@ -66,6 +66,16 @@
 
 #define HAVE_WRITEV     1
 
+#define HAVE_GETPASS_R  1
+/*
+ * check for older NDKs which only export the getpassword() function
+ * which is identical to getpass_r().
+ */
+#include <ndkvers.h>
+#if (CURRENT_NDK_THRESHOLD < 709060000)
+#define getpass_r getpassword
+#endif
+
 /*#define DSO_USE_DLFCN */
 
 #ifdef NW_BUILD_IPV6
