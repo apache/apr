@@ -140,7 +140,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         apr_thread_mutex_lock(thefile->mutex);
 
         if ( thefile->direction == 0 ) {
-            // Position file pointer for writing at the offset we are logically reading from
+            /* Position file pointer for writing at the offset we are logically reading from */
             ULONG offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
             if (offset != thefile->filePtr)
                 DosSetFilePtr(thefile->filedes, offset, FILE_BEGIN, &thefile->filePtr );
@@ -149,7 +149,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         }
 
         while (rc == 0 && size > 0) {
-            if (thefile->bufpos == APR_FILE_BUFSIZE)   // write buffer is full
+            if (thefile->bufpos == APR_FILE_BUFSIZE) /* write buffer is full */
                 rc = apr_file_flush(thefile);
 
             blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? APR_FILE_BUFSIZE - thefile->bufpos : size;

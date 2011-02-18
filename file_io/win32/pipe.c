@@ -42,8 +42,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_int
         return APR_ENOTIMPL;
     }
     if (timeout && !(thepipe->pOverlapped)) {
-        /* Cannot be nonzero if a pipe was opened blocking
-         */
+        /* Cannot be nonzero if a pipe was opened blocking */
         return APR_EINVAL;
     }
     thepipe->timeout = timeout;
@@ -95,7 +94,7 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
     char name[50];
 
     sa.nLength = sizeof(sa);
-    
+
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
         sa.bInheritHandle = FALSE;
@@ -149,10 +148,10 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
         (*in)->filehand = CreateNamedPipe(name,
                                           dwOpenMode,
                                           dwPipeMode,
-                                          1,            //nMaxInstances,
-                                          0,            //nOutBufferSize, 
-                                          65536,        //nInBufferSize,                   
-                                          1,            //nDefaultTimeOut,                
+                                          1,            /* nMaxInstances,   */
+                                          0,            /* nOutBufferSize,  */
+                                          65536,        /* nInBufferSize,   */
+                                          1,            /* nDefaultTimeOut, */
                                           &sa);
 
         /* Create the write end of the pipe */
@@ -163,14 +162,14 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
             (*out)->pOverlapped = (OVERLAPPED*) apr_pcalloc(p, sizeof(OVERLAPPED));
             (*out)->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
         }
-        
+
         (*out)->filehand = CreateFile(name,
-                                      GENERIC_WRITE,   // access mode
-                                      0,               // share mode
-                                      &sa,             // Security attributes
-                                      OPEN_EXISTING,   // dwCreationDisposition
-                                      dwOpenMode,      // Pipe attributes
-                                      NULL);           // handle to template file
+                                      GENERIC_WRITE, /* access mode             */
+                                      0,             /* share mode              */
+                                      &sa,           /* Security attributes     */
+                                      OPEN_EXISTING, /* dwCreationDisposition   */
+                                      dwOpenMode,    /* Pipe attributes         */
+                                      NULL);         /* handle to template file */
     }
     else {
         /* Pipes on Win9* are blocking. Live with it. */
@@ -233,3 +232,4 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
 {
     return apr_os_pipe_put_ex(file, thefile, 0, pool);
 }
+
