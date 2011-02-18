@@ -49,12 +49,13 @@ struct apr_file_t {
 
     /* Stuff for buffered mode */
     char *buffer;
-    apr_size_t bufsize;       // Read/Write position in buffer
-    apr_size_t bufpos;        // Read/Write position in buffer
-    unsigned long dataRead;   // amount of valid data read into buffer
-    int direction;            // buffer being used for 0 = read, 1 = write
-    unsigned long filePtr;    // position in file of handle
-    apr_thread_mutex_t *mutex;// mutex semaphore, must be owned to access the above fields
+    apr_size_t bufsize;        /* Read/Write position in buffer             */
+    apr_size_t bufpos;         /* Read/Write position in buffer             */
+    unsigned long dataRead;    /* amount of valid data read into buffer     */
+    int direction;             /* buffer being used for 0 = read, 1 = write */
+    unsigned long filePtr;     /* position in file of handle                */
+    apr_thread_mutex_t *mutex; /* mutex semaphore, must be owned to access
+                                  the above fields                          */
 };
 
 struct apr_dir_t {

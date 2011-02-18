@@ -263,7 +263,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         apr_thread_mutex_lock(thefile->mutex);
 
         if (thefile->direction == 0) {
-            // Position file pointer for writing at the offset we are logically reading from
+            /* Position file pointer for writing at the offset we are logically reading from */
             apr_off_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
             DWORD offlo = (DWORD)offset;
             DWORD offhi = (DWORD)(offset >> 32);
