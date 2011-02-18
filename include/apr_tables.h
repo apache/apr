@@ -271,7 +271,7 @@ APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key);
  * Add a key/value pair to a table.  If another element already exists with the
  * same key, this will overwrite the old data.
  * @param t The table to add the data to.
- * @param key The key to use
+ * @param key The key to use (case does not matter)
  * @param val The value to add
  * @remark When adding data, this function makes a copy of both the key and the
  *         value.
