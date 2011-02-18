@@ -36,9 +36,12 @@
 #endif
 
 #if APR_HAVE_UNISTD_H
-#include <unistd.h>     /* for getpid */
+#include <unistd.h>     /* for getpid and sysconf */
 #endif
 
+#if APR_ALLOCATOR_USES_MMAP
+#include <sys/mman.h>
+#endif
 
 /*
  * Magic numbers
@@ -47,8 +50,15 @@
 #define MIN_ALLOC 8192
 #define MAX_INDEX   20
 
+#if APR_ALLOCATOR_USES_MMAP && defined(_SC_PAGESIZE)
+static unsigned int boundary_index;
+static unsigned int boundary_size;
+#define BOUNDARY_INDEX  boundary_index
+#define BOUNDARY_SIZE   boundary_size
+#else
 #define BOUNDARY_INDEX 12
 #define BOUNDARY_SIZE (1 << BOUNDARY_INDEX)
+#endif
 
 /* 
  * Timing constants for killing subprocesses
@@ -131,7 +141,11 @@ APR_DECLARE(void) apr_allocator_destroy(apr_allocator_t *allocator)
         ref = &allocator->free[index];
         while ((node = *ref) != NULL) {
             *ref = node->next;
+#if APR_ALLOCATOR_USES_MMAP
+            munmap(node, (node->index+1) << BOUNDARY_INDEX);
+#else
             free(node);
+#endif
         }
     }
 
@@ -323,7 +337,12 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
     /* If we haven't got a suitable node, malloc a new one
      * and initialize it.
      */
+#if APR_ALLOCATOR_USES_MMAP
+    if ((node = mmap(NULL, size, PROT_READ|PROT_WRITE,
+                     MAP_PRIVATE|MAP_ANON, -1, 0)) == MAP_FAILED)
+#else
     if ((node = malloc(size)) == NULL)
+#endif
         return NULL;
 
     node->next = NULL;
@@ -400,7 +419,11 @@ void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
     while (freelist != NULL) {
         node = freelist;
         freelist = node->next;
+#if APR_ALLOCATOR_USES_MMAP
+        munmap(node, (node->index+1) << BOUNDARY_INDEX);
+#else
         free(node);
+#endif
     }
 }
 
@@ -547,6 +570,14 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
 
     if (apr_pools_initialized++)
         return APR_SUCCESS;
+
+#if APR_ALLOCATOR_USES_MMAP && defined(_SC_PAGESIZE)
+    boundary_size = sysconf(_SC_PAGESIZE);
+    boundary_index = 12;
+    while ( (1 << boundary_index) < boundary_size)
+        boundary_index++;
+    boundary_size = (1 << boundary_index);
+#endif
 
     if ((rv = apr_allocator_create(&global_allocator)) != APR_SUCCESS) {
         apr_pools_initialized = 0;
@@ -923,6 +954,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
     if (!apr_pools_initialized)
         return APR_ENOPOOL;
     if ((pool_allocator = allocator) == NULL) {
+#if !APR_ALLOCATOR_USES_MMAP
         if ((pool_allocator = malloc(MIN_ALLOC)) == NULL) {
             if (abort_fn)
                 abort_fn(APR_ENOMEM);
@@ -936,6 +968,21 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
         node->index = 1;
         node->first_avail = (char *)node + APR_MEMNODE_T_SIZE;
         node->endp = (char *)pool_allocator + MIN_ALLOC;
+#else
+        if (apr_allocator_create(&pool_allocator) != APR_SUCCESS) {
+            if (abort_fn)
+                abort_fn(APR_ENOMEM);
+
+            return APR_ENOMEM;
+        }
+        if ((node = allocator_alloc(pool_allocator,
+                                   MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
+            if (abort_fn)
+                abort_fn(APR_ENOMEM);
+
+            return APR_ENOMEM;
+        }
+#endif
     }
     else if ((node = allocator_alloc(pool_allocator,
                                      MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
@@ -1330,6 +1377,14 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
 
     if (apr_pools_initialized++)
         return APR_SUCCESS;
+
+#if APR_ALLOCATOR_USES_MMAP && defined(_SC_PAGESIZE)
+    boundary_size = sysconf(_SC_PAGESIZE);
+    boundary_index = 12;
+    while ( (1 << boundary_index) < boundary_size)
+        boundary_index++;
+    boundary_size = (1 << boundary_index);
+#endif
 
     /* Since the debug code works a bit differently then the
      * regular pools code, we ask for a lock here.  The regular
