@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.3
 
+  *) apr_file_flush_locked(): Handle short writes. [Stefan Fritsch]
+
   *) apr_pollset_create_ex(): Trap errors from pollset providers.
      PR 49094.  [Sami Tolvanen <sami.tolvanen mywot.com>]
 
