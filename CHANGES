@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_file_flush_locked(): Handle short writes. [Stefan Fritsch]
+
   *) Add new configure option --enable-allocator-uses-mmap to use mmap
      instead of malloc in apr_allocator_alloc(). This greatly reduces
      memory fragmentation with malloc implementations (e.g. glibc) that
