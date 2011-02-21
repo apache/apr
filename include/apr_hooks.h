@@ -63,8 +63,10 @@ extern "C" {
  * this macro, and will be provided to the other hook probe macros.
  * @param ns The namespace prefix of the hook functions
  * @param name The name of the hook
+ * @param args The argument list to the hook functions, with enclosing
+ * parens.
  */
-#define APR_HOOK_PROBE_ENTRY(ud,ns,name)
+#define APR_HOOK_PROBE_ENTRY(ud,ns,name,args)
 /**
  * User-defined hook probe macro that is invoked after the hook
  * has run.
@@ -73,8 +75,10 @@ extern "C" {
  * @param ns The namespace prefix of the hook functions
  * @param name The name of the hook
  * @param rv The return value of the hook, or 0 if the hook is void.
+ * @param args The argument list to the hook functions, with enclosing
+ * parens.
  */
-#define APR_HOOK_PROBE_RETURN(ud,ns,name,rv)
+#define APR_HOOK_PROBE_RETURN(ud,ns,name,rv,args)
 /**
  * User-defined hook probe macro that is invoked before calling a
  * hook function.
@@ -84,8 +88,10 @@ extern "C" {
  * @param name The name of the hook
  * @param src The value of apr_hook_debug_current at the time the function
  * was hooked (usually the source file implementing the hook function).
+ * @param args The argument list to the hook functions, with enclosing
+ * parens.
  */
-#define APR_HOOK_PROBE_INVOKE(ud,ns,name,src)
+#define APR_HOOK_PROBE_INVOKE(ud,ns,name,src,args)
 /**
  * User-defined hook probe macro that is invoked after calling a
  * hook function.
@@ -96,8 +102,10 @@ extern "C" {
  * @param src The value of apr_hook_debug_current at the time the function
  * was hooked (usually the source file implementing the hook function).
  * @param rv The return value of the hook function, or 0 if the hook is void.
+ * @param args The argument list to the hook functions, with enclosing
+ * parens.
  */
-#define APR_HOOK_PROBE_COMPLETE(ud,ns,name,src,rv)
+#define APR_HOOK_PROBE_COMPLETE(ud,ns,name,src,rv,args)
 #endif
 
 /** @} */
@@ -176,20 +184,20 @@ link##_DECLARE(void) ns##_run_##name args_decl \
     int n; \
     APR_HOOK_INT_DCL_UD; \
 \
-    APR_HOOK_PROBE_ENTRY(ud, ns, name); \
+    APR_HOOK_PROBE_ENTRY(ud, ns, name, args_use); \
 \
     if(_hooks.link_##name) \
         { \
         pHook=(ns##_LINK_##name##_t *)_hooks.link_##name->elts; \
         for(n=0 ; n < _hooks.link_##name->nelts ; ++n) \
             { \
-            APR_HOOK_PROBE_INVOKE(ud, ns, name, (char *)pHook[n].szName); \
+            APR_HOOK_PROBE_INVOKE(ud, ns, name, (char *)pHook[n].szName, args_use); \
 	    pHook[n].pFunc args_use; \
-            APR_HOOK_PROBE_COMPLETE(ud, ns, name, (char *)pHook[n].szName, 0); \
+            APR_HOOK_PROBE_COMPLETE(ud, ns, name, (char *)pHook[n].szName, 0, args_use); \
             } \
         } \
 \
-    APR_HOOK_PROBE_RETURN(ud, ns, name, 0); \
+    APR_HOOK_PROBE_RETURN(ud, ns, name, 0, args_use); \
 \
     }
 
@@ -220,23 +228,23 @@ link##_DECLARE(ret) ns##_run_##name args_decl \
     ret rv = ok; \
     APR_HOOK_INT_DCL_UD; \
 \
-    APR_HOOK_PROBE_ENTRY(ud, ns, name); \
+    APR_HOOK_PROBE_ENTRY(ud, ns, name, args_use); \
 \
     if(_hooks.link_##name) \
         { \
         pHook=(ns##_LINK_##name##_t *)_hooks.link_##name->elts; \
         for(n=0 ; n < _hooks.link_##name->nelts ; ++n) \
             { \
-            APR_HOOK_PROBE_INVOKE(ud, ns, name, (char *)pHook[n].szName); \
+            APR_HOOK_PROBE_INVOKE(ud, ns, name, (char *)pHook[n].szName, args_use); \
             rv=pHook[n].pFunc args_use; \
-            APR_HOOK_PROBE_COMPLETE(ud, ns, name, (char *)pHook[n].szName, rv); \
+            APR_HOOK_PROBE_COMPLETE(ud, ns, name, (char *)pHook[n].szName, rv, args_use); \
             if(rv != ok && rv != decline) \
                 break; \
             rv = ok; \
             } \
         } \
 \
-    APR_HOOK_PROBE_RETURN(ud, ns, name, rv); \
+    APR_HOOK_PROBE_RETURN(ud, ns, name, rv, args_use); \
 \
     return rv; \
     }
@@ -265,23 +273,23 @@ link##_DECLARE(ret) ns##_run_##name args_decl \
     ret rv = decline; \
     APR_HOOK_INT_DCL_UD; \
 \
-    APR_HOOK_PROBE_ENTRY(ud, ns, name); \
+    APR_HOOK_PROBE_ENTRY(ud, ns, name, args_use); \
 \
     if(_hooks.link_##name) \
         { \
         pHook=(ns##_LINK_##name##_t *)_hooks.link_##name->elts; \
         for(n=0 ; n < _hooks.link_##name->nelts ; ++n) \
             { \
-            APR_HOOK_PROBE_INVOKE(ud, ns, name, (char *)pHook[n].szName); \
+            APR_HOOK_PROBE_INVOKE(ud, ns, name, (char *)pHook[n].szName, args_use); \
             rv=pHook[n].pFunc args_use; \
-            APR_HOOK_PROBE_COMPLETE(ud, ns, name, (char *)pHook[n].szName, rv); \
+            APR_HOOK_PROBE_COMPLETE(ud, ns, name, (char *)pHook[n].szName, rv, args_use); \
 \
             if(rv != decline) \
                 break; \
             } \
         } \
 \
-    APR_HOOK_PROBE_RETURN(ud, ns, name, rv); \
+    APR_HOOK_PROBE_RETURN(ud, ns, name, rv, args_use); \
 \
     return rv; \
     }
