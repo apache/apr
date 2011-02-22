@@ -19,16 +19,16 @@
 
 #define APR_HOOK_PROBES_ENABLED
 
-#define APR_HOOK_PROBE_ENTRY(ud,ns,name) \
+#define APR_HOOK_PROBE_ENTRY(ud,ns,name,args) \
   ud = toy_hook_probe_entry(#name)
 
-#define APR_HOOK_PROBE_RETURN(ud,ns,name,rv) \
+#define APR_HOOK_PROBE_RETURN(ud,ns,name,rv,args) \
   toy_hook_probe_return(ud, #name, rv)
 
-#define APR_HOOK_PROBE_INVOKE(ud,ns,name,src) \
+#define APR_HOOK_PROBE_INVOKE(ud,ns,name,src,args) \
   toy_hook_probe_invoke(ud, #name, src)
 
-#define APR_HOOK_PROBE_COMPLETE(ud,ns,name,src,rv) \
+#define APR_HOOK_PROBE_COMPLETE(ud,ns,name,src,rv,args) \
   toy_hook_probe_complete(ud, #name, src, rv)
 
 #include "apr_hooks.h"
