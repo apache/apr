@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.3
 
+  *) apr_ring: Workaround for aliasing problem that causes gcc 4.5 to
+     miscompile some brigade related code. PR 50190. [Stefan Fritsch]
+
   *) apr_file_flush_locked(): Handle short writes. [Stefan Fritsch]
 
   *) apr_pollset_create_ex(): Trap errors from pollset providers.
