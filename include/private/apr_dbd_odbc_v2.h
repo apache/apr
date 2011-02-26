@@ -17,13 +17,13 @@
 
 /*  ONLY USED FOR ODBC Version 2   -DODBCV2
 *
-*   Re-define everything to work (more-or-less) in an ODBC V2 environment 
+*   Re-define everything to work (more-or-less) in an ODBC V2 environment
 *       Random access to retrieved rows is not supported - i.e. calls to apr_dbd_select() cannot
 *       have a 'random' argument of 1.  apr_dbd_get_row() must always pass rownum as 0 (get next row)
 *
 */
 
-#define SQLHANDLE SQLHENV   /* Presumes that ENV, DBC, and STMT handles are all the same datatype */
+#define SQLHANDLE SQLHENV /* Presumes that ENV, DBC, and STMT handles are all the same datatype */
 #define SQL_NULL_HANDLE 0
 #define SQL_HANDLE_STMT 1
 #define SQL_HANDLE_DBC  2
@@ -87,32 +87,32 @@
 #undef SQLColAttribute
 #define SQLColAttribute(s, c, f, a, l, m, n) SQLColAttributes(s, c, f, a, l, m, n)
 
-#define SQL_ATTR_ACCESS_MODE		SQL_ACCESS_MODE
-#define SQL_ATTR_AUTOCOMMIT			SQL_AUTOCOMMIT
-#define SQL_ATTR_CONNECTION_TIMEOUT	113
-#define SQL_ATTR_CURRENT_CATALOG	SQL_CURRENT_QUALIFIER
-#define SQL_ATTR_DISCONNECT_BEHAVIOR	114
-#define SQL_ATTR_ENLIST_IN_DTC		1207
-#define SQL_ATTR_ENLIST_IN_XA		1208
+#define SQL_ATTR_ACCESS_MODE            SQL_ACCESS_MODE
+#define SQL_ATTR_AUTOCOMMIT             SQL_AUTOCOMMIT
+#define SQL_ATTR_CONNECTION_TIMEOUT     113
+#define SQL_ATTR_CURRENT_CATALOG        SQL_CURRENT_QUALIFIER
+#define SQL_ATTR_DISCONNECT_BEHAVIOR    114
+#define SQL_ATTR_ENLIST_IN_DTC          1207
+#define SQL_ATTR_ENLIST_IN_XA           1208
 
-#define SQL_ATTR_CONNECTION_DEAD	1209
-#define SQL_CD_TRUE					1L		/* Connection is closed/dead */
-#define SQL_CD_FALSE				0L		/* Connection is open/available */
+#define SQL_ATTR_CONNECTION_DEAD        1209
+#define SQL_CD_TRUE                     1L   /* Connection is closed/dead */
+#define SQL_CD_FALSE                    0L   /* Connection is open/available */
 
-#define SQL_ATTR_LOGIN_TIMEOUT		SQL_LOGIN_TIMEOUT
-#define SQL_ATTR_ODBC_CURSORS		SQL_ODBC_CURSORS
-#define SQL_ATTR_PACKET_SIZE		SQL_PACKET_SIZE
-#define SQL_ATTR_QUIET_MODE			SQL_QUIET_MODE
-#define SQL_ATTR_TRACE				SQL_OPT_TRACE
-#define SQL_ATTR_TRACEFILE			SQL_OPT_TRACEFILE
-#define SQL_ATTR_TRANSLATE_LIB		SQL_TRANSLATE_DLL
-#define SQL_ATTR_TRANSLATE_OPTION	SQL_TRANSLATE_OPTION
-#define SQL_ATTR_TXN_ISOLATION		SQL_TXN_ISOLATION
+#define SQL_ATTR_LOGIN_TIMEOUT          SQL_LOGIN_TIMEOUT
+#define SQL_ATTR_ODBC_CURSORS           SQL_ODBC_CURSORS
+#define SQL_ATTR_PACKET_SIZE            SQL_PACKET_SIZE
+#define SQL_ATTR_QUIET_MODE             SQL_QUIET_MODE
+#define SQL_ATTR_TRACE                  SQL_OPT_TRACE
+#define SQL_ATTR_TRACEFILE              SQL_OPT_TRACEFILE
+#define SQL_ATTR_TRANSLATE_LIB          SQL_TRANSLATE_DLL
+#define SQL_ATTR_TRANSLATE_OPTION       SQL_TRANSLATE_OPTION
+#define SQL_ATTR_TXN_ISOLATION          SQL_TXN_ISOLATION
 
 #define SQL_ATTR_CURSOR_SCROLLABLE -1
 
-#define SQL_C_SBIGINT	(SQL_BIGINT+SQL_SIGNED_OFFSET)	   /* SIGNED BIGINT */
-#define SQL_C_UBIGINT	(SQL_BIGINT+SQL_UNSIGNED_OFFSET)   /* UNSIGNED BIGINT */
+#define SQL_C_SBIGINT (SQL_BIGINT+SQL_SIGNED_OFFSET)   /* SIGNED BIGINT */
+#define SQL_C_UBIGINT (SQL_BIGINT+SQL_UNSIGNED_OFFSET) /* UNSIGNED BIGINT */
 
 #define SQL_FALSE           0
 #define SQL_TRUE            1
