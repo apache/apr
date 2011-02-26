@@ -542,11 +542,12 @@ APR_DECLARE(apr_status_t) apr_file_getc(char *ch, apr_file_t *thefile);
 APR_DECLARE(apr_status_t) apr_file_ungetc(char ch, apr_file_t *thefile);
 
 /**
- * Read a string from the specified file.
+ * Read a line from the specified file
  * @param str The buffer to store the string in. 
  * @param len The length of the string
  * @param thefile The file descriptor to read from
  * @remark The buffer will be NUL-terminated if any characters are stored.
+ *         The newline at the end of the line will not be stripped.
  */
 APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, 
                                         apr_file_t *thefile);
