@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_ring: Workaround for aliasing problem that causes gcc 4.5 to
+     miscompile some brigade related code. PR 50190. [Stefan Fritsch]
+
   *) apr_file_flush_locked(): Handle short writes. [Stefan Fritsch]
 
   *) Add new configure option --enable-allocator-uses-mmap to use mmap
