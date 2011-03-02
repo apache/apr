@@ -164,6 +164,10 @@ PLIB3S	= $(METROWERKS)\Novell Support\Metrowerks Support\Libraries\MSL C++\MWCPP
 
 CFLAGS = -c -nosyspath -Cpp_exceptions off -RTTI off -align 4 -w nocmdline -proc PII
 
+ifeq "$(REQUIRE_PROTOTYPES)" "1"
+CFLAGS += -r
+endif
+
 # -g                    generate debugging information
 # -O0                   level 0 optimizations
 
