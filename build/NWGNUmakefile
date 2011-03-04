@@ -53,27 +53,15 @@ endif
 
 $(APR)/include/%.h: $(APR)/include/%.hnw
 	@echo Creating $@
-ifeq "$(OSTYPE)" "linux"
-	$(CP) $< $@
-else
-	$(CP) $(subst /,\,$<) $(subst /,\,$@)
-endif
+	$(call CP,$<,$@)
 
 $(APR)/include/private/%.h: $(APR)/include/private/%.hnw
 	@echo Creating $@
-ifeq "$(OSTYPE)" "linux"
-	$(CP) $< $@
-else
-	$(CP) $(subst /,\,$<) $(subst /,\,$@)
-endif
+	$(call CP,$<,$@)
 
 $(APR)/include/private/%.h: $(APR)/include/private/%.hw
 	@echo Creating $@
-ifeq "$(OSTYPE)" "linux"
-	$(CP) $< $@
-else
-	$(CP) $(subst /,\,$<) $(subst /,\,$@)
-endif
+	$(call CP,$<,$@)
 
 $(APR)/include/private/apu_config.h: FORCE
 
@@ -85,15 +73,15 @@ install :: nlms FORCE
 
 
 clean ::
-	$(CHK) nw_export.i                                          $(DEL) nw_export.i
-	$(CHK) $(NLM_NAME)_cc.opt                                   $(DEL) $(NLM_NAME)_cc.opt
-	$(CHK) NWGNUversion.inc                                     $(DEL) NWGNUversion.inc
-	$(CHK) $(subst /,\,$(APR))\include\apr.h                    $(DEL) $(subst /,\,$(APR))\include\apr.h
-	$(CHK) $(subst /,\,$(APR))\include\apu_want.h               $(DEL) $(subst /,\,$(APR))\include\apu_want.h
-	$(CHK) $(subst /,\,$(APR))\include\apr_ldap.h               $(DEL) $(subst /,\,$(APR))\include\apr_ldap.h
-	$(CHK) $(subst /,\,$(APR))\include\private\apu_config.h     $(DEL) $(subst /,\,$(APR))\include\private\apu_config.h
-	$(CHK) $(subst /,\,$(APR))\include\private\apu_select_dbm.h $(DEL) $(subst /,\,$(APR))\include\private\apu_select_dbm.h
-	$(CHK) $(subst /,\,$(APR))\aprlib.imp                       $(DEL) $(subst /,\,$(APR))\aprlib.imp
+	$(call DEL,nw_export.i)
+	$(call DEL,$(NLM_NAME)_cc.opt)
+	$(call DEL,NWGNUversion.inc)
+	$(call DEL,$(APR)/include/apr.h)
+	$(call DEL,$(APR)/include/apu_want.h)
+	$(call DEL,$(APR)/include/apr_ldap.h)
+	$(call DEL,$(APR)/include/private/apu_config.h)
+	$(call DEL,$(APR)/include/private/apu_select_dbm.h)
+	$(call DEL,$(APR)/aprlib.imp)
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined
