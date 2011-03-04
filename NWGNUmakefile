@@ -423,24 +423,24 @@ nlms :: libs $(TARGET_nlm)
 # correct place.  (See $(APR_WORK)/build/NWGNUhead.inc for examples)
 #
 install :: nlms $(INSTDIRS) FORCE
-	$(CP) $(subst /,\,$(APR)\$(TARGET_nlm))             $(INSTALLBASE)\*.*
+	$(call CP,$(APR)/$(TARGET_nlm),$(INSTALLBASE)/)
 ifndef DEST
-	-$(CP) $(subst /,\,$(APR))\STATUS                   $(INSTALLBASE)\*.apr
-	-$(CP) $(subst /,\,$(APR))\LICENSE                  $(INSTALLBASE)\*
-	-$(CP) $(subst /,\,$(APR))\CHANGES                  $(INSTALLBASE)\*.apr
-	@-$(XCP) $(subst /,\,$(APR))\docs                   $(INSTALLBASE)\docs\*.*
+	-$(call CP,$(APR)/STATUS,$(INSTALLBASE)/*.apr)
+	-$(call CP,$(APR)/LICENSE,$(INSTALLBASE)/)
+	-$(call CP,$(APR)/CHANGES,$(INSTALLBASE)/*.apr)
+	@-$(call XCP,$(APR)/docs,$(INSTALLBASE)/docs/)
 endif
 
 ifndef DEST
 installdev :: $(INSTDEVDIRS) FORCE
-	$(CP) $(subst /,\,$(APR))\include\*.h               $(INSTALLBASE)\include\*.*
-	$(CP) $(subst /,\,$(APR))\*.imp                     $(INSTALLBASE)\lib\*.*
-	$(CP) $(subst /,\,$(APR))\misc\netware\*.xdc        $(INSTALLBASE)\lib\*.*
-	$(CP) $(subst /,\,$(APR)\$(TARGET_lib))             $(INSTALLBASE)\lib\*.*
-	$(CP) $(subst /,\,$(APR)\$(TARGET_nlm))             $(INSTALLBASE)\bin\*.*
+	$(call CP,$(APR)/include/*.h,$(INSTALLBASE)/include/)
+	$(call CP,$(APR)/*.imp,$(INSTALLBASE)/lib/)
+	$(call CP,$(APR)/misc/netware/*.xdc,$(INSTALLBASE)/lib/)
+	$(call CP,$(APR)/$(TARGET_lib),$(INSTALLBASE)/lib/)
+	$(call CP,$(APR)/$(TARGET_nlm),$(INSTALLBASE)/bin/)
 
 $(INSTDEVDIRS) ::
-	$(CHKNOT) $@\NUL mkdir $@
+	$(call MD,$@)
 endif
 
 #
