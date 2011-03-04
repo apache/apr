@@ -242,7 +242,7 @@ endif
 CFLAGS += -prefix apr_arch_pre_nw.h
 
 
-ifeq ($(findstring /sh,$(SHELL)),/sh)
+ifneq ($(findstring /sh,$(SHELL)),/sh)
 PATH:=$(PATH);$(METROWERKS)\bin;$(METROWERKS)\Other Metrowerks Tools\Command Line Tools
 endif
 
