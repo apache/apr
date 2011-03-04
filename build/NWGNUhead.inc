@@ -26,7 +26,7 @@ install :: NO_LICENSE_FILE
 installdev :: NO_LICENSE_FILE
 
 NO_LICENSE_FILE :
-	$(MAKE) $(MAKECMDGOALS) -f NWGNUmakefile RELEASE=$(RELEASE) DEST="$(INSTALL)" LM_LICENSE_FILE="$(METROWERKS)\license.dat"
+	$(MAKE) $(MAKECMDGOALS) -f NWGNUmakefile RELEASE=$(RELEASE) DEST="$(INSTALL)" LM_LICENSE_FILE="$(METROWERKS)/license.dat"
 
 else # LM_LICENSE_FILE must be defined so use the real targets
 
@@ -51,21 +51,20 @@ help :
 	@echo clean . . . . . . deletes $(OBJDIR) dirs, *.err, and *.map
 	@echo clobber_all . . . deletes all possible output from the make
 	@echo clobber_install . deletes all files in $(INSTALL)
-	@$(CMD) echo.
+	@$(ECHONL)
 	@echo Multiple targets can be used on a single nmake command line -
 	@echo (i.e. $(MAKE) clean all)
-	@$(CMD) echo.
+	@$(ECHONL)
 	@echo You can also specify RELEASE=debug, RELEASE=noopt, or RELEASE=release
 	@echo The default is RELEASE=release
 
 clobber_all :: clean clobber_install
 
 clobber_install ::
-	-$(DELTREE) $(INSTALL) 2>NUL
+	-$(DELTREE) $(INSTALL)
 
 test :: default
 	$(MAKE) -C $(APRTEST) -f NWGNUmakefile RELEASE=$(RELEASE) DEST="$(INSTALL)" LM_LICENSE_FILE="$(LM_LICENSE_FILE)"
-	$(CMD) echo.
 
 #
 # build recursive targets
@@ -73,13 +72,13 @@ test :: default
 
 $(SUBDIRS) : FORCE
 ifneq "$(MAKECMDGOALS)" "clean"
-	$(CMD) echo.
+	@$(ECHONL)
 	@echo Building $(CURDIR)/$@
 endif
 	$(MAKE) -C $@ $(MAKECMDGOALS) -f NWGNUmakefile RELEASE=$(RELEASE) DEST="$(INSTALL)" LM_LICENSE_FILE="$(LM_LICENSE_FILE)"
-	$(CMD) echo.
+	@$(ECHONL)
 
-FORCE:
+FORCE : ;
 
 #
 # Standard targets
@@ -87,13 +86,13 @@ FORCE:
 
 clean :: $(SUBDIRS) $(APRTEST)
 	@echo Cleaning up $(CURDIR)
-	-$(DELTREE) $(OBJDIR) 2> NUL
+	-$(DELTREE) $(OBJDIR)
 	$(CHK) *.err $(DEL) *.err
 	$(CHK) *.map $(DEL) *.map
 	$(CHK) *.d $(DEL) *.d
 	$(CHK) *.tmp $(DEL) *.tmp
-	-$(DELTREE) $(OBJDIR) 2> NUL
+	-$(DELTREE) $(OBJDIR)
 
 $(OBJDIR) ::
-	$(CHKNOT) $(OBJDIR)\nul mkdir $(OBJDIR)
+	-$(MD) $@
 
