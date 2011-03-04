@@ -147,31 +147,27 @@ AWK	= awk
 # Declare Command and tool macros here
 #
 
-ifeq "$(OSTYPE)" "linux"
-DEL	= $(RM)
-MD	= mkdir -p
-DELTREE	= rmdir -p
-CP	= cp -av
+ifeq ($(findstring /sh,$(SHELL)),/sh)
+DEL	= $(RM) $1
+MD	= mkdir -p $1
+DELTREE	= rm -rf $1
+CP	= cp -av $1 $2
 XCP	= cp -ar
-CHK	= test -e
-CHKNOT	= test ! -e
 ECHONL	= echo ""
 DL	= '
 else
 ifeq "$(OS)" "Windows_NT"
 CMD	= cmd /c
-DEL	= del /q /f 2>NUL
-DELTREE	= rd /s /q 2>NUL
+DEL	= $(CMD) if exist $(subst /,\,$1) del /q /f 2>NUL $(subst /,\,$1)
+DELTREE	= rd /s /q 2>NUL $(subst /,\,$1)
 else
 CMD	= command /c
-DEL	= del
-DELTREE	= deltree /y
+DEL	= $(CMD) if exist $(subst /,\,$1) del 2>NUL $(subst /,\,$1)
+DELTREE	= deltree /y $(subst /,\,$1)
 endif
-MD	= md 2>NUL
-CP	= copy /y 2>NUL
-XCP	= xcopy /e /y 2>NUL
-CHK	= $(CMD) if exist
-CHKNOT	= $(CMD) if not exist
+MD	= $(CMD) if not exist $(subst /,\,$1)\NUL md 2>NUL $(subst /,\,$1)
+CP	= copy /y 2>NUL $(subst /,\,$1) $(subst /,\,$2)
+XCP	= xcopy /e /y 2>NUL $(subst /,\,$1) $(subst /,\,$2)
 ECHONL	= $(CMD) echo.
 endif
 
@@ -269,15 +265,15 @@ endif
 endif
 
 ifndef INSTALL
-INSTALL = $(APR_WORK)\Dist
-INSTDIRS = $(APR_WORK)\Dist
+INSTALL = $(APR_WORK)/Dist
+INSTDIRS = $(APR_WORK)/Dist
 BASEDIR = Apr
 endif
 
 # Add support for building IPV6 alongside
 ifneq "$(IPV6)" ""
 DEFINES += -DNW_BUILD_IPV6
-# INCDIRS := $(NOVELLLIBC)\include\winsock\IPV6;$(INCDIRS)
+# INCDIRS := $(NOVELLLIBC)/include/winsock/IPV6;$(INCDIRS)
 
 ifneq "$(findstring IPV6,$(OBJDIR))" "IPV6"
 OBJDIR := $(OBJDIR)_IPV6
@@ -301,14 +297,14 @@ endif
 
 endif
 
-INSTALLBASE := $(INSTALL)\$(BASEDIR)
+INSTALLBASE := $(INSTALL)/$(BASEDIR)
 
 INSTDEVDIRS := \
 	$(INSTDIRS) \
 	$(INSTALLBASE) \
-	$(INSTALLBASE)\include \
-	$(INSTALLBASE)\lib \
-	$(INSTALLBASE)\bin 
+	$(INSTALLBASE)/include \
+	$(INSTALLBASE)/lib \
+	$(INSTALLBASE)/bin 
 
 INSTDIRS += \
 	$(INSTALLBASE)

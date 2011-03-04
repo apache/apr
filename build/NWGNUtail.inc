@@ -118,11 +118,7 @@ $(OBJDIR)/%.o: %.c $(OBJDIR)/$(CCOPT_NAME)_cc.opt
 	$(CC) -o $@ $< @$(word 2, $^)
 
 $(OBJDIR)/$(CCOPT_NAME)_cc.opt: $(CCOPT_DEPENDS)
-ifeq "$(OSTYPE)" "linux"
-	$(DEL) $@
-else
-	$(CHK) $(subst /,\,$@) $(DEL) $(subst /,\,$@)
-endif
+	$(call DEL,$@)
 #	@echo CCOPT_DEPENDS=$^
 #	@echo Generating $@
 	@echo GEN  $@
@@ -151,11 +147,7 @@ $(OBJDIR)/%.o: %.cpp $(OBJDIR)/$(CCOPT_NAME)_cpp.opt
 	$(CCP) -o $@ $< @$(word 2, $^)
 
 $(OBJDIR)/$(CCOPT_NAME)_cpp.opt: $(CPPOPT_DEPENDS)
-ifeq "$(OSTYPE)" "linux"
-	$(DEL) $@
-else
-	$(CHK) $(subst /,\,$@) $(DEL) $(subst /,\,$@)
-endif
+	$(call DEL,$@)
 	@echo CPPOPT_DEPENDS=$^
 #	@echo Generating $@
 	@echo GEN  $@
@@ -189,21 +181,13 @@ endif # one target nlm or lib
 ifeq "$(words $(strip $(TARGET_lib)))" "1"
 
 $(TARGET_lib) : $(OBJDIR)/$(LIB_NAME)_lib.lst
-ifeq "$(OSTYPE)" "linux"
-	$(DEL) $@
-else
-	$(CHK) $(subst /,\,$@) $(DEL) $(subst /,\,$@)
-endif
+	$(call DEL,$@)
 #	@echo Generating $@
 	@echo AR   $@
 	$(LIB) -o $@ @$<
 
 $(OBJDIR)/aprlib_lib.lst: $(aprlib_LIBLST_DEPENDS)
-ifeq "$(OSTYPE)" "linux"
-	$(DEL) $@
-else
-	$(CHK) $(subst /,\,$@) $(DEL) $(subst /,\,$@)
-endif
+	$(call DEL,$@)
 ifneq "$(strip $(FILES_lib_objs))" ""
 #	@echo Generating $@
 	@echo GEN  $@
@@ -221,11 +205,7 @@ ifneq "$(strip $(FILES_lib_objs))" ""
 endif
 
 $(OBJDIR)/%_lib.lst: $($(LIB_NAME)_LIBLST_DEPENDS)
-ifeq "$(OSTYPE)" "linux"
-	$(DEL) $@
-else
-	$(CHK) $(subst /,\,$@) $(DEL) $(subst /,\,$@)
-endif
+	$(call DEL,$@)
 ifneq "$(strip $(FILES_lib_objs))" ""
 #	@echo Generating $@
 	@echo GEN  $@
@@ -258,13 +238,8 @@ $(TARGET_nlm) : $(FILES_nlm_objs) $(FILES_nlm_libs) $(OBJDIR)/$(NLM_NAME)_link.o
 # corresponding makefile
 
 $(OBJDIR)/$(NLM_NAME)_link.opt : $($(NLM_NAME)_LINKOPT_DEPENDS)
-ifeq "$(OSTYPE)" "linux"
-	$(DEL) $@
-	$(DEL) $(@:.opt=.def)
-else
-	$(CHK) $(subst /,\,$@) $(DEL) $(subst /,\,$@)
-	$(CHK) $(subst /,\,$(@:.opt=.def)) $(DEL) $(subst /,\,$(@:.opt=.def))
-endif
+	$(call DEL,$@)
+	$(call DEL,$(@:.opt=.def))
 #	@echo Generating $@
 	@echo GEN  $@
 	@echo -warnings off >> $@
@@ -383,7 +358,6 @@ endif # NO_LICENSE_FILE
 endif # multiple targets
 
 $(INSTDIRS) ::
-#	$(CHKNOT) $@\NUL mkdir $@
-	-$(MD) $@
+	$(call MD,$@)
 
 
