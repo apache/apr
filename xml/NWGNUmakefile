@@ -33,15 +33,27 @@ endif
 
 $(EXPATSRC)/lib/%.h: $(EXPATSRC)/lib/%.hnw
 	@echo Creating $@
+ifeq "$(OSTYPE)" "linux"
+	$(CP) $< $@
+else
 	$(CP) $(subst /,\,$<) $(subst /,\,$@)
+endif
 
 $(EXPATSRC)/lib/%.h: $(EXPATSRC)/lib/%.h.in
 	@echo Creating $@
+ifeq "$(OSTYPE)" "linux"
+	$(CP) $< $@
+else
 	$(CP) $(subst /,\,$<) $(subst /,\,$@)
+endif
 
 $(EXPATSRC)/lib/%.h: $(CURDIR)/%.hnw
 	@echo Creating $@
+ifeq "$(OSTYPE)" "linux"
+	$(CP) $< $@
+else
 	$(CP) $(subst /,\,$<) $(subst /,\,$@)
+endif
 
 vpath %.c $(EXPATSRC)/lib
 
