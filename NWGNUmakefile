@@ -275,8 +275,8 @@ endif
 #If the LDAP support is defined then add the imports
 ifneq "$(LDAPSDK)" ""
 FILES_nlm_Ximports += \
-	@$(LDAPSDK)/imports/lldapsdk.imp \
-	@$(LDAPSDK)/imports/lldapssl.imp \
+	@lldapsdk.imp \
+	@lldapssl.imp \
 	$(EOLIST)
 endif
 

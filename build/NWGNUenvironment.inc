@@ -143,6 +143,38 @@ LIB	= mwldnlm -type library -w nocmdline
 # Setup build tools
 AWK	= awk
 
+#
+# Declare Command and tool macros here
+#
+
+ifeq "$(OSTYPE)" "linux"
+DEL	= $(RM)
+MD	= mkdir -p
+DELTREE	= rmdir -p
+CP	= cp -av
+XCP	= cp -ar
+CHK	= test -e
+CHKNOT	= test ! -e
+ECHONL	= echo ""
+DL	= '
+else
+ifeq "$(OS)" "Windows_NT"
+CMD	= cmd /c
+DEL	= del /q /f 2>NUL
+DELTREE	= rd /s /q 2>NUL
+else
+CMD	= command /c
+DEL	= del
+DELTREE	= deltree /y
+endif
+MD	= md 2>NUL
+CP	= copy /y 2>NUL
+XCP	= xcopy /e /y 2>NUL
+CHK	= $(CMD) if exist
+CHKNOT	= $(CMD) if not exist
+ECHONL	= $(CMD) echo.
+endif
+
 ifdef IPV6
 ifndef USE_STDSOCKETS
 USE_STDSOCKETS=1
@@ -151,7 +183,7 @@ endif
 
 NOVI	= $(NOVELLLIBC)/imports
 
-INCDIRS	= $(NOVELLLIBC)/include;$(NOVELLLIBC)/include/nks;
+INCDIRS	= $(NOVELLLIBC)/include;
 
 DEFINES	= -DNETWARE
 ifdef USE_STDSOCKETS
@@ -214,7 +246,9 @@ endif
 CFLAGS += -prefix apr_arch_pre_nw.h
 
 
+ifneq "$(OSTYPE)" "linux"
 PATH:=$(PATH);$(METROWERKS)\bin;$(METROWERKS)\Other Metrowerks Tools\Command Line Tools
+endif
 
 #
 # Declare major project deliverables output directories here
@@ -278,35 +312,6 @@ INSTDEVDIRS := \
 
 INSTDIRS += \
 	$(INSTALLBASE)
-
-#
-# Declare Command and tool macros here
-#
-
-# Os2LibPath is an extra check to see if we are on NT
-ifdef Os2LibPath
-OS = Windows_NT
-endif
-
-ifeq "$(OS)" "Windows_NT"
-CMD	= cmd /C
-DEL	= del /F
-DELTREE	= $(CMD) rd /s/q
-WINNT	= 1
-else
-CMD	= command /C
-DEL	= del
-DELTREE	= deltree /y
-endif
-CP	= copy /Y
-XCP	= xcopy /E /Y
-CHK	= $(CMD) if exist
-CHKNOT	= $(CMD) if not exist
-
-
-#
-# Setup base C compiler flags
-#
 
 #
 # Common directories
