@@ -33,27 +33,15 @@ endif
 
 $(EXPATSRC)/lib/%.h: $(EXPATSRC)/lib/%.hnw
 	@echo Creating $@
-ifeq "$(OSTYPE)" "linux"
-	$(CP) $< $@
-else
-	$(CP) $(subst /,\,$<) $(subst /,\,$@)
-endif
+	$(call CP,$<,$@)
 
 $(EXPATSRC)/lib/%.h: $(EXPATSRC)/lib/%.h.in
 	@echo Creating $@
-ifeq "$(OSTYPE)" "linux"
-	$(CP) $< $@
-else
-	$(CP) $(subst /,\,$<) $(subst /,\,$@)
-endif
+	$(call CP,$<,$@)
 
 $(EXPATSRC)/lib/%.h: $(CURDIR)/%.hnw
 	@echo Creating $@
-ifeq "$(OSTYPE)" "linux"
-	$(CP) $< $@
-else
-	$(CP) $(subst /,\,$<) $(subst /,\,$@)
-endif
+	$(call CP,$<,$@)
 
 vpath %.c $(EXPATSRC)/lib
 
@@ -287,7 +275,7 @@ nlms :: libs $(TARGET_nlm)
 install :: nlms FORCE
 
 clean ::
-	$(foreach file,$(EXPAT_prebuild_headers),$(shell if exist $(subst /,\,$(file)) $(DEL) $(subst /,\,$(file))))
+	$(foreach file,$(EXPAT_prebuild_headers),$(call DEL,$(file)))
 
 #
 # Any specialized rules here
