@@ -275,10 +275,10 @@ else
 	@echo -sym internal >> $@
 endif
 	@echo -l $(APR)/$(OBJDIR) >> $@
-	@echo -l $(APRBUCKETS)/$(OBJDIR) >> $@
 	@echo -l $(APRLDAP)/$(OBJDIR) >> $@
 	@echo -l $(APRXML)/$(OBJDIR) >> $@
 	@echo -l $(APR)/misc/netware >> $@
+	@echo -l $(APR) >> $@
 	@echo $(DL)-l "$(METROWERKS)/Novell Support/Metrowerks Support/Libraries/Runtime"$(DL) >> $@
 	@echo $(DL)-l "$(METROWERKS)/Novell Support/Metrowerks Support/Libraries/MSL C++"$(DL) >> $@
 ifneq "$(IPV6)" ""
