@@ -19,7 +19,6 @@ FILES_prebuild_headers = \
 	$(APR)/include/apr.h \
 	$(APR)/include/apu_want.h \
 	$(APR)/include/apr_ldap.h \
-	$(APR)/include/private/apu_config.h \
 	$(APR)/include/private/apu_select_dbm.h \
 	$(EOLIST)
 
@@ -28,7 +27,7 @@ nlms :: $(APR)/aprlib.imp
 $(APR)/aprlib.imp : make_nw_export.awk nw_export.i
 #	@echo Generating $@
 	@echo GEN  $@
-	$(AWK) -v EXPPREFIX=APR$(VERSION_MAJMIN) -f $^ | sort >$@
+	$(AWK) -v EXPPREFIX=APR$(VERSION_MAJMIN) -f $^ | $(SORT) >$@
 
 nw_export.i : nw_export.inc $(FILES_prebuild_headers) $(NLM_NAME)_cc.opt
 #	@echo Generating $@
@@ -51,19 +50,13 @@ ifneq "$(LDAPSDK)" ""
 	@echo -ir $(LDAPSDK) >> $@
 endif
 
-$(APR)/include/%.h: $(APR)/include/%.hnw
+%.h: %.hnw
 	@echo Creating $@
-	$(call CP,$<,$@)
+	$(call COPY,$<,$@)
 
-$(APR)/include/private/%.h: $(APR)/include/private/%.hnw
+%.h: %.hw
 	@echo Creating $@
-	$(call CP,$<,$@)
-
-$(APR)/include/private/%.h: $(APR)/include/private/%.hw
-	@echo Creating $@
-	$(call CP,$<,$@)
-
-$(APR)/include/private/apu_config.h: FORCE
+	$(call COPY,$<,$@)
 
 #
 # You can use this target if all that is needed is to copy files to the
@@ -76,17 +69,14 @@ clean ::
 	$(call DEL,nw_export.i)
 	$(call DEL,$(NLM_NAME)_cc.opt)
 	$(call DEL,NWGNUversion.inc)
-	$(call DEL,$(APR)/include/apr.h)
-	$(call DEL,$(APR)/include/apu_want.h)
-	$(call DEL,$(APR)/include/apr_ldap.h)
-	$(call DEL,$(APR)/include/private/apu_config.h)
-	$(call DEL,$(APR)/include/private/apu_select_dbm.h)
 	$(call DEL,$(APR)/aprlib.imp)
+	$(foreach file,$(FILES_prebuild_headers),$(call DEL,$(file)))
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined
 # in this makefile
 #
 
-include $(APR_WORK)/build/NWGNUtail.inc
+include $(APRBUILD)/NWGNUtail.inc
+
 

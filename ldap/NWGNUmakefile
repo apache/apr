@@ -250,5 +250,5 @@ install :: nlms FORCE
 # in this makefile
 #
 
-include $(APR_WORK)/build/NWGNUtail.inc
+include $(APRBUILD)/NWGNUtail.inc
 

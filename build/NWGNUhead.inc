@@ -86,12 +86,12 @@ FORCE : ;
 
 clean :: $(SUBDIRS) $(APRTEST)
 	@echo Cleaning up $(CURDIR)
-	-$(call DELTREE,$(OBJDIR))
+	$(call RMDIR,$(OBJDIR))
 	$(call DEL,*.err)
 	$(call DEL,*.map)
-#	$(call DEL,*.d)
 	$(call DEL,*.tmp)
+#	$(call DEL,*.d)
 
 $(OBJDIR) ::
-	$(call MD,$@)
+	$(call MKDIR,$@)
 
