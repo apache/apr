@@ -123,12 +123,12 @@ NLM_STACK_SIZE	= 524288
 #
 # If this is specified it will be used by the link '-entry' directive
 #
-NLM_ENTRY_SYM	= _LibCPrelude
+NLM_ENTRY_SYM	=
 
 #
 # If this is specified it will be used by the link '-exit' directive
 #
-NLM_EXIT_SYM	= _LibCPostlude
+NLM_EXIT_SYM	=
 
 #
 # If this is specified it will be used by the link '-check' directive
@@ -138,7 +138,7 @@ NLM_CHECK_SYM	=
 #
 # If this is specified it will be used by the link '-flags' directive
 #
-NLM_FLAGS	= AUTOUNLOAD, PSEUDOPREEMPTION
+NLM_FLAGS	=
  
 #
 # If this is specified it will be linked in with the XDCData option in the def 
@@ -333,6 +333,5 @@ install :: nlms FORCE
 # in this makefile
 #
 
-include $(APR_WORK)/build/NWGNUtail.inc
-
+include $(APRBUILD)/NWGNUtail.inc
 

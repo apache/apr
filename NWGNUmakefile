@@ -141,12 +141,12 @@ NLM_STACK_SIZE	=
 #
 # If this is specified it will be used by the link '-entry' directive
 #
-NLM_ENTRY_SYM	= _LibCPrelude
+NLM_ENTRY_SYM	=
 
 #
 # If this is specified it will be used by the link '-exit' directive
 #
-NLM_EXIT_SYM	= _LibCPostlude
+NLM_EXIT_SYM	=
 
 #
 # If this is specified it will be used by the link '-check' directive
@@ -156,7 +156,7 @@ NLM_CHECK_SYM	=
 #
 # If this is specified it will be used by the link '-flags' directive
 #
-NLM_FLAGS	= AUTOUNLOAD, PSEUDOPREEMPTION
+NLM_FLAGS	=
 
 #
 # If this is specified it will be linked in with the XDCData option in the def
@@ -423,24 +423,24 @@ nlms :: libs $(TARGET_nlm)
 # correct place.  (See $(APR_WORK)/build/NWGNUhead.inc for examples)
 #
 install :: nlms $(INSTDIRS) FORCE
-	$(call CP,$(APR)/$(TARGET_nlm),$(INSTALLBASE)/)
+	$(call COPY,$(APR)/$(TARGET_nlm),$(INSTALLBASE)/)
 ifndef DEST
-	-$(call CP,$(APR)/STATUS,$(INSTALLBASE)/*.apr)
-	-$(call CP,$(APR)/LICENSE,$(INSTALLBASE)/)
-	-$(call CP,$(APR)/CHANGES,$(INSTALLBASE)/*.apr)
-	@-$(call XCP,$(APR)/docs,$(INSTALLBASE)/docs/)
+	-$(call COPY,$(APR)/STATUS,$(INSTALLBASE)/*.apr)
+	-$(call COPY,$(APR)/LICENSE,$(INSTALLBASE)/)
+	-$(call COPY,$(APR)/CHANGES,$(INSTALLBASE)/*.apr)
+	@-$(call COPYR,$(APR)/docs,$(INSTALLBASE)/docs/)
 endif
 
 ifndef DEST
 installdev :: $(INSTDEVDIRS) FORCE
-	$(call CP,$(APR)/include/*.h,$(INSTALLBASE)/include/)
-	$(call CP,$(APR)/*.imp,$(INSTALLBASE)/lib/)
-	$(call CP,$(APR)/misc/netware/*.xdc,$(INSTALLBASE)/lib/)
-	$(call CP,$(APR)/$(TARGET_lib),$(INSTALLBASE)/lib/)
-	$(call CP,$(APR)/$(TARGET_nlm),$(INSTALLBASE)/bin/)
+	$(call COPY,$(APR)/include/*.h,$(INSTALLBASE)/include/)
+	$(call COPY,$(APR)/*.imp,$(INSTALLBASE)/lib/)
+	$(call COPY,$(APR)/misc/netware/*.xdc,$(INSTALLBASE)/lib/)
+	$(call COPY,$(APR)/$(TARGET_lib),$(INSTALLBASE)/lib/)
+	$(call COPY,$(APR)/$(TARGET_nlm),$(INSTALLBASE)/bin/)
 
 $(INSTDEVDIRS) ::
-	$(call MD,$@)
+	$(call MKDIR,$@)
 endif
 
 #
@@ -460,7 +460,8 @@ endif
 vpath %.c network_io/unix
 
 $(OBJDIR)/%.o: file_io/netware/%.c $(OBJDIR)/$(NLM_NAME)_cc.opt
-	@echo Compiling $<
+#	@echo Compiling $<
+	@echo $(DL)CC   $<$(DL)
 	$(CC) -cwd source -o $@ $< @$(OBJDIR)/$(NLM_NAME)_cc.opt
 
 #
@@ -468,6 +469,6 @@ $(OBJDIR)/%.o: file_io/netware/%.c $(OBJDIR)/$(NLM_NAME)_cc.opt
 # in this makefile
 #
 
-include $(APR_WORK)/build/NWGNUtail.inc
+include $(APRBUILD)/NWGNUtail.inc
 
 
