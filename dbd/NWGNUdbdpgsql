@@ -65,6 +65,10 @@ ifdef LINK_STATIC
 XLFLAGS		+= \
 			-l $(PGSQLSDK)/lib \
 			$(EOLIST)
+else
+XLFLAGS		+= \
+			-l $(PGSQLSDK)/imp \
+			$(EOLIST)
 endif
 
 #
@@ -245,7 +249,7 @@ FILES_nlm_Ximports = \
 
 ifneq ($(LINK_STATIC),1)
 FILES_nlm_Ximports += \
-	@$(PGSQL_IMP) \
+	@$(notdir $(PGSQL_IMP)) \
 	$(EOLIST)
 endif
 

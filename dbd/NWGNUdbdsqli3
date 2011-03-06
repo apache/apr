@@ -60,11 +60,9 @@ XDEFINES	+= \
 XLFLAGS		+= \
 			$(EOLIST)
 
-ifdef LINK_STATIC
 XLFLAGS		+= \
 			-l $(SQLITE3SDK) \
 			$(EOLIST)
-endif
 
 #
 # These values will be appended to the correct variables based on the value of
@@ -246,7 +244,7 @@ FILES_nlm_Ximports = \
 
 ifneq ($(LINK_STATIC),1)
 FILES_nlm_Ximports += \
-	@$(SQLITE3_IMP) \
+	@$(notdir $(SQLITE3_IMP)) \
 	$(EOLIST)
 endif
 

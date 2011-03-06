@@ -60,11 +60,9 @@ XDEFINES	+= \
 XLFLAGS		+= \
 			$(EOLIST)
 
-ifdef LINK_STATIC
 XLFLAGS		+= \
 			-l $(FREETDSSDK)/lib \
 			$(EOLIST)
-endif
 
 #
 # These values will be appended to the correct variables based on the value of
@@ -244,7 +242,7 @@ FILES_nlm_Ximports = \
 
 ifneq ($(LINK_STATIC),1)
 FILES_nlm_Ximports += \
-	@$(FREETDS_IMP) \
+	@$(notdir $(FREETDS_IMP)) \
 	$(EOLIST)
 endif
 

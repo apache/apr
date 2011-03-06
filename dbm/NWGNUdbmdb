@@ -67,6 +67,10 @@ ifdef LINK_STATIC
 XLFLAGS		+= \
 			-l $(DBSDK)/lib \
 			$(EOLIST)
+else
+XLFLAGS		+= \
+			-l $(DBSDK)/imp \
+			$(EOLIST)
 endif
 
 #
@@ -247,7 +251,7 @@ FILES_nlm_Ximports = \
 
 ifneq ($(LINK_STATIC),1)
 FILES_nlm_Ximports += \
-	@$(DB_IMP) \
+	@$(notdir $(DB_IMP)) \
 	$(EOLIST)
 endif
 
