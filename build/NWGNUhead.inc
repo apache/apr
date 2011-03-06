@@ -39,24 +39,24 @@ $(TARGETS) :: $(SUBDIRS)
 endif #NO_LICENSE_FILE check
 
 help :
-	@echo targets for RELEASE=$(RELEASE):
-	@echo (default) . . . . libs nlms
-	@echo all . . . . . . . does everything (libs nlms install)
-	@echo libs. . . . . . . builds all libs
-	@echo nlms. . . . . . . builds all nlms
-	@echo install . . . . . builds libs and nlms and copies install files to
-	@echo                   "$(INSTALL)"
-	@echo installdev. . . . copies headers and files needed for development to
-	@echo                   "$(INSTALL)"
-	@echo clean . . . . . . deletes $(OBJDIR) dirs, *.err, and *.map
-	@echo clobber_all . . . deletes all possible output from the make
-	@echo clobber_install . deletes all files in $(INSTALL)
+	@echo $(DS)targets for RELEASE=$(RELEASE):$(DS)
+	@echo $(DS)(default) . . . . libs nlms$(DS)
+	@echo $(DS)all . . . . . . . does everything (libs nlms install)$(DS)
+	@echo $(DS)libs. . . . . . . builds all libs$(DS)
+	@echo $(DS)nlms. . . . . . . builds all nlms$(DS)
+	@echo $(DS)install . . . . . builds libs and nlms and copies install files to$(DS)
+	@echo $(DS)                  "$(INSTALL)"$(DS)
+	@echo $(DS)installdev. . . . copies headers and files needed for development to$(DS)
+	@echo $(DS)                  "$(INSTALL)"$(DS)
+	@echo $(DS)clean . . . . . . deletes $(OBJDIR) dirs, *.err, and *.map$(DS)
+	@echo $(DS)clobber_all . . . deletes all possible output from the make$(DS)
+	@echo $(DS)clobber_install . deletes all files in $(INSTALL)$(DS)
 	@$(ECHONL)
-	@echo Multiple targets can be used on a single nmake command line -
-	@echo (i.e. $(MAKE) clean all)
+	@echo $(DS)Multiple targets can be used on a single make command line -$(DS)
+	@echo $(DS)(i.e. $(MAKE) clean all)$(DS)
 	@$(ECHONL)
-	@echo You can also specify RELEASE=debug, RELEASE=noopt, or RELEASE=release
-	@echo The default is RELEASE=release
+	@echo $(DS)You can also specify RELEASE=debug, RELEASE=noopt, or RELEASE=release$(DS)
+	@echo $(DS)The default is RELEASE=release$(DS)
 
 clobber_all :: clean clobber_install
 

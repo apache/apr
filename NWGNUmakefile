@@ -425,9 +425,9 @@ nlms :: libs $(TARGET_nlm)
 install :: nlms $(INSTDIRS) FORCE
 	$(call COPY,$(APR)/$(TARGET_nlm),$(INSTALLBASE)/)
 ifndef DEST
-	-$(call COPY,$(APR)/STATUS,$(INSTALLBASE)/*.apr)
+	-$(call COPY,$(APR)/STATUS,$(INSTALLBASE)/STATUS.apr)
 	-$(call COPY,$(APR)/LICENSE,$(INSTALLBASE)/)
-	-$(call COPY,$(APR)/CHANGES,$(INSTALLBASE)/*.apr)
+	-$(call COPY,$(APR)/CHANGES,$(INSTALLBASE)/CHANGES.apr)
 	@-$(call COPYR,$(APR)/docs,$(INSTALLBASE)/docs/)
 endif
 

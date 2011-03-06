@@ -26,12 +26,12 @@ nlms :: $(APR)/aprlib.imp
 
 $(APR)/aprlib.imp : make_nw_export.awk nw_export.i
 #	@echo Generating $@
-	@echo GEN  $@
+	@echo $(DL)GEN  $@$(DL)
 	$(AWK) -v EXPPREFIX=APR$(VERSION_MAJMIN) -f $^ | $(SORT) >$@
 
 nw_export.i : nw_export.inc $(FILES_prebuild_headers) $(NLM_NAME)_cc.opt
 #	@echo Generating $@
-	@echo GEN  $@
+	@echo $(DL)GEN  $@$(DL)
 	$(CC) $< @$(NLM_NAME)_cc.opt
 
 $(NLM_NAME)_cc.opt : NWGNUmakefile $(APR)/build/NWGNUenvironment.inc $(APR)/build/NWGNUhead.inc $(APR)/build/NWGNUtail.inc $(CUSTOM_INI)
