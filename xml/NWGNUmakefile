@@ -33,15 +33,15 @@ endif
 
 $(EXPATSRC)/lib/%.h: $(EXPATSRC)/lib/%.hnw
 	@echo Creating $@
-	$(call CP,$<,$@)
+	$(call COPY,$<,$@)
 
 $(EXPATSRC)/lib/%.h: $(EXPATSRC)/lib/%.h.in
 	@echo Creating $@
-	$(call CP,$<,$@)
+	$(call COPY,$<,$@)
 
 $(EXPATSRC)/lib/%.h: $(CURDIR)/%.hnw
 	@echo Creating $@
-	$(call CP,$<,$@)
+	$(call COPY,$<,$@)
 
 vpath %.c $(EXPATSRC)/lib
 
@@ -286,5 +286,5 @@ clean ::
 # in this makefile
 #
 
-include $(APR_WORK)/build/NWGNUtail.inc
+include $(APRBUILD)/NWGNUtail.inc
 

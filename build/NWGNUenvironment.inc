@@ -72,7 +72,7 @@ $(error neither EXPATSDK nor EXPATSRC defined - cant compile without EXPAT SDK o
 endif
 
 ifndef METROWERKS
-METROWERKS = C:\Program Files\Metrowerks\CodeWarrior
+METROWERKS = $(ProgramFiles)\Metrowerks\CodeWarrior
 endif
 
 # If LM_LICENSE_FILE isn't defined, define a variable that can be used to
@@ -142,33 +142,35 @@ LIB	= mwldnlm -type library -w nocmdline
 
 # Setup build tools
 AWK	= awk
+SORT	= sort
 
 #
 # Declare Command and tool macros here
 #
 
 ifeq ($(findstring /sh,$(SHELL)),/sh)
-DEL	= $(RM) $1
-MD	= mkdir -p $1
-DELTREE	= rm -rf $1
-CP	= cp -av $1 $2
-XCP	= cp -ar
+DEL	= rm -f $1
+RMDIR	= rm -rf $1
+MKDIR	= mkdir -p $1
+COPY	= cp -av $1 $2
+COPYR	= cp -ar $1 $2
 ECHONL	= echo ""
 DL	= '
+CAT	= cat
 else
 ifeq "$(OS)" "Windows_NT"
-CMD	= cmd /c
-DEL	= $(CMD) if exist $(subst /,\,$1) del /q /f 2>NUL $(subst /,\,$1)
-DELTREE	= rd /s /q 2>NUL $(subst /,\,$1)
+DEL	= $(shell if exist $(subst /,\,$1) del /q /f 2>NUL $(subst /,\,$1))
+RMDIR	= $(shell if exist $(subst /,\,$1)\NUL rd /q /s 2>NUL $(subst /,\,$1))
+ECHONL	= cmd /c echo.
 else
-CMD	= command /c
-DEL	= $(CMD) if exist $(subst /,\,$1) del 2>NUL $(subst /,\,$1)
-DELTREE	= deltree /y $(subst /,\,$1)
+DEL	= $(shell if exist $(subst /,\,$1) del 2>NUL $(subst /,\,$1))
+RMDIR	= $(shell if exist $(subst /,\,$1)\NUL deltree /y 2>NUL $(subst /,\,$1))
+ECHONL	= command /c echo.
 endif
-MD	= $(CMD) if not exist $(subst /,\,$1)\NUL md 2>NUL $(subst /,\,$1)
-CP	= copy /y 2>NUL $(subst /,\,$1) $(subst /,\,$2)
-XCP	= xcopy /e /y 2>NUL $(subst /,\,$1) $(subst /,\,$2)
-ECHONL	= $(CMD) echo.
+MKDIR	= $(shell if not exist $(subst /,\,$1)\NUL md 2>NUL $(subst /,\,$1))
+COPY	= copy /y 2>NUL $(subst /,\,$1) $(subst /,\,$2)
+COPYR	= xcopy /y /e 2>NUL $(subst /,\,$1) $(subst /,\,$2)
+CAT	= type
 endif
 
 ifdef IPV6
