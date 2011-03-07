@@ -15,7 +15,6 @@
  */
 
 #include "apr_arch_threadproc.h"
-#include <nks/thread.h>
 #include "apr_private.h"
 #include "apr_pools.h"
 #include "apr_signal.h"
@@ -64,12 +63,12 @@ static void *signal_thread_func(void *signal_handler)
     return NULL;
 }
 
+#if (APR_HAVE_SIGWAIT || APR_HAVE_SIGSUSPEND)
 APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
 {
-    int rv = 0;
-
-    return rv;
+    return 0;
 }
+#endif /* (APR_HAVE_SIGWAIT || APR_HAVE_SIGSUSPEND) */
 
 APR_DECLARE(apr_status_t) apr_signal_block(int signum)
 {
