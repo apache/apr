@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.3
 
+  *) configure: Make definition of apr_ino_t independent of
+     _FILE_OFFSET_BITS even on platforms where ino_t is 'unsigned int'.
+     [Stefan Fritsch]
+
   *) apr_ring: Workaround for aliasing problem that causes gcc 4.5 to
      miscompile some brigade related code. PR 50190. [Stefan Fritsch]
 
