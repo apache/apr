@@ -914,10 +914,12 @@ static void check_error(apr_dbd_t *dbc, const char *step, SQLRETURN rc,
     /* set info about last error in dbc  - fast return for SQL_SUCCESS  */
     if (rc == SQL_SUCCESS) {
         char successMsg[] = "[dbd_odbc] SQL_SUCCESS ";
+        apr_size_t successMsgLen = sizeof successMsg - 1;
 
         dbc->lasterrorcode = SQL_SUCCESS;
-        strcpy(dbc->lastError, successMsg);
-        strcpy(dbc->lastError + sizeof(successMsg) - 1, step);
+        apr_cpystrn(dbc->lastError, successMsg, sizeof dbc->lastError);
+        apr_cpystrn(dbc->lastError + successMsgLen, step,
+                    sizeof dbc->lastError - successMsgLen);
         return;
     }
     switch (rc) {
@@ -974,7 +976,8 @@ static APR_INLINE int odbc_check_rollback(apr_dbd_t *handle)
 {
     if (handle->can_commit == APR_DBD_TRANSACTION_ROLLBACK) {
         handle->lasterrorcode = SQL_ERROR;
-        strcpy(handle->lastError, "[dbd_odbc] Rollback pending ");
+        apr_cpystrn(handle->lastError, "[dbd_odbc] Rollback pending ",
+                    sizeof handle->lastError);
         return 1;
     }
     return 0;
