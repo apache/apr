@@ -202,7 +202,7 @@ typedef struct {
 
 /* SQL datatype mappings to DBD datatypes 
  * These tables must correspond *exactly* to the apr_dbd_type_e enum 
- * in apr_dbd_internal.h 
+ * in apr_dbd.h
  */
 
 /* ODBC "C" types to DBD datatypes  */
@@ -231,6 +231,7 @@ static SQLSMALLINT const sqlCtype[] = {
     SQL_LONGVARCHAR,                /* APR_DBD_TYPE_CLOB,       \%pDc */
     SQL_TYPE_NULL                   /* APR_DBD_TYPE_NULL        \%pDn */
 };
+#define NUM_APR_DBD_TYPES (sizeof(sqlCtype) / sizeof(sqlCtype[0]))
 
 /*  ODBC Base types to DBD datatypes */
 static SQLSMALLINT const sqlBaseType[] = {
@@ -528,6 +529,10 @@ static SQLRETURN odbc_bind_param(apr_pool_t *pool,
     }
     /* bind a non-NULL data value */
     else {
+        if (type < 0 || type >= NUM_APR_DBD_TYPES) {
+            return APR_EGENERAL;
+        }
+
         baseType = sqlBaseType[type];
         cType = sqlCtype[type];
         indicator = NULL;
@@ -1338,15 +1343,17 @@ static apr_status_t odbc_datum_get(const apr_dbd_row_t *row, int col,
 {
     SQLSMALLINT sqltype;
     void *p;
-    int len = sqlSizes[dbdtype];
+    int len;
 
     if (col >= row->res->ncols)
         return APR_EGENERAL;
 
-    if (dbdtype < 0 || dbdtype >= sizeof(sqlCtype)) {
+    if (dbdtype < 0 || dbdtype >= NUM_APR_DBD_TYPES) {
         data = NULL;            /* invalid type */
         return APR_EGENERAL;
     }
+
+    len = sqlSizes[dbdtype];
     sqltype = sqlCtype[dbdtype];
 
     /* must not memcpy a brigade, sentinals are relative to orig loc */
