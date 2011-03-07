@@ -36,8 +36,7 @@ GDBM_NLM = libgdbm
 XINCDIRS	+= \
 			$(APR)/include/arch/netware \
 			$(APR)/include \
-			$(APRUTIL)/include \
-			$(APRUTIL)/include/private \
+			$(APR)/include/private \
 			$(APR) \
 			$(GDBM_INC) \
 			$(EOLIST)
