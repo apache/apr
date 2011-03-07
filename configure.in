@@ -1824,21 +1824,25 @@ else
 fi
 AC_MSG_RESULT($off_t_value)
 
-# Regardless of whether _LARGEFILE64_SOURCE is used, on 32-bit
+# Regardless of whether _LARGEFILE64_SOURCE is used, on some
 # platforms _FILE_OFFSET_BITS will affect the size of ino_t and hence
 # the build-time ABI may be different from the apparent ABI when using
 # APR with another package which *does* define _FILE_OFFSET_BITS.
 # (Exactly as per the case above with off_t where LFS is *not* used)
 #
-# To be safe, hard-code apr_ino_t as 'unsigned long' iff that is
-# exactly the size of ino_t here; otherwise use ino_t as existing
+# To be safe, hard-code apr_ino_t as 'unsigned long' or 'unsigned int'
+# iff that is exactly the size of ino_t here; otherwise use ino_t as existing
 # releases did.  To be correct, apr_ino_t should have been made an
 # ino64_t as apr_off_t is off64_t, but this can't be done now without
 # breaking ABI.
 ino_t_value=ino_t
-if test "$ac_cv_sizeof_long" = "4"; then
-    APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned long, 
-                               ino_t_value="unsigned long")
+APR_CHECK_SIZEOF_EXTENDED(AC_INCLUDES_DEFAULT, ino_t, $ac_cv_sizeof_long)
+if test $ac_cv_sizeof_ino_t = 4; then
+    if test $ac_cv_sizeof_long = 4; then
+        ino_t_value="unsigned long"
+    else
+        ino_t_value="unsigned int"
+    fi
 fi
 AC_MSG_NOTICE([using $ino_t_value for ino_t])
 
