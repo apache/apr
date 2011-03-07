@@ -36,8 +36,7 @@ DB_NLM = libdb47
 XINCDIRS	+= \
 			$(APR)/include/arch/netware \
 			$(APR)/include \
-			$(APRUTIL)/include \
-			$(APRUTIL)/include/private \
+			$(APR)/include/private \
 			$(APR) \
 			$(DB_INC) \
 			$(EOLIST)
