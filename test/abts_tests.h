@@ -86,7 +86,8 @@ const struct testlist {
     {testrmm},
     {testdbm},
     {testqueue},
-    {testreslist}
+    {testreslist},
+    {testlfsabi}
 };
 
 #endif /* APR_TEST_INCLUDES */

@@ -34,7 +34,8 @@ TESTS = testtime.lo teststr.lo testvsn.lo testipsub.lo testshm.lo	\
 	testxlate.lo testdbd.lo testrmm.lo testldap.lo testmd4.lo	\
 	teststrmatch.lo testpass.lo testcrypto.lo testqueue.lo		\
 	testbuckets.lo testxml.lo testdbm.lo testuuid.lo testmd5.lo	\
-	testreslist.lo testbase64.lo testhooks.lo
+	testreslist.lo testbase64.lo testhooks.lo testlfsabi.lo         \
+	testlfsabi32.lo testlfsabi64.lo
 
 OTHER_PROGRAMS = \
 	sendfile@EXEEXT@ \
