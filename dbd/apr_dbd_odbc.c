@@ -909,7 +909,6 @@ static void check_error(apr_dbd_t *dbc, const char *step, SQLRETURN rc,
     SQLSMALLINT reslength;
     char *res, *p, *end, *logval = NULL;
     int i;
-    apr_status_t r;
 
     /* set info about last error in dbc  - fast return for SQL_SUCCESS  */
     if (rc == SQL_SUCCESS) {
@@ -960,7 +959,7 @@ static void check_error(apr_dbd_t *dbc, const char *step, SQLRETURN rc,
         if (SQL_SUCCEEDED(rc) && (p < (end - 280))) 
             p += sprintf(p, "%.256s %.20s ", buffer, sqlstate);
     }
-    r = apr_env_get(&logval, "apr_dbd_odbc_log", dbc->pool);
+    apr_env_get(&logval, "apr_dbd_odbc_log", dbc->pool);
     /* if env var was set or call was init/open (no dbname) - log to stderr */
     if (logval || !dbc->dbname ) {
         char timestamp[APR_CTIME_LEN];
