@@ -819,7 +819,7 @@ static apr_status_t odbc_parse_params(apr_pool_t *pool, const char *params,
                                int *defaultBufferSize, int *nattrs,
                                int **attrs, int **attrvals)
 {
-    char *seps, *last, *name[MAX_PARAMS], *val[MAX_PARAMS];
+    char *seps, *last, *next, *name[MAX_PARAMS], *val[MAX_PARAMS];
     int nparams = 0, i, j;
 
     *attrs = apr_pcalloc(pool, MAX_PARAMS * sizeof(char *));
@@ -839,8 +839,18 @@ static apr_status_t odbc_parse_params(apr_pool_t *pool, const char *params,
         }
         val[nparams] = apr_strtok(NULL, seps, &last);
         seps = DEFAULTSEPS;
-        name[++nparams] = apr_strtok(NULL, seps, &last);
-    } while (nparams <= MAX_PARAMS && name[nparams] != NULL);
+
+        ++nparams;
+        next = apr_strtok(NULL, seps, &last);
+        if (!next) {
+            break;
+        }
+        if (nparams >= MAX_PARAMS) {
+            /* too many parameters, no place to store */
+            return APR_EGENERAL;
+        }
+        name[nparams] = next;
+    } while (1);
 
     for (j = i = 0; i < nparams; i++) {
         if (!apr_strnatcasecmp(name[i], "CONNECT")) {
