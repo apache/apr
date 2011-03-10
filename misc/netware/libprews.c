@@ -22,6 +22,7 @@
 
 #include "apr_pools.h"
 #include "apr_private.h"
+#include "apr_arch_internal_time.h"
 
 
 /* library-private data...*/
