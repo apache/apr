@@ -667,6 +667,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
     return errno;
 }
 
+#if APR_HAVE_STRUCT_RLIMIT
 APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr,
                                                  apr_int32_t what,
                                                  struct rlimit *limit)
@@ -681,7 +682,7 @@ APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr,
 #endif
 
         case APR_LIMIT_MEM:
-#if defined (RLIMIT_DATA) || defined (RLIMIT_VMEM) || defined(RLIMIT_AS)
+#if defined(RLIMIT_DATA) || defined(RLIMIT_VMEM) || defined(RLIMIT_AS)
             attr->limit_mem = limit;
             break;
 #else
@@ -708,3 +709,5 @@ APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr,
 
     return APR_SUCCESS;
 }
+#endif /* APR_HAVE_STRUCT_RLIMIT */
+
