@@ -74,7 +74,7 @@ extern "C" {
  */
 
 #define APR_INLINE
-#define APR_HAS_INLINE          0
+#define APR_HAS_INLINE                  0
 #ifndef __attribute__
 #define __attribute__(__x)
 #endif
@@ -111,7 +111,6 @@ extern "C" {
 #define APR_HAVE_STRTOLL                1
 #define APR_HAVE_SYS_SENDFILE_H         0
 #define APR_HAVE_SYS_SYSLIMITS_H        0
-#define APR_HAVE_SYS_TIME_H             1
 #ifdef USE_WINSOCK
 #define APR_HAVE_SYS_SOCKET_H           0
 #define APR_HAVE_SYS_SOCKIO_H           0
@@ -122,6 +121,7 @@ extern "C" {
 #define APR_HAVE_SYS_UN_H               1
 #endif
 #define APR_HAVE_SYS_SIGNAL_H           1
+#define APR_HAVE_SYS_TIME_H             1
 #define APR_HAVE_SYS_TYPES_H            1
 #define APR_HAVE_SYS_UIO_H              1
 #define APR_HAVE_SYS_WAIT_H             1
@@ -334,7 +334,7 @@ typedef  apr_uint32_t            apr_uintptr_t;
 #define APR_SIZE_MAX    (~((apr_size_t)0))
 
 /* PROC mutex is a GLOBAL mutex on Netware */
-#define APR_PROC_MUTEX_IS_GLOBAL      1
+#define APR_PROC_MUTEX_IS_GLOBAL        1
 
 /* Definitions that APR programs need to work properly. */
 
@@ -408,7 +408,7 @@ typedef  apr_uint32_t            apr_uintptr_t;
 /**
  * Declare a dso module's exported module structure as APR_MODULE_DECLARE_DATA.
  *
- * Unless APR_MODULE_DECLARE_STATIC is defined at compile time, symbols 
+ * Unless APR_MODULE_DECLARE_STATIC is defined at compile time, symbols
  * declared with APR_MODULE_DECLARE_DATA are always exported.
  * @code
  * module APR_MODULE_DECLARE_DATA mod_tag
@@ -466,7 +466,7 @@ typedef int apr_wait_t;
 #endif
 #endif
 
-/* 
+/*
  * we always enable dynamic driver loads within apr_dbd
  */
 #ifndef APU_DSO_MODULE_BUILD
