@@ -23,6 +23,17 @@
 #include "apr_arch_proc_mutex.h" /* for apr_proc_mutex_unix_setup_lock() */
 #include "apr_arch_internal_time.h"
 
+/* Prototypes missing from older NDKs */
+int WSAStartupRTags(WORD wVersionRequested,
+                    LPWSADATA lpWSAData,
+                    rtag_t WSAStartupRTag,
+                    rtag_t WSPSKTRTag,
+                    rtag_t lookUpServiceBeginRTag,
+                    rtag_t WSAEventRTag,
+                    rtag_t WSPCPRTag);
+
+int WSACleanupRTag(rtag_t rTag);
+
 /*
 ** Resource tag signatures for using NetWare WinSock 2. These will no longer
 ** be needed by anyone once the new WSAStartupWithNlmHandle() is available
