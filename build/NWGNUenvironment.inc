@@ -200,9 +200,7 @@ else
 VERSION_SKT = (WINSOCK)
 endif
 
-#
 # MetroWerks static Libraries
-
 CLIB3S	= $(METROWERKS)/Novell Support/Metrowerks Support/Libraries/Runtime/mwcrtl.lib
 MATH3S	=
 PLIB3S	= $(METROWERKS)/Novell Support/Metrowerks Support/Libraries/MSL C++/MWCPP.lib
@@ -229,7 +227,6 @@ endif
 
 # -g                    generate debugging information
 # -O0                   level 0 optimizations
-
 ifeq "$(RELEASE)" "debug"
 CFLAGS += -g -O0
 endif
@@ -240,7 +237,6 @@ CFLAGS += -O4,p
 endif
 
 # -prefix apr_arch_pre_nw.h      #include pre_nw.h for all files
-
 CFLAGS += -prefix apr_arch_pre_nw.h
 
 

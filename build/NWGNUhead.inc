@@ -61,7 +61,7 @@ help :
 clobber_all :: clean clobber_install
 
 clobber_install ::
-	-$(DELTREE) $(INSTALL)
+	$(call RMDIR,$(INSTALL))
 
 test :: default
 	$(MAKE) -C $(APRTEST) -f NWGNUmakefile RELEASE=$(RELEASE) DEST="$(INSTALL)" LM_LICENSE_FILE="$(LM_LICENSE_FILE)"
