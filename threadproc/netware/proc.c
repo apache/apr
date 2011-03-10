@@ -21,7 +21,7 @@
 
 #include <proc.h>
 
-apr_status_t apr_netware_proc_cleanup(void *theproc)
+static apr_status_t apr_netware_proc_cleanup(void *theproc)
 {
     apr_proc_t *proc = theproc;
     int exit_int;
