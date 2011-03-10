@@ -47,7 +47,9 @@ XINCDIRS	+= \
 			$(APR)/include/arch/unix \
 			$(APR)/memory/unix \
 			$(APR)/random/unix \
+			$(APRUTIL)/include \
 			$(APRUTIL)/xml \
+			$(LDAPSDK)/inc \
 			$(EOLIST)
 
 #
