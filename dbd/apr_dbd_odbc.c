@@ -1324,9 +1324,10 @@ static int odbc_get_row(apr_pool_t *pool, apr_dbd_results_t *res,
         if (res->colstate[c] != COL_BOUND) {
             res->colstate[c] = COL_AVAIL;
         }
-        /* some drivers do not null-term zero-len CHAR data */
-        if (res->colptrs[c])
-            *(char *)res->colptrs[c] = 0; 
+
+    /* some drivers do not null-term zero-len CHAR data */
+    if (res->colptrs[c])
+        *(char *)res->colptrs[c] = 0; 
     }
 
     if (res->random && (rownum > 0)) {
