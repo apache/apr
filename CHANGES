@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_ldap: resolve possible hangs or crashes when the pool passed
+     to apr_ldap_rebind_init() is cleaned up and apr_ldap_rebind
+     is re-initted and re-used. PR50918. [Eric Covener]
+
   *) apr_ring: Workaround for aliasing problem that causes gcc 4.5 to
      miscompile some brigade related code. PR 50190. [Stefan Fritsch]
 
