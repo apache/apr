@@ -64,6 +64,14 @@ static apr_ldap_rebind_entry_t *xref_head = NULL;
 static int apr_ldap_rebind_set_callback(LDAP *ld);
 static apr_status_t apr_ldap_rebind_remove_helper(void *data);
 
+static apr_status_t apr_ldap_pool_cleanup_set_null(void *data_)
+{
+    void **ptr = (void **)data_;
+    *ptr = NULL;
+    return APR_SUCCESS;
+}
+
+
 /* APR utility routine used to create the xref_lock. */
 APR_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_init(apr_pool_t *pool)
 {
@@ -72,6 +80,9 @@ APR_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_init(apr_pool_t *pool)
 #ifdef NETWARE
     get_apd
 #endif
+
+    /* run after apr_thread_mutex_create cleanup */
+    apr_pool_cleanup_register(pool, &apr_ldap_xref_lock, apr_ldap_pool_cleanup_set_null, NULL);
 
 #if APR_HAS_THREADS
     if (apr_ldap_xref_lock == NULL) {
@@ -107,14 +118,20 @@ APR_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_add(apr_pool_t *pool,
         }
     
 #if APR_HAS_THREADS
-       apr_thread_mutex_lock(apr_ldap_xref_lock);
+       retcode = apr_thread_mutex_lock(apr_ldap_xref_lock);
+       if (retcode != APR_SUCCESS) { 
+           return retcode;
+       }
 #endif
     
         new_xref->next = xref_head;
         xref_head = new_xref;
     
 #if APR_HAS_THREADS
-        apr_thread_mutex_unlock(apr_ldap_xref_lock);
+        retcode = apr_thread_mutex_unlock(apr_ldap_xref_lock);
+        if (retcode != APR_SUCCESS) { 
+           return retcode;
+        }
 #endif
     }
     else {
@@ -138,13 +155,17 @@ APR_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_add(apr_pool_t *pool,
 APR_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_remove(LDAP *ld)
 {
     apr_ldap_rebind_entry_t *tmp_xref, *prev = NULL;
+    apr_status_t retcode = 0;
 
 #ifdef NETWARE
     get_apd
 #endif
 
 #if APR_HAS_THREADS
-    apr_thread_mutex_lock(apr_ldap_xref_lock);
+    retcode = apr_thread_mutex_lock(apr_ldap_xref_lock);
+    if (retcode != APR_SUCCESS) { 
+        return retcode;
+    }
 #endif
     tmp_xref = xref_head;
 
@@ -169,7 +190,10 @@ APR_DECLARE_LDAP(apr_status_t) apr_ldap_rebind_remove(LDAP *ld)
     }
 
 #if APR_HAS_THREADS
-    apr_thread_mutex_unlock(apr_ldap_xref_lock);
+    retcode = apr_thread_mutex_unlock(apr_ldap_xref_lock);
+    if (retcode != APR_SUCCESS) { 
+       return retcode;
+    }
 #endif
     return APR_SUCCESS;
 }
@@ -347,5 +371,6 @@ static int apr_ldap_rebind_set_callback(LDAP *ld)
 }
 
 #endif
+
 
 #endif       /* APR_HAS_LDAP */
