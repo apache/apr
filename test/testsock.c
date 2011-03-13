@@ -74,6 +74,12 @@ static void test_addr_info(abts_case *tc, void *data)
     rv = apr_sockaddr_info_get(&sa, "127.0.0.1", APR_UNSPEC, 80, 0, p);
     APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
     ABTS_STR_EQUAL(tc, "127.0.0.1", sa->hostname);
+
+    rv = apr_sockaddr_info_get(&sa, "127.0.0.1", APR_UNSPEC, 0, 0, p);
+    APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
+    ABTS_STR_EQUAL(tc, "127.0.0.1", sa->hostname);
+    ABTS_INT_EQUAL(tc, 0, sa->port);
+    ABTS_INT_EQUAL(tc, 0, ntohs(sa->sa.sin.sin_port));
 }
 
 static void test_serv_by_name(abts_case *tc, void *data)

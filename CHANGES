@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.3
 
+  *) apr_sockaddr_info_get() on AIX: Fix a problem which could set
+     the port field in the native socket address to 1 when 0 was
+     specified.  PR 46964.  [Jeff Trawick]
+
   *) configure: Make definition of apr_ino_t independent of
      _FILE_OFFSET_BITS even on platforms where ino_t is 'unsigned int'.
      [Stefan Fritsch]
