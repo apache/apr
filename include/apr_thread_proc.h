@@ -198,7 +198,9 @@ typedef struct apr_other_child_rec_t  apr_other_child_rec_t;
 typedef void *(APR_THREAD_FUNC *apr_thread_start_t)(apr_thread_t*, void*);
 
 typedef enum {
-    APR_KILL_NEVER,             /**< process is never sent any signals */
+    APR_KILL_NEVER,             /**< process is never killed (i.e., never sent
+                                 * any signals), but it will be reaped if it exits
+                                 * before the pool is cleaned up */
     APR_KILL_ALWAYS,            /**< process is sent SIGKILL on apr_pool_t cleanup */
     APR_KILL_AFTER_TIMEOUT,     /**< SIGTERM, wait 3 seconds, SIGKILL */
     APR_JUST_WAIT,              /**< wait forever for the process to complete */
