@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.3
 
+  *) configure: Support 64 and 32 bit universal builds for Darwin/
+     OS X 10.6+. [Jim Jagielski]
+
   *) apr_sockaddr_info_get() on AIX: Fix a problem which could set
      the port field in the native socket address to 1 when 0 was
      specified.  PR 46964.  [Jeff Trawick]
