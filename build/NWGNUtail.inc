@@ -7,7 +7,6 @@
 # If we are going to create an nlm, make sure we have assigned variables to
 # use during the link.
 #
-#echo NLM_NAME=$(NLM_NAME)
 ifndef NLM_NAME
 NLM_NAME = $(TARGET_nlm)
 endif
@@ -139,7 +138,9 @@ $(OBJDIR)/%.o: %.c $(OBJDIR)/$(CCOPT_NAME)_cc.opt
 
 $(OBJDIR)/$(CCOPT_NAME)_cc.opt: $(CCOPT_DEPENDS)
 	$(call DEL,$@)
-#	@echo CCOPT_DEPENDS=$^
+ifdef VERBOSE
+	@echo CCOPT_DEPENDS=$^
+endif
 #	@echo Generating $@
 	@echo $(DL)GEN  $@$(DL)
 ifneq "$(strip $(CFLAGS))" ""
@@ -168,7 +169,9 @@ $(OBJDIR)/%.o: %.cpp $(OBJDIR)/$(CCOPT_NAME)_cpp.opt
 
 $(OBJDIR)/$(CCOPT_NAME)_cpp.opt: $(CPPOPT_DEPENDS)
 	$(call DEL,$@)
-#	@echo CPPOPT_DEPENDS=$^
+ifdef VERBOSE
+	@echo CPPOPT_DEPENDS=$^
+endif
 #	@echo Generating $@
 	@echo $(DL)GEN  $@$(DL)
 ifneq "$(strip $(CFLAGS))" ""

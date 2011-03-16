@@ -29,12 +29,12 @@ $(APR)/aprlib.imp : make_nw_export.awk nw_export.i
 	@echo $(DL)GEN  $@$(DL)
 	$(AWK) -v EXPPREFIX=APR$(VERSION_MAJMIN) -f $^ | $(SORT) >$@
 
-nw_export.i : nw_export.inc $(FILES_prebuild_headers) $(NLM_NAME)_cc.opt
+nw_export.i : nw_export.inc $(FILES_prebuild_headers) cc.opt
 #	@echo Generating $@
 	@echo $(DL)GEN  $@$(DL)
-	$(CC) $< @$(NLM_NAME)_cc.opt
+	$(CC) $< @cc.opt
 
-$(NLM_NAME)_cc.opt : NWGNUmakefile $(APR)/build/NWGNUenvironment.inc $(APR)/build/NWGNUhead.inc $(APR)/build/NWGNUtail.inc $(CUSTOM_INI)
+cc.opt : NWGNUmakefile $(APR)/build/NWGNUenvironment.inc $(APR)/build/NWGNUhead.inc $(APR)/build/NWGNUtail.inc $(CUSTOM_INI)
 	@echo -P > $@
 	@echo -EP >> $@
 	@echo -nosyspath >> $@
@@ -67,7 +67,7 @@ install :: nlms FORCE
 
 clean ::
 	$(call DEL,nw_export.i)
-	$(call DEL,$(NLM_NAME)_cc.opt)
+	$(call DEL,cc.opt)
 	$(call DEL,NWGNUversion.inc)
 	$(call DEL,$(APR)/aprlib.imp)
 	$(foreach file,$(FILES_prebuild_headers),$(call DEL,$(file)))
