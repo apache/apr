@@ -2205,6 +2205,10 @@ APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
 
 #if APR_POOL_DEBUG
     apr_pool_check_integrity(p);
+
+    if (!p || !plain_cleanup_fn || !child_cleanup_fn) {
+        abort();
+    }
 #endif /* APR_POOL_DEBUG */
 
     if (p != NULL) {
