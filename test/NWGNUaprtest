@@ -196,6 +196,9 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testipsub.o \
 	$(OBJDIR)/testldap.o \
 	$(OBJDIR)/testlfs.o \
+	$(OBJDIR)/testlfsabi.o \
+	$(OBJDIR)/testlfsabi32.o \
+	$(OBJDIR)/testlfsabi64.o \
 	$(OBJDIR)/testlock.o \
 	$(OBJDIR)/testmd4.o \
 	$(OBJDIR)/testmd5.o \
@@ -291,8 +294,8 @@ endif
 #If the LDAP support is defined then add the imports
 ifneq "$(LDAPSDK)" ""
 FILES_nlm_Ximports += \
-	@$(LDAPSDK)/imports/lldapsdk.imp \
-	@$(LDAPSDK)/imports/lldapssl.imp \
+	@lldapsdk.imp \
+	@lldapssl.imp \
 	$(EOLIST)
 endif
 
