@@ -180,6 +180,7 @@ endif
 endif
 
 NOVI	= $(NOVELLLIBC)/imports
+PRELUDE	= $(NOVI)/libcpre.o
 
 INCDIRS	= $(NOVELLLIBC)/include;
 

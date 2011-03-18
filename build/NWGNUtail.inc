@@ -247,8 +247,6 @@ endif
 # Rules to build nlms.
 #
 
-vpath libcpre.o $(NOVELLLIBC)/imports
-
 # If we only have one target NLM then build it
 ifeq "$(words $(strip $(TARGET_nlm)))" "1"
 
