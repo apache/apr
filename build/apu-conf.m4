@@ -146,6 +146,7 @@ AC_ARG_WITH([expat],
 ])
 
 APU_SYSTEM_EXPAT
+test ${apu_has_expat} != "1" && AC_MSG_ERROR(could not find Expat)
 
 APR_ADDTO(APRUTIL_EXPORT_LIBS, [$apu_expat_libs])
 APR_ADDTO(LIBS, [$apu_expat_libs])
