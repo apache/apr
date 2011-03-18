@@ -65,7 +65,7 @@ function add_symbol (sym_name) {
     next
 }
 
-/^[ \t]*AP[RUI]?_DECLARE_DATA .*;$/ {
+/^[ \t]*AP[RUI]?_DECLARE_DATA .*;/ {
        varname = $NF;
        gsub( /[*;]/, "", varname);
        gsub( /\[.*\]/, "", varname);

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <netware.h>
 #include <screen.h>
