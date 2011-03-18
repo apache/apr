@@ -130,42 +130,22 @@ save_cppflags="$CPPFLAGS"
 
 apu_has_expat=0
 
-# Default: will use either external or bundled expat.
-apu_try_external_expat=1
-apu_try_builtin_expat=1
-
 AC_ARG_WITH([expat],
-[  --with-expat=DIR        specify Expat location, or 'builtin'], [
+[  --with-expat=DIR        specify Expat location], [
   if test "$withval" = "yes"; then
     AC_MSG_ERROR([a directory must be specified for --with-expat])
   elif test "$withval" = "no"; then
     AC_MSG_ERROR([Expat cannot be disabled (at this time)])
-  elif test "$withval" = "builtin"; then
-    apu_try_external_expat=0
   else
     # Add given path to standard search paths if appropriate:
     if test "$withval" != "/usr"; then
       APR_ADDTO(INCLUDES, [-I$withval/include])
       APR_ADDTO(LDFLAGS, [-L$withval/lib])
     fi
-    # ...and refuse to fall back on the builtin expat.
-    apu_try_builtin_expat=0
   fi
 ])
 
-if test $apu_try_external_expat = 1; then
-  APU_SYSTEM_EXPAT
-fi
-
-if test "${apu_has_expat}${apu_try_builtin_expat}" = "01"; then
-  dnl This is a bit of a hack.  This only works because we know that
-  dnl we are working with the bundled version of the software.
-  bundled_subdir="xml/expat"
-  APR_SUBDIR_CONFIG($bundled_subdir, [--prefix=$prefix --exec-prefix=$exec_prefix --libdir=$libdir --includedir=$includedir --bindir=$bindir])
-  APR_ADDTO(INCLUDES, [-I$top_builddir/$bundled_subdir/lib])
-  APR_ADDTO(LDFLAGS, [-L$top_builddir/$bundled_subdir/lib])
-  apu_expat_libs="$top_builddir/$bundled_subdir/lib/libexpat.la"
-fi
+APU_SYSTEM_EXPAT
 
 APR_ADDTO(APRUTIL_EXPORT_LIBS, [$apu_expat_libs])
 APR_ADDTO(LIBS, [$apu_expat_libs])
