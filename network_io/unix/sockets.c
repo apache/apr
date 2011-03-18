@@ -177,10 +177,14 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
         int flags;
 
         if ((flags = fcntl((*new)->socketdes, F_GETFD)) == -1)
+            close((*new)->socketdes);
+            (*new)->socketdes = -1;
             return errno;
 
         flags |= FD_CLOEXEC;
         if (fcntl((*new)->socketdes, F_SETFD, flags) == -1)
+            close((*new)->socketdes);
+            (*new)->socketdes = -1;
             return errno;
     }
 #endif
@@ -339,12 +343,18 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
     {
         int flags;
 
-        if ((flags = fcntl((*new)->socketdes, F_GETFD)) == -1)
+        if ((flags = fcntl((*new)->socketdes, F_GETFD)) == -1) {
+            close((*new)->socketdes);
+            (*new)->socketdes = -1;
             return errno;
+        }
 
         flags |= FD_CLOEXEC;
-        if (fcntl((*new)->socketdes, F_SETFD, flags) == -1)
+        if (fcntl((*new)->socketdes, F_SETFD, flags) == -1) {
+            close((*new)->socketdes);
+            (*new)->socketdes = -1;
             return errno;
+        }
     }
 #endif
 
