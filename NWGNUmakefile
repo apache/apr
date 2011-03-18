@@ -23,12 +23,19 @@ SUBDIRS = \
 		$(APU_WORK) \
 		$(EOLIST)
 
+ifeq "$(TEST)" "1"
+SUBDIRS += \
+		test \
+		$(APU_WORK)/test \
+		$(EOLIST)
+endif
+
 #
 # Get the 'head' of the build environment.  This includes default targets and
 # paths to tools
 #
 
-include $(APR_WORK)\build\NWGNUhead.inc
+include $(APR_WORK)/build/NWGNUhead.inc
 
 #
 # build this level's files
@@ -47,8 +54,8 @@ XINCDIRS	+= \
 			$(APR)/include/arch/unix \
 			$(APR)/memory/unix \
 			$(APR)/random/unix \
-			$(APRUTIL)/include \
-			$(APRUTIL)/xml \
+			$(APU)/include \
+			$(APU)/xml \
 			$(LDAPSDK)/inc \
 			$(EOLIST)
 
@@ -136,7 +143,7 @@ NLM_DESCRIPTION	= Apache Portability Runtime Library $(VERSION_STR) $(VERSION_SK
 NLM_THREAD_NAME	=
 #
 # If this is specified, it will override VERSION value in
-# $(APR_WORK)\build\NWGNUenvironment.inc
+# $(APR_WORK)/build/NWGNUenvironment.inc
 #
 NLM_VERSION	=
 
@@ -148,12 +155,12 @@ NLM_STACK_SIZE	=
 #
 # If this is specified it will be used by the link '-entry' directive
 #
-NLM_ENTRY_SYM	= _LibCPrelude
+NLM_ENTRY_SYM	=
 
 #
 # If this is specified it will be used by the link '-exit' directive
 #
-NLM_EXIT_SYM	= _LibCPostlude
+NLM_EXIT_SYM	=
 
 #
 # If this is specified it will be used by the link '-check' directive
@@ -163,7 +170,7 @@ NLM_CHECK_SYM	=
 #
 # If this is specified it will be used by the link '-flags' directive
 #
-NLM_FLAGS	= AUTOUNLOAD, PSEUDOPREEMPTION
+NLM_FLAGS	=
 
 #
 # If this is specified it will be linked in with the XDCData option in the def
@@ -203,11 +210,11 @@ FILES_nlm_objs = \
 # These will be added as a library command in the link.opt file.
 #
 FILES_nlm_libs = \
-	libcpre.o \
+	$(PRELUDE) \
 	$(APRLIB) \
-	$(APRUTLIB) \
+	$(APULIB) \
 	$(APULDAPLIB) \
-	$(XMLLIB) \
+	$(APUXMLLIB) \
 	$(EOLIST)
 
 #
@@ -267,8 +274,8 @@ endif
 #If the LDAP support is defined then add the imports
 ifneq "$(LDAPSDK)" ""
 FILES_nlm_Ximports += \
-	@$(LDAPSDK)/imports/lldapsdk.imp \
-	@$(LDAPSDK)/imports/lldapssl.imp \
+	@lldapsdk.imp \
+	@lldapssl.imp \
 	$(EOLIST)
 endif
 
@@ -366,32 +373,32 @@ nlms :: libs $(TARGET_nlm)
 
 #
 # Updated this target to create necessary directories and copy files to the
-# correct place.  (See $(APR_WORK)\build\NWGNUhead.inc for examples)
+# correct place.  (See $(APR_WORK)/build/NWGNUhead.inc for examples)
 #
 install :: nlms $(INSTDIRS) FORCE
-	copy $(OBJDIR)\aprlib.nlm                          $(INSTALLBASE)\*.*
+	$(call COPY,$(APR)/$(TARGET_nlm),$(INSTALLBASE)/)
 ifndef DEST
-	-$(CP) $(subst /,\,$(APR))\STATUS                  $(INSTALLBASE)\*.apr
-	-$(CP) $(subst /,\,$(APR))\LICENSE                 $(INSTALLBASE)\*
-	-$(CP) $(subst /,\,$(APR))\CHANGES                 $(INSTALLBASE)\*.apr
-	-$(CP) $(subst /,\,$(APRUTIL))\STATUS              $(INSTALLBASE)\*.apu
-	-$(CP) $(subst /,\,$(APRUTIL))\CHANGES             $(INSTALLBASE)\*.apu
-	@-$(XCP) $(subst /,\,$(APR))\docs                  $(INSTALLBASE)\docs\*.*
+	-$(call COPY,$(APR)/LICENSE,$(INSTALLBASE)/)
+	-$(call COPY,$(APR)/STATUS,$(INSTALLBASE)/STATUS.apr)
+	-$(call COPY,$(APR)/CHANGES,$(INSTALLBASE)/CHANGES.apr)
+	-$(call COPY,$(APU)/STATUS,$(INSTALLBASE)/STATUS.apu)
+	-$(call COPY,$(APU)/CHANGES,$(INSTALLBASE)/CHANGES.apu)
+	-$(call COPYR,$(APR)/docs,$(INSTALLBASE)/docs/)
 endif
 
 ifndef DEST
 installdev :: $(INSTDEVDIRS) FORCE
-	-$(CP) $(subst /,\,$(APR))\include\*.h             $(INSTALLBASE)\include\*.*
-	-$(CP) $(subst /,\,$(APRUTIL))\include\*.h         $(INSTALLBASE)\include\*.*
-	-$(CP) $(subst /,\,$(APR))\*.imp                   $(INSTALLBASE)\lib\*.*
-	-$(CP) $(subst /,\,$(APR))\misc\netware\*.xdc      $(INSTALLBASE)\lib\*.*
-	-$(CP) $(subst /,\,$(APRLIB))                      $(INSTALLBASE)\lib\*.*
-	-$(CP) $(subst /,\,$(APRUTLIB))                    $(INSTALLBASE)\lib\*.*
-	-$(CP) $(subst /,\,$(APULDAPLIB))                  $(INSTALLBASE)\lib\*.*
-	-$(CP) $(subst /,\,$(XMLLIB))                      $(INSTALLBASE)\lib\*.*
+	$(call COPY,$(APR)/include/*.h,$(INSTALLBASE)/include/)
+	$(call COPY,$(APR)/*.imp,$(INSTALLBASE)/lib/)
+	$(call COPY,$(APR)/misc/netware/*.xdc,$(INSTALLBASE)/lib/)
+	$(call COPY,$(APR)/$(TARGET_nlm),$(INSTALLBASE)/bin/)
+	$(call COPY,$(APRLIB),$(INSTALLBASE)/lib/)
+	$(call COPY,$(APULIB),$(INSTALLBASE)/lib/)
+	$(call COPY,$(APULDAPLIB),$(INSTALLBASE)/lib/)
+	$(call COPY,$(APUXMLLIB),$(INSTALLBASE)/lib/)
 
 $(INSTDEVDIRS) ::
-	$(CHKNOT) $@\NUL mkdir $@
+	$(call MKDIR,$@)
 endif
 
 #
@@ -400,7 +407,7 @@ endif
 
 vpath %.c atomic/netware:strings:tables:passwd:lib:time/unix
 vpath %.c file_io/unix:locks/netware:misc/netware:misc/unix:threadproc/netware
-vpath %.c poll/unix:shmem\unix:support/unix:random/unix
+vpath %.c poll/unix:shmem/unix:support/unix:random/unix
 vpath %.c dso/netware:memory/unix:mmap/unix:user/netware
 
 # Use the win32 network_io if Winsock is being used
@@ -409,15 +416,16 @@ vpath %.c network_io/win32
 endif
 vpath %.c network_io/unix
 
-$(OBJDIR)/%.o: file_io/netware/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
-	@echo Compiling $<
-	$(CC) file_io\netware\$(<F) -cwd source -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
+$(OBJDIR)/%.o: file_io/netware/%.c $(OBJDIR)/$(NLM_NAME)_cc.opt
+#	@echo Compiling $<
+	@echo $(DL)CC   $<$(DL)
+	$(CC) $< -cwd source -o=$@ @$(OBJDIR)/$(NLM_NAME)_cc.opt
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined
 # in this makefile
 #
 
-include $(APR_WORK)\build\NWGNUtail.inc
+include $(APRBUILD)/NWGNUtail.inc
 
 
