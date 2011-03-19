@@ -268,7 +268,7 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
                                  ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
                                  NULL, &pdesc);
         else
-            return APR_INCOMPLETE;
+            return APR_INCOMPLETE; /* should not occur */
         if (rv == ERROR_SUCCESS)
             apr_pool_cleanup_register(finfo->pool, pdesc, free_localheap, 
                                  apr_pool_cleanup_null);
@@ -319,6 +319,8 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
                 sizelo = GetCompressedFileSizeW((apr_wchar_t*)ufile, &sizehi);
             else if (whatfile == MORE_OF_FSPEC)
                 sizelo = GetCompressedFileSizeA((char*)ufile, &sizehi);
+            else
+                return APR_EGENERAL; /* should not occur */
         
             if (sizelo != INVALID_FILE_SIZE || GetLastError() == NO_ERROR) {
 #if APR_HAS_LARGE_FILES
