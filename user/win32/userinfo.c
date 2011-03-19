@@ -30,7 +30,7 @@
  * depends on IsValidSid(), which internally we better test long
  * before we get here!
  */
-void get_sid_string(char *buf, apr_size_t blen, apr_uid_t id)
+static void get_sid_string(char *buf, apr_size_t blen, apr_uid_t id)
 {
     PSID_IDENTIFIER_AUTHORITY psia;
     DWORD nsa;
