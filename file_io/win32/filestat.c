@@ -97,7 +97,7 @@ static void resolve_prot(apr_finfo_t *finfo, apr_int32_t wanted, PACL dacl)
      * there is no reason for os_level testing here.
      */
     if ((wanted & APR_FINFO_WPROT) && !worldid) {
-        SID_IDENTIFIER_AUTHORITY SIDAuth = SECURITY_WORLD_SID_AUTHORITY;
+        SID_IDENTIFIER_AUTHORITY SIDAuth = {SECURITY_WORLD_SID_AUTHORITY};
         if (AllocateAndInitializeSid(&SIDAuth, 1, SECURITY_WORLD_RID,
                                      0, 0, 0, 0, 0, 0, 0, &worldid))
             atexit(free_world);

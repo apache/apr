@@ -26,3 +26,7 @@
 #define GETSIZE(res, type)  res[(IDX_##type)] = sizeof(type)
 #define CHECKSIZE(tc, res1, res2, type)                         \
   ABTS_INT_EQUAL(tc, res1[(IDX_##type)], res2[(IDX_##type)]);
+
+extern void get_type_sizes32(int *res);
+extern void get_type_sizes64(int *res);
+
