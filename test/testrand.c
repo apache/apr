@@ -63,6 +63,7 @@ static void rand_run_kat(abts_case *tc, rnd_fn *f, apr_random_t *r,
     }
 }
 
+#if APR_HAS_FORK
 static int rand_check_kat(rnd_fn *f, apr_random_t *r,
                           const unsigned char expected[128])
 {
@@ -76,6 +77,7 @@ static int rand_check_kat(rnd_fn *f, apr_random_t *r,
         return 1;
     return 0;
 }
+#endif
 
 static void rand_add_zeroes(apr_random_t *r)
 {
