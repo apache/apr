@@ -51,7 +51,7 @@ void apr_signal_init(apr_pool_t *pglobal)
 {
 }
 
-const char *apr_signal_description_get(int signum)
+APR_DECLARE(const char *) apr_signal_description_get(int signum)
 {
     return "unknown signal (not supported)";
 }
