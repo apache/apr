@@ -31,6 +31,7 @@
 
 #if APR_HAS_SHARED_MEMORY
 
+#if APR_HAS_FORK
 static int msgwait(int sleep_sec, int first_box, int last_box)
 {
     int i;
@@ -58,6 +59,7 @@ static void msgput(int boxnum, char *msg)
     apr_cpystrn(boxes[boxnum].msg, msg, strlen(msg) + 1);
     boxes[boxnum].msgavail = 1;
 }
+#endif /* APR_HAS_FORK */
 
 static void test_anon_create(abts_case *tc, void *data)
 {
