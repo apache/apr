@@ -26,7 +26,7 @@
 extern void get_type_sizes32(int *res);
 extern void get_type_sizes64(int *res);
 
-void get_type_sizes(int *res)
+static void get_type_sizes(int *res)
 {
 #include "testlfsabi_include.c"
 }
