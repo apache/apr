@@ -590,3 +590,10 @@ APR_DECLARE_NONSTD(int) apr_file_printf(apr_file_t *fptr,
     free(data.buf);
     return count;
 }
+
+APR_DECLARE(apr_status_t) apr_file_pipe_wait(apr_file_t *thepipe,
+                                             apr_wait_type_t direction)
+{
+    return APR_ENOTIMPL;
+}
+
