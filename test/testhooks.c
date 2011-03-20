@@ -70,6 +70,7 @@ static void *toy_hook_probe_entry(const char *name)
     hook_probe_data_t *ud = apr_palloc(probe_buf_pool, sizeof *ud);
     ud->buf_size = 18;
     ud->buf = (char *)apr_palloc(probe_buf_pool, ud->buf_size);
+    ud->buf[0] = '\0';
     safe_concat(ud->buf, ud->buf_size, "E");
     return (void *)ud;
 }
