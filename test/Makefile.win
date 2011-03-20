@@ -103,6 +103,9 @@ ALL_TESTS = \
 	$(INTDIR)\testipsub.obj \
 	$(INTDIR)\testldap.obj \
 	$(INTDIR)\testlfs.obj \
+	$(INTDIR)\testlfsabi.obj \
+	$(INTDIR)\testlfsabi32.obj \
+	$(INTDIR)\testlfsabi64.obj \
 	$(INTDIR)\testlock.obj \
 	$(INTDIR)\testmd4.obj \
 	$(INTDIR)\testmd5.obj \
