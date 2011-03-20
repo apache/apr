@@ -263,6 +263,26 @@ SOURCE=.\testlfs.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testlfsabi.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testlfsabi.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\testlfsabi_include.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testlfsabi32.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testlfsabi64.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\testlock.c
 # End Source File
 # Begin Source File
