@@ -1,6 +1,13 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.3
 
+  *) Add new experimental configure option --enable-allocator-uses-mmap to
+     use mmap instead of malloc in apr_allocator_alloc(). This greatly reduces
+     memory fragmentation with malloc implementations (e.g. glibc) that
+     don't handle allocationss of a page-size-multiples in an efficient way.
+     It also makes apr_allocator_max_free_set() actually have some effect
+     on such platforms. [Stefan Fritsch]
+
   *) configure: Support 64 and 32 bit universal builds for Darwin/
      OS X 10.6+. [Jim Jagielski]
 
