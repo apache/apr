@@ -1552,8 +1552,7 @@ AC_ARG_ENABLE(allocator-uses-mmap,
                                 [Define if apr_allocator should use mmap]) ],
 		     [AC_MSG_ERROR([mmap()/MAP_ANON not supported]) ]
 		    )
-    fi ],
-  [ ]
+    fi ]
 )
 
 dnl ----------------------------- Checks for standard typedefs
