@@ -439,7 +439,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
          * don't need to take chances while the handle is already open.
          */
         DWORD FileType;
-        if (FileType = GetFileType(thefile->filehand)) {
+        if ((FileType = GetFileType(thefile->filehand))) {
             if (FileType == FILE_TYPE_CHAR) {
                 finfo->filetype = APR_CHR;
             }
@@ -532,8 +532,8 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
                 wanted &= ~finfo->valid;
         }
 
-        if (rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
-                                            / sizeof(apr_wchar_t), fname))
+        if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
+                                            / sizeof(apr_wchar_t), fname)))
             return rv;
         if (!(wanted & APR_FINFO_NAME)) {
             if (!GetFileAttributesExW(wfname, GetFileExInfoStandard, 
@@ -718,9 +718,9 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
-        if (rv = utf8_to_unicode_path(wfname,
-                                      sizeof(wfname) / sizeof(wfname[0]),
-                                      fname))
+        if ((rv = utf8_to_unicode_path(wfname,
+                                       sizeof(wfname) / sizeof(wfname[0]),
+                                       fname)))
             return rv;
         flags = GetFileAttributesW(wfname);
     }

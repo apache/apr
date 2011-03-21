@@ -71,7 +71,6 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
 #ifdef _WIN32_WCE
     return APR_ENOTIMPL;
 #else
-    DWORD stdhandle = 0;
     HANDLE hproc = GetCurrentProcess();
     HANDLE newhand = NULL;
     apr_int32_t newflags;
