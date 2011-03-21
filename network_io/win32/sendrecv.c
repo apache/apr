@@ -266,7 +266,6 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
     DWORD dwFlags = 0;
     apr_size_t nbytes;
     TRANSMIT_FILE_BUFFERS tfb, *ptfb = NULL;
-    int ptr = 0;
     apr_size_t bytes_to_send;   /* Bytes to send out of the file (not including headers) */
     int disconnected = 0;
     int sendv_trailers = 0;
