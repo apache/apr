@@ -520,10 +520,6 @@ SOURCE=.\threadproc\win32\threadpriv.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\time\win32\access.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\time\win32\time.c
 # End Source File
 # Begin Source File

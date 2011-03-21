@@ -17,6 +17,7 @@
 #include "apr_arch_threadproc.h"
 #include "apr_arch_file_io.h"
 #include "apr_thread_proc.h"
+#include "apr_signal.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
 #if APR_HAVE_SIGNAL_H
@@ -50,7 +51,7 @@ void apr_signal_init(apr_pool_t *pglobal)
 {
 }
 
-const char *apr_signal_description_get(int signum)
+APR_DECLARE(const char *) apr_signal_description_get(int signum)
 {
     return "unknown signal (not supported)";
 }
