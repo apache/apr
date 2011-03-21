@@ -81,7 +81,9 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
                                             int type, int protocol, 
                                             apr_pool_t *cont)
 {
+#if APR_HAVE_IPV6
     int downgrade = (family == AF_UNSPEC);
+#endif
 
     if (family == AF_UNSPEC) {
 #if APR_HAVE_IPV6
