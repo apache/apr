@@ -16,7 +16,6 @@
 #include <netware.h>
 #include <library.h>
 #include <nks/synch.h>
-#include "novsock2.h"
 
 #include "apr_pools.h"
 #include "apr_private.h"

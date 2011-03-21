@@ -53,11 +53,15 @@
 #include <nks/time.h>
 #include <signal.h>
 #include <novsock2.h>
-#include <sys/types.h>
-
+/* The NetWare Winsock2 header novsock2.h has macros which define
+ * accept and connect, but these clash with serf, so we undef them
+ */
+#undef accept
+#undef connect
 #ifdef NW_BUILD_IPV6
 #include <novtcpip.h>
 #endif
+#include <sys/types.h>
 
 #define _POSIX_THREAD_SAFE_FUNCTIONS    1
 #define READDIR_IS_THREAD_SAFE          1
