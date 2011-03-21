@@ -49,6 +49,11 @@
 #include <signal.h>
 #ifdef USE_WINSOCK
 #include <novsock2.h>
+/* The NetWare Winsock2 header novsock2.h has macros which define
+ * accept and connect, but these clash with serf, so we undef them
+ */
+#undef accept
+#undef connect
 #ifdef NW_BUILD_IPV6
 #include <novtcpip.h>
 #endif
@@ -223,11 +228,11 @@ extern "C" {
 #define APR_CHARSET_EBCDIC              0
 
 /* Is the TCP_NODELAY socket option inherited from listening sockets?
-*/
+ */
 #define APR_TCP_NODELAY_INHERITED       1
 
 /* Is the O_NONBLOCK flag inherited from listening sockets?
-*/
+ */
 #define APR_O_NONBLOCK_INHERITED        1
 
 /* Typedefs that APR needs. */
