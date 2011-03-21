@@ -34,9 +34,13 @@
 #include <unistd.h>
 #endif
 #if APR_HAVE_CONIO_H
+#ifdef _MSC_VER
 #pragma warning(disable: 4032)
 #include <conio.h>
 #pragma warning(default: 4032)
+#else
+#include <conio.h>
+#endif
 #endif
 #if APR_HAVE_STDLIB_H
 #include <stdlib.h>
