@@ -210,6 +210,7 @@ APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from,
 }
 
 
+#if APR_HAS_SENDFILE
 static apr_status_t collapse_iovec(char **off, apr_size_t *len, 
                                    struct iovec *iovec, int numvec, 
                                    char *buf, apr_size_t buflen)
@@ -240,7 +241,6 @@ static apr_status_t collapse_iovec(char **off, apr_size_t *len,
 }
 
 
-#if APR_HAS_SENDFILE
 /*
  * apr_status_t apr_socket_sendfile(apr_socket_t *, apr_file_t *, apr_hdtr_t *, 
  *                                 apr_off_t *, apr_size_t *, apr_int32_t flags)
