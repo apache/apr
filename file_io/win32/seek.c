@@ -44,7 +44,7 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
         rv = APR_SUCCESS;
     } else {
         DWORD offlo = (DWORD)pos;
-        DWORD offhi = (DWORD)(pos >> 32);
+        LONG  offhi = (LONG)(pos >> 32);
         rc = SetFilePointer(thefile->filehand, offlo, &offhi, FILE_BEGIN);
 
         if (rc == (DWORD)-1)
@@ -158,7 +158,7 @@ APR_DECLARE(apr_status_t) apr_file_trunc(apr_file_t *thefile, apr_off_t offset)
 {
     apr_status_t rv;
     DWORD offlo = (DWORD)offset;
-    DWORD offhi = (DWORD)(offset >> 32);
+    LONG  offhi = (LONG)(offset >> 32);
     DWORD rc;
 
     rc = SetFilePointer(thefile->filehand, offlo, &offhi, FILE_BEGIN);

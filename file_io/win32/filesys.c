@@ -70,8 +70,8 @@ apr_status_t filepath_root_test(char *path, apr_pool_t *p)
     if (apr_os_level >= APR_WIN_NT)
     {
         apr_wchar_t wpath[APR_PATH_MAX];
-        if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
-                                           / sizeof(apr_wchar_t), path))
+        if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                            / sizeof(apr_wchar_t), path)))
             return rv;
         rv = GetDriveTypeW(wpath);
     }
@@ -143,8 +143,8 @@ apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)
         /* ???: This needs review, apparently "\\?\d:." returns "\\?\d:" 
          * as if that is useful for anything.
          */
-        if (rv = utf8_to_unicode_path(wroot, sizeof(wroot) 
-                                           / sizeof(apr_wchar_t), root))
+        if ((rv = utf8_to_unicode_path(wroot, sizeof(wroot) 
+                                            / sizeof(apr_wchar_t), root)))
             return rv;
         if (!GetFullPathNameW(wroot, sizeof(wpath) / sizeof(apr_wchar_t), wpath, &ignored))
             return apr_get_os_error();
@@ -211,8 +211,8 @@ APR_DECLARE(apr_status_t) apr_filepath_set(const char *rootpath,
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
-        if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
-                                           / sizeof(apr_wchar_t), rootpath))
+        if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                            / sizeof(apr_wchar_t), rootpath)))
             return rv;
         if (!SetCurrentDirectoryW(wpath))
             return apr_get_os_error();

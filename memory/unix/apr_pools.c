@@ -553,7 +553,6 @@ static apr_file_t *file_stderr = NULL;
  */
 
 static void run_cleanups(cleanup_t **c);
-static void run_child_cleanups(cleanup_t **c);
 static void free_proc_chain(struct process_chain *procs);
 
 #if APR_POOL_DEBUG
@@ -2349,6 +2348,8 @@ static void run_cleanups(cleanup_t **cref)
     }
 }
 
+#if !defined(WIN32) && !defined(OS2)
+
 static void run_child_cleanups(cleanup_t **cref)
 {
     cleanup_t *c = *cref;
@@ -2370,19 +2371,27 @@ static void cleanup_pool_for_exec(apr_pool_t *p)
 
 APR_DECLARE(void) apr_pool_cleanup_for_exec(void)
 {
-#if !defined(WIN32) && !defined(OS2)
-    /*
-     * Don't need to do anything on NT or OS/2, because I
-     * am actually going to spawn the new process - not
-     * exec it. All handles that are not inheritable, will
-     * be automajically closed. The only problem is with
-     * file handles that are open, but there isn't much
-     * I can do about that (except if the child decides
-     * to go out and close them
-     */
     cleanup_pool_for_exec(global_pool);
-#endif /* !defined(WIN32) && !defined(OS2) */
 }
+
+#else /* !defined(WIN32) && !defined(OS2) */
+
+APR_DECLARE(void) apr_pool_cleanup_for_exec(void)
+{
+    /*
+     * Don't need to do anything on NT or OS/2, because 
+     * these platforms will spawn the new process - not
+     * fork for exec. All handles that are not inheritable,
+     * will be automajically closed. The only problem is
+     * with file handles that are open, but there isn't
+     * much that can be done about that (except if the
+     * child decides to go out and close them, or the
+     * developer quits opening them shared)
+     */
+    return;
+}
+
+#endif /* !defined(WIN32) && !defined(OS2) */
 
 APR_DECLARE_NONSTD(apr_status_t) apr_pool_cleanup_null(void *data)
 {

@@ -86,7 +86,7 @@ apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen,
         }
     }
 
-    if (rv = apr_conv_utf8_to_ucs2(srcstr, &srcremains, t, &retlen)) {
+    if ((rv = apr_conv_utf8_to_ucs2(srcstr, &srcremains, t, &retlen))) {
         return (rv == APR_INCOMPLETE) ? APR_EINVAL : rv;
     }
     if (srcremains) {
@@ -127,7 +127,7 @@ apr_status_t unicode_to_utf8_path(char* retstr, apr_size_t retlen,
         }
     }
         
-    if (rv = apr_conv_ucs2_to_utf8(srcstr, &srcremains, t, &retlen)) {
+    if ((rv = apr_conv_ucs2_to_utf8(srcstr, &srcremains, t, &retlen))) {
         return rv;
     }
     if (srcremains) {
@@ -169,7 +169,7 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
         wfile = apr_palloc(pool, (r + n) * sizeof(apr_wchar_t));
         wcscpy(wfile, wpre);
         d = n;
-        if (rv = apr_conv_utf8_to_ucs2(file, &n, wfile + r, &d)) {
+        if ((rv = apr_conv_utf8_to_ucs2(file, &n, wfile + r, &d))) {
             return NULL;
         }
         for (ch = wfile + r; *ch; ++ch) {
@@ -415,8 +415,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
             attributes |= FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_OVERLAPPED;
         }
 
-        if (rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
-                                               / sizeof(apr_wchar_t), fname))
+        if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
+                                             / sizeof(apr_wchar_t), fname)))
             return rv;
         handle = CreateFileW(wfname, oflags, sharemode,
                              NULL, createflags, attributes, 0);
@@ -510,8 +510,8 @@ APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *pool)
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
-        if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
-                                              / sizeof(apr_wchar_t), path)) {
+        if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                            / sizeof(apr_wchar_t), path))) {
             return rv;
         }
         if (DeleteFileW(wpath))
@@ -535,12 +535,14 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
 #if APR_HAS_UNICODE_FS
         apr_wchar_t wfrompath[APR_PATH_MAX], wtopath[APR_PATH_MAX];
         apr_status_t rv;
-        if (rv = utf8_to_unicode_path(wfrompath, sizeof(wfrompath) 
-                                           / sizeof(apr_wchar_t), frompath)) {
+        if ((rv = utf8_to_unicode_path(wfrompath,
+                                       sizeof(wfrompath) / sizeof(apr_wchar_t),
+                                       frompath))) {
             return rv;
         }
-        if (rv = utf8_to_unicode_path(wtopath, sizeof(wtopath) 
-                                             / sizeof(apr_wchar_t), topath)) {
+        if ((rv = utf8_to_unicode_path(wtopath,
+                                       sizeof(wtopath) / sizeof(apr_wchar_t),
+                                       topath))) {
             return rv;
         }
 #ifndef _WIN32_WCE
@@ -592,11 +594,13 @@ APR_DECLARE(apr_status_t) apr_file_link(const char *from_path,
         apr_wchar_t wfrom_path[APR_PATH_MAX];
         apr_wchar_t wto_path[APR_PATH_MAX];
 
-        if (rv = utf8_to_unicode_path(wfrom_path, sizeof(wfrom_path) 
-                                               / sizeof(apr_wchar_t), from_path))
+        if ((rv = utf8_to_unicode_path(wfrom_path,
+                                       sizeof(wfrom_path) / sizeof(apr_wchar_t),
+                                       from_path)))
             return rv;
-        if (rv = utf8_to_unicode_path(wto_path, sizeof(wto_path) 
-                                               / sizeof(apr_wchar_t), to_path))
+        if ((rv = utf8_to_unicode_path(wto_path,
+                                       sizeof(wto_path) / sizeof(apr_wchar_t),
+                                       to_path)))
             return rv;
 
         if (!CreateHardLinkW(wto_path, wfrom_path, NULL))
