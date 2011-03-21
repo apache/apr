@@ -363,12 +363,13 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
     }
 #endif
     if (error) {
-#ifndef WIN32
+#if defined(WIN32)
+        return apr_get_netos_error();
+#else
         if (error == EAI_SYSTEM) {
             return errno;
         }
         else 
-#endif
         {
             /* issues with representing this with APR's error scheme:
              * glibc uses negative values for these numbers, perhaps so 
@@ -380,6 +381,7 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
 #endif
             return error + APR_OS_START_EAIERR;
         }
+#endif /* WIN32 */
     }
 
     prev_sa = NULL;
