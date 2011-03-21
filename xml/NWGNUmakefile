@@ -39,9 +39,20 @@ $(EXPATSRC)/lib/%.h: $(EXPATSRC)/lib/%.h.in
 	@echo Creating $@
 	$(call COPY,$<,$@)
 
-$(EXPATSRC)/lib/%.h: $(CURDIR)/%.hnw
+$(EXPATSRC)/lib/expat_config.h:
 	@echo Creating $@
-	$(call COPY,$<,$@)
+	@echo $(DL)/* $(notdir $@) for NetWare platform */$(DL)>>$@
+	@echo $(DL)#ifndef NETWARE$(DL)>>$@
+	@echo $(DL)#error This $(notdir $@) is for NetWare platform!$(DL)>>$@
+	@echo $(DL)#endif$(DL)>>$@
+	@echo $(DL)#ifndef EXPAT_CONFIG_H$(DL)>>$@
+	@echo $(DL)#define EXPAT_CONFIG_H$(DL)>>$@
+	@echo $(DL)#define HAVE_MEMMOVE 1$(DL)>>$@
+	@echo $(DL)#define XML_NS 1$(DL)>>$@
+	@echo $(DL)#define XML_DTD 1$(DL)>>$@
+	@echo $(DL)#define XML_BYTE_ORDER 1234$(DL)>>$@
+	@echo $(DL)#define XML_CONTEXT_BYTES 1024$(DL)>>$@
+	@echo $(DL)#endif /* EXPAT_CONFIG_H */$(DL)>>$@
 
 vpath %.c $(EXPATSRC)/lib
 
