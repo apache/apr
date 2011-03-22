@@ -55,11 +55,6 @@
 #include <signal.h>
 #ifdef USE_WINSOCK
 #include <novsock2.h>
-/* The NetWare Winsock2 header novsock2.h has macros which define
- * accept and connect, but these clash with serf, so we undef them
- */
-#undef accept
-#undef connect
 #ifdef NW_BUILD_IPV6
 #include <novtcpip.h>
 #endif
