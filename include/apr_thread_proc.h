@@ -775,7 +775,9 @@ APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int sig);
  * @param proc The process to register
  * @param how How to kill the process, one of:
  * <PRE>
- *         APR_KILL_NEVER         -- process is never sent any signals
+ *         APR_KILL_NEVER         -- process is never sent any signals; it is
+ *                                   reaped if it has exited before the pool is
+ *                                   cleaned up
  *         APR_KILL_ALWAYS        -- process is sent SIGKILL on apr_pool_t cleanup
  *         APR_KILL_AFTER_TIMEOUT -- SIGTERM, wait 3 seconds, SIGKILL
  *         APR_JUST_WAIT          -- wait forever for the process to complete

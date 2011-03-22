@@ -33,14 +33,6 @@ static apr_pollset_method_e pollset_default_method = POLLSET_DEFAULT_METHOD;
 #if !APR_FILES_AS_SOCKETS
 #if defined (WIN32)
 
-extern apr_status_t
-apr_file_socket_pipe_create(apr_file_t **in,
-                            apr_file_t **out,
-                            apr_pool_t *p);
-
-extern apr_status_t
-apr_file_socket_pipe_close(apr_file_t *file);
-
 /* Create a dummy wakeup socket pipe for interrupting the poller
  */
 static apr_status_t create_wakeup_pipe(apr_pollset_t *pollset)
