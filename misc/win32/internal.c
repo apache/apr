@@ -96,6 +96,6 @@ int apr_wastrtoastr(char const * const * *retarr,
         }
     }
 
-    *retarr = newarr;
+    *retarr = (char const * const *)newarr;
     return args;
 }
