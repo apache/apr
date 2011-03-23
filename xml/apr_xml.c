@@ -23,22 +23,15 @@
 #include "apr_want.h"
 
 #include "apr_xml.h"
-
-#if defined(HAVE_XMLPARSE_XMLPARSE_H)
-#include <xmlparse/xmlparse.h>
-#elif defined(HAVE_XMLTOK_XMLPARSE_H)
-#include <xmltok/xmlparse.h>
-#elif defined(HAVE_XML_XMLPARSE_H)
-#include <xml/xmlparse.h>
-#else
-#include <expat.h>
-#endif
+typedef void* XML_Parser;
+typedef int XML_Error;
+typedef unsigned char XML_Char;
+#include "apr_xml_internal.h"
 
 #define DEBUG_CR "\r\n"
 
 static const char APR_KW_xmlns[] = { 0x78, 0x6D, 0x6C, 0x6E, 0x73, '\0' };
 static const char APR_KW_xmlns_lang[] = { 0x78, 0x6D, 0x6C, 0x3A, 0x6C, 0x61, 0x6E, 0x67, '\0' };
-static const char APR_KW_DAV[] = { 0x44, 0x41, 0x56, 0x3A, '\0' };
 
 /* errors related to namespace processing */
 #define APR_XML_NS_ERROR_UNKNOWN_PREFIX (-1000)
@@ -50,21 +43,6 @@ static const char APR_KW_DAV[] = { 0x44, 0x41, 0x56, 0x3A, '\0' };
           (name[1] == 0x4D || name[1] == 0x6D) && \
           (name[2] == 0x4C || name[2] == 0x6C) )
 
-
-/* the real (internal) definition of the parser context */
-struct apr_xml_parser {
-    apr_xml_doc *doc;           /* the doc we're parsing */
-    apr_pool_t *p;              /* the pool we allocate from */
-    apr_xml_elem *cur_elem;     /* current element */
-
-    int error;                  /* an error has occurred */
-#define APR_XML_ERROR_EXPAT             1
-#define APR_XML_ERROR_PARSE_DONE        2
-/* also: public APR_XML_NS_ERROR_* values (if any) */
-
-    XML_Parser xp;              /* the actual (Expat) XML parser */
-    enum XML_Error xp_err;      /* stored Expat error code */
-};
 
 /* struct for scoping namespace declarations */
 typedef struct apr_xml_ns_scope {
@@ -139,7 +117,7 @@ static void start_handler(void *userdata, const char *name, const char **attrs)
     elem->name = elem_name = apr_pstrdup(parser->p, name);
 
     /* fill in the attributes (note: ends up in reverse order) */
-    while (*attrs) {
+    while (attrs && *attrs) {
         attr = apr_palloc(parser->p, sizeof(*attr));
         attr->name = apr_pstrdup(parser->p, *attrs++);
         attr->value = apr_pstrdup(parser->p, *attrs++);
@@ -336,111 +314,26 @@ static void cdata_handler(void *userdata, const char *data, int len)
     apr_text_append(parser->p, hdr, s);
 }
 
-static apr_status_t cleanup_parser(void *ctx)
-{
-    apr_xml_parser *parser = ctx;
-
-    XML_ParserFree(parser->xp);
-    parser->xp = NULL;
-
-    return APR_SUCCESS;
-}
-
-#if XML_MAJOR_VERSION > 1
-/* Stop the parser if an entity declaration is hit. */
-static void entity_declaration(void *userData, const XML_Char *entityName,
-                               int is_parameter_entity, const XML_Char *value,
-                               int value_length, const XML_Char *base,
-                               const XML_Char *systemId, const XML_Char *publicId,
-                               const XML_Char *notationName)
-{
-    apr_xml_parser *parser = userData;
-
-    XML_StopParser(parser->xp, XML_FALSE);
-}
-#else
-/* A noop default_handler. */
-static void default_handler(void *userData, const XML_Char *s, int len)
-{
-}
-#endif
-
 APR_DECLARE(apr_xml_parser *) apr_xml_parser_create(apr_pool_t *pool)
 {
-    apr_xml_parser *parser = apr_pcalloc(pool, sizeof(*parser));
-
-    parser->p = pool;
-    parser->doc = apr_pcalloc(pool, sizeof(*parser->doc));
-
-    parser->doc->namespaces = apr_array_make(pool, 5, sizeof(const char *));
-
-    /* ### is there a way to avoid hard-coding this? */
-    apr_xml_insert_uri(parser->doc->namespaces, APR_KW_DAV);
-
-    parser->xp = XML_ParserCreate(NULL);
-    if (parser->xp == NULL) {
-        (*apr_pool_abort_get(pool))(APR_ENOMEM);
-        return NULL;
-    }
-
-    apr_pool_cleanup_register(pool, parser, cleanup_parser,
-                              apr_pool_cleanup_null);
-
-    XML_SetUserData(parser->xp, parser);
-    XML_SetElementHandler(parser->xp, start_handler, end_handler);
-    XML_SetCharacterDataHandler(parser->xp, cdata_handler);
-
-    /* Prevent the "billion laughs" attack against expat by disabling
-     * internal entity expansion.  With 2.x, forcibly stop the parser
-     * if an entity is declared - this is safer and a more obvious
-     * failure mode.  With older versions, installing a noop
-     * DefaultHandler means that internal entities will be expanded as
-     * the empty string, which is also sufficient to prevent the
-     * attack. */
-#if XML_MAJOR_VERSION > 1
-    XML_SetEntityDeclHandler(parser->xp, entity_declaration);
-#else
-    XML_SetDefaultHandler(parser->xp, default_handler);
-#endif
-
-    return parser;
-}
-
-static apr_status_t do_parse(apr_xml_parser *parser,
-                             const char *data, apr_size_t len,
-                             int is_final)
-{
-    if (parser->xp == NULL) {
-        parser->error = APR_XML_ERROR_PARSE_DONE;
-    }
-    else {
-        int rv = XML_Parse(parser->xp, data, (int)len, is_final);
-
-        if (rv == 0) {
-            parser->error = APR_XML_ERROR_EXPAT;
-            parser->xp_err = XML_GetErrorCode(parser->xp);
-        }
-    }
-
-    /* ### better error code? */
-    return parser->error ? APR_EGENERAL : APR_SUCCESS;
+    return apr_xml_parser_create_ex(pool, &start_handler, &end_handler, &cdata_handler);
 }
 
 APR_DECLARE(apr_status_t) apr_xml_parser_feed(apr_xml_parser *parser,
                                               const char *data,
                                               apr_size_t len)
 {
-    return do_parse(parser, data, len, 0 /* is_final */);
+    return parser->impl->Parse(parser, data, len, 0 /* is_final */);
 }
 
 APR_DECLARE(apr_status_t) apr_xml_parser_done(apr_xml_parser *parser,
                                               apr_xml_doc **pdoc)
 {
     char end;
-    apr_status_t status = do_parse(parser, &end, 0, 1 /* is_final */);
+    apr_status_t status = parser->impl->Parse(parser, &end, 0, 1 /* is_final */);
 
     /* get rid of the parser */
-    (void) apr_pool_cleanup_run(parser->p, parser, cleanup_parser);
+    (void) apr_pool_cleanup_run(parser->p, parser, parser->impl->cleanup);
 
     if (status)
         return status;
@@ -476,7 +369,7 @@ APR_DECLARE(char *) apr_xml_parser_geterror(apr_xml_parser *parser,
     case APR_XML_ERROR_EXPAT:
         (void) apr_snprintf(errbuf, errbufsize,
                             "XML parser error code: %s (%d)",
-                            XML_ErrorString(parser->xp_err), parser->xp_err);
+                            parser->xp_msg, parser->xp_err);
         return errbuf;
 
     case APR_XML_ERROR_PARSE_DONE:
