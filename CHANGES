@@ -26,9 +26,6 @@ Changes for APR 2.0.0
 
   *) Added Unix domain socket support.  [Mladen Turk]
 
-  *) Win32: Use WSAPoll as default pollset method if supported and found
-     inside winsock dll.  [Mladen Turk]
-
   *) Introduce APR_PERMS_SET macros for setting the owner/group on objects
      Currently only implemented for shm, proc and global mutexes on posix
      platforms.  [Mladen Turk]
