@@ -75,6 +75,9 @@ Changes for APR 1.4.0
      choosing non-default providers.
      [Mladen Turk]
 
+  *) Win32: Use WSAPoll as default pollset method if supported and found
+     inside winsock dll.  [Mladen Turk]
+
   *) apr_temp_dir_get() now checks the TMPDIR environment variable first,
      instead of third.  [Jim Jagielski]
 
