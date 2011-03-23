@@ -222,7 +222,13 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
     }
 #endif
     alloc_socket(new, connection_context);
-    set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM, sock->protocol);
+
+    /* Set up socket variables -- note that it may be possible for
+     * *new to be an AF_INET socket when sock is AF_INET6 in some
+     * dual-stack configurations, so ensure that the remote_/local_addr
+     * structures are adjusted for the family of the accepted
+     * socket: */
+    set_socket_vars(*new, sa.sa.sin.sin_family, SOCK_STREAM, sock->protocol);
 
 #ifndef HAVE_POLL
     (*new)->connected = 1;
