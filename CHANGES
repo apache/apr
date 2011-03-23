@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.3
 
+  *) Fix address handling when accepting an AF_INET socket from a socket
+     bound as AF_INET6.   PR 49678.  [Joe Orton]
+
   *) Fix error return values from apr_sockaddr_info_get() on Windows for
      IPv6 builds.  [Ivan Zhakov <ivan visualsvn.com>]
 
