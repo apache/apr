@@ -261,6 +261,7 @@ FILES_nlm_exports = \
 #
 FILES_lib_objs = \
 	$(OBJDIR)/apr_xml.o \
+	$(OBJDIR)/apr_xml_expat.o \
 	$(EOLIST)
 
 ifdef EXPATSRC
