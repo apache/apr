@@ -17,7 +17,6 @@
 #include "apr.h"
 #include "apr_xml.h"
 
-typedef enum XML_Error XML_Error;
 #if defined(HAVE_XMLPARSE_XMLPARSE_H)
 #include <xmlparse/xmlparse.h>
 #elif defined(HAVE_XMLTOK_XMLPARSE_H)
@@ -28,6 +27,7 @@ typedef enum XML_Error XML_Error;
 #include <expat.h>
 #endif
 
+typedef enum XML_Error XML_Error;
 
 #include "apr_xml_internal.h"
 
