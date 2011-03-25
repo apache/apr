@@ -15,6 +15,8 @@
  */
 
 #include "apr.h"
+
+#if APU_USE_LIBXML2
 #include "apr_xml.h"
 
 #include <libxml/parser.h>
@@ -94,3 +96,4 @@ APR_DECLARE(apr_xml_parser *) apr_xml_parser_create_ex(apr_pool_t *pool,
 
     return parser;
 }
+#endif
