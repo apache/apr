@@ -27,6 +27,7 @@ sinclude(build/ltversion.m4)
 sinclude(build/lt~obsolete.m4)
 
 sinclude(build/apu-conf.m4)
+sinclude(build/xml.m4)
 sinclude(build/apu-hints.m4)
 sinclude(build/crypto.m4)
 sinclude(build/dbm.m4)
@@ -2598,8 +2599,8 @@ APU_CHECK_DBD_ORACLE
 APU_CHECK_DBD_FREETDS
 APU_CHECK_DBD_ODBC
 
-dnl Find Expat
-APU_FIND_EXPAT
+dnl select an XML parser
+APU_FIND_XML
 
 dnl Find iconv implementations
 APU_FIND_ICONV

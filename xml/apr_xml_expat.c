@@ -15,6 +15,8 @@
  */
 
 #include "apr.h"
+
+#if APU_USE_EXPAT
 #include "apr_xml.h"
 
 #if defined(HAVE_XMLPARSE_XMLPARSE_H)
@@ -132,3 +134,4 @@ APR_DECLARE(apr_xml_parser *) apr_xml_parser_create_ex(apr_pool_t *pool,
 
     return parser;
 }
+#endif
