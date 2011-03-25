@@ -29,6 +29,9 @@
 #if APR_HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+#if APR_HAVE_PROCESS_H
+#include <process.h>            /* for getpid() on Win32 */
+#endif
 #include "apr_arch_misc.h"
 
 APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe,
