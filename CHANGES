@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Support libxml2 as an alternative XML parser to expat [Nick Kew]
+
   *) Hide apr_wait_for_io_or_timeout() from public view and add instead
      apr_socket_wait() and apr_file_pipe_wait(). [Brian Havard]
 
