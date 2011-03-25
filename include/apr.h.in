@@ -667,6 +667,9 @@ typedef int apr_wait_t;
 #define APU_HAVE_ICONV         @have_iconv@
 #define APR_HAS_XLATE          (APU_HAVE_ICONV)
 
+#define APU_USE_EXPAT          @apu_has_expat@
+#define APU_USE_LIBXML2	       @apu_has_libxml2@
+
 /* Definitions that only Win32 programs need to compile properly. */
 
 /* XXX These simply don't belong here, perhaps in apr_portable.h
