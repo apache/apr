@@ -79,6 +79,7 @@ XCFLAGS		+= \
 # These defines will come after DEFINES
 #
 XDEFINES	+= \
+			-DAPU_USE_EXPAT=1 \
 			-DHAVE_EXPAT_CONFIG_H \
 			$(EOLIST)
 
