@@ -63,10 +63,10 @@
 #define __attribute__(__x)
 #endif
 #define APR_INLINE
-#define APR_HAS_INLINE		0
+#define APR_HAS_INLINE          0
 #else
 #define APR_INLINE __inline__
-#define APR_HAS_INLINE		1
+#define APR_HAS_INLINE          1
 #endif
 
 #define APR_HAVE_ARPA_INET_H     @arpa_ineth@
@@ -384,7 +384,7 @@ typedef  apr_uint32_t            apr_uintptr_t;
 #endif
 
 /* Are we big endian? */
-#define APR_IS_BIGENDIAN	@bigendian@
+#define APR_IS_BIGENDIAN        @bigendian@
 
 /* Mechanisms to properly type numeric literals */
 @int64_literal@
@@ -600,9 +600,9 @@ typedef  apr_uint32_t            apr_uintptr_t;
 
 #undef APR_IS_BIGENDIAN
 #ifdef __BIG_ENDIAN__
- #define APR_IS_BIGENDIAN	1
+ #define APR_IS_BIGENDIAN       1
 #else
- #define APR_IS_BIGENDIAN	0
+ #define APR_IS_BIGENDIAN       0
 #endif
 
 #undef APR_OFF_T_FMT
@@ -668,7 +668,7 @@ typedef int apr_wait_t;
 #define APR_HAS_XLATE          (APU_HAVE_ICONV)
 
 #define APU_USE_EXPAT          @apu_has_expat@
-#define APU_USE_LIBXML2	       @apu_has_libxml2@
+#define APU_USE_LIBXML2        @apu_has_libxml2@
 
 /* Definitions that only Win32 programs need to compile properly. */
 
