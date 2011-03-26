@@ -63,10 +63,10 @@
 #define __attribute__(__x)
 #endif
 #define APR_INLINE
-#define APR_HAS_INLINE		0
+#define APR_HAS_INLINE           0
 #else
 #define APR_INLINE __inline__
-#define APR_HAS_INLINE		1
+#define APR_HAS_INLINE           1
 #endif
 
 #define APR_HAVE_ARPA_INET_H     @arpa_ineth@
@@ -83,6 +83,7 @@
 #define APR_HAVE_NETINET_SCTP_H  @netinet_sctph@
 #define APR_HAVE_NETINET_SCTP_UIO_H @netinet_sctp_uioh@
 #define APR_HAVE_NETINET_TCP_H   @netinet_tcph@
+#define APR_HAVE_PROCESS_H       @processh@
 #define APR_HAVE_PTHREAD_H       @pthreadh@
 #define APR_HAVE_SEMAPHORE_H     @semaphoreh@
 #define APR_HAVE_SIGNAL_H        @signalh@
