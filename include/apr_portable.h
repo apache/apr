@@ -471,15 +471,16 @@ APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **dso,
 APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *dso,
                                                 apr_dso_handle_t *aprdso);
 
+/** @} */
+#endif /* APR_HAS_DSO */
+
+
 #if APR_HAS_OS_UUID
 /**
  * Private: apr-util's apr_uuid module when supported by the platform
  */
 APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data);
 #endif
-
-/** @} */
-#endif /* APR_HAS_DSO */
 
 
 /**
