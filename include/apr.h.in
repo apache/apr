@@ -85,6 +85,7 @@
 #define APR_HAVE_NETINET_SCTP_H  @netinet_sctph@
 #define APR_HAVE_NETINET_SCTP_UIO_H @netinet_sctp_uioh@
 #define APR_HAVE_NETINET_TCP_H   @netinet_tcph@
+#define APR_HAVE_PROCESS_H       @processh@
 #define APR_HAVE_PTHREAD_H       @pthreadh@
 #define APR_HAVE_SEMAPHORE_H     @semaphoreh@
 #define APR_HAVE_SIGNAL_H        @signalh@
