@@ -551,11 +551,11 @@ case $host in
        OSDIR="as400"
        eolstr="\\n"
        ;;
-   *-mingw*)
+   *mingw*)
        OSDIR="win32"
        enable_threads="system_threads"
        eolstr="\\r\\n"
-       file_as_socket="0"
+       file_as_socket=0
        proc_mutex_is_global=1
        OBJECTS_PLATFORM='$(OBJECTS_win32)'
        ;;
