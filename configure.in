@@ -542,11 +542,7 @@ case $host in
        eolstr="\\n"
        ;;
    *mingw*)
-       APR_ADDTO(CPPFLAGS,-DWIN32)
        OSDIR="win32"
-       ac_cv_file__dev_zero="no"
-       ac_cv_func_setpgrp_void="no"
-       apr_cv_tcp_nodelay_with_cork="no"
        enable_threads="system_threads"
        eolstr="\\r\\n"
        file_as_socket=0
@@ -555,7 +551,6 @@ case $host in
        ;;
    *cygwin*)
        OSDIR="unix"
-       APR_ADDTO(CPPFLAGS,-DCYGWIN)
        enable_threads="no"
        eolstr="\\n"
        ;;

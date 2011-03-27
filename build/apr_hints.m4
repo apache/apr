@@ -453,13 +453,21 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 		APR_REMOVEFROM(CFLAGS,-O2)
 		APR_ADDTO(CFLAGS,-O0)
 	fi
-	APR_ADDTO(LDFLAGS, [-Wl,--enable-auto-import,--subsystem,console])
-	APR_SETIFNULL(apr_lock_method, [win32])
-	APR_SETIFNULL(apr_process_lock_is_global, [yes])
-	APR_SETIFNULL(have_unicode_fs, [1])
-	APR_SETIFNULL(have_proc_invoked, [1])
-	APR_SETIFNULL(apr_cv_use_lfs64, [yes])
-	;;
+        APR_ADDTO(CPPFLAGS, [-DWIN32])
+        APR_ADDTO(LDFLAGS, [-Wl,--enable-auto-import,--subsystem,console])
+        APR_SETIFNULL(have_unicode_fs, [1])
+        APR_SETIFNULL(have_proc_invoked, [1])
+        APR_SETIFNULL(apr_lock_method, [win32])
+        APR_SETIFNULL(apr_process_lock_is_global, [yes])
+        APR_SETIFNULL(apr_cv_use_lfs64, [yes])
+        APR_SETIFNULL(apr_cv_osuuid, [yes])
+        APR_SETIFNULL(apr_cv_tcp_nodelay_with_cork, [no])
+        APR_SETIFNULL(apr_thread_func, [__stdcall])
+        APR_SETIFNULL(ac_cv_o_nonblock_inherited, [yes])
+        APR_SETIFNULL(ac_cv_tcp_nodelay_inherited, [yes])
+        APR_SETIFNULL(ac_cv_file__dev_zero, [no])
+        APR_SETIFNULL(ac_cv_func_setpgrp_void, [no])
+        ;;
   esac
 
 fi
