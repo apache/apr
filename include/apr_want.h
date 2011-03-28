@@ -89,19 +89,16 @@
 
 #else
 
+#ifndef APR_IOVEC_DEFINED
+#define APR_IOVEC_DEFINED
 struct iovec
 {
     void *iov_base;
     size_t iov_len;
 };
+#endif /* !APR_IOVEC_DEFINED */
 
-#endif
-
-/* apr_want is included at several layers; redefining APR_HAVE_IOVEC
- * now to ensure that our struct is not introduced several times.
- */
-#undef APR_HAVE_IOVEC
-#define APR_HAVE_IOVEC 1
+#endif /* APR_HAVE_IOVEC */
 
 #undef APR_WANT_IOVEC
 #endif
