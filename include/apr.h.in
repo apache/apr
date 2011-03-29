@@ -120,10 +120,10 @@
  * or the extern "C" namespace 
  */
 
+#if APR_HAVE_WINDOWS_H
 /* If windows.h was already included, our preferences don't matter.
  * If not, include a restricted set of windows headers to our tastes.
  */
-#if APR_HAVE_WINDOWS_H
 #ifndef _WINDOWS_
 
 #ifndef WIN32_LEAN_AND_MEAN
@@ -152,8 +152,8 @@
 #endif
 
 #include <windows.h>
-#endif
-#endif
+#endif /* ndef _WINDOWS_ */
+#endif /* APR_HAVE_WINDOWS_H */
 
 #if APR_HAVE_WINSOCK2_H
 #include <winsock2.h>
