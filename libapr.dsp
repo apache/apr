@@ -801,6 +801,10 @@ SOURCE=.\xlate\xlate.c
 
 SOURCE=.\xml\apr_xml.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\xml\apr_xml_expat.c
+# End Source File
 # End Group
 # End Group
 # Begin Group "Private Header Files"

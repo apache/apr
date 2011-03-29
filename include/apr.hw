@@ -660,6 +660,9 @@ typedef int apr_wait_t;
 #define APU_HAVE_ICONV          0
 #define APR_HAS_XLATE           (APU_HAVE_ICONV)
 
+#define APU_USE_EXPAT           1
+#define APU_USE_LIBXML2         0
+
 /** @} */
 
 /* Definitions that only Win32 programs need to compile properly. */
