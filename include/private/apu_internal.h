@@ -17,6 +17,7 @@
 #include "apr.h"
 #include "apr_dso.h"
 #include "apu.h"
+#include "apr_ldap.h"
 
 #ifndef APU_INTERNAL_H
 #define APU_INTERNAL_H
