@@ -104,13 +104,13 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
 
 #ifndef HAVE_EPOLL_CREATE1
     {
-        int flags;
+        int fd_flags;
 
-        if ((flags = fcntl(fd, F_GETFD)) == -1)
+        if ((fd_flags = fcntl(fd, F_GETFD)) == -1)
             return errno;
 
-        flags |= FD_CLOEXEC;
-        if (fcntl(fd, F_SETFD, flags) == -1)
+        fd_flags |= FD_CLOEXEC;
+        if (fcntl(fd, F_SETFD, fd_flags) == -1)
             return errno;
     }
 #endif
@@ -346,13 +346,13 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
 
 #ifndef HAVE_EPOLL_CREATE1
     {
-        int flags;
+        int fd_flags;
 
-        if ((flags = fcntl(fd, F_GETFD)) == -1)
+        if ((fd_flags = fcntl(fd, F_GETFD)) == -1)
             return errno;
 
-        flags |= FD_CLOEXEC;
-        if (fcntl(fd, F_SETFD, flags) == -1)
+        fd_flags |= FD_CLOEXEC;
+        if (fcntl(fd, F_SETFD, fd_flags) == -1)
             return errno;
     }
 #endif
