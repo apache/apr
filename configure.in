@@ -1842,15 +1842,24 @@ AC_MSG_RESULT($off_t_value)
 # releases did.  To be correct, apr_ino_t should have been made an
 # ino64_t as apr_off_t is off64_t, but this can't be done now without
 # breaking ABI.
-ino_t_value=ino_t
-APR_CHECK_SIZEOF_EXTENDED(AC_INCLUDES_DEFAULT, ino_t, $ac_cv_sizeof_long)
-if test $ac_cv_sizeof_ino_t = 4; then
-    if test $ac_cv_sizeof_long = 4; then
-        ino_t_value="unsigned long"
-    else
-        ino_t_value="unsigned int"
+
+# Per OS tuning...
+case $host in
+*mingw*)
+    ino_t_value=apr_int64_t
+    ;;
+*)
+    ino_t_value=ino_t
+    APR_CHECK_SIZEOF_EXTENDED(AC_INCLUDES_DEFAULT, ino_t, $ac_cv_sizeof_long)
+    if test $ac_cv_sizeof_ino_t = 4; then
+        if test $ac_cv_sizeof_long = 4; then
+            ino_t_value="unsigned long"
+        else
+            ino_t_value="unsigned int"
+        fi
     fi
-fi
+    ;;
+esac
 AC_MSG_NOTICE([using $ino_t_value for ino_t])
 
 # Checks for endianness
