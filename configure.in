@@ -1654,11 +1654,20 @@ AC_MSG_RESULT($off_t_value)
 # releases did.  To be correct, apr_ino_t should have been made an
 # ino64_t as apr_off_t is off64_t, but this can't be done now without
 # breaking ABI.
-ino_t_value=ino_t
-if test "$ac_cv_sizeof_long" = "4"; then
-    APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned long, 
-                               ino_t_value="unsigned long")
-fi
+
+# Per OS tuning...
+case $host in
+*mingw*)
+    ino_t_value=apr_int64_t
+    ;;
+*)
+    ino_t_value=ino_t
+    if test "$ac_cv_sizeof_long" = "4"; then
+        APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned long, 
+                                   ino_t_value="unsigned long")
+    fi
+    ;;
+esac
 AC_MSG_NOTICE([using $ino_t_value for ino_t])
 
 # Checks for endianness
