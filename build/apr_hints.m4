@@ -442,17 +442,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(CPPFLAGS, [-DCYGWIN])
 	;;
     *mingw*)
-	dnl gcc (3.4.2 at least) seems to mis-optimize at levels greater than
-	dnl -O0 producing link-time errors.  The user can override by
-	dnl explicitly passing a CFLAGS value to configure.
-	dnl 
-	dnl Example error messages:
-	dnl undefined reference to 'libmsvcrt_a_iname'
-	dnl undefined reference to '_nm___pctype'
-	if test "$ac_test_CFLAGS" != set; then
-		APR_REMOVEFROM(CFLAGS,-O2)
-		APR_ADDTO(CFLAGS,-O0)
-	fi
         APR_ADDTO(CPPFLAGS, [-DWIN32])
         APR_ADDTO(LDFLAGS, [-Wl,--enable-auto-import,--subsystem,console])
         APR_SETIFNULL(have_unicode_fs, [1])
@@ -467,6 +456,18 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         APR_SETIFNULL(ac_cv_tcp_nodelay_inherited, [yes])
         APR_SETIFNULL(ac_cv_file__dev_zero, [no])
         APR_SETIFNULL(ac_cv_func_setpgrp_void, [no])
+        case $host in
+            *mingw32*)
+                APR_SETIFNULL(apr_has_xthread_files, [1])
+                APR_SETIFNULL(apr_has_user, [1])
+                APR_SETIFNULL(apr_procattr_user_set_requires_password, [1])
+                ;;
+            *mingwce)
+                APR_SETIFNULL(apr_has_xthread_files, [0])
+                APR_SETIFNULL(apr_has_user, [0])
+                APR_SETIFNULL(apr_procattr_user_set_requires_password, [0])
+                ;;
+        esac
         ;;
   esac
 
