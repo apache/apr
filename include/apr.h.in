@@ -117,8 +117,39 @@
  */
 
 #if APR_HAVE_WINDOWS_H
-#include <windows.h>
+/* If windows.h was already included, our preferences don't matter.
+ * If not, include a restricted set of windows headers to our tastes.
+ */
+#ifndef _WINDOWS_
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #endif
+
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif
+
+#ifndef NOUSER
+#define NOUSER
+#endif
+#ifndef NOMCX
+#define NOMCX
+#endif
+#ifndef NOIME
+#define NOIME
+#endif
+
+/* Impossible to include winsock2.h after winsock.h, while windows.h
+ * attempts to load winsock.  Setting _WINSOCKAPI_ will dodge this.
+ */
+#if APR_HAVE_WINSOCK2_H
+#define _WINSOCKAPI_
+#endif
+
+#include <windows.h>
+#endif /* ndef _WINDOWS_ */
+#endif /* APR_HAVE_WINDOWS_H */
 
 #if APR_HAVE_WINSOCK2_H
 #include <winsock2.h>
