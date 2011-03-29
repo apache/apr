@@ -1736,6 +1736,14 @@ case $host in
         esac
         size_t_fmt="lu"
         ;;
+    *-mingw*)
+        int64_t_fmt='#define APR_INT64_T_FMT "I64d"'
+        uint64_t_fmt='#define APR_UINT64_T_FMT "I64u"'
+        uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "I64x"'
+        int64_value="__int64"
+        long_value="__int64"
+        int64_strfn="_strtoi64"
+        ;; 
 esac
 
 APR_CHECK_TYPES_COMPATIBLE(ssize_t, int, [ssize_t_fmt="d"])
@@ -1821,6 +1829,14 @@ elif test "$ac_cv_type_off_t" = "yes"; then
     else
         AC_ERROR([could not determine the size of off_t])
     fi
+    # Per OS tuning...
+    case $host in
+    *-mingw*)
+        off_t_value=apr_int64_t
+        off_t_fmt='#define APR_OFF_T_FMT "I64d"'
+        off_t_strfn='_strtoi64'
+        ;;
+    esac
 else
    # Fallback on int
    off_t_value=apr_int32_t
