@@ -2675,13 +2675,23 @@ dnl Check for langinfo support
 AC_CHECK_HEADERS(langinfo.h)
 AC_CHECK_FUNCS(nl_langinfo)
 
+dnl ------------------------------ Defaults for some platform nuances
+
 dnl Do we have a Win32-centric Unicode FS?
-
-if test -z "$have_unicode_fs"; then
-  have_unicode_fs="0"
-fi
-
+APR_SETIFNULL(have_unicode_fs, [0])
 AC_SUBST(have_unicode_fs)
+
+APR_SETIFNULL(apr_has_xthread_files, [0])
+AC_SUBST(apr_has_xthread_files)
+
+APR_SETIFNULL(apr_procattr_user_set_requires_password, [0])
+AC_SUBST(apr_procattr_user_set_requires_password)
+
+APR_SETIFNULL(apr_thread_func, [])
+AC_SUBST(apr_thread_func)
+
+APR_SETIFNULL(apr_has_user, [1])
+AC_SUBST(apr_has_user)
 
 dnl ----------------------------- Finalize the variables
 
