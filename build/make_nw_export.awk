@@ -18,7 +18,13 @@
 # based on Ryan Bloom's make_export.pl
 
 BEGIN {
-    printf(" ("EXPPREFIX")\n")
+    printf(" (%s)\n", EXPPREFIX)
+}
+
+function add_symbol(sym_name) {
+    found++
+    sub(" ", "", sym_name)
+    printf(" %s,\n", sym_name)
 }
 
 # List of functions that we don't support, yet??
@@ -75,10 +81,9 @@ BEGIN {
 #}
 
 /^[ \t]*AP[RUI]?_DECLARE_DATA .*;/ {
-    varname = $NF;
-    gsub( /[*;]/, "", varname);
-    gsub( /\[.*\]/, "", varname);
-    add_symbol(varname);
+    gsub(/[*;\n\r]/, "", $NF)
+    gsub(/\[.*\]/, "", $NF)
+    add_symbol($NF)
 }
 
 
@@ -86,11 +91,4 @@ END {
     add_symbol("apr_wait_for_io_or_timeout");
 #    printf("\n\n#found: %d symbols.\n", found)
 }
-
-function add_symbol(sym_name) {
-    found++
-    sub (" ", "", sym_name)
-    printf(" %s,\n", sym_name)
-}
-
 
