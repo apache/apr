@@ -679,8 +679,6 @@ dnl without the extra " " in that case, but they didn't do that.  So, we
 dnl end up LIBS="-lm -lcrypt -lnsl  -ldl" which is an annoyance.
 case $host in
    *-mingw*)
-      dnl APR_ADDTO(LIBS,[-lmsvcrt --lshell32 -ladvapi32 -lws2_32])
-
       AC_CHECK_LIB(msvcrt, getpid)
       APR_CHECK_DLL_FUNC(kernel32, SetErrorMode@4)
       APR_CHECK_DLL_FUNC(advapi32, GetSecurityInfo@32)
@@ -1599,8 +1597,6 @@ case $host in
         size_t_fmt="lu"
         ;;
     *-mingw*)
-dnl     int64_literal='#define APR_INT64_C(val) (val##i64)'
-dnl     uint64_literal='#define APR_UINT64_C(val) (val##Ui64)'
         int64_t_fmt='#define APR_INT64_T_FMT "I64d"'
         uint64_t_fmt='#define APR_UINT64_T_FMT "I64u"'
         uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "I64x"'
@@ -2742,15 +2738,6 @@ for i in $APR_SAVE_HEADERS; do
   rm -f $i.save
 done
 chmod +x apr-$APR_MAJOR_VERSION-config
-# for mingw builds, we currently won't allow the unix apr_private.h to exist.
-# instead, we will rely on the manually-crafted win32 apr_private.h instead.
-case $APR_PLATFORM in
-    *-mingw*)
-dnl XXX rm include/arch/unix/apr_private.h
-        ;;
-    *)
-        ;;
-esac
 ],[
 dnl This section is expanded by configure UNQUOTED so variable 
 dnl references must be backslash-escaped as necessary.
