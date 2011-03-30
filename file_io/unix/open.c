@@ -98,8 +98,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     int oflags = 0;
 #if APR_HAS_THREADS
     apr_thread_mutex_t *thlock;
-    apr_status_t rv;
 #endif
+    apr_status_t rv;
 
     if ((flag & APR_FOPEN_READ) && (flag & APR_FOPEN_WRITE)) {
         oflags = O_RDWR;
