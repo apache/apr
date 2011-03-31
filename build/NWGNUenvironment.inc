@@ -142,7 +142,6 @@ LIB	= mwldnlm -type library -w nocmdline
 
 # Setup build tools
 AWK	= awk
-SORT	= sort
 
 #
 # Declare Command and tool macros here
