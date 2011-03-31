@@ -105,7 +105,7 @@ endif
 ifneq ($(MAKECMDGOALS),clean)
 $(APRBUILD)/NWGNUversion.inc : $(APRBUILD)/nw_ver.awk $(APR)/include/apr_version.h
 #	@echo Generating $@
-	@echo GEN  $@
+	@echo $(DL)GEN  $@$(DL)
 	@$(AWK) -f $^ > $@
 
 -include $(APRBUILD)/NWGNUversion.inc
