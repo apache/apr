@@ -29,7 +29,7 @@ nlms :: $(APR)/aprlib.imp
 
 $(APR)/aprlib.imp : make_nw_export.awk nw_export.i
 	@echo $(DL)GEN  $@$(DL)
-	$(AWK) -v EXPPREFIX=APR$(VERSION_MAJMIN) -f $^ | $(SORT) >$@
+	$(AWK) -v EXPPREFIX=APR$(VERSION_MAJMIN) -f $^ >$@
     
 nw_export.i : nw_export.inc $(APU)/build/nw_apu_export.inc $(FILES_prebuild_headers) cc.opt
 	@echo $(DL)GEN  $@$(DL)
