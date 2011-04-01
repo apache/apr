@@ -30,13 +30,13 @@ nlms :: $(APR)/aprlib.imp
 
 $(APR)/aprlib.imp : make_nw_export.awk nw_export.i
 	@echo Generating $(subst /,\,$@)
-	awk -f make_nw_export.awk nw_export.i | sort >$(APR)/aprlib.imp
+	$(AWK) -v EXPPREFIX=APRLIB -f $^ >$@
     
-nw_export.i : nw_export.inc $(FILES_prebuild_headers) $(NLM_NAME)_cc.opt
+nw_export.i : nw_export.inc $(FILES_prebuild_headers) cc.opt
 	@echo Generating $(subst /,\,$@)
-	$(CC) $< @$(NLM_NAME)_cc.opt
+	$(CC) $< @cc.opt
 
-$(NLM_NAME)_cc.opt : NWGNUmakefile $(APR_WORK)\build\NWGNUenvironment.inc $(APR_WORK)\build\NWGNUhead.inc $(APR_WORK)\build\NWGNUtail.inc $(CUSTOM_INI)
+cc.opt : NWGNUmakefile $(APR_WORK)\build\NWGNUenvironment.inc $(APR_WORK)\build\NWGNUhead.inc $(APR_WORK)\build\NWGNUtail.inc $(CUSTOM_INI)
 	$(CHK) $@ $(DEL) $@
 	@echo -P >> $@
 	@echo -EP >> $@
@@ -91,7 +91,7 @@ install :: nlms FORCE
 
 clean ::
 	$(CHK) nw_export.i                                              $(DEL) nw_export.i
-	$(CHK) $(NLM_NAME)_cc.opt                                       $(DEL) $(NLM_NAME)_cc.opt
+	$(CHK) cc.opt                                                   $(DEL) cc.opt
 	$(CHK) NWGNUversion.inc                                         $(DEL) NWGNUversion.inc	
 	$(CHK) $(subst /,\,$(APR))\include\apr.h                        $(DEL) $(subst /,\,$(APR))\include\apr.h
 	$(CHK) $(subst /,\,$(APRUTIL))\include\apu.h                    $(DEL) $(subst /,\,$(APRUTIL))\include\apu.h

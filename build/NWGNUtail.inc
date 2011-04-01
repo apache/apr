@@ -97,6 +97,8 @@ VERSION		= 0,9,0
 VERSION_STR	= 0.9.0
 endif
 endif
+VERSION_MAJMIN	= $(word 1,$(subst ., ,$(VERSION_STR)))$(word 2,$(subst ., ,$(VERSION_STR)))
+ 
 
 ifeq "$(words $(strip $(TARGET_nlm)))" "1"
 INCLUDE_BLDCMDS=1
