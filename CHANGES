@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) MinGW/MSYS:  Support shared builds of APR, other general improvements
+     to support of this toolchain.  PR 46175.  [Carlo Bramini 
+     <carlo.bramix libero.it>]  
+
   *) Support libxml2 as an alternative XML parser to expat [Nick Kew]
 
   *) Hide apr_wait_for_io_or_timeout() from public view and add instead
