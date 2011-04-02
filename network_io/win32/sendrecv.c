@@ -457,6 +457,39 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
 
 APR_DECLARE(apr_status_t) apr_socket_wait(apr_socket_t *sock, apr_wait_type_t direction)
 {
-    return APR_ENOTIMPL;
+    fd_set fdset, *rptr, *wptr;
+    int rc;
+    struct timeval tv, *tvptr;
+
+    FD_ZERO(&fdset);
+    FD_SET(sock->socketdes, &fdset);
+
+    if (direction == APR_WAIT_READ) {
+        rptr = &fdset;
+        wptr = NULL;
+    }
+    else { /* APR_WAIT_WRITE */
+        rptr = NULL;
+        wptr = &fdset;
+    }
+
+    if (sock->timeout < 0) {
+        tvptr = NULL;
+    }
+    else {
+        /* casts for winsock/timeval definition */
+        tv.tv_sec =  (long)apr_time_sec(sock->timeout);
+        tv.tv_usec = (int)apr_time_usec(sock->timeout);
+        tvptr = &tv;
+    }
+    rc = select(/* ignored */ FD_SETSIZE+1, rptr, wptr, NULL, tvptr);
+    if (rc == SOCKET_ERROR) {
+        return apr_get_netos_error();
+    }
+    else if (!rc) {
+        return APR_FROM_OS_ERROR(WSAETIMEDOUT);
+    }
+
+    return APR_SUCCESS;
 }
 
