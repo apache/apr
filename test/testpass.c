@@ -28,6 +28,14 @@
 #include "abts.h"
 #include "testutil.h"
 
+#if defined(WIN32) || defined(BEOS) || defined(NETWARE)
+#define CRYPT_ALGO_SUPPORTED 0
+#else
+#define CRYPT_ALGO_SUPPORTED 1
+#endif
+
+#if CRYPT_ALGO_SUPPORTED
+
 static struct {
     const char *password;
     const char *hash;
@@ -104,6 +112,8 @@ static void test_threadsafe(abts_case *tc, void *data)
 }
 #endif
 
+#endif /* CRYPT_ALGO_SUPPORTED */
+
 static void test_shapass(abts_case *tc, void *data)
 {
     const char *pass = "hellojed";
@@ -130,10 +140,12 @@ abts_suite *testpass(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
 
+#if CRYPT_ALGO_SUPPORTED 
     abts_run_test(suite, test_crypt, NULL);
 #if APR_HAS_THREADS
     abts_run_test(suite, test_threadsafe, NULL);
 #endif
+#endif /* CRYPT_ALGO_SUPPORTED */
     abts_run_test(suite, test_shapass, NULL);
     abts_run_test(suite, test_md5pass, NULL);
     
