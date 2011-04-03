@@ -32,7 +32,7 @@
 #define GENERIC_INADDR_ANY_LEN  16
 #endif
 
-/* big enough for IPv4, IPv6 and optionaly sun_path */
+/* big enough for IPv4, IPv6 and optionally sun_path */
 static char generic_inaddr_any[GENERIC_INADDR_ANY_LEN] = {0};
 
 static apr_status_t socket_cleanup(void *sock)
