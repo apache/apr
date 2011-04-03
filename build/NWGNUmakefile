@@ -45,6 +45,7 @@ cc.opt : NWGNUmakefile $(APR_WORK)/build/NWGNUenvironment.inc $(APR_WORK)/build/
 	@echo $(DL)-I$(APR)/include/arch/netware$(DL)>> $@
 	@echo $(DL)-I$(APR)/include/arch/unix$(DL)>> $@
 	@echo $(DL)-I$(APU)/include$(DL)>> $@
+	@echo $(DL)-I$(APU)/include/private$(DL)>> $@
 	@echo $(DL)-I$(APU)/build$(DL)>> $@
 	@echo $(DL)-ir $(NOVELLLIBC)$(DL)>> $@
 ifneq "$(LDAPSDK)" ""
