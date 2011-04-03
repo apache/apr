@@ -252,6 +252,8 @@ APR_DECLARE(apr_status_t) apr_socket_accept(apr_socket_t **new,
     /* XXX next line looks bogus w.r.t. AF_INET6 support */
     (*new)->remote_addr->salen = sizeof((*new)->remote_addr->sa);
     memcpy (&(*new)->remote_addr->sa, &sa, salen);
+    (*new)->remote_addr_unknown = 0;
+
     *(*new)->local_addr = *sock->local_addr;
 
     /* The above assignment just overwrote the pool entry. Setting the local_addr 
