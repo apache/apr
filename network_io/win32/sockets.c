@@ -253,6 +253,7 @@ APR_DECLARE(apr_status_t) apr_socket_accept(apr_socket_t **new,
     (*new)->remote_addr->salen = sizeof((*new)->remote_addr->sa);
     memcpy (&(*new)->remote_addr->sa, &sa, salen);
     *(*new)->local_addr = *sock->local_addr;
+    (*new)->remote_addr_unknown = 0;
 
     /* The above assignment just overwrote the pool entry. Setting the local_addr 
        pool for the accepted socket back to what it should be.  Otherwise all 
