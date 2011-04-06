@@ -346,6 +346,7 @@ static void test_get_addr(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "create subpool", apr_pool_create(&subp, p));
 
     ld = setup_socket(tc);
+    if (!ld) return;
 
     APR_ASSERT_SUCCESS(tc,
                        "get local address of bound socket",
@@ -446,6 +447,8 @@ static void test_wait(abts_case *tc, void *data)
     int connected = FALSE;
 
     server = setup_socket(tc);
+    if (!server) return;
+
     rv = apr_sockaddr_info_get(&server_addr, socket_name, socket_type, 8021, 0, p);
     APR_ASSERT_SUCCESS(tc, "setting up sockaddr", rv);
 
