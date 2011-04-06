@@ -117,8 +117,8 @@ static void check_sbcs(apr_xlate_t *convset)
          * close the iconv descriptor
          */
 
-        convset->sbcs_table = apr_palloc(convset->pool, sizeof(outbuf));
-        memcpy(convset->sbcs_table, outbuf, sizeof(outbuf));
+        convset->sbcs_table = apr_pmemdup(convset->pool, outbuf, sizeof(outbuf));
+
         iconv_close(convset->ich);
         convset->ich = (iconv_t)-1;
 
