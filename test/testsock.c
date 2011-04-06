@@ -491,6 +491,9 @@ static void test_wait(abts_case *tc, void *data)
 
     rv = apr_socket_wait(client, APR_WAIT_READ);
     APR_ASSERT_SUCCESS(tc, "Wait for socket failed", rv);
+
+    rv = apr_socket_close(server);
+    APR_ASSERT_SUCCESS(tc, "couldn't close server socket", rv);
 }
 
 abts_suite *testsock(abts_suite *suite)
@@ -510,6 +513,8 @@ abts_suite *testsock(abts_suite *suite)
 #if APR_HAVE_SOCKADDR_UN
     socket_name = UNIX_SOCKET_NAME;
     socket_type = APR_UNIX;
+    /* in case AF_UNIX socket exists from a previous run: */
+    apr_file_remove(socket_name, p);
     abts_run_test(suite, test_create_bind_listen, NULL);
     abts_run_test(suite, test_send, NULL);
     abts_run_test(suite, test_recv, NULL);
