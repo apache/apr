@@ -241,7 +241,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     int ret;
     apr_status_t rv = APR_SUCCESS;
 #ifdef WIN32
-    apr_interval_time_t orig_timeout;
+    apr_interval_time_t orig_timeout = timeout;
 #endif
 
     if (timeout > 0) {
