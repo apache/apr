@@ -112,6 +112,8 @@ RELEASE SHOWSTOPPERS:
     these into DSO pluggable providers against the various SDK's/Toolkits.
     Either re-apply r799085, or drop apr_ldap before 2.0.0, per vote on dev@
 
+  * apr_file_rotating_* on most platforms
+
 CURRENT VOTES:
 
 
