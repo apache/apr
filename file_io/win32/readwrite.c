@@ -243,6 +243,17 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
     return rv;
 }
 
+APR_DECLARE(apr_status_t) apr_file_rotating_check(apr_file_t *thefile)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_file_rotating_manual_check(apr_file_t *thefile,
+                                                         apr_time_t n)
+{
+    return APR_ENOTIMPL;
+}
+
 APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
 {
     apr_status_t rv;
