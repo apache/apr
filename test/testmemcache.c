@@ -24,7 +24,7 @@
 #include "apr_network_io.h"
 
 #if APR_HAVE_STDLIB_H
-#include <stdlib.h>		/* for exit() */
+#include <stdlib.h>             /* for exit() */
 #endif
 
 #define HOST "localhost"
@@ -57,7 +57,7 @@ const char txt[] =
  * this datatype is for our custom server determination function. this might
  * be useful if you don't want to rely on simply hashing keys to determine
  * where a key belongs, but instead want to write something fancy, or use some
- * other kind of configuration data, i.e. a hash plus some data about a 
+ * other kind of configuration data, i.e. a hash plus some data about a
  * namespace, or whatever. see my_server_func, and test_memcache_user_funcs
  * for the examples.
  */
@@ -67,7 +67,7 @@ typedef struct {
 } my_hash_server_baton;
 
 
-/* this could do something fancy and return some hash result. 
+/* this could do something fancy and return some hash result.
  * for simplicity, just return the same value, so we can test it later on.
  * if you wanted to use some external hashing library or functions for
  * consistent hashing, for example, this would be a good place to do it.
@@ -82,10 +82,10 @@ static apr_uint32_t my_hash_func(void *baton, const char *data,
 /*
  * a fancy function to determine which server to use given some kind of data
  * and a hash value. this example actually ignores the hash value itself
- * and pulls some number from the *baton, which is a struct that has some 
+ * and pulls some number from the *baton, which is a struct that has some
  * kind of meaningful stuff in it.
  */
-static apr_memcache_server_t *my_server_func(void *baton, 
+static apr_memcache_server_t *my_server_func(void *baton,
                                              apr_memcache_t *mc,
                                              const apr_uint32_t hash)
 {
@@ -94,7 +94,7 @@ static apr_memcache_server_t *my_server_func(void *baton,
 
   if(mc->ntotal == 0) {
     return NULL;
-  } 
+  }
 
   if(mc->ntotal < mhsb->which_server) {
     return NULL;
@@ -112,8 +112,8 @@ static int randval(apr_uint32_t high)
     double d = 0;
 
     if (firsttime == 0) {
-	srand((unsigned) (getpid()));
-	firsttime = 1;
+        srand((unsigned) (getpid()));
+        firsttime = 1;
     }
 
     d = (double) rand() / ((double) RAND_MAX + 1);
@@ -139,40 +139,40 @@ static void test_memcache_create(abts_case * tc, void *data)
 
   rv = apr_memcache_create(pool, max_servers, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
-  
+
   for (i = 1; i <= max_servers; i++) {
     apr_port_t port;
-    
+
     port = PORT + i;
     rv =
       apr_memcache_server_create(pool, HOST, PORT + i, 0, 1, 1, 60, &server);
     ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
-    
+
     rv = apr_memcache_add_server(memcache, server);
     ABTS_ASSERT(tc, "server add failed", rv == APR_SUCCESS);
-    
+
     s = apr_memcache_find_server(memcache, HOST, port);
     ABTS_PTR_EQUAL(tc, server, s);
-    
+
     rv = apr_memcache_disable_server(memcache, s);
     ABTS_ASSERT(tc, "server disable failed", rv == APR_SUCCESS);
-    
+
     rv = apr_memcache_enable_server(memcache, s);
     ABTS_ASSERT(tc, "server enable failed", rv == APR_SUCCESS);
-    
+
     hash = apr_memcache_hash(memcache, prefix, strlen(prefix));
     ABTS_ASSERT(tc, "hash failed", hash > 0);
-    
+
     s = apr_memcache_find_server_hash(memcache, hash);
     ABTS_PTR_NOTNULL(tc, s);
   }
 
   rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1, 60, &server);
   ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
-  
+
   rv = apr_memcache_add_server(memcache, server);
   ABTS_ASSERT(tc, "server add should have failed", rv != APR_SUCCESS);
-  
+
 }
 
 /* install our own custom hashing and server selection routines. */
@@ -180,13 +180,13 @@ static void test_memcache_create(abts_case * tc, void *data)
 static int create_test_hash(apr_pool_t *p, apr_hash_t *h)
 {
   int i;
-  
+
   for (i = 0; i < TDATA_SIZE; i++) {
     char *k, *v;
-    
+
     k = apr_pstrcat(p, prefix, apr_itoa(p, i), NULL);
     v = apr_pstrndup(p, txt, randval((apr_uint32_t)strlen(txt)));
-    
+
     apr_hash_set(h, k, APR_HASH_KEY_STRING, v);
   }
 
@@ -202,13 +202,13 @@ static void test_memcache_user_funcs(abts_case * tc, void *data)
   apr_uint32_t max_servers = 10;
   apr_uint32_t hres;
   apr_uint32_t i;
-  my_hash_server_baton *baton = 
+  my_hash_server_baton *baton =
     apr_pcalloc(pool, sizeof(my_hash_server_baton));
 
   rv = apr_memcache_create(pool, max_servers, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
 
-  /* as noted above, install our custom hash function, and call 
+  /* as noted above, install our custom hash function, and call
    * apr_memcache_hash. the return value should be our predefined number,
    * and our function just ignores the other args, for simplicity.
    */
@@ -216,24 +216,24 @@ static void test_memcache_user_funcs(abts_case * tc, void *data)
 
   hres = apr_memcache_hash(memcache, "whatever", sizeof("whatever") - 1);
   ABTS_INT_EQUAL(tc, HASH_FUNC_RESULT, hres);
-  
+
   /* add some servers */
   for(i = 1; i <= 10; i++) {
     apr_memcache_server_t *ms;
 
     rv = apr_memcache_server_create(pool, HOST, i, 0, 1, 1, 60, &ms);
     ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
-    
+
     rv = apr_memcache_add_server(memcache, ms);
     ABTS_ASSERT(tc, "server add failed", rv == APR_SUCCESS);
   }
 
-  /* 
-   * set 'which_server' in our server_baton to find the third server 
+  /*
+   * set 'which_server' in our server_baton to find the third server
    * which should have the same port.
    */
   baton->which_server = 3;
-  memcache->server_func = my_server_func; 
+  memcache->server_func = my_server_func;
   memcache->server_baton = baton;
   found = apr_memcache_find_server_hash(memcache, 0);
   ABTS_ASSERT(tc, "wrong server found", found->port == baton->which_server);
@@ -266,11 +266,11 @@ static void test_memcache_meta(abts_case * tc, void *data)
 
     ABTS_STR_NEQUAL(tc, stats->version, result, 5);
 
-    /* 
+    /*
      * no way to know exactly what will be in most of these, so
      * just make sure there is something.
      */
-    
+
     ABTS_ASSERT(tc, "pid", stats->pid >= 0);
     ABTS_ASSERT(tc, "time", stats->time >= 0);
     /* ABTS_ASSERT(tc, "pointer_size", stats->pointer_size >= 0); */
@@ -283,7 +283,7 @@ static void test_memcache_meta(abts_case * tc, void *data)
 
     ABTS_ASSERT(tc, "curr_connections", stats->curr_connections >= 0);
     ABTS_ASSERT(tc, "total_connections", stats->total_connections >= 0);
-    ABTS_ASSERT(tc, "connection_structures", 
+    ABTS_ASSERT(tc, "connection_structures",
                 stats->connection_structures >= 0);
 
     ABTS_ASSERT(tc, "cmd_get", stats->cmd_get >= 0);
@@ -315,13 +315,13 @@ static void test_memcache_addreplace(abts_case * tc, void *data)
 
   rv = apr_memcache_create(pool, 1, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
-  
+
   rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1, 60, &server);
   ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
-  
+
   rv = apr_memcache_add_server(memcache, server);
   ABTS_ASSERT(tc, "server add failed", rv == APR_SUCCESS);
-  
+
   tdata = apr_hash_make(p);
   create_test_hash(pool, tdata);
 
@@ -336,7 +336,7 @@ static void test_memcache_addreplace(abts_case * tc, void *data)
     /* doesn't exist yet, fail */
     rv = apr_memcache_replace(memcache, key, v, strlen(v) - 1, 0, 27);
     ABTS_ASSERT(tc, "replace should have failed", rv != APR_SUCCESS);
-    
+
     /* doesn't exist yet, succeed */
     rv = apr_memcache_add(memcache, key, v, strlen(v), 0, 27);
     ABTS_ASSERT(tc, "add failed", rv == APR_SUCCESS);
@@ -374,16 +374,16 @@ static void test_memcache_incrdecr(abts_case * tc, void *data)
 
   rv = apr_memcache_create(pool, 1, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
-  
+
   rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1, 60, &server);
   ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
-  
+
   rv = apr_memcache_add_server(memcache, server);
   ABTS_ASSERT(tc, "server add failed", rv == APR_SUCCESS);
 
   rv = apr_memcache_set(memcache, prefix, "271", sizeof("271") - 1, 0, 27);
   ABTS_ASSERT(tc, "set failed", rv == APR_SUCCESS);
-  
+
   for( i = 1; i <= TDATA_SIZE; i++) {
     apr_uint32_t expect;
 
@@ -426,16 +426,16 @@ static void test_memcache_multiget(abts_case * tc, void *data)
 
   rv = apr_memcache_create(pool, 1, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
-  
+
   rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1, 60, &server);
   ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
-  
+
   rv = apr_memcache_add_server(memcache, server);
   ABTS_ASSERT(tc, "server add failed", rv == APR_SUCCESS);
-  
+
   values = apr_hash_make(p);
   tdata = apr_hash_make(p);
-  
+
   create_test_hash(pool, tdata);
 
   for (hi = apr_hash_first(p, tdata); hi; hi = apr_hash_next(hi)) {
@@ -449,34 +449,34 @@ static void test_memcache_multiget(abts_case * tc, void *data)
     rv = apr_memcache_set(memcache, key, v, strlen(v), 0, 27);
     ABTS_ASSERT(tc, "set failed", rv == APR_SUCCESS);
   }
-  
+
   rv = apr_pool_create(&tmppool, pool);
   for (i = 0; i < TDATA_SET; i++)
     apr_memcache_add_multget_key(pool,
                                  apr_pstrcat(pool, prefix,
                                              apr_itoa(pool, i), NULL),
                                  &values);
-    
+
   rv = apr_memcache_multgetp(memcache,
                              tmppool,
                              pool,
                              values);
-  
+
   ABTS_ASSERT(tc, "multgetp failed", rv == APR_SUCCESS);
   ABTS_ASSERT(tc, "multgetp returned too few results",
               apr_hash_count(values) == TDATA_SET);
-  
+
   for (hi = apr_hash_first(p, tdata); hi; hi = apr_hash_next(hi)) {
     const void *k;
     const char *key;
-    
+
     apr_hash_this(hi, &k, NULL, NULL);
     key = k;
 
     rv = apr_memcache_delete(memcache, key, 0);
     ABTS_ASSERT(tc, "delete failed", rv == APR_SUCCESS);
   }
-  
+
 }
 
 /* test setting and getting */
@@ -507,17 +507,17 @@ static void test_memcache_setget(abts_case * tc, void *data)
     create_test_hash(pool, tdata);
 
     for (hi = apr_hash_first(p, tdata); hi; hi = apr_hash_next(hi)) {
-	const void *k;
-	void *v;
+        const void *k;
+        void *v;
         const char *key;
 
-	apr_hash_this(hi, &k, NULL, &v);
+        apr_hash_this(hi, &k, NULL, &v);
         key = k;
 
-	rv = apr_memcache_set(memcache, key, v, strlen(v), 0, 27);
-	ABTS_ASSERT(tc, "set failed", rv == APR_SUCCESS);
-	rv = apr_memcache_getp(memcache, pool, key, &result, &len, NULL);
-	ABTS_ASSERT(tc, "get failed", rv == APR_SUCCESS);
+        rv = apr_memcache_set(memcache, key, v, strlen(v), 0, 27);
+        ABTS_ASSERT(tc, "set failed", rv == APR_SUCCESS);
+        rv = apr_memcache_getp(memcache, pool, key, &result, &len, NULL);
+        ABTS_ASSERT(tc, "get failed", rv == APR_SUCCESS);
     }
 
     rv = apr_memcache_getp(memcache, pool, "nothere3423", &result, &len, NULL);
@@ -525,19 +525,19 @@ static void test_memcache_setget(abts_case * tc, void *data)
     ABTS_ASSERT(tc, "get should have failed", rv != APR_SUCCESS);
 
     for (hi = apr_hash_first(p, tdata); hi; hi = apr_hash_next(hi)) {
-	const void *k;
-	const char *key;
+        const void *k;
+        const char *key;
 
-	apr_hash_this(hi, &k, NULL, NULL);
-	key = k;
+        apr_hash_this(hi, &k, NULL, NULL);
+        key = k;
 
-	rv = apr_memcache_delete(memcache, key, 0);
-	ABTS_ASSERT(tc, "delete failed", rv == APR_SUCCESS);
+        rv = apr_memcache_delete(memcache, key, 0);
+        ABTS_ASSERT(tc, "delete failed", rv == APR_SUCCESS);
     }
 }
 
-/* use apr_socket stuff to see if there is in fact a memcached server 
- * running on PORT. 
+/* use apr_socket stuff to see if there is in fact a memcached server
+ * running on PORT.
  */
 static apr_status_t check_mc(void)
 {
@@ -604,7 +604,7 @@ abts_suite *testmemcache(abts_suite * suite)
 {
     apr_status_t rv;
     suite = ADD_SUITE(suite);
-    /* check for a running memcached on the typical port before 
+    /* check for a running memcached on the typical port before
      * trying to run the tests. succeed silently if we don't find one.
      */
     rv = check_mc();
