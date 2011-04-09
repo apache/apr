@@ -1289,7 +1289,6 @@ APR_FLAG_HEADERS(
     mach-o/dyld.h	\
     malloc.h		\
     memory.h		\
-    mswsock.h		\
     netdb.h		\
     osreldate.h		\
     poll.h		\
@@ -1340,6 +1339,18 @@ APR_FLAG_HEADERS(
     sys/uio.h		\
     sys/un.h		\
     sys/wait.h)
+
+# Windows' <mswsock.h> requires <windows.h> first
+AC_CACHE_CHECK([for mswsock.h], [apr_cv_hdr_mswsock_h],
+[AC_TRY_CPP(
+[#include <windows.h>
+#include <mswsock.h>
+], [apr_cv_hdr_mswsock_h=yes], [apr_cv_hdr_mswsock_h=no])])
+if test "$apr_cv_hdr_mswsock_h" = "yes"; then
+   mswsockh=1
+else
+   mswsockh=0
+fi
 
 # IRIX 6.5 has a problem in <netinet/tcp.h> which prevents it from
 # being included by itself.  Check for <netinet/tcp.h> manually,
