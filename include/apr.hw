@@ -122,6 +122,7 @@
 #define APR_HAVE_DIRENT_H       0
 #define APR_HAVE_ERRNO_H         APR_NOT_IN_WCE
 #define APR_HAVE_FCNTL_H         APR_NOT_IN_WCE
+#define APR_HAVE_IF_ADDRS_H     0
 #define APR_HAVE_IO_H            APR_NOT_IN_WCE
 #define APR_HAVE_LIMITS_H        APR_NOT_IN_WCE
 #define APR_HAVE_MSWSOCK_H       APR_NOT_IN_WCE
@@ -130,6 +131,7 @@
 #define APR_HAVE_NETINET_SCTP_H 0
 #define APR_HAVE_NETINET_SCTP_UIO_H 0
 #define APR_HAVE_NETINET_TCP_H  0
+#define APR_HAVE_PROCESS_H      1
 #define APR_HAVE_PTHREAD_H      0
 #define APR_HAVE_SEMAPHORE_H    0
 #define APR_HAVE_SIGNAL_H        APR_NOT_IN_WCE
@@ -222,12 +224,12 @@
 #include <sys/types.h>
 #endif
 
-#if APR_HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-
 #if APR_HAVE_STDDEF_H
 #include <stddef.h>
+#endif
+
+#if APR_HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
 #endif
 
 #if APR_HAVE_STDINT_H
