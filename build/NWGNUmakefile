@@ -15,6 +15,23 @@ include $(APR_WORK)/build/NWGNUhead.inc
 #
 # build this level's files
 
+#
+# Make sure all needed macro's are defined
+#
+
+#
+# These directories will be at the beginning of the include list, followed by
+# INCDIRS
+#
+XINCDIRS += \
+	$(APR)/include \
+	$(APR)/include/private \
+	$(APR)/include/arch/netware \
+	$(APR)/include/arch/unix \
+	$(APRBUILD) \
+	$(LDAPSDK)/inc \
+	$(EOLIST)
+
 FILES_prebuild_headers = \
 	$(APR)/include/apr.h \
 	$(APR)/include/apu_want.h \
@@ -25,30 +42,12 @@ FILES_prebuild_headers = \
 nlms :: $(APR)/aprlib.imp
 
 $(APR)/aprlib.imp : make_nw_export.awk nw_export.i
-#	@echo Generating $@
 	@echo $(DL)GEN  $@$(DL)
 	$(AWK) -v EXPPREFIX=APR$(VERSION_MAJMIN) -f $^ >$@
 
-nw_export.i : nw_export.inc $(FILES_prebuild_headers) cc.opt
-#	@echo Generating $@
+nw_export.i : nw_export.h $(FILES_prebuild_headers) $(CCOPT_DEPENDS)
 	@echo $(DL)GEN  $@$(DL)
-	$(CC) $< @cc.opt
-
-cc.opt : NWGNUmakefile $(APR)/build/NWGNUenvironment.inc $(APR)/build/NWGNUhead.inc $(APR)/build/NWGNUtail.inc $(CUSTOM_INI)
-	@echo -P > $@
-	@echo -EP >> $@
-	@echo -nosyspath >> $@
-	@echo -w nocmdline >> $@
-	@echo $(DEFINES) -DGENEXPORTS >> $@
-	@echo -I$(APR)/include >> $@
-	@echo -I$(APR)/include/private >> $@
-	@echo -I$(APR)/include/arch/netware >> $@
-	@echo -I$(APR)/include/arch/unix >> $@
-	@echo -I$(APR)/build >> $@
-	@echo -ir $(NOVELLLIBC) >> $@
-ifneq "$(LDAPSDK)" ""
-	@echo -ir $(LDAPSDK) >> $@
-endif
+	$(CPRE) $(CCFLAGS) -DGENEXPORTS $< -o $@
 
 %.h: %.hnw
 	@echo Creating $@
