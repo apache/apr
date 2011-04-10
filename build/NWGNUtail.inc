@@ -179,7 +179,7 @@ ifeq "$(words $(strip $(TARGET_lib)))" "1"
 $(TARGET_lib) : $(OBJDIR)/$(LIB_NAME)_lib.lst
 	$(call DEL,$@)
 	@echo $(DL)AR   $@$(DL)
-	$(AR) -o $@ @$<
+	$(AR) $@ @$<
 ifdef RANLIB
 	$(RANLIB) $@
 endif

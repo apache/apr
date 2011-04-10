@@ -25,7 +25,7 @@ include $(APR_WORK)/build/NWGNUhead.inc
 #
 XINCDIRS	+= \
 			$(APR)/include \
-			$(APR)/include/arch/NetWare \
+			$(APR)/include/arch/netware \
 			$(APR)/include/private \
 			$(LDAPSDK)/inc \
 			$(EOLIST)
