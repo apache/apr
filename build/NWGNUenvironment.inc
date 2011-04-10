@@ -136,11 +136,11 @@ ifdef METROWERKS
 #METROWERKS = $(ProgramFiles)\Metrowerks\CodeWarrior
 #endif
 
-CC		= mwccnlm -w nocmdline -nosyspath
-CPP		= $(CC)
-CPRE	= $(CC) -P -EP
+CC	= mwccnlm -w nocmdline -nosyspath
+CPP	= $(CC)
+CPRE	= $(CC) -EP
 LINK	= mwldnlm -w nocmdline
-AR		= $(LINK) -type library
+AR	= $(LINK) -type library -o
 
 ifneq ($(findstring /sh,$(SHELL)),/sh)
 PATH:=$(PATH);$(METROWERKS)\bin;$(METROWERKS)\Other Metrowerks Tools\Command Line Tools
@@ -187,11 +187,11 @@ PRELUDE	= $(NOVI)/libcpre.o
 else
 # GNU NLM tools (gcc / nlmconv)
 
-CC		= gcc
-CPP		= g++
-CPRE	= $(CC) -E
+CC	= gcc
+CPP	= g++
+CPRE	= $(CC) -P -E
 LINK	= nlmconv -UT
-AR		= ar cru
+AR	= ar cru
 RANLIB	= ranlib
 
 CFLAGS	= -m32 -fno-builtin -fpcc-struct-return -fstrict-aliasing
@@ -223,12 +223,12 @@ PRELUDE	= $(NOVI)/libcpre.gcc.o
 
 endif
 
-# -prefix apr_arch_pre_nw.h      #include pre_nw.h for all files
-CFLAGS	+= -prefix apr_arch_pre_nw.h
+# -include apr_arch_pre_nw.h      #include pre_nw.h for all files
+CFLAGS	+= -include apr_arch_pre_nw.h
 
 
 # Setup build tools
-AWK		= awk
+AWK	= awk
 
 #
 # Declare Command and tool macros here

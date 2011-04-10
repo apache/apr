@@ -17,7 +17,7 @@ endif
 #
 XINCDIRS	+= \
 			$(APR)/include \
-			$(APR)/include/arch/NetWare \
+			$(APR)/include/arch/netware \
 			$(EOLIST)
 
 #
