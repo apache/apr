@@ -43,10 +43,9 @@ include $(APR_WORK)/build/NWGNUhead.inc
 XINCDIRS	+= \
 			$(APR)/include \
 			$(APR)/include/private \
-			$(APR)/include/arch/NetWare \
+			$(APR)/include/arch/netware \
 			$(APR)/include/arch/unix \
 			$(APR)/dbm/sdbm \
-			$(APR)/memory/unix \
 			$(APR)/random/unix \
 			$(LDAPSDK)/inc \
 			$(EOLIST)
@@ -428,6 +427,7 @@ nlms :: libs $(TARGET_nlm)
 # Updated this target to create necessary directories and copy files to the
 # correct place.  (See $(APR_WORK)/build/NWGNUhead.inc for examples)
 #
+
 install :: nlms $(INSTDIRS) FORCE
 	$(call COPY,$(APR)/$(TARGET_nlm),$(INSTALLBASE)/)
 ifndef DEST
@@ -453,9 +453,10 @@ endif
 # Any specialized rules here
 #
 
+vpath filepath.c file_io/win32
 vpath %.c atomic/netware:strings:tables:passwd:time/unix
-vpath %.c file_io/unix:locks/netware:misc/netware:misc/unix:threadproc/netware
-vpath %.c poll/unix:shmem/unix:support/unix:random/unix
+vpath %.c file_io/netware:file_io/unix:locks/netware:misc/netware:misc/unix
+vpath %.c threadproc/netware:poll/unix:shmem/unix:support/unix:random/unix
 vpath %.c dso/netware:memory/unix:mmap/unix:user/netware:util-misc
 vpath %.c buckets:crypto:dbd:dbm:dbm/sdbm:encoding:hooks:memcache:misc:strmatch:uri:xlate
 
@@ -464,11 +465,6 @@ ifndef USE_STDSOCKETS
 vpath %.c network_io/win32
 endif
 vpath %.c network_io/unix
-
-$(OBJDIR)/%.o: file_io/netware/%.c $(OBJDIR)/$(NLM_NAME)_cc.opt
-#	@echo Compiling $<
-	@echo $(DL)CC   $<$(DL)
-	$(CC) -cwd source -o $@ $< @$(OBJDIR)/$(NLM_NAME)_cc.opt
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined

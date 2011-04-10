@@ -71,10 +71,6 @@ ifndef EXPAT_INC
 $(error neither EXPATSDK nor EXPATSRC defined - cant compile without EXPAT SDK or source tree) 
 endif
 
-ifndef METROWERKS
-METROWERKS = $(ProgramFiles)\Metrowerks\CodeWarrior
-endif
-
 # If LM_LICENSE_FILE isn't defined, define a variable that can be used to
 # restart make with it defined
 ifndef LM_LICENSE_FILE
@@ -134,14 +130,105 @@ OBJDIR = obj_$(RELEASE)
 # Setup compiler information
 #
 
+ifdef METROWERKS
 # MetroWerks NLM tools
-CC	= mwccnlm
-CPP	= mwccnlm
-LINK	= mwldnlm
-LIB	= mwldnlm -type library -w nocmdline
+#ifndef METROWERKS
+#METROWERKS = $(ProgramFiles)\Metrowerks\CodeWarrior
+#endif
+
+CC		= mwccnlm -w nocmdline -nosyspath
+CPP		= $(CC)
+CPRE	= $(CC) -P -EP
+LINK	= mwldnlm -w nocmdline
+AR		= $(LINK) -type library
+
+ifneq ($(findstring /sh,$(SHELL)),/sh)
+PATH:=$(PATH);$(METROWERKS)\bin;$(METROWERKS)\Other Metrowerks Tools\Command Line Tools
+endif
+
+# MetroWerks static Libraries
+CLIB3S	= $(METROWERKS)/Novell Support/Metrowerks Support/Libraries/Runtime/mwcrtl.lib
+MATH3S	=
+PLIB3S	= $(METROWERKS)/Novell Support/Metrowerks Support/Libraries/MSL C++/MWCPP.lib
+
+# Base compile flags
+# and prefix or precompiled header added here.
+
+# The default flags are as follows:
+#
+# -w nocmdline          disable command-line driver/parser warnings
+# -nosyspath            treat #include <...> like #include "..."
+# -Cpp_exceptions off   disable C++ exceptions
+# -RTTI off             disable C++ run-time typing information
+# -align 4              align on 4 byte bounderies
+# -proc PII             generate code base on Pentium II instruction set
+# -inst mmx             use MMX extensions (not used)
+
+CFLAGS	= -proc PII -align 4
+CPFLAGS	= -Cpp_exceptions off -RTTI off
+
+ifeq "$(REQUIRE_PROTOTYPES)" "1"
+CFLAGS	+= -r
+endif
+
+# -g                    generate debugging information
+# -O0                   level 0 optimizations
+ifeq "$(RELEASE)" "debug"
+CFLAGS	+= -g -O0
+endif
+
+# -O4,p                 level 4 optimizations, optimize for speed
+ifeq "$(RELEASE)" "release"
+CFLAGS	+= -O4,p
+endif
+
+PRELUDE	= $(NOVI)/libcpre.o
+
+else
+# GNU NLM tools (gcc / nlmconv)
+
+CC		= gcc
+CPP		= g++
+CPRE	= $(CC) -E
+LINK	= nlmconv -UT
+AR		= ar cru
+RANLIB	= ranlib
+
+CFLAGS	= -m32 -fno-builtin -fpcc-struct-return -fstrict-aliasing
+CFLAGS	+= -fpack-struct=4
+CFLAGS	+= -Wall
+CFLAGS	+= -Wdeclaration-after-statement -Wmissing-declarations -Wmissing-prototypes
+
+ifdef MAINTAINER
+CFLAGS	+= \
+	-W -Wpointer-arith -Wwrite-strings -Wunused -Wshadow -Winline \
+	-Wnested-externs -Wcast-align -Wtype-limits -Wstrict-prototypes \
+	-Wfloat-equal -Wno-multichar -Wsign-compare -Wundef -Wendif-labels \
+	-Wold-style-declaration -Wmissing-parameter-type -Wempty-body \
+	-Wclobbered -Wignored-qualifiers -Wconversion -Wvla -pedantic
+endif
+
+# -g                    generate debugging information
+# -O0                   level 0 optimizations
+ifeq "$(RELEASE)" "debug"
+CFLAGS	+= -g -O0
+endif
+
+# -O3                   level 3 optimizations, optimize for speed
+ifeq "$(RELEASE)" "release"
+CFLAGS	+= -O3
+endif
+
+PRELUDE	= $(NOVI)/libcpre.gcc.o
+
+endif
+
+# -prefix apr_arch_pre_nw.h      #include pre_nw.h for all files
+CFLAGS	+= -prefix apr_arch_pre_nw.h
+
 
 # Setup build tools
-AWK	= awk
+AWK		= awk
 
 #
 # Declare Command and tool macros here
@@ -178,16 +265,14 @@ endif
 endif
 
 NOVI	= $(NOVELLLIBC)/imports
-PRELUDE	= $(NOVI)/libcpre.o
-
-INCDIRS	= $(NOVELLLIBC)/include;
+INCDIRS	= $(NOVELLLIBC)/include
 
 DEFINES	= -DNETWARE
 ifdef USE_STDSOCKETS
 DEFINES	+= -DUSE_BSD_SOCKETS
 else
 DEFINES	+= -DUSE_WINSOCK
-INCDIRS	+= $(NOVELLLIBC)/include/winsock;
+INCDIRS	+= $(NOVELLLIBC)/include/winsock
 endif
 ifndef DEBUG
 DEFINES	+= -DNDEBUG
@@ -197,50 +282,6 @@ ifdef USE_STDSOCKETS
 VERSION_SKT = (BSDSOCK)
 else
 VERSION_SKT = (WINSOCK)
-endif
-
-# MetroWerks static Libraries
-CLIB3S	= $(METROWERKS)/Novell Support/Metrowerks Support/Libraries/Runtime/mwcrtl.lib
-MATH3S	=
-PLIB3S	= $(METROWERKS)/Novell Support/Metrowerks Support/Libraries/MSL C++/MWCPP.lib
-
-# Base compile flags
-# and prefix or precompiled header added here.
-
-# The default flags are as follows:
-#
-# -c                    compile only, no link
-# -nosyspath            treat #include <...> like #include "..."
-# -Cpp_exceptions off   disable C++ exceptions
-# -RTTI off             disable C++ run-time typing information
-# -align 4              align on 4 byte bounderies
-# -w nocmdline          disable command-line driver/parser warnings
-# -proc PII             generate code base on Pentium II instruction set
-# -inst mmx             use MMX extensions (not used)
-
-CFLAGS = -c -nosyspath -Cpp_exceptions off -RTTI off -align 4 -w nocmdline -proc PII
-
-ifeq "$(REQUIRE_PROTOTYPES)" "1"
-CFLAGS += -r
-endif
-
-# -g                    generate debugging information
-# -O0                   level 0 optimizations
-ifeq "$(RELEASE)" "debug"
-CFLAGS += -g -O0
-endif
-
-# -O4,p                 level 4 optimizations, optimize for speed
-ifeq "$(RELEASE)" "release"
-CFLAGS += -O4,p
-endif
-
-# -prefix apr_arch_pre_nw.h      #include pre_nw.h for all files
-CFLAGS += -prefix apr_arch_pre_nw.h
-
-
-ifneq ($(findstring /sh,$(SHELL)),/sh)
-PATH:=$(PATH);$(METROWERKS)\bin;$(METROWERKS)\Other Metrowerks Tools\Command Line Tools
 endif
 
 #
@@ -270,7 +311,7 @@ endif
 # Add support for building IPV6 alongside
 ifneq "$(IPV6)" ""
 DEFINES += -DNW_BUILD_IPV6
-# INCDIRS := $(NOVELLLIBC)/include/winsock/IPV6;$(INCDIRS)
+# INCDIRS := $(NOVELLLIBC)/include/winsock/IPV6 $(INCDIRS)
 
 ifneq "$(findstring IPV6,$(OBJDIR))" "IPV6"
 OBJDIR := $(OBJDIR)_IPV6
