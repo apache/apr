@@ -48,15 +48,16 @@ typedef struct apr_ldap_rebind_entry apr_ldap_rebind_entry_t;
 
 
 #ifdef NETWARE
-#define get_apd                 APP_DATA* apd = (APP_DATA*)get_app_data(gLibId);
-#define apr_ldap_xref_lock      ((apr_thread_mutex_t *)(apd->gs_ldap_xref_lock))
-#define xref_head               ((apr_ldap_rebind_entry_t *)(apd->gs_xref_head))
-#else
+#define get_apd \
+    APP_DATA* apd = (APP_DATA*)get_app_data(gLibId); \
+    apr_ldap_xref_lock = (apr_thread_mutex_t *)apd->gs_ldap_xref_lock; \
+    xref_head = (apr_ldap_rebind_entry_t *)apd->gs_xref_head;
+#endif
+
 #if APR_HAS_THREADS
 static apr_thread_mutex_t *apr_ldap_xref_lock = NULL;
 #endif
 static apr_ldap_rebind_entry_t *xref_head = NULL;
-#endif
 
 static int apr_ldap_rebind_set_callback(LDAP *ld);
 static apr_status_t apr_ldap_rebind_remove_helper(void *data);
