@@ -91,7 +91,7 @@ static void default_handler(void *userData, const XML_Char *s, int len)
 }
 #endif
 
-APR_DECLARE(apr_xml_parser *) apr_xml_parser_create_ex(apr_pool_t *pool,
+apr_xml_parser* apr_xml_parser_create_internal(apr_pool_t *pool,
     void *start_func, void *end_func, void *cdata_func)
 {
     apr_xml_parser *parser = apr_pcalloc(pool, sizeof(*parser));

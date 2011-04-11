@@ -43,6 +43,6 @@ struct apr_xml_parser {
     XMLParserImpl *impl;
 };
 
-APR_DECLARE(apr_xml_parser *) apr_xml_parser_create_ex(apr_pool_t*, void*, void*, void*);
+apr_xml_parser* apr_xml_parser_create_internal(apr_pool_t*, void*, void*, void*);
 
 #endif
