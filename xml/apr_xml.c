@@ -316,7 +316,7 @@ static void cdata_handler(void *userdata, const char *data, int len)
 
 APR_DECLARE(apr_xml_parser *) apr_xml_parser_create(apr_pool_t *pool)
 {
-    return apr_xml_parser_create_ex(pool, &start_handler, &end_handler, &cdata_handler);
+    return apr_xml_parser_create_internal(pool, &start_handler, &end_handler, &cdata_handler);
 }
 
 APR_DECLARE(apr_status_t) apr_xml_parser_feed(apr_xml_parser *parser,
