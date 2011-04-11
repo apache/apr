@@ -456,16 +456,22 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         APR_SETIFNULL(ac_cv_tcp_nodelay_inherited, [yes])
         APR_SETIFNULL(ac_cv_file__dev_zero, [no])
         APR_SETIFNULL(ac_cv_func_setpgrp_void, [no])
+        APR_SETIFNULL(ac_cv_func_mmap, [yes])
         case $host in
             *mingw32*)
                 APR_SETIFNULL(apr_has_xthread_files, [1])
                 APR_SETIFNULL(apr_has_user, [1])
                 APR_SETIFNULL(apr_procattr_user_set_requires_password, [1])
+                dnl The real function is TransmitFile(), not sendfile(), but
+                dnl this bypasses the Linux/Solaris/AIX/etc. test and enables
+                dnl the TransmitFile() implementation.
+                APR_SETIFNULL(ac_cv_func_sendfile, [yes])
                 ;;
             *mingwce)
                 APR_SETIFNULL(apr_has_xthread_files, [0])
                 APR_SETIFNULL(apr_has_user, [0])
                 APR_SETIFNULL(apr_procattr_user_set_requires_password, [0])
+                APR_SETIFNULL(ac_cv_func_sendfile, [no])
                 ;;
         esac
         ;;
