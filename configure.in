@@ -669,14 +669,8 @@ dnl without the extra " " in that case, but they didn't do that.  So, we
 dnl end up LIBS="-lm -lcrypt -lnsl  -ldl" which is an annoyance.
 case $host in
    *mingw*)
-      AC_CHECK_LIB(msvcrt, getpid)
-      APR_CHECK_DLL_FUNC(kernel32, SetErrorMode@4)
-      APR_CHECK_DLL_FUNC(advapi32, GetSecurityInfo@32)
-      APR_CHECK_DLL_FUNC(ws2_32, gethostbyname@4)
-      APR_CHECK_DLL_FUNC(shell32, CommandLineToArgvW@8)
-      APR_CHECK_DLL_FUNC(kernel32,[CreateFileMappingA@24],
-         [ac_cv_func_CreateFileMapping=$ac_cv_lib_kernel32_CreateFileMappingA])
-      APR_CHECK_DLL_FUNC(rpcrt4,[UuidCreate@4])
+      APR_ADDTO(LIBS,[-lshell32 -ladvapi32 -lws2_32 -lrpcrt4 -lmswsock])
+      ac_cv_func_CreateFileMapping=yes
       ;;
    *)
       AC_SEARCH_LIBS(gethostbyname, nsl)
