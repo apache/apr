@@ -22,21 +22,19 @@
  */
 
 #include "apr.h"
-#include "apu.h"
 #include "apr_private.h"
+#include "apr_ldap.h"
+
+#if APR_HAS_LDAP
 
 #if APR_HAVE_MODULAR_DSO
 #define APU_DSO_LDAP_BUILD
 #endif
 
-#include "apr_ldap.h"
 #include "apr_errno.h"
 #include "apr_strings.h"
-#include "apr_ldap_rebind.h"
 
 #include "stdio.h"
-
-#if APR_HAS_LDAP
 
 /* Used to store information about connections for use in the referral rebind callback. */
 struct apr_ldap_rebind_entry {
@@ -50,7 +48,6 @@ typedef struct apr_ldap_rebind_entry apr_ldap_rebind_entry_t;
 
 
 #ifdef NETWARE
-#include "apr_private.h"
 #define get_apd                 APP_DATA* apd = (APP_DATA*)get_app_data(gLibId);
 #define apr_ldap_xref_lock      ((apr_thread_mutex_t *)(apd->gs_ldap_xref_lock))
 #define xref_head               ((apr_ldap_rebind_entry_t *)(apd->gs_xref_head))
