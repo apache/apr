@@ -707,7 +707,7 @@ typedef  int         gid_t;
      && (*(const apr_uint32_t *)(const void *)(&(a)->s6_addr[8]) == ntohl(0x0000ffff)))
 #endif
 
-#endif /* APR_HAS_IPV6 */
+#endif /* APR_HAVE_IPV6 */
 
 #ifdef __cplusplus
 }
