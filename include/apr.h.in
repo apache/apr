@@ -127,6 +127,8 @@
 #endif
 
 #ifndef _WIN32_WINNT
+/* Restrict the server to a subset of Windows XP header files by default
+ */
 #define _WIN32_WINNT 0x0501
 #endif
 
@@ -140,20 +142,23 @@
 #define NOIME
 #endif
 
-/* Impossible to include winsock2.h after winsock.h, while windows.h
- * attempts to load winsock.  Setting _WINSOCKAPI_ will dodge this.
+#include <windows.h>
+/* 
+ * Add a _very_few_ declarations missing from the restricted set of headers
+ * (If this list becomes extensive, re-enable the required headers above!)
+ * winsock headers were excluded by WIN32_LEAN_AND_MEAN, so include them now
  */
-#if APR_HAVE_WINSOCK2_H
-#define _WINSOCKAPI_
+#define SW_HIDE             0
+#ifndef _WIN32_WCE
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <mswsock.h>
+#else
+#include <winsock.h>
 #endif
 
-#include <windows.h>
 #endif /* ndef _WINDOWS_ */
 #endif /* APR_HAVE_WINDOWS_H */
-
-#if APR_HAVE_WINSOCK2_H
-#include <winsock2.h>
-#endif
 
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
