@@ -457,6 +457,10 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         APR_SETIFNULL(ac_cv_file__dev_zero, [no])
         APR_SETIFNULL(ac_cv_func_setpgrp_void, [no])
         APR_SETIFNULL(ac_cv_func_mmap, [yes])
+        APR_SETIFNULL(ac_cv_define_sockaddr_in6, [yes])
+        APR_SETIFNULL(ac_cv_working_getaddrinfo, [yes])
+        APR_SETIFNULL(ac_cv_working_getnameinfo, [yes])
+        APR_SETIFNULL(ac_cv_func_gai_strerror, [yes])
         case $host in
             *mingw32*)
                 APR_SETIFNULL(apr_has_xthread_files, [1])
