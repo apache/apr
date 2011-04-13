@@ -282,6 +282,7 @@ extern "C" {
 #define APR_HAVE_SIGACTION      0
 #define APR_HAVE_SIGSUSPEND     0
 #define APR_HAVE_SIGWAIT        0
+#define APR_HAVE_SA_STORAGE     0
 #define APR_HAVE_STRCASECMP     0
 #define APR_HAVE_STRDUP         1
 #define APR_HAVE_STRNCASECMP    0
