@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.3
 
+  *) Fix APR_IPV6_V6ONLY issues on Windows related to run-time behavior 
+     on Windows older than Vista and SDK/MinGW levels without IPV6_V6ONLY.
+     PR 45321.  [Sob <sob hisoftware.cz>]
+
   *) Fix address handling when accepting an AF_INET socket from a socket
      bound as AF_INET6.   PR 49678.  [Joe Orton]
 
