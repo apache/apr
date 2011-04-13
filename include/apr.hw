@@ -122,7 +122,7 @@
 #define APR_HAVE_DIRENT_H       0
 #define APR_HAVE_ERRNO_H         APR_NOT_IN_WCE
 #define APR_HAVE_FCNTL_H         APR_NOT_IN_WCE
-#define APR_HAVE_IF_ADDRS_H     0
+#define APR_HAVE_IFADDRS_H      0
 #define APR_HAVE_IO_H            APR_NOT_IN_WCE
 #define APR_HAVE_LIMITS_H        APR_NOT_IN_WCE
 #define APR_HAVE_MSWSOCK_H       APR_NOT_IN_WCE
