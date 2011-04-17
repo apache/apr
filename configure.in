@@ -447,19 +447,18 @@ case "$host:$CC" in
 	APR_SETVAR(AR,ar)
 	;;
 
-dnl If building static APR, both the APR build and the app build
-dnl need -DAPR_DECLARE_STATIC to generate the right linkage from    
-dnl APR_DECLARE et al.
-dnl If building dynamic APR, the APR build needs APR_DECLARE_EXPORT
-dnl and the app build should have neither define.
-
+    dnl If building static APR, both the APR build and the app build
+    dnl need -DAPR_DECLARE_STATIC to generate the right linkage from    
+    dnl APR_DECLARE et al.
+    dnl If building dynamic APR, the APR build needs APR_DECLARE_EXPORT
+    dnl and the app build should have neither define.
     *-mingw* | *-cygwin*)
-    if test "$enable_shared" = "yes"; then
-        APR_ADDTO(INTERNAL_CPPFLAGS, -DAPR_DECLARE_EXPORT)
-    else
-        APR_ADDTO(CPPFLAGS, -DAPR_DECLARE_STATIC)
-    fi
-    ;;
+        if test "$enable_shared" = "yes"; then
+            APR_ADDTO(INTERNAL_CPPFLAGS, -DAPR_DECLARE_EXPORT)
+        else
+            APR_ADDTO(CPPFLAGS, -DAPR_DECLARE_STATIC)
+        fi
+        ;;
 esac
 
 AC_CACHE_CHECK([whether the compiler provides atomic builtins], [ap_cv_atomic_builtins],
