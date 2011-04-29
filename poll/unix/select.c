@@ -41,6 +41,21 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num,
     apr_datatype_e set_type = APR_NO_DESC;
 #endif
 
+#ifdef WIN32
+    /* On Win32, select() must be presented with at least one socket to
+     * poll on, or select() will return WSAEINVAL.  So, we'll just
+     * short-circuit and bail now.
+     */
+    if (num == 0) {
+        (*nsds) = 0;
+        if (timeout > 0) {
+            apr_sleep(timeout);
+            return APR_TIMEUP;
+        }
+        return APR_SUCCESS;
+    }
+#endif
+
     if (timeout < 0) {
         tvptr = NULL;
     }
@@ -339,6 +354,10 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
      */
     if (pollset->nelts == 0) {
         (*num) = 0;
+        if (timeout > 0) {
+            apr_sleep(timeout);
+            return APR_TIMEUP;
+        }
         return APR_SUCCESS;
     }
 #endif
