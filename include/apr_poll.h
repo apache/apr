@@ -259,6 +259,8 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
  * @remark Multiple signalled conditions for the same descriptor may be reported
  *         in one or more returned apr_pollfd_t structures, depending on the
  *         implementation.
+ * @bug With versions 1.4.2 and prior on Windows, a call with no descriptors
+ *      and timeout will return immediately with the wrong error code.
  */
 APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                                            apr_interval_time_t timeout,
@@ -288,6 +290,8 @@ APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset);
  *         descriptor has been signalled or the timeout has expired. 
  * @remark The rtnevents field in the apr_pollfd_t array will only be filled-
  *         in if the return value is APR_SUCCESS.
+ * @bug With versions 1.4.2 and prior on Windows, a call with no descriptors
+ *      and timeout will return immediately with the wrong error code.
  */
 APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t numsock,
                                    apr_int32_t *nsds, 
@@ -393,6 +397,8 @@ typedef apr_status_t (*apr_pollcb_cb_t)(void *baton, apr_pollfd_t *descriptor);
  * @remark Multiple signalled conditions for the same descriptor may be reported
  *         in one or more calls to the callback function, depending on the
  *         implementation.
+ * @bug With versions 1.4.2 and prior on Windows, a call with no descriptors
+ *      and timeout will return immediately with the wrong error code.
  */
 APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
                                           apr_interval_time_t timeout,

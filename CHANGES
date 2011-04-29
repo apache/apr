@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.3
 
+  *) poll, pollset, pollcb on Windows: Handle calls with no file/socket
+     descriptors.  PR 49882.  [Stefan Ruppert <sr myarm.com>, Jeff Trawick]
+
   *) Fix APR_IPV6_V6ONLY issues on Windows related to run-time behavior 
      on Windows older than Vista and SDK/MinGW levels without IPV6_V6ONLY.
      PR 45321.  [Sob <sob hisoftware.cz>]
