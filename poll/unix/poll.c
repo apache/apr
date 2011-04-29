@@ -240,12 +240,24 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
 {
     int ret;
     apr_status_t rv = APR_SUCCESS;
-    apr_uint32_t i, j;
+#ifdef WIN32
+    apr_interval_time_t orig_timeout = timeout;
+#endif
 
     if (timeout > 0) {
         timeout /= 1000;
     }
 #ifdef WIN32
+    /* WSAPoll() requires at least one socket. */
+    if (pollset->nelts == 0) {
+        *num = 0;
+        if (orig_timeout > 0) {
+            apr_sleep(orig_timeout);
+            return APR_TIMEUP;
+        }
+        return APR_SUCCESS;
+    }
+
     ret = WSAPoll(pollset->p->pollset, pollset->nelts, (int)timeout);
 #else
     ret = poll(pollset->p->pollset, pollset->nelts, timeout);
@@ -258,6 +270,8 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
         return APR_TIMEUP;
     }
     else {
+        apr_uint32_t i, j;
+
         for (i = 0, j = 0; i < pollset->nelts; i++) {
             if (pollset->p->pollset[i].revents != 0) {
                 /* Check if the polled descriptor is our
@@ -305,9 +319,8 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
                                        apr_uint32_t flags)
 {
 #if APR_HAS_THREADS
-  return APR_ENOTIMPL;
-#endif
-
+    return APR_ENOTIMPL;
+#else
     pollcb->fd = -1;
 #ifdef WIN32
     if (!APR_HAVE_LATE_DLL_FUNC(WSAPoll)) {
@@ -319,6 +332,7 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
     pollcb->copyset = apr_palloc(p, size * sizeof(apr_pollfd_t *));
 
     return APR_SUCCESS;
+#endif
 }
 
 static apr_status_t impl_pollcb_add(apr_pollcb_t *pollcb,

@@ -769,6 +769,69 @@ static void pollcb_default(abts_case *tc, void *data)
     }
 }
 
+static void justsleep(abts_case *tc, void *data)
+{
+    apr_int32_t nsds;
+    const apr_pollfd_t *hot_files;
+    apr_pollset_t *pollset;
+    apr_status_t rv;
+    apr_time_t t1, t2;
+    int i;
+    apr_pollset_method_e methods[] = {
+        APR_POLLSET_DEFAULT,
+        APR_POLLSET_SELECT,
+        APR_POLLSET_KQUEUE,
+        APR_POLLSET_PORT,
+        APR_POLLSET_EPOLL,
+        APR_POLLSET_POLL};
+
+    nsds = 1;
+    t1 = apr_time_now();
+    rv = apr_poll(NULL, 0, &nsds, apr_time_from_msec(200));
+    t2 = apr_time_now();
+    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+    ABTS_INT_EQUAL(tc, 0, nsds);
+    ABTS_ASSERT(tc,
+                "apr_poll() didn't sleep",
+                (t2 - t1) > apr_time_from_msec(100));
+
+    for (i = 0; i < sizeof methods / sizeof methods[0]; i++) {
+        rv = apr_pollset_create_ex(&pollset, 5, p, 0, methods[i]);
+        if (rv != APR_ENOTIMPL) {
+            ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+            nsds = 1;
+            t1 = apr_time_now();
+            rv = apr_pollset_poll(pollset, apr_time_from_msec(200), &nsds,
+                                  &hot_files);
+            t2 = apr_time_now();
+            ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+            ABTS_INT_EQUAL(tc, 0, nsds);
+            ABTS_ASSERT(tc,
+                        "apr_pollset_poll() didn't sleep",
+                        (t2 - t1) > apr_time_from_msec(100));
+
+            rv = apr_pollset_destroy(pollset);
+            ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+        }
+
+        rv = apr_pollcb_create_ex(&pollcb, 5, p, 0, methods[0]);
+        if (rv != APR_ENOTIMPL) {
+            ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+            t1 = apr_time_now();
+            rv = apr_pollcb_poll(pollcb, apr_time_from_msec(200), NULL, NULL);
+            t2 = apr_time_now();
+            ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+            ABTS_ASSERT(tc,
+                        "apr_pollcb_poll() didn't sleep",
+                        (t2 - t1) > apr_time_from_msec(100));
+
+            /* no apr_pollcb_destroy() */
+        }
+    }
+}
+
 abts_suite *testpoll(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -808,6 +871,7 @@ abts_suite *testpoll(abts_suite *suite)
     abts_run_test(suite, close_all_sockets, NULL);
     abts_run_test(suite, pollset_default, NULL);
     abts_run_test(suite, pollcb_default, NULL);
+    abts_run_test(suite, justsleep, NULL);
     return suite;
 }
 
