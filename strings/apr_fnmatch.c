@@ -211,39 +211,47 @@ static const char *rangematch(const char *pattern, int test, int flags)
 }
 
 
-/* This function is an Apache addition */
-/* return non-zero if pattern has any glob chars in it */
+/* This function is an Apache addition
+ * return non-zero if pattern has any glob chars in it
+ * @bug Function does not distinguish for FNM_PATHNAME mode, which renders
+ * a false positive for test[/]this (which is not a range, but 
+ * seperate test[ and ]this segments and no glob.)
+ * @bug Function does not distinguish for non-FNM_ESCAPE mode.
+ * @bug Function does not parse []] correctly
+ * Solution may be to use fnmatch_ch() to walk the patterns?
+ */
 APR_DECLARE(int) apr_fnmatch_test(const char *pattern)
 {
     int nesting;
 
     nesting = 0;
     while (*pattern) {
-	switch (*pattern) {
-	case '?':
-	case '*':
-	    return 1;
+        switch (*pattern) {
+        case '?':
+        case '*':
+            return 1;
 
-	case '\\':
-	    if (*++pattern == '\0') {
-		return 0;
-	    }
-	    break;
+        case '\\':
+            if (*++pattern == '\0') {
+                return 0;
+            }
+            break;
 
-	case '[':	/* '[' is only a glob if it has a matching ']' */
-	    ++nesting;
-	    break;
+        case '[':         /* '[' is only a glob if it has a matching ']' */
+            ++nesting;
+            break;
 
-	case ']':
-	    if (nesting) {
-		return 1;
-	    }
-	    break;
-	}
-	++pattern;
+        case ']':
+            if (nesting) {
+                return 1;
+            }
+            break;
+        }
+        ++pattern;
     }
     return 0;
 }
+
 
 /* Find all files matching the specified pattern */
 APR_DECLARE(apr_status_t) apr_match_glob(const char *pattern, 
