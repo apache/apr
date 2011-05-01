@@ -15,12 +15,7 @@
  */ 
 
 
-/* apr_fnmatch() and fnmatch_ch()
- * Copyright (c) 2011, VMware, Inc.
- *
- * Authored by William A. Rowe Jr. <wrowe; apache.org, vmware.com>, April 2011
- *
- * Derived from The Open Group Base Specifications Issue 7, IEEE Std 1003.1-2008
+/* Derived from The Open Group Base Specifications Issue 7, IEEE Std 1003.1-2008
  * as described in;
  *   http://pubs.opengroup.org/onlinepubs/9699919799/functions/fnmatch.html
  *
