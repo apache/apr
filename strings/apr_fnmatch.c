@@ -152,7 +152,7 @@ static __inline int fnmatch_ch(const char **pattern, const char **string, int fl
     }
     else if (**pattern == '?') {
         /* Optimize '?' match before unescaping **pattern */
-        if (!**string || (!slash || (**string != '/')))
+        if (!**string || (slash && (**string == '/')))
             return APR_FNM_NOMATCH;
         result = 0;
         goto fnmatch_ch_success;
@@ -225,7 +225,8 @@ APR_DECLARE(int) apr_fnmatch(const char *pattern, const char *string, int flags)
          * Presumes '/' character is unique, not composite in any MBCS encoding
          */
         if (slash) {
-            if (!(strendseg = strchr(string, '/')))
+            strendseg = strchr(string, '/');
+            if (!strendseg)
                 strendseg = strchr(string, '\0');
         }
         else {
