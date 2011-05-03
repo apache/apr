@@ -327,6 +327,19 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 #endif /* ndef(NETWARE) */
 }
 
+#if !defined(NETWARE)
+static int same_drive(const char *path1, const char *path2)
+{
+    /* Alpha-colon pattern test, assumes an ASCII character set mapping */
+    if ((path1[0] < 'A' || (path1[0] > 'Z' && path1[0] < 'a') || path1[0] > 'z')
+     || (path2[0] < 'A' || (path2[0] > 'Z' && path2[0] < 'a') || path2[0] > 'z')
+     || path1[1] != ':' || path2[1] != ':')
+        return 0;
+
+    /* Once in the domain of ASCII alpha, compare these case insensitive */
+    return ((path1[0] & 0x1f) == (path2[0] & 0x1f));
+}
+#endif
 
 APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath, 
                                              const char *basepath, 
@@ -540,7 +553,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
              * use the basepath _if_ it matches this drive letter!
              * Otherwise we must discard the basepath.
              */
-            if (addroot[0] == baseroot[0] && baseroot[1] == ':') {
+            if (same_drive(addroot, baseroot)) {
 #endif
                 /* Base the result path on the basepath
                  */
