@@ -71,7 +71,7 @@
  * Both pattern and string are **char to support pointer increment of arbitrary
  * multibyte characters for the given locale, in a later iteration of this code
  */
-static __inline int fnmatch_ch(const char **pattern, const char **string, int flags)
+static APR_INLINE int fnmatch_ch(const char **pattern, const char **string, int flags)
 {
     const char * const mismatch = *pattern;
     const int nocase = !!(flags & APR_FNM_CASE_BLIND);
