@@ -5,6 +5,9 @@ Changes for APR 1.4.3
      algorithm; now has improved compliance with the fnmatch() spec.
      [William Rowe]
 
+  *) Fix environment-related crash using some non-standard builds on
+     Windows 7/Server 2008.  [Steve Hay <SteveHay planit.com>]
+
   *) poll, pollset, pollcb on Windows: Handle calls with no file/socket
      descriptors.  PR 49882.  [Stefan Ruppert <sr myarm.com>, Jeff Trawick]
 
