@@ -330,14 +330,22 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 #if !defined(NETWARE)
 static int same_drive(const char *path1, const char *path2)
 {
-    /* Alpha-colon pattern test, assumes an ASCII character set mapping */
-    if ((path1[0] < 'A' || (path1[0] > 'Z' && path1[0] < 'a') || path1[0] > 'z')
-     || (path2[0] < 'A' || (path2[0] > 'Z' && path2[0] < 'a') || path2[0] > 'z')
-     || path1[1] != ':' || path2[1] != ':')
-        return 0;
+    char drive1 = path1[0];
+    char drive2 = path2[0];
 
-    /* Once in the domain of ASCII alpha, compare these case insensitive */
-    return ((path1[0] & 0x1f) == (path2[0] & 0x1f));
+    if (!drive1 || !drive2 || path1[1] != ':' || path2[1] != ':')
+        return FALSE;
+
+    if (drive1 == drive2)
+        return TRUE;
+
+    if (drive1 >= 'a' && drive1 <= 'z')
+        drive1 += 'A' - 'a';
+
+    if (drive2 >= 'a' && drive2 <= 'z')
+        drive2 += 'A' - 'a';
+
+    return (drive1 == drive2);
 }
 #endif
 
