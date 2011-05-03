@@ -25,57 +25,112 @@
 
 #define NUM_FILES (5)
 
-#define APR_FNM_ANY  0
-#define APR_FNM_NONE 128
+#define APR_FNM_BITS    15
+#define APR_FNM_FAILBIT 256
 
-/* A string is expected to match pattern only if a success_flags bit is true,
- * and is expected to fail for all other cases (so APR_FNM_NONE is bit never tested).
- */
+#define FAILS_IF(X)     0, X
+#define SUCCEEDS_IF(X)  X, 256
+#define SUCCEEDS        0, 256
+#define FAILS           256, 0
+
 static struct pattern_s {
     const char *pattern;
     const char *string;
-    int         success_flags;
+    int         require_flags;
+    int         fail_flags;
 } patterns[] = {
 
-    {"test", "test",           APR_FNM_ANY},
-    {"test/this", "test/this", APR_FNM_ANY},
-    {"teST", "TEst",           APR_FNM_CASE_BLIND},
-    {"*", "",                  APR_FNM_ANY},
-    {"*", "test",              APR_FNM_ANY},
-    {".*", ".test",            APR_FNM_PERIOD},
-    {"*", ".test",             APR_FNM_NONE},
-    {"", "test",               APR_FNM_NONE},
-    {"", "*",                  APR_FNM_NONE},
-    {"test", "*",              APR_FNM_NONE},
-    {"test/this", "test/",     APR_FNM_NONE},
-    {"test/", "test/this",     APR_FNM_NONE},
+/*   Pattern,  String to Test,          Flags to Match  */
+    {"", "test",                        FAILS},
+    {"", "*",                           FAILS},
+    {"test", "*",                       FAILS},
+    {"test", "test",                    SUCCEEDS},
+
+     /* Remember C '\\' is a single backslash in pattern */
+    {"te\\st", "test",                  FAILS_IF(APR_FNM_NOESCAPE)},
+    {"te\\\\st", "te\\st",              FAILS_IF(APR_FNM_NOESCAPE)},
+    {"te\\*t", "te*t",                  FAILS_IF(APR_FNM_NOESCAPE)},
+    {"te\\*t", "test",                  FAILS},
+    {"te\\?t", "te?t",                  FAILS_IF(APR_FNM_NOESCAPE)},
+    {"te\\?t", "test",                  FAILS},
+
+    {"tesT", "test",                    SUCCEEDS_IF(APR_FNM_CASE_BLIND)},
+    {"test", "Test",                    SUCCEEDS_IF(APR_FNM_CASE_BLIND)},
+    {"tEst", "teSt",                    SUCCEEDS_IF(APR_FNM_CASE_BLIND)},
+
+    {"?est", "test",                    SUCCEEDS},
+    {"te?t", "test",                    SUCCEEDS},
+    {"tes?", "test",                    SUCCEEDS},
+    {"test?", "test",                   FAILS},
+
+    {"*", "",                           SUCCEEDS},
+    {"*", "test",                       SUCCEEDS},
+    {"*test", "test",                   SUCCEEDS},
+    {"*est", "test",                    SUCCEEDS},
+    {"*st", "test",                     SUCCEEDS},
+    {"t*t", "test",                     SUCCEEDS},
+    {"te*t", "test",                    SUCCEEDS},
+    {"te*st", "test",                   SUCCEEDS},
+    {"te*", "test",                     SUCCEEDS},
+    {"tes*", "test",                    SUCCEEDS},
+    {"test*", "test",                   SUCCEEDS},
+
+    {"test/this", "test/",              FAILS},
+    {"test/", "test/this",              FAILS},
+    {"test*/this", "test/this",         SUCCEEDS},
+    {"test/*this", "test/this",         SUCCEEDS},
+
+    {".*", ".this",                     SUCCEEDS},
+    {"*", ".this",                      FAILS_IF(APR_FNM_PERIOD)},
+    {"?this", ".this",                  FAILS_IF(APR_FNM_PERIOD)},
+    {"[.]this", ".this",                FAILS_IF(APR_FNM_PERIOD)},
+
+    {"test/this", "test/this",          SUCCEEDS},
+    {"test?this", "test/this",          FAILS_IF(APR_FNM_PATHNAME)},
+    {"test*this", "test/this",          FAILS_IF(APR_FNM_PATHNAME)},
+    {"test[/]this", "test/this",        FAILS_IF(APR_FNM_PATHNAME)},
+
+    {"test/.*", "test/.this",           SUCCEEDS},
+    {"test/*", "test/.this",            FAILS_IF(APR_FNM_PERIOD | APR_FNM_PATHNAME)},
+    {"test/?this", "test/.this",        FAILS_IF(APR_FNM_PERIOD | APR_FNM_PATHNAME)},
+    {"test/[.]this", "test/.this",      FAILS_IF(APR_FNM_PERIOD | APR_FNM_PATHNAME)},
 
     {NULL, NULL, 0}
 };
 
-#define APR_FNM_MAX 15 /* all bits */
+
 
 static void test_fnmatch(abts_case *tc, void *data)
 {
     struct pattern_s *test = patterns;
-    int i;
+    char buf[80];
+    int i = APR_FNM_BITS + 1;
     int res;
 
     for (test = patterns; test->pattern; ++test)
-        for (i = 0; i <= APR_FNM_MAX; ++i)
+    {
+        for (i = 0; i <= APR_FNM_BITS; ++i)
         {
             res = apr_fnmatch(test->pattern, test->string, i);
-            if ((i & test->success_flags) == test->success_flags) {
-                if (res == APR_FNM_NOMATCH)
-                    break;
-            }
-            else {
+            if (((i & test->require_flags) != test->require_flags)
+                || ((i & test->fail_flags) == test->fail_flags)) {
                 if (res != APR_FNM_NOMATCH)
                     break;
             }
+            else {
+                if (res != 0)
+                    break;
+            }
         }
+        if (i <= APR_FNM_BITS)
+            break;
+    }
 
-    ABTS_INT_EQUAL(tc, APR_FNM_MAX + 1, i);
+    if (i <= APR_FNM_BITS) {
+        sprintf(buf, "apr_fnmatch(\"%s\", \"%s\", %d) returns %d\n",
+                test->pattern, test->string, i, res);
+        abts_fail(tc, buf, __LINE__);
+    }
 }
 
 static void test_glob(abts_case *tc, void *data)
