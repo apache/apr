@@ -42,7 +42,6 @@ ALL : "$(OUTDIR)\libapr-1.dll" "$(DS_POSTBUILD_DEP)"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr_atomic.obj"
 	-@erase "$(INTDIR)\apr_cpystrn.obj"
 	-@erase "$(INTDIR)\apr_fnmatch.obj"
@@ -234,7 +233,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\signals.obj" \
 	"$(INTDIR)\thread.obj" \
 	"$(INTDIR)\threadpriv.obj" \
-	"$(INTDIR)\access.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj" \
 	"$(INTDIR)\groupinfo.obj" \
@@ -272,7 +270,6 @@ ALL : ".\include\apr.h" "$(OUTDIR)\libapr-1.dll" "$(DS_POSTBUILD_DEP)"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr_atomic.obj"
 	-@erase "$(INTDIR)\apr_cpystrn.obj"
 	-@erase "$(INTDIR)\apr_fnmatch.obj"
@@ -465,7 +462,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\signals.obj" \
 	"$(INTDIR)\thread.obj" \
 	"$(INTDIR)\threadpriv.obj" \
-	"$(INTDIR)\access.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj" \
 	"$(INTDIR)\groupinfo.obj" \
@@ -503,7 +499,6 @@ ALL : ".\include\apr.h" "$(OUTDIR)\libapr-1.dll" "$(DS_POSTBUILD_DEP)"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr_atomic.obj"
 	-@erase "$(INTDIR)\apr_cpystrn.obj"
 	-@erase "$(INTDIR)\apr_fnmatch.obj"
@@ -696,7 +691,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\signals.obj" \
 	"$(INTDIR)\thread.obj" \
 	"$(INTDIR)\threadpriv.obj" \
-	"$(INTDIR)\access.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj" \
 	"$(INTDIR)\groupinfo.obj" \
@@ -734,7 +728,6 @@ ALL : ".\include\apr.h" "$(OUTDIR)\libapr-1.dll" "$(DS_POSTBUILD_DEP)"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr_atomic.obj"
 	-@erase "$(INTDIR)\apr_cpystrn.obj"
 	-@erase "$(INTDIR)\apr_fnmatch.obj"
@@ -927,7 +920,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\signals.obj" \
 	"$(INTDIR)\thread.obj" \
 	"$(INTDIR)\threadpriv.obj" \
-	"$(INTDIR)\access.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj" \
 	"$(INTDIR)\groupinfo.obj" \
@@ -965,7 +957,6 @@ ALL : ".\include\apr.h" "$(OUTDIR)\libapr-1.dll" "$(DS_POSTBUILD_DEP)"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr_atomic.obj"
 	-@erase "$(INTDIR)\apr_cpystrn.obj"
 	-@erase "$(INTDIR)\apr_fnmatch.obj"
@@ -1158,7 +1149,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\signals.obj" \
 	"$(INTDIR)\thread.obj" \
 	"$(INTDIR)\threadpriv.obj" \
-	"$(INTDIR)\access.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj" \
 	"$(INTDIR)\groupinfo.obj" \
@@ -1192,11 +1182,10 @@ DS_POSTBUILD_DEP=$(INTDIR)\postbld.dep
 OutDir=.\x64\Debug
 # End Custom Macros
 
-ALL : "$(OUTDIR)\libapr-1.dll" "$(DS_POSTBUILD_DEP)"
+ALL : ".\include\apr.h" "$(OUTDIR)\libapr-1.dll" "$(DS_POSTBUILD_DEP)"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr_atomic.obj"
 	-@erase "$(INTDIR)\apr_cpystrn.obj"
 	-@erase "$(INTDIR)\apr_fnmatch.obj"
@@ -1274,6 +1263,7 @@ CLEAN :
 	-@erase "$(OUTDIR)\libapr-1.exp"
 	-@erase "$(OUTDIR)\libapr-1.lib"
 	-@erase "$(OUTDIR)\libapr-1.pdb"
+	-@erase ".\include\apr.h"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
@@ -1388,7 +1378,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\signals.obj" \
 	"$(INTDIR)\thread.obj" \
 	"$(INTDIR)\threadpriv.obj" \
-	"$(INTDIR)\access.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj" \
 	"$(INTDIR)\groupinfo.obj" \
@@ -1820,12 +1809,6 @@ SOURCE=.\threadproc\win32\thread.c
 SOURCE=.\threadproc\win32\threadpriv.c
 
 "$(INTDIR)\threadpriv.obj" : $(SOURCE) "$(INTDIR)" ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\time\win32\access.c
-
-"$(INTDIR)\access.obj" : $(SOURCE) "$(INTDIR)" ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 

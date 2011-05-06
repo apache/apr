@@ -41,7 +41,6 @@ ALL : "$(OUTDIR)\apr-1.lib"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr-1.idb"
 	-@erase "$(INTDIR)\apr-1.pdb"
 	-@erase "$(INTDIR)\apr_atomic.obj"
@@ -226,7 +225,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\signals.obj" \
 	"$(INTDIR)\thread.obj" \
 	"$(INTDIR)\threadpriv.obj" \
-	"$(INTDIR)\access.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj" \
 	"$(INTDIR)\groupinfo.obj" \
@@ -249,7 +247,6 @@ ALL : ".\include\apr.h" "$(OUTDIR)\apr-1.lib"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr-1.idb"
 	-@erase "$(INTDIR)\apr-1.pdb"
 	-@erase "$(INTDIR)\apr_atomic.obj"
@@ -435,7 +432,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\signals.obj" \
 	"$(INTDIR)\thread.obj" \
 	"$(INTDIR)\threadpriv.obj" \
-	"$(INTDIR)\access.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj" \
 	"$(INTDIR)\groupinfo.obj" \
@@ -458,7 +454,6 @@ ALL : ".\include\apr.h" "$(OUTDIR)\apr-1.lib"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr-1.idb"
 	-@erase "$(INTDIR)\apr-1.pdb"
 	-@erase "$(INTDIR)\apr_atomic.obj"
@@ -644,7 +639,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\signals.obj" \
 	"$(INTDIR)\thread.obj" \
 	"$(INTDIR)\threadpriv.obj" \
-	"$(INTDIR)\access.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj" \
 	"$(INTDIR)\groupinfo.obj" \
@@ -667,7 +661,6 @@ ALL : ".\include\apr.h" "$(OUTDIR)\apr-1.lib"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr-1.idb"
 	-@erase "$(INTDIR)\apr-1.pdb"
 	-@erase "$(INTDIR)\apr_atomic.obj"
@@ -853,7 +846,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\signals.obj" \
 	"$(INTDIR)\thread.obj" \
 	"$(INTDIR)\threadpriv.obj" \
-	"$(INTDIR)\access.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj" \
 	"$(INTDIR)\groupinfo.obj" \
@@ -876,7 +868,6 @@ ALL : ".\include\apr.h" "$(OUTDIR)\apr-1.lib"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr-1.idb"
 	-@erase "$(INTDIR)\apr-1.pdb"
 	-@erase "$(INTDIR)\apr_atomic.obj"
@@ -1062,7 +1053,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\signals.obj" \
 	"$(INTDIR)\thread.obj" \
 	"$(INTDIR)\threadpriv.obj" \
-	"$(INTDIR)\access.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj" \
 	"$(INTDIR)\groupinfo.obj" \
@@ -1085,7 +1075,6 @@ ALL : ".\include\apr.h" "$(OUTDIR)\apr-1.lib"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr-1.idb"
 	-@erase "$(INTDIR)\apr-1.pdb"
 	-@erase "$(INTDIR)\apr_atomic.obj"
@@ -1271,7 +1260,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\signals.obj" \
 	"$(INTDIR)\thread.obj" \
 	"$(INTDIR)\threadpriv.obj" \
-	"$(INTDIR)\access.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj" \
 	"$(INTDIR)\groupinfo.obj" \
@@ -1689,12 +1677,6 @@ SOURCE=.\threadproc\win32\thread.c
 SOURCE=.\threadproc\win32\threadpriv.c
 
 "$(INTDIR)\threadpriv.obj" : $(SOURCE) "$(INTDIR)" ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=.\time\win32\access.c
-
-"$(INTDIR)\access.obj" : $(SOURCE) "$(INTDIR)" ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
