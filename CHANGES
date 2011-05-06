@@ -1,6 +1,7 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.4
 
+  *) Windows: Fix command-line builds.  [William Rowe]
 
 Changes for APR 1.4.3
 
