@@ -31,7 +31,7 @@
 #include "apr_want.h"
 #include "apr_env.h"
 
-/*#define USE_POCORE*/
+#define USE_POCORE
 #ifdef USE_POCORE
 #include "pc_memory.h"
 #include "pc_misc.h"
@@ -478,7 +478,7 @@ struct debug_node_t {
 struct apr_pool_t {
 #ifdef USE_POCORE
     pc_pool_t *pcpool;
-    pc_post_t *post;
+    pc_pool_t *structure_pool;
 #else
     apr_pool_t           *parent;
     apr_pool_t           *child;
@@ -796,7 +796,7 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
     pool->user_data = NULL;
 
 #ifdef USE_POCORE
-    pc_post_recall(pool->post);
+    pc_pool_clear(pool->pcpool);
 #else
     /* Find the node attached to the pool structure, reset it, make
      * it the active node and free the rest of the nodes.
@@ -843,7 +843,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
     free_proc_chain(pool->subprocesses);
 
 #ifdef USE_POCORE
-    pc_pool_destroy(pool->pcpool);
+    pc_pool_destroy(pool->structure_pool);
 #else
     /* Remove the pool from the parents child list */
     if (pool->parent) {
@@ -933,12 +933,13 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
         }
 
         pool = pc_alloc(pcpool, sizeof(*pool));
-        pool->pcpool = pcpool;
+        pool->structure_pool = pcpool;
 
-        /* The APR pool is allocated within the PoCore pool. We don't want
-           to clear the pool and toss the APR pool. Set a post that we can
-           use for "clearing the [APR] pool".  */
-        pool->post = pc_post_create(pcpool);
+        /* ### ugh. in order to clear the pool, without destroying our
+           ### companion structure (*pool), we need to create a subpool
+           ### for the allocations. it would be nice if we could construct
+           ### pcpool as "small" rather than the default 8k ctx size.  */
+        pool->pcpool = pc_pool_create(pcpool);
     }
 #else
     if (allocator == NULL)

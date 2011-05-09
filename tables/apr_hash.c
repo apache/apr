@@ -32,7 +32,7 @@
 #include <stdio.h>
 #endif
 
-/*#define USE_POCORE*/
+#define USE_POCORE
 #ifdef USE_POCORE
 #include "pc_types.h"
 #include "pc_memory.h"
