@@ -10,98 +10,74 @@ SUBDIRS = \
 # paths to tools
 #
 
-include $(APR_WORK)\build\NWGNUhead.inc
+include $(APR_WORK)/build/NWGNUhead.inc
 
 #
 # build this level's files
 
 FILES_prebuild_headers = \
 	$(APR)/include/apr.h \
-	$(APRUTIL)/include/apu.h \
-	$(APRUTIL)/include/apu_want.h \
-	$(APRUTIL)/include/apr_ldap.h \
-	$(APRUTIL)/include/private/apu_config.h \
-	$(APRUTIL)/include/private/apu_select_dbm.h \
-	$(APRUTIL)/xml/expat/lib/expat.h \
-	$(APRUTIL)/xml/expat/lib/config.h \
+	$(APU)/include/apu.h \
+	$(APU)/include/apu_want.h \
+	$(APU)/include/apr_ldap.h \
+	$(APU)/include/private/apu_config.h \
+	$(APU)/include/private/apu_select_dbm.h \
+	$(APUXML)/expat/lib/expat_config.h \
 	$(EOLIST) 
     
 nlms :: $(APR)/aprlib.imp
 
 $(APR)/aprlib.imp : make_nw_export.awk nw_export.i
-	@echo Generating $(subst /,\,$@)
-	$(AWK) -v EXPPREFIX=APR$(VERSION_MAJMIN) -f $^ | sort >$@
+	@echo $(DL)GEN  $@$(DL)
+	$(AWK) -v EXPPREFIX=APR$(VERSION_MAJMIN) -f $^ >$@
     
-nw_export.i : nw_export.inc $(APRUTIL)/build/nw_apu_export.inc $(FILES_prebuild_headers) $(NLM_NAME)_cc.opt
-	@echo Generating $(subst /,\,$@)
-	$(CC) $< @$(NLM_NAME)_cc.opt
+nw_export.i : nw_export.inc $(APU)/build/nw_apu_export.inc $(FILES_prebuild_headers) cc.opt
+	@echo $(DL)GEN  $@$(DL)
+	$(CC) $< @cc.opt
 
-$(NLM_NAME)_cc.opt : NWGNUmakefile $(APR_WORK)\build\NWGNUenvironment.inc $(APR_WORK)\build\NWGNUhead.inc $(APR_WORK)\build\NWGNUtail.inc $(CUSTOM_INI)
-	$(CHK) $@ $(DEL) $@
-	@echo -P >> $@
-	@echo -EP >> $@
-	@echo -nosyspath >> $@
-	@echo -w nocmdline >> $@
-	@echo $(DEFINES) -DGENEXPORTS >> $@
-	@echo -I$(APR)\include >> $@
-	@echo -I$(APR)\include\arch\netware >> $@
-	@echo -I$(APR)\include\arch\unix >> $@
-	@echo -I$(APRUTIL)\include >> $@
-	@echo -I$(APRUTIL)\build >> $@
-	@echo -ir $(NOVELLLIBC) >> $@
+cc.opt : NWGNUmakefile $(APR_WORK)/build/NWGNUenvironment.inc $(APR_WORK)/build/NWGNUhead.inc $(APRBUILD)/NWGNUtail.inc $(CUSTOM_INI)
+	@echo $(DL)-P$(DL)> $@
+	@echo $(DL)-EP$(DL)>> $@
+	@echo $(DL)-nosyspath$(DL)>> $@
+	@echo $(DL)-w nocmdline$(DL)>> $@
+	@echo $(DL)$(DEFINES) -DGENEXPORTS$(DL)>> $@
+	@echo $(DL)-I$(APR)/include$(DL)>> $@
+	@echo $(DL)-I$(APR)/include/arch/netware$(DL)>> $@
+	@echo $(DL)-I$(APR)/include/arch/unix$(DL)>> $@
+	@echo $(DL)-I$(APU)/include$(DL)>> $@
+	@echo $(DL)-I$(APU)/include/private$(DL)>> $@
+	@echo $(DL)-I$(APU)/build$(DL)>> $@
+	@echo $(DL)-ir $(NOVELLLIBC)$(DL)>> $@
 ifneq "$(LDAPSDK)" ""
-	@echo -ir $(LDAPSDK) >> $@
+	@echo $(DL)-ir $(LDAPSDK)$(DL)>> $@
 endif
 
-$(APR)/include/%.h: $(subst /,\,$(APR))\include\%.hnw
-	@echo Creating $(subst /,\,$@)
-	$(CP) $< $(subst /,\,$(APR))\include\$(@F)
 
-$(APRUTIL)/include/private/%.h: $(subst /,\,$(APRUTIL))\include\private\%.hnw
-	@echo Creating $(subst /,\,$@)
-	$(CP) $< $(subst /,\,$(APRUTIL))\include\private\$(@F)
+%.h: %.hnw
+	@echo $(DL)Creating $@$(DL)
+	$(call COPY,$<,$@)
 
-$(APRUTIL)/include/private/%.h: $(subst /,\,$(APRUTIL))\include\private\%.hw
-	@echo Creating $(subst /,\,$@)
-	$(CP) $< $(subst /,\,$(APRUTIL))\include\private\$(@F)
-
-$(APRUTIL)/include/%.h: $(subst /,\,$(APRUTIL))\include\%.hnw
-	@echo Creating $(subst /,\,$@)
-	$(CP) $< $(subst /,\,$(APRUTIL))\include\$(@F)
-
-$(APRUTIL)/xml/expat/lib/%.h: $(subst /,\,$(APRUTIL))\xml\expat\lib\%.hnw
-	@echo Creating $(subst /,\,$@)
-	$(CP) $< $(subst /,\,$(APRUTIL))\xml\expat\lib\$(@F)
-
-$(APRUTIL)/xml/expat/lib/%.h: $(subst /,\,$(APRUTIL))\xml\expat\lib\%.h.in
-	@echo Creating $(subst /,\,$@)
-	$(CP) $< $(subst /,\,$(APRUTIL))\xml\expat\lib\$(@F)
+%.h: %.hw
+	@echo $(DL)Creating $@$(DL)
+	$(call COPY,$<,$@)
 
 #
 # You can use this target if all that is needed is to copy files to the
 # installation area
 #
 install :: nlms FORCE
-	
 
 clean ::
-	$(CHK) nw_export.i                                              $(DEL) nw_export.i
-	$(CHK) $(NLM_NAME)_cc.opt                                       $(DEL) $(NLM_NAME)_cc.opt
-	$(CHK) NWGNUversion.inc                                         $(DEL) NWGNUversion.inc	
-	$(CHK) $(subst /,\,$(APR))\include\apr.h                        $(DEL) $(subst /,\,$(APR))\include\apr.h
-	$(CHK) $(subst /,\,$(APRUTIL))\include\apu.h                    $(DEL) $(subst /,\,$(APRUTIL))\include\apu.h
-	$(CHK) $(subst /,\,$(APRUTIL))\include\apu_want.h               $(DEL) $(subst /,\,$(APRUTIL))\include\apu_want.h
-	$(CHK) $(subst /,\,$(APRUTIL))\include\apr_ldap.h               $(DEL) $(subst /,\,$(APRUTIL))\include\apr_ldap.h
-	$(CHK) $(subst /,\,$(APRUTIL))\include\private\apu_config.h     $(DEL) $(subst /,\,$(APRUTIL))\include\private\apu_config.h
-	$(CHK) $(subst /,\,$(APRUTIL))\include\private\apu_select_dbm.h $(DEL) $(subst /,\,$(APRUTIL))\include\private\apu_select_dbm.h
-	$(CHK) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat.h            $(DEL) $(subst /,\,$(APRUTIL))\xml\expat\lib\expat.h
-	$(CHK) $(subst /,\,$(APRUTIL))\xml\expat\lib\config.h           $(DEL) $(subst /,\,$(APRUTIL))\xml\expat\lib\config.h
-	$(CHK) $(subst /,\,$(APR))\aprlib.imp                           $(DEL) $(subst /,\,$(APR))\aprlib.imp
+	$(call DEL,nw_export.i)
+	$(call DEL,cc.opt)
+	$(call DEL,NWGNUversion.inc)
+	$(call DEL,$(APR)/aprlib.imp)
+	$(foreach file,$(FILES_prebuild_headers),$(call DEL,$(file)))
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined
 # in this makefile
 #
 
-include $(APR_WORK)\build\NWGNUtail.inc
+include $(APRBUILD)/NWGNUtail.inc
     

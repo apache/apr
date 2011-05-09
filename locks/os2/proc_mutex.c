@@ -32,7 +32,7 @@ static char *fixed_name(const char *fname, apr_pool_t *pool)
     if (fname == NULL)
         semname = NULL;
     else {
-        // Semaphores don't live in the file system, fix up the name
+        /* Semaphores don't live in the file system, fix up the name */
         while (*fname == '/' || *fname == '\\') {
             fname++;
         }

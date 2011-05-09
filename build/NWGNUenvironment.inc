@@ -2,9 +2,9 @@
 # Setup needed Tools and Libraries
 #
 
-ifeq "$(wildcard $(APR_WORK)\build\NWGNUcustom.inc)" "$(APR_WORK)\build\NWGNUcustom.inc"
-include $(APR_WORK)\build\NWGNUcustom.inc
-CUSTOM_INI = $(AP_WORK)\NWGNUcustom.ini
+ifeq "$(wildcard $(APR_WORK)/build/NWGNUcustom.inc)" "$(APR_WORK)/build/NWGNUcustom.inc"
+include $(APR_WORK)/build/NWGNUcustom.inc
+CUSTOM_INI = $(AP_WORK)/NWGNUcustom.ini
 endif
 
 ifndef VERBOSE
@@ -39,18 +39,42 @@ ifndef NOVELLLIBC
 NOVELLLIBC = C:/novell/ndk/libc
 endif
 ifneq "$(wildcard $(NOVELLLIBC)/include/ndkvers.h)" "$(NOVELLLIBC)/include/ndkvers.h"
-$(error NOVELLLIBC does not point to a valid LIBC SDK) 
+$(error NOVELLLIBC does not point to a valid Novell LIBC SDK) 
 endif
 
 ifndef LDAPSDK
 LDAPSDK = C:/novell/ndk/cldapsdk/NetWare/libc
 endif
 ifneq "$(wildcard $(LDAPSDK)/inc/ldap.h)" "$(LDAPSDK)/inc/ldap.h"
-$(error LDAPSDK does not point to a valid CLDAP SDK) 
+$(error LDAPSDK does not point to a valid Novell CLDAP SDK) 
+endif
+
+ifdef EXPATSDK
+ifeq "$(wildcard $(EXPATSDK)/include/expat.h)" "$(EXPATSDK)/include/expat.h"
+EXPAT_IMP = $(EXPATSDK)/imports/expatlbc.imp
+EXPAT_INC = $(EXPATSDK)/include
+EXPAT_LIB = $(EXPATSDK)/lib/expat.lib
+EXPAT_NLM = EXPATLBC
+else
+$(error EXPATSDK does not point to a valid EXPAT SDK) 
+endif
+endif
+ifdef EXPATSRC
+ifeq "$(wildcard $(EXPATSRC)/lib/xmlparse.c)" "$(EXPATSRC)/lib/xmlparse.c"
+EXPAT_INC = $(EXPATSRC)/lib
+EXPAT_LIB = $(EXPATSRC)/lib/$(OBJDIR)/expat.lib
+else
+$(error EXPATSRC does not point to a valid EXPAT source tree) 
+endif
+endif
+ifndef EXPAT_INC
+EXPATSRC  = $(APUXML)/expat
+EXPAT_INC = $(EXPATSRC)/lib
+EXPAT_LIB = $(EXPATSRC)/lib/$(OBJDIR)/expat.lib
 endif
 
 ifndef METROWERKS
-METROWERKS = C:\Program Files\Metrowerks\CodeWarrior
+METROWERKS = $(ProgramFiles)\Metrowerks\CodeWarrior
 endif
 
 # If LM_LICENSE_FILE isn't defined, define a variable that can be used to
@@ -68,7 +92,7 @@ endif
 
 ifdef reltype
 RELEASE = $(reltype)
-endif    
+endif
 
 ifdef RELTYPE
 RELEASE = $(RELTYPE)
@@ -102,6 +126,10 @@ ifndef RELEASE
 RELEASE = release
 endif
 
+ifeq "$(strip $(RELEASE))" "optimized"
+RELEASE = release
+endif
+
 OBJDIR = obj_$(RELEASE)
 
 #
@@ -117,19 +145,51 @@ LIB	= mwldnlm -type library -w nocmdline
 # Setup build tools
 AWK	= awk
 
+#
+# Declare Command and tool macros here
+#
+
+ifeq ($(findstring /sh,$(SHELL)),/sh)
+DEL	= rm -f $1
+RMDIR	= rm -rf $1
+MKDIR	= mkdir -p $1
+COPY	= cp -av $1 $2
+COPYR	= cp -ar $1 $2
+ECHONL	= echo ""
+DL	= '
+CAT	= cat
+else
+ifeq "$(OS)" "Windows_NT"
+DEL	= $(shell if exist $(subst /,\,$1) del /q /f 2>NUL $(subst /,\,$1))
+RMDIR	= $(shell if exist $(subst /,\,$1)\NUL rd /q /s 2>NUL $(subst /,\,$1))
+else
+DEL	= $(shell if exist $(subst /,\,$1) del 2>NUL $(subst /,\,$1))
+RMDIR	= $(shell if exist $(subst /,\,$1)\NUL deltree /y 2>NUL $(subst /,\,$1))
+endif
+ECHONL	= $(ComSpec) /c echo.
+MKDIR	= $(shell if not exist $(subst /,\,$1)\NUL md 2>NUL $(subst /,\,$1))
+COPY	= copy /y 2>NUL $(subst /,\,$1) $(subst /,\,$2)
+COPYR	= xcopy /y /e 2>NUL $(subst /,\,$1) $(subst /,\,$2)
+CAT	= type
+endif
+
 ifdef IPV6
 ifndef USE_STDSOCKETS
 USE_STDSOCKETS=1
 endif
 endif
 
-NOVI	= $(NOVELLLIBC)\imports
+NOVI	= $(NOVELLLIBC)/imports
+PRELUDE	= $(NOVI)/libcpre.o
 
-INCDIRS	= $(NOVELLLIBC)\include;$(NOVELLLIBC)\include\nks;$(NOVELLLIBC)\include\winsock;
+INCDIRS	= $(NOVELLLIBC)/include;
 
 DEFINES	= -DNETWARE
-ifndef USE_STDSOCKETS
+ifdef USE_STDSOCKETS
+DEFINES	+= -DUSE_BSD_SOCKETS
+else
 DEFINES	+= -DUSE_WINSOCK
+INCDIRS	+= $(NOVELLLIBC)/include/winsock;
 endif
 ifndef DEBUG
 DEFINES	+= -DNDEBUG
@@ -141,12 +201,10 @@ else
 VERSION_SKT = (WINSOCK)
 endif
 
-#
 # MetroWerks static Libraries
-
-CLIB3S	= $(METROWERKS)\Novell Support\Metrowerks Support\Libraries\Runtime\mwcrtl.lib
+CLIB3S	= $(METROWERKS)/Novell Support/Metrowerks Support/Libraries/Runtime/mwcrtl.lib
 MATH3S	=
-PLIB3S	= $(METROWERKS)\Novell Support\Metrowerks Support\Libraries\MSL C++\MWCPP.lib
+PLIB3S	= $(METROWERKS)/Novell Support/Metrowerks Support/Libraries/MSL C++/MWCPP.lib
 
 # Base compile flags
 # and prefix or precompiled header added here.
@@ -164,9 +222,12 @@ PLIB3S	= $(METROWERKS)\Novell Support\Metrowerks Support\Libraries\MSL C++\MWCPP
 
 CFLAGS = -c -nosyspath -Cpp_exceptions off -RTTI off -align 4 -w nocmdline -proc PII
 
+ifeq "$(REQUIRE_PROTOTYPES)" "1"
+CFLAGS += -r
+endif
+
 # -g                    generate debugging information
 # -O0                   level 0 optimizations
-
 ifeq "$(RELEASE)" "debug"
 CFLAGS += -g -O0
 endif
@@ -177,11 +238,12 @@ CFLAGS += -O4,p
 endif
 
 # -prefix apr_arch_pre_nw.h      #include pre_nw.h for all files
-
 CFLAGS += -prefix apr_arch_pre_nw.h
 
 
+ifneq ($(findstring /sh,$(SHELL)),/sh)
 PATH:=$(PATH);$(METROWERKS)\bin;$(METROWERKS)\Other Metrowerks Tools\Command Line Tools
+endif
 
 #
 # Declare major project deliverables output directories here
@@ -202,14 +264,15 @@ endif
 endif
 
 ifndef INSTALL
-INSTALL = $(APR_WORK)\Dist
-INSTDIRS = $(APR_WORK)\Dist
+INSTALL = $(APR_WORK)/Dist
+INSTDIRS = $(APR_WORK)/Dist
+BASEDIR = Apr
 endif
 
 # Add support for building IPV6 alongside
 ifneq "$(IPV6)" ""
 DEFINES += -DNW_BUILD_IPV6
-INCDIRS := $(NOVELLLIBC)\include\winsock\IPV6;$(INCDIRS)
+# INCDIRS := $(NOVELLLIBC)/include/winsock/IPV6;$(INCDIRS)
 
 ifneq "$(findstring IPV6,$(OBJDIR))" "IPV6"
 OBJDIR := $(OBJDIR)_IPV6
@@ -231,77 +294,40 @@ ifndef BASEDIR
 BASEDIR = Apache2
 endif
 
-INSTALLBASE := $(INSTALL)\$(BASEDIR)
-
-INSTDEVDIRS := \
-    $(INSTDIRS) \
-	$(INSTALLBASE) \
-	$(INSTALLBASE)\include \
-	$(INSTALLBASE)\lib \
-
-INSTDIRS += \
-	$(INSTALLBASE) \
-	
-else
-INSTALLBASE := $(INSTALL)\apr
-
-INSTDEVDIRS := \
-    $(INSTDIRS) \
-	$(INSTALLBASE) \
-	$(INSTALLBASE)\include \
-	$(INSTALLBASE)\lib \
-
-INSTDIRS += \
-	$(INSTALLBASE) \
-	
-endif	
-
-#
-# Declare Command and tool macros here
-#
-
-# Os2LibPath is an extra check to see if we are on NT
-ifdef Os2LibPath
-OS = Windows_NT
 endif
 
-ifeq "$(OS)" "Windows_NT"
-CMD	= cmd /C
-DEL	= del /F
-DELTREE	= $(CMD) rd /s/q
-WINNT	= 1
-else
-CMD	= command /C
-DEL	= del
-DELTREE	= deltree /y
-endif
-CP	= copy /Y
-XCP	= xcopy /E /Y
-CHK	= $(CMD) if exist
-CHKNOT	= $(CMD) if not exist
+INSTALLBASE := $(INSTALL)/$(BASEDIR)
 
-#
-# Setup base C compiler flags
-#
+INSTDEVDIRS := \
+	$(INSTDIRS) \
+	$(INSTALLBASE) \
+	$(INSTALLBASE)/include \
+	$(INSTALLBASE)/lib \
+	$(INSTALLBASE)/bin 
+
+INSTDIRS += \
+	$(INSTALLBASE)
 
 #
 # Common directories
 #
 
-APR		= $(APR_WORK)
-APRTEST		= $(APR_WORK)/test
-APRUTIL		= $(APU_WORK)
-APULDAP		= $(APU_WORK)/ldap
-XML		= $(APRUTIL)/xml
+APR		= $(subst \,/,$(APR_WORK))
+APU		= $(subst \,/,$(APU_WORK))
+APRBUILD	= $(APR)/build
+APULDAP		= $(APU)/ldap
+APUXML		= $(APU)/xml
+APRTEST		= $(APR)/test
+APUTEST		= $(APU)/test
 
 #
 # Internal Libraries
 #
 
 APRLIB		= $(APR)/$(OBJDIR)/aprlib.lib
-APRUTLIB	= $(APRUTIL)/$(OBJDIR)/aprutil.lib
+APULIB		= $(APU)/$(OBJDIR)/apulib.lib
 APULDAPLIB	= $(APULDAP)/$(OBJDIR)/apuldap.lib
-XMLLIB		= $(XML)/$(OBJDIR)/xmllib.lib
+APUXMLLIB	= $(APUXML)/$(OBJDIR)/apuxml.lib
 
 #
 # Additional general defines

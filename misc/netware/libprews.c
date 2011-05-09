@@ -16,12 +16,10 @@
 #include <netware.h>
 #include <library.h>
 #include <nks/synch.h>
-#ifdef USE_WINSOCK
-#include "novsock2.h"
-#endif
 
 #include "apr_pools.h"
 #include "apr_private.h"
+#include "apr_arch_internal_time.h"
 
 
 /* library-private data...*/

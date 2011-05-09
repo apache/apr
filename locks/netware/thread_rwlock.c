@@ -34,12 +34,12 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
 {
     apr_thread_rwlock_t *new_rwlock = NULL;
    
-	NXHierarchy_t hierarchy = 1;   //for libc NKS NXRwLockAlloc
-	NXLockInfo_t *info;			   //for libc NKS NXRwLockAlloc
+    NXHierarchy_t hierarchy = 1;   /* for libc NKS NXRwLockAlloc */
+    NXLockInfo_t *info;            /* for libc NKS NXRwLockAlloc */
 
     new_rwlock = (apr_thread_rwlock_t *)apr_pcalloc(pool, sizeof(apr_thread_rwlock_t));
-	
-	if(new_rwlock ==NULL) {
+
+    if(new_rwlock ==NULL) {
         return APR_ENOMEM;
     }     
     new_rwlock->pool = pool;

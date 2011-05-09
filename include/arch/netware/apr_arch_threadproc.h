@@ -68,11 +68,13 @@ struct apr_thread_once_t {
     unsigned long value;
 };
 
-//struct apr_proc_t {
-//    apr_pool_t *pool;
-//    pid_t pid;
-//    apr_procattr_t *attr;
-//};
+/*
+struct apr_proc_t {
+    apr_pool_t *pool;
+    pid_t pid;
+    apr_procattr_t *attr;
+};
+*/
 
 #endif  /* ! THREAD_PROC_H */
 

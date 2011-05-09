@@ -41,7 +41,7 @@ apr_status_t apr_threadattr_create(apr_threadattr_t **new,
 apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr,apr_int32_t on)
 {
     attr->detach = on;
-	return APR_SUCCESS;   
+    return APR_SUCCESS;   
 }
 
 apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr)
@@ -71,21 +71,21 @@ static void *dummy_worker(void *opaque)
 }
 
 apr_status_t apr_thread_create(apr_thread_t **new,
- 											apr_threadattr_t *attr, 
-                             				apr_thread_start_t func,
- 											void *data,
- 											apr_pool_t *pool)
+                               apr_threadattr_t *attr, 
+                               apr_thread_start_t func,
+                               void *data,
+                               apr_pool_t *pool)
 {
     apr_status_t stat;
     long flags = NX_THR_BIND_CONTEXT;
-  	char threadName[NX_MAX_OBJECT_NAME_LEN+1];
+    char threadName[NX_MAX_OBJECT_NAME_LEN+1];
     size_t stack_size = APR_DEFAULT_STACK_SIZE;
 
     if (attr && attr->thread_name) {
         strncpy (threadName, attr->thread_name, NX_MAX_OBJECT_NAME_LEN);
     }
     else {
-	    sprintf(threadName, "APR_thread %04ld", ++thread_count);
+        sprintf(threadName, "APR_thread %04ld", ++thread_count);
     }
 
     /* An original stack size of 0 will allow NXCreateThread() to
@@ -117,27 +117,26 @@ apr_status_t apr_thread_create(apr_thread_t **new,
     }
     
     (*new)->ctx = NXContextAlloc(
-    	/* void(*start_routine)(void *arg)*/(void (*)(void *)) dummy_worker,
-     	/* void *arg */										   (*new),
-     	/* int priority */ 									   NX_PRIO_MED,
-     	/* NXSize_t stackSize */							   stack_size,
-     	/* long flags */									   NX_CTX_NORMAL,
-     	/* int *error */									   &stat);
-		
-     	                                                                   
-  	stat = NXContextSetName(
-		 	/* NXContext_t ctx */			(*new)->ctx,
-			/* const char *name */			threadName);
+        /* void(*start_routine)(void *arg) */ (void (*)(void *)) dummy_worker,
+        /* void *arg */                       (*new),
+        /* int priority */                    NX_PRIO_MED,
+        /* NXSize_t stackSize */              stack_size,
+        /* long flags */                      NX_CTX_NORMAL,
+        /* int *error */                      &stat);
 
-  	stat = NXThreadCreate(
-        	/* NXContext_t context */		(*new)->ctx,
-        	/* long flags */				flags,
-        	/* NXThreadId_t *thread_id */	&(*new)->td);
+    stat = NXContextSetName(
+        /* NXContext_t ctx */  (*new)->ctx,
+        /* const char *name */ threadName);
 
-    if(stat==0)
-     	return APR_SUCCESS;
+    stat = NXThreadCreate(
+        /* NXContext_t context */     (*new)->ctx,
+        /* long flags */              flags,
+        /* NXThreadId_t *thread_id */ &(*new)->td);
+
+    if (stat == 0)
+        return APR_SUCCESS;
         
-	return(stat);// if error    
+    return(stat); /* if error */    
 }
 
 apr_os_thread_t apr_os_thread_current()

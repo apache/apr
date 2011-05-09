@@ -34,9 +34,13 @@
 #include <unistd.h>
 #endif
 #if APR_HAVE_CONIO_H
+#ifdef _MSC_VER
 #pragma warning(disable: 4032)
 #include <conio.h>
 #pragma warning(default: 4032)
+#else
+#include <conio.h>
+#endif
 #endif
 #if APR_HAVE_STDLIB_H
 #include <stdlib.h>
@@ -49,8 +53,12 @@
 #endif
 
 /* Disable getpass() support when PASS_MAX is defined and is "small",
- * for an arbitrary definition of "small". */
-#if defined(HAVE_GETPASS) && defined(PASS_MAX) && PASS_MAX < 32
+ * for an arbitrary definition of "small".
+ * HP-UX truncates passwords (PR49496) so we disable getpass() for
+ * this platform too.
+ */
+#if defined(HAVE_GETPASS) && \
+    (defined(PASS_MAX) && PASS_MAX < 32) || defined(__hpux) || defined(__hpux__)
 #undef HAVE_GETPASS
 #endif
 

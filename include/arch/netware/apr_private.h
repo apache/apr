@@ -16,8 +16,8 @@
 
 /*
  * Note: 
- * This is the windows specific autoconf-like config file
- * which unix would create at build time.
+ * This is the netware-specific autoconf-like config file
+ * which unix creates at ./configure time.
  */
 
 #ifdef NETWARE
@@ -25,10 +25,16 @@
 #ifndef APR_PRIVATE_H
 #define APR_PRIVATE_H
 
-/* Include the public APR symbols, include our idea of the 'right'
- * subset of the Windows.h header.  This saves us repetition.
+/* Pick up publicly advertised headers and symbols before the
+ * APR internal private headers and symbols
  */
-#include "apr.h"
+#include <apr.h>
+
+/* Pick up privately consumed headers */
+#include <ndkvers.h>
+
+/* Include alloca.h to get compiler-dependent defines */ 
+#include <alloca.h>
 
 #include <sys/types.h>
 #include <stddef.h>
@@ -72,15 +78,12 @@
 
 #define HAVE_GETPASS_R  1
 /*
- * check for older NDKs which have only the getpassword() function.
+ * Hack around older NDKs which have only the getpassword() function,
+ * a threadsafe, API-equivilant of getpass_r().
  */
-#include <ndkvers.h>
 #if (CURRENT_NDK_THRESHOLD < 709060000)
-#define getpass_r getpassword
+#define getpass_r       getpassword
 #endif
-
-/* 64-bit integer conversion function */
-#define APR_INT64_STRFN	      strtoll
 
 /*#define DSO_USE_DLFCN */
 
@@ -97,8 +100,8 @@
 /* 6 is used for SIGTERM on netware */
 /* 7 is used for SIGPOLL on netware */
 
+#if (CURRENT_NDK_THRESHOLD < 306030000)
 #define SIGKILL         11
-#define SA_NOCLDSTOP    12
 #define SIGALRM         13
 #define SIGCHLD         14 
 #define SIGCONT         15
@@ -111,10 +114,10 @@
 #define SIGTTOU         22
 #define SIGUSR1         23
 #define SIGUSR2         24
-    
+#endif
+
 #define SIGTRAP         25
 #define SIGIOT          26
-#define SIGBUS          27
 #define SIGSTKFLT       28
 #define SIGURG          29
 #define SIGXCPU         30
@@ -124,29 +127,23 @@
 #define SIGWINCH        34
 #define SIGIO           35
 
-#if 0
-#define __attribute__(__x) 
-
-/* APR COMPATABILITY FUNCTIONS
- * This section should be used to define functions and
- * macros which are need to make Windows features look
- * like POSIX features.
- */
-typedef void (Sigfunc)(int);
+#if (CURRENT_NDK_THRESHOLD < 406230000)
+#undef  SA_NOCLDSTOP
+#define SA_NOCLDSTOP    0x00000001
+#endif
+#ifndef SIGBUS
+#define SIGBUS          SIGSEGV
 #endif
 
-#define strcasecmp(s1, s2)       stricmp(s1, s2)
-#define Sleep(t)                 delay(t)
-#define lstat(a,b)               stat(a,b)
-#define _getch()                 getcharacter()
+#define _getch          getcharacter
 
-#define SIZEOF_SHORT           2
-#define SIZEOF_INT             4
-#define SIZEOF_LONGLONG        8
-#define SIZEOF_CHAR            1
-#define SIZEOF_SSIZE_T         SIZEOF_INT
+#define SIZEOF_SHORT    2
+#define SIZEOF_INT      4
+#define SIZEOF_LONGLONG 8
+#define SIZEOF_CHAR     1
+#define SIZEOF_SSIZE_T  SIZEOF_INT
 
-void netware_pool_proc_cleanup ();
+void netware_pool_proc_cleanup();
 
 /* NLM registration routines for managing which NLMs
     are using the library. */
@@ -183,15 +180,21 @@ void* getStatCache();
     and can be shared by the library. */
 #undef malloc
 #define malloc(x) library_malloc(gLibHandle,x)
+#ifndef __MWERKS__
+#define _alloca         alloca
+#endif
+
+/* 64-bit integer conversion function */
+#define APR_INT64_STRFN strtoll
 
 #if APR_HAS_LARGE_FILES
-#define APR_OFF_T_STRFN       strtoll
+#define APR_OFF_T_STRFN strtoll
 #else
-#define APR_OFF_T_STRFN       strtol
+#define APR_OFF_T_STRFN strtol
 #endif
 
 /* used to check DWORD overflow for 64bit compiles */
-#define APR_DWORD_MAX 0xFFFFFFFFUL
+#define APR_DWORD_MAX   0xFFFFFFFFUL
 
 /*
  * Include common private declarations.

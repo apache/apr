@@ -26,7 +26,7 @@
  */
 static apr_file_t no_file = { NULL, -1, };
 
-apr_status_t apr_netware_proc_cleanup(void *theproc)
+static apr_status_t apr_netware_proc_cleanup(void *theproc)
 {
     apr_proc_t *proc = theproc;
     int exit_int;
@@ -448,8 +448,10 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
     return errno;
 }
 
-APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr, apr_int32_t what, 
-                          struct rlimit *limit)
+#if APR_HAVE_STRUCT_RLIMIT
+APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr,
+                                                 apr_int32_t what, 
+                                                 struct rlimit *limit)
 {
     switch(what) {
         case APR_LIMIT_CPU:
@@ -459,13 +461,15 @@ APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr, apr_int32
 #else
             return APR_ENOTIMPL;
 #endif
+
         case APR_LIMIT_MEM:
-#if defined (RLIMIT_DATA) || defined (RLIMIT_VMEM) || defined(RLIMIT_AS)
+#if defined(RLIMIT_DATA) || defined(RLIMIT_VMEM) || defined(RLIMIT_AS)
             attr->limit_mem = limit;
             break;
 #else
             return APR_ENOTIMPL;
 #endif
+
         case APR_LIMIT_NPROC:
 #ifdef RLIMIT_NPROC
             attr->limit_nproc = limit;
@@ -473,9 +477,19 @@ APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr, apr_int32
 #else
             return APR_ENOTIMPL;
 #endif
+
+        case APR_LIMIT_NOFILE:
+#ifdef RLIMIT_NOFILE
+            attr->limit_nofile = limit;
+            break;
+#else
+            return APR_ENOTIMPL;
+#endif
+
     }
     return APR_SUCCESS;
 }  
+#endif /* APR_HAVE_STRUCT_RLIMIT */
 
 APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr, 
                                                 const char *username,

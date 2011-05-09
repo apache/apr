@@ -482,17 +482,14 @@ case $host in
        ;;
    *mingw*)
        OSDIR="win32"
-       ac_cv_file__dev_zero="no"
-       ac_cv_func_setpgrp_void="no"
-       apr_cv_tcp_nodelay_with_cork="no"
        enable_threads="system_threads"
-       eolstr="\\n"
+       eolstr="\\r\\n"
+       file_as_socket=0
        proc_mutex_is_global=1
        OBJECTS_PLATFORM='$(OBJECTS_win32)'
        ;;
    *cygwin*)
        OSDIR="unix"
-       APR_ADDTO(CPPFLAGS,-DCYGWIN)
        enable_threads="no"
        eolstr="\\n"
        ;;
@@ -1343,6 +1340,7 @@ AC_SUBST(timeh)
 AC_SUBST(unistdh)
 AC_SUBST(signalh)
 AC_SUBST(sys_waith)
+AC_SUBST(processh)
 AC_SUBST(pthreadh)
 AC_SUBST(semaphoreh)
 AC_SUBST(windowsh)
@@ -1656,11 +1654,20 @@ AC_MSG_RESULT($off_t_value)
 # releases did.  To be correct, apr_ino_t should have been made an
 # ino64_t as apr_off_t is off64_t, but this can't be done now without
 # breaking ABI.
-ino_t_value=ino_t
-if test "$ac_cv_sizeof_long" = "4"; then
-    APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned long, 
-                               ino_t_value="unsigned long")
-fi
+
+# Per OS tuning...
+case $host in
+*mingw*)
+    ino_t_value=apr_int64_t
+    ;;
+*)
+    ino_t_value=ino_t
+    if test "$ac_cv_sizeof_long" = "4"; then
+        APR_CHECK_TYPES_COMPATIBLE(ino_t, unsigned long, 
+                                   ino_t_value="unsigned long")
+    fi
+    ;;
+esac
 AC_MSG_NOTICE([using $ino_t_value for ino_t])
 
 # Checks for endianness
@@ -2486,13 +2493,23 @@ dnl Check for langinfo support
 AC_CHECK_HEADERS(langinfo.h)
 AC_CHECK_FUNCS(nl_langinfo)
 
+dnl ------------------------------ Defaults for some platform nuances
+
 dnl Do we have a Win32-centric Unicode FS?
-
-if test -z "$have_unicode_fs"; then
-  have_unicode_fs="0"
-fi
-
+APR_SETIFNULL(have_unicode_fs, [0])
 AC_SUBST(have_unicode_fs)
+
+APR_SETIFNULL(apr_has_xthread_files, [0])
+AC_SUBST(apr_has_xthread_files)
+
+APR_SETIFNULL(apr_procattr_user_set_requires_password, [0])
+AC_SUBST(apr_procattr_user_set_requires_password)
+
+APR_SETIFNULL(apr_thread_func, [])
+AC_SUBST(apr_thread_func)
+
+APR_SETIFNULL(apr_has_user, [1])
+AC_SUBST(apr_has_user)
 
 dnl ----------------------------- Finalize the variables
 
