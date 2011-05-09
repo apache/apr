@@ -504,8 +504,14 @@ AC_DEFUN([APU_CHECK_DBD_ODBC], [
         odbc_LDFLAGS="-L`$ODBC_CONFIG --lib-prefix`"
         odbc_LIBS="`$ODBC_CONFIG --libs`"
       else
-        odbc_CPPFLAGS="-I$withval/include"
-        odbc_LDFLAGS="-L$withval/lib "
+        if test -f "$withval" && test -x "$withval"; then 
+          odbc_CPPFLAGS="-I`$withval --include-prefix`"
+          odbc_LDFLAGS="-L`$withval --lib-prefix`"
+          odbc_LIBS="`$withval --libs`"
+        else
+          odbc_CPPFLAGS="-I$withval/include"
+          odbc_LDFLAGS="-L$withval/lib "
+        fi
       fi
 
       APR_ADDTO(CPPFLAGS, [$odbc_CPPFLAGS])
