@@ -1,6 +1,7 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.5
 
+  *) Fix top_builddir in installed apr_rules.mk.  [Bojan Smojver]
 
 Changes for APR 1.4.4
 
