@@ -193,4 +193,12 @@ APR_DECLARE_DATA int errno;
 #include <process.h>
 #endif
 
+/* Define APR_DBG_WIN32_HANDLES for the APR build, or just unconditionally
+ * include apr_dbg_win32_handles.h below to enable handle debugging for
+ * APR internals.  See apr_dbg_win32_handles.h for more information.
+ */
+#ifdef APR_DBG_WIN32_HANDLES
+#include "apr_dbg_win32_handles.h"
+#endif
+
 #endif  /*APR_PRIVATE_H*/
