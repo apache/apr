@@ -17,7 +17,6 @@
 #include "apr_private.h"
 #include "apr_arch_misc.h"
 #include "apr_arch_file_io.h"
-#include "apr_dbg_win32_handles.h"
 #include "assert.h"
 #include "apr_lib.h"
 #include "tchar.h"
@@ -192,7 +191,10 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
 }
 
 /* Declared in include/arch/win32/apr_dbg_win32_handles.h
+ * Enabled by defining APR_DBG_WIN32_HANDLES or by including
+ * apr_dbg_win32_handles.h in specific files.
  */
+#ifdef APR_DBG_WIN32_HANDLES
 APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln, 
                                        int nh, /* HANDLE hv, char *dsc */...)
 {
@@ -265,3 +267,4 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
     }
     return ha;
 }
+#endif /* ifdef APR_DBG_WIN32_HANDLES */
