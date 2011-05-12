@@ -17,7 +17,6 @@
 #include "apr_private.h"
 #include "apr_arch_misc.h"
 #include "apr_arch_file_io.h"
-#include "apr_dbg_win32_handles.h"
 #include "assert.h"
 #include "apr_lib.h"
 #include "tchar.h"
