@@ -23,12 +23,9 @@ extern "C" {
 
 /* USAGE:
  * 
- * To enable for APR only:
- *   Define APR_DBG_WIN32_HANDLES at compile time, or edit apr_private.h
- *   and make the include of apr_dbg_win32_handles.h unconditional.
- *
- * To enable for APR applications as well:
- *   Copy this header into apr/include add the include below to apr.h.
+ * Add the following include to apr_private.h for internal debugging,
+ * or copy this header into apr/include add the include below to apr.h
+ * for really global debugging;
  *
  *   #include "apr_dbg_win32_handles.h"
  *
@@ -55,10 +52,6 @@ extern "C" {
  * In this later usage, hv is the still the return value but is not
  * treated as a handle.
  */
-
-#ifndef APR_DBG_WIN32_HANDLES
-#define APR_DBG_WIN32_HANDLES
-#endif
 
 APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln, 
                                        int nh,/* HANDLE *hv, char *dsc */...);
