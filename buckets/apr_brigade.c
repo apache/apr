@@ -38,11 +38,16 @@ APR_DECLARE(apr_status_t) apr_brigade_cleanup(void *data)
 {
     apr_bucket_brigade *b = data;
     apr_bucket *e;
+    apr_bucket *prev = NULL;
 
     APR_BRIGADE_CHECK_CONSISTENCY(b);
 
     while (!APR_BRIGADE_EMPTY(b)) {
         e = APR_BRIGADE_FIRST(b);
+        if (e == prev) {         /* PR#51062: prevent infinite loop on a corrupt brigade */
+            return APR_EGENERAL; /* FIXME: this should definitely be a "can't happen"!   */
+        }
+        prev = e;
         apr_bucket_delete(e);
     }
     /* We don't need to free(bb) because it's allocated from a pool. */
@@ -323,6 +328,7 @@ APR_DECLARE(apr_status_t) apr_brigade_split_line(apr_bucket_brigade *bbOut,
                                                  apr_off_t maxbytes)
 {
     apr_off_t readbytes = 0;
+    apr_bucket *prev = NULL;
 
     while (!APR_BRIGADE_EMPTY(bbIn)) {
         const char *pos;
@@ -332,6 +338,10 @@ APR_DECLARE(apr_status_t) apr_brigade_split_line(apr_bucket_brigade *bbOut,
         apr_bucket *e;
 
         e = APR_BRIGADE_FIRST(bbIn);
+        if (e == prev) {         /* PR#51062: prevent infinite loop on a corrupt brigade */
+            return APR_EGENERAL; /* FIXME: this should definitely be a "can't happen"!   */
+        }
+        prev = e;
         rv = apr_bucket_read(e, &str, &len, block);
 
         if (rv != APR_SUCCESS) {
