@@ -118,8 +118,8 @@ static APR_INLINE int fnmatch_ch(const char **pattern, const char **string, int 
 leadingclosebrace:
             /* Look at only well-formed range patterns; 
              * "x-]" is not allowed unless escaped ("x-\]")
+             * XXX: Fix for locale/MBCS character width
              */
-            /* XXX: Fix for locale/MBCS character width */
             if (((*pattern)[1] == '-') && ((*pattern)[2] != ']'))
             {
                 startch = *pattern;
