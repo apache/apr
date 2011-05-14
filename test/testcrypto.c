@@ -382,21 +382,21 @@ static void test_crypto_block_openssl(abts_case *tc, void *data) {
     apr_pool_create(&pool, NULL);
     drivers[0] = get_openssl_driver(tc, pool);
     drivers[1] = get_openssl_driver(tc, pool);
-    crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_CBC, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_3DES_192, APR_MODE_CBC, 0, in, inlen,
             "KEY_3DES_192/MODE_CBC");
-    crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_ECB, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_3DES_192, APR_MODE_ECB, 0, in, inlen,
             "KEY_3DES_192/MODE_ECB");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_256, MODE_CBC, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_256, APR_MODE_CBC, 0, in, inlen,
             "KEY_AES_256/MODE_CBC");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_256, MODE_ECB, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_256, APR_MODE_ECB, 0, in, inlen,
             "KEY_AES_256/MODE_ECB");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_192, MODE_CBC, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_192, APR_MODE_CBC, 0, in, inlen,
             "KEY_AES_192/MODE_CBC");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_192, MODE_ECB, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_192, APR_MODE_ECB, 0, in, inlen,
             "KEY_AES_192/MODE_ECB");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_128, MODE_CBC, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_128, APR_MODE_CBC, 0, in, inlen,
             "KEY_AES_128/MODE_CBC");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_128, MODE_ECB, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_128, APR_MODE_ECB, 0, in, inlen,
             "KEY_AES_128/MODE_ECB");
     apr_pool_destroy(pool);
 
@@ -415,21 +415,21 @@ static void test_crypto_block_nss(abts_case *tc, void *data) {
     apr_pool_create(&pool, NULL);
     drivers[0] = get_nss_driver(tc, pool);
     drivers[1] = get_nss_driver(tc, pool);
-    crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_CBC, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_3DES_192, APR_MODE_CBC, 0, in, inlen,
             "KEY_3DES_192/MODE_CBC");
     /* KEY_3DES_192 / MODE_ECB doesn't work on NSS */
     /* crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_ECB, 0, in, inlen, "KEY_3DES_192/MODE_ECB"); */
-    crypto_block_cross(tc, pool, drivers, KEY_AES_256, MODE_CBC, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_256, APR_MODE_CBC, 0, in, inlen,
             "KEY_AES_256/MODE_CBC");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_256, MODE_ECB, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_256, APR_MODE_ECB, 0, in, inlen,
             "KEY_AES_256/MODE_ECB");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_192, MODE_CBC, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_192, APR_MODE_CBC, 0, in, inlen,
             "KEY_AES_192/MODE_CBC");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_192, MODE_ECB, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_192, APR_MODE_ECB, 0, in, inlen,
             "KEY_AES_192/MODE_ECB");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_128, MODE_CBC, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_128, APR_MODE_CBC, 0, in, inlen,
             "KEY_AES_128/MODE_CBC");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_128, MODE_ECB, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_128, APR_MODE_ECB, 0, in, inlen,
             "KEY_AES_128/MODE_ECB");
     apr_pool_destroy(pool);
 
@@ -449,14 +449,14 @@ static void test_crypto_block_nss_openssl(abts_case *tc, void *data) {
     drivers[0] = get_nss_driver(tc, pool);
     drivers[1] = get_openssl_driver(tc, pool);
 
-    crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_CBC, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_3DES_192, APR_MODE_CBC, 0, in, inlen,
             "KEY_3DES_192/MODE_CBC");
 
     /* KEY_3DES_192 / MODE_ECB doesn't work on NSS */
     /* crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_ECB, 0, in, inlen, "KEY_3DES_192/MODE_ECB"); */
-    crypto_block_cross(tc, pool, drivers, KEY_AES_256, MODE_CBC, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_256, APR_MODE_CBC, 0, in, inlen,
             "KEY_AES_256/MODE_CBC");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_256, MODE_ECB, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_256, APR_MODE_ECB, 0, in, inlen,
             "KEY_AES_256/MODE_ECB");
 
     /* all 4 of these tests fail to interoperate - a clue from the xml-security code is that
@@ -486,15 +486,15 @@ static void test_crypto_block_openssl_nss(abts_case *tc, void *data) {
     apr_pool_create(&pool, NULL);
     drivers[0] = get_openssl_driver(tc, pool);
     drivers[1] = get_nss_driver(tc, pool);
-    crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_CBC, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_3DES_192, APR_MODE_CBC, 0, in, inlen,
             "KEY_3DES_192/MODE_CBC");
 
     /* KEY_3DES_192 / MODE_ECB doesn't work on NSS */
     /* crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_ECB, 0, in, inlen, "KEY_3DES_192/MODE_ECB"); */
 
-    crypto_block_cross(tc, pool, drivers, KEY_AES_256, MODE_CBC, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_256, APR_MODE_CBC, 0, in, inlen,
             "KEY_AES_256/MODE_CBC");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_256, MODE_ECB, 0, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_256, APR_MODE_ECB, 0, in, inlen,
             "KEY_AES_256/MODE_ECB");
 
     /* all 4 of these tests fail to interoperate - a clue from the xml-security code is that
@@ -525,21 +525,21 @@ static void test_crypto_block_openssl_pad(abts_case *tc, void *data) {
     drivers[0] = get_openssl_driver(tc, pool);
     drivers[1] = get_openssl_driver(tc, pool);
 
-    crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_CBC, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_3DES_192, APR_MODE_CBC, 1, in, inlen,
             "KEY_3DES_192/MODE_CBC");
-    crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_ECB, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_3DES_192, APR_MODE_ECB, 1, in, inlen,
             "KEY_3DES_192/MODE_ECB");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_256, MODE_CBC, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_256, APR_MODE_CBC, 1, in, inlen,
             "KEY_AES_256/MODE_CBC");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_256, MODE_ECB, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_256, APR_MODE_ECB, 1, in, inlen,
             "KEY_AES_256/MODE_ECB");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_192, MODE_CBC, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_192, APR_MODE_CBC, 1, in, inlen,
             "KEY_AES_192/MODE_CBC");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_192, MODE_ECB, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_192, APR_MODE_ECB, 1, in, inlen,
             "KEY_AES_192/MODE_ECB");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_128, MODE_CBC, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_128, APR_MODE_CBC, 1, in, inlen,
             "KEY_AES_128/MODE_CBC");
-    crypto_block_cross(tc, pool, drivers, KEY_AES_128, MODE_ECB, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_128, APR_MODE_ECB, 1, in, inlen,
             "KEY_AES_128/MODE_ECB");
 
     apr_pool_destroy(pool);
@@ -560,24 +560,24 @@ static void test_crypto_block_nss_pad(abts_case *tc, void *data) {
     drivers[0] = get_nss_driver(tc, pool);
     drivers[1] = get_nss_driver(tc, pool);
 
-    crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_CBC, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_3DES_192, APR_MODE_CBC, 1, in, inlen,
             "KEY_3DES_192/MODE_CBC");
     /* KEY_3DES_192 / MODE_ECB doesn't work on NSS */
     /* crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_ECB, 1, in, inlen, "KEY_3DES_192/MODE_ECB"); */
 
-    crypto_block_cross(tc, pool, drivers, KEY_AES_256, MODE_CBC, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_256, APR_MODE_CBC, 1, in, inlen,
             "KEY_AES_256/MODE_CBC");
 
     /* KEY_AES_256 / MODE_ECB doesn't support padding on NSS */
     /*crypto_block_cross(tc, pool, drivers, KEY_AES_256, MODE_ECB, 1, in, inlen, "KEY_AES_256/MODE_ECB");*/
 
-    crypto_block_cross(tc, pool, drivers, KEY_AES_192, MODE_CBC, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_192, APR_MODE_CBC, 1, in, inlen,
             "KEY_AES_192/MODE_CBC");
 
     /* KEY_AES_256 / MODE_ECB doesn't support padding on NSS */
     /*crypto_block_cross(tc, pool, drivers, KEY_AES_192, MODE_ECB, 1, in, inlen, "KEY_AES_192/MODE_ECB");*/
 
-    crypto_block_cross(tc, pool, drivers, KEY_AES_128, MODE_CBC, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_128, APR_MODE_CBC, 1, in, inlen,
             "KEY_AES_128/MODE_CBC");
 
     /* KEY_AES_256 / MODE_ECB doesn't support padding on NSS */
@@ -601,13 +601,13 @@ static void test_crypto_block_nss_openssl_pad(abts_case *tc, void *data) {
     drivers[0] = get_nss_driver(tc, pool);
     drivers[1] = get_openssl_driver(tc, pool);
 
-    crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_CBC, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_3DES_192, APR_MODE_CBC, 1, in, inlen,
             "KEY_3DES_192/MODE_CBC");
 
     /* KEY_3DES_192 / MODE_ECB doesn't work on NSS */
     /* crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_ECB, 1, in, inlen, "KEY_3DES_192/MODE_ECB"); */
 
-    crypto_block_cross(tc, pool, drivers, KEY_AES_256, MODE_CBC, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_256, APR_MODE_CBC, 1, in, inlen,
             "KEY_AES_256/MODE_CBC");
 
     /* KEY_AES_256 / MODE_ECB doesn't support padding on NSS */
@@ -640,13 +640,13 @@ static void test_crypto_block_openssl_nss_pad(abts_case *tc, void *data) {
     apr_pool_create(&pool, NULL);
     drivers[0] = get_openssl_driver(tc, pool);
     drivers[1] = get_nss_driver(tc, pool);
-    crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_CBC, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_3DES_192, APR_MODE_CBC, 1, in, inlen,
             "KEY_3DES_192/MODE_CBC");
 
     /* KEY_3DES_192 / MODE_ECB doesn't work on NSS */
     /* crypto_block_cross(tc, pool, drivers, KEY_3DES_192, MODE_ECB, 1, in, inlen, "KEY_3DES_192/MODE_ECB"); */
 
-    crypto_block_cross(tc, pool, drivers, KEY_AES_256, MODE_CBC, 1, in, inlen,
+    crypto_block_cross(tc, pool, drivers, APR_KEY_AES_256, APR_MODE_CBC, 1, in, inlen,
             "KEY_AES_256/MODE_CBC");
 
     /* KEY_AES_256 / MODE_ECB doesn't support padding on NSS */
