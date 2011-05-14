@@ -143,17 +143,18 @@ extern "C" {
  */
 
 typedef enum {
-    KEY_NONE, KEY_3DES_192, /** 192 bit (3-Key) 3DES */
-    KEY_AES_128, /** 128 bit AES */
-    KEY_AES_192, /** 192 bit AES */
-    KEY_AES_256
+    APR_KEY_NONE,
+    APR_KEY_3DES_192, /** 192 bit (3-Key) 3DES */
+    APR_KEY_AES_128, /** 128 bit AES */
+    APR_KEY_AES_192, /** 192 bit AES */
+    APR_KEY_AES_256
 /** 256 bit AES */
 } apr_crypto_block_key_type_e;
 
 typedef enum {
-    MODE_NONE, /** An error condition */
-    MODE_ECB, /** Electronic Code Book */
-    MODE_CBC
+    APR_MODE_NONE, /** An error condition */
+    APR_MODE_ECB, /** Electronic Code Book */
+    APR_MODE_CBC
 /** Cipher Block Chaining */
 } apr_crypto_block_key_mode_e;
 
