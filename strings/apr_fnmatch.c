@@ -209,7 +209,8 @@ APR_DECLARE(int) apr_fnmatch(const char *pattern, const char *string, int flags)
 
     while (*pattern)
     {
-        /* Match balanced slashes, starting a new segment pattern
+        /* Pre-decode "\/" which has no special significance, and
+         * match balanced slashes, starting a new segment pattern
          */
         if (slash && escape && (*pattern == '\\') && (pattern[1] == '/'))
             ++pattern;
@@ -246,12 +247,17 @@ APR_DECLARE(int) apr_fnmatch(const char *pattern, const char *string, int flags)
 
         /* Allow pattern '*' to be consumed even with no remaining string to match
          */
-        while (*pattern && !(slash && ((*pattern == '/')
-                                       || (escape && (*pattern == '\\')
-                                                  && (pattern[1] == '/'))))
-                        && ((string < strendseg)
-                            || ((*pattern == '*') && (string == strendseg))))
+        while (*pattern)
         {
+            if ((string > strendseg)
+                || ((string == strendseg) && (*pattern != '*')))
+                break;
+
+            if (slash && ((*pattern == '/')
+                           || (escape && (*pattern == '\\')
+                                      && (pattern[1] == '/'))))
+                break;
+
             /* Reduce groups of '*' and '?' to n '?' matches
              * followed by one '*' test for simplicity
              */
@@ -335,9 +341,10 @@ APR_DECLARE(int) apr_fnmatch(const char *pattern, const char *string, int flags)
                 if (*pattern == '*')
                     break;
 
-                if (slash && ((*string == '/') || (*pattern == '/')
-                                               || (escape && (*pattern == '\\')
-                                                   && (pattern[1] == '/'))))
+                if (slash && ((*string == '/')
+                              || (*pattern == '/')
+                              || (escape && (*pattern == '\\')
+                                         && (pattern[1] == '/'))))
                     break;
 
                 /* Compare ch's (the pattern is advanced over "\/" to the '/',
