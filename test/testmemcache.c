@@ -22,6 +22,7 @@
 #include "apr_hash.h"
 #include "apr_memcache.h"
 #include "apr_network_io.h"
+#include "apr_thread_proc.h"
 
 #if APR_HAVE_STDLIB_H
 #include <stdlib.h>             /* for exit() */
