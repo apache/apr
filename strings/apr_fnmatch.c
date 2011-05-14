@@ -121,7 +121,7 @@ leadingclosebrace:
              */
             /* XXX: Fix for locale/MBCS character width */
             if (((*pattern)[1] == '-') && (*pattern)[2] 
-                    && ((escape && ((*pattern)[2] != '\\'))
+                    && (!(escape && ((*pattern)[2] == '\\'))
                           ? (((*pattern)[2] != ']') && (!slash || ((*pattern)[2] != '/')))
                           : (((*pattern)[3]) && (!slash || ((*pattern)[3] != '/'))))) {
                 startch = *pattern;
