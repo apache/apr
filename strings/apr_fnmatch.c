@@ -363,12 +363,12 @@ APR_DECLARE(int) apr_fnmatch(const char *pattern, const char *string, int flags)
             }
         }
 
-        if (*string && (!slash || (*string != '/')))
+        if (*string && !(slash && (*string == '/')))
             return APR_FNM_NOMATCH;
 
-        if (*pattern && (!slash || ((*pattern != '/')
-                                    && (!escape || (*pattern != '\\')
-                                                || (pattern[1] != '/')))))
+        if (*pattern && !(slash && ((*pattern == '/')
+                                    || (escape && (*pattern == '\\')
+                                               && (pattern[1] == '/')))))
             return APR_FNM_NOMATCH;
     }
 
