@@ -90,10 +90,13 @@ static APR_INLINE int fnmatch_ch(const char **pattern, const char **string, int 
         if (negate)
             ++*pattern;
 
+        /* ']' is an ordinary character at the start of the range pattern */
+        if (**pattern == ']')
+            goto leadingclosebrace;
+
         while (**pattern)
         {
-            /* ']' is an ordinary character at the start of the range pattern */
-            if ((**pattern == ']') && (*pattern > mismatch)) {
+            if (**pattern == ']') {
                 ++*pattern;
                 /* XXX: Fix for MBCS character width */
                 ++*string;
@@ -112,6 +115,7 @@ static APR_INLINE int fnmatch_ch(const char **pattern, const char **string, int 
             if (slash && (**pattern == '/'))
                 break;
 
+leadingclosebrace:
             /* Look at only well-formed range patterns; ']' is allowed only if escaped,
              * while '/' is not allowed at all in FNM_PATHNAME mode.
              */
