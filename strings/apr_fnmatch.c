@@ -116,16 +116,21 @@ static APR_INLINE int fnmatch_ch(const char **pattern, const char **string, int 
                 break;
 
 leadingclosebrace:
-            /* Look at only well-formed range patterns; ']' is allowed only if escaped,
-             * while '/' is not allowed at all in FNM_PATHNAME mode.
+            /* Look at only well-formed range patterns; 
+             * "x-]" is not allowed unless escaped ("x-\]")
              */
             /* XXX: Fix for locale/MBCS character width */
-            if (((*pattern)[1] == '-') && (*pattern)[2] 
-                    && ((escape && ((*pattern)[2] != '\\'))
-                          ? (((*pattern)[2] != ']') && (!slash || ((*pattern)[2] != '/')))
-                          : (((*pattern)[3]) && (!slash || ((*pattern)[3] != '/'))))) {
+            if (((*pattern)[1] == '-') && ((*pattern)[2] != ']'))
+            {
                 startch = *pattern;
                 *pattern += (escape && ((*pattern)[2] == '\\')) ? 3 : 2;
+
+                /* NOT a properly balanced [expr] pattern, EOS terminated 
+                 * or ranges containing a slash in FNM_PATHNAME mode pattern
+                 * fall out to to the rewind and test '[' literal code path
+                 */
+                if (!**pattern || (slash && (**pattern == '\\')))
+                    break;
 
                 /* XXX: handle locale/MBCS comparison, advance by MBCS char width */
                 if ((**string >= *startch) && (**string <= **pattern))
@@ -150,7 +155,9 @@ leadingclosebrace:
             ++*pattern;
         }
 
-        /* NOT a properly balanced [expr] pattern; Rewind to test '[' literal */
+        /* NOT a properly balanced [expr] pattern; Rewind
+         * and reset result to test '[' literal
+         */
         *pattern = mismatch;
         result = APR_FNM_NOMATCH;
     }
