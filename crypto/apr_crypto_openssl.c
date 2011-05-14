@@ -253,37 +253,37 @@ static apr_status_t crypto_passphrase(apr_pool_t *p, const apr_crypto_t *f,
     /* determine the cipher to be used */
     switch (type) {
 
-    case (KEY_3DES_192):
+    case (APR_KEY_3DES_192):
 
         /* A 3DES key */
-        if (mode == MODE_CBC) {
+        if (mode == APR_MODE_CBC) {
             key->cipher = EVP_des_ede3_cbc();
         } else {
             key->cipher = EVP_des_ede3_ecb();
         }
         break;
 
-    case (KEY_AES_128):
+    case (APR_KEY_AES_128):
 
-        if (mode == MODE_CBC) {
+        if (mode == APR_MODE_CBC) {
             key->cipher = EVP_aes_128_cbc();
         } else {
             key->cipher = EVP_aes_128_ecb();
         }
         break;
 
-    case (KEY_AES_192):
+    case (APR_KEY_AES_192):
 
-        if (mode == MODE_CBC) {
+        if (mode == APR_MODE_CBC) {
             key->cipher = EVP_aes_192_cbc();
         } else {
             key->cipher = EVP_aes_192_ecb();
         }
         break;
 
-    case (KEY_AES_256):
+    case (APR_KEY_AES_256):
 
-        if (mode == MODE_CBC) {
+        if (mode == APR_MODE_CBC) {
             key->cipher = EVP_aes_256_cbc();
         } else {
             key->cipher = EVP_aes_256_ecb();
@@ -317,7 +317,7 @@ static apr_status_t crypto_passphrase(apr_pool_t *p, const apr_crypto_t *f,
     /* note: openssl incorrectly returns non zero IV size values for ECB
      * algorithms, so work around this by ignoring the IV size.
      */
-    if (MODE_ECB != mode) {
+    if (APR_MODE_ECB != mode) {
         key->ivSize = EVP_CIPHER_iv_length(key->cipher);
     }
     if (ivSize) {

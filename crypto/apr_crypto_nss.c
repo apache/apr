@@ -332,33 +332,33 @@ static apr_status_t crypto_passphrase(apr_pool_t *p,
     /* decide on what cipher mechanism we will be using */
     switch (type) {
 
-    case (KEY_3DES_192) :
-        if (MODE_CBC == mode) {
+    case (APR_KEY_3DES_192) :
+        if (APR_MODE_CBC == mode) {
             key->cipherOid = SEC_OID_DES_EDE3_CBC;
         }
-        else if (MODE_ECB == mode) {
+        else if (APR_MODE_ECB == mode) {
             return APR_ENOCIPHER;
             /* No OID for CKM_DES3_ECB; */
         }
         break;
-    case (KEY_AES_128) :
-        if (MODE_CBC == mode) {
+    case (APR_KEY_AES_128) :
+        if (APR_MODE_CBC == mode) {
             key->cipherOid = SEC_OID_AES_128_CBC;
         }
         else {
             key->cipherOid = SEC_OID_AES_128_ECB;
         }
         break;
-    case (KEY_AES_192) :
-        if (MODE_CBC == mode) {
+    case (APR_KEY_AES_192) :
+        if (APR_MODE_CBC == mode) {
             key->cipherOid = SEC_OID_AES_192_CBC;
         }
         else {
             key->cipherOid = SEC_OID_AES_192_ECB;
         }
         break;
-    case (KEY_AES_256) :
-        if (MODE_CBC == mode) {
+    case (APR_KEY_AES_256) :
+        if (APR_MODE_CBC == mode) {
             key->cipherOid = SEC_OID_AES_256_CBC;
         }
         else {
