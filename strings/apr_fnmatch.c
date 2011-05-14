@@ -93,7 +93,7 @@ static APR_INLINE int fnmatch_ch(const char **pattern, const char **string, int 
         while (**pattern)
         {
             /* ']' is an ordinary character at the start of the range pattern */
-            if ((**pattern == ']') && (*pattern > mismatch)) {
+            if ((**pattern == ']') && (*pattern > mismatch + 1)) {
                 ++*pattern;
                 /* XXX: Fix for MBCS character width */
                 ++*string;
