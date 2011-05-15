@@ -57,6 +57,9 @@ struct apr_crypto_config_t {
 };
 
 struct apr_crypto_key_t {
+    apr_pool_t *pool;
+    const apr_crypto_driver_t *provider;
+    const apr_crypto_t *f;
     CK_MECHANISM_TYPE cipherMech;
     SECOidTag cipherOid;
     PK11SymKey *symKey;
@@ -64,8 +67,9 @@ struct apr_crypto_key_t {
 };
 
 struct apr_crypto_block_t {
-    const apr_crypto_t *f;
     apr_pool_t *pool;
+    const apr_crypto_driver_t *provider;
+    const apr_crypto_t *f;
     PK11Context *ctx;
     apr_crypto_key_t *key;
     int blockSize;
@@ -321,6 +325,9 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
         return APR_ENOMEM;
     }
 
+    key->f = f;
+    key->provider = f->provider;
+
     /* decide on what cipher mechanism we will be using */
     switch (type) {
 
@@ -423,7 +430,6 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
  *           used.
  * @param key The key structure.
  * @param blockSize The block size of the cipher.
- * @param f The block context to use.
  * @param p The pool to use.
  * @return Returns APR_ENOIV if an initialisation vector is required but not specified.
  *         Returns APR_EINIT if the backend failed to initialise the context. Returns
@@ -431,7 +437,7 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
  */
 static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
         const unsigned char **iv, const apr_crypto_key_t *key,
-        apr_size_t *blockSize, const apr_crypto_t *f, apr_pool_t *p)
+        apr_size_t *blockSize, apr_pool_t *p)
 {
     PRErrorCode perr;
     SECItem * secParam;
@@ -444,8 +450,9 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
     if (!block) {
         return APR_ENOMEM;
     }
-    block->f = f;
+    block->f = key->f;
     block->pool = p;
+    block->provider = key->provider;
 
     apr_pool_cleanup_register(p, block,
                               crypto_block_cleanup_helper,
@@ -599,7 +606,6 @@ static apr_status_t crypto_block_encrypt_finish(unsigned char *out,
  *           an IV will be created at random, in space allocated from the pool.
  *           If the buffer is not NULL, the IV in the buffer will be used.
  * @param key The key structure.
- * @param f The block context to use.
  * @param p The pool to use.
  * @return Returns APR_ENOIV if an initialisation vector is required but not specified.
  *         Returns APR_EINIT if the backend failed to initialise the context. Returns
@@ -607,7 +613,7 @@ static apr_status_t crypto_block_encrypt_finish(unsigned char *out,
  */
 static apr_status_t crypto_block_decrypt_init(apr_crypto_block_t **ctx,
         apr_size_t *blockSize, const unsigned char *iv,
-        const apr_crypto_key_t *key, const apr_crypto_t *f, apr_pool_t *p)
+        const apr_crypto_key_t *key, apr_pool_t *p)
 {
     PRErrorCode perr;
     SECItem * secParam;
@@ -618,8 +624,9 @@ static apr_status_t crypto_block_decrypt_init(apr_crypto_block_t **ctx,
     if (!block) {
         return APR_ENOMEM;
     }
-    block->f = f;
+    block->f = key->f;
     block->pool = p;
+    block->provider = key->provider;
 
     apr_pool_cleanup_register(p, block,
                               crypto_block_cleanup_helper,
