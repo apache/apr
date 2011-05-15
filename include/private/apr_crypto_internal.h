@@ -234,10 +234,9 @@ struct apr_crypto_driver_t {
     /**
      * @brief Clean encryption / decryption context.
      * @note After cleanup, a context is free to be reused if necessary.
-     * @param pool The pool to use.
      * @return Returns APR_ENOTIMPL if not supported.
      */
-    apr_status_t (*shutdown)(apr_pool_t *p);
+    apr_status_t (*shutdown)();
 
     /**
      * @brief: fetch the most recent error from this driver.

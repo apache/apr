@@ -84,7 +84,7 @@ static apr_status_t crypto_error(const apu_err_t **result, const apr_crypto_t *f
  *
  * It is safe to shut down twice.
  */
-static apr_status_t crypto_shutdown(apr_pool_t *pool)
+static apr_status_t crypto_shutdown()
 {
     if (NSS_IsInitialized()) {
         SECStatus s = NSS_Shutdown();
@@ -98,7 +98,7 @@ static apr_status_t crypto_shutdown(apr_pool_t *pool)
 static apr_status_t crypto_shutdown_helper(void *data)
 {
     apr_pool_t *pool = (apr_pool_t *) data;
-    return crypto_shutdown(pool);
+    return crypto_shutdown();
 }
 
 /**

@@ -436,12 +436,11 @@ APR_DECLARE(apr_status_t) apr_crypto_cleanup(apr_crypto_t *f) {
  * @brief Shutdown the crypto library.
  * @note After shutdown, it is expected that the init function can be called again.
  * @param driver - driver to use
- * @param p The pool to use.
  * @return Returns APR_ENOTIMPL if not supported.
  */
-APR_DECLARE(apr_status_t) apr_crypto_shutdown(const apr_crypto_driver_t *driver,
-        apr_pool_t *p) {
-    return driver->shutdown(p);
+APR_DECLARE(apr_status_t) apr_crypto_shutdown(const apr_crypto_driver_t *driver)
+{
+    return driver->shutdown();
 }
 
 #endif /* APU_HAVE_CRYPTO */
