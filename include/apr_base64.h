@@ -57,7 +57,7 @@ extern "C" {
  * @return the length of the string after it is encrypted, including the
  * trailing \0
  */ 
-APR_DECLARE(int) apr_base64_encode_len(int len);
+APR_DECLARE(int) apr_base64_encode_len(int len) __attribute__((pure));
 
 /**
  * Encode a text string using base64encoding. On EBCDIC machines, the input
@@ -69,7 +69,8 @@ APR_DECLARE(int) apr_base64_encode_len(int len);
  * @return the length of the encoded string, including the trailing \0
  */ 
 APR_DECLARE(int) apr_base64_encode(char * coded_dst, const char *plain_src, 
-                                 int len_plain_src);
+                                   int len_plain_src)
+                 __attribute__((nonnull(1,2)));
 
 /**
  * Encode an text string using base64encoding. This is the same as
@@ -81,9 +82,10 @@ APR_DECLARE(int) apr_base64_encode(char * coded_dst, const char *plain_src,
  * @param len_plain_src The length of the plain text string
  * @return the length of the encoded string, including the trailing \0
  */ 
-APR_DECLARE(int) apr_base64_encode_binary(char * coded_dst, 
-                                        const unsigned char *plain_src,
-                                        int len_plain_src);
+APR_DECLARE(int) apr_base64_encode_binary(char * coded_dst,
+                                          const unsigned char *plain_src,
+                                          int len_plain_src)
+                 __attribute__((nonnull(1,2)));
 
 /**
  * Determine the maximum buffer length required to decode the plain text
@@ -91,7 +93,8 @@ APR_DECLARE(int) apr_base64_encode_binary(char * coded_dst,
  * @param coded_src The encoded string
  * @return the maximum required buffer length for the plain text string
  */ 
-APR_DECLARE(int) apr_base64_decode_len(const char * coded_src);
+APR_DECLARE(int) apr_base64_decode_len(const char * coded_src)
+                 __attribute__((nonnull(1))) __attribute__((pure));
 
 /**
  * Decode a string to plain text. On EBCDIC machines, the result is then
@@ -101,7 +104,8 @@ APR_DECLARE(int) apr_base64_decode_len(const char * coded_src);
  * @param coded_src The encoded string 
  * @return the length of the plain text string (excluding the trailing \0)
  */ 
-APR_DECLARE(int) apr_base64_decode(char * plain_dst, const char *coded_src);
+APR_DECLARE(int) apr_base64_decode(char * plain_dst, const char *coded_src)
+                 __attribute__((nonnull(1,2)));
 
 /**
  * Decode an string to plain text. This is the same as apr_base64_decode()
@@ -113,7 +117,8 @@ APR_DECLARE(int) apr_base64_decode(char * plain_dst, const char *coded_src);
  * @return the length of the plain text string
  */ 
 APR_DECLARE(int) apr_base64_decode_binary(unsigned char * plain_dst, 
-                                        const char *coded_src);
+                                          const char *coded_src)
+                 __attribute__((nonnull(1,2)));
 
 /** @} */
 #ifdef __cplusplus
