@@ -74,7 +74,7 @@ struct apr_crypto_block_t {
 /**
  * Fetch the most recent error from this driver.
  */
-static apr_status_t crypto_error(const apr_crypto_t *f, const apu_err_t **result) {
+static apr_status_t crypto_error(const apu_err_t **result, const apr_crypto_t *f) {
     *result = f->result;
     return APR_SUCCESS;
 }
@@ -166,7 +166,7 @@ static apr_status_t crypto_init(apr_pool_t *pool, const apr_array_header_t *para
 /**
  * @brief Clean encryption / decryption context.
  * @note After cleanup, a context is free to be reused if necessary.
- * @param block The block context to use.
+ * @param f The context to use.
  * @return Returns APR_ENOTIMPL if not supported.
  */
 static apr_status_t crypto_block_cleanup(apr_crypto_block_t *block)
@@ -218,16 +218,15 @@ static apr_status_t crypto_cleanup_helper(void *data)
  *        algorithms and other parameters will be set per context. More than
  *        one context can be created at one time. A cleanup will be automatically
  *        registered with the given pool to guarantee a graceful shutdown.
- * @param pool - process pool
+ * @param f - context pointer will be written here
  * @param provider - provider to use
  * @param params - array of key parameters
- * @param ff - context pointer will be written here
+ * @param pool - process pool
  * @return APR_ENOENGINE when the engine specified does not exist. APR_EINITENGINE
  * if the engine cannot be initialised.
  */
-static apr_status_t crypto_make(apr_pool_t *pool, const apr_crypto_driver_t *provider,
-                                const apr_array_header_t *params,
-                                apr_crypto_t **ff)
+static apr_status_t crypto_make(apr_crypto_t **ff, const apr_crypto_driver_t *provider,
+        const apr_array_header_t *params, apr_pool_t *pool)
 {
     apr_crypto_config_t *config = NULL;
     /* struct apr_crypto_param_t *ents = params ? (struct apr_crypto_param_t *)params->elts : NULL; */
@@ -282,8 +281,9 @@ static apr_status_t crypto_make(apr_pool_t *pool, const apr_crypto_driver_t *pro
  *        operations.
  * @note If *key is NULL, a apr_crypto_key_t will be created from a pool. If
  *       *key is not NULL, *key must point at a previously created structure.
- * @param p The pool to use.
- * @param f The context to use.
+ * @param key The key returned, see note.
+ * @param ivSize The size of the initialisation vector will be returned, based
+ *               on whether an IV is relevant for this type of crypto.
  * @param pass The passphrase to use.
  * @param passLen The passphrase length in bytes
  * @param salt The salt to use.
@@ -292,27 +292,19 @@ static apr_status_t crypto_make(apr_pool_t *pool, const apr_crypto_driver_t *pro
  * @param mode Electronic Code Book / Cipher Block Chaining.
  * @param doPad Pad if necessary.
  * @param iterations Iteration count
- * @param key The key returned, see note.
- * @param ivSize The size of the initialisation vector will be returned, based
- *               on whether an IV is relevant for this type of crypto.
+ * @param f The context to use.
+ * @param p The pool to use.
  * @return Returns APR_ENOKEY if the pass phrase is missing or empty, or if a backend
  *         error occurred while generating the key. APR_ENOCIPHER if the type or mode
  *         is not supported by the particular backend. APR_EKEYTYPE if the key type is
  *         not known. APR_EPADDING if padding was requested but is not supported.
  *         APR_ENOTIMPL if not implemented.
  */
-static apr_status_t crypto_passphrase(apr_pool_t *p,
-                                      const apr_crypto_t *f,
-                                      const char *pass,
-                                      apr_size_t passLen,
-                                      const unsigned char * salt,
-                                      apr_size_t saltLen,
-                                      const apr_crypto_block_key_type_e type,
-                                      const apr_crypto_block_key_mode_e mode,
-                                      const int doPad,
-                                      const int iterations,
-                                      apr_crypto_key_t **k,
-                                      apr_size_t *ivSize)
+static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
+        const char *pass, apr_size_t passLen, const unsigned char * salt,
+        apr_size_t saltLen, const apr_crypto_block_key_type_e type,
+        const apr_crypto_block_key_mode_e mode, const int doPad,
+        const int iterations, const apr_crypto_t *f, apr_pool_t *p)
 {
     apr_status_t rv = APR_SUCCESS;
     PK11SlotInfo * slot;
@@ -424,25 +416,22 @@ static apr_status_t crypto_passphrase(apr_pool_t *p,
  * @brief Initialise a context for encrypting arbitrary data using the given key.
  * @note If *ctx is NULL, a apr_crypto_block_t will be created from a pool. If
  *       *ctx is not NULL, *ctx must point at a previously created structure.
- * @param p The pool to use.
- * @param f The block context to use.
- * @param key The key structure.
+ * @param ctx The block context returned, see note.
  * @param iv Optional initialisation vector. If the buffer pointed to is NULL,
  *           an IV will be created at random, in space allocated from the pool.
  *           If the buffer pointed to is not NULL, the IV in the buffer will be
  *           used.
- * @param ctx The block context returned, see note.
+ * @param key The key structure.
  * @param blockSize The block size of the cipher.
+ * @param f The block context to use.
+ * @param p The pool to use.
  * @return Returns APR_ENOIV if an initialisation vector is required but not specified.
  *         Returns APR_EINIT if the backend failed to initialise the context. Returns
  *         APR_ENOTIMPL if not implemented.
  */
-static apr_status_t crypto_block_encrypt_init(apr_pool_t *p,
-                                              const apr_crypto_t *f,
-                                              const apr_crypto_key_t *key,
-                                              const unsigned char **iv,
-                                              apr_crypto_block_t **ctx,
-                                              apr_size_t *blockSize)
+static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
+        const unsigned char **iv, const apr_crypto_key_t *key,
+        apr_size_t *blockSize, const apr_crypto_t *f, apr_pool_t *p)
 {
     PRErrorCode perr;
     SECItem * secParam;
@@ -515,20 +504,18 @@ static apr_status_t crypto_block_encrypt_init(apr_pool_t *p,
  *       to NULL, a buffer sufficiently large will be created from
  *       the pool provided. If *out points to a not-NULL value, this
  *       value will be used as a buffer instead.
- * @param block The block context to use.
  * @param out Address of a buffer to which data will be written,
  *        see note.
  * @param outlen Length of the output will be written here.
  * @param in Address of the buffer to read.
  * @param inlen Length of the buffer to read.
+ * @param ctx The block context to use.
  * @return APR_ECRYPT if an error occurred. Returns APR_ENOTIMPL if
  *         not implemented.
  */
-static apr_status_t crypto_block_encrypt(apr_crypto_block_t *block,
-                                         unsigned char **out,
-                                         apr_size_t *outlen,
-                                         const unsigned char *in,
-                                         apr_size_t inlen)
+static apr_status_t crypto_block_encrypt(unsigned char **out,
+        apr_size_t *outlen, const unsigned char *in, apr_size_t inlen,
+        apr_crypto_block_t *ctx)
 {
 
     unsigned char *buffer;
@@ -568,19 +555,18 @@ static apr_status_t crypto_block_encrypt(apr_crypto_block_t *block,
  *       number of bytes returned as actually written by the
  *       apr_crypto_block_encrypt() call. After this call, the context
  *       is cleaned and can be reused by apr_crypto_block_encrypt_init().
- * @param block The block context to use.
  * @param out Address of a buffer to which data will be written. This
  *            buffer must already exist, and is usually the same
  *            buffer used by apr_evp_crypt(). See note.
  * @param outlen Length of the output will be written here.
+ * @param ctx The block context to use.
  * @return APR_ECRYPT if an error occurred.
  * @return APR_EPADDING if padding was enabled and the block was incorrectly
  *         formatted.
  * @return APR_ENOTIMPL if not implemented.
  */
-static apr_status_t crypto_block_encrypt_finish(apr_crypto_block_t *block,
-                                                unsigned char *out,
-                                                apr_size_t *outlen)
+static apr_status_t crypto_block_encrypt_finish(unsigned char *out,
+        apr_size_t *outlen, apr_crypto_block_t *ctx)
 {
 
     apr_status_t rv = APR_SUCCESS;
@@ -607,25 +593,21 @@ static apr_status_t crypto_block_encrypt_finish(apr_crypto_block_t *block,
  * @brief Initialise a context for decrypting arbitrary data using the given key.
  * @note If *ctx is NULL, a apr_crypto_block_t will be created from a pool. If
  *       *ctx is not NULL, *ctx must point at a previously created structure.
- * @param p The pool to use.
- * @param f The block context to use.
- * @param key The key structure.
- * @param iv Optional initialisation vector. If the buffer pointed to is NULL,
- *           an IV will be created at random, in space allocated from the pool.
- *           If the buffer pointed to is not NULL, the IV in the buffer will be
- *           used.
  * @param ctx The block context returned, see note.
  * @param blockSize The block size of the cipher.
+ * @param iv Optional initialisation vector. If the buffer pointed to is NULL,
+ *           an IV will be created at random, in space allocated from the pool.
+ *           If the buffer is not NULL, the IV in the buffer will be used.
+ * @param key The key structure.
+ * @param f The block context to use.
+ * @param p The pool to use.
  * @return Returns APR_ENOIV if an initialisation vector is required but not specified.
  *         Returns APR_EINIT if the backend failed to initialise the context. Returns
  *         APR_ENOTIMPL if not implemented.
  */
-static apr_status_t crypto_block_decrypt_init(apr_pool_t *p,
-                                              const apr_crypto_t *f,
-                                              const apr_crypto_key_t *key,
-                                              const unsigned char *iv,
-                                              apr_crypto_block_t **ctx,
-                                              apr_size_t *blockSize)
+static apr_status_t crypto_block_decrypt_init(apr_crypto_block_t **ctx,
+        apr_size_t *blockSize, const unsigned char *iv,
+        const apr_crypto_key_t *key, const apr_crypto_t *f, apr_pool_t *p)
 {
     PRErrorCode perr;
     SECItem * secParam;
@@ -679,24 +661,22 @@ static apr_status_t crypto_block_decrypt_init(apr_pool_t *p,
  * @note The number of bytes written will be written to outlen. If
  *       out is NULL, outlen will contain the maximum size of the
  *       buffer needed to hold the data, including any data
- *       generated by apr_crypto_block_final below. If *out points
+ *       generated by apr_crypto_block_decrypt_finish below. If *out points
  *       to NULL, a buffer sufficiently large will be created from
  *       the pool provided. If *out points to a not-NULL value, this
  *       value will be used as a buffer instead.
- * @param block The block context to use.
  * @param out Address of a buffer to which data will be written,
  *        see note.
  * @param outlen Length of the output will be written here.
  * @param in Address of the buffer to read.
  * @param inlen Length of the buffer to read.
+ * @param ctx The block context to use.
  * @return APR_ECRYPT if an error occurred. Returns APR_ENOTIMPL if
  *         not implemented.
  */
-static apr_status_t crypto_block_decrypt(apr_crypto_block_t *block,
-                                         unsigned char **out,
-                                         apr_size_t *outlen,
-                                         const unsigned char *in,
-                                         apr_size_t inlen)
+static apr_status_t crypto_block_decrypt(unsigned char **out,
+        apr_size_t *outlen, const unsigned char *in, apr_size_t inlen,
+        apr_crypto_block_t *block)
 {
 
     unsigned char *buffer;
@@ -729,26 +709,25 @@ static apr_status_t crypto_block_decrypt(apr_crypto_block_t *block,
 }
 
 /**
- * @brief Encrypt final data block, write it to out.
+ * @brief Decrypt final data block, write it to out.
  * @note If necessary the final block will be written out after being
  *       padded. Typically the final block will be written to the
- *       same buffer used by apr_evp_crypt, offset by the number of
- *       bytes returned as actually written by the apr_evp_crypt()
- *       call. After this call, the context is cleaned and can be
- *       reused by apr_env_encrypt_init() or apr_env_decrypt_init().
- * @param block The block context to use.
+ *       same buffer used by apr_crypto_block_decrypt, offset by the
+ *       number of bytes returned as actually written by the
+ *       apr_crypto_block_decrypt() call. After this call, the context
+ *       is cleaned and can be reused by apr_crypto_block_decrypt_init().
  * @param out Address of a buffer to which data will be written. This
  *            buffer must already exist, and is usually the same
  *            buffer used by apr_evp_crypt(). See note.
  * @param outlen Length of the output will be written here.
+ * @param ctx The block context to use.
  * @return APR_ECRYPT if an error occurred.
  * @return APR_EPADDING if padding was enabled and the block was incorrectly
  *         formatted.
  * @return APR_ENOTIMPL if not implemented.
  */
-static apr_status_t crypto_block_decrypt_finish(apr_crypto_block_t *block,
-                                                unsigned char *out,
-                                                apr_size_t *outlen)
+static apr_status_t crypto_block_decrypt_finish(unsigned char *out,
+        apr_size_t *outlen, apr_crypto_block_t *block)
 {
 
     apr_status_t rv = APR_SUCCESS;
