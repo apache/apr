@@ -287,7 +287,6 @@ APR_DECLARE(apr_status_t) apr_crypto_passphrase(apr_crypto_key_t **key,
  *           used.
  * @param key The key structure to use.
  * @param blockSize The block size of the cipher.
- * @param f The block context to use.
  * @param p The pool to use.
  * @return Returns APR_ENOIV if an initialisation vector is required but not specified.
  *         Returns APR_EINIT if the backend failed to initialise the context. Returns
@@ -295,8 +294,7 @@ APR_DECLARE(apr_status_t) apr_crypto_passphrase(apr_crypto_key_t **key,
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_init(
         apr_crypto_block_t **ctx, const unsigned char **iv,
-        const apr_crypto_key_t *key, apr_size_t *blockSize,
-        const apr_crypto_t *f, apr_pool_t *p);
+        const apr_crypto_key_t *key, apr_size_t *blockSize, apr_pool_t *p);
 
 /**
  * @brief Encrypt data provided by in, write it to out.
@@ -312,14 +310,13 @@ APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_init(
  * @param outlen Length of the output will be written here.
  * @param in Address of the buffer to read.
  * @param inlen Length of the buffer to read.
- * @param f The block context to use.
  * @param ctx The block context to use.
  * @return APR_ECRYPT if an error occurred. Returns APR_ENOTIMPL if
  *         not implemented.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_encrypt(unsigned char **out,
         apr_size_t *outlen, const unsigned char *in, apr_size_t inlen,
-        const apr_crypto_t *f, apr_crypto_block_t *ctx);
+        apr_crypto_block_t *ctx);
 
 /**
  * @brief Encrypt final data block, write it to out.
@@ -333,7 +330,6 @@ APR_DECLARE(apr_status_t) apr_crypto_block_encrypt(unsigned char **out,
  *            buffer must already exist, and is usually the same
  *            buffer used by apr_evp_crypt(). See note.
  * @param outlen Length of the output will be written here.
- * @param f The block context to use.
  * @param ctx The block context to use.
  * @return APR_ECRYPT if an error occurred.
  * @return APR_EPADDING if padding was enabled and the block was incorrectly
@@ -341,7 +337,7 @@ APR_DECLARE(apr_status_t) apr_crypto_block_encrypt(unsigned char **out,
  * @return APR_ENOTIMPL if not implemented.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_finish(unsigned char *out,
-        apr_size_t *outlen, const apr_crypto_t *f, apr_crypto_block_t *ctx);
+        apr_size_t *outlen, apr_crypto_block_t *ctx);
 
 /**
  * @brief Initialise a context for decrypting arbitrary data using the given key.
@@ -351,7 +347,6 @@ APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_finish(unsigned char *out,
  * @param blockSize The block size of the cipher.
  * @param iv Optional initialisation vector.
  * @param key The key structure to use.
- * @param f The block context to use.
  * @param p The pool to use.
  * @return Returns APR_ENOIV if an initialisation vector is required but not specified.
  *         Returns APR_EINIT if the backend failed to initialise the context. Returns
@@ -359,8 +354,7 @@ APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_finish(unsigned char *out,
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_decrypt_init(
         apr_crypto_block_t **ctx, apr_size_t *blockSize,
-        const unsigned char *iv, const apr_crypto_key_t *key,
-        const apr_crypto_t *f, apr_pool_t *p);
+        const unsigned char *iv, const apr_crypto_key_t *key, apr_pool_t *p);
 
 /**
  * @brief Decrypt data provided by in, write it to out.
@@ -376,14 +370,13 @@ APR_DECLARE(apr_status_t) apr_crypto_block_decrypt_init(
  * @param outlen Length of the output will be written here.
  * @param in Address of the buffer to read.
  * @param inlen Length of the buffer to read.
- * @param f The block context to use.
  * @param ctx The block context to use.
  * @return APR_ECRYPT if an error occurred. Returns APR_ENOTIMPL if
  *         not implemented.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_decrypt(unsigned char **out,
         apr_size_t *outlen, const unsigned char *in, apr_size_t inlen,
-        const apr_crypto_t *f, apr_crypto_block_t *ctx);
+        apr_crypto_block_t *ctx);
 
 /**
  * @brief Decrypt final data block, write it to out.
@@ -397,7 +390,6 @@ APR_DECLARE(apr_status_t) apr_crypto_block_decrypt(unsigned char **out,
  *            buffer must already exist, and is usually the same
  *            buffer used by apr_evp_crypt(). See note.
  * @param outlen Length of the output will be written here.
- * @param f The block context to use.
  * @param ctx The block context to use.
  * @return APR_ECRYPT if an error occurred.
  * @return APR_EPADDING if padding was enabled and the block was incorrectly
@@ -405,17 +397,15 @@ APR_DECLARE(apr_status_t) apr_crypto_block_decrypt(unsigned char **out,
  * @return APR_ENOTIMPL if not implemented.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_decrypt_finish(unsigned char *out,
-        apr_size_t *outlen, const apr_crypto_t *f, apr_crypto_block_t *ctx);
+        apr_size_t *outlen, apr_crypto_block_t *ctx);
 
 /**
  * @brief Clean encryption / decryption context.
  * @note After cleanup, a context is free to be reused if necessary.
- * @param f The block context to use.
  * @param ctx The block context to use.
  * @return Returns APR_ENOTIMPL if not supported.
  */
-APR_DECLARE(apr_status_t) apr_crypto_block_cleanup(
-        const apr_crypto_t *f, apr_crypto_block_t *ctx);
+APR_DECLARE(apr_status_t) apr_crypto_block_cleanup(apr_crypto_block_t *ctx);
 
 /**
  * @brief Clean encryption / decryption context.

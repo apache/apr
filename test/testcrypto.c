@@ -160,7 +160,7 @@ static unsigned char *encrypt_block(abts_case *tc, apr_pool_t *pool,
     }
 
     /* init the encryption */
-    rv = apr_crypto_block_encrypt_init(&block, iv, key, blockSize, f, pool);
+    rv = apr_crypto_block_encrypt_init(&block, iv, key, blockSize, pool);
     if (APR_ENOTIMPL == rv) {
         ABTS_NOT_IMPL(tc, "apr_crypto_block_encrypt_init returned APR_ENOTIMPL");
     } else {
@@ -183,8 +183,7 @@ static unsigned char *encrypt_block(abts_case *tc, apr_pool_t *pool,
     }
 
     /* encrypt the block */
-    rv = apr_crypto_block_encrypt(cipherText, cipherTextLen, in, inlen, f,
-            block);
+    rv = apr_crypto_block_encrypt(cipherText, cipherTextLen, in, inlen, block);
     if (APR_SUCCESS != rv) {
         apr_crypto_error(&result, f);
         fprintf(stderr, "encrypt: %s %s native error %d: %s (%s)\n",
@@ -200,8 +199,7 @@ static unsigned char *encrypt_block(abts_case *tc, apr_pool_t *pool,
     }
 
     /* finalise the encryption */
-    rv = apr_crypto_block_encrypt_finish(*cipherText + *cipherTextLen, &len, f,
-            block);
+    rv = apr_crypto_block_encrypt_finish(*cipherText + *cipherTextLen, &len, block);
     if (APR_SUCCESS != rv) {
         apr_crypto_error(&result, f);
         fprintf(stderr, "encrypt_finish: %s %s native error %d: %s (%s)\n",
@@ -213,7 +211,7 @@ static unsigned char *encrypt_block(abts_case *tc, apr_pool_t *pool,
     ABTS_ASSERT(tc, "apr_crypto_block_encrypt_finish returned APR_EPADDING", rv != APR_EPADDING);
     ABTS_ASSERT(tc, "failed to apr_crypto_block_encrypt_finish", rv == APR_SUCCESS);
     *cipherTextLen += len;
-    apr_crypto_block_cleanup(f, block);
+    apr_crypto_block_cleanup(block);
     if (rv) {
         return NULL;
     }
@@ -239,7 +237,7 @@ static unsigned char *decrypt_block(abts_case *tc, apr_pool_t *pool,
     }
 
     /* init the decryption */
-    rv = apr_crypto_block_decrypt_init(&block, blockSize, iv, key, f, pool);
+    rv = apr_crypto_block_decrypt_init(&block, blockSize, iv, key, pool);
     if (APR_ENOTIMPL == rv) {
         ABTS_NOT_IMPL(tc, "apr_crypto_block_decrypt_init returned APR_ENOTIMPL");
     } else {
@@ -262,8 +260,8 @@ static unsigned char *decrypt_block(abts_case *tc, apr_pool_t *pool,
     }
 
     /* decrypt the block */
-    rv = apr_crypto_block_decrypt(plainText, plainTextLen,
-            cipherText, cipherTextLen, f, block);
+    rv = apr_crypto_block_decrypt(plainText, plainTextLen, cipherText,
+            cipherTextLen, block);
     if (APR_SUCCESS != rv) {
         apr_crypto_error(&result, f);
         fprintf(stderr, "decrypt: %s %s native error %d: %s (%s)\n",
@@ -279,7 +277,7 @@ static unsigned char *decrypt_block(abts_case *tc, apr_pool_t *pool,
     }
 
     /* finalise the decryption */
-    rv = apr_crypto_block_decrypt_finish(*plainText + *plainTextLen, &len, f,
+    rv = apr_crypto_block_decrypt_finish(*plainText + *plainTextLen, &len,
             block);
     if (APR_SUCCESS != rv) {
         apr_crypto_error(&result, f);
@@ -296,7 +294,7 @@ static unsigned char *decrypt_block(abts_case *tc, apr_pool_t *pool,
     }
 
     *plainTextLen += len;
-    apr_crypto_block_cleanup(f, block);
+    apr_crypto_block_cleanup(block);
 
     return *plainText;
 
