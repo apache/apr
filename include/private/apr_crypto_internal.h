@@ -101,7 +101,6 @@ struct apr_crypto_driver_t {
      *           used.
      * @param key The key structure.
      * @param blockSize The block size of the cipher.
-     * @param f The block context to use.
      * @param p The pool to use.
      * @return Returns APR_ENOIV if an initialisation vector is required but not specified.
      *         Returns APR_EINIT if the backend failed to initialise the context. Returns
@@ -109,7 +108,7 @@ struct apr_crypto_driver_t {
      */
     apr_status_t (*block_encrypt_init)(apr_crypto_block_t **ctx,
             const unsigned char **iv, const apr_crypto_key_t *key,
-            apr_size_t *blockSize, const apr_crypto_t *f, apr_pool_t *p);
+            apr_size_t *blockSize, apr_pool_t *p);
 
     /**
      * @brief Encrypt data provided by in, write it to out.
@@ -163,7 +162,6 @@ struct apr_crypto_driver_t {
      *           an IV will be created at random, in space allocated from the pool.
      *           If the buffer is not NULL, the IV in the buffer will be used.
      * @param key The key structure.
-     * @param f The block context to use.
      * @param p The pool to use.
      * @return Returns APR_ENOIV if an initialisation vector is required but not specified.
      *         Returns APR_EINIT if the backend failed to initialise the context. Returns
@@ -171,7 +169,7 @@ struct apr_crypto_driver_t {
      */
     apr_status_t (*block_decrypt_init)(apr_crypto_block_t **ctx,
             apr_size_t *blockSize, const unsigned char *iv,
-            const apr_crypto_key_t *key, const apr_crypto_t *f, apr_pool_t *p);
+            const apr_crypto_key_t *key, apr_pool_t *p);
 
     /**
      * @brief Decrypt data provided by in, write it to out.
