@@ -75,6 +75,36 @@ static struct pattern_s {
     {"tes*", "test",                    SUCCEEDS},
     {"test*", "test",                   SUCCEEDS},
 
+    {"test*?*[a-z]*", "testgoop",       SUCCEEDS},
+    {"te[^x]t", "test",                 SUCCEEDS},
+    {"te[^abc]t", "test",               SUCCEEDS},
+    {"te[^x]t", "test",                 SUCCEEDS},
+    {"te[!x]t", "test",                 SUCCEEDS},
+    {"te[^x]t", "text",                 FAILS},
+    {"te[^\\x]t", "text",               FAILS},
+    {"te[^x\\", "text",                 FAILS},
+    {"te[/]t", "text",                  FAILS},
+    {"te[S]t", "test",                  SUCCEEDS_IF(APR_FNM_CASE_BLIND)},
+    {"te[r-t]t", "test",                SUCCEEDS},
+    {"te[r-t]t", "teSt",                SUCCEEDS_IF(APR_FNM_CASE_BLIND)},
+    {"te[r-T]t", "test",                SUCCEEDS_IF(APR_FNM_CASE_BLIND)},
+    {"te[R-T]t", "test",                SUCCEEDS_IF(APR_FNM_CASE_BLIND)},
+    {"te[r-Tz]t", "tezt",               SUCCEEDS},
+    {"te[R-T]t", "tent",                FAILS},
+    {"\\/test", "/test",                FAILS_IF(APR_FNM_NOESCAPE)},
+    {"tes[]t]", "test",                 SUCCEEDS},
+    {"tes[t-]", "test",                 SUCCEEDS},
+    {"tes[t-]]", "test]",               SUCCEEDS},
+    {"tes[t-]]", "test",                FAILS},
+    {"tes[u-]", "test",                 FAILS},
+    {"tes[t-]", "tes[t-]",              FAILS},
+    {"test[/-/]", "test[/-/]",          SUCCEEDS_IF(APR_FNM_PATHNAME)},
+    {"test[\\/-/]", "test[/-/]",        APR_FNM_PATHNAME, APR_FNM_NOESCAPE},
+    {"test[/-\\/]", "test[/-/]",        APR_FNM_PATHNAME, APR_FNM_NOESCAPE},
+    {"test[/-/]", "test/",              FAILS_IF(APR_FNM_PATHNAME)},
+    {"test[\\/-/]", "test/",            FAILS_IF(APR_FNM_PATHNAME)},
+    {"test[/-\\/]", "test/",            FAILS_IF(APR_FNM_PATHNAME)},
+
     {"test/this", "test/",              FAILS},
     {"test/", "test/this",              FAILS},
     {"test*/this", "test/this",         SUCCEEDS},
@@ -133,6 +163,35 @@ static void test_fnmatch(abts_case *tc, void *data)
     }
 }
 
+static void test_fnmatch_test(abts_case *tc, void *data)
+{
+    static const struct test {
+        const char *pattern;
+        int result;
+    } ft_tests[] = {
+        { "a*b", 1 },
+        { "a?", 1 },
+        { "a\\b?", 1 },
+        { "a[b-c]", 1 },
+        { "a", 0 },
+        { "a\\", 0 },
+        { NULL, 0 }
+    };
+    const struct test *t;
+
+    for (t = ft_tests; t->pattern != NULL; t++) {
+        int res = apr_fnmatch_test(t->pattern);
+        
+        if (res != t->result) {
+            char buf[128];
+
+            sprintf(buf, "apr_fnmatch_test(\"%s\") = %d, expected %d\n",
+                    t->pattern, res, t->result);
+            abts_fail(tc, buf, __LINE__);
+        }
+    }
+}
+
 static void test_glob(abts_case *tc, void *data)
 {
     int i;
@@ -177,6 +236,7 @@ abts_suite *testfnmatch(abts_suite *suite)
     suite = ADD_SUITE(suite)
 
     abts_run_test(suite, test_fnmatch, NULL);
+    abts_run_test(suite, test_fnmatch_test, NULL);
     abts_run_test(suite, test_glob, NULL);
     abts_run_test(suite, test_glob_currdir, NULL);
 
