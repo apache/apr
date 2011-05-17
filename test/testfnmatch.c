@@ -94,6 +94,8 @@ static struct pattern_s {
     {"\\/test", "/test",                FAILS_IF(APR_FNM_NOESCAPE)},
     {"tes[]t]", "test",                 SUCCEEDS},
     {"tes[t-]", "test",                 SUCCEEDS},
+    {"tes[t-]]", "test]",               SUCCEEDS},
+    {"tes[t-]]", "test",                FAILS},
     {"tes[u-]", "test",                 FAILS},
     {"tes[t-]", "tes[t-]",              FAILS},
     {"test[/-/]", "test[/-/]",          SUCCEEDS_IF(APR_FNM_PATHNAME)},
