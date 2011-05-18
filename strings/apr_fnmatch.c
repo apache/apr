@@ -207,7 +207,10 @@ APR_DECLARE(int) apr_fnmatch(const char *pattern, const char *string, int flags)
     const char *mismatch = NULL;
     int matchlen = 0;
 
-    while (*pattern)
+    if (*pattern == '*')
+        goto firstsegment;
+
+    while (*pattern && *string)
     {
         /* Pre-decode "\/" which has no special significance, and
          * match balanced slashes, starting a new segment pattern
@@ -219,6 +222,7 @@ APR_DECLARE(int) apr_fnmatch(const char *pattern, const char *string, int flags)
             ++string;
         }            
 
+firstsegment:
         /* At the beginning of each segment, validate leading period behavior.
          */
         if ((flags & APR_FNM_PERIOD) && (*string == '.'))
@@ -379,9 +383,9 @@ APR_DECLARE(int) apr_fnmatch(const char *pattern, const char *string, int flags)
             return APR_FNM_NOMATCH;
     }
 
-    /* pattern is at EOS; if string is also, declare success
+    /* Where both pattern and string are at EOS, declare success
      */
-    if (!*string)
+    if (!*string && !*pattern)
         return 0;
 
     /* pattern didn't match to the end of string */
