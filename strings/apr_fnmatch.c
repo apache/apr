@@ -118,8 +118,8 @@ static APR_INLINE int fnmatch_ch(const char **pattern, const char **string, int 
 leadingclosebrace:
             /* Look at only well-formed range patterns; 
              * "x-]" is not allowed unless escaped ("x-\]")
+             * XXX: Fix for locale/MBCS character width
              */
-            /* XXX: Fix for locale/MBCS character width */
             if (((*pattern)[1] == '-') && ((*pattern)[2] != ']'))
             {
                 startch = *pattern;
@@ -370,12 +370,12 @@ APR_DECLARE(int) apr_fnmatch(const char *pattern, const char *string, int flags)
             }
         }
 
-        if (*string && (!slash || (*string != '/')))
+        if (*string && !(slash && (*string == '/')))
             return APR_FNM_NOMATCH;
 
-        if (*pattern && (!slash || ((*pattern != '/')
-                                    && (!escape || (*pattern != '\\')
-                                                || (pattern[1] != '/')))))
+        if (*pattern && !(slash && ((*pattern == '/')
+                                    || (escape && (*pattern == '\\')
+                                               && (pattern[1] == '/')))))
             return APR_FNM_NOMATCH;
     }
 
