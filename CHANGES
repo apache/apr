@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.5
 
+  *) Security: CVE-2011-1928
+     apr_fnmatch(): Fix high CPU loop.  [William Rowe]
+
   *) Fix top_builddir in installed apr_rules.mk.  [Bojan Smojver]
 
 Changes for APR 1.4.4
