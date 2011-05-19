@@ -129,7 +129,7 @@ leadingclosebrace:
                  * or ranges containing a slash in FNM_PATHNAME mode pattern
                  * fall out to to the rewind and test '[' literal code path
                  */
-                if (!**pattern || (slash && (**pattern == '\\')))
+                if (!**pattern || (slash && (**pattern == '/')))
                     break;
 
                 /* XXX: handle locale/MBCS comparison, advance by MBCS char width */
