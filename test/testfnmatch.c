@@ -75,6 +75,7 @@ static struct pattern_s {
     {"tes*", "test",                    SUCCEEDS},
     {"test*", "test",                   SUCCEEDS},
 
+    {".[\\-\\t]", ".t",                 SUCCEEDS},
     {"test*?*[a-z]*", "testgoop",       SUCCEEDS},
     {"te[^x]t", "test",                 SUCCEEDS},
     {"te[^abc]t", "test",               SUCCEEDS},
