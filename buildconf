@@ -45,7 +45,7 @@ echo "buildconf: copying libtool helper files using $libtoolize"
 # Remove any libtool files so one can switch between libtool versions
 # by simply rerunning the buildconf script.
 rm -f aclocal.m4 libtool.m4
-(cd build ; rm -f ltconfig ltmain.sh libtool.m4 ltoptions.m4 ltsugar.m4 ltversion.m4 lt~obsolete.m4)
+(cd build ; rm -f ltconfig ltmain.sh argz.m4 libtool.m4 ltoptions.m4 ltsugar.m4 ltversion.m4 lt~obsolete.m4)
 
 # Determine libtool version, because --copy behaves differently
 # w.r.t. copying libtool.m4
