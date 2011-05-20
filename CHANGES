@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.6
 
+  *) Improve platform detection by updating config.guess and config.sub.
+     [Rainer Jung]
+
   *) Add libtool2 files to extraclean make target.  [Rainer Jung]
 
   *) Don't overwrite our config.guess and config.sub
