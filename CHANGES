@@ -1,4 +1,8 @@
                                                      -*- coding: utf-8 -*-
+Changes for APR 1.4.6
+
+  *) Silence autoconf 2.68 warnings.  [Rainer Jung]
+
 Changes for APR 1.4.5
 
   *) Security: CVE-2011-1928
