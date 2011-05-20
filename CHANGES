@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.6
 
+  *) Don't overwrite our config.guess and config.sub
+     when running buildconf.  [Rainer Jung]
+
   *) Silence autoconf 2.68 warnings.  [Rainer Jung]
 
 Changes for APR 1.4.5
