@@ -51,7 +51,10 @@ DISTCLEAN_TARGETS = config.cache config.log config.status \
 	libtool $(APR_CONFIG) build/apr_rules.mk apr.pc \
 	build/pkg/pkginfo
 EXTRACLEAN_TARGETS = configure aclocal.m4 include/arch/unix/apr_private.h.in \
-	build-outputs.mk build/ltcf-c.sh build/ltmain.sh build/libtool.m4
+	build-outputs.mk build/ltcf-c.sh build/aclocal.m4 \
+	build/ltconfig build/ltmain.sh \
+	build/argz.m4 build/libtool.m4 build/ltoptions.m4 \
+	build/ltsugar.m4 build/ltversion.m4 build/lt~obsolete.m4
 
 prefix=@prefix@
 exec_prefix=@exec_prefix@
