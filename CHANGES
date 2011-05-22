@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_thread_pool: Fix thread unsafe pool usage. [Stefan Fritsch]
+
   *) apr_brigades: add a check to prevent infinite while loop in case
      of a corrupted brigade.  Problem evidenced in PR 51062.  Analysis by
      Krzysztof Kostałkowicz <KKostalkowicz ivmx.pl>, patch [Nick Kew].

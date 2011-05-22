@@ -353,13 +353,18 @@ APR_DECLARE(apr_status_t) apr_thread_pool_create(apr_thread_pool_t ** me,
     *me = NULL;
     tp = apr_pcalloc(pool, sizeof(apr_thread_pool_t));
 
-    tp->pool = pool;
-
-    rv = thread_pool_construct(tp, init_threads, max_threads);
-    if (APR_SUCCESS != rv) {
+    /*
+     * This pool will be used by different threads. As we cannot ensure that
+     * our caller won't use the pool without acquiring the mutex, we must
+     * create a new sub pool.
+     */
+    rv = apr_pool_create(&tp->pool, pool);
+    if (APR_SUCCESS != rv)
         return rv;
-    }
-    apr_pool_cleanup_register(pool, tp, thread_pool_cleanup,
+    rv = thread_pool_construct(tp, init_threads, max_threads);
+    if (APR_SUCCESS != rv)
+        return rv;
+    apr_pool_cleanup_register(tp->pool, tp, thread_pool_cleanup,
                               apr_pool_cleanup_null);
 
     while (init_threads) {
