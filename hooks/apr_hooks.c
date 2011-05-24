@@ -208,6 +208,10 @@ static apr_array_header_t *sort_hook(apr_array_header_t *pHooks,
     }
     if(apr_hook_debug_enabled)
         fputc('\n',stdout);
+
+    /* destroy the pool - the sorted hooks were already copied */
+    apr_pool_destroy(p);
+
     return pNew;
 }
 
