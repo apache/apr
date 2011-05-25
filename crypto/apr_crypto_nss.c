@@ -489,8 +489,8 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
     /* did an error occur? */
     perr = PORT_GetError();
     if (perr || !block->ctx) {
-        f->result->rc = perr;
-        f->result->msg = PR_ErrorToName(perr);
+        key->f->result->rc = perr;
+        key->f->result->msg = PR_ErrorToName(perr);
         return APR_EINIT;
     }
 
@@ -522,7 +522,7 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
  */
 static apr_status_t crypto_block_encrypt(unsigned char **out,
         apr_size_t *outlen, const unsigned char *in, apr_size_t inlen,
-        apr_crypto_block_t *ctx)
+        apr_crypto_block_t *block)
 {
 
     unsigned char *buffer;
@@ -573,7 +573,7 @@ static apr_status_t crypto_block_encrypt(unsigned char **out,
  * @return APR_ENOTIMPL if not implemented.
  */
 static apr_status_t crypto_block_encrypt_finish(unsigned char *out,
-        apr_size_t *outlen, apr_crypto_block_t *ctx)
+        apr_size_t *outlen, apr_crypto_block_t *block)
 {
 
     apr_status_t rv = APR_SUCCESS;
@@ -650,8 +650,8 @@ static apr_status_t crypto_block_decrypt_init(apr_crypto_block_t **ctx,
     /* did an error occur? */
     perr = PORT_GetError();
     if (perr || !block->ctx) {
-        f->result->rc = perr;
-        f->result->msg = PR_ErrorToName(perr);
+        key->f->result->rc = perr;
+        key->f->result->msg = PR_ErrorToName(perr);
         return APR_EINIT;
     }
 
