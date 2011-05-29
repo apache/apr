@@ -27,6 +27,7 @@ sinclude(build/ltversion.m4)
 sinclude(build/lt~obsolete.m4)
 
 sinclude(build/apu-conf.m4)
+sinclude(build/apu-ldap.m4)
 sinclude(build/xml.m4)
 sinclude(build/apu-hints.m4)
 sinclude(build/crypto.m4)
