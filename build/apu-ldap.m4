@@ -259,7 +259,6 @@ AC_SUBST(apu_has_ldap_tivoli)
 AC_SUBST(apu_has_ldap_zos)
 AC_SUBST(apu_has_ldap_other)
 AC_SUBST(LDADD_ldap)
-AC_SUBST(APRUTIL_EXPORT_LIBS)
 
 ])
 

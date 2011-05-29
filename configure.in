@@ -2664,6 +2664,10 @@ AC_SUBST(APR_DSO_LIBDIR)
 AC_SUBST(APR_DSO_MODULES)
 AC_SUBST(EXTRA_OBJECTS)
 
+dnl XXX FIXME; used for -lexpat, -liconv etc?
+AC_SUBST(APRUTIL_EXPORT_LIBS)
+
+
 dnl
 dnl Prep all the flags and stuff for compilation and export to other builds
 dnl
