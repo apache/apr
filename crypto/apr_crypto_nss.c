@@ -88,7 +88,7 @@ static apr_status_t crypto_error(const apu_err_t **result, const apr_crypto_t *f
  *
  * It is safe to shut down twice.
  */
-static apr_status_t crypto_shutdown()
+static apr_status_t crypto_shutdown(void)
 {
     if (NSS_IsInitialized()) {
         SECStatus s = NSS_Shutdown();
@@ -463,11 +463,12 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
             return APR_ENOIV;
         }
         if (*iv == NULL) {
+            SECStatus s;
             usedIv = apr_pcalloc(p, key->ivSize);
             if (!usedIv) {
                 return APR_ENOMEM;
             }
-            SECStatus s = PK11_GenerateRandom(usedIv, key->ivSize);
+            s = PK11_GenerateRandom(usedIv, key->ivSize);
             if (s != SECSuccess) {
                 return APR_ENOIV;
             }
@@ -527,6 +528,7 @@ static apr_status_t crypto_block_encrypt(unsigned char **out,
 
     unsigned char *buffer;
     int outl = (int) *outlen;
+    SECStatus s;
     if (!out) {
         *outlen = inlen + block->blockSize;
         return APR_SUCCESS;
@@ -539,7 +541,7 @@ static apr_status_t crypto_block_encrypt(unsigned char **out,
         *out = buffer;
     }
 
-    SECStatus s = PK11_CipherOp(block->ctx, *out, &outl, inlen, (unsigned char*)in, inlen);
+    s = PK11_CipherOp(block->ctx, *out, &outl, inlen, (unsigned char*)in, inlen);
     if (s != SECSuccess) {
         PRErrorCode perr = PORT_GetError();
         if (perr) {
@@ -688,6 +690,7 @@ static apr_status_t crypto_block_decrypt(unsigned char **out,
 
     unsigned char *buffer;
     int outl = (int) *outlen;
+    SECStatus s;
     if (!out) {
         *outlen = inlen + block->blockSize;
         return APR_SUCCESS;
@@ -700,7 +703,7 @@ static apr_status_t crypto_block_decrypt(unsigned char **out,
         *out = buffer;
     }
 
-    SECStatus s = PK11_CipherOp(block->ctx, *out, &outl, inlen, (unsigned char*)in, inlen);
+    s = PK11_CipherOp(block->ctx, *out, &outl, inlen, (unsigned char*)in, inlen);
     if (s != SECSuccess) {
         PRErrorCode perr = PORT_GetError();
         if (perr) {

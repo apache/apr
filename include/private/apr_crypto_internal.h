@@ -234,7 +234,7 @@ struct apr_crypto_driver_t {
      * @note After cleanup, a context is free to be reused if necessary.
      * @return Returns APR_ENOTIMPL if not supported.
      */
-    apr_status_t (*shutdown)();
+    apr_status_t (*shutdown)(void);
 
     /**
      * @brief: fetch the most recent error from this driver.

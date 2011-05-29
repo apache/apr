@@ -80,7 +80,7 @@ static apr_status_t crypto_error(const apu_err_t **result, const apr_crypto_t *f
 /**
  * Shutdown the crypto library and release resources.
  */
-static apr_status_t crypto_shutdown() {
+static apr_status_t crypto_shutdown(void) {
     ERR_free_strings();
     EVP_cleanup();
     ENGINE_cleanup();
