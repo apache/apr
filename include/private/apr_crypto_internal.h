@@ -57,6 +57,28 @@ struct apr_crypto_driver_t {
             const apr_array_header_t *params, apr_pool_t *pool);
 
     /**
+     * @brief Get a hash table of key types, keyed by the name of the type against
+     * an integer pointer constant.
+     *
+     * @param types - hashtable of key types keyed to constants.
+     * @param f - encryption context
+     * @return APR_SUCCESS for success
+     */
+    apr_status_t (*get_block_key_types)(apr_hash_t **types,
+            const apr_crypto_t *f);
+
+    /**
+     * @brief Get a hash table of key modes, keyed by the name of the mode against
+     * an integer pointer constant.
+     *
+     * @param modes - hashtable of key modes keyed to constants.
+     * @param f - encryption context
+     * @return APR_SUCCESS for success
+     */
+    apr_status_t (*get_block_key_modes)(apr_hash_t **modes,
+            const apr_crypto_t *f);
+
+    /**
      * @brief Create a key from the given passphrase. By default, the PBKDF2
      *        algorithm is used to generate the key from the passphrase. It is expected
      *        that the same pass phrase will generate the same key, regardless of the
