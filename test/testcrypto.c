@@ -662,6 +662,158 @@ static void test_crypto_block_openssl_nss_pad(abts_case *tc, void *data) {
 
 }
 
+/**
+ * Get Types, OpenSSL.
+ */
+static void test_crypto_get_block_key_types_openssl(abts_case *tc, void *data)
+{
+    apr_pool_t *pool = NULL;
+    const apr_crypto_driver_t *driver;
+    apr_crypto_t *f;
+    apr_hash_t *types;
+    int *key_3des_192;
+    int *key_aes_128;
+    int *key_aes_192;
+    int *key_aes_256;
+
+    apr_pool_create(&pool, NULL);
+    driver = get_openssl_driver(tc, pool);
+    if (driver) {
+
+        f = make(tc, pool, driver);
+        apr_crypto_get_block_key_types(&types, f);
+
+        key_3des_192 = apr_hash_get(types, "3des192", APR_HASH_KEY_STRING);
+        ABTS_PTR_NOTNULL(tc, key_3des_192);
+        ABTS_INT_EQUAL(tc, *key_3des_192, APR_KEY_3DES_192);
+
+        key_aes_128 = apr_hash_get(types, "aes128", APR_HASH_KEY_STRING);
+        ABTS_PTR_NOTNULL(tc, key_aes_128);
+        ABTS_INT_EQUAL(tc, *key_aes_128, APR_KEY_AES_128);
+
+        key_aes_192 = apr_hash_get(types, "aes192", APR_HASH_KEY_STRING);
+        ABTS_PTR_NOTNULL(tc, key_aes_192);
+        ABTS_INT_EQUAL(tc, *key_aes_192, APR_KEY_AES_192);
+
+        key_aes_256 = apr_hash_get(types, "aes256", APR_HASH_KEY_STRING);
+        ABTS_PTR_NOTNULL(tc, key_aes_256);
+        ABTS_INT_EQUAL(tc, *key_aes_256, APR_KEY_AES_256);
+
+    }
+
+    apr_pool_destroy(pool);
+
+}
+
+/**
+ * Get Types, NSS.
+ */
+static void test_crypto_get_block_key_types_nss(abts_case *tc, void *data)
+{
+    apr_pool_t *pool = NULL;
+    const apr_crypto_driver_t *driver;
+    apr_crypto_t *f;
+    apr_hash_t *types;
+    int *key_3des_192;
+    int *key_aes_128;
+    int *key_aes_192;
+    int *key_aes_256;
+
+    apr_pool_create(&pool, NULL);
+    driver = get_nss_driver(tc, pool);
+    if (driver) {
+
+        f = make(tc, pool, driver);
+        apr_crypto_get_block_key_types(&types, f);
+
+        key_3des_192 = apr_hash_get(types, "3des192", APR_HASH_KEY_STRING);
+        ABTS_PTR_NOTNULL(tc, key_3des_192);
+        ABTS_INT_EQUAL(tc, *key_3des_192, APR_KEY_3DES_192);
+
+        key_aes_128 = apr_hash_get(types, "aes128", APR_HASH_KEY_STRING);
+        ABTS_PTR_NOTNULL(tc, key_aes_128);
+        ABTS_INT_EQUAL(tc, *key_aes_128, APR_KEY_AES_128);
+
+        key_aes_192 = apr_hash_get(types, "aes192", APR_HASH_KEY_STRING);
+        ABTS_PTR_NOTNULL(tc, key_aes_192);
+        ABTS_INT_EQUAL(tc, *key_aes_192, APR_KEY_AES_192);
+
+        key_aes_256 = apr_hash_get(types, "aes256", APR_HASH_KEY_STRING);
+        ABTS_PTR_NOTNULL(tc, key_aes_256);
+        ABTS_INT_EQUAL(tc, *key_aes_256, APR_KEY_AES_256);
+
+    }
+
+    apr_pool_destroy(pool);
+
+}
+
+/**
+ * Get Modes, OpenSSL.
+ */
+static void test_crypto_get_block_key_modes_openssl(abts_case *tc, void *data)
+{
+    apr_pool_t *pool = NULL;
+    const apr_crypto_driver_t *driver;
+    apr_crypto_t *f;
+    apr_hash_t *modes;
+    int *mode_ecb;
+    int *mode_cbc;
+
+    apr_pool_create(&pool, NULL);
+    driver = get_openssl_driver(tc, pool);
+    if (driver) {
+
+        f = make(tc, pool, driver);
+        apr_crypto_get_block_key_modes(&modes, f);
+
+        mode_ecb = apr_hash_get(modes, "ecb", APR_HASH_KEY_STRING);
+        ABTS_PTR_NOTNULL(tc, mode_ecb);
+        ABTS_INT_EQUAL(tc, *mode_ecb, APR_MODE_ECB);
+
+        mode_cbc = apr_hash_get(modes, "cbc", APR_HASH_KEY_STRING);
+        ABTS_PTR_NOTNULL(tc, mode_cbc);
+        ABTS_INT_EQUAL(tc, *mode_cbc, APR_MODE_CBC);
+
+    }
+
+    apr_pool_destroy(pool);
+
+}
+
+/**
+ * Get Modes, NSS.
+ */
+static void test_crypto_get_block_key_modes_nss(abts_case *tc, void *data)
+{
+    apr_pool_t *pool = NULL;
+    const apr_crypto_driver_t *driver;
+    apr_crypto_t *f;
+    apr_hash_t *modes;
+    int *mode_ecb;
+    int *mode_cbc;
+
+    apr_pool_create(&pool, NULL);
+    driver = get_nss_driver(tc, pool);
+    if (driver) {
+
+        f = make(tc, pool, driver);
+        apr_crypto_get_block_key_modes(&modes, f);
+
+        mode_ecb = apr_hash_get(modes, "ecb", APR_HASH_KEY_STRING);
+        ABTS_PTR_NOTNULL(tc, mode_ecb);
+        ABTS_INT_EQUAL(tc, *mode_ecb, APR_MODE_ECB);
+
+        mode_cbc = apr_hash_get(modes, "cbc", APR_HASH_KEY_STRING);
+        ABTS_PTR_NOTNULL(tc, mode_cbc);
+        ABTS_INT_EQUAL(tc, *mode_cbc, APR_MODE_CBC);
+
+    }
+
+    apr_pool_destroy(pool);
+
+}
+
 abts_suite *testcrypto(abts_suite *suite) {
     suite = ADD_SUITE(suite);
 
@@ -691,6 +843,18 @@ abts_suite *testcrypto(abts_suite *suite) {
 
     /* test padded encrypt openssl / decrypt nss */
     abts_run_test(suite, test_crypto_block_openssl_nss_pad, NULL);
+
+    /* test block key types openssl */
+    abts_run_test(suite, test_crypto_get_block_key_types_openssl, NULL);
+
+    /* test block key types nss */
+    abts_run_test(suite, test_crypto_get_block_key_types_nss, NULL);
+
+    /* test block key modes openssl */
+    abts_run_test(suite, test_crypto_get_block_key_modes_openssl, NULL);
+
+    /* test block key modes nss */
+    abts_run_test(suite, test_crypto_get_block_key_modes_nss, NULL);
 
     return suite;
 }

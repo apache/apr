@@ -20,6 +20,7 @@
 #include "apu.h"
 #include "apr_pools.h"
 #include "apr_tables.h"
+#include "apr_hash.h"
 #include "apu_errno.h"
 
 #ifdef __cplusplus
@@ -240,6 +241,28 @@ APR_DECLARE(apr_status_t) apr_crypto_error(const apu_err_t **result,
  */
 APR_DECLARE(apr_status_t) apr_crypto_make(apr_crypto_t **f, const apr_crypto_driver_t *driver,
         const apr_array_header_t *params, apr_pool_t *pool);
+
+/**
+ * @brief Get a hash table of key types, keyed by the name of the type against
+ * an integer pointer constant.
+ *
+ * @param types - hashtable of key types keyed to constants.
+ * @param f - encryption context
+ * @return APR_SUCCESS for success
+ */
+APR_DECLARE(apr_status_t) apr_crypto_get_block_key_types(apr_hash_t **types,
+        const apr_crypto_t *f);
+
+/**
+ * @brief Get a hash table of key modes, keyed by the name of the mode against
+ * an integer pointer constant.
+ *
+ * @param modes - hashtable of key modes keyed to constants.
+ * @param f - encryption context
+ * @return APR_SUCCESS for success
+ */
+APR_DECLARE(apr_status_t) apr_crypto_get_block_key_modes(apr_hash_t **modes,
+        const apr_crypto_t *f);
 
 /**
  * @brief Create a key from the given passphrase. By default, the PBKDF2

@@ -51,6 +51,8 @@ struct apr_crypto_t {
     apu_err_t *result;
     apr_array_header_t *keys;
     apr_crypto_config_t *config;
+    apr_hash_t *types;
+    apr_hash_t *modes;
 };
 
 struct apr_crypto_config_t {
@@ -74,6 +76,14 @@ struct apr_crypto_block_t {
     apr_crypto_key_t *key;
     int blockSize;
 };
+
+static int key_3des_192 = APR_KEY_3DES_192;
+static int key_aes_128 = APR_KEY_AES_128;
+static int key_aes_192 = APR_KEY_AES_192;
+static int key_aes_256 = APR_KEY_AES_256;
+
+static int mode_ecb = APR_MODE_ECB;
+static int mode_cbc = APR_MODE_CBC;
 
 /**
  * Fetch the most recent error from this driver.
@@ -255,6 +265,22 @@ static apr_status_t crypto_make(apr_crypto_t **ff, const apr_crypto_driver_t *pr
     f->keys = apr_array_make(pool,
                              10, sizeof(apr_crypto_key_t));
 
+    f->types = apr_hash_make(pool);
+    if (!f->types) {
+        return APR_ENOMEM;
+    }
+    apr_hash_set(f->types, "3des192", APR_HASH_KEY_STRING, &(key_3des_192));
+    apr_hash_set(f->types, "aes128", APR_HASH_KEY_STRING, &(key_aes_128));
+    apr_hash_set(f->types, "aes192", APR_HASH_KEY_STRING, &(key_aes_192));
+    apr_hash_set(f->types, "aes256", APR_HASH_KEY_STRING, &(key_aes_256));
+
+    f->modes = apr_hash_make(pool);
+    if (!f->modes) {
+        return APR_ENOMEM;
+    }
+    apr_hash_set(f->modes, "ecb", APR_HASH_KEY_STRING, &(mode_ecb));
+    apr_hash_set(f->modes, "cbc", APR_HASH_KEY_STRING, &(mode_cbc));
+
     apr_pool_cleanup_register(pool, f,
                               crypto_cleanup_helper,
                               apr_pool_cleanup_null);
@@ -274,6 +300,34 @@ static apr_status_t crypto_make(apr_crypto_t **ff, const apr_crypto_driver_t *pr
 
     return APR_SUCCESS;
 
+}
+
+/**
+ * @brief Get a hash table of key types, keyed by the name of the type against
+ * an integer pointer constant.
+ *
+ * @param types - hashtable of key types keyed to constants.
+ * @param f - encryption context
+ * @return APR_SUCCESS for success
+ */
+static apr_status_t crypto_get_block_key_types(apr_hash_t **types,
+        const apr_crypto_t *f)
+{
+    *types = f->types;
+}
+
+/**
+ * @brief Get a hash table of key modes, keyed by the name of the mode against
+ * an integer pointer constant.
+ *
+ * @param modes - hashtable of key modes keyed to constants.
+ * @param f - encryption context
+ * @return APR_SUCCESS for success
+ */
+static apr_status_t crypto_get_block_key_modes(apr_hash_t **modes,
+        const apr_crypto_t *f)
+{
+    *modes = f->modes;
 }
 
 /**
@@ -767,6 +821,8 @@ APR_MODULE_DECLARE_DATA const apr_crypto_driver_t apr_crypto_nss_driver = {
     "nss",
     crypto_init,
     crypto_make,
+    crypto_get_block_key_types,
+    crypto_get_block_key_modes,
     crypto_passphrase,
     crypto_block_encrypt_init,
     crypto_block_encrypt,

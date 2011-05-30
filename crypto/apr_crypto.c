@@ -235,6 +235,34 @@ APR_DECLARE(apr_status_t) apr_crypto_make(apr_crypto_t **f, const apr_crypto_dri
 }
 
 /**
+ * @brief Get a hash table of key types, keyed by the name of the type against
+ * an integer pointer constant.
+ *
+ * @param types - hashtable of key types keyed to constants.
+ * @param f - encryption context
+ * @return APR_SUCCESS for success
+ */
+APR_DECLARE(apr_status_t) apr_crypto_get_block_key_types(apr_hash_t **types,
+        const apr_crypto_t *f)
+{
+    return f->provider->get_block_key_types(types, f);
+}
+
+/**
+ * @brief Get a hash table of key modes, keyed by the name of the mode against
+ * an integer pointer constant.
+ *
+ * @param modes - hashtable of key modes keyed to constants.
+ * @param f - encryption context
+ * @return APR_SUCCESS for success
+ */
+APR_DECLARE(apr_status_t) apr_crypto_get_block_key_modes(apr_hash_t **modes,
+        const apr_crypto_t *f)
+{
+    return f->provider->get_block_key_modes(modes, f);
+}
+
+/**
  * @brief Create a key from the given passphrase. By default, the PBKDF2
  *        algorithm is used to generate the key from the passphrase. It is expected
  *        that the same pass phrase will generate the same key, regardless of the
