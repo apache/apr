@@ -162,9 +162,7 @@ typedef enum {
  * Certificate and private key structure.
  *
  * The various crypto backends expect certificates and keys in a wide
- * array of formats. This structure is analogous to apr_ldap_opt_tls_cert_t
- * from the LDAP interface. Ultimately that interface should be meshed with
- * this one.
+ * array of formats.
  * @param type Type of certificate APR_CRYPTO_*_TYPE_*
  * @param path Path, file or nickname of the certificate
  * @param password Optional password, can be NULL

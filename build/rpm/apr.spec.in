@@ -88,15 +88,6 @@ Requires: apr-util = %{version}-%{release}
 This package provides the ODBC driver for the apr-util DBD
 (database abstraction) interface.
 
-%package ldap
-Group: Development/Libraries
-Summary: APR utility library LDAP support
-BuildRequires: openldap-devel
-Requires: apr-util = %{version}-%{release}
-
-%description ldap
-This package provides the LDAP support for the apr-util.
-
 %package openssl
 Group: Development/Libraries
 Summary: APR utility library OpenSSL crypto support
@@ -126,7 +117,7 @@ This package provides crypto support for apr-util based on Mozilla NSS.
         --includedir=%{_includedir}/apr-%{aprver} \
         --with-installbuilddir=%{_libdir}/apr/build-%{aprver} \
         --with-devrandom=/dev/urandom \
-        --with-ldap --without-gdbm \
+        --without-gdbm \
         --with-sqlite3 --with-pgsql --with-mysql --with-freetds --with-odbc \
         --with-berkeley-db \
         --with-crypto --with-openssl --with-nss \
@@ -187,10 +178,6 @@ rm -rf $RPM_BUILD_ROOT
 %files odbc
 %defattr(-,root,root,-)
 %{_libdir}/apr-%{aprver}/apr_dbd_odbc*
-
-%files ldap
-%defattr(-,root,root,-)
-%{_libdir}/apr-%{aprver}/apr_ldap*
 
 %files openssl
 %defattr(-,root,root,-)

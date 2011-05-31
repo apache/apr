@@ -17,7 +17,6 @@
 #include "apr.h"
 #include "apr_dso.h"
 #include "apu.h"
-#include "apr_ldap.h"
 
 #ifndef APU_INTERNAL_H
 #define APU_INTERNAL_H
@@ -38,31 +37,9 @@ apr_status_t apu_dso_init(apr_pool_t *pool);
 apr_status_t apu_dso_mutex_lock(void);
 apr_status_t apu_dso_mutex_unlock(void);
 
-apr_status_t apu_dso_load(apr_dso_handle_t **dso, apr_dso_handle_sym_t *dsoptr, const char *module,
-                          const char *modsym, apr_pool_t *pool);
-
-#if APR_HAS_LDAP
-
-/* For LDAP internal builds, wrap our LDAP namespace */
-
-struct apr__ldap_dso_fntable {
-    int (*info)(apr_pool_t *pool, apr_ldap_err_t **result_err);
-    int (*init)(apr_pool_t *pool, LDAP **ldap, const char *hostname,
-                int portno, int secure, apr_ldap_err_t **result_err);
-    int (*ssl_init)(apr_pool_t *pool, const char *cert_auth_file,
-                    int cert_file_type, apr_ldap_err_t **result_err);
-    int (*ssl_deinit)(void);
-    int (*get_option)(apr_pool_t *pool, LDAP *ldap, int option,
-                      void *outvalue, apr_ldap_err_t **result_err);
-    int (*set_option)(apr_pool_t *pool, LDAP *ldap, int option,
-                      const void *invalue, apr_ldap_err_t **result_err);
-    apr_status_t (*rebind_init)(apr_pool_t *pool);
-    apr_status_t (*rebind_add)(apr_pool_t *pool, LDAP *ld,
-                               const char *bindDN, const char *bindPW);
-    apr_status_t (*rebind_remove)(LDAP *ld);
-};
-
-#endif /* APR_HAS_LDAP */
+apr_status_t apu_dso_load(apr_dso_handle_t **dso, apr_dso_handle_sym_t *dsoptr,
+                          const char *module, const char *modsym,
+                          apr_pool_t *pool);
 
 #ifdef __cplusplus
 }

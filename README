@@ -43,7 +43,6 @@ Apache Portable Runtime Library (APR)
      Multiple SQL DBD client interfaces
      Multiple flat-database DBM client interfaces
      Typesafe function Hooks abstraction
-     LDAP SSL connections for a variety of LDAP toolkits   
      MemCache interface
      Date parsing rourtines
      Resource Lists
@@ -228,8 +227,6 @@ code and source code.
 The following provides more details on the included cryptographic
 software:
 
-  APR-Util provides an abstract interface for SSL encrypted LDAP (ldaps
-  and STARTTLS style) connections, which can be powered by OpenLDAP, 
-  Netscape LDAP SDK, Mozilla LDAP SDK, or other platform specific ldap
-  interfaces.
+  APR provides an abstract interface for SSL cryptographic functions,
+  specifically @bug XXX Fill This In XXX!
 
