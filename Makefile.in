@@ -79,7 +79,6 @@ LDADD_dbd_odbc = @LDADD_dbd_odbc@
 LDADD_dbm_db = @LDADD_dbm_db@
 LDADD_dbm_gdbm = @LDADD_dbm_gdbm@
 LDADD_dbm_ndbm = @LDADD_dbm_ndbm@
-LDADD_ldap = @LDADD_ldap@
 LDADD_crypto_openssl = @LDADD_crypto_openssl@
 LDADD_crypto_nss = @LDADD_crypto_nss@
 

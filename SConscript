@@ -18,7 +18,7 @@ tests = Split("""
 	testatomic.c testflock.c testsock.c testglobalmutex.c
 	teststrnatcmp.c testfilecopy.c testtemp.c testlfs.c
 	testcond.c testuri.c testmemcache.c testdate.c
-	testxlate.c testdbd.c testrmm.c testldap.c testmd4.c
+	testxlate.c testdbd.c testrmm.c testmd4.c
 	teststrmatch.c testpass.c testcrypto.c testqueue.c
 	testbuckets.c testxml.c testdbm.c testuuid.c testmd5.c
 	testreslist.c dbd.c

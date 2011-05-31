@@ -101,7 +101,6 @@ ALL_TESTS = \
 	$(INTDIR)\testhash.obj \
 	$(INTDIR)\testhooks.obj \
 	$(INTDIR)\testipsub.obj \
-	$(INTDIR)\testldap.obj \
 	$(INTDIR)\testlfs.obj \
 	$(INTDIR)\testlfsabi.obj \
 	$(INTDIR)\testlfsabi32.obj \
