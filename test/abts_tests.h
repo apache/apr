@@ -77,7 +77,6 @@ const struct testlist {
     {testmd4},
     {testmd5},
     {testcrypto},
-    {testldap},
     {testdbd},
     {testdate},
     {testmemcache},

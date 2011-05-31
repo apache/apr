@@ -409,30 +409,6 @@ SOURCE=.\file_io\unix\tempdir.c
 SOURCE=.\hooks\apr_hooks.c
 # End Source File
 # End Group
-# Begin Group "ldap"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=.\ldap\apr_ldap_init.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\ldap\apr_ldap_option.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\ldap\apr_ldap_rebind.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\ldap\apr_ldap_stub.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\ldap\apr_ldap_url.c
-# End Source File
-# End Group
 # Begin Group "locks"
 
 # PROP Default_Filter ""
@@ -966,61 +942,6 @@ SOURCE=.\include\apr_hash.h
 # Begin Source File
 
 SOURCE=.\include\apr_inherit.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_ldap.h.in
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_ldap.hnw
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_ldap.hw
-
-!IF  "$(CFG)" == "libapr - Win32 Release"
-
-# Begin Custom Build - Creating apr_ldap.h from apr_ldap.hw
-InputPath=.\include\apr_ldap.hw
-
-".\include\apr_ldap.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apr_ldap.hw > .\include\apr_ldap.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "libapr - Win32 Debug"
-
-# Begin Custom Build - Creating apr_ldap.h from apr_ldap.hw
-InputPath=.\include\apr_ldap.hw
-
-".\include\apr_ldap.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apr_ldap.hw > .\include\apr_ldap.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "libapr - x64 Release"
-
-# Begin Custom Build - Creating apr_ldap.h from apr_ldap.hw
-InputPath=.\include\apr_ldap.hw
-
-".\include\apr_ldap.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apr_ldap.hw > .\include\apr_ldap.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "libapr - x64 Debug"
-
-# Begin Custom Build - Creating apr_ldap.h from apr_ldap.hw
-InputPath=.\include\apr_ldap.hw
-
-".\include\apr_ldap.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apr_ldap.hw > .\include\apr_ldap.h
-
-# End Custom Build
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 

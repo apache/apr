@@ -31,7 +31,7 @@ TESTS = testtime.lo teststr.lo testvsn.lo testipsub.lo testshm.lo	\
 	testatomic.lo testflock.lo testsock.lo testglobalmutex.lo	\
 	teststrnatcmp.lo testfilecopy.lo testtemp.lo testlfs.lo		\
 	testcond.lo testuri.lo testmemcache.lo testdate.lo		\
-	testxlate.lo testdbd.lo testrmm.lo testldap.lo testmd4.lo	\
+	testxlate.lo testdbd.lo testrmm.lo testmd4.lo	\
 	teststrmatch.lo testpass.lo testcrypto.lo testqueue.lo		\
 	testbuckets.lo testxml.lo testdbm.lo testuuid.lo testmd5.lo	\
 	testreslist.lo testbase64.lo testhooks.lo testlfsabi.lo         \
@@ -87,7 +87,7 @@ testutil.lo: $(srcdir)/abts.c $(srcdir)/abts.h $(srcdir)/abts_tests.h \
 
 OBJECTS_testall = abts.lo testutil.lo $(TESTS) $(LOCAL_LIBS)
 testall@EXEEXT@: $(OBJECTS_testall)
-	$(LINK_PROG) $(OBJECTS_testall) $(ALL_LIBS) @LDADD_ldap@
+	$(LINK_PROG) $(OBJECTS_testall) $(ALL_LIBS)
 # For VPATH builds; where we have no ./data, copy us some data
 # if we wait until 'make check', then 'make; ./testall' fails;
 	if test ! -d "./data"; then cp -r $(srcdir)/data data; fi
@@ -176,7 +176,7 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	        if test "$$prog" = 'dbd'; then \
 			for driver in none @apu_dbd_tests@; do \
 				if test "$$driver" != 'none'; then \
-					@shlibpath_var@="`echo "../dbm/.libs:../dbd/.libs:../ldap/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
+					@shlibpath_var@="`echo "../dbm/.libs:../dbd/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
 					./$$prog $$driver; \
 					status=$$?; \
 					if test $$status != 0; then \
@@ -186,7 +186,7 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 				fi; \
 			done; \
 	        else \
-			@shlibpath_var@="`echo "../dbm/.libs:../dbd/.libs:../ldap/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
+			@shlibpath_var@="`echo "../dbm/.libs:../dbd/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
 			./$$prog; \
 			status=$$?; \
 			if test $$status != 0; then \

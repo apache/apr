@@ -155,7 +155,6 @@ typedef struct app_data {
     rtag_t  gs_lookup_rtag;
     rtag_t  gs_event_rtag;
     rtag_t  gs_pcp_rtag;
-    void*   gs_ldap_xref_lock;
     void*   gs_xref_head;
 } APP_DATA;
 

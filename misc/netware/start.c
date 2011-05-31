@@ -22,7 +22,6 @@
 #include "apr_arch_misc.h"       /* for WSAHighByte / WSALowByte */
 #include "apr_arch_proc_mutex.h" /* for apr_proc_mutex_unix_setup_lock() */
 #include "apr_arch_internal_time.h"
-#include "apr_ldap.h"            /* for apr_ldap_rebind_init() */
 
 #ifdef USE_WINSOCK
 /* Prototypes missing from older NDKs */
@@ -163,9 +162,6 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
 #endif
 
     apr_signal_init(pool);
-#if APR_HAS_LDAP
-    apr_ldap_rebind_init(pool);
-#endif
 
     return APR_SUCCESS;
 }
