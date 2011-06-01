@@ -47,7 +47,12 @@
  * Magic numbers
  */
 
-#define MIN_ALLOC 8192
+/*
+ * XXX: This is not optimal when using --enable-allocator-uses-mmap on
+ * XXX: machines with large pagesize, but currently the sink is assumed
+ * XXX: to be index 0, so MIN_ALLOC must be at least two pages.
+ */
+#define MIN_ALLOC (2 * BOUNDARY_SIZE)
 #define MAX_INDEX   20
 
 #if APR_ALLOCATOR_USES_MMAP && defined(_SC_PAGESIZE)
