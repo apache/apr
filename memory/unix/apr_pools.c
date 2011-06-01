@@ -47,7 +47,12 @@
  * Magic numbers
  */
 
-#define MIN_ALLOC 8192
+/*
+ * XXX: This is not optimal for machines with large pagesize, but currently
+ * XXX: the sink is assumed to be index 0, so MIN_ALLOC must be at least two
+ * XXX: pages.
+ */
+#define MIN_ALLOC (2 * BOUNDARY_SIZE)
 #define MAX_INDEX   20
 
 #if APR_ALLOCATOR_USES_MMAP && defined(_SC_PAGESIZE)
