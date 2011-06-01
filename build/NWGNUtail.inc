@@ -251,7 +251,6 @@ else
 	@echo $(DL)-sym internal$(DL)>> $@
 endif
 	@echo $(DL)-l $(APR)/$(OBJDIR)$(DL)>> $@
-	@echo $(DL)-l $(APRLDAP)/$(OBJDIR)$(DL)>> $@
 	@echo $(DL)-l $(APRXML)/$(OBJDIR)$(DL)>> $@
 	@echo $(DL)-l $(APR)/misc/netware$(DL)>> $@
 	@echo $(DL)-l $(APR)$(DL)>> $@
@@ -261,9 +260,6 @@ ifneq "$(IPV6)" ""
 	@echo $(DL)-l $(NOVELLLIBC)/include/winsock/IPV6$(DL)>> $@
 endif
 	@echo $(DL)-l $(NOVELLLIBC)/imports$(DL)>> $@
-ifneq "$(LDAPSDK)" ""
-	@echo $(DL)-l $(LDAPSDK)/imports$(DL)>> $@
-endif
 	@echo $(DL)-nodefaults$(DL)>> $@
 	@echo $(DL)-map $(OBJDIR)/$(NLM_NAME).map$(DL)>> $@
 ifneq "$(strip $(XLFLAGS))" ""
