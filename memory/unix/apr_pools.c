@@ -48,9 +48,9 @@
  */
 
 /*
- * XXX: This is not optimal for machines with large pagesize, but currently
- * XXX: the sink is assumed to be index 0, so MIN_ALLOC must be at least two
- * XXX: pages.
+ * XXX: This is not optimal when using --enable-allocator-uses-mmap on
+ * XXX: machines with large pagesize, but currently the sink is assumed
+ * XXX: to be index 0, so MIN_ALLOC must be at least two pages.
  */
 #define MIN_ALLOC (2 * BOUNDARY_SIZE)
 #define MAX_INDEX   20
