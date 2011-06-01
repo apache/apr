@@ -4,7 +4,6 @@
 
 SUBDIRS = \
 	build \
-	ldap \
 	xml \
 	$(EOLIST)
 
@@ -47,7 +46,6 @@ XINCDIRS	+= \
 			$(APR)/include/arch/unix \
 			$(APR)/dbm/sdbm \
 			$(APR)/random/unix \
-			$(LDAPSDK)/inc \
 			$(EOLIST)
 
 #
@@ -203,7 +201,6 @@ FILES_nlm_objs = \
 FILES_nlm_libs = \
 	$(PRELUDE) \
 	$(APRLIB) \
-	$(APRLDAPLIB) \
 	$(APRXMLLIB) \
 	$(EOLIST)
 
@@ -226,14 +223,6 @@ FILES_nlm_modules = \
 # Include the Winsock libraries if Winsock is being used
 ifndef USE_STDSOCKETS
 FILES_nlm_modules += ws2_32 \
-	$(EOLIST)
-endif
-
-#If the LDAP support is defined then add the auto-load modules
-ifneq "$(LDAPSDK)" ""
-FILES_nlm_modules += \
-	lldapsdk \
-	lldapssl \
 	$(EOLIST)
 endif
 
@@ -274,14 +263,6 @@ FILES_nlm_Ximports +=  \
 	@ws2nlm.imp \
 	WSAStartupRTags \
 	WSACleanupRTag \
-	$(EOLIST)
-endif
-
-#If the LDAP support is defined then add the imports
-ifneq "$(LDAPSDK)" ""
-FILES_nlm_Ximports += \
-	@lldapsdk.imp \
-	@lldapssl.imp \
 	$(EOLIST)
 endif
 

@@ -29,13 +29,11 @@ XINCDIRS += \
 	$(APR)/include/arch/netware \
 	$(APR)/include/arch/unix \
 	$(APRBUILD) \
-	$(LDAPSDK)/inc \
 	$(EOLIST)
 
 FILES_prebuild_headers = \
 	$(APR)/include/apr.h \
 	$(APR)/include/apu_want.h \
-	$(APR)/include/apr_ldap.h \
 	$(APR)/include/private/apu_select_dbm.h \
 	$(EOLIST)
 
