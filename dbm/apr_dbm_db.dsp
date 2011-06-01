@@ -45,11 +45,11 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "../include" /I "../../apr/include" /I "../include/private" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "../include" /I "../include/arch/win32" /I "../include/private" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
-# ADD RSC /l 0x409 /fo"Release/apr_dbm_db-1.res" /d DLL_NAME="apr_dbm_db" /d "NDEBUG" /d "APU_VERSION_ONLY" /I "../include" /I "../../apr/include"
+# ADD RSC /l 0x409 /fo"Release/apr_dbm_db-1.res" /d DLL_NAME="apr_dbm_db" /d "NDEBUG" /d "APU_VERSION_ONLY" /I "../include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -77,11 +77,11 @@ PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath).ma
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "../include" /I "../../apr/include" /I "../include/private" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "../include" /I "../include/arch/win32" /I "../include/private" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /EHsc /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
-# ADD RSC /l 0x409 /fo"Debug/apr_dbm_db-1.res" /d DLL_NAME="apr_dbm_db" /d "_DEBUG" /d "APU_VERSION_ONLY" /I "../include" /I "../../apr/include"
+# ADD RSC /l 0x409 /fo"Debug/apr_dbm_db-1.res" /d DLL_NAME="apr_dbm_db" /d "_DEBUG" /d "APU_VERSION_ONLY" /I "../include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -109,11 +109,11 @@ PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath).ma
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "../include" /I "../../apr/include" /I "../include/private" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "../include" /I "../include/arch/win32" /I "../include/private" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
-# ADD RSC /l 0x409 /fo"x64/Release/apr_dbm_db-1.res" /d DLL_NAME="apr_dbm_db" /d "NDEBUG" /d "APU_VERSION_ONLY" /I "../include" /I "../../apr/include"
+# ADD RSC /l 0x409 /fo"x64/Release/apr_dbm_db-1.res" /d DLL_NAME="apr_dbm_db" /d "NDEBUG" /d "APU_VERSION_ONLY" /I "../include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -141,11 +141,11 @@ PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath).ma
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "../include" /I "../../apr/include" /I "../include/private" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "../include" /I "../include/arch/win32" /I "../include/private" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /EHsc /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
-# ADD RSC /l 0x409 /fo"x64/Debug/apr_dbm_db-1.res" /d DLL_NAME="apr_dbm_db" /d "_DEBUG" /d "APU_VERSION_ONLY" /I "../include" /I "../../apr/include"
+# ADD RSC /l 0x409 /fo"x64/Debug/apr_dbm_db-1.res" /d DLL_NAME="apr_dbm_db" /d "_DEBUG" /d "APU_VERSION_ONLY" /I "../include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
