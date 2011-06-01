@@ -18,7 +18,6 @@ endif
 XINCDIRS	+= \
 			$(APR)/include \
 			$(APR)/include/arch/netware \
-			$(LDAPSDK)/inc \
 			$(EOLIST)
 
 #
@@ -194,7 +193,6 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testhash.o \
 	$(OBJDIR)/testhooks.o \
 	$(OBJDIR)/testipsub.o \
-	$(OBJDIR)/testldap.o \
 	$(OBJDIR)/testlfs.o \
 	$(OBJDIR)/testlfsabi.o \
 	$(OBJDIR)/testlfsabi32.o \
@@ -288,14 +286,6 @@ FILES_nlm_Ximports +=  \
 	@ws2nlm.imp \
 	WSAStartupRTags \
 	WSACleanupRTag \
-	$(EOLIST)
-endif
-
-#If the LDAP support is defined then add the imports
-ifneq "$(LDAPSDK)" ""
-FILES_nlm_Ximports += \
-	@lldapsdk.imp \
-	@lldapssl.imp \
 	$(EOLIST)
 endif
 
