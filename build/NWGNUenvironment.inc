@@ -42,13 +42,6 @@ ifneq "$(wildcard $(NOVELLLIBC)/include/ndkvers.h)" "$(NOVELLLIBC)/include/ndkve
 $(error NOVELLLIBC does not point to a valid Novell LIBC SDK) 
 endif
 
-ifndef LDAPSDK
-LDAPSDK = C:/novell/ndk/cldapsdk/NetWare/libc
-endif
-ifneq "$(wildcard $(LDAPSDK)/inc/ldap.h)" "$(LDAPSDK)/inc/ldap.h"
-$(error LDAPSDK does not point to a valid Novell CLDAP SDK) 
-endif
-
 ifdef EXPATSDK
 ifeq "$(wildcard $(EXPATSDK)/include/expat.h)" "$(EXPATSDK)/include/expat.h"
 EXPAT_IMP = $(EXPATSDK)/imports/expatlbc.imp
@@ -353,7 +346,6 @@ INSTDIRS += \
 
 APR		= $(subst \,/,$(APR_WORK))
 APRBUILD	= $(APR)/build
-APRLDAP		= $(APR)/ldap
 APRXML		= $(APR)/xml
 APRTEST		= $(APR)/test
 
@@ -362,7 +354,6 @@ APRTEST		= $(APR)/test
 #
 
 APRLIB		= $(APR)/$(OBJDIR)/aprlib.lib
-APRLDAPLIB	= $(APRLDAP)/$(OBJDIR)/ldap.lib
 APRXMLLIB	= $(APRXML)/$(OBJDIR)/xml.lib
 
 #
