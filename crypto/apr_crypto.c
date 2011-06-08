@@ -77,8 +77,7 @@ static apr_status_t apr_crypto_term(void *ptr) {
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool,
-        const apr_array_header_t *params) {
+APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool) {
     apr_status_t ret = APR_SUCCESS;
     apr_pool_t *parent;
 
