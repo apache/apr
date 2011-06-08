@@ -35,7 +35,7 @@ static const apr_crypto_driver_t *get_driver(abts_case *tc, apr_pool_t *pool,
     const apu_err_t *err = NULL;
     apr_status_t rv;
 
-    rv = apr_crypto_init(pool, params);
+    rv = apr_crypto_init(pool);
     ABTS_ASSERT(tc, "failed to init apr_crypto", rv == APR_SUCCESS);
 
     rv = apr_crypto_get_driver(&driver, name, params, &err, pool);
@@ -358,7 +358,7 @@ static void test_crypto_init(abts_case *tc, void *data) {
 
     apr_pool_create(&pool, NULL);
 
-    rv = apr_crypto_init(pool, NULL);
+    rv = apr_crypto_init(pool);
     ABTS_ASSERT(tc, "failed to init apr_crypto", rv == APR_SUCCESS);
 
     apr_pool_destroy(pool);

@@ -184,11 +184,9 @@ typedef struct apr_crypto_block_t apr_crypto_block_t;
  * @brief Perform once-only initialisation. Call once only.
  *
  * @param pool - pool to register any shutdown cleanups, etc
- * @param params - array of initialisation parameters
  * @return APR_NOTIMPL in case of no crypto support.
  */
-APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool,
-        const apr_array_header_t *params);
+APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool);
 
 /**
  * @brief Get the driver struct for a name
