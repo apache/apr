@@ -98,7 +98,7 @@ install: install-modules $(TARGETS)
 	for f in $(top_srcdir)/include/apr_*.h $(top_srcdir)/include/apu_*.h; do \
 	    $(INSTALL_DATA) $${f} $(DESTDIR)$(includedir); \
 	done
-	for f in $(top_blddir)/include/apr_*.h $(top_blddir)/include/apu_*.h; do \
+	for f in $(top_blddir)/include/apu_*.h; do \
 	    $(INSTALL_DATA) $${f} $(DESTDIR)$(includedir); \
 	done
 	$(LIBTOOL) --mode=install $(INSTALL) -m 755 $(TARGET_LIB) $(DESTDIR)$(libdir)
