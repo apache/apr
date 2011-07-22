@@ -69,6 +69,11 @@ static const char *handle_special_names(const char *page, apr_pool_t *pool)
     else if (page == APR_LOCALE_CHARSET) {
         return apr_os_locale_encoding(pool);
     }
+#ifdef __MVS__
+    else if (!strcasecmp(page, "ISO-8859-1")) {
+       	return "ISO8859-1"; /* z/OS ASCII name has no dash after ISO */
+    }
+#endif
     else {
         return page;
     }
