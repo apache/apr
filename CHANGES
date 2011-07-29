@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.6
 
+  *) Fix flag character '#' in combination with format character 'x' in
+     apr snprintf implementations.  [Rainer Jung]
+
   *) Improve platform detection by updating config.guess and config.sub.
      [Rainer Jung]
 
