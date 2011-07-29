@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.2.13
 
+  *) Fix flag character '#' in combination with format character 'x' in
+     apr snprintf implementations.  [Rainer Jung]
+
   *) Fix return value when apr_pollset_poll interrupted.
      PR 42580 [Basant Kumar Kukreja <basant.kukreja sun.com>]
 
