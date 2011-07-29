@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes with APR 0.9.20
 
+  *) Fix flag character '#' in combination with format character 'x' in
+     apr snprintf implementations.  [Rainer Jung]
 
 Changes with APR 0.9.19
 
