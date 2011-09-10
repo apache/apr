@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes with APR 0.9.20
 
+  *) Updated config.guess and config.sub.  [Rainer Jung]
+
   *) Fix flag character '#' in combination with format character 'x' in
      apr snprintf implementations.  [Rainer Jung]
 
