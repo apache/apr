@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes with APR 0.9.20
 
+  *) Security: CVE-2011-0419
+     Reimplement apr_fnmatch() from scratch using a non-recursive
+     algorithm; now has improved compliance with the fnmatch() spec.
+     [William Rowe]
+
   *) Updated config.guess and config.sub.  [Rainer Jung]
 
   *) Fix flag character '#' in combination with format character 'x' in
