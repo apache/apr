@@ -432,7 +432,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         if ((attr->child_in) && (attr->child_in->filedes == -1)) {
             close(STDIN_FILENO);
         }
-        else if (attr->child_in) {
+        else if (attr->child_in &&
+                 attr->child_in->filedes != STDIN_FILENO) {
             dup2(attr->child_in->filedes, STDIN_FILENO);
             apr_file_close(attr->child_in);
         }
@@ -440,7 +441,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         if ((attr->child_out) && (attr->child_out->filedes == -1)) {
             close(STDOUT_FILENO);
         }
-        else if (attr->child_out) {
+        else if (attr->child_out &&
+                 attr->child_out->filedes != STDOUT_FILENO) {
             dup2(attr->child_out->filedes, STDOUT_FILENO);
             apr_file_close(attr->child_out);
         }
@@ -448,7 +450,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         if ((attr->child_err) && (attr->child_err->filedes == -1)) {
             close(STDERR_FILENO);
         }
-        else if (attr->child_err) {
+        else if (attr->child_err &&
+                 attr->child_err->filedes != STDERR_FILENO) {
             dup2(attr->child_err->filedes, STDERR_FILENO);
             apr_file_close(attr->child_err);
         }

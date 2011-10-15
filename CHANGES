@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.6
 
+  *) apr_proc_create: Don't close any of the new stdin/stdout/stderr in the
+     child if it already has the correct FD. PR 51995.
+     [Dan Ports <drkp csail mit edu>]
+
   *) Fix flag character '#' in combination with format character 'x' in
      apr snprintf implementations.  [Rainer Jung]
 
