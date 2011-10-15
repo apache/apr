@@ -182,7 +182,8 @@ struct type { \
 
 /**
  * Setup any APR internal data structures.  This MUST be the first function 
- * called for any APR library.
+ * called for any APR library. It is save to call apr_initialize several
+ * times as long as apr_terminate is called the same number of times.
  * @remark See apr_app_initialize if this is an application, rather than
  * a library consumer of apr.
  */
@@ -206,7 +207,8 @@ APR_DECLARE(apr_status_t) apr_app_initialize(int *argc,
 
 /**
  * Tear down any APR internal data structures which aren't torn down 
- * automatically.
+ * automatically. apr_terminate must be called once for every call to
+ * apr_initialize() or apr_app_initialize().
  * @remark An APR program must call this function at termination once it 
  *         has stopped using APR services.  The APR developers suggest using
  *         atexit to ensure this is called.  When using APR from a language
