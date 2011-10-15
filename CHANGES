@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_file_open: Avoid fcntl() calls if support for O_CLOEXEC works.
+     PR 48557. [Mike Frysinger <vapier gentoo org>]
+
   *) apr_socket_opt_set: Add support for APR_SO_BROADCAST. PR 46389.
      [Armin Müller <mueller itestra com>]
 
