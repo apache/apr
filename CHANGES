@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_memcache_server_create: Fix possible segfault. PR 51064.
+     [Michajlo Matijkiw <michajlo_matijkiw comcast com>]
+
   *) apr_dir_make_recursive: Fix race condition that could lead to EEXIST
      being returned. PR 51254. [William Lee <william lee rainstor com>,
      Wim Lewis <wiml omnigroup com>]
