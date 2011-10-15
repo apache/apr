@@ -1650,7 +1650,7 @@ const char* expand_path(const char *relpath)
 
     getcwd(foo, PATH_MAX-1);
     newpath = (char*)malloc(strlen(foo)+strlen(relpath)+2);
-    strcat(newpath, foo);
+    strcpy(newpath, foo);
     strcat(newpath, "/");
     strcat(newpath, relpath);
     return newpath;
@@ -1682,7 +1682,7 @@ void link_fixup(command_t *c)
             push_count_chars(c->shared_opts.normal, DYNAMIC_INSTALL_NAME);
 
             tmp = (char*)malloc(PATH_MAX);
-            strcat(tmp, c->install_path);
+            strcpy(tmp, c->install_path);
             strcat(tmp, strrchr(c->shared_name.normal, '/'));
             push_count_chars(c->shared_opts.normal, tmp);
 #endif
