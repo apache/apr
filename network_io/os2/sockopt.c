@@ -58,6 +58,11 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
             return APR_OS2_STATUS(sock_errno());
         }
     }
+    if (opt & APR_SO_BROADCAST) {
+        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_BROADCAST, (void *)&one, sizeof(int)) == -1) {
+            return APR_FROM_OS_ERROR(sock_errno());
+        }
+    }
     if (opt & APR_SO_REUSEADDR) {
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_REUSEADDR, (void *)&one, sizeof(int)) == -1) {
             return APR_OS2_STATUS(sock_errno());
