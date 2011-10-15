@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_socket_opt_set: Add support for APR_SO_BROADCAST. PR 46389.
+     [Armin Müller <mueller itestra com>]
+
   *) apr_memcache_server_create: Fix possible segfault. PR 51064.
      [Michajlo Matijkiw <michajlo_matijkiw comcast com>]
 
