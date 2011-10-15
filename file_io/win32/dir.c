@@ -333,9 +333,6 @@ APR_DECLARE(apr_status_t) apr_dir_make_recursive(const char *path,
     
     rv = apr_dir_make (path, perm, pool); /* Try to make PATH right out */
     
-    if (APR_STATUS_IS_EEXIST(rv)) /* It's OK if PATH exists */
-        return APR_SUCCESS;
-    
     if (APR_STATUS_IS_ENOENT(rv)) { /* Missing an intermediate dir */
         char *dir;
         
@@ -347,6 +344,15 @@ APR_DECLARE(apr_status_t) apr_dir_make_recursive(const char *path,
         if (rv == APR_SUCCESS)
             rv = apr_dir_make (dir, perm, pool);   /* And complete the path */
     }
+
+    /*
+     * It's OK if PATH exists. Timing issues can lead to the second
+     * apr_dir_make being called on existing dir, therefore this check
+     * has to come last.
+     */
+    if (APR_STATUS_IS_EEXIST(apr_err))
+        return APR_SUCCESS;
+
     return rv;
 }
 
