@@ -209,7 +209,7 @@ else
   if test "x$apr_ste_save_$1" = "x$$1"; then
     $2$1=
   else
-    $2$1=`echo $$1 | sed -e "s%${apr_ste_save_$1}%%"`
+    $2$1="${$1#"${apr_ste_save_$1}"}"
     $1="$apr_ste_save_$1"
   fi
 fi
