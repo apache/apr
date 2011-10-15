@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.6
 
+  *) apr_dir_make_recursive: Fix race condition that could lead to EEXIST
+     being returned. PR 51254. [William Lee <william lee rainstor com>,
+     Wim Lewis <wiml omnigroup com>]
+
   *) configure: Fix APR_RESTORE_THE_ENVIRONMENT if the original variable was
      a single space. PR 50334. [Nathan Phillip Brink <binki gentoo org>]
 
