@@ -103,6 +103,8 @@ extern "C" {
                                     * until data is available.
                                     * @see apr_socket_accept_filter
                                     */
+#define APR_SO_BROADCAST     65536 /**< Allow broadcast
+                                    */
 
 /** @} */
 
