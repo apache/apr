@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.6
 
+  *) apr_file_open: Avoid fcntl() calls if support for O_CLOEXEC works.
+     PR 48557. [Mike Frysinger <vapier gentoo org>]
+
   *) apr_dir_make_recursive: Fix race condition that could lead to EEXIST
      being returned. PR 51254. [William Lee <william lee rainstor com>,
      Wim Lewis <wiml omnigroup com>]
