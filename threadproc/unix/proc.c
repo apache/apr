@@ -396,7 +396,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         return errno;
     }
     else if (new->pid == 0) {
-        int status;
         /* child process */
 
         /*
@@ -469,7 +468,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
         /* Only try to switch if we are running as root */
         if (attr->gid != -1 && !geteuid()) {
-            if ((status = setgid(attr->gid))) {
+            if (setgid(attr->gid)) {
                 if (attr->errfn) {
                     attr->errfn(pool, errno, "setting of group failed");
                 }
@@ -478,7 +477,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
 
         if (attr->uid != -1 && !geteuid()) {
-            if ((status = setuid(attr->uid))) {
+            if (setuid(attr->uid)) {
                 if (attr->errfn) {
                     attr->errfn(pool, errno, "setting of user failed");
                 }
@@ -486,7 +485,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             }
         }
 
-        if ((status = limit_proc(attr)) != APR_SUCCESS) {
+        if (limit_proc(attr) != APR_SUCCESS) {
             if (attr->errfn) {
                 attr->errfn(pool, errno, "setting of resource limits failed");
             }

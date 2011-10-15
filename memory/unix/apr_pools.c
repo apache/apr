@@ -1470,6 +1470,7 @@ static void *pool_alloc(apr_pool_t *pool, apr_size_t size)
     node = pool->nodes;
     if (node == NULL || node->index == 64) {
         if ((node = malloc(SIZEOF_DEBUG_NODE_T)) == NULL) {
+            free(mem);
             if (pool->abort_fn)
                 pool->abort_fn(APR_ENOMEM);
 

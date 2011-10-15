@@ -179,13 +179,17 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     if (!(flag & APR_FOPEN_NOCLEANUP)) {
         int flags;
 
-        if ((flags = fcntl(fd, F_GETFD)) == -1)
+        if ((flags = fcntl(fd, F_GETFD)) == -1) {
+            close(fd);
             return errno;
+        }
 
         if ((flags & FD_CLOEXEC) == 0) {
             flags |= FD_CLOEXEC;
-            if (fcntl(fd, F_SETFD, flags) == -1)
+            if (fcntl(fd, F_SETFD, flags) == -1) {
+                close(fd);
                 return errno;
+            }
         }
     }
 
