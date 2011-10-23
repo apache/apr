@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "apr_lib.h"
 #include "apu.h"
 #include "apr_private.h"
 #include "apu_errno.h"
@@ -127,65 +128,69 @@ static apr_status_t crypto_init(apr_pool_t *pool, const char *params, int *rc)
     const char *keyPrefix = NULL;
     const char *certPrefix = NULL;
     const char *secmod = NULL;
+    int noinit = 0;
     PRUint32 flags = 0;
 
     struct {
         const char *field;
-        char *value;
+        const char *value;
+        int set;
     } fields[] = {
-        { "dir", NULL },
-        { "key3", NULL },
-        { "cert7", NULL },
-        { "secmod", NULL },
-        { NULL, NULL }
+        { "dir", NULL, 0 },
+        { "key3", NULL, 0 },
+        { "cert7", NULL, 0 },
+        { "secmod", NULL, 0 },
+        { "noinit", NULL, 0 },
+        { NULL, NULL, 0 }
     };
-    int i;
     const char *ptr;
-    const char *key;
     size_t klen;
-    const char *value;
-    size_t vlen;
-    static const char * const delims = " \r\n\t;|,";
+    char **elts = NULL;
+    char *elt;
+    int i = 0, j;
+    apr_status_t status;
 
-    /* sanity check - we can only initialise NSS once */
-    if (NSS_IsInitialized()) {
-        return APR_EREINIT;
+    if (APR_SUCCESS != (status = apr_tokenize_to_argv(params, &elts, pool))) {
+        return status;
     }
+    while ((elt = elts[i])) {
+        ptr = strchr(elt, '=');
+        if (ptr) {
+            for (klen = ptr - elt; klen && apr_isspace(elt[klen - 1]); --klen);
+            ptr++;
+        }
+        else {
+            for (klen = strlen(elt); klen && apr_isspace(elt[klen - 1]); --klen);
+        }
+        elt[klen] = 0;
 
-    /* snitch parsing from the MySQL driver */
-    for (ptr = strchr(params, '='); ptr; ptr = strchr(ptr, '=')) {
-        /* don't dereference memory that may not belong to us */
-        if (ptr == params) {
-            ++ptr;
-            continue;
-        }
-        for (key = ptr - 1; apr_isspace(*key); --key);
-        klen = 0;
-        while (apr_isalpha(*key)) {
-            if (key == params) {
-                /* Don't parse off the front of the params */
-                --key;
-                ++klen;
-                break;
-            }
-            --key;
-            ++klen;
-        }
-        ++key;
-        for (value = ptr + 1; apr_isspace(*value); ++value);
-        vlen = strcspn(value, delims);
-        for (i = 0; fields[i].field != NULL; ++i) {
-            if (!strncasecmp(fields[i].field, key, klen)) {
-                fields[i].value = apr_pstrndup(pool, value, vlen);
+        for (j = 0; fields[j].field != NULL; ++j) {
+            if (klen && !strcasecmp(fields[j].field, elt)) {
+                fields[j].set = 1;
+                if (ptr) {
+                    fields[j].value = ptr;
+                }
                 break;
             }
         }
-        ptr = value + vlen;
+
+        i++;
     }
     dir = fields[0].value;
     keyPrefix = fields[1].value;
     certPrefix = fields[2].value;
     secmod = fields[3].value;
+    noinit = fields[4].set;
+
+    /* if we've been asked to bypass, do so here */
+    if (noinit) {
+        return APR_SUCCESS;
+    }
+
+    /* sanity check - we can only initialise NSS once */
+    if (NSS_IsInitialized()) {
+        return APR_EREINIT;
+    }
 
     apr_pool_cleanup_register(pool, pool, crypto_shutdown_helper,
             apr_pool_cleanup_null);
