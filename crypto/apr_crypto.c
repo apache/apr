@@ -39,21 +39,21 @@ static apr_hash_t *drivers = NULL;
 
 #define CLEANUP_CAST (apr_status_t (*)(void*))
 
-APR_TYPEDEF_STRUCT(apr_crypto_t, \
-   apr_pool_t *pool; \
-   apr_crypto_driver_t *provider; \
+APR_TYPEDEF_STRUCT(apr_crypto_t,
+    apr_pool_t *pool;
+    apr_crypto_driver_t *provider;
 )
 
-APR_TYPEDEF_STRUCT(apr_crypto_key_t, \
-   apr_pool_t *pool; \
-   apr_crypto_driver_t *provider; \
-   const apr_crypto_t *f;
+APR_TYPEDEF_STRUCT(apr_crypto_key_t,
+    apr_pool_t *pool;
+    apr_crypto_driver_t *provider;
+    const apr_crypto_t *f;
 )
 
-APR_TYPEDEF_STRUCT(apr_crypto_block_t, \
-   apr_pool_t *pool; \
-   apr_crypto_driver_t *provider; \
-   const apr_crypto_t *f;
+APR_TYPEDEF_STRUCT(apr_crypto_block_t,
+    apr_pool_t *pool;
+    apr_crypto_driver_t *provider;
+    const apr_crypto_t *f;
 )
 
 #if !APR_HAVE_MODULAR_DSO
@@ -67,7 +67,8 @@ APR_TYPEDEF_STRUCT(apr_crypto_block_t, \
     }
 #endif
 
-static apr_status_t apr_crypto_term(void *ptr) {
+static apr_status_t apr_crypto_term(void *ptr)
+{
     /* set drivers to NULL so init can work again */
     drivers = NULL;
 
@@ -77,7 +78,8 @@ static apr_status_t apr_crypto_term(void *ptr) {
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool) {
+APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool)
+{
     apr_status_t ret = APR_SUCCESS;
     apr_pool_t *parent;
 
@@ -118,7 +120,8 @@ APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool) {
 
 APR_DECLARE(apr_status_t) apr_crypto_get_driver(
         const apr_crypto_driver_t **driver, const char *name,
-        const char *params, const apu_err_t **result, apr_pool_t *pool) {
+        const char *params, const apu_err_t **result, apr_pool_t *pool)
+{
 #if APR_HAVE_MODULAR_DSO
     char modname[32];
     char symname[34];
@@ -153,7 +156,8 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
     apr_snprintf(modname, sizeof(modname),
             "apr_crypto_%s-" APR_STRINGIFY(APR_MAJOR_VERSION) ".dll", name);
 #else
-    apr_snprintf(modname, sizeof(modname), "apr_crypto_%s-" APR_STRINGIFY(APR_MAJOR_VERSION) ".so", name);
+    apr_snprintf(modname, sizeof(modname),
+            "apr_crypto_%s-" APR_STRINGIFY(APR_MAJOR_VERSION) ".so", name);
 #endif
     apr_snprintf(symname, sizeof(symname), "apr_crypto_%s_driver", name);
     rv = apu_dso_load(&dso, &symbol, modname, symname, pool);
@@ -199,7 +203,8 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
  * @param driver - The driver in use.
  * @return The name of the driver.
  */
-APR_DECLARE(const char *)apr_crypto_driver_name (const apr_crypto_driver_t *driver)
+APR_DECLARE(const char *)apr_crypto_driver_name(
+        const apr_crypto_driver_t *driver)
 {
     return driver->name;
 }
@@ -212,7 +217,8 @@ APR_DECLARE(const char *)apr_crypto_driver_name (const apr_crypto_driver_t *driv
  * @return APR_SUCCESS for success
  */
 APR_DECLARE(apr_status_t) apr_crypto_error(const apu_err_t **result,
-        const apr_crypto_t *f) {
+        const apr_crypto_t *f)
+{
     return f->provider->error(result, f);
 }
 
@@ -231,8 +237,9 @@ APR_DECLARE(apr_status_t) apr_crypto_error(const apu_err_t **result,
  * @remarks OpenSSL: the params can have "engine" as a key, followed by an equal
  *  sign and a value.
  */
-APR_DECLARE(apr_status_t) apr_crypto_make(apr_crypto_t **f, const apr_crypto_driver_t *driver,
-        const char *params, apr_pool_t *pool) {
+APR_DECLARE(apr_status_t) apr_crypto_make(apr_crypto_t **f,
+        const apr_crypto_driver_t *driver, const char *params, apr_pool_t *pool)
+{
     return driver->make(f, driver, params, pool);
 }
 
