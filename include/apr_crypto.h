@@ -145,7 +145,8 @@ APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool);
  * @return APR_ESYMNOTFOUND if the driver file doesn't contain a driver
  * @remarks NSS: the params can have "dir", "key3", "cert7" and "secmod"
  *  keys, each followed by an equal sign and a value. Such key/value pairs can
- *  be delimited by space, CR, LF, tab, semicolon, vertical bar or comma.
+ *  be delimited by space or tab. If the value contains a space, surround the
+ *  whole key value pair in quotes: "dir=My Directory".
  * @remarks OpenSSL: currently no params are supported.
  */
 APR_DECLARE(apr_status_t) apr_crypto_get_driver(
