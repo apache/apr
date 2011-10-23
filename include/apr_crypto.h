@@ -99,16 +99,17 @@ extern "C" {
  * aligned data, use 3DES_192/CBC, AES_256/CBC or AES_256/ECB.
  */
 
-typedef enum {
-    APR_KEY_NONE,
-    APR_KEY_3DES_192, /** 192 bit (3-Key) 3DES */
+typedef enum
+{
+    APR_KEY_NONE, APR_KEY_3DES_192, /** 192 bit (3-Key) 3DES */
     APR_KEY_AES_128, /** 128 bit AES */
     APR_KEY_AES_192, /** 192 bit AES */
     APR_KEY_AES_256
 /** 256 bit AES */
 } apr_crypto_block_key_type_e;
 
-typedef enum {
+typedef enum
+{
     APR_MODE_NONE, /** An error condition */
     APR_MODE_ECB, /** Electronic Code Book */
     APR_MODE_CBC
@@ -147,9 +148,9 @@ APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool);
  *  be delimited by space, CR, LF, tab, semicolon, vertical bar or comma.
  * @remarks OpenSSL: currently no params are supported.
  */
-APR_DECLARE(apr_status_t) apr_crypto_get_driver(const apr_crypto_driver_t **driver,
-        const char *name, const char *params, const apu_err_t **result,
-        apr_pool_t *pool);
+APR_DECLARE(apr_status_t) apr_crypto_get_driver(
+        const apr_crypto_driver_t **driver, const char *name,
+        const char *params, const apu_err_t **result, apr_pool_t *pool);
 
 /**
  * @brief Return the name of the driver.
@@ -157,7 +158,8 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(const apr_crypto_driver_t **driv
  * @param driver - The driver in use.
  * @return The name of the driver.
  */
-APR_DECLARE(const char *) apr_crypto_driver_name(const apr_crypto_driver_t *driver);
+APR_DECLARE(const char *) apr_crypto_driver_name(
+        const apr_crypto_driver_t *driver);
 
 /**
  * @brief Get the result of the last operation on a context. If the result
@@ -184,9 +186,9 @@ APR_DECLARE(apr_status_t) apr_crypto_error(const apu_err_t **result,
  * @remarks OpenSSL: the params can have "engine" as a key, followed by an equal
  *  sign and a value.
  */
-APR_DECLARE(apr_status_t) apr_crypto_make(apr_crypto_t **f,
-        const apr_crypto_driver_t *driver,
-        const char *params, apr_pool_t *pool);
+APR_DECLARE(apr_status_t)
+        apr_crypto_make(apr_crypto_t **f, const apr_crypto_driver_t *driver,
+                const char *params, apr_pool_t *pool);
 
 /**
  * @brief Get a hash table of key types, keyed by the name of the type against
@@ -390,7 +392,8 @@ APR_DECLARE(apr_status_t) apr_crypto_cleanup(apr_crypto_t *f);
  * @param driver - driver to use
  * @return Returns APR_ENOTIMPL if not supported.
  */
-APR_DECLARE(apr_status_t) apr_crypto_shutdown(const apr_crypto_driver_t *driver);
+APR_DECLARE(apr_status_t)
+        apr_crypto_shutdown(const apr_crypto_driver_t *driver);
 
 #endif /* APU_HAVE_CRYPTO */
 
