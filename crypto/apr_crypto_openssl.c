@@ -83,7 +83,9 @@ static int mode_cbc = APR_MODE_CBC;
 /**
  * Fetch the most recent error from this driver.
  */
-static apr_status_t crypto_error(const apu_err_t **result, const apr_crypto_t *f) {
+static apr_status_t crypto_error(const apu_err_t **result,
+        const apr_crypto_t *f)
+{
     *result = f->result;
     return APR_SUCCESS;
 }
@@ -91,22 +93,24 @@ static apr_status_t crypto_error(const apu_err_t **result, const apr_crypto_t *f
 /**
  * Shutdown the crypto library and release resources.
  */
-static apr_status_t crypto_shutdown(void) {
+static apr_status_t crypto_shutdown(void)
+{
     ERR_free_strings();
     EVP_cleanup();
     ENGINE_cleanup();
     return APR_SUCCESS;
 }
 
-static apr_status_t crypto_shutdown_helper(void *data) {
+static apr_status_t crypto_shutdown_helper(void *data)
+{
     return crypto_shutdown();
 }
 
 /**
  * Initialise the crypto library and perform one time initialisation.
  */
-static apr_status_t crypto_init(apr_pool_t *pool,
-        const char *params, int *rc) {
+static apr_status_t crypto_init(apr_pool_t *pool, const char *params, int *rc)
+{
     CRYPTO_malloc_init();
     ERR_load_crypto_strings();
     /* SSL_load_error_strings(); */
@@ -126,7 +130,8 @@ static apr_status_t crypto_init(apr_pool_t *pool,
  * @param ctx The block context to use.
  * @return Returns APR_ENOTIMPL if not supported.
  */
-static apr_status_t crypto_block_cleanup(apr_crypto_block_t *ctx) {
+static apr_status_t crypto_block_cleanup(apr_crypto_block_t *ctx)
+{
 
     if (ctx->initialised) {
         EVP_CIPHER_CTX_cleanup(&ctx->cipherCtx);
@@ -137,7 +142,8 @@ static apr_status_t crypto_block_cleanup(apr_crypto_block_t *ctx) {
 
 }
 
-static apr_status_t crypto_block_cleanup_helper(void *data) {
+static apr_status_t crypto_block_cleanup_helper(void *data)
+{
     apr_crypto_block_t *block = (apr_crypto_block_t *) data;
     return crypto_block_cleanup(block);
 }
@@ -148,7 +154,8 @@ static apr_status_t crypto_block_cleanup_helper(void *data) {
  * @param f The context to use.
  * @return Returns APR_ENOTIMPL if not supported.
  */
-static apr_status_t crypto_cleanup(apr_crypto_t *f) {
+static apr_status_t crypto_cleanup(apr_crypto_t *f)
+{
 
     if (f->config->engine) {
         ENGINE_finish(f->config->engine);
@@ -159,7 +166,8 @@ static apr_status_t crypto_cleanup(apr_crypto_t *f) {
 
 }
 
-static apr_status_t crypto_cleanup_helper(void *data) {
+static apr_status_t crypto_cleanup_helper(void *data)
+{
     apr_crypto_t *f = (apr_crypto_t *) data;
     return crypto_cleanup(f);
 }
@@ -176,8 +184,9 @@ static apr_status_t crypto_cleanup_helper(void *data) {
  * @return APR_ENOENGINE when the engine specified does not exist. APR_EINITENGINE
  * if the engine cannot be initialised.
  */
-static apr_status_t crypto_make(apr_crypto_t **ff, const apr_crypto_driver_t *provider,
-        const char *params, apr_pool_t *pool)
+static apr_status_t crypto_make(apr_crypto_t **ff,
+        const apr_crypto_driver_t *provider, const char *params,
+        apr_pool_t *pool)
 {
     apr_crypto_config_t *config = NULL;
     apr_crypto_t *f = apr_pcalloc(pool, sizeof(apr_crypto_t));
@@ -186,8 +195,8 @@ static apr_status_t crypto_make(apr_crypto_t **ff, const apr_crypto_driver_t *pr
         const char *field;
         char *value;
     } fields[] = {
-        {"engine", NULL},
-        {NULL, NULL}
+        { "engine", NULL },
+        { NULL, NULL }
     };
     int i;
     const char *ptr;
@@ -195,7 +204,7 @@ static apr_status_t crypto_make(apr_crypto_t **ff, const apr_crypto_driver_t *pr
     size_t klen;
     const char *value;
     size_t vlen;
-    static const char *const delims = " \r\n\t;|,";
+    static const char * const delims = " \r\n\t;|,";
     const char *engine;
 
     if (!f) {
@@ -245,7 +254,7 @@ static apr_status_t crypto_make(apr_crypto_t **ff, const apr_crypto_driver_t *pr
             ++ptr;
             continue;
         }
-        for (key = ptr-1; apr_isspace(*key); --key);
+        for (key = ptr - 1; apr_isspace(*key); --key);
         klen = 0;
         while (apr_isalpha(*key)) {
             if (key == params) {
@@ -258,15 +267,15 @@ static apr_status_t crypto_make(apr_crypto_t **ff, const apr_crypto_driver_t *pr
             ++klen;
         }
         ++key;
-        for (value = ptr+1; apr_isspace(*value); ++value);
+        for (value = ptr + 1; apr_isspace(*value); ++value);
         vlen = strcspn(value, delims);
-        for (i=0; fields[i].field != NULL; ++i) {
+        for (i = 0; fields[i].field != NULL; ++i) {
             if (!strncasecmp(fields[i].field, key, klen)) {
                 fields[i].value = apr_pstrndup(pool, value, vlen);
                 break;
             }
         }
-        ptr = value+vlen;
+        ptr = value + vlen;
     }
     engine = fields[0].value;
 
@@ -370,7 +379,8 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
         /* A 3DES key */
         if (mode == APR_MODE_CBC) {
             key->cipher = EVP_des_ede3_cbc();
-        } else {
+        }
+        else {
             key->cipher = EVP_des_ede3_ecb();
         }
         break;
@@ -379,7 +389,8 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
 
         if (mode == APR_MODE_CBC) {
             key->cipher = EVP_aes_128_cbc();
-        } else {
+        }
+        else {
             key->cipher = EVP_aes_128_ecb();
         }
         break;
@@ -388,7 +399,8 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
 
         if (mode == APR_MODE_CBC) {
             key->cipher = EVP_aes_192_cbc();
-        } else {
+        }
+        else {
             key->cipher = EVP_aes_192_ecb();
         }
         break;
@@ -397,7 +409,8 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
 
         if (mode == APR_MODE_CBC) {
             key->cipher = EVP_aes_256_cbc();
-        } else {
+        }
+        else {
             key->cipher = EVP_aes_256_ecb();
         }
         break;
@@ -495,7 +508,8 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
                 return APR_ENOIV;
             }
             *iv = usedIv;
-        } else {
+        }
+        else {
             usedIv = (unsigned char *) *iv;
         }
     }
@@ -767,13 +781,13 @@ static apr_status_t crypto_block_decrypt_finish(unsigned char *out,
 /**
  * OpenSSL module.
  */
-APR_MODULE_DECLARE_DATA const apr_crypto_driver_t apr_crypto_openssl_driver =
-{ "openssl", crypto_init, crypto_make, crypto_get_block_key_types,
-        crypto_get_block_key_modes, crypto_passphrase,
-        crypto_block_encrypt_init, crypto_block_encrypt,
-        crypto_block_encrypt_finish, crypto_block_decrypt_init,
-        crypto_block_decrypt, crypto_block_decrypt_finish,
-        crypto_block_cleanup, crypto_cleanup, crypto_shutdown, crypto_error
+APR_MODULE_DECLARE_DATA const apr_crypto_driver_t apr_crypto_openssl_driver = {
+    "openssl", crypto_init, crypto_make, crypto_get_block_key_types,
+    crypto_get_block_key_modes, crypto_passphrase,
+    crypto_block_encrypt_init, crypto_block_encrypt,
+    crypto_block_encrypt_finish, crypto_block_decrypt_init,
+    crypto_block_decrypt, crypto_block_decrypt_finish,
+    crypto_block_cleanup, crypto_cleanup, crypto_shutdown, crypto_error
 };
 
 #endif

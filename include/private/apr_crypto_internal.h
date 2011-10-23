@@ -171,8 +171,8 @@ struct apr_crypto_driver_t {
      *         formatted.
      * @return APR_ENOTIMPL if not implemented.
      */
-    apr_status_t (*block_encrypt_finish)(unsigned char *out, apr_size_t *outlen,
-            apr_crypto_block_t *ctx);
+    apr_status_t (*block_encrypt_finish)(unsigned char *out,
+            apr_size_t *outlen, apr_crypto_block_t *ctx);
 
     /**
      * @brief Initialise a context for decrypting arbitrary data using the given key.
