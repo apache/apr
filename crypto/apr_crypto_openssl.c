@@ -191,21 +191,50 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
     apr_crypto_config_t *config = NULL;
     apr_crypto_t *f = apr_pcalloc(pool, sizeof(apr_crypto_t));
 
+    const char *engine;
+
     struct {
         const char *field;
-        char *value;
+        const char *value;
+        int set;
     } fields[] = {
-        { "engine", NULL },
-        { NULL, NULL }
+        { "engine", NULL, 0 },
+        { NULL, NULL, 0 }
     };
-    int i;
     const char *ptr;
-    const char *key;
     size_t klen;
-    const char *value;
-    size_t vlen;
-    static const char * const delims = " \r\n\t;|,";
-    const char *engine;
+    char **elts = NULL;
+    char *elt;
+    int i = 0, j;
+    apr_status_t status;
+
+    if (APR_SUCCESS != (status = apr_tokenize_to_argv(params, &elts, pool))) {
+        return status;
+    }
+    while ((elt = elts[i])) {
+        ptr = strchr(elt, '=');
+        if (ptr) {
+            for (klen = ptr - elt; klen && apr_isspace(elt[klen - 1]); --klen);
+            ptr++;
+        }
+        else {
+            for (klen = strlen(elt); klen && apr_isspace(elt[klen - 1]); --klen);
+        }
+        elt[klen] = 0;
+
+        for (j = 0; fields[j].field != NULL; ++j) {
+            if (!strcasecmp(fields[j].field, elt)) {
+                fields[j].set = 1;
+                if (ptr) {
+                    fields[j].value = ptr;
+                }
+                break;
+            }
+        }
+
+        i++;
+    }
+    engine = fields[0].value;
 
     if (!f) {
         return APR_ENOMEM;
@@ -246,38 +275,6 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
 
     apr_pool_cleanup_register(pool, f, crypto_cleanup_helper,
             apr_pool_cleanup_null);
-
-    /* snitch parsing from the MySQL driver */
-    for (ptr = strchr(params, '='); ptr; ptr = strchr(ptr, '=')) {
-        /* don't dereference memory that may not belong to us */
-        if (ptr == params) {
-            ++ptr;
-            continue;
-        }
-        for (key = ptr - 1; apr_isspace(*key); --key);
-        klen = 0;
-        while (apr_isalpha(*key)) {
-            if (key == params) {
-                /* Don't parse off the front of the params */
-                --key;
-                ++klen;
-                break;
-            }
-            --key;
-            ++klen;
-        }
-        ++key;
-        for (value = ptr + 1; apr_isspace(*value); ++value);
-        vlen = strcspn(value, delims);
-        for (i = 0; fields[i].field != NULL; ++i) {
-            if (!strncasecmp(fields[i].field, key, klen)) {
-                fields[i].value = apr_pstrndup(pool, value, vlen);
-                break;
-            }
-        }
-        ptr = value + vlen;
-    }
-    engine = fields[0].value;
 
     if (engine) {
         config->engine = ENGINE_by_id(engine);
