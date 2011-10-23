@@ -36,10 +36,10 @@ struct apr_crypto_driver_t {
      * @brief: allow driver to perform once-only initialisation.
      * Called once only.
      * @param pool The pool to register the cleanup in.
-     * @param params An array of optional init parameters.
+     * @param params Optional init parameter string.
      * @param rc Driver-specific additional error code
      */
-    apr_status_t (*init)(apr_pool_t *pool, const apr_array_header_t *params, int *rc);
+    apr_status_t (*init)(apr_pool_t *pool, const char *params, int *rc);
 
     /**
      * @brief Create a context for supporting encryption. Keys, certificates,
@@ -54,7 +54,7 @@ struct apr_crypto_driver_t {
      * if the engine cannot be initialised.
      */
     apr_status_t (*make)(apr_crypto_t **f, const apr_crypto_driver_t *provider,
-            const apr_array_header_t *params, apr_pool_t *pool);
+            const char *params, apr_pool_t *pool);
 
     /**
      * @brief Get a hash table of key types, keyed by the name of the type against

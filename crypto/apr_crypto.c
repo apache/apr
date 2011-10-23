@@ -116,9 +116,9 @@ APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool) {
     return ret;
 }
 
-APR_DECLARE(apr_status_t) apr_crypto_get_driver(const apr_crypto_driver_t **driver,
-        const char *name, const apr_array_header_t *params, const apu_err_t **result,
-        apr_pool_t *pool) {
+APR_DECLARE(apr_status_t) apr_crypto_get_driver(
+        const apr_crypto_driver_t **driver, const char *name,
+        const char *params, const apu_err_t **result, apr_pool_t *pool) {
 #if APR_HAVE_MODULAR_DSO
     char modname[32];
     char symname[34];
@@ -227,9 +227,12 @@ APR_DECLARE(apr_status_t) apr_crypto_error(const apu_err_t **result,
  * @param pool - process pool
  * @return APR_ENOENGINE when the engine specified does not exist. APR_EINITENGINE
  * if the engine cannot be initialised.
+ * @remarks NSS: currently no params are supported.
+ * @remarks OpenSSL: the params can have "engine" as a key, followed by an equal
+ *  sign and a value.
  */
 APR_DECLARE(apr_status_t) apr_crypto_make(apr_crypto_t **f, const apr_crypto_driver_t *driver,
-        const apr_array_header_t *params, apr_pool_t *pool) {
+        const char *params, apr_pool_t *pool) {
     return driver->make(f, driver, params, pool);
 }
 

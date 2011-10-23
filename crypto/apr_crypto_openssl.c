@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "apr_lib.h"
 #include "apu.h"
 #include "apr_private.h"
 #include "apu_errno.h"
@@ -105,7 +106,7 @@ static apr_status_t crypto_shutdown_helper(void *data) {
  * Initialise the crypto library and perform one time initialisation.
  */
 static apr_status_t crypto_init(apr_pool_t *pool,
-        const apr_array_header_t *params, int *rc) {
+        const char *params, int *rc) {
     CRYPTO_malloc_init();
     ERR_load_crypto_strings();
     /* SSL_load_error_strings(); */
@@ -176,13 +177,27 @@ static apr_status_t crypto_cleanup_helper(void *data) {
  * if the engine cannot be initialised.
  */
 static apr_status_t crypto_make(apr_crypto_t **ff, const apr_crypto_driver_t *provider,
-        const apr_array_header_t *params, apr_pool_t *pool)
+        const char *params, apr_pool_t *pool)
 {
     apr_crypto_config_t *config = NULL;
-    struct apr_crypto_param_t *ents =
-            params ? (struct apr_crypto_param_t *) params->elts : NULL;
-    int i = 0;
     apr_crypto_t *f = apr_pcalloc(pool, sizeof(apr_crypto_t));
+
+    struct {
+        const char *field;
+        char *value;
+    } fields[] = {
+        {"engine", NULL},
+        {NULL, NULL}
+    };
+    int i;
+    const char *ptr;
+    const char *key;
+    size_t klen;
+    const char *value;
+    size_t vlen;
+    static const char *const delims = " \r\n\t;|,";
+    const char *engine;
+
     if (!f) {
         return APR_ENOMEM;
     }
@@ -223,19 +238,47 @@ static apr_status_t crypto_make(apr_crypto_t **ff, const apr_crypto_driver_t *pr
     apr_pool_cleanup_register(pool, f, crypto_cleanup_helper,
             apr_pool_cleanup_null);
 
-    for (i = 0; params && i < params->nelts; i++) {
-        switch (ents[i].type) {
-        case APR_CRYPTO_ENGINE:
-            config->engine = ENGINE_by_id(ents[i].path);
-            if (!config->engine) {
-                return APR_ENOENGINE;
+    /* snitch parsing from the MySQL driver */
+    for (ptr = strchr(params, '='); ptr; ptr = strchr(ptr, '=')) {
+        /* don't dereference memory that may not belong to us */
+        if (ptr == params) {
+            ++ptr;
+            continue;
+        }
+        for (key = ptr-1; apr_isspace(*key); --key);
+        klen = 0;
+        while (apr_isalpha(*key)) {
+            if (key == params) {
+                /* Don't parse off the front of the params */
+                --key;
+                ++klen;
+                break;
             }
-            if (!ENGINE_init(config->engine)) {
-                ENGINE_free(config->engine);
-                config->engine = NULL;
-                return APR_EINITENGINE;
+            --key;
+            ++klen;
+        }
+        ++key;
+        for (value = ptr+1; apr_isspace(*value); ++value);
+        vlen = strcspn(value, delims);
+        for (i=0; fields[i].field != NULL; ++i) {
+            if (!strncasecmp(fields[i].field, key, klen)) {
+                fields[i].value = apr_pstrndup(pool, value, vlen);
+                break;
             }
-            break;
+        }
+        ptr = value+vlen;
+    }
+    engine = fields[0].value;
+
+    if (engine) {
+        config->engine = ENGINE_by_id(engine);
+        if (!config->engine) {
+            return APR_ENOENGINE;
+        }
+        if (!ENGINE_init(config->engine)) {
+            ENGINE_free(config->engine);
+            config->engine = NULL;
+            return APR_EINITENGINE;
         }
     }
 
