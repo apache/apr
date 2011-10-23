@@ -37,49 +37,6 @@ extern "C" {
  * @{
  */
 
-/** CA certificate type unknown */
-#define APR_CRYPTO_CA_TYPE_UNKNOWN           0
-/** binary DER encoded CA certificate */
-#define APR_CRYPTO_CA_TYPE_DER               1
-/** PEM encoded CA certificate */
-#define APR_CRYPTO_CA_TYPE_BASE64            2
-/** Netscape/Mozilla cert7.db CA certificate database */
-#define APR_CRYPTO_CA_TYPE_CERT7_DB          3
-/** Netscape/Mozilla secmod file */
-#define APR_CRYPTO_CA_TYPE_SECMOD            4
-/** Client certificate type unknown */
-#define APR_CRYPTO_CERT_TYPE_UNKNOWN         5
-/** binary DER encoded client certificate */
-#define APR_CRYPTO_CERT_TYPE_DER             6
-/** PEM encoded client certificate */
-#define APR_CRYPTO_CERT_TYPE_BASE64          7
-/** Netscape/Mozilla key3.db client certificate database */
-#define APR_CRYPTO_CERT_TYPE_KEY3_DB         8
-/** Netscape/Mozilla client certificate nickname */
-#define APR_CRYPTO_CERT_TYPE_NICKNAME        9
-/** Private key type unknown */
-#define APR_CRYPTO_KEY_TYPE_UNKNOWN          10
-/** binary DER encoded private key */
-#define APR_CRYPTO_KEY_TYPE_DER              11
-/** PEM encoded private key */
-#define APR_CRYPTO_KEY_TYPE_BASE64           12
-/** PKCS#12 encoded client certificate */
-#define APR_CRYPTO_CERT_TYPE_PFX             13
-/** PKCS#12 encoded private key */
-#define APR_CRYPTO_KEY_TYPE_PFX              14
-/** Openldap directory full of base64-encoded cert
- * authorities with hashes in corresponding .0 directory
- */
-#define APR_CRYPTO_CA_TYPE_CACERTDIR_BASE64  15
-/** CMS Key Database with private key and cert chain */
-#define APR_CRYPTO_CA_TYPE_CMS               16
-/** Symmetrical key */
-#define APR_CRYPTO_KEY_TYPE_SYM              17
-/** Netscape/Mozilla certificate database directory */
-#define APR_CRYPTO_CA_TYPE_DIR               18
-/** Crypto engine */
-#define APR_CRYPTO_ENGINE                    101
-
 #if APU_HAVE_CRYPTO
 
 #ifndef APU_CRYPTO_RECOMMENDED_DRIVER
@@ -158,21 +115,6 @@ typedef enum {
 /** Cipher Block Chaining */
 } apr_crypto_block_key_mode_e;
 
-/**
- * Certificate and private key structure.
- *
- * The various crypto backends expect certificates and keys in a wide
- * array of formats.
- * @param type Type of certificate APR_CRYPTO_*_TYPE_*
- * @param path Path, file or nickname of the certificate
- * @param password Optional password, can be NULL
- */
-typedef struct apr_crypto_param_t {
-    int type;
-    const char *path;
-    const char *password;
-} apr_crypto_param_t;
-
 /* These are opaque structs.  Instantiation is up to each backend */
 typedef struct apr_crypto_driver_t apr_crypto_driver_t;
 typedef struct apr_crypto_t apr_crypto_t;
@@ -200,9 +142,13 @@ APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool);
  * @return APR_ENOTIMPL for no driver (when DSO not enabled)
  * @return APR_EDSOOPEN if DSO driver file can't be opened
  * @return APR_ESYMNOTFOUND if the driver file doesn't contain a driver
+ * @remarks NSS: the params can have "dir", "key3", "cert7" and "secmod"
+ *  keys, each followed by an equal sign and a value. Such key/value pairs can
+ *  be delimited by space, CR, LF, tab, semicolon, vertical bar or comma.
+ * @remarks OpenSSL: currently no params are supported.
  */
 APR_DECLARE(apr_status_t) apr_crypto_get_driver(const apr_crypto_driver_t **driver,
-        const char *name, const apr_array_header_t *params, const apu_err_t **result,
+        const char *name, const char *params, const apu_err_t **result,
         apr_pool_t *pool);
 
 /**
@@ -234,9 +180,13 @@ APR_DECLARE(apr_status_t) apr_crypto_error(const apu_err_t **result,
  * @param pool - process pool
  * @return APR_ENOENGINE when the engine specified does not exist. APR_EINITENGINE
  * if the engine cannot be initialised.
+ * @remarks NSS: currently no params are supported.
+ * @remarks OpenSSL: the params can have "engine" as a key, followed by an equal
+ *  sign and a value.
  */
-APR_DECLARE(apr_status_t) apr_crypto_make(apr_crypto_t **f, const apr_crypto_driver_t *driver,
-        const apr_array_header_t *params, apr_pool_t *pool);
+APR_DECLARE(apr_status_t) apr_crypto_make(apr_crypto_t **f,
+        const apr_crypto_driver_t *driver,
+        const char *params, apr_pool_t *pool);
 
 /**
  * @brief Get a hash table of key types, keyed by the name of the type against

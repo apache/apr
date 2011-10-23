@@ -118,7 +118,7 @@ static apr_status_t crypto_shutdown_helper(void *data)
 /**
  * Initialise the crypto library and perform one time initialisation.
  */
-static apr_status_t crypto_init(apr_pool_t *pool, const apr_array_header_t *params, int *rc)
+static apr_status_t crypto_init(apr_pool_t *pool, const char *params, int *rc)
 {
     SECStatus s;
     const char *dir = NULL;
@@ -126,36 +126,68 @@ static apr_status_t crypto_init(apr_pool_t *pool, const apr_array_header_t *para
     const char *certPrefix = NULL;
     const char *secmod = NULL;
     PRUint32 flags = 0;
-    struct apr_crypto_param_t *ents = params ? (struct apr_crypto_param_t *)params->elts : NULL;
-    int i = 0;
+
+    struct {
+        const char *field;
+        char *value;
+    } fields[] = {
+        {"dir", NULL},
+        {"key3", NULL},
+        {"cert7", NULL},
+        {"secmod", NULL},
+        {NULL, NULL}
+    };
+    int i;
+    const char *ptr;
+    const char *key;
+    size_t klen;
+    const char *value;
+    size_t vlen;
+    static const char *const delims = " \r\n\t;|,";
 
     /* sanity check - we can only initialise NSS once */
     if (NSS_IsInitialized()) {
         return APR_EREINIT;
     }
 
+    /* snitch parsing from the MySQL driver */
+    for (ptr = strchr(params, '='); ptr; ptr = strchr(ptr, '=')) {
+        /* don't dereference memory that may not belong to us */
+        if (ptr == params) {
+            ++ptr;
+            continue;
+        }
+        for (key = ptr-1; apr_isspace(*key); --key);
+        klen = 0;
+        while (apr_isalpha(*key)) {
+            if (key == params) {
+                /* Don't parse off the front of the params */
+                --key;
+                ++klen;
+                break;
+            }
+            --key;
+            ++klen;
+        }
+        ++key;
+        for (value = ptr+1; apr_isspace(*value); ++value);
+        vlen = strcspn(value, delims);
+        for (i=0; fields[i].field != NULL; ++i) {
+            if (!strncasecmp(fields[i].field, key, klen)) {
+                fields[i].value = apr_pstrndup(pool, value, vlen);
+                break;
+            }
+        }
+        ptr = value+vlen;
+    }
+    dir = fields[0].value;
+    keyPrefix = fields[1].value;
+    certPrefix = fields[2].value;
+    secmod = fields[3].value;
+
     apr_pool_cleanup_register(pool, pool,
                               crypto_shutdown_helper,
                               apr_pool_cleanup_null);
-
-    for (i = 0; params && i < params->nelts; i++) {
-        switch (ents[i].type) {
-        case APR_CRYPTO_CA_TYPE_DIR:
-            dir = ents[i].path;
-            break;
-        case APR_CRYPTO_CERT_TYPE_KEY3_DB:
-            keyPrefix = ents[i].path;
-            break;
-        case APR_CRYPTO_CA_TYPE_CERT7_DB:
-            certPrefix = ents[i].path;
-            break;
-        case APR_CRYPTO_CA_TYPE_SECMOD:
-            secmod = ents[i].path;
-            break;
-        default:
-            return APR_EINIT;
-        }
-    }
 
     if (keyPrefix || certPrefix || secmod) {
         s = NSS_Initialize(dir, certPrefix, keyPrefix, secmod, flags);
@@ -234,17 +266,15 @@ static apr_status_t crypto_cleanup_helper(void *data)
  *        registered with the given pool to guarantee a graceful shutdown.
  * @param f - context pointer will be written here
  * @param provider - provider to use
- * @param params - array of key parameters
+ * @param params - parameter string
  * @param pool - process pool
  * @return APR_ENOENGINE when the engine specified does not exist. APR_EINITENGINE
  * if the engine cannot be initialised.
  */
 static apr_status_t crypto_make(apr_crypto_t **ff, const apr_crypto_driver_t *provider,
-        const apr_array_header_t *params, apr_pool_t *pool)
+        const char *params, apr_pool_t *pool)
 {
     apr_crypto_config_t *config = NULL;
-    /* struct apr_crypto_param_t *ents = params ? (struct apr_crypto_param_t *)params->elts : NULL; */
-    /* int i = 0; */
     apr_crypto_t *f;
 
     f = apr_pcalloc(pool, sizeof(apr_crypto_t));
@@ -284,19 +314,6 @@ static apr_status_t crypto_make(apr_crypto_t **ff, const apr_crypto_driver_t *pr
     apr_pool_cleanup_register(pool, f,
                               crypto_cleanup_helper,
                               apr_pool_cleanup_null);
-
-    /*
-    for (i = 0; params && i < params->nelts; i++) {
-        switch (ents[i].type) {
-        default:
-            f->result->rc = -1;
-            f->result->reason = "The NSS module currently supports "
-                "no per context initialisation parameters at this time, but "
-                "may do in future.";
-            return APR_EINIT;
-        }
-    }
-    */
 
     return APR_SUCCESS;
 
