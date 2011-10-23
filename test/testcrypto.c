@@ -29,7 +29,7 @@
 #define ALIGNED_STRING "123456789012345"
 
 static const apr_crypto_driver_t *get_driver(abts_case *tc, apr_pool_t *pool,
-        const char *name, const apr_array_header_t *params) {
+        const char *name, const char *params) {
 
     const apr_crypto_driver_t *driver = NULL;
     const apu_err_t *err = NULL;
@@ -60,15 +60,8 @@ static const apr_crypto_driver_t *get_driver(abts_case *tc, apr_pool_t *pool,
 static const apr_crypto_driver_t *get_nss_driver(abts_case *tc,
         apr_pool_t *pool) {
 
-    apr_array_header_t *params;
-    apr_crypto_param_t *param;
-
     /* initialise NSS */
-    params = apr_array_make(pool, 10, sizeof(apr_crypto_param_t));
-    param = apr_array_push(params);
-    param->type = APR_CRYPTO_CA_TYPE_DIR;
-    param->path = "data";
-    return get_driver(tc, pool, "nss", params);
+    return get_driver(tc, pool, "nss", "dir=data");
 
 }
 
@@ -89,7 +82,7 @@ static apr_crypto_t *make(abts_case *tc, apr_pool_t *pool,
     }
 
     /* get the context */
-    apr_crypto_make(&f, driver, NULL, pool);
+    apr_crypto_make(&f, driver, "engine=openssl", pool);
     ABTS_ASSERT(tc, "apr_crypto_make returned NULL", f != NULL);
 
     return f;
