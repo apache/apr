@@ -150,37 +150,41 @@ static apr_status_t crypto_init(apr_pool_t *pool, const char *params, int *rc)
     int i = 0, j;
     apr_status_t status;
 
-    if (APR_SUCCESS != (status = apr_tokenize_to_argv(params, &elts, pool))) {
-        return status;
-    }
-    while ((elt = elts[i])) {
-        ptr = strchr(elt, '=');
-        if (ptr) {
-            for (klen = ptr - elt; klen && apr_isspace(elt[klen - 1]); --klen);
-            ptr++;
+    if (params) {
+        if (APR_SUCCESS != (status = apr_tokenize_to_argv(params, &elts, pool))) {
+            return status;
         }
-        else {
-            for (klen = strlen(elt); klen && apr_isspace(elt[klen - 1]); --klen);
-        }
-        elt[klen] = 0;
-
-        for (j = 0; fields[j].field != NULL; ++j) {
-            if (klen && !strcasecmp(fields[j].field, elt)) {
-                fields[j].set = 1;
-                if (ptr) {
-                    fields[j].value = ptr;
-                }
-                break;
+        while ((elt = elts[i])) {
+            ptr = strchr(elt, '=');
+            if (ptr) {
+                for (klen = ptr - elt; klen && apr_isspace(elt[klen - 1]); --klen)
+                    ;
+                ptr++;
             }
-        }
+            else {
+                for (klen = strlen(elt); klen && apr_isspace(elt[klen - 1]); --klen)
+                    ;
+            }
+            elt[klen] = 0;
 
-        i++;
+            for (j = 0; fields[j].field != NULL; ++j) {
+                if (klen && !strcasecmp(fields[j].field, elt)) {
+                    fields[j].set = 1;
+                    if (ptr) {
+                        fields[j].value = ptr;
+                    }
+                    break;
+                }
+            }
+
+            i++;
+        }
+        dir = fields[0].value;
+        keyPrefix = fields[1].value;
+        certPrefix = fields[2].value;
+        secmod = fields[3].value;
+        noinit = fields[4].set;
     }
-    dir = fields[0].value;
-    keyPrefix = fields[1].value;
-    certPrefix = fields[2].value;
-    secmod = fields[3].value;
-    noinit = fields[4].set;
 
     /* if we've been asked to bypass, do so here */
     if (noinit) {

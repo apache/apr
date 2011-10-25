@@ -191,7 +191,7 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
     apr_crypto_config_t *config = NULL;
     apr_crypto_t *f = apr_pcalloc(pool, sizeof(apr_crypto_t));
 
-    const char *engine;
+    const char *engine = NULL;
 
     struct {
         const char *field;
@@ -208,33 +208,37 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
     int i = 0, j;
     apr_status_t status;
 
-    if (APR_SUCCESS != (status = apr_tokenize_to_argv(params, &elts, pool))) {
-        return status;
-    }
-    while ((elt = elts[i])) {
-        ptr = strchr(elt, '=');
-        if (ptr) {
-            for (klen = ptr - elt; klen && apr_isspace(elt[klen - 1]); --klen);
-            ptr++;
+    if (params) {
+        if (APR_SUCCESS != (status = apr_tokenize_to_argv(params, &elts, pool))) {
+            return status;
         }
-        else {
-            for (klen = strlen(elt); klen && apr_isspace(elt[klen - 1]); --klen);
-        }
-        elt[klen] = 0;
-
-        for (j = 0; fields[j].field != NULL; ++j) {
-            if (!strcasecmp(fields[j].field, elt)) {
-                fields[j].set = 1;
-                if (ptr) {
-                    fields[j].value = ptr;
-                }
-                break;
+        while ((elt = elts[i])) {
+            ptr = strchr(elt, '=');
+            if (ptr) {
+                for (klen = ptr - elt; klen && apr_isspace(elt[klen - 1]); --klen)
+                    ;
+                ptr++;
             }
-        }
+            else {
+                for (klen = strlen(elt); klen && apr_isspace(elt[klen - 1]); --klen)
+                    ;
+            }
+            elt[klen] = 0;
 
-        i++;
+            for (j = 0; fields[j].field != NULL; ++j) {
+                if (!strcasecmp(fields[j].field, elt)) {
+                    fields[j].set = 1;
+                    if (ptr) {
+                        fields[j].value = ptr;
+                    }
+                    break;
+                }
+            }
+
+            i++;
+        }
+        engine = fields[0].value;
     }
-    engine = fields[0].value;
 
     if (!f) {
         return APR_ENOMEM;
