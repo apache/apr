@@ -169,7 +169,7 @@ void *memchr(const void *s, int c, size_t n);
 
 /**
  * Setup any APR internal data structures.  This MUST be the first function 
- * called for any APR library. It is save to call apr_initialize several
+ * called for any APR library. It is safe to call apr_initialize several
  * times as long as apr_terminate is called the same number of times.
  * @remark See apr_app_initialize if this is an application, rather than
  * a library consumer of apr.
