@@ -159,6 +159,11 @@ APR_DECLARE(void) apr_random_after_fork(apr_proc_t *proc)
     apr_random_t *r;
 
     for (r = all_random; r; r = r->next)
+        /* 
+         * XXX Note: the pid does not provide sufficient entropy to 
+         * actually call this secure.  See Ben's paper referenced at 
+         * the top of this file. 
+         */
         mixer(r,proc->pid);
 }
 
