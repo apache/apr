@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.6
 
+  *) apr_proc_fork, apr_random_after_fork: disambiguate what happens to the 
+     proc structure passed in, and ensure that the pid is set correctly in 
+     a newly created child; note that merely mixing a PID into the random 
+     seed of a new child doesn't markedly increase entropy. [Sander Temme]
+
   *) apr_file_open: Avoid fcntl() calls if support for O_CLOEXEC works.
      PR 48557. [Mike Frysinger <vapier gentoo org>]
 
