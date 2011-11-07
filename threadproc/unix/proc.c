@@ -219,15 +219,14 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr,
 APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
 {
     int pid;
+    
+    memset(proc, 0, sizeof(apr_proc_t));
 
     if ((pid = fork()) < 0) {
         return errno;
     }
     else if (pid == 0) {
-        proc->pid = pid;
-        proc->in = NULL;
-        proc->out = NULL;
-        proc->err = NULL;
+        proc->pid = getpid();
 
         apr_random_after_fork(proc);
 
@@ -235,9 +234,6 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
     }
 
     proc->pid = pid;
-    proc->in = NULL;
-    proc->out = NULL;
-    proc->err = NULL;
 
     return APR_INPARENT;
 }
