@@ -86,6 +86,23 @@ struct apr_random_t {
 
 static apr_random_t *all_random;
 
+static apr_status_t random_cleanup(void *data)
+{
+    apr_random_t *remove_this = data,
+                 *cur = all_random,
+                 **prev_ptr = &all_random;
+    while (cur) {
+        if (cur == remove_this) {
+            *prev_ptr = cur->next;
+            break;
+        }
+        prev_ptr = &cur->next;
+        cur = cur->next;
+    }
+    return APR_SUCCESS;
+}
+
+
 APR_DECLARE(void) apr_random_init(apr_random_t *g,apr_pool_t *p,
                                   apr_crypto_hash_t *pool_hash,
                                   apr_crypto_hash_t *key_hash,
@@ -128,6 +145,7 @@ APR_DECLARE(void) apr_random_init(apr_random_t *g,apr_pool_t *p,
 
     g->next = all_random;
     all_random = g;
+    apr_pool_cleanup_register(p, g, random_cleanup, apr_pool_cleanup_null);
 }
 
 static void mix_pid(apr_random_t *g,unsigned char *H,pid_t pid)
