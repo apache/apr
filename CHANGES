@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.6
 
+  *) testrand: Improve child randomness test case. [Rainer Jung]
+
   *) apr_proc_fork, apr_random_after_fork: disambiguate what happens to the 
      proc structure passed in, and ensure that the pid is set correctly in 
      a newly created child; note that merely mixing a PID into the random 

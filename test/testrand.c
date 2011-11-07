@@ -15,16 +15,20 @@
  */
 
 #include "apr_general.h"
+#include "apr_pools.h"
 #include "apr_random.h"
 #include "apr_thread_proc.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "testutil.h"
 
-static void hexdump(const unsigned char *b, int n)
+#define RANDOM_BUF_SZ 128
+
+static void hexdump(const char *msg, const unsigned char *b, int n)
 {
     int i;
 
+    printf("\n%s", msg);
     for (i = 0; i < n; ++i) {
 #if 0
         if ((i & 0xf) == 0)
@@ -47,35 +51,48 @@ typedef apr_status_t APR_THREAD_FUNC rnd_fn(apr_random_t * r, void *b,
                                             apr_size_t n);
 
 static void rand_run_kat(abts_case *tc, rnd_fn *f, apr_random_t *r,
-                         const unsigned char expected[128])
+                         const unsigned char expected[RANDOM_BUF_SZ])
 {
-    unsigned char c[128];
+    unsigned char c[RANDOM_BUF_SZ];
     apr_status_t rv;
 
-    rv = f(r, c, 128);
+    rv = f(r, c, RANDOM_BUF_SZ);
     ABTS_INT_EQUAL(tc, 0, rv);
     if (rv)
         return;
-    if (memcmp(c, expected, 128)) {
-        hexdump(c, 128);
-        hexdump(expected, 128);
+    if (memcmp(c, expected, RANDOM_BUF_SZ)) {
+        hexdump("Generated: ", c, RANDOM_BUF_SZ);
+        hexdump("Expected:  ", expected, RANDOM_BUF_SZ);
         ABTS_FAIL(tc, "Randomness mismatch");
     }
 }
 
 #if APR_HAS_FORK
 static int rand_check_kat(rnd_fn *f, apr_random_t *r,
-                          const unsigned char expected[128])
+                          const unsigned char expected[RANDOM_BUF_SZ],
+                          apr_file_t *readp, apr_file_t *writep)
 {
-    unsigned char c[128];
+    apr_size_t nbytes = RANDOM_BUF_SZ;
+    apr_size_t cmd_size = 1;
+    unsigned char c[RANDOM_BUF_SZ];
+    char ack;
     apr_status_t rv;
 
-    rv = f(r, c, 128);
+    rv = f(r, c, RANDOM_BUF_SZ);
     if (rv)
         return 2;
-    if (memcmp(c, expected, 128))
-        return 1;
-    return 0;
+    rv = 0;
+    if (memcmp(c, expected, RANDOM_BUF_SZ)) {
+        rv = 1;
+    } else {
+        hexdump("Generated: ", c, RANDOM_BUF_SZ);
+        hexdump("Previous:  ", expected, RANDOM_BUF_SZ);
+    }
+    /* Report back our random values for comparison in another child */
+    apr_file_write(writep, c, &nbytes);
+    /* Wait for our parent ack the data */
+    apr_file_read(readp, &ack, &cmd_size);
+    return rv;
 }
 #endif
 
@@ -107,7 +124,7 @@ static void rand_seed_short(abts_case *tc, void *data)
 
 static void rand_kat(abts_case *tc, void *data)
 {
-    unsigned char expected[128] = {
+    unsigned char expected[RANDOM_BUF_SZ] = {
         0x82, 0x04, 0xad, 0xd2, 0x0b, 0xd5, 0xac, 0xda,
         0x3d, 0x85, 0x58, 0x38, 0x54, 0x6b, 0x69, 0x45,
         0x37, 0x4c, 0xc7, 0xd7, 0x87, 0xeb, 0xbf, 0xd9,
@@ -137,7 +154,7 @@ static void rand_seed_short2(abts_case *tc, void *data)
 
 static void rand_kat2(abts_case *tc, void *data)
 {
-    unsigned char expected[128] = {
+    unsigned char expected[RANDOM_BUF_SZ] = {
         0x38, 0x8f, 0x01, 0x29, 0x5a, 0x5c, 0x1f, 0xa8,
         0x00, 0xde, 0x16, 0x4c, 0xe5, 0xf7, 0x1f, 0x58,
         0xc0, 0x67, 0xe2, 0x98, 0x3d, 0xde, 0x4a, 0x75,
@@ -168,7 +185,7 @@ static void rand_barrier(abts_case *tc, void *data)
 
 static void rand_kat3(abts_case *tc, void *data)
 {
-    unsigned char expected[128] = {
+    unsigned char expected[RANDOM_BUF_SZ] = {
         0xe8, 0xe7, 0xc9, 0x45, 0xe2, 0x2a, 0x54, 0xb2,
         0xdd, 0xe0, 0xf9, 0xbc, 0x3d, 0xf9, 0xce, 0x3c,
         0x4c, 0xbd, 0xc9, 0xe2, 0x20, 0x4a, 0x35, 0x1c,
@@ -192,7 +209,7 @@ static void rand_kat3(abts_case *tc, void *data)
 
 static void rand_kat4(abts_case *tc, void *data)
 {
-    unsigned char expected[128] = {
+    unsigned char expected[RANDOM_BUF_SZ] = {
         0x7d, 0x0e, 0xc4, 0x4e, 0x3e, 0xac, 0x86, 0x50,
         0x37, 0x95, 0x7a, 0x98, 0x23, 0x26, 0xa7, 0xbf,
         0x60, 0xfb, 0xa3, 0x70, 0x90, 0xc3, 0x58, 0xc6,
@@ -220,7 +237,10 @@ static void rand_fork(abts_case *tc, void *data)
 {
     apr_proc_t proc;
     apr_status_t rv;
-    unsigned char expected[128] = {
+    apr_size_t nbytes = RANDOM_BUF_SZ;
+    apr_size_t cmd_size = 1;
+    char cmd = 'X';
+    unsigned char expected[RANDOM_BUF_SZ] = {
         0xac, 0x93, 0xd2, 0x5c, 0xc7, 0xf5, 0x8d, 0xc2,
         0xd8, 0x8d, 0xb6, 0x7a, 0x94, 0xe1, 0x83, 0x4c,
         0x26, 0xe2, 0x38, 0x6d, 0xf5, 0xbd, 0x9d, 0x6e,
@@ -239,32 +259,68 @@ static void rand_fork(abts_case *tc, void *data)
         0xc1, 0x7f, 0x10, 0x2e, 0x08, 0x1c, 0x28, 0x4b,
     };
 
-    rv = apr_proc_fork(&proc, p);
-    if (rv == APR_INCHILD) {
-        int n = rand_check_kat(apr_random_secure_bytes, r, expected);
-        exit(n);
-    }
-    else if (rv == APR_INPARENT) {
-        int exitcode;
-        apr_exit_why_e why;
+    apr_file_t *readdatap = NULL;
+    apr_file_t *writedatap = NULL;
+    apr_file_t *readcmdp = NULL;
+    apr_file_t *writecmdp = NULL;
+    apr_pool_t *p;
+    int i;
 
-        rand_run_kat(tc, apr_random_secure_bytes, r, expected);
-        apr_proc_wait(&proc, &exitcode, &why, APR_WAIT);
-        if (why != APR_PROC_EXIT) {
-            ABTS_FAIL(tc, "Child terminated abnormally");
+    apr_pool_create(&p, NULL);
+    /* Set up data pipe for children */
+    rv = apr_file_pipe_create(&readdatap, &writedatap, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, readdatap);
+    ABTS_PTR_NOTNULL(tc, writedatap);
+    /* Set up cmd pipe for children */
+    rv = apr_file_pipe_create(&readcmdp, &writecmdp, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, readcmdp);
+    ABTS_PTR_NOTNULL(tc, writecmdp);
+
+    rand_run_kat(tc, apr_random_secure_bytes, r, expected);
+
+    for (i = 0; i< 10; i++)
+    {
+        rv = apr_proc_fork(&proc, p);
+        if (rv == APR_INCHILD) {
+            int n = rand_check_kat(apr_random_secure_bytes, r, expected, readcmdp, writedatap);
+            exit(n);
         }
-        else if (exitcode == 0) {
-            ABTS_FAIL(tc, "Child produced our randomness");
+        else if (rv == APR_INPARENT) {
+            int exitcode;
+            apr_exit_why_e why;
+
+            /* Read the random data generated by child */
+            rv = apr_file_read(readdatap, expected, &nbytes);
+            ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+            /* Tell child to finish */
+            rv = apr_file_write(writecmdp, &cmd, &cmd_size);
+            ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+            apr_proc_wait(&proc, &exitcode, &why, APR_WAIT);
+            if (why != APR_PROC_EXIT) {
+                ABTS_FAIL(tc, "Child terminated abnormally");
+            }
+            else if (exitcode == 0) {
+                if (i == 0)
+                {
+                    ABTS_FAIL(tc, "Child produced our randomness");
+                } else
+                {
+                    ABTS_FAIL(tc, "Child produced randomness of previous child");
+                }
+            }
+            else if (exitcode == 2) {
+                ABTS_FAIL(tc, "Child randomness failed");
+            }
+            else if (exitcode != 1) {
+                ABTS_FAIL(tc, "Unknown child error");
+            }
+        } else {
+            ABTS_FAIL(tc, "Fork failed");
         }
-        else if (exitcode == 2) {
-            ABTS_FAIL(tc, "Child randomness failed");
-        }
-        else if (exitcode != 1) {
-            ABTS_FAIL(tc, "Uknown child error");
-        }
-    } else {
-        ABTS_FAIL(tc, "Fork failed");
     }
+
 }
 #endif
 
