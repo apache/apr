@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.6
 
+  *) apr_random: Prevent segfault if pool used to initialize apr_random is
+     destroyed before forking. [Stefan Fritsch]
+
   *) testrand: Improve child randomness test case. [Rainer Jung]
 
   *) apr_proc_fork, apr_random_after_fork: disambiguate what happens to the 
