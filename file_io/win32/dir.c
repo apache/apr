@@ -350,7 +350,7 @@ APR_DECLARE(apr_status_t) apr_dir_make_recursive(const char *path,
      * apr_dir_make being called on existing dir, therefore this check
      * has to come last.
      */
-    if (APR_STATUS_IS_EEXIST(apr_err))
+    if (APR_STATUS_IS_EEXIST(rv))
         return APR_SUCCESS;
 
     return rv;
