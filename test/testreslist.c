@@ -142,7 +142,6 @@ static void test_timeout(abts_case *tc, apr_reslist_t *rl)
 {
     apr_status_t rv;
     my_resource_t *resources[RESLIST_HMAX];
-    my_resource_t *res;
     void *vp;
     int i;
 
@@ -162,8 +161,6 @@ static void test_timeout(abts_case *tc, apr_reslist_t *rl)
     /* next call will block until timeout is reached */
     rv = apr_reslist_acquire(rl, &vp);
     ABTS_TRUE(tc, APR_STATUS_IS_TIMEUP(rv));
-
-    res = vp;
 
     /* release the resources; otherwise the destroy operation
      * will blow

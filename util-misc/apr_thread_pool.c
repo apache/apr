@@ -237,7 +237,6 @@ static struct apr_thread_list_elt *elt_new(apr_thread_pool_t * me,
  */
 static void *APR_THREAD_FUNC thread_pool_func(apr_thread_t * t, void *param)
 {
-    apr_status_t rv = APR_SUCCESS;
     apr_thread_pool_t *me = param;
     apr_thread_pool_task_t *task = NULL;
     apr_interval_time_t wait;
@@ -313,10 +312,10 @@ static void *APR_THREAD_FUNC thread_pool_func(apr_thread_t * t, void *param)
             wait = -1;
 
         if (wait >= 0) {
-            rv = apr_thread_cond_timedwait(me->cond, me->lock, wait);
+            apr_thread_cond_timedwait(me->cond, me->lock, wait);
         }
         else {
-            rv = apr_thread_cond_wait(me->cond, me->lock);
+            apr_thread_cond_wait(me->cond, me->lock);
         }
     }
 
