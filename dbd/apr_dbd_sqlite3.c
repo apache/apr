@@ -118,7 +118,6 @@ static int dbd_sqlite3_select_internal(apr_pool_t *pool,
             }
         } else if (ret == SQLITE_ROW) {
             int length;
-            apr_dbd_column_t *col;
             row = apr_palloc(pool, sizeof(apr_dbd_row_t));
             row->res = *results;
             increment = sizeof(apr_dbd_column_t *);
@@ -157,7 +156,6 @@ static int dbd_sqlite3_select_internal(apr_pool_t *pool,
                 case SQLITE_NULL:
                     break;
                 }
-                col = row->columns[i];
             }
             row->rownum = num_tuples++;
             row->next_row = 0;
