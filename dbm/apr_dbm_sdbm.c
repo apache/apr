@@ -184,10 +184,9 @@ static apr_status_t vt_sdbm_firstkey(apr_dbm_t *dbm, apr_datum_t *pkey)
 
 static apr_status_t vt_sdbm_nextkey(apr_dbm_t *dbm, apr_datum_t *pkey)
 {
-    apr_status_t rv;
     apr_sdbm_datum_t rd;
 
-    rv = apr_sdbm_nextkey(dbm->file, &rd);
+    apr_sdbm_nextkey(dbm->file, &rd);
 
     pkey->dptr = rd.dptr;
     pkey->dsize = rd.dsize;
