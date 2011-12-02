@@ -227,6 +227,9 @@ code and source code.
 The following provides more details on the included cryptographic
 software:
 
-  APR provides an abstract interface for SSL cryptographic functions,
-  specifically @bug XXX Fill This In XXX!
+  APR provides an abstract interface for symmetrical cryptographic
+  functions that make use of a general-purpose encryption library,
+  such as OpenSSL, NSS, or the operating system's platform-specific
+  facilities. This interface is known as the apr_crypto interface,
+  with implementation beneath the /crypto directory.
 
