@@ -551,6 +551,7 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
             if (!usedIv) {
                 return APR_ENOMEM;
             }
+            apr_crypto_clear(p, usedIv, key->ivSize);
             s = PK11_GenerateRandom(usedIv, key->ivSize);
             if (s != SECSuccess) {
                 return APR_ENOIV;
@@ -622,6 +623,7 @@ static apr_status_t crypto_block_encrypt(unsigned char **out,
         if (!buffer) {
             return APR_ENOMEM;
         }
+        apr_crypto_clear(block->pool, buffer, inlen + block->blockSize);
         *out = buffer;
     }
 
@@ -785,6 +787,7 @@ static apr_status_t crypto_block_decrypt(unsigned char **out,
         if (!buffer) {
             return APR_ENOMEM;
         }
+        apr_crypto_clear(block->pool, buffer, inlen + block->blockSize);
         *out = buffer;
     }
 
