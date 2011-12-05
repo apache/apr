@@ -431,6 +431,7 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
     if (!key->key) {
         return APR_ENOMEM;
     }
+    apr_crypto_clear(p, key->key, key->keyLen);
 
     /* generate the key */
     if (PKCS5_PBKDF2_HMAC_SHA1(pass, passLen, (unsigned char *) salt, saltLen,
@@ -504,6 +505,7 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
             if (!usedIv) {
                 return APR_ENOMEM;
             }
+            apr_crypto_clear(p, usedIv, key->ivSize);
             if (!((RAND_status() == 1)
                     && (RAND_bytes(usedIv, key->ivSize) == 1))) {
                 return APR_ENOIV;
@@ -575,6 +577,7 @@ static apr_status_t crypto_block_encrypt(unsigned char **out,
         if (!buffer) {
             return APR_ENOMEM;
         }
+        apr_crypto_clear(ctx->pool, buffer, inlen + EVP_MAX_BLOCK_LENGTH);
         *out = buffer;
     }
 
@@ -729,6 +732,7 @@ static apr_status_t crypto_block_decrypt(unsigned char **out,
         if (!buffer) {
             return APR_ENOMEM;
         }
+        apr_crypto_clear(ctx->pool, buffer, inlen + EVP_MAX_BLOCK_LENGTH);
         *out = buffer;
     }
 
