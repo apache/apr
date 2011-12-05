@@ -56,6 +56,11 @@ APR_TYPEDEF_STRUCT(apr_crypto_block_t,
     const apr_crypto_t *f;
 )
 
+typedef struct apr_crypto_clear_t {
+    void *buffer;
+    apr_size_t size;
+} apr_crypto_clear_t;
+
 #if !APR_HAVE_MODULAR_DSO
 #define DRIVER_LOAD(name,driver,pool,params) \
     {   \
@@ -116,6 +121,31 @@ APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool)
             apr_pool_cleanup_null);
 
     return ret;
+}
+
+static apr_status_t crypto_clear(void *ptr)
+{
+    apr_crypto_clear_t *clear = (apr_crypto_clear_t *)ptr;
+
+    memset(clear->buffer, 0, clear->size);
+    clear->buffer = NULL;
+    clear->size = 0;
+
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_crypto_clear(apr_pool_t *pool,
+        void *buffer, apr_size_t size)
+{
+    apr_crypto_clear_t *clear = apr_palloc(pool, sizeof(apr_crypto_clear_t));
+
+    clear->buffer = buffer;
+    clear->size = size;
+
+    apr_pool_cleanup_register(pool, clear, crypto_clear,
+            apr_pool_cleanup_null);
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_crypto_get_driver(
