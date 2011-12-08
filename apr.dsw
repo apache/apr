@@ -87,6 +87,36 @@ Package=<4>
 
 ###############################################################################
 
+Project: "apr_crypto_nss"=".\crypto\apr_crypto_nss.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libapr
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "apr_crypto_openssl"=".\crypto\apr_crypto_openssl.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libapr
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Global:
 
 Package=<5>

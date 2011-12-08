@@ -204,6 +204,10 @@ SOURCE=.\buckets\apr_buckets_socket.c
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\crypto\apr_crypto.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\crypto\apr_md4.c
 # End Source File
 # Begin Source File
