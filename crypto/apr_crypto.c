@@ -62,12 +62,12 @@ typedef struct apr_crypto_clear_t {
 } apr_crypto_clear_t;
 
 #if !APR_HAVE_MODULAR_DSO
-#define DRIVER_LOAD(name,driver,pool,params) \
+#define DRIVER_LOAD(name,driver,pool,params,rv,result) \
     {   \
         extern const apr_crypto_driver_t driver; \
         apr_hash_set(drivers,name,APR_HASH_KEY_STRING,&driver); \
         if (driver.init) {     \
-            driver.init(pool, params); \
+            rv = driver.init(pool, params, result); \
         }  \
     }
 #endif
@@ -100,22 +100,6 @@ APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool)
     apu_dso_init(pool);
 #endif
     drivers = apr_hash_make(pool);
-
-#if !APR_HAVE_MODULAR_DSO
-    /* Load statically-linked drivers: */
-#if APU_HAVE_OPENSSL
-    DRIVER_LOAD("openssl", apr_crypto_openssl_driver, pool, params);
-#endif
-#if APU_HAVE_NSS
-    DRIVER_LOAD("nss", apr_crypto_nss_driver, pool, params);
-#endif
-#if APU_HAVE_MSCAPI
-    DRIVER_LOAD("mscapi", apr_crypto_mscapi_driver, pool, params);
-#endif
-#if APU_HAVE_MSCNG
-    DRIVER_LOAD("mscng", apr_crypto_mscng_driver, pool, params);
-#endif
-#endif /* APR_HAVE_MODULAR_DSO */
 
     apr_pool_cleanup_register(pool, NULL, apr_crypto_term,
             apr_pool_cleanup_null);
@@ -159,7 +143,10 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
     apr_dso_handle_sym_t symbol;
 #endif
     apr_status_t rv;
-    int rc = 0;
+
+    if (result) {
+        *result = NULL; /* until further notice */
+    }
 
 #if APR_HAVE_MODULAR_DSO
     rv = apu_dso_mutex_lock();
@@ -201,27 +188,51 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
     }
     *driver = symbol;
     if ((*driver)->init) {
-        rv = (*driver)->init(pool, params, &rc);
+        rv = (*driver)->init(pool, params, result);
     }
-    name = apr_pstrdup(pool, name);
-    apr_hash_set(drivers, name, APR_HASH_KEY_STRING, *driver);
+    if (rv == APR_SUCCESS) {
+        name = apr_pstrdup(pool, name);
+        apr_hash_set(drivers, name, APR_HASH_KEY_STRING, *driver);
+    }
 
     unlock: apu_dso_mutex_unlock();
 
-    if (APR_SUCCESS != rv && result) {
+    if (APR_SUCCESS != rv && result && !*result) {
         char *buffer = apr_pcalloc(pool, ERROR_SIZE);
         apu_err_t *err = apr_pcalloc(pool, sizeof(apu_err_t));
         if (err && buffer) {
             apr_dso_error(dso, buffer, ERROR_SIZE - 1);
             err->msg = buffer;
             err->reason = modname;
-            err->rc = rc;
             *result = err;
         }
     }
 
 #else /* not builtin and !APR_HAS_DSO => not implemented */
     rv = APR_ENOTIMPL;
+
+    /* Load statically-linked drivers: */
+#if APU_HAVE_OPENSSL
+    if (name[0] == 'o' && !strcmp(name, "openssl")) {
+        DRIVER_LOAD("openssl", apr_crypto_openssl_driver, pool, params, rv, result);
+    }
+#endif
+#if APU_HAVE_NSS
+    else if (name[0] == 'n' && !strcmp(name, "nss")) {
+        DRIVER_LOAD("nss", apr_crypto_nss_driver, pool, params, rv, result);
+    }
+#endif
+#if APU_HAVE_MSCAPI
+    else if (name[0] == 'm' && !strcmp(name, "mscapi")) {
+        DRIVER_LOAD("mscapi", apr_crypto_mscapi_driver, pool, params, rv, result);
+    }
+#endif
+#if APU_HAVE_MSCNG
+    else if (name[0] == 'm' && !strcmp(name, "mscng")) {
+        DRIVER_LOAD("mscng", apr_crypto_mscng_driver, pool, params, rv, result);
+    }
+#endif
+
 #endif
 
     return rv;
