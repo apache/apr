@@ -24,7 +24,7 @@
 
 /**
  * @defgroup APR_Util_Date Date routines
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 

@@ -31,7 +31,7 @@ extern "C" {
 
 /**
  * @defgroup apu_errno Error Codes
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 

@@ -33,7 +33,7 @@ extern "C" {
  */
 /**
  * @defgroup APR_Util_Crypto Crypto routines
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 

@@ -33,7 +33,7 @@ extern "C" {
 
 /**
  * @defgroup APR_Util_Base64 Base64 Encoding
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 

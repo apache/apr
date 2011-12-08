@@ -34,7 +34,7 @@ extern "C" {
  */
 /**
  * @defgroup APR_Util_DBD DBD routines
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 

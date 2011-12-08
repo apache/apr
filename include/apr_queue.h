@@ -37,7 +37,7 @@ extern "C" {
 
 /**
  * @defgroup APR_Util_FIFO Thread Safe FIFO bounded queue
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 

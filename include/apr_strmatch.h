@@ -30,7 +30,7 @@ extern "C" {
 
 /**
  * @defgroup APR_Util_StrMatch String matching routines
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 

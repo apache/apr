@@ -41,7 +41,7 @@ extern "C" {
 
 /**
  * @defgroup APR_Util_MC Memcached Client Routines
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 
