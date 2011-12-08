@@ -22,7 +22,7 @@
  */
 /**
  * @defgroup APR_Util_RMM Relocatable Memory Management Routines
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 

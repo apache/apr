@@ -46,7 +46,7 @@ extern "C" {
 
 /**
  * @defgroup APR_Util_Bucket_Brigades Bucket Brigades
- * @ingroup APR_Util
+ * @ingroup APR
  * @{ 
  */
 

@@ -22,7 +22,7 @@
 
 /**
  * @defgroup APR_Util_XML XML 
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 #include "apr_pools.h"

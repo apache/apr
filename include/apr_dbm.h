@@ -33,7 +33,7 @@ extern "C" {
  */
 /** 
  * @defgroup APR_Util_DBM DBM routines
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 /**

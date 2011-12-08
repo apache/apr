@@ -30,7 +30,7 @@
 
 /**
  * @defgroup APR_Util_RL Resource List Routines
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 

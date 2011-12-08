@@ -31,7 +31,7 @@ extern "C" {
 #endif
 /**
  * @defgroup APR_Util_Hook Hook Functions
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 
