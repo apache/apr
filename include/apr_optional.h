@@ -28,7 +28,7 @@ extern "C" {
 
 /** 
  * @defgroup APR_Util_Opt Optional Functions
- * @ingroup APR_Util
+ * @ingroup APR
  *
  * Typesafe registration and retrieval of functions that may not be present
  * (i.e. functions exported by optional modules)

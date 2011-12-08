@@ -36,7 +36,7 @@ extern "C" {
 
 /**
  * @defgroup APR_Util_URI URI
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 

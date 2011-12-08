@@ -50,7 +50,7 @@ extern "C" {
 
 /**
  * @defgroup APR_Util_TP Thread Pool routines
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 

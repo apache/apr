@@ -53,7 +53,7 @@ extern "C" {
 
 /**
  * @defgroup APR_Util_MD4 MD4 Library
- * @ingroup APR_Util
+ * @ingroup APR
  * @{
  */
 
