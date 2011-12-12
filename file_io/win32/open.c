@@ -55,7 +55,7 @@ apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen,
     apr_status_t rv;
 
     /* This is correct, we don't twist the filename if it is will
-     * definately be shorter than 248 characters.  It merits some 
+     * definitely be shorter than 248 characters.  It merits some 
      * performance testing to see if this has any effect, but there
      * seem to be applications that get confused by the resulting
      * Unicode \\?\ style file names, especially if they use argv[0]
