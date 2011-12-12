@@ -334,7 +334,7 @@ deal_with_authority:
 
     /* If there's a username:password@host:port, the @ we want is the last @...
      * too bad there's no memrchr()... For the C purists, note that hostinfo
-     * is definately not the first character of the original uri so therefore
+     * is definitely not the first character of the original uri so therefore
      * &hostinfo[-1] < &hostinfo[0] ... and this loop is valid C.
      */
     do {
