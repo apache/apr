@@ -2604,8 +2604,6 @@ APU_PRELOAD
 
 dnl Find crypto libraries
 APU_CHECK_CRYPTO
-APU_CHECK_CRYPTO_OPENSSL
-APU_CHECK_CRYPTO_NSS
 
 dnl Find DBM and DBD backends to use.
 APU_CHECK_DBM
