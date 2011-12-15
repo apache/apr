@@ -108,7 +108,7 @@ extern "C" {
 #define APR_HAVE_SYS_SOCKET_H   0
 #define APR_HAVE_SYS_SOCKIO_H   0
 #define APR_HAVE_SYS_SYSLIMITS_H 0
-#define APR_HAVE_SYS_TIME_H     0
+#define APR_HAVE_SYS_TIME_H     1
 #define APR_HAVE_SYS_TYPES_H    1
 #define APR_HAVE_SYS_UIO_H      1
 #define APR_HAVE_SYS_UN_H       0
