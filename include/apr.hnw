@@ -38,6 +38,7 @@
 
 #if defined(NETWARE) || defined(DOXYGEN)
 
+#undef  FD_SETSIZE
 #define FD_SETSIZE 1024
 
 #include <sys/types.h>
@@ -48,6 +49,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <netware.h>
 #include <nks/thread.h>
 #include <nks/synch.h>
 #include <nks/time.h>
