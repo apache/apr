@@ -34,7 +34,7 @@ AC_DEFUN([APU_CHECK_CRYPTO], [
       APU_CHECK_CRYPTO_OPENSSL
       APU_CHECK_CRYPTO_NSS
       dnl add checks for other varieties of ssl here
-      if test "$apu_have_crypto" == "0"; then
+      if test "$apu_have_crypto" = "0"; then
         AC_ERROR(Crypto was requested but no crypto library was enabled)
       fi
     fi
