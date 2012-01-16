@@ -19,9 +19,6 @@
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_time.h"
-#if APR_HAVE_STDLIB_H
-#include <stdlib.h>     /* for rand, srand */
-#endif
 
 #include "apr_hash.h"
 
@@ -106,8 +103,8 @@ APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool)
     ht->free = NULL;
     ht->count = 0;
     ht->max = INITIAL_MAX;
-    srand((unsigned int)((now >> 32) ^ now ^ (apr_uintptr_t)ht));
-    ht->seed = (unsigned int)(rand());
+    ht->seed = (unsigned int)((now >> 32) ^ now ^ (apr_uintptr_t)pool ^
+                              (apr_uintptr_t)ht ^ (apr_uintptr_t)&now) - 1;
     ht->array = alloc_array(ht, ht->max);
     ht->hash_func = NULL;
 
