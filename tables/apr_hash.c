@@ -18,7 +18,6 @@
 
 #include "apr_general.h"
 #include "apr_pools.h"
-#include "apr_time.h"
 
 #include "apr_hash.h"
 
@@ -76,7 +75,7 @@ struct apr_hash_t {
     apr_pool_t          *pool;
     apr_hash_entry_t   **array;
     apr_hash_index_t     iterator;  /* For apr_hash_first(NULL, ...) */
-    unsigned int         count, max, seed;
+    unsigned int         count, max;
     apr_hashfunc_t       hash_func;
     apr_hash_entry_t    *free;  /* List of recycled entries */
 };
@@ -96,18 +95,13 @@ static apr_hash_entry_t **alloc_array(apr_hash_t *ht, unsigned int max)
 APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool)
 {
     apr_hash_t *ht;
-    apr_time_t now = apr_time_now();
-
     ht = apr_palloc(pool, sizeof(apr_hash_t));
     ht->pool = pool;
     ht->free = NULL;
     ht->count = 0;
     ht->max = INITIAL_MAX;
-    ht->seed = (unsigned int)((now >> 32) ^ now ^ (apr_uintptr_t)pool ^
-                              (apr_uintptr_t)ht ^ (apr_uintptr_t)&now) - 1;
     ht->array = alloc_array(ht, ht->max);
-    ht->hash_func = NULL;
-
+    ht->hash_func = apr_hashfunc_default;
     return ht;
 }
 
@@ -207,10 +201,10 @@ static void expand_array(apr_hash_t *ht)
     ht->max = new_max;
 }
 
-static unsigned int apr_hashfunc_default_internal(const char *char_key,
-                                                  apr_ssize_t *klen,
-                                                  unsigned int hash)
+APR_DECLARE_NONSTD(unsigned int) apr_hashfunc_default(const char *char_key,
+                                                      apr_ssize_t *klen)
 {
+    unsigned int hash = 0;
     const unsigned char *key = (const unsigned char *)char_key;
     const unsigned char *p;
     apr_ssize_t i;
@@ -252,7 +246,7 @@ static unsigned int apr_hashfunc_default_internal(const char *char_key,
      *
      *                  -- Ralf S. Engelschall <rse@engelschall.com>
      */
-
+     
     if (*klen == APR_HASH_KEY_STRING) {
         for (p = key; *p; p++) {
             hash = hash * 33 + *p;
@@ -268,11 +262,6 @@ static unsigned int apr_hashfunc_default_internal(const char *char_key,
     return hash;
 }
 
-APR_DECLARE_NONSTD(unsigned int) apr_hashfunc_default(const char *char_key,
-                                                      apr_ssize_t *klen)
-{
-    return apr_hashfunc_default_internal(char_key, klen, 0);
-}
 
 /*
  * This is where we keep the details of the hash function and control
@@ -291,10 +280,7 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
     apr_hash_entry_t **hep, *he;
     unsigned int hash;
 
-    if (ht->hash_func)
-        hash = ht->hash_func(key, &klen);
-    else
-        hash = apr_hashfunc_default_internal(key, &klen, ht->seed);
+    hash = ht->hash_func(key, &klen);
 
     /* scan linked list */
     for (hep = &ht->array[hash & ht->max], he = *hep;
@@ -336,7 +322,6 @@ APR_DECLARE(apr_hash_t *) apr_hash_copy(apr_pool_t *pool,
     ht->free = NULL;
     ht->count = orig->count;
     ht->max = orig->max;
-    ht->seed = orig->seed;
     ht->hash_func = orig->hash_func;
     ht->array = (apr_hash_entry_t **)((char *)ht + sizeof(apr_hash_t));
 
