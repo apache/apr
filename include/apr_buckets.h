@@ -693,7 +693,8 @@ APR_DECLARE(apr_status_t) apr_brigade_cleanup(void *data)
  * @param b The brigade to split
  * @param e The first bucket to move
  * @param a The brigade which should be used for the result or NULL if
- *          a new brigade should be created.
+ *          a new brigade should be created. The brigade @param a will be
+ *          cleared if it is not empty.
  * @return The brigade supplied in @param a or a new one if @param a was NULL.
  * @warning Note that this function allocates a new brigade if @param a is
  * NULL so memory consumption should be carefully considered.
