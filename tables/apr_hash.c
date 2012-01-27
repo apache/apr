@@ -18,6 +18,7 @@
 
 #include "apr_general.h"
 #include "apr_pools.h"
+#include "apr_time.h"
 
 #include "apr_hash.h"
 
@@ -75,7 +76,7 @@ struct apr_hash_t {
     apr_pool_t          *pool;
     apr_hash_entry_t   **array;
     apr_hash_index_t     iterator;  /* For apr_hash_first(NULL, ...) */
-    unsigned int         count, max;
+    unsigned int         count, max, seed;
     apr_hashfunc_t       hash_func;
     apr_hash_entry_t    *free;  /* List of recycled entries */
 };
@@ -95,13 +96,18 @@ static apr_hash_entry_t **alloc_array(apr_hash_t *ht, unsigned int max)
 APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool)
 {
     apr_hash_t *ht;
+    apr_time_t now = apr_time_now();
+
     ht = apr_palloc(pool, sizeof(apr_hash_t));
     ht->pool = pool;
     ht->free = NULL;
     ht->count = 0;
     ht->max = INITIAL_MAX;
+    ht->seed = (unsigned int)((now >> 32) ^ now ^ (apr_uintptr_t)pool ^
+                              (apr_uintptr_t)ht ^ (apr_uintptr_t)&now) - 1;
     ht->array = alloc_array(ht, ht->max);
     ht->hash_func = apr_hashfunc_default;
+
     return ht;
 }
 
@@ -280,7 +286,7 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
     apr_hash_entry_t **hep, *he;
     unsigned int hash;
 
-    hash = ht->hash_func(key, &klen);
+    hash = ht->seed ^ ht->hash_func(key, &klen);
 
     /* scan linked list */
     for (hep = &ht->array[hash & ht->max], he = *hep;
@@ -322,6 +328,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_copy(apr_pool_t *pool,
     ht->free = NULL;
     ht->count = orig->count;
     ht->max = orig->max;
+    ht->seed = orig->seed;
     ht->hash_func = orig->hash_func;
     ht->array = (apr_hash_entry_t **)((char *)ht + sizeof(apr_hash_t));
 
@@ -419,7 +426,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
     apr_hash_entry_t *new_vals = NULL;
     apr_hash_entry_t *iter;
     apr_hash_entry_t *ent;
-    unsigned int i,j,k;
+    unsigned int i, j, k, hash;
 
 #if APR_POOL_DEBUG
     /* we don't copy keys and values, so it's necessary that
@@ -447,6 +454,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
     if (base->count + overlay->count > res->max) {
         res->max = res->max * 2 + 1;
     }
+    res->seed = base->seed;
     res->array = alloc_array(res, res->max);
     if (base->count + overlay->count) {
         new_vals = apr_palloc(p, sizeof(apr_hash_entry_t) *
@@ -468,7 +476,12 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
 
     for (k = 0; k <= overlay->max; k++) {
         for (iter = overlay->array[k]; iter; iter = iter->next) {
-            i = iter->hash & res->max;
+            if (res->hash_func == overlay->hash_func)
+                hash = iter->hash ^ overlay->seed;
+            else
+                hash = res->hash_func(iter->key, &iter->klen);
+            hash = res->seed ^ hash;
+            i = hash & res->max;
             for (ent = res->array[i]; ent; ent = ent->next) {
                 if ((ent->klen == iter->klen) &&
                     (memcmp(ent->key, iter->key, iter->klen) == 0)) {
@@ -486,7 +499,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
                 new_vals[j].klen = iter->klen;
                 new_vals[j].key = iter->key;
                 new_vals[j].val = iter->val;
-                new_vals[j].hash = iter->hash;
+                new_vals[j].hash = hash;
                 new_vals[j].next = res->array[i];
                 res->array[i] = &new_vals[j];
                 res->count++;
