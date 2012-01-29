@@ -106,7 +106,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool)
     ht->seed = (unsigned int)((now >> 32) ^ now ^ (apr_uintptr_t)pool ^
                               (apr_uintptr_t)ht ^ (apr_uintptr_t)&now) - 1;
     ht->array = alloc_array(ht, ht->max);
-    ht->hash_func = apr_hashfunc_default;
+    ht->hash_func = NULL;
 
     return ht;
 }
@@ -289,10 +289,11 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
 {
     apr_hash_entry_t **hep, *he;
     unsigned int hash;
-    apr_ssize_t hlen = sizeof(hash);
 
-    hash = ht->hash_func(key, &klen);
-    hash = hashfunc_default((char *)&hash, &hlen, ht->seed);
+    if (ht->hash_func)
+        hash = ht->hash_func(key, &klen);
+    else
+        hash = hashfunc_default(key, &klen, ht->seed);
 
     /* scan linked list */
     for (hep = &ht->array[hash & ht->max], he = *hep;
@@ -433,7 +434,6 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
     apr_hash_entry_t *iter;
     apr_hash_entry_t *ent;
     unsigned int i, j, k, hash;
-    apr_ssize_t hlen = sizeof(hash);
 
 #if APR_POOL_DEBUG
     /* we don't copy keys and values, so it's necessary that
@@ -483,8 +483,10 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
 
     for (k = 0; k <= overlay->max; k++) {
         for (iter = overlay->array[k]; iter; iter = iter->next) {
-            hash = res->hash_func(iter->key, &iter->klen);
-            hash = hashfunc_default((char*)&hash, &hlen, res->seed);
+            if (res->hash_func)
+                hash = res->hash_func(iter->key, &iter->klen);
+            else
+                hash = hashfunc_default(iter->key, &iter->klen, res->seed);
             i = hash & res->max;
             for (ent = res->array[i]; ent; ent = ent->next) {
                 if ((ent->klen == iter->klen) &&
