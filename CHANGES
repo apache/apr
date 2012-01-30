@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.6
 
+  *) Security: oCERT-2011-003
+     Randomise hashes by providing a seed. 
+     [Bojan Smojver, Branko Čibej, Ruediger Pluem et al.]
+
   *) apr_random: Prevent segfault if pool used to initialize apr_random is
      destroyed before forking. [Stefan Fritsch]
 
