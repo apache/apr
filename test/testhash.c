@@ -21,22 +21,44 @@
 #include "apr_pools.h"
 #include "apr_hash.h"
 
-static void dump_hash(apr_pool_t *p, apr_hash_t *h, char *str) 
+#if APR_HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#define MAX_LTH 256
+#define MAX_DEPTH 11
+
+static int comp_string(const void *str1, const void *str2)
+{
+    return strcmp(str1,str2);
+}
+
+static void dump_hash(apr_pool_t *p, apr_hash_t *h, char str[][MAX_LTH]) 
 {
     apr_hash_index_t *hi;
     char *val, *key;
     apr_ssize_t len;
     int i = 0;
 
-    str[0] = '\0';
-
     for (hi = apr_hash_first(p, h); hi; hi = apr_hash_next(hi)) {
         apr_hash_this(hi,(void*) &key, &len, (void*) &val);
-        apr_snprintf(str, 8196, "%sKey %s (%" APR_SSIZE_T_FMT ") Value %s\n", 
-                     str, key, len, val);
+        str[i][0]='\0';
+        apr_snprintf(str[i], MAX_LTH, "%sKey %s (%" APR_SSIZE_T_FMT ") Value %s\n",
+                 str[i], key, len, val);
         i++;
     }
-    apr_snprintf(str, 8196, "%s#entries %d\n", str, i);
+    str[i][0]='\0';
+    apr_snprintf(str[i], MAX_LTH, "%s#entries %d\n", str[i], i);
+
+    /* Sort the result strings so that they can be checked for expected results easily,
+     * without having to worry about platform quirks
+     */
+    qsort(
+        str, /* Pointer to elements */
+        i,   /* number of elements */
+        MAX_LTH, /* size of one element */
+        comp_string /* Pointer to comparison routine */
+    );
 }
 
 static void sum_hash(apr_pool_t *p, apr_hash_t *h, int *pcount, int *keySum, int *valSum) 
@@ -132,7 +154,7 @@ static void key_space(CuTest *tc)
 static void hash_traverse(CuTest *tc)
 {
     apr_hash_t *h;
-    char str[8196];
+    char StrArray[MAX_DEPTH][MAX_LTH];
 
     h = apr_hash_make(p);
     CuAssertPtrNotNull(tc, h);
@@ -147,15 +169,17 @@ static void hash_traverse(CuTest *tc)
     apr_hash_set(h, "SAME2", APR_HASH_KEY_STRING, "same");
     apr_hash_set(h, "OVERWRITE", APR_HASH_KEY_STRING, "Overwrite key");
 
-    dump_hash(p, h, str);
-    CuAssertStrEquals(tc, "Key FOO1 (4) Value bar1\n"
-                          "Key FOO2 (4) Value bar2\n"
-                          "Key OVERWRITE (9) Value Overwrite key\n"
-                          "Key FOO3 (4) Value bar3\n"
-                          "Key SAME1 (5) Value same\n"
-                          "Key FOO4 (4) Value bar4\n"
-                          "Key SAME2 (5) Value same\n"
-                          "#entries 7\n", str);
+    dump_hash(p, h, StrArray);
+
+    CuAssertStrEquals(tc, "Key FOO1 (4) Value bar1\n", StrArray[0]);
+    CuAssertStrEquals(tc, "Key FOO2 (4) Value bar2\n", StrArray[1]);
+    CuAssertStrEquals(tc, "Key FOO3 (4) Value bar3\n", StrArray[2]);
+    CuAssertStrEquals(tc, "Key FOO4 (4) Value bar4\n", StrArray[3]);
+    CuAssertStrEquals(tc, "Key OVERWRITE (9) Value Overwrite key\n",
+                          StrArray[4]);
+    CuAssertStrEquals(tc, "Key SAME1 (5) Value same\n", StrArray[5]);
+    CuAssertStrEquals(tc, "Key SAME2 (5) Value same\n", StrArray[6]);
+    CuAssertStrEquals(tc, "#entries 7\n", StrArray[7]);
 }
 
 /* This is kind of a hack, but I am just keeping an existing test.  This is
@@ -269,7 +293,7 @@ static void overlay_empty(CuTest *tc)
     apr_hash_t *overlay = NULL;
     apr_hash_t *result = NULL;
     int count;
-    char str[8196];
+    char StrArray[MAX_DEPTH][MAX_LTH];
 
     base = apr_hash_make(p);
     overlay = apr_hash_make(p);
@@ -287,13 +311,14 @@ static void overlay_empty(CuTest *tc)
     count = apr_hash_count(result);
     CuAssertIntEquals(tc, 5, count);
 
-    dump_hash(p, result, str);
-    CuAssertStrEquals(tc, "Key key1 (4) Value value1\n"
-                          "Key key2 (4) Value value2\n"
-                          "Key key3 (4) Value value3\n"
-                          "Key key4 (4) Value value4\n"
-                          "Key key5 (4) Value value5\n"
-                          "#entries 5\n", str);
+    dump_hash(p, result, StrArray);
+
+    CuAssertStrEquals(tc, "Key key1 (4) Value value1\n", StrArray[0]);
+    CuAssertStrEquals(tc, "Key key2 (4) Value value2\n", StrArray[1]);
+    CuAssertStrEquals(tc, "Key key3 (4) Value value3\n", StrArray[2]);
+    CuAssertStrEquals(tc, "Key key4 (4) Value value4\n", StrArray[3]);
+    CuAssertStrEquals(tc, "Key key5 (4) Value value5\n", StrArray[4]);
+    CuAssertStrEquals(tc, "#entries 5\n", StrArray[5]);
 }
 
 static void overlay_2unique(CuTest *tc)
@@ -302,7 +327,7 @@ static void overlay_2unique(CuTest *tc)
     apr_hash_t *overlay = NULL;
     apr_hash_t *result = NULL;
     int count;
-    char str[8196];
+    char StrArray[MAX_DEPTH][MAX_LTH];
 
     base = apr_hash_make(p);
     overlay = apr_hash_make(p);
@@ -326,21 +351,19 @@ static void overlay_2unique(CuTest *tc)
     count = apr_hash_count(result);
     CuAssertIntEquals(tc, 10, count);
 
-    dump_hash(p, result, str);
-    /* I don't know why these are out of order, but they are.  I would probably
-     * consider this a bug, but others should comment.
-     */
-    CuAssertStrEquals(tc, "Key base5 (5) Value value5\n"
-                          "Key overlay1 (8) Value value1\n"
-                          "Key overlay2 (8) Value value2\n"
-                          "Key overlay3 (8) Value value3\n"
-                          "Key overlay4 (8) Value value4\n"
-                          "Key overlay5 (8) Value value5\n"
-                          "Key base1 (5) Value value1\n"
-                          "Key base2 (5) Value value2\n"
-                          "Key base3 (5) Value value3\n"
-                          "Key base4 (5) Value value4\n"
-                          "#entries 10\n", str);
+    dump_hash(p, result, StrArray);
+
+    CuAssertStrEquals(tc, "Key base1 (5) Value value1\n", StrArray[0]);
+    CuAssertStrEquals(tc, "Key base2 (5) Value value2\n", StrArray[1]);
+    CuAssertStrEquals(tc, "Key base3 (5) Value value3\n", StrArray[2]);
+    CuAssertStrEquals(tc, "Key base4 (5) Value value4\n", StrArray[3]);
+    CuAssertStrEquals(tc, "Key base5 (5) Value value5\n", StrArray[4]);
+    CuAssertStrEquals(tc, "Key overlay1 (8) Value value1\n", StrArray[5]);
+    CuAssertStrEquals(tc, "Key overlay2 (8) Value value2\n", StrArray[6]);
+    CuAssertStrEquals(tc, "Key overlay3 (8) Value value3\n", StrArray[7]);
+    CuAssertStrEquals(tc, "Key overlay4 (8) Value value4\n", StrArray[8]);
+    CuAssertStrEquals(tc, "Key overlay5 (8) Value value5\n", StrArray[9]);
+    CuAssertStrEquals(tc, "#entries 10\n", StrArray[10]);
 }
 
 static void overlay_same(CuTest *tc)
@@ -348,7 +371,7 @@ static void overlay_same(CuTest *tc)
     apr_hash_t *base = NULL;
     apr_hash_t *result = NULL;
     int count;
-    char str[8196];
+    char StrArray[MAX_DEPTH][MAX_LTH];
 
     base = apr_hash_make(p);
     CuAssertPtrNotNull(tc, base);
@@ -364,18 +387,89 @@ static void overlay_same(CuTest *tc)
     count = apr_hash_count(result);
     CuAssertIntEquals(tc, 5, count);
 
-    dump_hash(p, result, str);
-    /* I don't know why these are out of order, but they are.  I would probably
-     * consider this a bug, but others should comment.
-     */
-    CuAssertStrEquals(tc, "Key base5 (5) Value value5\n"
-                          "Key base1 (5) Value value1\n"
-                          "Key base2 (5) Value value2\n"
-                          "Key base3 (5) Value value3\n"
-                          "Key base4 (5) Value value4\n"
-                          "#entries 5\n", str);
+    dump_hash(p, result, StrArray);
+
+    CuAssertStrEquals(tc, "Key base1 (5) Value value1\n", StrArray[0]);
+    CuAssertStrEquals(tc, "Key base2 (5) Value value2\n", StrArray[1]);
+    CuAssertStrEquals(tc, "Key base3 (5) Value value3\n", StrArray[2]);
+    CuAssertStrEquals(tc, "Key base4 (5) Value value4\n", StrArray[3]);
+    CuAssertStrEquals(tc, "Key base5 (5) Value value5\n", StrArray[4]);
+    CuAssertStrEquals(tc, "#entries 5\n", StrArray[5]);
 }
-        
+
+static void overlay_fetch(CuTest *tc)
+{
+    apr_hash_t *base = NULL;
+    apr_hash_t *overlay = NULL;
+    apr_hash_t *result = NULL;
+    int count;
+
+    base = apr_hash_make(p);
+    overlay = apr_hash_make(p);
+    CuAssertPtrNotNull(tc, base);
+    CuAssertPtrNotNull(tc, overlay);
+
+    apr_hash_set(base, "base1", APR_HASH_KEY_STRING, "value1");
+    apr_hash_set(base, "base2", APR_HASH_KEY_STRING, "value2");
+    apr_hash_set(base, "base3", APR_HASH_KEY_STRING, "value3");
+    apr_hash_set(base, "base4", APR_HASH_KEY_STRING, "value4");
+    apr_hash_set(base, "base5", APR_HASH_KEY_STRING, "value5");
+
+    apr_hash_set(overlay, "overlay1", APR_HASH_KEY_STRING, "value1");
+    apr_hash_set(overlay, "overlay2", APR_HASH_KEY_STRING, "value2");
+    apr_hash_set(overlay, "overlay3", APR_HASH_KEY_STRING, "value3");
+    apr_hash_set(overlay, "overlay4", APR_HASH_KEY_STRING, "value4");
+    apr_hash_set(overlay, "overlay5", APR_HASH_KEY_STRING, "value5");
+
+    result = apr_hash_overlay(p, overlay, base);
+
+    count = apr_hash_count(result);
+    CuAssertIntEquals(tc, 10, count);
+
+    CuAssertStrEquals(tc, "value1",
+                      apr_hash_get(result, "base1", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value2",
+                      apr_hash_get(result, "base2", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value3",
+                      apr_hash_get(result, "base3", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value4",
+                      apr_hash_get(result, "base4", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value5",
+                      apr_hash_get(result, "base5", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value1",
+                      apr_hash_get(result, "overlay1", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value2",
+                      apr_hash_get(result, "overlay2", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value3",
+                      apr_hash_get(result, "overlay3", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value4",
+                      apr_hash_get(result, "overlay4", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value5",
+                      apr_hash_get(result, "overlay5", APR_HASH_KEY_STRING));
+
+    CuAssertStrEquals(tc, "value1",
+                      apr_hash_get(base, "base1", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value2",
+                      apr_hash_get(base, "base2", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value3",
+                      apr_hash_get(base, "base3", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value4",
+                      apr_hash_get(base, "base4", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value5",
+                      apr_hash_get(base, "base5", APR_HASH_KEY_STRING));
+
+    CuAssertStrEquals(tc, "value1",
+                      apr_hash_get(overlay, "overlay1", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value2",
+                      apr_hash_get(overlay, "overlay2", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value3",
+                      apr_hash_get(overlay, "overlay3", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value4",
+                      apr_hash_get(overlay, "overlay4", APR_HASH_KEY_STRING));
+    CuAssertStrEquals(tc, "value5",
+                      apr_hash_get(overlay, "overlay5", APR_HASH_KEY_STRING));
+}
+
 CuSuite *testhash(void)
 {
     CuSuite *suite = CuSuiteNew("Hash");
@@ -397,7 +491,7 @@ CuSuite *testhash(void)
     SUITE_ADD_TEST(suite, overlay_empty);
     SUITE_ADD_TEST(suite, overlay_2unique);
     SUITE_ADD_TEST(suite, overlay_same);
+    SUITE_ADD_TEST(suite, overlay_fetch);
 
     return suite;
 }
-
