@@ -158,6 +158,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * Subversion - Defined ranges, of less than 100, at intervals of 5000
  *              starting at an offset of 5000, e.g.
  *               +5000 to 5100,  +10000 to 10100
+ *
+ * Apache HTTPD - +2000 to 2999
  */
 #define APR_OS_START_USERERR    (APR_OS_START_STATUS + APR_OS_ERRSPACE_SIZE)
 /**
