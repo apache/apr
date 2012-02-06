@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes with APR 0.9.21
 
+  *) Flush write buffer before truncate call on a file.
+     [Mladen Turk]
+
   *) Security: oCERT-2011-003
      Randomise hashes by providing a seed.
      [Bojan Smojver, Branko Čibej, Ruediger Pluem et al.]
