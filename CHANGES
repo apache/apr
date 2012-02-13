@@ -8,7 +8,7 @@ Changes for APR 1.4.6
   *) Flush write buffer before truncate call on a file.
      [Mladen Turk]
 
-  *) Security: oCERT-2011-003
+  *) Security: CVE-2012-0840, oCERT-2011-003
      Randomise hashes by providing a seed. 
      [Bojan Smojver, Branko Čibej, Ruediger Pluem et al.]
 
