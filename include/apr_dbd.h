@@ -49,7 +49,8 @@ extern "C" {
  * For apr_dbd_p[v]bquery/select functions, in and out parameters are
  * described next to each enumeration constant and are generally native binary
  * types or some APR data type. LOB types are passed with four (4) arguments:
- * payload (char*), length (apr_size_t*), table (char*) and column (char*).
+ * payload (char*), length (char*), table (char*) and column (char*).
+ * length is a characher array where the atol() result should be the size of the payload
  * Table and column are reserved for future use by Oracle.
  */
 typedef enum {
@@ -72,9 +73,9 @@ typedef enum {
     APR_DBD_TYPE_DATE,       /**< \%pDd : in: char*, out: char** */
     APR_DBD_TYPE_DATETIME,   /**< \%pDa : in: char*, out: char** */
     APR_DBD_TYPE_TIMESTAMP,  /**< \%pDs : in: char*, out: char** */
-    APR_DBD_TYPE_ZTIMESTAMP, /**< \%pDz : in: char*, out: char** */
-    APR_DBD_TYPE_BLOB,       /**< \%pDb : in: char* apr_size_t* char* char*, out: apr_bucket_brigade* */
-    APR_DBD_TYPE_CLOB,       /**< \%pDc : in: char* apr_size_t* char* char*, out: apr_bucket_brigade* */
+    APR_DBD_TYPE_ZTIMESTAMP, /**< \%pDz : in: char*, out: char** */	
+    APR_DBD_TYPE_BLOB,       /**< \%pDb : in: char* char* char* char*, out: apr_bucket_brigade* */
+    APR_DBD_TYPE_CLOB,       /**< \%pDc : in: char* char* char* char*, out: apr_bucket_brigade* */
     APR_DBD_TYPE_NULL        /**< \%pDn : in: void*, out: void** */
 } apr_dbd_type_e;
 
