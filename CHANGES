@@ -8,8 +8,8 @@ Changes for APR 1.4.6
   *) Flush write buffer before truncate call on a file.
      [Mladen Turk]
 
-  *) Security: CVE-2012-0840, oCERT-2011-003
-     Randomise hashes by providing a seed. 
+  *) Randomise hashes by providing a seed. 
+     Assigned CVE-2012-0840, oCERT-2011-003, but not known to be exploitable.
      [Bojan Smojver, Branko Čibej, Ruediger Pluem et al.]
 
   *) apr_random: Prevent segfault if pool used to initialize apr_random is
