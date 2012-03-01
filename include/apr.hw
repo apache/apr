@@ -377,7 +377,7 @@ typedef  int         apr_off_t;
 typedef  int         apr_socklen_t;
 typedef  apr_uint64_t      apr_ino_t;
 
-#ifdef WIN64
+#ifdef _WIN64
 #define APR_SIZEOF_VOIDP   8
 #else
 #define APR_SIZEOF_VOIDP   4
@@ -552,7 +552,7 @@ typedef  apr_uint32_t            apr_uintptr_t;
 #define APR_DECLARE_DATA             __declspec(dllimport)
 #endif
 
-#ifdef WIN64
+#ifdef _WIN64
 #define APR_SSIZE_T_FMT          "I64d"
 #define APR_SIZE_T_FMT           "I64u"
 #else
