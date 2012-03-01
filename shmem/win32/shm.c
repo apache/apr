@@ -82,7 +82,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     /* Compute the granualar multiple of the pagesize */
     size = memblock * (1 + (reqsize - 1) / memblock);
     sizelo = (DWORD)size;
-#ifdef WIN64
+#ifdef _WIN64
     sizehi = (DWORD)(size >> 32);
 #else
     sizehi = 0;
