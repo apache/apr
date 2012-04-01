@@ -178,24 +178,16 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
 #endif
     apr_snprintf(symname, sizeof(symname), "apr_crypto_%s_driver", name);
     rv = apu_dso_load(&dso, &symbol, modname, symname, pool);
-    if (rv != APR_SUCCESS) { /* APR_EDSOOPEN or APR_ESYMNOTFOUND? */
-        if (rv == APR_EINIT) { /* previously loaded?!? */
-            name = apr_pstrdup(pool, name);
-            apr_hash_set(drivers, name, APR_HASH_KEY_STRING, *driver);
-            rv = APR_SUCCESS;
-        }
-        goto unlock;
-    }
-    *driver = symbol;
-    if ((*driver)->init) {
-        rv = (*driver)->init(pool, params, result);
-    }
-    if (rv == APR_SUCCESS) {
+    if (rv == APR_SUCCESS || rv == APR_EINIT) { /* previously loaded?!? */
+        *driver = symbol;
         name = apr_pstrdup(pool, name);
         apr_hash_set(drivers, name, APR_HASH_KEY_STRING, *driver);
+        rv = APR_SUCCESS;
+        if ((*driver)->init) {
+            rv = (*driver)->init(pool, params, result);
+        }
     }
-
-    unlock: apu_dso_mutex_unlock();
+    apu_dso_mutex_unlock();
 
     if (APR_SUCCESS != rv && result && !*result) {
         char *buffer = apr_pcalloc(pool, ERROR_SIZE);
