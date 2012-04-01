@@ -62,13 +62,14 @@ typedef struct apr_crypto_clear_t {
 } apr_crypto_clear_t;
 
 #if !APR_HAVE_MODULAR_DSO
-#define DRIVER_LOAD(name,driver,pool,params,rv,result) \
+#define DRIVER_LOAD(name,driver_name,pool,params,rv,result) \
     {   \
-        extern const apr_crypto_driver_t driver; \
-        apr_hash_set(drivers,name,APR_HASH_KEY_STRING,&driver); \
-        if (driver.init) {     \
-            rv = driver.init(pool, params, result); \
+        extern const apr_crypto_driver_t driver_name; \
+        apr_hash_set(drivers,name,APR_HASH_KEY_STRING,&driver_name); \
+        if (driver_name.init) {     \
+            rv = driver_name.init(pool, params, result); \
         }  \
+        *driver = &driver_name; \
     }
 #endif
 
