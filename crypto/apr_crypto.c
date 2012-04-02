@@ -211,17 +211,17 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
     }
 #endif
 #if APU_HAVE_NSS
-    else if (name[0] == 'n' && !strcmp(name, "nss")) {
+    if (name[0] == 'n' && !strcmp(name, "nss")) {
         DRIVER_LOAD("nss", apr_crypto_nss_driver, pool, params, rv, result);
     }
 #endif
 #if APU_HAVE_MSCAPI
-    else if (name[0] == 'm' && !strcmp(name, "mscapi")) {
+    if (name[0] == 'm' && !strcmp(name, "mscapi")) {
         DRIVER_LOAD("mscapi", apr_crypto_mscapi_driver, pool, params, rv, result);
     }
 #endif
 #if APU_HAVE_MSCNG
-    else if (name[0] == 'm' && !strcmp(name, "mscng")) {
+    if (name[0] == 'm' && !strcmp(name, "mscng")) {
         DRIVER_LOAD("mscng", apr_crypto_mscng_driver, pool, params, rv, result);
     }
 #endif

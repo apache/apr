@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_crypto: Ensure that the if/else that governs the static
+     initialisation of each crypto driver works when the first driver
+     isn't in use. [Graham Leggett]
+
   *) apr_crypto: Ensure the *driver variable is initialised when the library
      has already been loaded. Fix ported from apr_dbd. [Graham Leggett]
 
