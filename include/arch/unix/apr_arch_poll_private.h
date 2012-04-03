@@ -45,6 +45,11 @@
 #define HAS_PIPES(dt) (dt == APR_POLL_FILE) ? 1 : 0
 #endif
 
+#ifdef HAVE_AIO_H
+#define _AIO_OS390     /* enable a bunch of z/OS aio.h definitions */
+#include <aio.h>       /* aiocb        */
+#endif
+
 /* Choose the best method platform specific to use in apr_pollset */
 #ifdef HAVE_KQUEUE
 #define POLLSET_USES_KQUEUE
@@ -55,6 +60,9 @@
 #elif defined(HAVE_EPOLL)
 #define POLLSET_USES_EPOLL
 #define POLLSET_DEFAULT_METHOD APR_POLLSET_EPOLL
+#elif defined(HAVE_AIO_H)
+#define POLLSET_USES_ASIO
+#define POLLSET_DEFAULT_METHOD APR_POLLSET_ASIO
 #elif defined(HAVE_POLL)
 #define POLLSET_USES_POLL
 #define POLLSET_DEFAULT_METHOD APR_POLLSET_POLL
@@ -75,7 +83,7 @@
 #endif
 #endif
 
-#if defined(POLLSET_USES_KQUEUE) || defined(POLLSET_USES_EPOLL) || defined(POLLSET_USES_PORT)
+#if defined(POLLSET_USES_KQUEUE) || defined(POLLSET_USES_EPOLL) || defined(POLLSET_USES_PORT) || defined(POLLSET_USES_ASIO)
 
 #include "apr_ring.h"
 
