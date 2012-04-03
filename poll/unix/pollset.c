@@ -52,7 +52,7 @@ extern apr_pollset_provider_t *apr_pollset_provider_port;
 #if defined(HAVE_EPOLL)
 extern apr_pollset_provider_t *apr_pollset_provider_epoll;
 #endif
-#if defined(HAVE_AIO_H)
+#if defined(HAVE_AIO_H) && defined(__MVS__)
 extern apr_pollset_provider_t *apr_pollset_provider_asio;
 #endif
 #if defined(HAVE_POLL)
