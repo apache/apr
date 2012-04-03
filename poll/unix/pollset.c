@@ -80,7 +80,7 @@ static apr_pollset_provider_t *pollset_provider(apr_pollset_method_e method)
 #endif
         break;
         case APR_POLLSET_ASIO:
-#if defined(HAVE_AIO_H)
+#if defined(HAVE_AIO_H) && defined(__MVS__)
             provider = apr_pollset_provider_asio;
 #endif
         break;
