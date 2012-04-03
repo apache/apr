@@ -1271,6 +1271,7 @@ dnl ----------------------------- Checks for Any required Headers
 AC_HEADER_STDC
 
 APR_FLAG_HEADERS(
+    aio.h               \
     ByteOrder.h		\
     conio.h		\
     crypt.h		\
@@ -1368,6 +1369,7 @@ else
    netinet_tcph=0
 fi
 
+AC_SUBST(aioh)
 AC_SUBST(arpa_ineth)
 AC_SUBST(conioh)
 AC_SUBST(ctypeh)
