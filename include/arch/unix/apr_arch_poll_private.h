@@ -45,7 +45,7 @@
 #define HAS_PIPES(dt) (dt == APR_POLL_FILE) ? 1 : 0
 #endif
 
-#ifdef HAVE_AIO_H
+#if defined(HAVE_AIO_H) && defined(__MVS__)
 #define _AIO_OS390     /* enable a bunch of z/OS aio.h definitions */
 #include <aio.h>       /* aiocb        */
 #endif
@@ -60,7 +60,7 @@
 #elif defined(HAVE_EPOLL)
 #define POLLSET_USES_EPOLL
 #define POLLSET_DEFAULT_METHOD APR_POLLSET_EPOLL
-#elif defined(HAVE_AIO_H)
+#elif defined(HAVE_AIO_H) && defined(__MVS__)
 #define POLLSET_USES_ASIO
 #define POLLSET_DEFAULT_METHOD APR_POLLSET_ASIO
 #elif defined(HAVE_POLL)
