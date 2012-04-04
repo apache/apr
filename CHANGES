@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.7
 
+  *) apr_mcast_hops: Fix EINVAL for IPv6 sockets caused by using byte
+     instead integer for setsockopt. [Mladen Turk]
+
   *) Windows: Fix compile-time checks for 64-bit builds, resolving a
      crash in httpd's mod_rewrite.  PR 49155.  [<anindyabaruah gmail.com>]
 
