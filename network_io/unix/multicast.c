@@ -208,16 +208,12 @@ static apr_status_t do_mcast_opt(int type, apr_socket_t *sock,
         }
     }
 #if APR_HAVE_IPV6
-    else if (sock_is_ipv6(sock) && type == IP_MULTICAST_LOOP) {
-        type = IPV6_MULTICAST_LOOP;
-        if (setsockopt(sock->socketdes, IPPROTO_IPV6, type,
-                       (const void *) &value, sizeof(value)) == -1) {
-            rv = errno;
-        }
-    }
     else if (sock_is_ipv6(sock)) {
         if (type == IP_MULTICAST_TTL) {
             type = IPV6_MULTICAST_HOPS;
+        }
+        else if (type == IP_MULTICAST_LOOP) {
+            type = IPV6_MULTICAST_LOOP;
         }
         else {
             return APR_ENOTIMPL;
