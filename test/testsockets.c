@@ -131,6 +131,10 @@ static void sendto_receivefrom_helper(abts_case *tc, const char *addr,
     APR_ASSERT_SUCCESS(tc, "Could not bind socket", rv);
     if (rv != APR_SUCCESS)
         return;
+    rv = apr_mcast_hops(sock, 10);
+    APR_ASSERT_SUCCESS(tc, "Could not set multicast hops", rv);
+    if (rv != APR_SUCCESS)
+        return;
 
     rv = apr_socket_bind(sock2, from);
     APR_ASSERT_SUCCESS(tc, "Could not bind second socket", rv);
