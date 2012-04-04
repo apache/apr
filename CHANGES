@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_mcast_hops: Fix EINVAL for IPv6 sockets caused by using byte
+     instead integer for setsockopt. [Mladen Turk]
+
   *) apr_file_open: Avoid fcntl() calls if support for O_CLOEXEC works.
      PR 48557. [Mike Frysinger <vapier gentoo org>]
 
