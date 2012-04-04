@@ -217,6 +217,7 @@ static apr_status_t do_mcast_opt(int type, apr_socket_t *sock,
         }
     }
     else if (sock_is_ipv6(sock)) {
+        unsigned int hopsopt = value;
         if (type == IP_MULTICAST_TTL) {
             type = IPV6_MULTICAST_HOPS;
         }
@@ -225,7 +226,7 @@ static apr_status_t do_mcast_opt(int type, apr_socket_t *sock,
         }
 
         if (setsockopt(sock->socketdes, IPPROTO_IPV6, type,
-                       &value, sizeof(value)) == -1) {
+                       (const void *) &hopsopt, sizeof(hopsopt)) == -1) {
             rv = errno;
         }
     }
