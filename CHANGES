@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_pollset_poll:  add z/OS async poll support for sockets [Greg Ames]
+
   *) apr_mcast_hops: Fix EINVAL for IPv6 sockets caused by using byte
      instead integer for setsockopt. [Mladen Turk]
 
