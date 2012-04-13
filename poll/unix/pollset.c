@@ -52,8 +52,8 @@ extern apr_pollset_provider_t *apr_pollset_provider_port;
 #if defined(HAVE_EPOLL)
 extern apr_pollset_provider_t *apr_pollset_provider_epoll;
 #endif
-#if defined(HAVE_AIO_H) && defined(__MVS__)
-extern apr_pollset_provider_t *apr_pollset_provider_asio;
+#if defined(HAVE_AIO_MSGQ)
+extern apr_pollset_provider_t *apr_pollset_provider_aio_msgq;
 #endif
 #if defined(HAVE_POLL)
 extern apr_pollset_provider_t *apr_pollset_provider_poll;
@@ -79,9 +79,9 @@ static apr_pollset_provider_t *pollset_provider(apr_pollset_method_e method)
             provider = apr_pollset_provider_epoll;
 #endif
         break;
-        case APR_POLLSET_ASIO:
-#if defined(HAVE_AIO_H) && defined(__MVS__)
-            provider = apr_pollset_provider_asio;
+        case APR_POLLSET_AIO_MSGQ:
+#if defined(HAVE_AIO_MSGQ)
+            provider = apr_pollset_provider_aio_msgq;
 #endif
         break;
         case APR_POLLSET_POLL:

@@ -41,7 +41,7 @@
 #include "apr_arch_networkio.h"
 #include "apr_arch_poll_private.h"
 
-#if defined(HAVE_AIO_H) && defined(__MVS__)
+#ifdef HAVE_AIO_MSGQ
 
 #include <sys/msg.h>  	/* msgget etc   */
 #include <time.h>     	/* timestruct   */
@@ -736,6 +736,6 @@ static apr_pollset_provider_t impl = {
     "asio"
 };  
 
-apr_pollset_provider_t *apr_pollset_provider_asio = &impl;
+apr_pollset_provider_t *apr_pollset_provider_aio_msgq = &impl;
 
-#endif /* HAVE_ASIO && __MVS__ */
+#endif /* HAVE_AIO_MSGQ */
