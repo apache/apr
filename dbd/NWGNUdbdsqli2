@@ -61,7 +61,6 @@ XLFLAGS		+= \
 			$(EOLIST)
 
 XLFLAGS		+= \
-			-l $(SQLITE2SDK) \
 			$(EOLIST)
 
 #
@@ -236,13 +235,18 @@ FILE_nlm_copyright =
 # Any additional imports go here
 #
 FILES_nlm_Ximports = \
-	@aprlib.imp \
-	@libc.imp \
+	@$(APR)/aprlib.imp \
+	@$(NOVI)/libc.imp \
+	$(EOLIST)
+
+FILES_nlm_imports = \
+	apr_dbd_mutex_lock \
+	apr_dbd_mutex_unlock \
 	$(EOLIST)
 
 ifneq ($(LINK_STATIC),1)
 FILES_nlm_Ximports += \
-	@$(notdir $(SQLITE2_IMP)) \
+	@$(SQLITE2_IMP) \
 	$(EOLIST)
 endif
 

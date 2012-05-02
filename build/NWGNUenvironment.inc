@@ -183,11 +183,11 @@ else
 CC	= gcc
 CPP	= g++
 CPRE	= $(CC) -P -E
-LINK	= nlmconv -UT
+LINK	= nlmconv
 AR	= ar cru
 RANLIB	= ranlib
 
-CFLAGS	= -m32 -fno-builtin -fpcc-struct-return -fstrict-aliasing
+CFLAGS	= -m32 -fno-builtin -fpcc-struct-return -fno-strict-aliasing
 CFLAGS	+= -fpack-struct=4
 CFLAGS	+= -Wall
 CFLAGS	+= -Wdeclaration-after-statement -Wmissing-declarations -Wmissing-prototypes
