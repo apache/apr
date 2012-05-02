@@ -187,7 +187,7 @@ FILES_nlm_libs = \
 #
 FILES_nlm_modules = \
 	aprlib \
-	Libc \
+	libc \
 	$(EOLIST)
 
 #
@@ -209,8 +209,8 @@ FILE_nlm_copyright =
 # Any additional imports go here
 #
 FILES_nlm_Ximports = \
-	@aprlib.imp \
-	@libc.imp \
+	@$(APR)/aprlib.imp \
+	@$(NOVI)/libc.imp \
 	$(EOLIST)
  
 #   

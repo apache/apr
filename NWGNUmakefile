@@ -217,7 +217,7 @@ endif
 # These will be added as a module command in the link.opt file.
 #
 FILES_nlm_modules = \
-	Libc \
+	libc \
 	$(EOLIST)
 
 # Include the Winsock libraries if Winsock is being used
@@ -253,14 +253,16 @@ FILE_nlm_copyright =
 # Any additional imports go here
 #
 FILES_nlm_Ximports = \
-	@libc.imp \
-	@netware.imp \
+	@$(NOVI)/libc.imp \
+	@$(NOVI)/netware.imp \
 	$(EOLIST)
 
 # Include the Winsock imports if Winsock is being used
 ifndef USE_STDSOCKETS
 FILES_nlm_Ximports +=  \
-	@ws2nlm.imp \
+	@$(NOVI)/ws2nlm.imp \
+	$(EOLIST)
+FILES_nlm_imports +=  \
 	WSAStartupRTags \
 	WSACleanupRTag \
 	$(EOLIST)
