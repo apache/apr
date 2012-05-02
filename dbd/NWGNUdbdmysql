@@ -65,7 +65,6 @@ XLFLAGS		+= \
 			$(EOLIST)
 
 XLFLAGS		+= \
-			-l $(MYSQLSDK)/lib \
 			$(EOLIST)
 
 #
@@ -240,13 +239,13 @@ FILE_nlm_copyright =
 # Any additional imports go here
 #
 FILES_nlm_Ximports = \
-	@aprlib.imp \
-	@libc.imp \
+	@$(APR)/aprlib.imp \
+	@$(NOVI)/libc.imp \
 	$(EOLIST)
 
 ifneq ($(LINK_STATIC),1)
 FILES_nlm_Ximports += \
-	@$(notdir $(MYSQL_IMP)) \
+	@$(MYSQL_IMP) \
 	$(EOLIST)
 endif
 
