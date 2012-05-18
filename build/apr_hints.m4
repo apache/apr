@@ -129,9 +129,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         esac
 	APR_ADDTO(CPPFLAGS, [-D_REENTRANT -D_GNU_SOURCE])
 	;;
-    *-GNU*)
-	APR_ADDTO(CPPFLAGS, [-DHURD -D_GNU_SOURCE])
-	;;
     *-lynx-lynxos)
 	APR_ADDTO(CPPFLAGS, [-D__NO_INCLUDE_WARN__ -DLYNXOS])
 	APR_ADDTO(LIBS, [-lbsd])
@@ -179,6 +176,9 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-k*bsd*-gnu)
         APR_ADDTO(CPPFLAGS, [-D_REENTRANT -D_GNU_SOURCE])
+        ;;
+    *-gnu*|*-GNU*)
+        APR_ADDTO(CPPFLAGS, [-D_REENTRANT -D_GNU_SOURCE -DHURD])
         ;;
     *-next-nextstep*)
 	APR_SETIFNULL(CFLAGS, [-O])
