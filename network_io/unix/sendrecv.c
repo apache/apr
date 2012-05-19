@@ -245,7 +245,7 @@ do_select:
 /* Define a structure to pass in when we have a NULL header value */
 static apr_hdtr_t no_hdtr;
 
-#if defined(__linux__) && defined(HAVE_WRITEV)
+#if (defined(__linux__) || defined(__GNU__)) && defined(HAVE_WRITEV)
 
 apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                                  apr_hdtr_t *hdtr, apr_off_t *offset,
