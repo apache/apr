@@ -401,6 +401,9 @@ APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *p,
  * @return The allocated memory
  */
 APR_DECLARE(void *) apr_palloc(apr_pool_t *p, apr_size_t size)
+#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4))
+                    __attribute__((alloc_size(2)))
+#endif
                     __attribute__((nonnull(1)));
 
 /**
@@ -413,6 +416,9 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *p, apr_size_t size)
  */
 APR_DECLARE(void *) apr_palloc_debug(apr_pool_t *p, apr_size_t size,
                                      const char *file_line)
+#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4))
+                    __attribute__((alloc_size(2)))
+#endif
                     __attribute__((nonnull(1)));
 
 #if APR_POOL_DEBUG
