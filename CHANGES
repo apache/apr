@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.7
 
+  *) Add various gcc function attributes. [Stefan Fritsch]
+
   *) Fix some problems in apr_sockaddr_info_get() when trying to resolve
      the loopback addresses of a protocol family that is not otherwise
      configured on the system. PR 52709. [Nirgal Vourgère
