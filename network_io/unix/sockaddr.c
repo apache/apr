@@ -372,7 +372,10 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
      * In case of EAI_BADFLAGS, AI_ADDRCONFIG is not supported.
      */
     if ((family == APR_UNSPEC) && (error == EAI_BADFLAGS
-                                   || error == EAI_ADDRFAMILY)) {
+#ifdef EAI_ADDRFAMILY
+                                   || error == EAI_ADDRFAMILY
+#endif
+                                                             )) {
         hints.ai_flags &= ~AI_ADDRCONFIG;
         error = getaddrinfo(hostname, servname, &hints, &ai_list);
     }
