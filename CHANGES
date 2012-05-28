@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.7
 
+  *) Fix some problems in apr_sockaddr_info_get() when trying to resolve
+     the loopback addresses of a protocol family that is not otherwise
+     configured on the system. PR 52709. [Nirgal Vourgère
+     <jmv_deb nirgal com>, Stefan Fritsch]
+
   *) Fix file not being unlocked if truncate call on a file fails.
      [Mladen Turk]
 
