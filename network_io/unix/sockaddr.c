@@ -356,8 +356,23 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
     }
     error = getaddrinfo(hostname, servname, &hints, &ai_list);
 #ifdef HAVE_GAI_ADDRCONFIG
-    if (error == EAI_BADFLAGS && family == APR_UNSPEC) {
-        /* Retry without AI_ADDRCONFIG if it was rejected. */
+    /*
+     * Using AI_ADDRCONFIG involves some unfortunate guesswork because it
+     * does not consider loopback addresses when trying to determine if
+     * IPv4 or IPv6 is configured on a system (see RFC 3493).
+     * This is a problem if one actually wants to listen on or connect to
+     * the loopback address of a protocol family that is not otherwise
+     * configured on the system. See PR 52709.
+     * To work around some of the problems, retry without AI_ADDRCONFIG
+     * in case of EAI_ADDRFAMILY.
+     * XXX: apr_sockaddr_info_get() should really accept a flag to determine
+     * XXX: if AI_ADDRCONFIG's guesswork is wanted and if the address is
+     * XXX: to be used for listen() or connect().
+     *
+     * In case of EAI_BADFLAGS, AI_ADDRCONFIG is not supported.
+     */
+    if ((family == APR_UNSPEC) && (error == EAI_BADFLAGS
+                                   || error == EAI_ADDRFAMILY)) {
         hints.ai_flags &= ~AI_ADDRCONFIG;
         error = getaddrinfo(hostname, servname, &hints, &ai_list);
     }
