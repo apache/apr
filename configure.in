@@ -125,8 +125,8 @@ dnl
 APR_CONFIG_NICE(config.nice)
 
 AC_CANONICAL_SYSTEM
-echo "Configuring APR library"
-echo "Platform: $host"
+AC_MSG_NOTICE([Configuring APR library])
+AC_MSG_NOTICE([Platform: $host])
 
 dnl Some initial steps for configuration.  We setup the default directory
 dnl and which files are to be configured.
@@ -175,7 +175,7 @@ APR_DOTTED_VERSION="`$get_version all $version_hdr APR`"
 AC_SUBST(APR_DOTTED_VERSION)
 AC_SUBST(APR_MAJOR_VERSION)
 
-echo "APR Version: ${APR_DOTTED_VERSION}"
+AC_MSG_NOTICE([APR Version: ${APR_DOTTED_VERSION}])
 
 dnl Enable the layout handling code, then reparse the prefix-style
 dnl arguments due to autoconf being a PITA.
@@ -204,7 +204,7 @@ APR_PRELOAD
 
 dnl These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
-echo "(Default will be ${DEFAULT_OSDIR})"
+AC_MSG_NOTICE([(Default will be ${DEFAULT_OSDIR})])
 
 apr_modules="file_io network_io threadproc misc locks time mmap shmem user memory atomic poll support random"
 
@@ -237,7 +237,7 @@ AC_SUBST(APR_LIBNAME)
 
 dnl prep libtool
 dnl
-echo "performing libtool configuration..."
+AC_MSG_NOTICE([performing libtool configuration...])
 
 AC_ARG_ENABLE(experimental-libtool,[  --enable-experimental-libtool Use experimental custom libtool],
   [experimental_libtool=$enableval],[experimental_libtool=no])
@@ -250,7 +250,7 @@ fi
 case $host in
 *-os2*)
     # Use a custom-made libtool replacement
-    echo "using aplibtool"
+    AC_MSG_NOTICE([using aplibtool])
     LIBTOOL="$apr_builddir/build/aplibtool"
     LIBTOOL_SRC="$apr_srcdir/build/aplibtool.c"
     $CC $CFLAGS $CPPFLAGS -o $LIBTOOL.exe $LIBTOOL_SRC
@@ -261,7 +261,7 @@ case $host in
     fi
     if test "$experimental_libtool" = "yes"; then
         # Use a custom-made libtool replacement
-        echo "using jlibtool"
+        AC_MSG_NOTICE([using jlibtool])
         LIBTOOL="$apr_builddir/libtool"
         LIBTOOL_SRC="$apr_srcdir/build/jlibtool.c"
         $CC $CFLAGS $CPPFLAGS -o $LIBTOOL $LIBTOOL_SRC
@@ -329,7 +329,8 @@ AC_SUBST(LT_VERSION)
 dnl ----------------------------- Checks for compiler flags
 nl='
 '
-echo "${nl}Check for compiler flags..."
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([Check for compiler flags...])
 
 dnl AC_PROG_CC sets -g in CFLAGS (and -O2 for gcc) by default.
 dnl On OS/390 this causes the compiler to insert extra debugger
@@ -686,7 +687,8 @@ case $host in
         ;;
 esac
 
-echo "${nl}Checking for libraries..."
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([Checking for libraries...])
 
 dnl ----------------------------- Checks for Any required Libraries
 dnl Note: Autoconf will always append LIBS with an extra " " in AC_CHECK_LIB.
@@ -709,7 +711,7 @@ case $host in
 esac
 
 dnl ----------------------------- Checking for Threads
-echo "${nl}Checking for Threads..."
+AC_MSG_NOTICE([${nl}Checking for Threads...])
 
 if test -z "$enable_threads"; then
 	AC_ARG_ENABLE(threads,
@@ -788,7 +790,7 @@ ac_cv_define_GETHOSTBYNAME_IS_THREAD_SAFE=no
 ac_cv_define_GETHOSTBYADDR_IS_THREAD_SAFE=no
 ac_cv_define_GETSERVBYNAME_IS_THREAD_SAFE=no
 if test "$threads" = "1"; then
-    echo "APR will use threads"
+    AC_MSG_NOTICE([APR will use threads])
     AC_CHECK_LIB(c_r, readdir,
         AC_DEFINE(READDIR_IS_THREAD_SAFE, 1, 
                   [Define if readdir is thread safe]))
@@ -815,7 +817,7 @@ if test "$threads" = "1"; then
     fi
     AC_CHECK_FUNCS(gethostbyname_r gethostbyaddr_r getservbyname_r)
 else
-    echo "APR will be non-threaded"
+    AC_MSG_NOTICE([APR will be non-threaded])
 fi
 
 dnl Electric Fence malloc checker.
@@ -982,7 +984,8 @@ dnl ----------------------------- Checking for missing POSIX thread functions
 AC_CHECK_FUNCS([getpwnam_r getpwuid_r getgrnam_r getgrgid_r])
 
 dnl ----------------------------- Checking for Shared Memory Support 
-echo "${nl}Checking for Shared Memory Support..."
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([Checking for Shared Memory Support...])
 
 # The real-time POSIX extensions (e.g. shm_*, sem_*) may only
 # be available if linking against librt.
@@ -1250,7 +1253,7 @@ AC_ARG_WITH(sendfile, [  --with-sendfile         Override decision to use sendfi
             ;;
     esac       
     if test "$orig_sendfile" != "$sendfile"; then
-      echo "sendfile support disabled to avoid system problem"
+      AC_MSG_NOTICE([sendfile support disabled to avoid system problem])
     fi ] )
 AC_SUBST(sendfile)
 
@@ -1854,7 +1857,9 @@ AC_DEFINE_UNQUOTED(APR_OFF_T_STRFN, [$off_t_strfn],
           [Define as function used for conversion of strings to apr_off_t])
 
 dnl ----------------------------- Checking for DSO support
-echo "${nl}Checking for DSO..."
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([Checking for DSO...])
+
 AC_ARG_ENABLE(dso,
   [  --disable-dso           Disable DSO support ],
   [if test "x$enableval" = "xyes"; then
@@ -1898,7 +1903,7 @@ if test "$dsotype" = "any"; then
           [AC_CHECK_LIB(dl, dlsym, 
              [APR_ADDTO(LIBS, -ldl)],
              [dsotype=any
-              echo "Weird: dlopen() was found but dlsym() was not found!"])])
+              AC_MSG_WARN([Weird: dlopen() was found but dlsym() was not found!])])])
     fi
     if test "$dsotype" = "any"; then
       # BeOS:
@@ -1937,7 +1942,8 @@ fi
 AC_SUBST(aprdso)
 
 dnl ----------------------------- Checking for Processes
-echo "${nl}Checking for Processes..."
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([Checking for Processes...])
 
 AC_CHECK_FUNCS(waitpid)
 
@@ -1989,7 +1995,8 @@ test "x$ac_cv_struct_rlimit" = xyes && struct_rlimit=1
 AC_SUBST(struct_rlimit)
 
 dnl ----------------------------- Checking for Locking Characteristics 
-echo "${nl}Checking for Locking..."
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([Checking for Locking...])
 
 AC_CHECK_FUNCS(semget semctl flock)
 AC_CHECK_HEADERS(semaphore.h OS.h)
@@ -2362,7 +2369,8 @@ fi
 AC_SUBST(rand)
 
 dnl ----------------------------- Checking for File Info Support 
-echo "${nl}Checking for File Info Support..."
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([Checking for File Info Support...])
 AC_CHECK_MEMBERS([struct stat.st_blocks, struct stat.st_atimensec,
 struct stat.st_ctimensec, struct stat.st_mtimensec, struct stat.st_atim.tv_nsec,
 struct stat.st_ctim.tv_nsec, struct stat.st_mtim.tv_nsec,
@@ -2381,7 +2389,8 @@ APR_CHECK_DIRENT_INODE
 APR_CHECK_DIRENT_TYPE
 
 dnl ----------------------------- Checking for UUID Support 
-echo "${nl}Checking for OS UUID Support..."
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([Checking for OS UUID Support...])
 
 AC_CHECK_HEADERS(uuid.h uuid/uuid.h sys/uuid.h, break)
 
@@ -2441,14 +2450,16 @@ AC_SUBST(osuuid)
 
 
 dnl ----------------------------- Checking for Time Support 
-echo "${nl}Checking for Time Support..."
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([Checking for Time Support...])
 
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff, struct tm.__tm_gmtoff],,,[
 #include <sys/types.h>
 #include <time.h>])
 
 dnl ----------------------------- Checking for Networking Support 
-echo "${nl}Checking for Networking support..."
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([Checking for Networking support...])
 APR_TYPE_IN_ADDR
 if test "$ac_cv_type_in_addr" = "yes"; then
   have_in_addr="1"
@@ -2459,9 +2470,9 @@ fi
 AC_MSG_CHECKING([if fd == socket on this platform])
 if test "x$file_as_socket" != "x0" ; then
     file_as_socket="1";
-    echo "yes"
+    AC_MSG_RESULT([yes])
 else
-    echo "no"
+    AC_MSG_RESULT([no])
 fi
 
 AC_SUBST(have_in_addr)
@@ -2533,7 +2544,8 @@ AC_SUBST(have_sctp)
 
 AC_CHECK_FUNCS(set_h_errno)
 
-echo "${nl}Checking for IPv6 Networking support..."
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([Checking for IPv6 Networking support...])
 dnl Start of checking for IPv6 support...
 
 AC_ARG_ENABLE(ipv6,
@@ -2693,7 +2705,8 @@ AC_SUBST(LDFLAGS)
 
 dnl ----------------------------- Finalize the variables
 
-echo "${nl}Restore user-defined environment settings..."
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([Restore user-defined environment settings...])
 
 APR_RESTORE_THE_ENVIRONMENT(CPPFLAGS, EXTRA_)
 APR_RESTORE_THE_ENVIRONMENT(CFLAGS, EXTRA_)
