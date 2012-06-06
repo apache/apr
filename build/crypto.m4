@@ -23,6 +23,8 @@ dnl APU_CHECK_CRYPTO: look for crypto libraries and headers
 dnl
 AC_DEFUN([APU_CHECK_CRYPTO], [
   apu_have_crypto=0
+  apu_have_openssl=0
+  apu_have_nss=0
 
   old_libs="$LIBS"
   old_cppflags="$CPPFLAGS"
@@ -48,7 +50,6 @@ AC_DEFUN([APU_CHECK_CRYPTO], [
 dnl
 
 AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
-  apu_have_openssl=0
   openssl_have_headers=0
   openssl_have_libs=0
 
@@ -137,7 +138,6 @@ AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
 ])
 
 AC_DEFUN([APU_CHECK_CRYPTO_NSS], [
-  apu_have_nss=0
   nss_have_headers=0
   nss_have_libs=0
 
