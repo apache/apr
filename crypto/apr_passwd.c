@@ -184,13 +184,11 @@ APR_DECLARE(apr_status_t) apr_bcrypt_encode(const char *pw,
                                             apr_size_t salt_len,
                                             char *out, apr_size_t out_len)
 {
-    apr_size_t len;
     char setting[40];
     if (_crypt_gensalt_blowfish_rn(bcrypt_id, count, (const char *)salt,
                                    salt_len, setting, sizeof(setting)) == NULL)
         return APR_FROM_OS_ERROR(errno);
-    len = strlen(out);
-    if (_crypt_blowfish_rn(pw, setting, out, out_len - len) == NULL)
+    if (_crypt_blowfish_rn(pw, setting, out, out_len) == NULL)
         return APR_FROM_OS_ERROR(errno);
     return APR_SUCCESS;
 }
