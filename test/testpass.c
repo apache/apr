@@ -151,7 +151,9 @@ static void test_bcryptpass(abts_case *tc, void *data)
     const char *hash2 = "$2a$08$qipUJiI9fySUN38hcbz.lucXvAmtgowKOWYtB9y3CXyl6lTknruou";
     const char *pass3 = "foobar";
 
-    apr_bcrypt_encode(pass, 5, salt, sizeof(salt), hash, sizeof(hash));
+    APR_ASSERT_SUCCESS(tc, "bcrypt encode password", 
+                       apr_bcrypt_encode(pass, 5, salt, sizeof(salt), hash,
+                                         sizeof(hash));
 
     APR_ASSERT_SUCCESS(tc, "bcrypt password validated",
                        apr_password_validate(pass, hash));
