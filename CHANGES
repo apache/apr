@@ -1,6 +1,12 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_password_validate, apr_bcrypt_encode: Add support for bcrypt encoded
+     passwords. The bcrypt implementation uses code from crypt_blowfish
+     written by Solar Designer <solar openwall com>. apr_bcrypt_encode creates
+     hashes with "$2y$" prefix, but apr_password_validate also accepts the old
+     prefix "$2a$". [Stefan Fritsch]
+
   *) apr_pollset_poll:  add z/OS async poll support for sockets [Greg Ames]
 
   *) apr_mcast_hops: Fix EINVAL for IPv6 sockets caused by using byte
