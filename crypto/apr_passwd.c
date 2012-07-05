@@ -19,6 +19,7 @@
 #include "apr_lib.h"
 #include "apr_private.h"
 #include "apr_sha1.h"
+#include "crypt_blowfish.h"
 
 #if APR_HAVE_STRING_H
 #include <string.h>
@@ -102,11 +103,19 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
 #if !defined(WIN32) && !defined(BEOS) && !defined(NETWARE)
     char *crypt_pw;
 #endif
-    if (!strncmp(hash, apr1_id, strlen(apr1_id))) {
-        /*
-         * The hash was created using our custom algorithm.
-         */
-        apr_md5_encode(passwd, hash, sample, sizeof(sample));
+    if (hash[0] == '$') {
+        if (hash[1] == '2' && (hash[2] == 'a' || hash[2] == 'y')
+            && hash[3] == '$')
+        {
+            if (_crypt_blowfish_rn(passwd, hash, sample, sizeof(sample)) == NULL)
+                return APR_FROM_OS_ERROR(errno);
+        }
+        else if (!strncmp(hash, apr1_id, strlen(apr1_id))) {
+            /*
+             * The hash was created using our custom algorithm.
+             */
+            apr_md5_encode(passwd, hash, sample, sizeof(sample));
+        }
     }
     else if (!strncmp(hash, APR_SHA1PW_ID, APR_SHA1PW_IDLEN)) {
          apr_sha1_base64(passwd, (int)strlen(passwd), sample);
@@ -166,4 +175,22 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
 #endif
     }
     return (strcmp(sample, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
+}
+
+static const char const *bcrypt_id = "$2y$";
+APR_DECLARE(apr_status_t) apr_bcrypt_encode(const char *pw,
+                                            unsigned int count,
+                                            const unsigned char *salt,
+                                            apr_size_t salt_len,
+                                            char *out, apr_size_t out_len)
+{
+    apr_size_t len;
+    char setting[40];
+    if (_crypt_gensalt_blowfish_rn(bcrypt_id, count, (const char *)salt,
+                                   salt_len, setting, sizeof(setting)) == NULL)
+        return APR_FROM_OS_ERROR(errno);
+    len = strlen(out);
+    if (_crypt_blowfish_rn(pw, setting, out, out_len - len) == NULL)
+        return APR_FROM_OS_ERROR(errno);
+    return APR_SUCCESS;
 }

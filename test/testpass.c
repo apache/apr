@@ -117,24 +117,50 @@ static void test_threadsafe(abts_case *tc, void *data)
 static void test_shapass(abts_case *tc, void *data)
 {
     const char *pass = "hellojed";
+    const char *pass2 = "hellojed2";
     char hash[100];
 
     apr_sha1_base64(pass, strlen(pass), hash);
 
     APR_ASSERT_SUCCESS(tc, "SHA1 password validated",
                        apr_password_validate(pass, hash));
+    APR_ASSERT_FAILURE(tc, "wrong SHA1 password should not validate",
+                       apr_password_validate(pass2, hash));
 }
 
 static void test_md5pass(abts_case *tc, void *data)
 {
     const char *pass = "hellojed", *salt = "sardine";
+    const char *pass2 = "hellojed2";
     char hash[100];
 
     apr_md5_encode(pass, salt, hash, sizeof hash);
 
     APR_ASSERT_SUCCESS(tc, "MD5 password validated",
                        apr_password_validate(pass, hash));
+    APR_ASSERT_FAILURE(tc, "wrong MD5 password should not validate",
+                       apr_password_validate(pass2, hash));
 }
+
+static void test_bcryptpass(abts_case *tc, void *data)
+{
+    const char *pass = "hellojed";
+    const char *pass2 = "hellojed2";
+    unsigned char salt[] = "sardine_sardine";
+    char hash[100];
+    const char *hash2 = "$2a$08$qipUJiI9fySUN38hcbz.lucXvAmtgowKOWYtB9y3CXyl6lTknruou";
+    const char *pass3 = "foobar";
+
+    apr_bcrypt_encode(pass, 5, salt, sizeof(salt), hash, sizeof(hash));
+
+    APR_ASSERT_SUCCESS(tc, "bcrypt password validated",
+                       apr_password_validate(pass, hash));
+    APR_ASSERT_FAILURE(tc, "wrong bcrypt password should not validate",
+                       apr_password_validate(pass2, hash));
+    APR_ASSERT_SUCCESS(tc, "bcrypt password validated",
+                       apr_password_validate(pass3, hash2));
+}
+
 
 abts_suite *testpass(abts_suite *suite)
 {
@@ -148,6 +174,7 @@ abts_suite *testpass(abts_suite *suite)
 #endif /* CRYPT_ALGO_SUPPORTED */
     abts_run_test(suite, test_shapass, NULL);
     abts_run_test(suite, test_md5pass, NULL);
+    abts_run_test(suite, test_bcryptpass, NULL);
     
     return suite;
 }
