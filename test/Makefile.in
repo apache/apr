@@ -187,7 +187,7 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 			done; \
 	        else \
 			@shlibpath_var@="`echo "../dbm/.libs:../dbd/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
-			./$$prog; \
+			./$$prog -v; \
 			status=$$?; \
 			if test $$status != 0; then \
 				teststatus=$$status; \
