@@ -153,7 +153,7 @@ static void test_bcryptpass(abts_case *tc, void *data)
 
     APR_ASSERT_SUCCESS(tc, "bcrypt encode password", 
                        apr_bcrypt_encode(pass, 5, salt, sizeof(salt), hash,
-                                         sizeof(hash));
+                                         sizeof(hash)));
 
     APR_ASSERT_SUCCESS(tc, "bcrypt password validated",
                        apr_password_validate(pass, hash));
