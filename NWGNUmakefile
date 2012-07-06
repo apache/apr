@@ -316,6 +316,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/apr_md4.o \
 	$(OBJDIR)/apr_md5.o \
 	$(OBJDIR)/apr_memcache.o \
+	$(OBJDIR)/apr_passwd.o \
 	$(OBJDIR)/apr_pools.o \
 	$(OBJDIR)/apr_queue.o \
 	$(OBJDIR)/apr_random.o \
@@ -333,6 +334,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/apu_dso.o \
 	$(OBJDIR)/buffer.o \
 	$(OBJDIR)/charset.o \
+	$(OBJDIR)/crypt_blowfish.o \
 	$(OBJDIR)/common.o \
 	$(OBJDIR)/copy.o \
 	$(OBJDIR)/dir.o \

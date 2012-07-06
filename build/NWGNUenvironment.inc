@@ -129,7 +129,7 @@ ifdef METROWERKS
 #METROWERKS = $(ProgramFiles)\Metrowerks\CodeWarrior
 #endif
 
-CC	= mwccnlm -w nocmdline -nosyspath
+CC	= mwccnlm -w nocmdline -gccinc
 CPP	= $(CC)
 CPRE	= $(CC) -EP
 LINK	= mwldnlm -w nocmdline
