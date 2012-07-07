@@ -468,7 +468,7 @@ APR_DECLARE(apr_status_t) apr_MD5InitEBCDIC(apr_xlate_t *xlate)
  * Define the Magic String prefix that identifies a password as being
  * hashed using our algorithm.
  */
-static const char const *apr1_id = "$apr1$";
+static const char * const apr1_id = "$apr1$";
 
 /*
  * The following MD5 password encryption code was largely borrowed from
