@@ -125,7 +125,7 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
          * It's not our algorithm, so feed it to crypt() if possible.
          */
 #if defined(WIN32) || defined(BEOS) || defined(NETWARE)
-        apr_cpystrn(sample, passwd, sizeof(sample) - 1);
+        return (strcmp(passwd, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
 #elif defined(CRYPT_R_CRYPTD)
         CRYPTD buffer;
 
@@ -133,7 +133,7 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
         if (!crypt_pw) {
             return APR_EMISMATCH;
         }
-        apr_cpystrn(sample, crypt_pw, sizeof(sample) - 1);
+        return (strcmp(crypt_pw, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
 #elif defined(CRYPT_R_STRUCT_CRYPT_DATA)
         struct crypt_data buffer;
 
@@ -150,7 +150,7 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
         if (!crypt_pw) {
             return APR_EMISMATCH;
         }
-        apr_cpystrn(sample, crypt_pw, sizeof(sample) - 1);
+        return (strcmp(crypt_pw, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
 #else
         /* Do a bit of sanity checking since we know that crypt_r()
          * should always be used for threaded builds on AIX, and
@@ -170,8 +170,8 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
             crypt_mutex_unlock();
             return APR_EMISMATCH;
         }
-        apr_cpystrn(sample, crypt_pw, sizeof(sample) - 1);
         crypt_mutex_unlock();
+        return (strcmp(crypt_pw, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
 #endif
     }
     return (strcmp(sample, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
