@@ -57,6 +57,7 @@ struct apr_crypto_t {
 };
 
 struct apr_crypto_config_t {
+       void *opaque;
 };
 
 struct apr_crypto_key_t {
