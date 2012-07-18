@@ -251,7 +251,19 @@ SOURCE=.\crypto\apr_md5.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\crypto\apr_passwd.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\crypto\apr_sha1.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\crypto\crypt_blowfish.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\crypto\crypt_blowfish.h
 # End Source File
 # Begin Source File
 
