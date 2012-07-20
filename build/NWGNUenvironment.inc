@@ -150,7 +150,7 @@ PLIB3S	= $(METROWERKS)/Novell Support/Metrowerks Support/Libraries/MSL C++/MWCPP
 # The default flags are as follows:
 #
 # -w nocmdline          disable command-line driver/parser warnings
-# -nosyspath            treat #include <...> like #include "..."
+# -gccinc               search directory of referencing file first for #includes
 # -Cpp_exceptions off   disable C++ exceptions
 # -RTTI off             disable C++ run-time typing information
 # -align 4              align on 4 byte bounderies
