@@ -327,7 +327,7 @@ static int dbd_freetds_get_row(apr_pool_t *pool, apr_dbd_results_t *res,
     case SUCCEED: return 0;
     case REG_ROW: return 0;
     case NO_MORE_ROWS:
-        apr_pool_cleanup_run(pool, res->proc, clear_result);
+        apr_pool_cleanup_run(res->pool, res->proc, clear_result);
         *rowp = NULL;
         return -1;
     case FAIL: return 1;
