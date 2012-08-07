@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.0
 
+  *) Improve platform detection by updating config.guess and config.sub.
+     [Rainer Jung]
+
   *) apr_socket_opt_set: Add support for APR_SO_BROADCAST. PR 46389.
      [Armin Müller <mueller itestra com>]
 
