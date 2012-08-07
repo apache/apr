@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes with APR 0.9.21
 
+  *) Improve platform detection by updating config.guess and config.sub.
+     [Rainer Jung]
+
   *) Flush write buffer before truncate call on a file.
      [Mladen Turk]
 
