@@ -160,18 +160,23 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
 #if defined(_AIX) && APR_HAS_THREADS
 #error Configuration error!  crypt_r() should have been selected!
 #endif
+        {
+            apr_status_t rv;
 
-        /* Handle thread safety issues by holding a mutex around the
-         * call to crypt().
-         */
-        crypt_mutex_lock();
-        crypt_pw = crypt(passwd, hash);
-        if (!crypt_pw) {
+            /* Handle thread safety issues by holding a mutex around the
+             * call to crypt().
+             */
+            crypt_mutex_lock();
+            crypt_pw = crypt(passwd, hash);
+            if (!crypt_pw) {
+                rv = APR_EMISMATCH;
+            }
+            else {
+                rv = (strcmp(crypt_pw, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
+            }
             crypt_mutex_unlock();
-            return APR_EMISMATCH;
+            return rv;
         }
-        crypt_mutex_unlock();
-        return (strcmp(crypt_pw, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
 #endif
     }
     return (strcmp(sample, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
