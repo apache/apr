@@ -108,7 +108,7 @@ AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
   dnl Since we have already done the AC_CHECK_LIB tests, if we have it, 
   dnl we know the library is there.
   if test "$apu_have_openssl" = "1"; then
-    LDADD_crypto_openssl="$openssl_LDFLAGS -lssl -lcrypto"
+    APR_ADDTO(LDADD_crypto_openssl, [$openssl_LDFLAGS -lssl -lcrypto])
     apu_have_crypto=1
 
     AC_MSG_CHECKING([for const input buffers in OpenSSL])
@@ -192,7 +192,7 @@ AC_DEFUN([APU_CHECK_CRYPTO_NSS], [
   dnl Since we have already done the AC_CHECK_LIB tests, if we have it, 
   dnl we know the library is there.
   if test "$apu_have_nss" = "1"; then
-    LDADD_crypto_nss="$nss_LDFLAGS -lnspr4 -lnss3"
+    APR_ADDTO(LDADD_crypto_nss, [$nss_LDFLAGS -lnspr4 -lnss3])
     apu_have_crypto=1
   fi
   AC_SUBST(LDADD_crypto_nss)
