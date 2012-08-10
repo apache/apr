@@ -147,7 +147,7 @@ AC_DEFUN([APU_CHECK_DBD], [
   dnl Since we have already done the AC_CHECK_LIB tests, if we have it, 
   dnl we know the library is there.
   if test "$apu_have_pgsql" = "1"; then
-    LDADD_dbd_pgsql="$pgsql_LDFLAGS -lpq $pgsql_LIBS"
+    APR_ADDTO(LDADD_dbd_pgsql, [$pgsql_LDFLAGS -lpq $pgsql_LIBS])
   fi
   AC_SUBST(LDADD_dbd_pgsql)
 
@@ -229,7 +229,7 @@ AC_DEFUN([APU_CHECK_DBD_MYSQL], [
   dnl Since we have already done the AC_CHECK_LIB tests, if we have it, 
   dnl we know the library is there.
   if test "$apu_have_mysql" = "1"; then
-    LDADD_dbd_mysql="$mysql_LDFLAGS -lmysqlclient_r $mysql_LIBS"
+    APR_ADDTO(LDADD_dbd_mysql, [$mysql_LDFLAGS -lmysqlclient_r $mysql_LIBS])
   fi
   AC_SUBST(LDADD_dbd_mysql)
 
@@ -273,7 +273,7 @@ AC_DEFUN([APU_CHECK_DBD_SQLITE3], [
   dnl Since we have already done the AC_CHECK_LIB tests, if we have it, 
   dnl we know the library is there.
   if test "$apu_have_sqlite3" = "1"; then
-    LDADD_dbd_sqlite3="$sqlite3_LDFLAGS -lsqlite3"
+    APR_ADDTO(LDADD_dbd_sqlite3, [$sqlite3_LDFLAGS -lsqlite3])
   fi
   AC_SUBST(LDADD_dbd_sqlite3)
 
@@ -317,7 +317,7 @@ AC_DEFUN([APU_CHECK_DBD_SQLITE2], [
   dnl Since we have already done the AC_CHECK_LIB tests, if we have it, 
   dnl we know the library is there.
   if test "$apu_have_sqlite2" = "1"; then
-    LDADD_dbd_sqlite2="$sqlite2_LDFLAGS -lsqlite"
+    APR_ADDTO(LDADD_dbd_sqlite2, [$sqlite2_LDFLAGS -lsqlite])
   fi
   AC_SUBST(LDADD_dbd_sqlite2)
 
@@ -399,7 +399,7 @@ AC_DEFUN([APU_CHECK_DBD_ORACLE], [
   dnl Since we have already done the AC_CHECK_LIB tests, if we have it, 
   dnl we know the library is there.
   if test "$apu_have_oracle" = "1"; then
-    LDADD_dbd_oracle="$oracle_LDFLAGS -lclntsh $oracle_LIBS"
+    APR_ADDTO(LDADD_dbd_oracle, [$oracle_LDFLAGS -lclntsh $oracle_LIBS])
   fi
   AC_SUBST(LDADD_dbd_oracle)
 
@@ -454,10 +454,10 @@ AC_DEFUN([APU_CHECK_DBD_FREETDS], [
   dnl Since we have already done the AC_CHECK_LIB tests, if we have it, 
   dnl we know the library is there.
   if test "$apu_have_freetds" = "1"; then
-    LDADD_dbd_freetds="$sybdb_LDFLAGS -lsybdb"
+    APR_ADDTO(LDADD_dbd_freetds, [$sybdb_LDFLAGS -lsybdb])
     dnl Erm, I needed pcreposix, but I think that dependency has gone
     dnl from the current code
-    dnl LDADD_dbd_freetds="$LDADD_dbd_freetds -lsybdb -lpcreposix"
+    dnl APR_ADDTO(LDADD_dbd_freetds, [-lpcreposix])
   fi
   AC_SUBST(LDADD_dbd_freetds)
 
@@ -551,7 +551,7 @@ AC_DEFUN([APU_CHECK_DBD_ODBC], [
   dnl Since we have already done the AC_CHECK_LIB tests, if we have it, 
   dnl we know the library is there.
   if test "$apu_have_odbc" = "1"; then
-    LDADD_dbd_odbc="$odbc_LDFLAGS -lodbc $odbc_LIBS"
+    APR_ADDTO(LDADD_dbd_odbc, [$odbc_LDFLAGS -lodbc $odbc_LIBS])
   fi
   AC_SUBST(LDADD_dbd_odbc)
 
