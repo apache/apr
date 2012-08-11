@@ -425,8 +425,8 @@ AC_DEFUN([APU_CHECK_DB], [
     fi
     ;;
   db[[45]] | db[[45]][[0-9]])
-    db_major=`echo "$requested" | sed -e 's/db//' -e 's/.$//`
-    db_minor=`echo "$requested" | sed -e 's/db//' -e 's/.//`
+    db_major=`echo "$requested" | sed -e 's/db//' -e 's/.$//'`
+    db_minor=`echo "$requested" | sed -e 's/db//' -e 's/.//'`
     APU_CHECK_DBXY("$check_places", "$db_major", "$db_minor")
     if test "$apu_db_version" != "$db_major"; then
       AC_MSG_ERROR(Berkeley db$db_major not found)
