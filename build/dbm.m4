@@ -381,7 +381,7 @@ AC_DEFUN([APU_CHECK_DBXY], [
   APU_CHECK_BERKELEY_DB("${db_major}", "${db_minor}", "-1",
     "$places",
     "db${db_major}${db_minor}/db.h db${db_major}/db.h db.h",
-    "db-${db_major}.${db_minor} db${db_major}-${db_major}.${db_minor} db${db_major}${db_minor} db${db_major} db"
+    "db-${db_major}.${db_minor} db${db_major}-${db_major}.${db_minor} db${db_major}${db_minor} db-${db_major} db${db_major} db"
   )
   if test "$apu_have_db" = "1"; then
     apu_db_version=${db_major}
@@ -443,18 +443,18 @@ dnl APU_CHECK_DB_ALL: Try all Berkeley DB versions, from 5.X to 1.
 dnl
 AC_DEFUN([APU_CHECK_DB_ALL], [
   all_places=$1
- 
+
   # Start version search at version 5.9
-  version=59
-  while [ $version -ge 40 ]
+  db_version=59
+  while [[ $db_version -ge 40 ]]
   do
-    db_major=`echo $version | sed -e 's/.$//'`
-    db_minor=`echo $version | sed -e 's/.//'`
+    db_major=`echo $db_version | sed -e 's/.$//'`
+    db_minor=`echo $db_version | sed -e 's/.//'`
     APU_CHECK_DBXY("$all_places", "$db_major", "$db_minor")
     if test "$apu_have_db" = "1"; then
       break
     fi
-    version=`expr $version - 1`
+    db_version=`expr $db_version - 1`
   done
   if test "$apu_have_db" = "0"; then
     APU_CHECK_DB3("$all_places")
@@ -494,19 +494,22 @@ AC_DEFUN([APU_CHECK_DBM], [
   apu_db_header=db.h                # default so apu_select_dbm.h is syntactically correct
   apu_db_version=0
 
+  # Maximum supported version announced in help string.
+  # Although we search for all versions up to 5.9,
+  # we should only include existing versions in our
+  # help string.
   db_max_version=53
   db_min_version=41
   dbm_list="sdbm, gdbm, ndbm, db, db1, db185, db2, db3, db4"
   db_version="$db_min_version"
-  while [ $version -ge 41 ]
+  while [[ $db_version -le $db_max_version ]]
   do
     dbm_list="$dbm_list, db$db_version"
-    version=`expr $version - 1`
+    db_version=`expr $db_version + 1`
   done
-  dbm_short_list=`echo $dbm_list | sed -e 's/ //g'`
 
   AC_ARG_WITH(dbm, [APR_HELP_STRING([--with-dbm=DBM], [choose the DBM type to use.
-      DBM={$dbm_short_list}])],
+      DBM={sdbm,gdbm,ndbm,db,db1,db185,db2,db3,db4,db4X,db5X} for some X=0,...,9])],
   [
     if test "$withval" = "yes"; then
       AC_MSG_ERROR([--with-dbm needs to specify a DBM type to use.
@@ -649,11 +652,11 @@ AC_DEFUN([APU_CHECK_DBM], [
       eval "apu_use_$requested=1"
       apu_default_dbm=$requested
       ;;
-    db185 | db[12345])
+    db185 | db[[12345]])
       apu_use_db=1
       apu_default_dbm=$requested
       ;;
-    db[45][0-9])
+    db[[45]][[0-9]])
       apu_use_db=1
       apu_default_dbm=`echo $requested | sed -e 's/.$//'`
       ;;
@@ -663,7 +666,7 @@ AC_DEFUN([APU_CHECK_DBM], [
       apu_use_sdbm=1
       ;;
     *)
-      AC_MSG_ERROR([--with-dbm=$look_for is an unknown DBM type.
+      AC_MSG_ERROR([--with-dbm=$requested is an unknown DBM type.
         Use one of: $dbm_list])
       ;;
   esac
