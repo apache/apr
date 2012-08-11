@@ -27,7 +27,7 @@
 /* The time value is used throughout the tests, so just make this a global.
  * Also, we need a single value that we can test for the positive tests, so
  * I chose the number below, it corresponds to:
- *           2002-08-14 12:05:36.186711 -25200 [257 Sat].
+ *           2002-09-14 12:05:36.186711 -25200 [257 Sat].
  * Which happens to be when I wrote the new tests.
  */
 static apr_time_t now = APR_INT64_C(1032030336186711);
@@ -37,7 +37,7 @@ static char* print_time (apr_pool_t *pool, const apr_time_exp_t *xt)
     return apr_psprintf (pool,
                          "%04d-%02d-%02d %02d:%02d:%02d.%06d %+05d [%d %s]%s",
                          xt->tm_year + 1900,
-                         xt->tm_mon,
+                         xt->tm_mon + 1,
                          xt->tm_mday,
                          xt->tm_hour,
                          xt->tm_min,
@@ -78,7 +78,7 @@ static void test_gmtstr(abts_case *tc, void *data)
         ABTS_NOT_IMPL(tc, "apr_time_exp_gmt");
     }
     ABTS_TRUE(tc, rv == APR_SUCCESS);
-    ABTS_STR_EQUAL(tc, "2002-08-14 19:05:36.186711 +0000 [257 Sat]", 
+    ABTS_STR_EQUAL(tc, "2002-09-14 19:05:36.186711 +0000 [257 Sat]", 
                       print_time(p, &xt));
 }
 
