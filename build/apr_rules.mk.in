@@ -56,6 +56,10 @@ EXTRA_LDFLAGS=@EXTRA_LDFLAGS@
 EXTRA_LIBS=@EXTRA_LIBS@
 EXTRA_INCLUDES=@EXTRA_INCLUDES@
 
+# CPPFLAGS which are used only while building APR itself
+#
+INTERNAL_CPPFLAGS=@INTERNAL_CPPFLAGS@
+
 # NOTEST_* are flags and libraries that can be added by the user without
 # causing them to be used in configure tests (necessary for things like
 # -Werror and other strict warnings that maintainers like to use).
@@ -71,7 +75,7 @@ NOTEST_LIBS=@NOTEST_LIBS@
 # left-to-right precedence and CPPFLAGS may include user-defined overrides.
 #
 ALL_CFLAGS   = $(EXTRA_CFLAGS) $(NOTEST_CFLAGS) $(CFLAGS)
-ALL_CPPFLAGS = $(DEFS) $(EXTRA_CPPFLAGS) $(NOTEST_CPPFLAGS) $(CPPFLAGS)
+ALL_CPPFLAGS = $(DEFS) $(INTERNAL_CPPFLAGS) $(EXTRA_CPPFLAGS) $(EXTRA_CPPFLAGS) $(NOTEST_CPPFLAGS) $(CPPFLAGS)
 ALL_LDFLAGS  = $(EXTRA_LDFLAGS) $(NOTEST_LDFLAGS) $(LDFLAGS)
 ALL_LIBS     = $(LIBS) $(NOTEST_LIBS) $(EXTRA_LIBS)
 ALL_INCLUDES = $(INCLUDES) $(EXTRA_INCLUDES)
