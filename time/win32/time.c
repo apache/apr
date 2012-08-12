@@ -32,7 +32,7 @@
 /* Leap year is any year divisible by four, but not by 100 unless also
  * divisible by 400
  */
-#define IsLeapYear(y) ((!(y % 4)) ? (((!(y % 400)) && (y % 100)) ? 1 : 0) : 0)
+#define IsLeapYear(y) ((!(y % 4)) ? (((y % 400) && !(y % 100)) ? 0 : 1) : 0)
 
 static DWORD get_local_timezone(TIME_ZONE_INFORMATION **tzresult)
 {

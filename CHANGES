@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes with APR 0.9.21
 
+  *) apr_time_exp_*() on Windows: Fix error in the tm_yday field of
+     apr_time_exp_t for times within leap years.  PR 53175.
+     [Jeff Trawick]
+
   *) Improve platform detection by updating config.guess and config.sub.
      [Rainer Jung]
 
