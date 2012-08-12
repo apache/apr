@@ -67,7 +67,7 @@ INCLUDES=-I$(INCDIR) -I$(srcdir)/../include
 
 # link programs using -no-install to get real executables not
 # libtool wrapper scripts which link an executable when first run.
-LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE) \
+LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) $(LT_LDFLAGS) \
 	    @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
 
 # STDTEST_PORTABLE;
@@ -119,10 +119,10 @@ mod_test.lo: $(srcdir)/mod_test.c
 	  -c $(srcdir)/mod_test.c
 
 OBJECTS_mod_test = mod_test.lo
-mod_test.la: $(OBJECTS_mod_test)
+mod_test.la: $(OBJECTS_mod_test) $(LOCAL_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -module \
 	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ \
-	  $(OBJECTS_mod_test)
+	  $(OBJECTS_mod_test) $(LOCAL_LIBS)
 
 OBJECTS_libmod_test = mod_test.lo $(LOCAL_LIBS)
 libmod_test.la: $(OBJECTS_libmod_test)

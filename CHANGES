@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.0
 
+  *) MinGW/MSYS:  Support shared builds of APR, other general improvements
+     to support of this toolchain.  PR 46175.  [Carlo Bramini 
+     <carlo.bramix libero.it>]  
+
   *) Improve platform detection by updating config.guess and config.sub.
      [Rainer Jung]
 
