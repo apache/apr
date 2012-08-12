@@ -442,6 +442,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(CPPFLAGS, [-DCYGWIN])
 	;;
     *mingw*)
+        APR_ADDTO(INTERNAL_CPPFLAGS, -DBINPATH=$apr_builddir/test/.libs)
         APR_ADDTO(CPPFLAGS, [-DWIN32 -D__MSVCRT__])
         APR_ADDTO(LDFLAGS, [-Wl,--enable-auto-import,--subsystem,console])
         APR_SETIFNULL(have_unicode_fs, [1])
