@@ -355,7 +355,7 @@ APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock,
  * return APR_EOF), if the socket's receive buffer is empty.  This
  * function does not block waiting for I/O.
  *
- * @param socket The socket to check
+ * @param sock The socket to check
  * @param atreadeof If APR_SUCCESS is returned, *atreadeof is set to
  *                  non-zero if a subsequent read would return APR_EOF
  * @return an error is returned if it was not possible to determine the
@@ -526,9 +526,10 @@ APR_DECLARE(apr_status_t) apr_socket_sendto(apr_socket_t *sock,
 
 /**
  * Read data from a socket.  On success, the address of the peer from
- * which the data was sent is copied into the @param from parameter,
- * and the @param len parameter is updated to give the number of bytes
- * written to @param buf.
+ * which the data was sent is copied into the @a from parameter, and the
+ * @a len parameter is updated to give the number of bytes written to
+ * @a buf.
+ *
  * @param from Updated with the address from which the data was received
  * @param sock The socket to use
  * @param flags The flags to use

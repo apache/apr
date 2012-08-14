@@ -730,13 +730,13 @@ APR_DECLARE(void) apr_proc_other_child_unregister(void *data);
  * <pre>
  * rv = apr_proc_wait_all_procs(&proc, &exitcode, &status, APR_WAIT, p);
  * if (APR_STATUS_IS_CHILD_DONE(rv)) {
- * #if APR_HAS_OTHER_CHILD
+ * \#if APR_HAS_OTHER_CHILD
  *     if (apr_proc_other_child_alert(&proc, APR_OC_REASON_DEATH, status)
  *             == APR_SUCCESS) {
  *         ;  (already handled)
  *     }
  *     else
- * #endif
+ * \#endif
  *         [... handling non-otherchild processes death ...]
  * </pre>
  */

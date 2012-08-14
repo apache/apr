@@ -678,6 +678,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in,
  * @param in The newly created pipe's file for reading.
  * @param out The newly created pipe's file for writing.
  * @param blocking one of these values defined in apr_thread_proc.h;
+ * @param pool The pool to operate on.
  * <pre>
  *       APR_FULL_BLOCK
  *       APR_READ_BLOCK
@@ -696,7 +697,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in,
 APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in, 
                                                   apr_file_t **out, 
                                                   apr_int32_t blocking, 
-                                                  apr_pool_t *p);
+                                                  apr_pool_t *pool);
 
 /**
  * Create a named pipe.
