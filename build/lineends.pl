@@ -3,7 +3,7 @@
 #  Heuristically converts line endings to the current OS's preferred format
 #  
 #  All existing line endings must be identical (e.g. lf's only, or even
-#  the accedental cr.cr.lf sequence.)  If some lines end lf, and others as
+#  the accidental cr.cr.lf sequence.)  If some lines end lf, and others as
 #  cr.lf, the file is presumed binary.  If the cr character appears anywhere
 #  except prefixed to an lf, the file is presumed binary.  If there is no 
 #  change in the resulting file size, or the file is binary, the conversion 
