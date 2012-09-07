@@ -424,10 +424,26 @@ AC_DEFUN([APU_CHECK_DB], [
       AC_MSG_ERROR(Berkeley db3 not found)
     fi
     ;;
-  db[[45]] | db[[45]][[0-9]])
+  db[[45]][[0-9]])
     db_major=`echo "$requested" | sed -e 's/db//' -e 's/.$//'`
     db_minor=`echo "$requested" | sed -e 's/db//' -e 's/.//'`
     APU_CHECK_DBXY("$check_places", "$db_major", "$db_minor")
+    if test "$apu_db_version" != "$db_major"; then
+      AC_MSG_ERROR(Berkeley db$db_major not found)
+    fi
+    ;;
+  db[[45]])
+    db_major=`echo "$requested" | sed -e 's/db//'`
+    # Start version search at version x.9
+    db_minor=9
+    while [[ $db_minor -ge 0 ]]
+    do
+      APU_CHECK_DBXY("$check_places", "$db_major", "$db_minor")
+      if test "$apu_have_db" = "1"; then
+        break
+      fi
+      db_minor=`expr $db_minor - 1`
+    done
     if test "$apu_db_version" != "$db_major"; then
       AC_MSG_ERROR(Berkeley db$db_major not found)
     fi
