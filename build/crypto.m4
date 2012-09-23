@@ -33,11 +33,26 @@ AC_DEFUN([APU_CHECK_CRYPTO], [
   AC_ARG_WITH([crypto], [APR_HELP_STRING([--with-crypto], [enable crypto support])],
   [
     if test "$withval" = "yes"; then
+
+      crypto_library_enabled=0
+      for cryptolib in openssl nss; do
+        eval v=\$with_$cryptolib
+        if test "$v" != "" -a "$v" != "no"; then
+          crypto_library_enabled=1
+        fi
+      done
+
+      if test "$crypto_library_enabled" = "0"; then
+        AC_MSG_NOTICE(Crypto was requested but no crypto library was found; autodetecting available libraries)
+        with_openssl=yes
+        with_nss=yes
+      fi
+
       APU_CHECK_CRYPTO_OPENSSL
       APU_CHECK_CRYPTO_NSS
       dnl add checks for other varieties of ssl here
       if test "$apu_have_crypto" = "0"; then
-        AC_ERROR(Crypto was requested but no crypto library was enabled)
+        AC_ERROR(Crypto was requested but no crypto library was found; specify the location of a crypto library using --with-openssl, --with-nss, etc.)
       fi
     fi
   ], [
