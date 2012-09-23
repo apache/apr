@@ -164,7 +164,6 @@ AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
 ])
 
 AC_DEFUN([APU_CHECK_CRYPTO_NSS], [
-  nss_have_headers=0
   nss_have_libs=0
 
   old_libs="$LIBS"
@@ -174,7 +173,6 @@ AC_DEFUN([APU_CHECK_CRYPTO_NSS], [
   AC_ARG_WITH([nss], 
   [APR_HELP_STRING([--with-nss=DIR], [specify location of NSS])],
   [
-
     if test "$withval" = "yes"; then
       AC_PATH_TOOL([PKG_CONFIG], [pkg-config])
       if test -n "$PKG_CONFIG"; then
@@ -183,9 +181,15 @@ AC_DEFUN([APU_CHECK_CRYPTO_NSS], [
         APR_ADDTO(CPPFLAGS, [$nss_CPPFLAGS])
         APR_ADDTO(LDFLAGS, [$nss_LDFLAGS])
       fi
-      AC_CHECK_HEADERS(prerror.h nss/nss.h nss.h nss/pk11pub.h pk11pub.h, [nss_have_headers=1])
+      nss_have_prerrorh=0
+      nss_have_nssh=0
+      nss_have_pk11pubh=0
+      AC_CHECK_HEADERS(prerror.h, [nss_have_prerrorh=1])
+      AC_CHECK_HEADERS(nss/nss.h nss.h, [nss_have_nssh=1])
+      AC_CHECK_HEADERS(nss/pk11pub.h pk11pub.h, [nss_have_pk11pubh=1])
+      nss_have_headers=${nss_have_prerrorh}${nss_have_nssh}${nss_have_pk11pubh}
       AC_CHECK_LIB(nspr4, PR_Initialize, AC_CHECK_LIB(nss3, PK11_CreatePBEV2AlgorithmID, [nss_have_libs=1],,-lnspr4))
-      if test "$nss_have_headers" != "0" && test "$nss_have_libs" != "0"; then
+      if test "$nss_have_headers" = "111" && test "$nss_have_libs" != "0"; then
         apu_have_nss=1
       fi
     elif test "$withval" = "no"; then
@@ -199,9 +203,15 @@ AC_DEFUN([APU_CHECK_CRYPTO_NSS], [
       APR_ADDTO(LDFLAGS, [$nss_LDFLAGS])
 
       AC_MSG_NOTICE(checking for nss in $withval)
-      AC_CHECK_HEADERS(prerror.h nss/nss.h nss.h nss/pk11pub.h pk11pub.h, [nss_have_headers=1])
+      nss_have_prerrorh=0
+      nss_have_nssh=0
+      nss_have_pk11pubh=0
+      AC_CHECK_HEADERS(prerror.h, [nss_have_prerrorh=1])
+      AC_CHECK_HEADERS(nss/nss.h nss.h, [nss_have_nssh=1])
+      AC_CHECK_HEADERS(nss/pk11pub.h pk11pub.h, [nss_have_pk11pubh=1])
+      nss_have_headers=${nss_have_prerrorh}${nss_have_nssh}${nss_have_pk11pubh}
       AC_CHECK_LIB(nspr4, PR_Initialize, AC_CHECK_LIB(nss3, PK11_CreatePBEV2AlgorithmID, [nss_have_libs=1],,-lnspr4))
-      if test "$nss_have_headers" != "0" && test "$nss_have_libs" != "0"; then
+      if test "$nss_have_headers" = "111" && test "$nss_have_libs" != "0"; then
         apu_have_nss=1
       fi
 
