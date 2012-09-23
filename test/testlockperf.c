@@ -226,7 +226,6 @@ int main(int argc, const char * const *argv)
 {
     apr_status_t rv;
     char errmsg[200];
-    const char *lockname = "multi.lock";
     apr_getopt_t *opt;
     char optchar;
     const char *optarg;
@@ -245,12 +244,9 @@ int main(int argc, const char * const *argv)
         exit(-1);
     }
         
-    while ((rv = apr_getopt(opt, "vf:", &optchar, &optarg)) == APR_SUCCESS) {
+    while ((rv = apr_getopt(opt, "v", &optchar, &optarg)) == APR_SUCCESS) {
         if (optchar == 'v') {
             verbose = 1;
-        }
-        if (optchar == 'f') {
-            lockname = optarg;
         }
     }
 

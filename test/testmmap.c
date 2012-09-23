@@ -125,6 +125,7 @@ static void test_mmap_offset(abts_case *tc, void *data)
     ABTS_PTR_NOTNULL(tc, themmap);
     rv = apr_mmap_offset(&addr, themmap, 5);
 
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     /* Must use nEquals since the string is not guaranteed to be NULL terminated */
     ABTS_STR_NEQUAL(tc, addr, TEST_STRING + 5, thisfsize-5);
 }
