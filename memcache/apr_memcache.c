@@ -183,8 +183,8 @@ apr_memcache_find_server_hash_default(void *baton, apr_memcache_t *mc,
 #endif
             /* Try the dead server, every 5 seconds */
             if (curtime - ms->btime >  apr_time_from_sec(5)) {
+                ms->btime = curtime;
                 if (mc_version_ping(ms) == APR_SUCCESS) {
-                    ms->btime = curtime;
                     make_server_live(mc, ms);
 #if APR_HAS_THREADS
                     apr_thread_mutex_unlock(ms->lock);
