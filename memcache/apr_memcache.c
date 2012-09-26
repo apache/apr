@@ -414,7 +414,7 @@ APR_DECLARE(apr_status_t) apr_memcache_server_create(apr_pool_t *p,
                                min,                     /* hard minimum */
                                smax,                    /* soft maximum */
                                max,                     /* hard maximum */
-                               ttl,                     /* Time to live */
+                               apr_time_from_sec(ttl),  /* Time to live */
                                mc_conn_construct,       /* Make a New Connection */
                                mc_conn_destruct,        /* Kill Old Connection */
                                server, np);
