@@ -605,10 +605,10 @@ abts_suite *testmemcache(abts_suite * suite)
     apr_status_t rv;
     suite = ADD_SUITE(suite);
     /* check for a running memcached on the typical port before
-     * trying to run the tests. succeed silently if we don't find one.
+     * trying to run the tests. succeed if we don't find one.
      */
     rv = check_mc();
-    if(rv == APR_SUCCESS) {
+    if (rv == APR_SUCCESS) {
       abts_run_test(suite, test_memcache_create, NULL);
       abts_run_test(suite, test_memcache_user_funcs, NULL);
       abts_run_test(suite, test_memcache_meta, NULL);
@@ -616,6 +616,11 @@ abts_suite *testmemcache(abts_suite * suite)
       abts_run_test(suite, test_memcache_multiget, NULL);
       abts_run_test(suite, test_memcache_addreplace, NULL);
       abts_run_test(suite, test_memcache_incrdecr, NULL);
+    }
+    else {
+        abts_log_message("Error %d occurred attempting to reach memcached "
+                         "on %s:%d.  Skipping apr_memcache tests...",
+                         rv, HOST, PORT);
     }
 
     return suite;
