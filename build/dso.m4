@@ -36,6 +36,7 @@ AC_DEFUN([APR_MODULAR_DSO], [
      objs=
      test $apu_have_openssl = 1 && objs="$objs crypto/apr_crypto_openssl.lo"
      test $apu_have_nss = 1 && objs="$objs crypto/apr_crypto_nss.lo"
+     test $apu_have_commoncrypto = 1 && objs="$objs crypto/apr_crypto_commoncrypto.lo"
      test $apu_have_oracle = 1 && objs="$objs dbd/apr_dbd_oracle.lo"
      test $apu_have_pgsql = 1 && objs="$objs dbd/apr_dbd_pgsql.lo"
      test $apu_have_mysql = 1 && objs="$objs dbd/apr_dbd_mysql.lo"
@@ -62,10 +63,10 @@ AC_DEFUN([APR_MODULAR_DSO], [
        done
      fi
 
-     LIBS="$LIBS $LDADD_crypto_openssl $LDADD_crypto_nss"
+     LIBS="$LIBS $LDADD_crypto_openssl $LDADD_crypto_nss $LDADD_crypto_commoncrypto"
      LIBS="$LIBS $LDADD_dbd_pgsql $LDADD_dbd_sqlite2 $LDADD_dbd_sqlite3 $LDADD_dbd_oracle $LDADD_dbd_mysql $LDADD_dbd_freetds $LDADD_dbd_odbc"
      LIBS="$LIBS $LDADD_dbm_db $LDADD_dbm_gdbm $LDADD_dbm_ndbm"
-     APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_crypto_openssl $LDADD_crypto_nss"
+     APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_crypto_openssl $LDADD_crypto_nss $LDADD_crypto_commoncrypto"
      APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_dbd_pgsql $LDADD_dbd_sqlite2 $LDADD_dbd_sqlite3 $LDADD_dbd_oracle $LDADD_dbd_mysql $LDADD_dbd_freetds $LDADD_dbd_odbc"
      APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_dbm_db $LDADD_dbm_gdbm $LDADD_dbm_ndbm"
 
@@ -75,6 +76,7 @@ AC_DEFUN([APR_MODULAR_DSO], [
      dsos=
      test $apu_have_openssl = 1 && dsos="$dsos crypto/apr_crypto_openssl.la"
      test $apu_have_nss = 1 && dsos="$dsos crypto/apr_crypto_nss.la"
+     test $apu_have_commoncrypto = 1 && dsos="$dsos crypto/apr_crypto_commoncrypto.la"
      test $apu_have_oracle = 1 && dsos="$dsos dbd/apr_dbd_oracle.la"
      test $apu_have_pgsql = 1 && dsos="$dsos dbd/apr_dbd_pgsql.la"
      test $apu_have_mysql = 1 && dsos="$dsos dbd/apr_dbd_mysql.la"

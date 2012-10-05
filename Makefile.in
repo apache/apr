@@ -82,6 +82,7 @@ LDADD_dbm_gdbm = @LDADD_dbm_gdbm@
 LDADD_dbm_ndbm = @LDADD_dbm_ndbm@
 LDADD_crypto_openssl = @LDADD_crypto_openssl@
 LDADD_crypto_nss = @LDADD_crypto_nss@
+LDADD_crypto_commoncrypto = @LDADD_crypto_commoncrypto@
 
 # Create apr-config script suitable for the install tree
 apr-config.out: $(APR_CONFIG)

@@ -25,6 +25,7 @@ AC_DEFUN([APU_CHECK_CRYPTO], [
   apu_have_crypto=0
   apu_have_openssl=0
   apu_have_nss=0
+  apu_have_commoncrypto=0
 
   old_libs="$LIBS"
   old_cppflags="$CPPFLAGS"
@@ -32,7 +33,7 @@ AC_DEFUN([APU_CHECK_CRYPTO], [
 
   AC_ARG_WITH([crypto], [APR_HELP_STRING([--with-crypto], [enable crypto support])],
   [
-    cryptolibs="openssl nss"
+    cryptolibs="openssl nss commoncrypto"
 
     if test "$withval" = "yes"; then
 
@@ -61,9 +62,10 @@ AC_DEFUN([APU_CHECK_CRYPTO], [
 
       APU_CHECK_CRYPTO_OPENSSL
       APU_CHECK_CRYPTO_NSS
+      APU_CHECK_CRYPTO_COMMONCRYPTO
       dnl add checks for other varieties of ssl here
       if test "$apu_have_crypto" = "0"; then
-        AC_ERROR([Crypto was requested but no crypto library could be enabled; specify the location of a crypto library using --with-openssl, --with-nss, etc.])
+        AC_ERROR([Crypto was requested but no crypto library could be enabled; specify the location of a crypto library using --with-openssl, --with-nss, and/or --with-commoncrypto.])
       fi
     fi
   ], [
@@ -238,4 +240,71 @@ AC_DEFUN([APU_CHECK_CRYPTO_NSS], [
   CPPFLAGS="$old_cppflags"
   LDFLAGS="$old_ldflags"
 ])
+
+AC_DEFUN([APU_CHECK_CRYPTO_COMMONCRYPTO], [
+  apu_have_commoncrypto=0
+  commoncrypto_have_headers=0
+  commoncrypto_have_libs=0
+
+  old_libs="$LIBS"
+  old_cppflags="$CPPFLAGS"
+  old_ldflags="$LDFLAGS"
+
+  AC_ARG_WITH([commoncrypto], 
+  [APR_HELP_STRING([--with-commoncrypto=DIR], [specify location of CommonCrypto])],
+  [
+    if test "$withval" = "yes"; then
+      AC_CHECK_HEADERS(CommonCrypto/CommonKeyDerivation.h, [commoncrypto_have_headers=1])
+      AC_CHECK_LIB(System, CCKeyDerivationPBKDF, AC_CHECK_LIB(System, CCCryptorCreate, [commoncrypto_have_libs=1],,-lcrypto))
+      if test "$commoncrypto_have_headers" != "0" && test "$commoncrypto_have_libs" != "0"; then
+        apu_have_commoncrypto=1
+      fi
+    elif test "$withval" = "no"; then
+      apu_have_commoncrypto=0
+    else
+
+      commoncrypto_CPPFLAGS="-I$withval/include"
+      commoncrypto_LDFLAGS="-L$withval/lib "
+
+      APR_ADDTO(CPPFLAGS, [$commoncrypto_CPPFLAGS])
+      APR_ADDTO(LDFLAGS, [$commoncrypto_LDFLAGS])
+
+      AC_MSG_NOTICE(checking for commoncrypto in $withval)
+      AC_CHECK_HEADERS(CommonCrypto/CommonKeyDerivation.h, [commoncrypto_have_headers=1])
+      AC_CHECK_LIB(System, CCKeyDerivationPBKDF, AC_CHECK_LIB(System, CCCryptorCreate, [commoncrypto_have_libs=1],,-lcrypto))
+      if test "$commoncrypto_have_headers" != "0" && test "$commoncrypto_have_libs" != "0"; then
+        apu_have_commoncrypto=1
+        APR_ADDTO(LDFLAGS, [-L$withval/lib])
+        APR_ADDTO(INCLUDES, [-I$withval/include])
+      fi
+
+      if test "$apu_have_commoncrypto" != "1"; then
+        AC_CHECK_HEADERS(CommonCrypto/CommonKeyDerivation.h, [commoncrypto_have_headers=1])
+        AC_CHECK_LIB(System, CCKeyDerivationPBKDF, AC_CHECK_LIB(System, CCCryptorCreate, [commoncrypto_have_libs=1],,-lcrypto))
+        if test "$commoncrypto_have_headers" != "0" && test "$commoncrypto_have_libs" != "0"; then
+          apu_have_commoncrypto=1
+          APR_ADDTO(LDFLAGS, [-L$withval/lib])
+          APR_ADDTO(INCLUDES, [-I$withval/include])
+        fi
+      fi
+
+    fi
+  ], [
+    apu_have_commoncrypto=0
+  ])
+
+  dnl Since we have already done the AC_CHECK_LIB tests, if we have it, 
+  dnl we know the library is there.
+  if test "$apu_have_commoncrypto" = "1"; then
+    apu_have_crypto=1
+  fi
+  AC_SUBST(apu_have_commoncrypto)
+  AC_SUBST(LDADD_crypto_commoncrypto)
+  AC_SUBST(apu_have_crypto)
+
+  LIBS="$old_libs"
+  CPPFLAGS="$old_cppflags"
+  LDFLAGS="$old_ldflags"
+])
+
 dnl
