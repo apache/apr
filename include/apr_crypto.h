@@ -40,6 +40,9 @@ extern "C" {
 #if APU_HAVE_CRYPTO
 
 #ifndef APU_CRYPTO_RECOMMENDED_DRIVER
+#if APU_HAVE_COMMONCRYPTO
+#define APU_CRYPTO_RECOMMENDED_DRIVER "commoncrypto"
+#else
 #if APU_HAVE_OPENSSL
 #define APU_CRYPTO_RECOMMENDED_DRIVER "openssl"
 #else
@@ -52,6 +55,7 @@ extern "C" {
 #if APU_HAVE_MSCAPI
 #define APU_CRYPTO_RECOMMENDED_DRIVER "mscapi"
 #else
+#endif
 #endif
 #endif
 #endif
@@ -84,16 +88,16 @@ extern "C" {
  * the chosen cipher. Padded data is data that is not aligned by block
  * size and must be padded by the crypto library.
  *
- *                  OpenSSL      NSS      Interop
- *                 Align Pad  Align Pad  Align Pad
- * 3DES_192/CBC    X     X    X     X    X     X
- * 3DES_192/ECB    X     X
- * AES_256/CBC     X     X    X     X    X     X
- * AES_256/ECB     X     X    X          X
- * AES_192/CBC     X     X    X     X
- * AES_192/ECB     X     X    X
- * AES_128/CBC     X     X    X     X
- * AES_128/ECB     X     X    X
+ *                  OpenSSL    CommonCrypto   NSS       Interop
+ *                 Align  Pad  Align  Pad  Align  Pad  Align  Pad
+ * 3DES_192/CBC    X      X    X      X    X      X    X      X
+ * 3DES_192/ECB    X      X    X      X
+ * AES_256/CBC     X      X    X      X    X      X    X      X
+ * AES_256/ECB     X      X    X      X    X           X
+ * AES_192/CBC     X      X    X      X    X      X
+ * AES_192/ECB     X      X    X      X    X
+ * AES_128/CBC     X      X    X      X    X      X
+ * AES_128/ECB     X      X    X      X    X
  *
  * Conclusion: for padded data, use 3DES_192/CBC or AES_256/CBC. For
  * aligned data, use 3DES_192/CBC, AES_256/CBC or AES_256/ECB.

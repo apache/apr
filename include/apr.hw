@@ -657,6 +657,7 @@ typedef int apr_wait_t;
 #ifndef APU_DSO_MODULE_BUILD
 #define APU_HAVE_OPENSSL        0
 #define APU_HAVE_NSS            0
+#define APU_HAVE_COMMONCRYPTO   0
 #endif
 
 #define APU_HAVE_ICONV          0

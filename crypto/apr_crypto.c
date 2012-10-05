@@ -215,6 +215,11 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
         DRIVER_LOAD("nss", apr_crypto_nss_driver, pool, params, rv, result);
     }
 #endif
+#if APU_HAVE_COMMONCRYPTO
+    if (name[0] == 'c' && !strcmp(name, "commoncrypto")) {
+        DRIVER_LOAD("commoncrypto", apr_crypto_commoncrypto_driver, pool, params, rv, result);
+    }
+#endif
 #if APU_HAVE_MSCAPI
     if (name[0] == 'm' && !strcmp(name, "mscapi")) {
         DRIVER_LOAD("mscapi", apr_crypto_mscapi_driver, pool, params, rv, result);
