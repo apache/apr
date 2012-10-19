@@ -119,15 +119,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(CPPFLAGS, [-DHPUX -D_REENTRANT])
 	;;
     *-linux*)
-        case `uname -r` in
-	    2.* )  APR_ADDTO(CPPFLAGS, [-DLINUX=2])
-	           ;;
-	    1.* )  APR_ADDTO(CPPFLAGS, [-DLINUX=1])
-	           ;;
-	    * )
-	           ;;
-        esac
-	APR_ADDTO(CPPFLAGS, [-D_REENTRANT -D_GNU_SOURCE])
+	APR_ADDTO(CPPFLAGS, [-DLINUX -D_REENTRANT -D_GNU_SOURCE])
 	;;
     *-lynx-lynxos)
 	APR_ADDTO(CPPFLAGS, [-D__NO_INCLUDE_WARN__ -DLYNXOS])
