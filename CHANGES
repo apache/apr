@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.7
 
+  *) configure: Fix Linux 3.x detection. PR 54001. [Gilles Espinasse
+     <g esp free fr>]
+
   *) apr_time_exp_*() on Windows: Fix error in the tm_yday field of
      apr_time_exp_t for times within leap years.  PR 53175.
      [Jeff Trawick]
