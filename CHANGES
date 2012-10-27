@@ -9,12 +9,6 @@ Changes for APR 2.0.0
   *) Remove duplicated logic in apr_brigade_puts(). PR 53740. [Christophe
      Jaillet <christophe jaillet wanadoo fr>]
 
-  *) apr_password_validate, apr_bcrypt_encode: Add support for bcrypt encoded
-     passwords. The bcrypt implementation uses code from crypt_blowfish
-     written by Solar Designer <solar openwall com>. apr_bcrypt_encode creates
-     hashes with "$2y$" prefix, but apr_password_validate also accepts the old
-     prefix "$2a$". [Stefan Fritsch]
-
   *) apr_pollset_poll:  add z/OS async poll support for sockets [Greg Ames]
 
   *) apr_mcast_hops: Fix EINVAL for IPv6 sockets caused by using byte
@@ -28,17 +22,6 @@ Changes for APR 2.0.0
 
   *) apr_memcache_server_create: Fix possible segfault. PR 51064.
      [Michajlo Matijkiw <michajlo_matijkiw comcast com>]
-
-  *) apr_dir_make_recursive: Fix race condition that could lead to EEXIST
-     being returned. PR 51254. [William Lee <william lee rainstor com>,
-     Wim Lewis <wiml omnigroup com>]
-
-  *) configure: Fix APR_RESTORE_THE_ENVIRONMENT if the original variable was
-     a single space. PR 50334. [Nathan Phillip Brink <binki gentoo org>]
-
-  *) apr_proc_create: Don't close any of the new stdin/stdout/stderr in the
-     child if it already has the correct FD. PR 51995.
-     [Dan Ports <drkp csail mit edu>]
 
   *) apr_thread_pool: Fix thread unsafe pool usage. [Stefan Fritsch]
 
