@@ -417,17 +417,30 @@ APR_DECLARE(apr_status_t) apr_brigade_vputstrs(apr_bucket_brigade *b,
                                                void *ctx,
                                                va_list va)
 {
+#define MAX_VECS    8
+    struct iovec vec[MAX_VECS];
+    apr_size_t i = 0;
+
     for (;;) {
-        const char *str = va_arg(va, const char *);
+        char *str = va_arg(va, char *);
         apr_status_t rv;
 
         if (str == NULL)
             break;
 
-        rv = apr_brigade_write(b, flush, ctx, str, strlen(str));
-        if (rv != APR_SUCCESS)
-            return rv;
+        vec[i].iov_base = str;
+        vec[i].iov_len = strlen(str);
+        i++;
+
+        if (i == MAX_VECS) {
+            rv = apr_brigade_writev(b, flush, ctx, vec, i);
+            if (rv != APR_SUCCESS)
+                return rv;
+            i = 0;
+        }
     }
+    if (i != 0)
+       return apr_brigade_writev(b, flush, ctx, vec, i);
 
     return APR_SUCCESS;
 }
