@@ -57,11 +57,14 @@ APR_DECLARE_NONSTD(apr_bucket_alloc_t *) apr_bucket_alloc_create(apr_pool_t *p)
     apr_allocator_t *allocator;
     apr_bucket_alloc_t *list;
 
-    if (apr_allocator_create(&allocator) != APR_SUCCESS) {
-        abort();
+    if (apr_allocator_create(&allocator) != APR_SUCCESS
+        || (list = apr_bucket_alloc_create_ex(allocator)) == NULL) {
+        apr_abortfunc_t fn = apr_pool_abort_get(p);
+        if (fn)
+            (fn)(APR_ENOMEM);
+        else
+            abort();
     }
-
-    list = apr_bucket_alloc_create_ex(allocator);
     list->pool = p;
     apr_pool_cleanup_register(list->pool, list, alloc_cleanup,
                               apr_pool_cleanup_null);
