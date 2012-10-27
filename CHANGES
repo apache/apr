@@ -23,8 +23,6 @@ Changes for APR 2.0.0
   *) apr_memcache_server_create: Fix possible segfault. PR 51064.
      [Michajlo Matijkiw <michajlo_matijkiw comcast com>]
 
-  *) apr_thread_pool: Fix thread unsafe pool usage. [Stefan Fritsch]
-
   *) apr_brigades: add a check to prevent infinite while loop in case
      of a corrupted brigade.  Problem evidenced in PR 51062.  Analysis by
      Krzysztof Kostałkowicz <KKostalkowicz ivmx.pl>, patch [Nick Kew].
