@@ -469,6 +469,25 @@ static void test_partition(abts_case *tc, void *data)
     apr_bucket_alloc_destroy(ba);
 }
 
+static void test_write_split(abts_case *tc, void *data)
+{
+    apr_bucket_alloc_t *ba = apr_bucket_alloc_create(p);
+    apr_bucket_brigade *bb1 = apr_brigade_create(p, ba);
+    apr_bucket_brigade *bb2;
+    apr_bucket *e;
+
+    e = apr_bucket_heap_create(hello, strlen(hello), NULL, ba);
+    APR_BRIGADE_INSERT_HEAD(bb1, e);
+    apr_bucket_split(e, strlen("hello, "));
+    bb2 = apr_brigade_split(bb1, APR_BRIGADE_LAST(bb1));
+    apr_brigade_write(bb1, NULL, NULL, "foo", strlen("foo"));
+    test_bucket_content(tc, APR_BRIGADE_FIRST(bb2), "world", 5);
+
+    apr_brigade_destroy(bb1);
+    apr_brigade_destroy(bb2);
+    apr_bucket_alloc_destroy(ba);
+}
+
 abts_suite *testbuckets(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
@@ -484,6 +503,7 @@ abts_suite *testbuckets(abts_suite *suite)
     abts_run_test(suite, test_manyfile, NULL);
     abts_run_test(suite, test_truncfile, NULL);
     abts_run_test(suite, test_partition, NULL);
+    abts_run_test(suite, test_write_split, NULL);
 
     return suite;
 }
