@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Remove duplicated logic in apr_brigade_puts(). PR 53740. [Christophe
+     Jaillet <christophe jaillet wanadoo fr>]
+
   *) apr_password_validate, apr_bcrypt_encode: Add support for bcrypt encoded
      passwords. The bcrypt implementation uses code from crypt_blowfish
      written by Solar Designer <solar openwall com>. apr_bcrypt_encode creates

@@ -617,29 +617,7 @@ APR_DECLARE(apr_status_t) apr_brigade_puts(apr_bucket_brigade *bb,
                                            apr_brigade_flush flush, void *ctx,
                                            const char *str)
 {
-    apr_size_t len = strlen(str);
-    apr_bucket *bkt = APR_BRIGADE_LAST(bb);
-    if (!APR_BRIGADE_EMPTY(bb) && APR_BUCKET_IS_HEAP(bkt)) {
-        /* If there is enough space available in a heap bucket
-         * at the end of the brigade, copy the string directly
-         * into the heap bucket
-         */
-        apr_bucket_heap *h = bkt->data;
-        apr_size_t bytes_avail = h->alloc_len - bkt->length;
-
-        if (bytes_avail >= len) {
-            char *buf = h->base + bkt->start + bkt->length;
-            memcpy(buf, str, len);
-            bkt->length += len;
-            return APR_SUCCESS;
-        }
-    }
-
-    /* If the string could not be copied into an existing heap
-     * bucket, delegate the work to apr_brigade_write(), which
-     * knows how to grow the brigade
-     */
-    return apr_brigade_write(bb, flush, ctx, str, len);
+    return apr_brigade_write(bb, flush, ctx, str, strlen(str));
 }
 
 APR_DECLARE_NONSTD(apr_status_t) apr_brigade_putstrs(apr_bucket_brigade *b, 
