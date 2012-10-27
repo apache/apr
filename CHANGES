@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Fix potential data corruption in apr_brigade_write() and friends if
+     the last bucket of the brigade is a heap bucket that has been split,
+     and there are still references to the next part of the original bucket
+     in use. [Stefan Fritsch]
+
   *) Remove duplicated logic in apr_brigade_puts(). PR 53740. [Christophe
      Jaillet <christophe jaillet wanadoo fr>]
 

@@ -448,7 +448,12 @@ APR_DECLARE(apr_status_t) apr_brigade_write(apr_bucket_brigade *b,
     apr_size_t remaining = APR_BUCKET_BUFF_SIZE;
     char *buf = NULL;
 
-    if (!APR_BRIGADE_EMPTY(b) && APR_BUCKET_IS_HEAP(e)) {
+    /*
+     * If the last bucket is a heap bucket and its buffer is not shared with
+     * another bucket, we may write into that bucket.
+     */
+    if (!APR_BRIGADE_EMPTY(b) && APR_BUCKET_IS_HEAP(e)
+        && ((apr_bucket_heap *)(e->data))->refcount.refcount == 1) {
         apr_bucket_heap *h = e->data;
 
         /* HEAP bucket start offsets are always in-memory, safe to cast */
@@ -538,10 +543,11 @@ APR_DECLARE(apr_status_t) apr_brigade_writev(apr_bucket_brigade *b,
     i = 0;
 
     /* If there is a heap bucket at the end of the brigade
-     * already, copy into the existing bucket.
+     * already, and its refcount is 1, copy into the existing bucket.
      */
     e = APR_BRIGADE_LAST(b);
-    if (!APR_BRIGADE_EMPTY(b) && APR_BUCKET_IS_HEAP(e)) {
+    if (!APR_BRIGADE_EMPTY(b) && APR_BUCKET_IS_HEAP(e)
+        && ((apr_bucket_heap *)(e->data))->refcount.refcount == 1) {
         apr_bucket_heap *h = e->data;
         apr_size_t remaining = h->alloc_len -
             (e->length + (apr_size_t)e->start);
