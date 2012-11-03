@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_socket_accept_filter(): The 2nd and 3rd arguments are now 
+     const char * instead of char *.  [Jeff Trawick]
+
   *) Fix potential data corruption in apr_brigade_write() and friends if
      the last bucket of the brigade is a heap bucket that has been split,
      and there are still references to the next part of the original bucket
