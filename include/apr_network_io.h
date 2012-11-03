@@ -798,8 +798,8 @@ APR_DECLARE(int) apr_ipsubnet_test(apr_ipsubnet_t *ipsub, apr_sockaddr_t *sa);
  * @param args Any extra args to the accept filter.  Passing NULL here removes
  *             the accept filter. 
  */
-apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char *name,
-                                      char *args);
+apr_status_t apr_socket_accept_filter(apr_socket_t *sock, const char *name,
+                                      const char *args);
 #endif
 
 /**
