@@ -393,9 +393,13 @@ apr_status_t apr_gethostname(char *buf, apr_int32_t len, apr_pool_t *cont)
 }
 
 #if APR_HAS_SO_ACCEPTFILTER
-apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char *name, 
-                                      char *args)
+apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char *nonconst_name, 
+                                      char *nonconst_args)
 {
+    /* these should have been const; act like they are */
+    const char *name = nonconst_name;
+    const char *args = nonconst_args;
+
     struct accept_filter_arg af;
     strncpy(af.af_name, name, 16);
     strncpy(af.af_arg, args, 256 - 16);
