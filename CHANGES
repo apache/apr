@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Fix apr_ipsubnet_test() false positives when comparing IPv4
+     subnet representation against an IPv6 address.  PR 54047.  [Joe Orton]
+
   *) apr_socket_accept_filter(): The 2nd and 3rd arguments are now 
      const char * instead of char *.  [Jeff Trawick]
 
