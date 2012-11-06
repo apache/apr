@@ -62,8 +62,7 @@ APR_DECLARE_NONSTD(apr_bucket_alloc_t *) apr_bucket_alloc_create(apr_pool_t *p)
         apr_abortfunc_t fn = apr_pool_abort_get(p);
         if (fn)
             (fn)(APR_ENOMEM);
-        else
-            abort();
+        abort();
     }
     list->pool = p;
     apr_pool_cleanup_register(list->pool, list, alloc_cleanup,
