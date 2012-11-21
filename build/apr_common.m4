@@ -202,14 +202,18 @@ dnl and restoring the original variable contents.  This makes it possible
 dnl for a user to override configure when it does something stupid.
 dnl
 AC_DEFUN([APR_RESTORE_THE_ENVIRONMENT], [
-if test "x$apr_ste_save_$1" = "x"; then
+dnl Check whether $apr_ste_save_$1 is empty or
+dnl only whitespace. The verbatim "X" is token number 1,
+dnl the following whitespace will be ignored.
+set X $apr_ste_save_$1
+if test ${#} -eq 1; then
   $2$1="$$1"
   $1=
 else
   if test "x$apr_ste_save_$1" = "x$$1"; then
     $2$1=
   else
-    $2$1=`echo $$1 | sed -e "s%${apr_ste_save_$1}%%"`
+    $2$1=`echo "$$1" | sed -e "s%${apr_ste_save_$1}%%"`
     $1="$apr_ste_save_$1"
   fi
 fi
@@ -495,12 +499,14 @@ AC_DEFUN([APR_TRY_COMPILE_NO_WARNING],
    CFLAGS="$CFLAGS -Werror"
  fi
  AC_COMPILE_IFELSE(
-  [#include "confdefs.h"
-  ]
-  [[$1]]
-  [int main(int argc, const char *const *argv) {]
-  [[$2]]
-  [   return 0; }],
+  [AC_LANG_SOURCE(
+   [#include "confdefs.h"
+   ]
+   [[$1]]
+   [int main(int argc, const char *const *argv) {]
+   [[$2]]
+   [   return 0; }]
+  )],
   [$3], [$4])
  CFLAGS=$apr_save_CFLAGS
 ])

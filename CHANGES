@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.13
 
+  *) configure: Fix APR_RESTORE_THE_ENVIRONMENT if the original variable was
+     a single space. PR 50334. [Nathan Phillip Brink <binki gentoo org>]
+
+  *) Silence autoconf 2.68 warnings.  [Rainer Jung]
+
   *) Don't overwrite our config.guess and config.sub
      when running buildconf.  [Rainer Jung]
 
