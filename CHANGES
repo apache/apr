@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.13
 
+  *) Don't overwrite our config.guess and config.sub
+     when running buildconf.  [Rainer Jung]
+
   *) apr_mcast_hops: Fix EINVAL for IPv6 sockets caused by using byte
      instead integer for setsockopt. [Mladen Turk]
 
