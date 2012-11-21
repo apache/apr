@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.13
 
+  *) Improve platform detection by updating config.guess and config.sub.
+     [Rainer Jung]
+
   *) configure: Fix APR_RESTORE_THE_ENVIRONMENT if the original variable was
      a single space. PR 50334. [Nathan Phillip Brink <binki gentoo org>]
 
