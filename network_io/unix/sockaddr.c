@@ -1028,7 +1028,7 @@ APR_DECLARE(int) apr_ipsubnet_test(apr_ipsubnet_t *ipsub, apr_sockaddr_t *sa)
     /* XXX This line will segv on Win32 build with APR_HAVE_IPV6,
      * but without the IPV6 drivers installed.
      */
-    if (sa->sa.sin.sin_family == AF_INET) {
+    if (sa->family == AF_INET) {
         if (ipsub->family == AF_INET &&
             ((sa->sa.sin.sin_addr.s_addr & ipsub->mask[0]) == ipsub->sub[0])) {
             return 1;
@@ -1040,7 +1040,7 @@ APR_DECLARE(int) apr_ipsubnet_test(apr_ipsubnet_t *ipsub, apr_sockaddr_t *sa)
             return 1;
         }
     }
-    else {
+    else if (sa->family == AF_INET6 && ipsub->family == AF_INET6) {
         apr_uint32_t *addr = (apr_uint32_t *)sa->ipaddr_ptr;
 
         if ((addr[0] & ipsub->mask[0]) == ipsub->sub[0] &&
