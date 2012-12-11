@@ -1,6 +1,12 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.7
 
+  *) Remove unused code, fix strict C compliance bug in SHA-256
+     implementation.  [Jan Kaluza <jkaluza redhat.com>]
+
+  *) Fix apr_ipsubnet_test() false positives when comparing IPv4
+     subnet representation against an IPv6 address.  PR 54047.  [Joe Orton]
+
   *) apr_socket_accept_filter: Return success when trying to again set
      the filter to the same value as before, avoiding an unhelpful
      APR_EINVAL.  PR 37863.  [Jeff Trawick]

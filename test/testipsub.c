@@ -119,6 +119,7 @@ static void test_interesting_subnets(abts_case *tc, void *data)
         ,{"127",              NULL,            APR_INET,  "127.0.0.1",           "10.1.2.3"}
         ,{"127.0.0.1",        "8",             APR_INET,  "127.0.0.1",           "10.1.2.3"}
 #if APR_HAVE_IPV6
+        ,{"38.0.0.0",         "8",             APR_INET6, "::ffff:38.1.1.1",     "2600::1"} /* PR 54047 */
         ,{"fe80::",           "8",             APR_INET6, "fe80::1",             "ff01::1"}
         ,{"ff01::",           "8",             APR_INET6, "ff01::1",             "fe80::1"}
         ,{"3FFE:8160::",      "28",            APR_INET6, "3ffE:816e:abcd:1234::1", "3ffe:8170::1"}
