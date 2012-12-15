@@ -137,7 +137,8 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
 #elif defined(CRYPT_R_STRUCT_CRYPT_DATA)
         struct crypt_data buffer;
 
-#if defined(__GLIBC_PREREQ) && __GLIBC_PREREQ(2,4)
+#ifdef __GLIBC_PREREQ
+#if __GLIBC_PREREQ(2,4)
         buffer.initialized = 0;
 #else
         /*
@@ -146,6 +147,8 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
          */
         memset(&buffer, 0, sizeof(buffer));
 #endif
+#endif /* defined __GLIBC_PREREQ */
+
         crypt_pw = crypt_r(passwd, hash, &buffer);
         if (!crypt_pw) {
             return APR_EMISMATCH;
