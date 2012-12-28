@@ -138,16 +138,21 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
         struct crypt_data buffer;
 
 #ifdef __GLIBC_PREREQ
+        /*
+         * For not too old glibc (>= 2.3.2), it's enough to set
+         * buffer.initialized = 0. For < 2.3.2 and for other platforms,
+         * we need to zero the whole struct.
+         */
 #if __GLIBC_PREREQ(2,4)
+#define USE_CRYPT_DATA_INITALIZED
+#endif
+#endif
+
+#ifdef USE_CRYPT_DATA_INITALIZED
         buffer.initialized = 0;
 #else
-        /*
-         * glibc before 2.3.2 had a bug that required clearing the
-         * whole struct
-         */
         memset(&buffer, 0, sizeof(buffer));
 #endif
-#endif /* defined __GLIBC_PREREQ */
 
         crypt_pw = crypt_r(passwd, hash, &buffer);
         if (!crypt_pw) {
