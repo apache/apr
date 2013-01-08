@@ -16,7 +16,8 @@
  *
  ******************************************************************************
  *
- * This implementation is based on the z/OS sockets async i/o facility.  When a
+ * This implementation is based on a design by John Brooks (IBM Pok) which uses
+ * the z/OS sockets async i/o facility.  When a
  * socket is added to the pollset, an async poll is issued for that individual 
  * socket.  It specifies that the kernel should send an IPC message when the 
  * socket becomes ready.  The IPC messages are sent to a single message queue 
