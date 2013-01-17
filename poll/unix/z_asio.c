@@ -77,7 +77,8 @@ struct apr_pollset_private_t
 
 typedef enum {
     ASIO_INIT = 0,
-    ASIO_REMOVED
+    ASIO_REMOVED,
+    ASIO_COMPLETE
 } asio_state_e;
 
 typedef struct asio_elem_t asio_elem_t;
@@ -499,20 +500,24 @@ static apr_status_t asio_pollset_remove(apr_pollset_t *pollset,
         DBG1(5, "hash found fd %d\n", fd);
         /* delete this fd from the hash */
         apr_hash_set(priv->elems, &(fd), sizeof(int), NULL);
-        /* asyncio call to cancel */
-        elem->a.aio_cmd    = AIO_CANCEL;
 
-        /* elem->a.aio_cflags = AIO_CANCELNONOTIFY; */
-        /* we want *msgrcv to collect cancel notifications to remove races
-         * in garbage collection */
+        if (elem->state == ASIO_INIT) {
+            /* asyncio call to cancel */
+            elem->a.aio_cmd    = AIO_CANCEL;
 
-        rv = asyncio(&elem->a);
-        DBG1(4, "asyncio returned %d\n", rv);
+            /* we want the original aiocb to show up on the pollset message queue 
+             * to eliminate race conditions
+             */
 
-        if (rv == 1) {
-            elem->state = ASIO_REMOVED;
-            rv = APR_SUCCESS;
+            rv = asyncio(&elem->a);
+            DBG1(4, "asyncio returned %d\n", rv);
+
+#if DEBUG
+            assert(rv == 1);
+#endif
         }
+        elem->state = ASIO_REMOVED;
+        rv = APR_SUCCESS;
     }
 
     DBG1(2, "exiting, rv: %d\n", rv);
@@ -567,16 +572,26 @@ static process_msg(apr_pollset_t *pollset, struct asio_msgbuf_t *msg)
     DBG_BUFF
     asio_elem_t *elem = msg->msg_elem;
 
-    if (elem->state == ASIO_REMOVED) {
+    switch(elem->state) {
+    case ASIO_REMOVED:
         DBG2(5, "for cancelled elem, recycling memory - elem %08p, fd %d\n",
                 elem, elem->os_pfd.fd);
         APR_RING_INSERT_TAIL(&(pollset->p->free_ring), elem,
                              asio_elem_t, link);
-    } else {
+        break;
+    case ASIO_INIT:
         DBG2(4, "adding to ready ring: elem %08p, fd %d\n",
                 elem, elem->os_pfd.fd);
+        elem->state = ASIO_COMPLETE;
         APR_RING_INSERT_TAIL(&(pollset->p->ready_ring), elem,
                              asio_elem_t, link);
+        break;
+    default:
+        DBG3(1, "unexpected state: elem %08p, fd %d, state %d\n",
+            elem, elem->os_pfd.fd, elem->state);
+#if DEBUG
+        assert(0);
+#endif
     }
 }
 
