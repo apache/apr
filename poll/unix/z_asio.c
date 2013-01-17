@@ -171,7 +171,7 @@ struct asio_elem_t
 
 #endif /* DEBUG */
 
-static int asyncio(asio_elem_t *elem)
+static int asyncio(struct aiocb *a)
 {
     DBG_BUFF
     int rv;
@@ -182,9 +182,9 @@ static int asyncio(asio_elem_t *elem)
 #define AIO BPX1AIO
 #endif
 
-    AIO(sizeof(struct aiocb), &(elem->a), &rv, &errno, __err2ad());
-    DBG3(4, "BPX4AIO aiocb %p elem %p rv %d\n",
-             &(elem->a), elem, rv);
+    AIO(sizeof(struct aiocb), a, &rv, &errno, __err2ad());
+    DBG2(4, "BPX4AIO aiocb %p rv %d\n",
+             a, rv);
 #ifdef DEBUG
     if (rv < 0) {
         DBG2(4, "errno %d errnojr %08x\n",
@@ -404,7 +404,7 @@ static apr_status_t asio_pollset_add(apr_pollset_t *pollset,
         elem->pfd             = *descriptor;
         elem->os_pfd.events   = get_event(descriptor->reqevents);
 
-        if (0 != asyncio(elem)) {
+        if (0 != asyncio(&elem->a)) {
             rv = errno;
             DBG3(4, "pollset %p asio failed fd %d, errno %p\n",
                      pollset, elem->os_pfd.fd, rv);
@@ -506,7 +506,7 @@ static apr_status_t asio_pollset_remove(apr_pollset_t *pollset,
         /* we want *msgrcv to collect cancel notifications to remove races
          * in garbage collection */
 
-        rv = asyncio(elem);
+        rv = asyncio(&elem->a);
         DBG1(4, "asyncio returned %d\n", rv);
 
         if (rv == 1) {
@@ -625,7 +625,7 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
 
         elem->a.aio_cflags     = AIO_OK2COMPIMD;
 
-        if (0 != (ret = asyncio(elem))) {
+        if (0 != (ret = asyncio(&elem->a))) {
             if (ret == 1) {
                 DBG(4, "asyncio() completed inline\n");
                 /* it's ready now */
