@@ -77,7 +77,7 @@ struct apr_pollset_private_t
 
 typedef enum {
     ASIO_INIT = 0,
-    ASIO_CANCELLED
+    ASIO_REMOVED
 } asio_state_e;
 
 typedef struct asio_elem_t asio_elem_t;
@@ -510,7 +510,7 @@ static apr_status_t asio_pollset_remove(apr_pollset_t *pollset,
         DBG1(4, "asyncio returned %d\n", rv);
 
         if (rv == 1) {
-            elem->state = ASIO_CANCELLED;
+            elem->state = ASIO_REMOVED;
             rv = APR_SUCCESS;
         }
     }
@@ -567,7 +567,7 @@ static process_msg(apr_pollset_t *pollset, struct asio_msgbuf_t *msg)
     DBG_BUFF
     asio_elem_t *elem = msg->msg_elem;
 
-    if (elem->state == ASIO_CANCELLED) {
+    if (elem->state == ASIO_REMOVED) {
         DBG2(5, "for cancelled elem, recycling memory - elem %08p, fd %d\n",
                 elem, elem->os_pfd.fd);
         APR_RING_INSERT_TAIL(&(pollset->p->free_ring), elem,
@@ -619,7 +619,7 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
          * result set last time. re-poll inline for both cases
          */
 
-        if (elem->state == ASIO_CANCELLED) {
+        if (elem->state == ASIO_REMOVED) {
             continue;  /* do not re-add if it has been _removed */
         }
 
