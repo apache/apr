@@ -18,15 +18,15 @@
  *
  * This implementation is based on a design by John Brooks (IBM Pok) which uses
  * the z/OS sockets async i/o facility.  When a
- * socket is added to the pollset, an async poll is issued for that individual 
- * socket.  It specifies that the kernel should send an IPC message when the 
- * socket becomes ready.  The IPC messages are sent to a single message queue 
- * that is part of the pollset.  apr_pollset_poll waits on the arrival of IPC 
+ * socket is added to the pollset, an async poll is issued for that individual
+ * socket.  It specifies that the kernel should send an IPC message when the
+ * socket becomes ready.  The IPC messages are sent to a single message queue
+ * that is part of the pollset.  apr_pollset_poll waits on the arrival of IPC
  * messages or the specified timeout.
  *
  * Since z/OS does not support async i/o for pipes or files at present, this
- * implementation falls back to using ordinary poll() when  
- * APR_POLLSET_THREADSAFE is unset. 
+ * implementation falls back to using ordinary poll() when
+ * APR_POLLSET_THREADSAFE is unset.
  *
  * Greg Ames
  * April 2012
@@ -37,7 +37,7 @@
 #include "apr_poll.h"
 #include "apr_time.h"
 #include "apr_portable.h"
-#include "apr_arch_inherit.h" 
+#include "apr_arch_inherit.h"
 #include "apr_arch_file_io.h"
 #include "apr_arch_networkio.h"
 #include "apr_arch_poll_private.h"
@@ -56,7 +56,7 @@ struct apr_pollset_private_t
                                          * file descriptors complete
                                          */
     apr_pollfd_t    *result_set;
-    apr_uint32_t    size; 
+    apr_uint32_t    size;
 
 #if APR_HAS_THREADS
     /* A thread mutex to protect operations on the rings and the hash */
@@ -69,7 +69,7 @@ struct apr_pollset_private_t
     APR_RING_HEAD(ready_ring_t,       asio_elem_t)      ready_ring;
     APR_RING_HEAD(prior_ready_ring_t, asio_elem_t)      prior_ready_ring;
     APR_RING_HEAD(free_ring_t,        asio_elem_t)      free_ring;
-  
+
     /* for pipes etc with no asio */
     struct pollfd   *pollset;
     apr_pollfd_t    *query_set;
@@ -88,7 +88,7 @@ struct asio_msgbuf_t {
 };
 
 struct asio_elem_t
-{ 
+{
     APR_RING_ENTRY(asio_elem_t) link;
     apr_pollfd_t                pfd;
     struct pollfd               os_pfd;
@@ -106,7 +106,7 @@ struct asio_elem_t
  *                 4 - z/OS, APR, and internal calls,
  *                 5 - everything else except the timer pop path,
  *                 6 - everything, including the Event 1 sec timer pop path
- * 
+ *
  *  each DEBUG level includes all messages produced by lower numbered levels
  */
 
@@ -162,9 +162,9 @@ struct asio_elem_t
                         DBG_END
 
 #else  /* DEBUG is 0 */
-#define DBG_BUFF 
-#define DBG(lvl, msg)                            ((void)0) 
-#define DBG1(lvl, msg, var1)                     ((void)0) 
+#define DBG_BUFF
+#define DBG(lvl, msg)                            ((void)0)
+#define DBG1(lvl, msg, var1)                     ((void)0)
 #define DBG2(lvl, msg, var1, var2)               ((void)0)
 #define DBG3(lvl, msg, var1, var2, var3)         ((void)0)
 #define DBG4(lvl, msg, var1, var2, var3, var4)   ((void)0)
@@ -182,12 +182,12 @@ static int asyncio(asio_elem_t *elem)
 #define AIO BPX1AIO
 #endif
 
-    AIO(sizeof(struct aiocb), &(elem->a), &rv, &errno, __err2ad()); 
-    DBG3(4, "BPX4AIO aiocb %p elem %p rv %d\n", 
+    AIO(sizeof(struct aiocb), &(elem->a), &rv, &errno, __err2ad());
+    DBG3(4, "BPX4AIO aiocb %p elem %p rv %d\n",
              &(elem->a), elem, rv);
 #ifdef DEBUG
     if (rv < 0) {
-        DBG2(4, "errno %d errnojr %08x\n", 
+        DBG2(4, "errno %d errnojr %08x\n",
                  errno, *__err2ad());
     }
 #endif
@@ -276,7 +276,7 @@ static apr_status_t asio_pollset_create(apr_pollset_t *pollset,
         }
         rv = msgget(IPC_PRIVATE, S_IWUSR+S_IRUSR); /* user r/w perms */
         if (rv < 0) {
-#if DEBUG 
+#if DEBUG
             perror(__FUNCTION__ " msgget returned < 0 ");
 #endif
             pollset = NULL;
@@ -295,7 +295,7 @@ static apr_status_t asio_pollset_create(apr_pollset_t *pollset,
         return APR_ENOTIMPL;
 #endif
 
-    } else {  /* APR_POLLSET_THREADSAFE not set, i.e. no async i/o, 
+    } else {  /* APR_POLLSET_THREADSAFE not set, i.e. no async i/o,
                * init fields only needed in old style pollset
                */
 
@@ -317,8 +317,8 @@ static apr_status_t asio_pollset_create(apr_pollset_t *pollset,
     }
 
     DBG2(2, "exiting, pollset: %p, type: %s\n",
-             pollset,            
-             flags & APR_POLLSET_THREADSAFE ? "async" : "POSIX"); 
+             pollset,
+             flags & APR_POLLSET_THREADSAFE ? "async" : "POSIX");
 
 
     return APR_SUCCESS;
@@ -371,7 +371,7 @@ static apr_status_t asio_pollset_add(apr_pollset_t *pollset,
     pollset_lock_rings();
     DBG(2, "entered\n");
 
-    if (pollset->flags & APR_POLLSET_THREADSAFE) {  
+    if (pollset->flags & APR_POLLSET_THREADSAFE) {
 
         if (!APR_RING_EMPTY(&(priv->free_ring), asio_elem_t, link)) {
             elem = APR_RING_FIRST(&(priv->free_ring));
@@ -397,7 +397,7 @@ static apr_status_t asio_pollset_add(apr_pollset_t *pollset,
 
         /* z/OS only supports async I/O for sockets for now */
         elem->os_pfd.fd = descriptor->desc.s->socketdes;
- 
+
         APR_RING_ELEM_INIT(elem, link);
         elem->a.aio_cmd       = AIO_SELPOLL;
         elem->a.aio_cflags    &= ~AIO_OK2COMPIMD; /* not OK to complete inline*/
@@ -406,14 +406,14 @@ static apr_status_t asio_pollset_add(apr_pollset_t *pollset,
 
         if (0 != asyncio(elem)) {
             rv = errno;
-            DBG3(4, "pollset %p asio failed fd %d, errno %p\n", 
+            DBG3(4, "pollset %p asio failed fd %d, errno %p\n",
                      pollset, elem->os_pfd.fd, rv);
 #if DEBUG
             perror(__FUNCTION__ " asio failure");
 #endif
         }
         else {
-            DBG2(4, "good asio call, adding fd %d to pollset %p\n", 
+            DBG2(4, "good asio call, adding fd %d to pollset %p\n",
                      elem->os_pfd.fd, pollset);
 
             pollset->nelts++;
@@ -421,11 +421,11 @@ static apr_status_t asio_pollset_add(apr_pollset_t *pollset,
         }
     }
     else {
-        /* APR_POLLSET_THREADSAFE isn't set.  use POSIX poll in case 
+        /* APR_POLLSET_THREADSAFE isn't set.  use POSIX poll in case
          * pipes or files are used with this pollset
          */
-             
-        rv = posix_add(pollset, descriptor);    
+
+        rv = posix_add(pollset, descriptor);
     }
 
     DBG1(2, "exiting, rv = %d\n", rv);
@@ -440,7 +440,7 @@ static posix_remove(apr_pollset_t *pollset, const apr_pollfd_t *descriptor)
     apr_uint32_t i;
     apr_pollset_private_t *priv = pollset->p;
 
-    DBG(4, "entered\n");  
+    DBG(4, "entered\n");
     for (i = 0; i < pollset->nelts; i++) {
         if (descriptor->desc.s == priv->query_set[i].desc.s) {
             /* Found an instance of the fd: remove this and any other copies */
@@ -457,12 +457,12 @@ static posix_remove(apr_pollset_t *pollset, const apr_pollfd_t *descriptor)
                     dst++;
                 }
             }
-            DBG(4, "returning OK\n");  
+            DBG(4, "returning OK\n");
             return APR_SUCCESS;
         }
     }
 
-    DBG(1, "returning APR_NOTFOUND\n");  
+    DBG(1, "returning APR_NOTFOUND\n");
     return APR_NOTFOUND;
 
 }   /* end of posix_remove */
@@ -499,17 +499,17 @@ static apr_status_t asio_pollset_remove(apr_pollset_t *pollset,
         DBG1(5, "hash found fd %d\n", fd);
         /* delete this fd from the hash */
         apr_hash_set(priv->elems, &(fd), sizeof(int), NULL);
-        /* asyncio call to cancel */ 
+        /* asyncio call to cancel */
         elem->a.aio_cmd    = AIO_CANCEL;
 
         /* elem->a.aio_cflags = AIO_CANCELNONOTIFY; */
-        /* we want *msgrcv to collect cancel notifications to remove races 
+        /* we want *msgrcv to collect cancel notifications to remove races
          * in garbage collection */
 
         rv = asyncio(elem);
         DBG1(4, "asyncio returned %d\n", rv);
 
-        if (rv == 1) { 
+        if (rv == 1) {
             elem->state = ASIO_CANCELLED;
             rv = APR_SUCCESS;
         }
@@ -562,20 +562,20 @@ static posix_poll(apr_pollset_t *pollset,
 
 }   /* end of posix_poll */
 
-static process_msg(apr_pollset_t *pollset, struct asio_msgbuf_t *msg) 
+static process_msg(apr_pollset_t *pollset, struct asio_msgbuf_t *msg)
 {
     DBG_BUFF
     asio_elem_t *elem = msg->msg_elem;
 
     if (elem->state == ASIO_CANCELLED) {
-        DBG2(5, "for cancelled elem, recycling memory - elem %08p, fd %d\n", 
-                elem, elem->os_pfd.fd); 
-        APR_RING_INSERT_TAIL(&(pollset->p->free_ring), elem, 
+        DBG2(5, "for cancelled elem, recycling memory - elem %08p, fd %d\n",
+                elem, elem->os_pfd.fd);
+        APR_RING_INSERT_TAIL(&(pollset->p->free_ring), elem,
                              asio_elem_t, link);
     } else {
-        DBG2(4, "adding to ready ring: elem %08p, fd %d\n", 
-                elem, elem->os_pfd.fd); 
-        APR_RING_INSERT_TAIL(&(pollset->p->ready_ring), elem, 
+        DBG2(4, "adding to ready ring: elem %08p, fd %d\n",
+                elem, elem->os_pfd.fd);
+        APR_RING_INSERT_TAIL(&(pollset->p->ready_ring), elem,
                              asio_elem_t, link);
     }
 }
@@ -607,7 +607,7 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
         DBG3(5, "pollset %p elem %p fd %d on prior ready ring\n",
                 pollset,
                 elem,
-                elem->os_pfd.fd); 
+                elem->os_pfd.fd);
 
         APR_RING_REMOVE(elem, link);
 
@@ -618,11 +618,11 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
          * there may have been too many ready fd's to return in the
          * result set last time. re-poll inline for both cases
          */
- 
+
         if (elem->state == ASIO_CANCELLED) {
             continue;  /* do not re-add if it has been _removed */
-        }  
-       
+        }
+
         elem->a.aio_cflags     = AIO_OK2COMPIMD;
 
         if (0 != (ret = asyncio(elem))) {
@@ -631,7 +631,7 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
                 /* it's ready now */
                 APR_RING_INSERT_TAIL(&(priv->ready_ring), elem, asio_elem_t,
                                      link);
-            } 
+            }
             else {
                 DBG2(1, "asyncio() failed, ret: %d, errno: %d\n",
                         ret, errno);
@@ -645,13 +645,13 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
     DBG(6, "after prior ready loop\n"); /* chatty w/timeouts, hence 6 */
 
     /* Gather async poll completions that have occurred since the last call */
-    while (0 < msgrcv(priv->msg_q, &msg_buff, sizeof(asio_elem_t *), 0, 
+    while (0 < msgrcv(priv->msg_q, &msg_buff, sizeof(asio_elem_t *), 0,
                       IPC_NOWAIT)) {
         process_msg(pollset, &msg_buff);
-    } 
-    
+    }
+
     /* Suspend if nothing is ready yet. */
-    if (APR_RING_EMPTY(&(priv->ready_ring), asio_elem_t, link)) { 
+    if (APR_RING_EMPTY(&(priv->ready_ring), asio_elem_t, link)) {
 
         if (timeout >= 0) {
             tv.tv_sec  = apr_time_sec(timeout);
@@ -664,7 +664,7 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
                 "- blocking for %d seconds %d ns\n",
                 tv.tv_sec, tv.tv_nsec);
 
-        pollset_unlock_rings();   /* allow other apr_pollset_* calls while blocked */ 
+        pollset_unlock_rings();   /* allow other apr_pollset_* calls while blocked */
 
         if (0 >= (ret = __msgrcv_timed(priv->msg_q, &msg_buff,
                                        sizeof(asio_elem_t *), 0, NULL, &tv))) {
@@ -682,27 +682,27 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
         pollset_lock_rings();
 
         process_msg(pollset, &msg_buff);
-    } 
+    }
 
-    APR_RING_INIT(&priv->prior_ready_ring, asio_elem_t, link); 
+    APR_RING_INIT(&priv->prior_ready_ring, asio_elem_t, link);
 
     (*num) = 0;
     elem = APR_RING_FIRST(&(priv->ready_ring));
 
     for (i = 0;
-             
+
         i < priv->size
                 && elem != APR_RING_SENTINEL(&(priv->ready_ring), asio_elem_t, link);
-        i++) { 
-             DBG2(5, "ready ring: elem %08p, fd %d\n", elem, elem->os_pfd.fd); 
+        i++) {
+             DBG2(5, "ready ring: elem %08p, fd %d\n", elem, elem->os_pfd.fd);
 
              priv->result_set[i] = elem->pfd;
-             priv->result_set[i].rtnevents 
+             priv->result_set[i].rtnevents
                                     = get_revent(elem->os_pfd.revents);
              (*num)++;
 
              elem = APR_RING_NEXT(elem, link);
-              
+
 #if DEBUG
              if (elem == APR_RING_SENTINEL(&(priv->ready_ring), asio_elem_t, link)) {
                  DBG(5, "end of ready ring reached\n");
@@ -713,15 +713,15 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
     if (descriptors) {
         *descriptors = priv->result_set;
     }
-    
+
     /* if the result size is too small, remember which descriptors
      * haven't had results reported yet.  we will look
-     * at these descriptors on the next apr_pollset_poll call 
-     */ 
+     * at these descriptors on the next apr_pollset_poll call
+     */
 
     APR_RING_CONCAT(&priv->prior_ready_ring, &(priv->ready_ring), asio_elem_t, link);
 
-    DBG1(2, "exiting, rv = %d\n", rv); 
+    DBG1(2, "exiting, rv = %d\n", rv);
 
     pollset_unlock_rings();
 
@@ -730,12 +730,12 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
 
 static apr_pollset_provider_t impl = {
     asio_pollset_create,
-    asio_pollset_add,                      
-    asio_pollset_remove,                   
+    asio_pollset_add,
+    asio_pollset_remove,
     asio_pollset_poll,
     asio_pollset_cleanup,
     "asio"
-};  
+};
 
 apr_pollset_provider_t *apr_pollset_provider_aio_msgq = &impl;
 
