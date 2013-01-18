@@ -475,6 +475,7 @@ static apr_status_t asio_pollset_remove(apr_pollset_t *pollset,
     asio_elem_t *elem;
     apr_status_t rv = APR_SUCCESS;
     apr_pollset_private_t *priv = pollset->p;
+    struct aiocb cancel_a;   /* AIO_CANCEL is synchronous, so autodata works fine */
 
     int fd;
 
@@ -503,7 +504,8 @@ static apr_status_t asio_pollset_remove(apr_pollset_t *pollset,
 
         if (elem->state == ASIO_INIT) {
             /* asyncio call to cancel */
-            elem->a.aio_cmd    = AIO_CANCEL;
+            cancel_a.aio_cmd = AIO_CANCEL;
+            cancel_a.aio_buf = &elem->a;
 
             /* we want the original aiocb to show up on the pollset message queue 
              * to eliminate race conditions
