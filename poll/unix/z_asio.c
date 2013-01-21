@@ -511,7 +511,7 @@ static apr_status_t asio_pollset_remove(apr_pollset_t *pollset,
              * to eliminate race conditions
              */
 
-            rv = asyncio(&elem->a);
+            rv = asyncio(&cancel_a);
             DBG1(4, "asyncio returned %d\n", rv);
 
 #if DEBUG
@@ -640,6 +640,7 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
             continue;  /* do not re-add if it has been _removed */
         }
 
+        elem->state = ASIO_INIT;
         elem->a.aio_cflags     = AIO_OK2COMPIMD;
 
         if (0 != (ret = asyncio(&elem->a))) {
