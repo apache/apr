@@ -505,7 +505,10 @@ static apr_status_t asio_pollset_remove(apr_pollset_t *pollset,
         if (elem->state == ASIO_INIT) {
             /* asyncio call to cancel */
             cancel_a.aio_cmd = AIO_CANCEL;
-            cancel_a.aio_buf = &elem->a;
+            cancel_a.aio_buf = &elem->a;   /* point to original aiocb */
+
+            cancel_a.aio_cflags  = 0;
+            cancel_a.aio_cflags2 = 0;
 
             /* we want the original aiocb to show up on the pollset message queue 
              * to eliminate race conditions
