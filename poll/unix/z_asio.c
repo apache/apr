@@ -511,7 +511,7 @@ static apr_status_t asio_pollset_remove(apr_pollset_t *pollset,
             cancel_a.aio_cflags2 = 0;
 
             /* we want the original aiocb to show up on the pollset message queue 
-             * to eliminate race conditions
+             * before recycling its memory to eliminate race conditions
              */
 
             rv = asyncio(&cancel_a);
