@@ -18,6 +18,7 @@
 
 #include "apr_buckets.h"
 #include "apr_allocator.h"
+#include "apr_support.h"
 
 #define ALLOC_AMT (8192 - APR_MEMNODE_T_SIZE)
 
@@ -102,7 +103,8 @@ APR_DECLARE_NONSTD(apr_bucket_alloc_t *) apr_bucket_alloc_create_ex(
     list->freelist = NULL;
     list->blocks = block;
     block->first_avail += APR_ALIGN_DEFAULT(sizeof(*list));
-
+    APR_VALGRIND_NOACCESS(block->first_avail,
+                          block->endp - block->first_avail);
     return list;
 }
 
@@ -121,18 +123,21 @@ APR_DECLARE_NONSTD(void) apr_bucket_alloc_destroy(apr_bucket_alloc_t *list)
 #endif
 }
 
-APR_DECLARE_NONSTD(void *) apr_bucket_alloc(apr_size_t size, 
+APR_DECLARE_NONSTD(void *) apr_bucket_alloc(apr_size_t in_size,
                                             apr_bucket_alloc_t *list)
 {
     node_header_t *node;
     apr_memnode_t *active = list->blocks;
     char *endp;
+    apr_size_t size;
 
-    size += SIZEOF_NODE_HEADER_T;
+    size = in_size + SIZEOF_NODE_HEADER_T;
     if (size <= SMALL_NODE_SIZE) {
         if (list->freelist) {
             node = list->freelist;
             list->freelist = node->next;
+            APR_VALGRIND_UNDEFINED((char *)node + SIZEOF_NODE_HEADER_T,
+                                   SMALL_NODE_SIZE - SIZEOF_NODE_HEADER_T);
         }
         else {
             endp = active->first_avail + SMALL_NODE_SIZE;
@@ -144,8 +149,11 @@ APR_DECLARE_NONSTD(void *) apr_bucket_alloc(apr_size_t size,
                 list->blocks->next = active;
                 active = list->blocks;
                 endp = active->first_avail + SMALL_NODE_SIZE;
+                APR_VALGRIND_NOACCESS(active->first_avail,
+                                      active->endp - active->first_avail);
             }
             node = (node_header_t *)active->first_avail;
+            APR_VALGRIND_UNDEFINED(node, SMALL_NODE_SIZE);
             node->alloc = list;
             node->memnode = active;
             node->size = SMALL_NODE_SIZE;
@@ -194,6 +202,7 @@ APR_DECLARE_NONSTD(void) apr_bucket_free(void *mem)
         check_not_already_free(node);
         node->next = list->freelist;
         list->freelist = node;
+        APR_VALGRIND_NOACCESS(mem, SMALL_NODE_SIZE - SIZEOF_NODE_HEADER_T);
     }
     else {
         apr_allocator_free(list->allocator, node->memnode);

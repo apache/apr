@@ -25,6 +25,26 @@
 #include "apr.h"
 #include "apr_network_io.h"
 #include "apr_file_io.h"
+#include "apr_private.h"
+
+#if HAVE_VALGRIND
+#include <valgrind.h>
+#include <memcheck.h>
+
+extern int apr_running_on_valgrind;
+
+#define APR_IF_VALGRIND(x)                                      \
+    do { if (apr_running_on_valgrind) { x; } } while (0)
+
+#else
+#define APR_IF_VALGRIND(x)
+#endif /* HAVE_VALGRIND */
+
+#define APR_VALGRIND_NOACCESS(addr_, size_)                     \
+    APR_IF_VALGRIND(VALGRIND_MAKE_MEM_NOACCESS(addr_, size_))
+#define APR_VALGRIND_UNDEFINED(addr_, size_)                    \
+    APR_IF_VALGRIND(VALGRIND_MAKE_MEM_UNDEFINED(addr_, size_))
+
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Add support code to teach valgrind about APR pools, allocators, and
+     bucket allocators. [Stefan Fritsch]
+
   *) Fix apr_ipsubnet_test() false positives when comparing IPv4
      subnet representation against an IPv6 address.  PR 54047.  [Joe Orton]
 
