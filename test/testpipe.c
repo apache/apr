@@ -129,7 +129,7 @@ static void test_pipe_writefull(abts_case *tc, void *data)
     int iterations = 1000;
     int i;
     int bytes_per_iteration = 8000;
-    char *buf = (char *)malloc(bytes_per_iteration);
+    char *buf = (char *)calloc(bytes_per_iteration, 1);
     char responsebuf[128];
     apr_size_t nbytes;
     int bytes_processed;
