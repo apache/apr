@@ -63,7 +63,7 @@ struct apr_pollset_private_t
     apr_thread_mutex_t *ring_lock;
 #endif
 
-    /* A hash of all active elements used for O(1) garbage collection */
+    /* A hash of all active elements used for O(1) _remove operations */
     apr_hash_t      *elems;
 
     APR_RING_HEAD(ready_ring_t,       asio_elem_t)      ready_ring;
@@ -640,6 +640,15 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
          */
 
         if (elem->state == ASIO_REMOVED) {
+
+            /* 
+             * async i/o is done since it was found on prior_ready
+             * the state says the caller is done with it too 
+             * so recycle the elem 
+             */
+             
+            APR_RING_INSERT_TAIL(&(priv->free_ring), elem,
+                                 asio_elem_t, link);
             continue;  /* do not re-add if it has been _removed */
         }
 
