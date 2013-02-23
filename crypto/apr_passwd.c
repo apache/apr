@@ -103,19 +103,18 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
 #if !defined(WIN32) && !defined(BEOS) && !defined(NETWARE)
     char *crypt_pw;
 #endif
-    if (hash[0] == '$') {
-        if (hash[1] == '2' && (hash[2] == 'a' || hash[2] == 'y')
-            && hash[3] == '$')
-        {
-            if (_crypt_blowfish_rn(passwd, hash, sample, sizeof(sample)) == NULL)
-                return APR_FROM_OS_ERROR(errno);
-        }
-        else if (!strncmp(hash, apr1_id, strlen(apr1_id))) {
-            /*
-             * The hash was created using our custom algorithm.
-             */
-            apr_md5_encode(passwd, hash, sample, sizeof(sample));
-        }
+    if (hash[0] == '$'
+        && hash[1] == '2'
+        && (hash[2] == 'a' || hash[2] == 'y')
+        && hash[3] == '$') {
+        if (_crypt_blowfish_rn(passwd, hash, sample, sizeof(sample)) == NULL)
+            return APR_FROM_OS_ERROR(errno);
+    }
+    else if (!strncmp(hash, apr1_id, strlen(apr1_id))) {
+        /*
+         * The hash was created using our custom algorithm.
+         */
+        apr_md5_encode(passwd, hash, sample, sizeof(sample));
     }
     else if (!strncmp(hash, APR_SHA1PW_ID, APR_SHA1PW_IDLEN)) {
          apr_sha1_base64(passwd, (int)strlen(passwd), sample);
