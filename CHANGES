@@ -1,5 +1,9 @@
-                                                     -*- coding: utf-8 -*-
+                                                     
+-*- coding: utf-8 -*-
 Changes with APR 0.9.21
+
+  *) configure: Fix detection of O_NONBLOCK inheritance on busy
+     systems.  [Rainer Jung]
 
   *) apr_time_exp_*() on Windows: Fix error in the tm_yday field of
      apr_time_exp_t for times within leap years.  PR 53175.
