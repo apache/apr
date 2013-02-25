@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.3.13
 
+  *) configure: Fix detection of O_NONBLOCK inheritance on busy
+     systems.  [Rainer Jung]
+
   *) Add libtool2 files to extraclean make target.  [Rainer Jung]
 
   *) Fix top_builddir in installed apr_rules.mk.  [Bojan Smojver]
