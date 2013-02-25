@@ -555,12 +555,23 @@ dnl
 AC_DEFUN([APR_CHECK_O_NONBLOCK_INHERITED], [
   AC_CACHE_CHECK(if O_NONBLOCK setting is inherited from listening sockets, ac_cv_o_nonblock_inherited,[
   AC_TRY_RUN( [
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_STDIO_H
 #include <stdio.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -632,6 +643,26 @@ int main(void) {
         exit(1);
     }
     sa_len = sizeof sa;
+    /* 1 second select timeout */
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+    /* Set up fd set */
+    FD_ZERO(&fds);
+    FD_SET(listen_s, &fds);
+    /* Wait for socket to become readable */
+    rc = select(listen_s + 1, &fds, NULL, NULL, &tv);
+    if (rc < 0) {
+        perror("select");
+        exit(1);
+    }
+    if (rc == 0) {
+        fprintf(stderr, "Socket failed to become readable (timeout)\n");
+        exit(1);
+    }
+    if (!FD_ISSET(listen_s, &fds)) {
+        fprintf(stderr, "Socket failed to become readable (selected another fd)\n");
+        exit(1);
+    }
     connected_s = accept(listen_s, (struct sockaddr *)&sa, &sa_len);
     if (connected_s < 0) {
         perror("accept");

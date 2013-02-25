@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.7
 
+  *) configure: Fix detection of O_NONBLOCK inheritance on busy
+     systems.  [Rainer Jung]
+
   *) Remove unused code, fix strict C compliance bug in SHA-256
      implementation.  [Jan Kaluza <jkaluza redhat.com>]
 
