@@ -33,6 +33,9 @@
 #if APR_HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
+#if APR_HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
 static const char * const apr1_id = "$apr1$";
 
@@ -126,15 +129,24 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
 #if defined(WIN32) || defined(BEOS) || defined(NETWARE)
         return (strcmp(passwd, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
 #elif defined(CRYPT_R_CRYPTD)
-        CRYPTD buffer;
+        apr_status_t rv;
+        CRYPTD *buffer = malloc(sizeof(*buffer));
 
-        crypt_pw = crypt_r(passwd, hash, &buffer);
-        if (!crypt_pw) {
-            return APR_EMISMATCH;
-        }
-        return (strcmp(crypt_pw, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
+        if (buffer == NULL)
+            return APR_ENOMEM;
+        crypt_pw = crypt_r(passwd, hash, buffer);
+        if (!crypt_pw)
+            rv = APR_EMISMATCH;
+        else
+            rv = (strcmp(crypt_pw, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
+        free(buffer);
+        return rv;
 #elif defined(CRYPT_R_STRUCT_CRYPT_DATA)
-        struct crypt_data buffer;
+        apr_status_t rv;
+        struct crypt_data *buffer = malloc(sizeof(*buffer));
+
+        if (buffer == NULL)
+            return APR_ENOMEM;
 
 #ifdef __GLIBC_PREREQ
         /*
@@ -148,16 +160,18 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
 #endif
 
 #ifdef USE_CRYPT_DATA_INITALIZED
-        buffer.initialized = 0;
+        buffer->initialized = 0;
 #else
-        memset(&buffer, 0, sizeof(buffer));
+        memset(buffer, 0, sizeof(*buffer));
 #endif
 
-        crypt_pw = crypt_r(passwd, hash, &buffer);
-        if (!crypt_pw) {
-            return APR_EMISMATCH;
-        }
-        return (strcmp(crypt_pw, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
+        crypt_pw = crypt_r(passwd, hash, buffer);
+        if (!crypt_pw)
+            rv = APR_EMISMATCH;
+        else
+            rv = (strcmp(crypt_pw, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
+        free(buffer);
+        return rv;
 #else
         /* Do a bit of sanity checking since we know that crypt_r()
          * should always be used for threaded builds on AIX, and
