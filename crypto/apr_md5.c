@@ -338,9 +338,18 @@ APR_DECLARE(apr_status_t) apr_md5(unsigned char digest[APR_MD5_DIGESTSIZE],
 static void MD5Transform(apr_uint32_t state[4], const unsigned char block[64])
 {
     apr_uint32_t a = state[0], b = state[1], c = state[2], d = state[3],
-                 x[APR_MD5_DIGESTSIZE];
+                 tmpbuf[APR_MD5_DIGESTSIZE];
+    const apr_uint32_t *x;
 
-    Decode(x, block, 64);
+#if !APR_IS_BIGENDIAN
+    if ((apr_uintptr_t)block % sizeof(apr_uint32_t) == 0) {
+        x = (apr_uint32_t *)block;
+    } else
+#endif
+    {
+        Decode(tmpbuf, block, 64);
+	x = tmpbuf;
+    }
 
     /* Round 1 */
     FF(a, b, c, d, x[0],  S11, 0xd76aa478); /* 1 */
@@ -419,8 +428,13 @@ static void MD5Transform(apr_uint32_t state[4], const unsigned char block[64])
     state[2] += c;
     state[3] += d;
 
-    /* Zeroize sensitive information. */
-    memset(x, 0, sizeof(x));
+#if !APR_IS_BIGENDIAN
+    if (x == tmpbuf)
+#endif
+    {
+        /* Zeroize sensitive information. */
+        memset(tmpbuf, 0, sizeof(tmpbuf));
+    }
 }
 
 /* Encodes input (apr_uint32_t) into output (unsigned char). Assumes len is
