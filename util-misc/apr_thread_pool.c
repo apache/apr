@@ -243,6 +243,7 @@ static void *APR_THREAD_FUNC thread_pool_func(apr_thread_t * t, void *param)
     struct apr_thread_list_elt *elt;
 
     apr_thread_mutex_lock(me->lock);
+    apr_pool_owner_set(me->pool, 0);
     elt = elt_new(me, t);
     if (!elt) {
         apr_thread_mutex_unlock(me->lock);
@@ -265,6 +266,7 @@ static void *APR_THREAD_FUNC thread_pool_func(apr_thread_t * t, void *param)
             apr_thread_data_set(task, "apr_thread_pool_task", NULL, t);
             task->func(t, task->param);
             apr_thread_mutex_lock(me->lock);
+            apr_pool_owner_set(me->pool, 0);
             APR_RING_INSERT_TAIL(me->recycled_tasks, task,
                                  apr_thread_pool_task, link);
             elt->current_owner = NULL;
@@ -335,6 +337,7 @@ static apr_status_t thread_pool_cleanup(void *me)
     while (_myself->thd_cnt) {
         apr_sleep(20 * 1000);   /* spin lock with 20 ms */
     }
+    apr_pool_owner_set(_myself->pool, 0);
     apr_thread_mutex_destroy(_myself->lock);
     apr_thread_cond_destroy(_myself->cond);
     return APR_SUCCESS;
@@ -372,6 +375,7 @@ APR_DECLARE(apr_status_t) apr_thread_pool_create(apr_thread_pool_t ** me,
          * initial threads to create.
          */
         apr_thread_mutex_lock(tp->lock);
+        apr_pool_owner_set(tp->pool, 0);
         rv = apr_thread_create(&t, NULL, thread_pool_func, tp, tp->pool);
         apr_thread_mutex_unlock(tp->lock);
         if (APR_SUCCESS != rv) {
@@ -485,6 +489,7 @@ static apr_status_t schedule_task(apr_thread_pool_t *me,
     apr_thread_t *thd;
     apr_status_t rv = APR_SUCCESS;
     apr_thread_mutex_lock(me->lock);
+    apr_pool_owner_set(me->pool, 0);
 
     t = task_new(me, func, param, 0, owner, time);
     if (NULL == t) {
@@ -535,6 +540,7 @@ static apr_status_t add_task(apr_thread_pool_t *me, apr_thread_start_t func,
     apr_status_t rv = APR_SUCCESS;
 
     apr_thread_mutex_lock(me->lock);
+    apr_pool_owner_set(me->pool, 0);
 
     t = task_new(me, func, param, priority, owner, 0);
     if (NULL == t) {
@@ -696,6 +702,7 @@ APR_DECLARE(apr_status_t) apr_thread_pool_tasks_cancel(apr_thread_pool_t *me,
     apr_status_t rv = APR_SUCCESS;
 
     apr_thread_mutex_lock(me->lock);
+    apr_pool_owner_set(me->pool, 0);
     if (me->task_cnt > 0) {
         rv = remove_tasks(me, owner);
     }
@@ -783,6 +790,7 @@ static struct apr_thread_list_elt *trim_threads(apr_thread_pool_t *me,
     struct apr_thread_list_elt *head, *tail, *elt;
 
     apr_thread_mutex_lock(me->lock);
+    apr_pool_owner_set(me->pool, 0);
     if (idle) {
         thds = me->idle_thds;
         n = me->idle_cnt;
