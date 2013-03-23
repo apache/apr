@@ -69,6 +69,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
 static void apr_thread_begin(void *arg)
 {
   apr_thread_t *thread = (apr_thread_t *)arg;
+  apr_pool_owner_set(thread->pool, 0);
   thread->exitval = thread->func(thread, thread->data);
   apr_pool_destroy(thread->pool);
 }
