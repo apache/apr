@@ -1436,7 +1436,7 @@ static int apr_pool_is_child_of(apr_pool_t *pool, apr_pool_t *parent)
 }
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_LIFETIME) */
 
-static void apr_pool_check_integrity(apr_pool_t *pool)
+static void apr_pool_check_lifetime(apr_pool_t *pool)
 {
     /* Rule of thumb: use of the global pool is always
      * ok, since the only user is apr_pools.c.  Unless
@@ -1460,7 +1460,10 @@ static void apr_pool_check_integrity(apr_pool_t *pool)
         abort();
     }
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_LIFETIME) */
+}
 
+static void apr_pool_check_owner(apr_pool_t *pool)
+{
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_OWNER)
 #if APR_HAS_THREADS
     if (!apr_os_thread_equal(pool->owner, apr_os_thread_current())) {
@@ -1472,6 +1475,12 @@ static void apr_pool_check_integrity(apr_pool_t *pool)
     }
 #endif /* APR_HAS_THREADS */
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_OWNER) */
+}
+
+static void apr_pool_check_integrity(apr_pool_t *pool)
+{
+    apr_pool_check_lifetime(pool);
+    apr_pool_check_owner(pool);
 }
 
 APR_DECLARE(void) apr_pool_owner_set(apr_pool_t *pool, apr_uint32_t flags)
@@ -1668,6 +1677,12 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
     run_cleanups(&pool->pre_cleanups);
     pool->pre_cleanups = NULL;
 
+    /*
+     * Now that we have given the pre cleanups the chance to kill of any
+     * threads using the pool, the owner must be correct.
+     */
+    apr_pool_check_owner(pool);
+
     /* Destroy the subpools.  The subpools will detach themselves from
      * this pool thus this loop is safe and easy.
      */
@@ -1716,7 +1731,7 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
     apr_thread_mutex_t *mutex = NULL;
 #endif
 
-    apr_pool_check_integrity(pool);
+    apr_pool_check_lifetime(pool);
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "CLEAR", file_line, 1);
@@ -1754,7 +1769,7 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
 
 static void pool_destroy_debug(apr_pool_t *pool, const char *file_line)
 {
-    apr_pool_check_integrity(pool);
+    apr_pool_check_lifetime(pool);
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "DESTROY", file_line, 1);
