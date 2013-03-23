@@ -143,6 +143,7 @@ static apr_status_t reslist_cleanup(void *data_)
 
 #if APR_HAS_THREADS
     apr_thread_mutex_lock(rl->listlock);
+    apr_pool_owner_set(rl->pool, 0);
 #endif
 
     while (rl->nidle > 0) {
@@ -182,6 +183,7 @@ APR_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist)
 
 #if APR_HAS_THREADS
     apr_thread_mutex_lock(reslist->listlock);
+    apr_pool_owner_set(reslist->pool, 0);
 #endif
 
     /* Check if we need to create more resources, and if we are allowed to. */
@@ -332,6 +334,7 @@ APR_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
 
 #if APR_HAS_THREADS
     apr_thread_mutex_lock(reslist->listlock);
+    apr_pool_owner_set(reslist->pool, 0);
 #endif
     /* If there are idle resources on the available list, use
      * them right away. */
@@ -412,6 +415,7 @@ APR_DECLARE(apr_status_t) apr_reslist_release(apr_reslist_t *reslist,
 
 #if APR_HAS_THREADS
     apr_thread_mutex_lock(reslist->listlock);
+    apr_pool_owner_set(reslist->pool, 0);
 #endif
     res = get_container(reslist);
     res->opaque = resource;
@@ -436,6 +440,7 @@ APR_DECLARE(apr_uint32_t) apr_reslist_acquired_count(apr_reslist_t *reslist)
 
 #if APR_HAS_THREADS
     apr_thread_mutex_lock(reslist->listlock);
+    apr_pool_owner_set(reslist->pool, 0);
 #endif
     count = reslist->ntotal - reslist->nidle;
 #if APR_HAS_THREADS
@@ -451,6 +456,7 @@ APR_DECLARE(apr_status_t) apr_reslist_invalidate(apr_reslist_t *reslist,
     apr_status_t ret;
 #if APR_HAS_THREADS
     apr_thread_mutex_lock(reslist->listlock);
+    apr_pool_owner_set(reslist->pool, 0);
 #endif
     ret = reslist->destructor(resource, reslist->params, reslist->pool);
     reslist->ntotal--;
