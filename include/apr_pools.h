@@ -741,6 +741,17 @@ APR_DECLARE(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub)
                   __attribute__((nonnull(2)));
 
 /**
+ * Guarantee that a pool is only used by the current thread.
+ * This should be used when a pool is created by a different thread than
+ * the thread it is using, or if there is some locking in use to ensure
+ * that only one thread uses the pool at the same time.
+ *
+ * @param pool The pool
+ * @param flags Flags, currently unused
+ */
+APR_DECLARE(void) apr_pool_owner_set(apr_pool_t *pool, apr_uint32_t flags);
+
+/**
  * Find a pool from something allocated in it.
  * @param mem The thing allocated in the pool
  * @return The pool it is allocated in
@@ -771,6 +782,11 @@ APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag);
 #undef apr_pool_join
 #endif
 #define apr_pool_join(a,b)
+
+#ifdef apr_pool_owner_set
+#undef apr_pool_owner_set
+#endif
+#define apr_pool_owner_set(a,b)
 
 #ifdef apr_pool_lock
 #undef apr_pool_lock

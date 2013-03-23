@@ -1474,6 +1474,12 @@ static void apr_pool_check_integrity(apr_pool_t *pool)
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_OWNER) */
 }
 
+APR_DECLARE(void) apr_pool_owner_set(apr_pool_t *pool, apr_uint32_t flags)
+{
+#if APR_HAS_THREADS && (APR_POOL_DEBUG & APR_POOL_DEBUG_OWNER)
+    pool->owner = apr_os_thread_current();
+#endif
+}
 
 /*
  * Initialization (debug)
