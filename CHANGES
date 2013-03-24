@@ -1,10 +1,6 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
-  *) Speedup md5 calculation by avoiding some copying on little endian
-     architectures. PR 49011. [Stefan Fritsch, Stefan Fuhrmann
-     <stefanfuhrmann alice-dsl de>]
-
   *) Fix pool integrity checks with threads. Add new apr_pool_owner_set()
      function. PR 43375, 52785. [Stefan Fritsch]
 
@@ -17,14 +13,6 @@ Changes for APR 2.0.0
   *) apr_socket_accept_filter(): The 2nd and 3rd arguments are now 
      const char * instead of char *.  [Jeff Trawick]
 
-  *) Fix potential data corruption in apr_brigade_write() and friends if
-     the last bucket of the brigade is a heap bucket that has been split,
-     and there are still references to the next part of the original bucket
-     in use. [Stefan Fritsch]
-
-  *) Remove duplicated logic in apr_brigade_puts(). PR 53740. [Christophe
-     Jaillet <christophe jaillet wanadoo fr>]
-
   *) apr_pollset_poll:  add z/OS async poll support for sockets [Greg Ames]
 
   *) apr_mcast_hops: Fix EINVAL for IPv6 sockets caused by using byte
@@ -35,9 +23,6 @@ Changes for APR 2.0.0
 
   *) apr_socket_opt_set: Add support for APR_SO_BROADCAST. PR 46389.
      [Armin Müller <mueller itestra com>]
-
-  *) apr_memcache_server_create: Fix possible segfault. PR 51064.
-     [Michajlo Matijkiw <michajlo_matijkiw comcast com>]
 
   *) apr_brigades: add a check to prevent infinite while loop in case
      of a corrupted brigade.  Problem evidenced in PR 51062.  Analysis by
