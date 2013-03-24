@@ -96,8 +96,10 @@ static apr_status_t sendRecvBuffer(apr_time_t *t, const char *buf,
 
         rv = apr_socket_create(&sock, APR_INET, SOCK_STREAM, APR_PROTO_TCP,
                            pool);
-        if (rv != APR_SUCCESS)
+        if (rv != APR_SUCCESS) {
+            reportError("Unable to create IPv4 stream socket", rv, pool);
             return rv;
+        }
 
         rv = apr_socket_connect(sock, sockAddr);
         if (rv != APR_SUCCESS) {
@@ -110,16 +112,21 @@ static apr_status_t sendRecvBuffer(apr_time_t *t, const char *buf,
     }
 
     recvBuf = apr_palloc(pool, size);
-    if (! recvBuf)
+    if (! recvBuf) {
+        reportError("Unable to allocate buffer", ENOMEM, pool);
         return ENOMEM;
+    }
+
     *t = 0;
 
     /* START! */
     testStart = apr_time_now();
     rv = apr_socket_create(&sock, APR_INET, SOCK_STREAM, APR_PROTO_TCP,
                            pool);
-    if (rv != APR_SUCCESS)
+    if (rv != APR_SUCCESS) {
+        reportError("Unable to create IPv4 stream socket", rv, pool);
         return rv;
+    }
 
     rv = apr_socket_connect(sock, sockAddr);
     if (rv != APR_SUCCESS) {
@@ -146,8 +153,10 @@ static apr_status_t sendRecvBuffer(apr_time_t *t, const char *buf,
         do {
             len = thistime;
             rv = apr_socket_recv(sock, &recvBuf[size - thistime], &len);
-            if (rv != APR_SUCCESS)
+            if (rv != APR_SUCCESS) {
+                reportError("Error receiving from socket", rv, pool);
                 break;
+            }
             thistime -= len;
         } while (thistime);
     }
@@ -218,14 +227,18 @@ int main(int argc, char **argv)
     results = (struct testResult *)apr_pcalloc(pool, 
                                         sizeof(*results) * nTests);
 
-    for(i = 0; i < nTests; i++) {
+    for (i = 0; i < nTests; i++) {
         printf("Test -> %c\n", testRuns[i].c);
         results[i].size = testRuns[i].size * (apr_size_t)TEST_SIZE;
         rv = runTest(&testRuns[i], &results[i], pool);
+        if (rv != APR_SUCCESS) {
+            /* error already reported */
+            exit(1);
+        }
     }
 
     printf("Tests Complete!\n");
-    for(i = 0; i < nTests; i++) {
+    for (i = 0; i < nTests; i++) {
         int j;
         apr_time_t totTime = 0;
         printf("%10d byte block:\n", results[i].size);
