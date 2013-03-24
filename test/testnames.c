@@ -269,7 +269,9 @@ static void root_from_cwd_and_back(abts_case *tc, void *data)
     const char *path = "//";
     char *origpath;
     char *testpath;
+#if defined(WIN32) || defined(OS2) || defined(NETWARE)
     int hadfailed;
+#endif
 
     ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_filepath_get(&origpath, 0, p));
     path = origpath;
@@ -308,7 +310,9 @@ static void root_from_cwd_and_back(abts_case *tc, void *data)
                           | APR_FILEPATH_NOTABOVEROOT
                           | APR_FILEPATH_NOTRELATIVE, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+#if defined(WIN32) || defined(OS2) || defined(NETWARE)
     hadfailed = tc->failed;
+#endif
     /* The API doesn't promise equality!!! 
      * apr_filepath_get never promised a canonical filepath.
      * We'll emit noise under verbose so the user is aware,
