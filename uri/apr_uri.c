@@ -170,10 +170,13 @@ APR_DECLARE(char *) apr_uri_unparse(apr_pool_t *p,
  * compares for NUL for free -- it's just another delimiter.
  */
 
-#define T_COLON           0x01        /* ':' */
-#define T_SLASH           0x02        /* '/' */
-#define T_QUESTION        0x04        /* '?' */
-#define T_HASH            0x08        /* '#' */
+#define T_SLASH           0x01        /* '/' */
+#define T_QUESTION        0x02        /* '?' */
+#define T_HASH            0x04        /* '#' */
+#define T_ALPHA           0x08        /* 'A' ... 'Z', 'a' ... 'z' */
+#define T_SCHEME          0x10        /* '0' ... '9', '-', '+', '.'
+                                       * (allowed in scheme except first char)
+                                       */
 #define T_NUL             0x80        /* '\0' */
 
 #if APR_CHARSET_EBCDIC
@@ -254,10 +257,10 @@ static const unsigned char uri_delims[256] = {
     0,                          /* 0x48     */
     0,                          /* 0x49     */
     0,                          /* 0x4a '[' */
-    0,                          /* 0x4b     */
+    T_SCHEME,                   /* 0x4b '.' */
     0,                          /* 0x4c '<' */
     0,                          /* 0x4d '(' */
-    0,                          /* 0x4e '+' */
+    T_SCHEME,                   /* 0x4e '+' */
     0,                          /* 0x4f '!' */
     0,                          /* 0x50 '&' */
     0,                          /* 0x51     */
@@ -275,7 +278,7 @@ static const unsigned char uri_delims[256] = {
     0,                          /* 0x5d ')' */
     0,                          /* 0x5e ';' */
     0,                          /* 0x5f '^' */
-    0,                          /* 0x60 '-' */
+    T_SCHEME,                   /* 0x60 '-' */
     T_SLASH,                    /* 0x61 '/' */
     0,                          /* 0x62     */
     0,                          /* 0x63     */
@@ -301,22 +304,22 @@ static const unsigned char uri_delims[256] = {
     0,                          /* 0x77     */
     0,                          /* 0x78     */
     0,                          /* 0x79 '`' */
-    T_COLON,                    /* 0x7a ':' */
+    0,                          /* 0x7a ':' */
     T_HASH,                     /* 0x7b '#' */
     0,                          /* 0x7c '@' */
     0,                          /* 0x7d ''' */
     0,                          /* 0x7e '=' */
     0,                          /* 0x7f '"' */
     0,                          /* 0x80     */
-    0,                          /* 0x81 'a' */
-    0,                          /* 0x82 'b' */
-    0,                          /* 0x83 'c' */
-    0,                          /* 0x84 'd' */
-    0,                          /* 0x85 'e' */
-    0,                          /* 0x86 'f' */
-    0,                          /* 0x87 'g' */
-    0,                          /* 0x88 'h' */
-    0,                          /* 0x89 'i' */
+    T_ALPHA,                    /* 0x81 'a' */
+    T_ALPHA,                    /* 0x82 'b' */
+    T_ALPHA,                    /* 0x83 'c' */
+    T_ALPHA,                    /* 0x84 'd' */
+    T_ALPHA,                    /* 0x85 'e' */
+    T_ALPHA,                    /* 0x86 'f' */
+    T_ALPHA,                    /* 0x87 'g' */
+    T_ALPHA,                    /* 0x88 'h' */
+    T_ALPHA,                    /* 0x89 'i' */
     0,                          /* 0x8a     */
     0,                          /* 0x8b     */
     0,                          /* 0x8c     */
@@ -324,15 +327,15 @@ static const unsigned char uri_delims[256] = {
     0,                          /* 0x8e     */
     0,                          /* 0x8f     */
     0,                          /* 0x90     */
-    0,                          /* 0x91 'j' */
-    0,                          /* 0x92 'k' */
-    0,                          /* 0x93 'l' */
-    0,                          /* 0x94 'm' */
-    0,                          /* 0x95 'n' */
-    0,                          /* 0x96 'o' */
-    0,                          /* 0x97 'p' */
-    0,                          /* 0x98 'q' */
-    0,                          /* 0x99 'r' */
+    T_ALPHA,                    /* 0x91 'j' */
+    T_ALPHA,                    /* 0x92 'k' */
+    T_ALPHA,                    /* 0x93 'l' */
+    T_ALPHA,                    /* 0x94 'm' */
+    T_ALPHA,                    /* 0x95 'n' */
+    T_ALPHA,                    /* 0x96 'o' */
+    T_ALPHA,                    /* 0x97 'p' */
+    T_ALPHA,                    /* 0x98 'q' */
+    T_ALPHA,                    /* 0x99 'r' */
     0,                          /* 0x9a     */
     0,                          /* 0x9b     */
     0,                          /* 0x9c     */
@@ -341,14 +344,14 @@ static const unsigned char uri_delims[256] = {
     0,                          /* 0x9f     */
     0,                          /* 0xa0     */
     0,                          /* 0xa1 '~' */
-    0,                          /* 0xa2 's' */
-    0,                          /* 0xa3 't' */
-    0,                          /* 0xa4 'u' */
-    0,                          /* 0xa5 'v' */
-    0,                          /* 0xa6 'w' */
-    0,                          /* 0xa7 'x' */
-    0,                          /* 0xa8 'y' */
-    0,                          /* 0xa9 'z' */
+    T_ALPHA,                    /* 0xa2 's' */
+    T_ALPHA,                    /* 0xa3 't' */
+    T_ALPHA,                    /* 0xa4 'u' */
+    T_ALPHA,                    /* 0xa5 'v' */
+    T_ALPHA,                    /* 0xa6 'w' */
+    T_ALPHA,                    /* 0xa7 'x' */
+    T_ALPHA,                    /* 0xa8 'y' */
+    T_ALPHA,                    /* 0xa9 'z' */
     0,                          /* 0xaa     */
     0,                          /* 0xab     */
     0,                          /* 0xac     */
@@ -372,15 +375,15 @@ static const unsigned char uri_delims[256] = {
     0,                          /* 0xbe     */
     0,                          /* 0xbf     */
     0,                          /* 0xc0 '{' */
-    0,                          /* 0xc1 'A' */
-    0,                          /* 0xc2 'B' */
-    0,                          /* 0xc3 'C' */
-    0,                          /* 0xc4 'D' */
-    0,                          /* 0xc5 'E' */
-    0,                          /* 0xc6 'F' */
-    0,                          /* 0xc7 'G' */
-    0,                          /* 0xc8 'H' */
-    0,                          /* 0xc9 'I' */
+    T_ALPHA,                    /* 0xc1 'A' */
+    T_ALPHA,                    /* 0xc2 'B' */
+    T_ALPHA,                    /* 0xc3 'C' */
+    T_ALPHA,                    /* 0xc4 'D' */
+    T_ALPHA,                    /* 0xc5 'E' */
+    T_ALPHA,                    /* 0xc6 'F' */
+    T_ALPHA,                    /* 0xc7 'G' */
+    T_ALPHA,                    /* 0xc8 'H' */
+    T_ALPHA,                    /* 0xc9 'I' */
     0,                          /* 0xca     */
     0,                          /* 0xcb     */
     0,                          /* 0xcc     */
@@ -388,15 +391,15 @@ static const unsigned char uri_delims[256] = {
     0,                          /* 0xce     */
     0,                          /* 0xcf     */
     0,                          /* 0xd0 '}' */
-    0,                          /* 0xd1 'J' */
-    0,                          /* 0xd2 'K' */
-    0,                          /* 0xd3 'L' */
-    0,                          /* 0xd4 'M' */
-    0,                          /* 0xd5 'N' */
-    0,                          /* 0xd6 'O' */
-    0,                          /* 0xd7 'P' */
-    0,                          /* 0xd8 'Q' */
-    0,                          /* 0xd9 'R' */
+    T_ALPHA,                    /* 0xd1 'J' */
+    T_ALPHA,                    /* 0xd2 'K' */
+    T_ALPHA,                    /* 0xd3 'L' */
+    T_ALPHA,                    /* 0xd4 'M' */
+    T_ALPHA,                    /* 0xd5 'N' */
+    T_ALPHA,                    /* 0xd6 'O' */
+    T_ALPHA,                    /* 0xd7 'P' */
+    T_ALPHA,                    /* 0xd8 'Q' */
+    T_ALPHA,                    /* 0xd9 'R' */
     0,                          /* 0xda     */
     0,                          /* 0xdb     */
     0,                          /* 0xdc     */
@@ -405,30 +408,30 @@ static const unsigned char uri_delims[256] = {
     0,                          /* 0xdf     */
     0,                          /* 0xe0 '\' */
     0,                          /* 0xe1     */
-    0,                          /* 0xe2 'S' */
-    0,                          /* 0xe3 'T' */
-    0,                          /* 0xe4 'U' */
-    0,                          /* 0xe5 'V' */
-    0,                          /* 0xe6 'W' */
-    0,                          /* 0xe7 'X' */
-    0,                          /* 0xe8 'Y' */
-    0,                          /* 0xe9 'Z' */
+    T_ALPHA,                    /* 0xe2 'S' */
+    T_ALPHA,                    /* 0xe3 'T' */
+    T_ALPHA,                    /* 0xe4 'U' */
+    T_ALPHA,                    /* 0xe5 'V' */
+    T_ALPHA,                    /* 0xe6 'W' */
+    T_ALPHA,                    /* 0xe7 'X' */
+    T_ALPHA,                    /* 0xe8 'Y' */
+    T_ALPHA,                    /* 0xe9 'Z' */
     0,                          /* 0xea     */
     0,                          /* 0xeb     */
     0,                          /* 0xec     */
     0,                          /* 0xed     */
     0,                          /* 0xee     */
     0,                          /* 0xef     */
-    0,                          /* 0xf0 '0' */
-    0,                          /* 0xf1 '1' */
-    0,                          /* 0xf2 '2' */
-    0,                          /* 0xf3 '3' */
-    0,                          /* 0xf4 '4' */
-    0,                          /* 0xf5 '5' */
-    0,                          /* 0xf6 '6' */
-    0,                          /* 0xf7 '7' */
-    0,                          /* 0xf8 '8' */
-    0,                          /* 0xf9 '9' */
+    T_SCHEME,                   /* 0xf0 '0' */
+    T_SCHEME,                   /* 0xf1 '1' */
+    T_SCHEME,                   /* 0xf2 '2' */
+    T_SCHEME,                   /* 0xf3 '3' */
+    T_SCHEME,                   /* 0xf4 '4' */
+    T_SCHEME,                   /* 0xf5 '5' */
+    T_SCHEME,                   /* 0xf6 '6' */
+    T_SCHEME,                   /* 0xf7 '7' */
+    T_SCHEME,                   /* 0xf8 '8' */
+    T_SCHEME,                   /* 0xf9 '9' */
     0,                          /* 0xfa     */
     0,                          /* 0xfb     */
     0,                          /* 0xfc     */
@@ -482,86 +485,86 @@ static const unsigned char uri_delims[256] = {
     0,                          /* 0x28 '(' */
     0,                          /* 0x29 ')' */
     0,                          /* 0x2a '*' */
-    0,                          /* 0x2b '+' */
+    T_SCHEME,                   /* 0x2b '+' */
     0,                          /* 0x2c ',' */
-    0,                          /* 0x2d '-' */
-    0,                          /* 0x2e '.' */
+    T_SCHEME,                   /* 0x2d '-' */
+    T_SCHEME,                   /* 0x2e '.' */
     T_SLASH,                    /* 0x2f '/' */
-    0,                          /* 0x30 '0' */
-    0,                          /* 0x31 '1' */
-    0,                          /* 0x32 '2' */
-    0,                          /* 0x33 '3' */
-    0,                          /* 0x34 '4' */
-    0,                          /* 0x35 '5' */
-    0,                          /* 0x36 '6' */
-    0,                          /* 0x37 '7' */
-    0,                          /* 0x38 '8' */
-    0,                          /* 0x39 '9' */
-    T_COLON,                    /* 0x3a ':' */
+    T_SCHEME,                   /* 0x30 '0' */
+    T_SCHEME,                   /* 0x31 '1' */
+    T_SCHEME,                   /* 0x32 '2' */
+    T_SCHEME,                   /* 0x33 '3' */
+    T_SCHEME,                   /* 0x34 '4' */
+    T_SCHEME,                   /* 0x35 '5' */
+    T_SCHEME,                   /* 0x36 '6' */
+    T_SCHEME,                   /* 0x37 '7' */
+    T_SCHEME,                   /* 0x38 '8' */
+    T_SCHEME,                   /* 0x39 '9' */
+    0,                          /* 0x3a ':' */
     0,                          /* 0x3b ';' */
     0,                          /* 0x3c '<' */
     0,                          /* 0x3d '=' */
     0,                          /* 0x3e '>' */
     T_QUESTION,                 /* 0x3f '?' */
     0,                          /* 0x40 '@' */
-    0,                          /* 0x41 'A' */
-    0,                          /* 0x42 'B' */
-    0,                          /* 0x43 'C' */
-    0,                          /* 0x44 'D' */
-    0,                          /* 0x45 'E' */
-    0,                          /* 0x46 'F' */
-    0,                          /* 0x47 'G' */
-    0,                          /* 0x48 'H' */
-    0,                          /* 0x49 'I' */
-    0,                          /* 0x4a 'J' */
-    0,                          /* 0x4b 'K' */
-    0,                          /* 0x4c 'L' */
-    0,                          /* 0x4d 'M' */
-    0,                          /* 0x4e 'N' */
-    0,                          /* 0x4f 'O' */
-    0,                          /* 0x50 'P' */
-    0,                          /* 0x51 'Q' */
-    0,                          /* 0x52 'R' */
-    0,                          /* 0x53 'S' */
-    0,                          /* 0x54 'T' */
-    0,                          /* 0x55 'U' */
-    0,                          /* 0x56 'V' */
-    0,                          /* 0x57 'W' */
-    0,                          /* 0x58 'X' */
-    0,                          /* 0x59 'Y' */
-    0,                          /* 0x5a 'Z' */
+    T_ALPHA,                    /* 0x41 'A' */
+    T_ALPHA,                    /* 0x42 'B' */
+    T_ALPHA,                    /* 0x43 'C' */
+    T_ALPHA,                    /* 0x44 'D' */
+    T_ALPHA,                    /* 0x45 'E' */
+    T_ALPHA,                    /* 0x46 'F' */
+    T_ALPHA,                    /* 0x47 'G' */
+    T_ALPHA,                    /* 0x48 'H' */
+    T_ALPHA,                    /* 0x49 'I' */
+    T_ALPHA,                    /* 0x4a 'J' */
+    T_ALPHA,                    /* 0x4b 'K' */
+    T_ALPHA,                    /* 0x4c 'L' */
+    T_ALPHA,                    /* 0x4d 'M' */
+    T_ALPHA,                    /* 0x4e 'N' */
+    T_ALPHA,                    /* 0x4f 'O' */
+    T_ALPHA,                    /* 0x50 'P' */
+    T_ALPHA,                    /* 0x51 'Q' */
+    T_ALPHA,                    /* 0x52 'R' */
+    T_ALPHA,                    /* 0x53 'S' */
+    T_ALPHA,                    /* 0x54 'T' */
+    T_ALPHA,                    /* 0x55 'U' */
+    T_ALPHA,                    /* 0x56 'V' */
+    T_ALPHA,                    /* 0x57 'W' */
+    T_ALPHA,                    /* 0x58 'X' */
+    T_ALPHA,                    /* 0x59 'Y' */
+    T_ALPHA,                    /* 0x5a 'Z' */
     0,                          /* 0x5b '[' */
     0,                          /* 0x5c '\' */
     0,                          /* 0x5d ']' */
     0,                          /* 0x5e '^' */
     0,                          /* 0x5f '_' */
     0,                          /* 0x60 '`' */
-    0,                          /* 0x61 'a' */
-    0,                          /* 0x62 'b' */
-    0,                          /* 0x63 'c' */
-    0,                          /* 0x64 'd' */
-    0,                          /* 0x65 'e' */
-    0,                          /* 0x66 'f' */
-    0,                          /* 0x67 'g' */
-    0,                          /* 0x68 'h' */
-    0,                          /* 0x69 'i' */
-    0,                          /* 0x6a 'j' */
-    0,                          /* 0x6b 'k' */
-    0,                          /* 0x6c 'l' */
-    0,                          /* 0x6d 'm' */
-    0,                          /* 0x6e 'n' */
-    0,                          /* 0x6f 'o' */
-    0,                          /* 0x70 'p' */
-    0,                          /* 0x71 'q' */
-    0,                          /* 0x72 'r' */
-    0,                          /* 0x73 's' */
-    0,                          /* 0x74 't' */
-    0,                          /* 0x75 'u' */
-    0,                          /* 0x76 'v' */
-    0,                          /* 0x77 'w' */
-    0,                          /* 0x78 'x' */
-    0,                          /* 0x79 'y' */
-    0,                          /* 0x7a 'z' */
+    T_ALPHA,                    /* 0x61 'a' */
+    T_ALPHA,                    /* 0x62 'b' */
+    T_ALPHA,                    /* 0x63 'c' */
+    T_ALPHA,                    /* 0x64 'd' */
+    T_ALPHA,                    /* 0x65 'e' */
+    T_ALPHA,                    /* 0x66 'f' */
+    T_ALPHA,                    /* 0x67 'g' */
+    T_ALPHA,                    /* 0x68 'h' */
+    T_ALPHA,                    /* 0x69 'i' */
+    T_ALPHA,                    /* 0x6a 'j' */
+    T_ALPHA,                    /* 0x6b 'k' */
+    T_ALPHA,                    /* 0x6c 'l' */
+    T_ALPHA,                    /* 0x6d 'm' */
+    T_ALPHA,                    /* 0x6e 'n' */
+    T_ALPHA,                    /* 0x6f 'o' */
+    T_ALPHA,                    /* 0x70 'p' */
+    T_ALPHA,                    /* 0x71 'q' */
+    T_ALPHA,                    /* 0x72 'r' */
+    T_ALPHA,                    /* 0x73 's' */
+    T_ALPHA,                    /* 0x74 't' */
+    T_ALPHA,                    /* 0x75 'u' */
+    T_ALPHA,                    /* 0x76 'v' */
+    T_ALPHA,                    /* 0x77 'w' */
+    T_ALPHA,                    /* 0x78 'x' */
+    T_ALPHA,                    /* 0x79 'y' */
+    T_ALPHA,                    /* 0x7a 'z' */
     0,                          /* 0x7b '{' */
     0,                          /* 0x7c '|' */
     0,                          /* 0x7d '}' */
@@ -705,10 +708,6 @@ static const unsigned char uri_delims[256] = {
     }
 */
 
-/* Note that we optimize the scheme scanning here, we cheat and let the
- * compiler know that it doesn't have to do the & masking.
- */
-#define NOTEND_SCHEME     (0xff)
 #define NOTEND_HOSTINFO   (T_SLASH | T_QUESTION | T_HASH | T_NUL)
 #define NOTEND_PATH       (T_QUESTION | T_HASH | T_NUL)
 
@@ -788,21 +787,50 @@ deal_with_path:
 
     /* find the scheme: */
     s = uri;
-    while ((uri_delims[*(unsigned char *)s] & NOTEND_SCHEME) == 0) {
+    /* first char must be letter */
+    if (uri_delims[*(unsigned char *)s] & T_ALPHA) {
         ++s;
+        while ((uri_delims[*(unsigned char *)s] & (T_ALPHA|T_SCHEME)))
+            ++s;
     }
     /* scheme must be non-empty and followed by : */
-    if (s == uri || s[0] != ':') {
-        goto deal_with_path;        /* backwards predicted taken! */
+    if (s != uri && s[0] == ':') {
+        uptr->scheme = apr_pstrmemdup(p, uri, s - uri);
+        s++;
+    }
+    else {
+        /* No valid scheme, restart from the beginning */
+        s = uri;
     }
 
-    uptr->scheme = apr_pstrmemdup(p, uri, s - uri);
-    if (s[1] != '/' || s[2] != '/') {
-        uri = s + 1;
+    if (s[0] != '/' || s[1] != '/') {
+        if (uri == s) {
+            /*
+             * RFC 3986 3.3: If we have no scheme and no authority,
+             * the leading segment of a relative path must not contain a ':'.
+             */
+            char *first_slash = strchr(uri, '/');
+            if (first_slash) {
+                while (s < first_slash) {
+                    if (s[0] == ':')
+                        return APR_EGENERAL;
+                    ++s;
+                }
+                /* no scheme but relative path, e.g. '../image.jpg' */
+            }
+            else {
+                if (strchr(uri, ':') != NULL)
+                    return APR_EGENERAL;
+                /* no scheme, no slash, but relative path, e.g. 'image.jpg' */
+            }
+            goto deal_with_path;
+        }
+        /* scheme and relative path */
+        uri = s;
         goto deal_with_path;
     }
 
-    s += 3;
+    s += 2;
 
 deal_with_authority:
     hostinfo = s;
