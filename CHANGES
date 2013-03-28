@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_uri_parse(): Do not accept invalid characters in the scheme.
+     Per RFC 3986 3.3, enforce that the first segment of a relative path does
+     not contain a colon. PR 52479. [Stefan Fritsch]
+
   *) Fix pool integrity checks with threads. Add new apr_pool_owner_set()
      function. PR 43375, 52785. [Stefan Fritsch]
 
