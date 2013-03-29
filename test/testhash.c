@@ -32,12 +32,13 @@ static int comp_string(const void *str1, const void *str2)
 static void dump_hash(apr_pool_t *p, apr_hash_t *h, char str[][MAX_LTH]) 
 {
     apr_hash_index_t *hi;
-    char *val, *key;
-    apr_ssize_t len;
     int i = 0;
 
     for (hi = apr_hash_first(p, h); hi; hi = apr_hash_next(hi)) {
-        apr_hash_this(hi,(void*) &key, &len, (void*) &val);
+        const char *key = apr_hash_this_key(hi);
+        apr_ssize_t len = apr_hash_this_key_len(hi);
+        char *val = apr_hash_this_val(hi);
+
         str[i][0]='\0';
         apr_snprintf(str[i], MAX_LTH, "%sKey %s (%" APR_SSIZE_T_FMT ") Value %s\n",
                  str[i], key, len, val);
