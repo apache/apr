@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#ifdef I_CAN_DEAL_WITH_THIS_PARTIAL_DRIVER_AND_UNMAINTAINED_CODE_FOR_FREETDS
+
 #include "apu.h"
 #include "apr_private.h"
 
@@ -802,4 +804,6 @@ APR_MODULE_DECLARE_DATA const apr_dbd_driver_t apr_dbd_freetds_driver = {
     dbd_freetds_datum_get
 #endif
 };
+#endif
+
 #endif

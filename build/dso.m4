@@ -42,7 +42,6 @@ AC_DEFUN([APR_MODULAR_DSO], [
      test $apu_have_mysql = 1 && objs="$objs dbd/apr_dbd_mysql.lo"
      test $apu_have_sqlite2 = 1 && objs="$objs dbd/apr_dbd_sqlite2.lo"
      test $apu_have_sqlite3 = 1 && objs="$objs dbd/apr_dbd_sqlite3.lo"
-     test $apu_have_freetds = 1 && objs="$objs dbd/apr_dbd_freetds.lo"
      test $apu_have_odbc = 1 && objs="$objs dbd/apr_dbd_odbc.lo"
      test $apu_have_db = 1 && objs="$objs dbm/apr_dbm_berkeleydb.lo"
      test $apu_have_gdbm = 1 && objs="$objs dbm/apr_dbm_gdbm.lo"
@@ -64,10 +63,10 @@ AC_DEFUN([APR_MODULAR_DSO], [
      fi
 
      LIBS="$LIBS $LDADD_crypto_openssl $LDADD_crypto_nss $LDADD_crypto_commoncrypto"
-     LIBS="$LIBS $LDADD_dbd_pgsql $LDADD_dbd_sqlite2 $LDADD_dbd_sqlite3 $LDADD_dbd_oracle $LDADD_dbd_mysql $LDADD_dbd_freetds $LDADD_dbd_odbc"
+     LIBS="$LIBS $LDADD_dbd_pgsql $LDADD_dbd_sqlite2 $LDADD_dbd_sqlite3 $LDADD_dbd_oracle $LDADD_dbd_mysql $LDADD_dbd_odbc"
      LIBS="$LIBS $LDADD_dbm_db $LDADD_dbm_gdbm $LDADD_dbm_ndbm"
      APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_crypto_openssl $LDADD_crypto_nss $LDADD_crypto_commoncrypto"
-     APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_dbd_pgsql $LDADD_dbd_sqlite2 $LDADD_dbd_sqlite3 $LDADD_dbd_oracle $LDADD_dbd_mysql $LDADD_dbd_freetds $LDADD_dbd_odbc"
+     APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_dbd_pgsql $LDADD_dbd_sqlite2 $LDADD_dbd_sqlite3 $LDADD_dbd_oracle $LDADD_dbd_mysql $LDADD_dbd_odbc"
      APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_dbm_db $LDADD_dbm_gdbm $LDADD_dbm_ndbm"
 
   else
@@ -82,7 +81,6 @@ AC_DEFUN([APR_MODULAR_DSO], [
      test $apu_have_mysql = 1 && dsos="$dsos dbd/apr_dbd_mysql.la"
      test $apu_have_sqlite2 = 1 && dsos="$dsos dbd/apr_dbd_sqlite2.la"
      test $apu_have_sqlite3 = 1 && dsos="$dsos dbd/apr_dbd_sqlite3.la"
-     test $apu_have_freetds = 1 && dsos="$dsos dbd/apr_dbd_freetds.la"
      test $apu_have_odbc = 1 && dsos="$dsos dbd/apr_dbd_odbc.la"
      test $apu_have_db = 1 && dsos="$dsos dbm/apr_dbm_db.la"
      test $apu_have_gdbm = 1 && dsos="$dsos dbm/apr_dbm_gdbm.la"
