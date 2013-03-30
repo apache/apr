@@ -749,6 +749,7 @@ static void test_writev_buffered_seek(abts_case *tc, void *data)
                                      APR_OS_DEFAULT, p));
 
     rv = apr_file_read(f, str, &nbytes);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_STR_EQUAL(tc, TESTSTR, str);
     APR_ASSERT_SUCCESS(tc, "buffered seek", apr_file_seek(f, APR_SET, &off));
 
@@ -950,6 +951,7 @@ static void test_xthread(abts_case *tc, void *data)
         apr_off_t offset = 0;
 
         rv = apr_file_seek(f, APR_END, &offset);
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     }
 
     APR_ASSERT_SUCCESS(tc, "more writes should succeed",
@@ -960,6 +962,7 @@ static void test_xthread(abts_case *tc, void *data)
         apr_off_t offset = 0;
         
         rv = apr_file_seek(f, APR_SET, &offset);
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     }
     
     apr_file_read_full(f, buf, sizeof(buf), NULL);
