@@ -183,7 +183,7 @@ define APR_DECLARE_STATIC before you include any apr header files
 in your source, and link to apr.lib instead.
 
 On windows, selection of database drivers is via the environment values
-DBD_LIST (for freetds, mysql, oracle, pgsql, sqlite2 and/or sqlite3) 
+DBD_LIST (for mysql, oracle, pgsql, sqlite2 and/or sqlite3) 
 and DBM_LIST (db and/or gdbm).  DBD odbc and DBM sdbm are unconditionally
 compiled and installed, do not include these in the list.
 

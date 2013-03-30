@@ -409,63 +409,6 @@ AC_DEFUN([APU_CHECK_DBD_ORACLE], [
 ])
 
 dnl
-AC_DEFUN([APU_CHECK_DBD_FREETDS], [
-  apu_have_freetds=0
-
-  old_libs="$LIBS"
-  old_cppflags="$CPPFLAGS"
-  old_ldflags="$LDFLAGS"
-
-  AC_ARG_WITH([freetds], 
-    APR_HELP_STRING([--with-freetds=DIR], [specify FreeTDS location]),
-  [
-    if test "$withval" = "yes"; then
-      AC_CHECK_HEADERS(sybdb.h, AC_CHECK_LIB(sybdb, tdsdbopen, [apu_have_freetds=1]))
-      if test "$apu_have_freetds" = "0"; then
-        AC_CHECK_HEADERS(freetds/sybdb.h, AC_CHECK_LIB(sybdb, tdsdbopen, [apu_have_freetds=1]))
-      fi
-    elif test "$withval" = "no"; then
-      :
-    else
-      sybdb_CPPFLAGS="-I$withval/include"
-      sybdb_LDFLAGS="-L$withval/lib "
-
-      APR_ADDTO(CPPFLAGS, [$sybdb_CPPFLAGS])
-      APR_ADDTO(LDFLAGS, [$sybdb_LDFLAGS])
-
-      AC_MSG_NOTICE(checking for freetds in $withval)
-      AC_CHECK_HEADERS(sybdb.h, AC_CHECK_LIB(sybdb, tdsdbopen, [apu_have_freetds=1]))
-      if test "$apu_have_freetds" = "0"; then
-        AC_CHECK_HEADERS(freetds/sybdb.h, AC_CHECK_LIB(sybdb, tdsdbopen, [apu_have_freetds=1]))
-      fi
-      if test "$apu_have_freetds" != "0"; then
-        APR_ADDTO(INCLUDES, [-I$withval/include])
-      fi
-    fi
-  ], [
-    AC_CHECK_HEADERS(sybdb.h, AC_CHECK_LIB(sybdb, tdsdbopen, [apu_have_freetds=1]))
-    if test "$apu_have_freetds" = "0"; then
-      AC_CHECK_HEADERS(freetds/sybdb.h, AC_CHECK_LIB(sybdb, tdsdbopen, [apu_have_freetds=1]))
-    fi
-  ])
-
-  AC_SUBST(apu_have_freetds)
-
-  dnl Since we have already done the AC_CHECK_LIB tests, if we have it, 
-  dnl we know the library is there.
-  if test "$apu_have_freetds" = "1"; then
-    APR_ADDTO(LDADD_dbd_freetds, [$sybdb_LDFLAGS -lsybdb])
-    dnl Erm, I needed pcreposix, but I think that dependency has gone
-    dnl from the current code
-    dnl APR_ADDTO(LDADD_dbd_freetds, [-lpcreposix])
-  fi
-  AC_SUBST(LDADD_dbd_freetds)
-
-  LIBS="$old_libs"
-  CPPFLAGS="$old_cppflags"
-  LDFLAGS="$old_ldflags"
-])
-dnl
 
 AC_DEFUN([APU_CHECK_DBD_ODBC], [
   apu_have_odbc=0
@@ -565,7 +508,6 @@ AC_DEFUN([APU_CHECK_DBD_ODBC], [
   test $apu_have_mysql = 1 &&   apu_dbd_tests="$apu_dbd_tests mysql"
   test $apu_have_sqlite2 = 1 && apu_dbd_tests="$apu_dbd_tests sqlite2"
   test $apu_have_sqlite3 = 1 && apu_dbd_tests="$apu_dbd_tests sqlite3"
-  test $apu_have_freetds = 1 && apu_dbd_tests="$apu_dbd_tests freetds"
   test $apu_have_odbc = 1 &&    apu_dbd_tests="$apu_dbd_tests odbc"
   AC_SUBST(apu_dbd_tests)
 ])
