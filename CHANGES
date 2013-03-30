@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Mark apr_dbd_freetds as unsupported, and remove it from all builds
+     [Nick Kew]
+
   *) Fix pool integrity checks with threads. Add new apr_pool_owner_set()
      function. PR 43375, 52785. [Stefan Fritsch]
 

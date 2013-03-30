@@ -674,7 +674,6 @@ typedef int apr_wait_t;
 #define APU_HAVE_SQLITE3       @apu_have_sqlite3@
 #define APU_HAVE_SQLITE2       @apu_have_sqlite2@
 #define APU_HAVE_ORACLE        @apu_have_oracle@
-#define APU_HAVE_FREETDS       @apu_have_freetds@
 #define APU_HAVE_ODBC          @apu_have_odbc@
 
 #define APU_HAVE_CRYPTO        @apu_have_crypto@

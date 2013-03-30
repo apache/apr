@@ -673,7 +673,6 @@ class APREnv(Environment):
     subst['@apu_have_sqlite3@'] = 0
     subst['@apu_have_sqlite2@'] = 0
     subst['@apu_have_oracle@'] = 0
-    subst['@apu_have_freetds@'] = 0
     subst['@apu_have_odbc@'] = 0
 
 
