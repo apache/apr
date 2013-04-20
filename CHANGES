@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.7
 
+  *) Fix PPC atomics to work with gcc 4.0. PR 54840. [Mattias Engdegård
+     <mattiase acm org>]
+
   *) configure: Fix detection of O_NONBLOCK inheritance on busy
      systems.  [Rainer Jung]
 
