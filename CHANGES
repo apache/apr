@@ -1,9 +1,15 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.0
 
+  *) Fix PPC atomics to work with gcc 4.0. PR 54840. [Mattias Engdegård
+     <mattiase acm org>]
+
   *) Add apr_hash_this_key(), apr_hash_this_key_len(), and 
      apr_hash_this_val() for easier access to those attributes from
      a hash iterator.  [Hyrum K. Wright <hyrum_wright mail.utexas.edu>]
+
+  *) Mark apr_dbd_freetds as unsupported, and remove it from all builds
+     [Nick Kew]
 
   *) MinGW/MSYS:  Support shared builds of APR, other general improvements
      to support of this toolchain.  PR 46175.  [Carlo Bramini 
