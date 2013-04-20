@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Fix PPC atomics to work with gcc 4.0. PR 54840. [Mattias Engdegård
+     <mattiase acm org>]
+
   *) Mark apr_dbd_freetds as unsupported, and remove it from all builds
      [Nick Kew]
 
