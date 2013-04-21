@@ -84,11 +84,12 @@ static void test_xchg32(abts_case *tc, void *data)
 static void test_xchgptr(abts_case *tc, void *data)
 {
     int a;
-    volatile void *target_ptr = NULL;
+    void *ref = "little piggy";
+    volatile void *target_ptr = ref;
     void *old_ptr;
 
     old_ptr = apr_atomic_xchgptr(&target_ptr, &a);
-    ABTS_PTR_EQUAL(tc, NULL, old_ptr);
+    ABTS_PTR_EQUAL(tc, ref, old_ptr);
     ABTS_PTR_EQUAL(tc, &a, (void *) target_ptr);
 }
 
