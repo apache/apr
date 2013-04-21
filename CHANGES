@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.0
 
+  *) Fix amd64 assembler version of apr_atomic_xchgptr(). PR 51851. [Mattias
+     Engdegård <mattiase acm org>]
+
   *) Fix PPC atomics to work with gcc 4.0. PR 54840. [Mattias Engdegård
      <mattiase acm org>]
 
