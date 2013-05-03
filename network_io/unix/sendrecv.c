@@ -174,7 +174,14 @@ apr_status_t apr_socket_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
         return errno;
     }
 
-    apr_sockaddr_vars_set(from, from->sa.sin.sin_family, ntohs(from->sa.sin.sin_port));
+    /*
+     * Check if we have a valid address. recvfrom() with MSG_PEEK may return
+     * success without filling in the address.
+     */
+    if (from->salen > APR_OFFSETOF(struct sockaddr_in, sin_port)) {
+        apr_sockaddr_vars_set(from, from->sa.sin.sin_family,
+                              ntohs(from->sa.sin.sin_port));
+    }
 
     (*len) = rv;
     if (rv == 0 && sock->type == SOCK_STREAM) {
