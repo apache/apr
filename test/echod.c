@@ -113,7 +113,6 @@ static apr_status_t glassToWall(apr_int16_t port, apr_pool_t *parent)
 int main(int argc, char **argv)
 {
     apr_pool_t *pool;
-    apr_status_t rv;
     apr_int16_t theport = 4747;
 
     printf("APR Test Application: echod\n");
@@ -129,7 +128,7 @@ int main(int argc, char **argv)
     }
 
     fprintf(stdout, "Starting to listen on port %d\n", theport);
-    rv = glassToWall(theport, pool);
+    glassToWall(theport, pool);
 
     return 0;
 }
