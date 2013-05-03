@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.7
 
+  *) Fix apr_sockaddr_info_get() not returning an error in some cases.
+     [Jan Kaluža <jkaluza redhat com>]
+
   *) Fix amd64 assembler version of apr_atomic_xchgptr(). PR 51851. [Mattias
      Engdegård <mattiase acm org>]
 

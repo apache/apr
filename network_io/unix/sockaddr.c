@@ -385,7 +385,7 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
         return apr_get_netos_error();
 #else
         if (error == EAI_SYSTEM) {
-            return errno;
+            return errno ? errno : APR_EGENERAL;
         }
         else 
         {
@@ -440,6 +440,15 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
         ai = ai->ai_next;
     }
     freeaddrinfo(ai_list);
+
+    if (prev_sa == NULL) {
+        /*
+         * getaddrinfo returned only useless entries and *sa is still empty.
+         * This should be treated as an error.
+         */
+        return APR_EGENERAL;
+    }
+
     return APR_SUCCESS;
 }
 
@@ -571,6 +580,11 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
 
         prev_sa = new_sa;
         ++curaddr;
+    }
+
+    if (prev_sa == NULL) {
+        /* this should not happen but no result should be treated as error */
+        return APR_EGENERAL;
     }
 
     return APR_SUCCESS;
