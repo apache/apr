@@ -180,6 +180,9 @@ AC_MSG_NOTICE([APR Version: ${APR_DOTTED_VERSION}])
 dnl Enable the layout handling code, then reparse the prefix-style
 dnl arguments due to autoconf being a PITA.
 APR_ENABLE_LAYOUT(apr)
+dnl This must be synchronized to the prefix of the apr layout, to make
+dnl configure --help print the correct default.
+AC_PREFIX_DEFAULT([/usr/local/apr])
 APR_PARSE_ARGUMENTS
 
 dnl Set optional CC hints here in case autoconf makes an inappropriate choice.
