@@ -86,8 +86,10 @@ apr_status_t apu_dso_init(apr_pool_t *pool)
     }
 
     /* Top level pool scope, need process-scope lifetime */
-    for (parent = global = pool; parent; parent = apr_pool_parent_get(global))
-        global = parent;
+    for (parent = apr_pool_parent_get(pool);
+         parent && parent != pool;
+         parent = apr_pool_parent_get(pool))
+        pool = parent;
 
     dsos = apr_hash_make(global);
 
