@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Add the apr_table_getm() call, which transparently handles the
+     merging of keys with multiple values. [Graham Leggett]
+
   *) Mark apr_dbd_freetds as unsupported, and remove it from all builds
      [Nick Kew]
 
