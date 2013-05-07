@@ -73,7 +73,6 @@ static apr_status_t apu_dso_term(void *ptr)
 apr_status_t apu_dso_init(apr_pool_t *pool)
 {
     apr_status_t ret = APR_SUCCESS;
-    apr_pool_t *global;
     apr_pool_t *parent;
 
     if (apr_atomic_inc32(&initialised)) {
@@ -91,14 +90,14 @@ apr_status_t apu_dso_init(apr_pool_t *pool)
          parent = apr_pool_parent_get(pool))
         pool = parent;
 
-    dsos = apr_hash_make(global);
+    dsos = apr_hash_make(pool);
 
 #if APR_HAS_THREADS
-    ret = apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_DEFAULT, global);
+    ret = apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_DEFAULT, pool);
     /* This already registers a pool cleanup */
 #endif
 
-    apr_pool_cleanup_register(global, NULL, apu_dso_term,
+    apr_pool_cleanup_register(pool, NULL, apu_dso_term,
                               apr_pool_cleanup_null);
 
     apr_atomic_dec32(&in_init);
