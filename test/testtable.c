@@ -57,6 +57,25 @@ static void table_get(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, "bar", val);
 }
 
+static void table_getm(abts_case *tc, void *data)
+{
+    const char *orig, *val;
+    apr_pool_t *subp;
+
+    apr_pool_create(&subp, p);
+
+    orig = "bar";
+    apr_table_setn(t1, "foo", orig);
+    val = apr_table_getm(subp, t1, "foo");
+    ABTS_PTR_EQUAL(tc, orig, val);
+    ABTS_STR_EQUAL(tc, "bar", val);
+    apr_table_add(t1, "foo", "baz");
+    val = apr_table_getm(subp, t1, "foo");
+    ABTS_STR_EQUAL(tc, "bar,baz", val);
+
+    apr_pool_destroy(subp);
+}
+
 static void table_set(abts_case *tc, void *data)
 {
     const char *val;
@@ -187,6 +206,7 @@ abts_suite *testtable(abts_suite *suite)
     abts_run_test(suite, array_clear, NULL);
     abts_run_test(suite, table_make, NULL);
     abts_run_test(suite, table_get, NULL);
+    abts_run_test(suite, table_getm, NULL);
     abts_run_test(suite, table_set, NULL);
     abts_run_test(suite, table_getnotthere, NULL);
     abts_run_test(suite, table_add, NULL);

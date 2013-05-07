@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.0
 
+  *) Add the apr_table_getm() call, which transparently handles the
+     merging of keys with multiple values. [Graham Leggett]
+
   *) Fix amd64 assembler version of apr_atomic_xchgptr(). PR 51851. [Mattias
      Engdegård <mattiase acm org>]
 
