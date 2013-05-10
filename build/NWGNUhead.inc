@@ -69,8 +69,10 @@ clobber_install ::
 
 $(SUBDIRS) : FORCE
 ifneq "$(MAKECMDGOALS)" "clean"
+ifneq "$(findstring clobber_,$(MAKECMDGOALS))" "clobber_"
 	@$(ECHONL)
 	@echo Building $(CURDIR)/$@
+endif
 endif
 	$(MAKE) -C $@ $(MAKECMDGOALS) -f NWGNUmakefile RELEASE=$(RELEASE) DEST="$(INSTALL)" LM_LICENSE_FILE="$(LM_LICENSE_FILE)"
 	@$(ECHONL)
