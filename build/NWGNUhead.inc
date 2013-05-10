@@ -84,13 +84,16 @@ FORCE : ;
 # Standard targets
 #
 
-clean :: $(SUBDIRS) $(APRTEST)
+clean :: $(SUBDIRS)
 	@echo Cleaning up $(CURDIR)
 	$(call RMDIR,$(OBJDIR))
 	$(call DEL,*.err)
 	$(call DEL,*.map)
 	$(call DEL,*.tmp)
 #	$(call DEL,*.d)
+
+test-clean ::
+	$(MAKE) -C $(APRTEST) -f NWGNUmakefile clean
 
 $(OBJDIR) ::
 	$(call MKDIR,$@)
