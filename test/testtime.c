@@ -61,12 +61,12 @@ static void test_now(abts_case *tc, void *data)
     current = apr_time_now();
     time(&os_now);
 
-    timediff = os_now - (current / APR_USEC_PER_SEC); 
+    timediff = os_now - (current / APR_USEC_PER_SEC);
     /* Even though these are called so close together, there is the chance
      * that the time will be slightly off, so accept anything between -1 and
      * 1 second.
      */
-    ABTS_ASSERT(tc, "apr_time and OS time do not agree", 
+    ABTS_ASSERT(tc, "apr_time and OS time do not agree",
              (timediff > -2) && (timediff < 2));
 }
 
@@ -80,21 +80,21 @@ static void test_gmtstr(abts_case *tc, void *data)
         ABTS_NOT_IMPL(tc, "apr_time_exp_gmt");
     }
     ABTS_TRUE(tc, rv == APR_SUCCESS);
-    ABTS_STR_EQUAL(tc, "2002-09-14 19:05:36.186711 +0000 [257 Sat]", 
+    ABTS_STR_EQUAL(tc, "2002-09-14 19:05:36.186711 +0000 [257 Sat]",
                       print_time(p, &xt));
 }
 
 static void test_exp_lt(abts_case *tc, void *data)
 {
-	apr_time_t test_times[3];
-	int i;
+    apr_time_t test_times[3];
+    int i;
 
-	test_times[0] = now;
-	test_times[1] = leap_year_now;
-	test_times[2] = 0;
+    test_times[0] = now;
+    test_times[1] = leap_year_now;
+    test_times[2] = 0;
 
-	for (i = 0; test_times[i] != 0; i++) {
-	    apr_status_t rv;
+    for (i = 0; test_times[i] != 0; i++) {
+        apr_status_t rv;
         apr_time_exp_t xt;
         time_t posix_secs = (time_t)apr_time_sec(test_times[i]);
         struct tm *posix_exp = localtime(&posix_secs);
@@ -118,7 +118,7 @@ static void test_exp_lt(abts_case *tc, void *data)
         CHK_FIELD(tm_yday);
         CHK_FIELD(tm_isdst);
 #undef CHK_FIELD
-	}
+    }
 }
 
 static void test_exp_get_gmt(abts_case *tc, void *data)
@@ -249,9 +249,9 @@ static void test_exp_tz(abts_case *tc, void *data)
         ABTS_NOT_IMPL(tc, "apr_time_exp_tz");
     }
     ABTS_TRUE(tc, rv == APR_SUCCESS);
-    ABTS_TRUE(tc, (xt.tm_usec == 186711) && 
+    ABTS_TRUE(tc, (xt.tm_usec == 186711) &&
                      (xt.tm_sec == 36) &&
-                     (xt.tm_min == 5) && 
+                     (xt.tm_min == 5) &&
                      (xt.tm_hour == 14) &&
                      (xt.tm_mday == 14) &&
                      (xt.tm_mon == 8) &&
@@ -289,7 +289,7 @@ static void test_2038(abts_case *tc, void *data)
     xt.tm_hour = 3;
     xt.tm_min = 14;
     xt.tm_sec = 7;
-    
+
     APR_ASSERT_SUCCESS(tc, "explode January 19th, 2038",
                        apr_time_exp_get(&t, &xt));
 }
