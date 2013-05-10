@@ -86,12 +86,11 @@ static void test_gmtstr(abts_case *tc, void *data)
 
 static void test_exp_lt(abts_case *tc, void *data)
 {
-    apr_time_t test_times[3];
+    apr_time_t test_times[] = {0, 0, 0};
     int i;
 
     test_times[0] = now;
     test_times[1] = leap_year_now;
-    test_times[2] = 0;
 
     for (i = 0; test_times[i] != 0; i++) {
         apr_status_t rv;
