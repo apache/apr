@@ -102,7 +102,8 @@ endif
 # Generic compiler rules
 #
 
-ifneq ($(MAKECMDGOALS),clean)
+ifneq "$(MAKECMDGOALS)" "clean"
+ifneq "$(findstring clobber_,$(MAKECMDGOALS))" "clobber_"
 $(APRBUILD)/NWGNUversion.inc : $(APRBUILD)/nw_ver.awk $(APR)/include/apr_version.h
 #	@echo Generating $@
 	@echo GEN  $@
@@ -116,6 +117,7 @@ else
 VERSION		= 1,4,0
 VERSION_STR	= 1.4.0
 VERSION_MAJMIN	= 14
+endif
 endif
 endif
 
