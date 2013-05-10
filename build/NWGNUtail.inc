@@ -114,9 +114,9 @@ $(APRBUILD)/NWGNUversion.inc : $(APRBUILD)/nw_ver.awk $(APR)/include/apr_version
 ifneq "$(strip $(VERSION_STR))" ""
 VERSION_INC = $(APRBUILD)/NWGNUversion.inc
 else
-VERSION		= 1,4,0
-VERSION_STR	= 1.4.0
-VERSION_MAJMIN	= 14
+VERSION		= 1,5,0
+VERSION_STR	= 1.5.0
+VERSION_MAJMIN	= 15
 endif
 endif
 endif
