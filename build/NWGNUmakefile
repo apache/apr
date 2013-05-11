@@ -53,6 +53,14 @@ ifneq "$(LDAPSDK)" ""
 endif
 
 
+ifndef WITH_LDAP
+WITH_LDAP = $(shell $(AWK) '/^\#define APR_HAS_LDAP /{print $$3}' $(APU)/include/apr_ldap.hnw)
+endif
+
+$(APU)/include/apr_ldap.h: $(APR)/build/nw_make_header.awk $(APU)/include/apr_ldap.hnw
+	@echo $(DL)Creating $@$(DL)
+	$(AWK) -v WITH_LDAP=$(WITH_LDAP) -f $^ >$@
+
 %.h: %.hnw
 	@echo $(DL)Creating $@$(DL)
 	$(call COPY,$<,$@)
