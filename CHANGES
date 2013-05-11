@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.8
 
+  *) Fix the return value of apr_threadattr_detach_get() on some
+     platforms like OS X and Solaris. [Rainer Jung, <dusanv gmail com>]
+
 
 Changes for APR 1.4.7
 
