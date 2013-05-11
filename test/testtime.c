@@ -31,6 +31,8 @@
  * Which happens to be when I wrote the new tests.
  */
 static apr_time_t now = APR_INT64_C(1032030336186711);
+/* 2012-08-11 16:00:55.151600 -14400 [224 Sat] DST */
+static apr_time_t leap_year_now = APR_INT64_C(1344715255151600);
 
 static char* print_time (apr_pool_t *pool, const apr_time_exp_t *xt)
 {
@@ -84,30 +86,38 @@ static void test_gmtstr(CuTest *tc)
 
 static void test_exp_lt(CuTest *tc)
 {
-    apr_status_t rv;
-    apr_time_exp_t xt;
-    time_t posix_secs = (time_t)apr_time_sec(now);
-    struct tm *posix_exp = localtime(&posix_secs);
+    apr_time_t test_times[] = {0, 0, 0};
+    int i;
 
-    rv = apr_time_exp_lt(&xt, now);
-    if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, "apr_time_exp_lt");
-    }
-    CuAssertTrue(tc, rv == APR_SUCCESS);
+    test_times[0] = now;
+    test_times[1] = leap_year_now;
+
+    for (i = 0; test_times[i] != 0; i++) {
+        apr_status_t rv;
+        apr_time_exp_t xt;
+        time_t posix_secs = (time_t)apr_time_sec(test_times[i]);
+        struct tm *posix_exp = localtime(&posix_secs);
+
+        rv = apr_time_exp_lt(&xt, test_times[i]);
+        if (rv == APR_ENOTIMPL) {
+            CuNotImpl(tc, "apr_time_exp_lt");
+        }
+        CuAssertTrue(tc, rv == APR_SUCCESS);
 
 #define CHK_FIELD(f) \
-    CuAssert(tc, "Mismatch in " #f, posix_exp->f == xt.f)
+        CuAssert(tc, "Mismatch in " #f, posix_exp->f == xt.f)
 
-    CHK_FIELD(tm_sec);
-    CHK_FIELD(tm_min);
-    CHK_FIELD(tm_hour);
-    CHK_FIELD(tm_mday);
-    CHK_FIELD(tm_mon);
-    CHK_FIELD(tm_year);
-    CHK_FIELD(tm_wday);
-    CHK_FIELD(tm_yday);
-    CHK_FIELD(tm_isdst);
+        CHK_FIELD(tm_sec);
+        CHK_FIELD(tm_min);
+        CHK_FIELD(tm_hour);
+        CHK_FIELD(tm_mday);
+        CHK_FIELD(tm_mon);
+        CHK_FIELD(tm_year);
+        CHK_FIELD(tm_wday);
+        CHK_FIELD(tm_yday);
+        CHK_FIELD(tm_isdst);
 #undef CHK_FIELD
+    }
 }
 
 static void test_exp_get_gmt(CuTest *tc)
