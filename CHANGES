@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Add support to apr_memcache for unix domain sockets. PR 54573 [Remi
+     Gacogne <rgacogne+asf aquaray.com>]
+
   *) Add the apr_table_getm() call, which transparently handles the
      merging of keys with multiple values. [Graham Leggett]
 
