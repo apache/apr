@@ -81,11 +81,7 @@
 #  define APU_IS_DEV_VERSION
 #endif
 
-#if defined(APU_IS_DEV_VERSION) || defined(DOXYGEN)
 /** Internal: string form of the "is dev" flag */
-#define APU_IS_DEV_STRING "-dev"
-#else
-#define APU_IS_DEV_STRING ""
-#endif
+#define APU_IS_DEV_STRING       APR_IS_DEV_STRING
 
 #endif /* ndef APU_VERSION_H */
