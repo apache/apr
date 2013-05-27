@@ -43,6 +43,9 @@ extern "C" {
  *     http://apr.apache.org/versioning.html
  */
 
+#define APR_COPYRIGHT "Copyright (c) 2013 The Apache Software " \
+                      "Foundation or its licensors, as applicable."
+
 /* The numeric compile-time version constants. These constants are the
  * authoritative version numbers for APR. 
  */
