@@ -114,9 +114,8 @@ endif
 ifneq "$(MAKECMDGOALS)" "clean"
 ifneq "$(findstring clobber_,$(MAKECMDGOALS))" "clobber_"
 $(APRBUILD)/NWGNUversion.inc : $(APRBUILD)/nw_ver.awk $(APR)/include/apr_version.h
-#	@echo Generating $@
 	@echo $(DL)GEN  $@$(DL)
-	@$(AWK) -f $^ > $@
+	$(AWK) -f $^ $(APR)/.svn/all-wcprops > $@
 
 -include $(APRBUILD)/NWGNUversion.inc
 
@@ -127,6 +126,11 @@ VERSION		= 2,0,0
 VERSION_STR	= 2.0.0
 VERSION_MAJMIN	= 20
 endif
+endif
+endif
+ifeq "$(USE_SVNREV)" "1"
+ifneq "$(strip $(SVN_REVISION))" ""
+CFLAGS	+= -DAPR_IS_DEV_STRING=\"$(SVN_REVISION)\"
 endif
 endif
 
