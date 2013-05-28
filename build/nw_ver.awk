@@ -18,16 +18,16 @@ BEGIN {
   # fetch APR version numbers from input file and write them to STDOUT
 
   while ((getline < ARGV[1]) > 0) {
-    if (match ($0, /^#define APR_MAJOR_VERSION/)) {
+    if (match ($0, /^#define AP._MAJOR_VERSION/)) {
       ver_major = $3;
     }
-    else if (match ($0, /^#define APR_MINOR_VERSION/)) {
+    else if (match ($0, /^#define AP._MINOR_VERSION/)) {
       ver_minor = $3;
     }
-    else if (match ($0, /^#define APR_PATCH_VERSION/)) {
+    else if (match ($0, /^#define AP._PATCH_VERSION/)) {
       ver_patch = $3;
     }
-    else if (match ($0, /^#define APR_IS_DEV_VERSION/)) {
+    else if (match ($0, /^#define AP._IS_DEV_VERSION/)) {
       ver_devbuild = 1;
     }
   }
