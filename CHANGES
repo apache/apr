@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Add the apr_escape interface. [Graham Leggett]
+     
   *) Add support to apr_memcache for unix domain sockets. PR 54573 [Remi
      Gacogne <rgacogne+asf aquaray.com>]
 

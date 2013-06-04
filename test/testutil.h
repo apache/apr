@@ -110,6 +110,7 @@ abts_suite *testud(abts_suite *suite);
 abts_suite *testuser(abts_suite *suite);
 abts_suite *testvsn(abts_suite *suite);
 
+abts_suite *testescape(abts_suite *suite);
 abts_suite *teststrmatch(abts_suite *suite);
 abts_suite *testuri(abts_suite *suite);
 abts_suite *testuuid(abts_suite *suite);
