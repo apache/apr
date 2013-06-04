@@ -43,7 +43,7 @@ APRUTIL_EXPORT_LIBS = @APRUTIL_EXPORT_LIBS@
 # building the entire package.
 #
 TARGETS = $(TARGET_LIB) $(APR_DSO_MODULES) \
-	apr.exp apr-config.out build/apr_rules.out
+	include/private/apr_escape_test_char.h apr.exp apr-config.out build/apr_rules.out
 
 LT_VERSION = @LT_VERSION@
 
@@ -52,7 +52,7 @@ LT_VERSION = @LT_VERSION@
 @INCLUDE_OUTPUTS@
 
 CLEAN_TARGETS = apr-config.out apr.exp exports.c export_vars.c .make.dirs \
-	build/apr_rules.out
+	build/apr_rules.out tools/gen_test_char
 DISTCLEAN_TARGETS = config.cache config.log config.status \
 	include/apr.h include/arch/unix/apr_private.h \
 	libtool $(APR_CONFIG) build/apr_rules.mk apr.pc \
@@ -156,6 +156,16 @@ check: $(TARGET_LIB)
 
 etags:
 	etags `find . -name '*.[ch]'`
+
+OBJECTS_gen_test_char = tools/gen_test_char.lo $(LOCAL_LIBS)
+tools/gen_test_char@EXEEXT@: $(OBJECTS_gen_test_char)
+	$(LINK_PROG) $(OBJECTS_gen_test_char) $(ALL_LIBS)
+
+include/private/apr_escape_test_char.h: tools/gen_test_char
+	tools/gen_test_char > include/private/apr_escape_test_char.h
+
+LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) $(LT_LDFLAGS) \
+	    @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
 
 # DO NOT REMOVE
 docs: $(INCDIR)/*.h
