@@ -90,7 +90,9 @@
 
 #if defined(APR_IS_DEV_VERSION) || defined(DOXYGEN)
 /** Internal: string form of the "is dev" flag */
+#ifndef APR_IS_DEV_STRING
 #define APR_IS_DEV_STRING "-dev"
+#endif
 #else
 #define APR_IS_DEV_STRING ""
 #endif
