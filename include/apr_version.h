@@ -106,7 +106,9 @@ APR_DECLARE(const char *) apr_version_string(void);
 
 /** Internal: string form of the "is dev" flag */
 #ifdef APR_IS_DEV_VERSION
+#ifndef APR_IS_DEV_STRING
 #define APR_IS_DEV_STRING "-dev"
+#endif
 #else
 #define APR_IS_DEV_STRING ""
 #endif
