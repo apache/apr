@@ -188,6 +188,18 @@ APR_DECLARE(int) apr_base64_decode_binary(unsigned char *bufplain,
     return nbytesdecoded;
 }
 
+APR_DECLARE(char *) apr_pbase64_decode(apr_pool_t *p, const char *bufcoded)
+{
+    char *decoded;
+    int l;
+
+    decoded = (char *) apr_palloc(p, 1 + apr_base64_decode_len(bufcoded));
+    l = apr_base64_decode(decoded, bufcoded);
+    decoded[l] = '\0'; /* make binary sequence into string */
+
+    return decoded;
+}
+
 static const char basis_64[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -266,4 +278,16 @@ APR_DECLARE(int) apr_base64_encode_binary(char *encoded,
 
     *p++ = '\0';
     return (int)(p - encoded);
+}
+
+APR_DECLARE(char *) apr_pbase64_encode(apr_pool_t *p, const char *string)
+{
+    char *encoded;
+    int l = strlen(string);
+
+    encoded = (char *) apr_palloc(p, 1 + apr_base64_encode_len(l));
+    l = apr_base64_encode(encoded, string, l);
+    encoded[l] = '\0'; /* make binary sequence into string */
+
+    return encoded;
 }
