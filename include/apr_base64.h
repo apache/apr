@@ -88,6 +88,15 @@ APR_DECLARE(int) apr_base64_encode_binary(char * coded_dst,
                  __attribute__((nonnull(1,2)));
 
 /**
+ * Encode a string into memory allocated from a pool in base 64 format
+ * @param p The pool to allocate from
+ * @param string The plaintext string
+ * @return The encoded string
+ */
+APR_DECLARE(char *) apr_pbase64_encode(apr_pool_t *p, const char *string)
+        __attribute__((nonnull(1,2)));
+
+/**
  * Determine the maximum buffer length required to decode the plain text
  * string given the encoded string.
  * @param coded_src The encoded string
@@ -119,6 +128,15 @@ APR_DECLARE(int) apr_base64_decode(char * plain_dst, const char *coded_src)
 APR_DECLARE(int) apr_base64_decode_binary(unsigned char * plain_dst, 
                                           const char *coded_src)
                  __attribute__((nonnull(1,2)));
+
+/**
+ * Decode a base64 encoded string into memory allocated from a pool
+ * @param p The pool to allocate from
+ * @param bufcoded The encoded string
+ * @return The decoded string
+ */
+APR_DECLARE(char *) apr_pbase64_decode(apr_pool_t *p, const char *bufcoded)
+        __attribute__((nonnull(1,2)));
 
 /** @} */
 #ifdef __cplusplus

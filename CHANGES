@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Add apr_pbase64_encode() and apr_pbase64_decode() to encode to/from
+     the pool. [Graham Leggett]
+
   *) Add the apr_escape interface. [Graham Leggett]
      
   *) Add support to apr_memcache for unix domain sockets. PR 54573 [Remi
