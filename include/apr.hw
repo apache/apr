@@ -36,6 +36,11 @@
  * for Win32 or Netware by those build environments, respectively.
  */
 
+/* Make sure we have our platform identifier macro defined we ask for later.
+#if defined(_WIN32) && !defined(WIN32)
+#define WIN32 1
+#endif
+
 #if defined(WIN32) || defined(DOXYGEN)
 
 /* Ignore most warnings (back down to /W3) for poorly constructed headers
