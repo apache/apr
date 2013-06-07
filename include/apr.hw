@@ -28,6 +28,19 @@
  * apr.hw by the apr.dsp and libapr.dsp projects.
  */
 
+/**
+ * @file apr.h
+ * @brief APR Platform Definitions
+ * @remark This is a generated header generated from include/apr.h.in by
+ * ./configure, or copied from include/apr.hw or include/apr.hnw 
+ * for Win32 or Netware by those build environments, respectively.
+ */
+
+/* Make sure we have our platform identifier macro defined we ask for later.
+#if defined(_WIN32) && !defined(WIN32)
+#define WIN32 1
+#endif
+
 /* Ignore most warnings (back down to /W3) for poorly constructed headers,
  * excluded from doxygen parsing
  */
