@@ -69,7 +69,7 @@
  * "development" copies of APR.  It is undefined for released versions
  * of APR.
  */
-#define APR_IS_DEV_VERSION
+/* #define APR_IS_DEV_VERSION */
 
 /**
  * Check at compile time if the APR version is at least a certain
