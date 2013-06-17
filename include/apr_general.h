@@ -79,7 +79,7 @@ typedef enum { APR_WAIT_READ, APR_WAIT_WRITE } apr_wait_type_t;
  * @return offset
  */
 
-#if defined(CRAY) || (defined(__arm) && !defined(LINUX))
+#if defined(CRAY) || (defined(__arm) && !(defined(LINUX) || defined(__FreeBSD__)))
 #ifdef __STDC__
 #define APR_OFFSET(p_type,field) _Offsetof(p_type,field)
 #else
