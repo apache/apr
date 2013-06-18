@@ -4,7 +4,7 @@ Changes for APR 1.4.9
 
 Changes for APR 1.4.8
 
-  *) Fix compiltation with FreeBSD on ARM.  [Olli Hauer <ohauer gmx.de>]
+  *) Fix compilation with FreeBSD on ARM.  [Olli Hauer <ohauer gmx.de>]
 
   *) Fix 1.4.7 regression in apr_mcast_hops() and apr_mcast_loopback()
      for AF_INET (IPv4) sockets on most Unix platforms.  [Joe Orton]
