@@ -526,7 +526,7 @@ AC_DEFUN([APU_CHECK_DBM], [
   dbm_list="$dbm_list, db60"
 
   AC_ARG_WITH(dbm, [APR_HELP_STRING([--with-dbm=DBM], [choose the DBM type to use.
-      DBM={sdbm,gdbm,ndbm,db,db1,db185,db2,db3,db4,db4X,db5X} for some X=0,...,9])],
+      DBM={sdbm,gdbm,ndbm,db,db1,db185,db2,db3,db4,db4X,db5X,db6X} for some X=0,...,9])],
   [
     if test "$withval" = "yes"; then
       AC_MSG_ERROR([--with-dbm needs to specify a DBM type to use.
