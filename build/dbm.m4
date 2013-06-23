@@ -424,7 +424,7 @@ AC_DEFUN([APU_CHECK_DB], [
       AC_MSG_ERROR(Berkeley db3 not found)
     fi
     ;;
-  db[[45]][[0-9]])
+  db[[456]][[0-9]])
     db_major=`echo "$requested" | sed -e 's/db//' -e 's/.$//'`
     db_minor=`echo "$requested" | sed -e 's/db//' -e 's/.//'`
     APU_CHECK_DBXY("$check_places", "$db_major", "$db_minor")
@@ -432,7 +432,7 @@ AC_DEFUN([APU_CHECK_DB], [
       AC_MSG_ERROR(Berkeley db$db_major not found)
     fi
     ;;
-  db[[45]])
+  db[[456]])
     db_major=`echo "$requested" | sed -e 's/db//'`
     # Start version search at version x.9
     db_minor=9
@@ -523,6 +523,7 @@ AC_DEFUN([APU_CHECK_DBM], [
     dbm_list="$dbm_list, db$db_version"
     db_version=`expr $db_version + 1`
   done
+  dbm_list="$dbm_list, db60"
 
   AC_ARG_WITH(dbm, [APR_HELP_STRING([--with-dbm=DBM], [choose the DBM type to use.
       DBM={sdbm,gdbm,ndbm,db,db1,db185,db2,db3,db4,db4X,db5X} for some X=0,...,9])],
@@ -668,11 +669,11 @@ AC_DEFUN([APU_CHECK_DBM], [
       eval "apu_use_$requested=1"
       apu_default_dbm=$requested
       ;;
-    db185 | db[[12345]])
+    db185 | db[[123456]])
       apu_use_db=1
       apu_default_dbm=$requested
       ;;
-    db[[45]][[0-9]])
+    db[[456]][[0-9]])
       apu_use_db=1
       apu_default_dbm=`echo $requested | sed -e 's/.$//'`
       ;;
