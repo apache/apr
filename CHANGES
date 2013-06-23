@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Add support for Berkeley DB 6.0. [Rainer Jung]
+
   *) Add apr_pbase64_encode() and apr_pbase64_decode() to encode to/from
      the pool. [Graham Leggett]
 
