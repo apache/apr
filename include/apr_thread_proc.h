@@ -115,7 +115,7 @@ typedef enum {
 #define APR_OC_REASON_DEATH         0     /**< child has died, caller must call
                                            * unregister still */
 #define APR_OC_REASON_UNWRITABLE    1     /**< currently unused. */
-#define APR_OC_REASON_RESTART       2     /**< a restart is occuring, perform
+#define APR_OC_REASON_RESTART       2     /**< a restart is occurring, perform
                                            * any necessary cleanup (including
                                            * sending a special signal to child)
                                            */
@@ -124,7 +124,7 @@ typedef enum {
                                            * kill the child) */
 #define APR_OC_REASON_LOST          4     /**< somehow the child exited without
                                            * us knowing ... buggy os? */
-#define APR_OC_REASON_RUNNING       5     /**< a health check is occuring, 
+#define APR_OC_REASON_RUNNING       5     /**< a health check is occurring, 
                                            * for most maintainence functions
                                            * this is a no-op.
                                            */
