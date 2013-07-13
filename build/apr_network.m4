@@ -570,6 +570,9 @@ AC_DEFUN([APR_CHECK_O_NONBLOCK_INHERITED], [
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
@@ -590,6 +593,8 @@ int main(void) {
     int listen_port, rc;
     struct sockaddr_in sa;
     socklen_t sa_len;
+    fd_set fds;
+    struct timeval tv;
 
     listen_s = socket(AF_INET, SOCK_STREAM, 0);
     if (listen_s < 0) {
