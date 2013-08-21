@@ -106,6 +106,9 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name_full)
     /* suite_name_full may be an absolute path depending on __FILE__ 
      * expansion */
     suite_name = strrchr(suite_name_full, '/');
+    if (!suite_name) {
+        suite_name = strrchr(suite_name_full, '\\');
+    }
     if (suite_name) {
         suite_name++;
     } else {
