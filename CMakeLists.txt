@@ -9,23 +9,26 @@ PROJECT(APR C)
 # . Options for remaining features, along with finding any necessary libraries
 #   + APR_POOL_DEBUG
 #   + APU_DSO_MODULE_BUILD
-#   + APU_HAVE_GDBM
-#   + APU_HAVE_NDBM
-#   + APU_HAVE_DB
-#   + APU_HAVE_PGSQL
-#   + APU_HAVE_MYSQL
-#   + APU_HAVE_SQLITE3
-#   + APU_HAVE_SQLITE2
-#   + APU_HAVE_ORACLE
-#   + APU_HAVE_ODBC
-#   + APU_HAVE_CRYPTO
-#   + APU_HAVE_OPENSSL
-#   + APU_HAVE_NSS
-#   + APU_HAVE_COMMONCRYPTO
+#   + DBM:
+#     . APU_HAVE_GDBM
+#     . APU_HAVE_NDBM
+#     . APU_HAVE_DB
+#   + DBD:
+#     . APU_HAVE_PGSQL
+#     . APU_HAVE_MYSQL
+#     . APU_HAVE_SQLITE3
+#     . APU_HAVE_SQLITE2
+#     . APU_HAVE_ORACLE
+#     . APU_HAVE_ODBC
+#   + CRYPTO:
+#     . APU_HAVE_CRYPTO
+#     . APU_HAVE_OPENSSL
+#     . APU_HAVE_NSS
+#     . APU_HAVE_COMMONCRYPTO
 #   + APU_HAVE_ICONV
 #   + APU_USE_LIBXML2 (sketched in, but not working)
 # . Support static *or* shared build of Expat
-# . Some easier way to run the test suite (not just testall.exe)
+# . Some easier way to run the test suite (the stuff besides testall.exe)
 # . All the other stuff Jeff doesn't know about yet
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
@@ -181,9 +184,6 @@ SET(APR_SOURCES
   buckets/apr_buckets_simple.c
   buckets/apr_buckets_socket.c
   crypto/apr_crypto.c
-  crypto/apr_crypto_commoncrypto.c
-  crypto/apr_crypto_nss.c
-  crypto/apr_crypto_openssl.c
   crypto/apr_md4.c
   crypto/apr_md5.c
   crypto/apr_passwd.c
@@ -192,17 +192,7 @@ SET(APR_SOURCES
   crypto/getuuid.c
   crypto/uuid.c
   dbd/apr_dbd.c
-  dbd/apr_dbd_mysql.c
-  dbd/apr_dbd_odbc.c
-  dbd/apr_dbd_oracle.c
-  dbd/apr_dbd_pgsql.c
-  dbd/apr_dbd_sqlite2.c
-  dbd/apr_dbd_sqlite3.c
-  dbd/unsupported/apr_dbd_freetds.c
   dbm/apr_dbm.c
-  dbm/apr_dbm_berkeleydb.c
-  dbm/apr_dbm_gdbm.c
-  dbm/apr_dbm_ndbm.c
   dbm/apr_dbm_sdbm.c
   dbm/sdbm/sdbm.c
   dbm/sdbm/sdbm_hash.c
