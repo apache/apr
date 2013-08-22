@@ -89,10 +89,28 @@ ELSE()
   SET(XMLLIB_LIBRARIES   ${LIBXML2_LIBRARIES})
 ENDIF()
 
-# BROKEN: not searching PROJECT_BINARY_DIR first, so I have to
+# Generated .h files are stored in PROJECT_BINARY_DIR, not the
+# source tree.
+#
+# BROKEN: not searching PROJECT_BINARY_DIR first, so you have to
 #         manually delete apr.h in PROJECT_SOURCE_DIR/include if
-#         I've generated apr.h before using a Unix-style build
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/private ${PROJECT_SOURCE_DIR}/include/arch/win32 ${PROJECT_SOURCE_DIR}/include/private ${PROJECT_SOURCE_DIR}/include/arch/unix ${XMLLIB_INCLUDE_DIR})
+#         you've generated apr.h before using a different build
+
+SET(APR_INCLUDE_DIRECTORIES
+  ${PROJECT_BINARY_DIR}
+  include
+  include/arch/win32
+  include/arch/unix
+  include/private
+)
+
+SET(APR_SYSTEM_LIBS
+  ws2_32
+  mswsock
+  rpcrt4
+)
+
+INCLUDE_DIRECTORIES(${APR_INCLUDE_DIRECTORIES} ${XMLLIB_INCLUDE_DIR})
 
 SET(APR_HEADERS ${PROJECT_BINARY_DIR}/apr.h)
 
@@ -357,23 +375,17 @@ SET(APR_TEST_SOURCES
   test/testxml.c
 )
 
-SET(WINDOWS_LIBS
-  wsock32
-  ws2_32
-  rpcrt4
-)
-
 SET(install_targets)
 
 # libapr-2 is shared, apr-2 is static
 ADD_LIBRARY(libapr-2 SHARED ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h)
 SET(install_targets ${install_targets} libapr-2)
-TARGET_LINK_LIBRARIES(libapr-2 ${XMLLIB_LIBRARIES} ${WINDOWS_LIBS})
+TARGET_LINK_LIBRARIES(libapr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(libapr-2 PROPERTIES COMPILE_FLAGS -DAPR_DECLARE_EXPORT)
 
 ADD_LIBRARY(apr-2 STATIC ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h)
 SET(install_targets ${install_targets} apr-2)
-TARGET_LINK_LIBRARIES(apr-2 ${XMLLIB_LIBRARIES} ${WINDOWS_LIBS})
+TARGET_LINK_LIBRARIES(apr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(apr-2 PROPERTIES COMPILE_FLAGS -DAPR_DECLARE_STATIC)
 
 IF(APR_BUILD_TESTAPR)
@@ -383,10 +395,10 @@ IF(APR_BUILD_TESTAPR)
   EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/test/data/mmap_datafile.txt ${PROJECT_BINARY_DIR}/data/mmap_datafile.txt)
 
   ADD_EXECUTABLE(testall ${APR_TEST_SOURCES})
-  TARGET_LINK_LIBRARIES(testall apr-2 ${XMLLIB_LIBRARIES} ${WINDOWS_LIBS})
+  TARGET_LINK_LIBRARIES(testall apr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
 
   ADD_LIBRARY(mod_test MODULE test/mod_test.c)
-  TARGET_LINK_LIBRARIES(mod_test apr-2 ${WINDOWS_LIBS})
+  TARGET_LINK_LIBRARIES(mod_test apr-2 ${APR_SYSTEM_LIBS})
   SET_PROPERTY(TARGET mod_test APPEND PROPERTY LINK_FLAGS /export:print_hello)
   # nasty work-around for difficulties adding more than one additional flag
   # (they get joined in a bad way behind the scenes)
@@ -395,28 +407,28 @@ IF(APR_BUILD_TESTAPR)
   SET_TARGET_PROPERTIES(mod_test PROPERTIES LINK_FLAGS ${link_flags})
 
   ADD_EXECUTABLE(occhild test/occhild.c)
-  TARGET_LINK_LIBRARIES(occhild apr-2 ${WINDOWS_LIBS})
+  TARGET_LINK_LIBRARIES(occhild apr-2 ${APR_SYSTEM_LIBS})
 
   ADD_EXECUTABLE(globalmutexchild test/globalmutexchild.c)
-  TARGET_LINK_LIBRARIES(globalmutexchild apr-2 ${WINDOWS_LIBS})
+  TARGET_LINK_LIBRARIES(globalmutexchild apr-2 ${APR_SYSTEM_LIBS})
 
   ADD_EXECUTABLE(proc_child test/proc_child.c)
-  TARGET_LINK_LIBRARIES(proc_child apr-2 ${WINDOWS_LIBS})
+  TARGET_LINK_LIBRARIES(proc_child apr-2 ${APR_SYSTEM_LIBS})
 
   ADD_EXECUTABLE(readchild test/readchild.c)
-  TARGET_LINK_LIBRARIES(readchild apr-2 ${WINDOWS_LIBS})
+  TARGET_LINK_LIBRARIES(readchild apr-2 ${APR_SYSTEM_LIBS})
 
   ADD_EXECUTABLE(sockchild test/sockchild.c)
-  TARGET_LINK_LIBRARIES(sockchild apr-2 ${WINDOWS_LIBS})
+  TARGET_LINK_LIBRARIES(sockchild apr-2 ${APR_SYSTEM_LIBS})
 
   ADD_EXECUTABLE(testshmconsumer test/testshmconsumer.c)
-  TARGET_LINK_LIBRARIES(testshmconsumer apr-2 ${WINDOWS_LIBS})
+  TARGET_LINK_LIBRARIES(testshmconsumer apr-2 ${APR_SYSTEM_LIBS})
 
   ADD_EXECUTABLE(testshmproducer test/testshmproducer.c)
-  TARGET_LINK_LIBRARIES(testshmproducer apr-2 ${WINDOWS_LIBS})
+  TARGET_LINK_LIBRARIES(testshmproducer apr-2 ${APR_SYSTEM_LIBS})
 
   ADD_EXECUTABLE(tryread test/tryread.c)
-  TARGET_LINK_LIBRARIES(tryread apr-2 ${WINDOWS_LIBS})
+  TARGET_LINK_LIBRARIES(tryread apr-2 ${APR_SYSTEM_LIBS})
 
   SET_TARGET_PROPERTIES(testall mod_test occhild globalmutexchild proc_child readchild sockchild testshmconsumer testshmproducer tryread PROPERTIES COMPILE_FLAGS -DAPR_DECLARE_STATIC)
 
