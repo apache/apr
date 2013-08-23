@@ -27,6 +27,7 @@
 #include "apr_file_io.h"
 #include "apr_env.h"
 #include "apr_atomic.h"
+#include "apr_version.h"
 
 #include "apu_internal.h"
 
