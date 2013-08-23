@@ -4,7 +4,6 @@ PROJECT(APR C)
 # . Fix problem where srcdir/include/apr.h (if it exists) is found before builddir/apr.h
 #   (and similar for apu_want.h)
 # . Document example 32-bit and 64-bit Windows builds using NMake
-# . Build and optionally run gen_test_char
 # . Build apr_app.c into libapr-2 properly (what about apr-2.lib?)
 # . Options for remaining features, along with finding any necessary libraries
 #   + APR_POOL_DEBUG
@@ -80,6 +79,19 @@ CONFIGURE_FILE(include/apr.hwc
 CONFIGURE_FILE(include/apu_want.hw
                ${PROJECT_BINARY_DIR}/apu_want.h
                COPYONLY)
+
+ADD_EXECUTABLE(gen_test_char tools/gen_test_char.c)
+GET_TARGET_PROPERTY(GEN_TEST_CHAR_EXE gen_test_char LOCATION)
+ADD_CUSTOM_COMMAND(
+  COMMENT "Generating character tables, apr_escape_test_char.h, for current locale"
+  DEPENDS gen_test_char
+  COMMAND ${GEN_TEST_CHAR_EXE} > ${PROJECT_BINARY_DIR}/apr_escape_test_char.h
+  OUTPUT ${PROJECT_BINARY_DIR}/apr_escape_test_char.h
+)
+ADD_CUSTOM_TARGET(
+  test_char_header ALL
+  DEPENDS ${PROJECT_BINARY_DIR}/apr_escape_test_char.h
+)
 
 IF(APU_USE_EXPAT)
   SET(XMLLIB_INCLUDE_DIR ${EXPAT_INCLUDE_DIRS})
@@ -382,11 +394,13 @@ ADD_LIBRARY(libapr-2 SHARED ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/
 SET(install_targets ${install_targets} libapr-2)
 TARGET_LINK_LIBRARIES(libapr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(libapr-2 PROPERTIES COMPILE_FLAGS -DAPR_DECLARE_EXPORT)
+ADD_DEPENDENCIES(libapr-2 test_char_header)
 
 ADD_LIBRARY(apr-2 STATIC ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h)
 SET(install_targets ${install_targets} apr-2)
 TARGET_LINK_LIBRARIES(apr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(apr-2 PROPERTIES COMPILE_FLAGS -DAPR_DECLARE_STATIC)
+ADD_DEPENDENCIES(apr-2 test_char_header)
 
 IF(APR_BUILD_TESTAPR)
   EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/data)
