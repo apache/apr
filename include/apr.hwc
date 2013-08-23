@@ -653,8 +653,9 @@ typedef int apr_wait_t;
 #endif
 
 /*
- * we always enable dynamic driver loads within apr_dbd
- * driver builds enable these flags individually
+ * Windows: Only dynamic driver loads within apr_dbd
+ *          are supported.  The driver builds enable
+ *          these flags individually.
  */
 #ifndef APU_DSO_MODULE_BUILD
 #define APU_HAVE_PGSQL          0
