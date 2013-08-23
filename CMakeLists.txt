@@ -18,7 +18,6 @@ PROJECT(APR C)
 #     . APU_HAVE_SQLITE3
 #     . APU_HAVE_SQLITE2
 #     . APU_HAVE_ORACLE
-#     . APU_HAVE_ODBC
 #   + CRYPTO:
 #     . APU_HAVE_CRYPTO
 #     . APU_HAVE_OPENSSL
@@ -26,6 +25,7 @@ PROJECT(APR C)
 #     . APU_HAVE_COMMONCRYPTO
 #   + APU_HAVE_ICONV
 #   + APU_USE_LIBXML2 (sketched in, but not working)
+# . Alternate build of test programs to use libapr-2.dll
 # . Support static *or* shared build of Expat
 # . Some easier way to run the test suite (the stuff besides testall.exe)
 # . All the other stuff Jeff doesn't know about yet
@@ -49,6 +49,7 @@ ELSE()
   OPTION(APU_USE_LIBXML2    "Use LibXml2"                  ON)
 ENDIF()
 
+OPTION(APU_HAVE_ODBC        "Build ODBC DBD driver"        ON)
 OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)
 OPTION(APR_SHOW_SETTINGS    "Show the build configuration" ON)
 OPTION(APR_BUILD_TESTAPR    "Build the test suite"         OFF)
@@ -393,14 +394,22 @@ SET(install_targets)
 ADD_LIBRARY(libapr-2 SHARED ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h)
 SET(install_targets ${install_targets} libapr-2)
 TARGET_LINK_LIBRARIES(libapr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
-SET_TARGET_PROPERTIES(libapr-2 PROPERTIES COMPILE_FLAGS -DAPR_DECLARE_EXPORT)
+SET_TARGET_PROPERTIES(libapr-2 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_EXPORT;APR_HAVE_MODULAR_DSO")
 ADD_DEPENDENCIES(libapr-2 test_char_header)
 
 ADD_LIBRARY(apr-2 STATIC ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h)
 SET(install_targets ${install_targets} apr-2)
 TARGET_LINK_LIBRARIES(apr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
-SET_TARGET_PROPERTIES(apr-2 PROPERTIES COMPILE_FLAGS -DAPR_DECLARE_STATIC)
+SET_TARGET_PROPERTIES(apr-2 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;APR_HAVE_MODULAR_DSO")
 ADD_DEPENDENCIES(apr-2 test_char_header)
+
+IF(APU_HAVE_ODBC)
+  ADD_LIBRARY(apr_dbd_odbc-2 SHARED dbd/apr_dbd_odbc.c)
+  SET(install_targets ${install_targets} apr_dbd_odbc-2)
+  TARGET_LINK_LIBRARIES(apr_dbd_odbc-2 libapr-2 ${APR_SYSTEM_LIBS} odbc32 odbccp32)
+  SET_PROPERTY(TARGET apr_dbd_odbc-2 APPEND PROPERTY LINK_FLAGS /export:apr_dbd_odbc_driver)
+  SET_TARGET_PROPERTIES(apr_dbd_odbc-2 PROPERTIES COMPILE_DEFINITIONS "APU_HAVE_ODBC;HAVE_SQL_H;APR_DECLARE_EXPORT;APU_DSO_MODULE_BUILD")
+ENDIF()
 
 IF(APR_BUILD_TESTAPR)
   EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/data)
@@ -419,6 +428,9 @@ IF(APR_BUILD_TESTAPR)
   GET_PROPERTY(link_flags TARGET mod_test PROPERTY LINK_FLAGS)
   SET(link_flags "${link_flags} /export:count_reps")
   SET_TARGET_PROPERTIES(mod_test PROPERTIES LINK_FLAGS ${link_flags})
+
+  ADD_EXECUTABLE(dbd test/dbd.c)
+  TARGET_LINK_LIBRARIES(dbd apr-2 ${APR_SYSTEM_LIBS})
 
   ADD_EXECUTABLE(occhild test/occhild.c)
   TARGET_LINK_LIBRARIES(occhild apr-2 ${APR_SYSTEM_LIBS})
@@ -444,7 +456,8 @@ IF(APR_BUILD_TESTAPR)
   ADD_EXECUTABLE(tryread test/tryread.c)
   TARGET_LINK_LIBRARIES(tryread apr-2 ${APR_SYSTEM_LIBS})
 
-  SET_TARGET_PROPERTIES(testall mod_test occhild globalmutexchild proc_child readchild sockchild testshmconsumer testshmproducer tryread PROPERTIES COMPILE_FLAGS -DAPR_DECLARE_STATIC)
+  # test programs are linked with static library
+  SET_TARGET_PROPERTIES(testall dbd mod_test occhild globalmutexchild proc_child readchild sockchild testshmconsumer testshmproducer tryread PROPERTIES COMPILE_FLAGS -DAPR_DECLARE_STATIC)
 
 ENDIF (APR_BUILD_TESTAPR)
 
@@ -471,7 +484,8 @@ IF(APR_SHOW_SETTINGS)
   MESSAGE(STATUS "")
   MESSAGE(STATUS "  Install prefix .................. : ${CMAKE_INSTALL_PREFIX}")
   MESSAGE(STATUS "  C compiler ...................... : ${CMAKE_C_COMPILER}")
-  MESSAGE(STATUS "  IPv6                              : ${APR_HAVE_IPV6}")
+  MESSAGE(STATUS "  IPv6 ............................ : ${APR_HAVE_IPV6}")
+  MESSAGE(STATUS "  DBD ODBC driver ................. : ${APU_HAVE_ODBC}")
   MESSAGE(STATUS "  Use Expat ....................... : ${APU_USE_EXPAT}")
   MESSAGE(STATUS "  Use LibXml2 ..................... : ${APU_USE_LIBXML2}")
   MESSAGE(STATUS "  Library files for XML ........... : ${XMLLIB_LIBRARIES}")
