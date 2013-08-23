@@ -49,6 +49,7 @@ ELSE()
   OPTION(APU_USE_LIBXML2    "Use LibXml2"                  ON)
 ENDIF()
 
+OPTION(APR_INSTALL_PRIVATE_H  "Install selected private .h files (for httpd)"  OFF)
 OPTION(APU_HAVE_ODBC        "Build ODBC DBD driver"        ON)
 OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)
 OPTION(APR_SHOW_SETTINGS    "Show the build configuration" ON)
@@ -473,11 +474,16 @@ INSTALL(TARGETS ${install_targets}
        )
 
 INSTALL(FILES ${APR_PUBLIC_HEADERS_STATIC} ${APR_PUBLIC_HEADERS_GENERATED} DESTINATION include)
-# Kludges for unexpected dependencies of httpd 2.x; at least segregate them in private_include
-INSTALL(FILES include/arch/win32/apr_arch_file_io.h DESTINATION private_include/arch/win32)
-INSTALL(FILES include/arch/win32/apr_arch_utf8.h DESTINATION private_include/arch/win32)
-INSTALL(FILES include/arch/win32/apr_private.h DESTINATION private_include/arch/win32)
-INSTALL(FILES include/arch/win32/apr_arch_misc.h DESTINATION private_include/arch/win32)
+IF(APR_INSTALL_PRIVATE_H)
+  # Kludges for unexpected dependencies of httpd 2.x, not installed by default
+  SET(APR_PRIVATE_H_FOR_HTTPD
+    include/arch/win32/apr_arch_file_io.h
+    include/arch/win32/apr_arch_misc.h
+    include/arch/win32/apr_arch_utf8.h
+    include/arch/win32/apr_private.h
+    )
+  INSTALL(FILES ${APR_PRIVATE_H_FOR_HTTPD} DESTINATION include/arch/win32)
+ENDIF()
 
 IF(APR_SHOW_SETTINGS)
   STRING(TOUPPER "${CMAKE_BUILD_TYPE}" buildtype)
@@ -493,4 +499,5 @@ IF(APR_SHOW_SETTINGS)
   MESSAGE(STATUS "  Use LibXml2 ..................... : ${APU_USE_LIBXML2}")
   MESSAGE(STATUS "  Library files for XML ........... : ${XMLLIB_LIBRARIES}")
   MESSAGE(STATUS "  Build test suite ................ : ${APR_BUILD_TESTAPR}")
+  MESSAGE(STATUS "  Install private .h for httpd .... : ${APR_INSTALL_PRIVATE_H}")
 ENDIF(APR_SHOW_SETTINGS)
