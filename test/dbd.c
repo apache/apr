@@ -346,6 +346,7 @@ int main(int argc, char** argv)
     apr_pool_t *pool = NULL;
     apr_dbd_t *sql = NULL;
     const apr_dbd_driver_t *driver = NULL;
+    char errbuf[256];
     int rv;
 
     apr_initialize();
@@ -372,6 +373,7 @@ int main(int argc, char** argv)
            goto finish;
         default:        /* it's a bug if none of the above happen */
            printf("Internal error loading %s.\n", name);
+           printf("(%d)%s\n", rv, apr_strerror(rv, errbuf, sizeof errbuf));
            goto finish;
         }
         rv = apr_dbd_open(driver, pool, params, &sql);
