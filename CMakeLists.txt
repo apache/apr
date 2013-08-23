@@ -54,23 +54,26 @@ OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)
 OPTION(APR_SHOW_SETTINGS    "Show the build configuration" ON)
 OPTION(APR_BUILD_TESTAPR    "Build the test suite"         OFF)
 
-IF(APR_HAVE_IPV6)
-  SET(apr_have_ipv6_10 1)
-ELSE()
-  SET(apr_have_ipv6_10 0)
-ENDIF()
-
 IF(NOT APU_USE_EXPAT AND NOT APU_USE_LIBXML2)
   MESSAGE(FATAL_ERROR "Either Expat or LibXml2 must be selected")
 ENDIF()
 IF(APU_USE_EXPAT AND APU_USE_LIBXML2)
   MESSAGE(FATAL_ERROR "Only one of Expat and LibXml2 can be selected")
 ENDIF()
+
+# create 1-or-0 representation of feature tests for apr.h
+
+SET(apr_have_ipv6_10 0)
+SET(apu_use_libxml2_10 0)
+SET(apu_use_expat_10 0)
+
+IF(APR_HAVE_IPV6)
+  SET(apr_have_ipv6_10 1)
+ENDIF()
+
 IF(APU_USE_EXPAT)
   SET(apu_use_expat_10 1)
-  SET(apu_use_libxml2_10 0)
 ELSE()
-  SET(apu_use_expat_10 0)
   SET(apu_use_libxml2_10 1)
 ENDIF()
 
