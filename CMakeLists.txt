@@ -46,7 +46,6 @@ PROJECT(APR C)
 # Todos to properly support Windows:
 # . Fix problem where srcdir/include/apr.h (if it exists) is found before builddir/apr.h
 #   (and similar for apu_want.h)
-# . Document example 32-bit and 64-bit Windows builds using NMake
 # . Build apr_app.c into libapr-2 properly (what about apr-2.lib?)
 # . Options for remaining features, along with finding any necessary libraries
 #   + APR_POOL_DEBUG
@@ -71,6 +70,9 @@ PROJECT(APR C)
 # . Alternate build of test programs to use libapr-2.dll
 # . Support static *or* shared build of Expat
 # . Some easier way to run the test suite (the stuff besides testall.exe)
+# . Install CHANGES/LICENSE/NOTICE like Makefile.win
+# . test/internal/testucs
+# . aprapp-2.lib/libaprapp-2.lib
 # . All the other stuff Jeff doesn't know about yet
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
