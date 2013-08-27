@@ -1,5 +1,48 @@
 PROJECT(APR C)
 
+# Experimental cmake-based build support for APR on Windows
+#
+# General usage:
+# 0. Read the todos down below and make sure this is good enough for your
+#    purposes.
+# 1. cd to a clean directory for building (i.e., don't build in your
+#    source tree)
+# 2. set CMAKE_LIBRARY_PATH=d:\path\to\prereq1\lib;d:\path\to\prereq2\lib;...
+# 3. set CMAKE_INCLUDE_PATH=d:\path\to\prereq1\include;d:\path\to\prereq2\include;...
+# 4. cmake -G "some backend, like 'NMake Makefiles'" \
+#          -DCMAKE_INSTALL_PREFIX=d:/path/to/aprinst \
+#          -DAPR-specific-flags \
+#          d:/path/to/aprsource
+#    Alternately, use cmake-gui and update settings in the GUI.
+#
+#    APR flags:
+#        APU_USE_EXPAT          Use Expat as the underlying XML implementation
+#                               Default: ON
+#        APU_USE_LIBXML2        Use libxml2 as the underlying XML implementation
+#                               Exactly one of APU_USE_EXPAT and APU_USE_LIBXML2
+#                               must be specified.
+#                               Default: OFF
+#        APR_INSTALL_PRIVATE_H  Install extra .h files which are required by httpd
+#                               but which aren't intended for use by applications.
+#                               Default: OFF
+#        APU_HAVE_ODBC          Build ODBC DBD driver
+#                               Default: ON
+#        APR_HAVE_IPV6          Enable IPv6 support
+#                               Default: ON
+#        APR_SHOW_SETTINGS      Display key build settings at the end of build
+#                               generation
+#                               Default: ON
+#        APR_BUILD_TESTAPR      Build APR test suite
+#                               Default: OFF
+#
+#    Other flags of interest:
+#        CMAKE_C_FLAGS_RELEASE, _DEBUG, _RELWITHDEBINFO, _MINSIZEREL
+#        CMAKE_BUILD_TYPE
+#          For NMake Makefiles the choices are at least DEBUG, RELEASE,
+#          RELWITHDEBINFO, and MINSIZEREL
+#          Other backends make have other selections.
+# 5. build using chosen backend (e.g., "nmake install")
+#
 # Todos to properly support Windows:
 # . Fix problem where srcdir/include/apr.h (if it exists) is found before builddir/apr.h
 #   (and similar for apu_want.h)
