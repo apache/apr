@@ -49,7 +49,6 @@ PROJECT(APR C)
 # . Build apr_app.c into libapr-2 properly (what about apr-2.lib?)
 # . Options for remaining features, along with finding any necessary libraries
 #   + APR_POOL_DEBUG
-#   + APU_DSO_MODULE_BUILD
 #   + DBM:
 #     . APU_HAVE_GDBM
 #     . APU_HAVE_NDBM
@@ -61,12 +60,10 @@ PROJECT(APR C)
 #     . APU_HAVE_SQLITE2
 #     . APU_HAVE_ORACLE
 #   + CRYPTO:
-#     . APU_HAVE_CRYPTO
-#     . APU_HAVE_OPENSSL
 #     . APU_HAVE_NSS
-#     . APU_HAVE_COMMONCRYPTO
 #   + APU_HAVE_ICONV
 #   + APU_USE_LIBXML2 (sketched in, but not working)
+# . Static builds of APR modules
 # . Alternate build of test programs to use libapr-2.dll
 # . Support static *or* shared build of Expat
 # . Some easier way to run the test suite (the stuff besides testall.exe)
@@ -77,9 +74,10 @@ PROJECT(APR C)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-# Either Expat or LibXml2 is required
+# Either Expat or LibXml2 is required; the others are optional
 FIND_PACKAGE(Expat)
 FIND_PACKAGE(LibXml2)
+FIND_PACKAGE(OpenSSL)
 
 IF(NOT EXPAT_FOUND AND NOT LIBXML2_FOUND)
   MESSAGE(FATAL_ERROR "Either Expat or LibXml2 is required, but neither was found")
@@ -95,6 +93,7 @@ ELSE()
 ENDIF()
 
 OPTION(APR_INSTALL_PRIVATE_H  "Install selected private .h files (for httpd)"  OFF)
+OPTION(APU_HAVE_CRYPTO      "Crypto support"               OFF)
 OPTION(APU_HAVE_ODBC        "Build ODBC DBD driver"        ON)
 OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)
 OPTION(APR_SHOW_SETTINGS    "Show the build configuration" ON)
@@ -107,14 +106,25 @@ IF(APU_USE_EXPAT AND APU_USE_LIBXML2)
   MESSAGE(FATAL_ERROR "Only one of Expat and LibXml2 can be selected")
 ENDIF()
 
+IF(APU_HAVE_CRYPTO)
+IF(NOT OPENSSL_FOUND)
+  MESSAGE(FATAL_ERROR "OpenSSL is the only supported crypto implementation, and it wasn't found!")
+ENDIF()
+ENDIF()
+
 # create 1-or-0 representation of feature tests for apr.h
 
 SET(apr_have_ipv6_10 0)
+SET(apu_have_crypto_10 0)
 SET(apu_use_libxml2_10 0)
 SET(apu_use_expat_10 0)
 
 IF(APR_HAVE_IPV6)
   SET(apr_have_ipv6_10 1)
+ENDIF()
+
+IF(APU_HAVE_CRYPTO)
+  SET(apu_have_crypto_10 1)
 ENDIF()
 
 IF(APU_USE_EXPAT)
@@ -160,10 +170,10 @@ ENDIF()
 
 SET(APR_INCLUDE_DIRECTORIES
   ${PROJECT_BINARY_DIR}
-  include
-  include/arch/win32
-  include/arch/unix
-  include/private
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/arch/win32
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/arch/unix
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/private
 )
 
 SET(APR_SYSTEM_LIBS
@@ -451,6 +461,16 @@ SET(install_targets ${install_targets} apr-2)
 TARGET_LINK_LIBRARIES(apr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(apr-2 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;APR_HAVE_MODULAR_DSO")
 ADD_DEPENDENCIES(apr-2 test_char_header)
+
+IF(APU_HAVE_CRYPTO)
+  IF(NOT OPENSSL_FOUND)
+    MESSAGE(FATAL_ERROR "Only OpenSSL-based crypto is currently implemented in the cmake build")
+  ENDIF()
+  ADD_LIBRARY(apr_crypto_openssl-2 SHARED crypto/apr_crypto_openssl.c)
+  SET(install_targets ${install_targets} apr_crypto_openssl-2)
+  SET_TARGET_PROPERTIES(apr_crypto_openssl-2 PROPERTIES INCLUDE_DIRECTORIES "${APR_INCLUDE_DIRECTORIES};${OPENSSL_INCLUDE_DIR}")
+  TARGET_LINK_LIBRARIES(apr_crypto_openssl-2 libapr-2 ${APR_SYSTEM_LIBS} ${OPENSSL_LIBRARIES})
+ENDIF()
 
 IF(APU_HAVE_ODBC)
   ADD_LIBRARY(apr_dbd_odbc-2 SHARED dbd/apr_dbd_odbc.c)

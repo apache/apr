@@ -666,7 +666,7 @@ typedef int apr_wait_t;
 #define APU_HAVE_ODBC           0
 #endif
 
-#define APU_HAVE_CRYPTO         0
+#define APU_HAVE_CRYPTO         @apu_have_crypto_10@
 
 #ifndef APU_DSO_MODULE_BUILD
 #define APU_HAVE_OPENSSL        0
