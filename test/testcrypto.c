@@ -41,7 +41,7 @@ static const apr_crypto_driver_t *get_driver(abts_case *tc, apr_pool_t *pool,
 
     rv = apr_crypto_get_driver(&driver, name, params, &err, pool);
     if (APR_SUCCESS != rv && err) {
-        ABTS_NOT_IMPL(tc, err->msg);
+        ABTS_NOT_IMPL(tc, apr_pstrcat(pool, err->msg, " (", name, ")", NULL));
         return NULL;
     }
     if (APR_ENOTIMPL == rv) {
