@@ -25,6 +25,9 @@ PROJECT(APR C)
 #        APR_INSTALL_PRIVATE_H  Install extra .h files which are required by httpd
 #                               but which aren't intended for use by applications.
 #                               Default: OFF
+#        APU_HAVE_CRYPTO        Build crypt support (only the OpenSSL implementation
+#                               is currently supported)
+#                               Default: OFF
 #        APU_HAVE_ODBC          Build ODBC DBD driver
 #                               Default: ON
 #        APR_HAVE_IPV6          Enable IPv6 support
@@ -36,6 +39,10 @@ PROJECT(APR C)
 #                               Default: OFF
 #
 #    Other flags of interest:
+#        LIBXML2_ICONV_INCLUDE_DIR, LIBXML2_ICONV_LIBRARIES
+#          If using libxml2 for the XML implementation and the build of libxml2
+#          requires iconv, set these variables to allow iconv includes
+#          and libraries to be found.
 #        CMAKE_C_FLAGS_RELEASE, _DEBUG, _RELWITHDEBINFO, _MINSIZEREL
 #        CMAKE_BUILD_TYPE
 #          For NMake Makefiles the choices are at least DEBUG, RELEASE,
@@ -62,7 +69,6 @@ PROJECT(APR C)
 #   + CRYPTO:
 #     . APU_HAVE_NSS
 #   + APU_HAVE_ICONV
-#   + APU_USE_LIBXML2 (sketched in, but not working)
 # . Static builds of APR modules
 # . Alternate build of test programs to use libapr-2.dll
 # . Support static *or* shared build of Expat
@@ -98,6 +104,8 @@ OPTION(APU_HAVE_ODBC        "Build ODBC DBD driver"        ON)
 OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)
 OPTION(APR_SHOW_SETTINGS    "Show the build configuration" ON)
 OPTION(APR_BUILD_TESTAPR    "Build the test suite"         OFF)
+SET(LIBXML2_ICONV_INCLUDE_DIR "" CACHE STRING "Directory with iconv include files for libxml2")
+SET(LIBXML2_ICONV_LIBRARIES   "" CACHE STRING "iconv libraries to link with for libxml2")
 
 IF(NOT APU_USE_EXPAT AND NOT APU_USE_LIBXML2)
   MESSAGE(FATAL_ERROR "Either Expat or LibXml2 must be selected")
@@ -157,8 +165,8 @@ IF(APU_USE_EXPAT)
   SET(XMLLIB_INCLUDE_DIR ${EXPAT_INCLUDE_DIRS})
   SET(XMLLIB_LIBRARIES   ${EXPAT_LIBRARIES})
 ELSE()
-  SET(XMLLIB_INCLUDE_DIR ${LIBXML2_INCLUDE_DIR})
-  SET(XMLLIB_LIBRARIES   ${LIBXML2_LIBRARIES})
+  SET(XMLLIB_INCLUDE_DIR "${LIBXML2_INCLUDE_DIR};${LIBXML2_ICONV_INCLUDE_DIR}")
+  SET(XMLLIB_LIBRARIES   "${LIBXML2_LIBRARIES};${LIBXML2_ICONV_LIBRARIES}")
 ENDIF()
 
 # Generated .h files are stored in PROJECT_BINARY_DIR, not the
