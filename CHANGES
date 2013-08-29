@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.9
 
+  *) Add experimental cmake-based build system for Windows.  Refer to 
+     README.cmake for more information.  [Jeff Trawick, Tom Donovan]
+
   *) configure: Fix detection of O_NONBLOCK inheritance broken in
      1.4.7.  [Rainer Jung]
 
