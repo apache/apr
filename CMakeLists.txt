@@ -1,5 +1,3 @@
-PROJECT(APR C)
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -16,6 +14,8 @@ PROJECT(APR C)
 # limitations under the License.
 #
 # Read README.cmake before using this.
+
+PROJECT(APR C)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
