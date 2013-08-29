@@ -100,3 +100,12 @@ Known Bugs and Limitations
 * No script or other mechanism is provided to run the test suite.
 * CHANGES/LICENSE/NOTICE is not installed, unlike Makefile.win.
 * test/internal/testucs is not built.
+
+Generally:
+
+* Many APR features have not been tested with this build.
+* Developers need to examine the existing Windows build in great detail and see
+  what is missing from the cmake-based build, whether a feature or some build
+  nuance.
+* Any feedback you can provide on your experiences with this build will be
+  helpful.
