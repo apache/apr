@@ -1,9 +1,6 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
-  *) Add experimental cmake-based build system for Windows.  [Jeff Trawick,
-     Tom Donovan]
-
   *) Add support for Berkeley DB 6.0. [Rainer Jung]
 
   *) Add apr_pbase64_encode() and apr_pbase64_decode() to encode to/from
