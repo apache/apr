@@ -67,6 +67,8 @@ Bundled with httpd:
 
 RELEASE SHOWSTOPPERS:
 
+    * Forward-port cmake-based build system from 1.4.x branch if it proves
+      useful.
 
 CURRENT VOTES:
 
