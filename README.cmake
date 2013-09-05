@@ -52,9 +52,9 @@ How to build
 
    APR feature flags:
 
-       APR_INSTALL_PRIVATE_H  Install extra .h files which are required by
-                              httpd but which aren't intended for use by
-                              applications.
+       APR_INSTALL_PRIVATE_H  Install extra .h files which are required when
+                              building httpd and Subversion but which aren't
+                              intended for use by applications.
                               Default: OFF
        APR_HAVE_IPV6          Enable IPv6 support
                               Default: ON
