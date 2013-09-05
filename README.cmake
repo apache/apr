@@ -73,9 +73,9 @@ How to build
        APU_USE_LIBXML2        Use libxml2 as the underlying XML
                               implementation
                               Default: OFF
-       APR_INSTALL_PRIVATE_H  Install extra .h files which are required by
-                              httpd but which aren't intended for use by
-                              applications.
+       APR_INSTALL_PRIVATE_H  Install extra .h files which are required when
+                              building httpd and Subversion but which aren't
+                              intended for use by applications.
                               Default: OFF
        APU_HAVE_CRYPTO        Build crypt support (only the OpenSSL
                               implementation is currently supported)
