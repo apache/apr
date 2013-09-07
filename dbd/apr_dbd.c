@@ -202,7 +202,7 @@ APR_DECLARE(apr_status_t) apr_dbd_get_driver(apr_pool_t *pool, const char *name,
     }
     apu_dso_mutex_unlock();
 
-#else /* not builtin and !APR_HAS_DSO => not implemented */
+#else /* not builtin and !APR_HAVE_MODULAR_DSO => not implemented */
     rv = APR_ENOTIMPL;
 #endif
 
