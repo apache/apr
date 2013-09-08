@@ -81,10 +81,7 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #ifndef _WIN32_WINNT
-
-/* Restrict the server to a subset of Windows XP header files by default
- */
-#define _WIN32_WINNT 0x0501
+#define _WIN32_WINNT @win32_winnt_str@
 #endif
 #ifndef NOUSER
 #define NOUSER
