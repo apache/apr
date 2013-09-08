@@ -63,6 +63,15 @@ How to build
                               Default: ON
        APR_BUILD_TESTAPR      Build APR test suite
                               Default: OFF
+       MIN_WINDOWS_VER        Minimum Windows version supported by this build
+                              (This controls the setting of _WIN32_WINNT.)
+                              "Vista" or "Windows7" or a numeric value like
+                              "0x0601"
+                              Default: "Vista"
+                              For desktop/server equivalence or other values,
+                              refer to
+                              http://msdn.microsoft.com/en-us/library/windows/
+                              desktop/aa383745(v=vs.85).aspx
 
    CMAKE_C_FLAGS_RELEASE, _DEBUG, _RELWITHDEBINFO, _MINSIZEREL
 

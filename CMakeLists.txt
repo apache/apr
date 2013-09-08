@@ -23,6 +23,8 @@ OPTION(APR_INSTALL_PRIVATE_H  "Install selected private .h files (for httpd)"  O
 OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)
 OPTION(APR_SHOW_SETTINGS    "Show the build configuration" ON)
 OPTION(APR_BUILD_TESTAPR    "Build the test suite"         OFF)
+SET(MIN_WINDOWS_VER             "Vista" 
+    CACHE STRING "Minimum Windows version")
 
 # create 1-or-0 representation of feature tests for apr.h
 
@@ -30,6 +32,16 @@ SET(apr_have_ipv6_10 0)
 
 IF(APR_HAVE_IPV6)
   SET(apr_have_ipv6_10 1)
+ENDIF()
+
+IF("${MIN_WINDOWS_VER}" STREQUAL "")
+  SET(win32_winnt_str "0x0600")
+ELSEIF(${MIN_WINDOWS_VER} STREQUAL "Vista")
+  SET(win32_winnt_str "0x0600")
+ELSEIF(${MIN_WINDOWS_VER} STREQUAL "Windows7")
+  SET(win32_winnt_str "0x0601")
+ELSE()
+  SET(win32_winnt_str ${MIN_WINDOWS_VER})
 ENDIF()
 
 CONFIGURE_FILE(include/apr.hwc
@@ -312,6 +324,7 @@ IF(APR_SHOW_SETTINGS)
   MESSAGE(STATUS "  Install prefix .................. : ${CMAKE_INSTALL_PREFIX}")
   MESSAGE(STATUS "  C compiler ...................... : ${CMAKE_C_COMPILER}")
   MESSAGE(STATUS "  IPv6 ............................ : ${APR_HAVE_IPV6}")
+  MESSAGE(STATUS "  Minimum Windows version ......... : ${MIN_WINDOWS_VER}")
   MESSAGE(STATUS "  Build test suite ................ : ${APR_BUILD_TESTAPR}")
   MESSAGE(STATUS "  Install private .h for httpd .... : ${APR_INSTALL_PRIVATE_H}")
 ENDIF(APR_SHOW_SETTINGS)
