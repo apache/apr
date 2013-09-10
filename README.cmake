@@ -58,9 +58,6 @@ How to build
                               Default: OFF
        APR_HAVE_IPV6          Enable IPv6 support
                               Default: ON
-       APR_SHOW_SETTINGS      Display key build settings at the end of build
-                              generation
-                              Default: ON
        APR_BUILD_TESTAPR      Build APR test suite
                               Default: OFF
        MIN_WINDOWS_VER        Minimum Windows version supported by this build
@@ -90,6 +87,7 @@ Known Bugs and Limitations
   directory by another build system, they will be used unexpectedly and
   cause the build to fail.
 * apr_app.c, aprapp-1.lib, and libaprapp-1.lib are not handled properly.
+* .pdb files are not installed
 * Options should be provided for remaining features:
   + APR_POOL_DEBUG
   + DBM:
@@ -104,10 +102,9 @@ Known Bugs and Limitations
     . APU_HAVE_ORACLE
   + CRYPTO:
     . APU_HAVE_NSS
-  + APU_HAVE_ICONV
 * No test program build to use libapr-1.dll is created.
 * No script or other mechanism is provided to run the test suite.
-* CHANGES/LICENSE/NOTICE is not installed, unlike Makefile.win.
+* APR_CHANGES.txt, APR-LICENSE.txt, and APR-NOTICE.txt are not installed.
 * test/internal/testucs is not built.
 
 Generally:
