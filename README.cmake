@@ -84,9 +84,6 @@ How to build
                               Default: ON
        APR_HAVE_IPV6          Enable IPv6 support
                               Default: ON
-       APR_SHOW_SETTINGS      Display key build settings at the end of build
-                              generation
-                              Default: ON
        APR_BUILD_TESTAPR      Build APR test suite
                               Default: OFF
        MIN_WINDOWS_VER        Minimum Windows version supported by this build
@@ -121,6 +118,7 @@ Known Bugs and Limitations
 * If include/apr.h or other generated files have been created in the source
   directory by another build system, they will be used unexpectedly and
   cause the build to fail.
+* .pdb files are not installed
 * apr_app.c, aprapp-2.lib, and libaprapp-2.lib are not handled properly.
 * Options should be provided for remaining features, along with finding any
   necessary libraries
@@ -142,7 +140,7 @@ Known Bugs and Limitations
 * No test program build to use libapr-2.dll is created.
 * Support static *or* shared build of Expat.
 * No script or other mechanism is provided to run the test suite.
-* CHANGES/LICENSE/NOTICE is not installed, unlike Makefile.win.
+* APR-CHANGES.txt, APR-LICENSE.txt, and APR-NOTICE.txt are not installed.
 * test/internal/testucs is not built.
 
 Generally:
