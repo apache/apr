@@ -21,6 +21,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 OPTION(APR_INSTALL_PRIVATE_H  "Install selected private .h files (for httpd)"  OFF)
 OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)
+OPTION(INSTALL_PDB          "Install .pdb files (if generated)"  ON)
 OPTION(APR_BUILD_TESTAPR    "Build the test suite"         OFF)
 SET(MIN_WINDOWS_VER             "Vista" 
     CACHE STRING "Minimum Windows version")
@@ -235,15 +236,19 @@ SET(APR_TEST_SOURCES
 )
 
 SET(install_targets)
+SET(install_bin_pdb)
+SET(install_lib_pdb)
 
 # libapr-1 is shared, apr-1 is static
 ADD_LIBRARY(libapr-1 SHARED ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h)
 SET(install_targets ${install_targets} libapr-1)
+SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/libapr-1.pdb)
 TARGET_LINK_LIBRARIES(libapr-1 ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(libapr-1 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_EXPORT")
 
 ADD_LIBRARY(apr-1 STATIC ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h)
 SET(install_targets ${install_targets} apr-1)
+SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/apr-1.pdb)
 TARGET_LINK_LIBRARIES(apr-1 ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(apr-1 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC")
 
@@ -301,6 +306,16 @@ INSTALL(TARGETS ${install_targets}
         ARCHIVE DESTINATION lib
        )
 
+IF(INSTALL_PDB)
+  INSTALL(FILES ${install_bin_pdb}
+          DESTINATION bin
+          CONFIGURATIONS RelWithDebInfo Debug)
+
+  INSTALL(FILES ${install_lib_pdb}
+          DESTINATION lib
+          CONFIGURATIONS RelWithDebInfo Debug)
+ENDIF()
+
 INSTALL(FILES ${APR_PUBLIC_HEADERS_STATIC} ${APR_PUBLIC_HEADERS_GENERATED} DESTINATION include)
 IF(APR_INSTALL_PRIVATE_H)
   # Kludges for unexpected dependencies of httpd 2.x, not installed by default
@@ -319,6 +334,8 @@ MESSAGE(STATUS "")
 MESSAGE(STATUS "")
 MESSAGE(STATUS "APR configuration summary:")
 MESSAGE(STATUS "")
+MESSAGE(STATUS "  Build type ...................... : ${CMAKE_BUILD_TYPE}")
+MESSAGE(STATUS "  Install .pdb (if available)...... : ${INSTALL_PDB}")
 MESSAGE(STATUS "  Install prefix .................. : ${CMAKE_INSTALL_PREFIX}")
 MESSAGE(STATUS "  C compiler ...................... : ${CMAKE_C_COMPILER}")
 MESSAGE(STATUS "  IPv6 ............................ : ${APR_HAVE_IPV6}")
