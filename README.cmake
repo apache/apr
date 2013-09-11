@@ -95,6 +95,8 @@ How to build
                               refer to
                               http://msdn.microsoft.com/en-us/library/windows/
                               desktop/aa383745(v=vs.85).aspx
+       INSTALL_PDB            Install .pdb files if generated.
+                              Default: ON
 
    LIBXML2_ICONV_INCLUDE_DIR, LIBXML2_ICONV_LIBRARIES
 
@@ -118,7 +120,6 @@ Known Bugs and Limitations
 * If include/apr.h or other generated files have been created in the source
   directory by another build system, they will be used unexpectedly and
   cause the build to fail.
-* .pdb files are not installed
 * apr_app.c, aprapp-2.lib, and libaprapp-2.lib are not handled properly.
 * Options should be provided for remaining features, along with finding any
   necessary libraries
@@ -140,7 +141,8 @@ Known Bugs and Limitations
 * No test program build to use libapr-2.dll is created.
 * Support static *or* shared build of Expat.
 * No script or other mechanism is provided to run the test suite.
-* APR-CHANGES.txt, APR-LICENSE.txt, and APR-NOTICE.txt are not installed.
+* APR-CHANGES.txt, APR-LICENSE.txt, and APR-NOTICE.txt are not installed,
+  though perhaps that is a job for a higher-level script.
 * test/internal/testucs is not built.
 
 Generally:
