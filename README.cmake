@@ -69,6 +69,8 @@ How to build
                               refer to
                               http://msdn.microsoft.com/en-us/library/windows/
                               desktop/aa383745(v=vs.85).aspx
+       INSTALL_PDB            Install .pdb files if generated.
+                              Default: ON
 
    CMAKE_C_FLAGS_RELEASE, _DEBUG, _RELWITHDEBINFO, _MINSIZEREL
 
@@ -87,24 +89,12 @@ Known Bugs and Limitations
   directory by another build system, they will be used unexpectedly and
   cause the build to fail.
 * apr_app.c, aprapp-1.lib, and libaprapp-1.lib are not handled properly.
-* .pdb files are not installed
 * Options should be provided for remaining features:
   + APR_POOL_DEBUG
-  + DBM:
-    . APU_HAVE_GDBM
-    . APU_HAVE_NDBM
-    . APU_HAVE_DB
-  + DBD:
-    . APU_HAVE_PGSQL
-    . APU_HAVE_MYSQL
-    . APU_HAVE_SQLITE3
-    . APU_HAVE_SQLITE2
-    . APU_HAVE_ORACLE
-  + CRYPTO:
-    . APU_HAVE_NSS
 * No test program build to use libapr-1.dll is created.
 * No script or other mechanism is provided to run the test suite.
-* APR_CHANGES.txt, APR-LICENSE.txt, and APR-NOTICE.txt are not installed.
+* APR-CHANGES.txt, APR-LICENSE.txt, and APR-NOTICE.txt are not installed,
+  though perhaps that is a job for a higher-level script.
 * test/internal/testucs is not built.
 
 Generally:
