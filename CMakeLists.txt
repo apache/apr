@@ -41,6 +41,7 @@ OPTION(APR_INSTALL_PRIVATE_H  "Install selected private .h files (for httpd)"  O
 OPTION(APU_HAVE_CRYPTO      "Crypto support"               OFF)
 OPTION(APU_HAVE_ODBC        "Build ODBC DBD driver"        ON)
 OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)
+OPTION(INSTALL_PDB          "Install .pdb files (if generated)"  ON)
 OPTION(APR_BUILD_TESTAPR    "Build the test suite"         OFF)
 SET(MIN_WINDOWS_VER             "Vista" 
     CACHE STRING "Minimum Windows version")
@@ -408,16 +409,20 @@ SET(APR_TEST_SOURCES
 )
 
 SET(install_targets)
+SET(install_bin_pdb)
+SET(install_lib_pdb)
 
 # libapr-2 is shared, apr-2 is static
 ADD_LIBRARY(libapr-2 SHARED ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h)
 SET(install_targets ${install_targets} libapr-2)
+SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/libapr-2.pdb)
 TARGET_LINK_LIBRARIES(libapr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(libapr-2 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_EXPORT;APR_HAVE_MODULAR_DSO")
 ADD_DEPENDENCIES(libapr-2 test_char_header)
 
 ADD_LIBRARY(apr-2 STATIC ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h)
 SET(install_targets ${install_targets} apr-2)
+SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/apr-2.pdb)
 TARGET_LINK_LIBRARIES(apr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(apr-2 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;APR_HAVE_MODULAR_DSO")
 ADD_DEPENDENCIES(apr-2 test_char_header)
@@ -428,6 +433,7 @@ IF(APU_HAVE_CRYPTO)
   ENDIF()
   ADD_LIBRARY(apr_crypto_openssl-2 SHARED crypto/apr_crypto_openssl.c)
   SET(install_targets ${install_targets} apr_crypto_openssl-2)
+  SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/apr_crypto_openssl-2.pdb)
   SET_TARGET_PROPERTIES(apr_crypto_openssl-2 PROPERTIES INCLUDE_DIRECTORIES "${APR_INCLUDE_DIRECTORIES};${OPENSSL_INCLUDE_DIR}")
   TARGET_LINK_LIBRARIES(apr_crypto_openssl-2 libapr-2 ${APR_SYSTEM_LIBS} ${OPENSSL_LIBRARIES})
 ENDIF()
@@ -435,6 +441,7 @@ ENDIF()
 IF(APU_HAVE_ODBC)
   ADD_LIBRARY(apr_dbd_odbc-2 SHARED dbd/apr_dbd_odbc.c)
   SET(install_targets ${install_targets} apr_dbd_odbc-2)
+  SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/apr_dbd_odbc-2.pdb)
   TARGET_LINK_LIBRARIES(apr_dbd_odbc-2 libapr-2 ${APR_SYSTEM_LIBS} odbc32 odbccp32)
   SET_PROPERTY(TARGET apr_dbd_odbc-2 APPEND PROPERTY LINK_FLAGS /export:apr_dbd_odbc_driver)
   SET_TARGET_PROPERTIES(apr_dbd_odbc-2 PROPERTIES COMPILE_DEFINITIONS "APU_HAVE_ODBC;HAVE_SQL_H;APR_DECLARE_EXPORT;APU_DSO_MODULE_BUILD")
@@ -498,6 +505,16 @@ INSTALL(TARGETS ${install_targets}
         ARCHIVE DESTINATION lib
        )
 
+IF(INSTALL_PDB)
+  INSTALL(FILES ${install_bin_pdb}
+          DESTINATION bin
+          CONFIGURATIONS RelWithDebInfo Debug)
+
+  INSTALL(FILES ${install_lib_pdb}
+          DESTINATION lib
+          CONFIGURATIONS RelWithDebInfo Debug)
+ENDIF()
+
 INSTALL(FILES ${APR_PUBLIC_HEADERS_STATIC} ${APR_PUBLIC_HEADERS_GENERATED} DESTINATION include)
 IF(APR_INSTALL_PRIVATE_H)
   # Kludges for unexpected dependencies of httpd 2.x, not installed by default
@@ -515,6 +532,9 @@ MESSAGE(STATUS "")
 MESSAGE(STATUS "")
 MESSAGE(STATUS "APR configuration summary:")
 MESSAGE(STATUS "")
+
+MESSAGE(STATUS "  Build type ...................... : ${CMAKE_BUILD_TYPE}")
+MESSAGE(STATUS "  Install .pdb (if available)...... : ${INSTALL_PDB}")
 MESSAGE(STATUS "  Install prefix .................. : ${CMAKE_INSTALL_PREFIX}")
 MESSAGE(STATUS "  C compiler ...................... : ${CMAKE_C_COMPILER}")
 MESSAGE(STATUS "  IPv6 ............................ : ${APR_HAVE_IPV6}")
