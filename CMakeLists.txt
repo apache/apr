@@ -240,7 +240,7 @@ SET(install_bin_pdb)
 SET(install_lib_pdb)
 
 # libapr-1 is shared, apr-1 is static
-ADD_LIBRARY(libapr-1 SHARED ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h)
+ADD_LIBRARY(libapr-1 SHARED ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h libapr.rc)
 SET(install_targets ${install_targets} libapr-1)
 SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/libapr-1.pdb)
 TARGET_LINK_LIBRARIES(libapr-1 ${APR_SYSTEM_LIBS})
