@@ -427,6 +427,17 @@ TARGET_LINK_LIBRARIES(apr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(apr-2 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;APR_HAVE_MODULAR_DSO")
 ADD_DEPENDENCIES(apr-2 test_char_header)
 
+# libaprapp-2 and aprapp-2 are static
+ADD_LIBRARY(libaprapp-2 STATIC ${APR_HEADERS} ${PROJECT_BINARY_DIR}/apr.h misc/win32/apr_app.c misc/win32/internal.c)
+SET(install_targets ${install_targets} libaprapp-2)
+SET(install_lib_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/libaprapp-2.pdb)
+SET_TARGET_PROPERTIES(libaprapp-2 PROPERTIES COMPILE_DEFINITIONS APR_APP)
+
+ADD_LIBRARY(aprapp-2 STATIC ${APR_HEADERS} ${PROJECT_BINARY_DIR}/apr.h misc/win32/apr_app.c)
+SET(install_targets ${install_targets} aprapp-2)
+SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/aprapp-2.pdb)
+SET_TARGET_PROPERTIES(libaprapp-2 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;APR_APP")
+
 IF(APU_HAVE_CRYPTO)
   IF(NOT OPENSSL_FOUND)
     MESSAGE(FATAL_ERROR "Only OpenSSL-based crypto is currently implemented in the cmake build")
