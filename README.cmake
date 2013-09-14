@@ -144,9 +144,6 @@ Known Bugs and Limitations
 * APR-CHANGES.txt, APR-LICENSE.txt, and APR-NOTICE.txt are not installed,
   though perhaps that is a job for a higher-level script.
 * test/internal/testucs is not built.
-* APR trunk's libapr.rc is missing the DLL_NAME switch from APR-util 1.x
-  (affects both Windows build systems), and the cmake build system isn't
-  setting it.
 
 Generally:
 
