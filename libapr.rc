@@ -14,7 +14,13 @@
   "See the License for the specific language governing permissions and " \
   "limitations under the License."
 
+#ifdef DLL_NAME
+#define APR_DLL_BASENAME APR_STRINGIFY(DLL_NAME) "-" APR_STRINGIFY(APR_MAJOR_VERSION)
+#define APR_DLL_DESCRIPTION "Apache Portable Runtime " APR_STRINGIFY(DLL_NAME) " Module"
+#else
 #define APR_DLL_BASENAME "libapr-" APR_STRINGIFY(APR_MAJOR_VERSION)
+#define APR_DLL_DESCRIPTION "Apache Portable Runtime Library"
+#endif
 
 
 1 VERSIONINFO
@@ -48,7 +54,7 @@ BEGIN
     BEGIN
       VALUE "Comments", APR_LICENSE "\0"
       VALUE "CompanyName", "Apache Software Foundation\0"
-      VALUE "FileDescription", "Apache Portable Runtime Library\0"
+      VALUE "FileDescription", APR_DLL_DESCRIPTION "\0"
       VALUE "FileVersion", APR_VERSION_STRING "\0"
       VALUE "InternalName", APR_DLL_BASENAME "\0"
       VALUE "LegalCopyright", APR_COPYRIGHT "\0"
