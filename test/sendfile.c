@@ -497,7 +497,7 @@ static int server(void)
     apr_sockaddr_t *localsa;
     int family;
 
-    family = APR_UNSPEC;
+    family = APR_INET;
     apr_setup(&p, &sock, &family);
 
     rv = apr_socket_opt_set(sock, APR_SO_REUSEADDR, 1);
