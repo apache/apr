@@ -252,6 +252,17 @@ SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/apr-1.pdb)
 TARGET_LINK_LIBRARIES(apr-1 ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(apr-1 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC")
 
+# libaprapp-1 and aprapp-1 are static
+ADD_LIBRARY(libaprapp-1 STATIC ${APR_HEADERS} ${PROJECT_BINARY_DIR}/apr.h misc/win32/apr_app.c misc/win32/internal.c)
+SET(install_targets ${install_targets} libaprapp-1)
+SET(install_lib_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/libaprapp-1.pdb)
+SET_TARGET_PROPERTIES(libaprapp-1 PROPERTIES COMPILE_DEFINITIONS APR_APP)
+
+ADD_LIBRARY(aprapp-1 STATIC ${APR_HEADERS} ${PROJECT_BINARY_DIR}/apr.h misc/win32/apr_app.c)
+SET(install_targets ${install_targets} aprapp-1)
+SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/aprapp-1.pdb)
+SET_TARGET_PROPERTIES(libaprapp-1 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;APR_APP")
+
 IF(APR_BUILD_TESTAPR)
   EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/data)
   EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/test/data/file_datafile.txt ${PROJECT_BINARY_DIR}/data/file_datafile.txt)
