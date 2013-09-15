@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* This program won't run or check correctly if assert() is disabled. */
+#undef NDEBUG
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
