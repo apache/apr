@@ -88,7 +88,6 @@ Known Bugs and Limitations
 * If include/apr.h or other generated files have been created in the source
   directory by another build system, they will be used unexpectedly and
   cause the build to fail.
-* apr_app.c, aprapp-1.lib, and libaprapp-1.lib are not handled properly.
 * Options should be provided for remaining features:
   + APR_POOL_DEBUG
 * No test program build to use libapr-1.dll is created.
