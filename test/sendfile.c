@@ -479,12 +479,16 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
         char responsebuf[1024];
         int exitcode;
 
+        rv = apr_file_pipe_timeout_set(server.out, apr_time_from_sec(2));
+        if (rv != APR_SUCCESS) {
+            aprerr("apr_file_pipe_timeout_set()", rv);
+        }
         nbytes = sizeof(responsebuf);
         rv = apr_file_read(server.out, responsebuf, &nbytes);
-        if (rv == APR_SUCCESS) {
-            printf("%.*s", (int)nbytes, responsebuf);
+        if (rv != APR_SUCCESS) {
+            aprerr("apr_file_read() messages from server", rv);
         }
-
+        printf("%.*s", (int)nbytes, responsebuf);
         rv = apr_proc_wait(&server, &exitcode, &exitwhy, APR_WAIT);
         if (rv != APR_CHILD_DONE) {
             aprerr("apr_proc_wait() (expected APR_CHILD_DONE)", rv);
