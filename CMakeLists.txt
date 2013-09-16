@@ -43,6 +43,7 @@ OPTION(APU_HAVE_ODBC        "Build ODBC DBD driver"        ON)
 OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)
 OPTION(INSTALL_PDB          "Install .pdb files (if generated)"  ON)
 OPTION(APR_BUILD_TESTAPR    "Build the test suite"         OFF)
+OPTION(TEST_STATIC_LIBS     "Test programs use APR static libraries instead of shared libraries?" OFF)
 SET(MIN_WINDOWS_VER             "Vista" 
     CACHE STRING "Minimum Windows version")
 SET(LIBXML2_ICONV_INCLUDE_DIR   ""
@@ -146,8 +147,6 @@ SET(APR_SYSTEM_LIBS
 INCLUDE_DIRECTORIES(${APR_INCLUDE_DIRECTORIES} ${XMLLIB_INCLUDE_DIR})
 
 SET(APR_HEADERS ${PROJECT_BINARY_DIR}/apr.h)
-
-# and misc/win32/apr_app.c
 
 SET(APR_PUBLIC_HEADERS_STATIC
   include/apr_allocator.h
@@ -411,6 +410,7 @@ SET(APR_TEST_SOURCES
 SET(install_targets)
 SET(install_bin_pdb)
 SET(install_lib_pdb)
+SET(dbd_drivers)
 
 # libapr-2 is shared, apr-2 is static
 ADD_LIBRARY(libapr-2 SHARED ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h libapr.rc)
@@ -430,13 +430,13 @@ ADD_DEPENDENCIES(apr-2 test_char_header)
 # libaprapp-2 and aprapp-2 are static
 ADD_LIBRARY(libaprapp-2 STATIC ${APR_HEADERS} ${PROJECT_BINARY_DIR}/apr.h misc/win32/apr_app.c misc/win32/internal.c)
 SET(install_targets ${install_targets} libaprapp-2)
-SET(install_lib_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/libaprapp-2.pdb)
+SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/libaprapp-2.pdb)
 SET_TARGET_PROPERTIES(libaprapp-2 PROPERTIES COMPILE_DEFINITIONS APR_APP)
 
-ADD_LIBRARY(aprapp-2 STATIC ${APR_HEADERS} ${PROJECT_BINARY_DIR}/apr.h misc/win32/apr_app.c)
+ADD_LIBRARY(aprapp-2 STATIC ${APR_HEADERS} ${PROJECT_BINARY_DIR}/apr.h misc/win32/apr_app.c misc/win32/internal.c)
 SET(install_targets ${install_targets} aprapp-2)
 SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/aprapp-2.pdb)
-SET_TARGET_PROPERTIES(libaprapp-2 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;APR_APP")
+SET_TARGET_PROPERTIES(aprapp-2 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;APR_APP")
 
 IF(APU_HAVE_CRYPTO)
   IF(NOT OPENSSL_FOUND)
@@ -454,6 +454,7 @@ IF(APU_HAVE_ODBC)
   ADD_LIBRARY(apr_dbd_odbc-2 SHARED dbd/apr_dbd_odbc.c libapr.rc)
   SET(install_targets ${install_targets} apr_dbd_odbc-2)
   SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/apr_dbd_odbc-2.pdb)
+  SET(dbd_drivers ${dbd_drivers} odbc)
   TARGET_LINK_LIBRARIES(apr_dbd_odbc-2 libapr-2 ${APR_SYSTEM_LIBS} odbc32 odbccp32)
   SET_PROPERTY(TARGET apr_dbd_odbc-2 APPEND PROPERTY LINK_FLAGS /export:apr_dbd_odbc_driver)
   SET_TARGET_PROPERTIES(apr_dbd_odbc-2 PROPERTIES COMPILE_DEFINITIONS "APU_HAVE_ODBC;HAVE_SQL_H;APR_DECLARE_EXPORT;APU_DSO_MODULE_BUILD")
@@ -461,52 +462,110 @@ IF(APU_HAVE_ODBC)
 ENDIF()
 
 IF(APR_BUILD_TESTAPR)
-  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/data)
-  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/test/data/billion-laughs.xml ${PROJECT_BINARY_DIR}/data/billion-laughs.xml)
-  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/test/data/file_datafile.txt ${PROJECT_BINARY_DIR}/data/file_datafile.txt)
-  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/test/data/mmap_datafile.txt ${PROJECT_BINARY_DIR}/data/mmap_datafile.txt)
+  ENABLE_TESTING()
+  # Create a "check" target that displays test program output to the console.
+  ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose)
+
+  # copy data files to build directory so that we can run programs from there
+  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E make_directory 
+                  ${PROJECT_BINARY_DIR}/data)
+  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                  ${PROJECT_SOURCE_DIR}/test/data/billion-laughs.xml
+                  ${PROJECT_BINARY_DIR}/data/billion-laughs.xml)
+  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                  ${PROJECT_SOURCE_DIR}/test/data/file_datafile.txt
+                  ${PROJECT_BINARY_DIR}/data/file_datafile.txt)
+  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                  ${PROJECT_SOURCE_DIR}/test/data/mmap_datafile.txt
+                  ${PROJECT_BINARY_DIR}/data/mmap_datafile.txt)
+
+  IF(TEST_STATIC_LIBS)
+    SET(whichapr    apr-2)
+    SET(whichaprapp aprapp-2)
+    SET(apiflag     -DAPR_DECLARE_STATIC)
+  ELSE()
+    SET(whichapr    libapr-2)
+    SET(whichaprapp libaprapp-2)
+    SET(apiflag)
+  ENDIF()
+
+  ADD_EXECUTABLE(testapp test/testapp.c)
+  TARGET_LINK_LIBRARIES(testapp ${whichapr} ${whichaprapp} ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
+  SET_TARGET_PROPERTIES(testapp PROPERTIES LINK_FLAGS /entry:wmainCRTStartup)
+  IF(apiflag)
+    SET_TARGET_PROPERTIES(testapp PROPERTIES COMPILE_FLAGS ${apiflag})
+  ENDIF()
+  ADD_TEST(NAME testapp COMMAND testapp)
 
   ADD_EXECUTABLE(testall ${APR_TEST_SOURCES})
-  TARGET_LINK_LIBRARIES(testall apr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
+  TARGET_LINK_LIBRARIES(testall ${whichapr} ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
+  IF(apiflag)
+    SET_TARGET_PROPERTIES(testall PROPERTIES COMPILE_FLAGS ${apiflag})
+  ENDIF()
+  ADD_TEST(NAME testall COMMAND testall)
 
   ADD_LIBRARY(mod_test MODULE test/mod_test.c)
-  TARGET_LINK_LIBRARIES(mod_test apr-2 ${APR_SYSTEM_LIBS})
+  TARGET_LINK_LIBRARIES(mod_test ${whichapr} ${APR_SYSTEM_LIBS})
   SET_PROPERTY(TARGET mod_test APPEND PROPERTY LINK_FLAGS /export:print_hello)
   # nasty work-around for difficulties adding more than one additional flag
   # (they get joined in a bad way behind the scenes)
   GET_PROPERTY(link_flags TARGET mod_test PROPERTY LINK_FLAGS)
   SET(link_flags "${link_flags} /export:count_reps")
   SET_TARGET_PROPERTIES(mod_test PROPERTIES LINK_FLAGS ${link_flags})
+  IF(apiflag)
+    SET_TARGET_PROPERTIES(mod_test PROPERTIES COMPILE_FLAGS ${apiflag})
+  ENDIF()
 
-  ADD_EXECUTABLE(dbd test/dbd.c)
-  TARGET_LINK_LIBRARIES(dbd apr-2 ${APR_SYSTEM_LIBS})
+  # Build all the single-source executable files with no special build
+  # requirements.
+  SET(single_source_programs
+    test/dbd.c
+    test/echod.c
+    test/sendfile.c
+    test/sockperf.c
+    test/testlockperf.c
+    test/testmutexscope.c
+    test/globalmutexchild.c
+    test/occhild.c
+    test/proc_child.c
+    test/readchild.c
+    test/sockchild.c
+    test/testshmproducer.c
+    test/testshmconsumer.c
+    test/tryread.c
+    test/internal/testucs.c
+  )
 
-  ADD_EXECUTABLE(occhild test/occhild.c)
-  TARGET_LINK_LIBRARIES(occhild apr-2 ${APR_SYSTEM_LIBS})
+  FOREACH(sourcefile ${single_source_programs})
+    STRING(REGEX REPLACE ".*/([^\\]+)\\.c" "\\1" proggie ${sourcefile})
+    ADD_EXECUTABLE(${proggie} ${sourcefile})
+    TARGET_LINK_LIBRARIES(${proggie} ${whichapr} ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
+    IF(apiflag)
+      SET_TARGET_PROPERTIES(${proggie} PROPERTIES COMPILE_FLAGS ${apiflag})
+    ENDIF()
+  ENDFOREACH()
 
-  ADD_EXECUTABLE(globalmutexchild test/globalmutexchild.c)
-  TARGET_LINK_LIBRARIES(globalmutexchild apr-2 ${APR_SYSTEM_LIBS})
+  # Add tests for programs that run by themselves with no arguments.
+  SET(simple_tests
+    testlockperf
+    testmutexscope
+    testucs
+  )
 
-  ADD_EXECUTABLE(proc_child test/proc_child.c)
-  TARGET_LINK_LIBRARIES(proc_child apr-2 ${APR_SYSTEM_LIBS})
+  FOREACH(simple ${simple_tests})
+    ADD_TEST(NAME ${simple} COMMAND ${simple})
+  ENDFOREACH()
 
-  ADD_EXECUTABLE(readchild test/readchild.c)
-  TARGET_LINK_LIBRARIES(readchild apr-2 ${APR_SYSTEM_LIBS})
+  # dbd and sendfile are run multiple times with different parameters.
+  FOREACH(somedbd ${dbd_drivers})
+    ADD_TEST(NAME dbd-${somedbd} COMMAND dbd ${somedbd})
+  ENDFOREACH()
 
-  ADD_EXECUTABLE(sockchild test/sockchild.c)
-  TARGET_LINK_LIBRARIES(sockchild apr-2 ${APR_SYSTEM_LIBS})
+  FOREACH(sendfile_mode blocking nonblocking timeout)
+    ADD_TEST(NAME sendfile-${sendfile_mode} COMMAND sendfile client ${sendfile_mode} startserver)
+  ENDFOREACH()
 
-  ADD_EXECUTABLE(testshmconsumer test/testshmconsumer.c)
-  TARGET_LINK_LIBRARIES(testshmconsumer apr-2 ${APR_SYSTEM_LIBS})
-
-  ADD_EXECUTABLE(testshmproducer test/testshmproducer.c)
-  TARGET_LINK_LIBRARIES(testshmproducer apr-2 ${APR_SYSTEM_LIBS})
-
-  ADD_EXECUTABLE(tryread test/tryread.c)
-  TARGET_LINK_LIBRARIES(tryread apr-2 ${APR_SYSTEM_LIBS})
-
-  # test programs are linked with static library
-  SET_TARGET_PROPERTIES(testall dbd mod_test occhild globalmutexchild proc_child readchild sockchild testshmconsumer testshmproducer tryread PROPERTIES COMPILE_FLAGS -DAPR_DECLARE_STATIC)
+  # No test is added for echod+sockperf.  Those will have to be run manually.
 
 ENDIF (APR_BUILD_TESTAPR)
 
@@ -557,4 +616,9 @@ MESSAGE(STATUS "  Use LibXml2 ..................... : ${APU_USE_LIBXML2}")
 MESSAGE(STATUS "  Minimum Windows version ......... : ${MIN_WINDOWS_VER}")
 MESSAGE(STATUS "  Library files for XML ........... : ${XMLLIB_LIBRARIES}")
 MESSAGE(STATUS "  Build test suite ................ : ${APR_BUILD_TESTAPR}")
+IF(TEST_STATIC_LIBS)
+MESSAGE(STATUS "    (testing static libraries)")
+ELSE()
+MESSAGE(STATUS "    (testing dynamic libraries)")
+ENDIF()
 MESSAGE(STATUS "  Install private .h for httpd .... : ${APR_INSTALL_PRIVATE_H}")
