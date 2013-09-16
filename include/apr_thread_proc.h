@@ -647,7 +647,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new_proc,
  *            APR_NOWAIT -- return immediately regardless of if the 
  *                          child is dead or not.
  * </PRE>
- * @remark The childs status is in the return code to this process.  It is one of:
+ * @remark The child's status is in the return code to this process.  It is one of:
  * <PRE>
  *            APR_CHILD_DONE     -- child is no longer running.
  *            APR_CHILD_NOTDONE  -- child is still running.
