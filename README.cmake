@@ -86,6 +86,13 @@ How to build
                               Default: ON
        APR_BUILD_TESTAPR      Build APR test suite
                               Default: OFF
+       TEST_STATIC_LIBS       Build the test suite to test the APR static
+                              library instead of the APR dynamic library.
+                              Default: OFF
+                              In order to build the test suite against both
+                              static and dynamic libraries, separate builds
+                              will be required, one with TEST_STATIC_LIBS
+                              set to ON.
        MIN_WINDOWS_VER        Minimum Windows version supported by this build
                               (This controls the setting of _WIN32_WINNT.)
                               "Vista" or "Windows7" or a numeric value like
@@ -137,12 +144,9 @@ Known Bugs and Limitations
     . APU_HAVE_NSS
   + APU_HAVE_ICONV
 * Static builds of APR modules are not supported.
-* No test program build to use libapr-2.dll is created.
 * Support static *or* shared build of Expat.
-* No script or other mechanism is provided to run the test suite.
 * APR-CHANGES.txt, APR-LICENSE.txt, and APR-NOTICE.txt are not installed,
   though perhaps that is a job for a higher-level script.
-* test/internal/testucs is not built.
 
 Generally:
 
