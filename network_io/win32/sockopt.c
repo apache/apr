@@ -66,6 +66,7 @@ APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock, apr_interva
         if (sock->timeout == 0 || apr_is_option_set(sock, APR_SO_NONBLOCK)) {
             if ((stat = soblock(sock->socketdes)) != APR_SUCCESS)
                 return stat;
+            apr_set_option(sock, APR_SO_NONBLOCK, 0);
         }
         /* Reset socket timeouts if the new timeout differs from the old timeout */
         if (sock->timeout != t) 
