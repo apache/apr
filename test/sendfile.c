@@ -231,6 +231,9 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
             apr_sleep(connect_retry_interval);
             connect_retry_interval *= 2;
         }
+        else {
+            break;
+        }
     }
     if (rv != APR_SUCCESS) {
         aprerr("apr_socket_connect()", rv);
