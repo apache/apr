@@ -228,7 +228,7 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
     while (connect_tries--) {
         rv = apr_socket_connect(sock, destsa);
         if (connect_tries && APR_STATUS_IS_ECONNREFUSED(rv)) {
-            apr_sleep(apr_time_from_msec(connect_retry_interval));
+            apr_sleep(connect_retry_interval);
             connect_retry_interval *= 2;
         }
     }
