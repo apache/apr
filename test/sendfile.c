@@ -60,8 +60,6 @@ static void aprerr(const char *fn, apr_status_t rv)
 {
     char buf[120];
 
-    printf("aprerr\n");
-
     fprintf(stderr, "%s->%d/%s\n",
             fn, rv, apr_strerror(rv, buf, sizeof buf));
     exit(1);
@@ -198,13 +196,16 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
     apr_size_t bytes_read;
     apr_pollset_t *pset;
     apr_int32_t nsocks;
+    int connect_tries = 1;
     int i;
     int family;
     apr_sockaddr_t *destsa;
     apr_proc_t server;
+    apr_interval_time_t connect_retry_interval = apr_time_from_msec(50);
 
     if (start_server) {
         spawn_server(p, &server);
+        connect_tries = 5; /* give it a chance to start up */
     }
 
     family = APR_INET;
@@ -224,7 +225,13 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
         aprerr("apr_sockaddr_info_get()", rv);
     }
 
-    rv = apr_socket_connect(sock, destsa);
+    while (connect_tries--) {
+        rv = apr_socket_connect(sock, destsa);
+        if (connect_tries && APR_STATUS_IS_ECONNREFUSED(rv)) {
+            apr_sleep(apr_time_from_msec(connect_retry_interval));
+            connect_retry_interval *= 2;
+        }
+    }
     if (rv != APR_SUCCESS) {
         aprerr("apr_socket_connect()", rv);
     }
