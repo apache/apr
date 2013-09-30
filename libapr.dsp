@@ -826,6 +826,10 @@ SOURCE=.\include\apr_signal.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\include\apr_skiplist.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\include\apr_strings.h
 # End Source File
 # Begin Source File
