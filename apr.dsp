@@ -494,6 +494,9 @@ SOURCE=.\tables\apr_hash.c
 
 SOURCE=.\tables\apr_tables.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\tables\apr_skiplist.c
 # End Group
 # Begin Group "threadproc"
 
@@ -767,6 +770,10 @@ SOURCE=.\include\apr_shm.h
 # Begin Source File
 
 SOURCE=.\include\apr_signal.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_skiplist.h
 # End Source File
 # Begin Source File
 
