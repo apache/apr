@@ -193,6 +193,7 @@ SET(APR_PUBLIC_HEADERS_STATIC
   include/apr_sha1.h
   include/apr_shm.h
   include/apr_signal.h
+  include/apr_skiplist.h
   include/apr_strings.h
   include/apr_strmatch.h
   include/apr_tables.h
@@ -314,6 +315,7 @@ SET(APR_SOURCES
   strings/apr_strtok.c
   strmatch/apr_strmatch.c
   tables/apr_hash.c
+  tables/apr_skiplist.c
   tables/apr_tables.c
   threadproc/win32/proc.c
   threadproc/win32/signals.c
