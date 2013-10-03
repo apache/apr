@@ -6,12 +6,6 @@ Changes for APR 1.5.0
   *) Add the apr_table_getm() call, which transparently handles the
      merging of keys with multiple values. [Graham Leggett]
 
-  *) Fix amd64 assembler version of apr_atomic_xchgptr(). PR 51851. [Mattias
-     Engdegård <mattiase acm org>]
-
-  *) Fix PPC atomics to work with gcc 4.0. PR 54840. [Mattias Engdegård
-     <mattiase acm org>]
-
   *) Add apr_hash_this_key(), apr_hash_this_key_len(), and 
      apr_hash_this_val() for easier access to those attributes from
      a hash iterator.  [Hyrum K. Wright <hyrum_wright mail.utexas.edu>]
@@ -22,8 +16,6 @@ Changes for APR 1.5.0
 
   *) Improve platform detection by updating config.guess and config.sub.
      [Rainer Jung]
-
-  *) Add support for OSX Mountain Lion (10.8) [Jim Jagielski]
 
   *) apr_socket_opt_set: Add support for APR_SO_BROADCAST. PR 46389.
      [Armin Müller <mueller itestra com>]
