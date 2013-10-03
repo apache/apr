@@ -7,14 +7,8 @@ Changes for APR 2.0.0
 
   *) Add support for Berkeley DB 6.0. [Rainer Jung]
 
-  *) Add apr_pbase64_encode() and apr_pbase64_decode() to encode to/from
-     the pool. [Graham Leggett]
-
   *) Add the apr_escape interface. [Graham Leggett]
      
-  *) Add support to apr_memcache for unix domain sockets. PR 54573 [Remi
-     Gacogne <rgacogne+asf aquaray.com>]
-
   *) Mark apr_dbd_freetds as unsupported, and remove it from all builds
      [Nick Kew]
 
