@@ -468,9 +468,14 @@ AC_MSG_CHECKING(size of $2)
 AC_CACHE_VAL(AC_CV_NAME,
 [AC_TRY_RUN([#include <stdio.h>
 $1
+#ifdef WIN32
+#define binmode "b"
+#else
+#define binmode
+#endif
 main()
 {
-  FILE *f=fopen("conftestval", "w");
+  FILE *f=fopen("conftestval", "w" binmode);
   if (!f) exit(1);
   fprintf(f, "%d\n", sizeof($2));
   exit(0);
