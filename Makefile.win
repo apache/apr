@@ -162,9 +162,9 @@ install:
 	@if NOT EXIST "$(PREFIX)\bin\."		mkdir "$(PREFIX)\bin"
 	@if NOT EXIST "$(PREFIX)\include\."	mkdir "$(PREFIX)\include"
 	@if NOT EXIST "$(PREFIX)\lib\."		mkdir "$(PREFIX)\lib"
-	copy CHANGES "$(PREFIX)\CHANGES.txt" <.y
-	copy LICENSE "$(PREFIX)\LICENSE.txt" <.y
-	copy NOTICE  "$(PREFIX)\NOTICE.txt"  <.y
+	copy CHANGES "$(PREFIX)\APR-CHANGES.txt" <.y
+	copy LICENSE "$(PREFIX)\APR-LICENSE.txt" <.y
+	copy NOTICE  "$(PREFIX)\APR-NOTICE.txt"  <.y
 	xcopy include\*.h		"$(PREFIX)\include\" /d < .a
 	copy $(LIBSOSPATH)\apr-1.lib		"$(PREFIX)\lib\" <.y
 	copy $(LIBSOSPATH)\apr-1.pdb		"$(PREFIX)\lib\" <.y
