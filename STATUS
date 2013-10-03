@@ -82,8 +82,14 @@ Bundled with httpd:
 
 RELEASE SHOWSTOPPERS:
 
-    * Forward-port cmake-based build system from 1.4.x branch if it proves
-      useful.
+    * Verify that no fixes in the 1.4.x branch are missing from the
+      1.5.x branch.
+
+    * Verify that new features are implemented across major platforms
+      (if applicable).
+
+    * Verify that new features have at least minimal regression tests
+      in place.
 
 CURRENT VOTES:
 
