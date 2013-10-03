@@ -135,6 +135,28 @@ sub fixcwd {
             print "Touched datestamp for " . $oname . " in " . $File::Find::dir . "\n"; 
         }
         $oname =~ s/.mak$/.dep/;
+        $verchg = 0;
+        $srcfl = new IO::File $oname, "r" || die;
+        $dstfl = new IO::File $tname, "w" || die;
+        while ($src = <$srcfl>) {
+            if (($src =~ m/^\t"(\.\.\\)+(apr|apr-util|apr-iconv)\\.*"\\/) || 
+                ($src =~ m/^\t{\$\(INCLUDE\)}".*"\\/)) {
+                $verchg = -1;
+            }
+            else {
+                print $dstfl $src;
+            }
+        }
+        undef $srcfl;
+        undef $dstfl;
+        if ($verchg) {
+            unlink $oname || die;
+            rename $tname, $oname || die;
+            print "Stripped external dependencies from " . $oname . " in " . $File::Find::dir . "\n"; 
+        }
+        else {
+            unlink $tname || die;
+        }
         @ostat = stat($oname);    
         if ($ostat[9] && $dstat[9] && ($ostat[9] != $dstat[9])) {
             @onames = ($oname);
