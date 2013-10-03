@@ -31,7 +31,7 @@
 /* Windows only really support killing process, but that will do for now. 
  *
  * ### Actually, closing the input handle to the proc should also do fine 
- * for most console apps.  This definately needs improvement...
+ * for most console apps.  This definitely needs improvement...
  */
 APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int signal)
 {
