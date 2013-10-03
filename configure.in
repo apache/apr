@@ -35,7 +35,7 @@ AH_TOP([
 dnl Hard-coded inclusion at the tail end of apr_private.h:
 AH_BOTTOM([
 /* switch this on if we have a BeOS version below BONE */
-#if BEOS && !HAVE_BONE_VERSION
+#if defined(BEOS) && !defined(HAVE_BONE_VERSION)
 #define BEOS_R5 1
 #else
 #define BEOS_BONE 1
