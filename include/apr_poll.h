@@ -74,10 +74,10 @@ extern "C" {
 typedef enum {
     APR_POLLSET_DEFAULT,        /**< Platform default poll method */
     APR_POLLSET_SELECT,         /**< Poll uses select method */
-    APR_POLLSET_KQUEUE,
-    APR_POLLSET_PORT,
-    APR_POLLSET_EPOLL,
-    APR_POLLSET_POLL
+    APR_POLLSET_KQUEUE,         /**< Poll uses kqueue method */
+    APR_POLLSET_PORT,           /**< Poll uses Solaris event port method */
+    APR_POLLSET_EPOLL,          /**< Poll uses epoll method */
+    APR_POLLSET_POLL            /**< Poll uses poll method */
 } apr_pollset_method_e;
 
 /** Used in apr_pollfd_t to determine what the apr_descriptor is */
@@ -137,6 +137,12 @@ typedef struct apr_pollset_t apr_pollset_t;
  * @remark If flags contains APR_POLLSET_NOCOPY, then the apr_pollfd_t
  *         structures passed to apr_pollset_add() are not copied and
  *         must have a lifetime at least as long as the pollset.
+ * @remark Some poll methods (including APR_POLLSET_KQUEUE,
+ *         APR_POLLSET_PORT, and APR_POLLSET_EPOLL) do not have a
+ *         fixed limit on the size of the pollset. For these methods,
+ *         the size parameter controls the maximum number of
+ *         descriptors that will be returned by a single call to
+ *         apr_pollset_poll().
  */
 APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                                              apr_uint32_t size,
@@ -149,7 +155,7 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
  * @param size The maximum number of descriptors that this pollset can hold
  * @param p The pool from which to allocate the pollset
  * @param flags Optional flags to modify the operation of the pollset.
- * @param method Poll method to use. See @apr_pollset_method_e.  If this
+ * @param method Poll method to use. See #apr_pollset_method_e.  If this
  *         method cannot be used, the default method will be used unless the
  *         APR_POLLSET_NODEFAULT flag has been specified.
  *
@@ -168,6 +174,12 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
  * @remark If flags contains APR_POLLSET_NOCOPY, then the apr_pollfd_t
  *         structures passed to apr_pollset_add() are not copied and
  *         must have a lifetime at least as long as the pollset.
+ * @remark Some poll methods (including APR_POLLSET_KQUEUE,
+ *         APR_POLLSET_PORT, and APR_POLLSET_EPOLL) do not have a
+ *         fixed limit on the size of the pollset. For these methods,
+ *         the size parameter controls the maximum number of
+ *         descriptors that will be returned by a single call to
+ *         apr_pollset_poll().
  */
 APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **pollset,
                                                 apr_uint32_t size,
@@ -308,7 +320,7 @@ typedef struct apr_pollcb_t apr_pollcb_t;
  */
 APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
                                             apr_uint32_t size,
-                                            apr_pool_t *pool,
+                                            apr_pool_t *p,
                                             apr_uint32_t flags);
 
 /**
@@ -317,7 +329,7 @@ APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
  * @param size The maximum number of descriptors that a single _poll can return.
  * @param p The pool from which to allocate the pollcb
  * @param flags Optional flags to modify the operation of the pollcb.
- * @param method Poll method to use. See @apr_pollset_method_e.  If this
+ * @param method Poll method to use. See #apr_pollset_method_e.  If this
  *         method cannot be used, the default method will be used unless the
  *         APR_POLLSET_NODEFAULT flag has been specified.
  *
@@ -326,7 +338,7 @@ APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
  */
 APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **pollcb,
                                                apr_uint32_t size,
-                                               apr_pool_t *pool,
+                                               apr_pool_t *p,
                                                apr_uint32_t flags,
                                                apr_pollset_method_e method);
 
@@ -361,7 +373,7 @@ APR_DECLARE(apr_status_t) apr_pollcb_remove(apr_pollcb_t *pollcb,
                                             apr_pollfd_t *descriptor);
 
 /** Function prototype for pollcb handlers 
- * @param baton Opaque baton passed into apr_pollcb_poll
+ * @param baton Opaque baton passed into apr_pollcb_poll()
  * @param descriptor Contains the notification for an active descriptor, 
  *                   the rtnevents member contains what events were triggered
  *                   for this descriptor.
