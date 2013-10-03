@@ -491,7 +491,7 @@ APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
                                           apr_size_t *len);
 
 /**
- * Send multiple packets of data over a network.
+ * Send multiple buffers over a network.
  * @param sock The socket to send the data over.
  * @param vec The array of iovec structs containing the data to send 
  * @param nvec The number of iovec structs in the array
@@ -501,7 +501,7 @@ APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
  * This functions acts like a blocking write by default.  To change 
  * this behavior, use apr_socket_timeout_set() or the APR_SO_NONBLOCK
  * socket option.
- * The number of bytes actually sent is stored in argument 3.
+ * The number of bytes actually sent is stored in argument 4.
  *
  * It is possible for both bytes to be sent and an error to be returned.
  *
