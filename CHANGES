@@ -7,6 +7,9 @@ Changes for APR 1.4.9
   *) configure: Fix detection of O_NONBLOCK inheritance broken in
      1.4.7.  [Rainer Jung]
 
+  *) Improve platform detection by updating config.guess and config.sub.
+     [Rainer Jung]
+
 Changes for APR 1.4.8
 
   *) Fix compilation with FreeBSD on ARM.  [Olli Hauer <ohauer gmx.de>]
