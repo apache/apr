@@ -327,6 +327,27 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 #endif /* ndef(NETWARE) */
 }
 
+#if !defined(NETWARE)
+static int same_drive(const char *path1, const char *path2)
+{
+    char drive1 = path1[0];
+    char drive2 = path2[0];
+
+    if (!drive1 || !drive2 || path1[1] != ':' || path2[1] != ':')
+        return FALSE;
+
+    if (drive1 == drive2)
+        return TRUE;
+
+    if (drive1 >= 'a' && drive1 <= 'z')
+        drive1 += 'A' - 'a';
+
+    if (drive2 >= 'a' && drive2 <= 'z')
+        drive2 += 'A' - 'a';
+
+    return (drive1 == drive2);
+}
+#endif
 
 APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath, 
                                              const char *basepath, 
@@ -540,7 +561,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
              * use the basepath _if_ it matches this drive letter!
              * Otherwise we must discard the basepath.
              */
-            if (addroot[0] == baseroot[0] && baseroot[1] == ':') {
+            if (same_drive(addroot, baseroot)) {
 #endif
                 /* Base the result path on the basepath
                  */
