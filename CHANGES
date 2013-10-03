@@ -3,6 +3,9 @@ Changes for APR 1.5.0
 
   *) Add apr_skiplist family. [Jim Jagielski]
 
+  *) Add experimental cmake-based build system for Windows.  Refer to 
+     README.cmake for more information.  [Jeff Trawick, Tom Donovan]
+
   *) Add the apr_table_getm() call, which transparently handles the
      merging of keys with multiple values. [Graham Leggett]
 
