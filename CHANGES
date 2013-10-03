@@ -15,9 +15,6 @@ Changes for APR 2.0.0
   *) Add support to apr_memcache for unix domain sockets. PR 54573 [Remi
      Gacogne <rgacogne+asf aquaray.com>]
 
-  *) Add the apr_table_getm() call, which transparently handles the
-     merging of keys with multiple values. [Graham Leggett]
-
   *) Mark apr_dbd_freetds as unsupported, and remove it from all builds
      [Nick Kew]
 
@@ -31,9 +28,6 @@ Changes for APR 2.0.0
      const char * instead of char *.  [Jeff Trawick]
 
   *) apr_pollset_poll:  add z/OS async poll support for sockets [Greg Ames]
-
-  *) apr_socket_opt_set: Add support for APR_SO_BROADCAST. PR 46389.
-     [Armin Müller <mueller itestra com>]
 
   *) apr_brigades: add a check to prevent infinite while loop in case
      of a corrupted brigade.  Problem evidenced in PR 51062.  Analysis by
