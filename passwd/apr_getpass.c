@@ -53,7 +53,7 @@
 #endif
 
 /* Disable getpass() support when PASS_MAX is defined and is "small",
- * for an arbitrary definition of "small". 
+ * for an arbitrary definition of "small".
  * HP-UX truncates passwords (PR49496) so we disable getpass() for
  * this platform too.
  */
