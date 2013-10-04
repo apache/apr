@@ -492,11 +492,12 @@ SOURCE=.\tables\apr_hash.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\tables\apr_tables.c
+SOURCE=.\tables\apr_skiplist.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\tables\apr_skiplist.c
+SOURCE=.\tables\apr_tables.c
+# End Source File
 # End Group
 # Begin Group "threadproc"
 
