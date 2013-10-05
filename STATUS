@@ -82,14 +82,12 @@ Bundled with httpd:
 
 RELEASE SHOWSTOPPERS:
 
-    * Verify that no fixes in the 1.4.x branch are missing from the
-      1.5.x branch.
+    * Verify that new features are:
+      + documented
+      + implemented across major platforms (if applicable)
+      + have at least minimal regression tests in place
 
-    * Verify that new features are implemented across major platforms
-      (if applicable).
-
-    * Verify that new features have at least minimal regression tests
-      in place.
+    * Makefiles for MSVC
 
 CURRENT VOTES:
 
