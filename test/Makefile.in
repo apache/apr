@@ -173,7 +173,7 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	teststatus=0; \
 	progfailed=""; \
 	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
-	        if test "$$prog" = 'dbd'; then \
+	        if test "$$prog" = 'dbd@EXEEXT@'; then \
 			for driver in none @apu_dbd_tests@; do \
 				if test "$$driver" != 'none'; then \
 					@shlibpath_var@="`echo "../dbm/.libs:../dbd/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
@@ -185,7 +185,7 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 					fi; \
 				fi; \
 			done; \
-		elif test "$$prog" = 'sendfile'; then \
+		elif test "$$prog" = 'sendfile@EXEEXT@'; then \
 			for mode in blocking nonblocking timeout; do \
 				@shlibpath_var@="`echo "../dbm/.libs:../dbd/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
 				./$$prog client $$mode startserver 127.0.0.1; \
