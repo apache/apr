@@ -277,7 +277,7 @@ APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key);
  * @return The value associated with the key, or NULL if the key does not exist.
  */
 APR_DECLARE(const char *) apr_table_getm(apr_pool_t *p, const apr_table_t *t,
-        const char *key);
+                                         const char *key);
 
 /**
  * Add a key/value pair to a table.  If another element already exists with the
