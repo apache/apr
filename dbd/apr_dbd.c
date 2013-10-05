@@ -182,7 +182,7 @@ APR_DECLARE(apr_status_t) apr_dbd_get_driver(apr_pool_t *pool, const char *name,
 
 #if defined(NETWARE)
     apr_snprintf(modname, sizeof(modname), "dbd%s.nlm", name);
-#elif defined(WIN32)
+#elif defined(WIN32) || defined(__CYGWIN__)
     apr_snprintf(modname, sizeof(modname),
                  "apr_dbd_%s-" APR_STRINGIFY(APR_MAJOR_VERSION) ".dll", name);
 #else

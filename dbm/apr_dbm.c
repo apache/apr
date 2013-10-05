@@ -164,7 +164,7 @@ static apr_status_t dbm_open_type(apr_dbm_type_t const* * vtable,
 
 #if defined(NETWARE)
     apr_snprintf(modname, sizeof(modname), "dbm%s.nlm", type);
-#elif defined(WIN32)
+#elif defined(WIN32) || defined (__CYGWIN__)
     apr_snprintf(modname, sizeof(modname),
                  "apr_dbm_%s-" APR_STRINGIFY(APR_MAJOR_VERSION) ".dll", type);
 #else
