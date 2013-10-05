@@ -37,7 +37,7 @@ Changes for APR 2.0.0
      apr_socket_wait() and apr_file_pipe_wait(). [Brian Havard]
 
   *) Enable platform specific support for the opening of a file or
-     pipe in non blocking module through the APR_FOPEN_NONBLOCK flag.
+     pipe in non-blocking mode through the APR_FOPEN_NONBLOCK flag.
      [Graham Leggett]
 
   *) Support connecttimeout, readtimeout and writetimeout MySQL options
