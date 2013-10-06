@@ -116,7 +116,7 @@
  * or the extern "C" namespace 
  */
 
-#if APR_HAVE_WINDOWS_H
+#if APR_HAVE_WINDOWS_H && defined(WIN32)
 /* If windows.h was already included, our preferences don't matter.
  * If not, include a restricted set of windows headers to our tastes.
  */
