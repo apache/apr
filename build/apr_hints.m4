@@ -430,9 +430,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         APR_SETIFNULL(apr_gethostbyaddr_is_thread_safe, [yes])
         APR_SETIFNULL(apr_getservbyname_is_thread_safe, [yes])
         ;;
-    *cygwin*)
-	APR_ADDTO(CPPFLAGS, [-DCYGWIN])
-	;;
     *mingw*)
         APR_ADDTO(INTERNAL_CPPFLAGS, -DBINPATH=$apr_builddir/test/.libs)
         APR_ADDTO(CPPFLAGS, [-DWIN32 -D__MSVCRT__])
