@@ -102,11 +102,6 @@ CURRENT VOTES:
       1.5.x patch: trunk patch works
       +1: jim
 
-     * Fix potential data corruption in apr_brigade_write() and friends
-       Trunk patch: http://svn.apache.org/viewvc?view=revision&revision=1402897
-       1.5.x patch: trunk patch works mod CHANGES
-       +1: jim
-
      * Add the apr_table_getm() call
        Trunk patch:http://svn.apache.org/viewvc?view=revision&revision=1480067
        1.5.x patch: trunk patch works mod CHANGES
