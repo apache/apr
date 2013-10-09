@@ -862,11 +862,6 @@ APR_DECLARE(apr_status_t) apr_escape_echo(char *escaped, const char *str,
                         size++;
                         found = 1;
                         break;
-                    case '\e':
-                        *d++ = 'e';
-                        size++;
-                        found = 1;
-                        break;
                     case '\f':
                         *d++ = 'f';
                         size++;
@@ -931,7 +926,6 @@ APR_DECLARE(apr_status_t) apr_escape_echo(char *escaped, const char *str,
                     switch (c) {
                     case '\a':
                     case '\b':
-                    case '\e':
                     case '\f':
                     case '\n':
                     case '\r':

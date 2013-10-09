@@ -275,9 +275,8 @@ APR_DECLARE(const char *) apr_punescape_entity(apr_pool_t *p, const char *str)
 /**
  * Escape control characters in a string, as performed by the shell's
  * 'echo' command. Characters are replaced as follows:
- * \a alert (bell), \b backspace, \e an escape character, \f form feed,
- * \n new line, \r carriage return, \t horizontal tab, \v vertical tab,
- * \\ backslash.
+ * \a alert (bell), \b backspace, \f form feed, \n new line, \r carriage
+ * return, \t horizontal tab, \v vertical tab, \\ backslash.
  *
  * Any non ascii character will be encoded as '\xHH', where HH is the hex
  * code of the character.
