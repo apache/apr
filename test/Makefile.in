@@ -28,7 +28,7 @@ TESTS = testtime.lo teststr.lo testvsn.lo testipsub.lo testshm.lo \
 	testhash.lo testargs.lo testnames.lo testuser.lo testpath.lo \
 	testenv.lo testprocmutex.lo testfnmatch.lo testatomic.lo testflock.lo \
 	testsock.lo testglobalmutex.lo teststrnatcmp.lo testfilecopy.lo \
-	testtemp.lo testlfs.lo testcond.lo
+	testtemp.lo testlfs.lo testcond.lo testescape.lo
 
 OTHER_PROGRAMS = \
 	sendfile@EXEEXT@ \

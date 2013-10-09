@@ -28,6 +28,7 @@ const struct testlist {
     {testdso},
     {testdup},
     {testenv},
+    {testescape},
     {testfile},
     {testfilecopy},
     {testfileinfo},
