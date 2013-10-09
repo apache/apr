@@ -47,6 +47,19 @@ ENDIF()
 CONFIGURE_FILE(include/apr.hwc
                ${PROJECT_BINARY_DIR}/apr.h)
 
+ADD_EXECUTABLE(gen_test_char tools/gen_test_char.c)
+GET_TARGET_PROPERTY(GEN_TEST_CHAR_EXE gen_test_char LOCATION)
+ADD_CUSTOM_COMMAND(
+  COMMENT "Generating character tables, apr_escape_test_char.h, for current locale"
+  DEPENDS gen_test_char
+  COMMAND ${GEN_TEST_CHAR_EXE} > ${PROJECT_BINARY_DIR}/apr_escape_test_char.h
+  OUTPUT ${PROJECT_BINARY_DIR}/apr_escape_test_char.h
+)
+ADD_CUSTOM_TARGET(
+  test_char_header ALL
+  DEPENDS ${PROJECT_BINARY_DIR}/apr_escape_test_char.h
+)
+
 # Generated .h files are stored in PROJECT_BINARY_DIR, not the
 # source tree.
 #
@@ -80,6 +93,7 @@ SET(APR_PUBLIC_HEADERS_STATIC
   include/apr_dso.h
   include/apr_env.h
   include/apr_errno.h
+  include/apr_escape.h
   include/apr_file_info.h
   include/apr_file_io.h
   include/apr_fnmatch.h
@@ -119,6 +133,7 @@ SET(APR_PUBLIC_HEADERS_GENERATED
 SET(APR_SOURCES
   atomic/win32/apr_atomic.c
   dso/win32/dso.c
+  encoding/apr_escape.c
   file_io/unix/copy.c
   file_io/unix/fileacc.c
   file_io/unix/filepath_util.c
@@ -199,6 +214,7 @@ SET(APR_TEST_SOURCES
   test/testdso.c
   test/testdup.c
   test/testenv.c
+  test/testescape.c
   test/testfile.c
   test/testfilecopy.c
   test/testfileinfo.c
@@ -247,12 +263,14 @@ SET(install_targets ${install_targets} libapr-1)
 SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/libapr-1.pdb)
 TARGET_LINK_LIBRARIES(libapr-1 ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(libapr-1 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_EXPORT")
+ADD_DEPENDENCIES(libapr-1 test_char_header)
 
 ADD_LIBRARY(apr-1 STATIC ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h)
 SET(install_targets ${install_targets} apr-1)
 SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/apr-1.pdb)
 TARGET_LINK_LIBRARIES(apr-1 ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(apr-1 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC")
+ADD_DEPENDENCIES(apr-1 test_char_header)
 
 # libaprapp-1 and aprapp-1 are static
 ADD_LIBRARY(libaprapp-1 STATIC ${APR_HEADERS} ${PROJECT_BINARY_DIR}/apr.h misc/win32/apr_app.c misc/win32/internal.c)
