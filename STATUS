@@ -91,11 +91,6 @@ RELEASE SHOWSTOPPERS:
 
 CURRENT VOTES:
 
-    * shmem: Don't leak file descriptors
-      Trunk patch: http://svn.apache.org/viewvc?view=revision&revision=910597
-      1.5.x patch: trunk patch works
-      +1: jim
-
     * Add object perms set macros and implement them for shm and mutex
       Trunk patch: http://svn.apache.org/viewvc?view=revision&revision=741862
                    http://svn.apache.org/viewvc?view=revision&revision=741869
