@@ -314,26 +314,31 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
          * exist before calling ftok(). */
         shmkey = ftok(filename, 1);
         if (shmkey == (key_t)-1) {
+            apr_file_close(file);
             return errno;
         }
 
         if ((new_m->shmid = shmget(shmkey, new_m->realsize,
                                    SHM_R | SHM_W | IPC_CREAT | IPC_EXCL)) < 0) {
+            apr_file_close(file);
             return errno;
         }
 
         if ((new_m->base = shmat(new_m->shmid, NULL, 0)) == (void *)-1) {
+            apr_file_close(file);
             return errno;
         }
         new_m->usable = new_m->base;
 
         if (shmctl(new_m->shmid, IPC_STAT, &shmbuf) == -1) {
+            apr_file_close(file);
             return errno;
         }
         apr_uid_current(&uid, &gid, pool);
         shmbuf.shm_perm.uid = uid;
         shmbuf.shm_perm.gid = gid;
         if (shmctl(new_m->shmid, IPC_SET, &shmbuf) == -1) {
+            apr_file_close(file);
             return errno;
         }
 
@@ -341,6 +346,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         status = apr_file_write(file, (const void *)&reqsize,
                                 &nbytes);
         if (status != APR_SUCCESS) {
+            apr_file_close(file);
             return status;
         }
         status = apr_file_close(file);
