@@ -34,15 +34,33 @@ static void test_escape(abts_case *tc, void *data)
 
     apr_pool_create(&pool, NULL);
 
-    src = "Hello World &;`'\"|*?~<>^()[]{}$\\\n";
-    target = "Hello World \\&\\;\\`\\'\\\"\\|\\*\\?\\~\\<\\>\\^\\(\\)\\[\\]\\{\\}\\$\\\\\\\n";
+    src = "Hello World &;`'\"|*?~<>^()[]{}$\\";
+    target = "Hello World \\&\\;\\`\\'\\\"\\|\\*\\?\\~\\<\\>\\^\\(\\)\\[\\]\\{\\}\\$\\\\";
     dest = apr_pescape_shell(pool, src);
-    ABTS_ASSERT(tc, "shell escaped matches expected output",
+    ABTS_ASSERT(tc,
+                apr_psprintf(pool, "shell escaped (%s) does not match expected output (%s)",
+                             dest, target),
                 (strcmp(dest, target) == 0));
     apr_escape_shell(NULL, src, APR_ESCAPE_STRING, &len);
     ABTS_ASSERT(tc,
             apr_psprintf(pool, "size mismatch (%" APR_SIZE_T_FMT "!=%" APR_SIZE_T_FMT ")", len, strlen(dest) + 1),
             (len == strlen(dest) + 1));
+
+#if !(defined(OS2) || defined(WIN32))
+    /* Now try with newline, which is converted to a space on OS/2 and Windows.
+     */
+    src = "Hello World &;`'\"|*?~<>^()[]{}$\\\n";
+    target = "Hello World \\&\\;\\`\\'\\\"\\|\\*\\?\\~\\<\\>\\^\\(\\)\\[\\]\\{\\}\\$\\\\\\\n";
+    dest = apr_pescape_shell(pool, src);
+    ABTS_ASSERT(tc,
+                apr_psprintf(pool, "shell escaped (%s) does not match expected output (%s)",
+                             dest, target),
+                (strcmp(dest, target) == 0));
+    apr_escape_shell(NULL, src, APR_ESCAPE_STRING, &len);
+    ABTS_ASSERT(tc,
+            apr_psprintf(pool, "size mismatch (%" APR_SIZE_T_FMT "!=%" APR_SIZE_T_FMT ")", len, strlen(dest) + 1),
+            (len == strlen(dest) + 1));
+#endif
 
     src = "Hello";
     dest = apr_punescape_url(pool, src, NULL, NULL, 0);
@@ -196,8 +214,8 @@ static void test_escape(abts_case *tc, void *data)
     dest = apr_pescape_echo(pool, src, 0);
     ABTS_PTR_EQUAL(tc, src, dest);
 
-    src = "\a\b\e\f\\n\r\t\v\"Hello World\"";
-    target = "\\a\\b\\e\\f\\\\n\\r\\t\\v\"Hello World\"";
+    src = "\a\b\f\\n\r\t\v\"Hello World\"";
+    target = "\\a\\b\\f\\\\n\\r\\t\\v\"Hello World\"";
     dest = apr_pescape_echo(pool, src, 0);
     ABTS_STR_EQUAL(tc, target, dest);
     apr_escape_echo(NULL, src, APR_ESCAPE_STRING, 0, &len);
@@ -205,8 +223,8 @@ static void test_escape(abts_case *tc, void *data)
             apr_psprintf(pool, "size mismatch (%" APR_SIZE_T_FMT "!=%" APR_SIZE_T_FMT ")", len, strlen(dest) + 1),
             (len == strlen(dest) + 1));
 
-    src = "\a\b\e\f\\n\r\t\v\"Hello World\"";
-    target = "\\a\\b\\e\\f\\\\n\\r\\t\\v\\\"Hello World\\\"";
+    src = "\a\b\f\\n\r\t\v\"Hello World\"";
+    target = "\\a\\b\\f\\\\n\\r\\t\\v\\\"Hello World\\\"";
     dest = apr_pescape_echo(pool, src, 1);
     ABTS_STR_EQUAL(tc, target, dest);
     apr_escape_echo(NULL, src, APR_ESCAPE_STRING, 1, &len);
