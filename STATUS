@@ -94,8 +94,8 @@ CURRENT VOTES:
     * Add object perms set macros and implement them for shm and mutex
       Trunk patch: http://svn.apache.org/viewvc?view=revision&revision=741862
                    http://svn.apache.org/viewvc?view=revision&revision=741869
-      1.5.x patch: trunk patch works
-      +1: jim
+      1.5.x patch: http://people.apache.org/~jim/patches/apr-1.5-permset.patch
+      +1: 
 
 CURRENT test/testall -v EXCEPTIONS:
 
