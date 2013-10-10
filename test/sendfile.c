@@ -23,6 +23,9 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_poll.h"
+#include "apr_thread_proc.h"
+
+#include "testutil.h"
 
 #if !APR_HAS_SENDFILE
 int main(void)
@@ -53,36 +56,23 @@ int main(void)
 
 typedef enum {BLK, NONBLK, TIMEOUT} client_socket_mode_t;
 
-static void apr_setup(apr_pool_t **p, apr_socket_t **sock, int *family)
+static void aprerr(const char *fn, apr_status_t rv)
 {
     char buf[120];
+
+    fprintf(stderr, "%s->%d/%s\n",
+            fn, rv, apr_strerror(rv, buf, sizeof buf));
+    exit(1);
+}
+
+static void apr_setup(apr_pool_t *p, apr_socket_t **sock, int *family)
+{
     apr_status_t rv;
 
-    rv = apr_initialize();
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_initialize()->%d/%s\n",
-                rv,
-                apr_strerror(rv, buf, sizeof buf));
-        exit(1);
-    }
-
-    atexit(apr_terminate);
-
-    rv = apr_pool_create(p, NULL);
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_pool_create()->%d/%s\n",
-                rv,
-                apr_strerror(rv, buf, sizeof buf));
-        exit(1);
-    }
-
     *sock = NULL;
-    rv = apr_socket_create(sock, *family, SOCK_STREAM, 0, *p);
+    rv = apr_socket_create(sock, *family, SOCK_STREAM, 0, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_socket_create()->%d/%s\n",
-                rv,
-                apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_socket_create()", rv);
     }
 
     if (*family == APR_UNSPEC) {
@@ -90,10 +80,7 @@ static void apr_setup(apr_pool_t **p, apr_socket_t **sock, int *family)
 
         rv = apr_socket_addr_get(&localsa, APR_LOCAL, *sock);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_socket_addr_get()->%d/%s\n",
-                    rv,
-                    apr_strerror(rv, buf, sizeof buf));
-            exit(1);
+            aprerr("apr_socket_addr_get()", rv);
         }
         *family = localsa->family;
     }
@@ -112,9 +99,7 @@ static void create_testfile(apr_pool_t *p, const char *fname)
                  APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_TRUNCATE | APR_FOPEN_BUFFERED,
                  APR_UREAD | APR_UWRITE, p);
     if (rv) {
-        fprintf(stderr, "apr_file_open()->%d/%s\n",
-                rv, apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_file_open()", rv);
     }
     
     buf[0] = FILE_DATA_CHAR;
@@ -124,33 +109,25 @@ static void create_testfile(apr_pool_t *p, const char *fname)
         if ((i % 2) == 0) {
             rv = apr_file_putc(buf[0], f);
             if (rv) {
-                fprintf(stderr, "apr_file_putc()->%d/%s\n",
-                        rv, apr_strerror(rv, buf, sizeof buf));
-                exit(1);
+                aprerr("apr_file_putc()", rv);
             }
         }
         else {
             rv = apr_file_puts(buf, f);
             if (rv) {
-                fprintf(stderr, "apr_file_puts()->%d/%s\n",
-                        rv, apr_strerror(rv, buf, sizeof buf));
-                exit(1);
+                aprerr("apr_file_puts()", rv);
             }
         }
     }
 
     rv = apr_file_close(f);
     if (rv) {
-        fprintf(stderr, "apr_file_close()->%d/%s\n",
-                rv, apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_file_close()", rv);
     }
 
     rv = apr_stat(&finfo, fname, APR_FINFO_NORM, p);
     if (rv != APR_SUCCESS && ! APR_STATUS_IS_INCOMPLETE(rv)) {
-        fprintf(stderr, "apr_stat()->%d/%s\n",
-                rv, apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_stat()", rv);
     }
 
     if (finfo.size != FILE_LENGTH) {
@@ -164,11 +141,50 @@ static void create_testfile(apr_pool_t *p, const char *fname)
     }
 }
 
-static int client(client_socket_mode_t socket_mode, char *host)
+static void spawn_server(apr_pool_t *p, apr_proc_t *out_proc)
+{
+    apr_proc_t proc = {0};
+    apr_procattr_t *procattr;
+    apr_status_t rv;
+    const char *args[3];
+
+    rv = apr_procattr_create(&procattr, p);
+    if (rv != APR_SUCCESS) {
+        aprerr("apr_procattr_create()", rv);
+    }
+
+    rv = apr_procattr_io_set(procattr, APR_CHILD_BLOCK, APR_CHILD_BLOCK,
+                             APR_CHILD_BLOCK);
+    if (rv != APR_SUCCESS) {
+        aprerr("apr_procattr_io_set()", rv);
+    }
+
+    rv = apr_procattr_cmdtype_set(procattr, APR_PROGRAM_ENV);
+    if (rv != APR_SUCCESS) {
+        aprerr("apr_procattr_cmdtype_set()", rv);
+    }
+
+    rv = apr_procattr_error_check_set(procattr, 1);
+    if (rv != APR_SUCCESS) {
+        aprerr("apr_procattr_error_check_set()", rv);
+    }
+
+    args[0] = "sendfile" EXTENSION;
+    args[1] = "server";
+    args[2] = NULL;
+    rv = apr_proc_create(&proc, TESTBINPATH "sendfile" EXTENSION, args, NULL, procattr, p);
+    if (rv != APR_SUCCESS) {
+        aprerr("apr_proc_create()", rv);
+    }
+
+    *out_proc = proc;
+}
+
+static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
+                  const char *host, int start_server)
 {
     apr_status_t rv, tmprv;
     apr_socket_t *sock;
-    apr_pool_t *p;
     char buf[120];
     apr_file_t *f = NULL;
     apr_size_t len;
@@ -180,20 +196,25 @@ static int client(client_socket_mode_t socket_mode, char *host)
     apr_size_t bytes_read;
     apr_pollset_t *pset;
     apr_int32_t nsocks;
+    int connect_tries = 1;
     int i;
     int family;
     apr_sockaddr_t *destsa;
+    apr_proc_t server;
+    apr_interval_time_t connect_retry_interval = apr_time_from_msec(50);
+
+    if (start_server) {
+        spawn_server(p, &server);
+        connect_tries = 5; /* give it a chance to start up */
+    }
 
     family = APR_INET;
-    apr_setup(&p, &sock, &family);
+    apr_setup(p, &sock, &family);
     create_testfile(p, TESTFILE);
 
     rv = apr_file_open(&f, TESTFILE, APR_FOPEN_READ, 0, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_file_open()->%d/%s\n",
-                rv,
-                apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_file_open()", rv);
     }
 
     if (!host) {
@@ -201,18 +222,21 @@ static int client(client_socket_mode_t socket_mode, char *host)
     }
     rv = apr_sockaddr_info_get(&destsa, host, family, TESTSF_PORT, 0, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_sockaddr_info_get()->%d/%s\n",
-                rv,
-                apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_sockaddr_info_get()", rv);
     }
 
-    rv = apr_socket_connect(sock, destsa);
+    while (connect_tries--) {
+        rv = apr_socket_connect(sock, destsa);
+        if (connect_tries && APR_STATUS_IS_ECONNREFUSED(rv)) {
+            apr_sleep(connect_retry_interval);
+            connect_retry_interval *= 2;
+        }
+        else {
+            break;
+        }
+    }
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_socket_connect()->%d/%s\n", 
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_socket_connect()", rv);
     }
 
     switch(socket_mode) {
@@ -223,19 +247,14 @@ static int client(client_socket_mode_t socket_mode, char *host)
         /* set it non-blocking */
         rv = apr_socket_opt_set(sock, APR_SO_NONBLOCK, 1);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_socket_opt_set(APR_SO_NONBLOCK)->%d/%s\n", 
-                    rv,
-                    apr_strerror(rv, buf, sizeof buf));
-            exit(1);
+            aprerr("apr_socket_opt_set(APR_SO_NONBLOCK)", rv);
         }
         break;
     case TIMEOUT:
         /* set a timeout */
         rv = apr_socket_timeout_set(sock, 100 * APR_USEC_PER_SEC);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_socket_opt_set(APR_SO_NONBLOCK)->%d/%s\n", 
-                    rv,
-                    apr_strerror(rv, buf, sizeof buf));
+            aprerr("apr_socket_opt_set(APR_SO_NONBLOCK)", rv);
             exit(1);
         }
         break;
@@ -277,10 +296,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
         len = FILE_LENGTH;
         rv = apr_socket_sendfile(sock, f, &hdtr, &current_file_offset, &len, 0);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_socket_sendfile()->%d/%s\n",
-                    rv,
-                    apr_strerror(rv, buf, sizeof buf));
-            exit(1);
+            aprerr("apr_socket_sendfile()", rv);
         }
         
         printf("apr_socket_sendfile() updated offset with %ld\n",
@@ -428,10 +444,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
     current_file_offset = 0;
     rv = apr_file_seek(f, APR_CUR, &current_file_offset);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_file_seek()->%d/%s\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_file_seek()", rv);
     }
 
     printf("After apr_socket_sendfile(), the kernel file pointer is "
@@ -440,10 +453,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
 
     rv = apr_socket_shutdown(sock, APR_SHUTDOWN_WRITE);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_socket_shutdown()->%d/%s\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_socket_shutdown()", rv);
     }
 
     /* in case this is the non-blocking test, set socket timeout;
@@ -451,19 +461,13 @@ static int client(client_socket_mode_t socket_mode, char *host)
 
     rv = apr_socket_timeout_set(sock, apr_time_from_sec(3));
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_socket_timeout_set()->%d/%s\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_socket_timeout_set()", rv);
     }
     
     bytes_read = 1;
     rv = apr_socket_recv(sock, buf, &bytes_read);
     if (rv != APR_EOF) {
-        fprintf(stderr, "apr_socket_recv()->%d/%s (expected APR_EOF)\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_socket_recv() (expected APR_EOF)", rv);
     }
     if (bytes_read != 0) {
         fprintf(stderr, "We expected to get 0 bytes read with APR_EOF\n"
@@ -476,20 +480,42 @@ static int client(client_socket_mode_t socket_mode, char *host)
 
     rv = apr_file_remove(TESTFILE, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_file_remove()->%d/%s\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_file_remove()", rv);
+    }
+
+    if (start_server) {
+        apr_exit_why_e exitwhy;
+        apr_size_t nbytes;
+        char responsebuf[1024];
+        int exitcode;
+
+        rv = apr_file_pipe_timeout_set(server.out, apr_time_from_sec(2));
+        if (rv != APR_SUCCESS) {
+            aprerr("apr_file_pipe_timeout_set()", rv);
+        }
+        nbytes = sizeof(responsebuf);
+        rv = apr_file_read(server.out, responsebuf, &nbytes);
+        if (rv != APR_SUCCESS) {
+            aprerr("apr_file_read() messages from server", rv);
+        }
+        printf("%.*s", (int)nbytes, responsebuf);
+        rv = apr_proc_wait(&server, &exitcode, &exitwhy, APR_WAIT);
+        if (rv != APR_CHILD_DONE) {
+            aprerr("apr_proc_wait() (expected APR_CHILD_DONE)", rv);
+        }
+        if (exitcode != 0) {
+            fprintf(stderr, "sendfile server returned %d\n", exitcode);
+            exit(1);
+        }
     }
 
     return 0;
 }
 
-static int server(void)
+static int server(apr_pool_t *p)
 {
     apr_status_t rv;
     apr_socket_t *sock;
-    apr_pool_t *p;
     char buf[120];
     int i;
     apr_socket_t *newsock = NULL;
@@ -497,49 +523,34 @@ static int server(void)
     apr_sockaddr_t *localsa;
     int family;
 
-    family = APR_UNSPEC;
-    apr_setup(&p, &sock, &family);
+    family = APR_INET;
+    apr_setup(p, &sock, &family);
 
     rv = apr_socket_opt_set(sock, APR_SO_REUSEADDR, 1);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_socket_opt_set()->%d/%s\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_socket_opt_set()", rv);
     }
 
     rv = apr_sockaddr_info_get(&localsa, NULL, family, TESTSF_PORT, 0, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_sockaddr_info_get()->%d/%s\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_sockaddr_info_get()", rv);
     }
 
     rv = apr_socket_bind(sock, localsa);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_socket_bind()->%d/%s\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_socket_bind()", rv);
     }
 
     rv = apr_socket_listen(sock, 5);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_socket_listen()->%d/%s\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_socket_listen()", rv);
     }
 
     printf("Waiting for a client to connect...\n");
 
     rv = apr_socket_accept(&newsock, sock, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_socket_accept()->%d/%s\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_socket_accept()", rv);
     }
 
     printf("Processing a client...\n");
@@ -548,10 +559,7 @@ static int server(void)
     bytes_read = strlen(HDR1);
     rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_socket_recv()->%d/%s\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_socket_recv()", rv);
     }
     if (bytes_read != strlen(HDR1)) {
         fprintf(stderr, "wrong data read (1)\n");
@@ -568,10 +576,7 @@ static int server(void)
     bytes_read = strlen(HDR2);
     rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_socket_recv()->%d/%s\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_socket_recv()", rv);
     }
     if (bytes_read != strlen(HDR2)) {
         fprintf(stderr, "wrong data read (3)\n");
@@ -588,10 +593,7 @@ static int server(void)
         bytes_read = 1;
         rv = apr_socket_recv(newsock, buf, &bytes_read);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_socket_recv()->%d/%s\n",
-                    rv,
-                    apr_strerror(rv, buf, sizeof buf));
-            exit(1);
+            aprerr("apr_socket_recv()", rv);
         }
         if (bytes_read != 1) {
             fprintf(stderr, "apr_socket_recv()->%ld bytes instead of 1\n",
@@ -613,10 +615,7 @@ static int server(void)
         bytes_read = 1;
         rv = apr_socket_recv(newsock, buf, &bytes_read);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_socket_recv()->%d/%s\n",
-                    rv,
-                    apr_strerror(rv, buf, sizeof buf));
-            exit(1);
+            aprerr("apr_socket_recv()", rv);
         }
         if (bytes_read != 1) {
             fprintf(stderr, "apr_socket_recv()->%ld bytes instead of 1\n",
@@ -638,10 +637,7 @@ static int server(void)
     bytes_read = strlen(TRL1);
     rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_socket_recv()->%d/%s\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_socket_recv()", rv);
     }
     if (bytes_read != strlen(TRL1)) {
         fprintf(stderr, "wrong data read (5)\n");
@@ -658,10 +654,7 @@ static int server(void)
     bytes_read = strlen(TRL2);
     rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_socket_recv()->%d/%s\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_socket_recv()", rv);
     }
     if (bytes_read != strlen(TRL2)) {
         fprintf(stderr, "wrong data read (7)\n");
@@ -678,10 +671,7 @@ static int server(void)
         bytes_read = 1;
         rv = apr_socket_recv(newsock, buf, &bytes_read);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_socket_recv()->%d/%s\n",
-                    rv,
-                    apr_strerror(rv, buf, sizeof buf));
-            exit(1);
+            aprerr("apr_socket_recv()", rv);
         }
         if (bytes_read != 1) {
             fprintf(stderr, "apr_socket_recv()->%ld bytes instead of 1\n",
@@ -702,10 +692,7 @@ static int server(void)
     bytes_read = 1;
     rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_EOF) {
-        fprintf(stderr, "apr_socket_recv()->%d/%s (expected APR_EOF)\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
+        aprerr("apr_socket_recv() (expected APR_EOF)", rv);
     }
     if (bytes_read != 0) {
         fprintf(stderr, "We expected to get 0 bytes read with APR_EOF\n"
@@ -721,34 +708,56 @@ static int server(void)
 
 int main(int argc, char *argv[])
 {
+    apr_pool_t *p;
+    apr_status_t rv;
+
 #ifdef SIGPIPE
     signal(SIGPIPE, SIG_IGN);
 #endif
 
-    /* Gee whiz this is goofy logic but I wanna drive sendfile right now, 
-     * not dork around with the command line!
-     */
-    if (argc >= 3 && !strcmp(argv[1], "client")) {
-        char *host = 0;
-        if (argv[3]) {
-            host = argv[3];
-        }	
-        if (!strcmp(argv[2], "blocking")) {
-            return client(BLK, host);
+    rv = apr_initialize();
+    if (rv != APR_SUCCESS) {
+        aprerr("apr_initialize()", rv);
+    }
+
+    atexit(apr_terminate);
+
+    rv = apr_pool_create(&p, NULL);
+    if (rv != APR_SUCCESS) {
+        aprerr("apr_pool_create()", rv);
+    }
+
+    if (argc >= 2 && !strcmp(argv[1], "client")) {
+        const char *host = NULL;
+        int mode = BLK;
+        int start_server = 0;
+        int i;
+
+        for (i = 2; i < argc; i++) {
+            if (!strcmp(argv[i], "blocking")) {
+                mode = BLK;
+            }
+            else if (!strcmp(argv[i], "timeout")) {
+                mode = TIMEOUT;
+            }
+            else if (!strcmp(argv[i], "nonblocking")) {
+                mode = NONBLK;
+            }
+            else if (!strcmp(argv[i], "startserver")) {
+                start_server = 1;
+            }
+            else {
+                host = argv[i];
+            }	
         }
-        else if (!strcmp(argv[2], "timeout")) {
-            return client(TIMEOUT, host);
-        }
-        else if (!strcmp(argv[2], "nonblocking")) {
-            return client(NONBLK, host);
-        }
+        return client(p, mode, host, start_server);
     }
     else if (argc == 2 && !strcmp(argv[1], "server")) {
-        return server();
+        return server(p);
     }
 
     fprintf(stderr, 
-            "Usage: %s client {blocking|nonblocking|timeout}\n"
+            "Usage: %s client {blocking|nonblocking|timeout} [startserver] [server-host]\n"
             "       %s server\n",
             argv[0], argv[0]);
     return -1;
