@@ -146,8 +146,6 @@ SET(APR_SYSTEM_LIBS
 
 INCLUDE_DIRECTORIES(${APR_INCLUDE_DIRECTORIES} ${XMLLIB_INCLUDE_DIR})
 
-SET(APR_HEADERS ${PROJECT_BINARY_DIR}/apr.h)
-
 SET(APR_PUBLIC_HEADERS_STATIC
   include/apr_allocator.h
   include/apr_anylock.h
@@ -415,14 +413,14 @@ SET(install_lib_pdb)
 SET(dbd_drivers)
 
 # libapr-2 is shared, apr-2 is static
-ADD_LIBRARY(libapr-2 SHARED ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h libapr.rc)
+ADD_LIBRARY(libapr-2 SHARED ${APR_SOURCES} ${APR_PUBLIC_HEADERS_GENERATED} libapr.rc)
 SET(install_targets ${install_targets} libapr-2)
 SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/libapr-2.pdb)
 TARGET_LINK_LIBRARIES(libapr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(libapr-2 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_EXPORT;APR_HAVE_MODULAR_DSO")
 ADD_DEPENDENCIES(libapr-2 test_char_header)
 
-ADD_LIBRARY(apr-2 STATIC ${APR_HEADERS} ${APR_SOURCES} ${PROJECT_BINARY_DIR}/apr.h)
+ADD_LIBRARY(apr-2 STATIC ${APR_SOURCES} ${APR_PUBLIC_HEADERS_GENERATED})
 SET(install_targets ${install_targets} apr-2)
 SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/apr-2.pdb)
 TARGET_LINK_LIBRARIES(apr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
@@ -430,12 +428,12 @@ SET_TARGET_PROPERTIES(apr-2 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;A
 ADD_DEPENDENCIES(apr-2 test_char_header)
 
 # libaprapp-2 and aprapp-2 are static
-ADD_LIBRARY(libaprapp-2 STATIC ${APR_HEADERS} ${PROJECT_BINARY_DIR}/apr.h misc/win32/apr_app.c misc/win32/internal.c)
+ADD_LIBRARY(libaprapp-2 STATIC misc/win32/apr_app.c misc/win32/internal.c ${APR_PUBLIC_HEADERS_GENERATED})
 SET(install_targets ${install_targets} libaprapp-2)
 SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/libaprapp-2.pdb)
 SET_TARGET_PROPERTIES(libaprapp-2 PROPERTIES COMPILE_DEFINITIONS APR_APP)
 
-ADD_LIBRARY(aprapp-2 STATIC ${APR_HEADERS} ${PROJECT_BINARY_DIR}/apr.h misc/win32/apr_app.c misc/win32/internal.c)
+ADD_LIBRARY(aprapp-2 STATIC misc/win32/apr_app.c misc/win32/internal.c ${APR_PUBLIC_HEADERS_GENERATED})
 SET(install_targets ${install_targets} aprapp-2)
 SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/aprapp-2.pdb)
 SET_TARGET_PROPERTIES(aprapp-2 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;APR_APP")
