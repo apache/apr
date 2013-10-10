@@ -187,7 +187,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
 
             if (setsockopt(sock->socketdes, optlevel, optname, 
                            (void *)&on, sizeof(int)) == -1) {
-                return errno;
+                return apr_get_netos_error();
             }
             apr_set_option(sock, APR_TCP_DEFER_ACCEPT, on);
         }
