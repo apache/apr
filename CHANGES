@@ -1,15 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
-  *) apr_socket_timeout_set() on Windows: If the socket was in a non-
-     blocking state before, disable that setting so that timeouts work.
-     [Jeff Trawick]
-
   *) Add apr_pbase64_encode() and apr_pbase64_decode() to encode to/from
      the pool. [Graham Leggett]
 
-  *) Add the apr_escape interface. [Graham Leggett]
-     
   *) Mark apr_dbd_freetds as unsupported, and remove it from all builds
      [Nick Kew]
 
