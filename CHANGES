@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.0
 
+  *) File info APIs: Fix calculation of atime and mtime on AIX. PR 51146.
+     [Ruediger Pluem]
+
   *) Add the apr_escape interface. [Graham Leggett]
 
   *) Cygwin build fixes.  PRs 51016 and 55586.  [Carlo Bramini
