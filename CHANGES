@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.0
 
+  *) apr_socket_timeout_set() on Windows: If the socket was in a non-
+     blocking state before, disable that setting so that timeouts work.
+     [Jeff Trawick]
+
   *) File info APIs: Fix calculation of atime and mtime on AIX. PR 51146.
      [Ruediger Pluem]
 
