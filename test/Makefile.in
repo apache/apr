@@ -9,7 +9,7 @@ VPATH = @srcdir@
 # STDTEST_NONPORTABLE
 #   test programs invoked via standard user interface, not portable
 # OTHER_PROGRAMS
-#   programs such as sendfile, that have to be invoked in a special sequence
+#   programs such as sockperf, that have to be invoked in a special sequence
 #   or with special parameters
 # TESTALL_COMPONENTS
 #   programs such as globalmutexchild which the various TESTS will invoke
@@ -18,7 +18,8 @@ VPATH = @srcdir@
 STDTEST_PORTABLE = \
 	testlockperf@EXEEXT@ \
 	testmutexscope@EXEEXT@ \
-	testall@EXEEXT@
+	testall@EXEEXT@ \
+	sendfile@EXEEXT@
 
 TESTS = testtime.lo teststr.lo testvsn.lo testipsub.lo testshm.lo \
 	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
@@ -31,7 +32,6 @@ TESTS = testtime.lo teststr.lo testvsn.lo testipsub.lo testshm.lo \
 	testtemp.lo testlfs.lo testcond.lo testescape.lo
 
 OTHER_PROGRAMS = \
-	sendfile@EXEEXT@ \
 	echod@EXEEXT@ \
 	sockperf@EXEEXT@
 
@@ -162,11 +162,22 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	teststatus=0; \
 	progfailed=""; \
 	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
-		./$$prog; \
-		status=$$?; \
-		if test $$status != 0; then \
-			teststatus=$$status; \
-			progfailed="$$progfailed $$prog"; \
+		if test "$$prog" = 'sendfile@EXEEXT@'; then \
+			for mode in blocking nonblocking timeout; do \
+				./$$prog client $$mode startserver 127.0.0.1; \
+				status=$$?; \
+				if test $$status != 0; then \
+					teststatus=$$status; \
+					progfailed="$$progfailed '$$prog mode $$mode'"; \
+				fi; \
+			done; \
+	        else \
+			./$$prog -v; \
+			status=$$?; \
+			if test $$status != 0; then \
+				teststatus=$$status; \
+				progfailed="$$progfailed $$prog"; \
+			fi; \
 		fi; \
 	done; \
 	if test $$teststatus != 0; then \
