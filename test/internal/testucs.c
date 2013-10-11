@@ -17,16 +17,19 @@
 #include "apr.h"
 #include "arch/win32/apr_arch_utf8.h"
 #include <wchar.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
 struct testval {
     unsigned char n[8];
-    int nl;
+    apr_size_t nl;
     wchar_t w[4];
-    int wl;
+    apr_size_t wl;
 };
 
+#ifdef FOR_REFERENCE
 /* For reference; a table of invalid utf-8 encoded ucs-2/ucs-4 sequences.
  * The table consists of start, end pairs for all invalid ranges.
  * NO_UCS2_PAIRS will pass the reservered D800-DFFF values, halting at FFFF
@@ -71,6 +74,7 @@ struct testval malformed[] = [
     [[0xFE,], 1,],    /* 11111110  invalid "too large" value, no 7 byte seq */
     [[0xFF,], 1,],    /* 11111111  invalid "too large" value, no 8 byte seq */
 ];
+#endif /* FOR_REFERENCE */
 
 void displaynw(struct testval *f, struct testval *l)
 {
@@ -192,7 +196,7 @@ void test_wrange(struct testval *p)
     }
 
     do {
-        int wl = s.wl, nl = sizeof(s.n);
+        apr_size_t wl = s.wl, nl = sizeof(s.n);
         rc = apr_conv_ucs2_to_utf8(s.w, &wl, s.n, &nl);
         s.nl = sizeof(s.n) - s.nl;
         if (rc == APR_INCOMPLETE) {

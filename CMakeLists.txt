@@ -23,6 +23,7 @@ OPTION(APR_INSTALL_PRIVATE_H  "Install selected private .h files (for httpd)"  O
 OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)
 OPTION(INSTALL_PDB          "Install .pdb files (if generated)"  ON)
 OPTION(APR_BUILD_TESTAPR    "Build the test suite"         OFF)
+OPTION(TEST_STATIC_LIBS     "Test programs use APR static libraries instead of shared libraries?" OFF)
 SET(MIN_WINDOWS_VER             "Vista" 
     CACHE STRING "Minimum Windows version")
 
@@ -84,8 +85,6 @@ SET(APR_SYSTEM_LIBS
 INCLUDE_DIRECTORIES(${APR_INCLUDE_DIRECTORIES})
 
 SET(APR_HEADERS ${PROJECT_BINARY_DIR}/apr.h)
-
-# and misc/win32/apr_app.c
 
 SET(APR_PUBLIC_HEADERS_STATIC
   include/apr_allocator.h
@@ -278,54 +277,108 @@ SET(install_targets ${install_targets} libaprapp-1)
 SET(install_lib_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/libaprapp-1.pdb)
 SET_TARGET_PROPERTIES(libaprapp-1 PROPERTIES COMPILE_DEFINITIONS APR_APP)
 
-ADD_LIBRARY(aprapp-1 STATIC ${APR_HEADERS} ${PROJECT_BINARY_DIR}/apr.h misc/win32/apr_app.c)
+ADD_LIBRARY(aprapp-1 STATIC ${APR_HEADERS} ${PROJECT_BINARY_DIR}/apr.h misc/win32/apr_app.c misc/win32/internal.c)
 SET(install_targets ${install_targets} aprapp-1)
 SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/aprapp-1.pdb)
-SET_TARGET_PROPERTIES(libaprapp-1 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;APR_APP")
+SET_TARGET_PROPERTIES(aprapp-1 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;APR_APP")
 
 IF(APR_BUILD_TESTAPR)
-  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/data)
-  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/test/data/file_datafile.txt ${PROJECT_BINARY_DIR}/data/file_datafile.txt)
-  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/test/data/mmap_datafile.txt ${PROJECT_BINARY_DIR}/data/mmap_datafile.txt)
+  ENABLE_TESTING()
+  # Create a "check" target that displays test program output to the console.
+  ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose)
+
+  # copy data files to build directory so that we can run programs from there
+  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E make_directory 
+                  ${PROJECT_BINARY_DIR}/data)
+  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                  ${PROJECT_SOURCE_DIR}/test/data/file_datafile.txt
+                  ${PROJECT_BINARY_DIR}/data/file_datafile.txt)
+  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                  ${PROJECT_SOURCE_DIR}/test/data/mmap_datafile.txt
+                  ${PROJECT_BINARY_DIR}/data/mmap_datafile.txt)
+
+  IF(TEST_STATIC_LIBS)
+    SET(whichapr    apr-1)
+    SET(whichaprapp aprapp-1)
+    SET(apiflag     -DAPR_DECLARE_STATIC)
+  ELSE()
+    SET(whichapr    libapr-1)
+    SET(whichaprapp libaprapp-1)
+    SET(apiflag)
+  ENDIF()
+
+  ADD_EXECUTABLE(testapp test/testapp.c)
+  TARGET_LINK_LIBRARIES(testapp ${whichapr} ${whichaprapp} ${APR_SYSTEM_LIBS})
+  SET_TARGET_PROPERTIES(testapp PROPERTIES LINK_FLAGS /entry:wmainCRTStartup)
+  IF(apiflag)
+    SET_TARGET_PROPERTIES(testapp PROPERTIES COMPILE_FLAGS ${apiflag})
+  ENDIF()
+  ADD_TEST(NAME testapp COMMAND testapp)
 
   ADD_EXECUTABLE(testall ${APR_TEST_SOURCES})
-  TARGET_LINK_LIBRARIES(testall apr-1 ${APR_SYSTEM_LIBS})
+  TARGET_LINK_LIBRARIES(testall ${whichapr} ${APR_SYSTEM_LIBS})
+  IF(apiflag)
+    SET_TARGET_PROPERTIES(testall PROPERTIES COMPILE_FLAGS ${apiflag})
+  ENDIF()
+  ADD_TEST(NAME testall COMMAND testall)
 
   ADD_LIBRARY(mod_test MODULE test/mod_test.c)
-  TARGET_LINK_LIBRARIES(mod_test apr-1 ${APR_SYSTEM_LIBS})
+  TARGET_LINK_LIBRARIES(mod_test ${whichapr} ${APR_SYSTEM_LIBS})
   SET_PROPERTY(TARGET mod_test APPEND PROPERTY LINK_FLAGS /export:print_hello)
   # nasty work-around for difficulties adding more than one additional flag
   # (they get joined in a bad way behind the scenes)
   GET_PROPERTY(link_flags TARGET mod_test PROPERTY LINK_FLAGS)
   SET(link_flags "${link_flags} /export:count_reps")
   SET_TARGET_PROPERTIES(mod_test PROPERTIES LINK_FLAGS ${link_flags})
+  IF(apiflag)
+    SET_TARGET_PROPERTIES(mod_test PROPERTIES COMPILE_FLAGS ${apiflag})
+  ENDIF()
 
-  ADD_EXECUTABLE(occhild test/occhild.c)
-  TARGET_LINK_LIBRARIES(occhild apr-1 ${APR_SYSTEM_LIBS})
+  # Build all the single-source executable files with no special build
+  # requirements.
+  SET(single_source_programs
+    test/echod.c
+    test/sendfile.c
+    test/sockperf.c
+    test/testlockperf.c
+    test/testmutexscope.c
+    test/globalmutexchild.c
+    test/occhild.c
+    test/proc_child.c
+    test/readchild.c
+    test/sockchild.c
+    test/testshmproducer.c
+    test/testshmconsumer.c
+    test/tryread.c
+    test/internal/testucs.c
+  )
 
-  ADD_EXECUTABLE(globalmutexchild test/globalmutexchild.c)
-  TARGET_LINK_LIBRARIES(globalmutexchild apr-1 ${APR_SYSTEM_LIBS})
+  FOREACH(sourcefile ${single_source_programs})
+    STRING(REGEX REPLACE ".*/([^\\]+)\\.c" "\\1" proggie ${sourcefile})
+    ADD_EXECUTABLE(${proggie} ${sourcefile})
+    TARGET_LINK_LIBRARIES(${proggie} ${whichapr} ${APR_SYSTEM_LIBS})
+    IF(apiflag)
+      SET_TARGET_PROPERTIES(${proggie} PROPERTIES COMPILE_FLAGS ${apiflag})
+    ENDIF()
+  ENDFOREACH()
 
-  ADD_EXECUTABLE(proc_child test/proc_child.c)
-  TARGET_LINK_LIBRARIES(proc_child apr-1 ${APR_SYSTEM_LIBS})
+  # Add tests for programs that run by themselves with no arguments.
+  SET(simple_tests
+    testlockperf
+    testmutexscope
+    testucs
+  )
 
-  ADD_EXECUTABLE(readchild test/readchild.c)
-  TARGET_LINK_LIBRARIES(readchild apr-1 ${APR_SYSTEM_LIBS})
+  FOREACH(simple ${simple_tests})
+    ADD_TEST(NAME ${simple} COMMAND ${simple})
+  ENDFOREACH()
 
-  ADD_EXECUTABLE(sockchild test/sockchild.c)
-  TARGET_LINK_LIBRARIES(sockchild apr-1 ${APR_SYSTEM_LIBS})
+  # sendfile runs multiple times with different parameters.
+  FOREACH(sendfile_mode blocking nonblocking timeout)
+    ADD_TEST(NAME sendfile-${sendfile_mode} COMMAND sendfile client ${sendfile_mode} startserver)
+  ENDFOREACH()
 
-  ADD_EXECUTABLE(testshmconsumer test/testshmconsumer.c)
-  TARGET_LINK_LIBRARIES(testshmconsumer apr-1 ${APR_SYSTEM_LIBS})
-
-  ADD_EXECUTABLE(testshmproducer test/testshmproducer.c)
-  TARGET_LINK_LIBRARIES(testshmproducer apr-1 ${APR_SYSTEM_LIBS})
-
-  ADD_EXECUTABLE(tryread test/tryread.c)
-  TARGET_LINK_LIBRARIES(tryread apr-1 ${APR_SYSTEM_LIBS})
-
-  # test programs are linked with static library
-  SET_TARGET_PROPERTIES(testall mod_test occhild globalmutexchild proc_child readchild sockchild testshmconsumer testshmproducer tryread PROPERTIES COMPILE_FLAGS -DAPR_DECLARE_STATIC)
+  # No test is added for echod+sockperf.  Those will have to be run manually.
 
 ENDIF (APR_BUILD_TESTAPR)
 
@@ -365,6 +418,7 @@ MESSAGE(STATUS "")
 MESSAGE(STATUS "")
 MESSAGE(STATUS "APR configuration summary:")
 MESSAGE(STATUS "")
+
 MESSAGE(STATUS "  Build type ...................... : ${CMAKE_BUILD_TYPE}")
 MESSAGE(STATUS "  Install .pdb (if available)...... : ${INSTALL_PDB}")
 MESSAGE(STATUS "  Install prefix .................. : ${CMAKE_INSTALL_PREFIX}")
@@ -372,4 +426,9 @@ MESSAGE(STATUS "  C compiler ...................... : ${CMAKE_C_COMPILER}")
 MESSAGE(STATUS "  IPv6 ............................ : ${APR_HAVE_IPV6}")
 MESSAGE(STATUS "  Minimum Windows version ......... : ${MIN_WINDOWS_VER}")
 MESSAGE(STATUS "  Build test suite ................ : ${APR_BUILD_TESTAPR}")
+IF(TEST_STATIC_LIBS)
+MESSAGE(STATUS "    (testing static libraries)")
+ELSE()
+MESSAGE(STATUS "    (testing dynamic libraries)")
+ENDIF()
 MESSAGE(STATUS "  Install private .h for httpd .... : ${APR_INSTALL_PRIVATE_H}")
