@@ -35,11 +35,12 @@ int main(void)
 }
 #else /* !APR_HAS_THREADS */
 
-#define MAX_COUNTER 1000000
+#define DEFAULT_MAX_COUNTER 1000000
 #define MAX_THREADS 6
 
 static int verbose = 0;
 static long mutex_counter;
+static long max_counter = DEFAULT_MAX_COUNTER;
 
 static apr_thread_mutex_t *thread_lock;
 void * APR_THREAD_FUNC thread_mutex_func(apr_thread_t *thd, void *data);
@@ -58,7 +59,7 @@ void * APR_THREAD_FUNC thread_mutex_func(apr_thread_t *thd, void *data)
 {
     int i;
 
-    for (i = 0; i < MAX_COUNTER; i++) {
+    for (i = 0; i < max_counter; i++) {
         apr_thread_mutex_lock(thread_lock);
         mutex_counter++;
         apr_thread_mutex_unlock(thread_lock);
@@ -70,7 +71,7 @@ void * APR_THREAD_FUNC thread_rwlock_func(apr_thread_t *thd, void *data)
 {
     int i;
 
-    for (i = 0; i < MAX_COUNTER; i++) {
+    for (i = 0; i < max_counter; i++) {
         apr_thread_rwlock_wrlock(thread_rwlock);
         mutex_counter++;
         apr_thread_rwlock_unlock(thread_rwlock);
@@ -120,7 +121,7 @@ int test_thread_mutex(int num_threads)
     time_stop = apr_time_now();
     printf("microseconds: %" APR_INT64_T_FMT " usec\n",
            (time_stop - time_start));
-    if (mutex_counter != MAX_COUNTER * num_threads)
+    if (mutex_counter != max_counter * num_threads)
         printf("error: counter = %ld\n", mutex_counter);
 
     return APR_SUCCESS;
@@ -168,7 +169,7 @@ int test_thread_mutex_nested(int num_threads)
     time_stop = apr_time_now();
     printf("microseconds: %" APR_INT64_T_FMT " usec\n",
            (time_stop - time_start));
-    if (mutex_counter != MAX_COUNTER * num_threads)
+    if (mutex_counter != max_counter * num_threads)
         printf("error: counter = %ld\n", mutex_counter);
 
     return APR_SUCCESS;
@@ -216,7 +217,7 @@ int test_thread_rwlock(int num_threads)
     time_stop = apr_time_now();
     printf("microseconds: %" APR_INT64_T_FMT " usec\n",
            (time_stop - time_start));
-    if (mutex_counter != MAX_COUNTER * num_threads)
+    if (mutex_counter != max_counter * num_threads)
         printf("error: counter = %ld\n", mutex_counter);
 
     return APR_SUCCESS;
@@ -244,8 +245,11 @@ int main(int argc, const char * const *argv)
         exit(-1);
     }
         
-    while ((rv = apr_getopt(opt, "v", &optchar, &optarg)) == APR_SUCCESS) {
-        if (optchar == 'v') {
+    while ((rv = apr_getopt(opt, "c:v", &optchar, &optarg)) == APR_SUCCESS) {
+        if (optchar == 'c') {
+            max_counter = atol(optarg);
+        }
+        else if (optchar == 'v') {
             verbose = 1;
         }
     }
