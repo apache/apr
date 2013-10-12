@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.0
 
+  *) Files and pipes on Windows:  Don't create an unused pollset when
+     files and pipes are opened.  [Mladen Turk]
+
   *) apr_socket_timeout_set() on Windows: If the socket was in a non-
      blocking state before, disable that setting so that timeouts work.
      [Jeff Trawick]

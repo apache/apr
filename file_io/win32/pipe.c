@@ -107,8 +107,9 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
     (*in)->dataRead = 0;
     (*in)->direction = 0;
     (*in)->pOverlapped = NULL;
+#if APR_FILES_AS_SOCKETS
     (void) apr_pollset_create(&(*in)->pollset, 1, p, 0);
-
+#endif
     (*out) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*out)->pool = p;
     (*out)->fname = NULL;
@@ -121,8 +122,9 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
     (*out)->dataRead = 0;
     (*out)->direction = 0;
     (*out)->pOverlapped = NULL;
+#if APR_FILES_AS_SOCKETS
     (void) apr_pollset_create(&(*out)->pollset, 1, p, 0);
-
+#endif
     if (apr_os_level >= APR_WIN_NT) {
         /* Create the read end of the pipe */
         dwOpenMode = PIPE_ACCESS_INBOUND;
@@ -210,8 +212,9 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put_ex(apr_file_t **file,
     (*file)->timeout = -1;
     (*file)->ungetchar = -1;
     (*file)->filehand = *thefile;
+#if APR_FILES_AS_SOCKETS
     (void) apr_pollset_create(&(*file)->pollset, 1, pool, 0);
-
+#endif
     if (register_cleanup) {
         apr_pool_cleanup_register(pool, *file, file_cleanup,
                                   apr_pool_cleanup_null);
