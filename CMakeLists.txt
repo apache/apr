@@ -547,7 +547,6 @@ IF(APR_BUILD_TESTAPR)
 
   # Add tests for programs that run by themselves with no arguments.
   SET(simple_tests
-    testlockperf
     testmutexscope
     testucs
   )
@@ -555,6 +554,9 @@ IF(APR_BUILD_TESTAPR)
   FOREACH(simple ${simple_tests})
     ADD_TEST(NAME ${simple} COMMAND ${simple})
   ENDFOREACH()
+
+  # testlockperf takes forever on Windows with default counter limit
+  ADD_TEST(NAME testlockperf COMMAND testlockperf -c 50000)
 
   # dbd and sendfile are run multiple times with different parameters.
   FOREACH(somedbd ${dbd_drivers})
