@@ -44,7 +44,7 @@ extern "C" {
 typedef struct apr_shm_t apr_shm_t;
 
 /**
- * Create and make accessable a shared memory segment.
+ * Create and make accessible a shared memory segment.
  * @param m The shared memory structure to create.
  * @param reqsize The desired size of the segment.
  * @param filename The file to use for shared memory on platforms that
