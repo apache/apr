@@ -208,8 +208,6 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
         connect_tries = 5; /* give it a chance to start up */
     }
 
-    family = APR_INET;
-    apr_setup(p, &sock, &family);
     create_testfile(p, TESTFILE);
 
     rv = apr_file_open(&f, TESTFILE, APR_FOPEN_READ, 0, p);
@@ -220,14 +218,20 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
     if (!host) {
         host = "127.0.0.1";
     }
+    family = APR_INET;
     rv = apr_sockaddr_info_get(&destsa, host, family, TESTSF_PORT, 0, p);
     if (rv != APR_SUCCESS) {
         aprerr("apr_sockaddr_info_get()", rv);
     }
 
     while (connect_tries--) {
+        apr_setup(p, &sock, &family);
         rv = apr_socket_connect(sock, destsa);
         if (connect_tries && APR_STATUS_IS_ECONNREFUSED(rv)) {
+            apr_status_t tmprv = apr_socket_close(sock);
+            if (tmprv != APR_SUCCESS) {
+                aprerr("apr_socket_close()", tmprv);
+            }
             apr_sleep(connect_retry_interval);
             connect_retry_interval *= 2;
         }
