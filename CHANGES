@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.0
 
+  *) Update compile settings for MINT OS.  PR 47181. [Alan Hourihane
+     <alanh fairlite.co.uk>]
+
   *) Files and pipes on Windows:  Don't create an unused pollset when
      files and pipes are opened.  [Mladen Turk]
 
