@@ -44,8 +44,7 @@ if test "x$apr_preload_done" != "xyes" ; then
 
   case "$host" in
     *mint)
-	APR_ADDTO(CPPFLAGS, [-DMINT])
-	APR_ADDTO(LIBS, [-lportlib])
+	APR_ADDTO(CPPFLAGS, [-DMINT -D_GNU_SOURCE])
 	;;
     *MPE/iX*)
 	APR_ADDTO(CPPFLAGS, [-DMPE -D_POSIX_SOURCE -D_SOCKET_SOURCE])
