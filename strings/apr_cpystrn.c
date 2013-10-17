@@ -46,14 +46,13 @@
 APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src, apr_size_t dst_size)
 {
 
-    char *d, *end;
+    char *d = dst, *end;
 
     if (dst_size == 0) {
         return (dst);
     }
 
     if (src) {
-        d = dst;
         end = dst + dst_size - 1;
 
         for (; d < end; ++d, ++src) {
