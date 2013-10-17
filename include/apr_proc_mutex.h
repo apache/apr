@@ -25,7 +25,6 @@
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
-#include "apr_perms_set.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -151,11 +150,6 @@ APR_DECLARE(const char *) apr_proc_mutex_name(apr_proc_mutex_t *mutex);
  * Display the name of the default mutex: APR_LOCK_DEFAULT
  */
 APR_DECLARE(const char *) apr_proc_mutex_defname(void);
-
-/**
- * Set mutex permissions.
- */
-APR_PERMS_SET_IMPLEMENT(proc_mutex);
 
 /**
  * Get the pool used by this proc_mutex.

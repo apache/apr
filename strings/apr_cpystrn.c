@@ -38,7 +38,6 @@
  *   (3) Instead of returning the pointer to the beginning of
  *       the destination string, we return a pointer to the
  *       terminating '\0' to allow us to "check" for truncation
- *   (4) If src is NULL, null terminate dst (empty string copy)
  *
  * apr_cpystrn() follows the same call structure as strncpy().
  */
@@ -52,15 +51,13 @@ APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src, apr_size_t dst_size)
         return (dst);
     }
 
-    if (src) {
-        d = dst;
-        end = dst + dst_size - 1;
+    d = dst;
+    end = dst + dst_size - 1;
 
-        for (; d < end; ++d, ++src) {
-            if (!(*d = *src)) {
-                return (d);
-            }
-        }
+    for (; d < end; ++d, ++src) {
+	if (!(*d = *src)) {
+	    return (d);
+	}
     }
 
     *d = '\0';	/* always null terminate */

@@ -25,7 +25,6 @@
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
-#include "apr_perms_set.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -132,11 +131,6 @@ APR_DECLARE(void *) apr_shm_baseaddr_get(const apr_shm_t *m);
  *        the segment length.
  */
 APR_DECLARE(apr_size_t) apr_shm_size_get(const apr_shm_t *m);
-
-/**
- * Set shared memory permissions.
- */
-APR_PERMS_SET_IMPLEMENT(shm);
 
 /**
  * Get the pool used by this shared memory segment.
