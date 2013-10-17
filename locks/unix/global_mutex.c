@@ -185,4 +185,13 @@ APR_DECLARE(const char *) apr_global_mutex_name(apr_global_mutex_t *mutex)
     return apr_proc_mutex_name(mutex->proc_mutex);
 }
 
+APR_PERMS_SET_IMPLEMENT(global_mutex)
+{
+    apr_status_t rv;
+    apr_global_mutex_t *mutex = (apr_global_mutex_t *)theglobal_mutex;
+
+    rv = apr_proc_mutex_set_perms(mutex->proc_mutex, perms, uid, gid);
+    return rv;
+}
+
 APR_POOL_IMPLEMENT_ACCESSOR(global_mutex)

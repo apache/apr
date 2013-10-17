@@ -135,6 +135,11 @@ APR_DECLARE(const char *) apr_global_mutex_lockfile(apr_global_mutex_t *mutex);
 APR_DECLARE(const char *) apr_global_mutex_name(apr_global_mutex_t *mutex);
 
 /**
+ * Set mutex permissions.
+ */
+APR_PERMS_SET_IMPLEMENT(global_mutex);
+
+/**
  * Get the pool used by this global_mutex.
  * @return apr_pool_t the pool
  */

@@ -199,6 +199,8 @@ APR_DECLARE(const char *) apr_proc_mutex_defname(void)
     return "win32mutex";
 }
 
+APR_PERMS_SET_ENOTIMPL(proc_mutex)
+
 APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 
 /* Implement OS-specific accessors defined in apr_portable.h */
