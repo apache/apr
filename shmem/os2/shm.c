@@ -113,8 +113,6 @@ APR_DECLARE(apr_size_t) apr_shm_size_get(const apr_shm_t *m)
     return size;
 }
 
-APR_PERMS_SET_ENOTIMPL(shm)
-
 APR_POOL_IMPLEMENT_ACCESSOR(shm)
 
 APR_DECLARE(apr_status_t) apr_os_shm_get(apr_os_shm_t *osshm,
