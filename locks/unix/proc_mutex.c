@@ -35,6 +35,17 @@ static apr_status_t proc_mutex_no_child_init(apr_proc_mutex_t **mutex,
 }
 #endif    
 
+#if APR_HAS_POSIXSEM_SERIALIZE || APR_HAS_PROC_PTHREAD_SERIALIZE
+static apr_status_t proc_mutex_no_perms_set(apr_proc_mutex_t *mutex,
+                                            apr_fileperms_t perms,
+                                            apr_uid_t uid,
+                                            apr_gid_t gid)
+{
+    return APR_ENOTIMPL;
+}
+#endif    
+
+
 #if APR_HAS_POSIXSEM_SERIALIZE
 
 #ifndef SEM_FAILED
@@ -183,6 +194,7 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_posixsem_methods =
     proc_mutex_posix_release,
     proc_mutex_posix_cleanup,
     proc_mutex_no_child_init,
+    proc_mutex_no_perms_set,
     "posixsem"
 };
 
@@ -291,6 +303,24 @@ static apr_status_t proc_mutex_sysv_release(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
+static apr_status_t proc_mutex_sysv_perms_set(apr_proc_mutex_t *mutex,
+                                              apr_fileperms_t perms,
+                                              apr_uid_t uid,
+                                              apr_gid_t gid)
+{
+
+    union semun ick;
+    struct semid_ds buf;
+    buf.sem_perm.uid = uid;
+    buf.sem_perm.gid = gid;
+    buf.sem_perm.mode = apr_unix_perms2mode(perms);
+    ick.buf = &buf;
+    if (semctl(mutex->interproc->filedes, 0, IPC_SET, ick) < 0) {
+        return errno;
+    }
+    return APR_SUCCESS;
+}
+
 static const apr_proc_mutex_unix_lock_methods_t mutex_sysv_methods =
 {
 #if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS || defined(SYSVSEM_IS_GLOBAL)
@@ -304,6 +334,7 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_sysv_methods =
     proc_mutex_sysv_release,
     proc_mutex_sysv_cleanup,
     proc_mutex_no_child_init,
+    proc_mutex_sysv_perms_set,
     "sysvsem"
 };
 
@@ -499,6 +530,7 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_proc_pthread_methods =
     proc_mutex_proc_pthread_release,
     proc_mutex_proc_pthread_cleanup,
     proc_mutex_no_child_init,
+    proc_mutex_no_perms_set,
     "pthread"
 };
 
@@ -620,6 +652,22 @@ static apr_status_t proc_mutex_fcntl_release(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
+static apr_status_t proc_mutex_fcntl_perms_set(apr_proc_mutex_t *mutex,
+                                               apr_fileperms_t perms,
+                                               apr_uid_t uid,
+                                               apr_gid_t gid)
+{
+
+    if (mutex->fname) {
+        if (!(perms & APR_FPROT_GSETID))
+            gid = -1;
+        if (fchown(mutex->interproc->filedes, uid, gid) < 0) {
+            return errno;
+        }
+    }
+    return APR_SUCCESS;
+}
+
 static const apr_proc_mutex_unix_lock_methods_t mutex_fcntl_methods =
 {
 #if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS || defined(FCNTL_IS_GLOBAL)
@@ -633,6 +681,7 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_fcntl_methods =
     proc_mutex_fcntl_release,
     proc_mutex_fcntl_cleanup,
     proc_mutex_no_child_init,
+    proc_mutex_fcntl_perms_set,
     "fcntl"
 };
 
@@ -758,6 +807,22 @@ static apr_status_t proc_mutex_flock_child_init(apr_proc_mutex_t **mutex,
     return APR_SUCCESS;
 }
 
+static apr_status_t proc_mutex_flock_perms_set(apr_proc_mutex_t *mutex,
+                                               apr_fileperms_t perms,
+                                               apr_uid_t uid,
+                                               apr_gid_t gid)
+{
+
+    if (mutex->fname) {
+        if (!(perms & APR_FPROT_GSETID))
+            gid = -1;
+        if (fchown(mutex->interproc->filedes, uid, gid) < 0) {
+            return errno;
+        }
+    }
+    return APR_SUCCESS;
+}
+
 static const apr_proc_mutex_unix_lock_methods_t mutex_flock_methods =
 {
 #if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS || defined(FLOCK_IS_GLOBAL)
@@ -771,6 +836,7 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_flock_methods =
     proc_mutex_flock_release,
     proc_mutex_flock_cleanup,
     proc_mutex_flock_child_init,
+    proc_mutex_flock_perms_set,
     "flock"
 };
 
@@ -941,6 +1007,12 @@ APR_DECLARE(const char *) apr_proc_mutex_lockfile(apr_proc_mutex_t *mutex)
     }
 #endif
     return NULL;
+}
+
+APR_PERMS_SET_IMPLEMENT(proc_mutex)
+{
+    apr_proc_mutex_t *mutex = (apr_proc_mutex_t *)theproc_mutex;
+    return mutex->meth->perms_set(mutex, perms, uid, gid);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
