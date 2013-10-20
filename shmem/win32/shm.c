@@ -114,10 +114,11 @@ static int can_create_global_maps(void)
 }
 #endif /* SE_CREATE_GLOBAL_NAME */
 
-APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
-                                         apr_size_t reqsize,
-                                         const char *file,
-                                         apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_shm_create_ex(apr_shm_t **m,
+                                            apr_size_t reqsize,
+                                            const char *file,
+                                            apr_pool_t *pool,
+                                            apr_int32_t flags)
 {
     static apr_size_t memblock = 0;
     HANDLE hMap, hFile;
@@ -154,6 +155,8 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         mapkey = NULL;
     }
     else {
+        int global;
+
         /* Do file backed, which is not an inherited handle 
          * While we could open APR_EXCL, it doesn't seem that Unix
          * ever did.  Ignore that error here, but fail later when
@@ -172,7 +175,16 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
          * without slashes or backslashes, and prepends the \global
          * or \local prefix on Win2K and later
          */
-        mapkey = res_name_from_filename(file, can_create_global_maps(), pool);
+        if (flags & APR_SHM_NS_GLOBAL) {
+            global = 1;
+        }
+        else if (flags & APR_SHM_NS_LOCAL) {
+            global = 0;
+        }
+        else {
+            global = can_create_global_maps();
+        }
+        mapkey = res_name_from_filename(file, global, pool);
     }
 
 #if APR_HAS_UNICODE_FS
@@ -226,6 +238,14 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     apr_pool_cleanup_register((*m)->pool, *m, 
                               shm_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
+                                         apr_size_t reqsize,
+                                         const char *file,
+                                         apr_pool_t *pool)
+{
+    return apr_shm_create_ex(m, reqsize, file, pool, 0);
 }
 
 APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m) 
@@ -318,24 +338,36 @@ static apr_status_t shm_attach_internal(apr_shm_t **m,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
-                                         const char *file,
-                                         apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_shm_attach_ex(apr_shm_t **m,
+                                            const char *file,
+                                            apr_pool_t *pool,
+                                            apr_int32_t flags)
 {
     apr_status_t rv;
-    int can_create_global = can_create_global_maps();
-    int try_global_local[3] = {1, /* first try to find shm under global namespace */
-                               0, /* next try to find it under local namespace */
-                               -1}; /* nothing more to try */
+    int can_create_global;
+    int try_global_local[3] = {-1, -1, -1};
     int cur;
 
     if (!file) {
         return APR_EINVAL;
     }
 
-    if (!can_create_global) { /* unprivileged process */
-        try_global_local[0] = 0; /* search local before global */
-        try_global_local[1] = 1;
+    if (flags & APR_SHM_NS_LOCAL) {
+        try_global_local[0] = 0; /* only search local */
+    }
+    else if (flags & APR_SHM_NS_GLOBAL) {
+        try_global_local[0] = 1; /* only search global */
+    }
+    else {
+        can_create_global = can_create_global_maps();
+        if (!can_create_global) { /* unprivileged process */
+            try_global_local[0] = 0; /* search local before global */
+            try_global_local[1] = 1;
+        }
+        else {
+            try_global_local[0] = 1; /* search global before local */
+            try_global_local[1] = 0;
+        }
     }
 
     for (cur = 0; try_global_local[cur] != -1; cur++) {
@@ -346,6 +378,13 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
     }
 
     return rv;
+}
+
+APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
+                                         const char *file,
+                                         apr_pool_t *pool)
+{
+    return apr_shm_attach_ex(m, file, pool, 0);
 }
 
 APR_DECLARE(apr_status_t) apr_shm_detach(apr_shm_t *m)
