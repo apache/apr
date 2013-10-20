@@ -56,10 +56,69 @@ static apr_status_t shm_cleanup(void* shm)
     return rv;
 }
 
-APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
-                                         apr_size_t reqsize,
-                                         const char *file,
-                                         apr_pool_t *pool)
+/* See if the caller is able to create a map in the global namespace by
+ * checking if the SE_CREATE_GLOBAL_NAME privilege is enabled.
+ *
+ * Prior to APR 1.5.0, named shared memory segments were always created
+ * in the global segment.  However, with recent versions of Windows this
+ * fails for unprivileged processes.  Thus, with older APR, named shared
+ * memory segments can't be created by unprivileged processes on newer
+ * Windows.
+ *
+ * By checking if the caller has the privilege, shm APIs can decide
+ * whether to use the Global or Local namespace.
+ *
+ * If running on an SDK without the required API definitions *OR*
+ * some processing failure occurs trying to check the privilege, fall
+ * back to earlier behavior -- always try to use the Global namespace.
+ */
+#ifdef SE_CREATE_GLOBAL_NAME
+static int can_create_global_maps(void)
+{
+    BOOL ok, has_priv;
+    LUID priv_id;
+    PRIVILEGE_SET privs;
+    HANDLE hToken;
+
+    ok = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, TRUE, &hToken);
+    if (!ok && GetLastError() == ERROR_NO_TOKEN) {
+        /* no thread-specific access token, so try to get process access token
+         */
+        ok = OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken);
+    }
+
+    if (ok) {
+        ok = LookupPrivilegeValue(NULL, SE_CREATE_GLOBAL_NAME, &priv_id);
+    }
+
+    if (ok) {
+        privs.PrivilegeCount = 1;
+        privs.Control = PRIVILEGE_SET_ALL_NECESSARY;
+        privs.Privilege[0].Luid = priv_id;
+        privs.Privilege[0].Attributes = SE_PRIVILEGE_ENABLED;
+        ok = PrivilegeCheck(hToken, &privs, &has_priv);
+    }
+
+    if (ok && !has_priv) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
+#else /* SE_CREATE_GLOBAL_NAME */
+/* SDK definitions missing */
+static int can_create_global_maps(void)
+{
+    return 1;
+}
+#endif /* SE_CREATE_GLOBAL_NAME */
+
+APR_DECLARE(apr_status_t) apr_shm_create_ex(apr_shm_t **m,
+                                            apr_size_t reqsize,
+                                            const char *file,
+                                            apr_pool_t *pool,
+                                            apr_int32_t flags)
 {
     static apr_size_t memblock = 0;
     HANDLE hMap, hFile;
@@ -96,6 +155,8 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         mapkey = NULL;
     }
     else {
+        int global;
+
         /* Do file backed, which is not an inherited handle 
          * While we could open APR_EXCL, it doesn't seem that Unix
          * ever did.  Ignore that error here, but fail later when
@@ -112,9 +173,18 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 
         /* res_name_from_filename turns file into a pseudo-name
          * without slashes or backslashes, and prepends the \global
-         * prefix on Win2K and later
+         * or \local prefix on Win2K and later
          */
-        mapkey = res_name_from_filename(file, 1, pool);
+        if (flags & APR_SHM_NS_GLOBAL) {
+            global = 1;
+        }
+        else if (flags & APR_SHM_NS_LOCAL) {
+            global = 0;
+        }
+        else {
+            global = can_create_global_maps();
+        }
+        mapkey = res_name_from_filename(file, global, pool);
     }
 
 #if APR_HAS_UNICODE_FS
@@ -170,6 +240,14 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
+                                         apr_size_t reqsize,
+                                         const char *file,
+                                         apr_pool_t *pool)
+{
+    return apr_shm_create_ex(m, reqsize, file, pool, 0);
+}
+
 APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m) 
 {
     apr_status_t rv = shm_cleanup(m);
@@ -183,24 +261,20 @@ APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
     return apr_file_remove(filename, pool);
 }
 
-APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
-                                         const char *file,
-                                         apr_pool_t *pool)
+static apr_status_t shm_attach_internal(apr_shm_t **m,
+                                        const char *file,
+                                        apr_pool_t *pool,
+                                        int global)
 {
     HANDLE hMap;
     void *mapkey;
     void *base;
 
-    if (!file) {
-        return APR_EINVAL;
-    }
-    else {
-        /* res_name_from_filename turns file into a pseudo-name
-         * without slashes or backslashes, and prepends the \global
-         * prefix on Win2K and later
-         */
-        mapkey = res_name_from_filename(file, 1, pool);
-    }
+    /* res_name_from_filename turns file into a pseudo-name
+     * without slashes or backslashes, and prepends the \global
+     * or local prefix on Win2K and later
+     */
+    mapkey = res_name_from_filename(file, global, pool);
 
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
@@ -262,6 +336,55 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
     apr_pool_cleanup_register((*m)->pool, *m, 
                               shm_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_shm_attach_ex(apr_shm_t **m,
+                                            const char *file,
+                                            apr_pool_t *pool,
+                                            apr_int32_t flags)
+{
+    apr_status_t rv;
+    int can_create_global;
+    int try_global_local[3] = {-1, -1, -1};
+    int cur;
+
+    if (!file) {
+        return APR_EINVAL;
+    }
+
+    if (flags & APR_SHM_NS_LOCAL) {
+        try_global_local[0] = 0; /* only search local */
+    }
+    else if (flags & APR_SHM_NS_GLOBAL) {
+        try_global_local[0] = 1; /* only search global */
+    }
+    else {
+        can_create_global = can_create_global_maps();
+        if (!can_create_global) { /* unprivileged process */
+            try_global_local[0] = 0; /* search local before global */
+            try_global_local[1] = 1;
+        }
+        else {
+            try_global_local[0] = 1; /* search global before local */
+            try_global_local[1] = 0;
+        }
+    }
+
+    for (cur = 0; try_global_local[cur] != -1; cur++) {
+        rv = shm_attach_internal(m, file, pool, try_global_local[cur]);
+        if (!APR_STATUS_IS_ENOENT(rv)) {
+            break;
+        }
+    }
+
+    return rv;
+}
+
+APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
+                                         const char *file,
+                                         apr_pool_t *pool)
+{
+    return apr_shm_attach_ex(m, file, pool, 0);
 }
 
 APR_DECLARE(apr_status_t) apr_shm_detach(apr_shm_t *m)
