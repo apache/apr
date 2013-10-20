@@ -44,7 +44,6 @@ if test -z "$lt_pversion"; then
 echo "buildconf: libtool not found."
 echo "           You need libtool version 1.4 or newer installed"
 echo "           to build APR from SVN."
-echo "           (libtool 2.x not supported yet)"
 exit 1
 fi
 lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$/.\1/'`
@@ -63,6 +62,5 @@ fi
 echo "buildconf: libtool version $lt_pversion found."
 echo "           You need libtool version 1.4 or newer installed"
 echo "           to build APR from SVN."
-echo "           (libtool 2.x not supported yet)"
 
 exit 1
