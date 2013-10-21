@@ -202,6 +202,15 @@ SOURCE=.\atomic\win32\apr_atomic.c
 SOURCE=.\dso\win32\dso.c
 # End Source File
 # End Group
+# Begin Group "encoding"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\encoding\apr_escape.c
+
+# End Source File
+# End Group
 # Begin Group "file_io"
 
 # PROP Default_Filter ""
@@ -615,61 +624,73 @@ SOURCE=.\include\apr.hw
 
 !IF  "$(CFG)" == "apr - Win32 Release"
 
-# Begin Custom Build - Creating apr.h from apr.hw
+# Begin Custom Build - Creating apr.h from apr.hw, apr_escape_test_char.h from gen_test_char.exe
 InputPath=.\include\apr.hw
 
 ".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	type .\include\apr.hw > .\include\apr.h
+	cl.exe /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" .\tools\gen_test_char.c
+	.\gen_test_char.exe > .\include\apr_escape_test_char.h
 
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "apr - Win32 Debug"
 
-# Begin Custom Build - Creating apr.h from apr.hw
+# Begin Custom Build - Creating apr.h from apr.hw, apr_escape_test_char.h from gen_test_char.exe
 InputPath=.\include\apr.hw
 
 ".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	type .\include\apr.hw > .\include\apr.h
+	cl.exe /nologo /MDd /W3 /EHsc /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" .\tools\gen_test_char.c 
+	.\gen_test_char.exe > .\include\apr_escape_test_char.h
 
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "apr - Win32 Release9x"
 
-# Begin Custom Build - Creating apr.h from apr.hw
+# Begin Custom Build - Creating apr.h from apr.hw, apr_escape_test_char.h from gen_test_char.exe
 InputPath=.\include\apr.hw
 
 ".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	type .\include\apr.hw > .\include\apr.h
+	cl.exe /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" .\tools\gen_test_char.c
+	.\gen_test_char.exe > .\include\apr_escape_test_char.h
 
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "apr - Win32 Debug9x"
 
-# Begin Custom Build - Creating apr.h from apr.hw
+# Begin Custom Build - Creating apr.h from apr.hw, apr_escape_test_char.h from gen_test_char.exe
 InputPath=.\include\apr.hw
 
 ".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	type .\include\apr.hw > .\include\apr.h
+	cl.exe /nologo /MDd /W3 /EHsc /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" .\tools\gen_test_char.c 
+	.\gen_test_char.exe > .\include\apr_escape_test_char.h
 
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "apr - x64 Release"
 
-# Begin Custom Build - Creating apr.h from apr.hw
+# Begin Custom Build - Creating apr.h from apr.hw, apr_escape_test_char.h from gen_test_char.exe
 InputPath=.\include\apr.hw
 
 ".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	type .\include\apr.hw > .\include\apr.h
+	cl.exe /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" .\tools\gen_test_char.c
+	.\gen_test_char.exe > .\include\apr_escape_test_char.h
 
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "apr - x64 Debug"
 
-# Begin Custom Build - Creating apr.h from apr.hw
+# Begin Custom Build - Creating apr.h from apr.hw, apr_escape_test_char.h from gen_test_char.exe
 InputPath=.\include\apr.hw
 
 ".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	type .\include\apr.hw > .\include\apr.h
+	cl.exe /nologo /MDd /W3 /EHsc /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" .\tools\gen_test_char.c 
+	.\gen_test_char.exe > .\include\apr_escape_test_char.h
 
 # End Custom Build
 
@@ -695,6 +716,10 @@ SOURCE=.\include\apr_env.h
 # Begin Source File
 
 SOURCE=.\include\apr_errno.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_escape.h
 # End Source File
 # Begin Source File
 
