@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.0
 
+  *) z/OS: threadsafe apr_pollset_poll support for sockets [Greg Ames]
+
   *) Windows:  Don't obtain a mutex for buffered file I/O unless the
      file was opened with the APR_FOPEN_XTHREAD flag.  [Ivan Zhakov
      <ivan visualsvn.com>]
