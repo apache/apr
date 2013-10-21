@@ -280,6 +280,9 @@ struct apr_hdtr_t {
  * @param type The type of the socket (e.g., SOCK_STREAM).
  * @param protocol The protocol of the socket (e.g., APR_PROTO_TCP).
  * @param cont The pool for the apr_socket_t and associated storage.
+ * @note The pool will be used by various functions that operate on the
+ *       socket. The caller must ensure that it is not used by other threads
+ *       at the same time.
  */
 APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new_sock, 
                                             int family, int type,
@@ -335,6 +338,9 @@ APR_DECLARE(apr_status_t) apr_socket_listen(apr_socket_t *sock,
  *                 be used for all future communication.
  * @param sock The socket we are listening on.
  * @param connection_pool The pool for the new socket.
+ * @note The pool will be used by various functions that operate on the
+ *       socket. The caller must ensure that it is not used by other threads
+ *       at the same time.
  */
 APR_DECLARE(apr_status_t) apr_socket_accept(apr_socket_t **new_sock, 
                                             apr_socket_t *sock,
