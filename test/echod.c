@@ -64,7 +64,7 @@ static apr_status_t talkTalk(apr_socket_t *socket, apr_pool_t *parent)
     return APR_SUCCESS;
 }
 
-static apr_status_t glassToWall(apr_int16_t port, apr_pool_t *parent)
+static apr_status_t glassToWall(apr_port_t port, apr_pool_t *parent)
 {
     apr_sockaddr_t *sockAddr;
     apr_socket_t *listener, *accepted;
@@ -113,7 +113,7 @@ static apr_status_t glassToWall(apr_int16_t port, apr_pool_t *parent)
 int main(int argc, char **argv)
 {
     apr_pool_t *pool;
-    apr_int16_t theport = 4747;
+    apr_port_t theport = 4747;
 
     printf("APR Test Application: echod\n");
 
