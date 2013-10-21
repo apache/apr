@@ -41,6 +41,17 @@ static void size_t_fmt(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, "0", buf);
 }
 
+static void time_t_fmt(abts_case *tc, void *data)
+{
+    char buf[100];
+    apr_time_t var = 1;
+
+    sprintf(buf, "%" APR_TIME_T_FMT, var);
+    ABTS_STR_EQUAL(tc, "1", buf);
+    apr_snprintf(buf, sizeof(buf), "%" APR_TIME_T_FMT, var);
+    ABTS_STR_EQUAL(tc, "1", buf);
+}
+
 static void off_t_fmt(abts_case *tc, void *data)
 {
     char buf[100];
@@ -141,6 +152,7 @@ abts_suite *testfmt(abts_suite *suite)
 
     abts_run_test(suite, ssize_t_fmt, NULL);
     abts_run_test(suite, size_t_fmt, NULL);
+    abts_run_test(suite, time_t_fmt, NULL);
     abts_run_test(suite, off_t_fmt, NULL);
     abts_run_test(suite, pid_t_fmt, NULL);
     abts_run_test(suite, int64_t_fmt, NULL);
