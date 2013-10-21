@@ -181,12 +181,16 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         apr_size_t blocksize;
         apr_size_t size = *len;
 
-        apr_thread_mutex_lock(thefile->mutex);
+        if (thefile->flags & APR_FOPEN_XTHREAD) {
+            apr_thread_mutex_lock(thefile->mutex);
+        }
 
         if (thefile->direction == 1) {
             rv = apr_file_flush(thefile);
             if (rv != APR_SUCCESS) {
-                apr_thread_mutex_unlock(thefile->mutex);
+                if (thefile->flags & APR_FOPEN_XTHREAD) {
+                    apr_thread_mutex_unlock(thefile->mutex);
+                }
                 return rv;
             }
             thefile->bufpos = 0;
@@ -223,7 +227,10 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         if (*len) {
             rv = APR_SUCCESS;
         }
-        apr_thread_mutex_unlock(thefile->mutex);
+
+        if (thefile->flags & APR_FOPEN_XTHREAD) {
+            apr_thread_mutex_unlock(thefile->mutex);
+        }
     } else {  
         /* Unbuffered i/o */
         apr_size_t nbytes;
@@ -260,7 +267,9 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         apr_size_t blocksize;
         apr_size_t size = *nbytes;
 
-        apr_thread_mutex_lock(thefile->mutex);
+        if (thefile->flags & APR_FOPEN_XTHREAD) {
+            apr_thread_mutex_lock(thefile->mutex);
+        }
 
         if (thefile->direction == 0) {
             /* Position file pointer for writing at the offset we are logically reading from */
@@ -286,7 +295,9 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             size -= blocksize;
         }
 
-        apr_thread_mutex_unlock(thefile->mutex);
+        if (thefile->flags & APR_FOPEN_XTHREAD) {
+            apr_thread_mutex_unlock(thefile->mutex);
+        }
         return rv;
     } else {
         if (!thefile->pipe) {
