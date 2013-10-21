@@ -275,7 +275,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
 
         rv = 0;
         while (rv == 0 && size > 0) {
-            if (thefile->bufpos == thefile->bufsize)   // write buffer is full
+            if (thefile->bufpos == thefile->bufsize)   /* write buffer is full */
                 rv = apr_file_flush(thefile);
 
             blocksize = size > thefile->bufsize - thefile->bufpos ? 
