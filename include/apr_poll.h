@@ -77,8 +77,8 @@ typedef enum {
     APR_POLLSET_KQUEUE,         /**< Poll uses kqueue method */
     APR_POLLSET_PORT,           /**< Poll uses Solaris event port method */
     APR_POLLSET_EPOLL,          /**< Poll uses epoll method */
-    APR_POLLSET_AIO_MSGQ,       /**< Poll uses z/OS asio method */
-    APR_POLLSET_POLL            /**< Poll uses poll method */
+    APR_POLLSET_POLL,           /**< Poll uses poll method */
+    APR_POLLSET_AIO_MSGQ        /**< Poll uses z/OS asio method */
 } apr_pollset_method_e;
 
 /** Used in apr_pollfd_t to determine what the apr_descriptor is */
