@@ -673,7 +673,7 @@ APR_DECLARE(apr_status_t) apr_socket_atmark(apr_socket_t *sock,
 
 /**
  * Return an address associated with a socket; either the address to
- * which the socket is bound locally or the the address of the peer
+ * which the socket is bound locally or the address of the peer
  * to which the socket is connected.
  * @param sa The returned apr_sockaddr_t.
  * @param which Whether to retrieve the local or remote address

@@ -127,7 +127,7 @@ APR_DECLARE(apr_status_t) apr_shm_create_ex(apr_shm_t **m,
  * name-based shared memory segments, and will return APR_ENOTIMPL on
  * platforms without such support.  Removing the file while the shm
  * is in use is not entirely portable, caller may use this to enhance
- * obscurity of the resource, but be prepared for the the call to fail,
+ * obscurity of the resource, but be prepared for the call to fail,
  * and for concurrent attempts to create a resource of the same name
  * to also fail.  The pool cleanup of apr_shm_create (apr_shm_destroy)
  * also removes the named resource.
