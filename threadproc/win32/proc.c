@@ -853,6 +853,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 rv = apr_get_os_error();
                 CloseHandle(attr->user_token);
                 attr->user_token = NULL;
+                LeaveCriticalSection(&proc_lock);
                 return rv;
             }
             rv = CreateProcessAsUserW(attr->user_token,
