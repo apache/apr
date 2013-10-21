@@ -130,7 +130,7 @@ APR_DECLARE(apr_status_t) apr_escape_path_segment(char *escaped,
  * Escape a path segment, as defined in RFC1808, returning the result from a
  * pool.
  * @param p Pool to allocate from
- * @param url String to be escaped
+ * @param str String to be escaped
  * @return A string allocated from the pool on success, the original string
  * if no characters are encoded or the string is NULL.
  */
@@ -149,7 +149,7 @@ APR_DECLARE(const char *) apr_pescape_path_segment(apr_pool_t *p,
  * something with a '/' in it (and thus does not prefix "./").
  * @param escaped Optional buffer to write the encoded string, can be
  * NULL
- * @param str The original string
+ * @param path The original string
  * @param slen The length of the original string, or APR_ESCAPE_STRING
  * @param partial If non zero, suppresses the prepending of "./"
  * @param len If present, returns the length of the string
@@ -199,7 +199,7 @@ APR_DECLARE(apr_status_t) apr_escape_urlencoded(char *escaped, const char *str,
  * http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.1, returning
  * the result from a pool.
  * @param p Pool to allocate from
- * @param url String to be escaped
+ * @param str String to be escaped
  * @return A string allocated from the pool on success, the original string
  * if no characters are encoded or if the string was NULL.
  */
@@ -318,7 +318,7 @@ APR_DECLARE(const char *) apr_pescape_echo(apr_pool_t *p, const char *str,
  * Convert binary data to a hex encoding.
  * @param dest The destination buffer, can be NULL
  * @param src The original buffer
- * @param slen The length of the original buffer
+ * @param srclen The length of the original buffer
  * @param colon If not zero, insert colon characters between hex digits.
  * @param len If present, returns the length of the string
  * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL
@@ -331,7 +331,7 @@ APR_DECLARE(apr_status_t) apr_escape_hex(char *dest, const void *src,
  * pool.
  * @param p Pool to allocate from
  * @param src The original buffer
- * @param srclen The length of the original buffer
+ * @param slen The length of the original buffer
  * @param colon If not zero, insert colon characters between hex digits.
  * @return A zero padded buffer allocated from the pool on success, or
  * NULL if src was NULL.
