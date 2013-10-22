@@ -104,7 +104,7 @@ CLEAN_DATA = testfile.tmp lfstests\large.bin \
 	data\testputs.txt data\testbigfprintf.dat \
 	data\testwritev.txt data\testwritev_full.txt \
 	data\testflush.dat data\testxthread.dat \
-	data\apr.testshm.shm
+	data\apr.testshm.shm lfstests\buffer.bin
 
 CLEAN_BUILDDIRS = Debug Release LibD LibR 9x x64
 
