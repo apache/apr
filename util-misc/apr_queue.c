@@ -223,6 +223,9 @@ APR_DECLARE(apr_status_t) apr_queue_trypush(apr_queue_t *queue, void *data)
 
     if (apr_queue_full(queue)) {
         rv = apr_thread_mutex_unlock(queue->one_big_mutex);
+        if (rv != APR_SUCCESS) {
+            return rv;
+        }
         return APR_EAGAIN;
     }
     

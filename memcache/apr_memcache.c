@@ -407,6 +407,9 @@ APR_DECLARE(apr_status_t) apr_memcache_server_create(apr_pool_t *p,
     apr_pool_t *np;
 
     rv = apr_pool_create(&np, p);
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
 
     server = apr_palloc(np, sizeof(apr_memcache_server_t));
 
@@ -787,8 +790,8 @@ apr_memcache_getp(apr_memcache_t *mc,
         char *last;
         apr_size_t len = 0;
 
-        flags = apr_strtok(conn->buffer, " ", &last);
-        flags = apr_strtok(NULL, " ", &last);
+        apr_strtok(conn->buffer, " ", &last);
+        apr_strtok(NULL, " ", &last);
         flags = apr_strtok(NULL, " ", &last);
 
         if (flags_) {
@@ -1359,7 +1362,7 @@ apr_memcache_multgetp(apr_memcache_t *mc,
                char *data;
                apr_size_t len = 0;
 
-               key = apr_strtok(conn->buffer, " ", &last); /* just the VALUE, ignore */
+               apr_strtok(conn->buffer, " ", &last); /* just the VALUE, ignore */
                key = apr_strtok(NULL, " ", &last);
                flags = apr_strtok(NULL, " ", &last);
 
