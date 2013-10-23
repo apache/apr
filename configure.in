@@ -681,7 +681,7 @@ case $host in
         ;;
     *linux*)
         os_major=[`uname -r | sed -e 's/\([1-9][0-9]*\)\..*/\1/'`]
-        os_minor=[`uname -r | sed -e 's/[1-9][0-9]*\.\([1-9][0-9]*\)\..*/\1/'`]
+        os_minor=[`uname -r | sed -e 's/[1-9][0-9]*\.\([0-9]+\)\..*/\1/'`]
         if test $os_major -lt 2 -o \( $os_major -eq 2 -a $os_minor -lt 4 \); then
             AC_MSG_WARN([Configured for pre-2.4 Linux $os_major.$os_minor])
             os_pre24linux=1
