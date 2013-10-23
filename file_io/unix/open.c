@@ -97,7 +97,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     apr_os_file_t fd;
     int oflags = 0;
 #if APR_HAS_THREADS
-    apr_thread_mutex_t *thlock;
+    apr_thread_mutex_t *thlock = NULL;
 #endif
     apr_status_t rv;
 
@@ -217,15 +217,14 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     if ((*new)->buffered) {
         (*new)->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
         (*new)->bufsize = APR_FILE_DEFAULT_BUFSIZE;
-#if APR_HAS_THREADS
-        if ((*new)->flags & APR_FOPEN_XTHREAD) {
-            (*new)->thlock = thlock;
-        }
-#endif
     }
     else {
         (*new)->buffer = NULL;
     }
+
+#if APR_HAS_THREADS
+    (*new)->thlock = thlock;
+#endif
 
     (*new)->is_pipe = 0;
     (*new)->timeout = -1;
