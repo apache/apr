@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.0
 
+  *) apr_socket_connect() on Windows: Handle WSAEISCONN.  PR 48736.
+     [<inoue ariel-networks.com>, Jeff Trawick]
+
   *) z/OS: threadsafe apr_pollset_poll support for sockets [Greg Ames]
 
   *) Windows:  Don't obtain a mutex for buffered file I/O unless the
