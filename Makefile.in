@@ -45,7 +45,7 @@ LT_VERSION = @LT_VERSION@
 @INCLUDE_OUTPUTS@
 
 CLEAN_TARGETS = apr-config.out apr.exp exports.c export_vars.c .make.dirs \
-	build/apr_rules.out tools/gen_test_char
+	build/apr_rules.out tools/gen_test_char@EXEEXT@
 DISTCLEAN_TARGETS = config.cache config.log config.status \
 	include/apr.h include/arch/unix/apr_private.h \
 	libtool $(APR_CONFIG) build/apr_rules.mk apr.pc \
@@ -129,8 +129,8 @@ OBJECTS_gen_test_char = tools/gen_test_char.lo $(LOCAL_LIBS)
 tools/gen_test_char@EXEEXT@: $(OBJECTS_gen_test_char)
 	$(LINK_PROG) $(OBJECTS_gen_test_char) $(ALL_LIBS)
 
-include/private/apr_escape_test_char.h: tools/gen_test_char
-	tools/gen_test_char > include/private/apr_escape_test_char.h
+include/private/apr_escape_test_char.h: tools/gen_test_char@EXEEXT@
+	tools/gen_test_char@EXEEXT@ > $@
 
 LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) $(LT_LDFLAGS) \
 	    @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
