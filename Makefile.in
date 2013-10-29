@@ -45,7 +45,9 @@ LT_VERSION = @LT_VERSION@
 @INCLUDE_OUTPUTS@
 
 CLEAN_TARGETS = apr-config.out apr.exp exports.c export_vars.c .make.dirs \
-	build/apr_rules.out tools/gen_test_char@EXEEXT@
+	build/apr_rules.out tools/gen_test_char@EXEEXT@ \
+	tools/gen_test_char.o tools/gen_test_char.lo \
+	include/private/apr_escape_test_char.h
 DISTCLEAN_TARGETS = config.cache config.log config.status \
 	include/apr.h include/arch/unix/apr_private.h \
 	libtool $(APR_CONFIG) build/apr_rules.mk apr.pc \
@@ -98,6 +100,8 @@ install: $(TARGETS)
 
 $(TARGET_LIB): $(OBJECTS)
 	$(LINK) @lib_target@ $(ALL_LIBS)
+
+encoding/apr_escape.lo: include/private/apr_escape_test_char.h 
 
 exports.c: $(HEADERS)
 	$(APR_MKEXPORT) $(HEADERS) > $@
