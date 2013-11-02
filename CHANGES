@@ -59,6 +59,10 @@ Changes for APR 1.5.0
   *) apr_socket_opt_set: Add support for APR_SO_BROADCAST. PR 46389.
      [Armin Müller <mueller itestra com>]
 
+  *) Enable platform specific support for the opening of a file or
+     pipe in non-blocking mode through the APR_FOPEN_NONBLOCK flag.
+     [Graham Leggett]
+
 Changes for APR 1.4.x and later:
 
   *) http://svn.apache.org/viewvc/apr/apr/branches/1.4.x/CHANGES?view=markup
