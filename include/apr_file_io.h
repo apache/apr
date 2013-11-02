@@ -127,6 +127,10 @@ extern "C" {
  * if it was previously created and written without the sparse flag.
  * On platforms which do not understand, or on file systems which
  * cannot handle sparse files, the flag is ignored by apr_file_open().
+ *
+ * @def APR_FOPEN_NONBLOCK
+ * @warning APR_FOPEN_NONBLOCK is not implemented on all platforms.
+ * Callers should be prepared for it to fail with #APR_ENOTIMPL.
  */
 
 /** @} */

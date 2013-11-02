@@ -38,6 +38,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     ULONG action;
     apr_file_t *dafile = (apr_file_t *)apr_palloc(pool, sizeof(apr_file_t));
 
+    if (flag & APR_FOPEN_NONBLOCK) {
+        return APR_ENOTIMPL;
+    }
+
     dafile->pool = pool;
     dafile->isopen = FALSE;
     dafile->eof_hit = FALSE;

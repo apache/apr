@@ -329,6 +329,9 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
     apr_status_t rv;
 
+    if (flag & APR_FOPEN_NONBLOCK) {
+        return APR_ENOTIMPL;
+    }
     if (flag & APR_FOPEN_READ) {
         oflags |= GENERIC_READ;
     }
