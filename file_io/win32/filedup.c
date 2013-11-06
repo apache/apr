@@ -88,7 +88,9 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
              */
             fflush(stderr);
             setvbuf(stderr, NULL, _IONBF, 0);
-            _commit(2 /* stderr */);
+            if (!_isatty(2)) {
+                _commit(2 /* stderr */);
+            }
 
             /* Clone a handle can _close() without harming the source handle,
              * open an MSVCRT-based pseudo-fd for the file handle, then dup2
@@ -118,7 +120,9 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
             /* For the process flow see the stderr case above */
             fflush(stdout);
             setvbuf(stdout, NULL, _IONBF, 0);
-            _commit(1 /* stdout */);
+            if (!_isatty(1)) {
+                _commit(1 /* stdout */);
+            }
 
             if (!DuplicateHandle(hproc, old_file->filehand, hproc, &newhand,
                                  0, FALSE, DUPLICATE_SAME_ACCESS)) {
@@ -134,7 +138,6 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
             /* For the process flow see the stderr case above */
             fflush(stdin);
             setvbuf(stdin, NULL, _IONBF, 0);
-            _commit(0 /* stdin */);
 
             if (!DuplicateHandle(hproc, old_file->filehand, hproc, &newhand,
                                  0, FALSE, DUPLICATE_SAME_ACCESS)) {
