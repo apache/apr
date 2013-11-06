@@ -98,6 +98,9 @@ ENDIF()
 CONFIGURE_FILE(include/apr.hwc
                ${PROJECT_BINARY_DIR}/apr.h)
 # "COPYONLY" just because anything else isn't implemented ;)
+CONFIGURE_FILE(include/private/apu_select_dbm.hw
+               ${PROJECT_BINARY_DIR}/apu_select_dbm.h
+               COPYONLY)
 CONFIGURE_FILE(include/apu_want.hw
                ${PROJECT_BINARY_DIR}/apu_want.h
                COPYONLY)
