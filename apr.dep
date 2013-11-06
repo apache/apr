@@ -1886,3 +1886,31 @@
 
 !ENDIF 
 
+!IF  "$(CFG)" == "apr - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "apr - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "apr - Win32 Release9x"
+
+!ELSEIF  "$(CFG)" == "apr - Win32 Debug9x"
+
+!ELSEIF  "$(CFG)" == "apr - x64 Release"
+
+!ELSEIF  "$(CFG)" == "apr - x64 Debug"
+
+!ENDIF 
+
+!IF  "$(CFG)" == "apr - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "apr - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "apr - Win32 Release9x"
+
+!ELSEIF  "$(CFG)" == "apr - Win32 Debug9x"
+
+!ELSEIF  "$(CFG)" == "apr - x64 Release"
+
+!ELSEIF  "$(CFG)" == "apr - x64 Debug"
+
+!ENDIF 
+
