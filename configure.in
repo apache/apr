@@ -970,9 +970,9 @@ int main(int argc, char **argv)
 
     if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         return 1;
-    if (fcntl(fd, F_GETFL, &flags) == -1 ||
-        fcntl(fd, F_SETFL, flags|O_NONBLOCK) == -1)
-        return 1;
+    flags = fcntl(fd, F_GETFL);
+    if (flags == -1 || fcntl(fd, F_SETFL, flags|O_NONBLOCK) == -1)
+        return 5;
 
     memset(&sin, 0, sizeof sin);
     sin.sin_family = AF_INET;
