@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.0
 
+  *) apr_file_dup2() on Windows: Fix debug RTL assertion in when 
+     attempting to _commit(stdout) or _commit(stderr).  [Mike Rumph
+     <mike.rumph oracle.com>]
+
   *) apr_socket_connect() on Windows: Handle WSAEISCONN.  PR 48736.
      [<inoue ariel-networks.com>, Jeff Trawick]
 
