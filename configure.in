@@ -961,13 +961,17 @@ AC_CACHE_CHECK([for accept4 support], [apr_cv_accept4],
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 int main(int argc, char **argv)
 {
-    int fd;
+    int fd, flags;
     struct sockaddr_in sin;
 
-    if ((fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) == -1)
+    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+        return 1;
+    if (fcntl(fd, F_GETFL, &flags) == -1 ||
+        fcntl(fd, F_SETFL, flags|O_NONBLOCK) == -1)
         return 1;
 
     memset(&sin, 0, sizeof sin);
