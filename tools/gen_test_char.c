@@ -14,33 +14,14 @@
  * limitations under the License.
  */
 
-#ifdef CROSS_COMPILE
-
-#define apr_isalnum(c) (isalnum(((unsigned char)(c))))
-#define apr_isalpha(c) (isalpha(((unsigned char)(c))))
-#define apr_iscntrl(c) (iscntrl(((unsigned char)(c))))
-#define apr_isprint(c) (isprint(((unsigned char)(c))))
-#include <ctype.h>
-#define APR_HAVE_STDIO_H 1
-#define APR_HAVE_STRING_H 1
-
-#else
-
-#include "apr.h"
-#include "apr_lib.h"
-
-#endif
-
 #if defined(WIN32) || defined(OS2)
 #define NEED_ENHANCED_ESCAPES
 #endif
 
-#if APR_HAVE_STDIO_H
 #include <stdio.h>
-#endif
-#if APR_HAVE_STRING_H
 #include <string.h>
-#endif
+#include <stdio.h>
+#include <ctype.h>
 
 /* A bunch of functions in util.c scan strings looking for certain characters.
  * To make that more efficient we encode a lookup table.
@@ -100,15 +81,15 @@ int main(int argc, char *argv[])
         }
 #endif
 
-        if (!apr_isalnum(c) && !strchr("$-_.+!*'(),:@&=~", c)) {
+        if (!isalnum(c) && !strchr("$-_.+!*'(),:@&=~", c)) {
             flags |= T_ESCAPE_PATH_SEGMENT;
         }
 
-        if (!apr_isalnum(c) && !strchr("$-_.+!*'(),:@&=/~", c)) {
+        if (!isalnum(c) && !strchr("$-_.+!*'(),:@&=/~", c)) {
             flags |= T_OS_ESCAPE_PATH;
         }
 
-        if (!apr_isalnum(c) && !strchr(".-*_ ", c)) {
+        if (!isalnum(c) && !strchr(".-*_ ", c)) {
             flags |= T_ESCAPE_URLENCODED;
         }
 
@@ -117,7 +98,7 @@ int main(int argc, char *argv[])
          * backslashes (because we use backslash for escaping)
          * and 8-bit chars with the high bit set
          */
-        if (c && (!apr_isprint(c) || c == '"' || c == '\\' || apr_iscntrl(c))) {
+        if (c && (!isprint(c) || c == '"' || c == '\\' || iscntrl(c))) {
             flags |= T_ESCAPE_ECHO;
         }
 
