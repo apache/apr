@@ -887,78 +887,47 @@ if test "$apr_cv_dup3" = "yes"; then
    AC_DEFINE([HAVE_DUP3], 1, [Define if dup3 function is supported])
 fi
 
-# test for accept4
+# Test for accept4().  Create a non-blocking socket, bind it to
+# an unspecified port & address (kernel picks), and attempt to
+# call accept4() on it.  If the syscall is wired up (i.e. the
+# kernel is new enough), it should return EAGAIN.
 AC_CACHE_CHECK([for accept4 support], [apr_cv_accept4],
 [AC_TRY_RUN([
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/un.h>
 #include <sys/wait.h>
-#include <signal.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <errno.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
 
-#define A4_SOCK "./apr_accept4_test_socket"
-
-int main()
+int main(int argc, char **argv)
 {
-    pid_t pid;
-    int fd;
-    struct sockaddr_un loc, rem;
-    socklen_t rem_sz;
+    int fd, flags;
+    struct sockaddr_in sin;
 
-    if ((pid = fork())) {
-        int status;
-
-        unlink(A4_SOCK);
-
-        if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
-            goto cleanup_failure2;
-
-        loc.sun_family = AF_UNIX;
-        strncpy(loc.sun_path, A4_SOCK, sizeof(loc.sun_path) - 1);
-
-        if (bind(fd, (struct sockaddr *) &loc,
-                 sizeof(struct sockaddr_un)) == -1)
-            goto cleanup_failure;
-
-        if (listen(fd, 5) == -1)
-            goto cleanup_failure;
-
-        rem_sz = sizeof(struct sockaddr_un);
-        if (accept4(fd, (struct sockaddr *) &rem, &rem_sz, 0) == -1) {
-            goto cleanup_failure;
-        }
-        else {
-            close(fd);
-            waitpid(pid, &status, 0);
-            unlink(A4_SOCK);
-            return 0;
-        }
-
-cleanup_failure:
-        close(fd);
-cleanup_failure2:
-        kill(pid, SIGKILL);
-        waitpid(pid, &status, 0);
-        unlink(A4_SOCK);
+    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         return 1;
-    }
-    else {
-        if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
-            return 1; /* this will be bad: we'll hang */
+    flags = fcntl(fd, F_GETFL);
+    if (flags == -1 || fcntl(fd, F_SETFL, flags|O_NONBLOCK) == -1)
+        return 5;
 
-        loc.sun_family = AF_UNIX;
-        strncpy(loc.sun_path, A4_SOCK, sizeof(loc.sun_path) - 1);
+    memset(&sin, 0, sizeof sin);
+    sin.sin_family = AF_INET;
+    
+    if (bind(fd, (struct sockaddr *) &sin, sizeof sin) == -1)
+        return 2;
+    
+    if (listen(fd, 5) == -1)
+        return 3;
 
-        while(connect(fd, (struct sockaddr *) &loc,
-                      sizeof(struct sockaddr_un)) == -1 &&
-              (errno==ENOENT || errno==ECONNREFUSED))
-            ;
-
-        close(fd);
+    if (accept4(fd, NULL, 0, SOCK_NONBLOCK) == 0
+        || errno == EAGAIN || errno == EWOULDBLOCK)
         return 0;
-    }
+
+    return 4;
 }], [apr_cv_accept4=yes], [apr_cv_accept4=no], [apr_cv_accept4=no])])
 
 if test "$apr_cv_accept4" = "yes"; then
