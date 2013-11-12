@@ -721,6 +721,16 @@ APR_DECLARE(int) apr_sockaddr_equal(const apr_sockaddr_t *addr1,
                                     const apr_sockaddr_t *addr2);
 
 /**
+ * See if the IP address in an APR socket address refers to the wildcard
+ * address for the protocol family (e.g., INADDR_ANY for IPv4).
+ *
+ * @param addr The APR socket address to examine.
+ * @remark The return value will be non-zero if the address is
+ * initialized and is the wildcard address.
+ */
+APR_DECLARE(int) apr_sockaddr_is_wildcard(const apr_sockaddr_t *addr);
+
+/**
 * Return the type of the socket.
 * @param sock The socket to query.
 * @param type The returned type (e.g., SOCK_STREAM).
