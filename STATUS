@@ -82,12 +82,6 @@ Bundled with httpd:
 
 RELEASE SHOWSTOPPERS:
 
-    * Verify that new features are:
-      + documented
-      + implemented across major platforms (if applicable)
-      + have at least minimal regression tests in place
-
-    * Makefiles for MSVC
 
 CURRENT VOTES:
 
