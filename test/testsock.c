@@ -67,13 +67,20 @@ static void test_addr_info(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_sockaddr_t *sa;
+    int rc;
 
     rv = apr_sockaddr_info_get(&sa, NULL, APR_UNSPEC, 80, 0, p);
     APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
 
+    rc = apr_sockaddr_is_wildcard(sa);
+    ABTS_INT_NEQUAL(tc, 0, rc);
+
     rv = apr_sockaddr_info_get(&sa, "127.0.0.1", APR_UNSPEC, 80, 0, p);
     APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
     ABTS_STR_EQUAL(tc, "127.0.0.1", sa->hostname);
+
+    rc = apr_sockaddr_is_wildcard(sa);
+    ABTS_INT_EQUAL(tc, 0, rc);
 
     rv = apr_sockaddr_info_get(&sa, "127.0.0.1", APR_UNSPEC, 0, 0, p);
     APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
@@ -318,6 +325,10 @@ static void test_print_addr(abts_case *tc, void *data)
     if (rv == APR_SUCCESS && sa) {
         /* sa should now be a v4-mapped IPv6 address. */
         char buf[128];
+        int rc;
+
+        rc = apr_sockaddr_is_wildcard(sa);
+        ABTS_INT_NEQUAL(tc, 0, rc);
 
         memset(buf, 'z', sizeof buf);
         
