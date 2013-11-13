@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.0
 
+  *) Fix Linux kernel version check to recognize more versions,
+     including versions 3.10 and later.  PR 55690.  [Joe Orton,
+     Arfrever Frehtes Taifersar Arahesis <arfrever.fta gmail.com>]
+
   *) Add apr_sockaddr_is_wildcard() to check if a socket address
      refers to the wildcard address for the protocol family (e.g.,
      0.0.0.0/INADDR_ANY for IPv4).  [Jeff Trawick]
