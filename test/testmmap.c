@@ -31,7 +31,7 @@
 #if !APR_HAS_MMAP
 static void not_implemented(abts_case *tc, void *data)
 {
-    ABTS_NOT_IMPL(tc, "User functions");
+    ABTS_NOT_IMPL(tc, "MMAP functions");
 }
 
 #else
