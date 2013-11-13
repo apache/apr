@@ -166,6 +166,7 @@ tools/gen_test_char@EXEEXT@: $(OBJECTS_gen_test_char)
 	$(LINK_PROG) $(OBJECTS_gen_test_char) $(ALL_LIBS)
 
 include/private/apr_escape_test_char.h: tools/gen_test_char@EXEEXT@
+	$(APR_MKDIR) include/private
 	tools/gen_test_char@EXEEXT@ > $@
 
 LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) $(LT_LDFLAGS) \
