@@ -664,7 +664,15 @@ case $host in
         fi
         ;;
     *linux*)
-        os_version=`uname -r | sed -e 's/\(.\)\.\(.\)\.\(.\).*/\1\2\3/'`
+        os_major=[`uname -r | sed -e 's/\([1-9][0-9]*\)\..*/\1/'`]
+        os_minor=[`uname -r | sed -e 's/[1-9][0-9]*\.\([0-9]\+\)\..*/\1/'`]
+        if test $os_major -lt 2 -o \( $os_major -eq 2 -a $os_minor -lt 4 \); then
+            AC_MSG_WARN([Configured for pre-2.4 Linux $os_major.$os_minor])
+            os_pre24linux=1
+        else
+            os_pre24linux=0
+            AC_MSG_NOTICE([Configured for Linux $os_major.$os_minor])
+        fi
         ;;
     *os390)
         os_version=`uname -r | sed -e 's/\.//g'`
@@ -1183,7 +1191,8 @@ case $host in
         # that it has it.
         # FIXME - find exact 2.3 version that MMANON was fixed in.  It is
         # confirmed fixed in 2.4 series.
-        if test $os_version -le "240"; then
+        if test $os_pre24linux -eq 1; then
+            AC_MSG_WARN([Disabling anon mmap() support for Linux pre-2.4])
             APR_DECISION_OVERRIDE(USE_SHMEM_MMAP_ZERO USE_SHMEM_SHMGET_ANON)
         fi
         ;;
@@ -1249,11 +1258,9 @@ APR_IFALLYES(header:windows.h,
               APR_DECIDE(USE_SHMEM_WIN32, [Windows shared memory])])
 case $host in
     *linux* ) 
-        # Linux has problems with MM_SHMT_MMANON even though it reports
-        # that it has it.
-        # FIXME - find exact 2.3 version that MMANON was fixed in.  It is
-        # confirmed fixed in 2.4 series.
-        if test $os_version -le "240"; then
+        # Linux pre-2.4 had problems with MM_SHMT_MMANON even though
+        # it reports that it has it.
+        if test $os_pre24linux -eq 1; then
             APR_DECISION_OVERRIDE(USE_SHMEM_MMAP_TMP USE_SHMEM_MMAP_SHM dnl
                                   USE_SHMEM_SHMGET)
         fi
@@ -1350,7 +1357,8 @@ AC_ARG_WITH(sendfile, [  --with-sendfile         Override decision to use sendfi
             ;;
         s390-*-linux-gnu)
             # disable sendfile support for 2.2 on S/390
-            if test $os_version -lt 240; then
+            if test $os_pre24linux -eq 1; then
+                AC_MSG_WARN([Disabled sendfile support for Linux 2.2 on S/390])
                 sendfile="0"
             fi
             ;;
