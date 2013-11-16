@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.1
 
+  *) Correct a regression in 1.5.0 which affected out-of-tree
+     builds on Unix.  [Rainer Jung]
 
 Changes for APR 1.5.0
 
