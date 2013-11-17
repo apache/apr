@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) When using shmget-based shared memory, the ID used for ftok is
+     now an APR hash of the filename instead of the constant '1'.
+     PR 53996 [Jim Jagielski]
+
   *) Changes to apr_pollset_method_e enum value of APR_POLLSET_POLL and
      APR_POLLSET_AIO_MSGQ.  Restore APR_POLLSET_POLL to its pre-r1308910 
      (April 2012) value, and move APR_POLLSET_AIO_MSGQ ahead. This restores
