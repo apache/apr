@@ -20,6 +20,7 @@
 #include "apr_errno.h"
 #include "apr_user.h"
 #include "apr_strings.h"
+#include "apr_hash.h"
 
 static apr_status_t shm_cleanup_owner(void *m_)
 {
@@ -103,6 +104,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 #if APR_USE_SHMEM_SHMGET
     apr_size_t nbytes;
     key_t shmkey;
+    apr_ssize_t slen;
 #endif
 #if APR_USE_SHMEM_MMAP_ZERO || APR_USE_SHMEM_SHMGET || \
     APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM
@@ -312,7 +314,9 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 
         /* ftok() (on solaris at least) requires that the file actually
          * exist before calling ftok(). */
-        shmkey = ftok(filename, 1);
+        slen = strlen(filename);
+        shmkey = ftok(filename,
+                      (int)apr_hashfunc_default(filename, &slen));
         if (shmkey == (key_t)-1) {
             apr_file_close(file);
             return errno;
@@ -382,6 +386,7 @@ APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
     apr_file_t *file;  
     key_t shmkey;
     int shmid;
+    apr_ssize_t slen;
 #endif
 
 #if APR_USE_SHMEM_MMAP_TMP
@@ -401,7 +406,9 @@ APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
 
     /* ftok() (on solaris at least) requires that the file actually
      * exist before calling ftok(). */
-    shmkey = ftok(filename, 1);
+    slen = strlen(filename);
+    shmkey = ftok(filename,
+                  (int)apr_hashfunc_default(filename, &slen));
     if (shmkey == (key_t)-1) {
         goto shm_remove_failed;
     }
@@ -533,6 +540,7 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
         apr_file_t *file;   /* file where metadata is stored */
         apr_size_t nbytes;
         key_t shmkey;
+        apr_ssize_t slen;
 
         new_m = apr_palloc(pool, sizeof(apr_shm_t));
 
@@ -555,7 +563,9 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
 
         new_m->filename = apr_pstrdup(pool, filename);
         new_m->pool = pool;
-        shmkey = ftok(filename, 1);
+        slen = strlen(filename);
+        shmkey = ftok(filename,
+                      (int)apr_hashfunc_default(filename, &slen));
         if (shmkey == (key_t)-1) {
             return errno;
         }
