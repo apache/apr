@@ -21,7 +21,7 @@ Changes for APR 1.5.0
      refers to the wildcard address for the protocol family (e.g.,
      0.0.0.0/INADDR_ANY for IPv4).  [Jeff Trawick]
 
-  *) apr_file_dup2() on Windows: Fix debug RTL assertion in when 
+  *) apr_file_dup2() on Windows: Fix debug RTL assertion when 
      attempting to _commit(stdout) or _commit(stderr).  [Mike Rumph
      <mike.rumph oracle.com>]
 
