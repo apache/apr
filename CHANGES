@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.1
 
+  *) Windows cmake build: Fix incorrect installation of some .pdb
+     files.  [Jeff Trawick]
+
   *) apr_skiplist: Add compatibility with C++ applications.
      [Jeff Trawick]
 
