@@ -263,7 +263,7 @@ Changes for APR 1.3.0
   *) Introduce APR_NO_FILE as an option to apr_procattr_io_set() for any 
      of the three stdio streams to cause the corresponding streams to be 
      closed to the child process.  This becomes effective in 1.3.0 across
-     platforms (equivilant to APR_NO_PIPE in 1.2.x except on Win32.)
+     platforms (equivalent to APR_NO_PIPE in 1.2.x except on Win32.)
      [William Rowe]
 
   *) Solve WinNT inherited pipe leaks by mutexing apr_proc_create calls,
