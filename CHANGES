@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.1
 
+  *) FreeBSD 10: Correct a regression in 1.5.0 which affected non-
+     blocking sockets in some applications, including httpd.  [Jeff
+     Trawick]
+
   *) Windows cmake build: Fix incorrect installation of some .pdb
      files.  [Jeff Trawick]
 
