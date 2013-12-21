@@ -23,6 +23,8 @@
 #include "apr_lib.h"
 #include "apr_strings.h"
 #include "apr_poll.h"
+#define APR_WANT_BYTEFUNC
+#include "apr_want.h"
 
 static void launch_child(abts_case *tc, apr_proc_t *proc, const char *arg1, apr_pool_t *p)
 {
