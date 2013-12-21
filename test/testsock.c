@@ -23,6 +23,8 @@
 #include "apr_lib.h"
 #include "apr_strings.h"
 #include "apr_poll.h"
+#define APR_WANT_BYTEFUNC
+#include "apr_want.h"
 
 #define UNIX_SOCKET_NAME    "/tmp/apr-socket"
 #define IPV4_SOCKET_NAME    "127.0.0.1"
