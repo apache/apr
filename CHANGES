@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.1
 
+  *) Fix apr_escape.c compilation errors on ebcdic platforms.
+     [Eric Covener]
+
   *) FreeBSD 10: Correct a regression in 1.5.0 which affected non-
      blocking sockets in some applications, including httpd.  [Jeff
      Trawick]
