@@ -269,8 +269,10 @@ typedef  apr_uint64_t      apr_ino_t;
 
 #if APR_SIZEOF_VOIDP == 8
 typedef  apr_uint64_t            apr_uintptr_t;
+typedef  apr_int64_t             apr_intptr_t;
 #else
 typedef  apr_uint32_t            apr_uintptr_t;
+typedef  apr_int32_t             apr_intptr_t;
 #endif
 
 /* Mechanisms to properly type numeric literals */
