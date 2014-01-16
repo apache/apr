@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Windows platform: Remove support for Windows 9x.
+
   *) Added signed apr_intptr_t.  Changed ODBC dbd driver to use this.
      [Tom Donovan]
 
