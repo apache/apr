@@ -170,7 +170,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     }
 #endif
 
-    if (perm == APR_OS_DEFAULT) {
+    if (perm == APR_FPROT_OS_DEFAULT) {
         fd = open(fname, oflags, 0666);
     }
     else {

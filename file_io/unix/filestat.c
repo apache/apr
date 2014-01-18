@@ -203,16 +203,16 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
     {
         if (attributes & APR_FILE_ATTR_READONLY)
         {
-            finfo.protection &= ~APR_UWRITE;
-            finfo.protection &= ~APR_GWRITE;
-            finfo.protection &= ~APR_WWRITE;
+            finfo.protection &= ~APR_FPROT_UWRITE;
+            finfo.protection &= ~APR_FPROT_GWRITE;
+            finfo.protection &= ~APR_FPROT_WWRITE;
         }
         else
         {
             /* ### umask this! */
-            finfo.protection |= APR_UWRITE;
-            finfo.protection |= APR_GWRITE;
-            finfo.protection |= APR_WWRITE;
+            finfo.protection |= APR_FPROT_UWRITE;
+            finfo.protection |= APR_FPROT_GWRITE;
+            finfo.protection |= APR_FPROT_WWRITE;
         }
     }
 
@@ -221,15 +221,15 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
         if (attributes & APR_FILE_ATTR_EXECUTABLE)
         {
             /* ### umask this! */
-            finfo.protection |= APR_UEXECUTE;
-            finfo.protection |= APR_GEXECUTE;
-            finfo.protection |= APR_WEXECUTE;
+            finfo.protection |= APR_FPROT_UEXECUTE;
+            finfo.protection |= APR_FPROT_GEXECUTE;
+            finfo.protection |= APR_FPROT_WEXECUTE;
         }
         else
         {
-            finfo.protection &= ~APR_UEXECUTE;
-            finfo.protection &= ~APR_GEXECUTE;
-            finfo.protection &= ~APR_WEXECUTE;
+            finfo.protection &= ~APR_FPROT_UEXECUTE;
+            finfo.protection &= ~APR_FPROT_GEXECUTE;
+            finfo.protection &= ~APR_FPROT_WEXECUTE;
         }
     }
 

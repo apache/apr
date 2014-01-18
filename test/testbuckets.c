@@ -317,7 +317,7 @@ static void test_insertfile(abts_case *tc, void *ctx)
                 apr_file_open(&f, TIF_FNAME,
                               APR_FOPEN_WRITE | APR_FOPEN_TRUNCATE
                             | APR_FOPEN_CREATE | APR_FOPEN_SPARSE,
-                              APR_OS_DEFAULT, p) == APR_SUCCESS);
+                              APR_FPROT_OS_DEFAULT, p) == APR_SUCCESS);
 
     if (apr_file_trunc(f, bignum)) {
         apr_file_close(f);
@@ -369,7 +369,7 @@ static apr_file_t *make_test_file(abts_case *tc, const char *fname,
     ABTS_ASSERT(tc, "create test file",
                 apr_file_open(&f, fname,
                               APR_FOPEN_READ|APR_FOPEN_WRITE|APR_FOPEN_TRUNCATE|APR_FOPEN_CREATE,
-                              APR_OS_DEFAULT, p) == APR_SUCCESS);
+                              APR_FPROT_OS_DEFAULT, p) == APR_SUCCESS);
     
     ABTS_ASSERT(tc, "write test file contents",
                 apr_file_puts(contents, f) == APR_SUCCESS);
