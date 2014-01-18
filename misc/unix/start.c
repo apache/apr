@@ -61,7 +61,7 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
 
     apr_pool_tag(pool, "apr_initialize");
 
-    /* apr_atomic_init() used to be called from here aswell.
+    /* apr_atomic_init() used to be called from here as well.
      * Pools rely on mutexes though, which can be backed by
      * atomics.  Due to this circular dependency
      * apr_pool_initialize() is taking care of calling
