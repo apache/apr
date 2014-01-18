@@ -122,8 +122,8 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         new_m->filename = NULL;
     
 #if APR_USE_SHMEM_MMAP_ZERO
-        status = apr_file_open(&file, "/dev/zero", APR_READ | APR_WRITE, 
-                               APR_OS_DEFAULT, pool);
+        status = apr_file_open(&file, "/dev/zero", APR_FOPEN_READ | APR_FOPEN_WRITE, 
+                               APR_FPROT_OS_DEFAULT, pool);
         if (status != APR_SUCCESS) {
             return status;
         }
@@ -231,10 +231,10 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         status = APR_SUCCESS;
     
 #if APR_USE_SHMEM_MMAP_TMP
-        /* FIXME: Is APR_OS_DEFAULT sufficient? */
+        /* FIXME: Is APR_FPROT_OS_DEFAULT sufficient? */
         status = apr_file_open(&file, filename, 
-                               APR_READ | APR_WRITE | APR_CREATE | APR_EXCL,
-                               APR_OS_DEFAULT, pool);
+                               APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_EXCL,
+                               APR_FPROT_OS_DEFAULT, pool);
         if (status != APR_SUCCESS) {
             return status;
         }
@@ -269,7 +269,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         }
 
         status = apr_os_file_put(&file, &tmpfd,
-                                 APR_READ | APR_WRITE | APR_CREATE | APR_EXCL,
+                                 APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_EXCL,
                                  pool); 
         if (status != APR_SUCCESS) {
             return status;
@@ -304,10 +304,10 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 #elif APR_USE_SHMEM_SHMGET
         new_m->realsize = reqsize;
 
-        /* FIXME: APR_OS_DEFAULT is too permissive, switch to 600 I think. */
+        /* FIXME: APR_FPROT_OS_DEFAULT is too permissive, switch to 600 I think. */
         status = apr_file_open(&file, filename, 
                                APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_EXCL,
-                               APR_OS_DEFAULT, pool);
+                               APR_FPROT_OS_DEFAULT, pool);
         if (status != APR_SUCCESS) {
             return status;
         }
@@ -399,7 +399,7 @@ APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
 #elif APR_USE_SHMEM_SHMGET
     /* Presume that the file already exists; just open for writing */    
     status = apr_file_open(&file, filename, APR_FOPEN_WRITE,
-                           APR_OS_DEFAULT, pool);
+                           APR_FPROT_OS_DEFAULT, pool);
     if (status) {
         return status;
     }
@@ -491,8 +491,8 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
         new_m->filename = apr_pstrdup(pool, filename);
 
         status = apr_file_open(&file, filename, 
-                               APR_READ | APR_WRITE,
-                               APR_OS_DEFAULT, pool);
+                               APR_FOPEN_READ | APR_FOPEN_WRITE,
+                               APR_FPROT_OS_DEFAULT, pool);
         if (status != APR_SUCCESS) {
             return status;
         }
@@ -544,7 +544,7 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
         new_m = apr_palloc(pool, sizeof(apr_shm_t));
 
         status = apr_file_open(&file, filename, 
-                               APR_FOPEN_READ, APR_OS_DEFAULT, pool);
+                               APR_FOPEN_READ, APR_FPROT_OS_DEFAULT, pool);
         if (status != APR_SUCCESS) {
             return status;
         }

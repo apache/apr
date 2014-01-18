@@ -69,14 +69,15 @@ typedef struct {
  * Open an sdbm database by file name
  * @param db The newly opened database
  * @param name The sdbm file to open
- * @param mode The flag values (APR_READ and APR_BINARY flags are implicit)
+ * @param mode The flag values (APR_FOPEN_READ and APR_FOPEN_BINARY flags are
+ * implicit)
  * <PRE>
- *           APR_WRITE          open for read-write access
- *           APR_CREATE         create the sdbm if it does not exist
- *           APR_TRUNCATE       empty the contents of the sdbm
- *           APR_EXCL           fail for APR_CREATE if the file exists
- *           APR_DELONCLOSE     delete the sdbm when closed
- *           APR_SHARELOCK      support locking across process/machines
+ *           APR_FOPEN_WRITE      open for read-write access
+ *           APR_FOPEN_CREATE     create the sdbm if it does not exist
+ *           APR_FOPEN_TRUNCATE   empty the contents of the sdbm
+ *           APR_FOPEN_EXCL       fail for APR_FOPEN_CREATE if the file exists
+ *           APR_FOPEN_DELONCLOSE delete the sdbm when closed
+ *           APR_FOPEN_SHARELOCK  support locking across process/machines
  * </PRE>
  * @param perms Permissions to apply to if created
  * @param p The pool to use when creating the sdbm
@@ -106,7 +107,7 @@ APR_DECLARE(apr_status_t) apr_sdbm_close(apr_sdbm_t *db);
  * portably promoted to an APR_FLOCK_EXCLUSIVE lock, apr_sdbm_store and 
  * apr_sdbm_delete calls will fail if an APR_FLOCK_SHARED lock is held.
  * The apr_sdbm_lock call requires the database to be opened with the
- * APR_SHARELOCK mode value.
+ * APR_FOPEN_SHARELOCK mode value.
  */
 APR_DECLARE(apr_status_t) apr_sdbm_lock(apr_sdbm_t *db, int type);
 
@@ -154,7 +155,7 @@ APR_DECLARE(apr_status_t) apr_sdbm_delete(apr_sdbm_t *db,
  * @param db The database 
  * @param key The key datum of the first record
  * @remark The keys returned are not ordered.  To traverse the list of keys
- * for an sdbm opened with APR_SHARELOCK, the caller must use apr_sdbm_lock
+ * for an sdbm opened with APR_FOPEN_SHARELOCK, the caller must use apr_sdbm_lock
  * prior to retrieving the first record, and hold the lock until after the
  * last call to apr_sdbm_nextkey.
  */

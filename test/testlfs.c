@@ -50,7 +50,7 @@ static void test_open(abts_case *tc, void *data)
     apr_finfo_t testsize;
     apr_status_t rv;
 
-    rv = apr_dir_make(TESTDIR, APR_OS_DEFAULT, p);
+    rv = apr_dir_make(TESTDIR, APR_FPROT_OS_DEFAULT, p);
     if (rv && !APR_STATUS_IS_EEXIST(rv)) {
         APR_ASSERT_SUCCESS(tc, "make test directory", rv);
     }
@@ -58,7 +58,7 @@ static void test_open(abts_case *tc, void *data)
     /* First attempt a 1MB sparse file so we don't tax the poor test box */
     rv = apr_file_open(&f, TESTFN, APR_FOPEN_CREATE | APR_FOPEN_WRITE
                                  | APR_FOPEN_TRUNCATE | APR_FOPEN_SPARSE,
-                       APR_OS_DEFAULT, p);
+                       APR_FPROT_OS_DEFAULT, p);
 
     APR_ASSERT_SUCCESS(tc, "open file", rv);
 
@@ -114,7 +114,7 @@ static void test_reopen(abts_case *tc, void *data)
     PRECOND;
     
     rv = apr_file_open(&fh, TESTFN, APR_FOPEN_SPARSE | APR_FOPEN_READ,
-                       APR_OS_DEFAULT, p);
+                       APR_FPROT_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "re-open 8GB file", rv);
 
     APR_ASSERT_SUCCESS(tc, "file_info_get failed",
@@ -180,7 +180,7 @@ static void test_append(abts_case *tc, void *data)
 
     rv = apr_file_open(&fh, TESTFN, APR_FOPEN_SPARSE | APR_FOPEN_WRITE 
                                   | APR_FOPEN_APPEND, 
-                       APR_OS_DEFAULT, p);
+                       APR_FPROT_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "open 8GB file for append", rv);
 
     APR_ASSERT_SUCCESS(tc, "append to 8GB file",
@@ -204,7 +204,7 @@ static void test_seek(abts_case *tc, void *data)
     PRECOND;
     
     rv = apr_file_open(&fh, TESTFN, APR_FOPEN_SPARSE | APR_FOPEN_WRITE,
-                       APR_OS_DEFAULT, p);
+                       APR_FPROT_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "open 8GB file for writing", rv);
 
     pos = 0;
@@ -232,7 +232,7 @@ static void test_write(abts_case *tc, void *data)
     PRECOND;
 
     rv = apr_file_open(&fh, TESTFN, APR_FOPEN_SPARSE | APR_FOPEN_WRITE,
-                       APR_OS_DEFAULT, p);
+                       APR_FPROT_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "re-open 8GB file", rv);
 
     APR_ASSERT_SUCCESS(tc, "seek to 8GB - 4", 
@@ -259,7 +259,7 @@ static void test_mmap(abts_case *tc, void *data)
     PRECOND;
 
     rv = apr_file_open(&fh, TESTFN, APR_FOPEN_SPARSE | APR_FOPEN_READ,
-                       APR_OS_DEFAULT, p);
+                       APR_FPROT_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "open 8gb file for mmap", rv);
     
     APR_ASSERT_SUCCESS(tc, "mmap 8GB file",
@@ -304,7 +304,7 @@ static void test_buffered(abts_case *tc, void *data)
     rv = apr_file_open(&f, TESTBUFFN, APR_FOPEN_CREATE | APR_FOPEN_WRITE
                                     | APR_FOPEN_TRUNCATE | APR_FOPEN_BUFFERED
                                     | APR_FOPEN_SPARSE,
-                       APR_OS_DEFAULT, p);
+                       APR_FPROT_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "open buffered file", rv);
 
     APR_ASSERT_SUCCESS(tc, "truncate to 8GB",

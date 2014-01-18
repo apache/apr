@@ -40,7 +40,7 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
      */
     close(fd);
     if ((rv = apr_file_open(fp, template, flags|APR_FOPEN_NOCLEANUP,
-                            APR_UREAD | APR_UWRITE, p)) == APR_SUCCESS) {
+                            APR_FPROT_UREAD | APR_FPROT_UWRITE, p)) == APR_SUCCESS) {
 
 
 	if (!(flags & APR_FOPEN_NOCLEANUP)) {

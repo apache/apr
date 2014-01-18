@@ -29,7 +29,9 @@ static void test_mkdir(abts_case *tc, void *data)
     apr_status_t rv;
     apr_finfo_t finfo;
 
-    rv = apr_dir_make("data/testdir", APR_UREAD | APR_UWRITE | APR_UEXECUTE, p);
+    rv = apr_dir_make("data/testdir",
+                      APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
+                      p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_stat(&finfo, "data/testdir", APR_FINFO_TYPE, p);
@@ -43,7 +45,8 @@ static void test_mkdir_recurs(abts_case *tc, void *data)
     apr_finfo_t finfo;
 
     rv = apr_dir_make_recursive("data/one/two/three", 
-                                APR_UREAD | APR_UWRITE | APR_UEXECUTE, p);
+                                APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
+                                p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_stat(&finfo, "data/one", APR_FINFO_TYPE, p);
@@ -105,10 +108,12 @@ static void test_mkdir_twice(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
-    rv = apr_dir_make("data/testdir", APR_UREAD | APR_UWRITE | APR_UEXECUTE, p);
+    rv = apr_dir_make("data/testdir", APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
+                      p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    rv = apr_dir_make("data/testdir", APR_UREAD | APR_UWRITE | APR_UEXECUTE, p);
+    rv = apr_dir_make("data/testdir", APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
+                      p);
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_EEXIST(rv));
 
     rv = apr_dir_remove("data/testdir", p);
@@ -175,12 +180,13 @@ static void test_uncleared_errno(abts_case *tc, void *data)
     apr_dir_t *this_dir;
     apr_status_t rv; 
 
-    rv = apr_dir_make("dir1", APR_OS_DEFAULT, p);
+    rv = apr_dir_make("dir1", APR_FPROT_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    rv = apr_dir_make("dir2", APR_OS_DEFAULT, p);
+    rv = apr_dir_make("dir2", APR_FPROT_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_file_open(&thefile, "dir1/file1",
-                       APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE, APR_OS_DEFAULT, p);
+                       APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE,
+                       APR_FPROT_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_file_close(thefile);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -224,7 +230,7 @@ static void test_rmkdir_nocwd(abts_case *tc, void *data)
     char *cwd, *path;
 
     APR_ASSERT_SUCCESS(tc, "make temp dir",
-                       apr_dir_make("dir3", APR_OS_DEFAULT, p));
+                       apr_dir_make("dir3", APR_FPROT_OS_DEFAULT, p));
 
     APR_ASSERT_SUCCESS(tc, "obtain cwd", apr_filepath_get(&cwd, 0, p));
 

@@ -1526,8 +1526,9 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
      * may attempt to use then then non-NULL but partially set up file
      * object. */
     if (rv == APR_SUCCESS) {
-        apr_file_open(&debug_log, logpath, APR_APPEND|APR_WRITE|APR_CREATE,
-                      APR_OS_DEFAULT, global_pool);
+        apr_file_open(&debug_log, logpath,
+                      APR_FOPEN_APPEND|APR_FOPEN_WRITE|APR_FOPEN_CREATE,
+                      APR_FPROT_OS_DEFAULT, global_pool);
     }
     else {
         apr_file_open_stderr(&debug_log, global_pool);
