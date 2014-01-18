@@ -63,7 +63,7 @@ static void copy_short_file(abts_case *tc, void *data)
     apr_file_remove("data/file_copy.txt", p);
     
     copy_helper(tc, "data/file_datafile.txt", "data/file_copy.txt", 
-                APR_FILE_SOURCE_PERMS, 0, p);
+                APR_FPROT_FILE_SOURCE_PERMS, 0, p);
     rv = apr_file_remove("data/file_copy.txt", p);
     APR_ASSERT_SUCCESS(tc, "Couldn't remove copy file", rv);
 }
@@ -80,10 +80,10 @@ static void copy_over_existing(abts_case *tc, void *data)
      * this works.
      */
     copy_helper(tc, "data/file_datafile.txt", "data/file_copy.txt", 
-                APR_FILE_SOURCE_PERMS, 0, p);
+                APR_FPROT_FILE_SOURCE_PERMS, 0, p);
     
     copy_helper(tc, "data/mmap_datafile.txt", "data/file_copy.txt", 
-                APR_FILE_SOURCE_PERMS, 0, p);
+                APR_FPROT_FILE_SOURCE_PERMS, 0, p);
   
     rv = apr_file_remove("data/file_copy.txt", p);
     APR_ASSERT_SUCCESS(tc, "Couldn't remove copy file", rv);
@@ -97,7 +97,7 @@ static void append_nonexist(abts_case *tc, void *data)
     apr_file_remove("data/file_copy.txt", p);
 
     copy_helper(tc, "data/file_datafile.txt", "data/file_copy.txt", 
-                APR_FILE_SOURCE_PERMS, 0, p);
+                APR_FPROT_FILE_SOURCE_PERMS, 0, p);
     rv = apr_file_remove("data/file_copy.txt", p);
     APR_ASSERT_SUCCESS(tc, "Couldn't remove copy file", rv);
 }
@@ -114,10 +114,10 @@ static void append_exist(abts_case *tc, void *data)
      * this works.
      */
     copy_helper(tc, "data/file_datafile.txt", "data/file_copy.txt", 
-                APR_FILE_SOURCE_PERMS, 0, p);
+                APR_FPROT_FILE_SOURCE_PERMS, 0, p);
     
     copy_helper(tc, "data/mmap_datafile.txt", "data/file_copy.txt", 
-                APR_FILE_SOURCE_PERMS, 1, p);
+                APR_FPROT_FILE_SOURCE_PERMS, 1, p);
   
     rv = apr_file_remove("data/file_copy.txt", p);
     APR_ASSERT_SUCCESS(tc, "Couldn't remove copy file", rv);

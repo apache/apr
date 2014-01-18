@@ -97,7 +97,7 @@ static void create_testfile(apr_pool_t *p, const char *fname)
     printf("Creating a test file...\n");
     rv = apr_file_open(&f, fname, 
                  APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_TRUNCATE | APR_FOPEN_BUFFERED,
-                 APR_UREAD | APR_UWRITE, p);
+                 APR_FPROT_UREAD | APR_FPROT_UWRITE, p);
     if (rv) {
         aprerr("apr_file_open()", rv);
     }

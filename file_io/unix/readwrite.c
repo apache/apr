@@ -170,7 +170,7 @@ static apr_status_t do_rotating_check(apr_file_t *thefile, apr_time_t now)
             close(thefile->filedes);
             thefile->filedes = -1;
 
-            if (thefile->rotating->perm == APR_OS_DEFAULT) {
+            if (thefile->rotating->perm == APR_FPROT_OS_DEFAULT) {
                 thefile->filedes = open(thefile->fname,
                                         thefile->rotating->oflags,
                                         0666);

@@ -158,13 +158,13 @@ APR_DECLARE(apr_status_t) apr_shm_create_ex(apr_shm_t **m,
         int global;
 
         /* Do file backed, which is not an inherited handle 
-         * While we could open APR_EXCL, it doesn't seem that Unix
+         * While we could open APR_FOPEN_EXCL, it doesn't seem that Unix
          * ever did.  Ignore that error here, but fail later when
          * we discover we aren't the creator of the file map object.
          */
         rv = apr_file_open(&f, file,
-                           APR_READ | APR_WRITE | APR_BINARY | APR_CREATE,
-                           APR_UREAD | APR_UWRITE, pool);
+                           APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_BINARY | APR_FOPEN_CREATE,
+                           APR_FPROT_UREAD | APR_FPROT_UWRITE, pool);
         if ((rv != APR_SUCCESS)
                 || ((rv = apr_os_file_get(&hFile, f)) != APR_SUCCESS)) {
             return rv;

@@ -570,7 +570,7 @@ static apr_status_t proc_mutex_fcntl_create(apr_proc_mutex_t *new_mutex,
         new_mutex->fname = apr_pstrdup(new_mutex->pool, fname);
         rv = apr_file_open(&new_mutex->interproc, new_mutex->fname,
                            APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_EXCL,
-                           APR_UREAD | APR_UWRITE | APR_GREAD | APR_WREAD,
+                           APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD | APR_FPROT_WREAD,
                            new_mutex->pool);
     }
     else {
@@ -707,7 +707,7 @@ static apr_status_t proc_mutex_flock_create(apr_proc_mutex_t *new_mutex,
         new_mutex->fname = apr_pstrdup(new_mutex->pool, fname);
         rv = apr_file_open(&new_mutex->interproc, new_mutex->fname,
                            APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_EXCL,
-                           APR_UREAD | APR_UWRITE,
+                           APR_FPROT_UREAD | APR_FPROT_UWRITE,
                            new_mutex->pool);
     }
     else {
