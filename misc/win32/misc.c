@@ -106,33 +106,6 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
                 apr_os_level = APR_WIN_XP;
             }
         }
-#ifndef WINNT
-        else if (oslev.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
-            TCHAR *prevision;
-            if (prevision = oslev.szCSDVersion) {
-                while (*prevision && !apr_isupper(*prevision)) {
-                     prevision++;
-                }
-            }
-            else prevision = _T("");
-
-            if (oslev.dwMinorVersion < 10) {
-                if (*prevision < _T('C'))
-                    apr_os_level = APR_WIN_95;
-                else
-                    apr_os_level = APR_WIN_95_OSR2;
-            }
-            else if (oslev.dwMinorVersion < 90) {
-                if (*prevision < _T('A'))
-                    apr_os_level = APR_WIN_98;
-                else
-                    apr_os_level = APR_WIN_98_SE;
-            }
-            else {
-                apr_os_level = APR_WIN_ME;
-            }
-        }
-#endif
 #ifdef _WIN32_WCE
         else if (oslev.dwPlatformId == VER_PLATFORM_WIN32_CE) 
         {

@@ -40,11 +40,7 @@
  FILEFLAGS 0x00L
 #endif
 #endif
-#if defined(WINNT) || defined(WIN64)
  FILEOS 0x40004L
-#else
- FILEOS 0x4L
-#endif
  FILETYPE 0x2L
  FILESUBTYPE 0x0L
 BEGIN

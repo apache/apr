@@ -122,11 +122,7 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *);
  * the unicode eqivilant.
  */
 
-#if defined(_WIN32_WCE) || defined(WINNT)
 #define APR_HAS_ANSI_FS           0
-#else
-#define APR_HAS_ANSI_FS           1
-#endif
 
 /* IF_WIN_OS_IS_UNICODE / ELSE_WIN_OS_IS_ANSI help us keep the code trivial
  * where have runtime tests for unicode-ness, that aren't needed in any
@@ -138,7 +134,7 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *);
 #else /* APR_HAS_UNICODE_FS */
 #define IF_WIN_OS_IS_UNICODE
 #define ELSE_WIN_OS_IS_ANSI
-#endif /* WINNT */
+#endif /* APR_HAS_ANSI_FS && APR_HAS_UNICODE_FS */
 
 #if defined(_MSC_VER) && !defined(_WIN32_WCE)
 #include "crtdbg.h"
@@ -222,102 +218,6 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
  * #undef/re#define the Ansi/Unicode generic name to abate confusion
  * In the case of non-text functions, simply #define the original name
  */
-
-#if !defined(_WIN32_WCE) && !defined(WINNT)
-/* This group is available to all versions of WINNT 4.0 SP6 and later */
-
-#ifdef GetFileAttributesExA
-#undef GetFileAttributesExA
-#endif
-APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExA, 0, (
-    IN LPCSTR lpFileName,
-    IN GET_FILEEX_INFO_LEVELS fInfoLevelId,
-    OUT LPVOID lpFileInformation),
-    (lpFileName, fInfoLevelId, lpFileInformation));
-#define GetFileAttributesExA apr_winapi_GetFileAttributesExA
-#undef GetFileAttributesEx
-#define GetFileAttributesEx apr_winapi_GetFileAttributesExA
-
-#ifdef GetFileAttributesExW
-#undef GetFileAttributesExW
-#endif
-APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExW, 0, (
-    IN LPCWSTR lpFileName,
-    IN GET_FILEEX_INFO_LEVELS fInfoLevelId,
-    OUT LPVOID lpFileInformation),
-    (lpFileName, fInfoLevelId, lpFileInformation));
-#define GetFileAttributesExW apr_winapi_GetFileAttributesExW
-
-APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, CancelIo, 0, (
-    IN HANDLE hFile),
-    (hFile));
-#define CancelIo apr_winapi_CancelIo
-
-APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, TryEnterCriticalSection, 0, (
-    LPCRITICAL_SECTION lpCriticalSection),
-    (lpCriticalSection));
-#define TryEnterCriticalSection apr_winapi_TryEnterCriticalSection
-
-APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, SwitchToThread, 0, (
-    void),
-    ());
-#define SwitchToThread apr_winapi_SwitchToThread
-
-APR_DECLARE_LATE_DLL_FUNC(DLL_WINADVAPI, BOOL, WINAPI, GetEffectiveRightsFromAclW, 0, (
-    IN PACL pacl,
-    IN PTRUSTEE_W pTrustee,
-    OUT PACCESS_MASK pAccessRights),
-    (pacl, pTrustee, pAccessRights));
-#define GetEffectiveRightsFromAclW apr_winapi_GetEffectiveRightsFromAclW
-
-APR_DECLARE_LATE_DLL_FUNC(DLL_WINADVAPI, BOOL, WINAPI, GetNamedSecurityInfoW, 0, (
-    IN LPWSTR pObjectName,
-    IN SE_OBJECT_TYPE ObjectType,
-    IN SECURITY_INFORMATION SecurityInfo,
-    OUT PSID *ppsidOwner,
-    OUT PSID *ppsidGroup,
-    OUT PACL *ppDacl,
-    OUT PACL *ppSacl,
-    OUT PSECURITY_DESCRIPTOR *ppSecurityDescriptor),
-    (pObjectName, ObjectType, SecurityInfo, ppsidOwner, ppsidGroup, 
-	 ppDacl, ppSacl, ppSecurityDescriptor));
-#define GetNamedSecurityInfoW apr_winapi_GetNamedSecurityInfoW
-
-APR_DECLARE_LATE_DLL_FUNC(DLL_WINADVAPI, BOOL, WINAPI, GetNamedSecurityInfoA, 0, (
-    IN LPSTR pObjectName,
-    IN SE_OBJECT_TYPE ObjectType,
-    IN SECURITY_INFORMATION SecurityInfo,
-    OUT PSID *ppsidOwner,
-    OUT PSID *ppsidGroup,
-    OUT PACL *ppDacl,
-    OUT PACL *ppSacl,
-    OUT PSECURITY_DESCRIPTOR *ppSecurityDescriptor),
-    (pObjectName, ObjectType, SecurityInfo, ppsidOwner, ppsidGroup, 
-	 ppDacl, ppSacl, ppSecurityDescriptor));
-#define GetNamedSecurityInfoA apr_winapi_GetNamedSecurityInfoA
-#undef GetNamedSecurityInfo
-#define GetNamedSecurityInfo apr_winapi_GetNamedSecurityInfoA
-
-APR_DECLARE_LATE_DLL_FUNC(DLL_WINADVAPI, BOOL, WINAPI, GetSecurityInfo, 0, (
-    IN HANDLE handle,
-    IN SE_OBJECT_TYPE ObjectType,
-    IN SECURITY_INFORMATION SecurityInfo,
-    OUT PSID *ppsidOwner,
-    OUT PSID *ppsidGroup,
-    OUT PACL *ppDacl,
-    OUT PACL *ppSacl,
-    OUT PSECURITY_DESCRIPTOR *ppSecurityDescriptor),
-    (handle, ObjectType, SecurityInfo, ppsidOwner, ppsidGroup, 
-	 ppDacl, ppSacl, ppSecurityDescriptor));
-#define GetSecurityInfo apr_winapi_GetSecurityInfo
-
-APR_DECLARE_LATE_DLL_FUNC(DLL_SHSTDAPI, LPWSTR *, WINAPI, CommandLineToArgvW, 0, (
-    LPCWSTR lpCmdLine, 
-    int *pNumArgs),
-    (lpCmdLine, pNumArgs));
-#define CommandLineToArgvW apr_winapi_CommandLineToArgvW
-
-#endif /* !defined(_WIN32_WCE) && !defined(WINNT) */
 
 #if !defined(_WIN32_WCE)
 /* This group is NOT available to all versions of WinNT,
