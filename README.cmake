@@ -121,6 +121,18 @@ How to build
 
 6. build using chosen backend (e.g., "nmake install")
 
+Tested generators
+-----------------
+
+1. NMake Makefiles
+
+This has been tested successfully with the following:
+
+* Visual Studio 2008 64-bit (requires KB948127 hot fix)
+* Visual Studio 2012 64-bit
+
+2. Visual Studio 11 (Visual Studio 2012 project files)
+
 Known Bugs and Limitations
 --------------------------
 
@@ -144,9 +156,8 @@ Known Bugs and Limitations
     . APU_HAVE_NSS
   + APU_HAVE_ICONV
 * Static builds of APR modules are not supported.
-* Support static *or* shared build of Expat.
-* APR-CHANGES.txt, APR-LICENSE.txt, and APR-NOTICE.txt are not installed,
-  though perhaps that is a job for a higher-level script.
+* XML implementation (i.e., Expat or libxml2) could support static XML impl
+  with apr-2.lib.
 
 Generally:
 
