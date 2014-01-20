@@ -9,7 +9,9 @@ Changes for APR 1.5.1
      Trawick]
 
   *) Windows cmake build: Fix incorrect installation of some .pdb
-     files.  [Jeff Trawick]
+     files.  Fix incorrect use of some logic intended for Windows 9x,
+     including legacy filesystem interfaces and dynamic loading of
+     some Windows APIs.  [Jeff Trawick]
 
   *) apr_skiplist: Add compatibility with C++ applications.
      [Jeff Trawick]
