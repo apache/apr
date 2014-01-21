@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.4.9
 
+  *) Fix race condition when calling apr_dir_make_recursive from
+     multiple threads on Windows.
+     [Bert Huijben]
+
   *) Add experimental cmake-based build system for Windows.  Refer to 
      README.cmake for more information.  [Jeff Trawick, Tom Donovan]
 
