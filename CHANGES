@@ -190,7 +190,7 @@ Changes for APR 1.4.3
      recent GNU tools.  [Eric Covener]
 
   *) Avoid a redundant fcntl() call in apr_file_open() where O_CLOEXEC
-     is supported.  PR 46297.  [Joe Orton]
+     is supported.  PR 48557.  [Joe Orton]
 
   *) Improve platform detection by updating config.guess and config.sub.
      [Rainer Jung]
