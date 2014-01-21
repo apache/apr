@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.1
 
+  *) Fix race condition when calling apr_dir_make_recursive from
+     multiple threads on Windows.
+     [Bert Huijben]
+
   *) Fix apr_escape.c compilation errors on ebcdic platforms.
      [Eric Covener]
 
