@@ -20,10 +20,6 @@ Changes for APR 1.5.1
   *) apr_skiplist: Add compatibility with C++ applications.
      [Jeff Trawick]
 
-  *) When using shmget-based shared memory, the ID used for ftok is
-     now an APR hash of the filename instead of the constant '1'.
-     PR 53996 [Jim Jagielski]
-
   *) Correct a regression in 1.5.0 which affected out-of-tree
      builds on Unix.  [Rainer Jung]
 
