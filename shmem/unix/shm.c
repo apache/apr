@@ -22,6 +22,61 @@
 #include "apr_strings.h"
 #include "apr_hash.h"
 
+#if APR_USE_SHMEM_MMAP_SHM
+/* 
+ *   For portable use, a shared memory object should be identified by a name of
+ *   the form /somename; that is, a null-terminated string of up to NAME_MAX
+ *   (i.e., 255) characters consisting of an initial slash, followed by one or
+ *   more characters, none of which are slashes.
+ */
+#ifndef NAME_MAX
+#define NAME_MAX 255
+#endif
+static const char *make_shm_open_safe_name(const char *filename,
+                                           apr_pool_t *pool)
+{
+    const char *in;
+    char *result;
+    char *out;
+    apr_size_t len = 0;
+
+    if (filename == NULL)
+        return NULL;
+
+    len = strlen(filename);
+    if (filename[0] != '/') {
+        ++len;
+    }
+    if (len > NAME_MAX) {
+        len = NAME_MAX;
+    }
+    /* Allocate the required string */
+    result = apr_palloc(pool, len+1);
+
+    in = filename;
+    if (*in == '/') {
+        ++in;
+    }
+
+    out = result;
+    *out++ = '/';
+
+    for ( ; --len; ++in, ++out) {
+        if (*in == '/') {
+            /* '/' becomes '|' */
+            *out = '|';
+        } else {
+            /* Everything else remains unchanged */
+            *out = *in;
+        }
+    }
+
+    *out = '\0';
+
+    return result;
+}
+#endif
+
 static apr_status_t shm_cleanup_owner(void *m_)
 {
     apr_shm_t *m = (apr_shm_t *)m_;
@@ -59,7 +114,7 @@ static apr_status_t shm_cleanup_owner(void *m_)
         if (munmap(m->base, m->realsize) == -1) {
             return errno;
         }
-        if (shm_unlink(m->filename) == -1) {
+        if (shm_unlink(make_shm_open_safe_name(m->filename, m->pool)) == -1 && errno != ENOENT) {
             return errno;
         }
         return APR_SUCCESS;
@@ -221,7 +276,9 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         new_m->pool = pool;
         new_m->reqsize = reqsize;
         new_m->filename = apr_pstrdup(pool, filename);
-
+#if APR_USE_SHMEM_MMAP_SHM
+        const char *shm_name = make_shm_open_safe_name(filename, pool);
+#endif
 #if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM
         new_m->realsize = reqsize + 
             APR_ALIGN_DEFAULT(sizeof(apr_size_t)); /* room for metadata */
@@ -262,7 +319,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         }
 #endif /* APR_USE_SHMEM_MMAP_TMP */
 #if APR_USE_SHMEM_MMAP_SHM
-        tmpfd = shm_open(filename, O_RDWR | O_CREAT | O_EXCL, 0644);
+        tmpfd = shm_open(shm_name, O_RDWR | O_CREAT | O_EXCL, 0644);
         if (tmpfd == -1) {
             return errno;
         }
@@ -276,10 +333,10 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 
         status = apr_file_trunc(file, new_m->realsize);
         if (status != APR_SUCCESS) {
-            shm_unlink(filename); /* we're failing, remove the object */
+            shm_unlink(shm_name); /* we're failing, remove the object */
             return status;
         }
-        new_m->base = mmap(NULL, reqsize, PROT_READ | PROT_WRITE,
+        new_m->base = mmap(NULL, new_m->realsize, PROT_READ | PROT_WRITE,
                            MAP_SHARED, tmpfd, 0);
 
         /* FIXME: check for errors */
@@ -388,7 +445,8 @@ APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
 #if APR_USE_SHMEM_MMAP_TMP
     return apr_file_remove(filename, pool);
 #elif APR_USE_SHMEM_MMAP_SHM
-    if (shm_unlink(filename) == -1) {
+    const char *shm_name = make_shm_open_safe_name(filename, pool);
+    if (shm_unlink(shm_name) == -1) {
         return errno;
     }
     return APR_SUCCESS;
@@ -483,7 +541,22 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
         new_m = apr_palloc(pool, sizeof(apr_shm_t));
         new_m->pool = pool;
         new_m->filename = apr_pstrdup(pool, filename);
+#if APR_USE_SHMEM_MMAP_SHM
+        const char *shm_name = make_shm_open_safe_name(filename, pool);
 
+        tmpfd = shm_open(shm_name, O_RDWR, 0644);
+        if (tmpfd == -1) {
+            return errno;
+        }
+
+        status = apr_os_file_put(&file, &tmpfd,
+                                 APR_READ | APR_WRITE,
+                                 pool); 
+        if (status != APR_SUCCESS) {
+            return status;
+        }
+
+#elif APR_USE_SHMEM_MMAP_TMP
         status = apr_file_open(&file, filename, 
                                APR_READ | APR_WRITE,
                                APR_OS_DEFAULT, pool);
@@ -494,6 +567,9 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
         if (status != APR_SUCCESS) {
             return status;
         }
+#else
+        return APR_ENOTIMPL;
+#endif
 
         nbytes = sizeof(new_m->realsize);
         status = apr_file_read(file, (void *)&(new_m->realsize),

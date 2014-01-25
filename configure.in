@@ -1238,11 +1238,6 @@ APR_IFALLYES(header:sys/mman.h func:mmap func:munmap,
              [havemmaptmp="1"
               APR_DECIDE(USE_SHMEM_MMAP_TMP, 
                   [Classical mmap() on temporary file])])
-APR_IFALLYES(header:sys/mman.h func:mmap func:munmap func:shm_open dnl
-             func:shm_unlink,
-             [havemmapshm="1"
-              APR_DECIDE(USE_SHMEM_MMAP_SHM, 
-                  [mmap() via POSIX.1 shm_open() on temporary file])])
 APR_IFALLYES(header:sys/ipc.h header:sys/shm.h header:sys/file.h dnl
              func:shmget func:shmat func:shmdt func:shmctl,
              [haveshmget="1"
@@ -1256,6 +1251,15 @@ APR_IFALLYES(header:os2.h,
 APR_IFALLYES(header:windows.h,
              [havewin32shm="1"
               APR_DECIDE(USE_SHMEM_WIN32, [Windows shared memory])])
+AC_ARG_ENABLE(posix-shm,
+[  --enable-posix-shm      Use POSIX shared memory (shm_open) if available],
+[
+APR_IFALLYES(header:sys/mman.h func:mmap func:munmap func:shm_open dnl
+             func:shm_unlink,
+             [havemmapshm="1"
+              APR_DECIDE(USE_SHMEM_MMAP_SHM, 
+                  [mmap() via POSIX.1 shm_open() on temporary file])])
+])
 case $host in
     *linux* ) 
         # Linux pre-2.4 had problems with MM_SHMT_MMANON even though

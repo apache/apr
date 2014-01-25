@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.1
 
+  *) Fix POSIX shared memory (shm_open) use for named shared memory.
+     PR 55928. [Jozef Hatala <jh-asf skrt org>]
+
   *) Fix race condition when calling apr_dir_make_recursive from
      multiple threads on Windows.
      [Bert Huijben]
