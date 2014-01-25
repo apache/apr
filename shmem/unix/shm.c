@@ -32,48 +32,37 @@
 #ifndef NAME_MAX
 #define NAME_MAX 255
 #endif
+
+/* See proc_mutex.c and sem_open for the reason for all this! */
+static unsigned int rshash (const char *p) {
+    /* hash function from Robert Sedgwicks 'Algorithms in C' book */
+    unsigned int b    = 378551;
+    unsigned int a    = 63689;
+    unsigned int retval = 0;
+
+    for( ; *p; p++) {
+        retval = retval * a + (*p);
+        a *= b;
+    }
+
+    return retval;
+}
+
 static const char *make_shm_open_safe_name(const char *filename,
                                            apr_pool_t *pool)
 {
-    const char *in;
-    char *result;
-    char *out;
-    apr_size_t len = 0;
+    apr_ssize_t flen;
+    unsigned int h1, h2;
 
-    if (filename == NULL)
+    if (filename == NULL) {
         return NULL;
-
-    len = strlen(filename);
-    if (filename[0] != '/') {
-        ++len;
-    }
-    if (len > NAME_MAX) {
-        len = NAME_MAX;
-    }
-    /* Allocate the required string */
-    result = apr_palloc(pool, len+1);
-
-    in = filename;
-    if (*in == '/') {
-        ++in;
     }
 
-    out = result;
-    *out++ = '/';
+    flen = strlen(filename);
+    h1 = (apr_hashfunc_default(filename, &flen) & 0xffffffff);
+    h2 = (rshash(filename) & 0xffffffff);
+    return apr_psprintf(pool, "/ShM.%xH%x", h1, h2);
 
-    for ( ; --len; ++in, ++out) {
-        if (*in == '/') {
-            /* '/' becomes '|' */
-            *out = '|';
-        } else {
-            /* Everything else remains unchanged */
-            *out = *in;
-        }
-    }
-
-    *out = '\0';
-
-    return result;
 }
 #endif
 
