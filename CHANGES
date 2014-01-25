@@ -2,7 +2,7 @@
 Changes for APR 2.0.0
 
   *) Fix POSIX shared memory (shm_open) use for named shared memory.
-     PR 55928. [Jozef Hatala <jh-asf skrt org>]
+     PR 55928. [Jozef Hatala <jh-asf skrt org>, Jim Jagielski]
 
   *) Windows platform: Remove support for Windows 9x.
 
