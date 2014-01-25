@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Fix POSIX shared memory (shm_open) use for named shared memory.
+     PR 55928. [Jozef Hatala <jh-asf skrt org>]
+
   *) Windows platform: Remove support for Windows 9x.
 
   *) Added signed apr_intptr_t.  Changed ODBC dbd driver to use this.
