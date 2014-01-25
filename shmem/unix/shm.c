@@ -325,7 +325,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
             shm_unlink(shm_name); /* we're failing, remove the object */
             return status;
         }
-        new_m->base = mmap(NULL, new_m->realsize, PROT_READ | PROT_WRITE,
+        new_m->base = mmap(NULL, reqsize, PROT_READ | PROT_WRITE,
                            MAP_SHARED, tmpfd, 0);
 
         /* FIXME: check for errors */
