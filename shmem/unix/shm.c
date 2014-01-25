@@ -308,6 +308,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         }
 #endif /* APR_USE_SHMEM_MMAP_TMP */
 #if APR_USE_SHMEM_MMAP_SHM
+        /* FIXME: SysV uses 0600... should we? */
         tmpfd = shm_open(shm_name, O_RDWR | O_CREAT | O_EXCL, 0644);
         if (tmpfd == -1) {
             return errno;
@@ -534,6 +535,7 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
 #if APR_USE_SHMEM_MMAP_SHM
         const char *shm_name = make_shm_open_safe_name(filename, pool);
 
+        /* FIXME: SysV uses 0600... should we? */
         tmpfd = shm_open(shm_name, O_RDWR, 0644);
         if (tmpfd == -1) {
             return errno;
