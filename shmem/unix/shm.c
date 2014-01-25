@@ -292,7 +292,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         }
 
         status = apr_file_trunc(file, new_m->realsize);
-        if (status != APR_SUCCESS) {
+        if (status != APR_SUCCESS && status != APR_ESPIPE) {
             apr_file_close(file); /* ignore errors, we're failing */
             apr_file_remove(new_m->filename, new_m->pool);
             return status;
@@ -321,10 +321,11 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         }
 
         status = apr_file_trunc(file, new_m->realsize);
-        if (status != APR_SUCCESS) {
+        if (status != APR_SUCCESS && status != APR_ESPIPE) {
             shm_unlink(shm_name); /* we're failing, remove the object */
             return status;
         }
+        /* TODO: should we use new_m->realsize instead of reqsize ?? */
         new_m->base = mmap(NULL, reqsize, PROT_READ | PROT_WRITE,
                            MAP_SHARED, tmpfd, 0);
 
