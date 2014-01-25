@@ -66,6 +66,17 @@ static const char *make_shm_open_safe_name(const char *filename,
 }
 #endif
 
+#if APR_USE_SHMEM_SHMGET
+static key_t our_ftok(const char *filename)
+{
+    /* to help avoid collisions while still using
+     * an easily recreated proj_id */
+    apr_ssize_t slen = strlen(filename);
+    return ftok(filename,
+                (int)apr_hashfunc_default(filename, &slen));
+}
+#endif
+
 static apr_status_t shm_cleanup_owner(void *m_)
 {
     apr_shm_t *m = (apr_shm_t *)m_;
@@ -361,7 +372,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 
         /* ftok() (on solaris at least) requires that the file actually
          * exist before calling ftok(). */
-        shmkey = ftok(filename, 1);
+        shmkey = our_ftok(filename);
         if (shmkey == (key_t)-1) {
             apr_file_close(file);
             return errno;
@@ -451,7 +462,7 @@ APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
 
     /* ftok() (on solaris at least) requires that the file actually
      * exist before calling ftok(). */
-    shmkey = ftok(filename, 1);
+    shmkey = our_ftok(filename);
     if (shmkey == (key_t)-1) {
         goto shm_remove_failed;
     }
@@ -624,7 +635,7 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
 
         new_m->filename = apr_pstrdup(pool, filename);
         new_m->pool = pool;
-        shmkey = ftok(filename, 1);
+        shmkey = our_ftok(filename);
         if (shmkey == (key_t)-1) {
             return errno;
         }

@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.1
 
+  *) When using shmget-based shared memory, the ID used for ftok is
+     now an APR hash of the filename instead of the constant '1'.
+     We do this to help avoid collisions. PR 53996 [Jim Jagielski]
+
   *) Fix POSIX shared memory (shm_open) use for named shared memory.
      Includes adding '--enable-posix-shm' to force POSIX shm if
      available, and OSX compatibility. PR 55928.
