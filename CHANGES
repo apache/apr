@@ -2,7 +2,9 @@
 Changes for APR 1.5.1
 
   *) Fix POSIX shared memory (shm_open) use for named shared memory.
-     PR 55928. [Jozef Hatala <jh-asf skrt org>, Jim Jagielski]
+     Includes adding '--enable-posix-shm' to force POSIX shm if
+     available, and OSX compatibility. PR 55928.
+     [Jozef Hatala <jh-asf skrt org>, Jim Jagielski]
 
   *) Fix race condition when calling apr_dir_make_recursive from
      multiple threads on Windows.
