@@ -1379,7 +1379,6 @@ APR_FLAG_HEADERS(
     netinet/in.h	\
     netinet/sctp.h      \
     netinet/sctp_uio.h  \
-    sys/attr.h          \
     sys/file.h		\
     sys/ioctl.h         \
     sys/mman.h		\
