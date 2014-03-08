@@ -32,6 +32,9 @@ Changes for APR 1.5.1
   *) Correct a regression in 1.5.0 which affected out-of-tree
      builds on Unix.  [Rainer Jung]
 
+  *) Improve platform detection for bundled expat by updating
+     config.guess and config.sub. [Rainer Jung]
+
 Changes for APR 1.5.0
 
   *) Fix Linux kernel version check to recognize more versions,
