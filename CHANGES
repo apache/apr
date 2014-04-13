@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Add apr_sockaddr_info_copy(), for making a deep copy of an
+     apr_sockaddr_t into a specified pool.  [Yann Ylavic
+     <ylavic.dev gmail.com>]
+
   *) When using shmget-based shared memory, the ID used for ftok is
      now an APR hash of the filename instead of the constant '1'.
      We do this to help avoid collisions. PR 53996 [Jim Jagielski]
