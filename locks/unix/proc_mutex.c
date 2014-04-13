@@ -951,7 +951,12 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex,
                                                 apr_proc_mutex_t *pmutex)
 {
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE || APR_HAS_POSIXSEM_SERIALIZE
-    ospmutex->crossproc = pmutex->interproc->filedes;
+    if (pmutex->interproc) {
+        ospmutex->crossproc = pmutex->interproc->filedes;
+    }
+    else {
+        ospmutex->crossproc = -1;
+    }
 #endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
     ospmutex->pthread_interproc = pmutex->pthread_interproc;

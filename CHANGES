@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.1
 
+  *) apr_os_proc_mutex_get() on Unix:  Avoid segfault for cross-
+     process pthread mutexes.  [Yann Ylavic <ylavic.dev gmail.com>]
+
   *) When using shmget-based shared memory, the ID used for ftok is
      now an APR hash of the filename instead of the constant '1'.
      We do this to help avoid collisions. PR 53996 [Jim Jagielski]
