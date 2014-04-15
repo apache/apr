@@ -10,14 +10,14 @@ Changes for APR 1.5.1
 
   *) Fix POSIX shared memory (shm_open) use for named shared memory.
      Includes adding '--enable-posix-shm' to force POSIX shm if
-     available, and OSX compatibility. PR 55928.
+     available, and OS X compatibility. PR 55928.
      [Jozef Hatala <jh-asf skrt org>, Jim Jagielski]
 
   *) Fix race condition when calling apr_dir_make_recursive from
      multiple threads on Windows.
      [Bert Huijben]
 
-  *) Fix apr_escape.c compilation errors on ebcdic platforms.
+  *) Fix apr_escape.c compilation errors on EBCDIC platforms.
      [Eric Covener]
 
   *) FreeBSD 10: Correct a regression in 1.5.0 which affected non-
