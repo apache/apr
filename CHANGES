@@ -1,4 +1,8 @@
                                                      -*- coding: utf-8 -*-
+Changes for APR 1.5.2
+
+  *)
+
 Changes for APR 1.5.1
 
   *) apr_os_proc_mutex_get() on Unix:  Avoid segfault for cross-
