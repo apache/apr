@@ -32,6 +32,7 @@
 #define T_ESCAPE_ECHO         (0x08)
 #define T_ESCAPE_URLENCODED   (0x10)
 #define T_ESCAPE_XML          (0x20)
+#define T_ESCAPE_LDAP         (0x40)
 
 int main(int argc, char *argv[])
 {
@@ -46,6 +47,7 @@ int main(int argc, char *argv[])
            "#define T_ESCAPE_ECHO          (%u)\n"
            "#define T_ESCAPE_URLENCODED    (%u)\n"
            "#define T_ESCAPE_XML           (%u)\n"
+           "#define T_ESCAPE_LDAP          (%u)\n"
            "\n"
            "static const unsigned char test_char_table[256] = {",
            T_ESCAPE_SHELL_CMD,
@@ -53,7 +55,8 @@ int main(int argc, char *argv[])
            T_OS_ESCAPE_PATH,
            T_ESCAPE_ECHO,
            T_ESCAPE_URLENCODED,
-           T_ESCAPE_XML);
+           T_ESCAPE_XML,
+           T_ESCAPE_LDAP);
 
     for (c = 0; c < 256; ++c) {
         flags = 0;
@@ -104,6 +107,11 @@ int main(int argc, char *argv[])
 
         if (strchr("<>&\"", c)) {
             flags |= T_ESCAPE_XML;
+        }
+
+        /* LDAP DN escaping (RFC4514) and LDAP filter escaping (RFC4515) */
+        if (!isprint(c) || strchr("\"+,;<>\\", c) || strchr("*()\\", c)) {
+            flags |= T_ESCAPE_LDAP;
         }
 
         printf("%u%c", flags, (c < 255) ? ',' : ' ');
