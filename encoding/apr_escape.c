@@ -1181,7 +1181,7 @@ APR_DECLARE(const void *) apr_punescape_hex(apr_pool_t *p, const char *str,
 }
 
 APR_DECLARE(apr_status_t) apr_escape_ldap(char *escaped, const void *str,
-        apr_ssize_t slen, apr_size_t *len)
+        apr_ssize_t slen, int flags, apr_size_t *len)
 {
     apr_size_t size = 1;
     int found = 0;
@@ -1192,7 +1192,8 @@ APR_DECLARE(apr_status_t) apr_escape_ldap(char *escaped, const void *str,
     if (s) {
         if (d) {
             while (((c = *s) && slen) || (slen > 0)) {
-                if (TEST_CHAR(c, T_ESCAPE_LDAP)) {
+                if (((flags & APR_ESCAPE_LDAP_DN) && TEST_CHAR(c, T_ESCAPE_LDAP_DN))
+                     || ((flags & APR_ESCAPE_LDAP_FILTER) && TEST_CHAR(c, T_ESCAPE_LDAP_FILTER))) {
                     d = c2x(c, '\\', d);
                     size += 2;
                     found = 1;
@@ -1208,7 +1209,8 @@ APR_DECLARE(apr_status_t) apr_escape_ldap(char *escaped, const void *str,
         }
         else {
             while (((c = *s) && slen) || (slen > 0)) {
-                if (TEST_CHAR(c, T_ESCAPE_LDAP)) {
+                if (((flags & APR_ESCAPE_LDAP_DN) && TEST_CHAR(c, T_ESCAPE_LDAP_DN)) 
+                     || ((flags & APR_ESCAPE_LDAP_FILTER) && TEST_CHAR(c, T_ESCAPE_LDAP_FILTER))) {
                     size += 2;
                     found = 1;
                 }
@@ -1229,14 +1231,15 @@ APR_DECLARE(apr_status_t) apr_escape_ldap(char *escaped, const void *str,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(const char *) apr_pescape_ldap(apr_pool_t *p, const void *src, apr_ssize_t srclen)
+APR_DECLARE(const char *) apr_pescape_ldap(apr_pool_t *p, const void *src,
+        apr_ssize_t srclen, int flags)
 {
     apr_size_t len;
 
-    switch (apr_escape_ldap(NULL, src, srclen, &len)) {
+    switch (apr_escape_ldap(NULL, src, srclen, flags, &len)) {
     case APR_SUCCESS: {
         char *encoded = apr_palloc(p, len);
-        apr_escape_ldap(encoded, src, srclen, NULL);
+        apr_escape_ldap(encoded, src, srclen, flags, NULL);
         return encoded;
     }
     case APR_NOTFOUND: {
