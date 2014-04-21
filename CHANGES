@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Add apr_escape_ldap() and apr_pescape_ldap(), escaping characters
+     as described by RFC4514 and RFC4515 respectively. [Graham Leggett]
+
   *) Add apr_sockaddr_info_copy(), for making a deep copy of an
      apr_sockaddr_t into a specified pool.  [Yann Ylavic
      <ylavic.dev gmail.com>]
