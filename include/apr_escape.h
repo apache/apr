@@ -366,6 +366,31 @@ APR_DECLARE(apr_status_t) apr_unescape_hex(void *dest, const char *str,
 APR_DECLARE(const void *) apr_punescape_hex(apr_pool_t *p, const char *str,
         int colon, apr_size_t *len);
 
+/**
+ * Apply LDAP escaping to binary data. Characters from RFC4514 and RFC4515
+ * are escaped with their hex equivalents.
+ * @param dest The destination buffer, can be NULL
+ * @param src The original buffer
+ * @param srclen The length of the original buffer
+ * @param len If present, returns the length of the string
+ * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL
+ */
+APR_DECLARE(apr_status_t) apr_escape_ldap(char *dest, const void *src,
+        apr_ssize_t srclen, apr_size_t *len);
+
+/**
+ * Apply LDAP escaping to binary data, and return the results from a
+ * pool. Characters from RFC4514 and RFC4515 are escaped with their hex
+ * equivalents.
+ * @param p Pool to allocate from
+ * @param src The original buffer
+ * @param slen The length of the original buffer
+ * @return A zero padded buffer allocated from the pool on success, or
+ * NULL if src was NULL.
+ */
+APR_DECLARE(const char *) apr_pescape_ldap(apr_pool_t *p, const void *src,
+        apr_ssize_t slen) __attribute__((nonnull(1)));
+
 /** @} */
 #ifdef __cplusplus
 }
