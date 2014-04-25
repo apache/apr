@@ -262,6 +262,42 @@ static void test_escape(abts_case *tc, void *data)
             apr_psprintf(pool, "size mismatch (%" APR_SIZE_T_FMT "!=%" APR_SIZE_T_FMT ")", len, (apr_size_t)4),
             (len == 4));
 
+    src = "Parens R Us (for all your parenthetical needs) plus asterisk* \"+,;<>\\";
+    target = "Parens R Us (for all your parenthetical needs) plus asterisk* \\22\\2b\\2c\\3b\\3c\\3e\\5c";
+    dest = apr_pescape_ldap(pool, src, APR_ESCAPE_STRING, APR_ESCAPE_LDAP_DN);
+    ABTS_ASSERT(tc,
+                apr_psprintf(pool, "ldap escaped (%s) does not match expected output (%s)",
+                             dest, target),
+                (strcmp(dest, target) == 0));
+    apr_escape_ldap(NULL, src, APR_ESCAPE_STRING, APR_ESCAPE_LDAP_DN, &len);
+    ABTS_ASSERT(tc,
+            apr_psprintf(pool, "size mismatch (%" APR_SIZE_T_FMT "!=%" APR_SIZE_T_FMT ")", len, strlen(dest) + 1),
+            (len == strlen(dest) + 1));
+
+    src = "Parens R Us (for all your parenthetical needs) plus asterisk* \"+,;<>\\";
+    target = "Parens R Us \\28for all your parenthetical needs\\29 plus asterisk\\2a \"+,;<>\\5c";
+    dest = apr_pescape_ldap(pool, src, APR_ESCAPE_STRING, APR_ESCAPE_LDAP_FILTER);
+    ABTS_ASSERT(tc,
+                apr_psprintf(pool, "ldap escaped (%s) does not match expected output (%s)",
+                             dest, target),
+                (strcmp(dest, target) == 0));
+    apr_escape_ldap(NULL, src, APR_ESCAPE_STRING, APR_ESCAPE_LDAP_FILTER, &len);
+    ABTS_ASSERT(tc,
+            apr_psprintf(pool, "size mismatch (%" APR_SIZE_T_FMT "!=%" APR_SIZE_T_FMT ")", len, strlen(dest) + 1),
+            (len == strlen(dest) + 1));
+
+    src = "Parens R Us (for all your parenthetical needs) plus asterisk* \"+,;<>\\";
+    target = "Parens R Us \\28for all your parenthetical needs\\29 plus asterisk\\2a \\22\\2b\\2c\\3b\\3c\\3e\\5c";
+    dest = apr_pescape_ldap(pool, src, APR_ESCAPE_STRING, APR_ESCAPE_LDAP_ALL);
+    ABTS_ASSERT(tc,
+                apr_psprintf(pool, "ldap escaped (%s) does not match expected output (%s)",
+                             dest, target),
+                (strcmp(dest, target) == 0));
+    apr_escape_ldap(NULL, src, APR_ESCAPE_STRING, APR_ESCAPE_LDAP_ALL, &len);
+    ABTS_ASSERT(tc,
+            apr_psprintf(pool, "size mismatch (%" APR_SIZE_T_FMT "!=%" APR_SIZE_T_FMT ")", len, strlen(dest) + 1),
+            (len == strlen(dest) + 1));
+
     apr_pool_destroy(pool);
 }
 

@@ -1,7 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
-  *)
+  *) Add apr_escape_ldap() and apr_pescape_ldap(), escaping characters
+     as described by RFC4514 and RFC4515 respectively. [Graham Leggett]
 
 Changes for APR 1.5.1
 
