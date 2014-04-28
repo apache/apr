@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Add apr_shm_delete() to compliment apr_shm_remove().
+     [Jim Jagielski]
+
   *) Add apr_escape_ldap() and apr_pescape_ldap(), escaping characters
      as described by RFC4514 and RFC4515 respectively. [Graham Leggett]
 
@@ -67,6 +70,11 @@ Changes for APR 2.0.0
      platforms.  [Mladen Turk]
 
   *) Merge APR-util into APR.  [various]
+
+Changes for APR and APR-util 1.6.x and later:
+
+  *) http://svn.apache.org/viewvc/apr/apr/branches/1.6.x/CHANGES?view=markup
+  *) http://svn.apache.org/viewvc/apr/apr-util/branches/1.6.x/CHANGES?view=markup
 
 Changes for APR and APR-util 1.5.x and later:
 
