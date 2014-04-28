@@ -137,6 +137,21 @@ APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
                                          apr_pool_t *pool);
 
 /**
+ * Delete named resource associated with a shared memory segment,
+ * preventing attachments to the resource.
+ * @param m The shared memory segment structure to delete.
+ * @remark This function is only supported on platforms which support
+ * name-based shared memory segments, and will return APR_ENOTIMPL on
+ * platforms without such support.  Removing the file while the shm
+ * is in use is not entirely portable, caller may use this to enhance
+ * obscurity of the resource, but be prepared for the call to fail,
+ * and for concurrent attempts to create a resource of the same name
+ * to also fail.  The pool cleanup of apr_shm_create (apr_shm_destroy)
+ * also removes the named resource.
+ */
+APR_DECLARE(apr_status_t) apr_shm_delete(apr_shm_t *m);
+
+/**
  * Destroy a shared memory segment and associated memory.
  * @param m The shared memory segment structure to destroy.
  */

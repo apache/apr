@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
+  *) Add apr_shm_delete() to compliment apr_shm_remove().
+     [Jim Jagielski]
+
   *) Intruduce APR_PERMS_SET macros for setting the owner/group on
      objects. Currently only implemented for shm, proc and global
      mutexes on posix platforms.

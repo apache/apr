@@ -491,6 +491,16 @@ shm_remove_failed:
 #endif
 } 
 
+APR_DECLARE(apr_status_t) apr_shm_delete(apr_shm_t *m)
+{
+    if (m->filename) {
+        return apr_shm_remove(m->filename, m->pool);
+    }
+    else {
+        return APR_ENOTIMPL;
+    }
+} 
+
 APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m)
 {
     return apr_pool_cleanup_run(m->pool, m, shm_cleanup_owner);
