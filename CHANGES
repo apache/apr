@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
+  *) Added Unix domain socket support.
+     [Mladen Turk]
+
   *) Add apr_shm_delete() to compliment apr_shm_remove().
      [Jim Jagielski]
 

@@ -428,3 +428,24 @@ apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char *nonconst_name,
     return APR_SUCCESS;
 }
 #endif
+
+APR_PERMS_SET_IMPLEMENT(socket)
+{
+#if APR_HAVE_SOCKADDR_UN
+    apr_status_t rv = APR_SUCCESS;
+    apr_socket_t *socket = (apr_socket_t *)thesocket;
+
+    if (socket->local_addr->family == APR_UNIX) {
+        if (!(perms & APR_FPROT_GSETID))
+            gid = -1;
+        if (fchown(socket->socketdes, uid, gid) < 0) {
+            rv = errno;
+        }
+    }
+    else
+        rv = APR_EINVAL;
+    return rv;
+#else
+    return APR_ENOTIMPL;
+#endif
+}

@@ -30,11 +30,11 @@ int main(int argc, char *argv[])
     atexit(apr_terminate);
     apr_pool_create(&p, NULL);
 
-    if (argc < 2) {
+    if (argc < 3) {
         exit(-1);
     }
 
-    rv = apr_sockaddr_info_get(&remote_sa, "127.0.0.1", APR_UNSPEC, 8021, 0, p);
+    rv = apr_sockaddr_info_get(&remote_sa, argv[2], APR_UNSPEC, 8021, 0, p);
     if (rv != APR_SUCCESS) {
         exit(-1);
     }
