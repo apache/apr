@@ -429,6 +429,16 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
                                           apr_pool_t *p);
 
 /**
+ * Copy apr_sockaddr_t src to dst on pool p.
+ * @param dst The destination apr_sockaddr_t.
+ * @param src The source apr_sockaddr_t.
+ * @param p The pool for the apr_sockaddr_t and associated storage.
+ */
+APR_DECLARE(apr_status_t) apr_sockaddr_info_copy(apr_sockaddr_t **dst,
+                                                 const apr_sockaddr_t *src,
+                                                 apr_pool_t *p);
+
+/**
  * Look up the host name from an apr_sockaddr_t.
  * @param hostname The hostname.
  * @param sa The apr_sockaddr_t.
