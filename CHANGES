@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
+  *) Intruduce APR_PERMS_SET macros for setting the owner/group on
+     objects. Currently only implemented for shm, proc and global
+     mutexes on posix platforms.
+     [Mladen Turk]
+
   *) Add apr_escape_ldap() and apr_pescape_ldap(), escaping characters
      as described by RFC4514 and RFC4515 respectively. [Graham Leggett]
 
