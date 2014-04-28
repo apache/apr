@@ -1,24 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
-  *) Add apr_shm_delete() to compliment apr_shm_remove().
-     [Jim Jagielski]
-
-  *) Add apr_escape_ldap() and apr_pescape_ldap(), escaping characters
-     as described by RFC4514 and RFC4515 respectively. [Graham Leggett]
-
   *) Add apr_sockaddr_info_copy(), for making a deep copy of an
      apr_sockaddr_t into a specified pool.  [Yann Ylavic
      <ylavic.dev gmail.com>]
-
-  *) When using shmget-based shared memory, the ID used for ftok is
-     now an APR hash of the filename instead of the constant '1'.
-     We do this to help avoid collisions. PR 53996 [Jim Jagielski]
-
-  *) Fix POSIX shared memory (shm_open) use for named shared memory.
-     Includes adding '--enable-posix-shm' to force POSIX shm if
-     available, and OSX compatibility. PR 55928.
-     [Jozef Hatala <jh-asf skrt org>, Jim Jagielski]
 
   *) Windows platform: Remove support for Windows 9x.
 
