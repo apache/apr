@@ -824,6 +824,36 @@ else
 fi
 ])
 
+dnl Check for presence of struct sockaddr_un.
+AC_DEFUN([APR_CHECK_SOCKADDR_UN], [
+AC_CACHE_CHECK(for sockaddr_un, ac_cv_define_sockaddr_un,[
+AC_TRY_COMPILE([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_SYS_UN_H
+#include <sys/un.h>
+#endif
+],[
+struct sockaddr_un sa;
+],[
+    ac_cv_define_sockaddr_un=yes
+],[
+    ac_cv_define_sockaddr_un=no
+])
+])
+
+if test "$ac_cv_define_sockaddr_un" = "yes"; then
+  have_sockaddr_un=1
+else
+  have_sockaddr_un=0
+fi
+AC_SUBST(have_sockaddr_un)
+])
+
 dnl
 dnl APR_H_ERRNO_COMPILE_CHECK
 dnl

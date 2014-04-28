@@ -167,6 +167,14 @@ void apr_sockaddr_vars_set(apr_sockaddr_t *addr, int family, apr_port_t port)
         addr->ipaddr_len = sizeof(struct in6_addr);
     }
 #endif
+#if APR_HAVE_SOCKADDR_UN
+    else if (family == APR_UNIX) {
+        addr->salen = sizeof(struct sockaddr_un);
+        addr->addr_str_len = sizeof(addr->sa.unx.sun_path);;
+        addr->ipaddr_ptr = &(addr->sa.unx.sun_path);
+        addr->ipaddr_len = addr->addr_str_len;
+    }
+#endif
 }
 
 APR_DECLARE(apr_status_t) apr_socket_addr_get(apr_sockaddr_t **sa,
@@ -612,6 +620,33 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
         }
 #endif
     }
+    if (family == APR_UNSPEC && hostname && *hostname == '/') {
+        family = APR_UNIX;
+    }
+    if (family == APR_UNIX) {
+#if APR_HAVE_SOCKADDR_UN
+        if (hostname && *hostname == '/') {
+            *sa = apr_pcalloc(p, sizeof(apr_sockaddr_t));
+            (*sa)->pool = p;
+            apr_cpystrn((*sa)->sa.unx.sun_path, hostname,
+                        sizeof((*sa)->sa.unx.sun_path));
+            (*sa)->hostname = apr_pstrdup(p, hostname);
+            (*sa)->family = APR_UNIX;
+            (*sa)->sa.unx.sun_family = APR_UNIX;
+            (*sa)->salen = sizeof(struct sockaddr_un);
+            (*sa)->addr_str_len = sizeof((*sa)->sa.unx.sun_path);
+            (*sa)->ipaddr_ptr = &((*sa)->sa.unx.sun_path);
+            (*sa)->ipaddr_len = (*sa)->addr_str_len;
+
+            return APR_SUCCESS;
+        }
+        else
+#endif
+        {
+            *sa = NULL;
+            return APR_ENOTIMPL;
+        }
+    }
 #if !APR_HAVE_IPV6
     /* What may happen is that APR is not IPv6-enabled, but we're still
      * going to call getaddrinfo(), so we have to tell the OS we only
@@ -664,6 +699,12 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
                          tmphostname, sizeof(tmphostname), NULL, 0,
                          flags != 0 ? flags : NI_NAMEREQD);
     }
+#if APR_HAVE_SOCKADDR_UN
+    else if (sockaddr->family == APR_UNIX) {
+        *hostname = sockaddr->hostname;
+        return APR_SUCCESS;
+    }
+#endif
     else
 #endif
     rc = getnameinfo((const struct sockaddr *)&sockaddr->sa, sockaddr->salen,
