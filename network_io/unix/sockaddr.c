@@ -661,6 +661,42 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
     return find_addresses(sa, hostname, family, port, flags, p);
 }
 
+APR_DECLARE(apr_status_t) apr_sockaddr_info_copy(apr_sockaddr_t **dst,
+                                                 const apr_sockaddr_t *src,
+                                                 apr_pool_t *p)
+{
+    apr_sockaddr_t *d;
+    const apr_sockaddr_t *s;
+
+    for (*dst = d = NULL, s = src; s; s = s->next) {
+        if (!d) {
+            *dst = d = apr_pmemdup(p, s, sizeof *s);
+        }
+        else {
+            d = d->next = apr_pmemdup(p, s, sizeof *s);
+        }
+        if (s->hostname) {
+            if (s == src || s->hostname != src->hostname) {
+                d->hostname = apr_pstrdup(p, s->hostname);
+            }
+            else {
+                d->hostname = (*dst)->hostname;
+            }
+        }
+        if (s->servname) {
+            if (s == src || s->servname != src->servname) {
+                d->servname = apr_pstrdup(p, s->servname);
+            }
+            else {
+                d->servname = (*dst)->servname;
+            }
+        }
+        d->pool = p;
+        apr_sockaddr_vars_set(d, s->family, s->port);
+    }
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
                                           apr_sockaddr_t *sockaddr,
                                           apr_int32_t flags)

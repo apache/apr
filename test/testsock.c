@@ -97,6 +97,56 @@ static void test_addr_info(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, 0, ntohs(sa->sa.sin.sin_port));
 }
 
+static void test_addr_copy(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_sockaddr_t *sa1, *sa2;
+    int rc;
+    const char *hosts[] = {
+        "127.0.0.1",
+#if APR_HAVE_IPV6
+        "::1",
+#endif
+        NULL
+    }, **host = hosts;
+
+    /* Loop up to and including NULL */
+    do {
+        rv = apr_sockaddr_info_get(&sa1, *host, APR_UNSPEC, 80, 0, p);
+        APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
+
+        rv = apr_sockaddr_info_copy(&sa2, sa1, p);
+        APR_ASSERT_SUCCESS(tc, "Problem copying sockaddr", rv);
+
+        ABTS_PTR_NOTNULL(tc, sa1);
+        do {
+            ABTS_PTR_NOTNULL(tc, sa2);
+
+            rc = apr_sockaddr_equal(sa2, sa1);
+            ABTS_INT_NEQUAL(tc, 0, rc);
+            ABTS_INT_EQUAL(tc, 80, sa1->port);
+            ABTS_INT_EQUAL(tc, sa2->port, sa1->port);
+            ABTS_INT_EQUAL(tc, 80, ntohs(sa1->sa.sin.sin_port));
+            ABTS_INT_EQUAL(tc, ntohs(sa2->sa.sin.sin_port), ntohs(sa1->sa.sin.sin_port));
+
+            if (*host) {
+                ABTS_PTR_NOTNULL(tc, sa1->hostname);
+                ABTS_PTR_NOTNULL(tc, sa2->hostname);
+                ABTS_STR_EQUAL(tc, *host, sa1->hostname);
+                ABTS_STR_EQUAL(tc, sa1->hostname, sa2->hostname);
+                ABTS_TRUE(tc, sa1->hostname != sa2->hostname);
+            }
+            else {
+                ABTS_PTR_EQUAL(tc, NULL, sa1->hostname);
+                ABTS_PTR_EQUAL(tc, NULL, sa2->hostname);
+            }
+
+        } while ((sa2 = sa2->next, sa1 = sa1->next));
+        ABTS_PTR_EQUAL(tc, NULL, sa2);
+
+    } while (*host++);
+}
+
 static void test_serv_by_name(abts_case *tc, void *data)
 {
     apr_status_t rv;
@@ -499,6 +549,7 @@ abts_suite *testsock(abts_suite *suite)
     suite = ADD_SUITE(suite)
     socket_name = IPV4_SOCKET_NAME;
     abts_run_test(suite, test_addr_info, NULL);
+    abts_run_test(suite, test_addr_copy, NULL);
     abts_run_test(suite, test_serv_by_name, NULL);
     abts_run_test(suite, test_create_bind_listen, NULL);
     abts_run_test(suite, test_send, NULL);
