@@ -1,6 +1,12 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
+  *) Add new --enable-allocator-guard-pages which is like allocator-uses-mmap,
+     but will also add inaccessible guard pages before and after each memnode.
+     This will result in higher ressource usage but allow to find/protect
+     against certain buffer overflow/overread bugs. Under Linux, it may be
+     necessary to increase /proc/sys/vm/max_map_count . [Stefan Fritsch]
+
   *) Add new --enable-pool-concurrency-check configure option to detect
      thread-unsafe concurrent accesses to pools. Runtime costs should be
      relatively low. [Stefan Fritsch]
