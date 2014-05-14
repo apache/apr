@@ -40,6 +40,10 @@
 #include <unistd.h>     /* for getpid and sysconf */
 #endif
 
+#if APR_ALLOCATOR_GUARD_PAGES && !APR_ALLOCATOR_USES_MMAP
+#define APR_ALLOCATOR_USES_MMAP   1
+#endif
+
 #if APR_ALLOCATOR_USES_MMAP
 #include <sys/mman.h>
 #endif
@@ -90,6 +94,16 @@ static unsigned int boundary_size;
 #define BOUNDARY_INDEX 12
 #define BOUNDARY_SIZE (1 << BOUNDARY_INDEX)
 #endif
+
+#if APR_ALLOCATOR_GUARD_PAGES
+#if defined(_SC_PAGESIZE)
+#define GUARDPAGE_SIZE boundary_size
+#else
+#error Cannot determine page size
+#endif /* _SC_PAGESIZE */
+#else
+#define GUARDPAGE_SIZE 0
+#endif /* APR_ALLOCATOR_GUARD_PAGES */
 
 /* 
  * Timing constants for killing subprocesses
@@ -173,7 +187,8 @@ APR_DECLARE(void) apr_allocator_destroy(apr_allocator_t *allocator)
         while ((node = *ref) != NULL) {
             *ref = node->next;
 #if APR_ALLOCATOR_USES_MMAP
-            munmap(node, (node->index+1) << BOUNDARY_INDEX);
+            munmap((char *)node - GUARDPAGE_SIZE,
+                   2 * GUARDPAGE_SIZE + ((node->index+1) << BOUNDARY_INDEX));
 #else
             free(node);
 #endif
@@ -362,7 +377,10 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
     /* If we haven't got a suitable node, malloc a new one
      * and initialize it.
      */
-#if APR_ALLOCATOR_USES_MMAP
+#if APR_ALLOCATOR_GUARD_PAGES
+    if ((node = mmap(NULL, size + 2 * GUARDPAGE_SIZE, PROT_NONE,
+                     MAP_PRIVATE|MAP_ANON, -1, 0)) == MAP_FAILED)
+#elif APR_ALLOCATOR_USES_MMAP
     if ((node = mmap(NULL, size, PROT_READ|PROT_WRITE,
                      MAP_PRIVATE|MAP_ANON, -1, 0)) == MAP_FAILED)
 #else
@@ -370,6 +388,13 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
 #endif
         return NULL;
 
+#if APR_ALLOCATOR_GUARD_PAGES
+    node = (apr_memnode_t *)((char *)node + GUARDPAGE_SIZE);
+    if (mprotect(node, size, PROT_READ|PROT_WRITE) != 0) {
+        munmap((char *)node - GUARDPAGE_SIZE, size + 2 * GUARDPAGE_SIZE);
+        return NULL;
+    }
+#endif
     node->index = index;
     node->endp = (char *)node + size;
 
@@ -452,7 +477,8 @@ void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
         node = freelist;
         freelist = node->next;
 #if APR_ALLOCATOR_USES_MMAP
-        munmap(node, (node->index+1) << BOUNDARY_INDEX);
+        munmap((char *)node - GUARDPAGE_SIZE,
+               2 * GUARDPAGE_SIZE + ((node->index+1) << BOUNDARY_INDEX));
 #else
         free(node);
 #endif
