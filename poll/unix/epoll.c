@@ -366,7 +366,7 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
 static apr_status_t impl_pollcb_add(apr_pollcb_t *pollcb,
                                     apr_pollfd_t *descriptor)
 {
-    struct epoll_event ev;
+    struct epoll_event ev = { 0 };
     int ret;
     
     ev.events = get_epoll_event(descriptor->reqevents);
