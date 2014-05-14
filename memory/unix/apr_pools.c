@@ -64,6 +64,11 @@ int apr_running_on_valgrind = 0;
 #define APR_VALGRIND_UNDEFINED(addr_, size_)                    \
     APR_IF_VALGRIND(VALGRIND_MAKE_MEM_UNDEFINED(addr_, size_))
 
+
+#if APR_POOL_CONCURRENCY_CHECK && !APR_HAS_THREADS
+#error pool-concurrency-check does not make sense without threads
+#endif
+
 /*
  * Magic numbers
  */
@@ -555,6 +560,10 @@ struct apr_pool_t {
     apr_os_proc_t         owner_proc;
 #endif /* defined(NETWARE) */
     cleanup_t            *pre_cleanups;
+#if APR_POOL_CONCURRENCY_CHECK
+    volatile apr_uint32_t in_use;
+    apr_os_thread_t       in_use_by;
+#endif /* APR_POOL_CONCURRENCY_CHECK */
 };
 
 #define SIZEOF_POOL_T       APR_ALIGN_DEFAULT(sizeof(apr_pool_t))
@@ -688,6 +697,65 @@ APR_DECLARE(void) apr_pool_terminate(void)
 #define node_free_space(node_) ((apr_size_t)(node_->endp - node_->first_avail))
 
 /*
+ * Helpers to mark pool as in-use/free. Used for finding thread-unsafe
+ * concurrent accesses from different threads.
+ */
+#if APR_POOL_CONCURRENCY_CHECK
+static void pool_concurrency_abort(apr_pool_t *pool, const char *func, apr_uint32_t old)
+{
+    fprintf(stderr, "%s: previous state %d in_use_by/cur %lx/%lx pool %p(%s)\n",
+            func, old,
+            (unsigned long)pool->in_use_by,
+            (unsigned long)apr_os_thread_current(),
+            pool, pool->tag);
+    abort();
+}
+
+static APR_INLINE void pool_concurrency_set_used(apr_pool_t *pool)
+{
+    apr_uint32_t old;
+
+    old = apr_atomic_cas32(&pool->in_use, 1, 0);
+
+    if (old == 2 && pool->in_use_by == apr_os_thread_current()) {
+        /* cleanups may use the pool */
+        return;
+    }
+
+    if (old != 0)
+        pool_concurrency_abort(pool, __func__, old);
+
+    pool->in_use_by = apr_os_thread_current();
+}
+
+static APR_INLINE void pool_concurrency_set_idle(apr_pool_t *pool)
+{
+    apr_uint32_t old;
+
+    old = apr_atomic_cas32(&pool->in_use, 0, 1);
+
+    if (old != 1)
+        pool_concurrency_abort(pool, __func__, old);
+}
+
+static APR_INLINE void pool_concurrency_init(apr_pool_t *pool)
+{
+    pool->in_use = 0;
+}
+
+static APR_INLINE void pool_concurrency_set_destroyed(apr_pool_t *pool)
+{
+    apr_atomic_set32(&pool->in_use, 3);
+    pool->in_use_by = apr_os_thread_current();
+}
+#else
+static APR_INLINE void pool_concurrency_init(apr_pool_t *pool)          { }
+static APR_INLINE void pool_concurrency_set_used(apr_pool_t *pool)      { }
+static APR_INLINE void pool_concurrency_set_idle(apr_pool_t *pool)      { }
+static APR_INLINE void pool_concurrency_set_destroyed(apr_pool_t *pool) { }
+#endif /* APR_POOL_CONCURRENCY_CHECK */
+
+/*
  * Memory allocation
  */
 
@@ -697,12 +765,14 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t in_size)
     void *mem;
     apr_size_t size, free_index;
 
+    pool_concurrency_set_used(pool);
     size = APR_ALIGN_DEFAULT(in_size);
 #if HAVE_VALGRIND
     if (apr_running_on_valgrind)
         size += 2 * REDZONE;
 #endif
     if (size < in_size) {
+        pool_concurrency_set_idle(pool);
         if (pool->abort_fn)
             pool->abort_fn(APR_ENOMEM);
 
@@ -723,6 +793,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t in_size)
     }
     else {
         if ((node = allocator_alloc(pool->allocator, size)) == NULL) {
+            pool_concurrency_set_idle(pool);
             if (pool->abort_fn)
                 pool->abort_fn(APR_ENOMEM);
 
@@ -758,14 +829,17 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t in_size)
 have_mem:
 #if HAVE_VALGRIND
     if (!apr_running_on_valgrind) {
+        pool_concurrency_set_idle(pool);
         return mem;
     }
     else {
         mem = (char *)mem + REDZONE;
         VALGRIND_MEMPOOL_ALLOC(pool, mem, in_size);
+        pool_concurrency_set_idle(pool);
         return mem;
     }
 #else
+    pool_concurrency_set_idle(pool);
     return mem;
 #endif
 }
@@ -801,7 +875,10 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
 
     /* Run pre destroy cleanups */
     run_cleanups(&pool->pre_cleanups);
+
+    pool_concurrency_set_used(pool);
     pool->pre_cleanups = NULL;
+    pool_concurrency_set_idle(pool);
 
     /* Destroy the subpools.  The subpools will detach themselves from
      * this pool thus this loop is safe and easy.
@@ -811,6 +888,8 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
 
     /* Run cleanups */
     run_cleanups(&pool->cleanups);
+
+    pool_concurrency_set_used(pool);
     pool->cleanups = NULL;
     pool->free_cleanups = NULL;
 
@@ -829,13 +908,17 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
 
     APR_IF_VALGRIND(VALGRIND_MEMPOOL_TRIM(pool, pool, 1));
 
-    if (active->next == active)
+    if (active->next == active) {
+        pool_concurrency_set_idle(pool);
         return;
+    }
 
     *active->ref = NULL;
     allocator_free(pool->allocator, active->next);
     active->next = active;
     active->ref = &active->next;
+
+    pool_concurrency_set_idle(pool);
 }
 
 APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
@@ -845,7 +928,10 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
 
     /* Run pre destroy cleanups */
     run_cleanups(&pool->pre_cleanups);
+
+    pool_concurrency_set_used(pool);
     pool->pre_cleanups = NULL;
+    pool_concurrency_set_idle(pool);
 
     /* Destroy the subpools.  The subpools will detach themselve from
      * this pool thus this loop is safe and easy.
@@ -855,6 +941,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
 
     /* Run cleanups */
     run_cleanups(&pool->cleanups);
+    pool_concurrency_set_destroyed(pool);
 
     /* Free subprocesses */
     free_proc_chain(pool->subprocesses);
@@ -1000,6 +1087,8 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
         pool->ref = NULL;
     }
 
+    pool_concurrency_init(pool);
+
     *newpool = pool;
 
     return APR_SUCCESS;
@@ -1069,6 +1158,8 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
 #endif /* defined(NETWARE) */
     if (!allocator)
         pool_allocator->owner = pool;
+
+    pool_concurrency_init(pool);
     *newpool = pool;
 
     return APR_SUCCESS;
@@ -1214,6 +1305,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     apr_memnode_t *active, *node;
     apr_size_t free_index;
 
+    pool_concurrency_set_used(pool);
     ps.node = active = pool->active;
     ps.pool = pool;
     ps.vbuff.curpos  = ps.node->first_avail;
@@ -1276,8 +1368,10 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     /*
      * Link the node in if it's a new one
      */
-    if (!ps.got_a_new_node)
+    if (!ps.got_a_new_node) {
+        pool_concurrency_set_idle(pool);
         return strp;
+    }
 
     active = pool->active;
     node = ps.node;
@@ -1294,8 +1388,10 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     active->free_index = (APR_UINT32_TRUNC_CAST)free_index;
     node = active->next;
 
-    if (free_index >= node->free_index)
+    if (free_index >= node->free_index) {
+        pool_concurrency_set_idle(pool);
         return strp;
+    }
 
     do {
         node = node->next;
@@ -1305,9 +1401,11 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     list_remove(active);
     list_insert(active, node);
 
+    pool_concurrency_set_idle(pool);
     return strp;
 
 error:
+    pool_concurrency_set_idle(pool);
     if (pool->abort_fn)
         pool->abort_fn(APR_ENOMEM);
     if (ps.got_a_new_node) {

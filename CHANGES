@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
+  *) Add new --enable-pool-concurrency-check configure option to detect
+     thread-unsafe concurrent accesses to pools. Runtime costs should be
+     relatively low. [Stefan Fritsch]
+
   *) Add support code to teach valgrind about APR pools and allocators.
      [Stefan Fritsch]
 
