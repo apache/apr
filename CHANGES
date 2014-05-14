@@ -1,20 +1,6 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
-  *) Add new --enable-allocator-guard-pages which is like allocator-uses-mmap,
-     but will also add inaccessible guard pages before and after each memnode.
-     This will result in higher ressource usage but allow to find/protect
-     against certain buffer overflow/overread bugs. Under Linux, it may be
-     necessary to increase /proc/sys/vm/max_map_count . [Stefan Fritsch]
-
-  *) Add new --enable-pool-concurrency-check configure option to detect
-     thread-unsafe concurrent accesses to pools. Runtime costs should be
-     relatively low. [Stefan Fritsch]
-
-  *) Add apr_sockaddr_info_copy(), for making a deep copy of an
-     apr_sockaddr_t into a specified pool.  [Yann Ylavic
-     <ylavic.dev gmail.com>]
-
   *) Windows platform: Remove support for Windows 9x.
 
   *) Added signed apr_intptr_t.  Changed ODBC dbd driver to use this.
@@ -59,10 +45,6 @@ Changes for APR 2.0.0
      [Jochen Voss (no e-mail)]
 
   *) Added Unix domain socket support.  [Mladen Turk]
-
-  *) Introduce APR_PERMS_SET macros for setting the owner/group on objects
-     Currently only implemented for shm, proc and global mutexes on posix
-     platforms.  [Mladen Turk]
 
   *) Merge APR-util into APR.  [various]
 
