@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
+  *) Add support code to teach valgrind about APR pools and allocators.
+     [Stefan Fritsch]
+
   *) Add apr_sockaddr_info_copy(), for making a deep copy of an
      apr_sockaddr_t into a specified pool.  [Yann Ylavic
      <ylavic.dev gmail.com>]

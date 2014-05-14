@@ -27,6 +27,7 @@
 #include "apr_thread_mutex.h"
 #include "apr_hash.h"
 #include "apr_time.h"
+#include "apr_support.h"
 #define APR_WANT_MEMFUNC
 #include "apr_want.h"
 #include "apr_env.h"
@@ -42,6 +43,26 @@
 #if APR_ALLOCATOR_USES_MMAP
 #include <sys/mman.h>
 #endif
+
+#if HAVE_VALGRIND
+#include <valgrind.h>
+#include <memcheck.h>
+
+#define REDZONE APR_ALIGN_DEFAULT(8)
+int apr_running_on_valgrind = 0;
+#define APR_IF_VALGRIND(x)                                      \
+    do { if (apr_running_on_valgrind) { x; } } while (0)
+
+#else
+
+#define APR_IF_VALGRIND(x)
+
+#endif /* HAVE_VALGRIND */
+
+#define APR_VALGRIND_NOACCESS(addr_, size_)                     \
+    APR_IF_VALGRIND(VALGRIND_MAKE_MEM_NOACCESS(addr_, size_))
+#define APR_VALGRIND_UNDEFINED(addr_, size_)                    \
+    APR_IF_VALGRIND(VALGRIND_MAKE_MEM_UNDEFINED(addr_, size_))
 
 /*
  * Magic numbers
@@ -287,10 +308,7 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
                 apr_thread_mutex_unlock(allocator->mutex);
 #endif /* APR_HAS_THREADS */
 
-            node->next = NULL;
-            node->first_avail = (char *)node + APR_MEMNODE_T_SIZE;
-
-            return node;
+            goto have_node;
         }
 
 #if APR_HAS_THREADS
@@ -327,10 +345,7 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
                 apr_thread_mutex_unlock(allocator->mutex);
 #endif /* APR_HAS_THREADS */
 
-            node->next = NULL;
-            node->first_avail = (char *)node + APR_MEMNODE_T_SIZE;
-
-            return node;
+            goto have_node;
         }
 
 #if APR_HAS_THREADS
@@ -350,10 +365,14 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
 #endif
         return NULL;
 
-    node->next = NULL;
     node->index = (APR_UINT32_TRUNC_CAST)index;
-    node->first_avail = (char *)node + APR_MEMNODE_T_SIZE;
     node->endp = (char *)node + size;
+
+have_node:
+    node->next = NULL;
+    node->first_avail = (char *)node + APR_MEMNODE_T_SIZE;
+
+    APR_VALGRIND_UNDEFINED(node->first_avail, size - APR_MEMNODE_T_SIZE);
 
     return node;
 }
@@ -380,6 +399,9 @@ void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
     do {
         next = node->next;
         index = node->index;
+
+        APR_VALGRIND_NOACCESS((char *)node + APR_MEMNODE_T_SIZE,
+                              (node->index+1) << BOUNDARY_INDEX);
 
         if (max_free_index != APR_ALLOCATOR_MAX_FREE_UNLIMITED
             && index + 1 > current_free_index) {
@@ -576,6 +598,10 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
     if (apr_pools_initialized++)
         return APR_SUCCESS;
 
+#if HAVE_VALGRIND
+    apr_running_on_valgrind = RUNNING_ON_VALGRIND;
+#endif
+
 #if APR_ALLOCATOR_USES_MMAP && defined(_SC_PAGESIZE)
     boundary_size = sysconf(_SC_PAGESIZE);
     boundary_index = 12;
@@ -672,6 +698,10 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t in_size)
     apr_size_t size, free_index;
 
     size = APR_ALIGN_DEFAULT(in_size);
+#if HAVE_VALGRIND
+    if (apr_running_on_valgrind)
+        size += 2 * REDZONE;
+#endif
     if (size < in_size) {
         if (pool->abort_fn)
             pool->abort_fn(APR_ENOMEM);
@@ -684,8 +714,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t in_size)
     if (size <= node_free_space(active)) {
         mem = active->first_avail;
         active->first_avail += size;
-
-        return mem;
+        goto have_mem;
     }
 
     node = active->next;
@@ -716,7 +745,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t in_size)
     active->free_index = (APR_UINT32_TRUNC_CAST)free_index;
     node = active->next;
     if (free_index >= node->free_index)
-        return mem;
+        goto have_mem;
 
     do {
         node = node->next;
@@ -726,7 +755,19 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t in_size)
     list_remove(active);
     list_insert(active, node);
 
+have_mem:
+#if HAVE_VALGRIND
+    if (!apr_running_on_valgrind) {
+        return mem;
+    }
+    else {
+        mem = (char *)mem + REDZONE;
+        VALGRIND_MEMPOOL_ALLOC(pool, mem, in_size);
+        return mem;
+    }
+#else
     return mem;
+#endif
 }
 
 /* Provide an implementation of apr_pcalloc for backward compatibility
@@ -785,6 +826,8 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
      */
     active = pool->active = pool->self;
     active->first_avail = pool->self_first_avail;
+
+    APR_IF_VALGRIND(VALGRIND_MEMPOOL_TRIM(pool, pool, 1));
 
     if (active->next == active)
         return;
@@ -863,6 +906,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
     if (apr_allocator_owner_get(allocator) == pool) {
         apr_allocator_destroy(allocator);
     }
+    APR_IF_VALGRIND(VALGRIND_DESTROY_MEMPOOL(pool));
 }
 
 APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
@@ -899,8 +943,23 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     node->next = node;
     node->ref = &node->next;
 
+#if HAVE_VALGRIND
+    if (!apr_running_on_valgrind) {
+        pool = (apr_pool_t *)node->first_avail;
+        pool->self_first_avail = (char *)pool + SIZEOF_POOL_T;
+    }
+    else {
+        pool = (apr_pool_t *)(node->first_avail + REDZONE);
+        pool->self_first_avail = (char *)pool + SIZEOF_POOL_T + 2 * REDZONE;
+        VALGRIND_MAKE_MEM_NOACCESS(pool->self_first_avail,
+                                   node->endp - pool->self_first_avail);
+        VALGRIND_CREATE_MEMPOOL(pool, REDZONE, 0);
+    }
+#else
     pool = (apr_pool_t *)node->first_avail;
-    node->first_avail = pool->self_first_avail = (char *)pool + SIZEOF_POOL_T;
+    pool->self_first_avail = (char *)pool + SIZEOF_POOL_T;
+#endif
+    node->first_avail = pool->self_first_avail;
 
     pool->allocator = allocator;
     pool->active = pool->self = node;
@@ -1105,7 +1164,11 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
         ps->got_a_new_node = 1;
     }
 
+    APR_VALGRIND_UNDEFINED(node->first_avail,
+                           node->endp - node->first_avail);
     memcpy(node->first_avail, active->first_avail, cur_len);
+    APR_VALGRIND_NOACCESS(active->first_avail,
+                          active->endp - active->first_avail);
 
     ps->node = node;
     ps->vbuff.curpos = node->first_avail + cur_len;
@@ -1113,6 +1176,35 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
 
     return 0;
 }
+
+#if HAVE_VALGRIND
+static int add_redzone(int (*flush_func)(apr_vformatter_buff_t *b),
+                       struct psprintf_data *ps)
+{
+    apr_size_t len = ps->vbuff.curpos - ps->node->first_avail + REDZONE;
+
+    while (ps->vbuff.curpos - ps->node->first_avail < len) {
+        if (ps->vbuff.endpos - ps->node->first_avail >= len)
+            ps->vbuff.curpos = ps->node->first_avail + len;
+        else
+            ps->vbuff.curpos = ps->vbuff.endpos;
+
+        /*
+         * Prevent valgrind from complaining when psprintf_flush()
+         * does a memcpy(). The VALGRIND_MEMPOOL_ALLOC() will reset
+         * the redzone to NOACCESS.
+         */
+        if (ps->vbuff.curpos != ps->node->first_avail)
+            VALGRIND_MAKE_MEM_DEFINED(ps->node->first_avail,
+                                      ps->vbuff.curpos - ps->node->first_avail);
+        if (ps->vbuff.curpos == ps->vbuff.endpos) {
+            if (psprintf_flush(&ps->vbuff) == -1)
+                return -1;
+        }
+    }
+    return 0;
+}
+#endif
 
 APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
 {
@@ -1136,18 +1228,46 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
      */
     if (ps.node->first_avail == ps.node->endp) {
         if (psprintf_flush(&ps.vbuff) == -1)
-           goto error;
+            goto error;
     }
+#if HAVE_VALGRIND
+    if (apr_running_on_valgrind) {
+        if (add_redzone(psprintf_flush, &ps) == -1)
+            goto error;
+        if (!ps.got_a_new_node) {
+            /* psprintf_flush() has not been called, allow access to our node */
+            VALGRIND_MAKE_MEM_UNDEFINED(ps.vbuff.curpos,
+                                        ps.node->endp - ps.vbuff.curpos);
+        }
+    }
+#endif /* HAVE_VALGRIND */
 
     if (apr_vformatter(psprintf_flush, &ps.vbuff, fmt, ap) == -1)
         goto error;
 
-    strp = ps.vbuff.curpos;
-    *strp++ = '\0';
+    *ps.vbuff.curpos++ = '\0';
 
-    size = strp - ps.node->first_avail;
-    size = APR_ALIGN_DEFAULT(size);
+#if HAVE_VALGRIND
+    if (!apr_running_on_valgrind) {
+        strp = ps.node->first_avail;
+    }
+    else {
+        if (add_redzone(psprintf_flush, &ps) == -1)
+            goto error;
+        if (ps.node->endp != ps.vbuff.curpos)
+            APR_VALGRIND_NOACCESS(ps.vbuff.curpos,
+                                  ps.node->endp - ps.vbuff.curpos);
+        strp = ps.node->first_avail + REDZONE;
+        size = ps.vbuff.curpos - strp;
+        VALGRIND_MEMPOOL_ALLOC(pool, strp, size);
+        VALGRIND_MAKE_MEM_DEFINED(strp, size);
+    }
+#else
     strp = ps.node->first_avail;
+#endif
+
+    size = ps.vbuff.curpos - ps.node->first_avail;
+    size = APR_ALIGN_DEFAULT(size);
     ps.node->first_avail += size;
 
     if (ps.free)
@@ -1194,6 +1314,8 @@ error:
         ps.node->next = ps.free;
         allocator_free(pool->allocator, ps.node);
     }
+    APR_VALGRIND_NOACCESS(pool->active->first_avail,
+                          pool->active->endp - pool->active->first_avail);
     return NULL;
 }
 
