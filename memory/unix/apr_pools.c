@@ -1458,7 +1458,7 @@ static void apr_pool_check_integrity(apr_pool_t *pool)
     if (!apr_pool_is_child_of(pool, global_pool)) {
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
         apr_pool_log_event(pool, "LIFE",
-                           __FILE__ ":apr_pool_integrity check", 0);
+                           __FILE__ ":apr_pool_integrity check [lifetime]", 0);
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL) */
         abort();
     }
@@ -1469,7 +1469,7 @@ static void apr_pool_check_integrity(apr_pool_t *pool)
     if (!apr_os_thread_equal(pool->owner, apr_os_thread_current())) {
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
         apr_pool_log_event(pool, "THREAD",
-                           __FILE__ ":apr_pool_integrity check", 0);
+                           __FILE__ ":apr_pool_integrity check [owner]", 0);
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL) */
         abort();
     }
@@ -1976,7 +1976,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
     *newpool = pool;
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
-    apr_pool_log_event(pool, "CREATE", file_line, 1);
+    apr_pool_log_event(pool, "CREATEU", file_line, 1);
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
 
     return APR_SUCCESS;
