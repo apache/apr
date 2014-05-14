@@ -468,7 +468,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 apr_status_t r;
                 r = (*c->perms_set_fn)((void *)c->data, c->perms,
                                        attr->uid, attr->gid);
-                if (r != APR_SUCCESS || r != APR_ENOTIMPL) {
+                if (r != APR_SUCCESS && r != APR_ENOTIMPL) {
                     _exit(-1);
                 }
                 c = c->next;
