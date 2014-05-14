@@ -439,8 +439,8 @@ void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
             freelist = node;
         }
         else if (index < MAX_INDEX) {
-            /* Add the node to the appropiate 'size' bucket.  Adjust
-             * the max_index when appropiate.
+            /* Add the node to the appropriate 'size' bucket.  Adjust
+             * the max_index when appropriate.
              */
             if ((node->next = allocator->free[index]) == NULL
                 && index > max_index) {
