@@ -239,7 +239,7 @@ static APR_INLINE
 apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
 {
     apr_memnode_t *node, **ref;
-    apr_uint32_t max_index;
+    apr_uint32_t max_index, upper_index;
     apr_size_t size, i, index;
 
     /* Round up the block size to the next boundary, but always
@@ -273,6 +273,11 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
         /* Walk the free list to see if there are
          * any nodes on it of the requested size
          *
+         * If there is no exact match, look for nodes
+         * of up to twice the requested size, so we
+         * won't unnecessarily allocate more memory
+         * nor waste too much of what we have.
+         *
          * NOTE: an optimization would be to check
          * allocator->free[index] first and if no
          * node is present, directly use
@@ -281,9 +286,10 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
          * memory waste.
          */
         max_index = allocator->max_index;
+        upper_index = 2 * index < max_index ? 2 * index : max_index;
         ref = &allocator->free[index];
         i = index;
-        while (*ref == NULL && i < max_index) {
+        while (*ref == NULL && i < upper_index) {
            ref++;
            i++;
         }
