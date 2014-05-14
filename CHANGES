@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_allocator: Be less wasteful and don't return a memnode that is
+     much larger than what was requested. [Stefan Fuhrmann
+     <stefan fuhrmann wandisco com>]
+
   *) Windows platform: Remove support for Windows 9x.
 
   *) Added signed apr_intptr_t.  Changed ODBC dbd driver to use this.
