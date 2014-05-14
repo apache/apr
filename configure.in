@@ -1576,6 +1576,14 @@ AC_ARG_ENABLE(allocator-uses-mmap,
     fi ]
 )
 
+AC_ARG_ENABLE(pool-concurrency-check,
+  [  --enable-pool-concurrency-check Check for concurrent usage of memory pools],
+  [ if test "$enableval" = "yes"; then
+    AC_DEFINE(APR_POOL_CONCURRENCY_CHECK, 1,
+               [Define if pool functions should abort if concurrent usage is detected])
+    fi ]
+)
+
 dnl ----------------------------- Checks for standard typedefs
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
