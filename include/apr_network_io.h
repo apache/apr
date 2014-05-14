@@ -847,7 +847,7 @@ APR_DECLARE_INHERIT_UNSET(socket);
 /**
  * Set socket permissions.
  */
-APR_PERMS_SET_IMPLEMENT(global_mutex);
+APR_PERMS_SET_IMPLEMENT(socket);
 
 /**
  * @defgroup apr_mcast IP Multicast
