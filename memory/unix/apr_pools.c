@@ -587,6 +587,10 @@ struct apr_pool_t {
 #endif /* defined(NETWARE) */
     cleanup_t            *pre_cleanups;
 #if APR_POOL_CONCURRENCY_CHECK
+
+#define                   IDLE        0
+#define                   IN_USE      1
+#define                   DESTROYED   2
     volatile apr_uint32_t in_use;
     apr_os_thread_t       in_use_by;
 #endif /* APR_POOL_CONCURRENCY_CHECK */
@@ -727,13 +731,16 @@ APR_DECLARE(void) apr_pool_terminate(void)
  * concurrent accesses from different threads.
  */
 #if APR_POOL_CONCURRENCY_CHECK
-static void pool_concurrency_abort(apr_pool_t *pool, const char *func, apr_uint32_t old)
+
+static const char * const in_use_string[] = { "idle", "in use", "destroyed" };
+
+static void pool_concurrency_abort(apr_pool_t *pool, apr_uint32_t new, apr_uint32_t old)
 {
-    fprintf(stderr, "%s: previous state %d in_use_by/cur %lx/%lx pool %p(%s)\n",
-            func, old,
-            (unsigned long)pool->in_use_by,
-            (unsigned long)apr_os_thread_current(),
-            pool, pool->tag);
+    fprintf(stderr, "pool concurrency check: pool %p(%s), thread cur %lx "
+                    "in use by %lx, state %s -> %s \n",
+                    pool, pool->tag, (unsigned long)apr_os_thread_current(),
+                    (unsigned long)pool->in_use_by,
+                    in_use_string[old], in_use_string[new]);
     abort();
 }
 
@@ -741,15 +748,10 @@ static APR_INLINE void pool_concurrency_set_used(apr_pool_t *pool)
 {
     apr_uint32_t old;
 
-    old = apr_atomic_cas32(&pool->in_use, 1, 0);
+    old = apr_atomic_cas32(&pool->in_use, IN_USE, IDLE);
 
-    if (old == 2 && pool->in_use_by == apr_os_thread_current()) {
-        /* cleanups may use the pool */
-        return;
-    }
-
-    if (old != 0)
-        pool_concurrency_abort(pool, __func__, old);
+    if (old != IDLE)
+        pool_concurrency_abort(pool, IN_USE, old);
 
     pool->in_use_by = apr_os_thread_current();
 }
@@ -758,20 +760,25 @@ static APR_INLINE void pool_concurrency_set_idle(apr_pool_t *pool)
 {
     apr_uint32_t old;
 
-    old = apr_atomic_cas32(&pool->in_use, 0, 1);
+    old = apr_atomic_cas32(&pool->in_use, IDLE, IN_USE);
 
-    if (old != 1)
-        pool_concurrency_abort(pool, __func__, old);
+    if (old != IN_USE)
+        pool_concurrency_abort(pool, IDLE, old);
 }
 
 static APR_INLINE void pool_concurrency_init(apr_pool_t *pool)
 {
-    pool->in_use = 0;
+    pool->in_use = IDLE;
 }
 
 static APR_INLINE void pool_concurrency_set_destroyed(apr_pool_t *pool)
 {
-    apr_atomic_set32(&pool->in_use, 3);
+    apr_uint32_t old;
+
+    old = apr_atomic_cas32(&pool->in_use, DESTROYED, IDLE);
+
+    if (old != IDLE)
+        pool_concurrency_abort(pool, DESTROYED, old);
     pool->in_use_by = apr_os_thread_current();
 }
 #else
