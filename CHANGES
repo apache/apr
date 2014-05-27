@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_skiplist: Add apr_skiplist_add() to support multiple values.
+
   *) apr_allocator: Be less wasteful and don't return a memnode that is
      much larger than what was requested. [Stefan Fuhrmann
      <stefan fuhrmann wandisco com>]
