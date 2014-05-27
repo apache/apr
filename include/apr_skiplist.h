@@ -180,11 +180,22 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl,
                                           void *data, apr_skiplist_compare comp);
 
 /**
+ * Add an element into the skip list using the existing comparison function.
+ * @param sl The skip list
+ * @param data The element to insert
+ * @remark If no comparison function has been set for the skip list, the element
+ * will not be inserted and NULL will be returned. This allows for multiple
+ * values to be added to the skiplist. To replace values, use apr_skiplist_insert().
+ */
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_add(apr_skiplist* sl, void *data);
+
+/**
  * Insert an element into the skip list using the existing comparison function.
  * @param sl The skip list
  * @param data The element to insert
  * @remark If no comparison function has been set for the skip list, the element
- * will not be inserted and NULL will be returned.
+ * will not be inserted and NULL will be returned. Previous values will
+ * be over-written. Use apr_skiplist_add() to allow multiple values.
  */
 APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert(apr_skiplist* sl, void *data);
 

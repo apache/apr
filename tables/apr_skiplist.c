@@ -339,16 +339,8 @@ APR_DECLARE(void *) apr_skiplist_previous(apr_skiplist *sl, apr_skiplistnode **i
     return (*iter) ? ((*iter)->data) : NULL;
 }
 
-APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert(apr_skiplist *sl, void *data)
-{
-    if (!sl->compare) {
-        return 0;
-    }
-    return apr_skiplist_insert_compare(sl, data, sl->compare);
-}
-
-APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, void *data,
-                                      apr_skiplist_compare comp)
+static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
+                                        apr_skiplist_compare comp, int replace)
 {
     apr_skiplistnode *m, *p, *tmp, *ret = NULL, **stack;
     int nh = 1, ch, stacki;
@@ -406,11 +398,11 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, vo
         if (m->next) {
             compared = comp(data, m->next->data);
         }
-        if (compared == 0) {
+        if (compared == 0 && replace) {
             free(stack);    /* OK. was malloc'ed */
             return 0;
         }
-        if ((m->next == NULL) || (compared < 0)) {
+        if ( (compared < 0) || (replace && (m->next == NULL)) ) {
             if (ch <= nh) {
                 /* push on stack */
                 stack[stacki++] = m;
@@ -468,6 +460,34 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, vo
     }
     sl->size++;
     return ret;
+}
+
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert(apr_skiplist *sl, void *data)
+{
+    if (!sl->compare) {
+        return 0;
+    }
+    return insert_compare(sl, data, sl->compare, 1);
+}
+
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_add_compare(apr_skiplist *sl, void *data,
+                                      apr_skiplist_compare comp)
+{
+    return insert_compare(sl, data, comp, 0);
+}
+
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_add(apr_skiplist *sl, void *data)
+{
+    if (!sl->compare) {
+        return 0;
+    }
+    return insert_compare(sl, data, sl->compare, 0);
+}
+
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, void *data,
+                                      apr_skiplist_compare comp)
+{
+    return insert_compare(sl, data, comp, 1);
 }
 
 APR_DECLARE(int) apr_skiplist_remove(apr_skiplist *sl, void *data, apr_skiplist_freefunc myfree)
