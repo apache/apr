@@ -229,7 +229,7 @@ APR_DECLARE(void) apr_skiplist_remove_all(apr_skiplist *sl, apr_skiplist_freefun
 APR_DECLARE(void) apr_skiplist_destroy(apr_skiplist *sl, apr_skiplist_freefunc myfree);
 
 /**
- * Return the first element in the skip list, leaving the element in the skip list.
+ * Return the first element in the skip list, removing the element from the skip list.
  * @param sl The skip list
  * @param myfree A function to be called for the removed element
  * @remark NULL will be returned if there are no elements
