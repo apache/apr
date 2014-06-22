@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_skiplist: Fix potential corruption of skiplists leading to 
+     results or crashes. [Takashi Sato <takashi tks st>, Eric Covener]
+     PR 56654.
+
   *) apr_skiplist: Add apr_skiplist_add() to support multiple values.
 
   *) apr_allocator: Be less wasteful and don't return a memnode that is
