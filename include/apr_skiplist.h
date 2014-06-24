@@ -180,6 +180,15 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl,
                                           void *data, apr_skiplist_compare comp);
 
 /**
+ * Add an element into the skip list using the specified comparison function.
+ * @param sl The skip list
+ * @param data The element to add
+ * @param comp The comparison function to use for placement into the skip list
+ */
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_add_compare(apr_skiplist *sl,
+                                          void *data, apr_skiplist_compare comp);
+
+/**
  * Add an element into the skip list using the existing comparison function.
  * @param sl The skip list
  * @param data The element to insert
