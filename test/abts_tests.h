@@ -67,7 +67,8 @@ const struct testlist {
     {testtime},
     {testud},
     {testuser},
-    {testvsn}
+    {testvsn},
+    {testskiplist}
 };
 
 #endif /* APR_TEST_INCLUDES */

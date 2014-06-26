@@ -103,5 +103,6 @@ abts_suite *testtime(abts_suite *suite);
 abts_suite *testud(abts_suite *suite);
 abts_suite *testuser(abts_suite *suite);
 abts_suite *testvsn(abts_suite *suite);
+abts_suite *testskiplist(abts_suite *suite);
 
 #endif /* APR_TEST_INCLUDES */
