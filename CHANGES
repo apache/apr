@@ -1,7 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.2
 
-  *)
+  *) apr_skiplist: Fix potential corruption of skiplists leading to 
+     results or crashes. [Takashi Sato <takashi tks st>, Eric Covener]
+     PR 56654.
 
 Changes for APR 1.5.1
 
