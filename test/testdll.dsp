@@ -311,6 +311,10 @@ SOURCE=.\testshm.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\testskiplist.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\testsleep.c
 # End Source File
 # Begin Source File
