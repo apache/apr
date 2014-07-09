@@ -59,7 +59,7 @@ extern "C" {
  
 #define APR_FNM_NOESCAPE    0x01  /**< Disable backslash escaping. */
 #define APR_FNM_PATHNAME    0x02  /**< Slash must be matched by slash. */
-#define APR_FNM_PERIOD      0x04  /**< Period must be matched by period. */
+#define APR_FNM_PERIOD      0x04  /**< Leading period must be matched by period. */
 #define APR_FNM_CASE_BLIND  0x08  /**< Compare characters case-insensitively. */
 
 /**
@@ -112,7 +112,7 @@ extern "C" {
  * <pre>
  *              APR_FNM_NOESCAPE       Disable backslash escaping
  *              APR_FNM_PATHNAME       Slash must be matched by slash
- *              APR_FNM_PERIOD         Period must be matched by period
+ *              APR_FNM_PERIOD         Leading period must be matched by period
  *              APR_FNM_CASE_BLIND     Compare characters case-insensitively.
  * </pre>
  */
