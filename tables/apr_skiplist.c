@@ -629,6 +629,9 @@ APR_DECLARE(void) apr_skiplist_destroy(apr_skiplist *sl, apr_skiplist_freefunc m
     while (apr_skiplist_pop(sl->index, skiplisti_destroy) != NULL)
         ;
     apr_skiplist_remove_all(sl, myfree);
+    if (!sl->pool) {
+        free(sl);
+    }
 }
 
 APR_DECLARE(apr_skiplist *) apr_skiplist_merge(apr_skiplist *sl1, apr_skiplist *sl2)
