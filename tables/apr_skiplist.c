@@ -52,10 +52,6 @@ struct apr_skiplistnode {
     apr_skiplist *sl;
 };
 
-#ifndef MIN
-#define MIN(a,b) ((a<b)?(a):(b))
-#endif
-
 static int get_b_rand(void)
 {
     static int ph = 32;         /* More bits than we will ever use */
@@ -103,7 +99,7 @@ APR_DECLARE(void *) apr_skiplist_alloc(apr_skiplist *sl, size_t size)
             memlist++;
         }
         /* no free chunks */
-        ptr = apr_pcalloc(sl->pool, size);
+        ptr = apr_palloc(sl->pool, size);
         if (!ptr) {
             return ptr;
         }
@@ -122,7 +118,7 @@ APR_DECLARE(void *) apr_skiplist_alloc(apr_skiplist *sl, size_t size)
         return ptr;
     }
     else {
-        return calloc(1, size);
+        return malloc(size);
     }
 }
 
@@ -348,15 +344,13 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
         sl->height = 1;
         sl->topend = sl->bottomend = sl->top = sl->bottom =
             (apr_skiplistnode *)apr_skiplist_alloc(sl, sizeof(apr_skiplistnode));
-#if 0
-        sl->top->next = (apr_skiplistnode *)NULL;
-        sl->top->data = (apr_skiplistnode *)NULL;
-        sl->top->prev = (apr_skiplistnode *)NULL;
-        sl->top->up = (apr_skiplistnode *)NULL;
-        sl->top->down = (apr_skiplistnode *)NULL;
-        sl->top->nextindex = (apr_skiplistnode *)NULL;
-        sl->top->previndex = (apr_skiplistnode *)NULL;
-#endif
+        sl->top->next = NULL;
+        sl->top->data = NULL;
+        sl->top->prev = NULL;
+        sl->top->up = NULL;
+        sl->top->down = NULL;
+        sl->top->nextindex = NULL;
+        sl->top->previndex = NULL;
         sl->top->sl = sl;
     }
     if (sl->preheight) {
