@@ -62,7 +62,7 @@ static void skiplist_test(abts_case *tc, void *data) {
     }
 
     /* remove all objects */
-    while (val = apr_skiplist_pop(list, NULL)){
+    while ((val = apr_skiplist_pop(list, NULL))){
         ABTS_INT_EQUAL(tc, *val, j++);
     }
 
@@ -72,7 +72,7 @@ static void skiplist_test(abts_case *tc, void *data) {
     }
 
     j = test_elems;
-    while (val = apr_skiplist_pop(list, NULL)){
+    while ((val = apr_skiplist_pop(list, NULL))){
         ABTS_INT_EQUAL(tc, *val, j++);
     }
 
