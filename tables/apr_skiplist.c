@@ -154,6 +154,9 @@ static apr_status_t skiplisti_init(apr_skiplist **s, apr_pool_t *p)
     }
     else {
         sl = calloc(1, sizeof(apr_skiplist));
+        if (!sl) {
+            return APR_ENOMEM;
+        }
     }
 #if 0
     sl->compare = (apr_skiplist_compare) NULL;
@@ -254,26 +257,18 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_getlist(apr_skiplist *sl)
 
 APR_DECLARE(void *) apr_skiplist_find(apr_skiplist *sl, void *data, apr_skiplistnode **iter)
 {
-    void *ret;
-    apr_skiplistnode *aiter;
     if (!sl->compare) {
         return NULL;
     }
-    if (iter) {
-        ret = apr_skiplist_find_compare(sl, data, iter, sl->compare);
-    }
-    else {
-        ret = apr_skiplist_find_compare(sl, data, &aiter, sl->compare);
-    }
-    return ret;
+    return apr_skiplist_find_compare(sl, data, iter, sl->compare);
 }
 
 static int skiplisti_find_compare(apr_skiplist *sl, void *data,
                            apr_skiplistnode **ret,
                            apr_skiplist_compare comp)
 {
-    apr_skiplistnode *m = NULL;
     int count = 0;
+    apr_skiplistnode *m;
     m = sl->top;
     while (m) {
         int compared;
@@ -286,7 +281,7 @@ static int skiplisti_find_compare(apr_skiplist *sl, void *data,
             *ret = m;
             return count;
         }
-        if ((m->next == NULL) || (compared < 0)) {
+        if (compared < 0) {
             m = m->down;
             count++;
         }
@@ -303,17 +298,26 @@ APR_DECLARE(void *) apr_skiplist_find_compare(apr_skiplist *sli, void *data,
                                apr_skiplistnode **iter,
                                apr_skiplist_compare comp)
 {
-    apr_skiplistnode *m = NULL;
+    apr_skiplistnode *m;
     apr_skiplist *sl;
     if (comp == sli->compare || !sli->index) {
         sl = sli;
     }
     else {
         apr_skiplist_find(sli->index, (void *)comp, &m);
+        if (!m) {
+            if (iter) {
+                *iter = NULL;
+            }
+            return NULL;
+        }
         sl = (apr_skiplist *) m->data;
     }
-    skiplisti_find_compare(sl, data, iter, sl->comparek);
-    return (iter && *iter) ? ((*iter)->data) : NULL;
+    skiplisti_find_compare(sl, data, &m, sl->comparek);
+    if (iter) {
+        *iter = m;
+    }
+    return (m) ? m->data : NULL;
 }
 
 
@@ -558,6 +562,9 @@ APR_DECLARE(int) apr_skiplist_remove_compare(apr_skiplist *sli,
     }
     else {
         apr_skiplist_find(sli->index, (void *)comp, &m);
+        if (!m) {
+            return 0;
+        }
         sl = (apr_skiplist *) m->data;
     }
     skiplisti_find_compare(sl, data, &m, comp);
