@@ -407,25 +407,15 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
             nh++;
         }
     }
-    /* Now we have the new height at which we wish to insert our new node */
-    /*
-     * Let us make sure that our tree is a least that tall (grow if
-     * necessary)
-     */
-    for (; sl->height < nh; sl->height++) {
-        sl->top->up =
-            (apr_skiplistnode *)apr_skiplist_alloc(sl, sizeof(apr_skiplistnode));
-        sl->top->up->down = sl->top;
-        sl->top = sl->topend = sl->top->up;
-        sl->top->prev = sl->top->next = sl->top->nextindex =
-            sl->top->previndex = sl->top->up = NULL;
-        sl->top->data = NULL;
-        sl->top->sl = sl;
-    }
     ch = sl->height;
-    /* Find the node (or node after which we would insert) */
-    /* Keep a stack to pop back through for insertion */
-    /* malloc() is OK since we free the temp stack */
+
+    /* Now we have in nh the height at which we wish to insert our new node,
+     * and in ch the current height: don't create skip paths to the inserted
+     * element until the walk down through the tree (which decrements ch)
+     * reaches nh. From there, any walk down pushes the current node on a
+     * stack (the node(s) after which we would insert) to pop back through
+     * for insertion later.
+     */
     m = sl->top;
     while (m) {
         int compared = -1;
@@ -472,6 +462,31 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
         tmp->sl = sl;
         m->next = tmp;
         p = tmp;
+    }
+
+    /* Now we are sure the node is inserted, grow our tree to 'nh' tall */
+    for (; sl->height < nh; sl->height++) {
+        m = (apr_skiplistnode *)apr_skiplist_alloc(sl, sizeof(apr_skiplistnode));
+        tmp = (apr_skiplistnode *)apr_skiplist_alloc(sl, sizeof(apr_skiplistnode));
+        m->up = m->prev = m->nextindex = m->previndex = NULL;
+        m->next = tmp;
+        m->down = sl->top;
+        m->data = NULL;
+        m->sl = sl;
+        if (sl->top) {
+            sl->top->up = m;
+        }
+        else {
+            sl->bottom = sl->bottomend = m;
+        }
+        sl->top = sl->topend = tmp->prev = m;
+        tmp->up = tmp->next = tmp->nextindex = tmp->previndex = NULL;
+        tmp->down = p;
+        if (p) {
+            p->up = tmp;
+        }
+        tmp->data = data;
+        tmp->sl = sl;
     }
     if (sl->index != NULL) {
         /*
