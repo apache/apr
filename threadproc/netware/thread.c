@@ -77,7 +77,7 @@ apr_status_t apr_thread_create(apr_thread_t **new,
                                apr_pool_t *pool)
 {
     apr_status_t stat;
-    long flags = NX_THR_BIND_CONTEXT;
+    unsigned long flags = NX_THR_BIND_CONTEXT;
     char threadName[NX_MAX_OBJECT_NAME_LEN+1];
     size_t stack_size = APR_DEFAULT_STACK_SIZE;
 
@@ -120,8 +120,8 @@ apr_status_t apr_thread_create(apr_thread_t **new,
         /* void(*start_routine)(void *arg) */ (void (*)(void *)) dummy_worker,
         /* void *arg */                       (*new),
         /* int priority */                    NX_PRIO_MED,
-        /* NXSize_t stackSize */              stack_size,
-        /* long flags */                      NX_CTX_NORMAL,
+        /* size_t stackSize */                stack_size,
+        /* unsigned long flags */             NX_CTX_NORMAL,
         /* int *error */                      &stat);
 
     stat = NXContextSetName(
@@ -130,7 +130,7 @@ apr_status_t apr_thread_create(apr_thread_t **new,
 
     stat = NXThreadCreate(
         /* NXContext_t context */     (*new)->ctx,
-        /* long flags */              flags,
+        /* unsigned long flags */     flags,
         /* NXThreadId_t *thread_id */ &(*new)->td);
 
     if (stat == 0)
