@@ -38,6 +38,9 @@ struct apr_skiplist {
     apr_skiplistnode *bottomend;
     apr_skiplist *index;
     apr_array_header_t *memlist;
+    apr_skiplistnode **stack;
+    size_t stack_pos,
+           stack_len;
     apr_pool_t *pool;
 };
 
@@ -143,6 +146,43 @@ APR_DECLARE(void) apr_skiplist_free(apr_skiplist *sl, void *mem)
             memlist++;
         }
     }
+}
+
+static apr_status_t skiplist_stack_push(apr_skiplist *sl, apr_skiplistnode *m)
+{
+    if (sl->stack_pos >= sl->stack_len) {
+        apr_skiplistnode **ptr;
+        size_t len = sl->stack_pos * 2;
+        if (len < 32) {
+            len = 32;
+        }
+        if (sl->pool) {
+            ptr = apr_palloc(sl->pool, len * sizeof(*ptr));
+            if (ptr) {
+                memcpy(ptr, sl->stack, sl->stack_pos * sizeof(*ptr));
+            }
+        }
+        else {
+            ptr = realloc(sl->stack, len * sizeof(*ptr));
+        }
+        if (!ptr) {
+            return APR_ENOMEM;
+        }
+        sl->stack = ptr;
+        sl->stack_len = len;
+    }
+    sl->stack[sl->stack_pos++] = m;
+    return APR_SUCCESS;
+}
+
+static APR_INLINE apr_skiplistnode *skiplist_stack_pop(apr_skiplist *sl)
+{
+    return (sl->stack_pos > 0) ? sl->stack[--sl->stack_pos] : NULL;
+}
+
+static APR_INLINE void skiplist_stack_clear(apr_skiplist *sl)
+{
+    sl->stack_pos = 0;
 }
 
 static apr_status_t skiplisti_init(apr_skiplist **s, apr_pool_t *p)
@@ -340,10 +380,10 @@ APR_DECLARE(void *) apr_skiplist_previous(apr_skiplist *sl, apr_skiplistnode **i
 }
 
 static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
-                                        apr_skiplist_compare comp, int replace)
+                                        apr_skiplist_compare comp, int add)
 {
-    apr_skiplistnode *m, *p, *tmp, *ret = NULL, **stack;
-    int nh = 1, ch, stacki;
+    apr_skiplistnode *m, *p, *tmp, *ret = NULL;
+    int nh = 1, ch;
     if (!sl->top) {
         sl->height = 1;
         sl->topend = sl->bottomend = sl->top = sl->bottom =
@@ -387,21 +427,20 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
     /* Keep a stack to pop back through for insertion */
     /* malloc() is OK since we free the temp stack */
     m = sl->top;
-    stack = (apr_skiplistnode **)malloc(sizeof(apr_skiplistnode *) * (nh));
-    stacki = 0;
     while (m) {
         int compared = -1;
         if (m->next) {
             compared = comp(data, m->next->data);
         }
-        if (compared == 0 && replace) {
-            free(stack);    /* OK. was malloc'ed */
+        if (compared == 0 && !add) {
+            /* Keep the existing element(s) */
+            skiplist_stack_clear(sl);
             return NULL;
         }
-        if ( (compared < 0) || (replace && (m->next == NULL)) ) {
+        if (compared < 0) {
             if (ch <= nh) {
                 /* push on stack */
-                stack[stacki++] = m;
+                skiplist_stack_push(sl, m);
             }
             m = m->down;
             ch--;
@@ -412,8 +451,7 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
     }
     /* Pop the stack and insert nodes */
     p = NULL;
-    for (; stacki > 0; stacki--) {
-        m = stack[stacki - 1];
+    while ((m = skiplist_stack_pop(sl))) {
         tmp = (apr_skiplistnode *)apr_skiplist_alloc(sl, sizeof(apr_skiplistnode));
         tmp->next = m->next;
         if (m->next) {
@@ -426,16 +464,15 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
         if (p) {
             p->up = tmp;
         }
+        else {
+            /* This sets ret to the bottom-most node we are inserting */
+            ret = tmp;
+        }
         tmp->data = data;
         tmp->sl = sl;
         m->next = tmp;
-        /* This sets ret to the bottom-most node we are inserting */
-        if (!p) {
-            ret = tmp;
-        }
         p = tmp;
     }
-    free(stack); /* OK. was malloc'ed */
     if (sl->index != NULL) {
         /*
          * this is a external insertion, we must insert into each index as
@@ -454,21 +491,13 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
     return ret;
 }
 
-APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert(apr_skiplist *sl, void *data)
-{
-    if (!sl->compare) {
-        return NULL;
-    }
-    return insert_compare(sl, data, sl->compare, 1);
-}
-
-APR_DECLARE(apr_skiplistnode *) apr_skiplist_add_compare(apr_skiplist *sl, void *data,
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, void *data,
                                       apr_skiplist_compare comp)
 {
     return insert_compare(sl, data, comp, 0);
 }
 
-APR_DECLARE(apr_skiplistnode *) apr_skiplist_add(apr_skiplist *sl, void *data)
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert(apr_skiplist *sl, void *data)
 {
     if (!sl->compare) {
         return NULL;
@@ -476,10 +505,18 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_add(apr_skiplist *sl, void *data)
     return insert_compare(sl, data, sl->compare, 0);
 }
 
-APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, void *data,
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_add_compare(apr_skiplist *sl, void *data,
                                       apr_skiplist_compare comp)
 {
     return insert_compare(sl, data, comp, 1);
+}
+
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_add(apr_skiplist *sl, void *data)
+{
+    if (!sl->compare) {
+        return NULL;
+    }
+    return insert_compare(sl, data, sl->compare, 1);
 }
 
 APR_DECLARE(int) apr_skiplist_remove(apr_skiplist *sl, void *data, apr_skiplist_freefunc myfree)
