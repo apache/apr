@@ -122,22 +122,21 @@ apr_status_t apr_thread_create(apr_thread_t **new,
     }
     
     (*new)->ctx = NXContextAlloc(
-        /* void(*start_routine)(void *arg)*/(void (*)(void *)) dummy_worker,
-        /* void *arg */                                        (*new),
-        /* int priority */                                     NX_PRIO_MED,
-        /* size_t stackSize */                                 stack_size,
-        /* unsigned long flags */                              NX_CTX_NORMAL,
-        /* int *error */                                       &stat);
-        
+        /* void(*start_routine)(void *arg) */ (void (*)(void *)) dummy_worker,
+        /* void *arg */                       (*new),
+        /* int priority */                    NX_PRIO_MED,
+        /* size_t stackSize */                stack_size,
+        /* unsigned long flags */             NX_CTX_NORMAL,
+        /* int *error */                      &stat);
                                                                            
     stat = NXContextSetName(
-            /* NXContext_t ctx */           (*new)->ctx,
-            /* const char *name */          threadName);
+        /* NXContext_t ctx */  (*new)->ctx,
+        /* const char *name */ threadName);
 
     stat = NXThreadCreate(
-            /* NXContext_t context */       (*new)->ctx,
-            /* unsigned long flags */       flags,
-            /* NXThreadId_t *thread_id */   &(*new)->td);
+        /* NXContext_t context */     (*new)->ctx,
+        /* unsigned long flags */     flags,
+        /* NXThreadId_t *thread_id */ &(*new)->td);
 
     if (stat == 0)
         return APR_SUCCESS;
