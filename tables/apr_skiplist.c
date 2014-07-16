@@ -648,10 +648,10 @@ APR_DECLARE(apr_skiplist *) apr_skiplist_merge(apr_skiplist *sl1, apr_skiplist *
         apr_skiplist_remove_all(sl2, NULL);
         return sl1;
     }
-    /* This is what makes it brute force... Just insert :/ */
+    /* This is what makes it brute force... Just add :/ */
     b2 = apr_skiplist_getlist(sl2);
     while (b2) {
-        apr_skiplist_insert(sl1, b2->data);
+        apr_skiplist_add(sl1, b2->data);
         apr_skiplist_next(sl2, &b2);
     }
     apr_skiplist_remove_all(sl2, NULL);
