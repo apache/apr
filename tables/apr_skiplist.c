@@ -261,7 +261,7 @@ APR_DECLARE(void *) apr_skiplist_find(apr_skiplist *sl, void *data, apr_skiplist
     void *ret;
     apr_skiplistnode *aiter;
     if (!sl->compare) {
-        return 0;
+        return NULL;
     }
     if (iter) {
         ret = apr_skiplist_find_compare(sl, data, iter, sl->compare);
@@ -398,7 +398,7 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
         }
         if (compared == 0 && replace) {
             free(stack);    /* OK. was malloc'ed */
-            return 0;
+            return NULL;
         }
         if ( (compared < 0) || (replace && (m->next == NULL)) ) {
             if (ch <= nh) {
@@ -434,7 +434,6 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
         /* This sets ret to the bottom-most node we are inserting */
         if (!p) {
             ret = tmp;
-            sl->size++; /* this seems to go here got each element to be counted */
         }
         p = tmp;
     }
@@ -453,9 +452,6 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
             li = ni;
         }
     }
-    else {
-        /* sl->size++; */
-    }
     sl->size++;
     return ret;
 }
@@ -463,7 +459,7 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
 APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert(apr_skiplist *sl, void *data)
 {
     if (!sl->compare) {
-        return 0;
+        return NULL;
     }
     return insert_compare(sl, data, sl->compare, 1);
 }
@@ -477,7 +473,7 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_add_compare(apr_skiplist *sl, void 
 APR_DECLARE(apr_skiplistnode *) apr_skiplist_add(apr_skiplist *sl, void *data)
 {
     if (!sl->compare) {
-        return 0;
+        return NULL;
     }
     return insert_compare(sl, data, sl->compare, 0);
 }
@@ -595,12 +591,13 @@ APR_DECLARE(void) apr_skiplist_remove_all(apr_skiplist *sl, apr_skiplist_freefun
             myfree(p->data);
         while (m) {
             u = m->up;
-            apr_skiplist_free(sl, p);
+            apr_skiplist_free(sl, m);
             m = u;
         }
         m = p;
     }
     sl->top = sl->bottom = NULL;
+    sl->topend = sl->bottomend = NULL;
     sl->height = 0;
     sl->size = 0;
 }
