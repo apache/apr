@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.2
 
+  *) apr_global_mutex/apr_proc_mutex: Resolve failures with the 
+     POSIX sem implementation in environments which receive signals.
+     [Jeff Trawick]
+
   *) apr_skiplist: Fix potential corruption of skiplists leading to 
      results or crashes. [Takashi Sato <takashi tks st>, Eric Covener]
      PR 56654.
