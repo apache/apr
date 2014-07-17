@@ -25,12 +25,14 @@
 
 #include "apr_skiplist.h"
 
+#include <limits.h> /* for INT_MAX */
+
 struct apr_skiplist {
     apr_skiplist_compare compare;
     apr_skiplist_compare comparek;
     int height;
     int preheight;
-    int size;
+    size_t size;
     apr_skiplistnode *top;
     apr_skiplistnode *bottom;
     /* These two are needed for appending */
@@ -673,6 +675,26 @@ APR_DECLARE(void *) apr_skiplist_peek(apr_skiplist *a)
         return sln->data;
     }
     return NULL;
+}
+
+APR_DECLARE(size_t) apr_skiplist_size(const apr_skiplist *sl)
+{
+    return sl->size;
+}
+
+APR_DECLARE(int) apr_skiplist_height(const apr_skiplist *sl)
+{
+    return sl->height;
+}
+
+APR_DECLARE(int) apr_skiplist_preheight(const apr_skiplist *sl)
+{
+    return sl->preheight;
+}
+
+APR_DECLARE(void) apr_skiplist_set_preheight(apr_skiplist *sl, int to)
+{
+    sl->preheight = (to > 0) ? to : 0;
 }
 
 static void skiplisti_destroy(void *vsl)
