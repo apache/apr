@@ -482,11 +482,9 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
         sl->top = sl->topend = tmp->prev = m;
         tmp->up = tmp->next = tmp->nextindex = tmp->previndex = NULL;
         tmp->down = p;
-        if (p) {
-            p->up = tmp;
-        }
         tmp->data = data;
         tmp->sl = sl;
+        p = p->up = tmp;
     }
     if (sl->index != NULL) {
         /*
