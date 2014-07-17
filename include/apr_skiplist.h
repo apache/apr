@@ -264,6 +264,40 @@ APR_DECLARE(void *) apr_skiplist_pop(apr_skiplist *sl, apr_skiplist_freefunc myf
 APR_DECLARE(void *) apr_skiplist_peek(apr_skiplist *sl);
 
 /**
+ * Return the size of the list (number of elements), in O(1).
+ * @param sl The skip list
+ */
+APR_DECLARE(size_t) apr_skiplist_size(const apr_skiplist *sl);
+
+/**
+ * Return the height of the list (number of skip paths), in O(1).
+ * @param sl The skip list
+ */
+APR_DECLARE(int) apr_skiplist_height(const apr_skiplist *sl);
+
+/**
+ * Return the predefined maximum height of the skip list.
+ * @param sl The skip list
+ */
+APR_DECLARE(int) apr_skiplist_preheight(const apr_skiplist *sl);
+
+/**
+ * Set a predefined maximum height for the skip list.
+ * @param sl The skip list
+ * @param to The preheight to set, or a nul/negative value to disable.
+ * @remark When a preheight is used, the height of each inserted element is
+ * computed randomly up to this preheight instead of the current skip list's
+ * height plus one used by the default implementation. Using a preheight can
+ * probably ensure more fairness with long living elements (since with an
+ * adaptative height, former elements may have been created with a low height,
+ * hence a longest path to reach them while the skip list grows). On the other
+ * hand, the default behaviour (preheight <= 0) with a growing and decreasing
+ * maximum height is more adaptative/suitable for short living values.
+ * @note Should be called before any insertion/add.
+ */
+APR_DECLARE(void) apr_skiplist_set_preheight(apr_skiplist *sl, int to);
+
+/**
  * Merge two skip lists.  XXX SEMANTICS
  * @param sl1 One of two skip lists to be merged
  * @param sl2 The other of two skip lists to be merged
