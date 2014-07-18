@@ -25,8 +25,6 @@
 
 #include "apr_skiplist.h"
 
-#include <limits.h> /* for INT_MAX */
-
 struct apr_skiplist {
     apr_skiplist_compare compare;
     apr_skiplist_compare comparek;
