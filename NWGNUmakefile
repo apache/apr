@@ -300,6 +300,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/apr_hash.o \
 	$(OBJDIR)/apr_pools.o \
 	$(OBJDIR)/apr_random.o \
+	$(OBJDIR)/apr_skiplist.o \
 	$(OBJDIR)/apr_snprintf.o \
 	$(OBJDIR)/apr_strings.o \
 	$(OBJDIR)/apr_strnatcmp.o \

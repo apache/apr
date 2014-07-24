@@ -35,6 +35,7 @@
 #include "apr_random.h"
 #include "apr_shm.h"
 #include "apr_signal.h"
+#include "apr_skiplist.h"
 #include "apr_strings.h"
 #include "apr_support.h"
 #include "apr_tables.h"
