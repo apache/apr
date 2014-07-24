@@ -29,6 +29,8 @@ function add_symbol(sym_name) {
 # List of functions that we don't support, yet??
 #/apr_##name##_set_inherit/{next}
 #/apr_##name##_unset_inherit/{next}
+#/apr_##name##_perms_set/{next}
+/apr_socket_perms_set/{next}
 
 /^[ \t]*AP[RUI]?_DECLARE[^(]*[(][^)]*[)]([^ ]* )*[^(]+[(]/ {
     sub("[ \t]*AP[RUI]?_DECLARE[^(]*[(][^)]*[)][ \t]*", "")
