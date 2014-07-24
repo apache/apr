@@ -134,6 +134,7 @@ CPP	= $(CC)
 CPRE	= $(CC) -EP
 LINK	= mwldnlm -w nocmdline
 AR	= $(LINK) -type library -o
+WIN_CC	= mwcc
 
 ifneq ($(findstring /sh,$(SHELL)),/sh)
 PATH:=$(PATH);$(METROWERKS)\bin;$(METROWERKS)\Other Metrowerks Tools\Command Line Tools
@@ -143,6 +144,20 @@ endif
 CLIB3S	= $(METROWERKS)/Novell Support/Metrowerks Support/Libraries/Runtime/mwcrtl.lib
 MATH3S	=
 PLIB3S	= $(METROWERKS)/Novell Support/Metrowerks Support/Libraries/MSL C++/MWCPP.lib
+
+ifeq "$(OS)" "Windows_NT"
+# MetroWerks Win32 build flags to create build tools
+MWCW_MSL         = "$(METROWERKS)/MSL"
+MWCW_W32         = "$(METROWERKS)/Win32-x86 Support"
+CC_FOR_BUILD     = $(WIN_CC)
+CFLAGS_FOR_BUILD =  -O2 -gccinc -nodefaults -proc 586 -w off
+CFLAGS_FOR_BUILD += -ir $(MWCW_MSL) -ir $(MWCW_W32) -lr $(MWCW_MSL) -lr $(MWCW_W32)
+CFLAGS_FOR_BUILD += -lMSL_All_x86.lib -lkernel32.lib -luser32.lib
+else
+# GNUC build flags to create build tools
+CC_FOR_BUILD     = gcc
+CFLAGS_FOR_BUILD = -Wall -O2
+endif
 
 # Base compile flags
 # and prefix or precompiled header added here.
@@ -159,6 +174,12 @@ PLIB3S	= $(METROWERKS)/Novell Support/Metrowerks Support/Libraries/MSL C++/MWCPP
 
 CFLAGS	= -proc PII -align 4
 CPFLAGS	= -Cpp_exceptions off -RTTI off
+
+ifdef CC_MAX_ERRORS
+CFLAGS += -maxerrors $(CC_MAX_ERRORS)
+else
+CFLAGS += -maxerrors 1
+endif
 
 ifeq "$(REQUIRE_PROTOTYPES)" "1"
 CFLAGS	+= -r
@@ -216,7 +237,7 @@ PRELUDE	= $(NOVI)/libcpre.gcc.o
 
 endif
 
-# -include apr_arch_pre_nw.h      #include pre_nw.h for all files
+# -include apr_arch_pre_nw.h      #include apr_arch_pre_nw.h for all files
 CFLAGS	+= -include apr_arch_pre_nw.h
 
 

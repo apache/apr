@@ -215,6 +215,7 @@ ifneq "$(strip $(FILES_lib_objs))" ""
 	@echo $(DL)$(wordlist 81, 90, $(FILES_lib_objs))$(DL)>> $@
 	@echo $(DL)$(wordlist 91, 100, $(FILES_lib_objs))$(DL)>> $@
 	@echo $(DL)$(wordlist 101, 110, $(FILES_lib_objs))$(DL)>> $@
+	@echo $(DL)$(wordlist 111, 120, $(FILES_lib_objs))$(DL)>> $@
 endif
 
 $(OBJDIR)/%_lib.lst: $($(LIB_NAME)_LIBLST_DEPENDS)
