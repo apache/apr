@@ -183,6 +183,7 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testdup.o \
 	$(OBJDIR)/testdso.o \
 	$(OBJDIR)/testenv.o \
+	$(OBJDIR)/testescape.o \
 	$(OBJDIR)/testfilecopy.o \
 	$(OBJDIR)/testfileinfo.o \
 	$(OBJDIR)/testfile.o \
@@ -216,6 +217,7 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testrand.o \
 	$(OBJDIR)/testrmm.o \
 	$(OBJDIR)/testshm.o \
+	$(OBJDIR)/testskiplist.o \
 	$(OBJDIR)/testsleep.o \
 	$(OBJDIR)/testsock.o \
 	$(OBJDIR)/testsockets.o \
