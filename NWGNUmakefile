@@ -309,6 +309,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/apr_dbm.o \
 	$(OBJDIR)/apr_dbm_berkeleydb.o \
 	$(OBJDIR)/apr_dbm_sdbm.o \
+	$(OBJDIR)/apr_escape.o \
 	$(OBJDIR)/apr_fnmatch.o \
 	$(OBJDIR)/apr_getpass.o \
 	$(OBJDIR)/apr_hash.o \
