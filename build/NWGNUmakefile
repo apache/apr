@@ -23,6 +23,7 @@ FILES_prebuild_headers = \
 	$(APU)/include/private/apu_config.h \
 	$(APU)/include/private/apu_select_dbm.h \
 	$(APUXML)/expat/lib/expat_config.h \
+	$(APR)/include/private/apr_escape_test_char.h \
 	$(EOLIST) 
     
 nlms :: $(APR)/aprlib.imp
@@ -69,6 +70,14 @@ $(APU)/include/apr_ldap.h: $(APR)/build/nw_make_header.awk $(APU)/include/apr_ld
 	@echo $(DL)Creating $@$(DL)
 	$(call COPY,$<,$@)
 
+$(APR)/include/private/apr_escape_test_char.h: gen_test_char.exe $(APR)/tools/gen_test_char.c
+	@echo $(DL)GEN  $@$(DL)
+	$< > $@
+
+%.exe: $(APR)/tools/%.c
+	@echo $(DL)Creating Build Helper $@$(DL)
+	$(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) -DCROSS_COMPILE $< -o $@
+
 #
 # You can use this target if all that is needed is to copy files to the
 # installation area
@@ -81,6 +90,7 @@ clean ::
 	$(call DEL,NWGNUversion.inc)
 	$(call DEL,$(APR)/aprlib.imp)
 	$(foreach file,$(FILES_prebuild_headers),$(call DEL,$(file)))
+	$(call DEL,gen_test_char.exe)
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined
