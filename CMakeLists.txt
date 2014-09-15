@@ -234,6 +234,7 @@ SET(APR_TEST_SOURCES
   test/testprocmutex.c
   test/testrand.c
   test/testshm.c
+  test/testskiplist.c
   test/testsleep.c
   test/testsock.c
   test/testsockets.c
