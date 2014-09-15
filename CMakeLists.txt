@@ -389,6 +389,7 @@ SET(APR_TEST_SOURCES
   test/testreslist.c
   test/testrmm.c
   test/testshm.c
+  test/testskiplist.c
   test/testsleep.c
   test/testsock.c
   test/testsockets.c
