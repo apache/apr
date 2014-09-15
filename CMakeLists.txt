@@ -413,7 +413,6 @@ SET(APR_TEST_SOURCES
 
 SET(install_targets)
 SET(install_bin_pdb)
-SET(install_lib_pdb)
 SET(dbd_drivers)
 
 # libapr-2 is shared, apr-2 is static
@@ -426,7 +425,7 @@ ADD_DEPENDENCIES(libapr-2 test_char_header)
 
 ADD_LIBRARY(apr-2 STATIC ${APR_SOURCES} ${APR_PUBLIC_HEADERS_GENERATED})
 SET(install_targets ${install_targets} apr-2)
-SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/apr-2.pdb)
+# no .pdb file generated for static libraries
 TARGET_LINK_LIBRARIES(apr-2 ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(apr-2 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;APR_HAVE_MODULAR_DSO")
 ADD_DEPENDENCIES(apr-2 test_char_header)
@@ -434,12 +433,10 @@ ADD_DEPENDENCIES(apr-2 test_char_header)
 # libaprapp-2 and aprapp-2 are static
 ADD_LIBRARY(libaprapp-2 STATIC misc/win32/apr_app.c misc/win32/internal.c ${APR_PUBLIC_HEADERS_GENERATED})
 SET(install_targets ${install_targets} libaprapp-2)
-SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/libaprapp-2.pdb)
 SET_TARGET_PROPERTIES(libaprapp-2 PROPERTIES COMPILE_DEFINITIONS APR_APP)
 
 ADD_LIBRARY(aprapp-2 STATIC misc/win32/apr_app.c misc/win32/internal.c ${APR_PUBLIC_HEADERS_GENERATED})
 SET(install_targets ${install_targets} aprapp-2)
-SET(install_lib_pdb ${install_lib_pdb} ${PROJECT_BINARY_DIR}/aprapp-2.pdb)
 SET_TARGET_PROPERTIES(aprapp-2 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;APR_APP")
 
 IF(APU_HAVE_CRYPTO)
@@ -586,10 +583,6 @@ INSTALL(TARGETS ${install_targets}
 IF(INSTALL_PDB)
   INSTALL(FILES ${install_bin_pdb}
           DESTINATION bin
-          CONFIGURATIONS RelWithDebInfo Debug)
-
-  INSTALL(FILES ${install_lib_pdb}
-          DESTINATION lib
           CONFIGURATIONS RelWithDebInfo Debug)
 ENDIF()
 
