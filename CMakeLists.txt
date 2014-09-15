@@ -102,6 +102,7 @@ SET(APR_PUBLIC_HEADERS_STATIC
   include/apr_lib.h
   include/apr_mmap.h
   include/apr_network_io.h
+  include/apr_perms_set.h
   include/apr_poll.h
   include/apr_pools.h
   include/apr_portable.h
