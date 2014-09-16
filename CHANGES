@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.2
 
+  *) Windows cmake build: Fix an incompatibility with cmake 2.8.12 and
+     later.  [Jeff Trawick]
+
   *) apr_global_mutex/apr_proc_mutex: Resolve failures with the 
      POSIX sem implementation in environments which receive signals.
      [Jeff Trawick]
