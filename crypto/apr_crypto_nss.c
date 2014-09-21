@@ -68,6 +68,7 @@ struct apr_crypto_key_t {
     SECOidTag cipherOid;
     PK11SymKey *symKey;
     int ivSize;
+    int keyLength;
 };
 
 struct apr_crypto_block_t {
@@ -426,6 +427,7 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
             return APR_ENOCIPHER;
             /* No OID for CKM_DES3_ECB; */
         }
+        key->keyLength = 24;
         break;
     case (APR_KEY_AES_128):
         if (APR_MODE_CBC == mode) {
@@ -434,6 +436,7 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
         else {
             key->cipherOid = SEC_OID_AES_128_ECB;
         }
+        key->keyLength = 16;
         break;
     case (APR_KEY_AES_192):
         if (APR_MODE_CBC == mode) {
@@ -442,6 +445,7 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
         else {
             key->cipherOid = SEC_OID_AES_192_ECB;
         }
+        key->keyLength = 24;
         break;
     case (APR_KEY_AES_256):
         if (APR_MODE_CBC == mode) {
@@ -450,6 +454,7 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
         else {
             key->cipherOid = SEC_OID_AES_256_ECB;
         }
+        key->keyLength = 32;
         break;
     default:
         /* unknown key type, give up */
@@ -478,9 +483,9 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
     saltItem.len = saltLen;
 
     /* generate the key */
-    /* pbeAlg and cipherAlg are the same. NSS decides the keylength. */
+    /* pbeAlg and cipherAlg are the same. */
     algid = PK11_CreatePBEV2AlgorithmID(key->cipherOid, key->cipherOid,
-            SEC_OID_HMAC_SHA1, 0, iterations, &saltItem);
+            SEC_OID_HMAC_SHA1, key->keyLength, iterations, &saltItem);
     if (algid) {
         slot = PK11_GetBestSlot(key->cipherMech, wincx);
         if (slot) {
