@@ -708,76 +708,70 @@ SOURCE=.\include\apr_errno.h
 # Begin Source File
 
 SOURCE=.\include\apr_escape.h
-# End Source File
-# Begin Source File
 
-SOURCE=.\include\apr_escape.h
-
-!IF  "$(CFG)" == "apr - Win32 Release"
+!IF  "$(CFG)" == "libapr - Win32 Release"
 
 # Begin Custom Build - Creating gen_test_char.exe and apr_escape_test_char.h
 InputPath=.\include\apr_escape.h
 
 ".\include\apr_escape_test_char.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cl.exe /nologo /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" /Fo.\LibR\gen_test_char /Fe.\LibR\gen_test_char.exe .\tools\gen_test_char.c 
-	.\LibR\gen_test_char.exe > .\include\apr_escape_test_char.h
+	cl.exe /nologo /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" /Fo.\Release\gen_test_char /Fe.\Release\gen_test_char.exe .\tools\gen_test_char.c 
+	.\Release\gen_test_char.exe > .\include\apr_escape_test_char.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "apr - Win32 Debug"
+!ELSEIF  "$(CFG)" == "libapr - Win32 Debug"
 
 # Begin Custom Build - Creating gen_test_char.exe and apr_escape_test_char.h
 InputPath=.\include\apr_escape.h
 
 ".\include\apr_escape_test_char.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cl.exe /nologo /W3 /EHsc /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" /Fo.\LibD\gen_test_char /Fe.\LibD\gen_test_char.exe .\tools\gen_test_char.c  
-	.\LibD\gen_test_char.exe > .\include\apr_escape_test_char.h
+	cl.exe /nologo /W3 /EHsc /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" /Fo.\Debug\gen_test_char /Fe.\Debug\gen_test_char.exe .\tools\gen_test_char.c  
+	.\Debug\gen_test_char.exe > .\include\apr_escape_test_char.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "apr - Win32 Release9x"
+!ELSEIF  "$(CFG)" == "libapr - Win32 Release9x"
 
 # Begin Custom Build - Creating gen_test_char.exe and apr_escape_test_char.h
 InputPath=.\include\apr_escape.h
 
 ".\include\apr_escape_test_char.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cl.exe /nologo /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" /Fo.\9x\LibR\gen_test_char /Fe.\9x\LibR\gen_test_char.exe .\tools\gen_test_char.c 
-	.\9x\LibR\gen_test_char.exe > .\include\apr_escape_test_char.h
+	cl.exe /nologo /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" /Fo.\9x\Release\gen_test_char /Fe.\9x\Release\gen_test_char.exe .\tools\gen_test_char.c 
+	.\9x\Release\gen_test_char.exe > .\include\apr_escape_test_char.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "apr - Win32 Debug9x"
+!ELSEIF  "$(CFG)" == "libapr - Win32 Debug9x"
 
 # Begin Custom Build - Creating gen_test_char.exe and apr_escape_test_char.h
 InputPath=.\include\apr_escape.h
 
-InputPath=.\include\apr_escape.h
 ".\include\apr_escape_test_char.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cl.exe /nologo /W3 /EHsc /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" /Fo.\9x\LibD\gen_test_char /Fe.\9x\LibD\gen_test_char.exe .\tools\gen_test_char.c  
-	.\9x\LibD\gen_test_char.exe > .\include\apr_escape_test_char.h
+	cl.exe /nologo /W3 /EHsc /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" /Fo.\9x\Debug\gen_test_char /Fe.\9x\Debug\gen_test_char.exe .\tools\gen_test_char.c  
+	.\9x\Debug\gen_test_char.exe > .\include\apr_escape_test_char.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "apr - x64 Release"
+!ELSEIF  "$(CFG)" == "libapr - x64 Release"
 
 # Begin Custom Build - Creating gen_test_char.exe and apr_escape_test_char.h
 InputPath=.\include\apr_escape.h
 
-InputPath=.\include\apr_escape.h
 ".\include\apr_escape_test_char.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cl.exe /nologo /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" /Fo.\x64\LibR\gen_test_char /Fe.\x64\LibR\gen_test_char.exe .\tools\gen_test_char.c 
-	.\x64\LibR\gen_test_char.exe > .\include\apr_escape_test_char.h
+	cl.exe /nologo /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" /Fo.\x64\Release\gen_test_char /Fe.\x64\Release\gen_test_char.exe .\tools\gen_test_char.c 
+	.\x64\Release\gen_test_char.exe > .\include\apr_escape_test_char.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "apr - x64 Debug"
+!ELSEIF  "$(CFG)" == "libapr - x64 Debug"
 
 # Begin Custom Build - Creating gen_test_char.exe and apr_escape_test_char.h
 InputPath=.\include\apr_escape.h
 
 ".\include\apr_escape_test_char.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cl.exe /nologo /W3 /EHsc /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" /Fo.\x64\LibD\gen_test_char /Fe.\x64\LibD\gen_test_char.exe .\tools\gen_test_char.c 
-	.\x64\LibD\gen_test_char.exe > .\include\apr_escape_test_char.h
+	cl.exe /nologo /W3 /EHsc /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" /Fo.\x64\Debug\gen_test_char /Fe.\x64\Debug\gen_test_char.exe .\tools\gen_test_char.c 
+	.\x64\Debug\gen_test_char.exe > .\include\apr_escape_test_char.h
 
 # End Custom Build
 
@@ -907,69 +901,6 @@ SOURCE=.\include\apr_version.h
 # Begin Source File
 
 SOURCE=.\include\apr_want.h
-
-!IF  "$(CFG)" == "apr - Win32 Release"
-
-# Begin Custom Build
-InputPath=.\include\apr_want.h
-
-".\LibR\gen_test_char.exe" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apr.hw > .\include\apr.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "apr - Win32 Debug"
-
-# Begin Custom Build
-InputPath=.\include\apr_want.h
-
-".\LibD\gen_test_char.exe" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apr.hw > .\include\apr.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "apr - Win32 Release9x"
-
-# Begin Custom Build
-InputPath=.\include\apr_want.h
-
-".\9x\LibR\gen_test_char.exe" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apr.hw > .\include\apr.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "apr - Win32 Debug9x"
-
-# Begin Custom Build
-InputPath=.\include\apr_want.h
-
-".\9x\LibD\gen_test_char.exe" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apr.hw > .\include\apr.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "apr - x64 Release"
-
-# Begin Custom Build
-InputPath=.\include\apr_want.h
-
-".\x64\LibR\gen_test_char.exe" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apr.hw > .\include\apr.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "apr - x64 Debug"
-
-# Begin Custom Build
-InputPath=.\include\apr_want.h
-
-".\x64\LibD\gen_test_char.exe" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	type .\include\apr.hw > .\include\apr.h
-
-# End Custom Build
-
-!ENDIF 
-
 # End Source File
 # End Group
 # End Target
