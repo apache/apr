@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
+  *) On z/OS, apr_sockaddr_info_get() with family == APR_UNSPEC was not 
+     returning IPv4 addresses if any IPv6 addresses were returned. 
+     [Eric Covener]
+
   *) apr_skiplist: Fix potential corruption of skiplists leading to 
      unexpected results or crashes. 
      [Takashi Sato <takashi tks st>, Eric Covener] PR 56654.
