@@ -106,6 +106,7 @@ extern "C" {
 #define APR_SO_BROADCAST     65536 /**< Allow broadcast
                                     */
 
+#define APR_SO_REUSEPORT     131072   /**< Reuse port */
 /** @} */
 
 /** Define what type of socket shutdown should occur. */

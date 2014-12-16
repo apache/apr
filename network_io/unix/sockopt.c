@@ -161,6 +161,18 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
             apr_set_option(sock, APR_SO_REUSEADDR, on);
         }
         break;
+    case APR_SO_REUSEPORT:
+#ifdef SO_REUSEPORT
+        if (on != apr_is_option_set(sock, APR_SO_REUSEPORT)) {
+            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_REUSEPORT, (void *)&one, sizeof(int)) == -1) {
+                return errno;
+            }
+            apr_set_option(sock, APR_SO_REUSEPORT, on);
+        }
+#else
+        return APR_ENOTIMPL;
+#endif
+        break;
     case APR_SO_SNDBUF:
 #ifdef SO_SNDBUF
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF, (void *)&on, sizeof(int)) == -1) {
