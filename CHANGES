@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_pollset: On z/OS, threadsafe apr_pollset_poll() may return
+     "EDC8102I Operation would block" under load.
+     [Pat Odonnell patod us.ibm.com ]
+
   *) apr_escape: Correctly calculate the size of the returned string in
      apr_escape_path and set the correct return value in case we actually
      escape the string. [<aduryagin gmail.com>] PR 57230.

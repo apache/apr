@@ -379,6 +379,7 @@ static apr_status_t asio_pollset_add(apr_pollset_t *pollset,
             APR_RING_REMOVE(elem, link);
             DBG1(3, "used recycled memory at %08p\n", elem);
             elem->state = ASIO_INIT;
+            elem->a.aio_cflags = 0;
         }
         else {
             elem = (asio_elem_t *) apr_pcalloc(pollset->pool, sizeof(asio_elem_t));
@@ -659,6 +660,7 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
             if (ret == 1) {
                 DBG(4, "asyncio() completed inline\n");
                 /* it's ready now */
+                elem->state = ASIO_COMPLETE;
                 APR_RING_INSERT_TAIL(&(priv->ready_ring), elem, asio_elem_t,
                                      link);
             }
