@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.2
 
+  *) apr_pollset: On z/OS, threadsafe apr_pollset_poll() may return
+     "EDC8102I Operation would block" under load.
+     [Pat Odonnell <patod us.ibm.com>]
+
   *) On z/OS, apr_sockaddr_info_get() with family == APR_UNSPEC was not 
      returning IPv4 addresses if any IPv6 addresses were returned. 
      [Eric Covener]
