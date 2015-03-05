@@ -418,16 +418,18 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
      */
     m = sl->top;
     while (m) {
-        int compared = -1;
-        if (m->next) {
-            compared = comp(data, m->next->data);
-        }
+        int compared;
+        compared = (m->next) ? comp(data, m->next->data) : -1;
         if (compared == 0 && !add) {
             /* Keep the existing element(s) */
             skiplist_stack_clear(sl);
             return NULL;
         }
-        if (compared < 0 || ((compared <= 0) && add)) {
+        /*
+         * To maintain stability, dups must be added AFTER each
+         * other.
+         */
+        if (compared <= 0) {
             if (ch <= nh) {
                 /* push on stack */
                 skiplist_stack_push(sl, m);
@@ -728,10 +730,10 @@ APR_DECLARE(apr_skiplist *) apr_skiplist_merge(apr_skiplist *sl1, apr_skiplist *
         apr_skiplist_remove_all(sl2, NULL);
         return sl1;
     }
-    /* This is what makes it brute force... Just add :/ */
+    /* This is what makes it brute force... Just insert :/ */
     b2 = apr_skiplist_getlist(sl2);
     while (b2) {
-        apr_skiplist_add(sl1, b2->data);
+        apr_skiplist_insert(sl1, b2->data);
         apr_skiplist_next(sl2, &b2);
     }
     apr_skiplist_remove_all(sl2, NULL);
