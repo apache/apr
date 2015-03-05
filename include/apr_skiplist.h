@@ -171,7 +171,8 @@ APR_DECLARE(void *) apr_skiplist_next(apr_skiplist *sl, apr_skiplistnode **iter)
 APR_DECLARE(void *) apr_skiplist_previous(apr_skiplist *sl, apr_skiplistnode **iter);
 
 /**
- * Insert an element into the skip list using the specified comparison function.
+ * Insert an element into the skip list using the specified comparison function
+ * allowing for duplicates.
  * @param sl The skip list
  * @param data The element to insert
  * @param comp The comparison function to use for placement into the skip list
@@ -180,7 +181,8 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl,
                                           void *data, apr_skiplist_compare comp);
 
 /**
- * Insert an element into the skip list using the existing comparison function.
+ * Insert an element into the skip list using the existing comparison function
+ * allowing for duplicates.
  * @param sl The skip list
  * @param data The element to insert
  * @remark If no comparison function has been set for the skip list, the element
