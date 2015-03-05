@@ -244,7 +244,7 @@ static void skiplist_random_loop(abts_case *tc, void *data)
 static void add_int_to_skiplist(apr_skiplist *list, int n){
     int* a = apr_skiplist_alloc(list, sizeof(int));
     *a = n;
-    apr_skiplist_addne(list, a);
+    apr_skiplist_insert(list, a);
 }
 
 static int comp(void *a, void *b){
@@ -295,6 +295,23 @@ static void skiplist_test(abts_case *tc, void *data) {
     /* empty */
     val = apr_skiplist_pop(list, NULL);
     ABTS_PTR_EQUAL(tc, val, NULL);
+
+    add_int_to_skiplist(list, 42);
+    add_int_to_skiplist(list, 1);
+    add_int_to_skiplist(list, 142);
+    add_int_to_skiplist(list, 42);
+    val = apr_skiplist_peek(list);
+    ABTS_INT_EQUAL(tc, *val, 1);
+    val = apr_skiplist_pop(list, NULL);
+    ABTS_INT_EQUAL(tc, *val, 1);
+    val = apr_skiplist_peek(list);
+    ABTS_INT_EQUAL(tc, *val, 42);
+    val = apr_skiplist_pop(list, NULL);
+    ABTS_INT_EQUAL(tc, *val, 42);
+    val = apr_skiplist_pop(list, NULL);
+    ABTS_INT_EQUAL(tc, *val, 42);
+    val = apr_skiplist_peek(list);
+    ABTS_INT_EQUAL(tc, *val, 142);
 
     apr_pool_clear(ptmp);
 }
