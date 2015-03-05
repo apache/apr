@@ -171,7 +171,7 @@ APR_DECLARE(void *) apr_skiplist_next(apr_skiplist *sl, apr_skiplistnode **iter)
 APR_DECLARE(void *) apr_skiplist_previous(apr_skiplist *sl, apr_skiplistnode **iter);
 
 /**
- * Insert an element into the skip list using the specified comparison function,
+ * Insert an element into the skip list using the specified comparison function
  * allowing for duplicates.
  * @param sl The skip list
  * @param data The element to insert
@@ -179,6 +179,26 @@ APR_DECLARE(void *) apr_skiplist_previous(apr_skiplist *sl, apr_skiplistnode **i
  */
 APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl,
                                           void *data, apr_skiplist_compare comp);
+
+/**
+ * Add an element into the skip list using the specified comparison function
+ * if it does not already exist.
+ * @param sl The skip list
+ * @param data The element to add
+ * @param comp The comparison function to use for placement into the skip list
+ */
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_addne_compare(apr_skiplist *sl,
+                                          void *data, apr_skiplist_compare comp);
+
+/**
+ * Add an element into the skip list using the existing comparison function
+ * if it does not already exist.
+ * @param sl The skip list
+ * @param data The element to insert
+ * @remark If no comparison function has been set for the skip list, the element
+ * will not be inserted and NULL will be returned.
+ */
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_addne(apr_skiplist* sl, void *data);
 
 /**
  * Insert an element into the skip list using the existing comparison function
@@ -192,7 +212,7 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert(apr_skiplist* sl, void *data
 
 /**
  * Remove an element from the skip list using the specified comparison function for
- * locating the element.
+ * locating the element. In the case of duplicates, the 1st entry will be removed.
  * @param sl The skip list
  * @param data The element to remove
  * @param myfree A function to be called for each removed element
@@ -205,7 +225,7 @@ APR_DECLARE(int) apr_skiplist_remove_compare(apr_skiplist *sl, void *data,
 
 /**
  * Remove an element from the skip list using the existing comparison function for
- * locating the element.
+ * locating the element. In the case of duplicates, the 1st entry will be removed.
  * @param sl The skip list
  * @param data The element to remove
  * @param myfree A function to be called for each removed element
@@ -244,6 +264,40 @@ APR_DECLARE(void *) apr_skiplist_pop(apr_skiplist *sl, apr_skiplist_freefunc myf
  * @remark NULL will be returned if there are no elements
  */
 APR_DECLARE(void *) apr_skiplist_peek(apr_skiplist *sl);
+
+/**
+ * Return the size of the list (number of elements), in O(1).
+ * @param sl The skip list
+ */
+APR_DECLARE(size_t) apr_skiplist_size(const apr_skiplist *sl);
+
+/**
+ * Return the height of the list (number of skip paths), in O(1).
+ * @param sl The skip list
+ */
+APR_DECLARE(int) apr_skiplist_height(const apr_skiplist *sl);
+
+/**
+ * Return the predefined maximum height of the skip list.
+ * @param sl The skip list
+ */
+APR_DECLARE(int) apr_skiplist_preheight(const apr_skiplist *sl);
+
+/**
+ * Set a predefined maximum height for the skip list.
+ * @param sl The skip list
+ * @param to The preheight to set, or a nul/negative value to disable.
+ * @remark When a preheight is used, the height of each inserted element is
+ * computed randomly up to this preheight instead of the current skip list's
+ * height plus one used by the default implementation. Using a preheight can
+ * probably ensure more fairness with long living elements (since with an
+ * adaptative height, former elements may have been created with a low height,
+ * hence a longest path to reach them while the skip list grows). On the other
+ * hand, the default behaviour (preheight <= 0) with a growing and decreasing
+ * maximum height is more adaptative/suitable for short living values.
+ * @note Should be called before any insertion/add.
+ */
+APR_DECLARE(void) apr_skiplist_set_preheight(apr_skiplist *sl, int to);
 
 /**
  * Merge two skip lists.  XXX SEMANTICS
