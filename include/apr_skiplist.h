@@ -192,7 +192,7 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert(apr_skiplist* sl, void *data
 
 /**
  * Remove an element from the skip list using the specified comparison function for
- * locating the element.
+ * locating the element. In the case of duplicates, the 1st entry will be removed.
  * @param sl The skip list
  * @param data The element to remove
  * @param myfree A function to be called for each removed element
@@ -205,7 +205,7 @@ APR_DECLARE(int) apr_skiplist_remove_compare(apr_skiplist *sl, void *data,
 
 /**
  * Remove an element from the skip list using the existing comparison function for
- * locating the element.
+ * locating the element. In the case of duplicates, the 1st entry will be removed.
  * @param sl The skip list
  * @param data The element to remove
  * @param myfree A function to be called for each removed element
