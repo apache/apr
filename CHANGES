@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
+  *) apr_skiplist: Add apr_skiplist_addne*() family to preserve existing
+     values (no duplicate), add apr_skiplist_size(), apr_skiplist_height()
+     and apr_skiplist_preheight() to get the corresponding current values,
+     and apr_skiplist_set_preheight() to modify it. [ Yann Ylavic ]
+
   *) apr_pollset: On z/OS, threadsafe apr_pollset_poll() may return
      "EDC8102I Operation would block" under load.
      [Pat Odonnell <patod us.ibm.com>]
