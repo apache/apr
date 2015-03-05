@@ -404,11 +404,11 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, vo
         if (m->next) {
             compared = comp(data, m->next->data);
         }
-        if (compared == 0) {
-            free(stack);    /* OK. was malloc'ed */
-            return 0;
-        }
-        if ((m->next == NULL) || (compared < 0)) {
+        /*
+         * To maintain stability, dups must be added AFTER each
+         * other.
+         */
+        if ((m->next == NULL) || (compared <= 0)) {
             if (ch <= nh) {
                 /* push on stack */
                 stack[stacki++] = m;
