@@ -260,6 +260,8 @@ static void skiplist_test(abts_case *tc, void *data) {
     int i = 0, j = 0;
     int *val = NULL;
     apr_skiplist * list = NULL;
+    int first_forty_two = 42,
+        second_forty_two = 42;
 
     ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_skiplist_init(&list, ptmp));
     apr_skiplist_set_compare(list, comp, compk);
@@ -296,19 +298,22 @@ static void skiplist_test(abts_case *tc, void *data) {
     val = apr_skiplist_pop(list, NULL);
     ABTS_PTR_EQUAL(tc, val, NULL);
 
-    add_int_to_skiplist(list, 42);
+    apr_skiplist_insert(list, &first_forty_two);
     add_int_to_skiplist(list, 1);
     add_int_to_skiplist(list, 142);
-    add_int_to_skiplist(list, 42);
+    apr_skiplist_insert(list, &second_forty_two);
     val = apr_skiplist_peek(list);
     ABTS_INT_EQUAL(tc, *val, 1);
     val = apr_skiplist_pop(list, NULL);
     ABTS_INT_EQUAL(tc, *val, 1);
     val = apr_skiplist_peek(list);
+    ABTS_PTR_EQUAL(tc, val, &second_forty_two);
     ABTS_INT_EQUAL(tc, *val, 42);
     val = apr_skiplist_pop(list, NULL);
+    ABTS_PTR_EQUAL(tc, val, &second_forty_two);
     ABTS_INT_EQUAL(tc, *val, 42);
     val = apr_skiplist_pop(list, NULL);
+    ABTS_PTR_EQUAL(tc, val, &first_forty_two);
     ABTS_INT_EQUAL(tc, *val, 42);
     val = apr_skiplist_peek(list);
     ABTS_INT_EQUAL(tc, *val, 142);
