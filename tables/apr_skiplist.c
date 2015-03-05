@@ -312,14 +312,19 @@ static int skiplisti_find_compare(apr_skiplist *sl, void *data,
     m = sl->top;
     while (m) {
         int compared;
-        compared = (m->next) ? comp(data, m->next->data) : -1;
-        if (compared == 0) {
-            m = m->next;
-            while (m->down) {
-                m = m->down;
+        if (m->next) {
+            compared = comp(data, m->next->data);
+            if (compared == 0) {
+                m = m->next;
+                while (m->down) {
+                    m = m->down;
+                }
+                *ret = m;
+                return count;
             }
-            *ret = m;
-            return count;
+        }
+        else {
+            compared = -1;
         }
         if (compared < 0) {
             m = m->down;
@@ -419,11 +424,16 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
     m = sl->top;
     while (m) {
         int compared;
-        compared = (m->next) ? comp(data, m->next->data) : -1;
-        if (compared == 0 && !add) {
-            /* Keep the existing element(s) */
-            skiplist_stack_clear(sl);
-            return NULL;
+        if (m->next) {
+            compared = comp(data, m->next->data);
+            if (compared == 0 && !add) {
+                /* Keep the existing element(s) */
+                skiplist_stack_clear(sl);
+                return NULL;
+            }
+        }
+        else {
+            compared = -1;
         }
         /*
          * To maintain stability, dups must be added AFTER each
