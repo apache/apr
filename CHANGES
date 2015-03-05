@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.2
 
+  *) apr_skiplist: Honor canonical description of skiplists and allow
+     for duplicate entries. As required, for stability, dups are added
+     after each other. [Jim Jagielski]
+
   *) apr_pollset: On z/OS, threadsafe apr_pollset_poll() may return
      "EDC8102I Operation would block" under load.
      [Pat Odonnell <patod us.ibm.com>]
