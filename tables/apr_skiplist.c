@@ -427,7 +427,7 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
             skiplist_stack_clear(sl);
             return NULL;
         }
-        if (compared < 0) {
+        if (compared < 0 || ((compared <= 0) && add)) {
             if (ch <= nh) {
                 /* push on stack */
                 skiplist_stack_push(sl, m);
@@ -507,7 +507,7 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
 APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, void *data,
                                       apr_skiplist_compare comp)
 {
-    return insert_compare(sl, data, comp, 0);
+    return insert_compare(sl, data, comp, 1);
 }
 
 APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert(apr_skiplist *sl, void *data)
@@ -515,21 +515,21 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert(apr_skiplist *sl, void *data
     if (!sl->compare) {
         return NULL;
     }
-    return insert_compare(sl, data, sl->compare, 0);
+    return insert_compare(sl, data, sl->compare, 1);
 }
 
-APR_DECLARE(apr_skiplistnode *) apr_skiplist_add_compare(apr_skiplist *sl, void *data,
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_addne_compare(apr_skiplist *sl, void *data,
                                       apr_skiplist_compare comp)
 {
-    return insert_compare(sl, data, comp, 1);
+    return insert_compare(sl, data, comp, 0);
 }
 
-APR_DECLARE(apr_skiplistnode *) apr_skiplist_add(apr_skiplist *sl, void *data)
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_addne(apr_skiplist *sl, void *data)
 {
     if (!sl->compare) {
         return NULL;
     }
-    return insert_compare(sl, data, sl->compare, 1);
+    return insert_compare(sl, data, sl->compare, 0);
 }
 
 APR_DECLARE(int) apr_skiplist_remove(apr_skiplist *sl, void *data, apr_skiplist_freefunc myfree)
