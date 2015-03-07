@@ -334,7 +334,7 @@ static void skiplist_test(abts_case *tc, void *data) {
     ABTS_INT_EQUAL(tc, val2->b, 2);
     val2 = apr_skiplist_pop(list2, NULL);
     ABTS_INT_EQUAL(tc, val2->a, 42);
-    ABTS_INT_EQUAL(tc, val2->b, 1);
+    ABTS_INT_EQUAL(tc, val2->b, 3);
     val2 = apr_skiplist_pop(list2, NULL);
     ABTS_INT_EQUAL(tc, val2->a, 142);
     ABTS_INT_EQUAL(tc, val2->b, 1);
