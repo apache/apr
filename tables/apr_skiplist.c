@@ -384,6 +384,11 @@ APR_DECLARE(void *) apr_skiplist_previous(apr_skiplist *sl, apr_skiplistnode **i
     return (*iter) ? ((*iter)->data) : NULL;
 }
 
+APR_DECLARE(void *) apr_skiplist_element(apr_skiplistnode *node)
+{
+    return node->data;
+}
+
 static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
                                         apr_skiplist_compare comp, int add)
 {
