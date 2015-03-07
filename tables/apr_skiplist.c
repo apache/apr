@@ -433,7 +433,7 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
                 skiplist_qclear(&sl->stack_q);
                 return NULL;
             }
-            if (compared > 0) {
+            if (compared >= 0) {
                 m = m->next;
                 continue;
             }
