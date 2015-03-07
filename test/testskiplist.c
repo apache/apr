@@ -212,9 +212,20 @@ static void skiplist_random_loop(abts_case *tc, void *data)
     apr_pool_clear(ptmp);
 }
 
+typedef struct elem {
+    int a;
+    int b;
+} elem;
+
 
 static void add_int_to_skiplist(apr_skiplist *list, int n){
     int* a = apr_skiplist_alloc(list, sizeof(int));
+    *a = n;
+    apr_skiplist_insert(list, a);
+}
+
+static void add_elem_to_skiplist(apr_skiplist *list, elem n){
+    elem* a = apr_skiplist_alloc(list, sizeof(elem));
     *a = n;
     apr_skiplist_insert(list, a);
 }
@@ -227,13 +238,29 @@ static int compk(void *a, void *b){
     return comp(a, b);
 }
 
+static int scomp(void *a, void *b){
+    return ((elem*) a)->a - ((elem*) b)->a;
+}
+
+static int scompk(void *a, void *b){
+    return scomp(a, b);
+}
+
 static void skiplist_test(abts_case *tc, void *data) {
     int test_elems = 10;
     int i = 0, j = 0;
     int *val = NULL;
+    elem *val2 = NULL;
     apr_skiplist * list = NULL;
+    apr_skiplist * list2 = NULL;
     int first_forty_two = 42,
         second_forty_two = 42;
+    elem t1, t2, t3, t4, t5;
+    t1.a = 1; t1.b = 1;
+    t2.a = 42; t2.b = 1;
+    t3.a = 42; t3.b = 2;
+    t4.a = 42; t4.b = 3;
+    t5.a = 142; t5.b = 1;
 
     ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_skiplist_init(&list, ptmp));
     apr_skiplist_set_compare(list, comp, compk);
@@ -289,6 +316,29 @@ static void skiplist_test(abts_case *tc, void *data) {
     ABTS_INT_EQUAL(tc, *val, 42);
     val = apr_skiplist_peek(list);
     ABTS_INT_EQUAL(tc, *val, 142);
+
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_skiplist_init(&list2, ptmp));
+    apr_skiplist_set_compare(list2, scomp, scompk);
+    add_elem_to_skiplist(list2, t2);
+    add_elem_to_skiplist(list2, t1);
+    add_elem_to_skiplist(list2, t3);
+    add_elem_to_skiplist(list2, t5);
+    add_elem_to_skiplist(list2, t4);
+    val2 = apr_skiplist_pop(list2, NULL);
+    ABTS_INT_EQUAL(tc, val2->a, 1);
+    val2 = apr_skiplist_pop(list2, NULL);
+    ABTS_INT_EQUAL(tc, val2->a, 42);
+    ABTS_INT_EQUAL(tc, val2->b, 1);
+    val2 = apr_skiplist_pop(list2, NULL);
+    ABTS_INT_EQUAL(tc, val2->a, 42);
+    ABTS_INT_EQUAL(tc, val2->b, 2);
+    val2 = apr_skiplist_pop(list2, NULL);
+    ABTS_INT_EQUAL(tc, val2->a, 42);
+    ABTS_INT_EQUAL(tc, val2->b, 1);
+    val2 = apr_skiplist_pop(list2, NULL);
+    ABTS_INT_EQUAL(tc, val2->a, 142);
+    ABTS_INT_EQUAL(tc, val2->b, 1);
+
 
     apr_pool_clear(ptmp);
 }
