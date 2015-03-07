@@ -325,17 +325,22 @@ static void skiplist_test(abts_case *tc, void *data) {
     add_elem_to_skiplist(list2, t5);
     add_elem_to_skiplist(list2, t4);
     val2 = apr_skiplist_pop(list2, NULL);
+    printf("\n%d %d\n", val2->a, val2->b);
     ABTS_INT_EQUAL(tc, val2->a, 1);
     val2 = apr_skiplist_pop(list2, NULL);
+    printf("\n%d %d\n", val2->a, val2->b);
     ABTS_INT_EQUAL(tc, val2->a, 42);
     ABTS_INT_EQUAL(tc, val2->b, 1);
     val2 = apr_skiplist_pop(list2, NULL);
+    printf("\n%d %d\n", val2->a, val2->b);
     ABTS_INT_EQUAL(tc, val2->a, 42);
     ABTS_INT_EQUAL(tc, val2->b, 2);
     val2 = apr_skiplist_pop(list2, NULL);
+    printf("\n%d %d\n", val2->a, val2->b);
     ABTS_INT_EQUAL(tc, val2->a, 42);
     ABTS_INT_EQUAL(tc, val2->b, 3);
     val2 = apr_skiplist_pop(list2, NULL);
+    printf("\n%d %d\n", val2->a, val2->b);
     ABTS_INT_EQUAL(tc, val2->a, 142);
     ABTS_INT_EQUAL(tc, val2->b, 1);
 

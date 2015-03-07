@@ -423,7 +423,7 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, vo
          */
         if (m->next) {
             int compared = comp(data, m->next->data);
-            if (compared > 0) {
+            if (compared >= 0) {
                 m = m->next;
                 continue;
             }
