@@ -311,9 +311,8 @@ static int skiplisti_find_compare(apr_skiplist *sl, void *data,
     apr_skiplistnode *m;
     m = sl->top;
     while (m) {
-        int compared;
         if (m->next) {
-            compared = comp(data, m->next->data);
+            int compared = comp(data, m->next->data);
             if (compared == 0) {
                 m = m->next;
                 while (m->down) {
@@ -322,18 +321,14 @@ static int skiplisti_find_compare(apr_skiplist *sl, void *data,
                 *ret = m;
                 return count;
             }
+            if (compared > 0) {
+                m = m->next;
+                count++;
+                continue;
+            }
         }
-        else {
-            compared = -1;
-        }
-        if (compared < 0) {
-            m = m->down;
-            count++;
-        }
-        else {
-            m = m->next;
-            count++;
-        }
+        m = m->down;
+        count++;
     }
     *ret = NULL;
     return count;
@@ -389,19 +384,7 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, vo
 {
     apr_skiplistnode *m, *p, *tmp, *ret = NULL;
     int nh = 1, ch;
-    if (!sl->top) {
-        sl->height = 1;
-        sl->topend = sl->bottomend = sl->top = sl->bottom =
-            (apr_skiplistnode *)apr_skiplist_alloc(sl, sizeof(apr_skiplistnode));
-        sl->top->next = NULL;
-        sl->top->data = NULL;
-        sl->top->prev = NULL;
-        sl->top->up = NULL;
-        sl->top->down = NULL;
-        sl->top->nextindex = NULL;
-        sl->top->previndex = NULL;
-        sl->top->sl = sl;
-    }
+
     if (sl->preheight) {
         while (nh < sl->preheight && get_b_rand()) {
             nh++;
@@ -423,28 +406,23 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, vo
      */
     m = sl->top;
     while (m) {
-        int compared;
-        if (m->next) {
-            compared = comp(data, m->next->data);
-        }
-        else {
-            compared = -1;
-        }
         /*
-         * To maintain stability, dups must be added AFTER each
-         * other.
+         * To maintain stability, dups (compared == 0) must be added
+         * AFTER each other.
          */
-        if (compared <= 0) {
-            if (ch <= nh) {
-                /* push on stack */
-                skiplist_stack_push(sl, m);
+        if (m->next) {
+            int compared = comp(data, m->next->data);
+            if (compared > 0) {
+                m = m->next;
+                continue;
             }
-            m = m->down;
-            ch--;
         }
-        else {
-            m = m->next;
+        if (ch <= nh) {
+            /* push on stack */
+            skiplist_stack_push(sl, m);
         }
+        m = m->down;
+        ch--;
     }
     /* Pop the stack and insert nodes */
     p = NULL;
@@ -491,7 +469,10 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, vo
         tmp->down = p;
         tmp->data = data;
         tmp->sl = sl;
-        p = p->up = tmp;
+        if (p) {
+            p->up = tmp;
+        }
+        p = tmp;
     }
     if (sl->index != NULL) {
         /*
