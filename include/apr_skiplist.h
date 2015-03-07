@@ -171,6 +171,12 @@ APR_DECLARE(void *) apr_skiplist_next(apr_skiplist *sl, apr_skiplistnode **iter)
 APR_DECLARE(void *) apr_skiplist_previous(apr_skiplist *sl, apr_skiplistnode **iter);
 
 /**
+ * Return the element of the skip list node
+ * @param iter The skip list node
+ */
+APR_DECLARE(void *) apr_skiplist_element(apr_skiplistnode *iter);
+
+/**
  * Insert an element into the skip list using the specified comparison function
  * allowing for duplicates.
  * @param sl The skip list
