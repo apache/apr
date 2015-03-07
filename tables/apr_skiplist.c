@@ -25,6 +25,12 @@
 
 #include "apr_skiplist.h"
 
+typedef struct {
+    apr_skiplistnode **data;
+    size_t size, pos;
+    apr_pool_t *p;
+} apr_skiplist_q; 
+
 struct apr_skiplist {
     apr_skiplist_compare compare;
     apr_skiplist_compare comparek;
@@ -38,9 +44,8 @@ struct apr_skiplist {
     apr_skiplistnode *bottomend;
     apr_skiplist *index;
     apr_array_header_t *memlist;
-    apr_skiplistnode **stack;
-    size_t stack_pos,
-           stack_len;
+    apr_skiplist_q nodes_q,
+                   stack_q;
     apr_pool_t *pool;
 };
 
@@ -148,41 +153,57 @@ APR_DECLARE(void) apr_skiplist_free(apr_skiplist *sl, void *mem)
     }
 }
 
-static apr_status_t skiplist_stack_push(apr_skiplist *sl, apr_skiplistnode *m)
+static apr_status_t skiplist_qpush(apr_skiplist_q *q, apr_skiplistnode *m)
 {
-    if (sl->stack_pos >= sl->stack_len) {
-        apr_skiplistnode **ptr;
-        size_t len = sl->stack_pos * 2;
-        if (len < 32) {
-            len = 32;
-        }
-        if (sl->pool) {
-            ptr = apr_palloc(sl->pool, len * sizeof(*ptr));
-            if (ptr) {
-                memcpy(ptr, sl->stack, sl->stack_pos * sizeof(*ptr));
+    if (q->pos >= q->size) {
+        apr_skiplistnode **data;
+        size_t size = (q->pos) ? q->pos * 2 : 32;
+        if (q->p) {
+            data = apr_palloc(q->p, size * sizeof(*data));
+            if (data) {
+                memcpy(data, q->data, q->pos * sizeof(*data));
             }
         }
         else {
-            ptr = realloc(sl->stack, len * sizeof(*ptr));
+            data = realloc(q->data, size * sizeof(*data));
         }
-        if (!ptr) {
+        if (!data) {
             return APR_ENOMEM;
         }
-        sl->stack = ptr;
-        sl->stack_len = len;
+        q->data = data;
+        q->size = size;
     }
-    sl->stack[sl->stack_pos++] = m;
+    q->data[q->pos++] = m;
     return APR_SUCCESS;
 }
 
-static APR_INLINE apr_skiplistnode *skiplist_stack_pop(apr_skiplist *sl)
+static APR_INLINE apr_skiplistnode *skiplist_qpop(apr_skiplist_q *q)
 {
-    return (sl->stack_pos > 0) ? sl->stack[--sl->stack_pos] : NULL;
+    return (q->pos > 0) ? q->data[--q->pos] : NULL;
 }
 
-static APR_INLINE void skiplist_stack_clear(apr_skiplist *sl)
+static APR_INLINE void skiplist_qclear(apr_skiplist_q *q)
 {
-    sl->stack_pos = 0;
+    q->pos = 0;
+}
+
+static apr_skiplistnode *skiplist_new_node(apr_skiplist *sl)
+{
+    apr_skiplistnode *m = skiplist_qpop(&sl->nodes_q);
+    if (!m) {
+        if (sl->pool) {
+            m = apr_palloc(sl->pool, sizeof *m);
+        }
+        else {
+            m = malloc(sizeof *m);
+        }
+    }
+    return m;
+}
+
+static apr_status_t skiplist_free_node(apr_skiplist *sl, apr_skiplistnode *m)
+{
+    return skiplist_qpush(&sl->nodes_q, m);
 }
 
 static apr_status_t skiplisti_init(apr_skiplist **s, apr_pool_t *p)
@@ -191,6 +212,7 @@ static apr_status_t skiplisti_init(apr_skiplist **s, apr_pool_t *p)
     if (p) {
         sl = apr_pcalloc(p, sizeof(apr_skiplist));
         sl->memlist = apr_array_make(p, 20, sizeof(memlist_t));
+        sl->pool = sl->nodes_q.p = sl->stack_q.p = p;
     }
     else {
         sl = calloc(1, sizeof(apr_skiplist));
@@ -198,17 +220,6 @@ static apr_status_t skiplisti_init(apr_skiplist **s, apr_pool_t *p)
             return APR_ENOMEM;
         }
     }
-#if 0
-    sl->compare = (apr_skiplist_compare) NULL;
-    sl->comparek = (apr_skiplist_compare) NULL;
-    sl->height = 0;
-    sl->preheight = 0;
-    sl->size = 0;
-    sl->top = NULL;
-    sl->bottom = NULL;
-    sl->index = NULL;
-#endif
-    sl->pool = p;
     *s = sl;
     return APR_SUCCESS;
 }
@@ -419,19 +430,20 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, vo
         }
         if (ch <= nh) {
             /* push on stack */
-            skiplist_stack_push(sl, m);
+            skiplist_qpush(&sl->stack_q, m);
         }
         m = m->down;
         ch--;
     }
     /* Pop the stack and insert nodes */
     p = NULL;
-    while ((m = skiplist_stack_pop(sl))) {
-        tmp = (apr_skiplistnode *)apr_skiplist_alloc(sl, sizeof(apr_skiplistnode));
+    while ((m = skiplist_qpop(&sl->stack_q))) {
+        tmp = skiplist_new_node(sl);
         tmp->next = m->next;
         if (m->next) {
             m->next->prev = tmp;
         }
+        m->next = tmp;
         tmp->prev = m;
         tmp->up = NULL;
         tmp->nextindex = tmp->previndex = NULL;
@@ -445,14 +457,13 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, vo
         }
         tmp->data = data;
         tmp->sl = sl;
-        m->next = tmp;
         p = tmp;
     }
 
     /* Now we are sure the node is inserted, grow our tree to 'nh' tall */
     for (; sl->height < nh; sl->height++) {
-        m = (apr_skiplistnode *)apr_skiplist_alloc(sl, sizeof(apr_skiplistnode));
-        tmp = (apr_skiplistnode *)apr_skiplist_alloc(sl, sizeof(apr_skiplistnode));
+        m = skiplist_new_node(sl);
+        tmp = skiplist_new_node(sl);
         m->up = m->prev = m->nextindex = m->previndex = NULL;
         m->next = tmp;
         m->down = sl->top;
@@ -482,7 +493,8 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, vo
         apr_skiplistnode *ni, *li;
         li = ret;
         for (p = apr_skiplist_getlist(sl->index); p; apr_skiplist_next(sl->index, &p)) {
-            ni = apr_skiplist_insert((apr_skiplist *) p->data, ret->data);
+            apr_skiplist *sli = (apr_skiplist *)p->data;
+            ni = apr_skiplist_insert_compare(sli, ret->data, sli->compare);
             li->nextindex = ni;
             ni->previndex = li;
             li = ni;
@@ -550,7 +562,7 @@ static int skiplisti_remove(apr_skiplist *sl, apr_skiplistnode *m, apr_skiplist_
         if (!m && myfree && p->data) {
             myfree(p->data);
         }
-        apr_skiplist_free(sl, p);
+        skiplist_free_node(sl, p);
     }
     sl->size--;
     while (sl->top && sl->top->next == NULL) {
@@ -560,7 +572,7 @@ static int skiplisti_remove(apr_skiplist *sl, apr_skiplistnode *m, apr_skiplist_
         if (sl->top) {
             sl->top->up = NULL; /* Make it think its the top */
         }
-        apr_skiplist_free(sl, p);
+        skiplist_free_node(sl, p);
         sl->height--;
     }
     if (!sl->top) {
@@ -606,13 +618,14 @@ APR_DECLARE(void) apr_skiplist_remove_all(apr_skiplist *sl, apr_skiplist_freefun
     m = sl->bottom;
     while (m) {
         p = m->next;
-        if (p && myfree && p->data)
+        if (myfree && p && p->data) {
             myfree(p->data);
-        while (m) {
-            u = m->up;
-            apr_skiplist_free(sl, m);
-            m = u;
         }
+        do {
+            u = m->up;
+            skiplist_free_node(sl, m);
+            m = u;
+        } while (m);
         m = p;
     }
     sl->top = sl->bottom = NULL;
@@ -645,8 +658,7 @@ APR_DECLARE(void *) apr_skiplist_peek(apr_skiplist *a)
 
 static void skiplisti_destroy(void *vsl)
 {
-    apr_skiplist_destroy((apr_skiplist *) vsl, NULL);
-    apr_skiplist_free((apr_skiplist *) vsl, vsl);
+    apr_skiplist_destroy(vsl, NULL);
 }
 
 APR_DECLARE(void) apr_skiplist_destroy(apr_skiplist *sl, apr_skiplist_freefunc myfree)
@@ -655,6 +667,10 @@ APR_DECLARE(void) apr_skiplist_destroy(apr_skiplist *sl, apr_skiplist_freefunc m
         ;
     apr_skiplist_remove_all(sl, myfree);
     if (!sl->pool) {
+        while (sl->nodes_q.pos)
+            free(sl->nodes_q.data[--sl->nodes_q.pos]);
+        free(sl->nodes_q.data);
+        free(sl->stack_q.data);
         free(sl);
     }
 }
