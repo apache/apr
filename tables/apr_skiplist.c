@@ -576,7 +576,8 @@ static int skiplisti_remove(apr_skiplist *sl, apr_skiplistnode *m, apr_skiplist_
         sl->height--;
     }
     if (!sl->top) {
-        sl->bottom = NULL;
+        sl->bottom = sl->bottomend = NULL;
+        sl->topend = NULL;
     }
     return sl->height;  /* return 1; ?? */
 }
