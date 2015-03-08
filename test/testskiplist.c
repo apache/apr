@@ -334,13 +334,13 @@ static void skiplist_test(abts_case *tc, void *data) {
     val = apr_skiplist_pop(list, NULL);
     ABTS_INT_EQUAL(tc, *val, 1);
     val = apr_skiplist_peek(list);
-    ABTS_PTR_EQUAL(tc, val, &second_forty_two);
-    ABTS_INT_EQUAL(tc, *val, 42);
-    val = apr_skiplist_pop(list, NULL);
-    ABTS_PTR_EQUAL(tc, val, &second_forty_two);
+    ABTS_PTR_EQUAL(tc, val, &first_forty_two);
     ABTS_INT_EQUAL(tc, *val, 42);
     val = apr_skiplist_pop(list, NULL);
     ABTS_PTR_EQUAL(tc, val, &first_forty_two);
+    ABTS_INT_EQUAL(tc, *val, 42);
+    val = apr_skiplist_pop(list, NULL);
+    ABTS_PTR_EQUAL(tc, val, &second_forty_two);
     ABTS_INT_EQUAL(tc, *val, 42);
     val = apr_skiplist_peek(list);
     ABTS_INT_EQUAL(tc, *val, 142);
