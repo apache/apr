@@ -399,6 +399,25 @@ APR_DECLARE(void) apr_hash_set(apr_hash_t *ht,
     /* else key not present and val==NULL */
 }
 
+APR_DECLARE(void *) apr_hash_get_or_set(apr_hash_t *ht,
+                                        const void *key,
+                                        apr_ssize_t klen,
+                                        const void *val)
+{
+    apr_hash_entry_t **hep;
+    hep = find_entry(ht, key, klen, val);
+    if (*hep) {
+        val = (*hep)->val;
+        /* check that the collision rate isn't too high */
+        if (ht->count > ht->max) {
+            expand_array(ht);
+        }
+        return (void *)val;
+    }
+    /* else key not present and val==NULL */
+    return NULL;
+}
+
 APR_DECLARE(unsigned int) apr_hash_count(apr_hash_t *ht)
 {
     return ht->count;
