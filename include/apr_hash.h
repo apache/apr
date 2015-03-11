@@ -118,6 +118,20 @@ APR_DECLARE(void *) apr_hash_get(apr_hash_t *ht, const void *key,
                                  apr_ssize_t klen);
 
 /**
+ * Look up the value associated with a key in a hash table, or if none exists
+ * associate a value.
+ * @param ht The hash table
+ * @param key Pointer to the key
+ * @param klen Length of the key. Can be APR_HASH_KEY_STRING to use the string
+ *        length.
+ * @param val Value to associate with the key (if none exists).
+ * @return Returns the existing value if any, the given value otherwise.
+ * @remark If the given value is NULL and a hash entry exists, nothing is done.
+ */
+APR_DECLARE(void *) apr_hash_get_or_set(apr_hash_t *ht, const void *key,
+                                        apr_ssize_t klen, const void *val);
+
+/**
  * Start iterating over the entries in a hash table.
  * @param p The pool to allocate the apr_hash_index_t iterator. If this
  *          pool is NULL, then an internal, non-thread-safe iterator is used.

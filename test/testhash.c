@@ -97,6 +97,34 @@ static void hash_set(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, "value", result);
 }
 
+static void hash_get_or_set(abts_case *tc, void *data)
+{
+    apr_hash_t *h = NULL;
+    char *result = NULL;
+
+    h = apr_hash_make(p);
+    ABTS_PTR_NOTNULL(tc, h);
+
+    result = apr_hash_get_or_set(h, "key", APR_HASH_KEY_STRING, "value");
+    ABTS_STR_EQUAL(tc, "value", result);
+
+    result = apr_hash_get_or_set(h, "key", APR_HASH_KEY_STRING, "other");
+    ABTS_STR_EQUAL(tc, "value", result);
+
+    result = apr_hash_get_or_set(h, "key", APR_HASH_KEY_STRING, NULL);
+    ABTS_STR_EQUAL(tc, "value", result);
+
+    apr_hash_set(h, "key", APR_HASH_KEY_STRING, NULL);
+    result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
+    ABTS_PTR_EQUAL(tc, NULL, result);
+
+    result = apr_hash_get_or_set(h, "key", APR_HASH_KEY_STRING, NULL);
+    ABTS_PTR_EQUAL(tc, NULL, result);
+
+    result = apr_hash_get_or_set(h, "key", APR_HASH_KEY_STRING, "other");
+    ABTS_STR_EQUAL(tc, "other", result);
+}
+
 static void hash_reset(abts_case *tc, void *data)
 {
     apr_hash_t *h = NULL;
@@ -517,6 +545,7 @@ abts_suite *testhash(abts_suite *suite)
 
     abts_run_test(suite, hash_make, NULL);
     abts_run_test(suite, hash_set, NULL);
+    abts_run_test(suite, hash_get_or_set, NULL);
     abts_run_test(suite, hash_reset, NULL);
     abts_run_test(suite, same_value, NULL);
     abts_run_test(suite, same_value_custom, NULL);
