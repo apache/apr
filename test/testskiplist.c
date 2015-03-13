@@ -49,10 +49,10 @@ static apr_skiplistnode *apr_skiplist_add_compare(apr_skiplist *sl, void *data,
 }
 static apr_skiplistnode *apr_skiplist_add(apr_skiplist *sl, void *data)
 {
-    /* Ugly, really, but should work *while* the compare function is the first
-     * field of the (opaque) skiplist struct, which is the case for now :p
+    /* Ugly, really, but should work *as long as* the compare function is the
+     * first field of the (opaque) skiplist struct, this is the case for now :p
      */
-    return apr_skiplist_add_compare(sl, data, *(apr_skiplist_compare**)sl);
+    return apr_skiplist_add_compare(sl, data, *(apr_skiplist_compare*)sl);
 }
 
 static int skiplist_get_size(abts_case *tc, apr_skiplist *sl)
