@@ -261,17 +261,17 @@ typedef struct elem {
 static void add_int_to_skiplist(apr_skiplist *list, int n){
     int* a = apr_skiplist_alloc(list, sizeof(int));
     *a = n;
-    apr_skiplist_add(list, a);
+    apr_skiplist_insert(list, a);
 }
 
 static void add_elem_to_skiplist(apr_skiplist *list, elem n){
     elem* a = apr_skiplist_alloc(list, sizeof(elem));
     *a = n;
-    apr_skiplist_add(list, a);
+    apr_skiplist_insert(list, a);
 }
 
 static int comp(void *a, void *b){
-    return *((int*) a) - *((int*) b);
+    return (*((int*) a) < *((int*) b)) ? -1 : 1;
 }
 
 static int compk(void *a, void *b){
@@ -279,7 +279,7 @@ static int compk(void *a, void *b){
 }
 
 static int scomp(void *a, void *b){
-    return ((elem*) a)->a - ((elem*) b)->a;
+    return (((elem*) a)->a < ((elem*) b)->a) ? -1 : 1;
 }
 
 static int scompk(void *a, void *b){
