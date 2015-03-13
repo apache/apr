@@ -40,7 +40,9 @@ extern "C" {
 /**
  * apr_skiplist_compare is the function type that must be implemented 
  * per object type that is used in a skip list for comparisons to maintain
- * order
+ * order. A value <0 indicates placement after this node; a value of 0
+ * indicates collision with this exact node; a value >0 indicates placement
+ * before this node.
  * */
 typedef int (*apr_skiplist_compare) (void *, void *);
 
@@ -182,7 +184,7 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl,
 
 /**
  * Insert an element into the skip list using the existing comparison function
- * if it does not already exist.
+ * if it does not already exist (as determined by the comparison function)
  * @param sl The skip list
  * @param data The element to insert
  * @remark If no comparison function has been set for the skip list, the element
