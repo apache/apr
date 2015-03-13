@@ -156,6 +156,9 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **ret_pollcb,
         }
         pollcb->provider = provider;
     }
+    else if (rv != APR_SUCCESS) {
+        return rv;
+    }
 
     if (flags & APR_POLLSET_WAKEABLE) {
         /* Create wakeup pipe */
