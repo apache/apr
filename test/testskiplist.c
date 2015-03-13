@@ -33,12 +33,26 @@
 static apr_pool_t *ptmp = NULL;
 static apr_skiplist *skiplist = NULL;
 
-/* Missing in 1.5.x, so emulate it */
-static apr_skiplistnode *apr_skiplist_addne(apr_skiplist *sl, void *data)
+/* apr_skiplist_add[_compare]() are missing in 1.5.x,
+ * so emulate them (not thread-safe!)...
+ */
+static apr_skiplist_compare current_comp;
+static int add_comp(void *a, void *b)
 {
-    if (apr_skiplist_find(skiplist, data, NULL))
-        return NULL;
-    return apr_skiplist_insert(skiplist, data);
+    return current_comp(a, b) < 0 ? -1 : +1;
+}
+static apr_skiplistnode *apr_skiplist_add_compare(apr_skiplist *sl, void *data,
+                                                  apr_skiplist_compare comp)
+{
+    current_comp = comp;
+    return apr_skiplist_insert_compare(sl, data, add_comp);
+}
+static apr_skiplistnode *apr_skiplist_add(apr_skiplist *sl, void *data)
+{
+    /* Ugly, really, but should work *while* the compare function is the first
+     * field of the (opaque) skiplist struct, which is the case for now :p
+     */
+    return apr_skiplist_add_compare(sl, data, *(apr_skiplist_compare**)sl);
 }
 
 static int skiplist_get_size(abts_case *tc, apr_skiplist *sl)
@@ -65,7 +79,7 @@ static void skiplist_find(abts_case *tc, void *data)
 {
     const char *val;
 
-    apr_skiplist_addne(skiplist, "baton");
+    apr_skiplist_insert(skiplist, "baton");
     val = apr_skiplist_find(skiplist, "baton", NULL);
     ABTS_PTR_NOTNULL(tc, val);
     ABTS_STR_EQUAL(tc, "baton", val);
@@ -82,32 +96,58 @@ static void skiplist_dontfind(abts_case *tc, void *data)
 static void skiplist_insert(abts_case *tc, void *data)
 {
     const char *val;
+    int i;
+
+    for (i = 0; i < 10; ++i) {
+        apr_skiplist_insert(skiplist, "baton");
+        ABTS_TRUE(tc, 1 == skiplist_get_size(tc, skiplist));
+        val = apr_skiplist_find(skiplist, "baton", NULL);
+        ABTS_PTR_NOTNULL(tc, val);
+        ABTS_STR_EQUAL(tc, "baton", val);
+    }
+
+    apr_skiplist_insert(skiplist, "foo");
+    ABTS_TRUE(tc, 2 == skiplist_get_size(tc, skiplist));
+    val = apr_skiplist_find(skiplist, "foo", NULL);
+    ABTS_PTR_NOTNULL(tc, val);
+    ABTS_STR_EQUAL(tc, "foo", val);
+
+    apr_skiplist_insert(skiplist, "atfirst");
+    ABTS_TRUE(tc, 3 == skiplist_get_size(tc, skiplist));
+    val = apr_skiplist_find(skiplist, "atfirst", NULL);
+    ABTS_PTR_NOTNULL(tc, val);
+    ABTS_STR_EQUAL(tc, "atfirst", val);
+}
+
+static void skiplist_add(abts_case *tc, void *data)
+{
+    const char *val;
     size_t i, n = skiplist_get_size(tc, skiplist);
 
     for (i = 0; i < 100; ++i) {
         n++;
-        apr_skiplist_insert(skiplist, "daton");
+        apr_skiplist_add(skiplist, "daton");
         ABTS_TRUE(tc, n == skiplist_get_size(tc, skiplist));
         val = apr_skiplist_find(skiplist, "daton", NULL);
         ABTS_PTR_NOTNULL(tc, val);
         ABTS_STR_EQUAL(tc, "daton", val);
 
         n++;
-        apr_skiplist_insert(skiplist, "baton");
+        apr_skiplist_add(skiplist, "baton");
         ABTS_TRUE(tc, n == skiplist_get_size(tc, skiplist));
         val = apr_skiplist_find(skiplist, "baton", NULL);
         ABTS_PTR_NOTNULL(tc, val);
         ABTS_STR_EQUAL(tc, "baton", val);
 
         n++;
-        apr_skiplist_insert(skiplist, "caton");
+        apr_skiplist_add(skiplist, "caton");
         ABTS_TRUE(tc, n == skiplist_get_size(tc, skiplist));
         val = apr_skiplist_find(skiplist, "caton", NULL);
         ABTS_PTR_NOTNULL(tc, val);
         ABTS_STR_EQUAL(tc, "caton", val);
 
         n++;
-        apr_skiplist_insert(skiplist, "aaton");
+        apr_skiplist_add(skiplist, "aaton");
         ABTS_TRUE(tc, n == skiplist_get_size(tc, skiplist));
         val = apr_skiplist_find(skiplist, "aaton", NULL);
         ABTS_PTR_NOTNULL(tc, val);
@@ -127,9 +167,9 @@ static void skiplist_size(abts_case *tc, void *data)
 
     ABTS_TRUE(tc, 0 == skiplist_get_size(tc, skiplist));
 
-    apr_skiplist_addne(skiplist, "abc");
-    apr_skiplist_addne(skiplist, "ghi");
-    apr_skiplist_addne(skiplist, "def");
+    apr_skiplist_insert(skiplist, "abc");
+    apr_skiplist_insert(skiplist, "ghi");
+    apr_skiplist_insert(skiplist, "def");
     val = apr_skiplist_find(skiplist, "abc", NULL);
     ABTS_PTR_NOTNULL(tc, val);
     ABTS_STR_EQUAL(tc, "abc", val);
@@ -150,13 +190,13 @@ static void skiplist_remove(abts_case *tc, void *data)
 
     ABTS_TRUE(tc, 0 == skiplist_get_size(tc, skiplist));
 
-    apr_skiplist_insert(skiplist, "baton");
+    apr_skiplist_add(skiplist, "baton");
     ABTS_TRUE(tc, 1 == skiplist_get_size(tc, skiplist));
     val = apr_skiplist_find(skiplist, "baton", NULL);
     ABTS_PTR_NOTNULL(tc, val);
     ABTS_STR_EQUAL(tc, "baton", val);
 
-    apr_skiplist_insert(skiplist, "baton");
+    apr_skiplist_add(skiplist, "baton");
     ABTS_TRUE(tc, 2 == skiplist_get_size(tc, skiplist));
     val = apr_skiplist_find(skiplist, "baton", NULL);
     ABTS_PTR_NOTNULL(tc, val);
@@ -168,7 +208,7 @@ static void skiplist_remove(abts_case *tc, void *data)
     ABTS_PTR_NOTNULL(tc, val);
     ABTS_STR_EQUAL(tc, "baton", val);
 
-    apr_skiplist_insert(skiplist, "baton");
+    apr_skiplist_add(skiplist, "baton");
     ABTS_TRUE(tc, 2 == skiplist_get_size(tc, skiplist));
     val = apr_skiplist_find(skiplist, "baton", NULL);
     ABTS_PTR_NOTNULL(tc, val);
@@ -203,7 +243,7 @@ static void skiplist_random_loop(abts_case *tc, void *data)
         else {
             batons[i] = apr_pstrdup(ptmp, batons[i % NUM_RAND]);
         }
-        apr_skiplist_insert(sl, batons[i]);
+        apr_skiplist_add(sl, batons[i]);
         val = apr_skiplist_find(sl, batons[i], NULL);
         ABTS_PTR_NOTNULL(tc, val);
         ABTS_STR_EQUAL(tc, batons[i], val);
@@ -221,13 +261,13 @@ typedef struct elem {
 static void add_int_to_skiplist(apr_skiplist *list, int n){
     int* a = apr_skiplist_alloc(list, sizeof(int));
     *a = n;
-    apr_skiplist_insert(list, a);
+    apr_skiplist_add(list, a);
 }
 
 static void add_elem_to_skiplist(apr_skiplist *list, elem n){
     elem* a = apr_skiplist_alloc(list, sizeof(elem));
     *a = n;
-    apr_skiplist_insert(list, a);
+    apr_skiplist_add(list, a);
 }
 
 static int comp(void *a, void *b){
@@ -297,10 +337,10 @@ static void skiplist_test(abts_case *tc, void *data) {
     val = apr_skiplist_pop(list, NULL);
     ABTS_PTR_EQUAL(tc, val, NULL);
 
-    apr_skiplist_insert(list, &first_forty_two);
+    apr_skiplist_add(list, &first_forty_two);
     add_int_to_skiplist(list, 1);
     add_int_to_skiplist(list, 142);
-    apr_skiplist_insert(list, &second_forty_two);
+    apr_skiplist_add(list, &second_forty_two);
     val = apr_skiplist_peek(list);
     ABTS_INT_EQUAL(tc, *val, 1);
     val = apr_skiplist_pop(list, NULL);
@@ -354,6 +394,7 @@ abts_suite *testskiplist(abts_suite *suite)
     abts_run_test(suite, skiplist_find, NULL);
     abts_run_test(suite, skiplist_dontfind, NULL);
     abts_run_test(suite, skiplist_insert, NULL);
+    abts_run_test(suite, skiplist_add, NULL);
     abts_run_test(suite, skiplist_destroy, NULL);
     abts_run_test(suite, skiplist_size, NULL);
     abts_run_test(suite, skiplist_remove, NULL);
