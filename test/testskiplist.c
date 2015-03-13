@@ -241,8 +241,8 @@ static void skiplist_random_loop(abts_case *tc, void *data)
 }
 
 typedef struct elem {
-    int a;
     int b;
+    int a;
 } elem;
 
 
@@ -262,16 +262,17 @@ static int comp(void *a, void *b){
     return *((int*) a) - *((int*) b);
 }
 
-static int compk(void *a, void *b){
-    return comp(a, b);
-}
-
 static int scomp(void *a, void *b){
     return ((elem*) a)->a - ((elem*) b)->a;
 }
 
-static int scompk(void *a, void *b){
-    return scomp(a, b);
+static int acomp(void *a, void *b){
+    if (a != b) {
+        return (scomp(a, b) < 0) ? -1 : 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 static void skiplist_test(abts_case *tc, void *data) {
@@ -281,6 +282,7 @@ static void skiplist_test(abts_case *tc, void *data) {
     elem *val2 = NULL;
     apr_skiplist * list = NULL;
     apr_skiplist * list2 = NULL;
+    apr_skiplist * list3 = NULL;
     int first_forty_two = 42,
         second_forty_two = 42;
     elem t1, t2, t3, t4, t5;
@@ -291,7 +293,7 @@ static void skiplist_test(abts_case *tc, void *data) {
     t5.a = 142; t5.b = 1;
 
     ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_skiplist_init(&list, ptmp));
-    apr_skiplist_set_compare(list, comp, compk);
+    apr_skiplist_set_compare(list, comp, comp);
     
     /* insert 10 objects */
     for (i = 0; i < test_elems; ++i){
@@ -346,7 +348,7 @@ static void skiplist_test(abts_case *tc, void *data) {
     ABTS_INT_EQUAL(tc, *val, 142);
 
     ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_skiplist_init(&list2, ptmp));
-    apr_skiplist_set_compare(list2, scomp, scompk);
+    apr_skiplist_set_compare(list2, scomp, scomp);
     add_elem_to_skiplist(list2, t2);
     add_elem_to_skiplist(list2, t1);
     add_elem_to_skiplist(list2, t3);
@@ -367,6 +369,20 @@ static void skiplist_test(abts_case *tc, void *data) {
     ABTS_INT_EQUAL(tc, val2->a, 142);
     ABTS_INT_EQUAL(tc, val2->b, 1);
 
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_skiplist_init(&list3, ptmp));
+    apr_skiplist_set_compare(list3, acomp, acomp);
+    apr_skiplist_insert(list3, &t2);
+    val2 = apr_skiplist_find(list3, &t2, NULL);
+    ABTS_PTR_EQUAL(tc, &t2, val2);
+    apr_skiplist_insert(list3, &t3);
+    val2 = apr_skiplist_find(list3, &t3, NULL);
+    ABTS_PTR_EQUAL(tc, &t3, val2);
+    apr_skiplist_remove(list3, &t3, NULL);
+    val2 = apr_skiplist_find(list3, &t3, NULL);
+    ABTS_PTR_EQUAL(tc, NULL, val2);
+    apr_skiplist_remove(list3, &t2, NULL);
+    val2 = apr_skiplist_find(list3, &t2, NULL);
+    ABTS_PTR_EQUAL(tc, NULL, val2);
 
     apr_pool_clear(ptmp);
 }
