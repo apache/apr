@@ -298,22 +298,6 @@ APR_DECLARE(void) apr_skiplist_add_index(apr_skiplist *sl,
     }
 }
 
-APR_DECLARE(apr_skiplistnode *) apr_skiplist_getlist(apr_skiplist *sl)
-{
-    if (!sl->bottom) {
-        return NULL;
-    }
-    return sl->bottom->next;
-}
-
-APR_DECLARE(void *) apr_skiplist_find(apr_skiplist *sl, void *data, apr_skiplistnode **iter)
-{
-    if (!sl->compare) {
-        return NULL;
-    }
-    return apr_skiplist_find_compare(sl, data, iter, sl->compare);
-}
-
 static int skiplisti_find_compare(apr_skiplist *sl, void *data,
                            apr_skiplistnode **ret,
                            apr_skiplist_compare comp)
@@ -351,6 +335,12 @@ APR_DECLARE(void *) apr_skiplist_find_compare(apr_skiplist *sli, void *data,
 {
     apr_skiplistnode *m;
     apr_skiplist *sl;
+    if (!comp) {
+        if (iter) {
+            *iter = NULL;
+        }
+        return NULL;
+    }
     if (comp == sli->compare || !sli->index) {
         sl = sli;
     }
@@ -371,6 +361,19 @@ APR_DECLARE(void *) apr_skiplist_find_compare(apr_skiplist *sli, void *data,
     return (m) ? m->data : NULL;
 }
 
+APR_DECLARE(void *) apr_skiplist_find(apr_skiplist *sl, void *data, apr_skiplistnode **iter)
+{
+    return apr_skiplist_find_compare(sl, data, iter, sl->compare);
+}
+
+
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_getlist(apr_skiplist *sl)
+{
+    if (!sl->bottom) {
+        return NULL;
+    }
+    return sl->bottom->next;
+}
 
 APR_DECLARE(void *) apr_skiplist_next(apr_skiplist *sl, apr_skiplistnode **iter)
 {
