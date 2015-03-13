@@ -517,37 +517,29 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
 APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, void *data,
                                       apr_skiplist_compare comp)
 {
-    return insert_compare(sl, data, comp, 1);
+    if (!comp) {
+        return NULL;
+    }
+    return insert_compare(sl, data, comp, 0);
 }
 
 APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert(apr_skiplist *sl, void *data)
 {
-    if (!sl->compare) {
-        return NULL;
-    }
-    return insert_compare(sl, data, sl->compare, 1);
+    return apr_skiplist_insert_compare(sl, data, sl->compare);
 }
 
-APR_DECLARE(apr_skiplistnode *) apr_skiplist_addne_compare(apr_skiplist *sl, void *data,
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_add_compare(apr_skiplist *sl, void *data,
                                       apr_skiplist_compare comp)
 {
-    return insert_compare(sl, data, comp, 0);
-}
-
-APR_DECLARE(apr_skiplistnode *) apr_skiplist_addne(apr_skiplist *sl, void *data)
-{
-    if (!sl->compare) {
+    if (!comp) {
         return NULL;
     }
-    return insert_compare(sl, data, sl->compare, 0);
+    return insert_compare(sl, data, comp, 1);
 }
 
-APR_DECLARE(int) apr_skiplist_remove(apr_skiplist *sl, void *data, apr_skiplist_freefunc myfree)
+APR_DECLARE(apr_skiplistnode *) apr_skiplist_add(apr_skiplist *sl, void *data)
 {
-    if (!sl->compare) {
-        return 0;
-    }
-    return apr_skiplist_remove_compare(sl, data, myfree, sl->comparek);
+    return apr_skiplist_add_compare(sl, data, sl->compare);
 }
 
 #if 0
@@ -618,6 +610,9 @@ APR_DECLARE(int) apr_skiplist_remove_compare(apr_skiplist *sli,
 {
     apr_skiplistnode *m;
     apr_skiplist *sl;
+    if (!comp) {
+        return 0;
+    }
     if (comp == sli->comparek || !sli->index) {
         sl = sli;
     }
@@ -636,6 +631,11 @@ APR_DECLARE(int) apr_skiplist_remove_compare(apr_skiplist *sli,
         m = m->previndex;
     }
     return skiplisti_remove(sl, m, myfree);
+}
+
+APR_DECLARE(int) apr_skiplist_remove(apr_skiplist *sl, void *data, apr_skiplist_freefunc myfree)
+{
+    return apr_skiplist_remove_compare(sl, data, myfree, sl->comparek);
 }
 
 APR_DECLARE(void) apr_skiplist_remove_all(apr_skiplist *sl, apr_skiplist_freefunc myfree)
