@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_queue: Add apr_queue_timedpush() and apr_queue_timedpop() to
+     support timedout operations. PR 56951.  [Travis Cross 
+     <tc+asf travislists com>, Yann Ylavic].
+
   *) apr_pollset: On z/OS, threadsafe apr_pollset_poll() may return
      "EDC8102I Operation would block" under load.
      [Pat Odonnell <patod us.ibm.com>]

@@ -121,6 +121,55 @@ static void test_queue_producer_consumer(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
+static void test_queue_timeout(abts_case *tc, void *data)
+{
+    apr_queue_t *q;
+    apr_status_t rv;
+    apr_time_t start;
+    unsigned int i;
+    void *value;
+
+    rv = apr_queue_create(&q, 5, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    for (i = 0; i < 2; ++i) {
+        rv = apr_queue_timedpush(q, NULL, apr_time_from_msec(1));
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    }
+    for (i = 0; i < 3; ++i) {
+        rv = apr_queue_trypush(q, NULL);
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    }
+
+    start = apr_time_now();
+    rv = apr_queue_timedpush(q, NULL, apr_time_from_msec(1));
+    ABTS_TRUE(tc, APR_STATUS_IS_TIMEUP(rv));
+    ABTS_TRUE(tc, apr_time_now() - start >= apr_time_from_msec(1));
+
+    rv = apr_queue_trypush(q, NULL);
+    ABTS_TRUE(tc, APR_STATUS_IS_EAGAIN(rv));
+
+    for (i = 0; i < 2; ++i) {
+        rv = apr_queue_timedpop(q, &value, apr_time_from_msec(1));
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    }
+    for (i = 0; i < 3; ++i) {
+        rv = apr_queue_trypop(q, &value);
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    }
+
+    start = apr_time_now();
+    rv = apr_queue_timedpop(q, &value, apr_time_from_sec(1));
+    ABTS_TRUE(tc, APR_STATUS_IS_TIMEUP(rv));
+    ABTS_TRUE(tc, apr_time_now() - start >= apr_time_from_msec(1));
+
+    rv = apr_queue_trypop(q, &value);
+    ABTS_TRUE(tc, APR_STATUS_IS_EAGAIN(rv));
+
+    rv = apr_queue_term(q);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
+
 #endif /* APR_HAS_THREADS */
 
 abts_suite *testqueue(abts_suite *suite)
@@ -129,6 +178,7 @@ abts_suite *testqueue(abts_suite *suite)
 
 #if APR_HAS_THREADS
     abts_run_test(suite, test_queue_producer_consumer, NULL);
+    abts_run_test(suite, test_queue_timeout, NULL);
 #endif /* APR_HAS_THREADS */
 
     return suite;
