@@ -28,6 +28,7 @@
 #include "apu.h"
 #include "apr_errno.h"
 #include "apr_pools.h"
+#include "apr_time.h"
 
 #if APR_HAS_THREADS
 
@@ -91,7 +92,7 @@ APR_DECLARE(apr_status_t) apr_queue_pop(apr_queue_t *queue, void **data);
 APR_DECLARE(apr_status_t) apr_queue_trypush(apr_queue_t *queue, void *data);
 
 /**
- * pop/get an object to the queue, returning immediately if the queue is empty
+ * pop/get an object from the queue, returning immediately if the queue is empty
  *
  * @param queue the queue
  * @param data the data
@@ -101,6 +102,38 @@ APR_DECLARE(apr_status_t) apr_queue_trypush(apr_queue_t *queue, void *data);
  * @returns APR_SUCCESS on a successful pop
  */
 APR_DECLARE(apr_status_t) apr_queue_trypop(apr_queue_t *queue, void **data);
+
+/**
+ * push/add an object to the queue, waiting a maximum of timeout microseconds
+ * before returning if the queue is empty
+ *
+ * @param queue the queue
+ * @param data the data
+ * @param timeout the timeout
+ * @returns APR_EINTR the blocking operation was interrupted (try again)
+ * @returns APR_EAGAIN the queue is empty and timeout is 0
+ * @returns APR_TIMEUP the queue is empty and the timeout expired
+ * @returns APR_EOF the queue has been terminated
+ * @returns APR_SUCCESS on a successful pop
+ */
+APR_DECLARE(apr_status_t) apr_queue_timedpush(apr_queue_t *queue, void *data,
+                                              apr_interval_time_t timeout);
+
+/**
+ * pop/get an object from the queue, waiting a maximum of timeout microseconds
+ * before returning if the queue is empty
+ *
+ * @param queue the queue
+ * @param data the data
+ * @param timeout the timeout
+ * @returns APR_EINTR the blocking operation was interrupted (try again)
+ * @returns APR_EAGAIN the queue is empty and timeout is 0
+ * @returns APR_TIMEUP the queue is empty and the timeout expired
+ * @returns APR_EOF the queue has been terminated
+ * @returns APR_SUCCESS on a successful pop
+ */
+APR_DECLARE(apr_status_t) apr_queue_timedpop(apr_queue_t *queue, void **data,
+                                             apr_interval_time_t timeout);
 
 /**
  * returns the size of the queue.
