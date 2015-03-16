@@ -91,6 +91,7 @@ ALL_TESTS = \
 	$(INTDIR)\testdso.obj \
 	$(INTDIR)\testdup.obj \
 	$(INTDIR)\testenv.obj \
+	$(INTDIR)\testescape.obj \
 	$(INTDIR)\testfile.obj \
 	$(INTDIR)\testfilecopy.obj \
 	$(INTDIR)\testfileinfo.obj \
