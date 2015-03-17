@@ -222,7 +222,7 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_add(apr_skiplist* sl, void *data);
  * @param sl The skip list
  * @param data The element to insert
  * @param comp The comparison function to use for placement into the skip list
- * @param myfree A function to be called for each replaced element
+ * @param myfree A function to be called for each removed duplicate
  * @remark If no comparison function has been set for the skip list, the element
  * will not be inserted, none will be replaced, and NULL will be returned.
  */
@@ -247,7 +247,7 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_replace(apr_skiplist *sl,
  * locating the element. In the case of duplicates, the 1st entry will be removed.
  * @param sl The skip list
  * @param data The element to remove
- * @param myfree A function to be called for each removed duplicate
+ * @param myfree A function to be called for each removed element
  * @param comp The comparison function to use for placement into the skip list
  * @remark If the element is not found, 0 will be returned.  Otherwise, the heightXXX
  * will be returned.
