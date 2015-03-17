@@ -525,7 +525,7 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
         li = ret;
         for (p = apr_skiplist_getlist(sl->index); p; apr_skiplist_next(sl->index, &p)) {
             apr_skiplist *sli = (apr_skiplist *)p->data;
-            ni = insert_compare(sli, ret->data, sli->compare, add, myfree);
+            ni = insert_compare(sli, ret->data, sli->compare, 1, NULL);
             li->nextindex = ni;
             ni->previndex = li;
             li = ni;
