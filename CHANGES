@@ -1,9 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.2
 
-  *) apr_skiplist: Honor canonical description of skiplists and allow
-     for duplicate entries. As required, for stability, dups are added
-     after each other. [Jim Jagielski]
+  *) apr_skiplist: Optimize the number of allocations by reusing pooled or
+     malloc()ed nodes for the lifetime of the skiplist.  [Yann Ylavic]
+
+  *) apr_skiplist: Fix possible multiple-free() on the same value in
+     apr_skiplist_remove_all().  [Yann Ylavic]
 
   *) apr_pollset: On z/OS, threadsafe apr_pollset_poll() may return
      "EDC8102I Operation would block" under load.
