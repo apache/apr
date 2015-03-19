@@ -50,9 +50,7 @@ const struct testlist {
     {testoc},
     {testpath},
     {testpipe},
-#if 0
     {testpoll},
-#endif
     {testpool},
     {testproc},
     {testprocmutex},
