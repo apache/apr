@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.2
 
+  *) apr_thread_cond_*wait() on BeOS: Fix broken logic.  PR 45800.
+     [Jochen Voss (no e-mail)]
+
   *) apr_skiplist: Optimize the number of allocations by reusing pooled or
      malloc()ed nodes for the lifetime of the skiplist.  [Yann Ylavic]
 
