@@ -43,20 +43,22 @@ static apr_pool_t *p;
 static volatile int counter;
 typedef enum {TEST_GLOBAL, TEST_PROC} test_mode_e;
 
-static void lock_init(apr_lockmech_e mech, test_mode_e test_mode)
+static int lock_init(apr_lockmech_e mech, test_mode_e test_mode)
 {
+    apr_status_t rv;
     if (test_mode == TEST_PROC) {
-        assert(apr_proc_mutex_create(&proc_mutex,
-                                     NULL,
-                                     mech,
-                                     p) == APR_SUCCESS);
+        rv = apr_proc_mutex_create(&proc_mutex,
+                                           NULL,
+                                           mech,
+                                           p);
     }
     else {
-        assert(apr_global_mutex_create(&global_mutex,
-                                       NULL,
-                                       mech,
-                                       p) == APR_SUCCESS);
+        rv = apr_global_mutex_create(&global_mutex,
+                                     NULL,
+                                     mech,
+                                     p);
     }
+    return rv;
 }
 
 static void lock_destroy(test_mode_e test_mode)
@@ -120,7 +122,17 @@ static void test_mech_mode(apr_lockmech_e mech, const char *mech_name,
   assert(apr_thread_mutex_create(&thread_mutex, 0, p) == APR_SUCCESS);
   assert(apr_thread_mutex_lock(thread_mutex) == APR_SUCCESS);
   
-  lock_init(mech, test_mode);
+  rv = lock_init(mech, test_mode);
+  if (rv != APR_SUCCESS) {
+      char errmsg[256];
+      printf("%s mutexes with mechanism `%s': %s\n",
+             test_mode == TEST_GLOBAL ? "Global" : "Proc", mech_name,
+             apr_strerror(rv, errmsg, sizeof errmsg));
+      if (rv != APR_ENOTIMPL || mech == APR_LOCK_DEFAULT) {
+          exit(1);
+      }
+      return;
+  }
 
   counter = 0;
 
@@ -142,7 +154,7 @@ static void test_mech_mode(apr_lockmech_e mech, const char *mech_name,
   apr_sleep(apr_time_from_sec(5));
 
   if (test_mode == TEST_PROC) {
-      printf("  Mutex mechanism `%s' is %sglobal in scope on this platform.\n",
+      printf("  mutex mechanism `%s' is %sglobal in scope on this platform.\n",
              mech_name, counter == 1 ? "" : "not ");
   }
   else {
@@ -155,7 +167,7 @@ static void test_mech_mode(apr_lockmech_e mech, const char *mech_name,
           exit(1);
       }
       else {
-          printf("  no problems encountered...\n");
+          printf("  no problem encountered...\n");
       }
   }
   
@@ -205,6 +217,7 @@ int main(void)
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
         ,{APR_LOCK_PROC_PTHREAD, "proc_pthread"}
 #endif
+        ,{APR_LOCK_DEFAULT_TIMED, "default_timed"}
     };
     int i;
         

@@ -35,6 +35,11 @@
 static apr_proc_mutex_t *proc_lock;
 static volatile int *x;
 
+typedef struct lockmech {
+    apr_lockmech_e num;
+    const char *name;
+} lockmech_t;
+
 /* a slower more racy way to implement (*x)++ */
 static int increment(int n)
 {
@@ -68,7 +73,7 @@ static void make_child(abts_case *tc, int trylock, apr_proc_t **proc, apr_pool_t
             exit(1);
 
         do {
-            if (trylock) {
+            if (trylock > 0) {
                 int wait_usec = 0;
 
                 while ((rv = apr_proc_mutex_trylock(proc_lock))) {
@@ -77,6 +82,16 @@ static void make_child(abts_case *tc, int trylock, apr_proc_t **proc, apr_pool_t
                     if (++wait_usec >= MAX_WAIT_USEC)
                         exit(1);
                     apr_sleep(1);
+                }
+            }
+            else if (trylock < 0) {
+                int wait_usec = 0;
+
+                while ((rv = apr_proc_mutex_timedlock(proc_lock, 1, 0))) {
+                    if (!APR_STATUS_IS_TIMEUP(rv))
+                        exit(1);
+                    if (++wait_usec >= MAX_WAIT_USEC)
+                        exit(1);
                 }
             }
             else {
@@ -108,16 +123,21 @@ static void await_child(abts_case *tc, apr_proc_t *proc)
 }
 
 static void test_exclusive(abts_case *tc, const char *lockname, 
-                           apr_lockmech_e mech)
+                           lockmech_t *mech)
 {
     apr_proc_t *child[CHILDREN];
     apr_status_t rv;
     int n;
  
-    rv = apr_proc_mutex_create(&proc_lock, lockname, mech, p);
+    rv = apr_proc_mutex_create(&proc_lock, lockname, mech->num, p);
     APR_ASSERT_SUCCESS(tc, "create the mutex", rv);
-    if (rv != APR_SUCCESS)
+    if (rv != APR_SUCCESS) {
+        fprintf(stderr, "%s not implemented, ", mech->name);
+        ABTS_ASSERT(tc, "Default timed not implemented",
+                    mech->num != APR_LOCK_DEFAULT &&
+                    mech->num != APR_LOCK_DEFAULT_TIMED);
         return;
+    }
  
     for (n = 0; n < CHILDREN; n++)
         make_child(tc, 0, &child[n], p);
@@ -129,24 +149,52 @@ static void test_exclusive(abts_case *tc, const char *lockname,
 
     rv = apr_proc_mutex_trylock(proc_lock);
     if (rv == APR_ENOTIMPL) {
-        ABTS_NOT_IMPL(tc, "apr_proc_mutex_trylock not implemented");
-        return;
+        fprintf(stderr, "%s_trylock() not implemented, ", mech->name);
+        ABTS_ASSERT(tc, "Default timed trylock not implemented",
+                    mech->num != APR_LOCK_DEFAULT &&
+                    mech->num != APR_LOCK_DEFAULT_TIMED);
     }
-    APR_ASSERT_SUCCESS(tc, "check for trylock", rv);
+    else {
+        APR_ASSERT_SUCCESS(tc, "check for trylock", rv);
 
-    rv = apr_proc_mutex_unlock(proc_lock);
-    APR_ASSERT_SUCCESS(tc, "unlock after trylock check", rv);
+        rv = apr_proc_mutex_unlock(proc_lock);
+        APR_ASSERT_SUCCESS(tc, "unlock after trylock check", rv);
 
-    *x = 0;
+        *x = 0;
 
-    for (n = 0; n < CHILDREN; n++)
-        make_child(tc, 1, &child[n], p);
+        for (n = 0; n < CHILDREN; n++)
+            make_child(tc, 1, &child[n], p);
 
-    for (n = 0; n < CHILDREN; n++)
-        await_child(tc, child[n]);
-    
-    ABTS_ASSERT(tc, "Locks don't appear to work with trylock",
-                *x == MAX_COUNTER);
+        for (n = 0; n < CHILDREN; n++)
+            await_child(tc, child[n]);
+        
+        ABTS_ASSERT(tc, "Locks don't appear to work with trylock",
+                    *x == MAX_COUNTER);
+    }
+
+    rv = apr_proc_mutex_timedlock(proc_lock, 1, 0);
+    if (rv == APR_ENOTIMPL) {
+        fprintf(stderr, "%s_timedlock() not implemented, ", mech->name);
+        ABTS_ASSERT(tc, "Default timed timedlock not implemented",
+                    mech->num != APR_LOCK_DEFAULT_TIMED);
+    }
+    else {
+        APR_ASSERT_SUCCESS(tc, "check for timedlock", rv);
+
+        rv = apr_proc_mutex_unlock(proc_lock);
+        APR_ASSERT_SUCCESS(tc, "unlock after timedlock check", rv);
+
+        *x = 0;
+
+        for (n = 0; n < CHILDREN; n++)
+            make_child(tc, -1, &child[n], p);
+
+        for (n = 0; n < CHILDREN; n++)
+            await_child(tc, child[n]);
+        
+        ABTS_ASSERT(tc, "Locks don't appear to work with timedlock",
+                    *x == MAX_COUNTER);
+    }
 }
 #endif
 
@@ -156,7 +204,6 @@ static void proc_mutex(abts_case *tc, void *data)
     apr_status_t rv;
     const char *shmname = "tpm.shm";
     apr_shm_t *shm;
-    apr_lockmech_e *mech = data;
 
     /* Use anonymous shm if available. */
     rv = apr_shm_create(&shm, sizeof(int), NULL, p);
@@ -170,7 +217,7 @@ static void proc_mutex(abts_case *tc, void *data)
         return;
 
     x = apr_shm_baseaddr_get(shm);
-    test_exclusive(tc, NULL, *mech);
+    test_exclusive(tc, NULL, data);
     rv = apr_shm_destroy(shm);
     APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
 #else
@@ -181,30 +228,30 @@ static void proc_mutex(abts_case *tc, void *data)
 
 abts_suite *testprocmutex(abts_suite *suite)
 {
-    apr_lockmech_e mech = APR_LOCK_DEFAULT;
-
-    suite = ADD_SUITE(suite)
-    abts_run_test(suite, proc_mutex, &mech);
-#if APR_HAS_POSIXSEM_SERIALIZE
-    mech = APR_LOCK_POSIXSEM;
-    abts_run_test(suite, proc_mutex, &mech);
+    lockmech_t lockmechs[] = {
+        {APR_LOCK_DEFAULT, "default"}
+#if APR_HAS_FLOCK_SERIALIZE
+        ,{APR_LOCK_FLOCK, "flock"}
 #endif
 #if APR_HAS_SYSVSEM_SERIALIZE
-    mech = APR_LOCK_SYSVSEM;
-    abts_run_test(suite, proc_mutex, &mech);
+        ,{APR_LOCK_SYSVSEM, "sysvsem"}
 #endif
-#if APR_HAS_PROC_PTHREAD_SERIALIZE
-    mech = APR_LOCK_PROC_PTHREAD;
-    abts_run_test(suite, proc_mutex, &mech);
+#if APR_HAS_POSIXSEM_SERIALIZE
+        ,{APR_LOCK_POSIXSEM, "posix"}
 #endif
 #if APR_HAS_FCNTL_SERIALIZE
-    mech = APR_LOCK_FCNTL;
-    abts_run_test(suite, proc_mutex, &mech);
+        ,{APR_LOCK_FCNTL, "fcntl"}
 #endif
-#if APR_HAS_FLOCK_SERIALIZE
-    mech = APR_LOCK_FLOCK;
-    abts_run_test(suite, proc_mutex, &mech);
+#if APR_HAS_PROC_PTHREAD_SERIALIZE
+        ,{APR_LOCK_PROC_PTHREAD, "proc_pthread"}
 #endif
+        ,{APR_LOCK_DEFAULT_TIMED, "default_timed"}
+    };
+    int i;
 
+    suite = ADD_SUITE(suite)
+    for (i = 0; i < sizeof(lockmechs) / sizeof(lockmechs[0]); i++) {
+        abts_run_test(suite, proc_mutex, &lockmechs[i]);
+    }
     return suite;
 }

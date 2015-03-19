@@ -24,6 +24,7 @@
 
 #include "apr.h"
 #include "apr_errno.h"
+#include "apr_time.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,6 +44,7 @@ typedef struct apr_thread_mutex_t apr_thread_mutex_t;
 #define APR_THREAD_MUTEX_DEFAULT  0x0   /**< platform-optimal lock behavior */
 #define APR_THREAD_MUTEX_NESTED   0x1   /**< enable nested (recursive) locks */
 #define APR_THREAD_MUTEX_UNNESTED 0x2   /**< disable nested locks */
+#define APR_THREAD_MUTEX_TIMED    0x4   /**< enable timed locks */
 
 /* Delayed the include to avoid a circular reference */
 #include "apr_pools.h"
@@ -80,6 +82,17 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex);
  * @param mutex the mutex on which to attempt the lock acquiring.
  */
 APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex);
+
+/**
+ * Attempt to acquire the lock for the given mutex until timeout expires.
+ * If the acquisition time outs, the call returns with APR_TIMEUP.
+ * @param mutex the mutex on which to attempt the lock acquiring.
+ * @param timeout the absolute (non 0) or relative (0) timeout
+ * @param absolute whether the timeout given is absolute or relative
+ */
+APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
+                                                     apr_time_t timeout,
+                                                     int absolute);
 
 /**
  * Release the lock for the given mutex.
