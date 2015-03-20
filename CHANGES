@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.2
 
+  *) apr_poll(cb): fix error paths returned values and leaks.  [Yann Ylavic]
+
   *) apr_thread_cond_*wait() on BeOS: Fix broken logic.  PR 45800.
      [Jochen Voss (no e-mail)]
 
