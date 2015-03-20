@@ -147,7 +147,7 @@ APR_DECLARE(apr_status_t) apr_global_mutex_timedlock(apr_global_mutex_t *mutex,
 {
     apr_status_t rv;
 
-    if (!absolute) {
+    if (timeout >= 0 && !absolute) {
         timeout += apr_time_now();
     }
 

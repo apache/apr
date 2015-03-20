@@ -196,21 +196,31 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
     apr_status_t rv = APR_ENOTIMPL;
 
 #ifdef HAVE_PTHREAD_MUTEX_TIMEDLOCK
-    struct timespec abstime;
-
-    if (!absolute) {
-        timeout += apr_time_now();
-    }
-    abstime.tv_sec = apr_time_sec(timeout);
-    abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
-
-    rv = pthread_mutex_timedlock(&mutex->mutex, &abstime);
-    if (rv) {
+    if (timeout < 0) {
+        rv = pthread_mutex_lock(&mutex->mutex);
+        if (rv) {
 #ifdef HAVE_ZOS_PTHREADS
-        rv = errno;
+            rv = errno;
 #endif
-        if (rv == ETIMEDOUT) {
-            rv = APR_TIMEUP;
+        }
+    }
+    else {
+        struct timespec abstime;
+
+        if (!absolute) {
+            timeout += apr_time_now();
+        }
+        abstime.tv_sec = apr_time_sec(timeout);
+        abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
+
+        rv = pthread_mutex_timedlock(&mutex->mutex, &abstime);
+        if (rv) {
+#ifdef HAVE_ZOS_PTHREADS
+            rv = errno;
+#endif
+            if (rv == ETIMEDOUT) {
+                rv = APR_TIMEUP;
+            }
         }
     }
 
@@ -228,17 +238,22 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
         }
 
         if (mutex->locked) {
-            if (absolute) {
-                apr_time_t now = apr_time_now();
-                if (timeout > now) {
-                    timeout -= now;
-                }
-                else {
-                    timeout = 0;
-                }
-            }
             mutex->num_waiters++;
-            rv = apr_thread_cond_timedwait(mutex->cond, mutex, timeout);
+            if (timeout < 0) {
+                rv = apr_thread_cond_wait(mutex->cond, mutex);
+            }
+            else {
+                if (absolute) {
+                    apr_time_t now = apr_time_now();
+                    if (timeout > now) {
+                        timeout -= now;
+                    }
+                    else {
+                        timeout = 0;
+                    }
+                }
+                rv = apr_thread_cond_timedwait(mutex->cond, mutex, timeout);
+            }
             mutex->num_waiters--;
         }
         else {

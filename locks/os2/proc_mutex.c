@@ -162,19 +162,24 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
 {
     ULONG rc;
     
-    if (absolute) {
-        apr_time_t now = apr_time_now();
-        if (timeout > now) {
-            timeout -= now;
-        }
-        else {
-            timeout = 0;
-        }
+    if (timeout < 0) {
+        rc = DosRequestMutexSem(mutex->hMutex, SEM_INDEFINITE_WAIT);
     }
+    else {
+        if (absolute) {
+            apr_time_t now = apr_time_now();
+            if (timeout > now) {
+                timeout -= now;
+            }
+            else {
+                timeout = 0;
+            }
+        }
 
-    rc = DosRequestMutexSem(mutex->hMutex, apr_time_as_msec(timeout));
-    if (rc == ERROR_TIMEOUT) {
-        return APR_TIMEUP;
+        rc = DosRequestMutexSem(mutex->hMutex, apr_time_as_msec(timeout));
+        if (rc == ERROR_TIMEOUT) {
+            return APR_TIMEUP;
+        }
     }
 
     if (rc == 0) {

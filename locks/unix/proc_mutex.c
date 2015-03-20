@@ -179,19 +179,28 @@ static apr_status_t proc_mutex_posix_timedacquire(apr_proc_mutex_t *mutex,
                                                   int absolute)
 {
 #if HAVE_SEM_TIMEDWAIT
-    struct timespec abstime;
-
-    if (!absolute) {
-        timeout += apr_time_now();
+    if (timeout < 0) {
+        return proc_mutex_posix_acquire(mutex);
     }
-    abstime.tv_sec = apr_time_sec(timeout);
-    abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
+    else {
+        int rc;
+        struct timespec abstime;
 
-    if (sem_timedwait(mutex->psem_interproc, &abstime) < 0) {
-        if (errno == ETIMEDOUT) {
-            return APR_TIMEUP;
+        if (!absolute) {
+            timeout += apr_time_now();
         }
-        return errno;
+        abstime.tv_sec = apr_time_sec(timeout);
+        abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
+        
+        do {
+            rc = sem_timedwait(mutex->psem_interproc, &abstime);
+        } while (rc < 0 && errno == EINTR);
+        if (rc < 0) {
+            if (errno == ETIMEDOUT) {
+                return APR_TIMEUP;
+            }
+            return errno;
+        }
     }
     mutex->curr_locked = 1;
     return APR_SUCCESS;
@@ -325,24 +334,27 @@ static apr_status_t proc_mutex_sysv_timedacquire(apr_proc_mutex_t *mutex,
                                                  int absolute)
 {
 #if HAVE_SEMTIMEDOP
-    int rc;
-    struct timespec abstime;
-
-    if (!absolute) {
-        timeout += apr_time_now();
+    if (timeout < 0) {
+        return proc_mutex_sysv_acquire(mutex);
     }
-    abstime.tv_sec = apr_time_sec(timeout);
-    abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
-
-    do {
-        rc = semtimedop(mutex->interproc->filedes, &proc_mutex_op_on, 1,
-                        &abstime);
-    } while (rc < 0 && errno == EINTR);
-    if (rc < 0) {
-        if (errno == EAGAIN) {
-            return APR_TIMEUP;
+    else {
+        int rc;
+        struct timespec abstime;
+        if (!absolute) {
+            timeout += apr_time_now();
         }
-        return errno;
+        abstime.tv_sec = apr_time_sec(timeout);
+        abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
+        do {
+            rc = semtimedop(mutex->interproc->filedes, &proc_mutex_op_on, 1,
+                            &abstime);
+        } while (rc < 0 && errno == EINTR);
+        if (rc < 0) {
+            if (errno == EAGAIN) {
+                return APR_TIMEUP;
+            }
+            return errno;
+        }
     }
     mutex->curr_locked = 1;
     return APR_SUCCESS;
@@ -567,7 +579,7 @@ static apr_status_t proc_mutex_proc_pthread_tryacquire(apr_proc_mutex_t *mutex)
 #endif
     }
     mutex->curr_locked = 1;
-    return rv;
+    return APR_SUCCESS;
 }
 
 static apr_status_t
@@ -575,36 +587,42 @@ proc_mutex_proc_pthread_timedacquire(apr_proc_mutex_t *mutex,
                                      apr_time_t timeout,
                                      int absolute)
 {
-    apr_status_t rv;
-    struct timespec abstime;
-
-    if (!absolute) {
-        timeout += apr_time_now();
+    if (timeout < 0) {
+        return proc_mutex_proc_pthread_acquire(mutex);
     }
-    abstime.tv_sec = apr_time_sec(timeout);
-    abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
+    else {
+        apr_status_t rv;
+        struct timespec abstime;
 
-    if ((rv = pthread_mutex_timedlock(mutex->pthread_interproc, &abstime))) {
+        if (!absolute) {
+            timeout += apr_time_now();
+        }
+        abstime.tv_sec = apr_time_sec(timeout);
+        abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
+
+        if ((rv = pthread_mutex_timedlock(mutex->pthread_interproc,
+                                          &abstime))) {
 #ifdef HAVE_ZOS_PTHREADS 
-        rv = errno;
+            rv = errno;
 #endif
-        if (rv == ETIMEDOUT) {
-            return APR_TIMEUP;
-        }
+            if (rv == ETIMEDOUT) {
+                return APR_TIMEUP;
+            }
 #ifdef HAVE_PTHREAD_MUTEX_ROBUST
-        /* Okay, our owner died.  Let's try to make it consistent again. */
-        if (rv == EOWNERDEAD) {
-            pthread_mutex_consistent_np(mutex->pthread_interproc);
-            rv = APR_SUCCESS;
-        }
-        else
-            return rv;
+            /* Okay, our owner died.  Let's try to make it consistent again. */
+            if (rv == EOWNERDEAD) {
+                pthread_mutex_consistent_np(mutex->pthread_interproc);
+                rv = APR_SUCCESS;
+            }
+            else
+                return rv;
 #else
-        return rv;
+            return rv;
 #endif
+        }
     }
     mutex->curr_locked = 1;
-    return rv;
+    return APR_SUCCESS;
 }
 
 static apr_status_t proc_mutex_proc_pthread_release(apr_proc_mutex_t *mutex)

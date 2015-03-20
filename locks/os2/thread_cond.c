@@ -131,7 +131,8 @@ APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
                                                     apr_thread_mutex_t *mutex,
                                                     apr_interval_time_t timeout)
 {
-    ULONG timeout_ms = apr_time_as_msec(timeout);
+    ULONG timeout_ms = (timeout >= 0) ? apr_time_as_msec(timeout)
+                                      : SEM_INDEFINITE_WAIT;
     return thread_cond_timedwait(cond, mutex, timeout_ms);
 }
 
