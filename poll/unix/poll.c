@@ -251,13 +251,14 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
         }
         return APR_SUCCESS;
     }
-
     if (timeout > 0) {
         timeout /= 1000;
     }
-
     ret = WSAPoll(pollset->p->pollset, pollset->nelts, (int)timeout);
 #else
+    if (timeout > 0) {
+        timeout /= 1000;
+    }
     ret = poll(pollset->p->pollset, pollset->nelts, timeout);
 #endif
     (*num) = ret;
