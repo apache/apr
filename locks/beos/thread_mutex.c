@@ -116,8 +116,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
     }
     
     if (atomic_add(&mutex->LockCount, 1) > 0) {
-        if ((stat = acquire_sem_etc(mutex->Lock, 1,
-                                    B_TIMEOUT, 0)) < B_NO_ERROR) {
+        if ((stat = acquire_sem_etc(mutex->Lock, 1, 0, 0)) < B_NO_ERROR) {
             atomic_add(&mutex->LockCount, -1);
             if (stat == B_WOULD_BLOCK) {
                 stat = APR_EBUSY;
@@ -145,24 +144,29 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
     }
     
     if (atomic_add(&mutex->LockCount, 1) > 0) {
-#ifdef B_ABSOLUTE_TIMEOUT
-        stat = acquire_sem_etc(mutex->Lock, 1,
-                               absolute ? B_ABSOLUTE_TIMEOUT
-                                        : B_RELATIVE_TIMEOUT,
-                               timeout);
-#else
-        if (absolute) {
-            apr_time_t now = apr_time_now();
-            if (timeout > now) {
-                timeout -= now;
-            }
-            else {
-                timeout = 0;
-            }
+        if (timeout < 0) {
+            stat = acquire_sem(mutex->Lock);
         }
-        stat = acquire_sem_etc(mutex->Lock, 1, B_TIMEOUT, timeout);
-#endif
-        if (stat  < B_NO_ERROR) {
+        else {
+            int flag = 0;
+            if (timeout > 0) {
+                if (absolute) {
+                    apr_time_t now = apr_time_now();
+                    if (timeout > now) {
+                        timeout -= now;
+                    }
+                    else {
+                        timeout = 0;
+                    }
+                    flag = B_ABSOLUTE_TIMEOUT;
+                }
+                else {
+                    flag = B_RELATIVE_TIMEOUT;
+                }
+            }
+            stat = acquire_sem_etc(mutex->Lock, 1, flag, timeout);
+        }
+        if (stat < B_NO_ERROR) {
             atomic_add(&mutex->LockCount, -1);
             if (stat == B_TIMED_OUT) {
                 stat = APR_TIMEUP;

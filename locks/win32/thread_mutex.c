@@ -119,19 +119,25 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
                                                      int absolute)
 {
     if (mutex->type != thread_mutex_critical_section) {
-        DWORD rv;
-        if (absolute) {
-            apr_time_t now = apr_time_now();
-            if (timeout > now) {
-                timeout -= now;
-            }
-            else {
-                timeout = 0;
-            }
+        DWORD rv, timeout_ms;
+        if (timeout < 0) {
+            timeout_ms = INFINITE;
         }
-        rv = WaitForSingleObject(mutex->handle, apr_time_as_msec(timeout));
+        else {
+            if (absolute) {
+                apr_time_t now = apr_time_now();
+                if (timeout > now) {
+                    timeout -= now;
+                }
+                else {
+                    timeout = 0;
+                }
+            }
+            timeout_ms = apr_time_as_msec(timeout);
+        }
+        rv = WaitForSingleObject(mutex->handle, timeout_ms);
         if ((rv != WAIT_OBJECT_0) && (rv != WAIT_ABANDONED)) {
-            return (rv == WAIT_TIMEOUT) ? APR_EBUSY : apr_get_os_error();
+            return (rv == WAIT_TIMEOUT) ? APR_TIMEUP : apr_get_os_error();
         }
         return APR_SUCCESS;
     }        

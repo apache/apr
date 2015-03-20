@@ -115,27 +115,28 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
     int32 stat;
 
     if (atomic_add(&mutex->LockCount, 1) > 0) {
-        int flag = 0;
-#ifdef B_ABSOLUTE_TIMEOUT
-        if (timeout) {
-            flag = absolute ? B_ABSOLUTE_TIMEOUT : B_RELATIVE_TIMEOUT;
+        if (timeout < 0) {
+            stat = acquire_sem(mutex->Lock);
         }
-        stat = acquire_sem_etc(mutex->Lock, 1, flag, timeout);
-#else
-        if (absolute) {
-            apr_time_t now = apr_time_now();
-            if (timeout > now) {
-                timeout -= now;
+        else {
+            int flag = 0;
+            if (timeout > 0) {
+                if (absolute) {
+                    apr_time_t now = apr_time_now();
+                    if (timeout > now) {
+                        timeout -= now;
+                    }
+                    else {
+                        timeout = 0;
+                    }
+                    flag = B_ABSOLUTE_TIMEOUT;
+                }
+                else {
+                    flag = B_RELATIVE_TIMEOUT;
+                }
             }
-            else {
-                timeout = 0;
-            }
+            stat = acquire_sem_etc(mutex->Lock, 1, flag, timeout);
         }
-        if (timeout) {
-            flag = B_RELATIVE_TIMEOUT;
-        }
-        stat = acquire_sem_etc(mutex->Lock, 1, flag, timeout);
-#endif
         if (stat < B_NO_ERROR) {
             atomic_add(&mutex->LockCount, -1);
             if (stat == B_TIMED_OUT) {
