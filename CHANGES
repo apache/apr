@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.2
 
+  *) pollcb on Windows: Handle calls with no file/socket descriptors.
+     Follow up to PR 49882. [Jeff Trawick, Yann Ylavic]
+
   *) apr_poll(cb): fix error paths returned values and leaks.  [Yann Ylavic]
 
   *) apr_thread_cond_*wait() on BeOS: Fix broken logic.  PR 45800.
