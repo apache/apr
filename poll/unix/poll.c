@@ -397,12 +397,23 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
     apr_status_t rv = APR_SUCCESS;
     apr_uint32_t i;
 
+#ifdef WIN32
+    /* WSAPoll() requires at least one socket. */
+    if (pollcb->nelts == 0) {
+        if (timeout > 0) {
+            apr_sleep(timeout);
+            return APR_TIMEUP;
+        }
+        return APR_SUCCESS;
+    }
     if (timeout > 0) {
         timeout /= 1000;
     }
-#ifdef WIN32
     ret = WSAPoll(pollcb->pollset.ps, pollcb->nelts, (int)timeout);
 #else
+    if (timeout > 0) {
+        timeout /= 1000;
+    }
     ret = poll(pollcb->pollset.ps, pollcb->nelts, timeout);
 #endif
     if (ret < 0) {
