@@ -31,6 +31,8 @@ Prerequisites
 The following tools must be in PATH:
 
 * cmake, version 2.8 or later
+  (It has been reported that cmake version 3.1.3 is needed if you build
+  APR in conjunction with OpenSSL 1.0.2.)
 * If using a command-line compiler: compiler and linker and related tools
   (Refer to the cmake documentation for more information.)
 
