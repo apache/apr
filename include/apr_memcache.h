@@ -370,7 +370,6 @@ APR_DECLARE(apr_status_t) apr_memcache_decr(apr_memcache_t *mc,
  * @param ms    server to query
  * @param p     Pool to allocate answer from
  * @param baton location to store server version string
- * @param len   length of the server version string
  */
 APR_DECLARE(apr_status_t) apr_memcache_version(apr_memcache_server_t *ms,
                                                apr_pool_t *p,
