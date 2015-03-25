@@ -231,8 +231,8 @@ APR_DECLARE(int) apr_dbd_transaction_start(const apr_dbd_driver_t *driver,
  *  May be a no-op.
  *
  *  @param driver - the driver
- *  @param handle - the db connection
- *  @param trans - the transaction.
+ *  @param pool   - working pool
+ *  @param trans  - the transaction
  *  @return 0 for success or error code
  */
 APR_DECLARE(int) apr_dbd_transaction_end(const apr_dbd_driver_t *driver,
