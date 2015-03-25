@@ -131,17 +131,17 @@ APR_DECLARE(apr_status_t) apr_md5(unsigned char digest[APR_MD5_DIGESTSIZE],
 
 /**
  * Encode a password using an MD5 algorithm
- * @param password The password to encode
+ * @param pw The password to encode
  * @param salt The salt string to use for the encoding
  * @param result The string to store the encoded password in
  * @param nbytes The size of the result buffer
  */
-APR_DECLARE(apr_status_t) apr_md5_encode(const char *password, const char *salt,
+APR_DECLARE(apr_status_t) apr_md5_encode(const char *pw, const char *salt,
                                          char *result, apr_size_t nbytes);
 
 /**
  * Encode a password using the bcrypt algorithm
- * @param password The password to encode
+ * @param pw The password to encode
  * @param count The cost of the encoding, possible values are 4 to 31
  * @param salt Pointer to binary data to be used as salt for the encoding
  * @param salt_len The size of the salt data (must be >= 16)
