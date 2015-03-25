@@ -267,7 +267,7 @@ APR_DECLARE(apr_size_t) apr_thread_pool_thread_max_get(apr_thread_pool_t *me);
 /**
  * Access function for the threshold of tasks in queue to trigger a new thread.
  * @param me The thread pool
- * @param cnt The new threshold
+ * @param val The new threshold
  * @return The original threshold
  */
 APR_DECLARE(apr_size_t) apr_thread_pool_threshold_set(apr_thread_pool_t *me,
