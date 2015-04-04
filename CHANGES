@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.2
 
+  *) apr_file_mktemp() on HP-UX: Remove limitation of 26 temporary files
+     per process.  PR 57677.  [Jeff Trawick]
+
   *) apr_escape: Correctly calculate the size of the returned string in
      apr_escape_path and set the correct return value in case we actually
      escape the string. [<aduryagin gmail.com>] PR 57230.
