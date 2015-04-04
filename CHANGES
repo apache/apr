@@ -5,23 +5,9 @@ Changes for APR 2.0.0
      support timedout operations. PR 56951. [Anthony Minessale <anthm
      freeswitch org>, Travis Cross <tc+asf travislists com>, Yann Ylavic].
 
-  *) apr_pollset: On z/OS, threadsafe apr_pollset_poll() may return
-     "EDC8102I Operation would block" under load.
-     [Pat Odonnell <patod us.ibm.com>]
-
   *) apr_escape: Correctly calculate the size of the returned string in
      apr_escape_path and set the correct return value in case we actually
      escape the string. [<aduryagin gmail.com>] PR 57230.
-
-  *) On z/OS, apr_sockaddr_info_get() with family == APR_UNSPEC was not 
-     returning IPv4 addresses if any IPv6 addresses were returned. 
-     [Eric Covener]
-
-  *) apr_skiplist: Fix potential corruption of skiplists leading to 
-     unexpected results or crashes. 
-     [Takashi Sato <takashi tks st>, Eric Covener] PR 56654.
-
-  *) apr_skiplist: Add apr_skiplist_add() to support multiple values.
 
   *) apr_allocator: Be less wasteful and don't return a memnode that is
      much larger than what was requested. [Stefan Fuhrmann
@@ -66,9 +52,6 @@ Changes for APR 2.0.0
 
   *) Transfer the apr-util spec file contents to apr.spec. [Graham
      Leggett]
-
-  *) apr_thread_cond_*wait() on BeOS: Fix broken logic.  PR 45800.
-     [Jochen Voss (no e-mail)]
 
   *) Added Unix domain socket support.  [Mladen Turk]
 
