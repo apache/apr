@@ -5,10 +5,6 @@ Changes for APR 2.0.0
      support timedout operations. PR 56951. [Anthony Minessale <anthm
      freeswitch org>, Travis Cross <tc+asf travislists com>, Yann Ylavic].
 
-  *) apr_escape: Correctly calculate the size of the returned string in
-     apr_escape_path and set the correct return value in case we actually
-     escape the string. [<aduryagin gmail.com>] PR 57230.
-
   *) apr_allocator: Be less wasteful and don't return a memnode that is
      much larger than what was requested. [Stefan Fuhrmann
      <stefan fuhrmann wandisco com>]
