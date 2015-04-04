@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) build: Correctly use AC_(PATH|CHECK)_TOOL to support cross compilation.
+     PR: 56866.  [Timothy Gu <timothygu99 gmail.com>]
+
   *) apr_queue: Add apr_queue_timedpush() and apr_queue_timedpop() to
      support timedout operations. PR 56951. [Anthony Minessale <anthm
      freeswitch org>, Travis Cross <tc+asf travislists com>, Yann Ylavic].
