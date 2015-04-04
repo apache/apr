@@ -31,7 +31,7 @@ AC_DEFUN([APU_CHECK_DBD], [
   AC_ARG_WITH([pgsql], APR_HELP_STRING([--with-pgsql=DIR], [specify PostgreSQL location]),
   [
     if test "$withval" = "yes"; then
-      AC_PATH_PROG([PGSQL_CONFIG],[pg_config])
+      AC_PATH_TOOL([PGSQL_CONFIG],[pg_config])
       if test "x$PGSQL_CONFIG" != 'x'; then
         pgsql_CPPFLAGS="-I`$PGSQL_CONFIG --includedir`"
         pgsql_LDFLAGS="-L`$PGSQL_CONFIG --libdir`"
@@ -68,7 +68,7 @@ AC_DEFUN([APU_CHECK_DBD], [
     elif test "$withval" = "no"; then
       :
     else
-      AC_PATH_PROG([PGSQL_CONFIG],[pg_config],,[$withval/bin])
+      AC_PATH_TOOL([PGSQL_CONFIG],[pg_config],,[$withval/bin])
       if test "x$PGSQL_CONFIG" != 'x'; then
         pgsql_CPPFLAGS="-I`$PGSQL_CONFIG --includedir`"
         pgsql_LDFLAGS="-L`$PGSQL_CONFIG --libdir`"
@@ -108,7 +108,7 @@ AC_DEFUN([APU_CHECK_DBD], [
       fi
     fi
   ], [
-    AC_PATH_PROG([PGSQL_CONFIG],[pg_config])
+    AC_PATH_TOOL([PGSQL_CONFIG],[pg_config])
     if test "x$PGSQL_CONFIG" != 'x'; then
       pgsql_CPPFLAGS="-I`$PGSQL_CONFIG --includedir`"
       pgsql_LDFLAGS="-L`$PGSQL_CONFIG --libdir`"
@@ -166,7 +166,7 @@ AC_DEFUN([APU_CHECK_DBD_MYSQL], [
   AC_ARG_WITH([mysql], APR_HELP_STRING([--with-mysql=DIR], [enable MySQL DBD driver]),
   [
     if test "$withval" = "yes"; then
-      AC_PATH_PROG([MYSQL_CONFIG],[mysql_config])
+      AC_PATH_TOOL([MYSQL_CONFIG],[mysql_config])
       if test "x$MYSQL_CONFIG" != 'x'; then
         mysql_CPPFLAGS="`$MYSQL_CONFIG --include`"
         mysql_LDFLAGS="`$MYSQL_CONFIG --libs_r | sed -e 's/-l[[^ ]]\+//g'`"
@@ -192,7 +192,7 @@ AC_DEFUN([APU_CHECK_DBD_MYSQL], [
     elif test "$withval" = "no"; then
       :
     else
-      AC_PATH_PROG([MYSQL_CONFIG],[mysql_config],,[$withval/bin])
+      AC_PATH_TOOL([MYSQL_CONFIG],[mysql_config],,[$withval/bin])
       if test "x$MYSQL_CONFIG" != 'x'; then
         mysql_CPPFLAGS="`$MYSQL_CONFIG --include`"
         mysql_LDFLAGS="`$MYSQL_CONFIG --libs_r | sed -e 's/-l[[^ ]]\+//g'`"
@@ -420,7 +420,7 @@ AC_DEFUN([APU_CHECK_DBD_ODBC], [
   AC_ARG_WITH([odbc], APR_HELP_STRING([--with-odbc=DIR], [specify ODBC location]),
   [
     if test "$withval" = "yes"; then
-      AC_PATH_PROG([ODBC_CONFIG],[odbc_config])
+      AC_PATH_TOOL([ODBC_CONFIG],[odbc_config])
       if test "x$ODBC_CONFIG" != 'x'; then
         odbc_CPPFLAGS="-I`$ODBC_CONFIG --include-prefix`"
         odbc_LDFLAGS="-L`$ODBC_CONFIG --lib-prefix`"
@@ -441,7 +441,7 @@ AC_DEFUN([APU_CHECK_DBD_ODBC], [
     elif test "$withval" = "no"; then
       :
     else
-      AC_PATH_PROG([ODBC_CONFIG],[odbc_config],,[$withval/bin])
+      AC_PATH_TOOL([ODBC_CONFIG],[odbc_config],,[$withval/bin])
       if test "x$ODBC_CONFIG" != 'x'; then
         odbc_CPPFLAGS="-I`$ODBC_CONFIG --include-prefix`"
         odbc_LDFLAGS="-L`$ODBC_CONFIG --lib-prefix`"
@@ -471,7 +471,7 @@ AC_DEFUN([APU_CHECK_DBD_ODBC], [
       fi
     fi
   ], [
-    AC_PATH_PROG([ODBC_CONFIG],[odbc_config])
+    AC_PATH_TOOL([ODBC_CONFIG],[odbc_config])
     if test "x$ODBC_CONFIG" != 'x'; then
       odbc_CPPFLAGS="-I`$ODBC_CONFIG --include-prefix`"
       odbc_LDFLAGS="-L`$ODBC_CONFIG --lib-prefix`"
