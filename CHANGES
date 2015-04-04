@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.2
 
+  *) apr_escape: Correctly calculate the size of the returned string in
+     apr_escape_path and set the correct return value in case we actually
+     escape the string. [<aduryagin gmail.com>] PR 57230.
+
   *) pollcb on Windows: Handle calls with no file/socket descriptors.
      Follow up to PR 49882. [Jeff Trawick, Yann Ylavic]
 
