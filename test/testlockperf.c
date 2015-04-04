@@ -180,7 +180,7 @@ int test_thread_mutex_nested(int num_threads)
     return APR_SUCCESS;
 }
 
-int test_thread_mutex_timed(int num_threads)
+static int test_thread_mutex_timed(int num_threads)
 {
     apr_thread_t *t[MAX_THREADS];
     apr_status_t s[MAX_THREADS];
