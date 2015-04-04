@@ -122,7 +122,7 @@ class APREnv(Environment):
   def APRHints(self):
     # TOOD: port more from apr_hints.m4
     if self['PLATFORM'] == 'darwin':
-      self.AppendUnique(CPPFLAGS=['-DDARWIN', '-DSIGPROCMASK_SETS_THREAD_MASK', '-no-cpp-precomp'])
+      self.AppendUnique(CPPFLAGS=['-DDARWIN', '-DSIGPROCMASK_SETS_THREAD_MASK'])
 
 
   def critical_value(self, f, value, *args):
