@@ -1,25 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
-  *) apr_thread_cond_*wait() on BeOS: Fix broken logic.  PR 45800.
-     [Jochen Voss (no e-mail)]
-
   *) apr_skiplist: Add apr_skiplist_addne*() family to preserve existing
      values (no duplicate), add apr_skiplist_size(), apr_skiplist_height()
      and apr_skiplist_preheight() to get the corresponding current values,
      and apr_skiplist_set_preheight() to modify it. [ Yann Ylavic ]
-
-  *) apr_pollset: On z/OS, threadsafe apr_pollset_poll() may return
-     "EDC8102I Operation would block" under load.
-     [Pat Odonnell <patod us.ibm.com>]
-
-  *) On z/OS, apr_sockaddr_info_get() with family == APR_UNSPEC was not 
-     returning IPv4 addresses if any IPv6 addresses were returned. 
-     [Eric Covener]
-
-  *) apr_skiplist: Fix potential corruption of skiplists leading to 
-     unexpected results or crashes. 
-     [Takashi Sato <takashi tks st>, Eric Covener] PR 56654.
 
   *) Add new --enable-allocator-guard-pages which is like allocator-uses-mmap,
      but will also add inaccessible guard pages before and after each memnode.
