@@ -261,7 +261,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     }
     ret = poll(pollset->p->pollset, pollset->nelts, timeout);
 #endif
-    (*num) = ret;
+    *num = 0;
     if (ret < 0) {
         return apr_get_netos_error();
     }
@@ -290,8 +290,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
                 }
             }
         }
-        if (((*num) = j) > 0)
-            rv = APR_SUCCESS;
+        *num = j;
     }
     if (descriptors && (*num))
         *descriptors = pollset->p->result_set;
