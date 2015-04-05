@@ -196,11 +196,9 @@ static void test_exclusive(abts_case *tc, const char *lockname,
                     *x == MAX_COUNTER);
     }
 }
-#endif
 
 static void proc_mutex(abts_case *tc, void *data)
 {
-#if APR_HAS_FORK
     apr_status_t rv;
     const char *shmname = "tpm.shm";
     apr_shm_t *shm;
@@ -220,9 +218,6 @@ static void proc_mutex(abts_case *tc, void *data)
     test_exclusive(tc, NULL, data);
     rv = apr_shm_destroy(shm);
     APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
-#else
-    ABTS_NOT_IMPL(tc, "APR lacks fork() support");
-#endif
 }
 
 
@@ -255,3 +250,18 @@ abts_suite *testprocmutex(abts_suite *suite)
     }
     return suite;
 }
+
+#else /* APR_HAS_FORK */
+
+static void proc_mutex(abts_case *tc, void *data)
+{
+    ABTS_NOT_IMPL(tc, "APR lacks fork() support");
+}
+
+abts_suite *testprocmutex(abts_suite *suite)
+{
+    suite = ADD_SUITE(suite);
+    abts_run_test(suite, proc_mutex, NULL);
+    return suite;
+}
+#endif /* APR_HAS_FORK */
