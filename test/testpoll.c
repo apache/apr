@@ -42,6 +42,11 @@ static apr_pollfd_t *pollarray;
 static apr_pollfd_t *pollarray_large;
 #endif
 
+/* default_pollset_impl can be overridden temporarily to control
+ * testcases which don't specify an implementation explicitly
+ */
+static int default_pollset_impl = APR_POLLSET_DEFAULT;
+
 static void make_socket(apr_socket_t **sock, apr_sockaddr_t **sa, 
                         apr_port_t port, apr_pool_t *p, abts_case *tc)
 {
@@ -287,7 +292,8 @@ static void recv_large_pollarray(abts_case *tc, void *data)
 static void setup_pollset(abts_case *tc, void *data)
 {
     apr_status_t rv;
-    rv = apr_pollset_create(&pollset, LARGE_NUM_SOCKETS, p, 0);
+    rv = apr_pollset_create_ex(&pollset, LARGE_NUM_SOCKETS, p, 0,
+                               default_pollset_impl);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
@@ -492,7 +498,8 @@ static void pollset_remove(abts_case *tc, void *data)
     apr_pollfd_t pfd;
     apr_int32_t num;
 
-    rv = apr_pollset_create(&pollset, 5, p, 0);
+    rv = apr_pollset_create_ex(&pollset, 5, p, 0,
+                               default_pollset_impl);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     pfd.p = p;
@@ -772,11 +779,13 @@ static void pollcb_default(abts_case *tc, void *data)
 static void pollset_wakeup(abts_case *tc, void *data)
 {
     apr_status_t rv;
+    apr_pollfd_t socket_pollfd;
     apr_pollset_t *pollset;
     apr_int32_t num;
     const apr_pollfd_t *descriptors;
 
-    rv = apr_pollset_create(&pollset, 1, p, APR_POLLSET_WAKEABLE);
+    rv = apr_pollset_create_ex(&pollset, 1, p, APR_POLLSET_WAKEABLE,
+                               default_pollset_impl);
     if (rv == APR_ENOTIMPL) {
         ABTS_NOT_IMPL(tc, "apr_pollset_wakeup() not supported");
         return;
@@ -789,6 +798,23 @@ static void pollset_wakeup(abts_case *tc, void *data)
 
     rv = apr_pollset_poll(pollset, -1, &num, &descriptors);
     ABTS_INT_EQUAL(tc, APR_EINTR, rv);
+
+    /* send wakeup and data; apr_pollset_poll() should return APR_SUCCESS */
+    socket_pollfd.desc_type = APR_POLL_SOCKET;
+    socket_pollfd.reqevents = APR_POLLIN;
+    socket_pollfd.desc.s = s[0];
+    socket_pollfd.client_data = s[0];
+    rv = apr_pollset_add(pollset, &socket_pollfd);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    send_msg(s, sa, 0, tc);
+
+    rv = apr_pollset_wakeup(pollset);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_pollset_poll(pollset, -1, &num, &descriptors);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 1, num);
 }
 
 static void justsleep(abts_case *tc, void *data)
@@ -890,10 +916,10 @@ abts_suite *testpoll(abts_suite *suite)
     abts_run_test(suite, trigger_pollcb, NULL);
     abts_run_test(suite, timeout_pollcb, NULL);
     abts_run_test(suite, timeout_pollin_pollcb, NULL);
+    abts_run_test(suite, pollset_wakeup, NULL);
     abts_run_test(suite, close_all_sockets, NULL);
     abts_run_test(suite, pollset_default, NULL);
     abts_run_test(suite, pollcb_default, NULL);
-    abts_run_test(suite, pollset_wakeup, NULL);
     abts_run_test(suite, justsleep, NULL);
     return suite;
 }
