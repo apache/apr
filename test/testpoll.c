@@ -769,6 +769,28 @@ static void pollcb_default(abts_case *tc, void *data)
     }
 }
 
+static void pollset_wakeup(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_pollset_t *pollset;
+    apr_int32_t num;
+    const apr_pollfd_t *descriptors;
+
+    rv = apr_pollset_create(&pollset, 1, p, APR_POLLSET_WAKEABLE);
+    if (rv == APR_ENOTIMPL) {
+        ABTS_NOT_IMPL(tc, "apr_pollset_wakeup() not supported");
+        return;
+    }
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    /* send wakeup but no data; apr_pollset_poll() should return APR_EINTR */
+    rv = apr_pollset_wakeup(pollset);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_pollset_poll(pollset, -1, &num, &descriptors);
+    ABTS_INT_EQUAL(tc, APR_EINTR, rv);
+}
+
 static void justsleep(abts_case *tc, void *data)
 {
     apr_int32_t nsds;
@@ -871,6 +893,7 @@ abts_suite *testpoll(abts_suite *suite)
     abts_run_test(suite, close_all_sockets, NULL);
     abts_run_test(suite, pollset_default, NULL);
     abts_run_test(suite, pollcb_default, NULL);
+    abts_run_test(suite, pollset_wakeup, NULL);
     abts_run_test(suite, justsleep, NULL);
     return suite;
 }
