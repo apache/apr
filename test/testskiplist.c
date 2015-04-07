@@ -317,6 +317,34 @@ static int acomp(void *a, void *b){
     }
 }
 
+/* If we add multiple duplicates and then try to remove each one
+ * individually (unique pointer) in arbitrary order, by using:
+ * - apr_skiplist_remove_compare(..., scomp, NULL)
+ *   There is no pointer comparison with scomp(), so will likely
+ *   remove any duplicate (the first encountered in the walking path).
+ * - apr_skiplist_remove_compare(..., acomp, NULL)
+ *   The exact element to be removed may be skipped in the walking path
+ *   because some "bigger" element (or duplicate) was added later with a
+ *   higher height.
+ * Hence we use skiplist_remove_scomp() which will go straight to the last
+ * duplicate (using scomp) and then iterate on the previous elements until
+ * pointers match.
+ * This pattern could be reused by any application which wants to remove
+ * elements by (unique) pointer.
+ */
+static void skiplist_remove_scomp(abts_case *tc, apr_skiplist *list, elem *n)
+{
+    elem *e;
+    apr_skiplistnode *iter = NULL;
+    e = apr_skiplist_last(list, n, &iter);
+    while (e && e != n) {
+        ABTS_INT_EQUAL(tc, 0, scomp(n, e));
+        e = apr_skiplist_previous(list, &iter);
+    }
+    ABTS_PTR_EQUAL(tc, n, apr_skiplist_element(iter));
+    apr_skiplist_remove_node(list, iter, NULL);
+}
+
 static void skiplist_test(abts_case *tc, void *data) {
     int test_elems = 10;
     int i = 0, j = 0;
@@ -325,6 +353,7 @@ static void skiplist_test(abts_case *tc, void *data) {
     apr_skiplist * list = NULL;
     apr_skiplist * list2 = NULL;
     apr_skiplist * list3 = NULL;
+    apr_skiplist * list4 = NULL;
     int first_forty_two = 42,
         second_forty_two = 42;
     elem t1, t2, t3, t4, t5;
@@ -425,6 +454,39 @@ static void skiplist_test(abts_case *tc, void *data) {
     apr_skiplist_remove(list3, &t2, NULL);
     val2 = apr_skiplist_find(list3, &t2, NULL);
     ABTS_PTR_EQUAL(tc, NULL, val2);
+
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_skiplist_init(&list4, ptmp));
+    apr_skiplist_set_compare(list4, scomp, scomp);
+    for (i = 0; i < 5; ++i){
+        add_elem_to_skiplist(list4, t1);
+    }
+    for (i = 0; i < 5; ++i){
+        add_elem_to_skiplist(list4, t2);
+    }
+    apr_skiplist_add(list4, &t2);
+    for (i = 0; i < 5; ++i){
+        add_elem_to_skiplist(list4, t2);
+    }
+    for (i = 0; i < 5; ++i){
+        add_elem_to_skiplist(list4, t3);
+    }
+    apr_skiplist_add(list4, &t3);
+    for (i = 0; i < 5; ++i){
+        add_elem_to_skiplist(list4, t3);
+    }
+    for (i = 0; i < 5; ++i){
+        add_elem_to_skiplist(list4, t4);
+    }
+    apr_skiplist_add(list4, &t4);
+    for (i = 0; i < 5; ++i){
+        add_elem_to_skiplist(list4, t4);
+    }
+    for (i = 0; i < 5; ++i){
+        add_elem_to_skiplist(list4, t5);
+    }
+    skiplist_remove_scomp(tc, list4, &t2);
+    skiplist_remove_scomp(tc, list4, &t3);
+    skiplist_remove_scomp(tc, list4, &t4);
 
     apr_pool_clear(ptmp);
 }
