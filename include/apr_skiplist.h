@@ -153,6 +153,30 @@ APR_DECLARE(void *) apr_skiplist_find_compare(apr_skiplist *sl,
 APR_DECLARE(void *) apr_skiplist_find(apr_skiplist *sl, void *data, apr_skiplistnode **iter);
 
 /**
+ * Return the last matching element in the skip list using the specified
+ * comparison function.
+ * @param sl The skip list
+ * @param data The value to search for
+ * @param iter A pointer to the returned skip list node representing the element
+ * found
+ * @param func The comparison function to use
+ */
+APR_DECLARE(void *) apr_skiplist_last_compare(apr_skiplist *sli, void *data,
+                                              apr_skiplistnode **iter,
+                                              apr_skiplist_compare comp);
+
+/**
+ * Return the last matching element in the skip list using the current comparison
+ * function.
+ * @param sl The skip list
+ * @param data The value to search for
+ * @param iter A pointer to the returned skip list node representing the element
+ * found
+ */
+APR_DECLARE(void *) apr_skiplist_last(apr_skiplist *sl, void *data,
+                                      apr_skiplistnode **iter);
+
+/**
  * Return the next element in the skip list.
  * @param sl The skip list
  * @param iter On entry, a pointer to the skip list node to start with; on return,
@@ -241,6 +265,16 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_replace_compare(apr_skiplist *sl,
  */
 APR_DECLARE(apr_skiplistnode *) apr_skiplist_replace(apr_skiplist *sl,
                                     void *data, apr_skiplist_freefunc myfree);
+
+/**
+ * Remove a node from the skip list.
+ * @param sl The skip list
+ * @param iter The skip list node to remove
+ * @param myfree A function to be called for the removed element
+ */
+APR_DECLARE(int) apr_skiplist_remove_node(apr_skiplist *sl,
+                                          apr_skiplistnode *iter,
+                                          apr_skiplist_freefunc myfree);
 
 /**
  * Remove an element from the skip list using the specified comparison function for
