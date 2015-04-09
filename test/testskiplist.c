@@ -185,7 +185,7 @@ static void skiplist_destroy(abts_case *tc, void *data)
 {
     apr_skiplist_destroy(skiplist, NULL);
     ABTS_TRUE(tc, 0 == apr_skiplist_size(skiplist));
-    ABTS_TRUE(tc, 0 == apr_skiplist_height(skiplist));
+    ABTS_TRUE(tc, 1 == apr_skiplist_height(skiplist));
     ABTS_TRUE(tc, NULL == apr_skiplist_getlist(skiplist));
 }
 
