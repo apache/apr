@@ -202,7 +202,7 @@ static void skiplist_remove(abts_case *tc, void *data)
     ABTS_PTR_NOTNULL(tc, val);
     ABTS_STR_EQUAL(tc, "baton", val);
 
-    apr_skiplist_remove(skiplist, "baton", NULL);
+    ABTS_TRUE(tc, apr_skiplist_remove(skiplist, "baton", NULL) != 0);
     ABTS_TRUE(tc, 1 == skiplist_get_size(tc, skiplist));
     val = apr_skiplist_find(skiplist, "baton", NULL);
     ABTS_PTR_NOTNULL(tc, val);
@@ -278,9 +278,21 @@ static int scomp(void *a, void *b){
     return (((elem*) a)->a < ((elem*) b)->a) ? -1 : 1;
 }
 
-static int acomp(void *a, void *b){
-    if (a != b) {
-        return scomp(a, b);
+static int ecomp(void *a, void *b)
+{
+    elem const * const e1 = a;
+    elem const * const e2 = b;
+    if (e1->a < e2->a) {
+        return -1;
+    }
+    else if (e1->a > e2->a) {
+        return +1;
+    }
+    else if (e1->b < e2->b) {
+        return -1;
+    }
+    else if (e1->b > e2->b) {
+        return +1;
     }
     else {
         return 0;
@@ -297,6 +309,7 @@ static void skiplist_test(abts_case *tc, void *data) {
     apr_skiplist * list3 = NULL;
     int first_forty_two = 42,
         second_forty_two = 42;
+    apr_array_header_t *array;
     elem t1, t2, t3, t4, t5;
     t1.a = 1; t1.b = 1;
     t2.a = 42; t2.b = 1;
@@ -382,19 +395,27 @@ static void skiplist_test(abts_case *tc, void *data) {
     ABTS_INT_EQUAL(tc, val2->b, 1);
 
     ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_skiplist_init(&list3, ptmp));
-    apr_skiplist_set_compare(list3, acomp, acomp);
-    ABTS_PTR_NOTNULL(tc, apr_skiplist_insert(list3, &t2));
-    val2 = apr_skiplist_find(list3, &t2, NULL);
-    ABTS_PTR_EQUAL(tc, &t2, val2);
-    ABTS_PTR_NOTNULL(tc, apr_skiplist_insert(list3, &t3));
-    val2 = apr_skiplist_find(list3, &t3, NULL);
-    ABTS_PTR_EQUAL(tc, &t3, val2);
-    apr_skiplist_remove(list3, &t3, NULL);
-    val2 = apr_skiplist_find(list3, &t3, NULL);
-    ABTS_PTR_EQUAL(tc, NULL, val2);
-    apr_skiplist_remove(list3, &t2, NULL);
-    val2 = apr_skiplist_find(list3, &t2, NULL);
-    ABTS_PTR_EQUAL(tc, NULL, val2);
+    apr_skiplist_set_compare(list3, ecomp, ecomp);
+    array = apr_array_make(ptmp, 10, sizeof(elem *));
+    for (i = 0; i < 10; ++i) {
+        elem *e = apr_palloc(ptmp, sizeof *e);
+        e->a = 4224;
+        e->b = i;
+        APR_ARRAY_PUSH(array, elem *) = e;
+        ABTS_PTR_NOTNULL(tc, apr_skiplist_insert(list3, e));
+    }
+    for (i = 0; i < 5; ++i) {
+        elem *e = APR_ARRAY_IDX(array, i, elem *);
+        val2 = apr_skiplist_find(list3, e, NULL);
+        ABTS_PTR_EQUAL(tc, e, val2);
+        ABTS_TRUE(tc, apr_skiplist_remove(list3, e, NULL) != 0);
+    }
+    for (i = 0; i < 5; ++i) {
+        elem *e = APR_ARRAY_IDX(array, 9 - i, elem *);
+        val2 = apr_skiplist_find(list3, e, NULL);
+        ABTS_PTR_EQUAL(tc, e, val2);
+        ABTS_TRUE(tc, apr_skiplist_remove(list3, e, NULL) != 0);
+    }
 
     apr_pool_clear(ptmp);
 }
