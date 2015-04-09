@@ -491,6 +491,10 @@ APR_DECLARE(apr_skiplistnode *) apr_skiplist_insert_compare(apr_skiplist *sl, vo
         if (p) {
             p->up = tmp;
         }
+        else {
+            /* This sets ret to the bottom-most node we are inserting */
+            ret = tmp;
+        }
         p = tmp;
     }
     if (sl->index != NULL) {
