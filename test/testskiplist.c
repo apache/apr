@@ -230,7 +230,7 @@ static void skiplist_remove(abts_case *tc, void *data)
     ABTS_PTR_NOTNULL(tc, val);
     ABTS_STR_EQUAL(tc, "baton", val);
 
-    apr_skiplist_remove(skiplist, "baton", NULL);
+    ABTS_TRUE(tc, apr_skiplist_remove(skiplist, "baton", NULL) != 0);
     ABTS_TRUE(tc, 1 == skiplist_get_size(tc, skiplist));
     val = apr_skiplist_find(skiplist, "baton", NULL);
     ABTS_PTR_NOTNULL(tc, val);
@@ -308,29 +308,46 @@ static int scomp(void *a, void *b){
     return ((elem*) a)->a - ((elem*) b)->a;
 }
 
-static int acomp(void *a, void *b){
-    if (a != b) {
-        return (scomp(a, b) < 0) ? -1 : 1;
+static int ecomp(void *a, void *b)
+{
+    elem const * const e1 = a;
+    elem const * const e2 = b;
+    if (e1->a < e2->a) {
+        return -1;
+    }
+    else if (e1->a > e2->a) {
+        return +1;
+    }
+    else if (e1->b < e2->b) {
+        return -1;
+    }
+    else if (e1->b > e2->b) {
+        return +1;
     }
     else {
         return 0;
     }
 }
 
-/* If we add multiple duplicates and then try to remove each one
- * individually (unique pointer) in arbitrary order, by using:
- * - apr_skiplist_remove_compare(..., scomp, NULL)
- *   There is no pointer comparison with scomp(), so will likely
- *   remove any duplicate (the first encountered in the walking path).
- * - apr_skiplist_remove_compare(..., acomp, NULL)
- *   The exact element to be removed may be skipped in the walking path
- *   because some "bigger" element (or duplicate) was added later with a
- *   higher height.
- * Hence we use skiplist_remove_scomp() which will go straight to the last
- * duplicate (using scomp) and then iterate on the previous elements until
- * pointers match.
- * This pattern could be reused by any application which wants to remove
- * elements by (unique) pointer.
+/* Some tests below add multiple duplicates and then try to remove each one
+ * individually, in arbitrary order.
+ *
+ * Using apr_skiplist_remove_compare(..., scomp, NULL) would not work because
+ * it will likely remove any duplicate (the first one) encountered on the path,
+ * hence possibly not the expected one.
+ * 
+ * Using apr_skiplist_remove_compare(..., ecomp, NULL) works provided all the
+ * duplicates (same a) don't also have the same b (which is the case in the
+ * test below), hence uniqueness is cooked in the elem itself.
+ *
+ * Another possibility is to rely on unique pointers, and then cook a remove
+ * function, like the following skiplist_remove_scomp(), which will go straight
+ * to the last duplicate (using scomp) and then iterate on the previous elems
+ * until pointers match.
+ *
+ * Providing uniqueness in the elem itself is the more clean/efficient option,
+ * but if all you have is a unique pointer the pattern in the function may be
+ * worth it ( or it's just a way to test several skiplist functionalities :)
  */
 static void skiplist_remove_scomp(abts_case *tc, apr_skiplist *list, elem *n)
 {
@@ -356,6 +373,7 @@ static void skiplist_test(abts_case *tc, void *data) {
     apr_skiplist * list4 = NULL;
     int first_forty_two = 42,
         second_forty_two = 42;
+    apr_array_header_t *array;
     elem t1, t2, t3, t4, t5;
     t1.a = 1; t1.b = 1;
     t2.a = 42; t2.b = 1;
@@ -441,19 +459,27 @@ static void skiplist_test(abts_case *tc, void *data) {
     ABTS_INT_EQUAL(tc, val2->b, 1);
 
     ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_skiplist_init(&list3, ptmp));
-    apr_skiplist_set_compare(list3, acomp, acomp);
-    ABTS_PTR_NOTNULL(tc, apr_skiplist_insert(list3, &t2));
-    val2 = apr_skiplist_find(list3, &t2, NULL);
-    ABTS_PTR_EQUAL(tc, &t2, val2);
-    ABTS_PTR_NOTNULL(tc, apr_skiplist_insert(list3, &t3));
-    val2 = apr_skiplist_find(list3, &t3, NULL);
-    ABTS_PTR_EQUAL(tc, &t3, val2);
-    apr_skiplist_remove(list3, &t3, NULL);
-    val2 = apr_skiplist_find(list3, &t3, NULL);
-    ABTS_PTR_EQUAL(tc, NULL, val2);
-    apr_skiplist_remove(list3, &t2, NULL);
-    val2 = apr_skiplist_find(list3, &t2, NULL);
-    ABTS_PTR_EQUAL(tc, NULL, val2);
+    apr_skiplist_set_compare(list3, ecomp, ecomp);
+    array = apr_array_make(ptmp, 10, sizeof(elem *));
+    for (i = 0; i < 10; ++i) {
+        elem *e = apr_palloc(ptmp, sizeof *e);
+        e->a = 4224;
+        e->b = i;
+        APR_ARRAY_PUSH(array, elem *) = e;
+        ABTS_PTR_NOTNULL(tc, apr_skiplist_insert(list3, e));
+    }
+    for (i = 0; i < 5; ++i) {
+        elem *e = APR_ARRAY_IDX(array, i, elem *);
+        val2 = apr_skiplist_find(list3, e, NULL);
+        ABTS_PTR_EQUAL(tc, e, val2);
+        ABTS_TRUE(tc, apr_skiplist_remove(list3, e, NULL) != 0);
+    }
+    for (i = 0; i < 5; ++i) {
+        elem *e = APR_ARRAY_IDX(array, 9 - i, elem *);
+        val2 = apr_skiplist_find(list3, e, NULL);
+        ABTS_PTR_EQUAL(tc, e, val2);
+        ABTS_TRUE(tc, apr_skiplist_remove(list3, e, NULL) != 0);
+    }
 
     ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_skiplist_init(&list4, ptmp));
     apr_skiplist_set_compare(list4, scomp, scomp);
