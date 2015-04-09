@@ -399,24 +399,34 @@ APR_DECLARE(void *) apr_skiplist_element(apr_skiplistnode *node)
 static int skiplisti_remove(apr_skiplist *sl, apr_skiplistnode *m,
                             apr_skiplist_freefunc myfree);
 
+static APR_INLINE int skiplist_height(const apr_skiplist *sl)
+{
+    /* Skiplists (even empty) always have a top node, although this
+     * implementation defers its creation until the first insert, or
+     * deletes it with the last remove. We want the real height here.
+     */
+    return sl->height ? sl->height : 1;
+}
+
 static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
                                         apr_skiplist_compare comp, int add,
                                         apr_skiplist_freefunc myfree)
 {
     apr_skiplistnode *m, *p, *tmp, *ret = NULL;
-    int ch, nh = 1;
+    int ch, top_nh, nh = 1;
 
+    ch = skiplist_height(sl);
     if (sl->preheight) {
         while (nh < sl->preheight && get_b_rand()) {
             nh++;
         }
     }
     else {
-        while (nh <= sl->height && get_b_rand()) {
+        while (nh <= ch && get_b_rand()) {
             nh++;
         }
     }
-    ch = sl->height;
+    top_nh = nh;
 
     /* Now we have in nh the height at which we wish to insert our new node,
      * and in ch the current height: don't create skip paths to the inserted
@@ -448,8 +458,8 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
                     if (top != sl->top) {
                         m = sl->top;
                         skiplist_qclear(&sl->stack_q);
-                        ch = sl->height;
-                        nh = ch + 1;
+                        ch = skiplist_height(sl);
+                        nh = top_nh;
                     }
                     continue;
                 }
@@ -644,7 +654,7 @@ static int skiplisti_remove(apr_skiplist *sl, apr_skiplistnode *m,
         sl->bottom = sl->bottomend = NULL;
         sl->topend = NULL;
     }
-    return sl->height;  /* return 1; ?? */
+    return skiplist_height(sl);
 }
 
 APR_DECLARE(int) apr_skiplist_remove_compare(apr_skiplist *sli,
@@ -737,7 +747,7 @@ APR_DECLARE(size_t) apr_skiplist_size(const apr_skiplist *sl)
 
 APR_DECLARE(int) apr_skiplist_height(const apr_skiplist *sl)
 {
-    return sl->height;
+    return skiplist_height(sl);
 }
 
 APR_DECLARE(int) apr_skiplist_preheight(const apr_skiplist *sl)
