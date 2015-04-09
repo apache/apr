@@ -543,6 +543,10 @@ static apr_skiplistnode *insert_compare(apr_skiplist *sl, void *data,
         if (p) {
             p->up = tmp;
         }
+        else {
+            /* This sets ret to the bottom-most node we are inserting */
+            ret = tmp;
+        }
         p = tmp;
     }
     if (sl->index != NULL) {
