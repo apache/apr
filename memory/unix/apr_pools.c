@@ -1501,6 +1501,7 @@ static void apr_pool_log_event(apr_pool_t *pool, const char *event,
                 "(%10lu/%10lu/%10lu) "
                 "0x%pp \"%s\" "
                 "<%s> "
+                "0x%pp "
                 "(%u/%u/%u) "
                 "\n",
                 (unsigned long)getpid(),
@@ -1513,6 +1514,7 @@ static void apr_pool_log_event(apr_pool_t *pool, const char *event,
                 (unsigned long)apr_pool_num_bytes(global_pool, 1),
                 pool, pool->tag,
                 file_line,
+                pool->parent,
                 pool->stat_alloc, pool->stat_total_alloc, pool->stat_clear);
         }
         else {
@@ -1681,7 +1683,7 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
             "/TID"
 #endif /* APR_HAS_THREADS */
             "] ACTION  (SIZE      /POOL SIZE /TOTAL SIZE) "
-            "POOL       \"TAG\" <__FILE__:__LINE__> (ALLOCS/TOTAL ALLOCS/CLEARS)\n");
+            "POOL       \"TAG\" <__FILE__:__LINE__> PARENT     (ALLOCS/TOTAL ALLOCS/CLEARS)\n");
 
         apr_pool_log_event(global_pool, "GLOBAL", __FILE__ ":apr_pool_initialize", 0);
     }
