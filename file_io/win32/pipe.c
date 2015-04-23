@@ -46,7 +46,8 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe,
         return APR_ENOTIMPL;
     }
     if (timeout && !(thepipe->pOverlapped)) {
-        /* Cannot be nonzero if a pipe was opened blocking */
+        /* Cannot be nonzero if a pipe was opened blocking
+         */
         return APR_EINVAL;
     }
     thepipe->timeout = timeout;
@@ -160,12 +161,12 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
         }
 
         (*out)->filehand = CreateFile(name,
-                                      GENERIC_WRITE, /* access mode             */
-                                      0,             /* share mode              */
-                                      &sa,           /* Security attributes     */
-                                      OPEN_EXISTING, /* dwCreationDisposition   */
-                                      dwOpenMode,    /* Pipe attributes         */
-                                      NULL);         /* handle to template file */
+                                      GENERIC_WRITE,   /* access mode             */
+                                      0,               /* share mode              */
+                                      &sa,             /* Security attributes     */
+                                      OPEN_EXISTING,   /* dwCreationDisposition   */
+                                      dwOpenMode,      /* Pipe attributes         */
+                                      NULL);           /* handle to template file */
     }
     else {
         /* Pipes on Win9* are blocking. Live with it. */
