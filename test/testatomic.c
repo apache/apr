@@ -205,7 +205,7 @@ static void test_wrap_zero(abts_case *tc, void *data)
 {
     apr_uint32_t y32;
     apr_uint32_t rv;
-    apr_uint32_t minus1 = -1;
+    apr_uint32_t minus1 = (apr_uint32_t)-1;
     char *str;
 
     apr_atomic_set32(&y32, 0);
@@ -218,8 +218,8 @@ static void test_wrap_zero(abts_case *tc, void *data)
 
 static void test_inc_neg1(abts_case *tc, void *data)
 {
-    apr_uint32_t y32 = -1;
-    apr_uint32_t minus1 = -1;
+    apr_uint32_t y32 = (apr_uint32_t)-1;
+    apr_uint32_t minus1 = (apr_uint32_t)-1;
     apr_uint32_t rv;
     char *str;
 
