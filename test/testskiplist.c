@@ -51,7 +51,8 @@ static void skiplist_init(abts_case *tc, void *data)
 
     ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_skiplist_init(&skiplist, p));
     ABTS_PTR_NOTNULL(tc, skiplist);
-    apr_skiplist_set_compare(skiplist, (void*)strcmp, (void*)strcmp);
+    apr_skiplist_set_compare(skiplist, (apr_skiplist_compare)strcmp,
+                                       (apr_skiplist_compare)strcmp);
 }
 
 static void skiplist_find(abts_case *tc, void *data)
@@ -260,7 +261,8 @@ static void skiplist_random_loop(abts_case *tc, void *data)
     int i;
 
     ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_skiplist_init(&sl, ptmp));
-    apr_skiplist_set_compare(sl, (void*)strcmp, (void*)strcmp);
+    apr_skiplist_set_compare(sl, (apr_skiplist_compare)strcmp,
+                                 (apr_skiplist_compare)strcmp);
     apr_skiplist_set_preheight(sl, 7);
     ABTS_INT_EQUAL(tc, 7, apr_skiplist_preheight(sl));
 
