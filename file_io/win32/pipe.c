@@ -85,7 +85,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
     char name[50];
 
     sa.nLength = sizeof(sa);
-    
+
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
         sa.bInheritHandle = FALSE;
@@ -145,9 +145,9 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
                                           dwOpenMode,
                                           dwPipeMode,
                                           1,            /* nMaxInstances,   */
-                                          0,            /* nOutBufferSize,  */ 
-                                          65536,        /* nInBufferSize,   */                 
-                                          1,            /* nDefaultTimeOut, */                
+                                          0,            /* nOutBufferSize,  */
+                                          65536,        /* nInBufferSize,   */
+                                          1,            /* nDefaultTimeOut, */
                                           &sa);
 
         /* Create the write end of the pipe */
@@ -159,7 +159,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
             (*out)->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
             (*out)->timeout = 0;
         }
-        
+
         (*out)->filehand = CreateFile(name,
                                       GENERIC_WRITE,   /* access mode             */
                                       0,               /* share mode              */
@@ -235,7 +235,7 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
 static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
 {
     static int id = 0;
-    FD_SET rs;    
+    FD_SET rs;
     SOCKET ls;
     struct timeval socktm;
     struct sockaddr_in pa;
