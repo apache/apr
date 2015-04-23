@@ -640,7 +640,20 @@ AC_ARG_ENABLE(nonportable-atomics,
 ],
 [case $host_cpu in
    i[[456]]86) force_generic_atomics=yes ;;
-   *) force_generic_atomics=no ;;
+   *) force_generic_atomics=no
+      case $host in
+         *solaris2.10*)
+            AC_TRY_COMPILE(
+                [#include <atomic.h>],
+                [void *ptr = NULL; atomic_cas_ptr(&ptr, NULL, NULL);],,
+                [force_generic_atomics=yes]
+            )
+            if test $force_generic_atomics = yes; then
+                AC_MSG_NOTICE([nonportable atomic support disabled, system needs Patch-ID 118884 or 118885])
+            fi
+            ;;
+      esac
+      ;;
 esac
 ])
 
