@@ -603,6 +603,12 @@ static apr_allocator_t *global_allocator = NULL;
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
 static apr_file_t *file_stderr = NULL;
+static apr_status_t apr_pool_cleanup_file_stderr(void *data)
+{
+    file_stderr = NULL;
+    return APR_SUCCESS;
+}
+
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL) */
 
 /*
@@ -1677,6 +1683,13 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
     file_stderr = debug_log;
 
     if (file_stderr) {
+        /* Add a cleanup handler that sets the debug log file handle
+         * to NULL, otherwise we'll try to log the global pool
+         * destruction event with predictably disastrous results. */
+        apr_pool_cleanup_register(global_pool, NULL,
+                                  apr_pool_cleanup_file_stderr,
+                                  apr_pool_cleanup_null);
+
         apr_file_printf(file_stderr,
             "POOL DEBUG: [PID"
 #if APR_HAS_THREADS
