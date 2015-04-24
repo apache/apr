@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.2
 
+  *) apr_atomic: Fix errors when building on Visual Studio 2013 while
+     maintaining the ability to build on Visual Studio 6 with Windows
+     Server 2003 R2 SDK. PR 57191. [Gregg Smith]
+
   *) Switch to generic atomics for early/unpatched Solaris 10 not exporting
      some atomic functions.  PR 55418.  [Yann Ylavic]
 
