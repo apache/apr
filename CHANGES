@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
+  *) apr_atomic: Fix errors when building on Visual Studio 2013 while
+     maintaining the ability to build on Visual Studio 6 with Windows
+     Server 2003 R2 SDK. PR 57191. [Gregg Smith]
+
   *) apr_skiplist: Add apr_skiplist_addne*() family to preserve existing
      values (no duplicate), add apr_skiplist_size(), apr_skiplist_height()
      and apr_skiplist_preheight() to get the corresponding current values,
