@@ -99,7 +99,7 @@ ALL_TESTS = $(INTDIR)\testutil.obj $(INTDIR)\testtime.obj \
 	$(INTDIR)\teststrnatcmp.obj $(INTDIR)\testfilecopy.obj \
 	$(INTDIR)\testtemp.obj $(INTDIR)\testlfs.obj \
 	$(INTDIR)\testcond.obj $(INTDIR)\testescape.obj \
-	$(INTDIR)\testskiplist.obj $(INTDIR)\testskiplist.obj
+	$(INTDIR)\testskiplist.obj
 
 CLEAN_DATA = testfile.tmp lfstests\large.bin \
 	data\testputs.txt data\testbigfprintf.dat \
