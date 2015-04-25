@@ -1,6 +1,13 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.2
 
+  *) SECURITY: CVE-2015-1829 (cve.mitre.org)
+     APR applications using APR named pipe support on Windows can be 
+     vulnerable to a pipe squatting attack from a local process; the extent
+     of the vulnerability, when present, depends on the application.
+     Initial analysis and report was provided by John Hernandez of Casaba 
+     Security via HP SSRT Security Alert.  [Yann Ylavic]
+
   *) apr_atomic: Fix errors when building on Visual Studio 2013 while
      maintaining the ability to build on Visual Studio 6 with Windows
      Server 2003 R2 SDK. PR 57191. [Gregg Smith]
