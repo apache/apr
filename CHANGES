@@ -11,6 +11,11 @@ Changes for APR 1.5.2
      Initial analysis and report was provided by John Hernandez of Casaba 
      Security via HP SSRT Security Alert.  [Yann Ylavic]
 
+  *) Potential Windows build consideration: The increased use of 
+     UuidCreate() in APR may introduce a link error for applications
+     which link with apr-1.lib.  Include the Windows library rpcrt4 if
+     linking fails with an unresolved reference to UuidCreate().
+     
   *) apr_atomic: Fix errors when building on Visual Studio 2013 while
      maintaining the ability to build on Visual Studio 6 with Windows
      Server 2003 R2 SDK. PR 57191. [Gregg Smith]
