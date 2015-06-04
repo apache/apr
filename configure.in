@@ -1331,7 +1331,7 @@ case $host in
         dnl mkstemp is limited to 26 temporary files (a-z); use APR replacement
         ;;
     *)
-        AC_CHECK_FUNCS(mkstemp)
+        AC_CHECK_FUNCS(mkstemp mkostemp)
         ;;
 esac
 
@@ -1781,7 +1781,7 @@ if test "${ac_cv_sizeof_off_t}${apr_cv_use_lfs64}" = "4yes"; then
             dnl mkstemp64 is limited to 26 temporary files (a-z); use APR replacement
             ;;
         *)
-            AC_CHECK_FUNCS(mkstemp64)
+            AC_CHECK_FUNCS(mkstemp64 mkostemp64)
             ;;
     esac
 elif test "${ac_cv_sizeof_off_t}" != "${ac_cv_sizeof_size_t}"; then

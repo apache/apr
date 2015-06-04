@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_file_mktemp: Use mkostemp() where available to save on system
+     calls.  [Joe Orton]
+
   *) apr_pools: Fix pool debugging output so that creation events are
      always emitted before allocation events and subpool destruction
      events are emitted on pool clear/destroy for proper accounting.
