@@ -277,19 +277,13 @@ APR_DECLARE(apr_status_t) apr_parse_addr_port(char **addr,
                 return APR_EINVAL;
             }
             addrlen = scope_delim - str - 1;
-            *scope_id = apr_palloc(p, end_bracket - scope_delim);
-            memcpy(*scope_id, scope_delim + 1, end_bracket - scope_delim - 1);
-            (*scope_id)[end_bracket - scope_delim - 1] = '\0';
+            *scope_id = apr_pstrmemdup(p, scope_delim, end_bracket - scope_delim - 1);
         }
         else {
             addrlen = addrlen - 2; /* minus 2 for '[' and ']' */
         }
 
-        *addr = apr_palloc(p, addrlen + 1);
-        memcpy(*addr,
-               str + 1,
-               addrlen);
-        (*addr)[addrlen] = '\0';
+        *addr = apr_pstrmemdup(p, str + 1, addrlen);
         if (apr_inet_pton(AF_INET6, *addr, &ipaddr) != 1) {
             *addr = NULL;
             *scope_id = NULL;
@@ -303,9 +297,7 @@ APR_DECLARE(apr_status_t) apr_parse_addr_port(char **addr,
         /* XXX If '%' is not a valid char in a DNS name, we *could* check 
          *     for bogus scope ids first.
          */
-        *addr = apr_palloc(p, addrlen + 1);
-        memcpy(*addr, str, addrlen);
-        (*addr)[addrlen] = '\0';
+        *addr = apr_pstrmemdup(p, str, addrlen);
     }
     return APR_SUCCESS;
 }
