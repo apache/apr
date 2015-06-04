@@ -173,6 +173,16 @@ static int gettemp(char *path, apr_file_t **doopen, apr_int32_t flags, apr_pool_
 #endif
 #endif /* !defined(HAVE_MKSTEMP) */
 
+#if defined(HAVE_MKOSTEMP64)
+#define wrap_mkostemp(t, f) mkostemp64(t, (f))
+#elif defined(HAVE_MKOSTEMP)
+#define wrap_mkostemp(t, f) mkostemp(t, (f))
+#elif defined(HAVE_MKSTEMP64)
+#define wrap_mkostemp(t, f) mkstemp64(t)
+#else
+#define wrap_mkostemp(t, f) mkstemp(t)
+#endif
+
 APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_int32_t flags, apr_pool_t *p)
 {
 #ifdef HAVE_MKSTEMP
@@ -184,12 +194,8 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
     return gettemp(template, fp, flags, p);
 #else
 
-#ifdef HAVE_MKSTEMP64
-    fd = mkstemp64(template);
-#else
-    fd = mkstemp(template);
-#endif
-    
+    fd = wrap_mkostemp(template,
+                       (flags & APR_FOPEN_NOCLEANUP) ? 0 : O_CLOEXEC);
     if (fd == -1) {
         return errno;
     }
@@ -204,6 +210,7 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
     (*fp)->fname = apr_pstrdup(p, template);
 
     if (!(flags & APR_FOPEN_NOCLEANUP)) {
+#if !defined(HAVE_MKOSTEMP64) && !defined(HAVE_MKOSTEMP)
         int flags;
 
         if ((flags = fcntl(fd, F_GETFD)) == -1)
@@ -212,6 +219,7 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
         flags |= FD_CLOEXEC;
         if (fcntl(fd, F_SETFD, flags) == -1)
             return errno;
+#endif
 
         apr_pool_cleanup_register((*fp)->pool, (void *)(*fp),
                                   apr_unix_file_cleanup,
