@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.3
 
+  *) apr_filepath_merge: Fix truename length calculation on Windows
+     in cases where the "short" name variant is actually longer than
+     the "long" or "true" name. See: testnames.c:merge_shortname().
+     [Bert Huijben <rhuijben a.o>]
 
 Changes for APR 1.5.2
 
