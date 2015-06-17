@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_filepath_merge: Fix truename length calculation on Windows
+     in cases where the "short" name variant is actually longer than
+     the "long" or "true" name. See: testnames.c:merge_shortname().
+     [Bert Huijben <rhuijben a.o>]
+
   *) apr_file_mktemp: Use mkostemp() where available to save on system
      calls.  [Joe Orton]
 
