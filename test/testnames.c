@@ -214,6 +214,39 @@ static void merge_lowercasedrive(abts_case *tc, void *data)
 
   ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
+
+static void merge_shortname(abts_case *tc, void *data)
+{
+  apr_status_t rv;
+  char *long_path;
+  char short_path[MAX_PATH+1];
+  DWORD short_len;
+  char *result_path;
+
+  /* 'A b.c' is not a valid short path, so will have multiple representations
+     when short path name generation is enabled... but its 'short' path will
+     most likely be longer than the long path */
+  rv = apr_dir_make_recursive("C:/data/short/A b.c",
+                              APR_UREAD | APR_UWRITE | APR_UEXECUTE, p);
+  ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+  rv = apr_filepath_merge(&long_path, NULL, "C:/data/short/A b.c",
+                          APR_FILEPATH_NOTRELATIVE, p);
+  ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+  short_len = GetShortPathName(long_path, short_path, sizeof(short_path));
+  if (short_len > MAX_PATH)
+    return; /* Unable to test. Impossible shortname */
+
+  if (! strcmp(long_path, short_path))
+    return; /* Unable to test. 8dot3name option is probably not enabled */
+
+  rv = apr_filepath_merge(&result_path, "", short_path, APR_FILEPATH_TRUENAME,
+                          p);
+  ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+  ABTS_STR_EQUAL(tc, long_path, result_path);
+}
 #endif
 
 static void root_absolute(abts_case *tc, void *data)
@@ -341,6 +374,7 @@ abts_suite *testnames(abts_suite *suite)
     abts_run_test(suite, merge_dotdot_dotdot_dotdot, NULL);
 #if defined(WIN32)
     abts_run_test(suite, merge_lowercasedrive, NULL);
+    abts_run_test(suite, merge_shortname, NULL);
 #endif
 
     abts_run_test(suite, root_absolute, NULL);
