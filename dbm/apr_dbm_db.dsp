@@ -45,7 +45,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "../include" /I "../include/arch/win32" /I "../include/private" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "../include" /I "../include/arch/win32" /I "../include/private" /I "../../db" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -55,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libdb47.lib /nologo /base:"0x6F000000" /subsystem:windows /dll /incremental:no /debug /opt:ref
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libdb47.lib /nologo /base:"0x6F000000" /subsystem:windows /dll /incremental:no /debug /out:"Release\apr_dbm_db-1.dll" /pdb:"Release\apr_dbm_db-1.pdb" /implib:"Release\apr_dbm_db-1.lib" /MACHINE:X86 /opt:ref
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libdb47.lib /nologo /base:"0x6F000000" /subsystem:windows /dll /incremental:no /libpath:"..\..\db" /debug /out:"Release\apr_dbm_db-1.dll" /pdb:"Release\apr_dbm_db-1.pdb" /implib:"Release\apr_dbm_db-1.lib" /MACHINE:X86 /opt:ref
 # Begin Special Build Tool
 TargetPath=Release\apr_dbm_db-1.dll
 SOURCE="$(InputPath)"
@@ -77,7 +77,7 @@ PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath).ma
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "../include" /I "../include/arch/win32" /I "../include/private" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "../include" /I "../include/arch/win32" /I "../include/private" /I "../../db" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /EHsc /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -87,7 +87,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libdb47.lib /nologo /base:"0x6F000000" /subsystem:windows /dll /incremental:no /debug
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libdb47.lib /nologo /base:"0x6F000000" /subsystem:windows /dll /incremental:no /debug /out:"Debug\apr_dbm_db-1.dll" /pdb:"Debug\apr_dbm_db-1.pdb" /implib:"Debug\apr_dbm_db-1.lib" /MACHINE:X86
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libdb47.lib /nologo /base:"0x6F000000" /subsystem:windows /dll /incremental:no /libpath:"..\..\db" /debug /out:"Debug\apr_dbm_db-1.dll" /pdb:"Debug\apr_dbm_db-1.pdb" /implib:"Debug\apr_dbm_db-1.lib" /MACHINE:X86
 # Begin Special Build Tool
 TargetPath=Debug\apr_dbm_db-1.dll
 SOURCE="$(InputPath)"
@@ -109,7 +109,7 @@ PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath).ma
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "../include" /I "../include/arch/win32" /I "../include/private" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "../include" /I "../include/arch/win32" /I "../include/private" /I "../../db" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -119,7 +119,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libdb47.lib /nologo /base:"0x6F000000" /subsystem:windows /dll /incremental:no /debug /opt:ref
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libdb47.lib /nologo /base:"0x6F000000" /subsystem:windows /dll /incremental:no /debug /out:"x64\Release\apr_dbm_db-1.dll" /pdb:"x64\Release\apr_dbm_db-1.pdb" /implib:"x64\Release\apr_dbm_db-1.lib" /MACHINE:X64 /opt:ref
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libdb47.lib /nologo /base:"0x6F000000" /subsystem:windows /dll /incremental:no /libpath:"..\..\db" /debug /out:"x64\Release\apr_dbm_db-1.dll" /pdb:"x64\Release\apr_dbm_db-1.pdb" /implib:"x64\Release\apr_dbm_db-1.lib" /MACHINE:X64 /opt:ref
 # Begin Special Build Tool
 TargetPath=x64\Release\apr_dbm_db-1.dll
 SOURCE="$(InputPath)"
@@ -141,7 +141,7 @@ PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath).ma
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "../include" /I "../include/arch/win32" /I "../include/private" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "../include" /I "../include/arch/win32" /I "../include/private" /I "../../db" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_DB=1 /D APU_HAVE_DB_VERSION=4 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_dbm_db_src" /FD /EHsc /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -151,7 +151,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libdb47.lib /nologo /base:"0x6F000000" /subsystem:windows /dll /incremental:no /debug
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libdb47.lib /nologo /base:"0x6F000000" /subsystem:windows /dll /incremental:no /debug /out:"x64\Debug\apr_dbm_db-1.dll" /pdb:"x64\Debug\apr_dbm_db-1.pdb" /implib:"x64\Debug\apr_dbm_db-1.lib" /MACHINE:X64
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libdb47.lib /nologo /base:"0x6F000000" /subsystem:windows /dll /incremental:no /libpath:"..\..\db" /debug /out:"x64\Debug\apr_dbm_db-1.dll" /pdb:"x64\Debug\apr_dbm_db-1.pdb" /implib:"x64\Debug\apr_dbm_db-1.lib" /MACHINE:X64
 # Begin Special Build Tool
 TargetPath=x64\Debug\apr_dbm_db-1.dll
 SOURCE="$(InputPath)"
