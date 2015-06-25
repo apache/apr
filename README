@@ -145,9 +145,9 @@ can load apr.dsw in Visual Studio 2002 (.NET) or later, which will
 convert these for you into apr.sln and associated .vcproj files.
 
 When using APR as a dynamic library, nothing special is required,
-simply link to libapr.lib.  To use it as a static library, simply 
+simply link to libapr-1.lib.  To use it as a static library, simply 
 define APR_DECLARE_STATIC before you include any apr header files 
-in your source, and link to apr.lib instead.
+in your source, and link to apr-1.lib instead.
 
 
 Generating Test Coverage information with gcc
