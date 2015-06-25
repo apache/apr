@@ -956,28 +956,6 @@ InputPath=.\include\apr_escape.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "libapr - Win32 Release9x"
-
-# Begin Custom Build - Creating gen_test_char.exe and apr_escape_test_char.h
-InputPath=.\include\apr_escape.h
-
-".\include\apr_escape_test_char.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cl.exe /nologo /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" /Fo.\9x\Release\gen_test_char /Fe.\9x\Release\gen_test_char.exe .\tools\gen_test_char.c 
-	.\9x\Release\gen_test_char.exe > .\include\apr_escape_test_char.h
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "libapr - Win32 Debug9x"
-
-# Begin Custom Build - Creating gen_test_char.exe and apr_escape_test_char.h
-InputPath=.\include\apr_escape.h
-
-".\include\apr_escape_test_char.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cl.exe /nologo /W3 /EHsc /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FD /I ".\include" /Fo.\9x\Debug\gen_test_char /Fe.\9x\Debug\gen_test_char.exe .\tools\gen_test_char.c  
-	.\9x\Debug\gen_test_char.exe > .\include\apr_escape_test_char.h
-
-# End Custom Build
-
 !ELSEIF  "$(CFG)" == "libapr - x64 Release"
 
 # Begin Custom Build - Creating gen_test_char.exe and apr_escape_test_char.h
