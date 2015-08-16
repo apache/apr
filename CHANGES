@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.3
 
+  *) apr_mcast_interface/apr_mcast_join: Fix comparison of IPv6 addresses.
+     [ Andre Naujoks <nautsch2 gmail com> ]
+
   *) apr_filepath_merge: Fix truename length calculation on Windows
      in cases where the "short" name variant is actually longer than
      the "long" or "true" name. See: testnames.c:merge_shortname().
