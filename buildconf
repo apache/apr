@@ -138,7 +138,6 @@ if [ -f "include/apr.h" -o -f "include/arch/unix/apr_private.h" -o \
     echo ""
     echo "Generated include files already exist, the tree is not clean."
     echo "The resulting build-outputs.mk file is incorrect"
-    exit 1
 fi
 
 exit 0
