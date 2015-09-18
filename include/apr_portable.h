@@ -380,7 +380,10 @@ APR_DECLARE(apr_status_t) apr_os_dir_put(apr_dir_t **dir,
                                          apr_pool_t *cont); 
 
 /**
- * Convert a socket from the os specific type to the apr type
+ * Convert a socket from the os specific type to the APR type. If
+ * sock points to NULL, a socket will be created from the pool
+ * provided. If **sock does not point to NULL, the structure pointed 
+ * to by sock will be reused and updated with the given socket.
  * @param sock The pool to use.
  * @param thesock The socket to convert to.
  * @param cont The socket we are converting to an apr type.
