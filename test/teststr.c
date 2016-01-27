@@ -382,6 +382,17 @@ static void snprintf_overflow(abts_case *tc, void *data)
     ABTS_TRUE(tc, buf[2] == '4' && buf[3] == '2');
 }
 
+static void skip_prefix(abts_case *tc, void *data)
+{
+    ABTS_STR_EQUAL(tc, apr_cstr_skip_prefix("12345", "12345"), "");
+    ABTS_STR_EQUAL(tc, apr_cstr_skip_prefix("12345", "123"),   "45");
+    ABTS_STR_EQUAL(tc, apr_cstr_skip_prefix("12345", ""),      "12345");
+    ABTS_STR_EQUAL(tc, apr_cstr_skip_prefix("12345", "23"),    NULL);
+    ABTS_STR_EQUAL(tc, apr_cstr_skip_prefix("1",     "12"),    NULL);
+    ABTS_STR_EQUAL(tc, apr_cstr_skip_prefix("",      ""),      "");
+    ABTS_STR_EQUAL(tc, apr_cstr_skip_prefix("",      "12"),    NULL);
+}
+
 abts_suite *teststr(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -399,6 +410,7 @@ abts_suite *teststr(abts_suite *suite)
     abts_run_test(suite, string_strfsize, NULL);
     abts_run_test(suite, string_cpystrn, NULL);
     abts_run_test(suite, snprintf_overflow, NULL);
+    abts_run_test(suite, skip_prefix, NULL);
 
     return suite;
 }
