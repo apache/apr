@@ -156,6 +156,7 @@ SET(APR_PUBLIC_HEADERS_STATIC
   include/apr_base64.h
   include/apr_buckets.h
   include/apr_crypto.h
+  include/apr_cstr.h
   include/apr_date.h
   include/apr_dbd.h
   include/apr_dbm.h
@@ -309,6 +310,7 @@ SET(APR_SOURCES
   random/unix/sha2_glue.c
   shmem/win32/shm.c
   strings/apr_cpystrn.c
+  strings/apr_cstr.c
   strings/apr_fnmatch.c
   strings/apr_snprintf.c
   strings/apr_strings.c
