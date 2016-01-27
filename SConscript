@@ -8,7 +8,7 @@ files = env.core_lib_files()
 libapr = env.SharedLibrary('apr-%d' % (major), files)
 tests = Split("""
   abts.c testutil.c
-  testtime.c testcstr.c teststr.c testvsn.c testipsub.c testshm.c
+  testtime.c teststr.c testvsn.c testipsub.c testshm.c
   testmmap.c testud.c testtable.c testsleep.c testpools.c
 	testfmt.c testfile.c testdir.c testfileinfo.c testrand.c
 	testdso.c testoc.c testdup.c testsockets.c testproc.c
