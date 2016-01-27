@@ -145,8 +145,9 @@ char * apr_cstr_join(const apr_array_header_t *strings,
 #endif
 
 /**
- * Compare two strings @a atr1 and @a atr2, treating case-equivalent
- * unaccented Latin (C/POSIX ASCII subset) alpha characters as equal.
+ * Perform a case-insensitive comparison of two strings @a atr1 and @a atr2,
+ * treating case-equivalent unaccented Latin (C/POSIX ASCII subset) alpha
+ * characters as equal.
  *
  * Returns in integer greater than, equal to, or less than 0,
  * according to whether @a str1 is considered greater than, equal to,
@@ -157,9 +158,9 @@ char * apr_cstr_join(const apr_array_header_t *strings,
 int apr_cstr_casecmp(const char *str1, const char *str2);
 
 /**
- * Compare two strings @a atr1 and @a atr2 of @n (or shorter) length,
- * treating case-equivalent unaccented Latin (C/POSIX ASCII subset)
- * alpha characters as equal.
+ * Perform a case-insensitive comparison of two strings @a atr1 and @a atr2,
+ * of @n (or shorter) length, treating case-equivalent unaccented Latin
+ * (C/POSIX ASCII subset) alpha characters as equal.
  *
  * Returns in integer greater than, equal to, or less than 0,
  * according to whether @a str1 is considered greater than, equal to,
