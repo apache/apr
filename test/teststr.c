@@ -26,6 +26,7 @@
 
 #include "apr_general.h"
 #include "apr_strings.h"
+#include "apr_cstr.h"
 #include "apr_errno.h"
 
 /* I haven't bothered to check for APR_ENOTIMPL here, AFAIK, all string
