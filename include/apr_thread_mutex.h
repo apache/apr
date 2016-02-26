@@ -24,7 +24,6 @@
 
 #include "apr.h"
 #include "apr_errno.h"
-#include "apr_time.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,6 +47,7 @@ typedef struct apr_thread_mutex_t apr_thread_mutex_t;
 
 /* Delayed the include to avoid a circular reference */
 #include "apr_pools.h"
+#include "apr_time.h"
 
 /**
  * Create and initialize a mutex that can be used to synchronize threads.
