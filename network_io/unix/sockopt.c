@@ -330,6 +330,20 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
         return APR_ENOTIMPL;
 #endif
         break;
+    case APR_SO_FREEBIND:
+#if defined(IP_FREEBIND)
+        if (setsockopt(sock->socketdes, SOL_IP, IP_FREEBIND,
+                       (void *)&one, sizeof(int)) == -1) {
+            return errno;
+        }
+        apr_set_option(sock, APR_SO_FREEBIND, on);
+#elif defined(IP_BINDANY)
+        /* TODO: insert FreeBSD support here, note family specific
+         * options, IP_BINDANY vs IPV6_BINDANY */
+#else
+        return APR_ENOTIMPL;
+#endif
+        break;
     default:
         return APR_EINVAL;
     }
