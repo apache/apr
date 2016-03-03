@@ -105,6 +105,9 @@ extern "C" {
                                     */
 #define APR_SO_BROADCAST     65536 /**< Allow broadcast
                                     */
+#define APR_SO_FREEBIND     131072 /**< Allow binding to addresses not owned
+                                    * by any interface
+                                    */
 
 /** @} */
 
