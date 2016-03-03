@@ -87,6 +87,7 @@ INCLUDE_DIRECTORIES(${APR_INCLUDE_DIRECTORIES})
 SET(APR_PUBLIC_HEADERS_STATIC
   include/apr_allocator.h
   include/apr_atomic.h
+  include/apr_cstr.h
   include/apr_dso.h
   include/apr_env.h
   include/apr_errno.h
@@ -185,6 +186,7 @@ SET(APR_SOURCES
   random/unix/sha2_glue.c
   shmem/win32/shm.c
   strings/apr_cpystrn.c
+  strings/apr_cstr.c
   strings/apr_fnmatch.c
   strings/apr_snprintf.c
   strings/apr_strings.c
