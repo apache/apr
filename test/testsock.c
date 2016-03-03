@@ -544,6 +544,39 @@ static void test_nonblock_inheritance(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "Problem closing socket", rv);
 }
 
+static void test_freebind(abts_case *tc, void *data)
+{
+#ifdef IP_FREEBIND
+    apr_status_t rv;
+    apr_socket_t *sock;
+    apr_sockaddr_t *sa;
+    apr_int32_t on;
+    
+    /* RFC 5737 address */
+    rv = apr_sockaddr_info_get(&sa, "192.0.2.1", APR_INET, 8080, 0, p);
+    APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
+    
+    rv = apr_socket_create(&sock, sa->family, SOCK_STREAM, APR_PROTO_TCP, p);
+    APR_ASSERT_SUCCESS(tc, "Problem creating socket", rv);
+
+    rv = apr_socket_opt_set(sock, APR_SO_REUSEADDR, 1);
+    APR_ASSERT_SUCCESS(tc, "Could not set REUSEADDR on socket", rv);
+
+    rv = apr_socket_opt_set(sock, APR_SO_FREEBIND, 1);
+    APR_ASSERT_SUCCESS(tc, "Could not enable FREEBIND option", rv);
+    
+    rv = apr_socket_opt_get(sock, APR_SO_FREEBIND, &on);
+    APR_ASSERT_SUCCESS(tc, "Could not retrieve FREEBIND option", rv);
+    ABTS_INT_EQUAL(tc, 1, on);
+    
+    rv = apr_socket_bind(sock, sa);
+    APR_ASSERT_SUCCESS(tc, "Problem binding to port with FREEBIND", rv);
+    
+    rv = apr_socket_close(sock);
+    APR_ASSERT_SUCCESS(tc, "Problem closing socket", rv);
+#endif
+}
+
 abts_suite *testsock(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -559,6 +592,7 @@ abts_suite *testsock(abts_suite *suite)
     abts_run_test(suite, test_print_addr, NULL);
     abts_run_test(suite, test_get_addr, NULL);
     abts_run_test(suite, test_nonblock_inheritance, NULL);
+    abts_run_test(suite, test_freebind, NULL);
 
 #if APR_HAVE_SOCKADDR_UN
     socket_name = UNIX_SOCKET_NAME;
