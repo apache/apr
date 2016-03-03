@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
+  *) Add APR_SO_FREEBIND option for apr_socket_opt_set.  PR 58725.
+     [Ashley GC, Jan Kaluza, Joe Orton]
+
   *) apr_filepath_merge: Fix truename length calculation on Windows
      in cases where the "short" name variant is actually longer than
      the "long" or "true" name. See: testnames.c:merge_shortname().
