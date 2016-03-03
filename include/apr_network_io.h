@@ -661,6 +661,7 @@ APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock,
  *                                  of local addresses.
  *            APR_SO_SNDBUF     --  Set the SendBufferSize
  *            APR_SO_RCVBUF     --  Set the ReceiveBufferSize
+ *            APR_SO_FREEBIND   --  Allow binding to non-local IP address.
  * </PRE>
  * @param on Value for the option.
  */
