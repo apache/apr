@@ -590,10 +590,8 @@ static apr_status_t proc_mutex_proc_pthread_acquire(apr_proc_mutex_t *mutex)
             pthread_mutex_consistent_np(mutex->pthread_interproc);
         }
         else
-            return rv;
-#else
-        return rv;
 #endif
+        return rv;
     }
     mutex->curr_locked = 1;
     return APR_SUCCESS;
@@ -615,13 +613,10 @@ static apr_status_t proc_mutex_proc_pthread_tryacquire(apr_proc_mutex_t *mutex)
         if (rv == EOWNERDEAD) {
             apr_atomic_dec32(&proc_pthread_mutex_refcount(mutex));
             pthread_mutex_consistent_np(mutex->pthread_interproc);
-            rv = APR_SUCCESS;
         }
         else
-            return rv;
-#else
-        return rv;
 #endif
+        return rv;
     }
     mutex->curr_locked = 1;
     return APR_SUCCESS;
@@ -658,13 +653,10 @@ proc_mutex_proc_pthread_timedacquire(apr_proc_mutex_t *mutex,
             if (rv == EOWNERDEAD) {
                 apr_atomic_dec32(&proc_pthread_mutex_refcount(mutex));
                 pthread_mutex_consistent_np(mutex->pthread_interproc);
-                rv = APR_SUCCESS;
             }
             else
-                return rv;
-#else
-            return rv;
 #endif
+            return rv;
         }
     }
     mutex->curr_locked = 1;
