@@ -630,7 +630,11 @@ typedef  apr_int32_t             apr_intptr_t;
 #endif /* DARWIN_10 */
 
 /* Does the proc mutex lock threads too */
+#ifdef WIN32
+#define APR_PROC_MUTEX_IS_GLOBAL      1
+#else
 #define APR_PROC_MUTEX_IS_GLOBAL      @proc_mutex_is_global@
+#endif
 
 /* Local machine definition for console and log output. */
 #define APR_EOL_STR              "@eolstr@"
