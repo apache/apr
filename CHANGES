@@ -7,9 +7,6 @@ Changes for APR 1.6.0
   *) Introduce the apr_cstr_fn() family of functions, derived from
      the svn_cstring_ functions of the Subversion project.
 
-  *) Introduce the apr_cstr_fn() family of functions, derived from
-     the svn_cstring_ functions of the Subversion project.
-
   *) Add APR_SO_FREEBIND option for apr_socket_opt_set.  PR 58725.
      [Ashley GC, Jan Kaluza, Joe Orton]
 
