@@ -29,6 +29,7 @@
 #if APR_PROC_MUTEX_IS_GLOBAL
 #include "apr_proc_mutex.h"
 #endif
+#include "apr_time.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,6 +67,7 @@ typedef struct apr_global_mutex_t apr_global_mutex_t;
  *            APR_LOCK_POSIXSEM
  *            APR_LOCK_PROC_PTHREAD
  *            APR_LOCK_DEFAULT     pick the default mechanism for the platform
+ *            APR_LOCK_DEFAULT_TIMED pick the default timed mechanism
  * </PRE>
  * @param pool the pool from which to allocate the mutex.
  * @warning Check APR_HAS_foo_SERIALIZE defines to see if the platform supports
@@ -107,6 +109,17 @@ APR_DECLARE(apr_status_t) apr_global_mutex_lock(apr_global_mutex_t *mutex);
  * @param mutex the mutex on which to attempt the lock acquiring.
  */
 APR_DECLARE(apr_status_t) apr_global_mutex_trylock(apr_global_mutex_t *mutex);
+
+/**
+ * Attempt to acquire the lock for the given mutex until timeout expires.
+ * If the acquisition time outs, the call returns with APR_TIMEUP.
+ * @param mutex the mutex on which to attempt the lock acquiring.
+ * @param timeout the absolute time or relative timeout (microseconds)
+ * @param absolute whether the timeout given is absolute (!0) or relative (0)
+ */
+APR_DECLARE(apr_status_t) apr_global_mutex_timedlock(apr_global_mutex_t *mutex,
+                                                     apr_time_t timeout,
+                                                     int absolute);
 
 /**
  * Release the lock for the given mutex.

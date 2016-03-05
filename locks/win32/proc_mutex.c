@@ -160,6 +160,37 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
     return apr_get_os_error();
 }
 
+APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
+                                                   apr_time_t timeout,
+                                                   int absolute)
+{
+    DWORD rv;
+
+    if (timeout < 0) {
+        rv = WaitForSingleObject(mutex->handle, INFINITE);
+    }
+    else {
+        if (absolute) {
+            apr_time_t now = apr_time_now();
+            if (timeout > now) {
+                timeout -= now;
+            }
+            else {
+                timeout = 0;
+            }
+        }
+        rv = WaitForSingleObject(mutex->handle, apr_time_as_msec(timeout));
+        if (rv == WAIT_TIMEOUT) {
+            return APR_TIMEUP;
+        }
+    }
+
+    if (rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
+        return APR_SUCCESS;
+    } 
+    return apr_get_os_error();
+}
+
 APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex)
 {
     if (ReleaseMutex(mutex->handle) == 0) {

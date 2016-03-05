@@ -54,6 +54,10 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
         (*mutex)->type = thread_mutex_unnested_event;
         (*mutex)->handle = CreateEvent(NULL, FALSE, TRUE, NULL);
     }
+    else if (flags & APR_THREAD_MUTEX_TIMED) {
+        (*mutex)->type = thread_mutex_nested_mutex;
+        (*mutex)->handle = CreateMutex(NULL, FALSE, NULL);
+    }
     else {
 #if APR_HAS_UNICODE_FS
         /* Critical Sections are terrific, performance-wise, on NT.
@@ -63,6 +67,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
         IF_WIN_OS_IS_UNICODE {
             InitializeCriticalSection(&(*mutex)->section);
             (*mutex)->type = thread_mutex_critical_section;
+            (*mutex)->handle = NULL;
         }
 #endif
 #if APR_HAS_ANSI_FS
@@ -86,9 +91,9 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
     }
     else {
         DWORD rv = WaitForSingleObject(mutex->handle, INFINITE);
-	if ((rv != WAIT_OBJECT_0) && (rv != WAIT_ABANDONED)) {
+        if ((rv != WAIT_OBJECT_0) && (rv != WAIT_ABANDONED)) {
             return (rv == WAIT_TIMEOUT) ? APR_EBUSY : apr_get_os_error();
-	}
+        }
     }        
     return APR_SUCCESS;
 }
@@ -102,11 +107,42 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
     }
     else {
         DWORD rv = WaitForSingleObject(mutex->handle, 0);
-	if ((rv != WAIT_OBJECT_0) && (rv != WAIT_ABANDONED)) {
+        if ((rv != WAIT_OBJECT_0) && (rv != WAIT_ABANDONED)) {
             return (rv == WAIT_TIMEOUT) ? APR_EBUSY : apr_get_os_error();
-	}
+        }
     }        
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
+                                                     apr_time_t timeout,
+                                                     int absolute)
+{
+    if (mutex->type != thread_mutex_critical_section) {
+        DWORD rv, timeout_ms;
+        if (timeout < 0) {
+            timeout_ms = INFINITE;
+        }
+        else {
+            if (absolute) {
+                apr_time_t now = apr_time_now();
+                if (timeout > now) {
+                    timeout -= now;
+                }
+                else {
+                    timeout = 0;
+                }
+            }
+            timeout_ms = apr_time_as_msec(timeout);
+        }
+        rv = WaitForSingleObject(mutex->handle, timeout_ms);
+        if ((rv != WAIT_OBJECT_0) && (rv != WAIT_ABANDONED)) {
+            return (rv == WAIT_TIMEOUT) ? APR_TIMEUP : apr_get_os_error();
+        }
+        return APR_SUCCESS;
+    }        
+
+    return APR_ENOTIMPL;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)

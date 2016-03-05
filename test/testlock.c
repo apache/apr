@@ -90,7 +90,12 @@ static void *APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data
     
     while (1)
     {
-        apr_thread_mutex_lock(thread_mutex);
+        if (data) {
+            apr_thread_mutex_timedlock(thread_mutex, *(apr_time_t *)data, 0);
+        }
+        else {
+            apr_thread_mutex_lock(thread_mutex);
+        }
         if (i == MAX_ITER)
             exitLoop = 0;
         else 
@@ -168,6 +173,38 @@ static void test_thread_mutex(abts_case *tc, void *data)
     s3 = apr_thread_create(&t3, NULL, thread_mutex_function, NULL, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, s3);
     s4 = apr_thread_create(&t4, NULL, thread_mutex_function, NULL, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s4);
+
+    apr_thread_join(&s1, t1);
+    apr_thread_join(&s2, t2);
+    apr_thread_join(&s3, t3);
+    apr_thread_join(&s4, t4);
+
+    ABTS_INT_EQUAL(tc, MAX_ITER, x);
+}
+
+static void test_thread_timedmutex(abts_case *tc, void *data)
+{
+    apr_thread_t *t1, *t2, *t3, *t4;
+    apr_status_t s1, s2, s3, s4;
+    apr_time_t timeout;
+
+    s1 = apr_thread_mutex_create(&thread_mutex, APR_THREAD_MUTEX_TIMED, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s1);
+    ABTS_PTR_NOTNULL(tc, thread_mutex);
+
+    i = 0;
+    x = 0;
+
+    timeout = apr_time_from_sec(5);
+
+    s1 = apr_thread_create(&t1, NULL, thread_mutex_function, &timeout, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s1);
+    s2 = apr_thread_create(&t2, NULL, thread_mutex_function, &timeout, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s2);
+    s3 = apr_thread_create(&t3, NULL, thread_mutex_function, &timeout, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s3);
+    s4 = apr_thread_create(&t4, NULL, thread_mutex_function, &timeout, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, s4);
 
     apr_thread_join(&s1, t1);
@@ -305,6 +342,38 @@ static void test_timeoutcond(abts_case *tc, void *data)
                        apr_thread_cond_destroy(timeout_cond));
 }
 
+static void test_timeoutmutex(abts_case *tc, void *data)
+{
+    apr_status_t s;
+    apr_time_t begin, end;
+    apr_time_t timeout;
+    int i;
+
+    s = apr_thread_mutex_create(&timeout_mutex, APR_THREAD_MUTEX_TIMED, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s);
+    ABTS_PTR_NOTNULL(tc, timeout_mutex);
+
+    timeout = apr_time_from_sec(5);
+
+    ABTS_INT_EQUAL(tc, 0, apr_thread_mutex_lock(timeout_mutex));
+    for (i = 0; i < MAX_RETRY; i++) {
+        begin = apr_time_now();
+        s = apr_thread_mutex_timedlock(timeout_mutex, timeout, 0);
+        end = apr_time_now();
+
+        if (s != APR_SUCCESS && !APR_STATUS_IS_TIMEUP(s)) {
+            continue;
+        }
+        ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(s));
+        ABTS_ASSERT(tc, "Timer returned too late", end - begin - timeout < 100000);
+        break;
+    }
+    ABTS_ASSERT(tc, "Too many retries", i < MAX_RETRY);
+    ABTS_INT_EQUAL(tc, 0, apr_thread_mutex_unlock(timeout_mutex));
+    APR_ASSERT_SUCCESS(tc, "Unable to destroy the mutex",
+                       apr_thread_mutex_destroy(timeout_mutex));
+}
+
 #endif /* !APR_HAS_THREADS */
 
 #if !APR_HAS_THREADS
@@ -323,9 +392,11 @@ abts_suite *testlock(abts_suite *suite)
     abts_run_test(suite, threads_not_impl, NULL);
 #else
     abts_run_test(suite, test_thread_mutex, NULL);
+    abts_run_test(suite, test_thread_timedmutex, NULL);
     abts_run_test(suite, test_thread_rwlock, NULL);
     abts_run_test(suite, test_cond, NULL);
     abts_run_test(suite, test_timeoutcond, NULL);
+    abts_run_test(suite, test_timeoutmutex, NULL);
 #endif
 
     return suite;

@@ -80,7 +80,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
     ULONG rc;
     char *semname;
 
-    if (mech != APR_LOCK_DEFAULT) {
+    if (mech != APR_LOCK_DEFAULT && mech != APR_LOCK_DEFAULT_TIMED) {
         return APR_ENOTIMPL;
     }
 
@@ -145,6 +145,42 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex)
 APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
 {
     ULONG rc = DosRequestMutexSem(mutex->hMutex, SEM_IMMEDIATE_RETURN);
+
+    if (rc == 0) {
+        mutex->owner = CurrentTid;
+        mutex->lock_count++;
+    }
+
+    return APR_FROM_OS_ERROR(rc);
+}
+
+
+
+APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
+                                                   apr_time_t timeout,
+                                                   int absolute)
+{
+    ULONG rc;
+    
+    if (timeout < 0) {
+        rc = DosRequestMutexSem(mutex->hMutex, SEM_INDEFINITE_WAIT);
+    }
+    else {
+        if (absolute) {
+            apr_time_t now = apr_time_now();
+            if (timeout > now) {
+                timeout -= now;
+            }
+            else {
+                timeout = 0;
+            }
+        }
+
+        rc = DosRequestMutexSem(mutex->hMutex, apr_time_as_msec(timeout));
+        if (rc == ERROR_TIMEOUT) {
+            return APR_TIMEUP;
+        }
+    }
 
     if (rc == 0) {
         mutex->owner = CurrentTid;
