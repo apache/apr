@@ -1,6 +1,12 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
+  *) locks: Introduce apr_{thread,proc,global}_mutex_timedlock().
+     [Yann Ylavic]
+
+  *) Introduce the apr_cstr_fn() family of functions, derived from
+     the svn_cstring_ functions of the Subversion project.
+
   *) Introduce the apr_cstr_fn() family of functions, derived from
      the svn_cstring_ functions of the Subversion project.
 
