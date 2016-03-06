@@ -109,9 +109,6 @@ Contributors looking for a mission:
 RELEASE SHOWSTOPPERS:
 
   * apr_file_rotating_* on most platforms
-  * Fix apr_os_proc_mutex_get() API.  The apr_os_proc_mutex_t structure
-    used on Unix must tell you what kind of mutex it is, and it may as
-    well be used on all platforms.
 
 CURRENT VOTES:
 
