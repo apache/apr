@@ -1,6 +1,13 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_proc/global_mutex: Fix API regarding the native OS mutexes
+     accessors from/to available APR mechanisms, adding the new functions
+     apr_os_proc_mutex_get_ex() and apr_os_proc_mutex_set_ex() which give
+     control to the user over the selected mechanisms, including the missing
+     POSIX semaphores (sem_t) on platforms supporting them.
+     [Yann Ylavic]
+
   *) apr_proc_mutex-pthread: Refcount shared mutexes usage to avoid
      destruction while still is use by some process(es).  PR 49504.
      [Yann Ylavic]
