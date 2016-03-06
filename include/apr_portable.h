@@ -112,7 +112,7 @@ typedef void*                 apr_os_shm_t;
 typedef int                   apr_os_file_t;
 typedef DIR                   apr_os_dir_t;
 typedef int                   apr_os_sock_t;
-typedef NXMutex_t             apr_os_proc_mutex_t;
+typedef NXMutex_t *           apr_os_proc_mutex_t;
 typedef NXThreadId_t          apr_os_thread_t;
 typedef long                  apr_os_proc_t;
 typedef NXKey_t               apr_os_threadkey_t; 
