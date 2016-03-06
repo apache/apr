@@ -105,6 +105,11 @@ APR_DECLARE(const char *) apr_proc_mutex_lockfile(apr_proc_mutex_t *mutex)
     return NULL;
 }
 
+APR_DECLARE(apr_lockmech_e) apr_proc_mutex_mech(apr_proc_mutex_t *mutex)
+{
+    return APR_LOCK_DEFAULT;
+}
+
 APR_DECLARE(const char *) apr_proc_mutex_name(apr_proc_mutex_t *mutex)
 {
     return "netwarethread";
@@ -121,18 +126,65 @@ APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 
 /* Implement OS-specific accessors defined in apr_portable.h */
 
-apr_status_t apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex,
-                                   apr_proc_mutex_t *pmutex)
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex, 
+                                                   apr_proc_mutex_t *pmutex,
+                                                   apr_lockmech_e *mech)
 {
-    if (pmutex)
-        ospmutex = pmutex->mutex->mutex;
-    return APR_ENOLOCK;
+#if 1
+    /* We need to change apr_os_proc_mutex_t to a pointer type
+     * to be able to implement this function.
+     */
+    return APR_ENOTIMPL;
+#else
+    if (!pmutex->mutex) {
+        return APR_ENOLOCK;
+    }
+    *ospmutex = pmutex->mutex->mutex;
+    if (mech) {
+        *mech = APR_LOCK_DEFAULT;
+    }
+    return APR_SUCCESS;
+#endif
 }
 
-apr_status_t apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
-                                   apr_os_proc_mutex_t *ospmutex,
-                                   apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex,
+                                                apr_proc_mutex_t *pmutex)
 {
+    return apr_os_proc_mutex_get_ex(ospmutex, pmutex, NULL);
+}
+
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_put_ex(apr_proc_mutex_t **pmutex,
+                                                apr_os_proc_mutex_t *ospmutex,
+                                                apr_lockmech_e mech,
+                                                apr_pool_t *pool)
+{
+    if (pool == NULL) {
+        return APR_ENOPOOL;
+    }
+    if (mech != APR_LOCK_DEFAULT) {
+        return APR_ENOTIMPL;
+    }
+#if 1
+    /* We need to change apr_os_proc_mutex_t to a pointer type
+     * to be able to implement this function.
+     */
     return APR_ENOTIMPL;
+#else
+    if ((*pmutex) == NULL) {
+        (*pmutex) = apr_pcalloc(pool, sizeof(apr_proc_mutex_t));
+        (*pmutex)->pool = pool;
+    }
+    (*pmutex)->mutex = apr_pcalloc(pool, sizeof(apr_thread_mutex_t));
+    (*pmutex)->mutex->mutex = *ospmutex;
+    (*pmutex)->mutex->pool = pool;
+    return APR_SUCCESS;
+#endif
+}
+
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
+                                                apr_os_proc_mutex_t *ospmutex,
+                                                apr_pool_t *pool)
+{
+    return apr_os_proc_mutex_put_ex(pmutex, ospmutex, APR_LOCK_DEFAULT, pool);
 }
 
