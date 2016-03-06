@@ -130,21 +130,15 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex
                                                    apr_proc_mutex_t *pmutex,
                                                    apr_lockmech_e *mech)
 {
-#if 1
-    /* We need to change apr_os_proc_mutex_t to a pointer type
-     * to be able to implement this function.
-     */
-    return APR_ENOTIMPL;
-#else
     if (!pmutex->mutex) {
         return APR_ENOLOCK;
     }
+
     *ospmutex = pmutex->mutex->mutex;
     if (mech) {
         *mech = APR_LOCK_DEFAULT;
     }
     return APR_SUCCESS;
-#endif
 }
 
 APR_DECLARE(apr_status_t) apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex,
@@ -164,12 +158,7 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_put_ex(apr_proc_mutex_t **pmutex,
     if (mech != APR_LOCK_DEFAULT) {
         return APR_ENOTIMPL;
     }
-#if 1
-    /* We need to change apr_os_proc_mutex_t to a pointer type
-     * to be able to implement this function.
-     */
-    return APR_ENOTIMPL;
-#else
+
     if ((*pmutex) == NULL) {
         (*pmutex) = apr_pcalloc(pool, sizeof(apr_proc_mutex_t));
         (*pmutex)->pool = pool;
@@ -178,7 +167,6 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_put_ex(apr_proc_mutex_t **pmutex,
     (*pmutex)->mutex->mutex = *ospmutex;
     (*pmutex)->mutex->pool = pool;
     return APR_SUCCESS;
-#endif
 }
 
 APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
