@@ -136,13 +136,6 @@ struct apr_os_proc_mutex_t {
     /** Value used for PTHREAD serialization */
     pthread_mutex_t *pthread_interproc;
 #endif
-#if APR_HAS_THREADS
-    /* If no threads, no need for thread locks */
-#if APR_USE_PTHREAD_SERIALIZE
-    /** This value is currently unused within APR and Apache */ 
-    pthread_mutex_t *intraproc;
-#endif
-#endif
 #if APR_HAS_POSIXSEM_SERIALIZE
     /** Value used for POSIX semaphores serialization */
     sem_t *psem_interproc;
