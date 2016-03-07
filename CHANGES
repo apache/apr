@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
+  *) apr_table_overlap: Add APR_OVERLAP_TABLES_ADD to merge and set when
+     overlapping tables. [Graham Leggett]
+
   *) locks: Introduce apr_{thread,proc,global}_mutex_timedlock().
      [Yann Ylavic]
 
