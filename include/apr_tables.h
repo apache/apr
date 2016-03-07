@@ -436,6 +436,8 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
 #define APR_OVERLAP_TABLES_SET   (0)
 /** flag for overlap to use apr_table_mergen */
 #define APR_OVERLAP_TABLES_MERGE (1)
+/** flag for overlap to use apr_table_addn */
+#define APR_OVERLAP_TABLES_ADD   (2)
 /**
  * For each element in table b, either use setn or mergen to add the data
  * to table a.  Which method is used is determined by the flags passed in.
@@ -444,6 +446,7 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
  * @param flags How to add the table to table a.  One of:
  *          APR_OVERLAP_TABLES_SET        Use apr_table_setn
  *          APR_OVERLAP_TABLES_MERGE      Use apr_table_mergen
+ *          APR_OVERLAP_TABLES_ADD        Use apr_table_addn
  * @remark  When merging duplicates, the two values are concatenated,
  *          separated by the string ", ".
  * @remark  This function is highly optimized, and uses less memory and CPU cycles
@@ -460,6 +463,9 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
  *  for (i = 0; i < barr->nelts; ++i) {
  *      if (flags & APR_OVERLAP_TABLES_MERGE) {
  *          apr_table_mergen(a, belt[i].key, belt[i].val);
+ *      }
+ *      else if (flags & APR_OVERLAP_TABLES_ADD) {
+ *          apr_table_addn(a, belt[i].key, belt[i].val);
  *      }
  *      else {
  *          apr_table_setn(a, belt[i].key, belt[i].val);
@@ -484,7 +490,8 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
  *
  * @param t Table.
  * @param flags APR_OVERLAP_TABLES_MERGE to merge, or
- *              APR_OVERLAP_TABLES_SET to overwrite
+ *              APR_OVERLAP_TABLES_SET to overwrite, or
+ *              APR_OVERLAP_TABLES_ADD to add
  * @remark When merging duplicates, the two values are concatenated,
  *         separated by the string ", ".
  */

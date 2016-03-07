@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_table_overlap: Add APR_OVERLAP_TABLES_ADD to merge and set when
+     overlapping tables. [Graham Leggett]
+
   *) apr_proc/global_mutex: Fix API regarding the native OS mutexes
      accessors from/to available APR mechanisms, adding the new functions
      apr_os_proc_mutex_get_ex() and apr_os_proc_mutex_set_ex() which give
