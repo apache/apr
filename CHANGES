@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_file_io: Add apr_file_pipe_create_pools() allowing a pair of
+     pipes to be created, each in a different pool. [Graham Leggett]
+
   *) apr_table_overlap: Add APR_OVERLAP_TABLES_ADD to merge and set when
      overlapping tables. [Graham Leggett]
 
