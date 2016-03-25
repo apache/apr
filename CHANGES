@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
+  *) apr_file_io: Add apr_file_pipe_create_pools() allowing a pair of
+     pipes to be created, each in a different pool. [Graham Leggett]
+
   *) Add apr_pollcb_wakeup(), with similar behavior to
      apr_pollset_wakeup(). Add apr_pollcb_method_name(), with similar 
      behavior to apr_pollset_method_name().
