@@ -149,6 +149,10 @@ struct apr_pollcb_t {
     apr_pool_t *pool;
     apr_uint32_t nelts;
     apr_uint32_t nalloc;
+    apr_uint32_t flags;
+    /* Pipe descriptors used for wakeup */
+    apr_file_t *wakeup_pipe[2];
+    apr_pollfd_t wakeup_pfd;
     int fd;
     apr_pollcb_pset pollset;
     apr_pollfd_t **copyset;
@@ -169,10 +173,17 @@ struct apr_pollcb_provider_t {
     apr_status_t (*add)(apr_pollcb_t *, apr_pollfd_t *);
     apr_status_t (*remove)(apr_pollcb_t *, apr_pollfd_t *);
     apr_status_t (*poll)(apr_pollcb_t *, apr_interval_time_t, apr_pollcb_cb_t, void *);
+    apr_status_t (*cleanup)(apr_pollcb_t *);
     const char *name;
 };
 
-/* Private functions */
-void apr_pollset_drain_wakeup_pipe(apr_pollset_t *pollset);
+/* 
+ * Private functions used for the implementation of both apr_pollcb_* and 
+ * apr_pollset_*
+ */
+apr_status_t apr_poll_create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd, 
+                                         apr_file_t **wakeup_pipe);
+apr_status_t apr_poll_close_wakeup_pipe(apr_file_t **wakeup_pipe);
+void apr_poll_drain_wakeup_pipe(apr_file_t **wakeup_pipe);
 
 #endif /* APR_ARCH_POLL_PRIVATE_H */
