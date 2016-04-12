@@ -46,6 +46,9 @@
 #if APR_HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
+#if APR_HAVE_SEMAPHORE_H
+#include <semaphore.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -139,6 +142,10 @@ struct apr_os_proc_mutex_t {
     /** This value is currently unused within APR and Apache */ 
     pthread_mutex_t *intraproc;
 #endif
+#endif
+#if APR_HAS_POSIXSEM_SERIALIZE
+    /** Value used for POSIX semaphores serialization */
+    sem_t *psem_interproc;
 #endif
 };
 
@@ -241,12 +248,25 @@ APR_DECLARE(apr_status_t) apr_os_sock_get(apr_os_sock_t *thesock,
                                           apr_socket_t *sock);
 
 /**
- * Convert the proc mutex from os specific type to apr type
+ * Convert the proc mutex from apr type to os specific type
  * @param ospmutex The os specific proc mutex we are converting to.
  * @param pmutex The apr proc mutex to convert.
  */
 APR_DECLARE(apr_status_t) apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex, 
                                                 apr_proc_mutex_t *pmutex);
+
+/**
+ * Convert the proc mutex from apr type to os specific type, also
+ * providing the mechanism used by the apr mutex.
+ * @param ospmutex The os specific proc mutex we are converting to.
+ * @param pmutex The apr proc mutex to convert.
+ * @param mech The mechanism used by the apr proc mutex (if not NULL).
+ * @remark Allows for disambiguation for platforms with multiple mechanisms
+ *         available.
+ */
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex, 
+                                                   apr_proc_mutex_t *pmutex,
+                                                   apr_lockmech_e *mech);
 
 /**
  * Get the exploded time in the platforms native format.
@@ -416,6 +436,21 @@ APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
  */
 APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
                                                 apr_os_proc_mutex_t *ospmutex,
+                                                apr_pool_t *cont); 
+
+/**
+ * Convert the proc mutex from os specific type to apr type, using the
+ * specified mechanism.
+ * @param pmutex The apr proc mutex we are converting to.
+ * @param ospmutex The os specific proc mutex to convert.
+ * @param mech The apr mutex locking mechanism
+ * @param cont The pool to use if it is needed.
+ * @remark Allows for disambiguation for platforms with multiple mechanisms
+ *         available.
+ */
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_put_ex(apr_proc_mutex_t **pmutex,
+                                                apr_os_proc_mutex_t *ospmutex,
+                                                apr_lockmech_e mech,
                                                 apr_pool_t *cont); 
 
 /**
