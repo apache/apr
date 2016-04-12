@@ -19,6 +19,7 @@
 #include "apr_arch_proc_mutex.h"
 #include "apr_arch_file_io.h" /* for apr_mkstemp() */
 #include "apr_hash.h"
+#include "apr_atomic.h"
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 {
@@ -427,7 +428,24 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_sysv_methods =
 
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
 
-static apr_status_t proc_mutex_proc_pthread_cleanup(void *mutex_)
+/* The mmap()ed pthread_interproc is the native pthread_mutex_t followed
+ * by a refcounter to track children using it.  We want to avoid calling
+ * pthread_mutex_destroy() on the shared mutex area while it is in use by
+ * another process, because this may mark the shared pthread_mutex_t as
+ * invalid for everyone, including forked children (unlike "sysvsem" for
+ * example), causing unexpected errors or deadlocks (PR 49504).  So the
+ * last process (parent or child) referencing the mutex will effectively
+ * destroy it.
+ */
+typedef struct {
+    pthread_mutex_t mutex;
+    apr_uint32_t refcount;
+} proc_pthread_mutex_t;
+
+#define proc_pthread_mutex_refcount(m) \
+    (((proc_pthread_mutex_t *)(m)->pthread_interproc)->refcount)
+
+static apr_status_t proc_pthread_mutex_unref(void *mutex_)
 {
     apr_proc_mutex_t *mutex=mutex_;
     apr_status_t rv;
@@ -440,12 +458,25 @@ static apr_status_t proc_mutex_proc_pthread_cleanup(void *mutex_)
             return rv;
         }
     }
-    /* curr_locked is set to -1 until the mutex has been created */
-    if (mutex->curr_locked != -1) {
+    if (!apr_atomic_dec32(&proc_pthread_mutex_refcount(mutex))) {
         if ((rv = pthread_mutex_destroy(mutex->pthread_interproc))) {
 #ifdef HAVE_ZOS_PTHREADS
             rv = errno;
 #endif
+            return rv;
+        }
+    }
+    return APR_SUCCESS;
+}
+
+static apr_status_t proc_mutex_proc_pthread_cleanup(void *mutex_)
+{
+    apr_proc_mutex_t *mutex=mutex_;
+    apr_status_t rv;
+
+    /* curr_locked is set to -1 until the mutex has been created */
+    if (mutex->curr_locked != -1) {
+        if ((rv = proc_pthread_mutex_unref(mutex))) {
             return rv;
         }
     }
@@ -469,7 +500,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
 
     new_mutex->pthread_interproc = (pthread_mutex_t *)mmap(
                                        (caddr_t) 0, 
-                                       sizeof(pthread_mutex_t), 
+                                       sizeof(proc_pthread_mutex_t),
                                        PROT_READ | PROT_WRITE, MAP_SHARED,
                                        fd, 0); 
     if (new_mutex->pthread_interproc == (pthread_mutex_t *) (caddr_t) -1) {
@@ -525,6 +556,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         return rv;
     }
 
+    proc_pthread_mutex_refcount(new_mutex) = 1; /* first/parent reference */
     new_mutex->curr_locked = 0; /* mutex created now */
 
     if ((rv = pthread_mutexattr_destroy(&mattr))) {
@@ -542,6 +574,17 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
     return APR_SUCCESS;
 }
 
+static apr_status_t proc_mutex_proc_pthread_child_init(apr_proc_mutex_t **mutex,
+                                                       apr_pool_t *pool, 
+                                                       const char *fname)
+{
+    (*mutex)->curr_locked = 0;
+    apr_atomic_inc32(&proc_pthread_mutex_refcount(*mutex));
+    apr_pool_cleanup_register(pool, *mutex, proc_pthread_mutex_unref, 
+                              apr_pool_cleanup_null);
+    return APR_SUCCESS;
+}
+
 static apr_status_t proc_mutex_proc_pthread_acquire(apr_proc_mutex_t *mutex)
 {
     apr_status_t rv;
@@ -553,13 +596,12 @@ static apr_status_t proc_mutex_proc_pthread_acquire(apr_proc_mutex_t *mutex)
 #ifdef HAVE_PTHREAD_MUTEX_ROBUST
         /* Okay, our owner died.  Let's try to make it consistent again. */
         if (rv == EOWNERDEAD) {
+            apr_atomic_dec32(&proc_pthread_mutex_refcount(mutex));
             pthread_mutex_consistent_np(mutex->pthread_interproc);
         }
         else
-            return rv;
-#else
-        return rv;
 #endif
+        return rv;
     }
     mutex->curr_locked = 1;
     return APR_SUCCESS;
@@ -579,14 +621,12 @@ static apr_status_t proc_mutex_proc_pthread_tryacquire(apr_proc_mutex_t *mutex)
 #ifdef HAVE_PTHREAD_MUTEX_ROBUST
         /* Okay, our owner died.  Let's try to make it consistent again. */
         if (rv == EOWNERDEAD) {
+            apr_atomic_dec32(&proc_pthread_mutex_refcount(mutex));
             pthread_mutex_consistent_np(mutex->pthread_interproc);
-            rv = APR_SUCCESS;
         }
         else
-            return rv;
-#else
-        return rv;
 #endif
+        return rv;
     }
     mutex->curr_locked = 1;
     return APR_SUCCESS;
@@ -621,14 +661,12 @@ proc_mutex_proc_pthread_timedacquire(apr_proc_mutex_t *mutex,
 #ifdef HAVE_PTHREAD_MUTEX_ROBUST
             /* Okay, our owner died.  Let's try to make it consistent again. */
             if (rv == EOWNERDEAD) {
+                apr_atomic_dec32(&proc_pthread_mutex_refcount(mutex));
                 pthread_mutex_consistent_np(mutex->pthread_interproc);
-                rv = APR_SUCCESS;
             }
             else
-                return rv;
-#else
-            return rv;
 #endif
+            return rv;
         }
     }
     mutex->curr_locked = 1;
@@ -658,7 +696,7 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_proc_pthread_methods =
     proc_mutex_proc_pthread_timedacquire,
     proc_mutex_proc_pthread_release,
     proc_mutex_proc_pthread_cleanup,
-    proc_mutex_no_child_init,
+    proc_mutex_proc_pthread_child_init,
     proc_mutex_no_perms_set,
     "pthread"
 };

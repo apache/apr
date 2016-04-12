@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.0
 
+  *) apr_proc_mutex-pthread: Refcount shared mutexes usage to avoid
+     destruction while still is use by some process(es).  PR 49504.
+     [Yann Ylavic]
+
   *) apr_file_io: Add apr_file_pipe_create_pools() allowing a pair of
      pipes to be created, each in a different pool. [Graham Leggett]
 
