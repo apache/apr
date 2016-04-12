@@ -154,9 +154,16 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_cleanup(void *mutex);
 APR_DECLARE(const char *) apr_proc_mutex_lockfile(apr_proc_mutex_t *mutex);
 
 /**
- * Display the name of the mutex, as it relates to the actual method used.
- * This matches the valid options for Apache's AcceptMutex directive
- * @param mutex the name of the mutex
+ * Get the mechanism of the mutex, as it relates to the actual method
+ * used for the underlying apr_proc_mutex_t.
+ * @param mutex the mutex to get the mechanism from.
+ */
+APR_DECLARE(apr_lockmech_e) apr_proc_mutex_mech(apr_proc_mutex_t *mutex);
+
+/**
+ * Get the mechanism's name of the mutex, as it relates to the actual method
+ * used for the underlying apr_proc_mutex_t.
+ * @param mutex the mutex to get the mechanism's name from.
  */
 APR_DECLARE(const char *) apr_proc_mutex_name(apr_proc_mutex_t *mutex);
 

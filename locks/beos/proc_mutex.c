@@ -182,6 +182,11 @@ APR_DECLARE(const char *) apr_proc_mutex_lockfile(apr_proc_mutex_t *mutex)
     return NULL;
 }
 
+APR_DECLARE(apr_lockmech_e) apr_proc_mutex_mech(apr_proc_mutex_t *mutex)
+{
+    return APR_LOCK_DEFAULT_TIMED;
+}
+
 APR_DECLARE(const char *) apr_proc_mutex_name(apr_proc_mutex_t *mutex)
 {
     return "beossem";
@@ -198,20 +203,34 @@ APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 
 /* Implement OS-specific accessors defined in apr_portable.h */
 
-APR_DECLARE(apr_status_t) apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex,
-                                                apr_proc_mutex_t *pmutex)
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex, 
+                                                   apr_proc_mutex_t *pmutex,
+                                                   apr_lockmech_e *mech)
 {
     ospmutex->sem = pmutex->Lock;
     ospmutex->ben = pmutex->LockCount;
+    if (mech) {
+        *mech = APR_LOCK_DEFAULT_TIMED;
+    }
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex,
+                                                apr_proc_mutex_t *pmutex)
+{
+    return apr_os_proc_mutex_get_ex(ospmutex, pmutex, NULL);
+}
+
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_put_ex(apr_proc_mutex_t **pmutex,
                                                 apr_os_proc_mutex_t *ospmutex,
+                                                apr_lockmech_e mech,
                                                 apr_pool_t *pool)
 {
     if (pool == NULL) {
         return APR_ENOPOOL;
+    }
+    if (mech != APR_LOCK_DEFAULT && mech != APR_LOCK_DEFAULT_TIMED) {
+        return APR_ENOTIMPL;
     }
     if ((*pmutex) == NULL) {
         (*pmutex) = (apr_proc_mutex_t *)apr_pcalloc(pool, sizeof(apr_proc_mutex_t));
@@ -220,5 +239,12 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
     (*pmutex)->Lock = ospmutex->sem;
     (*pmutex)->LockCount = ospmutex->ben;
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
+                                                apr_os_proc_mutex_t *ospmutex,
+                                                apr_pool_t *pool)
+{
+    return apr_os_proc_mutex_put_ex(pmutex, ospmutex, APR_LOCK_DEFAULT_TIMED, pool);
 }
 
