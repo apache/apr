@@ -343,6 +343,23 @@ typedef struct {
 #define proc_pthread_mutex_refcount(m) \
     (((proc_pthread_mutex_t *)(m)->pthread_interproc)->refcount)
 
+static APR_INLINE int proc_pthread_mutex_inc(apr_proc_mutex_t *mutex)
+{
+    if (mutex->pthread_refcounting) {
+        apr_atomic_inc32(&proc_pthread_mutex_refcount(mutex));
+        return 1;
+    }
+    return 0;
+}
+
+static APR_INLINE int proc_pthread_mutex_dec(apr_proc_mutex_t *mutex)
+{
+    if (mutex->pthread_refcounting) {
+        return apr_atomic_dec32(&proc_pthread_mutex_refcount(mutex));
+    }
+    return 0;
+}
+
 static apr_status_t proc_pthread_mutex_unref(void *mutex_)
 {
     apr_proc_mutex_t *mutex=mutex_;
@@ -356,7 +373,7 @@ static apr_status_t proc_pthread_mutex_unref(void *mutex_)
             return rv;
         }
     }
-    if (!apr_atomic_dec32(&proc_pthread_mutex_refcount(mutex))) {
+    if (!proc_pthread_mutex_dec(mutex)) {
         if ((rv = pthread_mutex_destroy(mutex->pthread_interproc))) {
 #ifdef HAVE_ZOS_PTHREADS
             rv = errno;
@@ -378,8 +395,7 @@ static apr_status_t proc_mutex_proc_pthread_cleanup(void *mutex_)
             return rv;
         }
     }
-    if (munmap((caddr_t)mutex->pthread_interproc,
-               sizeof(proc_pthread_mutex_t))) {
+    if (munmap(mutex->pthread_interproc, sizeof(proc_pthread_mutex_t))) {
         return errno;
     }
     return APR_SUCCESS;
@@ -397,17 +413,17 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         return errno;
     }
 
-    new_mutex->pthread_interproc = (pthread_mutex_t *)mmap(
-                                       (caddr_t) 0, 
-                                       sizeof(proc_pthread_mutex_t),
-                                       PROT_READ | PROT_WRITE, MAP_SHARED,
-                                       fd, 0); 
-    if (new_mutex->pthread_interproc == (pthread_mutex_t *) (caddr_t) -1) {
+    new_mutex->pthread_interproc = mmap(NULL, sizeof(proc_pthread_mutex_t),
+                                        PROT_READ | PROT_WRITE, MAP_SHARED,
+                                        fd, 0); 
+    if (new_mutex->pthread_interproc == MAP_FAILED) {
+        rv = errno;
         close(fd);
-        return errno;
+        return rv;
     }
     close(fd);
 
+    new_mutex->pthread_refcounting = 1;
     new_mutex->curr_locked = -1; /* until the mutex has been created */
 
     if ((rv = pthread_mutexattr_init(&mattr))) {
@@ -478,9 +494,10 @@ static apr_status_t proc_mutex_proc_pthread_child_init(apr_proc_mutex_t **mutex,
                                                        const char *fname)
 {
     (*mutex)->curr_locked = 0;
-    apr_atomic_inc32(&proc_pthread_mutex_refcount(*mutex));
-    apr_pool_cleanup_register(pool, *mutex, proc_pthread_mutex_unref, 
-                              apr_pool_cleanup_null);
+    if (proc_pthread_mutex_inc(*mutex)) {
+        apr_pool_cleanup_register(pool, *mutex, proc_pthread_mutex_unref, 
+                                  apr_pool_cleanup_null);
+    }
     return APR_SUCCESS;
 }
 
@@ -495,7 +512,7 @@ static apr_status_t proc_mutex_proc_pthread_acquire(apr_proc_mutex_t *mutex)
 #ifdef HAVE_PTHREAD_MUTEX_ROBUST
         /* Okay, our owner died.  Let's try to make it consistent again. */
         if (rv == EOWNERDEAD) {
-            apr_atomic_dec32(&proc_pthread_mutex_refcount(mutex));
+            proc_pthread_mutex_dec(mutex);
             pthread_mutex_consistent_np(mutex->pthread_interproc);
         }
         else
@@ -520,6 +537,7 @@ static apr_status_t proc_mutex_proc_pthread_tryacquire(apr_proc_mutex_t *mutex)
 #ifdef HAVE_PTHREAD_MUTEX_ROBUST
         /* Okay, our owner died.  Let's try to make it consistent again. */
         if (rv == EOWNERDEAD) {
+            proc_pthread_mutex_dec(mutex);
             pthread_mutex_consistent_np(mutex->pthread_interproc);
         }
         else
@@ -527,7 +545,7 @@ static apr_status_t proc_mutex_proc_pthread_tryacquire(apr_proc_mutex_t *mutex)
         return rv;
     }
     mutex->curr_locked = 1;
-    return rv;
+    return APR_SUCCESS;
 }
 
 static apr_status_t proc_mutex_proc_pthread_release(apr_proc_mutex_t *mutex)
@@ -734,8 +752,9 @@ static apr_status_t proc_mutex_flock_create(apr_proc_mutex_t *new_mutex,
  
     if (rv != APR_SUCCESS) {
         proc_mutex_flock_cleanup(new_mutex);
-        return errno;
+        return rv;
     }
+
     new_mutex->curr_locked = 0;
     apr_pool_cleanup_register(new_mutex->pool, (void *)new_mutex,
                               apr_proc_mutex_cleanup,
@@ -795,13 +814,13 @@ static apr_status_t proc_mutex_flock_child_init(apr_proc_mutex_t **mutex,
     apr_proc_mutex_t *new_mutex;
     int rv;
 
-    new_mutex = (apr_proc_mutex_t *)apr_palloc(pool, sizeof(apr_proc_mutex_t));
-
-    memcpy(new_mutex, *mutex, sizeof *new_mutex);
-    new_mutex->pool = pool;
     if (!fname) {
         fname = (*mutex)->fname;
     }
+
+    new_mutex = (apr_proc_mutex_t *)apr_pmemdup(pool, *mutex,
+                                                sizeof(apr_proc_mutex_t));
+    new_mutex->pool = pool;
     new_mutex->fname = apr_pstrdup(pool, fname);
     rv = apr_file_open(&new_mutex->interproc, new_mutex->fname,
                        APR_FOPEN_WRITE, 0, new_mutex->pool);

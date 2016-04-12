@@ -104,6 +104,10 @@ struct apr_proc_mutex_t {
 #endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
     pthread_mutex_t *pthread_interproc;
+    int pthread_refcounting;    /* Whether the native mutex is refcounted or
+                                 * apr_os_proc_mutex_put()ed, which makes
+                                 * refcounting impossible/undesirable.
+                                 */
 #endif
 };
 
