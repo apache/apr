@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.3
 
+  *) apr_proc_mutex-pthread: Refcount shared mutexes usage to avoid
+     destruction while still is use by some process(es).  PR 49504.
+     [Yann Ylavic]
+
   *) apr_mcast_interface/apr_mcast_join: Fix comparison of IPv6 addresses.
      [ Andre Naujoks <nautsch2 gmail com> ]
 
