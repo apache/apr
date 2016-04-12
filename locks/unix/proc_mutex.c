@@ -480,7 +480,8 @@ static apr_status_t proc_mutex_proc_pthread_cleanup(void *mutex_)
             return rv;
         }
     }
-    if (munmap((caddr_t)mutex->pthread_interproc, sizeof(pthread_mutex_t))) {
+    if (munmap((caddr_t)mutex->pthread_interproc,
+               sizeof(proc_pthread_mutex_t))) {
         return errno;
     }
     return APR_SUCCESS;
