@@ -513,8 +513,9 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         close(fd);
         return rv;
     }
-    new_mutex->pthread_refcounting = 1;
+    close(fd);
 
+    new_mutex->pthread_refcounting = 1;
     new_mutex->curr_locked = -1; /* until the mutex has been created */
 
     if ((rv = pthread_mutexattr_init(&mattr))) {
