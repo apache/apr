@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_os_proc_mutex_put_ex: Allow to specify whether the OS native
+     mutex should or not be cleaned up (destroyed) with the constructed
+     APR mutex (given pool), and default to not for the simple _put()
+     function.  [Yann Ylavic]
+
   *) apr_file_io: Add apr_file_pipe_create_pools() allowing a pair of
      pipes to be created, each in a different pool. [Graham Leggett]
 

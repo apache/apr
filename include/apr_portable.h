@@ -437,6 +437,8 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
  * @param pmutex The apr proc mutex we are converting to.
  * @param ospmutex The os specific proc mutex to convert.
  * @param mech The apr mutex locking mechanism
+ * @param register_cleanup Whether to destroy the os mutex with the apr
+ *        one (either on explicit destroy or pool cleanup).
  * @param cont The pool to use if it is needed.
  * @remark Allows for disambiguation for platforms with multiple mechanisms
  *         available.
@@ -444,6 +446,7 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
 APR_DECLARE(apr_status_t) apr_os_proc_mutex_put_ex(apr_proc_mutex_t **pmutex,
                                                 apr_os_proc_mutex_t *ospmutex,
                                                 apr_lockmech_e mech,
+                                                int register_cleanup,
                                                 apr_pool_t *cont); 
 
 /**
