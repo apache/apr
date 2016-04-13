@@ -224,6 +224,7 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex,
 APR_DECLARE(apr_status_t) apr_os_proc_mutex_put_ex(apr_proc_mutex_t **pmutex,
                                                 apr_os_proc_mutex_t *ospmutex,
                                                 apr_lockmech_e mech,
+                                                int register_cleanup,
                                                 apr_pool_t *pool)
 {
     if (pool == NULL) {
@@ -232,12 +233,18 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_put_ex(apr_proc_mutex_t **pmutex,
     if (mech != APR_LOCK_DEFAULT && mech != APR_LOCK_DEFAULT_TIMED) {
         return APR_ENOTIMPL;
     }
+
     if ((*pmutex) == NULL) {
         (*pmutex) = (apr_proc_mutex_t *)apr_pcalloc(pool, sizeof(apr_proc_mutex_t));
         (*pmutex)->pool = pool;
     }
     (*pmutex)->Lock = ospmutex->sem;
     (*pmutex)->LockCount = ospmutex->ben;
+
+    if (register_cleanup) {
+        apr_pool_cleanup_register(pool, *pmutex, _proc_mutex_cleanup,
+                                  apr_pool_cleanup_null);
+    }
     return APR_SUCCESS;
 }
 
@@ -245,6 +252,7 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
                                                 apr_os_proc_mutex_t *ospmutex,
                                                 apr_pool_t *pool)
 {
-    return apr_os_proc_mutex_put_ex(pmutex, ospmutex, APR_LOCK_DEFAULT_TIMED, pool);
+    return apr_os_proc_mutex_put_ex(pmutex, ospmutex, APR_LOCK_DEFAULT_TIMED,
+                                    0, pool);
 }
 
