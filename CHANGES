@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_os_proc_mutex-unix: For consistency with other OS native to APR
+     types constructors/_put()ers and non-unix mutex mechanisms, always
+     destroy the underlying native mutex when apr_proc_mutex_destroy() is
+     called explicitly.  [Yann Ylavic]
+
   *) apr_os_proc_mutex_put_ex: Allow to specify whether the OS native
      mutex should or not be cleaned up (destroyed) with the constructed
      APR mutex (given pool), and default to not for the simple _put()
