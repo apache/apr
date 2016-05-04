@@ -95,7 +95,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
                 timeout = 0;
             }
         }
-        rc = DosRequestMutexSem(mutex->hMutex, apr_time_as_msec(usec));
+        rc = DosRequestMutexSem(mutex->hMutex, apr_time_as_msec(timeout));
         if (rc == ERROR_TIMEOUT) {
             return APR_TIMEUP;
         }
