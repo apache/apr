@@ -268,9 +268,9 @@ static apr_status_t asio_pollset_create(apr_pollset_t *pollset,
 
     if (flags & APR_POLLSET_THREADSAFE) {
 #if APR_HAS_THREADS
-        if (rv = apr_thread_mutex_create(&(priv->ring_lock),
+        if ((rv = apr_thread_mutex_create(&(priv->ring_lock),
                                            APR_THREAD_MUTEX_DEFAULT,
-                                           p) != APR_SUCCESS) {
+                                           p)) != APR_SUCCESS) {
             DBG1(1, "apr_thread_mutex_create returned %d\n", rv);
             pollset->p = NULL;
             return rv;
