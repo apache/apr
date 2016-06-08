@@ -279,13 +279,15 @@ static const short ucharmap[] = {
 };
 #endif
 
-int apr_cstr_casecmp(const char *str1, const char *str2)
+int apr_cstr_casecmp(const char *s1, const char *s2)
 {
+    const unsigned char *str1 = (const unsigned char *)s1;
+    const unsigned char *str2 = (const unsigned char *)s2;
     for (;;)
     {
-        const short c1 = (short)(*((const unsigned char *)str1));
-        const short c2 = (short)(*((const unsigned char *)str2));
-        const short cmp = ucharmap[c1] - ucharmap[c2];
+        const int c1 = (int)(*str1);
+        const int c2 = (int)(*str2);
+        const int cmp = ucharmap[c1] - ucharmap[c2];
         /* Not necessary to test for !c2, this is caught by cmp */
         if (cmp || !c1)
             return cmp;
@@ -294,13 +296,15 @@ int apr_cstr_casecmp(const char *str1, const char *str2)
     }
 }
 
-int apr_cstr_casecmpn(const char *str1, const char *str2, apr_size_t n)
+int apr_cstr_casecmpn(const char *s1, const char *s2, apr_size_t n)
 {
+    const unsigned char *str1 = (const unsigned char *)s1;
+    const unsigned char *str2 = (const unsigned char *)s2;
     while (n--)
     {
-        const short c1 = (short)(*((const unsigned char *)str1));
-        const short c2 = (short)(*((const unsigned char *)str2));
-        const short cmp = ucharmap[c1] - ucharmap[c2];
+        const int c1 = (int)(*str1);
+        const int c2 = (int)(*str2);
+        const int cmp = ucharmap[c1] - ucharmap[c2];
         /* Not necessary to test for !c2, this is caught by cmp */
         if (cmp || !c1)
             return cmp;
