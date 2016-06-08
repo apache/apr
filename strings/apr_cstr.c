@@ -283,12 +283,14 @@ int apr_cstr_casecmp(const char *str1, const char *str2)
 {
     for (;;)
     {
-        const int c1 = (int)(*((const unsigned char *)str1++));
-        const int c2 = (int)(*((const unsigned char *)str2++));
+        const int c1 = (int)(*((const unsigned char *)str1));
+        const int c2 = (int)(*((const unsigned char *)str2));
         const int cmp = ucharmap[c1] - ucharmap[c2];
         /* Not necessary to test for !c2, this is caught by cmp */
         if (cmp || !c1)
             return cmp;
+        str1++;
+        str2++;
     }
 }
 
@@ -296,12 +298,14 @@ int apr_cstr_casecmpn(const char *str1, const char *str2, apr_size_t n)
 {
     while (n--)
     {
-        const int c1 = (int)(*((const unsigned char *)str1++));
-        const int c2 = (int)(*((const unsigned char *)str2++));
+        const int c1 = (int)(*((const unsigned char *)str1));
+        const int c2 = (int)(*((const unsigned char *)str2));
         const int cmp = ucharmap[c1] - ucharmap[c2];
         /* Not necessary to test for !c2, this is caught by cmp */
         if (cmp || !c1)
             return cmp;
+        str1++;
+        str2++;
     }
     return 0;
 }
