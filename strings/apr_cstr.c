@@ -196,7 +196,7 @@ char * apr_cstr_join(const apr_array_header_t *strings,
  * octets (such as extended latin alphabetics) are never case-folded.
  * NOTE: Other than Alpha A-Z/a-z, each code point is unique!
  */
-static const unsigned char ucharmap[] = {
+static const short ucharmap[] = {
     0x0,  0x1,  0x2,  0x3,  0x4,  0x5,  0x6,  0x7,
     0x8,  0x9,  0xa,  0xb,  0xc,  0xd,  0xe,  0xf,
     0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
@@ -243,7 +243,7 @@ static const unsigned char ucharmap[] = {
  *
  * NOTE: Other than Alpha A-Z/a-z, each code point is unique!
  */
-static const unsigned char ucharmap[] = {
+static const short ucharmap[] = {
     0x00, 0x01, 0x02, 0x03, 0x9C, 0x09, 0x86, 0x7F,
     0x97, 0x8D, 0x8E, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
     0x10, 0x11, 0x12, 0x13, 0x9D, 0x85, 0x08, 0x87,
@@ -279,27 +279,37 @@ static const unsigned char ucharmap[] = {
 };
 #endif
 
-int apr_cstr_casecmp(const char *str1, const char *str2)
+int apr_cstr_casecmp(const char *s1, const char *s2)
 {
+    const unsigned char *str1 = (const unsigned char *)s1;
+    const unsigned char *str2 = (const unsigned char *)s2;
     for (;;)
     {
-        const int c1 = (int)(*((const unsigned char *)str1++));
-        const int c2 = (int)(*((const unsigned char *)str2++));
+        const int c1 = (int)(*str1);
+        const int c2 = (int)(*str2);
         const int cmp = ucharmap[c1] - ucharmap[c2];
-        if (cmp || !c1 || !c2)
+        /* Not necessary to test for !c2, this is caught by cmp */
+        if (cmp || !c1)
             return cmp;
+        str1++;
+        str2++;
     }
 }
 
-int apr_cstr_casecmpn(const char *str1, const char *str2, apr_size_t n)
+int apr_cstr_casecmpn(const char *s1, const char *s2, apr_size_t n)
 {
+    const unsigned char *str1 = (const unsigned char *)s1;
+    const unsigned char *str2 = (const unsigned char *)s2;
     while (n--)
     {
-        const int c1 = (int)(*((const unsigned char *)str1++));
-        const int c2 = (int)(*((const unsigned char *)str2++));
+        const int c1 = (int)(*str1);
+        const int c2 = (int)(*str2);
         const int cmp = ucharmap[c1] - ucharmap[c2];
-        if (cmp || !c1 || !c2)
+        /* Not necessary to test for !c2, this is caught by cmp */
+        if (cmp || !c1)
             return cmp;
+        str1++;
+        str2++;
     }
     return 0;
 }
