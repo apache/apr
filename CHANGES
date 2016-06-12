@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_xml_to_text: Add style APR_XML_X2T_PARSED to maintain a
+     consistent namespace prefix. [Jari Urpalainen
+     <jari.urpalainen nokia.com>]
+
   *) apr_os_proc_mutex-unix: For consistency with other OS native to APR
      types constructors/_put()ers and non-unix mutex mechanisms, always
      destroy the underlying native mutex when apr_proc_mutex_destroy() is
