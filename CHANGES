@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.5.3
 
+  *) apr_pollset_poll: Fix an issue on z/OS where unpredictable
+     message queue identifiers could be removed when non-threadsafe
+     pollsets cleaned up. [Eric Covener]
+
   *) apr_proc_mutex-pthread: Refcount shared mutexes usage to avoid
      destruction while still is use by some process(es).  PR 49504.
      [Yann Ylavic]
