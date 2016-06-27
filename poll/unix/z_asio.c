@@ -247,9 +247,11 @@ static apr_status_t asio_pollset_cleanup(apr_pollset_t *pollset)
     int rv;
 
     DBG(4, "entered\n");
-    rv = msgctl(pollset->p->msg_q, IPC_RMID, NULL);
+    if (pollset->flags & APR_POLLSET_THREADSAFE) { 
+        rv = msgctl(pollset->p->msg_q, IPC_RMID, NULL);
+        DBG1(4, "asio_pollset_cleanup: msgctl(IPC_RMID) returned %d\n", rv);
+    }
 
-    DBG1(4, "exiting, msgctl(IPC_RMID) returned %d\n", rv);
     return rv;
 }
 
@@ -264,7 +266,7 @@ static apr_status_t asio_pollset_create(apr_pollset_t *pollset,
 
     DBG1(2, "entered, flags: %x\n", flags);
 
-    priv = pollset->p = apr_palloc(p, sizeof(*priv));
+    priv = pollset->p = apr_pcalloc(p, sizeof(*priv));
 
     if (flags & APR_POLLSET_THREADSAFE) {
 #if APR_HAS_THREADS
