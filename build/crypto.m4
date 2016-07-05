@@ -113,16 +113,6 @@ AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
         APR_ADDTO(INCLUDES, [-I$withval/include])
       fi
 
-      if test "$apu_have_openssl" != "1"; then
-        AC_CHECK_HEADERS(openssl/x509.h, [openssl_have_headers=1])
-        AC_CHECK_LIB(crypto, EVP_CIPHER_CTX_new, AC_CHECK_LIB(ssl, SSL_accept, [openssl_have_libs=1],,-lcrypto))
-        if test "$openssl_have_headers" != "0" && test "$openssl_have_libs" != "0"; then
-          apu_have_openssl=1
-          APR_ADDTO(LDFLAGS, [-L$withval/lib])
-          APR_ADDTO(INCLUDES, [-I$withval/include])
-        fi
-      fi
-
       AC_CHECK_DECLS([EVP_PKEY_CTX_new], [], [],
                      [#include <openssl/evp.h>])
 
@@ -276,16 +266,6 @@ AC_DEFUN([APU_CHECK_CRYPTO_COMMONCRYPTO], [
         apu_have_commoncrypto=1
         APR_ADDTO(LDFLAGS, [-L$withval/lib])
         APR_ADDTO(INCLUDES, [-I$withval/include])
-      fi
-
-      if test "$apu_have_commoncrypto" != "1"; then
-        AC_CHECK_HEADERS(CommonCrypto/CommonKeyDerivation.h, [commoncrypto_have_headers=1])
-        AC_CHECK_LIB(System, CCKeyDerivationPBKDF, AC_CHECK_LIB(System, CCCryptorCreate, [commoncrypto_have_libs=1],,-lcrypto))
-        if test "$commoncrypto_have_headers" != "0" && test "$commoncrypto_have_libs" != "0"; then
-          apu_have_commoncrypto=1
-          APR_ADDTO(LDFLAGS, [-L$withval/lib])
-          APR_ADDTO(INCLUDES, [-I$withval/include])
-        fi
       fi
 
     fi
