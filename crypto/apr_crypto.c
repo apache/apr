@@ -182,12 +182,15 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
     apr_snprintf(symname, sizeof(symname), "apr_crypto_%s_driver", name);
     rv = apu_dso_load(&dso, &symbol, modname, symname, pool);
     if (rv == APR_SUCCESS || rv == APR_EINIT) { /* previously loaded?!? */
-        *driver = symbol;
-        name = apr_pstrdup(pool, name);
-        apr_hash_set(drivers, name, APR_HASH_KEY_STRING, *driver);
+        apr_crypto_driver_t *d = symbol;
         rv = APR_SUCCESS;
-        if ((*driver)->init) {
-            rv = (*driver)->init(pool, params, result);
+        if (d->init) {
+            rv = d->init(pool, params, result);
+        }
+        if (APR_SUCCESS == rv) {
+            *driver = symbol;
+            name = apr_pstrdup(pool, name);
+            apr_hash_set(drivers, name, APR_HASH_KEY_STRING, *driver);
         }
     }
     apu_dso_mutex_unlock();

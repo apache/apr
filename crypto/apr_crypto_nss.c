@@ -198,9 +198,6 @@ static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
         return APR_EREINIT;
     }
 
-    apr_pool_cleanup_register(pool, pool, crypto_shutdown_helper,
-            apr_pool_cleanup_null);
-
     if (keyPrefix || certPrefix || secmod) {
         s = NSS_Initialize(dir, certPrefix, keyPrefix, secmod, flags);
     }
@@ -212,14 +209,18 @@ static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
     }
     if (s != SECSuccess) {
         if (result) {
+            /* Note: all memory must be owned by the caller, in case we're unloaded */
             apu_err_t *err = apr_pcalloc(pool, sizeof(apu_err_t));
             err->rc = PR_GetError();
-            err->msg = PR_ErrorToName(s);
-            err->reason = "Error during 'nss' initialisation";
+            err->msg = apr_pstrdup(pool, PR_ErrorToName(s));
+            err->reason = apr_pstrdup(pool, "Error during 'nss' initialisation");
             *result = err;
         }
         return APR_ECRYPT;
     }
+
+    apr_pool_cleanup_register(pool, pool, crypto_shutdown_helper,
+            apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 
