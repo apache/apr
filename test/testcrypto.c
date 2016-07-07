@@ -33,24 +33,33 @@ static const apr_crypto_driver_t *get_driver(abts_case *tc, apr_pool_t *pool,
 {
 
     const apr_crypto_driver_t *driver = NULL;
-    const apu_err_t *err = NULL;
+    const apu_err_t *result = NULL;
     apr_status_t rv;
 
     rv = apr_crypto_init(pool);
     ABTS_ASSERT(tc, "failed to init apr_crypto", rv == APR_SUCCESS);
 
-    rv = apr_crypto_get_driver(&driver, name, params, &err, pool);
-    if (APR_SUCCESS != rv && err) {
-        ABTS_NOT_IMPL(tc, apr_pstrcat(pool, err->msg, " (", name, ")", NULL));
-        return NULL;
-    }
+    rv = apr_crypto_get_driver(&driver, name, params, &result, pool);
     if (APR_ENOTIMPL == rv) {
         ABTS_NOT_IMPL(tc,
-                apr_psprintf(pool, "Crypto driver '%s' not implemented, skipping", (char *)name));
+                apr_psprintf(pool, "\nCrypto driver '%s' not implemented, skipping", (char *)name));
         return NULL;
     }
-    ABTS_ASSERT(tc, "failed to apr_crypto_get_driver", rv == APR_SUCCESS);
-    ABTS_ASSERT(tc, "apr_crypto_get_driver returned NULL", driver != NULL);
+    if (APR_EDSOOPEN == rv) {
+        ABTS_NOT_IMPL(tc,
+                apr_psprintf(pool, "\nCrypto driver '%s' DSO could not be opened, skipping", (char *)name));
+        return NULL;
+    }
+    if (APR_SUCCESS != rv && result) {
+        char err[1024];
+        apr_strerror(rv, err, sizeof(err) - 1);
+        fprintf(stderr, "\nget_driver error %d: %s: '%s' native error %d: %s (%s)\n",
+                rv, err, name, result->rc, result->reason ? result->reason : "",
+                result->msg ? result->msg : "");
+    }
+    ABTS_ASSERT(tc, apr_psprintf(pool, "\nfailed to apr_crypto_get_driver for '%s' with %d",
+                name, rv), rv == APR_SUCCESS);
+    ABTS_ASSERT(tc, "\napr_crypto_get_driver returned NULL", driver != NULL);
     if (!driver || rv) {
         return NULL;
     }
