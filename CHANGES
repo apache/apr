@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_crypto_nss: Ensure the SECItem returned by PK11_ParamFromIV
+     is properly freed. [Graham Leggett]
+
   *) apr_crypto: Don't cache the driver if initialisation fails. This
      stops the second and subsequent attempt to use the API from failing
      claiming the library is not initialised. [Graham Leggett]
