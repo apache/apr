@@ -77,6 +77,7 @@ struct apr_crypto_block_t {
     const apr_crypto_t *f;
     PK11Context *ctx;
     apr_crypto_key_t *key;
+    SECItem *secParam;
     int blockSize;
 };
 
@@ -108,6 +109,8 @@ static apr_status_t crypto_shutdown(void)
     if (NSS_IsInitialized()) {
         SECStatus s = NSS_Shutdown();
         if (s != SECSuccess) {
+            fprintf(stderr, "NSS failed to shutdown, possible leak: %d: %s",
+                PR_GetError(), PR_ErrorToName(s));
             return APR_EINIT;
         }
     }
@@ -216,6 +219,11 @@ static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
             err->reason = apr_pstrdup(pool, "Error during 'nss' initialisation");
             *result = err;
         }
+        s = NSS_Shutdown();
+        if (s != SECSuccess) {
+            return APR_ECRYPT;
+        }
+
         return APR_ECRYPT;
     }
 
@@ -234,6 +242,11 @@ static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
  */
 static apr_status_t crypto_block_cleanup(apr_crypto_block_t *block)
 {
+
+    if (block->secParam) {
+        SECITEM_FreeItem(block->secParam, PR_TRUE);
+        block->secParam = NULL;
+    }
 
     if (block->ctx) {
         PK11_DestroyContext(block->ctx, PR_TRUE);
@@ -536,7 +549,6 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
         apr_size_t *blockSize, apr_pool_t *p)
 {
     PRErrorCode perr;
-    SECItem * secParam;
     SECItem ivItem;
     unsigned char * usedIv;
     apr_crypto_block_t *block = *ctx;
@@ -575,14 +587,14 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
         }
         ivItem.data = usedIv;
         ivItem.len = key->ivSize;
-        secParam = PK11_ParamFromIV(key->cipherMech, &ivItem);
+        block->secParam = PK11_ParamFromIV(key->cipherMech, &ivItem);
     }
     else {
-        secParam = PK11_GenerateNewParam(key->cipherMech, key->symKey);
+        block->secParam = PK11_GenerateNewParam(key->cipherMech, key->symKey);
     }
-    block->blockSize = PK11_GetBlockSize(key->cipherMech, secParam);
+    block->blockSize = PK11_GetBlockSize(key->cipherMech, block->secParam);
     block->ctx = PK11_CreateContextBySymKey(key->cipherMech, CKA_ENCRYPT,
-            key->symKey, secParam);
+            key->symKey, block->secParam);
 
     /* did an error occur? */
     perr = PORT_GetError();
@@ -593,7 +605,7 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
     }
 
     if (blockSize) {
-        *blockSize = PK11_GetBlockSize(key->cipherMech, secParam);
+        *blockSize = PK11_GetBlockSize(key->cipherMech, block->secParam);
     }
 
     return APR_SUCCESS;
@@ -717,7 +729,6 @@ static apr_status_t crypto_block_decrypt_init(apr_crypto_block_t **ctx,
         const apr_crypto_key_t *key, apr_pool_t *p)
 {
     PRErrorCode perr;
-    SECItem * secParam;
     apr_crypto_block_t *block = *ctx;
     if (!block) {
         *ctx = block = apr_pcalloc(p, sizeof(apr_crypto_block_t));
@@ -739,14 +750,14 @@ static apr_status_t crypto_block_decrypt_init(apr_crypto_block_t **ctx,
         }
         ivItem.data = (unsigned char*) iv;
         ivItem.len = key->ivSize;
-        secParam = PK11_ParamFromIV(key->cipherMech, &ivItem);
+        block->secParam = PK11_ParamFromIV(key->cipherMech, &ivItem);
     }
     else {
-        secParam = PK11_GenerateNewParam(key->cipherMech, key->symKey);
+        block->secParam = PK11_GenerateNewParam(key->cipherMech, key->symKey);
     }
-    block->blockSize = PK11_GetBlockSize(key->cipherMech, secParam);
+    block->blockSize = PK11_GetBlockSize(key->cipherMech, block->secParam);
     block->ctx = PK11_CreateContextBySymKey(key->cipherMech, CKA_DECRYPT,
-            key->symKey, secParam);
+            key->symKey, block->secParam);
 
     /* did an error occur? */
     perr = PORT_GetError();
@@ -757,7 +768,7 @@ static apr_status_t crypto_block_decrypt_init(apr_crypto_block_t **ctx,
     }
 
     if (blockSize) {
-        *blockSize = PK11_GetBlockSize(key->cipherMech, secParam);
+        *blockSize = PK11_GetBlockSize(key->cipherMech, block->secParam);
     }
 
     return APR_SUCCESS;
