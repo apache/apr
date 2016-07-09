@@ -69,13 +69,17 @@ struct apr_crypto_block_t
     CCCryptorRef ref;
 };
 
-static int key_3des_192 = APR_KEY_3DES_192;
-static int key_aes_128 = APR_KEY_AES_128;
-static int key_aes_192 = APR_KEY_AES_192;
-static int key_aes_256 = APR_KEY_AES_256;
+static struct apr_crypto_block_key_type_t key_types[] =
+{
+{ APR_KEY_3DES_192, 24, 8, 8 },
+{ APR_KEY_AES_128, 16, 16, 16 },
+{ APR_KEY_AES_192, 24, 16, 16 },
+{ APR_KEY_AES_256, 32, 16, 16 } };
 
-static int mode_ecb = APR_MODE_ECB;
-static int mode_cbc = APR_MODE_CBC;
+static struct apr_crypto_block_key_mode_t key_modes[] =
+{
+{ APR_MODE_ECB },
+{ APR_MODE_CBC } };
 
 /**
  * Fetch the most recent error from this driver.
@@ -211,17 +215,17 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
     if (!f->types) {
         return APR_ENOMEM;
     }
-    apr_hash_set(f->types, "3des192", APR_HASH_KEY_STRING, &(key_3des_192));
-    apr_hash_set(f->types, "aes128", APR_HASH_KEY_STRING, &(key_aes_128));
-    apr_hash_set(f->types, "aes192", APR_HASH_KEY_STRING, &(key_aes_192));
-    apr_hash_set(f->types, "aes256", APR_HASH_KEY_STRING, &(key_aes_256));
+    apr_hash_set(f->types, "3des192", APR_HASH_KEY_STRING, &(key_types[0]));
+    apr_hash_set(f->types, "aes128", APR_HASH_KEY_STRING, &(key_types[1]));
+    apr_hash_set(f->types, "aes192", APR_HASH_KEY_STRING, &(key_types[2]));
+    apr_hash_set(f->types, "aes256", APR_HASH_KEY_STRING, &(key_types[3]));
 
     f->modes = apr_hash_make(pool);
     if (!f->modes) {
         return APR_ENOMEM;
     }
-    apr_hash_set(f->modes, "ecb", APR_HASH_KEY_STRING, &(mode_ecb));
-    apr_hash_set(f->modes, "cbc", APR_HASH_KEY_STRING, &(mode_cbc));
+    apr_hash_set(f->modes, "ecb", APR_HASH_KEY_STRING, &(key_modes[0]));
+    apr_hash_set(f->modes, "cbc", APR_HASH_KEY_STRING, &(key_modes[1]));
 
     apr_pool_cleanup_register(pool, f, crypto_cleanup_helper,
             apr_pool_cleanup_null);
@@ -232,7 +236,7 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
 
 /**
  * @brief Get a hash table of key types, keyed by the name of the type against
- * an integer pointer constant.
+ * a pointer to apr_crypto_block_key_type_t.
  *
  * @param types - hashtable of key types keyed to constants.
  * @param f - encryption context
@@ -247,7 +251,7 @@ static apr_status_t crypto_get_block_key_types(apr_hash_t **types,
 
 /**
  * @brief Get a hash table of key modes, keyed by the name of the mode against
- * an integer pointer constant.
+ * a pointer to apr_crypto_block_key_mode_t.
  *
  * @param modes - hashtable of key modes keyed to constants.
  * @param f - encryption context
@@ -260,52 +264,13 @@ static apr_status_t crypto_get_block_key_modes(apr_hash_t **modes,
     return APR_SUCCESS;
 }
 
-/**
- * @brief Create a key from the given passphrase. By default, the PBKDF2
- *        algorithm is used to generate the key from the passphrase. It is expected
- *        that the same pass phrase will generate the same key, regardless of the
- *        backend crypto platform used. The key is cleaned up when the context
- *        is cleaned, and may be reused with multiple encryption or decryption
- *        operations.
- * @note If *key is NULL, a apr_crypto_key_t will be created from a pool. If
- *       *key is not NULL, *key must point at a previously created structure.
- * @param key The key returned, see note.
- * @param ivSize The size of the initialisation vector will be returned, based
- *               on whether an IV is relevant for this type of crypto.
- * @param pass The passphrase to use.
- * @param passLen The passphrase length in bytes
- * @param salt The salt to use.
- * @param saltLen The salt length in bytes
- * @param type 3DES_192, AES_128, AES_192, AES_256.
- * @param mode Electronic Code Book / Cipher Block Chaining.
- * @param doPad Pad if necessary.
- * @param iterations Iteration count
- * @param f The context to use.
- * @param p The pool to use.
- * @return Returns APR_ENOKEY if the pass phrase is missing or empty, or if a backend
- *         error occurred while generating the key. APR_ENOCIPHER if the type or mode
- *         is not supported by the particular backend. APR_EKEYTYPE if the key type is
- *         not known. APR_EPADDING if padding was requested but is not supported.
- *         APR_ENOTIMPL if not implemented.
+/*
+ * Work out which mechanism to use.
  */
-static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
-        const char *pass, apr_size_t passLen, const unsigned char * salt,
-        apr_size_t saltLen, const apr_crypto_block_key_type_e type,
-        const apr_crypto_block_key_mode_e mode, const int doPad,
-        const int iterations, const apr_crypto_t *f, apr_pool_t *p)
+static apr_status_t crypto_cipher_mechanism(apr_crypto_key_t *key,
+        const apr_crypto_block_key_type_e type,
+        const apr_crypto_block_key_mode_e mode, const int doPad, apr_pool_t *p)
 {
-    apr_crypto_key_t *key = *k;
-
-    if (!key) {
-        *k = key = apr_array_push(f->keys);
-    }
-    if (!key) {
-        return APR_ENOMEM;
-    }
-
-    key->f = f;
-    key->provider = f->provider;
-
     /* handle padding */
     key->options = doPad ? kCCOptionPKCS7Padding : 0;
 
@@ -391,11 +356,144 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
     }
 
     /* make space for the key */
-    key->key = apr_pcalloc(p, key->keyLen);
+    key->key = apr_palloc(p, key->keyLen);
     if (!key->key) {
         return APR_ENOMEM;
     }
     apr_crypto_clear(p, key->key, key->keyLen);
+
+    return APR_SUCCESS;
+}
+
+/**
+ * @brief Create a key from the provided secret or passphrase. The key is cleaned
+ *        up when the context is cleaned, and may be reused with multiple encryption
+ *        or decryption operations.
+ * @note If *key is NULL, a apr_crypto_key_t will be created from a pool. If
+ *       *key is not NULL, *key must point at a previously created structure.
+ * @param key The key returned, see note.
+ * @param rec The key record, from which the key will be derived.
+ * @param f The context to use.
+ * @param p The pool to use.
+ * @return Returns APR_ENOKEY if the pass phrase is missing or empty, or if a backend
+ *         error occurred while generating the key. APR_ENOCIPHER if the type or mode
+ *         is not supported by the particular backend. APR_EKEYTYPE if the key type is
+ *         not known. APR_EPADDING if padding was requested but is not supported.
+ *         APR_ENOTIMPL if not implemented.
+ */
+static apr_status_t crypto_key(apr_crypto_key_t **k,
+        const apr_crypto_key_rec_t *rec, const apr_crypto_t *f, apr_pool_t *p)
+{
+    apr_status_t rv;
+    apr_crypto_key_t *key = *k;
+
+    if (!key) {
+        *k = key = apr_array_push(f->keys);
+    }
+    if (!key) {
+        return APR_ENOMEM;
+    }
+
+    key->f = f;
+    key->provider = f->provider;
+
+    /* decide on what cipher mechanism we will be using */
+    rv = crypto_cipher_mechanism(key, rec->type, rec->mode, rec->pad, p);
+    if (APR_SUCCESS != rv) {
+        return rv;
+    }
+
+    switch (rec->ktype) {
+
+    case APR_CRYPTO_KTYPE_PASSPHRASE: {
+
+        /* generate the key */
+        if ((f->result->rc = CCKeyDerivationPBKDF(kCCPBKDF2,
+                rec->k.passphrase.pass, rec->k.passphrase.passLen,
+                rec->k.passphrase.salt, rec->k.passphrase.saltLen,
+                kCCPRFHmacAlgSHA1, rec->k.passphrase.iterations, key->key,
+                key->keyLen)) == kCCParamError) {
+            return APR_ENOKEY;
+        }
+
+        break;
+    }
+
+    case APR_CRYPTO_KTYPE_SECRET: {
+
+        /* sanity check - key correct size? */
+        if (rec->k.secret.secretLen != key->keyLen) {
+            return APR_EKEYLENGTH;
+        }
+
+        /* copy the key */
+        memcpy(key->key, rec->k.secret.secret, rec->k.secret.secretLen);
+
+        break;
+    }
+
+    default: {
+
+        return APR_ENOKEY;
+
+    }
+    }
+
+    return APR_SUCCESS;
+}
+
+/**
+ * @brief Create a key from the given passphrase. By default, the PBKDF2
+ *        algorithm is used to generate the key from the passphrase. It is expected
+ *        that the same pass phrase will generate the same key, regardless of the
+ *        backend crypto platform used. The key is cleaned up when the context
+ *        is cleaned, and may be reused with multiple encryption or decryption
+ *        operations.
+ * @note If *key is NULL, a apr_crypto_key_t will be created from a pool. If
+ *       *key is not NULL, *key must point at a previously created structure.
+ * @param key The key returned, see note.
+ * @param ivSize The size of the initialisation vector will be returned, based
+ *               on whether an IV is relevant for this type of crypto.
+ * @param pass The passphrase to use.
+ * @param passLen The passphrase length in bytes
+ * @param salt The salt to use.
+ * @param saltLen The salt length in bytes
+ * @param type 3DES_192, AES_128, AES_192, AES_256.
+ * @param mode Electronic Code Book / Cipher Block Chaining.
+ * @param doPad Pad if necessary.
+ * @param iterations Iteration count
+ * @param f The context to use.
+ * @param p The pool to use.
+ * @return Returns APR_ENOKEY if the pass phrase is missing or empty, or if a backend
+ *         error occurred while generating the key. APR_ENOCIPHER if the type or mode
+ *         is not supported by the particular backend. APR_EKEYTYPE if the key type is
+ *         not known. APR_EPADDING if padding was requested but is not supported.
+ *         APR_ENOTIMPL if not implemented.
+ */
+static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
+        const char *pass, apr_size_t passLen, const unsigned char * salt,
+        apr_size_t saltLen, const apr_crypto_block_key_type_e type,
+        const apr_crypto_block_key_mode_e mode, const int doPad,
+        const int iterations, const apr_crypto_t *f, apr_pool_t *p)
+{
+    apr_status_t rv;
+    apr_crypto_key_t *key = *k;
+
+    if (!key) {
+        *k = key = apr_array_push(f->keys);
+    }
+    if (!key) {
+        return APR_ENOMEM;
+    }
+
+    key->f = f;
+    key->provider = f->provider;
+
+    /* decide on what cipher mechanism we will be using */
+    rv = crypto_cipher_mechanism(key, type, mode, doPad, p);
+    if (APR_SUCCESS != rv) {
+        return rv;
+    }
 
     /* generate the key */
     if ((f->result->rc = CCKeyDerivationPBKDF(kCCPBKDF2, pass, passLen, salt,
@@ -808,7 +906,7 @@ APR_MODULE_DECLARE_DATA const apr_crypto_driver_t apr_crypto_commoncrypto_driver
         crypto_block_encrypt_init, crypto_block_encrypt,
         crypto_block_encrypt_finish, crypto_block_decrypt_init,
         crypto_block_decrypt, crypto_block_decrypt_finish, crypto_block_cleanup,
-        crypto_cleanup, crypto_shutdown, crypto_error
+        crypto_cleanup, crypto_shutdown, crypto_error, crypto_key
 };
 
 #endif
