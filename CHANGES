@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_crypto: Add apr_crypto_key() function which supports keys
+     generated from a passphrase or a raw secret provided by the caller.
+     Deprecate apr_crypto_passphrase(). [Graham Leggett]
+
   *) apr_crypto_nss: Ensure the SECItem returned by PK11_ParamFromIV
      is properly freed. [Graham Leggett]
 

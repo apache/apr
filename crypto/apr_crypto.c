@@ -289,7 +289,8 @@ APR_DECLARE(apr_status_t) apr_crypto_make(apr_crypto_t **f,
 
 /**
  * @brief Get a hash table of key types, keyed by the name of the type against
- * an integer pointer constant.
+ * a pointer to apr_crypto_block_key_type_t, which in turn begins with an
+ * integer.
  *
  * @param types - hashtable of key types keyed to constants.
  * @param f - encryption context
@@ -303,7 +304,8 @@ APR_DECLARE(apr_status_t) apr_crypto_get_block_key_types(apr_hash_t **types,
 
 /**
  * @brief Get a hash table of key modes, keyed by the name of the mode against
- * an integer pointer constant.
+ * a pointer to apr_crypto_block_key_mode_t, which in turn begins with an
+ * integer.
  *
  * @param modes - hashtable of key modes keyed to constants.
  * @param f - encryption context
@@ -313,6 +315,28 @@ APR_DECLARE(apr_status_t) apr_crypto_get_block_key_modes(apr_hash_t **modes,
         const apr_crypto_t *f)
 {
     return f->provider->get_block_key_modes(modes, f);
+}
+
+/**
+ * @brief Create a key from the provided secret or passphrase. The key is cleaned
+ *        up when the context is cleaned, and may be reused with multiple encryption
+ *        or decryption operations.
+ * @note If *key is NULL, a apr_crypto_key_t will be created from a pool. If
+ *       *key is not NULL, *key must point at a previously created structure.
+ * @param key The key returned, see note.
+ * @param rec The key record, from which the key will be derived.
+ * @param f The context to use.
+ * @param p The pool to use.
+ * @return Returns APR_ENOKEY if the pass phrase is missing or empty, or if a backend
+ *         error occurred while generating the key. APR_ENOCIPHER if the type or mode
+ *         is not supported by the particular backend. APR_EKEYTYPE if the key type is
+ *         not known. APR_EPADDING if padding was requested but is not supported.
+ *         APR_ENOTIMPL if not implemented.
+ */
+APR_DECLARE(apr_status_t) apr_crypto_key(apr_crypto_key_t **key,
+        const apr_crypto_key_rec_t *rec, const apr_crypto_t *f, apr_pool_t *p)
+{
+    return f->provider->key(key, rec, f, p);
 }
 
 /**
