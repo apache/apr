@@ -275,9 +275,6 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                     }
                     /* Woken up, drain the pipe still. */
                     rc = APR_EINTR;
-                    if (buflen < sizeof(buf)) {
-                        break;
-                    }
                 }
             }
             else {
