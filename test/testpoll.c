@@ -947,12 +947,12 @@ abts_suite *testpoll(abts_suite *suite)
     abts_run_test(suite, timeout_pollcb, NULL);
     abts_run_test(suite, timeout_pollin_pollcb, NULL);
     abts_run_test(suite, pollset_wakeup, NULL);
+    abts_run_test(suite, pollcb_wakeup, NULL);
     abts_run_test(suite, close_all_sockets, NULL);
     abts_run_test(suite, pollset_default, NULL);
     abts_run_test(suite, pollcb_default, NULL);
     abts_run_test(suite, justsleep, NULL);
 
-    abts_run_test(suite, pollcb_wakeup, NULL);
     return suite;
 }
 
