@@ -266,15 +266,25 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                 struct apr_sockaddr_t from_addr;
                 char buffer[16];
                 apr_size_t buflen;
-                rc = APR_EINTR;
-
-                do {
+                for (;;) {
                     buflen = sizeof(buffer);
-                } while (apr_socket_recvfrom(&from_addr, pollset->wake_listen, MSG_DONTWAIT, buffer, &buflen) == APR_SUCCESS);
+                    rv = apr_socket_recvfrom(&from_addr, pollset->wake_listen,
+                                             MSG_DONTWAIT, buffer, &buflen);
+                    if (rv != APR_SUCCESS) {
+                        break;
+                    }
+                    /* Woken up, drain the pipe still. */
+                    rc = APR_EINTR;
+                    if (buflen < sizeof(buf)) {
+                        break;
+                    }
+                }
             }
             else {
                 pollset->result_set[*num] = pollset->query_set[i];
                 pollset->result_set[*num].rtnevents = rtnevents;
+                /* Event(s) besides wakeup pipe. */
+                rc = APR_SUCCESS;
                 (*num)++;
             }
         }
