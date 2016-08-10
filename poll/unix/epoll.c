@@ -258,14 +258,14 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     int ret;
     apr_status_t rv = APR_SUCCESS;
 
+    *num = 0;
+
     if (timeout > 0) {
         timeout /= 1000;
     }
 
     ret = epoll_wait(pollset->p->epoll_fd, pollset->p->pollset, pollset->nalloc,
                      timeout);
-    (*num) = ret;
-
     if (ret < 0) {
         rv = apr_get_netos_error();
     }

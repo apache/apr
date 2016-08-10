@@ -241,10 +241,11 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     int ret;
     apr_status_t rv = APR_SUCCESS;
 
+    *num = 0;
+
 #ifdef WIN32
     /* WSAPoll() requires at least one socket. */
     if (pollset->nelts == 0) {
-        *num = 0;
         if (timeout > 0) {
             apr_sleep(timeout);
             return APR_TIMEUP;
@@ -261,7 +262,6 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     }
     ret = poll(pollset->p->pollset, pollset->nelts, timeout);
 #endif
-    *num = 0;
     if (ret < 0) {
         return apr_get_netos_error();
     }
