@@ -347,13 +347,14 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     fd_set readset, writeset, exceptset;
     apr_status_t rv = APR_SUCCESS;
 
+    *num = 0;
+
 #ifdef WIN32
     /* On Win32, select() must be presented with at least one socket to
      * poll on, or select() will return WSAEINVAL.  So, we'll just
      * short-circuit and bail now.
      */
     if (pollset->nelts == 0) {
-        (*num) = 0;
         if (timeout > 0) {
             apr_sleep(timeout);
             return APR_TIMEUP;
@@ -385,7 +386,6 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
         rs = select(pollset->p->maxfd + 1, &readset, &writeset, &exceptset,
                     tvptr);
 
-    (*num) = rs;
     if (rs < 0) {
         return apr_get_netos_error();
     }

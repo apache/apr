@@ -259,6 +259,8 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     apr_status_t rv = APR_SUCCESS;
     apr_pollfd_t fd;
 
+    *num = 0;
+
     if (timeout < 0) {
         tvptr = NULL;
     }
@@ -270,7 +272,6 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
 
     ret = kevent(pollset->p->kqueue_fd, NULL, 0, pollset->p->ke_set,
                  pollset->p->setsize, tvptr);
-    (*num) = ret;
     if (ret < 0) {
         rv = apr_get_netos_error();
     }

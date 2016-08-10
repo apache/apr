@@ -360,6 +360,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     apr_status_t rv = APR_SUCCESS;
     apr_pollfd_t fp;
 
+    *num = 0;
     nget = 1;
 
     pollset_lock_rings();
@@ -403,7 +404,6 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
        port_associate within apr_pollset_add() */
     apr_atomic_dec32(&pollset->p->waiting);
 
-    (*num) = nget;
     if (nget) {
 
         pollset_lock_rings();
