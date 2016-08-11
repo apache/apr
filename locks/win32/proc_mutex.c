@@ -249,7 +249,7 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex
                                                    apr_proc_mutex_t *pmutex,
                                                    apr_lockmech_e *mech)
 {
-    *ospmutex = mutex->handle;
+    *ospmutex = pmutex->handle;
     if (mech) {
         *mech = APR_LOCK_DEFAULT_TIMED;
     }
