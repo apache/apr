@@ -483,7 +483,8 @@ static apr_status_t asio_pollset_remove(apr_pollset_t *pollset,
     asio_elem_t *elem;
     apr_status_t rv = APR_SUCCESS;
     apr_pollset_private_t *priv = pollset->p;
-    struct aiocb cancel_a;   /* AIO_CANCEL is synchronous, so autodata works fine */
+    /* AIO_CANCEL is synchronous, so autodata works fine.  */
+    struct aiocb cancel_a = {0};   
 
     int fd;
 
