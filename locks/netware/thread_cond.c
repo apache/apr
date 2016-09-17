@@ -73,7 +73,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
         rc = NXCondWait(cond->cond, mutex->mutex);
     }
     else {
-        timeout = timeout * 1000 / XGetSystemTick();
+        timeout = timeout * 1000 / NXGetSystemTick();
         rc = NXCondTimedWait(cond->cond, mutex->mutex, timeout);
         if (rc == NX_ETIMEDOUT) {
             return APR_TIMEUP;
