@@ -22,7 +22,7 @@ FILES_prebuild_headers = \
 	$(APU)/include/apr_ldap.h \
 	$(APU)/include/private/apu_config.h \
 	$(APU)/include/private/apu_select_dbm.h \
-	$(APUXML)/expat/expat_config.h \
+	$(APUXML)/expat/lib/expat_config.h \
 	$(APR)/include/private/apr_escape_test_char.h \
 	$(EOLIST) 
     
