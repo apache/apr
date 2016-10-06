@@ -83,7 +83,7 @@ apr_uint32_t apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint32_t swap,
 }
 
 #if APR_SIZEOF_VOIDP == 4
-void *apr_atomic_casptr(volatile void **mem_ptr,
+void *apr_atomic_casptr(void *volatile *mem_ptr,
                         void *swap_ptr,
                         const void *cmp_ptr)
 {
@@ -93,7 +93,7 @@ void *apr_atomic_casptr(volatile void **mem_ptr,
      return (void *)cmp_ptr;
 }
 #elif APR_SIZEOF_VOIDP == 8
-void *apr_atomic_casptr(volatile void **mem_ptr,
+void *apr_atomic_casptr(void *volatile *mem_ptr,
                         void *swap_ptr,
                         const void *cmp_ptr)
 {
@@ -118,7 +118,7 @@ apr_uint32_t apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
     return old;
 }
 
-APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem_ptr, void *new_ptr)
+APR_DECLARE(void*) apr_atomic_xchgptr(void *volatile *mem_ptr, void *new_ptr)
 {
     void *old_ptr;
 

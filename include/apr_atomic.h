@@ -121,7 +121,7 @@ APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint
  * @param cmp the value to compare it to
  * @return the old value of the pointer
  */
-APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void *cmp);
+APR_DECLARE(void*) apr_atomic_casptr(void *volatile *mem, void *with, const void *cmp);
 
 /**
  * exchange a pair of pointer values
@@ -129,7 +129,7 @@ APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void
  * @param with what to swap it with
  * @return the old value of the pointer
  */
-APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with);
+APR_DECLARE(void*) apr_atomic_xchgptr(void *volatile *mem, void *with);
 
 /** @} */
 
