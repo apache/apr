@@ -66,12 +66,12 @@ APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint
     return __sync_lock_test_and_set(mem, val);
 }
 
-APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
+APR_DECLARE(void*) apr_atomic_casptr(void *volatile *mem, void *with, const void *cmp)
 {
     return (void*) __sync_val_compare_and_swap(mem, cmp, with);
 }
 
-APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
+APR_DECLARE(void*) apr_atomic_xchgptr(void *volatile *mem, void *with)
 {
     __sync_synchronize();
 
