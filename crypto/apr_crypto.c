@@ -114,7 +114,7 @@ static apr_status_t crypto_clear(void *ptr)
 {
     apr_crypto_clear_t *clear = (apr_crypto_clear_t *)ptr;
 
-    memset(clear->buffer, 0, clear->size);
+    apr_crypto_memzero(clear->buffer, clear->size);
     clear->buffer = NULL;
     clear->size = 0;
 
@@ -132,6 +132,38 @@ APR_DECLARE(apr_status_t) apr_crypto_clear(apr_pool_t *pool,
     apr_pool_cleanup_register(pool, clear, crypto_clear,
             apr_pool_cleanup_null);
 
+    return APR_SUCCESS;
+}
+
+#if defined(HAVE_WEAK_SYMBOLS)
+void apr__memzero_explicit(void *buffer, apr_size_t size);
+
+__attribute__ ((weak))
+void apr__memzero_explicit(void *buffer, apr_size_t size)
+{
+    memset(buffer, 0, size);
+}
+#endif
+
+APR_DECLARE(apr_status_t) apr_crypto_memzero(void *buffer, apr_size_t size)
+{
+#if defined(WIN32)
+    SecureZeroMemory(buffer, size);
+#elif defined(HAVE_MEMSET_S)
+    if (size) {
+        return memset_s(buffer, (rsize_t)size, 0, (rsize_t)size);
+    }
+#elif defined(HAVE_EXPLICIT_BZERO)
+    explicit_bzero(buffer, size);
+#elif defined(HAVE_WEAK_SYMBOLS)
+    apr__memzero_explicit(buffer, size);
+#else
+    apr_size_t i;
+    volatile unsigned char *volatile ptr = buffer;
+    for (i = 0; i < size; ++i) {
+        ptr[i] = 0;
+    }
+#endif
     return APR_SUCCESS;
 }
 
