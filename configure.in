@@ -1963,7 +1963,7 @@ AC_CACHE_CHECK([for memset_s support], [apr_cv_memset_s],
 
 int main(int argc, const char **argv)
 {
-    char buf[1] = "1";
+    char buf[1] = {1};
     return memset_s(buf, sizeof buf, 0, sizeof buf) != 0 || *buf != '\0';
 }], [apr_cv_memset_s=yes], [apr_cv_memset_s=no], [apr_cv_memset_s=no])])
 
@@ -1982,7 +1982,7 @@ AC_CACHE_CHECK([for explicit_bzero support], [apr_cv_explicit_bzero],
 
 int main(int argc, const char **argv)
 {
-    char buf[1] = "1";
+    char buf[1] = {1};
     explicit_bzero(buf, sizeof buf);
     return *buf != '\0';
 }], [apr_cv_explicit_bzero=yes], [apr_cv_explicit_bzero=no], [apr_cv_explicit_bzero=no])])
