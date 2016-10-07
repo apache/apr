@@ -18,18 +18,18 @@
 #include <stdlib.h>
 
 #include "apr_siphash.h"
-#include "apr_crypto.h"
 
 #include "abts.h"
 #include "testutil.h"
-
 
 /*
  * Wrapped test vectors from the authors, see
  *  https://131002.net/siphash/siphash24.c
  */
-#define crypto_auth apr_siphash24_auth
 typedef unsigned char u8;
+#define crypto_auth apr_siphash24_auth
+
+#define MAXLEN 64
 
 /*
    SipHash-2-4 output with
@@ -42,7 +42,7 @@ typedef unsigned char u8;
    ...
    in = 00 01 02 ... 3e (63 bytes)
 */
-static u8 vectors[64][8] =
+static const u8 vectors[MAXLEN][8] =
 {
   { 0x31, 0x0e, 0x0e, 0xdd, 0x47, 0xdb, 0x6f, 0x72, },
   { 0xfd, 0x67, 0xdc, 0x93, 0xc5, 0x39, 0xf8, 0x74, },
@@ -112,7 +112,6 @@ static u8 vectors[64][8] =
 
 static int test_vectors(void)
 {
-#define MAXLEN 64
   u8 in[MAXLEN], out[8], k[16];
   int i;
   int ok = 1;
@@ -129,29 +128,21 @@ static int test_vectors(void)
       printf( "test vector failed for %d bytes\n", i );
       ok = 0;
     }
-    /* added validation (basic) of apr_crypto_equals() */
-    else if ( !apr_crypto_equals(out, vectors[i], 8)
-              || apr_crypto_equals(out, vectors[(i + 1) % MAXLEN], 8) )
-    {
-      printf( "apr_crypto_equals() failed for %d bytes\n", i );
-      ok = 0;
-    }
   }
 
   return ok;
 }
 
-
-static void test_siphash(abts_case *tc, void *data)
+static void test_siphash_vectors(abts_case *tc, void *data)
 {
-    ABTS_ASSERT(tc, "test vectors", (test_vectors() != 0));
+    ABTS_ASSERT(tc, "SipHash-2-4 test vectors", test_vectors());
 }
 
 abts_suite *testsiphash(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
 
-    abts_run_test(suite, test_siphash, NULL);
+    abts_run_test(suite, test_siphash_vectors, NULL);
 
     return suite;
 }
