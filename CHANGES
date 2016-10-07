@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_atomic: change the API of apr_atomic_casptr() apr_atomic_xchgptr()
+     functions to take a volatile pointer to void instead of pointer to
+     volatile void.  [Yann Ylavic]
+
   *) apr_crypto: Add apr_crypto_key() function which supports keys
      generated from a passphrase or a raw secret provided by the caller.
      Deprecate apr_crypto_passphrase(). [Graham Leggett]
