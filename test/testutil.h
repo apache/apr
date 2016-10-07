@@ -131,5 +131,6 @@ abts_suite *testrmm(abts_suite *suite);
 abts_suite *testdbm(abts_suite *suite);
 abts_suite *testlfsabi(abts_suite *suite);
 abts_suite *testskiplist(abts_suite *suite);
+abts_suite *testsiphash(abts_suite *suite);
 
 #endif /* APR_TEST_INCLUDES */

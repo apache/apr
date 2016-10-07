@@ -217,6 +217,7 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testrand.o \
 	$(OBJDIR)/testrmm.o \
 	$(OBJDIR)/testshm.o \
+	$(OBJDIR)/testsiphash.o \
 	$(OBJDIR)/testskiplist.o \
 	$(OBJDIR)/testsleep.o \
 	$(OBJDIR)/testsock.o \
