@@ -1375,6 +1375,81 @@ static void test_crypto_get_block_key_modes_commoncrypto(abts_case *tc, void *da
 
 }
 
+static void test_crypto_memzero(abts_case *tc, void *data)
+{
+    /* Aligned message */
+    struct {
+        char buf[7 * sizeof(int)];
+        int untouched;
+    } msg;
+    /* A bit of type punning such that 'msg' might look unused
+     * after the call to apr_crypto_memzero().
+     */
+    int *ptr = (int *)&msg;
+    int i;
+
+    /* Fill buf with non-zeros (odds) */
+    for (i = 1; i < 2 * sizeof(msg.buf); i += 2) {
+        msg.buf[i / 2] = (char)i;
+        ABTS_ASSERT(tc, "test_crypto_memzero() barrier", msg.buf[i / 2] != 0);
+    }
+
+    /* Zero out the whole, and check it */
+    apr_crypto_memzero(&msg, sizeof msg);
+    for (i = 0; i < sizeof(msg) / sizeof(*ptr); ++i) {
+        ABTS_ASSERT(tc, "test_crypto_memzero() optimized out", ptr[i] == 0);
+    }
+}
+
+static void test_crypto_equals(abts_case *tc, void *data)
+{
+    /* Buffers of each type of scalar */
+    union {
+        char c;
+        short s;
+        int i;
+        long l;
+        float f;
+        double d;
+        void *p;
+    } buf0[7], buf1[7], buf[7];
+    char *ptr = (char *)buf;
+    int i;
+
+#define TEST_SCALAR_MATCH(i, x, r) \
+    ABTS_ASSERT(tc, "test_crypto_equals(" APR_STRINGIFY(x) ")" \
+                                   " != " APR_STRINGIFY(r), \
+                apr_crypto_equals(&buf##r[i].x, &buf[i].x, \
+                                  sizeof(buf[i].x)) == r)
+
+    /* Fill buf with non-zeros (odds) */
+    for (i = 1; i < 2 * sizeof(buf); i += 2) {
+        ptr[i / 2] = (char)i;
+    }
+    /* Set buf1 = buf */
+    memcpy(buf1, buf, sizeof buf);
+    /* Set buf0 = {0} */
+    memset(buf0, 0, sizeof buf0);
+
+    /* Check that buf1 == buf for each scalar */
+    TEST_SCALAR_MATCH(0, c, 1);
+    TEST_SCALAR_MATCH(1, s, 1);
+    TEST_SCALAR_MATCH(2, i, 1);
+    TEST_SCALAR_MATCH(3, l, 1);
+    TEST_SCALAR_MATCH(4, f, 1);
+    TEST_SCALAR_MATCH(5, d, 1);
+    TEST_SCALAR_MATCH(6, p, 1);
+
+    /* Check that buf0 != buf for each scalar */
+    TEST_SCALAR_MATCH(0, c, 0);
+    TEST_SCALAR_MATCH(1, s, 0);
+    TEST_SCALAR_MATCH(2, i, 0);
+    TEST_SCALAR_MATCH(3, l, 0);
+    TEST_SCALAR_MATCH(4, f, 0);
+    TEST_SCALAR_MATCH(5, d, 0);
+    TEST_SCALAR_MATCH(6, p, 0);
+}
+
 abts_suite *testcrypto(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
@@ -1450,6 +1525,9 @@ abts_suite *testcrypto(abts_suite *suite)
 
     /* test block key modes commoncrypto */
     abts_run_test(suite, test_crypto_get_block_key_modes_commoncrypto, NULL);
+
+    abts_run_test(suite, test_crypto_memzero, NULL);
+    abts_run_test(suite, test_crypto_equals, NULL);
 
     return suite;
 }
