@@ -125,6 +125,7 @@ ALL_TESTS = \
 	$(INTDIR)\testreslist.obj \
 	$(INTDIR)\testrmm.obj \
 	$(INTDIR)\testshm.obj \
+	$(INTDIR)\testsiphash.obj \
 	$(INTDIR)\testsleep.obj \
 	$(INTDIR)\testsock.obj \
 	$(INTDIR)\testsockets.obj \

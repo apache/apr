@@ -195,6 +195,7 @@ SET(APR_PUBLIC_HEADERS_STATIC
   include/apr_sha1.h
   include/apr_shm.h
   include/apr_signal.h
+  include/apr_siphash.h
   include/apr_skiplist.h
   include/apr_strings.h
   include/apr_strmatch.h
@@ -241,6 +242,7 @@ SET(APR_SOURCES
   crypto/apr_md5.c
   crypto/apr_passwd.c
   crypto/apr_sha1.c
+  crypto/apr_siphash.c
   crypto/crypt_blowfish.c
   crypto/getuuid.c
   crypto/uuid.c

@@ -23,6 +23,7 @@
 const struct testlist {
     abts_suite *(*func)(abts_suite *suite);
 } alltests[] = {
+#if 0
     {testatomic},
     {testdir},
     {testdso},
@@ -77,7 +78,9 @@ const struct testlist {
     {testbase64},
     {testmd4},
     {testmd5},
+#endif
     {testcrypto},
+#if 0
     {testdbd},
     {testdate},
     {testmemcache},
@@ -88,7 +91,9 @@ const struct testlist {
     {testqueue},
     {testreslist},
     {testlfsabi},
-    {testskiplist}
+    {testskiplist},
+#endif 
+    {testsiphash}
 };
 
 #endif /* APR_TEST_INCLUDES */
