@@ -85,7 +85,7 @@ static void test_xchgptr(abts_case *tc, void *data)
 {
     int a;
     void *ref = "little piggy";
-    volatile void *target_ptr = ref;
+    void *target_ptr = ref;
     void *old_ptr;
 
     old_ptr = apr_atomic_xchgptr(&target_ptr, &a);
@@ -126,7 +126,7 @@ static void test_cas_notequal(abts_case *tc, void *data)
 static void test_casptr_equal(abts_case *tc, void *data)
 {
     int a;
-    volatile void *target_ptr = NULL;
+    void *target_ptr = NULL;
     void *old_ptr;
 
     old_ptr = apr_atomic_casptr(&target_ptr, &a, NULL);
@@ -137,7 +137,7 @@ static void test_casptr_equal(abts_case *tc, void *data)
 static void test_casptr_equal_nonnull(abts_case *tc, void *data)
 {
     int a, b;
-    volatile void *target_ptr = &a;
+    void *target_ptr = &a;
     void *old_ptr;
 
     old_ptr = apr_atomic_casptr(&target_ptr, &b, &a);
@@ -148,7 +148,7 @@ static void test_casptr_equal_nonnull(abts_case *tc, void *data)
 static void test_casptr_notequal(abts_case *tc, void *data)
 {
     int a, b;
-    volatile void *target_ptr = &a;
+    void *target_ptr = &a;
     void *old_ptr;
 
     old_ptr = apr_atomic_casptr(&target_ptr, &a, &b);
