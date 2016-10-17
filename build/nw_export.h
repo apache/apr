@@ -53,6 +53,7 @@
 #include "apr_sha1.h"
 #include "apr_shm.h"
 #include "apr_signal.h"
+#include "apr_siphash.h"
 #include "apr_skiplist.h"
 #include "apr_strings.h"
 #include "apr_strmatch.h"
