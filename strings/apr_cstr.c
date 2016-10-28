@@ -27,11 +27,11 @@
 #include "apr_want.h"
 #include "apr_cstr.h"
 
-void apr_cstr_split_append(apr_array_header_t *array,
-                           const char *input,
-                           const char *sep_chars,
-                           int chop_whitespace,
-                           apr_pool_t *pool)
+APR_DECLARE(void) apr_cstr_split_append(apr_array_header_t *array,
+                                        const char *input,
+                                        const char *sep_chars,
+                                        int chop_whitespace,
+                                        apr_pool_t *pool)
 {
   char *pats;
   char *p;
@@ -64,10 +64,10 @@ void apr_cstr_split_append(apr_array_header_t *array,
 }
 
 
-apr_array_header_t * apr_cstr_split(const char *input,
-                                    const char *sep_chars,
-                                    int chop_whitespace,
-                                    apr_pool_t *pool)
+APR_DECLARE(apr_array_header_t *) apr_cstr_split(const char *input,
+                                                 const char *sep_chars,
+                                                 int chop_whitespace,
+                                                 apr_pool_t *pool)
 {
   apr_array_header_t *a = apr_array_make(pool, 5, sizeof(input));
   apr_cstr_split_append(a, input, sep_chars, chop_whitespace, pool);
@@ -75,8 +75,8 @@ apr_array_header_t * apr_cstr_split(const char *input,
 }
 
 
-int apr_cstr_match_glob_list(const char *str,
-                             const apr_array_header_t *list)
+APR_DECLARE(int) apr_cstr_match_glob_list(const char *str,
+                                          const apr_array_header_t *list)
 {
   int i;
 
@@ -91,7 +91,8 @@ int apr_cstr_match_glob_list(const char *str,
   return FALSE;
 }
 
-int apr_cstr_match_list(const char *str, const apr_array_header_t *list)
+APR_DECLARE(int) apr_cstr_match_list(const char *str,
+                                     const apr_array_header_t *list)
 {
   int i;
 
@@ -106,7 +107,7 @@ int apr_cstr_match_list(const char *str, const apr_array_header_t *list)
   return FALSE;
 }
 
-char * apr_cstr_tokenize(const char *sep, char **str)
+APR_DECLARE(char *) apr_cstr_tokenize(const char *sep, char **str)
 {
     char *token;
     char *next;
@@ -146,7 +147,7 @@ char * apr_cstr_tokenize(const char *sep, char **str)
     return token;
 }
 
-int apr_cstr_count_newlines(const char *msg)
+APR_DECLARE(int) apr_cstr_count_newlines(const char *msg)
 {
   int count = 0;
   const char *p;
@@ -171,9 +172,9 @@ int apr_cstr_count_newlines(const char *msg)
 }
 
 #if 0 /* XXX: stringbuf logic is not present in APR */
-char * apr_cstr_join(const apr_array_header_t *strings,
-                     const char *separator,
-                     apr_pool_t *pool)
+APR_DECLARE(char *) apr_cstr_join(const apr_array_header_t *strings,
+                                  const char *separator,
+                                  apr_pool_t *pool)
 {
   svn_stringbuf_t *new_str = svn_stringbuf_create_empty(pool);
   size_t sep_len = strlen(separator);
@@ -279,7 +280,7 @@ static const short ucharmap[] = {
 };
 #endif
 
-int apr_cstr_casecmp(const char *s1, const char *s2)
+APR_DECLARE(int) apr_cstr_casecmp(const char *s1, const char *s2)
 {
     const unsigned char *str1 = (const unsigned char *)s1;
     const unsigned char *str2 = (const unsigned char *)s2;
@@ -296,7 +297,8 @@ int apr_cstr_casecmp(const char *s1, const char *s2)
     }
 }
 
-int apr_cstr_casecmpn(const char *s1, const char *s2, apr_size_t n)
+APR_DECLARE(int) apr_cstr_casecmpn(const char *s1, const char *s2,
+                                   apr_size_t n)
 {
     const unsigned char *str1 = (const unsigned char *)s1;
     const unsigned char *str2 = (const unsigned char *)s2;
@@ -314,9 +316,11 @@ int apr_cstr_casecmpn(const char *s1, const char *s2, apr_size_t n)
     return 0;
 }
 
-apr_status_t apr_cstr_strtoui64(apr_uint64_t *n, const char *str,
-                                apr_uint64_t minval, apr_uint64_t maxval,
-                                int base)
+APR_DECLARE(apr_status_t) apr_cstr_strtoui64(apr_uint64_t *n,
+                                             const char *str,
+                                             apr_uint64_t minval,
+                                             apr_uint64_t maxval,
+                                             int base)
 {
   apr_int64_t val;
   char *endptr;
@@ -336,12 +340,12 @@ apr_status_t apr_cstr_strtoui64(apr_uint64_t *n, const char *str,
   return APR_SUCCESS;
 }
 
-apr_status_t apr_cstr_atoui64(apr_uint64_t *n, const char *str)
+APR_DECLARE(apr_status_t) apr_cstr_atoui64(apr_uint64_t *n, const char *str)
 {
   return apr_cstr_strtoui64(n, str, 0, APR_UINT64_MAX, 10);
 }
 
-apr_status_t apr_cstr_atoui(unsigned int *n, const char *str)
+APR_DECLARE(apr_status_t) apr_cstr_atoui(unsigned int *n, const char *str)
 {
   apr_uint64_t val;
   apr_status_t rv = apr_cstr_strtoui64(&val, str, 0, APR_UINT32_MAX, 10);
@@ -350,9 +354,11 @@ apr_status_t apr_cstr_atoui(unsigned int *n, const char *str)
   return rv;
 }
 
-apr_status_t apr_cstr_strtoi64(apr_int64_t *n, const char *str,
-                               apr_int64_t minval, apr_int64_t maxval,
-                               int base)
+APR_DECLARE(apr_status_t) apr_cstr_strtoi64(apr_int64_t *n,
+                                            const char *str,
+                                            apr_int64_t minval,
+                                            apr_int64_t maxval,
+                                            int base)
 {
   apr_int64_t val;
   char *endptr;
@@ -370,12 +376,12 @@ apr_status_t apr_cstr_strtoi64(apr_int64_t *n, const char *str,
   return APR_SUCCESS;
 }
 
-apr_status_t apr_cstr_atoi64(apr_int64_t *n, const char *str)
+APR_DECLARE(apr_status_t) apr_cstr_atoi64(apr_int64_t *n, const char *str)
 {
   return apr_cstr_strtoi64(n, str, APR_INT64_MIN, APR_INT64_MAX, 10);
 }
 
-apr_status_t apr_cstr_atoi(int *n, const char *str)
+APR_DECLARE(apr_status_t) apr_cstr_atoi(int *n, const char *str)
 {
   apr_int64_t val;
   apr_status_t rv;
@@ -386,7 +392,7 @@ apr_status_t apr_cstr_atoi(int *n, const char *str)
   return rv;
 }
 
-const char *
+APR_DECLARE(const char *)
 apr_cstr_skip_prefix(const char *str, const char *prefix)
 {
   apr_size_t len = strlen(prefix);
