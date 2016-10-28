@@ -133,6 +133,7 @@ ALL_TESTS = \
 	$(INTDIR)\teststr.obj \
 	$(INTDIR)\teststrmatch.obj \
 	$(INTDIR)\teststrnatcmp.obj \
+	$(INTDIR)\testskiplist.obj \
 	$(INTDIR)\testtable.obj \
 	$(INTDIR)\testtemp.obj \
 	$(INTDIR)\testthread.obj \
