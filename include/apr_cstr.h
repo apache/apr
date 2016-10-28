@@ -78,10 +78,10 @@ extern "C" {
  *
  * @since New in 1.6
  */
-apr_array_header_t * apr_cstr_split(const char *input,
-                                    const char *sep_chars,
-                                    int chop_whitespace,
-                                    apr_pool_t *pool);
+APR_DECLARE(apr_array_header_t *) apr_cstr_split(const char *input,
+                                                 const char *sep_chars,
+                                                 int chop_whitespace,
+                                                 apr_pool_t *pool);
 
 /** Like apr_cstr_split(), but append to existing @a array instead of
  * creating a new one.  Allocate the copied substrings in @a pool
@@ -89,11 +89,11 @@ apr_array_header_t * apr_cstr_split(const char *input,
  *
  * @since New in 1.6
  */
-void apr_cstr_split_append(apr_array_header_t *array,
-                           const char *input,
-                           const char *sep_chars,
-                           int chop_whitespace,
-                           apr_pool_t *pool);
+APR_DECLARE(void) apr_cstr_split_append(apr_array_header_t *array,
+                                        const char *input,
+                                        const char *sep_chars,
+                                        int chop_whitespace,
+                                        apr_pool_t *pool);
 
 
 /** Return @c TRUE iff @a str matches any of the elements of @a list, a list
@@ -101,13 +101,15 @@ void apr_cstr_split_append(apr_array_header_t *array,
  *
  * @since New in 1.6
  */
-int apr_cstr_match_glob_list(const char *str, const apr_array_header_t *list);
+APR_DECLARE(int) apr_cstr_match_glob_list(const char *str,
+                                          const apr_array_header_t *list);
 
 /** Return @c TRUE iff @a str exactly matches any of the elements of @a list.
  *
  * @since New in 1.6
  */
-int apr_cstr_match_list(const char *str, const apr_array_header_t *list);
+APR_DECLARE(int) apr_cstr_match_list(const char *str,
+                                     const apr_array_header_t *list);
 
 /**
  * Get the next token from @a *str interpreting any char from @a sep as a
@@ -120,7 +122,7 @@ int apr_cstr_match_list(const char *str, const apr_array_header_t *list);
  *
  * @since New in 1.6.
  */
-char * apr_cstr_tokenize(const char *sep, char **str);
+APR_DECLARE(char *) apr_cstr_tokenize(const char *sep, char **str);
 
 /**
  * Return the number of line breaks in @a msg, allowing any kind of newline
@@ -128,7 +130,7 @@ char * apr_cstr_tokenize(const char *sep, char **str);
  *
  * @since New in 1.6.
  */
-int apr_cstr_count_newlines(const char *msg);
+APR_DECLARE(int) apr_cstr_count_newlines(const char *msg);
 
 #if 0 /* XXX: stringbuf logic is not present in APR */
 /**
@@ -139,9 +141,9 @@ int apr_cstr_count_newlines(const char *msg);
  *
  * @since New in 1.6.
  */
-char * apr_cstr_join(const apr_array_header_t *strings,
-                     const char *separator,
-                     apr_pool_t *pool);
+APR_DECLARE(char *) apr_cstr_join(const apr_array_header_t *strings,
+                                  const char *separator,
+                                  apr_pool_t *pool);
 #endif
 
 /**
@@ -156,7 +158,7 @@ char * apr_cstr_join(const apr_array_header_t *strings,
  *
  * @since New in 1.6.
  */
-int apr_cstr_casecmp(const char *str1, const char *str2);
+APR_DECLARE(int) apr_cstr_casecmp(const char *str1, const char *str2);
 
 /**
  * Perform a case-insensitive comparison of two strings @a atr1 and @a atr2,
@@ -170,7 +172,9 @@ int apr_cstr_casecmp(const char *str1, const char *str2);
  *
  * @since New in 1.6.
  */
-int apr_cstr_casecmpn(const char *str1, const char *str2, apr_size_t n);
+APR_DECLARE(int) apr_cstr_casecmpn(const char *str1,
+                                   const char *str2,
+                                   apr_size_t n);
 
 /**
  * Parse the C string @a str into a 64 bit number, and return it in @a *n.
@@ -191,9 +195,10 @@ int apr_cstr_casecmpn(const char *str1, const char *str2, apr_size_t n);
  *
  * @since New in 1.6.
  */
-apr_status_t apr_cstr_strtoi64(apr_int64_t *n, const char *str,
-                               apr_int64_t minval, apr_int64_t maxval,
-                               int base);
+APR_DECLARE(apr_status_t) apr_cstr_strtoi64(apr_int64_t *n, const char *str,
+                                            apr_int64_t minval,
+                                            apr_int64_t maxval,
+                                            int base);
 
 /**
  * Parse the C string @a str into a 64 bit number, and return it in @a *n.
@@ -204,7 +209,7 @@ apr_status_t apr_cstr_strtoi64(apr_int64_t *n, const char *str,
  *
  * @since New in 1.6.
  */
-apr_status_t apr_cstr_atoi64(apr_int64_t *n, const char *str);
+APR_DECLARE(apr_status_t) apr_cstr_atoi64(apr_int64_t *n, const char *str);
 
 /**
  * Parse the C string @a str into a 32 bit number, and return it in @a *n.
@@ -215,7 +220,7 @@ apr_status_t apr_cstr_atoi64(apr_int64_t *n, const char *str);
  *
  * @since New in 1.6.
  */
-apr_status_t apr_cstr_atoi(int *n, const char *str);
+APR_DECLARE(apr_status_t) apr_cstr_atoi(int *n, const char *str);
 
 /**
  * Parse the C string @a str into an unsigned 64 bit number, and return
@@ -239,9 +244,10 @@ apr_status_t apr_cstr_atoi(int *n, const char *str);
  *
  * @since New in 1.6.
  */
-apr_status_t apr_cstr_strtoui64(apr_uint64_t *n, const char *str,
-                                apr_uint64_t minval, apr_uint64_t maxval,
-                                int base);
+APR_DECLARE(apr_status_t) apr_cstr_strtoui64(apr_uint64_t *n, const char *str,
+                                             apr_uint64_t minval,
+                                             apr_uint64_t maxval,
+                                             int base);
 
 /**
  * Parse the C string @a str into an unsigned 64 bit number, and return
@@ -253,7 +259,7 @@ apr_status_t apr_cstr_strtoui64(apr_uint64_t *n, const char *str,
  *
  * @since New in 1.6.
  */
-apr_status_t apr_cstr_atoui64(apr_uint64_t *n, const char *str);
+APR_DECLARE(apr_status_t) apr_cstr_atoui64(apr_uint64_t *n, const char *str);
 
 /**
  * Parse the C string @a str into an unsigned 32 bit number, and return
@@ -265,7 +271,7 @@ apr_status_t apr_cstr_atoui64(apr_uint64_t *n, const char *str);
  *
  * @since New in 1.6.
  */
-apr_status_t apr_cstr_atoui(unsigned int *n, const char *str);
+APR_DECLARE(apr_status_t) apr_cstr_atoui(unsigned int *n, const char *str);
 
 /**
  * Skip the common prefix @a prefix from the C string @a str, and return
@@ -274,7 +280,8 @@ apr_status_t apr_cstr_atoui(unsigned int *n, const char *str);
  *
  * @since New in 1.6.
  */
-const char * apr_cstr_skip_prefix(const char *str, const char *prefix);
+APR_DECLARE(const char *) apr_cstr_skip_prefix(const char *str,
+                                               const char *prefix);
 
 /** @} */
 
