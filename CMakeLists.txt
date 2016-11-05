@@ -188,6 +188,7 @@ SET(APR_PUBLIC_HEADERS_STATIC
   include/apr_proc_mutex.h
   include/apr_queue.h
   include/apr_random.h
+  include/apr_redis.h
   include/apr_reslist.h
   include/apr_ring.h
   include/apr_rmm.h
@@ -310,6 +311,7 @@ SET(APR_SOURCES
   random/unix/apr_random.c
   random/unix/sha2.c
   random/unix/sha2_glue.c
+  redis/apr_redis.c
   shmem/win32/shm.c
   strings/apr_cpystrn.c
   strings/apr_cstr.c
@@ -390,6 +392,7 @@ SET(APR_TEST_SOURCES
   test/testprocmutex.c
   test/testqueue.c
   test/testrand.c
+  test/testredis.c
   test/testreslist.c
   test/testrmm.c
   test/testshm.c

@@ -122,6 +122,7 @@ ALL_TESTS = \
 	$(INTDIR)\testprocmutex.obj \
 	$(INTDIR)\testqueue.obj \
 	$(INTDIR)\testrand.obj \
+	$(INTDIR)\testredis.obj \
 	$(INTDIR)\testreslist.obj \
 	$(INTDIR)\testrmm.obj \
 	$(INTDIR)\testshm.obj \
