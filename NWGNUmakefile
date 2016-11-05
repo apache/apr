@@ -321,6 +321,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/apr_pools.o \
 	$(OBJDIR)/apr_queue.o \
 	$(OBJDIR)/apr_random.o \
+	$(OBJDIR)/apr_redis.o \
 	$(OBJDIR)/apr_reslist.o \
 	$(OBJDIR)/apr_rmm.o \
 	$(OBJDIR)/apr_sha1.o \
@@ -446,7 +447,7 @@ vpath %.c atomic/netware:strings:tables:passwd:time/unix
 vpath %.c file_io/netware:file_io/unix:locks/netware:misc/netware:misc/unix
 vpath %.c threadproc/netware:poll/unix:shmem/unix:support/unix:random/unix
 vpath %.c dso/netware:memory/unix:mmap/unix:user/netware:util-misc
-vpath %.c buckets:crypto:dbd:dbm:dbm/sdbm:encoding:hooks:memcache:misc:strmatch:uri:xlate
+vpath %.c buckets:crypto:dbd:dbm:dbm/sdbm:encoding:hooks:memcache:redis:misc:strmatch:uri:xlate
 
 # Use the win32 network_io if Winsock is being used
 ifndef USE_STDSOCKETS
