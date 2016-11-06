@@ -412,14 +412,16 @@ typedef struct
     apr_uint64_t total_connections_received;
     /** Total commands processed */
     apr_uint64_t total_commands_processed;
+    /** Total commands rejected */
+    apr_uint64_t rejected_connections;
     /** Total net input bytes */
     apr_uint64_t total_net_input_bytes;
     /** Total net output bytes */
     apr_uint64_t total_net_output_bytes;
     /** Keyspace hits */
-    apr_uint32_t keyspace_hits;
+    apr_uint64_t keyspace_hits;
     /** Keyspace misses */
-    apr_uint32_t keyspace_misses;
+    apr_uint64_t keyspace_misses;
 
 /* # Replication */
     /** Role */
