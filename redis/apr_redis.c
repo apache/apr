@@ -1416,6 +1416,9 @@ apr_redis_multgetp(apr_redis_t *rc,
 #define STAT_total_commands_processed "total_commands_processed:"
 #define STAT_total_commands_processed_LEN (sizeof(STAT_total_commands_processed)-1)
 
+#define STAT_rejected_connections "rejected_connections:"
+#define STAT_rejected_connections_LEN (sizeof(STAT_rejected_connections)-1)
+
 #define STAT_total_net_input_bytes "total_net_input_bytes:"
 #define STAT_total_net_input_bytes_LEN (sizeof(STAT_total_net_input_bytes)-1)
 
@@ -1470,10 +1473,11 @@ static void update_stats(char *info, apr_redis_stats_t *stats)
     rc_do_stat(total_system_memory, uint64);
     rc_do_stat(total_connections_received, uint64);
     rc_do_stat(total_commands_processed, uint64);
+    rc_do_stat(rejected_connections, uint64);
     rc_do_stat(total_net_input_bytes, uint64);
     rc_do_stat(total_net_output_bytes, uint64);
-    rc_do_stat(keyspace_hits, uint32);
-    rc_do_stat(keyspace_misses, uint32);
+    rc_do_stat(keyspace_hits, uint64);
+    rc_do_stat(keyspace_misses, uint64);
     rc_do_stat(connected_slaves, uint32);
     rc_do_stat(used_cpu_sys, uint32);
     rc_do_stat(used_cpu_user, uint32);
