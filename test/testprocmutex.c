@@ -25,11 +25,6 @@
 #include <stdlib.h>
 #include "testutil.h"
 
-typedef struct lockmech {
-    apr_lockmech_e num;
-    const char *name;
-} lockmech_t;
-
 #if APR_HAS_FORK
 
 #define MAX_ITER 200
@@ -39,6 +34,11 @@ typedef struct lockmech {
 
 static apr_proc_mutex_t *proc_lock;
 static volatile int *x;
+
+typedef struct lockmech {
+    apr_lockmech_e num;
+    const char *name;
+} lockmech_t;
 
 /* a slower more racy way to implement (*x)++ */
 static int increment(int n)
