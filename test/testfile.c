@@ -1036,7 +1036,6 @@ static void test_append(abts_case *tc, void *data)
     apr_file_t *f1;
     apr_file_t *f2;
     const char *fname = "data/testappend.dat";
-    apr_status_t rv;
     apr_int32_t flags = APR_FOPEN_CREATE | APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_APPEND;
     char buf[128];
     apr_off_t offset;
@@ -1056,7 +1055,7 @@ static void test_append(abts_case *tc, void *data)
     offset = 0;
     APR_ASSERT_SUCCESS(tc, "seek should succeed",
         apr_file_seek(f1, APR_CUR, &offset));
-    ABTS_INT_EQUAL(tc, 2, offset);
+    ABTS_INT_EQUAL(tc, 2, (int) offset);
 
     APR_ASSERT_SUCCESS(tc, "write should succeed",
         apr_file_puts("w2", f2));
