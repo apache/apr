@@ -859,9 +859,9 @@ static apr_status_t grab_bulk_resp(apr_redis_server_t *rs, apr_redis_t *rc,
 {
     char *length;
     char *last;
+    apr_status_t rv;
     apr_size_t len = 0;
     *new_length = 0;
-    apr_status_t rv;
 
     length = apr_strtok(conn->buffer + 1, " ", &last);
     if (length) {
