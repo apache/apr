@@ -41,7 +41,6 @@ struct apr_crypto_t
     apr_pool_t *pool;
     const apr_crypto_driver_t *provider;
     apu_err_t *result;
-    apr_array_header_t *keys;
     apr_hash_t *types;
     apr_hash_t *modes;
     apr_random_t *rng;
@@ -203,11 +202,6 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
 
     f->result = apr_pcalloc(pool, sizeof(apu_err_t));
     if (!f->result) {
-        return APR_ENOMEM;
-    }
-
-    f->keys = apr_array_make(pool, 10, sizeof(apr_crypto_key_t));
-    if (!f->keys) {
         return APR_ENOMEM;
     }
 
@@ -388,7 +382,7 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
     apr_crypto_key_t *key = *k;
 
     if (!key) {
-        *k = key = apr_array_push(f->keys);
+        *k = key = apr_pcalloc(p, sizeof *key);
     }
     if (!key) {
         return APR_ENOMEM;
@@ -480,10 +474,10 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
     apr_crypto_key_t *key = *k;
 
     if (!key) {
-        *k = key = apr_array_push(f->keys);
-    }
-    if (!key) {
-        return APR_ENOMEM;
+        *k = key = apr_pcalloc(p, sizeof *key);
+        if (!key) {
+            return APR_ENOMEM;
+        }
     }
 
     key->f = f;

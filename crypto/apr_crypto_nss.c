@@ -50,7 +50,6 @@ struct apr_crypto_t {
     apr_pool_t *pool;
     const apr_crypto_driver_t *provider;
     apu_err_t *result;
-    apr_array_header_t *keys;
     apr_crypto_config_t *config;
     apr_hash_t *types;
     apr_hash_t *modes;
@@ -266,6 +265,15 @@ static apr_status_t crypto_block_cleanup_helper(void *data)
     return crypto_block_cleanup(block);
 }
 
+static apr_status_t crypto_key_cleanup(void *data)
+{
+    apr_crypto_key_t *key = data;
+    if (key->symKey) {
+        PK11_FreeSymKey(key->symKey);
+        key->symKey = NULL;
+    }
+    return APR_SUCCESS;
+}
 /**
  * @brief Clean encryption / decryption context.
  * @note After cleanup, a context is free to be reused if necessary.
@@ -274,15 +282,6 @@ static apr_status_t crypto_block_cleanup_helper(void *data)
  */
 static apr_status_t crypto_cleanup(apr_crypto_t *f)
 {
-    apr_crypto_key_t *key;
-    if (f->keys) {
-        while ((key = apr_array_pop(f->keys))) {
-            if (key->symKey) {
-                PK11_FreeSymKey(key->symKey);
-                key->symKey = NULL;
-            }
-        }
-    }
     return APR_SUCCESS;
 }
 
@@ -326,7 +325,6 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
     if (!f->result) {
         return APR_ENOMEM;
     }
-    f->keys = apr_array_make(pool, 10, sizeof(apr_crypto_key_t));
 
     f->types = apr_hash_make(pool);
     if (!f->types) {
@@ -491,10 +489,12 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
 
     key = *k;
     if (!key) {
-        *k = key = apr_array_push(f->keys);
-    }
-    if (!key) {
-        return APR_ENOMEM;
+        *k = key = apr_pcalloc(p, sizeof *key);
+        if (!key) {
+            return APR_ENOMEM;
+        }
+        apr_pool_cleanup_register(p, key, crypto_key_cleanup,
+                                  apr_pool_cleanup_null);
     }
 
     key->f = f;
@@ -683,10 +683,12 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
     apr_crypto_key_t *key = *k;
 
     if (!key) {
-        *k = key = apr_array_push(f->keys);
-    }
-    if (!key) {
-        return APR_ENOMEM;
+        *k = key = apr_pcalloc(p, sizeof *key);
+        if (!key) {
+            return APR_ENOMEM;
+        }
+        apr_pool_cleanup_register(p, key, crypto_key_cleanup,
+                                  apr_pool_cleanup_null);
     }
 
     key->f = f;
