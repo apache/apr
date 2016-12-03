@@ -117,6 +117,7 @@ CLEAN :
 	-@erase "$(INTDIR)\userinfo.obj"
 	-@erase "$(INTDIR)\utf8.obj"
 	-@erase "$(INTDIR)\version.obj"
+	-@erase "$(INTDIR)\wakeup.obj"
 	-@erase "$(OUTDIR)\libapr-1.dll"
 	-@erase "$(OUTDIR)\libapr-1.exp"
 	-@erase "$(OUTDIR)\libapr-1.lib"
@@ -245,6 +246,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\timestr.obj" \
 	"$(INTDIR)\groupinfo.obj" \
 	"$(INTDIR)\userinfo.obj" \
+	"$(INTDIR)\wakeup.obj" \
 	"$(INTDIR)\libapr.res"
 
 "$(OUTDIR)\libapr-1.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
@@ -353,6 +355,7 @@ CLEAN :
 	-@erase "$(INTDIR)\userinfo.obj"
 	-@erase "$(INTDIR)\utf8.obj"
 	-@erase "$(INTDIR)\version.obj"
+	-@erase "$(INTDIR)\wakeup.obj"
 	-@erase "$(OUTDIR)\libapr-1.dll"
 	-@erase "$(OUTDIR)\libapr-1.exp"
 	-@erase "$(OUTDIR)\libapr-1.lib"
@@ -481,6 +484,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\timestr.obj" \
 	"$(INTDIR)\groupinfo.obj" \
 	"$(INTDIR)\userinfo.obj" \
+	"$(INTDIR)\wakeup.obj" \
 	"$(INTDIR)\libapr.res"
 
 "$(OUTDIR)\libapr-1.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
@@ -589,6 +593,7 @@ CLEAN :
 	-@erase "$(INTDIR)\userinfo.obj"
 	-@erase "$(INTDIR)\utf8.obj"
 	-@erase "$(INTDIR)\version.obj"
+	-@erase "$(INTDIR)\wakeup.obj"
 	-@erase "$(OUTDIR)\libapr-1.dll"
 	-@erase "$(OUTDIR)\libapr-1.exp"
 	-@erase "$(OUTDIR)\libapr-1.lib"
@@ -696,6 +701,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
 	"$(INTDIR)\select.obj" \
+	"$(INTDIR)\wakeup.obj" \
 	"$(INTDIR)\apr_random.obj" \
 	"$(INTDIR)\sha2.obj" \
 	"$(INTDIR)\sha2_glue.obj" \
@@ -798,6 +804,7 @@ CLEAN :
 	-@erase "$(INTDIR)\poll.obj"
 	-@erase "$(INTDIR)\pollcb.obj"
 	-@erase "$(INTDIR)\pollset.obj"
+	-@erase "$(INTDIR)\wakeup.obj"
 	-@erase "$(INTDIR)\proc.obj"
 	-@erase "$(INTDIR)\proc_mutex.obj"
 	-@erase "$(INTDIR)\rand.obj"
@@ -931,6 +938,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\poll.obj" \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
+	"$(INTDIR)\wakeup.obj" \
 	"$(INTDIR)\select.obj" \
 	"$(INTDIR)\apr_random.obj" \
 	"$(INTDIR)\sha2.obj" \
@@ -1034,6 +1042,7 @@ CLEAN :
 	-@erase "$(INTDIR)\poll.obj"
 	-@erase "$(INTDIR)\pollcb.obj"
 	-@erase "$(INTDIR)\pollset.obj"
+	-@erase "$(INTDIR)\wakeup.obj"
 	-@erase "$(INTDIR)\proc.obj"
 	-@erase "$(INTDIR)\proc_mutex.obj"
 	-@erase "$(INTDIR)\rand.obj"
@@ -1167,6 +1176,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\poll.obj" \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
+	"$(INTDIR)\wakeup.obj" \
 	"$(INTDIR)\select.obj" \
 	"$(INTDIR)\apr_random.obj" \
 	"$(INTDIR)\sha2.obj" \
@@ -1270,6 +1280,7 @@ CLEAN :
 	-@erase "$(INTDIR)\poll.obj"
 	-@erase "$(INTDIR)\pollcb.obj"
 	-@erase "$(INTDIR)\pollset.obj"
+	-@erase "$(INTDIR)\wakeup.obj"
 	-@erase "$(INTDIR)\proc.obj"
 	-@erase "$(INTDIR)\proc_mutex.obj"
 	-@erase "$(INTDIR)\rand.obj"
@@ -1403,6 +1414,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\poll.obj" \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
+	"$(INTDIR)\wakeup.obj" \
 	"$(INTDIR)\select.obj" \
 	"$(INTDIR)\apr_random.obj" \
 	"$(INTDIR)\sha2.obj" \
@@ -1762,6 +1774,12 @@ SOURCE=.\poll\unix\pollset.c
 SOURCE=.\poll\unix\select.c
 
 "$(INTDIR)\select.obj" : $(SOURCE) "$(INTDIR)" ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\poll\unix\wakeup.c
+
+"$(INTDIR)\wakeup.obj" : $(SOURCE) "$(INTDIR)" ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
