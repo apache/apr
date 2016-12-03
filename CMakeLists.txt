@@ -181,6 +181,7 @@ SET(APR_SOURCES
   poll/unix/pollcb.c
   poll/unix/pollset.c
   poll/unix/select.c
+  poll/unix/wakeup.c
   random/unix/apr_random.c
   random/unix/sha2.c
   random/unix/sha2_glue.c
