@@ -115,6 +115,7 @@ CLEAN :
 	-@erase "$(INTDIR)\userinfo.obj"
 	-@erase "$(INTDIR)\utf8.obj"
 	-@erase "$(INTDIR)\version.obj"
+	-@erase "$(INTDIR)\wakeup.obj"
 	-@erase "$(OUTDIR)\apr-1.lib"
 	-@erase ".\include\apr.h"
 	-@erase ".\include\apr_gen_test_char.h"
@@ -215,6 +216,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\poll.obj" \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
+	"$(INTDIR)\wakeup.obj" \
 	"$(INTDIR)\select.obj" \
 	"$(INTDIR)\apr_random.obj" \
 	"$(INTDIR)\sha2.obj" \
@@ -329,6 +331,7 @@ CLEAN :
 	-@erase "$(INTDIR)\userinfo.obj"
 	-@erase "$(INTDIR)\utf8.obj"
 	-@erase "$(INTDIR)\version.obj"
+	-@erase "$(INTDIR)\wakeup.obj"
 	-@erase "$(OUTDIR)\apr-1.lib"
 	-@erase ".\include\apr.h"
 	-@erase ".\include\apr_gen_test_char.h"
@@ -430,6 +433,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
 	"$(INTDIR)\select.obj" \
+	"$(INTDIR)\wakeup.obj" \
 	"$(INTDIR)\apr_random.obj" \
 	"$(INTDIR)\sha2.obj" \
 	"$(INTDIR)\sha2_glue.obj" \
@@ -543,6 +547,7 @@ CLEAN :
 	-@erase "$(INTDIR)\userinfo.obj"
 	-@erase "$(INTDIR)\utf8.obj"
 	-@erase "$(INTDIR)\version.obj"
+	-@erase "$(INTDIR)\wakeup.obj"
 	-@erase "$(OUTDIR)\apr-1.lib"
 	-@erase ".\include\apr.h"
 	-@erase ".\include\apr_gen_test_char.h"
@@ -644,6 +649,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
 	"$(INTDIR)\select.obj" \
+	"$(INTDIR)\wakeup.obj" \
 	"$(INTDIR)\apr_random.obj" \
 	"$(INTDIR)\sha2.obj" \
 	"$(INTDIR)\sha2_glue.obj" \
@@ -757,6 +763,7 @@ CLEAN :
 	-@erase "$(INTDIR)\userinfo.obj"
 	-@erase "$(INTDIR)\utf8.obj"
 	-@erase "$(INTDIR)\version.obj"
+	-@erase "$(INTDIR)\wakeup.obj"
 	-@erase "$(OUTDIR)\apr-1.lib"
 	-@erase ".\include\apr.h"
 	-@erase ".\include\apr_gen_test_char.h"
@@ -858,6 +865,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
 	"$(INTDIR)\select.obj" \
+	"$(INTDIR)\wakeup.obj" \
 	"$(INTDIR)\apr_random.obj" \
 	"$(INTDIR)\sha2.obj" \
 	"$(INTDIR)\sha2_glue.obj" \
@@ -971,6 +979,7 @@ CLEAN :
 	-@erase "$(INTDIR)\userinfo.obj"
 	-@erase "$(INTDIR)\utf8.obj"
 	-@erase "$(INTDIR)\version.obj"
+	-@erase "$(INTDIR)\wakeup.obj"
 	-@erase "$(OUTDIR)\apr-1.lib"
 	-@erase ".\include\apr.h"
 	-@erase ".\include\apr_gen_test_char.h"
@@ -1072,6 +1081,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
 	"$(INTDIR)\select.obj" \
+	"$(INTDIR)\wakeup.obj" \
 	"$(INTDIR)\apr_random.obj" \
 	"$(INTDIR)\sha2.obj" \
 	"$(INTDIR)\sha2_glue.obj" \
@@ -1185,6 +1195,7 @@ CLEAN :
 	-@erase "$(INTDIR)\userinfo.obj"
 	-@erase "$(INTDIR)\utf8.obj"
 	-@erase "$(INTDIR)\version.obj"
+	-@erase "$(INTDIR)\wakeup.obj"
 	-@erase "$(OUTDIR)\apr-1.lib"
 	-@erase ".\include\apr.h"
 	-@erase ".\include\apr_gen_test_char.h"
@@ -1286,6 +1297,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\pollcb.obj" \
 	"$(INTDIR)\pollset.obj" \
 	"$(INTDIR)\select.obj" \
+	"$(INTDIR)\wakeup.obj" \
 	"$(INTDIR)\apr_random.obj" \
 	"$(INTDIR)\sha2.obj" \
 	"$(INTDIR)\sha2_glue.obj" \
@@ -1632,6 +1644,11 @@ SOURCE=.\poll\unix\select.c
 "$(INTDIR)\select.obj" : $(SOURCE) "$(INTDIR)" ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
+
+SOURCE=.\poll\unix\wakeup.c
+
+"$(INTDIR)\wakeup.obj" : $(SOURCE) "$(INTDIR)" ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 SOURCE=.\random\unix\apr_random.c
 

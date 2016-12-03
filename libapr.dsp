@@ -490,6 +490,10 @@ SOURCE=.\poll\unix\pollset.c
 
 SOURCE=.\poll\unix\select.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\poll\unix\wakeup.c
+# End Source File
 # End Group
 # Begin Group "random"
 
