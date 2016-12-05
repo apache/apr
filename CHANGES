@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_crypto: avoid excessive iteration in bcrypt hash.
+     [Hanno Böck <hanno hboeck.de>]
+
   *) apr_siphash: Implement keyed hash function SipHash.  [Yann Ylavic]
 
   *) apr_atomic: change the API of apr_atomic_casptr() apr_atomic_xchgptr()
