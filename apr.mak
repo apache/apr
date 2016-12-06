@@ -222,6 +222,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\sha2_glue.obj" \
 	"$(INTDIR)\shm.obj" \
 	"$(INTDIR)\apr_cpystrn.obj" \
+	"$(INTDIR)\apr_cstr.obj" \
 	"$(INTDIR)\apr_fnmatch.obj" \
 	"$(INTDIR)\apr_snprintf.obj" \
 	"$(INTDIR)\apr_strings.obj" \
@@ -439,6 +440,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\sha2_glue.obj" \
 	"$(INTDIR)\shm.obj" \
 	"$(INTDIR)\apr_cpystrn.obj" \
+	"$(INTDIR)\apr_cstr.obj" \
 	"$(INTDIR)\apr_fnmatch.obj" \
 	"$(INTDIR)\apr_snprintf.obj" \
 	"$(INTDIR)\apr_strings.obj" \
@@ -656,6 +658,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\sha2_glue.obj" \
 	"$(INTDIR)\shm.obj" \
 	"$(INTDIR)\apr_cpystrn.obj" \
+	"$(INTDIR)\apr_cstr.obj" \
 	"$(INTDIR)\apr_fnmatch.obj" \
 	"$(INTDIR)\apr_snprintf.obj" \
 	"$(INTDIR)\apr_strings.obj" \
@@ -873,6 +876,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\sha2_glue.obj" \
 	"$(INTDIR)\shm.obj" \
 	"$(INTDIR)\apr_cpystrn.obj" \
+	"$(INTDIR)\apr_cstr.obj" \
 	"$(INTDIR)\apr_fnmatch.obj" \
 	"$(INTDIR)\apr_snprintf.obj" \
 	"$(INTDIR)\apr_strings.obj" \
