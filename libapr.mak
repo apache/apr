@@ -1343,6 +1343,12 @@ SOURCE=.\strings\apr_cpystrn.c
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
+SOURCE=.\strings\apr_cstr.c
+
+"$(INTDIR)\apr_cstr.obj" : $(SOURCE) "$(INTDIR)" ".\include\apr_cstr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
 SOURCE=.\strings\apr_fnmatch.c
 
 "$(INTDIR)\apr_fnmatch.obj" : $(SOURCE) "$(INTDIR)" ".\include\apr.h"
