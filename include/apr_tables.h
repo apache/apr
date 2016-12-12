@@ -380,6 +380,7 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
  * @remark Iteration continues while this callback function returns non-zero.
  * To export the callback function for apr_table_[v]do() it must be declared 
  * in the _NONSTD convention.
+ * @see apr_table_do @see apr_table_vdo
  */
 typedef int (apr_table_do_callback_fn_t)(void *rec, const char *key, 
                                                     const char *value);
@@ -392,7 +393,7 @@ typedef int (apr_table_do_callback_fn_t)(void *rec, const char *key,
  * in the table.  Otherwise, the function is invoked only for those
  * elements matching the keys specified.
  *
- * If an invocation of the @param comp function returns zero,
+ * If an invocation of the comp function returns zero,
  * iteration will continue using the next specified key, if any.
  *
  * @param comp The function to run
@@ -401,7 +402,7 @@ typedef int (apr_table_do_callback_fn_t)(void *rec, const char *key,
  * @param ... A varargs array of zero or more (char *) keys followed by NULL
  * @return FALSE if one of the comp() iterations returned zero; TRUE if all
  *            iterations returned non-zero
- * @see apr_table_do_callback_fn_t
+ * @see apr_table_do_callback_fn_t @see apr_table_vdo
  */
 APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
                                      void *rec, const apr_table_t *t, ...)
@@ -418,7 +419,7 @@ APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
  * every element in the table.  Otherwise, the function is invoked
  * only for those elements matching the keys specified.
  *
- * If an invocation of the @param comp function returns zero,
+ * If an invocation of the comp function returns zero,
  * iteration will continue using the next specified key, if any.
  *
  * @param comp The function to run
@@ -427,7 +428,7 @@ APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
  * @param vp List of zero or more (char *) keys followed by NULL
  * @return FALSE if one of the comp() iterations returned zero; TRUE if all
  *            iterations returned non-zero
- * @see apr_table_do_callback_fn_t
+ * @see apr_table_do_callback_fn_t @see apr_table_do
  */
 APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
                                void *rec, const apr_table_t *t, va_list vp);
