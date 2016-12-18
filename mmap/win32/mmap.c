@@ -108,8 +108,20 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
      * of the mapped region!
      */
 
-    (*new)->mhandle = CreateFileMapping(file->filehand, NULL, fmaccess,
-                                        0, 0, NULL);
+#if APR_HAS_UNICODE_FS
+    IF_WIN_OS_IS_UNICODE
+    {
+        (*new)->mhandle = CreateFileMappingW(file->filehand, NULL, fmaccess,
+                                             0, 0, NULL);
+    }
+#endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
+    {
+        (*new)->mhandle = CreateFileMappingA(file->filehand, NULL, fmaccess,
+                                             0, 0, NULL);
+    }
+#endif
     if (!(*new)->mhandle || (*new)->mhandle == INVALID_HANDLE_VALUE)
     {
         *new = NULL;
