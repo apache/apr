@@ -479,7 +479,7 @@ static apr_status_t proc_pthread_mutex_unref(void *mutex_)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_proc_pthread_cleanup(void *mutex_)
+static apr_status_t proc_mutex_pthread_cleanup(void *mutex_)
 {
     apr_proc_mutex_t *mutex=mutex_;
     apr_status_t rv;
@@ -496,8 +496,8 @@ static apr_status_t proc_mutex_proc_pthread_cleanup(void *mutex_)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
-                                                   const char *fname)
+static apr_status_t proc_mutex_pthread_create(apr_proc_mutex_t *new_mutex,
+                                              const char *fname)
 {
     apr_status_t rv;
     int fd;
@@ -526,14 +526,14 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
 #ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
-        proc_mutex_proc_pthread_cleanup(new_mutex);
+        proc_mutex_pthread_cleanup(new_mutex);
         return rv;
     }
     if ((rv = pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED))) {
 #ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
-        proc_mutex_proc_pthread_cleanup(new_mutex);
+        proc_mutex_pthread_cleanup(new_mutex);
         pthread_mutexattr_destroy(&mattr);
         return rv;
     }
@@ -544,7 +544,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
 #ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
-        proc_mutex_proc_pthread_cleanup(new_mutex);
+        proc_mutex_pthread_cleanup(new_mutex);
         pthread_mutexattr_destroy(&mattr);
         return rv;
     }
@@ -552,7 +552,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
 #ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
-        proc_mutex_proc_pthread_cleanup(new_mutex);
+        proc_mutex_pthread_cleanup(new_mutex);
         pthread_mutexattr_destroy(&mattr);
         return rv;
     }
@@ -562,7 +562,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
 #ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
-        proc_mutex_proc_pthread_cleanup(new_mutex);
+        proc_mutex_pthread_cleanup(new_mutex);
         pthread_mutexattr_destroy(&mattr);
         return rv;
     }
@@ -574,7 +574,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
 #ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
-        proc_mutex_proc_pthread_cleanup(new_mutex);
+        proc_mutex_pthread_cleanup(new_mutex);
         return rv;
     }
 
@@ -585,9 +585,9 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_proc_pthread_child_init(apr_proc_mutex_t **mutex,
-                                                       apr_pool_t *pool, 
-                                                       const char *fname)
+static apr_status_t proc_mutex_pthread_child_init(apr_proc_mutex_t **mutex,
+                                                  apr_pool_t *pool, 
+                                                  const char *fname)
 {
     (*mutex)->curr_locked = 0;
     if (proc_pthread_mutex_inc(*mutex)) {
@@ -597,7 +597,7 @@ static apr_status_t proc_mutex_proc_pthread_child_init(apr_proc_mutex_t **mutex,
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_proc_pthread_acquire(apr_proc_mutex_t *mutex)
+static apr_status_t proc_mutex_pthread_acquire(apr_proc_mutex_t *mutex)
 {
     apr_status_t rv;
 
@@ -619,7 +619,7 @@ static apr_status_t proc_mutex_proc_pthread_acquire(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_proc_pthread_tryacquire(apr_proc_mutex_t *mutex)
+static apr_status_t proc_mutex_pthread_tryacquire(apr_proc_mutex_t *mutex)
 {
     apr_status_t rv;
  
@@ -644,14 +644,13 @@ static apr_status_t proc_mutex_proc_pthread_tryacquire(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t
-proc_mutex_proc_pthread_timedacquire(apr_proc_mutex_t *mutex,
-                                     apr_time_t timeout,
-                                     int absolute)
+static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
+                                                    apr_time_t timeout,
+                                                    int absolute)
 {
 #ifdef HAVE_PTHREAD_MUTEX_TIMEDLOCK
     if (timeout < 0) {
-        return proc_mutex_proc_pthread_acquire(mutex);
+        return proc_mutex_pthread_acquire(mutex);
     }
     else {
         apr_status_t rv;
@@ -689,7 +688,7 @@ proc_mutex_proc_pthread_timedacquire(apr_proc_mutex_t *mutex,
 #endif
 }
 
-static apr_status_t proc_mutex_proc_pthread_release(apr_proc_mutex_t *mutex)
+static apr_status_t proc_mutex_pthread_release(apr_proc_mutex_t *mutex)
 {
     apr_status_t rv;
 
@@ -706,13 +705,13 @@ static apr_status_t proc_mutex_proc_pthread_release(apr_proc_mutex_t *mutex)
 static const apr_proc_mutex_unix_lock_methods_t mutex_proc_pthread_methods =
 {
     APR_PROCESS_LOCK_MECH_IS_GLOBAL,
-    proc_mutex_proc_pthread_create,
-    proc_mutex_proc_pthread_acquire,
-    proc_mutex_proc_pthread_tryacquire,
-    proc_mutex_proc_pthread_timedacquire,
-    proc_mutex_proc_pthread_release,
-    proc_mutex_proc_pthread_cleanup,
-    proc_mutex_proc_pthread_child_init,
+    proc_mutex_pthread_create,
+    proc_mutex_pthread_acquire,
+    proc_mutex_pthread_tryacquire,
+    proc_mutex_pthread_timedacquire,
+    proc_mutex_pthread_release,
+    proc_mutex_pthread_cleanup,
+    proc_mutex_pthread_child_init,
     proc_mutex_no_perms_set,
     APR_LOCK_PROC_PTHREAD,
     "pthread"
