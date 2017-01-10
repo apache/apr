@@ -807,7 +807,7 @@ static void pollset_wakeup(abts_case *tc, void *data)
     rv = apr_pollset_add(pollset, &socket_pollfd);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    send_msg(s, sa, 0, tc);
+    send_msg(s, sa, 0, tc); apr_sleep(1000);
 
     rv = apr_pollset_wakeup(pollset);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
