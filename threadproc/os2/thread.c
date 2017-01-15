@@ -74,8 +74,6 @@ static void apr_thread_begin(void *arg)
   apr_pool_destroy(thread->pool);
 }
 
-
-
 APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr, 
                                             apr_thread_start_t func, void *data, 
                                             apr_pool_t *pool)
@@ -260,4 +258,14 @@ APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control,
     }
 
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_setname(apr_thread_t *thread, const char *name)
+{
+	return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_getname(apr_thread_t *thread, char ** name)
+{
+	return APR_ENOTIMPL;
 }
