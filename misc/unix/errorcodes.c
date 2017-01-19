@@ -19,6 +19,8 @@
 #include "apr_lib.h"
 #include "apr_dso.h"
 
+#include "apu_errno.h"
+
 #if APR_HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -139,6 +141,15 @@ static char *apr_error_string(apr_status_t statcode)
         return "The process is not recognized.";
     case APR_EGENERAL:
         return "Internal error (specific information not available)";
+
+/* APR Util error codes */
+    case APR_ECRYPT:
+        return "Internal error in the crypto subsystem (specific information not available)";
+    case APR_ENOENGINE:
+        return "No engine found for crypto subsystem";
+    case APR_EINITENGINE:
+        return "Failed to init engine for crypto subsystem";
+
     default:
         return "Error string not specified yet";
     }
