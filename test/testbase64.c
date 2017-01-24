@@ -69,7 +69,8 @@ static void test_base64(abts_case *tc, void *data)
 
         enc = apr_pbase64_encode(pool, base64_tbl[i].orig);
         ABTS_ASSERT(tc, "base 64 encoded from pool matches expected output",
-                (strcmp(enc, base64_tbl[i].enc) == 0))
+                (strcmp(enc, base64_tbl[i].enc) == 0));
+        ABTS_ASSERT(tc, "base 64 length", strlen(enc) == strlen(base64_tbl[i].enc));
     }
 }
 
