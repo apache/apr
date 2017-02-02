@@ -675,9 +675,9 @@ static char *BF_crypt(const char *key, const char *setting,
 	    setting[2] < 'a' || setting[2] > 'z' ||
 	    !flags_by_subtype[(unsigned int)(unsigned char)setting[2] - 'a'] ||
 	    setting[3] != '$' ||
-	    setting[4] < '0' || setting[4] > '3' ||
+	    setting[4] < '0' || setting[4] > '1' ||
 	    setting[5] < '0' || setting[5] > '9' ||
-	    (setting[4] == '3' && setting[5] > '1') ||
+	    (setting[4] == '1' && setting[5] > '7') ||
 	    setting[6] != '$') {
 		__set_errno(EINVAL);
 		return NULL;
