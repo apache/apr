@@ -356,7 +356,7 @@ mc_conn_construct(void **conn_, void *params, apr_pool_t *pool)
         return rv;
     }
 
-    conn->buffer = apr_palloc(conn->p, BUFFER_SIZE);
+    conn->buffer = apr_palloc(conn->p, BUFFER_SIZE + 1);
     conn->blen = 0;
     conn->ms = ms;
 
