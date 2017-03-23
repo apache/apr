@@ -105,8 +105,8 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
                   __attribute__((nonnull(1,2)));
  
 /**
- * Return the aligned (round up) size that an allocator would use for
- * the given size.
+ * Get the true size that would be allocated for the given size (including
+ * the header and alignment).
  * @param size The size to align
  * @return The aligned size (or zero on apr_size_t overflow)
  */
