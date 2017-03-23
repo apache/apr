@@ -103,6 +103,14 @@ APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
 APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
                                      apr_memnode_t *memnode)
                   __attribute__((nonnull(1,2)));
+ 
+/**
+ * Return the aligned (round up) size that an allocator would use for
+ * the given size.
+ * @param size The size to align
+ * @return The aligned size (or zero on apr_size_t overflow)
+ */
+APR_DECLARE(apr_size_t) apr_allocator_align(apr_size_t size);
 
 #include "apr_pools.h"
 

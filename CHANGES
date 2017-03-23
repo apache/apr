@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_allocator: Provide apr_allocator_align() to get the true size that
+     would be allocated for the given size (including the header and
+     alignment).  [Yann Ylavic]
+
   *) apr_crypto: avoid excessive iteration in bcrypt hash.
      [Hanno Böck <hanno hboeck.de>]
 
