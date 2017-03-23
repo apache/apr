@@ -105,6 +105,21 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
                   __attribute__((nonnull(1,2)));
  
 /**
+ * Get the page/boundary size.
+ * @return The page size
+ */
+APR_DECLARE(apr_size_t) apr_allocator_page_size(void);
+
+/**
+ * Setup the minimum allocation order (in 2^order pages).
+ * @param order The order to set
+ * @return APR_SUCCESS, or APR_EINVAL if @a order above 9.
+ * @note Default is order-1 (e.g. 8K on systems with 4K pages).
+ * @remark Should be done at initialization time, never concurrently.
+ */
+APR_DECLARE(apr_status_t) apr_allocator_min_order_set(unsigned int order);
+
+/**
  * Get the true size that would be allocated for the given size (including
  * the header and alignment).
  * @param size The size to align
