@@ -123,6 +123,24 @@ APR_DECLARE_NONSTD(void) apr_bucket_alloc_destroy(apr_bucket_alloc_t *list)
 #endif
 }
 
+APR_DECLARE_NONSTD(apr_size_t) apr_bucket_alloc_aligned_floor(apr_size_t size)
+{
+    if (size <= SMALL_NODE_SIZE) {
+        size = SMALL_NODE_SIZE;
+    }
+    else {
+        if (size < APR_MEMNODE_T_SIZE) {
+            size = apr_allocator_align(0);
+        }
+        else {
+            size = apr_allocator_align(size - APR_MEMNODE_T_SIZE);
+        }
+        size -= APR_MEMNODE_T_SIZE;
+    }
+    size -= SIZEOF_NODE_HEADER_T;
+    return size;
+}
+
 APR_DECLARE_NONSTD(void *) apr_bucket_alloc(apr_size_t in_size,
                                             apr_bucket_alloc_t *list)
 {
