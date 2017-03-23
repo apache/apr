@@ -63,19 +63,20 @@ int apr_running_on_valgrind = 0;
  */
 
 /*
- * XXX: This is not optimal when using --enable-allocator-uses-mmap on
- * XXX: machines with large pagesize, but currently the sink is assumed
- * XXX: to be index 0, so MIN_ALLOC must be at least two pages.
+ * Recycle up to MAX_INDEX in slots, larger indexes go to
+ * the sink slot at MAX_INDEX.
  */
-#define MIN_ALLOC (2 * BOUNDARY_SIZE)
 #define MAX_INDEX   20
 
-#if APR_ALLOCATOR_USES_MMAP && defined(_SC_PAGESIZE)
+/*
+ * Determines the boundary/page size.
+ */
+#if defined(_SC_PAGESIZE) || defined(WIN32)
 static unsigned int boundary_index;
 static unsigned int boundary_size;
 #define BOUNDARY_INDEX  boundary_index
 #define BOUNDARY_SIZE   boundary_size
-#else
+#else  /* Assume 4K pages */
 #define BOUNDARY_INDEX 12
 #define BOUNDARY_SIZE (1 << BOUNDARY_INDEX)
 #endif
@@ -89,6 +90,16 @@ static unsigned int boundary_size;
 #else
 #define GUARDPAGE_SIZE 0
 #endif /* APR_ALLOCATOR_GUARD_PAGES */
+
+/*
+ * Allocate at least MIN_ALLOC bytes (2^order boundaries/pages),
+ * and POOL_SIZE bytes for each pool.
+ */
+#define MAX_ALLOC_ORDER 9
+static unsigned int     min_alloc_order = 1;
+#define MIN_ALLOC       (BOUNDARY_SIZE << min_alloc_order)
+static unsigned int     pool_alloc_order = 1;
+#define POOL_SIZE       (BOUNDARY_SIZE << pool_alloc_order)
 
 /* 
  * Timing constants for killing subprocesses
@@ -126,16 +137,17 @@ struct apr_allocator_t {
 #endif /* APR_HAS_THREADS */
     apr_pool_t         *owner;
     /**
-     * Lists of free nodes. Slot 0 is used for oversized nodes,
-     * and the slots 1..MAX_INDEX-1 contain nodes of sizes
+     * Lists of free nodes. Slot MAX_INDEX is used for oversized nodes,
+     * and the slots 0..MAX_INDEX-1 contain nodes of sizes
      * (i+1) * BOUNDARY_SIZE. Example for BOUNDARY_INDEX == 12:
-     * slot  0: nodes larger than 81920
+     * slot  0: size  4096
      * slot  1: size  8192
      * slot  2: size 12288
      * ...
      * slot 19: size 81920
+     * slot 20: nodes larger than 81920
      */
-    apr_memnode_t      *free[MAX_INDEX];
+    apr_memnode_t      *free[MAX_INDEX + 1];
 };
 
 #define SIZEOF_ALLOCATOR_T  APR_ALIGN_DEFAULT(sizeof(apr_allocator_t))
@@ -167,7 +179,7 @@ APR_DECLARE(void) apr_allocator_destroy(apr_allocator_t *allocator)
     apr_uint32_t index;
     apr_memnode_t *node, **ref;
 
-    for (index = 0; index < MAX_INDEX; index++) {
+    for (index = 0; index <= MAX_INDEX; index++) {
         ref = &allocator->free[index];
         while ((node = *ref) != NULL) {
             *ref = node->next;
@@ -350,10 +362,10 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
 #endif /* APR_HAS_THREADS */
     }
 
-    /* If we found nothing, seek the sink (at index 0), if
+    /* If we found nothing, seek the sink (at index MAX_INDEX), if
      * it is not empty.
      */
-    else if (allocator->free[0]) {
+    else if (allocator->free[MAX_INDEX]) {
 #if APR_HAS_THREADS
         if (allocator->mutex)
             apr_thread_mutex_lock(allocator->mutex);
@@ -362,7 +374,7 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
         /* Walk the free list to see if there are
          * any nodes on it of the requested size
          */
-        ref = &allocator->free[0];
+        ref = &allocator->free[MAX_INDEX];
         while ((node = *ref) != NULL && index > node->index)
             ref = &node->next;
 
@@ -467,10 +479,10 @@ void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
         }
         else {
             /* This node is too large to keep in a specific size bucket,
-             * just add it to the sink (at index 0).
+             * just add it to the sink (at index MAX_INDEX).
              */
-            node->next = allocator->free[0];
-            allocator->free[0] = node;
+            node->next = allocator->free[MAX_INDEX];
+            allocator->free[MAX_INDEX] = node;
             if (current_free_index >= index + 1)
                 current_free_index -= index + 1;
             else
@@ -510,6 +522,28 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
     allocator_free(allocator, node);
 }
 
+APR_DECLARE(apr_size_t) apr_allocator_page_size(void)
+{
+    return boundary_size;
+}
+
+APR_DECLARE(apr_status_t) apr_allocator_min_order_set(unsigned int order)
+{
+    if (order > MAX_ALLOC_ORDER) {
+        return APR_EINVAL;
+    }
+    min_alloc_order = order;
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pool_alloc_order_set(unsigned int order)
+{
+    if (order > MAX_ALLOC_ORDER) {
+        return APR_EINVAL;
+    }
+    pool_alloc_order = order;
+    return APR_SUCCESS;
+}
 
 
 /*
@@ -660,13 +694,19 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
     apr_running_on_valgrind = RUNNING_ON_VALGRIND;
 #endif
 
-#if APR_ALLOCATOR_USES_MMAP && defined(_SC_PAGESIZE)
+#if defined(_SC_PAGESIZE)
     boundary_size = sysconf(_SC_PAGESIZE);
+#elif defined(WIN32)
+    {
+        SYSTEM_INFO si;
+        GetSystemInfo(&si);
+        boundary_size = si.dwPageSize;
+    }
+#endif
     boundary_index = 12;
     while ( (1 << boundary_index) < boundary_size)
         boundary_index++;
     boundary_size = (1 << boundary_index);
-#endif
 
     if ((rv = apr_allocator_create(&global_allocator)) != APR_SUCCESS) {
         apr_pools_initialized = 0;
@@ -1072,7 +1112,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
         allocator = parent->allocator;
 
     if ((node = allocator_alloc(allocator,
-                                MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
+                                POOL_SIZE - APR_MEMNODE_T_SIZE)) == NULL) {
         if (abort_fn)
             abort_fn(APR_ENOMEM);
 
@@ -1166,7 +1206,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
             return APR_ENOMEM;
         }
         if ((node = allocator_alloc(pool_allocator,
-                                   MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
+                                    POOL_SIZE - APR_MEMNODE_T_SIZE)) == NULL) {
             if (abort_fn)
                 abort_fn(APR_ENOMEM);
 
@@ -1174,7 +1214,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
         }
     }
     else if ((node = allocator_alloc(pool_allocator,
-                                     MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
+                                     POOL_SIZE - APR_MEMNODE_T_SIZE)) == NULL) {
         if (abort_fn)
             abort_fn(APR_ENOMEM);
 
@@ -1656,13 +1696,19 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
     if (apr_pools_initialized++)
         return APR_SUCCESS;
 
-#if APR_ALLOCATOR_USES_MMAP && defined(_SC_PAGESIZE)
+#if defined(_SC_PAGESIZE)
     boundary_size = sysconf(_SC_PAGESIZE);
+#elif defined(WIN32)
+    {
+        SYSTEM_INFO si;
+        GetSystemInfo(&si);
+        boundary_size = si.dwPageSize;
+    }
+#endif
     boundary_index = 12;
     while ( (1 << boundary_index) < boundary_size)
         boundary_index++;
     boundary_size = (1 << boundary_index);
-#endif
 
     /* Since the debug code works a bit differently then the
      * regular pools code, we ask for a lock here.  The regular

@@ -1,6 +1,12 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_allocator, apr_pools: Add apr_allocator_page_size(),
+     apr_allocator_min_order_set() and apr_pool_alloc_order_set() to
+     respectively get the (system's) page size in use, set the minimum
+     allocation size for an allocator and the pool default allocation
+     size (expressed in 2^order pages).  [Yann Ylavic]
+
   *) apr_buckets: Add apr_bucket_file_set_buf_size() which allows to configure
      the size of the buffer used to read files.  [Yann Ylavic]
 
