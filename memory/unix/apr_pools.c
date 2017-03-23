@@ -236,6 +236,30 @@ APR_DECLARE(void) apr_allocator_max_free_set(apr_allocator_t *allocator,
 }
 
 static APR_INLINE
+apr_size_t allocator_align(apr_size_t in_size)
+{
+    apr_size_t size = in_size;
+
+    /* Round up the block size to the next boundary, but always
+     * allocate at least a certain size (MIN_ALLOC).
+     */
+    size = APR_ALIGN(size + APR_MEMNODE_T_SIZE, BOUNDARY_SIZE);
+    if (size < in_size) {
+        return 0;
+    }
+    if (size < MIN_ALLOC) {
+        size = MIN_ALLOC;
+    }
+
+    return size;
+}
+
+APR_DECLARE(apr_size_t) apr_allocator_align(apr_size_t size)
+{
+    return allocator_align(size);
+}
+
+static APR_INLINE
 apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
 {
     apr_memnode_t *node, **ref;
@@ -245,12 +269,10 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
     /* Round up the block size to the next boundary, but always
      * allocate at least a certain size (MIN_ALLOC).
      */
-    size = APR_ALIGN(in_size + APR_MEMNODE_T_SIZE, BOUNDARY_SIZE);
-    if (size < in_size) {
+    size = allocator_align(in_size);
+    if (!size) {
         return NULL;
     }
-    if (size < MIN_ALLOC)
-        size = MIN_ALLOC;
 
     /* Find the index for this node size by
      * dividing its size by the boundary size
