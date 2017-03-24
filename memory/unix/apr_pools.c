@@ -63,10 +63,14 @@ int apr_running_on_valgrind = 0;
  */
 
 /*
- * Recycle up to MAX_INDEX in slots, larger indexes go to
- * the sink slot at MAX_INDEX.
+ * Recycle up to MAX_INDEX in slots, larger indexes go to the
+ * sink slot at MAX_INDEX, and allocate at least MIN_ALLOC
+ * bytes (2^order boundaries/pages).
  */
 #define MAX_INDEX   20
+#define MAX_ORDER   9
+static unsigned int min_order = 1;
+#define MIN_ALLOC   (BOUNDARY_SIZE << min_order)
 
 /*
  * Determines the boundary/page size.
@@ -90,16 +94,6 @@ static unsigned int boundary_size;
 #else
 #define GUARDPAGE_SIZE 0
 #endif /* APR_ALLOCATOR_GUARD_PAGES */
-
-/*
- * Allocate at least MIN_ALLOC bytes (2^order boundaries/pages),
- * and POOL_SIZE bytes for each pool.
- */
-#define MAX_ALLOC_ORDER 9
-static unsigned int     min_alloc_order = 1;
-#define MIN_ALLOC       (BOUNDARY_SIZE << min_alloc_order)
-static unsigned int     pool_alloc_order = 1;
-#define POOL_SIZE       (BOUNDARY_SIZE << pool_alloc_order)
 
 /* 
  * Timing constants for killing subprocesses
@@ -529,19 +523,10 @@ APR_DECLARE(apr_size_t) apr_allocator_page_size(void)
 
 APR_DECLARE(apr_status_t) apr_allocator_min_order_set(unsigned int order)
 {
-    if (order > MAX_ALLOC_ORDER) {
+    if (order > MAX_ORDER) {
         return APR_EINVAL;
     }
-    min_alloc_order = order;
-    return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_pool_alloc_order_set(unsigned int order)
-{
-    if (order > MAX_ALLOC_ORDER) {
-        return APR_EINVAL;
-    }
-    pool_alloc_order = order;
+    min_order = order;
     return APR_SUCCESS;
 }
 
@@ -1112,7 +1097,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
         allocator = parent->allocator;
 
     if ((node = allocator_alloc(allocator,
-                                POOL_SIZE - APR_MEMNODE_T_SIZE)) == NULL) {
+                                MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
         if (abort_fn)
             abort_fn(APR_ENOMEM);
 
@@ -1206,7 +1191,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
             return APR_ENOMEM;
         }
         if ((node = allocator_alloc(pool_allocator,
-                                    POOL_SIZE - APR_MEMNODE_T_SIZE)) == NULL) {
+                                    MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
             if (abort_fn)
                 abort_fn(APR_ENOMEM);
 
@@ -1214,7 +1199,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
         }
     }
     else if ((node = allocator_alloc(pool_allocator,
-                                     POOL_SIZE - APR_MEMNODE_T_SIZE)) == NULL) {
+                                     MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
         if (abort_fn)
             abort_fn(APR_ENOMEM);
 

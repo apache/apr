@@ -171,15 +171,6 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void);
  */
 APR_DECLARE(void) apr_pool_terminate(void);
 
-/**
- * Setup the allocation order (in 2^order pages) when creating a pool.
- * @param order The order to set
- * @return APR_SUCCESS, or APR_EINVAL if @a order above 9.
- * @note Default is order-1 (e.g. 8K on systems with 4K pages).
- * @remark Should be done at initialization time, never concurrently.
- */
-APR_DECLARE(apr_status_t) apr_pool_alloc_order_set(unsigned int order);
-
 /*
  * Pool creation/destruction
  */
