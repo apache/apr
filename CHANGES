@@ -6,13 +6,6 @@ Changes for APR 2.0.0
      in use and set the minimum allocation size for an allocator (expressed in
      2^order pages).  [Yann Ylavic]
 
-  *) apr_buckets: Add apr_bucket_file_set_buf_size() which allows to configure
-     the size of the buffer used to read files.  [Yann Ylavic]
-
-  *) apr_allocator: Provide apr_allocator_align() to get the true size that
-     would be allocated for the given size (including the header and
-     alignment).  [Yann Ylavic]
-
   *) apr_crypto: avoid excessive iteration in bcrypt hash.
      [Hanno Böck <hanno hboeck.de>]
 
