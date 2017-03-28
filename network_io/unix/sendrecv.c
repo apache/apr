@@ -264,6 +264,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                                  apr_size_t *len, apr_int32_t flags)
 {
     int rv, nbytes = 0, total_hdrbytes, i;
+    int nopush_set = 0;
     apr_status_t arv;
 
 #if APR_HAS_LARGE_FILES && defined(HAVE_SENDFILE64)
@@ -296,15 +297,18 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
     if (!hdtr) {
         hdtr = &no_hdtr;
     }
-
-    if (hdtr->numheaders > 0) {
-        apr_size_t hdrbytes;
-
+    else if ((hdtr->numheaders > 0 || hdtr->numtrailers > 0)
+             && !apr_is_option_set(sock, APR_TCP_NOPUSH)) {
         /* cork before writing headers */
         rv = apr_socket_opt_set(sock, APR_TCP_NOPUSH, 1);
         if (rv != APR_SUCCESS) {
             return rv;
         }
+        nopush_set = 1;
+    }
+
+    if (hdtr->numheaders > 0) {
+        apr_size_t hdrbytes;
 
         /* Now write the headers */
         arv = apr_socket_sendv(sock, hdtr->headers, hdtr->numheaders,
@@ -325,7 +329,10 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         }
         if (hdrbytes < total_hdrbytes) {
             *len = hdrbytes;
-            return apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
+            if (nopush_set) {
+                return apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
+            }
+            return APR_SUCCESS;
         }
     }
 
@@ -362,7 +369,9 @@ do_select:
     if (rv == -1) {
         *len = nbytes;
         rv = errno;
-        apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
+        if (nopush_set) {
+            apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
+        }
         return rv;
     }
 
@@ -370,7 +379,12 @@ do_select:
 
     if (rv < *len) {
         *len = nbytes;
-        arv = apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
+        if (nopush_set) {
+            arv = apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
+        }
+        else {
+            arv = APR_SUCCESS;
+        }
         if (rv > 0) {
                 
             /* If this was a partial write, return now with the 
@@ -398,16 +412,16 @@ do_select:
         arv = apr_socket_sendv(sock, hdtr->trailers, hdtr->numtrailers, 
                                &trbytes);
         nbytes += trbytes;
+        if (nopush_set) {
+            apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
+        }
         if (arv != APR_SUCCESS) {
             *len = nbytes;
             rv = errno;
-            apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
             return rv;
         }
     }
 
-    apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
-    
     (*len) = nbytes;
     return rv < 0 ? errno : APR_SUCCESS;
 }
