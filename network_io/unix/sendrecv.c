@@ -263,9 +263,10 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                                  apr_hdtr_t *hdtr, apr_off_t *offset,
                                  apr_size_t *len, apr_int32_t flags)
 {
-    int rv, nbytes = 0, total_hdrbytes, i;
-    int nopush_set = 0;
+    int nopush_set = 0, rv, i;
+    apr_size_t bytes_to_send = *len;
     apr_status_t arv;
+    apr_size_t n;
 
 #if APR_HAS_LARGE_FILES && defined(HAVE_SENDFILE64)
     apr_off_t off = *offset;
@@ -276,7 +277,8 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
      * past the 2Gb limit. */
     off_t off;
     
-    if ((apr_int64_t)*offset + *len > INT_MAX) {
+    if ((apr_int64_t)*offset + bytes_to_send > INT_MAX) {
+        *len = 0;
         return EINVAL;
     }
     
@@ -289,10 +291,13 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
      * passed a >=2Gb count value on some 64-bit kernels.  It won't
      * noticably hurt performance to limit each call to <2Gb at a
      * time, so avoid that issue here: */
-    if (sizeof(off_t) == 8 && *len > INT_MAX) {
-        *len = INT_MAX;
+    if (sizeof(off_t) == 8 && bytes_to_send > INT_MAX) {
+        bytes_to_send = INT_MAX;
     }
 #endif
+
+    /* Until further notice. */
+    *len = 0;
 
     if (!hdtr) {
         hdtr = &no_hdtr;
@@ -308,16 +313,14 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
     }
 
     if (hdtr->numheaders > 0) {
-        apr_size_t hdrbytes;
+        apr_size_t total_hdrbytes;
 
         /* Now write the headers */
-        arv = apr_socket_sendv(sock, hdtr->headers, hdtr->numheaders,
-                               &hdrbytes);
+        arv = apr_socket_sendv(sock, hdtr->headers, hdtr->numheaders, &n);
+        *len += n;
         if (arv != APR_SUCCESS) {
-            *len = 0;
-            return errno;
+            return arv;
         }
-        nbytes += hdrbytes;
 
         /* If this was a partial write and we aren't doing timeouts, 
          * return now with the partial byte count; this is a non-blocking 
@@ -327,8 +330,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         for (i = 0; i < hdtr->numheaders; i++) {
             total_hdrbytes += hdtr->headers[i].iov_len;
         }
-        if (hdrbytes < total_hdrbytes) {
-            *len = hdrbytes;
+        if (n < total_hdrbytes) {
             if (nopush_set) {
                 return apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
             }
@@ -345,7 +347,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         rv = sendfile(sock->socketdes,    /* socket */
                       file->filedes, /* open file descriptor of the file to be sent */
                       &off,    /* where in the file to start */
-                      *len);   /* number of bytes to send */
+                      bytes_to_send);   /* number of bytes to send */
     } while (rv == -1 && errno == EINTR);
 
     while ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK) 
@@ -353,7 +355,6 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
 do_select:
         arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
         if (arv != APR_SUCCESS) {
-            *len = 0;
             return arv;
         }
         else {
@@ -361,24 +362,22 @@ do_select:
                 rv = sendfile(sock->socketdes,    /* socket */
                               file->filedes, /* open file descriptor of the file to be sent */
                               &off,    /* where in the file to start */
-                              *len);    /* number of bytes to send */
+                              bytes_to_send);    /* number of bytes to send */
             } while (rv == -1 && errno == EINTR);
         }
     }
 
     if (rv == -1) {
-        *len = nbytes;
-        rv = errno;
+        arv = errno;
         if (nopush_set) {
             apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
         }
-        return rv;
+        return arv;
     }
 
-    nbytes += rv;
+    *len += rv;
 
-    if (rv < *len) {
-        *len = nbytes;
+    if ((apr_size_t)rv < bytes_to_send) {
         if (nopush_set) {
             arv = apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
         }
@@ -408,22 +407,17 @@ do_select:
 
     /* Now write the footers */
     if (hdtr->numtrailers > 0) {
-        apr_size_t trbytes;
-        arv = apr_socket_sendv(sock, hdtr->trailers, hdtr->numtrailers, 
-                               &trbytes);
-        nbytes += trbytes;
+        arv = apr_socket_sendv(sock, hdtr->trailers, hdtr->numtrailers, &n);
+        *len += n;
         if (nopush_set) {
             apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
         }
         if (arv != APR_SUCCESS) {
-            *len = nbytes;
-            rv = errno;
-            return rv;
+            return arv;
         }
     }
 
-    (*len) = nbytes;
-    return rv < 0 ? errno : APR_SUCCESS;
+    return APR_SUCCESS;
 }
 
 #elif defined(DARWIN)
@@ -434,10 +428,13 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                                  apr_size_t *len, apr_int32_t flags)
 {
     apr_off_t nbytes = 0;
-    apr_off_t bytes_to_send = *len;
-    apr_off_t bytes_sent = 0;
+    apr_size_t bytes_to_send = *len;
     apr_status_t arv;
+    apr_size_t n;
     int rv = 0;
+
+    /* Until further notice. */
+    *len = 0;
 
     /* Ignore flags for now. */
     flags = 0;
@@ -451,24 +448,21 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
      * apr_socket_sendv() instead.
      */
      if (hdtr->numheaders > 0) {
-        apr_size_t hbytes;
+        apr_size_t total_hdrbytes;
         int i;
 
         /* Now write the headers */
-        arv = apr_socket_sendv(sock, hdtr->headers, hdtr->numheaders,
-                               &hbytes);
+        arv = apr_socket_sendv(sock, hdtr->headers, hdtr->numheaders, &n);
+        *len += n;
         if (arv != APR_SUCCESS) {
-            *len = 0;
-            return errno;
+            return arv;
         }
-        bytes_sent = hbytes;
 
-        hbytes = 0;
+        total_hdrbytes = 0;
         for (i = 0; i < hdtr->numheaders; i++) {
-            hbytes += hdtr->headers[i].iov_len;
+            total_hdrbytes += hdtr->headers[i].iov_len;
         }
-        if (bytes_sent < hbytes) {
-            *len = bytes_sent;
+        if (n < total_hdrbytes) {
             return APR_SUCCESS;
         }
     }
@@ -482,7 +476,6 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
             sock->options &= ~APR_INCOMPLETE_WRITE;
             arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
             if (arv != APR_SUCCESS) {
-                *len = 0;
                 return arv;
             }
         }
@@ -505,42 +498,40 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                  * semantics w.r.t. bytes sent.
                  */
                 if (nbytes) {
-                    bytes_sent += nbytes;
+                    *len += nbytes;
                     /* normal exit for a big file & non-blocking io */
-                    (*len) = bytes_sent;
                     return APR_SUCCESS;
+                }
+                if (sock->timeout <= 0) {
+                    /* normal exit for a non-blocking io which would block */
+                    break;
                 }
             }
         }
         else {       /* rv == 0 (or the kernel is broken) */
-            bytes_sent += nbytes;
             if (nbytes == 0) {
                 /* Most likely the file got smaller after the stat.
                  * Return an error so the caller can do the Right Thing.
                  */
-                (*len) = bytes_sent;
                 return APR_EOF;
             }
+            *len += nbytes;
         }
     } while (rv == -1 && (errno == EINTR || errno == EAGAIN));
 
-    /* Now write the footers */
-    if (hdtr->numtrailers > 0) {
-        apr_size_t tbytes;
-        arv = apr_socket_sendv(sock, hdtr->trailers, hdtr->numtrailers, 
-                               &tbytes);
-        bytes_sent += tbytes;
-        if (arv != APR_SUCCESS) {
-            *len = bytes_sent;
-            rv = errno;
-            return rv;
-        }
-    }
-
-    (*len) = bytes_sent;
     if (rv == -1) {
         return errno;
     }
+
+    /* Now write the footers */
+    if (hdtr->numtrailers > 0) {
+        arv = apr_socket_sendv(sock, hdtr->trailers, hdtr->numtrailers, &n);
+        *len += n;
+        if (arv != APR_SUCCESS) {
+            return arv;
+        }
+    }
+
     return APR_SUCCESS;
 }
 
@@ -558,6 +549,10 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
 #endif
     struct sf_hdtr headerstruct;
     apr_size_t bytes_to_send = *len;
+    apr_status_t arv;
+
+    /* Until further notice. */
+    *len = 0;
 
     /* Ignore flags for now. */
     flags = 0;
@@ -590,11 +585,9 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
     /* FreeBSD can send the headers/footers as part of the system call */
     do {
         if (sock->options & APR_INCOMPLETE_WRITE) {
-            apr_status_t arv;
             sock->options &= ~APR_INCOMPLETE_WRITE;
             arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
             if (arv != APR_SUCCESS) {
-                *len = 0;
                 return arv;
             }
         }
@@ -621,9 +614,13 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                      * semantics w.r.t. bytes sent.
                      */
                     if (nbytes) {
+                        *len += nbytes;
                         /* normal exit for a big file & non-blocking io */
-                        (*len) = nbytes;
                         return APR_SUCCESS;
+                    }
+                    if (sock->timeout <= 0) {
+                        /* normal exit for a non-blocking io which would block */
+                        break;
                     }
                 }
             }
@@ -632,9 +629,9 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                     /* Most likely the file got smaller after the stat.
                      * Return an error so the caller can do the Right Thing.
                      */
-                    (*len) = nbytes;
                     return APR_EOF;
                 }
+                *len += nbytes;
             }
         }    
         else {
@@ -644,24 +641,19 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                         hdtr->trailers,
                         hdtr->numtrailers);
             if (rv > 0) {
-                nbytes = rv;
-                rv = 0;
+                *len += rv;
             }
-            else {
-                nbytes = 0;
-            }
-        }
-        if ((rv == -1) && (errno == EAGAIN) 
-                       && (sock->timeout > 0)) {
-            apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
-            if (arv != APR_SUCCESS) {
-                *len = 0;
-                return arv;
+            else if (rv == -1 && errno == EAGAIN) {
+                if (sock->timeout > 0) {
+                    sock->options |= APR_INCOMPLETE_WRITE;
+                }
+                else {
+                    break;
+                }
             }
         }
     } while (rv == -1 && (errno == EINTR || errno == EAGAIN));
 
-    (*len) = nbytes;
     if (rv == -1) {
         return errno;
     }
