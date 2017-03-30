@@ -324,6 +324,10 @@ APR_DECLARE(apr_status_t) apr_file_copy(const char *from_path,
  *     file's permissions are copied.
  * @param pool The pool to use.
  * @remark The new file does not need to exist, it will be created if required.
+ * @remark Note that advanced filesystem permissions such as ACLs are not
+ * duplicated by this API. The target permissions (including duplicating the
+ * source file permissions) are assigned only when the target file does not yet
+ * exist.
  */
 APR_DECLARE(apr_status_t) apr_file_append(const char *from_path, 
                                           const char *to_path,

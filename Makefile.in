@@ -151,6 +151,12 @@ apr.exp: exports.c export_vars.c
 dox:
 	doxygen $(top_srcdir)/docs/doxygen.conf
 
+dox-vpath:
+	-mkdir docs 2> /dev/null
+	sed -e "s#\(INPUT=\.\)#\1 $(top_srcdir)#;" \
+		< $(top_srcdir)/docs/doxygen.conf > docs/doxygen.conf
+	doxygen docs/doxygen.conf
+
 gcov: 
 	@build/run-gcov.sh
 
