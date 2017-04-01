@@ -573,6 +573,11 @@ case $host in
        OSDIR="unix"
        eolstr="\\n"
        ;;
+   *darwin* ) 
+       ac_cv_func_fdatasync="no" # Mac OS X wrongly reports it has fdatasync()
+       OSDIR="unix"
+       eolstr="\\n"
+       ;;
    *)
        OSDIR="unix"
        eolstr="\\n"
