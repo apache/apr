@@ -342,7 +342,12 @@ static void test_buffered(abts_case *tc, void *data)
 
 static void test_nolfs(abts_case *tc, void *data)
 {
-    ABTS_NOT_IMPL(tc, "Large Files not supported");
+    if (sizeof(off_t) < 8) {
+        ABTS_NOT_IMPL(tc, "Large Files not supported");
+    }
+    else {
+        ABTS_NOT_IMPL(tc, "LFS support a no-op in 64-bit builds");
+    }
 }
 
 #endif
