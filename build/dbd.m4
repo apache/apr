@@ -177,12 +177,12 @@ AC_DEFUN([APU_CHECK_DBD_MYSQL], [
       fi
 
       AC_CHECK_HEADERS([mysql.h my_global.h my_sys.h],
-                       AC_CHECK_LIB(mysqlclient_r, mysql_init, [apu_have_mysql=1]),
+                       AC_CHECK_LIB(mysqlclient, mysql_init, [apu_have_mysql=1]),
                        [apu_have_mysql=0; break],
                        [#include <my_global.h>])
       if test "$apu_have_mysql" = "0"; then
         AC_CHECK_HEADERS([mysql/mysql.h mysql/my_global.h mysql/my_sys.h],
-                         AC_CHECK_LIB(mysqlclient_r, mysql_init, [apu_have_mysql=1]),
+                         AC_CHECK_LIB(mysqlclient, mysql_init, [apu_have_mysql=1]),
                          [apu_have_mysql=0; break],
                          [#include <mysql/my_global.h>])
       fi
@@ -208,13 +208,13 @@ AC_DEFUN([APU_CHECK_DBD_MYSQL], [
 
       AC_MSG_NOTICE(checking for mysql in $withval)
       AC_CHECK_HEADERS([mysql.h my_global.h my_sys.h],
-                       AC_CHECK_LIB(mysqlclient_r, mysql_init, [apu_have_mysql=1]),
+                       AC_CHECK_LIB(mysqlclient, mysql_init, [apu_have_mysql=1]),
                        [apu_have_mysql=0; break],
                        [#include <my_global.h>])
 
       if test "$apu_have_mysql" != "1"; then
         AC_CHECK_HEADERS([mysql/mysql.h mysql/my_global.h mysql/my_sys.h],
-                         AC_CHECK_LIB(mysqlclient_r, mysql_init, [apu_have_mysql=1]),
+                         AC_CHECK_LIB(mysqlclient, mysql_init, [apu_have_mysql=1]),
                          [apu_have_mysql=0; break],
                          [#include <mysql/my_global.h>])
       fi
@@ -229,7 +229,7 @@ AC_DEFUN([APU_CHECK_DBD_MYSQL], [
   dnl Since we have already done the AC_CHECK_LIB tests, if we have it, 
   dnl we know the library is there.
   if test "$apu_have_mysql" = "1"; then
-    APR_ADDTO(LDADD_dbd_mysql, [$mysql_LDFLAGS -lmysqlclient_r $mysql_LIBS])
+    APR_ADDTO(LDADD_dbd_mysql, [$mysql_LDFLAGS -lmysqlclient $mysql_LIBS])
   fi
   AC_SUBST(LDADD_dbd_mysql)
 
