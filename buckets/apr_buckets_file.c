@@ -205,7 +205,7 @@ APR_DECLARE(apr_status_t) apr_bucket_file_set_buf_size(apr_bucket *e,
         a->read_size = APR_BUCKET_BUFF_SIZE;
     }
     else {
-        apr_size_t floor = apr_bucket_alloc_aligned_floor(size);
+        apr_size_t floor = apr_bucket_alloc_aligned_floor(e->list, size);
         a->read_size = (size < floor) ? size : floor;
     }
 

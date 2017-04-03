@@ -997,10 +997,13 @@ APR_DECLARE_NONSTD(void) apr_bucket_alloc_destroy(apr_bucket_alloc_t *list)
  * Get the aligned size corresponding to the requested size, but minus the
  * allocator(s) overhead such that the allocation would remain in the
  * same boundary.
+ * @param list The allocator from which to the memory would be allocated.
  * @param size The requested size.
  * @return The corresponding aligned/floored size.
  */
-APR_DECLARE_NONSTD(apr_size_t) apr_bucket_alloc_aligned_floor(apr_size_t size);
+APR_DECLARE_NONSTD(apr_size_t) apr_bucket_alloc_aligned_floor(apr_bucket_alloc_t *list,
+                                                              apr_size_t size)
+                         __attribute__((nonnull(1)));
 
 /**
  * Allocate memory for use by the buckets.
