@@ -130,14 +130,12 @@ static void test_exclusive(abts_case *tc, const char *lockname,
     int n;
  
     rv = apr_proc_mutex_create(&proc_lock, lockname, mech->num, p);
-    APR_ASSERT_SUCCESS(tc, "create the mutex", rv);
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr, "%s not implemented, ", mech->name);
-        ABTS_ASSERT(tc, "Default timed not implemented",
-                    mech->num != APR_LOCK_DEFAULT &&
-                    mech->num != APR_LOCK_DEFAULT_TIMED);
+    if (rv == APR_ENOTIMPL) {
+        /* MacOS lacks TIMED implementation, so don't fail for ENOTIMPL */
+        fprintf(stderr, "method %s not implemented, ", mech->name);
         return;
     }
+    APR_ASSERT_SUCCESS(tc, "create the mutex", rv);
  
     for (n = 0; n < CHILDREN; n++)
         make_child(tc, 0, &child[n], p);
