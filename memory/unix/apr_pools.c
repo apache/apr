@@ -269,8 +269,10 @@ apr_size_t allocator_align(apr_size_t in_size)
     return size;
 }
 
-APR_DECLARE(apr_size_t) apr_allocator_align(apr_size_t size)
+APR_DECLARE(apr_size_t) apr_allocator_align(apr_allocator_t *allocator,
+                                            apr_size_t size)
 {
+    (void)allocator;
     return allocator_align(size);
 }
 
