@@ -27,7 +27,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 }
 
 #if APR_HAS_POSIXSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || \
-    APR_HAS_PROC_PTHREAD_SERIALIZE || APR_HAS_SYSVSEM_SERIALIZE
+    APR_HAS_SYSVSEM_SERIALIZE
 static apr_status_t proc_mutex_no_child_init(apr_proc_mutex_t **mutex,
                                              apr_pool_t *cont,
                                              const char *fname)
