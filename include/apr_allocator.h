@@ -107,10 +107,12 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
 /**
  * Get the true size that would be allocated for the given size (including
  * the header and alignment).
+ * @param list The allocator from which to the memory would be allocated
  * @param size The size to align
  * @return The aligned size (or zero on apr_size_t overflow)
  */
-APR_DECLARE(apr_size_t) apr_allocator_align(apr_size_t size);
+APR_DECLARE(apr_size_t) apr_allocator_align(apr_allocator_t *allocator,
+                                            apr_size_t size);
 
 #include "apr_pools.h"
 
