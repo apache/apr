@@ -654,7 +654,9 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
                                                     apr_time_t timeout,
                                                     int absolute)
 {
-#ifdef HAVE_PTHREAD_MUTEX_TIMEDLOCK
+#ifndef HAVE_PTHREAD_MUTEX_TIMEDLOCK
+extern int pthread_mutex_timedlock(pthread_mutex_t *mutex, const struct timespec *abs_timeout);
+#endif
     if (timeout < 0) {
         return proc_mutex_pthread_acquire(mutex);
     }
@@ -689,9 +691,6 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
     }
     mutex->curr_locked = 1;
     return APR_SUCCESS;
-#else
-    return APR_ENOTIMPL;
-#endif
 }
 
 static apr_status_t proc_mutex_pthread_release(apr_proc_mutex_t *mutex)
@@ -1220,8 +1219,7 @@ static apr_status_t proc_mutex_choose_method(apr_proc_mutex_t *new_mutex,
         break;
     case APR_LOCK_DEFAULT_TIMED:
 #if APR_HAS_PROC_PTHREAD_SERIALIZE \
-            && defined(HAVE_PTHREAD_MUTEX_ROBUST) \
-            && defined(HAVE_PTHREAD_MUTEX_TIMEDLOCK)
+            && defined(HAVE_PTHREAD_MUTEX_ROBUST)
         new_mutex->meth = &mutex_proc_pthread_methods;
 #elif APR_HAS_SYSVSEM_SERIALIZE \
             && defined(HAVE_SEMTIMEDOP)
