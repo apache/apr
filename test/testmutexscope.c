@@ -155,7 +155,7 @@ static void test_mech_mode(apr_lockmech_e mech, const char *mech_name,
 
   if (test_mode == TEST_PROC) {
       printf("  mutex mechanism `%s' is %sglobal in scope on this platform.\n",
-             mech_name, counter == 1 ? "" : "not ");
+             mech_name, counter == 1 ? "" : "*NOT* ");
   }
   else {
       if (counter != 1) {
