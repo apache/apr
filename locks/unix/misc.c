@@ -146,41 +146,23 @@ int sem_timedwait(sem_t * sem, const struct timespec *abs_timeout)
 #if APR_HAS_SYSVSEM_SERIALIZE
 #if !HAVE_SEMTIMEDOP
 extern int semtimedop(int semid, struct sembuf *sops, unsigned nsops,
-                      const struct timespec *abs_timeout);
+                      const struct timespec *timeout);
 /*
  * A semtimedop() impl for OSX/macOS, which lacks the
  * real thing.
  */
 int semtimedop(int semid, struct sembuf *sops, unsigned nsops,
-               const struct timespec *abs_timeout)
+               const struct timespec *timeout)
 {
     int rv;
-    struct timespec remaining, ts, tod;
-    apr_time_t now;
+    struct timespec remaining, ts;
     struct sembuf proc_mutex_op_try;
 
     proc_mutex_op_try.sem_num = 0;
     proc_mutex_op_try.sem_op = -1;
     proc_mutex_op_try.sem_flg = SEM_UNDO | IPC_NOWAIT;
 
-    remaining = *abs_timeout;
-    now = apr_time_now();
-    tod.tv_sec = apr_time_sec(now);
-    tod.tv_nsec = apr_time_usec(now) * 1000;    /* nanoseconds */
-
-    remaining.tv_sec -= tod.tv_sec;
-    if (tod.tv_nsec <= remaining.tv_nsec) {
-        remaining.tv_nsec -= tod.tv_nsec;
-    }
-    else {
-        remaining.tv_sec--;
-        remaining.tv_nsec =
-            (NANOSECS_PER_SEC - (tod.tv_nsec - remaining.tv_nsec));
-    }
-    /* If we had a REALLY small timeout ;) */
-    if (remaining.tv_sec < 0) {
-        return ETIMEDOUT;
-    }
+    remaining = *timeout;
     errno = 0;
     while (((rv = semop(semid, &proc_mutex_op_try, nsops)) != 0)
            && (errno == EAGAIN)) {
