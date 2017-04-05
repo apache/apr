@@ -343,8 +343,11 @@ static apr_status_t proc_mutex_sysv_timedacquire(apr_proc_mutex_t *mutex,
     else {
         int rc;
         struct timespec abstime;
-        if (!absolute) {
-            timeout += apr_time_now();
+        if (absolute) {
+            timeout -= apr_time_now();
+            if (timeout < 0) {
+                return proc_mutex_sysv_tryacquire(mutex);
+            }
         }
         abstime.tv_sec = apr_time_sec(timeout);
         abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
