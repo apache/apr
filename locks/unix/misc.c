@@ -19,6 +19,8 @@
 #define APR_WANT_MEMFUNC
 #include "apr_want.h"
 
+#include <errno.h>
+
 #if APR_HAS_THREADS
 #if APR_HAS_SYSVSEM_SERIALIZE
 #if !HAVE_SEMTIMEDOP
@@ -27,7 +29,6 @@
 #endif
 #define SLEEP_TIME_NS      10000000
 #define NANOSECS_PER_SEC 1000000000
-extern int errno;
 
 #ifndef HAVE_PTHREAD_MUTEX_TIMEDLOCK
 extern int pthread_mutex_timedlock(pthread_mutex_t * mutex,
