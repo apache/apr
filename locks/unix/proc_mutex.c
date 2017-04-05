@@ -181,7 +181,9 @@ static apr_status_t proc_mutex_posix_timedacquire(apr_proc_mutex_t *mutex,
                                                   apr_time_t timeout,
                                                   int absolute)
 {
-#if HAVE_SEM_TIMEDWAIT
+#if !HAVE_SEM_TIMEDWAIT
+extern int sem_timedwait(sem_t *sem, const struct timespec *abs_timeout);
+#endif
     if (timeout < 0) {
         return proc_mutex_posix_acquire(mutex);
     }
@@ -207,9 +209,6 @@ static apr_status_t proc_mutex_posix_timedacquire(apr_proc_mutex_t *mutex,
     }
     mutex->curr_locked = 1;
     return APR_SUCCESS;
-#else
-    return APR_ENOTIMPL;
-#endif
 }
 
 static apr_status_t proc_mutex_posix_release(apr_proc_mutex_t *mutex)
@@ -336,7 +335,10 @@ static apr_status_t proc_mutex_sysv_timedacquire(apr_proc_mutex_t *mutex,
                                                  apr_time_t timeout,
                                                  int absolute)
 {
-#if HAVE_SEMTIMEDOP
+#if !HAVE_SEMTIMEDOP
+extern int semtimedop(int semid, struct sembuf *sops, unsigned nsops,
+                      const struct timespec *abs_timeout);
+#endif
     if (timeout < 0) {
         return proc_mutex_sysv_acquire(mutex);
     }
@@ -364,9 +366,6 @@ static apr_status_t proc_mutex_sysv_timedacquire(apr_proc_mutex_t *mutex,
     }
     mutex->curr_locked = 1;
     return APR_SUCCESS;
-#else
-    return APR_ENOTIMPL;
-#endif
 }
 
 static apr_status_t proc_mutex_sysv_release(apr_proc_mutex_t *mutex)
