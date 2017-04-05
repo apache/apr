@@ -578,6 +578,11 @@ case $host in
              ;;
        esac
        ;;
+   *apple-darwin*)
+       ac_cv_func_fdatasync="no" # Mac OS X wrongly reports it has fdatasync()
+       OSDIR="unix"
+       eolstr="\\n"
+       ;;
    *os390)
        OSDIR="os390"
        OBJECTS_PLATFORM='$(OBJECTS_os390)'
