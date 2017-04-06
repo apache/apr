@@ -494,23 +494,27 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_sysv_methods =
  * destroy it.
  */
 typedef struct {
+#define proc_pthread_cast(m) \
+    ((proc_pthread_mutex_t *)(m)->os.pthread_interproc)
     pthread_mutex_t mutex;
+#define proc_pthread_mutex(m) \
+    (proc_pthread_cast(m)->mutex)
 #if APR_USE_PROC_PTHREAD_MUTEX_COND
     pthread_cond_t  cond;
-    apr_int32_t     cond_locked;
-    apr_uint32_t    cond_num_waiters;
 #define proc_pthread_mutex_cond(m) \
-    (((proc_pthread_mutex_t *)(m)->os.pthread_interproc)->cond)
+    (proc_pthread_cast(m)->cond)
+    apr_int32_t     cond_locked;
 #define proc_pthread_mutex_cond_locked(m) \
-    (((proc_pthread_mutex_t *)(m)->os.pthread_interproc)->cond_locked)
+    (proc_pthread_cast(m)->cond_locked)
+    apr_uint32_t    cond_num_waiters;
 #define proc_pthread_mutex_cond_num_waiters(m) \
-    (((proc_pthread_mutex_t *)(m)->os.pthread_interproc)->cond_num_waiters)
+    (proc_pthread_cast(m)->cond_num_waiters)
 #endif /* APR_USE_PROC_PTHREAD_MUTEX_COND */
     apr_uint32_t refcount;
+#define proc_pthread_mutex_refcount(m) \
+    (proc_pthread_cast(m)->refcount)
 } proc_pthread_mutex_t;
 
-#define proc_pthread_mutex_refcount(m) \
-    (((proc_pthread_mutex_t *)(m)->os.pthread_interproc)->refcount)
 
 static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
                                                     apr_time_t timeout,
@@ -545,7 +549,7 @@ static apr_status_t proc_pthread_mutex_unref(void *mutex_)
     else
 #endif /* APR_USE_PROC_PTHREAD_MUTEX_COND */
     if (mutex->curr_locked == 1) {
-        if ((rv = pthread_mutex_unlock(mutex->os.pthread_interproc))) {
+        if ((rv = pthread_mutex_unlock(&proc_pthread_mutex(mutex)))) {
 #ifdef HAVE_ZOS_PTHREADS
             rv = errno;
 #endif
@@ -563,7 +567,7 @@ static apr_status_t proc_pthread_mutex_unref(void *mutex_)
         }
 #endif /* APR_USE_PROC_PTHREAD_MUTEX_COND */
 
-        if ((rv = pthread_mutex_destroy(mutex->os.pthread_interproc))) {
+        if ((rv = pthread_mutex_destroy(&proc_pthread_mutex(mutex)))) {
 #ifdef HAVE_ZOS_PTHREADS
             rv = errno;
 #endif
@@ -655,7 +659,7 @@ static apr_status_t proc_mutex_pthread_create(apr_proc_mutex_t *new_mutex,
     }
 #endif /* HAVE_PTHREAD_MUTEX_ROBUST */
 
-    if ((rv = pthread_mutex_init(new_mutex->os.pthread_interproc, &mattr))) {
+    if ((rv = pthread_mutex_init(&proc_pthread_mutex(new_mutex), &mattr))) {
 #ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
@@ -716,7 +720,7 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
 
 #if APR_USE_PROC_PTHREAD_MUTEX_COND
     if (proc_pthread_mutex_cond_locked(mutex) != -1) {
-        if ((rv = pthread_mutex_lock(mutex->os.pthread_interproc))) {
+        if ((rv = pthread_mutex_lock(&proc_pthread_mutex(mutex)))) {
 #ifdef HAVE_ZOS_PTHREADS 
             rv = errno;
 #endif
@@ -724,7 +728,7 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
             /* Okay, our owner died.  Let's try to make it consistent again. */
             if (rv == EOWNERDEAD) {
                 proc_pthread_mutex_dec(mutex);
-                pthread_mutex_consistent_np(mutex->os.pthread_interproc);
+                pthread_mutex_consistent_np(&proc_pthread_mutex(mutex));
             }
             else
 #endif
@@ -741,7 +745,7 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
             proc_pthread_mutex_cond_num_waiters(mutex)++;
             if (timeout < 0) {
                 rv = pthread_cond_wait(&proc_pthread_mutex_cond(mutex),
-                                       mutex->os.pthread_interproc);
+                                       &proc_pthread_mutex(mutex));
 #ifdef HAVE_ZOS_PTHREADS
                 if (rv) {
                     rv = errno;
@@ -756,7 +760,7 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
                 abstime.tv_sec = apr_time_sec(timeout);
                 abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
                 rv = pthread_cond_timedwait(&proc_pthread_mutex_cond(mutex),
-                                            mutex->os.pthread_interproc,
+                                            &proc_pthread_mutex(mutex),
                                             &abstime);
                 if (rv) {
 #ifdef HAVE_ZOS_PTHREADS
@@ -770,11 +774,11 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
             proc_pthread_mutex_cond_num_waiters(mutex)--;
         }
         if (rv) {
-            pthread_mutex_unlock(mutex->os.pthread_interproc);
+            pthread_mutex_unlock(&proc_pthread_mutex(mutex));
             return rv;
         }
 
-        rv = pthread_mutex_unlock(mutex->os.pthread_interproc);
+        rv = pthread_mutex_unlock(&proc_pthread_mutex(mutex));
         if (rv) {
 #ifdef HAVE_ZOS_PTHREADS
             rv = errno;
@@ -786,7 +790,7 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
 #endif /* APR_USE_PROC_PTHREAD_MUTEX_COND */
     {
         if (timeout < 0) {
-            rv = pthread_mutex_lock(mutex->os.pthread_interproc);
+            rv = pthread_mutex_lock(&proc_pthread_mutex(mutex));
             if (rv) {
 #ifdef HAVE_ZOS_PTHREADS
                 rv = errno;
@@ -794,7 +798,7 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
             }
         }
         else if (!timeout) {
-            rv = pthread_mutex_trylock(mutex->os.pthread_interproc);
+            rv = pthread_mutex_trylock(&proc_pthread_mutex(mutex));
             if (rv) {
 #ifdef HAVE_ZOS_PTHREADS
                 rv = errno;
@@ -811,7 +815,7 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
             }
             abstime.tv_sec = apr_time_sec(timeout);
             abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
-            rv = pthread_mutex_timedlock(mutex->os.pthread_interproc, &abstime);
+            rv = pthread_mutex_timedlock(&proc_pthread_mutex(mutex), &abstime);
             if (rv) {
 #ifdef HAVE_ZOS_PTHREADS 
                 rv = errno;
@@ -826,7 +830,7 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
             /* Okay, our owner died.  Let's try to make it consistent again. */
             if (rv == EOWNERDEAD) {
                 proc_pthread_mutex_dec(mutex);
-                pthread_mutex_consistent_np(mutex->os.pthread_interproc);
+                pthread_mutex_consistent_np(&proc_pthread_mutex(mutex));
             }
             else
 #endif
@@ -845,7 +849,7 @@ static apr_status_t proc_mutex_pthread_release(apr_proc_mutex_t *mutex)
 
 #if APR_USE_PROC_PTHREAD_MUTEX_COND
     if (proc_pthread_mutex_cond_locked(mutex) != -1) {
-        if ((rv = pthread_mutex_lock(mutex->os.pthread_interproc))) {
+        if ((rv = pthread_mutex_lock(&proc_pthread_mutex(mutex)))) {
 #ifdef HAVE_ZOS_PTHREADS 
             rv = errno;
 #endif
@@ -853,7 +857,7 @@ static apr_status_t proc_mutex_pthread_release(apr_proc_mutex_t *mutex)
             /* Okay, our owner died.  Let's try to make it consistent again. */
             if (rv == EOWNERDEAD) {
                 proc_pthread_mutex_dec(mutex);
-                pthread_mutex_consistent_np(mutex->os.pthread_interproc);
+                pthread_mutex_consistent_np(&proc_pthread_mutex(mutex));
             }
             else
 #endif
@@ -876,14 +880,14 @@ static apr_status_t proc_mutex_pthread_release(apr_proc_mutex_t *mutex)
             rv = APR_SUCCESS;
         }
         if (rv) {
-            pthread_mutex_unlock(mutex->os.pthread_interproc);
+            pthread_mutex_unlock(&proc_pthread_mutex(mutex));
             return rv;
         }
     }
 #endif /* APR_USE_PROC_PTHREAD_MUTEX_COND */
 
     mutex->curr_locked = 0;
-    if ((rv = pthread_mutex_unlock(mutex->os.pthread_interproc))) {
+    if ((rv = pthread_mutex_unlock(&proc_pthread_mutex(mutex)))) {
 #ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
