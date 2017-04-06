@@ -505,7 +505,7 @@ typedef struct {
     (proc_pthread_cast(m)->cond)
     apr_int32_t     cond_locked;
 #define proc_pthread_mutex_cond_locked(m) \
-    (proc_pthread_cast(m)->cond_locked)
+    ((m)->pthread_refcounting ? proc_pthread_cast(m)->cond_locked : -1)
     apr_uint32_t    cond_num_waiters;
 #define proc_pthread_mutex_cond_num_waiters(m) \
     (proc_pthread_cast(m)->cond_num_waiters)
