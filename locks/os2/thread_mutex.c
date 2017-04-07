@@ -77,10 +77,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
 {
     ULONG rc;
 
-    if (timeout < 0) {
-        rc = DosRequestMutexSem(mutex->hMutex, SEM_INDEFINITE_WAIT);
-    }
-    else if (!timeout) {
+    if (timeout <= 0) {
         rc = DosRequestMutexSem(mutex->hMutex, SEM_IMMEDIATE_RETURN);
     }
     else {
