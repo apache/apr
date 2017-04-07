@@ -60,16 +60,9 @@ static apr_status_t proc_mutex_no_perms_set(apr_proc_mutex_t *mutex,
         && !defined(HAVE_PTHREAD_MUTEX_TIMEDLOCK) \
         && !defined(HAVE_PTHREAD_CONDATTR_SETPSHARED))
 static apr_status_t proc_mutex_spinsleep_timedacquire(apr_proc_mutex_t *mutex,
-                                                      apr_time_t timeout,
-                                                      int absolute)
+                                                      apr_time_t timeout)
 {
     apr_status_t rv;
-    if (absolute) {
-        timeout -= apr_time_now();
-        if (timeout < 0) {
-            timeout = 0;
-        }
-    }
     if (timeout < 0) {
         rv = apr_proc_mutex_lock(mutex);
     }
@@ -229,19 +222,20 @@ static apr_status_t proc_mutex_posix_tryacquire(apr_proc_mutex_t *mutex)
 
 #if defined(HAVE_SEM_TIMEDWAIT)
 static apr_status_t proc_mutex_posix_timedacquire(apr_proc_mutex_t *mutex,
-                                                  apr_time_t timeout,
-                                                  int absolute)
+                                                  apr_time_t timeout)
 {
     if (timeout < 0) {
         return proc_mutex_posix_acquire(mutex);
+    }
+    else if (!timeout) {
+        apr_status_t rv = proc_mutex_posix_tryacquire(mutex);
+        return (rv == APR_EBUSY) ? APR_TIMEUP : rv;
     }
     else {
         int rc;
         struct timespec abstime;
 
-        if (!absolute) {
-            timeout += apr_time_now();
-        }
+        timeout += apr_time_now();
         abstime.tv_sec = apr_time_sec(timeout);
         abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
         
@@ -386,23 +380,22 @@ static apr_status_t proc_mutex_sysv_tryacquire(apr_proc_mutex_t *mutex)
 
 #if defined(HAVE_SEMTIMEDOP)
 static apr_status_t proc_mutex_sysv_timedacquire(apr_proc_mutex_t *mutex,
-                                                 apr_time_t timeout,
-                                                 int absolute)
+                                                 apr_time_t timeout)
 {
     if (timeout < 0) {
         return proc_mutex_sysv_acquire(mutex);
     }
+    else if (!timeout) {
+        apr_status_t rv = proc_mutex_sysv_tryacquire(mutex);
+        return (rv == APR_EBUSY) ? APR_TIMEUP : rv;
+    }
     else {
         int rc;
         struct timespec reltime;
-        if (absolute) {
-            timeout -= apr_time_now();
-            if (timeout < 0) {
-                return proc_mutex_sysv_tryacquire(mutex);
-            }
-        }
+
         reltime.tv_sec = apr_time_sec(timeout);
         reltime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
+
         do {
             rc = semtimedop(mutex->os.crossproc, &proc_mutex_op_on, 1,
                             &reltime);
@@ -517,8 +510,7 @@ typedef struct {
 
 
 static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
-                                                    apr_time_t timeout,
-                                                    int absolute);
+                                                    apr_time_t timeout);
 
 static APR_INLINE int proc_pthread_mutex_inc(apr_proc_mutex_t *mutex)
 {
@@ -700,21 +692,20 @@ static apr_status_t proc_mutex_pthread_child_init(apr_proc_mutex_t **mutex,
 
 static apr_status_t proc_mutex_pthread_acquire(apr_proc_mutex_t *mutex)
 {
-    return proc_mutex_pthread_timedacquire(mutex, -1, 0);
+    return proc_mutex_pthread_timedacquire(mutex, -1);
 }
 
 static apr_status_t proc_mutex_pthread_tryacquire(apr_proc_mutex_t *mutex)
 {
-    apr_status_t rv = proc_mutex_pthread_timedacquire(mutex, 0, 0);
+    apr_status_t rv = proc_mutex_pthread_timedacquire(mutex, 0);
     return (rv == APR_TIMEUP) ? APR_EBUSY : rv;
 }
 
 static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
-                                                    apr_time_t timeout,
-                                                    int absolute)
+                                                    apr_time_t timeout)
 {
 #if !APR_USE_PROC_PTHREAD_MUTEX_COND && !defined(HAVE_PTHREAD_MUTEX_TIMEDLOCK)
-    return proc_mutex_spinsleep_timedacquire(mutex, timeout, absolute);
+    return proc_mutex_spinsleep_timedacquire(mutex, timeout);
 #else
     apr_status_t rv;
 
@@ -754,11 +745,11 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
             }
             else {
                 struct timespec abstime;
-                if (!absolute) {
-                    timeout += apr_time_now();
-                }
+
+                timeout += apr_time_now();
                 abstime.tv_sec = apr_time_sec(timeout);
                 abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
+
                 rv = pthread_cond_timedwait(&proc_pthread_mutex_cond(mutex),
                                             &proc_pthread_mutex(mutex),
                                             &abstime);
@@ -810,11 +801,11 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
         }
         else {
             struct timespec abstime;
-            if (!absolute) {
-                timeout += apr_time_now();
-            }
+
+            timeout += apr_time_now();
             abstime.tv_sec = apr_time_sec(timeout);
             abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
+
             rv = pthread_mutex_timedlock(&proc_pthread_mutex(mutex), &abstime);
             if (rv) {
 #ifdef HAVE_ZOS_PTHREADS 
@@ -1564,10 +1555,9 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
-                                                   apr_time_t timeout,
-                                                   int absolute)
+                                                   apr_time_t timeout)
 {
-    return mutex->meth->timedacquire(mutex, timeout, absolute);
+    return mutex->meth->timedacquire(mutex, timeout);
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex)
