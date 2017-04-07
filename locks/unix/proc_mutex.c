@@ -60,7 +60,7 @@ static apr_status_t proc_mutex_no_perms_set(apr_proc_mutex_t *mutex,
         && !defined(HAVE_PTHREAD_MUTEX_TIMEDLOCK) \
         && !defined(HAVE_PTHREAD_CONDATTR_SETPSHARED))
 static apr_status_t proc_mutex_spinsleep_timedacquire(apr_proc_mutex_t *mutex,
-                                                      apr_time_t timeout)
+                                                  apr_interval_time_t timeout)
 {
     apr_status_t rv;
     if (timeout < 0) {
@@ -222,7 +222,7 @@ static apr_status_t proc_mutex_posix_tryacquire(apr_proc_mutex_t *mutex)
 
 #if defined(HAVE_SEM_TIMEDWAIT)
 static apr_status_t proc_mutex_posix_timedacquire(apr_proc_mutex_t *mutex,
-                                                  apr_time_t timeout)
+                                              apr_interval_time_t timeout)
 {
     if (timeout < 0) {
         return proc_mutex_posix_acquire(mutex);
@@ -380,7 +380,7 @@ static apr_status_t proc_mutex_sysv_tryacquire(apr_proc_mutex_t *mutex)
 
 #if defined(HAVE_SEMTIMEDOP)
 static apr_status_t proc_mutex_sysv_timedacquire(apr_proc_mutex_t *mutex,
-                                                 apr_time_t timeout)
+                                             apr_interval_time_t timeout)
 {
     if (timeout < 0) {
         return proc_mutex_sysv_acquire(mutex);
@@ -510,7 +510,7 @@ typedef struct {
 
 
 static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
-                                                    apr_time_t timeout);
+                                                apr_interval_time_t timeout);
 
 static APR_INLINE int proc_pthread_mutex_inc(apr_proc_mutex_t *mutex)
 {
@@ -702,7 +702,7 @@ static apr_status_t proc_mutex_pthread_tryacquire(apr_proc_mutex_t *mutex)
 }
 
 static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
-                                                    apr_time_t timeout)
+                                                apr_interval_time_t timeout)
 {
 #if !APR_USE_PROC_PTHREAD_MUTEX_COND && !defined(HAVE_PTHREAD_MUTEX_TIMEDLOCK)
     return proc_mutex_spinsleep_timedacquire(mutex, timeout);
