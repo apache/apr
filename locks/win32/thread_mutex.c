@@ -118,13 +118,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
                                                  apr_interval_time_t timeout)
 {
     if (mutex->type != thread_mutex_critical_section) {
-        DWORD rv, timeout_ms;
-        if (timeout < 0) {
-            timeout_ms = INFINITE;
-        }
-        else {
-            timeout_ms = apr_time_as_msec(timeout);
-        }
+        DWORD rv, timeout_ms = (timeout <= 0) ? 0 : apr_time_as_msec(timeout);
         rv = WaitForSingleObject(mutex->handle, timeout_ms);
         if ((rv != WAIT_OBJECT_0) && (rv != WAIT_ABANDONED)) {
             return (rv == WAIT_TIMEOUT) ? APR_TIMEUP : apr_get_os_error();

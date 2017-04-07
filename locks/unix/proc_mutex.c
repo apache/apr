@@ -58,32 +58,27 @@ static apr_status_t proc_mutex_no_perms_set(apr_proc_mutex_t *mutex,
 static apr_status_t proc_mutex_spinsleep_timedacquire(apr_proc_mutex_t *mutex,
                                                   apr_interval_time_t timeout)
 {
-    apr_status_t rv;
-    if (timeout < 0) {
-        rv = apr_proc_mutex_lock(mutex);
-    }
-    else {
 #define SLEEP_TIME apr_time_from_msec(10)
-        for (;;) {
-            rv = apr_proc_mutex_trylock(mutex);
-            if (!APR_STATUS_IS_EBUSY(rv)) {
-                if (rv == APR_SUCCESS) {
-                    mutex->curr_locked = 1;
-                }
-                break;
+    apr_status_t rv;
+    for (;;) {
+        rv = apr_proc_mutex_trylock(mutex);
+        if (!APR_STATUS_IS_EBUSY(rv)) {
+            if (rv == APR_SUCCESS) {
+                mutex->curr_locked = 1;
             }
-            if (!timeout) {
-                rv = APR_TIMEUP;
-                break;
-            }
-            if (timeout > SLEEP_TIME) {
-                apr_sleep(SLEEP_TIME);
-                timeout -= SLEEP_TIME;
-            }
-            else {
-                apr_sleep(timeout);
-                timeout = 0;
-            }
+            break;
+        }
+        if (timeout <= 0) {
+            rv = APR_TIMEUP;
+            break;
+        }
+        if (timeout > SLEEP_TIME) {
+            apr_sleep(SLEEP_TIME);
+            timeout -= SLEEP_TIME;
+        }
+        else {
+            apr_sleep(timeout);
+            timeout = 0;
         }
     }
     return rv;
@@ -230,10 +225,7 @@ static apr_status_t proc_mutex_posix_tryacquire(apr_proc_mutex_t *mutex)
 static apr_status_t proc_mutex_posix_timedacquire(apr_proc_mutex_t *mutex,
                                               apr_interval_time_t timeout)
 {
-    if (timeout < 0) {
-        return proc_mutex_posix_acquire(mutex);
-    }
-    else if (!timeout) {
+    if (timeout <= 0) {
         apr_status_t rv = proc_mutex_posix_tryacquire(mutex);
         return (rv == APR_EBUSY) ? APR_TIMEUP : rv;
     }
@@ -388,10 +380,7 @@ static apr_status_t proc_mutex_sysv_tryacquire(apr_proc_mutex_t *mutex)
 static apr_status_t proc_mutex_sysv_timedacquire(apr_proc_mutex_t *mutex,
                                              apr_interval_time_t timeout)
 {
-    if (timeout < 0) {
-        return proc_mutex_sysv_acquire(mutex);
-    }
-    else if (!timeout) {
+    if (timeout <= 0) {
         apr_status_t rv = proc_mutex_sysv_tryacquire(mutex);
         return (rv == APR_EBUSY) ? APR_TIMEUP : rv;
     }
@@ -514,9 +503,6 @@ typedef struct {
     (proc_pthread_cast(m)->refcount)
 } proc_pthread_mutex_t;
 
-
-static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
-                                                apr_interval_time_t timeout);
 
 static APR_INLINE int proc_pthread_mutex_inc(apr_proc_mutex_t *mutex)
 {
@@ -696,19 +682,8 @@ static apr_status_t proc_mutex_pthread_child_init(apr_proc_mutex_t **mutex,
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_pthread_acquire(apr_proc_mutex_t *mutex)
-{
-    return proc_mutex_pthread_timedacquire(mutex, -1);
-}
-
-static apr_status_t proc_mutex_pthread_tryacquire(apr_proc_mutex_t *mutex)
-{
-    apr_status_t rv = proc_mutex_pthread_timedacquire(mutex, 0);
-    return (rv == APR_TIMEUP) ? APR_EBUSY : rv;
-}
-
-static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
-                                                apr_interval_time_t timeout)
+static apr_status_t proc_mutex_pthread_acquire_ex(apr_proc_mutex_t *mutex,
+                                                  apr_interval_time_t timeout)
 {
 #if !APR_USE_PROC_PTHREAD_MUTEX_COND && !defined(HAVE_PTHREAD_MUTEX_TIMEDLOCK)
     return proc_mutex_spinsleep_timedacquire(mutex, timeout);
@@ -838,6 +813,23 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
     mutex->curr_locked = 1;
     return APR_SUCCESS;
 #endif
+}
+
+static apr_status_t proc_mutex_pthread_acquire(apr_proc_mutex_t *mutex)
+{
+    return proc_mutex_pthread_acquire_ex(mutex, -1);
+}
+
+static apr_status_t proc_mutex_pthread_tryacquire(apr_proc_mutex_t *mutex)
+{
+    apr_status_t rv = proc_mutex_pthread_acquire_ex(mutex, 0);
+    return (rv == APR_TIMEUP) ? APR_EBUSY : rv;
+}
+
+static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
+                                                apr_interval_time_t timeout)
+{
+    return proc_mutex_pthread_acquire_ex(mutex, (timeout <= 0) ? 0 : timeout);
 }
 
 static apr_status_t proc_mutex_pthread_release(apr_proc_mutex_t *mutex)
