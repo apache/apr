@@ -73,11 +73,10 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
-                                                   apr_time_t timeout,
-                                                   int absolute)
+                                                   apr_time_t timeout)
 {
     if (mutex)
-        return apr_thread_mutex_timedlock(mutex->mutex, timeout, absolute);
+        return apr_thread_mutex_timedlock(mutex->mutex, timeout);
     return APR_ENOLOCK;
 }
 

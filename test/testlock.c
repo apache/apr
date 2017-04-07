@@ -91,7 +91,7 @@ static void *APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data
     while (1)
     {
         if (data) {
-            apr_thread_mutex_timedlock(thread_mutex, *(apr_time_t *)data, 0);
+            apr_thread_mutex_timedlock(thread_mutex, *(apr_time_t *)data);
         }
         else {
             apr_thread_mutex_lock(thread_mutex);
@@ -358,7 +358,7 @@ static void test_timeoutmutex(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, 0, apr_thread_mutex_lock(timeout_mutex));
     for (i = 0; i < MAX_RETRY; i++) {
         begin = apr_time_now();
-        s = apr_thread_mutex_timedlock(timeout_mutex, timeout, 0);
+        s = apr_thread_mutex_timedlock(timeout_mutex, timeout);
         end = apr_time_now();
 
         if (s != APR_SUCCESS && !APR_STATUS_IS_TIMEUP(s)) {
