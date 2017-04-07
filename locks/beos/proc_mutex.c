@@ -114,11 +114,8 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
     int32 stat;
 
     if (atomic_add(&mutex->LockCount, 1) > 0) {
-        if (!timeout) {
+        if (timeout <= 0) {
             stat = B_TIMED_OUT;
-        }
-        else if (timeout < 0) {
-            stat = acquire_sem(mutex->Lock);
         }
         else {
             stat = acquire_sem_etc(mutex->Lock, 1, B_RELATIVE_TIMEOUT,
