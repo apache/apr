@@ -132,7 +132,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
-                                                     apr_time_t timeout)
+                                                 apr_interval_time_t timeout)
 {
     int32 stat;
     thread_id me = find_thread(NULL);
