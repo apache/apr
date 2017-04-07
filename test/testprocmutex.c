@@ -131,11 +131,6 @@ static void test_exclusive(abts_case *tc, const char *lockname,
     int n;
  
     rv = apr_proc_mutex_create(&proc_lock, lockname, mech->num, p);
-    if (rv == APR_ENOTIMPL) {
-        /* MacOS lacks TIMED implementation, so don't fail for ENOTIMPL */
-        fprintf(stderr, "method %s not implemented, ", mech->name);
-        return;
-    }
     APR_ASSERT_SUCCESS(tc, "create the mutex", rv);
  
     for (n = 0; n < CHILDREN; n++)
