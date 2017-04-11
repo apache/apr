@@ -228,7 +228,7 @@ sub tovc2005 {
 
 sub toossl1 {
 
-    if (m|\.dsp$|) {
+    if (m|\.dsp$| || m|\.dsw$|) {
         $oname = $_;
         $tname = '.#' . $_;
         $verchg = 0;
@@ -245,6 +245,38 @@ sub toossl1 {
                 $verchg = -1;
             }
             if ($src =~ s|(\\\|/)?out32dll||) {
+                $verchg = -1;
+            }
+            # we must have apr-1.6+ to build with OpenSSL 1.1.0
+            # deal with the moving of xml.mak
+            if ($src =~ s|xml\\expat\\lib\\xml|xml\\xml|) {
+                $verchg = -1;
+            }
+            print $dstfl $src;
+        }
+        undef $srcfl;
+        undef $dstfl;
+        if ($verchg) {
+            unlink $oname || die;
+            rename $tname, $oname || die;
+            print "Converted project " . $oname . " to OpenSSL 1.1.0 in " . $File::Find::dir . "\n";
+        }
+        else {
+            unlink $tname;
+        }
+    }
+}
+
+sub toapr16 {
+
+    if (m|\.dsw$|) {
+        $oname = $_;
+        $tname = '.#' . $_;
+        $verchg = 0;
+        $srcfl = new IO::File $_, "r" || die;
+        $dstfl = new IO::File $tname, "w" || die;
+        while ($src = <$srcfl>) {
+            if ($src =~ s|xml\\expat\\lib\\xml|xml\\xml|) {
                 $verchg = -1;
             }
             print $dstfl $src;
