@@ -235,7 +235,7 @@ sub toossl1 {
         $srcfl = new IO::File $_, "r" || die;
         $dstfl = new IO::File $tname, "w" || die;
         while ($src = <$srcfl>) {
-            if ($src =~ s|inc32|include|) {
+            if ($src =~ s|inc32\"|include\" /I \"../../srclib/openssl/ms\"|) {
                 $verchg = -1;
             }
             if ($src =~ s|libeay32|libcrypto|) {
