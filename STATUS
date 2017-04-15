@@ -1,10 +1,10 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:        -*- coding: utf-8 -*-
-Last modified at [$Date: 2015-03-15 11:54:58 -0400 (Sun, 15 Mar 2015) $]
+Last modified at [$Date$]
 
 Releases:
     2.0.0     : in development on trunk/
-    1.6.0     : in development on branches/1.6.x/
-    1.5.2     : in development on branches/1.5.x/
+    1.6.0     : tagged April 15, 2017
+    1.5.2     : released April 29, 2015
     1.5.1     : released April 20, 2014
     1.5.0     : released November 18, 2013
     1.4.9     : in development on branches/1.4.x/
