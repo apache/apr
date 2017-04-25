@@ -717,30 +717,30 @@ static apr_status_t proc_mutex_pthread_acquire_ex(apr_proc_mutex_t *mutex,
 
             proc_pthread_mutex_cond_num_waiters(mutex)++;
             do {
-            if (timeout < 0) {
-                rv = pthread_cond_wait(&proc_pthread_mutex_cond(mutex),
-                                       &proc_pthread_mutex(mutex));
-                if (rv) {
+                if (timeout < 0) {
+                    rv = pthread_cond_wait(&proc_pthread_mutex_cond(mutex),
+                                           &proc_pthread_mutex(mutex));
+                    if (rv) {
 #ifdef HAVE_ZOS_PTHREADS
-                    rv = errno;
+                        rv = errno;
 #endif
-                    break;
-                }
-            }
-            else {
-                rv = pthread_cond_timedwait(&proc_pthread_mutex_cond(mutex),
-                                            &proc_pthread_mutex(mutex),
-                                            &abstime);
-                if (rv) {
-#ifdef HAVE_ZOS_PTHREADS
-                    rv = errno;
-#endif
-                    if (rv == ETIMEDOUT) {
-                        rv = APR_TIMEUP;
+                        break;
                     }
-                    break;
                 }
-            }
+                else {
+                    rv = pthread_cond_timedwait(&proc_pthread_mutex_cond(mutex),
+                                                &proc_pthread_mutex(mutex),
+                                                &abstime);
+                    if (rv) {
+#ifdef HAVE_ZOS_PTHREADS
+                        rv = errno;
+#endif
+                        if (rv == ETIMEDOUT) {
+                            rv = APR_TIMEUP;
+                        }
+                        break;
+                    }
+                }
             } while (proc_pthread_mutex_cond_locked(mutex));
             proc_pthread_mutex_cond_num_waiters(mutex)--;
         }
