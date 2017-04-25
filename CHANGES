@@ -1,8 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.1
 
-  *) Locks: add a --disable-timedlocks config option in case users
-     encounter more platforms where it fails [Nick Kew].
+  *) Locks: make timedlocks a configuration option, to avoid
+     advertising a capability that is not (yet) sufficiently
+     cross-platform. [Nick Kew]
 
 Changes for APR 1.6.0
 
