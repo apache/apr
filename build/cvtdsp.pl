@@ -37,6 +37,9 @@ elsif ($ARGV[0] eq '-m') {
 elsif ($ARGV[0] eq '-ossl11') {
     find(\&toossl1, '.');
 }
+elsif ($ARGV[0] eq '-apr16') {
+    find(\&toapr16, '.');
+}
 else {
     print "Specify -5 or -6 for Visual Studio 5 or 6 (98) .dsp format\n";
     print "Specify -w3 or -w4 for .dsp build with warning level 3 or 4 (strict)\n\n";
