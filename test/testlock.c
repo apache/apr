@@ -183,6 +183,7 @@ static void test_thread_mutex(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, MAX_ITER, x);
 }
 
+#if APR_HAS_TIMEDLOCKS
 static void test_thread_timedmutex(abts_case *tc, void *data)
 {
     apr_thread_t *t1, *t2, *t3, *t4;
@@ -214,6 +215,7 @@ static void test_thread_timedmutex(abts_case *tc, void *data)
 
     ABTS_INT_EQUAL(tc, MAX_ITER, x);
 }
+#endif
 
 static void test_thread_rwlock(abts_case *tc, void *data)
 {
@@ -342,6 +344,7 @@ static void test_timeoutcond(abts_case *tc, void *data)
                        apr_thread_cond_destroy(timeout_cond));
 }
 
+#if APR_HAS_TIMEDLOCKS
 static void test_timeoutmutex(abts_case *tc, void *data)
 {
     apr_status_t s;
@@ -373,6 +376,7 @@ static void test_timeoutmutex(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "Unable to destroy the mutex",
                        apr_thread_mutex_destroy(timeout_mutex));
 }
+#endif
 
 #endif /* !APR_HAS_THREADS */
 
