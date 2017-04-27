@@ -119,7 +119,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-linux*)
 	APR_ADDTO(CPPFLAGS, [-DLINUX -D_REENTRANT -D_GNU_SOURCE])
-        APR_SETIFNULL(ac_cv_func_pthread_mutex_timedlock, [no])
 	;;
     *-lynx-lynxos)
 	APR_ADDTO(CPPFLAGS, [-D__NO_INCLUDE_WARN__ -DLYNXOS])
