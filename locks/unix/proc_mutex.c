@@ -497,6 +497,8 @@ typedef struct {
     apr_uint32_t    cond_num_waiters;
 #define proc_pthread_mutex_cond_num_waiters(m) \
     (proc_pthread_cast(m)->cond_num_waiters)
+#define proc_pthread_mutex_is_cond(m) \
+    ((m)->pthread_refcounting && proc_pthread_mutex_cond_locked(m) != -1)
 #endif /* APR_USE_PROC_PTHREAD_MUTEX_COND */
     apr_uint32_t refcount;
 #define proc_pthread_mutex_refcount(m) \
@@ -527,8 +529,7 @@ static apr_status_t proc_pthread_mutex_unref(void *mutex_)
     apr_status_t rv;
 
 #if APR_USE_PROC_PTHREAD_MUTEX_COND
-    if (mutex->pthread_refcounting &&
-            proc_pthread_mutex_cond_locked(mutex) != -1) {
+    if (proc_pthread_mutex_is_cond(mutex)) {
         mutex->curr_locked = 0;
     }
     else
@@ -543,8 +544,7 @@ static apr_status_t proc_pthread_mutex_unref(void *mutex_)
     }
     if (!proc_pthread_mutex_dec(mutex)) {
 #if APR_USE_PROC_PTHREAD_MUTEX_COND
-        if (mutex->pthread_refcounting &&
-                proc_pthread_mutex_cond_locked(mutex) != -1 &&
+        if (proc_pthread_mutex_is_cond(mutex) &&
                 (rv = pthread_cond_destroy(&proc_pthread_mutex_cond(mutex)))) {
 #ifdef HAVE_ZOS_PTHREADS
             rv = errno;
@@ -690,8 +690,7 @@ static apr_status_t proc_mutex_pthread_acquire_ex(apr_proc_mutex_t *mutex,
     apr_status_t rv;
 
 #if APR_USE_PROC_PTHREAD_MUTEX_COND
-    if (mutex->pthread_refcounting &&
-            proc_pthread_mutex_cond_locked(mutex) != -1) {
+    if (proc_pthread_mutex_is_cond(mutex)) {
         if ((rv = pthread_mutex_lock(&proc_pthread_mutex(mutex)))) {
 #ifdef HAVE_ZOS_PTHREADS 
             rv = errno;
@@ -708,47 +707,55 @@ static apr_status_t proc_mutex_pthread_acquire_ex(apr_proc_mutex_t *mutex,
         }
 
         if (!proc_pthread_mutex_cond_locked(mutex)) {
-            proc_pthread_mutex_cond_locked(mutex) = 1;
+            rv = APR_SUCCESS;
         }
         else if (!timeout) {
             rv = APR_TIMEUP;
         }
         else {
-            proc_pthread_mutex_cond_num_waiters(mutex)++;
-            if (timeout < 0) {
-                rv = pthread_cond_wait(&proc_pthread_mutex_cond(mutex),
-                                       &proc_pthread_mutex(mutex));
-#ifdef HAVE_ZOS_PTHREADS
-                if (rv) {
-                    rv = errno;
-                }
-#endif
-            }
-            else {
-                struct timespec abstime;
+            struct timespec abstime;
 
+            if (timeout > 0) {
                 timeout += apr_time_now();
                 abstime.tv_sec = apr_time_sec(timeout);
                 abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
+            }
 
-                rv = pthread_cond_timedwait(&proc_pthread_mutex_cond(mutex),
-                                            &proc_pthread_mutex(mutex),
-                                            &abstime);
-                if (rv) {
+            proc_pthread_mutex_cond_num_waiters(mutex)++;
+            do {
+                if (timeout < 0) {
+                    rv = pthread_cond_wait(&proc_pthread_mutex_cond(mutex),
+                                           &proc_pthread_mutex(mutex));
+                    if (rv) {
 #ifdef HAVE_ZOS_PTHREADS
-                    rv = errno;
+                        rv = errno;
 #endif
-                    if (rv == ETIMEDOUT) {
-                        rv = APR_TIMEUP;
+                        break;
                     }
                 }
-            }
+                else {
+                    rv = pthread_cond_timedwait(&proc_pthread_mutex_cond(mutex),
+                                                &proc_pthread_mutex(mutex),
+                                                &abstime);
+                    if (rv) {
+#ifdef HAVE_ZOS_PTHREADS
+                        rv = errno;
+#endif
+                        if (rv == ETIMEDOUT) {
+                            rv = APR_TIMEUP;
+                        }
+                        break;
+                    }
+                }
+            } while (proc_pthread_mutex_cond_locked(mutex));
             proc_pthread_mutex_cond_num_waiters(mutex)--;
         }
-        if (rv) {
+        if (rv != APR_SUCCESS) {
             pthread_mutex_unlock(&proc_pthread_mutex(mutex));
             return rv;
         }
+
+        proc_pthread_mutex_cond_locked(mutex) = 1;
 
         rv = pthread_mutex_unlock(&proc_pthread_mutex(mutex));
         if (rv) {
@@ -841,8 +848,7 @@ static apr_status_t proc_mutex_pthread_release(apr_proc_mutex_t *mutex)
     apr_status_t rv;
 
 #if APR_USE_PROC_PTHREAD_MUTEX_COND
-    if (mutex->pthread_refcounting &&
-            proc_pthread_mutex_cond_locked(mutex) != -1) {
+    if (proc_pthread_mutex_is_cond(mutex)) {
         if ((rv = pthread_mutex_lock(&proc_pthread_mutex(mutex)))) {
 #ifdef HAVE_ZOS_PTHREADS 
             rv = errno;
@@ -861,22 +867,23 @@ static apr_status_t proc_mutex_pthread_release(apr_proc_mutex_t *mutex)
         if (!proc_pthread_mutex_cond_locked(mutex)) {
             rv = APR_EINVAL;
         }
-        else if (proc_pthread_mutex_cond_num_waiters(mutex)) {
-            rv = pthread_cond_signal(&proc_pthread_mutex_cond(mutex));
-            if (rv) {
-#ifdef HAVE_ZOS_PTHREADS
-                rv = errno;
-#endif
-            }
-        }
-        else {
-            proc_pthread_mutex_cond_locked(mutex) = 0;
+        else if (!proc_pthread_mutex_cond_num_waiters(mutex)) {
             rv = APR_SUCCESS;
         }
-        if (rv) {
+        else {
+            rv = pthread_cond_signal(&proc_pthread_mutex_cond(mutex));
+#ifdef HAVE_ZOS_PTHREADS
+            if (rv) {
+                rv = errno;
+            }
+#endif
+        }
+        if (rv != APR_SUCCESS) {
             pthread_mutex_unlock(&proc_pthread_mutex(mutex));
             return rv;
         }
+
+        proc_pthread_mutex_cond_locked(mutex) = 0;
     }
 #endif /* APR_USE_PROC_PTHREAD_MUTEX_COND */
 
