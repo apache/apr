@@ -241,22 +241,25 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
             }
             else {
                 mutex->num_waiters++;
-                rv = apr_thread_cond_timedwait(mutex->cond, mutex, timeout);
+                do {
+                    rv = apr_thread_cond_timedwait(mutex->cond, mutex,
+                                                   timeout);
+                    if (rv) {
 #ifdef HAVE_ZOS_PTHREADS
-                if (rv) {
-                    rv = errno;
-                }
+                        rv = errno;
 #endif
+                        break;
+                    }
+                } while (mutex->locked);
                 mutex->num_waiters--;
             }
+            if (rv) {
+                pthread_mutex_unlock(&mutex->mutex);
+                return rv;
+            }
         }
-        else {
-            mutex->locked = 1;
-        }
-        if (rv) {
-            pthread_mutex_unlock(&mutex->mutex);
-            return rv;
-        }
+
+        mutex->locked = 1;
 
         rv = pthread_mutex_unlock(&mutex->mutex);
         if (rv) {
@@ -277,8 +280,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
     apr_status_t status;
 
     if (mutex->cond) {
-        apr_status_t stat2;
-
         status = pthread_mutex_lock(&mutex->mutex);
         if (status) {
 #ifdef HAVE_ZOS_PTHREADS
@@ -293,21 +294,12 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
         else if (mutex->num_waiters) {
             status = apr_thread_cond_signal(mutex->cond);
         }
-        else {
-            mutex->locked = 0;
-            status = APR_SUCCESS;
+        if (status) {
+            pthread_mutex_unlock(&mutex->mutex);
+            return status;
         }
 
-        stat2 = pthread_mutex_unlock(&mutex->mutex);
-        if (stat2) {
-#ifdef HAVE_ZOS_PTHREADS
-            status = errno;
-#else
-            status = stat2;
-#endif
-        }
-
-        return status;
+        mutex->locked = 0;
     }
 
     status = pthread_mutex_unlock(&mutex->mutex);
