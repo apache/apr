@@ -2790,8 +2790,8 @@ AC_MSG_RESULT($ipv6_result)
 AC_SUBST(have_ipv6)
 
 AC_ARG_ENABLE(timedlocks,
-  [  --enable-timedlocks	  Enable experimental timed locks ],
-  [apr_has_timedlocks="1"], [apr_has_timedlocks="0"]
+  [  --disable-timedlocks	  Disable timed locks ],
+  [apr_has_timedlocks="0"], [apr_has_timedlocks="1"]
 )
 AC_SUBST(apr_has_timedlocks)
 
