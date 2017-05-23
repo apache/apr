@@ -115,7 +115,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
-                                                 apr_interval_time_t timeout)
+                                                     apr_time_t timeout)
 {
     if (mutex->type != thread_mutex_critical_section) {
         DWORD rv, timeout_ms;
