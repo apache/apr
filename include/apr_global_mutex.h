@@ -114,10 +114,12 @@ APR_DECLARE(apr_status_t) apr_global_mutex_trylock(apr_global_mutex_t *mutex);
  * Attempt to acquire the lock for the given mutex until timeout expires.
  * If the acquisition time outs, the call returns with APR_TIMEUP.
  * @param mutex the mutex on which to attempt the lock acquiring.
- * @param timeout the relative timeout (microseconds)
+ * @param timeout the absolute time or relative timeout (microseconds)
+ * @param absolute whether the timeout given is absolute (!0) or relative (0)
  */
 APR_DECLARE(apr_status_t) apr_global_mutex_timedlock(apr_global_mutex_t *mutex,
-                                                     apr_time_t timeout);
+                                                     apr_time_t timeout,
+                                                     int absolute);
 
 /**
  * Release the lock for the given mutex.

@@ -88,7 +88,7 @@ static void make_child(abts_case *tc, int trylock, apr_proc_t **proc, apr_pool_t
             else if (trylock < 0) {
                 int wait_usec = 0;
 
-                while ((rv = apr_proc_mutex_timedlock(proc_lock, 1))) {
+                while ((rv = apr_proc_mutex_timedlock(proc_lock, 1, 0))) {
                     if (!APR_STATUS_IS_TIMEUP(rv))
                         exit(1);
                     if (++wait_usec >= MAX_WAIT_USEC)
@@ -184,7 +184,7 @@ static void test_exclusive(abts_case *tc, const char *lockname,
                     *x == MAX_COUNTER);
     }
 
-    rv = apr_proc_mutex_timedlock(proc_lock, 1);
+    rv = apr_proc_mutex_timedlock(proc_lock, 1, 0);
     if (rv == APR_ENOTIMPL) {
         fprintf(stderr, "%s_timedlock() not implemented, ", mech->name);
         ABTS_ASSERT(tc, "Default timed timedlock not implemented",
@@ -194,7 +194,7 @@ static void test_exclusive(abts_case *tc, const char *lockname,
         APR_ASSERT_SUCCESS(tc, "check for timedlock", rv);
 
         for (n = 0; n < 2; n++) {
-            rv = apr_proc_mutex_timedlock(proc_lock, 1);
+            rv = apr_proc_mutex_timedlock(proc_lock, 1, 0);
             /* Some mech (eg. flock or fcntl) may succeed when the
              * lock is re-acquired in the same process.
              */

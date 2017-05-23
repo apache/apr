@@ -112,26 +112,30 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
-                                                     apr_time_t timeout)
+                                                     apr_time_t timeout,
+                                                     int absolute)
 {
     if (mutex->cond) {
         apr_status_t rv;
         NXLock(mutex->mutex);
         if (mutex->locked) {
-            if (!timeout) {
-                rv = APR_TIMEUP;
+            mutex->num_waiters++;
+            if (timeout < 0) {
+                rv = apr_thread_cond_wait(mutex->cond, mutex);
             }
             else {
-                mutex->num_waiters++;
-                if (timeout < 0) {
-                    rv = apr_thread_cond_wait(mutex->cond, mutex);
+                if (absolute) {
+                    apr_time_t now = apr_time_now();
+                    if (timeout > now) {
+                        timeout -= now;
+                    }
+                    else {
+                        timeout = 0;
+                    }
                 }
-                else {
-                    rv = apr_thread_cond_timedwait(mutex->cond, mutex,
-                                                   timeout);
-                }
-                mutex->num_waiters--;
+                rv = apr_thread_cond_timedwait(mutex->cond, mutex, timeout);
             }
+            mutex->num_waiters--;
         }
         else {
             mutex->locked = 1;

@@ -61,7 +61,7 @@ void * APR_THREAD_FUNC thread_mutex_func(apr_thread_t *thd, void *data)
 
     for (i = 0; i < max_counter; i++) {
         if (data) {
-            apr_thread_mutex_timedlock(thread_lock, *(apr_time_t *)data);
+            apr_thread_mutex_timedlock(thread_lock, *(apr_time_t *)data, 0);
         }
         else {
             apr_thread_mutex_lock(thread_lock);

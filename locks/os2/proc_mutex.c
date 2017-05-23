@@ -156,24 +156,35 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
         mutex->lock_count++;
     }
 
-    return (rc == ERROR_TIMEOUT) ? APR_EBUSY : APR_FROM_OS_ERROR(rc);
+    return APR_FROM_OS_ERROR(rc);
 }
 
 
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
-                                                   apr_time_t timeout)
+                                                   apr_time_t timeout,
+                                                   int absolute)
 {
     ULONG rc;
     
     if (timeout < 0) {
         rc = DosRequestMutexSem(mutex->hMutex, SEM_INDEFINITE_WAIT);
     }
-    else if (!timeout) {
-        rc = DosRequestMutexSem(mutex->hMutex, SEM_IMMEDIATE_RETURN);
-    }
     else {
+        if (absolute) {
+            apr_time_t now = apr_time_now();
+            if (timeout > now) {
+                timeout -= now;
+            }
+            else {
+                timeout = 0;
+            }
+        }
+
         rc = DosRequestMutexSem(mutex->hMutex, apr_time_as_msec(timeout));
+        if (rc == ERROR_TIMEOUT) {
+            return APR_TIMEUP;
+        }
     }
 
     if (rc == 0) {
@@ -181,7 +192,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
         mutex->lock_count++;
     }
 
-    return (rc == ERROR_TIMEOUT) ? APR_TIMEUP : APR_FROM_OS_ERROR(rc);
+    return APR_FROM_OS_ERROR(rc);
 }
 
 
