@@ -187,9 +187,7 @@ static apr_status_t proc_mutex_posix_timedacquire(apr_proc_mutex_t *mutex,
                                                   apr_time_t timeout,
                                                   int absolute)
 {
-#if !HAVE_SEM_TIMEDWAIT
-extern int sem_timedwait(sem_t *sem, const struct timespec *abs_timeout);
-#endif
+#if HAVE_SEM_TIMEDWAIT
     if (timeout < 0) {
         return proc_mutex_posix_acquire(mutex);
     }
@@ -215,6 +213,9 @@ extern int sem_timedwait(sem_t *sem, const struct timespec *abs_timeout);
     }
     mutex->curr_locked = 1;
     return APR_SUCCESS;
+#else
+    return APR_ENOTIMPL;
+#endif
 }
 
 static apr_status_t proc_mutex_posix_release(apr_proc_mutex_t *mutex)
@@ -341,10 +342,7 @@ static apr_status_t proc_mutex_sysv_timedacquire(apr_proc_mutex_t *mutex,
                                                  apr_time_t timeout,
                                                  int absolute)
 {
-#if !HAVE_SEMTIMEDOP
-extern int semtimedop(int semid, struct sembuf *sops, unsigned nsops,
-                      const struct timespec *abs_timeout);
-#endif
+#if HAVE_SEMTIMEDOP
     if (timeout < 0) {
         return proc_mutex_sysv_acquire(mutex);
     }
@@ -369,6 +367,9 @@ extern int semtimedop(int semid, struct sembuf *sops, unsigned nsops,
     }
     mutex->curr_locked = 1;
     return APR_SUCCESS;
+#else
+    return APR_ENOTIMPL;
+#endif
 }
 
 static apr_status_t proc_mutex_sysv_release(apr_proc_mutex_t *mutex)
@@ -1220,9 +1221,11 @@ static apr_status_t proc_mutex_choose_method(apr_proc_mutex_t *new_mutex,
 #if APR_HAS_PROC_PTHREAD_SERIALIZE \
             && defined(HAVE_PTHREAD_MUTEX_ROBUST)
         new_mutex->meth = &mutex_proc_pthread_methods;
-#elif APR_HAS_SYSVSEM_SERIALIZE
+#elif APR_HAS_SYSVSEM_SERIALIZE \
+            && defined(HAVE_SEMTIMEDOP)
         new_mutex->meth = &mutex_sysv_methods;
-#elif APR_HAS_POSIXSEM_SERIALIZE
+#elif APR_HAS_POSIXSEM_SERIALIZE \
+            && defined(HAVE_SEM_TIMEDWAIT)
         new_mutex->meth = &mutex_posixsem_methods;
 #else
         return APR_ENOTIMPL;
