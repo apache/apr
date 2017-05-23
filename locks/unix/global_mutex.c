@@ -145,7 +145,6 @@ APR_DECLARE(apr_status_t) apr_global_mutex_trylock(apr_global_mutex_t *mutex)
 APR_DECLARE(apr_status_t) apr_global_mutex_timedlock(apr_global_mutex_t *mutex,
                                                  apr_interval_time_t timeout)
 {
-#if APR_HAS_TIMEDLOCKS
     apr_status_t rv;
 
 #if APR_HAS_THREADS
@@ -178,9 +177,6 @@ APR_DECLARE(apr_status_t) apr_global_mutex_timedlock(apr_global_mutex_t *mutex,
 #endif /* APR_HAS_THREADS */
 
     return rv;
-#else  /* APR_HAS_TIMEDLOCKS */
-    return APR_ENOTIMPL;
-#endif
 }
 
 APR_DECLARE(apr_status_t) apr_global_mutex_unlock(apr_global_mutex_t *mutex)
