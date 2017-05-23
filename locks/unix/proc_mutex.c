@@ -343,7 +343,7 @@ static apr_status_t proc_mutex_sysv_timedacquire(apr_proc_mutex_t *mutex,
 {
 #if !HAVE_SEMTIMEDOP
 extern int semtimedop(int semid, struct sembuf *sops, unsigned nsops,
-                      const struct timespec *timeout);
+                      const struct timespec *abs_timeout);
 #endif
     if (timeout < 0) {
         return proc_mutex_sysv_acquire(mutex);
