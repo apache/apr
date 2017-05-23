@@ -511,7 +511,7 @@ typedef struct {
     (proc_pthread_cast(m)->cond)
     apr_int32_t     cond_locked;
 #define proc_pthread_mutex_cond_locked(m) \
-    (proc_pthread_cast(m)->cond_locked)
+    ((m)->pthread_refcounting ? proc_pthread_cast(m)->cond_locked : -1)
     apr_uint32_t    cond_num_waiters;
 #define proc_pthread_mutex_cond_num_waiters(m) \
     (proc_pthread_cast(m)->cond_num_waiters)
@@ -549,8 +549,7 @@ static apr_status_t proc_pthread_mutex_unref(void *mutex_)
     apr_status_t rv;
 
 #if APR_USE_PROC_PTHREAD_MUTEX_COND
-    if (mutex->pthread_refcounting &&
-            proc_pthread_mutex_cond_locked(mutex) != -1) {
+    if (proc_pthread_mutex_cond_locked(mutex) != -1) {
         mutex->curr_locked = 0;
     }
     else
@@ -565,8 +564,7 @@ static apr_status_t proc_pthread_mutex_unref(void *mutex_)
     }
     if (!proc_pthread_mutex_dec(mutex)) {
 #if APR_USE_PROC_PTHREAD_MUTEX_COND
-        if (mutex->pthread_refcounting &&
-                proc_pthread_mutex_cond_locked(mutex) != -1 &&
+        if (proc_pthread_mutex_cond_locked(mutex) != -1 &&
                 (rv = pthread_cond_destroy(&proc_pthread_mutex_cond(mutex)))) {
 #ifdef HAVE_ZOS_PTHREADS
             rv = errno;
@@ -727,8 +725,7 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
     apr_status_t rv;
 
 #if APR_USE_PROC_PTHREAD_MUTEX_COND
-    if (mutex->pthread_refcounting &&
-            proc_pthread_mutex_cond_locked(mutex) != -1) {
+    if (proc_pthread_mutex_cond_locked(mutex) != -1) {
         if ((rv = pthread_mutex_lock(&proc_pthread_mutex(mutex)))) {
 #ifdef HAVE_ZOS_PTHREADS 
             rv = errno;
@@ -857,8 +854,7 @@ static apr_status_t proc_mutex_pthread_release(apr_proc_mutex_t *mutex)
     apr_status_t rv;
 
 #if APR_USE_PROC_PTHREAD_MUTEX_COND
-    if (mutex->pthread_refcounting &&
-            proc_pthread_mutex_cond_locked(mutex) != -1) {
+    if (proc_pthread_mutex_cond_locked(mutex) != -1) {
         if ((rv = pthread_mutex_lock(&proc_pthread_mutex(mutex)))) {
 #ifdef HAVE_ZOS_PTHREADS 
             rv = errno;
