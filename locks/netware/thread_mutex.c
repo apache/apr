@@ -55,7 +55,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
 
     if (flags & APR_THREAD_MUTEX_TIMED) {
         apr_status_t rv = apr_thread_cond_create(&new_mutex->cond, pool);
-        if (rv != APR_SUCCESS) {
+        if (rv != SUCCESS) {
             NXMutexFree(new_mutex->mutex);        
             return rv;
         }
@@ -121,7 +121,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
         if (mutex->locked) {
             mutex->num_waiters++;
             if (timeout < 0) {
-                rv = apr_thread_cond_wait(mutex->cond, mutex);
+                rv = apr_thread_cond_dwait(mutex->cond, mutex);
             }
             else {
                 if (absolute) {
