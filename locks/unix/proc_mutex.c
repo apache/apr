@@ -654,7 +654,6 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
                                                     apr_time_t timeout,
                                                     int absolute)
 {
-#ifdef HAVE_PTHREAD_MUTEX_TIMEDLOCK
     if (timeout < 0) {
         return proc_mutex_pthread_acquire(mutex);
     }
@@ -689,9 +688,6 @@ static apr_status_t proc_mutex_pthread_timedacquire(apr_proc_mutex_t *mutex,
     }
     mutex->curr_locked = 1;
     return APR_SUCCESS;
-#else
-    return APR_ENOTIMPL;
-#endif
 }
 
 static apr_status_t proc_mutex_pthread_release(apr_proc_mutex_t *mutex)
