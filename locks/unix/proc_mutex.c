@@ -687,6 +687,9 @@ static apr_status_t proc_mutex_pthread_child_init(apr_proc_mutex_t **mutex,
 static apr_status_t proc_mutex_pthread_acquire_ex(apr_proc_mutex_t *mutex,
                                                   apr_interval_time_t timeout)
 {
+#if !APR_USE_PROC_PTHREAD_MUTEX_COND && !defined(HAVE_PTHREAD_MUTEX_TIMEDLOCK)
+    return proc_mutex_spinsleep_timedacquire(mutex, timeout);
+#else
     apr_status_t rv;
 
 #if APR_USE_PROC_PTHREAD_MUTEX_COND
@@ -780,9 +783,7 @@ static apr_status_t proc_mutex_pthread_acquire_ex(apr_proc_mutex_t *mutex,
                 }
             }
         }
-        else
-#if defined(HAVE_PTHREAD_MUTEX_TIMEDLOCK)
-        {
+        else {
             struct timespec abstime;
 
             timeout += apr_time_now();
@@ -810,13 +811,11 @@ static apr_status_t proc_mutex_pthread_acquire_ex(apr_proc_mutex_t *mutex,
 #endif
             return rv;
         }
-#else /* !HAVE_PTHREAD_MUTEX_TIMEDLOCK */
-        return proc_mutex_spinsleep_timedacquire(mutex, timeout);
-#endif
     }
 
     mutex->curr_locked = 1;
     return APR_SUCCESS;
+#endif
 }
 
 static apr_status_t proc_mutex_pthread_acquire(apr_proc_mutex_t *mutex)
