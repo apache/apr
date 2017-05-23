@@ -50,10 +50,6 @@ int pthread_mutex_timedlock(pthread_mutex_t *mutex, const struct timespec *abs_t
        remaining.tv_sec--;
        remaining.tv_nsec = (NANOSECS_PER_SEC - (tod.tv_nsec - remaining.tv_nsec));
    }
-   /* If we had a REALLY small timeout ;) */
-   if (remaining.tv_sec < 0) {
-       return pthread_mutex_trylock(mutex);
-   }
    while ((rv = pthread_mutex_trylock(mutex)) == EBUSY) {
        ts.tv_sec = 0;
        ts.tv_nsec = (remaining.tv_sec > 0 ? SLEEP_TIME_NS : 
