@@ -1560,11 +1560,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
 APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
                                                apr_interval_time_t timeout)
 {
-#if APR_HAS_TIMEDLOCKS
     return mutex->meth->timedacquire(mutex, timeout);
-#else
-    return APR_ENOTIMPL;
-#endif
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex)

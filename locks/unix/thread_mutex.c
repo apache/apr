@@ -193,7 +193,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
                                                  apr_interval_time_t timeout)
 {
     apr_status_t rv = APR_ENOTIMPL;
-#if APR_HAS_TIMEDLOCKS
 
 #ifdef HAVE_PTHREAD_MUTEX_TIMEDLOCK
     if (timeout <= 0) {
@@ -270,7 +269,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
 
 #endif /* HAVE_PTHREAD_MUTEX_TIMEDLOCK */
 
-#endif /* APR_HAS_TIMEDLOCKS */
     return rv;
 }
 

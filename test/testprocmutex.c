@@ -184,7 +184,6 @@ static void test_exclusive(abts_case *tc, const char *lockname,
                     *x == MAX_COUNTER);
     }
 
-#if APR_HAS_TIMEDLOCKS
     rv = apr_proc_mutex_timedlock(proc_lock, 1);
     if (rv == APR_ENOTIMPL) {
         fprintf(stderr, "%s_timedlock() not implemented, ", mech->name);
@@ -221,7 +220,6 @@ static void test_exclusive(abts_case *tc, const char *lockname,
         ABTS_ASSERT(tc, "Locks don't appear to work with timedlock",
                     *x == MAX_COUNTER);
     }
-#endif  /* APR_HAS_TIMEDLOCKS */
 }
 
 static void proc_mutex(abts_case *tc, void *data)
