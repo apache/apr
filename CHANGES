@@ -4,10 +4,6 @@ Changes for APR 1.6.1
 
 Changes for APR 1.6.0
 
-  *) locks: provide portable implementations of timedlock()s for
-     posix-sems, sysv-sems and pthreads for those platforms that
-     lack native versions (eg: OSX/macOS). [Jim Jagielski]
-
   *) apr_allocator: Provide apr_allocator_align() to get the true size that
      would be allocated for the given size (including the header and
      alignment).  [Yann Ylavic]
