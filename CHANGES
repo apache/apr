@@ -1,14 +1,17 @@
                                                      -*- coding: utf-8 -*-
-Changes for APR 1.6.1
+Changes for APR 1.7.0
 
   *) Locks: add a --disable-timedlocks config option in case users
      encounter more platforms where it fails [Nick Kew].
 
-Changes for APR 1.6.0
-
   *) locks: provide portable implementations of timedlock()s for
      posix-sems, sysv-sems and pthreads for those platforms that
      lack native versions (eg: OSX/macOS). [Jim Jagielski]
+
+  *) locks: Introduce apr_{thread,proc,global}_mutex_timedlock().
+     [Yann Ylavic]
+
+Changes for APR 1.6.0
 
   *) apr_allocator: Provide apr_allocator_align() to get the true size that
      would be allocated for the given size (including the header and
@@ -40,9 +43,6 @@ Changes for APR 1.6.0
 
   *) apr_table_overlap: Add APR_OVERLAP_TABLES_ADD to merge and set when
      overlapping tables. [Graham Leggett]
-
-  *) locks: Introduce apr_{thread,proc,global}_mutex_timedlock().
-     [Yann Ylavic]
 
   *) Introduce the apr_cstr_fn() family of functions, derived from
      the svn_cstring_ functions of the Subversion project.
