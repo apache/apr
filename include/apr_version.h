@@ -56,13 +56,13 @@
  * Minor API changes that do not cause binary compatibility problems.
  * Reset to 0 when upgrading APR_MAJOR_VERSION
  */
-#define APR_MINOR_VERSION       6
+#define APR_MINOR_VERSION       7
 
 /** patch level 
  * The Patch Level never includes API changes, simply bug fixes.
  * Reset to 0 when upgrading APR_MINOR_VERSION
  */
-#define APR_PATCH_VERSION       1
+#define APR_PATCH_VERSION       0
 
 /** 
  * The symbol APR_IS_DEV_VERSION is only defined for internal,
