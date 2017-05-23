@@ -2297,11 +2297,6 @@ APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
              hasprocpthreadser="1", hasprocpthreadser="0")
 APR_IFALLYES(header:OS.h func:create_sem, hasbeossem="1", hasbeossem="0")
 
-AC_CHECK_FUNCS(pthread_condattr_setpshared)
-APR_IFALLYES(header:pthread.h func:pthread_condattr_setpshared,
-             have_pthread_condattr_setpshared="1", have_pthread_condattr_setpshared="0")
-AC_SUBST(have_pthread_condattr_setpshared)
-
 # See which lock mechanism we'll select by default on this system.
 # The last APR_DECIDE to execute sets the default.
 # At this stage, we match the ordering in Apache 1.3
