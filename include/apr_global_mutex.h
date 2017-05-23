@@ -117,7 +117,7 @@ APR_DECLARE(apr_status_t) apr_global_mutex_trylock(apr_global_mutex_t *mutex);
  * @param timeout the relative timeout (microseconds)
  */
 APR_DECLARE(apr_status_t) apr_global_mutex_timedlock(apr_global_mutex_t *mutex,
-                                                 apr_interval_time_t timeout);
+                                                     apr_time_t timeout);
 
 /**
  * Release the lock for the given mutex.
