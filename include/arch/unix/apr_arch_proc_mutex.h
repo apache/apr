@@ -70,7 +70,7 @@ struct apr_proc_mutex_unix_lock_methods_t {
     apr_status_t (*create)(apr_proc_mutex_t *, const char *);
     apr_status_t (*acquire)(apr_proc_mutex_t *);
     apr_status_t (*tryacquire)(apr_proc_mutex_t *);
-    apr_status_t (*timedacquire)(apr_proc_mutex_t *, apr_time_t);
+    apr_status_t (*timedacquire)(apr_proc_mutex_t *, apr_time_t, int);
     apr_status_t (*release)(apr_proc_mutex_t *);
     apr_status_t (*cleanup)(void *);
     apr_status_t (*child_init)(apr_proc_mutex_t **, apr_pool_t *, const char *);

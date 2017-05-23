@@ -115,7 +115,8 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
-                                                     apr_time_t timeout)
+                                                     apr_time_t timeout,
+                                                     int absolute)
 {
     if (mutex->type != thread_mutex_critical_section) {
         DWORD rv, timeout_ms;
@@ -123,6 +124,15 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
             timeout_ms = INFINITE;
         }
         else {
+            if (absolute) {
+                apr_time_t now = apr_time_now();
+                if (timeout > now) {
+                    timeout -= now;
+                }
+                else {
+                    timeout = 0;
+                }
+            }
             timeout_ms = apr_time_as_msec(timeout);
         }
         rv = WaitForSingleObject(mutex->handle, timeout_ms);

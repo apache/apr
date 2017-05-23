@@ -143,30 +143,27 @@ APR_DECLARE(apr_status_t) apr_global_mutex_trylock(apr_global_mutex_t *mutex)
 }
 
 APR_DECLARE(apr_status_t) apr_global_mutex_timedlock(apr_global_mutex_t *mutex,
-                                                     apr_time_t timeout)
+                                                     apr_time_t timeout,
+                                                     int absolute)
 {
     apr_status_t rv;
 
 #if APR_HAS_THREADS
     if (mutex->thread_mutex) {
-        apr_time_t expiry = 0;
-        if (timeout > 0) {
-            expiry = apr_time_now() + timeout;
+        if (timeout >= 0 && !absolute) {
+            timeout += apr_time_now();
+            absolute = 1;
         }
-        rv = apr_thread_mutex_timedlock(mutex->thread_mutex, timeout);
+        rv = apr_thread_mutex_timedlock(mutex->thread_mutex, timeout,
+                                        absolute);
         if (rv != APR_SUCCESS) {
             return rv;
-        }
-        if (expiry) {
-            timeout = expiry - apr_time_now();
-            if (timeout < 0) {
-                timeout = 0;
-            }
         }
     }
 #endif /* APR_HAS_THREADS */
 
-    rv = apr_proc_mutex_timedlock(mutex->proc_mutex, timeout);
+    rv = apr_proc_mutex_timedlock(mutex->proc_mutex, timeout,
+                                  absolute);
 
 #if APR_HAS_THREADS
     if (rv != APR_SUCCESS) {
