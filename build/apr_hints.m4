@@ -237,11 +237,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-solaris2*)
     	PLATOSVERS=`echo $host | sed 's/^.*solaris2.//'`
 	APR_ADDTO(CPPFLAGS, [-DSOLARIS2=$PLATOSVERS -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT])
-        if test $PLATOSVERS -eq 10; then
-            # pthread_mutex_timedlock is broken on Solaris 10.
-            # It can block without timeout in case of EDEADLK.
-            APR_SETIFNULL(ac_cv_func_pthread_mutex_timedlock, [no])
-        fi
         if test $PLATOSVERS -ge 10; then
             APR_SETIFNULL(apr_lock_method, [USE_PROC_PTHREAD_SERIALIZE])
         else
