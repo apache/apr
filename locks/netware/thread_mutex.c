@@ -19,7 +19,6 @@
 #include "apr_general.h"
 #include "apr_strings.h"
 #include "apr_arch_thread_mutex.h"
-#include "apr_thread_cond.h"
 #include "apr_portable.h"
 
 static apr_status_t thread_mutex_cleanup(void *data)
@@ -42,8 +41,8 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
         return APR_ENOTIMPL;
     }
     new_mutex = (apr_thread_mutex_t *)apr_pcalloc(pool, sizeof(apr_thread_mutex_t));
-
-    if (new_mutex == NULL) {
+	
+	if(new_mutex ==NULL) {
         return APR_ENOMEM;
     }     
     new_mutex->pool = pool;
@@ -52,14 +51,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
     
     if(new_mutex->mutex == NULL)
         return APR_ENOMEM;
-
-    if (flags & APR_THREAD_MUTEX_TIMED) {
-        apr_status_t rv = apr_thread_cond_create(&new_mutex->cond, pool);
-        if (rv != SUCCESS) {
-            NXMutexFree(new_mutex->mutex);        
-            return rv;
-        }
-    }
 
     apr_pool_cleanup_register(new_mutex->pool, new_mutex, 
                                 (void*)thread_mutex_cleanup,
@@ -70,117 +61,29 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 {
-    if (mutex->cond) {
-        apr_status_t rv;
-        NXLock(mutex->mutex);
-        if (mutex->locked) {
-            mutex->num_waiters++;
-            rv = apr_thread_cond_wait(mutex->cond, mutex);
-            mutex->num_waiters--;
-        }
-        else {
-            mutex->locked = 1;
-            rv = APR_SUCCESS;
-        }
-        NXUnlock(mutex->mutex);
-        return rv;
-    }
-
     NXLock(mutex->mutex);
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 {
-    if (mutex->cond) {
-        apr_status_t rv;
-        NXLock(mutex->mutex);
-        if (mutex->locked) {
-            rv = APR_EBUSY;
-        }
-        else {
-            mutex->locked = 1;
-            rv = APR_SUCCESS;
-        }
-        NXUnlock(mutex->mutex);
-        return rv;
-    }
-
     if (!NXTryLock(mutex->mutex))
         return APR_EBUSY;
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
-                                                     apr_time_t timeout,
-                                                     int absolute)
-{
-    if (mutex->cond) {
-        apr_status_t rv;
-        NXLock(mutex->mutex);
-        if (mutex->locked) {
-            mutex->num_waiters++;
-            if (timeout < 0) {
-                rv = apr_thread_cond_dwait(mutex->cond, mutex);
-            }
-            else {
-                if (absolute) {
-                    apr_time_t now = apr_time_now();
-                    if (timeout > now) {
-                        timeout -= now;
-                    }
-                    else {
-                        timeout = 0;
-                    }
-                }
-                rv = apr_thread_cond_timedwait(mutex->cond, mutex, timeout);
-            }
-            mutex->num_waiters--;
-        }
-        else {
-            mutex->locked = 1;
-            rv = APR_SUCCESS;
-        }
-        NXUnlock(mutex->mutex);
-        return rv;
-    }
-
-    return APR_ENOTIMPL;
-}
-
 APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 {
-    if (mutex->cond) {
-        apr_status_t rv;
-        NXLock(mutex->mutex);
-        if (!mutex->locked) {
-            rv = APR_EINVAL;
-        }
-        else if (mutex->num_waiters) {
-            rv = apr_thread_cond_signal(mutex->cond);
-        }
-        else {
-            mutex->locked = 0;
-            rv = APR_SUCCESS;
-        }
-        NXUnlock(mutex->mutex);
-        return rv;
-    }
-
     NXUnlock(mutex->mutex);
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex)
 {
-    apr_status_t stat, rv = APR_SUCCESS;
-    if (mutex->cond) {
-        rv = apr_thread_cond_destroy(mutex->cond);
-        mutex->cond = NULL;
-    }
-    stat = apr_pool_cleanup_run(mutex->pool, mutex, thread_mutex_cleanup);
-    if (stat == APR_SUCCESS && rv) {
-        stat = rv;
+    apr_status_t stat;
+    if ((stat = thread_mutex_cleanup(mutex)) == APR_SUCCESS) {
+        apr_pool_cleanup_kill(mutex->pool, mutex, thread_mutex_cleanup);
+        return APR_SUCCESS;
     }
     return stat;
 }

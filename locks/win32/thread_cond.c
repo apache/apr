@@ -61,9 +61,9 @@ APR_DECLARE(apr_status_t) apr_thread_cond_destroy(apr_thread_cond_t *cond)
     return apr_pool_cleanup_run(cond->pool, cond, thread_cond_cleanup);
 }
 
-static APR_INLINE apr_status_t thread_cond_timedwait(apr_thread_cond_t *cond,
-                                                     apr_thread_mutex_t *mutex,
-                                                     DWORD timeout_ms )
+static APR_INLINE apr_status_t _thread_cond_timedwait(apr_thread_cond_t *cond,
+                                                      apr_thread_mutex_t *mutex,
+                                                      DWORD timeout_ms )
 {
     DWORD res;
     apr_status_t rv;
@@ -115,15 +115,16 @@ static APR_INLINE apr_status_t thread_cond_timedwait(apr_thread_cond_t *cond,
 APR_DECLARE(apr_status_t) apr_thread_cond_wait(apr_thread_cond_t *cond,
                                                apr_thread_mutex_t *mutex)
 {
-    return thread_cond_timedwait(cond, mutex, INFINITE);
+    return _thread_cond_timedwait(cond, mutex, INFINITE);
 }
 
 APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
                                                     apr_thread_mutex_t *mutex,
                                                     apr_interval_time_t timeout)
 {
-    DWORD timeout_ms = (timeout >= 0) ? apr_time_as_msec(timeout) : INFINITE;
-    return thread_cond_timedwait(cond, mutex, timeout_ms);
+    DWORD timeout_ms = (DWORD) apr_time_as_msec(timeout);
+
+    return _thread_cond_timedwait(cond, mutex, timeout_ms);
 }
 
 APR_DECLARE(apr_status_t) apr_thread_cond_signal(apr_thread_cond_t *cond)

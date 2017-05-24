@@ -79,31 +79,21 @@ APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
                                                     apr_interval_time_t timeout)
 {
     apr_status_t rv;
-    if (timeout < 0) {
-        rv = pthread_cond_wait(&cond->cond, &mutex->mutex);
+    apr_time_t then;
+    struct timespec abstime;
+
+    then = apr_time_now() + timeout;
+    abstime.tv_sec = apr_time_sec(then);
+    abstime.tv_nsec = apr_time_usec(then) * 1000; /* nanoseconds */
+
+    rv = pthread_cond_timedwait(&cond->cond, &mutex->mutex, &abstime);
 #ifdef HAVE_ZOS_PTHREADS
-        if (rv) {
-            rv = errno;
-        }
-#endif
+    if (rv) {
+        rv = errno;
     }
-    else {
-        apr_time_t then;
-        struct timespec abstime;
-
-        then = apr_time_now() + timeout;
-        abstime.tv_sec = apr_time_sec(then);
-        abstime.tv_nsec = apr_time_usec(then) * 1000; /* nanoseconds */
-
-        rv = pthread_cond_timedwait(&cond->cond, &mutex->mutex, &abstime);
-#ifdef HAVE_ZOS_PTHREADS
-        if (rv) {
-            rv = errno;
-        }
 #endif
-        if (ETIMEDOUT == rv) {
-            return APR_TIMEUP;
-        }
+    if (ETIMEDOUT == rv) {
+        return APR_TIMEUP;
     }
     return rv;
 }

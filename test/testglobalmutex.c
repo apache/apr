@@ -68,7 +68,6 @@ static const char *mutexname(apr_lockmech_e mech)
     case APR_LOCK_PROC_PTHREAD: return "proc_pthread";
     case APR_LOCK_POSIXSEM: return "posixsem";
     case APR_LOCK_DEFAULT: return "default";
-    case APR_LOCK_DEFAULT_TIMED: return "default_timed";
     default: return "unknown";
     }
 }
@@ -130,8 +129,6 @@ abts_suite *testglobalmutex(abts_suite *suite)
     mech = APR_LOCK_FLOCK;
     abts_run_test(suite, test_exclusive, &mech);
 #endif
-    mech = APR_LOCK_DEFAULT_TIMED;
-    abts_run_test(suite, test_exclusive, &mech);
 
     return suite;
 }
