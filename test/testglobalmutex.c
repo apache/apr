@@ -84,11 +84,6 @@ static void test_exclusive(abts_case *tc, void *data)
     abts_log_message(mutexname(mech));
  
     rv = apr_global_mutex_create(&global_lock, LOCKNAME, mech, p);
-    if (rv == APR_ENOTIMPL) {
-        /* MacOS lacks TIMED implementation, so don't fail for ENOTIMPL */
-        ABTS_NOT_IMPL(tc, "global mutex TIMED not implemented");
-        return;
-    }
     APR_ASSERT_SUCCESS(tc, "Error creating mutex", rv);
 
     launch_child(tc, mech, &p1, p);
