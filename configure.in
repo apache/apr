@@ -2176,17 +2176,10 @@ AC_SUBST(struct_rlimit)
 dnl ----------------------------- Checking for Locking Characteristics 
 echo "${nl}Checking for Locking..."
 
-AC_CHECK_FUNCS(semget semctl semop semtimedop flock)
-APR_IFALLYES(func:semtimedop, have_semtimedop="1", have_semtimedop="0")
-
-AC_CHECK_HEADERS(semaphore.h)
+AC_CHECK_FUNCS(semget semctl flock)
+AC_CHECK_HEADERS(semaphore.h OS.h)
 AC_SEARCH_LIBS(sem_open, rt)
-AC_CHECK_FUNCS(sem_close sem_unlink sem_post sem_wait sem_timedwait)
-APR_IFALLYES(func:sem_timedwait, have_sem_timedwait="1", have_sem_timedwait="0")
-
-AC_CHECK_HEADERS(OS.h)
-AC_CHECK_FUNCS(create_sem acquire_sem acquire_sem_etc)
-APR_IFALLYES(header:OS.h func:acquire_sem_etc, have_acquire_sem_etc="1", have_acquire_sem_etc="0")
+AC_CHECK_FUNCS(sem_close sem_unlink sem_post sem_wait create_sem)
 
 # Some systems return ENOSYS from sem_open.
 AC_CACHE_CHECK(for working sem_open,ac_cv_func_sem_open,[
@@ -2245,10 +2238,7 @@ APR_CHECK_DEFINE_FILES(POLLIN, poll.h sys/poll.h)
 
 if test "$threads" = "1"; then
     APR_CHECK_DEFINE(PTHREAD_PROCESS_SHARED, pthread.h)
-    AC_CHECK_FUNCS(pthread_mutex_timedlock pthread_mutexattr_setpshared)
-    APR_IFALLYES(header:pthread.h func:pthread_mutex_timedlock,
-                 have_pthread_mutex_timedlock="1", have_pthread_mutex_timedlock="0")
-    AC_SUBST(have_pthread_mutex_timedlock)
+    AC_CHECK_FUNCS(pthread_mutexattr_setpshared)
     # Some systems have setpshared and define PROCESS_SHARED, but don't 
     # really support PROCESS_SHARED locks.  So, we must validate that we 
     # can go through the steps without receiving some sort of system error.
@@ -2286,8 +2276,8 @@ fi
 APR_IFALLYES(header:semaphore.h func:sem_open func:sem_close dnl
              func:sem_unlink func:sem_post func:sem_wait,
              hasposixser="1", hasposixser="0")
-APR_IFALLYES(func:semget func:semctl func:semop define:SEM_UNDO,
-             hassysvser="1", hassysvser="0")
+APR_IFALLYES(func:semget func:semctl define:SEM_UNDO, hassysvser="1", 
+             hassysvser="0")
 APR_IFALLYES(func:flock define:LOCK_EX, hasflockser="1", hasflockser="0")
 APR_IFALLYES(header:fcntl.h define:F_SETLK, hasfcntlser="1", hasfcntlser="0")
 # note: the current APR use of shared mutex requires /dev/zero
@@ -2312,9 +2302,9 @@ APR_IFALLYES(func:flock define:LOCK_EX,
             APR_DECIDE(USE_FLOCK_SERIALIZE, [4.2BSD-style flock()]))
 APR_IFALLYES(header:fcntl.h define:F_SETLK,
             APR_DECIDE(USE_FCNTL_SERIALIZE, [SVR4-style fcntl()]))
-APR_IFALLYES(func:semget func:semctl func:semop define:SEM_UNDO,
+APR_IFALLYES(func:semget func:semctl define:SEM_UNDO,
             APR_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
-APR_IFALLYES(header:OS.h func:create_sem func:acquire_sem func:acquire_sem_etc, 
+APR_IFALLYES(header:OS.h func:create_sem, 
             APR_DECIDE(USE_BEOSSEM, [BeOS Semaphores])) 
 if test "x$apr_lock_method" != "x"; then
     APR_DECISION_FORCE($apr_lock_method)

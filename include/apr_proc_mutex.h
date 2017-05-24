@@ -26,7 +26,6 @@
 #include "apr_pools.h"
 #include "apr_errno.h"
 #include "apr_perms_set.h"
-#include "apr_time.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,8 +48,7 @@ typedef enum {
     APR_LOCK_SYSVSEM,       /**< System V Semaphores */
     APR_LOCK_PROC_PTHREAD,  /**< POSIX pthread process-based locking */
     APR_LOCK_POSIXSEM,      /**< POSIX semaphore process-based locking */
-    APR_LOCK_DEFAULT,       /**< Use the default process lock */
-    APR_LOCK_DEFAULT_TIMED  /**< Use the default process timed lock */
+    APR_LOCK_DEFAULT        /**< Use the default process lock */
 } apr_lockmech_e;
 
 /** Opaque structure representing a process mutex. */
@@ -114,17 +112,6 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex);
  * @param mutex the mutex on which to attempt the lock acquiring.
  */
 APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex);
-
-/**
- * Attempt to acquire the lock for the given mutex until timeout expires.
- * If the acquisition time outs, the call returns with APR_TIMEUP.
- * @param mutex the mutex on which to attempt the lock acquiring.
- * @param timeout the absolute time or relative timeout (microseconds)
- * @param absolute whether the timeout given is absolute (!0) or relative (0)
- */
-APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
-                                                   apr_time_t timeout,
-                                                   int absolute);
 
 /**
  * Release the lock for the given mutex.

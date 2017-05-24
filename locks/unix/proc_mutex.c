@@ -183,41 +183,6 @@ static apr_status_t proc_mutex_posix_tryacquire(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_posix_timedacquire(apr_proc_mutex_t *mutex,
-                                                  apr_time_t timeout,
-                                                  int absolute)
-{
-#if HAVE_SEM_TIMEDWAIT
-    if (timeout < 0) {
-        return proc_mutex_posix_acquire(mutex);
-    }
-    else {
-        int rc;
-        struct timespec abstime;
-
-        if (!absolute) {
-            timeout += apr_time_now();
-        }
-        abstime.tv_sec = apr_time_sec(timeout);
-        abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
-        
-        do {
-            rc = sem_timedwait(mutex->os.psem_interproc, &abstime);
-        } while (rc < 0 && errno == EINTR);
-        if (rc < 0) {
-            if (errno == ETIMEDOUT) {
-                return APR_TIMEUP;
-            }
-            return errno;
-        }
-    }
-    mutex->curr_locked = 1;
-    return APR_SUCCESS;
-#else
-    return APR_ENOTIMPL;
-#endif
-}
-
 static apr_status_t proc_mutex_posix_release(apr_proc_mutex_t *mutex)
 {
     mutex->curr_locked = 0;
@@ -239,7 +204,6 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_posixsem_methods =
     proc_mutex_posix_create,
     proc_mutex_posix_acquire,
     proc_mutex_posix_tryacquire,
-    proc_mutex_posix_timedacquire,
     proc_mutex_posix_release,
     proc_mutex_posix_cleanup,
     proc_mutex_no_child_init,
@@ -338,40 +302,6 @@ static apr_status_t proc_mutex_sysv_tryacquire(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_sysv_timedacquire(apr_proc_mutex_t *mutex,
-                                                 apr_time_t timeout,
-                                                 int absolute)
-{
-#if HAVE_SEMTIMEDOP
-    if (timeout < 0) {
-        return proc_mutex_sysv_acquire(mutex);
-    }
-    else {
-        int rc;
-        struct timespec abstime;
-        if (!absolute) {
-            timeout += apr_time_now();
-        }
-        abstime.tv_sec = apr_time_sec(timeout);
-        abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
-        do {
-            rc = semtimedop(mutex->os.crossproc, &proc_mutex_op_on, 1,
-                            &abstime);
-        } while (rc < 0 && errno == EINTR);
-        if (rc < 0) {
-            if (errno == EAGAIN) {
-                return APR_TIMEUP;
-            }
-            return errno;
-        }
-    }
-    mutex->curr_locked = 1;
-    return APR_SUCCESS;
-#else
-    return APR_ENOTIMPL;
-#endif
-}
-
 static apr_status_t proc_mutex_sysv_release(apr_proc_mutex_t *mutex)
 {
     int rc;
@@ -414,7 +344,6 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_sysv_methods =
     proc_mutex_sysv_create,
     proc_mutex_sysv_acquire,
     proc_mutex_sysv_tryacquire,
-    proc_mutex_sysv_timedacquire,
     proc_mutex_sysv_release,
     proc_mutex_sysv_cleanup,
     proc_mutex_no_child_init,
@@ -650,47 +579,6 @@ static apr_status_t proc_mutex_proc_pthread_tryacquire(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t
-proc_mutex_proc_pthread_timedacquire(apr_proc_mutex_t *mutex,
-                                     apr_time_t timeout,
-                                     int absolute)
-{
-    if (timeout < 0) {
-        return proc_mutex_proc_pthread_acquire(mutex);
-    }
-    else {
-        apr_status_t rv;
-        struct timespec abstime;
-
-        if (!absolute) {
-            timeout += apr_time_now();
-        }
-        abstime.tv_sec = apr_time_sec(timeout);
-        abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
-
-        if ((rv = pthread_mutex_timedlock(mutex->os.pthread_interproc,
-                                          &abstime))) {
-#ifdef HAVE_ZOS_PTHREADS 
-            rv = errno;
-#endif
-            if (rv == ETIMEDOUT) {
-                return APR_TIMEUP;
-            }
-#ifdef HAVE_PTHREAD_MUTEX_ROBUST
-            /* Okay, our owner died.  Let's try to make it consistent again. */
-            if (rv == EOWNERDEAD) {
-                proc_pthread_mutex_dec(mutex);
-                pthread_mutex_consistent_np(mutex->os.pthread_interproc);
-            }
-            else
-#endif
-            return rv;
-        }
-    }
-    mutex->curr_locked = 1;
-    return APR_SUCCESS;
-}
-
 static apr_status_t proc_mutex_proc_pthread_release(apr_proc_mutex_t *mutex)
 {
     apr_status_t rv;
@@ -711,7 +599,6 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_proc_pthread_methods =
     proc_mutex_proc_pthread_create,
     proc_mutex_proc_pthread_acquire,
     proc_mutex_proc_pthread_tryacquire,
-    proc_mutex_proc_pthread_timedacquire,
     proc_mutex_proc_pthread_release,
     proc_mutex_proc_pthread_cleanup,
     proc_mutex_proc_pthread_child_init,
@@ -835,13 +722,6 @@ static apr_status_t proc_mutex_fcntl_tryacquire(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_fcntl_timedacquire(apr_proc_mutex_t *mutex,
-                                                  apr_time_t timeout,
-                                                  int absolute)
-{
-    return APR_ENOTIMPL;
-}
-
 static apr_status_t proc_mutex_fcntl_release(apr_proc_mutex_t *mutex)
 {
     int rc;
@@ -882,7 +762,6 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_fcntl_methods =
     proc_mutex_fcntl_create,
     proc_mutex_fcntl_acquire,
     proc_mutex_fcntl_tryacquire,
-    proc_mutex_fcntl_timedacquire,
     proc_mutex_fcntl_release,
     proc_mutex_fcntl_cleanup,
     proc_mutex_no_child_init,
@@ -986,13 +865,6 @@ static apr_status_t proc_mutex_flock_tryacquire(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_flock_timedacquire(apr_proc_mutex_t *mutex,
-                                                  apr_time_t timeout,
-                                                  int absolute)
-{
-    return APR_ENOTIMPL;
-}
-
 static apr_status_t proc_mutex_flock_release(apr_proc_mutex_t *mutex)
 {
     int rc;
@@ -1063,7 +935,6 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_flock_methods =
     proc_mutex_flock_create,
     proc_mutex_flock_acquire,
     proc_mutex_flock_tryacquire,
-    proc_mutex_flock_timedacquire,
     proc_mutex_flock_release,
     proc_mutex_flock_cleanup,
     proc_mutex_flock_child_init,
@@ -1215,21 +1086,6 @@ static apr_status_t proc_mutex_choose_method(apr_proc_mutex_t *new_mutex,
         return APR_ENOTIMPL;
 #endif
         break;
-    case APR_LOCK_DEFAULT_TIMED:
-#if APR_HAS_PROC_PTHREAD_SERIALIZE \
-            && defined(HAVE_PTHREAD_MUTEX_ROBUST) \
-            && defined(HAVE_PTHREAD_MUTEX_TIMEDLOCK)
-        new_mutex->meth = &mutex_proc_pthread_methods;
-#elif APR_HAS_SYSVSEM_SERIALIZE \
-            && defined(HAVE_SEMTIMEDOP)
-        new_mutex->meth = &mutex_sysv_methods;
-#elif APR_HAS_POSIXSEM_SERIALIZE \
-            && defined(HAVE_SEM_TIMEDWAIT)
-        new_mutex->meth = &mutex_posixsem_methods;
-#else
-        return APR_ENOTIMPL;
-#endif
-        break;
     default:
         return APR_ENOTIMPL;
     }
@@ -1298,13 +1154,6 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex)
 APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
 {
     return mutex->meth->tryacquire(mutex);
-}
-
-APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
-                                                   apr_time_t timeout,
-                                                   int absolute)
-{
-    return mutex->meth->timedacquire(mutex, timeout, absolute);
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex)

@@ -23,6 +23,7 @@
  */
 
 #include "apr.h"
+#include "apr_pools.h"
 #include "apr_errno.h"
 
 #ifdef __cplusplus
@@ -118,9 +119,6 @@ struct apr_time_exp_t {
     /** seconds east of UTC */
     apr_int32_t tm_gmtoff;
 };
-
-/* Delayed the include to avoid a circular reference */
-#include "apr_pools.h"
 
 /**
  * Convert an ansi time_t to an apr_time_t

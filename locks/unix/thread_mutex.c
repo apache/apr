@@ -77,19 +77,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
         return rv;
     }
 
-#ifndef HAVE_PTHREAD_MUTEX_TIMEDLOCK
-    if (flags & APR_THREAD_MUTEX_TIMED) {
-        rv = apr_thread_cond_create(&new_mutex->cond, pool);
-        if (rv) {
-#ifdef HAVE_ZOS_PTHREADS
-            rv = errno;
-#endif
-            pthread_mutex_destroy(&new_mutex->mutex);
-            return rv;
-        }
-    }
-#endif
-
     apr_pool_cleanup_register(new_mutex->pool,
                               new_mutex, thread_mutex_cleanup,
                               apr_pool_cleanup_null);
@@ -102,81 +89,19 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 {
     apr_status_t rv;
 
-    if (mutex->cond) {
-        apr_status_t rv2;
-
-        rv = pthread_mutex_lock(&mutex->mutex);
-        if (rv) {
-#ifdef HAVE_ZOS_PTHREADS
-            rv = errno;
-#endif
-            return rv;
-        }
-
-        if (mutex->locked) {
-            mutex->num_waiters++;
-            rv = apr_thread_cond_wait(mutex->cond, mutex);
-            mutex->num_waiters--;
-        }
-        else {
-            mutex->locked = 1;
-        }
-
-        rv2 = pthread_mutex_unlock(&mutex->mutex);
-        if (rv2 && !rv) {
-#ifdef HAVE_ZOS_PTHREADS
-            rv = errno;
-#else
-            rv = rv2;
-#endif
-        }
-
-        return rv;
-    }
-
     rv = pthread_mutex_lock(&mutex->mutex);
 #ifdef HAVE_ZOS_PTHREADS
     if (rv) {
         rv = errno;
     }
 #endif
-
+    
     return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 {
     apr_status_t rv;
-
-    if (mutex->cond) {
-        apr_status_t rv2;
-
-        rv = pthread_mutex_lock(&mutex->mutex);
-        if (rv) {
-#ifdef HAVE_ZOS_PTHREADS
-            rv = errno;
-#endif
-            return rv;
-        }
-
-        if (mutex->locked) {
-            rv = APR_EBUSY;
-        }
-        else {
-            mutex->locked = 1;
-        }
-
-        rv2 = pthread_mutex_unlock(&mutex->mutex);
-        if (rv2) {
-#ifdef HAVE_ZOS_PTHREADS
-            rv = errno;
-#else
-            rv = rv2;
-#endif
-        }
-
-        return rv;
-    }
 
     rv = pthread_mutex_trylock(&mutex->mutex);
     if (rv) {
@@ -189,129 +114,9 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
-                                                     apr_time_t timeout,
-                                                     int absolute)
-{
-    apr_status_t rv = APR_ENOTIMPL;
-
-#ifdef HAVE_PTHREAD_MUTEX_TIMEDLOCK
-    if (timeout < 0) {
-        rv = pthread_mutex_lock(&mutex->mutex);
-        if (rv) {
-#ifdef HAVE_ZOS_PTHREADS
-            rv = errno;
-#endif
-        }
-    }
-    else {
-        struct timespec abstime;
-
-        if (!absolute) {
-            timeout += apr_time_now();
-        }
-        abstime.tv_sec = apr_time_sec(timeout);
-        abstime.tv_nsec = apr_time_usec(timeout) * 1000; /* nanoseconds */
-
-        rv = pthread_mutex_timedlock(&mutex->mutex, &abstime);
-        if (rv) {
-#ifdef HAVE_ZOS_PTHREADS
-            rv = errno;
-#endif
-            if (rv == ETIMEDOUT) {
-                rv = APR_TIMEUP;
-            }
-        }
-    }
-
-#else /* HAVE_PTHREAD_MUTEX_TIMEDLOCK */
-
-    if (mutex->cond) {
-        apr_status_t rv2;
-
-        rv = pthread_mutex_lock(&mutex->mutex);
-        if (rv) {
-#ifdef HAVE_ZOS_PTHREADS
-            rv = errno;
-#endif
-            return rv;
-        }
-
-        if (mutex->locked) {
-            mutex->num_waiters++;
-            if (timeout < 0) {
-                rv = apr_thread_cond_wait(mutex->cond, mutex);
-            }
-            else {
-                if (absolute) {
-                    apr_time_t now = apr_time_now();
-                    if (timeout > now) {
-                        timeout -= now;
-                    }
-                    else {
-                        timeout = 0;
-                    }
-                }
-                rv = apr_thread_cond_timedwait(mutex->cond, mutex, timeout);
-            }
-            mutex->num_waiters--;
-        }
-        else {
-            mutex->locked = 1;
-        }
-
-        rv2 = pthread_mutex_unlock(&mutex->mutex);
-        if (rv2 && !rv) {
-#ifdef HAVE_ZOS_PTHREADS
-            rv = errno;
-#else
-            rv = rv2;
-#endif
-        }
-    }
-
-#endif /* HAVE_PTHREAD_MUTEX_TIMEDLOCK */
-
-    return rv;
-}
-
 APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 {
     apr_status_t status;
-
-    if (mutex->cond) {
-        apr_status_t stat2;
-
-        status = pthread_mutex_lock(&mutex->mutex);
-        if (status) {
-#ifdef HAVE_ZOS_PTHREADS
-            status = errno;
-#endif
-            return status;
-        }
-
-        if (!mutex->locked) {
-            status = APR_EINVAL;
-        }
-        else if (mutex->num_waiters) {
-            status = apr_thread_cond_signal(mutex->cond);
-        }
-        else {
-            mutex->locked = 0;
-            status = APR_SUCCESS;
-        }
-
-        stat2 = pthread_mutex_unlock(&mutex->mutex);
-        if (stat2) {
-#ifdef HAVE_ZOS_PTHREADS
-            status = errno;
-#else
-            status = stat2;
-#endif
-        }
-
-        return status;
-    }
 
     status = pthread_mutex_unlock(&mutex->mutex);
 #ifdef HAVE_ZOS_PTHREADS
@@ -325,17 +130,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex)
 {
-    apr_status_t rv, rv2 = APR_SUCCESS;
-
-    if (mutex->cond) {
-        rv2 = apr_thread_cond_destroy(mutex->cond);
-    }
-    rv = apr_pool_cleanup_run(mutex->pool, mutex, thread_mutex_cleanup);
-    if (rv == APR_SUCCESS) {
-        rv = rv2;
-    }
-    
-    return rv;
+    return apr_pool_cleanup_run(mutex->pool, mutex, thread_mutex_cleanup);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(thread_mutex)
