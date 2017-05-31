@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.1
 
+  *) Cut out problematic timed lock code [Nick Kew, William Rowe]
+
+  *) Export build files find_apr.m4 and apr_common.m4 [Jacob Champion]
 
 Changes for APR 1.6.0
 
