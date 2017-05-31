@@ -1,4 +1,7 @@
                                                      -*- coding: utf-8 -*-
+Changes for APR 1.6.2
+
+
 Changes for APR 1.6.1
 
   *) Cut out problematic timed lock code [Nick Kew, William Rowe]
