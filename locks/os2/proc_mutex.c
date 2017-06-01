@@ -218,7 +218,7 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex
 {
     *ospmutex = pmutex->hMutex;
     if (mech) {
-        return *mech = APR_LOCK_DEFAULT;
+        *mech = APR_LOCK_DEFAULT;
     }
     return APR_SUCCESS;
 }
