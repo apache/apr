@@ -27,9 +27,13 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
 {
     apr_status_t ret;
     apr_proc_mutex_t *new_mutex = NULL;
+
+    if (mech != APR_LOCK_DEFAULT) {
+        return APR_ENOTIMPL;
+    }
+
     new_mutex = (apr_proc_mutex_t *)apr_pcalloc(pool, sizeof(apr_proc_mutex_t));
-	
-	if(new_mutex ==NULL) {
+    if (new_mutex == NULL) {
         return APR_ENOMEM;
     }     
     
@@ -123,10 +127,12 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex
     if (mech) {
         *mech = APR_LOCK_DEFAULT;
     }
-    return APR_SUCCESS;
 #else
-    return APR_ENOTIMPL;
+    if (mech) {
+        *mech = APR_LOCK_DEFAULT;
+    }
 #endif
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex,
