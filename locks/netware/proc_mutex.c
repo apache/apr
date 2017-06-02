@@ -129,9 +129,9 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex
                                                    apr_proc_mutex_t *pmutex,
                                                    apr_lockmech_e *mech)
 {
-    if (!pmutex->mutex) {
-        return APR_ENOLOCK;
-    }
+    if (pmutex && pmutex->mutex)
+        ospmutex = pmutex->mutex->mutex;
+    return APR_ENOLOCK;
 #if 0
     /* We need to change apr_os_proc_mutex_t to a pointer type
      * to be able to implement this function.
@@ -141,8 +141,6 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex
         *mech = APR_LOCK_DEFAULT;
     }
     return APR_SUCCESS;
-#else
-    return APR_ENOTIMPL;
 #endif
 }
 
@@ -161,7 +159,7 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_put_ex(apr_proc_mutex_t **pmutex,
     if (pool == NULL) {
         return APR_ENOPOOL;
     }
-    if (mech != APR_LOCK_DEFAULT) {
+    if (mech != APR_LOCK_DEFAULT && mech != APR_LOCK_DEFAULT_TIMED) {
         return APR_ENOTIMPL;
     }
 #if 0
