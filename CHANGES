@@ -1,7 +1,7 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.2
 
-  *) Corrected non-Unix builds for APR_LOCK_DEFAULT. [William Rowe]
+  *) Corrected non-Unix builds for APR_LOCK_DEFAULT.
 
 Changes for APR 1.6.1
 
