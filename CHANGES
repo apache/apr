@@ -5,7 +5,7 @@ Changes for APR 1.6.2
 
 Changes for APR 1.6.1
 
-  *) Cut out problematic timed lock code [Nick Kew, William Rowe]
+  *) Defer timed locks API for later 1.7 release [Nick Kew, William Rowe]
 
   *) Export build files find_apr.m4 and apr_common.m4 [Jacob Champion]
 
