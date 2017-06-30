@@ -867,7 +867,7 @@ static void test_file_trunc(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
-static void test_file_trunc(abts_case *tc, void *data)
+static void test_file_trunc2(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *f;
@@ -1253,6 +1253,8 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_bigread, NULL);
     abts_run_test(suite, test_mod_neg, NULL);
     abts_run_test(suite, test_truncate, NULL);
+    abts_run_test(suite, test_file_trunc, NULL);
+    abts_run_test(suite, test_file_trunc2, NULL);
     abts_run_test(suite, test_file_trunc_buffered_write, NULL);
     abts_run_test(suite, test_file_trunc_buffered_write2, NULL);
     abts_run_test(suite, test_file_trunc_buffered_read, NULL);
