@@ -811,6 +811,253 @@ static void test_truncate(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
+static void test_file_trunc(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testtruncate.dat";
+    const char *s;
+    apr_size_t nbytes;
+    apr_finfo_t finfo;
+
+    apr_file_remove(fname, p);
+
+    /* Test unbuffered */
+    rv = apr_file_open(&f, fname,
+                        APR_FOPEN_CREATE | APR_FOPEN_READ |
+                        APR_FOPEN_WRITE,
+                        APR_FPROT_UREAD | APR_FPROT_UWRITE, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    s = "some data";
+    nbytes = strlen(s);
+    rv = apr_file_write(f, s, &nbytes);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_SIZE_EQUAL(tc, strlen(s), nbytes);
+    rv = apr_file_trunc(f, 4);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    rv = apr_file_close(f);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    rv = apr_stat(&finfo, fname, APR_FINFO_SIZE, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_ASSERT(tc, "File size mismatch, expected 4", finfo.size == 4);
+
+    rv = apr_file_remove(fname, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    /* Test buffered */
+    rv = apr_file_open(&f, fname,
+                        APR_FOPEN_CREATE | APR_FOPEN_READ |
+                        APR_FOPEN_WRITE | APR_FOPEN_BUFFERED,
+                        APR_FPROT_UREAD | APR_FPROT_UWRITE, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    nbytes = strlen(s);
+    rv = apr_file_write(f, s, &nbytes);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_SIZE_EQUAL(tc, strlen(s), nbytes);
+    rv = apr_file_trunc(f, 4);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    rv = apr_file_close(f);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    rv = apr_stat(&finfo, fname, APR_FINFO_SIZE, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_ASSERT(tc, "File size mismatch, expected 4", finfo.size == 4);
+
+    rv = apr_file_remove(fname, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
+
+static void test_file_trunc2(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testtruncate.dat";
+    const char *s;
+    apr_size_t nbytes;
+    apr_finfo_t finfo;
+    char c;
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname,
+                        APR_FOPEN_CREATE | APR_FOPEN_READ |
+                        APR_FOPEN_WRITE,
+                        APR_FPROT_UREAD | APR_FPROT_UWRITE, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    s = "some data";
+    nbytes = strlen(s);
+    rv = apr_file_write(f, s, &nbytes);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_SIZE_EQUAL(tc, strlen(s), nbytes);
+    rv = apr_file_trunc(f, 4);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    /* Test apr_file_info_get(). */
+    rv = apr_file_info_get(&finfo, APR_FINFO_SIZE, f);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 4, (int)finfo.size);
+    /* EOF is not reported until the next read. */
+    rv = apr_file_eof(f);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    rv = apr_file_getc(&c, f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    rv = apr_file_eof(f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+
+    rv = apr_file_close(f);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    rv = apr_stat(&finfo, fname, APR_FINFO_SIZE, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 4, (int)finfo.size);
+
+    rv = apr_file_remove(fname, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
+
+static void test_file_trunc_buffered_write(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testtruncate_buffered_write.dat";
+    const char *s;
+    apr_size_t nbytes;
+    apr_finfo_t finfo;
+    char c;
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname,
+                        APR_FOPEN_CREATE | APR_FOPEN_READ |
+                        APR_FOPEN_WRITE | APR_FOPEN_BUFFERED,
+                        APR_FPROT_UREAD | APR_FPROT_UWRITE, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    s = "some data";
+    nbytes = strlen(s);
+    rv = apr_file_write(f, s, &nbytes);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_SIZE_EQUAL(tc, strlen(s), nbytes);
+    rv = apr_file_trunc(f, 4);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    /* Test apr_file_info_get(). */
+    rv = apr_file_info_get(&finfo, APR_FINFO_SIZE, f);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 4, (int)finfo.size);
+    /* EOF is not reported until the next read. */
+    rv = apr_file_eof(f);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    rv = apr_file_getc(&c, f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    rv = apr_file_eof(f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+
+    rv = apr_file_close(f);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    rv = apr_stat(&finfo, fname, APR_FINFO_SIZE, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 4, (int)finfo.size);
+
+    rv = apr_file_remove(fname, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
+
+static void test_file_trunc_buffered_write2(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testtruncate_buffered_write2.dat";
+    apr_finfo_t finfo;
+    char c;
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname,
+                       APR_FOPEN_CREATE | APR_FOPEN_READ |
+                       APR_FOPEN_WRITE | APR_FOPEN_BUFFERED,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file", rv);
+
+    rv = apr_file_puts("abc", f);
+    APR_ASSERT_SUCCESS(tc, "write first string", rv);
+    rv = apr_file_flush(f);
+    APR_ASSERT_SUCCESS(tc, "flush", rv);
+    rv = apr_file_puts("def", f);
+    APR_ASSERT_SUCCESS(tc, "write second string", rv);
+    /* Truncate behind the write buffer. */
+    rv = apr_file_trunc(f, 2);
+    APR_ASSERT_SUCCESS(tc, "truncate the file", rv);
+    /* Test apr_file_info_get(). */
+    rv = apr_file_info_get(&finfo, APR_FINFO_SIZE, f);
+    APR_ASSERT_SUCCESS(tc, "get file info", rv);
+    ABTS_INT_EQUAL(tc, 2, (int)finfo.size);
+    /* EOF is not reported until the next read. */
+    rv = apr_file_eof(f);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    rv = apr_file_getc(&c, f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    rv = apr_file_eof(f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+
+    apr_file_close(f);
+
+    rv = apr_stat(&finfo, fname, APR_FINFO_SIZE, p);
+    APR_ASSERT_SUCCESS(tc, "stat file", rv);
+    ABTS_INT_EQUAL(tc, 2, (int)finfo.size);
+
+    apr_file_remove(fname, p);
+}
+
+static void test_file_trunc_buffered_read(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testtruncate_buffered_read.dat";
+    apr_finfo_t finfo;
+    char c;
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname,
+                       APR_FOPEN_CREATE | APR_FOPEN_READ |
+                       APR_FOPEN_WRITE, APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file", rv);
+
+    rv = apr_file_puts("abc", f);
+    APR_ASSERT_SUCCESS(tc, "write test data", rv);
+    apr_file_close(f);
+
+    rv = apr_file_open(&f, fname,
+                       APR_FOPEN_READ | APR_FOPEN_WRITE |
+                       APR_FOPEN_BUFFERED, APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "re-open test file", rv);
+
+    /* Read to fill in the buffer. */
+    rv = apr_file_getc(&c, f);
+    APR_ASSERT_SUCCESS(tc, "read char", rv);
+    /* Truncate the file. */
+    rv = apr_file_trunc(f, 1);
+    APR_ASSERT_SUCCESS(tc, "truncate the file", rv);
+    /* Test apr_file_info_get(). */
+    rv = apr_file_info_get(&finfo, APR_FINFO_SIZE, f);
+    APR_ASSERT_SUCCESS(tc, "get file info", rv);
+    ABTS_INT_EQUAL(tc, 1, (int)finfo.size);
+    /* EOF is not reported until the next read. */
+    rv = apr_file_eof(f);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    rv = apr_file_getc(&c, f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    rv = apr_file_eof(f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+
+    apr_file_close(f);
+
+    rv = apr_stat(&finfo, fname, APR_FINFO_SIZE, p);
+    APR_ASSERT_SUCCESS(tc, "stat file", rv);
+    ABTS_INT_EQUAL(tc, 1, (int)finfo.size);
+
+    apr_file_remove(fname, p);
+}
+
 static void test_bigfprintf(abts_case *tc, void *data)
 {
     apr_file_t *f;
@@ -1006,6 +1253,11 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_bigread, NULL);
     abts_run_test(suite, test_mod_neg, NULL);
     abts_run_test(suite, test_truncate, NULL);
+    abts_run_test(suite, test_file_trunc, NULL);
+    abts_run_test(suite, test_file_trunc2, NULL);
+    abts_run_test(suite, test_file_trunc_buffered_write, NULL);
+    abts_run_test(suite, test_file_trunc_buffered_write2, NULL);
+    abts_run_test(suite, test_file_trunc_buffered_read, NULL);
     abts_run_test(suite, test_bigfprintf, NULL);
     abts_run_test(suite, test_fail_write_flush, NULL);
     abts_run_test(suite, test_fail_read_flush, NULL);
