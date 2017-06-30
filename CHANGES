@@ -1,7 +1,13 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.3
 
+  *) apr_file_trunc: Truncating a buffered file could add unexpected
+     data after the truncate position. PR 51017.
+     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
+  *) apr_file_trunc: Fix an issue where reading from a buffered file
+     after truncate could return stale data from the buffer.
+     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
 Changes for APR 1.6.2
 
