@@ -257,6 +257,38 @@ APR_DECLARE(apr_status_t) apr_file_rotating_manual_check(apr_file_t *thefile,
     return APR_ENOTIMPL;
 }
 
+/* Helper function that adapts WriteFile() to apr_size_t instead
+ * of DWORD. */
+static apr_status_t write_helper(HANDLE filehand, const char *buf,
+                                 apr_size_t len, apr_size_t *pwritten)
+{
+    apr_size_t remaining = len;
+
+    *pwritten = 0;
+    do {
+        DWORD to_write;
+        DWORD written;
+
+        if (remaining > APR_DWORD_MAX) {
+            to_write = APR_DWORD_MAX;
+        }
+        else {
+            to_write = (DWORD)remaining;
+        }
+
+        if (!WriteFile(filehand, buf, to_write, &written, NULL)) {
+            *pwritten += written;
+            return apr_get_os_error();
+        }
+
+        *pwritten += written;
+        remaining -= written;
+        buf += written;
+    } while (remaining);
+
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
 {
     apr_status_t rv;
@@ -576,34 +608,14 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
 APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
 {
     if (thefile->buffered) {
-        DWORD numbytes, written = 0;
         apr_status_t rc = 0;
-        char *buffer;
-        apr_size_t bytesleft;
 
         if (thefile->direction == 1 && thefile->bufpos) {
-            buffer = thefile->buffer;
-            bytesleft = thefile->bufpos;           
+            apr_size_t written;
 
-            do {
-                if (bytesleft > APR_DWORD_MAX) {
-                    numbytes = APR_DWORD_MAX;
-                }
-                else {
-                    numbytes = (DWORD)bytesleft;
-                }
-
-                if (!WriteFile(thefile->filehand, buffer, numbytes, &written, NULL)) {
-                    rc = apr_get_os_error();
-                    thefile->filePtr += written;
-                    break;
-                }
-
-                thefile->filePtr += written;
-                bytesleft -= written;
-                buffer += written;
-
-            } while (bytesleft > 0);
+            rc = write_helper(thefile->filehand, thefile->buffer,
+                              thefile->bufpos, &written);
+            thefile->filePtr += written;
 
             if (rc == 0)
                 thefile->bufpos = 0;
