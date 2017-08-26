@@ -289,6 +289,39 @@ static apr_status_t write_helper(HANDLE filehand, const char *buf,
     return APR_SUCCESS;
 }
 
+static apr_status_t write_buffered(apr_file_t *thefile, const char *buf,
+                                   apr_size_t len)
+{
+    apr_size_t blocksize;
+    apr_status_t rv;
+
+    if (thefile->direction == 0) {
+        /* Position file pointer for writing at the offset we are logically reading from */
+        apr_off_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+        DWORD offlo = (DWORD)offset;
+        LONG offhi = (LONG)(offset >> 32);
+        if (offset != thefile->filePtr)
+            SetFilePointer(thefile->filehand, offlo, &offhi, FILE_BEGIN);
+        thefile->bufpos = thefile->dataRead = 0;
+        thefile->direction = 1;
+    }
+
+    rv = 0;
+    while (rv == 0 && len > 0) {
+        if (thefile->bufpos == thefile->bufsize)   /* write buffer is full */
+            rv = apr_file_flush(thefile);
+
+        blocksize = len > thefile->bufsize - thefile->bufpos ?
+                    thefile->bufsize - thefile->bufpos : len;
+        memcpy(thefile->buffer + thefile->bufpos, buf, blocksize);
+        thefile->bufpos += blocksize;
+        buf += blocksize;
+        len -= blocksize;
+    }
+
+    return rv;
+}
+
 APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
 {
     apr_status_t rv;
@@ -309,38 +342,10 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
     }
 
     if (thefile->buffered) {
-        char *pos = (char *)buf;
-        apr_size_t blocksize;
-        apr_size_t size = *nbytes;
-
         if (thefile->flags & APR_FOPEN_XTHREAD) {
             apr_thread_mutex_lock(thefile->mutex);
         }
-
-        if (thefile->direction == 0) {
-            /* Position file pointer for writing at the offset we are logically reading from */
-            apr_off_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
-            DWORD offlo = (DWORD)offset;
-            LONG  offhi = (LONG)(offset >> 32);
-            if (offset != thefile->filePtr)
-                SetFilePointer(thefile->filehand, offlo, &offhi, FILE_BEGIN);
-            thefile->bufpos = thefile->dataRead = 0;
-            thefile->direction = 1;
-        }
-
-        rv = 0;
-        while (rv == 0 && size > 0) {
-            if (thefile->bufpos == thefile->bufsize)   /* write buffer is full */
-                rv = apr_file_flush(thefile);
-
-            blocksize = size > thefile->bufsize - thefile->bufpos ? 
-                                     thefile->bufsize - thefile->bufpos : size;
-            memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);
-            thefile->bufpos += blocksize;
-            pos += blocksize;
-            size -= blocksize;
-        }
-
+        rv = write_buffered(thefile, buf, *nbytes, nbytes);
         if (thefile->flags & APR_FOPEN_XTHREAD) {
             apr_thread_mutex_unlock(thefile->mutex);
         }
