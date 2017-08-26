@@ -290,9 +290,8 @@ static apr_status_t write_helper(HANDLE filehand, const char *buf,
 }
 
 static apr_status_t write_buffered(apr_file_t *thefile, const char *buf,
-                                   apr_size_t len)
+                                   apr_size_t len, apr_size_t *pwritten)
 {
-    apr_size_t blocksize;
     apr_status_t rv;
 
     if (thefile->direction == 0) {
@@ -306,20 +305,41 @@ static apr_status_t write_buffered(apr_file_t *thefile, const char *buf,
         thefile->direction = 1;
     }
 
-    rv = 0;
-    while (rv == 0 && len > 0) {
-        if (thefile->bufpos == thefile->bufsize)   /* write buffer is full */
-            rv = apr_file_flush(thefile);
+    *pwritten = 0;
 
-        blocksize = len > thefile->bufsize - thefile->bufpos ?
-                    thefile->bufsize - thefile->bufpos : len;
-        memcpy(thefile->buffer + thefile->bufpos, buf, blocksize);
-        thefile->bufpos += blocksize;
-        buf += blocksize;
-        len -= blocksize;
+    while (len > 0) {
+        if (thefile->bufpos == thefile->bufsize) { /* write buffer is full */
+            rv = apr_file_flush(thefile);
+            if (rv) {
+                return rv;
+            }
+        }
+        /* If our buffer is empty, and we cannot fit the remaining chunk
+         * into it, write the chunk with a single syscall and return.
+         */
+        if (thefile->bufpos == 0 && len > thefile->bufsize) {
+            apr_size_t written;
+
+            rv = write_helper(thefile->filehand, buf, len, &written);
+            thefile->filePtr += written;
+            *pwritten += written;
+            return rv;
+        }
+        else {
+            apr_size_t blocksize = len;
+
+            if (blocksize > thefile->bufsize - thefile->bufpos) {
+                blocksize = thefile->bufsize - thefile->bufpos;
+            }
+            memcpy(thefile->buffer + thefile->bufpos, buf, blocksize);
+            thefile->bufpos += blocksize;
+            buf += blocksize;
+            len -= blocksize;
+            *pwritten += blocksize;
+        }
     }
 
-    return rv;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
