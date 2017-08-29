@@ -4,6 +4,9 @@ Changes for APR 2.0.0
      on Windows. PR 50058.
      [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
+  *) apr_file_write: Optimize large writes to buffered files on Windows.
+     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
+
   *) apr_file_trunc: Truncating a buffered file could add unexpected
      data after the truncate position. PR 51017.
      [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
