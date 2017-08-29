@@ -371,7 +371,11 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         }
         return rv;
     } else {
-        if (!thefile->pipe) {
+        if (thefile->pipe) {
+            rv = WriteFile(thefile->filehand, buf, (DWORD)*nbytes, &bwrote,
+                           thefile->pOverlapped);
+        }
+        else {
             if (thefile->append) {
                 apr_off_t offset = 0;
 
@@ -405,10 +409,6 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                 apr_file_unlock(thefile);
                 apr_thread_mutex_unlock(thefile->mutex);
             }
-        }
-        else {
-            rv = WriteFile(thefile->filehand, buf, (DWORD)*nbytes, &bwrote,
-                           thefile->pOverlapped);
         }
         if (rv) {
             *nbytes = bwrote;
