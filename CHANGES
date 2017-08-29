@@ -1,5 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
+  *) Fix a deadlock when writing to locked files opened with APR_FOPEN_APPEND
+     on Windows. PR 50058.
+     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
   *) apr_file_trunc: Truncating a buffered file could add unexpected
      data after the truncate position. PR 51017.
