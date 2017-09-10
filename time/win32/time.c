@@ -54,6 +54,9 @@ static void SystemTimeToAprExpTime(apr_time_exp_t *xt, SYSTEMTIME *tm)
     static const int dayoffset[12] =
     {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
+    if (tm->wMonth < 1 || tm->wMonth > 12)
+        return APR_EBADDATE;
+
     /* Note; the caller is responsible for filling in detailed tm_usec,
      * tm_gmtoff and tm_isdst data when applicable.
      */
@@ -223,6 +226,9 @@ APR_DECLARE(apr_status_t) apr_time_exp_get(apr_time_t *t,
     apr_time_t days;
     static const int dayoffset[12] =
     {306, 337, 0, 31, 61, 92, 122, 153, 184, 214, 245, 275};
+
+    if (xt->tm_mon < 0 || xt->tm_mon >= 12)
+        return APR_EBADDATE;
 
     /* shift new year to 1st March in order to make leap year calc easy */
 
