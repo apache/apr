@@ -44,25 +44,25 @@ static apr_status_t pollset_cleanup(void *p)
 }
 
 #if defined(HAVE_KQUEUE)
-extern apr_pollset_provider_t *apr_pollset_provider_kqueue;
+extern const apr_pollset_provider_t *apr_pollset_provider_kqueue;
 #endif
 #if defined(HAVE_PORT_CREATE)
-extern apr_pollset_provider_t *apr_pollset_provider_port;
+extern const apr_pollset_provider_t *apr_pollset_provider_port;
 #endif
 #if defined(HAVE_EPOLL)
-extern apr_pollset_provider_t *apr_pollset_provider_epoll;
+extern const apr_pollset_provider_t *apr_pollset_provider_epoll;
 #endif
 #if defined(HAVE_AIO_MSGQ)
-extern apr_pollset_provider_t *apr_pollset_provider_aio_msgq;
+extern const apr_pollset_provider_t *apr_pollset_provider_aio_msgq;
 #endif
 #if defined(HAVE_POLL)
-extern apr_pollset_provider_t *apr_pollset_provider_poll;
+extern const apr_pollset_provider_t *apr_pollset_provider_poll;
 #endif
-extern apr_pollset_provider_t *apr_pollset_provider_select;
+extern const apr_pollset_provider_t *apr_pollset_provider_select;
 
-static apr_pollset_provider_t *pollset_provider(apr_pollset_method_e method)
+static const apr_pollset_provider_t *pollset_provider(apr_pollset_method_e method)
 {
-    apr_pollset_provider_t *provider = NULL;
+    const apr_pollset_provider_t *provider = NULL;
     switch (method) {
         case APR_POLLSET_KQUEUE:
 #if defined(HAVE_KQUEUE)
@@ -106,7 +106,7 @@ APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **ret_pollset,
 {
     apr_status_t rv;
     apr_pollset_t *pollset;
-    apr_pollset_provider_t *provider = NULL;
+    const apr_pollset_provider_t *provider = NULL;
 
     *ret_pollset = NULL;
 
@@ -190,7 +190,7 @@ APR_DECLARE(const char *) apr_pollset_method_name(apr_pollset_t *pollset)
 
 APR_DECLARE(const char *) apr_poll_method_defname()
 {
-    apr_pollset_provider_t *provider = NULL;
+    const apr_pollset_provider_t *provider = NULL;
 
     provider = pollset_provider(pollset_default_method);
     if (provider)

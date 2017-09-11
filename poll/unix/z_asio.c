@@ -768,7 +768,7 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
     return rv;
 }  /* end of asio_pollset_poll */
 
-static apr_pollset_provider_t impl = {
+static const apr_pollset_provider_t impl = {
     asio_pollset_create,
     asio_pollset_add,
     asio_pollset_remove,
@@ -777,6 +777,6 @@ static apr_pollset_provider_t impl = {
     "asio"
 };
 
-apr_pollset_provider_t *apr_pollset_provider_aio_msgq = &impl;
+const apr_pollset_provider_t *apr_pollset_provider_aio_msgq = &impl;
 
 #endif /* HAVE_AIO_MSGQ */

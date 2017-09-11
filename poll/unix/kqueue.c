@@ -316,7 +316,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     return rv;
 }
 
-static apr_pollset_provider_t impl = {
+static const apr_pollset_provider_t impl = {
     impl_pollset_create,
     impl_pollset_add,
     impl_pollset_remove,
@@ -325,7 +325,7 @@ static apr_pollset_provider_t impl = {
     "kqueue"
 };
 
-apr_pollset_provider_t *apr_pollset_provider_kqueue = &impl;
+const apr_pollset_provider_t *apr_pollset_provider_kqueue = &impl;
 
 static apr_status_t impl_pollcb_cleanup(apr_pollcb_t *pollcb)
 {
@@ -491,7 +491,7 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
     return rv;
 }
 
-static apr_pollcb_provider_t impl_cb = {
+static const apr_pollcb_provider_t impl_cb = {
     impl_pollcb_create,
     impl_pollcb_add,
     impl_pollcb_remove,
@@ -500,6 +500,6 @@ static apr_pollcb_provider_t impl_cb = {
     "kqueue"
 };
 
-apr_pollcb_provider_t *apr_pollcb_provider_kqueue = &impl_cb;
+const apr_pollcb_provider_t *apr_pollcb_provider_kqueue = &impl_cb;
 
 #endif /* HAVE_KQUEUE */
