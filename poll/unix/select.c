@@ -437,7 +437,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     return rv;
 }
 
-static apr_pollset_provider_t impl = {
+static const apr_pollset_provider_t impl = {
     impl_pollset_create,
     impl_pollset_add,
     impl_pollset_remove,
@@ -446,4 +446,4 @@ static apr_pollset_provider_t impl = {
     "select"
 };
 
-apr_pollset_provider_t *apr_pollset_provider_select = &impl;
+const apr_pollset_provider_t *apr_pollset_provider_select = &impl;
