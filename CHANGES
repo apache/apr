@@ -9,6 +9,9 @@ Changes for APR 1.6.3
      after truncate could return stale data from the buffer.
      [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
+  *) apr_ipsubnet_create() now fails for an empty input string.
+     [Joe Orton]
+
 Changes for APR 1.6.2
 
   *) Corrected non-Unix builds for APR_LOCK_DEFAULT.
