@@ -1053,6 +1053,10 @@ static apr_status_t parse_ip(apr_ipsubnet_t *ipsub, const char *ipstr, int netwo
 
 static int looks_like_ip(const char *ipstr)
 {
+    if (strlen(ipstr) == 0) {
+        return 0;
+    }
+    
     if (strchr(ipstr, ':')) {
         /* definitely not a hostname; assume it is intended to be an IPv6 address */
         return 1;
