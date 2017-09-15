@@ -451,8 +451,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         (*new)->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
         (*new)->bufsize = APR_FILE_DEFAULT_BUFSIZE;
     }
-    /* Need the mutex to handled buffered and O_APPEND style file i/o */
-    if ((*new)->buffered || (*new)->append) {
+    /* Need the mutex to share an apr_file_t across multiple threads */
+    if (flag & APR_FOPEN_XTHREAD) {
         rv = apr_thread_mutex_create(&(*new)->mutex, 
                                      APR_THREAD_MUTEX_DEFAULT, pool);
         if (rv) {
@@ -644,8 +644,7 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
         (*file)->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
         (*file)->bufsize = APR_FILE_DEFAULT_BUFSIZE;
     }
-
-    if ((*file)->append || (*file)->buffered) {
+    if (flags & APR_FOPEN_XTHREAD) {
         apr_status_t rv;
         rv = apr_thread_mutex_create(&(*file)->mutex, 
                                      APR_THREAD_MUTEX_DEFAULT, pool);

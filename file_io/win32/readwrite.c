@@ -412,20 +412,26 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             apr_off_t offset = 0;
             apr_status_t rc;
             if (thefile->append) {
-                /* apr_file_lock will mutex the file across processes.
-                 * The call to apr_thread_mutex_lock is added to avoid
-                 * a race condition between LockFile and WriteFile 
-                 * that occasionally leads to deadlocked threads.
-                 */
-                apr_thread_mutex_lock(thefile->mutex);
+                if (thefile->flags & APR_FOPEN_XTHREAD) {
+                    /* apr_file_lock will mutex the file across processes.
+                     * The call to apr_thread_mutex_lock is added to avoid
+                     * a race condition between LockFile and WriteFile
+                     * that occasionally leads to deadlocked threads.
+                     */
+                    apr_thread_mutex_lock(thefile->mutex);
+                }
                 rc = apr_file_lock(thefile, APR_FLOCK_EXCLUSIVE);
                 if (rc != APR_SUCCESS) {
-                    apr_thread_mutex_unlock(thefile->mutex);
+                    if (thefile->flags & APR_FOPEN_XTHREAD) {
+                        apr_thread_mutex_unlock(thefile->mutex);
+                    }
                     return rc;
                 }
                 rc = apr_file_seek(thefile, APR_END, &offset);
                 if (rc != APR_SUCCESS) {
-                    apr_thread_mutex_unlock(thefile->mutex);
+                    if (thefile->flags & APR_FOPEN_XTHREAD) {
+                        apr_thread_mutex_unlock(thefile->mutex);
+                    }
                     return rc;
                 }
             }
@@ -437,7 +443,9 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                            thefile->pOverlapped);
             if (thefile->append) {
                 apr_file_unlock(thefile);
-                apr_thread_mutex_unlock(thefile->mutex);
+                if (thefile->flags & APR_FOPEN_XTHREAD) {
+                    apr_thread_mutex_unlock(thefile->mutex);
+                }
             }
         }
         if (rv) {
