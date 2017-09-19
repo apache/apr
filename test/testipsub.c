@@ -45,7 +45,7 @@ static void test_bad_input(abts_case *tc, void *data)
         ,{"127.0.0.1.2",       NULL,               APR_EBADIP}
         ,{"127.0.0.1.2",       "8",                APR_EBADIP}
         ,{"127",               "255.0.0.0",        APR_EBADIP} /* either EBADIP or EBADMASK seems fine */
-        ,{"",                  NULL,               APR_EBADIP}
+        ,{"",                  NULL,               APR_EINVAL}
 #if APR_HAVE_IPV6
         ,{"::1",               NULL,               APR_SUCCESS}
         ,{"::1",               "20",               APR_SUCCESS}
