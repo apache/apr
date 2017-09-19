@@ -126,7 +126,7 @@ struct apr_pollset_t
     apr_file_t *wakeup_pipe[2];
     apr_pollfd_t wakeup_pfd;
     apr_pollset_private_t *p;
-    apr_pollset_provider_t *provider;
+    const apr_pollset_provider_t *provider;
 };
 
 typedef union {
@@ -156,7 +156,7 @@ struct apr_pollcb_t {
     int fd;
     apr_pollcb_pset pollset;
     apr_pollfd_t **copyset;
-    apr_pollcb_provider_t *provider;
+    const apr_pollcb_provider_t *provider;
 };
 
 struct apr_pollset_provider_t {

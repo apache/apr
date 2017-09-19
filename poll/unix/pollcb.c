@@ -29,21 +29,21 @@
 
 static apr_pollset_method_e pollset_default_method = POLLSET_DEFAULT_METHOD;
 #if defined(HAVE_KQUEUE)
-extern apr_pollcb_provider_t *apr_pollcb_provider_kqueue;
+extern const apr_pollcb_provider_t *apr_pollcb_provider_kqueue;
 #endif
 #if defined(HAVE_PORT_CREATE)
-extern apr_pollcb_provider_t *apr_pollcb_provider_port;
+extern const apr_pollcb_provider_t *apr_pollcb_provider_port;
 #endif
 #if defined(HAVE_EPOLL)
-extern apr_pollcb_provider_t *apr_pollcb_provider_epoll;
+extern const apr_pollcb_provider_t *apr_pollcb_provider_epoll;
 #endif
 #if defined(HAVE_POLL)
-extern apr_pollcb_provider_t *apr_pollcb_provider_poll;
+extern const apr_pollcb_provider_t *apr_pollcb_provider_poll;
 #endif
 
-static apr_pollcb_provider_t *pollcb_provider(apr_pollset_method_e method)
+static const apr_pollcb_provider_t *pollcb_provider(apr_pollset_method_e method)
 {
-    apr_pollcb_provider_t *provider = NULL;
+    const apr_pollcb_provider_t *provider = NULL;
     switch (method) {
         case APR_POLLSET_KQUEUE:
 #if defined(HAVE_KQUEUE)
@@ -95,7 +95,7 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **ret_pollcb,
 {
     apr_status_t rv;
     apr_pollcb_t *pollcb;
-    apr_pollcb_provider_t *provider = NULL;
+    const apr_pollcb_provider_t *provider = NULL;
 
     *ret_pollcb = NULL;
 
