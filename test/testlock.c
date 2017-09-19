@@ -334,7 +334,7 @@ static void test_timeoutcond(abts_case *tc, void *data)
             continue;
         }
         ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(s));
-        ABTS_ASSERT(tc, "Timer returned too late", end - begin - timeout < 100000);
+        ABTS_ASSERT(tc, "Timer returned too late", end - begin - timeout < 500000);
         break;
     }
     ABTS_ASSERT(tc, "Too many retries", i < MAX_RETRY);
