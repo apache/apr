@@ -63,27 +63,11 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in,
-                                               apr_file_t **out,
-                                               apr_pool_t *p)
-{
-    /* Unix creates full blocking pipes. */
-    return apr_file_pipe_create_pools(in, out, APR_FULL_BLOCK, p, p);
-}
-
-APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
-                                                  apr_file_t **out,
-                                                  apr_int32_t blocking,
-                                                  apr_pool_t *p)
-{
-    return apr_file_pipe_create_pools(in, out, blocking, p, p);
-}
-
-APR_DECLARE(apr_status_t) apr_file_pipe_create_pools(apr_file_t **in,
-                                                     apr_file_t **out,
-                                                     apr_int32_t blocking,
-                                                     apr_pool_t *pool_in,
-                                                     apr_pool_t *pool_out)
+static apr_status_t file_pipe_create(apr_file_t **in,
+                                     apr_file_t **out,
+                                     apr_int32_t blocking,
+                                     apr_pool_t *pool_in,
+                                     apr_pool_t *pool_out)
 {
 #ifdef _WIN32_WCE
     return APR_ENOTIMPL;
@@ -224,6 +208,30 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_pools(apr_file_t **in,
 #endif /* _WIN32_WCE */
 }
 
+APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in,
+                                               apr_file_t **out,
+                                               apr_pool_t *pool)
+{
+    /* Default is full blocking pipes. */
+    return file_pipe_create(in, out, APR_FULL_BLOCK, pool, pool);
+}
+
+APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
+                                                  apr_file_t **out,
+                                                  apr_int32_t blocking,
+                                                  apr_pool_t *pool)
+{
+    return file_pipe_create(in, out, blocking, pool, pool);
+}
+
+APR_DECLARE(apr_status_t) apr_file_pipe_create_pools(apr_file_t **in,
+                                                     apr_file_t **out,
+                                                     apr_int32_t blocking,
+                                                     apr_pool_t *pool_in,
+                                                     apr_pool_t *pool_out)
+{
+    return file_pipe_create(in, out, blocking, pool_in, pool_out);
+}
 
 APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename,
                                                     apr_fileperms_t perm,
