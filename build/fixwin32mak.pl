@@ -140,7 +140,7 @@ sub fixcwd {
         $dstfl = new IO::File $tname, "w" || die;
         while ($src = <$srcfl>) {
             if (($src =~ m/^\t"(\.\.\\)+(apr|apr-util|apr-iconv)\\.*"\\/) || 
-                ($src =~ m/^\t{\$\(INCLUDE\)}".*"\\/)) {
+                ($src =~ m/^\t\{\$\(INCLUDE\)\}".*"\\/)) {
                 $verchg = -1;
             }
             else {
