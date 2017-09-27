@@ -92,7 +92,7 @@ sub fixcwd {
             # that we also link here to the default CPU.  Omitting the
             # /machine spec from the .dsp was not enough, MSVC put it back.
             #
-            if ($src =~ s#^(LINK32_FLAGS=.*) /machine:(x|IX|I3)86 #$1 #) {
+            if ($src =~ s#^(LINK32_FLAGS=.*) /machine:(x|IX|I3)86 #$1 #i) {
                 $verchg = -1;
             }
             print $dstfl $src; 
