@@ -32,9 +32,22 @@
 #if APU_HAVE_CRYPTO
 
 #include <openssl/evp.h>
+#include <openssl/rand.h>
 #include <openssl/engine.h>
 
 #define LOG_PREFIX "apr_crypto_openssl: "
+
+#ifndef APR_USE_OPENSSL_PRE_1_1_API
+#if defined(LIBRESSL_VERSION_NUMBER)
+/* LibreSSL declares OPENSSL_VERSION_NUMBER == 2.0 but does not include most
+ * changes from OpenSSL >= 1.1 (new functions, macros, deprecations, ...), so
+ * we have to work around this...
+ */
+#define APR_USE_OPENSSL_PRE_1_1_API (1)
+#else
+#define APR_USE_OPENSSL_PRE_1_1_API (OPENSSL_VERSION_NUMBER < 0x10100000L)
+#endif
+#endif
 
 struct apr_crypto_t {
     apr_pool_t *pool;
@@ -118,8 +131,8 @@ static apr_status_t crypto_shutdown_helper(void *data)
 static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
         const apu_err_t **result)
 {
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-    CRYPTO_malloc_init();
+#if APR_USE_OPENSSL_PRE_1_1_API
+    (void)CRYPTO_malloc_init();
 #else
     OPENSSL_malloc_init();
 #endif
@@ -698,7 +711,7 @@ static apr_status_t crypto_block_encrypt(unsigned char **out,
     if (!EVP_EncryptUpdate(ctx->cipherCtx, (*out), &outl,
             (unsigned char *) in, inlen)) {
 #endif
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#if APR_USE_OPENSSL_PRE_1_1_API
         EVP_CIPHER_CTX_cleanup(ctx->cipherCtx);
 #else
         EVP_CIPHER_CTX_reset(ctx->cipherCtx);
@@ -741,7 +754,7 @@ static apr_status_t crypto_block_encrypt_finish(unsigned char *out,
     else {
         *outlen = len;
     }
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#if APR_USE_OPENSSL_PRE_1_1_API
     EVP_CIPHER_CTX_cleanup(ctx->cipherCtx);
 #else
     EVP_CIPHER_CTX_reset(ctx->cipherCtx);
@@ -868,7 +881,7 @@ static apr_status_t crypto_block_decrypt(unsigned char **out,
     if (!EVP_DecryptUpdate(ctx->cipherCtx, *out, &outl, (unsigned char *) in,
             inlen)) {
 #endif
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#if APR_USE_OPENSSL_PRE_1_1_API
         EVP_CIPHER_CTX_cleanup(ctx->cipherCtx);
 #else
         EVP_CIPHER_CTX_reset(ctx->cipherCtx);
@@ -911,7 +924,7 @@ static apr_status_t crypto_block_decrypt_finish(unsigned char *out,
     else {
         *outlen = len;
     }
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#if APR_USE_OPENSSL_PRE_1_1_API
     EVP_CIPHER_CTX_cleanup(ctx->cipherCtx);
 #else
     EVP_CIPHER_CTX_reset(ctx->cipherCtx);
