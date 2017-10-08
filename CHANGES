@@ -1,9 +1,6 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
-  *) apr_crypto: Fix compatibility with LibreSSL.  PR 61596.
-     [Bernard Spil <brnrd freebsd.org>, Yann Ylavic]
-
   *) Don't seek to the end when opening files with APR_FOPEN_APPEND on Windows.
      [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
