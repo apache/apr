@@ -27,8 +27,21 @@ Patches considered for backport are noted in their branches' STATUS:
 
 Releases:
     2.0.0     : in development on trunk/
-    1.5.0     : in development on branches/1.5.x/
-    1.4.3     : in development on branches/1.4.x/
+    1.7.0     : in development on branches/1.7.x
+    1.6.4     : in maintenance
+    1.6.3     : released October 22, 2017
+    1.6.2     : released June 14, 2017
+    1.6.1     : not released
+    1.6.0     : not released
+    1.5.2     : released April 29, 2015
+    1.5.1     : released April 20, 2014
+    1.5.0     : released November 18, 2013
+    1.4.8     : released June 21, 2013
+    1.4.7     : not released
+    1.4.6     : released Feb 14, 2012
+    1.4.5     : released May 22, 2011
+    1.4.4     : released May 9, 2011
+    1.4.3     : not released
     1.4.2     : released April 3, 2010
     1.4.1     : not released
     1.4.0     : not released
