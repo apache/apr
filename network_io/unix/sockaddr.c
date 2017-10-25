@@ -277,7 +277,7 @@ APR_DECLARE(apr_status_t) apr_parse_addr_port(char **addr,
                 return APR_EINVAL;
             }
             addrlen = scope_delim - str - 1;
-            *scope_id = apr_pstrmemdup(p, scope_delim, end_bracket - scope_delim - 1);
+            *scope_id = apr_pstrmemdup(p, scope_delim + 1, end_bracket - scope_delim - 1);
         }
         else {
             addrlen = addrlen - 2; /* minus 2 for '[' and ']' */
