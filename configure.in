@@ -2453,6 +2453,8 @@ else
 fi
 
 dnl ----------------------------- Checking for /dev/random 
+AC_CHECK_FUNCS(arc4random_buf)
+
 AC_MSG_CHECKING(for entropy source)
 
 why_no_rand=""
@@ -2469,6 +2471,13 @@ AC_ARG_WITH(egd,
     AC_MSG_RESULT(EGD-compatible daemon)
     rand="1"
   ])
+
+if test "$rand" != "1"; then
+  if test "$ac_cv_func_arc4random_buf" = yes; then
+    AC_MSG_RESULT(arc4random)
+    rand="1"
+  fi
+fi
 
 if test "$rand" != "1"; then
   AC_ARG_WITH(devrandom,
