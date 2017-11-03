@@ -87,7 +87,11 @@ APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 
                                                     apr_size_t length)
 {
-#ifdef DEV_RANDOM
+#if defined(HAVE_ARC4RANDOM)
+
+    arc4random_buf(buf, length);
+
+#elif defined(DEV_RANDOM)
 
     int fd = -1;
 
