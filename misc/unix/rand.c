@@ -43,13 +43,15 @@
 #include <sys/uuid.h>
 #endif
 
-#if defined(HAVE_SYS_RANDOM_H)
+#if defined(HAVE_SYS_RANDOM_H) && \
+    defined(HAVE_GETRANDOM)
 
 #include <sys/random.h>
 #define USE_GETRANDOM
 
 #elif defined(HAVE_SYS_SYSCALL_H) && \
       defined(HAVE_LINUX_RANDOM_H) && \
+      defined(HAVE_DECL_SYS_GETRANDOM) && \
       HAVE_DECL_SYS_GETRANDOM
 
 #ifndef _GNU_SOURCE
