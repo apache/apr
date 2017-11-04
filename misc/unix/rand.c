@@ -42,9 +42,28 @@
 #elif defined(HAVE_SYS_UUID_H)
 #include <sys/uuid.h>
 #endif
-#ifdef HAVE_GETRANDOM
+
+#if defined(HAVE_SYS_RANDOM_H)
+
 #include <sys/random.h>
+#define USE_GETRANDOM
+
+#elif defined(HAVE_SYS_SYSCALL_H) && \
+      defined(HAVE_LINUX_RANDOM_H) && \
+      HAVE_DECL_SYS_GETRANDOM
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
 #endif
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <linux/random.h>
+
+#define getrandom(buf, buflen, flags) \
+    syscall(SYS_getrandom, (buf), (buflen), (flags))
+#define USE_GETRANDOM
+
+#endif /* HAVE_SYS_RANDOM_H */
 
 #ifndef SHUT_RDWR
 #define SHUT_RDWR 2
@@ -90,7 +109,7 @@ APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 
                                                     apr_size_t length)
 {
-#if defined(HAVE_GETRANDOM)
+#if defined(USE_GETRANDOM)
 
     do {
         int rc;

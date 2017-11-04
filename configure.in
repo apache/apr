@@ -2456,6 +2456,10 @@ dnl ----------------------------- Checking for /dev/random
 AC_CHECK_HEADERS(sys/random.h)
 AC_CHECK_FUNCS(getrandom)
 
+AC_CHECK_HEADERS(sys/syscall.h)
+AC_CHECK_HEADERS(linux/random.h)
+AC_CHECK_DECLS([SYS_getrandom], [], [], [#include <sys/syscall.h>])
+
 AC_CHECK_FUNCS(arc4random_buf)
 
 AC_MSG_CHECKING(for entropy source)
@@ -2478,6 +2482,9 @@ AC_ARG_WITH(egd,
 if test "$rand" != "1"; then
   if test "$ac_cv_func_getrandom" = yes; then
     AC_MSG_RESULT(getrandom)
+    rand="1"
+  elif test "$ac_cv_have_decl_SYS_getrandom" = yes; then
+    AC_MSG_RESULT(SYS_getrandom)
     rand="1"
   fi
 fi
