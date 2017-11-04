@@ -42,6 +42,9 @@
 #elif defined(HAVE_SYS_UUID_H)
 #include <sys/uuid.h>
 #endif
+#ifdef HAVE_GETRANDOM
+#include <sys/random.h>
+#endif
 
 #ifndef SHUT_RDWR
 #define SHUT_RDWR 2
@@ -87,7 +90,24 @@ APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 
                                                     apr_size_t length)
 {
-#if defined(HAVE_ARC4RANDOM)
+#if defined(HAVE_GETRANDOM)
+
+    do {
+        int rc;
+
+        rc = getrandom(buf, length, GRND_NONBLOCK);
+        if (rc == -1) {
+            if (errno == EINTR) {
+                continue;
+            }
+            return errno;
+        }
+
+        buf += rc;
+        length -= rc;
+    } while (length > 0);
+
+#elif defined(HAVE_ARC4RANDOM)
 
     arc4random_buf(buf, length);
 
