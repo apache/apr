@@ -1069,7 +1069,9 @@ case $host in
 #endif";;
 esac
 
-AC_CHECK_HEADERS([sys/types.h sys/mman.h sys/ipc.h sys/mutex.h sys/shm.h sys/file.h kernel/OS.h os2.h windows.h])
+AC_CHECK_HEADERS([sys/types.h sys/mman.h sys/ipc.h sys/mutex.h \
+                  sys/shm.h sys/file.h kernel/OS.h os2.h windows.h \
+                  net/if.h])
 AC_CHECK_FUNCS([mmap munmap shm_open shm_unlink shmget shmat shmdt shmctl \
                 create_area mprotect])
 
@@ -2755,7 +2757,7 @@ esac
 AC_SEARCH_LIBS(getaddrinfo, socket inet6)
 AC_SEARCH_LIBS(gai_strerror, socket inet6)
 AC_SEARCH_LIBS(getnameinfo, socket inet6)
-AC_CHECK_FUNCS(gai_strerror)
+AC_CHECK_FUNCS(gai_strerror if_nametoindex if_indextoname)
 APR_CHECK_WORKING_GETADDRINFO
 APR_CHECK_NEGATIVE_EAI
 APR_CHECK_WORKING_GETNAMEINFO

@@ -640,6 +640,98 @@ static void test_freebind(abts_case *tc, void *data)
 #endif
 }
 
+#define TEST_ZONE_ADDR "fe80::1"
+
+#ifdef __linux__
+/* Reasonable bet that "lo" will exist. */
+#define TEST_ZONE_NAME "lo"
+/* ... fill in other platforms here */
+#endif
+
+#ifdef TEST_ZONE_NAME 
+#define TEST_ZONE_FULLADDR TEST_ZONE_ADDR "%" TEST_ZONE_NAME
+#endif
+
+static void test_zone(abts_case *tc, void *data)
+{
+#if APR_HAVE_IPV6
+    apr_sockaddr_t *sa;
+    apr_status_t rv;
+    const char *name = NULL;
+    apr_uint32_t id = 0;
+    
+    /* RFC 5737 address */
+    rv = apr_sockaddr_info_get(&sa, "127.0.0.1", APR_INET, 8080, 0, p);
+    APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
+
+    /* Fail for an IPv4 address! */
+    ABTS_INT_EQUAL(tc, APR_EBADIP,
+                   apr_sockaddr_zone_set(sa, "1"));
+    ABTS_INT_EQUAL(tc, APR_EBADIP,
+                   apr_sockaddr_zone_get(sa, &name, &id, p));
+
+    rv = apr_sockaddr_info_get(&sa, TEST_ZONE_ADDR, APR_INET6, 8080, 0, p);
+    APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
+
+    rv = apr_sockaddr_info_get(&sa, TEST_ZONE_ADDR, APR_INET6, 8080, 0, p);
+    APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
+
+    ABTS_INT_EQUAL(tc, APR_EBADIP, apr_sockaddr_zone_get(sa, &name, &id, p));
+
+#ifdef TEST_ZONE_NAME
+    {
+        apr_sockaddr_t *sa2;
+        char buf[50];
+        
+        APR_ASSERT_SUCCESS(tc, "Set zone to " TEST_ZONE_NAME,
+                           apr_sockaddr_zone_set(sa, TEST_ZONE_NAME));
+        
+        APR_ASSERT_SUCCESS(tc, "Get zone",
+                           apr_sockaddr_zone_get(sa, NULL, NULL, p));
+        
+        APR_ASSERT_SUCCESS(tc, "Get zone",
+                           apr_sockaddr_zone_get(sa, &name, &id, p));
+        ABTS_STR_EQUAL(tc, TEST_ZONE_NAME, name);
+        ABTS_INT_NEQUAL(tc, 0, id); /* Only guarantee is that it should be non-zero */
+
+        /* Check string translation. */
+        APR_ASSERT_SUCCESS(tc, "get IP address",
+                           apr_sockaddr_ip_getbuf(buf, 50, sa));
+        ABTS_STR_EQUAL(tc, TEST_ZONE_FULLADDR, buf);
+
+        memset(buf, 'A', sizeof buf);
+        ABTS_INT_EQUAL(tc, APR_ENOSPC, apr_sockaddr_ip_getbuf(buf, strlen(TEST_ZONE_ADDR), sa));
+        ABTS_INT_EQUAL(tc, APR_ENOSPC, apr_sockaddr_ip_getbuf(buf, strlen(TEST_ZONE_FULLADDR), sa));
+        
+        APR_ASSERT_SUCCESS(tc, "get IP address",
+                           apr_sockaddr_ip_getbuf(buf, strlen(TEST_ZONE_FULLADDR) + 1, sa));
+        /* Check for overflow. */
+        ABTS_INT_EQUAL(tc, 'A', buf[strlen(buf) + 1]);
+        
+        rv = apr_sockaddr_info_copy(&sa2, sa, p);
+        APR_ASSERT_SUCCESS(tc, "Problem copying sockaddr", rv);
+
+        /* Copy copied zone matches */
+        APR_ASSERT_SUCCESS(tc, "Get zone",
+                           apr_sockaddr_zone_get(sa2, &name, &id, p));
+        ABTS_STR_EQUAL(tc, TEST_ZONE_NAME, name);
+        ABTS_INT_NEQUAL(tc, 0, id); /* Only guarantee is that it should be non-zero */
+
+        /* Should match self and copy */
+        ABTS_INT_NEQUAL(tc, 0, apr_sockaddr_equal(sa, sa));
+        ABTS_INT_NEQUAL(tc, 0, apr_sockaddr_equal(sa2, sa2));
+        ABTS_INT_NEQUAL(tc, 0, apr_sockaddr_equal(sa2, sa));
+
+        /* Should not match against copy without zone set. */
+        rv = apr_sockaddr_info_get(&sa2, TEST_ZONE_ADDR, APR_INET6, 8080, 0, p);
+        APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
+
+        ABTS_INT_EQUAL(tc, 0, apr_sockaddr_equal(sa2, sa));
+    }
+#endif /* TEST_ZONE_NAME */
+#endif /* APR_HAVE_IPV6 */
+}
+    
 abts_suite *testsock(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -657,6 +749,7 @@ abts_suite *testsock(abts_suite *suite)
     abts_run_test(suite, test_wait, NULL);
     abts_run_test(suite, test_nonblock_inheritance, NULL);
     abts_run_test(suite, test_freebind, NULL);
+    abts_run_test(suite, test_zone, NULL);
 #if APR_HAVE_SOCKADDR_UN
     socket_name = UNIX_SOCKET_NAME;
     socket_type = APR_UNIX;
