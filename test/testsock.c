@@ -678,9 +678,6 @@ static void test_zone(abts_case *tc, void *data)
     rv = apr_sockaddr_info_get(&sa, TEST_ZONE_ADDR, APR_INET6, 8080, 0, p);
     APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
 
-    rv = apr_sockaddr_info_get(&sa, TEST_ZONE_ADDR, APR_INET6, 8080, 0, p);
-    APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
-
     ABTS_INT_EQUAL(tc, APR_EBADIP, apr_sockaddr_zone_get(sa, &name, &id, p));
 
 #ifdef TEST_ZONE_NAME
