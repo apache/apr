@@ -444,6 +444,8 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_copy(apr_sockaddr_t **dst,
 /* Set the zone of an IPv6 link-local address object.
  * @param sa Socket address object
  * @param zone_id Zone ID (textual "eth0" or numeric "3").
+ * @return Returns APR_EBADIP for non-IPv6 socket or an IPv6 address
+ * which isn't link-local.
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_zone_set(apr_sockaddr_t *sa,
                                                 const char *zone_id);

@@ -597,7 +597,6 @@ static void test_zone(abts_case *tc, void *data)
     const char *name = NULL;
     apr_uint32_t id = 0;
     
-    /* RFC 5737 address */
     rv = apr_sockaddr_info_get(&sa, "127.0.0.1", APR_INET, 8080, 0, p);
     APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
 
@@ -606,9 +605,12 @@ static void test_zone(abts_case *tc, void *data)
                    apr_sockaddr_zone_set(sa, "1"));
     ABTS_INT_EQUAL(tc, APR_EBADIP,
                    apr_sockaddr_zone_get(sa, &name, &id, p));
-
-    rv = apr_sockaddr_info_get(&sa, TEST_ZONE_ADDR, APR_INET6, 8080, 0, p);
+    
+    rv = apr_sockaddr_info_get(&sa, "::1", APR_INET6, 8080, 0, p);
     APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
+
+    /* Fail for an address which isn't link-local */
+    ABTS_INT_EQUAL(tc, APR_EBADIP, apr_sockaddr_zone_set(sa, "1"));
 
     rv = apr_sockaddr_info_get(&sa, TEST_ZONE_ADDR, APR_INET6, 8080, 0, p);
     APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
