@@ -139,6 +139,13 @@ static void test_cleanups(abts_case *tc, void *data)
     }
 }
 
+static void test_tags(abts_case *tc, void *data)
+{
+    ABTS_PTR_EQUAL(tc, NULL, apr_pool_get_tag(pmain));
+    apr_pool_tag(pmain, "main pool");
+    ABTS_STR_EQUAL(tc, "main pool", apr_pool_get_tag(pmain));
+}
+
 abts_suite *testpool(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -150,6 +157,7 @@ abts_suite *testpool(abts_suite *suite)
     abts_run_test(suite, alloc_bytes, NULL);
     abts_run_test(suite, calloc_bytes, NULL);
     abts_run_test(suite, test_cleanups, NULL);
+    abts_run_test(suite, test_tags, NULL);
 
     return suite;
 }

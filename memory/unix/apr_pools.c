@@ -2432,6 +2432,10 @@ APR_DECLARE(void) apr_pool_tag(apr_pool_t *pool, const char *tag)
     pool->tag = tag;
 }
 
+APR_DECLARE(const char *) apr_pool_get_tag(apr_pool_t *pool)
+{
+    return pool->tag;
+}
 
 /*
  * User data management
