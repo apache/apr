@@ -1226,7 +1226,8 @@ APR_DECLARE(apr_status_t) apr_sockaddr_zone_set(apr_sockaddr_t *sa,
 #else
     unsigned int idx;
     
-    if (sa->family != APR_INET6) {
+    if (sa->family != APR_INET6
+        || !IN6_IS_ADDR_LINKLOCAL((struct in6_addr *)sa->ipaddr_ptr)) {
         return APR_EBADIP;
     }
 
