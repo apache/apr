@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Add apr_pool_tag_get to retrieve the pool tag name.  [Joe Orton]
+
   *) Add apr_sockaddr_zone_set, apr_sockaddr_zone_set to set and retrieve
      the zone for link-local IPv6 addresses.  [Joe Orton]
 
