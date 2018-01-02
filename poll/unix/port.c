@@ -406,38 +406,36 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
 
     pollset_lock_rings();
 
-    if (nget) {
-        for (i = 0, j = 0; i < nget; i++) {
-            ep = (pfd_elem_t *)pollset->p->port_set[i].portev_user;
-            if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
-                ep->pfd.desc_type == APR_POLL_FILE &&
-                ep->pfd.desc.f == pollset->wakeup_pipe[0]) {
-                apr_poll_drain_wakeup_pipe(pollset->wakeup_pipe);
-                rv = APR_EINTR;
-            }
-            else {
-                pollset->p->result_set[j] = ep->pfd;
-                pollset->p->result_set[j].rtnevents =
-                    get_revent(pollset->p->port_set[i].portev_events);
-                j++;
-            }
-            /* If the ring element is still on the query ring, move it
-             * to the add ring for re-association with the event port
-             * later.  (It may have already been moved to the dead ring
-             * by a call to pollset_remove on another thread.)
-             */
-            if (ep->on_query_ring) {
-                APR_RING_REMOVE(ep, link);
-                ep->on_query_ring = 0;
-                APR_RING_INSERT_TAIL(&(pollset->p->add_ring), ep,
-                                     pfd_elem_t, link);
-            }
+    for (i = 0, j = 0; i < nget; i++) {
+        ep = (pfd_elem_t *)pollset->p->port_set[i].portev_user;
+        if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
+            ep->pfd.desc_type == APR_POLL_FILE &&
+            ep->pfd.desc.f == pollset->wakeup_pipe[0]) {
+            apr_poll_drain_wakeup_pipe(pollset->wakeup_pipe);
+            rv = APR_EINTR;
         }
-        if ((*num = j)) { /* any event besides wakeup pipe? */
-            rv = APR_SUCCESS;
-            if (descriptors) {
-                *descriptors = pollset->p->result_set;
-            }
+        else {
+            pollset->p->result_set[j] = ep->pfd;
+            pollset->p->result_set[j].rtnevents =
+                get_revent(pollset->p->port_set[i].portev_events);
+            j++;
+        }
+        /* If the ring element is still on the query ring, move it
+         * to the add ring for re-association with the event port
+         * later.  (It may have already been moved to the dead ring
+         * by a call to pollset_remove on another thread.)
+         */
+        if (ep->on_query_ring) {
+            APR_RING_REMOVE(ep, link);
+            ep->on_query_ring = 0;
+            APR_RING_INSERT_TAIL(&(pollset->p->add_ring), ep,
+                                 pfd_elem_t, link);
+        }
+    }
+    if ((*num = j)) { /* any event besides wakeup pipe? */
+        rv = APR_SUCCESS;
+        if (descriptors) {
+            *descriptors = pollset->p->result_set;
         }
     }
 
