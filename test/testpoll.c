@@ -783,6 +783,7 @@ static void pollset_wakeup(abts_case *tc, void *data)
     apr_pollset_t *pollset;
     apr_int32_t num;
     const apr_pollfd_t *descriptors;
+    int i;
 
     rv = apr_pollset_create_ex(&pollset, 1, p, APR_POLLSET_WAKEABLE,
                                default_pollset_impl);
@@ -792,12 +793,18 @@ static void pollset_wakeup(abts_case *tc, void *data)
     }
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    /* send wakeup but no data; apr_pollset_poll() should return APR_EINTR */
-    rv = apr_pollset_wakeup(pollset);
-    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    /* Send wakeup but no data; apr_pollset_poll() should return APR_EINTR.
+     * Do it twice to test implementations that need to re-arm the events after
+     * poll()ing (e.g. APR_POLLSET_PORT), hence verify that the wakeup pipe is
+     * still in the place afterward.
+     */
+    for (i = 0; i < 2; ++i) {
+        rv = apr_pollset_wakeup(pollset);
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    rv = apr_pollset_poll(pollset, -1, &num, &descriptors);
-    ABTS_INT_EQUAL(tc, APR_EINTR, rv);
+        rv = apr_pollset_poll(pollset, -1, &num, &descriptors);
+        ABTS_INT_EQUAL(tc, APR_EINTR, rv);
+    }
 
     /* send wakeup and data; apr_pollset_poll() should return APR_SUCCESS */
     socket_pollfd.desc_type = APR_POLL_SOCKET;
