@@ -354,8 +354,9 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
                                       const apr_pollfd_t **descriptors)
 {
     apr_os_sock_t fd;
-    int ret, i, j;
-    unsigned int nget;
+    int ret;
+    unsigned int nget, i;
+    apr_int32_t j;
     pfd_elem_t *ep;
     apr_status_t rv = APR_SUCCESS;
 
@@ -403,10 +404,9 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
        port_associate within apr_pollset_add() */
     apr_atomic_dec32(&pollset->p->waiting);
 
+    pollset_lock_rings();
+
     if (nget) {
-
-        pollset_lock_rings();
-
         for (i = 0, j = 0; i < nget; i++) {
             ep = (pfd_elem_t *)pollset->p->port_set[i].portev_user;
             if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
@@ -433,7 +433,6 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
                                      pfd_elem_t, link);
             }
         }
-        pollset_unlock_rings();
         if ((*num = j)) { /* any event besides wakeup pipe? */
             rv = APR_SUCCESS;
             if (descriptors) {
@@ -441,8 +440,6 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
             }
         }
     }
-
-    pollset_lock_rings();
 
     /* Shift all PFDs in the Dead Ring to the Free Ring */
     APR_RING_CONCAT(&(pollset->p->free_ring), &(pollset->p->dead_ring), pfd_elem_t, link);
