@@ -274,7 +274,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     }
     else {
         int i, j;
-        apr_pollfd_t *fdptr;
+        const apr_pollfd_t *fdptr;
 
         for (i = 0, j = 0; i < ret; i++) {
             if (pollset->flags & APR_POLLSET_NOCOPY) {
