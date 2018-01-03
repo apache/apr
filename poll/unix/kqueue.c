@@ -257,7 +257,6 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     int ret;
     struct timespec tv, *tvptr;
     apr_status_t rv = APR_SUCCESS;
-    apr_pollfd_t fd;
 
     *num = 0;
 
@@ -280,17 +279,18 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     }
     else {
         int i, j;
+        const apr_pollfd_t *fd;
 
         for (i = 0, j = 0; i < ret; i++) {
-            fd = (((pfd_elem_t *)(pollset->p->ke_set[i].udata))->pfd);
+            fd = &((pfd_elem_t *)pollset->p->ke_set[i].udata)->pfd;
             if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
-                fd.desc_type == APR_POLL_FILE &&
-                fd.desc.f == pollset->wakeup_pipe[0]) {
+                fd->desc_type == APR_POLL_FILE &&
+                fd->desc.f == pollset->wakeup_pipe[0]) {
                 apr_poll_drain_wakeup_pipe(pollset->wakeup_pipe);
                 rv = APR_EINTR;
             }
             else {
-                pollset->p->result_set[j] = fd;
+                pollset->p->result_set[j] = *fd;
                 pollset->p->result_set[j].rtnevents =
                         get_kqueue_revent(pollset->p->ke_set[i].filter,
                                           pollset->p->ke_set[i].flags);
