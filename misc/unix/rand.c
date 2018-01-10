@@ -224,7 +224,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
         length -= rc;
     } while (length > 0);
 
-#elif defined(HAVE_ARC4RANDOM)
+#elif defined(HAVE_ARC4RANDOM_BUF)
 
     arc4random_buf(buf, length);
 
