@@ -188,7 +188,7 @@ APR_DECLARE(apr_status_t) apr_allocator_create(apr_allocator_t **allocator)
 
 APR_DECLARE(void) apr_allocator_destroy(apr_allocator_t *allocator)
 {
-    apr_uint32_t index;
+    apr_size_t index;
     apr_memnode_t *node, **ref;
 
     for (index = 0; index <= MAX_INDEX; index++) {
@@ -235,7 +235,7 @@ APR_DECLARE(apr_pool_t *) apr_allocator_owner_get(apr_allocator_t *allocator)
 APR_DECLARE(void) apr_allocator_max_free_set(apr_allocator_t *allocator,
                                              apr_size_t in_size)
 {
-    apr_uint32_t max_free_index;
+    apr_size_t max_free_index;
     apr_size_t size = in_size;
 
     allocator_lock(allocator);
@@ -280,7 +280,7 @@ static APR_INLINE
 apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
 {
     apr_memnode_t *node, **ref;
-    apr_uint32_t max_index, upper_index;
+    apr_size_t max_index, upper_index;
     apr_size_t size, i, index;
 
     /* Round up the block size to the next boundary, but always
@@ -341,7 +341,7 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
                     ref--;
                     max_index--;
                 }
-                while (*ref == NULL && max_index > 0);
+                while (*ref == NULL && max_index);
 
                 allocator->max_index = max_index;
             }
@@ -423,8 +423,8 @@ static APR_INLINE
 void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
 {
     apr_memnode_t *next, *freelist = NULL;
-    apr_uint32_t index, max_index;
-    apr_uint32_t max_free_index, current_free_index;
+    apr_size_t index, max_index;
+    apr_size_t max_free_index, current_free_index;
 
     allocator_lock(allocator);
 
@@ -554,7 +554,7 @@ typedef struct debug_node_t debug_node_t;
 
 struct debug_node_t {
     debug_node_t *next;
-    apr_uint32_t  index;
+    apr_size_t    index;
     void         *beginp[64];
     void         *endp[64];
 };
@@ -1848,7 +1848,7 @@ APR_DECLARE(void *) apr_pcalloc_debug(apr_pool_t *pool, apr_size_t size,
 static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
 {
     debug_node_t *node;
-    apr_uint32_t index;
+    apr_size_t index;
 
     /* Run pre destroy cleanups */
     run_cleanups(&pool->pre_cleanups);
@@ -2265,7 +2265,7 @@ static int pool_find(apr_pool_t *pool, void *data)
 {
     void **pmem = (void **)data;
     debug_node_t *node;
-    apr_uint32_t index;
+    apr_size_t index;
 
     node = pool->nodes;
 
@@ -2298,7 +2298,7 @@ static int pool_num_bytes(apr_pool_t *pool, void *data)
 {
     apr_size_t *psize = (apr_size_t *)data;
     debug_node_t *node;
-    apr_uint32_t index;
+    apr_size_t index;
 
     node = pool->nodes;
 
