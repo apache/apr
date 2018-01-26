@@ -45,12 +45,21 @@ struct apr_bucket_alloc_t {
 static apr_status_t alloc_cleanup(void *data)
 {
     apr_bucket_alloc_t *list = data;
+#if APR_POOL_DEBUG
+    apr_allocator_t *allocator = NULL;
+#endif
+
+#if APR_POOL_DEBUG
+    if (list->pool && list->allocator != apr_pool_allocator_get(list->pool)) {
+        allocator = list->allocator;
+    }
+#endif
 
     apr_allocator_free(list->allocator, list->blocks);
 
 #if APR_POOL_DEBUG
-    if (list->pool && list->allocator != apr_pool_allocator_get(list->pool)) {
-        apr_allocator_destroy(list->allocator);
+    if (allocator) {
+        apr_allocator_destroy(allocator);
     }
 #endif
 
