@@ -114,9 +114,11 @@ static apr_status_t crypto_error(const apu_err_t **result,
  */
 static apr_status_t crypto_shutdown(void)
 {
+#if APR_USE_OPENSSL_PRE_1_1_API
     ERR_free_strings();
     EVP_cleanup();
     ENGINE_cleanup();
+#endif
     return APR_SUCCESS;
 }
 
@@ -133,12 +135,12 @@ static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
 {
 #if APR_USE_OPENSSL_PRE_1_1_API
     (void)CRYPTO_malloc_init();
-#else
-    OPENSSL_malloc_init();
-#endif
     ERR_load_crypto_strings();
     /* SSL_load_error_strings(); */
     OpenSSL_add_all_algorithms();
+#else
+    OPENSSL_malloc_init();
+#endif
     ENGINE_load_builtin_engines();
     ENGINE_register_all_complete();
 
