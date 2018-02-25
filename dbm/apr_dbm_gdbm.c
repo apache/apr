@@ -36,8 +36,20 @@
 static apr_status_t g2s(int gerr)
 {
     if (gerr == -1) {
-        /* ### need to fix this */
-        return APR_EGENERAL;
+        if (gdbm_errno == GDBM_NO_ERROR)
+           return APR_SUCCESS;
+        return APR_OS_START_USEERR + gdbm_errno;
+    }
+
+    return APR_SUCCESS;
+}
+
+static apr_status_t gdat2s(datum d)
+{
+    if (d.dptr == NULL) {
+        if (gdbm_errno == GDBM_NO_ERROR || gdbm_errno == GDBM_ITEM_NOT_FOUND)
+           return APR_SUCCESS;
+        return APR_OS_START_USEERR + gdbm_errno;
     }
 
     return APR_SUCCESS;
@@ -53,22 +65,14 @@ static apr_status_t datum_cleanup(void *dptr)
 
 static apr_status_t set_error(apr_dbm_t *dbm, apr_status_t dbm_said)
 {
-    apr_status_t rv = APR_SUCCESS;
+    dbm->errcode = dbm_said;
 
-    /* ### ignore whatever the DBM said (dbm_said); ask it explicitly */
-
-    if ((dbm->errcode = gdbm_errno) == GDBM_NO_ERROR) {
+    if (dbm_said == APR_SUCCESS)
         dbm->errmsg = NULL;
-    }
-    else {
-        dbm->errmsg = gdbm_strerror(gdbm_errno);
-        rv = APR_EGENERAL;        /* ### need something better */
-    }
+    else
+        dbm->errmsg = gdbm_strerror(dbm_said - APR_OS_START_USEERR);
 
-    /* captured it. clear it now. */
-    gdbm_errno = GDBM_NO_ERROR;
-
-    return rv;
+    return dbm_said;
 }
 
 /* --------------------------------------------------------------------------
@@ -107,7 +111,7 @@ static apr_status_t vt_gdbm_open(apr_dbm_t **pdb, const char *pathname,
                      NULL);
 
     if (file == NULL)
-        return APR_EGENERAL;      /* ### need a better error */
+        return APR_OS_START_USEERR + gdbm_errno;
 
     /* we have an open database... return it */
     *pdb = apr_pcalloc(pool, sizeof(**pdb));
@@ -141,10 +145,12 @@ static apr_status_t vt_gdbm_fetch(apr_dbm_t *dbm, apr_datum_t key,
     if (pvalue->dptr)
         apr_pool_cleanup_register(dbm->pool, pvalue->dptr, datum_cleanup,
                                   apr_pool_cleanup_null);
+    else
+        pvalue->dsize = 0;
 
     /* store the error info into DBM, and return a status code. Also, note
        that *pvalue should have been cleared on error. */
-    return set_error(dbm, APR_SUCCESS);
+    return set_error(dbm, gdat2s(rd));
 }
 
 static apr_status_t vt_gdbm_store(apr_dbm_t *dbm, apr_datum_t key,
@@ -201,9 +207,11 @@ static apr_status_t vt_gdbm_firstkey(apr_dbm_t *dbm, apr_datum_t *pkey)
     if (pkey->dptr)
         apr_pool_cleanup_register(dbm->pool, pkey->dptr, datum_cleanup,
                                   apr_pool_cleanup_null);
+    else
+        pkey->dsize = 0;
 
     /* store any error info into DBM, and return a status code. */
-    return set_error(dbm, APR_SUCCESS);
+    return set_error(dbm, gdat2s(rd));
 }
 
 static apr_status_t vt_gdbm_nextkey(apr_dbm_t *dbm, apr_datum_t *pkey)
@@ -221,9 +229,11 @@ static apr_status_t vt_gdbm_nextkey(apr_dbm_t *dbm, apr_datum_t *pkey)
     if (pkey->dptr)
         apr_pool_cleanup_register(dbm->pool, pkey->dptr, datum_cleanup,
                                   apr_pool_cleanup_null);
+    else
+        pkey->dsize = 0;
 
     /* store any error info into DBM, and return a status code. */
-    return set_error(dbm, APR_SUCCESS);
+    return set_error(dbm, gdat2s(rd));
 }
 
 static void vt_gdbm_freedatum(apr_dbm_t *dbm, apr_datum_t data)
