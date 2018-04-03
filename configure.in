@@ -1163,8 +1163,14 @@ case $host in
 esac
 
 AC_CHECK_HEADERS([sys/types.h sys/mman.h sys/ipc.h sys/mutex.h \
-                  sys/shm.h sys/file.h kernel/OS.h os2.h windows.h \
-                  net/if.h])
+                  sys/shm.h sys/file.h sys/socket.h kernel/OS.h os2.h windows.h])
+AC_CHECK_HEADERS([net/if.h],[],[],
+[
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#include <net/if.h>
+])
 AC_CHECK_FUNCS([mmap munmap shm_open shm_unlink shmget shmat shmdt shmctl \
                 create_area mprotect])
 
