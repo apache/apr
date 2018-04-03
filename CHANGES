@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.4
 
+  *) configure: Fix detection of <net/if.h> on OpenBSD.
+     PR 61976. [David Carlier <devnexen gmail.com>, Yann Ylavic]
+
   *) Fix apr_parse_addr_port() regression in scope_id parsing introduced
      in 1.6.3.  [Rainer Jung]
 
