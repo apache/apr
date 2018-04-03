@@ -58,6 +58,7 @@ struct apr_reslist_t {
     apr_thread_mutex_t *listlock;
     apr_thread_cond_t *avail;
 #endif
+    int fifo;
 };
 
 /**
@@ -80,7 +81,12 @@ static apr_res_t *pop_resource(apr_reslist_t *reslist)
  */
 static void push_resource(apr_reslist_t *reslist, apr_res_t *resource)
 {
-    APR_RING_INSERT_HEAD(&reslist->avail_list, resource, apr_res_t, link);
+    if (reslist->fifo) {
+        APR_RING_INSERT_TAIL(&reslist->avail_list, resource, apr_res_t, link);
+    }
+    else {
+        APR_RING_INSERT_HEAD(&reslist->avail_list, resource, apr_res_t, link);
+    }
     resource->freed = apr_time_now();
     reslist->nidle++;
 }
@@ -432,6 +438,11 @@ APR_DECLARE(void) apr_reslist_timeout_set(apr_reslist_t *reslist,
                                           apr_interval_time_t timeout)
 {
     reslist->timeout = timeout;
+}
+
+APR_DECLARE(void) apr_reslist_fifo_set(apr_reslist_t *reslist, int to)
+{
+    reslist->fifo = to;
 }
 
 APR_DECLARE(apr_uint32_t) apr_reslist_acquired_count(apr_reslist_t *reslist)

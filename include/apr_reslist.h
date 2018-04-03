@@ -134,6 +134,13 @@ APR_DECLARE(apr_status_t) apr_reslist_release(apr_reslist_t *reslist,
  */
 APR_DECLARE(void) apr_reslist_timeout_set(apr_reslist_t *reslist,
                                           apr_interval_time_t timeout);
+/**
+ * Set whether the reslist reuses resources as FIFO (First In First Out) or
+ * LIFO (Last In First Out).
+ * @param reslist The resource list.
+ * @param fifo Set as FIFO (non zero) or LIFO (zero).
+ */
+APR_DECLARE(void) apr_reslist_fifo_set(apr_reslist_t *reslist, int to);
 
 /**
  * Return the number of outstanding resources.
