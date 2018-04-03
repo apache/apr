@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) reslist: Add apr_reslist_fifo_set() to allow for reusing resources
+     in FIFO mode instead of the default LIFO mode.  [Yann Ylavic]
+
   *) Add apr_pool_tag_get to retrieve the pool tag name.  [Joe Orton]
 
   *) Add apr_sockaddr_zone_set, apr_sockaddr_zone_set to set and retrieve
