@@ -25,7 +25,7 @@ Changes for APR 1.7.0
   *) locks: Introduce apr_{thread,proc,global}_mutex_timedlock().
      [Yann Ylavic]
 
-Changes for APR 1.6.0
+Changes for APR 1.6.x and later:
 
   *) http://svn.apache.org/viewvc/apr/apr/branches/1.6.x/CHANGES?view=markup
 
