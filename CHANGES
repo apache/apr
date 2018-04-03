@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.0
 
+  *) configure: Fix detection of <net/if.h> on OpenBSD.
+     PR 61976. [David Carlier <devnexen gmail.com>, Yann Ylavic]
+
   *) Add apr_sockaddr_zone_set, apr_sockaddr_zone_set to set and retrieve
      the zone for link-local IPv6 addresses.  [Joe Orton]
 
