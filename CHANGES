@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.0
 
+  *) rand: Use arc4random_buf() on BSD platforms and getrandom() on Linux,
+     when available. [Christian Weisgerber <naddy openbsd.org, Yann Ylavic]
+
   *) Add apr_sockaddr_zone_set, apr_sockaddr_zone_set to set and retrieve
      the zone for link-local IPv6 addresses.  [Joe Orton]
 
