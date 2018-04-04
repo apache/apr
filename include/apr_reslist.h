@@ -134,11 +134,17 @@ APR_DECLARE(apr_status_t) apr_reslist_release(apr_reslist_t *reslist,
  */
 APR_DECLARE(void) apr_reslist_timeout_set(apr_reslist_t *reslist,
                                           apr_interval_time_t timeout);
+
 /**
  * Set whether the reslist reuses resources as FIFO (First In First Out) or
  * LIFO (Last In First Out).
  * @param reslist The resource list.
  * @param fifo Set as FIFO (non zero) or LIFO (zero).
+ * @remark This function should be called before any resource is in the
+ * the reslist, otherwise maintenance optimizations based on the expiration
+ * time relative to the order of insertion (i.e. position in the list) won't
+ * work as expected.
+ *
  */
 APR_DECLARE(void) apr_reslist_fifo_set(apr_reslist_t *reslist, int fifo);
 
