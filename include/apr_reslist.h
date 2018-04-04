@@ -140,7 +140,7 @@ APR_DECLARE(void) apr_reslist_timeout_set(apr_reslist_t *reslist,
  * @param reslist The resource list.
  * @param fifo Set as FIFO (non zero) or LIFO (zero).
  */
-APR_DECLARE(void) apr_reslist_fifo_set(apr_reslist_t *reslist, int to);
+APR_DECLARE(void) apr_reslist_fifo_set(apr_reslist_t *reslist, int fifo);
 
 /**
  * Return the number of outstanding resources.

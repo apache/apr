@@ -440,9 +440,9 @@ APR_DECLARE(void) apr_reslist_timeout_set(apr_reslist_t *reslist,
     reslist->timeout = timeout;
 }
 
-APR_DECLARE(void) apr_reslist_fifo_set(apr_reslist_t *reslist, int to)
+APR_DECLARE(void) apr_reslist_fifo_set(apr_reslist_t *reslist, int fifo)
 {
-    reslist->fifo = to;
+    reslist->fifo = fifo;
 }
 
 APR_DECLARE(apr_uint32_t) apr_reslist_acquired_count(apr_reslist_t *reslist)
