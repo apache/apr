@@ -229,8 +229,13 @@ APR_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist)
     /* Check if we need to expire old resources */
     now = apr_time_now();
     while (reslist->nidle > reslist->smax && reslist->nidle > 0) {
-        /* Peak at the last resource in the list */
-        res = APR_RING_LAST(&reslist->avail_list);
+        /* Peek at the next expiring resource in the list */
+        if (reslist->fifo) {
+            res = APR_RING_FIRST(&reslist->avail_list);
+        }
+        else {
+            res = APR_RING_LAST(&reslist->avail_list);
+        }
         /* See if the oldest entry should be expired */
         if (now - res->freed < reslist->ttl) {
             /* If this entry is too young, none of the others
