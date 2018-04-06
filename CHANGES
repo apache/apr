@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_file_write: Optimize large reads from buffered files on Windows.
+     [Evgeny Kotkov]
+
   *) reslist: Add apr_reslist_fifo_set() to allow for reusing resources
      in FIFO mode instead of the default LIFO mode.  [Yann Ylavic]
 
