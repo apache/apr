@@ -445,9 +445,15 @@ APR_DECLARE(void) apr_reslist_timeout_set(apr_reslist_t *reslist,
     reslist->timeout = timeout;
 }
 
-APR_DECLARE(void) apr_reslist_fifo_set(apr_reslist_t *reslist, int fifo)
+APR_DECLARE(apr_status_t) apr_reslist_fifo_set(apr_reslist_t *reslist,
+                                               int fifo)
 {
+    if (!APR_RING_EMPTY(&reslist->avail_list, apr_res_t, link)) {
+        return APR_EBUSY;
+    }
+
     reslist->fifo = fifo;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_uint32_t) apr_reslist_acquired_count(apr_reslist_t *reslist)
