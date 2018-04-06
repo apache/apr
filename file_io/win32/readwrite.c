@@ -144,8 +144,9 @@ static apr_status_t read_buffered(apr_file_t *thefile, void *buf, apr_size_t *le
 {
     apr_status_t rv;
     char *pos = (char *)buf;
-    apr_size_t blocksize;
-    apr_size_t size = *len;
+    apr_size_t bytes_read;
+    apr_size_t size;
+    apr_size_t remaining = *len;
 
     if (thefile->direction == 1) {
         rv = apr_file_flush(thefile);
@@ -157,29 +158,62 @@ static apr_status_t read_buffered(apr_file_t *thefile, void *buf, apr_size_t *le
         thefile->dataRead = 0;
     }
 
-    rv = 0;
-    while (rv == 0 && size > 0) {
-        if (thefile->bufpos >= thefile->dataRead) {
-            apr_size_t read;
-            rv = read_with_timeout(thefile, thefile->buffer,
-                                   thefile->bufsize, &read);
-            if (read == 0) {
-                if (rv == APR_EOF)
-                    thefile->eof_hit = TRUE;
-                break;
-            }
-            else {
-                thefile->dataRead = read;
-                thefile->filePtr += thefile->dataRead;
-                thefile->bufpos = 0;
-            }
-        }
+    /* Copy the data we have in the buffer. */
+    size = thefile->dataRead - thefile->bufpos;
+    if (size > remaining) {
+        size = remaining;
+    }
+    memcpy(pos, thefile->buffer + thefile->bufpos, size);
+    pos += size;
+    remaining -= size;
+    thefile->bufpos += size;
 
-        blocksize = size > thefile->dataRead - thefile->bufpos ? thefile->dataRead - thefile->bufpos : size;
-        memcpy(pos, thefile->buffer + thefile->bufpos, blocksize);
-        thefile->bufpos += blocksize;
-        pos += blocksize;
-        size -= blocksize;
+    if (remaining == 0) {
+        /* Nothing to do more, keep *LEN unchanged and return. */
+        return APR_SUCCESS;
+    }
+    /* The buffer is empty, but the caller wants more.
+     * Decide on the most appropriate way to read from the file:
+     */
+    if (remaining > thefile->bufsize) {
+        /* If the remaining chunk won't fit into the buffer, read it into
+         * the destination buffer with a single syscall.
+         */
+        rv = read_with_timeout(thefile, pos, remaining, &bytes_read);
+        thefile->filePtr += bytes_read;
+        pos += bytes_read;
+        /* Also, copy the last BUFSIZE (or less in case of a short read) bytes
+         * from the chunk to our buffer so that seeking backwards and reading
+         * would work from the buffer.
+         */
+        size = thefile->bufsize;
+        if (size > bytes_read) {
+            size = bytes_read;
+        }
+        memcpy(thefile->buffer, pos - size, size);
+        thefile->bufpos = size;
+        thefile->dataRead = size;
+    }
+    else {
+        /* The remaining chunk fits into the buffer.  Read up to BUFSIZE bytes
+         * from the file to our internal buffer.
+         */
+        rv = read_with_timeout(thefile, thefile->buffer, thefile->bufsize, &bytes_read);
+        thefile->filePtr += bytes_read;
+        thefile->bufpos = 0;
+        thefile->dataRead = bytes_read;
+        /* Copy the required part to the caller. */
+        size = remaining;
+        if (size > bytes_read) {
+            size = bytes_read;
+        }
+        memcpy(pos, thefile->buffer, size);
+        pos += size;
+        thefile->bufpos += size;
+    }
+
+    if (bytes_read == 0 && rv == APR_EOF) {
+        thefile->eof_hit = TRUE;
     }
 
     *len = pos - (char *)buf;
