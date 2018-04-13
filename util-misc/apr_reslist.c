@@ -58,7 +58,6 @@ struct apr_reslist_t {
     apr_thread_mutex_t *listlock;
     apr_thread_cond_t *avail;
 #endif
-    int fifo;
 };
 
 /**
@@ -81,12 +80,7 @@ static apr_res_t *pop_resource(apr_reslist_t *reslist)
  */
 static void push_resource(apr_reslist_t *reslist, apr_res_t *resource)
 {
-    if (reslist->fifo) {
-        APR_RING_INSERT_TAIL(&reslist->avail_list, resource, apr_res_t, link);
-    }
-    else {
-        APR_RING_INSERT_HEAD(&reslist->avail_list, resource, apr_res_t, link);
-    }
+    APR_RING_INSERT_HEAD(&reslist->avail_list, resource, apr_res_t, link);
     resource->freed = apr_time_now();
     reslist->nidle++;
 }
@@ -229,13 +223,8 @@ APR_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist)
     /* Check if we need to expire old resources */
     now = apr_time_now();
     while (reslist->nidle > reslist->smax && reslist->nidle > 0) {
-        /* Peek at the next expiring resource in the list */
-        if (reslist->fifo) {
-            res = APR_RING_FIRST(&reslist->avail_list);
-        }
-        else {
-            res = APR_RING_LAST(&reslist->avail_list);
-        }
+        /* Peak at the last resource in the list */
+        res = APR_RING_LAST(&reslist->avail_list);
         /* See if the oldest entry should be expired */
         if (now - res->freed < reslist->ttl) {
             /* If this entry is too young, none of the others
@@ -443,17 +432,6 @@ APR_DECLARE(void) apr_reslist_timeout_set(apr_reslist_t *reslist,
                                           apr_interval_time_t timeout)
 {
     reslist->timeout = timeout;
-}
-
-APR_DECLARE(apr_status_t) apr_reslist_fifo_set(apr_reslist_t *reslist,
-                                               int fifo)
-{
-    if (!APR_RING_EMPTY(&reslist->avail_list, apr_res_t, link)) {
-        return APR_EBUSY;
-    }
-
-    reslist->fifo = fifo;
-    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_uint32_t) apr_reslist_acquired_count(apr_reslist_t *reslist)

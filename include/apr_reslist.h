@@ -136,20 +136,6 @@ APR_DECLARE(void) apr_reslist_timeout_set(apr_reslist_t *reslist,
                                           apr_interval_time_t timeout);
 
 /**
- * Set whether the reslist should maintain resources as FIFO (First In First
- * Out) or LIFO (Last In First Out).
- * @param reslist The resource list.
- * @param fifo Set as FIFO (non zero) or LIFO (zero).
- * @return APR_SUCCESS, or APR_EBUSY if the reslist is not empty.
- * @remark The reslist is required to be empty because some maintenance
- * optimizations are based on the relative positions of resources in the
- * list to determine their expiry.
- *
- */
-APR_DECLARE(apr_status_t) apr_reslist_fifo_set(apr_reslist_t *reslist,
-                                               int fifo);
-
-/**
  * Return the number of outstanding resources.
  * @param reslist The resource list.
  */
