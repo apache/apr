@@ -31,7 +31,9 @@ APR_DECLARE(apr_status_t) apr_file_buffer_set(apr_file_t *file,
         /* Flush the existing buffer */
         rv = apr_file_flush(file);
         if (rv != APR_SUCCESS) {
-            apr_thread_mutex_unlock(file->mutex);
+            if (file->flags & APR_FOPEN_XTHREAD) {
+                apr_thread_mutex_unlock(file->mutex);
+            }
             return rv;
         }
     }
