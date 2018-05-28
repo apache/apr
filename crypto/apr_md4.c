@@ -41,6 +41,7 @@
 #include "apr_strings.h"
 #include "apr_md4.h"
 #include "apr_lib.h"
+#include "apr_crypto.h"     /* for apr_crypto_memzero, if available */
 
 #if APR_HAVE_STRING_H
 #include <string.h>
@@ -359,7 +360,11 @@ static void MD4Transform(apr_uint32_t state[4], const unsigned char block[64])
     state[3] += d;
     
     /* Zeroize sensitive information. */
+#if APU_HAVE_CRYPTO
+    apr_crypto_memzero(x, sizeof(x));
+#else
     memset(x, 0, sizeof(x));
+#endif
 }
 
 /* Encodes input (apr_uint32_t) into output (unsigned char). Assumes len is
