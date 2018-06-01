@@ -43,6 +43,7 @@
 #include <sys/uuid.h>
 #endif
 
+#if defined(SYS_RANDOM)
 #if defined(HAVE_SYS_RANDOM_H) && \
     defined(HAVE_GETRANDOM)
 
@@ -60,12 +61,12 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <linux/random.h>
-
 #define getrandom(buf, buflen, flags) \
     syscall(SYS_getrandom, (buf), (buflen), (flags))
 #define USE_GETRANDOM
 
 #endif /* HAVE_SYS_RANDOM_H */
+#endif /* SYS_RANDOM */
 
 #ifndef SHUT_RDWR
 #define SHUT_RDWR 2
@@ -207,12 +208,12 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
         return bad_errno;
     }
 
-#elif defined(USE_GETRANDOM)
+#elif defined(SYS_RANDOM) && defined(USE_GETRANDOM)
 
     do {
         int rc;
 
-        rc = getrandom(buf, length, GRND_NONBLOCK);
+        rc = getrandom(buf, length, 0);
         if (rc == -1) {
             if (errno == EINTR) {
                 continue;
@@ -224,7 +225,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
         length -= rc;
     } while (length > 0);
 
-#elif defined(HAVE_ARC4RANDOM_BUF)
+#elif defined(SYS_RANDOM) && defined(HAVE_ARC4RANDOM_BUF)
 
     arc4random_buf(buf, length);
 
