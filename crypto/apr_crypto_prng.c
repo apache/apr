@@ -187,8 +187,7 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(void)
     return apr_crypto_prng_reseed(cprng_global, NULL);
 }
 
-APR_DECLARE(apr_status_t) apr_crypto_random_bytes(unsigned char *buf,
-                                                  apr_size_t len)
+APR_DECLARE(apr_status_t) apr_crypto_random_bytes(void *buf, apr_size_t len)
 {
     if (!cprng_global) {
         return APR_EINIT;
@@ -198,7 +197,7 @@ APR_DECLARE(apr_status_t) apr_crypto_random_bytes(unsigned char *buf,
 }
 
 #if APR_HAS_THREADS
-APR_DECLARE(apr_status_t) apr_crypto_thread_random_bytes(unsigned char *buf,
+APR_DECLARE(apr_status_t) apr_crypto_thread_random_bytes(void *buf,
                                                          apr_size_t len)
 {
     apr_status_t rv;
@@ -403,9 +402,9 @@ apr_status_t cprng_stream_mix(apr_crypto_prng_t *cprng, unsigned char *to)
 }
 
 APR_DECLARE(apr_status_t) apr_crypto_prng_bytes(apr_crypto_prng_t *cprng,
-                                                unsigned char *buf,
-                                                apr_size_t len)
+                                                void *buf, apr_size_t len)
 {
+    unsigned char *ptr = buf;
     apr_status_t rv;
     apr_size_t n;
 
@@ -422,11 +421,11 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_bytes(apr_crypto_prng_t *cprng,
         if (cprng->pos == cprng->len) {
             if (len >= cprng->len) {
                 do {
-                    rv = cprng_stream_mix(cprng, buf);
+                    rv = cprng_stream_mix(cprng, ptr);
                     if (rv != APR_SUCCESS) {
                         return rv;
                     }
-                    buf += cprng->len;
+                    ptr += cprng->len;
                     len -= cprng->len;
                 } while (len >= cprng->len);
                 if (!len) {
@@ -447,11 +446,11 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_bytes(apr_crypto_prng_t *cprng,
         if (n > len) {
             n = len;
         }
-        memcpy(buf, cprng->buf + cprng->pos, n);
+        memcpy(ptr, cprng->buf + cprng->pos, n);
         apr_crypto_memzero(cprng->buf + cprng->pos, n);
         cprng->pos += n;
 
-        buf += n;
+        ptr += n;
         len -= n;
     }
 
