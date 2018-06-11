@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) New apr_crypto_prng API and apr_crypto[_thread]_random_bytes() functions.
+     [Yann Ylavic]
+
   *) apr_file_write: Optimize large reads from buffered files on Windows.
      [Evgeny Kotkov]
 
