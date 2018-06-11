@@ -496,6 +496,8 @@ APR_DECLARE(apr_status_t)
         apr_crypto_shutdown(const apr_crypto_driver_t *driver);
 
 
+#if APU_HAVE_CRYPTO_PRNG
+
 /**
  * Cryptographic Pseudo Random Number Generator (CPRNG).
  *
@@ -564,8 +566,7 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(void);
  * @return APR_EINIT if \ref apr_crypto_prng_init() was not called.
  *         any system error (APR_ENOMEM, ...).
  */
-APR_DECLARE(apr_status_t) apr_crypto_random_bytes(unsigned char *buf,
-                                                  apr_size_t len);
+APR_DECLARE(apr_status_t) apr_crypto_random_bytes(void *buf, apr_size_t len);
 
 #if APR_HAS_THREADS
 /**
@@ -578,7 +579,7 @@ APR_DECLARE(apr_status_t) apr_crypto_random_bytes(unsigned char *buf,
  *                   called without \ref APR_CRYPTO_PRNG_PER_THREAD,
  *         any system error (APR_ENOMEM, ...).
  */
-APR_DECLARE(apr_status_t) apr_crypto_thread_random_bytes(unsigned char *buf,
+APR_DECLARE(apr_status_t) apr_crypto_thread_random_bytes(void *buf,
                                                          apr_size_t len);
 #endif
 
@@ -633,8 +634,8 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_reseed(apr_crypto_prng_t *cprng,
  * @return Any system error (APR_ENOMEM, ...).
  */
 APR_DECLARE(apr_status_t) apr_crypto_prng_bytes(apr_crypto_prng_t *cprng,
-                                                unsigned char *buf,
-                                                apr_size_t len);
+                                                void *buf, apr_size_t len);
+#endif /* APU_HAVE_CRYPTO_PRNG */
 
 #endif /* APU_HAVE_CRYPTO */
 
