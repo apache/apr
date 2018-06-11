@@ -495,6 +495,147 @@ APR_DECLARE(apr_status_t) apr_crypto_cleanup(apr_crypto_t *f);
 APR_DECLARE(apr_status_t)
         apr_crypto_shutdown(const apr_crypto_driver_t *driver);
 
+
+/**
+ * Cryptographic Pseudo Random Number Generator (CPRNG).
+ *
+ * Allows to generate cryptographically secure random bytes indefinitely
+ * given an initial seed of \ref APR_CRYPTO_PRNG_SEED_SIZE bytes (32), which
+ * is either provided by the caller or automatically gathered from the system.
+ * The CPRNG can also be re-seeded at any time, or after a process is fork()ed.
+ *
+ * The internal key is renewed every \ref APR_CRYPTO_PRNG_SEED_SIZE random
+ * bytes produced and those data once returned to the caller are cleared from
+ * the internal state, which ensures forward secrecy.
+ *
+ * This CPRNG is fast, based on a stream cipher, and will never block besides
+ * the initial seed or any reseed if it depends on the system entropy.
+ *
+ * Finally, it can be used either globally (locked in multithread environment),
+ * per-thread (a lock free instance is automatically created for each thread on
+ * first use), or created as standalone instance (manageable independently).
+ */
+
+#define APR_CRYPTO_PRNG_SEED_SIZE 32
+
+#define APR_CRYPTO_PRNG_LOCKED      (0x1)
+#define APR_CRYPTO_PRNG_PER_THREAD  (0x2)
+#define APR_CRYPTO_PRNG_MASK        (0x3)
+
+/** Opaque CPRNG state */
+typedef struct apr_crypto_prng_t apr_crypto_prng_t;
+
+/**
+ * @brief Perform global initialisation. Call once only.
+ *
+ * @param pool Used to allocate memory and register cleanups
+ * @param bufsize The size of the buffer used to cache upcoming random bytes.
+ * @param seed A custom seed of \ref APR_CRYPTO_PRNG_SEED_SIZE bytes,
+ *             or NULL for the seed to be gathered from system entropy.
+ * @param flags \ref APR_CRYPTO_PRNG_PER_THREAD to allow for per-thread CPRNG,
+ *              or zero.
+ * @return APR_EREINIT if called more than once,
+ *         any system error (APR_ENOMEM, ...).
+ */
+APR_DECLARE(apr_status_t) apr_crypto_prng_init(apr_pool_t *pool,
+                                               apr_size_t bufsize,
+                                               const unsigned char seed[],
+                                               int flags);
+/**
+ * @brief Terminate global initialisation if needed, before automatic cleanups.
+ *
+ * @return APR_EINIT if \ref apr_crypto_prng_init() was not called.
+ */
+APR_DECLARE(apr_status_t) apr_crypto_prng_term(void);
+
+/**
+ * @brief Reseed global CPRNG after a process is fork()ed to avoid any
+ *        duplicated state.
+ *
+ * @return Any system error (APR_ENOMEM, ...).
+ */
+APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(void);
+
+/**
+ * @brief Generate cryptographically secure random bytes from the global CPRNG.
+ *
+ * @param buf The destination buffer
+ * @param len The destination length
+ * @return APR_EINIT if \ref apr_crypto_prng_init() was not called.
+ *         any system error (APR_ENOMEM, ...).
+ */
+APR_DECLARE(apr_status_t) apr_crypto_random_bytes(unsigned char *buf,
+                                                  apr_size_t len);
+
+#if APR_HAS_THREADS
+/**
+ * @brief Generate cryptographically secure random bytes from the CPRNG of
+ *        the current thread.
+ *
+ * @param buf The destination buffer
+ * @param len The destination length
+ * @return APR_EINIT if \ref apr_crypto_prng_init() was not called or
+ *                   called without \ref APR_CRYPTO_PRNG_PER_THREAD,
+ *         any system error (APR_ENOMEM, ...).
+ */
+APR_DECLARE(apr_status_t) apr_crypto_thread_random_bytes(unsigned char *buf,
+                                                         apr_size_t len);
+#endif
+
+/**
+ * @brief Create a standalone CPRNG.
+ *
+ * @param pcprng The CPRNG created.
+ * @param bufsize The size of the buffer used to cache upcoming random bytes.
+ * @param flags \ref APR_CRYPTO_PRNG_LOCKED to control concurrent accesses,
+ *              or zero.
+ * @param seed A custom seed of \ref APR_CRYPTO_PRNG_SEED_SIZE bytes,
+ *             or NULL for the seed to be gathered from system entropy.
+ * @param pool Used to allocate memory and register cleanups, or NULL
+ *             if the memory should be managed outside (besides per-thread
+ *             which has an automatic memory management with no pool, when
+ *             NULL is given the caller is responsible for calling
+ *             \ref apr_crypto_prng_destroy() or some memory would leak.
+ * @return APR_EINVAL if \ref bufsize is too large or flags are unknown,
+ *         APR_ENOTIMPL if \ref APR_CRYPTO_PRNG_LOCKED with !APR_HAS_THREADS,
+ *         any system error (APR_ENOMEM, ...).
+ */
+APR_DECLARE(apr_status_t) apr_crypto_prng_create(apr_crypto_prng_t **pcprng,
+                                                 apr_size_t bufsize, int flags,
+                                                 const unsigned char seed[],
+                                                 apr_pool_t *pool);
+
+/**
+ * @brief Destroy a standalone CPRNG.
+ *
+ * @param cprng The CPRNG to destroy.
+ * @return APR_SUCCESS.
+ */
+APR_DECLARE(apr_status_t) apr_crypto_prng_destroy(apr_crypto_prng_t *cprng);
+
+/**
+ * @brief Reseed a standalone CPRNG.
+ *
+ * @param cprng The CPRNG to reseed.
+ * @param seed A custom seed of \ref APR_CRYPTO_PRNG_SEED_SIZE bytes,
+ *             or NULL for the seed to be gathered from system entropy.
+ * @return Any system error (APR_ENOMEM, ...).
+ */
+APR_DECLARE(apr_status_t) apr_crypto_prng_reseed(apr_crypto_prng_t *cprng,
+                                                 const unsigned char seed[]);
+
+/**
+ * @brief Generate cryptographically secure random bytes a standalone CPRNG.
+ *
+ * @param cprng The CPRNG.
+ * @param buf The destination buffer
+ * @param len The destination length
+ * @return Any system error (APR_ENOMEM, ...).
+ */
+APR_DECLARE(apr_status_t) apr_crypto_prng_bytes(apr_crypto_prng_t *cprng,
+                                                unsigned char *buf,
+                                                apr_size_t len);
+
 #endif /* APU_HAVE_CRYPTO */
 
 /** @} */

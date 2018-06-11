@@ -23,6 +23,7 @@ dnl APU_CHECK_CRYPTO: look for crypto libraries and headers
 dnl
 AC_DEFUN([APU_CHECK_CRYPTO], [
   apu_have_crypto=0
+  apu_have_crypto_prng=0
   apu_have_openssl=0
   apu_have_nss=0
   apu_have_commoncrypto=0
@@ -66,13 +67,18 @@ AC_DEFUN([APU_CHECK_CRYPTO], [
       dnl add checks for other varieties of ssl here
       if test "$apu_have_crypto" = "0"; then
         AC_ERROR([Crypto was requested but no crypto library could be enabled; specify the location of a crypto library using --with-openssl, --with-nss, and/or --with-commoncrypto.])
+      elif test "$apu_have_openssl" = "1"; then
+        dnl PRNG only implemented with openssl for now
+        apu_have_crypto_prng=1
       fi
     fi
   ], [
       apu_have_crypto=0
+      apu_have_crypto_prng=0
   ])
 
   AC_SUBST(apu_have_crypto)
+  AC_SUBST(apu_have_crypto_prng)
 
 ])
 dnl
@@ -153,6 +159,11 @@ AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
   LIBS="$old_libs"
   CPPFLAGS="$old_cppflags"
   LDFLAGS="$old_ldflags"
+
+  if test "$apu_have_openssl" = "1"; then
+    APR_ADDTO(APRUTIL_EXPORT_LIBS, [-lcrypto])
+    APR_ADDTO(LIBS, [-lcrypto])
+  fi
 ])
 
 AC_DEFUN([APU_CHECK_CRYPTO_NSS], [

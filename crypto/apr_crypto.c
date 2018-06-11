@@ -86,7 +86,7 @@ static apr_status_t apr_crypto_term(void *ptr)
 
 APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool)
 {
-    apr_status_t ret = APR_SUCCESS;
+    apr_status_t rv;
     apr_pool_t *parent;
 
     if (drivers != NULL) {
@@ -107,7 +107,15 @@ APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool)
     apr_pool_cleanup_register(pool, NULL, apr_crypto_term,
             apr_pool_cleanup_null);
 
-    return ret;
+    /* apr_crypto_prng_init() may already have been called with
+     * non-default parameters, so ignore APR_EREINIT.
+     */
+    rv = apr_crypto_prng_init(pool, 0, NULL, 0);
+    if (rv != APR_SUCCESS && rv != APR_EREINIT) {
+        return rv;
+    }
+
+    return APR_SUCCESS;
 }
 
 static apr_status_t crypto_clear(void *ptr)

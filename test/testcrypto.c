@@ -22,6 +22,8 @@
 #include "apr_dso.h"
 #include "apr_crypto.h"
 #include "apr_strings.h"
+#include "apr_file_io.h"
+#include "apr_thread_proc.h"
 
 #if APU_HAVE_CRYPTO
 
@@ -554,8 +556,15 @@ static void test_crypto_init(abts_case *tc, void *data)
 {
     apr_pool_t *pool = NULL;
     apr_status_t rv;
+    int flags = 0;
 
     apr_pool_create(&pool, NULL);
+
+#if APR_HAS_THREADS
+    flags = APR_CRYPTO_PRNG_PER_THREAD;
+#endif
+    rv = apr_crypto_prng_init(apr_pool_parent_get(pool), 0, NULL, flags);
+    ABTS_ASSERT(tc, "failed to init apr_crypto_prng", rv == APR_SUCCESS);
 
     rv = apr_crypto_init(pool);
     ABTS_ASSERT(tc, "failed to init apr_crypto", rv == APR_SUCCESS);
@@ -1450,6 +1459,230 @@ static void test_crypto_equals(abts_case *tc, void *data)
     TEST_SCALAR_MATCH(6, p, 0);
 }
 
+#if APU_HAVE_OPENSSL
+#include <openssl/obj_mac.h> /* for NID_* */
+#endif
+#if defined(NID_chacha20)
+/*
+ * KAT for CHACHA20 with key, IV and plaintext full of zeros:
+ * $ openssl enc -chacha20 -in /dev/zero \
+ *               -K `printf "%.64d" 0` -iv `printf "%.32d" 0` \
+ *               -e | xxd -l128 -i -c8
+ */
+static const unsigned char test_PRNG_kat0[128] = {
+  0x76, 0xb8, 0xe0, 0xad, 0xa0, 0xf1, 0x3d, 0x90,
+  0x40, 0x5d, 0x6a, 0xe5, 0x53, 0x86, 0xbd, 0x28,
+  0xbd, 0xd2, 0x19, 0xb8, 0xa0, 0x8d, 0xed, 0x1a,
+  0xa8, 0x36, 0xef, 0xcc, 0x8b, 0x77, 0x0d, 0xc7,
+  0xda, 0x41, 0x59, 0x7c, 0x51, 0x57, 0x48, 0x8d,
+  0x77, 0x24, 0xe0, 0x3f, 0xb8, 0xd8, 0x4a, 0x37,
+  0x6a, 0x43, 0xb8, 0xf4, 0x15, 0x18, 0xa1, 0x1c,
+  0xc3, 0x87, 0xb6, 0x69, 0xb2, 0xee, 0x65, 0x86,
+  0x9f, 0x07, 0xe7, 0xbe, 0x55, 0x51, 0x38, 0x7a,
+  0x98, 0xba, 0x97, 0x7c, 0x73, 0x2d, 0x08, 0x0d,
+  0xcb, 0x0f, 0x29, 0xa0, 0x48, 0xe3, 0x65, 0x69,
+  0x12, 0xc6, 0x53, 0x3e, 0x32, 0xee, 0x7a, 0xed,
+  0x29, 0xb7, 0x21, 0x76, 0x9c, 0xe6, 0x4e, 0x43,
+  0xd5, 0x71, 0x33, 0xb0, 0x74, 0xd8, 0x39, 0xd5,
+  0x31, 0xed, 0x1f, 0x28, 0x51, 0x0a, 0xfb, 0x45,
+  0xac, 0xe1, 0x0a, 0x1f, 0x4b, 0x79, 0x4d, 0x6f
+};
+#else
+/*
+ * KAT for AES256-CTR with key, IV and plaintext full of zeros:
+ * $ openssl enc -aes-256-ctr -in /dev/zero \
+ *               -K `printf "%.64d" 0` -iv `printf "%.32d" 0` \
+ *               -e | xxd -l128 -i -c8
+ */
+static const unsigned char test_PRNG_kat0[128] = {
+  0xdc, 0x95, 0xc0, 0x78, 0xa2, 0x40, 0x89, 0x89,
+  0xad, 0x48, 0xa2, 0x14, 0x92, 0x84, 0x20, 0x87,
+  0x53, 0x0f, 0x8a, 0xfb, 0xc7, 0x45, 0x36, 0xb9,
+  0xa9, 0x63, 0xb4, 0xf1, 0xc4, 0xcb, 0x73, 0x8b,
+  0xce, 0xa7, 0x40, 0x3d, 0x4d, 0x60, 0x6b, 0x6e,
+  0x07, 0x4e, 0xc5, 0xd3, 0xba, 0xf3, 0x9d, 0x18,
+  0x72, 0x60, 0x03, 0xca, 0x37, 0xa6, 0x2a, 0x74,
+  0xd1, 0xa2, 0xf5, 0x8e, 0x75, 0x06, 0x35, 0x8e,
+  0xdd, 0x4a, 0xb1, 0x28, 0x4d, 0x4a, 0xe1, 0x7b,
+  0x41, 0xe8, 0x59, 0x24, 0x47, 0x0c, 0x36, 0xf7,
+  0x47, 0x41, 0xcb, 0xe1, 0x81, 0xbb, 0x7f, 0x30,
+  0x61, 0x7c, 0x1d, 0xe3, 0xab, 0x0c, 0x3a, 0x1f,
+  0xd0, 0xc4, 0x8f, 0x73, 0x21, 0xa8, 0x2d, 0x37,
+  0x60, 0x95, 0xac, 0xe0, 0x41, 0x91, 0x67, 0xa0,
+  0xbc, 0xaf, 0x49, 0xb0, 0xc0, 0xce, 0xa6, 0x2d,
+  0xe6, 0xbc, 0x1c, 0x66, 0x54, 0x5e, 0x1d, 0xad
+};
+#endif
+
+static void test_crypto_prng(abts_case *tc, void *data)
+{
+    unsigned char randbytes[128], seed[APR_CRYPTO_PRNG_SEED_SIZE];
+    apr_crypto_prng_t *cprng;
+    apr_pool_t *pool = NULL;
+    apr_status_t rv;
+    int i;
+
+    rv = apr_pool_create(&pool, NULL);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, pool);
+
+    for (i = 0; i < 10; ++i) {
+        /* Initial seed full of zeros (deterministic) */
+        memset(seed, 0, sizeof(seed));
+
+        rv = apr_crypto_prng_create(&cprng, 0, 0, seed, pool);
+        ABTS_ASSERT(tc, "apr_crypto_prng_create failed", rv == APR_SUCCESS);
+
+        /* Second time and more, change one bit of the seed */
+        if (i != 0) {
+            unsigned char pos = 0;
+            rv = apr_generate_random_bytes(&pos, sizeof pos);
+            ABTS_ASSERT(tc, "apr_generate_random_bytes failed",
+                        rv == APR_SUCCESS);
+
+            seed[pos % APR_CRYPTO_PRNG_SEED_SIZE] = 1;
+            rv = apr_crypto_prng_reseed(cprng, seed);
+            ABTS_ASSERT(tc, "apr_crypto_prng_reseed failed",
+                        rv == APR_SUCCESS);
+        }
+
+        rv = apr_crypto_prng_bytes(cprng, randbytes, 128 - 32);
+        ABTS_ASSERT(tc, "apr_crypto_prng_bytes failed", rv == APR_SUCCESS);
+
+        /* Should match the first time only */
+        if (i != 0) {
+            ABTS_ASSERT(tc, "test vector should not match",
+                        /* first 32 bytes (256 bits) are used for the next key */
+                        memcmp(randbytes, test_PRNG_kat0 + 32, 128 - 32) != 0);
+        }
+        else {
+            ABTS_ASSERT(tc, "test vector should match",
+                        /* first 32 bytes (256 bits) are used for the next key */
+                        memcmp(randbytes, test_PRNG_kat0 + 32, 128 - 32) == 0);
+        }
+
+        rv = apr_crypto_prng_destroy(cprng);
+        ABTS_ASSERT(tc, "apr_crypto_prng_destroy failed", rv == APR_SUCCESS);
+    }
+
+    apr_pool_destroy(pool);
+}
+
+#if APR_HAS_FORK
+static void test_crypto_fork_random(abts_case *tc, void *data)
+{
+    unsigned char randbytes[1024];
+    apr_pool_t *pool = NULL;
+    apr_file_t *pread = NULL;
+    apr_file_t *pwrite = NULL;
+    apr_size_t nbytes;
+    apr_proc_t proc;
+    apr_status_t rv;
+
+    rv = apr_pool_create(&pool, NULL);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, pool);
+
+    rv = apr_file_pipe_create(&pread, &pwrite, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, pread);
+    ABTS_PTR_NOTNULL(tc, pwrite);
+
+    rv = apr_proc_fork(&proc, pool);
+    if (rv == APR_INCHILD) {
+        apr_file_close(pread);
+        rv = apr_crypto_random_bytes(randbytes, 1024);
+        if (rv == APR_SUCCESS) {
+            apr_file_write_full(pwrite, randbytes, 1024, &nbytes);
+        }
+        apr_file_close(pwrite);
+
+        exit(rv != APR_SUCCESS);
+    }
+    else if (rv == APR_INPARENT) {
+        int exitcode;
+        apr_exit_why_e why;
+        unsigned char childbytes[1024];
+
+        apr_file_close(pwrite);
+        rv = apr_file_read_full(pread, childbytes, 1024, &nbytes);
+        ABTS_INT_EQUAL(tc, (int)nbytes, 1024);
+        apr_file_close(pread);
+
+        apr_proc_wait(&proc, &exitcode, &why, APR_WAIT);
+        if (why != APR_PROC_EXIT) {
+            ABTS_FAIL(tc, "child terminated abnormally");
+        }
+        else if (exitcode != 0) {
+            ABTS_FAIL(tc, "apr_crypto_random_bytes failed in child");
+        }
+
+        rv = apr_crypto_random_bytes(randbytes, 1024);
+        ABTS_ASSERT(tc, "apr_crypto_random_bytes failed in parent",
+                    rv == APR_SUCCESS);
+        ABTS_ASSERT(tc, "parent and child generated same random bytes",
+                    memcmp(randbytes, childbytes, 1024) != 0);
+    }
+    else {
+        ABTS_FAIL(tc, "apr_proc_fork failed");
+    }
+
+    apr_pool_destroy(pool);
+}
+#endif
+
+#if APR_HAS_THREADS
+#define NUM_THREADS 8
+
+static void *APR_THREAD_FUNC thread_func(apr_thread_t *thd, void *data)
+{
+    unsigned char *randbytes = data;
+    apr_status_t rv;
+
+    rv = apr_crypto_thread_random_bytes(randbytes, 800);
+    apr_thread_exit(thd, rv);
+
+    return NULL;
+}
+
+static void test_crypto_thread_random(abts_case *tc, void *data)
+{
+    static unsigned char zerobytes[800];
+    unsigned char *randbytes[NUM_THREADS];
+    apr_thread_t *threads[NUM_THREADS];
+    apr_pool_t *pool = NULL;
+    apr_status_t rv, ret;
+    int i, j;
+
+    rv = apr_pool_create(&pool, NULL);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, pool);
+
+    for (i = 0; i < NUM_THREADS; ++i) {
+        randbytes[i] = apr_pcalloc(pool, 800);
+        rv = apr_thread_create(&threads[i], NULL, thread_func,
+                               randbytes[i], pool);
+        ABTS_ASSERT(tc, "apr_thread_create failed", rv == APR_SUCCESS);
+    }
+    for (i = 0; i < NUM_THREADS; ++i) {
+        rv = apr_thread_join(&ret, threads[i]);
+        ABTS_ASSERT(tc, "apr_thread_join failed", rv == APR_SUCCESS);
+        ABTS_ASSERT(tc, "apr_crypto_thread_random_bytes failed",
+                    ret == APR_SUCCESS);
+    }
+    for (i = 0; i < NUM_THREADS; ++i) {
+        ABTS_ASSERT(tc, "some thread generated zero bytes",
+                    memcmp(randbytes[i], zerobytes, 800) != 0);
+        for (j = 0; j < i; ++j) {
+            ABTS_ASSERT(tc, "two threads generated same random bytes",
+                        memcmp(randbytes[i], randbytes[j], 800) != 0);
+        }
+    }
+
+    apr_pool_destroy(pool);
+}
+#endif
+
 abts_suite *testcrypto(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
@@ -1528,6 +1761,14 @@ abts_suite *testcrypto(abts_suite *suite)
 
     abts_run_test(suite, test_crypto_memzero, NULL);
     abts_run_test(suite, test_crypto_equals, NULL);
+
+    abts_run_test(suite, test_crypto_prng, NULL);
+#if APR_HAS_FORK
+    abts_run_test(suite, test_crypto_fork_random, NULL);
+#endif
+#if APR_HAS_THREADS
+    abts_run_test(suite, test_crypto_thread_random, NULL);
+#endif
 
     return suite;
 }
