@@ -22,6 +22,7 @@
 #include "apr_tables.h"
 #include "apr_hash.h"
 #include "apu_errno.h"
+#include "apr_thread_proc.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -554,9 +555,10 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_term(void);
  * @brief Reseed global CPRNG after a process is fork()ed to avoid any
  *        duplicated state.
  *
+ * @param proc The child process (including its PID).
  * @return Any system error (APR_ENOMEM, ...).
  */
-APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(void);
+APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(apr_proc_t *proc);
 
 /**
  * @brief Generate cryptographically secure random bytes from the global CPRNG.

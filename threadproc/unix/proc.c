@@ -231,7 +231,7 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
 
         apr_random_after_fork(proc);
 #if APU_HAVE_CRYPTO_PRNG
-        apr_crypto_prng_after_fork();
+        apr_crypto_prng_after_fork(proc);
 #endif
 
         return APR_INCHILD;
