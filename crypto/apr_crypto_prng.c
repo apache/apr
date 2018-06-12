@@ -57,6 +57,11 @@
 
 typedef EVP_CIPHER_CTX cprng_stream_ctx_t;
 
+static apr_status_t cprng_lib_init(apr_pool_t *pool)
+{
+    return apr_crypto_lib_init("openssl", NULL, NULL, pool);
+}
+
 static apr_status_t cprng_stream_ctx_make(cprng_stream_ctx_t **pctx)
 {
     EVP_CIPHER_CTX *ctx;
@@ -154,15 +159,21 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_init(apr_pool_t *pool,
                                                const unsigned char seed[],
                                                int flags)
 {
+    apr_status_t rv;
+
     if (cprng_global) {
         return APR_EREINIT;
+    }
+
+    rv = cprng_lib_init(pool);
+    if (rv != APR_SUCCESS && rv != APR_EREINIT) {
+        return rv;
     }
 
     if (flags & APR_CRYPTO_PRNG_PER_THREAD) {
 #if !APR_HAS_THREADS
         return APR_ENOTIMPL;
 #else
-        apr_status_t rv;
         rv = apr_threadkey_private_create(&cprng_thread_key,
                                           cprng_thread_destroy, pool);
         if (rv != APR_SUCCESS) {
