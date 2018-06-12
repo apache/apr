@@ -24,19 +24,32 @@
 
 #include <openssl/crypto.h>
 #include <openssl/engine.h>
+#include <openssl/conf.h>
+#include <openssl/comp.h>
 #include <openssl/evp.h>
+
+#ifndef APR_USE_OPENSSL_PRE_1_1_API
+#if defined(LIBRESSL_VERSION_NUMBER)
+/* LibreSSL declares OPENSSL_VERSION_NUMBER == 2.0 but does not include most
+ * changes from OpenSSL >= 1.1 (new functions, macros, deprecations, ...), so
+ * we have to work around this...
+ */
+#define APR_USE_OPENSSL_PRE_1_1_API (1)
+#else
+#define APR_USE_OPENSSL_PRE_1_1_API (OPENSSL_VERSION_NUMBER < 0x10100000L)
+#endif
+#endif
 
 apr_status_t apr__crypto_openssl_init(const char *params,
                                       const apu_err_t **result,
                                       apr_pool_t *pool)
 {
 #if APR_USE_OPENSSL_PRE_1_1_API
-    (void)CRYPTO_malloc_init();
+    CRYPTO_malloc_init();
 #else
     OPENSSL_malloc_init();
 #endif
     ERR_load_crypto_strings();
-    /* SSL_load_error_strings(); */
     OpenSSL_add_all_algorithms();
     ENGINE_load_builtin_engines();
     ENGINE_register_all_complete();
@@ -46,9 +59,24 @@ apr_status_t apr__crypto_openssl_init(const char *params,
 
 apr_status_t apr__crypto_openssl_term(void)
 {
-    ERR_free_strings();
+#if APR_USE_OPENSSL_PRE_1_1_API
+#ifdef OPENSSL_FIPS
+    FIPS_mode_set(0);
+#endif
+    CONF_modules_unload(1);
+    OBJ_cleanup();
     EVP_cleanup();
+    RAND_cleanup();
     ENGINE_cleanup();
+    ERR_free_strings();
+    ERR_remove_thread_state(NULL);
+    CRYPTO_cleanup_all_ex_data();
+#ifndef OPENSSL_NO_COMP
+    COMP_zlib_cleanup();
+#endif
+#else   /* !APR_USE_OPENSSL_PRE_1_1_API */
+    OPENSSL_cleanup();
+#endif  /* !APR_USE_OPENSSL_PRE_1_1_API */
 
     return APR_SUCCESS;
 }
