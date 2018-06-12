@@ -556,15 +556,8 @@ static void test_crypto_init(abts_case *tc, void *data)
 {
     apr_pool_t *pool = NULL;
     apr_status_t rv;
-    int flags = 0;
 
     apr_pool_create(&pool, NULL);
-
-#if APR_HAS_THREADS
-    flags = APR_CRYPTO_PRNG_PER_THREAD;
-#endif
-    rv = apr_crypto_prng_init(apr_pool_parent_get(pool), 0, NULL, flags);
-    ABTS_ASSERT(tc, "failed to init apr_crypto_prng", rv == APR_SUCCESS);
 
     rv = apr_crypto_init(pool);
     ABTS_ASSERT(tc, "failed to init apr_crypto", rv == APR_SUCCESS);

@@ -240,6 +240,7 @@ SET(APR_SOURCES
   buckets/apr_buckets_socket.c
   crypto/apr_crypto.c
   crypto/apr_crypto_prng.c
+  crypto/apr_crypto_internal.c
   crypto/apr_md4.c
   crypto/apr_md5.c
   crypto/apr_passwd.c

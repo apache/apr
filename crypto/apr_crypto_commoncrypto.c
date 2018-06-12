@@ -95,25 +95,16 @@ static apr_status_t crypto_error(const apu_err_t **result,
  */
 static apr_status_t crypto_shutdown(void)
 {
-    return APR_SUCCESS;
-}
-
-static apr_status_t crypto_shutdown_helper(void *data)
-{
-    return crypto_shutdown();
+    return apr_crypto_lib_term("commoncrypto");
 }
 
 /**
  * Initialise the crypto library and perform one time initialisation.
  */
 static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
-        const apu_err_t **result)
+                                const apu_err_t **result)
 {
-
-    apr_pool_cleanup_register(pool, pool, crypto_shutdown_helper,
-            apr_pool_cleanup_null);
-
-    return APR_SUCCESS;
+    return apr_crypto_lib_init("commoncrypto", params, result, pool);
 }
 
 /**

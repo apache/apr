@@ -178,6 +178,15 @@ typedef struct apr_crypto_key_rec_t {
  */
 APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool);
 
+APR_DECLARE(apr_status_t) apr_crypto_lib_init(const char *name,
+                                              const char *params,
+                                              const apu_err_t **result,
+                                              apr_pool_t *pool);
+
+APR_DECLARE(apr_status_t) apr_crypto_lib_term(const char *name);
+
+APR_DECLARE(int) apr_crypto_lib_is_initialized(const char *name);
+
 /**
  * @brief Zero out the buffer provided when the pool is cleaned up.
  *
