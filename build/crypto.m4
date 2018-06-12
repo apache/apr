@@ -132,7 +132,7 @@ AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
   dnl Since we have already done the AC_CHECK_LIB tests, if we have it, 
   dnl we know the library is there.
   if test "$apu_have_openssl" = "1"; then
-    APR_ADDTO(LDADD_crypto_openssl, [$openssl_LDFLAGS -lssl -lcrypto])
+    APR_ADDTO(LDADD_crypto_openssl, [$openssl_LDFLAGS -lcrypto])
     apu_have_crypto=1
 
     AC_MSG_CHECKING([for const input buffers in OpenSSL])
@@ -161,8 +161,8 @@ AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
   LDFLAGS="$old_ldflags"
 
   if test "$apu_have_openssl" = "1"; then
-    APR_ADDTO(APRUTIL_EXPORT_LIBS, [-lcrypto])
-    APR_ADDTO(LIBS, [-lcrypto])
+    APR_ADDTO(APRUTIL_EXPORT_LIBS, [$LDADD_crypto_openssl])
+    APR_ADDTO(LIBS, [$LDADD_crypto_openssl])
   fi
 ])
 
@@ -242,8 +242,8 @@ AC_DEFUN([APU_CHECK_CRYPTO_NSS], [
   LDFLAGS="$old_ldflags"
 
   if test "$apu_have_nss" = "1"; then
-    APR_ADDTO(APRUTIL_EXPORT_LIBS, [-lnspr4 -lnss3])
-    APR_ADDTO(LIBS, [-lnspr4 -lnss3])
+    APR_ADDTO(APRUTIL_EXPORT_LIBS, [$LDADD_crypto_nss])
+    APR_ADDTO(LIBS, [$LDADD_crypto_nss])
   fi
 ])
 
@@ -303,8 +303,8 @@ AC_DEFUN([APU_CHECK_CRYPTO_COMMONCRYPTO], [
   LDFLAGS="$old_ldflags"
 
   if test "$apu_have_commoncrypto" = "1"; then
-    APR_ADDTO(APRUTIL_EXPORT_LIBS, [-lcrypto])
-    APR_ADDTO(LIBS, [-lcrypto])
+    APR_ADDTO(APRUTIL_EXPORT_LIBS, [$LDADD_crypto_commoncrypto])
+    APR_ADDTO(LIBS, [$LDADD_crypto_commoncrypto])
   fi
 ])
 
