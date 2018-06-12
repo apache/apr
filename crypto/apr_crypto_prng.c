@@ -47,6 +47,7 @@
 #if APU_HAVE_OPENSSL
 
 #include <openssl/evp.h>
+#include <openssl/sha.h>
 
 #include <openssl/obj_mac.h> /* for NID_* */
 #if !defined(NID_chacha20) && !defined(NID_aes_256_ctr)
@@ -100,6 +101,17 @@ apr_status_t cprng_stream_ctx_mix(cprng_stream_ctx_t **pctx,
     memset(key, 0, APR_CRYPTO_PRNG_KEY_SIZE);
     EVP_EncryptUpdate(ctx, key, &len, key, APR_CRYPTO_PRNG_KEY_SIZE);
     EVP_EncryptUpdate(ctx, to, &len, z, n);
+
+    return APR_SUCCESS;
+}
+
+static apr_status_t cprng_hash_to_seed(pid_t pid, unsigned char seed[])
+{
+    SHA256_CTX ctx;
+
+    SHA256_Init(&ctx);
+    SHA256_Update(&ctx, &pid, sizeof(pid));
+    SHA256_Final(seed, &ctx);
 
     return APR_SUCCESS;
 }
@@ -178,13 +190,24 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_term(void)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(void)
+APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(apr_proc_t *proc)
 {
+    unsigned char seedb[APR_CRYPTO_PRNG_SEED_SIZE], *seed = NULL;
+
     if (!cprng_global) {
         return APR_EINIT;
     }
 
-    return apr_crypto_prng_reseed(cprng_global, NULL);
+    if (proc) {
+        apr_status_t rv;
+        rv = cprng_hash_to_seed(proc->pid, seedb);
+        if (rv != APR_SUCCESS) {
+            return rv;
+        }
+        seed = seedb;
+    }
+
+    return apr_crypto_prng_reseed(cprng_global, seed);
 }
 
 APR_DECLARE(apr_status_t) apr_crypto_random_bytes(void *buf, apr_size_t len)
