@@ -340,13 +340,20 @@ static struct crypto_lib *spare_lib_pop(void)
     return lib;
 }
 
-static apr_status_t crypto_lib_cleanup(void *arg)
+static apr_status_t crypto_lib_free(struct crypto_lib *lib)
 {
-    struct crypto_lib *lib = arg;
+    apr_status_t rv;
 
     apr_hash_set(active_libs, lib->name, APR_HASH_KEY_STRING, NULL);
-    lib->term();
+    rv = lib->term();
     spare_lib_push(lib);
+
+    return rv;
+}
+
+static apr_status_t crypto_lib_cleanup(void *arg)
+{
+    crypto_lib_free(arg);
 
     return APR_SUCCESS;
 }
@@ -502,10 +509,8 @@ static apr_status_t crypto_lib_term(const char *name)
 #endif
     ;
     if (rv == APR_SUCCESS) {
-        apr_hash_set(active_libs, lib->name, APR_HASH_KEY_STRING, NULL);
         apr_pool_cleanup_kill(lib->pool, lib, crypto_lib_cleanup);
-        rv = lib->term();
-        spare_lib_push(lib);
+        rv = crypto_lib_free(lib);
     }
     return rv;
 }
