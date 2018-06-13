@@ -394,7 +394,6 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_init(const char *name,
             return APR_ENOMEM;
         }
     }
-    lib->pool = pool;
 
     rv = APR_ENOTIMPL;
 #if APU_HAVE_OPENSSL
@@ -449,8 +448,9 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_init(const char *name,
 #endif
     ;
     if (rv == APR_SUCCESS) {
+        lib->pool = pool;
         apr_hash_set(active_libs, lib->name, APR_HASH_KEY_STRING, lib);
-        apr_pool_cleanup_register(pool, lib, crypto_lib_cleanup,
+        apr_pool_cleanup_register(lib->pool, lib, crypto_lib_cleanup,
                                   apr_pool_cleanup_null);
     }
     else {
@@ -502,7 +502,10 @@ static apr_status_t crypto_lib_term(const char *name)
 #endif
     ;
     if (rv == APR_SUCCESS) {
-        rv = apr_pool_cleanup_run(lib->pool, lib, crypto_lib_cleanup);
+        apr_hash_set(active_libs, lib->name, APR_HASH_KEY_STRING, NULL);
+        apr_pool_cleanup_kill(lib->pool, lib, crypto_lib_cleanup);
+        rv = lib->term();
+        spare_lib_push(lib);
     }
     return rv;
 }
