@@ -43,25 +43,16 @@ extern "C" {
 #ifndef APU_CRYPTO_RECOMMENDED_DRIVER
 #if APU_HAVE_COMMONCRYPTO
 #define APU_CRYPTO_RECOMMENDED_DRIVER "commoncrypto"
-#else
-#if APU_HAVE_OPENSSL
+#elif APU_HAVE_OPENSSL
 #define APU_CRYPTO_RECOMMENDED_DRIVER "openssl"
-#else
-#if APU_HAVE_NSS
+#elif APU_HAVE_NSS
 #define APU_CRYPTO_RECOMMENDED_DRIVER "nss"
-#else
-#if APU_HAVE_MSCNG
+#elif APU_HAVE_MSCNG
 #define APU_CRYPTO_RECOMMENDED_DRIVER "mscng"
-#else
-#if APU_HAVE_MSCAPI
+#elif APU_HAVE_MSCAPI
 #define APU_CRYPTO_RECOMMENDED_DRIVER "mscapi"
-#else
 #endif
-#endif
-#endif
-#endif
-#endif
-#endif
+#endif /* APU_CRYPTO_RECOMMENDED_DRIVER */
 
 /**
  * Symmetric Key types understood by the library.
@@ -178,13 +169,14 @@ typedef struct apr_crypto_key_rec_t {
  */
 APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool);
 
+/* TODO: doxygen */
+APR_DECLARE(apr_status_t) apr_crypto_lib_version(const char *name,
+                                                 const char **version);
 APR_DECLARE(apr_status_t) apr_crypto_lib_init(const char *name,
                                               const char *params,
                                               const apu_err_t **result,
                                               apr_pool_t *pool);
-
 APR_DECLARE(apr_status_t) apr_crypto_lib_term(const char *name);
-
 APR_DECLARE(int) apr_crypto_lib_is_active(const char *name);
 
 /**
