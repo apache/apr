@@ -33,7 +33,6 @@
 #include "apr_crypto.h"
 #include "apr_version.h"
 
-static apr_hash_t *crypto_libs = NULL;
 static apr_hash_t *drivers = NULL;
 
 #define ERROR_SIZE 1024
@@ -305,24 +304,56 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
     return rv;
 }
 
-static apr_status_t crypto_libs_cleanup(void *arg)
-{
-    apr_hash_index_t *hi;
+struct crypto_lib {
+    const char *name;
+    apr_pool_t *pool;
+    apr_status_t (*term)(void);
+    struct crypto_lib *next;
+};
+static apr_hash_t *active_libs = NULL;
+static struct crypto_lib *spare_libs = NULL;
 
-    for (hi = apr_hash_first(NULL, crypto_libs); hi; hi = apr_hash_next(hi)) {
-        const char *name = apr_hash_this_key(hi);
-        if (name) {
-            apr_crypto_lib_term(name);
-        }
+static apr_status_t crypto_libs_cleanup(void *nil)
+{
+    active_libs = NULL;
+    spare_libs = NULL;
+    return APR_SUCCESS;
+}
+
+static void spare_lib_push(struct crypto_lib *lib)
+{
+    lib->name = NULL;
+    lib->pool = NULL;
+    lib->term = NULL;
+    lib->next = spare_libs;
+    spare_libs = lib;
+}
+
+static struct crypto_lib *spare_lib_pop(void)
+{
+    struct crypto_lib *lib;
+    lib = spare_libs;
+    if (lib) {
+        spare_libs = lib->next;
+        lib->next = NULL;
     }
-    crypto_libs = NULL;
+    return lib;
+}
+
+static apr_status_t crypto_lib_cleanup(void *arg)
+{
+    struct crypto_lib *lib = arg;
+
+    apr_hash_set(active_libs, lib->name, APR_HASH_KEY_STRING, NULL);
+    lib->term();
+    spare_lib_push(lib);
 
     return APR_SUCCESS;
 }
 
-APR_DECLARE(int) apr_crypto_lib_is_initialized(const char *name)
+APR_DECLARE(int) apr_crypto_lib_is_active(const char *name)
 {
-    return crypto_libs && apr_hash_get(crypto_libs, name, APR_HASH_KEY_STRING);
+    return active_libs && apr_hash_get(active_libs, name, APR_HASH_KEY_STRING);
 }
 
 APR_DECLARE(apr_status_t) apr_crypto_lib_init(const char *name,
@@ -331,121 +362,167 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_init(const char *name,
                                               apr_pool_t *pool)
 {
     apr_status_t rv;
-    apr_pool_t *parent;
+    apr_pool_t *rootp, *p;
+    struct crypto_lib *lib;
 
     if (!name) {
         return APR_EINVAL;
     }
 
-    if (apr_crypto_lib_is_initialized(name)) {
+    if (apr_crypto_lib_is_active(name)) {
         return APR_EREINIT;
     }
 
-    while ((parent = apr_pool_parent_get(pool))) {
-        pool = parent;
+    rootp = pool;
+    while ((p = apr_pool_parent_get(rootp))) {
+        rootp = p;
     }
 
-    if (!crypto_libs) {
-        crypto_libs = apr_hash_make(pool);
-        if (!crypto_libs) {
+    if (!active_libs) {
+        active_libs = apr_hash_make(rootp);
+        if (!active_libs) {
             return APR_ENOMEM;
         }
-        apr_pool_cleanup_register(pool, NULL, crypto_libs_cleanup,
+        apr_pool_cleanup_register(rootp, NULL, crypto_libs_cleanup,
                                   apr_pool_cleanup_null);
     }
+
+    lib = spare_lib_pop();
+    if (!lib) {
+        lib = apr_pcalloc(rootp, sizeof(*lib));
+        if (!lib) {
+            return APR_ENOMEM;
+        }
+    }
+    lib->pool = pool;
 
     rv = APR_ENOTIMPL;
 #if APU_HAVE_OPENSSL
     if (!strcmp(name, "openssl")) {
         rv = apr__crypto_openssl_init(params, result, pool);
+        if (rv == APR_SUCCESS) {
+            lib->term = apr__crypto_openssl_term;
+            lib->name = "openssl";
+        }
     }
     else
 #endif
 #if APU_HAVE_NSS
     if (!strcmp(name, "nss")) {
         rv = apr__crypto_nss_init(params, result, pool);
+        if (rv == APR_SUCCESS) {
+            lib->term = apr__crypto_nss_term;
+            lib->name = "nss";
+        }
     }
     else
 #endif
 #if APU_HAVE_COMMONCRYPTO
     if (!strcmp(name, "commoncrypto")) {
         rv = apr__crypto_commoncrypto_init(params, result, pool);
+        if (rv == APR_SUCCESS) {
+            lib->term = apr__crypto_commoncrypto_term;
+            lib->name = "commoncrypto";
+        }
     }
     else
 #endif
 #if APU_HAVE_MSCAPI
     if (!strcmp(name, "mscapi")) {
         rv = apr__crypto_mscapi_init(params, result, pool);
+        if (rv == APR_SUCCESS) {
+            lib->term = apr__crypto_mscapi_term;
+            lib->name = "mscapi";
+        }
     }
     else
 #endif
 #if APU_HAVE_MSCNG
     if (!strcmp(name, "mscng")) {
         rv = apr__crypto_mscng_init(params, result, pool);
+        if (rv == APR_SUCCESS) {
+            lib->term = apr__crypto_mscng_term;
+            lib->name = "mscng";
+        }
     }
     else
 #endif
     ;
     if (rv == APR_SUCCESS) {
-        name = apr_pstrdup(pool, name);
-        apr_hash_set(crypto_libs, name, APR_HASH_KEY_STRING, name);
+        apr_hash_set(active_libs, lib->name, APR_HASH_KEY_STRING, lib);
+        apr_pool_cleanup_register(pool, lib, crypto_lib_cleanup,
+                                  apr_pool_cleanup_null);
+    }
+    else {
+        spare_lib_push(lib);
     }
     return rv;
 }
 
-APR_DECLARE(apr_status_t) apr_crypto_lib_term(const char *name)
+static apr_status_t crypto_lib_term(const char *name)
 {
     apr_status_t rv;
+    struct crypto_lib *lib;
 
-    if (!crypto_libs) {
-        return APR_EINIT;
-    }
-
-    if (!name) {
-        apr_pool_t *pool = apr_hash_pool_get(crypto_libs);
-        return apr_pool_cleanup_run(pool, NULL, crypto_libs_cleanup);
-    }
-
-    if (!apr_hash_get(crypto_libs, name, APR_HASH_KEY_STRING)) {
+    lib = apr_hash_get(active_libs, name, APR_HASH_KEY_STRING);
+    if (!lib) {
         return APR_EINIT;
     }
 
     rv = APR_ENOTIMPL;
 #if APU_HAVE_OPENSSL
     if (!strcmp(name, "openssl")) {
-        rv = apr__crypto_openssl_term();
+        rv = APR_SUCCESS;
     }
     else
 #endif
 #if APU_HAVE_NSS
     if (!strcmp(name, "nss")) {
-        rv = apr__crypto_nss_term();
+        rv = APR_SUCCESS;
     }
     else
 #endif
 #if APU_HAVE_COMMONCRYPTO
     if (!strcmp(name, "commoncrypto")) {
-        rv = apr__crypto_commoncrypto_term();
+        rv = APR_SUCCESS;
     }
     else
 #endif
 #if APU_HAVE_MSCAPI
     if (!strcmp(name, "mscapi")) {
-        rv = apr__crypto_mscapi_term();
+        rv = APR_SUCCESS;
     }
     else
 #endif
 #if APU_HAVE_MSCNG
     if (!strcmp(name, "mscng")) {
-        rv = apr__crypto_mscng_term();
+        rv = APR_SUCCESS;
     }
     else
 #endif
     ;
     if (rv == APR_SUCCESS) {
-        apr_hash_set(crypto_libs, name, APR_HASH_KEY_STRING, NULL);
+        rv = apr_pool_cleanup_run(lib->pool, lib, crypto_lib_cleanup);
     }
     return rv;
+}
+
+APR_DECLARE(apr_status_t) apr_crypto_lib_term(const char *name)
+{
+    if (!active_libs) {
+        return APR_EINIT;
+    }
+
+    if (!name) {
+        apr_hash_index_t *hi = apr_hash_first(NULL, active_libs);
+        for (; hi; hi = apr_hash_next(hi)) {
+            name = apr_hash_this_key(hi);
+            crypto_lib_term(name);
+        }
+        return APR_SUCCESS;
+    }
+
+    return crypto_lib_term(name);
 }
 
 /**

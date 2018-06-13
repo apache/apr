@@ -63,6 +63,7 @@ apr_status_t apr__crypto_openssl_init(const char *params,
 apr_status_t apr__crypto_openssl_term(void)
 {
 #if APR_USE_OPENSSL_PRE_1_1_API
+
 #ifdef OPENSSL_FIPS
     FIPS_mode_set(0);
 #endif
@@ -71,12 +72,17 @@ apr_status_t apr__crypto_openssl_term(void)
     EVP_cleanup();
     RAND_cleanup();
     ENGINE_cleanup();
-    ERR_free_strings();
-    ERR_remove_thread_state(NULL);
-    CRYPTO_cleanup_all_ex_data();
 #ifndef OPENSSL_NO_COMP
     COMP_zlib_cleanup();
 #endif
+#if OPENSSL_VERSION_NUMBER >= 0x1000000fL
+    ERR_remove_thread_state(NULL);
+#else
+    ERR_remove_state(0);
+#endif
+    ERR_free_strings();
+    CRYPTO_cleanup_all_ex_data();
+
 #else   /* !APR_USE_OPENSSL_PRE_1_1_API */
     OPENSSL_cleanup();
 #endif  /* !APR_USE_OPENSSL_PRE_1_1_API */
