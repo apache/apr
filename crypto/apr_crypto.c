@@ -358,9 +358,47 @@ static apr_status_t crypto_lib_cleanup(void *arg)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(int) apr_crypto_lib_is_active(const char *name)
+APR_DECLARE(apr_status_t) apr_crypto_lib_version(const char *name,
+                                                 const char **version)
 {
-    return active_libs && apr_hash_get(active_libs, name, APR_HASH_KEY_STRING);
+    apr_status_t rv = APR_ENOTIMPL;
+#if APU_HAVE_OPENSSL
+    if (!strcmp(name, "openssl")) {
+        *version = apr__crypto_openssl_version();
+        rv = *version ? APR_SUCCESS : APR_NOTFOUND;
+    }
+    else
+#endif
+#if APU_HAVE_NSS
+    if (!strcmp(name, "nss")) {
+        *version = apr__crypto_nss_version();
+        rv = *version ? APR_SUCCESS : APR_NOTFOUND;
+    }
+    else
+#endif
+#if APU_HAVE_COMMONCRYPTO
+    if (!strcmp(name, "commoncrypto")) {
+        *version = apr__crypto_commoncrypto_version();
+        rv = *version ? APR_SUCCESS : APR_NOTFOUND;
+    }
+    else
+#endif
+#if APU_HAVE_MSCAPI
+    if (!strcmp(name, "mscapi")) {
+        *version = apr__crypto_mscapi_version();
+        rv = *version ? APR_SUCCESS : APR_NOTFOUND;
+    }
+    else
+#endif
+#if APU_HAVE_MSCNG
+    if (!strcmp(name, "mscng")) {
+        *version = apr__crypto_mscng_version();
+        rv = *version ? APR_SUCCESS : APR_NOTFOUND;
+    }
+    else
+#endif
+    ;
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_crypto_lib_init(const char *name,
@@ -531,6 +569,11 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_term(const char *name)
     }
 
     return crypto_lib_term(name);
+}
+
+APR_DECLARE(int) apr_crypto_lib_is_active(const char *name)
+{
+    return active_libs && apr_hash_get(active_libs, name, APR_HASH_KEY_STRING);
 }
 
 /**

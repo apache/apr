@@ -43,6 +43,11 @@
 #endif
 #endif
 
+const char *apr__crypto_openssl_version(void)
+{
+    return OPENSSL_VERSION_TEXT;
+}
+
 apr_status_t apr__crypto_openssl_init(const char *params,
                                       const apu_err_t **result,
                                       apr_pool_t *pool)
@@ -103,6 +108,11 @@ apr_status_t apr__crypto_openssl_term(void)
 #ifdef HAVE_NSS_H
 #include <nss.h>
 #endif
+
+const char *apr__crypto_nss_version(void)
+{
+    return NSS_VERSION;
+}
 
 apr_status_t apr__crypto_nss_init(const char *params,
                                  const apu_err_t **result,
@@ -224,6 +234,11 @@ apr_status_t apr__crypto_nss_term(void)
 
 #if APU_HAVE_COMMONCRYPTO
 
+const char *apr__crypto_commoncrypto_version(void)
+{
+    return NULL;
+}
+
 apr_status_t apr__crypto_commoncrypto_init(const char *params,
                                            const apu_err_t **result,
                                            apr_pool_t *pool)
@@ -241,14 +256,19 @@ apr_status_t apr__crypto_commoncrypto_term(void)
 
 #if APU_HAVE_MSCAPI
 
-apr_status_t apr__crypto_commoncrypto_init(const char *params,
-                                           const apu_err_t **result,
-                                           apr_pool_t *pool)
+const char *apr__crypto_mscapi_version(void)
+{
+    return NULL;
+}
+
+apr_status_t apr__crypto_mscapi_init(const char *params,
+                                     const apu_err_t **result,
+                                     apr_pool_t *pool)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr__crypto_commoncrypto_term(void)
+apr_status_t apr__crypto_mscapi_term(void)
 {
     return APR_ENOTIMPL;
 }
@@ -258,14 +278,19 @@ apr_status_t apr__crypto_commoncrypto_term(void)
 
 #if APU_HAVE_MSCNG
 
-apr_status_t apr__crypto_commoncrypto_init(const char *params,
+const char *apr__crypto_mscng_version(void)
+{
+    return NULL;
+}
+
+apr_status_t apr__crypto_mscng_init(const char *params,
                                            const apu_err_t **result,
                                            apr_pool_t *pool)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr__crypto_commoncrypto_term(void)
+apr_status_t apr__crypto_mscng_term(void)
 {
     return APR_ENOTIMPL;
 }
