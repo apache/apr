@@ -185,7 +185,7 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_init(const char *name,
 
 APR_DECLARE(apr_status_t) apr_crypto_lib_term(const char *name);
 
-APR_DECLARE(int) apr_crypto_lib_is_initialized(const char *name);
+APR_DECLARE(int) apr_crypto_lib_is_active(const char *name);
 
 /**
  * @brief Zero out the buffer provided when the pool is cleaned up.
