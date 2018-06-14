@@ -284,8 +284,8 @@ const char *apr__crypto_mscng_version(void)
 }
 
 apr_status_t apr__crypto_mscng_init(const char *params,
-                                           const apu_err_t **result,
-                                           apr_pool_t *pool)
+                                    const apu_err_t **result,
+                                    apr_pool_t *pool)
 {
     return APR_ENOTIMPL;
 }
