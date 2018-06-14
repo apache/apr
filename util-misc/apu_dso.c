@@ -106,6 +106,11 @@ apr_status_t apu_dso_init(apr_pool_t *pool)
     return ret;
 }
 
+struct dso_entry {
+    apr_dso_handle_t *handle;
+    apr_dso_handle_sym_t *sym;
+};
+
 apr_status_t apu_dso_load(apr_dso_handle_t **dlhandleptr,
                           apr_dso_handle_sym_t *dsoptr,
                           const char *module,
@@ -118,11 +123,14 @@ apr_status_t apu_dso_load(apr_dso_handle_t **dlhandleptr,
     apr_array_header_t *paths;
     apr_pool_t *global;
     apr_status_t rv = APR_EDSOOPEN;
+    struct dso_entry *entry;
     char *eos = NULL;
     int i;
 
-    *dsoptr = apr_hash_get(dsos, module, APR_HASH_KEY_STRING);
-    if (*dsoptr) {
+    entry = apr_hash_get(dsos, module, APR_HASH_KEY_STRING);
+    if (entry) {
+        *dlhandleptr = entry->handle;
+        *dsoptr = entry->sym;
         return APR_EINIT;
     }
 
@@ -199,7 +207,10 @@ apr_status_t apu_dso_load(apr_dso_handle_t **dlhandleptr,
     }
     else {
         module = apr_pstrdup(global, module);
-        apr_hash_set(dsos, module, APR_HASH_KEY_STRING, *dsoptr);
+        entry = apr_palloc(global, sizeof(*entry));
+        entry->handle = dlhandle;
+        entry->sym = *dsoptr;
+        apr_hash_set(dsos, module, APR_HASH_KEY_STRING, entry);
     }
     return rv;
 }

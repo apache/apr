@@ -37,8 +37,6 @@ static apr_hash_t *drivers = NULL;
 
 #define ERROR_SIZE 1024
 
-#define CLEANUP_CAST (apr_status_t (*)(void*))
-
 APR_TYPEDEF_STRUCT(apr_crypto_t,
     apr_pool_t *pool;
     apr_crypto_driver_t *provider;
@@ -87,26 +85,29 @@ static apr_status_t apr_crypto_term(void *ptr)
 APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool)
 {
     apr_status_t rv;
-    apr_pool_t *parent;
+    apr_pool_t *rootp;
     int flags = 0;
 
     if (drivers != NULL) {
         return APR_SUCCESS;
     }
 
-    /* Top level pool scope, need process-scope lifetime */
-    for (parent = apr_pool_parent_get(pool);
-         parent && parent != pool;
-         parent = apr_pool_parent_get(pool))
-        pool = parent;
+    /* Top level pool scope, for drivers' process-scope lifetime */
+    rootp = pool;
+    for (;;) {
+        apr_pool_t *p = apr_pool_parent_get(rootp);
+        if (!p || p == rootp) {
+            break;
+        }
+        rootp = p;
+    }
 #if APR_HAVE_MODULAR_DSO
     /* deprecate in 2.0 - permit implicit initialization */
-    apu_dso_init(pool);
+    apu_dso_init(rootp);
 #endif
-    drivers = apr_hash_make(pool);
-
-    apr_pool_cleanup_register(pool, NULL, apr_crypto_term,
-            apr_pool_cleanup_null);
+    drivers = apr_hash_make(rootp);
+    apr_pool_cleanup_register(rootp, NULL, apr_crypto_term,
+                              apr_pool_cleanup_null);
 
     /* apr_crypto_prng_init() may already have been called with
      * non-default parameters, so ignore APR_EREINIT.
@@ -203,6 +204,7 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
     char symname[34];
     apr_dso_handle_t *dso;
     apr_dso_handle_sym_t symbol;
+    apr_pool_t *rootp;
 #endif
     apr_status_t rv;
 
@@ -227,7 +229,7 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
 #if APR_HAVE_MODULAR_DSO
     /* The driver DSO must have exactly the same lifetime as the
      * drivers hash table; ignore the passed-in pool */
-    pool = apr_hash_pool_get(drivers);
+    rootp = apr_hash_pool_get(drivers);
 
 #if defined(NETWARE)
     apr_snprintf(modname, sizeof(modname), "crypto%s.nlm", name);
@@ -239,21 +241,19 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
             "apr_crypto_%s-" APR_STRINGIFY(APR_MAJOR_VERSION) ".so", name);
 #endif
     apr_snprintf(symname, sizeof(symname), "apr_crypto_%s_driver", name);
-    rv = apu_dso_load(&dso, &symbol, modname, symname, pool);
+    rv = apu_dso_load(&dso, &symbol, modname, symname, rootp);
     if (rv == APR_SUCCESS || rv == APR_EINIT) { /* previously loaded?!? */
         apr_crypto_driver_t *d = symbol;
         rv = APR_SUCCESS;
         if (d->init) {
-            rv = d->init(pool, params, result);
+            rv = d->init(rootp, params, result);
             if (rv == APR_EREINIT) {
                 rv = APR_SUCCESS;
             }
         }
         if (rv == APR_SUCCESS) {
-            *driver = symbol;
-            name = apr_pstrdup(pool, name);
-            apr_hash_set(drivers, name, APR_HASH_KEY_STRING, *driver);
-            rv = APR_SUCCESS;
+            apr_hash_set(drivers, d->name, APR_HASH_KEY_STRING, d);
+            *driver = d;
         }
     }
     apu_dso_mutex_unlock();
@@ -274,32 +274,38 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
 
     /* Load statically-linked drivers: */
 #if APU_HAVE_OPENSSL
-    if (name[0] == 'o' && !strcmp(name, "openssl")) {
+    if (!strcmp(name, "openssl")) {
         DRIVER_LOAD("openssl", apr_crypto_openssl_driver, pool, params, rv, result);
     }
+    else
 #endif
 #if APU_HAVE_NSS
-    if (name[0] == 'n' && !strcmp(name, "nss")) {
+    if (!strcmp(name, "nss")) {
         DRIVER_LOAD("nss", apr_crypto_nss_driver, pool, params, rv, result);
     }
+    else
 #endif
 #if APU_HAVE_COMMONCRYPTO
-    if (name[0] == 'c' && !strcmp(name, "commoncrypto")) {
+    if (!strcmp(name, "commoncrypto")) {
         DRIVER_LOAD("commoncrypto", apr_crypto_commoncrypto_driver, pool, params, rv, result);
     }
+    else
 #endif
 #if APU_HAVE_MSCAPI
-    if (name[0] == 'm' && !strcmp(name, "mscapi")) {
+    if (!strcmp(name, "mscapi")) {
         DRIVER_LOAD("mscapi", apr_crypto_mscapi_driver, pool, params, rv, result);
     }
+    else
 #endif
 #if APU_HAVE_MSCNG
-    if (name[0] == 'm' && !strcmp(name, "mscng")) {
+    if (!strcmp(name, "mscng")) {
         DRIVER_LOAD("mscng", apr_crypto_mscng_driver, pool, params, rv, result);
     }
+    else
 #endif
+    ;
 
-#endif
+#endif /* !APR_HAVE_MODULAR_DSO */
 
     return rv;
 }
@@ -407,7 +413,7 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_init(const char *name,
                                               apr_pool_t *pool)
 {
     apr_status_t rv;
-    apr_pool_t *rootp, *p;
+    apr_pool_t *rootp;
     struct crypto_lib *lib;
 
     if (!name) {
@@ -419,7 +425,11 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_init(const char *name,
     }
 
     rootp = pool;
-    while ((p = apr_pool_parent_get(rootp))) {
+    for (;;) {
+        apr_pool_t *p = apr_pool_parent_get(rootp);
+        if (!p || p == rootp) {
+            break;
+        }
         rootp = p;
     }
 
@@ -495,8 +505,10 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_init(const char *name,
     if (rv == APR_SUCCESS) {
         lib->pool = pool;
         apr_hash_set(active_libs, lib->name, APR_HASH_KEY_STRING, lib);
-        apr_pool_cleanup_register(lib->pool, lib, crypto_lib_cleanup,
-                                  apr_pool_cleanup_null);
+        if (apr_pool_parent_get(pool)) {
+            apr_pool_cleanup_register(pool, lib, crypto_lib_cleanup,
+                                      apr_pool_cleanup_null);
+        }
     }
     else {
         spare_lib_push(lib);
@@ -512,6 +524,9 @@ static apr_status_t crypto_lib_term(const char *name)
     lib = apr_hash_get(active_libs, name, APR_HASH_KEY_STRING);
     if (!lib) {
         return APR_EINIT;
+    }
+    if (!apr_pool_parent_get(lib->pool)) {
+        return APR_EBUSY;
     }
 
     rv = APR_ENOTIMPL;
@@ -560,12 +575,15 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_term(const char *name)
     }
 
     if (!name) {
+        apr_status_t rv = APR_SUCCESS;
         apr_hash_index_t *hi = apr_hash_first(NULL, active_libs);
         for (; hi; hi = apr_hash_next(hi)) {
-            name = apr_hash_this_key(hi);
-            crypto_lib_term(name);
+            apr_status_t rt = crypto_lib_term(apr_hash_this_key(hi));
+            if (rt != APR_SUCCESS && (rv == APR_SUCCESS || rv == APR_EBUSY)) {
+                rv = rt;
+            }
         }
-        return APR_SUCCESS;
+        return rv;
     }
 
     return crypto_lib_term(name);

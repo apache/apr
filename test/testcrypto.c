@@ -559,7 +559,10 @@ static void test_crypto_init(abts_case *tc, void *data)
 
     apr_pool_create(&pool, NULL);
 
-    rv = apr_crypto_init(pool);
+    /* Use root pool (top level init) so that the crypto lib is
+     * not cleanup on pool destroy below (e.g. openssl can't re-init).
+     */
+    rv = apr_crypto_init(apr_pool_parent_get(pool));
     ABTS_ASSERT(tc, "failed to init apr_crypto", rv == APR_SUCCESS);
 
     apr_pool_destroy(pool);
@@ -1680,7 +1683,7 @@ abts_suite *testcrypto(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
 
-    /* test simple init and shutdown */
+    /* test simple init and shutdown (keep first) */
     abts_run_test(suite, test_crypto_init, NULL);
 
     /* test key parsing - openssl */
