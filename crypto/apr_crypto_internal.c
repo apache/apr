@@ -31,18 +31,6 @@
 #include <openssl/comp.h>
 #include <openssl/evp.h>
 
-#ifndef APR_USE_OPENSSL_PRE_1_1_API
-#if defined(LIBRESSL_VERSION_NUMBER)
-/* LibreSSL declares OPENSSL_VERSION_NUMBER == 2.0 but does not include most
- * changes from OpenSSL >= 1.1 (new functions, macros, deprecations, ...), so
- * we have to work around this...
- */
-#define APR_USE_OPENSSL_PRE_1_1_API (1)
-#else
-#define APR_USE_OPENSSL_PRE_1_1_API (OPENSSL_VERSION_NUMBER < 0x10100000L)
-#endif
-#endif
-
 const char *apr__crypto_openssl_version(void)
 {
     return OPENSSL_VERSION_TEXT;
@@ -52,9 +40,10 @@ apr_status_t apr__crypto_openssl_init(const char *params,
                                       const apu_err_t **result,
                                       apr_pool_t *pool)
 {
-#if APR_USE_OPENSSL_PRE_1_1_API
+    /* Both undefined (or no-op) with LibreSSL */
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     CRYPTO_malloc_init();
-#else
+#elif !defined(LIBRESSL_VERSION_NUMBER)
     OPENSSL_malloc_init();
 #endif
     ERR_load_crypto_strings();
@@ -67,7 +56,7 @@ apr_status_t apr__crypto_openssl_init(const char *params,
 
 apr_status_t apr__crypto_openssl_term(void)
 {
-#if APR_USE_OPENSSL_PRE_1_1_API
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 
 #ifdef OPENSSL_FIPS
     FIPS_mode_set(0);
@@ -75,7 +64,9 @@ apr_status_t apr__crypto_openssl_term(void)
     CONF_modules_unload(1);
     OBJ_cleanup();
     EVP_cleanup();
+#if !defined(LIBRESSL_VERSION_NUMBER)
     RAND_cleanup();
+#endif
     ENGINE_cleanup();
 #ifndef OPENSSL_NO_COMP
     COMP_zlib_cleanup();
@@ -88,9 +79,9 @@ apr_status_t apr__crypto_openssl_term(void)
     ERR_free_strings();
     CRYPTO_cleanup_all_ex_data();
 
-#else   /* !APR_USE_OPENSSL_PRE_1_1_API */
+#else   /* OPENSSL_VERSION_NUMBER >= 0x10100000L */
     OPENSSL_cleanup();
-#endif  /* !APR_USE_OPENSSL_PRE_1_1_API */
+#endif	/* OPENSSL_VERSION_NUMBER >= 0x10100000L */
 
     return APR_SUCCESS;
 }
