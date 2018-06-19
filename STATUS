@@ -98,6 +98,10 @@ CURRENT VOTES:
       1.5.x patch: http://people.apache.org/~jim/patches/apr-1.5-permset.patch
       +1: 
 
+    * make sure we don't unlock mutex when we haven't locked it.
+      1.6.x patch: http://people.apache.org/~jfclere/patch.180618.txt
+      +1 jfclere
+
 CURRENT test/testall -v EXCEPTIONS:
 
     Please add any platform anomilies to the following exception list.
