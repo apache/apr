@@ -81,7 +81,9 @@ static apr_res_t *pop_resource(apr_reslist_t *reslist)
 static void push_resource(apr_reslist_t *reslist, apr_res_t *resource)
 {
     APR_RING_INSERT_HEAD(&reslist->avail_list, resource, apr_res_t, link);
-    resource->freed = apr_time_now();
+    if (reslist->ttl) {
+        resource->freed = apr_time_now();
+    }
     reslist->nidle++;
 }
 
@@ -332,7 +334,7 @@ APR_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
 {
     apr_status_t rv;
     apr_res_t *res;
-    apr_time_t now;
+    apr_time_t now = 0;
 
 #if APR_HAS_THREADS
     apr_thread_mutex_lock(reslist->listlock);
@@ -340,7 +342,9 @@ APR_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
 #endif
     /* If there are idle resources on the available list, use
      * them right away. */
-    now = apr_time_now();
+    if (reslist->ttl) {
+        now = apr_time_now();
+    }
     while (reslist->nidle > 0) {
         /* Pop off the first resource */
         res = pop_resource(reslist);
