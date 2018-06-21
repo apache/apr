@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Add apr_reslist_acquire_ex() which allows to control acquire order,
+     that is LIFO (default) or FIFO.  [Yann Ylavic]
+
   *) apr_file_write: Optimize large reads from buffered files on Windows.
      [Evgeny Kotkov]
 

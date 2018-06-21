@@ -107,8 +107,26 @@ APR_DECLARE(apr_status_t) apr_reslist_create(apr_reslist_t **reslist,
  */
 APR_DECLARE(apr_status_t) apr_reslist_destroy(apr_reslist_t *reslist);
 
+/* Acquire order modes */
+#define APR_RESLIST_ACQUIRE_LIFO 0x0
+#define APR_RESLIST_ACQUIRE_FIFO 0x1
+#define APR_RESLIST_ACQUIRE_MASK 0x1
+
 /**
- * Retrieve a resource from the list, creating a new one if necessary.
+ * Retrieve a resource from the list, either the oldest (FIFO) or
+ * latest (LIFO), creating a new one if necessary.
+ * If we have met our maximum number of resources, we will block
+ * until one becomes available.
+ * @param reslist The resource list.
+ * @param resource An address where the pointer to the resource
+ *                will be stored.
+ * @param flags Bitmask of APR_RESLIST_ACQUIRE_* flags.
+ */
+APR_DECLARE(apr_status_t) apr_reslist_acquire_ex(apr_reslist_t *reslist,
+                                                 void **resource, int flags);
+
+/**
+ * Retrieve the latest resource from the list, creating a new one if necessary.
  * If we have met our maximum number of resources, we will block
  * until one becomes available.
  * @param reslist The resource list.
