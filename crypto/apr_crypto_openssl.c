@@ -37,6 +37,10 @@
 
 #define LOG_PREFIX "apr_crypto_openssl: "
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+#define EVP_CIPHER_CTX_reset EVP_CIPHER_CTX_cleanup
+#endif
+
 struct apr_crypto_t {
     apr_pool_t *pool;
     const apr_crypto_driver_t *provider;
@@ -677,11 +681,7 @@ static apr_status_t crypto_block_encrypt(unsigned char **out,
     if (!EVP_EncryptUpdate(ctx->cipherCtx, (*out), &outl,
             (unsigned char *) in, inlen)) {
 #endif
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
-        EVP_CIPHER_CTX_cleanup(ctx->cipherCtx);
-#else
         EVP_CIPHER_CTX_reset(ctx->cipherCtx);
-#endif
         return APR_ECRYPT;
     }
     *outlen = outl;
@@ -720,11 +720,7 @@ static apr_status_t crypto_block_encrypt_finish(unsigned char *out,
     else {
         *outlen = len;
     }
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
-    EVP_CIPHER_CTX_cleanup(ctx->cipherCtx);
-#else
     EVP_CIPHER_CTX_reset(ctx->cipherCtx);
-#endif
 
     return rc;
 
@@ -847,11 +843,7 @@ static apr_status_t crypto_block_decrypt(unsigned char **out,
     if (!EVP_DecryptUpdate(ctx->cipherCtx, *out, &outl, (unsigned char *) in,
             inlen)) {
 #endif
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
-        EVP_CIPHER_CTX_cleanup(ctx->cipherCtx);
-#else
         EVP_CIPHER_CTX_reset(ctx->cipherCtx);
-#endif
         return APR_ECRYPT;
     }
     *outlen = outl;
@@ -890,11 +882,7 @@ static apr_status_t crypto_block_decrypt_finish(unsigned char *out,
     else {
         *outlen = len;
     }
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
-    EVP_CIPHER_CTX_cleanup(ctx->cipherCtx);
-#else
     EVP_CIPHER_CTX_reset(ctx->cipherCtx);
-#endif
 
     return rc;
 
