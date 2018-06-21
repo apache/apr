@@ -61,13 +61,18 @@ struct apr_reslist_t {
 };
 
 /**
- * Grab a resource from the front of the resource list.
+ * Grab a resource from the resource list, latest or oldest depending on fifo.
  * Assumes: that the reslist is locked.
  */
-static apr_res_t *pop_resource(apr_reslist_t *reslist)
+static apr_res_t *pop_resource(apr_reslist_t *reslist, int fifo)
 {
     apr_res_t *res;
-    res = APR_RING_FIRST(&reslist->avail_list);
+    if (fifo) {
+        res = APR_RING_LAST(&reslist->avail_list);
+    }
+    else {
+        res = APR_RING_FIRST(&reslist->avail_list);
+    }
     APR_RING_REMOVE(res, link);
     reslist->nidle--;
     return res;
@@ -150,7 +155,7 @@ static apr_status_t reslist_cleanup(void *data_)
 
     while (rl->nidle > 0) {
         apr_status_t rv1;
-        res = pop_resource(rl);
+        res = pop_resource(rl, 0);
         rl->ntotal--;
         rv1 = destroy_resource(rl, res);
         if (rv1 != APR_SUCCESS) {
@@ -329,11 +334,17 @@ APR_DECLARE(apr_status_t) apr_reslist_destroy(apr_reslist_t *reslist)
     return apr_pool_cleanup_run(reslist->pool, reslist, reslist_cleanup);
 }
 
-APR_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
-                                              void **resource)
+static apr_status_t reslist_acquire(apr_reslist_t *reslist,
+                                    void **resource, int flags)
 {
     apr_status_t rv;
     apr_res_t *res;
+    int fifo;
+
+    if (flags & ~APR_RESLIST_ACQUIRE_MASK) {
+        return APR_EINVAL;
+    }
+    fifo = flags & APR_RESLIST_ACQUIRE_FIFO;
 
 #if APR_HAS_THREADS
     apr_thread_mutex_lock(reslist->listlock);
@@ -367,7 +378,7 @@ APR_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
     }
     /* If there is still an idle resource, use it right away */
     if (reslist->nidle > 0) {
-        res = pop_resource(reslist);
+        res = pop_resource(reslist, fifo);
         *resource = res->opaque;
         free_container(reslist, res);
 #if APR_HAS_THREADS
@@ -396,7 +407,7 @@ APR_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
     /* If we popped out of the loop, first try to see if there
      * are new resources available for immediate use. */
     if (reslist->nidle > 0) {
-        res = pop_resource(reslist);
+        res = pop_resource(reslist, fifo);
         *resource = res->opaque;
         free_container(reslist, res);
 #if APR_HAS_THREADS
@@ -419,6 +430,18 @@ APR_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
 #endif
         return rv;
     }
+}
+
+APR_DECLARE(apr_status_t) apr_reslist_acquire_ex(apr_reslist_t *reslist,
+                                                 void **resource, int flags)
+{
+    return reslist_acquire(reslist, resource, flags);
+}
+
+APR_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
+                                              void **resource)
+{
+    return reslist_acquire(reslist, resource, 0);
 }
 
 APR_DECLARE(apr_status_t) apr_reslist_release(apr_reslist_t *reslist,
