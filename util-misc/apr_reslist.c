@@ -83,13 +83,23 @@ static apr_res_t *pop_resource(apr_reslist_t *reslist, int fifo)
  * it was added to the list.
  * Assumes: that the reslist is locked.
  */
-static void push_resource(apr_reslist_t *reslist, apr_res_t *resource)
+static apr_status_t push_resource(apr_reslist_t *reslist,
+                                  apr_res_t *resource, int new)
 {
     APR_RING_INSERT_HEAD(&reslist->avail_list, resource, apr_res_t, link);
     if (reslist->ttl) {
         resource->freed = apr_time_now();
     }
     reslist->nidle++;
+    if (new) {
+        reslist->ntotal++;
+    }
+#if APR_HAS_THREADS
+    /* If someone is waiting on that guy, wake them up. */
+    return apr_thread_cond_signal(reslist->avail);
+#else
+    return APR_SUCCESS;
+#endif
 }
 
 /**
@@ -197,16 +207,10 @@ static apr_status_t reslist_maintain(apr_reslist_t *reslist)
             return rv;
         }
         /* Add it to the list */
-        push_resource(reslist, res);
-        /* Update our counters */
-        reslist->ntotal++;
-        /* If someone is waiting on that guy, wake them up. */
-#if APR_HAS_THREADS
-        rv = apr_thread_cond_signal(reslist->avail);
+        rv = push_resource(reslist, res, 1);
         if (rv != APR_SUCCESS) {
             return rv;
         }
-#endif
         created_one++;
     }
 
@@ -453,10 +457,7 @@ APR_DECLARE(apr_status_t) apr_reslist_release(apr_reslist_t *reslist,
 #endif
     res = get_container(reslist);
     res->opaque = resource;
-    push_resource(reslist, res);
-#if APR_HAS_THREADS
-    apr_thread_cond_signal(reslist->avail);
-#endif
+    push_resource(reslist, res, 0);
     rv = reslist_maintain(reslist);
 #if APR_HAS_THREADS
     apr_thread_mutex_unlock(reslist->listlock);
