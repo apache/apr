@@ -582,7 +582,7 @@ APR_DECLARE(apr_status_t) apr_crypto_random_bytes(void *buf, apr_size_t len);
  *                   called without \ref APR_CRYPTO_PRNG_PER_THREAD,
  *         any system error (APR_ENOMEM, ...).
  */
-APR_DECLARE(apr_status_t) apr_crypto_thread_random_bytes(void *buf,
+APR_DECLARE(apr_status_t) apr_crypto_random_thread_bytes(void *buf,
                                                          apr_size_t len);
 #endif
 

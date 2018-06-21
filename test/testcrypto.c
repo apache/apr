@@ -1635,7 +1635,7 @@ static void *APR_THREAD_FUNC thread_func(apr_thread_t *thd, void *data)
     unsigned char *randbytes = data;
     apr_status_t rv;
 
-    rv = apr_crypto_thread_random_bytes(randbytes, 800);
+    rv = apr_crypto_random_thread_bytes(randbytes, 800);
     apr_thread_exit(thd, rv);
 
     return NULL;
@@ -1663,7 +1663,7 @@ static void test_crypto_thread_random(abts_case *tc, void *data)
     for (i = 0; i < NUM_THREADS; ++i) {
         rv = apr_thread_join(&ret, threads[i]);
         ABTS_ASSERT(tc, "apr_thread_join failed", rv == APR_SUCCESS);
-        ABTS_ASSERT(tc, "apr_crypto_thread_random_bytes failed",
+        ABTS_ASSERT(tc, "apr_crypto_random_thread_bytes failed",
                     ret == APR_SUCCESS);
     }
     for (i = 0; i < NUM_THREADS; ++i) {

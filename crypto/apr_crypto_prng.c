@@ -231,7 +231,7 @@ APR_DECLARE(apr_status_t) apr_crypto_random_bytes(void *buf, apr_size_t len)
 }
 
 #if APR_HAS_THREADS
-APR_DECLARE(apr_status_t) apr_crypto_thread_random_bytes(void *buf,
+APR_DECLARE(apr_status_t) apr_crypto_random_thread_bytes(void *buf,
                                                          apr_size_t len)
 {
     apr_status_t rv;
