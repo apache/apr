@@ -227,14 +227,14 @@ APR_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist)
     /* Check if we need to expire old resources */
     now = apr_time_now();
     while (reslist->nidle > reslist->smax && reslist->nidle > 0) {
-        /* Peak at the last resource in the list */
+        /* Peek at the oldest resource in the list */
         res = APR_RING_LAST(&reslist->avail_list);
-        /* See if the oldest entry should be expired */
         if (now - res->freed < reslist->ttl) {
             /* If this entry is too young, none of the others
              * will be ready to be expired either, so we are done. */
             break;
         }
+        /* this res is expired - kill it */
         APR_RING_REMOVE(res, link);
         reslist->nidle--;
         reslist->ntotal--;
@@ -334,22 +334,26 @@ APR_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
 {
     apr_status_t rv;
     apr_res_t *res;
-    apr_time_t now = 0;
 
 #if APR_HAS_THREADS
     apr_thread_mutex_lock(reslist->listlock);
     apr_pool_owner_set(reslist->pool, 0);
 #endif
-    /* If there are idle resources on the available list, use
+    /* If there are expired resources in the available list, kill
      * them right away. */
-    if (reslist->ttl) {
-        now = apr_time_now();
-    }
-    while (reslist->nidle > 0) {
-        /* Pop off the first resource */
-        res = pop_resource(reslist);
-        if (reslist->ttl && (now - res->freed >= reslist->ttl)) {
+    if (reslist->ttl && reslist->nidle > 0) {
+        apr_time_t now = apr_time_now();
+        do {
+            /* Peek at the oldest resource in the list */
+            res = APR_RING_LAST(&reslist->avail_list);
+            if (now - res->freed < reslist->ttl) {
+                /* If this entry is too young, none of the others
+                 * will be ready to be expired either, so we are done. */
+                break;
+            }
             /* this res is expired - kill it */
+            APR_RING_REMOVE(res, link);
+            reslist->nidle--;
             reslist->ntotal--;
             rv = destroy_resource(reslist, res);
             free_container(reslist, res);
@@ -359,8 +363,11 @@ APR_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
 #endif
                 return rv;  /* FIXME: this might cause unnecessary fails */
             }
-            continue;
-        }
+        } while (reslist->nidle > 0);
+    }
+    /* If there is still an idle resource, use it right away */
+    if (reslist->nidle > 0) {
+        res = pop_resource(reslist);
         *resource = res->opaque;
         free_container(reslist, res);
 #if APR_HAS_THREADS
