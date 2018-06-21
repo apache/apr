@@ -181,17 +181,12 @@ static apr_status_t reslist_cleanup(void *data_)
  * Perform routine maintenance on the resource list. This call
  * may instantiate new resources or expire old resources.
  */
-APR_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist)
+static apr_status_t reslist_maintain(apr_reslist_t *reslist)
 {
     apr_time_t now;
     apr_status_t rv;
     apr_res_t *res;
     int created_one = 0;
-
-#if APR_HAS_THREADS
-    apr_thread_mutex_lock(reslist->listlock);
-    apr_pool_owner_set(reslist->pool, 0);
-#endif
 
     /* Check if we need to create more resources, and if we are allowed to. */
     while (reslist->nidle < reslist->min && reslist->ntotal < reslist->hmax) {
@@ -199,9 +194,6 @@ APR_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist)
         rv = create_resource(reslist, &res);
         if (rv != APR_SUCCESS) {
             free_container(reslist, res);
-#if APR_HAS_THREADS
-            apr_thread_mutex_unlock(reslist->listlock);
-#endif
             return rv;
         }
         /* Add it to the list */
@@ -212,7 +204,6 @@ APR_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist)
 #if APR_HAS_THREADS
         rv = apr_thread_cond_signal(reslist->avail);
         if (rv != APR_SUCCESS) {
-            apr_thread_mutex_unlock(reslist->listlock);
             return rv;
         }
 #endif
@@ -223,9 +214,6 @@ APR_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist)
      * nor need we check for expiry if no ttl is configure.
      */
     if (created_one || !reslist->ttl) {
-#if APR_HAS_THREADS
-        apr_thread_mutex_unlock(reslist->listlock);
-#endif
         return APR_SUCCESS;
     }
 
@@ -246,17 +234,26 @@ APR_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist)
         rv = destroy_resource(reslist, res);
         free_container(reslist, res);
         if (rv != APR_SUCCESS) {
-#if APR_HAS_THREADS
-            apr_thread_mutex_unlock(reslist->listlock);
-#endif
             return rv;
         }
     }
 
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist)
+{
+    apr_status_t rv;
+
+#if APR_HAS_THREADS
+    apr_thread_mutex_lock(reslist->listlock);
+    apr_pool_owner_set(reslist->pool, 0);
+#endif
+    rv = reslist_maintain(reslist);
 #if APR_HAS_THREADS
     apr_thread_mutex_unlock(reslist->listlock);
 #endif
-    return APR_SUCCESS;
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_reslist_create(apr_reslist_t **reslist,
@@ -313,7 +310,7 @@ APR_DECLARE(apr_status_t) apr_reslist_create(apr_reslist_t **reslist,
     }
 #endif
 
-    rv = apr_reslist_maintain(rl);
+    rv = reslist_maintain(rl);
     if (rv != APR_SUCCESS) {
         /* Destroy what we've created so far.
          */
@@ -447,6 +444,7 @@ APR_DECLARE(apr_status_t) apr_reslist_acquire(apr_reslist_t *reslist,
 APR_DECLARE(apr_status_t) apr_reslist_release(apr_reslist_t *reslist,
                                               void *resource)
 {
+    apr_status_t rv;
     apr_res_t *res;
 
 #if APR_HAS_THREADS
@@ -458,10 +456,12 @@ APR_DECLARE(apr_status_t) apr_reslist_release(apr_reslist_t *reslist,
     push_resource(reslist, res);
 #if APR_HAS_THREADS
     apr_thread_cond_signal(reslist->avail);
+#endif
+    rv = reslist_maintain(reslist);
+#if APR_HAS_THREADS
     apr_thread_mutex_unlock(reslist->listlock);
 #endif
-
-    return apr_reslist_maintain(reslist);
+    return rv;
 }
 
 APR_DECLARE(void) apr_reslist_timeout_set(apr_reslist_t *reslist,
