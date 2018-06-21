@@ -212,8 +212,10 @@ APR_DECLARE(apr_status_t) apr_reslist_maintain(apr_reslist_t *reslist)
         created_one++;
     }
 
-    /* We don't need to see if we're over the max if we were under it before */
-    if (created_one) {
+    /* We don't need to see if we're over the max if we were under it before,
+     * nor need we check for expiry if no ttl is configure.
+     */
+    if (created_one || !reslist->ttl) {
 #if APR_HAS_THREADS
         apr_thread_mutex_unlock(reslist->listlock);
 #endif
