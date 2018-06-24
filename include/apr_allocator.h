@@ -122,7 +122,7 @@ APR_DECLARE(apr_status_t) apr_allocator_min_order_set(unsigned int order);
 /**
  * Get the true size that would be allocated for the given size (including
  * the header and alignment).
- * @param list The allocator from which to the memory would be allocated
+ * @param allocator The allocator from which to the memory would be allocated
  * @param size The size to align
  * @return The aligned size (or zero on apr_size_t overflow)
  */
