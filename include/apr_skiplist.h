@@ -159,9 +159,9 @@ APR_DECLARE(void *) apr_skiplist_find(apr_skiplist *sl, void *data, apr_skiplist
  * @param data The value to search for
  * @param iter A pointer to the returned skip list node representing the element
  * found
- * @param func The comparison function to use
+ * @param comp The comparison function to use
  */
-APR_DECLARE(void *) apr_skiplist_last_compare(apr_skiplist *sli, void *data,
+APR_DECLARE(void *) apr_skiplist_last_compare(apr_skiplist *sl, void *data,
                                               apr_skiplistnode **iter,
                                               apr_skiplist_compare comp);
 
