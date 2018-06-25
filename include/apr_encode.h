@@ -159,8 +159,8 @@ extern "C" {
  *  not NULL, returns the number of characters actually written.
  * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL.
  */
-    APR_DECLARE(apr_status_t) apr_encode_base64(char *dest, const char *src,
-                             apr_ssize_t slen, int flags, apr_size_t * len);
+APR_DECLARE(apr_status_t) apr_encode_base64(char *dest, const char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert binary data to base64.
