@@ -176,8 +176,8 @@ extern "C" {
  *  not NULL, returns the number of characters actually written.
  * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL.
  */
-    APR_DECLARE(apr_status_t) apr_encode_base64_binary(char *dest, const unsigned char *src,
-                             apr_ssize_t slen, int flags, apr_size_t * len);
+APR_DECLARE(apr_status_t) apr_encode_base64_binary(char *dest, const unsigned char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert text data to base64, and return the results from a pool.
@@ -194,8 +194,8 @@ extern "C" {
  * @return A zero padded string allocated from the pool on success, or
  * NULL if src was NULL.
  */
-    APR_DECLARE(const char *)apr_pencode_base64(apr_pool_t * p, const char *src,
-                                                apr_ssize_t slen, int flags, apr_size_t * len)__attribute__((nonnull(1)));
+APR_DECLARE(const char *)apr_pencode_base64(apr_pool_t * p, const char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len)__attribute__((nonnull(1)));
 
 /**
  * Convert binary data to base64, and return the results from a pool.
@@ -211,8 +211,8 @@ extern "C" {
  * @return A zero padded string allocated from the pool on success, or
  * NULL if src was NULL.
  */
-    APR_DECLARE(const char *)apr_pencode_base64_binary(apr_pool_t * p, const unsigned char *src,
-                                                       apr_ssize_t slen, int flags, apr_size_t * len)__attribute__((nonnull(1)));
+APR_DECLARE(const char *)apr_pencode_base64_binary(apr_pool_t * p, const unsigned char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len)__attribute__((nonnull(1)));
 
 /**
  * Convert base64 or base64url with or without padding to text data.
@@ -229,8 +229,8 @@ extern "C" {
  * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL, or APR_BADCH
  * if a non hex character is present.
  */
-    APR_DECLARE(apr_status_t) apr_decode_base64(char *dest, const char *src,
-                             apr_ssize_t slen, int flags, apr_size_t * len);
+APR_DECLARE(apr_status_t) apr_decode_base64(char *dest, const char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert base64 or base64url with or without padding to binary data.
@@ -247,8 +247,8 @@ extern "C" {
  * @return APR_SUCCESS, or APR_NOTFOUND if the src was NULL, or APR_BADCH
  * if a non base64 character is present.
  */
-    APR_DECLARE(apr_status_t) apr_decode_base64_binary(unsigned char *dest,
-            const char *src, apr_ssize_t slen, int flags, apr_size_t * len);
+APR_DECLARE(apr_status_t) apr_decode_base64_binary(unsigned char *dest,
+        const char *src, apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert base64 or base64url with or without padding to text data, and
@@ -265,9 +265,9 @@ extern "C" {
  * @return A string allocated from the pool containing the result with a zero
  *  pad. If src was NULL, or an error occurred, NULL is returned.
  */
-    APR_DECLARE(const char *)apr_pdecode_base64(apr_pool_t * p, const char *src,
-                              apr_ssize_t slen, int flags, apr_size_t * len)
-    __attribute__((nonnull(1)));
+APR_DECLARE(const char *)apr_pdecode_base64(apr_pool_t * p, const char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len)
+        __attribute__((nonnull(1)));
 
 /**
  * Convert base64 or base64url with or without padding to binary data, and
@@ -284,9 +284,9 @@ extern "C" {
  * @return A buffer allocated from the pool containing the result with a zero
  *  pad. If src was NULL, or an error occurred, NULL is returned.
  */
-    APR_DECLARE(const unsigned char *)apr_pdecode_base64_binary(apr_pool_t * p,
-             const char *src, apr_ssize_t slen, int flags, apr_size_t * len)
-    __attribute__((nonnull(1)));
+APR_DECLARE(const unsigned char *)apr_pdecode_base64_binary(apr_pool_t * p,
+        const char *src, apr_ssize_t slen, int flags, apr_size_t * len)
+        __attribute__((nonnull(1)));
 
 /**
  * Convert text data to base32.
@@ -302,8 +302,8 @@ extern "C" {
  *  not NULL, returns the number of characters actually written.
  * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL.
  */
-    APR_DECLARE(apr_status_t) apr_encode_base32(char *dest, const char *src,
-                             apr_ssize_t slen, int flags, apr_size_t * len);
+APR_DECLARE(apr_status_t) apr_encode_base32(char *dest, const char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert binary data to base32.
@@ -318,8 +318,8 @@ extern "C" {
  *  not NULL, returns the number of characters actually written.
  * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL.
  */
-    APR_DECLARE(apr_status_t) apr_encode_base32_binary(char *dest, const unsigned char *src,
-                             apr_ssize_t slen, int flags, apr_size_t * len);
+APR_DECLARE(apr_status_t) apr_encode_base32_binary(char *dest, const unsigned char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert text data to base32, and return the results from a pool.
@@ -335,9 +335,9 @@ extern "C" {
  * @return A zero padded string allocated from the pool on success, or
  * NULL if src was NULL.
  */
-    APR_DECLARE(const char *)apr_pencode_base32(apr_pool_t * p, const char *src,
-                              apr_ssize_t slen, int flags, apr_size_t * len)
-    __attribute__((nonnull(1)));
+APR_DECLARE(const char *)apr_pencode_base32(apr_pool_t * p, const char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len)
+        __attribute__((nonnull(1)));
 
 /**
  * Convert binary data to base32, and return the results from a pool.
@@ -352,9 +352,9 @@ extern "C" {
  * @return A zero padded string allocated from the pool on success, or
  * NULL if src was NULL.
  */
-    APR_DECLARE(const char *)apr_pencode_base32_binary(apr_pool_t * p, const unsigned char *src,
-                              apr_ssize_t slen, int flags, apr_size_t * len)
-    __attribute__((nonnull(1)));
+APR_DECLARE(const char *)apr_pencode_base32_binary(apr_pool_t * p, const unsigned char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len)
+        __attribute__((nonnull(1)));
 
 /**
  * Convert base32 or base32hex with or without padding to text data.
@@ -370,8 +370,8 @@ extern "C" {
  * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL, or APR_BADCH
  * if a non base32 character is present.
  */
-    APR_DECLARE(apr_status_t) apr_decode_base32(char *dest, const char *src,
-                             apr_ssize_t slen, int flags, apr_size_t * len);
+APR_DECLARE(apr_status_t) apr_decode_base32(char *dest, const char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert base32 or base32hex with or without padding to binary data.
@@ -387,8 +387,8 @@ extern "C" {
  * @return APR_SUCCESS, or APR_NOTFOUND if the src was NULL, or APR_BADCH
  * if a non base32 character is present.
  */
-    APR_DECLARE(apr_status_t) apr_decode_base32_binary(unsigned char *dest,
-            const char *src, apr_ssize_t slen, int flags, apr_size_t * len);
+APR_DECLARE(apr_status_t) apr_decode_base32_binary(unsigned char *dest,
+        const char *src, apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert base32 or base32hex with or without padding to text data, and
@@ -404,9 +404,9 @@ extern "C" {
  * @return A string allocated from the pool containing the result with a zero
  *  pad. If src was NULL, or an error occurred, NULL is returned.
  */
-    APR_DECLARE(const char *)apr_pdecode_base32(apr_pool_t * p, const char *src,
-                              apr_ssize_t slen, int flags, apr_size_t * len)
-    __attribute__((nonnull(1)));
+APR_DECLARE(const char *)apr_pdecode_base32(apr_pool_t * p, const char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len)
+        __attribute__((nonnull(1)));
 
 /**
  * Convert base32 or base32hex with or without padding to binary data, and
@@ -422,9 +422,9 @@ extern "C" {
  * @return A buffer allocated from the pool containing the result with a zero
  *  pad. If src was NULL, or an error occurred, NULL is returned.
  */
-    APR_DECLARE(const unsigned char *)apr_pdecode_base32_binary(apr_pool_t * p,
-             const char *src, apr_ssize_t slen, int flags, apr_size_t * len)
-    __attribute__((nonnull(1)));
+APR_DECLARE(const unsigned char *)apr_pdecode_base32_binary(apr_pool_t * p,
+        const char *src, apr_ssize_t slen, int flags, apr_size_t * len)
+        __attribute__((nonnull(1)));
 
 /**
  * Convert text data to base16 (hex).
@@ -439,8 +439,8 @@ extern "C" {
  *  not NULL, returns the number of characters actually written.
  * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL.
  */
-    APR_DECLARE(apr_status_t) apr_encode_base16(char *dest, const char *src,
-                             apr_ssize_t slen, int flags, apr_size_t * len);
+APR_DECLARE(apr_status_t) apr_encode_base16(char *dest, const char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert binary data to base16 (hex).
@@ -454,9 +454,9 @@ extern "C" {
  *  not NULL, returns the number of characters actually written.
  * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL.
  */
-    APR_DECLARE(apr_status_t) apr_encode_base16_binary(char *dest,
-                      const unsigned char *src, apr_ssize_t slen, int flags,
-                                                       apr_size_t * len);
+APR_DECLARE(apr_status_t) apr_encode_base16_binary(char *dest,
+        const unsigned char *src, apr_ssize_t slen, int flags,
+        apr_size_t * len);
 
 /**
  * Convert text data to base16 (hex), and return the results from a
@@ -472,9 +472,9 @@ extern "C" {
  * @return A string allocated from the pool containing the result with a zero
  *  pad. If src was NULL, or an error occurred, NULL is returned.
  */
-    APR_DECLARE(const char *)apr_pencode_base16(apr_pool_t * p, const char *src,
-                              apr_ssize_t slen, int flags, apr_size_t * len)
-    __attribute__((nonnull(1)));
+APR_DECLARE(const char *)apr_pencode_base16(apr_pool_t * p, const char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len)
+        __attribute__((nonnull(1)));
 
 /**
  * Convert binary data to base16 (hex), and return the results from a
@@ -489,9 +489,9 @@ extern "C" {
  * @return A string allocated from the pool containing the result with a zero
  *  pad. If src was NULL, or an error occurred, NULL is returned.
  */
-    APR_DECLARE(const char *)apr_pencode_base16_binary(apr_pool_t * p,
-                                 const unsigned char *src, apr_ssize_t slen,
-                    int flags, apr_size_t * len)__attribute__((nonnull(1)));
+APR_DECLARE(const char *)apr_pencode_base16_binary(apr_pool_t * p,
+        const unsigned char *src, apr_ssize_t slen,
+        int flags, apr_size_t * len)__attribute__((nonnull(1)));
 
 /**
  * Convert base16 (hex) to text data.
@@ -507,8 +507,8 @@ extern "C" {
  * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL, or APR_BADCH
  * if a non hex character is present. A zero pad is appended to the buffer.
  */
-    APR_DECLARE(apr_status_t) apr_decode_base16(char *dest, const char *src,
-                             apr_ssize_t slen, int flags, apr_size_t * len);
+APR_DECLARE(apr_status_t) apr_decode_base16(char *dest, const char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert base16 (hex) to binary data.
@@ -524,8 +524,8 @@ extern "C" {
  * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL, or APR_BADCH
  * if a non hex character is present. No zero pad is written to the buffer.
  */
-    APR_DECLARE(apr_status_t) apr_decode_base16_binary(unsigned char *dest,
-            const char *src, apr_ssize_t slen, int flags, apr_size_t * len);
+APR_DECLARE(apr_status_t) apr_decode_base16_binary(unsigned char *dest,
+        const char *src, apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert base16 (hex) and return the results from a pool.
@@ -540,9 +540,9 @@ extern "C" {
  * @return A buffer allocated from the pool containing the result with a zero
  *  pad. If src was NULL, or an error occurred, NULL is returned.
  */
-    APR_DECLARE(const char *)apr_pdecode_base16(apr_pool_t * p, const char *src,
-                              apr_ssize_t slen, int flags, apr_size_t * len)
-    __attribute__((nonnull(1)));
+APR_DECLARE(const char *)apr_pdecode_base16(apr_pool_t * p, const char *src,
+        apr_ssize_t slen, int flags, apr_size_t * len)
+        __attribute__((nonnull(1)));
 
 /**
  * Convert base16 (hex) to binary data, and return the results from a pool.
@@ -557,9 +557,9 @@ extern "C" {
  * @return A buffer allocated from the pool containing the result with a zero
  *  pad. If src was NULL, or an error occurred, NULL is returned.
  */
-    APR_DECLARE(const unsigned char *)apr_pdecode_base16_binary(apr_pool_t * p,
-             const char *src, apr_ssize_t slen, int flags, apr_size_t * len)
-    __attribute__((nonnull(1)));
+APR_DECLARE(const unsigned char *)apr_pdecode_base16_binary(apr_pool_t * p,
+        const char *src, apr_ssize_t slen, int flags, apr_size_t * len)
+        __attribute__((nonnull(1)));
 
 /** @} */
 #ifdef __cplusplus
