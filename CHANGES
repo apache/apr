@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.0
 
+  *) Add the apr_encode_* API that implements RFC4648 and RFC7515
+     compliant BASE64, BASE64URL, BASE32, BASE32HEX and BASE16
+     encode/decode functions. [Graham Leggett]
+
   *) rand: Use arc4random_buf() on BSD platforms and getrandom() on Linux,
      when available. [Christian Weisgerber <naddy openbsd.org, Yann Ylavic]
 
