@@ -4,14 +4,14 @@ echo "buildconf: checking installation..."
 res=0
 
 # any python
-python=`build/PrintPath python`
+python=${PYTHON-`build/PrintPath python3 python2 python`}
 if test -z "$python"; then
   echo "buildconf: python not found."
   echo "           You need python installed"
   echo "           to build APR from SVN."
   res=1
 else
-  py_version=`python -c 'import sys; print sys.version' 2>&1|sed 's/ .*//;q'`
+  py_version=`$python -c 'import sys; print(sys.version)' 2>&1|sed 's/ .*//;q'`
   echo "buildconf: python version $py_version (ok)"
 fi
 
