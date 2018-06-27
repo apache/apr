@@ -127,7 +127,7 @@ extern "C" {
 /**
  * Generate RFC7515 BASE64URL
  */
-#define APR_ENCODE_BASE64URL APR_ENCODE_NOPADDING | APR_ENCODE_URL
+#define APR_ENCODE_BASE64URL (APR_ENCODE_NOPADDING | APR_ENCODE_URL)
 
 /**
  * Generate base32hex encoding instead of base32 encoding
