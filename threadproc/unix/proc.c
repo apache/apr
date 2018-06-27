@@ -223,21 +223,34 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
     
     memset(proc, 0, sizeof(apr_proc_t));
 
+    /* Rekey PRNG(s) to clear buffer(s) and make sure that the
+     * state(s) change between fork()s in any case.
+     */
+#if APU_HAVE_CRYPTO_PRNG
+    apr_crypto_prng_rekey(NULL);
+#endif
+
     if ((pid = fork()) < 0) {
         return errno;
     }
     else if (pid == 0) {
         proc->pid = getpid();
 
-        apr_random_after_fork(proc);
+        /* Do the work needed for children PRNG(s). */
 #if APU_HAVE_CRYPTO_PRNG
-        apr_crypto_prng_after_fork(proc);
+        apr_crypto_prng_after_fork(NULL, 1);
 #endif
+        apr_random_after_fork(proc);
 
         return APR_INCHILD;
     }
 
     proc->pid = pid;
+
+    /* Do the work needed for parent PRNG(s). */
+#if APU_HAVE_CRYPTO_PRNG
+    apr_crypto_prng_after_fork(NULL, 0);
+#endif
 
     return APR_INPARENT;
 }

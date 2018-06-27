@@ -553,15 +553,6 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_init(apr_pool_t *pool,
 APR_DECLARE(apr_status_t) apr_crypto_prng_term(void);
 
 /**
- * @brief Reseed global CPRNG after a process is fork()ed to avoid any
- *        duplicated state.
- *
- * @param proc The child process (including its PID).
- * @return Any system error (APR_ENOMEM, ...).
- */
-APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(apr_proc_t *proc);
-
-/**
  * @brief Generate cryptographically secure random bytes from the global CPRNG.
  *
  * @param buf The destination buffer
@@ -618,9 +609,17 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_create(apr_crypto_prng_t **pcprng,
 APR_DECLARE(apr_status_t) apr_crypto_prng_destroy(apr_crypto_prng_t *cprng);
 
 /**
- * @brief Reseed a standalone CPRNG.
+ * @brief Rekey a CPRNG.
  *
- * @param cprng The CPRNG to reseed.
+ * @param cprng The CPRNG, or NULL for all the created CPRNGs (but per-thread).
+ * @return Any system error (APR_ENOMEM, ...).
+ */
+APR_DECLARE(apr_status_t) apr_crypto_prng_rekey(apr_crypto_prng_t *cprng);
+
+/**
+ * @brief Reseed a CPRNG.
+ *
+ * @param cprng The CPRNG to reseed, or NULL for the global CPRNG.
  * @param seed A custom seed of \ref APR_CRYPTO_PRNG_SEED_SIZE bytes,
  *             or NULL for the seed to be gathered from system entropy.
  * @return Any system error (APR_ENOMEM, ...).
@@ -628,16 +627,32 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_destroy(apr_crypto_prng_t *cprng);
 APR_DECLARE(apr_status_t) apr_crypto_prng_reseed(apr_crypto_prng_t *cprng,
                                                  const unsigned char seed[]);
 
+#if APR_HAS_FORK
 /**
- * @brief Generate cryptographically secure random bytes a standalone CPRNG.
+ * @brief Rekey a CPRNG in the parent and/or child process after a fork(),
+ *        so that they don't share the same state.
  *
- * @param cprng The CPRNG.
+ * @param cprng The CPRNG, or NULL for all the created CPRNGs (but per-thread).
+ * @param in_child Whether in the child process (non zero), or in the parent
+ *                 process otherwise (zero).
+ *
+ * @return Any system error (APR_ENOMEM, ...).
+ */
+APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(apr_crypto_prng_t *cprng,
+                                                     int in_child);
+#endif
+
+/**
+ * @brief Generate cryptographically secure random bytes from a CPRNG.
+ *
+ * @param cprng The CPRNG, or NULL for the global CPRNG.
  * @param buf The destination buffer
  * @param len The destination length
  * @return Any system error (APR_ENOMEM, ...).
  */
 APR_DECLARE(apr_status_t) apr_crypto_prng_bytes(apr_crypto_prng_t *cprng,
                                                 void *buf, apr_size_t len);
+
 #endif /* APU_HAVE_CRYPTO_PRNG */
 
 #endif /* APU_HAVE_CRYPTO */
