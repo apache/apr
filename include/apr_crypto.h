@@ -628,6 +628,9 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_reseed(apr_crypto_prng_t *cprng,
                                                  const unsigned char seed[]);
 
 #if APR_HAS_FORK
+#define APR_CRYPTO_FORK_INPARENT 0
+#define APR_CRYPTO_FORK_INCHILD  1
+
 /**
  * @brief Rekey a CPRNG in the parent and/or child process after a fork(),
  *        so that they don't share the same state.
@@ -639,7 +642,7 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_reseed(apr_crypto_prng_t *cprng,
  * @return Any system error (APR_ENOMEM, ...).
  */
 APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(apr_crypto_prng_t *cprng,
-                                                     int in_child);
+                                                     int flags);
 #endif
 
 /**
