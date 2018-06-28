@@ -139,9 +139,8 @@ void cprng_stream_setkey(cprng_stream_ctx_t *ctx,
 
 static APR_INLINE
 apr_status_t cprng_stream_ctx_bytes(cprng_stream_ctx_t **pctx,
-                                    unsigned char *key, int rekey,
-                                    unsigned char *to, apr_size_t n,
-                                    const unsigned char *z)
+                                    unsigned char *key, unsigned char *to,
+                                    apr_size_t n, const unsigned char *z)
 {
     cprng_stream_ctx_t *ctx = *pctx;
     int len;
@@ -157,9 +156,7 @@ apr_status_t cprng_stream_ctx_bytes(cprng_stream_ctx_t **pctx,
      */
     cprng_stream_setkey(ctx, key, z);
     EVP_CIPHER_CTX_set_padding(ctx, 0);
-    if (rekey) {
-        EVP_EncryptUpdate(ctx, key, &len, z, CPRNG_KEY_SIZE);
-    }
+    EVP_EncryptUpdate(ctx, key, &len, z, CPRNG_KEY_SIZE);
     if (n) {
         EVP_EncryptUpdate(ctx, to, &len, z, n);
     }
@@ -482,13 +479,11 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_destroy(apr_crypto_prng_t *cprng)
 }
 
 static apr_status_t cprng_stream_bytes(apr_crypto_prng_t *cprng,
-                                       void *to, size_t len,
-                                       int rekey)
+                                       void *to, apr_size_t len)
 {
     apr_status_t rv;
 
-    rv = cprng_stream_ctx_bytes(&cprng->ctx, cprng->key, rekey,
-                                to, len, cprng->buf);
+    rv = cprng_stream_ctx_bytes(&cprng->ctx, cprng->key, to, len, cprng->buf);
     if (rv != APR_SUCCESS && len) {
         apr_crypto_memzero(to, len);
     }
@@ -537,7 +532,7 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_reseed(apr_crypto_prng_t *cprng,
          * i.e. the next key is always extracted from the stream cipher state
          * and cleared upon use.
          */
-        rv = cprng_stream_bytes(cprng, NULL, 0, 1);
+        rv = cprng_stream_bytes(cprng, NULL, 0);
     }
 
     cprng_unlock(cprng);
@@ -558,7 +553,7 @@ static apr_status_t cprng_bytes(apr_crypto_prng_t *cprng,
             n = cprng->len;
             if (len >= n) {
                 do {
-                    rv = cprng_stream_bytes(cprng, ptr, n, 1);
+                    rv = cprng_stream_bytes(cprng, ptr, n);
                     if (rv != APR_SUCCESS) {
                         return rv;
                     }
@@ -569,7 +564,7 @@ static apr_status_t cprng_bytes(apr_crypto_prng_t *cprng,
                     break;
                 }
             }
-            rv = cprng_stream_bytes(cprng, cprng->buf, n, 1);
+            rv = cprng_stream_bytes(cprng, cprng->buf, n);
             if (rv != APR_SUCCESS) {
                 return rv;
             }
@@ -616,11 +611,12 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_bytes(apr_crypto_prng_t *cprng,
 }
 
 /* Reset the buffer and use the next stream bytes as the new key. */
-static apr_status_t cprng_newkey(apr_crypto_prng_t *cprng, int rekey)
+static apr_status_t cprng_rekey(apr_crypto_prng_t *cprng,
+                                unsigned char *newkey)
 {
     cprng->pos = cprng->len;
     apr_crypto_memzero(cprng->buf, cprng->len);
-    return cprng_stream_bytes(cprng, cprng->key, CPRNG_KEY_SIZE, rekey);
+    return cprng_stream_bytes(cprng, newkey, newkey ? CPRNG_KEY_SIZE : 0);
 }
 
 APR_DECLARE(apr_status_t) apr_crypto_prng_rekey(apr_crypto_prng_t *cprng)
@@ -637,8 +633,8 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_rekey(apr_crypto_prng_t *cprng)
 
     cprng_lock(cprng);
 
-    /* Renew and apply the new key. */
-    rv = cprng_newkey(cprng, 1);
+    /* Clear state and renew the key. */
+    rv = cprng_rekey(cprng, NULL);
 
     cprng_unlock(cprng);
 
@@ -661,9 +657,10 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_rekey(apr_crypto_prng_t *cprng)
 
 #if APR_HAS_FORK
 APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(apr_crypto_prng_t *cprng,
-                                                     int in_child)
+                                                     int flags)
 {
     apr_status_t rv;
+    int child = flags & APR_CRYPTO_FORK_INCHILD;
 
     if (!cprng) {
         /* Fall through with global CPRNG. */
@@ -675,16 +672,20 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(apr_crypto_prng_t *cprng,
 
     cprng_lock(cprng);
 
-    /* Make sure the parent and child processes never share the same state, so
-     * renew the key first (also clears the buffer) for both parent and child,
-     * so that further fork()s (from parent or child) won't use the same state.
-     * For the parent process only, renew a second time to ensure that key
-     * material is different from the child. Finally parent and child keys will
-     * be different and unknown to each other processes.
+    /* Make sure the parent and child processes never share the same state,
+     * and that further fork()s from either process will not either.
+     * This is done by rekeying (and clearing the buffers) in both processes,
+     * and by rekeying a second time in the parent process to ensure both that
+     * keys are different and that after apr_crypto_prng_after_fork() is called
+     * the keys are unknown to each other processes.
+     * The new key to be used by the parent process is generated in the same
+     * pass as the rekey, and since cprng_stream_bytes() is designed to burn
+     * and never reuse keys we are sure that this key is unique to the parent,
+     * and that nothing is left over from the initial state in both processes.
      */
-    rv = cprng_newkey(cprng, in_child);
-    if (rv == APR_SUCCESS && !in_child) {
-        rv = cprng_stream_bytes(cprng, cprng->key, CPRNG_KEY_SIZE, 1);
+    rv = cprng_rekey(cprng, child ? NULL : cprng->key);
+    if (rv == APR_SUCCESS && !child) {
+        rv = cprng_rekey(cprng, NULL);
     }
 
     cprng_unlock(cprng);
@@ -695,7 +696,7 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(apr_crypto_prng_t *cprng,
         for (cprng = APR_RING_FIRST(cprng_ring);
              cprng != APR_RING_SENTINEL(cprng_ring, apr_crypto_prng_t, link);
              cprng = APR_RING_NEXT(cprng, link)) {
-            apr_status_t rt = apr_crypto_prng_after_fork(cprng, in_child);
+            apr_status_t rt = apr_crypto_prng_after_fork(cprng, flags);
             if (rt != APR_SUCCESS && rv == APR_SUCCESS) {
                 rv = rt;
             }
