@@ -158,8 +158,7 @@ apr_status_t cprng_stream_ctx_bytes(cprng_stream_ctx_t **pctx,
     cprng_stream_setkey(ctx, key, z);
     EVP_CIPHER_CTX_set_padding(ctx, 0);
     if (rekey) {
-        memset(key, 0, CPRNG_KEY_SIZE);
-        EVP_EncryptUpdate(ctx, key, &len, key, CPRNG_KEY_SIZE);
+        EVP_EncryptUpdate(ctx, key, &len, z, CPRNG_KEY_SIZE);
     }
     if (n) {
         EVP_EncryptUpdate(ctx, to, &len, z, n);
