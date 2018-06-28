@@ -130,11 +130,14 @@ apr_status_t cprng_stream_ctx_bytes(cprng_stream_ctx_t **pctx,
      * with the current key (n != 0), or both successively in a one go.
      */
     if (key) {
-        /* We never encrypt twice with the same key, so we can use an
-         * all zeros IV. Also EVP_EncryptInit() can be called multiple
-         * times and it will recycle its previous/replaced resources by
-         * itself, so since padding is disabled/irrelevant too we don't
-         * need EVP_EncryptFinish() after each call or before rekeying.
+        /* We never encrypt twice with the same key, so no IV is needed (can
+         * be zeros). When EVP_EncryptInit() is called multiple times it clears
+         * its previous resources approprietly, and since we don't want the key
+         * and its keystream to reside in memory at the same time, we have to
+         * EVP_EncryptInit() twice: firstly to set the key and then finally to
+         * overwrite the key (with zeros) after the keystream is produced.
+         * As for EVP_EncryptFinish(), we don't need it either because padding
+         * is disabled (irrelevant for a stream cipher).
          */
 #if defined(NID_chacha20)
         /* With CHACHA20, iv=NULL is the same as zeros but it's faster
@@ -155,6 +158,13 @@ apr_status_t cprng_stream_ctx_bytes(cprng_stream_ctx_t **pctx,
     }
     if (n) {
         EVP_EncryptUpdate(ctx, to, &len, z, n);
+
+        /* Burn the key in openssl internals */
+#if defined(NID_chacha20)
+        EVP_EncryptInit_ex(ctx, NULL, NULL, z, NULL);
+#else
+        EVP_EncryptInit_ex(ctx, NULL, NULL, z, z);
+#endif
     }
 
     return APR_SUCCESS;
