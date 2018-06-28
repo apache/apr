@@ -119,53 +119,52 @@ void cprng_stream_ctx_free(cprng_stream_ctx_t *ctx)
 }
 
 static APR_INLINE
+void cprng_stream_setkey(cprng_stream_ctx_t *ctx,
+                         const unsigned char *key,
+                         const unsigned char *iv)
+{
+#if defined(NID_chacha20)
+    /* With CHACHA20, iv=NULL is the same as zeros but it's faster
+     * to (re-)init; use that for efficiency.
+     */
+    EVP_EncryptInit_ex(ctx, NULL, NULL, key, NULL);
+#else
+    /* With AES256-CTR, iv=NULL seems to peek up and random one (for
+     * the initial CTR), while we can live with zeros (fixed CTR);
+     * efficiency still.
+     */
+    EVP_EncryptInit_ex(ctx, NULL, NULL, key, iv);
+#endif
+}
+
+static APR_INLINE
 apr_status_t cprng_stream_ctx_bytes(cprng_stream_ctx_t **pctx,
-                                    unsigned char *key, unsigned char *to,
-                                    apr_size_t n, const unsigned char *z)
+                                    unsigned char *key, int rekey,
+                                    unsigned char *to, apr_size_t n,
+                                    const unsigned char *z)
 {
     cprng_stream_ctx_t *ctx = *pctx;
     int len;
 
-    /* Can be called for rekeying (key != NULL), streaming more bytes
-     * with the current key (n != 0), or both successively in a one go.
+    /* We never encrypt twice with the same key, so no IV is needed (can
+     * be zeros). When EVP_EncryptInit() is called multiple times it clears
+     * its previous resources approprietly, and since we don't want the key
+     * and its keystream to reside in memory at the same time, we have to
+     * EVP_EncryptInit() twice: firstly to set the key and then finally to
+     * overwrite the key (with zeros) after the keystream is produced.
+     * As for EVP_EncryptFinish(), we don't need it either because padding
+     * is disabled (irrelevant for a stream cipher).
      */
-    if (key) {
-        /* We never encrypt twice with the same key, so no IV is needed (can
-         * be zeros). When EVP_EncryptInit() is called multiple times it clears
-         * its previous resources approprietly, and since we don't want the key
-         * and its keystream to reside in memory at the same time, we have to
-         * EVP_EncryptInit() twice: firstly to set the key and then finally to
-         * overwrite the key (with zeros) after the keystream is produced.
-         * As for EVP_EncryptFinish(), we don't need it either because padding
-         * is disabled (irrelevant for a stream cipher).
-         */
-#if defined(NID_chacha20)
-        /* With CHACHA20, iv=NULL is the same as zeros but it's faster
-         * to (re-)init; use that for efficiency.
-         */
-        EVP_EncryptInit_ex(ctx, NULL, NULL, key, NULL);
-#else
-        /* With AES256-CTR, iv=NULL seems to peek up and random one (for
-         * the initial CTR), while we can live with zeros (fixed CTR);
-         * efficiency still.
-         */
-        EVP_EncryptInit_ex(ctx, NULL, NULL, key, z);
-#endif
-        EVP_CIPHER_CTX_set_padding(ctx, 0);
-
+    cprng_stream_setkey(ctx, key, z);
+    EVP_CIPHER_CTX_set_padding(ctx, 0);
+    if (rekey) {
         memset(key, 0, CPRNG_KEY_SIZE);
         EVP_EncryptUpdate(ctx, key, &len, key, CPRNG_KEY_SIZE);
     }
     if (n) {
         EVP_EncryptUpdate(ctx, to, &len, z, n);
-
-        /* Burn the key in openssl internals */
-#if defined(NID_chacha20)
-        EVP_EncryptInit_ex(ctx, NULL, NULL, z, NULL);
-#else
-        EVP_EncryptInit_ex(ctx, NULL, NULL, z, z);
-#endif
     }
+    cprng_stream_setkey(ctx, z, z);
 
     return APR_SUCCESS;
 }
@@ -484,12 +483,13 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_destroy(apr_crypto_prng_t *cprng)
 }
 
 static apr_status_t cprng_stream_bytes(apr_crypto_prng_t *cprng,
-                                       unsigned char *key, void *to,
-                                       size_t len)
+                                       void *to, size_t len,
+                                       int rekey)
 {
     apr_status_t rv;
 
-    rv = cprng_stream_ctx_bytes(&cprng->ctx, key, to, len, cprng->buf);
+    rv = cprng_stream_ctx_bytes(&cprng->ctx, cprng->key, rekey,
+                                to, len, cprng->buf);
     if (rv != APR_SUCCESS && len) {
         apr_crypto_memzero(to, len);
     }
@@ -538,7 +538,7 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_reseed(apr_crypto_prng_t *cprng,
          * i.e. the next key is always extracted from the stream cipher state
          * and cleared upon use.
          */
-        rv = cprng_stream_bytes(cprng, cprng->key, NULL, 0);
+        rv = cprng_stream_bytes(cprng, NULL, 0, 1);
     }
 
     cprng_unlock(cprng);
@@ -559,7 +559,7 @@ static apr_status_t cprng_bytes(apr_crypto_prng_t *cprng,
             n = cprng->len;
             if (len >= n) {
                 do {
-                    rv = cprng_stream_bytes(cprng, cprng->key, ptr, n);
+                    rv = cprng_stream_bytes(cprng, ptr, n, 1);
                     if (rv != APR_SUCCESS) {
                         return rv;
                     }
@@ -570,7 +570,7 @@ static apr_status_t cprng_bytes(apr_crypto_prng_t *cprng,
                     break;
                 }
             }
-            rv = cprng_stream_bytes(cprng, cprng->key, cprng->buf, n);
+            rv = cprng_stream_bytes(cprng, cprng->buf, n, 1);
             if (rv != APR_SUCCESS) {
                 return rv;
             }
@@ -617,11 +617,11 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_bytes(apr_crypto_prng_t *cprng,
 }
 
 /* Reset the buffer and use the next stream bytes as the new key. */
-static apr_status_t cprng_newkey(apr_crypto_prng_t *cprng)
+static apr_status_t cprng_newkey(apr_crypto_prng_t *cprng, int rekey)
 {
     cprng->pos = cprng->len;
     apr_crypto_memzero(cprng->buf, cprng->len);
-    return cprng_stream_bytes(cprng, NULL, cprng->key, CPRNG_KEY_SIZE);
+    return cprng_stream_bytes(cprng, cprng->key, CPRNG_KEY_SIZE, rekey);
 }
 
 APR_DECLARE(apr_status_t) apr_crypto_prng_rekey(apr_crypto_prng_t *cprng)
@@ -639,10 +639,7 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_rekey(apr_crypto_prng_t *cprng)
     cprng_lock(cprng);
 
     /* Renew and apply the new key. */
-    rv = cprng_newkey(cprng);
-    if (rv == APR_SUCCESS) {
-        rv = cprng_stream_bytes(cprng, cprng->key, NULL, 0);
-    }
+    rv = cprng_newkey(cprng, 1);
 
     cprng_unlock(cprng);
 
@@ -682,20 +679,13 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(apr_crypto_prng_t *cprng,
     /* Make sure the parent and child processes never share the same state, so
      * renew the key first (also clears the buffer) for both parent and child,
      * so that further fork()s (from parent or child) won't use the same state.
+     * For the parent process only, renew a second time to ensure that key
+     * material is different from the child. Finally parent and child keys will
+     * be different and unknown to each other processes.
      */
-    rv = cprng_newkey(cprng);
+    rv = cprng_newkey(cprng, in_child);
     if (rv == APR_SUCCESS && !in_child) {
-        /* For the parent process only, renew a second time to ensure that key
-         * material is different from the child.
-         */
-        rv = cprng_stream_bytes(cprng, NULL, cprng->key, CPRNG_KEY_SIZE);
-    }
-    if (rv == APR_SUCCESS) {
-        /* Finally apply the new key, parent and child ones will now be
-         * different and unknown to each other (including at the stream ctx
-         * level).
-         */
-        rv = cprng_stream_bytes(cprng, cprng->key, NULL, 0);
+        rv = cprng_stream_bytes(cprng, cprng->key, CPRNG_KEY_SIZE, 1);
     }
 
     cprng_unlock(cprng);
