@@ -610,15 +610,6 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_bytes(apr_crypto_prng_t *cprng,
     return rv;
 }
 
-/* Reset the buffer and use the next stream bytes as the new key. */
-static apr_status_t cprng_rekey(apr_crypto_prng_t *cprng,
-                                unsigned char *newkey)
-{
-    cprng->pos = cprng->len;
-    apr_crypto_memzero(cprng->buf, cprng->len);
-    return cprng_stream_bytes(cprng, newkey, newkey ? CPRNG_KEY_SIZE : 0);
-}
-
 APR_DECLARE(apr_status_t) apr_crypto_prng_rekey(apr_crypto_prng_t *cprng)
 {
     apr_status_t rv;
@@ -634,7 +625,9 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_rekey(apr_crypto_prng_t *cprng)
     cprng_lock(cprng);
 
     /* Clear state and renew the key. */
-    rv = cprng_rekey(cprng, NULL);
+    cprng->pos = cprng->len;
+    apr_crypto_memzero(cprng->buf, cprng->len);
+    rv = cprng_stream_bytes(cprng, NULL, 0);
 
     cprng_unlock(cprng);
 
@@ -659,8 +652,8 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_rekey(apr_crypto_prng_t *cprng)
 APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(apr_crypto_prng_t *cprng,
                                                      int flags)
 {
-    apr_status_t rv;
-    int child = flags & APR_CRYPTO_FORK_INCHILD;
+    apr_status_t rv = APR_SUCCESS;
+    int is_child = flags & APR_CRYPTO_FORK_INCHILD;
 
     if (!cprng) {
         /* Fall through with global CPRNG. */
@@ -683,9 +676,13 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(apr_crypto_prng_t *cprng,
      * and never reuse keys we are sure that this key is unique to the parent,
      * and that nothing is left over from the initial state in both processes.
      */
-    rv = cprng_rekey(cprng, child ? NULL : cprng->key);
-    if (rv == APR_SUCCESS && !child) {
-        rv = cprng_rekey(cprng, NULL);
+    cprng->pos = cprng->len;
+    apr_crypto_memzero(cprng->buf, cprng->len);
+    if (!is_child) {
+        rv = cprng_stream_bytes(cprng, cprng->key, CPRNG_KEY_SIZE);
+    }
+    if (rv == APR_SUCCESS) {
+        rv = cprng_stream_bytes(cprng, NULL, 0);
     }
 
     cprng_unlock(cprng);
