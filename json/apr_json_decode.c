@@ -519,18 +519,12 @@ static apr_status_t apr_json_decode_boolean(apr_json_scanner_t * self, int *retv
     if (self->p >= self->e)
         return APR_EOF;
 
-    if (self->e - self->p >= 4 && strncmp("true", self->p, 4) == 0 &&
-        (self->p == self->e ||
-                (!isalnum(((unsigned char *)self->p)[4]) &&
-                        ((unsigned char *)self->p)[4] != '_'))) {
+    if (self->e - self->p >= 4 && strncmp("true", self->p, 4) == 0) {
         self->p += 4;
         *retval = 1;
         return APR_SUCCESS;
     }
-    else if (self->e - self->p >= 5 && strncmp("false", self->p, 5) == 0 &&
-             (self->p == self->e ||
-                     (!isalnum(((unsigned char *)self->p)[5]) &&
-                             ((unsigned char *)self->p)[5] != '_'))) {
+    else if (self->e - self->p >= 5 && strncmp("false", self->p, 5) == 0) {
         self->p += 5;
         *retval = 0;
         return APR_SUCCESS;
@@ -678,10 +672,7 @@ out:
 
 static apr_status_t apr_json_decode_null(apr_json_scanner_t * self)
 {
-    if (self->e - self->p >= 4 && strncmp("null", self->p, 4) == 0 &&
-        (self->p == self->e ||
-                (!isalnum(((unsigned char *)self->p)[4]) &&
-                        ((unsigned char *)self->p)[4] != '_'))) {
+    if (self->e - self->p >= 4 && strncmp("null", self->p, 4) == 0) {
         self->p += 4;
         return APR_SUCCESS;
     }
