@@ -354,17 +354,18 @@ static apr_status_t apr_json_decode_array(apr_json_scanner_t * self,
     json_link_t *head = NULL, *tail = NULL;
     apr_size_t count = 0;
 
-    if ((status = apr_pool_create(&link_pool, self->pool)))
-        return status;
-
     if (self->p >= self->e) {
         status = APR_EOF;
         goto out;
     }
 
-    self->level--;
-    if (self->level < 0) {
+    if (self->level <= 0) {
         return APR_EINVAL;
+    }
+    self->level--;
+
+    if ((status = apr_pool_create(&link_pool, self->pool))) {
+        return status;
     }
 
     self->p++; /* toss of the leading [ */
@@ -441,10 +442,10 @@ static apr_status_t apr_json_decode_object(apr_json_scanner_t * self,
         return APR_EOF;
     }
 
-    self->level--;
-    if (self->level < 0) {
+    if (self->level <= 0) {
         return APR_EINVAL;
     }
+    self->level--;
 
     self->p++; /* toss of the leading { */
 
