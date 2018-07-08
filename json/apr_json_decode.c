@@ -83,6 +83,7 @@ static apr_status_t apr_json_decode_string(apr_json_scanner_t * self, apr_json_s
     const char *p = self->p;
     const char *e;
     char *q;
+    apr_size_t len;
 
     if (self->p >= self->e) {
         status = APR_EOF;
@@ -92,7 +93,7 @@ static apr_status_t apr_json_decode_string(apr_json_scanner_t * self, apr_json_s
     self->p++; /* eat the leading '"' */
 
     /* advance past the \ " */
-    string.len = 0;
+    len = 0;
     for (p = self->p, e = self->e; p < e;) {
         if (*p == '"')
             break;
@@ -108,21 +109,20 @@ static apr_status_t apr_json_decode_string(apr_json_scanner_t * self, apr_json_s
                     goto out;
                 }
                 p += 5;
-                string.len += 4;/* an UTF-8 character spans at most 4 bytes */
-                break;
+                len += 4;/* an UTF-8 character spans at most 4 bytes */
             }
             else {
-                string.len++;
+                len++;
                 p++;
             }
         }
         else {
-            string.len++;
+            len++;
             p++;
         }
     }
 
-    string.p = q = apr_pcalloc(self->pool, string.len + 1);
+    string.p = q = apr_pcalloc(self->pool, len + 1);
     e = p;
 
 #define VALIDATE_UTF8_SUCCEEDING_BYTE(p) \
@@ -139,15 +139,14 @@ static apr_status_t apr_json_decode_string(apr_json_scanner_t * self, apr_json_s
             case 'u':
                 /* THIS IS REQUIRED TO BE A 4 DIGIT HEX NUMBER */
                 {
-                    int cp = 0;
-                    while (p < e) {
-                        int d = hex_to_int(*p);
+                    int i, d, cp = 0;
+                    for (i = 0, p++; i < 4 && p < e; i++, p++) {
+                        d = hex_to_int(*p);
                         if (d < 0) {
                             status = APR_BADCH;
                             goto out;
                         }
                         cp = (cp << 4) | d;
-                        p++;
                     }
                     if (cp >= 0xd800 && cp < 0xdc00) {
                         /* surrogate pair */
@@ -160,14 +159,13 @@ static apr_status_t apr_json_decode_string(apr_json_scanner_t * self, apr_json_s
                             status = APR_BADCH;
                             goto out;
                         }
-                        while (p < e) {
-                            int d = hex_to_int(*p);
+                        for (i = 0, p += 2; i < 4 && p < e; i++, p++) {
+                            d = hex_to_int(*p);
                             if (d < 0) {
                                 status = APR_BADCH;
                                 goto out;
                             }
                             sc = (sc << 4) | d;
-                            p++;
                         }
                         cp = ((cp & 0x3ff) << 10) | (sc & 0x3ff);
                         if ((cp >= 0xd800 && cp < 0xe000) || (cp >= 0x110000)) {
@@ -340,6 +338,8 @@ static apr_status_t apr_json_decode_string(apr_json_scanner_t * self, apr_json_s
     }
 #undef VALIDATE_UTF8_SUCCEEDING_BYTE
     p++; /* eat the trailing '"' */
+    *q = 0;
+    string.len = q - string.p;
     *retval = string;
 out:
     self->p = p;
