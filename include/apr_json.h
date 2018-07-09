@@ -153,12 +153,12 @@ typedef struct apr_json_kv_t {
  *
  * Use apr_json_object_create() to allocate.
  */
-typedef struct apr_json_object_t {
+struct apr_json_object_t {
     /** The key value pairs in the object are in this list */
     APR_RING_HEAD(apr_json_object_list_t, apr_json_kv_t) list;
     /** JSON object */
     apr_hash_t *hash;
-} apr_json_object_t;
+};
 
 /**
  * Allocate and return a apr_json_value_t structure.
