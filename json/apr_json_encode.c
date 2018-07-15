@@ -73,7 +73,9 @@ static apr_status_t apr_json_encode_string(apr_json_serializer_t * self,
         return status;
     }
 
-    for (p = chunk = string->p, e = string->p + string->len; p < e; p++) {
+    for (p = chunk = string->p, e = string->p
+            + (APR_JSON_VALUE_STRING == string->len ?
+                    strlen(string->p) : string->len); p < e; p++) {
         switch (*p) {
         case '\n':
             status = apr_json_brigade_write(self, chunk, p - chunk, "\\n");

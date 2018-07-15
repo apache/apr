@@ -83,7 +83,7 @@ static apr_status_t apr_json_decode_string(apr_json_scanner_t * self, apr_json_s
     const char *p = self->p;
     const char *e;
     char *q;
-    apr_size_t len;
+    apr_ssize_t len;
 
     if (self->p >= self->e) {
         status = APR_EOF;
@@ -432,11 +432,16 @@ out:
 }
 
 static apr_status_t apr_json_decode_object(apr_json_scanner_t * self,
-        apr_json_object_t ** retval)
+        apr_json_value_t *json, apr_json_object_t ** retval)
 {
     apr_status_t status = APR_SUCCESS;
 
-    apr_json_object_t *object = apr_json_object_create(self->pool);
+	apr_json_object_t *object = apr_pcalloc(self->pool,
+			sizeof(apr_json_object_t));
+    APR_RING_INIT(&object->list, apr_json_kv_t, link);
+    object->hash = apr_hash_make(self->pool);
+
+    *retval = object;
 
     if (self->p >= self->e) {
         return APR_EOF;
@@ -491,7 +496,7 @@ static apr_status_t apr_json_decode_object(apr_json_scanner_t * self,
         if ((status = apr_json_decode_value(self, &value)))
             goto out;
 
-        apr_json_object_set(object, key, value, self->pool);
+        apr_json_object_set(json, key, value, self->pool);
 
         if (self->p == self->e) {
             status = APR_EOF;
@@ -509,7 +514,6 @@ static apr_status_t apr_json_decode_object(apr_json_scanner_t * self,
 
     self->level++;
 
-    *retval = object;
 out:
     return status;
 }
@@ -733,7 +737,7 @@ static apr_status_t apr_json_decode_value(apr_json_scanner_t * self, apr_json_va
             break;
         case '{':
             value.type = APR_JSON_OBJECT;
-            status = apr_json_decode_object(self, &value.value.object);
+            status = apr_json_decode_object(self, &value, &value.value.object);
             break;
         case 'n':
             value.type = APR_JSON_NULL;
