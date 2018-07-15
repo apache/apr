@@ -30,42 +30,133 @@ apr_json_value_t *apr_json_value_create(apr_pool_t *pool)
     return apr_pcalloc(pool, sizeof(apr_json_value_t));
 }
 
-apr_json_object_t *apr_json_object_create(apr_pool_t *pool)
+apr_json_value_t *apr_json_object_create(apr_pool_t *pool)
 {
-    apr_json_object_t *object = apr_pcalloc(pool,
-            sizeof(apr_json_object_t));
+	apr_json_object_t *object;
+
+	apr_json_value_t *json = apr_json_value_create(pool);
+
+	json->type = APR_JSON_OBJECT;
+	json->value.object = object = apr_pcalloc(pool, sizeof(apr_json_object_t));
     APR_RING_INIT(&object->list, apr_json_kv_t, link);
     object->hash = apr_hash_make(pool);
 
-    return object;
+    return json;
 }
 
-void apr_json_object_set(apr_json_object_t *object, apr_json_value_t *key,
+apr_json_value_t *apr_json_string_create(apr_pool_t *pool, const char *val,
+		apr_ssize_t len) {
+	apr_json_value_t *json = apr_json_value_create(pool);
+
+	if (json) {
+		if (val) {
+			json->type = APR_JSON_STRING;
+			json->value.string.p = val;
+			json->value.string.len = len;
+		} else {
+			json->type = APR_JSON_NULL;
+		}
+	}
+
+	return json;
+}
+
+apr_json_value_t *apr_json_array_create(apr_pool_t *pool, int nelts)
+{
+	apr_json_value_t *json = apr_json_value_create(pool);
+
+	if (json) {
+		json->type = APR_JSON_ARRAY;
+		json->value.array = apr_array_make(pool, nelts,
+				sizeof(apr_json_value_t *));
+	}
+
+	return json;
+}
+
+apr_json_value_t *apr_json_long_create(apr_pool_t *pool, apr_int64_t lnumber)
+{
+	apr_json_value_t *json = apr_json_value_create(pool);
+
+	if (json) {
+		json->type = APR_JSON_LONG;
+		json->value.lnumber = lnumber;
+	}
+
+	return json;
+}
+
+apr_json_value_t *apr_json_double_create(apr_pool_t *pool, double dnumber)
+{
+	apr_json_value_t *json = apr_json_value_create(pool);
+
+	if (json) {
+		json->type = APR_JSON_DOUBLE;
+		json->value.lnumber = dnumber;
+	}
+
+	return json;
+}
+
+apr_json_value_t *apr_json_boolean_create(apr_pool_t *pool, int boolean)
+{
+	apr_json_value_t *json = apr_json_value_create(pool);
+
+	if (json) {
+		json->type = APR_JSON_BOOLEAN;
+		json->value.boolean = boolean;
+	}
+
+	return json;
+}
+
+apr_json_value_t *apr_json_null_create(apr_pool_t *pool)
+{
+	apr_json_value_t *json = apr_json_value_create(pool);
+
+	if (json) {
+		json->type = APR_JSON_NULL;
+	}
+
+	return json;
+}
+
+apr_status_t apr_json_object_set(apr_json_value_t *object, apr_json_value_t *key,
         apr_json_value_t *val, apr_pool_t *pool)
 {
     apr_json_kv_t *kv;
+    apr_hash_t *hash;
 
-    kv = apr_hash_get(object->hash, key->value.string.p, key->value.string.len);
+	if (object->type != APR_JSON_OBJECT || !key
+			|| key->type != APR_JSON_STRING) {
+		return APR_EINVAL;
+	}
+
+	hash = object->value.object->hash;
+
+    kv = apr_hash_get(hash, key->value.string.p, key->value.string.len);
 
     if (!val) {
         if (kv) {
-            apr_hash_set(object->hash, key->value.string.p, key->value.string.len,
+            apr_hash_set(hash, key->value.string.p, key->value.string.len,
                     NULL);
             APR_RING_REMOVE((kv), link);
         }
-        return;
+        return APR_SUCCESS;
     }
 
     if (!kv) {
         kv = apr_palloc(pool, sizeof(apr_json_kv_t));
         APR_RING_ELEM_INIT(kv, link);
-        APR_JSON_OBJECT_INSERT_TAIL(object, kv);
-        apr_hash_set(object->hash, key->value.string.p, key->value.string.len,
+        APR_JSON_OBJECT_INSERT_TAIL(object->value.object, kv);
+        apr_hash_set(hash, key->value.string.p, key->value.string.len,
                 kv);
     }
 
     kv->k = key;
     kv->v = val;
+
+    return APR_SUCCESS;
 }
 
 apr_json_kv_t *apr_json_object_get(apr_json_object_t *object, const char *key)

@@ -101,8 +101,8 @@ typedef enum apr_json_type_e {
 typedef struct apr_json_string_t {
     /** pointer to the string */
     const char *p;
-    /** string length */
-    apr_size_t len;
+    /** string length, or APR_JSON_VALUE_STRING to compute length automatically */
+    apr_ssize_t len;
 } apr_json_string_t;
 
 /**
@@ -170,29 +170,98 @@ APR_DECLARE(apr_json_value_t *) apr_json_value_create(apr_pool_t *pool)
         __attribute__((nonnull(1)));
 
 /**
- * Allocate and return a apr_json_object_t structure.
+ * Allocate and return a JSON string with the given value.
  *
  * @param pool The pool to allocate from.
- * @return The apr_json_object_t structure.
+ * @param val The UTF-8 encoded string value.
+ * @param len The length of the string, or APR_JSON_VALUE_STRING.
+ * @return The apr_json_value_t structure.
  */
-APR_DECLARE(apr_json_object_t *) apr_json_object_create(apr_pool_t *pool)
+APR_DECLARE(apr_json_value_t *)
+		apr_json_string_create(apr_pool_t *pool, const char *val,
+				apr_ssize_t len) __attribute__((nonnull(1)));
+
+/**
+ * Allocate and return a JSON array.
+ *
+ * @param pool The pool to allocate from.
+ * @param nelts the number of elements in the initial array
+ * @return The apr_json_value_t structure.
+ */
+APR_DECLARE(apr_json_value_t *)
+		apr_json_array_create(apr_pool_t *pool, int nelts)
+		__attribute__((nonnull(1)));
+
+/**
+ * Allocate and return a JSON object.
+ *
+ * @param pool The pool to allocate from.
+ * @return The apr_json_value_t structure.
+ */
+APR_DECLARE(apr_json_value_t *) apr_json_object_create(apr_pool_t *pool)
         __attribute__((nonnull(1)));
+
+/**
+ * Allocate and return a JSON long.
+ *
+ * @param pool The pool to allocate from.
+ * @param lnumber The long value.
+ * @return The apr_json_value_t structure.
+ */
+APR_DECLARE(apr_json_value_t *)
+		apr_json_long_create(apr_pool_t *pool, apr_int64_t lnumber)
+		__attribute__((nonnull(1)));
+
+/**
+ * Allocate and return a JSON double.
+ *
+ * @param pool The pool to allocate from.
+ * @param dnumber The double value.
+ * @return The apr_json_value_t structure.
+ */
+APR_DECLARE(apr_json_value_t *)
+		apr_json_double_create(apr_pool_t *pool, double dnumber)
+		__attribute__((nonnull(1)));
+
+/**
+ * Allocate and return a JSON boolean.
+ *
+ * @param pool The pool to allocate from.
+ * @param boolean The boolean value.
+ * @return The apr_json_value_t structure.
+ */
+APR_DECLARE(apr_json_value_t *)
+		apr_json_boolean_create(apr_pool_t *pool, int boolean)
+		__attribute__((nonnull(1)));
+
+/**
+ * Allocate and return a JSON null.
+ *
+ * @param pool The pool to allocate from.
+ * @return The apr_json_value_t structure.
+ */
+APR_DECLARE(apr_json_value_t *)
+		apr_json_null_create(apr_pool_t *pool)
+		__attribute__((nonnull(1)));
 
 /**
  * Associate a value with a key in a JSON object.
  * @param obj The JSON object.
- * @param key Pointer to the key.
+ * @param key Pointer to the key string.
  * @param val Value to associate with the key.
+ * @param pool Pool to use.
+ * @return APR_SUCCESS on success, APR_EINVAL if the key is
+ *   NULL or not a string, or the object is not an APR_JSON_OBJECT.
  * @remark If the value is NULL the key value pair is deleted.
  */
-APR_DECLARE(void) apr_json_object_set(apr_json_object_t *obj,
+APR_DECLARE(apr_status_t) apr_json_object_set(apr_json_value_t *obj,
         apr_json_value_t *key, apr_json_value_t *val,
-        apr_pool_t *pool) __attribute__((nonnull(1, 2, 4)));
+        apr_pool_t *pool) __attribute__((nonnull(1, 4)));
 
 /**
  * Look up the value associated with a key in a JSON object.
- * @param ht The hash table
- * @param key Pointer to the key
+ * @param obj The JSON object.
+ * @param key Pointer to the key.
  * @return Returns NULL if the key is not present.
  */
 APR_DECLARE(apr_json_kv_t *)
