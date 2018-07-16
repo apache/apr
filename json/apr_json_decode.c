@@ -439,8 +439,8 @@ static apr_status_t apr_json_decode_object(apr_json_scanner_t * self,
 {
     apr_status_t status = APR_SUCCESS;
 
-	apr_json_object_t *object = apr_pcalloc(self->pool,
-			sizeof(apr_json_object_t));
+    apr_json_object_t *object = apr_pcalloc(self->pool,
+            sizeof(apr_json_object_t));
     APR_RING_INIT(&object->list, apr_json_kv_t, link);
     object->hash = apr_hash_make(self->pool);
 

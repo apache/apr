@@ -178,8 +178,8 @@ APR_DECLARE(apr_json_value_t *) apr_json_value_create(apr_pool_t *pool)
  * @return The apr_json_value_t structure.
  */
 APR_DECLARE(apr_json_value_t *)
-		apr_json_string_create(apr_pool_t *pool, const char *val,
-				apr_ssize_t len) __attribute__((nonnull(1)));
+        apr_json_string_create(apr_pool_t *pool, const char *val,
+                apr_ssize_t len) __attribute__((nonnull(1)));
 
 /**
  * Allocate and return a JSON array.
@@ -189,8 +189,8 @@ APR_DECLARE(apr_json_value_t *)
  * @return The apr_json_value_t structure.
  */
 APR_DECLARE(apr_json_value_t *)
-		apr_json_array_create(apr_pool_t *pool, int nelts)
-		__attribute__((nonnull(1)));
+        apr_json_array_create(apr_pool_t *pool, int nelts)
+        __attribute__((nonnull(1)));
 
 /**
  * Allocate and return a JSON object.
@@ -209,8 +209,8 @@ APR_DECLARE(apr_json_value_t *) apr_json_object_create(apr_pool_t *pool)
  * @return The apr_json_value_t structure.
  */
 APR_DECLARE(apr_json_value_t *)
-		apr_json_long_create(apr_pool_t *pool, apr_int64_t lnumber)
-		__attribute__((nonnull(1)));
+        apr_json_long_create(apr_pool_t *pool, apr_int64_t lnumber)
+        __attribute__((nonnull(1)));
 
 /**
  * Allocate and return a JSON double.
@@ -220,8 +220,8 @@ APR_DECLARE(apr_json_value_t *)
  * @return The apr_json_value_t structure.
  */
 APR_DECLARE(apr_json_value_t *)
-		apr_json_double_create(apr_pool_t *pool, double dnumber)
-		__attribute__((nonnull(1)));
+        apr_json_double_create(apr_pool_t *pool, double dnumber)
+        __attribute__((nonnull(1)));
 
 /**
  * Allocate and return a JSON boolean.
@@ -231,8 +231,8 @@ APR_DECLARE(apr_json_value_t *)
  * @return The apr_json_value_t structure.
  */
 APR_DECLARE(apr_json_value_t *)
-		apr_json_boolean_create(apr_pool_t *pool, int boolean)
-		__attribute__((nonnull(1)));
+        apr_json_boolean_create(apr_pool_t *pool, int boolean)
+        __attribute__((nonnull(1)));
 
 /**
  * Allocate and return a JSON null.
@@ -241,8 +241,8 @@ APR_DECLARE(apr_json_value_t *)
  * @return The apr_json_value_t structure.
  */
 APR_DECLARE(apr_json_value_t *)
-		apr_json_null_create(apr_pool_t *pool)
-		__attribute__((nonnull(1)));
+        apr_json_null_create(apr_pool_t *pool)
+        __attribute__((nonnull(1)));
 
 /**
  * Associate a value with a key in a JSON object.
