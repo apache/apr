@@ -135,7 +135,7 @@ static void test_json_string(abts_case * tc, void *data)
     apr_off_t offset = 0;
 
     /* "턞\"\t/\b\f\n\r\t"; */
-	const unsigned char expected[] = {237, 132, 158, 34, 9, 47, 8, 12, 10, 13, 9, 0};
+    const unsigned char expected[] = {237, 132, 158, 34, 9, 47, 8, 12, 10, 13, 9, 0};
 
     src = "\"\\uD834\\uDD1E\\\"\\t\\/\\b\\f\\n\\r\\t\"";
 
@@ -145,8 +145,8 @@ static void test_json_string(abts_case * tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, status);
     ABTS_INT_EQUAL(tc, APR_JSON_STRING, json->type);
 
-	ABTS_ASSERT(tc, "check for string unescape match",
-			(memcmp(expected, json->value.string.p, json->value.string.len) == 0));
+    ABTS_ASSERT(tc, "check for string unescape match",
+            (memcmp(expected, json->value.string.p, json->value.string.len) == 0));
 }
 
 abts_suite *testjson(abts_suite * suite)
