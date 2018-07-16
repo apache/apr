@@ -34,7 +34,10 @@ typedef struct apr_json_scanner_t {
     int level;
 } apr_json_scanner_t;
 
-static apr_status_t apr_json_decode_value(apr_json_scanner_t * self, apr_json_value_t ** retval);
+static apr_status_t apr_json_decode_space(apr_json_scanner_t * self,
+                                          const char **space);
+static apr_status_t apr_json_decode_value(apr_json_scanner_t * self,
+                                          apr_json_value_t ** retval);
 
 /* stolen from mod_mime_magic.c :) */
 /* Single hex char to int; -1 if not a hex char. */
@@ -468,19 +471,30 @@ static apr_status_t apr_json_decode_object(apr_json_scanner_t * self,
             break;
         }
 
-        if ((status = apr_json_decode_value(self, &key)))
+        key = apr_json_value_create(self->pool);
+        if ((status = apr_json_decode_space(self, &key->pre)))
             goto out;
-
-        if (key->type != APR_JSON_STRING) {
-            status = APR_BADCH;
-            goto out;
-        }
 
         if (self->p == self->e) {
             status = APR_EOF;
             goto out;
         }
+        if (*self->p != '"') {
+            status = APR_BADCH;
+            goto out;
+        }
 
+        key->type = APR_JSON_STRING;
+        if ((status = apr_json_decode_string(self, &key->value.string)))
+            goto out;
+
+        if ((status = apr_json_decode_space(self, &key->post)))
+            goto out;
+
+        if (self->p == self->e) {
+            status = APR_EOF;
+            goto out;
+        }
         if (*self->p != ':') {
             status = APR_BADCH;
             goto out;
@@ -552,13 +566,6 @@ static apr_status_t apr_json_decode_number(apr_json_scanner_t * self, apr_json_v
             if (p >= e)
                 return APR_EOF;
             c = *(unsigned char *)p;
-        }
-        if (c == '.') {
-            p++;
-            if (p >= e)
-                return APR_EOF;
-            c = *(unsigned char *)p;
-            treat_as_float = 1;
         }
         if (!isdigit(c)) {
             status = APR_BADCH;
@@ -771,8 +778,10 @@ static apr_status_t apr_json_decode_value(apr_json_scanner_t * self, apr_json_va
     }
 
     if (status == APR_SUCCESS) {
-        *retval = apr_json_value_create(self->pool);
-        **retval = value;
+        *retval = apr_pmemdup(self->pool, &value, sizeof(value));
+    }
+    else {
+        *retval = NULL;
     }
     return status;
 }
