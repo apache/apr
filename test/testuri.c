@@ -284,7 +284,7 @@ static void test_aup(abts_case *tc, void *data)
             ABTS_STR_EQUAL(tc, t->uri, s);
 
             s = apr_uri_unparse(p, &info, APR_URI_UNP_OMITSITEPART);
-            rv = apr_uri_parse(p, s, &info);
+            apr_uri_parse(p, s, &info);
             ABTS_STR_EQUAL(tc, info.scheme, NULL);
             ABTS_STR_EQUAL(tc, info.hostinfo, NULL);
             ABTS_STR_EQUAL(tc, info.user, NULL);
