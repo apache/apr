@@ -259,10 +259,10 @@ static void test_redis_meta(abts_case * tc, void *data)
     rv = apr_redis_add_server(redis, server);
     ABTS_ASSERT(tc, "server add failed", rv == APR_SUCCESS);
 
-    rv = apr_redis_version(server, pool, &result);
+    apr_redis_version(server, pool, &result);
     ABTS_PTR_NOTNULL(tc, result);
 
-    rv = apr_redis_stats(server, p, &stats);
+    apr_redis_stats(server, p, &stats);
     ABTS_PTR_NOTNULL(tc, stats);
 
     /* 

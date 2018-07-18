@@ -154,7 +154,7 @@ static void test_dbd_generic(abts_case *tc, apr_dbd_t* handle,
     native = apr_dbd_native_handle(driver, handle);
     ABTS_PTR_NOTNULL(tc, native);
 
-    rv = apr_dbd_check_conn(driver, pool, handle);
+    apr_dbd_check_conn(driver, pool, handle);
 
     create_table(tc, handle, driver);
     select_rows(tc, handle, driver, 0);

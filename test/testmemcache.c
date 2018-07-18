@@ -259,10 +259,10 @@ static void test_memcache_meta(abts_case * tc, void *data)
     rv = apr_memcache_add_server(memcache, server);
     ABTS_ASSERT(tc, "server add failed", rv == APR_SUCCESS);
 
-    rv = apr_memcache_version(server, pool, &result);
+    apr_memcache_version(server, pool, &result);
     ABTS_PTR_NOTNULL(tc, result);
 
-    rv = apr_memcache_stats(server, p, &stats);
+    apr_memcache_stats(server, p, &stats);
     ABTS_PTR_NOTNULL(tc, stats);
 
     ABTS_STR_NEQUAL(tc, stats->version, result, 5);
@@ -451,7 +451,7 @@ static void test_memcache_multiget(abts_case * tc, void *data)
     ABTS_ASSERT(tc, "set failed", rv == APR_SUCCESS);
   }
 
-  rv = apr_pool_create(&tmppool, pool);
+  apr_pool_create(&tmppool, pool);
   for (i = 0; i < TDATA_SET; i++)
     apr_memcache_add_multget_key(pool,
                                  apr_pstrcat(pool, prefix,
