@@ -183,7 +183,7 @@ static apr_status_t runTest(struct testSet *ts, struct testResult *res,
                             apr_pool_t *pool)
 {
     char *buffer;
-    apr_status_t rv;
+    apr_status_t rv = APR_SUCCESS;
     int i;
     apr_size_t sz = ts->size * TEST_SIZE;
     
