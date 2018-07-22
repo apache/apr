@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_crypto: Add support for digest functions, with hashing, signing
+     and verifying. [Graham Leggett]
+
   *) apr_json: Add support for encoding and decoding RFC8259 JSON.
      [Moriyoshi Koizumi <mozo mozo jp>]
 

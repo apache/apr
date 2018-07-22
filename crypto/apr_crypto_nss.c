@@ -51,6 +51,7 @@ struct apr_crypto_t {
     const apr_crypto_driver_t *provider;
     apu_err_t *result;
     apr_crypto_config_t *config;
+    apr_hash_t *digests;
     apr_hash_t *types;
     apr_hash_t *modes;
 };
@@ -63,8 +64,11 @@ struct apr_crypto_key_t {
     apr_pool_t *pool;
     const apr_crypto_driver_t *provider;
     const apr_crypto_t *f;
+    const apr_crypto_key_rec_t *rec;
     CK_MECHANISM_TYPE cipherMech;
+    CK_MECHANISM_TYPE hashMech;
     SECOidTag cipherOid;
+    SECOidTag hashAlg;
     PK11SymKey *symKey;
     int ivSize;
     int keyLength;
@@ -75,10 +79,29 @@ struct apr_crypto_block_t {
     const apr_crypto_driver_t *provider;
     const apr_crypto_t *f;
     PK11Context *ctx;
-    apr_crypto_key_t *key;
+    const apr_crypto_key_t *key;
     SECItem *secParam;
     int blockSize;
 };
+
+struct apr_crypto_digest_t {
+    apr_pool_t *pool;
+    const apr_crypto_driver_t *provider;
+    const apr_crypto_t *f;
+    apr_crypto_digest_rec_t *rec;
+    PK11Context *ctx;
+    const apr_crypto_key_t *key;
+    SECItem *secParam;
+};
+
+static struct apr_crypto_block_key_digest_t key_digests[] =
+{
+{ APR_CRYPTO_DIGEST_MD5, 16, 64 },
+{ APR_CRYPTO_DIGEST_SHA1, 20, 64 },
+{ APR_CRYPTO_DIGEST_SHA224, 28, 64 },
+{ APR_CRYPTO_DIGEST_SHA256, 32, 64 },
+{ APR_CRYPTO_DIGEST_SHA384, 48, 128 },
+{ APR_CRYPTO_DIGEST_SHA512, 64, 128 } };
 
 static struct apr_crypto_block_key_type_t key_types[] =
 {
@@ -112,16 +135,128 @@ static apr_status_t crypto_error(const apu_err_t **result,
  */
 static apr_status_t crypto_shutdown(void)
 {
-    return apr_crypto_lib_term("nss");
+    if (NSS_IsInitialized()) {
+        SECStatus s = NSS_Shutdown();
+        if (s != SECSuccess) {
+            fprintf(stderr, "NSS failed to shutdown, possible leak: %d: %s",
+                PR_GetError(), PR_ErrorToName(s));
+            return APR_EINIT;
+        }
+    }
+    return APR_SUCCESS;
+}
+
+static apr_status_t crypto_shutdown_helper(void *data)
+{
+    return crypto_shutdown();
 }
 
 /**
  * Initialise the crypto library and perform one time initialisation.
  */
 static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
-                                const apu_err_t **result)
+        const apu_err_t **result)
 {
-    return apr_crypto_lib_init("nss", params, result, pool);
+    SECStatus s;
+    const char *dir = NULL;
+    const char *keyPrefix = NULL;
+    const char *certPrefix = NULL;
+    const char *secmod = NULL;
+    int noinit = 0;
+    PRUint32 flags = 0;
+
+    struct {
+        const char *field;
+        const char *value;
+        int set;
+    } fields[] = {
+        { "dir", NULL, 0 },
+        { "key3", NULL, 0 },
+        { "cert7", NULL, 0 },
+        { "secmod", NULL, 0 },
+        { "noinit", NULL, 0 },
+        { NULL, NULL, 0 }
+    };
+    const char *ptr;
+    size_t klen;
+    char **elts = NULL;
+    char *elt;
+    int i = 0, j;
+    apr_status_t status;
+
+    if (params) {
+        if (APR_SUCCESS != (status = apr_tokenize_to_argv(params, &elts, pool))) {
+            return status;
+        }
+        while ((elt = elts[i])) {
+            ptr = strchr(elt, '=');
+            if (ptr) {
+                for (klen = ptr - elt; klen && apr_isspace(elt[klen - 1]); --klen)
+                    ;
+                ptr++;
+            }
+            else {
+                for (klen = strlen(elt); klen && apr_isspace(elt[klen - 1]); --klen)
+                    ;
+            }
+            elt[klen] = 0;
+
+            for (j = 0; fields[j].field != NULL; ++j) {
+                if (klen && !strcasecmp(fields[j].field, elt)) {
+                    fields[j].set = 1;
+                    if (ptr) {
+                        fields[j].value = ptr;
+                    }
+                    break;
+                }
+            }
+
+            i++;
+        }
+        dir = fields[0].value;
+        keyPrefix = fields[1].value;
+        certPrefix = fields[2].value;
+        secmod = fields[3].value;
+        noinit = fields[4].set;
+    }
+
+    /* if we've been asked to bypass, do so here */
+    if (noinit) {
+        return APR_SUCCESS;
+    }
+
+    /* sanity check - we can only initialise NSS once */
+    if (NSS_IsInitialized()) {
+        return APR_EREINIT;
+    }
+
+    if (keyPrefix || certPrefix || secmod) {
+        s = NSS_Initialize(dir, certPrefix, keyPrefix, secmod, flags);
+    }
+    else if (dir) {
+        s = NSS_InitReadWrite(dir);
+    }
+    else {
+        s = NSS_NoDB_Init(NULL);
+    }
+    if (s != SECSuccess) {
+        if (result) {
+            /* Note: all memory must be owned by the caller, in case we're unloaded */
+            apu_err_t *err = apr_pcalloc(pool, sizeof(apu_err_t));
+            err->rc = PR_GetError();
+            err->msg = apr_pstrdup(pool, PR_ErrorToName(s));
+            err->reason = apr_pstrdup(pool, "Error during 'nss' initialisation");
+            *result = err;
+        }
+
+        return APR_ECRYPT;
+    }
+
+    apr_pool_cleanup_register(pool, pool, crypto_shutdown_helper,
+            apr_pool_cleanup_null);
+
+    return APR_SUCCESS;
+
 }
 
 /**
@@ -147,10 +282,39 @@ static apr_status_t crypto_block_cleanup(apr_crypto_block_t *block)
 
 }
 
+/**
+ * @brief Clean sign / verify context.
+ * @note After cleanup, a context is free to be reused if necessary.
+ * @param f The context to use.
+ * @return Returns APR_ENOTIMPL if not supported.
+ */
+static apr_status_t crypto_digest_cleanup(apr_crypto_digest_t *digest)
+{
+
+    if (digest->secParam) {
+        SECITEM_FreeItem(digest->secParam, PR_TRUE);
+        digest->secParam = NULL;
+    }
+
+    if (digest->ctx) {
+        PK11_DestroyContext(digest->ctx, PR_TRUE);
+        digest->ctx = NULL;
+    }
+
+    return APR_SUCCESS;
+
+}
+
 static apr_status_t crypto_block_cleanup_helper(void *data)
 {
     apr_crypto_block_t *block = (apr_crypto_block_t *) data;
     return crypto_block_cleanup(block);
+}
+
+static apr_status_t crypto_digest_cleanup_helper(void *data)
+{
+    apr_crypto_digest_t *digest = (apr_crypto_digest_t *) data;
+    return crypto_digest_cleanup(digest);
 }
 
 static apr_status_t crypto_key_cleanup(void *data)
@@ -197,6 +361,7 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
 {
     apr_crypto_config_t *config = NULL;
     apr_crypto_t *f;
+    int i;
 
     f = apr_pcalloc(pool, sizeof(apr_crypto_t));
     if (!f) {
@@ -214,27 +379,55 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
         return APR_ENOMEM;
     }
 
+    f->digests = apr_hash_make(pool);
+    if (!f->digests) {
+        return APR_ENOMEM;
+    }
+    apr_hash_set(f->digests, "md2", APR_HASH_KEY_STRING, &(key_digests[i = 0]));
+    apr_hash_set(f->digests, "md4", APR_HASH_KEY_STRING, &(key_digests[++i]));
+    apr_hash_set(f->digests, "md5", APR_HASH_KEY_STRING, &(key_digests[++i]));
+    apr_hash_set(f->digests, "sha1", APR_HASH_KEY_STRING, &(key_digests[++i]));
+    apr_hash_set(f->digests, "sha224", APR_HASH_KEY_STRING, &(key_digests[++i]));
+    apr_hash_set(f->digests, "sha256", APR_HASH_KEY_STRING, &(key_digests[++i]));
+    apr_hash_set(f->digests, "sha384", APR_HASH_KEY_STRING, &(key_digests[++i]));
+    apr_hash_set(f->digests, "sha512", APR_HASH_KEY_STRING, &(key_digests[++i]));
+
     f->types = apr_hash_make(pool);
     if (!f->types) {
         return APR_ENOMEM;
     }
-    apr_hash_set(f->types, "3des192", APR_HASH_KEY_STRING, &(key_types[0]));
-    apr_hash_set(f->types, "aes128", APR_HASH_KEY_STRING, &(key_types[1]));
-    apr_hash_set(f->types, "aes192", APR_HASH_KEY_STRING, &(key_types[2]));
-    apr_hash_set(f->types, "aes256", APR_HASH_KEY_STRING, &(key_types[3]));
+    apr_hash_set(f->types, "3des192", APR_HASH_KEY_STRING, &(key_types[i = 0]));
+    apr_hash_set(f->types, "aes128", APR_HASH_KEY_STRING, &(key_types[++i]));
+    apr_hash_set(f->types, "aes192", APR_HASH_KEY_STRING, &(key_types[++i]));
+    apr_hash_set(f->types, "aes256", APR_HASH_KEY_STRING, &(key_types[++i]));
 
     f->modes = apr_hash_make(pool);
     if (!f->modes) {
         return APR_ENOMEM;
     }
-    apr_hash_set(f->modes, "ecb", APR_HASH_KEY_STRING, &(key_modes[0]));
-    apr_hash_set(f->modes, "cbc", APR_HASH_KEY_STRING, &(key_modes[1]));
+    apr_hash_set(f->modes, "ecb", APR_HASH_KEY_STRING, &(key_modes[i = 0]));
+    apr_hash_set(f->modes, "cbc", APR_HASH_KEY_STRING, &(key_modes[++i]));
 
     apr_pool_cleanup_register(pool, f, crypto_cleanup_helper,
             apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 
+}
+
+/**
+ * @brief Get a hash table of key digests, keyed by the name of the digest against
+ * a pointer to apr_crypto_block_key_digest_t.
+ *
+ * @param digests - hashtable of key digests keyed to constants.
+ * @param f - encryption context
+ * @return APR_SUCCESS for success
+ */
+static apr_status_t crypto_get_block_key_digests(apr_hash_t **digests,
+        const apr_crypto_t *f)
+{
+    *digests = f->digests;
+    return APR_SUCCESS;
 }
 
 /**
@@ -385,18 +578,20 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
                                   apr_pool_cleanup_null);
     }
 
+    key->pool = p;
     key->f = f;
     key->provider = f->provider;
-
-    /* decide on what cipher mechanism we will be using */
-    rv = crypto_cipher_mechanism(key, rec->type, rec->mode, rec->pad);
-    if (APR_SUCCESS != rv) {
-        return rv;
-    }
+    key->rec = rec;
 
     switch (rec->ktype) {
 
     case APR_CRYPTO_KTYPE_PASSPHRASE: {
+
+        /* decide on what cipher mechanism we will be using */
+        rv = crypto_cipher_mechanism(key, rec->type, rec->mode, rec->pad);
+        if (APR_SUCCESS != rv) {
+            return rv;
+        }
 
         /* Turn the raw passphrase and salt into SECItems */
         passItem.data = (unsigned char*) rec->k.passphrase.pass;
@@ -419,10 +614,26 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
             SECOID_DestroyAlgorithmID(algid, PR_TRUE);
         }
 
+        /* sanity check? */
+        if (!key->symKey) {
+            PRErrorCode perr = PORT_GetError();
+            if (perr) {
+                f->result->rc = perr;
+                f->result->msg = PR_ErrorToName(perr);
+                rv = APR_ENOKEY;
+            }
+        }
+
         break;
     }
 
     case APR_CRYPTO_KTYPE_SECRET: {
+
+        /* decide on what cipher mechanism we will be using */
+        rv = crypto_cipher_mechanism(key, rec->type, rec->mode, rec->pad);
+        if (APR_SUCCESS != rv) {
+            return rv;
+        }
 
         /*
          * NSS is by default in FIPS mode, which disallows the use of unencrypted
@@ -505,7 +716,108 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
             PK11_FreeSlot(slot);
         }
 
+        /* sanity check? */
+        if (!key->symKey) {
+            PRErrorCode perr = PORT_GetError();
+            if (perr) {
+                f->result->rc = perr;
+                f->result->msg = PR_ErrorToName(perr);
+                rv = APR_ENOKEY;
+            }
+        }
+
         break;
+    }
+
+    case APR_CRYPTO_KTYPE_HASH: {
+
+        switch (rec->k.hash.digest) {
+        case APR_CRYPTO_DIGEST_MD5:
+            key->hashAlg = SEC_OID_MD5;
+            break;
+        case APR_CRYPTO_DIGEST_SHA1:
+            key->hashAlg = SEC_OID_SHA1;
+            break;
+        case APR_CRYPTO_DIGEST_SHA224:
+            key->hashAlg = SEC_OID_SHA224;
+            break;
+        case APR_CRYPTO_DIGEST_SHA256:
+            key->hashAlg = SEC_OID_SHA256;
+            break;
+        case APR_CRYPTO_DIGEST_SHA384:
+            key->hashAlg = SEC_OID_SHA384;
+            break;
+        case APR_CRYPTO_DIGEST_SHA512:
+            key->hashAlg = SEC_OID_SHA512;
+            break;
+        default:
+            return APR_ENODIGEST;
+        }
+
+        break;
+    }
+    case APR_CRYPTO_KTYPE_HMAC: {
+
+        /* decide on what cipher mechanism we will be using */
+        rv = crypto_cipher_mechanism(key, rec->type, rec->mode, rec->pad);
+        if (APR_SUCCESS != rv) {
+            return rv;
+        }
+
+        switch (rec->k.hmac.digest) {
+        case APR_CRYPTO_DIGEST_MD5:
+            key->hashMech = CKM_MD5_HMAC;
+            break;
+        case APR_CRYPTO_DIGEST_SHA1:
+            key->hashMech = CKM_SHA_1_HMAC;
+            break;
+        case APR_CRYPTO_DIGEST_SHA224:
+            key->hashMech = CKM_SHA224_HMAC;
+            break;
+        case APR_CRYPTO_DIGEST_SHA256:
+            key->hashMech = CKM_SHA256_HMAC;
+            break;
+        case APR_CRYPTO_DIGEST_SHA384:
+            key->hashMech = CKM_SHA384_HMAC;
+            break;
+        case APR_CRYPTO_DIGEST_SHA512:
+            key->hashMech = CKM_SHA512_HMAC;
+            break;
+        default:
+            return APR_ENODIGEST;
+        }
+
+        /* generate the key */
+        slot = PK11_GetBestSlot(key->hashMech, NULL);
+        if (slot) {
+
+            /* prepare the key to wrap */
+            secretItem.data = (unsigned char *) rec->k.hmac.secret;
+            secretItem.len = rec->k.hmac.secretLen;
+
+            key->symKey = PK11_ImportSymKey(slot, key->hashMech, PK11_OriginDerive,
+                                           CKA_SIGN, &secretItem, NULL);
+
+            /* sanity check? */
+            if (!key->symKey) {
+                PRErrorCode perr = PORT_GetError();
+                if (perr) {
+                    f->result->rc = perr;
+                    f->result->msg = PR_ErrorToName(perr);
+                    rv = APR_ENOKEY;
+                }
+            }
+
+            PK11_FreeSlot(slot);
+        }
+
+        break;
+    }
+
+    case APR_CRYPTO_KTYPE_CMAC: {
+
+        return APR_ENOTIMPL;
+
     }
 
     default: {
@@ -513,16 +825,6 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
         return APR_ENOKEY;
 
     }
-    }
-
-    /* sanity check? */
-    if (!key->symKey) {
-        PRErrorCode perr = PORT_GetError();
-        if (perr) {
-            f->result->rc = perr;
-            f->result->msg = PR_ErrorToName(perr);
-            rv = APR_ENOKEY;
-        }
     }
 
     return rv;
@@ -569,6 +871,7 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
     SECAlgorithmID *algid;
     void *wincx = NULL; /* what is wincx? */
     apr_crypto_key_t *key = *k;
+    apr_crypto_key_rec_t *rec;
 
     if (!key) {
         *k = key = apr_pcalloc(p, sizeof *key);
@@ -581,6 +884,11 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
 
     key->f = f;
     key->provider = f->provider;
+    key->rec = rec = apr_pcalloc(p, sizeof(apr_crypto_key_rec_t));
+    if (!key->rec) {
+        return APR_ENOMEM;
+    }
+    rec->ktype = APR_CRYPTO_KTYPE_PASSPHRASE;
 
     /* decide on what cipher mechanism we will be using */
     rv = crypto_cipher_mechanism(key, type, mode, doPad);
@@ -658,54 +966,68 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
     block->f = key->f;
     block->pool = p;
     block->provider = key->provider;
+    block->key = key;
 
     apr_pool_cleanup_register(p, block, crypto_block_cleanup_helper,
             apr_pool_cleanup_null);
 
-    if (key->ivSize) {
-        if (iv == NULL) {
-            return APR_ENOIV;
-        }
-        if (*iv == NULL) {
-            SECStatus s;
-            usedIv = apr_pcalloc(p, key->ivSize);
-            if (!usedIv) {
-                return APR_ENOMEM;
-            }
-            apr_crypto_clear(p, usedIv, key->ivSize);
-            s = PK11_GenerateRandom(usedIv, key->ivSize);
-            if (s != SECSuccess) {
+    switch (key->rec->ktype) {
+
+    case APR_CRYPTO_KTYPE_PASSPHRASE:
+    case APR_CRYPTO_KTYPE_SECRET: {
+
+        if (key->ivSize) {
+            if (iv == NULL) {
                 return APR_ENOIV;
             }
-            *iv = usedIv;
+            if (*iv == NULL) {
+                SECStatus s;
+                usedIv = apr_pcalloc(p, key->ivSize);
+                if (!usedIv) {
+                    return APR_ENOMEM;
+                }
+                apr_crypto_clear(p, usedIv, key->ivSize);
+                s = PK11_GenerateRandom(usedIv, key->ivSize);
+                if (s != SECSuccess) {
+                    return APR_ENOIV;
+                }
+                *iv = usedIv;
+            }
+            else {
+                usedIv = (unsigned char *) *iv;
+            }
+            ivItem.data = usedIv;
+            ivItem.len = key->ivSize;
+            block->secParam = PK11_ParamFromIV(key->cipherMech, &ivItem);
         }
         else {
-            usedIv = (unsigned char *) *iv;
+            block->secParam = PK11_GenerateNewParam(key->cipherMech, key->symKey);
         }
-        ivItem.data = usedIv;
-        ivItem.len = key->ivSize;
-        block->secParam = PK11_ParamFromIV(key->cipherMech, &ivItem);
-    }
-    else {
-        block->secParam = PK11_GenerateNewParam(key->cipherMech, key->symKey);
-    }
-    block->blockSize = PK11_GetBlockSize(key->cipherMech, block->secParam);
-    block->ctx = PK11_CreateContextBySymKey(key->cipherMech, CKA_ENCRYPT,
-            key->symKey, block->secParam);
+        block->blockSize = PK11_GetBlockSize(key->cipherMech, block->secParam);
+        block->ctx = PK11_CreateContextBySymKey(key->cipherMech, CKA_ENCRYPT,
+                key->symKey, block->secParam);
 
-    /* did an error occur? */
-    perr = PORT_GetError();
-    if (perr || !block->ctx) {
-        key->f->result->rc = perr;
-        key->f->result->msg = PR_ErrorToName(perr);
-        return APR_EINIT;
-    }
+        /* did an error occur? */
+        perr = PORT_GetError();
+        if (perr || !block->ctx) {
+            key->f->result->rc = perr;
+            key->f->result->msg = PR_ErrorToName(perr);
+            return APR_EINIT;
+        }
 
-    if (blockSize) {
-        *blockSize = PK11_GetBlockSize(key->cipherMech, block->secParam);
-    }
+        if (blockSize) {
+            *blockSize = PK11_GetBlockSize(key->cipherMech, block->secParam);
+        }
 
-    return APR_SUCCESS;
+        return APR_SUCCESS;
+
+    }
+    default: {
+
+        return APR_EINVAL;
+
+    }
+    }
 
 }
 
@@ -731,36 +1053,48 @@ static apr_status_t crypto_block_encrypt(unsigned char **out,
         apr_size_t *outlen, const unsigned char *in, apr_size_t inlen,
         apr_crypto_block_t *block)
 {
+    switch (block->key->rec->ktype) {
 
-    unsigned char *buffer;
-    int outl = (int) *outlen;
-    SECStatus s;
-    if (!out) {
-        *outlen = inlen + block->blockSize;
+    case APR_CRYPTO_KTYPE_PASSPHRASE:
+    case APR_CRYPTO_KTYPE_SECRET: {
+
+        unsigned char *buffer;
+        int outl = (int) *outlen;
+        SECStatus s;
+        if (!out) {
+            *outlen = inlen + block->blockSize;
+            return APR_SUCCESS;
+        }
+        if (!*out) {
+            buffer = apr_palloc(block->pool, inlen + block->blockSize);
+            if (!buffer) {
+                return APR_ENOMEM;
+            }
+            apr_crypto_clear(block->pool, buffer, inlen + block->blockSize);
+            *out = buffer;
+        }
+
+        s = PK11_CipherOp(block->ctx, *out, &outl, inlen, (unsigned char*) in,
+                inlen);
+        if (s != SECSuccess) {
+            PRErrorCode perr = PORT_GetError();
+            if (perr) {
+                block->f->result->rc = perr;
+                block->f->result->msg = PR_ErrorToName(perr);
+            }
+            return APR_ECRYPT;
+        }
+        *outlen = outl;
+
         return APR_SUCCESS;
-    }
-    if (!*out) {
-        buffer = apr_palloc(block->pool, inlen + block->blockSize);
-        if (!buffer) {
-            return APR_ENOMEM;
-        }
-        apr_crypto_clear(block->pool, buffer, inlen + block->blockSize);
-        *out = buffer;
-    }
 
-    s = PK11_CipherOp(block->ctx, *out, &outl, inlen, (unsigned char*) in,
-            inlen);
-    if (s != SECSuccess) {
-        PRErrorCode perr = PORT_GetError();
-        if (perr) {
-            block->f->result->rc = perr;
-            block->f->result->msg = PR_ErrorToName(perr);
-        }
-        return APR_ECRYPT;
     }
-    *outlen = outl;
+    default: {
 
-    return APR_SUCCESS;
+        return APR_EINVAL;
+
+    }
+    }
 
 }
 
@@ -785,24 +1119,36 @@ static apr_status_t crypto_block_encrypt(unsigned char **out,
 static apr_status_t crypto_block_encrypt_finish(unsigned char *out,
         apr_size_t *outlen, apr_crypto_block_t *block)
 {
+    switch (block->key->rec->ktype) {
 
-    apr_status_t rv = APR_SUCCESS;
-    unsigned int outl = *outlen;
+    case APR_CRYPTO_KTYPE_PASSPHRASE:
+    case APR_CRYPTO_KTYPE_SECRET: {
 
-    SECStatus s = PK11_DigestFinal(block->ctx, out, &outl, block->blockSize);
-    *outlen = outl;
+        apr_status_t rv = APR_SUCCESS;
+        unsigned int outl = *outlen;
 
-    if (s != SECSuccess) {
-        PRErrorCode perr = PORT_GetError();
-        if (perr) {
-            block->f->result->rc = perr;
-            block->f->result->msg = PR_ErrorToName(perr);
+        SECStatus s = PK11_DigestFinal(block->ctx, out, &outl, block->blockSize);
+        *outlen = outl;
+
+        if (s != SECSuccess) {
+            PRErrorCode perr = PORT_GetError();
+            if (perr) {
+                block->f->result->rc = perr;
+                block->f->result->msg = PR_ErrorToName(perr);
+            }
+            rv = APR_ECRYPT;
         }
-        rv = APR_ECRYPT;
-    }
-    crypto_block_cleanup(block);
+        crypto_block_cleanup(block);
 
-    return rv;
+        return rv;
+
+    }
+    default: {
+
+        return APR_EINVAL;
+
+    }
+    }
 
 }
 
@@ -825,50 +1171,64 @@ static apr_status_t crypto_block_decrypt_init(apr_crypto_block_t **ctx,
         apr_size_t *blockSize, const unsigned char *iv,
         const apr_crypto_key_t *key, apr_pool_t *p)
 {
-    PRErrorCode perr;
-    apr_crypto_block_t *block = *ctx;
-    if (!block) {
-        *ctx = block = apr_pcalloc(p, sizeof(apr_crypto_block_t));
-    }
-    if (!block) {
-        return APR_ENOMEM;
-    }
-    block->f = key->f;
-    block->pool = p;
-    block->provider = key->provider;
+    switch (key->rec->ktype) {
 
-    apr_pool_cleanup_register(p, block, crypto_block_cleanup_helper,
-            apr_pool_cleanup_null);
+    case APR_CRYPTO_KTYPE_PASSPHRASE:
+    case APR_CRYPTO_KTYPE_SECRET: {
 
-    if (key->ivSize) {
-        SECItem ivItem;
-        if (iv == NULL) {
-            return APR_ENOIV; /* Cannot initialise without an IV */
+        PRErrorCode perr;
+        apr_crypto_block_t *block = *ctx;
+        if (!block) {
+            *ctx = block = apr_pcalloc(p, sizeof(apr_crypto_block_t));
         }
-        ivItem.data = (unsigned char*) iv;
-        ivItem.len = key->ivSize;
-        block->secParam = PK11_ParamFromIV(key->cipherMech, &ivItem);
-    }
-    else {
-        block->secParam = PK11_GenerateNewParam(key->cipherMech, key->symKey);
-    }
-    block->blockSize = PK11_GetBlockSize(key->cipherMech, block->secParam);
-    block->ctx = PK11_CreateContextBySymKey(key->cipherMech, CKA_DECRYPT,
-            key->symKey, block->secParam);
+        if (!block) {
+            return APR_ENOMEM;
+        }
+        block->f = key->f;
+        block->pool = p;
+        block->provider = key->provider;
+        block->key = key;
 
-    /* did an error occur? */
-    perr = PORT_GetError();
-    if (perr || !block->ctx) {
-        key->f->result->rc = perr;
-        key->f->result->msg = PR_ErrorToName(perr);
-        return APR_EINIT;
-    }
+        apr_pool_cleanup_register(p, block, crypto_block_cleanup_helper,
+                apr_pool_cleanup_null);
 
-    if (blockSize) {
-        *blockSize = PK11_GetBlockSize(key->cipherMech, block->secParam);
-    }
+        if (key->ivSize) {
+            SECItem ivItem;
+            if (iv == NULL) {
+                return APR_ENOIV; /* Cannot initialise without an IV */
+            }
+            ivItem.data = (unsigned char*) iv;
+            ivItem.len = key->ivSize;
+            block->secParam = PK11_ParamFromIV(key->cipherMech, &ivItem);
+        }
+        else {
+            block->secParam = PK11_GenerateNewParam(key->cipherMech, key->symKey);
+        }
+        block->blockSize = PK11_GetBlockSize(key->cipherMech, block->secParam);
+        block->ctx = PK11_CreateContextBySymKey(key->cipherMech, CKA_DECRYPT,
+                key->symKey, block->secParam);
 
-    return APR_SUCCESS;
+        /* did an error occur? */
+        perr = PORT_GetError();
+        if (perr || !block->ctx) {
+            key->f->result->rc = perr;
+            key->f->result->msg = PR_ErrorToName(perr);
+            return APR_EINIT;
+        }
+
+        if (blockSize) {
+            *blockSize = PK11_GetBlockSize(key->cipherMech, block->secParam);
+        }
+
+        return APR_SUCCESS;
+
+    }
+    default: {
+
+        return APR_EINVAL;
+
+    }
+    }
 
 }
 
@@ -894,36 +1254,48 @@ static apr_status_t crypto_block_decrypt(unsigned char **out,
         apr_size_t *outlen, const unsigned char *in, apr_size_t inlen,
         apr_crypto_block_t *block)
 {
+    switch (block->key->rec->ktype) {
 
-    unsigned char *buffer;
-    int outl = (int) *outlen;
-    SECStatus s;
-    if (!out) {
-        *outlen = inlen + block->blockSize;
+    case APR_CRYPTO_KTYPE_PASSPHRASE:
+    case APR_CRYPTO_KTYPE_SECRET: {
+
+        unsigned char *buffer;
+        int outl = (int) *outlen;
+        SECStatus s;
+        if (!out) {
+            *outlen = inlen + block->blockSize;
+            return APR_SUCCESS;
+        }
+        if (!*out) {
+            buffer = apr_palloc(block->pool, inlen + block->blockSize);
+            if (!buffer) {
+                return APR_ENOMEM;
+            }
+            apr_crypto_clear(block->pool, buffer, inlen + block->blockSize);
+            *out = buffer;
+        }
+
+        s = PK11_CipherOp(block->ctx, *out, &outl, inlen, (unsigned char*) in,
+                inlen);
+        if (s != SECSuccess) {
+            PRErrorCode perr = PORT_GetError();
+            if (perr) {
+                block->f->result->rc = perr;
+                block->f->result->msg = PR_ErrorToName(perr);
+            }
+            return APR_ECRYPT;
+        }
+        *outlen = outl;
+
         return APR_SUCCESS;
-    }
-    if (!*out) {
-        buffer = apr_palloc(block->pool, inlen + block->blockSize);
-        if (!buffer) {
-            return APR_ENOMEM;
-        }
-        apr_crypto_clear(block->pool, buffer, inlen + block->blockSize);
-        *out = buffer;
-    }
 
-    s = PK11_CipherOp(block->ctx, *out, &outl, inlen, (unsigned char*) in,
-            inlen);
-    if (s != SECSuccess) {
-        PRErrorCode perr = PORT_GetError();
-        if (perr) {
-            block->f->result->rc = perr;
-            block->f->result->msg = PR_ErrorToName(perr);
-        }
-        return APR_ECRYPT;
     }
-    *outlen = outl;
+    default: {
 
-    return APR_SUCCESS;
+        return APR_EINVAL;
+
+    }
+    }
 
 }
 
@@ -948,37 +1320,326 @@ static apr_status_t crypto_block_decrypt(unsigned char **out,
 static apr_status_t crypto_block_decrypt_finish(unsigned char *out,
         apr_size_t *outlen, apr_crypto_block_t *block)
 {
+    switch (block->key->rec->ktype) {
 
-    apr_status_t rv = APR_SUCCESS;
-    unsigned int outl = *outlen;
+    case APR_CRYPTO_KTYPE_PASSPHRASE:
+    case APR_CRYPTO_KTYPE_SECRET: {
 
-    SECStatus s = PK11_DigestFinal(block->ctx, out, &outl, block->blockSize);
-    *outlen = outl;
+        apr_status_t rv = APR_SUCCESS;
+        unsigned int outl = *outlen;
 
-    if (s != SECSuccess) {
-        PRErrorCode perr = PORT_GetError();
-        if (perr) {
-            block->f->result->rc = perr;
-            block->f->result->msg = PR_ErrorToName(perr);
+        SECStatus s = PK11_DigestFinal(block->ctx, out, &outl, block->blockSize);
+        *outlen = outl;
+
+        if (s != SECSuccess) {
+            PRErrorCode perr = PORT_GetError();
+            if (perr) {
+                block->f->result->rc = perr;
+                block->f->result->msg = PR_ErrorToName(perr);
+            }
+            rv = APR_ECRYPT;
         }
-        rv = APR_ECRYPT;
+        crypto_block_cleanup(block);
+
+        return rv;
+
     }
-    crypto_block_cleanup(block);
+    default: {
 
-    return rv;
+        return APR_EINVAL;
 
+    }
+    }
+
+}
+
+static apr_status_t crypto_digest_init(apr_crypto_digest_t **d,
+        const apr_crypto_key_t *key, apr_crypto_digest_rec_t *rec, apr_pool_t *p)
+{
+    PRErrorCode perr;
+    SECStatus s;
+    apr_crypto_digest_t *digest = *d;
+    if (!digest) {
+        *d = digest = apr_pcalloc(p, sizeof(apr_crypto_digest_t));
+    }
+    if (!digest) {
+        return APR_ENOMEM;
+    }
+    digest->f = key->f;
+    digest->pool = p;
+    digest->provider = key->provider;
+    digest->key = key;
+    digest->rec = rec;
+
+    apr_pool_cleanup_register(p, digest, crypto_digest_cleanup_helper,
+            apr_pool_cleanup_null);
+
+    switch (key->rec->ktype) {
+
+    case APR_CRYPTO_KTYPE_HASH: {
+
+        digest->ctx = PK11_CreateDigestContext(key->hashAlg);
+
+        s = PK11_DigestBegin(digest->ctx);
+        if (s != SECSuccess) {
+            PRErrorCode perr = PORT_GetError();
+            if (perr) {
+                digest->f->result->rc = perr;
+                digest->f->result->msg = PR_ErrorToName(perr);
+            }
+            return APR_ECRYPT;
+        }
+
+        return APR_SUCCESS;
+
+    }
+    case APR_CRYPTO_KTYPE_HMAC: {
+
+        digest->secParam = PK11_GenerateNewParam(key->cipherMech, key->symKey);
+        digest->ctx = PK11_CreateContextBySymKey(key->hashMech, CKA_SIGN,
+                key->symKey, digest->secParam);
+
+        /* did an error occur? */
+        perr = PORT_GetError();
+        if (perr || !digest->ctx) {
+            key->f->result->rc = perr;
+            key->f->result->msg = PR_ErrorToName(perr);
+            return APR_EINIT;
+        }
+
+        s = PK11_DigestBegin(digest->ctx);
+        if (s != SECSuccess) {
+            PRErrorCode perr = PORT_GetError();
+            if (perr) {
+                digest->f->result->rc = perr;
+                digest->f->result->msg = PR_ErrorToName(perr);
+            }
+            return APR_ECRYPT;
+        }
+
+        return APR_SUCCESS;
+
+    }
+    case APR_CRYPTO_KTYPE_CMAC: {
+
+        return APR_ENOTIMPL;
+
+    }
+    default: {
+
+        return APR_EINVAL;
+
+    }
+    }
+
+}
+
+static apr_status_t crypto_digest_update(apr_crypto_digest_t *digest,
+        const unsigned char *in, apr_size_t inlen)
+{
+    switch (digest->key->rec->ktype) {
+
+    case APR_CRYPTO_KTYPE_HASH:
+    case APR_CRYPTO_KTYPE_HMAC: {
+
+        SECStatus s;
+
+        s = PK11_DigestOp(digest->ctx, (unsigned char*) in,
+                inlen);
+        if (s != SECSuccess) {
+            PRErrorCode perr = PORT_GetError();
+            if (perr) {
+                digest->f->result->rc = perr;
+                digest->f->result->msg = PR_ErrorToName(perr);
+            }
+            return APR_ECRYPT;
+        }
+
+        return APR_SUCCESS;
+
+    }
+    case APR_CRYPTO_KTYPE_CMAC: {
+
+        return APR_ENOTIMPL;
+
+    }
+    default: {
+
+        return APR_EINVAL;
+
+    }
+    }
+
+}
+
+static apr_status_t crypto_digest_final(apr_crypto_digest_t *digest)
+{
+    switch (digest->key->rec->ktype) {
+
+    case APR_CRYPTO_KTYPE_HASH:
+    case APR_CRYPTO_KTYPE_HMAC: {
+
+        apr_status_t status = APR_SUCCESS;
+        unsigned int len;
+
+        /* first, determine the signature length */
+        SECStatus s = PK11_DigestFinal(digest->ctx, NULL, &len, 0);
+        if (s != SECSuccess) {
+            PRErrorCode perr = PORT_GetError();
+            if (perr) {
+                digest->f->result->rc = perr;
+                digest->f->result->msg = PR_ErrorToName(perr);
+            }
+            status = APR_ECRYPT;
+        }
+        else {
+
+            switch (digest->rec->dtype) {
+            case APR_CRYPTO_DTYPE_HASH: {
+
+                /* must we allocate the output buffer from a pool? */
+                if (!digest->rec->d.hash.s || digest->rec->d.hash.slen != len) {
+                    digest->rec->d.hash.slen = len;
+                    digest->rec->d.hash.s = apr_palloc(digest->pool, len);
+                    if (!digest->rec->d.hash.s) {
+                        return APR_ENOMEM;
+                    }
+                    apr_crypto_clear(digest->pool, digest->rec->d.hash.s, len);
+                }
+
+                /* then, determine the signature */
+                SECStatus s = PK11_DigestFinal(digest->ctx,
+                        digest->rec->d.hash.s, &len, digest->rec->d.hash.slen);
+                if (s != SECSuccess) {
+                    PRErrorCode perr = PORT_GetError();
+                    if (perr) {
+                        digest->f->result->rc = perr;
+                        digest->f->result->msg = PR_ErrorToName(perr);
+                    }
+                    status = APR_ECRYPT;
+                }
+
+                break;
+            }
+            case APR_CRYPTO_DTYPE_SIGN: {
+
+                /* must we allocate the output buffer from a pool? */
+                if (!digest->rec->d.sign.s || digest->rec->d.sign.slen != len) {
+                    digest->rec->d.sign.slen = len;
+                    digest->rec->d.sign.s = apr_palloc(digest->pool, len);
+                    if (!digest->rec->d.sign.s) {
+                        return APR_ENOMEM;
+                    }
+                    apr_crypto_clear(digest->pool, digest->rec->d.sign.s, len);
+                }
+
+                /* then, determine the signature */
+                SECStatus s = PK11_DigestFinal(digest->ctx,
+                        digest->rec->d.sign.s, &len, digest->rec->d.sign.slen);
+                if (s != SECSuccess) {
+                    PRErrorCode perr = PORT_GetError();
+                    if (perr) {
+                        digest->f->result->rc = perr;
+                        digest->f->result->msg = PR_ErrorToName(perr);
+                    }
+                    status = APR_ECRYPT;
+                }
+
+                break;
+            }
+            case APR_CRYPTO_DTYPE_VERIFY: {
+
+                /* must we allocate the output buffer from a pool? */
+                if (!digest->rec->d.verify.s
+                        || digest->rec->d.verify.slen != len) {
+                    digest->rec->d.verify.slen = len;
+                    digest->rec->d.verify.s = apr_palloc(digest->pool, len);
+                    if (!digest->rec->d.verify.s) {
+                        return APR_ENOMEM;
+                    }
+                    apr_crypto_clear(digest->pool, digest->rec->d.verify.s,
+                            len);
+                }
+
+                /* then, determine the signature */
+                SECStatus s = PK11_DigestFinal(digest->ctx,
+                        digest->rec->d.verify.s, &len,
+                        digest->rec->d.verify.slen);
+                if (s != SECSuccess) {
+                    PRErrorCode perr = PORT_GetError();
+                    if (perr) {
+                        digest->f->result->rc = perr;
+                        digest->f->result->msg = PR_ErrorToName(perr);
+                    }
+                    status = APR_ECRYPT;
+                } else if (digest->rec->d.verify.slen
+                        == digest->rec->d.verify.vlen) {
+                    status =
+                            apr_crypto_equals(digest->rec->d.verify.s,
+                                    digest->rec->d.verify.v,
+                                    digest->rec->d.verify.slen) ?
+                            APR_SUCCESS : APR_ENOVERIFY;
+                } else {
+                    status = APR_ENOVERIFY;
+                }
+
+                break;
+            }
+            default: {
+                status = APR_ENODIGEST;
+            }
+            }
+
+        }
+
+        crypto_digest_cleanup(digest);
+
+        return status;
+
+    }
+    case APR_CRYPTO_KTYPE_CMAC: {
+
+        return APR_ENOTIMPL;
+
+    }
+    default: {
+
+        return APR_EINVAL;
+
+    }
+    }
+
+}
+
+static apr_status_t crypto_digest(
+        const apr_crypto_key_t *key, apr_crypto_digest_rec_t *rec, const unsigned char *in,
+        apr_size_t inlen, apr_pool_t *p)
+{
+    apr_crypto_digest_t *digest = NULL;
+    apr_status_t status = APR_SUCCESS;
+
+    status = crypto_digest_init(&digest, key, rec, p);
+    if (APR_SUCCESS == status) {
+        status = crypto_digest_update(digest, in, inlen);
+        if (APR_SUCCESS == status) {
+            status = crypto_digest_final(digest);
+        }
+    }
+
+    return status;
 }
 
 /**
  * NSS module.
  */
 APR_MODULE_DECLARE_DATA const apr_crypto_driver_t apr_crypto_nss_driver = {
-    "nss", crypto_init, crypto_make, crypto_get_block_key_types,
+    "nss", crypto_init, crypto_make, crypto_get_block_key_digests, crypto_get_block_key_types,
     crypto_get_block_key_modes, crypto_passphrase,
     crypto_block_encrypt_init, crypto_block_encrypt,
     crypto_block_encrypt_finish, crypto_block_decrypt_init,
     crypto_block_decrypt, crypto_block_decrypt_finish,
-    crypto_block_cleanup, crypto_cleanup, crypto_shutdown, crypto_error,
+    crypto_digest_init, crypto_digest_update, crypto_digest_final, crypto_digest,
+    crypto_block_cleanup, crypto_digest_cleanup, crypto_cleanup, crypto_shutdown, crypto_error,
     crypto_key
 };
 

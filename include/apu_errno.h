@@ -51,6 +51,7 @@ extern "C" {
  * APR_ENOENGINE      The engine provided was not recognised
  * APR_EINITENGINE    The engine could not be initialised
  * APR_EREINIT        Underlying crypto has already been initialised
+ * APR_ENOVERIFY      The signature verification failed
  * </PRE>
  *
  * <PRE>
@@ -83,6 +84,8 @@ extern "C" {
 #define APR_EINITENGINE      (APR_UTIL_START_STATUS + 11)
 /** @see APR_STATUS_IS_EREINIT */
 #define APR_EREINIT          (APR_UTIL_START_STATUS + 12)
+/** @see APR_STATUS_IS_ENOVERIFY */
+#define APR_ENOVERIFY        (APR_UTIL_START_STATUS + 13)
 /** @} */
 
 /**
@@ -151,6 +154,10 @@ extern "C" {
  * Crypto has already been initialised
  */
 #define APR_STATUS_IS_EREINIT(s)        ((s) == APR_EREINIT)
+/**
+ * The signature verification failed
+ */
+#define APR_STATUS_IS_ENOVERIFY(s)        ((s) == APR_ENOVERIFY)
 /** @} */
 
 /**

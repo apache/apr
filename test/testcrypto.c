@@ -113,6 +113,117 @@ static apr_crypto_t *make(abts_case *tc, apr_pool_t *pool,
 
 }
 
+static const apr_crypto_key_t *keyhash(abts_case *tc, apr_pool_t *pool,
+        const apr_crypto_driver_t *driver, const apr_crypto_t *f,
+        apr_crypto_block_key_digest_e digest, const char *description)
+{
+    apr_crypto_key_t *key = NULL;
+    const apu_err_t *result = NULL;
+    apr_crypto_key_rec_t *rec = apr_crypto_key_rec_make(APR_CRYPTO_KTYPE_HASH,
+            pool);
+    apr_status_t rv;
+
+    if (!driver) {
+        return NULL;
+    }
+
+    if (!f) {
+        return NULL;
+    }
+
+    rec->k.hash.digest = digest;
+
+    /* init the key */
+    rv = apr_crypto_key(&key, rec, f, pool);
+    if (APR_ENOCIPHER == rv || APR_ENODIGEST == rv) {
+        apr_crypto_error(&result, f);
+        ABTS_NOT_IMPL(tc,
+                apr_psprintf(pool, "skipped: %s %s key return APR_ENOTIMPL: error %d: %s (%s)\n", description, apr_crypto_driver_name(driver), result->rc, result->reason ? result->reason : "", result->msg ? result->msg : ""));
+        return NULL;
+    }
+    else {
+        if (APR_SUCCESS != rv) {
+            apr_crypto_error(&result, f);
+            fprintf(stderr, "key: %s %s apr error %d / native error %d: %s (%s)\n",
+                    description, apr_crypto_driver_name(driver), rv, result->rc,
+                    result->reason ? result->reason : "",
+                    result->msg ? result->msg : "");
+        }
+        ABTS_ASSERT(tc, "apr_crypto_key returned APR_EKEYLENGTH", rv != APR_EKEYLENGTH);
+        ABTS_ASSERT(tc, "apr_crypto_key returned APR_ENOKEY", rv != APR_ENOKEY);
+        ABTS_ASSERT(tc, "apr_crypto_key returned APR_EPADDING",
+                rv != APR_EPADDING);
+        ABTS_ASSERT(tc, "apr_crypto_key returned APR_EKEYTYPE",
+                rv != APR_EKEYTYPE);
+        ABTS_ASSERT(tc, "failed to apr_crypto_key", rv == APR_SUCCESS);
+        ABTS_ASSERT(tc, "apr_crypto_key returned NULL context", key != NULL);
+    }
+    if (rv) {
+        return NULL;
+    }
+    return key;
+
+}
+
+static const apr_crypto_key_t *keyhmac(abts_case *tc, apr_pool_t *pool,
+        const apr_crypto_driver_t *driver, const apr_crypto_t *f,
+        apr_crypto_block_key_digest_e digest, apr_crypto_block_key_type_e type,
+        apr_crypto_block_key_mode_e mode, int doPad, apr_size_t secretLen,
+        const char *description)
+{
+    apr_crypto_key_t *key = NULL;
+    const apu_err_t *result = NULL;
+    apr_crypto_key_rec_t *rec = apr_crypto_key_rec_make(APR_CRYPTO_KTYPE_HMAC,
+            pool);
+    apr_status_t rv;
+
+    if (!driver) {
+        return NULL;
+    }
+
+    if (!f) {
+        return NULL;
+    }
+
+    rec->type = type;
+    rec->mode = mode;
+    rec->pad = doPad;
+    rec->k.hmac.digest = digest;
+    rec->k.hmac.secret = apr_pcalloc(pool, secretLen);
+    rec->k.hmac.secretLen = secretLen;
+
+    /* init the key */
+    rv = apr_crypto_key(&key, rec, f, pool);
+    if (APR_ENOCIPHER == rv || APR_ENODIGEST == rv) {
+        apr_crypto_error(&result, f);
+        ABTS_NOT_IMPL(tc,
+                apr_psprintf(pool, "skipped: %s %s key return APR_ENOTIMPL: error %d: %s (%s)\n", description, apr_crypto_driver_name(driver), result->rc, result->reason ? result->reason : "", result->msg ? result->msg : ""));
+        return NULL;
+    }
+    else {
+        if (APR_SUCCESS != rv) {
+            apr_crypto_error(&result, f);
+            fprintf(stderr, "key: %s %s apr error %d / native error %d: %s (%s)\n",
+                    description, apr_crypto_driver_name(driver), rv, result->rc,
+                    result->reason ? result->reason : "",
+                    result->msg ? result->msg : "");
+        }
+        ABTS_ASSERT(tc, "apr_crypto_key returned APR_EKEYLENGTH", rv != APR_EKEYLENGTH);
+        ABTS_ASSERT(tc, "apr_crypto_key returned APR_ENOKEY", rv != APR_ENOKEY);
+        ABTS_ASSERT(tc, "apr_crypto_key returned APR_EPADDING",
+                rv != APR_EPADDING);
+        ABTS_ASSERT(tc, "apr_crypto_key returned APR_EKEYTYPE",
+                rv != APR_EKEYTYPE);
+        ABTS_ASSERT(tc, "failed to apr_crypto_key", rv == APR_SUCCESS);
+        ABTS_ASSERT(tc, "apr_crypto_key returned NULL context", key != NULL);
+    }
+    if (rv) {
+        return NULL;
+    }
+    return key;
+
+}
+
 static const apr_crypto_key_t *keysecret(abts_case *tc, apr_pool_t *pool,
         const apr_crypto_driver_t *driver, const apr_crypto_t *f,
         apr_crypto_block_key_type_e type, apr_crypto_block_key_mode_e mode,
@@ -120,14 +231,18 @@ static const apr_crypto_key_t *keysecret(abts_case *tc, apr_pool_t *pool,
 {
     apr_crypto_key_t *key = NULL;
     const apu_err_t *result = NULL;
-    apr_crypto_key_rec_t *rec = apr_pcalloc(pool, sizeof(apr_crypto_key_rec_t));
+    apr_crypto_key_rec_t *rec = apr_crypto_key_rec_make(APR_CRYPTO_KTYPE_SECRET,
+            pool);
     apr_status_t rv;
+
+    if (!driver) {
+        return NULL;
+    }
 
     if (!f) {
         return NULL;
     }
 
-    rec->ktype = APR_CRYPTO_KTYPE_SECRET;
     rec->type = type;
     rec->mode = mode;
     rec->pad = doPad;
@@ -178,6 +293,10 @@ static const apr_crypto_key_t *passphrase(abts_case *tc, apr_pool_t *pool,
     const char *salt = "salt";
     apr_status_t rv;
 
+    if (!driver) {
+        return NULL;
+    }
+
     if (!f) {
         return NULL;
     }
@@ -227,6 +346,10 @@ static const apr_crypto_key_t *keypassphrase(abts_case *tc, apr_pool_t *pool,
     const char *salt = "salt";
     apr_crypto_key_rec_t *rec = apr_pcalloc(pool, sizeof(apr_crypto_key_rec_t));
     apr_status_t rv;
+
+    if (!driver) {
+        return NULL;
+    }
 
     if (!f) {
         return NULL;
@@ -450,6 +573,275 @@ static unsigned char *decrypt_block(abts_case *tc, apr_pool_t *pool,
 
 }
 
+static apr_status_t sign_block(abts_case *tc, apr_pool_t *pool,
+        const apr_crypto_driver_t *driver, const apr_crypto_t *f,
+        const apr_crypto_key_t *key, const unsigned char *in,
+        const apr_size_t inlen, unsigned char **signature,
+        apr_size_t *signatureLen,
+        apr_size_t *blockSize, const char *description)
+{
+
+    apr_crypto_digest_t *digest = NULL;
+    const apu_err_t *result = NULL;
+    apr_crypto_digest_rec_t *rec = apr_crypto_digest_rec_make(
+            APR_CRYPTO_DTYPE_SIGN, pool);
+    apr_status_t rv;
+
+    if (!driver || !f || !key || !in) {
+        return APR_EGENERAL;
+    }
+
+    /* init the signature */
+    rv = apr_crypto_digest_init(&digest, key, rec, pool);
+    if (APR_ENOTIMPL == rv) {
+        ABTS_NOT_IMPL(tc, "apr_crypto_digest_init returned APR_ENOTIMPL");
+    }
+    else {
+        if (APR_SUCCESS != rv) {
+            apr_crypto_error(&result, f);
+            fprintf(stderr,
+                    "sign_init: %s %s (APR %d) native error %d: %s (%s)\n",
+                    description, apr_crypto_driver_name(driver), rv, result->rc,
+                    result->reason ? result->reason : "",
+                    result->msg ? result->msg : "");
+        }
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned APR_ENOKEY",
+                rv != APR_ENOKEY);
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned APR_ENOIV",
+                rv != APR_ENOIV);
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned APR_EKEYTYPE",
+                rv != APR_EKEYTYPE);
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned APR_EKEYLENGTH",
+                rv != APR_EKEYLENGTH);
+        ABTS_ASSERT(tc,
+                "apr_crypto_digest_init returned APR_ENOTENOUGHENTROPY",
+                rv != APR_ENOTENOUGHENTROPY);
+        ABTS_ASSERT(tc, "failed to apr_crypto_digest_init",
+                rv == APR_SUCCESS);
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned NULL context",
+                digest != NULL);
+    }
+    if (!digest || rv) {
+        return rv;
+    }
+
+    /* sign the block */
+    rv = apr_crypto_digest_update(digest, in, inlen);
+    if (APR_SUCCESS != rv) {
+        apr_crypto_error(&result, f);
+        fprintf(stderr, "sign: %s %s (APR %d) native error %d: %s (%s)\n",
+                description, apr_crypto_driver_name(driver), rv, result->rc,
+                result->reason ? result->reason : "",
+                result->msg ? result->msg : "");
+    }
+    ABTS_ASSERT(tc, "apr_crypto_digest returned APR_ECRYPT", rv != APR_ECRYPT);
+    ABTS_ASSERT(tc, "failed to apr_crypto_digest", rv == APR_SUCCESS);
+    if (rv) {
+        return rv;
+    }
+
+    /* finalise the sign */
+    rv = apr_crypto_digest_final(digest);
+    if (APR_SUCCESS != rv) {
+        apr_crypto_error(&result, f);
+        fprintf(stderr,
+                "sign_finish: %s %s (APR %d) native error %d: %s (%s)\n",
+                description, apr_crypto_driver_name(driver), rv, result->rc,
+                result->reason ? result->reason : "",
+                result->msg ? result->msg : "");
+    }
+    ABTS_ASSERT(tc, "apr_crypto_digest_final returned APR_ECRYPT", rv != APR_ECRYPT);
+    ABTS_ASSERT(tc, "apr_crypto_digest_final returned APR_EPADDING", rv != APR_EPADDING);
+    ABTS_ASSERT(tc, "apr_crypto_digest_final returned APR_ENOSPACE", rv != APR_ENOSPACE);
+    ABTS_ASSERT(tc, "failed to apr_crypto_digest_final", rv == APR_SUCCESS);
+    ABTS_ASSERT(tc, "apr_crypto_digest_final failed to allocate buffer", rec->d.sign.s != NULL);
+
+    apr_crypto_digest_cleanup(digest);
+
+    *signature = rec->d.sign.s;
+    *signatureLen = rec->d.sign.slen;
+
+    return rv;
+
+}
+
+static apr_status_t hash_block(abts_case *tc, apr_pool_t *pool,
+        const apr_crypto_driver_t *driver, const apr_crypto_t *f,
+        const apr_crypto_key_t *key, const unsigned char *in,
+        const apr_size_t inlen, unsigned char **hash,
+        apr_size_t *hashLen,
+        apr_size_t *blockSize, const char *description)
+{
+
+    apr_crypto_digest_t *digest = NULL;
+    const apu_err_t *result = NULL;
+    apr_crypto_digest_rec_t *rec = apr_crypto_digest_rec_make(
+            APR_CRYPTO_DTYPE_HASH, pool);
+    apr_status_t rv;
+
+    if (!driver || !f || !key || !in) {
+        return APR_EGENERAL;
+    }
+
+    rec->d.hash.digest = APR_CRYPTO_DIGEST_SHA256;
+
+    /* init the signature */
+    rv = apr_crypto_digest_init(&digest, key, rec, pool);
+    if (APR_ENOTIMPL == rv) {
+        ABTS_NOT_IMPL(tc, "apr_crypto_digest_init returned APR_ENOTIMPL");
+    }
+    else {
+        if (APR_SUCCESS != rv) {
+            apr_crypto_error(&result, f);
+            fprintf(stderr,
+                    "sign_init: %s %s (APR %d) native error %d: %s (%s)\n",
+                    description, apr_crypto_driver_name(driver), rv, result->rc,
+                    result->reason ? result->reason : "",
+                    result->msg ? result->msg : "");
+        }
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned APR_ENOKEY",
+                rv != APR_ENOKEY);
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned APR_ENOIV",
+                rv != APR_ENOIV);
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned APR_EKEYTYPE",
+                rv != APR_EKEYTYPE);
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned APR_EKEYLENGTH",
+                rv != APR_EKEYLENGTH);
+        ABTS_ASSERT(tc,
+                "apr_crypto_digest_init returned APR_ENOTENOUGHENTROPY",
+                rv != APR_ENOTENOUGHENTROPY);
+        ABTS_ASSERT(tc, "failed to apr_crypto_digest_init",
+                rv == APR_SUCCESS);
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned NULL context",
+                digest != NULL);
+    }
+    if (!digest || rv) {
+        return rv;
+    }
+
+    /* sign the block */
+    rv = apr_crypto_digest_update(digest, in, inlen);
+    if (APR_SUCCESS != rv) {
+        apr_crypto_error(&result, f);
+        fprintf(stderr, "sign: %s %s (APR %d) native error %d: %s (%s)\n",
+                description, apr_crypto_driver_name(driver), rv, result->rc,
+                result->reason ? result->reason : "",
+                result->msg ? result->msg : "");
+    }
+    ABTS_ASSERT(tc, "apr_crypto_digest returned APR_ECRYPT", rv != APR_ECRYPT);
+    ABTS_ASSERT(tc, "failed to apr_crypto_digest", rv == APR_SUCCESS);
+    if (rv) {
+        return rv;
+    }
+
+    /* finalise the sign */
+    rv = apr_crypto_digest_final(digest);
+    if (APR_SUCCESS != rv) {
+        apr_crypto_error(&result, f);
+        fprintf(stderr,
+                "sign_finish: %s %s (APR %d) native error %d: %s (%s)\n",
+                description, apr_crypto_driver_name(driver), rv, result->rc,
+                result->reason ? result->reason : "",
+                result->msg ? result->msg : "");
+    }
+    ABTS_ASSERT(tc, "apr_crypto_digest_final returned APR_ECRYPT", rv != APR_ECRYPT);
+    ABTS_ASSERT(tc, "apr_crypto_digest_final returned APR_EPADDING", rv != APR_EPADDING);
+    ABTS_ASSERT(tc, "apr_crypto_digest_final returned APR_ENOSPACE", rv != APR_ENOSPACE);
+    ABTS_ASSERT(tc, "failed to apr_crypto_digest_final", rv == APR_SUCCESS);
+    ABTS_ASSERT(tc, "apr_crypto_digest_final failed to allocate buffer", rec->d.hash.s != NULL);
+
+    apr_crypto_digest_cleanup(digest);
+
+    *hash = rec->d.hash.s;
+    *hashLen = rec->d.hash.slen;
+
+    return rv;
+
+}
+
+static apr_status_t verify_block(abts_case *tc, apr_pool_t *pool,
+        const apr_crypto_driver_t *driver, const apr_crypto_t *f,
+        const apr_crypto_key_t *key, const unsigned char *in,
+        apr_size_t inlen, const unsigned char *signature,
+        apr_size_t signatureLen,
+        apr_size_t *blockSize, const char *description)
+{
+
+    apr_crypto_digest_t *digest = NULL;
+    const apu_err_t *result = NULL;
+    apr_crypto_digest_rec_t *rec = apr_crypto_digest_rec_make(
+            APR_CRYPTO_DTYPE_VERIFY, pool);
+    apr_status_t rv;
+
+    if (!driver || !f || !key || !in || !signature) {
+        return APR_EGENERAL;
+    }
+
+    rec->d.verify.v = signature;
+    rec->d.verify.vlen = signatureLen;
+
+    /* init the decryption */
+    rv = apr_crypto_digest_init(&digest, key, rec, pool);
+    if (APR_ENOTIMPL == rv) {
+        ABTS_NOT_IMPL(tc, "apr_crypto_digest_init returned APR_ENOTIMPL");
+    }
+    else {
+        if (APR_SUCCESS != rv) {
+            apr_crypto_error(&result, f);
+            fprintf(stderr,
+                    "digest_init: %s %s (APR %d) native error %d: %s (%s)\n",
+                    description, apr_crypto_driver_name(driver), rv, result->rc,
+                    result->reason ? result->reason : "",
+                    result->msg ? result->msg : "");
+        }
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned APR_ENOKEY", rv != APR_ENOKEY);
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned APR_ENOIV", rv != APR_ENOIV);
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned APR_EKEYTYPE", rv != APR_EKEYTYPE);
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned APR_EKEYLENGTH", rv != APR_EKEYLENGTH);
+        ABTS_ASSERT(tc, "failed to apr_crypto_digest_init", rv == APR_SUCCESS);
+        ABTS_ASSERT(tc, "apr_crypto_digest_init returned NULL context", digest != NULL);
+    }
+    if (!digest || rv) {
+        return APR_EGENERAL;
+    }
+
+    /* decrypt the block */
+    rv = apr_crypto_digest_update(digest, in, inlen);
+    if (APR_SUCCESS != rv) {
+        apr_crypto_error(&result, f);
+        fprintf(stderr, "decrypt: %s %s (APR %d) native error %d: %s (%s)\n",
+                description, apr_crypto_driver_name(driver), rv, result->rc,
+                result->reason ? result->reason : "",
+                result->msg ? result->msg : "");
+    }
+    ABTS_ASSERT(tc, "apr_crypto_digest returned APR_ECRYPT", rv != APR_ECRYPT);
+    ABTS_ASSERT(tc, "failed to apr_crypto_digest", rv == APR_SUCCESS);
+    ABTS_ASSERT(tc, "apr_crypto_digest failed to allocate buffer", signature != NULL);
+    if (rv) {
+        return APR_EGENERAL;
+    }
+
+    /* finalise the decryption */
+    rv = apr_crypto_digest_final(digest);
+    if (APR_SUCCESS != rv) {
+        apr_crypto_error(&result, f);
+        fprintf(stderr,
+                "verify_finish: %s %s (APR %d) native error %d: %s (%s)\n",
+                description, apr_crypto_driver_name(driver), rv, result->rc,
+                result->reason ? result->reason : "",
+                result->msg ? result->msg : "");
+    }
+    ABTS_ASSERT(tc, "apr_crypto_digest_final returned APR_ECRYPT", rv != APR_ECRYPT);
+    ABTS_ASSERT(tc, "apr_crypto_digest_final returned APR_EPADDING", rv != APR_EPADDING);
+    ABTS_ASSERT(tc, "apr_crypto_digest_final returned APR_ENOSPACE", rv != APR_ENOSPACE);
+    ABTS_ASSERT(tc, "failed to apr_crypto_digest_final", rv == APR_SUCCESS);
+
+    apr_crypto_digest_cleanup(digest);
+
+    return rv;
+
+}
+
 /**
  * Interoperability test.
  *
@@ -550,6 +942,130 @@ static void crypto_block_cross(abts_case *tc, apr_pool_t *pool,
 }
 
 /**
+ * Interoperability test.
+ *
+ * data must point at an array of two driver structures. Data will be signed
+ * with the first driver, and verified with the second.
+ *
+ * If the two drivers interoperate, the test passes.
+ */
+static void crypto_cross_hash(abts_case *tc, apr_pool_t *pool,
+        const apr_crypto_driver_t **drivers,
+        const apr_crypto_block_key_digest_e digest,
+        const unsigned char *in, apr_size_t inlen,
+        const char *description)
+{
+    const apr_crypto_driver_t *driver1 = drivers[0];
+    const apr_crypto_driver_t *driver2 = drivers[1];
+    apr_crypto_t *f1 = NULL;
+    apr_crypto_t *f2 = NULL;
+    const apr_crypto_key_t *key7 = NULL;
+    const apr_crypto_key_t *key8 = NULL;
+
+    apr_size_t blockSize = 0;
+    unsigned char *hash1 = NULL;
+    unsigned char *hash2 = NULL;
+    apr_size_t hash1Len = 0;
+    apr_size_t hash2Len = 0;
+
+    apr_status_t rv;
+
+    f1 = make(tc, pool, driver1);
+    f2 = make(tc, pool, driver2);
+
+    key7 = keyhash(tc, pool, driver1, f1, digest, description);
+    key8 = keyhash(tc, pool, driver2, f2, digest, description);
+
+    blockSize = 0;
+    rv = hash_block(tc, pool, driver1, f1, key7, in, inlen,
+            &hash1, &hash1Len, &blockSize, description);
+
+    if (APR_SUCCESS != rv && driver1 && driver2) {
+        fprintf(stderr, "key hash cross error %d: %s %s/%s\n", rv, description,
+                apr_crypto_driver_name(driver1),
+                apr_crypto_driver_name(driver2));
+    }
+
+    rv = hash_block(tc, pool, driver2, f2, key8, in,
+            inlen, &hash2, &hash2Len, &blockSize,
+            description);
+
+    if (APR_SUCCESS != rv && driver1 && driver2) {
+        fprintf(stderr, "key hash cross error %d: %s %s/%s\n", rv, description,
+                apr_crypto_driver_name(driver1),
+                apr_crypto_driver_name(driver2));
+    }
+
+    if (driver1 && driver2
+            && (!hash1 || !hash2 || hash1Len != hash2Len
+                    || memcmp(hash1, hash2, hash1Len))) {
+        fprintf(stderr, "key hash cross mismatch (hash): %s %s/%s\n", description,
+                apr_crypto_driver_name(driver1),
+                apr_crypto_driver_name(driver2));
+    }
+
+}
+
+/**
+ * Interoperability test.
+ *
+ * data must point at an array of two driver structures. Data will be signed
+ * with the first driver, and verified with the second.
+ *
+ * If the two drivers interoperate, the test passes.
+ */
+static void crypto_cross_sign(abts_case *tc, apr_pool_t *pool,
+        const apr_crypto_driver_t **drivers,
+        const apr_crypto_block_key_digest_e digest,
+        const apr_crypto_block_key_type_e type,
+        const apr_crypto_block_key_mode_e mode, int doPad,
+        const unsigned char *in, apr_size_t inlen, apr_size_t secretLen,
+        const char *description)
+{
+    const apr_crypto_driver_t *driver1 = drivers[0];
+    const apr_crypto_driver_t *driver2 = drivers[1];
+    apr_crypto_t *f1 = NULL;
+    apr_crypto_t *f2 = NULL;
+    const apr_crypto_key_t *key7 = NULL;
+    const apr_crypto_key_t *key8 = NULL;
+
+    apr_size_t blockSize = 0;
+    unsigned char *signature = NULL;
+    apr_size_t signatureLen = 0;
+
+    apr_status_t rv;
+
+    f1 = make(tc, pool, driver1);
+    f2 = make(tc, pool, driver2);
+
+    key7 = keyhmac(tc, pool, driver1, f1, digest, type, mode, doPad, secretLen,
+            description);
+    key8 = keyhmac(tc, pool, driver2, f2, digest, type, mode, doPad, secretLen,
+            description);
+
+    blockSize = 0;
+    rv = sign_block(tc, pool, driver1, f1, key7, in, inlen,
+            &signature, &signatureLen, &blockSize, description);
+
+    if (APR_SUCCESS != rv && driver1 && driver2) {
+        fprintf(stderr, "key hmac cross mismatch (sign): %s %s/%s\n", description,
+                apr_crypto_driver_name(driver1),
+                apr_crypto_driver_name(driver2));
+    }
+
+    rv = verify_block(tc, pool, driver2, f2, key8, in,
+            inlen, signature, signatureLen, &blockSize,
+            description);
+
+    if (APR_SUCCESS != rv && driver1 && driver2) {
+        fprintf(stderr, "key hmac cross mismatch (verify): %s %s/%s\n", description,
+                apr_crypto_driver_name(driver1),
+                apr_crypto_driver_name(driver2));
+    }
+
+}
+
+/**
  * Test initialisation.
  */
 static void test_crypto_init(abts_case *tc, void *data)
@@ -559,10 +1075,7 @@ static void test_crypto_init(abts_case *tc, void *data)
 
     apr_pool_create(&pool, NULL);
 
-    /* Use root pool (top level init) so that the crypto lib is
-     * not cleanup on pool destroy below (e.g. openssl can't re-init).
-     */
-    rv = apr_crypto_init(apr_pool_parent_get(pool));
+    rv = apr_crypto_init(pool);
     ABTS_ASSERT(tc, "failed to init apr_crypto", rv == APR_SUCCESS);
 
     apr_pool_destroy(pool);
@@ -661,6 +1174,62 @@ static void test_crypto_block_openssl(abts_case *tc, void *data)
 }
 
 /**
+ * Simple test of OpenSSL block signatures.
+ */
+static void test_crypto_digest_openssl(abts_case *tc, void *data)
+{
+    apr_pool_t *pool = NULL;
+    const apr_crypto_driver_t *drivers[] = { NULL, NULL };
+
+    const unsigned char *in = (const unsigned char *) ALIGNED_STRING;
+    apr_size_t inlen = sizeof(ALIGNED_STRING);
+
+    apr_pool_create(&pool, NULL);
+    drivers[0] = get_openssl_driver(tc, pool);
+    drivers[1] = get_openssl_driver(tc, pool);
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_3DES_192, APR_MODE_CBC, 0, in, inlen, 24,
+            "KEY_3DES_192/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_3DES_192, APR_MODE_ECB, 0, in, inlen, 24,
+            "KEY_3DES_192/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_256, APR_MODE_CBC, 0, in, inlen, 32,
+            "KEY_AES_256/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_256, APR_MODE_ECB, 0, in, inlen, 32,
+            "KEY_AES_256/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_192, APR_MODE_CBC, 0, in, inlen, 24,
+            "KEY_AES_192/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_192, APR_MODE_ECB, 0, in, inlen, 24,
+            "KEY_AES_192/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_128, APR_MODE_CBC, 0, in, inlen, 16,
+            "KEY_AES_128/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_128, APR_MODE_ECB, 0, in, inlen, 16,
+            "KEY_AES_128/MODE_ECB");
+
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_MD5, in, inlen,
+            "DIGEST MD5");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA1, in, inlen,
+            "DIGEST SHA1");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA224, in, inlen,
+            "DIGEST SHA224");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256, in, inlen,
+            "DIGEST SHA256");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA384, in, inlen,
+            "DIGEST SHA384");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA512, in, inlen,
+            "DIGEST SHA512");
+
+    apr_pool_destroy(pool);
+
+}
+
+/**
  * Simple test of NSS block crypt.
  */
 static void test_crypto_block_nss(abts_case *tc, void *data)
@@ -695,6 +1264,61 @@ static void test_crypto_block_nss(abts_case *tc, void *data)
 }
 
 /**
+ * Simple test of NSS block sign/verify.
+ */
+static void test_crypto_digest_nss(abts_case *tc, void *data)
+{
+    apr_pool_t *pool = NULL;
+    const apr_crypto_driver_t *drivers[] = { NULL, NULL };
+
+    const unsigned char *in = (const unsigned char *) ALIGNED_STRING;
+    apr_size_t inlen = sizeof(ALIGNED_STRING);
+
+    apr_pool_create(&pool, NULL);
+    drivers[0] = get_nss_driver(tc, pool);
+    drivers[1] = get_nss_driver(tc, pool);
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_3DES_192, APR_MODE_CBC, 0, in, inlen, 24,
+            "KEY_3DES_192/MODE_CBC");
+    /* KEY_3DES_192 / MODE_ECB doesn't work on NSS */
+    /* crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256, KEY_3DES_192, MODE_ECB, 0, in, inlen, "KEY_3DES_192/MODE_ECB"); */
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_256, APR_MODE_CBC, 0, in, inlen, 32,
+            "KEY_AES_256/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_256, APR_MODE_ECB, 0, in, inlen, 32,
+            "KEY_AES_256/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_192, APR_MODE_CBC, 0, in, inlen, 24,
+            "KEY_AES_192/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_192, APR_MODE_ECB, 0, in, inlen, 24,
+            "KEY_AES_192/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_128, APR_MODE_CBC, 0, in, inlen, 16,
+            "KEY_AES_128/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_128, APR_MODE_ECB, 0, in, inlen, 16,
+            "KEY_AES_128/MODE_ECB");
+
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_MD5, in, inlen,
+            "DIGEST MD5");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA1, in, inlen,
+            "DIGEST SHA1");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA224, in, inlen,
+            "DIGEST SHA224");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256, in, inlen,
+            "DIGEST SHA256");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA384, in, inlen,
+            "DIGEST SHA384");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA512, in, inlen,
+            "DIGEST SHA512");
+
+    apr_pool_destroy(pool);
+
+}
+
+/**
  * Simple test of Common Crypto block crypt.
  */
 static void test_crypto_block_commoncrypto(abts_case *tc, void *data)
@@ -724,6 +1348,62 @@ static void test_crypto_block_commoncrypto(abts_case *tc, void *data)
             inlen, 16, "KEY_AES_128/MODE_CBC");
     crypto_block_cross(tc, pool, drivers, APR_KEY_AES_128, APR_MODE_ECB, 0, in,
             inlen, 16, "KEY_AES_128/MODE_ECB");
+    apr_pool_destroy(pool);
+
+}
+
+/**
+ * Simple test of Common Crypto block sign.
+ */
+static void test_crypto_digest_commoncrypto(abts_case *tc, void *data)
+{
+    apr_pool_t *pool = NULL;
+    const apr_crypto_driver_t *drivers[] = { NULL, NULL };
+
+    const unsigned char *in = (const unsigned char *) ALIGNED_STRING;
+    apr_size_t inlen = sizeof(ALIGNED_STRING);
+
+    apr_pool_create(&pool, NULL);
+    drivers[0] = get_commoncrypto_driver(tc, pool);
+    drivers[1] = get_commoncrypto_driver(tc, pool);
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_3DES_192, APR_MODE_CBC, 0, in, inlen, 24,
+            "KEY_3DES_192/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_3DES_192, APR_MODE_ECB, 0, in, inlen, 24,
+            "KEY_3DES_192/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_256, APR_MODE_CBC, 0, in, inlen, 32,
+            "KEY_AES_256/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_256, APR_MODE_ECB, 0, in, inlen, 32,
+            "KEY_AES_256/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_192, APR_MODE_CBC, 0, in, inlen, 24,
+            "KEY_AES_192/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_192, APR_MODE_ECB, 0, in, inlen, 24,
+            "KEY_AES_192/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_128, APR_MODE_CBC, 0, in, inlen, 16,
+            "KEY_AES_128/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_128, APR_MODE_ECB, 0, in, inlen, 16,
+            "KEY_AES_128/MODE_ECB");
+
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_MD5, in, inlen,
+            "DIGEST MD5");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA1, in, inlen,
+            "DIGEST SHA1");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA224, in, inlen,
+            "DIGEST SHA224");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256, in, inlen,
+            "DIGEST SHA256");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA384, in, inlen,
+            "DIGEST SHA384");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA512, in, inlen,
+            "DIGEST SHA512");
+
     apr_pool_destroy(pool);
 
 }
@@ -801,6 +1481,120 @@ static void test_crypto_block_openssl_nss(abts_case *tc, void *data)
 }
 
 /**
+ * Sign NSS, verify OpenSSL.
+ */
+static void test_crypto_digest_nss_openssl(abts_case *tc, void *data)
+{
+    apr_pool_t *pool = NULL;
+    const apr_crypto_driver_t *drivers[] = { NULL, NULL };
+
+    const unsigned char *in = (const unsigned char *) ALIGNED_STRING;
+    apr_size_t inlen = sizeof(ALIGNED_STRING);
+
+    apr_pool_create(&pool, NULL);
+    drivers[0] = get_nss_driver(tc, pool);
+    drivers[1] = get_openssl_driver(tc, pool);
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_3DES_192, APR_MODE_CBC, 0, in, inlen, 24,
+            "KEY_3DES_192/MODE_CBC");
+    /* KEY_3DES_192 / MODE_ECB doesn't work on NSS */
+/*    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_3DES_192, APR_MODE_ECB, 0, in, inlen, 24,
+            "KEY_3DES_192/MODE_ECB");*/
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_256, APR_MODE_CBC, 0, in, inlen, 32,
+            "KEY_AES_256/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_256, APR_MODE_ECB, 0, in, inlen, 32,
+            "KEY_AES_256/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_192, APR_MODE_CBC, 0, in, inlen, 24,
+            "KEY_AES_192/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_192, APR_MODE_ECB, 0, in, inlen, 24,
+            "KEY_AES_192/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_128, APR_MODE_CBC, 0, in, inlen, 16,
+            "KEY_AES_128/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_128, APR_MODE_ECB, 0, in, inlen, 16,
+            "KEY_AES_128/MODE_ECB");
+
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_MD5, in, inlen,
+            "DIGEST MD5");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA1, in, inlen,
+            "DIGEST SHA1");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA224, in, inlen,
+            "DIGEST SHA224");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256, in, inlen,
+            "DIGEST SHA256");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA384, in, inlen,
+            "DIGEST SHA384");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA512, in, inlen,
+            "DIGEST SHA512");
+
+    apr_pool_destroy(pool);
+
+}
+
+/**
+ * Sign OpenSSL, verify NSS.
+ */
+static void test_crypto_digest_openssl_nss(abts_case *tc, void *data)
+{
+    apr_pool_t *pool = NULL;
+    const apr_crypto_driver_t *drivers[] = { NULL, NULL };
+
+    const unsigned char *in = (const unsigned char *) ALIGNED_STRING;
+    apr_size_t inlen = sizeof(ALIGNED_STRING);
+
+    apr_pool_create(&pool, NULL);
+    drivers[0] = get_openssl_driver(tc, pool);
+    drivers[1] = get_nss_driver(tc, pool);
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_3DES_192, APR_MODE_CBC, 0, in, inlen, 24,
+            "KEY_3DES_192/MODE_CBC");
+    /* KEY_3DES_192 / MODE_ECB doesn't work on NSS */
+/*    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_3DES_192, APR_MODE_ECB, 0, in, inlen, 24,
+            "KEY_3DES_192/MODE_ECB");*/
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_256, APR_MODE_CBC, 0, in, inlen, 32,
+            "KEY_AES_256/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_256, APR_MODE_ECB, 0, in, inlen, 32,
+            "KEY_AES_256/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_192, APR_MODE_CBC, 0, in, inlen, 24,
+            "KEY_AES_192/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_192, APR_MODE_ECB, 0, in, inlen, 24,
+            "KEY_AES_192/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_128, APR_MODE_CBC, 0, in, inlen, 16,
+            "KEY_AES_128/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_128, APR_MODE_ECB, 0, in, inlen, 16,
+            "KEY_AES_128/MODE_ECB");
+
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_MD5, in, inlen,
+            "DIGEST MD5");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA1, in, inlen,
+            "DIGEST SHA1");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA224, in, inlen,
+            "DIGEST SHA224");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256, in, inlen,
+            "DIGEST SHA256");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA384, in, inlen,
+            "DIGEST SHA384");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA512, in, inlen,
+            "DIGEST SHA512");
+
+    apr_pool_destroy(pool);
+
+}
+
+/**
  * Encrypt OpenSSL, decrypt CommonCrypto.
  */
 static void test_crypto_block_openssl_commoncrypto(abts_case *tc, void *data)
@@ -837,6 +1631,63 @@ static void test_crypto_block_openssl_commoncrypto(abts_case *tc, void *data)
 }
 
 /**
+ * Sign OpenSSL, verify CommonCrypto.
+ */
+static void test_crypto_digest_openssl_commoncrypto(abts_case *tc, void *data)
+{
+    apr_pool_t *pool = NULL;
+    const apr_crypto_driver_t *drivers[] = { NULL, NULL };
+
+    const unsigned char *in = (const unsigned char *) ALIGNED_STRING;
+    apr_size_t inlen = sizeof(ALIGNED_STRING);
+
+    apr_pool_create(&pool, NULL);
+    drivers[0] = get_openssl_driver(tc, pool);
+    drivers[1] = get_commoncrypto_driver(tc, pool);
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_3DES_192, APR_MODE_CBC, 0, in, inlen, 24,
+            "KEY_3DES_192/MODE_CBC");
+    /* KEY_3DES_192 / MODE_ECB doesn't work on NSS */
+/*    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_3DES_192, APR_MODE_ECB, 0, in, inlen, 24,
+            "KEY_3DES_192/MODE_ECB");*/
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_256, APR_MODE_CBC, 0, in, inlen, 32,
+            "KEY_AES_256/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_256, APR_MODE_ECB, 0, in, inlen, 32,
+            "KEY_AES_256/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_192, APR_MODE_CBC, 0, in, inlen, 24,
+            "KEY_AES_192/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_192, APR_MODE_ECB, 0, in, inlen, 24,
+            "KEY_AES_192/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_128, APR_MODE_CBC, 0, in, inlen, 16,
+            "KEY_AES_128/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_128, APR_MODE_ECB, 0, in, inlen, 16,
+            "KEY_AES_128/MODE_ECB");
+
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_MD5, in, inlen,
+            "DIGEST MD5");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA1, in, inlen,
+            "DIGEST SHA1");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA224, in, inlen,
+            "DIGEST SHA224");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256, in, inlen,
+            "DIGEST SHA256");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA384, in, inlen,
+            "DIGEST SHA384");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA512, in, inlen,
+            "DIGEST SHA512");
+
+    apr_pool_destroy(pool);
+
+}
+
+/**
  * Encrypt OpenSSL, decrypt CommonCrypto.
  */
 static void test_crypto_block_commoncrypto_openssl(abts_case *tc, void *data)
@@ -868,6 +1719,63 @@ static void test_crypto_block_commoncrypto_openssl(abts_case *tc, void *data)
             inlen, 16, "KEY_AES_128/MODE_CBC");
     crypto_block_cross(tc, pool, drivers, APR_KEY_AES_128, APR_MODE_ECB, 0, in,
             inlen, 16, "KEY_AES_128/MODE_ECB");
+    apr_pool_destroy(pool);
+
+}
+
+/**
+ * Sign OpenSSL, verify CommonCrypto.
+ */
+static void test_crypto_digest_commoncrypto_openssl(abts_case *tc, void *data)
+{
+    apr_pool_t *pool = NULL;
+    const apr_crypto_driver_t *drivers[] = { NULL, NULL };
+
+    const unsigned char *in = (const unsigned char *) ALIGNED_STRING;
+    apr_size_t inlen = sizeof(ALIGNED_STRING);
+
+    apr_pool_create(&pool, NULL);
+    drivers[0] = get_commoncrypto_driver(tc, pool);
+    drivers[1] = get_openssl_driver(tc, pool);
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_3DES_192, APR_MODE_CBC, 0, in, inlen, 24,
+            "KEY_3DES_192/MODE_CBC");
+    /* KEY_3DES_192 / MODE_ECB doesn't work on NSS */
+/*    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_3DES_192, APR_MODE_ECB, 0, in, inlen, 24,
+            "KEY_3DES_192/MODE_ECB");*/
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_256, APR_MODE_CBC, 0, in, inlen, 32,
+            "KEY_AES_256/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_256, APR_MODE_ECB, 0, in, inlen, 32,
+            "KEY_AES_256/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_192, APR_MODE_CBC, 0, in, inlen, 24,
+            "KEY_AES_192/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_192, APR_MODE_ECB, 0, in, inlen, 24,
+            "KEY_AES_192/MODE_ECB");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_128, APR_MODE_CBC, 0, in, inlen, 16,
+            "KEY_AES_128/MODE_CBC");
+    crypto_cross_sign(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256,
+            APR_KEY_AES_128, APR_MODE_ECB, 0, in, inlen, 16,
+            "KEY_AES_128/MODE_ECB");
+
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_MD5, in, inlen,
+            "DIGEST MD5");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA1, in, inlen,
+            "DIGEST SHA1");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA224, in, inlen,
+            "DIGEST SHA224");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA256, in, inlen,
+            "DIGEST SHA256");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA384, in, inlen,
+            "DIGEST SHA384");
+    crypto_cross_hash(tc, pool, drivers, APR_CRYPTO_DIGEST_SHA512, in, inlen,
+            "DIGEST SHA512");
+
     apr_pool_destroy(pool);
 
 }
@@ -1699,7 +2607,7 @@ abts_suite *testcrypto(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
 
-    /* test simple init and shutdown (keep first) */
+    /* test simple init and shutdown */
     abts_run_test(suite, test_crypto_init, NULL);
 
     /* test key parsing - openssl */
@@ -1714,11 +2622,17 @@ abts_suite *testcrypto(abts_suite *suite)
     /* test a simple encrypt / decrypt operation - openssl */
     abts_run_test(suite, test_crypto_block_openssl, NULL);
 
+    /* test a simple sign / verify operation - openssl */
+    abts_run_test(suite, test_crypto_digest_openssl, NULL);
+
     /* test a padded encrypt / decrypt operation - openssl */
     abts_run_test(suite, test_crypto_block_openssl_pad, NULL);
 
     /* test a simple encrypt / decrypt operation - nss */
     abts_run_test(suite, test_crypto_block_nss, NULL);
+
+    /* test a simple sign / verify operation - nss */
+    abts_run_test(suite, test_crypto_digest_nss, NULL);
 
     /* test a padded encrypt / decrypt operation - nss */
     abts_run_test(suite, test_crypto_block_nss_pad, NULL);
@@ -1726,8 +2640,12 @@ abts_suite *testcrypto(abts_suite *suite)
     /* test a simple encrypt / decrypt operation - commoncrypto */
     abts_run_test(suite, test_crypto_block_commoncrypto, NULL);
 
+    /* test a simple sign / verify operation - commoncrypto */
+    abts_run_test(suite, test_crypto_digest_commoncrypto, NULL);
+
     /* test a padded encrypt / decrypt operation - commoncrypto */
     abts_run_test(suite, test_crypto_block_commoncrypto_pad, NULL);
+
 
     /* test encrypt nss / decrypt openssl */
     abts_run_test(suite, test_crypto_block_nss_openssl, NULL);
@@ -1735,11 +2653,19 @@ abts_suite *testcrypto(abts_suite *suite)
     /* test padded encrypt nss / decrypt openssl */
     abts_run_test(suite, test_crypto_block_nss_openssl_pad, NULL);
 
+    /* test sign nss / verify openssl */
+    abts_run_test(suite, test_crypto_digest_nss_openssl, NULL);
+
+
     /* test encrypt openssl / decrypt nss */
     abts_run_test(suite, test_crypto_block_openssl_nss, NULL);
 
     /* test padded encrypt openssl / decrypt nss */
     abts_run_test(suite, test_crypto_block_openssl_nss_pad, NULL);
+
+    /* test sign openssl / verify nss */
+    abts_run_test(suite, test_crypto_digest_openssl_nss, NULL);
+
 
     /* test encrypt openssl / decrypt commoncrypto */
     abts_run_test(suite, test_crypto_block_openssl_commoncrypto, NULL);
@@ -1747,11 +2673,19 @@ abts_suite *testcrypto(abts_suite *suite)
     /* test padded encrypt openssl / decrypt commoncrypto */
     abts_run_test(suite, test_crypto_block_openssl_commoncrypto_pad, NULL);
 
+    /* test sign openssl / verify commoncrypto */
+    abts_run_test(suite, test_crypto_digest_openssl_commoncrypto, NULL);
+
+
     /* test encrypt commoncrypto / decrypt openssl */
     abts_run_test(suite, test_crypto_block_commoncrypto_openssl, NULL);
 
     /* test padded encrypt commoncrypto / decrypt openssl */
     abts_run_test(suite, test_crypto_block_commoncrypto_openssl_pad, NULL);
+
+    /* test sign commoncrypto / verify openssl */
+    abts_run_test(suite, test_crypto_digest_commoncrypto_openssl, NULL);
+
 
     /* test block key types openssl */
     abts_run_test(suite, test_crypto_get_block_key_types_openssl, NULL);
