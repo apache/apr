@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "apr.h"
 #include "apr_lib.h"
 #include "apu.h"
 #include "apr_private.h"
@@ -33,6 +34,7 @@
 #if APU_HAVE_CRYPTO
 
 #include <CommonCrypto/CommonCrypto.h>
+#include <CommonCrypto/CommonDigest.h>
 
 #define LOG_PREFIX "apr_crypto_commoncrypto: "
 
@@ -41,6 +43,7 @@ struct apr_crypto_t
     apr_pool_t *pool;
     const apr_crypto_driver_t *provider;
     apu_err_t *result;
+    apr_hash_t *digests;
     apr_hash_t *types;
     apr_hash_t *modes;
     apr_random_t *rng;
@@ -51,12 +54,16 @@ struct apr_crypto_key_t
     apr_pool_t *pool;
     const apr_crypto_driver_t *provider;
     const apr_crypto_t *f;
+    const apr_crypto_key_rec_t *rec;
+    unsigned char *key;
+    void *hash;
     CCAlgorithm algorithm;
     CCOptions options;
-    unsigned char *key;
     int keyLen;
     int ivSize;
+    CCHmacAlgorithm hmac;
     apr_size_t blockSize;
+    apr_size_t digestSize;
 };
 
 struct apr_crypto_block_t
@@ -67,6 +74,27 @@ struct apr_crypto_block_t
     const apr_crypto_key_t *key;
     CCCryptorRef ref;
 };
+
+struct apr_crypto_digest_t
+{
+    apr_pool_t *pool;
+    const apr_crypto_driver_t *provider;
+    const apr_crypto_t *f;
+    const apr_crypto_key_t *key;
+    apr_crypto_digest_rec_t *rec;
+    CCHmacContext *hmac;
+    void *hash;
+    unsigned char *md;
+};
+
+static struct apr_crypto_block_key_digest_t key_digests[] =
+{
+{ APR_CRYPTO_DIGEST_MD5, 16, 64 },
+{ APR_CRYPTO_DIGEST_SHA1, 20, 64 },
+{ APR_CRYPTO_DIGEST_SHA224, 28, 64 },
+{ APR_CRYPTO_DIGEST_SHA256, 32, 64 },
+{ APR_CRYPTO_DIGEST_SHA384, 48, 128 },
+{ APR_CRYPTO_DIGEST_SHA512, 64, 128 } };
 
 static struct apr_crypto_block_key_type_t key_types[] =
 {
@@ -95,16 +123,25 @@ static apr_status_t crypto_error(const apu_err_t **result,
  */
 static apr_status_t crypto_shutdown(void)
 {
-    return apr_crypto_lib_term("commoncrypto");
+    return APR_SUCCESS;
+}
+
+static apr_status_t crypto_shutdown_helper(void *data)
+{
+    return crypto_shutdown();
 }
 
 /**
  * Initialise the crypto library and perform one time initialisation.
  */
 static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
-                                const apu_err_t **result)
+        const apu_err_t **result)
 {
-    return apr_crypto_lib_init("commoncrypto", params, result, pool);
+
+    apr_pool_cleanup_register(pool, pool, crypto_shutdown_helper,
+            apr_pool_cleanup_null);
+
+    return APR_SUCCESS;
 }
 
 /**
@@ -129,6 +166,25 @@ static apr_status_t crypto_block_cleanup_helper(void *data)
 {
     apr_crypto_block_t *block = (apr_crypto_block_t *) data;
     return crypto_block_cleanup(block);
+}
+
+/**
+ * @brief Clean sign / verify context.
+ * @note After cleanup, a context is free to be reused if necessary.
+ * @param ctx The digest context to use.
+ * @return Returns APR_ENOTIMPL if not supported.
+ */
+static apr_status_t crypto_digest_cleanup(apr_crypto_digest_t *ctx)
+{
+
+    return APR_SUCCESS;
+
+}
+
+static apr_status_t crypto_digest_cleanup_helper(void *data)
+{
+    apr_crypto_digest_t *digest = (apr_crypto_digest_t *) data;
+    return crypto_digest_cleanup(digest);
 }
 
 /**
@@ -168,6 +224,7 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
 {
     apr_crypto_t *f = apr_pcalloc(pool, sizeof(apr_crypto_t));
     apr_status_t rv;
+    int i;
 
     if (!f) {
         return APR_ENOMEM;
@@ -196,27 +253,55 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
         return APR_ENOMEM;
     }
 
+    f->digests = apr_hash_make(pool);
+    if (!f->digests) {
+        return APR_ENOMEM;
+    }
+    apr_hash_set(f->digests, "md2", APR_HASH_KEY_STRING, &(key_digests[i = 0]));
+    apr_hash_set(f->digests, "md4", APR_HASH_KEY_STRING, &(key_digests[++i]));
+    apr_hash_set(f->digests, "md5", APR_HASH_KEY_STRING, &(key_digests[++i]));
+    apr_hash_set(f->digests, "sha1", APR_HASH_KEY_STRING, &(key_digests[++i]));
+    apr_hash_set(f->digests, "sha224", APR_HASH_KEY_STRING, &(key_digests[++i]));
+    apr_hash_set(f->digests, "sha256", APR_HASH_KEY_STRING, &(key_digests[++i]));
+    apr_hash_set(f->digests, "sha384", APR_HASH_KEY_STRING, &(key_digests[++i]));
+    apr_hash_set(f->digests, "sha512", APR_HASH_KEY_STRING, &(key_digests[++i]));
+
     f->types = apr_hash_make(pool);
     if (!f->types) {
         return APR_ENOMEM;
     }
-    apr_hash_set(f->types, "3des192", APR_HASH_KEY_STRING, &(key_types[0]));
-    apr_hash_set(f->types, "aes128", APR_HASH_KEY_STRING, &(key_types[1]));
-    apr_hash_set(f->types, "aes192", APR_HASH_KEY_STRING, &(key_types[2]));
-    apr_hash_set(f->types, "aes256", APR_HASH_KEY_STRING, &(key_types[3]));
+    apr_hash_set(f->types, "3des192", APR_HASH_KEY_STRING, &(key_types[i = 0]));
+    apr_hash_set(f->types, "aes128", APR_HASH_KEY_STRING, &(key_types[++i]));
+    apr_hash_set(f->types, "aes192", APR_HASH_KEY_STRING, &(key_types[++i]));
+    apr_hash_set(f->types, "aes256", APR_HASH_KEY_STRING, &(key_types[++i]));
 
     f->modes = apr_hash_make(pool);
     if (!f->modes) {
         return APR_ENOMEM;
     }
-    apr_hash_set(f->modes, "ecb", APR_HASH_KEY_STRING, &(key_modes[0]));
-    apr_hash_set(f->modes, "cbc", APR_HASH_KEY_STRING, &(key_modes[1]));
+    apr_hash_set(f->modes, "ecb", APR_HASH_KEY_STRING, &(key_modes[i = 0]));
+    apr_hash_set(f->modes, "cbc", APR_HASH_KEY_STRING, &(key_modes[++i]));
 
     apr_pool_cleanup_register(pool, f, crypto_cleanup_helper,
             apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 
+}
+
+/**
+ * @brief Get a hash table of key digests, keyed by the name of the digest against
+ * a pointer to apr_crypto_block_key_digest_t.
+ *
+ * @param digests - hashtable of key digests keyed to constants.
+ * @param f - encryption context
+ * @return APR_SUCCESS for success
+ */
+static apr_status_t crypto_get_block_key_digests(apr_hash_t **digests,
+        const apr_crypto_t *f)
+{
+    *digests = f->digests;
+    return APR_SUCCESS;
 }
 
 /**
@@ -350,6 +435,36 @@ static apr_status_t crypto_cipher_mechanism(apr_crypto_key_t *key,
     return APR_SUCCESS;
 }
 
+static apr_status_t crypto_digest_mechanism(apr_crypto_key_t *key,
+        const apr_crypto_block_key_digest_e digest, apr_pool_t *p)
+{
+    /* determine the digest algorithm to be used */
+    switch (digest) {
+    case APR_CRYPTO_DIGEST_MD5:
+        key->digestSize = CC_MD5_DIGEST_LENGTH;
+        break;
+    case APR_CRYPTO_DIGEST_SHA1:
+        key->digestSize = CC_SHA1_DIGEST_LENGTH;
+        break;
+    case APR_CRYPTO_DIGEST_SHA224:
+        key->digestSize = CC_SHA224_DIGEST_LENGTH;
+        break;
+    case APR_CRYPTO_DIGEST_SHA256:
+        key->digestSize = CC_SHA256_DIGEST_LENGTH;
+        break;
+    case APR_CRYPTO_DIGEST_SHA384:
+        key->digestSize = CC_SHA384_DIGEST_LENGTH;
+        break;
+    case APR_CRYPTO_DIGEST_SHA512:
+        key->digestSize = CC_SHA512_DIGEST_LENGTH;
+        break;
+    default:
+        return APR_ENODIGEST;
+    }
+
+    return APR_SUCCESS;
+}
+
 /**
  * @brief Create a key from the provided secret or passphrase. The key is cleaned
  *        up when the context is cleaned, and may be reused with multiple encryption
@@ -379,18 +494,20 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
         return APR_ENOMEM;
     }
 
+    key->pool = p;
     key->f = f;
     key->provider = f->provider;
-
-    /* decide on what cipher mechanism we will be using */
-    rv = crypto_cipher_mechanism(key, rec->type, rec->mode, rec->pad, p);
-    if (APR_SUCCESS != rv) {
-        return rv;
-    }
+    key->rec = rec;
 
     switch (rec->ktype) {
 
     case APR_CRYPTO_KTYPE_PASSPHRASE: {
+
+        /* decide on what cipher mechanism we will be using */
+        rv = crypto_cipher_mechanism(key, rec->type, rec->mode, rec->pad, p);
+        if (APR_SUCCESS != rv) {
+            return rv;
+        }
 
         /* generate the key */
         if ((f->result->rc = CCKeyDerivationPBKDF(kCCPBKDF2,
@@ -406,6 +523,12 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
 
     case APR_CRYPTO_KTYPE_SECRET: {
 
+        /* decide on what cipher mechanism we will be using */
+        rv = crypto_cipher_mechanism(key, rec->type, rec->mode, rec->pad, p);
+        if (APR_SUCCESS != rv) {
+            return rv;
+        }
+
         /* sanity check - key correct size? */
         if (rec->k.secret.secretLen != key->keyLen) {
             return APR_EKEYLENGTH;
@@ -415,6 +538,87 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
         memcpy(key->key, rec->k.secret.secret, rec->k.secret.secretLen);
 
         break;
+    }
+
+    case APR_CRYPTO_KTYPE_HASH: {
+
+        /* decide on what digest mechanism we will be using */
+        rv = crypto_digest_mechanism(key, rec->k.hash.digest, p);
+        if (APR_SUCCESS != rv) {
+            return rv;
+        }
+
+        switch (rec->k.hash.digest) {
+        case APR_CRYPTO_DIGEST_MD5:
+            key->digestSize = CC_MD5_DIGEST_LENGTH;
+            break;
+        case APR_CRYPTO_DIGEST_SHA1:
+            key->digestSize = CC_SHA1_DIGEST_LENGTH;
+            break;
+        case APR_CRYPTO_DIGEST_SHA224:
+            key->digestSize = CC_SHA224_DIGEST_LENGTH;
+            break;
+        case APR_CRYPTO_DIGEST_SHA256:
+            key->digestSize = CC_SHA256_DIGEST_LENGTH;
+            break;
+        case APR_CRYPTO_DIGEST_SHA384:
+            key->digestSize = CC_SHA384_DIGEST_LENGTH;
+            break;
+        case APR_CRYPTO_DIGEST_SHA512:
+            key->digestSize = CC_SHA512_DIGEST_LENGTH;
+            break;
+        default:
+            return APR_ENODIGEST;
+        }
+
+        break;
+    }
+    case APR_CRYPTO_KTYPE_HMAC: {
+
+        /* decide on what cipher mechanism we will be using */
+        rv = crypto_cipher_mechanism(key, rec->type, rec->mode, rec->pad, p);
+        if (APR_SUCCESS != rv) {
+            return rv;
+        }
+
+        /* decide on what digest mechanism we will be using */
+        rv = crypto_digest_mechanism(key, rec->k.hmac.digest, p);
+        if (APR_SUCCESS != rv) {
+            return rv;
+        }
+
+        key->hmac = rec->k.hmac.digest;
+
+        switch (rec->k.hmac.digest) {
+        case APR_CRYPTO_DIGEST_MD5:
+            key->hmac = kCCHmacAlgMD5;
+            break;
+        case APR_CRYPTO_DIGEST_SHA1:
+            key->hmac = kCCHmacAlgSHA1;
+            break;
+        case APR_CRYPTO_DIGEST_SHA224:
+            key->hmac = kCCHmacAlgSHA224;
+            break;
+        case APR_CRYPTO_DIGEST_SHA256:
+            key->hmac = kCCHmacAlgSHA256;
+            break;
+        case APR_CRYPTO_DIGEST_SHA384:
+            key->hmac = kCCHmacAlgSHA384;
+            break;
+        case APR_CRYPTO_DIGEST_SHA512:
+            key->hmac = kCCHmacAlgSHA512;
+            break;
+        default:
+            return APR_ENODIGEST;
+        }
+
+        break;
+    }
+
+    case APR_CRYPTO_KTYPE_CMAC: {
+
+        return APR_ENOTIMPL;
+
     }
 
     default: {
@@ -463,6 +667,7 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
 {
     apr_status_t rv;
     apr_crypto_key_t *key = *k;
+    apr_crypto_key_rec_t *rec;
 
     if (!key) {
         *k = key = apr_pcalloc(p, sizeof *key);
@@ -473,6 +678,11 @@ static apr_status_t crypto_passphrase(apr_crypto_key_t **k, apr_size_t *ivSize,
 
     key->f = f;
     key->provider = f->provider;
+    key->rec = rec = apr_pcalloc(p, sizeof(apr_crypto_key_rec_t));
+    if (!key->rec) {
+        return APR_ENOMEM;
+    }
+    rec->ktype = APR_CRYPTO_KTYPE_PASSPHRASE;
 
     /* decide on what cipher mechanism we will be using */
     rv = crypto_cipher_mechanism(key, type, mode, doPad, p);
@@ -530,59 +740,72 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
     apr_pool_cleanup_register(p, block, crypto_block_cleanup_helper,
             apr_pool_cleanup_null);
 
-    /* generate an IV, if necessary */
-    usedIv = NULL;
-    if (key->ivSize) {
-        if (iv == NULL) {
-            return APR_ENOIV;
-        }
-        if (*iv == NULL) {
-            apr_status_t status;
-            usedIv = apr_pcalloc(p, key->ivSize);
-            if (!usedIv) {
-                return APR_ENOMEM;
-            }
-            apr_crypto_clear(p, usedIv, key->ivSize);
-            status = apr_random_secure_bytes(block->f->rng, usedIv,
-                    key->ivSize);
-            if (APR_SUCCESS != status) {
-                return status;
-            }
-            *iv = usedIv;
-        }
-        else {
-            usedIv = (unsigned char *) *iv;
-        }
-    }
+    switch (key->rec->ktype) {
 
-    /* create a new context for encryption */
-    switch ((block->f->result->rc = CCCryptorCreate(kCCEncrypt, key->algorithm,
-            key->options, key->key, key->keyLen, usedIv, &block->ref))) {
-    case kCCSuccess: {
-        break;
-    }
-    case kCCParamError: {
-        return APR_EINIT;
-    }
-    case kCCMemoryFailure: {
-        return APR_ENOMEM;
-    }
-    case kCCAlignmentError: {
-        return APR_EPADDING;
-    }
-    case kCCUnimplemented: {
-        return APR_ENOTIMPL;
+    case APR_CRYPTO_KTYPE_PASSPHRASE:
+    case APR_CRYPTO_KTYPE_SECRET: {
+
+        /* generate an IV, if necessary */
+        usedIv = NULL;
+        if (key->ivSize) {
+            if (iv == NULL) {
+                return APR_ENOIV;
+            }
+            if (*iv == NULL) {
+                apr_status_t status;
+                usedIv = apr_pcalloc(p, key->ivSize);
+                if (!usedIv) {
+                    return APR_ENOMEM;
+                }
+                apr_crypto_clear(p, usedIv, key->ivSize);
+                status = apr_random_secure_bytes(block->f->rng, usedIv,
+                        key->ivSize);
+                if (APR_SUCCESS != status) {
+                    return status;
+                }
+                *iv = usedIv;
+            } else {
+                usedIv = (unsigned char *) *iv;
+            }
+        }
+
+        /* create a new context for encryption */
+        switch ((block->f->result->rc = CCCryptorCreate(kCCEncrypt,
+                key->algorithm, key->options, key->key, key->keyLen, usedIv,
+                &block->ref))) {
+        case kCCSuccess: {
+            break;
+        }
+        case kCCParamError: {
+            return APR_EINIT;
+        }
+        case kCCMemoryFailure: {
+            return APR_ENOMEM;
+        }
+        case kCCAlignmentError: {
+            return APR_EPADDING;
+        }
+        case kCCUnimplemented: {
+            return APR_ENOTIMPL;
+        }
+        default: {
+            return APR_EINIT;
+        }
+        }
+
+        if (blockSize) {
+            *blockSize = key->blockSize;
+        }
+
+        return APR_SUCCESS;
+
     }
     default: {
-        return APR_EINIT;
-    }
-    }
 
-    if (blockSize) {
-        *blockSize = key->blockSize;
-    }
+        return APR_EINVAL;
 
-    return APR_SUCCESS;
+    }
+    }
 
 }
 
@@ -606,43 +829,56 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
  */
 static apr_status_t crypto_block_encrypt(unsigned char **out,
         apr_size_t *outlen, const unsigned char *in, apr_size_t inlen,
-        apr_crypto_block_t *ctx)
+        apr_crypto_block_t *block)
 {
-    apr_size_t outl = *outlen;
-    unsigned char *buffer;
+    switch (block->key->rec->ktype) {
 
-    /* are we after the maximum size of the out buffer? */
-    if (!out) {
-        *outlen = CCCryptorGetOutputLength(ctx->ref, inlen, 1);
-        return APR_SUCCESS;
-    }
+    case APR_CRYPTO_KTYPE_PASSPHRASE:
+    case APR_CRYPTO_KTYPE_SECRET: {
 
-    /* must we allocate the output buffer from a pool? */
-    if (!*out) {
-        outl = CCCryptorGetOutputLength(ctx->ref, inlen, 1);
-        buffer = apr_palloc(ctx->pool, outl);
-        if (!buffer) {
-            return APR_ENOMEM;
+        apr_size_t outl = *outlen;
+        unsigned char *buffer;
+
+        /* are we after the maximum size of the out buffer? */
+        if (!out) {
+            *outlen = CCCryptorGetOutputLength(block->ref, inlen, 1);
+            return APR_SUCCESS;
         }
-        apr_crypto_clear(ctx->pool, buffer, outl);
-        *out = buffer;
-    }
 
-    switch ((ctx->f->result->rc = CCCryptorUpdate(ctx->ref, in, inlen, (*out),
-            outl, &outl))) {
-    case kCCSuccess: {
-        break;
-    }
-    case kCCBufferTooSmall: {
-        return APR_ENOSPACE;
+        /* must we allocate the output buffer from a pool? */
+        if (!*out) {
+            outl = CCCryptorGetOutputLength(block->ref, inlen, 1);
+            buffer = apr_palloc(block->pool, outl);
+            if (!buffer) {
+                return APR_ENOMEM;
+            }
+            apr_crypto_clear(block->pool, buffer, outl);
+            *out = buffer;
+        }
+
+        switch ((block->f->result->rc = CCCryptorUpdate(block->ref, in, inlen, (*out),
+                outl, &outl))) {
+        case kCCSuccess: {
+            break;
+        }
+        case kCCBufferTooSmall: {
+            return APR_ENOSPACE;
+        }
+        default: {
+            return APR_ECRYPT;
+        }
+        }
+        *outlen = outl;
+
+        return APR_SUCCESS;
+
     }
     default: {
-        return APR_ECRYPT;
-    }
-    }
-    *outlen = outl;
 
-    return APR_SUCCESS;
+        return APR_EINVAL;
+
+    }
+    }
 
 }
 
@@ -665,36 +901,49 @@ static apr_status_t crypto_block_encrypt(unsigned char **out,
  * @return APR_ENOTIMPL if not implemented.
  */
 static apr_status_t crypto_block_encrypt_finish(unsigned char *out,
-        apr_size_t *outlen, apr_crypto_block_t *ctx)
+        apr_size_t *outlen, apr_crypto_block_t *block)
 {
-    apr_size_t len = *outlen;
+    switch (block->key->rec->ktype) {
 
-    ctx->f->result->rc = CCCryptorFinal(ctx->ref, out,
-            CCCryptorGetOutputLength(ctx->ref, 0, 1), &len);
+    case APR_CRYPTO_KTYPE_PASSPHRASE:
+    case APR_CRYPTO_KTYPE_SECRET: {
 
-    /* always clean up */
-    crypto_block_cleanup(ctx);
+        apr_size_t len = *outlen;
 
-    switch (ctx->f->result->rc) {
-    case kCCSuccess: {
-        break;
-    }
-    case kCCBufferTooSmall: {
-        return APR_ENOSPACE;
-    }
-    case kCCAlignmentError: {
-        return APR_EPADDING;
-    }
-    case kCCDecodeError: {
-        return APR_ECRYPT;
+        block->f->result->rc = CCCryptorFinal(block->ref, out,
+                CCCryptorGetOutputLength(block->ref, 0, 1), &len);
+
+        /* always clean up */
+        crypto_block_cleanup(block);
+
+        switch (block->f->result->rc) {
+        case kCCSuccess: {
+            break;
+        }
+        case kCCBufferTooSmall: {
+            return APR_ENOSPACE;
+        }
+        case kCCAlignmentError: {
+            return APR_EPADDING;
+        }
+        case kCCDecodeError: {
+            return APR_ECRYPT;
+        }
+        default: {
+            return APR_ECRYPT;
+        }
+        }
+        *outlen = len;
+
+        return APR_SUCCESS;
+
     }
     default: {
-        return APR_ECRYPT;
-    }
-    }
-    *outlen = len;
 
-    return APR_SUCCESS;
+        return APR_EINVAL;
+
+    }
+    }
 
 }
 
@@ -717,55 +966,69 @@ static apr_status_t crypto_block_decrypt_init(apr_crypto_block_t **ctx,
         apr_size_t *blockSize, const unsigned char *iv,
         const apr_crypto_key_t *key, apr_pool_t *p)
 {
-    apr_crypto_block_t *block = *ctx;
-    if (!block) {
-        *ctx = block = apr_pcalloc(p, sizeof(apr_crypto_block_t));
-    }
-    if (!block) {
-        return APR_ENOMEM;
-    }
-    block->f = key->f;
-    block->pool = p;
-    block->provider = key->provider;
+    switch (key->rec->ktype) {
 
-    apr_pool_cleanup_register(p, block, crypto_block_cleanup_helper,
-            apr_pool_cleanup_null);
+    case APR_CRYPTO_KTYPE_PASSPHRASE:
+    case APR_CRYPTO_KTYPE_SECRET: {
 
-    /* generate an IV, if necessary */
-    if (key->ivSize) {
-        if (iv == NULL) {
-            return APR_ENOIV;
+        apr_crypto_block_t *block = *ctx;
+        if (!block) {
+            *ctx = block = apr_pcalloc(p, sizeof(apr_crypto_block_t));
         }
-    }
+        if (!block) {
+            return APR_ENOMEM;
+        }
+        block->f = key->f;
+        block->pool = p;
+        block->provider = key->provider;
+        block->key = key;
 
-    /* create a new context for decryption */
-    switch ((block->f->result->rc = CCCryptorCreate(kCCDecrypt, key->algorithm,
-            key->options, key->key, key->keyLen, iv, &block->ref))) {
-    case kCCSuccess: {
-        break;
-    }
-    case kCCParamError: {
-        return APR_EINIT;
-    }
-    case kCCMemoryFailure: {
-        return APR_ENOMEM;
-    }
-    case kCCAlignmentError: {
-        return APR_EPADDING;
-    }
-    case kCCUnimplemented: {
-        return APR_ENOTIMPL;
+        apr_pool_cleanup_register(p, block, crypto_block_cleanup_helper,
+                apr_pool_cleanup_null);
+
+        /* generate an IV, if necessary */
+        if (key->ivSize) {
+            if (iv == NULL) {
+                return APR_ENOIV;
+            }
+        }
+
+        /* create a new context for decryption */
+        switch ((block->f->result->rc = CCCryptorCreate(kCCDecrypt, key->algorithm,
+                key->options, key->key, key->keyLen, iv, &block->ref))) {
+        case kCCSuccess: {
+            break;
+        }
+        case kCCParamError: {
+            return APR_EINIT;
+        }
+        case kCCMemoryFailure: {
+            return APR_ENOMEM;
+        }
+        case kCCAlignmentError: {
+            return APR_EPADDING;
+        }
+        case kCCUnimplemented: {
+            return APR_ENOTIMPL;
+        }
+        default: {
+            return APR_EINIT;
+        }
+        }
+
+        if (blockSize) {
+            *blockSize = key->blockSize;
+        }
+
+        return APR_SUCCESS;
+
     }
     default: {
-        return APR_EINIT;
-    }
-    }
 
-    if (blockSize) {
-        *blockSize = key->blockSize;
-    }
+        return APR_EINVAL;
 
-    return APR_SUCCESS;
+    }
+    }
 
 }
 
@@ -789,43 +1052,56 @@ static apr_status_t crypto_block_decrypt_init(apr_crypto_block_t **ctx,
  */
 static apr_status_t crypto_block_decrypt(unsigned char **out,
         apr_size_t *outlen, const unsigned char *in, apr_size_t inlen,
-        apr_crypto_block_t *ctx)
+        apr_crypto_block_t *block)
 {
-    apr_size_t outl = *outlen;
-    unsigned char *buffer;
+    switch (block->key->rec->ktype) {
 
-    /* are we after the maximum size of the out buffer? */
-    if (!out) {
-        *outlen = CCCryptorGetOutputLength(ctx->ref, inlen, 1);
-        return APR_SUCCESS;
-    }
+    case APR_CRYPTO_KTYPE_PASSPHRASE:
+    case APR_CRYPTO_KTYPE_SECRET: {
 
-    /* must we allocate the output buffer from a pool? */
-    if (!*out) {
-        outl = CCCryptorGetOutputLength(ctx->ref, inlen, 1);
-        buffer = apr_palloc(ctx->pool, outl);
-        if (!buffer) {
-            return APR_ENOMEM;
+        apr_size_t outl = *outlen;
+        unsigned char *buffer;
+
+        /* are we after the maximum size of the out buffer? */
+        if (!out) {
+            *outlen = CCCryptorGetOutputLength(block->ref, inlen, 1);
+            return APR_SUCCESS;
         }
-        apr_crypto_clear(ctx->pool, buffer, outl);
-        *out = buffer;
-    }
 
-    switch ((ctx->f->result->rc = CCCryptorUpdate(ctx->ref, in, inlen, (*out),
-            outl, &outl))) {
-    case kCCSuccess: {
-        break;
-    }
-    case kCCBufferTooSmall: {
-        return APR_ENOSPACE;
+        /* must we allocate the output buffer from a pool? */
+        if (!*out) {
+            outl = CCCryptorGetOutputLength(block->ref, inlen, 1);
+            buffer = apr_palloc(block->pool, outl);
+            if (!buffer) {
+                return APR_ENOMEM;
+            }
+            apr_crypto_clear(block->pool, buffer, outl);
+            *out = buffer;
+        }
+
+        switch ((block->f->result->rc = CCCryptorUpdate(block->ref, in, inlen, (*out),
+                outl, &outl))) {
+        case kCCSuccess: {
+            break;
+        }
+        case kCCBufferTooSmall: {
+            return APR_ENOSPACE;
+        }
+        default: {
+            return APR_ECRYPT;
+        }
+        }
+        *outlen = outl;
+
+        return APR_SUCCESS;
+
     }
     default: {
-        return APR_ECRYPT;
-    }
-    }
-    *outlen = outl;
 
-    return APR_SUCCESS;
+        return APR_EINVAL;
+
+    }
+    }
 
 }
 
@@ -848,37 +1124,333 @@ static apr_status_t crypto_block_decrypt(unsigned char **out,
  * @return APR_ENOTIMPL if not implemented.
  */
 static apr_status_t crypto_block_decrypt_finish(unsigned char *out,
-        apr_size_t *outlen, apr_crypto_block_t *ctx)
+        apr_size_t *outlen, apr_crypto_block_t *block)
 {
-    apr_size_t len = *outlen;
+    switch (block->key->rec->ktype) {
 
-    ctx->f->result->rc = CCCryptorFinal(ctx->ref, out,
-            CCCryptorGetOutputLength(ctx->ref, 0, 1), &len);
+    case APR_CRYPTO_KTYPE_PASSPHRASE:
+    case APR_CRYPTO_KTYPE_SECRET: {
 
-    /* always clean up */
-    crypto_block_cleanup(ctx);
+        apr_size_t len = *outlen;
 
-    switch (ctx->f->result->rc) {
-    case kCCSuccess: {
-        break;
-    }
-    case kCCBufferTooSmall: {
-        return APR_ENOSPACE;
-    }
-    case kCCAlignmentError: {
-        return APR_EPADDING;
-    }
-    case kCCDecodeError: {
-        return APR_ECRYPT;
+        block->f->result->rc = CCCryptorFinal(block->ref, out,
+                CCCryptorGetOutputLength(block->ref, 0, 1), &len);
+
+        /* always clean up */
+        crypto_block_cleanup(block);
+
+        switch (block->f->result->rc) {
+        case kCCSuccess: {
+            break;
+        }
+        case kCCBufferTooSmall: {
+            return APR_ENOSPACE;
+        }
+        case kCCAlignmentError: {
+            return APR_EPADDING;
+        }
+        case kCCDecodeError: {
+            return APR_ECRYPT;
+        }
+        default: {
+            return APR_ECRYPT;
+        }
+        }
+        *outlen = len;
+
+        return APR_SUCCESS;
+
     }
     default: {
-        return APR_ECRYPT;
+
+        return APR_EINVAL;
+
     }
     }
-    *outlen = len;
+
+}
+
+static apr_status_t crypto_digest_init(apr_crypto_digest_t **ctx,
+        const apr_crypto_key_t *key, apr_crypto_digest_rec_t *rec, apr_pool_t *p)
+{
+
+    apr_crypto_digest_t *digest = *ctx;
+
+    if (!digest) {
+        *ctx = digest = apr_pcalloc(p, sizeof(apr_crypto_digest_t));
+    }
+    if (!digest) {
+        return APR_ENOMEM;
+    }
+    digest->f = key->f;
+    digest->pool = p;
+    digest->provider = key->provider;
+    digest->key = key;
+    digest->rec = rec;
+
+    apr_pool_cleanup_register(p, digest, crypto_digest_cleanup_helper,
+            apr_pool_cleanup_null);
+
+    switch (digest->key->rec->ktype) {
+
+    case APR_CRYPTO_KTYPE_HASH: {
+
+        switch (key->rec->k.hash.digest) {
+        case APR_CRYPTO_DIGEST_MD5:
+            digest->hash = apr_pcalloc(p, sizeof(CC_MD5_CTX));
+            CC_MD5_Init(digest->hash);
+            break;
+        case APR_CRYPTO_DIGEST_SHA1:
+            digest->hash = apr_pcalloc(p, sizeof(CC_SHA1_CTX));
+            CC_SHA1_Init(digest->hash);
+            break;
+        case APR_CRYPTO_DIGEST_SHA224:
+            digest->hash = apr_pcalloc(p, sizeof(CC_SHA256_CTX));
+            CC_SHA224_Init(digest->hash);
+            break;
+        case APR_CRYPTO_DIGEST_SHA256:
+            digest->hash = apr_pcalloc(p, sizeof(CC_SHA256_CTX));
+            CC_SHA256_Init(digest->hash);
+            break;
+        case APR_CRYPTO_DIGEST_SHA384:
+            digest->hash = apr_pcalloc(p, sizeof(CC_SHA512_CTX));
+            CC_SHA384_Init(digest->hash);
+            break;
+        case APR_CRYPTO_DIGEST_SHA512:
+            digest->hash = apr_pcalloc(p, sizeof(CC_SHA512_CTX));
+            CC_SHA512_Init(digest->hash);
+            break;
+        default:
+            return APR_ENODIGEST;
+        }
+
+        break;
+    }
+    case APR_CRYPTO_KTYPE_HMAC: {
+
+        digest->hmac = apr_pcalloc(p, sizeof(CCHmacContext));
+        if (!digest->hmac) {
+            return APR_ENOMEM;
+        }
+
+        CCHmacInit(digest->hmac, key->hmac, key->rec->k.hmac.secret,
+                key->rec->k.hmac.secretLen);
+
+        break;
+    }
+
+    case APR_CRYPTO_KTYPE_CMAC: {
+
+        return APR_ENOTIMPL;
+
+    }
+
+    default: {
+
+        return APR_EINVAL;
+
+    }
+    }
 
     return APR_SUCCESS;
+}
 
+static apr_status_t crypto_digest_update(apr_crypto_digest_t *digest,
+        const unsigned char *in, apr_size_t inlen)
+{
+
+    switch (digest->key->rec->ktype) {
+
+    case APR_CRYPTO_KTYPE_HASH: {
+
+        switch (digest->key->rec->k.hash.digest) {
+        case APR_CRYPTO_DIGEST_MD5:
+            CC_MD5_Update(digest->hash, in, inlen);
+            break;
+        case APR_CRYPTO_DIGEST_SHA1:
+            CC_SHA1_Update(digest->hash, in, inlen);
+            break;
+        case APR_CRYPTO_DIGEST_SHA224:
+            CC_SHA224_Update(digest->hash, in, inlen);
+            break;
+        case APR_CRYPTO_DIGEST_SHA256:
+            CC_SHA256_Update(digest->hash, in, inlen);
+            break;
+        case APR_CRYPTO_DIGEST_SHA384:
+            CC_SHA384_Update(digest->hash, in, inlen);
+            break;
+        case APR_CRYPTO_DIGEST_SHA512:
+            CC_SHA512_Update(digest->hash, in, inlen);
+            break;
+        default:
+            return APR_ENODIGEST;
+        }
+
+        break;
+    }
+    case APR_CRYPTO_KTYPE_HMAC: {
+
+        CCHmacUpdate(digest->hmac, in, inlen);
+
+        break;
+    }
+
+    case APR_CRYPTO_KTYPE_CMAC: {
+
+        return APR_ENOTIMPL;
+
+    }
+
+    default: {
+
+        return APR_EINVAL;
+
+    }
+    }
+
+    return APR_SUCCESS;
+}
+
+static apr_status_t crypto_digest_final(apr_crypto_digest_t *digest)
+{
+
+    switch (digest->key->rec->ktype) {
+
+    case APR_CRYPTO_KTYPE_HASH: {
+
+        size_t len = digest->key->digestSize;
+
+        /* must we allocate the output buffer from a pool? */
+        if (!digest->rec->d.hash.s || digest->rec->d.hash.slen != len) {
+            digest->rec->d.hash.slen = len;
+            digest->rec->d.hash.s = apr_palloc(digest->pool, len);
+            if (!digest->rec->d.hash.s) {
+                return APR_ENOMEM;
+            }
+            apr_crypto_clear(digest->pool, digest->rec->d.hash.s, len);
+        }
+
+        switch (digest->key->rec->k.hash.digest) {
+        case APR_CRYPTO_DIGEST_MD5:
+            CC_MD5_Final(digest->rec->d.hash.s, digest->hash);
+            break;
+        case APR_CRYPTO_DIGEST_SHA1:
+            CC_SHA1_Final(digest->rec->d.hash.s, digest->hash);
+            break;
+        case APR_CRYPTO_DIGEST_SHA224:
+            CC_SHA224_Final(digest->rec->d.hash.s, digest->hash);
+            break;
+        case APR_CRYPTO_DIGEST_SHA256:
+            CC_SHA256_Final(digest->rec->d.hash.s, digest->hash);
+            break;
+        case APR_CRYPTO_DIGEST_SHA384:
+            CC_SHA384_Final(digest->rec->d.hash.s, digest->hash);
+            break;
+        case APR_CRYPTO_DIGEST_SHA512:
+            CC_SHA512_Final(digest->rec->d.hash.s, digest->hash);
+            break;
+        default:
+            return APR_ENODIGEST;
+        }
+
+        break;
+    }
+    case APR_CRYPTO_KTYPE_HMAC: {
+
+        apr_status_t status = APR_SUCCESS;
+
+        size_t len = digest->key->digestSize;
+
+        switch (digest->rec->dtype) {
+        case APR_CRYPTO_DTYPE_SIGN: {
+
+            /* must we allocate the output buffer from a pool? */
+            if (!digest->rec->d.sign.s || digest->rec->d.sign.slen != len) {
+                digest->rec->d.sign.slen = len;
+                digest->rec->d.sign.s = apr_palloc(digest->pool, len);
+                if (!digest->rec->d.sign.s) {
+                    return APR_ENOMEM;
+                }
+                apr_crypto_clear(digest->pool, digest->rec->d.sign.s, len);
+            }
+
+            /* then, determine the signature */
+            CCHmacFinal(digest->hmac, digest->rec->d.sign.s);
+
+            break;
+        }
+        case APR_CRYPTO_DTYPE_VERIFY: {
+
+            /* must we allocate the output buffer from a pool? */
+            if (!digest->rec->d.verify.s
+                    || digest->rec->d.verify.slen != len) {
+                digest->rec->d.verify.slen = len;
+                digest->rec->d.verify.s = apr_palloc(digest->pool, len);
+                if (!digest->rec->d.verify.s) {
+                    return APR_ENOMEM;
+                }
+                apr_crypto_clear(digest->pool, digest->rec->d.verify.s,
+                        len);
+            }
+
+            /* then, determine the signature */
+            CCHmacFinal(digest->hmac, digest->rec->d.verify.s);
+
+            if (digest->rec->d.verify.slen
+                    == digest->rec->d.verify.vlen) {
+                status =
+                        apr_crypto_equals(digest->rec->d.verify.s,
+                                digest->rec->d.verify.v,
+                                digest->rec->d.verify.slen) ?
+                        APR_SUCCESS : APR_ENOVERIFY;
+            } else {
+                status = APR_ENOVERIFY;
+            }
+
+            break;
+        }
+        default: {
+            status = APR_ENODIGEST;
+            break;
+        }
+        }
+
+        return status;
+
+    }
+
+    case APR_CRYPTO_KTYPE_CMAC: {
+
+        return APR_ENOTIMPL;
+
+    }
+
+    default: {
+
+        return APR_EINVAL;
+
+    }
+    }
+
+    return APR_SUCCESS;
+}
+
+static apr_status_t crypto_digest(
+        const apr_crypto_key_t *key, apr_crypto_digest_rec_t *rec, const unsigned char *in,
+        apr_size_t inlen, apr_pool_t *p)
+{
+    apr_crypto_digest_t *digest = NULL;
+    apr_status_t status = APR_SUCCESS;
+
+    status = crypto_digest_init(&digest, key, rec, p);
+    if (APR_SUCCESS == status) {
+        status = crypto_digest_update(digest, in, inlen);
+        if (APR_SUCCESS == status) {
+            status = crypto_digest_final(digest);
+        }
+    }
+
+    return status;
 }
 
 /**
@@ -886,11 +1458,14 @@ static apr_status_t crypto_block_decrypt_finish(unsigned char *out,
  */
 APR_MODULE_DECLARE_DATA const apr_crypto_driver_t apr_crypto_commoncrypto_driver =
 {
-        "commoncrypto", crypto_init, crypto_make, crypto_get_block_key_types,
+        "commoncrypto", crypto_init, crypto_make,
+        crypto_get_block_key_digests, crypto_get_block_key_types,
         crypto_get_block_key_modes, crypto_passphrase,
         crypto_block_encrypt_init, crypto_block_encrypt,
         crypto_block_encrypt_finish, crypto_block_decrypt_init,
-        crypto_block_decrypt, crypto_block_decrypt_finish, crypto_block_cleanup,
+        crypto_block_decrypt, crypto_block_decrypt_finish,
+        crypto_digest_init, crypto_digest_update, crypto_digest_final,
+        crypto_digest, crypto_block_cleanup, crypto_digest_cleanup,
         crypto_cleanup, crypto_shutdown, crypto_error, crypto_key
 };
 

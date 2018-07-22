@@ -42,17 +42,31 @@ extern "C" {
 
 #ifndef APU_CRYPTO_RECOMMENDED_DRIVER
 #if APU_HAVE_COMMONCRYPTO
+/** Recommended driver for this platform */
 #define APU_CRYPTO_RECOMMENDED_DRIVER "commoncrypto"
-#elif APU_HAVE_OPENSSL
+#else
+#if APU_HAVE_OPENSSL
+/** Recommended driver for this platform */
 #define APU_CRYPTO_RECOMMENDED_DRIVER "openssl"
-#elif APU_HAVE_NSS
+#else
+#if APU_HAVE_NSS
+/** Recommended driver for this platform */
 #define APU_CRYPTO_RECOMMENDED_DRIVER "nss"
-#elif APU_HAVE_MSCNG
+#else
+#if APU_HAVE_MSCNG
+/** Recommended driver for this platform */
 #define APU_CRYPTO_RECOMMENDED_DRIVER "mscng"
-#elif APU_HAVE_MSCAPI
+#else
+#if APU_HAVE_MSCAPI
+/** Recommended driver for this platform */
 #define APU_CRYPTO_RECOMMENDED_DRIVER "mscapi"
+#else
 #endif
-#endif /* APU_CRYPTO_RECOMMENDED_DRIVER */
+#endif
+#endif
+#endif
+#endif
+#endif
 
 /**
  * Symmetric Key types understood by the library.
@@ -95,6 +109,9 @@ extern "C" {
  * aligned data, use 3DES_192/CBC, AES_256/CBC or AES_256/ECB.
  */
 
+/**
+ * Types of ciphers.
+ */
 typedef enum
 {
     APR_KEY_NONE, APR_KEY_3DES_192, /** 192 bit (3-Key) 3DES */
@@ -104,6 +121,9 @@ typedef enum
 /** 256 bit AES */
 } apr_crypto_block_key_type_e;
 
+/**
+ * Types of modes supported by the ciphers.
+ */
 typedef enum
 {
     APR_MODE_NONE, /** An error condition */
@@ -112,54 +132,368 @@ typedef enum
 /** Cipher Block Chaining */
 } apr_crypto_block_key_mode_e;
 
-/* These are opaque structs.  Instantiation is up to each backend */
+/**
+ * Types of digests supported by the apr_crypto_key() function.
+ */
+typedef enum
+{
+    APR_CRYPTO_DIGEST_NONE, /** An error condition */
+    APR_CRYPTO_DIGEST_MD5, /** MD5 */
+    APR_CRYPTO_DIGEST_SHA1, /** SHA1 */
+    APR_CRYPTO_DIGEST_SHA224, /** SHA224 */
+    APR_CRYPTO_DIGEST_SHA256, /** SHA256 */
+    APR_CRYPTO_DIGEST_SHA384, /** SHA384 */
+    APR_CRYPTO_DIGEST_SHA512, /** SHA512 */
+} apr_crypto_block_key_digest_e;
+
+/**
+ * Structure returned by the crypto_get_block_key_digests() function.
+ */
+typedef struct apr_crypto_block_key_digest_t {
+    /** The digest used with this crypto operation. */
+    apr_crypto_block_key_digest_e type;
+    /** The digest size used with this digest operation */
+    int digestsize;
+    /** The block size used with this digest operation */
+    int blocksize;
+} apr_crypto_block_key_digest_t;
+
+/**
+ * Structure representing a backend crypto driver.
+ *
+ * This structure is created with apr_crypto_get_driver().
+ */
 typedef struct apr_crypto_driver_t apr_crypto_driver_t;
+
+/**
+ * Structure to support a group of crypto operations.
+ *
+ * This structure is created with apr_crypto_make().
+ */
 typedef struct apr_crypto_t apr_crypto_t;
+
+/**
+ * Structure representing the configuration of the given backend
+ * crypto library.
+ */
 typedef struct apr_crypto_config_t apr_crypto_config_t;
+
+/**
+ * Structure representing a key prepared for encryption, decryption,
+ * signing or verifying.
+ *
+ * This structure is created using the apr_crypto_key() function.
+ */
 typedef struct apr_crypto_key_t apr_crypto_key_t;
+
+/**
+ * Structure representing a block context for encryption, decryption,
+ * signing or verifying.
+ *
+ * This structure is created using the apr_crypto_block_encrypt_init()
+ * and apr_crypto_block_decrypt_init() functions.
+ */
 typedef struct apr_crypto_block_t apr_crypto_block_t;
 
+/**
+ * Structure representing a digest context for signing or verifying.
+ *
+ * This structure is created using the apr_crypto_digest_init() function.
+ */
+typedef struct apr_crypto_digest_t apr_crypto_digest_t;
+
+/**
+ * Structure returned by the crypto_get_block_key_types() function.
+ */
 typedef struct apr_crypto_block_key_type_t {
+    /** The cipher used with this crypto operation. */
     apr_crypto_block_key_type_e type;
+    /** The key size used with this crypto operation */
     int keysize;
+    /** The block size used with this crypto operation */
     int blocksize;
+    /** The initialisation vector size used with this crypto operation */
     int ivsize;
 } apr_crypto_block_key_type_t;
 
+/**
+ * Structure returned by the crypto_get_block_key_modes() function.
+ */
 typedef struct apr_crypto_block_key_mode_t {
+    /** The mode used with this crypto operation. */
     apr_crypto_block_key_mode_e mode;
 } apr_crypto_block_key_mode_t;
 
+/**
+ * Structure describing a key to be derived from PBKDF2 to be passed by the
+ * apr_crypto_key() function.
+ *
+ * Derived keys are used for encryption and decryption.
+ *
+ * Implementations must use apr_crypto_key_rec_make() to allocate
+ * this structure.
+ */
 typedef struct apr_crypto_passphrase_t {
+    /** The passphrase used by the key generation algorithm */
     const char *pass;
+    /** The length of the passphrase */
     apr_size_t passLen;
+    /** The salt used by the key derivation algorithm */
     const unsigned char * salt;
+    /** The length of the salt. */
     apr_size_t saltLen;
+    /** The number of iterations used by the key derivation function */
     int iterations;
 } apr_crypto_passphrase_t;
 
+/**
+ * Structure describing a raw key to be passed by the
+ * apr_crypto_key() function.
+ *
+ * Raw keys are used for encryption and decryption, and must match
+ * the correct sizes for each cipher.
+ *
+ * Implementations must use apr_crypto_key_rec_make() to allocate
+ * this structure.
+ */
 typedef struct apr_crypto_secret_t {
+    /** The raw secret key used for encrypt / decrypt. Must be
+     * the same size as the block size of the cipher being used.
+     */
     const unsigned char *secret;
+    /** The length of the secret key. */
     apr_size_t secretLen;
 } apr_crypto_secret_t;
 
+/**
+ * Structure describing a simple digest hash to be generated by the
+ * apr_crypto_key() function.
+ *
+ * Implementations must use apr_crypto_key_rec_make() to allocate
+ * this structure.
+ */
+typedef struct apr_crypto_key_hash_t {
+    /** The digest used for the HMAC. */
+    apr_crypto_block_key_digest_e digest;
+} apr_crypto_key_hash_t;
+
+/**
+ * Structure describing a HMAC key and digest to be generated by the
+ * apr_crypto_key() function.
+ *
+ * Implementations must use apr_crypto_key_rec_make() to allocate
+ * this structure.
+ */
+typedef struct apr_crypto_key_hmac_t {
+    /** The secret used for the HMAC */
+    const unsigned char *secret;
+    /** The length of the secret used for the HMAC */
+    apr_size_t secretLen;
+    /** The digest used for the HMAC. */
+    apr_crypto_block_key_digest_e digest;
+} apr_crypto_key_hmac_t;
+
+/**
+ * Structure describing a CMAC key and digest to be generated by the
+ * apr_crypto_key() function.
+ *
+ * Implementations must use apr_crypto_key_rec_make() to allocate
+ * this structure.
+ */
+typedef struct apr_crypto_key_cmac_t {
+    /** The secret used for the CMAC */
+    const unsigned char *secret;
+    /** The length of the secret used for the CMAC */
+    apr_size_t secretLen;
+    /** The digest used for the CMAC. */
+    apr_crypto_block_key_digest_e digest;
+} apr_crypto_key_cmac_t;
+
+/**
+ * Structure used to create a hashed digest.
+ *
+ * Implementations must use apr_crypto_digest_rec_make() to allocate
+ * this structure.
+ */
+typedef struct apr_crypto_digest_hash_t {
+    /** The message digest */
+    unsigned char *s;
+    /** The length of the message digest */
+    apr_size_t slen;
+    /** The digest algorithm */
+    apr_crypto_block_key_digest_e digest;
+} apr_crypto_digest_hash_t;
+
+/**
+ * Structure used to create a signature.
+ *
+ * Implementations must use apr_crypto_digest_rec_make() to allocate
+ * this structure.
+ */
+typedef struct apr_crypto_digest_sign_t {
+    /** The message digest */
+    unsigned char *s;
+    /** The length of the message digest */
+    apr_size_t slen;
+    /** The digest algorithm */
+    apr_crypto_block_key_digest_e digest;
+} apr_crypto_digest_sign_t;
+
+/**
+ * Structure used to create a signature for verification.
+ *
+ * Implementations must use apr_crypto_digest_rec_make() to allocate
+ * this structure.
+ */
+typedef struct apr_crypto_digest_verify_t {
+    /** The message digest generated */
+    unsigned char *s;
+    /** The length of the message digest */
+    apr_size_t slen;
+    /** The message digest to be verified against */
+    const unsigned char *v;
+    /** The length of the message digest */
+    apr_size_t vlen;
+    /** The digest algorithm */
+    apr_crypto_block_key_digest_e digest;
+} apr_crypto_digest_verify_t;
+
+/**
+ * Types of keys supported by the apr_crypto_key() function and the
+ * apr_crypto_key_rec_t structure.
+ */
 typedef enum {
-    /** Key is derived from a passphrase */
+    /**
+     * Key is derived from a passphrase.
+     *
+     * Used with the encrypt / decrypt functions.
+     */
     APR_CRYPTO_KTYPE_PASSPHRASE     = 1,
-    /** Key is derived from a raw key */
-    APR_CRYPTO_KTYPE_SECRET     = 2,
+    /**
+     * Key is derived from a raw key.
+     *
+     * Used with the encrypt / decrypt functions.
+     */
+    APR_CRYPTO_KTYPE_SECRET         = 2,
+    /**
+     * Simple digest, no key.
+     *
+     * Used with the digest functions.
+     */
+    APR_CRYPTO_KTYPE_HASH           = 3,
+    /**
+     * HMAC Key is derived from a raw key.
+     *
+     * Used with the digest functions.
+     */
+    APR_CRYPTO_KTYPE_HMAC           = 4,
+    /**
+     * CMAC Key is derived from a raw key.
+     *
+     * Used with the digest functions.
+     */
+    APR_CRYPTO_KTYPE_CMAC           = 5,
 } apr_crypto_key_type;
 
+/**
+ * Types of digests supported by the apr_crypto_digest() functions and the
+ * apr_crypto_digest_rec_t structure.
+ */
+typedef enum {
+    /**
+     * Simple digest operation.
+     *
+     * Use with apr_crypto_key_rec_t APR_CRYPTO_KTYPE_HASH.
+     */
+    APR_CRYPTO_DTYPE_HASH   = 1,
+    /**
+     * Sign operation.
+     *
+     * Use with apr_crypto_key_rec_t APR_CRYPTO_KTYPE_HMAC or
+     * APR_CRYPTO_KTYPE_CMAC.
+     */
+    APR_CRYPTO_DTYPE_SIGN     = 2,
+    /**
+     * Verify operation.
+     *
+     * Use with apr_crypto_key_rec_t APR_CRYPTO_KTYPE_HMAC or
+     * APR_CRYPTO_KTYPE_CMAC.
+     */
+    APR_CRYPTO_DTYPE_VERIFY   = 3,
+} apr_crypto_digest_type_e;
+
+/**
+ * Structure describing a key to be generated by the
+ * apr_crypto_key() function.
+ *
+ * Implementations must use apr_crypto_key_rec_make() to allocate
+ * this structure.
+ */
 typedef struct apr_crypto_key_rec_t {
+    /** The type of the key. */
     apr_crypto_key_type ktype;
+    /** The cipher used with this crypto operation. */
     apr_crypto_block_key_type_e type;
+    /** The mode used with this crypto operation. */
     apr_crypto_block_key_mode_e mode;
+    /** Non zero if padding should be used with this crypto operation. */
     int pad;
+    /** Details of each key, based on the key type. */
     union {
+        /**
+         * This key is generated using a PBE algorithm from a given
+         * passphrase, and can be used to encrypt / decrypt.
+         *
+         * Key type: APR_CRYPTO_KTYPE_PASSPHRASE
+         */
         apr_crypto_passphrase_t passphrase;
+        /**
+         * This is a raw key matching the block size of the given
+         * cipher, and can be used to encrypt / decrypt.
+         *
+         * Key type: APR_CRYPTO_KTYPE_SECRET
+         */
         apr_crypto_secret_t secret;
+        /**
+         * This represents a simple digest with no key.
+         *
+         * Key type: APR_CRYPTO_KTYPE_HASH
+         */
+        apr_crypto_key_hash_t hash;
+        /**
+         * This is a key of arbitrary length used with an HMAC.
+         *
+         * Key type: APR_CRYPTO_KTYPE_HMAC
+         */
+        apr_crypto_key_hmac_t hmac;
+        /**
+         * This is a key of arbitrary length used with a CMAC.
+         *
+         * Key type: APR_CRYPTO_KTYPE_CMAC
+         */
+        apr_crypto_key_cmac_t cmac;
     } k;
 } apr_crypto_key_rec_t;
+
+/**
+ * Structure describing a digest to be hashed, signed or verified.
+ *
+ * This structure is passed to the apr_crypto_digest_init() and
+ * apr_crypto_digest() functions.
+ *
+ * Implementations must use apr_crypto_digest_rec_make() to allocate
+ * this structure.
+ */
+typedef struct apr_crypto_digest_rec_t {
+    /** The type of the digest record. */
+    apr_crypto_digest_type_e dtype;
+    /** Details of each digest, based on the digest type. */
+    union {
+        apr_crypto_digest_hash_t hash;
+        apr_crypto_digest_sign_t sign;
+        apr_crypto_digest_verify_t verify;
+    } d;
+} apr_crypto_digest_rec_t;
 
 /**
  * @brief Perform once-only initialisation. Call once only.
@@ -229,8 +563,9 @@ APR_DECLARE(int) apr_crypto_equals(const void *buf1, const void *buf2,
  * @remarks OpenSSL: currently no params are supported.
  */
 APR_DECLARE(apr_status_t) apr_crypto_get_driver(
-        const apr_crypto_driver_t **driver, const char *name,
-        const char *params, const apu_err_t **result, apr_pool_t *pool);
+        const apr_crypto_driver_t **driver,
+        const char *name, const char *params, const apu_err_t **result,
+        apr_pool_t *pool);
 
 /**
  * @brief Return the name of the driver.
@@ -266,9 +601,21 @@ APR_DECLARE(apr_status_t) apr_crypto_error(const apu_err_t **result,
  * @remarks OpenSSL: the params can have "engine" as a key, followed by an equal
  *  sign and a value.
  */
-APR_DECLARE(apr_status_t)
-        apr_crypto_make(apr_crypto_t **f, const apr_crypto_driver_t *driver,
-                const char *params, apr_pool_t *pool);
+APR_DECLARE(apr_status_t) apr_crypto_make(apr_crypto_t **f,
+        const apr_crypto_driver_t *driver, const char *params,
+        apr_pool_t *pool);
+
+/**
+ * @brief Get a hash table of key digests, keyed by the name of the digest against
+ * a pointer to apr_crypto_block_key_digest_t, which in turn begins with an
+ * integer.
+ *
+ * @param digests - hashtable of key digests keyed to constants.
+ * @param f - encryption context
+ * @return APR_SUCCESS for success
+ */
+APR_DECLARE(apr_status_t) apr_crypto_get_block_key_digests(apr_hash_t **digests,
+        const apr_crypto_t *f);
 
 /**
  * @brief Get a hash table of key types, keyed by the name of the type against
@@ -295,20 +642,42 @@ APR_DECLARE(apr_status_t) apr_crypto_get_block_key_modes(apr_hash_t **modes,
         const apr_crypto_t *f);
 
 /**
+ * @brief Create a key record to be passed to apr_crypto_key().
+ * @param ktype The apr_crypto_key_type to use.
+ * @param p The pool to use.
+ * @return Returns a blank structure of the correct size.
+ */
+APR_DECLARE(apr_crypto_key_rec_t *) apr_crypto_key_rec_make(
+        apr_crypto_key_type ktype, apr_pool_t *p);
+
+/**
+ * @brief Create a digest record to be passed to apr_crypto_digest_init().
+ * @param dtype The type of digest record to create.
+ * @param p The pool to use.
+ * @return Returns a blank structure of the correct size.
+ */
+APR_DECLARE(apr_crypto_digest_rec_t *) apr_crypto_digest_rec_make(
+        apr_crypto_digest_type_e dtype, apr_pool_t *p);
+
+/**
  * @brief Create a key from the provided secret or passphrase. The key is cleaned
- *        up when the context is cleaned, and may be reused with multiple encryption
- *        or decryption operations.
+ *        up when the context is cleaned, and may be reused with multiple
+ *        encryption, decryption, signing or verifying operations. The choice of
+ *        key type much match the intended operation.
  * @note If *key is NULL, a apr_crypto_key_t will be created from a pool. If
  *       *key is not NULL, *key must point at a previously created structure.
  * @param key The key returned, see note.
  * @param rec The key record, from which the key will be derived.
  * @param f The context to use.
  * @param p The pool to use.
- * @return Returns APR_ENOKEY if the pass phrase is missing or empty, or if a backend
- *         error occurred while generating the key. APR_ENOCIPHER if the type or mode
- *         is not supported by the particular backend. APR_EKEYTYPE if the key type is
- *         not known. APR_EPADDING if padding was requested but is not supported.
- *         APR_ENOTIMPL if not implemented.
+ * @return APR_ENOKEY if the pass phrase is missing or empty, or if a backend
+ *         error occurred while generating the key.
+ * @return APR_ENOCIPHER if the type or mode
+ *         is not supported by the particular backend.
+ * @return APR_EKEYTYPE if the key type is
+ *         not known.
+ * @return APR_EPADDING if padding was requested but is not supported.
+ * @return APR_ENOTIMPL if not implemented.
  */
 APR_DECLARE(apr_status_t) apr_crypto_key(apr_crypto_key_t **key,
         const apr_crypto_key_rec_t *rec, const apr_crypto_t *f, apr_pool_t *p);
@@ -335,11 +704,14 @@ APR_DECLARE(apr_status_t) apr_crypto_key(apr_crypto_key_t **key,
  * @param iterations Number of iterations to use in algorithm
  * @param f The context to use.
  * @param p The pool to use.
- * @return Returns APR_ENOKEY if the pass phrase is missing or empty, or if a backend
- *         error occurred while generating the key. APR_ENOCIPHER if the type or mode
- *         is not supported by the particular backend. APR_EKEYTYPE if the key type is
- *         not known. APR_EPADDING if padding was requested but is not supported.
- *         APR_ENOTIMPL if not implemented.
+ * @return APR_ENOKEY if the pass phrase is missing or empty, or if a backend
+ *         error occurred while generating the key.
+ * @return APR_ENOCIPHER if the type or mode
+ *         is not supported by the particular backend.
+ * @return APR_EKEYTYPE if the key type is
+ *         not known.
+ * @return APR_EPADDING if padding was requested but is not supported.
+ * @return APR_ENOTIMPL if not implemented.
  * @deprecated Replaced by apr_crypto_key().
  */
 APR_DECLARE(apr_status_t) apr_crypto_passphrase(apr_crypto_key_t **key,
@@ -361,9 +733,10 @@ APR_DECLARE(apr_status_t) apr_crypto_passphrase(apr_crypto_key_t **key,
  * @param key The key structure to use.
  * @param blockSize The block size of the cipher.
  * @param p The pool to use.
- * @return Returns APR_ENOIV if an initialisation vector is required but not specified.
- *         Returns APR_EINIT if the backend failed to initialise the context. Returns
- *         APR_ENOTIMPL if not implemented.
+ * @return APR_ENOIV if an initialisation vector is required but not specified.
+ * @return APR_EINIT if the backend failed to initialise the context.
+ * @return APR_ENOTIMPL if not implemented.
+ * @return APR_EINVAL if the key type does not support the given operation.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_init(
         apr_crypto_block_t **ctx, const unsigned char **iv,
@@ -384,8 +757,9 @@ APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_init(
  * @param in Address of the buffer to read.
  * @param inlen Length of the buffer to read.
  * @param ctx The block context to use.
- * @return APR_ECRYPT if an error occurred. Returns APR_ENOTIMPL if
- *         not implemented.
+ * @return APR_ECRYPT if an error occurred.
+ * @return APR_ENOTIMPL if not implemented.
+ * @return APR_EINVAL if the key type does not support the given operation.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_encrypt(unsigned char **out,
         apr_size_t *outlen, const unsigned char *in, apr_size_t inlen,
@@ -401,13 +775,14 @@ APR_DECLARE(apr_status_t) apr_crypto_block_encrypt(unsigned char **out,
  *       is cleaned and can be reused by apr_crypto_block_encrypt_init().
  * @param out Address of a buffer to which data will be written. This
  *            buffer must already exist, and is usually the same
- *            buffer used by apr_evp_crypt(). See note.
+ *            buffer used by apr_crypto_block_encrypt(). See note.
  * @param outlen Length of the output will be written here.
  * @param ctx The block context to use.
  * @return APR_ECRYPT if an error occurred.
  * @return APR_EPADDING if padding was enabled and the block was incorrectly
  *         formatted.
  * @return APR_ENOTIMPL if not implemented.
+ * @return APR_EINVAL if the key type does not support the given operation.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_finish(unsigned char *out,
         apr_size_t *outlen, apr_crypto_block_t *ctx);
@@ -421,9 +796,10 @@ APR_DECLARE(apr_status_t) apr_crypto_block_encrypt_finish(unsigned char *out,
  * @param iv Optional initialisation vector.
  * @param key The key structure to use.
  * @param p The pool to use.
- * @return Returns APR_ENOIV if an initialisation vector is required but not specified.
- *         Returns APR_EINIT if the backend failed to initialise the context. Returns
- *         APR_ENOTIMPL if not implemented.
+ * @return APR_ENOIV if an initialisation vector is required but not specified.
+ * @return APR_EINIT if the backend failed to initialise the context.
+ * @return APR_ENOTIMPL if not implemented.
+ * @return APR_EINVAL if the key type does not support the given operation.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_decrypt_init(
         apr_crypto_block_t **ctx, apr_size_t *blockSize,
@@ -444,8 +820,9 @@ APR_DECLARE(apr_status_t) apr_crypto_block_decrypt_init(
  * @param in Address of the buffer to read.
  * @param inlen Length of the buffer to read.
  * @param ctx The block context to use.
- * @return APR_ECRYPT if an error occurred. Returns APR_ENOTIMPL if
- *         not implemented.
+ * @return APR_ECRYPT if an error occurred.
+ * @return APR_ENOTIMPL if not implemented.
+ * @return APR_EINVAL if the key type does not support the given operation.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_decrypt(unsigned char **out,
         apr_size_t *outlen, const unsigned char *in, apr_size_t inlen,
@@ -461,13 +838,14 @@ APR_DECLARE(apr_status_t) apr_crypto_block_decrypt(unsigned char **out,
  *       is cleaned and can be reused by apr_crypto_block_decrypt_init().
  * @param out Address of a buffer to which data will be written. This
  *            buffer must already exist, and is usually the same
- *            buffer used by apr_evp_crypt(). See note.
+ *            buffer used by apr_crypto_block_decrypt(). See note.
  * @param outlen Length of the output will be written here.
  * @param ctx The block context to use.
  * @return APR_ECRYPT if an error occurred.
  * @return APR_EPADDING if padding was enabled and the block was incorrectly
  *         formatted.
  * @return APR_ENOTIMPL if not implemented.
+ * @return APR_EINVAL if the key type does not support the given operation.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_decrypt_finish(unsigned char *out,
         apr_size_t *outlen, apr_crypto_block_t *ctx);
@@ -479,6 +857,103 @@ APR_DECLARE(apr_status_t) apr_crypto_block_decrypt_finish(unsigned char *out,
  * @return Returns APR_ENOTIMPL if not supported.
  */
 APR_DECLARE(apr_status_t) apr_crypto_block_cleanup(apr_crypto_block_t *ctx);
+
+/**
+ * @brief Initialise a context for hashing, signing or verifying arbitrary
+ *        data.
+ *
+ *        This function supports:
+ *        - Simple hashing (MD5, SHA1, SHA224, SHA256, SHA384, SHA512).
+ *        - HMAC (with a secret key)
+ *        - CMAC (with a secret key)
+ *
+ *        Details of the key and the type of digest to be performed are
+ *        passed in the constant apr_crypto_key_t structure, which can be
+ *        reused by many calls to apr_crypto_digest_init().
+ *
+ *        Details of this particular operation are read from and written to
+ *        the apr_crypto_digest_rec_t structure, which is expected to
+ *        contain the message digest to be verified, as well as message
+ *        digest generated during the hashing or signing process. This
+ *        structure will be modified by each digest operation, and cannot be
+ *        shared.
+ * @note If *d is NULL, a apr_crypto_digest_t will be created from a pool. If
+ *       *d is not NULL, *d must point at a previously created structure.
+ * @param d The digest context returned, see note.
+ * @param key The key structure to use.
+ * @param rec The digest record indicating whether we want to sign or verify.
+ *        This record contains digest we want to verify against, as well as
+ *        the signature we have generated.
+ * @param p The pool to use.
+ * @return APR_SUCCESS if successful.
+ * @return APR_ENOIV if an initialisation vector is required but not specified.
+ * @return APR_EINIT if the backend failed to initialise the context.
+ * @return APR_ENOTIMPL if not implemented.
+ * @return APR_EINVAL if the key type does not support the given operation.
+ */
+APR_DECLARE(apr_status_t) apr_crypto_digest_init(apr_crypto_digest_t **d,
+        const apr_crypto_key_t *key, apr_crypto_digest_rec_t *rec, apr_pool_t *p);
+
+/**
+ * @brief Update the digest with data provided by in.
+ * @param digest The block context to use.
+ * @param in Address of the buffer to digest.
+ * @param inlen Length of the buffer to digest.
+ * @return APR_SUCCESS if successful.
+ * @return APR_ECRYPT if an error occurred.
+ * @return APR_ENOTIMPL if not implemented.
+ * @return APR_EINVAL if the key type does not support the given operation.
+ */
+APR_DECLARE(apr_status_t) apr_crypto_digest_update(apr_crypto_digest_t *digest,
+        const unsigned char *in, apr_size_t inlen);
+
+/**
+ * @brief Finalise the digest and write the result.
+ *
+ *        The result is written to the apr_crypto_digest_rec_t structure
+ *        passed into apr_crypto_digest_init().
+ *
+ *        If verification is requested, this function will return the
+ *        result of the verification.
+ * @note After this call, the context is cleaned and can be reused by
+ *   apr_crypto_digest_init().
+ * @param digest The digest context to use.
+ * @return APR_SUCCESS if hash, signing or verification was successful.
+ * @return APR_ENOVERIFY if the verification failed.
+ * @return APR_ECRYPT if an error occurred.
+ * @return APR_EPADDING if padding was enabled and the block was incorrectly
+ *         formatted.
+ * @return APR_ENOTIMPL if not implemented.
+ * @return APR_EINVAL if the key type does not support the given operation.
+ */
+APR_DECLARE(apr_status_t) apr_crypto_digest_final(apr_crypto_digest_t *digest);
+
+/**
+ * @brief One shot digest on a single memory buffer.
+ * @param key The key structure to use.
+ * @param rec The digest record indicating whether we want to sign or verify.
+ *        This record contains digest we want to verify against, as well as
+ *        the signature we have generated. This record will contain the digest
+ *        calculated.
+ * @param in Address of the buffer to digest.
+ * @param inlen Length of the buffer to digest.
+ * @param p The pool to use.
+ * @return APR_ENOIV if an initialisation vector is required but not specified.
+ * @return APR_EINIT if the backend failed to initialise the context.
+ * @return APR_ENOTIMPL if not implemented.
+ * @return APR_EINVAL if the key type does not support the given operation.
+ */
+APR_DECLARE(apr_status_t) apr_crypto_digest(const apr_crypto_key_t *key,
+        apr_crypto_digest_rec_t *rec, const unsigned char *in, apr_size_t inlen,
+        apr_pool_t *p);
+
+/**
+ * @brief Clean digest context.
+ * @note After cleanup, a digest context is free to be reused if necessary.
+ * @param ctx The digest context to use.
+ * @return Returns APR_ENOTIMPL if not supported.
+ */
+APR_DECLARE(apr_status_t) apr_crypto_digest_cleanup(apr_crypto_digest_t *ctx);
 
 /**
  * @brief Clean encryption / decryption context.
@@ -494,9 +969,8 @@ APR_DECLARE(apr_status_t) apr_crypto_cleanup(apr_crypto_t *f);
  * @param driver - driver to use
  * @return Returns APR_ENOTIMPL if not supported.
  */
-APR_DECLARE(apr_status_t)
-        apr_crypto_shutdown(const apr_crypto_driver_t *driver);
-
+APR_DECLARE(apr_status_t) apr_crypto_shutdown(
+        const apr_crypto_driver_t *driver);
 
 #if APU_HAVE_CRYPTO_PRNG
 

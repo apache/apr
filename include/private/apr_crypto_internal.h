@@ -58,6 +58,17 @@ struct apr_crypto_driver_t {
             const char *params, apr_pool_t *pool);
 
     /**
+     * @brief Get a hash table of key digests, keyed by the name of the digest against
+     * a pointer to apr_crypto_block_key_digest_t.
+     *
+     * @param digests - hashtable of key digests keyed to constants.
+     * @param f - encryption context
+     * @return APR_SUCCESS for success
+     */
+    apr_status_t (*get_block_key_digests)(apr_hash_t **types,
+            const apr_crypto_t *f);
+
+    /**
      * @brief Get a hash table of key types, keyed by the name of the type against
      * a pointer to apr_crypto_block_key_type_t.
      *
@@ -237,12 +248,78 @@ struct apr_crypto_driver_t {
             apr_size_t *outlen, apr_crypto_block_t *ctx);
 
     /**
+     * @brief Initialise a context for signing or verifying arbitrary data using the
+     *        given key.
+     * @note If *d is NULL, a apr_crypto_digest_t will be created from a pool. If
+     *       *d is not NULL, *d must point at a previously created structure.
+     * @param d The digest context returned, see note.
+     * @param key The key structure to use.
+     * @param rec The digest record.
+     * @param p The pool to use.
+     * @return APR_ENOIV if an initialisation vector is required but not specified.
+     * @return APR_EINIT if the backend failed to initialise the context.
+     * @return APR_ENOTIMPL if not implemented.
+     * @return APR_NOKEY if the key type does not support the given operation.
+     */
+    apr_status_t (*digest_init)(apr_crypto_digest_t **d,
+            const apr_crypto_key_t *key, apr_crypto_digest_rec_t *rec, apr_pool_t *p);
+
+    /**
+     * @brief Update the digest with data provided by in.
+     * @param in Address of the buffer to read.
+     * @param inlen Length of the buffer to read.
+     * @param digest The digest context to use.
+     * @return APR_ECRYPT if an error occurred.
+     * @return APR_ENOTIMPL if not implemented.
+     * @return APR_NOKEY if the key type does not support the given operation.
+     */
+    apr_status_t (*digest_update)(apr_crypto_digest_t *digest,
+            const unsigned char *in, apr_size_t inlen);
+
+    /**
+     * @brief Finalise the digest and write the result.
+     * @note After this call, the context is cleaned and can be reused by
+     *   apr_crypto_digest_init().
+     * @param digest The digest context to use.
+     * @return APR_ECRYPT if an error occurred.
+     * @return APR_EPADDING if padding was enabled and the block was incorrectly
+     *         formatted.
+     * @return APR_ENOTIMPL if not implemented.
+     * @return APR_NOKEY if the key type does not support the given operation.
+     */
+    apr_status_t (*digest_final)(apr_crypto_digest_t *digest);
+
+    /**
+     * @brief One shot digest on a single memory buffer.
+     * @param key The key structure to use.
+     * @param rec The digest record.
+     * @param in Address of the buffer to digest.
+     * @param inlen Length of the buffer to digest.
+     * @param p The pool to use.
+     * @return APR_ENOIV if an initialisation vector is required but not specified.
+     * @return APR_EINIT if the backend failed to initialise the context.
+     * @return APR_ENOTIMPL if not implemented.
+     * @return APR_NOKEY if the key type does not support the given operation.
+     */
+    apr_status_t (*digest)(const apr_crypto_key_t *key,
+            apr_crypto_digest_rec_t *rec, const unsigned char *in,
+            apr_size_t inlen, apr_pool_t *p);
+
+    /**
      * @brief Clean encryption / decryption context.
      * @note After cleanup, a context is free to be reused if necessary.
      * @param ctx The block context to use.
      * @return Returns APR_ENOTIMPL if not supported.
      */
     apr_status_t (*block_cleanup)(apr_crypto_block_t *ctx);
+
+    /**
+     * @brief Clean sign / verify context.
+     * @note After cleanup, a context is free to be reused if necessary.
+     * @param ctx The digest context to use.
+     * @return Returns APR_ENOTIMPL if not supported.
+     */
+    apr_status_t (*digest_cleanup)(apr_crypto_digest_t *ctx);
 
     /**
      * @brief Clean encryption / decryption context.
