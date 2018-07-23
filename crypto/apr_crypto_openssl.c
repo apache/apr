@@ -201,7 +201,7 @@ void EVP_CIPHER_CTX_free(EVP_CIPHER_CTX *ctx)
 
 #endif
 
-#ifdef APR_USE_OPENSSL_PRE_1_1_API
+#if APR_USE_OPENSSL_PRE_1_1_API
 #define EVP_MD_CTX_new EVP_MD_CTX_create
 #define EVP_MD_CTX_free EVP_MD_CTX_destroy
 #endif
