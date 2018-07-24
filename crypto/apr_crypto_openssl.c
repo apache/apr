@@ -34,6 +34,7 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/engine.h>
+#include <openssl/crypto.h>
 
 #define LOG_PREFIX "apr_crypto_openssl: "
 
@@ -143,15 +144,7 @@ static apr_status_t crypto_error(const apu_err_t **result,
  */
 static apr_status_t crypto_shutdown(void)
 {
-    ERR_free_strings();
-    EVP_cleanup();
-    ENGINE_cleanup();
-    return APR_SUCCESS;
-}
-
-static apr_status_t crypto_shutdown_helper(void *data)
-{
-    return crypto_shutdown();
+    return apr_crypto_lib_term("openssl");
 }
 
 /**
@@ -160,21 +153,7 @@ static apr_status_t crypto_shutdown_helper(void *data)
 static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
         const apu_err_t **result)
 {
-#if APR_USE_OPENSSL_PRE_1_1_API
-    (void)CRYPTO_malloc_init();
-#else
-    OPENSSL_malloc_init();
-#endif
-    ERR_load_crypto_strings();
-    /* SSL_load_error_strings(); */
-    OpenSSL_add_all_algorithms();
-    ENGINE_load_builtin_engines();
-    ENGINE_register_all_complete();
-
-    apr_pool_cleanup_register(pool, pool, crypto_shutdown_helper,
-            apr_pool_cleanup_null);
-
-    return APR_SUCCESS;
+    return apr_crypto_lib_init("openssl", params, result, pool);
 }
 
 #if OPENSSL_VERSION_NUMBER < 0x0090802fL

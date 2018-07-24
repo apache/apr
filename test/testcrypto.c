@@ -1075,7 +1075,7 @@ static void test_crypto_init(abts_case *tc, void *data)
 
     apr_pool_create(&pool, NULL);
 
-    rv = apr_crypto_init(pool);
+    rv = apr_crypto_init(apr_pool_parent_get(pool));
     ABTS_ASSERT(tc, "failed to init apr_crypto", rv == APR_SUCCESS);
 
     apr_pool_destroy(pool);
@@ -2461,10 +2461,8 @@ static void test_crypto_prng(abts_case *tc, void *data)
                         rv == APR_SUCCESS);
         }
 
-        if (cprng) {
-            rv = apr_crypto_prng_bytes(cprng, randbytes, 128 - 32);
-            ABTS_ASSERT(tc, "apr_crypto_prng_bytes failed", rv == APR_SUCCESS);
-        }
+        rv = apr_crypto_prng_bytes(cprng, randbytes, 128 - 32);
+        ABTS_ASSERT(tc, "apr_crypto_prng_bytes failed", rv == APR_SUCCESS);
 
         /* Should match the first time only */
         if (i != 0) {
@@ -2478,10 +2476,8 @@ static void test_crypto_prng(abts_case *tc, void *data)
                         memcmp(randbytes, test_PRNG_kat0 + 32, 128 - 32) == 0);
         }
 
-        if (cprng) {
-            rv = apr_crypto_prng_destroy(cprng);
-            ABTS_ASSERT(tc, "apr_crypto_prng_destroy failed", rv == APR_SUCCESS);
-        }
+        rv = apr_crypto_prng_destroy(cprng);
+        ABTS_ASSERT(tc, "apr_crypto_prng_destroy failed", rv == APR_SUCCESS);
     }
 
     apr_pool_destroy(pool);
