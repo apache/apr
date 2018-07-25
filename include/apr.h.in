@@ -334,6 +334,7 @@ typedef  @int_value@             apr_int32_t;
 typedef  unsigned @int_value@    apr_uint32_t;
 
 #define APR_SIZEOF_VOIDP @voidp_size@
+#define APR_SIZEOF_OFF_T @off_t_size@
 
 /*
  * Darwin 10's default compiler (gcc42) builds for both 64 and
