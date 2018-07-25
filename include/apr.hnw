@@ -266,6 +266,11 @@ typedef  apr_uint64_t      apr_ino_t;
 #else
 #define APR_SIZEOF_VOIDP   4
 #endif
+#if APR_HAS_LARGE_FILES
+#define APR_SIZEOF_OFF_T   8
+#else
+#define APR_SIZEOF_OFF_T   4
+#endif
 
 #if APR_SIZEOF_VOIDP == 8
 typedef  apr_uint64_t            apr_uintptr_t;
