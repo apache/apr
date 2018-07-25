@@ -1866,7 +1866,7 @@ elif test "$ac_cv_type_off_t" = "yes"; then
     esac
 else
     # Fallback on int
-    off_t_value=apr_int64_t
+    off_t_value=int
     off_t_fmt='#define APR_OFF_T_FMT "d"'
     off_t_strfn='strtoi'
 fi
