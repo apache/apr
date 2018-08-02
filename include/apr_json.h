@@ -265,7 +265,7 @@ APR_DECLARE(apr_status_t) apr_json_object_set(apr_json_value_t *obj,
  * @return Returns NULL if the key is not present.
  */
 APR_DECLARE(apr_json_kv_t *)
-        apr_json_object_get(apr_json_object_t *obj, const char *key)
+        apr_json_object_get(apr_json_value_t *obj, const char *key)
         __attribute__((nonnull(1, 2)));
 
 /**
