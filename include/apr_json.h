@@ -78,6 +78,11 @@ extern "C" {
 #define APR_JSON_FLAGS_WHITESPACE 1
 
 /**
+ * Flag indicating strict overlay.
+ */
+#define APR_JSON_FLAGS_STRICT 2
+
+/**
  * A structure to hold a JSON object.
  */
 typedef struct apr_json_object_t apr_json_object_t;
@@ -309,6 +314,30 @@ APR_DECLARE(apr_status_t) apr_json_decode(apr_json_value_t ** retval,
 APR_DECLARE(apr_status_t) apr_json_encode(apr_bucket_brigade * brigade,
         apr_brigade_flush flush, void *ctx, const apr_json_value_t * json,
         int flags, apr_pool_t * pool) __attribute__((nonnull(1, 4, 6)));
+
+/**
+ * Overlay one JSON object over a second JSON object.
+ *
+ * If the values are objects, a new object will be returned containing
+ * all keys from the overlay superimposed on the base.
+ *
+ * Keys that appear in the overlay will replace keys in the base, unless
+ * APR_JSON_FLAGS_STRICT is specified, in which case NULL will be returned.
+ *
+ * If the base is not an object, overlay will be returned.
+ * @param p pool to use
+ * @param overlay the JSON object to overlay on top of base. If NULL, the
+ *   base will be returned.
+ * @param base the base JSON object. If NULL, the overlay will be returned.
+ * @param flags set to APR_JSON_FLAGS_STRICT to fail if object keys are not
+ *   unique, or APR_JSON_FLAGS_NONE to replace keys in base with overlay.
+ * @return A new object containing the result. If APR_JSON_FLAGS_STRICT was
+ *   specified and a key was present in overlay that was also present in base,
+ *   NULL will be returned.
+ */
+APR_DECLARE(apr_json_value_t *) apr_json_overlay(apr_pool_t *p,
+        apr_json_value_t *overlay, apr_json_value_t *base,
+        int flags) __attribute__((nonnull(1)));;
 
 #ifdef __cplusplus
 }
