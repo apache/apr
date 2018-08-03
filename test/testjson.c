@@ -149,6 +149,35 @@ static void test_json_string(abts_case * tc, void *data)
             (memcmp(expected, json->value.string.p, json->value.string.len) == 0));
 }
 
+static void test_json_overlay(abts_case * tc, void *data)
+{
+	const char *o = "{\"o1\":\"foo\",\"common\":\"bar\",\"o2\":\"baz\"}";
+	const char *b = "{\"b1\":\"foo\",\"common\":\"bar\",\"b2\":\"baz\"}";
+
+	apr_json_value_t *res;
+	apr_json_value_t *base;
+	apr_json_value_t *overlay;
+
+	apr_off_t offset;
+	apr_status_t status;
+
+    status = apr_json_decode(&base, b, APR_JSON_VALUE_STRING, &offset,
+            APR_JSON_FLAGS_WHITESPACE, 10, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, status);
+
+    status = apr_json_decode(&overlay, o, APR_JSON_VALUE_STRING, &offset,
+            APR_JSON_FLAGS_WHITESPACE, 10, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, status);
+
+    res = apr_json_overlay(p, overlay, base, APR_JSON_FLAGS_NONE);
+    ABTS_INT_EQUAL(tc, 5, apr_hash_count(res->value.object->hash));
+
+    res = apr_json_overlay(p, overlay, base, APR_JSON_FLAGS_STRICT);
+    ABTS_ASSERT(tc, "overlay strict should return NULL",
+            (res == NULL));
+
+}
+
 abts_suite *testjson(abts_suite * suite)
 {
     suite = ADD_SUITE(suite);
@@ -157,6 +186,7 @@ abts_suite *testjson(abts_suite * suite)
     abts_run_test(suite, test_json_level, NULL);
     abts_run_test(suite, test_json_eof, NULL);
     abts_run_test(suite, test_json_string, NULL);
+    abts_run_test(suite, test_json_overlay, NULL);
 
     return suite;
 }

@@ -167,3 +167,59 @@ apr_json_kv_t *apr_json_object_get(apr_json_value_t *object, const char *key)
 
     return apr_hash_get(object->value.object->hash, key, APR_HASH_KEY_STRING);
 }
+
+apr_json_value_t *apr_json_overlay(apr_pool_t *p,
+        apr_json_value_t *overlay, apr_json_value_t *base,
+        int flags)
+{
+    apr_json_value_t *res;
+    apr_json_kv_t *kv;
+    int oc, bc;
+
+    if (!base || base->type != APR_JSON_OBJECT) {
+        return overlay;
+    }
+    if (!overlay) {
+        return base;
+    }
+    if (overlay->type != APR_JSON_OBJECT) {
+        return overlay;
+    }
+
+    oc = apr_hash_count(overlay->value.object->hash);
+    if (!oc) {
+        return base;
+    }
+    bc = apr_hash_count(base->value.object->hash);
+    if (!bc) {
+        return overlay;
+    }
+
+    res = apr_json_object_create(p);
+
+    for (kv = APR_RING_FIRST(&(base->value.object)->list);
+         kv != APR_RING_SENTINEL(&(base->value.object)->list, apr_json_kv_t, link);
+         kv = APR_RING_NEXT((kv), link)) {
+
+        if (!apr_hash_get(overlay->value.object->hash, kv->k->value.string.p,
+                kv->k->value.string.len)) {
+
+            apr_json_object_set(res, kv->k, kv->v, p);
+
+        }
+        else if (APR_JSON_FLAGS_STRICT & flags) {
+            return NULL;
+        }
+
+    }
+
+    for (kv = APR_RING_FIRST(&(overlay->value.object)->list);
+         kv != APR_RING_SENTINEL(&(overlay->value.object)->list, apr_json_kv_t, link);
+         kv = APR_RING_NEXT((kv), link)) {
+
+        apr_json_object_set(res, kv->k, kv->v, p);
+
+    }
+
+    return res;
+}
