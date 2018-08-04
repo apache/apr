@@ -38,22 +38,6 @@
 
 #define LOG_PREFIX "apr_crypto_openssl: "
 
-#ifndef APR_USE_OPENSSL_PRE_1_1_API
-#if defined(LIBRESSL_VERSION_NUMBER)
-/* LibreSSL declares OPENSSL_VERSION_NUMBER == 2.0 but does not include most
- * changes from OpenSSL >= 1.1 (new functions, macros, deprecations, ...), so
- * we have to work around this...
- */
-#define APR_USE_OPENSSL_PRE_1_1_API (1)
-#define APR_USE_OPENSSL_PRE_1_1_1_API (1)
-#define APR_USE_OPENSSL_PRE_1_0_API (0)
-#else
-#define APR_USE_OPENSSL_PRE_1_1_API (OPENSSL_VERSION_NUMBER < 0x10100000L)
-#define APR_USE_OPENSSL_PRE_1_1_1_API (OPENSSL_VERSION_NUMBER < 0x10101000L)
-#define APR_USE_OPENSSL_PRE_1_0_API (OPENSSL_VERSION_NUMBER < 0x10000000L)
-#endif
-#endif
-
 struct apr_crypto_t {
     apr_pool_t *pool;
     const apr_crypto_driver_t *provider;
@@ -681,7 +665,7 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
 
     case APR_CRYPTO_KTYPE_CMAC: {
 
-#ifndef APR_USE_OPENSSL_PRE_1_1_1_API
+#if !APR_USE_OPENSSL_PRE_1_1_1_API
         apr_crypto_config_t *config = f->config;
 
         /* decide on what cipher mechanism we will be using */
@@ -696,7 +680,7 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
             return APR_ENOKEY;
         }
 
-        switch (rec->k.hmac.hmac) {
+        switch (rec->k.hmac.digest) {
         case APR_CRYPTO_DIGEST_MD5:
             key->hmac = EVP_md5();
             break;

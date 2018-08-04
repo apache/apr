@@ -366,6 +366,24 @@ struct apr_crypto_driver_t {
 };
 
 #if APU_HAVE_OPENSSL
+#include <openssl/crypto.h>
+
+#ifndef APR_USE_OPENSSL_PRE_1_1_API
+#if defined(LIBRESSL_VERSION_NUMBER)
+/* LibreSSL declares OPENSSL_VERSION_NUMBER == 2.0 but does not necessarily
+ * include changes from OpenSSL >= 1.1 (new functions, macros, * deprecations,
+ * ...), so we have to work around this...
+ */
+#define APR_USE_OPENSSL_PRE_1_0_API     (0)
+#define APR_USE_OPENSSL_PRE_1_1_API     (LIBRESSL_VERSION_NUMBER < 0x2070000f)
+#define APR_USE_OPENSSL_PRE_1_1_1_API   (1)
+#else  /* defined(LIBRESSL_VERSION_NUMBER) */
+#define APR_USE_OPENSSL_PRE_1_0_API     (OPENSSL_VERSION_NUMBER < 0x10000000L)
+#define APR_USE_OPENSSL_PRE_1_1_API     (OPENSSL_VERSION_NUMBER < 0x10100000L)
+#define APR_USE_OPENSSL_PRE_1_1_1_API   (OPENSSL_VERSION_NUMBER < 0x10101000L)
+#endif /* defined(LIBRESSL_VERSION_NUMBER) */
+#endif /* ndef APR_USE_OPENSSL_PRE_1_1_API */
+
 const char *apr__crypto_openssl_version(void);
 apr_status_t apr__crypto_openssl_init(const char *params,
                                       const apu_err_t **result,
