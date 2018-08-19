@@ -24,6 +24,7 @@
 
 #include "apr.h"
 #include "apr_errno.h"
+#include "apr_pools.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -170,6 +171,27 @@ typedef struct apu_err_t {
     const char *msg;
     int rc;
 } apu_err_t;
+
+/**
+ * Populate a apu_err_t structure with the given error, allocated
+ * from the given pool.
+ *
+ * If the result parameter points at a NULL pointer, a apu_err_t
+ * structure will be allocated, otherwise the apu_err_t structure
+ * will be reused.
+ * @param result If points to NULL, the apu_err_t structure is
+ *   allocated and returned, otherwise the existing apu_err_t is used.
+ * @param p The pool to use.
+ * @param reason The reason string, may be NULL.
+ * @param rc The underlying result code.
+ * @param fmt The format of the string
+ * @param ... The arguments to use while printing the data
+ * @return APR_SUCCESS on success, APR_ENOMEM if out of memory.
+ */
+APR_DECLARE_NONSTD(apr_status_t) apr_errprintf(apu_err_t **result,
+        apr_pool_t *p, const char *reason, int rc, const char *fmt, ...)
+        __attribute__((format(printf,5,6)))
+        __attribute__((nonnull(1,2)));
 
 /** @} */
 
