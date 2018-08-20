@@ -143,7 +143,7 @@ include/private/apr_escape_test_char.h: tools/gen_test_char@EXEEXT@
 	$(APR_MKDIR) include/private
 	tools/gen_test_char@EXEEXT@ > $@
 
-LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) $(LT_LDFLAGS) \
+LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link --tag=CC $(COMPILE) $(LT_LDFLAGS) \
 	    @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
 
 # DO NOT REMOVE

@@ -283,9 +283,9 @@ AC_ARG_WITH(libtool, [  --without-libtool       avoid using libtool to link the 
   [ use_libtool=$withval ], [ use_libtool="yes" ] )
 
 if test "x$use_libtool" = "xyes"; then
-      lt_compile='$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -o $@ -c $< && touch $@'
+      lt_compile='$(LIBTOOL) $(LTFLAGS) --mode=compile --tag=CC $(COMPILE) -o $@ -c $< && touch $@'
       LT_VERSION="-version-info `$get_version libtool $version_hdr APR`"
-      link="\$(LIBTOOL) \$(LTFLAGS) --mode=link \$(COMPILE) \$(LT_LDFLAGS) \$(LT_VERSION) \$(ALL_LDFLAGS) -o \$@"
+      link="\$(LIBTOOL) \$(LTFLAGS) --mode=link --tag=CC \$(COMPILE) \$(LT_LDFLAGS) \$(LT_VERSION) \$(ALL_LDFLAGS) -o \$@"
       so_ext='lo'
       lib_target='-rpath $(libdir) $(OBJECTS)'
       export_lib_target='-rpath \$(libdir) \$(OBJECTS)'
