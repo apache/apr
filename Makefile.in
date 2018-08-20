@@ -70,6 +70,7 @@ exec_prefix=@exec_prefix@
 bindir=@bindir@
 libdir=@libdir@
 includedir=@includedir@
+datadir=@datadir@
 installbuilddir=@installbuilddir@
 
 LDADD_dbd_pgsql = @LDADD_dbd_pgsql@
