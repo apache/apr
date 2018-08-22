@@ -119,8 +119,8 @@ rpmbuild -tb apr-util-<version>.tar.bz2
 Resolve dependencies as appropriate.
 
 
-Configuring and Building APR on Windows
-=======================================
+Configuring and Building APR on Windows with Visual Studio
+==========================================================
 
 Using Visual Studio, you can build and run the test validation of APR.
 The Makefile.win make file has a bunch of documentation about it's
@@ -148,6 +148,22 @@ When using APR as a dynamic library, nothing special is required,
 simply link to libapr.lib.  To use it as a static library, simply 
 define APR_DECLARE_STATIC before you include any apr header files 
 in your source, and link to apr.lib instead.
+
+Configuring and Building APR on Windows with C++ Builder and Ninja
+==================================================================
+(WORK IN PROGRESS)
+A draft work is available in the bcc sub directory of APR source. 
+Here you can find the static and dynamic apr library projects to be opened
+directly on the IDE or through MSBuild. Please note that you can 
+use Ninja build system to create and configure some files but the 
+build process fails while building the shared dll. Additional linker options
+should be used to get rid of them.
+
+At the moment there is no way to build the tests as ninja stops 
+building before trying to build tests. APR project tests has no IDE 
+project and should be built using cmake/ninja (same as Visual Studio). 
+The linker reports some unresolved external errors on Windows 
+interlocked APIs.
 
 
 Generating Test Coverage information with gcc
