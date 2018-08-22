@@ -55,7 +55,7 @@ static void SystemTimeToAprExpTime(apr_time_exp_t *xt, SYSTEMTIME *tm)
     {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
     if (tm->wMonth < 1 || tm->wMonth > 12)
-        return APR_EBADDATE;
+        return /*APR_EBADDATE*/;
 
     /* Note; the caller is responsible for filling in detailed tm_usec,
      * tm_gmtoff and tm_isdst data when applicable.
