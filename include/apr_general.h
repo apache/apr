@@ -98,6 +98,17 @@ typedef int               apr_signum_t;
 #endif /* !CRAY */
 
 /**
+ * Embarcadero C++ Builder uses posix 
+ * functions names  
+  */
+#if defined(__BORLANDC__) & defined(__clang__)
+  #define _isatty isatty
+  #define _dup2  dup2
+  #define _setmode setmode
+#endif
+
+
+/**
  * Finding offsets of elements within structures.
  * @param s_type structure type name
  * @param field  data field within the structure
