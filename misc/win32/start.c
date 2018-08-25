@@ -48,7 +48,7 @@ static int warrsztoastr(const char * const * *retarr,
     char **env;
     char *pstrs;
     char *strs;
-    int arg;
+    int arg, args;
 
     for (args = 1, wch = arrsz; wch[0] || wch[1]; ++wch)
         if (!*wch)
