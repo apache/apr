@@ -259,7 +259,7 @@ struct apr_crypto_driver_t {
      * @return APR_ENOIV if an initialisation vector is required but not specified.
      * @return APR_EINIT if the backend failed to initialise the context.
      * @return APR_ENOTIMPL if not implemented.
-     * @return APR_NOKEY if the key type does not support the given operation.
+     * @return APR_ENOKEY if the key type does not support the given operation.
      */
     apr_status_t (*digest_init)(apr_crypto_digest_t **d,
             const apr_crypto_key_t *key, apr_crypto_digest_rec_t *rec, apr_pool_t *p);
@@ -271,7 +271,7 @@ struct apr_crypto_driver_t {
      * @param digest The digest context to use.
      * @return APR_ECRYPT if an error occurred.
      * @return APR_ENOTIMPL if not implemented.
-     * @return APR_NOKEY if the key type does not support the given operation.
+     * @return APR_ENOKEY if the key type does not support the given operation.
      */
     apr_status_t (*digest_update)(apr_crypto_digest_t *digest,
             const unsigned char *in, apr_size_t inlen);
@@ -285,7 +285,7 @@ struct apr_crypto_driver_t {
      * @return APR_EPADDING if padding was enabled and the block was incorrectly
      *         formatted.
      * @return APR_ENOTIMPL if not implemented.
-     * @return APR_NOKEY if the key type does not support the given operation.
+     * @return APR_ENOKEY if the key type does not support the given operation.
      */
     apr_status_t (*digest_final)(apr_crypto_digest_t *digest);
 
@@ -299,7 +299,7 @@ struct apr_crypto_driver_t {
      * @return APR_ENOIV if an initialisation vector is required but not specified.
      * @return APR_EINIT if the backend failed to initialise the context.
      * @return APR_ENOTIMPL if not implemented.
-     * @return APR_NOKEY if the key type does not support the given operation.
+     * @return APR_ENOKEY if the key type does not support the given operation.
      */
     apr_status_t (*digest)(const apr_crypto_key_t *key,
             apr_crypto_digest_rec_t *rec, const unsigned char *in,
