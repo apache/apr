@@ -38,7 +38,7 @@ extern "C" {
  * @{
  */
 
-#if APU_HAVE_CRYPTO
+#if APU_HAVE_CRYPTO || defined(DOXYGEN)
 
 #ifndef APU_CRYPTO_RECOMMENDED_DRIVER
 #if APU_HAVE_COMMONCRYPTO
