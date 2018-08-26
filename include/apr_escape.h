@@ -223,8 +223,8 @@ APR_DECLARE(const char *) apr_pescape_urlencoded(apr_pool_t *p,
 
 /**
  * Apply entity encoding to a string. Characters are replaced as follows:
- * '<' becomes '&lt;', '>' becomes '&gt;', '&' becomes '&amp;', the
- * double quote becomes '&quot;" and the single quote becomes '&apos;'.
+ * '<' becomes '\&lt;', '>' becomes '\&gt;', '&' becomes '\&amp;', the
+ * double quote becomes '\&quot;" and the single quote becomes '\&apos;'.
  *
  * If toasc is not zero, any non ascii character will be encoded as
  * '%\#ddd;', where ddd is the decimal code of the character.
@@ -242,9 +242,9 @@ APR_DECLARE(apr_status_t) apr_escape_entity(char *escaped, const char *str,
 
 /**
  * Apply entity encoding to a string, returning the result from a pool.
- * Characters are replaced as follows: '<' becomes '&lt;', '>' becomes
- * '&gt;', '&' becomes '&amp;', the double quote becomes '&quot;" and the
- * single quote becomes '&apos;'.
+ * Characters are replaced as follows: '<' becomes '\&lt;', '>' becomes
+ * '\&gt;', '&' becomes '\&amp;', the double quote becomes '\&quot;" and the
+ * single quote becomes '\&apos;'.
  * @param p Pool to allocate from
  * @param str The original string
  * @param toasc If non zero, encode non ascii characters
