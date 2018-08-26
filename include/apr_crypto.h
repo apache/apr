@@ -499,7 +499,7 @@ typedef struct apr_crypto_digest_rec_t {
  * @brief Perform once-only initialisation. Call once only.
  *
  * @param pool - pool to register any shutdown cleanups, etc
- * @return APR_NOTIMPL in case of no crypto support.
+ * @return APR_ENOTIMPL in case of no crypto support.
  */
 APR_DECLARE(apr_status_t) apr_crypto_init(apr_pool_t *pool);
 
