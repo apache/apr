@@ -644,12 +644,6 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
     }
     case APR_CRYPTO_KTYPE_HMAC: {
 
-        /* decide on what cipher mechanism we will be using */
-        rv = crypto_cipher_mechanism(key, rec->type, rec->mode, rec->pad);
-        if (APR_SUCCESS != rv) {
-            return rv;
-        }
-
         switch (rec->k.hmac.digest) {
         case APR_CRYPTO_DIGEST_MD5:
             key->hashMech = CKM_MD5_HMAC;
