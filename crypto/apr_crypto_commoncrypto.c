@@ -248,9 +248,7 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
     if (!f->digests) {
         return APR_ENOMEM;
     }
-    apr_hash_set(f->digests, "md2", APR_HASH_KEY_STRING, &(key_digests[i = 0]));
-    apr_hash_set(f->digests, "md4", APR_HASH_KEY_STRING, &(key_digests[++i]));
-    apr_hash_set(f->digests, "md5", APR_HASH_KEY_STRING, &(key_digests[++i]));
+    apr_hash_set(f->digests, "md5", APR_HASH_KEY_STRING, &(key_digests[i = 0]));
     apr_hash_set(f->digests, "sha1", APR_HASH_KEY_STRING, &(key_digests[++i]));
     apr_hash_set(f->digests, "sha224", APR_HASH_KEY_STRING, &(key_digests[++i]));
     apr_hash_set(f->digests, "sha256", APR_HASH_KEY_STRING, &(key_digests[++i]));
