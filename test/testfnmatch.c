@@ -135,19 +135,6 @@ static struct pattern_s {
     {"test/*", "test/.this",            FAILS_IF(APR_FNM_PERIOD | APR_FNM_PATHNAME)},
     {"test/?this", "test/.this",        FAILS_IF(APR_FNM_PERIOD | APR_FNM_PATHNAME)},
     {"test/[.]this", "test/.this",      FAILS_IF(APR_FNM_PERIOD | APR_FNM_PATHNAME)},
-    
-    {"foo[[]bar", "foo[bar",            SUCCEEDS},
-    {"foo]bar", "foo]bar",              SUCCEEDS},
-    {"foo[[]]bar", "foo[]bar",          SUCCEEDS},
-    
-    {"foo[]bar", "foobar",              FAILS},
-    {"foo[]]bar", "foo]bar",            FAILS},
-    {"foo[!]bar", "foobar",             SUCCEEDS},
-    {"foo[^]bar", "foobar",             SUCCEEDS},
-    {"foo[!]]bar", "foo]bar",           SUCCEEDS},
-    {"foo[^]]bar", "foo]bar",           SUCCEEDS},
-    {"foo[!]]bar", "fooXbar",           FAILS},
-    {"foo[^]]bar", "fooXbar",           FAILS},
 
     {NULL, NULL, 0}
 };
