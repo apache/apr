@@ -196,9 +196,6 @@ dnl can only be used once within a configure script, so this prevents a
 dnl preload section from invoking the macro to get compiler info.
 AC_PROG_CC
 
-dnl Check build CC for gen_test_char compiling which is executed at build time.
-AX_PROG_CC_FOR_BUILD
-
 dnl AC_PROG_SED is only avaliable in recent autoconf versions.
 dnl Use AC_CHECK_PROG instead if AC_PROG_SED is not present.
 ifdef([AC_PROG_SED],
