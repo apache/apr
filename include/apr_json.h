@@ -252,7 +252,8 @@ APR_DECLARE(apr_json_value_t *)
 /**
  * Associate a value with a key in a JSON object.
  * @param obj The JSON object.
- * @param key Pointer to the key string.
+ * @param key Pointer to the key string, including any whitespace
+ *   required.
  * @param val Value to associate with the key.
  * @param pool Pool to use.
  * @return APR_SUCCESS on success, APR_EINVAL if the key is
@@ -319,7 +320,7 @@ APR_DECLARE(apr_status_t) apr_json_encode(apr_bucket_brigade * brigade,
         int flags, apr_pool_t * pool) __attribute__((nonnull(1, 4, 6)));
 
 /**
- * Overlay one JSON object over a second JSON object.
+ * Overlay one JSON value over a second JSON value.
  *
  * If the values are objects, a new object will be returned containing
  * all keys from the overlay superimposed on the base.
@@ -327,7 +328,8 @@ APR_DECLARE(apr_status_t) apr_json_encode(apr_bucket_brigade * brigade,
  * Keys that appear in the overlay will replace keys in the base, unless
  * APR_JSON_FLAGS_STRICT is specified, in which case NULL will be returned.
  *
- * If the base is not an object, overlay will be returned.
+ * If either the base or the overlay are not objects, overlay will be
+ * returned.
  * @param p pool to use
  * @param overlay the JSON object to overlay on top of base. If NULL, the
  *   base will be returned.
