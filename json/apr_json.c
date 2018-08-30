@@ -159,13 +159,14 @@ apr_status_t apr_json_object_set(apr_json_value_t *object, apr_json_value_t *key
     return APR_SUCCESS;
 }
 
-apr_json_kv_t *apr_json_object_get(apr_json_value_t *object, const char *key)
+apr_json_kv_t *apr_json_object_get(apr_json_value_t *object, const char *key,
+        apr_ssize_t klen)
 {
     if (object->type != APR_JSON_OBJECT) {
         return NULL;
     }
 
-    return apr_hash_get(object->value.object->hash, key, APR_HASH_KEY_STRING);
+    return apr_hash_get(object->value.object->hash, key, klen);
 }
 
 apr_json_value_t *apr_json_overlay(apr_pool_t *p,

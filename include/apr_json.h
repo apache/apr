@@ -267,10 +267,13 @@ APR_DECLARE(apr_status_t) apr_json_object_set(apr_json_value_t *obj,
  * Look up the value associated with a key in a JSON object.
  * @param obj The JSON object.
  * @param key Pointer to the key.
+ * @param klen Length of the key, or APR_JSON_VALUE_STRING if NUL
+ *   terminated.
  * @return Returns NULL if the key is not present.
  */
 APR_DECLARE(apr_json_kv_t *)
-        apr_json_object_get(apr_json_value_t *obj, const char *key)
+        apr_json_object_get(apr_json_value_t *obj, const char *key,
+        apr_ssize_t klen)
         __attribute__((nonnull(1, 2)));
 
 /**
