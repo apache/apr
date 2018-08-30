@@ -53,7 +53,7 @@ LT_VERSION = @LT_VERSION@
 
 CLEAN_TARGETS = apr-config.out apr.exp exports.c export_vars.c .make.dirs \
 	build/apr_rules.out tools/gen_test_char@EXEEXT@ \
-	tools/gen_test_char.o \
+	tools/gen_test_char.o tools/gen_test_char.lo \
 	include/private/apr_escape_test_char.h
 DISTCLEAN_TARGETS = config.cache config.log config.status \
 	include/apr.h include/arch/unix/apr_private.h \
@@ -162,9 +162,13 @@ check: $(TARGET_LIB)
 etags:
 	etags `find . -name '*.[ch]'`
 
-tools/gen_test_char@EXEEXT@: tools/gen_test_char.c
+OBJECTS_gen_test_char = tools/gen_test_char.lo $(LOCAL_LIBS)
+tools/gen_test_char.lo: tools/gen_test_char.c
 	$(APR_MKDIR) tools
-	$(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $< -o $@
+	$(LT_COMPILE)
+
+tools/gen_test_char@EXEEXT@: $(OBJECTS_gen_test_char)
+	$(LINK_PROG) $(OBJECTS_gen_test_char) $(ALL_LIBS)
 
 include/private/apr_escape_test_char.h: tools/gen_test_char@EXEEXT@
 	$(APR_MKDIR) include/private
