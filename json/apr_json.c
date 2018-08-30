@@ -169,6 +169,42 @@ apr_json_kv_t *apr_json_object_get(apr_json_value_t *object, const char *key,
     return apr_hash_get(object->value.object->hash, key, klen);
 }
 
+apr_json_kv_t *apr_json_object_first(apr_json_value_t *obj)
+{
+    apr_json_kv_t *kv;
+
+    if (obj->type != APR_JSON_OBJECT) {
+        return NULL;
+    }
+
+    kv = APR_RING_FIRST(&(obj->value.object)->list);
+
+    if (kv != APR_RING_SENTINEL(&(obj->value.object)->list, apr_json_kv_t, link)) {
+        return kv;
+    }
+    else {
+        return NULL;
+    }
+}
+
+apr_json_kv_t *apr_json_object_next(apr_json_value_t *obj, apr_json_kv_t *kv)
+{
+    apr_json_kv_t *next;
+
+    if (obj->type != APR_JSON_OBJECT) {
+        return NULL;
+    }
+
+    next = APR_RING_NEXT((kv), link);
+
+    if (next != APR_RING_SENTINEL(&(obj->value.object)->list, apr_json_kv_t, link)) {
+        return next;
+    }
+    else {
+        return NULL;
+    }
+}
+
 apr_json_value_t *apr_json_overlay(apr_pool_t *p,
         apr_json_value_t *overlay, apr_json_value_t *base,
         int flags)

@@ -278,6 +278,31 @@ APR_DECLARE(apr_json_kv_t *)
         __attribute__((nonnull(1, 2)));
 
 /**
+ * Get the first value associated with an object.
+ *
+ * If the value is an object, this function returns the first key value pair.
+ * @param obj The JSON object.
+ * @return Returns the first value, or NULL if not an object, or the object is
+ *   empty.
+ */
+APR_DECLARE(apr_json_kv_t *) apr_json_object_first(apr_json_value_t *obj)
+        __attribute__((nonnull(1)));;
+
+/**
+ * Get the next value associated with an object.
+ *
+ * This function returns the next key value pair, or NULL if no more pairs
+ * are present.
+ * @param obj The JSON object.
+ * @param kv The previous JSON key value pair.
+ * @return Returns the next key value pair, or NULL if not an object, or
+ *   the object is empty.
+ */
+APR_DECLARE(apr_json_kv_t *) apr_json_object_next(apr_json_value_t *obj,
+        apr_json_kv_t *kv)
+        __attribute__((nonnull(1, 2)));;
+
+/**
  * Decode utf8-encoded JSON string into apr_json_value_t.
  * @param retval the result
  * @param injson utf8-encoded JSON string.
