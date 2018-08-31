@@ -350,16 +350,13 @@ out:
 }
 
 static apr_status_t apr_json_decode_array(apr_json_scanner_t * self,
-        apr_array_header_t ** retval)
+        apr_json_value_t * array)
 {
     apr_status_t status = APR_SUCCESS;
-    apr_pool_t *link_pool = NULL;
-    json_link_t *head = NULL, *tail = NULL;
     apr_size_t count = 0;
 
     if (self->p >= self->e) {
-        status = APR_EOF;
-        goto out;
+        return APR_EOF;
     }
 
     if (self->level <= 0) {
@@ -367,19 +364,21 @@ static apr_status_t apr_json_decode_array(apr_json_scanner_t * self,
     }
     self->level--;
 
-    if ((status = apr_pool_create(&link_pool, self->pool))) {
-        return status;
+    array->value.array = apr_pcalloc(self->pool,
+            sizeof(apr_json_array_t));
+    if (!array) {
+        return APR_ENOMEM;
     }
+    APR_RING_INIT(&array->value.array->list, apr_json_value_t, link);
+    array->value.array->array = NULL;
 
     self->p++; /* toss of the leading [ */
 
     for (;;) {
         apr_json_value_t *element;
-        json_link_t *new_node;
 
         if (self->p == self->e) {
-            status = APR_EOF;
-            goto out;
+            return APR_EOF;
         }
 
         if (*self->p == ']') {
@@ -388,49 +387,41 @@ static apr_status_t apr_json_decode_array(apr_json_scanner_t * self,
         }
 
         if (APR_SUCCESS != (status = apr_json_decode_value(self, &element))) {
-            goto out;
+            return status;
         }
 
-        new_node = apr_pcalloc(link_pool, sizeof(json_link_t));
-        new_node->value = element;
-        if (tail) {
-            tail->next = new_node;
+        if (APR_SUCCESS
+                != (status = apr_json_array_add(array, element, self->pool))) {
+            return status;
         }
-        else {
-            head = new_node;
-        }
-        tail = new_node;
+
         count++;
 
         if (self->p == self->e) {
-            status = APR_EOF;
-            goto out;
+            return APR_EOF;
         }
 
         if (*self->p == ',') {
             self->p++;
         }
         else if (*self->p != ']') {
-            status = APR_BADCH;
-            goto out;
+            return APR_BADCH;
         }
     }
 
     {
-        json_link_t *node;
-        apr_array_header_t *array = apr_array_make(self->pool, count, sizeof(apr_json_value_t *));
-        for (node = head; node; node = node->next) {
-            *((apr_json_value_t **) (apr_array_push(array))) = node->value;
+        apr_json_value_t *element = apr_json_array_first(array);
+        array->value.array->array = apr_array_make(self->pool, count,
+                sizeof(apr_json_value_t *));
+        while (element) {
+            *((apr_json_value_t **) (apr_array_push(array->value.array->array))) =
+                    element;
+            element = apr_json_array_next(array, element);
         }
-        *retval = array;
     }
 
     self->level++;
 
-out:
-    if (link_pool) {
-        apr_pool_destroy(link_pool);
-    }
     return status;
 }
 
@@ -740,7 +731,7 @@ static apr_status_t apr_json_decode_value(apr_json_scanner_t * self, apr_json_va
             break;
         case '[':
             value.type = APR_JSON_ARRAY;
-            status = apr_json_decode_array(self, &value.value.array);
+            status = apr_json_decode_array(self, &value);
             break;
         case '{':
             value.type = APR_JSON_OBJECT;

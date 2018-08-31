@@ -88,6 +88,11 @@ extern "C" {
 typedef struct apr_json_object_t apr_json_object_t;
 
 /**
+ * A structure to hold a JSON array.
+ */
+typedef struct apr_json_array_t apr_json_array_t;
+
+/**
  * Enum that represents the type of the given JSON value.
  */
 typedef enum apr_json_type_e {
@@ -116,6 +121,8 @@ typedef struct apr_json_string_t {
  * Use apr_json_value_create() to allocate.
  */
 typedef struct apr_json_value_t {
+    /** Links to the rest of the values if in an array */
+    APR_RING_ENTRY(apr_json_value_t) link;
     /** preceding whitespace, if any */
     const char *pre;
     /** trailing whitespace, if any */
@@ -127,7 +134,7 @@ typedef struct apr_json_value_t {
         /** JSON object */
         apr_json_object_t *object;
         /** JSON array */
-        apr_array_header_t *array;
+        apr_json_array_t *array;
         /** JSON floating point value */
         double dnumber;
         /** JSON long integer value */
@@ -163,6 +170,18 @@ struct apr_json_object_t {
     APR_RING_HEAD(apr_json_object_list_t, apr_json_kv_t) list;
     /** JSON object */
     apr_hash_t *hash;
+};
+
+/**
+ * A structure to hold a JSON array.
+ *
+ * Use apr_json_array_create() to allocate.
+ */
+struct apr_json_array_t {
+    /** The key value pairs in the object are in this list */
+    APR_RING_HEAD(apr_json_array_list_t, apr_json_value_t) list;
+    /** Array of JSON objects */
+    apr_array_header_t *array;
 };
 
 /**
@@ -274,7 +293,7 @@ APR_DECLARE(apr_status_t) apr_json_object_set(apr_json_value_t *obj,
  */
 APR_DECLARE(apr_json_kv_t *)
         apr_json_object_get(apr_json_value_t *obj, const char *key,
-        apr_ssize_t klen)
+                apr_ssize_t klen)
         __attribute__((nonnull(1, 2)));
 
 /**
@@ -300,6 +319,53 @@ APR_DECLARE(apr_json_kv_t *) apr_json_object_first(apr_json_value_t *obj)
  */
 APR_DECLARE(apr_json_kv_t *) apr_json_object_next(apr_json_value_t *obj,
         apr_json_kv_t *kv)
+        __attribute__((nonnull(1, 2)));;
+
+/**
+ * Add the value to the end of this array.
+ * @param arr The JSON array.
+ * @param val Value to add to the array.
+ * @param pool Pool to use.
+ * @return APR_SUCCESS on success, APR_EINVAL if the array value is not
+ *   an APR_JSON_ARRAY.
+ */
+APR_DECLARE(apr_status_t) apr_json_array_add(apr_json_value_t *arr,
+        apr_json_value_t *val, apr_pool_t *pool)
+        __attribute__((nonnull(1, 2, 3)));
+
+/**
+ * Look up the value associated with a key in a JSON object.
+ * @param arr The JSON array.
+ * @param index The index of the element in the array.
+ * @return Returns NULL if the element is out of bounds.
+ */
+APR_DECLARE(apr_json_value_t *)
+        apr_json_array_get(apr_json_value_t *arr, int index)
+        __attribute__((nonnull(1)));
+
+/**
+ * Get the first value associated with an array.
+ *
+ * If the value is an array, this function returns the first value.
+ * @param arr The JSON array.
+ * @return Returns the first value, or NULL if not an array, or the array is
+ *   empty.
+ */
+APR_DECLARE(apr_json_value_t *) apr_json_array_first(const apr_json_value_t *obj)
+        __attribute__((nonnull(1)));;
+
+/**
+ * Get the next value associated with an array.
+ *
+ * This function returns the next value in the array, or NULL if no more
+ * values are present.
+ * @param arr The JSON array.
+ * @param val The previous element of the array.
+ * @return Returns the next value in the array, or NULL if not an array, or
+ *   we have reached the end of the array.
+ */
+APR_DECLARE(apr_json_value_t *) apr_json_array_next(const apr_json_value_t *arr,
+        const apr_json_value_t *val)
         __attribute__((nonnull(1, 2)));;
 
 /**
