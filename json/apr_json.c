@@ -25,6 +25,12 @@
         APR_RING_CHECK_CONSISTENCY(&(o)->list, apr_json_kv_t, link);                             \
     } while (0)
 
+#define APR_JSON_ARRAY_INSERT_TAIL(o, e) do {                              \
+        apr_json_value_t *ap__b = (e);                                        \
+        APR_RING_INSERT_TAIL(&(o)->list, ap__b, apr_json_value_t, link);      \
+        APR_RING_CHECK_CONSISTENCY(&(o)->list, apr_json_value_t, link);                             \
+    } while (0)
+
 apr_json_value_t *apr_json_value_create(apr_pool_t *pool)
 {
     return apr_pcalloc(pool, sizeof(apr_json_value_t));
@@ -67,7 +73,9 @@ apr_json_value_t *apr_json_array_create(apr_pool_t *pool, int nelts)
 
     if (json) {
         json->type = APR_JSON_ARRAY;
-        json->value.array = apr_array_make(pool, nelts,
+        json->value.array = apr_pcalloc(pool, sizeof(apr_json_array_t));
+        APR_RING_INIT(&json->value.array->list, apr_json_value_t, link);
+        json->value.array->array = apr_array_make(pool, nelts,
                 sizeof(apr_json_value_t *));
     }
 
@@ -159,8 +167,7 @@ apr_status_t apr_json_object_set(apr_json_value_t *object, apr_json_value_t *key
     return APR_SUCCESS;
 }
 
-apr_json_kv_t *apr_json_object_get(apr_json_value_t *object, const char *key,
-        apr_ssize_t klen)
+apr_json_kv_t *apr_json_object_get(apr_json_value_t *object, const char *key, apr_ssize_t klen)
 {
     if (object->type != APR_JSON_OBJECT) {
         return NULL;
@@ -201,6 +208,74 @@ apr_json_kv_t *apr_json_object_next(apr_json_value_t *obj, apr_json_kv_t *kv)
         return next;
     }
     else {
+        return NULL;
+    }
+}
+
+apr_status_t apr_json_array_add(apr_json_value_t *arr,
+        apr_json_value_t *val, apr_pool_t *pool)
+{
+    apr_array_header_t *array;
+
+    if (arr->type != APR_JSON_ARRAY) {
+        return APR_EINVAL;
+    }
+
+    APR_RING_ELEM_INIT(val, link);
+    APR_JSON_ARRAY_INSERT_TAIL(arr->value.array, val);
+
+    array = arr->value.array->array;
+    if (array) {
+        *((apr_json_value_t **) (apr_array_push(array))) = val;
+    }
+
+    return APR_SUCCESS;
+}
+
+apr_json_value_t *apr_json_array_get(apr_json_value_t *arr, int index)
+{
+    if (arr->type != APR_JSON_ARRAY) {
+        return NULL;
+    }
+
+    return APR_ARRAY_IDX(arr->value.array->array, index, apr_json_value_t *);
+}
+
+apr_json_value_t *apr_json_array_first(const apr_json_value_t *arr)
+{
+    apr_json_value_t *val;
+
+    if (arr->type != APR_JSON_ARRAY) {
+        return NULL;
+    }
+
+    val = APR_RING_FIRST(&(arr->value.array)->list);
+
+    if (val
+            != APR_RING_SENTINEL(&(arr->value.object)->list, apr_json_value_t,
+                    link)) {
+        return val;
+    } else {
+        return NULL;
+    }
+}
+
+apr_json_value_t *apr_json_array_next(const apr_json_value_t *arr,
+        const apr_json_value_t *val)
+{
+    apr_json_value_t *next;
+
+    if (arr->type != APR_JSON_ARRAY) {
+        return NULL;
+    }
+
+    next = APR_RING_NEXT((val), link);
+
+    if (next
+            != APR_RING_SENTINEL(&(arr->value.array)->list, apr_json_value_t,
+                    link)) {
+        return next;
+    } else {
         return NULL;
     }
 }

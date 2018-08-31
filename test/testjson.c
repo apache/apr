@@ -151,15 +151,15 @@ static void test_json_string(abts_case * tc, void *data)
 
 static void test_json_overlay(abts_case * tc, void *data)
 {
-	const char *o = "{\"o1\":\"foo\",\"common\":\"bar\",\"o2\":\"baz\"}";
-	const char *b = "{\"b1\":\"foo\",\"common\":\"bar\",\"b2\":\"baz\"}";
+    const char *o = "{\"o1\":\"foo\",\"common\":\"bar\",\"o2\":\"baz\"}";
+    const char *b = "{\"b1\":\"foo\",\"common\":\"bar\",\"b2\":\"baz\"}";
 
-	apr_json_value_t *res;
-	apr_json_value_t *base;
-	apr_json_value_t *overlay;
+    apr_json_value_t *res;
+    apr_json_value_t *base;
+    apr_json_value_t *overlay;
 
-	apr_off_t offset;
-	apr_status_t status;
+    apr_off_t offset;
+    apr_status_t status;
 
     status = apr_json_decode(&base, b, APR_JSON_VALUE_STRING, &offset,
             APR_JSON_FLAGS_WHITESPACE, 10, p);
@@ -178,6 +178,58 @@ static void test_json_overlay(abts_case * tc, void *data)
 
 }
 
+static void test_json_object_iterate(abts_case * tc, void *data)
+{
+    const char *o = "{\"o1\":\"foo\",\"o2\":\"bar\"}";
+
+    apr_json_value_t *val;
+    apr_json_kv_t *kv;
+
+    apr_off_t offset;
+    apr_status_t status;
+
+    status = apr_json_decode(&val, o, APR_JSON_VALUE_STRING, &offset,
+            APR_JSON_FLAGS_WHITESPACE, 10, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, status);
+
+    kv = apr_json_object_first(val);
+    ABTS_PTR_NOTNULL(tc, kv);
+
+    kv = apr_json_object_next(val, kv);
+    ABTS_PTR_NOTNULL(tc, kv);
+
+    kv = apr_json_object_next(val, kv);
+    ABTS_ASSERT(tc, "object next should return NULL",
+            (kv == NULL));
+
+}
+
+static void test_json_array_iterate(abts_case * tc, void *data)
+{
+    const char *o = "[\"a1\",\"a2\"]";
+
+    apr_json_value_t *arr;
+    apr_json_value_t *val;
+
+    apr_off_t offset;
+    apr_status_t status;
+
+    status = apr_json_decode(&arr, o, APR_JSON_VALUE_STRING, &offset,
+            APR_JSON_FLAGS_WHITESPACE, 10, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, status);
+
+    val = apr_json_array_first(arr);
+    ABTS_PTR_NOTNULL(tc, val);
+
+    val = apr_json_array_next(arr, val);
+    ABTS_PTR_NOTNULL(tc, val);
+
+    val = apr_json_array_next(arr, val);
+    ABTS_ASSERT(tc, "array next should return NULL",
+            (val == NULL));
+
+}
+
 abts_suite *testjson(abts_suite * suite)
 {
     suite = ADD_SUITE(suite);
@@ -187,6 +239,8 @@ abts_suite *testjson(abts_suite * suite)
     abts_run_test(suite, test_json_eof, NULL);
     abts_run_test(suite, test_json_string, NULL);
     abts_run_test(suite, test_json_overlay, NULL);
+    abts_run_test(suite, test_json_object_iterate, NULL);
+    abts_run_test(suite, test_json_array_iterate, NULL);
 
     return suite;
 }

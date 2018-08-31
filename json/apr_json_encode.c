@@ -164,30 +164,35 @@ static apr_status_t apr_json_encode_string(apr_json_serializer_t * self,
 }
 
 
-static apr_status_t apr_json_encode_array(apr_json_serializer_t * self, apr_array_header_t * array)
+static apr_status_t apr_json_encode_array(apr_json_serializer_t * self,
+        const apr_json_value_t * array)
 {
     apr_status_t status;
-    apr_size_t i;
+    apr_json_value_t *val;
+    apr_size_t count = 0;
 
     status = apr_brigade_putc(self->brigade, self->flush, self->ctx, '[');
     if (APR_SUCCESS != status) {
         return status;
     }
 
-    for (i = 0; i < array->nelts; i++) {
+    val = apr_json_array_first(array);
+    while (val) {
 
-        if (i > 0) {
+        if (count > 0) {
             status = apr_brigade_putc(self->brigade, self->flush, self->ctx, ',');
             if (APR_SUCCESS != status) {
                 return status;
             }
         }
 
-        status = apr_json_encode_value(self, ((apr_json_value_t **) array->elts)[i]);
+        status = apr_json_encode_value(self, val);
         if (APR_SUCCESS != status) {
             return status;
         }
 
+        val = apr_json_array_next(array, val);
+        count++;
     }
 
     return apr_brigade_putc(self->brigade, self->flush, self->ctx, ']');
@@ -269,7 +274,7 @@ static apr_status_t apr_json_encode_value(apr_json_serializer_t * self, const ap
             status = apr_json_encode_object(self, value->value.object);
             break;
         case APR_JSON_ARRAY:
-            status = apr_json_encode_array(self, value->value.array);
+            status = apr_json_encode_array(self, value);
             break;
         default:
             return APR_EINVAL;
