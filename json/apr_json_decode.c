@@ -390,8 +390,7 @@ static apr_status_t apr_json_decode_array(apr_json_scanner_t * self,
             return status;
         }
 
-        if (APR_SUCCESS
-                != (status = apr_json_array_add(array, element, self->pool))) {
+        if (APR_SUCCESS != (status = apr_json_array_add(array, element))) {
             return status;
         }
 
@@ -501,7 +500,8 @@ static apr_status_t apr_json_decode_object(apr_json_scanner_t * self,
         if ((status = apr_json_decode_value(self, &value)))
             goto out;
 
-        apr_json_object_set(json, key, value, self->pool);
+        apr_json_object_set(json, key->value.string.p, key->value.string.len,
+                            value, self->pool);
 
         if (self->p == self->e) {
             status = APR_EOF;

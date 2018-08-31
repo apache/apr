@@ -178,7 +178,7 @@ struct apr_json_object_t {
  * Use apr_json_array_create() to allocate.
  */
 struct apr_json_array_t {
-    /** The key value pairs in the object are in this list */
+    /** The values in the array are in this list */
     APR_RING_HEAD(apr_json_array_list_t, apr_json_value_t) list;
     /** Array of JSON objects */
     apr_array_header_t *array;
@@ -271,8 +271,9 @@ APR_DECLARE(apr_json_value_t *)
 /**
  * Associate a value with a key in a JSON object.
  * @param obj The JSON object.
- * @param key Pointer to the key string, including any whitespace
- *   required.
+ * @param key Pointer to the key.
+ * @param klen Length of the key, or APR_JSON_VALUE_STRING if NUL
+ *             terminated.
  * @param val Value to associate with the key.
  * @param pool Pool to use.
  * @return APR_SUCCESS on success, APR_EINVAL if the key is
@@ -280,20 +281,19 @@ APR_DECLARE(apr_json_value_t *)
  * @remark If the value is NULL the key value pair is deleted.
  */
 APR_DECLARE(apr_status_t) apr_json_object_set(apr_json_value_t *obj,
-        apr_json_value_t *key, apr_json_value_t *val,
-        apr_pool_t *pool) __attribute__((nonnull(1, 4)));
+        const char *key, apr_ssize_t klen, apr_json_value_t *val,
+        apr_pool_t *pool) __attribute__((nonnull(1, 2, 5)));
 
 /**
  * Look up the value associated with a key in a JSON object.
  * @param obj The JSON object.
  * @param key Pointer to the key.
  * @param klen Length of the key, or APR_JSON_VALUE_STRING if NUL
- *   terminated.
+ *             terminated.
  * @return Returns NULL if the key is not present.
  */
-APR_DECLARE(apr_json_kv_t *)
-        apr_json_object_get(apr_json_value_t *obj, const char *key,
-                apr_ssize_t klen)
+APR_DECLARE(apr_json_kv_t *) apr_json_object_get(apr_json_value_t *obj,
+        const char *key, apr_ssize_t klen)
         __attribute__((nonnull(1, 2)));
 
 /**
@@ -325,13 +325,12 @@ APR_DECLARE(apr_json_kv_t *) apr_json_object_next(apr_json_value_t *obj,
  * Add the value to the end of this array.
  * @param arr The JSON array.
  * @param val Value to add to the array.
- * @param pool Pool to use.
  * @return APR_SUCCESS on success, APR_EINVAL if the array value is not
  *   an APR_JSON_ARRAY.
  */
 APR_DECLARE(apr_status_t) apr_json_array_add(apr_json_value_t *arr,
-        apr_json_value_t *val, apr_pool_t *pool)
-        __attribute__((nonnull(1, 2, 3)));
+        apr_json_value_t *val)
+        __attribute__((nonnull(1, 2)));
 
 /**
  * Look up the value associated with a key in a JSON object.
