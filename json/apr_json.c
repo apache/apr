@@ -213,7 +213,7 @@ apr_json_kv_t *apr_json_object_next(apr_json_value_t *obj, apr_json_kv_t *kv)
 }
 
 apr_status_t apr_json_array_add(apr_json_value_t *arr,
-        apr_json_value_t *val, apr_pool_t *pool)
+        apr_json_value_t *val)
 {
     apr_array_header_t *array;
 
