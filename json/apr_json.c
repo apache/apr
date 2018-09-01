@@ -129,50 +129,21 @@ apr_json_value_t *apr_json_null_create(apr_pool_t *pool)
     return json;
 }
 
-apr_status_t apr__json_object_set(apr_json_value_t *object,
-        apr_json_value_t *key, apr_json_value_t *val, apr_pool_t *pool);
-
-apr_status_t apr__json_object_set(apr_json_value_t *object,
-        apr_json_value_t *key, apr_json_value_t *val, apr_pool_t *pool)
-{
-    apr_json_kv_t *kv;
-    apr_hash_t *hash;
-
-    hash = object->value.object->hash;
-
-    kv = apr_hash_get(hash, key->value.string.p, key->value.string.len);
-    if (!kv) {
-        kv = apr_palloc(pool, sizeof(apr_json_kv_t));
-        if (!kv) {
-            return APR_ENOMEM;
-        }
-
-        APR_RING_ELEM_INIT(kv, link);
-        APR_JSON_OBJECT_INSERT_TAIL(object->value.object, kv);
-        apr_hash_set(hash, key->value.string.p, key->value.string.len, kv);
-    }
-
-    kv->k = key;
-    kv->v = val;
-
-    return APR_SUCCESS;
-}
-
 apr_status_t apr_json_object_set(apr_json_value_t *object, const char *key,
         apr_ssize_t klen, apr_json_value_t *val, apr_pool_t *pool)
 {
-    apr_json_value_t *k;
+    apr_json_kv_t *kv;
+    apr_hash_t *hash;
 
     if (object->type != APR_JSON_OBJECT) {
         return APR_EINVAL;
     }
 
-    if (!val) {
-        apr_hash_t *hash;
-        apr_json_kv_t *kv;
+    hash = object->value.object->hash;
 
-        hash = object->value.object->hash;
-        kv = apr_hash_get(hash, key, klen);
+    kv = apr_hash_get(hash, key, klen);
+
+    if (!val) {
         if (kv) {
             apr_hash_set(hash, key, klen, NULL);
             APR_RING_REMOVE((kv), link);
@@ -180,12 +151,17 @@ apr_status_t apr_json_object_set(apr_json_value_t *object, const char *key,
         return APR_SUCCESS;
     }
 
-    k = apr_json_string_create(pool, key, klen);
-    if (!k) {
-        return APR_ENOMEM;
+    if (!kv) {
+        kv = apr_palloc(pool, sizeof(apr_json_kv_t));
+        APR_RING_ELEM_INIT(kv, link);
+        APR_JSON_OBJECT_INSERT_TAIL(object->value.object, kv);
+        kv->k = apr_json_string_create(pool, key, klen);
+        apr_hash_set(hash, kv->k->value.string.p, kv->k->value.string.len, kv);
     }
 
-    return apr__json_object_set(object, k, val, pool);
+    kv->v = val;
+
+    return APR_SUCCESS;
 }
 
 apr_json_kv_t *apr_json_object_get(apr_json_value_t *object, const char *key, apr_ssize_t klen)
