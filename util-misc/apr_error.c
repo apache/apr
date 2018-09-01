@@ -19,27 +19,25 @@
 #include "apr_pools.h"
 #include "apu_errno.h"
 
-APR_DECLARE_NONSTD(apr_status_t) apr_errprintf(apu_err_t **result,
+APR_DECLARE_NONSTD(apu_err_t *) apr_errprintf(apu_err_t *result,
         apr_pool_t *p, const char *reason, int rc, const char *fmt, ...)
 {
     va_list ap;
-    apu_err_t *res;
 
-    res = *result;
-    if (!res) {
-        res = *result = apr_pcalloc(p, sizeof(apu_err_t));
-        if (!res) {
-            return APR_ENOMEM;
+    if (!result) {
+        result = apr_pcalloc(p, sizeof(apu_err_t));
+        if (!result) {
+            return NULL;
         }
     }
 
     va_start(ap, fmt);
-    res->msg = apr_pvsprintf(p, fmt, ap);
+    result->msg = apr_pvsprintf(p, fmt, ap);
     va_end(ap);
 
-    res->reason = reason;
-    res->rc = rc;
+    result->reason = reason;
+    result->rc = rc;
 
-    return APR_SUCCESS;
+    return result;
 }
 
