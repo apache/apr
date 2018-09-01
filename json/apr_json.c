@@ -129,13 +129,55 @@ apr_json_value_t *apr_json_null_create(apr_pool_t *pool)
     return json;
 }
 
-apr_status_t apr_json_object_set(apr_json_value_t *object, apr_json_value_t *key,
-        apr_json_value_t *val, apr_pool_t *pool)
+apr_status_t apr_json_object_set(apr_json_value_t *object,
+        const char *key, apr_ssize_t klen, apr_json_value_t *val,
+        apr_pool_t *pool)
 {
     apr_json_kv_t *kv;
     apr_hash_t *hash;
 
-    if (object->type != APR_JSON_OBJECT || !key
+    if (object->type != APR_JSON_OBJECT) {
+        return APR_EINVAL;
+    }
+
+    if (klen == APR_JSON_VALUE_STRING) {
+        klen = strlen(key);
+    }
+
+    hash = object->value.object->hash;
+
+    kv = apr_hash_get(hash, key, klen);
+
+    if (!val) {
+        if (kv) {
+            apr_hash_set(hash, key, klen, NULL);
+            APR_RING_REMOVE((kv), link);
+        }
+        return APR_SUCCESS;
+    }
+
+    if (!kv) {
+        kv = apr_palloc(pool, sizeof(apr_json_kv_t));
+        APR_RING_ELEM_INIT(kv, link);
+        APR_JSON_OBJECT_INSERT_TAIL(object->value.object, kv);
+        apr_hash_set(hash, key, klen,
+                kv);
+    }
+
+    kv->k = apr_json_string_create(pool, key, klen);
+    kv->v = val;
+
+    return APR_SUCCESS;
+}
+
+apr_status_t apr_json_object_set_ex(apr_json_value_t *object,
+        apr_json_value_t *key, apr_json_value_t *val,
+        apr_pool_t *pool)
+{
+    apr_json_kv_t *kv;
+    apr_hash_t *hash;
+
+    if (object->type != APR_JSON_OBJECT
             || key->type != APR_JSON_STRING) {
         return APR_EINVAL;
     }
@@ -316,7 +358,7 @@ apr_json_value_t *apr_json_overlay(apr_pool_t *p,
         if (!apr_hash_get(overlay->value.object->hash, kv->k->value.string.p,
                 kv->k->value.string.len)) {
 
-            apr_json_object_set(res, kv->k, kv->v, p);
+            apr_json_object_set_ex(res, kv->k, kv->v, p);
 
         }
         else if (APR_JSON_FLAGS_STRICT & flags) {
@@ -329,7 +371,7 @@ apr_json_value_t *apr_json_overlay(apr_pool_t *p,
          kv != APR_RING_SENTINEL(&(overlay->value.object)->list, apr_json_kv_t, link);
          kv = APR_RING_NEXT((kv), link)) {
 
-        apr_json_object_set(res, kv->k, kv->v, p);
+        apr_json_object_set_ex(res, kv->k, kv->v, p);
 
     }
 

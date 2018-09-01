@@ -271,6 +271,22 @@ APR_DECLARE(apr_json_value_t *)
 /**
  * Associate a value with a key in a JSON object.
  * @param obj The JSON object.
+ * @param key Pointer to the key string.
+ * @param klen Length of the key, or APR_JSON_VALUE_STRING if NUL
+ *   terminated.
+ * @param val Value to associate with the key.
+ * @param pool Pool to use.
+ * @return APR_SUCCESS on success, APR_EINVAL if the key is
+ *   NULL or not a string, or the object is not an APR_JSON_OBJECT.
+ * @remark If the value is NULL the key value pair is deleted.
+ */
+APR_DECLARE(apr_status_t) apr_json_object_set(apr_json_value_t *obj,
+        const char *key, apr_ssize_t klen, apr_json_value_t *val,
+        apr_pool_t *pool) __attribute__((nonnull(1, 2, 5)));
+
+/**
+ * Associate a value with a key in a JSON object, preserving whitespace.
+ * @param obj The JSON object.
  * @param key Pointer to the key string, including any whitespace
  *   required.
  * @param val Value to associate with the key.
@@ -279,9 +295,9 @@ APR_DECLARE(apr_json_value_t *)
  *   NULL or not a string, or the object is not an APR_JSON_OBJECT.
  * @remark If the value is NULL the key value pair is deleted.
  */
-APR_DECLARE(apr_status_t) apr_json_object_set(apr_json_value_t *obj,
+APR_DECLARE(apr_status_t) apr_json_object_set_ex(apr_json_value_t *obj,
         apr_json_value_t *key, apr_json_value_t *val,
-        apr_pool_t *pool) __attribute__((nonnull(1, 4)));
+        apr_pool_t *pool) __attribute__((nonnull(1, 2, 4)));
 
 /**
  * Look up the value associated with a key in a JSON object.

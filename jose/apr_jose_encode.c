@@ -263,7 +263,7 @@ static apr_status_t apr_jose_encode_json_jwe(apr_bucket_brigade *brigade,
         apr_pool_t *p)
 {
 
-    apr_json_value_t *json, *key, *val;
+    apr_json_value_t *json;
     char *buf;
     const char *buf64;
     apr_size_t len;
@@ -300,10 +300,9 @@ static apr_status_t apr_jose_encode_json_jwe(apr_bucket_brigade *brigade,
 
             apr_brigade_cleanup(bb);
 
-            key = apr_json_string_create(p, "protected",
-                    APR_JSON_VALUE_STRING);
-            val = apr_json_string_create(p, buf, len);
-            apr_json_object_set(json, key, val, p);
+            apr_json_object_set(json, "protected",
+                    APR_JSON_VALUE_STRING,
+                    apr_json_string_create(p, buf, len), p);
 
         }
 
@@ -311,9 +310,8 @@ static apr_status_t apr_jose_encode_json_jwe(apr_bucket_brigade *brigade,
 
         if (e->unprotected) {
 
-            key = apr_json_string_create(p, "unprotected",
-                    APR_JSON_VALUE_STRING);
-            apr_json_object_set(json, key, e->unprotected, p);
+            apr_json_object_set(json, "unprotected",
+                    APR_JSON_VALUE_STRING, e->unprotected, p);
 
         }
 
@@ -341,9 +339,8 @@ static apr_status_t apr_jose_encode_json_jwe(apr_bucket_brigade *brigade,
 
             /* create header */
 
-            key = apr_json_string_create(p, "header",
-                    APR_JSON_VALUE_STRING);
-            apr_json_object_set(json, key, recip->header, p);
+            apr_json_object_set(json, "header",
+                    APR_JSON_VALUE_STRING, recip->header, p);
 
             apr_brigade_cleanup(bb);
 
@@ -353,10 +350,9 @@ static apr_status_t apr_jose_encode_json_jwe(apr_bucket_brigade *brigade,
                     recip->ekey.len,
                     APR_ENCODE_BASE64URL, &len64);
 
-            key = apr_json_string_create(p, "encrypted_key",
-                    APR_JSON_VALUE_STRING);
-            val = apr_json_string_create(p, buf64, len64);
-            apr_json_object_set(json, key, val, p);
+            apr_json_object_set(json, "encrypted_key",
+                    APR_JSON_VALUE_STRING,
+                    apr_json_string_create(p, buf64, len64), p);
 
         }
 
@@ -368,10 +364,9 @@ static apr_status_t apr_jose_encode_json_jwe(apr_bucket_brigade *brigade,
 
             /* create recipients element */
 
-            key = apr_json_string_create(p, "recipients",
-                    APR_JSON_VALUE_STRING);
             recips = apr_json_array_create(p, jwe->recipients->nelts);
-            apr_json_object_set(json, key, recips, p);
+            apr_json_object_set(json, "recipients",
+                    APR_JSON_VALUE_STRING, recips, p);
 
             /* populate each recipient */
 
@@ -405,9 +400,8 @@ static apr_status_t apr_jose_encode_json_jwe(apr_bucket_brigade *brigade,
 
                 /* create header */
 
-                key = apr_json_string_create(p, "header",
-                        APR_JSON_VALUE_STRING);
-                apr_json_object_set(r, key, recip->header, p);
+                apr_json_object_set(r, "header",
+                        APR_JSON_VALUE_STRING, recip->header, p);
 
                 apr_brigade_cleanup(bb);
 
@@ -417,10 +411,9 @@ static apr_status_t apr_jose_encode_json_jwe(apr_bucket_brigade *brigade,
                         recip->ekey.len,
                         APR_ENCODE_BASE64URL, &len64);
 
-                key = apr_json_string_create(p, "encrypted_key",
-                        APR_JSON_VALUE_STRING);
-                val = apr_json_string_create(p, buf64, len64);
-                apr_json_object_set(r, key, val, p);
+                apr_json_object_set(r, "encrypted_key",
+                        APR_JSON_VALUE_STRING,
+                        apr_json_string_create(p, buf64, len64), p);
 
             }
             if (APR_SUCCESS != status) {
@@ -436,9 +429,8 @@ static apr_status_t apr_jose_encode_json_jwe(apr_bucket_brigade *brigade,
             buf64 = apr_pencode_base64_binary(p, e->iv.data, e->iv.len,
                     APR_ENCODE_BASE64URL, &len64);
 
-            key = apr_json_string_create(p, "iv", APR_JSON_VALUE_STRING);
-            val = apr_json_string_create(p, buf64, len64);
-            apr_json_object_set(json, key, val, p);
+            apr_json_object_set(json, "iv", APR_JSON_VALUE_STRING,
+                    apr_json_string_create(p, buf64, len64), p);
         }
 
         /* create aad */
@@ -448,9 +440,8 @@ static apr_status_t apr_jose_encode_json_jwe(apr_bucket_brigade *brigade,
             buf64 = apr_pencode_base64_binary(p, e->aad.data, e->aad.len,
                     APR_ENCODE_BASE64URL, &len64);
 
-            key = apr_json_string_create(p, "aad", APR_JSON_VALUE_STRING);
-            val = apr_json_string_create(p, buf64, len64);
-            apr_json_object_set(json, key, val, p);
+            apr_json_object_set(json, "aad", APR_JSON_VALUE_STRING,
+                    apr_json_string_create(p, buf64, len64), p);
         }
 
         /* create ciphertext */
@@ -460,9 +451,8 @@ static apr_status_t apr_jose_encode_json_jwe(apr_bucket_brigade *brigade,
             buf64 = apr_pencode_base64_binary(p, e->cipher.data, e->cipher.len,
                     APR_ENCODE_BASE64URL, &len64);
 
-            key = apr_json_string_create(p, "ciphertext", APR_JSON_VALUE_STRING);
-            val = apr_json_string_create(p, buf64, len64);
-            apr_json_object_set(json, key, val, p);
+            apr_json_object_set(json, "ciphertext", APR_JSON_VALUE_STRING,
+                    apr_json_string_create(p, buf64, len64), p);
         }
 
         /* create tag */
@@ -472,9 +462,8 @@ static apr_status_t apr_jose_encode_json_jwe(apr_bucket_brigade *brigade,
             buf64 = apr_pencode_base64_binary(p, e->tag.data, e->tag.len,
                     APR_ENCODE_BASE64URL, &len64);
 
-            key = apr_json_string_create(p, "tag", APR_JSON_VALUE_STRING);
-            val = apr_json_string_create(p, buf64, len64);
-            apr_json_object_set(json, key, val, p);
+            apr_json_object_set(json, "tag", APR_JSON_VALUE_STRING,
+                    apr_json_string_create(p, buf64, len64), p);
         }
 
     }
@@ -493,7 +482,7 @@ static apr_status_t apr_jose_encode_json_jws(apr_bucket_brigade *brigade,
         apr_brigade_flush flush, void *ctx, apr_jose_t *jose, apr_jose_cb_t *cb,
         apr_pool_t *p)
 {
-    apr_json_value_t *json, *key, *val;
+    apr_json_value_t *json;
     char *buf;
     const char *buf64;
     apr_size_t len;
@@ -530,9 +519,8 @@ static apr_status_t apr_jose_encode_json_jws(apr_bucket_brigade *brigade,
 
     /* add the payload to our json */
 
-    key = apr_json_string_create(p, "payload", APR_JSON_VALUE_STRING);
-    val = apr_json_string_create(p, buf64, len64);
-    apr_json_object_set(json, key, val, p);
+    apr_json_object_set(json, "payload", APR_JSON_VALUE_STRING,
+            apr_json_string_create(p, buf64, len64), p);
 
     /* calculate the flattened signature */
 
@@ -551,9 +539,8 @@ static apr_status_t apr_jose_encode_json_jws(apr_bucket_brigade *brigade,
             return status;
         }
 
-        key = apr_json_string_create(p, "protected", APR_JSON_VALUE_STRING);
-        val = apr_json_string_create(p, buf, len);
-        apr_json_object_set(json, key, val, p);
+        apr_json_object_set(json, "protected", APR_JSON_VALUE_STRING,
+                apr_json_string_create(p, buf, len), p);
 
         status = apr_brigade_write(bb, flush, ctx, ".", 1);
         if (APR_SUCCESS != status) {
@@ -576,8 +563,8 @@ static apr_status_t apr_jose_encode_json_jws(apr_bucket_brigade *brigade,
 
         /* create header */
 
-        key = apr_json_string_create(p, "header", APR_JSON_VALUE_STRING);
-        apr_json_object_set(json, key, jws->signature->header, p);
+        apr_json_object_set(json, "header", APR_JSON_VALUE_STRING,
+                jws->signature->header, p);
 
         apr_brigade_cleanup(bb);
 
@@ -587,9 +574,8 @@ static apr_status_t apr_jose_encode_json_jws(apr_bucket_brigade *brigade,
                 jws->signature->sig.data, jws->signature->sig.len,
                 APR_ENCODE_BASE64URL, &len64);
 
-        key = apr_json_string_create(p, "signature", APR_JSON_VALUE_STRING);
-        val = apr_json_string_create(p, buf64, len64);
-        apr_json_object_set(json, key, val, p);
+        apr_json_object_set(json, "signature", APR_JSON_VALUE_STRING,
+                apr_json_string_create(p, buf64, len64), p);
 
     }
 
@@ -602,9 +588,9 @@ static apr_status_t apr_jose_encode_json_jws(apr_bucket_brigade *brigade,
 
         /* create signatures element */
 
-        key = apr_json_string_create(p, "signatures", APR_JSON_VALUE_STRING);
         sigs = apr_json_array_create(p, jws->signatures->nelts);
-        apr_json_object_set(json, key, sigs, p);
+        apr_json_object_set(json, "signatures", APR_JSON_VALUE_STRING,
+                sigs, p);
 
         /* populate each signature */
 
@@ -630,9 +616,8 @@ static apr_status_t apr_jose_encode_json_jws(apr_bucket_brigade *brigade,
 
             /* add protected header to array */
 
-            key = apr_json_string_create(p, "protected", APR_JSON_VALUE_STRING);
-            val = apr_json_string_create(p, buf, len);
-            apr_json_object_set(s, key, val, p);
+            apr_json_object_set(s, "protected", APR_JSON_VALUE_STRING,
+                    apr_json_string_create(p, buf, len), p);
 
             status = apr_brigade_write(bb, flush, ctx, ".", 1);
             if (APR_SUCCESS != status) {
@@ -655,8 +640,8 @@ static apr_status_t apr_jose_encode_json_jws(apr_bucket_brigade *brigade,
 
             /* create header */
 
-            key = apr_json_string_create(p, "header", APR_JSON_VALUE_STRING);
-            apr_json_object_set(s, key, sig->header, p);
+            apr_json_object_set(s, "header", APR_JSON_VALUE_STRING,
+                    sig->header, p);
 
             apr_brigade_cleanup(bb);
 
@@ -666,9 +651,8 @@ static apr_status_t apr_jose_encode_json_jws(apr_bucket_brigade *brigade,
                     sig->sig.len,
                     APR_ENCODE_BASE64URL, &len64);
 
-            key = apr_json_string_create(p, "signature", APR_JSON_VALUE_STRING);
-            val = apr_json_string_create(p, buf64, len64);
-            apr_json_object_set(s, key, val, p);
+            apr_json_object_set(s, "signature", APR_JSON_VALUE_STRING,
+                    apr_json_string_create(p, buf64, len64), p);
 
         }
         if (APR_SUCCESS != status) {
