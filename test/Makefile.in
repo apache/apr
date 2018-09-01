@@ -37,7 +37,8 @@ TESTS = testtime.lo teststr.lo testvsn.lo testipsub.lo testshm.lo	\
 	testbuckets.lo testxml.lo testdbm.lo testuuid.lo testmd5.lo	\
 	testreslist.lo testbase64.lo testhooks.lo testlfsabi.lo		\
 	testlfsabi32.lo testlfsabi64.lo testescape.lo testskiplist.lo	\
-	testsiphash.lo testredis.lo testencode.lo testjson.lo
+	testsiphash.lo testredis.lo testencode.lo testjson.lo           \
+	testjose.lo
 
 OTHER_PROGRAMS = \
 	echod@EXEEXT@ \
