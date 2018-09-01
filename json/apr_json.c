@@ -129,23 +129,25 @@ apr_json_value_t *apr_json_null_create(apr_pool_t *pool)
     return json;
 }
 
-apr_status_t apr_json_object_set(apr_json_value_t *object, const char *key,
-        apr_ssize_t klen, apr_json_value_t *val, apr_pool_t *pool)
+apr_status_t apr_json_object_set(apr_json_value_t *object, apr_json_value_t *key,
+        apr_json_value_t *val, apr_pool_t *pool)
 {
     apr_json_kv_t *kv;
     apr_hash_t *hash;
 
-    if (object->type != APR_JSON_OBJECT) {
+    if (object->type != APR_JSON_OBJECT || !key
+            || key->type != APR_JSON_STRING) {
         return APR_EINVAL;
     }
 
     hash = object->value.object->hash;
 
-    kv = apr_hash_get(hash, key, klen);
+    kv = apr_hash_get(hash, key->value.string.p, key->value.string.len);
 
     if (!val) {
         if (kv) {
-            apr_hash_set(hash, key, klen, NULL);
+            apr_hash_set(hash, key->value.string.p, key->value.string.len,
+                    NULL);
             APR_RING_REMOVE((kv), link);
         }
         return APR_SUCCESS;
@@ -155,10 +157,11 @@ apr_status_t apr_json_object_set(apr_json_value_t *object, const char *key,
         kv = apr_palloc(pool, sizeof(apr_json_kv_t));
         APR_RING_ELEM_INIT(kv, link);
         APR_JSON_OBJECT_INSERT_TAIL(object->value.object, kv);
-        kv->k = apr_json_string_create(pool, key, klen);
-        apr_hash_set(hash, kv->k->value.string.p, kv->k->value.string.len, kv);
+        apr_hash_set(hash, key->value.string.p, key->value.string.len,
+                kv);
     }
 
+    kv->k = key;
     kv->v = val;
 
     return APR_SUCCESS;
@@ -209,7 +212,8 @@ apr_json_kv_t *apr_json_object_next(apr_json_value_t *obj, apr_json_kv_t *kv)
     }
 }
 
-apr_status_t apr_json_array_add(apr_json_value_t *arr, apr_json_value_t *val)
+apr_status_t apr_json_array_add(apr_json_value_t *arr,
+        apr_json_value_t *val, apr_pool_t *pool)
 {
     apr_array_header_t *array;
 
@@ -312,8 +316,7 @@ apr_json_value_t *apr_json_overlay(apr_pool_t *p,
         if (!apr_hash_get(overlay->value.object->hash, kv->k->value.string.p,
                 kv->k->value.string.len)) {
 
-            apr_json_object_set(res, kv->k->value.string.p,
-                                kv->k->value.string.len, kv->v, p);
+            apr_json_object_set(res, kv->k, kv->v, p);
 
         }
         else if (APR_JSON_FLAGS_STRICT & flags) {
@@ -326,8 +329,7 @@ apr_json_value_t *apr_json_overlay(apr_pool_t *p,
          kv != APR_RING_SENTINEL(&(overlay->value.object)->list, apr_json_kv_t, link);
          kv = APR_RING_NEXT((kv), link)) {
 
-        apr_json_object_set(res, kv->k->value.string.p,
-                            kv->k->value.string.len, kv->v, p);
+        apr_json_object_set(res, kv->k, kv->v, p);
 
     }
 
