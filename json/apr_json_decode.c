@@ -424,9 +424,6 @@ static apr_status_t apr_json_decode_array(apr_json_scanner_t * self,
     return status;
 }
 
-apr_status_t apr__json_object_set(apr_json_value_t *object,
-        apr_json_value_t *key, apr_json_value_t *val, apr_pool_t *pool);
-
 static apr_status_t apr_json_decode_object(apr_json_scanner_t * self,
         apr_json_value_t *json, apr_json_object_t ** retval)
 {
@@ -503,7 +500,8 @@ static apr_status_t apr_json_decode_object(apr_json_scanner_t * self,
         if ((status = apr_json_decode_value(self, &value)))
             goto out;
 
-        apr__json_object_set(json, key, value, self->pool);
+        apr_json_object_set(json, key->value.string.p, key->value.string.len,
+                            value, self->pool);
 
         if (self->p == self->e) {
             status = APR_EOF;
