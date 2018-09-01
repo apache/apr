@@ -325,13 +325,12 @@ APR_DECLARE(apr_json_kv_t *) apr_json_object_next(apr_json_value_t *obj,
  * Add the value to the end of this array.
  * @param arr The JSON array.
  * @param val Value to add to the array.
- * @param pool Pool to use.
  * @return APR_SUCCESS on success, APR_EINVAL if the array value is not
  *   an APR_JSON_ARRAY.
  */
 APR_DECLARE(apr_status_t) apr_json_array_add(apr_json_value_t *arr,
-        apr_json_value_t *val, apr_pool_t *pool)
-        __attribute__((nonnull(1, 2, 3)));
+        apr_json_value_t *val)
+        __attribute__((nonnull(1, 2)));
 
 /**
  * Look up the value associated with a key in a JSON object.

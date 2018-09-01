@@ -391,7 +391,7 @@ static apr_status_t apr_json_decode_array(apr_json_scanner_t * self,
         }
 
         if (APR_SUCCESS
-                != (status = apr_json_array_add(array, element, self->pool))) {
+                != (status = apr_json_array_add(array, element))) {
             return status;
         }
 
