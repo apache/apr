@@ -599,8 +599,8 @@ static void test_jose_encode_jws_compact_unsecured(abts_case *tc, void *data)
 {
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
-    apr_jose_t *jose = NULL;
-    apr_jose_t *jdata = NULL;
+    apr_jose_t *jose;
+    apr_jose_t *jdata;
     apr_jose_signature_t signature;
     char buf[1024];
     apr_size_t len = sizeof(buf);
@@ -631,8 +631,8 @@ static void test_jose_encode_jws_compact_unsecured(abts_case *tc, void *data)
     ba = apr_bucket_alloc_create(p);
     bb = apr_brigade_create(p, ba);
 
-    apr_jose_data_make(&jdata, "JWT", pl, sizeof(pl), p);
-    apr_jose_jws_make(&jose, &signature, NULL, jdata, p);
+    jdata = apr_jose_data_make(NULL, "JWT", pl, sizeof(pl), p);
+    jose = apr_jose_jws_make(NULL, &signature, NULL, jdata, p);
 
     status = apr_jose_encode(bb, NULL, NULL, jose, &cb, p);
 
@@ -649,8 +649,8 @@ static void test_jose_encode_jws_compact_hs256(abts_case *tc, void *data)
 {
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
-    apr_jose_t *jose = NULL;
-    apr_jose_t *jdata = NULL;
+    apr_jose_t *jose;
+    apr_jose_t *jdata;
     apr_jose_signature_t signature;
     char buf[1024];
     apr_size_t len = sizeof(buf);
@@ -685,8 +685,8 @@ static void test_jose_encode_jws_compact_hs256(abts_case *tc, void *data)
     ba = apr_bucket_alloc_create(p);
     bb = apr_brigade_create(p, ba);
 
-    apr_jose_data_make(&jdata, "JWT", pl, sizeof(pl), p);
-    apr_jose_jws_make(&jose, &signature, NULL, jdata, p);
+    jdata = apr_jose_data_make(NULL, "JWT", pl, sizeof(pl), p);
+    jose = apr_jose_jws_make(NULL, &signature, NULL, jdata, p);
 
     status = apr_jose_encode(bb, NULL, NULL, jose, &cb, p);
 
@@ -703,8 +703,8 @@ static void test_jose_encode_jws_json_general(abts_case *tc, void *data)
 {
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
-    apr_jose_t *jose = NULL;
-    apr_jose_t *jdata = NULL;
+    apr_jose_t *jose;
+    apr_jose_t *jdata;
     apr_jose_signature_t **signature;
     apr_jose_signature_t signature1;
     apr_jose_signature_t signature2;
@@ -771,8 +771,8 @@ static void test_jose_encode_jws_json_general(abts_case *tc, void *data)
     ba = apr_bucket_alloc_create(p);
     bb = apr_brigade_create(p, ba);
 
-    apr_jose_data_make(&jdata, "JWT", pl, sizeof(pl), p);
-    apr_jose_jws_json_make(&jose, NULL, signatures, jdata, p);
+    jdata = apr_jose_data_make(NULL, "JWT", pl, sizeof(pl), p);
+    jose = apr_jose_jws_json_make(NULL, NULL, signatures, jdata, p);
 
     status = apr_jose_encode(bb, NULL, NULL, jose, &cb, p);
 
@@ -790,8 +790,8 @@ static void test_jose_encode_jws_json_flattened(abts_case *tc, void *data)
 {
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
-    apr_jose_t *jose = NULL;
-    apr_jose_t *jdata = NULL;
+    apr_jose_t *jose;
+    apr_jose_t *jdata;
     apr_jose_signature_t signature2;
     char buf[1024];
     apr_size_t len = sizeof(buf);
@@ -832,8 +832,8 @@ static void test_jose_encode_jws_json_flattened(abts_case *tc, void *data)
     ba = apr_bucket_alloc_create(p);
     bb = apr_brigade_create(p, ba);
 
-    apr_jose_data_make(&jdata, "JWT", pl, sizeof(pl), p);
-    apr_jose_jws_json_make(&jose, &signature2, NULL, jdata, p);
+    jdata = apr_jose_data_make(NULL, "JWT", pl, sizeof(pl), p);
+    jose = apr_jose_jws_json_make(NULL, &signature2, NULL, jdata, p);
 
     status = apr_jose_encode(bb, NULL, NULL, jose, &cb, p);
 
@@ -851,8 +851,8 @@ static void test_jose_encode_jwe_compact_rsaes_oaep_aes_gcm(abts_case *tc, void 
 {
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
-    apr_jose_t *jose = NULL;
-    apr_jose_t *jdata = NULL;
+    apr_jose_t *jose;
+    apr_jose_t *jdata;
     apr_jose_encryption_t *encryption;
     apr_jose_recipient_t *recipient;
     apr_json_value_t *header = NULL;
@@ -893,10 +893,10 @@ static void test_jose_encode_jwe_compact_rsaes_oaep_aes_gcm(abts_case *tc, void 
     ba = apr_bucket_alloc_create(p);
     bb = apr_brigade_create(p, ba);
 
-    apr_jose_data_make(&jdata, "JWT", pl, sizeof(pl), p);
-    apr_jose_recipient_make(&recipient, header, p);
-    apr_jose_encryption_make(&encryption, NULL, protected_header, p);
-    apr_jose_jwe_make(&jose, recipient, NULL, encryption, jdata, p);
+    jdata = apr_jose_data_make(NULL, "JWT", pl, sizeof(pl), p);
+    recipient = apr_jose_recipient_make(NULL, header, p);
+    encryption = apr_jose_encryption_make(NULL, NULL, protected_header, p);
+    jose = apr_jose_jwe_make(NULL, recipient, NULL, encryption, jdata, p);
 
     status = apr_jose_encode(bb, NULL, NULL, jose, &cb, p);
 
@@ -913,8 +913,8 @@ static void test_jose_encode_jwe_json_general(abts_case *tc, void *data)
 {
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
-    apr_jose_t *jose = NULL;
-    apr_jose_t *jdata = NULL;
+    apr_jose_t *jose;
+    apr_jose_t *jdata;
     apr_json_value_t *header = NULL;
     apr_json_value_t *protected_header = NULL;
     apr_jose_recipient_t **recipient;
@@ -979,9 +979,6 @@ static void test_jose_encode_jwe_json_general(abts_case *tc, void *data)
     recipient = apr_array_push(recipients);
     *recipient = &recipient2;
 
-
-
-
     apr_json_decode(&header, h, APR_JSON_VALUE_STRING, &offset,
             APR_JSON_FLAGS_WHITESPACE, 10, p);
     apr_json_decode(&protected_header, ph, APR_JSON_VALUE_STRING, &offset,
@@ -990,9 +987,9 @@ static void test_jose_encode_jwe_json_general(abts_case *tc, void *data)
     ba = apr_bucket_alloc_create(p);
     bb = apr_brigade_create(p, ba);
 
-    apr_jose_data_make(&jdata, "plain", pl, sizeof(pl), p);
-    apr_jose_encryption_make(&encryption, header, protected_header, p);
-    apr_jose_jwe_json_make(&jose, NULL, recipients, encryption, jdata, p);
+    jdata = apr_jose_data_make(NULL, "plain", pl, sizeof(pl), p);
+    encryption = apr_jose_encryption_make(NULL, header, protected_header, p);
+    jose = apr_jose_jwe_json_make(NULL, NULL, recipients, encryption, jdata, p);
 
     status = apr_jose_encode(bb, NULL, NULL, jose, &cb, p);
 
@@ -1009,8 +1006,8 @@ static void test_jose_encode_jwe_json_flattened(abts_case *tc, void *data)
 {
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
-    apr_jose_t *jose = NULL;
-    apr_jose_t *jdata = NULL;
+    apr_jose_t *jose;
+    apr_jose_t *jdata;
     apr_json_value_t *header = NULL;
     apr_json_value_t *protected_header = NULL;
     apr_jose_recipient_t recipient;
@@ -1061,9 +1058,9 @@ static void test_jose_encode_jwe_json_flattened(abts_case *tc, void *data)
     ba = apr_bucket_alloc_create(p);
     bb = apr_brigade_create(p, ba);
 
-    apr_jose_data_make(&jdata, "plain", pl, sizeof(pl), p);
-    apr_jose_encryption_make(&encryption, header, protected_header, p);
-    apr_jose_jwe_json_make(&jose, &recipient, NULL, encryption, jdata, p);
+    jdata = apr_jose_data_make(NULL, "plain", pl, sizeof(pl), p);
+    encryption = apr_jose_encryption_make(NULL, header, protected_header, p);
+    jose = apr_jose_jwe_json_make(NULL, &recipient, NULL, encryption, jdata, p);
 
     status = apr_jose_encode(bb, NULL, NULL, jose, &cb, p);
 
@@ -1080,7 +1077,7 @@ static void test_jose_decode_jws_compact_unsecured(abts_case *tc, void *data)
 {
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
-    apr_jose_t *jose = NULL;
+    apr_jose_t *jose;
     apr_json_kv_t *kv;
     apr_status_t status;
 
@@ -1121,7 +1118,7 @@ static void test_jose_decode_jws_compact_hs256(abts_case *tc, void *data)
 {
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
-    apr_jose_t *jose = NULL;
+    apr_jose_t *jose;
     apr_json_kv_t *kv;
     apr_status_t status;
 
@@ -1186,7 +1183,7 @@ static void test_jose_decode_jws_json_general(abts_case *tc, void *data)
 
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
-    apr_jose_t *jose = NULL;
+    apr_jose_t *jose;
     apr_status_t status;
 
     apr_jose_cb_t cb;
@@ -1220,7 +1217,7 @@ static void test_jose_decode_jws_json_flattened(abts_case *tc, void *data)
 {
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
-    apr_jose_t *jose = NULL;
+    apr_jose_t *jose;
     apr_status_t status;
 
     const char *source = "{"
@@ -1261,7 +1258,7 @@ static void test_jose_decode_jwe_compact_rsaes_oaep_aes_gcm(abts_case *tc, void 
 {
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
-    apr_jose_t *jose = NULL;
+    apr_jose_t *jose;
     apr_status_t status;
 
     const char *source = "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ."
@@ -1302,7 +1299,7 @@ static void test_jose_decode_jwe_json_general(abts_case *tc, void *data)
 {
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
-    apr_jose_t *jose = NULL;
+    apr_jose_t *jose;
     apr_status_t status;
 
     const char *source = "{"
@@ -1359,7 +1356,7 @@ static void test_jose_decode_jwe_json_flattened(abts_case *tc, void *data)
 {
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
-    apr_jose_t *jose = NULL;
+    apr_jose_t *jose;
     apr_status_t status;
 
     const char *source = "{"
