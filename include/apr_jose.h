@@ -923,8 +923,9 @@ APR_DECLARE(apu_err_t *) apr_jose_error(apr_jose_t *jose);
  *   be reused.
  * @param type the type of structure to create.
  * @param pool pool used to allocate the result from.
+ * @return The apr_jose_t is returned.
  */
-APR_DECLARE(apr_status_t) apr_jose_make(apr_jose_t **jose, apr_jose_type_e type,
+APR_DECLARE(apr_jose_t *) apr_jose_make(apr_jose_t *jose, apr_jose_type_e type,
         apr_pool_t *pool);
 
 /**
@@ -934,8 +935,9 @@ APR_DECLARE(apr_status_t) apr_jose_make(apr_jose_t **jose, apr_jose_type_e type,
  *   be reused.
  * @param key the json representing the key. May be NULL.
  * @param pool pool used to allocate the result from.
+ * @return The apr_jose_t is returned.
  */
-APR_DECLARE(apr_status_t) apr_jose_jwk_make(apr_jose_t **jose,
+APR_DECLARE(apr_jose_t *) apr_jose_jwk_make(apr_jose_t *jose,
         apr_json_value_t *key, apr_pool_t *pool);
 
 /**
@@ -945,8 +947,9 @@ APR_DECLARE(apr_status_t) apr_jose_jwk_make(apr_jose_t **jose,
  *   be reused.
  * @param keys the array of keys in JSON format. May be NULL.
  * @param pool pool used to allocate the result from.
+ * @return The apr_jose_t is returned.
  */
-APR_DECLARE(apr_status_t) apr_jose_jwks_make(apr_jose_t **jose,
+APR_DECLARE(apr_jose_t *) apr_jose_jwks_make(apr_jose_t *jose,
         apr_json_value_t *keys, apr_pool_t *pool);
 
 /**
@@ -956,9 +959,10 @@ APR_DECLARE(apr_status_t) apr_jose_jwks_make(apr_jose_t **jose,
  * @param header the unprotected header.
  * @param protected the protected header.
  * @param pool the pool to use.
+ * @return The apr_jose_signature_t is returned.
  */
-APR_DECLARE(apr_status_t) apr_jose_signature_make(
-        apr_jose_signature_t **signature, apr_json_value_t *header,
+APR_DECLARE(apr_jose_signature_t *) apr_jose_signature_make(
+        apr_jose_signature_t *signature, apr_json_value_t *header,
         apr_json_value_t *protected, apr_pool_t *pool);
 
 /**
@@ -967,8 +971,9 @@ APR_DECLARE(apr_status_t) apr_jose_signature_make(
  * @param recipient the result.
  * @param unprotected the unprotected header.
  * @param pool the pool to use.
+ * @return The apr_jose_recipient_t is returned.
  */
-APR_DECLARE(apr_status_t) apr_jose_recipient_make(apr_jose_recipient_t **recipient,
+APR_DECLARE(apr_jose_recipient_t *) apr_jose_recipient_make(apr_jose_recipient_t *recipient,
         apr_json_value_t *unprotected, apr_pool_t *pool);
 
 /**
@@ -978,8 +983,9 @@ APR_DECLARE(apr_status_t) apr_jose_recipient_make(apr_jose_recipient_t **recipie
  * @param unprotected the unprotected shared header.
  * @param protected the protected header.
  * @param pool the pool to use.
+ * @return The apr_jose_encryption_t is returned.
  */
-APR_DECLARE(apr_status_t) apr_jose_encryption_make(apr_jose_encryption_t **encryption,
+APR_DECLARE(apr_jose_encryption_t *) apr_jose_encryption_make(apr_jose_encryption_t *encryption,
         apr_json_value_t *unprotected, apr_json_value_t *protected,
         apr_pool_t *pool);
 
@@ -993,8 +999,9 @@ APR_DECLARE(apr_status_t) apr_jose_encryption_make(apr_jose_encryption_t **encry
  * @param encryption the encryption structure.
  * @param payload the JOSE payload to encrypt.
  * @param pool pool used to allocate the result from.
+ * @return The apr_jose_t is returned.
  */
-APR_DECLARE(apr_status_t) apr_jose_jwe_make(apr_jose_t **jose,
+APR_DECLARE(apr_jose_t *) apr_jose_jwe_make(apr_jose_t *jose,
         apr_jose_recipient_t *recipient, apr_array_header_t *recipients,
         apr_jose_encryption_t *encryption, apr_jose_t *payload,
         apr_pool_t *pool);
@@ -1009,8 +1016,9 @@ APR_DECLARE(apr_status_t) apr_jose_jwe_make(apr_jose_t **jose,
  * @param encryption the encryption structure.
  * @param payload the JOSE payload to encrypt.
  * @param pool pool used to allocate the result from.
+ * @return The apr_jose_t is returned.
  */
-APR_DECLARE(apr_status_t) apr_jose_jwe_json_make(apr_jose_t **jose,
+APR_DECLARE(apr_jose_t *) apr_jose_jwe_json_make(apr_jose_t *jose,
         apr_jose_recipient_t *recipient,
         apr_array_header_t *recipients, apr_jose_encryption_t *encryption,
         apr_jose_t *payload, apr_pool_t *pool);
@@ -1024,8 +1032,9 @@ APR_DECLARE(apr_status_t) apr_jose_jwe_json_make(apr_jose_t **jose,
  * @param signatures array of header / protected header / signature used with general JSON syntax.
  * @param payload the payload to be wrapped by this JWS.
  * @param pool pool used to allocate the result from.
+ * @return The apr_jose_t is returned.
  */
-APR_DECLARE(apr_status_t) apr_jose_jws_make(apr_jose_t **jose,
+APR_DECLARE(apr_jose_t *) apr_jose_jws_make(apr_jose_t *jose,
         apr_jose_signature_t *signature, apr_array_header_t *signatures,
         apr_jose_t *payload, apr_pool_t *pool);
 
@@ -1038,8 +1047,9 @@ APR_DECLARE(apr_status_t) apr_jose_jws_make(apr_jose_t **jose,
  * @param signatures array of header / protected header / signature used with general JSON syntax.
  * @param payload the payload to be wrapped by this JWS.
  * @param pool pool used to allocate the result from.
+ * @return The apr_jose_t is returned.
  */
-APR_DECLARE(apr_status_t) apr_jose_jws_json_make(apr_jose_t **jose,
+APR_DECLARE(apr_jose_t *) apr_jose_jws_json_make(apr_jose_t *jose,
         apr_jose_signature_t *signature, apr_array_header_t *signatures,
         apr_jose_t *payload, apr_pool_t *pool);
 
@@ -1053,8 +1063,9 @@ APR_DECLARE(apr_status_t) apr_jose_jws_json_make(apr_jose_t **jose,
  *   be reused.
  * @param claims the claims to sign.
  * @param pool pool used to allocate the result from.
+ * @return The apr_jose_t is returned.
  */
-APR_DECLARE(apr_status_t) apr_jose_jwt_make(apr_jose_t **jose,
+APR_DECLARE(apr_jose_t *) apr_jose_jwt_make(apr_jose_t *jose,
         apr_json_value_t *claims, apr_pool_t *pool);
 
 /**
@@ -1066,8 +1077,9 @@ APR_DECLARE(apr_status_t) apr_jose_jwt_make(apr_jose_t **jose,
  * @param in the plaintext to sign.
  * @param inlen length of the plaintext.
  * @param pool pool used to allocate the result from.
+ * @return The apr_jose_t is returned.
  */
-APR_DECLARE(apr_status_t) apr_jose_data_make(apr_jose_t **jose, const char *typ,
+APR_DECLARE(apr_jose_t *) apr_jose_data_make(apr_jose_t *jose, const char *typ,
         const unsigned char *in, apr_size_t inlen, apr_pool_t *pool);
 
 /**
@@ -1080,8 +1092,9 @@ APR_DECLARE(apr_status_t) apr_jose_data_make(apr_jose_t **jose, const char *typ,
  * @param in the UTF-8 encoded text string.
  * @param inlen length of the UTF-8 encoded text string.
  * @param pool pool used to allocate the result from.
+ * @return The apr_jose_t is returned.
  */
-APR_DECLARE(apr_status_t) apr_jose_text_make(apr_jose_t **jose, const char *cty,
+APR_DECLARE(apr_jose_t *) apr_jose_text_make(apr_jose_t *jose, const char *cty,
         const char *in, apr_size_t inlen, apr_pool_t *pool);
 
 /**
@@ -1092,8 +1105,9 @@ APR_DECLARE(apr_status_t) apr_jose_text_make(apr_jose_t **jose, const char *cty,
  * @param cty the content type.
  * @param json the json object to add.
  * @param pool pool used to allocate the result from.
+ * @return The apr_jose_t is returned.
  */
-APR_DECLARE(apr_status_t) apr_jose_json_make(apr_jose_t **jose, const char *cty,
+APR_DECLARE(apr_jose_t *) apr_jose_json_make(apr_jose_t *jose, const char *cty,
         apr_json_value_t *json, apr_pool_t *pool);
 
 /**

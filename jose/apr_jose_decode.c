@@ -41,22 +41,23 @@ apr_status_t apr_jose_decode_jwk(apr_jose_t **jose,
         const char *typ, apr_bucket_brigade *bb, apr_jose_cb_t *cb,
         int level, int flags, apr_pool_t *pool)
 {
+    apr_json_value_t *key;
     apr_jose_text_t in;
     apr_off_t offset;
     apr_status_t status;
-
-    status = apr_jose_jwk_make(jose, NULL, pool);
-    if (APR_SUCCESS != status) {
-        return status;
-    }
 
     status = apr_jose_flatten(bb, &in, pool);
     if (APR_SUCCESS != status) {
         return status;
     }
 
-    status = apr_json_decode(&(*jose)->jose.jwk->key, in.text, in.len, &offset,
+    status = apr_json_decode(&key, in.text, in.len, &offset,
             APR_JSON_FLAGS_WHITESPACE, level, pool);
+
+    *jose = apr_jose_jwk_make(NULL, key, pool);
+    if (!*jose) {
+        return APR_ENOMEM;
+    }
 
     if (APR_SUCCESS != status) {
         char buf[1024];
@@ -75,22 +76,23 @@ apr_status_t apr_jose_decode_jwks(apr_jose_t **jose,
         const char *typ, apr_bucket_brigade *bb, apr_jose_cb_t *cb,
         int level, int flags, apr_pool_t *pool)
 {
+    apr_json_value_t *keys;
     apr_jose_text_t in;
     apr_off_t offset;
     apr_status_t status;
-
-    status = apr_jose_jwks_make(jose, NULL, pool);
-    if (APR_SUCCESS != status) {
-        return status;
-    }
 
     status = apr_jose_flatten(bb, &in, pool);
     if (APR_SUCCESS != status) {
         return status;
     }
 
-    status = apr_json_decode(&(*jose)->jose.jwks->keys, in.text, in.len,
+    status = apr_json_decode(&keys, in.text, in.len,
             &offset, APR_JSON_FLAGS_WHITESPACE, level, pool);
+
+    *jose = apr_jose_jwks_make(NULL, keys, pool);
+    if (!*jose) {
+        return APR_ENOMEM;
+    }
 
     if (APR_SUCCESS != status) {
         char buf[1024];
@@ -102,7 +104,7 @@ apr_status_t apr_jose_decode_jwks(apr_jose_t **jose,
         return status;
     }
 
-    if ((*jose)->jose.jwks->keys->type != APR_JSON_ARRAY) {
+    if (keys->type != APR_JSON_ARRAY) {
         apr_errprintf(&(*jose)->result, pool, NULL, 0,
                 "Syntax error: JWKS 'keys' is not an array");
         return APR_EINVAL;
@@ -115,22 +117,23 @@ apr_status_t apr_jose_decode_jwt(apr_jose_t **jose,
         const char *typ, apr_bucket_brigade *bb, apr_jose_cb_t *cb,
         int level, int flags, apr_pool_t *pool)
 {
+    apr_json_value_t *claims;
     apr_jose_text_t in;
     apr_off_t offset;
     apr_status_t status;
-
-    status = apr_jose_jwt_make(jose, NULL, pool);
-    if (APR_SUCCESS != status) {
-        return status;
-    }
 
     status = apr_jose_flatten(bb, &in, pool);
     if (APR_SUCCESS != status) {
         return status;
     }
 
-    status = apr_json_decode(&(*jose)->jose.jwt->claims, in.text, in.len, &offset,
+    status = apr_json_decode(&claims, in.text, in.len, &offset,
             APR_JSON_FLAGS_WHITESPACE, level, pool);
+
+    *jose = apr_jose_jwt_make(NULL, claims, pool);
+    if (!*jose) {
+        return APR_ENOMEM;
+    }
 
     if (APR_SUCCESS != status) {
         char buf[1024];
@@ -157,10 +160,10 @@ apr_status_t apr_jose_decode_data(apr_jose_t **jose, const char *typ,
         return status;
     }
 
-    status = apr_jose_data_make(jose, typ, (const unsigned char *) in.text, in.len,
-            pool);
-    if (APR_SUCCESS != status) {
-        return status;
+    *jose = apr_jose_data_make(NULL, typ, (const unsigned char *) in.text,
+            in.len, pool);
+    if (!*jose) {
+        return APR_ENOMEM;
     }
 
     return status;
@@ -404,9 +407,9 @@ apr_status_t apr_jose_decode_compact_jws(apr_jose_t **jose,
         return APR_EINIT;
     }
 
-    status = apr_jose_jws_make(jose, NULL, NULL, NULL, pool);
-    if (APR_SUCCESS != status) {
-        return status;
+    *jose = apr_jose_jws_make(*jose, NULL, NULL, NULL, pool);
+    if (!*jose) {
+        return APR_ENOMEM;
     }
     jws = (*jose)->jose.jws;
 
@@ -415,9 +418,9 @@ apr_status_t apr_jose_decode_compact_jws(apr_jose_t **jose,
      * the JWS Protected Header.
      */
 
-    status = apr_jose_signature_make(&jws->signature, NULL, ph, pool);
-    if (APR_SUCCESS != status) {
-        return status;
+    jws->signature = apr_jose_signature_make(NULL, NULL, ph, pool);
+    if (!jws->signature) {
+        return APR_ENOMEM;
     }
 
     dot = memchr(left, '.', right - left);
@@ -501,21 +504,21 @@ apr_status_t apr_jose_decode_compact_jwe(apr_jose_t **jose, const char *left,
         return APR_EINIT;
     }
 
-    status = apr_jose_jwe_make(jose, NULL, NULL, NULL, NULL, pool);
-    if (APR_SUCCESS != status) {
-        return status;
+    *jose = apr_jose_jwe_make(*jose, NULL, NULL, NULL, NULL, pool);
+    if (!*jose) {
+        return APR_ENOMEM;
     }
     jwe = (*jose)->jose.jwe;
 
-    status = apr_jose_encryption_make(&jwe->encryption, NULL,
+    jwe->encryption = apr_jose_encryption_make(NULL, NULL,
             NULL, pool);
-    if (APR_SUCCESS != status) {
-        return status;
+    if (!jwe->encryption) {
+        return APR_ENOMEM;
     }
 
-    status = apr_jose_recipient_make(&jwe->recipient, NULL, pool);
-    if (APR_SUCCESS != status) {
-        return status;
+    jwe->recipient = apr_jose_recipient_make(NULL, NULL, pool);
+    if (!jwe->recipient) {
+        return APR_ENOMEM;
     }
 
     /*
@@ -655,9 +658,9 @@ apr_status_t apr_jose_decode_compact(apr_jose_t **jose, const char *typ,
     left = in.text;
     right = in.text + in.len;
 
-    status = apr_jose_make(jose, APR_JOSE_TYPE_NONE, pool);
-    if (APR_SUCCESS != status) {
-        return status;
+    *jose = apr_jose_make(NULL, APR_JOSE_TYPE_NONE, pool);
+    if (!*jose) {
+        return APR_ENOMEM;
     }
 
     bb = apr_brigade_create(pool, brigade->bucket_alloc);
@@ -852,9 +855,9 @@ apr_status_t apr_jose_decode_json_jws(apr_jose_t **jose, apr_json_value_t *val,
         return APR_BADCH;
     }
 
-    status = apr_jose_jws_json_make(jose, NULL, NULL, NULL, pool);
-    if (APR_SUCCESS != status) {
-        return status;
+    *jose = apr_jose_jws_json_make(*jose, NULL, NULL, NULL, pool);
+    if (!*jose) {
+        return APR_ENOMEM;
     }
     jws = (*jose)->jose.jws;
 
@@ -1037,10 +1040,10 @@ apr_status_t apr_jose_decode_json_jws(apr_jose_t **jose, apr_json_value_t *val,
         return APR_SUCCESS;
     }
 
-    status = apr_jose_signature_make(&jws->signature, NULL, NULL,
+    jws->signature = apr_jose_signature_make(NULL, NULL, NULL,
             pool);
-    if (APR_SUCCESS != status) {
-        return status;
+    if (!jws->signature) {
+        return APR_ENOMEM;
     }
 
     kv = apr_json_object_get(val, APR_JOSE_JWSE_PROTECTED,
@@ -1173,16 +1176,16 @@ apr_status_t apr_jose_decode_json_jwe(apr_jose_t **jose, apr_json_value_t *val,
         return APR_EINVAL;
     }
 
-    status = apr_jose_jwe_json_make(jose, NULL, NULL, NULL, NULL, pool);
-    if (APR_SUCCESS != status) {
-        return status;
+    *jose = apr_jose_jwe_json_make(*jose, NULL, NULL, NULL, NULL, pool);
+    if (!*jose) {
+        return APR_ENOMEM;
     }
     jwe = (*jose)->jose.jwe;
 
-    status = apr_jose_encryption_make(&jwe->encryption, NULL,
+    jwe->encryption = apr_jose_encryption_make(NULL, NULL,
             NULL, pool);
-    if (APR_SUCCESS != status) {
-        return status;
+    if (!jwe->encryption) {
+        return APR_ENOMEM;
     }
 
     /*
@@ -1547,9 +1550,9 @@ apr_status_t apr_jose_decode_json(apr_jose_t **jose, const char *typ,
     apr_off_t offset;
     apr_status_t status;
 
-    status = apr_jose_make(jose, APR_JOSE_TYPE_NONE, pool);
-    if (APR_SUCCESS != status) {
-        return status;
+    *jose = apr_jose_make(NULL, APR_JOSE_TYPE_NONE, pool);
+    if (!*jose) {
+        return APR_ENOMEM;
     }
 
     status = apr_jose_flatten(brigade, &in, pool);
