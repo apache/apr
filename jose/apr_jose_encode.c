@@ -678,11 +678,6 @@ apr_status_t apr_jose_encode(apr_bucket_brigade *brigade,
     apr_pool_t *p;
     apr_status_t status = APR_EINVAL;
 
-    /* if asked to encode nothing, encode nothing */
-    if (jose == NULL) {
-        return APR_SUCCESS;
-    }
-
     apr_pool_create(&p, pool);
     if (p == NULL) {
         return APR_ENOMEM;

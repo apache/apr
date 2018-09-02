@@ -914,7 +914,8 @@ typedef struct apr_jose_cb_t {
  * @param jose - context pointer
  * @return The apu_err_t is returned.
  */
-APR_DECLARE(apu_err_t *) apr_jose_error(apr_jose_t *jose);
+APR_DECLARE(apu_err_t *) apr_jose_error(apr_jose_t *jose)
+        __attribute__((nonnull(1)));
 
 /**
  * Make a generic JOSE structure.
@@ -926,7 +927,8 @@ APR_DECLARE(apu_err_t *) apr_jose_error(apr_jose_t *jose);
  * @return The apr_jose_t is returned.
  */
 APR_DECLARE(apr_jose_t *) apr_jose_make(apr_jose_t *jose, apr_jose_type_e type,
-        apr_pool_t *pool);
+        apr_pool_t *pool)
+        __attribute__((nonnull(3)));
 
 /**
  * Make a JSON Web Key for encoding or decoding.
@@ -938,7 +940,8 @@ APR_DECLARE(apr_jose_t *) apr_jose_make(apr_jose_t *jose, apr_jose_type_e type,
  * @return The apr_jose_t is returned.
  */
 APR_DECLARE(apr_jose_t *) apr_jose_jwk_make(apr_jose_t *jose,
-        apr_json_value_t *key, apr_pool_t *pool);
+        apr_json_value_t *key, apr_pool_t *pool)
+        __attribute__((nonnull(3)));
 
 /**
  * Make a JSON Web Key Set.
@@ -950,7 +953,8 @@ APR_DECLARE(apr_jose_t *) apr_jose_jwk_make(apr_jose_t *jose,
  * @return The apr_jose_t is returned.
  */
 APR_DECLARE(apr_jose_t *) apr_jose_jwks_make(apr_jose_t *jose,
-        apr_json_value_t *keys, apr_pool_t *pool);
+        apr_json_value_t *keys, apr_pool_t *pool)
+        __attribute__((nonnull(3)));
 
 /**
  * Make a signature structure for JWS.
@@ -963,7 +967,8 @@ APR_DECLARE(apr_jose_t *) apr_jose_jwks_make(apr_jose_t *jose,
  */
 APR_DECLARE(apr_jose_signature_t *) apr_jose_signature_make(
         apr_jose_signature_t *signature, apr_json_value_t *header,
-        apr_json_value_t *protected, apr_pool_t *pool);
+        apr_json_value_t *protected, apr_pool_t *pool)
+        __attribute__((nonnull(4)));
 
 /**
  * Make a recipient structure for JWE.
@@ -974,7 +979,8 @@ APR_DECLARE(apr_jose_signature_t *) apr_jose_signature_make(
  * @return The apr_jose_recipient_t is returned.
  */
 APR_DECLARE(apr_jose_recipient_t *) apr_jose_recipient_make(apr_jose_recipient_t *recipient,
-        apr_json_value_t *unprotected, apr_pool_t *pool);
+        apr_json_value_t *unprotected, apr_pool_t *pool)
+        __attribute__((nonnull(3)));
 
 /**
  * Make an encryption structure for JWE.
@@ -987,7 +993,8 @@ APR_DECLARE(apr_jose_recipient_t *) apr_jose_recipient_make(apr_jose_recipient_t
  */
 APR_DECLARE(apr_jose_encryption_t *) apr_jose_encryption_make(apr_jose_encryption_t *encryption,
         apr_json_value_t *unprotected, apr_json_value_t *protected,
-        apr_pool_t *pool);
+        apr_pool_t *pool)
+        __attribute__((nonnull(4)));
 
 /**
  * Make a compact encoded JWE.
@@ -1004,7 +1011,8 @@ APR_DECLARE(apr_jose_encryption_t *) apr_jose_encryption_make(apr_jose_encryptio
 APR_DECLARE(apr_jose_t *) apr_jose_jwe_make(apr_jose_t *jose,
         apr_jose_recipient_t *recipient, apr_array_header_t *recipients,
         apr_jose_encryption_t *encryption, apr_jose_t *payload,
-        apr_pool_t *pool);
+        apr_pool_t *pool)
+        __attribute__((nonnull(6)));
 
 /**
  * Make a JSON encoded JWE.
@@ -1021,7 +1029,8 @@ APR_DECLARE(apr_jose_t *) apr_jose_jwe_make(apr_jose_t *jose,
 APR_DECLARE(apr_jose_t *) apr_jose_jwe_json_make(apr_jose_t *jose,
         apr_jose_recipient_t *recipient,
         apr_array_header_t *recipients, apr_jose_encryption_t *encryption,
-        apr_jose_t *payload, apr_pool_t *pool);
+        apr_jose_t *payload, apr_pool_t *pool)
+        __attribute__((nonnull(6)));
 
 /**
  * Make a compact encoded JWS.
@@ -1036,7 +1045,8 @@ APR_DECLARE(apr_jose_t *) apr_jose_jwe_json_make(apr_jose_t *jose,
  */
 APR_DECLARE(apr_jose_t *) apr_jose_jws_make(apr_jose_t *jose,
         apr_jose_signature_t *signature, apr_array_header_t *signatures,
-        apr_jose_t *payload, apr_pool_t *pool);
+        apr_jose_t *payload, apr_pool_t *pool)
+        __attribute__((nonnull(5)));
 
 /**
  * Make a JSON encoded JWS.
@@ -1051,7 +1061,8 @@ APR_DECLARE(apr_jose_t *) apr_jose_jws_make(apr_jose_t *jose,
  */
 APR_DECLARE(apr_jose_t *) apr_jose_jws_json_make(apr_jose_t *jose,
         apr_jose_signature_t *signature, apr_array_header_t *signatures,
-        apr_jose_t *payload, apr_pool_t *pool);
+        apr_jose_t *payload, apr_pool_t *pool)
+        __attribute__((nonnull(5)));
 
 /**
  * Make a JWT claims payload.
@@ -1066,7 +1077,8 @@ APR_DECLARE(apr_jose_t *) apr_jose_jws_json_make(apr_jose_t *jose,
  * @return The apr_jose_t is returned.
  */
 APR_DECLARE(apr_jose_t *) apr_jose_jwt_make(apr_jose_t *jose,
-        apr_json_value_t *claims, apr_pool_t *pool);
+        apr_json_value_t *claims, apr_pool_t *pool)
+        __attribute__((nonnull(3)));
 
 /**
  * Make a data buffer for encoding from the given data and length.
@@ -1080,7 +1092,8 @@ APR_DECLARE(apr_jose_t *) apr_jose_jwt_make(apr_jose_t *jose,
  * @return The apr_jose_t is returned.
  */
 APR_DECLARE(apr_jose_t *) apr_jose_data_make(apr_jose_t *jose, const char *typ,
-        const unsigned char *in, apr_size_t inlen, apr_pool_t *pool);
+        const unsigned char *in, apr_size_t inlen, apr_pool_t *pool)
+        __attribute__((nonnull(5)));
 
 /**
  * Make a UTF-8 text buffer for encoding from the given string
@@ -1095,7 +1108,8 @@ APR_DECLARE(apr_jose_t *) apr_jose_data_make(apr_jose_t *jose, const char *typ,
  * @return The apr_jose_t is returned.
  */
 APR_DECLARE(apr_jose_t *) apr_jose_text_make(apr_jose_t *jose, const char *cty,
-        const char *in, apr_size_t inlen, apr_pool_t *pool);
+        const char *in, apr_size_t inlen, apr_pool_t *pool)
+        __attribute__((nonnull(5)));
 
 /**
  * Make a json structure for encoding.
@@ -1108,7 +1122,8 @@ APR_DECLARE(apr_jose_t *) apr_jose_text_make(apr_jose_t *jose, const char *cty,
  * @return The apr_jose_t is returned.
  */
 APR_DECLARE(apr_jose_t *) apr_jose_json_make(apr_jose_t *jose, const char *cty,
-        apr_json_value_t *json, apr_pool_t *pool);
+        apr_json_value_t *json, apr_pool_t *pool)
+        __attribute__((nonnull(4)));
 
 /**
  * Sign or encrypt the apr_jose_t, and write it to the brigade.
@@ -1124,7 +1139,8 @@ APR_DECLARE(apr_jose_t *) apr_jose_json_make(apr_jose_t *jose, const char *cty,
  */
 APR_DECLARE(apr_status_t) apr_jose_encode(apr_bucket_brigade *brigade,
         apr_brigade_flush flush, void *ctx, apr_jose_t *jose,
-        apr_jose_cb_t *cb, apr_pool_t *pool);
+        apr_jose_cb_t *cb, apr_pool_t *pool)
+		__attribute__((nonnull(1, 4, 6)));
 
 /**
  * Decode, decrypt and verify the utf8-encoded JOSE string into apr_jose_t.
@@ -1143,7 +1159,8 @@ APR_DECLARE(apr_status_t) apr_jose_encode(apr_bucket_brigade *brigade,
  */
 APR_DECLARE(apr_status_t) apr_jose_decode(apr_jose_t **jose, const char *typ,
         apr_bucket_brigade *brigade, apr_jose_cb_t *cb, int level, int flags,
-        apr_pool_t *pool);
+        apr_pool_t *pool)
+        __attribute__((nonnull(1, 3, 7)));
 
 
 #ifdef __cplusplus
