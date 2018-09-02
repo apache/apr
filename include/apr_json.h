@@ -366,7 +366,7 @@ APR_DECLARE(apr_json_value_t *)
  * @return Returns the first value, or NULL if not an array, or the array is
  *   empty.
  */
-APR_DECLARE(apr_json_value_t *) apr_json_array_first(const apr_json_value_t *obj)
+APR_DECLARE(apr_json_value_t *) apr_json_array_first(const apr_json_value_t *arr)
         __attribute__((nonnull(1)));;
 
 /**
