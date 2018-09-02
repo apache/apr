@@ -796,6 +796,13 @@ apr_status_t apr_jose_decode_compact(apr_jose_t **jose, const char *typ,
         }
         else {
 
+            if (level <= 0) {
+                apr_errprintf(&(*jose)->result, pool, NULL, 0,
+                        "Syntax error: too many nested JOSE payloads");
+                return APR_EINVAL;
+            }
+            level--;
+
             status = apr_jose_decode(
                     flags & APR_JOSE_FLAG_DECODE_ALL ?
                             &(*jose)->jose.jws->payload : jose, typ, bb, cb,
@@ -1005,6 +1012,13 @@ apr_status_t apr_jose_decode_json_jws(apr_jose_t **jose, apr_json_value_t *val,
                                 bb->bucket_alloc);
                         APR_BRIGADE_INSERT_TAIL(bb, e);
 
+                        if (level <= 0) {
+                            apr_errprintf(&(*jose)->result, pool, NULL, 0,
+                                    "Syntax error: too many nested JOSE payloads");
+                            return APR_EINVAL;
+                        }
+                        level--;
+
                         status = apr_jose_decode(
                                 flags & APR_JOSE_FLAG_DECODE_ALL ?
                                         &(*jose)->jose.jwe->payload : jose, typ,
@@ -1143,6 +1157,13 @@ apr_status_t apr_jose_decode_json_jws(apr_jose_t **jose, apr_json_value_t *val,
     e = apr_bucket_pool_create(pls.text, pls.len, pool,
             bb->bucket_alloc);
     APR_BRIGADE_INSERT_TAIL(bb, e);
+
+    if (level <= 0) {
+        apr_errprintf(&(*jose)->result, pool, NULL, 0,
+                "Syntax error: too many nested JOSE payloads");
+        return APR_EINVAL;
+    }
+    level--;
 
     return apr_jose_decode(
             flags & APR_JOSE_FLAG_DECODE_ALL ?
@@ -1442,6 +1463,13 @@ apr_status_t apr_jose_decode_json_jwe(apr_jose_t **jose, apr_json_value_t *val,
 
                     if (decrypt == 1) {
 
+                        if (level <= 0) {
+                            apr_errprintf(&(*jose)->result, pool, NULL, 0,
+                                    "Syntax error: too many nested JOSE payloads");
+                            return APR_EINVAL;
+                        }
+                        level--;
+
                         status = apr_jose_decode(
                                 flags & APR_JOSE_FLAG_DECODE_ALL ?
                                         &(*jose)->jose.jwe->payload : jose, typ,
@@ -1517,6 +1545,13 @@ apr_status_t apr_jose_decode_json_jwe(apr_jose_t **jose, apr_json_value_t *val,
                 pool);
 
         if (APR_SUCCESS == status) {
+
+            if (level <= 0) {
+                apr_errprintf(&(*jose)->result, pool, NULL, 0,
+                        "Syntax error: too many nested JOSE payloads");
+                return APR_EINVAL;
+            }
+            level--;
 
             return apr_jose_decode(
                     flags & APR_JOSE_FLAG_DECODE_ALL ?
