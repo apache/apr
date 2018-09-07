@@ -194,7 +194,7 @@ Generating Test Coverage information with gcc
 If you want to generate test coverage data, use the following steps:
 
   ./buildconf
-  CFLAGS="-fprofile-arcs -ftest-coverage" ./configure
+  CFLAGS="--coverage -fprofile-abs-path" LDFLAGS="--coverage" ./configure
   make
   cd test
   make

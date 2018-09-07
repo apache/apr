@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ ! -d coverage ]; then
     mkdir coverage
@@ -85,20 +85,48 @@ but all tests should be moving to the unified framework, so this is correct.</p>
    <table border="0" width="100%" cellspacing="0">
 EOF
 
-for i in `find .. -name "*.bb" -maxdepth 1 | sort`; do
-    percent=`gcov $i -o .. | grep "%" | awk -F'%' {'print $1'}`
-    name=`echo $i | awk -F'/' {'print $2'}`
-    basename=`echo $name | awk -F'.' {'print $1'}` 
+# Remind current dir, so that we can easily navigate in directories
+pwd=`pwd`
 
+# gcno files are created at compile time and gcna files at run-time
+for i in `find ../.. -name "*.gcno" | sort`; do
+    # Skip test files
+    if [[ "$i" =~ "test" ]]; then
+        continue
+    fi
+
+    # We are only intested in gcno files in .libs directories, because it there
+    # that we'll also find some gcna files
+    if ! [[ "$i" =~ "libs" ]]; then
+        continue
+    fi
+
+    # Find the directory and base name of this gcno file
+    dir=`dirname -- "$i"`
+    basename=`basename "$i"`
+    filename="${basename%.*}"
+    
+    # Go to this directory
+    cd $dir
+
+    # Get the % of test coverage for each of this file
+    percent=`gcov $filename.gcda | grep "%" | awk -F'%' {'print $1'} | awk -F':' {'print $2'}`
+
+    # Come back to our base directory
+    cd $pwd
+
+    # Process the data we have collected
     if [ "x$percent" = "x" ]; then
         echo "<tr>" >> index.html
-        echo "<td bgcolor=#ffffff> Error generating data for $basename<br>" >> index.html
-        continue;	
+        echo "<td bgcolor=#ffffff> Error generating data for <b>$filename</b></td>" >> index.html
+        echo "</tr>" >> index.html
+        continue;
     fi
+
     intpercent=`echo "$percent/1" | bc`
-    if [ $intpercent -lt 33 ]; then
+    if [[ $intpercent -lt 33 ]]; then
         color="#ffaaaa"
-    else if [ $intpercent -lt 66 ]; then
+    else if [[ $intpercent -lt 66 ]]; then
         color="#ffff77"
         else
             color="#aaffaa"
@@ -106,8 +134,9 @@ for i in `find .. -name "*.bb" -maxdepth 1 | sort`; do
     fi
 
     echo "<tr>" >> index.html
-    echo "<td bgcolor=$color><a href=\"$basename.c.gcov\">$basename</a><br>" >> index.html
-    echo "<td bgcolor=$color>$percent% tested"  >> index.html
+    echo "<td bgcolor=$color><a href=\"$dir\\$filename.c.gcov\">$filename</a></td>" >> index.html
+    echo "<td bgcolor=$color><b>$percent%</b> tested</td>"  >> index.html
+    echo "</tr>" >> index.html
 done
 
 echo "</table><p>Last generated `date`</p>" >> index.html
