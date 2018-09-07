@@ -7,6 +7,11 @@ Changes for APR 1.6.4
   *) Fix apr_parse_addr_port() regression in scope_id parsing introduced
      in 1.6.3.  [Rainer Jung]
 
+  *) Fix Win32 file buffer locking behavior for single threaded file streams.
+     [Evgeny Kotkov, Mladen Turk, Jean-Frederic Clere]
+
+  *) Numerous corrections to APR poll behavior. [Yann Ylavic]
+
 Changes for APR 1.6.3
 
   *) apr_file_trunc: Truncating a buffered file could add unexpected
