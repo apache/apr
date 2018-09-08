@@ -299,7 +299,7 @@ APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_time_exp_t *aprtime,
     /* The Platform SDK documents that SYSTEMTIME/FILETIME are
      * generally UTC, so no timezone info needed
      */
-    if (tm->wMonth < 1 || tm->wMonth > 12)
+    if ((*ostime)->wMonth < 1 || (*ostime)->wMonth > 12)
         return APR_EBADDATE;
 
     SystemTimeToAprExpTime(aprtime, *ostime);
