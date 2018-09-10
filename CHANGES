@@ -1,9 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.6.5
 
-
-
-Changes for APR 1.6.4
+  *) Fix Win32 build breakage in apr_os_exp_time_put() in 1.6.4. [Rainer Jung]
+     
+Changes for APR 1.6.4 (not released)
 
   *) configure: Fix detection of <net/if.h> on OpenBSD.
      PR 61976. [David Carlier <devnexen gmail.com>, Yann Ylavic]
