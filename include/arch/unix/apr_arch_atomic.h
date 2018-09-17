@@ -34,12 +34,16 @@
 #   define USE_ATOMICS_SOLARIS
 #elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
 #   define USE_ATOMICS_IA32
+#   define NEED_ATOMICS_GENERIC64
 #elif defined(__GNUC__) && (defined(__PPC__) || defined(__ppc__))
 #   define USE_ATOMICS_PPC
+#   define NEED_ATOMICS_GENERIC64
 #elif defined(__GNUC__) && (defined(__s390__) || defined(__s390x__))
 #   define USE_ATOMICS_S390
+#   define NEED_ATOMICS_GENERIC64
 #else
 #   define USE_ATOMICS_GENERIC
+#   define NEED_ATOMICS_GENERIC64
 #endif
 
 #endif /* ATOMIC_H */

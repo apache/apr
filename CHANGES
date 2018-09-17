@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.0
 
+  *) Atomics: Support for 64bit ints. [Jim Jagielski]
+
   *) Add the apr_encode_* API that implements RFC4648 and RFC7515
      compliant BASE64, BASE64URL, BASE32, BASE32HEX and BASE16
      encode/decode functions. [Graham Leggett]
