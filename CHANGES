@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Atomics: Support for 64bit ints. [Jim Jagielski]
+
   *) apr_jose: Add support for encoding and decoding of JSON Object
      Signing and Encryption messages as per RFC7515, RFC7516, RFC7517
      and RFC7519. [Graham Leggett]
