@@ -230,15 +230,136 @@ static void test_inc_neg1(abts_case *tc, void *data)
     ABTS_ASSERT(tc, str, y32 == 0);
 }
 
+static void test_set64(abts_case *tc, void *data)
+{
+    apr_uint64_t y64;
+    apr_atomic_set64(&y64, 2);
+    ABTS_INT_EQUAL(tc, 2, y64);
+}
+
+static void test_read64(abts_case *tc, void *data)
+{
+    apr_uint64_t y64;
+    apr_atomic_set64(&y64, 2);
+    ABTS_INT_EQUAL(tc, 2, apr_atomic_read64(&y64));
+}
+
+static void test_dec64(abts_case *tc, void *data)
+{
+    apr_uint64_t y64;
+    int rv;
+
+    apr_atomic_set64(&y64, 2);
+
+    rv = apr_atomic_dec64(&y64);
+    ABTS_INT_EQUAL(tc, 1, y64);
+    ABTS_ASSERT(tc, "atomic_dec returned zero when it shouldn't", rv != 0);
+
+    rv = apr_atomic_dec64(&y64);
+    ABTS_INT_EQUAL(tc, 0, y64);
+    ABTS_ASSERT(tc, "atomic_dec didn't returned zero when it should", rv == 0);
+}
+
+static void test_xchg64(abts_case *tc, void *data)
+{
+    apr_uint64_t oldval;
+    apr_uint64_t y64;
+
+    apr_atomic_set64(&y64, 100);
+    oldval = apr_atomic_xchg64(&y64, 50);
+
+    ABTS_INT_EQUAL(tc, 100, oldval);
+    ABTS_INT_EQUAL(tc, 50, y64);
+}
+
+static void test_add64(abts_case *tc, void *data)
+{
+    apr_uint64_t oldval;
+    apr_uint64_t y64;
+
+    apr_atomic_set64(&y64, 23);
+    oldval = apr_atomic_add64(&y64, 4);
+    ABTS_INT_EQUAL(tc, 23, oldval);
+    ABTS_INT_EQUAL(tc, 27, y64);
+}
+
+static void test_add64_neg(abts_case *tc, void *data)
+{
+    apr_uint64_t oldval;
+    apr_uint64_t y64;
+
+    apr_atomic_set64(&y64, 23);
+    oldval = apr_atomic_add64(&y64, -10);
+    ABTS_INT_EQUAL(tc, 23, oldval);
+    ABTS_INT_EQUAL(tc, 13, y64);
+}
+
+static void test_inc64(abts_case *tc, void *data)
+{
+    apr_uint64_t oldval;
+    apr_uint64_t y64;
+
+    apr_atomic_set64(&y64, 23);
+    oldval = apr_atomic_inc64(&y64);
+    ABTS_INT_EQUAL(tc, 23, oldval);
+    ABTS_INT_EQUAL(tc, 24, y64);
+}
+
+static void test_set_add_inc_sub64(abts_case *tc, void *data)
+{
+    apr_uint64_t y64;
+
+    apr_atomic_set64(&y64, 0);
+    apr_atomic_add64(&y64, 20);
+    apr_atomic_inc64(&y64);
+    apr_atomic_sub64(&y64, 10);
+
+    ABTS_INT_EQUAL(tc, 11, y64);
+}
+
+static void test_wrap_zero64(abts_case *tc, void *data)
+{
+    apr_uint64_t y64;
+    apr_uint64_t rv;
+    apr_uint64_t minus1 = (apr_uint64_t)-1;
+    char *str;
+
+    apr_atomic_set64(&y64, 0);
+    rv = apr_atomic_dec64(&y64);
+
+    ABTS_ASSERT(tc, "apr_atomic_dec64 on zero returned zero.", rv != 0);
+    str = apr_psprintf(p, "zero wrap failed: 0 - 1 = %lu", y64);
+    ABTS_ASSERT(tc, str, y64 == minus1);
+}
+
+static void test_inc_neg164(abts_case *tc, void *data)
+{
+    apr_uint64_t y64 = (apr_uint64_t)-1;
+    apr_uint64_t minus1 = (apr_uint64_t)-1;
+    apr_uint64_t rv;
+    char *str;
+
+    rv = apr_atomic_inc64(&y64);
+
+    ABTS_ASSERT(tc, "apr_atomic_inc64 didn't return the old value.", rv == minus1);
+    str = apr_psprintf(p, "zero wrap failed: -1 + 1 = %lu", y64);
+    ABTS_ASSERT(tc, str, y64 == 0);
+}
+
 
 #if APR_HAS_THREADS
 
 void *APR_THREAD_FUNC thread_func_mutex(apr_thread_t *thd, void *data);
+void *APR_THREAD_FUNC thread_func_mutex64(apr_thread_t *thd, void *data);
 void *APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data);
+void *APR_THREAD_FUNC thread_func_atomic64(apr_thread_t *thd, void *data);
 
 apr_thread_mutex_t *thread_lock;
+apr_thread_mutex_t *thread_lock64;
 volatile apr_uint32_t mutex_locks = 0;
+volatile apr_uint64_t mutex_locks64 = 0;
 volatile apr_uint32_t atomic_ops = 0;
+volatile apr_uint64_t atomic_ops64 = 0;
 apr_status_t exit_ret_val = 123; /* just some made up number to check on later */
 
 #define NUM_THREADS 40
@@ -313,6 +434,7 @@ static void test_atomics_threaded(abts_case *tc, void *data)
 #define NUM_THREADS 7
 
 typedef struct tbox_t tbox_t;
+typedef struct tbox_t64 tbox_t64;
 
 struct tbox_t {
     abts_case *tc;
@@ -501,6 +623,259 @@ static void test_atomics_busyloop_threaded(abts_case *tc, void *data)
     ABTS_ASSERT(tc, "Failed creating threads", rv == APR_SUCCESS);
 }
 
+void *APR_THREAD_FUNC thread_func_mutex64(apr_thread_t *thd, void *data)
+{
+    int i;
+
+    for (i = 0; i < NUM_ITERATIONS; i++) {
+        apr_thread_mutex_lock(thread_lock64);
+        mutex_locks64++;
+        apr_thread_mutex_unlock(thread_lock64);
+    }
+    apr_thread_exit(thd, exit_ret_val);
+    return NULL;
+}
+
+
+void *APR_THREAD_FUNC thread_func_atomic64(apr_thread_t *thd, void *data)
+{
+    int i;
+
+    for (i = 0; i < NUM_ITERATIONS ; i++) {
+        apr_atomic_inc64(&atomic_ops64);
+        apr_atomic_add64(&atomic_ops64, 2);
+        apr_atomic_dec64(&atomic_ops64);
+        apr_atomic_dec64(&atomic_ops64);
+    }
+    apr_thread_exit(thd, exit_ret_val);
+    return NULL;
+}
+
+static void test_atomics_threaded64(abts_case *tc, void *data)
+{
+    apr_thread_t *t1[NUM_THREADS];
+    apr_thread_t *t2[NUM_THREADS];
+    apr_status_t rv;
+    int i;
+
+#ifdef HAVE_PTHREAD_SETCONCURRENCY
+    pthread_setconcurrency(8);
+#endif
+
+    rv = apr_thread_mutex_create(&thread_lock64, APR_THREAD_MUTEX_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "Could not create lock", rv);
+
+    for (i = 0; i < NUM_THREADS; i++) {
+        apr_status_t r1, r2;
+        r1 = apr_thread_create(&t1[i], NULL, thread_func_mutex64, NULL, p);
+        r2 = apr_thread_create(&t2[i], NULL, thread_func_atomic64, NULL, p);
+        ABTS_ASSERT(tc, "Failed creating threads", !r1 && !r2);
+    }
+
+    for (i = 0; i < NUM_THREADS; i++) {
+        apr_status_t s1, s2;
+        apr_thread_join(&s1, t1[i]);
+        apr_thread_join(&s2, t2[i]);
+
+        ABTS_ASSERT(tc, "Invalid return value from thread_join",
+                    s1 == exit_ret_val && s2 == exit_ret_val);
+    }
+
+    ABTS_INT_EQUAL(tc, NUM_THREADS * NUM_ITERATIONS, mutex_locks64);
+    ABTS_INT_EQUAL(tc, NUM_THREADS * NUM_ITERATIONS,
+                   apr_atomic_read64(&atomic_ops64));
+
+    rv = apr_thread_mutex_destroy(thread_lock64);
+    ABTS_ASSERT(tc, "Failed creating threads", rv == APR_SUCCESS);
+}
+
+struct tbox_t64 {
+    abts_case *tc;
+    apr_uint64_t *mem;
+    apr_uint64_t preval;
+    apr_uint64_t postval;
+    apr_uint64_t loop;
+    void (*func)(tbox_t64 *box);
+};
+
+static APR_INLINE void busyloop_read64(tbox_t64 *tbox)
+{
+    apr_uint64_t val;
+
+    do {
+        val = apr_atomic_read64(tbox->mem);
+
+        if (val != tbox->preval)
+            apr_thread_yield();
+        else
+            break;
+    } while (1);
+}
+
+static void busyloop_set64(tbox_t64 *tbox)
+{
+    do {
+        busyloop_read64(tbox);
+        apr_atomic_set64(tbox->mem, tbox->postval);
+    } while (--tbox->loop);
+}
+
+static void busyloop_add64(tbox_t64 *tbox)
+{
+    apr_uint64_t val;
+
+    do {
+        busyloop_read64(tbox);
+        val = apr_atomic_add64(tbox->mem, tbox->postval);
+        apr_thread_mutex_lock(thread_lock64);
+        ABTS_INT_EQUAL(tbox->tc, val, tbox->preval);
+        apr_thread_mutex_unlock(thread_lock64);
+    } while (--tbox->loop);
+}
+
+static void busyloop_sub64(tbox_t64 *tbox)
+{
+    do {
+        busyloop_read64(tbox);
+        apr_atomic_sub64(tbox->mem, tbox->postval);
+    } while (--tbox->loop);
+}
+
+static void busyloop_inc64(tbox_t64 *tbox)
+{
+    apr_uint64_t val;
+
+    do {
+        busyloop_read64(tbox);
+        val = apr_atomic_inc64(tbox->mem);
+        apr_thread_mutex_lock(thread_lock64);
+        ABTS_INT_EQUAL(tbox->tc, val, tbox->preval);
+        apr_thread_mutex_unlock(thread_lock64);
+    } while (--tbox->loop);
+}
+
+static void busyloop_dec64(tbox_t64 *tbox)
+{
+    apr_uint64_t val;
+
+    do {
+        busyloop_read64(tbox);
+        val = apr_atomic_dec64(tbox->mem);
+        apr_thread_mutex_lock(thread_lock64);
+        ABTS_INT_NEQUAL(tbox->tc, 0, val);
+        apr_thread_mutex_unlock(thread_lock64);
+    } while (--tbox->loop);
+}
+
+static void busyloop_cas64(tbox_t64 *tbox)
+{
+    apr_uint64_t val;
+
+    do {
+        do {
+            val = apr_atomic_cas64(tbox->mem, tbox->postval, tbox->preval);
+
+            if (val != tbox->preval)
+                apr_thread_yield();
+            else
+                break;
+        } while (1);
+    } while (--tbox->loop);
+}
+
+static void busyloop_xchg64(tbox_t64 *tbox)
+{
+    apr_uint64_t val;
+
+    do {
+        busyloop_read64(tbox);
+        val = apr_atomic_xchg64(tbox->mem, tbox->postval);
+        apr_thread_mutex_lock(thread_lock64);
+        ABTS_INT_EQUAL(tbox->tc, val, tbox->preval);
+        apr_thread_mutex_unlock(thread_lock64);
+    } while (--tbox->loop);
+}
+
+static void *APR_THREAD_FUNC thread_func_busyloop64(apr_thread_t *thd, void *data)
+{
+    tbox_t64 *tbox = data;
+
+    tbox->func(tbox);
+
+    apr_thread_exit(thd, 0);
+
+    return NULL;
+}
+
+static void test_atomics_busyloop_threaded64(abts_case *tc, void *data)
+{
+    unsigned int i;
+    apr_status_t rv;
+    apr_uint64_t count = 0;
+    tbox_t64 tbox[NUM_THREADS];
+    apr_thread_t *thread[NUM_THREADS];
+
+    rv = apr_thread_mutex_create(&thread_lock64, APR_THREAD_MUTEX_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "Could not create lock", rv);
+
+    /* get ready */
+    for (i = 0; i < NUM_THREADS; i++) {
+        tbox[i].tc = tc;
+        tbox[i].mem = &count;
+        tbox[i].loop = 50;
+    }
+
+    tbox[0].preval = 98;
+    tbox[0].postval = 3891;
+    tbox[0].func = busyloop_add64;
+
+    tbox[1].preval = 3989;
+    tbox[1].postval = 1010;
+    tbox[1].func = busyloop_sub64;
+
+    tbox[2].preval = 2979;
+    tbox[2].postval = 0; /* not used */
+    tbox[2].func = busyloop_inc64;
+
+    tbox[3].preval = 2980;
+    tbox[3].postval = 16384;
+    tbox[3].func = busyloop_set64;
+
+    tbox[4].preval = 16384;
+    tbox[4].postval = 0; /* not used */
+    tbox[4].func = busyloop_dec64;
+
+    tbox[5].preval = 16383;
+    tbox[5].postval = 1048576;
+    tbox[5].func = busyloop_cas64;
+
+    tbox[6].preval = 1048576;
+    tbox[6].postval = 98; /* goto tbox[0] */
+    tbox[6].func = busyloop_xchg64;
+
+    /* get set */
+    for (i = 0; i < NUM_THREADS; i++) {
+        rv = apr_thread_create(&thread[i], NULL, thread_func_busyloop64,
+                               &tbox[i], p);
+        ABTS_ASSERT(tc, "Failed creating thread", rv == APR_SUCCESS);
+    }
+
+    /* go! */
+    apr_atomic_set64(tbox->mem, 98);
+
+    for (i = 0; i < NUM_THREADS; i++) {
+        apr_status_t retval;
+        rv = apr_thread_join(&retval, thread[i]);
+        ABTS_ASSERT(tc, "Thread join failed", rv == APR_SUCCESS);
+        ABTS_ASSERT(tc, "Invalid return value from thread_join", retval == 0);
+    }
+
+    ABTS_INT_EQUAL(tbox->tc, 98, count);
+
+    rv = apr_thread_mutex_destroy(thread_lock64);
+    ABTS_ASSERT(tc, "Failed creating threads", rv == APR_SUCCESS);
+}
+
 #endif /* !APR_HAS_THREADS */
 
 abts_suite *testatomic(abts_suite *suite)
@@ -525,10 +900,22 @@ abts_suite *testatomic(abts_suite *suite)
     abts_run_test(suite, test_set_add_inc_sub, NULL);
     abts_run_test(suite, test_wrap_zero, NULL);
     abts_run_test(suite, test_inc_neg1, NULL);
+    abts_run_test(suite, test_set64, NULL);
+    abts_run_test(suite, test_read64, NULL);
+    abts_run_test(suite, test_dec64, NULL);
+    abts_run_test(suite, test_xchg64, NULL);
+    abts_run_test(suite, test_add64, NULL);
+    abts_run_test(suite, test_add64_neg, NULL);
+    abts_run_test(suite, test_inc64, NULL);
+    abts_run_test(suite, test_set_add_inc_sub64, NULL);
+    abts_run_test(suite, test_wrap_zero64, NULL);
+    abts_run_test(suite, test_inc_neg164, NULL);
 
 #if APR_HAS_THREADS
     abts_run_test(suite, test_atomics_threaded, NULL);
+    abts_run_test(suite, test_atomics_threaded64, NULL);
     abts_run_test(suite, test_atomics_busyloop_threaded, NULL);
+    abts_run_test(suite, test_atomics_busyloop_threaded64, NULL);
 #endif
 
     return suite;

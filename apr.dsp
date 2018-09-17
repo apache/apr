@@ -142,6 +142,10 @@ LIB32=link.exe -lib
 
 SOURCE=.\atomic\win32\apr_atomic.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\atomic\win32\apr_atomic64.c
+# End Source File
 # End Group
 # Begin Group "buckets"
 
