@@ -689,7 +689,7 @@ static apr_status_t odbc_lob_bucket_read(apr_bucket *e, const char **str,
 
         if (!eos) {
             /* Create a new LOB bucket to append and append it */
-            nxt = apr_bucket_alloc(sizeof(apr_bucket *), e->list);
+            nxt = apr_bucket_alloc(sizeof *nxt, e->list);
             APR_BUCKET_INIT(nxt);
             nxt->length = -1;
             nxt->data   = e->data;
