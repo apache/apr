@@ -14,6 +14,7 @@ try:
   import configparser
 except ImportError:
   import ConfigParser as configparser
+import codecs
 import getopt
 import string
 import glob
@@ -195,7 +196,7 @@ def write_objects(f, legal_deps, h_deps, files):
 def extract_deps(fname, legal_deps):
   "Extract the headers this file includes."
   deps = { }
-  for line in open(fname).readlines():
+  for line in codecs.open(fname, 'r', 'utf-8').readlines():
     if line[:8] != '#include':
       continue
     inc = _re_include.match(line).group(1)
