@@ -122,7 +122,7 @@ static apr_status_t dodgy_cleanup(void *data)
 {
     apr_pool_t *p = data;
     
-    return apr_pool_cleanup_run(p, checker_data, checker_cleanup);
+    return apr_pool_cleanup_run(p, another_data, another_cleanup);
 }
 
 static void test_cleanups(abts_case *tc, void *data)
