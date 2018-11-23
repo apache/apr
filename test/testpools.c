@@ -104,6 +104,27 @@ static apr_status_t checker_cleanup(void *data)
     return data == checker_data ? APR_SUCCESS : APR_EGENERAL;
 }
 
+static char *another_data = "Hello again, world.";
+
+static apr_status_t another_cleanup(void *data)
+{
+    return data == another_data ? APR_SUCCESS : APR_EGENERAL;
+}    
+
+/* A few places in httpd modify the cleanup list for a pool while
+ * cleanups are being run. An example is close_listeners_on_exec ->
+ * ap_close_listeners -> ... -> apr_socket_close ->
+ * apr_pool_cleanup_run. This appears to be safe with the current
+ * pools implementation, though perhaps only by chance. If the code is
+ * changed to break this, catch that here - the API can be clarified
+ * and callers fixed. */
+static apr_status_t dodgy_cleanup(void *data)
+{
+    apr_pool_t *p = data;
+    
+    return apr_pool_cleanup_run(p, checker_data, checker_cleanup);
+}
+
 static void test_cleanups(abts_case *tc, void *data)
 {
     apr_status_t rv;
@@ -117,6 +138,10 @@ static void test_cleanups(abts_case *tc, void *data)
                                   success_cleanup);
         apr_pool_cleanup_register(pchild, NULL, checker_cleanup, 
                                   success_cleanup);
+        apr_pool_cleanup_register(pchild, another_data, another_cleanup,
+                                  another_cleanup);
+        apr_pool_cleanup_register(pchild, pchild, dodgy_cleanup,
+                                  dodgy_cleanup);
 
         rv = apr_pool_cleanup_run(p, NULL, success_cleanup);
         ABTS_ASSERT(tc, "nullop cleanup run OK", rv == APR_SUCCESS);
