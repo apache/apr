@@ -18,6 +18,7 @@
 #include "apr_lib.h"
 #include "apr_encode.h"
 
+static
 apr_status_t apr_jose_flatten(apr_bucket_brigade *bb, apr_jose_text_t *in,
         apr_pool_t *pool)
 {
@@ -37,6 +38,7 @@ apr_status_t apr_jose_flatten(apr_bucket_brigade *bb, apr_jose_text_t *in,
     return apr_brigade_pflatten(bb, (char **)&in->text, &in->len, pool);
 }
 
+static
 apr_status_t apr_jose_decode_jwk(apr_jose_t **jose,
         const char *typ, apr_bucket_brigade *bb, apr_jose_cb_t *cb,
         int level, int flags, apr_pool_t *pool)
@@ -72,6 +74,7 @@ apr_status_t apr_jose_decode_jwk(apr_jose_t **jose,
     return APR_SUCCESS;
 }
 
+static
 apr_status_t apr_jose_decode_jwks(apr_jose_t **jose,
         const char *typ, apr_bucket_brigade *bb, apr_jose_cb_t *cb,
         int level, int flags, apr_pool_t *pool)
@@ -113,6 +116,7 @@ apr_status_t apr_jose_decode_jwks(apr_jose_t **jose,
     return APR_SUCCESS;
 }
 
+static
 apr_status_t apr_jose_decode_jwt(apr_jose_t **jose,
         const char *typ, apr_bucket_brigade *bb, apr_jose_cb_t *cb,
         int level, int flags, apr_pool_t *pool)
@@ -148,6 +152,7 @@ apr_status_t apr_jose_decode_jwt(apr_jose_t **jose,
     return APR_SUCCESS;
 }
 
+static
 apr_status_t apr_jose_decode_data(apr_jose_t **jose, const char *typ,
         apr_bucket_brigade *brigade, apr_jose_cb_t *cb, int level, int flags,
         apr_pool_t *pool)
@@ -169,6 +174,7 @@ apr_status_t apr_jose_decode_data(apr_jose_t **jose, const char *typ,
     return status;
 }
 
+static
 apr_status_t apr_jose_decode_jws_signature(apr_jose_t **jose,
         apr_jose_signature_t *signature, const char *typ, const char *cty,
         apr_jose_text_t *ph64, apr_jose_text_t *sig64, apr_jose_text_t *pl64,
@@ -269,6 +275,7 @@ apr_status_t apr_jose_decode_jws_signature(apr_jose_t **jose,
     return status;
 }
 
+static
 apr_status_t apr_jose_decode_jwe_recipient(apr_jose_t **jose,
         apr_bucket_brigade *bb, apr_jose_recipient_t *recipient,
         apr_jose_encryption_t *encryption, const char *typ, const char *cty,
@@ -386,6 +393,7 @@ apr_status_t apr_jose_decode_jwe_recipient(apr_jose_t **jose,
     return status;
 }
 
+static
 apr_status_t apr_jose_decode_compact_jws(apr_jose_t **jose,
         const char *left, const char *right,
         apr_json_value_t *ph, const char *typ, const char *cty,
@@ -486,6 +494,7 @@ apr_status_t apr_jose_decode_compact_jws(apr_jose_t **jose,
     return APR_SUCCESS;
 }
 
+static
 apr_status_t apr_jose_decode_compact_jwe(apr_jose_t **jose, const char *left,
         const char *right, apr_json_value_t *ph, apr_json_value_t *enc,
         const char *typ, const char *cty, apr_jose_text_t *ph64,
@@ -633,6 +642,7 @@ apr_status_t apr_jose_decode_compact_jwe(apr_jose_t **jose, const char *left,
     return APR_SUCCESS;
 }
 
+static
 apr_status_t apr_jose_decode_compact(apr_jose_t **jose, const char *typ,
         apr_bucket_brigade *brigade, apr_jose_cb_t *cb, int level, int flags,
         apr_pool_t *pool)
@@ -814,6 +824,7 @@ apr_status_t apr_jose_decode_compact(apr_jose_t **jose, const char *typ,
     return status;
 }
 
+static
 apr_status_t apr_jose_decode_json_jws(apr_jose_t **jose, apr_json_value_t *val,
         const char *typ, const char *cty, apr_json_value_t *pl,
         apr_jose_cb_t *cb, int level, int flags, apr_pool_t *pool,
@@ -1171,6 +1182,7 @@ apr_status_t apr_jose_decode_json_jws(apr_jose_t **jose, apr_json_value_t *val,
             level, flags, pool);
 }
 
+static
 apr_status_t apr_jose_decode_json_jwe(apr_jose_t **jose, apr_json_value_t *val,
         const char *typ, const char *cty, apr_json_value_t *ct,
         apr_jose_cb_t *cb, int level, int flags, apr_pool_t *pool,
@@ -1575,6 +1587,7 @@ apr_status_t apr_jose_decode_json_jwe(apr_jose_t **jose, apr_json_value_t *val,
 
 }
 
+static
 apr_status_t apr_jose_decode_json(apr_jose_t **jose, const char *typ,
         apr_bucket_brigade *brigade, apr_jose_cb_t *cb, int level,
         int flags, apr_pool_t *pool)
