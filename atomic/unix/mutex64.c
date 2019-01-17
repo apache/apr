@@ -15,6 +15,7 @@
  */
 
 #include "apr_arch_atomic.h"
+#include "apr_thread_mutex.h"
 
 #if defined(USE_ATOMICS_GENERIC) || defined (NEED_ATOMICS_GENERIC64)
 
@@ -50,7 +51,7 @@ static apr_status_t atomic_cleanup(void *data)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_atomic_init(apr_pool_t *p)
+apr_status_t apr__atomic_generic64_init(apr_pool_t *p)
 {
     int i;
     apr_status_t rv;
@@ -86,7 +87,7 @@ static APR_INLINE apr_thread_mutex_t *mutex_hash(volatile apr_uint64_t *mem)
 
 #else
 
-APR_DECLARE(apr_status_t) apr_atomic_init(apr_pool_t *p)
+apr_status_t apr__atomic_generic64_init(apr_pool_t *p)
 {
     return APR_SUCCESS;
 }
