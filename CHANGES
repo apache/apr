@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Signals: Allow handling of SIGUSR2 in apr_signal_thread. [Yann Ylavic]
+
   *) Atomics: Support for 64bit ints. [Jim Jagielski]
 
   *) apr_jose: Add support for encoding and decoding of JSON Object
