@@ -24,15 +24,15 @@
 
 #if defined(USE_ATOMICS_GENERIC)
 /* noop */
-#elif defined(__GNUC__) && defined(__STRICT_ANSI__)
-/* force use of generic atomics if building e.g. with -std=c89, which
- * doesn't allow inline asm */
-#   define USE_ATOMICS_GENERIC
 #elif HAVE_ATOMIC_BUILTINS
 #   define USE_ATOMICS_BUILTINS
 #elif defined(SOLARIS2) && SOLARIS2 >= 10
 #   define USE_ATOMICS_SOLARIS
 #   define NEED_ATOMICS_GENERIC64
+#elif defined(__GNUC__) && defined(__STRICT_ANSI__)
+/* force use of generic atomics if building e.g. with -std=c89, which
+ * doesn't allow inline asm */
+#   define USE_ATOMICS_GENERIC
 #elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
 #   define USE_ATOMICS_IA32
 #   define NEED_ATOMICS_GENERIC64
