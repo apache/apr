@@ -63,6 +63,7 @@ exec_prefix=@exec_prefix@
 bindir=@bindir@
 libdir=@libdir@
 includedir=@includedir@
+datarootdir=@datarootdir@
 datadir=@datadir@
 installbuilddir=@installbuilddir@
 
