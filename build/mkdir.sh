@@ -27,7 +27,6 @@ for file in ${1+"$@"} ; do
                  continue ;;
         esac
         if test ! -d "$pathcomp"; then
-            echo "mkdir $pathcomp" 1>&2
             thiserrstatus=0
             mkdir "$pathcomp" || thiserrstatus=$?
             # ignore errors due to races if a parallel mkdir.sh already
