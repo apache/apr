@@ -264,8 +264,11 @@ case $host in
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
         # get libtool's setting of shlibpath_var
-        eval `grep "^shlibpath_var=[[A-Z_]]*$" $apr_builddir/libtool`
         if test "x$shlibpath_var" = "x"; then
+            eval `grep "^shlibpath_var=[[A-Z_]]*$" $apr_builddir/libtool`
+        fi
+        if test "x$shlibpath_var" = "x"; then
+            AC_MSG_NOTICE([SHLIBPATH variable could not be determined])
             shlibpath_var=REPLACE_WITH_YOUR_SHLIBPATH_VAR
         fi
     fi
