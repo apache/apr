@@ -197,6 +197,13 @@
 #endif
 #endif
 
+/* __APPLE__ is now the official pre-defined macro for macOS */
+#ifdef __APPLE__
+#undef DARWIN
+#undef DARWIN_10
+#define DARWIN
+#define DARWIN_10
+#endif /* __APPLE__ */
 
 #ifdef __cplusplus
 extern "C" {
