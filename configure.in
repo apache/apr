@@ -1841,13 +1841,17 @@ case $host in
         ;; 
 esac
 
-APR_CHECK_TYPES_COMPATIBLE(ssize_t, int, [ssize_t_fmt="d"])
-APR_CHECK_TYPES_COMPATIBLE(ssize_t, long, [ssize_t_fmt="ld"])
-APR_CHECK_TYPES_COMPATIBLE(size_t, unsigned int, [size_t_fmt="u"])
-APR_CHECK_TYPES_COMPATIBLE(size_t, unsigned long, [size_t_fmt="lu"])
+dnl I would expect much of the above to go away with new compile test
+APR_CHECK_TYPES_FMT_COMPATIBLE(ssize_t, long, ld, [ssize_t_fmt="ld"], [
+APR_CHECK_TYPES_FMT_COMPATIBLE(ssize_t, int, d, [ssize_t_fmt="d"])
+])
+APR_CHECK_TYPES_FMT_COMPATIBLE(size_t, unsigned long, lu, [size_t_fmt="lu"], [
+APR_CHECK_TYPES_FMT_COMPATIBLE(size_t, unsigned int, u, [size_t_fmt="u"])
+])
 
 APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], ssize_t, 8)
 
+dnl the else cases below should no longer occur;
 AC_MSG_CHECKING([which format to use for apr_ssize_t])
 if test -n "$ssize_t_fmt"; then
     AC_MSG_RESULT(%$ssize_t_fmt)
@@ -1865,6 +1869,7 @@ ssize_t_fmt="#define APR_SSIZE_T_FMT \"$ssize_t_fmt\""
 
 APR_CHECK_SIZEOF_EXTENDED([#include <stddef.h>], size_t, 8)
 
+# else cases below should no longer occur;
 AC_MSG_CHECKING([which format to use for apr_size_t])
 if test -n "$size_t_fmt"; then
     AC_MSG_RESULT(%$size_t_fmt)
