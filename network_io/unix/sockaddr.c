@@ -30,7 +30,7 @@
 #endif
 
 #if defined(HAVE_IF_INDEXTONAME) && defined(_MSC_VER)
-#include <Iphlpapi.h>
+#include "arch/win32/apr_arch_misc.h"
 #endif
 
 #define APR_WANT_STRFUNC
@@ -1252,7 +1252,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_zone_set(apr_sockaddr_t *sa,
             return APR_EGENERAL;
         }
 
-        sa->sa.sin6.sin6_scope_id = i;
+        sa->sa.sin6.sin6_scope_id = (unsigned int) i;
         return APR_SUCCESS;
     }
 #endif
