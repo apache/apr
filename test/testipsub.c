@@ -179,19 +179,23 @@ static void test_parse_addr_port(abts_case *tc, void *data)
         ,{ "www.example.com:8080", APR_SUCCESS, "www.example.com", NULL, 8080 }
         ,{ "w:1", APR_SUCCESS, "w", NULL, 1 }
         ,{ "127.0.0.1:80", APR_SUCCESS, "127.0.0.1", NULL, 80 }
+        ,{ "8080", APR_SUCCESS, NULL, NULL, 8080 } /* API doc has this case */
+#if APR_HAVE_IPV6
         ,{ "[::]:80", APR_SUCCESS, "::", NULL, 80 }
         ,{ "[::%eth0]:80", APR_SUCCESS, "::", "eth0", 80 }
         ,{ "[::%eth0]", APR_SUCCESS, "::", "eth0", 0 }
-        ,{ "8080", APR_SUCCESS, NULL, NULL, 8080 } /* API doc has this case */
+#endif
 
         /* Failure cases */
         ,{ "localhost:999999", APR_EINVAL, NULL, NULL, 0 }
         ,{ "localhost:0", APR_EINVAL, NULL, NULL, 0 }
+#if APR_HAVE_IPV6
         ,{ "[abc]", APR_EINVAL, NULL, NULL, 0 }
         ,{ "[::]z:80", APR_EINVAL, NULL, NULL, 0 }
         ,{ "[:::80", APR_EINVAL, NULL, NULL, 0 }
         ,{ "[zzzz]:80", APR_EINVAL, NULL, NULL, 0 }
         ,{ "[::%]:80", APR_EINVAL, NULL, NULL, 0 }
+#endif
 /*        ,{ "127.0.0.1:80x", APR_EINVAL, NULL, NULL, 0 }  <- should fail, doesn't  */
 /*        ,{ "127.0.0.1x:80", APR_EINVAL, NULL, NULL, 0 }  <- maybe should fail?, doesn't  */
 /*        ,{ "localhost:-1", APR_EINVAL, NULL, NULL, 0 }   <- should fail, doesn't */
