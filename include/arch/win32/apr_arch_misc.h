@@ -398,7 +398,7 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_IPHLPAPI, NET_IFINDEX, WINAPI, if_nametoindex, 0, 
 #undef if_indextoname
 #endif
 APR_DECLARE_LATE_DLL_FUNC(DLL_IPHLPAPI, PCHAR, NETIOAPI_API_, if_indextoname, 0, (
-    NET_IFINDEX InterfaceIndex
+    NET_IFINDEX InterfaceIndex,
     PCHAR       InterfaceName),
     (InterfaceIndex, InterfaceName));
 #define if_indextoname apr_winapi_if_indextoname
