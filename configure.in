@@ -1922,21 +1922,24 @@ elif test "${ac_cv_sizeof_off_t}x${ac_cv_sizeof_long}" = "4x4"; then
     off_t_fmt='#define APR_OFF_T_FMT "ld"'
     off_t_strfn='strtol'
 elif test "$ac_cv_type_off_t" = "yes"; then
-    off_t_value=off_t
     # off_t is more commonly a long than an int; prefer that case
-    # where int and long are the same size.
-    if test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long"; then
-        off_t_fmt='#define APR_OFF_T_FMT "ld"'
+    # where int and long are the same size and interchangable.
+    off_t_value=off_t
+    APR_CHECK_TYPES_FMT_COMPATIBLE(off_t, long, ld, [
+        off_t_fmt="#define APR_OFF_T_FMT \"ld\""
         off_t_strfn='strtol'
-    elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_int"; then
-        off_t_fmt='#define APR_OFF_T_FMT "d"'
+    ], [
+    APR_CHECK_TYPES_FMT_COMPATIBLE(off_t, int, d, [
+        off_t_fmt="#define APR_OFF_T_FMT \"d\""
         off_t_strfn='strtoi'
-    elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long_long"; then
-        off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
+    ], [
+    APR_CHECK_TYPES_FMT_COMPATIBLE(off_t, long long, lld, [
+        off_t_fmt="#define APR_OFF_T_FMT \"lld\""
         off_t_strfn='apr_strtoi64'
-    else
-        AC_ERROR([could not determine the size of off_t])
-    fi
+    ], [
+    APR_CHECK_TYPES_FMT_COMPATIBLE(off_t, $int64_value, I64d, [
+        off_t_fmt="#define APR_OFF_T_FMT APR_INT64_T_FMT"
+        off_t_strfn='apr_strtoi64'], [
     # Per OS tuning...
     case $host in
     *-mingw*)
@@ -1944,7 +1947,11 @@ elif test "$ac_cv_type_off_t" = "yes"; then
         off_t_fmt='#define APR_OFF_T_FMT "I64d"'
         off_t_strfn='_strtoi64'
         ;;
+    *)
+        AC_ERROR([could not determine the size of off_t])
+        ;;
     esac
+    ])])])])
 else
    # Fallback on int
    off_t_value=apr_int32_t
