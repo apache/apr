@@ -31,7 +31,6 @@
 
 #if defined(HAVE_IF_INDEXTONAME) && defined(_MSC_VER)
 #include <Iphlpapi.h>
-#pragma comment(lib, "Iphlpapi.lib")
 #endif
 
 #define APR_WANT_STRFUNC
