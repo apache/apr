@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Test %ld vs. %lld to avoid compiler emits using APR_OFF_T_FMT, in the
+     case of apparently equivilant long and long long types. [William Rowe] 
+
+  *) Recognize APPLE predefined macros as equivilant to DARWIN. [Jim Jagielski]
+
   *) Signals: Allow handling of SIGUSR2 in apr_signal_thread. [Yann Ylavic]
 
   *) Atomics: Support for 64bit ints. [Jim Jagielski]
