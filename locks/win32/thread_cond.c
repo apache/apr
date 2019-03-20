@@ -99,7 +99,7 @@ static APR_INLINE apr_status_t thread_cond_timedwait(apr_thread_cond_t *cond,
                     t = 0;
                 }
             }
-            res = WaitForSingleObject(mutex->handle, timeout_ms);
+            res = WaitForSingleObject(cond->semaphore, timeout_ms);
         } while (res == WAIT_TIMEOUT && t > 0);
 
         EnterCriticalSection(&cond->csection);
