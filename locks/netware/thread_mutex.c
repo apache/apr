@@ -115,7 +115,8 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
                                                  apr_interval_time_t timeout)
 {
     if (mutex->cond) {
-        apr_status_t rv;
+        apr_status_t rv = APR_SUCCESS;
+
         NXLock(mutex->mutex);
         if (mutex->locked) {
             if (timeout <= 0) {
@@ -123,13 +124,15 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
             }
             else {
                 mutex->num_waiters++;
-                rv = apr_thread_cond_timedwait(mutex->cond, mutex, timeout);
+                do {
+                    rv = apr_thread_cond_timedwait(mutex->cond, mutex,
+                                                   timeout);
+                } while (rv == APR_SUCCESS && mutex->locked);
                 mutex->num_waiters--;
             }
         }
-        else {
+        if (rv == APR_SUCCESS) {
             mutex->locked = 1;
-            rv = APR_SUCCESS;
         }
         NXUnlock(mutex->mutex);
         return rv;
@@ -140,25 +143,24 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 {
+    apr_status_t rv = APR_SUCCESS;
+
     if (mutex->cond) {
-        apr_status_t rv;
         NXLock(mutex->mutex);
+
         if (!mutex->locked) {
             rv = APR_EINVAL;
         }
         else if (mutex->num_waiters) {
             rv = apr_thread_cond_signal(mutex->cond);
         }
-        else {
+        if (rv == APR_SUCCESS) {
             mutex->locked = 0;
-            rv = APR_SUCCESS;
         }
-        NXUnlock(mutex->mutex);
-        return rv;
     }
 
     NXUnlock(mutex->mutex);
-    return APR_SUCCESS;
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex)
