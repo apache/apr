@@ -30,10 +30,9 @@ ENDIF()
 
 IF(EXPAT_FOUND)
   OPTION(APU_USE_EXPAT      "Use Expat"                    ON)
-  IF(LIBXML2_FOUND)
-    OPTION(APU_USE_LIBXML2  "Use LibXml2"                  OFF)
-  ENDIF()
+  OPTION(APU_USE_LIBXML2    "Use LibXml2"                  OFF)
 ELSE()
+  OPTION(APU_USE_EXPAT      "Use Expat"                    OFF)
   OPTION(APU_USE_LIBXML2    "Use LibXml2"                  ON)
 ENDIF()
 
