@@ -1958,7 +1958,7 @@ elif test "$ac_cv_type_off_t" = "yes"; then
     ], [
     APR_CHECK_TYPES_FMT_COMPATIBLE(off_t, long long, lld, [
         off_t_fmt="#define APR_OFF_T_FMT \"lld\""
-        off_t_strfn='apr_strtoi64'
+        off_t_strfn='strtoll'
     ], [
     APR_CHECK_TYPES_FMT_COMPATIBLE(off_t, $int64_value, I64d, [
         off_t_fmt="#define APR_OFF_T_FMT APR_INT64_T_FMT"
