@@ -262,6 +262,33 @@ int main(int argc, char **argv)
         exit(1);
     if (pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED))
         exit(2);
+    if (pthread_mutexattr_setrobust(&attr, PTHREAD_MUTEX_ROBUST))
+        exit(3);
+    if (pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT))
+        exit(4);
+    if (pthread_mutex_init(&mutex, &attr))
+        exit(5);
+    if (pthread_mutexattr_destroy(&attr))
+        exit(6);
+    if (pthread_mutex_destroy(&mutex))
+        exit(7);
+
+    exit(0);
+}], [apr_cv_mutex_robust_shared=yes], [
+AC_TRY_RUN([
+#include <sys/types.h>
+#include <pthread.h>
+#include <stdlib.h>
+
+int main(int argc, char **argv)
+{
+    pthread_mutex_t mutex;
+    pthread_mutexattr_t attr;
+
+    if (pthread_mutexattr_init(&attr))
+        exit(1);
+    if (pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED))
+        exit(2);
     if (pthread_mutexattr_setrobust_np(&attr, PTHREAD_MUTEX_ROBUST_NP))
         exit(3);
     if (pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT))
@@ -274,10 +301,14 @@ int main(int argc, char **argv)
         exit(7);
 
     exit(0);
-}], [apr_cv_mutex_robust_shared=yes], [apr_cv_mutex_robust_shared=no])])
+}], [apr_cv_mutex_robust_shared=np], [apr_cv_mutex_robust_shared=no])
+])])
 
 if test "$apr_cv_mutex_robust_shared" = "yes"; then
    AC_DEFINE([HAVE_PTHREAD_MUTEX_ROBUST], 1,
              [Define if cross-process robust mutexes are available])
+elif test "$apr_cv_mutex_robust_shared" = "np"; then
+   AC_DEFINE([HAVE_PTHREAD_MUTEX_ROBUST_NP], 1,
+             [Define if non-posix/portable cross-process robust mutexes are available])
 fi
 ])

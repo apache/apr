@@ -619,9 +619,13 @@ static apr_status_t proc_mutex_pthread_create(apr_proc_mutex_t *new_mutex,
         return rv;
     }
 
+#if defined(HAVE_PTHREAD_MUTEX_ROBUST) || defined(HAVE_PTHREAD_MUTEX_ROBUST_NP)
 #ifdef HAVE_PTHREAD_MUTEX_ROBUST
-    if ((rv = pthread_mutexattr_setrobust_np(&mattr, 
-                                               PTHREAD_MUTEX_ROBUST_NP))) {
+    rv = pthread_mutexattr_setrobust(&mattr, PTHREAD_MUTEX_ROBUST);
+#else
+    rv = pthread_mutexattr_setrobust_np(&mattr, PTHREAD_MUTEX_ROBUST_NP);
+#endif
+    if (rv) {
 #ifdef HAVE_ZOS_PTHREADS
         rv = errno;
 #endif
@@ -637,7 +641,7 @@ static apr_status_t proc_mutex_pthread_create(apr_proc_mutex_t *new_mutex,
         pthread_mutexattr_destroy(&mattr);
         return rv;
     }
-#endif /* HAVE_PTHREAD_MUTEX_ROBUST */
+#endif /* HAVE_PTHREAD_MUTEX_ROBUST[_NP] */
 
     if ((rv = pthread_mutex_init(&proc_pthread_mutex(new_mutex), &mattr))) {
 #ifdef HAVE_ZOS_PTHREADS
@@ -689,11 +693,15 @@ static apr_status_t proc_mutex_pthread_acquire_ex(apr_proc_mutex_t *mutex,
 #ifdef HAVE_ZOS_PTHREADS 
             rv = errno;
 #endif
-#ifdef HAVE_PTHREAD_MUTEX_ROBUST
+#if defined(HAVE_PTHREAD_MUTEX_ROBUST) || defined(HAVE_PTHREAD_MUTEX_ROBUST_NP)
             /* Okay, our owner died.  Let's try to make it consistent again. */
             if (rv == EOWNERDEAD) {
                 proc_pthread_mutex_dec(mutex);
+#ifdef HAVE_PTHREAD_MUTEX_ROBUST
+                pthread_mutex_consistent(&proc_pthread_mutex(mutex));
+#else
                 pthread_mutex_consistent_np(&proc_pthread_mutex(mutex));
+#endif
             }
             else
 #endif
@@ -801,11 +809,15 @@ static apr_status_t proc_mutex_pthread_acquire_ex(apr_proc_mutex_t *mutex,
             }
         }
         if (rv) {
-#ifdef HAVE_PTHREAD_MUTEX_ROBUST
+#if defined(HAVE_PTHREAD_MUTEX_ROBUST) || defined(HAVE_PTHREAD_MUTEX_ROBUST_NP)
             /* Okay, our owner died.  Let's try to make it consistent again. */
             if (rv == EOWNERDEAD) {
                 proc_pthread_mutex_dec(mutex);
+#ifdef HAVE_PTHREAD_MUTEX_ROBUST
+                pthread_mutex_consistent(&proc_pthread_mutex(mutex));
+#else
                 pthread_mutex_consistent_np(&proc_pthread_mutex(mutex));
+#endif
             }
             else
 #endif
@@ -847,11 +859,15 @@ static apr_status_t proc_mutex_pthread_release(apr_proc_mutex_t *mutex)
 #ifdef HAVE_ZOS_PTHREADS 
             rv = errno;
 #endif
-#ifdef HAVE_PTHREAD_MUTEX_ROBUST
+#if defined(HAVE_PTHREAD_MUTEX_ROBUST) || defined(HAVE_PTHREAD_MUTEX_ROBUST_NP)
             /* Okay, our owner died.  Let's try to make it consistent again. */
             if (rv == EOWNERDEAD) {
                 proc_pthread_mutex_dec(mutex);
+#ifdef HAVE_PTHREAD_MUTEX_ROBUST
+                pthread_mutex_consistent(&proc_pthread_mutex(mutex));
+#else
                 pthread_mutex_consistent_np(&proc_pthread_mutex(mutex));
+#endif
             }
             else
 #endif
