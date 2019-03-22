@@ -1401,7 +1401,8 @@ APR_FLAG_HEADERS(
     errno.h		\
     fcntl.h		\
     grp.h		\
-    ifaddrs.h           \
+    ifaddrs.h		\
+    inttypes.h		\
     io.h		\
     limits.h		\
     mach-o/dyld.h	\
@@ -1495,8 +1496,9 @@ AC_SUBST(crypth)
 AC_SUBST(errnoh)
 AC_SUBST(direnth)
 AC_SUBST(fcntlh)
-AC_SUBST(ioh)
 AC_SUBST(ifaddrsh)
+AC_SUBST(inttypesh)
+AC_SUBST(ioh)
 AC_SUBST(limitsh)
 AC_SUBST(mswsockh)
 AC_SUBST(netdbh)
@@ -1594,9 +1596,9 @@ fi
 
 dnl Checks for integer size
 AC_CHECK_SIZEOF(char, 1)
+AC_CHECK_SIZEOF(short, 2)
 AC_CHECK_SIZEOF(int, 4)
 AC_CHECK_SIZEOF(long, 4)
-AC_CHECK_SIZEOF(short, 2)
 AC_CHECK_SIZEOF(long long, 8)
 
 if test "$ac_cv_sizeof_short" = "2"; then
@@ -1605,16 +1607,37 @@ fi
 if test "$ac_cv_sizeof_int" = "4"; then
     int_value=int
 fi
+
 # Now we need to find what apr_int64_t (sizeof == 8) will be.
-# The first match is our preference.
-if test "$ac_cv_sizeof_int" = "8"; then
+# The first match is our preference (use inttypes if available).
+APR_IFALLYES(header:stdint.h header:inttypes.h, hasinttypes="1", hasinttypes="0")
+if test "$hasinttypes" = "1"; then
+    int64_literal='#define APR_INT64_C(val) INT64_C(val)'
+    uint64_literal='#define APR_UINT64_C(val) UINT64_C(val)'
+    int64_t_fmt='#define APR_INT64_T_FMT PRId64'
+    uint64_t_fmt='#define APR_UINT64_T_FMT PRIu64'
+    uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT PRIx64'
+    int64_value="int64_t"
+    uint64_value="uint64_t"
+    APR_CHECK_TYPES_FMT_COMPATIBLE(int64_t, int, d, [
+        int64_strfn="strtoi"
+    ], [
+    APR_CHECK_TYPES_FMT_COMPATIBLE(int64_t, long, ld, [
+        int64_strfn="strtol"
+    ], [
+    APR_CHECK_TYPES_FMT_COMPATIBLE(int64_t, long long, lld, [
+        int64_strfn="strtoll"
+    ], [
+        AC_ERROR([could not determine the string function for int64_t])
+    ])])])
+elif test "$ac_cv_sizeof_int" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val)'
     uint64_literal='#define APR_UINT64_C(val) (val##U)'
     int64_t_fmt='#define APR_INT64_T_FMT "d"'
     uint64_t_fmt='#define APR_UINT64_T_FMT "u"'
     uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "x"'
     int64_value="int"
-    long_value=int
+    uint64_value="unsigned int"
     int64_strfn="strtoi"
 elif test "$ac_cv_sizeof_long" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val##L)'
@@ -1623,7 +1646,7 @@ elif test "$ac_cv_sizeof_long" = "8"; then
     uint64_t_fmt='#define APR_UINT64_T_FMT "lu"'
     uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "lx"'
     int64_value="long"
-    long_value=long
+    uint64_value="unsigned long"
     int64_strfn="strtol"
 elif test "$ac_cv_sizeof_long_long" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val##LL)'
@@ -1636,7 +1659,7 @@ elif test "$ac_cv_sizeof_long_long" = "8"; then
     uint64_t_fmt='#define APR_UINT64_T_FMT "llu"'
     uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "llx"'
     int64_value="long long"
-    long_value="long long"
+    uint64_value="unsigned long long"
     int64_strfn="strtoll"
 elif test "$ac_cv_sizeof_longlong" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val##LL)'
@@ -1645,7 +1668,7 @@ elif test "$ac_cv_sizeof_longlong" = "8"; then
     uint64_t_fmt='#define APR_UINT64_T_FMT "qu"'
     uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "qx"'
     int64_value="__int64"
-    long_value="__int64"
+    uint64_value="unsigned __int64"
     int64_strfn="strtoll"
 else
     # int64_literal may be overriden if your compiler thinks you have
@@ -1763,7 +1786,7 @@ case $host in
         uint64_t_fmt='#define APR_UINT64_T_FMT "I64u"'
         uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "I64x"'
         int64_value="__int64"
-        long_value="__int64"
+        uint64_value="unsigned __int64"
         int64_strfn="_strtoi64"
         ;;
 esac
@@ -1943,8 +1966,8 @@ fi
 AC_SUBST(voidp_size)
 AC_SUBST(short_value)
 AC_SUBST(int_value)
-AC_SUBST(long_value)
 AC_SUBST(int64_value)
+AC_SUBST(uint64_value)
 AC_SUBST(off_t_value)
 AC_SUBST(size_t_value)
 AC_SUBST(ssize_t_value)
