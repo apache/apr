@@ -78,7 +78,10 @@ static void test_encode_base64_binary(abts_case * tc, void *data)
 {
     apr_pool_t *pool;
     const char *target;
-    const unsigned char *usrc;
+    const unsigned char usrc_empty[] = { },
+                        usrc_f[] = { 'f' },
+                        usrc_fo[] = { 'f', 'o' },
+                        usrc_foo[] = { 'f', 'o', 'o' };
     const char *dest;
     apr_size_t len;
 
@@ -87,52 +90,32 @@ static void test_encode_base64_binary(abts_case * tc, void *data)
     /*
      * Test vectors from https://tools.ietf.org/html/rfc4648#section-10
      */
-    usrc = (unsigned char[]){
-    };
     target = "";
-    dest = apr_pencode_base64_binary(pool, usrc, 0, APR_ENCODE_NONE, &len);
+    dest = apr_pencode_base64_binary(pool, usrc_empty, 0, APR_ENCODE_NONE, &len);
     ABTS_STR_EQUAL(tc, target, dest);
 
-    usrc = (unsigned char[]){
-        'f'
-    };
     target = "Zg==";
-    dest = apr_pencode_base64_binary(pool, usrc, 1, APR_ENCODE_NONE, &len);
+    dest = apr_pencode_base64_binary(pool, usrc_f, 1, APR_ENCODE_NONE, &len);
     ABTS_STR_EQUAL(tc, target, dest);
 
-    usrc = (unsigned char[]){
-        'f'
-    };
     target = "Zg";
-    dest = apr_pencode_base64_binary(pool, usrc, 1, APR_ENCODE_NOPADDING, &len);
+    dest = apr_pencode_base64_binary(pool, usrc_f, 1, APR_ENCODE_NOPADDING, &len);
     ABTS_STR_EQUAL(tc, target, dest);
 
-    usrc = (unsigned char[]){
-        'f', 'o'
-    };
     target = "Zm8=";
-    dest = apr_pencode_base64_binary(pool, usrc, 2, APR_ENCODE_NONE, &len);
+    dest = apr_pencode_base64_binary(pool, usrc_fo, 2, APR_ENCODE_NONE, &len);
     ABTS_STR_EQUAL(tc, target, dest);
 
-    usrc = (unsigned char[]){
-        'f', 'o'
-    };
     target = "Zm8";
-    dest = apr_pencode_base64_binary(pool, usrc, 2, APR_ENCODE_NOPADDING, &len);
+    dest = apr_pencode_base64_binary(pool, usrc_fo, 2, APR_ENCODE_NOPADDING, &len);
     ABTS_STR_EQUAL(tc, target, dest);
 
-    usrc = (unsigned char[]){
-        'f', 'o', 'o'
-    };
     target = "Zm9v";
-    dest = apr_pencode_base64_binary(pool, usrc, 3, APR_ENCODE_NONE, &len);
+    dest = apr_pencode_base64_binary(pool, usrc_foo, 3, APR_ENCODE_NONE, &len);
     ABTS_STR_EQUAL(tc, target, dest);
 
-    usrc = (unsigned char[]){
-        'f', 'o', 'o'
-    };
     target = "Zm9v";
-    dest = apr_pencode_base64_binary(pool, usrc, 3, APR_ENCODE_NOPADDING, &len);
+    dest = apr_pencode_base64_binary(pool, usrc_foo, 3, APR_ENCODE_NOPADDING, &len);
     ABTS_STR_EQUAL(tc, target, dest);
 
     apr_pool_destroy(pool);
