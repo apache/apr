@@ -2349,6 +2349,14 @@ APR_IFALLYES(func:semget func:semctl func:semop define:SEM_UNDO,
             APR_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
 APR_IFALLYES(header:OS.h func:create_sem func:acquire_sem func:acquire_sem_etc, 
             APR_DECIDE(USE_BEOSSEM, [BeOS Semaphores])) 
+# pthread mutex both pshared and robust[_np] is the best default
+case "$apr_cv_mutex_robust_shared" in
+"yes"|"np")
+    APR_DECIDE(USE_PROC_PTHREAD_SERIALIZE, [pthread pshared mutex]) 
+    ;;
+*)
+    ;;
+esac
 if test "x$apr_lock_method" != "x"; then
     APR_DECISION_FORCE($apr_lock_method)
 fi
