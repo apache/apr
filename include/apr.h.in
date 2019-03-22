@@ -96,6 +96,7 @@
 #define APR_HAVE_STDLIB_H        @stdlibh@
 #define APR_HAVE_STRING_H        @stringh@
 #define APR_HAVE_STRINGS_H       @stringsh@
+#define APR_HAVE_INTTYPES_H      @inttypesh@
 #define APR_HAVE_SYS_IOCTL_H     @sys_ioctlh@
 #define APR_HAVE_SYS_SENDFILE_H  @sys_sendfileh@
 #define APR_HAVE_SYS_SIGNAL_H    @sys_signalh@
@@ -194,6 +195,10 @@
 
 #if APR_HAVE_STDINT_H
 #include <stdint.h>
+#endif
+
+#if APR_HAVE_INTTYPES_H
+#include <inttypes.h>
 #endif
 
 #if APR_HAVE_SYS_WAIT_H
@@ -376,8 +381,8 @@ typedef  unsigned @int_value@    apr_uint32_t;
  #define UINT64_C(v)  (v ## ULL)
 #endif
 #else
- typedef  @long_value@            apr_int64_t;
- typedef  unsigned @long_value@   apr_uint64_t;
+ typedef  @int64_value@           apr_int64_t;
+ typedef  @uint64_value@          apr_uint64_t;
 #endif
 
 typedef  @size_t_value@          apr_size_t;
