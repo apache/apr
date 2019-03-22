@@ -985,7 +985,11 @@ AC_DEFUN([APR_CHECK_TYPES_FMT_COMPATIBLE], [
 define([apr_cvname], apr_cv_typematch_[]translit([$1], [ ], [_])_[]translit([$2], [ ], [_])_[][$3])
 AC_CACHE_CHECK([whether $1 and $2 use fmt %$3], apr_cvname, [
 APR_TRY_COMPILE_NO_WARNING([#include <sys/types.h>
-#include <stdio.h>], [
+#include <stdio.h>
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+], [
     $1 chk1, *ptr1;
     $2 chk2, *ptr2 = &chk1;
     ptr1 = &chk2;
