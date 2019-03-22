@@ -365,24 +365,28 @@ typedef  unsigned @int_value@    apr_uint32_t;
  */
 #ifdef DARWIN_10
 #undef APR_SIZEOF_VOIDP
-#undef INT64_C
-#undef UINT64_C
+#undef APR_INT64_C
+#undef APR_UINT64_C
 #ifdef __LP64__
  typedef  long            apr_int64_t;
  typedef  unsigned long   apr_uint64_t;
  #define APR_SIZEOF_VOIDP     8
- #define INT64_C(v)   (v ## L)
- #define UINT64_C(v)  (v ## UL)
+ #define APR_INT64_C(v)   (v ## L)
+ #define APR_UINT64_C(v)  (v ## UL)
 #else
  typedef  long long            apr_int64_t;
  typedef  unsigned long long   apr_uint64_t;
  #define APR_SIZEOF_VOIDP     4
- #define INT64_C(v)   (v ## LL)
- #define UINT64_C(v)  (v ## ULL)
+ #define APR_INT64_C(v)   (v ## LL)
+ #define APR_UINT64_C(v)  (v ## ULL)
 #endif
 #else
  typedef  @int64_value@           apr_int64_t;
  typedef  @uint64_value@          apr_uint64_t;
+
+ /* Mechanisms to properly type numeric literals */
+ @int64_literal@
+ @uint64_literal@
 #endif
 
 typedef  @size_t_value@          apr_size_t;
@@ -401,10 +405,6 @@ typedef  apr_int32_t             apr_intptr_t;
 
 /* Are we big endian? */
 #define APR_IS_BIGENDIAN        @bigendian@
-
-/* Mechanisms to properly type numeric literals */
-@int64_literal@
-@uint64_literal@
 
 #ifdef INT16_MIN
 #define APR_INT16_MIN   INT16_MIN
