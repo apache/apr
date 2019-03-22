@@ -188,19 +188,21 @@
 #endif
 
 #if APR_HAVE_STDINT_H
-#if defined(__cplusplus) && !defined(__STDC_CONSTANT_MACROS)
+#ifdef __cplusplus
 /* C99 7.18.4 requires that stdint.h only exposes INT64_C 
  * and UINT64_C for C++ implementations if this is defined: */
+#ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS
 #endif
+/* C++ needs this too for PRI*NN formats: */
+#ifndef __STDC_FORMAT_MACROS
+#define __STDC_FORMAT_MACROS
+#endif
+#endif /* __cplusplus */
 #include <stdint.h>
 #endif
 
 #if APR_HAVE_INTTYPES_H
-#if defined(__cplusplus) && !defined(__STDC_FORMAT_MACROS)
-/* C++ may need this for PRI*NN formats: */
-#define __STDC_FORMAT_MACROS
-#endif
 #include <inttypes.h>
 #endif
 
