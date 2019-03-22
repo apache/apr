@@ -975,8 +975,8 @@ AC_SUBST(MKDEP)
 ])
 
 dnl
-dnl APR_CHECK_TYPES_COMPATIBLE(TYPE-1, TYPE-2, FMT-TAG, 
-dnl                            [ACTION-IF-TRUE], [ACTION-IF-FALSE])
+dnl APR_CHECK_TYPES_FMT_COMPATIBLE(TYPE-1, TYPE-2, FMT-TAG, 
+dnl                                [ACTION-IF-TRUE], [ACTION-IF-FALSE])
 dnl
 dnl Try to determine whether two types are the same and accept the given
 dnl printf formatter (bare token, e.g. literal d, ld, etc).
@@ -995,9 +995,14 @@ APR_TRY_COMPILE_NO_WARNING([#include <sys/types.h>
     ptr1 = &chk2;
     *ptr1 = *ptr2 = 0;
     printf("%$3 %$3", chk1, chk2);
-], [apr_cvname=yes
-$4], [apr_cvname=no
-$5])])
+], [apr_cvname=yes], [apr_cvname=no])])
+if test "$apr_cvname" = "yes"; then
+    :
+    $4
+else
+    :
+    $5
+fi
 ])
 
 dnl
