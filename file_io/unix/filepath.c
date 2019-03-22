@@ -135,10 +135,10 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
          */
         char *getpath;
         rv = apr_filepath_get(&getpath, flags, p);
-        rootpath = getpath;
         if (rv != APR_SUCCESS)
             return errno;
 
+        rootpath = getpath;
         /* XXX: Any kernel subject to goofy, uncanonical results
          * must run the rootpath against the user's given flags.
          * Simplest would be a recursive call to apr_filepath_merge
