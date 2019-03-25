@@ -24,6 +24,10 @@
 #include <limits.h>
 #endif
 
+#ifndef NAME_MAX
+#define NAME_MAX 255
+#endif
+
 static apr_status_t dir_cleanup(void *thedir)
 {
     apr_dir_t *dir = thedir;
@@ -78,7 +82,7 @@ apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname,
      */
     apr_size_t dirent_size = 
         sizeof(*(*new)->entry) +
-        (sizeof((*new)->entry->d_name) > 1 ? 0 : 255);
+        (sizeof((*new)->entry->d_name) > 1 ? 0 : NAME_MAX);
     DIR *dir = opendir(dirname);
 
     if (!dir) {
