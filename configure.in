@@ -855,6 +855,7 @@ if test "$threads" = "1"; then
             dnl readdir_r() may exist but be deprecated, meaning
             dnl the readdir() itself is thread-safe
             APR_TRY_COMPILE_NO_WARNING([
+                #include <sys/types.h>
                 #include <dirent.h>
             ],
             [
