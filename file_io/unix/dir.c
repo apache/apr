@@ -138,9 +138,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     apr_filetype_e type;
 #endif
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
-                    && !defined(READDIR_IS_THREAD_SAFE) \
-                    && (defined(APR_USE_READDIR64_R) \
-                        || defined(APR_USE_READDIR_R))
+                    && !defined(READDIR_IS_THREAD_SAFE)
 #ifdef APR_USE_READDIR64_R
     struct dirent64 *retent;
 
