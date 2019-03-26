@@ -215,6 +215,10 @@ SOURCE=.\testenv.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testenv.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\testfile.c
 # End Source File
 # Begin Source File
