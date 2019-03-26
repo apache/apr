@@ -86,8 +86,7 @@ MAKEOPT=-s -N
 !ENDIF
 
 
-all: buildall 
-# checkall
+all: buildall checkall
 
 !IF $(USEMAK) == 1
 
