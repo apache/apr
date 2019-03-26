@@ -99,7 +99,7 @@ ALL_TESTS = $(INTDIR)\testutil.obj $(INTDIR)\testtime.obj \
 	$(INTDIR)\teststrnatcmp.obj $(INTDIR)\testfilecopy.obj \
 	$(INTDIR)\testtemp.obj $(INTDIR)\testlfs.obj \
 	$(INTDIR)\testcond.obj $(INTDIR)\testescape.obj \
-	$(INTDIR)\testskiplist.obj
+	$(INTDIR)\testskiplist.obj $(INTDIR)\testencode.obj
 
 CLEAN_DATA = testfile.tmp lfstests\large.bin \
 	data\testputs.txt data\testbigfprintf.dat \
@@ -138,7 +138,7 @@ DEBUG_CFLAGS = /MDd
 DEBUG_CFLAGS = /MD 
 !ENDIF
 
-INCLUDES=/I "$(INCDIR)"
+INCLUDES=/I "$(INCDIR)" /I "$(INCDIR)/private"
 
 CFLAGS = /nologo /c /W3 /Gm /EHsc /Zi /Od $(INCLUDES) \
 	 $(STATIC_CFLAGS) $(DEBUG_CFLAGS) /D "BINPATH=$(OUTDIR:\=/)" \
