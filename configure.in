@@ -817,31 +817,8 @@ ac_cv_define_GETSERVBYNAME_IS_THREAD_SAFE=no
 if test "$threads" = "1"; then
     echo "APR will use threads"
     AC_CHECK_LIB(c_r, readdir,
-                 apr_readdir_is_thread_safe=yes)
-    if test "x$apr_readdir_is_thread_safe" = "x"; then
-        AC_CHECK_HEADERS(dirent.h)
-        AC_CHECK_FUNCS(readdir_r)
-        APR_IFALLYES(header:dirent.h func:readdir_r,
-                     apr_has_readdir_r="1", apr_has_readdir_r="0")
-        if test "$apr_has_readdir_r" = "1"; then
-            dnl readdir_r() may exist but be deprecated, meaning
-            dnl the readdir() itself is thread-safe
-            APR_TRY_COMPILE_NO_WARNING([
-                #include <sys/types.h>
-                #include <dirent.h>
-            ],
-            [
-                DIR *dir = opendir("/tmp");
-                struct dirent entry, *result;
-                return readdir_r(dir, &entry, &result) != 0;
-            ], apr_readdir_is_thread_safe=no, apr_readdir_is_thread_safe=yes)
-        fi
-    fi
-    if test "$apr_readdir_is_thread_safe" = "yes"; then
-        AC_MSG_NOTICE([APR will use thread-safe readdir()])
         AC_DEFINE(READDIR_IS_THREAD_SAFE, 1, 
-                  [Define if readdir is thread safe])
-    fi
+                  [Define if readdir is thread safe]))
     if test "x$apr_gethostbyname_is_thread_safe" = "x"; then
         AC_CHECK_LIB(c_r, gethostbyname, apr_gethostbyname_is_thread_safe=yes)
     fi

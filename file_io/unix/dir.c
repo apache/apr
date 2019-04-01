@@ -188,10 +188,9 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         ret = APR_ENOENT;
     }
 #else
-    /* We're about to call readdir() that may possibly set errno, and the
-     * logic below actually cares about errno after the call.  Therefore
-     * we need to clear errno first.
-     */
+    /* We're about to call a non-thread-safe readdir() that may
+       possibly set `errno', and the logic below actually cares about
+       errno after the call.  Therefore we need to clear errno first. */
     errno = 0;
     thedir->entry = readdir(thedir->dirstruct);
     if (thedir->entry == NULL) {
