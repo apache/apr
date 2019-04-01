@@ -838,15 +838,13 @@ else
     fi
 fi
 
-ac_cv_define_READDIR_IS_THREAD_SAFE=no
+ac_cv_define_READDIR_IS_THREAD_SAFE=yes
 ac_cv_define_GETHOSTBYNAME_IS_THREAD_SAFE=no
 ac_cv_define_GETHOSTBYADDR_IS_THREAD_SAFE=no
 ac_cv_define_GETSERVBYNAME_IS_THREAD_SAFE=no
 if test "$threads" = "1"; then
     AC_MSG_NOTICE([APR will use threads])
-    AC_CHECK_LIB(c_r, readdir,
-        AC_DEFINE(READDIR_IS_THREAD_SAFE, 1, 
-                  [Define if readdir is thread safe]))
+    AC_DEFINE(READDIR_IS_THREAD_SAFE, 1, [Modern readdir is thread safe])
     if test "x$apr_gethostbyname_is_thread_safe" = "x"; then
         AC_CHECK_LIB(c_r, gethostbyname, apr_gethostbyname_is_thread_safe=yes)
     fi
