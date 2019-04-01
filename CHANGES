@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.0
 
+  *) apr_dir_read: [Unix] Dropped the preference of the dirread_r() flavor
+     for dirread(), because the former is both deprecated and unneeded.
+     [Yann Ylavic, William Rowe]
+
   *) apr_file_info: [Win32 only] Treat only "name surrogate" reparse points
      as symlinks, and not other reparse tag types. PR47630
      [Oleg Liatte <olegliatte gmail.com>]
