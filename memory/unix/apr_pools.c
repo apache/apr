@@ -407,7 +407,7 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
         return NULL;
     }
 #endif
-    node->index = index;
+    node->index = (apr_uint32_t)index;
     node->endp = (char *)node + size;
 
 have_node:
@@ -877,7 +877,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t in_size)
     free_index = (APR_ALIGN(active->endp - active->first_avail + 1,
                             BOUNDARY_SIZE) - BOUNDARY_SIZE) >> BOUNDARY_INDEX;
 
-    active->free_index = free_index;
+    active->free_index = (apr_uint32_t)free_index;
     node = active->next;
     if (free_index >= node->free_index)
         goto have_mem;
@@ -1289,7 +1289,7 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
         free_index = (APR_ALIGN(active->endp - active->first_avail + 1,
                                 BOUNDARY_SIZE) - BOUNDARY_SIZE) >> BOUNDARY_INDEX;
 
-        active->free_index = free_index;
+        active->free_index = (apr_uint32_t)free_index;
         node = active->next;
         if (free_index < node->free_index) {
             do {
@@ -1445,7 +1445,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     free_index = (APR_ALIGN(active->endp - active->first_avail + 1,
                             BOUNDARY_SIZE) - BOUNDARY_SIZE) >> BOUNDARY_INDEX;
 
-    active->free_index = free_index;
+    active->free_index = (apr_uint32_t)free_index;
     node = active->next;
 
     if (free_index >= node->free_index) {
