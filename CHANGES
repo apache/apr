@@ -1,4 +1,25 @@
                                                      -*- coding: utf-8 -*-
+Changes for APR 1.6.6
+
+
+
+Changes for APR 1.6.5
+
+  *) Fix Win32 build breakage in apr_os_exp_time_put() in 1.6.4. [Rainer Jung]
+     
+Changes for APR 1.6.4 (not released)
+
+  *) configure: Fix detection of <net/if.h> on OpenBSD.
+     PR 61976. [David Carlier <devnexen gmail.com>, Yann Ylavic]
+
+  *) Fix apr_parse_addr_port() regression in scope_id parsing introduced
+     in 1.6.3.  [Rainer Jung]
+
+  *) Fix Win32 file buffer locking behavior for single threaded file streams.
+     [Evgeny Kotkov, Mladen Turk, Jean-Frederic Clere]
+
+  *) Numerous corrections to APR poll behavior. [Yann Ylavic]
+
 Changes for APR 1.6.3
 
   *) apr_file_trunc: Truncating a buffered file could add unexpected

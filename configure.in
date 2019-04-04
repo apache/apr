@@ -272,8 +272,8 @@ AC_PROG_LIBTOOL
     ;;
 esac
 
-AC_ARG_WITH(installbuilddir, [  --with-installbuilddir=DIR location to store APR build files (defaults to '${datadir}/build')],
-  [ installbuilddir=$withval ], [ installbuilddir="${datadir}/build-${APR_MAJOR_VERSION}" ] )
+AC_ARG_WITH(installbuilddir, [  --with-installbuilddir=DIR location to store APR build files],
+  [ installbuilddir=$withval ] )
 AC_SUBST(installbuilddir)
 
 AC_ARG_WITH(libtool, [  --without-libtool       avoid using libtool to link the library],
@@ -1162,7 +1162,15 @@ case $host in
 #endif";;
 esac
 
-AC_CHECK_HEADERS([sys/types.h sys/mman.h sys/ipc.h sys/mutex.h sys/shm.h sys/file.h kernel/OS.h os2.h windows.h])
+AC_CHECK_HEADERS([sys/types.h sys/mman.h sys/ipc.h sys/mutex.h \
+                  sys/shm.h sys/file.h sys/socket.h kernel/OS.h os2.h windows.h])
+AC_CHECK_HEADERS([net/if.h],[],[],
+[
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#include <net/if.h>
+])
 AC_CHECK_FUNCS([mmap munmap shm_open shm_unlink shmget shmat shmdt shmctl \
                 create_area mprotect])
 

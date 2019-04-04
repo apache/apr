@@ -10,7 +10,11 @@
 
 
 import os
-import ConfigParser
+try:
+  import configparser
+except ImportError:
+  import ConfigParser as configparser
+import codecs
 import getopt
 import string
 import glob
@@ -36,7 +40,7 @@ MAKE_PLATFORMS = [
 
 
 def main():
-  parser = ConfigParser.ConfigParser()
+  parser = configparser.ConfigParser()
   parser.read('build.conf')
 
   if parser.has_option('options', 'dsp'):
@@ -62,7 +66,7 @@ def main():
   # write out the platform-independent files
   files = get_files(parser.get('options', 'paths'))
   objects, dirs = write_objects(f, legal_deps, h_deps, files)
-  f.write('\nOBJECTS_all = %s\n\n' % string.join(objects))
+  f.write('\nOBJECTS_all = %s\n\n' % " ".join(objects))
 
   # for each platform and each subdirectory holding platform-specific files,
   # write out their compilation rules, and an OBJECT_<subdir>_<plat> symbol.
@@ -86,11 +90,11 @@ def main():
           inherit_files[-1] = inherit_files[-1][:-2] + '.lo'
           # replace the \\'s with /'s
           inherit_line = '/'.join(inherit_files)
-          if not inherit_parent.has_key(inherit_files[0]):
+          if inherit_files[0] not in inherit_parent:
             inherit_parent[inherit_files[0]] = []
           inherit_parent[inherit_files[0]].append(inherit_line)
 
-    for subdir in string.split(parser.get('options', 'platform_dirs')):
+    for subdir in parser.get('options', 'platform_dirs').split():
       path = '%s/%s' % (subdir, platform)
       if not os.path.exists(path):
         # this subdir doesn't have a subdir for this platform, so we'll
@@ -106,7 +110,7 @@ def main():
       files = get_files(path + '/*.c')
       objects, _unused = write_objects(f, legal_deps, h_deps, files)
 
-      if inherit_parent.has_key(subdir):
+      if subdir in inherit_parent:
         objects = objects + inherit_parent[subdir]
 
       symname = 'OBJECTS_%s_%s' % (subdir, platform)
@@ -114,7 +118,7 @@ def main():
       objects.sort()
 
       # and write the symbol for the whole group
-      f.write('\n%s = %s\n\n' % (symname, string.join(objects)))
+      f.write('\n%s = %s\n\n' % (symname, " ".join(objects)))
 
       # and include that symbol in the group
       group.append('$(%s)' % symname)
@@ -122,18 +126,18 @@ def main():
     group.sort()
 
     # write out a symbol which contains the necessary files
-    f.write('OBJECTS_%s = %s\n\n' % (platform, string.join(group)))
+    f.write('OBJECTS_%s = %s\n\n' % (platform, " ".join(group)))
 
-  f.write('HEADERS = $(top_srcdir)/%s\n\n' % string.join(headers, ' $(top_srcdir)/'))
-  f.write('SOURCE_DIRS = %s $(EXTRA_SOURCE_DIRS)\n\n' % string.join(dirs.keys()))
+  f.write('HEADERS = $(top_srcdir)/%s\n\n' % ' $(top_srcdir)/'.join(headers))
+  f.write('SOURCE_DIRS = %s $(EXTRA_SOURCE_DIRS)\n\n' % " ".join(dirs.keys()))
 
   if parser.has_option('options', 'modules'):
     modules = parser.get('options', 'modules')
 
-    for mod in string.split(modules):
+    for mod in modules.split():
       files = get_files(parser.get(mod, 'paths'))
       objects, _unused = write_objects(f, legal_deps, h_deps, files)
-      flat_objects = string.join(objects)
+      flat_objects = " ".join(objects)
       f.write('OBJECTS_%s = %s\n' % (mod, flat_objects))
 
       if parser.has_option(mod, 'target'):
@@ -153,9 +157,9 @@ def main():
       d = os.path.dirname(d)
 
   # Sort so 'foo' is before 'foo/bar'
-  keys = alldirs.keys()
+  keys = list(alldirs.keys())
   keys.sort()
-  f.write('BUILD_DIRS = %s\n\n' % string.join(keys))
+  f.write('BUILD_DIRS = %s\n\n' % " ".join(keys))
 
   f.write('.make.dirs: $(srcdir)/build-outputs.mk\n' \
           '\t@for d in $(BUILD_DIRS); do test -d $$d || mkdir $$d; done\n' \
@@ -177,12 +181,12 @@ def write_objects(f, legal_deps, h_deps, files):
 
     # what headers does this file include, along with the implied headers
     deps = extract_deps(file, legal_deps)
-    for hdr in deps.keys():
+    for hdr in list(deps.keys()):
       deps.update(h_deps.get(hdr, {}))
 
-    vals = deps.values()
+    vals = list(deps.values())
     vals.sort()
-    f.write('%s: %s .make.dirs %s\n' % (obj, file, string.join(vals)))
+    f.write('%s: %s .make.dirs %s\n' % (obj, file, " ".join(vals)))
 
   objects.sort()
 
@@ -192,7 +196,7 @@ def write_objects(f, legal_deps, h_deps, files):
 def extract_deps(fname, legal_deps):
   "Extract the headers this file includes."
   deps = { }
-  for line in open(fname).readlines():
+  for line in codecs.open(fname, 'r', 'utf-8').readlines():
     if line[:8] != '#include':
       continue
     inc = _re_include.match(line).group(1)
@@ -210,7 +214,7 @@ def resolve_deps(header_deps):
     for hdr, deps in header_deps.items():
       # print hdr, deps
       start = len(deps)
-      for dep in deps.keys():
+      for dep in list(deps.keys()):
         deps.update(header_deps.get(dep, {}))
       if len(deps) != start:
         altered = 1
@@ -220,7 +224,7 @@ def clean_path(path):
 
 def get_files(patterns):
   files = [ ]
-  for pat in string.split(patterns):
+  for pat in patterns.split():
     files.extend(map(clean_path, glob.glob(pat)))
   files.sort()
   return files

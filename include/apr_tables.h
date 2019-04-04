@@ -179,7 +179,7 @@ APR_DECLARE(void) apr_array_cat(apr_array_header_t *dst,
  * @param p The pool to allocate the copy of the array out of
  * @param arr The array to copy
  * @return An exact copy of the array passed in
- * @remark The alternate apr_array_copy_hdr copies only the header, and arranges 
+ * @remark The alternate apr_array_copy_hdr() copies only the header, and arranges 
  *         for the elements to be copied if (and only if) the code subsequently
  *         does a push or arraycat.
  */
@@ -191,7 +191,7 @@ APR_DECLARE(apr_array_header_t *) apr_array_copy(apr_pool_t *p,
  * @param p The pool to allocate the copy of the array out of
  * @param arr The array to copy
  * @return An exact copy of the array passed in
- * @remark The alternate apr_array_copy copies the *entire* array.
+ * @remark The alternate apr_array_copy() copies the *entire* array.
  */
 APR_DECLARE(apr_array_header_t *) apr_array_copy_hdr(apr_pool_t *p,
                                       const apr_array_header_t *arr);
@@ -318,7 +318,7 @@ APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key);
  * @param t The table to search for the data
  * @param key The key to merge data for (case does not matter)
  * @param val The data to add
- * @remark If the key is not found, then this function acts like apr_table_add
+ * @remark If the key is not found, then this function acts like apr_table_add()
  */
 APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
                                   const char *val);
@@ -330,7 +330,7 @@ APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
  * @param t The table to search for the data
  * @param key The key to merge data for (case does not matter)
  * @param val The data to add
- * @remark If the key is not found, then this function acts like apr_table_addn
+ * @remark If the key is not found, then this function acts like apr_table_addn()
  */
 APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
                                    const char *val);
