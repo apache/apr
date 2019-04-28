@@ -280,6 +280,9 @@ SET(APR_SOURCES
   jose/apr_jose.c
   jose/apr_jose_decode.c
   jose/apr_jose_encode.c
+  json/apr_json.c
+  json/apr_json_decode.c
+  json/apr_json_encode.c
   hooks/apr_hooks.c
   locks/win32/proc_mutex.c
   locks/win32/thread_cond.c
