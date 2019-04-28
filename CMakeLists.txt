@@ -224,6 +224,7 @@ SET(APR_PUBLIC_HEADERS_GENERATED
 
 SET(APR_SOURCES
   atomic/win32/apr_atomic.c
+  atomic/win32/apr_atomic64.c
   buckets/apr_brigade.c
   buckets/apr_buckets.c
   buckets/apr_buckets_alloc.c
