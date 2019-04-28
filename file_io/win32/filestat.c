@@ -272,7 +272,7 @@ static int reparse_point_is_link(WIN32_FILE_ATTRIBUTE_DATA *wininfo,
 
     // Test "Name surrogate bit" to detect any kind of symbolic link
     // See https://docs.microsoft.com/en-us/windows/desktop/fileio/reparse-point-tags
-    return tag & 0x20000000;
+    return IsReparseTagNameSurrogate(tag);
 }
 
 apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, 
