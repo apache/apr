@@ -277,6 +277,9 @@ SET(APR_SOURCES
   file_io/win32/pipe.c
   file_io/win32/readwrite.c
   file_io/win32/seek.c
+  jose/apr_jose.c
+  jose/apr_jose_decode.c
+  jose/apr_jose_encode.c
   hooks/apr_hooks.c
   locks/win32/proc_mutex.c
   locks/win32/thread_cond.c
