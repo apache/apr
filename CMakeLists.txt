@@ -381,6 +381,8 @@ SET(APR_TEST_SOURCES
   test/testglobalmutex.c
   test/testhash.c
   test/testhooks.c
+  test/testjson.c
+  test/testjose.c
   test/testipsub.c
   test/testlfs.c
   test/testlfsabi.c
