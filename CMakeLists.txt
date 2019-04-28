@@ -336,6 +336,7 @@ SET(APR_SOURCES
   user/win32/groupinfo.c
   user/win32/userinfo.c
   util-misc/apr_date.c
+  util-misc/apr_error.c
   util-misc/apr_queue.c
   util-misc/apr_reslist.c
   util-misc/apr_rmm.c
