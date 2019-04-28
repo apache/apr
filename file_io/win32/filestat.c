@@ -361,7 +361,6 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
     if ((apr_os_level >= APR_WIN_2000) && (wanted & APR_FINFO_CSIZE)
                                        && (finfo->filetype == APR_REG))
     {
-        DWORD sizelo, sizehi;
         if (whatfile == MORE_OF_HANDLE) {
             /* Not available for development and implementation under
              * a reasonable license; if you review the licensing
@@ -379,6 +378,8 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
             }
         }
         else {
+            DWORD sizelo, sizehi;
+
             SetLastError(NO_ERROR);
             if (whatfile == MORE_OF_WFSPEC)
                 sizelo = GetCompressedFileSizeW((apr_wchar_t*)ufile, &sizehi);
