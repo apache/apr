@@ -258,6 +258,7 @@ SET(APR_SOURCES
   dbm/sdbm/sdbm_pair.c
   dso/win32/dso.c
   encoding/apr_base64.c
+  encoding/apr_encode.c
   encoding/apr_escape.c
   file_io/unix/copy.c
   file_io/unix/fileacc.c
@@ -363,6 +364,7 @@ SET(APR_TEST_SOURCES
   test/testdso.c
   test/testdup.c
   test/testenv.c
+  test/testencode.c
   test/testescape.c
   test/testfile.c
   test/testfilecopy.c
