@@ -362,18 +362,9 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
                                        && (finfo->filetype == APR_REG))
     {
         if (whatfile == MORE_OF_HANDLE) {
-            /* Not available for development and implementation under
-             * a reasonable license; if you review the licensing
-             * terms and conditions of;
-             *   http://go.microsoft.com/fwlink/?linkid=84083
-             * you probably understand why APR chooses not to implement.
-             */
-            IOSB sb;
-            FSI fi;
-            if ((ZwQueryInformationFile((HANDLE)ufile, &sb, 
-                                       &fi, sizeof(fi), 5) == 0) 
-                    && (sb.Status == 0)) {
-                finfo->csize = fi.AllocationSize;
+            FILE_ALLOCATION_INFO fi;
+            if (GetFileInformationByHandleEx((HANDLE)ufile, FileAllocationInfo, &fi, sizeof(fi))) {
+                finfo->csize = fi.AllocationSize.QuadPart;
                 finfo->valid |= APR_FINFO_CSIZE;
             }
         }
