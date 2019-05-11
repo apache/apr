@@ -165,12 +165,86 @@ static void test_billion_laughs(abts_case *tc, void *data)
     apr_file_close(fd);
 }
 
+static void roundtrip(abts_case* tc, char* xml, char* expected, int lineno)
+{
+    apr_xml_parser *parser;
+    apr_xml_doc *doc;
+    apr_status_t rv;
+    const char *actual;
+    apr_size_t len = strlen(xml);
+    apr_size_t i;
+    apr_pool_t *pool;
+
+    apr_pool_create(&pool, p);
+
+    parser = apr_xml_parser_create(pool);
+
+    /* Feed parser by one character for better test coverage. */
+    for (i = 0; i < len; i++) {
+        rv = apr_xml_parser_feed(parser, xml + i, 1);
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+        if (rv != APR_SUCCESS)
+            return;
+    }
+
+    rv = apr_xml_parser_done(parser, &doc);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    if (rv != APR_SUCCESS)
+        return;
+
+    apr_xml_to_text(pool, doc->root, APR_XML_X2T_FULL_NS_LANG, doc->namespaces, NULL, &actual, NULL);
+
+    abts_str_equal(tc, expected, actual, lineno);
+
+    apr_pool_destroy(pool);
+}
+
+static void test_xml_roundtrip(abts_case *tc, void *data)
+{
+    roundtrip(tc,
+              "<test attr='val'></test>",
+              "<test attr=\"val\" xmlns:ns0=\"DAV:\"/>",
+              __LINE__);
+
+    roundtrip(tc,
+              "<test>aa<q/></test>",
+              "<test xmlns:ns0=\"DAV:\">aa<q/></test>",
+              __LINE__);
+
+    roundtrip(tc,
+              "<?xml version='1.0'?><test>aa<q/>bb</test>",
+              "<test xmlns:ns0=\"DAV:\">aa<q/>bb</test>",
+              __LINE__);
+
+    roundtrip(tc,
+              "<test xmlns:ns1='NS1:'>aa<ns1:q/></test>",
+              "<test xmlns:ns1=\"NS1:\" xmlns:ns0=\"DAV:\">aa<ns1:q/></test>",
+              __LINE__);
+
+    roundtrip(tc,
+              "<test xmlns='default'>aa<q/></test>",
+              "<ns1:test xmlns:ns1=\"default\" xmlns:ns0=\"DAV:\">"
+              "aa<ns1:q/>"
+              "</ns1:test>",
+              __LINE__);
+
+    roundtrip(tc,
+              "<test xmlns='default' xmlns:ns1='NS1:'>"
+              "aa<ns1:q/>"
+              "</test>",
+              "<ns2:test xmlns:ns2=\"default\" xmlns:ns1=\"NS1:\" xmlns:ns0=\"DAV:\">"
+              "aa<ns1:q/>"
+              "</ns2:test>",
+              __LINE__);
+}
+
 abts_suite *testxml(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
 
     abts_run_test(suite, test_xml_parser, NULL);
     abts_run_test(suite, test_billion_laughs, NULL);
+    abts_run_test(suite, test_xml_roundtrip, NULL);
 
     return suite;
 }
