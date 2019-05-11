@@ -686,6 +686,7 @@ typedef int apr_wait_t;
 
 #define APU_USE_EXPAT           @apu_use_expat_10@
 #define APU_USE_LIBXML2         @apu_use_libxml2_10@
+#define APU_USE_XMLLITE         @apu_use_xmllite_10@
 
 /** @} */
 
