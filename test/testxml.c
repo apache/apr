@@ -192,6 +192,8 @@ static void roundtrip(abts_case* tc, char* xml, char* expected, int lineno)
     if (rv != APR_SUCCESS)
         return;
 
+    apr_xml_quote_elem(pool, doc->root);
+
     apr_xml_to_text(pool, doc->root, APR_XML_X2T_FULL_NS_LANG, doc->namespaces, NULL, &actual, NULL);
 
     abts_str_equal(tc, expected, actual, lineno);
@@ -236,6 +238,90 @@ static void test_xml_roundtrip(abts_case *tc, void *data)
               "aa<ns1:q/>"
               "</ns2:test>",
               __LINE__);
+
+    roundtrip(tc,
+              "<test>"
+              "&lt;sender&gt;John Smith&lt;/sender&gt;"
+              "</test>",
+              "<test xmlns:ns0=\"DAV:\">"
+              "&lt;sender&gt;John Smith&lt;/sender&gt;"
+              "</test>",
+              __LINE__);
+
+    roundtrip(tc,
+              "<test>"
+              "<![CDATA[<sender>John Smith</sender>]]>"
+              "</test>",
+              "<test xmlns:ns0=\"DAV:\">"
+              "&lt;sender&gt;John Smith&lt;/sender&gt;"
+              "</test>",
+              __LINE__);
+
+    roundtrip(tc,
+              "<elem>   abc    def    </elem>",
+              "<elem xmlns:ns0=\"DAV:\">   abc    def    </elem>",
+              __LINE__);
+
+    roundtrip(tc,
+              "<elem>   </elem>",
+              "<elem xmlns:ns0=\"DAV:\">   </elem>",
+              __LINE__);
+
+    roundtrip(tc,
+              "<?xml version='1.0' ?>\n"
+              "<elem>   </elem>",
+              "<elem xmlns:ns0=\"DAV:\">   </elem>",
+              __LINE__);
+}
+
+static void get_xml_error(abts_case* tc,
+                          char *errbuf,
+                          apr_size_t errbufsize,
+                          const char* xml)
+{
+    apr_xml_parser *parser;
+    apr_xml_doc *doc;
+    apr_status_t rv;
+    apr_size_t len = strlen(xml);
+    apr_pool_t *pool;
+
+    strcpy(errbuf, "");
+
+    apr_pool_create(&pool, p);
+
+    parser = apr_xml_parser_create(pool);
+
+    rv = apr_xml_parser_feed(parser, xml, len);
+
+    if (rv == APR_SUCCESS) {
+        rv = apr_xml_parser_done(parser, &doc);
+        ABTS_INT_EQUAL(tc, APR_EGENERAL, rv);
+    }
+
+    if (rv != APR_SUCCESS) {
+        apr_xml_parser_geterror(parser, errbuf, errbufsize);
+    }
+
+    apr_pool_destroy(pool);
+}
+
+static void test_xml_parser_geterror(abts_case *tc, void *data)
+{
+    char errbuf[256];
+
+    get_xml_error(tc, errbuf, sizeof(errbuf),
+                  "<elem");
+
+#if APU_USE_EXPAT
+    ABTS_STR_EQUAL(tc, "XML parser error code: unclosed token (5)", errbuf);
+#endif
+
+    get_xml_error(tc, errbuf, sizeof(errbuf),
+                  "<elem1><elem2></elem1>");
+
+#if APU_USE_EXPAT
+    ABTS_STR_EQUAL(tc, "XML parser error code: mismatched tag (7)", errbuf);
+#endif
 }
 
 abts_suite *testxml(abts_suite *suite)
@@ -245,6 +331,7 @@ abts_suite *testxml(abts_suite *suite)
     abts_run_test(suite, test_xml_parser, NULL);
     abts_run_test(suite, test_billion_laughs, NULL);
     abts_run_test(suite, test_xml_roundtrip, NULL);
+    abts_run_test(suite, test_xml_parser_geterror, NULL);
 
     return suite;
 }
