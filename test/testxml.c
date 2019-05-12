@@ -238,6 +238,40 @@ static void test_xml_roundtrip(abts_case *tc, void *data)
               "aa<ns1:q/>"
               "</ns2:test>",
               __LINE__);
+
+    roundtrip(tc,
+              "<test>"
+              "&lt;sender&gt;John Smith&lt;/sender&gt;"
+              "</test>",
+              "<test xmlns:ns0=\"DAV:\">"
+              "&lt;sender&gt;John Smith&lt;/sender&gt;"
+              "</test>",
+              __LINE__);
+
+    roundtrip(tc,
+              "<test>"
+              "<![CDATA[<sender>John Smith</sender>]]>"
+              "</test>",
+              "<test xmlns:ns0=\"DAV:\">"
+              "&lt;sender&gt;John Smith&lt;/sender&gt;"
+              "</test>",
+              __LINE__);
+
+    roundtrip(tc,
+              "<elem>   abc    def    </elem>",
+              "<elem xmlns:ns0=\"DAV:\">   abc    def    </elem>",
+              __LINE__);
+
+    roundtrip(tc,
+              "<elem>   </elem>",
+              "<elem xmlns:ns0=\"DAV:\">   </elem>",
+              __LINE__);
+
+    roundtrip(tc,
+              "<?xml version='1.0' ?>\n"
+              "<elem>   </elem>",
+              "<elem xmlns:ns0=\"DAV:\">   </elem>",
+              __LINE__);
 }
 
 abts_suite *testxml(abts_suite *suite)
