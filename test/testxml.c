@@ -274,6 +274,56 @@ static void test_xml_roundtrip(abts_case *tc, void *data)
               __LINE__);
 }
 
+static void get_xml_error(abts_case* tc,
+                          char *errbuf,
+                          apr_size_t errbufsize,
+                          const char* xml)
+{
+    apr_xml_parser *parser;
+    apr_xml_doc *doc;
+    apr_status_t rv;
+    apr_size_t len = strlen(xml);
+    apr_pool_t *pool;
+
+    strcpy(errbuf, "");
+
+    apr_pool_create(&pool, p);
+
+    parser = apr_xml_parser_create(pool);
+
+    rv = apr_xml_parser_feed(parser, xml, len);
+
+    if (rv == APR_SUCCESS) {
+        rv = apr_xml_parser_done(parser, &doc);
+        ABTS_INT_EQUAL(tc, APR_EGENERAL, rv);
+    }
+
+    if (rv != APR_SUCCESS) {
+        apr_xml_parser_geterror(parser, errbuf, errbufsize);
+    }
+
+    apr_pool_destroy(pool);
+}
+
+static void test_xml_parser_geterror(abts_case *tc, void *data)
+{
+    char errbuf[256];
+
+    get_xml_error(tc, errbuf, sizeof(errbuf),
+                  "<elem");
+
+#if APU_USE_EXPAT
+    ABTS_STR_EQUAL(tc, "XML parser error code: unclosed token (5)", errbuf);
+#endif
+
+    get_xml_error(tc, errbuf, sizeof(errbuf),
+                  "<elem1><elem2></elem1>");
+
+#if APU_USE_EXPAT
+    ABTS_STR_EQUAL(tc, "XML parser error code: mismatched tag (7)", errbuf);
+#endif
+}
+
 abts_suite *testxml(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
@@ -281,6 +331,7 @@ abts_suite *testxml(abts_suite *suite)
     abts_run_test(suite, test_xml_parser, NULL);
     abts_run_test(suite, test_billion_laughs, NULL);
     abts_run_test(suite, test_xml_roundtrip, NULL);
+    abts_run_test(suite, test_xml_parser_geterror, NULL);
 
     return suite;
 }
