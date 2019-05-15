@@ -79,17 +79,11 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
             os_handle = LoadLibraryExW(wpath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
         if (!os_handle) {
 #ifndef _WIN32_WCE
-            apr_wchar_t *ignored;
-            apr_wchar_t fpath[APR_PATH_MAX];
             rv = apr_get_os_error();
-            if (GetFullPathNameW(wpath, sizeof(fpath) / sizeof(apr_wchar_t), fpath, &ignored)) {
-                if (SetDllDirectoryW(fpath)) {
-                    os_handle = LoadLibraryExW(wpath, NULL, 0);
-                    if (!os_handle)
-                        os_handle = LoadLibraryExW(wpath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
-                    if (os_handle)
-                        rv = APR_SUCCESS;
-                 }
+
+            os_handle = LoadLibraryExW(wpath, NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
+            if (os_handle) {
+                rv = APR_SUCCESS;
             }
 #else            
             rv = apr_get_os_error();
