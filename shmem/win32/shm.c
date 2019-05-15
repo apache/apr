@@ -87,9 +87,11 @@ static int can_create_global_maps(void)
         ok = OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken);
     }
 
-    if (ok) {
-        ok = LookupPrivilegeValue(NULL, SE_CREATE_GLOBAL_NAME, &priv_id);
+    if (!ok) {
+        return 0;
     }
+
+    ok = LookupPrivilegeValue(NULL, SE_CREATE_GLOBAL_NAME, &priv_id);
 
     if (ok) {
         privs.PrivilegeCount = 1;
@@ -98,6 +100,8 @@ static int can_create_global_maps(void)
         privs.Privilege[0].Attributes = SE_PRIVILEGE_ENABLED;
         ok = PrivilegeCheck(hToken, &privs, &has_priv);
     }
+
+    CloseHandle(hToken);
 
     if (ok && !has_priv) {
         return 0;
