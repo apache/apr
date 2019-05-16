@@ -139,24 +139,24 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
  */
 
 typedef struct win32_late_dll_t {
-    const char *dll_name;
+    const apr_wchar_t *dll_name;
     HMODULE dll_handle;
 } win32_late_dll_t;
 
 static win32_late_dll_t late_dll[DLL_defined] = {
-    {"kernel32", NULL},
-    {"advapi32", NULL},
-    {"mswsock", NULL},
-    {"ws2_32", NULL},
-    {"shell32", NULL},
-    {"ntdll.dll", NULL},
-    {"Iphplapi", NULL}
+    {L"kernel32", NULL},
+    {L"advapi32", NULL},
+    {L"mswsock", NULL},
+    {L"ws2_32", NULL},
+    {L"shell32", NULL},
+    {L"ntdll.dll", NULL},
+    {L"Iphplapi", NULL}
 };
 
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
 {
     if (!late_dll[fnLib].dll_handle) {
-        late_dll[fnLib].dll_handle = LoadLibraryA(late_dll[fnLib].dll_name);
+        late_dll[fnLib].dll_handle = LoadLibraryW(late_dll[fnLib].dll_name);
         if (!late_dll[fnLib].dll_handle)
             return NULL;
     }
