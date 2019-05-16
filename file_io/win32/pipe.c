@@ -120,6 +120,7 @@ static apr_status_t file_pipe_create(apr_file_t **in,
     (void) apr_pollset_create(&(*out)->pollset, 1, p, 0);
 #endif
     if (apr_os_level >= APR_WIN_NT) {
+        apr_status_t rv;
         char rand[8];
         int pid = getpid();
 #define FMT_PIPE_NAME "\\\\.\\pipe\\apr-pipe-%x.%lx."
@@ -150,7 +151,12 @@ static apr_status_t file_pipe_create(apr_file_t **in,
         }
         dwPipeMode = 0;
 
-        apr_generate_random_bytes(rand, sizeof rand);
+        rv = apr_generate_random_bytes(rand, sizeof rand);
+        if (rv != APR_SUCCESS) {
+            file_cleanup(*in);
+            return rv;
+        }
+
         pos = apr_snprintf(name, sizeof name, FMT_PIPE_NAME, pid, id++);
         apr_escape_hex(name + pos, rand, sizeof rand, 0, NULL);
 
@@ -163,7 +169,7 @@ static apr_status_t file_pipe_create(apr_file_t **in,
                                           1,            /* nDefaultTimeOut, */
                                           &sa);
         if ((*in)->filehand == INVALID_HANDLE_VALUE) {
-            apr_status_t rv = apr_get_os_error();
+            rv = apr_get_os_error();
             file_cleanup(*in);
             return rv;
         }
