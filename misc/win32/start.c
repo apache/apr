@@ -127,7 +127,7 @@ APR_DECLARE(apr_status_t) apr_app_initialize(int *argc,
             wstrs = CommandLineToArgvW(sysstr, &wstrc);
             if (wstrs) {
                 *argc = apr_wastrtoastr(argv, wstrs, wstrc);
-                GlobalFree(wstrs);
+                LocalFree(wstrs);
             }
         }
 
