@@ -105,7 +105,7 @@ static void flatten_match(abts_case *tc, const char *ctx,
     sprintf(msg, "%s: length match (%ld not %ld)", ctx,
             (long)len, (long)elen);
     ABTS_ASSERT(tc, msg, len == elen);
-    sprintf(msg, "%s: result match", msg);
+    sprintf(msg, "%s: result match", ctx);
     ABTS_STR_NEQUAL(tc, expect, buf, len);
     free(buf);
 }
