@@ -123,7 +123,7 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
     else {
         DWORD howmove;
         LARGE_INTEGER li;
-        li.QuadPart = offset;
+        li.QuadPart = *offset;
 
         switch(where) {
             case APR_SET:
