@@ -60,65 +60,34 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
     UINT em;
 #endif
 
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE 
-    {
-        apr_wchar_t wpath[APR_PATH_MAX];
-        if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
-                                            / sizeof(apr_wchar_t), path))
-                != APR_SUCCESS) {
-            *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
-            return ((*res_handle)->load_error = rv);
-        }
-        /* Prevent ugly popups from killing our app */
+    apr_wchar_t wpath[APR_PATH_MAX];
+    if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                        / sizeof(apr_wchar_t), path))
+            != APR_SUCCESS) {
+        *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
+        return ((*res_handle)->load_error = rv);
+    }
+    /* Prevent ugly popups from killing our app */
 #ifndef _WIN32_WCE
-        em = SetErrorMode(SEM_FAILCRITICALERRORS);
+    em = SetErrorMode(SEM_FAILCRITICALERRORS);
 #endif
-        os_handle = LoadLibraryExW(wpath, NULL, 0);
-        if (!os_handle)
-            os_handle = LoadLibraryExW(wpath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
-        if (!os_handle) {
+    os_handle = LoadLibraryExW(wpath, NULL, 0);
+    if (!os_handle)
+        os_handle = LoadLibraryExW(wpath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+    if (!os_handle) {
 #ifndef _WIN32_WCE
-            rv = apr_get_os_error();
+        rv = apr_get_os_error();
 
-            os_handle = LoadLibraryExW(wpath, NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
-            if (os_handle) {
-                rv = APR_SUCCESS;
-            }
-#else            
-            rv = apr_get_os_error();
-#endif
-        }
-#ifndef _WIN32_WCE
-        SetErrorMode(em);
-#endif
-    }
-#endif /* APR_HAS_UNICODE_FS */
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        char fspec[APR_PATH_MAX], *p = fspec;
-        /* Must convert path from / to \ notation.
-         * Per PR2555, the LoadLibraryEx function is very picky about slashes.
-         * Debugging on NT 4 SP 6a reveals First Chance Exception within NTDLL.
-         * LoadLibrary in the MS PSDK also reveals that it -explicitly- states
-         * that backslashes must be used for the LoadLibrary family of calls.
-         */
-        apr_cpystrn(fspec, path, sizeof(fspec));
-        while ((p = strchr(p, '/')) != NULL)
-            *p = '\\';
-        
-        /* Prevent ugly popups from killing our app */
-        em = SetErrorMode(SEM_FAILCRITICALERRORS);
-        os_handle = LoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
-        if (!os_handle)
-            os_handle = LoadLibraryEx(path, NULL, 0);
-        if (!os_handle)
-            rv = apr_get_os_error();
-        else
+        os_handle = LoadLibraryExW(wpath, NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
+        if (os_handle) {
             rv = APR_SUCCESS;
-        SetErrorMode(em);
+        }
+#else            
+        rv = apr_get_os_error();
+#endif
     }
+#ifndef _WIN32_WCE
+    SetErrorMode(em);
 #endif
 
     *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
