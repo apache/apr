@@ -85,7 +85,7 @@ ELSE()
 ENDIF()
 
 IF("${MIN_WINDOWS_VER}" STREQUAL "")
-  SET(win32_winnt_str "0x0600")
+  SET(win32_winnt_str "0x0601")
 ELSEIF(${MIN_WINDOWS_VER} STREQUAL "Vista")
   SET(win32_winnt_str "0x0600")
 ELSEIF(${MIN_WINDOWS_VER} STREQUAL "Windows7")
