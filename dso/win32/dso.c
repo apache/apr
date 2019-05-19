@@ -69,7 +69,10 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
     }
     /* Prevent ugly popups from killing our app */
 #ifndef _WIN32_WCE
-    em = SetErrorMode(SEM_FAILCRITICALERRORS);
+    if (!SetThreadErrorMode(SEM_FAILCRITICALERRORS, &em)) {
+        *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
+        return ((*res_handle)->load_error = apr_get_os_error());
+    }
 #endif
     os_handle = LoadLibraryExW(wpath, NULL, 0);
     if (!os_handle)
@@ -87,7 +90,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
 #endif
     }
 #ifndef _WIN32_WCE
-    SetErrorMode(em);
+    SetThreadErrorMode(em, NULL);
 #endif
 
     *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
