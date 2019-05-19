@@ -65,7 +65,7 @@ struct apr_procattr_t {
 };
 
 struct apr_thread_once_t {
-    long value;
+    INIT_ONCE once;
 };
 
 extern apr_status_t apr_threadproc_init(apr_pool_t *pool);
