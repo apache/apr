@@ -32,7 +32,7 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key,
 
     (*key)->pool = pool;
 
-    if (((*key)->key = TlsAlloc()) != 0xFFFFFFFF) {
+    if (((*key)->key = TlsAlloc()) != TLS_OUT_OF_INDEXES) {
         return APR_SUCCESS;
     }
     return apr_get_os_error();
