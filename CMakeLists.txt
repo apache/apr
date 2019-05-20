@@ -55,7 +55,7 @@ OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)
 OPTION(INSTALL_PDB          "Install .pdb files (if generated)"  ON)
 OPTION(APR_BUILD_TESTAPR    "Build the test suite"         OFF)
 OPTION(TEST_STATIC_LIBS     "Test programs use APR static libraries instead of shared libraries?" OFF)
-SET(MIN_WINDOWS_VER             "Vista" 
+SET(MIN_WINDOWS_VER         "Windows7"
     CACHE STRING "Minimum Windows version")
 SET(LIBXML2_ICONV_INCLUDE_DIR   ""
     CACHE STRING "Directory with iconv include files for libxml2")
@@ -100,9 +100,9 @@ ELSE(APU_USE_XMLLITE)
 ENDIF()
 
 IF("${MIN_WINDOWS_VER}" STREQUAL "")
-  SET(win32_winnt_str "0x0600")
+  SET(win32_winnt_str "0x0601")
 ELSEIF(${MIN_WINDOWS_VER} STREQUAL "Vista")
-  SET(win32_winnt_str "0x0600")
+  MESSAGE(FATAL_ERROR "Minimum supported Windows version is Windows 7/Windows Server 2008 R2")
 ELSEIF(${MIN_WINDOWS_VER} STREQUAL "Windows7")
   SET(win32_winnt_str "0x0601")
 ELSE()

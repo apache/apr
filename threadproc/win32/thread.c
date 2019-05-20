@@ -257,19 +257,39 @@ APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
+APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control_p,
                                                apr_pool_t *p)
 {
-    (*control) = apr_pcalloc(p, sizeof(**control));
+    apr_thread_once_t *control = apr_pcalloc(p, sizeof(*control));
+
+    InitOnceInitialize(&control->once);
+
+    *control_p = control;
+
     return APR_SUCCESS;
+}
+
+static BOOL WINAPI init_once_callback(PINIT_ONCE InitOnce,
+                                      PVOID Parameter,
+                                      PVOID *Context)
+{
+    void (*func)(void) = Parameter;
+
+    func();
+
+    return TRUE;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control,
                                           void (*func)(void))
 {
-    if (!InterlockedExchange(&control->value, 1)) {
-        func();
+    PVOID lpContext;
+
+    if (!InitOnceExecuteOnce(&control->once, init_once_callback, func,
+                             &lpContext)) {
+        return apr_get_os_error();
     }
+
     return APR_SUCCESS;
 }
 

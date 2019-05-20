@@ -23,7 +23,6 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
 {
     apr_off_t newbufpos;
     apr_status_t rv;
-    DWORD rc;
 
     if (thefile->direction == 1) {
         /* XXX: flush here is not mutex protected */
@@ -43,19 +42,15 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
         thefile->bufpos = (apr_size_t)newbufpos;
         rv = APR_SUCCESS;
     } else {
-        DWORD offlo = (DWORD)pos;
-        LONG  offhi = (LONG)(pos >> 32);
-        rc = SetFilePointer(thefile->filehand, offlo, &offhi, FILE_BEGIN);
-
-        if (rc == (DWORD)-1)
-            /* A legal value, perhaps?  MSDN implies prior SetLastError isn't
-             * needed, googling for SetLastError SetFilePointer seems
-             * to confirm this.  INVALID_SET_FILE_POINTER is too recently
-             * added for us to rely on it as a constant.
-             */
+        LARGE_INTEGER li;
+        li.QuadPart = pos;
+        
+        if (!SetFilePointerEx(thefile->filehand, li, NULL, FILE_BEGIN)) {
             rv = apr_get_os_error();
-        else
+        }
+        else {
             rv = APR_SUCCESS;
+        }
 
         if (rv == APR_SUCCESS) {
             rv = APR_SUCCESS;
@@ -127,8 +122,8 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
     }
     else {
         DWORD howmove;
-        DWORD offlo = (DWORD)*offset;
-        DWORD offhi = (DWORD)(*offset >> 32);
+        LARGE_INTEGER li;
+        li.QuadPart = *offset;
 
         switch(where) {
             case APR_SET:
@@ -140,15 +135,17 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
             default:
                 return APR_EINVAL;
         }
-        offlo = SetFilePointer(thefile->filehand, (LONG)offlo, 
-                               (LONG*)&offhi, howmove);
-        if (offlo == 0xFFFFFFFF)
+
+        if (!SetFilePointerEx(thefile->filehand, li, &li, howmove)) {
             rc = apr_get_os_error();
-        else
+        }
+        else {
             rc = APR_SUCCESS;
+        }
+
         /* Since we can land at 0xffffffff we will measure our APR_SUCCESS */
         if (rc == APR_SUCCESS)
-            *offset = ((apr_off_t)offhi << 32) | offlo;
+            *offset = li.QuadPart;
         return rc;
     }
 }
@@ -157,9 +154,7 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
 APR_DECLARE(apr_status_t) apr_file_trunc(apr_file_t *thefile, apr_off_t offset)
 {
     apr_status_t rv;
-    DWORD offlo = (DWORD)offset;
-    LONG  offhi = (LONG)(offset >> 32);
-    DWORD rc;
+    LARGE_INTEGER li;
 
     if (thefile->buffered) {
         if (thefile->direction == 1) {
@@ -188,10 +183,10 @@ APR_DECLARE(apr_status_t) apr_file_trunc(apr_file_t *thefile, apr_off_t offset)
         }
     }
 
-    rc = SetFilePointer(thefile->filehand, offlo, &offhi, FILE_BEGIN);
-    if (rc == 0xFFFFFFFF)
-        if ((rv = apr_get_os_error()) != APR_SUCCESS)
-            return rv;
+    li.QuadPart  = offset;
+    if (!SetFilePointerEx(thefile->filehand, li, NULL, FILE_BEGIN))
+        return apr_get_os_error();
+
     thefile->filePtr = offset;
     /* Don't report EOF until the next read. */
     thefile->eof_hit = 0;

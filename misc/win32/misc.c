@@ -138,32 +138,53 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
  * missing from one or more releases of the Win32 API
  */
 
-static const char* const lateDllName[DLL_defined] = {
-    "kernel32", "advapi32", "mswsock",  "ws2_32", "shell32", "ntdll.dll",
-    "Iphplapi"  };
-static HMODULE lateDllHandle[DLL_defined] = {
-     NULL,       NULL,       NULL,       NULL,     NULL,      NULL,
-     NULL       };
+typedef struct win32_late_dll_t {
+    INIT_ONCE control;
+    const apr_wchar_t *dll_name;
+    HMODULE dll_handle;
+} win32_late_dll_t;
+
+static win32_late_dll_t late_dll[DLL_defined] = {
+    {INIT_ONCE_STATIC_INIT, L"kernel32", NULL},
+    {INIT_ONCE_STATIC_INIT, L"advapi32", NULL},
+    {INIT_ONCE_STATIC_INIT, L"mswsock", NULL},
+    {INIT_ONCE_STATIC_INIT, L"ws2_32", NULL},
+    {INIT_ONCE_STATIC_INIT, L"shell32", NULL},
+    {INIT_ONCE_STATIC_INIT, L"ntdll.dll", NULL},
+    {INIT_ONCE_STATIC_INIT, L"Iphplapi", NULL}
+};
+
+static BOOL WINAPI load_dll_callback(PINIT_ONCE InitOnce,
+                                     PVOID Parameter,
+                                     PVOID *Context)
+{
+    win32_late_dll_t *dll = Parameter;
+
+    dll->dll_handle = LoadLibraryW(dll->dll_name);
+
+    return TRUE;
+}
 
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
 {
-    if (!lateDllHandle[fnLib]) { 
-        lateDllHandle[fnLib] = LoadLibraryA(lateDllName[fnLib]);
-        if (!lateDllHandle[fnLib])
-            return NULL;
-    }
+    win32_late_dll_t *dll = &late_dll[fnLib];
+
+    InitOnceExecuteOnce(&dll->control, load_dll_callback, dll, NULL);
+    if (!dll->dll_handle)
+        return NULL;
+
 #if defined(_WIN32_WCE)
     if (ordinal)
-        return GetProcAddressA(lateDllHandle[fnLib], (const char *)
-                                                     (apr_ssize_t)ordinal);
+        return GetProcAddressA(dll->dll_handle,
+                               (const char *) (apr_ssize_t)ordinal);
     else
-        return GetProcAddressA(lateDllHandle[fnLib], fnName);
+        return GetProcAddressA(dll->dll_handle, fnName);
 #else
     if (ordinal)
-        return GetProcAddress(lateDllHandle[fnLib], (const char *)
-                                                    (apr_ssize_t)ordinal);
+        return GetProcAddress(dll->dll_handle,
+                              (const char *) (apr_ssize_t)ordinal);
     else
-        return GetProcAddress(lateDllHandle[fnLib], fnName);
+        return GetProcAddress(dll->dll_handle, fnName);
 #endif
 }
 

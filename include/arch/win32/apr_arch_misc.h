@@ -230,27 +230,6 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
  * these we must always look up
  */
 
-#ifdef GetCompressedFileSizeA
-#undef GetCompressedFileSizeA
-#endif
-APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, DWORD, WINAPI, GetCompressedFileSizeA, 0, (
-    IN LPCSTR lpFileName,
-    OUT LPDWORD lpFileSizeHigh),
-    (lpFileName, lpFileSizeHigh));
-#define GetCompressedFileSizeA apr_winapi_GetCompressedFileSizeA
-#undef GetCompressedFileSize
-#define GetCompressedFileSize apr_winapi_GetCompressedFileSizeA
-
-#ifdef GetCompressedFileSizeW
-#undef GetCompressedFileSizeW
-#endif
-APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, DWORD, WINAPI, GetCompressedFileSizeW, 0, (
-    IN LPCWSTR lpFileName,
-    OUT LPDWORD lpFileSizeHigh),
-    (lpFileName, lpFileSizeHigh));
-#define GetCompressedFileSizeW apr_winapi_GetCompressedFileSizeW
-
-
 APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, NtQueryTimerResolution, 0, (
     ULONG *pMaxRes,  /* Minimum NS Resolution */
     ULONG *pMinRes,  /* Maximum NS Resolution */
@@ -352,14 +331,6 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_WINSOCK2API, int, WSAAPI, WSAPoll, 0, (
     (fdArray, fds, timeout));
 #define WSAPoll apr_winapi_WSAPoll
 #define HAVE_POLL   1
-
-#ifdef SetDllDirectoryW
-#undef SetDllDirectoryW
-#endif
-APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, SetDllDirectoryW, 0, (
-    IN LPCWSTR lpPathName),
-    (lpPathName));
-#define SetDllDirectoryW apr_winapi_SetDllDirectoryW
 
 #ifdef if_nametoindex
 #undef if_nametoindex
