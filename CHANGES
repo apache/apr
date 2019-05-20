@@ -1,6 +1,12 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_rwlock_t: Use native Slim Reader/Writer (SRW) locks on Windows.
+     PR 51360. [Ivan Zhakov]
+
+  *) Fix possible race condition in the Win32 apr_rwlock_t implementation.
+     PR 45455. [Ivan Zhakov]
+
   *) apr_thread_once: Fix problem that apr_thread_once can return before
      the other thread completes initialization on Windows.
 

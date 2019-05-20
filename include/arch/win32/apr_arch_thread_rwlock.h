@@ -21,9 +21,8 @@
 
 struct apr_thread_rwlock_t {
     apr_pool_t *pool;
-    HANDLE      write_mutex;
-    HANDLE      read_event;
-    LONG        readers;
+    SRWLOCK lock;
+    int has_wrlock;
 };
 
 #endif  /* THREAD_RWLOCK_H */
