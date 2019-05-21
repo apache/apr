@@ -16,7 +16,8 @@
 
 #include "apr.h"
 #include <rpc.h>
-#include <wincrypt.h>
+#include <winnt.h>
+#include <bcrypt.h>
 #include "apr_private.h"
 #include "apr_general.h"
 #include "apr_portable.h"
@@ -26,27 +27,20 @@
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf,
                                                     apr_size_t length)
 {
-    HCRYPTPROV hProv;
-    apr_status_t res = APR_SUCCESS;
+    NTSTATUS ntstatus;
 
-    /* 0x40 bit = CRYPT_SILENT, only introduced in more recent PSDKs 
-     * and will only work for Win2K and later.
-     */
-    DWORD flags = CRYPT_VERIFYCONTEXT
-                | ((apr_os_level >= APR_WIN_2000) ? 0x40 : 0);
+    ntstatus = BCryptGenRandom(NULL, buf, (DWORD) length,
+                               BCRYPT_USE_SYSTEM_PREFERRED_RNG);
 
-    if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, flags)) {
-	return apr_get_os_error();
+    if (BCRYPT_SUCCESS(ntstatus)) {
+        return APR_SUCCESS;
     }
-    /* XXX: An ugly hack for Win64, randomness is such that noone should
-     * ever expect > 2^31 bytes of data at once without the prng
-     * coming to a complete halt.
-     */
-    if (!CryptGenRandom(hProv, (DWORD)length, buf)) {
-    	res = apr_get_os_error();
+    else if (ntstatus == STATUS_INVALID_PARAMETER) {
+        return APR_FROM_OS_ERROR(ERROR_INVALID_PARAMETER);
     }
-    CryptReleaseContext(hProv, 0);
-    return res;
+    else {
+        return APR_EGENERAL;
+    }
 }
 
 
