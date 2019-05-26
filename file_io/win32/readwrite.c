@@ -523,8 +523,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                         break;
                 }
                 if (rv != APR_SUCCESS) {
-                    if (apr_os_level >= APR_WIN_98)
-                        CancelIo(thefile->filehand);
+                    CancelIo(thefile->filehand);
                 }
             }
         }
