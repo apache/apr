@@ -167,26 +167,9 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
 APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
                                                apr_interval_time_t timeout)
 {
-    DWORD rv, timeout_ms = 0;
-    apr_interval_time_t t = timeout;
+    DWORD rv;
 
-    do {
-        if (t > 0) {
-            /* Given timeout is 64bit usecs whereas Windows timeouts are
-             * 32bit msecs and below INFINITE (2^32 - 1), so we may need
-             * multiple timed out waits...
-             */
-            if (t > apr_time_from_msec(INFINITE - 1)) {
-                timeout_ms = INFINITE - 1;
-                t -= apr_time_from_msec(INFINITE - 1);
-            }
-            else {
-                timeout_ms = (DWORD)apr_time_as_msec(t);
-                t = 0;
-            }
-        }
-        rv = WaitForSingleObject(mutex->handle, timeout_ms);
-    } while (rv == WAIT_TIMEOUT && t > 0);
+    rv = apr_wait_for_single_object(mutex->handle, timeout);
 
     if (rv == WAIT_TIMEOUT) {
         return APR_TIMEUP;
