@@ -173,8 +173,7 @@ static apr_status_t cleanup_parser(void *ctx)
 {
     apr_xml_parser *parser = ctx;
 
-    if (parser->xp->xml_reader)
-    {
+    if (parser->xp->xml_reader) {
         IXmlReader_Release(parser->xp->xml_reader);
         parser->xp->xml_reader = NULL;
     }
