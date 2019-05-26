@@ -490,10 +490,10 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             (*nbytes) = 0;
             rv = apr_get_os_error();
 
-            /* XXX: This must be corrected, per the apr_file_read logic!!! */
             if (rv == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
  
                 DWORD timeout_ms;
+                DWORD res;
 
                 if (thefile->timeout == 0) {
                     timeout_ms = 0;
@@ -505,25 +505,37 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                     timeout_ms = (DWORD)(thefile->timeout / 1000);
                 }
 	       
-                rv = WaitForSingleObject(thefile->pOverlapped->hEvent, timeout_ms);
-                switch (rv) {
-                    case WAIT_OBJECT_0:
-                        GetOverlappedResult(thefile->filehand, thefile->pOverlapped, 
-                                            &bwrote, TRUE);
-                        *nbytes = bwrote;
-                        rv = APR_SUCCESS;
-                        break;
-                    case WAIT_TIMEOUT:
-                        rv = (timeout_ms == 0) ? APR_EAGAIN : APR_TIMEUP;
-                        break;
-                    case WAIT_FAILED:
-                        rv = apr_get_os_error();
-                        break;
-                    default:
-                        break;
-                }
-                if (rv != APR_SUCCESS) {
+                res = WaitForSingleObject(thefile->pOverlapped->hEvent, timeout_ms);
+
+                /* There is one case that represents entirely
+                 * successful operations, otherwise we will cancel
+                 * the operation in progress.
+                 */
+                if (res != WAIT_OBJECT_0) {
                     CancelIoEx(thefile->filehand, thefile->pOverlapped);
+                }
+
+                /* Ignore any failures above.  Attempt to complete
+                 * the overlapped operation and use only _its_ result.
+                 * For example, CancelIo or WaitForSingleObject can
+                 * fail if the handle is closed, yet the read may have
+                 * completed before we attempted to CancelIo...
+                 */
+                if (GetOverlappedResult(thefile->filehand, thefile->pOverlapped,
+                                        &bwrote, TRUE)) {
+                    *nbytes = bwrote;
+                    rv = APR_SUCCESS;
+                }
+                else {
+                    rv = apr_get_os_error();
+                    if (((rv == APR_FROM_OS_ERROR(ERROR_IO_INCOMPLETE))
+                        || (rv == APR_FROM_OS_ERROR(ERROR_OPERATION_ABORTED)))
+                        && (res == WAIT_TIMEOUT))
+                        rv = APR_TIMEUP;
+
+                    if (rv == APR_TIMEUP && timeout_ms == 0) {
+                        rv = APR_EAGAIN;
+                    }
                 }
             }
         }
