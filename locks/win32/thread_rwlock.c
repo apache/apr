@@ -21,104 +21,32 @@
 #include "apr_arch_thread_rwlock.h"
 #include "apr_portable.h"
 
-static apr_status_t thread_rwlock_cleanup(void *data)
+APR_DECLARE(apr_status_t) apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock_p,
+                                                   apr_pool_t *pool)
 {
-    apr_thread_rwlock_t *rwlock = data;
-    
-    if (! CloseHandle(rwlock->read_event))
-        return apr_get_os_error();
+    apr_thread_rwlock_t* rwlock = apr_palloc(pool, sizeof(*rwlock));
 
-    if (! CloseHandle(rwlock->write_mutex))
-        return apr_get_os_error();
-    
-    return APR_SUCCESS;
-}
+    rwlock->pool = pool;
+    rwlock->has_wrlock = 0;
+    InitializeSRWLock(&rwlock->lock);
 
-APR_DECLARE(apr_status_t)apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
-                                                  apr_pool_t *pool)
-{
-    *rwlock = apr_palloc(pool, sizeof(**rwlock));
+    *rwlock_p = rwlock;
 
-    (*rwlock)->pool        = pool;
-    (*rwlock)->readers     = 0;
-
-    if (! ((*rwlock)->read_event = CreateEvent(NULL, TRUE, FALSE, NULL))) {
-        *rwlock = NULL;
-        return apr_get_os_error();
-    }
-
-    if (! ((*rwlock)->write_mutex = CreateMutex(NULL, FALSE, NULL))) {
-        CloseHandle((*rwlock)->read_event);
-        *rwlock = NULL;
-        return apr_get_os_error();
-    }
-
-    apr_pool_cleanup_register(pool, *rwlock, thread_rwlock_cleanup,
-                              apr_pool_cleanup_null);
-
-    return APR_SUCCESS;
-}
-
-static apr_status_t apr_thread_rwlock_rdlock_core(apr_thread_rwlock_t *rwlock,
-                                                  DWORD  milliseconds)
-{
-    DWORD   code = WaitForSingleObject(rwlock->write_mutex, milliseconds);
-
-    if (code == WAIT_FAILED || code == WAIT_TIMEOUT)
-        return APR_FROM_OS_ERROR(code);
-
-    /* We've successfully acquired the writer mutex, we can't be locked
-     * for write, so it's OK to add the reader lock.  The writer mutex
-     * doubles as race condition protection for the readers counter.   
-     */
-    InterlockedIncrement(&rwlock->readers);
-    
-    if (! ResetEvent(rwlock->read_event))
-        return apr_get_os_error();
-    
-    if (! ReleaseMutex(rwlock->write_mutex))
-        return apr_get_os_error();
-    
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_rdlock(apr_thread_rwlock_t *rwlock)
 {
-    return apr_thread_rwlock_rdlock_core(rwlock, INFINITE);
+    AcquireSRWLockShared(&rwlock->lock);
+
+    return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) 
+APR_DECLARE(apr_status_t)
 apr_thread_rwlock_tryrdlock(apr_thread_rwlock_t *rwlock)
 {
-    return apr_thread_rwlock_rdlock_core(rwlock, 0);
-}
-
-static apr_status_t 
-apr_thread_rwlock_wrlock_core(apr_thread_rwlock_t *rwlock, DWORD milliseconds)
-{
-    DWORD   code = WaitForSingleObject(rwlock->write_mutex, milliseconds);
-
-    if (code == WAIT_FAILED || code == WAIT_TIMEOUT)
-        return APR_FROM_OS_ERROR(code);
-
-    /* We've got the writer lock but we have to wait for all readers to
-     * unlock before it's ok to use it.
-     */
-    if (rwlock->readers) {
-        /* Must wait for readers to finish before returning, unless this
-         * is an trywrlock (milliseconds == 0):
-         */
-        code = milliseconds
-          ? WaitForSingleObject(rwlock->read_event, milliseconds)
-          : WAIT_TIMEOUT;
-        
-        if (code == WAIT_FAILED || code == WAIT_TIMEOUT) {
-            /* Unable to wait for readers to finish, release write lock: */
-            if (! ReleaseMutex(rwlock->write_mutex))
-                return apr_get_os_error();
-            
-            return APR_FROM_OS_ERROR(code);
-        }
+    if (!TryAcquireSRWLockShared(&rwlock->lock)) {
+        return APR_EBUSY;
     }
 
     return APR_SUCCESS;
@@ -126,40 +54,43 @@ apr_thread_rwlock_wrlock_core(apr_thread_rwlock_t *rwlock, DWORD milliseconds)
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_wrlock(apr_thread_rwlock_t *rwlock)
 {
-    return apr_thread_rwlock_wrlock_core(rwlock, INFINITE);
+    AcquireSRWLockExclusive(&rwlock->lock);
+    rwlock->has_wrlock = 1;
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t)apr_thread_rwlock_trywrlock(apr_thread_rwlock_t *rwlock)
 {
-    return apr_thread_rwlock_wrlock_core(rwlock, 0);
+    if (!TryAcquireSRWLockExclusive(&rwlock->lock)) {
+        return APR_EBUSY;
+    }
+
+    rwlock->has_wrlock = 1;
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_unlock(apr_thread_rwlock_t *rwlock)
 {
-    apr_status_t rv = 0;
-
-    /* First, guess that we're unlocking a writer */
-    if (! ReleaseMutex(rwlock->write_mutex))
-        rv = apr_get_os_error();
-    
-    if (rv == APR_FROM_OS_ERROR(ERROR_NOT_OWNER)) {
-        /* Nope, we must have a read lock */
-        if (rwlock->readers &&
-            ! InterlockedDecrement(&rwlock->readers) &&
-            ! SetEvent(rwlock->read_event)) {
-            rv = apr_get_os_error();
-        }
-        else {
-            rv = 0;
-        }
+    if (rwlock->has_wrlock) {
+        /* Someone holds the write lock. It MUST be the calling thread, since
+           the caller wants to unlock. */
+        rwlock->has_wrlock = 0;
+        ReleaseSRWLockExclusive(&rwlock->lock);
+    }
+    else {
+        /* Calling thread holds the read lock. */
+        ReleaseSRWLockShared(&rwlock->lock);
     }
 
-    return rv;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock)
 {
-    return apr_pool_cleanup_run(rwlock->pool, rwlock, thread_rwlock_cleanup);
+    /* SRW lock is statically allocated. */
+    return APR_SUCCESS;
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(thread_rwlock)
