@@ -830,7 +830,7 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
     }
 
     /* Don't do anything if we are not going to change attributes. */
-    if (new_flags == new_flags) {
+    if (new_flags == old_flags) {
         return APR_SUCCESS;
     }
 
