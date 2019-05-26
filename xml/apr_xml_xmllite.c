@@ -574,8 +574,7 @@ static apr_status_t do_parse(apr_xml_parser *parser,
     parser->xp->input_stream->remaining = len;
     parser->xp->input_stream->is_final = is_final;
 
-    while (TRUE)
-    {
+    while (TRUE) {
         apr_pool_clear(iterpool);
 
         status = parser->xp->current_state(parser, iterpool);
@@ -584,8 +583,7 @@ static apr_status_t do_parse(apr_xml_parser *parser,
         }
     }
 
-    if (status == APR_EAGAIN || status == APR_EOF)
-    {
+    if (status == APR_EAGAIN || status == APR_EOF) {
         status = APR_SUCCESS;
     }
 
