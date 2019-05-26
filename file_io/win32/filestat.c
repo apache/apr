@@ -793,7 +793,8 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
                                              apr_fileattrs_t attr_mask,
                                              apr_pool_t *pool)
 {
-    DWORD flags;
+    DWORD old_flags;
+    DWORD new_flags;
     apr_status_t rv;
     apr_wchar_t wfname[APR_PATH_MAX];
 
@@ -807,27 +808,33 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
                                     fname)))
         return rv;
 
-    flags = GetFileAttributesW(wfname);
-    if (flags == 0xFFFFFFFF)
+    old_flags = GetFileAttributesW(wfname);
+    if (old_flags == 0xFFFFFFFF)
         return apr_get_os_error();
 
+    new_flags = old_flags;
     if (attr_mask & APR_FILE_ATTR_READONLY)
     {
         if (attributes & APR_FILE_ATTR_READONLY)
-            flags |= FILE_ATTRIBUTE_READONLY;
+            new_flags |= FILE_ATTRIBUTE_READONLY;
         else
-            flags &= ~FILE_ATTRIBUTE_READONLY;
+            new_flags &= ~FILE_ATTRIBUTE_READONLY;
     }
 
     if (attr_mask & APR_FILE_ATTR_HIDDEN)
     {
         if (attributes & APR_FILE_ATTR_HIDDEN)
-            flags |= FILE_ATTRIBUTE_HIDDEN;
+            new_flags |= FILE_ATTRIBUTE_HIDDEN;
         else
-            flags &= ~FILE_ATTRIBUTE_HIDDEN;
+            new_flags &= ~FILE_ATTRIBUTE_HIDDEN;
     }
 
-    rv = SetFileAttributesW(wfname, flags);
+    /* Don't do anything if we are not going to change attributes. */
+    if (new_flags == new_flags) {
+        return APR_SUCCESS;
+    }
+
+    rv = SetFileAttributesW(wfname, new_flags);
 
     if (rv == 0)
         return apr_get_os_error();
