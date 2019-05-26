@@ -795,32 +795,19 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
 {
     DWORD flags;
     apr_status_t rv;
-#if APR_HAS_UNICODE_FS
     apr_wchar_t wfname[APR_PATH_MAX];
-#endif
 
     /* Don't do anything if we can't handle the requested attributes */
     if (!(attr_mask & (APR_FILE_ATTR_READONLY
                        | APR_FILE_ATTR_HIDDEN)))
         return APR_SUCCESS;
 
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        if ((rv = utf8_to_unicode_path(wfname,
-                                       sizeof(wfname) / sizeof(wfname[0]),
-                                       fname)))
-            return rv;
-        flags = GetFileAttributesW(wfname);
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        flags = GetFileAttributesA(fname);
-    }
-#endif
+    if ((rv = utf8_to_unicode_path(wfname,
+                                    sizeof(wfname) / sizeof(wfname[0]),
+                                    fname)))
+        return rv;
 
+    flags = GetFileAttributesW(wfname);
     if (flags == 0xFFFFFFFF)
         return apr_get_os_error();
 
@@ -840,18 +827,7 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
             flags &= ~FILE_ATTRIBUTE_HIDDEN;
     }
 
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        rv = SetFileAttributesW(wfname, flags);
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        rv = SetFileAttributesA(fname, flags);
-    }
-#endif
+    rv = SetFileAttributesW(wfname, flags);
 
     if (rv == 0)
         return apr_get_os_error();
