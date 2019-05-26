@@ -834,10 +834,9 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
         return APR_SUCCESS;
     }
 
-    rv = SetFileAttributesW(wfname, new_flags);
-
-    if (rv == 0)
+    if (!SetFileAttributesW(wfname, new_flags)) {
         return apr_get_os_error();
+    }
 
     return APR_SUCCESS;
 }
