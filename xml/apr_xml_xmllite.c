@@ -530,7 +530,7 @@ cdata_state(apr_xml_parser *parser,
 {
     HRESULT hr;
     apr_status_t status;
-    WCHAR buf[512];
+    WCHAR buf[4000];
     UINT read_count;
 
     hr = IXmlReader_ReadValueChunk(parser->xp->xml_reader, buf,
