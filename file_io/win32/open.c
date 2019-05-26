@@ -260,7 +260,7 @@ static apr_status_t make_sparse_file(apr_file_t *file)
             } while (res == WAIT_ABANDONED);
 
             if (res != WAIT_OBJECT_0) {
-                CancelIo(file->filehand);
+                CancelIoEx(file->filehand, file->pOverlapped);
             }
 
             if (GetOverlappedResult(file->filehand, file->pOverlapped, 

@@ -57,7 +57,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
     HINSTANCE os_handle;
     apr_status_t rv;
 #ifndef _WIN32_WCE
-    UINT em;
+    DWORD em;
 #endif
 
     apr_wchar_t wpath[APR_PATH_MAX];
