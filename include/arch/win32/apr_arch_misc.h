@@ -172,6 +172,11 @@ static APR_INLINE void* apr_realloc_dbg(void* userData, size_t newSize,
 
 #endif  /* ! _MSC_VER */
 
+/* Wrapper around WaitForSingleObject() that accepts apr_interval_time_t
+ * in microseconds instead of milliseconds. Values < 0 mean wait 
+ * forever, 0 means do not wait at all. */
+DWORD apr_wait_for_single_object(HANDLE handle, apr_interval_time_t timeout);
+
 typedef enum {
     DLL_WINBASEAPI = 0,    /* kernel32 From WinBase.h       */
     DLL_WINADVAPI = 1,     /* advapi32 From WinBase.h       */
