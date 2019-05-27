@@ -31,7 +31,6 @@
 static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t len_in, apr_size_t *nbytes)
 {
     apr_status_t rv;
-    DWORD res;
     DWORD len = (DWORD)len_in;
     DWORD bytesread = 0;
 
@@ -80,6 +79,8 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
     else {
         rv = apr_get_os_error();
         if (rv == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
+            DWORD res;
+
             /* It seems that ReadFile() return ERROR_IO_PENDING even
              * when I/O operation completed syncronously.
              * Use fast macro to check that overlapped I/O already
