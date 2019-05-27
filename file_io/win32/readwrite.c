@@ -87,11 +87,8 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
              * one owner to a new proc/thread.
              */
             do {
-                res = WaitForSingleObject(file->pOverlapped->hEvent, 
-                                          (file->timeout > 0)
-                                            ? (DWORD)(file->timeout/1000)
-                                            : ((file->timeout == -1) 
-                                                 ? INFINITE : 0));
+                res = apr_wait_for_single_object(file->pOverlapped->hEvent,
+                                                 file->timeout);
             } while (res == WAIT_ABANDONED);
 
             /* There is one case that represents entirely
@@ -492,20 +489,10 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
 
             if (rv == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
  
-                DWORD timeout_ms;
                 DWORD res;
 
-                if (thefile->timeout == 0) {
-                    timeout_ms = 0;
-                }
-                else if (thefile->timeout < 0) {
-                    timeout_ms = INFINITE;
-                }
-                else {
-                    timeout_ms = (DWORD)(thefile->timeout / 1000);
-                }
-	       
-                res = WaitForSingleObject(thefile->pOverlapped->hEvent, timeout_ms);
+                res = apr_wait_for_single_object(thefile->pOverlapped->hEvent,
+                                                 thefile->timeout);
 
                 /* There is one case that represents entirely
                  * successful operations, otherwise we will cancel
@@ -533,7 +520,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                         && (res == WAIT_TIMEOUT))
                         rv = APR_TIMEUP;
 
-                    if (rv == APR_TIMEUP && timeout_ms == 0) {
+                    if (rv == APR_TIMEUP && thefile->timeout == 0) {
                         rv = APR_EAGAIN;
                     }
                 }
