@@ -20,6 +20,7 @@
 #include "apr_strings.h"
 #include "apr_arch_thread_mutex.h"
 #include "apr_arch_thread_cond.h"
+#include "apr_arch_misc.h"
 #include "apr_portable.h"
 
 #include <limits.h>
@@ -79,28 +80,7 @@ static APR_INLINE apr_status_t thread_cond_timedwait(apr_thread_cond_t *cond,
     apr_thread_mutex_unlock(mutex);
 
     do {
-        apr_interval_time_t t = timeout;
-
-        do {
-            if (t < 0) {
-                timeout_ms = INFINITE;
-            }
-            else if (t > 0) {
-                /* Given timeout is 64bit usecs whereas Windows timeouts are
-                 * 32bit msecs and below INFINITE (2^32 - 1), so we may need
-                 * multiple timed out waits...
-                 */
-                if (t > apr_time_from_msec(INFINITE - 1)) {
-                    timeout_ms = INFINITE - 1;
-                    t -= apr_time_from_msec(INFINITE - 1);
-                }
-                else {
-                    timeout_ms = (DWORD)apr_time_as_msec(t);
-                    t = 0;
-                }
-            }
-            res = WaitForSingleObject(cond->semaphore, timeout_ms);
-        } while (res == WAIT_TIMEOUT && t > 0);
+        res = apr_wait_for_single_object(cond->semaphore, timeout);
 
         EnterCriticalSection(&cond->csection);
 
