@@ -247,7 +247,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
     if ((thefile->flags & APR_FOPEN_XTHREAD) && !thefile->pOverlapped ) {
         thefile->pOverlapped = (OVERLAPPED*) apr_pcalloc(thefile->pool, 
                                                          sizeof(OVERLAPPED));
-        thefile->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+        thefile->pOverlapped->hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
         if (!thefile->pOverlapped->hEvent) {
             rv = apr_get_os_error();
             return rv;
@@ -394,7 +394,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
     if ((thefile->flags & APR_FOPEN_XTHREAD) && !thefile->pOverlapped ) {
         thefile->pOverlapped = (OVERLAPPED*) apr_pcalloc(thefile->pool, 
                                                          sizeof(OVERLAPPED));
-        thefile->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+        thefile->pOverlapped->hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
         if (!thefile->pOverlapped->hEvent) {
             rv = apr_get_os_error();
             return rv;
@@ -630,7 +630,7 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
     if ((thefile->flags & APR_FOPEN_XTHREAD) && !thefile->pOverlapped) {
         thefile->pOverlapped = (OVERLAPPED*) apr_pcalloc(thefile->pool,
                                                          sizeof(OVERLAPPED));
-        thefile->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+        thefile->pOverlapped->hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
         if (!thefile->pOverlapped->hEvent) {
             rv = apr_get_os_error();
             return rv;
