@@ -230,6 +230,52 @@ static void test_json_array_iterate(abts_case * tc, void *data)
 
 }
 
+static void test_json_create(abts_case* tc, void* data)
+{
+    apr_json_value_t *json;
+    apr_status_t status;
+    apr_bucket_brigade *bb;
+    apr_bucket_alloc_t *ba;
+    char buf[1024];
+    apr_size_t len;
+
+    ba = apr_bucket_alloc_create(p);
+    bb = apr_brigade_create(p, ba);
+
+    json = apr_json_object_create(p);
+    apr_json_object_set(json, "null", APR_JSON_VALUE_STRING,
+                        apr_json_null_create(p), p);
+
+    apr_json_object_set(json, "bool", APR_JSON_VALUE_STRING,
+                        apr_json_boolean_create(p, 1), p);
+
+    apr_json_object_set(json, "double", APR_JSON_VALUE_STRING,
+                        apr_json_double_create(p, 12.34), p);
+
+    apr_json_object_set(json, "long", APR_JSON_VALUE_STRING,
+                        apr_json_long_create(p, 1234), p);
+
+    apr_json_object_set(json, "string", APR_JSON_VALUE_STRING,
+                        apr_json_string_create(p, "str",
+                                               APR_JSON_VALUE_STRING),
+                        p);
+
+    status = apr_json_encode(bb, NULL, NULL, json,
+                             APR_JSON_FLAGS_WHITESPACE, p);
+
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, status);
+
+    len = sizeof(buf);
+    status = apr_brigade_flatten(bb, buf, &len);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, status);
+    buf[len] = 0;
+
+    ABTS_STR_EQUAL(tc,
+                   "{\"null\":null,\"bool\":true,\"double\":12.340000,"
+                   "\"long\":1234,\"string\":\"str\"}",
+                   buf);
+}
+
 abts_suite *testjson(abts_suite * suite)
 {
     suite = ADD_SUITE(suite);
@@ -241,6 +287,7 @@ abts_suite *testjson(abts_suite * suite)
     abts_run_test(suite, test_json_overlay, NULL);
     abts_run_test(suite, test_json_object_iterate, NULL);
     abts_run_test(suite, test_json_array_iterate, NULL);
+    abts_run_test(suite, test_json_create, NULL);
 
     return suite;
 }

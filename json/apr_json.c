@@ -100,7 +100,7 @@ apr_json_value_t *apr_json_double_create(apr_pool_t *pool, double dnumber)
 
     if (json) {
         json->type = APR_JSON_DOUBLE;
-        json->value.lnumber = dnumber;
+        json->value.dnumber = dnumber;
     }
 
     return json;
