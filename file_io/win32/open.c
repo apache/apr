@@ -252,11 +252,8 @@ static apr_status_t make_sparse_file(apr_file_t *file)
         if (rv == APR_FROM_OS_ERROR(ERROR_IO_PENDING))
         {
             do {
-                res = WaitForSingleObject(file->pOverlapped->hEvent, 
-                                          (file->timeout > 0)
-                                            ? (DWORD)(file->timeout/1000)
-                                            : ((file->timeout == -1) 
-                                                 ? INFINITE : 0));
+                res = apr_wait_for_single_object(file->pOverlapped->hEvent,
+                                                 file->timeout);
             } while (res == WAIT_ABANDONED);
 
             if (res != WAIT_OBJECT_0) {

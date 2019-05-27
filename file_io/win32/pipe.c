@@ -146,7 +146,7 @@ static apr_status_t file_pipe_create(apr_file_t **in,
             dwOpenMode |= FILE_FLAG_OVERLAPPED;
             (*in)->pOverlapped =
                     (OVERLAPPED*) apr_pcalloc((*in)->pool, sizeof(OVERLAPPED));
-            (*in)->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+            (*in)->pOverlapped->hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
             (*in)->timeout = 0;
         }
         dwPipeMode = 0;
@@ -181,7 +181,7 @@ static apr_status_t file_pipe_create(apr_file_t **in,
             dwOpenMode |= FILE_FLAG_OVERLAPPED;
             (*out)->pOverlapped =
                     (OVERLAPPED*) apr_pcalloc((*out)->pool, sizeof(OVERLAPPED));
-            (*out)->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+            (*out)->pOverlapped->hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
             (*out)->timeout = 0;
         }
 

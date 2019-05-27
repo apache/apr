@@ -4,6 +4,9 @@ Changes for APR 2.0.0
   *) Windows platform: Use the native XML parser implementation (XmlLite)
      by default instead of libxml2 and expat. [Ivan Zhakov]
 
+  *) Fix handle leak in the Win32 apr_uid_current implementation.
+     PR 61165. [Ivan Zhakov]
+
   *) apr_rwlock_t: Use native Slim Reader/Writer (SRW) locks on Windows.
      PR 51360. [Ivan Zhakov]
 

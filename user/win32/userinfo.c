@@ -171,27 +171,38 @@ APR_DECLARE(apr_status_t) apr_uid_current(apr_uid_t *uid,
     DWORD needed;
     TOKEN_USER *usr;
     TOKEN_PRIMARY_GROUP *grp;
-    
+    apr_status_t rv;
+
     if(!OpenProcessToken(GetCurrentProcess(), STANDARD_RIGHTS_READ | READ_CONTROL | TOKEN_QUERY, &threadtok)) {
         return apr_get_os_error();
     }
 
     *uid = NULL;
     if (!GetTokenInformation(threadtok, TokenUser, NULL, 0, &needed)
-        && (GetLastError() == ERROR_INSUFFICIENT_BUFFER) 
+        && (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
         && (usr = apr_palloc(p, needed))
-        && GetTokenInformation(threadtok, TokenUser, usr, needed, &needed))
+        && GetTokenInformation(threadtok, TokenUser, usr, needed, &needed)) {
         *uid = usr->User.Sid;
-    else
-        return apr_get_os_error();
+    }
+    else {
+        rv = apr_get_os_error();
+        CloseHandle(threadtok);
+        return rv;
+    }
 
     if (!GetTokenInformation(threadtok, TokenPrimaryGroup, NULL, 0, &needed)
         && (GetLastError() == ERROR_INSUFFICIENT_BUFFER) 
         && (grp = apr_palloc(p, needed))
-        && GetTokenInformation(threadtok, TokenPrimaryGroup, grp, needed, &needed))
+        && GetTokenInformation(threadtok, TokenPrimaryGroup, grp, needed, &needed)) {
         *gid = grp->PrimaryGroup;
-    else
-        return apr_get_os_error();
+    }
+    else {
+        rv = apr_get_os_error();
+        CloseHandle(threadtok);
+        return rv;
+    }
+
+    CloseHandle(threadtok);
 
     return APR_SUCCESS;
 #endif 
