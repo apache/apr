@@ -81,15 +81,13 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
         rv = apr_get_os_error();
         if (rv == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
             /* Wait for the pending i/o, timeout converted from us to ms
-             * Note that we loop if someone gives up the event, since
-             * folks suggest that WAIT_ABANDONED isn't actually a result
-             * but an alert that ownership of the event has passed from
-             * one owner to a new proc/thread.
+             * Note that we loop if someone gives up the event.
+             *
+             * NOTE: We do not handle WAIT_ABANDONED here because they
+             * can be returned only when waiting for mutex.
              */
-            do {
-                res = apr_wait_for_single_object(file->pOverlapped->hEvent,
-                                                 file->timeout);
-            } while (res == WAIT_ABANDONED);
+            res = apr_wait_for_single_object(file->pOverlapped->hEvent,
+                                             file->timeout);
 
             /* There is one case that represents entirely
              * successful operations, otherwise we will cancel
