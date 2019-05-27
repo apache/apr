@@ -904,7 +904,7 @@ APR_DECLARE(apr_size_t) apr_thread_pool_thread_max_get(apr_thread_pool_t *me)
 APR_DECLARE(apr_size_t) apr_thread_pool_thread_max_set(apr_thread_pool_t *me,
                                                        apr_size_t cnt)
 {
-    unsigned int n;
+    apr_size_t n;
 
     me->thd_max = cnt;
     if (0 == cnt || me->thd_cnt <= cnt) {
