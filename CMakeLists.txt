@@ -24,16 +24,28 @@ FIND_PACKAGE(Expat)
 FIND_PACKAGE(LibXml2)
 FIND_PACKAGE(OpenSSL)
 
-IF(NOT EXPAT_FOUND AND NOT LIBXML2_FOUND)
-  MESSAGE(FATAL_ERROR "Either Expat or LibXml2 is required, but neither was found")
+IF(NOT APU_USE_EXPAT AND NOT APU_USE_LIBXML2 AND NOT APU_USE_XMLLITE)
+  IF(EXPAT_FOUND)
+    OPTION(APU_USE_EXPAT      "Use Expat"                    ON)
+    OPTION(APU_USE_LIBXML2    "Use LibXml2"                  OFF)
+    OPTION(APU_USE_XMLLITE    "Use XmlLite"                  OFF)
+  ELSEIF(LIBXML2_FOUND)
+    OPTION(APU_USE_EXPAT      "Use Expat"                    OFF)
+    OPTION(APU_USE_LIBXML2    "Use LibXml2"                  ON)
+    OPTION(APU_USE_XMLLITE    "Use XmlLite"                  OFF)
+  ELSE()
+    OPTION(APU_USE_EXPAT      "Use Expat"                    OFF)
+    OPTION(APU_USE_LIBXML2    "Use LibXml2"                  OFF)
+    OPTION(APU_USE_XMLLITE    "Use XmlLite"                  ON)
+  ENDIF()
 ENDIF()
 
-IF(EXPAT_FOUND)
-  OPTION(APU_USE_EXPAT      "Use Expat"                    ON)
-  OPTION(APU_USE_LIBXML2    "Use LibXml2"                  OFF)
-ELSE()
-  OPTION(APU_USE_EXPAT      "Use Expat"                    OFF)
-  OPTION(APU_USE_LIBXML2    "Use LibXml2"                  ON)
+IF(APU_USE_EXPAT AND NOT EXPAT_FOUND)
+  MESSAGE(FATAL_ERROR "Expat not found")
+ENDIF()
+
+IF(APU_USE_LIBXML2 AND NOT LIBXML2_FOUND)
+  MESSAGE(FATAL_ERROR "LibXml2 not found")
 ENDIF()
 
 OPTION(APR_INSTALL_PRIVATE_H  "Install selected private .h files (for httpd)"  OFF)
@@ -50,8 +62,8 @@ SET(LIBXML2_ICONV_INCLUDE_DIR   ""
 SET(LIBXML2_ICONV_LIBRARIES     ""
     CACHE STRING "iconv libraries to link with for libxml2")
 
-IF(NOT APU_USE_EXPAT AND NOT APU_USE_LIBXML2)
-  MESSAGE(FATAL_ERROR "Either Expat or LibXml2 must be selected")
+IF(NOT APU_USE_EXPAT AND NOT APU_USE_LIBXML2 AND NOT APU_USE_XMLLITE)
+  MESSAGE(FATAL_ERROR "Either Expat or LibXml2 or XmlLite must be selected")
 ENDIF()
 IF(APU_USE_EXPAT AND APU_USE_LIBXML2)
   MESSAGE(FATAL_ERROR "Only one of Expat and LibXml2 can be selected")
@@ -69,6 +81,7 @@ SET(apr_have_ipv6_10 0)
 SET(apu_have_crypto_10 0)
 SET(apu_use_libxml2_10 0)
 SET(apu_use_expat_10 0)
+SET(apu_use_xmllite_10 0)
 
 IF(APR_HAVE_IPV6)
   SET(apr_have_ipv6_10 1)
@@ -80,8 +93,10 @@ ENDIF()
 
 IF(APU_USE_EXPAT)
   SET(apu_use_expat_10 1)
-ELSE()
+ELSEIF(APU_USE_LIBXML2)
   SET(apu_use_libxml2_10 1)
+ELSE(APU_USE_XMLLITE)
+  SET(apu_use_xmllite_10 1)
 ENDIF()
 
 IF("${MIN_WINDOWS_VER}" STREQUAL "")
@@ -120,9 +135,12 @@ ADD_CUSTOM_TARGET(
 IF(APU_USE_EXPAT)
   SET(XMLLIB_INCLUDE_DIR ${EXPAT_INCLUDE_DIRS})
   SET(XMLLIB_LIBRARIES   ${EXPAT_LIBRARIES})
-ELSE()
+ELSEIF(APU_USE_LIBXML2)
   SET(XMLLIB_INCLUDE_DIR "${LIBXML2_INCLUDE_DIR};${LIBXML2_ICONV_INCLUDE_DIR}")
   SET(XMLLIB_LIBRARIES   "${LIBXML2_LIBRARIES};${LIBXML2_ICONV_LIBRARIES}")
+ELSEIF(APU_USE_XMLLITE)
+  SET(XMLLIB_INCLUDE_DIR "")
+  SET(XMLLIB_LIBRARIES   "xmllite.lib")
 ENDIF()
 
 # Generated .h files are stored in PROJECT_BINARY_DIR, not the
@@ -354,6 +372,7 @@ SET(APR_SOURCES
   xml/apr_xml.c
   xml/apr_xml_expat.c
   xml/apr_xml_libxml2.c
+  xml/apr_xml_xmllite.c
 )
 
 SET(APR_TEST_SOURCES
@@ -634,6 +653,7 @@ MESSAGE(STATUS "  IPv6 ............................ : ${APR_HAVE_IPV6}")
 MESSAGE(STATUS "  DBD ODBC driver ................. : ${APU_HAVE_ODBC}")
 MESSAGE(STATUS "  Use Expat ....................... : ${APU_USE_EXPAT}")
 MESSAGE(STATUS "  Use LibXml2 ..................... : ${APU_USE_LIBXML2}")
+MESSAGE(STATUS "  Use XmlLite ..................... : ${APU_USE_XMLLITE}")
 MESSAGE(STATUS "  Minimum Windows version ......... : ${MIN_WINDOWS_VER}")
 MESSAGE(STATUS "  Library files for XML ........... : ${XMLLIB_LIBRARIES}")
 MESSAGE(STATUS "  Build test suite ................ : ${APR_BUILD_TESTAPR}")
