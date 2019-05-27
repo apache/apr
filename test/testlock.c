@@ -349,7 +349,10 @@ static void test_timeoutmutex(abts_case *tc, void *data)
     apr_time_t begin, end;
     int i;
 
-    s = apr_thread_mutex_create(&timeout_mutex, APR_THREAD_MUTEX_TIMED, p);
+    /* This test assumes unnested mutex. */
+    s = apr_thread_mutex_create(&timeout_mutex,
+                                APR_THREAD_MUTEX_TIMED |
+                                APR_THREAD_MUTEX_UNNESTED, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, s);
     ABTS_PTR_NOTNULL(tc, timeout_mutex);
 
