@@ -162,11 +162,7 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
     if (flags & APR_POLLSET_THREADSAFE) {                
         return APR_ENOTIMPL;
     }
-#ifdef WIN32
-    if (!APR_HAVE_LATE_DLL_FUNC(WSAPoll)) {
-        return APR_ENOTIMPL;
-    }
-#endif
+
     pollset->p = apr_palloc(p, sizeof(apr_pollset_private_t));
     pollset->p->pollset = apr_palloc(p, size * sizeof(struct pollfd));
     pollset->p->query_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
@@ -322,11 +318,6 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
     return APR_ENOTIMPL;
 #else
     pollcb->fd = -1;
-#ifdef WIN32
-    if (!APR_HAVE_LATE_DLL_FUNC(WSAPoll)) {
-        return APR_ENOTIMPL;
-    }
-#endif
 
     pollcb->pollset.ps = apr_palloc(p, size * sizeof(struct pollfd));
     pollcb->copyset = apr_palloc(p, size * sizeof(apr_pollfd_t *));
