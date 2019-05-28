@@ -15,9 +15,9 @@
  */
 
 #include "apr.h"
-#include "apr_arch_utf8.h"
 
 #if APU_USE_XMLLITE
+#include "apr_arch_utf8.h"
 #include "apr_xml.h"
 
 typedef struct xmllite_parser_s* XML_Parser;
