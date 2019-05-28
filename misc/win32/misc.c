@@ -190,32 +190,64 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
 
 DWORD apr_wait_for_single_object(HANDLE handle, apr_interval_time_t timeout)
 {
-    apr_interval_time_t t = timeout;
-    DWORD res;
-    DWORD timeout_ms = 0;
+    if (APR_HAVE_LATE_DLL_FUNC(NtWaitForSingleObject)){
+        LONG ntstatus;
 
-    do {
-        if (t < 0) {
-            timeout_ms = INFINITE;
+        if (timeout < 0) {
+            ntstatus = apr_winapi_NtWaitForSingleObject(handle, FALSE, NULL);
         }
-        else if (t > 0) {
-            /* Given timeout is 64bit usecs whereas Windows timeouts are
-             * 32bit msecs and below INFINITE (2^32 - 1), so we may need
-             * multiple timed out waits...
-             */
-            if (t > apr_time_from_msec(INFINITE - 1)) {
-                timeout_ms = INFINITE - 1;
-                t -= apr_time_from_msec(INFINITE - 1);
-            }
-            else {
-                timeout_ms = (DWORD)apr_time_as_msec(t);
-                t = 0;
-            }
-        }
-        res = WaitForSingleObject(handle, timeout_ms);
-    } while (res == WAIT_TIMEOUT && t > 0);
+        else {
+            LARGE_INTEGER timeout_100ns;
 
-    return res;
+            /* Negative timeout means relative time. In 100 nanoseconds. */
+            timeout_100ns.QuadPart = -timeout * 10;
+            ntstatus = apr_winapi_NtWaitForSingleObject(handle, FALSE,
+                                                        &timeout_100ns);
+        }
+
+        switch(ntstatus)
+        {
+        case STATUS_WAIT_0:
+            return WAIT_OBJECT_0;
+        case STATUS_ABANDONED_WAIT_0:
+            return WAIT_ABANDONED_0;
+        case STATUS_TIMEOUT:
+            return WAIT_TIMEOUT;
+        case STATUS_USER_APC:
+            return WAIT_IO_COMPLETION;
+        default:
+            SetLastError(ERROR_INVALID_HANDLE);
+            return WAIT_FAILED;
+        }
+    }
+    else {
+        apr_interval_time_t t = timeout;
+        DWORD res;
+        DWORD timeout_ms = 0;
+
+        do {
+            if (t < 0) {
+                timeout_ms = INFINITE;
+            }
+            else if (t > 0) {
+                /* Given timeout is 64bit usecs whereas Windows timeouts are
+                 * 32bit msecs and below INFINITE (2^32 - 1), so we may need
+                 * multiple timed out waits...
+                 */
+                if (t > apr_time_from_msec(INFINITE - 1)) {
+                    timeout_ms = INFINITE - 1;
+                    t -= apr_time_from_msec(INFINITE - 1);
+                }
+                else {
+                    timeout_ms = (DWORD)apr_time_as_msec(t);
+                    t = 0;
+                }
+            }
+            res = WaitForSingleObject(handle, timeout_ms);
+        } while (res == WAIT_TIMEOUT && t > 0);
+
+        return res;
+    }
 }
 
 /* Declared in include/arch/win32/apr_dbg_win32_handles.h

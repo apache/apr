@@ -276,6 +276,15 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, NtQueryObject, 0, (
     (hObject, info, pOI, LenOI, pSizeOI));
 #define QueryObject apr_winapi_NtQueryObject
 
+/* https://docs.microsoft.com/en-us/windows/desktop/api/winternl/nf-winternl-ntwaitforsingleobject */
+APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, NtWaitForSingleObject, 0, (
+    HANDLE Handle,          /* The handle to the wait object. */
+    BOOLEAN Alertable,      /* Specifies whether an alert can be delivered when
+                               the object is waiting. */
+    PLARGE_INTEGER Timeout),/* A pointer to an absolute or relative time over
+                               which the wait is to occur.  */
+    (Handle, Alertable, Timeout));
+
 #ifdef CreateToolhelp32Snapshot
 #undef CreateToolhelp32Snapshot
 #endif
