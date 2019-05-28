@@ -194,7 +194,7 @@ static void wait_pipe(abts_case *tc, void *data)
     apr_time_t end_time;
     apr_size_t nbytes;
 
-    rv = apr_file_pipe_create(&readp, &writep, p);
+    rv = apr_file_pipe_create_ex(&readp, &writep, APR_WRITE_BLOCK, p);
     APR_ASSERT_SUCCESS(tc, "Couldn't create pipe", rv);
 
     rv = apr_file_pipe_timeout_set(readp, delay);
@@ -202,6 +202,11 @@ static void wait_pipe(abts_case *tc, void *data)
 
     start_time = apr_time_now();
     rv = apr_file_pipe_wait(readp, APR_WAIT_READ);
+
+    if (rv == APR_ENOTIMPL) {
+        ABTS_NOT_IMPL(tc, "apr_file_pipe_wait() not implemented");
+        return;
+    }
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
 
     end_time = apr_time_now();
