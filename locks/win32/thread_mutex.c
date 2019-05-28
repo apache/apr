@@ -59,24 +59,11 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
         (*mutex)->handle = CreateMutex(NULL, FALSE, NULL);
     }
     else {
-#if APR_HAS_UNICODE_FS
         /* Critical Sections are terrific, performance-wise, on NT.
-         * On Win9x, we cannot 'try' on a critical section, so we 
-         * use a [slower] mutex object, instead.
          */
-        IF_WIN_OS_IS_UNICODE {
-            InitializeCriticalSection(&(*mutex)->section);
-            (*mutex)->type = thread_mutex_critical_section;
-            (*mutex)->handle = NULL;
-        }
-#endif
-#if APR_HAS_ANSI_FS
-        ELSE_WIN_OS_IS_ANSI {
-            (*mutex)->type = thread_mutex_nested_mutex;
-            (*mutex)->handle = CreateMutex(NULL, FALSE, NULL);
-
-        }
-#endif
+        InitializeCriticalSection(&(*mutex)->section);
+        (*mutex)->type = thread_mutex_critical_section;
+        (*mutex)->handle = NULL;
     }
 
     apr_pool_cleanup_register((*mutex)->pool, (*mutex), thread_mutex_cleanup,
