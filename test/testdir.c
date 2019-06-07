@@ -378,6 +378,57 @@ static void test_rmkdir_nocwd(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "remove cwd", apr_dir_remove(path, p));
 }
 
+static void test_readmore_info(abts_case* tc, void* data)
+{
+    apr_status_t rv;
+    apr_dir_t* dir;
+    apr_file_t* thefile;
+    apr_finfo_t finfo;
+    /* Ask for information that is not stored in dirent. */
+    apr_uint32_t wanted = APR_FINFO_MIN | APR_FINFO_OWNER;
+
+    rv = apr_dir_make("dir1",
+                      APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
+                      p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_file_open(&thefile, "dir1/file1",
+                       APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE,
+                       APR_FPROT_OS_DEFAULT, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    rv = apr_file_close(thefile);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_file_open(&thefile, "dir1/file2",
+                       APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE,
+                       APR_FPROT_OS_DEFAULT, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    rv = apr_file_close(thefile);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_dir_open(&dir, "dir1", p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    while (1) {
+        rv = apr_dir_read(&finfo, wanted, dir);
+        if (APR_STATUS_IS_ENOENT(rv))
+            break;
+
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+        ABTS_TRUE(tc, finfo.valid & wanted);
+    }
+
+    apr_dir_close(dir);
+
+    rv = apr_file_remove("dir1/file1", p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_file_remove("dir1/file2", p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_dir_remove("dir1", p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
 
 abts_suite *testdir(abts_suite *suite)
 {
@@ -399,6 +450,7 @@ abts_suite *testdir(abts_suite *suite)
     abts_run_test(suite, test_opendir_notthere, NULL);
     abts_run_test(suite, test_closedir, NULL);
     abts_run_test(suite, test_uncleared_errno, NULL);
+    abts_run_test(suite, test_readmore_info, NULL);
 
     return suite;
 }

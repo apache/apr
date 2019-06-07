@@ -172,8 +172,18 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         /* Almost all our work is done.  Tack on the wide file name
          * to the end of the wdirname (already / delimited)
          */
-        if (!eos)
+        if (!eos) {
+            /* It's more efficient to store WDIRNAME in THEDIR,
+             * but let's make simple fix first. */
+            if ((rv = utf8_to_unicode_path(wdirname, sizeof(wdirname)
+                                                     / sizeof(apr_wchar_t),
+                                           thedir->dirname))) {
+                return rv;
+            }
+
             eos = wcschr(wdirname, '\0');
+        }
+
         wcscpy(eos, thedir->w.entry->cFileName);
         rv = more_finfo(finfo, wdirname, wanted, MORE_OF_WFSPEC);
         eos[0] = '\0';
