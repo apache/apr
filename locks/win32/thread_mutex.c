@@ -48,11 +48,10 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
     (*mutex)->pool = pool;
 
     if (flags & APR_THREAD_MUTEX_UNNESTED) {
-        /* Use an auto-reset signaled event, ready to accept one
-         * waiting thread.
+        /* Use semaphore for unnested mutex.
          */
-        (*mutex)->type = thread_mutex_unnested_event;
-        (*mutex)->handle = CreateEvent(NULL, FALSE, TRUE, NULL);
+        (*mutex)->type = thread_mutex_unnested_semaphore;
+        (*mutex)->handle = CreateSemaphore(NULL, 1, 1, NULL);
     }
     else if (flags & APR_THREAD_MUTEX_TIMED) {
         (*mutex)->type = thread_mutex_nested_mutex;
@@ -123,8 +122,8 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
     if (mutex->type == thread_mutex_critical_section) {
         LeaveCriticalSection(&mutex->section);
     }
-    else if (mutex->type == thread_mutex_unnested_event) {
-        if (!SetEvent(mutex->handle)) {
+    else if (mutex->type == thread_mutex_unnested_semaphore) {
+        if (!ReleaseSemaphore(mutex->handle, 1, NULL)) {
             return apr_get_os_error();
         }
     }
