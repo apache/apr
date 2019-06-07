@@ -65,7 +65,7 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
 
     /* Create a buffer for the longest file name we will ever see 
         */
-    (*new)->w.entry = apr_pcalloc(pool, sizeof(WIN32_FIND_DATAW));
+    (*new)->entry = apr_pcalloc(pool, sizeof(WIN32_FIND_DATAW));
     (*new)->name = apr_pcalloc(pool, APR_FILE_MAX * 3 + 1);
     (*new)->rootlen = len - 1;
     (*new)->pool = pool;
@@ -126,7 +126,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         }
 
         thedir->dirhand = FindFirstFileExW(wdirname, info_level,
-                                           thedir->w.entry,
+                                           thedir->entry,
                                            FindExSearchNameMatch, NULL,
                                            0);
         eos[0] = '\0';
@@ -143,23 +143,23 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
          */
         thedir->bof = 0; 
     }
-    else if (!FindNextFileW(thedir->dirhand, thedir->w.entry)) {
+    else if (!FindNextFileW(thedir->dirhand, thedir->entry)) {
         return apr_get_os_error();
     }
 
     while (thedir->rootlen &&
-           thedir->rootlen + wcslen(thedir->w.entry->cFileName) >= APR_PATH_MAX)
+           thedir->rootlen + wcslen(thedir->entry->cFileName) >= APR_PATH_MAX)
     {
-        if (!FindNextFileW(thedir->dirhand, thedir->w.entry)) {
+        if (!FindNextFileW(thedir->dirhand, thedir->entry)) {
             return apr_get_os_error();
         }
     }
     if ((rv = unicode_to_utf8_path(thedir->name, APR_FILE_MAX * 3 + 1, 
-                                   thedir->w.entry->cFileName)))
+                                   thedir->entry->cFileName)))
         return rv;
     fname = thedir->name;
 
-    fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) thedir->w.entry,
+    fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) thedir->entry,
                     0, 1, fname, wanted);
     finfo->pool = thedir->pool;
 
@@ -184,7 +184,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
             eos = wcschr(wdirname, '\0');
         }
 
-        wcscpy(eos, thedir->w.entry->cFileName);
+        wcscpy(eos, thedir->entry->cFileName);
         rv = more_finfo(finfo, wdirname, wanted, MORE_OF_WFSPEC);
         eos[0] = '\0';
         return rv;
