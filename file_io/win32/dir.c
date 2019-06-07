@@ -105,8 +105,6 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
      */
     if (thedir->dirhand == INVALID_HANDLE_VALUE) 
     {
-        apr_status_t rv;
-
         if ((rv = utf8_to_unicode_path(wdirname, sizeof(wdirname) 
                                                 / sizeof(apr_wchar_t), 
                                         thedir->dirname))) {
