@@ -63,31 +63,10 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
     (*new)->dirname[len++] = '\0';
     (*new)->dirname[len] = '\0';
 
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        /* Create a buffer for the longest file name we will ever see 
-         */
-        (*new)->w.entry = apr_pcalloc(pool, sizeof(WIN32_FIND_DATAW));
-        (*new)->name = apr_pcalloc(pool, APR_FILE_MAX * 3 + 1);        
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        /* Note that we won't open a directory that is greater than MAX_PATH,
-         * counting the additional '/' '*' wildcard suffix.  If a * won't fit
-         * then neither will any other file name within the directory.
-         * The length not including the trailing '*' is stored as rootlen, to
-         * skip over all paths which are too long.
-         */
-        if (len >= APR_PATH_MAX) {
-            (*new) = NULL;
-            return APR_ENAMETOOLONG;
-        }
-        (*new)->n.entry = apr_pcalloc(pool, sizeof(WIN32_FIND_DATAW));
-    }
-#endif
+    /* Create a buffer for the longest file name we will ever see 
+        */
+    (*new)->w.entry = apr_pcalloc(pool, sizeof(WIN32_FIND_DATAW));
+    (*new)->name = apr_pcalloc(pool, APR_FILE_MAX * 3 + 1);
     (*new)->rootlen = len - 1;
     (*new)->pool = pool;
     (*new)->dirhand = INVALID_HANDLE_VALUE;
@@ -114,116 +93,73 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
 {
     apr_status_t rv;
     char *fname;
+    apr_wchar_t wdirname[APR_PATH_MAX];
+    apr_wchar_t* eos = NULL;
+
     /* The while loops below allow us to skip all invalid file names, so that
      * we aren't reporting any files where their absolute paths are too long.
      */
-#if APR_HAS_UNICODE_FS
-    apr_wchar_t wdirname[APR_PATH_MAX];
-    apr_wchar_t *eos = NULL;
-    IF_WIN_OS_IS_UNICODE
+
+    /* This code path is always be invoked by apr_dir_open or
+     * apr_dir_rewind, so return without filling out the finfo.
+     */
+    if (thedir->dirhand == INVALID_HANDLE_VALUE) 
     {
-        /* This code path is always be invoked by apr_dir_open or
-         * apr_dir_rewind, so return without filling out the finfo.
-         */
-        if (thedir->dirhand == INVALID_HANDLE_VALUE) 
-        {
-            apr_status_t rv;
-            FINDEX_INFO_LEVELS info_level;
+        apr_status_t rv;
+        FINDEX_INFO_LEVELS info_level;
 
-            if ((rv = utf8_to_unicode_path(wdirname, sizeof(wdirname) 
-                                                   / sizeof(apr_wchar_t), 
-                                           thedir->dirname))) {
-                return rv;
-            }
-            eos = wcschr(wdirname, '\0');
-            eos[0] = '*';
-            eos[1] = '\0';
-
-            /* Do not request short file names on Windows 7 and later. */
-            if (apr_os_level >= APR_WIN_7) {
-                info_level = FindExInfoBasic;
-            }
-            else {
-                info_level = FindExInfoStandard;
-            }
-
-            thedir->dirhand = FindFirstFileExW(wdirname, info_level,
-                                               thedir->w.entry,
-                                               FindExSearchNameMatch, NULL,
-                                               0);
-            eos[0] = '\0';
-            if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-                return apr_get_os_error();
-            }
-            thedir->bof = 1;
-            return APR_SUCCESS;
-        }
-        else if (thedir->bof) {
-            /* Noop - we already called FindFirstFileW from
-             * either apr_dir_open or apr_dir_rewind ... use
-             * that first record.
-             */
-            thedir->bof = 0; 
-        }
-        else if (!FindNextFileW(thedir->dirhand, thedir->w.entry)) {
-            return apr_get_os_error();
-        }
-
-        while (thedir->rootlen &&
-               thedir->rootlen + wcslen(thedir->w.entry->cFileName) >= APR_PATH_MAX)
-        {
-            if (!FindNextFileW(thedir->dirhand, thedir->w.entry)) {
-                return apr_get_os_error();
-            }
-        }
-        if ((rv = unicode_to_utf8_path(thedir->name, APR_FILE_MAX * 3 + 1, 
-                                       thedir->w.entry->cFileName)))
+        if ((rv = utf8_to_unicode_path(wdirname, sizeof(wdirname) 
+                                                / sizeof(apr_wchar_t), 
+                                        thedir->dirname))) {
             return rv;
-        fname = thedir->name;
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        /* This code path is always be invoked by apr_dir_open or 
-         * apr_dir_rewind, so return without filling out the finfo.
-         */
+        }
+        eos = wcschr(wdirname, '\0');
+        eos[0] = '*';
+        eos[1] = '\0';
+
+        /* Do not request short file names on Windows 7 and later. */
+        if (apr_os_level >= APR_WIN_7) {
+            info_level = FindExInfoBasic;
+        }
+        else {
+            info_level = FindExInfoStandard;
+        }
+
+        thedir->dirhand = FindFirstFileExW(wdirname, info_level,
+                                           thedir->w.entry,
+                                           FindExSearchNameMatch, NULL,
+                                           0);
+        eos[0] = '\0';
         if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-            /* '/' terminated, so add the '*' and pop it when we finish */
-            char *eop = strchr(thedir->dirname, '\0');
-            eop[0] = '*';
-            eop[1] = '\0';
-            thedir->dirhand = FindFirstFileA(thedir->dirname, 
-                                             thedir->n.entry);
-            eop[0] = '\0';
-            if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-                return apr_get_os_error();
-            }
-            thedir->bof = 1;
-            return APR_SUCCESS;
-        }
-        else if (thedir->bof) {
-            /* Noop - we already called FindFirstFileW from
-             * either apr_dir_open or apr_dir_rewind ... use
-             * that first record.
-             */
-            thedir->bof = 0; 
-        }
-        else if (!FindNextFileA(thedir->dirhand, thedir->n.entry)) {
             return apr_get_os_error();
         }
-        while (thedir->rootlen &&
-               thedir->rootlen + strlen(thedir->n.entry->cFileName) >= MAX_PATH)
-        {
-            if (!FindNextFileA(thedir->dirhand, thedir->n.entry)) {
-                return apr_get_os_error();
-            }
-        }
-        fname = thedir->n.entry->cFileName;
+        thedir->bof = 1;
+        return APR_SUCCESS;
     }
-#endif
+    else if (thedir->bof) {
+        /* Noop - we already called FindFirstFileW from
+         * either apr_dir_open or apr_dir_rewind ... use
+         * that first record.
+         */
+        thedir->bof = 0; 
+    }
+    else if (!FindNextFileW(thedir->dirhand, thedir->w.entry)) {
+        return apr_get_os_error();
+    }
 
-    fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) thedir->w.entry, 
+    while (thedir->rootlen &&
+           thedir->rootlen + wcslen(thedir->w.entry->cFileName) >= APR_PATH_MAX)
+    {
+        if (!FindNextFileW(thedir->dirhand, thedir->w.entry)) {
+            return apr_get_os_error();
+        }
+    }
+    if ((rv = unicode_to_utf8_path(thedir->name, APR_FILE_MAX * 3 + 1, 
+                                   thedir->w.entry->cFileName)))
+        return rv;
+    fname = thedir->name;
+
+    fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) thedir->w.entry,
                     0, 1, fname, wanted);
     finfo->pool = thedir->pool;
 
@@ -233,39 +169,15 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     if (wanted &= ~finfo->valid) {
         /* Go back and get more_info if we can't answer the whole inquiry
          */
-#if APR_HAS_UNICODE_FS
-        IF_WIN_OS_IS_UNICODE
-        {
-            /* Almost all our work is done.  Tack on the wide file name
-             * to the end of the wdirname (already / delimited)
-             */
-            if (!eos)
-                eos = wcschr(wdirname, '\0');
-            wcscpy(eos, thedir->w.entry->cFileName);
-            rv = more_finfo(finfo, wdirname, wanted, MORE_OF_WFSPEC);
-            eos[0] = '\0';
-            return rv;
-        }
-#endif
-#if APR_HAS_ANSI_FS
-        ELSE_WIN_OS_IS_ANSI
-        {
-#if APR_HAS_UNICODE_FS
-            /* Don't waste stack space on a second buffer, the one we set
-             * aside for the wide directory name is twice what we need.
-             */
-            char *fspec = (char*)wdirname;
-#else
-            char fspec[APR_PATH_MAX];
-#endif
-            apr_size_t dirlen = strlen(thedir->dirname);
-            if (dirlen >= sizeof(fspec))
-                dirlen = sizeof(fspec) - 1;
-            apr_cpystrn(fspec, thedir->dirname, sizeof(fspec));
-            apr_cpystrn(fspec + dirlen, fname, sizeof(fspec) - dirlen);
-            return more_finfo(finfo, fspec, wanted, MORE_OF_FSPEC);
-        }
-#endif
+        /* Almost all our work is done.  Tack on the wide file name
+         * to the end of the wdirname (already / delimited)
+         */
+        if (!eos)
+            eos = wcschr(wdirname, '\0');
+        wcscpy(eos, thedir->w.entry->cFileName);
+        rv = more_finfo(finfo, wdirname, wanted, MORE_OF_WFSPEC);
+        eos[0] = '\0';
+        return rv;
     }
 
     return APR_SUCCESS;
@@ -289,27 +201,17 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *dir)
 APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm,
                                        apr_pool_t *pool)
 {
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        apr_wchar_t wpath[APR_PATH_MAX];
-        apr_status_t rv;
-        if ((rv = utf8_to_unicode_path(wpath,
-                                       sizeof(wpath) / sizeof(apr_wchar_t),
-                                       path))) {
-            return rv;
-        }
-        if (!CreateDirectoryW(wpath, NULL)) {
-            return apr_get_os_error();
-        }
+    apr_wchar_t wpath[APR_PATH_MAX];
+    apr_status_t rv;
+    if ((rv = utf8_to_unicode_path(wpath,
+                                    sizeof(wpath) / sizeof(apr_wchar_t),
+                                    path))) {
+        return rv;
     }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-        if (!CreateDirectory(path, NULL)) {
-            return apr_get_os_error();
-        }
-#endif
+    if (!CreateDirectoryW(wpath, NULL)) {
+        return apr_get_os_error();
+    }
+
     return APR_SUCCESS;
 }
 
@@ -380,27 +282,18 @@ APR_DECLARE(apr_status_t) apr_dir_make_recursive(const char *path,
 
 APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *pool)
 {
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        apr_wchar_t wpath[APR_PATH_MAX];
-        apr_status_t rv;
-        if ((rv = utf8_to_unicode_path(wpath,
-                                       sizeof(wpath) / sizeof(apr_wchar_t),
-                                       path))) {
-            return rv;
-        }
-        if (!RemoveDirectoryW(wpath)) {
-            return apr_get_os_error();
-        }
+    apr_wchar_t wpath[APR_PATH_MAX];
+    apr_status_t rv;
+
+    if ((rv = utf8_to_unicode_path(wpath,
+                                    sizeof(wpath) / sizeof(apr_wchar_t),
+                                    path))) {
+        return rv;
     }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-        if (!RemoveDirectory(path)) {
-            return apr_get_os_error();
-        }
-#endif
+    if (!RemoveDirectoryW(wpath)) {
+        return apr_get_os_error();
+    }
+
     return APR_SUCCESS;
 }
 
