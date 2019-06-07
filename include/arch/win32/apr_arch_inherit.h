@@ -24,20 +24,20 @@
 #define APR_IMPLEMENT_INHERIT_SET(name, flag, pool, cleanup)        \
 APR_DECLARE(apr_status_t) apr_##name##_inherit_set(apr_##name##_t *the##name) \
 {                                                                   \
-/*  if (!SetHandleInformation(the##name->filehand,                  \
- *                            HANDLE_FLAG_INHERIT,                  \
- *                            HANDLE_FLAG_INHERIT))                 \
- *      return apr_get_os_error();                                  \
- */ return APR_SUCCESS;                                             \
+    if (!SetHandleInformation(the##name->filehand,                  \
+                              HANDLE_FLAG_INHERIT,                  \
+                              HANDLE_FLAG_INHERIT))                 \
+        return apr_get_os_error();                                  \
+    return APR_SUCCESS;                                             \
 }
 
 #define APR_IMPLEMENT_INHERIT_UNSET(name, flag, pool, cleanup)      \
 APR_DECLARE(apr_status_t) apr_##name##_inherit_unset(apr_##name##_t *the##name)\
 {                                                                   \
-/*  if (!SetHandleInformation(the##name->filehand,                  \
- *                            HANDLE_FLAG_INHERIT, 0))              \
- *      return apr_get_os_error();                                  \
- */ return APR_SUCCESS;                                             \
+    if (!SetHandleInformation(the##name->filehand,                  \
+                              HANDLE_FLAG_INHERIT, 0))              \
+        return apr_get_os_error();                                  \
+    return APR_SUCCESS;                                             \
 }
 
 
