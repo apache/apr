@@ -199,18 +199,7 @@ struct apr_dir_t {
     apr_size_t rootlen;
     char *dirname;
     char *name;
-    union {
-#if APR_HAS_UNICODE_FS
-        struct {
-            WIN32_FIND_DATAW *entry;
-        } w;
-#endif
-#if APR_HAS_ANSI_FS
-        struct {
-            WIN32_FIND_DATAA *entry;
-        } n;
-#endif        
-    };
+    WIN32_FIND_DATAW *entry;
     int bof;
 };
 
