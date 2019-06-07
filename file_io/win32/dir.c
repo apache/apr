@@ -106,7 +106,6 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     if (thedir->dirhand == INVALID_HANDLE_VALUE) 
     {
         apr_status_t rv;
-        FINDEX_INFO_LEVELS info_level;
 
         if ((rv = utf8_to_unicode_path(wdirname, sizeof(wdirname) 
                                                 / sizeof(apr_wchar_t), 
@@ -117,15 +116,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         eos[0] = '*';
         eos[1] = '\0';
 
-        /* Do not request short file names on Windows 7 and later. */
-        if (apr_os_level >= APR_WIN_7) {
-            info_level = FindExInfoBasic;
-        }
-        else {
-            info_level = FindExInfoStandard;
-        }
-
-        thedir->dirhand = FindFirstFileExW(wdirname, info_level,
+        thedir->dirhand = FindFirstFileExW(wdirname, FindExInfoBasic,
                                            thedir->entry,
                                            FindExSearchNameMatch, NULL,
                                            0);
