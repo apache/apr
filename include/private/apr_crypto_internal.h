@@ -27,6 +27,16 @@ extern "C" {
 
 #if APU_HAVE_CRYPTO
 
+/**
+ * Structure representing the streaming context for the CPRNG.
+ */
+typedef struct cprng_stream_ctx_t cprng_stream_ctx_t;
+
+/**
+ * Key size for the CPRNG.
+ */
+#define CPRNG_KEY_SIZE 32
+
 struct apr_crypto_driver_t {
 
     /** name */
@@ -362,6 +372,33 @@ struct apr_crypto_driver_t {
      */
     apr_status_t (*key)(apr_crypto_key_t **key, const apr_crypto_key_rec_t *rec,
             const apr_crypto_t *f, apr_pool_t *p);
+
+    /**
+     * @brief Create the context for encrypting the CPRNG stream.
+     * @param pctx The pointer where the context will be returned.
+     * @param f The crypto context to use.
+     * @param cipher The cipher to use.
+     * @param pool The pool to use.
+     */
+    apr_status_t (*cprng_stream_ctx_make)(cprng_stream_ctx_t **pctx, apr_crypto_t *f,
+            apr_crypto_cipher_e cipher, apr_pool_t *pool);
+
+    /**
+     * @brief Free the context for encrypting the CPRNG stream.
+     * @param ctx The context to free.
+     */
+    void (*cprng_stream_ctx_free)(cprng_stream_ctx_t *ctx);
+
+    /**
+     * @brief Return further encrypted bytes, rekeying as necessary.
+     * @param pctx The context.
+     * @param key The key to use while rekeying.
+     * @param to Encrypted bytes are written here.
+     * @param n Length of encrypted bytes.
+     * @param z The IV to use.
+     */
+    apr_status_t (*cprng_stream_ctx_bytes)(cprng_stream_ctx_t **pctx, unsigned char *key,
+            unsigned char *to, apr_size_t n, const unsigned char *z);
 
 };
 

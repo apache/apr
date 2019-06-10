@@ -159,6 +159,16 @@ typedef struct apr_crypto_block_key_digest_t {
 } apr_crypto_block_key_digest_t;
 
 /**
+ * Types of ciphers supported by the apr_
+ */
+typedef enum
+{   
+    APR_CRYPTO_CIPHER_AUTO, /** Choose the recommended cipher / autodetect the cipher */
+    APR_CRYPTO_CIPHER_AES_256_CTR, /** AES 256 - CTR mode */
+    APR_CRYPTO_CIPHER_CHACHA20_CTR, /** ChaCha20 - CTR mode */
+} apr_crypto_cipher_e;
+
+/**
  * Structure representing a backend crypto driver.
  *
  * This structure is created with apr_crypto_get_driver().
@@ -1007,6 +1017,9 @@ typedef struct apr_crypto_prng_t apr_crypto_prng_t;
  * @brief Perform global initialisation. Call once only.
  *
  * @param pool Used to allocate memory and register cleanups
+ * @param crypto The crypto context to use. If NULL, one will be created from
+ *               the recommended crypto implementation.
+ * @param cipher The cipher to use.
  * @param bufsize The size of the buffer used to cache upcoming random bytes.
  * @param seed A custom seed of \ref APR_CRYPTO_PRNG_SEED_SIZE bytes,
  *             or NULL for the seed to be gathered from system entropy.
@@ -1015,10 +1028,9 @@ typedef struct apr_crypto_prng_t apr_crypto_prng_t;
  * @return APR_EREINIT if called more than once,
  *         any system error (APR_ENOMEM, ...).
  */
-APR_DECLARE(apr_status_t) apr_crypto_prng_init(apr_pool_t *pool,
-                                               apr_size_t bufsize,
-                                               const unsigned char seed[],
-                                               int flags);
+APR_DECLARE(apr_status_t) apr_crypto_prng_init(apr_pool_t *pool, apr_crypto_t *crypto,
+        apr_crypto_cipher_e cipher, apr_size_t bufsize, const unsigned char seed[], int flags);
+
 /**
  * @brief Terminate global initialisation if needed, before automatic cleanups.
  *
@@ -1048,13 +1060,16 @@ APR_DECLARE(apr_status_t) apr_crypto_random_bytes(void *buf, apr_size_t len);
  *         any system error (APR_ENOMEM, ...).
  */
 APR_DECLARE(apr_status_t) apr_crypto_random_thread_bytes(void *buf,
-                                                         apr_size_t len);
+        apr_size_t len);
 #endif
 
 /**
  * @brief Create a standalone CPRNG.
  *
  * @param pcprng The CPRNG created.
+ * @param crypto The crypto context to use. If NULL, one will be created from
+ *               the recommended crypto implementation.
+ * @param cipher The cipher to use.
  * @param bufsize The size of the buffer used to cache upcoming random bytes.
  * @param flags \ref APR_CRYPTO_PRNG_LOCKED to control concurrent accesses,
  *              or zero.
@@ -1067,12 +1082,12 @@ APR_DECLARE(apr_status_t) apr_crypto_random_thread_bytes(void *buf,
  *             \ref apr_crypto_prng_destroy() or some memory would leak.
  * @return APR_EINVAL if \ref bufsize is too large or flags are unknown,
  *         APR_ENOTIMPL if \ref APR_CRYPTO_PRNG_LOCKED with !APR_HAS_THREADS,
+ *         APR_ENOCIPHER if neither Chacha20 nor AES-256-CTR are available,
  *         any system error (APR_ENOMEM, ...).
  */
 APR_DECLARE(apr_status_t) apr_crypto_prng_create(apr_crypto_prng_t **pcprng,
-                                                 apr_size_t bufsize, int flags,
-                                                 const unsigned char seed[],
-                                                 apr_pool_t *pool);
+        apr_crypto_t *crypto, apr_crypto_cipher_e cipher, apr_size_t bufsize,
+        int flags, const unsigned char seed[], apr_pool_t *pool);
 
 /**
  * @brief Destroy a standalone CPRNG.

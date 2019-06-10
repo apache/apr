@@ -41,6 +41,7 @@
 #include "apu.h"
 
 #include "apr_crypto.h"
+#include "apr_crypto_internal.h"
 
 #if APU_HAVE_CRYPTO
 #if APU_HAVE_CRYPTO_PRNG
@@ -53,8 +54,6 @@
 
 #include <stdlib.h> /* for malloc() */
 
-#define CPRNG_KEY_SIZE 32
-
 /* Be consistent with the .h (the seed is xor-ed with key on reseed). */
 #if CPRNG_KEY_SIZE != APR_CRYPTO_PRNG_SEED_SIZE
 #error apr_crypto_prng handles stream ciphers with 256bit keys only
@@ -63,118 +62,15 @@
 #define CPRNG_BUF_SIZE_MIN (CPRNG_KEY_SIZE * (8 - 1))
 #define CPRNG_BUF_SIZE_DEF (CPRNG_KEY_SIZE * (24 - 1))
 
-#if APU_HAVE_OPENSSL
-
-#include <openssl/evp.h>
-#include <openssl/sha.h>
-
-/* We only handle Chacha20 and AES256-CTR stream ciphers, for now.
- * AES256-CTR should be in any openssl version of this century but is used
- * only if Chacha20 is missing (openssl < 1.1). This is because Chacha20 is
- * fast (enough) in software and timing attacks safe, though AES256-CTR can
- * be faster and constant-time but only when the CPU (aesni) or some crypto
- * hardware are in the place.
- */
-#include <openssl/obj_mac.h> /* for NID_* */
-#if !defined(NID_chacha20) && !defined(NID_aes_256_ctr)
-/* XXX: APU_HAVE_CRYPTO_PRNG && APU_HAVE_OPENSSL shoudn't be defined! */
-#error apr_crypto_prng needs OpenSSL implementation for Chacha20 or AES256-CTR
-#endif
-
-typedef EVP_CIPHER_CTX cprng_stream_ctx_t;
-
-static apr_status_t cprng_lib_init(apr_pool_t *pool)
-{
-    return apr_crypto_lib_init("openssl", NULL, NULL, pool);
-}
-
-static apr_status_t cprng_stream_ctx_make(cprng_stream_ctx_t **pctx)
-{
-    EVP_CIPHER_CTX *ctx;
-    const EVP_CIPHER *cipher;
-
-    ctx = EVP_CIPHER_CTX_new();
-    if (!ctx) {
-        return APR_ENOMEM;
-    }
-
-#if defined(NID_chacha20)
-    cipher = EVP_chacha20();
-#else
-    cipher = EVP_aes_256_ctr();
-#endif
-    if (EVP_EncryptInit_ex(ctx, cipher, NULL, NULL, NULL) <= 0) {
-        EVP_CIPHER_CTX_free(ctx);
-        return APR_ENOMEM;
-    }
-
-    *pctx = ctx;
-    return APR_SUCCESS;
-}
-
-static APR_INLINE
-void cprng_stream_ctx_free(cprng_stream_ctx_t *ctx)
-{
-    EVP_CIPHER_CTX_free(ctx);
-}
-
-static APR_INLINE
-void cprng_stream_setkey(cprng_stream_ctx_t *ctx,
-                         const unsigned char *key,
-                         const unsigned char *iv)
-{
-#if defined(NID_chacha20)
-    /* With CHACHA20, iv=NULL is the same as zeros but it's faster
-     * to (re-)init; use that for efficiency.
-     */
-    EVP_EncryptInit_ex(ctx, NULL, NULL, key, NULL);
-#else
-    /* With AES256-CTR, iv=NULL seems to peek up and random one (for
-     * the initial CTR), while we can live with zeros (fixed CTR);
-     * efficiency still.
-     */
-    EVP_EncryptInit_ex(ctx, NULL, NULL, key, iv);
-#endif
-}
-
-static APR_INLINE
-apr_status_t cprng_stream_ctx_bytes(cprng_stream_ctx_t **pctx,
-                                    unsigned char *key, unsigned char *to,
-                                    apr_size_t n, const unsigned char *z)
-{
-    cprng_stream_ctx_t *ctx = *pctx;
-    int len;
-
-    /* We never encrypt twice with the same key, so no IV is needed (can
-     * be zeros). When EVP_EncryptInit() is called multiple times it clears
-     * its previous resources approprietly, and since we don't want the key
-     * and its keystream to reside in memory at the same time, we have to
-     * EVP_EncryptInit() twice: firstly to set the key and then finally to
-     * overwrite the key (with zeros) after the keystream is produced.
-     * As for EVP_EncryptFinish(), we don't need it either because padding
-     * is disabled (irrelevant for a stream cipher).
-     */
-    cprng_stream_setkey(ctx, key, z);
-    EVP_CIPHER_CTX_set_padding(ctx, 0);
-    EVP_EncryptUpdate(ctx, key, &len, z, CPRNG_KEY_SIZE);
-    if (n) {
-        EVP_EncryptUpdate(ctx, to, &len, z, n);
-    }
-    cprng_stream_setkey(ctx, z, z);
-
-    return APR_SUCCESS;
-}
-
-#else /* APU_HAVE_OPENSSL */
-
-/* XXX: APU_HAVE_CRYPTO_PRNG shoudn't be defined! */
-#error apr_crypto_prng implemented with OpenSSL only for now
-
-#endif /* APU_HAVE_OPENSSL */
+APR_TYPEDEF_STRUCT(apr_crypto_t,
+    apr_pool_t *pool;
+    apr_crypto_driver_t *provider;
+)
 
 struct apr_crypto_prng_t {
     APR_RING_ENTRY(apr_crypto_prng_t) link;
     apr_pool_t *pool;
+    apr_crypto_t *crypto;
     cprng_stream_ctx_t *ctx;
 #if APR_HAS_THREADS
     apr_thread_mutex_t *mutex;
@@ -182,6 +78,7 @@ struct apr_crypto_prng_t {
     unsigned char *key, *buf;
     apr_size_t len, pos;
     int flags;
+    apr_crypto_cipher_e cipher;
 };
 
 static apr_crypto_prng_t *cprng_global = NULL;
@@ -224,20 +121,13 @@ static void cprng_thread_destroy(void *cprng)
 #define cprng_ring_unlock()
 #endif /* !APR_HAS_THREADS */
 
-APR_DECLARE(apr_status_t) apr_crypto_prng_init(apr_pool_t *pool,
-                                               apr_size_t bufsize,
-                                               const unsigned char seed[],
-                                               int flags)
+APR_DECLARE(apr_status_t) apr_crypto_prng_init(apr_pool_t *pool, apr_crypto_t *crypto,
+        apr_crypto_cipher_e cipher, apr_size_t bufsize, const unsigned char seed[], int flags)
 {
     apr_status_t rv;
 
     if (cprng_global) {
         return APR_EREINIT;
-    }
-
-    rv = cprng_lib_init(pool);
-    if (rv != APR_SUCCESS && rv != APR_EREINIT) {
-        return rv;
     }
 
     if (flags & APR_CRYPTO_PRNG_PER_THREAD) {
@@ -271,7 +161,8 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_init(apr_pool_t *pool,
     flags = (flags | APR_CRYPTO_PRNG_LOCKED) & ~APR_CRYPTO_PRNG_PER_THREAD;
 #endif
 
-    return apr_crypto_prng_create(&cprng_global, bufsize, flags, seed, pool);
+    return apr_crypto_prng_create(&cprng_global, crypto, cipher, bufsize, flags,
+            seed, pool);
 }
 
 APR_DECLARE(apr_status_t) apr_crypto_prng_term(void)
@@ -303,7 +194,7 @@ APR_DECLARE(apr_status_t) apr_crypto_random_thread_bytes(void *buf,
     apr_crypto_prng_t *cprng;
     void *private = NULL;
 
-    if (!cprng_thread_key) {
+    if (!cprng_thread_key || !cprng_global) {
         return APR_EINIT;
     }
 
@@ -314,8 +205,8 @@ APR_DECLARE(apr_status_t) apr_crypto_random_thread_bytes(void *buf,
 
     cprng = private;
     if (!cprng) {
-        rv = apr_crypto_prng_create(&cprng, 0, APR_CRYPTO_PRNG_PER_THREAD,
-                                    NULL, NULL);
+        rv = apr_crypto_prng_create(&cprng, cprng_global->crypto, cprng_global->cipher, 0,
+                APR_CRYPTO_PRNG_PER_THREAD, NULL, NULL);
         if (rv != APR_SUCCESS) {
             return rv;
         }
@@ -349,7 +240,7 @@ static apr_status_t cprng_cleanup(void *arg)
     }
 
     if (cprng->ctx) {
-        cprng_stream_ctx_free(cprng->ctx);
+        cprng->crypto->provider->cprng_stream_ctx_free(cprng->ctx);
     }
 
     if (cprng->key) {
@@ -365,9 +256,8 @@ static apr_status_t cprng_cleanup(void *arg)
 }
 
 APR_DECLARE(apr_status_t) apr_crypto_prng_create(apr_crypto_prng_t **pcprng,
-                                                 apr_size_t bufsize, int flags,
-                                                 const unsigned char seed[],
-                                                 apr_pool_t *pool)
+        apr_crypto_t *crypto, apr_crypto_cipher_e cipher, apr_size_t bufsize, int flags,
+        const unsigned char seed[], apr_pool_t *pool)
 {
     apr_status_t rv;
     apr_crypto_prng_t *cprng;
@@ -399,6 +289,7 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_create(apr_crypto_prng_t **pcprng,
     if (!cprng) {
         return APR_ENOMEM;
     }
+    cprng->cipher = cipher;
     cprng->flags = flags;
     cprng->pool = pool;
 
@@ -425,7 +316,40 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_create(apr_crypto_prng_t **pcprng,
     cprng->buf = cprng->key + CPRNG_KEY_SIZE;
     cprng->len = bufsize;
 
-    rv = cprng_stream_ctx_make(&cprng->ctx);
+    if (crypto) {
+        cprng->crypto = crypto;
+    }
+    else if (cprng_global && cprng_global->crypto) {
+        cprng->crypto = cprng_global->crypto;
+    }
+    else {
+        const apr_crypto_driver_t *driver = NULL;
+        if (!pool) {
+            return APR_EINVAL;
+        }
+
+        rv = apr_crypto_init(pool);
+        if (rv != APR_SUCCESS) {
+            cprng_cleanup(cprng);
+            return rv;
+        }
+
+        rv = apr_crypto_get_driver(&driver, "openssl",
+                NULL, NULL, pool);
+        if (rv != APR_SUCCESS) {
+            cprng_cleanup(cprng);
+            return rv;
+        }
+
+        rv = apr_crypto_make(&cprng->crypto, driver, NULL, pool);
+        if (rv != APR_SUCCESS) {
+            cprng_cleanup(cprng);
+            return rv;
+        }
+    }
+
+    rv = cprng->crypto->provider->cprng_stream_ctx_make(&cprng->ctx,
+            cprng->crypto, cprng->cipher, pool);
     if (rv != APR_SUCCESS) {
         cprng_cleanup(cprng);
         return rv;
@@ -483,7 +407,8 @@ static apr_status_t cprng_stream_bytes(apr_crypto_prng_t *cprng,
 {
     apr_status_t rv;
 
-    rv = cprng_stream_ctx_bytes(&cprng->ctx, cprng->key, to, len, cprng->buf);
+    rv = cprng->crypto->provider->cprng_stream_ctx_bytes(&cprng->ctx,
+            cprng->key, to, len, cprng->buf);
     if (rv != APR_SUCCESS && len) {
         apr_crypto_memzero(to, len);
     }

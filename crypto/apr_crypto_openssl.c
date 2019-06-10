@@ -35,6 +35,7 @@
 #include <openssl/rand.h>
 #include <openssl/engine.h>
 #include <openssl/crypto.h>
+#include <openssl/obj_mac.h> /* for NID_* */
 
 #define LOG_PREFIX "apr_crypto_openssl: "
 
@@ -87,6 +88,10 @@ struct apr_crypto_digest_t {
     EVP_MD_CTX *mdCtx;
     int initialised;
     int digestSize;
+};
+
+struct cprng_stream_ctx_t {
+    EVP_CIPHER_CTX *ctx;
 };
 
 static struct apr_crypto_block_key_digest_t key_digests[] =
@@ -1464,6 +1469,124 @@ static apr_status_t crypto_digest(
     return status;
 }
 
+static apr_status_t cprng_stream_ctx_make(cprng_stream_ctx_t **psctx,
+        apr_crypto_t *f, apr_crypto_cipher_e cipher, apr_pool_t *pool)
+{
+    cprng_stream_ctx_t *sctx;
+    EVP_CIPHER_CTX *ctx;
+    const EVP_CIPHER *ecipher;
+
+    if (pool) {
+        *psctx = sctx = apr_palloc(pool, sizeof(cprng_stream_ctx_t));
+    }
+    else {
+        *psctx = sctx = malloc(sizeof(cprng_stream_ctx_t));
+    }
+    if (!sctx) {
+        return APR_ENOMEM;
+    }
+
+    sctx->ctx = ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) {
+        return APR_ENOMEM;
+    }
+
+    /* We only handle Chacha20 and AES256-CTR stream ciphers, for now.
+     * AES256-CTR should be in any openssl version of this century but is used
+     * only if Chacha20 is missing (openssl < 1.1). This is because Chacha20 is
+     * fast (enough) in software and timing attacks safe, though AES256-CTR can
+     * be faster and constant-time but only when the CPU (aesni) or some crypto
+     * hardware are in place.
+     */
+    switch (cipher) {
+    case APR_CRYPTO_CIPHER_AUTO: {
+#if defined(NID_chacha20)
+        ecipher = EVP_chacha20();
+#elif defined(NID_aes_256_ctr)
+        ecipher = EVP_aes_256_ctr();
+#else
+        return APR_ENOCIPHER;
+#endif
+    }
+    case APR_CRYPTO_CIPHER_AES_256_CTR: {
+#if defined(NID_aes_256_ctr)
+        ecipher = EVP_aes_256_ctr();
+        break;
+#else
+        return APR_ENOCIPHER;
+#endif
+    }
+    case APR_CRYPTO_CIPHER_CHACHA20_CTR: {
+#if defined(NID_chacha20)
+        ecipher = EVP_chacha20();
+        break;
+#else
+        return APR_ENOCIPHER;
+#endif
+    }
+    default: {
+        return APR_ENOCIPHER;
+    }
+    }
+
+    if (EVP_EncryptInit_ex(ctx, ecipher, f->config->engine, NULL, NULL) <= 0) {
+        EVP_CIPHER_CTX_free(ctx);
+        return APR_ENOMEM;
+    }
+
+    return APR_SUCCESS;
+}
+
+void cprng_stream_ctx_free(cprng_stream_ctx_t *sctx)
+{
+    EVP_CIPHER_CTX_free(sctx->ctx);
+}
+
+static APR_INLINE
+void cprng_stream_setkey(cprng_stream_ctx_t *sctx,
+                         const unsigned char *key,
+                         const unsigned char *iv)
+{
+#if defined(NID_chacha20)
+    /* With CHACHA20, iv=NULL is the same as zeros but it's faster
+     * to (re-)init; use that for efficiency.
+     */
+    EVP_EncryptInit_ex(sctx->ctx, NULL, NULL, key, NULL);
+#else
+    /* With AES256-CTR, iv=NULL seems to peek up and random one (for
+     * the initial CTR), while we can live with zeros (fixed CTR);
+     * efficiency still.
+     */
+    EVP_EncryptInit_ex(sctx->ctx, NULL, NULL, key, iv);
+#endif
+}
+
+static apr_status_t cprng_stream_ctx_bytes(cprng_stream_ctx_t **pctx,
+        unsigned char *key, unsigned char *to, apr_size_t n, const unsigned char *z)
+{
+    cprng_stream_ctx_t *sctx = *pctx;
+    int len;
+
+    /* We never encrypt twice with the same key, so no IV is needed (can
+     * be zeros). When EVP_EncryptInit() is called multiple times it clears
+     * its previous resources appropriately, and since we don't want the key
+     * and its keystream to reside in memory at the same time, we have to
+     * EVP_EncryptInit() twice: firstly to set the key and then finally to
+     * overwrite the key (with zeros) after the keystream is produced.
+     * As for EVP_EncryptFinish(), we don't need it either because padding
+     * is disabled (irrelevant for a stream cipher).
+     */
+    cprng_stream_setkey(sctx, key, z);
+    EVP_CIPHER_CTX_set_padding(sctx->ctx, 0);
+    EVP_EncryptUpdate(sctx->ctx, key, &len, z, CPRNG_KEY_SIZE);
+    if (n) {
+        EVP_EncryptUpdate(sctx->ctx, to, &len, z, n);
+    }
+    cprng_stream_setkey(sctx, z, z);
+
+    return APR_SUCCESS;
+}
+
 /**
  * OpenSSL module.
  */
@@ -1475,7 +1598,7 @@ APR_MODULE_DECLARE_DATA const apr_crypto_driver_t apr_crypto_openssl_driver = {
     crypto_block_decrypt, crypto_block_decrypt_finish,
     crypto_digest_init, crypto_digest_update, crypto_digest_final, crypto_digest,
     crypto_block_cleanup, crypto_digest_cleanup, crypto_cleanup, crypto_shutdown, crypto_error,
-    crypto_key
+    crypto_key, cprng_stream_ctx_make, cprng_stream_ctx_free, cprng_stream_ctx_bytes
 };
 
 #endif
