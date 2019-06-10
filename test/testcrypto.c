@@ -2364,10 +2364,6 @@ static void test_crypto_equals(abts_case *tc, void *data)
 }
 
 #if APU_HAVE_CRYPTO_PRNG
-#if APU_HAVE_OPENSSL
-#include <openssl/obj_mac.h> /* for NID_* */
-#endif
-#if defined(NID_chacha20)
 /*
  * KAT for CHACHA20:
  * # iv=$(printf "%.32d" 0)
@@ -2379,7 +2375,7 @@ static void test_crypto_equals(abts_case *tc, void *data)
  *               -in /dev/zero -K $key -iv $iv \
  *   | xxd -l128 -c8 -i
  */
-static const unsigned char test_PRNG_kat0[128] = {
+static const unsigned char test_PRNG_kat0_chacha20[128] = {
   0xb0, 0xfd, 0x14, 0xff, 0x96, 0xa0, 0xbd, 0xa1,
   0x54, 0xc3, 0x29, 0x08, 0x2c, 0x9c, 0x65, 0x33,
   0xbb, 0x4c, 0x94, 0x73, 0xbf, 0x5d, 0xde, 0x13,
@@ -2397,7 +2393,7 @@ static const unsigned char test_PRNG_kat0[128] = {
   0xb8, 0x79, 0xb5, 0x57, 0x47, 0x97, 0xa1, 0xb7,
   0x3d, 0xce, 0x7c, 0xd0, 0x9f, 0x24, 0x51, 0x01
 };
-#else
+
 /*
  * KAT for AES256-CTR:
  * # iv=$(printf "%.32d" 0)
@@ -2409,7 +2405,7 @@ static const unsigned char test_PRNG_kat0[128] = {
  *               -in /dev/zero -K $key -iv $iv \
  *   | xxd -l128 -c8 -i
  */
-static const unsigned char test_PRNG_kat0[128] = {
+static const unsigned char test_PRNG_kat0_aes256[128] = {
   0x79, 0x04, 0x2a, 0x33, 0xfa, 0x41, 0x1a, 0x37,
   0x97, 0x3a, 0xec, 0xa0, 0xfc, 0xde, 0x6b, 0x2b,
   0x16, 0xa4, 0x5f, 0xa1, 0x2a, 0xe3, 0xf5, 0x4c,
@@ -2427,26 +2423,49 @@ static const unsigned char test_PRNG_kat0[128] = {
   0xc5, 0x0c, 0xe6, 0x71, 0x42, 0xbf, 0x81, 0xb0,
   0xd1, 0x59, 0x28, 0xa1, 0x04, 0xe9, 0x8d, 0xad
 };
-#endif
 
-static void test_crypto_prng(abts_case *tc, void *data)
+static void test_crypto_prng(abts_case *tc, apr_crypto_cipher_e cipher, const unsigned char *test_PRNG_kat0)
 {
     unsigned char randbytes[128], seed[APR_CRYPTO_PRNG_SEED_SIZE];
     apr_crypto_prng_t *cprng = NULL;
     apr_pool_t *pool = NULL;
     apr_status_t rv;
     int i;
+    int flags = 0;
 
     rv = apr_pool_create(&pool, NULL);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, pool);
 
+#if APR_HAS_THREADS
+    flags = APR_CRYPTO_PRNG_PER_THREAD;
+#endif
+    rv = apr_crypto_prng_init(pool, NULL, cipher, 0, NULL, flags);
+
+    if (APR_ENOCIPHER == rv) {
+        apr_pool_destroy(pool);
+        return;
+    }
+
+    ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_EREINIT", rv != APR_EREINIT);
+    ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_ENOTIMPL", rv != APR_ENOTIMPL);
+    ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_ENOCIPHER", rv != APR_ENOCIPHER);
+    ABTS_ASSERT(tc, "apr_crypto_prng_init failed", rv == APR_SUCCESS);
+
     for (i = 0; i < 10; ++i) {
         /* Initial seed full of zeros (deterministic) */
         memset(seed, 0, sizeof(seed));
 
-        rv = apr_crypto_prng_create(&cprng, 0, 0, seed, pool);
+        rv = apr_crypto_prng_create(&cprng, NULL, cipher, 0, 0, seed, pool);
+        ABTS_ASSERT(tc, "apr_crypto_prng_create returned APR_EINIT", rv != APR_EINIT);
+        ABTS_ASSERT(tc, "apr_crypto_prng_create returned APR_EINVAL", rv != APR_EINVAL);
+        ABTS_ASSERT(tc, "apr_crypto_prng_create returned APR_ENOTIMPL", rv != APR_ENOTIMPL);
+        ABTS_ASSERT(tc, "apr_crypto_prng_create returned APR_ENOCIPHER", rv != APR_ENOCIPHER);
+        ABTS_ASSERT(tc, "apr_crypto_prng_create returned APR_EDSOOPEN", rv != APR_EDSOOPEN);
         ABTS_ASSERT(tc, "apr_crypto_prng_create failed", rv == APR_SUCCESS);
+        if (!cprng) {
+            break;
+        }
 
         /* Second time and more, change one bit of the seed */
         if (i != 0) {
@@ -2483,6 +2502,16 @@ static void test_crypto_prng(abts_case *tc, void *data)
     apr_pool_destroy(pool);
 }
 
+static void test_crypto_prng_aes256(abts_case *tc, void *data)
+{
+    return test_crypto_prng(tc, APR_CRYPTO_CIPHER_AES_256_CTR, test_PRNG_kat0_aes256);
+}
+
+static void test_crypto_prng_chacha20(abts_case *tc, void *data)
+{
+    return test_crypto_prng(tc, APR_CRYPTO_CIPHER_CHACHA20_CTR, test_PRNG_kat0_chacha20);
+}
+
 #if APR_HAS_FORK
 static void test_crypto_fork_random(abts_case *tc, void *data)
 {
@@ -2493,10 +2522,19 @@ static void test_crypto_fork_random(abts_case *tc, void *data)
     apr_size_t nbytes;
     apr_proc_t proc;
     apr_status_t rv;
+    int flags = 0;
 
     rv = apr_pool_create(&pool, NULL);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, pool);
+
+#if APR_HAS_THREADS
+    flags = APR_CRYPTO_PRNG_PER_THREAD;
+#endif
+    rv = apr_crypto_prng_init(pool, NULL, APR_CRYPTO_CIPHER_AUTO, 0, NULL, flags);
+    ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_EREINIT", rv != APR_EREINIT);
+    ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_ENOTIMPL", rv != APR_ENOTIMPL);
+    ABTS_ASSERT(tc, "apr_crypto_prng_init failed", rv == APR_SUCCESS);
 
     rv = apr_file_pipe_create(&pread, &pwrite, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -2526,6 +2564,8 @@ static void test_crypto_fork_random(abts_case *tc, void *data)
 
         apr_proc_wait(&proc, &exitcode, &why, APR_WAIT);
         if (why != APR_PROC_EXIT) {
+            ABTS_ASSERT(tc, "apr_proc_wait returned APR_PROC_SIGNAL", why != APR_PROC_SIGNAL);
+            ABTS_ASSERT(tc, "apr_proc_wait returned APR_PROC_SIGNAL_CORE", why != (APR_PROC_SIGNAL | APR_PROC_SIGNAL_CORE));
             ABTS_FAIL(tc, "child terminated abnormally");
         }
         else if (exitcode != 0) {
@@ -2568,10 +2608,19 @@ static void test_crypto_thread_random(abts_case *tc, void *data)
     apr_pool_t *pool = NULL;
     apr_status_t rv, ret;
     int i, j;
+    int flags = 0;
 
     rv = apr_pool_create(&pool, NULL);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, pool);
+
+#if APR_HAS_THREADS
+    flags = APR_CRYPTO_PRNG_PER_THREAD;
+#endif
+    rv = apr_crypto_prng_init(pool, NULL, APR_CRYPTO_CIPHER_AUTO, 0, NULL, flags);
+    ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_EREINIT", rv != APR_EREINIT);
+    ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_ENOTIMPL", rv != APR_ENOTIMPL);
+    ABTS_ASSERT(tc, "apr_crypto_prng_init failed", rv == APR_SUCCESS);
 
     for (i = 0; i < NUM_THREADS; ++i) {
         randbytes[i] = apr_pcalloc(pool, 800);
@@ -2705,7 +2754,8 @@ abts_suite *testcrypto(abts_suite *suite)
     abts_run_test(suite, test_crypto_equals, NULL);
 
 #if APU_HAVE_CRYPTO_PRNG
-    abts_run_test(suite, test_crypto_prng, NULL);
+    abts_run_test(suite, test_crypto_prng_aes256, NULL);
+    abts_run_test(suite, test_crypto_prng_chacha20, NULL);
 #if APR_HAS_FORK
     abts_run_test(suite, test_crypto_fork_random, NULL);
 #endif
