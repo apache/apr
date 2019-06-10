@@ -200,7 +200,7 @@ AC_DEFUN([APU_CHECK_CRYPTO_NSS], [
     elif test "x$withval" != "x"; then
 
       nss_CPPFLAGS="-I$withval/include/nss -I$withval/include/nss3 -I$withval/include/nspr -I$withval/include/nspr4 -I$withval/include -I$withval/../public"
-      nss_LDFLAGS="-L$withval/lib "
+      nss_LDFLAGS="-L$withval/lib -L$withval/lib/nss -L$withval/lib/nspr "
 
       APR_ADDTO(CPPFLAGS, [$nss_CPPFLAGS])
       APR_ADDTO(LDFLAGS, [$nss_LDFLAGS])
