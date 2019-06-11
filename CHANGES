@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Fixed: apr_get_oslevel() was returning APR_WIN_XP on Windows 10
+
   *) Windows platform: Use the native XML parser implementation (XmlLite)
      by default instead of libxml2 and expat. [Ivan Zhakov]
 
