@@ -27,27 +27,15 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
 {
     if (apr_os_level == APR_WIN_UNK) 
     {
-        OSVERSIONINFO oslev;
-        oslev.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-        if (!GetVersionEx(&oslev)) {
+        OSVERSIONINFOEXW oslev;
+        oslev.dwOSVersionInfoSize = sizeof(oslev);
+        if (!GetVersionExW((OSVERSIONINFOW*) &oslev)) {
             return apr_get_os_error();
         }
 
         if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) 
         {
-            unsigned int servpack = 0;
-            TCHAR *pservpack;
-            if ((pservpack = oslev.szCSDVersion)) {
-                while (*pservpack && !apr_isdigit(*pservpack)) {
-                    pservpack++;
-                }
-                if (*pservpack)
-#ifdef _UNICODE
-                    servpack = _wtoi(pservpack);
-#else
-                    servpack = atoi(pservpack);
-#endif
-            }
+            unsigned int servpack = oslev.wServicePackMajor;
 
             if (oslev.dwMajorVersion < 3) {
                 apr_os_level = APR_WIN_UNSUP;
