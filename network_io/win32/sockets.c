@@ -94,6 +94,7 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
                                             int type, int protocol, 
                                             apr_pool_t *cont)
 {
+    DWORD flags;
 #if APR_HAVE_IPV6
     int downgrade = (family == AF_UNSPEC);
 #endif
@@ -108,14 +109,31 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
 
     alloc_socket(new, cont);
 
-    /* For right now, we are not using socket groups.  We may later.
-     * No flags to use when creating a socket, so use 0 for that parameter as well.
+    /* Enable support for overlapped I/O, because that's what socket() does
+     * on Windows [1]:
+     * [[[
+     * The socket that is created will have the overlapped attribute as a
+     * default.
+     * ]]]
+     * https://docs.microsoft.com/en-us/windows/desktop/api/winsock2/nf-winsock2-socket
      */
-    (*new)->socketdes = socket(family, type, protocol);
+    flags = WSA_FLAG_OVERLAPPED;
+
+    if (apr_os_level >= APR_WIN_7_SP1) {
+        /* Socket handles are never truly inheritable, there are too many
+         * bugs associated.  WSADuplicateSocket will copy them, but for our
+         * purposes, always try create the socket as a non-inherited
+         * handle if supported.
+         */
+        flags |= WSA_FLAG_NO_HANDLE_INHERIT;
+    }
+
+    /* For right now, we are not using socket groups.  We may later. */
+    (*new)->socketdes = WSASocketW(family, type, protocol, NULL, 0, flags);
 #if APR_HAVE_IPV6
     if ((*new)->socketdes == INVALID_SOCKET && downgrade) {
         family = AF_INET;
-        (*new)->socketdes = socket(family, type, protocol);
+        (*new)->socketdes = WSASocketW(family, type, protocol, NULL, 0, flags);
     }
 #endif
 
@@ -123,22 +141,12 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
         return apr_get_netos_error();
     }
 
-    /* Socket handles are never truly inheritable, there are too many
-     * bugs associated.  WSADuplicateSocket will copy them, but for our
-     * purposes, always transform the socket() created as a non-inherited
-     * handle
-     */
-    /* A different approach.  Many users report errors such as 
-     * (32538)An operation was attempted on something that is not 
-     * a socket.  : Parent: WSADuplicateSocket failed...
-     *
-     * This appears that the duplicated handle is no longer recognized
-     * as a socket handle.  SetHandleInformation should overcome that
-     * problem by not altering the handle identifier.  But this won't
-     * work on 9x - it's unsupported.
-     */
-    SetHandleInformation((HANDLE) (*new)->socketdes, 
-                         HANDLE_FLAG_INHERIT, 0);
+    if ((flags & WSA_FLAG_NO_HANDLE_INHERIT) == 0) {
+        /* Disable inheritance using SetHandleInformation() if
+         * WSA_FLAG_NO_HANDLE_INHERIT is not supported. */
+        SetHandleInformation((HANDLE)(*new)->socketdes,
+                             HANDLE_FLAG_INHERIT, 0);
+    }
 
     set_socket_vars(*new, family, type, protocol);
 
