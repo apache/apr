@@ -97,7 +97,7 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
                     apr_os_level = APR_WIN_8_1;
             }
             else {
-                apr_os_level = APR_WIN_XP;
+                apr_os_level = APR_WIN_10;
             }
         }
 #ifdef _WIN32_WCE
