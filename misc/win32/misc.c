@@ -29,7 +29,9 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
     {
         static OSVERSIONINFO oslev;
         oslev.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-        GetVersionEx(&oslev);
+        if (!GetVersionEx(&oslev)) {
+            return apr_get_os_error();
+        }
 
         if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) 
         {
