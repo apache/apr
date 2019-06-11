@@ -27,7 +27,7 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
 {
     if (apr_os_level == APR_WIN_UNK) 
     {
-        static OSVERSIONINFO oslev;
+        OSVERSIONINFO oslev;
         oslev.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
         if (!GetVersionEx(&oslev)) {
             return apr_get_os_error();
@@ -35,7 +35,7 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
 
         if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) 
         {
-            static unsigned int servpack = 0;
+            unsigned int servpack = 0;
             TCHAR *pservpack;
             if ((pservpack = oslev.szCSDVersion)) {
                 while (*pservpack && !apr_isdigit(*pservpack)) {
