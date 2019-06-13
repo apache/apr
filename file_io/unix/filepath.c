@@ -99,7 +99,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
 
     if (addpath[0] == '/') {
         /* If addpath is rooted, then rootpath is unused.
-         * Ths violates any APR_FILEPATH_SECUREROOTTEST and
+         * This violates any APR_FILEPATH_SECUREROOTTEST and
          * APR_FILEPATH_NOTABSOLUTE flags specified.
          */
         if (flags & APR_FILEPATH_SECUREROOTTEST)
