@@ -428,14 +428,6 @@ apr_status_t apr__crypto_openssl_init(const char *params,
 apr_status_t apr__crypto_openssl_term(void);
 #endif
 
-#if APU_HAVE_NSS
-const char *apr__crypto_nss_version(void);
-apr_status_t apr__crypto_nss_init(const char *params,
-                                  const apu_err_t **result,
-                                  apr_pool_t *pool);
-apr_status_t apr__crypto_nss_term(void);
-#endif
-
 #endif
 
 #ifdef __cplusplus
