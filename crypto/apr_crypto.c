@@ -393,27 +393,6 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_version(const char *name,
     }
     else
 #endif
-#if APU_HAVE_COMMONCRYPTO
-    if (!strcmp(name, "commoncrypto")) {
-        *version = apr__crypto_commoncrypto_version();
-        rv = *version ? APR_SUCCESS : APR_NOTFOUND;
-    }
-    else
-#endif
-#if APU_HAVE_MSCAPI
-    if (!strcmp(name, "mscapi")) {
-        *version = apr__crypto_mscapi_version();
-        rv = *version ? APR_SUCCESS : APR_NOTFOUND;
-    }
-    else
-#endif
-#if APU_HAVE_MSCNG
-    if (!strcmp(name, "mscng")) {
-        *version = apr__crypto_mscng_version();
-        rv = *version ? APR_SUCCESS : APR_NOTFOUND;
-    }
-    else
-#endif
     ;
     return rv;
 }
@@ -482,36 +461,6 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_init(const char *name,
     }
     else
 #endif
-#if APU_HAVE_COMMONCRYPTO
-    if (!strcmp(name, "commoncrypto")) {
-        rv = apr__crypto_commoncrypto_init(params, result, pool);
-        if (rv == APR_SUCCESS) {
-            lib->term = apr__crypto_commoncrypto_term;
-            lib->name = "commoncrypto";
-        }
-    }
-    else
-#endif
-#if APU_HAVE_MSCAPI
-    if (!strcmp(name, "mscapi")) {
-        rv = apr__crypto_mscapi_init(params, result, pool);
-        if (rv == APR_SUCCESS) {
-            lib->term = apr__crypto_mscapi_term;
-            lib->name = "mscapi";
-        }
-    }
-    else
-#endif
-#if APU_HAVE_MSCNG
-    if (!strcmp(name, "mscng")) {
-        rv = apr__crypto_mscng_init(params, result, pool);
-        if (rv == APR_SUCCESS) {
-            lib->term = apr__crypto_mscng_term;
-            lib->name = "mscng";
-        }
-    }
-    else
-#endif
     ;
     if (rv == APR_SUCCESS) {
         lib->pool = pool;
@@ -549,24 +498,6 @@ static apr_status_t crypto_lib_term(const char *name)
 #endif
 #if APU_HAVE_NSS
     if (!strcmp(name, "nss")) {
-        rv = APR_SUCCESS;
-    }
-    else
-#endif
-#if APU_HAVE_COMMONCRYPTO
-    if (!strcmp(name, "commoncrypto")) {
-        rv = APR_SUCCESS;
-    }
-    else
-#endif
-#if APU_HAVE_MSCAPI
-    if (!strcmp(name, "mscapi")) {
-        rv = APR_SUCCESS;
-    }
-    else
-#endif
-#if APU_HAVE_MSCNG
-    if (!strcmp(name, "mscng")) {
         rv = APR_SUCCESS;
     }
     else

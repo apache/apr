@@ -123,7 +123,7 @@ static apr_status_t crypto_error(const apu_err_t **result,
  */
 static apr_status_t crypto_shutdown(void)
 {
-    return apr_crypto_lib_term("commoncrypto");
+    return APR_SUCCESS;
 }
 
 /**
@@ -132,7 +132,7 @@ static apr_status_t crypto_shutdown(void)
 static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
         const apu_err_t **result)
 {
-    return apr_crypto_lib_init("commoncrypto", params, result, pool);
+    return APR_SUCCESS;
 }
 
 /**
