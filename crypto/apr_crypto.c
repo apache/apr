@@ -386,13 +386,6 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_version(const char *name,
     }
     else
 #endif
-#if APU_HAVE_NSS
-    if (!strcmp(name, "nss")) {
-        *version = apr__crypto_nss_version();
-        rv = *version ? APR_SUCCESS : APR_NOTFOUND;
-    }
-    else
-#endif
     ;
     return rv;
 }
@@ -451,16 +444,6 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_init(const char *name,
     }
     else
 #endif
-#if APU_HAVE_NSS
-    if (!strcmp(name, "nss")) {
-        rv = apr__crypto_nss_init(params, result, pool);
-        if (rv == APR_SUCCESS) {
-            lib->term = apr__crypto_nss_term;
-            lib->name = "nss";
-        }
-    }
-    else
-#endif
     ;
     if (rv == APR_SUCCESS) {
         lib->pool = pool;
@@ -492,12 +475,6 @@ static apr_status_t crypto_lib_term(const char *name)
     rv = APR_ENOTIMPL;
 #if APU_HAVE_OPENSSL
     if (!strcmp(name, "openssl")) {
-        rv = APR_SUCCESS;
-    }
-    else
-#endif
-#if APU_HAVE_NSS
-    if (!strcmp(name, "nss")) {
         rv = APR_SUCCESS;
     }
     else
