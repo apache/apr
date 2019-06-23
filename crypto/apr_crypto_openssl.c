@@ -26,6 +26,7 @@
 #include "apr_strings.h"
 #include "apr_time.h"
 #include "apr_buckets.h"
+#include "apr_thread_mutex.h"
 
 #include "apr_crypto_internal.h"
 
@@ -36,8 +37,27 @@
 #include <openssl/engine.h>
 #include <openssl/crypto.h>
 #include <openssl/obj_mac.h> /* for NID_* */
+#include <openssl/conf.h>
+#include <openssl/comp.h>
+#include <openssl/ssl.h>
 
 #define LOG_PREFIX "apr_crypto_openssl: "
+
+#ifndef APR_USE_OPENSSL_PRE_1_1_API
+#if defined(LIBRESSL_VERSION_NUMBER)
+/* LibreSSL declares OPENSSL_VERSION_NUMBER == 2.0 but does not necessarily
+ * include changes from OpenSSL >= 1.1 (new functions, macros, * deprecations,
+ * ...), so we have to work around this...
+ */
+#define APR_USE_OPENSSL_PRE_1_0_API     (0)
+#define APR_USE_OPENSSL_PRE_1_1_API     (LIBRESSL_VERSION_NUMBER < 0x2070000f)
+#define APR_USE_OPENSSL_PRE_1_1_1_API   (1)
+#else  /* defined(LIBRESSL_VERSION_NUMBER) */
+#define APR_USE_OPENSSL_PRE_1_0_API     (OPENSSL_VERSION_NUMBER < 0x10000000L)
+#define APR_USE_OPENSSL_PRE_1_1_API     (OPENSSL_VERSION_NUMBER < 0x10100000L)
+#define APR_USE_OPENSSL_PRE_1_1_1_API   (OPENSSL_VERSION_NUMBER < 0x10101000L)
+#endif /* defined(LIBRESSL_VERSION_NUMBER) */
+#endif /* ndef APR_USE_OPENSSL_PRE_1_1_API */
 
 struct apr_crypto_t {
     apr_pool_t *pool;
@@ -133,7 +153,15 @@ static apr_status_t crypto_error(const apu_err_t **result,
  */
 static apr_status_t crypto_shutdown(void)
 {
-    return apr_crypto_lib_term("openssl");
+    ERR_free_strings();
+    EVP_cleanup();
+    ENGINE_cleanup();
+    return APR_SUCCESS;
+}
+
+static apr_status_t crypto_shutdown_helper(void *data)
+{
+    return crypto_shutdown();
 }
 
 /**
@@ -142,7 +170,21 @@ static apr_status_t crypto_shutdown(void)
 static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
         const apu_err_t **result)
 {
-    return apr_crypto_lib_init("openssl", params, result, pool);
+#if APR_USE_OPENSSL_PRE_1_1_API
+    (void)CRYPTO_malloc_init();
+#else
+    OPENSSL_malloc_init();
+#endif
+    ERR_load_crypto_strings();
+    /* SSL_load_error_strings(); */
+    OpenSSL_add_all_algorithms();
+    ENGINE_load_builtin_engines();
+    ENGINE_register_all_complete();
+
+    apr_pool_cleanup_register(pool, pool, crypto_shutdown_helper,
+            apr_pool_cleanup_null);
+
+    return APR_SUCCESS;
 }
 
 #if OPENSSL_VERSION_NUMBER < 0x0090802fL
