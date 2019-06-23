@@ -379,14 +379,7 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_version(const char *name,
                                                  const char **version)
 {
     apr_status_t rv = APR_ENOTIMPL;
-#if APU_HAVE_OPENSSL
-    if (!strcmp(name, "openssl")) {
-        *version = apr__crypto_openssl_version();
-        rv = *version ? APR_SUCCESS : APR_NOTFOUND;
-    }
-    else
-#endif
-    ;
+
     return rv;
 }
 
@@ -434,16 +427,6 @@ APR_DECLARE(apr_status_t) apr_crypto_lib_init(const char *name,
     }
 
     rv = APR_ENOTIMPL;
-#if APU_HAVE_OPENSSL
-    if (!strcmp(name, "openssl")) {
-        rv = apr__crypto_openssl_init(params, result, pool);
-        if (rv == APR_SUCCESS) {
-            lib->term = apr__crypto_openssl_term;
-            lib->name = "openssl";
-        }
-    }
-    else
-#endif
     ;
     if (rv == APR_SUCCESS) {
         lib->pool = pool;
@@ -473,12 +456,6 @@ static apr_status_t crypto_lib_term(const char *name)
     }
 
     rv = APR_ENOTIMPL;
-#if APU_HAVE_OPENSSL
-    if (!strcmp(name, "openssl")) {
-        rv = APR_SUCCESS;
-    }
-    else
-#endif
     ;
     if (rv == APR_SUCCESS) {
         apr_pool_cleanup_kill(lib->pool, lib, crypto_lib_cleanup);
