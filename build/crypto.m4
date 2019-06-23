@@ -119,7 +119,7 @@ AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
         APR_ADDTO(INCLUDES, [-I$withval/include])
       fi
 
-      AC_CHECK_DECLS([EVP_PKEY_CTX_new], [], [],
+      AC_CHECK_DECLS([EVP_PKEY_CTX_new, OPENSSL_init_crypto], [], [],
                      [#include <openssl/evp.h>])
 
     fi
