@@ -153,9 +153,21 @@ static apr_status_t crypto_error(const apu_err_t **result,
  */
 static apr_status_t crypto_shutdown(void)
 {
+#if HAVE_OPENSSL_INIT_SSL
+    /* Openssl v1.1+ handles all termination automatically. Do
+     * nothing in this case.
+     */
+
+#else
+    /* Termination below is for legacy Openssl versions v1.0.x and
+     * older.
+     */
+
     ERR_free_strings();
     EVP_cleanup();
     ENGINE_cleanup();
+#endif
+
     return APR_SUCCESS;
 }
 
@@ -170,6 +182,19 @@ static apr_status_t crypto_shutdown_helper(void *data)
 static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
         const apu_err_t **result)
 {
+#if HAVE_DECL_OPENSSL_INIT_CRYPTO
+    /* Openssl v1.1+ handles all initialisation automatically, apart
+     * from hints as to how we want to use the library.
+     *
+     * We tell openssl we want to include engine support.
+     */
+    OPENSSL_init_crypto(OPENSSL_INIT_ENGINE_ALL_BUILTIN, NULL);
+
+#else
+    /* Configuration below is for legacy versions Openssl v1.0 and
+     * older.
+     */
+
 #if APR_USE_OPENSSL_PRE_1_1_API
     (void)CRYPTO_malloc_init();
 #else
@@ -180,6 +205,7 @@ static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
     OpenSSL_add_all_algorithms();
     ENGINE_load_builtin_engines();
     ENGINE_register_all_complete();
+#endif
 
     apr_pool_cleanup_register(pool, pool, crypto_shutdown_helper,
             apr_pool_cleanup_null);

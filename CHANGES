@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_crypto_openssl: use OPENSSL_init_crypto() to initialise OpenSSL
+     on versions 1.1+. [Graham Leggett]
+
   *) Fixed: apr_get_oslevel() was returning APR_WIN_XP on Windows 10
 
   *) Windows platform: Use the native XML parser implementation (XmlLite)
