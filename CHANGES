@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_crypto_openssl: Remove unused link to the ssl library.
+     [Graham Leggett]
+
   *) apu_dso_init: Fix pool lifetime and introduce a reference count.
      apu_dso_init() can now be called more than once (from multiple
      modules) and from unrelated pools (usually seen in unit tests).
