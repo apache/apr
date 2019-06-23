@@ -37,7 +37,7 @@
 static apr_thread_mutex_t* mutex = NULL;
 #endif
 static apr_hash_t *dsos = NULL;
-static apr_uint32_t initialised = 0, in_init = 1;
+static apr_uint32_t in_init = 0, initialised = 0;
 
 #if APR_HAS_THREADS
 apr_status_t apu_dso_mutex_lock()
@@ -59,11 +59,24 @@ apr_status_t apu_dso_mutex_unlock() {
 
 static apr_status_t apu_dso_term(void *ptr)
 {
-    /* set statics to NULL so init can work again */
-    dsos = NULL;
+    if (apr_atomic_inc32(&in_init)) {
+        while (apr_atomic_read32(&in_init) > 1); /* wait until we get fully inited */
+    }
+
+    /* Reference count - cleanup when last reference is cleaned up */
+    if (!apr_atomic_dec32(&initialised)) {
+        apr_pool_t *global = apr_hash_pool_get(dsos);
+
+        apr_pool_destroy(global);
+
+        /* set statics to NULL so init can work again */
+        dsos = NULL;
 #if APR_HAS_THREADS
-    mutex = NULL;
+        mutex = NULL;
 #endif
+    }
+
+    apr_atomic_dec32(&in_init);
 
     /* Everything else we need is handled by cleanups registered
      * when we created mutexes and loaded DSOs
@@ -76,13 +89,22 @@ apr_status_t apu_dso_init(apr_pool_t *pool)
     apr_status_t ret = APR_SUCCESS;
     apr_pool_t *parent;
 
-    if (apr_atomic_inc32(&initialised)) {
-        apr_atomic_set32(&initialised, 1); /* prevent wrap-around */
+    if (apr_atomic_inc32(&in_init)) {
+        while (apr_atomic_read32(&in_init) > 1); /* wait until we get fully inited */
+    }
 
-        while (apr_atomic_read32(&in_init)) /* wait until we get fully inited */
-            ;
+    /* Reference count increment... */
+    if (!apr_atomic_inc32(&initialised)) {
+        apr_pool_t *global;
 
-        return APR_SUCCESS;
+        apr_pool_create_unmanaged(&global);
+        dsos = apr_hash_make(global);
+
+#if APR_HAS_THREADS
+        ret = apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_DEFAULT, global);
+        /* This already registers a pool cleanup */
+#endif
+
     }
 
     /* Top level pool scope, need process-scope lifetime */
@@ -91,13 +113,7 @@ apr_status_t apu_dso_init(apr_pool_t *pool)
          parent = apr_pool_parent_get(pool))
         pool = parent;
 
-    dsos = apr_hash_make(pool);
-
-#if APR_HAS_THREADS
-    ret = apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_DEFAULT, pool);
-    /* This already registers a pool cleanup */
-#endif
-
+    /* ... to be decremented on cleanup */
     apr_pool_cleanup_register(pool, NULL, apu_dso_term,
                               apr_pool_cleanup_null);
 
