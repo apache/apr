@@ -153,7 +153,7 @@ static apr_status_t crypto_error(const apu_err_t **result,
  */
 static apr_status_t crypto_shutdown(void)
 {
-#if HAVE_OPENSSL_INIT_SSL
+#if HAVE_DECL_OPENSSL_INIT_CRYPTO
     /* Openssl v1.1+ handles all termination automatically. Do
      * nothing in this case.
      */
