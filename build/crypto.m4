@@ -159,11 +159,6 @@ AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
   LIBS="$old_libs"
   CPPFLAGS="$old_cppflags"
   LDFLAGS="$old_ldflags"
-
-  if test "$apu_have_openssl" = "1"; then
-    APR_ADDTO(APRUTIL_EXPORT_LIBS, [$LDADD_crypto_openssl])
-    APR_ADDTO(LIBS, [$LDADD_crypto_openssl])
-  fi
 ])
 
 AC_DEFUN([APU_CHECK_CRYPTO_NSS], [
@@ -240,11 +235,6 @@ AC_DEFUN([APU_CHECK_CRYPTO_NSS], [
   LIBS="$old_libs"
   CPPFLAGS="$old_cppflags"
   LDFLAGS="$old_ldflags"
-
-  if test "$apu_have_nss" = "1"; then
-    APR_ADDTO(APRUTIL_EXPORT_LIBS, [$LDADD_crypto_nss])
-    APR_ADDTO(LIBS, [$LDADD_crypto_nss])
-  fi
 ])
 
 AC_DEFUN([APU_CHECK_CRYPTO_COMMONCRYPTO], [
@@ -301,11 +291,6 @@ AC_DEFUN([APU_CHECK_CRYPTO_COMMONCRYPTO], [
   LIBS="$old_libs"
   CPPFLAGS="$old_cppflags"
   LDFLAGS="$old_ldflags"
-
-  if test "$apu_have_commoncrypto" = "1"; then
-    APR_ADDTO(APRUTIL_EXPORT_LIBS, [$LDADD_crypto_commoncrypto])
-    APR_ADDTO(LIBS, [$LDADD_crypto_commoncrypto])
-  fi
 ])
 
 dnl
