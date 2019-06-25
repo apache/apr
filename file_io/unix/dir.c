@@ -142,6 +142,12 @@ static apr_filetype_e filetype_from_dirent_type(int type)
 apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                           apr_dir_t *thedir)
 {
+    return apr_dir_pread(finfo, wanted, thedir, thedir->pool);
+}
+
+apr_status_t apr_dir_pread(apr_finfo_t *finfo, apr_int32_t wanted,
+                           apr_dir_t *thedir, apr_pool_t *pool)
+{
     apr_status_t ret = 0;
 #ifdef DIRENT_TYPE
     apr_filetype_e type;
@@ -251,7 +257,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         apr_cpystrn(end, thedir->entry->d_name, 
                     sizeof fspec - (end - fspec));
 
-        ret = apr_stat(finfo, fspec, APR_FINFO_LINK | wanted, thedir->pool);
+        ret = apr_stat(finfo, fspec, APR_FINFO_LINK | wanted, pool);
         /* We passed a stack name that will disappear */
         finfo->fname = NULL;
     }
@@ -263,7 +269,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         /* We don't bail because we fail to stat, when we are only -required-
          * to readdir... but the result will be APR_INCOMPLETE
          */
-        finfo->pool = thedir->pool;
+        finfo->pool = pool;
         finfo->valid = 0;
 #ifdef DIRENT_TYPE
         if (type != APR_UNKFILE) {
@@ -279,7 +285,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
 #endif
     }
 
-    finfo->name = apr_pstrdup(thedir->pool, thedir->entry->d_name);
+    finfo->name = apr_pstrdup(pool, thedir->entry->d_name);
     finfo->valid |= APR_FINFO_NAME;
 
     if (wanted)

@@ -430,6 +430,36 @@ static void test_readmore_info(abts_case* tc, void* data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
+#if APR_POOL_DEBUG
+static void test_pread(abts_case *tc, void *data)
+{
+    apr_dir_t *dir;
+    apr_finfo_t finfo;
+    apr_size_t before, after;
+    apr_pool_t *subp;
+
+    APR_ASSERT_SUCCESS(tc, "apr_dir_open failed", apr_dir_open(&dir, "data", p));
+    
+    apr_pool_create(&subp, p);
+
+    before = apr_pool_num_bytes(p, 0);
+    
+    APR_ASSERT_SUCCESS(tc, "apr_dir_read failed",
+                       apr_dir_pread(&finfo, APR_FINFO_DIRENT, dir, subp));
+
+    after = apr_pool_num_bytes(p, 0);
+
+    ABTS_PTR_EQUAL(tc, finfo.pool, subp);
+
+    apr_pool_destroy(subp);
+    
+    APR_ASSERT_SUCCESS(tc, "apr_dir_close failed", apr_dir_close(dir));
+
+    ABTS_INT_EQUAL(tc, before, after);
+    
+}
+#endif
+
 abts_suite *testdir(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -451,7 +481,10 @@ abts_suite *testdir(abts_suite *suite)
     abts_run_test(suite, test_closedir, NULL);
     abts_run_test(suite, test_uncleared_errno, NULL);
     abts_run_test(suite, test_readmore_info, NULL);
-
+#if APR_POOL_DEBUG
+    abts_run_test(suite, test_pread, NULL);
+#endif
+    
     return suite;
 }
 
