@@ -20,6 +20,8 @@
 #include "apr_thread_mutex.h"
 #include "apr_arch_inherit.h"
 
+#include <assert.h>
+
 static apr_status_t file_dup(apr_file_t **new_file, 
                              apr_file_t *old_file, apr_pool_t *p,
                              int which_dup)
@@ -29,6 +31,8 @@ static apr_status_t file_dup(apr_file_t **new_file,
     int flags = 0;
 #endif
 
+    assert(which_dup == 1 || which_dup == 2);
+    
     if (which_dup == 2) {
         if ((*new_file) == NULL) {
             /* We can't dup2 unless we have a valid new_file */
