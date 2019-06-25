@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_dir_pread(): Add function which restricts per-read memory
+     consumption to a different pool to the apr_dir_t object.
+     [Joe Orton]
+
   *) apr_crypto_openssl: Remove unused link to the ssl library.
      [Graham Leggett]
 
