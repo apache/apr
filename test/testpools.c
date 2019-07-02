@@ -166,7 +166,12 @@ static void test_cleanups(abts_case *tc, void *data)
 
 static void test_tags(abts_case *tc, void *data)
 {
+    /* if APR_POOL_DEBUG is set, all pools are tagged by default */
+#if APR_POOL_DEBUG
+    ABTS_PTR_NOTNULL(tc, apr_pool_get_tag(pmain));
+#else
     ABTS_PTR_EQUAL(tc, NULL, apr_pool_get_tag(pmain));
+#endif
     apr_pool_tag(pmain, "main pool");
     ABTS_STR_EQUAL(tc, "main pool", apr_pool_get_tag(pmain));
 }
