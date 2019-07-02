@@ -152,7 +152,7 @@ APR_DECLARE(apr_status_t) apr_dir_pread(apr_finfo_t *finfo, apr_int32_t wanted,
     if ((rv = unicode_to_utf8_path(thedir->name, APR_FILE_MAX * 3 + 1, 
                                    thedir->entry->cFileName)))
         return rv;
-    fname = thedir->name;
+    fname = apr_pstrdup(pool, thedir->name);
 
     fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) thedir->entry,
                     0, 1, fname, wanted);

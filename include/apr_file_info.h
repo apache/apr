@@ -257,15 +257,18 @@ APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *thedir);
  * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_
                  values 
  * @param thedir the directory descriptor returned from apr_dir_open
+ *
  * @remark No ordering is guaranteed for the entries read.
+ *         @c finfo->pool is set to the pool used to create @a thedir,
+ *         and @c finfo->name is allocated from that pool.
  *
  * @note If @c APR_INCOMPLETE is returned all the fields in @a finfo may
  *       not be filled in, and you need to check the @c finfo->valid bitmask
  *       to verify that what you're looking for is there. When no more
  *       entries are available, APR_ENOENT is returned.
  *
- * @warning Memory will be allocated in the pool passed to apr_dir_open;
- *          use apr_dir_pread() and a temporary pool to restrict memory
+ * @warning Allocations will use the directory pool; use
+ *          apr_dir_pread() and a temporary pool to restrict memory
  *          consumption for a large directory.
  */                        
 APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
@@ -278,7 +281,10 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                  values 
  * @param thedir the directory descriptor returned from apr_dir_open
  * @param pool the pool to use for allocations
- * @remark No ordering is guaranteed for the entries read.
+
+ * @remark No ordering is guaranteed for the entries read.  
+ * @remark @c finfo->pool is set to @a pool, and @c finfo->name is
+ *         allocated from that pool.
  *
  * @note If @c APR_INCOMPLETE is returned all the fields in @a finfo may
  *       not be filled in, and you need to check the @c finfo->valid bitmask

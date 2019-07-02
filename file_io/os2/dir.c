@@ -122,7 +122,7 @@ APR_DECLARE(apr_status_t) apr_dir_pread(apr_finfo_t *finfo, apr_int32_t wanted,
         apr_os2_time_to_apr_time(&finfo->ctime, thedir->entry.fdateCreation,
                                  thedir->entry.ftimeCreation);
 
-        finfo->name = thedir->entry.achName;
+        finfo->name = apr_pstrdup(pool, thedir->entry.achName);
         finfo->valid = APR_FINFO_NAME | APR_FINFO_MTIME | APR_FINFO_ATIME |
             APR_FINFO_CTIME | APR_FINFO_TYPE | APR_FINFO_SIZE |
             APR_FINFO_CSIZE;
