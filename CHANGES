@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_thread_exit() is now a void function.  [Joe Orton]
+
   *) apr_dir_read(): The returned finfo->name field is now duplicated
      into the pool for all implementations.  [Joe Orton]
 

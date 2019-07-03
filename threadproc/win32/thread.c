@@ -134,8 +134,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd,
-                                          apr_status_t retval)
+APR_DECLARE(void) apr_thread_exit(apr_thread_t *thd, apr_status_t retval)
 {
     thd->exitval = retval;
     apr_pool_destroy(thd->pool);
@@ -145,7 +144,6 @@ APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd,
 #else
     ExitThread(0);
 #endif
-    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
