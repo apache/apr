@@ -45,21 +45,6 @@ static apr_file_t no_file = { NULL, INVALID_HANDLE_VALUE, };
 #define LOGON32_LOGON_NETWORK 3
 #endif
 
-#ifdef _WIN32_WCE
-#ifndef DETACHED_PROCESS
-#define DETACHED_PROCESS 0
-#endif
-#ifndef CREATE_UNICODE_ENVIRONMENT
-#define CREATE_UNICODE_ENVIRONMENT 0
-#endif
-#ifndef STARTF_USESHOWWINDOW
-#define STARTF_USESHOWWINDOW 0
-#endif
-#ifndef SW_HIDE
-#define SW_HIDE 0
-#endif
-#endif
-
 /* 
  * some of the ideas expressed herein are based off of Microsoft
  * Knowledge Base article: Q190351
@@ -226,7 +211,6 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
-#ifndef _WIN32_WCE
 static apr_status_t attr_cleanup(void *theattr)
 {
     apr_procattr_t *attr = (apr_procattr_t *)theattr;    
@@ -235,15 +219,11 @@ static apr_status_t attr_cleanup(void *theattr)
     attr->user_token = NULL;
     return APR_SUCCESS;
 }
-#endif
 
 APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr, 
                                                 const char *username,
                                                 const char *password)
 {
-#ifdef _WIN32_WCE
-    return APR_ENOTIMPL;
-#else
     HANDLE user;
     apr_wchar_t *wusername = NULL;
     apr_wchar_t *wpassword = NULL;
@@ -331,7 +311,6 @@ APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr,
     }
     else
         return APR_ENOTIMPL;
-#endif
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_group_set(apr_procattr_t *attr,
@@ -404,8 +383,6 @@ APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
-#if APR_HAS_UNICODE_FS && !defined(_WIN32_WCE)
-
 /* Used only for the NT code path, a critical section is the fastest
  * implementation available.
  */
@@ -425,25 +402,13 @@ static apr_status_t threadproc_global_cleanup(void *ignored)
  */
 apr_status_t apr_threadproc_init(apr_pool_t *pool)
 {
-    IF_WIN_OS_IS_UNICODE
-    {
-        InitializeCriticalSection(&proc_lock);
-        /* register the cleanup */
-        apr_pool_cleanup_register(pool, &proc_lock,
-                                  threadproc_global_cleanup,
-                                  apr_pool_cleanup_null);
-    }
+    InitializeCriticalSection(&proc_lock);
+    /* register the cleanup */
+    apr_pool_cleanup_register(pool, &proc_lock,
+                                threadproc_global_cleanup,
+                                apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
-
-#else /* !APR_HAS_UNICODE_FS || defined(_WIN32_WCE) */
-
-apr_status_t apr_threadproc_init(apr_pool_t *pool)
-{
-    return APR_SUCCESS;
-}
-
-#endif
 
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           const char *progname,
@@ -536,7 +501,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
     }
 
-#ifndef _WIN32_WCE
     if (attr->cmdtype == APR_SHELLCMD || attr->cmdtype == APR_SHELLCMD_ENV) {
         char *shellcmd = getenv("COMSPEC");
         if (!shellcmd) {
@@ -565,11 +529,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
     } 
     else 
-#endif
     {
-#if defined(_WIN32_WCE)
-        {
-#else
         /* Win32 is _different_ than unix.  While unix will find the given
          * program since it's already chdir'ed, Win32 cannot since the parent
          * attempts to open the program with it's own path.
@@ -627,7 +587,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             }
         }
         else {
-#endif
             /* A simple command we are directly invoking.  Do not pass
              * the first arg to CreateProc() for APR_PROGRAM_PATH
              * invocation, since it would need to be a literal and
@@ -663,8 +622,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         if (!i) 
             ++iEnvBlockLen;
 
-#if APR_HAS_UNICODE_FS
-        IF_WIN_OS_IS_UNICODE
         {
             apr_wchar_t *pNext;
             pEnvBlock = (char *)apr_palloc(pool, iEnvBlockLen * 2);
@@ -692,31 +649,10 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 *(pNext++) = L'\0';
 	    *pNext = L'\0';
         }
-#endif /* APR_HAS_UNICODE_FS */
-#if APR_HAS_ANSI_FS
-        ELSE_WIN_OS_IS_ANSI
-        {
-            char *pNext;
-            pEnvBlock = (char *)apr_palloc(pool, iEnvBlockLen);
-    
-            i = 0;
-            pNext = pEnvBlock;
-            while (env[i]) {
-                strcpy(pNext, env[i]);
-                pNext = strchr(pNext, '\0') + 1;
-                i++;
-            }
-	    if (!i)
-                *(pNext++) = '\0';
-	    *pNext = '\0';
-        }
-#endif /* APR_HAS_ANSI_FS */
     } 
 
     new->invoked = cmdline;
 
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
     {
         STARTUPINFOW si;
         DWORD stdin_reset = 0;
@@ -784,7 +720,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             si.wShowWindow = SW_HIDE;
         }
 
-#ifndef _WIN32_WCE
         /* LOCK CRITICAL SECTION 
          * before we begin to manipulate the inherited handles
          */
@@ -899,58 +834,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
          */
         LeaveCriticalSection(&proc_lock);
 
-#else /* defined(_WIN32_WCE) */
-        rv = CreateProcessW(wprg, wcmd,        /* Executable & Command line */
-                            NULL, NULL,        /* Proc & thread security attributes */
-                            FALSE,             /* must be 0 */
-                            dwCreationFlags,   /* Creation flags */
-                            NULL,              /* Environment block must be NULL */
-                            NULL,              /* Current directory name must be NULL*/
-                            NULL,              /* STARTUPINFO not supported */
-                            &pi);
-#endif
     }
-#endif /* APR_HAS_UNICODE_FS */
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        STARTUPINFOA si;
-        memset(&si, 0, sizeof(si));
-        si.cb = sizeof(si);
-
-        if (attr->detached) {
-            si.dwFlags |= STARTF_USESHOWWINDOW;
-            si.wShowWindow = SW_HIDE;
-        }
-
-        if ((attr->child_in && attr->child_in->filehand)
-            || (attr->child_out && attr->child_out->filehand)
-            || (attr->child_err && attr->child_err->filehand))
-        {
-            si.dwFlags |= STARTF_USESTDHANDLES;
-
-            si.hStdInput = (attr->child_in) 
-                              ? attr->child_in->filehand
-                              : GetStdHandle(STD_INPUT_HANDLE);
-
-            si.hStdOutput = (attr->child_out)
-                              ? attr->child_out->filehand
-                              : GetStdHandle(STD_OUTPUT_HANDLE);
-
-            si.hStdError = (attr->child_err)
-                              ? attr->child_err->filehand
-                              : GetStdHandle(STD_ERROR_HANDLE);
-        }
-
-        rv = CreateProcessA(progname, cmdline, /* Command line */
-                            NULL, NULL,        /* Proc & thread security attributes */
-                            TRUE,              /* Inherit handles */
-                            dwCreationFlags,   /* Creation flags */
-                            pEnvBlock,         /* Environment block */
-                            attr->currdir,     /* Current directory name */
-                            &si, &pi);
-    }
-#endif /* APR_HAS_ANSI_FS */
 
     /* Check CreateProcess result 
      */
@@ -995,124 +879,116 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
                                                   apr_wait_how_e waithow,
                                                   apr_pool_t *p)
 {
-#if APR_HAS_UNICODE_FS
-#ifndef _WIN32_WCE
-    IF_WIN_OS_IS_UNICODE
-    {
-        DWORD  dwId    = GetCurrentProcessId();
-        DWORD  i;
-        DWORD  nChilds = 0;
-        DWORD  nActive = 0;
-        HANDLE ps32;
-        PROCESSENTRY32W pe32;
-        BOOL   bHasMore = FALSE;
-        DWORD  dwFlags  = PROCESS_QUERY_INFORMATION;
-        apr_status_t rv = APR_EGENERAL;
+    DWORD  dwId    = GetCurrentProcessId();
+    DWORD  i;
+    DWORD  nChilds = 0;
+    DWORD  nActive = 0;
+    HANDLE ps32;
+    PROCESSENTRY32W pe32;
+    BOOL   bHasMore = FALSE;
+    DWORD  dwFlags  = PROCESS_QUERY_INFORMATION;
+    apr_status_t rv = APR_EGENERAL;
 
-        if (waithow == APR_WAIT)
-            dwFlags |= SYNCHRONIZE;
-        if (!(ps32 = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0))) {
+    if (waithow == APR_WAIT)
+        dwFlags |= SYNCHRONIZE;
+    if (!(ps32 = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0))) {
+        return apr_get_os_error();
+    }
+    pe32.dwSize = sizeof(PROCESSENTRY32W);
+    if (!Process32FirstW(ps32, &pe32)) {
+        if (GetLastError() == ERROR_NO_MORE_FILES)
+            return APR_EOF;
+        else
             return apr_get_os_error();
-        }
-        pe32.dwSize = sizeof(PROCESSENTRY32W);
-        if (!Process32FirstW(ps32, &pe32)) {
-            if (GetLastError() == ERROR_NO_MORE_FILES)
-                return APR_EOF;
-            else
-                return apr_get_os_error();
-        }
+    }
+    do {
+        DWORD  dwRetval = 0;
+        DWORD  nHandles = 0;
+        HANDLE hProcess = NULL;
+        HANDLE pHandles[MAXIMUM_WAIT_OBJECTS];
         do {
-            DWORD  dwRetval = 0;
-            DWORD  nHandles = 0;
-            HANDLE hProcess = NULL;
-            HANDLE pHandles[MAXIMUM_WAIT_OBJECTS];
-            do {
-                if (pe32.th32ParentProcessID == dwId) {
-                    nChilds++;
-                    if ((hProcess = OpenProcess(dwFlags, FALSE,
-                                                pe32.th32ProcessID)) != NULL) {
-                        if (GetExitCodeProcess(hProcess, &dwRetval)) {
-                            if (dwRetval == STILL_ACTIVE) {
-                                nActive++;
-                                if (waithow == APR_WAIT)
-                                    pHandles[nHandles++] = hProcess;
-                                else
-                                    CloseHandle(hProcess);
-                            }
-                            else {                                
-                                /* Process has exited.
-                                 * No need to wait for its termination.
-                                 */
+            if (pe32.th32ParentProcessID == dwId) {
+                nChilds++;
+                if ((hProcess = OpenProcess(dwFlags, FALSE,
+                                            pe32.th32ProcessID)) != NULL) {
+                    if (GetExitCodeProcess(hProcess, &dwRetval)) {
+                        if (dwRetval == STILL_ACTIVE) {
+                            nActive++;
+                            if (waithow == APR_WAIT)
+                                pHandles[nHandles++] = hProcess;
+                            else
                                 CloseHandle(hProcess);
-                                if (exitcode)
-                                    *exitcode = dwRetval;
-                                if (exitwhy)
-                                    *exitwhy  = why_from_exit_code(dwRetval);
-                                proc->pid = pe32.th32ProcessID;
-                            }
                         }
-                        else {
-                            /* Unexpected error code.
-                             * Cleanup and return;
+                        else {                                
+                            /* Process has exited.
+                             * No need to wait for its termination.
                              */
-                            rv = apr_get_os_error();
                             CloseHandle(hProcess);
-                            for (i = 0; i < nHandles; i++)
-                                CloseHandle(pHandles[i]);
-                            return rv;
+                            if (exitcode)
+                                *exitcode = dwRetval;
+                            if (exitwhy)
+                                *exitwhy  = why_from_exit_code(dwRetval);
+                            proc->pid = pe32.th32ProcessID;
                         }
                     }
                     else {
-                        /* This is our child, so it shouldn't happen
-                         * that we cannot open our child's process handle.
-                         * However if the child process increased the
-                         * security token it might fail.
+                        /* Unexpected error code.
+                         * Cleanup and return;
                          */
+                        rv = apr_get_os_error();
+                        CloseHandle(hProcess);
+                        for (i = 0; i < nHandles; i++)
+                            CloseHandle(pHandles[i]);
+                        return rv;
                     }
                 }
-            } while ((bHasMore = Process32NextW(ps32, &pe32)) &&
-                     nHandles < MAXIMUM_WAIT_OBJECTS);
-            if (nHandles) {
-                /* Wait for all collected processes to finish */
-                DWORD waitStatus = WaitForMultipleObjects(nHandles, pHandles,
-                                                          TRUE, INFINITE);
-                for (i = 0; i < nHandles; i++)
-                    CloseHandle(pHandles[i]);
-                if (waitStatus == WAIT_OBJECT_0) {
-                    /* Decrease active count by the number of awaited
-                     * processes.
-                     */
-                    nActive -= nHandles;
-                }
                 else {
-                    /* Broken from the infinite loop */
-                    break;
+                    /* This is our child, so it shouldn't happen
+                     * that we cannot open our child's process handle.
+                     * However if the child process increased the
+                     * security token it might fail.
+                     */
                 }
             }
-        } while (bHasMore);
-        CloseHandle(ps32);
-        if (waithow != APR_WAIT) {
-            if (nChilds && nChilds == nActive) {
-                /* All child processes are running */
-                rv = APR_CHILD_NOTDONE;
-                proc->pid = -1;
+        } while ((bHasMore = Process32NextW(ps32, &pe32)) &&
+                 nHandles < MAXIMUM_WAIT_OBJECTS);
+        if (nHandles) {
+            /* Wait for all collected processes to finish */
+            DWORD waitStatus = WaitForMultipleObjects(nHandles, pHandles,
+                                                      TRUE, INFINITE);
+            for (i = 0; i < nHandles; i++)
+                CloseHandle(pHandles[i]);
+            if (waitStatus == WAIT_OBJECT_0) {
+                /* Decrease active count by the number of awaited
+                 * processes.
+                 */
+                nActive -= nHandles;
             }
             else {
-                /* proc->pid contains the pid of the
-                 * exited processes
-                 */
-                rv = APR_CHILD_DONE;
+                /* Broken from the infinite loop */
+                break;
             }
         }
-        if (nActive == 0) {
-            rv = APR_CHILD_DONE;
+    } while (bHasMore);
+    CloseHandle(ps32);
+    if (waithow != APR_WAIT) {
+        if (nChilds && nChilds == nActive) {
+            /* All child processes are running */
+            rv = APR_CHILD_NOTDONE;
             proc->pid = -1;
         }
-        return rv;
+        else {
+            /* proc->pid contains the pid of the
+             * exited processes
+             */
+            rv = APR_CHILD_DONE;
+        }
     }
-#endif /* _WIN32_WCE */
-#endif /* APR_HAS_UNICODE_FS */
-    return APR_ENOTIMPL;
+    if (nActive == 0) {
+        rv = APR_CHILD_DONE;
+        proc->pid = -1;
+    }
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
