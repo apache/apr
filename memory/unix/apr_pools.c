@@ -1886,10 +1886,6 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
 
     apr_pool_check_lifetime(pool);
 
-#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
-    apr_pool_log_event(pool, "CLEAR", file_line, 1);
-#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
-
 #if APR_HAS_THREADS
     if (pool->parent != NULL)
         mutex = pool->parent->mutex;
@@ -1904,6 +1900,10 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
 #endif
 
     pool_clear_debug(pool, file_line);
+
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
+    apr_pool_log_event(pool, "CLEAR", file_line, 1);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
 
 #if APR_HAS_THREADS
     /* If we had our own mutex, it will have been destroyed by
@@ -1929,11 +1929,11 @@ static void pool_destroy_debug(apr_pool_t *pool, const char *file_line)
 {
     apr_pool_check_lifetime(pool);
 
+    pool_clear_debug(pool, file_line);
+
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "DESTROY", file_line, 1);
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
-
-    pool_clear_debug(pool, file_line);
 
     /* Remove the pool from the parents child list */
     if (pool->parent) {
@@ -2043,6 +2043,9 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     pool->owner_proc = (apr_os_proc_t)getnlmhandle();
 #endif /* defined(NETWARE) */
 
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
+    apr_pool_log_event(pool, "CREATE", file_line, 1);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
 
     if (parent == NULL || parent->allocator != allocator) {
 #if APR_HAS_THREADS
@@ -2071,10 +2074,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     }
 
     *newpool = pool;
-
-#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
-    apr_pool_log_event(pool, "CREATE", file_line, 1);
-#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
 
     return APR_SUCCESS;
 }
@@ -2129,6 +2128,10 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
     }
     pool->allocator = pool_allocator;
 
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
+    apr_pool_log_event(pool, "CREATEU", file_line, 1);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
+
     if (pool->allocator != allocator) {
 #if APR_HAS_THREADS
         apr_status_t rv;
@@ -2150,10 +2153,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
     }
 
     *newpool = pool;
-
-#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
-    apr_pool_log_event(pool, "CREATEU", file_line, 1);
-#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
 
     return APR_SUCCESS;
 }
