@@ -1712,13 +1712,6 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
     file_stderr = debug_log;
 
     if (file_stderr) {
-        /* Add a cleanup handler that sets the debug log file handle
-         * to NULL, otherwise we'll try to log the global pool
-         * destruction event with predictably disastrous results. */
-        apr_pool_cleanup_register(global_pool, NULL,
-                                  apr_pool_cleanup_file_stderr,
-                                  apr_pool_cleanup_null);
-
         apr_file_printf(file_stderr,
             "POOL DEBUG: [PID"
 #if APR_HAS_THREADS
@@ -1728,6 +1721,13 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
             "POOL       \"TAG\" <__FILE__:__LINE__> PARENT     (ALLOCS/TOTAL ALLOCS/CLEARS)\n");
 
         apr_pool_log_event(global_pool, "GLOBAL", __FILE__ ":apr_pool_initialize", 0);
+
+        /* Add a cleanup handler that sets the debug log file handle
+         * to NULL, otherwise we'll try to log the global pool
+         * destruction event with predictably disastrous results. */
+        apr_pool_cleanup_register(global_pool, NULL,
+                                  apr_pool_cleanup_file_stderr,
+                                  apr_pool_cleanup_null);
     }
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL) */
 
