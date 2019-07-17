@@ -1909,6 +1909,11 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
      * the mutex we obtained above.
      */
     if (mutex != pool->mutex) {
+        /*
+         * Prevent apr_palloc() in apr_thread_mutex_create() from trying to
+         * use the destroyed mutex.
+         */
+        pool->mutex = NULL;
         (void)apr_thread_mutex_create(&pool->mutex,
                                       APR_THREAD_MUTEX_NESTED, pool);
 
@@ -1985,7 +1990,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
         parent = global_pool;
     }
     else {
-       apr_pool_check_integrity(parent);
+       apr_pool_check_lifetime(parent);
 
        if (!allocator)
            allocator = parent->allocator;
