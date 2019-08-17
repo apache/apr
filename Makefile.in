@@ -34,7 +34,7 @@ INSTALL_DATA = @INSTALL_DATA@
 
 EXTRA_OBJECTS = @EXTRA_OBJECTS@
 APR_DSO_MODULES = @APR_DSO_MODULES@
-LINK_MODULE = $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LT_LDFLAGS) $(ALL_CFLAGS) $(ALL_LDFLAGS) $(APRUTIL_LDFLAGS) -release $(APR_MAJOR_VERSION) -module -rpath $(APR_DSO_LIBDIR)
+LINK_MODULE = $(LIBTOOL) $(LTFLAGS) --mode=link --tag=CC $(CC) $(LT_LDFLAGS) $(ALL_CFLAGS) $(ALL_LDFLAGS) $(APRUTIL_LDFLAGS) -release $(APR_MAJOR_VERSION) -module -rpath $(APR_DSO_LIBDIR)
 APR_DSO_LIBDIR = @APR_DSO_LIBDIR@
 APRUTIL_EXPORT_LIBS = @APRUTIL_EXPORT_LIBS@
 
@@ -175,7 +175,7 @@ include/private/apr_escape_test_char.h: tools/gen_test_char@EXEEXT@
 	$(APR_MKDIR) include/private
 	tools/gen_test_char@EXEEXT@ > $@
 
-LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) $(LT_LDFLAGS) \
+LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link --tag=CC $(COMPILE) $(LT_LDFLAGS) \
 	    @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
 
 # DO NOT REMOVE
