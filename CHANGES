@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.1
 
+  *) Add --tag=CC to libtool invocations. PR 62640. [Michael Osipov]
+
   *) apr_pools: Fix pool debugging output so that creation events are
      always emitted before allocation events and subpool destruction
      events are emitted on pool clear/destroy for proper accounting.
