@@ -1,0 +1,60 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{8EDCF3CC-2339-4D95-BED6-8380B5F8AEE6}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="apr.cbproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="aprapp.cbproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="libapr.cbproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="apr">
+        <MSBuild Projects="apr.cbproj"/>
+    </Target>
+    <Target Name="apr:Clean">
+        <MSBuild Projects="apr.cbproj" Targets="Clean"/>
+    </Target>
+    <Target Name="apr:Make">
+        <MSBuild Projects="apr.cbproj" Targets="Make"/>
+    </Target>
+    <Target Name="aprapp">
+        <MSBuild Projects="aprapp.cbproj"/>
+    </Target>
+    <Target Name="aprapp:Clean">
+        <MSBuild Projects="aprapp.cbproj" Targets="Clean"/>
+    </Target>
+    <Target Name="aprapp:Make">
+        <MSBuild Projects="aprapp.cbproj" Targets="Make"/>
+    </Target>
+    <Target Name="libapr">
+        <MSBuild Projects="libapr.cbproj"/>
+    </Target>
+    <Target Name="libapr:Clean">
+        <MSBuild Projects="libapr.cbproj" Targets="Clean"/>
+    </Target>
+    <Target Name="libapr:Make">
+        <MSBuild Projects="libapr.cbproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="apr;aprapp;libapr"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="apr:Clean;aprapp:Clean;libapr:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="apr:Make;aprapp:Make;libapr:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

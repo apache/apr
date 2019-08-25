@@ -1,0 +1,25 @@
+# Untrack files for eleven_engine project
+# Written by Alex Bassi
+# Telit Production Test Tools & Fixture Team
+# September 2017
+
+# untrack Temp folder
+obj/
+
+# untrack Embarcadero temporary files
+*.ilc
+*.ild
+*.ilf
+*.ils
+*.map
+*.pdi
+*.tds
+*.local
+*.cbproj.local
+*.stat
+*.res
+*.obj
+*.orig
+__astcache/
+__recovery/
+__history/

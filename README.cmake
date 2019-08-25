@@ -35,6 +35,7 @@ The following tools must be in PATH:
 * cmake, version 2.8 or later
 * If using a command-line compiler: compiler and linker and related tools
   (Refer to the cmake documentation for more information.)
+* Ninja build system (https://ninja-build.org/) if building with Embarcadero C++ Builder (Clang)
 
 How to build
 ------------
@@ -90,6 +91,24 @@ How to build
        Other backends make have other selections.
 
 4. build using chosen backend (e.g., "nmake install")
+
+
+Notes for building with cmake/Ninja and C++ Builder 
+----------------------------------------------------
+Before trying to build the library, follow the instructions on Embarcadero web site about how to setup cmake correctly in order to support correctly C++ Builder tool chain.
+(http://docwiki.embarcadero.com/RADStudio/Tokyo/en/Using_CMake_with_C%2B%2B_Builder)
+After you installed all files as well as ninja build system, you can start building the library. 
+
+Here is a command line example to successfully build a release library.
+ cmake -DCMAKE_C_COMPILER=bcc32x.exe 
+	-DCMAKE_CXX_COMPILER=bcc32x.exe 
+	-G Ninja 
+	-DCMAKE_INSTALL_PREFIX=d:/path/to/aprinst
+	-DMIN_WINDOWS_VER=0x0501 
+	d:/path/to/aprsource
+	
+Note: at the moment only apr and aprapp libraries can be succesfully build through ninja. The build process stops while linking the files to build libapr.dll. The linker returns an exit code (2) which is probably due to a process crash. 
+I've noticed that turning off the warning about "public symbol defined in more than one obj file" fixes the issue. You can use the project files to build succesfully the dll.
 
 Known Bugs and Limitations
 --------------------------

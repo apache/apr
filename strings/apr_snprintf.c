@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <math.h>
 #include "apr.h"
 #include "apr_private.h"
-
+//
 #include "apr_lib.h"
 #include "apr_strings.h"
 #include "apr_network_io.h"
 #include "apr_portable.h"
 #include "apr_errno.h"
-#include <math.h>
+//
 #if APR_HAVE_CTYPE_H
 #include <ctype.h>
 #endif
