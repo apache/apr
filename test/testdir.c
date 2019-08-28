@@ -21,7 +21,6 @@
 #include "apr_file_info.h"
 #include "apr_errno.h"
 #include "apr_general.h"
-#include "apr_strings.h"
 #include "apr_lib.h"
 #include "apr_thread_proc.h"
 #include "testutil.h"
@@ -431,66 +430,6 @@ static void test_readmore_info(abts_case* tc, void* data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
-#if APR_POOL_DEBUG
-static void test_pread(abts_case *tc, void *data)
-{
-    apr_dir_t *dir;
-    apr_finfo_t finfo;
-    apr_size_t before, after;
-    apr_pool_t *subp;
-
-    APR_ASSERT_SUCCESS(tc, "apr_dir_open failed", apr_dir_open(&dir, "data", p));
-    
-    apr_pool_create(&subp, p);
-
-    before = apr_pool_num_bytes(p, 0);
-    
-    APR_ASSERT_SUCCESS(tc, "apr_dir_read failed",
-                       apr_dir_pread(&finfo, APR_FINFO_DIRENT, dir, subp));
-
-    after = apr_pool_num_bytes(p, 0);
-
-    ABTS_PTR_EQUAL(tc, finfo.pool, subp);
-
-    apr_pool_destroy(subp);
-    
-    APR_ASSERT_SUCCESS(tc, "apr_dir_close failed", apr_dir_close(dir));
-
-    ABTS_INT_EQUAL(tc, before, after);
-    
-}
-#endif
-
-/* Ensure that apr_dir_read() doesn't have side-effects, because
- * finfo->name points to a static buffer inside the apr_dir_t */
-static void test_read_side_effects(abts_case *tc, void *data)
-{
-    apr_dir_t *dir;
-    apr_finfo_t f1;
-    apr_finfo_t f2;
-    char name[APR_PATH_MAX], fname[APR_PATH_MAX];
-
-    APR_ASSERT_SUCCESS(tc, "apr_dir_open failed", apr_dir_open(&dir, "data", p));
-    
-    APR_ASSERT_SUCCESS(tc, "apr_dir_read failed",
-                       apr_dir_read(&f1, APR_FINFO_DIRENT, dir));
-
-    if (f1.name)
-        apr_cpystrn(name, f1.name, sizeof name);
-    if (f1.fname)
-        apr_cpystrn(fname, f1.fname, sizeof fname);
-
-    APR_ASSERT_SUCCESS(tc, "second apr_dir_read failed",
-                       apr_dir_read(&f2, APR_FINFO_DIRENT, dir));
-
-    if (f1.name)
-        ABTS_STR_EQUAL(tc, name, f1.name);
-    if (f1.fname)
-        ABTS_STR_EQUAL(tc, fname, f1.fname);
-    
-    APR_ASSERT_SUCCESS(tc, "apr_dir_close failed", apr_dir_close(dir));
-}
-
 abts_suite *testdir(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -512,11 +451,7 @@ abts_suite *testdir(abts_suite *suite)
     abts_run_test(suite, test_closedir, NULL);
     abts_run_test(suite, test_uncleared_errno, NULL);
     abts_run_test(suite, test_readmore_info, NULL);
-#if APR_POOL_DEBUG
-    abts_run_test(suite, test_pread, NULL);
-#endif
-    abts_run_test(suite, test_read_side_effects, NULL);
-    
+
     return suite;
 }
 
