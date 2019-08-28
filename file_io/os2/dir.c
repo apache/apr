@@ -79,28 +79,24 @@ APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *thedir)
     return APR_FROM_OS_ERROR(rv);
 } 
 
+
+
 APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                                        apr_dir_t *thedir)
-{
-    return apr_dir_pread(finfo, wanted, thedir, thedir->pool);
-}
-
-APR_DECLARE(apr_status_t) apr_dir_pread(apr_finfo_t *finfo, apr_int32_t wanted,
-                                        apr_dir_t *thedir, apr_pool_t *pool)
 {
     int rv;
     ULONG entries = 1;
     
     if (thedir->handle == 0) {
         thedir->handle = HDIR_CREATE;
-        rv = DosFindFirst(apr_pstrcat(pool, thedir->dirname, "/*", NULL), &thedir->handle, 
+        rv = DosFindFirst(apr_pstrcat(thedir->pool, thedir->dirname, "/*", NULL), &thedir->handle, 
                           FILE_ARCHIVED|FILE_DIRECTORY|FILE_SYSTEM|FILE_HIDDEN|FILE_READONLY, 
                           &thedir->entry, sizeof(thedir->entry), &entries, FIL_STANDARD);
     } else {
         rv = DosFindNext(thedir->handle, &thedir->entry, sizeof(thedir->entry), &entries);
     }
 
-    finfo->pool = pool;
+    finfo->pool = thedir->pool;
     finfo->fname = NULL;
     finfo->valid = 0;
 
@@ -122,7 +118,7 @@ APR_DECLARE(apr_status_t) apr_dir_pread(apr_finfo_t *finfo, apr_int32_t wanted,
         apr_os2_time_to_apr_time(&finfo->ctime, thedir->entry.fdateCreation,
                                  thedir->entry.ftimeCreation);
 
-        finfo->name = apr_pstrdup(pool, thedir->entry.achName);
+        finfo->name = thedir->entry.achName;
         finfo->valid = APR_FINFO_NAME | APR_FINFO_MTIME | APR_FINFO_ATIME |
             APR_FINFO_CTIME | APR_FINFO_TYPE | APR_FINFO_SIZE |
             APR_FINFO_CSIZE;

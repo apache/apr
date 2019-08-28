@@ -91,12 +91,6 @@ APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *dir)
 APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                                        apr_dir_t *thedir)
 {
-    return apr_dir_pread(finfo, wanted, thedir, thedir->pool);
-}
-
-APR_DECLARE(apr_status_t) apr_dir_pread(apr_finfo_t *finfo, apr_int32_t wanted,
-                                        apr_dir_t *thedir, apr_pool_t *pool)
-{
     apr_status_t rv;
     char *fname;
     apr_wchar_t wdirname[APR_PATH_MAX];
@@ -152,11 +146,11 @@ APR_DECLARE(apr_status_t) apr_dir_pread(apr_finfo_t *finfo, apr_int32_t wanted,
     if ((rv = unicode_to_utf8_path(thedir->name, APR_FILE_MAX * 3 + 1, 
                                    thedir->entry->cFileName)))
         return rv;
-    fname = apr_pstrdup(pool, thedir->name);
+    fname = thedir->name;
 
     fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) thedir->entry,
                     0, 1, fname, wanted);
-    finfo->pool = pool;
+    finfo->pool = thedir->pool;
 
     finfo->valid |= APR_FINFO_NAME;
     finfo->name = fname;
