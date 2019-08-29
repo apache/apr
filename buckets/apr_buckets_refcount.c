@@ -35,10 +35,9 @@ APR_DECLARE_NONSTD(apr_status_t) apr_bucket_shared_copy(apr_bucket *a,
 {
     apr_bucket_refcount *r = a->data;
 
-    apr_bucket_simple_copy(a, b);
     r->refcount++;
 
-    return APR_SUCCESS;
+    return apr_bucket_simple_copy(a, b);
 }
 
 APR_DECLARE(int) apr_bucket_shared_destroy(void *data)
