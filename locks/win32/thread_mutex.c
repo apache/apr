@@ -74,14 +74,20 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 {
     if (mutex->type == thread_mutex_critical_section) {
         EnterCriticalSection(&mutex->section);
+        return APR_SUCCESS;
     }
     else {
         DWORD rv = WaitForSingleObject(mutex->handle, INFINITE);
-        if ((rv != WAIT_OBJECT_0) && (rv != WAIT_ABANDONED)) {
-            return (rv == WAIT_TIMEOUT) ? APR_EBUSY : apr_get_os_error();
+        if (rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
+            return APR_SUCCESS;
         }
-    }        
-    return APR_SUCCESS;
+        else if (rv == WAIT_TIMEOUT) {
+            return APR_EBUSY;
+        }
+        else {
+            return apr_get_os_error();
+        }
+    }
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
@@ -90,14 +96,20 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
         if (!TryEnterCriticalSection(&mutex->section)) {
             return APR_EBUSY;
         }
+        return APR_SUCCESS;
     }
     else {
         DWORD rv = WaitForSingleObject(mutex->handle, 0);
-        if ((rv != WAIT_OBJECT_0) && (rv != WAIT_ABANDONED)) {
-            return (rv == WAIT_TIMEOUT) ? APR_EBUSY : apr_get_os_error();
+        if (rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
+            return APR_SUCCESS;
         }
-    }        
-    return APR_SUCCESS;
+        else if (rv == WAIT_TIMEOUT) {
+            return APR_EBUSY;
+        }
+        else {
+            return apr_get_os_error();
+        }
+    }
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
@@ -108,11 +120,16 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
 
         rv = apr_wait_for_single_object(mutex->handle, timeout);
 
-        if ((rv != WAIT_OBJECT_0) && (rv != WAIT_ABANDONED)) {
-            return (rv == WAIT_TIMEOUT) ? APR_TIMEUP : apr_get_os_error();
+        if (rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
+            return APR_SUCCESS;
         }
-        return APR_SUCCESS;
-    }        
+        else if (rv == WAIT_TIMEOUT) {
+            return APR_TIMEUP;
+        }
+        else {
+            return apr_get_os_error();
+        }
+    }
 
     return APR_ENOTIMPL;
 }
