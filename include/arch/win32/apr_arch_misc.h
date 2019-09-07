@@ -257,33 +257,6 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, NtSetTimerResolution, 0, (
     (ReqRes, Acquire, pNewRes));
 #define SetTimerResolution apr_winapi_NtSetTimerResolution
 
-typedef struct PBI {
-    LONG      ExitStatus;
-    PVOID     PebBaseAddress;
-    apr_uintptr_t AffinityMask;
-    LONG      BasePriority;
-    apr_uintptr_t UniqueProcessId;
-    apr_uintptr_t InheritedFromUniqueProcessId;
-} PBI, *PPBI;
-
-APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, NtQueryInformationProcess, 0, (
-    HANDLE hProcess,  /* Obvious */
-    INT   info,       /* Use 0 for PBI documented above */
-    PVOID pPI,        /* The PIB buffer */
-    ULONG LenPI,      /* Use sizeof(PBI) */
-    ULONG *pSizePI),  /* returns pPI buffer used (may pass NULL) */
-    (hProcess, info, pPI, LenPI, pSizePI));
-#define QueryInformationProcess apr_winapi_NtQueryInformationProcess
-
-APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, NtQueryObject, 0, (
-    HANDLE hObject,   /* Obvious */
-    INT   info,       /* Use 0 for PBI documented above */
-    PVOID pOI,        /* The PIB buffer */
-    ULONG LenOI,      /* Use sizeof(PBI) */
-    ULONG *pSizeOI),  /* returns pPI buffer used (may pass NULL) */
-    (hObject, info, pOI, LenOI, pSizeOI));
-#define QueryObject apr_winapi_NtQueryObject
-
 /* https://docs.microsoft.com/en-us/windows/desktop/api/winternl/nf-winternl-ntwaitforsingleobject */
 APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, LONG, WINAPI, NtWaitForSingleObject, 0, (
     HANDLE Handle,          /* The handle to the wait object. */
