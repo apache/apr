@@ -70,7 +70,6 @@ static APR_INLINE apr_status_t thread_cond_timedwait(apr_thread_cond_t *cond,
     apr_status_t rv;
     unsigned int wake = 0;
     unsigned long generation;
-    DWORD timeout_ms = 0;
 
     EnterCriticalSection(&cond->csection);
     cond->num_waiting++;
