@@ -437,13 +437,11 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
          * not manage the stdio handles properly when running old 16
          * bit executables if the detached attribute is set.
          */
-        if (apr_os_level >= APR_WIN_NT) {
-            /* 
-             * XXX DETACHED_PROCESS won't on Win9x at all; on NT/W2K 
-             * 16 bit executables fail (MS KB: Q150956)
-             */
-            dwCreationFlags |= DETACHED_PROCESS;
-        }
+        /* 
+         * XXX DETACHED_PROCESS won't on Win9x at all; on NT/W2K 
+         * 16 bit executables fail (MS KB: Q150956)
+         */
+        dwCreationFlags |= DETACHED_PROCESS;
     }
 
     /* progname must be unquoted, in native format, as there are all sorts 
