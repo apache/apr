@@ -436,6 +436,8 @@ thread_win32_abandoned_mutex_function(apr_thread_t *thd, void *data)
 
     /* exit from thread without unlocking mutex. */
     apr_thread_exit(thd, rv);
+
+    return NULL;
 }
 
 static void test_win32_abandoned_mutex(abts_case *tc, void *data)
