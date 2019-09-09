@@ -518,15 +518,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 shellcmd = apr_pstrcat(pool, "\"", shellcmd, "\"", NULL);
             }
         }
-        /* Command.com does not support a quoted command, while cmd.exe demands one.
-         */
-        i = strlen(progname);
-        if (i >= 11 && strcasecmp(progname + i - 11, "command.com") == 0) {
-            cmdline = apr_pstrcat(pool, shellcmd, " /C ", argv0, cmdline, NULL);
-        }
-        else {
-            cmdline = apr_pstrcat(pool, shellcmd, " /C \"", argv0, cmdline, "\"", NULL);
-        }
+
+        cmdline = apr_pstrcat(pool, shellcmd, " /C \"", argv0, cmdline, "\"", NULL);
     } 
     else 
     {
@@ -556,34 +549,24 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                     shellcmd = apr_pstrcat(pool, "\"", shellcmd, "\"", NULL);
                 }
             }
-            i = strlen(progname);
-            if (i >= 11 && strcasecmp(progname + i - 11, "command.com") == 0) {
-                /* XXX: Still insecure - need doubled-quotes on each individual
-                 * arg of cmdline.  Suspect we need to postpone cmdline parsing
-                 * until this moment in all four code paths, with some flags
-                 * to toggle 'which flavor' is needed.
-                 */
-                cmdline = apr_pstrcat(pool, shellcmd, " /C ", argv0, cmdline, NULL);
+
+            /* We must protect the cmdline args from any interpolation - this
+             * is not a shellcmd, and the source of argv[] is untrusted.
+             * Notice we escape ALL the cmdline args, including the quotes
+             * around the individual args themselves.  No sense in allowing
+             * the shift-state to be toggled, and the application will 
+             * not see the caret escapes.
+             */
+            cmdline = apr_caret_escape_args(pool, cmdline);
+            /*
+             * Our app name must always be quoted so the quotes surrounding
+             * the entire /c "command args" are unambigious.
+             */
+            if (*argv0 != '"') {
+                cmdline = apr_pstrcat(pool, shellcmd, " /C \"\"", argv0, "\"", cmdline, "\"", NULL);
             }
             else {
-                /* We must protect the cmdline args from any interpolation - this
-                 * is not a shellcmd, and the source of argv[] is untrusted.
-                 * Notice we escape ALL the cmdline args, including the quotes
-                 * around the individual args themselves.  No sense in allowing
-                 * the shift-state to be toggled, and the application will 
-                 * not see the caret escapes.
-                 */
-                cmdline = apr_caret_escape_args(pool, cmdline);
-                /*
-                 * Our app name must always be quoted so the quotes surrounding
-                 * the entire /c "command args" are unambigious.
-                 */
-                if (*argv0 != '"') {
-                    cmdline = apr_pstrcat(pool, shellcmd, " /C \"\"", argv0, "\"", cmdline, "\"", NULL);
-                }
-                else {
-                    cmdline = apr_pstrcat(pool, shellcmd, " /C \"", argv0, cmdline, "\"", NULL);
-                }
+                cmdline = apr_pstrcat(pool, shellcmd, " /C \"", argv0, cmdline, "\"", NULL);
             }
         }
         else {
