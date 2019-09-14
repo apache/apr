@@ -271,10 +271,6 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
     int sendv_trailers = 0;
     char hdtrbuf[4096];
 
-    if (apr_os_level < APR_WIN_NT) {
-        return APR_ENOTIMPL;
-    }
-
     /* Use len to keep track of number of total bytes sent (including headers) */
     bytes_to_send = *len;
     *len = 0;
