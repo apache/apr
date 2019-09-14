@@ -293,6 +293,28 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
     bytes_to_send = *len;
     *len = 0;
 
+    /* According to the documentation [1] TF_USE_KERNEL_APC is the most performant option:
+     * [[[
+     * Directs the driver to use kernel asynchronous procedure calls (APCs)
+     * instead of worker threads to process long TransmitFile requests.
+     * Long TransmitFile requests are defined as requests that require more
+     * than a single read from the file or a cache; the request therefore
+     * depends on the size of the file and the specified length of the send
+     * packet. 
+     *
+     * Use of TF_USE_KERNEL_APC can deliver significant performance benefits.
+     * It is possible (though unlikely), however, that the thread in which
+     * context TransmitFile is initiated is being used for heavy computations;
+     * this situation may prevent APCs from launching.
+     * ]]]
+     *
+     * The downside is not applicable for our use case since calling thread
+     * is not busy and waiting for operation completion.
+     *
+     * [1] https://docs.microsoft.com/en-gb/windows/win32/api/mswsock/nf-mswsock-transmitfile
+     */
+    dwFlags |= TF_USE_KERNEL_APC;
+
     /* Handle the goofy case of sending headers/trailers and a zero byte file */
     if (!bytes_to_send && hdtr) {
         if (hdtr->numheaders) {
