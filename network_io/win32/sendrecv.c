@@ -267,7 +267,6 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
     apr_size_t nbytes;
     TRANSMIT_FILE_BUFFERS tfb, *ptfb = NULL;
     apr_size_t bytes_to_send;   /* Bytes to send out of the file (not including headers) */
-    int disconnected = 0;
     int sendv_trailers = 0;
     char hdtrbuf[4096];
     LPFN_TRANSMITFILE pfn_transmit_file = NULL;
@@ -388,13 +387,6 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
                     sendv_trailers = 1;
                 }
             }
-            /* Disconnect the socket after last send */
-            if ((flags & APR_SENDFILE_DISCONNECT_SOCKET)
-                    && !sendv_trailers) {
-                dwFlags |= TF_REUSE_SOCKET;
-                dwFlags |= TF_DISCONNECT;
-                disconnected = 1;
-            }
         }
 
         sock->overlapped->Offset = (DWORD)(curoff);
@@ -419,21 +411,19 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
                                                  ? sock->timeout_ms : INFINITE));
                 if (rv == WAIT_OBJECT_0) {
                     status = APR_SUCCESS;
-                    if (!disconnected) {
-                        if (!WSAGetOverlappedResult(sock->socketdes,
-                                                    sock->overlapped,
-                                                    &xmitbytes,
-                                                    FALSE,
-                                                    &dwFlags)) {
-                            status = apr_get_netos_error();
-                        }
-                        /* Ugly code alert: WSAGetOverlappedResult returns
-                         * a count of all bytes sent. This loop only
-                         * tracks bytes sent out of the file.
-                         */
-                        else if (ptfb) {
-                            xmitbytes -= (ptfb->HeadLength + ptfb->TailLength);
-                        }
+                    if (!WSAGetOverlappedResult(sock->socketdes,
+                                                sock->overlapped,
+                                                &xmitbytes,
+                                                FALSE,
+                                                &dwFlags)) {
+                        status = apr_get_netos_error();
+                    }
+                    /* Ugly code alert: WSAGetOverlappedResult returns
+                     * a count of all bytes sent. This loop only
+                     * tracks bytes sent out of the file.
+                     */
+                    else if (ptfb) {
+                        xmitbytes -= (ptfb->HeadLength + ptfb->TailLength);
                     }
                 }
                 else if (rv == WAIT_TIMEOUT) {
@@ -472,17 +462,6 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
             if (rv != APR_SUCCESS)
                 return rv;
             *len += nbytes;
-        }
-
-    
-        /* Mark the socket as disconnected, but do not close it.
-         * Note: The application must have stored the socket prior to making
-         * the call to apr_socket_sendfile in order to either reuse it 
-         * or close it.
-         */
-        if (disconnected) {
-            sock->disconnected = 1;
-            sock->socketdes = INVALID_SOCKET;
         }
     }
 

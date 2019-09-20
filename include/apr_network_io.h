@@ -281,12 +281,7 @@ struct apr_sockaddr_t {
 };
 
 #if APR_HAS_SENDFILE
-/** 
- * Support reusing the socket on platforms which support it (from disconnect,
- * specifically Win32.
- * @remark Optional flag passed into apr_socket_sendfile() 
- */
-#define APR_SENDFILE_DISCONNECT_SOCKET      1
+/* APR_SENDFILE_DISCONNECT_SOCKET has been removed in APR 2.0. */
 #endif
 
 /** A structure to encapsulate headers and trailers for apr_socket_sendfile */
