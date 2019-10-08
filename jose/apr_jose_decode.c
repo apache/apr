@@ -1681,9 +1681,10 @@ apr_status_t apr_jose_decode_json(apr_jose_t **jose, const char *typ,
     return status;
 }
 
-apr_status_t apr_jose_decode(apr_jose_t **jose, const char *typ,
-        apr_bucket_brigade *brigade, apr_jose_cb_t *cb, int level, int flags,
-        apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_jose_decode(apr_jose_t **jose, const char *typ,
+                                          apr_bucket_brigade *brigade,
+                                          apr_jose_cb_t *cb, int level,
+                                          int flags, apr_pool_t *pool)
 {
 
     /* handle JOSE and JOSE+JSON */

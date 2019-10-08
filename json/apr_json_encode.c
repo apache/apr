@@ -290,8 +290,10 @@ static apr_status_t apr_json_encode_value(apr_json_serializer_t * self, const ap
     return status;
 }
 
-apr_status_t apr_json_encode(apr_bucket_brigade * brigade, apr_brigade_flush flush,
-                void *ctx, const apr_json_value_t * json, int flags, apr_pool_t * pool)
+APR_DECLARE(apr_status_t) apr_json_encode(apr_bucket_brigade * brigade,
+                                          apr_brigade_flush flush,
+                                          void *ctx, const apr_json_value_t * json,
+                                          int flags, apr_pool_t * pool)
 {
     apr_json_serializer_t serializer = {pool, brigade, flush, ctx, flags};
     return apr_json_encode_value(&serializer, json);
