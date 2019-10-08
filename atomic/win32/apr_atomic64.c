@@ -51,7 +51,9 @@ APR_DECLARE(void) apr_atomic_set64(volatile apr_uint64_t *mem, apr_uint64_t val)
 
 APR_DECLARE(apr_uint64_t) apr_atomic_read64(volatile apr_uint64_t *mem)
 {
-    return *mem;
+    /* 64-bit read is not atomic on 32-bit platform: use InterlockedCompareExchange
+       to perform atomic read. */
+    return InterlockedCompareExchange64((volatile LONG64 *)mem, 0, 0);
 }
 
 APR_DECLARE(apr_uint64_t) apr_atomic_cas64(volatile apr_uint64_t *mem, apr_uint64_t with,
