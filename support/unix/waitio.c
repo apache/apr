@@ -47,6 +47,8 @@ apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
     pfd.fd     = f        ? f->filedes        : s->socketdes;
     pfd.events = for_read ? POLLIN            : POLLOUT;
 
+    if (pfd.fd < 0) return EINVAL;
+
     do {
         rc = poll(&pfd, 1, timeout);
     } while (rc == -1 && errno == EINTR);
