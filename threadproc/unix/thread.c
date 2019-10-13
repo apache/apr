@@ -22,6 +22,10 @@
 
 #if APR_HAVE_PTHREAD_H
 
+/* Unfortunately the kernel headers do not export the TASK_COMM_LEN
+   macro.  So we have to define it here. Used in apr_thread_getname and apr_thread_setname functions */
+#define TASK_COMM_LEN 16
+
 /* Destroy the threadattr object */
 static apr_status_t threadattr_cleanup(void *data)
 {
@@ -191,6 +195,26 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
 
         return stat;
     }
+}
+
+APR_DECLARE(apr_status_t) apr_thread_setname(apr_thread_t *thread, const char *name)
+{
+	size_t name_len;
+	if  (!name) {
+		return APR_BADARG;
+	}
+
+	name_len = strlen (name);
+	if ( name_len >= TASK_COMM_LEN) {
+		name = name + name_len - TASK_COMM_LEN + 1;
+	}
+	return pthread_setname_np(*thread->td, name);
+}
+
+APR_DECLARE(apr_status_t) apr_thread_getname(apr_thread_t *thread, char ** name)
+{
+	*name = apr_pcalloc(thread->pool, TASK_COMM_LEN);
+	return pthread_getname_np(*thread->td, *name, TASK_COMM_LEN);
 }
 
 APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void)

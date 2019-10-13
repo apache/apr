@@ -278,12 +278,26 @@ APR_DECLARE(void) apr_thread_exit(apr_thread_t *thd, apr_status_t retval)
     __attribute__((noreturn));
 
 /**
+ * Get name of thread
+ * @param thread The thread that name required to get.
+ * @param name The variable where is will be stored name of thread.
+ */
+APR_DECLARE(apr_status_t) apr_thread_getname(apr_thread_t *thread, char ** name);
+
+/**
  * block until the desired thread stops executing.
  * @param retval The return value from the dead thread.
  * @param thd The thread to join
  */
 APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, 
                                           apr_thread_t *thd); 
+
+/**
+ * Set name of thread
+ * @param thread The thread that name will be changed.
+ * @param name The name of thread must be setted. If name is to long, then name stripped to max length supported by operation system.
+ */
+APR_DECLARE(apr_status_t) apr_thread_setname(apr_thread_t *thread, const char *name);
 
 /**
  * force the current thread to yield the processor

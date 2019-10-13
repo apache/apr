@@ -238,3 +238,13 @@ APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control,
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(thread)
+
+APR_DECLARE(apr_status_t) apr_thread_setname(apr_thread_t *thread, const char *name)
+{
+	return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_getname(apr_thread_t *thread, char ** name)
+{
+	return APR_ENOTIMPL;
+}
