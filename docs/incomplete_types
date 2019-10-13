@@ -57,7 +57,7 @@ And then in the definition for ap_file_t, we could say:
     filetype filedes;
 
 This gets rid of some of the complexity, by moving it off to the side, but
-it is still not safe for a programmers to access the filedes field directly 
+it is still not safe for a programmer to access the filedes field directly 
 outside of APR, because the programmer has no way of knowing what the actual 
 type is.  So for example printing the filedes using printf would yield wildly 
 varying results on Windows and OS2 when compared to Unix.
