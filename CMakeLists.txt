@@ -560,6 +560,7 @@ IF(APR_BUILD_TESTAPR)
   # requirements.
   SET(single_source_programs
     test/dbd.c
+    test/echoargs.c
     test/echod.c
     test/sendfile.c
     test/sockperf.c

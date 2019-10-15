@@ -331,6 +331,91 @@ static const char* has_space(const char *str)
     return NULL;
 }
 
+/* Quote one command line argument if needed. See documentation for
+ * CommandLineToArgV() for details:
+ * https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw
+ */
+static const char * quote_arg(const char *str, apr_pool_t *pool)
+{
+    const char *ch;
+    apr_size_t needed;
+    char *escaped;
+    char *dst;
+
+    /* Perform quoting only if neccessary. */
+    if (*str && !strpbrk(str, " \f\n\r\t\v\"")) {
+        return str;
+    }
+
+    needed = 0;
+    /* One char for leading quote. */
+    needed++;
+    for (ch = str; ; ch++) {
+        apr_size_t backslash_count = 0;
+
+        while (*ch == '\\') {
+            backslash_count++;
+            ch++;
+        }
+
+        if (*ch == 0) {
+            /* Escape backslashes. */
+            needed += backslash_count * 2;
+            break;
+        }
+        else if (*ch == '"') {
+            /* Escape backslashes. */
+            needed += backslash_count * 2 + 1;
+            /* Double quote char. */
+            needed += 1;
+        }
+        else {
+            /* Unescaped backslashes. */
+            needed += backslash_count;
+            /* Original character. */
+            needed += 1;
+        }
+    }
+
+    /* For trailing quote. */
+    needed++;
+    /* Zero terminator. */
+    needed++;
+
+    escaped = apr_palloc(pool, needed);
+
+    dst = escaped;
+    *dst++ = '"';
+    for (ch = str; ; ch++) {
+        apr_size_t backslash_count = 0;
+
+        while (*ch == '\\') {
+            backslash_count++;
+            ch++;
+        }
+
+        if (*ch == 0) {
+            memset(dst, '\\', backslash_count * 2);
+            dst += backslash_count * 2;
+            break;
+        }
+        else if (*ch == '"') {
+            memset(dst, '\\', backslash_count * 2 + 1);
+            dst += backslash_count * 2 + 1;
+            *dst++ = *ch;
+        }
+        else {
+            memset(dst, '\\', backslash_count);
+            dst += backslash_count;
+            *dst++ = *ch;
+        }
+    }
+    *dst++ = '"';
+    *dst = 0;
+
+    return escaped;
+}
+
 static char *apr_caret_escape_args(apr_pool_t *p, const char *str)
 {
     char *cmd;
@@ -583,12 +668,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
              * Handle the args, seperate from argv0 */
             cmdline = argv0;
             for (i = 1; args && args[i]; ++i) {
-                if (has_space(args[i]) || !args[i][0]) {
-                    cmdline = apr_pstrcat(pool, cmdline, " \"", args[i], "\"", NULL);
-                }
-                else {
-                    cmdline = apr_pstrcat(pool, cmdline, " ", args[i], NULL);
-                }
+                cmdline = apr_pstrcat(pool, cmdline, " ", quote_arg(args[i], pool), NULL);
             }
 
             /* Do not pass the first arg to CreateProc() for APR_PROGRAM_PATH
