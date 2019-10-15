@@ -488,17 +488,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         argv0 = progname;
     }
 
-    /* Handle the args, seperate from argv0 */
-    cmdline = "";
-    for (i = 1; args && args[i]; ++i) {
-        if (has_space(args[i]) || !args[i][0]) {
-            cmdline = apr_pstrcat(pool, cmdline, " \"", args[i], "\"", NULL);
-        }
-        else {
-            cmdline = apr_pstrcat(pool, cmdline, " ", args[i], NULL);
-        }
-    }
-
     if (attr->cmdtype == APR_SHELLCMD || attr->cmdtype == APR_SHELLCMD_ENV) {
         char *shellcmd = getenv("COMSPEC");
         if (!shellcmd) {
@@ -514,6 +503,17 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             progname = shellcmd;
             if (has_space(shellcmd)) {
                 shellcmd = apr_pstrcat(pool, "\"", shellcmd, "\"", NULL);
+            }
+        }
+
+        /* Handle the args, separate from argv0 */
+        cmdline = "";
+        for (i = 1; args && args[i]; ++i) {
+            if (has_space(args[i]) || !args[i][0]) {
+                cmdline = apr_pstrcat(pool, cmdline, " \"", args[i], "\"", NULL);
+            }
+            else {
+                cmdline = apr_pstrcat(pool, cmdline, " ", args[i], NULL);
             }
         }
 
@@ -548,6 +548,17 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 }
             }
 
+            /* Handle the args, seperate from argv0 */
+            cmdline = "";
+            for (i = 1; args && args[i]; ++i) {
+                if (has_space(args[i]) || !args[i][0]) {
+                    cmdline = apr_pstrcat(pool, cmdline, " \"", args[i], "\"", NULL);
+                }
+                else {
+                    cmdline = apr_pstrcat(pool, cmdline, " ", args[i], NULL);
+                }
+            }
+
             /* We must protect the cmdline args from any interpolation - this
              * is not a shellcmd, and the source of argv[] is untrusted.
              * Notice we escape ALL the cmdline args, including the quotes
@@ -568,15 +579,24 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             }
         }
         else {
-            /* A simple command we are directly invoking.  Do not pass
-             * the first arg to CreateProc() for APR_PROGRAM_PATH
+            /* A simple command we are directly invoking.
+             * Handle the args, seperate from argv0 */
+            cmdline = argv0;
+            for (i = 1; args && args[i]; ++i) {
+                if (has_space(args[i]) || !args[i][0]) {
+                    cmdline = apr_pstrcat(pool, cmdline, " \"", args[i], "\"", NULL);
+                }
+                else {
+                    cmdline = apr_pstrcat(pool, cmdline, " ", args[i], NULL);
+                }
+            }
+
+            /* Do not pass the first arg to CreateProc() for APR_PROGRAM_PATH
              * invocation, since it would need to be a literal and
              * complete file path.  That is; "c:\bin\aprtest.exe"
              * would succeed, but "c:\bin\aprtest" or "aprtest.exe"
              * can fail.
              */
-            cmdline = apr_pstrcat(pool, argv0, cmdline, NULL);
-
             if (attr->cmdtype == APR_PROGRAM_PATH) {
                 progname = NULL;
             }
