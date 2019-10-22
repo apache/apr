@@ -184,16 +184,7 @@ APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
 
 APR_DECLARE(void) apr_thread_yield()
 {
-    /* SwitchToThread is not supported on Win9x, but since it's
-     * primarily a noop (entering time consuming code, therefore
-     * providing more critical threads a bit larger timeslice)
-     * we won't worry too much if it's not available.
-     */
-#ifndef _WIN32_WCE
-    if (apr_os_level >= APR_WIN_NT) {
-        SwitchToThread();
-    }
-#endif
+    SwitchToThread();
 }
 
 APR_DECLARE(apr_status_t) apr_thread_data_get(void **data, const char *key,
