@@ -86,7 +86,7 @@ apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen,
         }
     }
 
-    if ((rv = apr_conv_utf8_to_ucs2(srcstr, &srcremains, t, &retlen))) {
+    if ((rv = apr_conv_utf8_to_utf16(srcstr, &srcremains, t, &retlen))) {
         return (rv == APR_INCOMPLETE) ? APR_EINVAL : rv;
     }
     if (srcremains) {
@@ -127,7 +127,7 @@ apr_status_t unicode_to_utf8_path(char* retstr, apr_size_t retlen,
         }
     }
         
-    if ((rv = apr_conv_ucs2_to_utf8(srcstr, &srcremains, t, &retlen))) {
+    if ((rv = apr_conv_utf16_to_utf8(srcstr, &srcremains, t, &retlen))) {
         return rv;
     }
     if (srcremains) {
@@ -168,7 +168,7 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
         wfile = apr_palloc(pool, (r + n) * sizeof(apr_wchar_t));
         wcscpy(wfile, wpre);
         d = n;
-        if (apr_conv_utf8_to_ucs2(file, &n, wfile + r, &d)) {
+        if (apr_conv_utf8_to_utf16(file, &n, wfile + r, &d)) {
             return NULL;
         }
         for (ch = wfile + r; *ch; ++ch) {

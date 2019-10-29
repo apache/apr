@@ -58,14 +58,14 @@ static int warrsztoastr(const char * const * *retarr,
     /* This is a safe max allocation, we will alloc each
      * string exactly after processing and return this
      * temporary buffer to the free store.
-     * 3 ucs bytes hold any single wchar_t value (16 bits)
-     * 4 ucs bytes will hold a wchar_t pair value (20 bits)
+     * 3 utf-8 bytes hold any single utf-16 value (16 bits)
+     * 4 utf-8 bytes will hold a 2 word utf-16 surrogate pair value (20 bits)
      */
     newlen = totlen = wsize * 3 + 1;
     pstrs = strs = apr_malloc_dbg(newlen * sizeof(char),
                                   __FILE__, __LINE__);
 
-    (void)apr_conv_ucs2_to_utf8(arrsz, &wsize, strs, &newlen);
+    (void)apr_conv_utf16_to_utf8(arrsz, &wsize, strs, &newlen);
 
     assert(newlen && !wsize);
 

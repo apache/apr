@@ -33,7 +33,7 @@ static apr_status_t widen_envvar_name (apr_wchar_t *buffer,
     apr_status_t status;
 
     inchars = strlen(envvar) + 1;
-    status = apr_conv_utf8_to_ucs2(envvar, &inchars, buffer, &bufflen);
+    status = apr_conv_utf8_to_utf16(envvar, &inchars, buffer, &bufflen);
     if (status == APR_INCOMPLETE)
         status = APR_ENAMETOOLONG;
 
@@ -82,7 +82,7 @@ APR_DECLARE(apr_status_t) apr_env_get(char **value,
         inchars = wcslen(wvalue) + 1;
         outchars = 3 * inchars; /* Enough for any UTF-8 representation */
         val = apr_palloc(pool, outchars);
-        status = apr_conv_ucs2_to_utf8(wvalue, &inchars, val, &outchars);
+        status = apr_conv_utf16_to_utf8(wvalue, &inchars, val, &outchars);
         if (status)
             return status;
     }
@@ -139,7 +139,7 @@ APR_DECLARE(apr_status_t) apr_env_set(const char *envvar,
 
         outchars = inchars = strlen(value) + 1;
         wvalue = apr_palloc(pool, outchars * sizeof(*wvalue));
-        status = apr_conv_utf8_to_ucs2(value, &inchars, wvalue, &outchars);
+        status = apr_conv_utf8_to_utf16(value, &inchars, wvalue, &outchars);
         if (status)
             return status;
 

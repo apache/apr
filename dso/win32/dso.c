@@ -119,11 +119,11 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
 {
 #ifdef _WIN32_WCE
     apr_size_t symlen = strlen(symname) + 1;
-    apr_size_t wsymlen = 256;
-    apr_wchar_t wsymname[256];
+    apr_size_t wsymlen = symlen;
+    apr_wchar_t wsymname[wsymlen];
     apr_status_t rv;
 
-    rv = apr_conv_utf8_to_ucs2(wsymname, &wsymlen, symname, &symlen);
+    rv = apr_conv_utf8_to_utf16(wsymname, &wsymlen, symname, &symlen);
     if (rv != APR_SUCCESS) {
         return rv;
     }

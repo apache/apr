@@ -23,28 +23,28 @@
  * with particular attention to canonical translation forms (see section 10
  * "Security Considerations" of the RFC for more info).
  *
- * Since several architectures including Windows support unicode, with UCS2
+ * Since several architectures including Windows support unicode, with utf-16
  * used as the actual storage conventions by that archicture, these functions
- * exist to transform or validate UCS2 strings into APR's 'char' type
+ * exist to transform or validate utf-16 strings into APR's 'char' type
  * convention.  It is left up to the operating system to determine the
  * validitity of the string, e.g. normative forms, in the context of 
  * its native language support.  Other file systems which support filename 
  * characters of 0x80-0xff but have no explicit requirement for Unicode
  * will find this function useful only for validating the character sequences 
- * and rejecting poorly encoded UTF8 sequences.
+ * and rejecting poorly encoded utf-8 sequences.
  *
- * Len UCS-4 range (hex) UTF-8 octet sequence (binary)
- * 1:2 00000000-0000007F 0xxxxxxx
- * 2:2 00000080-000007FF 110XXXXx 10xxxxxx
- * 3:2 00000800-0000FFFF 1110XXXX 10Xxxxxx 10xxxxxx
- * 4:4 00010000-001FFFFF 11110XXX 10XXxxxx 10xxxxxx 10xxxxxx
- *     00200000-03FFFFFF 111110XX 10XXXxxx 10xxxxxx 10xxxxxx 10xxxxxx
- *     04000000-7FFFFFFF 1111110X 10XXXXxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+ * len  utf-4 range (hex)  utf-8 octet sequence (binary)
+ * 1:2  00000000-0000007F  0xxxxxxx
+ * 2:2  00000080-000007FF  110XXXXx 10xxxxxx
+ * 3:2  00000800-0000FFFF  1110XXXX 10Xxxxxx 10xxxxxx
+ * 4:4  00010000-001FFFFF  11110XXX 10XXxxxx 10xxxxxx 10xxxxxx
+ *      00200000-03FFFFFF  111110XX 10XXXxxx 10xxxxxx 10xxxxxx 10xxxxxx
+ *      04000000-7FFFFFFF  1111110X 10XXXXxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
  *
- * One of the X bits must be 1 to avoid overlong representation of ucs2 values. 
+ * One of the X bits must be 1 to avoid overlong representation in utf-8.
  *
- * For conversion into ucs2, the 4th form is limited in range to 0010 FFFF,
- * and the final two forms are used only by full ucs4, per RFC 3629;
+ * For conversion into utf-16, the 4th form is limited in range to 0010 FFFF,
+ * and the final two forms are used only by full ucs-4, per RFC 3629;
  *
  *   "Pairs of UCS-2 values between D800 and DFFF (surrogate pairs in 
  *   Unicode parlance), being actually UCS-4 characters transformed 
@@ -54,24 +54,29 @@
  *
  * From RFC2781 UTF-16: the compressed ISO 10646 encoding bitmask
  *
- *  U' = U - 0x10000
- *  U' = 00000000 0000yyyy yyyyyyxx xxxxxxxx
- *                    W1 = 110110yy yyyyyyyy
- *                    W2 = 110111xx xxxxxxxx
- *  Max U' = 0000 00001111 11111111 11111111
- *  Max U  = 0000 00010000 11111111 11111111
+ *   U' = U - 0x10000
+ *   U' = 00000000 0000yyyy yyyyyyxx xxxxxxxx
+ *                     W1 = 110110yy yyyyyyyy
+ *                     W2 = 110111xx xxxxxxxx
+ *   Max U' = 0000 00001111 11111111 11111111
+ *   Max U  = 0000 00010000 11111111 11111111
  *
- * Len is the table above is a mapping of bytes used for utf8:ucs2 values,
+ * Also note ISO/IEC 10646:2014 Clause 9.4: "Because surrogate code points
+ * are not UCS scalar values, UTF-32 code units in the range 
+ * 0000 D800-0000 DFFF are ill-formed" for future reference in adding any
+ * utf-32 accessor functions.
+ *
+ * Len is the table above is a mapping of bytes used for utf-8:utf-16 values,
  * which results in these conclusions of maximum allocations;
  *
- *  apr_conv_utf8_to_ucs2 out bytes:sizeof(in) * 1 <= Req <= sizeof(in) * 2
- *  apr_conv_ucs2_to_utf8 out words:sizeof(in) / 2 <= Req <= sizeof(in) * 3 / 2
+ * apr_conv_utf8_to_utf16 out bytes:sizeof(in) * 1 <= Req <= sizeof(in) * 2
+ * apr_conv_utf16_to_utf8 out words:sizeof(in) / 2 <= Req <= sizeof(in) * 3 / 2
  */
 
-APR_DECLARE(apr_status_t) apr_conv_utf8_to_ucs2(const char *in, 
-                                                apr_size_t *inbytes,
-                                                apr_wchar_t *out, 
-                                                apr_size_t *outwords)
+APR_DECLARE(apr_status_t) apr_conv_utf8_to_utf16(const char *in, 
+                                                 apr_size_t *inbytes,
+                                                 apr_wchar_t *out, 
+                                                 apr_size_t *outwords)
 {
     apr_int64_t newch, mask;
     apr_size_t expect, eating;
@@ -105,7 +110,7 @@ APR_DECLARE(apr_status_t) apr_conv_utf8_to_ucs2(const char *in,
                 expect = 1;
                 while ((ch & mask) == mask) {
                     mask |= mask >> 1;
-                    if (++expect > 3) /* (truly 5 for ucs-4) */
+                    if (++expect > 3) /* (or 5 for a ucs-4 code point) */
                         return APR_EINVAL;
                 }
                 newch = ch & ~mask;
@@ -125,8 +130,7 @@ APR_DECLARE(apr_status_t) apr_conv_utf8_to_ucs2(const char *in,
                     if (!newch && !((unsigned char)*in & 0077 & (mask << 1)))
                         return APR_EINVAL;
                     if (expect == 2) {
-                        /* Reject values D800-DFFF when not utf16 encoded
-                         * (may not be an appropriate restriction for ucs-4)
+                        /* Reject values D800-DFFF when not utf-16 encoded
                          */
                         if (newch == 0015 && ((unsigned char)*in & 0040))
                             return APR_EINVAL;
@@ -156,7 +160,7 @@ APR_DECLARE(apr_status_t) apr_conv_utf8_to_ucs2(const char *in,
                 *inbytes -= eating;
                 /* newch is now a true ucs-4 character
                  *
-                 * now we need to fold to ucs-2
+                 * now we need to fold to utf-16
                  */
                 if (newch < 0x10000) 
                 {
@@ -179,10 +183,10 @@ APR_DECLARE(apr_status_t) apr_conv_utf8_to_ucs2(const char *in,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_conv_ucs2_to_utf8(const apr_wchar_t *in, 
-                                                apr_size_t *inwords,
-                                                char *out, 
-                                                apr_size_t *outbytes)
+APR_DECLARE(apr_status_t) apr_conv_utf16_to_utf8(const apr_wchar_t *in, 
+                                                 apr_size_t *inwords,
+                                                 char *out, 
+                                                 apr_size_t *outbytes)
 {
     apr_int64_t newch, require;
     apr_size_t need;
@@ -201,20 +205,20 @@ APR_DECLARE(apr_status_t) apr_conv_ucs2_to_utf8(const apr_wchar_t *in,
         else 
         {
             if ((ch & 0xFC00) == 0xDC00) {
-                /* Invalid Leading ucs-2 Multiword Continuation Character
+                /* Invalid Leading utf-16 Multiword Continuation Character
                  */
                 return APR_EINVAL;
             }
             if ((ch & 0xFC00) == 0xD800) {
-                /* Leading ucs-2 Multiword Character
+                /* Leading utf-16 Multiword Character
                  */
                 if (*inwords < 2) {
-                    /* Missing ucs-2 Multiword Continuation Character
+                    /* Missing utf-16 Multiword Continuation Character
                      */
                     return APR_INCOMPLETE;
                 }
                 if (((unsigned short)(*in) & 0xFC00) != 0xDC00) {
-                    /* Invalid ucs-2 Multiword Continuation Character
+                    /* Invalid utf-16 Multiword Continuation Character
                      */
                     return APR_EINVAL;
                 }
@@ -222,7 +226,7 @@ APR_DECLARE(apr_status_t) apr_conv_ucs2_to_utf8(const apr_wchar_t *in,
                 newch += 0x10000;
             }
             else {
-                /* ucs-2 Single Word Character
+                /* utf-16 Single Word Character
                  */
                 newch = ch;
             }

@@ -61,8 +61,8 @@ int apr_wastrtoastr(char const * const * *retarr,
 
     /* This is a safe max allocation, we will realloc after
      * processing and return the excess to the free store.
-     * 3 ucs bytes hold any single wchar_t value (16 bits)
-     * 4 ucs bytes will hold a wchar_t pair value (20 bits)
+     * 3 utf-8 bytes hold any single wchar_t value (16 bits)
+     * 4 utf-8 bytes will hold a 2 word utf-16 surrogate pair value (20 bits)
      */
     elesize = elesize * 3 + 1;
     ele = elements = apr_malloc_dbg(elesize * sizeof(char),
@@ -73,7 +73,7 @@ int apr_wastrtoastr(char const * const * *retarr,
         apr_size_t newlen = elesize;
 
         newarr[arg] = ele;
-        (void)apr_conv_ucs2_to_utf8(arr[arg], &len,
+        (void)apr_conv_utf16_to_utf8(arr[arg], &len,
                                     newarr[arg], &elesize);
 
         newlen -= elesize;

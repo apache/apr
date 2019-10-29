@@ -245,13 +245,12 @@ APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr,
         len = strlen(username) + 1;
         wlen = len;
         wusername = apr_palloc(attr->pool, wlen * sizeof(apr_wchar_t));
-        if ((rv = apr_conv_utf8_to_ucs2(username, &len, wusername, &wlen))
+        if ((rv = apr_conv_utf8_to_utf16(username, &len, wusername, &wlen))
                    != APR_SUCCESS) {
             if (attr->errfn) {
                 attr->errfn(attr->pool, rv, 
-                            apr_pstrcat(attr->pool, 
-                                        "utf8 to ucs2 conversion failed" 
-                                         " on username: ", username, NULL));
+                    apr_pstrcat(attr->pool, "utf8 to utf16 conversion failed" 
+                                " on username: ", username, NULL));
             }
             return rv;
         }
@@ -259,13 +258,11 @@ APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr,
             len = strlen(password) + 1;
             wlen = len;
             wpassword = apr_palloc(attr->pool, wlen * sizeof(apr_wchar_t));
-            if ((rv = apr_conv_utf8_to_ucs2(password, &len, wpassword, &wlen))
+            if ((rv = apr_conv_utf8_to_utf16(password, &len, wpassword, &wlen))
                        != APR_SUCCESS) {
                 if (attr->errfn) {
-                    attr->errfn(attr->pool, rv, 
-                                apr_pstrcat(attr->pool, 
-                                        "utf8 to ucs2 conversion failed" 
-                                         " on password: ", password, NULL));
+                    attr->errfn(attr->pool, rv, "utf8 to utf16 conversion" 
+                                " failed on password: <redacted>");
                 }
                 return rv;
             }
@@ -712,14 +709,13 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             pNext = (apr_wchar_t*)pEnvBlock;
             while (env[i]) {
                 apr_size_t in = strlen(env[i]) + 1;
-                if ((rv = apr_conv_utf8_to_ucs2(env[i], &in, 
-                                                pNext, &iEnvBlockLen)) 
+                if ((rv = apr_conv_utf8_to_utf16(env[i], &in, 
+                                                 pNext, &iEnvBlockLen)) 
                         != APR_SUCCESS) {
                     if (attr->errfn) {
                         attr->errfn(pool, rv, 
-                                    apr_pstrcat(pool, 
-                                                "utf8 to ucs2 conversion failed" 
-                                                " on this string: ", env[i], NULL));
+                            apr_pstrcat(pool, "utf8 to utf16 conversion failed" 
+                                        " on this string: ", env[i], NULL));
                     }
                     return rv;
                 }
@@ -747,13 +743,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             apr_size_t nprg = strlen(progname) + 1;
             apr_size_t nwprg = nprg + 6;
             wprg = apr_palloc(pool, nwprg * sizeof(wprg[0]));
-            if ((rv = apr_conv_utf8_to_ucs2(progname, &nprg, wprg, &nwprg))
+            if ((rv = apr_conv_utf8_to_utf16(progname, &nprg, wprg, &nwprg))
                    != APR_SUCCESS) {
                 if (attr->errfn) {
                     attr->errfn(pool, rv, 
-                                apr_pstrcat(pool, 
-                                            "utf8 to ucs2 conversion failed" 
-                                            " on progname: ", progname, NULL));
+                        apr_pstrcat(pool, "utf8 to utf16 conversion failed" 
+                                          " on progname: ", progname, NULL));
                 }
                 return rv;
             }
@@ -763,13 +758,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             apr_size_t ncmd = strlen(cmdline) + 1;
             apr_size_t nwcmd = ncmd;
             wcmd = apr_palloc(pool, nwcmd * sizeof(wcmd[0]));
-            if ((rv = apr_conv_utf8_to_ucs2(cmdline, &ncmd, wcmd, &nwcmd))
+            if ((rv = apr_conv_utf8_to_utf16(cmdline, &ncmd, wcmd, &nwcmd))
                     != APR_SUCCESS) {
                 if (attr->errfn) {
                     attr->errfn(pool, rv, 
-                                apr_pstrcat(pool, 
-                                            "utf8 to ucs2 conversion failed" 
-                                            " on cmdline: ", cmdline, NULL));
+                        apr_pstrcat(pool, "utf8 to utf16 conversion failed" 
+                                          " on cmdline: ", cmdline, NULL));
                 }
                 return rv;
             }
@@ -780,14 +774,13 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             apr_size_t ncwd = strlen(attr->currdir) + 1;
             apr_size_t nwcwd = ncwd;
             wcwd = apr_palloc(pool, ncwd * sizeof(wcwd[0]));
-            if ((rv = apr_conv_utf8_to_ucs2(attr->currdir, &ncwd, 
+            if ((rv = apr_conv_utf8_to_utf16(attr->currdir, &ncwd, 
                                             wcwd, &nwcwd))
                     != APR_SUCCESS) {
                 if (attr->errfn) {
                     attr->errfn(pool, rv, 
-                                apr_pstrcat(pool, 
-                                            "utf8 to ucs2 conversion failed" 
-                                            " on currdir: ", attr->currdir, NULL));
+                        apr_pstrcat(pool, "utf8 to utf16 conversion failed" 
+                                    " on currdir: ", attr->currdir, NULL));
                 }
                 return rv;
             }

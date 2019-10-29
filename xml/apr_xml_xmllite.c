@@ -198,7 +198,7 @@ static apr_status_t wstr2utf(const char **utf_p, apr_size_t *utf_len_p,
             return APR_ENOMEM;
         }
 
-        status = apr_conv_ucs2_to_utf8(wstr, &wlen, result, &outbytes);
+        status = apr_conv_utf16_to_utf8(wstr, &wlen, result, &outbytes);
         if (status) {
             return status;
         }

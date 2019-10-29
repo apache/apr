@@ -113,7 +113,7 @@ void test_nrange(struct testval *p)
     
     do {
         apr_size_t nl = s.nl, wl = sizeof(s.w) / 2;
-        rc = apr_conv_utf8_to_ucs2(s.n, &nl, s.w, &wl);
+        rc = apr_conv_utf8_to_utf16(s.n, &nl, s.w, &wl);
         s.wl = (sizeof(s.w) / 2) - wl;
         if (!nl && rc == APR_SUCCESS) {
             if (!success) {
@@ -165,7 +165,7 @@ void test_wrange(struct testval *p)
     
     do {
         apr_size_t nl = sizeof(s.n), wl = s.wl;        
-        rc = apr_conv_ucs2_to_utf8(s.w, &wl, s.n, &nl);
+        rc = apr_conv_utf16_to_utf8(s.w, &wl, s.n, &nl);
         s.nl = sizeof(s.n) - nl;
         if (!wl && rc == APR_SUCCESS) {
             if (!success) {
@@ -197,7 +197,7 @@ void test_wrange(struct testval *p)
 
     do {
         apr_size_t wl = s.wl, nl = sizeof(s.n);
-        rc = apr_conv_ucs2_to_utf8(s.w, &wl, s.n, &nl);
+        rc = apr_conv_utf16_to_utf8(s.w, &wl, s.n, &nl);
         s.nl = sizeof(s.n) - s.nl;
         if (rc == APR_INCOMPLETE) {
             test_wrange(&s);
@@ -227,7 +227,7 @@ void test_ranges()
         do {
             inlen = ntest.nl;
             ntest.wl = sizeof(ntest.w) / 2;
-            nrc = apr_conv_utf8_to_ucs2(ntest.n, &inlen, ntest.w, &ntest.wl);
+            nrc = apr_conv_utf8_to_utf16(ntest.n, &inlen, ntest.w, &ntest.wl);
             if (nrc == APR_SUCCESS) {
                 ntest.wl = (sizeof(ntest.w) / 2) - ntest.wl;
                 break;
@@ -251,7 +251,7 @@ void test_ranges()
         do {
             inlen = wtest.wl;
             wtest.nl = sizeof(wtest.n);
-            wrc = apr_conv_ucs2_to_utf8(wtest.w, &inlen, wtest.n, &wtest.nl);
+            wrc = apr_conv_utf16_to_utf8(wtest.w, &inlen, wtest.n, &wtest.nl);
             if (wrc == APR_SUCCESS) {
                 wtest.nl = sizeof(wtest.n) - wtest.nl;
                 break;
@@ -267,7 +267,7 @@ void test_ranges()
                     do {
                         inlen = 1;
                         wtest.nl = sizeof(wtest.n);
-                        if (apr_conv_ucs2_to_utf8(wtest.w, &inlen, wtest.n, &wtest.nl)
+                        if (apr_conv_utf16_to_utf8(wtest.w, &inlen, wtest.n, &wtest.nl)
                                 == APR_INCOMPLETE)
                             break;
                         if (!(++wtest.w[0])) {
@@ -308,7 +308,7 @@ void test_ranges()
             do {
                 inlen = 1;
                 wtest.nl = sizeof(wtest.n);
-                if (apr_conv_ucs2_to_utf8(wtest.w, &inlen, wtest.n, &wtest.nl)
+                if (apr_conv_utf16_to_utf8(wtest.w, &inlen, wtest.n, &wtest.nl)
                         == APR_INCOMPLETE)
                     break;
                 if (!(++wtest.w[0])) {
@@ -319,7 +319,7 @@ void test_ranges()
         }
     } while (wtest.wl || ntest.nl);
 
-    printf ("\n\nutf8 and ucs2 sequences of %lu transformations matched OK.\n",
+    printf ("\n\nutf8 and utf16 sequences of %lu transformations matched OK.\n",
             matches);
 }
 
