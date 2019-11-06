@@ -251,7 +251,7 @@ AC_DEFUN([APU_CHECK_CRYPTO_COMMONCRYPTO], [
   [
     if test "$withval" = "yes"; then
       AC_CHECK_HEADERS(CommonCrypto/CommonKeyDerivation.h, [commoncrypto_have_headers=1])
-      AC_CHECK_LIB(System, CCKeyDerivationPBKDF, AC_CHECK_LIB(System, CCCryptorCreate, [commoncrypto_have_libs=1],,-lcrypto))
+      AC_CHECK_LIB(System, CCKeyDerivationPBKDF, AC_CHECK_LIB(System, CCCryptorCreate, [commoncrypto_have_libs=1]))
       if test "$commoncrypto_have_headers" != "0" && test "$commoncrypto_have_libs" != "0"; then
         apu_have_commoncrypto=1
       fi
@@ -267,7 +267,7 @@ AC_DEFUN([APU_CHECK_CRYPTO_COMMONCRYPTO], [
 
       AC_MSG_NOTICE(checking for commoncrypto in $withval)
       AC_CHECK_HEADERS(CommonCrypto/CommonKeyDerivation.h, [commoncrypto_have_headers=1])
-      AC_CHECK_LIB(System, CCKeyDerivationPBKDF, AC_CHECK_LIB(System, CCCryptorCreate, [commoncrypto_have_libs=1],,-lcrypto))
+      AC_CHECK_LIB(System, CCKeyDerivationPBKDF, AC_CHECK_LIB(System, CCCryptorCreate, [commoncrypto_have_libs=1]))
       if test "$commoncrypto_have_headers" != "0" && test "$commoncrypto_have_libs" != "0"; then
         apu_have_commoncrypto=1
         APR_ADDTO(LDFLAGS, [-L$withval/lib])

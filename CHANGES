@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_crypto_commoncrypto: Remove stray reference to -lcrypto that
+     prevented commoncrypto being enabled. [Graham Leggett]
+
   *) Add --tag=CC to libtool invocations. PR 62640. [Michael Osipov]
 
   *) apr_thread_exit() is now a void function.  [Joe Orton]
