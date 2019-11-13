@@ -191,9 +191,9 @@ static void test_parse_addr_port(abts_case *tc, void *data)
         ,{ "localhost:0", APR_EINVAL, NULL, NULL, 0 }
 #if APR_HAVE_IPV6
         ,{ "[abc]", APR_EINVAL, NULL, NULL, 0 }
+        ,{ "[zzzz]:80", APR_EINVAL, NULL, NULL, 0 }
         ,{ "[::]z:80", APR_EINVAL, NULL, NULL, 0 }
         ,{ "[:::80", APR_EINVAL, NULL, NULL, 0 }
-        ,{ "[zzzz]:80", APR_EINVAL, NULL, NULL, 0 }
         ,{ "[::%]:80", APR_EINVAL, NULL, NULL, 0 }
 #endif
 /*        ,{ "127.0.0.1:80x", APR_EINVAL, NULL, NULL, 0 }  <- should fail, doesn't  */
