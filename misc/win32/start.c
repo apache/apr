@@ -124,7 +124,7 @@ APR_DECLARE(apr_status_t) apr_app_initialize(int *argc,
 
         sysstr = GetCommandLineW();
         if (sysstr) {
-            wstrs = CommandLineToArgvW(sysstr, &wstrc);
+            wstrs = apr_winapi_CommandLineToArgvW(sysstr, &wstrc);
             if (wstrs) {
                 *argc = apr_wastrtoastr(argv, wstrs, wstrc);
                 LocalFree(wstrs);

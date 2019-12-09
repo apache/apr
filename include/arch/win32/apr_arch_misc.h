@@ -188,7 +188,10 @@ typedef enum {
     DLL_SHSTDAPI = 4,      /* shell32  From ShellAPI.h      */
     DLL_NTDLL = 5,         /* ntdll    From our real kernel */
     DLL_IPHLPAPI = 6,      /* Iphlpapi From Iphlpapi.h      */
-    DLL_defined = 7        /* must define as last idx_ + 1  */
+    DLL_API_MS_WIN_DOWNLEVEL_SHELL32_L1_1_0 = 7,
+                           /* api-ms-win-downlevel-shell32-l1-1-0.dll,
+                              fallback to shell32.dll       */
+    DLL_defined = 8        /* must define as last idx_ + 1  */
 } apr_dlltoken_e;
 
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
@@ -311,6 +314,11 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_IPHLPAPI, PCHAR, NETIOAPI_API_, if_indextoname, 0,
     PCHAR       InterfaceName),
     (InterfaceIndex, InterfaceName));
 #define if_indextoname apr_winapi_if_indextoname
+
+APR_DECLARE_LATE_DLL_FUNC(DLL_SHSTDAPI, LPWSTR *, STDAPICALLTYPE, CommandLineToArgvW, 0, (
+    LPCWSTR lpCmdLine,
+    int *pNumArgs),
+    (lpCmdLine, pNumArgs));
 
 #endif /* !defined(_WIN32_WCE) */
 

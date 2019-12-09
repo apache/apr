@@ -136,18 +136,21 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
 
 typedef struct win32_late_dll_t {
     INIT_ONCE control;
+    const apr_wchar_t *apiset_name;
     const apr_wchar_t *dll_name;
     HMODULE dll_handle;
 } win32_late_dll_t;
 
 static win32_late_dll_t late_dll[DLL_defined] = {
-    {INIT_ONCE_STATIC_INIT, L"kernel32", NULL},
-    {INIT_ONCE_STATIC_INIT, L"advapi32", NULL},
-    {INIT_ONCE_STATIC_INIT, L"mswsock", NULL},
-    {INIT_ONCE_STATIC_INIT, L"ws2_32", NULL},
-    {INIT_ONCE_STATIC_INIT, L"shell32", NULL},
-    {INIT_ONCE_STATIC_INIT, L"ntdll.dll", NULL},
-    {INIT_ONCE_STATIC_INIT, L"Iphplapi", NULL}
+    {INIT_ONCE_STATIC_INIT, NULL, L"kernel32", NULL},
+    {INIT_ONCE_STATIC_INIT, NULL, L"advapi32", NULL},
+    {INIT_ONCE_STATIC_INIT, NULL, L"mswsock", NULL},
+    {INIT_ONCE_STATIC_INIT, NULL, L"ws2_32", NULL},
+    {INIT_ONCE_STATIC_INIT, NULL, L"shell32", NULL},
+    {INIT_ONCE_STATIC_INIT, NULL, L"ntdll.dll", NULL},
+    {INIT_ONCE_STATIC_INIT, NULL, L"Iphplapi", NULL},
+    {INIT_ONCE_STATIC_INIT, L"api-ms-win-downlevel-shell32-l1-1-0.dll",
+     L"shell32", NULL}
 };
 
 static BOOL WINAPI load_dll_callback(PINIT_ONCE InitOnce,
@@ -156,7 +159,15 @@ static BOOL WINAPI load_dll_callback(PINIT_ONCE InitOnce,
 {
     win32_late_dll_t *dll = Parameter;
 
-    dll->dll_handle = LoadLibraryW(dll->dll_name);
+    /* Try api set dll first if defined. */
+    if (dll->apiset_name) {
+        dll->dll_handle = LoadLibraryExW(dll->apiset_name, NULL,
+                                         LOAD_LIBRARY_SEARCH_SYSTEM32);
+    }
+
+    if (!dll->dll_handle) {
+        dll->dll_handle = LoadLibraryW(dll->dll_name);
+    }
 
     return TRUE;
 }
