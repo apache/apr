@@ -135,63 +135,70 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
  */
 
 typedef struct win32_late_dll_t {
-    INIT_ONCE control;
     const apr_wchar_t *apiset_name;
     const apr_wchar_t *dll_name;
-    HMODULE dll_handle;
+    volatile HMODULE dll_handle;
 } win32_late_dll_t;
 
 static win32_late_dll_t late_dll[DLL_defined] = {
-    {INIT_ONCE_STATIC_INIT, NULL, L"kernel32", NULL},
-    {INIT_ONCE_STATIC_INIT, NULL, L"advapi32", NULL},
-    {INIT_ONCE_STATIC_INIT, NULL, L"mswsock", NULL},
-    {INIT_ONCE_STATIC_INIT, NULL, L"ws2_32", NULL},
-    {INIT_ONCE_STATIC_INIT, NULL, L"shell32", NULL},
-    {INIT_ONCE_STATIC_INIT, NULL, L"ntdll.dll", NULL},
-    {INIT_ONCE_STATIC_INIT, NULL, L"Iphplapi", NULL},
-    {INIT_ONCE_STATIC_INIT, L"api-ms-win-downlevel-shell32-l1-1-0.dll",
-     L"shell32", NULL}
+    {NULL, L"kernel32", INVALID_HANDLE_VALUE},
+    {NULL, L"advapi32", INVALID_HANDLE_VALUE},
+    {NULL, L"mswsock", INVALID_HANDLE_VALUE},
+    {NULL, L"ws2_32", INVALID_HANDLE_VALUE},
+    {NULL, L"shell32", INVALID_HANDLE_VALUE},
+    {NULL, L"ntdll.dll", INVALID_HANDLE_VALUE},
+    {NULL, L"Iphplapi", INVALID_HANDLE_VALUE},
+    {L"api-ms-win-downlevel-shell32-l1-1-0.dll", L"shell32", INVALID_HANDLE_VALUE}
 };
-
-static BOOL WINAPI load_dll_callback(PINIT_ONCE InitOnce,
-                                     PVOID Parameter,
-                                     PVOID *Context)
-{
-    win32_late_dll_t *dll = Parameter;
-
-    /* Try api set dll first if defined. */
-    if (dll->apiset_name) {
-        dll->dll_handle = LoadLibraryExW(dll->apiset_name, NULL,
-                                         LOAD_LIBRARY_SEARCH_SYSTEM32);
-    }
-
-    if (!dll->dll_handle) {
-        dll->dll_handle = LoadLibraryW(dll->dll_name);
-    }
-
-    return TRUE;
-}
 
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
 {
     win32_late_dll_t *dll = &late_dll[fnLib];
+    HMODULE cached_dll_handle;
 
-    InitOnceExecuteOnce(&dll->control, load_dll_callback, dll, NULL);
-    if (!dll->dll_handle)
+    /* Pointer sized reads are atomic on Windows. */
+    cached_dll_handle = dll->dll_handle;
+    if (cached_dll_handle == INVALID_HANDLE_VALUE) {
+        HMODULE dll_handle = NULL;
+
+        /* Try API Set dll first if defined. */
+        if (dll->apiset_name) {
+            dll_handle = LoadLibraryExW(dll->apiset_name, NULL,
+                                        LOAD_LIBRARY_SEARCH_SYSTEM32);
+        }
+
+        if (!dll_handle) {
+            dll_handle = LoadLibraryW(dll->dll_name);
+        }
+
+        cached_dll_handle = InterlockedCompareExchangePointer(&dll->dll_handle,
+                                                              dll_handle,
+                                                              INVALID_HANDLE_VALUE);
+        if (cached_dll_handle == INVALID_HANDLE_VALUE) {
+            cached_dll_handle = dll_handle;
+        }
+        else if (dll_handle) {
+            /* Other thread won the race: release our library handle. */
+            FreeLibrary(dll_handle);
+        }
+    }
+
+    if (!cached_dll_handle) {
         return NULL;
+    }
 
 #if defined(_WIN32_WCE)
     if (ordinal)
-        return GetProcAddressA(dll->dll_handle,
+        return GetProcAddressA(cached_dll_handle,
                                (const char *) (apr_ssize_t)ordinal);
     else
-        return GetProcAddressA(dll->dll_handle, fnName);
+        return GetProcAddressA(cached_dll_handle, fnName);
 #else
     if (ordinal)
-        return GetProcAddress(dll->dll_handle,
+        return GetProcAddress(cached_dll_handle,
                               (const char *) (apr_ssize_t)ordinal);
     else
-        return GetProcAddress(dll->dll_handle, fnName);
+        return GetProcAddress(cached_dll_handle, fnName);
 #endif
 }
 
