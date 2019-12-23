@@ -311,10 +311,10 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_IPHLPAPI, PCHAR, NETIOAPI_API_, if_indextoname, 0,
     (InterfaceIndex, InterfaceName));
 #define if_indextoname apr_winapi_if_indextoname
 
-APR_DECLARE_LATE_DLL_FUNC(DLL_SHSTDAPI, LPWSTR *, STDAPICALLTYPE, CommandLineToArgvW, 0, (
-    LPCWSTR lpCmdLine,
-    int *pNumArgs),
-    (lpCmdLine, pNumArgs));
+APR_DECLARE_LATE_DLL_FUNC(DLL_API_MS_WIN_DOWNLEVEL_SHELL32_L1_1_0, LPWSTR *,
+                          STDAPICALLTYPE, CommandLineToArgvW, 0,
+                          (LPCWSTR lpCmdLine, int *pNumArgs),
+                          (lpCmdLine, pNumArgs));
 
 #endif /* !defined(_WIN32_WCE) */
 
