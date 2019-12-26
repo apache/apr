@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.1
 
+  *) Use AC_CHECK_SIZEOF, so as to support cross compiling. PR 56053.
+     [Mike Frysinger <vapier gentoo.org>]
+
   *) Add --tag=CC to libtool invocations. PR 62640. [Michael Osipov]
 
   *) apr_pools: Fix pool debugging output so that creation events are

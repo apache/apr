@@ -452,43 +452,6 @@ fi
 
 
 dnl
-dnl APR_CHECK_SIZEOF_EXTENDED(INCLUDES, TYPE [, CROSS_SIZE])
-dnl
-dnl A variant of AC_CHECK_SIZEOF which allows the checking of
-dnl sizes of non-builtin types
-dnl
-AC_DEFUN([APR_CHECK_SIZEOF_EXTENDED],
-[changequote(<<, >>)dnl
-dnl The name to #define.
-define(<<AC_TYPE_NAME>>, translit(sizeof_$2, [a-z *], [A-Z_P]))dnl
-dnl The cache variable name.
-define(<<AC_CV_NAME>>, translit(ac_cv_sizeof_$2, [ *], [_p]))dnl
-changequote([, ])dnl
-AC_MSG_CHECKING(size of $2)
-AC_CACHE_VAL(AC_CV_NAME,
-[AC_TRY_RUN([#include <stdio.h>
-$1
-#ifdef WIN32
-#define binmode "b"
-#else
-#define binmode
-#endif
-main()
-{
-  FILE *f=fopen("conftestval", "w" binmode);
-  if (!f) exit(1);
-  fprintf(f, "%d\n", sizeof($2));
-  exit(0);
-}], AC_CV_NAME=`cat conftestval`, AC_CV_NAME=0, ifelse([$3],,,
-AC_CV_NAME=$3))])dnl
-AC_MSG_RESULT($AC_CV_NAME)
-AC_DEFINE_UNQUOTED(AC_TYPE_NAME, $AC_CV_NAME, [The size of ]$2)
-undefine([AC_TYPE_NAME])dnl
-undefine([AC_CV_NAME])dnl
-])
-
-
-dnl
 dnl APR_TRY_COMPILE_NO_WARNING(INCLUDES, FUNCTION-BODY,
 dnl             [ACTIONS-IF-NO-WARNINGS], [ACTIONS-IF-WARNINGS])
 dnl
