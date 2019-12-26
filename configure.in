@@ -1725,7 +1725,7 @@ else
     socklen_t_value="int"
 fi
 
-APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], pid_t, 8)
+AC_CHECK_SIZEOF(pid_t)
 
 if test "$ac_cv_sizeof_pid_t" = "$ac_cv_sizeof_short"; then
     pid_t_fmt='#define APR_PID_T_FMT "hd"'
@@ -1797,7 +1797,7 @@ APR_CHECK_TYPES_FMT_COMPATIBLE(size_t, unsigned long, lu, [size_t_fmt="lu"], [
 APR_CHECK_TYPES_FMT_COMPATIBLE(size_t, unsigned int, u, [size_t_fmt="u"])
 ])
 
-APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], ssize_t, 8)
+AC_CHECK_SIZEOF(ssize_t)
 
 dnl the else cases below should no longer occur;
 AC_MSG_CHECKING([which format to use for apr_ssize_t])
@@ -1815,7 +1815,7 @@ fi
 
 ssize_t_fmt="#define APR_SSIZE_T_FMT \"$ssize_t_fmt\""
 
-APR_CHECK_SIZEOF_EXTENDED([#include <stddef.h>], size_t, 8)
+AC_CHECK_SIZEOF(size_t)
 
 # else cases below should no longer occur;
 AC_MSG_CHECKING([which format to use for apr_size_t])
@@ -1833,7 +1833,7 @@ fi
 
 size_t_fmt="#define APR_SIZE_T_FMT \"$size_t_fmt\""
 
-APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], off_t, 8)
+AC_CHECK_SIZEOF(off_t)
 
 if test "${ac_cv_sizeof_off_t}${apr_cv_use_lfs64}" = "4yes"; then
     # Enable LFS
@@ -1933,7 +1933,7 @@ case $host in
     ;;
 *)
     ino_t_value=ino_t
-    APR_CHECK_SIZEOF_EXTENDED(AC_INCLUDES_DEFAULT, ino_t, $ac_cv_sizeof_long)
+    AC_CHECK_SIZEOF(ino_t)
     if test $ac_cv_sizeof_ino_t = 4; then
         if test $ac_cv_sizeof_long = 4; then
             ino_t_value="unsigned long"
@@ -1953,8 +1953,8 @@ else
     bigendian=0
 fi
 
-APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>
-#include <sys/uio.h>],struct iovec,0)
+AC_CHECK_SIZEOF(struct iovec,,[AC_INCLUDES_DEFAULT
+#include <sys/uio.h>])
 if test "$ac_cv_sizeof_struct_iovec" = "0"; then
     have_iovec=0
 else
