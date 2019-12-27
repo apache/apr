@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.1
 
+  *) Avoid an overflow on 32 bit platforms. [René Hjortskov Nielsen
+     <r... hjortskov.dk>]
+
   *) Use AC_CHECK_SIZEOF, so as to support cross compiling. PR 56053.
      [Mike Frysinger <vapier gentoo.org>]
 
