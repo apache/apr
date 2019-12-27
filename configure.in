@@ -26,6 +26,8 @@ sinclude(build/ltoptions.m4)
 sinclude(build/ltversion.m4)
 sinclude(build/lt~obsolete.m4)
 
+sinclude(build/ax_prog_cc_for_build.m4)
+
 dnl Hard-coded top of apr_private.h:
 AH_TOP([
 #ifndef APR_PRIVATE_H
@@ -182,6 +184,9 @@ dnl may need to use compiler characteristics to make decisions. This macro
 dnl can only be used once within a configure script, so this prevents a
 dnl preload section from invoking the macro to get compiler info.
 AC_PROG_CC
+
+dnl Check build CC for gen_test_char compiling which is executed at build time.
+AX_PROG_CC_FOR_BUILD
 
 dnl AC_PROG_SED is only avaliable in recent autoconf versions.
 dnl Use AC_CHECK_PROG instead if AC_PROG_SED is not present.
