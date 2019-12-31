@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.1
 
+  *) Add the ability to cross compile APR. [Graham Leggett]
+
   *) While cross-compiling, the tools/gen_test_char could not
      be executed at build time, use AX_PROG_CC_FOR_BUILD to
      build native tools/gen_test_char
