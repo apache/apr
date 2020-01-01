@@ -246,7 +246,7 @@ while test $# -gt 0; do
     if test "$location" = "installed"; then
         echo "${installbuilddir}/libtool"
     elif test "$location" = "crosscompile"; then
-        echo "$APR_TARGET_DIR/${installbuilddir}/build"
+        echo "$APR_TARGET_DIR/${installbuilddir}/libtool"
     else
         echo "$APR_BUILD_DIR/libtool"
     fi
