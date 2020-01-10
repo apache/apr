@@ -194,7 +194,7 @@ AC_DEFUN([APU_CHECK_DBD_MYSQL], [
         AC_CHECK_LIB($my_library, mysql_init,, [apu_have_mysql=0])
       fi
       if test "$apu_have_mysql" = "1" && test "x$MYSQL_CONFIG" != 'x'; then
-        APR_ADDTO(APRUTIL_PRIV_INCLUDES, [$mysql_CPPFLAGS])
+        APR_ADDTO(INCLUDES, [$mysql_CPPFLAGS])
       fi
     elif test "$withval" = "no"; then
       :
