@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.1
 
+  *) Don't try to use PROC_PTHREAD by default when cross compiling.
+     [Yann Ylavic]
+
   *) Add the ability to cross compile APR. [Graham Leggett]
 
   *) While cross-compiling, the tools/gen_test_char could not
