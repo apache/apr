@@ -2351,8 +2351,8 @@ APR_IFALLYES(func:semget func:semctl func:semop define:SEM_UNDO,
 APR_IFALLYES(header:OS.h func:create_sem func:acquire_sem func:acquire_sem_etc, 
             APR_DECIDE(USE_BEOSSEM, [BeOS Semaphores])) 
 # pthread mutex both pshared and robust[_np] is the best default
-case "$apr_cv_mutex_robust_shared" in
-"yes"|"np")
+case "$hasprocpthreadser:$apr_cv_mutex_robust_shared" in
+"1:yes" | "1:np")
     APR_DECIDE(USE_PROC_PTHREAD_SERIALIZE, [pthread pshared mutex]) 
     ;;
 *)
@@ -2371,21 +2371,27 @@ procpthreadser="0"
 fcntlser="0"
 case $ac_decision in
     USE_FLOCK_SERIALIZE )
+        hasflockser="1"
         flockser="1"
         ;;
     USE_FCNTL_SERIALIZE )
+        hasfcntlser="1"
         fcntlser="1"
         ;;
     USE_SYSVSEM_SERIALIZE )
+        hassysvser="1"
         sysvser="1"
         ;;
     USE_POSIXSEM_SERIALIZE )
+        hasposixser="1"
         posixser="1"
         ;;
     USE_PROC_PTHREAD_SERIALIZE )
+        hasprocpthreadser="1"
         procpthreadser="1"
         ;;
     USE_BEOSSEM )
+        hasbeossem="1"
         beossem="1"
         ;;
 esac
