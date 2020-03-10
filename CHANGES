@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Add a cache check with which users who cross-compile APR
+     can influence the outcome of the /dev/zero test by setting the variable
+     ac_cv_mmap__dev_zero=yes [Sebastian Kemper <sebastian_ml gmx net>]
+
   *) apr_crypto_commoncrypto: Remove stray reference to -lcrypto that
      prevented commoncrypto being enabled. [Graham Leggett]
 
