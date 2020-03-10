@@ -1,6 +1,13 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.1
 
+  *) APR's configure script uses AC_TRY_RUN to detect whether the return type
+     of strerror_r is int. When cross-compiling this defaults to no.
+
+     This commit adds an AC_CACHE_CHECK so users who cross-compile APR may
+     influence the outcome with a configure variable. [Sebastian Kemper
+     <sebastian_ml gmx net>]
+
   *) Add a cache check with which users who cross-compile APR
      can influence the outcome of the /dev/zero test by setting the variable
      ac_cv_mmap__dev_zero=yes [Sebastian Kemper <sebastian_ml gmx net>]
