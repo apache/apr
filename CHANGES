@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.1
 
+  *) Trick autoconf into printing the correct default prefix in the help.
+     [Stefan Fritsch]
+
   *) Don't try to use PROC_PTHREAD by default when cross compiling.
      [Yann Ylavic]
 
