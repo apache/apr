@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.1
 
+  *) Add a cache check with which users who cross-compile APR
+     can influence the outcome of the /dev/zero test by setting the variable
+     ac_cv_mmap__dev_zero=yes [Sebastian Kemper <sebastian_ml gmx net>]
+
   *) Trick autoconf into printing the correct default prefix in the help.
      [Stefan Fritsch]
 
