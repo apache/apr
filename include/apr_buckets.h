@@ -1030,8 +1030,9 @@ APR_DECLARE_NONSTD(void) apr_bucket_free(void *block)
  * @param e The bucket to destroy
  */
 #define apr_bucket_destroy(e) do {					\
-        (e)->type->destroy((e)->data);					\
-        (e)->free(e);							\
+        apr_bucket *apr__d = (e);					\
+        apr__d->type->destroy(apr__d->data);			       	\
+        apr__d->free(apr__d);						\
     } while (0)
 
 /**
@@ -1046,8 +1047,9 @@ APR_DECLARE_NONSTD(void) apr_bucket_free(void *block)
  * @param e The bucket to delete
  */
 #define apr_bucket_delete(e) do {					\
-        APR_BUCKET_REMOVE(e);						\
-        apr_bucket_destroy(e);						\
+        apr_bucket *apr__b = (e);					\
+        APR_BUCKET_REMOVE(apr__b);					\
+        apr_bucket_destroy(apr__b);					\
     } while (0)
 
 /**
