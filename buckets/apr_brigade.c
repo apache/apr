@@ -37,6 +37,14 @@ static apr_status_t brigade_cleanup(void *data)
 APR_DECLARE(apr_status_t) apr_brigade_cleanup(void *data)
 {
     apr_bucket_brigade *b = data;
+
+#ifndef APR_BUCKET_DEBUG
+    while (!APR_BRIGADE_EMPTY(b)) {
+        apr_bucket_delete(APR_BRIGADE_FIRST(b));
+    }
+#else
+    /* Debugging version with checks which will only trigger if the
+     * bucket list becomes corrupt. */
     apr_bucket *e;
     apr_bucket *prev = NULL;
 
@@ -44,12 +52,12 @@ APR_DECLARE(apr_status_t) apr_brigade_cleanup(void *data)
 
     while (!APR_BRIGADE_EMPTY(b)) {
         e = APR_BRIGADE_FIRST(b);
-        if (e == prev) {         /* PR#51062: prevent infinite loop on a corrupt brigade */
-            return APR_EGENERAL; /* FIXME: this should definitely be a "can't happen"!   */
-        }
+        assert(e != prev);
         prev = e;
         apr_bucket_delete(e);
     }
+#endif
+    
     /* We don't need to free(bb) because it's allocated from a pool. */
     return APR_SUCCESS;
 }
