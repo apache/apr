@@ -1615,18 +1615,28 @@ void cprng_stream_setkey(cprng_stream_ctx_t *sctx,
                          const unsigned char *key,
                          const unsigned char *iv)
 {
+    switch(EVP_CIPHER_CTX_nid(sctx->ctx)) {
 #if defined(NID_chacha20)
-    /* With CHACHA20, iv=NULL is the same as zeros but it's faster
-     * to (re-)init; use that for efficiency.
-     */
-    EVP_EncryptInit_ex(sctx->ctx, NULL, NULL, key, NULL);
-#else
-    /* With AES256-CTR, iv=NULL seems to peek up and random one (for
-     * the initial CTR), while we can live with zeros (fixed CTR);
-     * efficiency still.
-     */
-    EVP_EncryptInit_ex(sctx->ctx, NULL, NULL, key, iv);
+    case NID_chacha20:
+        /* With CHACHA20, iv=NULL is the same as zeros but it's faster
+         * to (re-)init; use that for efficiency.
+         */
+        EVP_EncryptInit_ex(sctx->ctx, NULL, NULL, key, NULL);
+        break;
 #endif
+#if defined(NID_aes_256_ctr)
+    case NID_aes_256_ctr:
+        /* With AES256-CTR, iv=NULL seems to peek up and random one (for
+         * the initial CTR), while we can live with zeros (fixed CTR);
+         * efficiency still.
+         */
+        EVP_EncryptInit_ex(sctx->ctx, NULL, NULL, key, iv);
+        break;
+#endif
+    default:
+        assert(0);
+        break;
+    }
 }
 
 static apr_status_t cprng_stream_ctx_bytes(cprng_stream_ctx_t **pctx,
