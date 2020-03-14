@@ -54,6 +54,11 @@
 
 #include <stdlib.h> /* for malloc() */
 
+#if APU_HAVE_OPENSSL
+/** Recommended prng driver for this platform */
+#define APU_CRYPTO_PRNG_RECOMMENDED_DRIVER "openssl"
+#endif
+
 /* Be consistent with the .h (the seed is xor-ed with key on reseed). */
 #if CPRNG_KEY_SIZE != APR_CRYPTO_PRNG_SEED_SIZE
 #error apr_crypto_prng handles stream ciphers with 256bit keys only
@@ -322,6 +327,7 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_create(apr_crypto_prng_t **pcprng,
     else if (cprng_global && cprng_global->crypto) {
         cprng->crypto = cprng_global->crypto;
     }
+#ifdef APU_CRYPTO_PRNG_RECOMMENDED_DRIVER
     else {
         const apr_crypto_driver_t *driver = NULL;
         if (!pool) {
@@ -334,7 +340,7 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_create(apr_crypto_prng_t **pcprng,
             return rv;
         }
 
-        rv = apr_crypto_get_driver(&driver, "openssl",
+        rv = apr_crypto_get_driver(&driver, APU_CRYPTO_PRNG_RECOMMENDED_DRIVER,
                 NULL, NULL, pool);
         if (rv != APR_SUCCESS) {
             cprng_cleanup(cprng);
@@ -347,6 +353,11 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_create(apr_crypto_prng_t **pcprng,
             return rv;
         }
     }
+#else
+    else {
+        return APR_ENOTIMPL;
+    }
+#endif
 
     rv = cprng->crypto->provider->cprng_stream_ctx_make(&cprng->ctx,
             cprng->crypto, cprng->cipher, pool);
