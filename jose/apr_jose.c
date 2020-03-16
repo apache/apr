@@ -42,11 +42,9 @@ APR_DECLARE(apr_jose_t *) apr_jose_data_make(apr_jose_t *jose, const char *typ,
         const unsigned char *in, apr_size_t inlen, apr_pool_t *pool)
 {
 
+    jose = apr_jose_make(jose, APR_JOSE_TYPE_DATA, pool);
     if (!jose) {
-        jose = apr_jose_make(jose, APR_JOSE_TYPE_DATA, pool);
-        if (!jose) {
-            return NULL;
-        }
+        return NULL;
     }
 
     jose->typ = typ;
@@ -64,11 +62,9 @@ APR_DECLARE(apr_jose_t *) apr_jose_json_make(apr_jose_t *jose, const char *cty,
         apr_json_value_t *json, apr_pool_t *pool)
 {
 
+    jose = apr_jose_make(jose, APR_JOSE_TYPE_JSON, pool);
     if (!jose) {
-        jose = apr_jose_make(jose, APR_JOSE_TYPE_JSON, pool);
-        if (!jose) {
-            return NULL;
-        }
+        return NULL;
     }
 
     jose->cty = cty;
@@ -141,11 +137,9 @@ APR_DECLARE(apr_jose_t *) apr_jose_jwe_make(apr_jose_t *jose,
 {
     apr_jose_jwe_t *jwe;
 
+    jose = apr_jose_make(jose, APR_JOSE_TYPE_JWE, pool);
     if (!jose) {
-        jose = apr_jose_make(jose, APR_JOSE_TYPE_JWE, pool);
-        if (!jose) {
-            return NULL;
-        }
+        return NULL;
     }
 
     jose->cty = payload->cty;
@@ -170,11 +164,9 @@ APR_DECLARE(apr_jose_t *) apr_jose_jwe_json_make(apr_jose_t *jose,
 {
     apr_jose_jwe_t *jwe;
 
+    jose = apr_jose_make(jose, APR_JOSE_TYPE_JWE_JSON, pool);
     if (!jose) {
-        jose = apr_jose_make(jose, APR_JOSE_TYPE_JWE_JSON, pool);
-        if (!jose) {
-            return NULL;
-        }
+        return NULL;
     }
 
     if (payload) {
@@ -199,11 +191,9 @@ APR_DECLARE(apr_jose_t *) apr_jose_jwk_make(apr_jose_t *jose,
 {
     apr_jose_jwk_t *jwk;
 
+    jose = apr_jose_make(jose, APR_JOSE_TYPE_JWK, pool);
     if (!jose) {
-        jose = apr_jose_make(jose, APR_JOSE_TYPE_JWK, pool);
-        if (!jose) {
-            return NULL;
-        }
+        return NULL;
     }
 
     jwk = jose->jose.jwk = apr_palloc(pool, sizeof(apr_jose_jwk_t));
@@ -221,11 +211,9 @@ APR_DECLARE(apr_jose_t *) apr_jose_jwks_make(apr_jose_t *jose,
 {
     apr_jose_jwks_t *jwks;
 
+    jose = apr_jose_make(jose, APR_JOSE_TYPE_JWKS, pool);
     if (!jose) {
-        jose = apr_jose_make(jose, APR_JOSE_TYPE_JWKS, pool);
-        if (!jose) {
-            return NULL;
-        }
+        return NULL;
     }
 
     jwks = jose->jose.jwks = apr_palloc(pool, sizeof(apr_jose_jwks_t));
@@ -244,11 +232,9 @@ APR_DECLARE(apr_jose_t *) apr_jose_jws_make(apr_jose_t *jose,
 {
     apr_jose_jws_t *jws;
 
+    jose = apr_jose_make(jose, APR_JOSE_TYPE_JWS, pool);
     if (!jose) {
-        jose = apr_jose_make(jose, APR_JOSE_TYPE_JWS, pool);
-        if (!jose) {
-            return NULL;
-        }
+        return NULL;
     }
 
     if (payload) {
@@ -273,11 +259,9 @@ APR_DECLARE(apr_jose_t *) apr_jose_jws_json_make(apr_jose_t *jose,
 {
     apr_jose_jws_t *jws;
 
+    jose = apr_jose_make(jose, APR_JOSE_TYPE_JWS_JSON, pool);
     if (!jose) {
-        jose = apr_jose_make(jose, APR_JOSE_TYPE_JWS_JSON, pool);
-        if (!jose) {
-            return NULL;
-        }
+        return NULL;
     }
 
     if (payload) {
@@ -301,11 +285,9 @@ APR_DECLARE(apr_jose_t *) apr_jose_jwt_make(apr_jose_t *jose, apr_json_value_t *
 {
     apr_jose_jwt_t *jwt;
 
+    jose = apr_jose_make(jose, APR_JOSE_TYPE_JWT, pool);
     if (!jose) {
-        jose = apr_jose_make(jose, APR_JOSE_TYPE_JWT, pool);
-        if (!jose) {
-            return NULL;
-        }
+        return NULL;
     }
 
     jose->cty = "JWT";
@@ -324,11 +306,9 @@ APR_DECLARE(apr_jose_t *) apr_jose_text_make(apr_jose_t *jose, const char *cty,
         const char *in, apr_size_t inlen, apr_pool_t *pool)
 {
 
+    jose = apr_jose_make(jose, APR_JOSE_TYPE_TEXT, pool);
     if (!jose) {
-        jose = apr_jose_make(jose, APR_JOSE_TYPE_TEXT, pool);
-        if (!jose) {
-            return NULL;
-        }
+        return NULL;
     }
 
     jose->cty = cty;
