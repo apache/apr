@@ -3103,6 +3103,12 @@ AC_MSG_RESULT($ipv6_result)
 
 AC_SUBST(have_ipv6)
 
+AC_ARG_ENABLE(timed-tests,
+  [  --disable-timed-tests	  Disable timed tests ],
+  [apr_has_timedtests="0"], [apr_has_timedtests="1"]
+)
+AC_SUBST(apr_has_timedtests)
+
 # hstrerror is only needed if IPv6 is not enabled,
 # so getaddrinfo/gai_strerror are not used.
 if test $have_ipv6 = 0; then

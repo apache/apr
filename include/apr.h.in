@@ -312,6 +312,7 @@ extern "C" {
 #define APR_HAS_LARGE_FILES       @aprlfs@
 #define APR_HAS_XTHREAD_FILES     @apr_has_xthread_files@
 #define APR_HAS_OS_UUID           @osuuid@
+#define APR_HAS_TIME_DEPENDANT_TESTS        @apr_has_timedtests@
 
 #define APR_PROCATTR_USER_SET_REQUIRES_PASSWORD @apr_procattr_user_set_requires_password@
 
