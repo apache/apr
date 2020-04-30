@@ -1605,7 +1605,7 @@ static apr_status_t cprng_stream_ctx_make(cprng_stream_ctx_t **psctx,
     return APR_SUCCESS;
 }
 
-void cprng_stream_ctx_free(cprng_stream_ctx_t *sctx)
+static void cprng_stream_ctx_free(cprng_stream_ctx_t *sctx)
 {
     EVP_CIPHER_CTX_free(sctx->ctx);
 }

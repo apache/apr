@@ -1442,7 +1442,7 @@ static apr_status_t cprng_stream_ctx_make(cprng_stream_ctx_t **psctx,
     return APR_ENOTIMPL;
 }
 
-void cprng_stream_ctx_free(cprng_stream_ctx_t *sctx)
+static void cprng_stream_ctx_free(cprng_stream_ctx_t *sctx)
 {
 }
 
