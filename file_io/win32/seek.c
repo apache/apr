@@ -170,7 +170,7 @@ APR_DECLARE(apr_status_t) apr_file_trunc(apr_file_t *thefile, apr_off_t offset)
                 thefile->bufpos = 0;
             }
             else if (offset < thefile->filePtr + (apr_off_t)thefile->bufpos) {
-                thefile->bufpos = offset - thefile->filePtr;
+                thefile->bufpos = (apr_size_t)(offset - thefile->filePtr);
             }
 
             if (thefile->bufpos != 0) {

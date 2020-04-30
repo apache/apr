@@ -1062,7 +1062,7 @@ APR_DECLARE(apr_status_t) apr_encode_base16(char *dest,
              const char *src, apr_ssize_t slen, int flags, apr_size_t * len)
 {
     const char *in = src;
-    apr_size_t size;
+    apr_ssize_t size;
 
     if (!src) {
         return APR_NOTFOUND;
@@ -1115,7 +1115,7 @@ APR_DECLARE(apr_status_t) apr_encode_base16_binary(char *dest,
     const unsigned char *src, apr_ssize_t slen, int flags, apr_size_t * len)
 {
     const unsigned char *in = src;
-    apr_size_t size;
+    apr_ssize_t size;
 
     if (!src) {
         return APR_NOTFOUND;
