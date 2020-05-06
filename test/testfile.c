@@ -262,7 +262,7 @@ static void test_seek(abts_case *tc, void *data)
     rv = apr_file_read(filetest, str, &nbytes);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_SIZE_EQUAL(tc, strlen(TESTSTR) - 5, nbytes);
-    ABTS_STR_EQUAL(tc, TESTSTR + 5, str);
+    ABTS_STR_EQUAL(tc, &TESTSTR[5], str);
 
     apr_file_close(filetest);
 
@@ -283,7 +283,7 @@ static void test_seek(abts_case *tc, void *data)
     rv = apr_file_read(filetest, str, &nbytes);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_SIZE_EQUAL(tc, 5, nbytes);
-    ABTS_STR_EQUAL(tc, TESTSTR + strlen(TESTSTR) - 5, str);
+    ABTS_STR_EQUAL(tc, &TESTSTR[strlen(TESTSTR) - 5], str);
 
     apr_file_close(filetest);
 }                
