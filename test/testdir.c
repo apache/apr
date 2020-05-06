@@ -132,8 +132,7 @@ static void test_mkdir_recurs_parallel(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, s3);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, s4);
 #else
-    (void)tc;
-    (void)data;
+    ABTS_SKIP(tc, data, "This test requires APR thread support.");
 #endif  /* APR_HAS_THREADS */
 }
 

@@ -42,6 +42,7 @@ struct sub_suite {
     const char *name;
     int num_test;
     int failed;
+    int skipped;
     int not_run;
     int not_impl;
     struct sub_suite *next;
@@ -56,6 +57,7 @@ typedef struct abts_suite abts_suite;
 
 struct abts_case {
     int failed;
+    int skipped;
     sub_suite *suite;
 };
 typedef struct abts_case abts_case;
@@ -77,6 +79,7 @@ void abts_ptr_notnull(abts_case *tc, const void *ptr, int lineno);
 void abts_ptr_equal(abts_case *tc, const void *expected, const void *actual, int lineno);
 void abts_true(abts_case *tc, int condition, int lineno);
 void abts_fail(abts_case *tc, const char *message, int lineno);
+void abts_skip(abts_case *tc, const char *message, int lineno);
 void abts_not_impl(abts_case *tc, const char *message, int lineno);
 void abts_assert(abts_case *tc, const char *message, int condition, int lineno);
 void abts_size_equal(abts_case *tc, size_t expected, size_t actual, int lineno);
@@ -95,6 +98,12 @@ void abts_size_equal(abts_case *tc, size_t expected, size_t actual, int lineno);
 
 #define ABTS_SIZE_EQUAL(a, b, c)    abts_size_equal(a, b, c, __LINE__)
 
+/* When skipping tests, make a reference to the test data parameter
+   to avoid unused variable warnings. */
+#define ABTS_SKIP(tc, data, msg) do {     \
+        ((void)(data));                   \
+        abts_skip((tc), (msg), __LINE__); \
+    } while (0)
 
 abts_suite *run_tests(abts_suite *suite);
 abts_suite *run_tests1(abts_suite *suite);

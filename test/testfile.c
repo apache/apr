@@ -1757,8 +1757,7 @@ static void test_atomic_append(abts_case *tc, void *data)
 
     apr_file_remove(fname, p);
 #else
-    (void)tc;
-    (void)data;
+    ABTS_SKIP(tc, data, "This test requires APR thread support.");
 #endif /* APR_HAS_THREADS */
 }
 
