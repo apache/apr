@@ -876,7 +876,7 @@ static void test_atomics_busyloop_threaded64(abts_case *tc, void *data)
     ABTS_ASSERT(tc, "Failed creating threads", rv == APR_SUCCESS);
 }
 
-void *APR_THREAD_FUNC test_func_set64(apr_thread_t *thd, void *data)
+static void *APR_THREAD_FUNC test_func_set64(apr_thread_t *thd, void *data)
 {
     int i;
 
