@@ -96,6 +96,7 @@ typedef struct {
     abts_case *tc;
     apr_reslist_t *reslist;
     apr_interval_time_t work_delay_sleep;
+    int acquire_flags;
 } my_thread_info_t;
 
 /* MAX_UINT * .95 = 2**32 * .95 = 4080218931u */
@@ -119,7 +120,7 @@ static void * APR_THREAD_FUNC resource_consuming_thread(apr_thread_t *thd,
 #endif
 
     for (i = 0; i < CONSUMER_ITERATIONS; i++) {
-        rv = apr_reslist_acquire(rl, &vp);
+        rv = apr_reslist_acquire_ex(rl, &vp, thread_info->acquire_flags);
         ABTS_INT_EQUAL(thread_info->tc, APR_SUCCESS, rv);
         res = vp;
         apr_sleep(thread_info->work_delay_sleep);
@@ -138,7 +139,7 @@ static void * APR_THREAD_FUNC resource_consuming_thread(apr_thread_t *thd,
     return APR_SUCCESS;
 }
 
-static void test_timeout(abts_case *tc, apr_reslist_t *rl)
+static void test_timeout(abts_case *tc, apr_reslist_t *rl, int acquire_flags)
 {
     apr_status_t rv;
     my_resource_t *resources[RESLIST_HMAX];
@@ -154,12 +155,12 @@ static void test_timeout(abts_case *tc, apr_reslist_t *rl)
      */
 
     for (i = 0; i < RESLIST_HMAX; i++) {
-        rv = apr_reslist_acquire(rl, (void**)&resources[i]);
+        rv = apr_reslist_acquire_ex(rl, (void**)&resources[i], acquire_flags);
         ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     }
 
     /* next call will block until timeout is reached */
-    rv = apr_reslist_acquire(rl, &vp);
+    rv = apr_reslist_acquire_ex(rl, &vp, acquire_flags);
     ABTS_TRUE(tc, APR_STATUS_IS_TIMEUP(rv));
 
     /* release the resources; otherwise the destroy operation
@@ -171,7 +172,7 @@ static void test_timeout(abts_case *tc, apr_reslist_t *rl)
     }
 }
 
-static void test_shrinking(abts_case *tc, apr_reslist_t *rl)
+static void test_shrinking(abts_case *tc, apr_reslist_t *rl, int acquire_flags)
 {
     apr_status_t rv;
     my_resource_t *resources[RESLIST_HMAX];
@@ -182,18 +183,18 @@ static void test_shrinking(abts_case *tc, apr_reslist_t *rl)
 
     /* deplete all possible resources from the resource list */
     for (i = 0; i < RESLIST_HMAX; i++) {
-        rv = apr_reslist_acquire(rl, (void**)&resources[i]);
+        rv = apr_reslist_acquire_ex(rl, (void**)&resources[i], acquire_flags);
         ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     }
 
     /* Free all resources above RESLIST_SMAX - 1 */
     for (i = RESLIST_SMAX - 1; i < RESLIST_HMAX; i++) {
-        rv = apr_reslist_release(rl, resources[i]);
+        rv = apr_reslist_invalidate(rl, resources[i]);
         ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     }
 
     for (i = 0; i < RESLIST_HMAX; i++) {
-        rv = apr_reslist_acquire(rl, &vp);
+        rv = apr_reslist_acquire_ex(rl, &vp, acquire_flags);
         ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
         res = vp;
         apr_sleep(sleep_time);
@@ -220,6 +221,7 @@ static void test_reslist(abts_case *tc, void *data)
     my_parameters_t *params;
     apr_thread_pool_t *thrp;
     my_thread_info_t thread_info[CONSUMER_THREADS];
+    int acquire_flags = (int)(apr_uintptr_t)data;
 
     rv = apr_thread_pool_create(&thrp, CONSUMER_THREADS/2, CONSUMER_THREADS, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -241,6 +243,7 @@ static void test_reslist(abts_case *tc, void *data)
         thread_info[i].tc = tc;
         thread_info[i].reslist = rl;
         thread_info[i].work_delay_sleep = WORK_DELAY_SLEEP_TIME;
+        thread_info[i].acquire_flags = acquire_flags;
         rv = apr_thread_pool_push(thrp, resource_consuming_thread,
                                   &thread_info[i], 0, NULL);
         ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -249,9 +252,9 @@ static void test_reslist(abts_case *tc, void *data)
     rv = apr_thread_pool_destroy(thrp);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    test_timeout(tc, rl);
+    test_timeout(tc, rl, acquire_flags);
 
-    test_shrinking(tc, rl);
+    test_shrinking(tc, rl, acquire_flags);
     ABTS_INT_EQUAL(tc, RESLIST_SMAX, params->c_count - params->d_count);
 
     rv = apr_reslist_destroy(rl);
@@ -303,7 +306,10 @@ abts_suite *testreslist(abts_suite *suite)
     suite = ADD_SUITE(suite);
 
 #if APR_HAS_THREADS
-    abts_run_test(suite, test_reslist, NULL);
+    abts_run_test(suite, test_reslist,
+                  (void*)(apr_uintptr_t)APR_RESLIST_ACQUIRE_LIFO);
+    abts_run_test(suite, test_reslist,
+                  (void*)(apr_uintptr_t)APR_RESLIST_ACQUIRE_FIFO);
     abts_run_test(suite, test_reslist_no_ttl, NULL);
 #endif
 
