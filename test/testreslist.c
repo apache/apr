@@ -34,12 +34,12 @@
 #define RESLIST_MIN   3
 #define RESLIST_SMAX 10
 #define RESLIST_HMAX 20
-#define RESLIST_TTL  APR_TIME_C(35000) /* 35 ms */
+#define RESLIST_TTL  APR_TIME_C(3500) /* 3.5 ms */
 #define CONSUMER_THREADS 25
 #define CONSUMER_ITERATIONS 100
-#define CONSTRUCT_SLEEP_TIME  APR_TIME_C(25000) /* 25 ms */
-#define DESTRUCT_SLEEP_TIME   APR_TIME_C(10000) /* 10 ms */
-#define WORK_DELAY_SLEEP_TIME APR_TIME_C(15000) /* 15 ms */
+#define CONSTRUCT_SLEEP_TIME  APR_TIME_C(2500) /* 2.5 ms */
+#define DESTRUCT_SLEEP_TIME   APR_TIME_C(1000) /* 1.0 ms */
+#define WORK_DELAY_SLEEP_TIME APR_TIME_C(1500) /* 1.5 ms */
 
 typedef struct {
     apr_interval_time_t sleep_upon_construct;
