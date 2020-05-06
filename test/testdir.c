@@ -63,6 +63,33 @@ static void test_mkdir_recurs(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_DIR, finfo.filetype);
 }
 
+static void mkdir_func(abts_case *tc, apr_pool_t *pool)
+{
+    apr_status_t s1, s2, s3, s4, s5;
+
+    s1 = apr_dir_make_recursive("data/prll/one/thwo/three",
+                                APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
+                                pool);
+    s2 = apr_dir_make_recursive("data/prll/four/five/six/seven/eight",
+                                APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
+                                pool);
+    s3 = apr_dir_make_recursive("data/prll/nine/ten",
+                                APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
+                                pool);
+    s4 = apr_dir_make_recursive("data/prll/11/12/13/14/15/16/17/18/19/20",
+                                APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
+                                pool);
+    s5 = apr_dir_make_recursive("data/fortytwo",
+                                APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
+                                pool);
+
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s1);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s2);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s3);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s4);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s5);
+}
+
 #if APR_HAS_THREADS
 struct thread_data
 {
@@ -73,29 +100,7 @@ struct thread_data
 static void *APR_THREAD_FUNC thread_mkdir_func(apr_thread_t *thd, void *data)
 {
     struct thread_data *td = data;
-    apr_status_t s1, s2, s3, s4, s5;
-
-    s1 = apr_dir_make_recursive("data/prll/one/thwo/three",
-                                APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
-                                td->pool);
-    s2 = apr_dir_make_recursive("data/prll/four/five/six/seven/eight",
-                                APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
-                                td->pool);
-    s3 = apr_dir_make_recursive("data/prll/nine/ten",
-                                APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
-                                td->pool);
-    s4 = apr_dir_make_recursive("data/prll/11/12/13/14/15/16/17/18/19/20",
-                                APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
-                                td->pool);
-    s5 = apr_dir_make_recursive("data/fortytwo",
-                                APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
-                                td->pool);
-
-    ABTS_INT_EQUAL(td->tc, APR_SUCCESS, s1);
-    ABTS_INT_EQUAL(td->tc, APR_SUCCESS, s2);
-    ABTS_INT_EQUAL(td->tc, APR_SUCCESS, s3);
-    ABTS_INT_EQUAL(td->tc, APR_SUCCESS, s4);
-    ABTS_INT_EQUAL(td->tc, APR_SUCCESS, s5);
+    mkdir_func(td->tc, td->pool);
     return NULL;
 }
 #endif  /* APR_HAS_THREADS */
@@ -132,6 +137,8 @@ static void test_mkdir_recurs_parallel(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, s3);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, s4);
 #else
+    /* Create the test directories for test_removeall anwyay. */
+    mkdir_func(tc, p);
     ABTS_SKIP(tc, data, "This test requires APR thread support.");
 #endif  /* APR_HAS_THREADS */
 }
