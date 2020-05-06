@@ -1630,6 +1630,7 @@ static void test_write_buffered_spanning_over_bufsize(abts_case *tc, void *data)
     apr_file_remove(fname, p);
 }
 
+#if APR_HAS_THREADS
 typedef struct thread_file_append_ctx_t {
     apr_pool_t *pool;
     const char *fname;
@@ -1698,9 +1699,11 @@ static void * APR_THREAD_FUNC thread_file_append_func(apr_thread_t *thd, void *d
 
     return NULL;
 }
+#endif  /* APR_HAS_THREADS */
 
 static void test_atomic_append(abts_case *tc, void *data)
 {
+#if APR_HAS_THREADS
     apr_status_t rv;
     apr_status_t thread_rv;
     apr_file_t *f;
@@ -1753,6 +1756,10 @@ static void test_atomic_append(abts_case *tc, void *data)
     }
 
     apr_file_remove(fname, p);
+#else
+    (void)tc;
+    (void)data;
+#endif /* APR_HAS_THREADS */
 }
 
 static void test_append_locked(abts_case *tc, void *data)
