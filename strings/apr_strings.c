@@ -124,7 +124,7 @@ APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
 {
     char *cp, *argp, *res;
     apr_size_t saved_lengths[MAX_SAVED_LENGTHS];
-    unsigned n, nargs = 0;
+    int nargs = 0;
 
     /* Pass one --- find length of required string */
 
@@ -152,10 +152,10 @@ APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
 
     va_start(adummy, a);
 
-    n = 0;
+    nargs = 0;
     while ((argp = va_arg(adummy, char *)) != NULL) {
-        if (n < nargs) {
-            len = saved_lengths[n++];
+        if (nargs < MAX_SAVED_LENGTHS) {
+            len = saved_lengths[nargs++];
         }
         else {
             len = strlen(argp);
