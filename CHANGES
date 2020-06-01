@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.1
 
+  *) Don't silently set APR_FOPEN_NOCLEANUP for apr_file_mktemp() created file
+     to avoid a fd and inode leak when/if later passed to apr_file_setaside().
+     [Yann Ylavic]
+
   *) APR's configure script uses AC_TRY_RUN to detect whether the return type
      of strerror_r is int. When cross-compiling this defaults to no.
 
