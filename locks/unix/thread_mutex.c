@@ -68,7 +68,26 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
         pthread_mutexattr_destroy(&mattr);
     } else
 #endif
+    {
+#if defined(APR_THREAD_DEBUG)
+        pthread_mutexattr_t mattr;
+
+        rv = pthread_mutexattr_init(&mattr);
+        if (rv) return rv;
+        
+        rv = pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_ERRORCHECK);
+        if (rv) {
+            pthread_mutexattr_destroy(&mattr);
+            return rv;
+        }
+
+        rv = pthread_mutex_init(&new_mutex->mutex, &mattr);
+
+        pthread_mutexattr_destroy(&mattr);
+#else
         rv = pthread_mutex_init(&new_mutex->mutex, NULL);
+#endif
+    }
 
     if (rv) {
 #ifdef HAVE_ZOS_PTHREADS
