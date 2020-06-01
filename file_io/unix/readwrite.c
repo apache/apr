@@ -244,14 +244,15 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
              * logically reading from
              */
             apr_int64_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
-            if (offset != thefile->filePtr)
-                lseek(thefile->filedes, offset, SEEK_SET);
+            if (offset != thefile->filePtr) {
+                thefile->filePtr = lseek(thefile->filedes, offset, SEEK_SET);
+                if (thefile->filePtr == -1) rv = errno;
+            }
             thefile->bufpos = thefile->dataRead = 0;
             thefile->direction = 1;
         }
 
-        rv = 0;
-        while (rv == 0 && size > 0) {
+        while (rv == APR_SUCCESS && size > 0) {
             if (thefile->bufpos == thefile->bufsize)   /* write buffer is full*/
                 rv = apr_file_flush_locked(thefile);
 
@@ -328,12 +329,15 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
              */
             apr_int64_t offset = thefile->filePtr - thefile->dataRead +
                                  thefile->bufpos;
-            if (offset != thefile->filePtr)
-                lseek(thefile->filedes, offset, SEEK_SET);
+            if (offset != thefile->filePtr) {
+                thefile->filePtr = lseek(thefile->filedes, offset, SEEK_SET);
+                if (thefile->filePtr == -1) rv = errno;
+            }
             thefile->bufpos = thefile->dataRead = 0;
         }
 
         file_unlock(thefile);
+        if (rv) return rv;
     }
 
     rv = file_rotating_check(thefile);
