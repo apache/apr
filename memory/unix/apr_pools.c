@@ -1366,7 +1366,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     apr_size_t free_index;
 
     pool_concurrency_set_used(pool);
-    ps.node = active = pool->active;
+    ps.node = pool->active;
     ps.pool = pool;
     ps.vbuff.curpos  = ps.node->first_avail;
 
