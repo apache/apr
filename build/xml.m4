@@ -83,7 +83,10 @@ AC_DEFUN([APU_SYSTEM_EXPAT], [
     APR_ADDTO(INCLUDES, [-I/usr/local/include])
  
     APU_TRY_EXPAT_LINK([Expat 1.95.x in /usr/local], 
-       apu_cv_expat_usrlocal, [expat.h], [-lexpat], [], [
+       apu_cv_expat_usrlocal, [expat.h], [-lexpat], [
+       APR_ADDTO(APRUTIL_INCLUDES, [-I/usr/local/include])
+       APR_ADDTO(APRUTIL_LDFLAGS, [-L/usr/local/lib])],[
+      ], [
        APR_REMOVEFROM(LDFLAGS, [-L/usr/local/lib])
        APR_REMOVEFROM(INCLUDES, [-I/usr/local/include])
       ])
@@ -96,9 +99,11 @@ dnl APU_FIND_EXPAT: figure out where EXPAT is located (or use bundled)
 dnl
 AC_DEFUN([APU_FIND_EXPAT], [
 
-save_cppflags="$CPPFLAGS"
-
 apu_has_expat=0
+
+old_libs="$LIBS"
+old_cppflags="$CPPFLAGS"
+old_ldflags="$LDFLAGS"
 
 AC_ARG_WITH([expat],
 [  --with-expat=DIR        specify Expat location], [
@@ -116,6 +121,8 @@ AC_ARG_WITH([expat],
     if test "$withval" != "/usr"; then
       APR_ADDTO(INCLUDES, [-I$withval/include])
       APR_ADDTO(LDFLAGS, [-L$withval/lib])
+      APR_ADDTO(APRUTIL_INCLUDES, [-I$withval/include])
+      APR_ADDTO(APRUTIL_LDFLAGS, [-L$withval/lib])
     fi
   fi
 ])
@@ -124,13 +131,16 @@ if test "$apu_has_libxml2" != "1"; then
   APU_SYSTEM_EXPAT
 
   APR_ADDTO(APRUTIL_EXPORT_LIBS, [$apu_expat_libs])
-  APR_ADDTO(LIBS, [$apu_expat_libs])
+  APR_ADDTO(APRUTIL_LIBS, [$apu_expat_libs])
 
   APR_XML_DIR=$bundled_subdir
   AC_SUBST(APR_XML_DIR)
 fi
 
-CPPFLAGS=$save_cppflags
+LIBS="$old_libs"
+CPPFLAGS="$old_cppflags"
+LDFLAGS="$old_ldflags"
+
 ])
 
 
@@ -139,56 +149,57 @@ dnl APU_FIND_LIBXML2: figure out where LIBXML2 is located (or use bundled)
 dnl
 AC_DEFUN([APU_FIND_LIBXML2], [
 
-save_cppflags="$CPPFLAGS"
-
 apu_has_libxml2=0
 apu_try_libxml2=0
+
+old_libs="$LIBS"
+old_cppflags="$CPPFLAGS"
+old_ldflags="$LDFLAGS"
 
 AC_ARG_WITH([libxml2],
 [  --with-libxml2=DIR      specify libxml2 location], [
   if test "$withval" = "yes"; then
-    apu_try_libxml2=1
-    APR_ADDTO(INCLUDES, [-I/usr/include/libxml2])
-  elif test "$withval" != "no"; then
-    apu_try_libxml2=1
-    APR_ADDTO(INCLUDES, [-I$withval/include/libxml2])
-    if test "$withval" != "/usr"; then
-      APR_ADDTO(LDFLAGS, [-L$withval/lib])
-    fi
-  fi
-  if test ${apu_try_libxml2} = "1" ; then
+    AC_PATH_TOOL([XML2_CONFIG],[xml2-config])
+    if test "x$XML2_CONFIG" != 'x'; then
+      xml2_CPPFLAGS="`$XML2_CONFIG --cflags`"
+      xml2_LIBS="`$XML2_CONFIG --libs`"
 
-    #test for libxml2
-    AC_CACHE_CHECK([libxml2], [apu_cv_libxml2], [
-      apu_libxml2_CPPFLAGS=$CPPFLAGS
-      apu_libxml2_LIBS="$LIBS -lxml2"
-      CPPFLAGS="$CPPFLAGS $INCLUDES"
-      LIBS="$LIBS -lxml2"
-      AC_TRY_LINK(
-        [#include <libxml/parser.h>],
-        [xmlSAXHandler sax; xmlCreatePushParserCtxt(&sax, NULL, NULL, 0, NULL);],
-        [apu_cv_libxml2=yes],
-        [apu_cv_libxml2=no],
-      )
-      CPPFLAGS=$apu_libxml2_CPPFLAGS
-      LIBS=$apu_libxml2_LIBS
-    ])
-    if test $apu_cv_libxml2 = yes ; then
-      AC_DEFINE([HAVE_LIBXML2_H], 1, [libxml2 found])
-      apu_has_libxml2=1
-    else
-      apu_has_libxml2=0
+      APR_ADDTO(CPPFLAGS, [$xml2_CPPFLAGS])
+      APR_ADDTO(LIBS, [$xml2_LIBS])
     fi
+
+    AC_CHECK_HEADERS(libxml/parser.h, AC_CHECK_LIB(xml2, xmlCreatePushParserCtxt, [apu_has_libxml2=1]))
+  elif test "$withval" != "no"; then
+    AC_PATH_TOOL([XML2_CONFIG],[xml2-config],,[$withval/bin])
+    if test "x$XML2_CONFIG" != 'x'; then
+      xml2_CPPFLAGS="`$XML2_CONFIG --cflags`"
+      xml2_LIBS="`$XML2_CONFIG --libs`"
+    else
+      xml2_CPPFLAGS="-I$withval/include/libxml2"
+      xml2_LDFLAGS="-L$withval/lib64 -L$withval/lib"
+    fi
+
+    APR_ADDTO(CPPFLAGS, [$xml2_CPPFLAGS])
+    APR_ADDTO(LIBS, [$xml2_LIBS])
+
+    AC_MSG_NOTICE(checking for libxml2 in $withval)
+    AC_CHECK_HEADERS(libxml/parser.h, AC_CHECK_LIB(xml2, xmlCreatePushParserCtxt, [apu_has_libxml2=1]))
   fi
+  ], [
+    AC_CHECK_HEADERS(libxml/parser.h, AC_CHECK_LIB(xml2, xmlCreatePushParserCtxt, [apu_has_libxml2=1]))
 ])
 AC_SUBST(apu_has_libxml2)
 
 if test ${apu_has_libxml2} = "1" ; then
-  APR_ADDTO(APRUTIL_EXPORT_LIBS, [-lxml2])
-  APR_ADDTO(LIBS, [-lxml2])
+  APR_ADDTO(APRUTIL_CPPFLAGS, [$xml2_CPPFLAGS])
+  APR_ADDTO(APRUTIL_PRIV_INCLUDES, [$xml2_CPPFLAGS])
+  APR_ADDTO(APRUTIL_LIBS, [$xml2_LIBS])
 fi
 
-CPPFLAGS=$save_cppflags
+LIBS="$old_libs"
+CPPFLAGS="$old_cppflags"
+LDFLAGS="$old_ldflags"
+
 ])
 
 dnl
