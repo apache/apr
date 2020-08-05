@@ -14,6 +14,7 @@
 
 use IO::File;
 use File::Find;
+use Fcntl ':mode';
 
 # The ignore list is '-' seperated, with this leading hyphen and
 # trailing hyphens in ever concatinated list below.
@@ -102,8 +103,9 @@ sub totxt {
                 }
             }
         }
-        return if ($File::Find::dir =~ m|^(.+/)?.svn(/.+)?$|);
+        return if ($File::Find::dir =~ m|^(.+/)?(\.svn\|\.git)(/.+)?$|);
         @ostat = stat($oname);
+        return if (!S_ISREG($ostat[2]));
         $srcfl = new IO::File $oname, "r" or die;
         $dstfl = new IO::File $tname, "w" or die;
         binmode $srcfl; 
