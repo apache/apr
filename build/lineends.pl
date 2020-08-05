@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #
 #  Heuristically converts line endings to the current OS's preferred format
 #  
