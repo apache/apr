@@ -104,7 +104,7 @@ sub totxt {
             }
         }
         return if ($File::Find::dir =~ m|^(.+/)?(\.svn\|\.git)(/.+)?$|);
-        @ostat = stat($oname);
+        @ostat = lstat($oname);
         return if (!S_ISREG($ostat[2]));
         $srcfl = new IO::File $oname, "r" or die;
         $dstfl = new IO::File $tname, "w" or die;
