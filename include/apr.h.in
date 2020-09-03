@@ -122,19 +122,21 @@
  */
 
 #if APR_HAVE_WINDOWS_H && defined(WIN32)
-/* If windows.h was already included, our preferences don't matter.
- * If not, include a restricted set of windows headers to our tastes.
+/* Has Windows.h already been included?  If so, our preferences don't matter,
+ * but we will still need the winsock things no matter what was included.
+ * If not, include a restricted set of Windows headers to our tastes.
+ * Note: _WIN32_WINNT is not an APR toggle, and should be set to the current API
+ * level; it is not a minimum, it is a maximum. Newly added functions to Win32
+ * are maintained in apr_arch_misc.h for runtime (not build time) determination.
  */
 #ifndef _WINDOWS_
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-
 #ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0501
+#define _WIN32_WINNT 0x0A00
 #endif
-
 #ifndef NOUSER
 #define NOUSER
 #endif
@@ -145,32 +147,26 @@
 #define NOIME
 #endif
 
-/* Impossible to include winsock2.h after winsock.h, while windows.h
+/* Impossible to include WinSock2.h after winsock.h, while Windows.h
  * attempts to load winsock.  Setting _WINSOCKAPI_ will dodge this.
  */
 #if APR_HAVE_WINSOCK2_H
 #define _WINSOCKAPI_
 #endif
 
-#include <windows.h>
+#include <Windows.h>
 #endif /* ndef _WINDOWS_ */
 #endif /* APR_HAVE_WINDOWS_H */
 
 #if APR_HAVE_WINSOCK2_H
-#include <winsock2.h>
+#include <WinSock2.h>
 
 #if APR_HAVE_WS2TCPIP_H
-#include <ws2tcpip.h>
+#include <WS2tcpip.h>
 #endif
 
 #if APR_HAVE_MSWSOCK_H
-#include <mswsock.h>
-#endif
-
-#else /* !APR_HAVE_WINSOCK2_H */
-
-#if APR_HAVE_WINSOCK_H
-#include <winsock.h>
+#include <MSWSock.h>
 #endif
 
 #endif /* !APR_HAVE_WINSOCK2_H */

@@ -55,8 +55,6 @@ OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)
 OPTION(INSTALL_PDB          "Install .pdb files (if generated)"  ON)
 OPTION(APR_BUILD_TESTAPR    "Build the test suite"         OFF)
 OPTION(TEST_STATIC_LIBS     "Test programs use APR static libraries instead of shared libraries?" OFF)
-SET(MIN_WINDOWS_VER         "Windows7"
-    CACHE STRING "Minimum Windows version")
 SET(LIBXML2_ICONV_INCLUDE_DIR   ""
     CACHE STRING "Directory with iconv include files for libxml2")
 SET(LIBXML2_ICONV_LIBRARIES     ""
@@ -97,16 +95,6 @@ ELSEIF(APU_USE_LIBXML2)
   SET(apu_use_libxml2_10 1)
 ELSE(APU_USE_XMLLITE)
   SET(apu_use_xmllite_10 1)
-ENDIF()
-
-IF("${MIN_WINDOWS_VER}" STREQUAL "")
-  SET(win32_winnt_str "0x0601")
-ELSEIF(${MIN_WINDOWS_VER} STREQUAL "Vista")
-  MESSAGE(FATAL_ERROR "Minimum supported Windows version is Windows 7/Windows Server 2008 R2")
-ELSEIF(${MIN_WINDOWS_VER} STREQUAL "Windows7")
-  SET(win32_winnt_str "0x0601")
-ELSE()
-  SET(win32_winnt_str ${MIN_WINDOWS_VER})
 ENDIF()
 
 CONFIGURE_FILE(include/apr.hwc
@@ -653,7 +641,6 @@ MESSAGE(STATUS "  DBD ODBC driver ................. : ${APU_HAVE_ODBC}")
 MESSAGE(STATUS "  Use Expat ....................... : ${APU_USE_EXPAT}")
 MESSAGE(STATUS "  Use LibXml2 ..................... : ${APU_USE_LIBXML2}")
 MESSAGE(STATUS "  Use XmlLite ..................... : ${APU_USE_XMLLITE}")
-MESSAGE(STATUS "  Minimum Windows version ......... : ${MIN_WINDOWS_VER}")
 MESSAGE(STATUS "  Library files for XML ........... : ${XMLLIB_LIBRARIES}")
 MESSAGE(STATUS "  Build test suite ................ : ${APR_BUILD_TESTAPR}")
 IF(TEST_STATIC_LIBS)
