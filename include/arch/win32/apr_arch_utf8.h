@@ -41,6 +41,11 @@ APR_DECLARE(apr_status_t) apr_conv_utf8_to_utf16(const char *in,
                                                  apr_size_t *outwords);
 
 /**
+ * @deprecated @see apr_conv_utf8_to_utf16
+ */
+#define apr_conv_utf8_to_ucs2(in, inbytes, out, outwords) apr_conv_utf8_to_utf16(in, inbytes, out, outwords)
+
+/**
  * An APR internal function for fast utf-16 Unicode including surrogate pairs
  * format conversion to the utf-8 octet-encoded Unicode.  This function is used
  * for filename and other resource conversions for platforms providing native
@@ -54,5 +59,10 @@ APR_DECLARE(apr_status_t) apr_conv_utf16_to_utf8(const apr_wchar_t *in,
                                                  apr_size_t *inwords,
                                                  char *out, 
                                                  apr_size_t *outbytes);
+
+/**
+ * @deprecated @see apr_conv_utf16_to_utf8
+ */
+#define apr_conv_ucs2_to_utf8(in, inwords, out, outbytes) apr_conv_utf16_to_utf8(in, inwords, out, outbytes)
 
 #endif /* def UTF8_H */
