@@ -495,6 +495,9 @@ AC_CACHE_CHECK([whether return code from strerror_r has type int],
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 main()
 {
   char buf[1024];
