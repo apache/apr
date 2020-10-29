@@ -2214,6 +2214,7 @@ AC_TRY_RUN([
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <stdlib.h>
 main()
 {
     struct rlimit limit;
@@ -2250,6 +2251,7 @@ AC_TRY_RUN([
 #include <stdlib.h>
 #include <fcntl.h>
 #include <semaphore.h>
+#include <stdlib.h>
 #ifndef SEM_FAILED
 #define SEM_FAILED (-1)
 #endif
@@ -2313,6 +2315,7 @@ if test "$threads" = "1"; then
       AC_TRY_RUN([
 #include <sys/types.h>
 #include <pthread.h>
+#include <stdlib.h>
         int main()
         {
             pthread_mutex_t mutex;
@@ -2442,7 +2445,9 @@ AC_TRY_RUN([
 #endif
 #include <fcntl.h>
 #include <errno.h>
-
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 int fd;
 struct flock proc_mutex_lock_it = {0};
 const char *fname = "conftest.fcntl";
