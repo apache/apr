@@ -389,11 +389,11 @@ typedef int (apr_table_do_callback_fn_t)(void *rec, const char *key,
  * Iterate over a table running the provided function once for every
  * element in the table.  The varargs array must be a list of zero or
  * more (char *) keys followed by a NULL pointer.  If zero keys are
- * given, the @param comp function will be invoked for every element
+ * given, the @p comp function will be invoked for every element
  * in the table.  Otherwise, the function is invoked only for those
  * elements matching the keys specified.
  *
- * If an invocation of the comp function returns zero,
+ * If an invocation of the @p comp function returns zero,
  * iteration will continue using the next specified key, if any.
  *
  * @param comp The function to run
@@ -413,13 +413,13 @@ APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
 
 /** 
  * Iterate over a table running the provided function once for every
- * element in the table.  The vp varargs parameter must be a
+ * element in the table.  The @p vp varargs parameter must be a
  * list of zero or more (char *) keys followed by a NULL pointer.  If
- * zero keys are given, the @param comp function will be invoked for
+ * zero keys are given, the @p comp function will be invoked for
  * every element in the table.  Otherwise, the function is invoked
  * only for those elements matching the keys specified.
  *
- * If an invocation of the comp function returns zero,
+ * If an invocation of the @p comp function returns zero,
  * iteration will continue using the next specified key, if any.
  *
  * @param comp The function to run
