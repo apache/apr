@@ -717,7 +717,7 @@ APR_DECLARE(void) apr_pool_cleanup_for_exec(void);
 /** @} */
 
 /**
- * @defgroup PoolDebug Pool Debugging functions.
+ * @defgroup PoolDebug Pool Debugging functions
  *
  * pools have nested lifetimes -- sub_pools are destroyed when the
  * parent pool is cleared.  We allow certain liberties with operations
@@ -791,7 +791,7 @@ APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse)
  */
 APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag);
 
-/* @} */
+/** @} */
 
 /** @} */
 
