@@ -256,7 +256,7 @@ typedef int (apr_hash_do_callback_fn_t)(void *rec, const void *key,
 
 /** 
  * Iterate over a hash table running the provided function once for every
- * element in the hash table. The @param comp function will be invoked for
+ * element in the hash table. The @p comp function will be invoked for
  * every element in the hash table.
  *
  * @param comp The function to run
