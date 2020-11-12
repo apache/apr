@@ -2207,6 +2207,41 @@ static void test_read_buffered_seek(abts_case *tc, void *data)
     apr_file_remove(fname, p);
 }
 
+static void test_datasync_on_file(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = DIRNAME "/testtest_datasync.dat";
+    apr_size_t bytes_written;
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_CREATE | APR_FOPEN_WRITE,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file for writing", rv);
+    rv = apr_file_write_full(f, "abcdef", 6, &bytes_written);
+    APR_ASSERT_SUCCESS(tc, "write to file", rv);
+    rv = apr_file_datasync(f);
+    APR_ASSERT_SUCCESS(tc, "sync file contents", rv);
+    apr_file_close(f);
+
+    apr_file_remove(fname, p);
+}
+
+static void test_datasync_on_stream(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    apr_size_t bytes_written;
+
+    rv = apr_file_open_stdout(&f, p);
+    APR_ASSERT_SUCCESS(tc, "open stdout", rv);
+    rv = apr_file_write_full(f, "abcdef\b\b\b\b\b\b\b", 12, &bytes_written);
+    APR_ASSERT_SUCCESS(tc, "write to stdout", rv);
+    rv = apr_file_datasync(f);
+    APR_ASSERT_SUCCESS(tc, "sync stdout", rv);
+}
+
 abts_suite *testfile(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -2270,6 +2305,8 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_read_buffered_spanning_over_bufsize, NULL);
     abts_run_test(suite, test_single_byte_reads_buffered, NULL);
     abts_run_test(suite, test_read_buffered_seek, NULL);
+    abts_run_test(suite, test_datasync_on_file, NULL);
+    abts_run_test(suite, test_datasync_on_stream, NULL);
 
     return suite;
 }

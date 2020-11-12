@@ -466,6 +466,7 @@ APR_DECLARE(apr_status_t) apr_file_sync(apr_file_t *thefile)
 APR_DECLARE(apr_status_t) apr_file_datasync(apr_file_t *thefile)
 {
     apr_status_t rv = APR_SUCCESS;
+    int os_status = 0;
 
     file_lock(thefile);
 
@@ -479,12 +480,17 @@ APR_DECLARE(apr_status_t) apr_file_datasync(apr_file_t *thefile)
     }
 
 #ifdef HAVE_FDATASYNC
-    if (fdatasync(thefile->filedes)) {
+    os_status = fdatasync(thefile->filedes);
 #elif defined(F_FULLFSYNC)
-    if (fcntl(thefile->filedes, F_FULLFSYNC)) {
+    os_status = fcntl(thefile->filedes, F_FULLFSYNC);
+    if (os_status) {
+        /* Fall back to fsync() if the device doesn't support F_FULLFSYNC. */
+        os_status = fsync(thefile->filedes);
+    }
 #else
-    if (fsync(thefile->filedes)) {
+    os_status = fsync(thefile->filedes);
 #endif
+    if (os_status) {
         rv = apr_get_os_error();
     }
 
