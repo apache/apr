@@ -1951,9 +1951,7 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
 
 static void pool_destroy_debug(apr_pool_t *pool, const char *file_line)
 {
-    apr_pool_check_lifetime(pool);
-
-    pool_clear_debug(pool, file_line);
+    apr_pool_clear_debug(pool, file_line);
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "DESTROY", file_line, 1);
