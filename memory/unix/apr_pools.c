@@ -2511,14 +2511,10 @@ APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
                       apr_status_t (*plain_cleanup_fn)(void *data),
                       apr_status_t (*child_cleanup_fn)(void *data))
 {
-    cleanup_t *c;
+    cleanup_t *c = NULL;
 
 #if APR_POOL_DEBUG
     apr_pool_check_integrity(p);
-
-    if (!p || !plain_cleanup_fn || !child_cleanup_fn) {
-        abort();
-    }
 #endif /* APR_POOL_DEBUG */
 
     if (p != NULL) {
@@ -2535,12 +2531,18 @@ APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
         c->next = p->cleanups;
         p->cleanups = c;
     }
+
+#if APR_POOL_DEBUG
+    if (!c || !c->plain_cleanup_fn || !c->child_cleanup_fn) {
+        abort();
+    }
+#endif /* APR_POOL_DEBUG */
 }
 
 APR_DECLARE(void) apr_pool_pre_cleanup_register(apr_pool_t *p, const void *data,
                       apr_status_t (*plain_cleanup_fn)(void *data))
 {
-    cleanup_t *c;
+    cleanup_t *c = NULL;
 
 #if APR_POOL_DEBUG
     apr_pool_check_integrity(p);
@@ -2559,6 +2561,12 @@ APR_DECLARE(void) apr_pool_pre_cleanup_register(apr_pool_t *p, const void *data,
         c->next = p->pre_cleanups;
         p->pre_cleanups = c;
     }
+
+#if APR_POOL_DEBUG
+    if (!c || !c->plain_cleanup_fn) {
+        abort();
+    }
+#endif /* APR_POOL_DEBUG */
 }
 
 APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
