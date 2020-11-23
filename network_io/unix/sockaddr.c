@@ -118,10 +118,10 @@ static apr_status_t get_remote_addr(apr_socket_t *sock)
 APR_DECLARE(apr_status_t) apr_sockaddr_ip_getbuf(char *buf, apr_size_t buflen,
                                                  apr_sockaddr_t *sockaddr)
 {
-#if APR_HAVE_SOCKADDR_UN && 0
+#if APR_HAVE_SOCKADDR_UN
     if (sockaddr->family == APR_UNIX) {
         apr_size_t len = (apr_size_t)sockaddr->ipaddr_len;
-        apr_cpystrn(buf, buflen < len ? buflen : len, sockaddr->ipaddr_ptr);
+        apr_cpystrn(buf, sockaddr->ipaddr_ptr, buflen < len ? buflen : len);
         return APR_SUCCESS;
     }
 #endif
