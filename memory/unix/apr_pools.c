@@ -1012,20 +1012,12 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
 
     /* Remove the pool from the parents child list */
     if (pool->parent) {
-#if APR_HAS_THREADS
-        apr_thread_mutex_t *mutex;
-
-        if ((mutex = apr_allocator_mutex_get(pool->parent->allocator)) != NULL)
-            apr_thread_mutex_lock(mutex);
-#endif /* APR_HAS_THREADS */
+        allocator_lock(pool->parent->allocator);
 
         if ((*pool->ref = pool->sibling) != NULL)
             pool->sibling->ref = pool->ref;
 
-#if APR_HAS_THREADS
-        if (mutex)
-            apr_thread_mutex_unlock(mutex);
-#endif /* APR_HAS_THREADS */
+        allocator_unlock(pool->parent->allocator);
     }
 
     /* Find the block attached to the pool structure.  Save a copy of the
@@ -1128,12 +1120,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
 #endif /* defined(NETWARE) */
 
     if ((pool->parent = parent) != NULL) {
-#if APR_HAS_THREADS
-        apr_thread_mutex_t *mutex;
-
-        if ((mutex = apr_allocator_mutex_get(parent->allocator)) != NULL)
-            apr_thread_mutex_lock(mutex);
-#endif /* APR_HAS_THREADS */
+        allocator_lock(parent->allocator);
 
         if ((pool->sibling = parent->child) != NULL)
             pool->sibling->ref = &pool->sibling;
@@ -1141,10 +1128,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
         parent->child = pool;
         pool->ref = &parent->child;
 
-#if APR_HAS_THREADS
-        if (mutex)
-            apr_thread_mutex_unlock(mutex);
-#endif /* APR_HAS_THREADS */
+        allocator_unlock(parent->allocator);
     }
     else {
         pool->sibling = NULL;
