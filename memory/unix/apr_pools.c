@@ -1911,14 +1911,12 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
     apr_pool_check_lifetime(pool);
 
 #if APR_HAS_THREADS
-    if (pool->parent != NULL)
-        mutex = pool->parent->mutex;
-
     /* Lock the parent mutex before clearing so that if we have our
      * own mutex it won't be accessed by apr_pool_walk_tree after
      * it has been destroyed.
      */
-    if (mutex != NULL && mutex != pool->mutex) {
+    if (pool->parent != NULL) {
+        mutex = pool->parent->mutex;
         apr_thread_mutex_lock(mutex);
     }
 #endif
@@ -1942,9 +1940,9 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
         pool->mutex = NULL;
         (void)apr_thread_mutex_create(&pool->mutex,
                                       APR_THREAD_MUTEX_NESTED, pool);
-
-        if (mutex != NULL)
-            (void)apr_thread_mutex_unlock(mutex);
+    }
+    if (mutex != NULL) {
+        apr_thread_mutex_unlock(mutex);
     }
 #endif /* APR_HAS_THREADS */
 }
@@ -2037,6 +2035,29 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     pool->tag = file_line;
     pool->file_line = file_line;
 
+#if APR_HAS_THREADS
+    if (parent == NULL || parent->allocator != allocator) {
+        apr_status_t rv;
+
+        /* No matter what the creation flags say, always create
+         * a lock.  Without it integrity_check and apr_pool_num_bytes
+         * blow up (because they traverse pools child lists that
+         * possibly belong to another thread, in combination with
+         * the pool having no lock).  However, this might actually
+         * hide problems like creating a child pool of a pool
+         * belonging to another thread.
+         */
+        if ((rv = apr_thread_mutex_create(&pool->mutex,
+                APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
+            free(pool);
+            return rv;
+        }
+    }
+    else {
+        pool->mutex = parent->mutex;
+    }
+#endif /* APR_HAS_THREADS */
+
     if ((pool->parent = parent) != NULL) {
 #if APR_HAS_THREADS
         if (parent->mutex)
@@ -2069,32 +2090,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     apr_pool_log_event(pool, "CREATE", file_line, 1);
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
 
-    if (parent == NULL || parent->allocator != allocator) {
-#if APR_HAS_THREADS
-        apr_status_t rv;
-
-        /* No matter what the creation flags say, always create
-         * a lock.  Without it integrity_check and apr_pool_num_bytes
-         * blow up (because they traverse pools child lists that
-         * possibly belong to another thread, in combination with
-         * the pool having no lock).  However, this might actually
-         * hide problems like creating a child pool of a pool
-         * belonging to another thread.
-         */
-        if ((rv = apr_thread_mutex_create(&pool->mutex,
-                APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
-            free(pool);
-            return rv;
-        }
-#endif /* APR_HAS_THREADS */
-    }
-    else {
-#if APR_HAS_THREADS
-        if (parent)
-            pool->mutex = parent->mutex;
-#endif /* APR_HAS_THREADS */
-    }
-
     *newpool = pool;
 
     return APR_SUCCESS;
@@ -2124,6 +2119,26 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
     pool->file_line = file_line;
 
 #if APR_HAS_THREADS
+    {
+        apr_status_t rv;
+
+        /* No matter what the creation flags say, always create
+         * a lock.  Without it integrity_check and apr_pool_num_bytes
+         * blow up (because they traverse pools child lists that
+         * possibly belong to another thread, in combination with
+         * the pool having no lock).  However, this might actually
+         * hide problems like creating a child pool of a pool
+         * belonging to another thread.
+         */
+        if ((rv = apr_thread_mutex_create(&pool->mutex,
+                APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
+            free(pool);
+            return rv;
+        }
+    }
+#endif /* APR_HAS_THREADS */
+
+#if APR_HAS_THREADS
     pool->owner = apr_os_thread_current();
 #endif /* APR_HAS_THREADS */
 #ifdef NETWARE
@@ -2144,26 +2159,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "CREATEU", file_line, 1);
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
-
-    if (pool->allocator != allocator) {
-#if APR_HAS_THREADS
-        apr_status_t rv;
-
-        /* No matter what the creation flags say, always create
-         * a lock.  Without it integrity_check and apr_pool_num_bytes
-         * blow up (because they traverse pools child lists that
-         * possibly belong to another thread, in combination with
-         * the pool having no lock).  However, this might actually
-         * hide problems like creating a child pool of a pool
-         * belonging to another thread.
-         */
-        if ((rv = apr_thread_mutex_create(&pool->mutex,
-                APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
-            free(pool);
-            return rv;
-        }
-#endif /* APR_HAS_THREADS */
-    }
 
     *newpool = pool;
 
