@@ -1501,9 +1501,7 @@ static int apr_pool_walk_tree(apr_pool_t *pool,
         return rv;
 
 #if APR_HAS_THREADS
-    if (pool->mutex) {
-        apr_thread_mutex_lock(pool->mutex);
-                        }
+    apr_thread_mutex_lock(pool->mutex);
 #endif /* APR_HAS_THREADS */
 
     child = pool->child;
@@ -1516,9 +1514,7 @@ static int apr_pool_walk_tree(apr_pool_t *pool,
     }
 
 #if APR_HAS_THREADS
-    if (pool->mutex) {
-        apr_thread_mutex_unlock(pool->mutex);
-    }
+    apr_thread_mutex_unlock(pool->mutex);
 #endif /* APR_HAS_THREADS */
 
     return rv;
@@ -1958,18 +1954,14 @@ static void pool_destroy_debug(apr_pool_t *pool, const char *file_line)
     /* Remove the pool from the parents child list */
     if (pool->parent) {
 #if APR_HAS_THREADS
-        apr_thread_mutex_t *mutex;
-
-        if ((mutex = pool->parent->mutex) != NULL)
-            apr_thread_mutex_lock(mutex);
+        apr_thread_mutex_lock(pool->parent->mutex);
 #endif /* APR_HAS_THREADS */
 
         if ((*pool->ref = pool->sibling) != NULL)
             pool->sibling->ref = pool->ref;
 
 #if APR_HAS_THREADS
-        if (mutex)
-            apr_thread_mutex_unlock(mutex);
+        apr_thread_mutex_unlock(pool->parent->mutex);
 #endif /* APR_HAS_THREADS */
     }
 
@@ -2060,9 +2052,9 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
 
     if ((pool->parent = parent) != NULL) {
 #if APR_HAS_THREADS
-        if (parent->mutex)
-            apr_thread_mutex_lock(parent->mutex);
+        apr_thread_mutex_lock(parent->mutex);
 #endif /* APR_HAS_THREADS */
+
         if ((pool->sibling = parent->child) != NULL)
             pool->sibling->ref = &pool->sibling;
 
@@ -2070,8 +2062,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
         pool->ref = &parent->child;
 
 #if APR_HAS_THREADS
-        if (parent->mutex)
-            apr_thread_mutex_unlock(parent->mutex);
+        apr_thread_mutex_unlock(parent->mutex);
 #endif /* APR_HAS_THREADS */
     }
     else {
