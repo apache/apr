@@ -1895,6 +1895,10 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
 
     pool->stat_alloc = 0;
     pool->stat_clear++;
+
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
+    apr_pool_log_event(pool, "CLEARED", file_line, 1);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
 }
 
 APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
@@ -1917,11 +1921,11 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
     }
 #endif
 
-    pool_clear_debug(pool, file_line);
-
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "CLEAR", file_line, 1);
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
+
+    pool_clear_debug(pool, file_line);
 
 #if APR_HAS_THREADS
     /* If we had our own mutex, it will have been destroyed by
@@ -1945,26 +1949,15 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
 
 static void pool_destroy_debug(apr_pool_t *pool, const char *file_line)
 {
-    apr_pool_clear_debug(pool, file_line);
+    pool_clear_debug(pool, file_line);
 
-#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
-    apr_pool_log_event(pool, "DESTROY", file_line, 1);
-#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
-
-    /* Remove the pool from the parents child list */
-    if (pool->parent) {
-#if APR_HAS_THREADS
-        apr_thread_mutex_lock(pool->parent->mutex);
-#endif /* APR_HAS_THREADS */
-
-        if ((*pool->ref = pool->sibling) != NULL)
-            pool->sibling->ref = pool->ref;
-
-#if APR_HAS_THREADS
-        apr_thread_mutex_unlock(pool->parent->mutex);
-#endif /* APR_HAS_THREADS */
+    /* Remove the pool from the parent's child list */
+    if (pool->parent != NULL
+        && (*pool->ref = pool->sibling) != NULL) {
+        pool->sibling->ref = pool->ref;
     }
 
+    /* Destroy the allocator if the pool owns it */
     if (pool->allocator != NULL
         && apr_allocator_owner_get(pool->allocator) == pool) {
         apr_allocator_destroy(pool->allocator);
@@ -1977,6 +1970,12 @@ static void pool_destroy_debug(apr_pool_t *pool, const char *file_line)
 APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
                                          const char *file_line)
 {
+#if APR_HAS_THREADS
+    apr_thread_mutex_t *mutex = NULL;
+#endif
+
+    apr_pool_check_lifetime(pool);
+
     if (pool->joined) {
         /* Joined pools must not be explicitly destroyed; the caller
          * has broken the guarantee. */
@@ -1987,7 +1986,29 @@ APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
 
         abort();
     }
+
+#if APR_HAS_THREADS
+    /* Lock the parent mutex before destroying so that it's not accessed
+     * concurrently by apr_pool_walk_tree.
+     */
+    if (pool->parent != NULL) {
+        mutex = pool->parent->mutex;
+        apr_thread_mutex_lock(mutex);
+    }
+#endif
+
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
+    apr_pool_log_event(pool, "DESTROY", file_line, 1);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
+
     pool_destroy_debug(pool, file_line);
+
+#if APR_HAS_THREADS
+    /* Unlock the mutex we obtained above */
+    if (mutex != NULL) {
+        apr_thread_mutex_unlock(mutex);
+    }
+#endif /* APR_HAS_THREADS */
 }
 
 APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
