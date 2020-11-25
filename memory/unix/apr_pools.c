@@ -1467,6 +1467,41 @@ error:
  * Debug helper functions
  */
 
+static APR_INLINE
+void pool_lock(apr_pool_t *pool)
+{
+#if APR_HAS_THREADS
+    apr_thread_mutex_lock(pool->mutex);
+#endif /* APR_HAS_THREADS */
+}
+
+static APR_INLINE
+void pool_unlock(apr_pool_t *pool)
+{
+#if APR_HAS_THREADS
+    apr_thread_mutex_unlock(pool->mutex);
+#endif /* APR_HAS_THREADS */
+}
+
+#if APR_HAS_THREADS
+static APR_INLINE
+apr_thread_mutex_t *parent_lock(apr_pool_t *pool)
+{
+    if (pool->parent) {
+        apr_thread_mutex_lock(pool->parent->mutex);
+        return pool->parent->mutex;
+    }
+    return NULL;
+}
+
+static APR_INLINE
+void parent_unlock(apr_thread_mutex_t *mutex)
+{
+    if (mutex) {
+        apr_thread_mutex_unlock(mutex);
+    }
+}
+#endif /* APR_HAS_THREADS */
 
 /*
  * Walk the pool tree rooted at pool, depth first.  When fn returns
@@ -1484,9 +1519,7 @@ static int apr_pool_walk_tree(apr_pool_t *pool,
     if (rv)
         return rv;
 
-#if APR_HAS_THREADS
-    apr_thread_mutex_lock(pool->mutex);
-#endif /* APR_HAS_THREADS */
+    pool_lock(pool);
 
     child = pool->child;
     while (child) {
@@ -1497,9 +1530,7 @@ static int apr_pool_walk_tree(apr_pool_t *pool,
         child = child->sibling;
     }
 
-#if APR_HAS_THREADS
-    apr_thread_mutex_unlock(pool->mutex);
-#endif /* APR_HAS_THREADS */
+    pool_unlock(pool);
 
     return rv;
 }
@@ -1889,7 +1920,7 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
                                        const char *file_line)
 {
 #if APR_HAS_THREADS
-    apr_thread_mutex_t *mutex = NULL;
+    apr_thread_mutex_t *mutex;
 #endif
 
     apr_pool_check_lifetime(pool);
@@ -1899,10 +1930,7 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
      * own mutex it won't be accessed by apr_pool_walk_tree after
      * it has been destroyed.
      */
-    if (pool->parent != NULL) {
-        mutex = pool->parent->mutex;
-        apr_thread_mutex_lock(mutex);
-    }
+    mutex = parent_lock(pool);
 #endif
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
@@ -1913,8 +1941,7 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
 
 #if APR_HAS_THREADS
     /* If we had our own mutex, it will have been destroyed by
-     * the registered cleanups.  Recreate the mutex.  Unlock
-     * the mutex we obtained above.
+     * the registered cleanups.  Recreate it.
      */
     if (mutex != pool->mutex) {
         /*
@@ -1925,9 +1952,9 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
         (void)apr_thread_mutex_create(&pool->mutex,
                                       APR_THREAD_MUTEX_NESTED, pool);
     }
-    if (mutex != NULL) {
-        apr_thread_mutex_unlock(mutex);
-    }
+
+    /* Unlock the mutex we obtained above */
+    parent_unlock(mutex);
 #endif /* APR_HAS_THREADS */
 }
 
@@ -1955,7 +1982,7 @@ APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
                                          const char *file_line)
 {
 #if APR_HAS_THREADS
-    apr_thread_mutex_t *mutex = NULL;
+    apr_thread_mutex_t *mutex;
 #endif
 
     apr_pool_check_lifetime(pool);
@@ -1975,10 +2002,7 @@ APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
     /* Lock the parent mutex before destroying so that it's not accessed
      * concurrently by apr_pool_walk_tree.
      */
-    if (pool->parent != NULL) {
-        mutex = pool->parent->mutex;
-        apr_thread_mutex_lock(mutex);
-    }
+    mutex = parent_lock(pool);
 #endif
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
@@ -1989,9 +2013,7 @@ APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
 
 #if APR_HAS_THREADS
     /* Unlock the mutex we obtained above */
-    if (mutex != NULL) {
-        apr_thread_mutex_unlock(mutex);
-    }
+    parent_unlock(mutex);
 #endif /* APR_HAS_THREADS */
 }
 
@@ -2056,9 +2078,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
 #endif /* APR_HAS_THREADS */
 
     if ((pool->parent = parent) != NULL) {
-#if APR_HAS_THREADS
-        apr_thread_mutex_lock(parent->mutex);
-#endif /* APR_HAS_THREADS */
+        pool_lock(parent);
 
         if ((pool->sibling = parent->child) != NULL)
             pool->sibling->ref = &pool->sibling;
@@ -2066,9 +2086,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
         parent->child = pool;
         pool->ref = &parent->child;
 
-#if APR_HAS_THREADS
-        apr_thread_mutex_unlock(parent->mutex);
-#endif /* APR_HAS_THREADS */
+        pool_unlock(parent);
     }
     else {
         pool->sibling = NULL;
