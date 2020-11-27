@@ -134,37 +134,42 @@ static void test_decode_base64(abts_case * tc, void *data)
     src = "";
     target = "";
     dest = apr_pdecode_base64(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
-    ABTS_STR_EQUAL(tc, dest, target);
+    ABTS_STR_EQUAL(tc, target, dest);
 
     src = "Zg==";
     target = "f";
     dest = apr_pdecode_base64(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
-    ABTS_STR_EQUAL(tc, dest, target);
+    ABTS_STR_EQUAL(tc, target, dest);
+
+    src = "Zg=";
+    target = "f";
+    dest = apr_pdecode_base64(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
+    ABTS_STR_EQUAL(tc, target, dest);
 
     src = "Zg";
     target = "f";
     dest = apr_pdecode_base64(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
-    ABTS_STR_EQUAL(tc, dest, target);
+    ABTS_STR_EQUAL(tc, target, dest);
 
     src = "Zm8=";
     target = "fo";
     dest = apr_pdecode_base64(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
-    ABTS_STR_EQUAL(tc, dest, target);
+    ABTS_STR_EQUAL(tc, target, dest);
 
     src = "Zm8";
     target = "fo";
     dest = apr_pdecode_base64(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
-    ABTS_STR_EQUAL(tc, dest, target);
+    ABTS_STR_EQUAL(tc, target, dest);
 
     src = "Zm9v";
     target = "foo";
     dest = apr_pdecode_base64(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
-    ABTS_STR_EQUAL(tc, dest, target);
+    ABTS_STR_EQUAL(tc, target, dest);
 
     src = "Zm9v";
     target = "foo";
     dest = apr_pdecode_base64(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
-    ABTS_STR_EQUAL(tc, dest, target);
+    ABTS_STR_EQUAL(tc, target, dest);
 
     apr_pool_destroy(pool);
 }
@@ -187,6 +192,11 @@ static void test_decode_base64_binary(abts_case * tc, void *data)
     ABTS_INT_EQUAL(tc, len, 0);
 
     src = "Zg==";
+    udest = apr_pdecode_base64_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
+    ABTS_ASSERT(tc, "apr_pdecode_base64_binary target!=dest", memcmp(ufoobar, udest, 1) == 0);
+    ABTS_INT_EQUAL(tc, len, 1);
+
+    src = "Zg=";
     udest = apr_pdecode_base64_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base64_binary target!=dest", memcmp(ufoobar, udest, 1) == 0);
     ABTS_INT_EQUAL(tc, len, 1);

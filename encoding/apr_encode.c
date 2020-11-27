@@ -394,11 +394,15 @@ APR_DECLARE(apr_status_t) apr_decode_base64(char *dest, const char *src,
         apr_status_t status;
 
         bufin = (const unsigned char *)src;
-        while (pr2six[*(bufin++)] < 64 && count)
+        while (count && pr2six[*bufin] < 64) {
             count--;
-        nprbytes = (bufin - (const unsigned char *)src) - 1;
-        while (pr2six[*(bufin++)] > 64 && count)
+            bufin++;
+        }
+        nprbytes = bufin - (const unsigned char *)src;
+        while (count && pr2six[*bufin] > 64) {
             count--;
+            bufin++;
+        }
 
         status = flags & APR_ENCODE_RELAXED ? APR_SUCCESS :
             count ? APR_BADCH : APR_SUCCESS;
@@ -469,11 +473,15 @@ APR_DECLARE(apr_status_t) apr_decode_base64_binary(unsigned char *dest,
         apr_status_t status;
 
         bufin = (const unsigned char *)src;
-        while (pr2six[*(bufin++)] < 64 && count)
+        while (count && pr2six[*bufin] < 64) {
             count--;
-        nprbytes = (bufin - (const unsigned char *)src) - 1;
-        while (pr2six[*(bufin++)] > 64 && count)
+            bufin++;
+        }
+        nprbytes = bufin - (const unsigned char *)src;
+        while (count && pr2six[*bufin] > 64) {
             count--;
+            bufin++;
+        }
 
         status = flags & APR_ENCODE_RELAXED ? APR_SUCCESS :
             count ? APR_BADCH : APR_SUCCESS;
@@ -842,11 +850,15 @@ APR_DECLARE(apr_status_t) apr_decode_base32(char *dest, const char *src,
         }
 
         bufin = (const unsigned char *)src;
-        while (pr2[*(bufin++)] < 32 && count)
+        while (count && pr2[*bufin] < 32) {
             count--;
-        nprbytes = (bufin - (const unsigned char *)src) - 1;
-        while (pr2[*(bufin++)] > 32 && count)
+            bufin++;
+        }
+        nprbytes = bufin - (const unsigned char *)src;
+        while (count && pr2[*bufin] > 32) {
             count--;
+            bufin++;
+        }
 
         status = flags & APR_ENCODE_RELAXED ? APR_SUCCESS :
             count ? APR_BADCH : APR_SUCCESS;
@@ -945,11 +957,15 @@ APR_DECLARE(apr_status_t) apr_decode_base32_binary(unsigned char *dest,
         }
 
         bufin = (const unsigned char *)src;
-        while (pr2[*(bufin++)] < 32 && count)
+        while (count && pr2[*bufin] < 32) {
             count--;
-        nprbytes = (bufin - (const unsigned char *)src) - 1;
-        while (pr2[*(bufin++)] > 32 && count)
+            bufin++;
+        }
+        nprbytes = bufin - (const unsigned char *)src;
+        while (count && pr2[*bufin] > 32) {
             count--;
+            bufin++;
+        }
 
         status = flags & APR_ENCODE_RELAXED ? APR_SUCCESS :
             count ? APR_BADCH : APR_SUCCESS;
@@ -1220,11 +1236,15 @@ APR_DECLARE(apr_status_t) apr_decode_base16(char *dest,
 
     count = slen;
     bufin = (const unsigned char *)src;
-    while (pr2two[*(bufin++)] != 16 && count)
+    while (count && pr2two[*bufin] != 16) {
         count--;
-    nprbytes = (bufin - (const unsigned char *)src) - 1;
-    while (pr2two[*(bufin++)] > 16 && count)
+        bufin++;
+    }
+    nprbytes = bufin - (const unsigned char *)src;
+    while (count && pr2two[*bufin] > 16) {
         count--;
+        bufin++;
+    }
 
     status = flags & APR_ENCODE_RELAXED ? APR_SUCCESS :
         count ? APR_BADCH : APR_SUCCESS;
@@ -1310,11 +1330,15 @@ APR_DECLARE(apr_status_t) apr_decode_base16_binary(unsigned char *dest,
 
     count = slen;
     bufin = (const unsigned char *)src;
-    while (pr2two[*(bufin++)] != 16 && count)
+    while (count && pr2two[*bufin] != 16) {
         count--;
-    nprbytes = (bufin - (const unsigned char *)src) - 1;
-    while (pr2two[*(bufin++)] > 16 && count)
+        bufin++;
+    }
+    nprbytes = bufin - (const unsigned char *)src;
+    while (count && pr2two[*bufin] > 16) {
         count--;
+        bufin++;
+    }
 
     status = flags & APR_ENCODE_RELAXED ? APR_SUCCESS :
         count ? APR_BADCH : APR_SUCCESS;
