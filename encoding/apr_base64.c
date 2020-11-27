@@ -191,11 +191,9 @@ APR_DECLARE(int) apr_base64_decode_binary(unsigned char *bufplain,
 APR_DECLARE(char *) apr_pbase64_decode(apr_pool_t *p, const char *bufcoded)
 {
     char *decoded;
-    int l;
 
-    decoded = (char *) apr_palloc(p, 1 + apr_base64_decode_len(bufcoded));
-    l = apr_base64_decode(decoded, bufcoded);
-    decoded[l] = '\0'; /* make binary sequence into string */
+    decoded = (char *) apr_palloc(p, apr_base64_decode_len(bufcoded));
+    apr_base64_decode(decoded, bufcoded);
 
     return decoded;
 }
@@ -286,8 +284,7 @@ APR_DECLARE(char *) apr_pbase64_encode(apr_pool_t *p, const char *string)
     int l = strlen(string);
 
     encoded = (char *) apr_palloc(p, apr_base64_encode_len(l));
-    l = apr_base64_encode(encoded, string, l);
-    encoded[l] = '\0'; /* make binary sequence into string */
+    apr_base64_encode(encoded, string, l);
 
     return encoded;
 }
