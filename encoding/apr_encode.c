@@ -665,7 +665,7 @@ APR_DECLARE(apr_status_t) apr_encode_base32(char *dest, const char *src,
     }
 
     if (len) {
-        *len = ((slen + 2) / 3 * 4) + 1;
+        *len = ((slen + 4) / 5 * 8) + 1;
     }
 
     return APR_SUCCESS;
