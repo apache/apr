@@ -853,6 +853,13 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_ERANGE          (APR_OS_START_CANONERR + 29)
 #endif
 
+/** @see APR_STATUS_IS_EALREADY */
+#ifdef EALREADY
+#define APR_EALREADY EALREADY
+#else
+#define APR_EALREADY      (APR_OS_START_CANONERR + 30)
+#endif
+
 /** @} */
 
 #if defined(OS2) && !defined(DOXYGEN)
@@ -996,13 +1003,14 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EOPNOTSUPP(s)     ((s) == APR_EOPNOTSUPP \
                 || (s) == APR_OS_START_SYSERR + SOCEOPNOTSUPP)
 #define APR_STATUS_IS_ERANGE(s)         ((s) == APR_ERANGE)
+#define APR_STATUS_IS_EALREADY(s)       ((s) == APR_EALREADY \
+                || (s) == APR_OS_START_SYSERR + SOCEALREADY)
 
 /*
     Sorry, too tired to wrap this up for OS2... feel free to
     fit the following into their best matches.
 
     { ERROR_NO_SIGNAL_SENT,     ESRCH           },
-    { SOCEALREADY,              EALREADY        },
     { SOCEDESTADDRREQ,          EDESTADDRREQ    },
     { SOCEMSGSIZE,              EMSGSIZE        },
     { SOCEPROTOTYPE,            EPROTOTYPE      },
@@ -1143,6 +1151,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EOPNOTSUPP(s)     ((s) == APR_EOPNOTSUPP \
                 || (s) == APR_OS_START_SYSERR + WSAEOPNOTSUPP)
 #define APR_STATUS_IS_ERANGE(s)         ((s) == APR_ERANGE)
+#define APR_STATUS_IS_EALREADY(s)       ((s) == APR_EALREADY \
+                || (s) == APR_OS_START_SYSERR + WSAEALREADY)
 
 #elif defined(NETWARE) && defined(USE_WINSOCK) && !defined(DOXYGEN) /* !defined(OS2) && !defined(WIN32) */
 
@@ -1207,6 +1217,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EOPNOTSUPP(s)     ((s) == APR_EOPNOTSUPP \
                 || (s) == APR_OS_START_SYSERR + WSAEOPNOTSUPP)
 #define APR_STATUS_IS_ERANGE(s)         ((s) == APR_ERANGE)
+#define APR_STATUS_IS_EALREADY(s)       ((s) == APR_EALREADY \
+                || (s) == APR_OS_START_SYSERR + WSAEALREADY)
 
 #else /* !defined(NETWARE) && !defined(OS2) && !defined(WIN32) */
 
@@ -1331,6 +1343,9 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 
 /** Numeric value not representable */
 #define APR_STATUS_IS_ERANGE(s)         ((s) == APR_ERANGE)
+
+/** Operation already in progress */
+#define APR_STATUS_IS_EALREADY(s)       ((s) == APR_EALREADY)
 /** @} */
 
 #endif /* !defined(NETWARE) && !defined(OS2) && !defined(WIN32) */

@@ -139,6 +139,8 @@ static char *apr_error_string(apr_status_t statcode)
         return "The given lock was busy.";
     case APR_EPROC_UNKNOWN:
         return "The process is not recognized.";
+    case APR_EALREADY:
+        return "Operation already in progress";
     case APR_EGENERAL:
         return "Internal error (specific information not available)";
 
