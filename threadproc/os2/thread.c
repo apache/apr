@@ -71,7 +71,9 @@ static void apr_thread_begin(void *arg)
   apr_thread_t *thread = (apr_thread_t *)arg;
   apr_pool_owner_set(thread->pool, 0);
   thread->exitval = thread->func(thread, thread->data);
-  apr_pool_destroy(thread->pool);
+  if (thd->attr->attr & APR_THREADATTR_DETACHED) {
+      apr_pool_destroy(thread->pool);
+  }
 }
 
 
@@ -83,7 +85,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
     apr_status_t stat;
     apr_thread_t *thread;
  
-    thread = (apr_thread_t *)apr_palloc(pool, sizeof(apr_thread_t));
+    thread = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
     *new = thread;
 
     if (thread == NULL) {
@@ -134,7 +136,9 @@ APR_DECLARE(apr_os_thread_t) apr_os_thread_current()
 APR_DECLARE(void) apr_thread_exit(apr_thread_t *thd, apr_status_t retval)
 {
     thd->exitval = retval;
-    apr_pool_destroy(thd->pool);
+    if (thd->attr->attr & APR_THREADATTR_DETACHED) {
+        apr_pool_destroy(thd->pool);
+    }
     _endthread();
 }
 
@@ -154,6 +158,9 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *th
         rc = 0; /* Thread had already terminated */
 
     *retval = thd->exitval;
+    if (rc == 0) {
+        apr_pool_destroy(thd->pool);
+    }
     return APR_FROM_OS_ERROR(rc);
 }
 
@@ -161,6 +168,10 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *th
 
 APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
 {
+    if (thd->attr->attr & APR_THREADATTR_DETACHED) {
+        return APR_EINVAL;
+    }
+
     thd->attr->attr |= APR_THREADATTR_DETACHED;
     return APR_SUCCESS;
 }

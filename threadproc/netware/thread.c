@@ -71,7 +71,9 @@ static void *dummy_worker(void *opaque)
 
     apr_pool_owner_set(thd->pool, 0);
     ret = thd->func(thd, thd->data);
-    apr_pool_destroy(thd->pool);
+    if (thd->detached) {
+        apr_pool_destroy(thd->pool);
+    }
     return ret;
 }
 
@@ -102,7 +104,7 @@ apr_status_t apr_thread_create(apr_thread_t **new,
         stack_size = attr->stack_size;
     }
     
-    (*new) = (apr_thread_t *)apr_palloc(pool, sizeof(apr_thread_t));
+    (*new) = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -111,6 +113,7 @@ apr_status_t apr_thread_create(apr_thread_t **new,
     (*new)->data = data;
     (*new)->func = func;
     (*new)->thread_name = (char*)apr_pstrdup(pool, threadName);
+    (*new)->detached = (attr && apr_threadattr_detach_get(attr) == APR_DETACH);
     
     stat = apr_pool_create(&(*new)->pool, pool);
     if (stat != APR_SUCCESS) {
@@ -162,7 +165,9 @@ void apr_thread_yield()
 void apr_thread_exit(apr_thread_t *thd, apr_status_t retval)
 {
     thd->exitval = retval;
-    apr_pool_destroy(thd->pool);
+    if (thd->detached) {
+        apr_pool_destroy(thd->pool);
+    }
     NXThreadExit(NULL);
 }
 
@@ -172,8 +177,13 @@ apr_status_t apr_thread_join(apr_status_t *retval,
     apr_status_t  stat;    
     NXThreadId_t dthr;
 
+    if (thd->detached) {
+        return APR_EINVAL;
+    }
+
     if ((stat = NXThreadJoin(thd->td, &dthr, NULL)) == 0) {
         *retval = thd->exitval;
+        apr_pool_destroy(thd->pool);
         return APR_SUCCESS;
     }
     else {
@@ -183,6 +193,11 @@ apr_status_t apr_thread_join(apr_status_t *retval,
 
 apr_status_t apr_thread_detach(apr_thread_t *thd)
 {
+    if (thd->detached) {
+        return APR_EINVAL;
+    }
+
+    thd->detached = 1;
     return APR_SUCCESS;
 }
 

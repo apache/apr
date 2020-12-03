@@ -31,6 +31,7 @@ struct apr_thread_t {
     void *data;
     apr_thread_start_t func;
     apr_status_t exitval;
+    int exited;
 };
 
 struct apr_threadattr_t {

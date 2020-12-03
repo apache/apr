@@ -80,7 +80,9 @@ static void *dummy_worker(void *opaque)
     TlsSetValue(tls_apr_thread, thd->td);
     apr_pool_owner_set(thd->pool, 0);
     ret = thd->func(thd, thd->data);
-    apr_pool_destroy(thd->pool);
+    if (!thd->td) { /* detached? */
+        apr_pool_destroy(thd->pool);
+    }
     return ret;
 }
 
@@ -93,7 +95,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
 	unsigned temp;
     HANDLE handle;
 
-    (*new) = (apr_thread_t *)apr_palloc(pool, sizeof(apr_thread_t));
+    (*new) = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -101,7 +103,6 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
 
     (*new)->data = data;
     (*new)->func = func;
-    (*new)->td   = NULL;
     stat = apr_pool_create(&(*new)->pool, pool);
     if (stat != APR_SUCCESS) {
         return stat;
@@ -136,9 +137,11 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
 
 APR_DECLARE(void) apr_thread_exit(apr_thread_t *thd, apr_status_t retval)
 {
+    thd->exited = 1;
     thd->exitval = retval;
-    apr_pool_destroy(thd->pool);
-    thd->pool = NULL;
+    if (!thd->td) { /* detached? */
+        apr_pool_destroy(thd->pool);
+    }
 #ifndef _WIN32_WCE
     _endthreadex(0);
 #else
@@ -150,30 +153,40 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
                                           apr_thread_t *thd)
 {
     apr_status_t rv = APR_SUCCESS;
+    DWORD ret;
     
     if (!thd->td) {
         /* Can not join on detached threads */
         return APR_DETACH;
     }
-    rv = WaitForSingleObject(thd->td, INFINITE);
-    if ( rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
+
+    ret = WaitForSingleObject(thd->td, INFINITE);
+    if (ret == WAIT_OBJECT_0 || ret == WAIT_ABANDONED) {
         /* If the thread_exit has been called */
-        if (!thd->pool)
+        if (thd->exited)
             *retval = thd->exitval;
         else
             rv = APR_INCOMPLETE;
     }
     else
         rv = apr_get_os_error();
-    CloseHandle(thd->td);
-    thd->td = NULL;
+
+    if (rv == APR_SUCCESS) {
+        CloseHandle(thd->td);
+        apr_pool_destroy(thd->pool);
+        thd->td = NULL;
+    }
 
     return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
 {
-    if (thd->td && CloseHandle(thd->td)) {
+    if (!thd->td) {
+        return APR_EINVAL;
+    }
+
+    if (CloseHandle(thd->td)) {
         thd->td = NULL;
         return APR_SUCCESS;
     }

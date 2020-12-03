@@ -143,7 +143,9 @@ static void *dummy_worker(void *opaque)
 
     apr_pool_owner_set(thread->pool, 0);
     ret = thread->func(thread, thread->data);
-    apr_pool_destroy(thread->pool);
+    if (thread->detached) {
+        apr_pool_destroy(thread->pool);
+    }
     return ret;
 }
 
@@ -170,16 +172,16 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
 
     (*new)->data = data;
     (*new)->func = func;
+    (*new)->detached = (attr && apr_threadattr_detach_get(attr) == APR_DETACH);
+    stat = apr_pool_create(&(*new)->pool, pool);
+    if (stat != APR_SUCCESS) {
+        return stat;
+    }
 
     if (attr)
         temp = &attr->attr;
     else
         temp = NULL;
-
-    stat = apr_pool_create(&(*new)->pool, pool);
-    if (stat != APR_SUCCESS) {
-        return stat;
-    }
 
     if ((stat = pthread_create((*new)->td, temp, dummy_worker, (*new))) == 0) {
         return APR_SUCCESS;
@@ -208,7 +210,9 @@ APR_DECLARE(void) apr_thread_exit(apr_thread_t *thd,
                                   apr_status_t retval)
 {
     thd->exitval = retval;
-    apr_pool_destroy(thd->pool);
+    if (thd->detached) {
+        apr_pool_destroy(thd->pool);
+    }
     pthread_exit(NULL);
 }
 
@@ -218,8 +222,13 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
     apr_status_t stat;
     apr_status_t *thread_stat;
 
+    if (thd->detached) {
+        return APR_EINVAL;
+    }
+
     if ((stat = pthread_join(*thd->td,(void *)&thread_stat)) == 0) {
         *retval = thd->exitval;
+        apr_pool_destroy(thd->pool);
         return APR_SUCCESS;
     }
     else {
@@ -235,11 +244,16 @@ APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
 {
     apr_status_t stat;
 
+    if (thd->detached) {
+        return APR_EINVAL;
+    }
+
 #ifdef HAVE_ZOS_PTHREADS
     if ((stat = pthread_detach(thd->td)) == 0) {
 #else
     if ((stat = pthread_detach(*thd->td)) == 0) {
 #endif
+        thd->detached = 1;
 
         return APR_SUCCESS;
     }
