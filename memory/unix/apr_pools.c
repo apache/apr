@@ -1486,6 +1486,41 @@ error:
  * Debug helper functions
  */
 
+static APR_INLINE
+void pool_lock(apr_pool_t *pool)
+{
+#if APR_HAS_THREADS
+    apr_thread_mutex_lock(pool->mutex);
+#endif /* APR_HAS_THREADS */
+}
+
+static APR_INLINE
+void pool_unlock(apr_pool_t *pool)
+{
+#if APR_HAS_THREADS
+    apr_thread_mutex_unlock(pool->mutex);
+#endif /* APR_HAS_THREADS */
+}
+
+#if APR_HAS_THREADS
+static APR_INLINE
+apr_thread_mutex_t *parent_lock(apr_pool_t *pool)
+{
+    if (pool->parent) {
+        apr_thread_mutex_lock(pool->parent->mutex);
+        return pool->parent->mutex;
+    }
+    return NULL;
+}
+
+static APR_INLINE
+void parent_unlock(apr_thread_mutex_t *mutex)
+{
+    if (mutex) {
+        apr_thread_mutex_unlock(mutex);
+    }
+}
+#endif /* APR_HAS_THREADS */
 
 /*
  * Walk the pool tree rooted at pool, depth first.  When fn returns
@@ -1503,11 +1538,7 @@ static int apr_pool_walk_tree(apr_pool_t *pool,
     if (rv)
         return rv;
 
-#if APR_HAS_THREADS
-    if (pool->mutex) {
-        apr_thread_mutex_lock(pool->mutex);
-                        }
-#endif /* APR_HAS_THREADS */
+    pool_lock(pool);
 
     child = pool->child;
     while (child) {
@@ -1518,11 +1549,7 @@ static int apr_pool_walk_tree(apr_pool_t *pool,
         child = child->sibling;
     }
 
-#if APR_HAS_THREADS
-    if (pool->mutex) {
-        apr_thread_mutex_unlock(pool->mutex);
-    }
-#endif /* APR_HAS_THREADS */
+    pool_unlock(pool);
 
     return rv;
 }
@@ -1888,40 +1915,38 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
 
     pool->stat_alloc = 0;
     pool->stat_clear++;
+
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
+    apr_pool_log_event(pool, "CLEARED", file_line, 1);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
 }
 
 APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
                                        const char *file_line)
 {
 #if APR_HAS_THREADS
-    apr_thread_mutex_t *mutex = NULL;
+    apr_thread_mutex_t *mutex;
 #endif
 
     apr_pool_check_lifetime(pool);
 
 #if APR_HAS_THREADS
-    if (pool->parent != NULL)
-        mutex = pool->parent->mutex;
-
     /* Lock the parent mutex before clearing so that if we have our
      * own mutex it won't be accessed by apr_pool_walk_tree after
      * it has been destroyed.
      */
-    if (mutex != NULL && mutex != pool->mutex) {
-        apr_thread_mutex_lock(mutex);
-    }
+    mutex = parent_lock(pool);
 #endif
-
-    pool_clear_debug(pool, file_line);
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "CLEAR", file_line, 1);
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
 
+    pool_clear_debug(pool, file_line);
+
 #if APR_HAS_THREADS
     /* If we had our own mutex, it will have been destroyed by
-     * the registered cleanups.  Recreate the mutex.  Unlock
-     * the mutex we obtained above.
+     * the registered cleanups.  Recreate it.
      */
     if (mutex != pool->mutex) {
         /*
@@ -1931,39 +1956,24 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
         pool->mutex = NULL;
         (void)apr_thread_mutex_create(&pool->mutex,
                                       APR_THREAD_MUTEX_NESTED, pool);
-
-        if (mutex != NULL)
-            (void)apr_thread_mutex_unlock(mutex);
     }
+
+    /* Unlock the mutex we obtained above */
+    parent_unlock(mutex);
 #endif /* APR_HAS_THREADS */
 }
 
 static void pool_destroy_debug(apr_pool_t *pool, const char *file_line)
 {
-    apr_pool_clear_debug(pool, file_line);
+    pool_clear_debug(pool, file_line);
 
-#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
-    apr_pool_log_event(pool, "DESTROY", file_line, 1);
-#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
-
-    /* Remove the pool from the parents child list */
-    if (pool->parent) {
-#if APR_HAS_THREADS
-        apr_thread_mutex_t *mutex;
-
-        if ((mutex = pool->parent->mutex) != NULL)
-            apr_thread_mutex_lock(mutex);
-#endif /* APR_HAS_THREADS */
-
-        if ((*pool->ref = pool->sibling) != NULL)
-            pool->sibling->ref = pool->ref;
-
-#if APR_HAS_THREADS
-        if (mutex)
-            apr_thread_mutex_unlock(mutex);
-#endif /* APR_HAS_THREADS */
+    /* Remove the pool from the parent's child list */
+    if (pool->parent != NULL
+        && (*pool->ref = pool->sibling) != NULL) {
+        pool->sibling->ref = pool->ref;
     }
 
+    /* Destroy the allocator if the pool owns it */
     if (pool->allocator != NULL
         && apr_allocator_owner_get(pool->allocator) == pool) {
         apr_allocator_destroy(pool->allocator);
@@ -1976,6 +1986,12 @@ static void pool_destroy_debug(apr_pool_t *pool, const char *file_line)
 APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
                                          const char *file_line)
 {
+#if APR_HAS_THREADS
+    apr_thread_mutex_t *mutex;
+#endif
+
+    apr_pool_check_lifetime(pool);
+
     if (pool->joined) {
         /* Joined pools must not be explicitly destroyed; the caller
          * has broken the guarantee. */
@@ -1986,7 +2002,24 @@ APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
 
         abort();
     }
+
+#if APR_HAS_THREADS
+    /* Lock the parent mutex before destroying so that it's not accessed
+     * concurrently by apr_pool_walk_tree.
+     */
+    mutex = parent_lock(pool);
+#endif
+
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
+    apr_pool_log_event(pool, "DESTROY", file_line, 1);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
+
     pool_destroy_debug(pool, file_line);
+
+#if APR_HAS_THREADS
+    /* Unlock the mutex we obtained above */
+    parent_unlock(mutex);
+#endif /* APR_HAS_THREADS */
 }
 
 APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
@@ -2026,21 +2059,39 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     pool->tag = file_line;
     pool->file_line = file_line;
 
-    if ((pool->parent = parent) != NULL) {
 #if APR_HAS_THREADS
-        if (parent->mutex)
-            apr_thread_mutex_lock(parent->mutex);
+    if (parent == NULL || parent->allocator != allocator) {
+        apr_status_t rv;
+
+        /* No matter what the creation flags say, always create
+         * a lock.  Without it integrity_check and apr_pool_num_bytes
+         * blow up (because they traverse pools child lists that
+         * possibly belong to another thread, in combination with
+         * the pool having no lock).  However, this might actually
+         * hide problems like creating a child pool of a pool
+         * belonging to another thread.
+         */
+        if ((rv = apr_thread_mutex_create(&pool->mutex,
+                APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
+            free(pool);
+            return rv;
+        }
+    }
+    else {
+        pool->mutex = parent->mutex;
+    }
 #endif /* APR_HAS_THREADS */
+
+    if ((pool->parent = parent) != NULL) {
+        pool_lock(parent);
+
         if ((pool->sibling = parent->child) != NULL)
             pool->sibling->ref = &pool->sibling;
 
         parent->child = pool;
         pool->ref = &parent->child;
 
-#if APR_HAS_THREADS
-        if (parent->mutex)
-            apr_thread_mutex_unlock(parent->mutex);
-#endif /* APR_HAS_THREADS */
+        pool_unlock(parent);
     }
     else {
         pool->sibling = NULL;
@@ -2057,32 +2108,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "CREATE", file_line, 1);
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
-
-    if (parent == NULL || parent->allocator != allocator) {
-#if APR_HAS_THREADS
-        apr_status_t rv;
-
-        /* No matter what the creation flags say, always create
-         * a lock.  Without it integrity_check and apr_pool_num_bytes
-         * blow up (because they traverse pools child lists that
-         * possibly belong to another thread, in combination with
-         * the pool having no lock).  However, this might actually
-         * hide problems like creating a child pool of a pool
-         * belonging to another thread.
-         */
-        if ((rv = apr_thread_mutex_create(&pool->mutex,
-                APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
-            free(pool);
-            return rv;
-        }
-#endif /* APR_HAS_THREADS */
-    }
-    else {
-#if APR_HAS_THREADS
-        if (parent)
-            pool->mutex = parent->mutex;
-#endif /* APR_HAS_THREADS */
-    }
 
     *newpool = pool;
 
@@ -2122,6 +2147,26 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
     pool->file_line = file_line;
 
 #if APR_HAS_THREADS
+    {
+        apr_status_t rv;
+
+        /* No matter what the creation flags say, always create
+         * a lock.  Without it integrity_check and apr_pool_num_bytes
+         * blow up (because they traverse pools child lists that
+         * possibly belong to another thread, in combination with
+         * the pool having no lock).  However, this might actually
+         * hide problems like creating a child pool of a pool
+         * belonging to another thread.
+         */
+        if ((rv = apr_thread_mutex_create(&pool->mutex,
+                APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
+            free(pool);
+            return rv;
+        }
+    }
+#endif /* APR_HAS_THREADS */
+
+#if APR_HAS_THREADS
     pool->owner = apr_os_thread_current();
 #endif /* APR_HAS_THREADS */
 #ifdef NETWARE
@@ -2142,26 +2187,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "CREATEU", file_line, 1);
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
-
-    if (pool->allocator != allocator) {
-#if APR_HAS_THREADS
-        apr_status_t rv;
-
-        /* No matter what the creation flags say, always create
-         * a lock.  Without it integrity_check and apr_pool_num_bytes
-         * blow up (because they traverse pools child lists that
-         * possibly belong to another thread, in combination with
-         * the pool having no lock).  However, this might actually
-         * hide problems like creating a child pool of a pool
-         * belonging to another thread.
-         */
-        if ((rv = apr_thread_mutex_create(&pool->mutex,
-                APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
-            free(pool);
-            return rv;
-        }
-#endif /* APR_HAS_THREADS */
-    }
 
     *newpool = pool;
 
