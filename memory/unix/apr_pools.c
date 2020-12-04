@@ -2324,6 +2324,45 @@ APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag)
 
 #endif /* !APR_POOL_DEBUG */
 
+/* For APR internal use only (for now).
+ * Detach the pool from its/any parent (i.e. un-manage).
+ */
+apr_status_t apr__pool_unmanage(apr_pool_t *pool);
+apr_status_t apr__pool_unmanage(apr_pool_t *pool)
+{
+    apr_pool_t *parent = pool->parent;
+
+    if (!parent) {
+        return APR_NOTFOUND;
+    }
+
+#if APR_POOL_DEBUG
+    if (pool->allocator && pool->allocator == parent->allocator) {
+        return APR_EINVAL;
+    }
+    apr_thread_mutex_lock(parent->mutex);
+#else
+    if (pool->allocator == parent->allocator) {
+        return APR_EINVAL;
+    }
+    allocator_lock(parent->allocator);
+#endif
+
+    /* Remove the pool from the parent's children */
+    if ((*pool->ref = pool->sibling) != NULL) {
+        pool->sibling->ref = pool->ref;
+    }
+    pool->parent = NULL;
+
+#if APR_POOL_DEBUG
+    apr_thread_mutex_unlock(parent->mutex);
+#else
+    allocator_unlock(parent->allocator);
+#endif
+
+    return APR_SUCCESS;
+}
+
 #ifdef NETWARE
 void netware_pool_proc_cleanup ()
 {

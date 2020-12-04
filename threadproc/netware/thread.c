@@ -21,6 +21,9 @@
 
 static int thread_count = 0;
 
+/* Internal (from apr_pools.c) */
+extern apr_status_t apr__pool_unmanage(apr_pool_t *pool);
+
 apr_status_t apr_threadattr_create(apr_threadattr_t **new,
                                                 apr_pool_t *pool)
 {
@@ -67,7 +70,13 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
 static void *dummy_worker(void *opaque)
 {
     apr_thread_t *thd = (apr_thread_t *)opaque;
-    return thd->func(thd, thd->data);
+    void *ret;
+
+    ret = thd->func(thd, thd->data);
+    if (thd->detached) {
+        apr_pool_destroy(thd->pool);
+    }
+    return ret;
 }
 
 apr_status_t apr_thread_create(apr_thread_t **new,
@@ -97,7 +106,7 @@ apr_status_t apr_thread_create(apr_thread_t **new,
         stack_size = attr->stack_size;
     }
     
-    (*new) = (apr_thread_t *)apr_palloc(pool, sizeof(apr_thread_t));
+    (*new) = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -106,8 +115,32 @@ apr_status_t apr_thread_create(apr_thread_t **new,
     (*new)->data = data;
     (*new)->func = func;
     (*new)->thread_name = (char*)apr_pstrdup(pool, threadName);
-    
-    stat = apr_pool_create(&(*new)->pool, pool);
+
+    (*new)->detached = (attr && apr_threadattr_detach_get(attr) == APR_DETACH);
+    if ((*new)->detached) {
+        stat = apr_pool_create_unmanaged_ex(&(*new)->pool,
+                                            apr_pool_abort_get(pool),
+                                            NULL);
+    }
+    else {
+        /* The thread can be apr_thread_detach()ed later, so the pool needs
+         * its own allocator to not depend on the parent pool which could be
+         * destroyed before the thread exits.  The allocator needs no mutex
+         * obviously since the pool should not be used nor create children
+         * pools outside the thread.
+         */
+        apr_allocator_t *allocator;
+        if (apr_allocator_create(&allocator) != APR_SUCCESS) {
+            return APR_ENOMEM;
+        }
+        stat = apr_pool_create_ex(&(*new)->pool, pool, NULL, allocator);
+        if (stat == APR_SUCCESS) {
+            apr_allocator_owner_set(allocator, (*new)->pool);
+        }
+        else {
+            apr_allocator_destroy(allocator);
+        }
+    }
     if (stat != APR_SUCCESS) {
         return stat;
     }
@@ -158,7 +191,9 @@ apr_status_t apr_thread_exit(apr_thread_t *thd,
                              apr_status_t retval)
 {
     thd->exitval = retval;
-    apr_pool_destroy(thd->pool);
+    if (thd->detached) {
+        apr_pool_destroy(thd->pool);
+    }
     NXThreadExit(NULL);
     return APR_SUCCESS;
 }
@@ -169,8 +204,13 @@ apr_status_t apr_thread_join(apr_status_t *retval,
     apr_status_t  stat;    
     NXThreadId_t dthr;
 
+    if (thd->detached) {
+        return APR_EINVAL;
+    }
+
     if ((stat = NXThreadJoin(thd->td, &dthr, NULL)) == 0) {
         *retval = thd->exitval;
+        apr_pool_destroy(thd->pool);
         return APR_SUCCESS;
     }
     else {
@@ -180,6 +220,14 @@ apr_status_t apr_thread_join(apr_status_t *retval,
 
 apr_status_t apr_thread_detach(apr_thread_t *thd)
 {
+    if (thd->detached) {
+        return APR_EINVAL;
+    }
+
+    /* Detach from the parent pool too */
+    apr__pool_unmanage(thd->pool);
+    thd->detached = 1;
+
     return APR_SUCCESS;
 }
 
