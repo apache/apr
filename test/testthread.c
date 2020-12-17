@@ -33,7 +33,7 @@ static apr_thread_t *t3;
 static apr_thread_t *t4;
 
 /* just some made up number to check on later */
-static apr_status_t exit_ret_val = 123;
+static apr_status_t exit_ret_val = (APR_OS_START_USERERR + 123);
 
 static void init_func(void)
 {
@@ -42,14 +42,17 @@ static void init_func(void)
 
 static void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data)
 {
+    apr_status_t rv;
     int i;
 
     apr_thread_once(control, init_func);
 
     for (i = 0; i < 10000; i++) {
-        apr_thread_mutex_lock(thread_lock);
+        rv = apr_thread_mutex_lock(thread_lock);
+        if (rv != APR_SUCCESS) apr_thread_exit(thd, rv);
         x++;
-        apr_thread_mutex_unlock(thread_lock);
+        rv = apr_thread_mutex_unlock(thread_lock);
+        if (rv != APR_SUCCESS) apr_thread_exit(thd, rv);
     }
     apr_thread_exit(thd, exit_ret_val);
     return NULL;
