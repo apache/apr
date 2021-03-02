@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_mmap_t members pstart, psize and poffset are used internally only
+     on Windows, remove them.  [Yann Yalvic]
+
   *) Align apr_mmap()ing offset to a page boundary. [Yann Ylavic]
 
   *) APR's configure script uses AC_TRY_RUN to detect whether the return type

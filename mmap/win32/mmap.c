@@ -72,8 +72,11 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
     static DWORD memblock = 0;
     DWORD fmaccess = 0;
     DWORD mvaccess = 0;
-    DWORD offlo;
-    DWORD offhi;
+    /** The physical start, size and offset */
+    apr_off_t  pstart;
+    apr_size_t psize;
+    apr_off_t  poffset;
+    DWORD offlo, offhi;
 
     if (size == 0)
         return APR_EINVAL;
@@ -100,9 +103,9 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
     }   
     
     *new = apr_pcalloc(cont, sizeof(apr_mmap_t));
-    (*new)->pstart = (offset / memblock) * memblock;
-    (*new)->poffset = offset - (*new)->pstart;
-    (*new)->psize = (apr_size_t)((*new)->poffset) + size;
+    pstart = (offset / memblock) * memblock;
+    poffset = offset - pstart;
+    psize = (apr_size_t)poffset + size;
     /* The size of the CreateFileMapping object is the current size
      * of the size of the mmap object (e.g. file size), not the size 
      * of the mapped region!
@@ -128,10 +131,10 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
         return apr_get_os_error();
     }
 
-    offlo = (DWORD)(*new)->pstart;
-    offhi = (DWORD)((*new)->pstart >> 32);
+    offlo = (DWORD)pstart;
+    offhi = (DWORD)(pstart >> 32);
     (*new)->mv = MapViewOfFile((*new)->mhandle, mvaccess, offhi,
-                               offlo, (*new)->psize);
+                               offlo, psize);
     if (!(*new)->mv)
     {
         apr_status_t rv = apr_get_os_error();
@@ -140,7 +143,7 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
         return rv;
     }
 
-    (*new)->mm = (char*)((*new)->mv) + (*new)->poffset;
+    (*new)->mm = (char *)(*new)->mv + poffset;
     (*new)->size = size;
     (*new)->cntxt = cont;
     APR_RING_ELEM_INIT(*new, link);
