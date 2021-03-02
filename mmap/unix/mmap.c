@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <assert.h>
+
 #include "apr.h"
 #include "apr_private.h"
 #include "apr_general.h"
@@ -32,6 +34,9 @@
 #endif
 #if APR_HAVE_STDIO_H
 #include <stdio.h>
+#endif
+#if APR_HAVE_UNISTD_H
+#include <unistd.h>  /* for sysconf() */
 #endif
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -61,7 +66,7 @@ static apr_status_t mmap_cleanup(void *themmap)
 #ifdef BEOS
     rv = delete_area(mm->area);
 #else
-    rv = munmap(mm->mm, mm->size);
+    rv = munmap((char *)mm->mm - mm->poffset, mm->size + mm->poffset);
 #endif
     mm->mm = (void *)-1;
 
@@ -81,6 +86,8 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
     area_id aid = -1;
     uint32 pages = 0;
 #else
+    static long psize;
+    apr_off_t poffset = 0;
     apr_int32_t native_flags = 0;
 #endif
 
@@ -130,7 +137,18 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
         native_flags |= PROT_READ;
     }
 
-    mm = mmap(NULL, size, native_flags, MAP_SHARED, file->filedes, offset);
+#if defined(_SC_PAGESIZE)
+    if (psize == 0) {
+        psize = sysconf(_SC_PAGESIZE);
+        /* the page size should be a power of two */
+        assert(psize > 0 && (psize & (psize - 1)) == 0);
+    }
+    poffset = offset & (apr_off_t)(psize - 1);
+#endif
+
+    mm = mmap(NULL, size + poffset,
+              native_flags, MAP_SHARED,
+              file->filedes, offset - poffset);
 
     if (mm == (void *)-1) {
         /* we failed to get an mmap'd file... */
@@ -139,7 +157,8 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
     }
 #endif
 
-    (*new)->mm = mm;
+    (*new)->mm = (char *)mm + poffset;
+    (*new)->poffset = poffset;
     (*new)->size = size;
     (*new)->cntxt = cont;
     APR_RING_ELEM_INIT(*new, link);

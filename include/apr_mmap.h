@@ -62,11 +62,10 @@ typedef struct apr_mmap_t            apr_mmap_t;
 struct apr_mmap_t {
     /** The pool the mmap structure was allocated out of. */
     apr_pool_t *cntxt;
-#ifdef BEOS
+#if defined(BEOS)
     /** An area ID.  Only valid on BeOS */
     area_id area;
-#endif
-#ifdef WIN32
+#elif defined(WIN32)
     /** The handle of the file mapping */
     HANDLE mhandle;
     /** The start of the real memory page area (mapped view) */
@@ -75,6 +74,8 @@ struct apr_mmap_t {
     apr_off_t  pstart;
     apr_size_t psize;
     apr_off_t  poffset;
+#else
+    apr_off_t poffset;
 #endif
     /** The start of the memory mapped area */
     void *mm;

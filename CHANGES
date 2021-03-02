@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) Align apr_mmap()ing offset to a page boundary. [Yann Ylavic]
+
   *) APR's configure script uses AC_TRY_RUN to detect whether the return type
      of strerror_r is int. When cross-compiling this defaults to no.
 
