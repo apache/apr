@@ -238,11 +238,20 @@ static int indexing_compk(void *ac, void *b)
 
 APR_DECLARE(apr_status_t) apr_skiplist_init(apr_skiplist **s, apr_pool_t *p)
 {
+    apr_status_t rv;
     apr_skiplist *sl;
-    skiplisti_init(s, p);
-    sl = *s;
-    skiplisti_init(&(sl->index), p);
+    rv = skiplisti_init(&sl, p);
+    if (rv != APR_SUCCESS) {
+        *s = NULL;
+        return rv;
+    }
+    rv = skiplisti_init(&sl->index, p);
+    if (rv != APR_SUCCESS) {
+        *s = NULL;
+        return rv;
+    }
     apr_skiplist_set_compare(sl->index, indexing_comp, indexing_compk);
+    sl = *s;
     return APR_SUCCESS;
 }
 
@@ -270,7 +279,10 @@ APR_DECLARE(void) apr_skiplist_add_index(apr_skiplist *sl,
     if (m) {
         return;                 /* Index already there! */
     }
-    skiplisti_init(&ni, sl->pool);
+    if (skiplisti_init(&ni, sl->pool) != APR_SUCCESS) {
+        abort();
+        return;
+    }
     apr_skiplist_set_compare(ni, comp, compk);
     /* Build the new index... This can be expensive! */
     m = apr_skiplist_insert(sl->index, ni);
