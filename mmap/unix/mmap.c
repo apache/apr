@@ -144,6 +144,7 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
         assert(psize > 0 && (psize & (psize - 1)) == 0);
     }
     poffset = offset & (apr_off_t)(psize - 1);
+    (*new)->poffset = poffset;
 #endif
 
     mm = mmap(NULL, size + poffset,
@@ -155,10 +156,11 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
         *new = NULL;
         return errno;
     }
+
+    mm = (char *)mm + poffset;
 #endif
 
-    (*new)->mm = (char *)mm + poffset;
-    (*new)->poffset = poffset;
+    (*new)->mm = mm;
     (*new)->size = size;
     (*new)->cntxt = cont;
     APR_RING_ELEM_INIT(*new, link);
