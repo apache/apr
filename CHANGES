@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.1
 
+  *) Align apr_mmap()ing offset to a page boundary.  PR 65158.  [Yann Ylavic]
+
   *) Don't silently set APR_FOPEN_NOCLEANUP for apr_file_mktemp() created file
      to avoid a fd and inode leak when/if later passed to apr_file_setaside().
      [Yann Ylavic]
