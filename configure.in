@@ -327,9 +327,6 @@ case $host in
         ;;
 esac
 
-dnl Libtool has been broken for decades, incorrectly passing 'cru' to 'ar'
-AR_FLAGS=${AR_FLAGS:-cr}
-
 AC_SUBST(lt_compile)
 AC_SUBST(link)
 AC_SUBST(so_ext)
