@@ -251,7 +251,7 @@ APR_DECLARE(apr_status_t) apr_skiplist_init(apr_skiplist **s, apr_pool_t *p)
         return rv;
     }
     apr_skiplist_set_compare(sl->index, indexing_comp, indexing_compk);
-    sl = *s;
+    *s = sl;
     return APR_SUCCESS;
 }
 
