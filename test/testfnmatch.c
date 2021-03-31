@@ -23,7 +23,7 @@
  * .txt extension in the data directory at the time testfnmatch
  * happens to be run (!?!). */
 
-#define NUM_FILES (6)
+#define NUM_FILES (3)
 
 #define APR_FNM_BITS    15
 #define APR_FNM_FAILBIT 256

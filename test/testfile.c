@@ -606,7 +606,7 @@ static void file_contents_equal(abts_case *tc,
 static void test_puts(abts_case *tc, void *data)
 {
     apr_file_t *f;
-    const char *fname = "data/testputs.txt";
+    const char *fname = "data/testputs.dat";
 
     APR_ASSERT_SUCCESS(tc, "open file for writing",
                        apr_file_open(&f, fname, 
@@ -629,7 +629,7 @@ static void test_writev(abts_case *tc, void *data)
     apr_file_t *f;
     apr_size_t nbytes;
     struct iovec vec[5];
-    const char *fname = "data/testwritev.txt";
+    const char *fname = "data/testwritev.dat";
 
     APR_ASSERT_SUCCESS(tc, "open file for writing",
                        apr_file_open(&f, fname, 
@@ -671,7 +671,7 @@ static void test_writev_full(abts_case *tc, void *data)
     apr_file_t *f;
     apr_size_t nbytes;
     struct iovec vec[5];
-    const char *fname = "data/testwritev_full.txt";
+    const char *fname = "data/testwritev_full.dat";
 
     APR_ASSERT_SUCCESS(tc, "open file for writing",
                        apr_file_open(&f, fname, 
