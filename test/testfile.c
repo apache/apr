@@ -470,7 +470,7 @@ static void test_gets_empty(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *f;
-    const char *fname = "data/testgets_empty.txt";
+    const char *fname = "data/testgets_empty.dat";
     char buf[256];
 
     apr_file_remove(fname, p);
@@ -497,7 +497,7 @@ static void test_gets_multiline(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *f;
-    const char *fname = "data/testgets_multiline.txt";
+    const char *fname = "data/testgets_multiline.dat";
     char buf[256];
 
     apr_file_remove(fname, p);
@@ -536,7 +536,7 @@ static void test_gets_small_buf(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *f;
-    const char *fname = "data/testgets_small_buf.txt";
+    const char *fname = "data/testgets_small_buf.dat";
     char buf[2];
 
     apr_file_remove(fname, p);
@@ -581,7 +581,7 @@ static void test_gets_ungetc(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *f;
-    const char *fname = "data/testgets_ungetc.txt";
+    const char *fname = "data/testgets_ungetc.dat";
     char buf[256];
 
     apr_file_remove(fname, p);
@@ -624,7 +624,7 @@ static void test_gets_buffered_big(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *f;
-    const char *fname = "data/testgets_buffered_big.txt";
+    const char *fname = "data/testgets_buffered_big.dat";
     char hugestr[APR_BUFFERSIZE + 2];
     char buf[APR_BUFFERSIZE + 2];
 
@@ -821,7 +821,7 @@ static void file_contents_equal(abts_case *tc,
 static void test_puts(abts_case *tc, void *data)
 {
     apr_file_t *f;
-    const char *fname = "data/testputs.txt";
+    const char *fname = "data/testputs.dat";
 
     APR_ASSERT_SUCCESS(tc, "open file for writing",
                        apr_file_open(&f, fname, 
@@ -844,7 +844,7 @@ static void test_writev(abts_case *tc, void *data)
     apr_file_t *f;
     apr_size_t nbytes;
     struct iovec vec[5];
-    const char *fname = "data/testwritev.txt";
+    const char *fname = "data/testwritev.dat";
 
     APR_ASSERT_SUCCESS(tc, "open file for writing",
                        apr_file_open(&f, fname, 
@@ -886,7 +886,7 @@ static void test_writev_full(abts_case *tc, void *data)
     apr_file_t *f;
     apr_size_t nbytes;
     struct iovec vec[5];
-    const char *fname = "data/testwritev_full.txt";
+    const char *fname = "data/testwritev_full.dat";
 
     APR_ASSERT_SUCCESS(tc, "open file for writing",
                        apr_file_open(&f, fname, 
