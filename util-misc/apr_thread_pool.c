@@ -46,8 +46,9 @@ struct apr_thread_list_elt
 {
     APR_RING_ENTRY(apr_thread_list_elt) link;
     apr_thread_t *thd;
-    volatile void *current_owner;
-    volatile enum { TH_RUN, TH_STOP, TH_PROBATION } state;
+    void *current_owner;
+    enum { TH_RUN, TH_STOP, TH_PROBATION } state;
+    int signal_work_done;
 };
 
 APR_RING_HEAD(apr_thread_list, apr_thread_list_elt);
@@ -78,7 +79,6 @@ struct apr_thread_pool
     apr_thread_cond_t *all_done;
     apr_thread_mutex_t *lock;
     volatile int terminated;
-    int waiting_work_done;
     struct apr_thread_pool_tasks *recycled_tasks;
     struct apr_thread_list *recycled_thds;
     apr_thread_pool_task_t *task_idx[TASK_PRIORITY_SEGS];
@@ -254,6 +254,7 @@ static struct apr_thread_list_elt *elt_new(apr_thread_pool_t * me,
     APR_RING_ELEM_INIT(elt, link);
     elt->thd = t;
     elt->current_owner = NULL;
+    elt->signal_work_done = 0;
     elt->state = TH_RUN;
     return elt;
 }
@@ -313,11 +314,9 @@ static void *APR_THREAD_FUNC thread_pool_func(apr_thread_t * t, void *param)
                 APR_RING_INSERT_TAIL(me->recycled_tasks, task,
                                      apr_thread_pool_task, link);
                 elt->current_owner = NULL;
-                if (me->waiting_work_done) {
+                if (elt->signal_work_done) {
+                    elt->signal_work_done = 0;
                     apr_thread_cond_signal(me->work_done);
-                    apr_thread_mutex_unlock(me->lock);
-                    apr_thread_mutex_lock(me->lock);
-                    apr_pool_owner_set(me->pool, 0);
                 }
             } while (elt->state != TH_STOP);
             APR_RING_REMOVE(elt, link);
@@ -433,25 +432,23 @@ APR_DECLARE(apr_status_t) apr_thread_pool_create(apr_thread_pool_t ** me,
         return rv;
     apr_pool_pre_cleanup_register(tp->pool, tp, thread_pool_cleanup);
 
-    while (init_threads) {
-        /* Grab the mutex as apr_thread_create() and thread_pool_func() will 
-         * allocate from (*me)->pool. This is dangerous if there are multiple 
-         * initial threads to create.
-         */
-        apr_thread_mutex_lock(tp->lock);
-        apr_pool_owner_set(tp->pool, 0);
+    /* Grab the mutex as apr_thread_create() and thread_pool_func() will 
+     * allocate from (*me)->pool. This is dangerous if there are multiple 
+     * initial threads to create.
+     */
+    apr_thread_mutex_lock(tp->lock);
+    apr_pool_owner_set(tp->pool, 0);
+    while (init_threads--) {
         rv = apr_thread_create(&t, NULL, thread_pool_func, tp, tp->pool);
         if (APR_SUCCESS != rv) {
-            apr_thread_mutex_unlock(tp->lock);
             break;
         }
         tp->thd_cnt++;
         if (tp->thd_cnt > tp->thd_high) {
             tp->thd_high = tp->thd_cnt;
         }
-        apr_thread_mutex_unlock(tp->lock);
-        --init_threads;
     }
+    apr_thread_mutex_unlock(tp->lock);
 
     if (rv == APR_SUCCESS) {
         *me = tp;
@@ -758,7 +755,7 @@ static void wait_on_busy_threads(apr_thread_pool_t *me, void *owner)
 
     elt = APR_RING_FIRST(me->busy_thds);
     while (elt != APR_RING_SENTINEL(me->busy_thds, apr_thread_list_elt, link)) {
-        if (owner && elt->current_owner != owner) {
+        if (owner ? owner != elt->current_owner : !elt->current_owner) {
             elt = APR_RING_NEXT(elt, link);
             continue;
         }
@@ -774,10 +771,9 @@ static void wait_on_busy_threads(apr_thread_pool_t *me, void *owner)
 #endif
 #endif
 
-        me->waiting_work_done = 1;
+        elt->signal_work_done = 1;
         apr_thread_cond_wait(me->work_done, me->lock);
         apr_pool_owner_set(me->pool, 0);
-        me->waiting_work_done = 0;
 
         /* Restart */
         elt = APR_RING_FIRST(me->busy_thds);
