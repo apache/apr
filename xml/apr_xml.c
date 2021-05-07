@@ -348,8 +348,7 @@ APR_DECLARE(apr_status_t) apr_xml_parser_feed(apr_xml_parser *parser,
 APR_DECLARE(apr_status_t) apr_xml_parser_done(apr_xml_parser *parser,
                                               apr_xml_doc **pdoc)
 {
-    char end;
-    apr_status_t status = parser->impl->Parse(parser, &end, 0, 1 /* is_final */);
+    apr_status_t status = parser->impl->Parse(parser, "", 0, 1 /* is_final */);
 
     /* get rid of the parser */
     (void) apr_pool_cleanup_run(parser->p, parser, parser->impl->cleanup);
