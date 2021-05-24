@@ -6,6 +6,8 @@ Changes for APR 1.6.6
      events are emitted on pool clear/destroy for proper accounting.
      [Brane Čibej]
 
+  *) Add --tag=CC to libtool invocations. PR 62640. [Michael Osipov]
+
 Changes for APR 1.6.5
 
   *) Fix Win32 build breakage in apr_os_exp_time_put() in 1.6.4. [Rainer Jung]
