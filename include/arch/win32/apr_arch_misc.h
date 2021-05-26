@@ -110,7 +110,11 @@ typedef enum {
     APR_WIN_XP_SP2 =   62,
     APR_WIN_2003 =     70,
     APR_WIN_VISTA =    80,
-    APR_WIN_7 =        90
+    APR_WIN_7 =        90,
+    APR_WIN_7_SP1 =    91,
+    APR_WIN_8  =       100,
+    APR_WIN_8_1 =      110,
+    APR_WIN_10 =       120
 } apr_oslevel_e;
 
 extern APR_DECLARE_DATA apr_oslevel_e apr_os_level;
