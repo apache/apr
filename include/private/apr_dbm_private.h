@@ -44,7 +44,7 @@ APR_DECLARE(int) apr_posix_perms2mode(apr_fileperms_t perm);
 /**
  * Structure to describe the operations of the DBM
  */
-typedef struct {
+struct apr_dbm_driver_t {
     /** The name of the DBM Type */
     const char *name;
 
@@ -84,7 +84,7 @@ typedef struct {
                          const char **used1,
                          const char **used2);
 
-} apr_dbm_type_t;
+};
 
 
 /**
@@ -104,15 +104,15 @@ struct apr_dbm_t
     const char *errmsg;
 
     /** the type of DBM */
-    const apr_dbm_type_t *type;
+    const apr_dbm_driver_t *type;
 };
 
 
 /* Declare all of the DBM provider tables */
-APR_MODULE_DECLARE_DATA extern const apr_dbm_type_t apr_dbm_type_sdbm;
-APR_MODULE_DECLARE_DATA extern const apr_dbm_type_t apr_dbm_type_gdbm;
-APR_MODULE_DECLARE_DATA extern const apr_dbm_type_t apr_dbm_type_ndbm;
-APR_MODULE_DECLARE_DATA extern const apr_dbm_type_t apr_dbm_type_db;
+APR_MODULE_DECLARE_DATA extern const apr_dbm_driver_t apr_dbm_type_sdbm;
+APR_MODULE_DECLARE_DATA extern const apr_dbm_driver_t apr_dbm_type_gdbm;
+APR_MODULE_DECLARE_DATA extern const apr_dbm_driver_t apr_dbm_type_ndbm;
+APR_MODULE_DECLARE_DATA extern const apr_dbm_driver_t apr_dbm_type_db;
 
 #ifdef __cplusplus
 }

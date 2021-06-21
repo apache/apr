@@ -221,7 +221,7 @@ static void vt_ndbm_usednames(apr_pool_t *pool, const char *pathname,
     *used2 = NULL;
 }
 
-APR_MODULE_DECLARE_DATA const apr_dbm_type_t apr_dbm_type_ndbm = {
+APR_MODULE_DECLARE_DATA const apr_dbm_driver_t apr_dbm_type_ndbm = {
     "ndbm",
     vt_ndbm_open,
     vt_ndbm_close,

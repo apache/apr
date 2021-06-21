@@ -20,6 +20,7 @@
 #include "apu.h"
 #include "apr.h"
 #include "apr_errno.h"
+#include "apu_errno.h"
 #include "apr_pools.h"
 #include "apr_file_info.h"
 
@@ -36,6 +37,11 @@ extern "C" {
  * @ingroup APR
  * @{
  */
+/**
+ * Structure representing a dbm driver.
+ */
+typedef struct apr_dbm_driver_t apr_dbm_driver_t;
+
 /**
  * Structure for referencing a dbm
  */
@@ -58,6 +64,25 @@ typedef struct
 #define APR_DBM_RWCREATE        3       /**< open for r/w, create if needed */
 #define APR_DBM_RWTRUNC         4       /**< open for r/w, truncating an existing
                                           DB if present */
+
+/**
+ * apr_dm_get_driver: get the driver struct for a name
+ *
+ * If the driver cannot be found, or cannot be opened, details of the
+ * error are returned in apu_err_t.
+ *
+ * @param driver - pointer to driver struct.
+ * @param name - driver name
+ * @param result - result and error message on failure
+ * @param pool - (process) pool to register cleanup
+ * @return APR_SUCCESS for success
+ * @return APR_ENOTIMPL for no driver (when DSO not enabled)
+ * @return APR_EDSOOPEN if DSO driver file can't be opened
+ * @return APR_ESYMNOTFOUND if the driver file doesn't contain a driver
+ */
+APR_DECLARE(apr_status_t) apr_dbm_get_driver(const apr_dbm_driver_t **driver,
+        const char *name, const apu_err_t **result, apr_pool_t *pool);
+
 /**
  * Open a dbm file by file name and type of DBM
  * @param dbm The newly opened database
@@ -91,6 +116,27 @@ APR_DECLARE(apr_status_t) apr_dbm_open_ex(apr_dbm_t **dbm, const char* type,
                                        apr_int32_t mode, apr_fileperms_t perm,
                                        apr_pool_t *cntxt);
 
+/**
+ * Open a dbm file by file name and driver
+ * @param pdb The newly opened database
+ * @param driver The dbm driver to use
+ * @param name The dbm file name to open
+ * @param mode The flag value
+ * <PRE>
+ *           APR_DBM_READONLY   open for read-only access
+ *           APR_DBM_READWRITE  open for read-write access
+ *           APR_DBM_RWCREATE   open for r/w, create if needed
+ *           APR_DBM_RWTRUNC    open for r/w, truncate if already there
+ * </PRE>
+ * @param perm Permissions to apply to if created
+ * @param pool The pool to use when creating the dbm
+ * @remark The dbm name may not be a true file name, as many dbm packages
+ * append suffixes for separate data and index files.
+ */
+APR_DECLARE(apr_status_t) apr_dbm_open2(apr_dbm_t **pdb,
+                                        const apr_dbm_driver_t *driver,
+                                        const char *name, apr_int32_t mode,
+                                        apr_fileperms_t perm, apr_pool_t *pool);
 
 /**
  * Open a dbm file by file name
@@ -106,7 +152,7 @@ APR_DECLARE(apr_status_t) apr_dbm_open_ex(apr_dbm_t **dbm, const char* type,
  * @param perm Permissions to apply to if created
  * @param cntxt The pool to use when creating the dbm
  * @remark The dbm name may not be a true file name, as many dbm packages
- * append suffixes for seperate data and index files.
+ * append suffixes for separate data and index files.
  */
 APR_DECLARE(apr_status_t) apr_dbm_open(apr_dbm_t **dbm, const char *name, 
                                        apr_int32_t mode, apr_fileperms_t perm,

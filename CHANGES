@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_dbm: Add dedicated apr_dbm_get_driver() function that returns
+     details of the driver selected and any error encountered. Add the
+     apr_dbm_open2() function that references the driver. [Graham Leggett]
+
   *) apr_mmap_t members pstart, psize and poffset are used internally only
      on Windows, remove them.  [Yann Yalvic]
 

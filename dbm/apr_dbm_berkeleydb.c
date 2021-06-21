@@ -386,7 +386,7 @@ static void vt_db_usednames(apr_pool_t *pool, const char *pathname,
 }
 
 
-APR_MODULE_DECLARE_DATA const apr_dbm_type_t apr_dbm_type_db = {
+APR_MODULE_DECLARE_DATA const apr_dbm_driver_t apr_dbm_type_db = {
     "db",
 
     vt_db_open,
