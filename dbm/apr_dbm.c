@@ -87,7 +87,7 @@ APR_DECLARE(apr_status_t) apr_dbm_get_driver(const apr_dbm_driver_t **vtable,
     }
 
     if (!type) {
-    	type = DBM_NAME;
+        type = DBM_NAME;
     }
 
     *vtable = NULL;
@@ -112,11 +112,10 @@ APR_DECLARE(apr_status_t) apr_dbm_get_driver(const apr_dbm_driver_t **vtable,
     }
 
     if (result && !*result) {
-        char *buffer = apr_pcalloc(pool, ERROR_SIZE);
         apu_err_t *err = apr_pcalloc(pool, sizeof(apu_err_t));
-        if (err && buffer) {
-            apr_strerror(APR_ENOTIMPL, buffer, ERROR_SIZE - 1);
-            err->msg = buffer;
+        if (err) {
+            apr_status_t rv = APR_ENOTIMPL;
+            err->msg = apr_psprintf(pool, "%pm", &rv);
             err->reason = apr_pstrdup(pool, type);
             *result = err;
         }
@@ -138,7 +137,7 @@ APR_DECLARE(apr_status_t) apr_dbm_get_driver(const apr_dbm_driver_t **vtable,
     }
 
     if (!type) {
-    	type = DBM_NAME;
+        type = DBM_NAME;
     }
 
     if (!strcasecmp(type, "default"))        type = DBM_NAME;
