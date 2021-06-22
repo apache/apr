@@ -86,6 +86,10 @@ APR_DECLARE(apr_status_t) apr_dbm_get_driver(const apr_dbm_driver_t **vtable,
         *result = NULL; /* until further notice */
     }
 
+    if (!type) {
+    	type = DBM_NAME;
+    }
+
     *vtable = NULL;
     if (!strcasecmp(type, "default"))     *vtable = &DBM_VTABLE;
 #if APU_HAVE_DB
@@ -131,6 +135,10 @@ APR_DECLARE(apr_status_t) apr_dbm_get_driver(const apr_dbm_driver_t **vtable,
 
     if (result) {
         *result = NULL; /* until further notice */
+    }
+
+    if (!type) {
+    	type = DBM_NAME;
     }
 
     if (!strcasecmp(type, "default"))        type = DBM_NAME;
