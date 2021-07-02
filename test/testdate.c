@@ -191,12 +191,39 @@ static void test_date_rfc(abts_case *tc, void *data)
     }
 }
 
+static void test_date_exp_get(abts_case *tc, void *data)
+{
+    apr_time_t t = {0};
+    apr_time_exp_t tm = {0};
+    unsigned n;
+    static const int ts[] = {
+        1, 2, 10, 100, 1000, 9000, 10000, 100000,
+        -1, -2, -10, -100, -1000, -9000, -10000, -100000,
+    };
+    
+    tm.tm_mday = 1;
+    tm.tm_year = 70;
+
+     for (n = 0; n < sizeof(ts)/sizeof(ts[0]); n++) {
+         apr_status_t rv;
+
+         tm.tm_mon = ts[n];
+         rv = apr_time_exp_get(&t, &tm);
+         if (ts[n] > 0 && ts[n] < 12)
+             APR_ASSERT_SUCCESS(tc, "apr_time_exp_get", rv);
+         else
+             ABTS_ASSERT(tc, "apr_time_exp_get should fail",
+                         rv == APR_EBADDATE);
+     }
+}
+
 abts_suite *testdate(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
 
     abts_run_test(suite, test_date_parse_http, NULL);
     abts_run_test(suite, test_date_rfc, NULL);
+    abts_run_test(suite, test_date_exp_get, NULL);
 
     return suite;
 }
