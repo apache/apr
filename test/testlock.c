@@ -90,14 +90,22 @@ static void *APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data
     /* slight delay to allow things to settle */
     apr_sleep (1);
     
-    while (1)
-    {
+    while (1) {
+        apr_status_t rv;
+        
         if (data) {
-            apr_thread_mutex_timedlock(thread_mutex, *(apr_interval_time_t *)data);
+            rv = apr_thread_mutex_timedlock(thread_mutex, *(apr_interval_time_t *)data);
         }
         else {
-            apr_thread_mutex_lock(thread_mutex);
+            rv = apr_thread_mutex_lock(thread_mutex);
         }
+
+        if (rv != APR_SUCCESS) {
+            fprintf(stderr, "thread_mutex_function: failed locking mutex\n");
+            apr_thread_exit(thd, rv);
+            break;
+        }
+        
         if (i == MAX_ITER)
             exitLoop = 0;
         else 
@@ -105,12 +113,19 @@ static void *APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data
             i++;
             x++;
         }
-        apr_thread_mutex_unlock(thread_mutex);
+
+        rv = apr_thread_mutex_unlock(thread_mutex);
+        if (rv != APR_SUCCESS) {
+            fprintf(stderr, "thread_mutex_function: failed unlocking mutex\n");
+            apr_thread_exit(thd, rv);
+            break;
+        }
 
         if (!exitLoop)
             break;
     }
-    return NULL;
+
+    apr_thread_exit(thd, APR_SUCCESS);
 }
 
 /* Sleepy-loop until f_ value matches val: */
@@ -184,6 +199,11 @@ static void *APR_THREAD_FUNC thread_cond_consumer(apr_thread_t *thd, void *data)
     return NULL;
 }
 
+#define JOIN_WITH_SUCCESS(tc_, thd_) do { apr_status_t rv__thd;         \
+        APR_ASSERT_SUCCESS(tc_, "join thread", apr_thread_join(&rv__thd, thd_)); \
+        APR_ASSERT_SUCCESS(tc_, "spawned thread terminated successfully", rv__thd); \
+    } while (0)
+
 static void test_thread_mutex(abts_case *tc, void *data)
 {
     apr_thread_t *t1, *t2, *t3, *t4;
@@ -205,11 +225,11 @@ static void test_thread_mutex(abts_case *tc, void *data)
     s4 = apr_thread_create(&t4, NULL, thread_mutex_function, NULL, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, s4);
 
-    apr_thread_join(&s1, t1);
-    apr_thread_join(&s2, t2);
-    apr_thread_join(&s3, t3);
-    apr_thread_join(&s4, t4);
-
+    JOIN_WITH_SUCCESS(tc, t1);
+    JOIN_WITH_SUCCESS(tc, t2);
+    JOIN_WITH_SUCCESS(tc, t3);
+    JOIN_WITH_SUCCESS(tc, t4);
+    
     ABTS_INT_EQUAL(tc, MAX_ITER, x);
 }
 
@@ -237,10 +257,10 @@ static void test_thread_timedmutex(abts_case *tc, void *data)
     s4 = apr_thread_create(&t4, NULL, thread_mutex_function, &timeout, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, s4);
 
-    apr_thread_join(&s1, t1);
-    apr_thread_join(&s2, t2);
-    apr_thread_join(&s3, t3);
-    apr_thread_join(&s4, t4);
+    JOIN_WITH_SUCCESS(tc, t1);
+    JOIN_WITH_SUCCESS(tc, t2);
+    JOIN_WITH_SUCCESS(tc, t3);
+    JOIN_WITH_SUCCESS(tc, t4);
 
     ABTS_INT_EQUAL(tc, MAX_ITER, x);
 }
@@ -415,8 +435,7 @@ static void test_timeoutmutex(abts_case *tc, void *data)
 
     apr_atomic_set32(&flag, 0); /* tell the thread to exit.  */
 
-    APR_ASSERT_SUCCESS(tc, "join spawned thread", apr_thread_join(&s, th));
-    APR_ASSERT_SUCCESS(tc, "spawned thread terminated", s);
+    JOIN_WITH_SUCCESS(tc, th);
 
     ABTS_ASSERT(tc, "Too many retries", i < MAX_RETRY);
     APR_ASSERT_SUCCESS(tc, "Unable to destroy the timeout mutex",
