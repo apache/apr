@@ -1518,11 +1518,10 @@ static apr_status_t proc_mutex_choose_method(apr_proc_mutex_t *new_mutex,
 
 APR_DECLARE(const char *) apr_proc_mutex_defname(void)
 {
-    apr_status_t rv;
     apr_proc_mutex_t mutex;
 
-    if ((rv = proc_mutex_choose_method(&mutex, APR_LOCK_DEFAULT,
-                                       NULL)) != APR_SUCCESS) {
+    if (proc_mutex_choose_method(&mutex, APR_LOCK_DEFAULT,
+                                 NULL) != APR_SUCCESS) {
         return "unknown";
     }
 

@@ -146,7 +146,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
 
 APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
 {
-    apr_size_t rv;
+    apr_size_t rv = APR_SUCCESS;
 
     if (thefile->buffered) {
         char *pos = (char *)buf;
@@ -160,13 +160,14 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
              * logically reading from
              */
             apr_int64_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
-            if (offset != thefile->filePtr)
-                lseek(thefile->filedes, offset, SEEK_SET);
+            if (offset != thefile->filePtr) {
+                thefile->filePtr = lseek(thefile->filedes, offset, SEEK_SET);
+                if (thefile->filePtr == -1) rv = errno;
+            }
             thefile->bufpos = thefile->dataRead = 0;
             thefile->direction = 1;
         }
 
-        rv = 0;
         while (rv == 0 && size > 0) {
             if (thefile->bufpos == thefile->bufsize)   /* write buffer is full*/
                 rv = apr_file_flush_locked(thefile);
@@ -244,12 +245,15 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
              */
             apr_int64_t offset = thefile->filePtr - thefile->dataRead +
                                  thefile->bufpos;
-            if (offset != thefile->filePtr)
-                lseek(thefile->filedes, offset, SEEK_SET);
+            if (offset != thefile->filePtr) {
+                thefile->filePtr = lseek(thefile->filedes, offset, SEEK_SET);
+                if (thefile->filePtr == -1) rv = errno;
+            }
             thefile->bufpos = thefile->dataRead = 0;
         }
 
         file_unlock(thefile);
+        if (rv) return rv;
     }
 
     if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
