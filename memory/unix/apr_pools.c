@@ -1166,6 +1166,8 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
             if (abort_fn)
                 abort_fn(APR_ENOMEM);
 
+            apr_allocator_destroy(pool_allocator);
+            
             return APR_ENOMEM;
         }
     }
