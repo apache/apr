@@ -121,6 +121,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 {
     apr_status_t rv;
 
+#ifndef HAVE_PTHREAD_MUTEX_TIMEDLOCK
     if (mutex->cond) {
         apr_status_t rv2;
 
@@ -152,6 +153,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 
         return rv;
     }
+#endif
 
     rv = pthread_mutex_lock(&mutex->mutex);
 #ifdef HAVE_ZOS_PTHREADS
@@ -167,6 +169,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 {
     apr_status_t rv;
 
+#ifndef HAVE_PTHREAD_MUTEX_TIMEDLOCK
     if (mutex->cond) {
         apr_status_t rv2;
 
@@ -196,6 +199,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 
         return rv;
     }
+#endif
 
     rv = pthread_mutex_trylock(&mutex->mutex);
     if (rv) {
@@ -298,6 +302,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 {
     apr_status_t status;
 
+#ifndef HAVE_PTHREAD_MUTEX_TIMEDLOCK
     if (mutex->cond) {
         status = pthread_mutex_lock(&mutex->mutex);
         if (status) {
@@ -320,6 +325,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 
         mutex->locked = 0;
     }
+#endif
 
     status = pthread_mutex_unlock(&mutex->mutex);
 #ifdef HAVE_ZOS_PTHREADS
@@ -335,9 +341,12 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex)
 {
     apr_status_t rv, rv2 = APR_SUCCESS;
 
+#ifndef HAVE_PTHREAD_MUTEX_TIMEDLOCK
     if (mutex->cond) {
         rv2 = apr_thread_cond_destroy(mutex->cond);
     }
+#endif
+
     rv = apr_pool_cleanup_run(mutex->pool, mutex, thread_mutex_cleanup);
     if (rv == APR_SUCCESS) {
         rv = rv2;
