@@ -33,8 +33,10 @@
 struct apr_thread_mutex_t {
     apr_pool_t *pool;
     pthread_mutex_t mutex;
+#ifndef HAVE_PTHREAD_MUTEX_TIMEDLOCK
     apr_thread_cond_t *cond;
     int locked, num_waiters;
+#endif
 };
 #endif
 
