@@ -18,6 +18,7 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_strings.h"
 #include "testutil.h"
 
 #define STRLEN 21
@@ -128,7 +129,8 @@ static void sendto_receivefrom_helper(abts_case *tc, const char *addr,
     APR_ASSERT_SUCCESS(tc, "Could not set REUSEADDR on socket2", rv);
 
     rv = apr_socket_bind(sock, to);
-    APR_ASSERT_SUCCESS(tc, "Could not bind socket", rv);
+    APR_ASSERT_SUCCESS(tc, apr_psprintf(p, "Could not bind socket to %s:7772 (family %d)",
+                                        addr, family), rv);
     if (rv != APR_SUCCESS)
         return;
     rv = apr_mcast_hops(sock, 10);
