@@ -2343,6 +2343,8 @@ APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag)
 
 #endif /* !APR_POOL_DEBUG */
 
+apr_status_t apr__pool_unmanage(apr_pool_t *pool);
+
 /* For APR internal use only (for now).
  * Detach the pool from its/any parent (i.e. un-manage).
  */
