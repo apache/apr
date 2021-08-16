@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.1
 
+  *) SECURITY: CVE-2021-35940 (cve.mitre.org)
+     Restore fix for out-of-bounds array dereference in apr_time_exp*() functions.
+     (This issue was addressed as CVE-2017-12613 in APR 1.6.3 and
+     later 1.6.x releases, but was missing in 1.7.0.)  [Stefan Sperling]
+
   *) Add error handling for lseek() failures in apr_file_write() and
      apr_file_writev().  [Joe Orton]
 
