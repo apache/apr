@@ -112,11 +112,14 @@ static apr_threadkey_t *cprng_thread_key = NULL;
 
 static void cprng_thread_destroy(void *cprng)
 {
+    apr_threadkey_private_set(NULL, cprng_thread_key);
+    if (cprng) {
+        apr_crypto_prng_destroy(cprng);
+    }
     if (!cprng_global) {
         apr_threadkey_private_delete(cprng_thread_key);
         cprng_thread_key = NULL;
     }
-    apr_crypto_prng_destroy(cprng);
 }
 
 #else  /* !APR_HAS_THREADS */
@@ -157,8 +160,10 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_init(apr_pool_t *pool, apr_crypto_t *c
     rv = apr_thread_mutex_create(&cprng_ring_mutex, APR_THREAD_MUTEX_DEFAULT,
                                  pool);
     if (rv != APR_SUCCESS) {
-        apr_threadkey_private_delete(cprng_thread_key);
-        cprng_thread_key = NULL;
+        if (flags & APR_CRYPTO_PRNG_PER_THREAD) {
+            apr_threadkey_private_delete(cprng_thread_key);
+            cprng_thread_key = NULL;
+        }
         return rv;
     }
 
