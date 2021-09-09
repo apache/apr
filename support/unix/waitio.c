@@ -30,10 +30,9 @@
 
 #ifdef WAITIO_USES_POLL
 
-#ifdef HAVE_POLL_H
+#if HAVE_POLL_H
 #include <poll.h>
-#endif
-#ifdef HAVE_SYS_POLL_H
+#elif HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
 
