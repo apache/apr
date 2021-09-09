@@ -296,8 +296,8 @@ APR_DECLARE(char *) apr_array_pstrcat(apr_pool_t *p,
 #define TABLE_HASH_SIZE 32
 #define TABLE_INDEX_MASK 0x1f
 #define TABLE_HASH(key)  (TABLE_INDEX_MASK & *(unsigned char *)(key))
-#define TABLE_INDEX_IS_INITIALIZED(t, i) ((t)->index_initialized & (1 << (i)))
-#define TABLE_SET_INDEX_INITIALIZED(t, i) ((t)->index_initialized |= (1 << (i)))
+#define TABLE_INDEX_IS_INITIALIZED(t, i) ((t)->index_initialized & (1u << (i)))
+#define TABLE_SET_INDEX_INITIALIZED(t, i) ((t)->index_initialized |= (1u << (i)))
 
 /* Compute the "checksum" for a key, consisting of the first
  * 4 bytes, normalized for case-insensitivity and packed into
