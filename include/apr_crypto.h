@@ -165,7 +165,7 @@ typedef enum
 {   
     APR_CRYPTO_CIPHER_AUTO, /** Choose the recommended cipher / autodetect the cipher */
     APR_CRYPTO_CIPHER_AES_256_CTR, /** AES 256 - CTR mode */
-    APR_CRYPTO_CIPHER_CHACHA20_CTR, /** ChaCha20 - CTR mode */
+    APR_CRYPTO_CIPHER_CHACHA20, /** ChaCha20 */
 } apr_crypto_cipher_e;
 
 /**

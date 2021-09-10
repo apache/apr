@@ -1599,7 +1599,7 @@ static apr_status_t cprng_stream_ctx_make(cprng_stream_ctx_t **psctx,
         return APR_ENOCIPHER;
 #endif
     }
-    case APR_CRYPTO_CIPHER_CHACHA20_CTR: {
+    case APR_CRYPTO_CIPHER_CHACHA20: {
 #if defined(NID_chacha20)
         ecipher = EVP_chacha20();
         break;

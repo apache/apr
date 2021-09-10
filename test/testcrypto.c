@@ -2509,7 +2509,7 @@ static void test_crypto_prng_aes256(abts_case *tc, void *data)
 
 static void test_crypto_prng_chacha20(abts_case *tc, void *data)
 {
-    return test_crypto_prng(tc, APR_CRYPTO_CIPHER_CHACHA20_CTR, test_PRNG_kat0_chacha20);
+    return test_crypto_prng(tc, APR_CRYPTO_CIPHER_CHACHA20, test_PRNG_kat0_chacha20);
 }
 
 #if APR_HAS_FORK
