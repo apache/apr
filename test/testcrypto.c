@@ -2431,26 +2431,19 @@ static void test_crypto_prng(abts_case *tc, apr_crypto_cipher_e cipher, const un
     apr_pool_t *pool = NULL;
     apr_status_t rv;
     int i;
-    int flags = 0;
 
     rv = apr_pool_create(&pool, NULL);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, pool);
 
-#if APR_HAS_THREADS
-    flags = APR_CRYPTO_PRNG_PER_THREAD;
-#endif
-    rv = apr_crypto_prng_init(pool, NULL, cipher, 0, NULL, flags);
-
-    if (APR_ENOCIPHER == rv) {
+    rv = apr_crypto_prng_init(pool, NULL, cipher, 0, NULL, 0);
+    ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_EREINIT", rv != APR_EREINIT);
+    ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_ENOTIMPL", rv != APR_ENOTIMPL);
+    ABTS_ASSERT(tc, "apr_crypto_prng_init failed", rv == APR_SUCCESS || rv == APR_ENOCIPHER);
+    if (rv != APR_SUCCESS) {
         apr_pool_destroy(pool);
         return;
     }
-
-    ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_EREINIT", rv != APR_EREINIT);
-    ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_ENOTIMPL", rv != APR_ENOTIMPL);
-    ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_ENOCIPHER", rv != APR_ENOCIPHER);
-    ABTS_ASSERT(tc, "apr_crypto_prng_init failed", rv == APR_SUCCESS);
 
     for (i = 0; i < 10; ++i) {
         /* Initial seed full of zeros (deterministic) */
@@ -2463,7 +2456,7 @@ static void test_crypto_prng(abts_case *tc, apr_crypto_cipher_e cipher, const un
         ABTS_ASSERT(tc, "apr_crypto_prng_create returned APR_ENOCIPHER", rv != APR_ENOCIPHER);
         ABTS_ASSERT(tc, "apr_crypto_prng_create returned APR_EDSOOPEN", rv != APR_EDSOOPEN);
         ABTS_ASSERT(tc, "apr_crypto_prng_create failed", rv == APR_SUCCESS);
-        if (!cprng) {
+        if (rv != APR_SUCCESS) {
             break;
         }
 
@@ -2522,16 +2515,12 @@ static void test_crypto_fork_random(abts_case *tc, void *data)
     apr_size_t nbytes;
     apr_proc_t proc;
     apr_status_t rv;
-    int flags = 0;
 
     rv = apr_pool_create(&pool, NULL);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, pool);
 
-#if APR_HAS_THREADS
-    flags = APR_CRYPTO_PRNG_PER_THREAD;
-#endif
-    rv = apr_crypto_prng_init(pool, NULL, APR_CRYPTO_CIPHER_AUTO, 0, NULL, flags);
+    rv = apr_crypto_prng_init(pool, NULL, APR_CRYPTO_CIPHER_AUTO, 0, NULL, 0);
     ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_EREINIT", rv != APR_EREINIT);
     ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_ENOTIMPL", rv != APR_ENOTIMPL);
     ABTS_ASSERT(tc, "apr_crypto_prng_init failed", rv == APR_SUCCESS);
@@ -2605,18 +2594,15 @@ static void test_crypto_thread_random(abts_case *tc, void *data)
     static unsigned char zerobytes[800];
     unsigned char *randbytes[NUM_THREADS];
     apr_thread_t *threads[NUM_THREADS];
+    int flags = APR_CRYPTO_PRNG_PER_THREAD;
     apr_pool_t *pool = NULL;
     apr_status_t rv, ret;
     int i, j;
-    int flags = 0;
 
     rv = apr_pool_create(&pool, NULL);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, pool);
 
-#if APR_HAS_THREADS
-    flags = APR_CRYPTO_PRNG_PER_THREAD;
-#endif
     rv = apr_crypto_prng_init(pool, NULL, APR_CRYPTO_CIPHER_AUTO, 0, NULL, flags);
     ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_EREINIT", rv != APR_EREINIT);
     ABTS_ASSERT(tc, "apr_crypto_prng_init returned APR_ENOTIMPL", rv != APR_ENOTIMPL);
@@ -2645,8 +2631,8 @@ static void test_crypto_thread_random(abts_case *tc, void *data)
 
     apr_pool_destroy(pool);
 }
-#endif
-#endif
+#endif /* APR_HAS_THREADS */
+#endif /* APU_HAVE_CRYPTO_PRNG */
 
 abts_suite *testcrypto(abts_suite *suite)
 {
