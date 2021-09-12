@@ -138,6 +138,12 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_init(apr_pool_t *pool, apr_crypto_t *c
         return APR_EREINIT;
     }
 
+    cprng_ring = apr_palloc(pool, sizeof(*cprng_ring));
+    if (!cprng_ring) {
+        return APR_ENOMEM;
+    }
+    APR_RING_INIT(cprng_ring, apr_crypto_prng_t, link);
+
     if (flags & APR_CRYPTO_PRNG_PER_THREAD) {
 #if !APR_HAS_THREADS
         return APR_ENOTIMPL;
@@ -149,12 +155,6 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_init(apr_pool_t *pool, apr_crypto_t *c
         }
 #endif
     }
-
-    cprng_ring = apr_palloc(pool, sizeof(*cprng_ring));
-    if (!cprng_ring) {
-        return APR_ENOMEM;
-    }
-    APR_RING_INIT(cprng_ring, apr_crypto_prng_t, link);
 
 #if APR_HAS_THREADS
     rv = apr_thread_mutex_create(&cprng_ring_mutex, APR_THREAD_MUTEX_DEFAULT,
@@ -171,8 +171,17 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_init(apr_pool_t *pool, apr_crypto_t *c
     flags = (flags | APR_CRYPTO_PRNG_LOCKED) & ~APR_CRYPTO_PRNG_PER_THREAD;
 #endif
 
-    return apr_crypto_prng_create(&cprng_global, crypto, cipher, bufsize, flags,
-            seed, pool);
+    rv = apr_crypto_prng_create(&cprng_global, crypto, cipher, bufsize, flags,
+                                seed, pool);
+    if (rv != APR_SUCCESS) {
+        if (flags & APR_CRYPTO_PRNG_PER_THREAD) {
+            apr_threadkey_private_delete(cprng_thread_key);
+            cprng_thread_key = NULL;
+        }
+        return rv;
+    }
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_crypto_prng_term(void)
