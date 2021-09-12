@@ -1555,11 +1555,13 @@ static apr_status_t cprng_stream_ctx_make(cprng_stream_ctx_t **psctx,
     EVP_CIPHER_CTX *ctx;
     const EVP_CIPHER *ecipher;
 
+    *psctx = NULL;
+
     if (pool) {
-        *psctx = sctx = apr_palloc(pool, sizeof(cprng_stream_ctx_t));
+        sctx = apr_palloc(pool, sizeof(cprng_stream_ctx_t));
     }
     else {
-        *psctx = sctx = malloc(sizeof(cprng_stream_ctx_t));
+        sctx = malloc(sizeof(cprng_stream_ctx_t));
     }
     if (!sctx) {
         return APR_ENOMEM;
@@ -1619,6 +1621,7 @@ static apr_status_t cprng_stream_ctx_make(cprng_stream_ctx_t **psctx,
         return APR_ENOMEM;
     }
 
+    *psctx = sctx;
     return APR_SUCCESS;
 }
 
