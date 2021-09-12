@@ -2460,14 +2460,14 @@ static void test_crypto_prng(abts_case *tc, apr_crypto_cipher_e cipher, const un
             break;
         }
 
-        /* Second time and more, change one bit of the seed */
+        /* Second time and more, set one random bit of the seed */
         if (i != 0) {
-            unsigned char pos = 0;
-            rv = apr_generate_random_bytes(&pos, sizeof pos);
+            unsigned char rnd;
+            rv = apr_generate_random_bytes(&rnd, sizeof rnd);
             ABTS_ASSERT(tc, "apr_generate_random_bytes failed",
                         rv == APR_SUCCESS);
+            seed[rnd % APR_CRYPTO_PRNG_SEED_SIZE] = (unsigned char)(1u << (rnd % 8));
 
-            seed[pos % APR_CRYPTO_PRNG_SEED_SIZE] = 1;
             rv = apr_crypto_prng_reseed(cprng, seed);
             ABTS_ASSERT(tc, "apr_crypto_prng_reseed failed",
                         rv == APR_SUCCESS);
