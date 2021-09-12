@@ -19,9 +19,7 @@
 
 #if HAVE_POLL_H
 #include <poll.h>
-#endif
-
-#if HAVE_SYS_POLL_H
+#elif HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
 
