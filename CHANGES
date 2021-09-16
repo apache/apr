@@ -6,6 +6,9 @@ Changes for APR 1.7.1
      (This issue was addressed as CVE-2017-12613 in APR 1.6.3 and
      later 1.6.x releases, but was missing in 1.7.0.)  [Stefan Sperling]
 
+  *) Fix handle leak in the Win32 apr_uid_current implementation.
+     PR 61165. [Ivan Zhakov]
+
   *) Add error handling for lseek() failures in apr_file_write() and
      apr_file_writev().  [Joe Orton]
 
