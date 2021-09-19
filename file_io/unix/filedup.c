@@ -188,6 +188,7 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
                                      : apr_unix_child_file_cleanup);
     }
 
+    old_file->filedes = -1;
 #ifndef WAITIO_USES_POLL
     (*new_file)->pollset = NULL;
 #endif

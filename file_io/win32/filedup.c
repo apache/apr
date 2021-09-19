@@ -218,6 +218,7 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
                                   file_cleanup);
     }
 
+    old_file->filehand = INVALID_HANDLE_VALUE;
 #if APR_FILES_AS_SOCKETS
     /* Create a pollset with room for one descriptor. */
     /* ### check return codes */

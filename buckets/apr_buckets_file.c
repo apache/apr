@@ -212,9 +212,9 @@ APR_DECLARE(apr_status_t) apr_bucket_file_set_buf_size(apr_bucket *e,
     return APR_SUCCESS;
 }
 
-static apr_status_t file_bucket_setaside(apr_bucket *data, apr_pool_t *reqpool)
+static apr_status_t file_bucket_setaside(apr_bucket *b, apr_pool_t *reqpool)
 {
-    apr_bucket_file *a = data->data;
+    apr_bucket_file *a = b->data;
     apr_file_t *fd = NULL;
     apr_file_t *f = a->fd;
     apr_pool_t *curpool = apr_file_pool_get(f);
@@ -223,11 +223,33 @@ static apr_status_t file_bucket_setaside(apr_bucket *data, apr_pool_t *reqpool)
         return APR_SUCCESS;
     }
 
-    if (!apr_pool_is_ancestor(a->readpool, reqpool)) {
-        a->readpool = reqpool;
-    }
+    /* If the file is shared/split accross multiple buckets, this bucket can't
+     * take exclusive ownership with apr_file_setaside() (thus invalidating the
+     * f->filedes), let's apr_file_dup() in this case instead.
+     */
+    if (a->refcount.refcount > 1) {
+        apr_bucket_file *new;
+        apr_status_t rv;
 
-    apr_file_setaside(&fd, f, reqpool);
+        rv = apr_file_dup(&fd, f, reqpool);
+        if (rv != APR_SUCCESS) {
+            return rv;
+        }
+
+        new = apr_bucket_alloc(sizeof(*new), b->list);
+        memcpy(new, a, sizeof(*new));
+        new->refcount.refcount = 1;
+        new->readpool = reqpool;
+
+        a->refcount.refcount--;
+        a = b->data = new;
+    }
+    else {
+        apr_file_setaside(&fd, f, reqpool);
+        if (!apr_pool_is_ancestor(a->readpool, reqpool)) {
+            a->readpool = reqpool;
+        }
+    }
     a->fd = fd;
     return APR_SUCCESS;
 }
