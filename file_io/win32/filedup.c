@@ -211,15 +211,14 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
         (*new_file)->fname = apr_pstrdup(p, old_file->fname);
     }
     if (!(old_file->flags & APR_FOPEN_NOCLEANUP)) {
+        apr_pool_cleanup_kill(old_file->pool, (void *)old_file,
+                              file_cleanup);
         apr_pool_cleanup_register(p, (void *)(*new_file), 
                                   file_cleanup,
                                   file_cleanup);
     }
 
     old_file->filehand = INVALID_HANDLE_VALUE;
-    apr_pool_cleanup_kill(old_file->pool, (void *)old_file,
-                          file_cleanup);
-
 #if APR_FILES_AS_SOCKETS
     /* Create a pollset with room for one descriptor. */
     /* ### check return codes */
