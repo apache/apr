@@ -215,8 +215,8 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
     char symname[34];
     apr_dso_handle_t *dso;
     apr_dso_handle_sym_t symbol;
-    apr_pool_t *rootp;
 #endif
+    apr_pool_t *rootp;
     apr_status_t rv;
 
     if (result) {
@@ -237,11 +237,11 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
         return APR_SUCCESS;
     }
 
-#if APR_HAVE_MODULAR_DSO
-    /* The driver DSO must have exactly the same lifetime as the
+    /* The driver must have exactly the same lifetime as the
      * drivers hash table; ignore the passed-in pool */
     rootp = apr_hash_pool_get(drivers);
 
+#if APR_HAVE_MODULAR_DSO
 #if defined(NETWARE)
     apr_snprintf(modname, sizeof(modname), "crypto%s.nlm", name);
 #elif defined(WIN32) || defined(__CYGWIN__)
@@ -282,6 +282,8 @@ APR_DECLARE(apr_status_t) apr_crypto_get_driver(
 
 #else /* not builtin and !APR_HAS_DSO => not implemented */
     rv = APR_ENOTIMPL;
+
+    pool = rootp; /* global lifetime (aligned to hash table) */
 
     /* Load statically-linked drivers: */
 #if APU_HAVE_OPENSSL
