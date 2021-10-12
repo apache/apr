@@ -906,8 +906,16 @@ dnl check for presence of SCTP protocol support
 dnl
 AC_DEFUN([APR_CHECK_SCTP],
 [
-  AC_CACHE_CHECK([whether SCTP is supported], [apr_cv_sctp], [
-  AC_TRY_RUN([
+AC_ARG_ENABLE([sctp],
+    APR_HELP_STRING([--disable-sctp], [disable SCTP protocol support]),
+    [apr_wants_sctp=$enableval],
+    [apr_wants_sctp=any])
+
+if test "$apr_wants_sctp" = no; then
+    apr_cv_sctp=no
+else
+    AC_CACHE_CHECK([whether SCTP is supported], [apr_cv_sctp], [
+    AC_TRY_RUN([
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -932,6 +940,11 @@ int main(void) {
        exit(2);
     exit(0);
 }], [apr_cv_sctp=yes], [apr_cv_sctp=no], [apr_cv_sctp=no])])
+fi
+
+if test "${apr_wants_sctp}X${apr_cv_sctp}" = yesXno; then
+   AC_MSG_ERROR([SCTP support requested but not available])
+fi
 
 if test "$apr_cv_sctp" = "yes"; then
     have_sctp=1

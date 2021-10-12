@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) configure: Add --disable-sctp argument to forcibly disable SCTP
+     support, or --enable-sctp which fails if SCTP support is not
+     detected.  [Lubos Uhliarik <luhliari redhat.com>, Joe Orton]
+  
   *) apr_dbm: Add dedicated apr_dbm_get_driver() function that returns
      details of the driver selected and any error encountered. Add the
      apr_dbm_open2() function that references the driver. [Graham Leggett]
