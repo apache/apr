@@ -387,6 +387,269 @@ APR_DECLARE(apr_status_t) apr_brigade_split_line(apr_bucket_brigade *bbOut,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_brigade_split_boundary(apr_bucket_brigade *bbOut,
+                                                     apr_bucket_brigade *bbIn,
+                                                     apr_read_type_e block,
+                                                     const char *boundary,
+                                                     apr_size_t boundary_len,
+                                                     apr_off_t maxbytes)
+{
+    apr_off_t outbytes = 0;
+
+    if (!boundary || !boundary[0]) {
+        return APR_EINVAL;
+    }
+
+    if (APR_BUCKETS_STRING == boundary_len) {
+        boundary_len = strlen(boundary);
+    }
+
+    /*
+     * While the call describes itself as searching for a boundary string,
+     * what we actually do is search for anything that is definitely not
+     * a boundary string, and allow that not-boundary data to pass through.
+     *
+     * If we find data that might be a boundary, we try read more data in
+     * until we know for sure.
+     */
+    while (!APR_BRIGADE_EMPTY(bbIn)) {
+
+        const char *pos;
+        const char *str;
+        apr_bucket *e, *next, *prev;
+        apr_off_t inbytes = 0;
+        apr_size_t len;
+        apr_status_t rv;
+
+        /* We didn't find a boundary within the maximum line length. */
+        if (outbytes >= maxbytes) {
+            return APR_INCOMPLETE;
+        }
+
+        e = APR_BRIGADE_FIRST(bbIn);
+
+        /* We hit a metadata bucket, stop and let the caller handle it */
+        if (APR_BUCKET_IS_METADATA(e)) {
+            return APR_INCOMPLETE;
+        }
+
+        rv = apr_bucket_read(e, &str, &len, block);
+
+        if (rv != APR_SUCCESS) {
+            return rv;
+        }
+
+        inbytes += len;
+
+        /*
+         * Fast path.
+         *
+         * If we have at least one boundary worth of data, do an optimised
+         * substring search for the boundary, and split quickly if found.
+         */
+        if (len >= boundary_len) {
+
+            apr_size_t off;
+            apr_size_t leftover;
+
+            pos = strnstr(str, boundary, len);
+
+            /* definitely found it, we leave */
+            if (pos != NULL) {
+
+                off = pos - str;
+
+                /* everything up to the boundary */
+                if (off) {
+
+                    apr_bucket_split(e, off);
+                    APR_BUCKET_REMOVE(e);
+                    APR_BRIGADE_INSERT_TAIL(bbOut, e);
+
+                    e = APR_BRIGADE_FIRST(bbIn);
+                }
+
+                /* cut out the boundary */
+                apr_bucket_split(e, boundary_len);
+                apr_bucket_delete(e);
+
+                return APR_SUCCESS;
+            }
+
+            /* any partial matches at the end? */
+            leftover = boundary_len - 1;
+            off = (len - leftover);
+
+            while (leftover) {
+                if (!strncmp(str + off, boundary, leftover)) {
+
+                    if (off) {
+
+                        apr_bucket_split(e, off);
+                        APR_BUCKET_REMOVE(e);
+                        APR_BRIGADE_INSERT_TAIL(bbOut, e);
+
+                        e = APR_BRIGADE_FIRST(bbIn);
+                    }
+
+                    outbytes += off;
+                    inbytes -= off;
+
+                    goto skip;
+                }
+                off++;
+                leftover--;
+            }
+
+            APR_BUCKET_REMOVE(e);
+            APR_BRIGADE_INSERT_TAIL(bbOut, e);
+
+            outbytes += len;
+
+            continue;
+
+        }
+
+        /*
+         * Slow path.
+         *
+         * We need to read ahead at least one boundary worth of data so
+         * we can search across the bucket edges.
+         */
+        else {
+
+            apr_size_t off = 0;
+
+            /* find all definite non matches */
+            while (len) {
+                if (!strncmp(str + off, boundary, len)) {
+
+                    if (off) {
+
+                        apr_bucket_split(e, off);
+                        APR_BUCKET_REMOVE(e);
+                        APR_BRIGADE_INSERT_TAIL(bbOut, e);
+
+                        e = APR_BRIGADE_FIRST(bbIn);
+                    }
+
+                    inbytes -= off;
+
+                    goto skip;
+                }
+                off++;
+                len--;
+            }
+
+            APR_BUCKET_REMOVE(e);
+            APR_BRIGADE_INSERT_TAIL(bbOut, e);
+            continue;
+
+        }
+
+        /*
+         * If we reach skip, it means the bucket in e is:
+         *
+         * - shorter than the boundary
+         * - matches the boundary up to the bucket length
+         * - might match more buckets
+         *
+         * Read further buckets and check whether the boundary matches all
+         * the way to the end. If so, we have a match. If no match, shave off
+         * one byte and continue round to try again.
+         */
+skip:
+
+        for (next = APR_BUCKET_NEXT(e);
+                inbytes < boundary_len && next != APR_BRIGADE_SENTINEL(bbIn);
+                next = APR_BUCKET_NEXT(next)) {
+
+            const char *str;
+            apr_size_t off;
+            apr_size_t len;
+
+            rv = apr_bucket_read(next, &str, &len, block);
+
+            if (rv != APR_SUCCESS) {
+                return rv;
+            }
+
+            off = boundary_len - inbytes;
+
+            if (len > off) {
+
+                /* not a match, bail out */
+                if (strncmp(str, boundary + inbytes, off)) {
+                    break;
+                }
+
+                /* a match! remove the boundary and return */
+                apr_bucket_split(next, off);
+
+                e = APR_BUCKET_NEXT(next);
+
+                for (prev = APR_BRIGADE_FIRST(bbIn);
+                        prev != e;
+                        prev = APR_BRIGADE_FIRST(bbIn)) {
+
+                    apr_bucket_delete(prev);
+
+                }
+
+                return APR_SUCCESS;
+
+            }
+            if (len == off) {
+
+                /* not a match, bail out */
+                if (strncmp(str, boundary + inbytes, off)) {
+                    break;
+                }
+
+                /* a match! remove the boundary and return */
+                e = APR_BUCKET_NEXT(next);
+
+                for (prev = APR_BRIGADE_FIRST(bbIn);
+                        prev != e;
+                        prev = APR_BRIGADE_FIRST(bbIn)) {
+
+                    apr_bucket_delete(prev);
+
+                }
+
+                return APR_SUCCESS;
+
+            }
+            else if (len) {
+
+                /* not a match, bail out */
+                if (strncmp(str, boundary + inbytes, len)) {
+                    break;
+                }
+
+                /* still hope for a match */
+                inbytes += len;
+            }
+
+        }
+
+        /*
+         * If we reach this point, the bucket e did not match the boundary
+         * in the subsequent buckets.
+         *
+         * Bump one byte off, and loop round to search again.
+         */
+        apr_bucket_split(e, 1);
+        APR_BUCKET_REMOVE(e);
+        APR_BRIGADE_INSERT_TAIL(bbOut, e);
+
+        outbytes++;
+
+    }
+
+    return APR_INCOMPLETE;
+}
+
 
 APR_DECLARE(apr_status_t) apr_brigade_to_iovec(apr_bucket_brigade *b, 
                                                struct iovec *vec, int *nvec)

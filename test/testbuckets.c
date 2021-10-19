@@ -209,6 +209,62 @@ static void test_splitline(abts_case *tc, void *data)
     apr_bucket_alloc_destroy(ba);
 }
 
+static void test_splitboundary(abts_case *tc, void *data)
+{
+    apr_bucket_alloc_t *ba = apr_bucket_alloc_create(p);
+    apr_bucket_brigade *bin, *bout;
+
+    /* fast path */
+    bin = make_simple_brigade(ba, "quick brown fox",
+                              " jumped over the lazy dog");
+    bout = apr_brigade_create(p, ba);
+
+    APR_ASSERT_SUCCESS(tc, "split boundary",
+                       apr_brigade_split_boundary(bout, bin,
+                                              APR_BLOCK_READ, "brown",
+                                              APR_BUCKETS_STRING, 100));
+
+    flatten_match(tc, "split boundary", bout, "quick ");
+    flatten_match(tc, "remainder", bin, " fox jumped over the lazy dog");
+
+    apr_brigade_destroy(bout);
+    apr_brigade_destroy(bin);
+
+    /* slow path */
+    bin = make_simple_brigade(ba, "quick brown fox jum",
+                              "ped over the lazy dog");
+    bout = apr_brigade_create(p, ba);
+
+    APR_ASSERT_SUCCESS(tc, "split boundary",
+                       apr_brigade_split_boundary(bout, bin,
+                                              APR_BLOCK_READ, "jumped",
+                                              APR_BUCKETS_STRING, 100));
+
+    flatten_match(tc, "split boundary", bout, "quick brown fox ");
+    flatten_match(tc, "remainder", bin, " over the lazy dog");
+
+    apr_brigade_destroy(bout);
+    apr_brigade_destroy(bin);
+
+    /* not found */
+    bin = make_simple_brigade(ba, "quick brown fox jum",
+                              "ped over the lazy dog");
+    bout = apr_brigade_create(p, ba);
+
+    ABTS_ASSERT(tc, "split boundary",
+                apr_brigade_split_boundary(bout, bin,
+                    APR_BLOCK_READ, "jumping",
+                    APR_BUCKETS_STRING, 100) == APR_INCOMPLETE);
+
+    flatten_match(tc, "split boundary", bout, "quick brown fox jumped over the lazy dog");
+    flatten_match(tc, "remainder", bin, "");
+
+    apr_brigade_destroy(bout);
+    apr_brigade_destroy(bin);
+
+    apr_bucket_alloc_destroy(ba);
+}
+
 /* Test that bucket E has content EDATA of length ELEN. */
 static void test_bucket_content(abts_case *tc,
                                 apr_bucket *e,
@@ -521,6 +577,7 @@ abts_suite *testbuckets(abts_suite *suite)
     abts_run_test(suite, test_split, NULL);
     abts_run_test(suite, test_bwrite, NULL);
     abts_run_test(suite, test_splitline, NULL);
+    abts_run_test(suite, test_splitboundary, NULL);
     abts_run_test(suite, test_splits, NULL);
     abts_run_test(suite, test_insertfile, NULL);
     abts_run_test(suite, test_manyfile, NULL);

@@ -53,6 +53,11 @@ extern "C" {
 /** default bucket buffer size - 8KB minus room for memory allocator headers */
 #define APR_BUCKET_BUFF_SIZE 8000
 
+/** if passed to apr_brigade_split_boundary(), the string length will
+ * be calculated
+ */
+#define APR_BUCKETS_STRING -1
+
 /** Determines how a bucket or brigade should be read */
 typedef enum {
     APR_BLOCK_READ,   /**< block until data becomes available */
@@ -788,6 +793,38 @@ APR_DECLARE(apr_status_t) apr_brigade_split_line(apr_bucket_brigade *bbOut,
                                                  apr_bucket_brigade *bbIn,
                                                  apr_read_type_e block,
                                                  apr_off_t maxbytes)
+                          __attribute__((nonnull(1,2)));
+
+/**
+ * Split a brigade based on the provided boundary, or metadata buckets,
+ * whichever are encountered first.
+ *
+ * If the boundary is found, all buckets prior to the boundary are passed
+ * into bbOut, and APR_SUCCESS is returned.
+ *
+ * If a metadata bucket is found, or if the boundary is not found within
+ * the limit specified by maxbytes, all prior buckets are passed into bbOut,
+ * and APR_INCOMPLETE is returned.
+ *
+ * Any partial matches at the end of a bucket will be held back
+ * If the boundary is NULL or the empty string, APR_EINVAL is returned.
+ *
+ * If an error is encountered, the APR error code will be returned.
+ *
+ * @param bbOut The bucket brigade that will have the LF line appended to.
+ * @param bbIn The input bucket brigade to search for a LF-line.
+ * @param block The blocking mode to be used to split the line.
+ * @param boundary The boundary string.
+ * @param boundary_len The length of the boundary string. If set to
+ *        APR_BUCKETS_STRING, the length will be calculated.
+ * @param maxbytes The maximum bytes to read.
+ */
+APR_DECLARE(apr_status_t) apr_brigade_split_boundary(apr_bucket_brigade *bbOut,
+                                                     apr_bucket_brigade *bbIn,
+                                                     apr_read_type_e block,
+                                                     const char *boundary,
+                                                     apr_size_t boundary_len,
+                                                     apr_off_t maxbytes)
                           __attribute__((nonnull(1,2)));
 
 /**
