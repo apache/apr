@@ -530,6 +530,8 @@ APR_DECLARE(apr_status_t) apr_brigade_split_boundary(apr_bucket_brigade *bbOut,
                         APR_BUCKET_REMOVE(e);
                         APR_BRIGADE_INSERT_TAIL(bbOut, e);
 
+                        outbytes += off;
+
                         e = APR_BRIGADE_FIRST(bbIn);
                     }
 
@@ -543,6 +545,9 @@ APR_DECLARE(apr_status_t) apr_brigade_split_boundary(apr_bucket_brigade *bbOut,
 
             APR_BUCKET_REMOVE(e);
             APR_BRIGADE_INSERT_TAIL(bbOut, e);
+
+            outbytes += off;
+
             continue;
 
         }
