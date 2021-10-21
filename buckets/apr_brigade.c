@@ -453,7 +453,7 @@ APR_DECLARE(apr_status_t) apr_brigade_split_boundary(apr_bucket_brigade *bbOut,
             apr_size_t off;
             apr_size_t leftover;
 
-            pos = strnstr(str + ignore, boundary, len - ignore);
+            pos = memmem(str + ignore, len - ignore, boundary, boundary_len);
 
             /* definitely found it, we leave */
             if (pos != NULL) {
@@ -482,7 +482,7 @@ APR_DECLARE(apr_status_t) apr_brigade_split_boundary(apr_bucket_brigade *bbOut,
             off = (len - leftover);
 
             while (leftover) {
-                if (!strncmp(str + off, boundary, leftover)) {
+                if (!memcmp(str + off, boundary, leftover)) {
 
                     if (off) {
 
@@ -525,7 +525,7 @@ APR_DECLARE(apr_status_t) apr_brigade_split_boundary(apr_bucket_brigade *bbOut,
 
             /* find all definite non matches */
             while (len) {
-                if (!strncmp(str + off, boundary, len)) {
+                if (!memcmp(str + off, boundary, len)) {
 
                     if (off) {
 
@@ -587,7 +587,7 @@ skip:
             if (len > off) {
 
                 /* not a match, bail out */
-                if (strncmp(str, boundary + inbytes, off)) {
+                if (memcmp(str, boundary + inbytes, off)) {
                     break;
                 }
 
@@ -610,7 +610,7 @@ skip:
             if (len == off) {
 
                 /* not a match, bail out */
-                if (strncmp(str, boundary + inbytes, off)) {
+                if (memcmp(str, boundary + inbytes, off)) {
                     break;
                 }
 
@@ -631,7 +631,7 @@ skip:
             else if (len) {
 
                 /* not a match, bail out */
-                if (strncmp(str, boundary + inbytes, len)) {
+                if (memcmp(str, boundary + inbytes, len)) {
                     break;
                 }
 
