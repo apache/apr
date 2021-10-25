@@ -399,7 +399,6 @@ memmem(const void *hay, size_t hay_len, const void *needle, size_t needle_len)
 
         apr_size_t len = hay_len - needle_len + 1;
         const void *end = hay + hay_len;
-        const void *begin = hay;
 
         while ((hay = memchr(hay, *(char *)needle, len))) {
             len = end - hay - needle_len + 1;
