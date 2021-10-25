@@ -309,6 +309,7 @@ extern "C" {
 #define APR_HAVE_IPV6           1
 #define APR_HAVE_SOCKADDR_UN    0
 #define APR_HAVE_MEMMOVE        1
+#define APR_HAVE_MEMMEM         0
 #define APR_HAVE_SETRLIMIT      0
 #define APR_HAVE_SIGACTION      0
 #define APR_HAVE_SIGSUSPEND     0

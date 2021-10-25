@@ -179,6 +179,7 @@ extern "C" {
 #define APR_HAVE_SOCKADDR_UN            1
 #endif
 #define APR_HAVE_MEMCHR                 1
+#define APR_HAVE_MEMMEM                 0
 #define APR_HAVE_MEMMOVE                1
 #define APR_HAVE_SETRLIMIT              0
 #define APR_HAVE_SIGACTION              0

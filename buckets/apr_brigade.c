@@ -387,6 +387,36 @@ APR_DECLARE(apr_status_t) apr_brigade_split_line(apr_bucket_brigade *bbOut,
     return APR_SUCCESS;
 }
 
+#if !APR_HAVE_MEMMEM
+static const void *
+memmem(const void *hay, size_t hay_len, const void *needle, size_t needle_len)
+{
+
+    if (hay_len < needle_len || !needle_len || !hay_len) {
+        return NULL;
+    }
+    else {
+
+        apr_size_t len = hay_len - needle_len + 1;
+        const void *end = hay + hay_len;
+        const void *begin = hay;
+
+        while ((hay = memchr(hay, *(char *)needle, len))) {
+            len = end - hay - needle_len + 1;
+
+            if (memcmp(hay, needle, needle_len) == 0 ) {
+                break;
+            }
+
+            --len;
+            ++hay;
+        }
+
+        return hay;
+    }
+}
+#endif
+
 APR_DECLARE(apr_status_t) apr_brigade_split_boundary(apr_bucket_brigade *bbOut,
                                                      apr_bucket_brigade *bbIn,
                                                      apr_read_type_e block,

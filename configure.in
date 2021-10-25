@@ -1369,6 +1369,7 @@ AC_CHECK_FUNCS(mmap, [ mmap="1" ], [ mmap="0" ])
 if test "$native_mmap_emul" = "1"; then
     mmap="1"
 fi
+AC_CHECK_FUNCS(memmem, [ have_memmem="1" ], [have_memmem="0" ])
 AC_CHECK_FUNCS(memmove, [ have_memmove="1" ], [have_memmove="0" ])
 AC_CHECK_FUNCS([getpass getpassphrase gmtime_r localtime_r])
 case $host in
@@ -1389,6 +1390,7 @@ AC_SUBST(have_sigaction)
 AC_SUBST(have_setrlimit)
 AC_SUBST(have_getrlimit)
 AC_SUBST(mmap)
+AC_SUBST(have_memmem)
 AC_SUBST(have_memmove)
 
 APR_CHECK_SIGWAIT_ONE_ARG
