@@ -18,6 +18,12 @@
 
 #ifdef USE_ATOMICS_BUILTINS
 
+#if defined(__arm__) || defined(__powerpc__) || defined(__powerpc64__)
+#define WEAK_MEMORY_ORDERING 1
+#else
+#define WEAK_MEMORY_ORDERING 0
+#endif
+
 APR_DECLARE(apr_status_t) apr_atomic_init(apr_pool_t *p)
 {
     return APR_SUCCESS;
@@ -27,6 +33,9 @@ APR_DECLARE(apr_uint32_t) apr_atomic_read32(volatile apr_uint32_t *mem)
 {
 #if HAVE__ATOMIC_BUILTINS
     return __atomic_load_n(mem, __ATOMIC_SEQ_CST);
+#elif WEAK_MEMORY_ORDERING
+    /* No __sync_load() available => apr_atomic_add32(mem, 0) */
+    return __sync_fetch_and_add(mem, 0);
 #else
     return *mem;
 #endif
@@ -36,6 +45,10 @@ APR_DECLARE(void) apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
 #if HAVE__ATOMIC_BUILTINS
     __atomic_store_n(mem, val, __ATOMIC_SEQ_CST);
+#elif WEAK_MEMORY_ORDERING
+    /* No __sync_store() available => apr_atomic_xchg32(mem, val) */
+    __sync_synchronize();
+    __sync_lock_test_and_set(mem, val);
 #else
     *mem = val;
 #endif
