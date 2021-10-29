@@ -89,7 +89,7 @@ static APR_INLINE apr_thread_mutex_t *mutex_hash(volatile apr_uint32_t *mem)
 
 APR_DECLARE(apr_status_t) apr_atomic_init(apr_pool_t *p)
 {
-    return APR_SUCCESS;
+    return apr__atomic_generic64_init(p);
 }
 
 #endif /* APR_HAS_THREADS */

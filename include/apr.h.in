@@ -45,26 +45,6 @@
  * are platform specific and should NOT be relied upon!</em></strong>
  */
 
-/* So that we can test for clang features */
-#ifndef	__has_feature
-#define	__has_feature(x) 0
-#endif
-#ifndef	__has_extension
-#define	__has_extension  __has_feature
-#endif
-#ifndef	__has_include
-#define	__has_include(x) 0
-#endif
-#ifndef	__has_builtin
-#define	__has_builtin(x) 0
-#endif
-
-#if !(defined(__attribute__) \
-      || (defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && \
-                                                 __GNUC_MINOR__ >= 4))))
-#define __attribute__(x)
-#endif
-
 /* So that we can use inline on some critical functions, and use
  * GNUC attributes (such as to get -Wall warnings for printf-like
  * functions).  Only do this in gcc 2.7 or later ... it may work
@@ -90,7 +70,6 @@
 #endif
 
 #define APR_HAVE_ARPA_INET_H     @arpa_ineth@
-#define APR_HAVE_ASSERT_H        @asserth@
 #define APR_HAVE_CONIO_H         @conioh@
 #define APR_HAVE_CRYPT_H         @crypth@
 #define APR_HAVE_CTYPE_H         @ctypeh@

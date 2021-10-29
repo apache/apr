@@ -29,9 +29,6 @@
 #include "apr_pools.h"
 #include "apr_errno.h"
 
-#if APR_HAVE_ASSERT_H
-#include <assert.h>
-#endif
 #if APR_HAVE_SIGNAL_H
 #include <signal.h>
 #endif
@@ -114,42 +111,6 @@ typedef enum { APR_WAIT_READ, APR_WAIT_WRITE } apr_wait_type_t;
 #else
 #define APR_OFFSETOF(s_type,field) APR_OFFSET(s_type*,field)
 #endif
-
-/**
- * Compile time assertions.
- * @param predicate static condition
- * @param errstring static error message (literal)
- */
-#if defined(static_assert) \
-    || __has_builtin(static_assert) \
-    || (defined(__cplusplus) && (__cplusplus >= 201103L || \
-                                 __has_extension(cxx_static_assert))) \
-    || (defined(_MSC_VER ) && _MSC_VER >= 1600)
-#define APR_STATIC_ASSERT static_assert
-
-#elif defined(_Static_assert) \
-    || __has_builtin(_Static_assert) \
-    || __has_extension(c_static_assert) \
-    || (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && \
-                                               __GNUC_MINOR__ >= 6)))
-#define APR_STATIC_ASSERT _Static_assert
-
-#else  /* !static_assert && !_Static_assert */
-#define APR__STATIC_CONCAT_(x, y) x##y
-#define APR__STATIC_CONCAT(x, y) APR__STATIC_CONCAT_(x, y)
-#if defined(__COUNTER__)
-#define APR_STATIC_ASSERT(predicate, errstring) \
-    typedef struct { \
-        int static_assert_failure:!!(predicate)*2-1; \
-    } APR__STATIC_CONCAT(static_assert_test_, __COUNTER__);
-#else  /* !__COUNTER__ */
-#define APR_STATIC_ASSERT(predicate, errstring) \
-    typedef struct { \
-        int static_assert_failure:!!(predicate)*2-1; \
-    } APR__STATIC_CONCAT(static_assert_test_, __LINE__);
-#endif /* !__COUNTER__ */
-
-#endif /* !static_assert && !_Static_assert */
 
 #ifndef DOXYGEN
 
