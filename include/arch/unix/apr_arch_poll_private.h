@@ -182,6 +182,8 @@ struct apr_pollcb_provider_t {
 apr_status_t apr_poll_create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd, 
                                          apr_file_t **wakeup_pipe);
 apr_status_t apr_poll_close_wakeup_pipe(apr_file_t **wakeup_pipe);
-void apr_poll_drain_wakeup_pipe(apr_file_t **wakeup_pipe);
+apr_status_t apr_poll_drain_wakeup_pipe(apr_file_t **wakeup_pipe);
+apr_status_t apr_pollset_wakeup_pipe_regenerate(apr_pollset_t *pollset);
+apr_status_t apr_pollcb_wakeup_pipe_regenerate(apr_pollcb_t *pollcb);
 
 #endif /* APR_ARCH_POLL_PRIVATE_H */

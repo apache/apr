@@ -134,12 +134,13 @@ apr_status_t apr_poll_close_wakeup_pipe(apr_file_t **wakeup_pipe)
 
 /* Read and discard whatever is in the wakeup pipe.
  */
-void apr_poll_drain_wakeup_pipe(apr_file_t **wakeup_pipe)
+apr_status_t apr_poll_drain_wakeup_pipe(apr_file_t **wakeup_pipe)
 {
     char rb[512];
     apr_size_t nr = sizeof(rb);
+    apr_status_t rv;
 
-    while (apr_file_read(wakeup_pipe[0], rb, &nr) == APR_SUCCESS) {
+    while ((rv = apr_file_read(wakeup_pipe[0], rb, &nr)) == APR_SUCCESS) {
         /* Although we write just one byte to the other end of the pipe
          * during wakeup, multiple threads could call the wakeup.
          * So simply drain out from the input side of the pipe all
@@ -148,4 +149,38 @@ void apr_poll_drain_wakeup_pipe(apr_file_t **wakeup_pipe)
         if (nr != sizeof(rb))
             break;
     }
+
+    return rv;
+}
+
+apr_status_t apr_pollset_wakeup_pipe_regenerate(apr_pollset_t *pollset)
+{
+    apr_status_t rv;
+
+    apr_pollset_remove(pollset, &pollset->wakeup_pfd);
+    apr_poll_close_wakeup_pipe(pollset->wakeup_pipe);
+    if (!((rv = apr_poll_create_wakeup_pipe(pollset->pool,
+            &pollset->wakeup_pfd, pollset->wakeup_pipe)) == APR_SUCCESS &&
+          (rv = apr_pollset_add(pollset,
+            &pollset->wakeup_pfd)) == APR_SUCCESS)) {
+        return rv;
+    }
+
+    return APR_SUCCESS;
+}
+
+apr_status_t apr_pollcb_wakeup_pipe_regenerate(apr_pollcb_t *pollcb)
+{
+    apr_status_t rv;
+
+    apr_pollcb_remove(pollcb, &pollcb->wakeup_pfd);
+    apr_poll_close_wakeup_pipe(pollcb->wakeup_pipe);
+    if (!((rv = apr_poll_create_wakeup_pipe(pollcb->pool,
+            &pollcb->wakeup_pfd, pollcb->wakeup_pipe)) == APR_SUCCESS &&
+          (rv = apr_pollcb_add(pollcb,
+            &pollcb->wakeup_pfd)) == APR_SUCCESS)) {
+        return rv;
+    }
+
+    return APR_SUCCESS;
 }
