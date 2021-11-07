@@ -1327,6 +1327,10 @@ dnl Checks for library functions. (N.B. poll is further down)
 
 AC_FUNC_ALLOCA
 
+nanosleep=0
+AC_CHECK_LIB(rt, nanosleep)
+AC_CHECK_FUNCS(nanosleep, [nanosleep="1" ])
+
 AC_CHECK_FUNCS([calloc setsid isinf isnan \
                 getenv putenv setenv unsetenv \
                 writev getifaddrs utime utimes])

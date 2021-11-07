@@ -242,7 +242,13 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t)
     snooze(t);
 #elif defined(NETWARE)
     delay(t/1000);
-#else
+#elif defined(HAVE_NANOSLEEP)
+    struct timespec ts;
+    int ret;
+    ts.tv_nsec = (t % APR_USEC_PER_SEC) * 1000000;
+    ts.tv_sec = t / APR_USEC_PER_SEC;
+    nanosleep(&ts, NULL);
+#else 
     struct timeval tv;
     tv.tv_usec = t % APR_USEC_PER_SEC;
     tv.tv_sec = t / APR_USEC_PER_SEC;
