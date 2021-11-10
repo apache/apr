@@ -80,8 +80,9 @@ apr_status_t apr_poll_create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd,
 {
     apr_status_t rv;
 
-    if ((rv = apr_file_pipe_create(&wakeup_pipe[0], &wakeup_pipe[1],
-                                   pool)) != APR_SUCCESS)
+    if ((rv = apr_file_pipe_create_ex(&wakeup_pipe[0], &wakeup_pipe[1],
+                                      APR_WRITE_BLOCK,
+                                      pool)) != APR_SUCCESS)
         return rv;
 
     pfd->p = pool;
