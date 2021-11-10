@@ -257,6 +257,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
 {
     int ret;
     apr_status_t rv = APR_SUCCESS;
+    apr_status_t wakeup_rv = APR_SUCCESS;
 
     *num = 0;
 
@@ -289,8 +290,15 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
             if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
                 fdptr->desc_type == APR_POLL_FILE &&
                 fdptr->desc.f == pollset->wakeup_pipe[0]) {
-                apr_poll_drain_wakeup_pipe(pollset->wakeup_pipe);
                 rv = APR_EINTR;
+                if ( apr_poll_drain_wakeup_pipe(pollset->wakeup_pipe) != APR_SUCCESS )
+                {
+                    wakeup_rv = apr_pollset_wakeup_pipe_regenerate(pollset);
+                    if ( wakeup_rv != APR_SUCCESS )
+                    {
+                        rv = wakeup_rv;
+                    }
+                }
             }
             else {
                 pollset->p->result_set[j] = *fdptr;
@@ -460,7 +468,14 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
             if ((pollcb->flags & APR_POLLSET_WAKEABLE) &&
                 pollfd->desc_type == APR_POLL_FILE &&
                 pollfd->desc.f == pollcb->wakeup_pipe[0]) {
-                apr_poll_drain_wakeup_pipe(pollcb->wakeup_pipe);
+                if ( apr_poll_drain_wakeup_pipe(pollcb->wakeup_pipe) != APR_SUCCESS )
+                {
+                    rv = apr_pollcb_wakeup_pipe_regenerate(pollcb);
+                    if ( rv != APR_SUCCESS )
+                    {
+                        return rv;
+                    }
+                }
                 return APR_EINTR;
             }
 
