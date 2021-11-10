@@ -36,6 +36,9 @@ apr_status_t apr_poll_create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd,
                                       pool)) != APR_SUCCESS)
         return rv;
 
+    /* Read end of the pipe is non-blocking */
+    apr_file_pipe_timeout_set(wakeup_pipe[0], 0);
+
     pfd->reqevents = APR_POLLIN;
     pfd->desc_type = APR_POLL_FILE;
     pfd->desc.f = wakeup_pipe[0];
@@ -80,6 +83,7 @@ apr_status_t apr_poll_create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd,
 {
     apr_status_t rv;
 
+    /* Read end of the pipe is non-blocking */
     if ((rv = apr_file_pipe_create_ex(&wakeup_pipe[0], &wakeup_pipe[1],
                                       APR_WRITE_BLOCK,
                                       pool)) != APR_SUCCESS)
