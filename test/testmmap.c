@@ -175,10 +175,12 @@ static void test_mmap_offset(abts_case *tc, void *data)
 
 abts_suite *testmmap(abts_suite *suite)
 {
+#if APR_HAS_MMAP
+    int i;
+#endif
     suite = ADD_SUITE(suite)
 
-#if APR_HAS_MMAP    
-    apr_size_t i;
+#if APR_HAS_MMAP
     apr_pool_create(&ptest, p);
     for (i = 0; test_set[i].filename; ++i) {
         abts_run_test(suite, create_filename, (void *)test_set[i].filename);
