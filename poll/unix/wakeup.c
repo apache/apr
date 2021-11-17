@@ -18,6 +18,7 @@
 #include "apr_poll.h"
 #include "apr_time.h"
 #include "apr_portable.h"
+#include "apr_atomic.h"
 #include "apr_arch_file_io.h"
 #include "apr_arch_networkio.h"
 #include "apr_arch_poll_private.h"
@@ -35,9 +36,6 @@ apr_status_t apr_poll_create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd,
     if ((rv = file_socket_pipe_create(&wakeup_pipe[0], &wakeup_pipe[1],
                                       pool)) != APR_SUCCESS)
         return rv;
-
-    /* Read end of the pipe is non-blocking */
-    apr_file_pipe_timeout_set(wakeup_pipe[0], 0);
 
     pfd->reqevents = APR_POLLIN;
     pfd->desc_type = APR_POLL_FILE;
@@ -139,18 +137,18 @@ apr_status_t apr_poll_close_wakeup_pipe(apr_file_t **wakeup_pipe)
 
 /* Read and discard whatever is in the wakeup pipe.
  */
-void apr_poll_drain_wakeup_pipe(apr_file_t **wakeup_pipe)
+void apr_poll_drain_wakeup_pipe(volatile apr_uint32_t *wakeup_set, apr_file_t **wakeup_pipe)
 {
-    char rb[512];
-    apr_size_t nr = sizeof(rb);
 
-    while (apr_file_read(wakeup_pipe[0], rb, &nr) == APR_SUCCESS) {
-        /* Although we write just one byte to the other end of the pipe
+    while (apr_atomic_cas32(wakeup_set, 0, 1) > 0) {
+        char ch;
+        /* though we write just one byte to the other end of the pipe
          * during wakeup, multiple threads could call the wakeup.
          * So simply drain out from the input side of the pipe all
          * the data.
          */
-        if (nr != sizeof(rb))
+        if (apr_file_getc(&ch, wakeup_pipe[0]) != APR_SUCCESS)
             break;
     }
 }
+
