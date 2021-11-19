@@ -430,9 +430,9 @@ static apr_status_t socket_pipe_cleanup(void *thefile)
     return APR_SUCCESS;
 }
 
-apr_status_t file_socket_pipe_create(apr_file_t **in,
-                                     apr_file_t **out,
-                                     apr_pool_t *p)
+apr_status_t apr_file_socket_pipe_create(apr_file_t **in,
+                                         apr_file_t **out,
+                                         apr_pool_t *p)
 {
     apr_status_t rv;
     SOCKET rd;
@@ -477,7 +477,7 @@ apr_status_t file_socket_pipe_create(apr_file_t **in,
     return rv;
 }
 
-apr_status_t file_socket_pipe_close(apr_file_t *file)
+apr_status_t apr_file_socket_pipe_close(apr_file_t *file)
 {
     apr_status_t stat;
     if (!file->socket)
