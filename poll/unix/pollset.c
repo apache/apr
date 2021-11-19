@@ -218,14 +218,13 @@ APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t * pollset)
 
 APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset)
 {
-    if (pollset->flags & APR_POLLSET_WAKEABLE) {
-        if (apr_atomic_cas32(&pollset->wakeup_set, 1, 0) == 0)
-            return apr_file_putc(1, pollset->wakeup_pipe[1]);
-        else
-           return APR_SUCCESS;
-    }
-    else
+    if (!(pollset->flags & APR_POLLSET_WAKEABLE))
         return APR_EINIT;
+
+    if (apr_atomic_cas32(&pollset->wakeup_set, 1, 0) == 0)
+        return apr_file_putc(1, pollset->wakeup_pipe[1]);
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,

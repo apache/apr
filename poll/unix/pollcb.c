@@ -214,14 +214,13 @@ APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
 
 APR_DECLARE(apr_status_t) apr_pollcb_wakeup(apr_pollcb_t *pollcb)
 {
-    if (pollcb->flags & APR_POLLSET_WAKEABLE) {
-        if (apr_atomic_cas32(&pollcb->wakeup_set, 1, 0) == 0)
-            return apr_file_putc(1, pollcb->wakeup_pipe[1]);
-        else
-           return APR_SUCCESS;
-    }
-    else
+    if (!(pollcb->flags & APR_POLLSET_WAKEABLE))
         return APR_EINIT;
+
+    if (apr_atomic_cas32(&pollcb->wakeup_set, 1, 0) == 0)
+        return apr_file_putc(1, pollcb->wakeup_pipe[1]);
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(const char *) apr_pollcb_method_name(apr_pollcb_t *pollcb)

@@ -81,8 +81,9 @@ apr_status_t apr_poll_create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd,
 {
     apr_status_t rv;
 
-    if ((rv = apr_file_pipe_create(&wakeup_pipe[0], &wakeup_pipe[1],
-                                   pool)) != APR_SUCCESS)
+    /* Read end of the pipe is non-blocking */
+    if ((rv = apr_file_pipe_create_ex(&wakeup_pipe[0], &wakeup_pipe[1],
+                                      APR_WRITE_BLOCK, pool)))
         return rv;
 
     pfd->p = pool;
@@ -137,16 +138,9 @@ apr_status_t apr_poll_close_wakeup_pipe(apr_file_t **wakeup_pipe)
  */
 void apr_poll_drain_wakeup_pipe(volatile apr_uint32_t *wakeup_set, apr_file_t **wakeup_pipe)
 {
+    char ch;
 
-    while (apr_atomic_cas32(wakeup_set, 0, 1) > 0) {
-        char ch;
-        /* though we write just one byte to the other end of the pipe
-         * during wakeup, multiple threads could call the wakeup.
-         * So simply drain out from the input side of the pipe all
-         * the data.
-         */
-        if (apr_file_getc(&ch, wakeup_pipe[0]) != APR_SUCCESS)
-            break;
-    }
+    (void)apr_file_getc(&ch, wakeup_pipe[0]);
+    apr_atomic_set32(wakeup_set, 0);
 }
 

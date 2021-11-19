@@ -162,7 +162,7 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
 struct apr_file_t {
     apr_pool_t *pool;
     HANDLE filehand;
-    BOOLEAN pipe;              /* Is this a pipe of a file? */
+    BOOLEAN pipe, socket;      /* Is this a pipe, a socket or a file? */
     OVERLAPPED *pOverlapped;
     apr_interval_time_t timeout;
     apr_int32_t flags;

@@ -20,9 +20,11 @@
 #include "apr_strings.h"
 #include "apr_lib.h"
 #include "apr_errno.h"
-#include <malloc.h>
+#include "apr_arch_networkio.h"
 #include "apr_arch_atime.h"
 #include "apr_arch_misc.h"
+
+#include <malloc.h>
 
 /*
  * read_with_timeout() 
@@ -31,6 +33,7 @@
 static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t len_in, apr_size_t *nbytes)
 {
     apr_status_t rv;
+    int pipe_or_socket = (file->pipe || file->socket);
     DWORD len = (DWORD)len_in;
     DWORD bytesread = 0;
 
@@ -67,13 +70,28 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
         }
     }
 
-    if (file->pOverlapped && !file->pipe) {
+    if (file->pOverlapped && !pipe_or_socket) {
         file->pOverlapped->Offset     = (DWORD)file->filePtr;
         file->pOverlapped->OffsetHigh = (DWORD)(file->filePtr >> 32);
     }
 
-    if (ReadFile(file->filehand, buf, len, 
-                 &bytesread, file->pOverlapped)) {
+    if (file->socket && !file->pOverlapped) {
+        WSABUF wsaData;
+        DWORD flags = 0;
+
+        wsaData.buf = (char*) buf;
+        wsaData.len = (u_long)len;
+        if (WSARecv((SOCKET)file->filehand, &wsaData, 1, &bytesread,
+                    &flags, NULL, NULL) == SOCKET_ERROR) {
+            rv = apr_get_netos_error();
+            bytesread = 0;
+        }
+        else {
+            rv = APR_SUCCESS;
+        }
+    }
+    else if (ReadFile(file->filehand, buf, len, 
+                      &bytesread, file->pOverlapped)) {
         rv = APR_SUCCESS;
     }
     else {
@@ -139,7 +157,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
     if (rv == APR_SUCCESS && bytesread == 0)
         rv = APR_EOF;
     
-    if (rv == APR_SUCCESS && file->pOverlapped && !file->pipe) {
+    if (rv == APR_SUCCESS && file->pOverlapped && !pipe_or_socket) {
         file->filePtr += bytesread;
     }
     *nbytes = bytesread;
@@ -385,7 +403,7 @@ static apr_status_t write_buffered(apr_file_t *thefile, const char *buf,
 APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
 {
     apr_status_t rv;
-    DWORD bwrote;
+    DWORD bwrote = 0;
 
     /* If the file is open for xthread support, allocate and
      * initialize the overlapped and io completion event (hEvent). 
@@ -409,9 +427,27 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         if (thefile->flags & APR_FOPEN_XTHREAD) {
             apr_thread_mutex_unlock(thefile->mutex);
         }
-        return rv;
-    } else {
-        if (thefile->pipe) {
+    }
+    else if (thefile->socket && !thefile->pOverlapped) {
+        WSABUF wsaData;
+        DWORD flags = 0;
+
+        wsaData.buf = (char*) buf;
+        wsaData.len = (u_long)*nbytes;
+        if (WSASend((SOCKET)file->filehand, &wsaData, 1, &bwrote,
+                    flags, NULL, NULL) == SOCKET_ERROR) {
+            rv = apr_get_netos_error();
+            bwrote = 0;
+        }
+        else {
+            rv = APR_SUCCESS;
+        }
+        *nbytes = bwrote;
+    }
+    else {
+        int pipe_or_socket = (thefile->pipe || thefile->socket);
+
+        if (pipe_or_socket) {
             rv = WriteFile(thefile->filehand, buf, (DWORD)*nbytes, &bwrote,
                            thefile->pOverlapped);
         }
@@ -545,7 +581,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                 }
             }
         }
-        if (rv == APR_SUCCESS && thefile->pOverlapped && !thefile->pipe) {
+        if (rv == APR_SUCCESS && thefile->pOverlapped && !pipe_or_socket) {
             thefile->filePtr += *nbytes;
         }
     }
