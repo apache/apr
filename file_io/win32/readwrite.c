@@ -434,7 +434,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
 
         wsaData.buf = (char*) buf;
         wsaData.len = (u_long)*nbytes;
-        if (WSASend((SOCKET)file->filehand, &wsaData, 1, &bwrote,
+        if (WSASend((SOCKET)thefile->filehand, &wsaData, 1, &bwrote,
                     flags, NULL, NULL) == SOCKET_ERROR) {
             rv = apr_get_netos_error();
             bwrote = 0;
