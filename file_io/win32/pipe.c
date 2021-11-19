@@ -43,7 +43,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe,
         thepipe->timeout = timeout;
         return APR_SUCCESS;
     }
-    if (!thepipe->pipe) {
+    if (thepipe->ftype != APR_FILETYPE_PIPE) {
         return APR_ENOTIMPL;
     }
     if (timeout && !(thepipe->pOverlapped)) {
@@ -92,7 +92,7 @@ static apr_status_t file_pipe_create(apr_file_t **in,
     (*in) = (apr_file_t *)apr_pcalloc(pool_in, sizeof(apr_file_t));
     (*in)->pool = pool_in;
     (*in)->fname = NULL;
-    (*in)->pipe = 1;
+    (*in)->ftype = APR_FILETYPE_PIPE;
     (*in)->timeout = -1;
     (*in)->ungetchar = -1;
     (*in)->eof_hit = 0;
@@ -107,7 +107,7 @@ static apr_status_t file_pipe_create(apr_file_t **in,
     (*out) = (apr_file_t *)apr_pcalloc(pool_out, sizeof(apr_file_t));
     (*out)->pool = pool_out;
     (*out)->fname = NULL;
-    (*out)->pipe = 1;
+    (*out)->ftype = APR_FILETYPE_PIPE;
     (*out)->timeout = -1;
     (*out)->ungetchar = -1;
     (*out)->eof_hit = 0;
@@ -264,7 +264,7 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put_ex(apr_file_t **file,
 {
     (*file) = apr_pcalloc(pool, sizeof(apr_file_t));
     (*file)->pool = pool;
-    (*file)->pipe = 1;
+    (*file)->ftype = APR_FILETYPE_PIPE;
     (*file)->timeout = -1;
     (*file)->ungetchar = -1;
     (*file)->filehand = *thefile;
@@ -446,7 +446,7 @@ apr_status_t apr_file_socket_pipe_create(apr_file_t **in,
     (*in) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*in)->pool = p;
     (*in)->fname = NULL;
-    (*in)->socket = 1;
+    (*in)->ftype = APR_FILETYPE_SOCKET;
     (*in)->timeout = 0; /* read end of the pipe is non-blocking */
     (*in)->ungetchar = -1;
     (*in)->eof_hit = 0;
@@ -460,7 +460,7 @@ apr_status_t apr_file_socket_pipe_create(apr_file_t **in,
     (*out) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*out)->pool = p;
     (*out)->fname = NULL;
-    (*out)->socket = 1;
+    (*out)->ftype = APR_FILETYPE_SOCKET;
     (*out)->timeout = -1;
     (*out)->ungetchar = -1;
     (*out)->eof_hit = 0;
@@ -482,7 +482,7 @@ apr_status_t apr_file_socket_pipe_create(apr_file_t **in,
 apr_status_t apr_file_socket_pipe_close(apr_file_t *file)
 {
     apr_status_t stat;
-    if (!file->socket)
+    if (file->ftype != APR_FILETYPE_SOCKET)
         return apr_file_close(file);
     if ((stat = socket_pipe_cleanup(file)) == APR_SUCCESS) {
         apr_pool_cleanup_kill(file->pool, file, socket_pipe_cleanup);

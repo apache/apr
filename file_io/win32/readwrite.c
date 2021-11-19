@@ -33,7 +33,6 @@
 static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t len_in, apr_size_t *nbytes)
 {
     apr_status_t rv;
-    int pipe_or_socket = (file->pipe || file->socket);
     DWORD len = (DWORD)len_in;
     DWORD bytesread = 0;
 
@@ -42,7 +41,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
         /* Peek at the pipe. If there is no data available, return APR_EAGAIN.
          * If data is available, go ahead and read it.
          */
-        if (file->pipe) {
+        if (file->ftype == APR_FILETYPE_PIPE) {
             DWORD bytes;
             if (!PeekNamedPipe(file->filehand, NULL, 0, NULL, &bytes, NULL)) {
                 rv = apr_get_os_error();
@@ -70,12 +69,12 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
         }
     }
 
-    if (file->pOverlapped && !pipe_or_socket) {
+    if (file->pOverlapped && file->ftype == APR_FILETYPE_FILE) {
         file->pOverlapped->Offset     = (DWORD)file->filePtr;
         file->pOverlapped->OffsetHigh = (DWORD)(file->filePtr >> 32);
     }
 
-    if (file->socket && !file->pOverlapped) {
+    if (file->ftype == APR_FILETYPE_SOCKET) {
         WSABUF wsaData;
         DWORD flags = 0;
 
@@ -428,7 +427,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             apr_thread_mutex_unlock(thefile->mutex);
         }
     }
-    else if (thefile->socket && !thefile->pOverlapped) {
+    else if (thefile->ftype == APR_FILETYPE_SOCKET) {
         WSABUF wsaData;
         DWORD flags = 0;
 
@@ -445,9 +444,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         *nbytes = bwrote;
     }
     else {
-        int pipe_or_socket = (thefile->pipe || thefile->socket);
-
-        if (pipe_or_socket) {
+        if (thefile->ftype != APR_FILETYPE_FILE) {
             rv = WriteFile(thefile->filehand, buf, (DWORD)*nbytes, &bwrote,
                            thefile->pOverlapped);
         }
@@ -581,7 +578,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                 }
             }
         }
-        if (rv == APR_SUCCESS && thefile->pOverlapped && !pipe_or_socket) {
+        if (rv == APR_SUCCESS && thefile->pOverlapped && thefile->ftype == APR_FILETYPE_FILE) {
             thefile->filePtr += *nbytes;
         }
     }
