@@ -289,7 +289,6 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
 
 static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
 {
-    static int id = 0;
     FD_SET rs;
     SOCKET ls;
     struct timeval socktm;
@@ -297,12 +296,12 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
     struct sockaddr_in la;
     struct sockaddr_in ca;
     int nrd;
-    apr_status_t rv = APR_SUCCESS;
+    apr_status_t rv;
     int ll = sizeof(la);
     int lc = sizeof(ca);
     unsigned long bm = 1;
-    int uid[2];
-    int iid[2];
+    char uid[8];
+    char iid[8];
 
     *rd = INVALID_SOCKET;
     *wr = INVALID_SOCKET;
@@ -311,8 +310,11 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
      * so that we know the connection originated
      * from us.
      */
-    uid[0] = getpid();
-    uid[1] = id++;
+    rv = apr_generate_random_bytes(uid, sizeof(uid));
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+
     if ((ls = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET) {
         return apr_get_netos_error();
     }
@@ -341,7 +343,7 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
         rv =  apr_get_netos_error();
         goto cleanup;
     }
-    if (send(*wr, (char *)uid, sizeof(uid), 0) != sizeof(uid)) {
+    if (send(*wr, uid, sizeof(uid), 0) != sizeof(uid)) {
         if ((rv =  apr_get_netos_error()) == 0) {
             rv = APR_EINVAL;
         }
@@ -384,7 +386,7 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
             rv = apr_get_netos_error();
             goto cleanup;
         }
-        nrd = recv(*rd, (char *)iid, sizeof(iid), 0);
+        nrd = recv(*rd, iid, sizeof(iid), 0);
         if (nrd == SOCKET_ERROR) {
             rv = apr_get_netos_error();
             goto cleanup;
