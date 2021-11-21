@@ -94,6 +94,9 @@ RELEASE SHOWSTOPPERS:
 
 CURRENT VOTES:
 
+    * Fix trivial 'configure apr.h.in' copy/paste error inside apr.hw
+		-#define APR_TCP_NOPUSH_FLAG       @apr_tcp_nopush_flag@
+		+#define APR_TCP_NOPUSH_FLAG       0
     * Add object perms set macros and implement them for shm and mutex
       Trunk patch: http://svn.apache.org/viewvc?view=revision&revision=741862
                    http://svn.apache.org/viewvc?view=revision&revision=741869
