@@ -97,7 +97,7 @@ CURRENT VOTES:
     * Fix trivial 'configure apr.h.in' copy/paste error inside apr.hw
 		-#define APR_TCP_NOPUSH_FLAG       @apr_tcp_nopush_flag@
 		+#define APR_TCP_NOPUSH_FLAG       0
-      +1: 
+      +1: ylavic,
 
 CURRENT test/testall -v EXCEPTIONS:
 
