@@ -802,6 +802,10 @@ case $host in
        ;;
 esac
 
+AC_CHECK_HEADERS([time.h])
+AC_CHECK_FUNCS([nanosleep])
+AC_SEARCH_LIBS(nanosleep, rt)
+
 dnl ----------------------------- Checking for Threads
 AC_MSG_NOTICE([${nl}Checking for Threads...])
 
