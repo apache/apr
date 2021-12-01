@@ -156,7 +156,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
     if (rv == APR_SUCCESS && bytesread == 0)
         rv = APR_EOF;
     
-    if (rv == APR_SUCCESS && file->pOverlapped && !pipe_or_socket) {
+    if (rv == APR_SUCCESS && file->pOverlapped && file->ftype == APR_FILETYPE_FILE) {
         file->filePtr += bytesread;
     }
     *nbytes = bytesread;
