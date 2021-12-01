@@ -389,19 +389,18 @@ APR_DECLARE(apr_status_t) apr_brigade_split_line(apr_bucket_brigade *bbOut,
 
 #if !APR_HAVE_MEMMEM
 static const void *
-memmem(const void *hay, size_t hay_len, const void *needle, size_t needle_len)
+memmem(const void *_hay, size_t hay_len, const void *needle, size_t needle_len)
 {
-
     if (hay_len < needle_len || !needle_len || !hay_len) {
         return NULL;
     }
     else {
-
         apr_size_t len = hay_len - needle_len + 1;
-        const void *end = hay + hay_len;
+        const apr_byte_t *hay = (apr_byte_t *)_hay;
+        const apr_byte_t *end = hay + hay_len;
 
         while ((hay = memchr(hay, *(char *)needle, len))) {
-            len = end - hay - needle_len + 1;
+            len = (apr_size_t)(end - hay) - needle_len + 1;
 
             if (memcmp(hay, needle, needle_len) == 0 ) {
                 break;
