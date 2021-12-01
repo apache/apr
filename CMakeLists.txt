@@ -20,7 +20,7 @@ PROJECT(APR C)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 # Either Expat or LibXml2 is required; the others are optional
-FIND_PACKAGE(Expat)
+FIND_PACKAGE(EXPAT)
 FIND_PACKAGE(LibXml2)
 FIND_PACKAGE(OpenSSL)
 
