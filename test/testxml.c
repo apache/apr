@@ -295,7 +295,7 @@ static void get_xml_error(abts_case* tc,
 
     if (rv == APR_SUCCESS) {
         rv = apr_xml_parser_done(parser, &doc);
-        ABTS_INT_EQUAL(tc, APR_EGENERAL, rv);
+        ABTS_INT_NEQUAL(tc, APR_SUCCESS, rv);
     }
 
     if (rv != APR_SUCCESS) {
