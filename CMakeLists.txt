@@ -142,6 +142,13 @@ ELSEIF(APU_USE_XMLLITE)
   SET(XMLLIB_LIBRARIES   "xmllite.lib")
 ENDIF()
 
+IF(APU_HAVE_ICONV)
+  SET(XLATE_INCLUDE_DIR ${Iconv_INCLUDE_DIRS})
+  SET(XLATE_LIBRARIES   ${Iconv_LIBRARIES})
+ELSE()
+  SET(XLATE_INCLUDE_DIR "")
+  SET(XLATE_LIBRARIES   "")
+ENDIF()
 # Generated .h files are stored in PROJECT_BINARY_DIR, not the
 # source tree.
 #
@@ -163,7 +170,7 @@ SET(APR_SYSTEM_LIBS
   bcrypt
 )
 
-INCLUDE_DIRECTORIES(${APR_INCLUDE_DIRECTORIES} ${XMLLIB_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${APR_INCLUDE_DIRECTORIES} ${XMLLIB_INCLUDE_DIR} ${XLATE_INCLUDE_DIR})
 
 SET(APR_PUBLIC_HEADERS_STATIC
   include/apr_allocator.h
@@ -457,14 +464,14 @@ SET(dbd_drivers)
 ADD_LIBRARY(${apr_libname} SHARED ${APR_SOURCES} ${APR_PUBLIC_HEADERS_GENERATED} libapr.rc)
 SET(install_targets ${install_targets} ${apr_libname})
 SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/${apr_libname}.pdb)
-TARGET_LINK_LIBRARIES(${apr_libname} ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
+TARGET_LINK_LIBRARIES(${apr_libname} ${XMLLIB_LIBRARIES} ${XLATE_LIBRARIES} ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(${apr_libname} PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_EXPORT;APR_HAVE_MODULAR_DSO")
 ADD_DEPENDENCIES(${apr_libname} test_char_header)
 
 ADD_LIBRARY(${apr_name} STATIC ${APR_SOURCES} ${APR_PUBLIC_HEADERS_GENERATED})
 SET(install_targets ${install_targets} ${apr_name})
 # no .pdb file generated for static libraries
-TARGET_LINK_LIBRARIES(${apr_name} ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
+TARGET_LINK_LIBRARIES(${apr_name} ${XMLLIB_LIBRARIES} ${XLATE_LIBRARIES} ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(${apr_name} PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_STATIC;APR_HAVE_MODULAR_DSO")
 ADD_DEPENDENCIES(${apr_name} test_char_header)
 
@@ -532,7 +539,7 @@ IF(APR_BUILD_TESTAPR)
   ENDIF()
 
   ADD_EXECUTABLE(testapp test/testapp.c)
-  TARGET_LINK_LIBRARIES(testapp ${whichapr} ${whichaprapp} ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
+  TARGET_LINK_LIBRARIES(testapp ${whichapr} ${whichaprapp} ${XMLLIB_LIBRARIES} ${XLATE_LIBRARIES} ${APR_SYSTEM_LIBS})
   SET_TARGET_PROPERTIES(testapp PROPERTIES LINK_FLAGS /entry:wmainCRTStartup)
   IF(apiflag)
     SET_TARGET_PROPERTIES(testapp PROPERTIES COMPILE_FLAGS ${apiflag})
@@ -540,7 +547,7 @@ IF(APR_BUILD_TESTAPR)
   ADD_TEST(NAME testapp COMMAND testapp)
 
   ADD_EXECUTABLE(testall ${APR_TEST_SOURCES})
-  TARGET_LINK_LIBRARIES(testall ${whichapr} ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
+  TARGET_LINK_LIBRARIES(testall ${whichapr} ${XMLLIB_LIBRARIES} ${XLATE_LIBRARIES} ${APR_SYSTEM_LIBS})
   IF(apiflag)
     SET_TARGET_PROPERTIES(testall PROPERTIES COMPILE_FLAGS ${apiflag})
   ENDIF()
@@ -582,7 +589,7 @@ IF(APR_BUILD_TESTAPR)
   FOREACH(sourcefile ${single_source_programs})
     STRING(REGEX REPLACE ".*/([^\\]+)\\.c" "\\1" proggie ${sourcefile})
     ADD_EXECUTABLE(${proggie} ${sourcefile})
-    TARGET_LINK_LIBRARIES(${proggie} ${whichapr} ${XMLLIB_LIBRARIES} ${APR_SYSTEM_LIBS})
+    TARGET_LINK_LIBRARIES(${proggie} ${whichapr} ${XMLLIB_LIBRARIES} ${XLATE_LIBRARIES} ${APR_SYSTEM_LIBS})
     IF(apiflag)
       SET_TARGET_PROPERTIES(${proggie} PROPERTIES COMPILE_FLAGS ${apiflag})
     ENDIF()
