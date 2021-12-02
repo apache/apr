@@ -46,36 +46,36 @@ APR_DECLARE(apr_status_t) apr_env_get(char **value,
 {
     char *val = NULL;
     DWORD size;
-	apr_wchar_t wenvvar[APR_PATH_MAX];
-	apr_size_t inchars, outchars;
-	apr_wchar_t *wvalue, dummy;
-	apr_status_t status;
+    apr_wchar_t wenvvar[APR_PATH_MAX];
+    apr_size_t inchars, outchars;
+    apr_wchar_t *wvalue, dummy;
+    apr_status_t status;
 
-	status = widen_envvar_name(wenvvar, APR_PATH_MAX, envvar);
-	if (status)
-		return status;
+    status = widen_envvar_name(wenvvar, APR_PATH_MAX, envvar);
+    if (status)
+        return status;
 
-	SetLastError(0);
-	size = GetEnvironmentVariableW(wenvvar, &dummy, 0);
-	if (GetLastError() == ERROR_ENVVAR_NOT_FOUND)
-		/* The environment variable doesn't exist. */
-		return APR_ENOENT;
+    SetLastError(0);
+    size = GetEnvironmentVariableW(wenvvar, &dummy, 0);
+    if (GetLastError() == ERROR_ENVVAR_NOT_FOUND)
+        /* The environment variable doesn't exist. */
+        return APR_ENOENT;
 
-	if (size == 0) {
-		/* The environment value exists, but is zero-length. */
-		*value = apr_pstrdup(pool, "");
-		return APR_SUCCESS;
-	}
+    if (size == 0) {
+        /* The environment value exists, but is zero-length. */
+        *value = apr_pstrdup(pool, "");
+        return APR_SUCCESS;
+    }
 
-	wvalue = apr_palloc(pool, size * sizeof(*wvalue));
-	size = GetEnvironmentVariableW(wenvvar, wvalue, size);
+    wvalue = apr_palloc(pool, size * sizeof(*wvalue));
+    size = GetEnvironmentVariableW(wenvvar, wvalue, size);
 
-	inchars = wcslen(wvalue) + 1;
-	outchars = 3 * inchars; /* Enough for any UTF-8 representation */
-	val = apr_palloc(pool, outchars);
-	status = apr_conv_utf16_to_utf8(wvalue, &inchars, val, &outchars);
-	if (status)
-		return status;
+    inchars = wcslen(wvalue) + 1;
+    outchars = 3 * inchars; /* Enough for any UTF-8 representation */
+    val = apr_palloc(pool, outchars);
+    status = apr_conv_utf16_to_utf8(wvalue, &inchars, val, &outchars);
+    if (status)
+        return status;
 
     *value = val;
     return APR_SUCCESS;
@@ -86,23 +86,23 @@ APR_DECLARE(apr_status_t) apr_env_set(const char *envvar,
                                       const char *value,
                                       apr_pool_t *pool)
 {
-	apr_wchar_t wenvvar[APR_PATH_MAX];
-	apr_wchar_t *wvalue;
-	apr_size_t inchars, outchars;
-	apr_status_t status;
+    apr_wchar_t wenvvar[APR_PATH_MAX];
+    apr_wchar_t *wvalue;
+    apr_size_t inchars, outchars;
+    apr_status_t status;
 
-	status = widen_envvar_name(wenvvar, APR_PATH_MAX, envvar);
-	if (status)
-		return status;
+    status = widen_envvar_name(wenvvar, APR_PATH_MAX, envvar);
+    if (status)
+        return status;
 
-	outchars = inchars = strlen(value) + 1;
-	wvalue = apr_palloc(pool, outchars * sizeof(*wvalue));
-	status = apr_conv_utf8_to_utf16(value, &inchars, wvalue, &outchars);
-	if (status)
-		return status;
+    outchars = inchars = strlen(value) + 1;
+    wvalue = apr_palloc(pool, outchars * sizeof(*wvalue));
+    status = apr_conv_utf8_to_utf16(value, &inchars, wvalue, &outchars);
+    if (status)
+        return status;
 
-	if (!SetEnvironmentVariableW(wenvvar, wvalue))
-		return apr_get_os_error();
+    if (!SetEnvironmentVariableW(wenvvar, wvalue))
+        return apr_get_os_error();
 
     return APR_SUCCESS;
 }
@@ -110,15 +110,15 @@ APR_DECLARE(apr_status_t) apr_env_set(const char *envvar,
 
 APR_DECLARE(apr_status_t) apr_env_delete(const char *envvar, apr_pool_t *pool)
 {
-	apr_wchar_t wenvvar[APR_PATH_MAX];
-	apr_status_t status;
+    apr_wchar_t wenvvar[APR_PATH_MAX];
+    apr_status_t status;
 
-	status = widen_envvar_name(wenvvar, APR_PATH_MAX, envvar);
-	if (status)
-		return status;
+    status = widen_envvar_name(wenvvar, APR_PATH_MAX, envvar);
+    if (status)
+        return status;
 
-	if (!SetEnvironmentVariableW(wenvvar, NULL))
-		return apr_get_os_error();
+    if (!SetEnvironmentVariableW(wenvvar, NULL))
+        return apr_get_os_error();
 
     return APR_SUCCESS;
 }
