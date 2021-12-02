@@ -98,63 +98,56 @@ APR_DECLARE(apr_status_t) apr_app_initialize(int *argc,
                                              const char * const * *argv,
                                              const char * const * *env)
 {
+	apr_wchar_t **wstrs;
+	apr_wchar_t *sysstr;
+	int wstrc;
+	int dupenv;
     apr_status_t rv = apr_initialize();
 
     if (rv != APR_SUCCESS) {
         return rv;
     }
 
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        apr_wchar_t **wstrs;
-        apr_wchar_t *sysstr;
-        int wstrc;
-        int dupenv;
+	if (apr_app_init_complete) {
+		return rv;
+	}
 
-        if (apr_app_init_complete) {
-            return rv;
-        }
+	apr_app_init_complete = 1;
 
-        apr_app_init_complete = 1;
+	sysstr = GetCommandLineW();
+	if (sysstr) {
+		wstrs = apr_winapi_CommandLineToArgvW(sysstr, &wstrc);
+		if (wstrs) {
+			*argc = apr_wastrtoastr(argv, wstrs, wstrc);
+			LocalFree(wstrs);
+		}
+	}
 
-        sysstr = GetCommandLineW();
-        if (sysstr) {
-            wstrs = apr_winapi_CommandLineToArgvW(sysstr, &wstrc);
-            if (wstrs) {
-                *argc = apr_wastrtoastr(argv, wstrs, wstrc);
-                LocalFree(wstrs);
-            }
-        }
+	sysstr = GetEnvironmentStringsW();
+	dupenv = warrsztoastr(&_environ, sysstr);
 
-        sysstr = GetEnvironmentStringsW();
-        dupenv = warrsztoastr(&_environ, sysstr);
+	if (env) {
+		*env = apr_malloc_dbg((dupenv + 1) * sizeof (char *),
+							  __FILE__, __LINE__ );
+		memcpy((void*)*env, _environ, (dupenv + 1) * sizeof (char *));
+	}
+	else {
+	}
 
-        if (env) {
-            *env = apr_malloc_dbg((dupenv + 1) * sizeof (char *),
-                                  __FILE__, __LINE__ );
-            memcpy((void*)*env, _environ, (dupenv + 1) * sizeof (char *));
-        }
-        else {
-        }
+	FreeEnvironmentStringsW(sysstr);
 
-        FreeEnvironmentStringsW(sysstr);
-
-        /* MSVCRT will attempt to maintain the wide environment calls
-         * on _putenv(), which is bogus if we've passed a non-ascii
-         * string to _putenv(), since they use MultiByteToWideChar
-         * and breaking the implicit utf-8 assumption we've built.
-         *
-         * Reset _wenviron for good measure.
-         */
-        if (_wenviron) {
-            apr_wchar_t **wenv = _wenviron;
-            _wenviron = NULL;
-            free(wenv);
-        }
-
-    }
-#endif
+	/* MSVCRT will attempt to maintain the wide environment calls
+	 * on _putenv(), which is bogus if we've passed a non-ascii
+	 * string to _putenv(), since they use MultiByteToWideChar
+	 * and breaking the implicit utf-8 assumption we've built.
+	 *
+	 * Reset _wenviron for good measure.
+	 */
+	if (_wenviron) {
+		apr_wchar_t **wenv = _wenviron;
+		_wenviron = NULL;
+		free(wenv);
+	}
     return rv;
 }
 

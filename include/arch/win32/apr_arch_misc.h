@@ -118,30 +118,6 @@ extern APR_DECLARE_DATA apr_oslevel_e apr_os_level;
 
 apr_status_t apr_get_oslevel(apr_oslevel_e *);
 
-/* The APR_HAS_ANSI_FS symbol is PRIVATE, and internal to APR.
- * APR only supports char data for filenames.  Like most applications,
- * characters >127 are essentially undefined.  APR_HAS_UNICODE_FS lets
- * the application know that utf-8 is the encoding method of APR, and
- * only incidently hints that we have Wide OS calls.
- *
- * APR_HAS_ANSI_FS is simply an OS flag to tell us all calls must be
- * the unicode eqivilant.
- */
-
-#define APR_HAS_ANSI_FS           0
-
-/* IF_WIN_OS_IS_UNICODE / ELSE_WIN_OS_IS_ANSI help us keep the code trivial
- * where have runtime tests for unicode-ness, that aren't needed in any
- * build which supports only WINNT or WCE.
- */
-#if APR_HAS_ANSI_FS && APR_HAS_UNICODE_FS
-#define IF_WIN_OS_IS_UNICODE if (apr_os_level >= APR_WIN_UNICODE)
-#define ELSE_WIN_OS_IS_ANSI else
-#else /* APR_HAS_UNICODE_FS */
-#define IF_WIN_OS_IS_UNICODE
-#define ELSE_WIN_OS_IS_ANSI
-#endif /* APR_HAS_ANSI_FS && APR_HAS_UNICODE_FS */
-
 #if defined(_MSC_VER)
 #include "crtdbg.h"
 
