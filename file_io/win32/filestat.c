@@ -229,26 +229,26 @@ static int reparse_point_is_link(WIN32_FILE_ATTRIBUTE_DATA *wininfo,
     }
     else
     {
-		apr_wchar_t wfname[APR_PATH_MAX];
-		HANDLE hFind;
-		WIN32_FIND_DATAW fd;
+        apr_wchar_t wfname[APR_PATH_MAX];
+        HANDLE hFind;
+        WIN32_FIND_DATAW fd;
 
         if (test_safe_name(fname) != APR_SUCCESS) {
             return 0;
         }
 
-		if (utf8_to_unicode_path(wfname, APR_PATH_MAX, fname) != APR_SUCCESS) {
-			return 0;
-		}
+        if (utf8_to_unicode_path(wfname, APR_PATH_MAX, fname) != APR_SUCCESS) {
+            return 0;
+        }
 
-		hFind = FindFirstFileW(wfname, &fd);
-		if (hFind == INVALID_HANDLE_VALUE) {
-			return 0;
-		}
+        hFind = FindFirstFileW(wfname, &fd);
+        if (hFind == INVALID_HANDLE_VALUE) {
+            return 0;
+        }
 
-		FindClose(hFind);
+        FindClose(hFind);
 
-		tag = fd.dwReserved0;
+        tag = fd.dwReserved0;
     }
 
     // Test "Name surrogate bit" to detect any kind of symbolic link
@@ -567,59 +567,59 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         return APR_ENAMETOOLONG;
     }
 
-	if ((wanted & (APR_FINFO_IDENT | APR_FINFO_NLINK)) 
-		   || (~wanted & APR_FINFO_LINK)) {
-		/* FindFirstFile and GetFileAttributesEx can't figure the inode,
-		 * device or number of links, so we need to resolve with an open 
-		 * file handle.  If the user has asked for these fields, fall over 
-		 * to the get file info by handle method.  If we fail, or the user
-		 * also asks for the file name, continue by our usual means.
-		 *
-		 * We also must use this method for a 'true' stat, that resolves
-		 * a symlink (NTFS Junction) target.  This is because all fileinfo
-		 * on a Junction always returns the junction, opening the target
-		 * is the only way to resolve the target's attributes.
-		 */
-		if ((ident_rv = resolve_ident(finfo, fname, wanted, pool)) 
-				== APR_SUCCESS)
-			return ident_rv;
-		else if (ident_rv == APR_INCOMPLETE)
-			wanted &= ~finfo->valid;
-	}
+    if ((wanted & (APR_FINFO_IDENT | APR_FINFO_NLINK)) 
+           || (~wanted & APR_FINFO_LINK)) {
+        /* FindFirstFile and GetFileAttributesEx can't figure the inode,
+         * device or number of links, so we need to resolve with an open 
+         * file handle.  If the user has asked for these fields, fall over 
+         * to the get file info by handle method.  If we fail, or the user
+         * also asks for the file name, continue by our usual means.
+         *
+         * We also must use this method for a 'true' stat, that resolves
+         * a symlink (NTFS Junction) target.  This is because all fileinfo
+         * on a Junction always returns the junction, opening the target
+         * is the only way to resolve the target's attributes.
+         */
+        if ((ident_rv = resolve_ident(finfo, fname, wanted, pool)) 
+                == APR_SUCCESS)
+            return ident_rv;
+        else if (ident_rv == APR_INCOMPLETE)
+            wanted &= ~finfo->valid;
+    }
 
-	if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
-										/ sizeof(apr_wchar_t), fname)))
-		return rv;
-	if (!(wanted & (APR_FINFO_NAME | APR_FINFO_LINK))) {
-		if (!GetFileAttributesExW(wfname, GetFileExInfoStandard, 
-								  &FileInfo.i))
-			return apr_get_os_error();
-	}
-	else {
-		/* Guard against bogus wildcards and retrieve by name
-		 * since we want the true name, and set aside a long
-		 * enough string to handle the longest file name.
-		 */
-		HANDLE hFind;
-		if ((rv = test_safe_name(fname)) != APR_SUCCESS) {
-			return rv;
-		}
-		hFind = FindFirstFileW(wfname, &FileInfo.w);
-		if (hFind == INVALID_HANDLE_VALUE)
-			return apr_get_os_error();
-		FindClose(hFind);
-		finddata = 1;
+    if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
+                                        / sizeof(apr_wchar_t), fname)))
+        return rv;
+    if (!(wanted & (APR_FINFO_NAME | APR_FINFO_LINK))) {
+        if (!GetFileAttributesExW(wfname, GetFileExInfoStandard, 
+                                  &FileInfo.i))
+            return apr_get_os_error();
+    }
+    else {
+        /* Guard against bogus wildcards and retrieve by name
+         * since we want the true name, and set aside a long
+         * enough string to handle the longest file name.
+         */
+        HANDLE hFind;
+        if ((rv = test_safe_name(fname)) != APR_SUCCESS) {
+            return rv;
+        }
+        hFind = FindFirstFileW(wfname, &FileInfo.w);
+        if (hFind == INVALID_HANDLE_VALUE)
+            return apr_get_os_error();
+        FindClose(hFind);
+        finddata = 1;
 
-		if (wanted & APR_FINFO_NAME)
-		{
-			char tmpname[APR_FILE_MAX * 3 + 1];
-			if (unicode_to_utf8_path(tmpname, sizeof(tmpname),
-									 FileInfo.w.cFileName)) {
-				return APR_ENAMETOOLONG;
-			}
-			filename = apr_pstrdup(pool, tmpname);
-		}
-	}
+        if (wanted & APR_FINFO_NAME)
+        {
+            char tmpname[APR_FILE_MAX * 3 + 1];
+            if (unicode_to_utf8_path(tmpname, sizeof(tmpname),
+                                     FileInfo.w.cFileName)) {
+                return APR_ENAMETOOLONG;
+            }
+            filename = apr_pstrdup(pool, tmpname);
+        }
+    }
 
     if (ident_rv != APR_INCOMPLETE) {
         if (fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 

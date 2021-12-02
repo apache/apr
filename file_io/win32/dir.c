@@ -58,7 +58,7 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
     (*new)->dirname = apr_palloc(pool, len + 3);
     memcpy((*new)->dirname, dirname, len);
     if (len && (*new)->dirname[len - 1] != '/') {
-    	(*new)->dirname[len++] = '/';
+        (*new)->dirname[len++] = '/';
     }
     (*new)->dirname[len++] = '\0';
     (*new)->dirname[len] = '\0';

@@ -137,36 +137,36 @@ apr_status_t unicode_to_utf8_path(char* retstr, apr_size_t retlen,
 
 void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
 {
-	apr_wchar_t *wpre, *wfile, *ch;
-	apr_size_t n = strlen(file) + 1;
-	apr_size_t r, d;
+    apr_wchar_t *wpre, *wfile, *ch;
+    apr_size_t n = strlen(file) + 1;
+    apr_size_t r, d;
 
-	if (global)
-		wpre = L"Global\\";
-	else
-		wpre = L"Local\\";
-	r = wcslen(wpre);
+    if (global)
+        wpre = L"Global\\";
+    else
+        wpre = L"Local\\";
+    r = wcslen(wpre);
 
-	if (n > 256 - r) {
-		file += n - 256 - r;
-		n = 256;
-		/* skip utf8 continuation bytes */
-		while ((*file & 0xC0) == 0x80) {
-			++file;
-			--n;
-		}
-	}
-	wfile = apr_palloc(pool, (r + n) * sizeof(apr_wchar_t));
-	wcscpy(wfile, wpre);
-	d = n;
-	if (apr_conv_utf8_to_utf16(file, &n, wfile + r, &d)) {
-		return NULL;
-	}
-	for (ch = wfile + r; *ch; ++ch) {
-		if (*ch == ':' || *ch == '/' || *ch == '\\')
-			*ch = '_';
-	}
-	return wfile;
+    if (n > 256 - r) {
+        file += n - 256 - r;
+        n = 256;
+        /* skip utf8 continuation bytes */
+        while ((*file & 0xC0) == 0x80) {
+            ++file;
+            --n;
+        }
+    }
+    wfile = apr_palloc(pool, (r + n) * sizeof(apr_wchar_t));
+    wcscpy(wfile, wpre);
+    d = n;
+    if (apr_conv_utf8_to_utf16(file, &n, wfile + r, &d)) {
+        return NULL;
+    }
+    for (ch = wfile + r; *ch; ++ch) {
+        if (*ch == ':' || *ch == '/' || *ch == '\\')
+            *ch = '_';
+    }
+    return wfile;
 }
 
 static apr_status_t make_sparse_file(apr_file_t *file)
@@ -270,7 +270,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     DWORD attributes = 0;
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
     apr_status_t rv;
-	apr_wchar_t wfname[APR_PATH_MAX];
+    apr_wchar_t wfname[APR_PATH_MAX];
 
 
     if (flag & APR_FOPEN_NONBLOCK) {
@@ -347,19 +347,19 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         attributes |= FILE_FLAG_OVERLAPPED;
     }
 
-	if (flag & APR_FOPEN_SENDFILE_ENABLED) {
-		/* This feature is required to enable sendfile operations
-		 * against the file on Win32. Also implies APR_FOPEN_XTHREAD.
-		 */
-		flag |= APR_FOPEN_XTHREAD;
-		attributes |= FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_OVERLAPPED;
-	}
+    if (flag & APR_FOPEN_SENDFILE_ENABLED) {
+        /* This feature is required to enable sendfile operations
+         * against the file on Win32. Also implies APR_FOPEN_XTHREAD.
+         */
+        flag |= APR_FOPEN_XTHREAD;
+        attributes |= FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_OVERLAPPED;
+    }
 
-	if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
-										 / sizeof(apr_wchar_t), fname)))
-		return rv;
-	handle = CreateFileW(wfname, oflags, sharemode,
-						 NULL, createflags, attributes, 0);
+    if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
+                                         / sizeof(apr_wchar_t), fname)))
+        return rv;
+    handle = CreateFileW(wfname, oflags, sharemode,
+                         NULL, createflags, attributes, 0);
     if (handle == INVALID_HANDLE_VALUE) {
         return apr_get_os_error();
     }
@@ -433,15 +433,15 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
 
 APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *pool)
 {
-	apr_wchar_t wpath[APR_PATH_MAX];
-	apr_status_t rv;
+    apr_wchar_t wpath[APR_PATH_MAX];
+    apr_status_t rv;
 
-	if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
-										/ sizeof(apr_wchar_t), path))) {
-		return rv;
-	}
-	if (DeleteFileW(wpath))
-		return APR_SUCCESS;
+    if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                        / sizeof(apr_wchar_t), path))) {
+        return rv;
+    }
+    if (DeleteFileW(wpath))
+        return APR_SUCCESS;
     return apr_get_os_error();
 }
 
@@ -449,22 +449,22 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
                                           const char *topath,
                                           apr_pool_t *pool)
 {
-	apr_wchar_t wfrompath[APR_PATH_MAX], wtopath[APR_PATH_MAX];
-	apr_status_t rv;
+    apr_wchar_t wfrompath[APR_PATH_MAX], wtopath[APR_PATH_MAX];
+    apr_status_t rv;
 
-	if ((rv = utf8_to_unicode_path(wfrompath,
-								   sizeof(wfrompath) / sizeof(apr_wchar_t),
-								   frompath))) {
-		return rv;
-	}
-	if ((rv = utf8_to_unicode_path(wtopath,
-								   sizeof(wtopath) / sizeof(apr_wchar_t),
-								   topath))) {
-		return rv;
-	}
-	if (MoveFileExW(wfrompath, wtopath, MOVEFILE_REPLACE_EXISTING |
-										MOVEFILE_COPY_ALLOWED))
-		return APR_SUCCESS;
+    if ((rv = utf8_to_unicode_path(wfrompath,
+                                   sizeof(wfrompath) / sizeof(apr_wchar_t),
+                                   frompath))) {
+        return rv;
+    }
+    if ((rv = utf8_to_unicode_path(wtopath,
+                                   sizeof(wtopath) / sizeof(apr_wchar_t),
+                                   topath))) {
+        return rv;
+    }
+    if (MoveFileExW(wfrompath, wtopath, MOVEFILE_REPLACE_EXISTING |
+                                        MOVEFILE_COPY_ALLOWED))
+        return APR_SUCCESS;
     return apr_get_os_error();
 }
 
@@ -472,20 +472,20 @@ APR_DECLARE(apr_status_t) apr_file_link(const char *from_path,
                                            const char *to_path)
 {
     apr_status_t rv = APR_SUCCESS;
-	apr_wchar_t wfrom_path[APR_PATH_MAX];
-	apr_wchar_t wto_path[APR_PATH_MAX];
+    apr_wchar_t wfrom_path[APR_PATH_MAX];
+    apr_wchar_t wto_path[APR_PATH_MAX];
 
-	if ((rv = utf8_to_unicode_path(wfrom_path,
-								   sizeof(wfrom_path) / sizeof(apr_wchar_t),
-								   from_path)))
-		return rv;
-	if ((rv = utf8_to_unicode_path(wto_path,
-								   sizeof(wto_path) / sizeof(apr_wchar_t),
-								   to_path)))
-		return rv;
+    if ((rv = utf8_to_unicode_path(wfrom_path,
+                                   sizeof(wfrom_path) / sizeof(apr_wchar_t),
+                                   from_path)))
+        return rv;
+    if ((rv = utf8_to_unicode_path(wto_path,
+                                   sizeof(wto_path) / sizeof(apr_wchar_t),
+                                   to_path)))
+        return rv;
 
-	if (!CreateHardLinkW(wto_path, wfrom_path, NULL))
-			return apr_get_os_error();
+    if (!CreateHardLinkW(wto_path, wfrom_path, NULL))
+            return apr_get_os_error();
     return rv;
 }
 

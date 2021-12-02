@@ -66,12 +66,12 @@ const char apr_c_is_fnchar[256] =
 apr_status_t filepath_root_test(char *path, apr_pool_t *p)
 {
     apr_status_t rv;
-	apr_wchar_t wpath[APR_PATH_MAX];
+    apr_wchar_t wpath[APR_PATH_MAX];
 
-	if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
-										/ sizeof(apr_wchar_t), path)))
-		return rv;
-	rv = GetDriveTypeW(wpath);
+    if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                        / sizeof(apr_wchar_t), path)))
+        return rv;
+    rv = GetDriveTypeW(wpath);
 
     if (rv == DRIVE_UNKNOWN || rv == DRIVE_NO_ROOT_DIR)
         return APR_EBADPATH;
@@ -83,19 +83,19 @@ apr_status_t filepath_drive_get(char **rootpath, char drive,
                                 apr_int32_t flags, apr_pool_t *p)
 {
     char path[APR_PATH_MAX];
-	apr_wchar_t *ignored;
-	apr_wchar_t wdrive[8];
-	apr_wchar_t wpath[APR_PATH_MAX];
-	apr_status_t rv;
-	/* ???: This needs review, apparently "\\?\d:." returns "\\?\d:" 
-	 * as if that is useful for anything.
-	 */
-	wcscpy(wdrive, L"D:.");
-	wdrive[0] = (apr_wchar_t)(unsigned char)drive;
-	if (!GetFullPathNameW(wdrive, sizeof(wpath) / sizeof(apr_wchar_t), wpath, &ignored))
-		return apr_get_os_error();
-	if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
-		return rv;
+    apr_wchar_t *ignored;
+    apr_wchar_t wdrive[8];
+    apr_wchar_t wpath[APR_PATH_MAX];
+    apr_status_t rv;
+    /* ???: This needs review, apparently "\\?\d:." returns "\\?\d:" 
+     * as if that is useful for anything.
+     */
+    wcscpy(wdrive, L"D:.");
+    wdrive[0] = (apr_wchar_t)(unsigned char)drive;
+    if (!GetFullPathNameW(wdrive, sizeof(wpath) / sizeof(apr_wchar_t), wpath, &ignored))
+        return apr_get_os_error();
+    if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
+        return rv;
     if (!(flags & APR_FILEPATH_NATIVE)) {
         for (*rootpath = path; **rootpath; ++*rootpath) {
             if (**rootpath == '\\')
@@ -109,24 +109,24 @@ apr_status_t filepath_drive_get(char **rootpath, char drive,
 
 apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)
 {
-	apr_wchar_t *ignored;
-	apr_wchar_t wpath[APR_PATH_MAX];
-	apr_status_t rv;
-	apr_wchar_t wroot[APR_PATH_MAX];
-	/* ???: This needs review, apparently "\\?\d:." returns "\\?\d:" 
-	 * as if that is useful for anything.
-	 */
-	if ((rv = utf8_to_unicode_path(wroot, sizeof(wroot) 
-										/ sizeof(apr_wchar_t), root)))
-		return rv;
-	if (!GetFullPathNameW(wroot, sizeof(wpath) / sizeof(apr_wchar_t), wpath, &ignored))
-		return apr_get_os_error();
+    apr_wchar_t *ignored;
+    apr_wchar_t wpath[APR_PATH_MAX];
+    apr_status_t rv;
+    apr_wchar_t wroot[APR_PATH_MAX];
+    /* ???: This needs review, apparently "\\?\d:." returns "\\?\d:" 
+     * as if that is useful for anything.
+     */
+    if ((rv = utf8_to_unicode_path(wroot, sizeof(wroot) 
+                                        / sizeof(apr_wchar_t), root)))
+        return rv;
+    if (!GetFullPathNameW(wroot, sizeof(wpath) / sizeof(apr_wchar_t), wpath, &ignored))
+        return apr_get_os_error();
 
-	/* Borrow wroot as a char buffer (twice as big as necessary) 
-	 */
-	if ((rv = unicode_to_utf8_path((char*)wroot, sizeof(wroot), wpath)))
-		return rv;
-	*rootpath = apr_pstrdup(p, (char*)wroot);
+    /* Borrow wroot as a char buffer (twice as big as necessary) 
+     */
+    if ((rv = unicode_to_utf8_path((char*)wroot, sizeof(wroot), wpath)))
+        return rv;
+    *rootpath = apr_pstrdup(p, (char*)wroot);
     return APR_SUCCESS;
 }
 
@@ -135,13 +135,13 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath, apr_int32_t flags,
                                            apr_pool_t *p)
 {
     char path[APR_PATH_MAX];
-	apr_wchar_t wpath[APR_PATH_MAX];
-	apr_status_t rv;
+    apr_wchar_t wpath[APR_PATH_MAX];
+    apr_status_t rv;
 
-	if (!GetCurrentDirectoryW(sizeof(wpath) / sizeof(apr_wchar_t), wpath))
-		return apr_get_os_error();
-	if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
-		return rv;
+    if (!GetCurrentDirectoryW(sizeof(wpath) / sizeof(apr_wchar_t), wpath))
+        return apr_get_os_error();
+    if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
+        return rv;
     if (!(flags & APR_FILEPATH_NATIVE)) {
         for (*rootpath = path; **rootpath; ++*rootpath) {
             if (**rootpath == '\\')
@@ -156,13 +156,13 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath, apr_int32_t flags,
 APR_DECLARE(apr_status_t) apr_filepath_set(const char *rootpath,
                                            apr_pool_t *p)
 {
-	apr_wchar_t wpath[APR_PATH_MAX];
-	apr_status_t rv;
+    apr_wchar_t wpath[APR_PATH_MAX];
+    apr_status_t rv;
 
-	if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
-										/ sizeof(apr_wchar_t), rootpath)))
-		return rv;
-	if (!SetCurrentDirectoryW(wpath))
-		return apr_get_os_error();
+    if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                        / sizeof(apr_wchar_t), rootpath)))
+        return rv;
+    if (!SetCurrentDirectoryW(wpath))
+        return apr_get_os_error();
     return APR_SUCCESS;
 }
