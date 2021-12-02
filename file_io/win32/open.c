@@ -141,14 +141,10 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
 	apr_size_t n = strlen(file) + 1;
 	apr_size_t r, d;
 
-	if (apr_os_level >= APR_WIN_2000) {
-		if (global)
-			wpre = L"Global\\";
-		else
-			wpre = L"Local\\";
-	}
+	if (global)
+		wpre = L"Global\\";
 	else
-		wpre = L"";
+		wpre = L"Local\\";
 	r = wcslen(wpre);
 
 	if (n > 256 - r) {

@@ -339,8 +339,7 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
             guess_protection_bits(finfo, wanted);
     }
 
-    if ((apr_os_level >= APR_WIN_2000) && (wanted & APR_FINFO_CSIZE)
-                                       && (finfo->filetype == APR_REG))
+    if ((wanted & APR_FINFO_CSIZE) && (finfo->filetype == APR_REG))
     {
         if (whatfile == MORE_OF_HANDLE) {
             FILE_ALLOCATION_INFO fi;

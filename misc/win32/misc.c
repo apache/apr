@@ -37,33 +37,8 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
         {
             unsigned int servpack = oslev.wServicePackMajor;
 
-            if (oslev.dwMajorVersion < 3) {
+            if (oslev.dwMajorVersion < 5) {
                 apr_os_level = APR_WIN_UNSUP;
-            }
-            else if (oslev.dwMajorVersion == 3) {
-                if (oslev.dwMajorVersion < 50) {
-                    apr_os_level = APR_WIN_UNSUP;
-                }
-                else if (oslev.dwMajorVersion == 50) {
-                    apr_os_level = APR_WIN_NT_3_5;
-                }
-                else {
-                    apr_os_level = APR_WIN_NT_3_51;
-                }
-            }
-            else if (oslev.dwMajorVersion == 4) {
-                if (servpack < 2)
-                    apr_os_level = APR_WIN_NT_4;
-                else if (servpack <= 2)
-                    apr_os_level = APR_WIN_NT_4_SP2;
-                else if (servpack <= 3)
-                    apr_os_level = APR_WIN_NT_4_SP3;
-                else if (servpack <= 4)
-                    apr_os_level = APR_WIN_NT_4_SP4;
-                else if (servpack <= 5)
-                    apr_os_level = APR_WIN_NT_4_SP5;
-                else 
-                    apr_os_level = APR_WIN_NT_4_SP6;
             }
             else if (oslev.dwMajorVersion == 5) {
                 if (oslev.dwMinorVersion == 0) {
