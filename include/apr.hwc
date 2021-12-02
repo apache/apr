@@ -678,7 +678,7 @@ typedef int apr_wait_t;
 #define APU_HAVE_COMMONCRYPTO   0
 #endif
 
-#define APU_HAVE_ICONV          0
+#define APU_HAVE_ICONV          @apu_have_iconv_10@
 #define APR_HAS_XLATE           (APU_HAVE_ICONV)
 
 #define APU_USE_EXPAT           @apu_use_expat_10@
