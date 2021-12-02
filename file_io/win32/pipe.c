@@ -75,15 +75,7 @@ static apr_status_t file_pipe_create(apr_file_t **in,
     DWORD dwOpenMode;
 
     sa.nLength = sizeof(sa);
-
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-        sa.bInheritHandle = FALSE;
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-        sa.bInheritHandle = TRUE;
-#endif
+    sa.bInheritHandle = FALSE;
     sa.lpSecurityDescriptor = NULL;
 
     (*in) = (apr_file_t *)apr_pcalloc(pool_in, sizeof(apr_file_t));

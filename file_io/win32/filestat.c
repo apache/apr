@@ -229,47 +229,26 @@ static int reparse_point_is_link(WIN32_FILE_ATTRIBUTE_DATA *wininfo,
     }
     else
     {
+		apr_wchar_t wfname[APR_PATH_MAX];
+		HANDLE hFind;
+		WIN32_FIND_DATAW fd;
+
         if (test_safe_name(fname) != APR_SUCCESS) {
             return 0;
         }
 
-#if APR_HAS_UNICODE_FS
-        IF_WIN_OS_IS_UNICODE
-        {
-            apr_wchar_t wfname[APR_PATH_MAX];
-            HANDLE hFind;
-            WIN32_FIND_DATAW fd;
+		if (utf8_to_unicode_path(wfname, APR_PATH_MAX, fname) != APR_SUCCESS) {
+			return 0;
+		}
 
-            if (utf8_to_unicode_path(wfname, APR_PATH_MAX, fname) != APR_SUCCESS) {
-                return 0;
-            }
+		hFind = FindFirstFileW(wfname, &fd);
+		if (hFind == INVALID_HANDLE_VALUE) {
+			return 0;
+		}
 
-            hFind = FindFirstFileW(wfname, &fd);
-            if (hFind == INVALID_HANDLE_VALUE) {
-                return 0;
-            }
+		FindClose(hFind);
 
-            FindClose(hFind);
-
-            tag = fd.dwReserved0;
-        }
-#endif
-#if APR_HAS_ANSI_FS || 1
-        ELSE_WIN_OS_IS_ANSI
-        {
-            HANDLE hFind;
-            WIN32_FIND_DATAA fd;
-
-            hFind = FindFirstFileA(fname, &fd);
-            if (hFind == INVALID_HANDLE_VALUE) {
-                return 0;
-            }
-
-            FindClose(hFind);
-
-            tag = fd.dwReserved0;
-        }
-#endif
+		tag = fd.dwReserved0;
     }
 
     // Test "Name surrogate bit" to detect any kind of symbolic link
@@ -571,10 +550,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     int isroot = 0;
     apr_status_t ident_rv = 0;
     apr_status_t rv;
-#if APR_HAS_UNICODE_FS
     apr_wchar_t wfname[APR_PATH_MAX];
-
-#endif
     char *filename = NULL;
     /* These all share a common subset of this structure */
     union {
@@ -592,123 +568,59 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         return APR_ENAMETOOLONG;
     }
 
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        if ((wanted & (APR_FINFO_IDENT | APR_FINFO_NLINK)) 
-               || (~wanted & APR_FINFO_LINK)) {
-            /* FindFirstFile and GetFileAttributesEx can't figure the inode,
-             * device or number of links, so we need to resolve with an open 
-             * file handle.  If the user has asked for these fields, fall over 
-             * to the get file info by handle method.  If we fail, or the user
-             * also asks for the file name, continue by our usual means.
-             *
-             * We also must use this method for a 'true' stat, that resolves
-             * a symlink (NTFS Junction) target.  This is because all fileinfo
-             * on a Junction always returns the junction, opening the target
-             * is the only way to resolve the target's attributes.
-             */
-            if ((ident_rv = resolve_ident(finfo, fname, wanted, pool)) 
-                    == APR_SUCCESS)
-                return ident_rv;
-            else if (ident_rv == APR_INCOMPLETE)
-                wanted &= ~finfo->valid;
-        }
+	if ((wanted & (APR_FINFO_IDENT | APR_FINFO_NLINK)) 
+		   || (~wanted & APR_FINFO_LINK)) {
+		/* FindFirstFile and GetFileAttributesEx can't figure the inode,
+		 * device or number of links, so we need to resolve with an open 
+		 * file handle.  If the user has asked for these fields, fall over 
+		 * to the get file info by handle method.  If we fail, or the user
+		 * also asks for the file name, continue by our usual means.
+		 *
+		 * We also must use this method for a 'true' stat, that resolves
+		 * a symlink (NTFS Junction) target.  This is because all fileinfo
+		 * on a Junction always returns the junction, opening the target
+		 * is the only way to resolve the target's attributes.
+		 */
+		if ((ident_rv = resolve_ident(finfo, fname, wanted, pool)) 
+				== APR_SUCCESS)
+			return ident_rv;
+		else if (ident_rv == APR_INCOMPLETE)
+			wanted &= ~finfo->valid;
+	}
 
-        if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
-                                            / sizeof(apr_wchar_t), fname)))
-            return rv;
-        if (!(wanted & (APR_FINFO_NAME | APR_FINFO_LINK))) {
-            if (!GetFileAttributesExW(wfname, GetFileExInfoStandard, 
-                                      &FileInfo.i))
-                return apr_get_os_error();
-        }
-        else {
-            /* Guard against bogus wildcards and retrieve by name
-             * since we want the true name, and set aside a long
-             * enough string to handle the longest file name.
-             */
-            HANDLE hFind;
-            if ((rv = test_safe_name(fname)) != APR_SUCCESS) {
-                return rv;
-            }
-            hFind = FindFirstFileW(wfname, &FileInfo.w);
-            if (hFind == INVALID_HANDLE_VALUE)
-                return apr_get_os_error();
-            FindClose(hFind);
-            finddata = 1;
+	if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
+										/ sizeof(apr_wchar_t), fname)))
+		return rv;
+	if (!(wanted & (APR_FINFO_NAME | APR_FINFO_LINK))) {
+		if (!GetFileAttributesExW(wfname, GetFileExInfoStandard, 
+								  &FileInfo.i))
+			return apr_get_os_error();
+	}
+	else {
+		/* Guard against bogus wildcards and retrieve by name
+		 * since we want the true name, and set aside a long
+		 * enough string to handle the longest file name.
+		 */
+		HANDLE hFind;
+		if ((rv = test_safe_name(fname)) != APR_SUCCESS) {
+			return rv;
+		}
+		hFind = FindFirstFileW(wfname, &FileInfo.w);
+		if (hFind == INVALID_HANDLE_VALUE)
+			return apr_get_os_error();
+		FindClose(hFind);
+		finddata = 1;
 
-            if (wanted & APR_FINFO_NAME)
-            {
-                char tmpname[APR_FILE_MAX * 3 + 1];
-                if (unicode_to_utf8_path(tmpname, sizeof(tmpname),
-                                         FileInfo.w.cFileName)) {
-                    return APR_ENAMETOOLONG;
-                }
-                filename = apr_pstrdup(pool, tmpname);
-            }
-        }
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        const char *root = NULL;
-        const char *test = fname;
-        rv = apr_filepath_root(&root, &test, APR_FILEPATH_NATIVE, pool);
-        isroot = (root && *root && !(*test));
-
-        if ((apr_os_level >= APR_WIN_98) && (!(wanted & (APR_FINFO_NAME | APR_FINFO_LINK)) || isroot))
-        {
-            /* cannot use FindFile on a Win98 root, it returns \*
-             * GetFileAttributesExA is not available on Win95
-             */
-            if (!GetFileAttributesExA(fname, GetFileExInfoStandard, 
-                                     &FileInfo.i)) {
-                return apr_get_os_error();
-            }
-        }
-        else if (isroot) {
-            /* This is Win95 and we are trying to stat a root.  Lie.
-             */
-            if (GetDriveType(fname) != DRIVE_UNKNOWN) 
-            {
-                finfo->pool = pool;
-                finfo->filetype = 0;
-                finfo->mtime = apr_time_now();
-                finfo->protection |= APR_FPROT_WREAD | APR_FPROT_WEXECUTE | APR_FPROT_WWRITE;
-                finfo->protection |= (finfo->protection << prot_scope_group) 
-                                   | (finfo->protection << prot_scope_user);
-                finfo->valid |= APR_FINFO_TYPE | APR_FINFO_PROT 
-                              | APR_FINFO_MTIME
-                              | (wanted & APR_FINFO_LINK);
-                return (wanted &= ~finfo->valid) ? APR_INCOMPLETE 
-                                                 : APR_SUCCESS;
-            }
-            else
-                return APR_FROM_OS_ERROR(ERROR_PATH_NOT_FOUND);
-        }
-        else  {
-            /* Guard against bogus wildcards and retrieve by name
-             * since we want the true name, or are stuck in Win95,
-             * or are looking for the root of a Win98 drive.
-             */
-            HANDLE hFind;
-            if ((rv = test_safe_name(fname)) != APR_SUCCESS) {
-                return rv;
-            }
-            hFind = FindFirstFileA(fname, &FileInfo.n);
-            if (hFind == INVALID_HANDLE_VALUE) {
-                return apr_get_os_error();
-            } 
-            FindClose(hFind);
-            finddata = 1;
-            if (wanted & APR_FINFO_NAME) {
-                filename = apr_pstrdup(pool, FileInfo.n.cFileName);
-            }
-        }
-    }
-#endif
+		if (wanted & APR_FINFO_NAME)
+		{
+			char tmpname[APR_FILE_MAX * 3 + 1];
+			if (unicode_to_utf8_path(tmpname, sizeof(tmpname),
+									 FileInfo.w.cFileName)) {
+				return APR_ENAMETOOLONG;
+			}
+			filename = apr_pstrdup(pool, tmpname);
+		}
+	}
 
     if (ident_rv != APR_INCOMPLETE) {
         if (fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 
@@ -720,23 +632,12 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
              */
             if (apr_os_level >= APR_WIN_NT)
             {
-#if APR_HAS_UNICODE_FS
                 apr_wchar_t tmpname[APR_FILE_MAX];
                 apr_wchar_t *tmpoff = NULL;
                 if (GetFullPathNameW(wfname, sizeof(tmpname) / sizeof(apr_wchar_t),
                                      tmpname, &tmpoff))
                 {
                     if (!wcsncmp(tmpname, L"\\\\.\\", 4)) {
-#else
-                /* Same initial logic as above, but
-                 * only for WinNT/non-UTF-8 builds of APR:
-                 */
-                char tmpname[APR_FILE_MAX];
-                char *tmpoff;
-                if (GetFullPathName(fname, sizeof(tmpname), tmpname, &tmpoff))
-                {
-                    if (!strncmp(tmpname, "\\\\.\\", 4)) {
-#endif
                         if (tmpoff == tmpname + 4) {
                             finfo->filetype = APR_CHR;
                         }
@@ -780,11 +681,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
 
     if (wanted &= ~finfo->valid) {
         /* Caller wants more than APR_FINFO_MIN | APR_FINFO_NAME */
-#if APR_HAS_UNICODE_FS
-        if (apr_os_level >= APR_WIN_NT)
-            return more_finfo(finfo, wfname, wanted, MORE_OF_WFSPEC);
-#endif
-        return more_finfo(finfo, fname, wanted, MORE_OF_FSPEC);
+        return more_finfo(finfo, wfname, wanted, MORE_OF_WFSPEC);
     }
 
     return APR_SUCCESS;

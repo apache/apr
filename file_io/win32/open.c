@@ -34,7 +34,6 @@
 #include <io.h>
 #include <winioctl.h>
 
-#if APR_HAS_UNICODE_FS
 apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen, 
                                   const char* srcstr)
 {
@@ -135,94 +134,45 @@ apr_status_t unicode_to_utf8_path(char* retstr, apr_size_t retlen,
     }
     return APR_SUCCESS;
 }
-#endif
 
 void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
 {
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        apr_wchar_t *wpre, *wfile, *ch;
-        apr_size_t n = strlen(file) + 1;
-        apr_size_t r, d;
+	apr_wchar_t *wpre, *wfile, *ch;
+	apr_size_t n = strlen(file) + 1;
+	apr_size_t r, d;
 
-        if (apr_os_level >= APR_WIN_2000) {
-            if (global)
-                wpre = L"Global\\";
-            else
-                wpre = L"Local\\";
-        }
-        else
-            wpre = L"";
-        r = wcslen(wpre);
+	if (apr_os_level >= APR_WIN_2000) {
+		if (global)
+			wpre = L"Global\\";
+		else
+			wpre = L"Local\\";
+	}
+	else
+		wpre = L"";
+	r = wcslen(wpre);
 
-        if (n > 256 - r) {
-            file += n - 256 - r;
-            n = 256;
-            /* skip utf8 continuation bytes */
-            while ((*file & 0xC0) == 0x80) {
-                ++file;
-                --n;
-            }
-        }
-        wfile = apr_palloc(pool, (r + n) * sizeof(apr_wchar_t));
-        wcscpy(wfile, wpre);
-        d = n;
-        if (apr_conv_utf8_to_utf16(file, &n, wfile + r, &d)) {
-            return NULL;
-        }
-        for (ch = wfile + r; *ch; ++ch) {
-            if (*ch == ':' || *ch == '/' || *ch == '\\')
-                *ch = '_';
-        }
-        return wfile;
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        char *nfile, *ch;
-        apr_size_t n = strlen(file) + 1;
-
-#if !APR_HAS_UNICODE_FS
-        apr_size_t r, d;
-        char *pre;
-
-        if (apr_os_level >= APR_WIN_2000) {
-            if (global)
-                pre = "Global\\";
-            else
-                pre = "Local\\";
-        }
-        else
-            pre = "";
-        r = strlen(pre);
-
-        if (n > 256 - r) {
-            file += n - 256 - r;
-            n = 256;
-        }
-        nfile = apr_palloc(pool, (r + n) * sizeof(apr_wchar_t));
-        memcpy(nfile, pre, r);
-        memcpy(nfile + r, file, n);
-#else
-        const apr_size_t r = 0;
-        if (n > 256) {
-            file += n - 256;
-            n = 256;
-        }
-        nfile = apr_pmemdup(pool, file, n);
-#endif
-        for (ch = nfile + r; *ch; ++ch) {
-            if (*ch == ':' || *ch == '/' || *ch == '\\')
-                *ch = '_';
-        }
-        return nfile;
-    }
-#endif
+	if (n > 256 - r) {
+		file += n - 256 - r;
+		n = 256;
+		/* skip utf8 continuation bytes */
+		while ((*file & 0xC0) == 0x80) {
+			++file;
+			--n;
+		}
+	}
+	wfile = apr_palloc(pool, (r + n) * sizeof(apr_wchar_t));
+	wcscpy(wfile, wpre);
+	d = n;
+	if (apr_conv_utf8_to_utf16(file, &n, wfile + r, &d)) {
+		return NULL;
+	}
+	for (ch = wfile + r; *ch; ++ch) {
+		if (*ch == ':' || *ch == '/' || *ch == '\\')
+			*ch = '_';
+	}
+	return wfile;
 }
 
-#if APR_HAS_UNICODE_FS
 static apr_status_t make_sparse_file(apr_file_t *file)
 {
     BY_HANDLE_FILE_INFORMATION info;
@@ -269,7 +219,6 @@ static apr_status_t make_sparse_file(apr_file_t *file)
     }
     return rv;
 }
-#endif
 
 apr_status_t file_cleanup(void *thefile)
 {
@@ -325,6 +274,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     DWORD attributes = 0;
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
     apr_status_t rv;
+	apr_wchar_t wfname[APR_PATH_MAX];
+
 
     if (flag & APR_FOPEN_NONBLOCK) {
         return APR_ENOTIMPL;
@@ -400,34 +351,19 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         attributes |= FILE_FLAG_OVERLAPPED;
     }
 
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        apr_wchar_t wfname[APR_PATH_MAX];
+	if (flag & APR_FOPEN_SENDFILE_ENABLED) {
+		/* This feature is required to enable sendfile operations
+		 * against the file on Win32. Also implies APR_FOPEN_XTHREAD.
+		 */
+		flag |= APR_FOPEN_XTHREAD;
+		attributes |= FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_OVERLAPPED;
+	}
 
-        if (flag & APR_FOPEN_SENDFILE_ENABLED) {
-            /* This feature is required to enable sendfile operations
-             * against the file on Win32. Also implies APR_FOPEN_XTHREAD.
-             */
-            flag |= APR_FOPEN_XTHREAD;
-            attributes |= FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_OVERLAPPED;
-        }
-
-        if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
-                                             / sizeof(apr_wchar_t), fname)))
-            return rv;
-        handle = CreateFileW(wfname, oflags, sharemode,
-                             NULL, createflags, attributes, 0);
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI {
-        handle = CreateFileA(fname, oflags, sharemode,
-                             NULL, createflags, attributes, 0);
-        /* This feature is not supported on this platform. */
-        flag &= ~APR_FOPEN_SENDFILE_ENABLED;
-    }
-#endif
+	if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
+										 / sizeof(apr_wchar_t), fname)))
+		return rv;
+	handle = CreateFileW(wfname, oflags, sharemode,
+						 NULL, createflags, attributes, 0);
     if (handle == INVALID_HANDLE_VALUE) {
         return apr_get_os_error();
     }
@@ -460,8 +396,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         }
     }
 
-#if APR_HAS_UNICODE_FS
-    if ((apr_os_level >= APR_WIN_2000) && ((*new)->flags & APR_FOPEN_SPARSE)) {
+    if ((*new)->flags & APR_FOPEN_SPARSE) {
         if ((rv = make_sparse_file(*new)) != APR_SUCCESS)
             /* The great mystery; do we close the file and return an error?
              * Do we add a new APR_INCOMPLETE style error saying opened, but
@@ -470,7 +405,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
             (*new)->flags &= ~APR_FOPEN_SPARSE;
     }
     else
-#endif
         /* This feature is not supported on this platform. */
         (*new)->flags &= ~APR_FOPEN_SPARSE;
 
@@ -503,24 +437,15 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
 
 APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *pool)
 {
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        apr_wchar_t wpath[APR_PATH_MAX];
-        apr_status_t rv;
-        if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
-                                            / sizeof(apr_wchar_t), path))) {
-            return rv;
-        }
-        if (DeleteFileW(wpath))
-            return APR_SUCCESS;
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-        if (DeleteFile(path))
-            return APR_SUCCESS;
-#endif
+	apr_wchar_t wpath[APR_PATH_MAX];
+	apr_status_t rv;
+
+	if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+										/ sizeof(apr_wchar_t), path))) {
+		return rv;
+	}
+	if (DeleteFileW(wpath))
+		return APR_SUCCESS;
     return apr_get_os_error();
 }
 
@@ -528,52 +453,22 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
                                           const char *topath,
                                           apr_pool_t *pool)
 {
-    IF_WIN_OS_IS_UNICODE
-    {
-#if APR_HAS_UNICODE_FS
-        apr_wchar_t wfrompath[APR_PATH_MAX], wtopath[APR_PATH_MAX];
-        apr_status_t rv;
-        if ((rv = utf8_to_unicode_path(wfrompath,
-                                       sizeof(wfrompath) / sizeof(apr_wchar_t),
-                                       frompath))) {
-            return rv;
-        }
-        if ((rv = utf8_to_unicode_path(wtopath,
-                                       sizeof(wtopath) / sizeof(apr_wchar_t),
-                                       topath))) {
-            return rv;
-        }
-        if (MoveFileExW(wfrompath, wtopath, MOVEFILE_REPLACE_EXISTING |
-                                            MOVEFILE_COPY_ALLOWED))
-            return APR_SUCCESS;
-#else
-        if (MoveFileEx(frompath, topath, MOVEFILE_REPLACE_EXISTING |
-                                         MOVEFILE_COPY_ALLOWED))
-            return APR_SUCCESS;
-#endif
-    }
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        /* Windows 95 and 98 do not support MoveFileEx, so we'll use
-         * the old MoveFile function.  However, MoveFile requires that
-         * the new file not already exist...so we have to delete that
-         * file if it does.  Perhaps we should back up the to-be-deleted
-         * file in case something happens?
-         */
-        HANDLE handle = INVALID_HANDLE_VALUE;
+	apr_wchar_t wfrompath[APR_PATH_MAX], wtopath[APR_PATH_MAX];
+	apr_status_t rv;
 
-        if ((handle = CreateFile(topath, GENERIC_WRITE, 0, 0,  
-            OPEN_EXISTING, 0, 0 )) != INVALID_HANDLE_VALUE )
-        {
-            CloseHandle(handle);
-            if (!DeleteFile(topath))
-                return apr_get_os_error();
-        }
-        if (MoveFile(frompath, topath))
-            return APR_SUCCESS;
-    }        
-#endif
+	if ((rv = utf8_to_unicode_path(wfrompath,
+								   sizeof(wfrompath) / sizeof(apr_wchar_t),
+								   frompath))) {
+		return rv;
+	}
+	if ((rv = utf8_to_unicode_path(wtopath,
+								   sizeof(wtopath) / sizeof(apr_wchar_t),
+								   topath))) {
+		return rv;
+	}
+	if (MoveFileExW(wfrompath, wtopath, MOVEFILE_REPLACE_EXISTING |
+										MOVEFILE_COPY_ALLOWED))
+		return APR_SUCCESS;
     return apr_get_os_error();
 }
 
@@ -581,32 +476,20 @@ APR_DECLARE(apr_status_t) apr_file_link(const char *from_path,
                                            const char *to_path)
 {
     apr_status_t rv = APR_SUCCESS;
+	apr_wchar_t wfrom_path[APR_PATH_MAX];
+	apr_wchar_t wto_path[APR_PATH_MAX];
 
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        apr_wchar_t wfrom_path[APR_PATH_MAX];
-        apr_wchar_t wto_path[APR_PATH_MAX];
+	if ((rv = utf8_to_unicode_path(wfrom_path,
+								   sizeof(wfrom_path) / sizeof(apr_wchar_t),
+								   from_path)))
+		return rv;
+	if ((rv = utf8_to_unicode_path(wto_path,
+								   sizeof(wto_path) / sizeof(apr_wchar_t),
+								   to_path)))
+		return rv;
 
-        if ((rv = utf8_to_unicode_path(wfrom_path,
-                                       sizeof(wfrom_path) / sizeof(apr_wchar_t),
-                                       from_path)))
-            return rv;
-        if ((rv = utf8_to_unicode_path(wto_path,
-                                       sizeof(wto_path) / sizeof(apr_wchar_t),
-                                       to_path)))
-            return rv;
-
-        if (!CreateHardLinkW(wto_path, wfrom_path, NULL))
-                return apr_get_os_error();
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI {
-        if (!CreateHardLinkA(to_path, from_path, NULL))
-                return apr_get_os_error();
-    }
-#endif
+	if (!CreateHardLinkW(wto_path, wfrom_path, NULL))
+			return apr_get_os_error();
     return rv;
 }
 
