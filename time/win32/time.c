@@ -91,13 +91,8 @@ APR_DECLARE(apr_time_t) apr_time_now(void)
 {
     LONGLONG aprtime = 0;
     FILETIME time;
-#ifndef _WIN32_WCE
+
     GetSystemTimeAsFileTime(&time);
-#else
-    SYSTEMTIME st;
-    GetSystemTime(&st);
-    SystemTimeToFileTime(&st, &time);
-#endif
     FileTimeToAprTime(&aprtime, &time);
     return aprtime; 
 }
@@ -144,7 +139,7 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
 
     AprTimeToFileTime(&ft, input);
 
-#if APR_HAS_UNICODE_FS && !defined(_WIN32_WCE)
+#if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
         TIME_ZONE_INFORMATION *tz;
@@ -184,7 +179,7 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
                          - (-(tz->Bias + tz->StandardBias) / 60);
     }
 #endif
-#if APR_HAS_ANSI_FS || defined(_WIN32_WCE)
+#if APR_HAS_ANSI_FS
     ELSE_WIN_OS_IS_ANSI
     {
         TIME_ZONE_INFORMATION tz;
@@ -317,13 +312,6 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t)
     Sleep((DWORD)(t / 1000));
 }
 
-#if defined(_WIN32_WCE)
-/* A noop on WinCE, like Unix implementation */
-APR_DECLARE(void) apr_time_clock_hires(apr_pool_t *p)
-{
-    return;
-}
-#else
 static apr_status_t clock_restore(void *unsetres)
 {
     ULONG newRes;
@@ -343,4 +331,3 @@ APR_DECLARE(void) apr_time_clock_hires(apr_pool_t *p)
                                   apr_pool_cleanup_null);
     }
 }
-#endif

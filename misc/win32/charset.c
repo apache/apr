@@ -30,11 +30,7 @@ APR_DECLARE(const char*) apr_os_locale_encoding (apr_pool_t *pool)
 #ifdef _UNICODE
     int i;
 #endif
-#if defined(_WIN32_WCE)
-    LCID locale = GetUserDefaultLCID();
-#else
     LCID locale = GetThreadLocale();
-#endif
     int len = GetLocaleInfo(locale, LOCALE_IDEFAULTANSICODEPAGE, NULL, 0);
     char *cp = apr_palloc(pool, (len * sizeof(TCHAR)) + 2);
     if (0 < GetLocaleInfo(locale, LOCALE_IDEFAULTANSICODEPAGE, (TCHAR*) (cp + 2), len))

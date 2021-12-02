@@ -47,12 +47,7 @@ APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
     wsaData.len = (u_long)*len;
     wsaData.buf = (char*) buf;
 
-#ifndef _WIN32_WCE
     rv = WSASend(sock->socketdes, &wsaData, 1, &dwBytes, 0, NULL, NULL);
-#else
-    rv = send(sock->socketdes, wsaData.buf, wsaData.len, 0);
-    dwBytes = rv;
-#endif
     if (rv == SOCKET_ERROR) {
         lasterror = apr_get_netos_error();
         *len = 0;
@@ -77,12 +72,7 @@ APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock, char *buf,
     wsaData.len = (u_long)*len;
     wsaData.buf = (char*) buf;
 
-#ifndef _WIN32_WCE
     rv = WSARecv(sock->socketdes, &wsaData, 1, &dwBytes, &flags, NULL, NULL);
-#else
-    rv = recv(sock->socketdes, wsaData.buf, wsaData.len, 0);
-    dwBytes = rv;
-#endif
     if (rv == SOCKET_ERROR) {
         lasterror = apr_get_netos_error();
         *len = 0;
@@ -140,21 +130,10 @@ APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock,
 
         } while (cur_len > 0);
     }
-#ifndef _WIN32_WCE
     rv = WSASend(sock->socketdes, pWsaBuf, nvec, &dwBytes, 0, NULL, NULL);
     if (rv == SOCKET_ERROR) {
         rc = apr_get_netos_error();
     }
-#else
-    for (i = 0; i < nvec; i++) {
-        rv = send(sock->socketdes, pWsaBuf[i].buf, pWsaBuf[i].len, 0);
-        if (rv == SOCKET_ERROR) {
-            rc = apr_get_netos_error();
-            break;
-        }
-        dwBytes += rv;
-    }
-#endif
     if (nvec > WSABUF_ON_STACK) 
         free(pWsaBuf);
 

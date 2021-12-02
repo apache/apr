@@ -26,9 +26,6 @@
 APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
                                        apr_file_t *old_file, apr_pool_t *p)
 {
-#ifdef _WIN32_WCE
-    return APR_ENOTIMPL;
-#else
     HANDLE hproc = GetCurrentProcess();
     HANDLE newhand = NULL;
 
@@ -63,15 +60,11 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
     (void) apr_pollset_create(&(*new_file)->pollset, 1, p, 0);
 #endif
     return APR_SUCCESS;
-#endif /* !defined(_WIN32_WCE) */
 }
 
 APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                                         apr_file_t *old_file, apr_pool_t *p)
 {
-#ifdef _WIN32_WCE
-    return APR_ENOTIMPL;
-#else
     HANDLE hproc = GetCurrentProcess();
     HANDLE newhand = NULL;
     apr_int32_t newflags;
@@ -183,7 +176,6 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
 #endif
 
     return APR_SUCCESS;
-#endif /* !defined(_WIN32_WCE) */
 }
 
 APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,

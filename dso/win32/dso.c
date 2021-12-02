@@ -56,9 +56,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
 {
     HINSTANCE os_handle;
     apr_status_t rv;
-#ifndef _WIN32_WCE
     DWORD em;
-#endif
 
     apr_wchar_t wpath[APR_PATH_MAX];
     if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
@@ -68,30 +66,22 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
         return ((*res_handle)->load_error = rv);
     }
     /* Prevent ugly popups from killing our app */
-#ifndef _WIN32_WCE
     if (!SetThreadErrorMode(SEM_FAILCRITICALERRORS, &em)) {
         *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
         return ((*res_handle)->load_error = apr_get_os_error());
     }
-#endif
     os_handle = LoadLibraryExW(wpath, NULL, 0);
     if (!os_handle)
         os_handle = LoadLibraryExW(wpath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
     if (!os_handle) {
-#ifndef _WIN32_WCE
         rv = apr_get_os_error();
 
         os_handle = LoadLibraryExW(wpath, NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
         if (os_handle) {
             rv = APR_SUCCESS;
         }
-#else            
-        rv = apr_get_os_error();
-#endif
     }
-#ifndef _WIN32_WCE
     SetThreadErrorMode(em, NULL);
-#endif
 
     *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
     (*res_handle)->cont = ctx;
@@ -117,24 +107,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
                          struct apr_dso_handle_t *handle, 
                          const char *symname)
 {
-#ifdef _WIN32_WCE
-    apr_size_t symlen = strlen(symname) + 1;
-    apr_size_t wsymlen = symlen;
-    apr_wchar_t wsymname[wsymlen];
-    apr_status_t rv;
-
-    rv = apr_conv_utf8_to_utf16(wsymname, &wsymlen, symname, &symlen);
-    if (rv != APR_SUCCESS) {
-        return rv;
-    }
-    else if (symlen) {
-        return APR_ENAMETOOLONG;
-    }
-
-    *ressym = (apr_dso_handle_sym_t)GetProcAddressW(handle->handle, wsymname);
-#else
     *ressym = (apr_dso_handle_sym_t)GetProcAddress(handle->handle, symname);
-#endif
     if (!*ressym) {
         return apr_get_os_error();
     }

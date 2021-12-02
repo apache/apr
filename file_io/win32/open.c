@@ -543,12 +543,8 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
                                        topath))) {
             return rv;
         }
-#ifndef _WIN32_WCE
         if (MoveFileExW(wfrompath, wtopath, MOVEFILE_REPLACE_EXISTING |
                                             MOVEFILE_COPY_ALLOWED))
-#else
-        if (MoveFileW(wfrompath, wtopath))
-#endif
             return APR_SUCCESS;
 #else
         if (MoveFileEx(frompath, topath, MOVEFILE_REPLACE_EXISTING |
@@ -675,9 +671,6 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile,
                                                      apr_int32_t flags, 
                                                      apr_pool_t *pool)
 {
-#ifdef _WIN32_WCE
-    return APR_ENOTIMPL;
-#else
     apr_os_file_t file_handle;
 
     apr_set_os_error(APR_SUCCESS);
@@ -687,16 +680,12 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile,
 
     return apr_os_file_put(thefile, &file_handle,
                            flags | APR_FOPEN_WRITE | APR_STDERR_FLAG, pool);
-#endif
 }
 
 APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile, 
                                                      apr_int32_t flags,
                                                      apr_pool_t *pool)
 {
-#ifdef _WIN32_WCE
-    return APR_ENOTIMPL;
-#else
     apr_os_file_t file_handle;
 
     apr_set_os_error(APR_SUCCESS);
@@ -706,16 +695,12 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile,
 
     return apr_os_file_put(thefile, &file_handle,
                            flags | APR_FOPEN_WRITE | APR_STDOUT_FLAG, pool);
-#endif
 }
 
 APR_DECLARE(apr_status_t) apr_file_open_flags_stdin(apr_file_t **thefile, 
                                                     apr_int32_t flags,
                                                     apr_pool_t *pool)
 {
-#ifdef _WIN32_WCE
-    return APR_ENOTIMPL;
-#else
     apr_os_file_t file_handle;
 
     apr_set_os_error(APR_SUCCESS);
@@ -725,7 +710,6 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stdin(apr_file_t **thefile,
 
     return apr_os_file_put(thefile, &file_handle,
                            flags | APR_FOPEN_READ | APR_STDIN_FLAG, pool);
-#endif
 }
 
 APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *pool)

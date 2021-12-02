@@ -24,7 +24,7 @@
 #include "apr_pools.h"
 #include "apr_strings.h"
 
-#if APR_HAS_UNICODE_FS && !defined(_WIN32_WCE)
+#if APR_HAS_UNICODE_FS
 static apr_status_t widen_envvar_name (apr_wchar_t *buffer,
                                        apr_size_t bufflen,
                                        const char *envvar)
@@ -46,9 +46,6 @@ APR_DECLARE(apr_status_t) apr_env_get(char **value,
                                       const char *envvar,
                                       apr_pool_t *pool)
 {
-#if defined(_WIN32_WCE)
-    return APR_ENOTIMPL;
-#else
     char *val = NULL;
     DWORD size;
 
@@ -114,7 +111,6 @@ APR_DECLARE(apr_status_t) apr_env_get(char **value,
 
     *value = val;
     return APR_SUCCESS;
-#endif
 }
 
 
@@ -122,9 +118,6 @@ APR_DECLARE(apr_status_t) apr_env_set(const char *envvar,
                                       const char *value,
                                       apr_pool_t *pool)
 {
-#if defined(_WIN32_WCE)
-    return APR_ENOTIMPL;
-#else
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
@@ -156,15 +149,11 @@ APR_DECLARE(apr_status_t) apr_env_set(const char *envvar,
 #endif
 
     return APR_SUCCESS;
-#endif
 }
 
 
 APR_DECLARE(apr_status_t) apr_env_delete(const char *envvar, apr_pool_t *pool)
 {
-#if defined(_WIN32_WCE)
-    return APR_ENOTIMPL;
-#else
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
@@ -188,5 +177,4 @@ APR_DECLARE(apr_status_t) apr_env_delete(const char *envvar, apr_pool_t *pool)
 #endif
 
     return APR_SUCCESS;
-#endif
 }

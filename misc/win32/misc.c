@@ -104,17 +104,6 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
                 apr_os_level = APR_WIN_10;
             }
         }
-#ifdef _WIN32_WCE
-        else if (oslev.dwPlatformId == VER_PLATFORM_WIN32_CE) 
-        {
-            if (oslev.dwMajorVersion < 3) {
-                apr_os_level = APR_WIN_UNSUP;
-            }
-            else {
-                apr_os_level = APR_WIN_CE_3;
-            }
-        }
-#endif
         else {
             apr_os_level = APR_WIN_UNSUP;
         }
@@ -187,19 +176,11 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
         return NULL;
     }
 
-#if defined(_WIN32_WCE)
-    if (ordinal)
-        return GetProcAddressA(cached_dll_handle,
-                               (const char *) (apr_ssize_t)ordinal);
-    else
-        return GetProcAddressA(cached_dll_handle, fnName);
-#else
     if (ordinal)
         return GetProcAddress(cached_dll_handle,
                               (const char *) (apr_ssize_t)ordinal);
     else
         return GetProcAddress(cached_dll_handle, fnName);
-#endif
 }
 
 DWORD apr_wait_for_single_object(HANDLE handle, apr_interval_time_t timeout)

@@ -75,16 +75,6 @@ struct apr_ipsubnet_t {
 #define AIX_SERVNAME_HACK 0
 #endif
 
-#ifdef _WIN32_WCE
-/* XXX: BS solution.  Need an HAVE_GETSERVBYNAME and actually
- * do something here, to provide the obvious proto mappings.
- */
-static void *getservbyname(const char *name, const char *proto)
-{
-    return NULL;
-}
-#endif
-
 static apr_status_t get_local_addr(apr_socket_t *sock)
 {
     sock->local_addr->salen = sizeof(sock->local_addr->sa);

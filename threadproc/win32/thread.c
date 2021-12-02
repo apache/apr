@@ -138,21 +138,12 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
     /* Use 0 for default Thread Stack Size, because that will
      * default the stack to the same size as the calling thread.
      */
-#ifndef _WIN32_WCE
     if ((handle = (HANDLE)_beginthreadex(NULL,
                         (DWORD) (attr ? attr->stacksize : 0),
                         (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
                         (*new), 0, &temp)) == 0) {
         return APR_FROM_OS_ERROR(_doserrno);
     }
-#else
-   if ((handle = CreateThread(NULL,
-                        attr && attr->stacksize > 0 ? attr->stacksize : 0,
-                        (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
-                        (*new), 0, &temp)) == 0) {
-        return apr_get_os_error();
-    }
-#endif
     if (attr && attr->detach) {
         CloseHandle(handle);
     }
@@ -169,11 +160,7 @@ APR_DECLARE(void) apr_thread_exit(apr_thread_t *thd, apr_status_t retval)
     if (!thd->td) { /* detached? */
         apr_pool_destroy(thd->pool);
     }
-#ifndef _WIN32_WCE
     _endthreadex(0);
-#else
-    ExitThread(0);
-#endif
 }
 
 APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,

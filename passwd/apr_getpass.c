@@ -113,9 +113,6 @@ static char *get_password(const char *prompt)
  * The only way is to use the GUI so the getpass should be implemented
  * on per-application basis.
  */ 
-#ifdef _WIN32_WCE
-    return NULL;
-#else
     static char password[128];
     int n = 0;
     int ch;
@@ -169,7 +166,6 @@ static char *get_password(const char *prompt)
     fputc('\n', stderr);
     password[n] = '\0';
     return password;
-#endif
 }
 
 #elif defined (HAVE_TERMIOS_H)

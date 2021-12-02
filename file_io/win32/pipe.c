@@ -69,9 +69,6 @@ static apr_status_t file_pipe_create(apr_file_t **in,
                                      apr_pool_t *pool_in,
                                      apr_pool_t *pool_out)
 {
-#ifdef _WIN32_WCE
-    return APR_ENOTIMPL;
-#else
     SECURITY_ATTRIBUTES sa;
     static unsigned long id = 0;
     DWORD dwPipeMode;
@@ -211,7 +208,6 @@ static apr_status_t file_pipe_create(apr_file_t **in,
     apr_pool_cleanup_register((*out)->pool, (void *)(*out), file_cleanup,
                         apr_pool_cleanup_null);
     return APR_SUCCESS;
-#endif /* _WIN32_WCE */
 }
 
 APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in,
