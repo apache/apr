@@ -41,7 +41,6 @@
  * Avoid dragging in wtypes.h unless it's absolutely necessary [generally
  * not with APR itself, until some GUI-related security is introduced.]
  */
-#ifndef _WIN32_WCE
 #define HAVE_ACLAPI 1
 #ifdef __wtypes_h__
 #include <accctrl.h>
@@ -50,18 +49,15 @@
 #include <accctrl.h>
 #undef __wtypes_h__
 #endif
-#else
-#define HAVE_ACLAPI 0
-#endif
 
 /* Use this section to define all of the HAVE_FOO_H
  * that are required to build properly.
  */
 #define HAVE_LIMITS_H 1
 #define HAVE_MALLOC_H 1
-#define HAVE_PROCESS_H APR_NOT_IN_WCE
+#define HAVE_PROCESS_H 1
 #define HAVE_SIGNAL_H 1
-#define HAVE_STDDEF_H APR_NOT_IN_WCE
+#define HAVE_STDDEF_H 1
 #define HAVE_STDLIB_H 1
 
 #define HAVE_STRICMP  1
@@ -150,11 +146,7 @@ APR_DECLARE_DATA int errno;
 #define APR_OFF_T_STRFN         apr_strtoi64
 #endif
 #else
-#if defined(_WIN32_WCE)
-#define APR_OFF_T_STRFN         strtol
-#else
 #define APR_OFF_T_STRFN         strtoi
-#endif
 #endif
 
 /* used to check for DWORD overflow in 64bit compiles */
