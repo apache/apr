@@ -58,11 +58,9 @@ struct apr_procattr_t {
     apr_int32_t detached;
     apr_child_errfn_t *errfn;
     apr_int32_t errchk;
-#ifndef _WIN32_WCE
     HANDLE     user_token;
     LPSECURITY_ATTRIBUTES   sa;
     LPVOID                  sd;
-#endif
 };
 
 struct apr_thread_once_t {

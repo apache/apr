@@ -135,7 +135,7 @@ APR_DECLARE_DATA int errno;
 #endif
 
 /* MSVC 7.0 introduced _strtoi64 */
-#if _MSC_VER >= 1300 && _INTEGRAL_MAX_BITS >= 64 && !defined(_WIN32_WCE)
+#if _MSC_VER >= 1300 && _INTEGRAL_MAX_BITS >= 64
 #define APR_INT64_STRFN	      _strtoi64
 #endif
 

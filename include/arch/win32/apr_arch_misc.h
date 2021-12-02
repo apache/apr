@@ -43,9 +43,7 @@
 #if APR_HAVE_STRING_H
 #include <string.h>
 #endif
-#ifndef _WIN32_WCE
 #include <tlhelp32.h>
-#endif
 
 #if defined(HAVE_IF_INDEXTONAME) && defined(_MSC_VER)
 #include <Iphlpapi.h>
@@ -144,7 +142,7 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *);
 #define ELSE_WIN_OS_IS_ANSI
 #endif /* APR_HAS_ANSI_FS && APR_HAS_UNICODE_FS */
 
-#if defined(_MSC_VER) && !defined(_WIN32_WCE)
+#if defined(_MSC_VER)
 #include "crtdbg.h"
 
 static APR_INLINE void* apr_malloc_dbg(size_t size, const char* filename,
@@ -237,7 +235,6 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
  * In the case of non-text functions, simply #define the original name
  */
 
-#if !defined(_WIN32_WCE)
 /* This group is NOT available to all versions of WinNT,
  * these we must always look up
  */
@@ -315,7 +312,5 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_API_MS_WIN_DOWNLEVEL_SHELL32_L1_1_0, LPWSTR *,
                           STDAPICALLTYPE, CommandLineToArgvW, 0,
                           (LPCWSTR lpCmdLine, int *pNumArgs),
                           (lpCmdLine, pNumArgs));
-
-#endif /* !defined(_WIN32_WCE) */
 
 #endif  /* ! MISC_H */

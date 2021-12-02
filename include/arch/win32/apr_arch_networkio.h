@@ -56,17 +56,8 @@ struct apr_socket_t {
     apr_pollset_t *pollset;
 };
 
-#ifdef _WIN32_WCE
-#ifndef WSABUF
-typedef struct _WSABUF {
-    u_long      len;     /* the length of the buffer */
-    char FAR *  buf;     /* the pointer to the buffer */
-} WSABUF, FAR * LPWSABUF;
-#endif
-#else
 #ifdef _MSC_VER
 #define HAVE_STRUCT_IPMREQ
-#endif
 #endif
 
 apr_status_t status_from_res_error(int);
