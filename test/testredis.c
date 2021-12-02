@@ -25,7 +25,10 @@
 
 #include <stdio.h>
 #if APR_HAVE_STDLIB_H
-#include <stdlib.h>		/* for exit() */
+#include <stdlib.h>     /* for exit() */
+#endif
+#if APR_HAVE_PROCESS_H
+#include <process.h>    /* for getpid() */
 #endif
 
 #define HOST "localhost"
