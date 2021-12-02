@@ -136,84 +136,43 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
 {
     SYSTEMTIME st;
     FILETIME ft, localft;
+	TIME_ZONE_INFORMATION *tz;
+	SYSTEMTIME localst;
+	apr_time_t localtime;
 
     AprTimeToFileTime(&ft, input);
 
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        TIME_ZONE_INFORMATION *tz;
-        SYSTEMTIME localst;
-        apr_time_t localtime;
+	get_local_timezone(&tz);
 
-        get_local_timezone(&tz);
+	FileTimeToSystemTime(&ft, &st);
 
-        FileTimeToSystemTime(&ft, &st);
-
-        /* The Platform SDK documents that SYSTEMTIME/FILETIME are
-         * generally UTC.  We use SystemTimeToTzSpecificLocalTime
-         * because FileTimeToLocalFileFime is documented that the
-         * resulting time local file time would have DST relative
-         * to the *present* date, not the date converted.
-         * The time value makes a roundtrip, localst cannot be invalid below.
-         */
-        SystemTimeToTzSpecificLocalTime(tz, &st, &localst);
-        SystemTimeToAprExpTime(result, &localst);
-        result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
+	/* The Platform SDK documents that SYSTEMTIME/FILETIME are
+	 * generally UTC.  We use SystemTimeToTzSpecificLocalTime
+	 * because FileTimeToLocalFileFime is documented that the
+	 * resulting time local file time would have DST relative
+	 * to the *present* date, not the date converted.
+	 * The time value makes a roundtrip, localst cannot be invalid below.
+	 */
+	SystemTimeToTzSpecificLocalTime(tz, &st, &localst);
+	SystemTimeToAprExpTime(result, &localst);
+	result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
 
 
-        /* Recover the resulting time as an apr time and use the
-         * delta for gmtoff in seconds (and ignore msec rounding) 
-         */
-        SystemTimeToFileTime(&localst, &localft);
-        FileTimeToAprTime(&localtime, &localft);
-        result->tm_gmtoff = (int)apr_time_sec(localtime) 
-                          - (int)apr_time_sec(input);
+	/* Recover the resulting time as an apr time and use the
+	 * delta for gmtoff in seconds (and ignore msec rounding) 
+	 */
+	SystemTimeToFileTime(&localst, &localft);
+	FileTimeToAprTime(&localtime, &localft);
+	result->tm_gmtoff = (int)apr_time_sec(localtime) 
+					  - (int)apr_time_sec(input);
 
-        /* To compute the dst flag, we compare the expected 
-         * local (standard) timezone bias to the delta.
-         * [Note, in war time or double daylight time the
-         * resulting tm_isdst is, desireably, 2 hours]
-         */
-        result->tm_isdst = (result->tm_gmtoff / 3600)
-                         - (-(tz->Bias + tz->StandardBias) / 60);
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        TIME_ZONE_INFORMATION tz;
-	/* XXX: This code is simply *wrong*.  The time converted will always
-         * map to the *now current* status of daylight savings time.
-         * The time value makes a roundtrip, st cannot be invalid below.
-         */
-
-        FileTimeToLocalFileTime(&ft, &localft);
-        FileTimeToSystemTime(&localft, &st);
-        SystemTimeToAprExpTime(result, &st);
-        result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
-
-        switch (GetTimeZoneInformation(&tz)) {
-            case TIME_ZONE_ID_UNKNOWN:
-                result->tm_isdst = 0;
-                /* Bias = UTC - local time in minutes
-                 * tm_gmtoff is seconds east of UTC
-                 */
-                result->tm_gmtoff = tz.Bias * -60;
-                break;
-            case TIME_ZONE_ID_STANDARD:
-                result->tm_isdst = 0;
-                result->tm_gmtoff = (tz.Bias + tz.StandardBias) * -60;
-                break;
-            case TIME_ZONE_ID_DAYLIGHT:
-                result->tm_isdst = 1;
-                result->tm_gmtoff = (tz.Bias + tz.DaylightBias) * -60;
-                break;
-            default:
-                /* noop */;
-        }
-    }
-#endif
+	/* To compute the dst flag, we compare the expected 
+	 * local (standard) timezone bias to the delta.
+	 * [Note, in war time or double daylight time the
+	 * resulting tm_isdst is, desireably, 2 hours]
+	 */
+	result->tm_isdst = (result->tm_gmtoff / 3600)
+					 - (-(tz->Bias + tz->StandardBias) / 60);
 
     return APR_SUCCESS;
 }

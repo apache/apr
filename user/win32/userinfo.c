@@ -97,57 +97,31 @@ APR_DECLARE(apr_status_t) apr_uid_homepath_get(char **dirname,
                            KEY_QUERY_VALUE, &key)) != ERROR_SUCCESS)
         return APR_FROM_OS_ERROR(rv);
 
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        keylen = sizeof(regkey);
-        rv = RegQueryValueExW(key, L"ProfileImagePath", NULL, &type,
-                                   (void*)regkey, &keylen);
-        RegCloseKey(key);
-        if (rv != ERROR_SUCCESS)
-            return APR_FROM_OS_ERROR(rv);
-        if (type == REG_SZ) {
-            char retdir[MAX_PATH];
-            if ((rv = unicode_to_utf8_path(retdir, sizeof(retdir), 
-                                           (apr_wchar_t*)regkey)) != APR_SUCCESS)
-                return rv;
-            *dirname = apr_pstrdup(p, retdir);
-        }
-        else if (type == REG_EXPAND_SZ) {
-            apr_wchar_t path[MAX_PATH];
-            char retdir[MAX_PATH];
-            ExpandEnvironmentStringsW((apr_wchar_t*)regkey, path, 
-                                      sizeof(path) / 2);
-            if ((rv = unicode_to_utf8_path(retdir, sizeof(retdir), path))
-                    != APR_SUCCESS)
-                return rv;
-            *dirname = apr_pstrdup(p, retdir);
-        }
-        else
-            return APR_ENOENT;
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        keylen = sizeof(regkey);
-        rv = RegQueryValueEx(key, "ProfileImagePath", NULL, &type,
-                                  (void*)regkey, &keylen);
-        RegCloseKey(key);
-        if (rv != ERROR_SUCCESS)
-            return APR_FROM_OS_ERROR(rv);
-        if (type == REG_SZ) {
-            *dirname = apr_pstrdup(p, regkey);
-        }
-        else if (type == REG_EXPAND_SZ) {
-            char path[MAX_PATH];
-            ExpandEnvironmentStrings(regkey, path, sizeof(path));
-            *dirname = apr_pstrdup(p, path);
-        }
-        else
-            return APR_ENOENT;
-    }
-#endif /* APR_HAS_ANSI_FS */
+	keylen = sizeof(regkey);
+	rv = RegQueryValueExW(key, L"ProfileImagePath", NULL, &type,
+							   (void*)regkey, &keylen);
+	RegCloseKey(key);
+	if (rv != ERROR_SUCCESS)
+		return APR_FROM_OS_ERROR(rv);
+	if (type == REG_SZ) {
+		char retdir[MAX_PATH];
+		if ((rv = unicode_to_utf8_path(retdir, sizeof(retdir), 
+									   (apr_wchar_t*)regkey)) != APR_SUCCESS)
+			return rv;
+		*dirname = apr_pstrdup(p, retdir);
+	}
+	else if (type == REG_EXPAND_SZ) {
+		apr_wchar_t path[MAX_PATH];
+		char retdir[MAX_PATH];
+		ExpandEnvironmentStringsW((apr_wchar_t*)regkey, path, 
+								  sizeof(path) / 2);
+		if ((rv = unicode_to_utf8_path(retdir, sizeof(retdir), path))
+				!= APR_SUCCESS)
+			return rv;
+		*dirname = apr_pstrdup(p, retdir);
+	}
+	else
+		return APR_ENOENT;
     for (fixch = *dirname; *fixch; ++fixch)
         if (*fixch == '\\')
             *fixch = '/';

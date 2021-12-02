@@ -58,19 +58,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
         mutexkey = NULL;
     }
 
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        hMutex = CreateMutexW(NULL, FALSE, mutexkey);
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        hMutex = CreateMutexA(NULL, FALSE, mutexkey);
-    }
-#endif
-
+    hMutex = CreateMutexW(NULL, FALSE, mutexkey);
     if (!hMutex) {
         return apr_get_os_error();
     }
@@ -102,19 +90,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
      */
     mutexkey = res_name_from_filename(fname, 1, pool);
 
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        hMutex = OpenMutexW(MUTEX_ALL_ACCESS, FALSE, mutexkey);
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        hMutex = OpenMutexA(MUTEX_ALL_ACCESS, FALSE, mutexkey);
-    }
-#endif
-
+    hMutex = OpenMutexW(MUTEX_ALL_ACCESS, FALSE, mutexkey);
     if (!hMutex) {
         return apr_get_os_error();
     }
