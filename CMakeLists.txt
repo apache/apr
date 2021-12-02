@@ -119,7 +119,7 @@ CONFIGURE_FILE(include/apu_want.hw
                COPYONLY)
 
 ADD_EXECUTABLE(gen_test_char tools/gen_test_char.c)
-GET_TARGET_PROPERTY(GEN_TEST_CHAR_EXE gen_test_char LOCATION)
+SET(GEN_TEST_CHAR_EXE ${PROJECT_BINARY_DIR}/gen_test_char.exe)
 ADD_CUSTOM_COMMAND(
   COMMENT "Generating character tables, apr_escape_test_char.h, for current locale"
   DEPENDS gen_test_char
