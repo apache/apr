@@ -466,8 +466,8 @@ SET(dbd_drivers)
 
 # libapr-2 is shared, apr-2 is static
 ADD_LIBRARY(${apr_libname} SHARED ${APR_SOURCES} ${APR_PUBLIC_HEADERS_GENERATED} libapr.rc)
-SET(install_targets ${install_targets} ${apr_libname})
-SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/${apr_libname}.pdb)
+LIST(APPEND install_targets ${apr_libname})
+LIST(APPEND install_bin_pdb ${PROJECT_BINARY_DIR}/${apr_libname}.pdb)
 TARGET_LINK_LIBRARIES(${apr_libname} ${XMLLIB_LIBRARIES} ${XLATE_LIBRARIES} ${APR_SYSTEM_LIBS})
 SET_TARGET_PROPERTIES(${apr_libname} PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_EXPORT;APR_HAVE_MODULAR_DSO")
 ADD_DEPENDENCIES(${apr_libname} test_char_header)
