@@ -1,0 +1,24 @@
+{
+  "name": "apr-2",
+  "version": "2.0.0",
+  "port-version": 5,
+  "description": "The Apache Portable Runtime (APR) is a C library that forms a system portability layer that covers many operating systems.",
+  "homepage": "https://apr.apache.org/",
+  "supports": "!uwp",
+  "dependencies": [
+    "libiconv",
+    "expat",
+    "sqlite3",
+    "openssl",
+    {
+      "name": "vcpkg-cmake",
+      "host": true,
+      "platform": "windows"
+    }
+  ],
+  "features": {
+    "private-headers": {
+      "description": "Install non-standard files required for building Apache httpd"
+    }
+  }
+}
