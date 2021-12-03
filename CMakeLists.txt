@@ -476,6 +476,7 @@ SET(APR_TEST_SOURCES
 )
 
 SET(install_targets)
+SET(install_modules)
 SET(install_bin_pdb)
 SET(dbd_drivers)
 
@@ -508,7 +509,7 @@ IF(APU_HAVE_CRYPTO)
     MESSAGE(FATAL_ERROR "Only OpenSSL-based crypto is currently implemented in the cmake build")
   ENDIF()
   ADD_LIBRARY(apr_crypto_openssl-2 SHARED crypto/apr_crypto_openssl.c libapr.rc)
-  LIST(APPEND install_targets apr_crypto_openssl-2)
+  LIST(APPEND install_modules ${PROJECT_BINARY_DIR}/apr_crypto_openssl-2.dll)
   LIST(APPEND install_bin_pdb ${PROJECT_BINARY_DIR}/apr_crypto_openssl-2.pdb)
   TARGET_LINK_LIBRARIES(apr_crypto_openssl-2 ${apr_libname} ${APR_SYSTEM_LIBS} ${OPENSSL_LIBRARIES})
   SET_TARGET_PROPERTIES(apr_crypto_openssl-2 PROPERTIES INCLUDE_DIRECTORIES "${APR_INCLUDE_DIRECTORIES};${OPENSSL_INCLUDE_DIR}")
@@ -518,7 +519,7 @@ ENDIF()
 
 IF(APU_HAVE_ODBC)
   ADD_LIBRARY(apr_dbd_odbc-2 SHARED dbd/apr_dbd_odbc.c libapr.rc)
-  LIST(APPEND install_targets apr_dbd_odbc-2)
+  LIST(APPEND install_modules ${PROJECT_BINARY_DIR}/apr_dbd_odbc-2.dll)
   LIST(APPEND install_bin_pdb ${PROJECT_BINARY_DIR}/apr_dbd_odbc-2.pdb)
   LIST(APPEND dbd_drivers odbc)
   TARGET_LINK_LIBRARIES(apr_dbd_odbc-2 ${apr_libname} ${APR_SYSTEM_LIBS} odbc32 odbccp32)
@@ -529,7 +530,7 @@ ENDIF()
 
 IF(APU_HAVE_SQLITE3)
   ADD_LIBRARY(apr_dbd_sqlite3-2 SHARED dbd/apr_dbd_sqlite3.c libapr.rc)
-  LIST(APPEND install_targets apr_dbd_sqlite3-2)
+  LIST(APPEND install_modules ${PROJECT_BINARY_DIR}/apr_dbd_sqlite3-2.dll)
   LIST(APPEND install_bin_pdb ${PROJECT_BINARY_DIR}/apr_dbd_sqlite3-2.pdb)
   LIST(APPEND dbd_drivers sqlite3)
   TARGET_LINK_LIBRARIES(apr_dbd_sqlite3-2 ${apr_libname} ${APR_SYSTEM_LIBS} ${SQLite3_LIBRARIES})
@@ -660,6 +661,10 @@ INSTALL(TARGETS ${install_targets}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
        )
+
+# For DSO modules, install only binaries
+INSTALL(FILES ${install_modules}
+        DESTINATION bin)
 
 IF(INSTALL_PDB)
   INSTALL(FILES ${install_bin_pdb}
