@@ -91,6 +91,7 @@ SET(apu_use_libxml2_10 0)
 SET(apu_use_expat_10 0)
 SET(apu_use_xmllite_10 0)
 SET(apu_have_iconv_10 0)
+SET(apu_have_odbc_10 0)
 
 IF(APR_HAVE_IPV6)
   SET(apr_have_ipv6_10 1)
@@ -110,6 +111,9 @@ ENDIF()
 
 IF(APU_HAVE_ICONV)
 SET(apu_have_iconv_10 1)
+ENDIF()
+IF(APU_HAVE_ODBC)
+SET(apu_have_odbc_10 1)
 ENDIF()
 
 CONFIGURE_FILE(include/apr.hwc
@@ -507,7 +511,6 @@ IF(APU_HAVE_ODBC)
   LIST(APPEND dbd_drivers odbc)
   TARGET_LINK_LIBRARIES(apr_dbd_odbc-2 ${apr_libname} ${APR_SYSTEM_LIBS} odbc32 odbccp32)
   SET_PROPERTY(TARGET apr_dbd_odbc-2 APPEND PROPERTY LINK_FLAGS /export:apr_dbd_odbc_driver)
-  SET_TARGET_PROPERTIES(apr_dbd_odbc-2 PROPERTIES COMPILE_DEFINITIONS "APU_HAVE_ODBC;HAVE_SQL_H;APU_DSO_MODULE_BUILD")
   SET_TARGET_PROPERTIES(apr_dbd_odbc-2 PROPERTIES COMPILE_FLAGS "-DDLL_NAME=apr_dbd_odbc-2")
 ENDIF()
 

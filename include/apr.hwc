@@ -655,22 +655,18 @@ typedef int apr_wait_t;
  *          are supported.  The driver builds enable
  *          these flags individually.
  */
-#ifndef APU_DSO_MODULE_BUILD
 #define APU_HAVE_PGSQL          0
 #define APU_HAVE_MYSQL          0
 #define APU_HAVE_SQLITE3        0
 #define APU_HAVE_SQLITE2        0
 #define APU_HAVE_ORACLE         0
-#define APU_HAVE_ODBC           0
-#endif
+#define APU_HAVE_ODBC           @apu_have_odbc_10@
 
 #define APU_HAVE_CRYPTO         @apu_have_crypto_10@
-
-#ifndef APU_DSO_MODULE_BUILD
-#define APU_HAVE_OPENSSL        0
+#define APU_HAVE_CRYPTO_PRNG    0
 #define APU_HAVE_NSS            0
 #define APU_HAVE_COMMONCRYPTO   0
-#endif
+#define APU_HAVE_OPENSSL        @apu_have_crypto_10@
 
 #define APU_HAVE_ICONV          @apu_have_iconv_10@
 #define APR_HAS_XLATE           (APU_HAVE_ICONV)
