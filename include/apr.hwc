@@ -639,15 +639,12 @@ typedef int apr_wait_t;
  * we always have SDBM (it's in our codebase)
  */
 #define APU_HAVE_SDBM           1
-
-#ifndef APU_DSO_MODULE_BUILD
 #define APU_HAVE_GDBM           0
 #define APU_HAVE_NDBM           0
 #define APU_HAVE_DB             0
 
 #if APU_HAVE_DB
 #define APU_HAVE_DB_VERSION     0
-#endif
 #endif
 
 /*
