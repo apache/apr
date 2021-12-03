@@ -657,7 +657,7 @@ typedef int apr_wait_t;
  */
 #define APU_HAVE_PGSQL          0
 #define APU_HAVE_MYSQL          0
-#define APU_HAVE_SQLITE3        0
+#define APU_HAVE_SQLITE3        @apu_have_sqlite3_10@
 #define APU_HAVE_SQLITE2        0
 #define APU_HAVE_ORACLE         0
 #define APU_HAVE_ODBC           @apu_have_odbc_10@
