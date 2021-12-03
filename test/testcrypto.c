@@ -2641,100 +2641,83 @@ abts_suite *testcrypto(abts_suite *suite)
     /* test simple init and shutdown */
     abts_run_test(suite, test_crypto_init, NULL);
 
+#if APU_APU_HAVE_OPENSSL
     /* test key parsing - openssl */
     abts_run_test(suite, test_crypto_key_openssl, NULL);
-
-    /* test key parsing - nss */
-    abts_run_test(suite, test_crypto_key_nss, NULL);
-
-    /* test key parsing - commoncrypto */
-    abts_run_test(suite, test_crypto_key_commoncrypto, NULL);
-
     /* test a simple encrypt / decrypt operation - openssl */
     abts_run_test(suite, test_crypto_block_openssl, NULL);
-
     /* test a simple sign / verify operation - openssl */
     abts_run_test(suite, test_crypto_digest_openssl, NULL);
-
     /* test a padded encrypt / decrypt operation - openssl */
     abts_run_test(suite, test_crypto_block_openssl_pad, NULL);
-
-    /* test a simple encrypt / decrypt operation - nss */
-    abts_run_test(suite, test_crypto_block_nss, NULL);
-
-    /* test a simple sign / verify operation - nss */
-    abts_run_test(suite, test_crypto_digest_nss, NULL);
-
-    /* test a padded encrypt / decrypt operation - nss */
-    abts_run_test(suite, test_crypto_block_nss_pad, NULL);
-
-    /* test a simple encrypt / decrypt operation - commoncrypto */
-    abts_run_test(suite, test_crypto_block_commoncrypto, NULL);
-
-    /* test a simple sign / verify operation - commoncrypto */
-    abts_run_test(suite, test_crypto_digest_commoncrypto, NULL);
-
-    /* test a padded encrypt / decrypt operation - commoncrypto */
-    abts_run_test(suite, test_crypto_block_commoncrypto_pad, NULL);
-
-
     /* test encrypt nss / decrypt openssl */
     abts_run_test(suite, test_crypto_block_nss_openssl, NULL);
-
     /* test padded encrypt nss / decrypt openssl */
     abts_run_test(suite, test_crypto_block_nss_openssl_pad, NULL);
-
-    /* test sign nss / verify openssl */
-    abts_run_test(suite, test_crypto_digest_nss_openssl, NULL);
-
-
-    /* test encrypt openssl / decrypt nss */
-    abts_run_test(suite, test_crypto_block_openssl_nss, NULL);
-
-    /* test padded encrypt openssl / decrypt nss */
-    abts_run_test(suite, test_crypto_block_openssl_nss_pad, NULL);
-
-    /* test sign openssl / verify nss */
-    abts_run_test(suite, test_crypto_digest_openssl_nss, NULL);
-
-
-    /* test encrypt openssl / decrypt commoncrypto */
-    abts_run_test(suite, test_crypto_block_openssl_commoncrypto, NULL);
-
-    /* test padded encrypt openssl / decrypt commoncrypto */
-    abts_run_test(suite, test_crypto_block_openssl_commoncrypto_pad, NULL);
-
-    /* test sign openssl / verify commoncrypto */
-    abts_run_test(suite, test_crypto_digest_openssl_commoncrypto, NULL);
-
-
-    /* test encrypt commoncrypto / decrypt openssl */
-    abts_run_test(suite, test_crypto_block_commoncrypto_openssl, NULL);
-
-    /* test padded encrypt commoncrypto / decrypt openssl */
-    abts_run_test(suite, test_crypto_block_commoncrypto_openssl_pad, NULL);
-
-    /* test sign commoncrypto / verify openssl */
-    abts_run_test(suite, test_crypto_digest_commoncrypto_openssl, NULL);
-
-
     /* test block key types openssl */
     abts_run_test(suite, test_crypto_get_block_key_types_openssl, NULL);
-
-    /* test block key types nss */
-    abts_run_test(suite, test_crypto_get_block_key_types_nss, NULL);
-
-    /* test block key types commoncrypto */
-    abts_run_test(suite, test_crypto_get_block_key_types_commoncrypto, NULL);
-
     /* test block key modes openssl */
     abts_run_test(suite, test_crypto_get_block_key_modes_openssl, NULL);
 
+#endif
+#if APU_APU_HAVE_NSS
+    /* test key parsing - nss */
+    abts_run_test(suite, test_crypto_key_nss, NULL);
+    /* test a simple encrypt / decrypt operation - nss */
+    abts_run_test(suite, test_crypto_block_nss, NULL);
+    /* test a simple sign / verify operation - nss */
+    abts_run_test(suite, test_crypto_digest_nss, NULL);
+    /* test a padded encrypt / decrypt operation - nss */
+    abts_run_test(suite, test_crypto_block_nss_pad, NULL);
+
+#if APU_APU_HAVE_OPENSSL
+    /* test sign nss / verify openssl */
+    abts_run_test(suite, test_crypto_digest_nss_openssl, NULL);
+    /* test encrypt openssl / decrypt nss */
+    abts_run_test(suite, test_crypto_block_openssl_nss, NULL);
+    /* test padded encrypt openssl / decrypt nss */
+    abts_run_test(suite, test_crypto_block_openssl_nss_pad, NULL);
+    /* test sign openssl / verify nss */
+    abts_run_test(suite, test_crypto_digest_openssl_nss, NULL);
+#endif
+
+    /* test block key types nss */
+    abts_run_test(suite, test_crypto_get_block_key_types_nss, NULL);
     /* test block key modes nss */
     abts_run_test(suite, test_crypto_get_block_key_modes_nss, NULL);
+#endif
 
+#if APU_APU_HAVE_COMMONCRYPTO
+    /* test key parsing - commoncrypto */
+    abts_run_test(suite, test_crypto_key_commoncrypto, NULL);
+    /* test a simple encrypt / decrypt operation - commoncrypto */
+    abts_run_test(suite, test_crypto_block_commoncrypto, NULL);
+    /* test a simple sign / verify operation - commoncrypto */
+    abts_run_test(suite, test_crypto_digest_commoncrypto, NULL);
+    /* test a padded encrypt / decrypt operation - commoncrypto */
+    abts_run_test(suite, test_crypto_block_commoncrypto_pad, NULL);
+
+#if APU_APU_HAVE_OPENSSL
+    /* test encrypt openssl / decrypt commoncrypto */
+    abts_run_test(suite, test_crypto_block_openssl_commoncrypto, NULL);
+    /* test padded encrypt openssl / decrypt commoncrypto */
+    abts_run_test(suite, test_crypto_block_openssl_commoncrypto_pad, NULL);
+    /* test sign openssl / verify commoncrypto */
+    abts_run_test(suite, test_crypto_digest_openssl_commoncrypto, NULL);
+    /* test encrypt commoncrypto / decrypt openssl */
+    abts_run_test(suite, test_crypto_block_commoncrypto_openssl, NULL);
+    /* test padded encrypt commoncrypto / decrypt openssl */
+    abts_run_test(suite, test_crypto_block_commoncrypto_openssl_pad, NULL);
+    /* test sign commoncrypto / verify openssl */
+    abts_run_test(suite, test_crypto_digest_commoncrypto_openssl, NULL);
+#endif
+
+    /* test block key types commoncrypto */
+    abts_run_test(suite, test_crypto_get_block_key_types_commoncrypto, NULL);
     /* test block key modes commoncrypto */
     abts_run_test(suite, test_crypto_get_block_key_modes_commoncrypto, NULL);
+#endif
+
 
     abts_run_test(suite, test_crypto_memzero, NULL);
     abts_run_test(suite, test_crypto_equals, NULL);
