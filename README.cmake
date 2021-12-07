@@ -1,50 +1,28 @@
-Experimental cmake-based build support for APR on Microsoft Windows
+CMake based build support for APR on Microsoft Windows
 
 Status
 ------
 
 This build support is currently intended only for Microsoft Windows.
 
-This build support is experimental.  Specifically,
-
-* It does not support all features of APR.
-* Some components may not be built correctly and/or in a manner
-  compatible with the previous Windows build support.
-* Build interfaces, such as the mechanisms which are used to enable
-  optional functionality or specify prerequisites, may change from
-  release to release as feedback is received from users and bugs and
-  limitations are resolved.
-
-Important: Refer to the "Known Bugs and Limitations" section for further
-           information.
-
-           It is beyond the scope of this document to document or explain
-           how to utilize the various cmake features, such as different
-           build backends or provisions for finding support libraries.
-
-           Please refer to the cmake documentation for additional information
-           that applies to building any project with cmake.
-
 Prerequisites
 -------------
 
 The following tools must be in PATH:
 
-* cmake, version 2.8 or later
+* cmake, version 3.0 or later
   cmake version 3.1.3 or later is required to work with current OpenSSL
   releases.  (OpenSSL is an optional prerequisite of APR.)
 * If using a command-line compiler: compiler and linker and related tools
   (Refer to the cmake documentation for more information.)
 
-The following support libraries are mandatory:
-
-* Either expat or libxml2
-
 Additional support libraries allow optional features of APR to be enabled:
 
+* Expat
+* Iconv
+* Libxml2
+* SQlite3
 * OpenSSL
-* many others potentially, though the build support isn't currently
-  implemented
 
 How to build
 ------------
@@ -55,11 +33,7 @@ How to build
 2. Some cmake backends may want your compile tools in PATH.  (Hint: "Visual
    Studio Command Prompt")
 
-3. set CMAKE_LIBRARY_PATH=d:\path\to\prereq1\lib;d:\path\to\prereq2\lib;...
-
-4. set CMAKE_INCLUDE_PATH=d:\path\to\prereq1\include;d:\path\to\prereq2\include;...
-
-5. cmake -G "some backend, like 'NMake Makefiles'"
+3. cmake -G "some backend, like 'Ninja' or 'NMake Makefiles'"
      -DCMAKE_INSTALL_PREFIX=d:/path/to/aprinst
      -DAPR-specific-flags
      d:/path/to/aprsource
@@ -112,19 +86,16 @@ How to build
        RELWITHDEBINFO, and MINSIZEREL
        Other backends make have other selections.
 
-6. build using chosen backend (e.g., "nmake install")
+4. build using chosen backend (e.g., "nmake install")
 
 Tested generators
 -----------------
 
-1. NMake Makefiles
+1. Ninja
 
 This has been tested successfully with the following:
 
-* Visual Studio 2008 64-bit (requires KB948127 hot fix)
-* Visual Studio 2012 64-bit
-
-2. Visual Studio 11 (Visual Studio 2012 project files)
+1. Visual Studio 2019 and Visual Studio 2022
 
 Known Bugs and Limitations
 --------------------------
@@ -154,9 +125,5 @@ Known Bugs and Limitations
 
 Generally:
 
-* Many APR features have not been tested with this build.
-* Developers need to examine the existing Windows build in great detail and see
-  what is missing from the cmake-based build, whether a feature or some build
-  nuance.
 * Any feedback you can provide on your experiences with this build will be
   helpful.
