@@ -18,6 +18,12 @@
 
 #ifdef USE_ATOMICS_BUILTINS
 
+#if defined(__arm__) || defined(__powerpc__) || defined(__powerpc64__)
+#define WEAK_MEMORY_ORDERING 1
+#else
+#define WEAK_MEMORY_ORDERING 0
+#endif
+
 APR_DECLARE(apr_status_t) apr_atomic_init(apr_pool_t *p)
 {
     return APR_SUCCESS;
@@ -25,57 +31,104 @@ APR_DECLARE(apr_status_t) apr_atomic_init(apr_pool_t *p)
 
 APR_DECLARE(apr_uint32_t) apr_atomic_read32(volatile apr_uint32_t *mem)
 {
+#if HAVE__ATOMIC_BUILTINS
+    return __atomic_load_n(mem, __ATOMIC_SEQ_CST);
+#elif WEAK_MEMORY_ORDERING
+    /* No __sync_load() available => apr_atomic_add32(mem, 0) */
+    return __sync_fetch_and_add(mem, 0);
+#else
     return *mem;
+#endif
 }
 
 APR_DECLARE(void) apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
+#if HAVE__ATOMIC_BUILTINS
+    __atomic_store_n(mem, val, __ATOMIC_SEQ_CST);
+#elif WEAK_MEMORY_ORDERING
+    /* No __sync_store() available => apr_atomic_xchg32(mem, val) */
+    __sync_synchronize();
+    __sync_lock_test_and_set(mem, val);
+#else
     *mem = val;
+#endif
 }
 
 APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
+#if HAVE__ATOMIC_BUILTINS
+    return __atomic_fetch_add(mem, val, __ATOMIC_SEQ_CST);
+#else
     return __sync_fetch_and_add(mem, val);
+#endif
 }
 
 APR_DECLARE(void) apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
+#if HAVE__ATOMIC_BUILTINS
+    __atomic_fetch_sub(mem, val, __ATOMIC_SEQ_CST);
+#else
     __sync_fetch_and_sub(mem, val);
+#endif
 }
 
 APR_DECLARE(apr_uint32_t) apr_atomic_inc32(volatile apr_uint32_t *mem)
 {
+#if HAVE__ATOMIC_BUILTINS
+    return __atomic_fetch_add(mem, 1, __ATOMIC_SEQ_CST);
+#else
     return __sync_fetch_and_add(mem, 1);
+#endif
 }
 
 APR_DECLARE(int) apr_atomic_dec32(volatile apr_uint32_t *mem)
 {
+#if HAVE__ATOMIC_BUILTINS
+    return __atomic_sub_fetch(mem, 1, __ATOMIC_SEQ_CST);
+#else
     return __sync_sub_and_fetch(mem, 1);
+#endif
 }
 
-APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint32_t with,
+APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint32_t val,
                                            apr_uint32_t cmp)
 {
-    return __sync_val_compare_and_swap(mem, cmp, with);
+#if HAVE__ATOMIC_BUILTINS
+    __atomic_compare_exchange_n(mem, &cmp, val, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    return cmp;
+#else
+    return __sync_val_compare_and_swap(mem, cmp, val);
+#endif
 }
 
 APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
+#if HAVE__ATOMIC_BUILTINS
+    return __atomic_exchange_n(mem, val, __ATOMIC_SEQ_CST);
+#else
     __sync_synchronize();
-
     return __sync_lock_test_and_set(mem, val);
+#endif
 }
 
-APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
+APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *ptr, const void *cmp)
 {
-    return (void*) __sync_val_compare_and_swap(mem, cmp, with);
+#if HAVE__ATOMIC_BUILTINS
+    __atomic_compare_exchange_n(mem, (void **)&cmp, ptr, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    return (void *)cmp;
+#else
+    return (void *)__sync_val_compare_and_swap(mem, (void *)cmp, ptr);
+#endif
 }
 
-APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
+APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *ptr)
 {
+#if HAVE__ATOMIC_BUILTINS
+    return (void *)__atomic_exchange_n(mem, ptr, __ATOMIC_SEQ_CST);
+#else
     __sync_synchronize();
-
-    return (void*) __sync_lock_test_and_set(mem, with);
+    return (void *)__sync_lock_test_and_set(mem, ptr);
+#endif
 }
 
 #endif /* USE_ATOMICS_BUILTINS */
