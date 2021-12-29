@@ -23,6 +23,7 @@
 #include "apr_poll.h"
 #include "apr_time.h"
 #include "apr_portable.h"
+#include "apr_atomic.h"
 #include "apr_arch_file_io.h"
 #include "apr_arch_networkio.h"
 #include "apr_arch_poll_private.h"
@@ -134,6 +135,7 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **ret_pollcb,
     pollcb->flags = flags;
     pollcb->pool = p;
     pollcb->provider = provider;
+    pollcb->wakeup_set = 0;
 
     rv = (*provider->create)(pollcb, size, p, flags);
     if (rv == APR_ENOTIMPL) {
@@ -212,10 +214,13 @@ APR_DECLARE(apr_status_t) apr_pollcb_poll(apr_pollcb_t *pollcb,
 
 APR_DECLARE(apr_status_t) apr_pollcb_wakeup(apr_pollcb_t *pollcb)
 {
-    if (pollcb->flags & APR_POLLSET_WAKEABLE)
-        return apr_file_putc(1, pollcb->wakeup_pipe[1]);
-    else
+    if (!(pollcb->flags & APR_POLLSET_WAKEABLE))
         return APR_EINIT;
+
+    if (apr_atomic_cas32(&pollcb->wakeup_set, 1, 0) == 0)
+        return apr_file_putc(1, pollcb->wakeup_pipe[1]);
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(const char *) apr_pollcb_method_name(apr_pollcb_t *pollcb)

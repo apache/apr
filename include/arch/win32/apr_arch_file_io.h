@@ -159,10 +159,16 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
 /* for apr_poll.c */
 #define filedes filehand
 
+typedef enum {
+    APR_FILETYPE_FILE   = 0,
+    APR_FILETYPE_PIPE,
+    APR_FILETYPE_SOCKET
+} apr_filetype_e;
+    
 struct apr_file_t {
     apr_pool_t *pool;
     HANDLE filehand;
-    BOOLEAN pipe;              /* Is this a pipe of a file? */
+    apr_filetype_e ftype;      /* Is this a pipe, a socket or a file? */
     OVERLAPPED *pOverlapped;
     apr_interval_time_t timeout;
     apr_int32_t flags;

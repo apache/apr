@@ -43,7 +43,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe,
         thepipe->timeout = timeout;
         return APR_SUCCESS;
     }
-    if (!thepipe->pipe) {
+    if (thepipe->ftype != APR_FILETYPE_PIPE) {
         return APR_ENOTIMPL;
     }
     if (timeout && !(thepipe->pOverlapped)) {
@@ -108,7 +108,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_pools(apr_file_t **in,
     (*in) = (apr_file_t *)apr_pcalloc(pool_in, sizeof(apr_file_t));
     (*in)->pool = pool_in;
     (*in)->fname = NULL;
-    (*in)->pipe = 1;
+    (*in)->ftype = APR_FILETYPE_PIPE;
     (*in)->timeout = -1;
     (*in)->ungetchar = -1;
     (*in)->eof_hit = 0;
@@ -123,7 +123,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_pools(apr_file_t **in,
     (*out) = (apr_file_t *)apr_pcalloc(pool_out, sizeof(apr_file_t));
     (*out)->pool = pool_out;
     (*out)->fname = NULL;
-    (*out)->pipe = 1;
+    (*out)->ftype = APR_FILETYPE_PIPE;
     (*out)->timeout = -1;
     (*out)->ungetchar = -1;
     (*out)->eof_hit = 0;
@@ -250,7 +250,7 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put_ex(apr_file_t **file,
 {
     (*file) = apr_pcalloc(pool, sizeof(apr_file_t));
     (*file)->pool = pool;
-    (*file)->pipe = 1;
+    (*file)->ftype = APR_FILETYPE_PIPE;
     (*file)->timeout = -1;
     (*file)->ungetchar = -1;
     (*file)->filehand = *thefile;
@@ -364,31 +364,27 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
             rv =  apr_get_netos_error();
             goto cleanup;
         }
-        /* Verify the connection by reading the send identification.
-         */
-        do {
-            if (nc++)
-                Sleep(1);
-            nrd = recv(*rd, (char *)iid, sizeof(iid), 0);
-            rv = nrd == SOCKET_ERROR ? apr_get_netos_error() : APR_SUCCESS;
-        } while (APR_STATUS_IS_EAGAIN(rv));
-
-        if (nrd == sizeof(iid)) {
-            if (memcmp(uid, iid, sizeof(uid)) == 0) {
-                /* Wow, we recived what we send.
-                 * Put read side of the pipe to the blocking
-                 * mode and return.
-                 */
-                bm = 0;
-                if (ioctlsocket(*rd, FIONBIO, &bm) == SOCKET_ERROR) {
-                    rv = apr_get_netos_error();
-                    goto cleanup;
-                }
-                break;
-            }
-        }
-        else if (nrd == SOCKET_ERROR) {
+        /* Verify the connection by reading/waiting for the identification */
+        bm = 0;
+        if (ioctlsocket(*rd, FIONBIO, &bm) == SOCKET_ERROR) {
+            rv = apr_get_netos_error();
             goto cleanup;
+        }
+        nrd = recv(*rd, (char *)iid, sizeof(iid), 0);
+        if (nrd == SOCKET_ERROR) {
+            rv = apr_get_netos_error();
+            goto cleanup;
+        }
+        if (nrd == (int)sizeof(uid) && memcmp(iid, uid, sizeof(uid)) == 0) {
+            /* Got the right identifier, put the poll()able read side of
+             * the pipe in nonblocking mode and return.
+             */
+            bm = 1;
+            if (ioctlsocket(*rd, FIONBIO, &bm) == SOCKET_ERROR) {
+                rv = apr_get_netos_error();
+                goto cleanup;
+            }
+            break;
         }
         closesocket(*rd);
     }
@@ -398,6 +394,7 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
 
 cleanup:
     /* Don't leak resources */
+    closesocket(ls);
     if (*rd != INVALID_SOCKET)
         closesocket(*rd);
     if (*wr != INVALID_SOCKET)
@@ -405,7 +402,6 @@ cleanup:
 
     *rd = INVALID_SOCKET;
     *wr = INVALID_SOCKET;
-    closesocket(ls);
     return rv;
 }
 
@@ -434,21 +430,21 @@ apr_status_t apr_file_socket_pipe_create(apr_file_t **in,
     (*in) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*in)->pool = p;
     (*in)->fname = NULL;
-    (*in)->pipe = 1;
-    (*in)->timeout = -1;
+    (*in)->ftype = APR_FILETYPE_SOCKET;
+    (*in)->timeout = 0; /* read end of the pipe is non-blocking */
     (*in)->ungetchar = -1;
     (*in)->eof_hit = 0;
     (*in)->filePtr = 0;
     (*in)->bufpos = 0;
     (*in)->dataRead = 0;
     (*in)->direction = 0;
-    (*in)->pOverlapped = (OVERLAPPED*)apr_pcalloc(p, sizeof(OVERLAPPED));
+    (*in)->pOverlapped = NULL;
     (*in)->filehand = (HANDLE)rd;
 
     (*out) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*out)->pool = p;
     (*out)->fname = NULL;
-    (*out)->pipe = 1;
+    (*out)->ftype = APR_FILETYPE_SOCKET;
     (*out)->timeout = -1;
     (*out)->ungetchar = -1;
     (*out)->eof_hit = 0;
@@ -456,7 +452,7 @@ apr_status_t apr_file_socket_pipe_create(apr_file_t **in,
     (*out)->bufpos = 0;
     (*out)->dataRead = 0;
     (*out)->direction = 0;
-    (*out)->pOverlapped = (OVERLAPPED*)apr_pcalloc(p, sizeof(OVERLAPPED));
+    (*out)->pOverlapped = NULL;
     (*out)->filehand = (HANDLE)wr;
 
     apr_pool_cleanup_register(p, (void *)(*in), socket_pipe_cleanup,
@@ -470,7 +466,7 @@ apr_status_t apr_file_socket_pipe_create(apr_file_t **in,
 apr_status_t apr_file_socket_pipe_close(apr_file_t *file)
 {
     apr_status_t stat;
-    if (!file->pipe)
+    if (file->ftype != APR_FILETYPE_SOCKET)
         return apr_file_close(file);
     if ((stat = socket_pipe_cleanup(file)) == APR_SUCCESS) {
         apr_pool_cleanup_kill(file->pool, file, socket_pipe_cleanup);
