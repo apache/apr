@@ -283,9 +283,12 @@
  * @param elem The name of the element struct
  * @param link The name of the APR_RING_ENTRY in the element struct
  */
-#define APR_RING_SPLICE_HEAD(hp, ep1, epN, elem, link)			\
-	APR_RING_SPLICE_AFTER(APR_RING_SENTINEL((hp), elem, link),	\
-			     (ep1), (epN), link)
+#define APR_RING_SPLICE_HEAD(hp, ep1, epN, elem, link) do {		\
+	APR_RING_PREV((ep1), link) = APR_RING_SENTINEL((hp), elem, link);\
+	APR_RING_NEXT((epN), link) = (hp)->next;			\
+	APR_RING_PREV((hp)->next, link) = (epN);			\
+	(hp)->next = (ep1);						\
+    } while (0)
 
 /**
  * Splice the sequence ep1..epN into the ring after the last element
@@ -296,9 +299,12 @@
  * @param elem The name of the element struct
  * @param link The name of the APR_RING_ENTRY in the element struct
  */
-#define APR_RING_SPLICE_TAIL(hp, ep1, epN, elem, link)			\
-	APR_RING_SPLICE_BEFORE(APR_RING_SENTINEL((hp), elem, link),	\
-			     (ep1), (epN), link)
+#define APR_RING_SPLICE_TAIL(hp, ep1, epN, elem, link) do {		\
+	APR_RING_NEXT((epN), link) = APR_RING_SENTINEL((hp), elem, link);\
+	APR_RING_PREV((ep1), link) = (hp)->prev;			\
+	APR_RING_NEXT((hp)->prev, link) = (ep1);			\
+	(hp)->prev = (epN);						\
+    } while (0)
 
 /**
  * Insert the element nep into the ring before the first element
@@ -331,9 +337,8 @@
  */
 #define APR_RING_CONCAT(h1, h2, elem, link) do {			\
 	if (!APR_RING_EMPTY((h2), elem, link)) {			\
-	    APR_RING_SPLICE_BEFORE(APR_RING_SENTINEL((h1), elem, link),	\
-				  APR_RING_FIRST((h2)),			\
-				  APR_RING_LAST((h2)), link);		\
+	    APR_RING_SPLICE_TAIL((h1), APR_RING_FIRST((h2)),		\
+				 APR_RING_LAST((h2)), elem, link);	\
 	    APR_RING_INIT((h2), elem, link);				\
 	}								\
     } while (0)
@@ -347,9 +352,8 @@
  */
 #define APR_RING_PREPEND(h1, h2, elem, link) do {			\
 	if (!APR_RING_EMPTY((h2), elem, link)) {			\
-	    APR_RING_SPLICE_AFTER(APR_RING_SENTINEL((h1), elem, link),	\
-				  APR_RING_FIRST((h2)),			\
-				  APR_RING_LAST((h2)), link);		\
+	    APR_RING_SPLICE_HEAD((h1), APR_RING_FIRST((h2)),		\
+				 APR_RING_LAST((h2)), elem, link);	\
 	    APR_RING_INIT((h2), elem, link);				\
 	}								\
     } while (0)
