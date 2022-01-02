@@ -752,20 +752,11 @@ APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
                        APR_FPROT_OS_DEFAULT, pool);
     if (!rv)
     {
-        FILETIME file_ctime;
-        FILETIME file_atime;
         FILETIME file_mtime;
 
-        if (!GetFileTime(thefile->filehand,
-                         &file_ctime, &file_atime, &file_mtime))
+        AprTimeToFileTime(&file_mtime, mtime);
+        if (!SetFileTime(thefile->filehand, NULL, NULL, &file_mtime))
             rv = apr_get_os_error();
-        else
-        {
-            AprTimeToFileTime(&file_mtime, mtime);
-            if (!SetFileTime(thefile->filehand,
-                             &file_ctime, &file_atime, &file_mtime))
-                rv = apr_get_os_error();
-        }
 
         apr_file_close(thefile);
     }
