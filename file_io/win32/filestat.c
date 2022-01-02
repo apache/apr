@@ -489,7 +489,57 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
         return apr_get_os_error();
     }
 
-    fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 1, 0, thefile->fname, wanted);
+    memset(finfo, '\0', sizeof(*finfo));
+
+    FileTimeToAprTime(&finfo->atime, &FileInfo.ftLastAccessTime);
+    FileTimeToAprTime(&finfo->ctime, &FileInfo.ftCreationTime);
+    FileTimeToAprTime(&finfo->mtime, &FileInfo.ftLastWriteTime);
+
+#if APR_HAS_LARGE_FILES
+    finfo->size = (apr_off_t)FileInfo.nFileSizeLow
+        | ((apr_off_t)FileInfo.nFileSizeHigh << 32);
+#else
+    finfo->size = (apr_off_t)FileInfo.nFileSizeLow;
+    if (finfo->size < 0 || FileInfo.nFileSizeHigh)
+        finfo->size = 0x7fffffff;
+#endif
+
+    if (wanted & APR_FINFO_LINK &&
+        reparse_point_is_link(&FileInfo, 0, thefile->fname)) {
+        finfo->filetype = APR_LNK;
+    }
+    else if (FileInfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        finfo->filetype = APR_DIR;
+    }
+    else if (FileInfo.dwFileAttributes & FILE_ATTRIBUTE_DEVICE) {
+        /* Warning: This test only succeeds on Win9x, on NT these files
+         * (con, aux, nul, lpt#, com# etc) escape early detection!
+         */
+        finfo->filetype = APR_CHR;
+    }
+    else {
+        /* Warning: Short of opening the handle to the file, the 'FileType'
+         * appears to be unknowable (in any trustworthy or consistent sense)
+         * on WinNT/2K as far as PIPE, CHR, etc are concerned.
+         */
+        finfo->filetype = APR_REG;
+    }
+
+    /* The following flags are [for this moment] private to Win32.
+     * That's the only excuse for not toggling valid bits to reflect them.
+     */
+    if (FileInfo.dwFileAttributes & FILE_ATTRIBUTE_READONLY)
+        finfo->protection = APR_FREADONLY;
+
+    finfo->valid = APR_FINFO_ATIME | APR_FINFO_CTIME | APR_FINFO_MTIME
+        | APR_FINFO_SIZE | APR_FINFO_TYPE;   /* == APR_FINFO_MIN */
+
+    /* Only byhandle optionally tests link targets, so tell that caller
+     * what it wants to hear, otherwise the byattributes is never
+     * reporting anything but the link.
+     */
+    if (wanted & APR_FINFO_LINK)
+        finfo->valid |= APR_FINFO_LINK;
 
     if (finfo->filetype == APR_REG)
     {
