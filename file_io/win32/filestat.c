@@ -505,7 +505,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
 #endif
 
     if (wanted & APR_FINFO_LINK &&
-        reparse_point_is_link(&FileInfo, 0, thefile->fname)) {
+        reparse_point_is_link((WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 0, thefile->fname)) {
         finfo->filetype = APR_LNK;
     }
     else if (FileInfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
