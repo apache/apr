@@ -11,11 +11,11 @@
 int main(void)
 {
     char buf[256];
-    int bytes;
+    int bytes, rv = 0;
     
     bytes = (int)read(STDIN_FILENO, buf, 256);
     if (bytes > 0)
-        write(STDOUT_FILENO, buf, (unsigned int)bytes);
+        rv = write(STDOUT_FILENO, buf, (unsigned int)bytes) == bytes ? 0 : 1;
 
-    return 0; /* just to keep the compiler happy */
+    return rv;
 }
