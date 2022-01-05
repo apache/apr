@@ -1,0 +1,35 @@
+language: c
+os: linux
+dist: bionic
+addons:
+  apt:
+    packages:
+      - libtool-bin
+env:
+  global:
+    - MARGS="-j2"
+matrix:
+  include:
+    - name: Default
+    - name: Static
+      env: CONFIG="--enable-static"
+    - name: Maintainer-mode
+      env: CONFIG="--enable-maintainer-mode"
+    - name: Pool-debug
+      env: CONFIG="--enable-pool-debug"
+    - name: Pool-debug, maintainer-mode
+      env: CONFIG="--enable-pool-debug --enable-maintainer-mode"
+    - name: Maintainer-mode, no IPv6
+      env: CONFIG="--enable-maintainer-mode --disable-ipv6"
+    - name: Maintainer-mode, -Werror
+      env: NOTEST_CFLAGS=-Werror CONFIG="--enable-maintainer-mode"
+    - name: Maintainer-mode, -Werror (Bionic)
+      dist: bionic
+      env: NOTEST_CFLAGS=-Werror CONFIG="--enable-maintainer-mode"
+    - name: Maintainer-mode, -Werror (Focal)
+      dist: focal
+      env: NOTEST_CFLAGS=-Werror CONFIG="--enable-maintainer-mode"
+
+before_script: sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6'
+
+script: ./buildconf && ./configure $CONFIG && make $MARGS && make check
