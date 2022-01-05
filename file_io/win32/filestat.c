@@ -675,42 +675,35 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
              * to reliably translate char devices to the path '\\.\device'
              * so go ask for the full path.
              */
-            if (apr_os_level >= APR_WIN_NT)
+            apr_wchar_t tmpname[APR_FILE_MAX];
+            apr_wchar_t *tmpoff = NULL;
+            if (GetFullPathNameW(wfname, sizeof(tmpname) / sizeof(apr_wchar_t),
+                                 tmpname, &tmpoff))
             {
-                apr_wchar_t tmpname[APR_FILE_MAX];
-                apr_wchar_t *tmpoff = NULL;
-                if (GetFullPathNameW(wfname, sizeof(tmpname) / sizeof(apr_wchar_t),
-                                     tmpname, &tmpoff))
-                {
-                    if (!wcsncmp(tmpname, L"\\\\.\\", 4)) {
-                        if (tmpoff == tmpname + 4) {
-                            finfo->filetype = APR_CHR;
+                if (!wcsncmp(tmpname, L"\\\\.\\", 4)) {
+                    if (tmpoff == tmpname + 4) {
+                        finfo->filetype = APR_CHR;
+                    }
+                    /* For WHATEVER reason, CHR devices such as \\.\con 
+                     * or \\.\lpt1 *may*not* update tmpoff; in fact the
+                     * resulting tmpoff is set to NULL.  Guard against 
+                     * either case.
+                     *
+                     * This code is identical for wide and narrow chars...
+                     */
+                    else if (!tmpoff) {
+                        tmpoff = tmpname + 4;
+                        while (*tmpoff) {
+                            if (*tmpoff == '\\' || *tmpoff == '/') {
+                                break;
+                            }
+                            ++tmpoff;
                         }
-                        /* For WHATEVER reason, CHR devices such as \\.\con 
-                         * or \\.\lpt1 *may*not* update tmpoff; in fact the
-                         * resulting tmpoff is set to NULL.  Guard against 
-                         * either case.
-                         *
-                         * This code is identical for wide and narrow chars...
-                         */
-                        else if (!tmpoff) {
-                            tmpoff = tmpname + 4;
-                            while (*tmpoff) {
-                                if (*tmpoff == '\\' || *tmpoff == '/') {
-                                    break;
-                                }
-                                ++tmpoff;
-                            }
-                            if (!*tmpoff) {
-                                finfo->filetype = APR_CHR;
-                            }
+                        if (!*tmpoff) {
+                            finfo->filetype = APR_CHR;
                         }
                     }
                 }
-                else {
-                    finfo->valid &= ~APR_FINFO_TYPE;
-                }
-
             }
             else {
                 finfo->valid &= ~APR_FINFO_TYPE;

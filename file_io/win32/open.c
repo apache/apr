@@ -268,7 +268,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     DWORD oflags = 0;
     DWORD createflags = 0;
     DWORD attributes = 0;
-    DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
+    DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
     apr_status_t rv;
     apr_wchar_t wfname[APR_PATH_MAX];
 
@@ -285,9 +285,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     if (flag & APR_WRITEATTRS) {
         oflags |= FILE_WRITE_ATTRIBUTES;
     }
-
-    if (apr_os_level >= APR_WIN_NT) 
-        sharemode |= FILE_SHARE_DELETE;
 
     if (flag & APR_FOPEN_CREATE) {
         if (flag & APR_FOPEN_EXCL) {
@@ -329,9 +326,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
      */
     if (!(flag & (APR_FOPEN_READ | APR_FOPEN_WRITE))) {
         if (flag & APR_OPENINFO) {
-            if (apr_os_level >= APR_WIN_NT) {
-                attributes |= FILE_FLAG_BACKUP_SEMANTICS;
-            }
+            attributes |= FILE_FLAG_BACKUP_SEMANTICS;
         }
         else {
             return APR_EACCES;
