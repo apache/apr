@@ -604,7 +604,6 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     /* These all share a common subset of this structure */
     union {
         WIN32_FIND_DATAW w;
-        WIN32_FIND_DATAA n;
         WIN32_FILE_ATTRIBUTE_DATA i;
     } FileInfo;
     int finddata = 0;
