@@ -240,7 +240,8 @@ static int reparse_point_is_link(WIN32_FILE_ATTRIBUTE_DATA *wininfo,
             return 0;
         }
 
-        hFind = FindFirstFileW(wfname, &fd);
+        hFind = FindFirstFileExW(wfname, FindExInfoBasic, &fd, FindExSearchNameMatch,
+                                 NULL, 0);
         if (hFind == INVALID_HANDLE_VALUE) {
             return 0;
         }
@@ -653,7 +654,8 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         if ((rv = test_safe_name(fname)) != APR_SUCCESS) {
             return rv;
         }
-        hFind = FindFirstFileW(wfname, &FileInfo.w);
+        hFind = FindFirstFileExW(wfname, FindExInfoBasic, &FileInfo.w,
+                                 FindExSearchNameMatch, NULL, 0);
         if (hFind == INVALID_HANDLE_VALUE)
             return apr_get_os_error();
         FindClose(hFind);
