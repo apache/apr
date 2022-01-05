@@ -224,8 +224,7 @@ static int reparse_point_is_link(WIN32_FILE_ATTRIBUTE_DATA *wininfo,
 
     if (finddata)
     {
-        // no matter A or W as we don't need file name
-        tag = ((WIN32_FIND_DATAA*)wininfo)->dwReserved0;
+        tag = ((WIN32_FIND_DATAW*)wininfo)->dwReserved0;
     }
     else
     {
