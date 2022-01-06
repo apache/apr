@@ -285,9 +285,9 @@
  */
 #define APR_RING_SPLICE_HEAD(hp, ep1, epN, elem, link) do {		\
 	APR_RING_PREV((ep1), link) = APR_RING_SENTINEL((hp), elem, link);\
-	APR_RING_NEXT((epN), link) = (hp)->next;			\
-	APR_RING_PREV((hp)->next, link) = (epN);			\
-	(hp)->next = (ep1);						\
+	APR_RING_NEXT((epN), link) = APR_RING_FIRST((hp));		\
+	APR_RING_PREV(APR_RING_FIRST((hp)), link) = (epN);		\
+	APR_RING_FIRST((hp)) = (ep1);					\
     } while (0)
 
 /**
@@ -301,9 +301,9 @@
  */
 #define APR_RING_SPLICE_TAIL(hp, ep1, epN, elem, link) do {		\
 	APR_RING_NEXT((epN), link) = APR_RING_SENTINEL((hp), elem, link);\
-	APR_RING_PREV((ep1), link) = (hp)->prev;			\
-	APR_RING_NEXT((hp)->prev, link) = (ep1);			\
-	(hp)->prev = (epN);						\
+	APR_RING_PREV((ep1), link) = APR_RING_LAST((hp));		\
+	APR_RING_NEXT(APR_RING_LAST((hp)), link) = (ep1);		\
+	APR_RING_LAST((hp)) = (epN);					\
     } while (0)
 
 /**
