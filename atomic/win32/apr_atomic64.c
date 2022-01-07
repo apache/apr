@@ -46,7 +46,14 @@ APR_DECLARE(int) apr_atomic_dec64(volatile apr_uint64_t *mem)
 
 APR_DECLARE(void) apr_atomic_set64(volatile apr_uint64_t *mem, apr_uint64_t val)
 {
+#if defined(_M_X64)
+    /* https://docs.microsoft.com/en-us/windows/win32/sync/interlocked-variable-access
+     * "Simple reads and writes to properly aligned 64-bit variables are atomic
+     * on 64-bit Windows."*/
+    *mem = val;
+#else
     InterlockedExchange64((volatile LONG64 *)mem, val);
+#endif
 }
 
 APR_DECLARE(apr_uint64_t) apr_atomic_read64(volatile apr_uint64_t *mem)
