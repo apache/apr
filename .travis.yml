@@ -23,8 +23,8 @@ matrix:
       env: CONFIG="--enable-maintainer-mode --disable-ipv6"
     - name: Maintainer-mode, -Werror
       env: NOTEST_CFLAGS=-Werror CONFIG="--enable-maintainer-mode"
-    - name: Maintainer-mode, -Werror (Bionic)
-      dist: bionic
+    - name: Maintainer-mode, -Werror (Xenial)
+      dist: xenial
       env: NOTEST_CFLAGS=-Werror CONFIG="--enable-maintainer-mode"
     - name: Maintainer-mode, -Werror (Focal)
       dist: focal
