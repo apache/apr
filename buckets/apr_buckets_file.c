@@ -239,18 +239,15 @@ static apr_status_t file_bucket_setaside(apr_bucket *b, apr_pool_t *reqpool)
         new = apr_bucket_alloc(sizeof(*new), b->list);
         memcpy(new, a, sizeof(*new));
         new->refcount.refcount = 1;
-        new->readpool = reqpool;
 
         a->refcount.refcount--;
         a = b->data = new;
     }
     else {
         apr_file_setaside(&fd, f, reqpool);
-        if (!apr_pool_is_ancestor(a->readpool, reqpool)) {
-            a->readpool = reqpool;
-        }
     }
     a->fd = fd;
+    a->readpool = reqpool;
     return APR_SUCCESS;
 }
 
