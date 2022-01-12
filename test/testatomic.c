@@ -90,7 +90,7 @@ static void test_xchgptr(abts_case *tc, void *data)
 
     old_ptr = apr_atomic_xchgptr(&target_ptr, &a);
     ABTS_PTR_EQUAL(tc, ref, old_ptr);
-    ABTS_PTR_EQUAL(tc, &a, (void *) target_ptr);
+    ABTS_PTR_EQUAL(tc, (void *)&a, (void *)target_ptr);
 }
 
 static void test_cas_equal(abts_case *tc, void *data)
@@ -125,35 +125,35 @@ static void test_cas_notequal(abts_case *tc, void *data)
 
 static void test_casptr_equal(abts_case *tc, void *data)
 {
-    int a;
+    int a = 0;
     volatile void *target_ptr = NULL;
     void *old_ptr;
 
     old_ptr = apr_atomic_casptr(&target_ptr, &a, NULL);
     ABTS_PTR_EQUAL(tc, NULL, old_ptr);
-    ABTS_PTR_EQUAL(tc, &a, (void *) target_ptr);
+    ABTS_PTR_EQUAL(tc, (void *)&a, (void *)target_ptr);
 }
 
 static void test_casptr_equal_nonnull(abts_case *tc, void *data)
 {
-    int a, b;
+    int a = 0, b = 0;
     volatile void *target_ptr = &a;
     void *old_ptr;
 
     old_ptr = apr_atomic_casptr(&target_ptr, &b, &a);
-    ABTS_PTR_EQUAL(tc, &a, old_ptr);
-    ABTS_PTR_EQUAL(tc, &b, (void *) target_ptr);
+    ABTS_PTR_EQUAL(tc, (void *)&a, old_ptr);
+    ABTS_PTR_EQUAL(tc, (void *)&b, (void *)target_ptr);
 }
 
 static void test_casptr_notequal(abts_case *tc, void *data)
 {
-    int a, b;
+    int a = 0, b = 0;
     volatile void *target_ptr = &a;
     void *old_ptr;
 
     old_ptr = apr_atomic_casptr(&target_ptr, &a, &b);
-    ABTS_PTR_EQUAL(tc, &a, old_ptr);
-    ABTS_PTR_EQUAL(tc, &a, (void *) target_ptr);
+    ABTS_PTR_EQUAL(tc, (void *)&a, old_ptr);
+    ABTS_PTR_EQUAL(tc, (void *)&a, (void *)target_ptr);
 }
 
 static void test_add32(abts_case *tc, void *data)
