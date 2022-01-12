@@ -23,12 +23,22 @@ matrix:
       env: CONFIG="--enable-maintainer-mode --disable-ipv6"
     - name: Maintainer-mode, -Werror
       env: NOTEST_CFLAGS=-Werror CONFIG="--enable-maintainer-mode"
-    - name: Maintainer-mode, -Werror (Bionic)
-      dist: bionic
+    - name: Maintainer-mode, -Werror (Xenial)
+      dist: xenial
       env: NOTEST_CFLAGS=-Werror CONFIG="--enable-maintainer-mode"
     - name: Maintainer-mode, -Werror (Focal)
       dist: focal
       env: NOTEST_CFLAGS=-Werror CONFIG="--enable-maintainer-mode"
+    - name: GCC 10, maintainer-mode, -Werror (Focal)
+      dist: focal
+      env: NOTEST_CFLAGS="-Werror -O2" CONFIG="--enable-maintainer-mode" CC=gcc-10
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          packages:
+            - libtool-bin
+            - gcc-10
 
 before_script: sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6'
 
