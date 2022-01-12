@@ -110,9 +110,10 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_getbuf(char *buf, apr_size_t buflen,
 {
 #if APR_HAVE_SOCKADDR_UN
     if (sockaddr->family == APR_UNIX) {
-        apr_size_t len = (apr_size_t)sockaddr->ipaddr_len;
-        apr_cpystrn(buf, sockaddr->ipaddr_ptr, buflen < len ? buflen : len);
-        return APR_SUCCESS;
+        const char *ptr = sockaddr->ipaddr_ptr;
+        apr_size_t len = apr_cpystrn(buf, ptr, buflen) - buf;
+        /* assumes that sockaddr->ipaddr_ptr is nul terminated */
+        return ptr[len] ? APR_ENOSPC : APR_SUCCESS;
     }
 #endif
 
