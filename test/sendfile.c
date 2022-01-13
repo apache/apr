@@ -274,7 +274,7 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
     hdtr.headers[0].iov_len  = strlen(hdtr.headers[0].iov_base);
     hdtr.headers[1].iov_base = HDR2;
     hdtr.headers[1].iov_len  = strlen(hdtr.headers[1].iov_base);
-    hdtr.headers[2].iov_base = malloc(HDR3_LEN);
+    hdtr.headers[2].iov_base = apr_palloc(p, HDR3_LEN);
     assert(hdtr.headers[2].iov_base);
     memset(hdtr.headers[2].iov_base, HDR3_CHAR, HDR3_LEN);
     hdtr.headers[2].iov_len  = HDR3_LEN;
@@ -285,9 +285,9 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
     hdtr.trailers[0].iov_len  = strlen(hdtr.trailers[0].iov_base);
     hdtr.trailers[1].iov_base = TRL2;
     hdtr.trailers[1].iov_len  = strlen(hdtr.trailers[1].iov_base);
-    hdtr.trailers[2].iov_base = malloc(TRL3_LEN);
-    memset(hdtr.trailers[2].iov_base, TRL3_CHAR, TRL3_LEN);
+    hdtr.trailers[2].iov_base = apr_palloc(p, TRL3_LEN);
     assert(hdtr.trailers[2].iov_base);
+    memset(hdtr.trailers[2].iov_base, TRL3_CHAR, TRL3_LEN);
     hdtr.trailers[2].iov_len  = TRL3_LEN;
 
     expected_len = 

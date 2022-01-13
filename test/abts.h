@@ -39,7 +39,7 @@ extern "C" {
 #endif
 
 struct sub_suite {
-    const char *name;
+    char *name;
     int num_test;
     int failed;
     int not_run;

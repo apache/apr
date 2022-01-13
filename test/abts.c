@@ -120,7 +120,7 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name_full)
                                 suite_name, p - suite_name);
     }
     else {
-        subsuite->name = suite_name;
+        subsuite->name = strdup(suite_name);
     }
 
     if (list_tests) {
@@ -150,6 +150,21 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name_full)
     fflush(stdout);
 
     return suite;
+}
+
+static void abts_free_suite(abts_suite *suite)
+{
+    if (suite) {
+        sub_suite *dptr, *next;
+
+        for (dptr = suite->head; dptr; dptr = next) {
+            next = dptr->next;
+            free(dptr->name);
+            free(dptr);
+        }
+
+        free(suite);
+    }
 }
 
 void abts_run_test(abts_suite *ts, test_func f, void *value)
@@ -430,6 +445,7 @@ int main(int argc, const char *const argv[]) {
     }
 
     rv = report(suite);
+    abts_free_suite(suite);
     return rv;
 }
        
