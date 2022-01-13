@@ -22,16 +22,47 @@ matrix:
     - name: Maintainer-mode, no IPv6
       env: CONFIG="--enable-maintainer-mode --disable-ipv6"
     - name: Maintainer-mode, -Werror
-      env: NOTEST_CFLAGS=-Werror CONFIG="--enable-maintainer-mode"
+      env: NOTEST_CFLAGS=-Werror
+           CONFIG="--enable-maintainer-mode"
     - name: Maintainer-mode, -Werror (Xenial)
       dist: xenial
-      env: NOTEST_CFLAGS=-Werror CONFIG="--enable-maintainer-mode"
+      env: NOTEST_CFLAGS=-Werror
+           CONFIG="--enable-maintainer-mode"
     - name: Maintainer-mode, -Werror (Focal)
       dist: focal
-      env: NOTEST_CFLAGS=-Werror CONFIG="--enable-maintainer-mode"
+      env: NOTEST_CFLAGS=-Werror
+           CONFIG="--enable-maintainer-mode"
     - name: GCC 10, maintainer-mode, -Werror (Focal)
       dist: focal
-      env: NOTEST_CFLAGS="-Werror -O2" CONFIG="--enable-maintainer-mode" CC=gcc-10
+      env: CC=gcc-10
+           NOTEST_CFLAGS="-Werror -O2"
+           CONFIG="--enable-maintainer-mode"
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          packages:
+            - libtool-bin
+            - gcc-10
+    - name: GCC-10, ASan (Focal)
+      dist: focal
+      # w/o ODBC since DSO unload leaks memory and fails the tests
+      env: CC=gcc-10
+           NOTEST_CFLAGS="-fsanitize=address -fno-sanitize-recover=address -fno-omit-frame-pointer -Werror -O2"
+           CONFIG="--with-odbc=no"
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          packages:
+            - libtool-bin
+            - gcc-10
+    - name: GCC-10, ASan, pool-debug (Focal)
+      dist: focal
+      # w/o ODBC since DSO unload leaks memory and fails the tests
+      env: CC=gcc-10
+           NOTEST_CFLAGS="-fsanitize=address -fno-sanitize-recover=address -fno-omit-frame-pointer -Werror -O2"
+           CONFIG="--enable-pool-debug --with-odbc=no"
       addons:
         apt:
           sources:
