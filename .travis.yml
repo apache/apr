@@ -48,6 +48,8 @@ matrix:
       dist: focal
       env: CC=gcc-10
            NOTEST_CFLAGS="-fsanitize=address -fno-sanitize-recover=address -fno-omit-frame-pointer -Werror -O2"
+           # odbc dso unload leaks memory and fails the tests
+           CONFIG="--with-odbc=no"
       addons:
         apt:
           sources:
@@ -59,7 +61,8 @@ matrix:
       dist: focal
       env: CC=gcc-10
            NOTEST_CFLAGS="-fsanitize=address -fno-sanitize-recover=address -fno-omit-frame-pointer -Werror -O2"
-           CONFIG="--enable-pool-debug"
+           # odbc dso unload leaks memory and fails the tests
+           CONFIG="--enable-pool-debug --with-odbc=no"
       addons:
         apt:
           sources:
