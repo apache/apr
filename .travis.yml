@@ -46,9 +46,9 @@ matrix:
             - gcc-10
     - name: GCC-10, ASan (Focal)
       dist: focal
+      # w/o ODBC since DSO unload leaks memory and fails the tests
       env: CC=gcc-10
            NOTEST_CFLAGS="-fsanitize=address -fno-sanitize-recover=address -fno-omit-frame-pointer -Werror -O2"
-           # odbc dso unload leaks memory and fails the tests
            CONFIG="--with-odbc=no"
       addons:
         apt:
@@ -59,9 +59,9 @@ matrix:
             - gcc-10
     - name: GCC-10, ASan, pool-debug (Focal)
       dist: focal
+      # w/o ODBC since DSO unload leaks memory and fails the tests
       env: CC=gcc-10
            NOTEST_CFLAGS="-fsanitize=address -fno-sanitize-recover=address -fno-omit-frame-pointer -Werror -O2"
-           # odbc dso unload leaks memory and fails the tests
            CONFIG="--enable-pool-debug --with-odbc=no"
       addons:
         apt:
