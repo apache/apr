@@ -1,9 +1,16 @@
                                                      -*- coding: utf-8 -*-
+Changes for APR 1.8.0
+
+  [Anything backed out from 1.7.x branch should be slid up here, and the
+  details of 1.7.1 deleted]
+
+  *)
+
 Changes for APR 1.7.1
 
   *) SECURITY: CVE-2021-35940 (cve.mitre.org)
-     Restore fix for out-of-bounds array dereference in apr_time_exp*() functions.
-     (This issue was addressed as CVE-2017-12613 in APR 1.6.3 and
+     Restore fix for out-of-bounds array dereference in apr_time_exp*()
+     functions. (This issue was addressed as CVE-2017-12613 in APR 1.6.3 and
      later 1.6.x releases, but was missing in 1.7.0.)  [Stefan Sperling]
 
   *) apr_atomic_read64(): Fix non-atomic read on 32-bit Windows [Ivan Zhakov]
@@ -26,7 +33,6 @@ Changes for APR 1.7.1
 
   *) APR's configure script uses AC_TRY_RUN to detect whether the return type
      of strerror_r is int. When cross-compiling this defaults to no.
-
      This commit adds an AC_CACHE_CHECK so users who cross-compile APR may
      influence the outcome with a configure variable. [Sebastian Kemper
      <sebastian_ml gmx net>]
@@ -46,7 +52,6 @@ Changes for APR 1.7.1
   *) While cross-compiling, the tools/gen_test_char could not
      be executed at build time, use AX_PROG_CC_FOR_BUILD to
      build native tools/gen_test_char
-
      Support explicit libtool by variable assigning before buildcheck.sh,
      it is helpful for cross-compiling (such as libtool=aarch64-linux-libtool)
      [Hongxu Jia <hongxu.jia windriver.com>]
@@ -69,55 +74,9 @@ Changes for APR 1.7.1
 
   *) Fixed: apr_get_oslevel() was returning APR_WIN_XP on Windows 10
 
-Changes for APR 1.7.0
+Changes for APR 1.7.0 and later:
 
-  *) apr_dir_read: [Unix] Dropped the preference of the dirread_r() flavor
-     for dirread(), because the former is both deprecated and unneeded.
-     [Yann Ylavic, William Rowe]
-
-  *) apr_file_info: [Win32 only] Treat only "name surrogate" reparse points
-     as symlinks, and not other reparse tag types. PR47630
-     [Oleg Liatte <olegliatte gmail.com>]
-
-  *) Test %ld vs. %lld to avoid compiler emits using APR_OFF_T_FMT, in the
-     case of apparently equivilant long and long long types. [William Rowe] 
-
-  *) Recognize APPLE predefined macros as equivilant to DARWIN. [Jim Jagielski]
-
-  *) Signals: Allow handling of SIGUSR2 in apr_signal_thread. [Yann Ylavic]
-
-  *) Atomics: Support for 64bit ints. [Jim Jagielski]
-
-  *) Add the apr_encode_* API that implements RFC4648 and RFC7515
-     compliant BASE64, BASE64URL, BASE32, BASE32HEX and BASE16
-     encode/decode functions. [Graham Leggett]
-
-  *) rand: Use arc4random_buf() on BSD platforms and getrandom() on Linux,
-     when available. [Christian Weisgerber <naddy openbsd.org, Yann Ylavic]
-
-  *) Add apr_sockaddr_zone_set, apr_sockaddr_zone_set to set and retrieve
-     the zone for link-local IPv6 addresses.  [Joe Orton]
-
-  *) apr_sockaddr_equal: Compare link-local IPv6 addresses with different
-     zones as not equal.  [Joe Orton]
-
-  *) apr_sockaddr_ip_getbuf, apr_sockaddr_ip_get: Append "%zone" for
-     IPv6 link-local addresses.  [Joe Orton]
-
-  *) Locks: add a --disable-timedlocks config option in case users
-     encounter more platforms where it fails [Nick Kew].
-
-  *) apr_allocator, apr_pools: Add apr_allocator_page_size() and
-     apr_allocator_min_order_set() to respectively get the (system's) page size
-     in use and set the minimum allocation size for an allocator (expressed in
-     2^order pages).  [Yann Ylavic]
-
-  *) locks: provide portable implementations of timedlock()s for
-     posix-sems, sysv-sems and pthreads for those platforms that
-     lack native versions (eg: OSX/macOS). [Jim Jagielski]
-
-  *) locks: Introduce apr_{thread,proc,global}_mutex_timedlock().
-     [Yann Ylavic]
+  *) http://svn.apache.org/viewvc/apr/apr/branches/1.7.x/CHANGES?view=markup
 
 Changes for APR 1.6.x and later:
 

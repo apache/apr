@@ -3,6 +3,7 @@ Last modified at [$Date$]
 
 Releases:
     2.0.0     : in development on trunk/
+    1.8.0     : in development
     1.7.1     : in maintenance
     1.7.0     : tagged April 1, 2019
     1.6.5     : released September 14, 2018
@@ -94,10 +95,6 @@ RELEASE SHOWSTOPPERS:
 
 CURRENT VOTES:
 
-    * Fix trivial 'configure apr.h.in' copy/paste error inside apr.hw
-		-#define APR_TCP_NOPUSH_FLAG       @apr_tcp_nopush_flag@
-		+#define APR_TCP_NOPUSH_FLAG       0
-      +1: ylavic,
 
 CURRENT test/testall -v EXCEPTIONS:
 
