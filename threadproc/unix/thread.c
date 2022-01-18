@@ -22,9 +22,6 @@
 
 #if APR_HAVE_PTHREAD_H
 
-/* Internal (from apr_pools.c) */
-extern apr_status_t apr__pool_unmanage(apr_pool_t *pool);
-
 /* Destroy the threadattr object */
 static apr_status_t threadattr_cleanup(void *data)
 {
@@ -160,49 +157,39 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
 {
     apr_status_t stat;
     pthread_attr_t *temp;
-
+    apr_allocator_t *allocator;
+    
     (*new) = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
-
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
 
-    (*new)->td = (pthread_t *)apr_pcalloc(pool, sizeof(pthread_t));
-
-    if ((*new)->td == NULL) {
-        return APR_ENOMEM;
+    /* The thread can be detached anytime (from the creation or later with
+     * apr_thread_detach), so it needs its own pool and allocator to not
+     * depend on a parent pool which could be destroyed before the thread
+     * exits. The allocator needs no mutex obviously since the pool should 
+     * not be used nor create children pools outside the thread.
+     */
+    stat = apr_allocator_create(&allocator);
+    if (stat != APR_SUCCESS) {
+        return stat;
     }
+    stat = apr_pool_create_unmanaged_ex(&(*new)->pool,
+                                        apr_pool_abort_get(pool),
+                                        allocator);
+    if (stat != APR_SUCCESS) {
+        apr_allocator_destroy(allocator);
+        return stat;
+    }
+    apr_allocator_owner_set(allocator, (*new)->pool);
 
     (*new)->data = data;
     (*new)->func = func;
-
     (*new)->detached = (attr && apr_threadattr_detach_get(attr) == APR_DETACH);
-    if ((*new)->detached) {
-        stat = apr_pool_create_unmanaged_ex(&(*new)->pool,
-                                            apr_pool_abort_get(pool),
-                                            NULL);
-    }
-    else {
-        /* The thread can be apr_thread_detach()ed later, so the pool needs
-         * its own allocator to not depend on the parent pool which could be
-         * destroyed before the thread exits.  The allocator needs no mutex
-         * obviously since the pool should not be used nor create children
-         * pools outside the thread.
-         */
-        apr_allocator_t *allocator;
-        if (apr_allocator_create(&allocator) != APR_SUCCESS) {
-            return APR_ENOMEM;
-        }
-        stat = apr_pool_create_ex(&(*new)->pool, pool, NULL, allocator);
-        if (stat == APR_SUCCESS) {
-            apr_allocator_owner_set(allocator, (*new)->pool);
-        }
-        else {
-            apr_allocator_destroy(allocator);
-        }
-    }
-    if (stat != APR_SUCCESS) {
-        return stat;
+    (*new)->td = (pthread_t *)apr_pcalloc(pool, sizeof(pthread_t));
+    if ((*new)->td == NULL) {
+        apr_pool_destroy((*new)->pool);
+        return APR_ENOMEM;
     }
 
     if (attr)
@@ -210,16 +197,15 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
     else
         temp = NULL;
 
-    if ((stat = pthread_create((*new)->td, temp, dummy_worker, (*new))) == 0) {
-        return APR_SUCCESS;
-    }
-    else {
+    if ((stat = pthread_create((*new)->td, temp, dummy_worker, (*new)))) {
 #ifdef HAVE_ZOS_PTHREADS
         stat = errno;
 #endif
-
+        apr_pool_destroy((*new)->pool);
         return stat;
     }
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void)
@@ -280,8 +266,6 @@ APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
 #else
     if ((stat = pthread_detach(*thd->td)) == 0) {
 #endif
-        /* Detach from the parent pool too */
-        apr__pool_unmanage(thd->pool);
         thd->detached = 1;
 
         return APR_SUCCESS;
