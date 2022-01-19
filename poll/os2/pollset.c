@@ -67,6 +67,7 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
 
         if (rc == APR_SUCCESS) {
             apr_sockaddr_t *listen_address;
+            apr_socket_timeout_set((*pollset)->wake_listen, 0);
             apr_sockaddr_info_get(&listen_address, "", APR_UNIX, 0, 0, p);
             rc = apr_socket_bind((*pollset)->wake_listen, listen_address);
 
@@ -79,7 +80,6 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                 wake_poll_fd.client_data = NULL;
                 apr_pollset_add(*pollset, &wake_poll_fd);
                 apr_socket_addr_get(&(*pollset)->wake_address, APR_LOCAL, (*pollset)->wake_listen);
-                apr_socket_timeout_set((*pollset)->wake_listen, 0);
 
                 rc = apr_socket_create(&(*pollset)->wake_sender, APR_UNIX, SOCK_DGRAM, 0, p);
             }
@@ -263,14 +263,17 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 
         if (rtnevents) {
             if (i == 0 && pollset->wake_listen != NULL) {
-                char ch;
-                apr_size_t len = 1;
                 struct apr_sockaddr_t from_addr;
-                rv = apr_socket_recvfrom(&from_addr, pollset->wake_listen,
-                                          MSG_DONTWAIT, &ch, &len);
-                if (rv == APR_SUCCESS) {
-                    /* Woken up, senders can fill the pipe again */
-                    apr_atomic_set32(&pollset->wakeup_set, 0);
+                char buffer[16];
+                apr_size_t buflen;
+                for (;;) {
+                    buflen = sizeof(buffer);
+                    rv = apr_socket_recvfrom(&from_addr, pollset->wake_listen,
+                                             MSG_DONTWAIT, buffer, &buflen);
+                    if (rv != APR_SUCCESS) {
+                        break;
+                    }
+                    /* Woken up, drain the pipe still. */
                     rc = APR_EINTR;
                 }
             }
@@ -295,15 +298,12 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 
 APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset)
 {
-    if (!pollset->wake_sender)
-        return APR_EINIT;
-
-    if (apr_atomic_cas32(&pollset->wakeup_set, 1, 0) == 0) {
+    if (pollset->wake_sender) {
         apr_size_t len = 1;
         return apr_socket_sendto(pollset->wake_sender, pollset->wake_address, 0, "", &len);
     }
 
-    return APR_SUCCESS;
+    return APR_EINIT;
 }
 
 

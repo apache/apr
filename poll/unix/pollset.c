@@ -23,7 +23,6 @@
 #include "apr_poll.h"
 #include "apr_time.h"
 #include "apr_portable.h"
-#include "apr_atomic.h"
 #include "apr_arch_file_io.h"
 #include "apr_arch_networkio.h"
 #include "apr_arch_poll_private.h"
@@ -145,7 +144,6 @@ APR_DECLARE(apr_status_t) apr_pollset_create_ex(apr_pollset_t **ret_pollset,
     pollset->pool = p;
     pollset->flags = flags;
     pollset->provider = provider;
-    pollset->wakeup_set = 0;
 
     rv = (*provider->create)(pollset, size, p, flags);
     if (rv == APR_ENOTIMPL) {
@@ -222,13 +220,10 @@ APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t * pollset)
 
 APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset)
 {
-    if (!(pollset->flags & APR_POLLSET_WAKEABLE))
-        return APR_EINIT;
-
-    if (apr_atomic_cas32(&pollset->wakeup_set, 1, 0) == 0)
+    if (pollset->flags & APR_POLLSET_WAKEABLE)
         return apr_file_putc(1, pollset->wakeup_pipe[1]);
-
-    return APR_SUCCESS;
+    else
+        return APR_EINIT;
 }
 
 APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
