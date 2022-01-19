@@ -235,24 +235,22 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
                                           apr_thread_t *thd)
 {
     apr_status_t stat;
-    apr_status_t *thread_stat;
+    void *thread_stat;
 
     if (thd->detached) {
         return APR_EINVAL;
     }
 
-    if ((stat = pthread_join(*thd->td,(void *)&thread_stat)) == 0) {
-        *retval = thd->exitval;
-        apr_pool_destroy(thd->pool);
-        return APR_SUCCESS;
-    }
-    else {
+    if ((stat = pthread_join(*thd->td, &thread_stat))) {
 #ifdef HAVE_ZOS_PTHREADS
         stat = errno;
 #endif
-
         return stat;
     }
+
+    *retval = thd->exitval;
+    apr_pool_destroy(thd->pool);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)

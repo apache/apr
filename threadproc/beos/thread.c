@@ -161,21 +161,19 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *th
     }
 
     ret = wait_for_thread(thd->td, &rv);
-    if (ret == B_NO_ERROR) {
-        *retval = rv;
-        return APR_SUCCESS;
-    }
-    else {
+    if (ret != B_NO_ERROR) {
         /* if we've missed the thread's death, did we set an exit value prior
          * to it's demise?  If we did return that.
          */
-        if (thd->exitval != -1) {
-            *retval = thd->exitval;
-            apr_pool_destroy(thd->pool);
-            return APR_SUCCESS;
-        } else 
-            return ret;
+        if (thd->exitval == -1) {
+            return errno;
+        }
+        rv = thd->exitval;
     }
+
+    *retval = rv;
+    apr_pool_destroy(thd->pool);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)

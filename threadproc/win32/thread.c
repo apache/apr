@@ -181,7 +181,6 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
     if (rv == APR_SUCCESS) {
         CloseHandle(thd->td);
         apr_pool_destroy(thd->pool);
-        thd->td = NULL;
     }
 
     return rv;
