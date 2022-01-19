@@ -64,35 +64,44 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
     return APR_ENOTIMPL;
 }
 
+#ifdef APR_HAS_THREAD_LOCAL
+static APR_THREAD_LOCAL apr_thread_t *current_thread;
+#endif
+
 static void *dummy_worker(void *opaque)
 {
     apr_thread_t *thd = (apr_thread_t *)opaque;
     void *ret;
+
+#ifdef APR_HAS_THREAD_LOCAL
+    current_thread = thd;
+#endif
 
     apr_pool_owner_set(thd->pool, 0);
     ret = thd->func(thd, thd->data);
     if (thd->detached) {
         apr_pool_destroy(thd->pool);
     }
+
+#ifdef APR_HAS_THREAD_LOCAL
+    current_thread = NULL;
+#endif
     return ret;
 }
 
-apr_status_t apr_thread_create(apr_thread_t **new,
-                                            apr_threadattr_t *attr, 
-                                            apr_thread_start_t func,
-                                            void *data,
-                                            apr_pool_t *pool)
+static apr_status_t alloc_thread(apr_thread_t **new,
+                                 apr_threadattr_t *attr,
+                                 apr_thread_start_t func, void *data,
+                                 apr_pool_t *pool)
 {
     apr_status_t stat;
-    unsigned long flags = NX_THR_BIND_CONTEXT;
-    size_t stack_size = APR_DEFAULT_STACK_SIZE;
     apr_allocator_t *allocator;
     apr_pool_t *p;
-    
+
     /* The thread can be detached anytime (from the creation or later with
      * apr_thread_detach), so it needs its own pool and allocator to not
      * depend on a parent pool which could be destroyed before the thread
-     * exits. The allocator needs no mutex obviously since the pool should 
+     * exits. The allocator needs no mutex obviously since the pool should
      * not be used nor create children pools outside the thread.
      */
     stat = apr_allocator_create(&allocator);
@@ -131,6 +140,24 @@ apr_status_t apr_thread_create(apr_thread_t **new,
         return APR_ENOMEM;
     }
 
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
+                                            apr_threadattr_t *attr,
+                                            apr_thread_start_t func,
+                                            void *data,
+                                            apr_pool_t *pool)
+{
+    apr_status_t stat;
+    unsigned long flags = NX_THR_BIND_CONTEXT;
+    size_t stack_size = APR_DEFAULT_STACK_SIZE;
+
+    stat = alloc_thread(new, attr, func, data, pool);
+    if (stat != APR_SUCCESS) {
+        return stat;
+    }
+
     /* An original stack size of 0 will allow NXCreateThread() to
     *   assign a default system stack size.  An original stack
     *   size of less than 0 will assign the APR default stack size.
@@ -139,11 +166,11 @@ apr_status_t apr_thread_create(apr_thread_t **new,
     if (attr && (attr->stack_size >= 0)) {
         stack_size = attr->stack_size;
     }
-    
+
     if (attr && attr->detach) {
         flags |= NX_THR_DETACHED;
     }
-    
+
     (*new)->ctx = NXContextAlloc(
         /* void(*start_routine)(void *arg) */ (void (*)(void *)) dummy_worker,
         /* void *arg */                       (*new),
@@ -151,7 +178,7 @@ apr_status_t apr_thread_create(apr_thread_t **new,
         /* size_t stackSize */                stack_size,
         /* unsigned long flags */             NX_CTX_NORMAL,
         /* int *error */                      &stat);
-                                                                           
+
     (void) NXContextSetName(
         /* NXContext_t ctx */  (*new)->ctx,
         /* const char *name */ (*new)->thread_name);
@@ -162,11 +189,44 @@ apr_status_t apr_thread_create(apr_thread_t **new,
         /* NXThreadId_t *thread_id */ &(*new)->td);
 
     if (stat) {
-        apr_pool_destroy(p);
+        apr_pool_destroy((*new)->pool);
         return stat;
     }
-        
+
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_current_create(apr_thread_t **current,
+                                                    apr_threadattr_t *attr,
+                                                    apr_pool_t *pool)
+{
+    apr_status_t stat;
+
+    *current = apr_thread_current();
+    if (*current) {
+        return APR_EEXIST;
+    }
+
+    stat = alloc_thread(current, attr, NULL, NULL, pool);
+    if (stat != APR_SUCCESS) {
+        return stat;
+    }
+
+    (*current)->td = apr_os_thread_current();
+
+#ifdef APR_HAS_THREAD_LOCAL
+    current_thread = *current;
+#endif
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_thread_t *) apr_thread_current(void)
+{
+#ifdef APR_HAS_THREAD_LOCAL
+    return current_thread;
+#else
+    return NULL;
+#endif
 }
 
 apr_os_thread_t apr_os_thread_current()
@@ -190,6 +250,9 @@ void apr_thread_exit(apr_thread_t *thd, apr_status_t retval)
     if (thd->detached) {
         apr_pool_destroy(thd->pool);
     }
+#ifdef APR_HAS_THREAD_LOCAL
+    current_thread = NULL;
+#endif
     NXThreadExit(NULL);
 }
 
@@ -227,26 +290,21 @@ apr_status_t apr_thread_detach(apr_thread_t *thd)
 apr_status_t apr_thread_data_get(void **data, const char *key,
                                              apr_thread_t *thread)
 {
-    if (thread != NULL) {
-            return apr_pool_userdata_get(data, key, thread->pool);
-    }
-    else {
-        data = NULL;
+    if (thread == NULL) {
+        *data = NULL;
         return APR_ENOTHREAD;
     }
+    return apr_pool_userdata_get(data, key, thread->pool);
 }
 
 apr_status_t apr_thread_data_set(void *data, const char *key,
                               apr_status_t (*cleanup) (void *),
                               apr_thread_t *thread)
 {
-    if (thread != NULL) {
-       return apr_pool_userdata_set(data, key, cleanup, thread->pool);
-    }
-    else {
-        data = NULL;
+    if (thread == NULL) {
         return APR_ENOTHREAD;
     }
+    return apr_pool_userdata_set(data, key, cleanup, thread->pool);
 }
 
 APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd,
