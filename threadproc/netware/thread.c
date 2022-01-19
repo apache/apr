@@ -21,9 +21,6 @@
 
 static int thread_count = 0;
 
-/* Internal (from apr_pools.c) */
-extern apr_status_t apr__pool_unmanage(apr_pool_t *pool);
-
 apr_status_t apr_threadattr_create(apr_threadattr_t **new,
                                                 apr_pool_t *pool)
 {
@@ -87,14 +84,48 @@ apr_status_t apr_thread_create(apr_thread_t **new,
 {
     apr_status_t stat;
     unsigned long flags = NX_THR_BIND_CONTEXT;
-    char threadName[NX_MAX_OBJECT_NAME_LEN+1];
     size_t stack_size = APR_DEFAULT_STACK_SIZE;
+    apr_allocator_t *allocator;
+    
+    (*new) = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
+    if ((*new) == NULL) {
+        return APR_ENOMEM;
+    }
 
+    /* The thread can be detached anytime (from the creation or later with
+     * apr_thread_detach), so it needs its own pool and allocator to not
+     * depend on a parent pool which could be destroyed before the thread
+     * exits. The allocator needs no mutex obviously since the pool should 
+     * not be used nor create children pools outside the thread.
+     */
+    stat = apr_allocator_create(&allocator);
+    if (stat != APR_SUCCESS) {
+        return stat;
+    }
+    stat = apr_pool_create_unmanaged_ex(&(*new)->pool,
+                                        apr_pool_abort_get(pool),
+                                        allocator);
+    if (stat != APR_SUCCESS) {
+        apr_allocator_destroy(allocator);
+        return stat;
+    }
+    apr_allocator_owner_set(allocator, (*new)->pool);
+
+    (*new)->data = data;
+    (*new)->func = func;
+    (*new)->exitval = -1;
+    (*new)->detached = (attr && apr_threadattr_detach_get(attr) == APR_DETACH);
     if (attr && attr->thread_name) {
-        strncpy (threadName, attr->thread_name, NX_MAX_OBJECT_NAME_LEN);
+        (*new)->thread_name = apr_pstrndup(pool, ttr->thread_name,
+                                           NX_MAX_OBJECT_NAME_LEN);
     }
     else {
-        sprintf(threadName, "APR_thread %04ld", ++thread_count);
+        (*new)->thread_name = apr_psprintf(pool, "APR_thread %04d",
+                                           ++thread_count);
+    }
+    if ((*new)->thread_name == NULL) {
+        apr_pool_destroy((*new)->pool);
+        return APR_ENOMEM;
     }
 
     /* An original stack size of 0 will allow NXCreateThread() to
@@ -104,45 +135,6 @@ apr_status_t apr_thread_create(apr_thread_t **new,
     */
     if (attr && (attr->stack_size >= 0)) {
         stack_size = attr->stack_size;
-    }
-    
-    (*new) = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
-
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-    
-    (*new)->data = data;
-    (*new)->func = func;
-    (*new)->thread_name = (char*)apr_pstrdup(pool, threadName);
-
-    (*new)->detached = (attr && apr_threadattr_detach_get(attr) == APR_DETACH);
-    if ((*new)->detached) {
-        stat = apr_pool_create_unmanaged_ex(&(*new)->pool,
-                                            apr_pool_abort_get(pool),
-                                            NULL);
-    }
-    else {
-        /* The thread can be apr_thread_detach()ed later, so the pool needs
-         * its own allocator to not depend on the parent pool which could be
-         * destroyed before the thread exits.  The allocator needs no mutex
-         * obviously since the pool should not be used nor create children
-         * pools outside the thread.
-         */
-        apr_allocator_t *allocator;
-        if (apr_allocator_create(&allocator) != APR_SUCCESS) {
-            return APR_ENOMEM;
-        }
-        stat = apr_pool_create_ex(&(*new)->pool, pool, NULL, allocator);
-        if (stat == APR_SUCCESS) {
-            apr_allocator_owner_set(allocator, (*new)->pool);
-        }
-        else {
-            apr_allocator_destroy(allocator);
-        }
-    }
-    if (stat != APR_SUCCESS) {
-        return stat;
     }
     
     if (attr && attr->detach) {
@@ -157,19 +149,21 @@ apr_status_t apr_thread_create(apr_thread_t **new,
         /* unsigned long flags */             NX_CTX_NORMAL,
         /* int *error */                      &stat);
 
-    stat = NXContextSetName(
+    (void) NXContextSetName(
         /* NXContext_t ctx */  (*new)->ctx,
-        /* const char *name */ threadName);
+        /* const char *name */ (*new)->thread_name);
 
     stat = NXThreadCreate(
         /* NXContext_t context */     (*new)->ctx,
         /* unsigned long flags */     flags,
         /* NXThreadId_t *thread_id */ &(*new)->td);
 
-    if (stat == 0)
-        return APR_SUCCESS;
+    if (stat) {
+        apr_pool_destroy((*new)->pool);
+        return stat;
+    }
         
-    return(stat); /* if error */    
+    return APR_SUCCESS;
 }
 
 apr_os_thread_t apr_os_thread_current()
@@ -224,8 +218,6 @@ apr_status_t apr_thread_detach(apr_thread_t *thd)
         return APR_EINVAL;
     }
 
-    /* Detach from the parent pool too */
-    apr__pool_unmanage(thd->pool);
     thd->detached = 1;
 
     return APR_SUCCESS;
