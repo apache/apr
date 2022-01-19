@@ -95,12 +95,8 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
     unsigned temp;
     HANDLE handle;
     apr_allocator_t *allocator;
+    apr_pool_t *p;
     
-    (*new) = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-
     /* The thread can be detached anytime (from the creation or later with
      * apr_thread_detach), so it needs its own pool and allocator to not
      * depend on a parent pool which could be destroyed before the thread
@@ -111,15 +107,21 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
     if (stat != APR_SUCCESS) {
         return stat;
     }
-    stat = apr_pool_create_unmanaged_ex(&(*new)->pool,
-                                        apr_pool_abort_get(pool),
+    stat = apr_pool_create_unmanaged_ex(&p, apr_pool_abort_get(pool),
                                         allocator);
     if (stat != APR_SUCCESS) {
         apr_allocator_destroy(allocator);
         return stat;
     }
-    apr_allocator_owner_set(allocator, (*new)->pool);
+    apr_allocator_owner_set(allocator, p);
 
+    (*new) = (apr_thread_t *)apr_pcalloc(p, sizeof(apr_thread_t));
+    if ((*new) == NULL) {
+        apr_pool_destroy(p);
+        return APR_ENOMEM;
+    }
+
+    (*new)->pool = p;
     (*new)->data = data;
     (*new)->func = func;
 
@@ -131,7 +133,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
                         (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
                         (*new), 0, &temp)) == 0) {
         stat = APR_FROM_OS_ERROR(_doserrno);
-        apr_pool_destroy((*new)->pool);
+        apr_pool_destroy(p);
         return stat;
     }
     if (attr && attr->detach) {
