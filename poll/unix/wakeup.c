@@ -28,34 +28,34 @@
 
 #ifdef WIN32
 
-apr_status_t apr_poll_create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd,
-                                         apr_file_t **wakeup_pipe)
+apr_status_t apr_poll_create_wakeup_socket(apr_pool_t *pool, apr_pollfd_t *pfd,
+                                           apr_socket_t **wakeup_socket)
 {
     apr_status_t rv;
 
-    if ((rv = apr_file_socket_pipe_create(&wakeup_pipe[0], &wakeup_pipe[1],
+    if ((rv = apr_file_socket_pipe_create(&wakeup_socket[0], &wakeup_socket[1],
                                           pool)) != APR_SUCCESS)
         return rv;
 
     pfd->reqevents = APR_POLLIN;
-    pfd->desc_type = APR_POLL_FILE;
-    pfd->desc.f = wakeup_pipe[0];
+    pfd->desc_type = APR_POLL_SOCKET;
+    pfd->desc.s = wakeup_socket[0];
     return APR_SUCCESS;
 }
 
-apr_status_t apr_poll_close_wakeup_pipe(apr_file_t **wakeup_pipe)
+apr_status_t apr_poll_close_wakeup_socket(apr_socket_t **wakeup_socket)
 {
     apr_status_t rv0 = APR_SUCCESS;
     apr_status_t rv1 = APR_SUCCESS;
 
     /* Close both sides of the wakeup pipe */
-    if (wakeup_pipe[0]) {
-        rv0 = apr_file_socket_pipe_close(wakeup_pipe[0]);
-        wakeup_pipe[0] = NULL;
+    if (wakeup_socket[0]) {
+        rv0 = apr_file_socket_pipe_close(wakeup_socket[0]);
+        wakeup_socket[0] = NULL;
     }
-    if (wakeup_pipe[1]) {
-        rv1 = apr_file_socket_pipe_close(wakeup_pipe[1]);
-        wakeup_pipe[1] = NULL;
+    if (wakeup_socket[1]) {
+        rv1 = apr_file_socket_pipe_close(wakeup_socket[1]);
+        wakeup_socket[1] = NULL;
     }
     return rv0 ? rv0 : rv1;
 }
@@ -134,6 +134,7 @@ apr_status_t apr_poll_close_wakeup_pipe(apr_file_t **wakeup_pipe)
 
 #endif /* APR_FILES_AS_SOCKETS */
 
+#if WAKEUP_USES_PIPE
 /* Read and discard whatever is in the wakeup pipe.
  */
 void apr_poll_drain_wakeup_pipe(volatile apr_uint32_t *wakeup_set, apr_file_t **wakeup_pipe)
@@ -143,4 +144,15 @@ void apr_poll_drain_wakeup_pipe(volatile apr_uint32_t *wakeup_set, apr_file_t **
     (void)apr_file_getc(&ch, wakeup_pipe[0]);
     apr_atomic_set32(wakeup_set, 0);
 }
+#else
+/* Read and discard whatever is in the wakeup socket.
+ */
+void apr_poll_drain_wakeup_socket(volatile apr_uint32_t *wakeup_set, apr_socket_t **wakeup_socket)
+{
+    char ch;
+    apr_size_t len;
 
+    (void)apr_socket_recv(wakeup_socket[0], &ch, &len);
+    apr_atomic_set32(wakeup_set, 0);
+}
+#endif

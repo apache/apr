@@ -187,11 +187,7 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
 #if APR_FILES_AS_SOCKETS
         pollset->p->pollset[pollset->nelts].fd = descriptor->desc.f->filedes;
 #else
-        if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
-            descriptor->desc.f == pollset->wakeup_pipe[0])
-            pollset->p->pollset[pollset->nelts].fd = (SOCKET)descriptor->desc.f->filedes;
-        else
-            return APR_EBADF;
+        return APR_EBADF;
 #endif
     }
     pollset->p->pollset[pollset->nelts].events =
@@ -272,12 +268,21 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
                 /* Check if the polled descriptor is our
                  * wakeup pipe. In that case do not put it result set.
                  */
+#if WAKEUP_USES_PIPE
                 if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
                     pollset->p->query_set[i].desc_type == APR_POLL_FILE &&
                     pollset->p->query_set[i].desc.f == pollset->wakeup_pipe[0]) {
                     apr_poll_drain_wakeup_pipe(&pollset->wakeup_set, pollset->wakeup_pipe);
                     rv = APR_EINTR;
                 }
+#else
+                if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
+                    pollset->p->query_set[i].desc_type == APR_POLL_SOCKET &&
+                    pollset->p->query_set[i].desc.s == pollset->wakeup_socket[0]) {
+                    apr_poll_drain_wakeup_socket(&pollset->wakeup_set, pollset->wakeup_socket);
+                    rv = APR_EINTR;
+                }
+#endif
                 else {
                     pollset->p->result_set[j] = pollset->p->query_set[i];
                     pollset->p->result_set[j].rtnevents =
@@ -419,13 +424,21 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
             if (pollcb->pollset.ps[i].revents != 0) {
                 apr_pollfd_t *pollfd = pollcb->copyset[i];
 
+#if WAKEUP_USES_PIPE
                 if ((pollcb->flags & APR_POLLSET_WAKEABLE) &&
                     pollfd->desc_type == APR_POLL_FILE &&
                     pollfd->desc.f == pollcb->wakeup_pipe[0]) {
                     apr_poll_drain_wakeup_pipe(&pollcb->wakeup_set, pollcb->wakeup_pipe);
                     return APR_EINTR;
                 }
-
+#else
+                if ((pollcb->flags & APR_POLLSET_WAKEABLE) &&
+                    pollfd->desc_type == APR_POLL_SOCKET &&
+                    pollfd->desc.s == pollcb->wakeup_socket[0]) {
+                    apr_poll_drain_wakeup_socket(&pollcb->wakeup_set, pollcb->wakeup_socket);
+                    return APR_EINTR;
+                }
+#endif
                 pollfd->rtnevents = get_revent(pollcb->pollset.ps[i].revents);                    
                 rv = func(baton, pollfd);
                 if (rv) {

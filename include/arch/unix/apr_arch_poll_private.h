@@ -81,6 +81,12 @@
 #endif
 #endif
 
+#ifdef WIN32
+#define WAKEUP_USES_PIPE 0
+#else
+#define WAKEUP_USES_PIPE 1
+#endif
+
 #if defined(POLLSET_USES_KQUEUE) || defined(POLLSET_USES_EPOLL) || defined(POLLSET_USES_PORT) || defined(POLLSET_USES_AIO_MSGQ)
 
 #include "apr_ring.h"
@@ -121,7 +127,11 @@ struct apr_pollset_t
     apr_uint32_t nalloc;
     apr_uint32_t flags;
     /* Pipe descriptors used for wakeup */
+#if WAKEUP_USES_PIPE
     apr_file_t *wakeup_pipe[2];
+#else
+    apr_socket_t *wakeup_socket[2];
+#endif
     apr_pollfd_t wakeup_pfd;
     volatile apr_uint32_t wakeup_set;
     apr_pollset_private_t *p;
@@ -150,7 +160,11 @@ struct apr_pollcb_t {
     apr_uint32_t nalloc;
     apr_uint32_t flags;
     /* Pipe descriptors used for wakeup */
+#if WAKEUP_USES_PIPE
     apr_file_t *wakeup_pipe[2];
+#else
+    apr_socket_t *wakeup_socket[2];
+#endif
     apr_pollfd_t wakeup_pfd;
     volatile apr_uint32_t wakeup_set;
     int fd;
@@ -181,9 +195,16 @@ struct apr_pollcb_provider_t {
  * Private functions used for the implementation of both apr_pollcb_* and 
  * apr_pollset_*
  */
-apr_status_t apr_poll_create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd, 
+#if WAKEUP_USES_PIPE
+apr_status_t apr_poll_create_wakeup_pipe(apr_pool_t *pool, apr_pollfd_t *pfd,
                                          apr_file_t **wakeup_pipe);
 apr_status_t apr_poll_close_wakeup_pipe(apr_file_t **wakeup_pipe);
 void apr_poll_drain_wakeup_pipe(volatile apr_uint32_t *wakeup_set, apr_file_t **wakeup_pipe);
+#else
+apr_status_t apr_poll_create_wakeup_socket(apr_pool_t *pool, apr_pollfd_t *pfd,
+                                         apr_socket_t **wakeup_socket);
+apr_status_t apr_poll_close_wakeup_socket(apr_socket_t **wakeup_socket);
+void apr_poll_drain_wakeup_socket(volatile apr_uint32_t *wakeup_set, apr_socket_t **wakeup_socket);
+#endif
 
 #endif /* APR_ARCH_POLL_PRIVATE_H */

@@ -15,6 +15,7 @@
  */
 
 #include "apr_arch_file_io.h"
+#include "apr_arch_networkio.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_strings.h"
@@ -411,53 +412,31 @@ cleanup:
 
 static apr_status_t socket_pipe_cleanup(void *thefile)
 {
-    apr_file_t *file = thefile;
-    if (file->filehand != INVALID_HANDLE_VALUE) {
-        shutdown((SOCKET)file->filehand, SD_BOTH);
-        closesocket((SOCKET)file->filehand);
-        file->filehand = INVALID_HANDLE_VALUE;
+    apr_socket_t *file = thefile;
+    if (file->socketdes != INVALID_SOCKET) {
+        shutdown(file->socketdes, SD_BOTH);
+        closesocket(file->socketdes);
+        file->socketdes = INVALID_SOCKET;
     }
     return APR_SUCCESS;
 }
 
-apr_status_t apr_file_socket_pipe_create(apr_file_t **in,
-                                         apr_file_t **out,
+apr_status_t apr_file_socket_pipe_create(apr_socket_t **in,
+                                         apr_socket_t **out,
                                          apr_pool_t *p)
 {
     apr_status_t rv;
     SOCKET rd;
     SOCKET wr;
 
+    *in = NULL;
+    *out = NULL;
+
     if ((rv = create_socket_pipe(&rd, &wr)) != APR_SUCCESS) {
         return rv;
     }
-    (*in) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
-    (*in)->pool = p;
-    (*in)->fname = NULL;
-    (*in)->ftype = APR_FILETYPE_SOCKET;
-    (*in)->timeout = 0; /* read end of the pipe is non-blocking */
-    (*in)->ungetchar = -1;
-    (*in)->eof_hit = 0;
-    (*in)->filePtr = 0;
-    (*in)->bufpos = 0;
-    (*in)->dataRead = 0;
-    (*in)->direction = 0;
-    (*in)->pOverlapped = NULL;
-    (*in)->filehand = (HANDLE)rd;
-
-    (*out) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
-    (*out)->pool = p;
-    (*out)->fname = NULL;
-    (*out)->ftype = APR_FILETYPE_SOCKET;
-    (*out)->timeout = -1;
-    (*out)->ungetchar = -1;
-    (*out)->eof_hit = 0;
-    (*out)->filePtr = 0;
-    (*out)->bufpos = 0;
-    (*out)->dataRead = 0;
-    (*out)->direction = 0;
-    (*out)->pOverlapped = NULL;
-    (*out)->filehand = (HANDLE)wr;
+    apr_os_sock_put(in, &rd, p);
+    apr_os_sock_put(out, &wr, p);
 
     apr_pool_cleanup_register(p, (void *)(*in), socket_pipe_cleanup,
                               apr_pool_cleanup_null);
@@ -467,17 +446,11 @@ apr_status_t apr_file_socket_pipe_create(apr_file_t **in,
     return rv;
 }
 
-apr_status_t apr_file_socket_pipe_close(apr_file_t *file)
+apr_status_t apr_file_socket_pipe_close(apr_socket_t *socket)
 {
     apr_status_t stat;
-    if (file->ftype != APR_FILETYPE_SOCKET)
-        return apr_file_close(file);
-    if ((stat = socket_pipe_cleanup(file)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(file->pool, file, socket_pipe_cleanup);
-
-        if (file->mutex) {
-            apr_thread_mutex_destroy(file->mutex);
-        }
+    if ((stat = socket_pipe_cleanup(socket)) == APR_SUCCESS) {
+        apr_pool_cleanup_kill(socket->pool, socket, socket_pipe_cleanup);
 
         return APR_SUCCESS;
     }

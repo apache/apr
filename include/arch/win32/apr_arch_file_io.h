@@ -251,11 +251,11 @@ apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p);
 apr_status_t file_cleanup(void *);
 
 extern apr_status_t
-apr_file_socket_pipe_create(apr_file_t **in,
-                            apr_file_t **out,
+apr_file_socket_pipe_create(apr_socket_t **in,
+                            apr_socket_t **out,
                             apr_pool_t *p);
 
 extern apr_status_t
-apr_file_socket_pipe_close(apr_file_t *file);
+apr_file_socket_pipe_close(apr_socket_t *socket);
 
 #endif  /* ! FILE_IO_H */
