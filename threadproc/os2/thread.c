@@ -84,14 +84,9 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
                                             apr_pool_t *pool)
 {
     apr_status_t stat;
-    apr_thread_t *thread;
     apr_allocator_t *allocator;
+    apr_pool_t *p;
     
-    *new = thread = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
-    if (thread == NULL) {
-        return APR_ENOMEM;
-    }
-
     /* The thread can be detached anytime (from the creation or later with
      * apr_thread_detach), so it needs its own pool and allocator to not
      * depend on a parent pool which could be destroyed before the thread
@@ -102,33 +97,39 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
     if (stat != APR_SUCCESS) {
         return stat;
     }
-    stat = apr_pool_create_unmanaged_ex(&thread->pool,
-                                        apr_pool_abort_get(pool),
+    stat = apr_pool_create_unmanaged_ex(&p, apr_pool_abort_get(pool),
                                         allocator);
     if (stat != APR_SUCCESS) {
         apr_allocator_destroy(allocator);
         return stat;
     }
-    apr_allocator_owner_set(allocator, thread->pool);
+    apr_allocator_owner_set(allocator, p);
 
-    thread->func = func;
-    thread->data = data;
+    (*new) = (apr_thread_t *)apr_pcalloc(p, sizeof(apr_thread_t));
+    if ((*new) == NULL) {
+        apr_pool_destroy(p);
+        return APR_ENOMEM;
+    }
+
+    (*new)->pool = p;
+    (*new)->func = func;
+    (*new)->data = data;
     if (attr == NULL) {
-        stat = apr_threadattr_create(&attr, thread->pool);
+        stat = apr_threadattr_create(&attr, p);
         if (stat != APR_SUCCESS) {
-            apr_pool_destroy(thread->pool);
+            apr_pool_destroy(p);
             return stat;
         }
     }
-    thread->attr = attr;
+    (*new)->attr = attr;
 
-    thread->tid = _beginthread(dummy_worker, NULL, 
-                               thread->attr->stacksize > 0 ?
-                               thread->attr->stacksize : APR_THREAD_STACKSIZE,
-                               thread);
-    if (thread->tid < 0) {
+    (*new)->tid = _beginthread(dummy_worker, NULL, 
+                               (*new)->attr->stacksize > 0 ?
+                               (*new)->attr->stacksize : APR_THREAD_STACKSIZE,
+                               (*new));
+    if ((*new)->tid < 0) {
         stat = errno;
-        apr_pool_destroy(thread->pool);
+        apr_pool_destroy(p);
         return stat;
     }
 

@@ -81,12 +81,8 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
     int32 temp;
     apr_status_t stat;
     apr_allocator_t *allocator;
+    apr_pool_t *p;
     
-    (*new) = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-
     /* The thread can be detached anytime (from the creation or later with
      * apr_thread_detach), so it needs its own pool and allocator to not
      * depend on a parent pool which could be destroyed before the thread
@@ -97,15 +93,21 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
     if (stat != APR_SUCCESS) {
         return stat;
     }
-    stat = apr_pool_create_unmanaged_ex(&(*new)->pool,
-                                        apr_pool_abort_get(pool),
+    stat = apr_pool_create_unmanaged_ex(&p, apr_pool_abort_get(pool),
                                         allocator);
     if (stat != APR_SUCCESS) {
         apr_allocator_destroy(allocator);
         return stat;
     }
-    apr_allocator_owner_set(allocator, (*new)->pool);
+    apr_allocator_owner_set(allocator, p);
 
+    (*new) = (apr_thread_t *)apr_pcalloc(p, sizeof(apr_thread_t));
+    if ((*new) == NULL) {
+        apr_pool_destroy(p);
+        return APR_ENOMEM;
+    }
+
+    (*new)->pool = p;
     (*new)->data = data;
     (*new)->func = func;
     (*new)->exitval = -1;
@@ -118,14 +120,12 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
 
     /* First we create the new thread...*/
     (*new)->td = spawn_thread((thread_func)dummy_worker, 
-                              "apr thread", 
-                              temp, 
-                              (*new));
+                              "apr thread", temp, (*new));
 
     /* Now we try to run it...*/
     if (resume_thread((*new)->td) != B_NO_ERROR) {
         stat = errno;
-        apr_pool_destroy((*new)->pool);
+        apr_pool_destroy(p);
         return stat;
     }
 
@@ -162,21 +162,19 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *th
     }
 
     ret = wait_for_thread(thd->td, &rv);
-    if (ret == B_NO_ERROR) {
-        *retval = rv;
-        return APR_SUCCESS;
-    }
-    else {
+    if (ret != B_NO_ERROR) {
         /* if we've missed the thread's death, did we set an exit value prior
          * to it's demise?  If we did return that.
          */
-        if (thd->exitval != -1) {
-            *retval = thd->exitval;
-            apr_pool_destroy(thd->pool);
-            return APR_SUCCESS;
-        } else 
-            return ret;
+        if (thd->exitval == -1) {
+            return errno;
+        }
+        rv = thd->exitval;
     }
+
+    *retval = rv;
+    apr_pool_destroy(thd->pool);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
