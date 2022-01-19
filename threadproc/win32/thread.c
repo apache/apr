@@ -139,7 +139,9 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
                         attr && attr->stacksize > 0 ? attr->stacksize : 0,
                         (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
                         (*new), 0, &temp)) == 0) {
-        return apr_get_os_error();
+        stat = apr_get_os_error();
+        apr_pool_destroy((*new)->pool);
+        return stat;
     }
 #endif
     if (attr && attr->detach) {
