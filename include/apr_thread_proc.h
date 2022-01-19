@@ -209,7 +209,26 @@ typedef enum {
 
 /* Thread Function definitions */
 
+#undef APR_HAS_THREAD_LOCAL
+
 #if APR_HAS_THREADS
+
+/**
+ * APR_THREAD_LOCAL keyword mapping the compiler's.
+ */
+#if defined(__cplusplus) && __cplusplus >= 201103L
+#define APR_THREAD_LOCAL thread_local
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112
+#define APR_THREAD_LOCAL _Thread_local
+#elif defined(__GNUC__) /* works for clang too */
+#define APR_THREAD_LOCAL __thread
+#elif defined(WIN32) && defined(_MSC_VER)
+#define APR_THREAD_LOCAL __declspec(thread)
+#endif
+
+#ifdef APR_THREAD_LOCAL
+#define APR_HAS_THREAD_LOCAL 1
+#endif
 
 /**
  * Create and initialize a new threadattr variable
@@ -268,6 +287,24 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new_thread,
                                             apr_threadattr_t *attr, 
                                             apr_thread_start_t func, 
                                             void *data, apr_pool_t *cont);
+
+/**
+ * Setup the current os_thread as an apr_thread
+ * @param current The current apr_thread set up (or reused)
+ * @param attr The threadattr associated with the current thread
+ * @param pool The parent pool of the current thread
+ * @return APR_SUCCESS, APR_EEXIST if the current thread is already set,
+ *         any error otherwise
+ */
+APR_DECLARE(apr_status_t) apr_thread_current_create(apr_thread_t **current,
+                                                    apr_threadattr_t *attr,
+                                                    apr_pool_t *pool);
+/**
+ * Get the current thread
+ * @param The current apr_thread, NULL if it is not an apr_thread or if
+ *        it could not be determined.
+ */
+APR_DECLARE(apr_thread_t *) apr_thread_current(void);
 
 /**
  * stop the current thread

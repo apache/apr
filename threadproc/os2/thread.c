@@ -68,29 +68,42 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
     return APR_ENOTIMPL;
 }
 
+#ifdef APR_HAS_THREAD_LOCAL
+static APR_THREAD_LOCAL apr_thread_t *current_thread;
+#endif
+
 static void dummy_worker(void *opaque)
 {
+#ifdef APR_HAS_THREAD_LOCAL
+  current_thread = thread;
+#endif
+
   apr_thread_t *thread = (apr_thread_t *)opaque;
   thread->exitval = thread->func(thread, thread->data);
   if (thd->attr->attr & APR_THREADATTR_DETACHED) {
       apr_pool_destroy(thread->pool);
   }
+
+#ifdef APR_HAS_THREAD_LOCAL
+  current_thread = NULL;
+#endif
 }
 
 
 
-APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr, 
-                                            apr_thread_start_t func, void *data, 
-                                            apr_pool_t *pool)
+static apr_status_t alloc_thread(apr_thread_t **new,
+                                 apr_threadattr_t *attr,
+                                 apr_thread_start_t func, void *data,
+                                 apr_pool_t *pool)
 {
     apr_status_t stat;
     apr_allocator_t *allocator;
     apr_pool_t *p;
-    
+
     /* The thread can be detached anytime (from the creation or later with
      * apr_thread_detach), so it needs its own pool and allocator to not
      * depend on a parent pool which could be destroyed before the thread
-     * exits. The allocator needs no mutex obviously since the pool should 
+     * exits. The allocator needs no mutex obviously since the pool should
      * not be used nor create children pools outside the thread.
      */
     stat = apr_allocator_create(&allocator);
@@ -123,19 +136,66 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
     }
     (*new)->attr = attr;
 
-    (*new)->tid = _beginthread(dummy_worker, NULL, 
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
+                                            apr_threadattr_t *attr,
+                                            apr_thread_start_t func, void *data,
+                                            apr_pool_t *pool)
+{
+    apr_status_t stat;
+
+    stat = alloc_thread(new, attr, func, data, pool);
+    if (stat != APR_SUCCESS) {
+        return stat;
+    }
+
+    (*new)->tid = _beginthread(dummy_worker, NULL,
                                (*new)->attr->stacksize > 0 ?
                                (*new)->attr->stacksize : APR_THREAD_STACKSIZE,
                                (*new));
     if ((*new)->tid < 0) {
         stat = errno;
-        apr_pool_destroy(p);
+        apr_pool_destroy((*new)->pool);
         return stat;
     }
 
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_thread_current_create(apr_thread_t **current,
+                                                    apr_threadattr_t *attr,
+                                                    apr_pool_t *pool)
+{
+    apr_status_t stat;
+
+    *current = apr_thread_current();
+    if (*current) {
+        return APR_EEXIST;
+    }
+
+    stat = alloc_thread(new, attr, NULL, NULL, pool);
+    if (stat != APR_SUCCESS) {
+        return stat;
+    }
+
+    (*current)->tid = apr_os_thread_current();
+
+#ifdef APR_HAS_THREAD_LOCAL
+    current_thread = *current;
+#endif
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_thread_t *) apr_thread_current(void)
+{
+#ifdef APR_HAS_THREAD_LOCAL
+    return current_thread;
+#else
+    return NULL;
+#endif
+}
 
 
 APR_DECLARE(apr_os_thread_t) apr_os_thread_current()
@@ -154,6 +214,9 @@ APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t retval
     if (thd->attr->attr & APR_THREADATTR_DETACHED) {
         apr_pool_destroy(thd->pool);
     }
+#ifdef APR_HAS_THREAD_LOCAL
+    current_thread = NULL;
+#endif
     _endthread();
     return -1; /* If we get here something's wrong */
 }
@@ -232,6 +295,10 @@ int apr_os_thread_equal(apr_os_thread_t tid1, apr_os_thread_t tid2)
 
 APR_DECLARE(apr_status_t) apr_thread_data_get(void **data, const char *key, apr_thread_t *thread)
 {
+    if (thread == NULL) {
+        *data = NULL;
+        return APR_ENOTHREAD;
+    }
     return apr_pool_userdata_get(data, key, thread->pool);
 }
 
@@ -241,6 +308,9 @@ APR_DECLARE(apr_status_t) apr_thread_data_set(void *data, const char *key,
                                               apr_status_t (*cleanup) (void *),
                                               apr_thread_t *thread)
 {
+    if (thread == NULL) {
+        return APR_ENOTHREAD;
+    }
     return apr_pool_userdata_set(data, key, cleanup, thread->pool);
 }
 
