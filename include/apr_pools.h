@@ -754,11 +754,13 @@ APR_DECLARE(void) apr_pool_cleanup_for_exec(void);
  * In this case the caller must call apr_pool_join() to indicate this
  * guarantee to the APR_POOL_DEBUG code.
  *
- * These functions have an empty implementation if APR is compiled
- * with #APR_POOL_DEBUG not set.
+ * These functions are implemented when #APR_POOL_DEBUG is set and
+ * defined as no-op macros otherwise.
  *
  * @{
  */
+
+#if APR_POOL_DEBUG || defined(DOXYGEN)
 
 /**
  * Guarantee that a subpool has the same lifetime as the parent.
@@ -791,7 +793,21 @@ APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse)
  */
 APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag);
 
-/** @} */
+#else /* APR_POOL_DEBUG or DOXYGEN */
+
+#undef apr_pool_join
+#define apr_pool_join(a,b)
+
+#undef apr_pool_find
+#define apr_pool_find(mem) (NULL)
+
+#undef apr_pool_num_bytes
+#define apr_pool_num_bytes(p, rec) ((apr_size_t)0)
+
+#undef apr_pool_lock
+#define apr_pool_lock(pool, lock)
+
+#endif /* APR_POOL_DEBUG or DOXYGEN */
 
 /** @} */
 

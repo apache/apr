@@ -2929,29 +2929,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
     return apr_pool_create_unmanaged_ex(newpool, abort_fn, allocator);
 }
 
-/*
- * Other stubs, for people who are running
- * mixed release/debug enviroments.
- */
-
-APR_DECLARE(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub)
-{
-}
-
-APR_DECLARE(apr_pool_t *) apr_pool_find(const void *mem)
-{
-    return NULL;
-}
-
-APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *pool, int recurse)
-{
-    return 0;
-}
-
-APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag)
-{
-}
-
 #else /* APR_POOL_DEBUG */
 
 #undef apr_palloc
