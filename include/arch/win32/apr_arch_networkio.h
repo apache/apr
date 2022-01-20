@@ -77,5 +77,13 @@ void apr_sockaddr_vars_set(apr_sockaddr_t *, int, apr_port_t);
             (skt)->options &= ~(option);        \
     } while (0)
 
+extern apr_status_t
+apr_socket_pipe_create(apr_socket_t **in,
+                            apr_socket_t **out,
+                            apr_pool_t *p);
+
+extern apr_status_t
+apr_socket_pipe_close(apr_socket_t *socket);
+
 #endif  /* ! NETWORK_IO_H */
 

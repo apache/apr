@@ -33,7 +33,7 @@ apr_status_t apr_poll_create_wakeup_socket(apr_pool_t *pool, apr_pollfd_t *pfd,
 {
     apr_status_t rv;
 
-    if ((rv = apr_file_socket_pipe_create(&wakeup_socket[0], &wakeup_socket[1],
+    if ((rv = apr_socket_pipe_create(&wakeup_socket[0], &wakeup_socket[1],
                                           pool)) != APR_SUCCESS)
         return rv;
 
@@ -50,11 +50,11 @@ apr_status_t apr_poll_close_wakeup_socket(apr_socket_t **wakeup_socket)
 
     /* Close both sides of the wakeup pipe */
     if (wakeup_socket[0]) {
-        rv0 = apr_file_socket_pipe_close(wakeup_socket[0]);
+        rv0 = apr_socket_pipe_close(wakeup_socket[0]);
         wakeup_socket[0] = NULL;
     }
     if (wakeup_socket[1]) {
-        rv1 = apr_file_socket_pipe_close(wakeup_socket[1]);
+        rv1 = apr_socket_pipe_close(wakeup_socket[1]);
         wakeup_socket[1] = NULL;
     }
     return rv0 ? rv0 : rv1;
