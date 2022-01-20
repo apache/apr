@@ -161,8 +161,7 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
 
 typedef enum {
     APR_FILETYPE_FILE   = 0,
-    APR_FILETYPE_PIPE,
-    APR_FILETYPE_SOCKET
+    APR_FILETYPE_PIPE
 } apr_filetype_e;
     
 struct apr_file_t {
