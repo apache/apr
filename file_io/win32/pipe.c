@@ -381,14 +381,7 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
             goto cleanup;
         }
         if (nrd == (int)sizeof(uid) && memcmp(iid, uid, sizeof(uid)) == 0) {
-            /* Got the right identifier, put the poll()able read side of
-             * the pipe in nonblocking mode and return.
-             */
-            bm = 1;
-            if (ioctlsocket(*rd, FIONBIO, &bm) == SOCKET_ERROR) {
-                rv = apr_get_netos_error();
-                goto cleanup;
-            }
+            /* Got the right identifier, return. */
             break;
         }
         closesocket(*rd);
@@ -437,6 +430,9 @@ apr_status_t apr_file_socket_pipe_create(apr_socket_t **in,
     }
     apr_os_sock_put(in, &rd, p);
     apr_os_sock_put(out, &wr, p);
+
+    /* read end of the pipe is non-blocking */
+    apr_socket_timeout_set(*in, 0);
 
     apr_pool_cleanup_register(p, (void *)(*in), socket_pipe_cleanup,
                               apr_pool_cleanup_null);
