@@ -94,6 +94,7 @@ static apr_status_t alloc_thread(apr_thread_t **new,
                                  apr_pool_t *pool)
 {
     apr_status_t stat;
+    apr_abortfunc_t abort_fn = apr_pool_abort_get(pool);
     apr_allocator_t *allocator;
     apr_pool_t *p;
 
@@ -105,10 +106,11 @@ static apr_status_t alloc_thread(apr_thread_t **new,
      */
     stat = apr_allocator_create(&allocator);
     if (stat != APR_SUCCESS) {
+        if (abort_fn)
+            abort_fn(stat);
         return stat;
     }
-    stat = apr_pool_create_unmanaged_ex(&p, apr_pool_abort_get(pool),
-                                        allocator);
+    stat = apr_pool_create_unmanaged_ex(&p, abort_fn, allocator);
     if (stat != APR_SUCCESS) {
         apr_allocator_destroy(allocator);
         return stat;
