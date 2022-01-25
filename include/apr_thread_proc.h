@@ -209,8 +209,6 @@ typedef enum {
 
 /* Thread Function definitions */
 
-#undef APR_HAS_THREAD_LOCAL
-
 #if APR_HAS_THREADS
 
 /**
@@ -228,6 +226,8 @@ typedef enum {
 
 #ifdef APR_THREAD_LOCAL
 #define APR_HAS_THREAD_LOCAL 1
+#else
+#define APR_HAS_THREAD_LOCAL 0
 #endif
 
 /**
@@ -426,7 +426,11 @@ APR_DECLARE(apr_status_t) apr_threadkey_data_set(void *data, const char *key,
                                                 apr_status_t (*cleanup) (void *),
                                                 apr_threadkey_t *threadkey);
 
-#endif
+#else  /* APR_HAS_THREADS */
+
+#define APR_HAS_THREAD_LOCAL 0
+
+#endif /* APR_HAS_THREADS */
 
 /**
  * Create and initialize a new procattr variable
