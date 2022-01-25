@@ -187,6 +187,13 @@ APR_DECLARE(apr_status_t) apr_thread_current_create(apr_thread_t **current,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(void) apr_thread_current_after_fork(void)
+{
+#if APR_HAS_THREAD_LOCAL
+    current_thread = NULL;
+#endif
+}
+
 APR_DECLARE(apr_thread_t *) apr_thread_current(void)
 {
 #if APR_HAS_THREAD_LOCAL
