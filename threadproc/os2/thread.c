@@ -68,13 +68,13 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
     return APR_ENOTIMPL;
 }
 
-#ifdef APR_HAS_THREAD_LOCAL
+#if APR_HAS_THREAD_LOCAL
 static APR_THREAD_LOCAL apr_thread_t *current_thread = NULL;
 #endif
 
 static void dummy_worker(void *opaque)
 {
-#ifdef APR_HAS_THREAD_LOCAL
+#if APR_HAS_THREAD_LOCAL
   current_thread = thread;
 #endif
 
@@ -181,7 +181,7 @@ APR_DECLARE(apr_status_t) apr_thread_current_create(apr_thread_t **current,
 
     (*current)->tid = apr_os_thread_current();
 
-#ifdef APR_HAS_THREAD_LOCAL
+#if APR_HAS_THREAD_LOCAL
     current_thread = *current;
 #endif
     return APR_SUCCESS;
@@ -189,7 +189,7 @@ APR_DECLARE(apr_status_t) apr_thread_current_create(apr_thread_t **current,
 
 APR_DECLARE(apr_thread_t *) apr_thread_current(void)
 {
-#ifdef APR_HAS_THREAD_LOCAL
+#if APR_HAS_THREAD_LOCAL
     return current_thread;
 #else
     return NULL;
