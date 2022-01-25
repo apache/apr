@@ -289,7 +289,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new_thread,
                                             void *data, apr_pool_t *cont);
 
 /**
- * Setup the current os_thread as an apr_thread
+ * Setup the current native thread as an apr_thread
  * @param current The current apr_thread set up (or reused)
  * @param attr The threadattr associated with the current thread
  * @param pool The parent pool of the current thread
@@ -299,6 +299,12 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new_thread,
 APR_DECLARE(apr_status_t) apr_thread_current_create(apr_thread_t **current,
                                                     apr_threadattr_t *attr,
                                                     apr_pool_t *pool);
+
+/**
+ * Clear the current thread after fork()
+ */
+APR_DECLARE(void) apr_thread_current_after_fork(void);
+
 /**
  * Get the current thread
  * @param The current apr_thread, NULL if it is not an apr_thread or if
