@@ -137,7 +137,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
 }
 
 #ifdef APR_HAS_THREAD_LOCAL
-static APR_THREAD_LOCAL apr_thread_t *current_thread;
+static APR_THREAD_LOCAL apr_thread_t *current_thread = NULL;
 #endif
 
 static void *dummy_worker(void *opaque)
@@ -154,9 +154,6 @@ static void *dummy_worker(void *opaque)
         apr_pool_destroy(thread->pool);
     }
 
-#ifdef APR_HAS_THREAD_LOCAL
-    current_thread = NULL;
-#endif
     return ret;
 }
 
@@ -289,9 +286,6 @@ APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd,
     if (thd->detached) {
         apr_pool_destroy(thd->pool);
     }
-#ifdef APR_HAS_THREAD_LOCAL
-    current_thread = NULL;
-#endif
     pthread_exit(NULL);
     return APR_SUCCESS;
 }
