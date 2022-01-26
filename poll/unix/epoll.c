@@ -35,6 +35,10 @@ static apr_int16_t get_epoll_event(apr_int16_t event)
         rv |= EPOLLPRI;
     if (event & APR_POLLOUT)
         rv |= EPOLLOUT;
+#ifdef EPOLLEXCLUSIVE
+    if (event & APR_POLLEXCL)
+        rv |= EPOLLEXCLUSIVE;
+#endif
     /* APR_POLLNVAL is not handled by epoll.  EPOLLERR and EPOLLHUP are return-only */
 
     return rv;
