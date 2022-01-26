@@ -159,7 +159,7 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
                                              apr_uint32_t flags)
 {
     apr_status_t rv = APR_SUCCESS;
-    pollset->p = apr_pcalloc(p, sizeof(apr_pollset_private_t));
+    pollset->p = apr_palloc(p, sizeof(apr_pollset_private_t));
 #if APR_HAS_THREADS
     if (flags & APR_POLLSET_THREADSAFE &&
         ((rv = apr_thread_mutex_create(&pollset->p->ring_lock,
@@ -206,12 +206,10 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
 
     pollset->p->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
 
-    if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
-        APR_RING_INIT(&pollset->p->query_ring, pfd_elem_t, link);
-        APR_RING_INIT(&pollset->p->add_ring, pfd_elem_t, link);
-        APR_RING_INIT(&pollset->p->free_ring, pfd_elem_t, link);
-        APR_RING_INIT(&pollset->p->dead_ring, pfd_elem_t, link);
-    }
+    APR_RING_INIT(&pollset->p->query_ring, pfd_elem_t, link);
+    APR_RING_INIT(&pollset->p->add_ring, pfd_elem_t, link);
+    APR_RING_INIT(&pollset->p->free_ring, pfd_elem_t, link);
+    APR_RING_INIT(&pollset->p->dead_ring, pfd_elem_t, link);
 
     return rv;
 }
@@ -224,6 +222,19 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
     int res;
     apr_status_t rv = APR_SUCCESS;
 
+    pollset_lock_rings();
+
+    if (!APR_RING_EMPTY(&(pollset->p->free_ring), pfd_elem_t, link)) {
+        elem = APR_RING_FIRST(&(pollset->p->free_ring));
+        APR_RING_REMOVE(elem, link);
+    }
+    else {
+        elem = (pfd_elem_t *) apr_palloc(pollset->pool, sizeof(pfd_elem_t));
+        APR_RING_ELEM_INIT(elem, link);
+        elem->on_query_ring = 0;
+    }
+    elem->pfd = *descriptor;
+
     if (descriptor->desc_type == APR_POLL_SOCKET) {
         fd = descriptor->desc.s->socketdes;
     }
@@ -231,52 +242,27 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
         fd = descriptor->desc.f->filedes;
     }
 
-    if (pollset->flags & APR_POLLSET_NOCOPY) {
+    /* If another thread is polling, notify the kernel immediately; otherwise,
+     * wait until the next call to apr_pollset_poll().
+     */
+    if (apr_atomic_read32(&pollset->p->waiting)) {
         res = port_associate(pollset->p->port_fd, PORT_SOURCE_FD, fd, 
-                             get_event(descriptor->reqevents), (void *)descriptor);
+                             get_event(descriptor->reqevents), (void *)elem);
 
         if (res < 0) {
             rv = apr_get_netos_error();
+            APR_RING_INSERT_TAIL(&(pollset->p->free_ring), elem, pfd_elem_t, link);
         }
-    }
+        else {
+            elem->on_query_ring = 1;
+            APR_RING_INSERT_TAIL(&(pollset->p->query_ring), elem, pfd_elem_t, link);
+        }
+    } 
     else {
-        pollset_lock_rings();
-
-        if (!APR_RING_EMPTY(&(pollset->p->free_ring), pfd_elem_t, link)) {
-            elem = APR_RING_FIRST(&(pollset->p->free_ring));
-            APR_RING_REMOVE(elem, link);
-        }
-        else {
-            elem = (pfd_elem_t *) apr_palloc(pollset->pool, sizeof(pfd_elem_t));
-            APR_RING_ELEM_INIT(elem, link);
-            elem->on_query_ring = 0;
-        }
-        elem->pfd = *descriptor;
-
-        /* If another thread is polling, notify the kernel immediately; otherwise,
-         * wait until the next call to apr_pollset_poll().
-         */
-        if (apr_atomic_read32(&pollset->p->waiting)) {
-            res = port_associate(pollset->p->port_fd, PORT_SOURCE_FD, fd, 
-                                 get_event(descriptor->reqevents), (void *)elem);
-
-            if (res < 0) {
-                rv = apr_get_netos_error();
-                APR_RING_INSERT_TAIL(&(pollset->p->free_ring), elem,
-                                     pfd_elem_t, link);
-            }
-            else {
-                elem->on_query_ring = 1;
-                APR_RING_INSERT_TAIL(&(pollset->p->query_ring), elem,
-                                     pfd_elem_t, link);
-            }
-        }
-        else {
-            APR_RING_INSERT_TAIL(&(pollset->p->add_ring), elem, pfd_elem_t, link);
-        }
-
-        pollset_unlock_rings();
+        APR_RING_INSERT_TAIL(&(pollset->p->add_ring), elem, pfd_elem_t, link);
     }
+
+    pollset_unlock_rings();
 
     return rv;
 }
@@ -289,7 +275,9 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
     apr_status_t rv = APR_SUCCESS;
     int res;
     int err = 0;
-    int found = 0;
+    int found;
+
+    pollset_lock_rings();
 
     if (descriptor->desc_type == APR_POLL_SOCKET) {
         fd = descriptor->desc.s->socketdes;
@@ -298,36 +286,34 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
         fd = descriptor->desc.f->filedes;
     }
 
-    if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
-        pollset_lock_rings();
+    /* Search the add ring first.  This ring is often shorter,
+     * and it often contains the descriptor being removed.  
+     * (For the common scenario where apr_pollset_poll() 
+     * returns activity for the descriptor and the descriptor
+     * is then removed from the pollset, it will have just 
+     * been moved to the add ring by apr_pollset_poll().)
+     *
+     * If it is on the add ring, it isn't associated with the
+     * event port yet/anymore.
+     */
+    found = 0;
+    for (ep = APR_RING_FIRST(&(pollset->p->add_ring));
+         ep != APR_RING_SENTINEL(&(pollset->p->add_ring),
+                                 pfd_elem_t, link);
+         ep = APR_RING_NEXT(ep, link)) {
 
-        /* Search the add ring first.  This ring is often shorter,
-         * and it often contains the descriptor being removed.  
-         * (For the common scenario where apr_pollset_poll() 
-         * returns activity for the descriptor and the descriptor
-         * is then removed from the pollset, it will have just 
-         * been moved to the add ring by apr_pollset_poll().)
-         *
-         * If it is on the add ring, it isn't associated with the
-         * event port yet/anymore.
-         */
-        for (ep = APR_RING_FIRST(&(pollset->p->add_ring));
-             ep != APR_RING_SENTINEL(&(pollset->p->add_ring),
-                                     pfd_elem_t, link);
-             ep = APR_RING_NEXT(ep, link)) {
-
-            if (descriptor->desc.s == ep->pfd.desc.s) {
-                found = 1;
-                APR_RING_REMOVE(ep, link);
-                APR_RING_INSERT_TAIL(&(pollset->p->free_ring),
-                                     ep, pfd_elem_t, link);
-                break;
-            }
+        if (descriptor->desc.s == ep->pfd.desc.s) {
+            found = 1;
+            APR_RING_REMOVE(ep, link);
+            APR_RING_INSERT_TAIL(&(pollset->p->free_ring),
+                                 ep, pfd_elem_t, link);
+            break;
         }
     }
 
     if (!found) {
         res = port_dissociate(pollset->p->port_fd, PORT_SOURCE_FD, fd);
+
         if (res < 0) {
             /* The expected case for this failure is that another
              * thread's call to port_getn() returned this fd and
@@ -339,29 +325,25 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
             rv = APR_NOTFOUND;
         }
 
-        if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
-            for (ep = APR_RING_FIRST(&(pollset->p->query_ring));
-                 ep != APR_RING_SENTINEL(&(pollset->p->query_ring),
-                                         pfd_elem_t, link);
-                 ep = APR_RING_NEXT(ep, link)) {
+        for (ep = APR_RING_FIRST(&(pollset->p->query_ring));
+             ep != APR_RING_SENTINEL(&(pollset->p->query_ring),
+                                     pfd_elem_t, link);
+             ep = APR_RING_NEXT(ep, link)) {
 
-                if (descriptor->desc.s == ep->pfd.desc.s) {
-                    APR_RING_REMOVE(ep, link);
-                    ep->on_query_ring = 0;
-                    APR_RING_INSERT_TAIL(&(pollset->p->dead_ring),
-                                         ep, pfd_elem_t, link);
-                    if (ENOENT == err) {
-                        rv = APR_SUCCESS;
-                    }
-                    break;
+            if (descriptor->desc.s == ep->pfd.desc.s) {
+                APR_RING_REMOVE(ep, link);
+                ep->on_query_ring = 0;
+                APR_RING_INSERT_TAIL(&(pollset->p->dead_ring),
+                                     ep, pfd_elem_t, link);
+                if (ENOENT == err) {
+                    rv = APR_SUCCESS;
                 }
+                break;
             }
-            pollset_unlock_rings();
         }
     }
-    else if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
-        pollset_unlock_rings();
-    }
+
+    pollset_unlock_rings();
 
     return rv;
 }
@@ -381,89 +363,73 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     *num = 0;
     nget = 1;
 
-    if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
-        pollset_lock_rings();
+    pollset_lock_rings();
 
-        apr_atomic_inc32(&pollset->p->waiting);
+    apr_atomic_inc32(&pollset->p->waiting);
 
-        while (!APR_RING_EMPTY(&(pollset->p->add_ring), pfd_elem_t, link)) {
-            ep = APR_RING_FIRST(&(pollset->p->add_ring));
-            APR_RING_REMOVE(ep, link);
+    while (!APR_RING_EMPTY(&(pollset->p->add_ring), pfd_elem_t, link)) {
+        ep = APR_RING_FIRST(&(pollset->p->add_ring));
+        APR_RING_REMOVE(ep, link);
 
-            if (ep->pfd.desc_type == APR_POLL_SOCKET) {
-                fd = ep->pfd.desc.s->socketdes;
-            }
-            else {
-                fd = ep->pfd.desc.f->filedes;
-            }
-
-            ret = port_associate(pollset->p->port_fd, PORT_SOURCE_FD, 
-                                 fd, get_event(ep->pfd.reqevents), ep);
-            if (ret < 0) {
-                rv = apr_get_netos_error();
-                APR_RING_INSERT_TAIL(&(pollset->p->free_ring), ep, pfd_elem_t, link);
-                break;
-            }
-
-            ep->on_query_ring = 1;
-            APR_RING_INSERT_TAIL(&(pollset->p->query_ring), ep, pfd_elem_t, link);
+        if (ep->pfd.desc_type == APR_POLL_SOCKET) {
+            fd = ep->pfd.desc.s->socketdes;
+        }
+        else {
+            fd = ep->pfd.desc.f->filedes;
         }
 
-        pollset_unlock_rings();
-
-        if (rv != APR_SUCCESS) {
-            apr_atomic_dec32(&pollset->p->waiting);
-            return rv;
+        ret = port_associate(pollset->p->port_fd, PORT_SOURCE_FD, 
+                             fd, get_event(ep->pfd.reqevents), ep);
+        if (ret < 0) {
+            rv = apr_get_netos_error();
+            APR_RING_INSERT_TAIL(&(pollset->p->free_ring), ep, pfd_elem_t, link);
+            break;
         }
+
+        ep->on_query_ring = 1;
+        APR_RING_INSERT_TAIL(&(pollset->p->query_ring), ep, pfd_elem_t, link);
+    }
+
+    pollset_unlock_rings();
+
+    if (rv != APR_SUCCESS) {
+        apr_atomic_dec32(&pollset->p->waiting);
+        return rv;
     }
 
     rv = call_port_getn(pollset->p->port_fd, pollset->p->port_set, 
                         pollset->nalloc, &nget, timeout);
 
-    if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
-        /* decrease the waiting ASAP to reduce the window for calling 
-           port_associate within apr_pollset_add() */
-        apr_atomic_dec32(&pollset->p->waiting);
+    /* decrease the waiting ASAP to reduce the window for calling 
+       port_associate within apr_pollset_add() */
+    apr_atomic_dec32(&pollset->p->waiting);
 
-        pollset_lock_rings();
-    }
+    pollset_lock_rings();
 
     for (i = 0, j = 0; i < nget; i++) {
-        const apr_poll_fd_t *pfd;
-
-        if (pollset->flags & APR_POLLSET_NOCOPY) {
-            pfd = (apr_pollfd_t *)pollset->p->port_set[i].portev_user;
-        }
-        else {
-            ep = (pfd_elem_t *)pollset->p->port_set[i].portev_user;
-            pfd = &ep->pfd;
-        }
-
+        ep = (pfd_elem_t *)pollset->p->port_set[i].portev_user;
         if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
-            pfd->desc_type == APR_POLL_FILE &&
-            pfd->desc.f == pollset->wakeup_pipe[0]) {
+            ep->pfd.desc_type == APR_POLL_FILE &&
+            ep->pfd.desc.f == pollset->wakeup_pipe[0]) {
             apr_poll_drain_wakeup_pipe(&pollset->wakeup_set, pollset->wakeup_pipe);
             rv = APR_EINTR;
         }
         else {
-            pollset->p->result_set[j] = *pfd;
+            pollset->p->result_set[j] = ep->pfd;
             pollset->p->result_set[j].rtnevents =
                 get_revent(pollset->p->port_set[i].portev_events);
             j++;
         }
-
-        if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
-            /* If the ring element is still on the query ring, move it
-             * to the add ring for re-association with the event port
-             * later.  (It may have already been moved to the dead ring
-             * by a call to pollset_remove on another thread.)
-             */
-            if (ep->on_query_ring) {
-                APR_RING_REMOVE(ep, link);
-                ep->on_query_ring = 0;
-                APR_RING_INSERT_TAIL(&(pollset->p->add_ring), ep,
-                                     pfd_elem_t, link);
-            }
+        /* If the ring element is still on the query ring, move it
+         * to the add ring for re-association with the event port
+         * later.  (It may have already been moved to the dead ring
+         * by a call to pollset_remove on another thread.)
+         */
+        if (ep->on_query_ring) {
+            APR_RING_REMOVE(ep, link);
+            ep->on_query_ring = 0;
+            APR_RING_INSERT_TAIL(&(pollset->p->add_ring), ep,
+                                 pfd_elem_t, link);
         }
     }
     if ((*num = j)) { /* any event besides wakeup pipe? */
@@ -473,13 +439,10 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
         }
     }
 
-    if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
-        /* Shift all PFDs in the Dead Ring to the Free Ring */
-        APR_RING_CONCAT(&(pollset->p->free_ring), &(pollset->p->dead_ring),
-                        pfd_elem_t, link);
+    /* Shift all PFDs in the Dead Ring to the Free Ring */
+    APR_RING_CONCAT(&(pollset->p->free_ring), &(pollset->p->dead_ring), pfd_elem_t, link);
 
-        pollset_unlock_rings();
-    }
+    pollset_unlock_rings();
 
     return rv;
 }
