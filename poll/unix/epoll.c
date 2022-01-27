@@ -25,9 +25,9 @@
 
 #if defined(HAVE_EPOLL)
 
-static apr_int16_t get_epoll_event(apr_int16_t event)
+static unsigned get_epoll_event(apr_int16_t event)
 {
-    apr_int16_t rv = 0;
+    unsigned rv = 0;
 
     if (event & APR_POLLIN)
         rv |= EPOLLIN;
@@ -44,7 +44,7 @@ static apr_int16_t get_epoll_event(apr_int16_t event)
     return rv;
 }
 
-static apr_int16_t get_epoll_revent(apr_int16_t event)
+static apr_int16_t get_epoll_revent(unsigned event)
 {
     apr_int16_t rv = 0;
 
