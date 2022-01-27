@@ -179,9 +179,15 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
     set_poffset(*new, poffset);
 #endif
 
+#ifdef HAVE_MAP_POPULATE
+    mm = mmap(NULL, size + poffset,
+              native_flags, MAP_SHARED | MAP_POPULATE,
+              file->filedes, offset - poffset);
+#else
     mm = mmap(NULL, size + poffset,
               native_flags, MAP_SHARED,
               file->filedes, offset - poffset);
+#endif
 
     if (mm == (void *)-1) {
         /* we failed to get an mmap'd file... */
