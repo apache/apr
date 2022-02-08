@@ -249,6 +249,7 @@ APR_DECLARE(apr_status_t) apr_thread_current_create(apr_thread_t **current,
 
     stat = alloc_thread(current, attr, NULL, NULL, pool);
     if (stat != APR_SUCCESS) {
+        *current = NULL;
         return stat;
     }
 
