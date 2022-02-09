@@ -20,7 +20,6 @@
 #include "apr_strings.h"
 #include "apr_lib.h"
 #include "apr_errno.h"
-#include "apr_arch_networkio.h"
 #include "apr_arch_atime.h"
 #include "apr_arch_misc.h"
 
@@ -74,23 +73,8 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
         file->pOverlapped->OffsetHigh = (DWORD)(file->filePtr >> 32);
     }
 
-    if (file->ftype == APR_FILETYPE_SOCKET) {
-        WSABUF wsaData;
-        DWORD flags = 0;
-
-        wsaData.buf = (char*) buf;
-        wsaData.len = (u_long)len;
-        if (WSARecv((SOCKET)file->filehand, &wsaData, 1, &bytesread,
-                    &flags, NULL, NULL) == SOCKET_ERROR) {
-            rv = apr_get_netos_error();
-            bytesread = 0;
-        }
-        else {
-            rv = APR_SUCCESS;
-        }
-    }
-    else if (ReadFile(file->filehand, buf, len, 
-                      &bytesread, file->pOverlapped)) {
+    if (ReadFile(file->filehand, buf, len, 
+                 &bytesread, file->pOverlapped)) {
         rv = APR_SUCCESS;
     }
     else {
@@ -426,25 +410,9 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         if (thefile->flags & APR_FOPEN_XTHREAD) {
             apr_thread_mutex_unlock(thefile->mutex);
         }
-    }
-    else if (thefile->ftype == APR_FILETYPE_SOCKET) {
-        WSABUF wsaData;
-        DWORD flags = 0;
-
-        wsaData.buf = (char*) buf;
-        wsaData.len = (u_long)*nbytes;
-        if (WSASend((SOCKET)thefile->filehand, &wsaData, 1, &bwrote,
-                    flags, NULL, NULL) == SOCKET_ERROR) {
-            rv = apr_get_netos_error();
-            bwrote = 0;
-        }
-        else {
-            rv = APR_SUCCESS;
-        }
-        *nbytes = bwrote;
-    }
-    else {
-        if (thefile->ftype != APR_FILETYPE_FILE) {
+        return rv;
+    } else {
+        if (thefile->ftype == APR_FILETYPE_PIPE) {
             rv = WriteFile(thefile->filehand, buf, (DWORD)*nbytes, &bwrote,
                            thefile->pOverlapped);
         }
