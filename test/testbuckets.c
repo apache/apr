@@ -100,12 +100,12 @@ static void flatten_match(abts_case *tc, const char *ctx,
     apr_size_t len = elen;
     char msg[200];
 
-    sprintf(msg, "%s: flatten brigade", ctx);
+    apr_snprintf(msg, sizeof msg, "%s: flatten brigade", ctx);
     APR_ASSERT_SUCCESS(tc, msg, apr_brigade_flatten(bb, buf, &len));
-    sprintf(msg, "%s: length match (%ld not %ld)", ctx,
-            (long)len, (long)elen);
+    apr_snprintf(msg, sizeof msg, "%s: length match (%ld not %ld)", ctx,
+                 (long)len, (long)elen);
     ABTS_ASSERT(tc, msg, len == elen);
-    sprintf(msg, "%s: result match", ctx);
+    apr_snprintf(msg, sizeof msg, "%s: result match", ctx);
     ABTS_STR_NEQUAL(tc, expect, buf, len);
     free(buf);
 }

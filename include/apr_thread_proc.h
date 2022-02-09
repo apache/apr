@@ -212,6 +212,25 @@ typedef enum {
 #if APR_HAS_THREADS
 
 /**
+ * APR_THREAD_LOCAL keyword mapping the compiler's.
+ */
+#if defined(__cplusplus) && __cplusplus >= 201103L
+#define APR_THREAD_LOCAL thread_local
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112
+#define APR_THREAD_LOCAL _Thread_local
+#elif defined(__GNUC__) /* works for clang too */
+#define APR_THREAD_LOCAL __thread
+#elif defined(WIN32) && defined(_MSC_VER)
+#define APR_THREAD_LOCAL __declspec(thread)
+#endif
+
+#ifdef APR_THREAD_LOCAL
+#define APR_HAS_THREAD_LOCAL 1
+#else
+#define APR_HAS_THREAD_LOCAL 0
+#endif
+
+/**
  * Create and initialize a new threadattr variable
  * @param new_attr The newly created threadattr.
  * @param cont The pool to use
@@ -268,6 +287,30 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new_thread,
                                             apr_threadattr_t *attr, 
                                             apr_thread_start_t func, 
                                             void *data, apr_pool_t *cont);
+
+/**
+ * Setup the current native thread as an apr_thread
+ * @param current The current apr_thread set up (or reused)
+ * @param attr The threadattr associated with the current thread
+ * @param pool The parent pool of the current thread
+ * @return APR_SUCCESS, APR_EEXIST if the current thread is already set,
+ *         any error otherwise
+ */
+APR_DECLARE(apr_status_t) apr_thread_current_create(apr_thread_t **current,
+                                                    apr_threadattr_t *attr,
+                                                    apr_pool_t *pool);
+
+/**
+ * Clear the current thread after fork()
+ */
+APR_DECLARE(void) apr_thread_current_after_fork(void);
+
+/**
+ * Get the current thread
+ * @param The current apr_thread, NULL if it is not an apr_thread or if
+ *        it could not be determined.
+ */
+APR_DECLARE(apr_thread_t *) apr_thread_current(void);
 
 /**
  * Stop the current thread
@@ -389,7 +432,11 @@ APR_DECLARE(apr_status_t) apr_threadkey_data_set(void *data, const char *key,
                                                 apr_status_t (*cleanup) (void *),
                                                 apr_threadkey_t *threadkey);
 
-#endif
+#else  /* APR_HAS_THREADS */
+
+#define APR_HAS_THREAD_LOCAL 0
+
+#endif /* APR_HAS_THREADS */
 
 /**
  * Create and initialize a new procattr variable

@@ -52,6 +52,7 @@ extern "C" {
 #define APR_POLLERR   0x010     /**< Pending error */
 #define APR_POLLHUP   0x020     /**< Hangup occurred */
 #define APR_POLLNVAL  0x040     /**< Descriptor invalid */
+#define APR_POLLEXCL  0x080     /**< Exclusive wake up */
 /** @} */
 
 /**
