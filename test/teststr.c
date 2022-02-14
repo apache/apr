@@ -309,7 +309,8 @@ static void overflow_strfsize(abts_case *tc, void *data)
     }
     for (off = LONG_MAX; off > 1; off /= 2) {
         apr_strfsize(off, buf);
-        apr_strfsize(off + 1, buf);
+        if (sizeof(apr_off_t) > sizeof(long) || off < LONG_MAX)
+            apr_strfsize(off + 1, buf);
         apr_strfsize(off - 1, buf);
     }
 
