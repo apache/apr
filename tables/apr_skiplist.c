@@ -60,15 +60,15 @@ struct apr_skiplistnode {
     apr_skiplist *sl;
 };
 
-static int get_b_rand(void)
+static unsigned int get_b_rand(void)
 {
-    static int ph = 32;         /* More bits than we will ever use */
-    static int randseq;
+    static unsigned int ph = 32;         /* More bits than we will ever use */
+    static unsigned int randseq;
     if (ph > 31) {              /* Num bits in return of rand() */
         ph = 0;
         randseq = rand();
     }
-    return randseq & (1 << ph++);
+    return randseq & (1U << ph++);
 }
 
 typedef struct {
