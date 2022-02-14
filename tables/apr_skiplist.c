@@ -159,7 +159,7 @@ static apr_status_t skiplist_qpush(apr_skiplist_q *q, apr_skiplistnode *m)
         size_t size = (q->pos) ? q->pos * 2 : 32;
         if (q->p) {
             data = apr_palloc(q->p, size * sizeof(*data));
-            if (p->data && q->data) {
+            if (data && q->data) {
                 memcpy(data, q->data, q->pos * sizeof(*data));
             }
         }
