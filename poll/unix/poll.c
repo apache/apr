@@ -75,7 +75,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
     int i, num_to_poll;
 #ifdef HAVE_VLA
     /* XXX: I trust that this is a segv when insufficient stack exists? */
-    struct pollfd pollset[num];
+    struct pollfd pollset[num + 1]; /* +1 since allocating 0 is undefined behaviour */
 #elif defined(HAVE_ALLOCA)
     struct pollfd *pollset = alloca(sizeof(struct pollfd) * num);
     if (!pollset)
