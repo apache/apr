@@ -95,6 +95,9 @@ RELEASE SHOWSTOPPERS:
 
 CURRENT VOTES:
 
+    * r1897895: Rework win32 poll wakeup implementation
+      Backport branch: trunk https://svn.apache.org/repos/asf/apr/apr/branches/1.8.x-r1897895
+      +1: ivan
 
 CURRENT test/testall -v EXCEPTIONS:
 
