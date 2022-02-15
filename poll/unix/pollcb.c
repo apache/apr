@@ -82,7 +82,11 @@ static apr_status_t pollcb_cleanup(void *p)
         (*pollcb->provider->cleanup)(pollcb);
     }
     if (pollcb->flags & APR_POLLSET_WAKEABLE) {
+#if WAKEUP_USES_PIPE
         apr_poll_close_wakeup_pipe(pollcb->wakeup_pipe);
+#else
+        apr_poll_close_wakeup_socket(pollcb->wakeup_socket);
+#endif
     }
 
     return APR_SUCCESS;
@@ -163,12 +167,21 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **ret_pollcb,
     }
 
     if (flags & APR_POLLSET_WAKEABLE) {
+#if WAKEUP_USES_PIPE
         /* Create wakeup pipe */
         if ((rv = apr_poll_create_wakeup_pipe(pollcb->pool, &pollcb->wakeup_pfd,
-                                              pollcb->wakeup_pipe)) 
-                != APR_SUCCESS) {
+                                              pollcb->wakeup_pipe))
+            != APR_SUCCESS) {
             return rv;
         }
+#else
+        /* Create wakeup socket */
+        if ((rv = apr_poll_create_wakeup_socket(pollcb->pool, &pollcb->wakeup_pfd,
+                                                pollcb->wakeup_socket))
+            != APR_SUCCESS) {
+            return rv;
+        }
+#endif
 
         if ((rv = apr_pollcb_add(pollcb, &pollcb->wakeup_pfd)) != APR_SUCCESS) {
             return rv;
@@ -217,8 +230,14 @@ APR_DECLARE(apr_status_t) apr_pollcb_wakeup(apr_pollcb_t *pollcb)
     if (!(pollcb->flags & APR_POLLSET_WAKEABLE))
         return APR_EINIT;
 
-    if (apr_atomic_cas32(&pollcb->wakeup_set, 1, 0) == 0)
+    if (apr_atomic_cas32(&pollcb->wakeup_set, 1, 0) == 0) {
+#if WAKEUP_USES_PIPE
         return apr_file_putc(1, pollcb->wakeup_pipe[1]);
+#else
+        apr_size_t len = 1;
+        return apr_socket_send(pollcb->wakeup_socket[1], "\1", &len);
+#endif
+    }
 
     return APR_SUCCESS;
 }

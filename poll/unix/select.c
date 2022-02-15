@@ -248,11 +248,7 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
     }
     else {
 #if !APR_FILES_AS_SOCKETS
-        if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
-            descriptor->desc.f == pollset->wakeup_pipe[0])
-            fd = (apr_os_sock_t)descriptor->desc.f->filedes;
-        else
-            return APR_EBADF;
+        return APR_EBADF;
 #else
 #ifdef NETWARE
         /* NetWare can't handle mixed descriptor types in select() */
@@ -395,23 +391,34 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     j = 0;
     for (i = 0; i < pollset->nelts; i++) {
         apr_os_sock_t fd;
-        if (pollset->p->query_set[i].desc_type == APR_POLL_SOCKET) {
-            fd = pollset->p->query_set[i].desc.s->socketdes;
-        }
-        else {
-            if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
+
+        if (pollset->flags & APR_POLLSET_WAKEABLE) {
+#if WAKEUP_USES_PIPE
+            if (pollset->p->query_set[i].desc_type == APR_POLL_FILE &&
                 pollset->p->query_set[i].desc.f == pollset->wakeup_pipe[0]) {
                 apr_poll_drain_wakeup_pipe(&pollset->wakeup_set, pollset->wakeup_pipe);
                 rv = APR_EINTR;
                 continue;
             }
-            else {
-#if !APR_FILES_AS_SOCKETS
-                return APR_EBADF;
 #else
-                fd = pollset->p->query_set[i].desc.f->filedes;
-#endif
+            if (pollset->p->query_set[i].desc_type == APR_POLL_SOCKET &&
+                pollset->p->query_set[i].desc.s == pollset->wakeup_socket[0]) {
+                apr_poll_drain_wakeup_socket(&pollset->wakeup_set, pollset->wakeup_socket);
+                rv = APR_EINTR;
+                continue;
             }
+#endif
+        }
+
+        if (pollset->p->query_set[i].desc_type == APR_POLL_SOCKET) {
+            fd = pollset->p->query_set[i].desc.s->socketdes;
+        }
+        else {
+#if !APR_FILES_AS_SOCKETS
+            return APR_EBADF;
+#else
+            fd = pollset->p->query_set[i].desc.f->filedes;
+#endif
         }
         if (FD_ISSET(fd, &readset) || FD_ISSET(fd, &writeset) ||
             FD_ISSET(fd, &exceptset)) {

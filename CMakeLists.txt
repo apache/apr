@@ -174,6 +174,7 @@ SET(APR_SOURCES
   network_io/unix/sockaddr.c
   network_io/unix/socket_util.c
   network_io/win32/sendrecv.c
+  network_io/win32/socket_pipe.c
   network_io/win32/sockets.c
   network_io/win32/sockopt.c
   passwd/apr_getpass.c
