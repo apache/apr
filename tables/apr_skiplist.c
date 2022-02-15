@@ -60,15 +60,15 @@ struct apr_skiplistnode {
     apr_skiplist *sl;
 };
 
-static int get_b_rand(void)
+static unsigned int get_b_rand(void)
 {
-    static int ph = 32;         /* More bits than we will ever use */
-    static int randseq;
+    static unsigned int ph = 32;         /* More bits than we will ever use */
+    static unsigned int randseq;
     if (ph > 31) {              /* Num bits in return of rand() */
         ph = 0;
         randseq = rand();
     }
-    return randseq & (1 << ph++);
+    return randseq & (1U << ph++);
 }
 
 typedef struct {
@@ -159,7 +159,7 @@ static apr_status_t skiplist_qpush(apr_skiplist_q *q, apr_skiplistnode *m)
         size_t size = (q->pos) ? q->pos * 2 : 32;
         if (q->p) {
             data = apr_palloc(q->p, size * sizeof(*data));
-            if (data) {
+            if (data && q->data) {
                 memcpy(data, q->data, q->pos * sizeof(*data));
             }
         }
