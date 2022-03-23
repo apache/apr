@@ -216,7 +216,9 @@ typedef enum {
  */
 #if defined(__cplusplus) && __cplusplus >= 201103L
 #define APR_THREAD_LOCAL thread_local
-#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112 && \
+      (!defined(__GNUC__) || \
+      __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 9))
 #define APR_THREAD_LOCAL _Thread_local
 #elif defined(__GNUC__) /* works for clang too */
 #define APR_THREAD_LOCAL __thread
