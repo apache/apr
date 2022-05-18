@@ -1235,6 +1235,10 @@ havebeosarea="0"
 haveos2shm="0"
 havewin32shm="0"
 APR_BEGIN_DECISION([namebased memory allocation method])
+APR_IFALLYES(header:sys/ipc.h header:sys/shm.h header:sys/file.h dnl
+             func:shmget func:shmat func:shmdt func:shmctl,
+             [haveshmget="1"
+              APR_DECIDE(USE_SHMEM_SHMGET, [SysV IPC shmget()])])
 APR_IFALLYES(header:sys/mman.h func:mmap func:munmap,
              [havemmaptmp="1"
               APR_DECIDE(USE_SHMEM_MMAP_TMP, 
@@ -1244,10 +1248,6 @@ APR_IFALLYES(header:sys/mman.h func:mmap func:munmap func:shm_open dnl
              [havemmapshm="1"
               APR_DECIDE(USE_SHMEM_MMAP_SHM, 
                   [mmap() via POSIX.1 shm_open() on temporary file])])
-APR_IFALLYES(header:sys/ipc.h header:sys/shm.h header:sys/file.h dnl
-             func:shmget func:shmat func:shmdt func:shmctl,
-             [haveshmget="1"
-              APR_DECIDE(USE_SHMEM_SHMGET, [SysV IPC shmget()])])
 APR_IFALLYES(header:kernel/OS.h func:create_area,
              [havebeosshm="1"
               APR_DECIDE(USE_SHMEM_BEOS, [BeOS areas])])

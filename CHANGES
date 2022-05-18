@@ -1,10 +1,13 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) configure: Prefer posix name-based shared memory over SysV IPC.
+     [Jim Jagielski]
+
   *) configure: Add --disable-sctp argument to forcibly disable SCTP
      support, or --enable-sctp which fails if SCTP support is not
      detected.  [Lubos Uhliarik <luhliari redhat.com>, Joe Orton]
-  
+
   *) apr_dbm: Add dedicated apr_dbm_get_driver() function that returns
      details of the driver selected and any error encountered. Add the
      apr_dbm_open2() function that references the driver. [Graham Leggett]
@@ -68,7 +71,7 @@ Changes for APR 2.0.0
      [Oleg Liatte <olegliatte gmail.com>]
 
   *) Test %ld vs. %lld to avoid compiler emits using APR_OFF_T_FMT, in the
-     case of apparently equivilant long and long long types. [William Rowe] 
+     case of apparently equivilant long and long long types. [William Rowe]
 
   *) Recognize APPLE predefined macros as equivilant to DARWIN. [Jim Jagielski]
 
@@ -210,7 +213,7 @@ Changes for APR 2.0.0
      [Tom Donovan]
 
   *) Changes to apr_pollset_method_e enum value of APR_POLLSET_POLL and
-     APR_POLLSET_AIO_MSGQ.  Restore APR_POLLSET_POLL to its pre-r1308910 
+     APR_POLLSET_AIO_MSGQ.  Restore APR_POLLSET_POLL to its pre-r1308910
      (April 2012) value, and move APR_POLLSET_AIO_MSGQ ahead. This restores
      ABI compat with released branches.  [Eric Covener]
 
@@ -226,7 +229,7 @@ Changes for APR 2.0.0
   *) Add support code to teach valgrind about APR pools, allocators, and
      bucket allocators. [Stefan Fritsch]
 
-  *) apr_socket_accept_filter(): The 2nd and 3rd arguments are now 
+  *) apr_socket_accept_filter(): The 2nd and 3rd arguments are now
      const char * instead of char *.  [Jeff Trawick]
 
   *) apr_brigades: add a check to prevent infinite while loop in case
