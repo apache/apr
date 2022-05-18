@@ -8,6 +8,9 @@ Changes for APR 1.7.1
 
   *) apr_atomic_read64(): Fix non-atomic read on 32-bit Windows [Ivan Zhakov]
 
+  *) configure: Prefer posix name-based shared memory over SysV IPC.
+     [Jim Jagielski]
+
   *) configure: Add --disable-sctp argument to forcibly disable SCTP
      support, or --enable-sctp which fails if SCTP support is not
      detected.  [Lubos Uhliarik <luhliari redhat.com>, Joe Orton]
@@ -80,7 +83,7 @@ Changes for APR 1.7.0
      [Oleg Liatte <olegliatte gmail.com>]
 
   *) Test %ld vs. %lld to avoid compiler emits using APR_OFF_T_FMT, in the
-     case of apparently equivilant long and long long types. [William Rowe] 
+     case of apparently equivilant long and long long types. [William Rowe]
 
   *) Recognize APPLE predefined macros as equivilant to DARWIN. [Jim Jagielski]
 
