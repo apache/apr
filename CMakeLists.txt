@@ -64,7 +64,7 @@ OPTION(APU_HAVE_CRYPTO      "Crypto support"               OFF)
 OPTION(APU_HAVE_ICONV       "Xlate support"                OFF)
 OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)
 OPTION(INSTALL_PDB          "Install .pdb files (if generated)"  ON)
-OPTION(APR_BUILD_TESTAPR    "Build the test suite"         OFF)
+OPTION(APR_BUILD_TESTAPR    "Build the test suite"         ON)
 OPTION(TEST_STATIC_LIBS     "Test programs use APR static libraries instead of shared libraries?" OFF)
 
 IF(NOT APU_USE_EXPAT AND NOT APU_USE_LIBXML2 AND NOT APU_USE_XMLLITE)
@@ -617,7 +617,7 @@ IF(APR_BUILD_TESTAPR)
     test/testshmproducer.c
     test/testshmconsumer.c
     test/tryread.c
-    test/internal/testucs.c
+    test/internal/testutf.c
   )
 
   FOREACH(sourcefile ${single_source_programs})
@@ -632,7 +632,7 @@ IF(APR_BUILD_TESTAPR)
   # Add tests for programs that run by themselves with no arguments.
   SET(simple_tests
     testmutexscope
-    testucs
+    testutf
   )
 
   FOREACH(simple ${simple_tests})
