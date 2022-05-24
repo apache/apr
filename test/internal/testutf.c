@@ -30,10 +30,10 @@ struct testval {
 };
 
 #ifdef FOR_REFERENCE
-/* For reference; a table of invalid utf-8 encoded ucs-2/ucs-4 sequences.
+/* For reference; a table of invalid utf-8 encoded utf-16/utf-32 sequences.
  * The table consists of start, end pairs for all invalid ranges.
- * NO_UCS2_PAIRS will pass the reservered D800-DFFF values, halting at FFFF
- * FULL_UCS4_MAPPER represents all 31 bit values to 7FFF FFFF
+ * NO_UTF16_PAIRS will pass the reservered D800-DFFF values, halting at FFFF
+ * FULL_UTF32_MAPPER represents all 31 bit values to 7FFF FFFF
  *
  * We already tested these, because we ensure there is a 1:1 mapping across
  * the entire range of byte values in each position of 1 to 6 byte sequences.
@@ -45,29 +45,29 @@ struct testval malformed[] = [
     [[0xC1,0xBF], 2,],                         /* overshort mapping of 007F */
     [[0xE0,0x80,0x80,], 3,],                   /* overshort mapping of 0000 */
     [[0xE0,0x9F,0xBF,], 3,],                   /* overshort mapping of 07FF */
-#ifndef NO_UCS2_PAIRS
-    [[0xED,0xA0,0x80,], 3,],    /* unexpected mapping of UCS-2 literal D800 */
-    [[0xED,0xBF,0xBF,], 3,],    /* unexpected mapping of UCS-2 literal DFFF */
+#ifndef NO_UTF16_PAIRS
+    [[0xED,0xA0,0x80,], 3,],   /* unexpected mapping of utf-16 literal D800 */
+    [[0xED,0xBF,0xBF,], 3,],   /* unexpected mapping of utf-16 literal DFFF */
 #endif
     [[0xF0,0x80,0x80,0x80,], 4,],              /* overshort mapping of 0000 */
     [[0xF0,0x8F,0xBF,0xBF,], 4,],              /* overshort mapping of FFFF */
-#ifdef NO_UCS2_PAIRS
+#ifdef NO_UTF16_PAIRS
     [[0xF0,0x90,0x80,0x80,], 4,],      /* invalid too large value 0001 0000 */
     [[0xF4,0x8F,0xBF,0xBF,], 4,],      /* invalid too large value 0010 FFFF */
 #endif
-#ifndef FULL_UCS4_MAPPER
+#ifndef FULL_UTF32_MAPPER
     [[0xF4,0x90,0x80,0x80,], 4,],      /* invalid too large value 0011 0000 */
     [[0xF7,0xBF,0xBF,0xBF,], 4,],      /* invalid too large value 001F FFFF */
 #endif
     [[0xF8,0x80,0x80,0x80,0x80,], 5,],    /* overshort mapping of 0000 0000 */
     [[0xF8,0x87,0xBF,0xBF,0xBF,], 5,],    /* overshort mapping of 001F FFFF */
-#ifndef FULL_UCS4_MAPPER
+#ifndef FULL_UTF32_MAPPER
     [[0xF8,0x88,0x80,0x80,0x80,], 5,], /* invalid too large value 0020 0000 */
     [[0xFB,0xBF,0xBF,0xBF,0xBF,], 5,], /* invalid too large value 03FF FFFF */
 #endif
     [[0xFC,0x80,0x80,0x80,0x80,0x80,], 6,],  /* overshort mapping 0000 0000 */
     [[0xFC,0x83,0xBF,0xBF,0xBF,0xBF,], 6,],  /* overshort mapping 03FF FFFF */
-#ifndef FULL_UCS4_MAPPER
+#ifndef FULL_UTF32_MAPPER
     [[0xFC,0x84,0x80,0x80,0x80,0x80,], 6,],  /* overshort mapping 0400 0000 */
     [[0xFD,0xBF,0xBF,0xBF,0xBF,0xBF,], 6,],  /* overshort mapping 7FFF FFFF */
 #endif
@@ -324,7 +324,7 @@ void test_ranges()
 }
 
 /*
- *  Syntax: testucs [w|n]
+ *  Syntax: testutf [w|n]
  *
  *  If no arg or arg is not recognized, run equality sequence test.
  */

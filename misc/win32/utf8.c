@@ -44,7 +44,7 @@
  * One of the X bits must be 1 to avoid overlong representation in utf-8.
  *
  * For conversion into utf-16, the 4th form is limited in range to 0010 FFFF,
- * and the final two forms are used only by full ucs-4, per RFC 3629;
+ * and the final two forms are used only by full utf-32, per RFC 3629;
  *
  *   "Pairs of UCS-2 values between D800 and DFFF (surrogate pairs in 
  *   Unicode parlance), being actually UCS-4 characters transformed 
@@ -110,7 +110,7 @@ APR_DECLARE(apr_status_t) apr_conv_utf8_to_utf16(const char *in,
                 expect = 1;
                 while ((ch & mask) == mask) {
                     mask |= mask >> 1;
-                    if (++expect > 3) /* (or 5 for a ucs-4 code point) */
+                    if (++expect > 3) /* (or 5 for a utf-32 code point) */
                         return APR_EINVAL;
                 }
                 newch = ch & ~mask;
@@ -158,7 +158,7 @@ APR_DECLARE(apr_status_t) apr_conv_utf8_to_utf16(const char *in,
                     newch |= (ch & 0077);
                 }
                 *inbytes -= eating;
-                /* newch is now a true ucs-4 character
+                /* newch is now a true utf-32 character
                  *
                  * now we need to fold to utf-16
                  */
