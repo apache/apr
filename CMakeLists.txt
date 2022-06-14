@@ -131,6 +131,7 @@ SET(APR_PUBLIC_HEADERS_GENERATED
 
 SET(APR_SOURCES
   atomic/win32/apr_atomic.c
+  atomic/win32/apr_atomic64.c
   dso/win32/dso.c
   encoding/apr_escape.c
   file_io/unix/copy.c
