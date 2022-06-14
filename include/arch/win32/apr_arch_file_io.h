@@ -161,8 +161,7 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
 
 typedef enum {
     APR_FILETYPE_FILE   = 0,
-    APR_FILETYPE_PIPE,
-    APR_FILETYPE_SOCKET
+    APR_FILETYPE_PIPE
 } apr_filetype_e;
     
 struct apr_file_t {
@@ -260,13 +259,5 @@ apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p);
 
 
 apr_status_t file_cleanup(void *);
-
-extern apr_status_t
-apr_file_socket_pipe_create(apr_file_t **in,
-                            apr_file_t **out,
-                            apr_pool_t *p);
-
-extern apr_status_t
-apr_file_socket_pipe_close(apr_file_t *file);
 
 #endif  /* ! FILE_IO_H */
