@@ -263,6 +263,8 @@ Changes for APR 2.0.0
 
   *) apr_file_mtime_set(): Minor optimization on Windows. [Ivan Zhakov]
 
+  *) Fix a regression in apr_stat() for root path on Windows. [Ivan Zhakov]
+
 Changes for APR and APR-util 1.7.x and later:
 
   *) http://svn.apache.org/viewvc/apr/apr/branches/1.7.x/CHANGES?view=markup
