@@ -70,6 +70,17 @@ matrix:
           packages:
             - libtool-bin
             - gcc-10
+    - name: GCC-10, UBsan (Focal)
+      dist: focal
+      env: CC=gcc-10
+           NOTEST_CFLAGS="-fsanitize=undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -Werror -O2"
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          packages:
+            - libtool-bin
+            - gcc-10
 
 before_script: sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6'
 

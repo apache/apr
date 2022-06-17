@@ -238,7 +238,7 @@ APR_DECLARE(void) apr_random_add_entropy(apr_random_t *g,const void *entropy_,
         if (p->pool_size < p->bytes+1) {
             unsigned char *np = apr_palloc(g->apr_pool,(p->bytes+1)*2);
 
-            memcpy(np,p->pool,p->bytes);
+            if (p->pool) memcpy(np,p->pool,p->bytes);
             p->pool = np;
             p->pool_size = (p->bytes+1)*2;
         }
