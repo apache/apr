@@ -299,13 +299,6 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
             if (fix == 6)
                 wfile[6] = L'C';
         }
-        else if (whatfile == MORE_OF_FSPEC)
-            rv = GetNamedSecurityInfoA((char*)ufile, 
-                                 SE_FILE_OBJECT, sinf,
-                                 ((wanted & (APR_FINFO_USER | APR_FINFO_UPROT)) ? &user : NULL),
-                                 ((wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT)) ? &grp : NULL),
-                                 ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
-                                 NULL, &pdesc);
         else if (whatfile == MORE_OF_HANDLE)
             rv = GetSecurityInfo((HANDLE)ufile, 
                                  SE_FILE_OBJECT, sinf,
@@ -354,8 +347,6 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
             SetLastError(NO_ERROR);
             if (whatfile == MORE_OF_WFSPEC)
                 sizelo = GetCompressedFileSizeW((apr_wchar_t*)ufile, &sizehi);
-            else if (whatfile == MORE_OF_FSPEC)
-                sizelo = GetCompressedFileSizeA((char*)ufile, &sizehi);
             else
                 return APR_EGENERAL; /* should not occur */
         

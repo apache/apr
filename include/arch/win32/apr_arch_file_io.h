@@ -144,7 +144,6 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
 
 /* whatfile types for the ufile arg */
 #define MORE_OF_HANDLE 0
-#define MORE_OF_FSPEC  1
 #define MORE_OF_WFSPEC 2
 
 /* quick run-down of fields in windows' apr_file_t structure that may have 
