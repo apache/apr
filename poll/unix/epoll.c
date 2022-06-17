@@ -127,7 +127,7 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
     }
 #endif
 
-    pollset->p = apr_palloc(p, sizeof(apr_pollset_private_t));
+    pollset->p = apr_pcalloc(p, sizeof(apr_pollset_private_t));
 #if APR_HAS_THREADS
     if ((flags & APR_POLLSET_THREADSAFE) &&
         !(flags & APR_POLLSET_NOCOPY) &&

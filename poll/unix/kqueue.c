@@ -75,9 +75,12 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
                                         apr_uint32_t flags)
 {
     apr_status_t rv;
-    pollset->p = apr_palloc(p, sizeof(apr_pollset_private_t));
+
+    pollset->p = apr_pcalloc(p, sizeof(apr_pollset_private_t));
+
 #if APR_HAS_THREADS
     if (flags & APR_POLLSET_THREADSAFE &&
+        !(flags & APR_POLLSET_NOCOPY) &&
         ((rv = apr_thread_mutex_create(&pollset->p->ring_lock,
                                        APR_THREAD_MUTEX_DEFAULT,
                                        p)) != APR_SUCCESS)) {
@@ -99,14 +102,9 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
      * for the same descriptor)
      */
     pollset->p->setsize = 2 * size;
-
-    pollset->p->ke_set =
-        (struct kevent *) apr_palloc(p, pollset->p->setsize * sizeof(struct kevent));
-
-    memset(pollset->p->ke_set, 0, pollset->p->setsize * sizeof(struct kevent));
+    pollset->p->ke_set = apr_pcalloc(p, pollset->p->setsize * sizeof(struct kevent));
 
     pollset->p->kqueue_fd = kqueue();
-
     if (pollset->p->kqueue_fd == -1) {
         pollset->p = NULL;
         return apr_get_netos_error();
@@ -133,9 +131,11 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
 
     pollset->p->result_set = apr_palloc(p, pollset->p->setsize * sizeof(apr_pollfd_t));
 
-    APR_RING_INIT(&pollset->p->query_ring, pfd_elem_t, link);
-    APR_RING_INIT(&pollset->p->free_ring, pfd_elem_t, link);
-    APR_RING_INIT(&pollset->p->dead_ring, pfd_elem_t, link);
+    if (!(flags & APR_POLLSET_NOCOPY)) {
+        APR_RING_INIT(&pollset->p->query_ring, pfd_elem_t, link);
+        APR_RING_INIT(&pollset->p->free_ring, pfd_elem_t, link);
+        APR_RING_INIT(&pollset->p->dead_ring, pfd_elem_t, link);
+    }
 
     return APR_SUCCESS;
 }
@@ -144,20 +144,22 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
                                      const apr_pollfd_t *descriptor)
 {
     apr_os_sock_t fd;
-    pfd_elem_t *elem;
+    pfd_elem_t *elem = NULL;
     apr_status_t rv = APR_SUCCESS;
 
-    pollset_lock_rings();
+    if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
+        pollset_lock_rings();
 
-    if (!APR_RING_EMPTY(&(pollset->p->free_ring), pfd_elem_t, link)) {
-        elem = APR_RING_FIRST(&(pollset->p->free_ring));
-        APR_RING_REMOVE(elem, link);
+        if (!APR_RING_EMPTY(&(pollset->p->free_ring), pfd_elem_t, link)) {
+            elem = APR_RING_FIRST(&(pollset->p->free_ring));
+            APR_RING_REMOVE(elem, link);
+        }
+        else {
+            elem = (pfd_elem_t *) apr_palloc(pollset->pool, sizeof(pfd_elem_t));
+            APR_RING_ELEM_INIT(elem, link);
+        }
+        elem->pfd = *descriptor;
     }
-    else {
-        elem = (pfd_elem_t *) apr_palloc(pollset->pool, sizeof(pfd_elem_t));
-        APR_RING_ELEM_INIT(elem, link);
-    }
-    elem->pfd = *descriptor;
 
     if (descriptor->desc_type == APR_POLL_SOCKET) {
         fd = descriptor->desc.s->socketdes;
@@ -167,7 +169,14 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
     }
 
     if (descriptor->reqevents & APR_POLLIN) {
-        EV_SET(&pollset->p->kevent, fd, EVFILT_READ, EV_ADD, 0, 0, elem);
+        if (pollset->flags & APR_POLLSET_NOCOPY) {
+            EV_SET(&pollset->p->kevent, fd, EVFILT_READ, EV_ADD, 0, 0,
+                   descriptor);
+        }
+        else {
+            EV_SET(&pollset->p->kevent, fd, EVFILT_READ, EV_ADD, 0, 0,
+                   elem);
+        }
 
         if (kevent(pollset->p->kqueue_fd, &pollset->p->kevent, 1, NULL, 0,
                    NULL) == -1) {
@@ -176,7 +185,14 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
     }
 
     if (descriptor->reqevents & APR_POLLOUT && rv == APR_SUCCESS) {
-        EV_SET(&pollset->p->kevent, fd, EVFILT_WRITE, EV_ADD, 0, 0, elem);
+        if (pollset->flags & APR_POLLSET_NOCOPY) {
+            EV_SET(&pollset->p->kevent, fd, EVFILT_WRITE, EV_ADD, 0, 0,
+                   descriptor);
+        }
+        else {
+            EV_SET(&pollset->p->kevent, fd, EVFILT_WRITE, EV_ADD, 0, 0,
+                   elem);
+        }
 
         if (kevent(pollset->p->kqueue_fd, &pollset->p->kevent, 1, NULL, 0,
                    NULL) == -1) {
@@ -184,14 +200,16 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
         }
     }
 
-    if (rv == APR_SUCCESS) {
-        APR_RING_INSERT_TAIL(&(pollset->p->query_ring), elem, pfd_elem_t, link);
-    }
-    else {
-        APR_RING_INSERT_TAIL(&(pollset->p->free_ring), elem, pfd_elem_t, link);
-    }
+    if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
+        if (rv == APR_SUCCESS) {
+            APR_RING_INSERT_TAIL(&(pollset->p->query_ring), elem, pfd_elem_t, link);
+        }
+        else {
+            APR_RING_INSERT_TAIL(&(pollset->p->free_ring), elem, pfd_elem_t, link);
+        }
 
-    pollset_unlock_rings();
+        pollset_unlock_rings();
+    }
 
     return rv;
 }
@@ -199,11 +217,8 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
 static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
                                         const apr_pollfd_t *descriptor)
 {
-    pfd_elem_t *ep;
     apr_status_t rv;
     apr_os_sock_t fd;
-
-    pollset_lock_rings();
 
     if (descriptor->desc_type == APR_POLL_SOCKET) {
         fd = descriptor->desc.s->socketdes;
@@ -231,20 +246,26 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
         }
     }
 
-    for (ep = APR_RING_FIRST(&(pollset->p->query_ring));
-         ep != APR_RING_SENTINEL(&(pollset->p->query_ring),
-                                 pfd_elem_t, link);
-         ep = APR_RING_NEXT(ep, link)) {
+    if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
+        pfd_elem_t *ep;
 
-        if (descriptor->desc.s == ep->pfd.desc.s) {
-            APR_RING_REMOVE(ep, link);
-            APR_RING_INSERT_TAIL(&(pollset->p->dead_ring),
-                                 ep, pfd_elem_t, link);
-            break;
+        pollset_lock_rings();
+
+        for (ep = APR_RING_FIRST(&(pollset->p->query_ring));
+             ep != APR_RING_SENTINEL(&(pollset->p->query_ring),
+                                     pfd_elem_t, link);
+             ep = APR_RING_NEXT(ep, link)) {
+
+            if (descriptor->desc.s == ep->pfd.desc.s) {
+                APR_RING_REMOVE(ep, link);
+                APR_RING_INSERT_TAIL(&(pollset->p->dead_ring),
+                                     ep, pfd_elem_t, link);
+                break;
+            }
         }
-    }
 
-    pollset_unlock_rings();
+        pollset_unlock_rings();
+    }
 
     return rv;
 }
@@ -282,7 +303,13 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
         const apr_pollfd_t *fd;
 
         for (i = 0, j = 0; i < ret; i++) {
-            fd = &((pfd_elem_t *)pollset->p->ke_set[i].udata)->pfd;
+            if (pollset->flags & APR_POLLSET_NOCOPY) {
+                fd = (apr_pollfd_t *)pollset->p->ke_set[i].udata;
+            }
+            else {
+                fd = &((pfd_elem_t *)pollset->p->ke_set[i].udata)->pfd;
+            }
+
             if ((pollset->flags & APR_POLLSET_WAKEABLE) &&
                 fd->desc_type == APR_POLL_FILE &&
                 fd->desc.f == pollset->wakeup_pipe[0]) {
@@ -305,13 +332,15 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
         }
     }
 
-    pollset_lock_rings();
+    if (!(pollset->flags & APR_POLLSET_NOCOPY)) {
+        pollset_lock_rings();
 
-    /* Shift all PFDs in the Dead Ring to the Free Ring */
-    APR_RING_CONCAT(&(pollset->p->free_ring), &(pollset->p->dead_ring),
-                    pfd_elem_t, link);
+        /* Shift all PFDs in the Dead Ring to the Free Ring */
+        APR_RING_CONCAT(&(pollset->p->free_ring), &(pollset->p->dead_ring),
+                        pfd_elem_t, link);
 
-    pollset_unlock_rings();
+        pollset_unlock_rings();
+    }
 
     return rv;
 }
