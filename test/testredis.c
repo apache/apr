@@ -189,7 +189,7 @@ static apr_status_t check_redis(void)
     return rv;
 }
 
-static int has_redis_server()
+static int has_redis_server(void)
 {
     static int has_redis_server_state = -1;
 
@@ -587,7 +587,6 @@ static void test_redis_setexget(abts_case * tc, void *data)
 
 abts_suite *testredis(abts_suite * suite)
 {
-    apr_status_t rv;
     suite = ADD_SUITE(suite);
 
     abts_run_test(suite, test_redis_create, NULL);
