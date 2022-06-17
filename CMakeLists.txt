@@ -399,81 +399,76 @@ SET(APR_SOURCES
   xml/apr_xml_xmllite.c
 )
 
-SET(APR_TEST_SOURCES
-  test/abts.c
-  test/testargs.c
-  test/testatomic.c
-  test/testbase64.c
-  test/testbuckets.c
-  test/testcond.c
-  test/testcrypto.c
-  test/testdate.c
-  test/testdbd.c
-  test/testdbm.c
-  test/testdir.c
-  test/testdso.c
-  test/testdup.c
-  test/testenv.c
-  test/testencode.c
-  test/testescape.c
-  test/testfile.c
-  test/testfilecopy.c
-  test/testfileinfo.c
-  test/testflock.c
-  test/testfmt.c
-  test/testfnmatch.c
-  test/testglobalmutex.c
-  test/testhash.c
-  test/testhooks.c
-  test/testjson.c
-  test/testjose.c
-  test/testipsub.c
-  test/testlfs.c
-  test/testlfsabi.c
-  test/testlfsabi32.c
-  test/testlfsabi64.c
-  test/testlfsabi_include.c
-  test/testlock.c
-  test/testmd4.c
-  test/testmd5.c
-  test/testmemcache.c
-  test/testmmap.c
-  test/testnames.c
-  test/testoc.c
-  test/testpass.c
-  test/testpath.c
-  test/testpipe.c
-  test/testpoll.c
-  test/testpools.c
-  test/testproc.c
-  test/testprocmutex.c
-  test/testqueue.c
-  test/testrand.c
-  test/testredis.c
-  test/testreslist.c
-  test/testrmm.c
-  test/testshm.c
-  test/testsiphash.c
-  test/testskiplist.c
-  test/testsleep.c
-  test/testsock.c
-  test/testsockets.c
-  test/testsockopt.c
-  test/teststr.c
-  test/teststrmatch.c
-  test/teststrnatcmp.c
-  test/testtable.c
-  test/testtemp.c
-  test/testthread.c
-  test/testtime.c
-  test/testud.c
-  test/testuri.c
-  test/testuser.c
-  test/testutil.c
-  test/testuuid.c
-  test/testvsn.c
-  test/testxlate.c
-  test/testxml.c
+SET(APR_TEST_SUITES
+  testargs
+  testatomic
+  testbase64
+  testbuckets
+  testcond
+  testcrypto
+  testdate
+  testdbd
+  testdbm
+  testdir
+  testdso
+  testdup
+  testenv
+  testencode
+  testescape
+  testfile
+  testfilecopy
+  testfileinfo
+  testflock
+  testfmt
+  testfnmatch
+  testglobalmutex
+  testhash
+  testhooks
+  testjson
+  testjose
+  testipsub
+  testlfs
+  testlfsabi
+  testlock
+  testmd4
+  testmd5
+  testmemcache
+  testmmap
+  testnames
+  testoc
+  testpass
+  testpath
+  testpipe
+  testpoll
+  testpools
+  testproc
+  testprocmutex
+  testqueue
+  testrand
+  testredis
+  testreslist
+  testrmm
+  testshm
+  testsiphash
+  testskiplist
+  testsleep
+  testsock
+  testsockets
+  testsockopt
+  teststr
+  teststrmatch
+  teststrnatcmp
+  testtable
+  testtemp
+  testthread
+  testtime
+  testud
+  testuri
+  testuser
+  testuuid
+  testvsn
+  testxlate
+  testxml
 )
 
 SET(install_targets)
@@ -580,12 +575,27 @@ IF(APR_BUILD_TESTAPR)
   ENDIF()
   ADD_TEST(NAME testapp COMMAND testapp)
 
+  SET (APR_TEST_SOURCES
+    test/abts.c
+    test/testlfsabi32.c
+    test/testlfsabi64.c
+    test/testlfsabi_include.c
+    test/testutil.c
+    )
+
+  FOREACH(testsuite ${APR_TEST_SUITES})
+    LIST(APPEND APR_TEST_SOURCES test/${testsuite}.c)
+  ENDFOREACH()
+
   ADD_EXECUTABLE(testall ${APR_TEST_SOURCES})
   TARGET_LINK_LIBRARIES(testall ${whichapr} ${XMLLIB_LIBRARIES} ${XLATE_LIBRARIES} ${APR_SYSTEM_LIBS})
   IF(apiflag)
     SET_TARGET_PROPERTIES(testall PROPERTIES COMPILE_FLAGS ${apiflag})
   ENDIF()
-  ADD_TEST(NAME testall COMMAND testall)
+
+  FOREACH(test ${APR_TEST_SUITES})
+    ADD_TEST(NAME ${test} COMMAND testall ${test})
+  ENDFOREACH()
 
   ADD_LIBRARY(mod_test MODULE test/mod_test.c)
   TARGET_LINK_LIBRARIES(mod_test ${whichapr} ${APR_SYSTEM_LIBS})
