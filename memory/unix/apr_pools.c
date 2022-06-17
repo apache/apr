@@ -2834,13 +2834,13 @@ static void free_proc_chain(struct process_chain *procs)
     }
 }
 
-#if !APR_POOL_DEBUG
 
 /*
  * Pool creation/destruction stubs, for people who are running
  * mixed release/debug enviroments.
  */
 
+#if !APR_POOL_DEBUG
 APR_DECLARE(void *) apr_palloc_debug(apr_pool_t *pool, apr_size_t size,
                                      const char *file_line)
 {
