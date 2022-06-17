@@ -126,6 +126,94 @@ static int randval(apr_uint32_t high)
     return i > 0 ? i : 1;
 }
 
+/* use apr_socket stuff to see if there is in fact a memcached server
+ * running on PORT.
+ */
+static apr_status_t check_mc(void)
+{
+    apr_pool_t *pool = p;
+    apr_status_t rv;
+    apr_socket_t *sock = NULL;
+    apr_sockaddr_t *sa;
+    struct iovec vec[2];
+    apr_size_t written;
+    char buf[128];
+    apr_size_t len;
+
+    rv = apr_socket_create(&sock, APR_INET, SOCK_STREAM, 0, pool);
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+
+    rv = apr_sockaddr_info_get(&sa, HOST, APR_INET, PORT, 0, pool);
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+
+    rv = apr_socket_timeout_set(sock, 1 * APR_USEC_PER_SEC);
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+
+    rv = apr_socket_connect(sock, sa);
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+
+    rv = apr_socket_timeout_set(sock, -1);
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+
+    vec[0].iov_base = "version";
+    vec[0].iov_len = sizeof("version") - 1;
+
+    vec[1].iov_base = "\r\n";
+    vec[1].iov_len = sizeof("\r\n") - 1;
+
+    rv = apr_socket_sendv(sock, vec, 2, &written);
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+
+    len = sizeof(buf);
+    rv = apr_socket_recv(sock, buf, &len);
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+
+    if (strncmp(buf, "VERSION", sizeof("VERSION") - 1) != 0) {
+        rv = APR_EGENERAL;
+    }
+
+    apr_socket_close(sock);
+    return rv;
+}
+
+static int has_memcache_server()
+{
+    static int has_memcache_server_state = -1;
+
+    if (has_memcache_server_state < 0) {
+        apr_status_t rv;
+
+        /* check for a running memcached on the typical port before
+         * trying to run the tests. succeed if we don't find one.
+         */
+        rv = check_mc();
+        if (rv == APR_SUCCESS) {
+            has_memcache_server_state = 1;
+        }
+        else {
+            has_memcache_server_state = 0;
+            abts_log_message("Error %d occurred attempting to reach memcached "
+                             "on %s:%d.  Skipping apr_memcache tests...",
+                             rv, HOST, PORT);
+        }
+    }
+
+    return has_memcache_server_state;
+}
 /*
  * general test to make sure we can create the memcache struct and add
  * some servers, but not more than we tell it we can add
@@ -140,6 +228,11 @@ static void test_memcache_create(abts_case * tc, void *data)
   apr_uint32_t max_servers = 10;
   apr_uint32_t i;
   apr_uint32_t hash;
+
+  if (!has_memcache_server()) {
+      ABTS_SKIP(tc, data, "Memcache server not found.");
+      return;
+  }
 
   rv = apr_memcache_create(pool, max_servers, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
@@ -209,6 +302,11 @@ static void test_memcache_user_funcs(abts_case * tc, void *data)
   my_hash_server_baton *baton =
     apr_pcalloc(pool, sizeof(my_hash_server_baton));
 
+  if (!has_memcache_server()) {
+      ABTS_SKIP(tc, data, "Memcache server not found.");
+      return;
+  }
+
   rv = apr_memcache_create(pool, max_servers, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
 
@@ -252,6 +350,11 @@ static void test_memcache_meta(abts_case * tc, void *data)
     apr_memcache_stats_t *stats;
     char *result;
     apr_status_t rv;
+
+    if (!has_memcache_server()) {
+        ABTS_SKIP(tc, data, "Memcache server not found.");
+        return;
+    }
 
     rv = apr_memcache_create(pool, 1, 0, &memcache);
     ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
@@ -317,6 +420,11 @@ static void test_memcache_addreplace(abts_case * tc, void *data)
  char *result;
  apr_size_t len;
 
+  if (!has_memcache_server()) {
+      ABTS_SKIP(tc, data, "Memcache server not found.");
+      return;
+  }
+ 
   rv = apr_memcache_create(pool, 1, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
 
@@ -376,6 +484,11 @@ static void test_memcache_incrdecr(abts_case * tc, void *data)
  apr_size_t len;
  apr_uint32_t i;
 
+  if (!has_memcache_server()) {
+      ABTS_SKIP(tc, data, "Memcache server not found.");
+      return;
+  }
+ 
   rv = apr_memcache_create(pool, 1, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
 
@@ -427,6 +540,11 @@ static void test_memcache_multiget(abts_case * tc, void *data)
   apr_hash_t *tdata, *values;
   apr_hash_index_t *hi;
   apr_uint32_t i;
+
+  if (!has_memcache_server()) {
+      ABTS_SKIP(tc, data, "Memcache server not found.");
+      return;
+  }
 
   rv = apr_memcache_create(pool, 1, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
@@ -496,6 +614,11 @@ static void test_memcache_setget(abts_case * tc, void *data)
     char *result;
     apr_size_t len;
 
+    if (!has_memcache_server()) {
+        ABTS_SKIP(tc, data, "Memcache server not found.");
+        return;
+    }
+
     rv = apr_memcache_create(pool, 1, 0, &memcache);
     ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
 
@@ -539,92 +662,17 @@ static void test_memcache_setget(abts_case * tc, void *data)
     }
 }
 
-/* use apr_socket stuff to see if there is in fact a memcached server
- * running on PORT.
- */
-static apr_status_t check_mc(void)
-{
-  apr_pool_t *pool = p;
-  apr_status_t rv;
-  apr_socket_t *sock = NULL;
-  apr_sockaddr_t *sa;
-  struct iovec vec[2];
-  apr_size_t written;
-  char buf[128];
-  apr_size_t len;
-
-  rv = apr_socket_create(&sock, APR_INET, SOCK_STREAM, 0, pool);
-  if(rv != APR_SUCCESS) {
-    return rv;
-  }
-
-  rv = apr_sockaddr_info_get(&sa, HOST, APR_INET, PORT, 0, pool);
-  if(rv != APR_SUCCESS) {
-    return rv;
-  }
-
-  rv = apr_socket_timeout_set(sock, 1 * APR_USEC_PER_SEC);
-  if (rv != APR_SUCCESS) {
-    return rv;
-  }
-
-  rv = apr_socket_connect(sock, sa);
-  if (rv != APR_SUCCESS) {
-    return rv;
-  }
-
-  rv = apr_socket_timeout_set(sock, -1);
-  if (rv != APR_SUCCESS) {
-    return rv;
-  }
-
-  vec[0].iov_base = "version";
-  vec[0].iov_len  = sizeof("version") - 1;
-
-  vec[1].iov_base = "\r\n";
-  vec[1].iov_len  = sizeof("\r\n") -1;
-
-  rv = apr_socket_sendv(sock, vec, 2, &written);
-  if (rv != APR_SUCCESS) {
-    return rv;
-  }
-
-  len = sizeof(buf);
-  rv = apr_socket_recv(sock, buf, &len);
-  if(rv != APR_SUCCESS) {
-    return rv;
-  }
-
-  if(strncmp(buf, "VERSION", sizeof("VERSION")-1) != 0) {
-    rv = APR_EGENERAL;
-  }
-
-  apr_socket_close(sock);
-  return rv;
-}
-
 abts_suite *testmemcache(abts_suite * suite)
 {
     apr_status_t rv;
     suite = ADD_SUITE(suite);
-    /* check for a running memcached on the typical port before
-     * trying to run the tests. succeed if we don't find one.
-     */
-    rv = check_mc();
-    if (rv == APR_SUCCESS) {
-      abts_run_test(suite, test_memcache_create, NULL);
-      abts_run_test(suite, test_memcache_user_funcs, NULL);
-      abts_run_test(suite, test_memcache_meta, NULL);
-      abts_run_test(suite, test_memcache_setget, NULL);
-      abts_run_test(suite, test_memcache_multiget, NULL);
-      abts_run_test(suite, test_memcache_addreplace, NULL);
-      abts_run_test(suite, test_memcache_incrdecr, NULL);
-    }
-    else {
-        abts_log_message("Error %d occurred attempting to reach memcached "
-                         "on %s:%d.  Skipping apr_memcache tests...",
-                         rv, HOST, PORT);
-    }
+    abts_run_test(suite, test_memcache_create, NULL);
+    abts_run_test(suite, test_memcache_user_funcs, NULL);
+    abts_run_test(suite, test_memcache_meta, NULL);
+    abts_run_test(suite, test_memcache_setget, NULL);
+    abts_run_test(suite, test_memcache_multiget, NULL);
+    abts_run_test(suite, test_memcache_addreplace, NULL);
+    abts_run_test(suite, test_memcache_incrdecr, NULL);
 
     return suite;
 }
