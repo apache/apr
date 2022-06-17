@@ -226,7 +226,7 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
         return errno;
     }
     else if (pid == 0) {
-#if AP_HAS_THREAD_LOCAL
+#if APR_HAS_THREAD_LOCAL
         apr_thread_current_after_fork();
 #endif
         proc->pid = pid;
