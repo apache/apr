@@ -74,6 +74,8 @@ Changes for APR 1.7.1
 
   *) Fixed: apr_get_oslevel() was returning APR_WIN_XP on Windows 10
 
+  *) apr_file_mtime_set(): Minor optimization on Windows. [Ivan Zhakov]
+
 Changes for APR 1.7.0 and later:
 
   *) http://svn.apache.org/viewvc/apr/apr/branches/1.7.x/CHANGES?view=markup
