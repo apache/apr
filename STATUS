@@ -95,12 +95,6 @@ RELEASE SHOWSTOPPERS:
 
 CURRENT VOTES:
 
-    * r1896717: Fix a regression in apr_stat() for root path on Windows
-      caused by the extended symlink detection added in r1855949 (PR47630).
-      
-      Backport branch: trunk https://svn.apache.org/repos/asf/apr/apr/branches/1.8.x-r1896717
-      +1: ivan
-
 CURRENT test/testall -v EXCEPTIONS:
 
     Please add any platform anomilies to the following exception list.

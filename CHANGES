@@ -4,7 +4,7 @@ Changes for APR 1.8.0
   [Anything backed out from 1.7.x branch should be slid up here, and the
   details of 1.7.1 deleted]
 
-  *)
+  *) Fix a regression in apr_stat() for root path on Windows. [Ivan Zhakov]
 
 Changes for APR 1.7.1
 

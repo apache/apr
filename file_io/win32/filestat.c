@@ -624,7 +624,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
                                             / sizeof(apr_wchar_t), fname)))
             return rv;
-        if (!(wanted & (APR_FINFO_NAME | APR_FINFO_LINK))) {
+        if (!(wanted & APR_FINFO_NAME)) {
             if (!GetFileAttributesExW(wfname, GetFileExInfoStandard, 
                                       &FileInfo.i))
                 return apr_get_os_error();
@@ -634,6 +634,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
              * since we want the true name, and set aside a long
              * enough string to handle the longest file name.
              */
+            char tmpname[APR_FILE_MAX * 3 + 1];
             HANDLE hFind;
             if ((rv = test_safe_name(fname)) != APR_SUCCESS) {
                 return rv;
@@ -644,15 +645,11 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
             FindClose(hFind);
             finddata = 1;
 
-            if (wanted & APR_FINFO_NAME)
-            {
-                char tmpname[APR_FILE_MAX * 3 + 1];
-                if (unicode_to_utf8_path(tmpname, sizeof(tmpname),
-                                         FileInfo.w.cFileName)) {
-                    return APR_ENAMETOOLONG;
-                }
-                filename = apr_pstrdup(pool, tmpname);
+            if (unicode_to_utf8_path(tmpname, sizeof(tmpname),
+                                     FileInfo.w.cFileName)) {
+                return APR_ENAMETOOLONG;
             }
+            filename = apr_pstrdup(pool, tmpname);
         }
     }
 #endif
