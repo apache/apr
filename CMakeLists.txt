@@ -595,7 +595,7 @@ IF(APR_BUILD_TESTAPR)
   ENDIF()
 
   FOREACH(test ${APR_TEST_SUITES})
-    ADD_TEST(NAME ${test} COMMAND testall ${test})
+    ADD_TEST(NAME ${test} COMMAND testall -v ${test})
   ENDFOREACH()
 
   ADD_LIBRARY(mod_test MODULE test/mod_test.c)
