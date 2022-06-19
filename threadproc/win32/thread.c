@@ -76,7 +76,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
 static APR_THREAD_LOCAL apr_thread_t *current_thread = NULL;
 #endif
 
-static void *dummy_worker(void *opaque)
+static void * APR_THREAD_FUNC dummy_worker(void *opaque)
 {
     apr_thread_t *thd = (apr_thread_t *)opaque;
     void *ret;
