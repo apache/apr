@@ -89,11 +89,11 @@ static void test_dbm_fetch(abts_case *tc, apr_dbm_t *db, dbm_table_t *table)
         rv = apr_dbm_fetch(db, table[i].key, &val);
         if (!table[i].deleted) {
             ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-            ABTS_INT_EQUAL(tc, table[i].val.dsize, val.dsize);
+            ABTS_SIZE_EQUAL(tc, table[i].val.dsize, val.dsize);
             ABTS_INT_EQUAL(tc, 0, memcmp(table[i].val.dptr, val.dptr, val.dsize));
             apr_dbm_freedatum(db, val);
         } else {
-            ABTS_INT_EQUAL(tc, 0, val.dsize);
+            ABTS_SIZE_EQUAL(tc, 0, val.dsize);
         }
     }
 }
