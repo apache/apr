@@ -169,7 +169,7 @@ static void test_proc_args(abts_case* tc, void* data)
     const char *expected;
     const char *actual;
 
-    apr_filepath_merge(&progname, NULL, "echoargs" EXTENSION, 0, p);
+    apr_filepath_merge(&progname, NULL, BINPATH "echoargs" EXTENSION, 0, p);
 
     rv = apr_procattr_create(&attr, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -180,7 +180,7 @@ static void test_proc_args(abts_case* tc, void* data)
     rv = apr_procattr_cmdtype_set(attr, APR_PROGRAM_ENV);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    args[0] = progname;
+    args[0] = BINPATH progname;
     args[1] = "1";
     args[2] = "";
     args[3] = "\"te st";
