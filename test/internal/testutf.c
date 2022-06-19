@@ -79,7 +79,7 @@ struct testval malformed[] = [
 void displaynw(struct testval *f, struct testval *l)
 {
     char x[80], *t = x;
-    int i;
+    apr_size_t i;
     for (i = 0; i < f->nl; ++i)
         t += sprintf(t, "%02X ", f->n[i]);
     *(t++) = '-'; 
