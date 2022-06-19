@@ -36,9 +36,8 @@
  */
 
 #include "apr_general.h"
-#include "ShellAPI.h"
 #include "wchar.h"
-#include "apr_arch_file_io.h"
+#include "arch/win32/apr_arch_utf8.h"
 #include "assert.h"
 #include "apr_private.h"
 #include "apr_arch_misc.h"
