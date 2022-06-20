@@ -47,9 +47,9 @@ static struct {
     const char *filename;
     apr_off_t offset;
 } test_set[] = {
-    { "/data/mmap_datafile.txt", 0 },
-    { "/data/mmap_large_datafile.txt", 65536 },
-    { "/data/mmap_large_datafile.txt", 66650 }, /* not page aligned */
+    { "data/mmap_datafile.txt", 0 },
+    { "data/mmap_large_datafile.txt", 65536 },
+    { "data/mmap_large_datafile.txt", 66650 }, /* not page aligned */
     { NULL, }
 };
 
