@@ -91,9 +91,11 @@ int wmain(int argc, const wchar_t **wargv, const wchar_t **wenv)
      * Reset _wenviron for good measure.
      */
     if (_wenviron) {
-        wenv = _wenviron;
         _wenviron = NULL;
-        free((wchar_t **)wenv);
+
+        /* There is no need to free _wenviron because MSVCRT
+         * automatically free 'initial' environment block.
+         */
     }
 
     apr_app_init_complete = 1;

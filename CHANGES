@@ -11,6 +11,8 @@ Changes for APR 1.8.0
   *) Fix attempt to free invalid memory on exit when apr_app is used
      on Windows. [Ivan Zhakov]
 
+  *) Fix double free on exit when apr_app is used on Windows. [Ivan Zhakov]
+
 Changes for APR 1.7.1
 
   *) SECURITY: CVE-2021-35940 (cve.mitre.org)
