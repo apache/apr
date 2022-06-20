@@ -297,6 +297,9 @@ IF(APR_BUILD_TESTAPR)
   EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different
                   ${PROJECT_SOURCE_DIR}/test/data/mmap_datafile.txt
                   ${PROJECT_BINARY_DIR}/data/mmap_datafile.txt)
+  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                  ${PROJECT_SOURCE_DIR}/test/data/mmap_large_datafile.txt
+                  ${PROJECT_BINARY_DIR}/data/mmap_large_datafile.txt)
 
   IF(TEST_STATIC_LIBS)
     SET(whichapr    apr-1)
