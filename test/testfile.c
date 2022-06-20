@@ -1254,6 +1254,74 @@ static void test_datasync_on_stream(abts_case *tc, void *data)
     ABTS_TRUE(tc, rv == APR_SUCCESS || APR_STATUS_IS_EINVAL(rv));
 }
 
+static void test_append(abts_case *tc, void *data)
+{
+    apr_file_t *f1;
+    apr_file_t *f2;
+    const char *fname = "data/testappend.dat";
+    apr_int32_t flags = APR_FOPEN_CREATE | APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_APPEND;
+    char buf[128];
+    apr_off_t offset;
+
+    apr_file_remove(fname, p);
+
+    /* Open test file with APR_FOPEN_APPEND, but without APR_FOPEN_XTHREAD. */
+    APR_ASSERT_SUCCESS(tc, "open test file",
+        apr_file_open(&f1, fname, flags, APR_FPROT_OS_DEFAULT, p));
+
+    /* Open test file with APR_FOPEN_APPEND and APR_FOPEN_XTHREAD. */
+    APR_ASSERT_SUCCESS(tc, "open test file",
+        apr_file_open(&f2, fname, flags | APR_FOPEN_XTHREAD, APR_FPROT_OS_DEFAULT, p));
+
+    APR_ASSERT_SUCCESS(tc, "write should succeed",
+        apr_file_puts("w1", f1));
+    offset = 0;
+    APR_ASSERT_SUCCESS(tc, "seek should succeed",
+        apr_file_seek(f1, APR_CUR, &offset));
+    ABTS_INT_EQUAL(tc, 2, (int) offset);
+
+    APR_ASSERT_SUCCESS(tc, "write should succeed",
+        apr_file_puts("w2", f2));
+    offset = 0;
+    APR_ASSERT_SUCCESS(tc, "seek should succeed",
+        apr_file_seek(f2, APR_CUR, &offset));
+    ABTS_INT_EQUAL(tc, 4, (int) offset);
+
+    APR_ASSERT_SUCCESS(tc, "write should succeed",
+        apr_file_puts("w3", f1));
+    offset = 0;
+    APR_ASSERT_SUCCESS(tc, "seek should succeed",
+        apr_file_seek(f1, APR_CUR, &offset));
+    ABTS_INT_EQUAL(tc, 6, (int) offset);
+
+    APR_ASSERT_SUCCESS(tc, "write should succeed",
+        apr_file_puts("w4", f2));
+
+    offset = 0;
+    APR_ASSERT_SUCCESS(tc, "seek should succeed",
+        apr_file_seek(f2, APR_CUR, &offset));
+    ABTS_INT_EQUAL(tc, 8, (int) offset);
+
+    /* Check file content file using F1. */
+    offset = 0;
+    APR_ASSERT_SUCCESS(tc, "seek should succeed",
+        apr_file_seek(f1, APR_SET, &offset));
+    memset(buf, 0, sizeof(buf));
+    apr_file_read_full(f1, buf, sizeof(buf), NULL);
+    ABTS_STR_EQUAL(tc, "w1w2w3w4", buf);
+
+    /* Check file content file using F2. */
+    offset = 0;
+    APR_ASSERT_SUCCESS(tc, "seek should succeed",
+        apr_file_seek(f2, APR_SET, &offset));
+    memset(buf, 0, sizeof(buf));
+    apr_file_read_full(f2, buf, sizeof(buf), NULL);
+    ABTS_STR_EQUAL(tc, "w1w2w3w4", buf);
+
+    apr_file_close(f1);
+    apr_file_close(f2);
+}
+
 abts_suite *testfile(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -1298,8 +1366,7 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_fail_read_flush, NULL);
     abts_run_test(suite, test_buffer_set_get, NULL);
     abts_run_test(suite, test_xthread, NULL);
-    abts_run_test(suite, test_datasync_on_file, NULL);
-    abts_run_test(suite, test_datasync_on_stream, NULL);
+    abts_run_test(suite, test_append, NULL);
 
     return suite;
 }
