@@ -76,7 +76,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
 static APR_THREAD_LOCAL apr_thread_t *current_thread = NULL;
 #endif
 
-static void * APR_THREAD_FUNC dummy_worker(void *opaque)
+static unsigned int APR_THREAD_FUNC dummy_worker(void *opaque)
 {
     apr_thread_t *thd = (apr_thread_t *)opaque;
     void *ret;
@@ -92,7 +92,7 @@ static void * APR_THREAD_FUNC dummy_worker(void *opaque)
         apr_pool_destroy(thd->pool);
     }
 
-    return ret;
+    return (unsigned int) ret;
 }
 
 static apr_status_t alloc_thread(apr_thread_t **new,
@@ -156,7 +156,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
      */
     if ((handle = (HANDLE)_beginthreadex(NULL,
                         (DWORD) (attr ? attr->stacksize : 0),
-                        (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
+                        dummy_worker,
                         (*new), 0, &temp)) == 0) {
         stat = APR_FROM_OS_ERROR(_doserrno);
         apr_pool_destroy((*new)->pool);
