@@ -22,6 +22,7 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_getopt.h"
+#include "apr_atomic.h"
 #include "testutil.h"
 
 #if APR_HAS_THREADS
@@ -32,6 +33,7 @@
 
 static void *APR_THREAD_FUNC thread_rwlock_func(apr_thread_t *thd, void *data);
 static void *APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data);
+static void *APR_THREAD_FUNC thread_mutex_sleep_function(apr_thread_t *thd, void *data);
 static void *APR_THREAD_FUNC thread_cond_producer(apr_thread_t *thd, void *data);
 static void *APR_THREAD_FUNC thread_cond_consumer(apr_thread_t *thd, void *data);
 
@@ -109,6 +111,34 @@ static void *APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data
             break;
     }
     return NULL;
+}
+
+/* Sleepy-loop until f_ value matches val: */
+#define wait_for_flag(f_, val) while (apr_atomic_read32(&(f_)) != val) apr_sleep(100000)
+
+/* Helper function.  Passed (apr_uint32_t *) flag as data, sets flag
+ * to one, locks the timeout_mutex, waits for *flag to be set to zero
+ * and terminates.  The co-ordination could also be done via mutexes
+ * but since we're timedlocking timeout_mutex it would look like a
+ * deadlock to a mutex implementation which detects deadlocks. */
+static void *APR_THREAD_FUNC thread_mutex_sleep_function(apr_thread_t *thd, void *data)
+{
+    apr_uint32_t *flag = data;
+    apr_status_t rv;
+
+    rv = apr_thread_mutex_lock(timeout_mutex);
+    if (rv) {
+        fprintf(stderr, "testlock: failed to lock timeout mutex, errno %d\n", rv);
+        apr_thread_exit(thd, rv);
+    }
+
+    apr_atomic_set32(flag, 1);
+
+    wait_for_flag(*flag, 0);
+
+    rv = apr_thread_mutex_unlock(timeout_mutex);
+
+    apr_thread_exit(thd, APR_SUCCESS);
 } 
 
 static void *APR_THREAD_FUNC thread_cond_producer(apr_thread_t *thd, void *data)
@@ -344,21 +374,35 @@ static void test_timeoutcond(abts_case *tc, void *data)
                        apr_thread_cond_destroy(timeout_cond));
 }
 
+/* Test whether _timedlock times out appropriately.  Since
+ * double-locking a non-recursive mutex has undefined behaviour, and
+ * double-locking a recursive mutex succeeds immediately, a thread is
+ * spawned to hold the lock while this thread tests whether _timedlock
+ * times out. */
 #if APR_HAS_TIMEDLOCKS
 static void test_timeoutmutex(abts_case *tc, void *data)
 {
     apr_status_t s;
     apr_interval_time_t timeout;
     apr_time_t begin, end;
+    apr_thread_t *th;
+    apr_uint32_t flag = 0;
     int i;
 
-    s = apr_thread_mutex_create(&timeout_mutex, APR_THREAD_MUTEX_TIMED, p);
+    s = apr_thread_mutex_create(&timeout_mutex,
+                                APR_THREAD_MUTEX_TIMED |
+                                APR_THREAD_MUTEX_UNNESTED, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, s);
     ABTS_PTR_NOTNULL(tc, timeout_mutex);
 
+    s = apr_thread_create(&th, NULL, thread_mutex_sleep_function, &flag, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s);
+
+    wait_for_flag(flag, 1); /* the thread will set flag to 1 once the
+                             * timeout_mutex is locked. */
+    
     timeout = apr_time_from_sec(5);
 
-    ABTS_INT_EQUAL(tc, 0, apr_thread_mutex_lock(timeout_mutex));
     for (i = 0; i < MAX_RETRY; i++) {
         begin = apr_time_now();
         s = apr_thread_mutex_timedlock(timeout_mutex, timeout);
@@ -371,9 +415,14 @@ static void test_timeoutmutex(abts_case *tc, void *data)
         ABTS_ASSERT(tc, "Timer returned too late", end - begin - timeout < 1000000);
         break;
     }
+
+    apr_atomic_set32(&flag, 0); /* tell the thread to exit.  */
+
+    APR_ASSERT_SUCCESS(tc, "join spawned thread", apr_thread_join(&s, th));
+    APR_ASSERT_SUCCESS(tc, "spawned thread terminated", s);
+
     ABTS_ASSERT(tc, "Too many retries", i < MAX_RETRY);
-    ABTS_INT_EQUAL(tc, 0, apr_thread_mutex_unlock(timeout_mutex));
-    APR_ASSERT_SUCCESS(tc, "Unable to destroy the mutex",
+    APR_ASSERT_SUCCESS(tc, "Unable to destroy the timeout mutex",
                        apr_thread_mutex_destroy(timeout_mutex));
 }
 #endif
