@@ -189,42 +189,42 @@ static void test_decode_base64_binary(abts_case * tc, void *data)
     src = "";
     udest = apr_pdecode_base64_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base64_binary target!=dest", memcmp(ufoobar, udest, 0) == 0);
-    ABTS_INT_EQUAL(tc, len, 0);
+    ABTS_SIZE_EQUAL(tc, len, 0);
 
     src = "Zg==";
     udest = apr_pdecode_base64_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base64_binary target!=dest", memcmp(ufoobar, udest, 1) == 0);
-    ABTS_INT_EQUAL(tc, len, 1);
+    ABTS_SIZE_EQUAL(tc, len, 1);
 
     src = "Zg=";
     udest = apr_pdecode_base64_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base64_binary target!=dest", memcmp(ufoobar, udest, 1) == 0);
-    ABTS_INT_EQUAL(tc, len, 1);
+    ABTS_SIZE_EQUAL(tc, len, 1);
 
     src = "Zg";
     udest = apr_pdecode_base64_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base64_binary target!=dest", memcmp(ufoobar, udest, 1) == 0);
-    ABTS_INT_EQUAL(tc, len, 1);
+    ABTS_SIZE_EQUAL(tc, len, 1);
 
     src = "Zm8=";
     udest = apr_pdecode_base64_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base64_binary target!=dest", memcmp(ufoobar, udest, 2) == 0);
-    ABTS_INT_EQUAL(tc, len, 2);
+    ABTS_SIZE_EQUAL(tc, len, 2);
 
     src = "Zm8";
     udest = apr_pdecode_base64_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base64_binary target!=dest", memcmp(ufoobar, udest, 2) == 0);
-    ABTS_INT_EQUAL(tc, len, 2);
+    ABTS_SIZE_EQUAL(tc, len, 2);
 
     src = "Zm9v";
     udest = apr_pdecode_base64_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base64_binary target!=dest", memcmp(ufoobar, udest, 3) == 0);
-    ABTS_INT_EQUAL(tc, len, 3);
+    ABTS_SIZE_EQUAL(tc, len, 3);
 
     src = "Zm9v";
     udest = apr_pdecode_base64_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base64_binary target!=dest", memcmp(ufoobar, udest, 3) == 0);
-    ABTS_INT_EQUAL(tc, len, 3);
+    ABTS_SIZE_EQUAL(tc, len, 3);
 
     apr_pool_destroy(pool);
 }
@@ -639,127 +639,127 @@ static void test_decode_base32_binary(abts_case * tc, void *data)
     src = "";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 0) == 0);
-    ABTS_INT_EQUAL(tc, 0, len);
+    ABTS_SIZE_EQUAL(tc, 0, len);
 
     src = "MY======";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 1) == 0);
-    ABTS_INT_EQUAL(tc, 1, len);
+    ABTS_SIZE_EQUAL(tc, 1, len);
 
     src = "MY";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 1) == 0);
-    ABTS_INT_EQUAL(tc, 1, len);
+    ABTS_SIZE_EQUAL(tc, 1, len);
 
     src = "CO======";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_BASE32HEX, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 1) == 0);
-    ABTS_INT_EQUAL(tc, 1, len);
+    ABTS_SIZE_EQUAL(tc, 1, len);
 
     src = "CO";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_BASE32HEX, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 1) == 0);
-    ABTS_INT_EQUAL(tc, 1, len);
+    ABTS_SIZE_EQUAL(tc, 1, len);
 
     src = "MZXQ====";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 2) == 0);
-    ABTS_INT_EQUAL(tc, 2, len);
+    ABTS_SIZE_EQUAL(tc, 2, len);
 
     src = "MZXQ";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 2) == 0);
-    ABTS_INT_EQUAL(tc, 2, len);
+    ABTS_SIZE_EQUAL(tc, 2, len);
 
     src = "CPNG====";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_BASE32HEX, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 2) == 0);
-    ABTS_INT_EQUAL(tc, 2, len);
+    ABTS_SIZE_EQUAL(tc, 2, len);
 
     src = "CPNG";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_BASE32HEX, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 2) == 0);
-    ABTS_INT_EQUAL(tc, 2, len);
+    ABTS_SIZE_EQUAL(tc, 2, len);
 
     src = "MZXW6===";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 3) == 0);
-    ABTS_INT_EQUAL(tc, 3, len);
+    ABTS_SIZE_EQUAL(tc, 3, len);
 
     src = "MZXW6";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 3) == 0);
-    ABTS_INT_EQUAL(tc, 3, len);
+    ABTS_SIZE_EQUAL(tc, 3, len);
 
     src = "CPNMU===";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_BASE32HEX, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 3) == 0);
-    ABTS_INT_EQUAL(tc, 3, len);
+    ABTS_SIZE_EQUAL(tc, 3, len);
 
     src = "CPNMU";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_BASE32HEX, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 3) == 0);
-    ABTS_INT_EQUAL(tc, 3, len);
+    ABTS_SIZE_EQUAL(tc, 3, len);
 
     src = "MZXW6YQ=";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 4) == 0);
-    ABTS_INT_EQUAL(tc, 4, len);
+    ABTS_SIZE_EQUAL(tc, 4, len);
 
     src = "MZXW6YQ=";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 4) == 0);
-    ABTS_INT_EQUAL(tc, 4, len);
+    ABTS_SIZE_EQUAL(tc, 4, len);
 
     src = "CPNMUOG=";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_BASE32HEX, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 4) == 0);
-    ABTS_INT_EQUAL(tc, 4, len);
+    ABTS_SIZE_EQUAL(tc, 4, len);
 
     src = "CPNMUOG";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_BASE32HEX, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 4) == 0);
-    ABTS_INT_EQUAL(tc, 4, len);
+    ABTS_SIZE_EQUAL(tc, 4, len);
 
     src = "MZXW6YTB";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 5) == 0);
-    ABTS_INT_EQUAL(tc, 5, len);
+    ABTS_SIZE_EQUAL(tc, 5, len);
 
     src = "MZXW6YTB";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 5) == 0);
-    ABTS_INT_EQUAL(tc, 5, len);
+    ABTS_SIZE_EQUAL(tc, 5, len);
 
     src = "CPNMUOJ1";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_BASE32HEX, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 5) == 0);
-    ABTS_INT_EQUAL(tc, 5, len);
+    ABTS_SIZE_EQUAL(tc, 5, len);
 
     src = "CPNMUOJ1";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_BASE32HEX, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 5) == 0);
-    ABTS_INT_EQUAL(tc, 5, len);
+    ABTS_SIZE_EQUAL(tc, 5, len);
 
     src = "MZXW6YTBOI======";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 6) == 0);
-    ABTS_INT_EQUAL(tc, 6, len);
+    ABTS_SIZE_EQUAL(tc, 6, len);
 
     src = "MZXW6YTBOI";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_NONE, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 6) == 0);
-    ABTS_INT_EQUAL(tc, 6, len);
+    ABTS_SIZE_EQUAL(tc, 6, len);
 
     src = "CPNMUOJ1E8======";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_BASE32HEX, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 6) == 0);
-    ABTS_INT_EQUAL(tc, 6, len);
+    ABTS_SIZE_EQUAL(tc, 6, len);
 
     src = "CPNMUOJ1E8";
     udest = apr_pdecode_base32_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_BASE32HEX, &len);
     ABTS_ASSERT(tc, "apr_pdecode_base32_binary target!=dest", memcmp(ufoobar, udest, 6) == 0);
-    ABTS_INT_EQUAL(tc, 6, len);
+    ABTS_SIZE_EQUAL(tc, 6, len);
 
     apr_pool_destroy(pool);
 }
@@ -872,7 +872,7 @@ static void test_decode_base16(abts_case * tc, void *data)
     target = ":;<=";
     dest = apr_pdecode_base16(pool, src, APR_ENCODE_STRING, APR_ENCODE_COLON, &len);
     ABTS_STR_EQUAL(tc, target, dest);
-    ABTS_INT_EQUAL(tc, 4, (int)len);
+    ABTS_SIZE_EQUAL(tc, 4, len);
     apr_decode_base16(NULL, src, APR_ENCODE_STRING, APR_ENCODE_COLON, &len);
     ABTS_ASSERT(tc,
                 apr_psprintf(pool, "size mismatch (%" APR_SIZE_T_FMT "!=%" APR_SIZE_T_FMT ")", len, (apr_size_t) 5),
@@ -896,7 +896,7 @@ static void test_decode_base16_binary(abts_case * tc, void *data)
     src = "ff:00:ff:00";
     udest = apr_pdecode_base16_binary(pool, src, APR_ENCODE_STRING, APR_ENCODE_COLON, &vlen);
     ABTS_ASSERT(tc, "apr_pdecode_base16_binary target!=dest", memcmp(utarget, udest, 4) == 0);
-    ABTS_INT_EQUAL(tc, (int)vlen, 4);
+    ABTS_SIZE_EQUAL(tc, vlen, 4);
     apr_decode_base16_binary(NULL, src, APR_ENCODE_STRING, APR_ENCODE_COLON, &len);
     ABTS_ASSERT(tc,
                 apr_psprintf(pool, "size mismatch (%" APR_SIZE_T_FMT "!=%" APR_SIZE_T_FMT ")", len, (apr_size_t) 4),
