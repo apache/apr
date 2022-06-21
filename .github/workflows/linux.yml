@@ -2,9 +2,9 @@ name: Linux
 
 on:
   push:
-    branches: [ "trunk" ]
+    branches: [ "trunk", "1.8.x" ]
   pull_request:
-    branches: [ "trunk" ]
+    branches: [ "trunk", "1.8.x" ]
 
 env:
   MARGS: "-j2"
