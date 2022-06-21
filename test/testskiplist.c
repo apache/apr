@@ -33,7 +33,7 @@
 static apr_pool_t *ptmp = NULL;
 static apr_skiplist *skiplist = NULL;
 
-static int skiplist_get_size(abts_case *tc, apr_skiplist *sl)
+static size_t skiplist_get_size(abts_case *tc, apr_skiplist *sl)
 {
     size_t size = 0;
     apr_skiplistnode *n;
