@@ -29,6 +29,14 @@ jobs:
           - name: Maintainer-mode, -Werror
             notest-cflags: -Werror
             config: --enable-maintainer-mode
+          - name: ASan
+            # w/o ODBC since DSO unload leaks memory and fails the tests
+            notest-cflags: -fsanitize=address -fno-sanitize-recover=address -fno-omit-frame-pointer -Werror -O2
+            config: --with-odbc=no
+          - name: ASan, pool-debug
+            # w/o ODBC since DSO unload leaks memory and fails the tests
+            notest-cflags: -fsanitize=address -fno-sanitize-recover=address -fno-omit-frame-pointer -Werror -O2
+            config: --enable-pool-debug --with-odbc=no
           - name: UBsan
             notest-cflags: -fsanitize=undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -Werror -O2
 
