@@ -95,7 +95,7 @@ static void test_md4sum(abts_case *tc, void *data)
         unsigned char digest[APR_MD4_DIGESTSIZE];
         const void *string = md4sums[count].string;
         const void *sum = md4sums[count].md4sum;
-        unsigned int len = strlen(string);
+        size_t len = strlen(string);
 
         ABTS_ASSERT(tc, "apr_md4_init", (apr_md4_init(&context) == 0));
         ABTS_ASSERT(tc, "apr_md4_update", 
