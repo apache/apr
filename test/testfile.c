@@ -1367,6 +1367,8 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_buffer_set_get, NULL);
     abts_run_test(suite, test_xthread, NULL);
     abts_run_test(suite, test_append, NULL);
+    abts_run_test(suite, test_datasync_on_file, NULL);
+    abts_run_test(suite, test_datasync_on_stream, NULL);
 
     return suite;
 }
