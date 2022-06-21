@@ -39,6 +39,7 @@ jobs:
             config: --enable-pool-debug --with-odbc=no
           - name: UBsan
             notest-cflags: -fsanitize=undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -Werror -O2
+      fail-fast: false
 
     runs-on: ubuntu-latest
     env:
