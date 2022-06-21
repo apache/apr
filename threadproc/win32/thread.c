@@ -371,10 +371,8 @@ static BOOL WINAPI init_once_callback(PINIT_ONCE InitOnce,
 APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control,
                                           void (*func)(void))
 {
-    PVOID lpContext;
-
     if (!InitOnceExecuteOnce(&control->once, init_once_callback, func,
-                             &lpContext)) {
+                             NULL)) {
         return apr_get_os_error();
     }
 
