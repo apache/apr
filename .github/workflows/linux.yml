@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "trunk", "1.8.x" ]
   pull_request:
-    branches: [ "trunk", "1.8.x" ]
+    branches: [ "trunk" ]
 
 env:
   MARGS: "-j2"
