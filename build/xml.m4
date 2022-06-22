@@ -177,6 +177,7 @@ AC_ARG_WITH([libxml2],
     else
       xml2_CPPFLAGS="-I$withval/include/libxml2"
       xml2_LDFLAGS="-L$withval/lib64 -L$withval/lib"
+      xml2_LIBS="-lxml2"
     fi
 
     APR_ADDTO(CPPFLAGS, [$xml2_CPPFLAGS])
@@ -186,6 +187,7 @@ AC_ARG_WITH([libxml2],
     AC_CHECK_HEADERS(libxml/parser.h, AC_CHECK_LIB(xml2, xmlCreatePushParserCtxt, [apu_has_libxml2=1]))
   fi
   ], [
+    xml2_LIBS="-lxml2"
     AC_CHECK_HEADERS(libxml/parser.h, AC_CHECK_LIB(xml2, xmlCreatePushParserCtxt, [apu_has_libxml2=1]))
 ])
 AC_SUBST(apu_has_libxml2)
