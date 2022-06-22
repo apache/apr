@@ -268,7 +268,7 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t)
     /* One of the few sane situations for a cast, Sleep
      * is in ms, not us, and passed as a DWORD value
      */
-    Sleep((DWORD)(t / 1000));
+    Sleep((DWORD)((t + 999) / 1000));
 }
 
 static apr_status_t clock_restore(void *unsetres)
