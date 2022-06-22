@@ -2239,7 +2239,9 @@ static void test_datasync_on_stream(abts_case *tc, void *data)
     rv = apr_file_write_full(f, "abcdef\b\b\b\b\b\b\b", 12, &bytes_written);
     APR_ASSERT_SUCCESS(tc, "write to stdout", rv);
     rv = apr_file_datasync(f);
-    ABTS_TRUE(tc, rv == APR_SUCCESS || APR_STATUS_IS_EINVAL(rv));
+    if (rv != APR_SUCCESS) {
+        ABTS_INT_EQUAL(tc, APR_EINVAL, rv);
+    }
 }
 
 abts_suite *testfile(abts_suite *suite)
