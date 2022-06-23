@@ -353,7 +353,7 @@ static apr_status_t apr_json_decode_array(apr_json_scanner_t * self,
         apr_json_value_t * array)
 {
     apr_status_t status = APR_SUCCESS;
-    apr_size_t count = 0;
+    int count = 0;
 
     if (self->p >= self->e) {
         return APR_EOF;
@@ -412,7 +412,7 @@ static apr_status_t apr_json_decode_array(apr_json_scanner_t * self,
     {
         apr_json_value_t *element = apr_json_array_first(array);
         array->value.array->array = apr_array_make(self->pool, count,
-                sizeof(apr_json_value_t *));
+                                                   sizeof(apr_json_value_t *));
         while (element) {
             *((apr_json_value_t **) (apr_array_push(array->value.array->array))) =
                     element;
