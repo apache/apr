@@ -676,9 +676,9 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
     }
 #endif
     boundary_index = 12;
-    while ( (1 << boundary_index) < boundary_size)
+    while ( (1u << boundary_index) < boundary_size)
         boundary_index++;
-    boundary_size = (1 << boundary_index);
+    boundary_size = (1u << boundary_index);
 
     if ((rv = apr_allocator_create(&global_allocator)) != APR_SUCCESS) {
         apr_pools_initialized = 0;
