@@ -382,7 +382,7 @@ static unsigned char BF_atoi64[0x60] = {
 	(dst) = tmp; \
 }
 
-static int BF_decode(BF_word *dst, const char *src, int size)
+static int BF_decode(BF_word *dst, const char *src, apr_size_t size)
 {
 	unsigned char *dptr = (unsigned char *)dst;
 	unsigned char *end = dptr + size;
@@ -406,7 +406,7 @@ static int BF_decode(BF_word *dst, const char *src, int size)
 	return 0;
 }
 
-static void BF_encode(char *dst, const BF_word *src, int size)
+static void BF_encode(char *dst, const BF_word *src, apr_size_t size)
 {
 	const unsigned char *sptr = (const unsigned char *)src;
 	const unsigned char *end = sptr + size;
@@ -642,7 +642,7 @@ static void BF_set_key(const char *key, BF_key expanded, BF_key initial,
 }
 
 static char *BF_crypt(const char *key, const char *setting,
-	char *output, int size,
+	char *output, apr_size_t size,
 	BF_word min)
 {
 #if BF_ASM
@@ -776,7 +776,7 @@ static char *BF_crypt(const char *key, const char *setting,
 	return output;
 }
 
-int _crypt_output_magic(const char *setting, char *output, int size)
+int _crypt_output_magic(const char *setting, char *output, apr_size_t size)
 {
 	if (size < 3)
 		return -1;
@@ -812,7 +812,7 @@ int _crypt_output_magic(const char *setting, char *output, int size)
  * setting.
  */
 char *_crypt_blowfish_rn(const char *key, const char *setting,
-	char *output, int size)
+	char *output, apr_size_t size)
 {
 	const char *test_key = "8b \xd0\xc1\xd2\xcf\xcc\xd8";
 	const char *test_setting = "$2a$00$abcdefghijklmnopqrstuu";
@@ -874,7 +874,7 @@ char *_crypt_blowfish_rn(const char *key, const char *setting,
 }
 
 char *_crypt_gensalt_blowfish_rn(const char *prefix, unsigned long count,
-	const char *input, int size, char *output, int output_size)
+	const char *input, apr_size_t size, char *output, apr_size_t output_size)
 {
 	if (size < 16 || output_size < 7 + 22 + 1 ||
 	    (count && (count < 4 || count > 17)) ||
@@ -891,8 +891,8 @@ char *_crypt_gensalt_blowfish_rn(const char *prefix, unsigned long count,
 	output[1] = '2';
 	output[2] = prefix[2];
 	output[3] = '$';
-	output[4] = '0' + count / 10;
-	output[5] = '0' + count % 10;
+	output[4] = '0' + (unsigned char)(count / 10);
+	output[5] = '0' + (unsigned char)(count % 10);
 	output[6] = '$';
 
 	BF_encode(&output[7], (const BF_word *)input, 16);
