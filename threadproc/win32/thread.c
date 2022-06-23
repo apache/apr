@@ -92,7 +92,7 @@ static unsigned int APR_THREAD_FUNC dummy_worker(void *opaque)
         apr_pool_destroy(thd->pool);
     }
 
-    return (unsigned int) ret;
+    return (unsigned int)(apr_uintptr_t)ret;
 }
 
 static apr_status_t alloc_thread(apr_thread_t **new,
