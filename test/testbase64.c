@@ -52,8 +52,8 @@ static void test_base64(abts_case *tc, void *data)
 
         apr_pool_clear(pool);
 
-        orig_len = strlen(base64_tbl[i].orig);
-        enc_len = strlen(base64_tbl[i].enc);
+        orig_len = (int)strlen(base64_tbl[i].orig);
+        enc_len = (int)strlen(base64_tbl[i].enc);
 
         /* includes + 1 for term null */
         b64_enc_len = apr_base64_encode_len(orig_len);

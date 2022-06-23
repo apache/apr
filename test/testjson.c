@@ -61,14 +61,14 @@ static void test_json_identity(abts_case * tc, void *data)
 
     ABTS_STR_NEQUAL(tc, src, buf, len);
 
-    ABTS_INT_EQUAL(tc, len, offset);
+    ABTS_SIZE_EQUAL(tc, len, (apr_size_t)offset);
     ABTS_INT_EQUAL(tc, APR_JSON_OBJECT, json->type);
     image = apr_hash_get(json->value.object->hash, "Image", 5);
     ABTS_PTR_NOTNULL(tc, image);
     width = apr_hash_get(image->v->value.object->hash, "Width", 5);
     ABTS_PTR_NOTNULL(tc, width);
     ABTS_INT_EQUAL(tc, APR_JSON_LONG, width->v->type);
-    ABTS_INT_EQUAL(tc, 800, width->v->value.lnumber);
+    ABTS_LLONG_EQUAL(tc, 800, width->v->value.lnumber);
     ids = apr_hash_get(image->v->value.object->hash, "IDs", 3);
     ABTS_PTR_NOTNULL(tc, ids);
     ABTS_INT_EQUAL(tc, APR_JSON_ARRAY, ids->v->type);
@@ -85,7 +85,7 @@ static void test_json_identity(abts_case * tc, void *data)
     height = apr_hash_get(image->v->value.object->hash, "Height", 6);
     ABTS_PTR_NOTNULL(tc, height);
     ABTS_INT_EQUAL(tc, APR_JSON_LONG, height->v->type);
-    ABTS_INT_EQUAL(tc, 600, height->v->value.lnumber);
+    ABTS_LLONG_EQUAL(tc, 600, height->v->value.lnumber);
 
 }
 
