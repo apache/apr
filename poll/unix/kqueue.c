@@ -171,7 +171,7 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
     if (descriptor->reqevents & APR_POLLIN) {
         if (pollset->flags & APR_POLLSET_NOCOPY) {
             EV_SET(&pollset->p->kevent, fd, EVFILT_READ, EV_ADD, 0, 0,
-                   descriptor);
+                   (void *)descriptor);
         }
         else {
             EV_SET(&pollset->p->kevent, fd, EVFILT_READ, EV_ADD, 0, 0,
@@ -187,7 +187,7 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
     if (descriptor->reqevents & APR_POLLOUT && rv == APR_SUCCESS) {
         if (pollset->flags & APR_POLLSET_NOCOPY) {
             EV_SET(&pollset->p->kevent, fd, EVFILT_WRITE, EV_ADD, 0, 0,
-                   descriptor);
+                   (void *)descriptor);
         }
         else {
             EV_SET(&pollset->p->kevent, fd, EVFILT_WRITE, EV_ADD, 0, 0,
