@@ -310,7 +310,7 @@ void abts_##NAME##_nequal(abts_case *tc, const T expected, const T actual, int l
     update_status(); \
     if (tc->failed) return; \
     \
-    if (expected == actual) return; \
+    if (expected != actual) return; \
     \
     tc->failed = TRUE; \
     if (verbose) { \
