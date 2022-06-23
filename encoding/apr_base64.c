@@ -20,10 +20,19 @@
  * ugly 'len' functions, which is quite a nasty cost.
  */
 
+#undef NDEBUG /* always abort() on assert()ion failure */
+#include <assert.h>
+
 #include "apr_base64.h"
 #if APR_CHARSET_EBCDIC
 #include "apr_xlate.h"
 #endif				/* APR_CHARSET_EBCDIC */
+
+/* Above APR_BASE64_ENCODE_MAX length the encoding can't fit in an int >= 0 */
+#define APR_BASE64_ENCODE_MAX 1610612733
+
+/* Above APR_BASE64_DECODE_MAX length the decoding can't fit in an int >= 0 */
+#define APR_BASE64_DECODE_MAX 2863311524u
 
 /* aaaack but it's fast and const should make it shared text page. */
 static const unsigned char pr2six[256] =
@@ -109,24 +118,22 @@ APR_DECLARE(apr_status_t) apr_base64init_ebcdic(apr_xlate_t *to_ascii,
 
 APR_DECLARE(int) apr_base64_decode_len(const char *bufcoded)
 {
-    int nbytesdecoded;
     register const unsigned char *bufin;
     register apr_size_t nprbytes;
 
     bufin = (const unsigned char *) bufcoded;
     while (pr2six[*(bufin++)] <= 63);
-
     nprbytes = (bufin - (const unsigned char *) bufcoded) - 1;
-    nbytesdecoded = (((int)nprbytes + 3) / 4) * 3;
+    assert(nprbytes <= APR_BASE64_DECODE_MAX);
 
-    return nbytesdecoded + 1;
+    return (int)(((nprbytes + 3u) / 4u) * 3u + 1u);
 }
 
 APR_DECLARE(int) apr_base64_decode(char *bufplain, const char *bufcoded)
 {
 #if APR_CHARSET_EBCDIC
     apr_size_t inbytes_left, outbytes_left;
-#endif				/* APR_CHARSET_EBCDIC */
+#endif /* APR_CHARSET_EBCDIC */
     int len;
     
     len = apr_base64_decode_binary((unsigned char *) bufplain, bufcoded);
@@ -154,12 +161,13 @@ APR_DECLARE(int) apr_base64_decode_binary(unsigned char *bufplain,
     bufin = (const unsigned char *) bufcoded;
     while (pr2six[*(bufin++)] <= 63);
     nprbytes = (bufin - (const unsigned char *) bufcoded) - 1;
-    nbytesdecoded = (((int)nprbytes + 3) / 4) * 3;
+    assert(nprbytes <= APR_BASE64_DECODE_MAX);
+    nbytesdecoded = (int)(((nprbytes + 3u) / 4u) * 3u);
 
     bufout = (unsigned char *) bufplain;
     bufin = (const unsigned char *) bufcoded;
 
-    while (nprbytes > 4) {
+    while (nprbytes >= 4) {
 	*(bufout++) =
 	    (unsigned char) (pr2six[*bufin] << 2 | pr2six[bufin[1]] >> 4);
 	*(bufout++) =
@@ -179,13 +187,8 @@ APR_DECLARE(int) apr_base64_decode_binary(unsigned char *bufplain,
 	*(bufout++) =
 	    (unsigned char) (pr2six[bufin[1]] << 4 | pr2six[bufin[2]] >> 2);
     }
-    if (nprbytes > 3) {
-	*(bufout++) =
-	    (unsigned char) (pr2six[bufin[2]] << 6 | pr2six[bufin[3]]);
-    }
 
-    nbytesdecoded -= (4 - (int)nprbytes) & 3;
-    return nbytesdecoded;
+    return nbytesdecoded - (int)((4u - nprbytes) & 3u);
 }
 
 APR_DECLARE(char *) apr_pbase64_decode(apr_pool_t *p, const char *bufcoded)
@@ -203,6 +206,8 @@ static const char basis_64[] =
 
 APR_DECLARE(int) apr_base64_encode_len(int len)
 {
+    assert(len >= 0 && len <= APR_BASE64_ENCODE_MAX);
+
     return ((len + 2) / 3 * 4) + 1;
 }
 
@@ -213,6 +218,8 @@ APR_DECLARE(int) apr_base64_encode(char *encoded, const char *string, int len)
 #else /* APR_CHARSET_EBCDIC */
     int i;
     char *p;
+
+    assert(len >= 0 && len <= APR_BASE64_ENCODE_MAX);
 
     p = encoded;
     for (i = 0; i < len - 2; i += 3) {
@@ -238,7 +245,7 @@ APR_DECLARE(int) apr_base64_encode(char *encoded, const char *string, int len)
     }
 
     *p++ = '\0';
-    return p - encoded;
+    return (unsigned int)(p - encoded);
 #endif				/* APR_CHARSET_EBCDIC */
 }
 
@@ -250,6 +257,8 @@ APR_DECLARE(int) apr_base64_encode_binary(char *encoded,
 {
     int i;
     char *p;
+
+    assert(len >= 0 && len <= APR_BASE64_ENCODE_MAX);
 
     p = encoded;
     for (i = 0; i < len - 2; i += 3) {
@@ -275,16 +284,17 @@ APR_DECLARE(int) apr_base64_encode_binary(char *encoded,
     }
 
     *p++ = '\0';
-    return (int)(p - encoded);
+    return (unsigned int)(p - encoded);
 }
 
 APR_DECLARE(char *) apr_pbase64_encode(apr_pool_t *p, const char *string)
 {
     char *encoded;
-    int l = strlen(string);
+    apr_size_t len = strlen(string);
 
-    encoded = (char *) apr_palloc(p, apr_base64_encode_len(l));
-    apr_base64_encode(encoded, string, l);
+    assert(len <= (apr_size_t)APR_INT32_MAX);
+    encoded = (char *) apr_palloc(p, apr_base64_encode_len((int)len));
+    apr_base64_encode(encoded, string, (int)len);
 
     return encoded;
 }
