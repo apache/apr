@@ -2240,7 +2240,11 @@ static void test_datasync_on_stream(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "write to stdout", rv);
     rv = apr_file_datasync(f);
     if (rv != APR_SUCCESS) {
+#if defined(__APPLE__)
+        ABTS_INT_EQUAL(tc, ENOTSUP, rv);
+#else
         ABTS_INT_EQUAL(tc, APR_EINVAL, rv);
+#endif
     }
 }
 
