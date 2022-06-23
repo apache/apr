@@ -386,6 +386,10 @@ static apr_status_t apr_json_decode_array(apr_json_scanner_t * self,
             break;
         }
 
+        if (count >= APR_INT32_MAX) {
+            return APR_ENOSPC;
+        }
+
         if (APR_SUCCESS != (status = apr_json_decode_value(self, &element))) {
             return status;
         }
@@ -394,7 +398,6 @@ static apr_status_t apr_json_decode_array(apr_json_scanner_t * self,
                 != (status = apr_json_array_add(array, element))) {
             return status;
         }
-
         count++;
 
         if (self->p == self->e) {
