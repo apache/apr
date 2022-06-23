@@ -589,7 +589,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
 
         /* Handle the args, separate from argv0 */
-        cmdline = "";
+        cmdline = apr_pstrdup(pool, "");
         for (i = 1; args && args[i]; ++i) {
             if (has_space(args[i]) || !args[i][0]) {
                 cmdline = apr_pstrcat(pool, cmdline, " \"", args[i], "\"", NULL);
@@ -631,7 +631,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             }
 
             /* Handle the args, seperate from argv0 */
-            cmdline = "";
+            cmdline = apr_pstrdup(pool, "");
             for (i = 1; args && args[i]; ++i) {
                 if (has_space(args[i]) || !args[i][0]) {
                     cmdline = apr_pstrcat(pool, cmdline, " \"", args[i], "\"", NULL);
@@ -663,7 +663,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         else {
             /* A simple command we are directly invoking.
              * Handle the args, seperate from argv0 */
-            cmdline = argv0;
+            cmdline = apr_pstrdup(pool, argv0);
             for (i = 1; args && args[i]; ++i) {
                 cmdline = apr_pstrcat(pool, cmdline, " ", quote_arg(args[i], pool), NULL);
             }
