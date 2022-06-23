@@ -509,7 +509,7 @@ static void busyloop_dec32(tbox_t *tbox)
         busyloop_read32(tbox);
         val = apr_atomic_dec32(tbox->mem);
         apr_thread_mutex_lock(thread_lock);
-        ABTS_INT_NEQUAL(tbox->tc, 0, val);
+        ABTS_UINT_NEQUAL(tbox->tc, 0, val);
         apr_thread_mutex_unlock(thread_lock);
     } while (--tbox->loop);
 }
@@ -762,7 +762,7 @@ static void busyloop_dec64(tbox_t64 *tbox)
         busyloop_read64(tbox);
         val = apr_atomic_dec64(tbox->mem);
         apr_thread_mutex_lock(thread_lock64);
-        ABTS_INT_NEQUAL(tbox->tc, 0, val);
+        ABTS_ULLONG_NEQUAL(tbox->tc, 0, val);
         apr_thread_mutex_unlock(thread_lock64);
     } while (--tbox->loop);
 }
