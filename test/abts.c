@@ -76,6 +76,10 @@ static void end_suite(abts_suite *suite)
             fprintf(stdout, "\b");
             fflush(stdout);
         }
+        if (last->skipped > 0) {
+            fprintf(stdout, "SKIPPED %d of %d\n", last->skipped, last->num_test);
+            fflush(stdout);
+        }
         if (last->failed == 0) {
             fprintf(stdout, "SUCCESS\n");
             fflush(stdout);
@@ -102,6 +106,7 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name_full)
     subsuite = malloc(sizeof(*subsuite));
     subsuite->num_test = 0;
     subsuite->failed = 0;
+    subsuite->skipped = 0;
     subsuite->next = NULL;
     /* suite_name_full may be an absolute path depending on __FILE__ 
      * expansion */
@@ -178,6 +183,7 @@ void abts_run_test(abts_suite *ts, test_func f, void *value)
     ss = ts->tail;
 
     tc.failed = 0;
+    tc.skipped = 0;
     tc.suite = ss;
     
     ss->num_test++;
@@ -188,11 +194,25 @@ void abts_run_test(abts_suite *ts, test_func f, void *value)
     if (tc.failed) {
         ss->failed++;
     }
+
+    if (tc.skipped) {
+        ss->skipped++;
+    }
+}
+
+static void report_summary(const char *kind_header,
+                           const char *name_header,
+                           const char *percent_header)
+{
+    fprintf(stdout, "%-15s\t\tTotal\t%s\t%s\n",
+            kind_header, name_header, percent_header);
+    fprintf(stdout, "===================================================\n");
 }
 
 static int report(abts_suite *suite)
 {
-    int count = 0;
+    int failed_count = 0;
+    int skipped_count = 0;
     sub_suite *dptr;
 
     if (suite && suite->tail &&!suite->tail->not_run) {
@@ -200,25 +220,46 @@ static int report(abts_suite *suite)
     }
 
     for (dptr = suite->head; dptr; dptr = dptr->next) {
-        count += dptr->failed;
+        failed_count += dptr->failed;
+    }
+
+    for (dptr = suite->head; dptr; dptr = dptr->next) {
+        skipped_count += dptr->skipped;
     }
 
     if (list_tests) {
         return 0;
     }
 
-    if (count == 0) {
+    /* Report skipped tests */
+    if (skipped_count > 0) {
+        dptr = suite->head;
+        report_summary("Skipped Tests", "Skip", "Skipped %");
+        while (dptr != NULL) {
+            if (dptr->skipped != 0) {
+                float percent = ((float)dptr->skipped / (float)dptr->num_test);
+                fprintf(stdout, "%-15s\t\t%5d\t%4d\t%8.2f%%\n", dptr->name,
+                        dptr->num_test, dptr->skipped, percent * 100);
+            }
+            dptr = dptr->next;
+        }
+    }
+
+    if (failed_count == 0) {
         printf("All tests passed.\n");
         return 0;
     }
 
+    /* Report failed tests */
     dptr = suite->head;
-    fprintf(stdout, "%-15s\t\tTotal\tFail\tFailed %%\n", "Failed Tests");
-    fprintf(stdout, "===================================================\n");
+    if (skipped_count > 0) {
+        fprintf(stdout, "\n");
+    }
+    report_summary("Failed Tests", "Fail", " Failed %");
     while (dptr != NULL) {
         if (dptr->failed != 0) {
             float percent = ((float)dptr->failed / (float)dptr->num_test);
-            fprintf(stdout, "%-15s\t\t%5d\t%4d\t%6.2f%%\n", dptr->name, 
+            fprintf(stdout, "%-15s\t\t%5d\t%4d\t%8.2f%%\n", dptr->name,
                     dptr->num_test, dptr->failed, percent * 100);
         }
         dptr = dptr->next;
@@ -358,7 +399,19 @@ void abts_fail(abts_case *tc, const char *message, int lineno)
         fflush(stderr);
     }
 }
- 
+
+void abts_skip(abts_case *tc, const char *message, int lineno)
+{
+    update_status();
+    if (tc->skipped) return;
+
+    tc->skipped = TRUE;
+    if (verbose) {
+        fprintf(stderr, "\bSKIP: Line %d: %s\n", lineno, message);
+        fflush(stderr);
+    }
+}
+
 void abts_assert(abts_case *tc, const char *message, int condition, int lineno)
 {
     update_status();

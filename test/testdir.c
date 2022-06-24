@@ -60,6 +60,7 @@ static void test_mkdir_recurs(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_DIR, finfo.filetype);
 }
 
+#if APR_HAS_THREADS
 struct thread_data
 {
     abts_case *tc;
@@ -94,9 +95,11 @@ static void *APR_THREAD_FUNC thread_mkdir_func(apr_thread_t *thd, void *data)
     ABTS_INT_EQUAL(td->tc, APR_SUCCESS, s5);
     return NULL;
 }
+#endif  /* APR_HAS_THREADS */
 
 static void test_mkdir_recurs_parallel(abts_case *tc, void *data)
 {
+#if APR_HAS_THREADS
     struct thread_data td1, td2, td3, td4;
     apr_thread_t *t1, *t2, *t3, *t4;
     apr_status_t s1, s2, s3, s4;
@@ -125,6 +128,9 @@ static void test_mkdir_recurs_parallel(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, s2);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, s3);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, s4);
+#else
+    ABTS_SKIP(tc, data, "This test requires APR thread support.");
+#endif  /* APR_HAS_THREADS */
 }
 
 static void test_remove(abts_case *tc, void *data)
