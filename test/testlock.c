@@ -111,6 +111,7 @@ static void *APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data
             break;
     }
     return NULL;
+    return NULL;
 }
 
 /* Sleepy-loop until f_ value matches val: */
@@ -139,6 +140,7 @@ static void *APR_THREAD_FUNC thread_mutex_sleep_function(apr_thread_t *thd, void
     rv = apr_thread_mutex_unlock(timeout_mutex);
 
     apr_thread_exit(thd, APR_SUCCESS);
+    return NULL;
 } 
 
 static void *APR_THREAD_FUNC thread_cond_producer(apr_thread_t *thd, void *data)
