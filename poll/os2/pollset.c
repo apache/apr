@@ -223,7 +223,7 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     (*num) = 0;
 
     if (timeout > 0) {
-        timeout /= 1000;
+        timeout = (timeout + 999) / 1000;
     }
 
     rv = select(pollresult, pollset->num_read, pollset->num_write, pollset->num_except, timeout);

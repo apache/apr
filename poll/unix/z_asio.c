@@ -554,7 +554,7 @@ static posix_poll(apr_pollset_t *pollset,
     DBG(4, "entered\n");
 
     if (timeout > 0) {
-        timeout /= 1000;
+        timeout = (timeout + 999) / 1000;
     }
     rv = poll(priv->pollset, pollset->nelts, timeout);
     (*num) = rv;
