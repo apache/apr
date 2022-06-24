@@ -98,8 +98,9 @@ static void test_get_filesize(abts_case *tc, void *data)
 
     rv = apr_file_info_get(&thisfinfo, APR_FINFO_NORM, thefile);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_TRUE(tc, thisfinfo.size == (apr_off_t)(apr_size_t)thisfinfo.size);
 
-    thisfsize = thisfinfo.size;
+    thisfsize = (apr_size_t)thisfinfo.size;
     thisfdata = apr_palloc(ptest, thisfsize + 1);
     ABTS_PTR_NOTNULL(tc, thisfdata);
 }
@@ -109,6 +110,8 @@ static void read_expected_contents(abts_case *tc, void *data)
     apr_off_t *offset = data;
     apr_size_t nbytes = 0;
     apr_status_t rv;
+
+    ABTS_TRUE(tc, *offset == (apr_off_t)(apr_size_t)*offset);
 
     rv = apr_file_read_full(thefile, thisfdata, thisfsize, &nbytes);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -124,7 +127,7 @@ static void read_expected_contents(abts_case *tc, void *data)
      * all over the place in the next tests.
      */
     thisfdata += *offset;
-    thisfsize -= *offset;
+    thisfsize -= (apr_size_t)*offset;
 }
 
 static void test_mmap_create(abts_case *tc, void *data)
