@@ -91,15 +91,6 @@ APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint3
 #endif
 }
 
-APR_DECLARE(void *) apr_atomic_casptr(void *volatile *mem, void *with, const void *cmp)
-{
-#if (defined(_M_IA64) || defined(_M_AMD64)) && !defined(RC_INVOKED)
-    return InterlockedCompareExchangePointer(mem, with, (void*)cmp);
-#else
-    return InterlockedCompareExchangePointer((long volatile *)mem, with, (void*)cmp);
-#endif
-}
-
 APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
 #if (defined(_M_IA64) || defined(_M_AMD64)) && !defined(RC_INVOKED)
@@ -107,6 +98,11 @@ APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint
 #else
     return InterlockedExchange((long volatile *)mem, val);
 #endif
+}
+
+APR_DECLARE(void *) apr_atomic_casptr(void *volatile *mem, void *with, const void *cmp)
+{
+    return InterlockedCompareExchangePointer(mem, with, (void*)cmp);
 }
 
 APR_DECLARE(void*) apr_atomic_xchgptr(void *volatile *mem, void *with)
