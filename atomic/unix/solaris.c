@@ -75,7 +75,17 @@ APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void
     return atomic_cas_ptr(mem, (void*) cmp, with);
 }
 
+APR_DECLARE(void*) apr_atomic_casptr2(void *volatile *mem, void *with, const void *cmp)
+{
+    return atomic_cas_ptr(mem, (void*) cmp, with);
+}
+
 APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
+{
+    return atomic_swap_ptr(mem, with);
+}
+
+APR_DECLARE(void*) apr_atomic_xchgptr2(void *volatile *mem, void *with)
 {
     return atomic_swap_ptr(mem, with);
 }

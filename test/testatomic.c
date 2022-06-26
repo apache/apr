@@ -85,10 +85,15 @@ static void test_xchgptr(abts_case *tc, void *data)
 {
     int a;
     void *ref = "little piggy";
-    volatile void *target_ptr = ref;
+    void *target_ptr = ref;
     void *old_ptr;
 
-    old_ptr = apr_atomic_xchgptr(&target_ptr, &a);
+    if (data) {
+        old_ptr = apr_atomic_xchgptr2(&target_ptr, &a);
+    }
+    else {
+        old_ptr = apr_atomic_xchgptr((void *)&target_ptr, &a);
+    }
     ABTS_PTR_EQUAL(tc, ref, old_ptr);
     ABTS_PTR_EQUAL(tc, (void *)&a, (void *)target_ptr);
 }
@@ -126,10 +131,15 @@ static void test_cas_notequal(abts_case *tc, void *data)
 static void test_casptr_equal(abts_case *tc, void *data)
 {
     int a = 0;
-    volatile void *target_ptr = NULL;
+    void *target_ptr = NULL;
     void *old_ptr;
 
-    old_ptr = apr_atomic_casptr(&target_ptr, &a, NULL);
+    if (data) {
+        old_ptr = apr_atomic_casptr2(&target_ptr, &a, NULL);
+    }
+    else {
+        old_ptr = apr_atomic_casptr((void *)&target_ptr, &a, NULL);
+    }
     ABTS_PTR_EQUAL(tc, NULL, old_ptr);
     ABTS_PTR_EQUAL(tc, (void *)&a, (void *)target_ptr);
 }
@@ -137,23 +147,33 @@ static void test_casptr_equal(abts_case *tc, void *data)
 static void test_casptr_equal_nonnull(abts_case *tc, void *data)
 {
     int a = 0, b = 0;
-    volatile void *target_ptr = &a;
+    void *target_ptr = &a;
     void *old_ptr;
 
-    old_ptr = apr_atomic_casptr(&target_ptr, &b, &a);
+    if (data) {
+        old_ptr = apr_atomic_casptr2(&target_ptr, &b, &a);
+    }
+    else {
+        old_ptr = apr_atomic_casptr((void *)&target_ptr, &b, &a);
+    }
     ABTS_PTR_EQUAL(tc, (void *)&a, old_ptr);
-    ABTS_PTR_EQUAL(tc, (void *)&b, (void *)target_ptr);
+    ABTS_PTR_EQUAL(tc, (void *)&b, target_ptr);
 }
 
 static void test_casptr_notequal(abts_case *tc, void *data)
 {
     int a = 0, b = 0;
-    volatile void *target_ptr = &a;
+    void *target_ptr = &a;
     void *old_ptr;
 
-    old_ptr = apr_atomic_casptr(&target_ptr, &a, &b);
+    if (data) {
+        old_ptr = apr_atomic_casptr2(&target_ptr, &a, &b);
+    }
+    else {
+        old_ptr = apr_atomic_casptr((void *)&target_ptr, &a, &b);
+    }
     ABTS_PTR_EQUAL(tc, (void *)&a, old_ptr);
-    ABTS_PTR_EQUAL(tc, (void *)&a, (void *)target_ptr);
+    ABTS_PTR_EQUAL(tc, (void *)&a, target_ptr);
 }
 
 static void test_add32(abts_case *tc, void *data)
@@ -925,12 +945,16 @@ abts_suite *testatomic(abts_suite *suite)
     abts_run_test(suite, test_dec32, NULL);
     abts_run_test(suite, test_xchg32, NULL);
     abts_run_test(suite, test_xchgptr, NULL);
+    abts_run_test(suite, test_xchgptr, (void *)(apr_uintptr_t)2);
     abts_run_test(suite, test_cas_equal, NULL);
     abts_run_test(suite, test_cas_equal_nonnull, NULL);
     abts_run_test(suite, test_cas_notequal, NULL);
     abts_run_test(suite, test_casptr_equal, NULL);
+    abts_run_test(suite, test_casptr_equal, (void *)(apr_uintptr_t)2);
     abts_run_test(suite, test_casptr_equal_nonnull, NULL);
+    abts_run_test(suite, test_casptr_equal_nonnull, (void *)(apr_uintptr_t)2);
     abts_run_test(suite, test_casptr_notequal, NULL);
+    abts_run_test(suite, test_casptr_notequal, (void *)(apr_uintptr_t)2);
     abts_run_test(suite, test_add32, NULL);
     abts_run_test(suite, test_add32_neg, NULL);
     abts_run_test(suite, test_inc32, NULL);

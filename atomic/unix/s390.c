@@ -114,7 +114,8 @@ APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint
     return prev;
 }
 
-APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
+static APR_INLINE
+void *do_casptr(void *volatile *mem, void *with, const void *cmp)
 {
     void *prev = (void *) cmp;
 #if APR_SIZEOF_VOIDP == 4
@@ -133,9 +134,20 @@ APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void
     return prev;
 }
 
-APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
+APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
 {
-    void *prev = (void *) *mem;
+    return do_casptr((void *)mem, with, cmp);
+}
+
+APR_DECLARE(void*) apr_atomic_casptr2(void *volatile *mem, void *with, const void *cmp)
+{
+    return do_casptr(mem, with, cmp);
+}
+
+static APR_INLINE
+void *do_xchgptr(void *volatile *mem, void *with)
+{
+    void *prev = *mem;
 #if APR_SIZEOF_VOIDP == 4
     asm volatile ("loop_%=:\n"
                   "    cs  %0,%2,%1\n"
@@ -154,6 +166,16 @@ APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
 #error APR_SIZEOF_VOIDP value not supported
 #endif
     return prev;
+}
+
+APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with)
+{
+    return do_xchgptr((void *)mem, with);
+}
+
+APR_DECLARE(void*) apr_atomic_xchgptr2(void *volatile *mem, void *with)
+{
+    return do_xchgptr(mem, with);
 }
 
 #endif /* USE_ATOMICS_S390 */

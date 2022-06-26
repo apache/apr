@@ -111,7 +111,8 @@ APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint
 #endif
 }
 
-APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *ptr, const void *cmp)
+static APR_INLINE
+void *do_casptr(void *volatile *mem, void *ptr, const void *cmp)
 {
 #if HAVE__ATOMIC_BUILTINS
     __atomic_compare_exchange_n(mem, (void *)&cmp, ptr, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
@@ -121,7 +122,18 @@ APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *ptr, const void 
 #endif
 }
 
-APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *ptr)
+APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *ptr, const void *cmp)
+{
+    return do_casptr((void *)mem, ptr, cmp);
+}
+
+APR_DECLARE(void*) apr_atomic_casptr2(void *volatile *mem, void *ptr, const void *cmp)
+{
+    return do_casptr(mem, ptr, cmp);
+}
+
+static APR_INLINE
+void *do_xchgptr(void *volatile *mem, void *ptr)
 {
 #if HAVE__ATOMIC_BUILTINS
     return (void *)__atomic_exchange_n(mem, ptr, __ATOMIC_SEQ_CST);
@@ -129,6 +141,16 @@ APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *ptr)
     __sync_synchronize();
     return (void *)__sync_lock_test_and_set(mem, ptr);
 #endif
+}
+
+APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *ptr)
+{
+    return do_xchgptr((void *)mem, ptr);
+}
+
+APR_DECLARE(void*) apr_atomic_xchgptr2(void *volatile *mem, void *ptr)
+{
+    return do_xchgptr(mem, ptr);
 }
 
 #endif /* USE_ATOMICS_BUILTINS */

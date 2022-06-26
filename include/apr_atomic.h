@@ -187,8 +187,32 @@ APR_DECLARE(apr_uint64_t) apr_atomic_xchg64(volatile apr_uint64_t *mem, apr_uint
  * @param with what to swap it with
  * @param cmp the value to compare it to
  * @return the old value of the pointer
+ * @warning The API of this function is not correct, it does not prevent the
+ *          compiler from caching the pointer in *mem, possibly breaking the
+ *          atomic garantees. Use apr_atomic_casptr2() instead.
  */
 APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void *cmp);
+
+/**
+ * compare the pointer's value with cmp.
+ * If they are the same swap the value with 'with'
+ * @param mem pointer to the pointer
+ * @param with what to swap it with
+ * @param cmp the value to compare it to
+ * @return the old value of the pointer
+ */
+APR_DECLARE(void*) apr_atomic_casptr2(void *volatile *mem, void *with, const void *cmp);
+
+/**
+ * exchange a pair of pointer values
+ * @param mem pointer to the pointer
+ * @param with what to swap it with
+ * @return the old value of the pointer
+ * @warning The API of this function is not correct, it does not prevent the
+ *          compiler from caching the pointer in *mem, possibly breaking the
+ *          atomic garantees. Use apr_atomic_xchgptr2() instead.
+ */
+APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with);
 
 /**
  * exchange a pair of pointer values
@@ -196,7 +220,7 @@ APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *with, const void
  * @param with what to swap it with
  * @return the old value of the pointer
  */
-APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem, void *with);
+APR_DECLARE(void*) apr_atomic_xchgptr2(void *volatile *mem, void *with);
 
 /** @} */
 

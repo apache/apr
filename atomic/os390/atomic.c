@@ -85,9 +85,8 @@ apr_uint32_t apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint32_t swap,
 }
 
 #if APR_SIZEOF_VOIDP == 4
-void *apr_atomic_casptr(volatile void **mem_ptr,
-                        void *swap_ptr,
-                        const void *cmp_ptr)
+static APR_INLINE
+void *do_casptr(void *volatile *mem_ptr, void *swap_ptr, const void *cmp_ptr)
 {
      __cs1(&cmp_ptr,     /* automatically updated from mem on __cs1 failure  */
            mem_ptr,      /* set from swap when __cs1 succeeds                */
@@ -95,9 +94,8 @@ void *apr_atomic_casptr(volatile void **mem_ptr,
      return (void *)cmp_ptr;
 }
 #elif APR_SIZEOF_VOIDP == 8
-void *apr_atomic_casptr(volatile void **mem_ptr,
-                        void *swap_ptr,
-                        const void *cmp_ptr)
+static APR_INLINE
+void *do_casptr(void *volatile *mem_ptr, void *swap_ptr, const void *cmp_ptr)
 {
      __csg(&cmp_ptr,     /* automatically updated from mem on __csg failure  */
            mem_ptr,      /* set from swap when __csg succeeds                */
@@ -107,6 +105,20 @@ void *apr_atomic_casptr(volatile void **mem_ptr,
 #else
 #error APR_SIZEOF_VOIDP value not supported
 #endif /* APR_SIZEOF_VOIDP */
+
+void *apr_atomic_casptr(volatile void **mem_ptr,
+                        void *swap_ptr,
+                        const void *cmp_ptr)
+{
+    return do_casptr((void *)mem_ptr, swap_ptr, cmp_ptr);
+}
+
+void *apr_atomic_casptr2(void *volatile *mem_ptr,
+                         void *swap_ptr,
+                         const void *cmp_ptr)
+{
+    return do_casptr(mem_ptr, swap_ptr, cmp_ptr);
+}
 
 apr_uint32_t apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
@@ -120,11 +132,12 @@ apr_uint32_t apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
     return old;
 }
 
-APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem_ptr, void *new_ptr)
+static APR_INLINE
+void *do_xchgptr(void *volatile *mem_ptr, void *new_ptr)
 {
     void *old_ptr;
 
-    old_ptr = *(void **)mem_ptr; /* old is automatically updated on cs failure */
+    old_ptr = *mem_ptr; /* old is automatically updated on cs failure */
 #if APR_SIZEOF_VOIDP == 4
     do {
     } while (__cs1(&old_ptr, mem_ptr, &new_ptr)); 
@@ -136,4 +149,14 @@ APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem_ptr, void *new_ptr)
 #endif /* APR_SIZEOF_VOIDP */
 
     return old_ptr;
+}
+
+APR_DECLARE(void*) apr_atomic_xchgptr(volatile void **mem_ptr, void *new_ptr)
+{
+    return do_xchgptr((void *)mem_ptr, new_ptr);
+}
+
+APR_DECLARE(void*) apr_atomic_xchgptr2(void *volatile *mem_ptr, void *new_ptr)
+{
+    return do_xchgptr(mem_ptr, new_ptr);
 }
