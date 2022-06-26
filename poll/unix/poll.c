@@ -236,9 +236,6 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
 
     *num = 0;
 
-    if (timeout > 0) {
-        timeout = (timeout + 999) / 1000;
-    }
 #ifdef WIN32
     /* WSAPoll() requires at least one socket. */
     if (pollset->nelts == 0) {
@@ -248,6 +245,13 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
         }
         return APR_SUCCESS;
     }
+#endif
+
+    if (timeout > 0) {
+        timeout = (timeout + 999) / 1000;
+    }
+
+#ifdef WIN32
     ret = WSAPoll(pollset->p->pollset, pollset->nelts, (int)timeout);
 #else
     ret = poll(pollset->p->pollset, pollset->nelts, timeout);
@@ -392,10 +396,6 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
     apr_status_t rv = APR_SUCCESS;
     apr_uint32_t i;
 
-    if (timeout > 0) {
-        timeout = (timeout + 999) / 1000;
-    }
-
 #ifdef WIN32
     /* WSAPoll() requires at least one socket. */
     if (pollcb->nelts == 0) {
@@ -405,6 +405,13 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
         }
         return APR_SUCCESS;
     }
+#endif
+
+    if (timeout > 0) {
+        timeout = (timeout + 999) / 1000;
+    }
+
+#ifdef WIN32
     ret = WSAPoll(pollcb->pollset.ps, pollcb->nelts, (int)timeout);
 #else
     ret = poll(pollcb->pollset.ps, pollcb->nelts, timeout);

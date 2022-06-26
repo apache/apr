@@ -878,7 +878,7 @@ static void justsleep(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, 0, nsds);
     ABTS_ASSERT(tc,
                 "apr_poll() didn't sleep",
-                (t2 - t1) > apr_time_from_msec(100));
+                (t2 - t1) >= apr_time_from_msec(200));
 
     for (i = 0; i < sizeof methods / sizeof methods[0]; i++) {
         rv = apr_pollset_create_ex(&pollset, 5, p, 0, methods[i]);
@@ -894,7 +894,7 @@ static void justsleep(abts_case *tc, void *data)
             ABTS_INT_EQUAL(tc, 0, nsds);
             ABTS_ASSERT(tc,
                         "apr_pollset_poll() didn't sleep",
-                        (t2 - t1) > apr_time_from_msec(100));
+                        (t2 - t1) >= apr_time_from_msec(200));
 
             rv = apr_pollset_destroy(pollset);
             ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -910,7 +910,7 @@ static void justsleep(abts_case *tc, void *data)
             ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
             ABTS_ASSERT(tc,
                         "apr_pollcb_poll() didn't sleep",
-                        (t2 - t1) > apr_time_from_msec(100));
+                        (t2 - t1) >= apr_time_from_msec(200));
 
             /* no apr_pollcb_destroy() */
         }

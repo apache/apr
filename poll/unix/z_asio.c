@@ -698,6 +698,7 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
             tv.tv_nsec = apr_time_usec(timeout) * 1000;
         } else {
             tv.tv_sec = INT_MAX;  /* block until something is ready */
+            tv.tv_nsec = 0;
         }
 
         DBG2(6, "nothing on the ready ring "
