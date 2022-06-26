@@ -29,11 +29,6 @@
 
 
 #if APR_HAS_SHARED_MEMORY
-static void msgput(int boxnum, char *msg)
-{
-    apr_cpystrn(boxes[boxnum].msg, msg, strlen(msg) + 1);
-    boxes[boxnum].msgavail = 1;
-}
 
 int main(void)
 {
@@ -63,7 +58,7 @@ int main(void)
      * are returning the right number.
      */
     for (i = N_BOXES - 1, sent = 0; i >= 0; i--, sent++) {
-        msgput(i, MSG);
+        msgput(MSG, i);
         apr_sleep(apr_time_from_sec(1));
     }
 

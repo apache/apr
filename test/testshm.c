@@ -31,36 +31,6 @@
 
 #if APR_HAS_SHARED_MEMORY
 
-#if APR_HAS_FORK
-static int msgwait(int sleep_sec, int first_box, int last_box)
-{
-    int i;
-    int recvd = 0;
-    apr_time_t start = apr_time_now();
-    apr_interval_time_t sleep_duration = apr_time_from_sec(sleep_sec);
-    while (apr_time_now() - start < sleep_duration) {
-        for (i = first_box; i < last_box; i++) {
-            if (boxes[i].msgavail && !strcmp(boxes[i].msg, MSG)) {
-                recvd++;
-                boxes[i].msgavail = 0; /* reset back to 0 */
-                /* reset the msg field.  1024 is a magic number and it should
-                 * be a macro, but I am being lazy.
-                 */
-                memset(boxes[i].msg, 0, 1024);
-            }
-        }
-        apr_sleep(apr_time_make(0, 10000)); /* 10ms */
-    }
-    return recvd;
-}
-
-static void msgput(int boxnum, char *msg)
-{
-    apr_cpystrn(boxes[boxnum].msg, msg, strlen(msg) + 1);
-    boxes[boxnum].msgavail = 1;
-}
-#endif /* APR_HAS_FORK */
-
 static void test_anon_create(abts_case *tc, void *data)
 {
     apr_status_t rv;
@@ -102,6 +72,7 @@ static void test_shm_allocate(abts_case *tc, void *data)
 
     boxes = apr_shm_baseaddr_get(shm);
     ABTS_PTR_NOTNULL(tc, boxes);
+    memset(boxes, 0, SHARED_SIZE);
 
     rv = apr_shm_destroy(shm);
     APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
@@ -126,10 +97,13 @@ static void test_anon(abts_case *tc, void *data)
 
     boxes = apr_shm_baseaddr_get(shm);
     ABTS_PTR_NOTNULL(tc, boxes);
+    memset(boxes, 0, SHARED_SIZE);
 
     rv = apr_proc_fork(&proc, p);
     if (rv == APR_INCHILD) { /* child */
-        int num = msgwait(5, 0, N_BOXES);
+        int num = msgwait("anon_test", N_MESSAGES,
+                          5, /* wait for 5s */
+                          10 /* with 10ms spin delay */);
         /* exit with the number of messages received so that the parent
          * can check that all messages were received.
          */
@@ -142,8 +116,10 @@ static void test_anon(abts_case *tc, void *data)
             if ((i-=3) < 0) {
                 i += N_BOXES; /* start over at the top */
             }
-            msgput(i, MSG);
-            apr_sleep(apr_time_make(0, 10000));
+            if (!msgput("anon_test", i)) {
+                cnt--;
+            }
+            apr_sleep(apr_time_from_msec(10));
         }
     }
     else {
@@ -183,6 +159,7 @@ static void test_named(abts_case *tc, void *data)
 
     boxes = apr_shm_baseaddr_get(shm);
     ABTS_PTR_NOTNULL(tc, boxes);
+    memset(boxes, 0, SHARED_SIZE);
 
     rv = apr_procattr_create(&attr1, p);
     ABTS_PTR_NOTNULL(tc, attr1);
