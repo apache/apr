@@ -111,7 +111,6 @@ static void *APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data
             break;
     }
     return NULL;
-    return NULL;
 }
 
 /* Sleepy-loop until f_ value matches val: */
