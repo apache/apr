@@ -237,11 +237,11 @@ APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_time_exp_t *aprtime,
 APR_DECLARE(void) apr_sleep(apr_interval_time_t t)
 {
 #ifdef OS2
-    DosSleep(t/1000);
+    DosSleep((t + 999) / 1000);
 #elif defined(BEOS)
     snooze(t);
 #elif defined(NETWARE)
-    delay(t/1000);
+    delay((t + 999) / 1000);
 #elif defined(HAVE_NANOSLEEP)
     struct timespec ts;
     ts.tv_sec = t / APR_USEC_PER_SEC; 
