@@ -124,7 +124,7 @@ APR_DECLARE(void*) apr_atomic_xchgptr(void *volatile *mem_ptr, void *new_ptr)
 {
     void *old_ptr;
 
-    old_ptr = *(void **)mem_ptr; /* old is automatically updated on cs failure */
+    old_ptr = *mem_ptr; /* old is automatically updated on cs failure */
 #if APR_SIZEOF_VOIDP == 4
     do {
     } while (__cs1(&old_ptr, mem_ptr, &new_ptr)); 

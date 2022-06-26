@@ -180,7 +180,7 @@ APR_DECLARE(void*) apr_atomic_casptr(void *volatile *mem, void *with, const void
     void *prev;
     DECLARE_MUTEX_LOCKED(mutex, *mem);
 
-    prev = *(void **)mem;
+    prev = *mem;
     if (prev == cmp) {
         *mem = with;
     }
@@ -195,7 +195,7 @@ APR_DECLARE(void*) apr_atomic_xchgptr(void *volatile *mem, void *with)
     void *prev;
     DECLARE_MUTEX_LOCKED(mutex, *mem);
 
-    prev = *(void **)mem;
+    prev = *mem;
     *mem = with;
 
     MUTEX_UNLOCK(mutex);
