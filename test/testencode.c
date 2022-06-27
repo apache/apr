@@ -909,7 +909,7 @@ typedef apr_status_t (*encdec_fn)(char*, const char*, apr_ssize_t, int, apr_size
 
 static void test_encode_errors(abts_case * tc, void *data)
 {
-    char dest[1];
+    char dest[64];
     apr_size_t len;
     apr_status_t rv;
 
@@ -947,9 +947,9 @@ static void test_encode_errors(abts_case * tc, void *data)
 static void test_decode_errors(abts_case * tc, void *data)
 {
     char dest[64];
-    unsigned char *udest = (unsigned char *)dest;
     apr_size_t len;
     apr_status_t rv;
+    unsigned char *udest = (unsigned char *)dest;
 
     const encdec_fn *dec, decs[] = {
         (encdec_fn)apr_decode_base64,
@@ -1057,6 +1057,32 @@ static void test_decode_errors(abts_case * tc, void *data)
     ABTS_INT_EQUAL(tc, APR_BADCH, rv);
     rv = apr_decode_base16(dest, "AB:CD*EF", APR_ENCODE_STRING,
                            APR_ENCODE_COLON|APR_ENCODE_RELAXED, &len);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_SIZE_EQUAL(tc, 2, len);
+
+    /* base16_binary */
+    rv = apr_decode_base16_binary(NULL, NULL, 3, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base16_binary(udest, "ABC", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base16_binary(udest, "ABCD*EF", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_BADCH, rv);
+    rv = apr_decode_base16_binary(udest, "ABCD*EF", APR_ENCODE_STRING,
+                                  APR_ENCODE_RELAXED, &len);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_SIZE_EQUAL(tc, 2, len);
+    /* base16_binary with colon */
+    rv = apr_decode_base16_binary(udest, "AB:", APR_ENCODE_STRING,
+                                  APR_ENCODE_COLON, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base16_binary(udest, "AB:C", APR_ENCODE_STRING,
+                                  APR_ENCODE_COLON, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base16_binary(udest, "AB:CD*EF", APR_ENCODE_STRING,
+                                  APR_ENCODE_COLON, &len);
+    ABTS_INT_EQUAL(tc, APR_BADCH, rv);
+    rv = apr_decode_base16_binary(udest, "AB:CD*EF", APR_ENCODE_STRING,
+                                  APR_ENCODE_COLON|APR_ENCODE_RELAXED, &len);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_SIZE_EQUAL(tc, 2, len);
 }
