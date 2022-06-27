@@ -211,19 +211,20 @@ static const char base16lower[] = "0123456789abcdef";
 APR_DECLARE(apr_status_t) apr_encode_base64(char *dest, const char *src,
                               apr_ssize_t slen, int flags, apr_size_t * len)
 {
+    apr_status_t status = APR_SUCCESS;
+    apr_size_t count = slen, dlen = 0;
     const char *base;
 
-    if (!src) {
-        return APR_NOTFOUND;
+    if (src && slen == APR_ENCODE_STRING) {
+        count = strlen(src);
     }
-
-    if (APR_ENCODE_STRING == slen) {
-        slen = strlen(src);
+    else if (slen < 0 || (dest && !src)) {
+        return (src) ? APR_EINVAL : APR_NOTFOUND;
     }
 
     if (dest) {
-        register char *bufout = dest;
-        int i;
+        char *bufout = dest;
+        apr_size_t i = 0;
 
         if (0 == ((flags & APR_ENCODE_BASE64URL))) {
             base = base64;
@@ -232,60 +233,64 @@ APR_DECLARE(apr_status_t) apr_encode_base64(char *dest, const char *src,
             base = base64url;
         }
 
-        for (i = 0; i < slen - 2; i += 3) {
-            *bufout++ = base[ENCODE_TO_ASCII(((src[i]) >> 2) & 0x3F)];
-            *bufout++ = base[ENCODE_TO_ASCII((((src[i]) & 0x3) << 4)
-                                      | ((int)((src[i + 1]) & 0xF0) >> 4))];
-            *bufout++ = base[ENCODE_TO_ASCII((((src[i + 1]) & 0xF) << 2)
-                       | ((int)(ENCODE_TO_ASCII(src[i + 2]) & 0xC0) >> 6))];
-            *bufout++ = base[ENCODE_TO_ASCII((src[i + 2]) & 0x3F)];
+        if (count > 2) {
+            for (; i < count - 2; i += 3) {
+                *bufout++ = base[(TO_ASCII(src[i]) >> 2) & 0x3F];
+                *bufout++ = base[((TO_ASCII(src[i]) & 0x3) << 4 |
+                                  (TO_ASCII(src[i + 1]) & 0xF0) >> 4)];
+                *bufout++ = base[((TO_ASCII(src[i + 1]) & 0xF) << 2 |
+                                  (TO_ASCII(src[i + 2]) & 0xC0) >> 6)];
+                *bufout++ = base[TO_ASCII(src[i + 2]) & 0x3F];
+            }
         }
-        if (i < slen) {
-            *bufout++ = base[ENCODE_TO_ASCII(((src[i]) >> 2) & 0x3F)];
-            if (i == (slen - 1)) {
-                *bufout++ = base[ENCODE_TO_ASCII((((src[i]) & 0x3) << 4))];
+        if (i < count) {
+            *bufout++ = base[(TO_ASCII(src[i]) >> 2) & 0x3F];
+            if (i == (count - 1)) {
+                *bufout++ = base[(TO_ASCII(src[i]) & 0x3) << 4];
                 if (!(flags & APR_ENCODE_NOPADDING)) {
                     *bufout++ = '=';
                 }
             }
             else {
-                *bufout++ = base[ENCODE_TO_ASCII((((src[i]) & 0x3) << 4)
-                                      | ((int)((src[i + 1]) & 0xF0) >> 4))];
-                *bufout++ = base[ENCODE_TO_ASCII(((src[i + 1]) & 0xF) << 2)];
+                *bufout++ = base[((TO_ASCII(src[i]) & 0x3) << 4 |
+                                  (TO_ASCII(src[i + 1]) & 0xF0) >> 4)];
+                *bufout++ = base[(TO_ASCII(src[i + 1]) & 0xF) << 2];
             }
             if (!(flags & APR_ENCODE_NOPADDING)) {
                 *bufout++ = '=';
             }
         }
 
-        if (len) {
-            *len = bufout - dest;
+        dlen = bufout - dest;
+        dest[dlen] = '\0';
+    }
+    else {
+        dlen = ((count + 2u) / 3u) * 4u + 1u;
+        if (dlen <= count) {
+            status = APR_ENOSPC;
         }
-
-        *bufout++ = '\0';
-
-        return APR_SUCCESS;
     }
 
     if (len) {
-        *len = ((slen + 2) / 3 * 4) + 1;
+        *len = dlen;
     }
-
-    return APR_SUCCESS;
+    return status;
 }
 
 APR_DECLARE(apr_status_t) apr_encode_base64_binary(char *dest, const unsigned char *src,
                               apr_ssize_t slen, int flags, apr_size_t * len)
 {
+    apr_status_t status = APR_SUCCESS;
+    apr_size_t count = slen, dlen = 0;
     const char *base;
 
-    if (!src) {
-        return APR_NOTFOUND;
+    if (slen < 0 || (dest && !src)) {
+        return (src) ? APR_EINVAL : APR_NOTFOUND;
     }
 
     if (dest) {
-        register char *bufout = dest;
-        int i;
+        char *bufout = dest;
+        apr_size_t i = 0;
 
         if (0 == ((flags & APR_ENCODE_BASE64URL))) {
             base = base64;
@@ -294,46 +299,48 @@ APR_DECLARE(apr_status_t) apr_encode_base64_binary(char *dest, const unsigned ch
             base = base64url;
         }
 
-        for (i = 0; i < slen - 2; i += 3) {
-            *bufout++ = base[(src[i] >> 2) & 0x3F];
-            *bufout++ = base[((src[i] & 0x3) << 4)
-                             | ((int)(src[i + 1] & 0xF0) >> 4)];
-            *bufout++ = base[((src[i + 1] & 0xF) << 2)
-                             | ((int)(src[i + 2] & 0xC0) >> 6)];
-            *bufout++ = base[src[i + 2] & 0x3F];
+        if (count > 2) {
+            for (; i < count - 2; i += 3) {
+                *bufout++ = base[(src[i] >> 2) & 0x3F];
+                *bufout++ = base[((src[i] & 0x3) << 4 |
+                                  (src[i + 1] & 0xF0) >> 4)];
+                *bufout++ = base[((src[i + 1] & 0xF) << 2 |
+                                  (src[i + 2] & 0xC0) >> 6)];
+                *bufout++ = base[src[i + 2] & 0x3F];
+            }
         }
-        if (i < slen) {
+        if (i < count) {
             *bufout++ = base[(src[i] >> 2) & 0x3F];
-            if (i == (slen - 1)) {
+            if (i == (count - 1)) {
                 *bufout++ = base[((src[i] & 0x3) << 4)];
                 if (!(flags & APR_ENCODE_NOPADDING)) {
                     *bufout++ = '=';
                 }
             }
             else {
-                *bufout++ = base[((src[i] & 0x3) << 4)
-                                 | ((int)(src[i + 1] & 0xF0) >> 4)];
-                *bufout++ = base[((src[i + 1] & 0xF) << 2)];
+                *bufout++ = base[((src[i] & 0x3) << 4 |
+                                  (src[i + 1] & 0xF0) >> 4)];
+                *bufout++ = base[(src[i + 1] & 0xF) << 2];
             }
             if (!(flags & APR_ENCODE_NOPADDING)) {
                 *bufout++ = '=';
             }
         }
 
-        if (len) {
-            *len = bufout - dest;
+        dlen = bufout - dest;
+        dest[dlen] = '\0';
+    }
+    else {
+        dlen = ((count + 2u) / 3u) * 4u + 1u;
+        if (dlen <= count) {
+            status = APR_ENOSPC;
         }
-
-        *bufout++ = '\0';
-
-        return APR_SUCCESS;
     }
 
     if (len) {
-        *len = ((slen + 2) / 3 * 4) + 1;
+        *len = dlen;
     }
-
-    return APR_SUCCESS;
+    return status;
 }
 
 APR_DECLARE(const char *)apr_pencode_base64(apr_pool_t * p, const char *src,
@@ -341,13 +348,19 @@ APR_DECLARE(const char *)apr_pencode_base64(apr_pool_t * p, const char *src,
 {
     apr_size_t size;
 
+    if (!src) {
+        return NULL;
+    }
+
     switch (apr_encode_base64(NULL, src, slen, flags, &size)) {
     case APR_SUCCESS:{
             char *cmd = apr_palloc(p, size);
-            apr_encode_base64(cmd, src, slen, flags, len);
+            if (cmd) {
+                apr_encode_base64(cmd, src, slen, flags, len);
+            }
             return cmd;
         }
-    case APR_NOTFOUND:{
+    default:{
             break;
         }
     }
@@ -360,13 +373,19 @@ APR_DECLARE(const char *)apr_pencode_base64_binary(apr_pool_t * p, const unsigne
 {
     apr_size_t size;
 
+    if (!src) {
+        return NULL;
+    }
+
     switch (apr_encode_base64_binary(NULL, src, slen, flags, &size)) {
     case APR_SUCCESS:{
             char *cmd = apr_palloc(p, size);
-            apr_encode_base64_binary(cmd, src, slen, flags, len);
+            if (cmd) {
+                apr_encode_base64_binary(cmd, src, slen, flags, len);
+            }
             return cmd;
         }
-    case APR_NOTFOUND:{
+    default:{
             break;
         }
     }
@@ -377,157 +396,184 @@ APR_DECLARE(const char *)apr_pencode_base64_binary(apr_pool_t * p, const unsigne
 APR_DECLARE(apr_status_t) apr_decode_base64(char *dest, const char *src,
                               apr_ssize_t slen, int flags, apr_size_t * len)
 {
-    if (!src) {
-        return APR_NOTFOUND;
+    apr_status_t status = APR_SUCCESS;
+    apr_size_t count = slen, dlen = 0;
+
+    if (src && slen == APR_ENCODE_STRING) {
+        count = strlen(src);
+    }
+    else if (slen < 0 || (dest && !src)) {
+        return (src) ? APR_EINVAL : APR_NOTFOUND;
     }
 
-    if (APR_ENCODE_STRING == slen) {
-        slen = strlen(src);
-    }
-
-    if (dest) {
-        register const unsigned char *bufin;
-        register unsigned char *bufout;
-        register apr_size_t nprbytes;
-        register apr_size_t count = slen;
-
-        apr_status_t status;
+    if (src) {
+        const unsigned char *bufin;
 
         bufin = (const unsigned char *)src;
-        while (count && pr2six[*bufin] < 64) {
+        while (count) {
+            if (pr2six[*bufin] >= 64) {
+                if (!(flags & APR_ENCODE_RELAXED)) {
+                    if (count <= 2) {
+                        do {
+                            if (pr2six[bufin[count - 1]] <= 64)
+                                break;
+                        } while (--count);
+                    }
+                    if (count) {
+                        status = APR_BADCH;
+                    }
+                }
+                break;
+            }
             count--;
             bufin++;
         }
-        nprbytes = bufin - (const unsigned char *)src;
-        while (count && pr2six[*bufin] > 64) {
-            count--;
-            bufin++;
-        }
+        count = bufin - (const unsigned char *)src;
 
-        status = flags & APR_ENCODE_RELAXED ? APR_SUCCESS :
-            count ? APR_BADCH : APR_SUCCESS;
+        if (dest) {
+            unsigned char *bufout;
 
-        bufout = (unsigned char *)dest;
-        bufin = (const unsigned char *)src;
+            bufout = (unsigned char *)dest;
+            bufin = (const unsigned char *)src;
 
-        while (nprbytes > 4) {
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(pr2six[bufin[0]] << 2
-                                                   | pr2six[bufin[1]] >> 4);
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(
-                             pr2six[bufin[1]] << 4 | pr2six[bufin[2]] >> 2);
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(
-                                  pr2six[bufin[2]] << 6 | pr2six[bufin[3]]);
-            bufin += 4;
-            nprbytes -= 4;
-        }
+            while (count >= 4) {
+                *(bufout++) = TO_NATIVE(pr2six[bufin[0]] << 2 |
+                                        pr2six[bufin[1]] >> 4);
+                *(bufout++) = TO_NATIVE(pr2six[bufin[1]] << 4 |
+                                        pr2six[bufin[2]] >> 2);
+                *(bufout++) = TO_NATIVE(pr2six[bufin[2]] << 6 |
+                                        pr2six[bufin[3]]);
+                bufin += 4;
+                count -= 4;
+            }
 
-        if (nprbytes == 1) {
-            status = APR_BADCH;
-        }
-        if (nprbytes > 1) {
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(
-                               pr2six[*bufin] << 2 | pr2six[bufin[1]] >> 4);
-        }
-        if (nprbytes > 2) {
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(
-                             pr2six[bufin[1]] << 4 | pr2six[bufin[2]] >> 2);
-        }
-        if (nprbytes > 3) {
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(
-                                  pr2six[bufin[2]] << 6 | pr2six[bufin[3]]);
-        }
+            if (count == 1) {
+                status = APR_EINCOMPLETE;
+            }
+            if (count > 1) {
+                *(bufout++) = TO_NATIVE(pr2six[bufin[0]] << 2 |
+                                        pr2six[bufin[1]] >> 4);
+            }
+            if (count > 2) {
+                *(bufout++) = TO_NATIVE(pr2six[bufin[1]] << 4 |
+                                        pr2six[bufin[2]] >> 2);
+            }
 
-        if (len) {
-            *len = bufout - (unsigned char *)dest;
+            dlen = bufout - (unsigned char *)dest;
+            dest[dlen] = '\0';
         }
+    }
 
-        *(bufout++) = 0;
-
-        return status;
+    if (!src || !dest) {
+        dlen = (count / 4u) * 3u + 1u;
+        switch (count % 4) {
+        case 3:
+            dlen += 2;
+            break;
+        case 2:
+            dlen++;
+            break;
+        case 1:
+            status = APR_EINCOMPLETE;
+            break;
+        }
     }
 
     if (len) {
-        *len = (((int)slen + 3) / 4) * 3 + 1;
+        *len = dlen;
     }
-
-    return APR_SUCCESS;
+    return status;
 }
 
 APR_DECLARE(apr_status_t) apr_decode_base64_binary(unsigned char *dest,
              const char *src, apr_ssize_t slen, int flags, apr_size_t * len)
 {
-    if (!src) {
-        return APR_NOTFOUND;
+    apr_status_t status = APR_SUCCESS;
+    apr_size_t count = slen, dlen = 0;
+
+    if (src && slen == APR_ENCODE_STRING) {
+        count = strlen(src);
+    }
+    else if (slen < 0 || (dest && !src)) {
+        return (src) ? APR_EINVAL : APR_NOTFOUND;
     }
 
-    if (APR_ENCODE_STRING == slen) {
-        slen = strlen(src);
-    }
-
-    if (dest) {
-        register const unsigned char *bufin;
-        register unsigned char *bufout;
-        register apr_size_t nprbytes;
-        register apr_size_t count = slen;
-
-        apr_status_t status;
+    if (src) {
+        const unsigned char *bufin;
 
         bufin = (const unsigned char *)src;
-        while (count && pr2six[*bufin] < 64) {
+        while (count) {
+            if (pr2six[*bufin] >= 64) {
+                if (!(flags & APR_ENCODE_RELAXED)) {
+                    if (count <= 2) {
+                        do {
+                            if (pr2six[bufin[count - 1]] <= 64)
+                                break;
+                        } while (--count);
+                    }
+                    if (count) {
+                        status = APR_BADCH;
+                    }
+                }
+                break;
+            }
             count--;
             bufin++;
         }
-        nprbytes = bufin - (const unsigned char *)src;
-        while (count && pr2six[*bufin] > 64) {
-            count--;
-            bufin++;
-        }
+        count = bufin - (const unsigned char *)src;
 
-        status = flags & APR_ENCODE_RELAXED ? APR_SUCCESS :
-            count ? APR_BADCH : APR_SUCCESS;
+        if (dest) {
+            unsigned char *bufout;
 
-        bufout = (unsigned char *)dest;
-        bufin = (const unsigned char *)src;
+            bufout = (unsigned char *)dest;
+            bufin = (const unsigned char *)src;
 
-        while (nprbytes > 4) {
-            *(bufout++) = (unsigned char)(pr2six[bufin[0]] << 2
-                                          | pr2six[bufin[1]] >> 4);
-            *(bufout++) = (unsigned char)(pr2six[bufin[1]] << 4
-                                          | pr2six[bufin[2]] >> 2);
-            *(bufout++) = (unsigned char)(pr2six[bufin[2]] << 6
-                                          | pr2six[bufin[3]]);
-            bufin += 4;
-            nprbytes -= 4;
-        }
+            while (count >= 4) {
+                *(bufout++) = (pr2six[bufin[0]] << 2 |
+                               pr2six[bufin[1]] >> 4);
+                *(bufout++) = (pr2six[bufin[1]] << 4 |
+                               pr2six[bufin[2]] >> 2);
+                *(bufout++) = (pr2six[bufin[2]] << 6 |
+                               pr2six[bufin[3]]);
+                bufin += 4;
+                count -= 4;
+            }
 
-        if (nprbytes == 1) {
-            status = APR_BADCH;
-        }
-        if (nprbytes > 1) {
-            *(bufout++) = (unsigned char)(pr2six[bufin[0]] << 2
-                                          | pr2six[bufin[1]] >> 4);
-        }
-        if (nprbytes > 2) {
-            *(bufout++) = (unsigned char)(pr2six[bufin[1]] << 4
-                                          | pr2six[bufin[2]] >> 2);
-        }
-        if (nprbytes > 3) {
-            *(bufout++) = (unsigned char)(pr2six[bufin[2]] << 6
-                                          | pr2six[bufin[3]]);
-        }
+            if (count == 1) {
+                status = APR_EINCOMPLETE;
+            }
+            if (count > 1) {
+                *(bufout++) = (pr2six[bufin[0]] << 2 |
+                               pr2six[bufin[1]] >> 4);
+            }
+            if (count > 2) {
+                *(bufout++) = (pr2six[bufin[1]] << 4 |
+                               pr2six[bufin[2]] >> 2);
+            }
 
-        if (len) {
-            *len = bufout - dest;
+            dlen = bufout - dest;
         }
+    }
 
-        return status;
+    if (!src || !dest) {
+        dlen = (count / 4u) * 3u;
+        switch (count % 4) {
+        case 3:
+            dlen += 2;
+            break;
+        case 2:
+            dlen++;
+            break;
+        case 1:
+            status = APR_EINCOMPLETE;
+            break;
+        }
     }
 
     if (len) {
-        *len = (((int)slen + 3) / 4) * 3;
+        *len = dlen;
     }
-
-    return APR_SUCCESS;
+    return status;
 }
 
 APR_DECLARE(const char *)apr_pdecode_base64(apr_pool_t * p, const char *str,
@@ -535,14 +581,19 @@ APR_DECLARE(const char *)apr_pdecode_base64(apr_pool_t * p, const char *str,
 {
     apr_size_t size;
 
+    if (!str) {
+        return NULL;
+    }
+
     switch (apr_decode_base64(NULL, str, slen, flags, &size)) {
     case APR_SUCCESS:{
             void *cmd = apr_palloc(p, size);
-            apr_decode_base64(cmd, str, slen, flags, len);
+            if (cmd) {
+                apr_decode_base64(cmd, str, slen, flags, len);
+            }
             return cmd;
         }
-    case APR_BADCH:
-    case APR_NOTFOUND:{
+    default:{
             break;
         }
     }
@@ -555,15 +606,20 @@ APR_DECLARE(const unsigned char *)apr_pdecode_base64_binary(apr_pool_t * p,
 {
     apr_size_t size;
 
+    if (!str) {
+        return NULL;
+    }
+
     switch (apr_decode_base64_binary(NULL, str, slen, flags, &size)) {
     case APR_SUCCESS:{
             unsigned char *cmd = apr_palloc(p, size + 1);
-            cmd[size] = 0;
-            apr_decode_base64_binary(cmd, str, slen, flags, len);
+            if (cmd) {
+                apr_decode_base64_binary(cmd, str, slen, flags, len);
+                cmd[size] = 0;
+            }
             return cmd;
         }
-    case APR_BADCH:
-    case APR_NOTFOUND:{
+    default:{
             break;
         }
     }
@@ -574,19 +630,20 @@ APR_DECLARE(const unsigned char *)apr_pdecode_base64_binary(apr_pool_t * p,
 APR_DECLARE(apr_status_t) apr_encode_base32(char *dest, const char *src,
                               apr_ssize_t slen, int flags, apr_size_t * len)
 {
+    apr_status_t status = APR_SUCCESS;
+    apr_size_t count = slen, dlen = 0;
     const char *base;
 
-    if (!src) {
-        return APR_NOTFOUND;
+    if (src && slen == APR_ENCODE_STRING) {
+        count = strlen(src);
     }
-
-    if (APR_ENCODE_STRING == slen) {
-        slen = strlen(src);
+    else if (slen < 0 || (dest && !src)) {
+        return (src) ? APR_EINVAL : APR_NOTFOUND;
     }
 
     if (dest) {
-        register char *bufout = dest;
-        int i;
+        char *bufout = dest;
+        apr_size_t i = 0;
 
         if (!((flags & APR_ENCODE_BASE32HEX))) {
             base = base32;
@@ -595,24 +652,26 @@ APR_DECLARE(apr_status_t) apr_encode_base32(char *dest, const char *src,
             base = base32hex;
         }
 
-        for (i = 0; i < slen - 4; i += 5) {
-            *bufout++ = base[ENCODE_TO_ASCII((src[i] >> 3) & 0x1F)];
-            *bufout++ = base[ENCODE_TO_ASCII(((src[i] << 2) & 0x1C)
-                                             | ((src[i + 1] >> 6) & 0x3))];
-            *bufout++ = base[ENCODE_TO_ASCII((src[i + 1] >> 1) & 0x1F)];
-            *bufout++ = base[ENCODE_TO_ASCII(((src[i + 1] << 4) & 0x10)
-                                             | ((src[i + 2] >> 4) & 0xF))];
-            *bufout++ = base[ENCODE_TO_ASCII(((src[i + 2] << 1) & 0x1E)
-                                             | ((src[i + 3] >> 7) & 0x1))];
-            *bufout++ = base[ENCODE_TO_ASCII((src[i + 3] >> 2) & 0x1F)];
-            *bufout++ = base[ENCODE_TO_ASCII(((src[i + 3] << 3) & 0x18)
-                                             | ((src[i + 4] >> 5) & 0x7))];
-            *bufout++ = base[ENCODE_TO_ASCII(src[i + 4] & 0x1F)];
+        if (count > 4) {
+            for (; i < count - 4; i += 5) {
+                *bufout++ = base[(TO_ASCII(src[i]) >> 3) & 0x1F];
+                *bufout++ = base[(((TO_ASCII(src[i]) << 2) & 0x1C) |
+                                  ((TO_ASCII(src[i + 1]) >> 6) & 0x3))];
+                *bufout++ = base[(TO_ASCII(src[i + 1]) >> 1) & 0x1F];
+                *bufout++ = base[(((TO_ASCII(src[i + 1]) << 4) & 0x10) |
+                                  ((TO_ASCII(src[i + 2]) >> 4) & 0xF))];
+                *bufout++ = base[(((TO_ASCII(src[i + 2]) << 1) & 0x1E) |
+                                  ((TO_ASCII(src[i + 3]) >> 7) & 0x1))];
+                *bufout++ = base[(TO_ASCII(src[i + 3]) >> 2) & 0x1F];
+                *bufout++ = base[(((TO_ASCII(src[i + 3]) << 3) & 0x18) |
+                                  ((TO_ASCII(src[i + 4]) >> 5) & 0x7))];
+                *bufout++ = base[TO_ASCII(src[i + 4]) & 0x1F];
+            }
         }
-        if (i < slen) {
-            *bufout++ = base[ENCODE_TO_ASCII(src[i] >> 3) & 0x1F];
-            if (i == (slen - 1)) {
-                *bufout++ = base[ENCODE_TO_ASCII((src[i] << 2) & 0x1C)];
+        if (i < count) {
+            *bufout++ = base[(TO_ASCII(src[i]) >> 3) & 0x1F];
+            if (i == (count - 1)) {
+                *bufout++ = base[(TO_ASCII(src[i]) << 2) & 0x1C];
                 if (!(flags & APR_ENCODE_NOPADDING)) {
                     *bufout++ = '=';
                     *bufout++ = '=';
@@ -622,11 +681,11 @@ APR_DECLARE(apr_status_t) apr_encode_base32(char *dest, const char *src,
                     *bufout++ = '=';
                 }
             }
-            else if (i == (slen - 2)) {
-                *bufout++ = base[ENCODE_TO_ASCII(((src[i] << 2) & 0x1C)
-                                              | ((src[i + 1] >> 6) & 0x3))];
-                *bufout++ = base[ENCODE_TO_ASCII((src[i + 1] >> 1) & 0x1F)];
-                *bufout++ = base[ENCODE_TO_ASCII((src[i + 1] << 4) & 0x10)];
+            else if (i == (count - 2)) {
+                *bufout++ = base[(((TO_ASCII(src[i]) << 2) & 0x1C) |
+                                  ((TO_ASCII(src[i + 1]) >> 6) & 0x3))];
+                *bufout++ = base[(TO_ASCII(src[i + 1]) >> 1) & 0x1F];
+                *bufout++ = base[(TO_ASCII(src[i + 1]) << 4) & 0x10];
                 if (!(flags & APR_ENCODE_NOPADDING)) {
                     *bufout++ = '=';
                     *bufout++ = '=';
@@ -634,13 +693,13 @@ APR_DECLARE(apr_status_t) apr_encode_base32(char *dest, const char *src,
                     *bufout++ = '=';
                 }
             }
-            else if (i == (slen - 3)) {
-                *bufout++ = base[ENCODE_TO_ASCII(((src[i] << 2) & 0x1C)
-                                              | ((src[i + 1] >> 6) & 0x3))];
-                *bufout++ = base[ENCODE_TO_ASCII((src[i + 1] >> 1) & 0x1F)];
-                *bufout++ = base[ENCODE_TO_ASCII(((src[i + 1] << 4) & 0x10)
-                                              | ((src[i + 2] >> 4) & 0xF))];
-                *bufout++ = base[ENCODE_TO_ASCII((src[i + 2] << 1) & 0x1E)];
+            else if (i == (count - 3)) {
+                *bufout++ = base[(((TO_ASCII(src[i]) << 2) & 0x1C) |
+                                  ((TO_ASCII(src[i + 1]) >> 6) & 0x3))];
+                *bufout++ = base[(TO_ASCII(src[i + 1]) >> 1) & 0x1F];
+                *bufout++ = base[(((TO_ASCII(src[i + 1]) << 4) & 0x10) |
+                                  ((TO_ASCII(src[i + 2]) >> 4) & 0xF))];
+                *bufout++ = base[(TO_ASCII(src[i + 2]) << 1) & 0x1E];
                 if (!(flags & APR_ENCODE_NOPADDING)) {
                     *bufout++ = '=';
                     *bufout++ = '=';
@@ -648,49 +707,51 @@ APR_DECLARE(apr_status_t) apr_encode_base32(char *dest, const char *src,
                 }
             }
             else {
-                *bufout++ = base[ENCODE_TO_ASCII(((src[i] << 2) & 0x1C)
-                                              | ((src[i + 1] >> 6) & 0x3))];
-                *bufout++ = base[ENCODE_TO_ASCII((src[i + 1] >> 1) & 0x1F)];
-                *bufout++ = base[ENCODE_TO_ASCII(((src[i + 1] << 4) & 0x10)
-                                              | ((src[i + 2] >> 4) & 0xF))];
-                *bufout++ = base[ENCODE_TO_ASCII(((src[i + 2] << 1) & 0x1E)
-                                              | ((src[i + 3] >> 7) & 0x1))];
-                *bufout++ = base[ENCODE_TO_ASCII((src[i + 3] >> 2) & 0x1F)];
-                *bufout++ = base[ENCODE_TO_ASCII((src[i + 3] << 3) & 0x18)];
+                *bufout++ = base[(((TO_ASCII(src[i]) << 2) & 0x1C) |
+                                  ((TO_ASCII(src[i + 1]) >> 6) & 0x3))];
+                *bufout++ = base[(TO_ASCII(src[i + 1]) >> 1) & 0x1F];
+                *bufout++ = base[(((TO_ASCII(src[i + 1]) << 4) & 0x10) |
+                                  ((TO_ASCII(src[i + 2]) >> 4) & 0xF))];
+                *bufout++ = base[(((TO_ASCII(src[i + 2]) << 1) & 0x1E) |
+                                  ((TO_ASCII(src[i + 3]) >> 7) & 0x1))];
+                *bufout++ = base[(TO_ASCII(src[i + 3]) >> 2) & 0x1F];
+                *bufout++ = base[(TO_ASCII(src[i + 3]) << 3) & 0x18];
                 if (!(flags & APR_ENCODE_NOPADDING)) {
                     *bufout++ = '=';
                 }
             }
         }
 
-        if (len) {
-            *len = bufout - dest;
+        dlen = bufout - dest;
+        dest[dlen] = '\0';
+    }
+    else {
+        dlen = ((count + 4u) / 5u) * 8u + 1u;
+        if (dlen <= count) {
+            status = APR_ENOSPC;
         }
-
-        *bufout++ = '\0';
-
-        return APR_SUCCESS;
     }
 
     if (len) {
-        *len = ((slen + 4) / 5 * 8) + 1;
+        *len = dlen;
     }
-
-    return APR_SUCCESS;
+    return status;
 }
 
 APR_DECLARE(apr_status_t) apr_encode_base32_binary(char *dest, const unsigned char *src,
                               apr_ssize_t slen, int flags, apr_size_t * len)
 {
+    apr_status_t status = APR_SUCCESS;
+    apr_size_t count = slen, dlen = 0;
     const char *base;
 
-    if (!src) {
-        return APR_NOTFOUND;
+    if (slen < 0 || (dest && !src)) {
+        return (src) ? APR_EINVAL : APR_NOTFOUND;
     }
 
     if (dest) {
-        register char *bufout = dest;
-        int i;
+        char *bufout = dest;
+        apr_size_t i = 0;
 
         if (!((flags & APR_ENCODE_BASE32HEX))) {
             base = base32;
@@ -699,23 +760,25 @@ APR_DECLARE(apr_status_t) apr_encode_base32_binary(char *dest, const unsigned ch
             base = base32hex;
         }
 
-        for (i = 0; i < slen - 4; i += 5) {
-            *bufout++ = base[((src[i] >> 3) & 0x1F)];
-            *bufout++ = base[(((src[i] << 2) & 0x1C)
-                              | ((src[i + 1] >> 6) & 0x3))];
-            *bufout++ = base[((src[i + 1] >> 1) & 0x1F)];
-            *bufout++ = base[(((src[i + 1] << 4) & 0x10)
-                              | ((src[i + 2] >> 4) & 0xF))];
-            *bufout++ = base[(((src[i + 2] << 1) & 0x1E)
-                              | ((src[i + 3] >> 7) & 0x1))];
-            *bufout++ = base[((src[i + 3] >> 2) & 0x1F)];
-            *bufout++ = base[(((src[i + 3] << 3) & 0x18)
-                              | ((src[i + 4] >> 5) & 0x7))];
-            *bufout++ = base[(src[i + 4] & 0x1F)];
+        if (count > 4) {
+            for (; i < count - 4; i += 5) {
+                *bufout++ = base[((src[i] >> 3) & 0x1F)];
+                *bufout++ = base[(((src[i] << 2) & 0x1C) |
+                                  ((src[i + 1] >> 6) & 0x3))];
+                *bufout++ = base[((src[i + 1] >> 1) & 0x1F)];
+                *bufout++ = base[(((src[i + 1] << 4) & 0x10) |
+                                  ((src[i + 2] >> 4) & 0xF))];
+                *bufout++ = base[(((src[i + 2] << 1) & 0x1E) |
+                                  ((src[i + 3] >> 7) & 0x1))];
+                *bufout++ = base[((src[i + 3] >> 2) & 0x1F)];
+                *bufout++ = base[(((src[i + 3] << 3) & 0x18) |
+                                  ((src[i + 4] >> 5) & 0x7))];
+                *bufout++ = base[(src[i + 4] & 0x1F)];
+            }
         }
-        if (i < slen) {
+        if (i < count) {
             *bufout++ = base[(src[i] >> 3) & 0x1F];
-            if (i == (slen - 1)) {
+            if (i == (count - 1)) {
                 *bufout++ = base[((src[i] << 2) & 0x1C)];
                 if (!(flags & APR_ENCODE_NOPADDING)) {
                     *bufout++ = '=';
@@ -726,9 +789,9 @@ APR_DECLARE(apr_status_t) apr_encode_base32_binary(char *dest, const unsigned ch
                     *bufout++ = '=';
                 }
             }
-            else if (i == (slen - 2)) {
-                *bufout++ = base[(((src[i] << 2) & 0x1C)
-                                  | ((src[i + 1] >> 6) & 0x3))];
+            else if (i == (count - 2)) {
+                *bufout++ = base[(((src[i] << 2) & 0x1C) |
+                                  ((src[i + 1] >> 6) & 0x3))];
                 *bufout++ = base[((src[i + 1] >> 1) & 0x1F)];
                 *bufout++ = base[((src[i + 1] << 4) & 0x10)];
                 if (!(flags & APR_ENCODE_NOPADDING)) {
@@ -738,12 +801,12 @@ APR_DECLARE(apr_status_t) apr_encode_base32_binary(char *dest, const unsigned ch
                     *bufout++ = '=';
                 }
             }
-            else if (i == (slen - 3)) {
-                *bufout++ = base[(((src[i] << 2) & 0x1C)
-                                  | ((src[i + 1] >> 6) & 0x3))];
+            else if (i == (count - 3)) {
+                *bufout++ = base[(((src[i] << 2) & 0x1C) |
+                                  ((src[i + 1] >> 6) & 0x3))];
                 *bufout++ = base[((src[i + 1] >> 1) & 0x1F)];
-                *bufout++ = base[(((src[i + 1] << 4) & 0x10)
-                                  | ((int)(src[i + 2] >> 4) & 0xF))];
+                *bufout++ = base[(((src[i + 1] << 4) & 0x10) |
+                                  ((src[i + 2] >> 4) & 0xF))];
                 *bufout++ = base[((src[i + 2] << 1) & 0x1E)];
                 if (!(flags & APR_ENCODE_NOPADDING)) {
                     *bufout++ = '=';
@@ -752,13 +815,13 @@ APR_DECLARE(apr_status_t) apr_encode_base32_binary(char *dest, const unsigned ch
                 }
             }
             else {
-                *bufout++ = base[(((src[i] << 2) & 0x1C)
-                                  | ((src[i + 1] >> 6) & 0x3))];
+                *bufout++ = base[(((src[i] << 2) & 0x1C) |
+                                  ((src[i + 1] >> 6) & 0x3))];
                 *bufout++ = base[((src[i + 1] >> 1) & 0x1F)];
-                *bufout++ = base[(((src[i + 1] << 4) & 0x10)
-                                  | ((src[i + 2] >> 4) & 0xF))];
-                *bufout++ = base[(((src[i + 2] << 1) & 0x1E)
-                                  | ((src[i + 3] >> 7) & 0x1))];
+                *bufout++ = base[(((src[i + 1] << 4) & 0x10) |
+                                  ((src[i + 2] >> 4) & 0xF))];
+                *bufout++ = base[(((src[i + 2] << 1) & 0x1E) |
+                                  ((src[i + 3] >> 7) & 0x1))];
                 *bufout++ = base[((src[i + 3] >> 2) & 0x1F)];
                 *bufout++ = base[((src[i + 3] << 3) & 0x18)];
                 if (!(flags & APR_ENCODE_NOPADDING)) {
@@ -767,20 +830,20 @@ APR_DECLARE(apr_status_t) apr_encode_base32_binary(char *dest, const unsigned ch
             }
         }
 
-        if (len) {
-            *len = bufout - dest;
+        dlen = bufout - dest;
+        dest[dlen] = '\0';
+    }
+    else {
+        dlen = ((count + 4u) / 5u) * 8u + 1u;
+        if (dlen <= count) {
+            status = APR_ENOSPC;
         }
-
-        *bufout++ = '\0';
-
-        return APR_SUCCESS;
     }
 
     if (len) {
-        *len = ((slen + 4) / 5 * 8) + 1;
+        *len = dlen;
     }
-
-    return APR_SUCCESS;
+    return status;
 }
 
 APR_DECLARE(const char *)apr_pencode_base32(apr_pool_t * p, const char *src,
@@ -788,13 +851,19 @@ APR_DECLARE(const char *)apr_pencode_base32(apr_pool_t * p, const char *src,
 {
     apr_size_t size;
 
+    if (!src) {
+        return NULL;
+    }
+
     switch (apr_encode_base32(NULL, src, slen, flags, &size)) {
     case APR_SUCCESS:{
             char *cmd = apr_palloc(p, size);
-            apr_encode_base32(cmd, src, slen, flags, len);
+            if (cmd) {
+                apr_encode_base32(cmd, src, slen, flags, len);
+            }
             return cmd;
         }
-    case APR_NOTFOUND:{
+    default:{
             break;
         }
     }
@@ -807,13 +876,19 @@ APR_DECLARE(const char *)apr_pencode_base32_binary(apr_pool_t * p, const unsigne
 {
     apr_size_t size;
 
+    if (!src) {
+        return NULL;
+    }
+
     switch (apr_encode_base32_binary(NULL, src, slen, flags, &size)) {
     case APR_SUCCESS:{
             char *cmd = apr_palloc(p, size);
-            apr_encode_base32_binary(cmd, src, slen, flags, len);
+            if (cmd) {
+                apr_encode_base32_binary(cmd, src, slen, flags, len);
+            }
             return cmd;
         }
-    case APR_NOTFOUND:{
+    default:{
             break;
         }
     }
@@ -824,23 +899,19 @@ APR_DECLARE(const char *)apr_pencode_base32_binary(apr_pool_t * p, const unsigne
 APR_DECLARE(apr_status_t) apr_decode_base32(char *dest, const char *src,
                               apr_ssize_t slen, int flags, apr_size_t * len)
 {
-    if (!src) {
-        return APR_NOTFOUND;
+    apr_status_t status = APR_SUCCESS;
+    apr_size_t count = slen, dlen = 0;
+
+    if (src && slen == APR_ENCODE_STRING) {
+        count = strlen(src);
+    }
+    else if (slen < 0 || (dest && !src)) {
+        return (src) ? APR_EINVAL : APR_NOTFOUND;
     }
 
-    if (APR_ENCODE_STRING == slen) {
-        slen = strlen(src);
-    }
-
-    if (dest) {
-        register const unsigned char *bufin;
-        register unsigned char *bufout;
-        register apr_size_t nprbytes;
-        register apr_size_t count = slen;
-
+    if (src) {
+        const unsigned char *bufin;
         const unsigned char *pr2;
-
-        apr_status_t status;
 
         if ((flags & APR_ENCODE_BASE32HEX)) {
             pr2 = pr2fivehex;
@@ -850,104 +921,129 @@ APR_DECLARE(apr_status_t) apr_decode_base32(char *dest, const char *src,
         }
 
         bufin = (const unsigned char *)src;
-        while (count && pr2[*bufin] < 32) {
+        while (count) {
+            if (pr2[*bufin] >= 32) {
+                if (!(flags & APR_ENCODE_RELAXED)) {
+                    if (count <= 6) {
+                        do {
+                            if (pr2[bufin[count - 1]] <= 32)
+                                break;
+                        } while (--count);
+                    }
+                    if (count) {
+                        status = APR_BADCH;
+                    }
+                }
+                break;
+            }
             count--;
             bufin++;
         }
-        nprbytes = bufin - (const unsigned char *)src;
-        while (count && pr2[*bufin] > 32) {
-            count--;
-            bufin++;
-        }
+        count = bufin - (const unsigned char *)src;
 
-        status = flags & APR_ENCODE_RELAXED ? APR_SUCCESS :
-            count ? APR_BADCH : APR_SUCCESS;
+        if (dest) {
+            unsigned char *bufout;
 
-        bufout = (unsigned char *)dest;
-        bufin = (const unsigned char *)src;
+            bufout = (unsigned char *)dest;
+            bufin = (const unsigned char *)src;
 
-        while (nprbytes > 8) {
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(pr2[bufin[0]] << 3
-                                                      | pr2[bufin[1]] >> 2);
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(pr2[bufin[1]] << 6
-                                 | pr2[bufin[2]] << 1 | pr2[bufin[3]] >> 4);
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(pr2[bufin[3]] << 4
-                                                      | pr2[bufin[4]] >> 1);
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(pr2[bufin[4]] << 7
-                                 | pr2[bufin[5]] << 2 | pr2[bufin[6]] >> 3);
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(pr2[bufin[6]] << 5
-                                                          | pr2[bufin[7]]);
-            bufin += 8;
-            nprbytes -= 8;
-        }
+            while (count >= 8) {
+                *(bufout++) = TO_NATIVE(pr2[bufin[0]] << 3 |
+                                        pr2[bufin[1]] >> 2);
+                *(bufout++) = TO_NATIVE(pr2[bufin[1]] << 6 |
+                                        pr2[bufin[2]] << 1 |
+                                        pr2[bufin[3]] >> 4);
+                *(bufout++) = TO_NATIVE(pr2[bufin[3]] << 4 |
+                                        pr2[bufin[4]] >> 1);
+                *(bufout++) = TO_NATIVE(pr2[bufin[4]] << 7 |
+                                        pr2[bufin[5]] << 2 |
+                                        pr2[bufin[6]] >> 3);
+                *(bufout++) = TO_NATIVE(pr2[bufin[6]] << 5 |
+                                        pr2[bufin[7]]);
+                bufin += 8;
+                count -= 8;
+            }
 
-        if (nprbytes == 1) {
-            status = APR_BADCH;
-        }
-        if (nprbytes >= 2) {
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(
-                                   pr2[bufin[0]] << 3 | pr2[bufin[1]] >> 2);
-        }
-        if (nprbytes == 3) {
-            status = APR_BADCH;
-        }
-        if (nprbytes >= 4) {
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(
-                                     pr2[bufin[1]] << 6 | pr2[bufin[2]] << 1
-                                                      | pr2[bufin[3]] >> 4);
-        }
-        if (nprbytes >= 5) {
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(pr2[bufin[3]] << 4
-                                                      | pr2[bufin[4]] >> 1);
-        }
-        if (nprbytes == 6) {
-            status = APR_BADCH;
-        }
-        if (nprbytes >= 7) {
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(pr2[bufin[4]] << 7
-                                 | pr2[bufin[5]] << 2 | pr2[bufin[6]] >> 3);
-        }
-        if (nprbytes == 8) {
-            *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(pr2[bufin[6]] << 5
-                                                          | pr2[bufin[7]]);
-        }
+            if (count == 1) {
+                status = APR_EINCOMPLETE;
+            }
+            if (count >= 2) {
+                *(bufout++) = TO_NATIVE(pr2[bufin[0]] << 3 |
+                                        pr2[bufin[1]] >> 2);
+            }
+            if (count == 3) {
+                status = APR_EINCOMPLETE;
+            }
+            if (count >= 4) {
+                *(bufout++) = TO_NATIVE(pr2[bufin[1]] << 6 |
+                                        pr2[bufin[2]] << 1 |
+                                        pr2[bufin[3]] >> 4);
+            }
+            if (count >= 5) {
+                *(bufout++) = TO_NATIVE(pr2[bufin[3]] << 4 |
+                                        pr2[bufin[4]] >> 1);
+            }
+            if (count == 6) {
+                status = APR_EINCOMPLETE;
+            }
+            if (count >= 7) {
+                *(bufout++) = TO_NATIVE(pr2[bufin[4]] << 7 |
+                                        pr2[bufin[5]] << 2 |
+                                        pr2[bufin[6]] >> 3);
+            }
 
-        if (len) {
-            *len = bufout - (unsigned char *)dest;
+            dlen = bufout - (unsigned char *)dest;
+            dest[dlen] = '\0';
         }
+    }
 
-        *(bufout++) = 0;
-
-        return status;
+    if (!src || !dest) {
+        dlen = (count / 8u) * 5u + 1u;
+        switch (count % 8) {
+        case 7:
+            dlen += 4;
+            break;
+        case 6:
+            status = APR_EINCOMPLETE;
+        case 5:
+            dlen += 3;
+            break;
+        case 4:
+            dlen += 2;
+            break;
+        case 3:
+            status = APR_EINCOMPLETE;
+        case 2:
+            dlen++;
+            break;
+        case 1:
+            status = APR_EINCOMPLETE;
+            break;
+        }
     }
 
     if (len) {
-        *len = (((int)slen + 7) / 8) * 5 + 1;
+        *len = dlen;
     }
-
-    return APR_SUCCESS;
+    return status;
 }
 
 APR_DECLARE(apr_status_t) apr_decode_base32_binary(unsigned char *dest,
              const char *src, apr_ssize_t slen, int flags, apr_size_t * len)
 {
-    if (!src) {
-        return APR_NOTFOUND;
+    apr_status_t status = APR_SUCCESS;
+    apr_size_t count = slen, dlen = 0;
+
+    if (src && slen == APR_ENCODE_STRING) {
+        count = strlen(src);
+    }
+    else if (slen < 0 || (dest && !src)) {
+        return (src) ? APR_EINVAL : APR_NOTFOUND;
     }
 
-    if (APR_ENCODE_STRING == slen) {
-        slen = strlen(src);
-    }
-
-    if (dest) {
-        register const unsigned char *bufin;
-        register unsigned char *bufout;
-        register apr_size_t nprbytes;
-        register apr_size_t count = slen;
-
+    if (src) {
+        const unsigned char *bufin;
         const unsigned char *pr2;
-
-        apr_status_t status;
 
         if ((flags & APR_ENCODE_BASE32HEX)) {
             pr2 = pr2fivehex;
@@ -957,80 +1053,110 @@ APR_DECLARE(apr_status_t) apr_decode_base32_binary(unsigned char *dest,
         }
 
         bufin = (const unsigned char *)src;
-        while (count && pr2[*bufin] < 32) {
+        while (count) {
+            if (pr2[*bufin] >= 32) {
+                if (!(flags & APR_ENCODE_RELAXED)) {
+                    if (count <= 6) {
+                        do {
+                            if (pr2[bufin[count - 1]] <= 32)
+                                break;
+                        } while (--count);
+                    }
+                    if (count) {
+                        status = APR_BADCH;
+                    }
+                }
+                break;
+            }
             count--;
             bufin++;
         }
-        nprbytes = bufin - (const unsigned char *)src;
-        while (count && pr2[*bufin] > 32) {
-            count--;
-            bufin++;
-        }
+        count = bufin - (const unsigned char *)src;
 
-        status = flags & APR_ENCODE_RELAXED ? APR_SUCCESS :
-            count ? APR_BADCH : APR_SUCCESS;
+        if (dest) {
+            unsigned char *bufout;
 
-        bufout = (unsigned char *)dest;
-        bufin = (const unsigned char *)src;
+            bufout = (unsigned char *)dest;
+            bufin = (const unsigned char *)src;
 
-        while (nprbytes > 8) {
-            *(bufout++) = (unsigned char)(pr2[bufin[0]] << 3
-                                          | pr2[bufin[1]] >> 2);
-            *(bufout++) = (unsigned char)(pr2[bufin[1]] << 6
-                                 | pr2[bufin[2]] << 1 | pr2[bufin[3]] >> 4);
-            *(bufout++) = (unsigned char)(pr2[bufin[3]] << 4
-                                          | pr2[bufin[4]] >> 1);
-            *(bufout++) = (unsigned char)(pr2[bufin[4]] << 7
-                                 | pr2[bufin[5]] << 2 | pr2[bufin[6]] >> 3);
-            *(bufout++) = (unsigned char)(pr2[bufin[6]] << 5
-                                          | pr2[bufin[7]]);
-            bufin += 8;
-            nprbytes -= 8;
-        }
+            while (count >= 8) {
+                *(bufout++) = (pr2[bufin[0]] << 3 |
+                               pr2[bufin[1]] >> 2);
+                *(bufout++) = (pr2[bufin[1]] << 6 |
+                               pr2[bufin[2]] << 1 |
+                               pr2[bufin[3]] >> 4);
+                *(bufout++) = (pr2[bufin[3]] << 4 |
+                               pr2[bufin[4]] >> 1);
+                *(bufout++) = (pr2[bufin[4]] << 7 |
+                               pr2[bufin[5]] << 2 |
+                               pr2[bufin[6]] >> 3);
+                *(bufout++) = (pr2[bufin[6]] << 5 |
+                               pr2[bufin[7]]);
+                bufin += 8;
+                count -= 8;
+            }
 
-        if (nprbytes == 1) {
-            status = APR_BADCH;
-        }
-        if (nprbytes >= 2) {
-            *(bufout++) = (unsigned char)(
-                                   pr2[bufin[0]] << 3 | pr2[bufin[1]] >> 2);
-        }
-        if (nprbytes == 3) {
-            status = APR_BADCH;
-        }
-        if (nprbytes >= 4) {
-            *(bufout++) = (unsigned char)(
-                                     pr2[bufin[1]] << 6 | pr2[bufin[2]] << 1
-                                          | pr2[bufin[3]] >> 4);
-        }
-        if (nprbytes >= 5) {
-            *(bufout++) = (unsigned char)(pr2[bufin[3]] << 4
-                                          | pr2[bufin[4]] >> 1);
-        }
-        if (nprbytes == 6) {
-            status = APR_BADCH;
-        }
-        if (nprbytes >= 7) {
-            *(bufout++) = (unsigned char)(pr2[bufin[4]] << 7
-                                 | pr2[bufin[5]] << 2 | pr2[bufin[6]] >> 3);
-        }
-        if (nprbytes == 8) {
-            *(bufout++) = (unsigned char)(pr2[bufin[6]] << 5
-                                          | pr2[bufin[7]]);
-        }
+            if (count == 1) {
+                status = APR_EINCOMPLETE;
+            }
+            if (count >= 2) {
+                *(bufout++) = (pr2[bufin[0]] << 3 |
+                               pr2[bufin[1]] >> 2);
+            }
+            if (count == 3) {
+                status = APR_EINCOMPLETE;
+            }
+            if (count >= 4) {
+                *(bufout++) = (pr2[bufin[1]] << 6 |
+                               pr2[bufin[2]] << 1 |
+                               pr2[bufin[3]] >> 4);
+            }
+            if (count >= 5) {
+                *(bufout++) = (pr2[bufin[3]] << 4 |
+                               pr2[bufin[4]] >> 1);
+            }
+            if (count == 6) {
+                status = APR_EINCOMPLETE;
+            }
+            if (count >= 7) {
+                *(bufout++) = (pr2[bufin[4]] << 7 |
+                               pr2[bufin[5]] << 2 |
+                               pr2[bufin[6]] >> 3);
+            }
 
-        if (len) {
-            *len = bufout - dest;
+            dlen = bufout - dest;
         }
+    }
 
-        return status;
+    if (!src || !dest) {
+        dlen = (count / 8u) * 5u;
+        switch (count % 8) {
+        case 7:
+            dlen += 4;
+            break;
+        case 6:
+            status = APR_EINCOMPLETE;
+        case 5:
+            dlen += 3;
+            break;
+        case 4:
+            dlen += 2;
+            break;
+        case 3:
+            status = APR_EINCOMPLETE;
+        case 2:
+            dlen++;
+            break;
+        case 1:
+            status = APR_EINCOMPLETE;
+            break;
+        }
     }
 
     if (len) {
-        *len = (((int)slen + 7) / 8) * 5;
+        *len = dlen;
     }
-
-    return APR_SUCCESS;
+    return status;
 }
 
 APR_DECLARE(const char *)apr_pdecode_base32(apr_pool_t * p, const char *str,
@@ -1038,14 +1164,19 @@ APR_DECLARE(const char *)apr_pdecode_base32(apr_pool_t * p, const char *str,
 {
     apr_size_t size;
 
+    if (!str) {
+        return NULL;
+    }
+
     switch (apr_decode_base32(NULL, str, slen, flags, &size)) {
     case APR_SUCCESS:{
             void *cmd = apr_palloc(p, size);
-            apr_decode_base32(cmd, str, slen, flags, len);
+            if (cmd) {
+                apr_decode_base32(cmd, str, slen, flags, len);
+            }
             return cmd;
         }
-    case APR_BADCH:
-    case APR_NOTFOUND:{
+    default:{
             break;
         }
     }
@@ -1058,15 +1189,20 @@ APR_DECLARE(const unsigned char *)apr_pdecode_base32_binary(apr_pool_t * p,
 {
     apr_size_t size;
 
+    if (!str) {
+        return NULL;
+    }
+
     switch (apr_decode_base32_binary(NULL, str, slen, flags, &size)) {
     case APR_SUCCESS:{
             unsigned char *cmd = apr_palloc(p, size + 1);
-            cmd[size] = 0;
-            apr_decode_base32_binary(cmd, str, slen, flags, len);
+            if (cmd) {
+                apr_decode_base32_binary(cmd, str, slen, flags, len);
+                cmd[size] = 0;
+            }
             return cmd;
         }
-    case APR_BADCH:
-    case APR_NOTFOUND:{
+    default:{
             break;
         }
     }
@@ -1077,16 +1213,20 @@ APR_DECLARE(const unsigned char *)apr_pdecode_base32_binary(apr_pool_t * p,
 APR_DECLARE(apr_status_t) apr_encode_base16(char *dest,
              const char *src, apr_ssize_t slen, int flags, apr_size_t * len)
 {
-    const char *in = src;
-    apr_ssize_t size;
+    apr_status_t status = APR_SUCCESS;
+    apr_size_t count = slen, dlen = 0;
 
-    if (!src) {
-        return APR_NOTFOUND;
+    if (src && slen == APR_ENCODE_STRING) {
+        count = strlen(src);
+    }
+    else if (slen < 0 || (dest && !src)) {
+        return (src) ? APR_EINVAL : APR_NOTFOUND;
     }
 
     if (dest) {
-        register char *bufout = dest;
+        char *bufout = dest;
         const char *base;
+        apr_size_t i;
 
         if ((flags & APR_ENCODE_LOWER)) {
             base = base16lower;
@@ -1095,51 +1235,51 @@ APR_DECLARE(apr_status_t) apr_encode_base16(char *dest,
             base = base16;
         }
 
-        for (size = 0; (APR_ENCODE_STRING == slen) ? in[size] : size < slen; size++) {
-            if ((flags & APR_ENCODE_COLON) && size) {
+        for (i = 0; i < count; i++) {
+            if ((flags & APR_ENCODE_COLON) && i) {
                 *(bufout++) = ':';
             }
-            *(bufout++) = base[(const unsigned char)(ENCODE_TO_ASCII(in[size])) >> 4];
-            *(bufout++) = base[(const unsigned char)(ENCODE_TO_ASCII(in[size])) & 0xf];
+            *(bufout++) = base[TO_ASCII(src[i]) >> 4];
+            *(bufout++) = base[TO_ASCII(src[i]) & 0xf];
         }
 
-        if (len) {
-            *len = bufout - dest;
+        dlen = bufout - dest;
+        dest[dlen] = '\0';
+    }
+    else {
+        dlen = count * 2u + 1u;
+        if (dlen <= count) {
+            status = APR_ENOSPC;
         }
-
-        *bufout = '\0';
-
-        return APR_SUCCESS;
+        if ((flags & APR_ENCODE_COLON) && count > 1) {
+            apr_size_t more = dlen + count - 1;
+            if (more <= dlen) {
+                status = APR_ENOSPC;
+            }
+            dlen = more;
+        }
     }
 
     if (len) {
-        if (APR_ENCODE_STRING == slen) {
-            slen = strlen(src);
-        }
-        if ((flags & APR_ENCODE_COLON) && slen) {
-            *len = slen * 3;
-        }
-        else {
-            *len = slen * 2 + 1;
-        }
+        *len = dlen;
     }
-
-    return APR_SUCCESS;
+    return status;
 }
 
 APR_DECLARE(apr_status_t) apr_encode_base16_binary(char *dest,
     const unsigned char *src, apr_ssize_t slen, int flags, apr_size_t * len)
 {
-    const unsigned char *in = src;
-    apr_ssize_t size;
+    apr_status_t status = APR_SUCCESS;
+    apr_size_t count = slen, dlen = 0;
 
-    if (!src) {
-        return APR_NOTFOUND;
+    if (slen < 0 || (dest && !src)) {
+        return (src) ? APR_EINVAL : APR_NOTFOUND;
     }
 
     if (dest) {
-        register char *bufout = dest;
+        char *bufout = dest;
         const char *base;
+        apr_size_t i;
 
         if ((flags & APR_ENCODE_LOWER)) {
             base = base16lower;
@@ -1148,33 +1288,35 @@ APR_DECLARE(apr_status_t) apr_encode_base16_binary(char *dest,
             base = base16;
         }
 
-        for (size = 0; size < slen; size++) {
-            if ((flags & APR_ENCODE_COLON) && size) {
+        for (i = 0; i < count; i++) {
+            if ((flags & APR_ENCODE_COLON) && i) {
                 *(bufout++) = ':';
             }
-            *(bufout++) = base[in[size] >> 4];
-            *(bufout++) = base[in[size] & 0xf];
+            *(bufout++) = base[src[i] >> 4];
+            *(bufout++) = base[src[i] & 0xf];
         }
 
-        if (len) {
-            *len = bufout - dest;
+        dlen = bufout - dest;
+        dest[dlen] = '\0';
+    }
+    else {
+        dlen = count * 2u + 1u;
+        if (dlen <= count) {
+            status = APR_ENOSPC;
         }
-
-        *bufout = 0;
-
-        return APR_SUCCESS;
+        if ((flags & APR_ENCODE_COLON) && count > 1) {
+            apr_size_t more = dlen + count - 1;
+            if (more <= dlen) {
+                status = APR_ENOSPC;
+            }
+            dlen = more;
+        }
     }
 
     if (len) {
-        if ((flags & APR_ENCODE_COLON) && slen) {
-            *len = slen * 3;
-        }
-        else {
-            *len = slen * 2 + 1;
-        }
+        *len = dlen;
     }
-
-    return APR_SUCCESS;
+    return status;
 }
 
 APR_DECLARE(const char *)apr_pencode_base16(apr_pool_t * p,
@@ -1182,13 +1324,19 @@ APR_DECLARE(const char *)apr_pencode_base16(apr_pool_t * p,
 {
     apr_size_t size;
 
+    if (!src) {
+        return NULL;
+    }
+
     switch (apr_encode_base16(NULL, src, slen, flags, &size)) {
     case APR_SUCCESS:{
             char *cmd = apr_palloc(p, size);
-            apr_encode_base16(cmd, src, slen, flags, len);
+            if (cmd) {
+                apr_encode_base16(cmd, src, slen, flags, len);
+            }
             return cmd;
         }
-    case APR_NOTFOUND:{
+    default:{
             break;
         }
     }
@@ -1202,13 +1350,19 @@ APR_DECLARE(const char *)apr_pencode_base16_binary(apr_pool_t * p,
 {
     apr_size_t size;
 
+    if (!src) {
+        return NULL;
+    }
+
     switch (apr_encode_base16_binary(NULL, src, slen, flags, &size)) {
     case APR_SUCCESS:{
             char *cmd = apr_palloc(p, size);
-            apr_encode_base16_binary(cmd, src, slen, flags, len);
+            if (cmd) {
+                apr_encode_base16_binary(cmd, src, slen, flags, len);
+            }
             return cmd;
         }
-    case APR_NOTFOUND:{
+    default:{
             break;
         }
     }
@@ -1219,186 +1373,156 @@ APR_DECLARE(const char *)apr_pencode_base16_binary(apr_pool_t * p,
 APR_DECLARE(apr_status_t) apr_decode_base16(char *dest,
              const char *src, apr_ssize_t slen, int flags, apr_size_t * len)
 {
-    register const unsigned char *bufin;
-    register unsigned char *bufout;
-    register apr_size_t nprbytes;
-    register apr_size_t count;
+    apr_status_t status = APR_SUCCESS;
+    apr_size_t count = slen, dlen = 0;
 
-    apr_status_t status;
-
-    if (!src) {
-        return APR_NOTFOUND;
+    if (src && slen == APR_ENCODE_STRING) {
+        count = strlen(src);
+    }
+    else if (slen < 0 || (dest && !src)) {
+        return (src) ? APR_EINVAL : APR_NOTFOUND;
     }
 
-    if (APR_ENCODE_STRING == slen) {
-        slen = strlen(src);
-    }
+    if (src) {
+        const unsigned char *bufin;
 
-    count = slen;
-    bufin = (const unsigned char *)src;
-    while (count && pr2two[*bufin] != 16) {
-        count--;
-        bufin++;
-    }
-    nprbytes = bufin - (const unsigned char *)src;
-    while (count && pr2two[*bufin] > 16) {
-        count--;
-        bufin++;
-    }
-
-    status = flags & APR_ENCODE_RELAXED ? APR_SUCCESS :
-        count ? APR_BADCH : APR_SUCCESS;
-
-    if (dest) {
-
-        bufout = (unsigned char *)dest;
         bufin = (const unsigned char *)src;
-
-        while (nprbytes >= 2) {
-            if (pr2two[bufin[0]] > 16) {
-                bufin += 1;
-                nprbytes -= 1;
+        while (count) {
+            if (pr2two[*bufin] >= 16
+                && (!(flags & APR_ENCODE_COLON)
+                    || pr2two[*bufin] != 32 /* ':' */)) {
+                if (!(flags & APR_ENCODE_RELAXED)) {
+                    status = APR_BADCH;
+                }
+                break;
             }
-            else {
-                *(bufout++) = (unsigned char)ENCODE_TO_NATIVE(
-                                  pr2two[bufin[0]] << 4 | pr2two[bufin[1]]);
-                bufin += 2;
-                nprbytes -= 2;
+            count--;
+            bufin++;
+        }
+        count = bufin - (const unsigned char *)src;
+
+        if (dest) {
+            unsigned char *bufout;
+
+            bufout = (unsigned char *)dest;
+            bufin = (const unsigned char *)src;
+
+            while (count >= 2) {
+                if (pr2two[bufin[0]] == 32 /* ':' */) {
+                    bufin += 1;
+                    count -= 1;
+                }
+                else {
+                    *(bufout++) = TO_NATIVE(pr2two[bufin[0]] << 4 |
+                                            pr2two[bufin[1]]);
+                    bufin += 2;
+                    count -= 2;
+                }
             }
+
+            if (count == 1) {
+                status = APR_EINCOMPLETE;
+            }
+
+            dlen = bufout - (unsigned char *)dest;
+            dest[dlen] = '\0';
         }
-
-        if (nprbytes == 1) {
-            status = APR_BADCH;
-        }
-
-        if (len) {
-            *len = bufout - (unsigned char *)dest;
-        }
-
-        *(bufout++) = 0;
-
-        return status;
     }
 
-    else {
-
-        count = 0;
-        bufin = (const unsigned char *)src;
-
-        while (nprbytes >= 2) {
-            if (pr2two[bufin[0]] > 16) {
-                bufin += 1;
-                nprbytes -= 1;
+    if (!src || !dest) {
+        if (flags & APR_ENCODE_COLON) {
+            if (count && (count + 1u) % 3u) {
+                status = APR_EINCOMPLETE;
             }
-            else {
-                count++;
-                bufin += 2;
-                nprbytes -= 2;
-            }
+            count -= count / 3u;
         }
-
-        if (nprbytes == 1) {
-            status = APR_BADCH;
+        if (count % 2u) {
+            status = APR_EINCOMPLETE;
         }
-
-        if (len) {
-            *len = count + 1;
-        }
-
-        return status;
+        dlen = count / 2u + 1u;
     }
 
+    if (len) {
+        *len = dlen;
+    }
+    return status;
 }
 
 APR_DECLARE(apr_status_t) apr_decode_base16_binary(unsigned char *dest,
              const char *src, apr_ssize_t slen, int flags, apr_size_t * len)
 {
-    register const unsigned char *bufin;
-    register unsigned char *bufout;
-    register apr_size_t nprbytes;
-    register apr_size_t count;
+    apr_status_t status = APR_SUCCESS;
+    apr_size_t count = slen, dlen = 0;
 
-    apr_status_t status;
-
-    if (!src) {
-        return APR_NOTFOUND;
+    if (src && slen == APR_ENCODE_STRING) {
+        count = strlen(src);
+    }
+    else if (slen < 0 || (dest && !src)) {
+        return (src) ? APR_EINVAL : APR_NOTFOUND;
     }
 
-    if (APR_ENCODE_STRING == slen) {
-        slen = strlen(src);
-    }
+    if (src) {
+        const unsigned char *bufin;
 
-    count = slen;
-    bufin = (const unsigned char *)src;
-    while (count && pr2two[*bufin] != 16) {
-        count--;
-        bufin++;
-    }
-    nprbytes = bufin - (const unsigned char *)src;
-    while (count && pr2two[*bufin] > 16) {
-        count--;
-        bufin++;
-    }
-
-    status = flags & APR_ENCODE_RELAXED ? APR_SUCCESS :
-        count ? APR_BADCH : APR_SUCCESS;
-
-    if (dest) {
-
-        bufout = (unsigned char *)dest;
         bufin = (const unsigned char *)src;
-
-        while (nprbytes >= 2) {
-            if (pr2two[bufin[0]] > 16) {
-                bufin += 1;
-                nprbytes -= 1;
+        while (count) {
+            if (pr2two[*bufin] >= 16
+                && (!(flags & APR_ENCODE_COLON)
+                    || pr2two[*bufin] != 32 /* ':' */)) {
+                if (!(flags & APR_ENCODE_RELAXED)) {
+                    status = APR_BADCH;
+                }
+                break;
             }
-            else {
-                *(bufout++) = (unsigned char)(
-                                  pr2two[bufin[0]] << 4 | pr2two[bufin[1]]);
-                bufin += 2;
-                nprbytes -= 2;
+            count--;
+            bufin++;
+        }
+        count = bufin - (const unsigned char *)src;
+
+        if (dest) {
+            unsigned char *bufout;
+
+            bufout = (unsigned char *)dest;
+            bufin = (const unsigned char *)src;
+
+            while (count >= 2) {
+                if (pr2two[bufin[0]] == 32 /* ':' */) {
+                    bufin += 1;
+                    count -= 1;
+                }
+                else {
+                    *(bufout++) = (pr2two[bufin[0]] << 4 |
+                                   pr2two[bufin[1]]);
+                    bufin += 2;
+                    count -= 2;
+                }
             }
-        }
 
-        if (nprbytes == 1) {
-            status = APR_BADCH;
-        }
+            if (count == 1) {
+                status = APR_EINCOMPLETE;
+            }
 
-        if (len) {
-            *len = bufout - (unsigned char *)dest;
+            dlen = bufout - (unsigned char *)dest;
         }
-
-        return status;
     }
 
-    else {
-
-        count = 0;
-        bufin = (const unsigned char *)src;
-
-        while (nprbytes >= 2) {
-            if (pr2two[bufin[0]] > 16) {
-                bufin += 1;
-                nprbytes -= 1;
+    if (!src || !dest) {
+        if (flags & APR_ENCODE_COLON) {
+            if (count && (count + 1u) % 3u) {
+                status = APR_EINCOMPLETE;
             }
-            else {
-                count++;
-                bufin += 2;
-                nprbytes -= 2;
-            }
+            count -= count / 3u;
         }
-
-        if (nprbytes == 1) {
-            status = APR_BADCH;
+        if (count % 2u) {
+            status = APR_EINCOMPLETE;
         }
-
-        if (len) {
-            *len = count;
-        }
-
-        return status;
+        dlen = count / 2u;
     }
+
+    if (len) {
+        *len = dlen;
+    }
+    return status;
 }
 
 APR_DECLARE(const char *)apr_pdecode_base16(apr_pool_t * p,
@@ -1406,14 +1530,19 @@ APR_DECLARE(const char *)apr_pdecode_base16(apr_pool_t * p,
 {
     apr_size_t size;
 
+    if (!str) {
+        return NULL;
+    }
+
     switch (apr_decode_base16(NULL, str, slen, flags, &size)) {
     case APR_SUCCESS:{
             void *cmd = apr_palloc(p, size);
-            apr_decode_base16(cmd, str, slen, flags, len);
+            if (cmd) {
+                apr_decode_base16(cmd, str, slen, flags, len);
+            }
             return cmd;
         }
-    case APR_BADCH:
-    case APR_NOTFOUND:{
+    default:{
             break;
         }
     }
@@ -1426,15 +1555,20 @@ APR_DECLARE(const unsigned char *)apr_pdecode_base16_binary(apr_pool_t * p,
 {
     apr_size_t size;
 
+    if (!str) {
+        return NULL;
+    }
+
     switch (apr_decode_base16_binary(NULL, str, slen, flags, &size)) {
     case APR_SUCCESS:{
             unsigned char *cmd = apr_palloc(p, size + 1);
-            cmd[size] = 0;
-            apr_decode_base16_binary(cmd, str, slen, flags, len);
+            if (cmd) {
+                apr_decode_base16_binary(cmd, str, slen, flags, len);
+                cmd[size] = 0;
+            }
             return cmd;
         }
-    case APR_BADCH:
-    case APR_NOTFOUND:{
+    default:{
             break;
         }
     }

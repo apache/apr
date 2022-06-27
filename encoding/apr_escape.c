@@ -131,7 +131,7 @@ static char x2c(const char *what)
     xstr[2]=what[0];
     xstr[3]=what[1];
     xstr[4]='\0';
-    digit = ENCODE_TO_NATIVE[0xFF & strtol(xstr, NULL, 16)];
+    digit = TO_NATIVE(strtol(xstr, NULL, 16));
 #endif /*APR_CHARSET_EBCDIC*/
     return (digit);
 }
@@ -716,7 +716,7 @@ APR_DECLARE(apr_status_t) apr_unescape_entity(char *unescaped, const char *str,
                         size--;
                     }
                     else {
-                        *d = ENCODE_TO_ASCII(val);
+                        *d = TO_ASCII(val);
                         found = 1;
                     }
                 }
@@ -737,7 +737,7 @@ APR_DECLARE(apr_status_t) apr_unescape_entity(char *unescaped, const char *str,
                         *d = '&'; /* unknown */
                     }
                     else {
-                        *d = ENCODE_TO_ASCII(((const unsigned char *) ents)[j]);
+                        *d = TO_ASCII(ents[j]);
                         s += i;
                         slen -= i;
                         found = 1;

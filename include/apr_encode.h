@@ -146,35 +146,44 @@ extern "C" {
 
 /**
  * Convert text data to base64.
- * @param dest The destination string, can be NULL.
- * @param src The original string.
+ * @param dest The destination string, can be NULL to output in \c len the
+ *  needed buffer length for encoding.
+ * @param src The original string, can be NULL if \c dest is NULL and \c slen
+ *  is positive or nul.
  * @param slen The length of the original string, or APR_ENCODE_STRING if
- * NUL terminated.
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, emit RFC4648 Base 64 Encoding. If
  *  APR_ENCODE_NOPADDING, omit the = padding character.	If APR_ENCODE_URL,
  *  use RFC4648 Base 64 Encoding with URL and Filename Safe Alphabet.
- * 	If APR_ENCODE_BASE64URL, use RFC7515 base64url Encoding.
- * @param len If present and src is NULL, returns the maximum possible length
- *  of the destination string, including a zero pad. If present and src is
- *  not NULL, returns the number of characters actually written.
- * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL.
+ *  If APR_ENCODE_BASE64URL, use RFC7515 base64url Encoding.
+ * @param len If not NULL, outputs the length of the buffer needed for encoding
+ *  (including the trailing NUL) if \c dest is NULL, or the actual length of
+ *  the encoding (excluding the trailing NUL) if \c dest is not NULL.
+ * @return APR_SUCCESS, or APR_EINVAL if \c slen is not APR_ENCODE_STRING and
+ *  negative, or APR_NOTFOUND if \c dest is not NULL and \c src is NULL, or
+ *  APR_ENOSPC if \c dest is NULL and the source length (based on \c slen or
+ *  APR_ENCODE_STRING) is too big to encode.
  */
 APR_DECLARE(apr_status_t) apr_encode_base64(char *dest, const char *src,
         apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert binary data to base64.
- * @param dest The destination string, can be NULL.
- * @param src The original buffer.
+ * @param dest The destination string, can be NULL to output in \c len the
+ *  needed buffer length for encoding.
+ * @param src The original buffer, can be NULL if \c dest is NULL.
  * @param slen The length of the original buffer.
  * @param flags If APR_ENCODE_NONE, emit RFC4648 Base 64 Encoding. If
  *  APR_ENCODE_NOPADDING, omit the = padding character.	If APR_ENCODE_URL,
  *  use RFC4648 Base 64 Encoding with URL and Filename Safe Alphabet.
- * 	If APR_ENCODE_BASE64URL, use RFC7515 base64url Encoding.
- * @param len If present and src is NULL, returns the maximum possible length
- *  of the destination string, including a zero pad. If present and src is
- *  not NULL, returns the number of characters actually written.
- * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL.
+ *  If APR_ENCODE_BASE64URL, use RFC7515 base64url Encoding.
+ * @param len If not NULL, outputs the length of the buffer needed for encoding
+ *  (including the trailing NUL) if \c dest is NULL, or the actual length of
+ *  the encoding (excluding the trailing NUL) if \c dest is not NULL.
+ * @return APR_SUCCESS, or APR_EINVAL if \c slen is negative, or APR_NOTFOUND
+ *  if \c dest is not NULL and \c src is NULL, or APR_ENOSPC if \c dest is NULL
+ *  and the source length (based on \c slen or APR_ENCODE_STRING) is too big to
+ *  encode.
  */
 APR_DECLARE(apr_status_t) apr_encode_base64_binary(char *dest, const unsigned char *src,
         apr_ssize_t slen, int flags, apr_size_t * len);
@@ -184,15 +193,16 @@ APR_DECLARE(apr_status_t) apr_encode_base64_binary(char *dest, const unsigned ch
  * @param p Pool to allocate from.
  * @param src The original string.
  * @param slen The length of the original string, or APR_ENCODE_STRING if
- * NUL terminated.
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, emit RFC4648 Base 64 Encoding. If
  *  APR_ENCODE_NOPADDING, omit the = padding character.	If APR_ENCODE_URL,
  *  use RFC4648 Base 64 Encoding with URL and Filename Safe Alphabet.
- * 	If APR_ENCODE_BASE64URL, use RFC7515 base64url Encoding.
- * @param len If present, returns the number of characters written excluding
- *  the zero pad.
- * @return A zero padded string allocated from the pool on success, or
- * NULL if src was NULL.
+ *  If APR_ENCODE_BASE64URL, use RFC7515 base64url Encoding.
+ * @param len If not NULL, outputs the length of the encoding (excluding the
+ *  trailing NUL).
+ * @return A NUL terminated string allocated from the pool on success,
+ *  or NULL if src is NULL or allocation failed or the encoding is not
+ *  possible (see apr_encode_base64 errors).
  */
 APR_DECLARE(const char *)apr_pencode_base64(apr_pool_t * p, const char *src,
         apr_ssize_t slen, int flags, apr_size_t * len)__attribute__((nonnull(1)));
@@ -205,47 +215,62 @@ APR_DECLARE(const char *)apr_pencode_base64(apr_pool_t * p, const char *src,
  * @param flags If APR_ENCODE_NONE, emit RFC4648 Base 64 Encoding. If
  *  APR_ENCODE_NOPADDING, omit the = padding character.	If APR_ENCODE_URL,
  *  use RFC4648 Base 64 Encoding with URL and Filename Safe Alphabet.
- * 	If APR_ENCODE_BASE64URL, use RFC7515 base64url Encoding.
- * @param len If present, returns the number of characters written excluding
- *  the zero pad.
- * @return A zero padded string allocated from the pool on success, or
- * NULL if src was NULL.
+ *  If APR_ENCODE_BASE64URL, use RFC7515 base64url Encoding.
+ * @param len If not NULL, outputs the length of the encoding (excluding the
+ *  trailing NUL).
+ * @return A NUL terminated string allocated from the pool on success,
+ *  or NULL if src is NULL or allocation failed or the encoding is not
+ *  possible (see apr_encode_base64_binary errors).
  */
 APR_DECLARE(const char *)apr_pencode_base64_binary(apr_pool_t * p, const unsigned char *src,
         apr_ssize_t slen, int flags, apr_size_t * len)__attribute__((nonnull(1)));
 
 /**
  * Convert base64 or base64url with or without padding to text data.
- * @param dest The destination string, can be NULL.
- * @param src The original string.
- * @param slen The length of the original string, or APR_ENCODE_STRING if
- * NUL terminated.
- * @param flags If APR_ENCODE_NONE, attempt to decode the full original buffer,
+ * @param dest The destination string, can be NULL to output in \c len the
+ *  needed buffer length for decoding.
+ * @param src The base64 string, can be NULL if \c dest is NULL and \c slen
+ *  is positive or nul.
+ * @param slen The length of the base64 string, or APR_ENCODE_STRING if
+ *  the actual length should be computed based on NUL termination.
+ * @param flags If APR_ENCODE_NONE, attempt to decode the full base64 string,
  *  and return NULL if any bad character is detected. If APR_ENCODE_RELAXED,
  *  decode until the first non base64/base64url character.
- * @param len If present and src is NULL, returns the maximum possible length
- *  of the destination string, including a zero pad. If present and src is
- *  not NULL, returns the number of characters actually written.
- * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL, or APR_BADCH
- * if a non hex character is present.
+ * @param len If not NULL, outputs the length of the buffer needed for decoding
+ *  (including the trailing NUL) if \c dest is NULL, or the actual length of
+ *  the decoding (excluding the trailing NUL) if \c dest is not NULL.
+ * @return APR_SUCCESS, or APR_EINVAL if \c slen is not APR_ENCODE_STRING and
+ *  negative, or APR_NOTFOUND if \c dest is not NULL and \c src is NULL, or
+ *  APR_ENOSPC if \c dest is NULL and the source length (based on \c slen or
+ *  APR_ENCODE_STRING) is too big to decode, or APR_EINCOMPLETE if the source
+ *  length (based on \c slen or APR_ENCODE_STRING) is invalid for a base64
+ *  encoding, or APR_BADCH if a non base64 character is present and
+ *  APR_ENCODE_RELAXED is not specified.
  */
 APR_DECLARE(apr_status_t) apr_decode_base64(char *dest, const char *src,
         apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert base64 or base64url with or without padding to binary data.
- * @param dest The destination buffer, can be NULL.
- * @param src The original string.
- * @param slen The length of the original string, or APR_ENCODE_STRING if
- * NUL terminated.
- * @param flags If APR_ENCODE_NONE, attempt to decode the full original buffer,
+ * @param dest The destination string, can be NULL to output in \c len the
+ *  needed buffer length for decoding.
+ * @param src The base64 string, can be NULL if \c dest is NULL and \c slen
+ *  is positive or nul.
+ * @param slen The length of the base64 string, or APR_ENCODE_STRING if
+ *  the actual length should be computed based on NUL termination.
+ * @param flags If APR_ENCODE_NONE, attempt to decode the full base64 string,
  *  and return NULL if any bad character is detected. If APR_ENCODE_RELAXED,
  *  decode until the first non base64/base64url character.
- * @param len If present and src is NULL, returns the maximum possible length
- *  of the destination buffer, including a zero pad. If present and src is
- *  not NULL, returns the number of characters actually written.
- * @return APR_SUCCESS, or APR_NOTFOUND if the src was NULL, or APR_BADCH
- * if a non base64 character is present.
+ * @param len If not NULL, outputs the length of the buffer needed for decoding
+ *  (including the trailing NUL) if \c dest is NULL, or the actual length of
+ *  the decoding (excluding the trailing NUL) if \c dest is not NULL.
+ * @return APR_SUCCESS, or APR_EINVAL if \c slen is not APR_ENCODE_STRING and
+ *  negative, or APR_NOTFOUND if \c dest is not NULL and \c src is NULL, or
+ *  APR_ENOSPC if \c dest is NULL and the source length (based on \c slen or
+ *  APR_ENCODE_STRING) is too big to decode, or APR_EINCOMPLETE if the source
+ *  length (based on \c slen or APR_ENCODE_STRING) is invalid for a base64
+ *  encoding, or APR_BADCH if a non base64 character is present and
+ *  APR_ENCODE_RELAXED is not specified.
  */
 APR_DECLARE(apr_status_t) apr_decode_base64_binary(unsigned char *dest,
         const char *src, apr_ssize_t slen, int flags, apr_size_t * len);
@@ -255,15 +280,16 @@ APR_DECLARE(apr_status_t) apr_decode_base64_binary(unsigned char *dest,
  * return the results from a pool.
  * @param p Pool to allocate from.
  * @param src The base64 string to decode.
- * @param slen The length of the base64 string, or APR_ENCODE_STRING if
- * NUL terminated.
+ * @param slen The length of the original string, or APR_ENCODE_STRING if
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, attempt to decode the full original buffer,
  *  and return NULL if any bad character is detected. If APR_ENCODE_RELAXED,
  *  decode until the first non base64/base64url character.
- * @param len If present, returns the number of characters written, excluding
- *  the zero padding.
- * @return A string allocated from the pool containing the result with a zero
- *  pad. If src was NULL, or an error occurred, NULL is returned.
+ * @param len If not NULL, outputs the length of the decoding (excluding the
+ *  trailing NUL).
+ * @return A NUL terminated string allocated from the pool on success,
+ *  or NULL if src is NULL or allocation failed or the decoding is not
+ *  possible (see apr_decode_base64_binary errors).
  */
 APR_DECLARE(const char *)apr_pdecode_base64(apr_pool_t * p, const char *src,
         apr_ssize_t slen, int flags, apr_size_t * len)
@@ -273,16 +299,17 @@ APR_DECLARE(const char *)apr_pdecode_base64(apr_pool_t * p, const char *src,
  * Convert base64 or base64url with or without padding to binary data, and
  * return the results from a pool.
  * @param p Pool to allocate from.
- * @param src The original string.
+ * @param src The base64 string to decode.
  * @param slen The length of the original string, or APR_ENCODE_STRING if
- *  NUL terminated.
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, attempt to decode the full original buffer,
  *  and return NULL if any bad character is detected. If APR_ENCODE_RELAXED,
  *  decode until the first non base64/base64url character.
- * @param len If present, returns the number of characters written, excluding
- *  the zero padding.
- * @return A buffer allocated from the pool containing the result with a zero
- *  pad. If src was NULL, or an error occurred, NULL is returned.
+ * @param len If not NULL, outputs the length of the decoding (excluding the
+ *  trailing NUL).
+ * @return A NUL terminated string allocated from the pool on success,
+ *  or NULL if src is NULL or allocation failed or the decoding is not
+ *  possible (see apr_decode_base64_binary errors).
  */
 APR_DECLARE(const unsigned char *)apr_pdecode_base64_binary(apr_pool_t * p,
         const char *src, apr_ssize_t slen, int flags, apr_size_t * len)
@@ -290,33 +317,42 @@ APR_DECLARE(const unsigned char *)apr_pdecode_base64_binary(apr_pool_t * p,
 
 /**
  * Convert text data to base32.
- * @param dest The destination string, can be NULL.
- * @param src The original string.
+ * @param dest The destination string, can be NULL to output in \c len the
+ *  needed buffer length for encoding.
+ * @param src The original string, can be NULL if \c dest is NULL and \c slen
+ *  is positive or nul.
  * @param slen The length of the original string, or APR_ENCODE_STRING if
- * NUL terminated.
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, emit RFC4648 Base 32 Encoding. If
  *  APR_ENCODE_NOPADDING, omit the = padding character.	If APR_ENCODE_BASE32HEX,
  *  use RFC4648 base32hex Encoding.
- * @param len If present and src is NULL, returns the maximum possible length
- *  of the destination string, including a zero pad. If present and src is
- *  not NULL, returns the number of characters actually written.
- * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL.
+ * @param len If not NULL, outputs the length of the buffer needed for encoding
+ *  (including the trailing NUL) if \c dest is NULL, or the actual length of
+ *  the encoding (excluding the trailing NUL) if \c dest is not NULL.
+ * @return APR_SUCCESS, or APR_EINVAL if \c slen is not APR_ENCODE_STRING and
+ *  negative, or APR_NOTFOUND if \c dest is not NULL and \c src is NULL, or
+ *  APR_ENOSPC if \c dest is NULL and the source length (based on \c slen or
+ *  APR_ENCODE_STRING) is too big to encode.
  */
 APR_DECLARE(apr_status_t) apr_encode_base32(char *dest, const char *src,
         apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert binary data to base32.
- * @param dest The destination string, can be NULL.
- * @param src The original buffer.
+ * @param dest The destination string, can be NULL to output in \c len the
+ *  needed buffer length for encoding.
+ * @param src The original buffer, can be NULL if \c dest is NULL.
  * @param slen The length of the original buffer.
  * @param flags If APR_ENCODE_NONE, emit RFC4648 Base 32 Encoding. If
  *  APR_ENCODE_NOPADDING, omit the = padding character.	If APR_ENCODE_BASE32HEX,
  *  use RFC4648 base32hex Encoding.
- * @param len If present and src is NULL, returns the maximum possible length
- *  of the destination string, including a zero pad. If present and src is
- *  not NULL, returns the number of characters actually written.
- * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL.
+ * @param len If not NULL, outputs the length of the buffer needed for encoding
+ *  (including the trailing NUL) if \c dest is NULL, or the actual length of
+ *  the encoding (excluding the trailing NUL) if \c dest is not NULL.
+ * @return APR_SUCCESS, or APR_EINVAL if \c slen is negative, or APR_NOTFOUND
+ *  if \c dest is not NULL and \c src is NULL, or APR_ENOSPC if \c dest is NULL
+ *  and the source length (based on \c slen or APR_ENCODE_STRING) is too big to
+ *  encode.
  */
 APR_DECLARE(apr_status_t) apr_encode_base32_binary(char *dest, const unsigned char *src,
         apr_ssize_t slen, int flags, apr_size_t * len);
@@ -326,14 +362,15 @@ APR_DECLARE(apr_status_t) apr_encode_base32_binary(char *dest, const unsigned ch
  * @param p Pool to allocate from.
  * @param src The original string.
  * @param slen The length of the original string, or APR_ENCODE_STRING if
- * NUL terminated.
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, emit RFC4648 Base 32 Encoding. If
  *  APR_ENCODE_NOPADDING, omit the = padding character.	If APR_ENCODE_BASE32HEX,
  *  use RFC4648 base32hex Encoding.
- * @param len If present, returns the number of characters written excluding
- *  the zero pad.
- * @return A zero padded string allocated from the pool on success, or
- * NULL if src was NULL.
+ * @param len If not NULL, outputs the length of the encoding (excluding the
+ *  trailing NUL).
+ * @return A NUL terminated string allocated from the pool on success,
+ *  or NULL if src is NULL or allocation failed or the encoding is not
+ *  possible (see apr_encode_base32 errors).
  */
 APR_DECLARE(const char *)apr_pencode_base32(apr_pool_t * p, const char *src,
         apr_ssize_t slen, int flags, apr_size_t * len)
@@ -346,11 +383,12 @@ APR_DECLARE(const char *)apr_pencode_base32(apr_pool_t * p, const char *src,
  * @param slen The length of the original buffer.
  * @param flags If APR_ENCODE_NONE, emit RFC4648 Base 32 Encoding. If
  *  APR_ENCODE_NOPADDING, omit the = padding character.	If APR_ENCODE_BASE32HEX,
- *  use RFC7515 base32hex Encoding.
- * @param len If present, returns the number of characters written excluding
- *  the zero pad.
- * @return A zero padded string allocated from the pool on success, or
- * NULL if src was NULL.
+ *  use RFC4648 base32hex Encoding.
+ * @param len If not NULL, outputs the length of the encoding (excluding the
+ *  trailing NUL).
+ * @return A NUL terminated string allocated from the pool on success,
+ *  or NULL if src is NULL or allocation failed or the encoding is not
+ *  possible (see apr_encode_base32_binary errors).
  */
 APR_DECLARE(const char *)apr_pencode_base32_binary(apr_pool_t * p, const unsigned char *src,
         apr_ssize_t slen, int flags, apr_size_t * len)
@@ -358,34 +396,48 @@ APR_DECLARE(const char *)apr_pencode_base32_binary(apr_pool_t * p, const unsigne
 
 /**
  * Convert base32 or base32hex with or without padding to text data.
- * @param dest The destination string, can be NULL.
- * @param src The original string.
- * @param slen The length of the original string, or APR_ENCODE_STRING if
- * NUL terminated.
+ * @param dest The destination string, can be NULL to output in \c len the
+ *  needed buffer length for decoding.
+ * @param src The base32 string, can be NULL if \c dest is NULL and \c slen
+ *  is positive or nul.
+ * @param slen The length of the base32 string, or APR_ENCODE_STRING if
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, parse RFC4648 Base 32 Encoding. If
  *  APR_ENCODE_BASE32HEX, use RFC4648 base32hex Encoding.
- * @param len If present and src is NULL, returns the maximum possible length
- *  of the destination buffer, including a zero pad. If present and src is
- *  not NULL, returns the number of characters actually written.
- * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL, or APR_BADCH
- * if a non base32 character is present.
+ * @param len If not NULL, outputs the length of the buffer needed for decoding
+ *  (including the trailing NUL) if \c dest is NULL, or the actual length of
+ *  the decoding (excluding the trailing NUL) if \c dest is not NULL.
+ * @return APR_SUCCESS, or APR_EINVAL if \c slen is not APR_ENCODE_STRING and
+ *  negative, or APR_NOTFOUND if \c dest is not NULL and \c src is NULL, or
+ *  APR_ENOSPC if \c dest is NULL and the source length (based on \c slen or
+ *  APR_ENCODE_STRING) is too big to decode, or APR_EINCOMPLETE if the source
+ *  length (based on \c slen or APR_ENCODE_STRING) is invalid for a base32
+ *  encoding, or APR_BADCH if a non base32 character is present and
+ *  APR_ENCODE_RELAXED is not specified.
  */
 APR_DECLARE(apr_status_t) apr_decode_base32(char *dest, const char *src,
         apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert base32 or base32hex with or without padding to binary data.
- * @param dest The destination buffer, can be NULL.
- * @param src The original string.
- * @param slen The length of the original string, or APR_ENCODE_STRING if
- * NUL terminated.
+ * @param dest The destination string, can be NULL to output in \c len the
+ *  needed buffer length for decoding.
+ * @param src The base32 string, can be NULL if \c dest is NULL and \c slen
+ *  is positive or nul.
+ * @param slen The length of the base32 string, or APR_ENCODE_STRING if
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, parse RFC4648 Base 32 Encoding. If
  *  APR_ENCODE_BASE32HEX, use RFC4648 base32hex Encoding.
- * @param len If present and src is NULL, returns the maximum possible length
- *  of the destination buffer, including a zero pad. If present and src is
- *  not NULL, returns the number of characters actually written.
- * @return APR_SUCCESS, or APR_NOTFOUND if the src was NULL, or APR_BADCH
- * if a non base32 character is present.
+ * @param len If not NULL, outputs the length of the buffer needed for decoding
+ *  (including the trailing NUL) if \c dest is NULL, or the actual length of
+ *  the decoding (excluding the trailing NUL) if \c dest is not NULL.
+ * @return APR_SUCCESS, or APR_EINVAL if \c slen is not APR_ENCODE_STRING and
+ *  negative, or APR_NOTFOUND if \c dest is not NULL and \c src is NULL, or
+ *  APR_ENOSPC if \c dest is NULL and the source length (based on \c slen or
+ *  APR_ENCODE_STRING) is too big to decode, or APR_EINCOMPLETE if the source
+ *  length (based on \c slen or APR_ENCODE_STRING) is invalid for a base32
+ *  encoding, or APR_BADCH if a non base32 character is present and
+ *  APR_ENCODE_RELAXED is not specified.
  */
 APR_DECLARE(apr_status_t) apr_decode_base32_binary(unsigned char *dest,
         const char *src, apr_ssize_t slen, int flags, apr_size_t * len);
@@ -395,14 +447,15 @@ APR_DECLARE(apr_status_t) apr_decode_base32_binary(unsigned char *dest,
  * return the results from a pool.
  * @param p Pool to allocate from.
  * @param src The base32 string to decode.
- * @param slen The length of the base32 string, or APR_ENCODE_STRING if
- * NUL terminated.
+ * @param slen The length of the original string, or APR_ENCODE_STRING if
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, parse RFC4648 Base 32 Encoding. If
  *  APR_ENCODE_BASE32HEX, use RFC4648 base32hex Encoding.
- * @param len If present, returns the number of characters written, excluding
- *  the zero padding.
- * @return A string allocated from the pool containing the result with a zero
- *  pad. If src was NULL, or an error occurred, NULL is returned.
+ * @param len If not NULL, outputs the length of the encoding (excluding the
+ *  trailing NUL).
+ * @return A NUL terminated string allocated from the pool on success,
+ *  or NULL if src is NULL or allocation failed or the decoding is not
+ *  possible (see apr_decode_base32 errors).
  */
 APR_DECLARE(const char *)apr_pdecode_base32(apr_pool_t * p, const char *src,
         apr_ssize_t slen, int flags, apr_size_t * len)
@@ -412,15 +465,16 @@ APR_DECLARE(const char *)apr_pdecode_base32(apr_pool_t * p, const char *src,
  * Convert base32 or base32hex with or without padding to binary data, and
  * return the results from a pool.
  * @param p Pool to allocate from.
- * @param src The original string.
+ * @param src The base32 string to decode.
  * @param slen The length of the original string, or APR_ENCODE_STRING if
- *  NUL terminated.
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, parse RFC4648 Base 32 Encoding. If
  *  APR_ENCODE_BASE32HEX, use RFC4648 base32hex Encoding.
- * @param len If present, returns the number of characters written, excluding
- *  the zero padding.
- * @return A buffer allocated from the pool containing the result with a zero
- *  pad. If src was NULL, or an error occurred, NULL is returned.
+ * @param len If not NULL, outputs the length of the encoding (excluding the
+ *  trailing NUL).
+ * @return A NUL terminated string allocated from the pool on success,
+ *  or NULL if src is NULL or allocation failed or the decoding is not
+ *  possible (see apr_decode_base32_binary errors).
  */
 APR_DECLARE(const unsigned char *)apr_pdecode_base32_binary(apr_pool_t * p,
         const char *src, apr_ssize_t slen, int flags, apr_size_t * len)
@@ -428,31 +482,40 @@ APR_DECLARE(const unsigned char *)apr_pdecode_base32_binary(apr_pool_t * p,
 
 /**
  * Convert text data to base16 (hex).
- * @param dest The destination string, can be NULL.
- * @param src The original string.
+ * @param dest The destination string, can be NULL to output in \c len the
+ *  needed buffer length for encoding.
+ * @param src The original string, can be NULL if \c dest is NULL and \c slen
+ *  is positive or nul.
  * @param slen The length of the original string, or APR_ENCODE_STRING if
- * NUL terminated.
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, emit RFC4648 Base 16 Encoding. If
  *  APR_ENCODE_COLON, separate each token with a colon.
- * @param len If present and src is NULL, returns the maximum possible length
- *  of the destination buffer, including a zero pad. If present and src is
- *  not NULL, returns the number of characters actually written.
- * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL.
+ * @param len If not NULL, outputs the length of the buffer needed for encoding
+ *  (including the trailing NUL) if \c dest is NULL, or the actual length of
+ *  the encoding (excluding the trailing NUL) if \c dest is not NULL.
+ * @return APR_SUCCESS, or APR_EINVAL if \c slen is not APR_ENCODE_STRING and
+ *  negative, or APR_NOTFOUND if \c dest is not NULL and \c src is NULL, or
+ *  APR_ENOSPC if \c dest is NULL and the source length (based on \c slen or
+ *  APR_ENCODE_STRING) is too big to encode.
  */
 APR_DECLARE(apr_status_t) apr_encode_base16(char *dest, const char *src,
         apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert binary data to base16 (hex).
- * @param dest The destination string, can be NULL.
- * @param src The original buffer.
+ * @param dest The destination string, can be NULL to output in \c len the
+ *  needed buffer length for encoding.
+ * @param src The original buffer, can be NULL if \c dest is NULL.
  * @param slen The length of the original buffer.
  * @param flags If APR_ENCODE_NONE, emit RFC4648 Base 16 Encoding. If
  *  APR_ENCODE_COLON, separate each token with a colon.
- * @param len If present and src is NULL, returns the maximum possible length
- *  of the destination buffer, including a zero pad. If present and src is
- *  not NULL, returns the number of characters actually written.
- * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL.
+ * @param len If not NULL, outputs the length of the buffer needed for encoding
+ *  (including the trailing NUL) if \c dest is NULL, or the actual length of
+ *  the encoding (excluding the trailing NUL) if \c dest is not NULL.
+ * @return APR_SUCCESS, or APR_EINVAL if \c slen is negative, or APR_NOTFOUND
+ *  if \c dest is not NULL and \c src is NULL, or APR_ENOSPC if \c dest is NULL
+ *  and the source length (based on \c slen or APR_ENCODE_STRING) is too big to
+ *  encode.
  */
 APR_DECLARE(apr_status_t) apr_encode_base16_binary(char *dest,
         const unsigned char *src, apr_ssize_t slen, int flags,
@@ -464,13 +527,14 @@ APR_DECLARE(apr_status_t) apr_encode_base16_binary(char *dest,
  * @param p Pool to allocate from.
  * @param src The original string.
  * @param slen The length of the original string, or APR_ENCODE_STRING if
- * NUL terminated.
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, emit RFC4648 Base 16 Encoding. If
  *  APR_ENCODE_COLON, separate each token with a colon.
- * @param len If present, returns the number of characters written, excluding
- *  the zero padding.
- * @return A string allocated from the pool containing the result with a zero
- *  pad. If src was NULL, or an error occurred, NULL is returned.
+ * @param len If not NULL, outputs the length of the encoding (excluding the
+ *  trailing NUL).
+ * @return A NUL terminated string allocated from the pool on success,
+ *  or NULL if src is NULL or allocation failed or the encoding is not
+ *  possible (see apr_encode_base16 errors).
  */
 APR_DECLARE(const char *)apr_pencode_base16(apr_pool_t * p, const char *src,
         apr_ssize_t slen, int flags, apr_size_t * len)
@@ -484,10 +548,11 @@ APR_DECLARE(const char *)apr_pencode_base16(apr_pool_t * p, const char *src,
  * @param slen The length of the original buffer.
  * @param flags If APR_ENCODE_NONE, emit RFC4648 Base 16 Encoding. If
  *  APR_ENCODE_COLON, separate each token with a colon.
- * @param len If present, returns the number of characters written, excluding
- *  the zero padding.
- * @return A string allocated from the pool containing the result with a zero
- *  pad. If src was NULL, or an error occurred, NULL is returned.
+ * @param len If not NULL, outputs the length of the encoding (excluding the
+ *  trailing NUL).
+ * @return A NUL terminated string allocated from the pool on success,
+ *  or NULL if src is NULL or allocation failed or the encoding is not
+ *  possible (see apr_encode_base16_binary errors).
  */
 APR_DECLARE(const char *)apr_pencode_base16_binary(apr_pool_t * p,
         const unsigned char *src, apr_ssize_t slen,
@@ -495,34 +560,48 @@ APR_DECLARE(const char *)apr_pencode_base16_binary(apr_pool_t * p,
 
 /**
  * Convert base16 (hex) to text data.
- * @param dest The destination string, can be NULL.
- * @param src The original string.
- * @param slen The length of the original string, or APR_ENCODE_STRING if
- * NUL terminated.
+ * @param dest The destination string, can be NULL to output in \c len the
+ *  needed buffer length for decoding.
+ * @param src The base16 string, can be NULL if \c dest is NULL and \c slen
+ *  is positive or nul.
+ * @param slen The length of the base16 string, or APR_ENCODE_STRING if
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, parse RFC4648 Base 16 Encoding. If
  *  APR_ENCODE_COLON, allow tokens to be separated with a colon.
- * @param len If present and src is NULL, returns the maximum possible length
- *  of the destination buffer, including a zero pad. If present and src is
- *  not NULL, returns the number of characters actually written.
- * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL, or APR_BADCH
- * if a non hex character is present. A zero pad is appended to the buffer.
+ * @param len If not NULL, outputs the length of the buffer needed for decoding
+ *  (including the trailing NUL) if \c dest is NULL, or the actual length of
+ *  the decoding (excluding the trailing NUL) if \c dest is not NULL.
+ * @return APR_SUCCESS, or APR_EINVAL if \c slen is not APR_ENCODE_STRING and
+ *  negative, or APR_NOTFOUND if \c dest is not NULL and \c src is NULL, or
+ *  APR_ENOSPC if \c dest is NULL and the source length (based on \c slen or
+ *  APR_ENCODE_STRING) is too big to decode, or APR_EINCOMPLETE if the source
+ *  length (based on \c slen or APR_ENCODE_STRING) is invalid for a base16
+ *  encoding, or APR_BADCH if a non base16 character is present and
+ *  APR_ENCODE_RELAXED is not specified.
  */
 APR_DECLARE(apr_status_t) apr_decode_base16(char *dest, const char *src,
         apr_ssize_t slen, int flags, apr_size_t * len);
 
 /**
  * Convert base16 (hex) to binary data.
- * @param dest The destination buffer, can be NULL.
- * @param src The original string.
- * @param slen The length of the original string, or APR_ENCODE_STRING if
- * NUL terminated.
+ * @param dest The destination string, can be NULL to output in \c len the
+ *  needed buffer length for decoding.
+ * @param src The base16 string, can be NULL if \c dest is NULL and \c slen
+ *  is positive or nul.
+ * @param slen The length of the base16 string, or APR_ENCODE_STRING if
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, parse RFC4648 Base 16 Encoding. If
  *  APR_ENCODE_COLON, allow tokens to be separated with a colon.
- * @param len If present and src is NULL, returns the maximum possible length
- *  of the destination buffer, including a zero pad. If present and src is
- *  not NULL, returns the number of characters actually written.
- * @return APR_SUCCESS, or APR_NOTFOUND if the string was NULL, or APR_BADCH
- * if a non hex character is present. No zero pad is written to the buffer.
+ * @param len If not NULL, outputs the length of the buffer needed for decoding
+ *  (including the trailing NUL) if \c dest is NULL, or the actual length of
+ *  the decoding (excluding the trailing NUL) if \c dest is not NULL.
+ * @return APR_SUCCESS, or APR_EINVAL if \c slen is not APR_ENCODE_STRING and
+ *  negative, or APR_NOTFOUND if \c dest is not NULL and \c src is NULL, or
+ *  APR_ENOSPC if \c dest is NULL and the source length (based on \c slen or
+ *  APR_ENCODE_STRING) is too big to decode, or APR_EINCOMPLETE if the source
+ *  length (based on \c slen or APR_ENCODE_STRING) is invalid for a base16
+ *  encoding, or APR_BADCH if a non base16 character is present and
+ *  APR_ENCODE_RELAXED is not specified.
  */
 APR_DECLARE(apr_status_t) apr_decode_base16_binary(unsigned char *dest,
         const char *src, apr_ssize_t slen, int flags, apr_size_t * len);
@@ -530,15 +609,16 @@ APR_DECLARE(apr_status_t) apr_decode_base16_binary(unsigned char *dest,
 /**
  * Convert base16 (hex) and return the results from a pool.
  * @param p Pool to allocate from.
- * @param src The original string.
+ * @param src The base16 string to decode.
  * @param slen The length of the original string, or APR_ENCODE_STRING if
- * NUL terminated.
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, parse RFC4648 Base 16 Encoding. If
  *  APR_ENCODE_COLON, allow tokens to be separated with a colon.
- * @param len If present, returns the number of characters written, excluding
- *  the zero padding.
- * @return A buffer allocated from the pool containing the result with a zero
- *  pad. If src was NULL, or an error occurred, NULL is returned.
+ * @param len If not NULL, outputs the length of the encoding (excluding the
+ *  trailing NUL).
+ * @return A NUL terminated string allocated from the pool on success,
+ *  or NULL if src is NULL or allocation failed or the decoding is not
+ *  possible (see apr_decode_base16 errors).
  */
 APR_DECLARE(const char *)apr_pdecode_base16(apr_pool_t * p, const char *src,
         apr_ssize_t slen, int flags, apr_size_t * len)
@@ -547,15 +627,16 @@ APR_DECLARE(const char *)apr_pdecode_base16(apr_pool_t * p, const char *src,
 /**
  * Convert base16 (hex) to binary data, and return the results from a pool.
  * @param p Pool to allocate from.
- * @param src The original string.
+ * @param src The base16 string to decode.
  * @param slen The length of the original string, or APR_ENCODE_STRING if
- * NUL terminated.
+ *  the actual length should be computed based on NUL termination.
  * @param flags If APR_ENCODE_NONE, parse RFC4648 Base 16 Encoding. If
  *  APR_ENCODE_COLON, allow tokens to be separated with a colon.
- * @param len If present, returns the number of characters written, excluding
- *  the zero padding.
- * @return A buffer allocated from the pool containing the result with a zero
- *  pad. If src was NULL, or an error occurred, NULL is returned.
+ * @param len If not NULL, outputs the length of the encoding (excluding the
+ *  trailing NUL).
+ * @return A NUL terminated string allocated from the pool on success,
+ *  or NULL if src is NULL or allocation failed or the decoding is not
+ *  possible (see apr_decode_base16_binary errors).
  */
 APR_DECLARE(const unsigned char *)apr_pdecode_base16_binary(apr_pool_t * p,
         const char *src, apr_ssize_t slen, int flags, apr_size_t * len)

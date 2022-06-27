@@ -905,6 +905,162 @@ static void test_decode_base16_binary(abts_case * tc, void *data)
     apr_pool_destroy(pool);
 }
 
+typedef apr_status_t (*encdec_fn)(char*, const char*, apr_ssize_t, int, apr_size_t*);
+
+static void test_encode_errors(abts_case * tc, void *data)
+{
+    char dest[1];
+    apr_size_t len;
+    apr_status_t rv;
+
+    const encdec_fn *enc, encs[] = {
+        (encdec_fn)apr_encode_base64,
+        (encdec_fn)apr_encode_base64_binary,
+        (encdec_fn)apr_encode_base32,
+        (encdec_fn)apr_encode_base32_binary,
+        (encdec_fn)apr_encode_base16,
+        (encdec_fn)apr_encode_base16_binary,
+        NULL
+    };
+    for (enc = encs; *enc; ++enc) {
+        rv = (*enc)(dest, "", -2, 0, &len);
+        ABTS_INT_EQUAL(tc, APR_EINVAL, rv);
+
+        rv = (*enc)(dest, NULL, APR_ENCODE_STRING, 0, &len);
+        ABTS_INT_EQUAL(tc, APR_NOTFOUND, rv);
+
+#if 0
+        /* Can't test APR_ENOSPC without a NUL terminated buffer of
+         * length APR_SIZE_MAX / 4 * 3 and passing APR_ENCODE_STRING,
+         * which we won't even think about :)
+         */
+        {
+            static char huge_buffer[APR_SIZE_MAX / 4 * 3 + 1];
+            memset(huge_buffer, !0, sizeof(huge_buffer) - 1);
+            rv = (*enc)(NULL, huge_buffer, APR_ENCODE_STRING, &len);
+            ABTS_INT_EQUAL(tc, APR_ENOSPC, rv);
+        }
+#endif
+    }
+}
+
+static void test_decode_errors(abts_case * tc, void *data)
+{
+    char dest[64];
+    unsigned char *udest = (unsigned char *)dest;
+    apr_size_t len;
+    apr_status_t rv;
+
+    const encdec_fn *dec, decs[] = {
+        (encdec_fn)apr_decode_base64,
+        (encdec_fn)apr_decode_base64_binary,
+        (encdec_fn)apr_decode_base32,
+        (encdec_fn)apr_decode_base32_binary,
+        (encdec_fn)apr_decode_base16,
+        (encdec_fn)apr_decode_base16_binary,
+        NULL
+    };
+    for (dec = decs; *dec; ++dec) {
+        rv = (*dec)(dest, "", -2, 0, &len);
+        ABTS_INT_EQUAL(tc, APR_EINVAL, rv);
+
+        rv = (*dec)(dest, NULL, APR_ENCODE_STRING, 0, &len);
+        ABTS_INT_EQUAL(tc, APR_NOTFOUND, rv);
+
+        /* No possible APR_ENOSPC when decoding */
+    }
+
+    /* base64 */
+    rv = apr_decode_base64(NULL, NULL, 5, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base64(dest, "ABCDE", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base64(dest, "ABCD*EF", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_BADCH, rv);
+    rv = apr_decode_base64(dest, "ABCD*EF", APR_ENCODE_STRING,
+                           APR_ENCODE_RELAXED, &len);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_SIZE_EQUAL(tc, 3, len);
+
+    /* base64_binary */
+    rv = apr_decode_base64_binary(NULL, NULL, 5, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base64_binary(udest, "ABCDE", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base64_binary(udest, "ABCD*EF", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_BADCH, rv);
+    rv = apr_decode_base64_binary(udest, "ABCD*EF", APR_ENCODE_STRING,
+                                  APR_ENCODE_RELAXED, &len);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_SIZE_EQUAL(tc, 3, len);
+
+    /* base32 */
+    rv = apr_decode_base32(NULL, NULL, 9, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base32(NULL, NULL, 11, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base32(NULL, NULL, 14, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base32(dest, "ABCDEFGHI", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base32(dest, "ABCDEFGHIJK", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base32(dest, "ABCDEFGHIJKLMN", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base32(dest, "ABCDEFGH*IJ", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_BADCH, rv);
+    rv = apr_decode_base32(dest, "ABCEEFGH*IJ", APR_ENCODE_STRING,
+                           APR_ENCODE_RELAXED, &len);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_SIZE_EQUAL(tc, 5, len);
+
+    /* base32_binary */
+    rv = apr_decode_base32_binary(NULL, NULL, 9, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base32_binary(NULL, NULL, 11, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base32_binary(NULL, NULL, 14, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base32_binary(udest, "ABCDEFGHI", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base32_binary(udest, "ABCDEFGHIJK", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base32_binary(udest, "ABCDEFGHIJKLMN", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base32_binary(udest, "ABCDEFGH*IJ", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_BADCH, rv);
+    rv = apr_decode_base32_binary(udest, "ABCEEFGH*IJ", APR_ENCODE_STRING,
+                                  APR_ENCODE_RELAXED, &len);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_SIZE_EQUAL(tc, 5, len);
+
+    /* base16 */
+    rv = apr_decode_base16(NULL, NULL, 3, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base16(dest, "ABC", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base16(dest, "ABCD*EF", APR_ENCODE_STRING, 0, &len);
+    ABTS_INT_EQUAL(tc, APR_BADCH, rv);
+    rv = apr_decode_base16(dest, "ABCD*EF", APR_ENCODE_STRING,
+                           APR_ENCODE_RELAXED, &len);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_SIZE_EQUAL(tc, 2, len);
+    /* base16 with colon */
+    rv = apr_decode_base16(dest, "AB:", APR_ENCODE_STRING,
+                           APR_ENCODE_COLON, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base16(dest, "AB:C", APR_ENCODE_STRING,
+                           APR_ENCODE_COLON, &len);
+    ABTS_INT_EQUAL(tc, APR_EINCOMPLETE, rv);
+    rv = apr_decode_base16(dest, "AB:CD*EF", APR_ENCODE_STRING,
+                           APR_ENCODE_COLON, &len);
+    ABTS_INT_EQUAL(tc, APR_BADCH, rv);
+    rv = apr_decode_base16(dest, "AB:CD*EF", APR_ENCODE_STRING,
+                           APR_ENCODE_COLON|APR_ENCODE_RELAXED, &len);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_SIZE_EQUAL(tc, 2, len);
+}
+
 abts_suite *testencode(abts_suite * suite)
 {
     suite = ADD_SUITE(suite);
@@ -921,6 +1077,8 @@ abts_suite *testencode(abts_suite * suite)
     abts_run_test(suite, test_encode_base16_binary, NULL);
     abts_run_test(suite, test_decode_base16, NULL);
     abts_run_test(suite, test_decode_base16_binary, NULL);
+    abts_run_test(suite, test_encode_errors, NULL);
+    abts_run_test(suite, test_decode_errors, NULL);
 
     return suite;
 }
