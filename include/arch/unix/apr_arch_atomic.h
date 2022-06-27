@@ -26,6 +26,11 @@
 /* noop */
 #elif HAVE_ATOMIC_BUILTINS
 #   define USE_ATOMICS_BUILTINS
+#   if HAVE_ATOMIC_BUILTINS64
+#   define USE_ATOMICS_BUILTINS64
+#   else
+#   define NEED_ATOMICS_GENERIC64
+#   endif
 #elif defined(SOLARIS2) && SOLARIS2 >= 10
 #   define USE_ATOMICS_SOLARIS
 #   define NEED_ATOMICS_GENERIC64
@@ -36,7 +41,9 @@
 #elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
 #   define USE_ATOMICS_IA32
 #   define NEED_ATOMICS_GENERIC64
-#elif defined(__GNUC__) && (defined(__PPC__) || defined(__ppc__))
+#elif defined(__GNUC__) && (defined(__powerpc__) \
+                            || defined(__PPC__) \
+                            || defined(__ppc__))
 #   define USE_ATOMICS_PPC
 #   define NEED_ATOMICS_GENERIC64
 #elif defined(__GNUC__) && (defined(__s390__) || defined(__s390x__))

@@ -16,7 +16,7 @@
 
 #include "apr_arch_atomic.h"
 
-#ifdef USE_ATOMICS_BUILTINS
+#ifdef USE_ATOMICS_BUILTINS64
 
 #if defined(__arm__) || defined(__powerpc__) || defined(__powerpc64__)
 #define WEAK_MEMORY_ORDERING 1
@@ -106,4 +106,4 @@ APR_DECLARE(apr_uint64_t) apr_atomic_xchg64(volatile apr_uint64_t *mem, apr_uint
 #endif
 }
 
-#endif /* USE_ATOMICS_BUILTINS */
+#endif /* USE_ATOMICS_BUILTINS64 */
