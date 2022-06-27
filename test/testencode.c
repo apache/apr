@@ -905,7 +905,7 @@ static void test_decode_base16_binary(abts_case * tc, void *data)
     apr_pool_destroy(pool);
 }
 
-typedef apr_status_t (*encdec_fn)(char*, const char*, apr_ssize_t, int, apr_size_t*);
+typedef APR_DECLARE(apr_status_t) (*encdec_fn)(char*, const char*, apr_ssize_t, int, apr_size_t*);
 
 static void test_encode_errors(abts_case * tc, void *data)
 {
