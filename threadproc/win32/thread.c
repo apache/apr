@@ -157,17 +157,19 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
     if ((handle = (HANDLE)_beginthreadex(NULL,
                         (DWORD) (attr ? attr->stacksize : 0),
                         dummy_worker,
-                        (*new), 0, &temp)) == 0) {
+                        (*new), CREATE_SUSPENDED, &temp)) == 0) {
         stat = APR_FROM_OS_ERROR(_doserrno);
         apr_pool_destroy((*new)->pool);
         return stat;
     }
 
     if (attr && attr->detach) {
+        ResumeThread(handle);
         CloseHandle(handle);
     }
     else {
         (*new)->td = handle;
+        ResumeThread(handle);
     }
 
     return APR_SUCCESS;
