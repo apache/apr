@@ -947,6 +947,7 @@ else
         APR_CHECK_PTHREAD_GETSPECIFIC_TWO_ARGS
         APR_CHECK_PTHREAD_ATTR_GETDETACHSTATE_ONE_ARG
         APR_CHECK_PTHREAD_RECURSIVE_MUTEX
+        APR_CHECK_PTHREAD_SETNAME_NP
         AC_CHECK_FUNCS([pthread_key_delete pthread_rwlock_init \
                         pthread_attr_setguardsize pthread_yield])
 

@@ -312,3 +312,27 @@ elif test "$apr_cv_mutex_robust_shared" = "np"; then
              [Define if non-posix/portable cross-process robust mutexes are available])
 fi
 ])
+
+
+dnl Check for pthread_setname_np
+dnl Note: Only detects two-arg version
+AC_DEFUN([APR_CHECK_PTHREAD_SETNAME_NP], [
+AC_CACHE_CHECK([for pthread_setname_np support],
+[apr_cv_pthread_setname_np], [
+AC_TRY_COMPILE([
+#include <pthread.h>
+],[
+pthread_t td = pthread_self();
+pthread_setname_np(td, "name");
+],[
+    apr_cv_pthread_setname_np=yes
+],[
+    apr_cv_pthread_setname_np=no
+])])
+
+if test "$apr_cv_pthread_setname_np" = "yes"; then
+   AC_DEFINE([HAVE_PTHREAD_SETNAME_NP], 1,
+             [Define if pthread_setname_np is available])
+fi
+])dnl
+
