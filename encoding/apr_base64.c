@@ -168,24 +168,24 @@ APR_DECLARE(int) apr_base64_decode_binary(unsigned char *bufplain,
     bufin = (const unsigned char *) bufcoded;
 
     while (nprbytes >= 4) {
-    *(bufout++) =
-        (unsigned char) (pr2six[*bufin] << 2 | pr2six[bufin[1]] >> 4);
-    *(bufout++) =
-        (unsigned char) (pr2six[bufin[1]] << 4 | pr2six[bufin[2]] >> 2);
-    *(bufout++) =
-        (unsigned char) (pr2six[bufin[2]] << 6 | pr2six[bufin[3]]);
-    bufin += 4;
-    nprbytes -= 4;
+        *(bufout++) =
+            (unsigned char) (pr2six[*bufin] << 2 | pr2six[bufin[1]] >> 4);
+        *(bufout++) =
+            (unsigned char) (pr2six[bufin[1]] << 4 | pr2six[bufin[2]] >> 2);
+        *(bufout++) =
+            (unsigned char) (pr2six[bufin[2]] << 6 | pr2six[bufin[3]]);
+        bufin += 4;
+        nprbytes -= 4;
     }
 
     /* Note: (nprbytes == 1) would be an error, so just ignore that case */
     if (nprbytes > 1) {
-    *(bufout++) =
-        (unsigned char) (pr2six[*bufin] << 2 | pr2six[bufin[1]] >> 4);
+        *(bufout++) =
+            (unsigned char) (pr2six[*bufin] << 2 | pr2six[bufin[1]] >> 4);
     }
     if (nprbytes > 2) {
-    *(bufout++) =
-        (unsigned char) (pr2six[bufin[1]] << 4 | pr2six[bufin[2]] >> 2);
+        *(bufout++) =
+            (unsigned char) (pr2six[bufin[1]] << 4 | pr2six[bufin[2]] >> 2);
     }
 
     return nbytesdecoded - (int)((4u - nprbytes) & 3u);
@@ -223,25 +223,25 @@ APR_DECLARE(int) apr_base64_encode(char *encoded, const char *string, int len)
 
     p = encoded;
     for (i = 0; i < len - 2; i += 3) {
-    *p++ = basis_64[(os_toascii[string[i]] >> 2) & 0x3F];
-    *p++ = basis_64[((os_toascii[string[i]] & 0x3) << 4) |
-                    ((int) (os_toascii[string[i + 1]] & 0xF0) >> 4)];
-    *p++ = basis_64[((os_toascii[string[i + 1]] & 0xF) << 2) |
-                    ((int) (os_toascii[string[i + 2]] & 0xC0) >> 6)];
-    *p++ = basis_64[os_toascii[string[i + 2]] & 0x3F];
+        *p++ = basis_64[(os_toascii[string[i]] >> 2) & 0x3F];
+        *p++ = basis_64[((os_toascii[string[i]] & 0x3) << 4) |
+            ((int) (os_toascii[string[i + 1]] & 0xF0) >> 4)];
+        *p++ = basis_64[((os_toascii[string[i + 1]] & 0xF) << 2) |
+            ((int) (os_toascii[string[i + 2]] & 0xC0) >> 6)];
+        *p++ = basis_64[os_toascii[string[i + 2]] & 0x3F];
     }
     if (i < len) {
-    *p++ = basis_64[(os_toascii[string[i]] >> 2) & 0x3F];
-    if (i == (len - 1)) {
-        *p++ = basis_64[((os_toascii[string[i]] & 0x3) << 4)];
+        *p++ = basis_64[(os_toascii[string[i]] >> 2) & 0x3F];
+        if (i == (len - 1)) {
+            *p++ = basis_64[((os_toascii[string[i]] & 0x3) << 4)];
+            *p++ = '=';
+        }
+        else {
+            *p++ = basis_64[((os_toascii[string[i]] & 0x3) << 4) |
+                ((int) (os_toascii[string[i + 1]] & 0xF0) >> 4)];
+            *p++ = basis_64[((os_toascii[string[i + 1]] & 0xF) << 2)];
+        }
         *p++ = '=';
-    }
-    else {
-        *p++ = basis_64[((os_toascii[string[i]] & 0x3) << 4) |
-                        ((int) (os_toascii[string[i + 1]] & 0xF0) >> 4)];
-        *p++ = basis_64[((os_toascii[string[i + 1]] & 0xF) << 2)];
-    }
-    *p++ = '=';
     }
 
     *p++ = '\0';
