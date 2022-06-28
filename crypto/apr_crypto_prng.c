@@ -43,12 +43,13 @@
 #include "apr_crypto.h"
 #include "apr_crypto_internal.h"
 
+#include "apr_strings.h"
+
 #if APU_HAVE_CRYPTO
 #if APU_HAVE_CRYPTO_PRNG
 
 #include "apr_ring.h"
 #include "apr_pools.h"
-#include "apr_strings.h"
 #include "apr_thread_mutex.h"
 #include "apr_thread_proc.h"
 
@@ -263,7 +264,7 @@ static apr_status_t cprng_cleanup(void *arg)
     }
 
     if (cprng->key) {
-        apr_crypto_memzero(cprng->key, CPRNG_KEY_SIZE + cprng->len);
+        apr_memzero_explicit(cprng->key, CPRNG_KEY_SIZE + cprng->len);
     }
 
     if (!cprng->pool) {
@@ -435,7 +436,7 @@ static apr_status_t cprng_stream_bytes(apr_crypto_prng_t *cprng,
     rv = cprng->crypto->provider->cprng_stream_ctx_bytes(&cprng->ctx,
             cprng->key, to, len, cprng->buf);
     if (rv != APR_SUCCESS && len) {
-        apr_crypto_memzero(to, len);
+        apr_memzero_explicit(to, len);
     }
     return rv;
 }
@@ -456,7 +457,7 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_reseed(apr_crypto_prng_t *cprng,
     cprng_lock(cprng);
 
     cprng->pos = cprng->len;
-    apr_crypto_memzero(cprng->buf, cprng->len);
+    apr_memzero_explicit(cprng->buf, cprng->len);
     if (seed) {
         apr_size_t n = 0;
         do {
@@ -528,7 +529,7 @@ static apr_status_t cprng_bytes(apr_crypto_prng_t *cprng,
          * both forward secrecy and cleared next mixed data.
          */
         memcpy(ptr, cprng->buf + cprng->pos, n);
-        apr_crypto_memzero(cprng->buf + cprng->pos, n);
+        apr_memzero_explicit(cprng->buf + cprng->pos, n);
         cprng->pos += n;
 
         ptr += n;
@@ -576,7 +577,7 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_rekey(apr_crypto_prng_t *cprng)
 
     /* Clear state and renew the key. */
     cprng->pos = cprng->len;
-    apr_crypto_memzero(cprng->buf, cprng->len);
+    apr_memzero_explicit(cprng->buf, cprng->len);
     rv = cprng_stream_bytes(cprng, NULL, 0);
 
     cprng_unlock(cprng);
@@ -627,7 +628,7 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_after_fork(apr_crypto_prng_t *cprng,
      * and that nothing is left over from the initial state in both processes.
      */
     cprng->pos = cprng->len;
-    apr_crypto_memzero(cprng->buf, cprng->len);
+    apr_memzero_explicit(cprng->buf, cprng->len);
     if (!is_child) {
         rv = cprng_stream_bytes(cprng, cprng->key, CPRNG_KEY_SIZE);
     }

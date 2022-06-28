@@ -183,6 +183,16 @@ APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...)
         __attribute__((format(printf,2,3)));
 
 /**
+ * zero out the buffer provided, without being optimized out by
+ * the compiler.
+ *
+ * @param buffer buffer to zero out
+ * @param size size of the buffer to zero out
+ * @return APR_SUCCESS or an errno
+ */
+APR_DECLARE(apr_status_t) apr_memzero_explicit(void *buffer, apr_size_t size);
+
+/**
  * Copy up to dst_size characters from src to dst; does not copy
  * past a NUL terminator in src, but always terminates dst with a NUL
  * regardless.
