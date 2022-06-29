@@ -212,6 +212,38 @@ APR_DECLARE(char *) apr_pstrcatv(apr_pool_t *a, const struct iovec *vec,
     return res;
 }
 
+#if defined(HAVE_WEAK_SYMBOLS)
+void apr__memzero_explicit(void *buffer, apr_size_t size);
+
+__attribute__ ((weak))
+void apr__memzero_explicit(void *buffer, apr_size_t size)
+{
+    memset(buffer, 0, size);
+}
+#endif
+
+APR_DECLARE(apr_status_t) apr_memzero_explicit(void *buffer, apr_size_t size)
+{
+#if defined(WIN32)
+    SecureZeroMemory(buffer, size);
+#elif defined(HAVE_EXPLICIT_BZERO)
+    explicit_bzero(buffer, size);
+#elif defined(HAVE_MEMSET_S)
+    if (size) {
+        return memset_s(buffer, (rsize_t)size, 0, (rsize_t)size);
+    }
+#elif defined(HAVE_WEAK_SYMBOLS)
+    apr__memzero_explicit(buffer, size);
+#else
+    apr_size_t i;
+    volatile unsigned char *volatile ptr = buffer;
+    for (i = 0; i < size; ++i) {
+        ptr[i] = 0;
+    }
+#endif
+    return APR_SUCCESS;
+}
+
 #if (!APR_HAVE_MEMCHR)
 void *memchr(const void *s, int c, size_t n)
 {

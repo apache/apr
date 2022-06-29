@@ -196,12 +196,7 @@ apr_status_t apr_socket_sendv(apr_socket_t * sock, const struct iovec *vec,
 {
 #ifdef HAVE_WRITEV
     apr_ssize_t rv;
-    apr_size_t requested_len = 0;
     apr_int32_t i;
-
-    for (i = 0; i < nvec; i++) {
-        requested_len += vec[i].iov_len;
-    }
 
     if (sock->options & APR_INCOMPLETE_WRITE) {
         sock->options &= ~APR_INCOMPLETE_WRITE;
@@ -231,8 +226,16 @@ do_select:
         *len = 0;
         return errno;
     }
-    if ((sock->timeout > 0) && (rv < requested_len)) {
-        sock->options |= APR_INCOMPLETE_WRITE;
+    if (sock->timeout > 0) {
+        apr_size_t rv_len = rv;
+        for (i = 0; i < nvec; ++i) {
+            apr_size_t iov_len = vec[i].iov_len;
+            if (rv_len < iov_len) {
+                sock->options |= APR_INCOMPLETE_WRITE;
+                break;
+            }
+            rv_len -= iov_len;
+        }
     }
     (*len) = rv;
     return APR_SUCCESS;
