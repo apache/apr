@@ -286,6 +286,7 @@ APR_DECLARE(apr_status_t) apr_thread_name_set(const char *name,
                                               apr_thread_t *thread,
                                               apr_pool_t *pool)
 {
+#if HAVE_PTHREAD_SETNAME_NP
     pthread_t td;
 
     size_t name_len;
@@ -306,12 +307,16 @@ APR_DECLARE(apr_status_t) apr_thread_name_set(const char *name,
     }
 
     return pthread_setname_np(td, name);
+#else
+    return APR_ENOTIMPL;
+#endif
 }
 
 APR_DECLARE(apr_status_t) apr_thread_name_get(char **name,
                                               apr_thread_t *thread,
                                               apr_pool_t *pool)
 {
+#if HAVE_PTHREAD_SETNAME_NP
     pthread_t td;
     if (thread) {
         td = *thread->td;
@@ -322,6 +327,9 @@ APR_DECLARE(apr_status_t) apr_thread_name_get(char **name,
 
     *name = apr_pcalloc(pool, TASK_COMM_LEN);
     return pthread_getname_np(td, *name, TASK_COMM_LEN);
+#else
+    return APR_ENOTIMPL;
+#endif
 }
 
 APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void)
