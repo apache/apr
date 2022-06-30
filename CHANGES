@@ -23,6 +23,9 @@ Changes for APR 1.8.0
   *) Don't seek to the end when opening files with APR_FOPEN_APPEND on Windows.
      [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
+  *) apr_file_write: Optimize large writes to buffered files on Windows.
+     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
+
 Changes for APR 1.7.1
 
   *) SECURITY: CVE-2021-35940 (cve.mitre.org)
