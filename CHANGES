@@ -20,6 +20,9 @@ Changes for APR 1.8.0
   *) apr_file_gets: Optimize for buffered files on Windows.
      [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
+  *) Don't seek to the end when opening files with APR_FOPEN_APPEND on Windows.
+     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
+
 Changes for APR 1.7.1
 
   *) SECURITY: CVE-2021-35940 (cve.mitre.org)
