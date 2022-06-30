@@ -13,6 +13,9 @@ Changes for APR 1.8.0
 
   *) Fix double free on exit when apr_app is used on Windows. [Ivan Zhakov]
 
+  *) apr_file_gets: Optimize for buffered files on Windows.
+     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
+
 Changes for APR 1.7.1
 
   *) SECURITY: CVE-2021-35940 (cve.mitre.org)
