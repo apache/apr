@@ -99,7 +99,7 @@ Changes for APR 2.0.0
   *) Add apr_reslist_acquire_ex() which allows to control acquire order,
      that is LIFO (default) or FIFO.  [Yann Ylavic]
 
-  *) apr_file_write: Optimize large reads from buffered files on Windows.
+  *) apr_file_read: Optimize large reads from buffered files on Windows.
      [Evgeny Kotkov]
 
   *) Add apr_pool_tag_get to retrieve the pool tag name.  [Joe Orton]
