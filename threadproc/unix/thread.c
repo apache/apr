@@ -139,13 +139,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
 static void *dummy_worker(void *opaque)
 {
     apr_thread_t *thread = (apr_thread_t*)opaque;
-    void *ret;
-
-    ret = thread->func(thread, thread->data);
-    if (thread->detached) {
-        apr_pool_destroy(thread->pool);
-    }
-    return ret;
+    return thread->func(thread, thread->data);
 }
 
 APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
@@ -156,55 +150,42 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
 {
     apr_status_t stat;
     pthread_attr_t *temp;
-    apr_allocator_t *allocator;
-    
+
     (*new) = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
+
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
 
-    /* The thread can be detached anytime (from the creation or later with
-     * apr_thread_detach), so it needs its own pool and allocator to not
-     * depend on a parent pool which could be destroyed before the thread
-     * exits. The allocator needs no mutex obviously since the pool should 
-     * not be used nor create children pools outside the thread.
-     */
-    stat = apr_allocator_create(&allocator);
-    if (stat != APR_SUCCESS) {
-        return stat;
+    (*new)->td = (pthread_t *)apr_pcalloc(pool, sizeof(pthread_t));
+
+    if ((*new)->td == NULL) {
+        return APR_ENOMEM;
     }
-    stat = apr_pool_create_unmanaged_ex(&(*new)->pool,
-                                        apr_pool_abort_get(pool),
-                                        allocator);
-    if (stat != APR_SUCCESS) {
-        apr_allocator_destroy(allocator);
-        return stat;
-    }
-    apr_allocator_owner_set(allocator, (*new)->pool);
 
     (*new)->data = data;
     (*new)->func = func;
-    (*new)->detached = (attr && apr_threadattr_detach_get(attr) == APR_DETACH);
-    (*new)->td = (pthread_t *)apr_pcalloc(pool, sizeof(pthread_t));
-    if ((*new)->td == NULL) {
-        apr_pool_destroy((*new)->pool);
-        return APR_ENOMEM;
-    }
 
     if (attr)
         temp = &attr->attr;
     else
         temp = NULL;
 
-    if ((stat = pthread_create((*new)->td, temp, dummy_worker, (*new)))) {
-#ifdef HAVE_ZOS_PTHREADS
-        stat = errno;
-#endif
-        apr_pool_destroy((*new)->pool);
+    stat = apr_pool_create(&(*new)->pool, pool);
+    if (stat != APR_SUCCESS) {
         return stat;
     }
 
-    return APR_SUCCESS;
+    if ((stat = pthread_create((*new)->td, temp, dummy_worker, (*new))) == 0) {
+        return APR_SUCCESS;
+    }
+    else {
+#ifdef HAVE_ZOS_PTHREADS
+        stat = errno;
+#endif
+
+        return stat;
+    }
 }
 
 APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void)
@@ -222,9 +203,7 @@ APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd,
                                           apr_status_t retval)
 {
     thd->exitval = retval;
-    if (thd->detached) {
-        apr_pool_destroy(thd->pool);
-    }
+    apr_pool_destroy(thd->pool);
     pthread_exit(NULL);
     return APR_SUCCESS;
 }
@@ -235,13 +214,8 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
     apr_status_t stat;
     apr_status_t *thread_stat;
 
-    if (thd->detached) {
-        return APR_EINVAL;
-    }
-
     if ((stat = pthread_join(*thd->td,(void *)&thread_stat)) == 0) {
         *retval = thd->exitval;
-        apr_pool_destroy(thd->pool);
         return APR_SUCCESS;
     }
     else {
@@ -257,16 +231,11 @@ APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
 {
     apr_status_t stat;
 
-    if (thd->detached) {
-        return APR_EINVAL;
-    }
-
 #ifdef HAVE_ZOS_PTHREADS
     if ((stat = pthread_detach(thd->td)) == 0) {
 #else
     if ((stat = pthread_detach(*thd->td)) == 0) {
 #endif
-        thd->detached = 1;
 
         return APR_SUCCESS;
     }

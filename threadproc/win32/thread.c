@@ -75,14 +75,8 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
 static void *dummy_worker(void *opaque)
 {
     apr_thread_t *thd = (apr_thread_t *)opaque;
-    void *ret;
-
     TlsSetValue(tls_apr_thread, thd->td);
-    ret = thd->func(thd, thd->data);
-    if (!thd->td) { /* detached? */
-        apr_pool_destroy(thd->pool);
-    }
-    return ret;
+    return thd->func(thd, thd->data);
 }
 
 APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
@@ -91,36 +85,22 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
                                             void *data, apr_pool_t *pool)
 {
     apr_status_t stat;
-    unsigned temp;
+	unsigned temp;
     HANDLE handle;
-    apr_allocator_t *allocator;
-    
-    (*new) = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
+
+    (*new) = (apr_thread_t *)apr_palloc(pool, sizeof(apr_thread_t));
+
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
 
-    /* The thread can be detached anytime (from the creation or later with
-     * apr_thread_detach), so it needs its own pool and allocator to not
-     * depend on a parent pool which could be destroyed before the thread
-     * exits. The allocator needs no mutex obviously since the pool should 
-     * not be used nor create children pools outside the thread.
-     */
-    stat = apr_allocator_create(&allocator);
-    if (stat != APR_SUCCESS) {
-        return stat;
-    }
-    stat = apr_pool_create_unmanaged_ex(&(*new)->pool,
-                                        apr_pool_abort_get(pool),
-                                        allocator);
-    if (stat != APR_SUCCESS) {
-        apr_allocator_destroy(allocator);
-        return stat;
-    }
-    apr_allocator_owner_set(allocator, (*new)->pool);
-
     (*new)->data = data;
     (*new)->func = func;
+    (*new)->td   = NULL;
+    stat = apr_pool_create(&(*new)->pool, pool);
+    if (stat != APR_SUCCESS) {
+        return stat;
+    }
 
     /* Use 0 for default Thread Stack Size, because that will
      * default the stack to the same size as the calling thread.
@@ -130,26 +110,21 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
                         (DWORD) (attr ? attr->stacksize : 0),
                         (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
                         (*new), 0, &temp)) == 0) {
-        stat = APR_FROM_OS_ERROR(_doserrno);
-        apr_pool_destroy((*new)->pool);
-        return stat;
+        return APR_FROM_OS_ERROR(_doserrno);
     }
 #else
    if ((handle = CreateThread(NULL,
                         attr && attr->stacksize > 0 ? attr->stacksize : 0,
                         (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
                         (*new), 0, &temp)) == 0) {
-        stat = apr_get_os_error();
-        apr_pool_destroy((*new)->pool);
-        return stat;
+        return apr_get_os_error();
     }
 #endif
     if (attr && attr->detach) {
         CloseHandle(handle);
     }
-    else {
+    else
         (*new)->td = handle;
-    }
 
     return APR_SUCCESS;
 }
@@ -157,11 +132,9 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
 APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd,
                                           apr_status_t retval)
 {
-    thd->exited = 1;
     thd->exitval = retval;
-    if (!thd->td) { /* detached? */
-        apr_pool_destroy(thd->pool);
-    }
+    apr_pool_destroy(thd->pool);
+    thd->pool = NULL;
 #ifndef _WIN32_WCE
     _endthreadex(0);
 #else
@@ -174,40 +147,30 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
                                           apr_thread_t *thd)
 {
     apr_status_t rv = APR_SUCCESS;
-    DWORD ret;
     
     if (!thd->td) {
         /* Can not join on detached threads */
         return APR_DETACH;
     }
-
-    ret = WaitForSingleObject(thd->td, INFINITE);
-    if (ret == WAIT_OBJECT_0 || ret == WAIT_ABANDONED) {
+    rv = WaitForSingleObject(thd->td, INFINITE);
+    if ( rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
         /* If the thread_exit has been called */
-        if (thd->exited)
+        if (!thd->pool)
             *retval = thd->exitval;
         else
             rv = APR_INCOMPLETE;
     }
     else
         rv = apr_get_os_error();
-
-    if (rv == APR_SUCCESS) {
-        CloseHandle(thd->td);
-        apr_pool_destroy(thd->pool);
-        thd->td = NULL;
-    }
+    CloseHandle(thd->td);
+    thd->td = NULL;
 
     return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
 {
-    if (!thd->td) {
-        return APR_EINVAL;
-    }
-
-    if (CloseHandle(thd->td)) {
+    if (thd->td && CloseHandle(thd->td)) {
         thd->td = NULL;
         return APR_SUCCESS;
     }
