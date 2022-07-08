@@ -104,6 +104,7 @@ CLEAN :
 	-@erase "$(INTDIR)\signals.obj"
 	-@erase "$(INTDIR)\sockaddr.obj"
 	-@erase "$(INTDIR)\socket_util.obj"
+	-@erase "$(INTDIR)\socket_pipe.obj"
 	-@erase "$(INTDIR)\sockets.obj"
 	-@erase "$(INTDIR)\sockopt.obj"
 	-@erase "$(INTDIR)\start.obj"
@@ -222,6 +223,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\sockaddr.obj" \
 	"$(INTDIR)\sockets.obj" \
 	"$(INTDIR)\socket_util.obj" \
+	"$(INTDIR)\socket_pipe.obj" \
 	"$(INTDIR)\sockopt.obj" \
 	"$(INTDIR)\apr_getpass.obj" \
 	"$(INTDIR)\poll.obj" \
@@ -348,6 +350,7 @@ CLEAN :
 	-@erase "$(INTDIR)\signals.obj"
 	-@erase "$(INTDIR)\sockaddr.obj"
 	-@erase "$(INTDIR)\socket_util.obj"
+	-@erase "$(INTDIR)\socket_pipe.obj"
 	-@erase "$(INTDIR)\sockets.obj"
 	-@erase "$(INTDIR)\sockopt.obj"
 	-@erase "$(INTDIR)\start.obj"
@@ -466,6 +469,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\sockaddr.obj" \
 	"$(INTDIR)\sockets.obj" \
 	"$(INTDIR)\socket_util.obj" \
+	"$(INTDIR)\socket_pipe.obj" \
 	"$(INTDIR)\sockopt.obj" \
 	"$(INTDIR)\apr_getpass.obj" \
 	"$(INTDIR)\poll.obj" \
@@ -593,6 +597,7 @@ CLEAN :
 	-@erase "$(INTDIR)\signals.obj"
 	-@erase "$(INTDIR)\sockaddr.obj"
 	-@erase "$(INTDIR)\socket_util.obj"
+	-@erase "$(INTDIR)\socket_pipe.obj"
 	-@erase "$(INTDIR)\sockets.obj"
 	-@erase "$(INTDIR)\sockopt.obj"
 	-@erase "$(INTDIR)\start.obj"
@@ -710,6 +715,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\sockaddr.obj" \
 	"$(INTDIR)\sockets.obj" \
 	"$(INTDIR)\socket_util.obj" \
+	"$(INTDIR)\socket_pipe.obj" \
 	"$(INTDIR)\sockopt.obj" \
 	"$(INTDIR)\apr_getpass.obj" \
 	"$(INTDIR)\poll.obj" \
@@ -837,6 +843,7 @@ CLEAN :
 	-@erase "$(INTDIR)\signals.obj"
 	-@erase "$(INTDIR)\sockaddr.obj"
 	-@erase "$(INTDIR)\socket_util.obj"
+	-@erase "$(INTDIR)\socket_pipe.obj"
 	-@erase "$(INTDIR)\sockets.obj"
 	-@erase "$(INTDIR)\sockopt.obj"
 	-@erase "$(INTDIR)\start.obj"
@@ -954,6 +961,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\sockaddr.obj" \
 	"$(INTDIR)\sockets.obj" \
 	"$(INTDIR)\socket_util.obj" \
+	"$(INTDIR)\socket_pipe.obj" \
 	"$(INTDIR)\sockopt.obj" \
 	"$(INTDIR)\apr_getpass.obj" \
 	"$(INTDIR)\poll.obj" \
@@ -1302,6 +1310,12 @@ SOURCE=.\network_io\win32\sockets.c
 SOURCE=.\network_io\win32\sockopt.c
 
 "$(INTDIR)\sockopt.obj" : $(SOURCE) "$(INTDIR)" ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\network_io\win32\socket_pipe.c
+
+"$(INTDIR)\socket_pipe.obj" : $(SOURCE) "$(INTDIR)" ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
