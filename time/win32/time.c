@@ -136,43 +136,43 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
 {
     SYSTEMTIME st;
     FILETIME ft, localft;
-	TIME_ZONE_INFORMATION *tz;
-	SYSTEMTIME localst;
-	apr_time_t localtime;
+    TIME_ZONE_INFORMATION *tz;
+    SYSTEMTIME localst;
+    apr_time_t localtime;
 
     AprTimeToFileTime(&ft, input);
 
-	get_local_timezone(&tz);
+    get_local_timezone(&tz);
 
-	FileTimeToSystemTime(&ft, &st);
+    FileTimeToSystemTime(&ft, &st);
 
-	/* The Platform SDK documents that SYSTEMTIME/FILETIME are
-	 * generally UTC.  We use SystemTimeToTzSpecificLocalTime
-	 * because FileTimeToLocalFileFime is documented that the
-	 * resulting time local file time would have DST relative
-	 * to the *present* date, not the date converted.
-	 * The time value makes a roundtrip, localst cannot be invalid below.
-	 */
-	SystemTimeToTzSpecificLocalTime(tz, &st, &localst);
-	SystemTimeToAprExpTime(result, &localst);
-	result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
+    /* The Platform SDK documents that SYSTEMTIME/FILETIME are
+     * generally UTC.  We use SystemTimeToTzSpecificLocalTime
+     * because FileTimeToLocalFileFime is documented that the
+     * resulting time local file time would have DST relative
+     * to the *present* date, not the date converted.
+     * The time value makes a roundtrip, localst cannot be invalid below.
+     */
+    SystemTimeToTzSpecificLocalTime(tz, &st, &localst);
+    SystemTimeToAprExpTime(result, &localst);
+    result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
 
 
-	/* Recover the resulting time as an apr time and use the
-	 * delta for gmtoff in seconds (and ignore msec rounding) 
-	 */
-	SystemTimeToFileTime(&localst, &localft);
-	FileTimeToAprTime(&localtime, &localft);
-	result->tm_gmtoff = (int)apr_time_sec(localtime) 
-					  - (int)apr_time_sec(input);
+    /* Recover the resulting time as an apr time and use the
+     * delta for gmtoff in seconds (and ignore msec rounding) 
+     */
+    SystemTimeToFileTime(&localst, &localft);
+    FileTimeToAprTime(&localtime, &localft);
+    result->tm_gmtoff = (int)apr_time_sec(localtime) 
+                      - (int)apr_time_sec(input);
 
-	/* To compute the dst flag, we compare the expected 
-	 * local (standard) timezone bias to the delta.
-	 * [Note, in war time or double daylight time the
-	 * resulting tm_isdst is, desireably, 2 hours]
-	 */
-	result->tm_isdst = (result->tm_gmtoff / 3600)
-					 - (-(tz->Bias + tz->StandardBias) / 60);
+    /* To compute the dst flag, we compare the expected 
+     * local (standard) timezone bias to the delta.
+     * [Note, in war time or double daylight time the
+     * resulting tm_isdst is, desireably, 2 hours]
+     */
+    result->tm_isdst = (result->tm_gmtoff / 3600)
+                     - (-(tz->Bias + tz->StandardBias) / 60);
 
     return APR_SUCCESS;
 }

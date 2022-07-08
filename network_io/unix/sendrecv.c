@@ -1119,6 +1119,6 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
 #error version of it for APR yet.  To get past this, either write 
 #error apr_socket_sendfile or change APR_HAS_SENDFILE in apr.h to 0.
 #endif /* __linux__, __FreeBSD__, __DragonFly__, __HPUX__, _AIX, __MVS__,
-	  Tru64/OSF1 */
+      Tru64/OSF1 */
 
 #endif /* APR_HAS_SENDFILE */

@@ -84,7 +84,7 @@ typedef enum {
         APR_WIN_98_SE =    16,
         APR_WIN_ME =       18,
 
-	APR_WIN_UNICODE =  20, /* Prior versions support only narrow chars */
+        APR_WIN_UNICODE =  20, /* Prior versions support only narrow chars */
 
         APR_WIN_CE_3 =     23, /* CE is an odd beast, not supporting */
                                /* some pre-NT features, such as the    */

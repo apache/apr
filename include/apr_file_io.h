@@ -58,8 +58,8 @@ extern "C" {
 #define APR_FOPEN_TRUNCATE   0x00010  /**< Open the file and truncate
                                          to 0 length */
 #define APR_FOPEN_BINARY     0x00020  /**< Open the file in binary mode
-				         (This flag is ignored on UNIX 
-					 because it has no meaning)*/
+                                         (This flag is ignored on UNIX 
+                                         because it has no meaning)*/
 #define APR_FOPEN_EXCL       0x00040  /**< Open should fail if #APR_FOPEN_CREATE
                                          and file exists. */
 #define APR_FOPEN_BUFFERED   0x00080  /**< Open the file for buffered I/O */
@@ -73,9 +73,9 @@ extern "C" {
                                          process/machines */
 #define APR_FOPEN_NOCLEANUP  0x00800  /**< Do not register a cleanup
                                          when the file is opened. The
-					 apr_os_file_t handle in apr_file_t
-					 will not be closed when the pool
-					 is destroyed. */
+                                         apr_os_file_t handle in apr_file_t
+                                         will not be closed when the pool
+                                         is destroyed. */
 #define APR_FOPEN_SENDFILE_ENABLED 0x01000 /**< Advisory flag that this
                                              file should support
                                              apr_socket_sendfile operation */

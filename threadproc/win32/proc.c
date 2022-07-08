@@ -419,7 +419,7 @@ static char *apr_caret_escape_args(apr_pool_t *p, const char *str)
     unsigned char *d;
     const unsigned char *s;
 
-    cmd = apr_palloc(p, 2 * strlen(str) + 1);	/* Be safe */
+    cmd = apr_palloc(p, 2 * strlen(str) + 1);    /* Be safe */
     d = (unsigned char *)cmd;
     s = (const unsigned char *)str;
     for (; *s; ++s) {
@@ -429,15 +429,15 @@ static char *apr_caret_escape_args(apr_pool_t *p, const char *str)
          * Convert them to spaces since they are effectively white
          * space to most applications
          */
-	if (*s == '\r' || *s == '\n') {
-	    *d++ = ' ';
+        if (*s == '\r' || *s == '\n') {
+            *d++ = ' ';
             continue;
-	}
+        }
 
-	if (IS_SHCHAR(*s)) {
-	    *d++ = '^';
-	}
-	*d++ = *s;
+        if (IS_SHCHAR(*s)) {
+            *d++ = '^';
+        }
+        *d++ = *s;
     }
     *d = '\0';
 
@@ -722,9 +722,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 pNext = wcschr(pNext, L'\0') + 1;
                 i++;
             }
-	    if (!i)
+            if (!i)
                 *(pNext++) = L'\0';
-	    *pNext = L'\0';
+            *pNext = L'\0';
         }
     } 
 

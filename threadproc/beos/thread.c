@@ -27,27 +27,27 @@ APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new, apr_pool
     }
 
     (*new)->pool = pool;
-	(*new)->attr = (int32)B_NORMAL_PRIORITY;
+    (*new)->attr = (int32)B_NORMAL_PRIORITY;
 
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr, apr_int32_t on)
 {
-	if (on == 1){
-		attr->detached = 1;
-	} else {
-		attr->detached = 0;
-	}    
+    if (on == 1){
+        attr->detached = 1;
+    } else {
+        attr->detached = 0;
+    }    
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
 {
-	if (attr->detached == 1){
-		return APR_DETACH;
-	}
-	return APR_NOTDETACH;
+    if (attr->detached == 1){
+        return APR_DETACH;
+    }
+    return APR_NOTDETACH;
 }
 
 APR_DECLARE(apr_status_t) apr_threadattr_stacksize_set(apr_threadattr_t *attr,

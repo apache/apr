@@ -136,7 +136,7 @@ APR_DECLARE_DATA int errno;
 
 /* MSVC 7.0 introduced _strtoi64 */
 #if _MSC_VER >= 1300 && _INTEGRAL_MAX_BITS >= 64
-#define APR_INT64_STRFN	      _strtoi64
+#define APR_INT64_STRFN          _strtoi64
 #endif
 
 #if APR_HAS_LARGE_FILES
@@ -171,7 +171,7 @@ APR_DECLARE_DATA int errno;
 /* Windows ODBC sql.h is always present */
 #define HAVE_SQL_H              1
 
-#define HAVE_ICONV_H 			APR_HAVE_ICONV
+#define HAVE_ICONV_H             APR_HAVE_ICONV
 
 /*
  * Windows does not have GDBM, and we always use the bundled (new) Expat

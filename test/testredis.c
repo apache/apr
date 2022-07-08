@@ -116,8 +116,8 @@ static int randval(apr_uint32_t high)
     double d = 0;
 
     if (firsttime == 0) {
-	srand((unsigned) (getpid()));
-	firsttime = 1;
+        srand((unsigned) (getpid()));
+        firsttime = 1;
     }
 
     d = (double) rand() / ((double) RAND_MAX + 1);
@@ -493,17 +493,17 @@ static void test_redis_setget(abts_case * tc, void *data)
     create_test_hash(pool, tdata);
 
     for (hi = apr_hash_first(p, tdata); hi; hi = apr_hash_next(hi)) {
-	const void *k;
-	void *v;
+        const void *k;
+        void *v;
         const char *key;
 
-	apr_hash_this(hi, &k, NULL, &v);
+        apr_hash_this(hi, &k, NULL, &v);
         key = k;
 
-	rv = apr_redis_set(redis, key, v, strlen(v), 27);
-	ABTS_ASSERT(tc, "set failed", rv == APR_SUCCESS);
-	rv = apr_redis_getp(redis, pool, key, &result, &len, NULL);
-	ABTS_ASSERT(tc, "get failed", rv == APR_SUCCESS);
+        rv = apr_redis_set(redis, key, v, strlen(v), 27);
+        ABTS_ASSERT(tc, "set failed", rv == APR_SUCCESS);
+        rv = apr_redis_getp(redis, pool, key, &result, &len, NULL);
+        ABTS_ASSERT(tc, "get failed", rv == APR_SUCCESS);
     }
 
     rv = apr_redis_getp(redis, pool, "nothere3423", &result, &len, NULL);
@@ -511,14 +511,14 @@ static void test_redis_setget(abts_case * tc, void *data)
     ABTS_ASSERT(tc, "get should have failed", rv != APR_SUCCESS);
 
     for (hi = apr_hash_first(p, tdata); hi; hi = apr_hash_next(hi)) {
-	const void *k;
-	const char *key;
+        const void *k;
+        const char *key;
 
-	apr_hash_this(hi, &k, NULL, NULL);
-	key = k;
+        apr_hash_this(hi, &k, NULL, NULL);
+        key = k;
 
-	rv = apr_redis_delete(redis, key, 0);
-	ABTS_ASSERT(tc, "delete failed", rv == APR_SUCCESS);
+        rv = apr_redis_delete(redis, key, 0);
+        ABTS_ASSERT(tc, "delete failed", rv == APR_SUCCESS);
     }
 }
 

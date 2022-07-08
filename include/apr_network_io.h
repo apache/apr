@@ -83,16 +83,16 @@ extern "C" {
                                    * again when NOPUSH is turned off
                                    */
 #define APR_INCOMPLETE_READ 4096  /**< Set on non-blocking sockets
-				   * (timeout != 0) on which the
-				   * previous read() did not fill a buffer
-				   * completely.  the next apr_socket_recv() 
-                                   * will first call select()/poll() rather than
-				   * going straight into read().  (Can also
-				   * be set by an application to force a
-				   * select()/poll() call before the next
-				   * read, in cases where the app expects
-				   * that an immediate read would fail.)
-				   */
+                                   * (timeout != 0) on which the
+                                   * previous read() did not fill a buffer
+                                   * completely.  the next apr_socket_recv() 
+                                                   * will first call select()/poll() rather than
+                                   * going straight into read().  (Can also
+                                   * be set by an application to force a
+                                   * select()/poll() call before the next
+                                   * read, in cases where the app expects
+                                   * that an immediate read would fail.)
+                                   */
 #define APR_INCOMPLETE_WRITE 8192 /**< like APR_INCOMPLETE_READ, but for write
                                    * @see APR_INCOMPLETE_READ
                                    */

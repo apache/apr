@@ -23,7 +23,7 @@ apr_status_t apr_threadkey_private_create(apr_threadkey_t **key,
     apr_status_t stat;
     
     (*key) = (apr_threadkey_t *)apr_palloc(pool, sizeof(apr_threadkey_t));
-	if ((*key) == NULL) {
+    if ((*key) == NULL) {
         return APR_ENOMEM;
     }
 

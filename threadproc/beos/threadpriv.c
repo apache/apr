@@ -29,121 +29,121 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key,
     }
 
     (*key)->pool = pool;
-    	
-	acquire_sem(lock);
-	for ((*key)->key=0; (*key)->key < BEOS_MAX_DATAKEYS; (*key)->key++){
-		if (key_table[(*key)->key].assigned == 0){
-			key_table[(*key)->key].assigned = 1;
-			key_table[(*key)->key].destructor = dest;
-			release_sem(lock);
-			return APR_SUCCESS;
-		}				
 
-	}
-	release_sem(lock);
+    acquire_sem(lock);
+    for ((*key)->key=0; (*key)->key < BEOS_MAX_DATAKEYS; (*key)->key++){
+        if (key_table[(*key)->key].assigned == 0){
+            key_table[(*key)->key].assigned = 1;
+            key_table[(*key)->key].destructor = dest;
+            release_sem(lock);
+            return APR_SUCCESS;
+        }
+
+    }
+    release_sem(lock);
     return APR_ENOMEM;
 }
 
 APR_DECLARE(apr_status_t) apr_threadkey_private_get(void **new, apr_threadkey_t *key)
 {
-	thread_id tid;
-	int i, index=0;
-	tid = find_thread(NULL);
-	for (i=0;i<BEOS_MAX_DATAKEYS;i++){
-		if (beos_data[i]->data){
-			/* it's been used */
-			if (beos_data[i]->td == tid){
-				index = i;
-			}
-		}
-	}
-	if (index == 0){
-		/* no storage for thread so we can't get anything... */
-		return APR_ENOMEM;
-	}
+    thread_id tid;
+    int i, index=0;
+    tid = find_thread(NULL);
+    for (i=0;i<BEOS_MAX_DATAKEYS;i++){
+        if (beos_data[i]->data){
+            /* it's been used */
+            if (beos_data[i]->td == tid){
+                index = i;
+            }
+        }
+    }
+    if (index == 0){
+        /* no storage for thread so we can't get anything... */
+        return APR_ENOMEM;
+    }
 
-	if ((key->key < BEOS_MAX_DATAKEYS) && (key_table)){
-		acquire_sem(key_table[key->key].lock);
-		if (key_table[key->key].count){
-			(*new) = (void*)beos_data[index]->data[key->key];
-		} else {
-			(*new) = NULL;
-		}
-		release_sem(key_table[key->key].lock);
-	} else {
-		(*new) = NULL;
-	}
-	return APR_SUCCESS;
+    if ((key->key < BEOS_MAX_DATAKEYS) && (key_table)){
+        acquire_sem(key_table[key->key].lock);
+        if (key_table[key->key].count){
+            (*new) = (void*)beos_data[index]->data[key->key];
+        } else {
+            (*new) = NULL;
+        }
+        release_sem(key_table[key->key].lock);
+    } else {
+        (*new) = NULL;
+    }
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_threadkey_private_set(void *priv, apr_threadkey_t *key)
 {
-	thread_id tid;
-	int i,index = 0, ret = 0;
+    thread_id tid;
+    int i,index = 0, ret = 0;
 
-	tid = find_thread(NULL);	
-	for (i=0; i < BEOS_MAX_DATAKEYS; i++){
-		if (beos_data[i]->data){
-			if (beos_data[i]->td == tid){index = i;}
-		}
-	}
-	if (index==0){
-		/* not yet been allocated */
-		for (i=0; i< BEOS_MAX_DATAKEYS; i++){
-			if (! beos_data[i]->data){
-				/* we'll take this one... */
-				index = i;
-				beos_data[i]->data = (const void **)malloc(sizeof(void *) * BEOS_MAX_DATAKEYS);
-				memset((void *)beos_data[i]->data, 0, sizeof(void *) * BEOS_MAX_DATAKEYS);
-				beos_data[i]->count = (int)malloc(sizeof(int));
-				beos_data[i]->td = (thread_id)malloc(sizeof(thread_id));
-				beos_data[i]->td = tid;
-			}
-		}
-	}
-	if (index == 0){
-		/* we're out of luck.. */
-		return APR_ENOMEM;
-	}
-	if ((key->key < BEOS_MAX_DATAKEYS) && (key_table)){
-		acquire_sem(key_table[key->key].lock);
-		if (key_table[key->key].count){
-			if (beos_data[index]->data[key->key] == NULL){
-				if (priv != NULL){
-					beos_data[index]->count++;
-					key_table[key->key].count++;
-				}
-			} else {
-				if (priv == NULL){
-					beos_data[index]->count--;
-					key_table[key->key].count--;
-				}
-			}
-			beos_data[index]->data[key->key] = priv;
-			ret = 1;
-		} else {
-			ret = 0;
-		}
-		release_sem(key_table[key->key].lock);
-	}
-	if (ret)
-    	return APR_SUCCESS;
-	return APR_ENOMEM;
+    tid = find_thread(NULL);    
+    for (i=0; i < BEOS_MAX_DATAKEYS; i++){
+        if (beos_data[i]->data){
+            if (beos_data[i]->td == tid){index = i;}
+        }
+    }
+    if (index==0){
+        /* not yet been allocated */
+        for (i=0; i< BEOS_MAX_DATAKEYS; i++){
+            if (! beos_data[i]->data){
+                /* we'll take this one... */
+                index = i;
+                beos_data[i]->data = (const void **)malloc(sizeof(void *) * BEOS_MAX_DATAKEYS);
+                memset((void *)beos_data[i]->data, 0, sizeof(void *) * BEOS_MAX_DATAKEYS);
+                beos_data[i]->count = (int)malloc(sizeof(int));
+                beos_data[i]->td = (thread_id)malloc(sizeof(thread_id));
+                beos_data[i]->td = tid;
+            }
+        }
+    }
+    if (index == 0){
+        /* we're out of luck.. */
+        return APR_ENOMEM;
+    }
+    if ((key->key < BEOS_MAX_DATAKEYS) && (key_table)){
+        acquire_sem(key_table[key->key].lock);
+        if (key_table[key->key].count){
+            if (beos_data[index]->data[key->key] == NULL){
+                if (priv != NULL){
+                    beos_data[index]->count++;
+                    key_table[key->key].count++;
+                }
+            } else {
+                if (priv == NULL){
+                    beos_data[index]->count--;
+                    key_table[key->key].count--;
+                }
+            }
+            beos_data[index]->data[key->key] = priv;
+            ret = 1;
+        } else {
+            ret = 0;
+        }
+        release_sem(key_table[key->key].lock);
+    }
+    if (ret)
+        return APR_SUCCESS;
+    return APR_ENOMEM;
 }
 
 APR_DECLARE(apr_status_t) apr_threadkey_private_delete(apr_threadkey_t *key)
 {
-	if (key->key < BEOS_MAX_DATAKEYS){
-		acquire_sem(key_table[key->key].lock);
-		if (key_table[key->key].count == 1){
-			key_table[key->key].destructor = NULL;
-			key_table[key->key].count = 0;
-		}
-		release_sem(key_table[key->key].lock);
-	} else {
-		return APR_ENOMEM;
-	}
-	return APR_SUCCESS;
+    if (key->key < BEOS_MAX_DATAKEYS){
+        acquire_sem(key_table[key->key].lock);
+        if (key_table[key->key].count == 1){
+            key_table[key->key].destructor = NULL;
+            key_table[key->key].count = 0;
+        }
+        release_sem(key_table[key->key].lock);
+    } else {
+        return APR_ENOMEM;
+    }
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_threadkey_data_get(void **data, const char *key,

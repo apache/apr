@@ -111,8 +111,8 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
      * of the mapped region!
      */
 
-	(*new)->mhandle = CreateFileMappingW(file->filehand, NULL, fmaccess,
-										 0, 0, NULL);
+    (*new)->mhandle = CreateFileMappingW(file->filehand, NULL, fmaccess,
+                                         0, 0, NULL);
     if (!(*new)->mhandle || (*new)->mhandle == INVALID_HANDLE_VALUE)
     {
         *new = NULL;
