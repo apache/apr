@@ -267,6 +267,7 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, Process32NextW, 0, (
 
 #define HAVE_POLL   1
 
+#if HAVE_IF_NAMETOINDEX
 #ifdef if_nametoindex
 #undef if_nametoindex
 #endif
@@ -274,7 +275,9 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_IPHLPAPI, NET_IFINDEX, WINAPI, if_nametoindex, 0, 
     IN PCSTR InterfaceName),
     (InterfaceName));
 #define if_nametoindex apr_winapi_if_nametoindex
+#endif
 
+#if HAVE_IF_INDEXTONAME
 #ifdef if_indextoname
 #undef if_indextoname
 #endif
@@ -283,6 +286,7 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_IPHLPAPI, PCHAR, NETIOAPI_API_, if_indextoname, 0,
     PCHAR       InterfaceName),
     (InterfaceIndex, InterfaceName));
 #define if_indextoname apr_winapi_if_indextoname
+#endif
 
 APR_DECLARE_LATE_DLL_FUNC(DLL_API_MS_WIN_DOWNLEVEL_SHELL32_L1_1_0, LPWSTR *,
                           STDAPICALLTYPE, CommandLineToArgvW, 0,
