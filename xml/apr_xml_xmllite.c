@@ -401,7 +401,7 @@ read_state(apr_xml_parser *parser,
     if (node_type == XmlNodeType_Element) {
         LPCWSTR wname;
         UINT wname_len;
-        ULONG attr_count;
+        UINT attr_count;
         char **attrs;
         const char* elem_name;
 
@@ -422,7 +422,7 @@ read_state(apr_xml_parser *parser,
         }
 
         if (attr_count > 0) {
-            ULONG i;
+            UINT i;
 
             attrs = apr_palloc(parser->p, sizeof(char*) * (attr_count + 1) * 2);
 
