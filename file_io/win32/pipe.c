@@ -110,7 +110,7 @@ static apr_status_t file_pipe_create(apr_file_t **in,
 #endif
     if (apr_os_level >= APR_WIN_NT) {
         apr_status_t rv;
-        char rand[8];
+        unsigned char rand[8];
         int pid = getpid();
 #define FMT_PIPE_NAME "\\\\.\\pipe\\apr-pipe-%x.%lx."
         /*                                    ^   ^ ^
