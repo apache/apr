@@ -5,3 +5,6 @@ indent_style = space
 
 [**/CMakeLists.txt]
 indent_size = 2
+
+[*.json]
+ident_size = 2
