@@ -484,6 +484,13 @@ SET(install_modules)
 SET(install_bin_pdb)
 SET(dbd_drivers)
 
+IF (MSVC)
+  # Ignore Microsoft's interpretation of secure development
+  # and the POSIX string handling API
+  ADD_COMPILE_DEFINITIONS(_CRT_SECURE_NO_DEPRECATE)
+  STRING(APPEND CMAKE_C_FLAGS " /wd4996")
+ENDIF()
+
 # libapr-2 is shared, apr-2 is static
 ADD_LIBRARY(${apr_libname} SHARED ${APR_SOURCES} ${APR_PUBLIC_HEADERS_GENERATED} libapr.rc)
 LIST(APPEND install_targets ${apr_libname})

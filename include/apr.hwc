@@ -63,16 +63,6 @@
 #pragma warning(disable: 4100 4127 4163 4201 4514; once: 4057 4075 4244)
 #endif
 
-/* Ignore Microsoft's interpretation of secure development
- * and the POSIX string handling API
- */
-#if defined(_MSC_VER) && _MSC_VER >= 1400
-#ifndef _CRT_SECURE_NO_DEPRECATE
-#define _CRT_SECURE_NO_DEPRECATE
-#endif
-#pragma warning(disable: 4996)
-#endif
-
 /**
  * @file apr.h
  * @brief APR Platform Definitions
@@ -724,9 +714,6 @@ typedef  int         gid_t;
  */
 #if defined(_MSC_VER) && _MSC_VER >= 1200
 #pragma warning(pop)
-#if _MSC_VER >= 1400
-#pragma warning(disable: 4996)
-#endif
 #endif
 
 #endif /* APR_H */
