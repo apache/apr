@@ -487,8 +487,7 @@ SET(dbd_drivers)
 IF (MSVC)
   # Ignore Microsoft's interpretation of secure development
   # and the POSIX string handling API
-  ADD_COMPILE_DEFINITIONS(_CRT_SECURE_NO_DEPRECATE)
-  STRING(APPEND CMAKE_C_FLAGS " /wd4996")
+  ADD_COMPILE_DEFINITIONS(_CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_WARNINGS)
 ENDIF()
 
 # libapr-2 is shared, apr-2 is static
