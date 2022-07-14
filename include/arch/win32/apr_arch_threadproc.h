@@ -38,6 +38,7 @@ struct apr_threadattr_t {
     apr_pool_t *pool;
     apr_int32_t detach;
     apr_size_t stacksize;
+    apr_size_t max_free;
 };
 
 struct apr_threadkey_t {

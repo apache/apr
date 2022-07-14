@@ -44,6 +44,7 @@ struct apr_threadattr_t {
     apr_size_t  stack_size;
     apr_int32_t detach;
     char *thread_name;
+    apr_size_t max_free;
 };
 
 struct apr_threadkey_t {

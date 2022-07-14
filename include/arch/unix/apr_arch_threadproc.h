@@ -65,6 +65,7 @@ struct apr_thread_t {
 struct apr_threadattr_t {
     apr_pool_t *pool;
     pthread_attr_t attr;
+    apr_size_t max_free;
 };
 
 struct apr_threadkey_t {

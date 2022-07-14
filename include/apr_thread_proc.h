@@ -278,6 +278,15 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
                                                        apr_size_t guardsize);
 
 /**
+ * Set the threshold at which the thread pool allocator should start
+ * giving blocks back to the system.
+ * @param attr The threadattr to affect 
+ * @param on Non-zero if detached threads should be created.
+ */
+APR_DECLARE(apr_status_t) apr_threadattr_max_free_set(apr_threadattr_t *attr, 
+                                                      apr_size_t size);
+
+/**
  * Create a new thread of execution
  * @param new_thread The newly created thread handle.
  * @param attr The threadattr to use to determine how to create the thread
