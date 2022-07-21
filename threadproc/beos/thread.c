@@ -62,6 +62,13 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
     return APR_ENOTIMPL;
 }
 
+APR_DECLARE(apr_status_t) apr_threadattr_max_free_set(apr_threadattr_t *attr, 
+                                                      apr_size_t size)
+{
+    attr->max_free = size;
+    return APR_SUCCESS;
+}
+
 #if APR_HAS_THREAD_LOCAL
 static APR_THREAD_LOCAL apr_thread_t *current_thread = NULL;
 #endif
@@ -90,27 +97,22 @@ static apr_status_t alloc_thread(apr_thread_t **new,
 {
     apr_status_t stat;
     apr_abortfunc_t abort_fn = apr_pool_abort_get(pool);
-    apr_allocator_t *allocator;
     apr_pool_t *p;
 
     /* The thread can be detached anytime (from the creation or later with
      * apr_thread_detach), so it needs its own pool and allocator to not
      * depend on a parent pool which could be destroyed before the thread
      * exits. The allocator needs no mutex obviously since the pool should
-     * not be used nor create children pools outside the thread.
+     * not be used nor create children pools outside the thread. Passing
+     * NULL allocator will create one like that.
      */
-    stat = apr_allocator_create(&allocator);
+    stat = apr_pool_create_unmanaged_ex(&p, abort_fn, NULL);
     if (stat != APR_SUCCESS) {
-        if (abort_fn)
-            abort_fn(stat);
         return stat;
     }
-    stat = apr_pool_create_unmanaged_ex(&p, abort_fn, allocator);
-    if (stat != APR_SUCCESS) {
-        apr_allocator_destroy(allocator);
-        return stat;
+    if (attr && attr->max_free) {
+        apr_allocator_max_free_set(apr_pool_allocator_get(p), attr->max_free);
     }
-    apr_allocator_owner_set(allocator, p);
 
     (*new) = (apr_thread_t *)apr_pcalloc(p, sizeof(apr_thread_t));
     if ((*new) == NULL) {

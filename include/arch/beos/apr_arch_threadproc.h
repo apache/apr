@@ -53,6 +53,7 @@ struct apr_threadattr_t {
     int32 attr;
     int detached;
     int joinable;
+    apr_size_t max_free;
 };
 
 struct apr_threadkey_t {
