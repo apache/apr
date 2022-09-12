@@ -51,15 +51,37 @@ int wmain(int argc, const wchar_t **wargv, const wchar_t **wenv)
 {
     char **argv;
     char **env;
-    int dupenv;
+    int envc;
+    int i;
 
     (void)apr_wastrtoastr(&argv, wargv, argc);
 
-    dupenv = apr_wastrtoastr(&env, wenv, -1);
+    envc = 0;
+    while (wenv[envc]) {
+        envc++;
+    }
 
-    _environ = apr_malloc_dbg((dupenv + 1) * sizeof (char *),
-                              __FILE__, __LINE__ );
-    memcpy(_environ, env, (dupenv + 1) * sizeof (char *));
+    /* Initial environment stored as single heap block, but uses
+     * separate heap entry for every environment variable
+     * after first change.
+     */
+    env = apr_malloc_dbg((envc + 1) * sizeof(char *), __FILE__, __LINE__);
+
+    for (i = 0; i < envc; i++) {
+        apr_size_t wcount;
+        apr_size_t envlen;
+
+        wcount = wcslen(wenv[i]) + 1;
+        envlen = (wcount - 1) * 3 + 1;
+
+        env[i] = apr_malloc_dbg(envlen, __FILE__, __LINE__);
+
+        (void)apr_conv_ucs2_to_utf8(wenv[i], &wcount, env[i], &envlen);
+    }
+
+    env[i] = NULL;
+
+    _environ = env;
 
     /* MSVCRT will attempt to maintain the wide environment calls
      * on _putenv(), which is bogus if we've passed a non-ascii
