@@ -16,6 +16,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#if defined(_MSC_VER)
+#include <crtdbg.h>
+#endif
 
 #include "abts.h"
 #include "testutil.h"
@@ -41,4 +44,18 @@ void initialize(void) {
     atexit(apr_terminate);
     
     apr_pool_create(&p, NULL);
+
+#if _MSC_VER >= 1400
+    /* In release mode: Redirect abort() errors to stderr */
+    _set_error_mode(_OUT_TO_STDERR);
+
+    /* In _DEBUG mode: Redirect all debug output (E.g. assert() to stderr.
+        (Ignored in release builds) */
+    _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+    _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+    _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+    _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+    _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+    _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+#endif /* _MSC_VER >= 1400 */
 }
