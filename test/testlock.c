@@ -428,6 +428,95 @@ static void test_timeoutmutex(abts_case *tc, void *data)
 }
 #endif
 
+static void test_thread_nestedmutex(abts_case *tc, void *data)
+{
+    apr_thread_mutex_t *m;
+    apr_status_t rv;
+
+    rv = apr_thread_mutex_create(&m, APR_THREAD_MUTEX_NESTED, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, m);
+
+    rv = apr_thread_mutex_lock(m);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_thread_mutex_trylock(m);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    if (rv == APR_SUCCESS)
+    {
+        rv = apr_thread_mutex_unlock(m);
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    }
+
+    rv = apr_thread_mutex_unlock(m);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
+
+static void test_thread_unnestedmutex(abts_case *tc, void *data)
+{
+    apr_thread_mutex_t *m;
+    apr_status_t rv;
+
+    rv = apr_thread_mutex_create(&m, APR_THREAD_MUTEX_UNNESTED, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, m);
+
+    rv = apr_thread_mutex_lock(m);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_thread_mutex_trylock(m);
+    ABTS_INT_EQUAL(tc, APR_EBUSY, rv);
+    if (rv == APR_SUCCESS)
+    {
+        rv = apr_thread_mutex_unlock(m);
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    }
+
+    rv = apr_thread_mutex_unlock(m);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
+
+#ifdef WIN32
+static void *APR_THREAD_FUNC
+thread_win32_abandoned_mutex_function(apr_thread_t *thd, void *data)
+{
+    apr_thread_mutex_t *mutex = data;
+    apr_status_t rv;
+
+    rv = apr_thread_mutex_lock(mutex);
+
+    /* exit from thread without unlocking mutex. */
+    apr_thread_exit(thd, rv);
+
+    return NULL;
+}
+
+static void test_win32_abandoned_mutex(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_thread_t *thread;
+    apr_thread_mutex_t *mutex;
+
+    /* Create timed mutex: APR will create Win32 mutex object in this case. */
+    rv = apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_TIMED, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_thread_create(&thread, NULL, thread_win32_abandoned_mutex_function,
+                           mutex, p);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    apr_thread_join(&rv, thread);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_thread_mutex_trylock(mutex);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    rv = apr_thread_mutex_unlock (mutex);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
+
+#endif
+
 #endif /* !APR_HAS_THREADS */
 
 #if !APR_HAS_THREADS
@@ -449,11 +538,16 @@ abts_suite *testlock(abts_suite *suite)
 #if APR_HAS_TIMEDLOCKS
     abts_run_test(suite, test_thread_timedmutex, NULL);
 #endif
+    abts_run_test(suite, test_thread_nestedmutex, NULL);
+    abts_run_test(suite, test_thread_unnestedmutex, NULL);
     abts_run_test(suite, test_thread_rwlock, NULL);
     abts_run_test(suite, test_cond, NULL);
     abts_run_test(suite, test_timeoutcond, NULL);
 #if APR_HAS_TIMEDLOCKS
     abts_run_test(suite, test_timeoutmutex, NULL);
+#endif
+#ifdef WIN32
+    abts_run_test(suite, test_win32_abandoned_mutex, NULL);
 #endif
 #endif
 
