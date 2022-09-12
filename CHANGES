@@ -73,6 +73,8 @@ Changes for APR 1.7.1
   *) Fix attempt to free invalid memory on exit when apr_app is used
      on Windows. [Ivan Zhakov]
 
+  *) Fix double free on exit when apr_app is used on Windows. [Ivan Zhakov]
+
 Changes for APR 1.7.0
 
   *) apr_dir_read: [Unix] Dropped the preference of the dirread_r() flavor
