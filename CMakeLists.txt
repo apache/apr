@@ -208,54 +208,52 @@ SET(APR_SOURCES
   user/win32/userinfo.c
 )
 
-SET(APR_TEST_SOURCES
-  test/abts.c
-  test/testargs.c
-  test/testatomic.c
-  test/testcond.c
-  test/testdir.c
-  test/testdso.c
-  test/testdup.c
-  test/testenv.c
-  test/testencode.c
-  test/testescape.c
-  test/testfile.c
-  test/testfilecopy.c
-  test/testfileinfo.c
-  test/testflock.c
-  test/testfmt.c
-  test/testfnmatch.c
-  test/testglobalmutex.c
-  test/testhash.c
-  test/testipsub.c
-  test/testlfs.c
-  test/testlock.c
-  test/testmmap.c
-  test/testnames.c
-  test/testoc.c
-  test/testpath.c
-  test/testpipe.c
-  test/testpoll.c
-  test/testpools.c
-  test/testproc.c
-  test/testprocmutex.c
-  test/testrand.c
-  test/testshm.c
-  test/testskiplist.c
-  test/testsleep.c
-  test/testsock.c
-  test/testsockets.c
-  test/testsockopt.c
-  test/teststr.c
-  test/teststrnatcmp.c
-  test/testtable.c
-  test/testtemp.c
-  test/testthread.c
-  test/testtime.c
-  test/testud.c
-  test/testuser.c
-  test/testutil.c
-  test/testvsn.c
+SET(APR_TEST_SUITES
+  testargs
+  testatomic
+  testcond
+  testdir
+  testdso
+  testdup
+  testenv
+  testencode
+  testescape
+  testfile
+  testfilecopy
+  testfileinfo
+  testflock
+  testfmt
+  testfnmatch
+  testglobalmutex
+  testhash
+  testipsub
+  testlfs
+  testlock
+  testmmap
+  testnames
+  testoc
+  testpath
+  testpipe
+  testpoll
+  testpools
+  testproc
+  testprocmutex
+  testrand
+  testshm
+  testskiplist
+  testsleep
+  testsock
+  testsockets
+  testsockopt
+  teststr
+  teststrnatcmp
+  testtable
+  testtemp
+  testthread
+  testtime
+  testud
+  testuser
+  testvsn
 )
 
 SET(install_targets)
@@ -317,12 +315,25 @@ IF(APR_BUILD_TESTAPR)
   ENDIF()
   ADD_TEST(NAME testapp COMMAND testapp)
 
+  SET (APR_TEST_SOURCES
+    test/abts.c
+    test/testutil.c
+    )
+
+  FOREACH(testsuite ${APR_TEST_SUITES})
+    LIST(APPEND APR_TEST_SOURCES test/${testsuite}.c)
+  ENDFOREACH()
+
   ADD_EXECUTABLE(testall ${APR_TEST_SOURCES})
   TARGET_LINK_LIBRARIES(testall ${whichapr} ${APR_SYSTEM_LIBS})
+  SET_TARGET_PROPERTIES(testall PROPERTIES COMPILE_DEFINITIONS "BINPATH=$<TARGET_FILE_DIR:testall>")
   IF(apiflag)
     SET_TARGET_PROPERTIES(testall PROPERTIES COMPILE_FLAGS ${apiflag})
   ENDIF()
-  ADD_TEST(NAME testall COMMAND testall)
+
+  FOREACH(test ${APR_TEST_SUITES})
+    ADD_TEST(NAME ${test} COMMAND testall -v ${test})
+  ENDFOREACH()
 
   ADD_LIBRARY(mod_test MODULE test/mod_test.c)
   TARGET_LINK_LIBRARIES(mod_test ${whichapr} ${APR_SYSTEM_LIBS})
@@ -359,6 +370,7 @@ IF(APR_BUILD_TESTAPR)
     STRING(REGEX REPLACE ".*/([^\\]+)\\.c" "\\1" proggie ${sourcefile})
     ADD_EXECUTABLE(${proggie} ${sourcefile})
     TARGET_LINK_LIBRARIES(${proggie} ${whichapr} ${APR_SYSTEM_LIBS})
+    SET_TARGET_PROPERTIES(${proggie} PROPERTIES COMPILE_DEFINITIONS "BINPATH=$<TARGET_FILE_DIR:${proggie}>")
     IF(apiflag)
       SET_TARGET_PROPERTIES(${proggie} PROPERTIES COMPILE_FLAGS ${apiflag})
     ENDIF()
