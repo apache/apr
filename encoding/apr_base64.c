@@ -151,7 +151,7 @@ APR_DECLARE(int) apr_base64_decode(char *bufplain, const char *bufcoded)
  * - on EBCDIC machines, the conversion of the output to ebcdic is left out
  */
 APR_DECLARE(int) apr_base64_decode_binary(unsigned char *bufplain,
-                   const char *bufcoded)
+                                          const char *bufcoded)
 {
     int nbytesdecoded;
     register const unsigned char *bufin;
@@ -292,7 +292,7 @@ APR_DECLARE(char *) apr_pbase64_encode(apr_pool_t *p, const char *string)
     char *encoded;
     apr_size_t len = strlen(string);
 
-    assert(len <= (apr_size_t)APR_INT32_MAX);
+    assert(len <= (apr_size_t)APR_BASE64_ENCODE_MAX);
     encoded = (char *) apr_palloc(p, apr_base64_encode_len((int)len));
     apr_base64_encode(encoded, string, (int)len);
 
