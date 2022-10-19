@@ -574,6 +574,12 @@ APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
  * socket option.
  * The number of bytes actually sent is stored in argument 4.
  *
+ * This function does not provide full-write and/or atomicity guarantees
+ * if the underlying system call does not either. Some systems (like Windows)
+ * guarantee both for a single system call but this call does not allow for
+ * as much data as an iovec vector can contain; in this case apr_socket_sendv()
+ * can issue multiple system calls thus favoring full-write over atomicity.
+ *
  * It is possible for both bytes to be sent and an error to be returned.
  *
  * APR_EINTR is never returned.
