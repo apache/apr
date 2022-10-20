@@ -3053,8 +3053,7 @@ APU_FIND_ICONV
 dnl Enable DSO build; must be last:
 APR_MODULAR_DSO
 
-AC_SEARCH_LIBS(crypt, crypt ufc,
-               [APR_ADDTO(APRUTIL_LIBS, [$ac_cv_search_crypt])])
+AC_SEARCH_LIBS(crypt, crypt ufc)
 AC_MSG_CHECKING(if system crypt() function is threadsafe)
 if test "x$apu_crypt_threadsafe" = "x1"; then
   AC_DEFINE(APU_CRYPT_THREADSAFE, 1, [Define if the system crypt() function is threadsafe])
