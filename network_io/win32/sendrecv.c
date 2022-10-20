@@ -108,17 +108,12 @@ APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock,
     total_len = 0;
     for (i = 0; i < in_vec; i++) {
         apr_size_t iov_len = vec[i].iov_len;
-        if (iov_len > MAXDWORD) {
-            /* WSASend() returns NumberOfBytesSent as DWORD, so any iovec
-               should be less than that. */
-            return APR_EINVAL;
-        }
-        total_len += iov_len;
-        if (total_len > MAXDWORD) {
+        if (iov_len > (apr_size_t)MAXDWORD - total_len) {
             /* WSASend() returns NumberOfBytesSent as DWORD, so the total size
                should be less than that. */
             return APR_EINVAL;
         }
+        total_len += iov_len;
     }
 
     pWsaBuf = (in_vec <= WSABUF_ON_STACK) ? _alloca(sizeof(WSABUF) * (in_vec))
