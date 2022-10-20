@@ -90,51 +90,41 @@ APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock,
 {
     apr_status_t rc = APR_SUCCESS;
     apr_ssize_t rv;
-    apr_size_t cur_len;
-    apr_int32_t nvec = 0;
-    int i, j = 0;
+    apr_size_t total_len;
+    apr_int32_t i;
     DWORD dwBytes = 0;
     WSABUF *pWsaBuf;
 
+    total_len = 0;
     for (i = 0; i < in_vec; i++) {
-        cur_len = vec[i].iov_len;
-        nvec++;
-        while (cur_len > APR_DWORD_MAX) {
-            nvec++;
-            cur_len -= APR_DWORD_MAX;
-        } 
+        apr_size_t iov_len = vec[i].iov_len;
+        if (iov_len > MAXDWORD) {
+            /* WSASend() returns NumberOfBytesSent as DWORD, so any iovec
+               should be less than that. */
+            return APR_EINVAL;
+        }
+        total_len += iov_len;
+        if (total_len > MAXDWORD) {
+            /* WSASend() returns NumberOfBytesSent as DWORD, so the total size
+               should be less than that. */
+            return APR_EINVAL;
+        }
     }
 
-    pWsaBuf = (nvec <= WSABUF_ON_STACK) ? _alloca(sizeof(WSABUF) * (nvec))
-                                         : malloc(sizeof(WSABUF) * (nvec));
+    pWsaBuf = (in_vec <= WSABUF_ON_STACK) ? _alloca(sizeof(WSABUF) * (in_vec))
+                                          : malloc(sizeof(WSABUF) * (in_vec));
     if (!pWsaBuf)
         return APR_ENOMEM;
 
     for (i = 0; i < in_vec; i++) {
-        char * base = vec[i].iov_base;
-        cur_len = vec[i].iov_len;
-        
-        do {
-            if (cur_len > APR_DWORD_MAX) {
-                pWsaBuf[j].buf = base;
-                pWsaBuf[j].len = APR_DWORD_MAX;
-                cur_len -= APR_DWORD_MAX;
-                base += APR_DWORD_MAX;
-            }
-            else {
-                pWsaBuf[j].buf = base;
-                pWsaBuf[j].len = (DWORD)cur_len;
-                cur_len = 0;
-            }
-            j++;
-
-        } while (cur_len > 0);
+        pWsaBuf[i].buf = vec[i].iov_base;
+        pWsaBuf[i].len = (ULONG) vec[i].iov_len;
     }
-    rv = WSASend(sock->socketdes, pWsaBuf, nvec, &dwBytes, 0, NULL, NULL);
+    rv = WSASend(sock->socketdes, pWsaBuf, in_vec, &dwBytes, 0, NULL, NULL);
     if (rv == SOCKET_ERROR) {
         rc = apr_get_netos_error();
     }
-    if (nvec > WSABUF_ON_STACK) 
+    if (in_vec > WSABUF_ON_STACK)
         free(pWsaBuf);
 
     *nbytes = dwBytes;
