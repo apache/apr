@@ -20,7 +20,6 @@
 #include "apr_network_io.h"
 #include "apr_lib.h"
 #include "apr_arch_file_io.h"
-#include <assert.h>
 #if APR_HAVE_TIME_H
 #include <time.h>
 #endif
@@ -35,14 +34,7 @@
  * than 8193 bytes.
  */
 #define MAX_SEGMENT_SIZE 65536
-
-/* Maximum number of WSABUF allocated for a single apr_socket_sendv() */
 #define WSABUF_ON_STACK 50
-#if APR_SIZEOF_VOIDP < 8
-#define WSABUF_ON_HEAP (APR_DWORD_MAX / sizeof(WSABUF))
-#else
-#define WSABUF_ON_HEAP (APR_DWORD_MAX)
-#endif
 
 APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
                                           apr_size_t *len)
@@ -99,32 +91,18 @@ APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock,
     apr_status_t rc = APR_SUCCESS;
     apr_ssize_t rv;
     apr_size_t cur_len;
-    apr_size_t cur_pos = 0;
-    apr_size_t total_len = 0;
-    apr_size_t nvec = 0;
-    int i;
+    apr_int32_t nvec = 0;
+    int i, j = 0;
+    DWORD dwBytes = 0;
     WSABUF *pWsaBuf;
-
-    *nbytes = 0; /* until further notice */
 
     for (i = 0; i < in_vec; i++) {
         cur_len = vec[i].iov_len;
-        if (!cur_len) {
-            continue;
-        }
-        if (cur_len > APR_SIZE_MAX - total_len) {
-            /* max total_len can take */
-            return APR_EINVAL;
-        }
-        total_len += cur_len;
         nvec++;
-    }
-    if (!nvec) {
-        return (in_vec >= 0) ? APR_SUCCESS : APR_EINVAL;
-    }
-    if (nvec > WSABUF_ON_HEAP) {
-        /* max malloc() and/or WSASend() can take */
-        nvec = WSABUF_ON_HEAP;
+        while (cur_len > APR_DWORD_MAX) {
+            nvec++;
+            cur_len -= APR_DWORD_MAX;
+        } 
     }
 
     pWsaBuf = (nvec <= WSABUF_ON_STACK) ? _alloca(sizeof(WSABUF) * (nvec))
@@ -132,48 +110,34 @@ APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock,
     if (!pWsaBuf)
         return APR_ENOMEM;
 
-    for (i = 0; total_len > 0;) {
-        DWORD nbuf = 0, nsend = 0, nsent = 0;
-
+    for (i = 0; i < in_vec; i++) {
+        char * base = vec[i].iov_base;
+        cur_len = vec[i].iov_len;
+        
         do {
-            assert(i < in_vec);
-            cur_len = vec[i].iov_len - cur_pos;
-            if (!cur_len) {
-                assert(cur_pos == 0);
-                i++;
-                continue;
-            }
-            pWsaBuf[nbuf].buf = (char *)vec[i].iov_base + cur_pos;
-            if (cur_len > APR_DWORD_MAX - nsend) {
-                cur_len = APR_DWORD_MAX - nsend;
-                cur_pos += cur_len;
+            if (cur_len > APR_DWORD_MAX) {
+                pWsaBuf[j].buf = base;
+                pWsaBuf[j].len = APR_DWORD_MAX;
+                cur_len -= APR_DWORD_MAX;
+                base += APR_DWORD_MAX;
             }
             else {
-                cur_pos = 0;
-                i++;
+                pWsaBuf[j].buf = base;
+                pWsaBuf[j].len = (DWORD)cur_len;
+                cur_len = 0;
             }
-            nsend += cur_len;
-            pWsaBuf[nbuf++].len = (DWORD)cur_len;
-        } while (nbuf < nvec && nsend < total_len && nsend < APR_DWORD_MAX);
+            j++;
 
-        rv = WSASend(sock->socketdes, pWsaBuf, nbuf, &nsent, 0, NULL, NULL);
-        if (rv == SOCKET_ERROR) {
-            rc = apr_get_netos_error();
-            break;
-        }
-        *nbytes += nsent;
-        if (nsent < nsend) {
-            /* Stop on short/partial write (nonblocking supposedly, but anyway
-             * we don't guarantee full write if the system does not either).
-             */
-            break;
-        }
-        total_len -= nsent;
+        } while (cur_len > 0);
     }
-
+    rv = WSASend(sock->socketdes, pWsaBuf, nvec, &dwBytes, 0, NULL, NULL);
+    if (rv == SOCKET_ERROR) {
+        rc = apr_get_netos_error();
+    }
     if (nvec > WSABUF_ON_STACK) 
         free(pWsaBuf);
 
+    *nbytes = dwBytes;
     return rc;
 }
 
