@@ -475,7 +475,6 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
             break;
         }
         if (sock->options & APR_INCOMPLETE_WRITE) {
-            apr_status_t arv;
             sock->options &= ~APR_INCOMPLETE_WRITE;
             arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
             if (arv != APR_SUCCESS) {
