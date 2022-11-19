@@ -30,11 +30,11 @@ extern "C" {
 
 /**
  * @defgroup apr_getopt Command Argument Parsing
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
-/** 
+/**
  * An @c apr_getopt_t error callback function.
  *
  * @a arg is this @c apr_getopt_t's @c errarg member.
@@ -46,7 +46,7 @@ typedef struct apr_getopt_t apr_getopt_t;
 
 /**
  * Structure to store command line argument information.
- */ 
+ */
 struct apr_getopt_t {
     /** context for processing */
     apr_pool_t *cont;
@@ -106,8 +106,8 @@ APR_DECLARE(apr_status_t) apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,
 /**
  * Parse the options initialized by apr_getopt_init().
  * @param os     The apr_opt_t structure returned by apr_getopt_init()
- * @param opts   A string of characters that are acceptable options to the 
- *               program.  Characters followed by ":" are required to have an 
+ * @param opts   A string of characters that are acceptable options to the
+ *               program.  Characters followed by ":" are required to have an
  *               option associated
  * @param option_ch  The next option character parsed
  * @param option_arg The argument following the option character:
@@ -119,7 +119,7 @@ APR_DECLARE(apr_status_t) apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,
  *             APR_SUCCESS  --  The next option was found.
  * </PRE>
  */
-APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
+APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
                                      char *option_ch, const char **option_arg);
 
 /**

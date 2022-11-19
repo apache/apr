@@ -39,7 +39,7 @@
 
 /**
  * @defgroup apr_ring Ring Macro Implementations
- * @ingroup APR 
+ * @ingroup APR
  * A ring is a kind of doubly-linked list that can be manipulated
  * without knowing where its head is.
  * @{
@@ -512,6 +512,6 @@
 #define APR_RING_CHECK_ELEM_CONSISTENCY(ep, elem, link)
 #endif
 
-/** @} */ 
+/** @} */
 
 #endif /* !APR_RING_H */

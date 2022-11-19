@@ -162,7 +162,7 @@ typedef struct apr_crypto_block_key_digest_t {
  * Types of ciphers supported by the apr_
  */
 typedef enum
-{   
+{
     APR_CRYPTO_CIPHER_AUTO, /** Choose the recommended cipher / autodetect the cipher */
     APR_CRYPTO_CIPHER_AES_256_CTR, /** AES 256 - CTR mode */
     APR_CRYPTO_CIPHER_CHACHA20, /** ChaCha20 */

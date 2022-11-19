@@ -21,7 +21,7 @@
 #define APR_XML_H
 
 /**
- * @defgroup APR_Util_XML XML 
+ * @defgroup APR_Util_XML XML
  * @ingroup APR
  * @{
  */
@@ -173,13 +173,13 @@ struct apr_xml_elem {
     apr_text_header following_cdata;
 
     /** parent element */
-    struct apr_xml_elem *parent;	
+    struct apr_xml_elem *parent;
     /** next (sibling) element */
-    struct apr_xml_elem *next;	
+    struct apr_xml_elem *next;
     /** first child element */
     struct apr_xml_elem *first_child;
     /** first attribute */
-    struct apr_xml_attr *attr;		
+    struct apr_xml_attr *attr;
 
     /* used only during parsing */
     /** last child element */
@@ -199,7 +199,7 @@ struct apr_xml_elem {
 /** apr_xml_doc: holds a parsed XML document */
 struct apr_xml_doc {
     /** root element */
-    apr_xml_elem *root;	
+    apr_xml_elem *root;
     /** array of namespaces used */
     apr_array_header_t *namespaces;
 };
@@ -221,7 +221,7 @@ APR_DECLARE(apr_xml_parser *) apr_xml_parser_create(apr_pool_t *pool);
  *               errors), will be set to NULL on successful completion.
  * @param ppdoc  A pointer to *apr_xml_doc (which has the parsed results in it)
  * @param xmlfd  A file to read from.
- * @param buffer_length Buffer length which would be suitable 
+ * @param buffer_length Buffer length which would be suitable
  * @return Any errors found during parsing.
  */
 APR_DECLARE(apr_status_t) apr_xml_parse_file(apr_pool_t *p,
@@ -267,15 +267,15 @@ APR_DECLARE(char *) apr_xml_parser_geterror(apr_xml_parser *parser,
 
 
 /**
- * Converts an XML element tree to flat text 
+ * Converts an XML element tree to flat text
  * @param p The pool to allocate out of
  * @param elem The XML element to convert
  * @param style How to covert the XML.  One of:
  * <PRE>
- *     APR_XML_X2T_FULL                start tag, contents, end tag 
- *     APR_XML_X2T_INNER               contents only 
- *     APR_XML_X2T_LANG_INNER          xml:lang + inner contents 
- *     APR_XML_X2T_FULL_NS_LANG        FULL + ns defns + xml:lang 
+ *     APR_XML_X2T_FULL                start tag, contents, end tag
+ *     APR_XML_X2T_INNER               contents only
+ *     APR_XML_X2T_LANG_INNER          xml:lang + inner contents
+ *     APR_XML_X2T_FULL_NS_LANG        FULL + ns defns + xml:lang
  *     APR_XML_X2T_PARSED              original prefixes
  * </PRE>
  * @param namespaces The namespace of the current XML element
@@ -327,7 +327,7 @@ APR_DECLARE(void) apr_xml_quote_elem(apr_pool_t *p, apr_xml_elem *elem);
 /* manage an array of unique URIs: apr_xml_insert_uri() and APR_XML_URI_ITEM() */
 
 /**
- * return the URI's (existing) index, or insert it and return a new index 
+ * return the URI's (existing) index, or insert it and return a new index
  * @param uri_array array to insert into
  * @param uri The uri to insert
  * @return int The uri's index
@@ -340,7 +340,7 @@ APR_DECLARE(int) apr_xml_insert_uri(apr_array_header_t *uri_array,
 
 #if APR_CHARSET_EBCDIC
 /**
- * Convert parsed tree in EBCDIC 
+ * Convert parsed tree in EBCDIC
  * @param p The pool to allocate out of
  * @param pdoc The apr_xml_doc to convert.
  * @param xlate The translation handle to use.

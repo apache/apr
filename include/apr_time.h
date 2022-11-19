@@ -31,7 +31,7 @@ extern "C" {
 
 /**
  * @defgroup apr_time Time Routines
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -127,7 +127,7 @@ struct apr_time_exp_t {
  * @param result the resulting apr_time_t
  * @param input the time_t to convert
  */
-APR_DECLARE(apr_status_t) apr_time_ansi_put(apr_time_t *result, 
+APR_DECLARE(apr_status_t) apr_time_ansi_put(apr_time_t *result,
                                                     time_t input);
 
 /**
@@ -146,7 +146,7 @@ APR_DECLARE(apr_status_t) apr_time_exp_tz(apr_time_exp_t *result,
  * @param result the exploded time
  * @param input the time to explode
  */
-APR_DECLARE(apr_status_t) apr_time_exp_gmt(apr_time_exp_t *result, 
+APR_DECLARE(apr_status_t) apr_time_exp_gmt(apr_time_exp_t *result,
                                            apr_time_t input);
 
 /**
@@ -154,7 +154,7 @@ APR_DECLARE(apr_status_t) apr_time_exp_gmt(apr_time_exp_t *result,
  * @param result the exploded time
  * @param input the time to explode
  */
-APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result, 
+APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
                                           apr_time_t input);
 
 /**
@@ -163,7 +163,7 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
  * @param result the resulting imploded time
  * @param input the input exploded time
  */
-APR_DECLARE(apr_status_t) apr_time_exp_get(apr_time_t *result, 
+APR_DECLARE(apr_status_t) apr_time_exp_get(apr_time_t *result,
                                            apr_time_exp_t *input);
 
 /**
@@ -172,13 +172,13 @@ APR_DECLARE(apr_status_t) apr_time_exp_get(apr_time_t *result,
  * @param result the resulting imploded time
  * @param input the input exploded time
  */
-APR_DECLARE(apr_status_t) apr_time_exp_gmt_get(apr_time_t *result, 
+APR_DECLARE(apr_status_t) apr_time_exp_gmt_get(apr_time_t *result,
                                                apr_time_exp_t *input);
 
 /**
  * Sleep for the specified number of micro-seconds.
  * @param t desired amount of time to sleep.
- * @warning May sleep for longer than the specified time. 
+ * @warning May sleep for longer than the specified time.
  */
 APR_DECLARE(void) apr_sleep(apr_interval_time_t t);
 
@@ -190,7 +190,7 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t);
  * format which requires APR_RFC822_DATA_LEN bytes of storage,
  * including the trailing NUL terminator.
  * @param date_str String to write to.
- * @param t the time to convert 
+ * @param t the time to convert
  */
 APR_DECLARE(apr_status_t) apr_rfc822_date(char *date_str, apr_time_t t);
 
@@ -204,7 +204,7 @@ APR_DECLARE(apr_status_t) apr_rfc822_date(char *date_str, apr_time_t t);
  * Unlike ANSI/ISO C ctime(), apr_ctime() does not include
  * a \\n at the end of the string.
  * @param date_str String to write to.
- * @param t the time to convert 
+ * @param t the time to convert
  */
 APR_DECLARE(apr_status_t) apr_ctime(char *date_str, apr_time_t t);
 
@@ -216,15 +216,15 @@ APR_DECLARE(apr_status_t) apr_ctime(char *date_str, apr_time_t t);
  * @param format The format for the time string
  * @param tm The time to convert
  */
-APR_DECLARE(apr_status_t) apr_strftime(char *s, apr_size_t *retsize, 
-                                       apr_size_t max, const char *format, 
+APR_DECLARE(apr_status_t) apr_strftime(char *s, apr_size_t *retsize,
+                                       apr_size_t max, const char *format,
                                        apr_time_exp_t *tm);
 
 /**
  * Improve the clock resolution for the lifetime of the given pool.
  * Generally this is only desirable on benchmarking and other very
  * time-sensitive applications, and has no impact on most platforms.
- * @param p The pool to associate the finer clock resolution 
+ * @param p The pool to associate the finer clock resolution
  */
 APR_DECLARE(void) apr_time_clock_hires(apr_pool_t *p);
 

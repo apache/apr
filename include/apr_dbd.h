@@ -444,7 +444,7 @@ APR_DECLARE(int) apr_dbd_pselect(const apr_dbd_driver_t *driver, apr_pool_t *poo
  *  @param ... - varargs list
  *  @return 0 for success or error code
  */
-APR_DECLARE_NONSTD(int) apr_dbd_pvquery(const apr_dbd_driver_t *driver, 
+APR_DECLARE_NONSTD(int) apr_dbd_pvquery(const apr_dbd_driver_t *driver,
                                         apr_pool_t *pool,
                                         apr_dbd_t *handle, int *nrows,
                                         apr_dbd_prepared_t *statement, ...);

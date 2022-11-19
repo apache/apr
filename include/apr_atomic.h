@@ -31,7 +31,7 @@ extern "C" {
 
 /**
  * @defgroup apr_atomic Atomic Operations
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 

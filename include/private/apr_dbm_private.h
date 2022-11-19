@@ -91,7 +91,7 @@ struct apr_dbm_driver_t {
  * The actual DBM
  */
 struct apr_dbm_t
-{ 
+{
     /** Associated pool */
     apr_pool_t *pool;
 

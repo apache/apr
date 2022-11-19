@@ -256,7 +256,7 @@ APR_DECLARE(apr_status_t) apr_redis_create(apr_pool_t *p,
  * @param baton location of the allocated value
  * @param len   length of data at baton
  * @param flags any flags set by the client for this key
- * @return 
+ * @return
  */
 APR_DECLARE(apr_status_t) apr_redis_getp(apr_redis_t *rc,
                                          apr_pool_t *p,

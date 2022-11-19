@@ -38,7 +38,7 @@ extern "C" {
  */
 
 /**
- * apr_skiplist_compare is the function type that must be implemented 
+ * apr_skiplist_compare is the function type that must be implemented
  * per object type that is used in a skip list for comparisons to maintain
  * order
  * */
@@ -55,7 +55,7 @@ struct apr_skiplist;
 /** Opaque structure used to represent the skip list */
 typedef struct apr_skiplist apr_skiplist;
 
-/** 
+/**
  * Opaque structure used to represent abstract nodes in the skip list
  * (an abstraction above the raw elements which are collected in the
  * skip list).

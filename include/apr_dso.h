@@ -32,7 +32,7 @@ extern "C" {
 
 /**
  * @defgroup apr_dso Dynamic Object Handling
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -56,7 +56,7 @@ typedef void *                        apr_dso_handle_sym_t;
  * @bug We aught to provide an alternative to RTLD_GLOBAL, which
  * is the only supported method of loading DSOs today.
  */
-APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
+APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
                                        const char *path, apr_pool_t *ctx);
 
 /**
@@ -71,7 +71,7 @@ APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle);
  * @param handle handle to load the symbol from.
  * @param symname Name of the symbol to load.
  */
-APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
+APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
                                       apr_dso_handle_t *handle,
                                       const char *symname);
 

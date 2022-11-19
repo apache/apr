@@ -107,7 +107,7 @@ struct apr_uri_t {
 
     /** The port number, numeric, valid only if port_str != NULL */
     apr_port_t port;
-    
+
     /** has the structure been initialized */
     unsigned is_initialized:1;
 
@@ -123,27 +123,27 @@ struct apr_uri_t {
  * http, ftp, https, gopher, wais, nntp, snews, and prospero
  * @param scheme_str The string that contains the current scheme
  * @return The default port for this scheme
- */ 
+ */
 APR_DECLARE(apr_port_t) apr_uri_port_of_scheme(const char *scheme_str);
 
 /**
- * Unparse a apr_uri_t structure to an URI string.  Optionally 
+ * Unparse a apr_uri_t structure to an URI string.  Optionally
  * suppress the password for security reasons.
  * @param p The pool to allocate out of
  * @param uptr All of the parts of the uri
  * @param flags How to unparse the uri.  One of:
  * <PRE>
- *    APR_URI_UNP_OMITSITEPART        Suppress "scheme://user\@site:port" 
- *    APR_URI_UNP_OMITUSER            Just omit user 
- *    APR_URI_UNP_OMITPASSWORD        Just omit password 
+ *    APR_URI_UNP_OMITSITEPART        Suppress "scheme://user\@site:port"
+ *    APR_URI_UNP_OMITUSER            Just omit user
+ *    APR_URI_UNP_OMITPASSWORD        Just omit password
  *    APR_URI_UNP_OMITUSERINFO        Omit "user:password\@" part
  *    APR_URI_UNP_REVEALPASSWORD      Show plain text password (default: show XXXXXXXX)
- *    APR_URI_UNP_OMITPATHINFO        Show "scheme://user\@site:port" only 
- *    APR_URI_UNP_OMITQUERY           Omit "?queryarg" or "#fragment" 
+ *    APR_URI_UNP_OMITPATHINFO        Show "scheme://user\@site:port" only
+ *    APR_URI_UNP_OMITQUERY           Omit "?queryarg" or "#fragment"
  * </PRE>
  * @return The uri as a string
  */
-APR_DECLARE(char *) apr_uri_unparse(apr_pool_t *p, 
+APR_DECLARE(char *) apr_uri_unparse(apr_pool_t *p,
                                     const apr_uri_t *uptr,
                                     unsigned flags);
 
@@ -156,7 +156,7 @@ APR_DECLARE(char *) apr_uri_unparse(apr_pool_t *p,
  * @param uptr The apr_uri_t to fill out
  * @return APR_SUCCESS for success or error code
  */
-APR_DECLARE(apr_status_t) apr_uri_parse(apr_pool_t *p, const char *uri, 
+APR_DECLARE(apr_status_t) apr_uri_parse(apr_pool_t *p, const char *uri,
                                         apr_uri_t *uptr);
 
 /**
@@ -166,8 +166,8 @@ APR_DECLARE(apr_status_t) apr_uri_parse(apr_pool_t *p, const char *uri,
  * @param uptr The apr_uri_t to fill out
  * @return APR_SUCCESS for success or error code
  */
-APR_DECLARE(apr_status_t) apr_uri_parse_hostinfo(apr_pool_t *p, 
-                                                 const char *hostinfo, 
+APR_DECLARE(apr_status_t) apr_uri_parse_hostinfo(apr_pool_t *p,
+                                                 const char *hostinfo,
                                                  apr_uri_t *uptr);
 
 /** @} */

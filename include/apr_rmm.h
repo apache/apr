@@ -16,7 +16,7 @@
 
 #ifndef APR_RMM_H
 #define APR_RMM_H
-/** 
+/**
  * @file apr_rmm.h
  * @brief APR-UTIL Relocatable Memory Management Routines
  */
@@ -54,7 +54,7 @@ typedef apr_size_t   apr_rmm_off_t;
  * (for instance using APR_ALIGN_DEFAULT).
  */
 APR_DECLARE(apr_status_t) apr_rmm_init(apr_rmm_t **rmm, apr_anylock_t *lock,
-                                       void *membuf, apr_size_t memsize, 
+                                       void *membuf, apr_size_t memsize,
                                        apr_pool_t *cont);
 
 /**

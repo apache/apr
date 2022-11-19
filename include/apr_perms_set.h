@@ -34,7 +34,7 @@ extern "C" {
 
 /**
  * @defgroup apr_perms_set Object permission set functions
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 

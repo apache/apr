@@ -50,7 +50,7 @@ extern "C" {
 /** @see apr_sha1_ctx_t */
 typedef struct apr_sha1_ctx_t apr_sha1_ctx_t;
 
-/** 
+/**
  * SHA1 context structure
  */
 struct apr_sha1_ctx_t {

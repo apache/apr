@@ -25,7 +25,7 @@
 #include "apr_errno.h"
 #include "apr_poll.h"
 
-/* We have an implementation of mkstemp but it's not very multi-threading 
+/* We have an implementation of mkstemp but it's not very multi-threading
  * friendly & is part of the POSIX emulation rather than native so don't
  * use it.
  */
@@ -68,7 +68,7 @@ struct apr_dir_t {
 };
 
 apr_status_t apr_file_cleanup(void *);
-apr_status_t apr_os2_time_to_apr_time(apr_time_t *result, FDATE os2date, 
+apr_status_t apr_os2_time_to_apr_time(apr_time_t *result, FDATE os2date,
                                       FTIME os2time);
 apr_status_t apr_apr_time_to_os2_time(FDATE *os2date, FTIME *os2time,
                                       apr_time_t aprtime);
@@ -79,7 +79,7 @@ extern const char c_is_fnchar[256];
 #define IS_FNCHAR(c) c_is_fnchar[(unsigned char)c]
 
 apr_status_t filepath_root_test(char *path, apr_pool_t *p);
-apr_status_t filepath_drive_get(char **rootpath, char drive, 
+apr_status_t filepath_drive_get(char **rootpath, char drive,
                                 apr_int32_t flags, apr_pool_t *p);
 apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p);
 

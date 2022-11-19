@@ -33,7 +33,7 @@ extern "C" {
 
 /**
  * @defgroup apr_thread_mutex Thread Mutex Routines
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 

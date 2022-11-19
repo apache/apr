@@ -47,14 +47,14 @@ extern "C" {
  */
 typedef struct apr_queue_t apr_queue_t;
 
-/** 
+/**
  * create a FIFO queue
  * @param queue The new queue
  * @param queue_capacity maximum size of the queue
  * @param a pool to allocate queue from
  */
-APR_DECLARE(apr_status_t) apr_queue_create(apr_queue_t **queue, 
-                                           unsigned int queue_capacity, 
+APR_DECLARE(apr_status_t) apr_queue_create(apr_queue_t **queue,
+                                           unsigned int queue_capacity,
                                            apr_pool_t *a);
 
 /**

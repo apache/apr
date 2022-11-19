@@ -15,7 +15,7 @@
  */
 
 /*
- * Note: 
+ * Note:
  * This is the netware-specific autoconf-like config file
  * which unix creates at ./configure time.
  */
@@ -31,7 +31,7 @@
 /* Pick up privately consumed headers */
 #include <ndkvers.h>
 
-/* Include alloca.h to get compiler-dependent defines */ 
+/* Include alloca.h to get compiler-dependent defines */
 #include <alloca.h>
 
 /* Use this section to define all of the HAVE_FOO_H
@@ -92,7 +92,7 @@
 #if (CURRENT_NDK_THRESHOLD < 306030000)
 #define SIGKILL         11
 #define SIGALRM         13
-#define SIGCHLD         14 
+#define SIGCHLD         14
 #define SIGCONT         15
 #define SIGHUP          16
 #define SIGPIPE         17
@@ -163,7 +163,7 @@ void* getGlobalPool();
 int setStatCache(void *data);
 void* getStatCache();
 
-/* Redefine malloc to use the library malloc call so 
+/* Redefine malloc to use the library malloc call so
     that all of the memory resources will be owned
     and can be shared by the library. */
 #undef malloc

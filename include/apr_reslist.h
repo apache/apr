@@ -17,7 +17,7 @@
 #ifndef APR_RESLIST_H
 #define APR_RESLIST_H
 
-/** 
+/**
  * @file apr_reslist.h
  * @brief APR-UTIL Resource List Routines
  */

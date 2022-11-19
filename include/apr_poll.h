@@ -23,9 +23,9 @@
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
-#include "apr_inherit.h" 
-#include "apr_file_io.h" 
-#include "apr_network_io.h" 
+#include "apr_inherit.h"
+#include "apr_file_io.h"
+#include "apr_network_io.h"
 
 #if APR_HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -37,7 +37,7 @@ extern "C" {
 
 /**
  * @defgroup apr_poll Poll Routines
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -89,7 +89,7 @@ typedef enum {
 } apr_pollset_method_e;
 
 /** Used in apr_pollfd_t to determine what the apr_descriptor is */
-typedef enum { 
+typedef enum {
     APR_NO_DESC,                /**< nothing here */
     APR_POLL_SOCKET,            /**< descriptor refers to a socket */
     APR_POLL_FILE,              /**< descriptor refers to a file */
@@ -125,7 +125,7 @@ typedef struct apr_pollset_t apr_pollset_t;
 
 /**
  * Set up a pollset object
- * @param pollset  The pointer in which to return the newly created object 
+ * @param pollset  The pointer in which to return the newly created object
  * @param size The maximum number of descriptors that this pollset can hold
  * @param p The pool from which to allocate the pollset
  * @param flags Optional flags to modify the operation of the pollset.
@@ -159,7 +159,7 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
 
 /**
  * Set up a pollset object
- * @param pollset  The pointer in which to return the newly created object 
+ * @param pollset  The pointer in which to return the newly created object
  * @param size The maximum number of descriptors that this pollset can hold
  * @param p The pool from which to allocate the pollset
  * @param flags Optional flags to modify the operation of the pollset.
@@ -217,14 +217,14 @@ APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t *pollset);
  *         with APR_EINTR.  Option (1) is recommended, but option (2) is
  *         allowed for implementations where option (1) is impossible
  *         or impractical.
- * @remark If the pollset has been created with APR_POLLSET_NOCOPY, the 
+ * @remark If the pollset has been created with APR_POLLSET_NOCOPY, the
  *         apr_pollfd_t structure referenced by descriptor will not be copied
  *         and must have a lifetime at least as long as the pollset.
  * @remark Do not add the same socket or file descriptor to the same pollset
- *         multiple times, even if the requested events differ for the 
+ *         multiple times, even if the requested events differ for the
  *         different calls to apr_pollset_add().  If the events of interest
- *         for a descriptor change, you must first remove the descriptor 
- *         from the pollset with apr_pollset_remove(), then add it again 
+ *         for a descriptor change, you must first remove the descriptor
+ *         from the pollset with apr_pollset_remove(), then add it again
  *         specifying all requested events.
  */
 APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
@@ -284,7 +284,7 @@ APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset);
 
 /**
  * Poll the descriptors in the poll structure
- * @param aprset The poll structure we will be using. 
+ * @param aprset The poll structure we will be using.
  * @param numsock The number of descriptors we are polling
  * @param nsds The number of descriptors signalled (output parameter)
  * @param timeout The amount of time in microseconds to wait.  This is a
@@ -292,14 +292,14 @@ APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset);
  *                function will return before this time.  If timeout is
  *                negative, the function will block until a descriptor is
  *                signalled or until apr_pollset_wakeup() has been called.
- * @remark The number of descriptors signalled is returned in the third argument. 
- *         This is a blocking call, and it will not return until either a 
- *         descriptor has been signalled or the timeout has expired. 
+ * @remark The number of descriptors signalled is returned in the third argument.
+ *         This is a blocking call, and it will not return until either a
+ *         descriptor has been signalled or the timeout has expired.
  * @remark The rtnevents field in the apr_pollfd_t array will only be filled-
  *         in if the return value is APR_SUCCESS.
  */
 APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t numsock,
-                                   apr_int32_t *nsds, 
+                                   apr_int32_t *nsds,
                                    apr_interval_time_t timeout);
 
 /**
@@ -319,7 +319,7 @@ typedef struct apr_pollcb_t apr_pollcb_t;
 
 /**
  * Set up a pollcb object
- * @param pollcb  The pointer in which to return the newly created object 
+ * @param pollcb  The pointer in which to return the newly created object
  * @param size The maximum number of descriptors that a single _poll can return.
  * @param p The pool from which to allocate the pollcb
  * @param flags Optional flags to modify the operation of the pollcb.
@@ -338,7 +338,7 @@ APR_DECLARE(apr_status_t) apr_pollcb_create(apr_pollcb_t **pollcb,
 
 /**
  * Set up a pollcb object
- * @param pollcb  The pointer in which to return the newly created object 
+ * @param pollcb  The pointer in which to return the newly created object
  * @param size The maximum number of descriptors that a single _poll can return.
  * @param p The pool from which to allocate the pollcb
  * @param flags Optional flags to modify the operation of the pollcb.
@@ -366,14 +366,14 @@ APR_DECLARE(apr_status_t) apr_pollcb_create_ex(apr_pollcb_t **pollcb,
  * @remark If you set client_data in the descriptor, that value will be
  *         returned in the client_data field whenever this descriptor is
  *         signalled in apr_pollcb_poll().
- * @remark Unlike the apr_pollset API, the descriptor is not copied, and users 
+ * @remark Unlike the apr_pollset API, the descriptor is not copied, and users
  *         must retain the memory used by descriptor, as the same pointer will
  *         be returned to them from apr_pollcb_poll.
  * @remark Do not add the same socket or file descriptor to the same pollcb
- *         multiple times, even if the requested events differ for the 
+ *         multiple times, even if the requested events differ for the
  *         different calls to apr_pollcb_add().  If the events of interest
- *         for a descriptor change, you must first remove the descriptor 
- *         from the pollcb with apr_pollcb_remove(), then add it again 
+ *         for a descriptor change, you must first remove the descriptor
+ *         from the pollcb with apr_pollcb_remove(), then add it again
  *         specifying all requested events.
  */
 APR_DECLARE(apr_status_t) apr_pollcb_add(apr_pollcb_t *pollcb,
@@ -391,9 +391,9 @@ APR_DECLARE(apr_status_t) apr_pollcb_remove(apr_pollcb_t *pollcb,
                                             apr_pollfd_t *descriptor);
 
 /**
- * Function prototype for pollcb handlers 
+ * Function prototype for pollcb handlers
  * @param baton Opaque baton passed into apr_pollcb_poll()
- * @param descriptor Contains the notification for an active descriptor. 
+ * @param descriptor Contains the notification for an active descriptor.
  *                   The @a rtnevents member describes which events were triggered
  *                   for this descriptor.
  * @remark If the pollcb handler does not return APR_SUCCESS, the apr_pollcb_poll()

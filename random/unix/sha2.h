@@ -16,7 +16,7 @@
 /*
  * FILE:        sha2.h
  * AUTHOR:      Aaron D. Gifford <me@aarongifford.com>
- * 
+ *
  * A licence was granted to the ASF by Aaron on 4 November 2003.
  */
 
@@ -50,7 +50,7 @@ void apr__SHA256_Final(apr_byte_t [SHA256_DIGEST_LENGTH], SHA256_CTX *);
 char* apr__SHA256_End(SHA256_CTX *, char [SHA256_DIGEST_STRING_LENGTH]);
 char* apr__SHA256_Data(const apr_byte_t *, size_t,
                   char [SHA256_DIGEST_STRING_LENGTH]);
-                  
+
 #ifdef  __cplusplus
 }
 #endif /* __cplusplus */

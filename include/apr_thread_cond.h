@@ -36,7 +36,7 @@ extern "C" {
 
 /**
  * @defgroup apr_thread_cond Condition Variable Routines
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -88,8 +88,8 @@ APR_DECLARE(apr_status_t) apr_thread_cond_wait(apr_thread_cond_t *cond,
  * @param mutex the mutex that must be locked upon entering this function,
  *        is released while the thread is asleep, and is again acquired before
  *        returning from this function.
- * @param timeout The amount of time in microseconds to wait. This is 
- *        a maximum, not a minimum. If the condition is signaled, we 
+ * @param timeout The amount of time in microseconds to wait. This is
+ *        a maximum, not a minimum. If the condition is signaled, we
  *        will wake up before this time, otherwise the error APR_TIMEUP
  *        is returned.
  */

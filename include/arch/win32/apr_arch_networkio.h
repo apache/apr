@@ -44,8 +44,8 @@ struct apr_socket_t {
     apr_int32_t         options;
     apr_int32_t         inherit;
 #if APR_HAS_SENDFILE
-    /* As of 07.20.04, the overlapped structure is only used by 
-     * apr_socket_sendfile and that's where it will be allocated 
+    /* As of 07.20.04, the overlapped structure is only used by
+     * apr_socket_sendfile and that's where it will be allocated
      * and initialized.
      */
     OVERLAPPED         *overlapped;

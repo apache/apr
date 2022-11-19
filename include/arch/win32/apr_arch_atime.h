@@ -31,7 +31,7 @@ struct atime_t {
 
 
 /* Number of micro-seconds between the beginning of the Windows epoch
- * (Jan. 1, 1601) and the Unix epoch (Jan. 1, 1970) 
+ * (Jan. 1, 1601) and the Unix epoch (Jan. 1, 1970)
  */
 #define APR_DELTA_EPOCH_IN_USEC   APR_TIME_C(11644473600000000);
 

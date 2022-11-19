@@ -20,7 +20,7 @@
 /**
  * @file apu_version.h
  * @brief APR-util Versioning Interface
- * 
+ *
  * APR-util's Version
  *
  * There are several different mechanisms for accessing the version. There
@@ -45,7 +45,7 @@
  * a compatibility stub.
  */
 
-/** major version 
+/** major version
  * Major API changes that could cause compatibility problems for older
  * programs such as structure size changes.  No binary compatibility is
  * possible across a change in the major version.
@@ -62,7 +62,7 @@
  */
 #define APU_MINOR_VERSION       APR_MINOR_VERSION
 
-/** patch level 
+/** patch level
  * The Patch Level never includes API changes, simply bug fixes.
  * Reset to 0 when upgrading APR_MINOR_VERSION
  * In 2.0, for legacy support, this is an identity of the APR version.
@@ -70,7 +70,7 @@
  */
 #define APU_PATCH_VERSION       APR_PATCH_VERSION
 
-/** 
+/**
  * The symbol APU_IS_DEV_VERSION is only defined for internal,
  * "development" copies of APU.  It is undefined for released versions
  * of APU.

@@ -38,13 +38,13 @@ extern "C" {
  */
 
 /* Simple BASE64 encode/decode functions.
- * 
+ *
  * As we might encode binary strings, hence we require the length of
  * the incoming plain source. And return the length of what we decoded.
  *
  * The decoding function takes any non valid char (i.e. whitespace, \0
  * or anything non A-Z,0-9 etc) as terminal.
- * 
+ *
  * The handling of terminating \0 characters differs from function to
  * function.
  *
@@ -56,7 +56,7 @@ extern "C" {
  * @param len the length of an unencoded string.
  * @return the length of the string after it is encoded, including the
  * trailing \0
- */ 
+ */
 APR_DECLARE(int) apr_base64_encode_len(int len) __attribute__((pure));
 
 /**
@@ -67,8 +67,8 @@ APR_DECLARE(int) apr_base64_encode_len(int len) __attribute__((pure));
  * @param plain_src The original string in plain text
  * @param len_plain_src The length of the plain text string
  * @return the length of the encoded string, including the trailing \0
- */ 
-APR_DECLARE(int) apr_base64_encode(char * coded_dst, const char *plain_src, 
+ */
+APR_DECLARE(int) apr_base64_encode(char * coded_dst, const char *plain_src,
                                    int len_plain_src)
                  __attribute__((nonnull(1,2)));
 
@@ -81,7 +81,7 @@ APR_DECLARE(int) apr_base64_encode(char * coded_dst, const char *plain_src,
  * @param plain_src The original string in plain text
  * @param len_plain_src The length of the plain text string
  * @return the length of the encoded string, including the trailing \0
- */ 
+ */
 APR_DECLARE(int) apr_base64_encode_binary(char * coded_dst,
                                           const unsigned char *plain_src,
                                           int len_plain_src)
@@ -101,7 +101,7 @@ APR_DECLARE(char *) apr_pbase64_encode(apr_pool_t *p, const char *string)
  * string given the encoded string.
  * @param coded_src The encoded string
  * @return the maximum required buffer length for the plain text string
- */ 
+ */
 APR_DECLARE(int) apr_base64_decode_len(const char * coded_src)
                  __attribute__((nonnull(1))) __attribute__((pure));
 
@@ -110,9 +110,9 @@ APR_DECLARE(int) apr_base64_decode_len(const char * coded_src)
  * converted to EBCDIC.
  * @param plain_dst The destination string for the plain text. A \0 is
  * appended.
- * @param coded_src The encoded string 
+ * @param coded_src The encoded string
  * @return the length of the plain text string (excluding the trailing \0)
- */ 
+ */
 APR_DECLARE(int) apr_base64_decode(char * plain_dst, const char *coded_src)
                  __attribute__((nonnull(1,2)));
 
@@ -122,10 +122,10 @@ APR_DECLARE(int) apr_base64_decode(char * plain_dst, const char *coded_src)
  * output to EBCDIC is left out.
  * @param plain_dst The destination string for the plain text. The string is
  * not \0-terminated.
- * @param coded_src The encoded string 
+ * @param coded_src The encoded string
  * @return the length of the plain text string
- */ 
-APR_DECLARE(int) apr_base64_decode_binary(unsigned char * plain_dst, 
+ */
+APR_DECLARE(int) apr_base64_decode_binary(unsigned char * plain_dst,
                                           const char *coded_src)
                  __attribute__((nonnull(1,2)));
 

@@ -29,7 +29,7 @@ extern "C" {
 
 /**
  * @defgroup apr_env Functions for manipulating the environment
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 

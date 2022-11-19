@@ -19,7 +19,7 @@
 
 /**
  * @file apr_user.h
- * @brief APR User ID Services 
+ * @brief APR User ID Services
  */
 
 #include "apr.h"
@@ -32,7 +32,7 @@ extern "C" {
 
 /**
  * @defgroup apr_user User and Group ID Services
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -54,7 +54,7 @@ typedef PSID                      apr_gid_t;
 typedef gid_t                     apr_gid_t;
 #endif
 
-#if APR_HAS_USER 
+#if APR_HAS_USER
 
 /**
  * Get the userid (and groupid) of the calling process
@@ -95,8 +95,8 @@ APR_DECLARE(apr_status_t) apr_uid_get(apr_uid_t *userid, apr_gid_t *groupid,
  * @param p The pool from which to allocate the string
  * @remark This function is available only if APR_HAS_USER is defined.
  */
-APR_DECLARE(apr_status_t) apr_uid_homepath_get(char **dirname, 
-                                               const char *username, 
+APR_DECLARE(apr_status_t) apr_uid_homepath_get(char **dirname,
+                                               const char *username,
                                                apr_pool_t *p);
 
 /**
@@ -120,7 +120,7 @@ APR_DECLARE(apr_status_t) apr_uid_compare(apr_uid_t left, apr_uid_t right);
  * @param p The pool from which to allocate the string
  * @remark This function is available only if APR_HAS_USER is defined.
  */
-APR_DECLARE(apr_status_t) apr_gid_name_get(char **groupname, 
+APR_DECLARE(apr_status_t) apr_gid_name_get(char **groupname,
                                              apr_gid_t groupid, apr_pool_t *p);
 
 /**
@@ -130,7 +130,7 @@ APR_DECLARE(apr_status_t) apr_gid_name_get(char **groupname,
  * @param p The pool from which to allocate the string
  * @remark This function is available only if APR_HAS_USER is defined.
  */
-APR_DECLARE(apr_status_t) apr_gid_get(apr_gid_t *groupid, 
+APR_DECLARE(apr_status_t) apr_gid_get(apr_gid_t *groupid,
                                       const char *groupname, apr_pool_t *p);
 
 /**

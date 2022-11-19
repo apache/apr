@@ -39,7 +39,7 @@ extern "C" {
 
 /**
  * @defgroup apr_file_info File Information
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -48,11 +48,11 @@ extern "C" {
  * so the APR_NOFILE value must be distinct from APR_UNKFILE.
  */
 
-/** apr_filetype_e values for the filetype member of the 
+/** apr_filetype_e values for the filetype member of the
  * apr_file_info_t structure
  * @warning Not all of the filetypes below can be determined.
- * For example, a given platform might not correctly report 
- * a socket descriptor as APR_SOCK if that type isn't 
+ * For example, a given platform might not correctly report
+ * a socket descriptor as APR_SOCK if that type isn't
  * well-identified on that platform.  In such cases where
  * a filetype exists but cannot be described by the recognized
  * flags below, the filetype will be APR_UNKFILE.  If the
@@ -69,10 +69,10 @@ typedef enum {
     APR_LNK,            /**< a symbolic link */
     APR_SOCK,           /**< a [unix domain] socket */
     APR_UNKFILE = 127   /**< a file of some other unknown type */
-} apr_filetype_e; 
+} apr_filetype_e;
 
 /**
- * @defgroup apr_file_permissions File Permissions flags 
+ * @defgroup apr_file_permissions File Permissions flags
  * @{
  */
 
@@ -95,7 +95,7 @@ typedef enum {
 
 /* additional permission flags for apr_file_copy  and apr_file_append */
 #define APR_FPROT_FILE_SOURCE_PERMS 0x1000 /**< Copy source file's permissions */
-    
+
 /* backcompat */
 #define APR_USETID     APR_FPROT_USETID     /**< @deprecated @see APR_FPROT_USETID     */
 #define APR_UREAD      APR_FPROT_UREAD      /**< @deprecated @see APR_FPROT_UREAD      */
@@ -111,7 +111,7 @@ typedef enum {
 #define APR_WEXECUTE   APR_FPROT_WEXECUTE   /**< @deprecated @see APR_FPROT_WEXECUTE   */
 #define APR_OS_DEFAULT APR_FPROT_OS_DEFAULT /**< @deprecated @see APR_FPROT_OS_DEFAULT */
 #define APR_FILE_SOURCE_PERMS APR_FPROT_FILE_SOURCE_PERMS /**< @deprecated @see APR_FPROT_FILE_SOURCE_PERMS */
-    
+
 /** @} */
 
 
@@ -174,12 +174,12 @@ typedef struct apr_finfo_t        apr_finfo_t;
 struct apr_finfo_t {
     /** Allocates memory and closes lingering handles in the specified pool */
     apr_pool_t *pool;
-    /** The bitmask describing valid fields of this apr_finfo_t structure 
+    /** The bitmask describing valid fields of this apr_finfo_t structure
      *  including all available 'wanted' fields and potentially more */
     apr_int32_t valid;
     /** The access permissions of the file.  Mimics Unix access rights. */
     apr_fileperms_t protection;
-    /** The type of file.  One of APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, 
+    /** The type of file.  One of APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE,
      * APR_LNK or APR_SOCK.  If the type is undetermined, the value is APR_NOFILE.
      * If the type cannot be determined, the value is APR_UNKFILE.
      */
@@ -213,19 +213,19 @@ struct apr_finfo_t {
 };
 
 /**
- * get the specified file's stats.  The file is specified by filename, 
+ * get the specified file's stats.  The file is specified by filename,
  * instead of using a pre-opened file.
  * @param finfo Where to store the information about the file, which is
  * never touched if the call fails.
  * @param fname The name of the file to stat.
  * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_
-                 values 
- * @param pool the pool to use to allocate the new file. 
+                 values
+ * @param pool the pool to use to allocate the new file.
  *
  * @note If @c APR_INCOMPLETE is returned all the fields in @a finfo may
  *       not be filled in, and you need to check the @c finfo->valid bitmask
  *       to verify that what you're looking for is there.
- */ 
+ */
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
                                    apr_int32_t wanted, apr_pool_t *pool);
 
@@ -240,22 +240,22 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
  * @param new_dir The opened directory descriptor.
  * @param dirname The full path to the directory (use / on all systems)
  * @param pool The pool to use.
- */                        
-APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new_dir, 
-                                       const char *dirname, 
+ */
+APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new_dir,
+                                       const char *dirname,
                                        apr_pool_t *pool);
 
 /**
- * close the specified directory. 
+ * close the specified directory.
  * @param thedir the directory descriptor to close.
- */                        
+ */
 APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *thedir);
 
 /**
- * Read the next entry from the specified directory. 
+ * Read the next entry from the specified directory.
  * @param finfo the file info structure and filled in by apr_dir_read
  * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_
-                 values 
+                 values
  * @param thedir the directory descriptor returned from apr_dir_open
  * @remark No ordering is guaranteed for the entries read.
  *
@@ -263,14 +263,14 @@ APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *thedir);
  *       not be filled in, and you need to check the @c finfo->valid bitmask
  *       to verify that what you're looking for is there. When no more
  *       entries are available, APR_ENOENT is returned.
- */                        
+ */
 APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                                        apr_dir_t *thedir);
 
 /**
  * Rewind the directory to the first entry.
  * @param thedir the directory descriptor to rewind.
- */                        
+ */
 APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
 /** @} */
 
@@ -279,7 +279,7 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
  * @{
  */
 
-/** Cause apr_filepath_merge to fail if addpath is above rootpath 
+/** Cause apr_filepath_merge to fail if addpath is above rootpath
  * @bug in APR 0.9 and 1.x, this flag's behavior is undefined
  * if the rootpath is NULL or empty.  In APR 2.0 this should be
  * changed to imply NOTABSOLUTE if the rootpath is NULL or empty.
@@ -305,7 +305,7 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
 #define APR_FILEPATH_NATIVE         0x10
 
 /** Resolve the true case of existing directories and file elements
- * of addpath, (resolving any aliases on Win32) and append a proper 
+ * of addpath, (resolving any aliases on Win32) and append a proper
  * trailing slash if a directory
  */
 #define APR_FILEPATH_TRUENAME       0x20
@@ -321,20 +321,20 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
  * </PRE>
  * @param p the pool to allocate the new path string from
  * @remark on return, filepath points to the first non-root character in the
- * given filepath.  In the simplest example, given a filepath of "/foo", 
- * returns the rootpath of "/" and filepath points at "foo".  This is far 
+ * given filepath.  In the simplest example, given a filepath of "/foo",
+ * returns the rootpath of "/" and filepath points at "foo".  This is far
  * more complex on other platforms, which will canonicalize the root form
  * to a consistant format, given the APR_FILEPATH_TRUENAME flag, and also
- * test for the validity of that root (e.g., that a drive d:/ or network 
- * share //machine/foovol/). 
+ * test for the validity of that root (e.g., that a drive d:/ or network
+ * share //machine/foovol/).
  * The function returns APR_ERELATIVE if filepath isn't rooted (an
  * error), APR_EINCOMPLETE if the root path is ambiguous (but potentially
  * legitimate, e.g. "/" on Windows is incomplete because it doesn't specify
  * the drive letter), or APR_EBADPATH if the root is simply invalid.
  * APR_SUCCESS is returned if filepath is an absolute path.
  */
-APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath, 
-                                            const char **filepath, 
+APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
+                                            const char **filepath,
                                             apr_int32_t flags,
                                             apr_pool_t *p);
 
@@ -345,15 +345,15 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
  * @param addpath the path to add to the root path
  * @param flags the desired APR_FILEPATH_ rules to apply when merging
  * @param p the pool to allocate the new path string from
- * @remark if the flag APR_FILEPATH_TRUENAME is given, and the addpath 
- * contains wildcard characters ('*', '?') on platforms that don't support 
- * such characters within filenames, the paths will be merged, but the 
+ * @remark if the flag APR_FILEPATH_TRUENAME is given, and the addpath
+ * contains wildcard characters ('*', '?') on platforms that don't support
+ * such characters within filenames, the paths will be merged, but the
  * result code will be APR_EPATHWILD, and all further segments will not
  * reflect the true filenames including the wildcard and following segments.
- */                        
-APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath, 
+ */
+APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                                              const char *rootpath,
-                                             const char *addpath, 
+                                             const char *addpath,
                                              apr_int32_t flags,
                                              apr_pool_t *p);
 

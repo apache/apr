@@ -33,7 +33,7 @@ extern "C" {
 
 /**
  * @defgroup apr_allocator Internal Memory Allocation
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -47,7 +47,7 @@ typedef struct apr_memnode_t apr_memnode_t;
  *       caller of apr_allocator_alloc(), the remaining fields are read-only.
  *       The next field has to be used with caution and sensibly set when the
  *       memnode is passed back to apr_allocator_free().  See apr_allocator_free()
- *       for details.  
+ *       for details.
  *       The ref and first_avail fields will be properly restored by
  *       apr_allocator_free().
  */
@@ -103,7 +103,7 @@ APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
 APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
                                      apr_memnode_t *memnode)
                   __attribute__((nonnull(1,2)));
- 
+
 /**
  * Get the page/boundary size.
  * @return The page size

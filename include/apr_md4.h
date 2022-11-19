@@ -85,10 +85,10 @@ APR_DECLARE(apr_status_t) apr_md4_init(apr_md4_ctx_t *context);
 
 #if APR_HAS_XLATE
 /**
- * MDr4 translation setup.  Provides the APR translation handle to be used 
+ * MDr4 translation setup.  Provides the APR translation handle to be used
  * for translating the content before calculating the digest.
  * @param context The MD4 content to set the translation for.
- * @param xlate The translation handle to use for this MD4 context 
+ * @param xlate The translation handle to use for this MD4 context
  */
 APR_DECLARE(apr_status_t) apr_md4_set_xlate(apr_md4_ctx_t *context,
                                             apr_xlate_t *xlate);
@@ -97,7 +97,7 @@ APR_DECLARE(apr_status_t) apr_md4_set_xlate(apr_md4_ctx_t *context,
 #endif
 
 /**
- * MD4 block update operation.  Continue an MD4 message-digest operation, 
+ * MD4 block update operation.  Continue an MD4 message-digest operation,
  * processing another message block, and updating the context.
  * @param context The MD4 content to update.
  * @param input next message block to update
@@ -108,7 +108,7 @@ APR_DECLARE(apr_status_t) apr_md4_update(apr_md4_ctx_t *context,
                                          apr_size_t inputLen);
 
 /**
- * MD4 finalization.  Ends an MD4 message-digest operation, writing the 
+ * MD4 finalization.  Ends an MD4 message-digest operation, writing the
  * message digest and zeroing the context
  * @param digest The final MD4 digest
  * @param context The MD4 content we are finalizing.

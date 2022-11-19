@@ -34,7 +34,7 @@ extern "C" {
 
 /**
  * @defgroup apr_thread_rwlock Reader/Writer Lock Routines
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -89,7 +89,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_tryrdlock(apr_thread_rwlock_t *rwloc
 APR_DECLARE(apr_status_t) apr_thread_rwlock_wrlock(apr_thread_rwlock_t *rwlock);
 
 /**
- * Attempt to acquire the exclusive-write lock on the given read-write lock. 
+ * Attempt to acquire the exclusive-write lock on the given read-write lock.
  * This is the same as apr_thread_rwlock_wrlock(), only that the function fails
  * if there is any other thread holding the lock (for reading or writing),
  * in which case the function will return APR_EBUSY. Note: it is important

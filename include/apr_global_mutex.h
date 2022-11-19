@@ -37,7 +37,7 @@ extern "C" {
 
 /**
  * @defgroup APR_GlobalMutex Global Locking Routines
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -83,7 +83,7 @@ APR_DECLARE(apr_status_t) apr_global_mutex_create(apr_global_mutex_t **mutex,
  * @param mutex The newly re-opened mutex structure.
  * @param fname A file name to use if the mutex mechanism requires one.  This
  *              argument should always be provided.  The mutex code itself will
- *              determine if it should be used.  This filename should be the 
+ *              determine if it should be used.  This filename should be the
  *              same one that was passed to apr_global_mutex_create().
  * @param pool The pool to operate on.
  * @remark This function must be called to maintain portability, even

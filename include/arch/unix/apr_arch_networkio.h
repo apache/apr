@@ -107,7 +107,7 @@ struct apr_socket_t {
     int protocol;
     apr_sockaddr_t *local_addr;
     apr_sockaddr_t *remote_addr;
-    apr_interval_time_t timeout; 
+    apr_interval_time_t timeout;
 #ifndef HAVE_POLL
     int connected;
 #endif

@@ -33,7 +33,7 @@ extern "C" {
 
 /**
  * @defgroup apr_shm Shared Memory Routines
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -65,7 +65,7 @@ typedef struct apr_shm_t apr_shm_t;
  *         implementation to request a slightly greater segment length
  *         from the subsystem. In all cases, the apr_shm_baseaddr_get()
  *         function will return the first usable byte of memory.
- * 
+ *
  */
 APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
                                          apr_size_t reqsize,
@@ -110,7 +110,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
  *         implementation to request a slightly greater segment length
  *         from the subsystem. In all cases, the apr_shm_baseaddr_get()
  *         function will return the first usable byte of memory.
- * 
+ *
  */
 APR_DECLARE(apr_status_t) apr_shm_create_ex(apr_shm_t **m,
                                             apr_size_t reqsize,
@@ -220,7 +220,7 @@ APR_PERMS_SET_IMPLEMENT(shm);
  */
 APR_POOL_DECLARE_ACCESSOR(shm);
 
-/** @} */ 
+/** @} */
 
 #ifdef __cplusplus
 }

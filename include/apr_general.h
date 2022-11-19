@@ -39,7 +39,7 @@ extern "C" {
 
 /**
  * @defgroup apr_general Miscellaneous library routines
- * @ingroup APR 
+ * @ingroup APR
  * This is collection of oddballs that didn't fit anywhere else,
  * and might move to more appropriate headers with the release
  * of APR 1.0.
@@ -114,10 +114,10 @@ typedef enum { APR_WAIT_READ, APR_WAIT_WRITE } apr_wait_type_t;
 
 #ifndef DOXYGEN
 
-/* A couple of prototypes for functions in case some platform doesn't 
+/* A couple of prototypes for functions in case some platform doesn't
  * have it
  */
-#if (!APR_HAVE_STRCASECMP) && (APR_HAVE_STRICMP) 
+#if (!APR_HAVE_STRCASECMP) && (APR_HAVE_STRICMP)
 #define strcasecmp(s1, s2) stricmp(s1, s2)
 #elif (!APR_HAVE_STRCASECMP)
 int strcasecmp(const char *a, const char *b);
@@ -181,7 +181,7 @@ struct type { \
  */
 
 /**
- * Setup any APR internal data structures.  This MUST be the first function 
+ * Setup any APR internal data structures.  This MUST be the first function
  * called for any APR library. It is safe to call apr_initialize several
  * times as long as apr_terminate() is called the same number of times.
  * @remark See apr_app_initialize() if this is an application, rather than
@@ -201,15 +201,15 @@ APR_DECLARE(apr_status_t) apr_initialize(void);
  * Otherwise, this call is identical to apr_initialize(), and must be closed
  * with a call to apr_terminate() at the end of program execution.
  */
-APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, 
-                                             char const * const * *argv, 
+APR_DECLARE(apr_status_t) apr_app_initialize(int *argc,
+                                             char const * const * *argv,
                                              char const * const * *env);
 
 /**
- * Tear down any APR internal data structures which aren't torn down 
+ * Tear down any APR internal data structures which aren't torn down
  * automatically. apr_terminate must be called once for every call to
  * apr_initialize() or apr_app_initialize().
- * @remark An APR program must call this function at termination once it 
+ * @remark An APR program must call this function at termination once it
  *         has stopped using APR services.  The APR developers suggest using
  *         @c atexit(apr_terminate) to ensure this is called.  When using APR
  *         from a language other than C that has problems with the calling
@@ -219,12 +219,12 @@ APR_DECLARE(apr_status_t) apr_app_initialize(int *argc,
 APR_DECLARE_NONSTD(void) apr_terminate(void);
 
 /**
- * Tear down any APR internal data structures which aren't torn down 
+ * Tear down any APR internal data structures which aren't torn down
  * automatically, same as apr_terminate()
  * @remark An APR program must call either the apr_terminate() or apr_terminate2
- *         function once it it has finished using APR services.  The APR 
+ *         function once it it has finished using APR services.  The APR
  *         developers suggest using @c atexit(apr_terminate) to ensure this is done.
- *         apr_terminate2 exists to allow non-c language apps to tear down apr, 
+ *         apr_terminate2 exists to allow non-c language apps to tear down apr,
  *         while apr_terminate() is recommended from c language applications.
  */
 APR_DECLARE(void) apr_terminate2(void);
@@ -244,7 +244,7 @@ APR_DECLARE(void) apr_terminate2(void);
  * @param buf Buffer to fill with random bytes
  * @param length Length of buffer in bytes
  */
-APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf, 
+APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf,
                                                     apr_size_t length);
 
 #endif

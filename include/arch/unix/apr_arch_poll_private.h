@@ -191,8 +191,8 @@ struct apr_pollcb_provider_t {
     const char *name;
 };
 
-/* 
- * Private functions used for the implementation of both apr_pollcb_* and 
+/*
+ * Private functions used for the implementation of both apr_pollcb_* and
  * apr_pollset_*
  */
 #if WAKEUP_USES_PIPE

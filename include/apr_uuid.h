@@ -49,7 +49,7 @@ typedef struct {
 /**
  * Generate and return a (new) UUID
  * @param uuid The resulting UUID
- */ 
+ */
 APR_DECLARE(void) apr_uuid_get(apr_uuid_t *uuid);
 
 /**
@@ -58,14 +58,14 @@ APR_DECLARE(void) apr_uuid_get(apr_uuid_t *uuid);
  *               be at least APR_UUID_FORMATTED_LENGTH + 1 bytes long to hold
  *               the formatted UUID and a null terminator
  * @param uuid The UUID to format
- */ 
+ */
 APR_DECLARE(void) apr_uuid_format(char *buffer, const apr_uuid_t *uuid);
 
 /**
  * Parse a standard-format string into a UUID
  * @param uuid The resulting UUID
  * @param uuid_str The formatted UUID
- */ 
+ */
 APR_DECLARE(apr_status_t) apr_uuid_parse(apr_uuid_t *uuid, const char *uuid_str);
 
 /** @} */

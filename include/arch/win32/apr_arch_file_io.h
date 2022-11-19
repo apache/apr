@@ -53,8 +53,8 @@
 #include <wchar.h>
 
 /* Helper functions for the WinNT ApiW() functions.  APR treats all
- * resource identifiers (files, etc) by their UTF-8 name, to provide 
- * access to all named identifiers.  [UTF-8 completely maps Unicode 
+ * resource identifiers (files, etc) by their UTF-8 name, to provide
+ * access to all named identifiers.  [UTF-8 completely maps Unicode
  * into char type strings.]
  *
  * The _path flavors below provide us fast mappings of the
@@ -64,9 +64,9 @@
  * Ascii API calls.  So we tack them on in utf8_to_unicode_path, and
  * strip them right back off in unicode_to_utf8_path.
  */
-apr_status_t utf8_to_unicode_path(apr_wchar_t* dststr, apr_size_t dstchars, 
+apr_status_t utf8_to_unicode_path(apr_wchar_t* dststr, apr_size_t dstchars,
                                   const char* srcstr);
-apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars, 
+apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars,
                                   const apr_wchar_t* srcstr);
 
 #endif /* APR_HAS_UNICODE_FS */
@@ -131,22 +131,22 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool);
                            | APR_FINFO_MTIME | APR_FINFO_SIZE)
 
 /* Sneak the Readonly bit through finfo->protection for internal use _only_ */
-#define APR_FREADONLY 0x10000000 
+#define APR_FREADONLY 0x10000000
 
 /* Private function for apr_stat/lstat/getfileinfo/dir_read */
-int fillin_fileinfo(apr_finfo_t *finfo, WIN32_FILE_ATTRIBUTE_DATA *wininfo, 
+int fillin_fileinfo(apr_finfo_t *finfo, WIN32_FILE_ATTRIBUTE_DATA *wininfo,
                     int byhandle, int finddata, const char *fname,
                     apr_int32_t wanted);
 
 /* Private function that extends apr_stat/lstat/getfileinfo/dir_read */
-apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, 
+apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
                         apr_int32_t wanted, int whatfile);
 
 /* whatfile types for the ufile arg */
 #define MORE_OF_HANDLE 0
 #define MORE_OF_WFSPEC 2
 
-/* quick run-down of fields in windows' apr_file_t structure that may have 
+/* quick run-down of fields in windows' apr_file_t structure that may have
  * obvious uses.
  * fname --  the filename as passed to the open call.
  * dwFileAttricutes -- Attributes used to open the file.
@@ -162,7 +162,7 @@ typedef enum {
     APR_FILETYPE_FILE   = 0,
     APR_FILETYPE_PIPE
 } apr_filetype_e;
-    
+
 struct apr_file_t {
     apr_pool_t *pool;
     HANDLE filehand;
@@ -178,7 +178,7 @@ struct apr_file_t {
     int eof_hit;
     BOOLEAN buffered;          /* Use buffered I/O? */
     int ungetchar;             /* Last char provided by an unget op. (-1 = no char) */
-    int append; 
+    int append;
 
     /* Stuff for buffered mode */
     char *buffer;
@@ -194,7 +194,7 @@ struct apr_file_t {
     /* if there is a timeout set, then this pollset is used */
     apr_pollset_t *pollset;
 #endif
-    /* Pipe specific info */    
+    /* Pipe specific info */
 };
 
 struct apr_dir_t {
@@ -225,7 +225,7 @@ extern const char apr_c_is_fnchar[256];
 apr_status_t filepath_root_test(char *path, apr_pool_t *p);
 
 
-/* The apr_filepath_merge wants to canonicalize the cwd to the 
+/* The apr_filepath_merge wants to canonicalize the cwd to the
  * addpath if the user passes NULL as the old root path (this
  * isn't true of an empty string "", which won't be concatenated.
  *
@@ -235,7 +235,7 @@ apr_status_t filepath_root_test(char *path, apr_pool_t *p);
  * If flags includes the bit APR_FILEPATH_NATIVE, the path returned
  * is in the os-native format.
  */
-apr_status_t filepath_drive_get(char **rootpath, char drive, 
+apr_status_t filepath_drive_get(char **rootpath, char drive,
                                 apr_int32_t flags, apr_pool_t *p);
 
 

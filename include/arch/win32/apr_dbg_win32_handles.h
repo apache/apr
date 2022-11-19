@@ -22,7 +22,7 @@ extern "C" {
 #endif
 
 /* USAGE:
- * 
+ *
  * Add the following include to apr_private.h for internal debugging,
  * or copy this header into apr/include add the include below to apr.h
  * for really global debugging;
@@ -34,7 +34,7 @@ extern "C" {
  * executing application with a .pid suffix.  Ergo several instances
  * may be executing and logged at once.
  *
- * HANDLE apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln, int nh 
+ * HANDLE apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln, int nh
  *                           [, HANDLE *hv, char *dsc...])
  *
  * returns: the handle passed in ha, which is cast back to the real return type.
@@ -53,7 +53,7 @@ extern "C" {
  * treated as a handle.
  */
 
-APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln, 
+APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
                                        int nh,/* HANDLE *hv, char *dsc */...);
 
 #define apr_dbg_rv(fn, args) (apr_dbg_log(#fn,(fn) args,__FILE__,__LINE__,0))

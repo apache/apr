@@ -63,12 +63,12 @@ typedef struct apr_xlate_t            apr_xlate_t;
  *  if charset transcoding is not available in this instance of
  *  apr-util at all (i.e., APR_HAS_XLATE is undefined).
  */
-APR_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset, 
-                                         const char *topage, 
-                                         const char *frompage, 
+APR_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset,
+                                         const char *topage,
+                                         const char *frompage,
                                          apr_pool_t *pool);
 
-/** 
+/**
  * This is to indicate the charset of the sourcecode at compile time
  * names to indicate the charset of the source code at
  * compile time.  This is useful if there are literal
@@ -77,13 +77,13 @@ APR_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset,
  */
 #define APR_DEFAULT_CHARSET (const char *)0
 /**
- * To indicate charset names of the current locale 
+ * To indicate charset names of the current locale
  */
 #define APR_LOCALE_CHARSET (const char *)1
 
 /**
  * Find out whether or not the specified conversion is single-byte-only.
- * @param convset The handle allocated by apr_xlate_open, specifying the 
+ * @param convset The handle allocated by apr_xlate_open, specifying the
  *                parameters of conversion
  * @param onoff Output: whether or not the conversion is single-byte-only
  * @remark
@@ -94,11 +94,11 @@ APR_DECLARE(apr_status_t) apr_xlate_sb_get(apr_xlate_t *convset, int *onoff);
 
 /**
  * Convert a buffer of text from one codepage to another.
- * @param convset The handle allocated by apr_xlate_open, specifying 
+ * @param convset The handle allocated by apr_xlate_open, specifying
  *                the parameters of conversion
  * @param inbuf The address of the source buffer
  * @param inbytes_left Input: the amount of input data to be translated
- *                     Output: the amount of input data not yet translated    
+ *                     Output: the amount of input data not yet translated
  * @param outbuf The address of the destination buffer
  * @param outbytes_left Input: the size of the output buffer
  *                      Output: the amount of the output buffer not yet used
@@ -114,9 +114,9 @@ APR_DECLARE(apr_status_t) apr_xlate_sb_get(apr_xlate_t *convset, int *onoff);
  * the inbuf and inbytes_left parameters as NULL.  (Note that this
  * mode only works from version 1.1.0 onwards)
  */
-APR_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset, 
-                                                const char *inbuf, 
-                                                apr_size_t *inbytes_left, 
+APR_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset,
+                                                const char *inbuf,
+                                                apr_size_t *inbytes_left,
                                                 char *outbuf,
                                                 apr_size_t *outbytes_left);
 
@@ -125,25 +125,25 @@ APR_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset,
 /**
  * The purpose of apr_xlate_conv_char is to translate one character
  * at a time.  This needs to be written carefully so that it works
- * with double-byte character sets. 
+ * with double-byte character sets.
  * @param convset The handle allocated by apr_xlate_open, specifying the
  *                parameters of conversion
  * @param inchar The character to convert
  * @param outchar The converted character
  */
-APR_DECLARE(apr_status_t) apr_xlate_conv_char(apr_xlate_t *convset, 
+APR_DECLARE(apr_status_t) apr_xlate_conv_char(apr_xlate_t *convset,
                                               char inchar, char outchar);
 #endif
 
 /**
  * Convert a single-byte character from one charset to another.
- * @param convset The handle allocated by apr_xlate_open, specifying the 
+ * @param convset The handle allocated by apr_xlate_open, specifying the
  *                parameters of conversion
  * @param inchar The single-byte character to convert.
  * @warning This only works when converting between single-byte character sets.
  *          -1 will be returned if the conversion can't be performed.
  */
-APR_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset, 
+APR_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset,
                                              unsigned char inchar);
 
 /**

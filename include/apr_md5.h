@@ -78,7 +78,7 @@ struct apr_md5_ctx_t {
     apr_uint32_t count[2];
     /** input buffer */
     unsigned char buffer[64];
-    /** translation handle 
+    /** translation handle
      *  ignored if xlate is unsupported
      */
     apr_xlate_t *xlate;
@@ -91,16 +91,16 @@ struct apr_md5_ctx_t {
 APR_DECLARE(apr_status_t) apr_md5_init(apr_md5_ctx_t *context);
 
 /**
- * MD5 translation setup.  Provides the APR translation handle to be used 
+ * MD5 translation setup.  Provides the APR translation handle to be used
  * for translating the content before calculating the digest.
  * @param context The MD5 content to set the translation for.
- * @param xlate The translation handle to use for this MD5 context 
+ * @param xlate The translation handle to use for this MD5 context
  */
 APR_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context,
                                             apr_xlate_t *xlate);
 
 /**
- * MD5 block update operation.  Continue an MD5 message-digest operation, 
+ * MD5 block update operation.  Continue an MD5 message-digest operation,
  * processing another message block, and updating the context.
  * @param context The MD5 content to update.
  * @param input next message block to update
@@ -111,7 +111,7 @@ APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
                                          apr_size_t inputLen);
 
 /**
- * MD5 finalization.  Ends an MD5 message-digest operation, writing the 
+ * MD5 finalization.  Ends an MD5 message-digest operation, writing the
  * message digest and zeroing the context
  * @param digest The final MD5 digest
  * @param context The MD5 content we are finalizing.
@@ -164,7 +164,7 @@ APR_DECLARE(apr_status_t) apr_bcrypt_encode(const char *pw,
  * @param passwd The password to validate
  * @param hash The password to validate against
  */
-APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd, 
+APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
                                                 const char *hash);
 
 

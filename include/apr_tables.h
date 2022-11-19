@@ -35,7 +35,7 @@ extern "C" {
 
 /**
  * @defgroup apr_tables Table and Array Functions
- * @ingroup APR 
+ * @ingroup APR
  * Arrays are used to store data which is referenced sequentially or
  * as a stack.  Functions are provided to push and pop individual
  * elements as well as to operate on the entire array.
@@ -167,7 +167,7 @@ APR_DECLARE(void) apr_array_clear(apr_array_header_t *arr);
 
 /**
  * Concatenate two arrays together.
- * @param dst The destination array, and the one to go first in the combined 
+ * @param dst The destination array, and the one to go first in the combined
  *            array
  * @param src The source array to add to the destination array
  */
@@ -179,7 +179,7 @@ APR_DECLARE(void) apr_array_cat(apr_array_header_t *dst,
  * @param p The pool to allocate the copy of the array out of
  * @param arr The array to copy
  * @return An exact copy of the array passed in
- * @remark The alternate apr_array_copy_hdr() copies only the header, and arranges 
+ * @remark The alternate apr_array_copy_hdr() copies only the header, and arranges
  *         for the elements to be copied if (and only if) the code subsequently
  *         does a push or arraycat.
  */
@@ -208,10 +208,10 @@ APR_DECLARE(apr_array_header_t *) apr_array_append(apr_pool_t *p,
                                       const apr_array_header_t *second);
 
 /**
- * Generate a new string from the apr_pool_t containing the concatenated 
- * sequence of substrings referenced as elements within the array.  The string 
- * will be empty if all substrings are empty or null, or if there are no 
- * elements in the array.  If sep is non-NUL, it will be inserted between 
+ * Generate a new string from the apr_pool_t containing the concatenated
+ * sequence of substrings referenced as elements within the array.  The string
+ * will be empty if all substrings are empty or null, or if there are no
+ * elements in the array.  If sep is non-NUL, it will be inserted between
  * elements as a separator.
  * @param p The pool to allocate the string out of
  * @param arr The array to generate the string from
@@ -263,7 +263,7 @@ APR_DECLARE(void) apr_table_clear(apr_table_t *t);
  * the data is still in the table.
  * @param t The table to search for the key
  * @param key The key to search for (case does not matter)
- * @return The value associated with the key, or NULL if the key does not exist. 
+ * @return The value associated with the key, or NULL if the key does not exist.
  */
 APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key);
 
@@ -297,8 +297,8 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
  * @param t The table to add the data to.
  * @param key The key to use (case does not matter)
  * @param val The value to add
- * @warning When adding data, this function does not make a copy of the key or 
- *          the value, so care should be taken to ensure that the values will 
+ * @warning When adding data, this function does not make a copy of the key or
+ *          the value, so care should be taken to ensure that the values will
  *          not change after they have been added..
  */
 APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
@@ -312,7 +312,7 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
 APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key);
 
 /**
- * Add data to a table by merging the value with data that has already been 
+ * Add data to a table by merging the value with data that has already been
  * stored. The merging is done by concatenating the two values, separated
  * by the string ", ".
  * @param t The table to search for the data
@@ -324,7 +324,7 @@ APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
                                   const char *val);
 
 /**
- * Add data to a table by merging the value with data that has already been 
+ * Add data to a table by merging the value with data that has already been
  * stored. The merging is done by concatenating the two values, separated
  * by the string ", ".
  * @param t The table to search for the data
@@ -354,7 +354,7 @@ APR_DECLARE(void) apr_table_add(apr_table_t *t, const char *key,
  * @param key The key to use
  * @param val The value to add.
  * @remark When adding data, this function does not make a copy of the key or the
- *         value, so care should be taken to ensure that the values will not 
+ *         value, so care should be taken to ensure that the values will not
  *         change after they have been added.
  */
 APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
@@ -378,14 +378,14 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
  * @param key The key from this iteration of the table
  * @param value The value from this iteration of the table
  * @remark Iteration continues while this callback function returns non-zero.
- * To export the callback function for apr_table_[v]do() it must be declared 
+ * To export the callback function for apr_table_[v]do() it must be declared
  * in the _NONSTD convention.
  * @see apr_table_do @see apr_table_vdo
  */
-typedef int (apr_table_do_callback_fn_t)(void *rec, const char *key, 
+typedef int (apr_table_do_callback_fn_t)(void *rec, const char *key,
                                                     const char *value);
 
-/** 
+/**
  * Iterate over a table running the provided function once for every
  * element in the table.  The varargs array must be a list of zero or
  * more (char *) keys followed by a NULL pointer.  If zero keys are
@@ -411,7 +411,7 @@ APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
 #endif
     ;
 
-/** 
+/**
  * Iterate over a table running the provided function once for every
  * element in the table.  The @p vp varargs parameter must be a
  * list of zero or more (char *) keys followed by a NULL pointer.  If

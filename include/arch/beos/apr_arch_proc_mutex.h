@@ -26,7 +26,7 @@
 
 struct apr_proc_mutex_t {
     apr_pool_t *pool;
-    
+
     /* Our lock :) */
     sem_id Lock;
     int32  LockCount;

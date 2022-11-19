@@ -27,7 +27,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/** 
+/**
  * @defgroup APR_Util_OPT_HOOK Optional Hook Functions
  * @ingroup APR_Util_Hook
  * @{

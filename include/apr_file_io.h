@@ -39,7 +39,7 @@ extern "C" {
 
 /**
  * @defgroup apr_file_io File I/O Handling Functions
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -58,7 +58,7 @@ extern "C" {
 #define APR_FOPEN_TRUNCATE   0x00010  /**< Open the file and truncate
                                          to 0 length */
 #define APR_FOPEN_BINARY     0x00020  /**< Open the file in binary mode
-                                         (This flag is ignored on UNIX 
+                                         (This flag is ignored on UNIX
                                          because it has no meaning)*/
 #define APR_FOPEN_EXCL       0x00040  /**< Open should fail if #APR_FOPEN_CREATE
                                          and file exists. */
@@ -80,7 +80,7 @@ extern "C" {
                                              file should support
                                              apr_socket_sendfile operation */
 #define APR_FOPEN_LARGEFILE   0x04000 /**< Platform dependent flag to enable
-                                       * large file support, see WARNING below 
+                                       * large file support, see WARNING below
                                        */
 
 #define APR_FOPEN_SPARSE      0x08000 /**< Platform dependent flag to enable
@@ -88,31 +88,31 @@ extern "C" {
                                        */
 
 #define APR_FOPEN_ROTATING  0x10000 /**< Do file file rotation checking */
- 
+
 #define APR_FOPEN_MANUAL_ROTATE  0x20000 /**< Enable Manual rotation */
 
 #define APR_FOPEN_NONBLOCK    0x40000 /**< Platform dependent flag to enable
                                        * non blocking file io */
 
- 
+
 
 /* backcompat */
 #define APR_READ             APR_FOPEN_READ       /**< @deprecated @see APR_FOPEN_READ */
-#define APR_WRITE            APR_FOPEN_WRITE      /**< @deprecated @see APR_FOPEN_WRITE */   
-#define APR_CREATE           APR_FOPEN_CREATE     /**< @deprecated @see APR_FOPEN_CREATE */   
-#define APR_APPEND           APR_FOPEN_APPEND     /**< @deprecated @see APR_FOPEN_APPEND */   
-#define APR_TRUNCATE         APR_FOPEN_TRUNCATE   /**< @deprecated @see APR_FOPEN_TRUNCATE */   
-#define APR_BINARY           APR_FOPEN_BINARY     /**< @deprecated @see APR_FOPEN_BINARY */   
-#define APR_EXCL             APR_FOPEN_EXCL       /**< @deprecated @see APR_FOPEN_EXCL */   
-#define APR_BUFFERED         APR_FOPEN_BUFFERED   /**< @deprecated @see APR_FOPEN_BUFFERED */   
-#define APR_DELONCLOSE       APR_FOPEN_DELONCLOSE /**< @deprecated @see APR_FOPEN_DELONCLOSE */   
-#define APR_XTHREAD          APR_FOPEN_XTHREAD    /**< @deprecated @see APR_FOPEN_XTHREAD */   
-#define APR_SHARELOCK        APR_FOPEN_SHARELOCK  /**< @deprecated @see APR_FOPEN_SHARELOCK */   
-#define APR_FILE_NOCLEANUP   APR_FOPEN_NOCLEANUP  /**< @deprecated @see APR_FOPEN_NOCLEANUP */   
-#define APR_SENDFILE_ENABLED APR_FOPEN_SENDFILE_ENABLED /**< @deprecated @see APR_FOPEN_SENDFILE_ENABLED */   
-#define APR_LARGEFILE        APR_FOPEN_LARGEFILE  /**< @deprecated @see APR_FOPEN_LARGEFILE */   
+#define APR_WRITE            APR_FOPEN_WRITE      /**< @deprecated @see APR_FOPEN_WRITE */
+#define APR_CREATE           APR_FOPEN_CREATE     /**< @deprecated @see APR_FOPEN_CREATE */
+#define APR_APPEND           APR_FOPEN_APPEND     /**< @deprecated @see APR_FOPEN_APPEND */
+#define APR_TRUNCATE         APR_FOPEN_TRUNCATE   /**< @deprecated @see APR_FOPEN_TRUNCATE */
+#define APR_BINARY           APR_FOPEN_BINARY     /**< @deprecated @see APR_FOPEN_BINARY */
+#define APR_EXCL             APR_FOPEN_EXCL       /**< @deprecated @see APR_FOPEN_EXCL */
+#define APR_BUFFERED         APR_FOPEN_BUFFERED   /**< @deprecated @see APR_FOPEN_BUFFERED */
+#define APR_DELONCLOSE       APR_FOPEN_DELONCLOSE /**< @deprecated @see APR_FOPEN_DELONCLOSE */
+#define APR_XTHREAD          APR_FOPEN_XTHREAD    /**< @deprecated @see APR_FOPEN_XTHREAD */
+#define APR_SHARELOCK        APR_FOPEN_SHARELOCK  /**< @deprecated @see APR_FOPEN_SHARELOCK */
+#define APR_FILE_NOCLEANUP   APR_FOPEN_NOCLEANUP  /**< @deprecated @see APR_FOPEN_NOCLEANUP */
+#define APR_SENDFILE_ENABLED APR_FOPEN_SENDFILE_ENABLED /**< @deprecated @see APR_FOPEN_SENDFILE_ENABLED */
+#define APR_LARGEFILE        APR_FOPEN_LARGEFILE  /**< @deprecated @see APR_FOPEN_LARGEFILE */
 
-/** @def APR_FOPEN_LARGEFILE 
+/** @def APR_FOPEN_LARGEFILE
  * @warning APR_FOPEN_LARGEFILE flag only has effect on some
  * platforms where sizeof(apr_off_t) == 4.  Where implemented, it
  * allows opening and writing to a file which exceeds the size which
@@ -172,7 +172,7 @@ extern "C" {
  * @{
  */
 #if defined(DOXYGEN)
-#define APR_MAX_IOVEC_SIZE 1024                /**< System dependent maximum 
+#define APR_MAX_IOVEC_SIZE 1024                /**< System dependent maximum
                                                     size of an iovec array */
 #elif defined(IOV_MAX)
 #define APR_MAX_IOVEC_SIZE IOV_MAX
@@ -235,13 +235,13 @@ typedef struct apr_file_t         apr_file_t;
  * @li #APR_FOPEN_SHARELOCK      Platform dependent support for higher
  *                               level locked read/write access to support
  *                               writes across process/machines
- * @li #APR_FOPEN_NOCLEANUP      Do not register a cleanup with the pool 
+ * @li #APR_FOPEN_NOCLEANUP      Do not register a cleanup with the pool
  *                               passed in on the @a pool argument (see below)
  * @li #APR_FOPEN_SENDFILE_ENABLED  Open with appropriate platform semantics
  *                               for sendfile operations.  Advisory only,
  *                               apr_socket_sendfile does not check this flag
  * @li #APR_FOPEN_LARGEFILE      Platform dependent flag to enable large file
- *                               support, see WARNING below 
+ *                               support, see WARNING below
  * @li #APR_FOPEN_SPARSE         Platform dependent flag to enable sparse file
  *                               support, see WARNING below
  * @li #APR_FOPEN_ROTATING       Do file file rotation checking
@@ -284,7 +284,7 @@ APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *pool);
  * overwritten.  Moving files or directories across devices may not be
  * possible.
  */
-APR_DECLARE(apr_status_t) apr_file_rename(const char *from_path, 
+APR_DECLARE(apr_status_t) apr_file_rename(const char *from_path,
                                           const char *to_path,
                                           apr_pool_t *pool);
 
@@ -294,7 +294,7 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *from_path,
  * @param to_path The full path to the new file (using / on all systems)
  * @remark Both files must reside on the same device.
  */
-APR_DECLARE(apr_status_t) apr_file_link(const char *from_path, 
+APR_DECLARE(apr_status_t) apr_file_link(const char *from_path,
                                           const char *to_path);
 
 /**
@@ -309,7 +309,7 @@ APR_DECLARE(apr_status_t) apr_file_link(const char *from_path,
  * @remark The new file does not need to exist, it will be created if required.
  * @warning If the new file already exists, its contents will be overwritten.
  */
-APR_DECLARE(apr_status_t) apr_file_copy(const char *from_path, 
+APR_DECLARE(apr_status_t) apr_file_copy(const char *from_path,
                                         const char *to_path,
                                         apr_fileperms_t perms,
                                         apr_pool_t *pool);
@@ -329,7 +329,7 @@ APR_DECLARE(apr_status_t) apr_file_copy(const char *from_path,
  * source file permissions) are assigned only when the target file does not yet
  * exist.
  */
-APR_DECLARE(apr_status_t) apr_file_append(const char *from_path, 
+APR_DECLARE(apr_status_t) apr_file_append(const char *from_path,
                                           const char *to_path,
                                           apr_fileperms_t perms,
                                           apr_pool_t *pool);
@@ -345,11 +345,11 @@ APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr);
  * Open standard error as an apr file pointer.
  * @param thefile The apr file to use as stderr.
  * @param pool The pool to allocate the file out of.
- * 
+ *
  * @remark The only reason that the apr_file_open_std* functions exist
  * is that you may not always have a stderr/out/in on Windows.  This
  * is generally a problem with newer versions of Windows and services.
- * 
+ *
  * @remark The other problem is that the C library functions generally work
  * differently on Windows and Unix.  So, by using apr_file_open_std*
  * functions, you can get a handle to an APR struct that works with
@@ -363,7 +363,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile,
  * open standard output as an apr file pointer.
  * @param thefile The apr file to use as stdout.
  * @param pool The pool to allocate the file out of.
- * 
+ *
  * @remark See remarks for apr_file_open_stderr().
  */
 APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile,
@@ -373,7 +373,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile,
  * open standard input as an apr file pointer.
  * @param thefile The apr file to use as stdin.
  * @param pool The pool to allocate the file out of.
- * 
+ *
  * @remark See remarks for apr_file_open_stderr().
  */
 APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile,
@@ -382,18 +382,18 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile,
 /**
  * open standard error as an apr file pointer, with flags.
  * @param thefile The apr file to use as stderr.
- * @param flags The flags to open the file with. Only the 
+ * @param flags The flags to open the file with. Only the
  *              @li #APR_FOPEN_EXCL
  *              @li #APR_FOPEN_BUFFERED
  *              @li #APR_FOPEN_XTHREAD
- *              @li #APR_FOPEN_SHARELOCK 
+ *              @li #APR_FOPEN_SHARELOCK
  *              @li #APR_FOPEN_SENDFILE_ENABLED
  *              @li #APR_FOPEN_LARGEFILE
  *
  *              flags should be used. The #APR_FOPEN_WRITE flag will
  *              be set unconditionally.
  * @param pool The pool to allocate the file out of.
- * 
+ *
  * @remark See remarks for apr_file_open_stderr().
  */
 APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile,
@@ -403,18 +403,18 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile,
 /**
  * open standard output as an apr file pointer, with flags.
  * @param thefile The apr file to use as stdout.
- * @param flags The flags to open the file with. Only the 
+ * @param flags The flags to open the file with. Only the
  *              @li #APR_FOPEN_EXCL
  *              @li #APR_FOPEN_BUFFERED
  *              @li #APR_FOPEN_XTHREAD
- *              @li #APR_FOPEN_SHARELOCK 
+ *              @li #APR_FOPEN_SHARELOCK
  *              @li #APR_FOPEN_SENDFILE_ENABLED
  *              @li #APR_FOPEN_LARGEFILE
  *
  *              flags should be used. The #APR_FOPEN_WRITE flag will
  *              be set unconditionally.
  * @param pool The pool to allocate the file out of.
- * 
+ *
  * @remark See remarks for apr_file_open_stderr().
  */
 APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile,
@@ -424,18 +424,18 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile,
 /**
  * open standard input as an apr file pointer, with flags.
  * @param thefile The apr file to use as stdin.
- * @param flags The flags to open the file with. Only the 
+ * @param flags The flags to open the file with. Only the
  *              @li #APR_FOPEN_EXCL
  *              @li #APR_FOPEN_BUFFERED
  *              @li #APR_FOPEN_XTHREAD
- *              @li #APR_FOPEN_SHARELOCK 
+ *              @li #APR_FOPEN_SHARELOCK
  *              @li #APR_FOPEN_SENDFILE_ENABLED
  *              @li #APR_FOPEN_LARGEFILE
  *
  *              flags should be used. The #APR_FOPEN_WRITE flag will
  *              be set unconditionally.
  * @param pool The pool to allocate the file out of.
- * 
+ *
  * @remark See remarks for apr_file_open_stderr().
  */
 APR_DECLARE(apr_status_t) apr_file_open_flags_stdin(apr_file_t **thefile,
@@ -466,7 +466,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf,
  * Write data to the specified file.
  * @param thefile The file descriptor to write to.
  * @param buf The buffer which contains the data.
- * @param nbytes On entry, the number of bytes to write; on exit, the number 
+ * @param nbytes On entry, the number of bytes to write; on exit, the number
  *               of bytes written.
  *
  * @remark apr_file_write() will write up to the specified number of
@@ -484,8 +484,8 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf,
  * Write data from iovec array to the specified file.
  * @param thefile The file descriptor to write to.
  * @param vec The array from which to get the data to write to the file.
- * @param nvec The number of elements in the struct iovec array. This must 
- *             be smaller than #APR_MAX_IOVEC_SIZE.  If it isn't, the function 
+ * @param nvec The number of elements in the struct iovec array. This must
+ *             be smaller than #APR_MAX_IOVEC_SIZE.  If it isn't, the function
  *             will fail with #APR_EINVAL.
  * @param nbytes The number of bytes written.
  *
@@ -530,7 +530,7 @@ APR_DECLARE(apr_status_t) apr_file_read_full(apr_file_t *thefile, void *buf,
  * @param buf The buffer which contains the data.
  * @param nbytes The number of bytes to write.
  * @param bytes_written If non-NULL, set to the number of bytes written.
- * 
+ *
  * @remark apr_file_write_full() will write up to the specified number of
  * bytes, but never more.  If the OS cannot write that many bytes, the
  * process/thread will block until they can be written. Exceptional
@@ -543,9 +543,9 @@ APR_DECLARE(apr_status_t) apr_file_read_full(apr_file_t *thefile, void *buf,
  *
  * @remark #APR_EINTR is never returned.
  */
-APR_DECLARE(apr_status_t) apr_file_write_full(apr_file_t *thefile, 
+APR_DECLARE(apr_status_t) apr_file_write_full(apr_file_t *thefile,
                                               const void *buf,
-                                              apr_size_t nbytes, 
+                                              apr_size_t nbytes,
                                               apr_size_t *bytes_written);
 
 
@@ -554,8 +554,8 @@ APR_DECLARE(apr_status_t) apr_file_write_full(apr_file_t *thefile,
  * data is written before returning.
  * @param thefile The file descriptor to write to.
  * @param vec The array from which to get the data to write to the file.
- * @param nvec The number of elements in the struct iovec array. This must 
- *             be smaller than #APR_MAX_IOVEC_SIZE.  If it isn't, the function 
+ * @param nvec The number of elements in the struct iovec array. This must
+ *             be smaller than #APR_MAX_IOVEC_SIZE.  If it isn't, the function
  *             will fail with #APR_EINVAL.
  * @param nbytes The number of bytes written.
  *
@@ -589,18 +589,18 @@ APR_DECLARE(apr_status_t) apr_file_ungetc(char ch, apr_file_t *thefile);
 
 /**
  * Read a line from the specified file
- * @param str The buffer to store the string in. 
+ * @param str The buffer to store the string in.
  * @param len The length of the string
  * @param thefile The file descriptor to read from
  * @remark The buffer will be NUL-terminated if any characters are stored.
  *         The newline at the end of the line will not be stripped.
  */
-APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, 
+APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len,
                                         apr_file_t *thefile);
 
 /**
  * Write the string into the specified file.
- * @param str The string to write. 
+ * @param str The string to write.
  * @param thefile The file descriptor to write to
  */
 APR_DECLARE(apr_status_t) apr_file_puts(const char *str, apr_file_t *thefile);
@@ -635,11 +635,11 @@ APR_DECLARE(apr_status_t) apr_file_datasync(apr_file_t *thefile);
 
 /**
  * Duplicate the specified file descriptor.
- * @param new_file The structure to duplicate into. 
+ * @param new_file The structure to duplicate into.
  * @param old_file The file to duplicate.
  * @param p The pool to use for the new file.
  * @remark *new_file must point to a valid apr_file_t, or point to NULL.
- */         
+ */
 APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
                                        apr_file_t *old_file,
                                        apr_pool_t *p);
@@ -672,7 +672,7 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
                                             apr_pool_t *p);
 
 /**
- * Give the specified apr file handle a new buffer 
+ * Give the specified apr file handle a new buffer
  * @param thefile  The file handle that is to be modified
  * @param buffer   The buffer
  * @param bufsize  The size of the buffer
@@ -687,8 +687,8 @@ APR_DECLARE(apr_status_t) apr_file_buffer_set(apr_file_t *thefile,
                                               apr_size_t bufsize);
 
 /**
- * Get the size of any buffer for the specified apr file handle 
- * @param thefile  The file handle 
+ * Get the size of any buffer for the specified apr file handle
+ * @param thefile  The file handle
  */
 APR_DECLARE(apr_size_t) apr_file_buffer_size_get(apr_file_t *thefile);
 
@@ -697,13 +697,13 @@ APR_DECLARE(apr_size_t) apr_file_buffer_size_get(apr_file_t *thefile);
  * @param thefile The file descriptor
  * @param where How to move the pointer, one of:
  *              @li #APR_SET  --  set the offset to offset
- *              @li #APR_CUR  --  add the offset to the current position 
- *              @li #APR_END  --  add the offset to the current file size 
+ *              @li #APR_CUR  --  add the offset to the current position
+ *              @li #APR_END  --  add the offset to the current file size
  * @param offset The offset to move the pointer to.
  * @remark The third argument is modified to be the offset the pointer
           was actually moved to.
  */
-APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, 
+APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile,
                                    apr_seek_where_t where,
                                    apr_off_t *offset);
 
@@ -720,7 +720,7 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile,
  * does not expect it, a non-blocking stream will fluxor the client app.
  * @deprecated @see apr_file_pipe_create_pools()
  */
-APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, 
+APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in,
                                                apr_file_t **out,
                                                apr_pool_t *pool);
 
@@ -740,13 +740,13 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in,
  * @remark Some platforms cannot toggle between blocking and nonblocking,
  * and when passing a pipe as a standard handle to an application which
  * does not expect it, a non-blocking stream will fluxor the client app.
- * Use this function rather than apr_file_pipe_create() to create pipes 
+ * Use this function rather than apr_file_pipe_create() to create pipes
  * where one or both ends require non-blocking semantics.
  * @deprecated @see apr_file_pipe_create_pools()
  */
-APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in, 
-                                                  apr_file_t **out, 
-                                                  apr_int32_t blocking, 
+APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
+                                                  apr_file_t **out,
+                                                  apr_int32_t blocking,
                                                   apr_pool_t *pool);
 
 /**
@@ -782,25 +782,25 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_pools(apr_file_t **in,
  * @param perm The permissions for the newly created pipe.
  * @param pool The pool to operate on.
  */
-APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, 
-                                                    apr_fileperms_t perm, 
+APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename,
+                                                    apr_fileperms_t perm,
                                                     apr_pool_t *pool);
 
 /**
  * Get the timeout value for a pipe or manipulate the blocking state.
  * @param thepipe The pipe we are getting a timeout for.
- * @param timeout The current timeout value in microseconds. 
+ * @param timeout The current timeout value in microseconds.
  */
-APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, 
+APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe,
                                                apr_interval_time_t *timeout);
 
 /**
  * Set the timeout value for a pipe or manipulate the blocking state.
  * @param thepipe The pipe we are setting a timeout on.
- * @param timeout The timeout value in microseconds.  Values < 0 mean wait 
+ * @param timeout The timeout value in microseconds.  Values < 0 mean wait
  *        forever, 0 means do not wait at all.
  */
-APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, 
+APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe,
                                                   apr_interval_time_t timeout);
 
 /** file (un)locking functions. */
@@ -826,28 +826,28 @@ APR_DECLARE(apr_status_t) apr_file_unlock(apr_file_t *thefile);
 
 /**
  * return the file name of the current file.
- * @param new_path The path of the file.  
+ * @param new_path The path of the file.
  * @param thefile The currently open file.
- */                     
-APR_DECLARE(apr_status_t) apr_file_name_get(const char **new_path, 
+ */
+APR_DECLARE(apr_status_t) apr_file_name_get(const char **new_path,
                                             apr_file_t *thefile);
-    
+
 /**
  * Return the data associated with the current file.
- * @param data The user data associated with the file.  
+ * @param data The user data associated with the file.
  * @param key The key to use for retrieving data associated with this file.
  * @param file The currently open file.
- */                     
-APR_DECLARE(apr_status_t) apr_file_data_get(void **data, const char *key, 
+ */
+APR_DECLARE(apr_status_t) apr_file_data_get(void **data, const char *key,
                                             apr_file_t *file);
 
 /**
  * Set the data associated with the current file.
  * @param file The currently open file.
- * @param data The user data to associate with the file.  
+ * @param data The user data to associate with the file.
  * @param key The key to use for associating data with the file.
  * @param cleanup The cleanup routine to use when the file is destroyed.
- */                     
+ */
 APR_DECLARE(apr_status_t) apr_file_data_set(apr_file_t *file, void *data,
                                             const char *key,
                                             apr_status_t (*cleanup)(void *));
@@ -858,8 +858,8 @@ APR_DECLARE(apr_status_t) apr_file_data_set(apr_file_t *file, void *data,
  * @param format The format string
  * @param ... The values to substitute in the format string
  * @return The number of bytes written
- */ 
-APR_DECLARE_NONSTD(int) apr_file_printf(apr_file_t *fptr, 
+ */
+APR_DECLARE_NONSTD(int) apr_file_printf(apr_file_t *fptr,
                                         const char *format, ...)
         __attribute__((format(printf,2,3)));
 
@@ -916,8 +916,8 @@ APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
  * @param path the path for the directory to be created. (use / on all systems)
  * @param perm Permissions for the new directory.
  * @param pool the pool to use.
- */                        
-APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm, 
+ */
+APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm,
                                        apr_pool_t *pool);
 
 /** Creates a new directory on the file system, but behaves like
@@ -937,19 +937,19 @@ APR_DECLARE(apr_status_t) apr_dir_make_recursive(const char *path,
  * @param pool the pool to use.
  * @remark Removing a directory which is in-use (e.g., the current working
  * directory, or during apr_dir_read, or with an open file) is not portable.
- */                        
+ */
 APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *pool);
 
 /**
  * get the specified file's stats.
  * @param finfo Where to store the information about the file.
- * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_* values 
+ * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_* values
  * @param thefile The file to get information about.
- */ 
-APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, 
+ */
+APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo,
                                             apr_int32_t wanted,
                                             apr_file_t *thefile);
-    
+
 
 /**
  * Truncate the file's length to the specified offset
@@ -987,16 +987,16 @@ APR_DECLARE_INHERIT_UNSET(file);
  * @param fp The apr file to use as a temporary file.
  * @param templ The template to use when creating a temp file.
  * @param flags The flags to open the file with. If this is zero,
- *              the file is opened with 
+ *              the file is opened with
  *              #APR_FOPEN_CREATE | #APR_FOPEN_READ | #APR_FOPEN_WRITE |
  *              #APR_FOPEN_EXCL | #APR_FOPEN_DELONCLOSE
  * @param p The pool to allocate the file out of.
- * @remark   
- * This function  generates  a unique temporary file name from template.  
- * The last six characters of template must be XXXXXX and these are replaced 
+ * @remark
+ * This function  generates  a unique temporary file name from template.
+ * The last six characters of template must be XXXXXX and these are replaced
  * with a string that makes the filename unique. Since it will  be  modified,
  * template must not be a string constant, but should be declared as a character
- * array.  
+ * array.
  *
  */
 APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *templ,
@@ -1007,12 +1007,12 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *templ,
  * Find an existing directory suitable as a temporary storage location.
  * @param temp_dir The temp directory.
  * @param p The pool to use for any necessary allocations.
- * @remark   
+ * @remark
  * This function uses an algorithm to search for a directory that an
  * an application can use for temporary storage.
  *
  */
-APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir, 
+APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
                                            apr_pool_t *p);
 
 

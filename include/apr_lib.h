@@ -41,7 +41,7 @@ extern "C" {
 
 /**
  * @defgroup apr_lib General Purpose Library Routines
- * @ingroup APR 
+ * @ingroup APR
  * This is collection of oddballs that didn't fit anywhere else,
  * and might move to more appropriate headers with the release
  * of APR 1.0.
@@ -186,7 +186,7 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
  * reason; its value will never be modified by the apr_password_get()
  * function.
  */
-APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, 
+APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf,
                                            apr_size_t *bufsize);
 
 /** @} */

@@ -47,7 +47,7 @@ extern "C" {
 /**
  * @defgroup APR_Util_Bucket_Brigades Bucket Brigades
  * @ingroup APR
- * @{ 
+ * @{
  */
 
 /** default bucket buffer size - 8KB minus room for memory allocator headers */
@@ -138,7 +138,7 @@ struct apr_bucket_type_t {
      * The name of the bucket type
      */
     const char *name;
-    /** 
+    /**
      * The number of functions this bucket understands.  Can not be less than
      * five.
      */
@@ -173,14 +173,14 @@ struct apr_bucket_type_t {
      *  for all bucket types.
      * @param b The bucket to read from
      * @param str A place to store the data read.  Allocation should only be
-     *            done if absolutely necessary. 
+     *            done if absolutely necessary.
      * @param len The amount of data read.
      * @param block Should this read function block if there is more data that
      *              cannot be read immediately.
      */
-    apr_status_t (*read)(apr_bucket *b, const char **str, apr_size_t *len, 
+    apr_status_t (*read)(apr_bucket *b, const char **str, apr_size_t *len,
                          apr_read_type_e block);
-    
+
     /**
      * Make it possible to set aside the data for at least as long as the
      *  given pool. Buckets containing data that could potentially die before
@@ -241,16 +241,16 @@ struct apr_bucket {
      *  pointer.  The vast majority of bucket types allow a fixed block of
      *  data to be referenced by multiple buckets, each bucket pointing to
      *  a different segment of the data.  That segment starts at base+start
-     *  and ends at base+start+length.  
+     *  and ends at base+start+length.
      *  If the length == (apr_size_t)(-1), then start == -1.
      */
     apr_off_t start;
     /** type-dependent data hangs off this pointer */
-    void *data;	
+    void *data;
     /**
      * Pointer to function used to free the bucket. This function should
      * always be defined and it should be consistent with the memory
-     * function used to allocate the bucket. For example, if malloc() is 
+     * function used to allocate the bucket. For example, if malloc() is
      * used to allocate the bucket, this pointer should point to free().
      * @param e Pointer to the bucket being freed
      */
@@ -262,7 +262,7 @@ struct apr_bucket {
 /** A list of buckets */
 struct apr_bucket_brigade {
     /** The pool to associate the brigade with.  The data is not allocated out
-     *  of the pool, but a cleanup is registered with this pool.  If the 
+     *  of the pool, but a cleanup is registered with this pool.  If the
      *  brigade is destroyed by some mechanism other than pool destruction,
      *  the destroying function is responsible for killing the cleanup.
      */
@@ -671,7 +671,7 @@ APR_DECLARE(apr_bucket_brigade *) apr_brigade_create(apr_pool_t *p,
 
 /**
  * Destroy an entire bucket brigade.  This includes destroying all of the
- * buckets within the bucket brigade's bucket list. 
+ * buckets within the bucket brigade's bucket list.
  * @param b The bucket brigade to destroy
  */
 APR_DECLARE(apr_status_t) apr_brigade_destroy(apr_bucket_brigade *b)
@@ -713,10 +713,10 @@ APR_DECLARE(apr_bucket_brigade *) apr_brigade_split_ex(apr_bucket_brigade *b,
 
 /**
  * Create a new bucket brigade and move the buckets from the tail end
- * of an existing brigade into the new brigade.  Buckets from 
+ * of an existing brigade into the new brigade.  Buckets from
  * @a e to the last bucket (inclusively) of brigade @a b
  * are moved from @a b to the returned brigade.
- * @param b The brigade to split 
+ * @param b The brigade to split
  * @param e The first bucket to move
  * @return The new brigade
  * @warning Note that this function always allocates a new brigade
@@ -775,7 +775,7 @@ APR_DECLARE(apr_status_t) apr_brigade_flatten(apr_bucket_brigade *bb,
  * @param len On return, the length of the char array.
  * @param pool The pool to allocate the string from.
  */
-APR_DECLARE(apr_status_t) apr_brigade_pflatten(apr_bucket_brigade *bb, 
+APR_DECLARE(apr_status_t) apr_brigade_pflatten(apr_bucket_brigade *bb,
                                                char **c,
                                                apr_size_t *len,
                                                apr_pool_t *pool)
@@ -828,7 +828,7 @@ APR_DECLARE(apr_status_t) apr_brigade_split_boundary(apr_bucket_brigade *bbOut,
                           __attribute__((nonnull(1,2)));
 
 /**
- * Create an iovec of the elements in a bucket_brigade... return number 
+ * Create an iovec of the elements in a bucket_brigade... return number
  * of elements used.  This is useful for writing to a file or to the
  * network efficiently.
  * @param b The bucket brigade to create the iovec from
@@ -836,12 +836,12 @@ APR_DECLARE(apr_status_t) apr_brigade_split_boundary(apr_bucket_brigade *bbOut,
  * @param nvec The number of elements in the iovec. On return, it is the
  *             number of iovec elements actually filled out.
  */
-APR_DECLARE(apr_status_t) apr_brigade_to_iovec(apr_bucket_brigade *b, 
+APR_DECLARE(apr_status_t) apr_brigade_to_iovec(apr_bucket_brigade *b,
                                                struct iovec *vec, int *nvec)
                           __attribute__((nonnull(1,2,3)));
 
 /**
- * This function writes a list of strings into a bucket brigade. 
+ * This function writes a list of strings into a bucket brigade.
  * @param b The bucket brigade to add to
  * @param flush The flush function to use if the brigade is full
  * @param ctx The structure to pass to the flush function
@@ -862,7 +862,7 @@ APR_DECLARE(apr_status_t) apr_brigade_vputstrs(apr_bucket_brigade *b,
  * inside a heap bucket, heap buckets are a fixed size to promote their
  * reuse.
  *
- * If an attempt is made to write a string to a brigade that already 
+ * If an attempt is made to write a string to a brigade that already
  * ends with a heap bucket, this function will attempt to pack the
  * string into the remaining space in the previous heap bucket, before
  * allocating a new heap bucket.
@@ -942,7 +942,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_brigade_putstrs(apr_bucket_brigade *b,
     ;
 
 /**
- * Evaluate a printf and put the resulting string at the end 
+ * Evaluate a printf and put the resulting string at the end
  * of the bucket brigade.
  * @param b The brigade to write to
  * @param flush The flush function to use if the brigade is full
@@ -951,7 +951,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_brigade_putstrs(apr_bucket_brigade *b,
  * @param ... The arguments to fill out the format
  * @return APR_SUCCESS or error code
  */
-APR_DECLARE_NONSTD(apr_status_t) apr_brigade_printf(apr_bucket_brigade *b, 
+APR_DECLARE_NONSTD(apr_status_t) apr_brigade_printf(apr_bucket_brigade *b,
                                                     apr_brigade_flush flush,
                                                     void *ctx,
                                                     const char *fmt, ...)
@@ -959,7 +959,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_brigade_printf(apr_bucket_brigade *b,
                                  __attribute__((nonnull(1)));
 
 /**
- * Evaluate a printf and put the resulting string at the end 
+ * Evaluate a printf and put the resulting string at the end
  * of the bucket brigade.
  * @param b The brigade to write to
  * @param flush The flush function to use if the brigade is full
@@ -968,7 +968,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_brigade_printf(apr_bucket_brigade *b,
  * @param va The arguments to fill out the format
  * @return APR_SUCCESS or error code
  */
-APR_DECLARE(apr_status_t) apr_brigade_vprintf(apr_bucket_brigade *b, 
+APR_DECLARE(apr_status_t) apr_brigade_vprintf(apr_bucket_brigade *b,
                                               apr_brigade_flush flush,
                                               void *ctx,
                                               const char *fmt, va_list va)
@@ -1168,9 +1168,9 @@ APR_DECLARE_NONSTD(void) apr_bucket_free(void *block)
 
 /**
  * Split one bucket in two at the point provided.
- * 
+ *
  * Once split, the original bucket becomes the first of the two new buckets.
- * 
+ *
  * (It is assumed that the bucket is a member of a brigade when this
  * function is called).
  * @param e The bucket to split
@@ -1195,7 +1195,7 @@ APR_DECLARE_NONSTD(void) apr_bucket_free(void *block)
  * @param data The bucket to setaside
  * @param pool The pool defining the desired lifetime of the bucket data
  * @return APR_SUCCESS
- */ 
+ */
 APR_DECLARE_NONSTD(apr_status_t) apr_bucket_setaside_noop(apr_bucket *data,
                                                           apr_pool_t *pool);
 
@@ -1205,7 +1205,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_bucket_setaside_noop(apr_bucket *data,
  * @param data The bucket to setaside
  * @param pool The pool defining the desired lifetime of the bucket data
  * @return APR_ENOTIMPL
- */ 
+ */
 APR_DECLARE_NONSTD(apr_status_t) apr_bucket_setaside_notimpl(apr_bucket *data,
                                                              apr_pool_t *pool);
 
@@ -1215,7 +1215,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_bucket_setaside_notimpl(apr_bucket *data,
  * @param data The bucket to split
  * @param point The location to split the bucket
  * @return APR_ENOTIMPL
- */ 
+ */
 APR_DECLARE_NONSTD(apr_status_t) apr_bucket_split_notimpl(apr_bucket *data,
                                                           apr_size_t point);
 
@@ -1237,7 +1237,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_bucket_copy_notimpl(apr_bucket *e,
  * simple buckets where data points to a string and pipe buckets where data
  * points directly to the apr_file_t.
  * @param data The bucket data to destroy
- */ 
+ */
 APR_DECLARE_NONSTD(void) apr_bucket_destroy_noop(void *data);
 
 /**
@@ -1352,7 +1352,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_bucket_simple_copy(apr_bucket *a,
  * @return The new bucket, or NULL if allocation failed
  */
 APR_DECLARE(apr_bucket *) apr_bucket_shared_make(apr_bucket *b, void *data,
-				                 apr_off_t start, 
+				                 apr_off_t start,
                                                  apr_size_t length);
 
 /**
@@ -1413,8 +1413,8 @@ APR_DECLARE_NONSTD(apr_status_t) apr_bucket_shared_copy(apr_bucket *a,
 APR_DECLARE(apr_bucket *) apr_bucket_eos_create(apr_bucket_alloc_t *list);
 
 /**
- * Make the bucket passed in an EOS bucket.  This indicates that there is no 
- * more data coming from down the filter stack.  All filters should flush at 
+ * Make the bucket passed in an EOS bucket.  This indicates that there is no
+ * more data coming from down the filter stack.  All filters should flush at
  * this point.
  * @param b The bucket to make into an EOS bucket
  * @return The new bucket, or NULL if allocation failed
@@ -1433,8 +1433,8 @@ APR_DECLARE(apr_bucket *) apr_bucket_flush_create(apr_bucket_alloc_t *list)
                           __attribute__((nonnull(1)));
 
 /**
- * Make the bucket passed in a FLUSH  bucket.  This indicates that filters 
- * should flush their data.  There is no guarantee that they will flush it, 
+ * Make the bucket passed in a FLUSH  bucket.  This indicates that filters
+ * should flush their data.  There is no guarantee that they will flush it,
  * but this is the best we can do.
  * @param b The bucket to make into a FLUSH bucket
  * @return The new bucket, or NULL if allocation failed
@@ -1449,7 +1449,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_flush_make(apr_bucket *b)
  * @param list The freelist from which this bucket should be allocated
  * @return The new bucket, or NULL if allocation failed
  */
-APR_DECLARE(apr_bucket *) apr_bucket_immortal_create(const char *buf, 
+APR_DECLARE(apr_bucket *) apr_bucket_immortal_create(const char *buf,
                                                      apr_size_t nbyte,
                                                      apr_bucket_alloc_t *list)
                           __attribute__((nonnull(1,3)));
@@ -1461,8 +1461,8 @@ APR_DECLARE(apr_bucket *) apr_bucket_immortal_create(const char *buf,
  * @param nbyte The size of the data to insert.
  * @return The new bucket, or NULL if allocation failed
  */
-APR_DECLARE(apr_bucket *) apr_bucket_immortal_make(apr_bucket *b, 
-                                                   const char *buf, 
+APR_DECLARE(apr_bucket *) apr_bucket_immortal_make(apr_bucket *b,
+                                                   const char *buf,
                                                    apr_size_t nbyte)
                           __attribute__((nonnull(1,2)));
 
@@ -1473,7 +1473,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_immortal_make(apr_bucket *b,
  * @param list The freelist from which this bucket should be allocated
  * @return The new bucket, or NULL if allocation failed
  */
-APR_DECLARE(apr_bucket *) apr_bucket_transient_create(const char *buf, 
+APR_DECLARE(apr_bucket *) apr_bucket_transient_create(const char *buf,
                                                       apr_size_t nbyte,
                                                       apr_bucket_alloc_t *list)
                           __attribute__((nonnull(1,3)));
@@ -1485,7 +1485,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_transient_create(const char *buf,
  * @param nbyte The size of the data to insert.
  * @return The new bucket, or NULL if allocation failed
  */
-APR_DECLARE(apr_bucket *) apr_bucket_transient_make(apr_bucket *b, 
+APR_DECLARE(apr_bucket *) apr_bucket_transient_make(apr_bucket *b,
                                                     const char *buf,
                                                     apr_size_t nbyte)
                           __attribute__((nonnull(1,2)));
@@ -1504,7 +1504,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_transient_make(apr_bucket *b,
  * @param list The freelist from which this bucket should be allocated
  * @return The new bucket, or NULL if allocation failed
  */
-APR_DECLARE(apr_bucket *) apr_bucket_heap_create(const char *buf, 
+APR_DECLARE(apr_bucket *) apr_bucket_heap_create(const char *buf,
                                                  apr_size_t nbyte,
                                                  void (*free_func)(void *data),
                                                  apr_bucket_alloc_t *list)
@@ -1532,7 +1532,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_heap_make(apr_bucket *b, const char *buf,
  * @param list The freelist from which this bucket should be allocated
  * @return The new bucket, or NULL if allocation failed
  */
-APR_DECLARE(apr_bucket *) apr_bucket_pool_create(const char *buf, 
+APR_DECLARE(apr_bucket *) apr_bucket_pool_create(const char *buf,
                                                  apr_size_t length,
                                                  apr_pool_t *pool,
                                                  apr_bucket_alloc_t *list)
@@ -1547,7 +1547,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_pool_create(const char *buf,
  * @return The new bucket, or NULL if allocation failed
  */
 APR_DECLARE(apr_bucket *) apr_bucket_pool_make(apr_bucket *b, const char *buf,
-                                               apr_size_t length, 
+                                               apr_size_t length,
                                                apr_pool_t *pool)
                           __attribute__((nonnull(1,2,4)));
 
@@ -1561,7 +1561,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_pool_make(apr_bucket *b, const char *buf,
  * @param list The freelist from which this bucket should be allocated
  * @return The new bucket, or NULL if allocation failed
  */
-APR_DECLARE(apr_bucket *) apr_bucket_mmap_create(apr_mmap_t *mm, 
+APR_DECLARE(apr_bucket *) apr_bucket_mmap_create(apr_mmap_t *mm,
                                                  apr_off_t start,
                                                  apr_size_t length,
                                                  apr_bucket_alloc_t *list)
@@ -1577,7 +1577,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_mmap_create(apr_mmap_t *mm,
  * @return The new bucket, or NULL if allocation failed
  */
 APR_DECLARE(apr_bucket *) apr_bucket_mmap_make(apr_bucket *b, apr_mmap_t *mm,
-                                               apr_off_t start, 
+                                               apr_off_t start,
                                                apr_size_t length)
                           __attribute__((nonnull(1,2)));
 #endif
@@ -1597,7 +1597,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_socket_create(apr_socket_t *thissock,
  * @param thissock The socket to put in the bucket
  * @return The new bucket, or NULL if allocation failed
  */
-APR_DECLARE(apr_bucket *) apr_bucket_socket_make(apr_bucket *b, 
+APR_DECLARE(apr_bucket *) apr_bucket_socket_make(apr_bucket *b,
                                                  apr_socket_t *thissock)
                           __attribute__((nonnull(1,2)));
 
@@ -1617,7 +1617,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_pipe_create(apr_file_t *thispipe,
  * @param thispipe The pipe to put in the bucket
  * @return The new bucket, or NULL if allocation failed
  */
-APR_DECLARE(apr_bucket *) apr_bucket_pipe_make(apr_bucket *b, 
+APR_DECLARE(apr_bucket *) apr_bucket_pipe_make(apr_bucket *b,
                                                apr_file_t *thispipe)
                           __attribute__((nonnull(1,2)));
 
@@ -1632,14 +1632,14 @@ APR_DECLARE(apr_bucket *) apr_bucket_pipe_make(apr_bucket *b,
  * @return The new bucket, or NULL if allocation failed
  * @remark If the file is truncated such that the segment of the file
  * referenced by the bucket no longer exists, an attempt to read
- * from the bucket will fail with APR_EOF. 
+ * from the bucket will fail with APR_EOF.
  * @remark apr_brigade_insert_file() should generally be used to
  * insert files into brigades, since that function can correctly
  * handle large file issues.
  */
 APR_DECLARE(apr_bucket *) apr_bucket_file_create(apr_file_t *fd,
                                                  apr_off_t offset,
-                                                 apr_size_t len, 
+                                                 apr_size_t len,
                                                  apr_pool_t *p,
                                                  apr_bucket_alloc_t *list)
                           __attribute__((nonnull(1,4,5)));

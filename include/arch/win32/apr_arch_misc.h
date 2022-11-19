@@ -67,7 +67,7 @@ struct apr_other_child_rec_t {
  */
 extern int APR_DECLARE_DATA apr_app_init_complete;
 
-int apr_wastrtoastr(char const * const * *retarr, 
+int apr_wastrtoastr(char const * const * *retarr,
                     wchar_t const * const *arr, int args);
 
 /* Platform specific designation of run time os version.
@@ -150,7 +150,7 @@ static APR_INLINE void* apr_realloc_dbg(void* userData, size_t newSize,
 #endif  /* ! _MSC_VER */
 
 /* Wrapper around WaitForSingleObject() that accepts apr_interval_time_t
- * in microseconds instead of milliseconds. Values < 0 mean wait 
+ * in microseconds instead of milliseconds. Values < 0 mean wait
  * forever, 0 means do not wait at all. */
 DWORD apr_wait_for_single_object(HANDLE handle, apr_interval_time_t timeout);
 

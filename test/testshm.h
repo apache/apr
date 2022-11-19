@@ -25,8 +25,8 @@
 #include <assert.h>
 
 typedef struct mbox {
-    char msg[1024]; 
-    apr_uint32_t msgavail; 
+    char msg[1024];
+    apr_uint32_t msgavail;
 } mbox;
 mbox *boxes;
 

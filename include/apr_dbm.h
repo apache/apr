@@ -32,7 +32,7 @@ extern "C" {
  * @file apr_dbm.h
  * @brief APR-UTIL DBM library
  */
-/** 
+/**
  * @defgroup APR_Util_DBM DBM routines
  * @ingroup APR
  * @{
@@ -111,8 +111,8 @@ APR_DECLARE(apr_status_t) apr_dbm_get_driver(const apr_dbm_driver_t **driver,
  * the correct case (lower case for all bundled providers)
  */
 
-APR_DECLARE(apr_status_t) apr_dbm_open_ex(apr_dbm_t **dbm, const char* type, 
-                                       const char *name, 
+APR_DECLARE(apr_status_t) apr_dbm_open_ex(apr_dbm_t **dbm, const char* type,
+                                       const char *name,
                                        apr_int32_t mode, apr_fileperms_t perm,
                                        apr_pool_t *cntxt);
 
@@ -154,7 +154,7 @@ APR_DECLARE(apr_status_t) apr_dbm_open2(apr_dbm_t **pdb,
  * @remark The dbm name may not be a true file name, as many dbm packages
  * append suffixes for separate data and index files.
  */
-APR_DECLARE(apr_status_t) apr_dbm_open(apr_dbm_t **dbm, const char *name, 
+APR_DECLARE(apr_status_t) apr_dbm_open(apr_dbm_t **dbm, const char *name,
                                        apr_int32_t mode, apr_fileperms_t perm,
                                        apr_pool_t *cntxt);
 
@@ -166,7 +166,7 @@ APR_DECLARE(void) apr_dbm_close(apr_dbm_t *dbm);
 
 /**
  * Fetch a dbm record value by key
- * @param dbm The database 
+ * @param dbm The database
  * @param key The key datum to find this record
  * @param pvalue The value datum retrieved for this record
  */
@@ -174,16 +174,16 @@ APR_DECLARE(apr_status_t) apr_dbm_fetch(apr_dbm_t *dbm, apr_datum_t key,
                                         apr_datum_t *pvalue);
 /**
  * Store a dbm record value by key
- * @param dbm The database 
+ * @param dbm The database
  * @param key The key datum to store this record by
  * @param value The value datum to store in this record
  */
-APR_DECLARE(apr_status_t) apr_dbm_store(apr_dbm_t *dbm, apr_datum_t key, 
+APR_DECLARE(apr_status_t) apr_dbm_store(apr_dbm_t *dbm, apr_datum_t key,
                                         apr_datum_t value);
 
 /**
  * Delete a dbm record value by key
- * @param dbm The database 
+ * @param dbm The database
  * @param key The key datum of the record to delete
  * @remark It is not an error to delete a non-existent record.
  */
@@ -191,28 +191,28 @@ APR_DECLARE(apr_status_t) apr_dbm_delete(apr_dbm_t *dbm, apr_datum_t key);
 
 /**
  * Search for a key within the dbm
- * @param dbm The database 
+ * @param dbm The database
  * @param key The datum describing a key to test
  */
 APR_DECLARE(int) apr_dbm_exists(apr_dbm_t *dbm, apr_datum_t key);
 
 /**
  * Retrieve the first record key from a dbm
- * @param dbm The database 
+ * @param dbm The database
  * @param pkey The key datum of the first record
  */
 APR_DECLARE(apr_status_t) apr_dbm_firstkey(apr_dbm_t *dbm, apr_datum_t *pkey);
 
 /**
  * Retrieve the next record key from a dbm
- * @param dbm The database 
+ * @param dbm The database
  * @param pkey The key datum of the next record
  */
 APR_DECLARE(apr_status_t) apr_dbm_nextkey(apr_dbm_t *dbm, apr_datum_t *pkey);
 
 /**
  * Proactively toss any memory associated with the apr_datum_t.
- * @param dbm The database 
+ * @param dbm The database
  * @param data The datum to free.
  */
 APR_DECLARE(void) apr_dbm_freedatum(apr_dbm_t *dbm, apr_datum_t data);

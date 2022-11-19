@@ -35,9 +35,9 @@ typedef apr_uint16_t apr_wchar_t;
  * when the character code is invalid (in or out of context) and the later
  * when more characters were expected, but insufficient characters remain.
  */
-APR_DECLARE(apr_status_t) apr_conv_utf8_to_utf16(const char *in, 
+APR_DECLARE(apr_status_t) apr_conv_utf8_to_utf16(const char *in,
                                                  apr_size_t *inbytes,
-                                                 apr_wchar_t *out, 
+                                                 apr_wchar_t *out,
                                                  apr_size_t *outwords);
 
 /**
@@ -55,9 +55,9 @@ APR_DECLARE(apr_status_t) apr_conv_utf8_to_utf16(const char *in,
  * when the surrogate word is invalid (in or out of context) and the later
  * when another surrogate word is expected, but insufficient words remain.
  */
-APR_DECLARE(apr_status_t) apr_conv_utf16_to_utf8(const apr_wchar_t *in, 
+APR_DECLARE(apr_status_t) apr_conv_utf16_to_utf8(const apr_wchar_t *in,
                                                  apr_size_t *inwords,
-                                                 char *out, 
+                                                 char *out,
                                                  apr_size_t *outbytes);
 
 /**

@@ -34,11 +34,11 @@ extern "C" {
 
 /**
  * @defgroup apr_proc_mutex Process Locking Routines
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
-/** 
+/**
  * Enumerated potential types for APR process locking methods
  * @warning Check APR_HAS_foo_SERIALIZE defines to see if the platform supports
  *          APR_LOCK_foo.  Only APR_LOCK_DEFAULT is portable.
@@ -89,7 +89,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
  * @param mutex The newly re-opened mutex structure.
  * @param fname A file name to use if the mutex mechanism requires one.  This
  *              argument should always be provided.  The mutex code itself will
- *              determine if it should be used.  This filename should be the 
+ *              determine if it should be used.  This filename should be the
  *              same one that was passed to apr_proc_mutex_create().
  * @param pool The pool to operate on.
  * @remark This function must be called to maintain portability, even

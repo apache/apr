@@ -51,12 +51,12 @@ extern "C" {
 
 /**
  * @defgroup apr_fnmatch Filename Matching Functions
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
 #define APR_FNM_NOMATCH     1     /**< Match failed. */
- 
+
 #define APR_FNM_NOESCAPE    0x01  /**< Disable backslash escaping. */
 #define APR_FNM_PATHNAME    0x02  /**< Slash must be matched by slash. */
 #define APR_FNM_PERIOD      0x04  /**< Leading period must be matched by period. */
@@ -72,20 +72,20 @@ extern "C" {
  * PATTERN: Backslash followed by any character, including another
  *          backslash.<br/>
  * MATCHES: That character exactly.
- * 
+ *
  * <p>
  * PATTERN: ?<br/>
  * MATCHES: Any single character.
  * </p>
- * 
+ *
  * <p>
  * PATTERN: *<br/>
  * MATCHES: Any sequence of zero or more characters. (Note that multiple
  *          *s in a row are equivalent to one.)
- * 
+ *
  * PATTERN: Any character other than \?*[ or a \ at the end of the pattern<br/>
  * MATCHES: That character exactly. (Case sensitive.)
- * 
+ *
  * PATTERN: [ followed by a class description followed by ]<br/>
  * MATCHES: A single character described by the class description.
  *          (Never matches, if the class description reaches until the
@@ -102,7 +102,7 @@ extern "C" {
  *          the first character larger than the second are legal but
  *          never match. Edge cases: [] never matches, and [^] and [!]
  *          always match without consuming a character.
- * 
+ *
  * Note that these patterns attempt to match the entire string, not
  * just find a substring matching the pattern.
  *
@@ -117,7 +117,7 @@ extern "C" {
  * </pre>
  */
 
-APR_DECLARE(apr_status_t) apr_fnmatch(const char *pattern, 
+APR_DECLARE(apr_status_t) apr_fnmatch(const char *pattern,
                                       const char *strings, int flags);
 
 /**
@@ -140,7 +140,7 @@ APR_DECLARE(int) apr_fnmatch_test(const char *pattern);
  * @remark The returned array may be empty even if APR_SUCCESS was
  * returned.
  */
-APR_DECLARE(apr_status_t) apr_match_glob(const char *dir_pattern, 
+APR_DECLARE(apr_status_t) apr_match_glob(const char *dir_pattern,
                                          apr_array_header_t **result,
                                          apr_pool_t *p);
 

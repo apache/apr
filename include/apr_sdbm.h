@@ -28,7 +28,7 @@
 #include "apr_errno.h"
 #include "apr_file_io.h"   /* for apr_fileperms_t */
 
-/** 
+/**
  * @file apr_sdbm.h
  * @brief apr-util SDBM library
  */
@@ -81,11 +81,11 @@ typedef struct {
  * </PRE>
  * @param perms Permissions to apply to if created
  * @param p The pool to use when creating the sdbm
- * @remark The sdbm name is not a true file name, as sdbm appends suffixes 
+ * @remark The sdbm name is not a true file name, as sdbm appends suffixes
  * for seperate data and index files.
  */
-APR_DECLARE(apr_status_t) apr_sdbm_open(apr_sdbm_t **db, const char *name, 
-                                        apr_int32_t mode, 
+APR_DECLARE(apr_status_t) apr_sdbm_open(apr_sdbm_t **db, const char *name,
+                                        apr_int32_t mode,
                                         apr_fileperms_t perms, apr_pool_t *p);
 
 /**
@@ -103,8 +103,8 @@ APR_DECLARE(apr_status_t) apr_sdbm_close(apr_sdbm_t *db);
  *           APR_FLOCK_EXCLUSIVE
  * </PRE>
  * @remark Calls to apr_sdbm_lock may be nested.  All apr_sdbm functions
- * perform implicit locking.  Since an APR_FLOCK_SHARED lock cannot be 
- * portably promoted to an APR_FLOCK_EXCLUSIVE lock, apr_sdbm_store and 
+ * perform implicit locking.  Since an APR_FLOCK_SHARED lock cannot be
+ * portably promoted to an APR_FLOCK_EXCLUSIVE lock, apr_sdbm_store and
  * apr_sdbm_delete calls will fail if an APR_FLOCK_SHARED lock is held.
  * The apr_sdbm_lock call requires the database to be opened with the
  * APR_FOPEN_SHARELOCK mode value.
@@ -119,17 +119,17 @@ APR_DECLARE(apr_status_t) apr_sdbm_unlock(apr_sdbm_t *db);
 
 /**
  * Fetch an sdbm record value by key
- * @param db The database 
+ * @param db The database
  * @param value The value datum retrieved for this record
  * @param key The key datum to find this record
  */
-APR_DECLARE(apr_status_t) apr_sdbm_fetch(apr_sdbm_t *db, 
-                                         apr_sdbm_datum_t *value, 
+APR_DECLARE(apr_status_t) apr_sdbm_fetch(apr_sdbm_t *db,
+                                         apr_sdbm_datum_t *value,
                                          apr_sdbm_datum_t key);
 
 /**
  * Store an sdbm record value by key
- * @param db The database 
+ * @param db The database
  * @param key The key datum to store this record by
  * @param value The value datum to store in this record
  * @param opt The method used to store the record
@@ -143,16 +143,16 @@ APR_DECLARE(apr_status_t) apr_sdbm_store(apr_sdbm_t *db, apr_sdbm_datum_t key,
 
 /**
  * Delete an sdbm record value by key
- * @param db The database 
+ * @param db The database
  * @param key The key datum of the record to delete
  * @remark It is not an error to delete a non-existent record.
  */
-APR_DECLARE(apr_status_t) apr_sdbm_delete(apr_sdbm_t *db, 
+APR_DECLARE(apr_status_t) apr_sdbm_delete(apr_sdbm_t *db,
                                           const apr_sdbm_datum_t key);
 
 /**
  * Retrieve the first record key from a dbm
- * @param db The database 
+ * @param db The database
  * @param key The key datum of the first record
  * @remark The keys returned are not ordered.  To traverse the list of keys
  * for an sdbm opened with APR_FOPEN_SHARELOCK, the caller must use apr_sdbm_lock
@@ -163,7 +163,7 @@ APR_DECLARE(apr_status_t) apr_sdbm_firstkey(apr_sdbm_t *db, apr_sdbm_datum_t *ke
 
 /**
  * Retrieve the next record key from an sdbm
- * @param db The database 
+ * @param db The database
  * @param key The key datum of the next record
  */
 APR_DECLARE(apr_status_t) apr_sdbm_nextkey(apr_sdbm_t *db, apr_sdbm_datum_t *key);

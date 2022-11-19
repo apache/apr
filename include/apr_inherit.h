@@ -18,16 +18,16 @@
 #define APR_INHERIT_H
 
 /**
- * @file apr_inherit.h 
+ * @file apr_inherit.h
  * @brief APR File Handle Inheritance Helpers
- * @remark This internal header includes internal declaration helpers 
+ * @remark This internal header includes internal declaration helpers
  * for other headers to declare apr_foo_inherit_[un]set functions.
  */
 
 /**
- * Prototype for type-specific declarations of apr_foo_inherit_set 
- * functions.  
- * @remark Doxygen unwraps this macro (via doxygen.conf) to provide 
+ * Prototype for type-specific declarations of apr_foo_inherit_set
+ * functions.
+ * @remark Doxygen unwraps this macro (via doxygen.conf) to provide
  * actual help for each specific occurrence of apr_foo_inherit_set.
  * @remark the linkage is specified for APR. It would be possible to expand
  *       the macros to support other linkages.
@@ -37,9 +37,9 @@
                                           apr_##type##_t *the##type)
 
 /**
- * Prototype for type-specific declarations of apr_foo_inherit_unset 
- * functions.  
- * @remark Doxygen unwraps this macro (via doxygen.conf) to provide 
+ * Prototype for type-specific declarations of apr_foo_inherit_unset
+ * functions.
+ * @remark Doxygen unwraps this macro (via doxygen.conf) to provide
  * actual help for each specific occurrence of apr_foo_inherit_unset.
  * @remark the linkage is specified for APR. It would be possible to expand
  *       the macros to support other linkages.

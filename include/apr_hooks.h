@@ -110,11 +110,11 @@ extern "C" {
 
 /** @} */
 
-/** macro to return the prototype of the hook function */    
+/** macro to return the prototype of the hook function */
 #define APR_IMPLEMENT_HOOK_GET_PROTO(ns,link,name) \
 link##_DECLARE(apr_array_header_t *) ns##_hook_get_##name(void)
 
-/** macro to declare the hook correctly */    
+/** macro to declare the hook correctly */
 #define APR_DECLARE_EXTERNAL_HOOK(ns,link,ret,name,args) \
 typedef ret ns##_HOOK_##name##_t args; \
 link##_DECLARE(void) ns##_hook_##name(ns##_HOOK_##name##_t *pf, \
@@ -131,7 +131,7 @@ typedef struct ns##_LINK_##name##_t \
     int nOrder; \
     } ns##_LINK_##name##_t;
 
-/** macro to declare the hook structure */    
+/** macro to declare the hook structure */
 #define APR_HOOK_STRUCT(members) \
 static struct { members } _hooks;
 
@@ -308,18 +308,18 @@ link##_DECLARE(ret) ns##_run_##name args_decl \
 
 /**
  * The global pool used to allocate any memory needed by the hooks.
- */ 
+ */
 APR_DECLARE_DATA extern apr_pool_t *apr_hook_global_pool;
 
 /**
  * A global variable to determine if debugging information about the
  * hooks functions should be printed.
- */ 
+ */
 APR_DECLARE_DATA extern int apr_hook_debug_enabled;
 
 /**
  * The name of the module that is currently registering a function.
- */ 
+ */
 APR_DECLARE_DATA extern const char *apr_hook_debug_current;
 
 /**
@@ -327,7 +327,7 @@ APR_DECLARE_DATA extern const char *apr_hook_debug_current;
  * @param szHookName The name of the Hook the function is registered for
  * @param aHooks The array which stores all of the functions for this hook
  */
-APR_DECLARE(void) apr_hook_sort_register(const char *szHookName, 
+APR_DECLARE(void) apr_hook_sort_register(const char *szHookName,
                                         apr_array_header_t **aHooks);
 /**
  * Sort all of the registered functions for a given hook.

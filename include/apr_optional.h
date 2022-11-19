@@ -18,7 +18,7 @@
 #define APR_OPTIONAL_H
 
 #include "apu.h"
-/** 
+/**
  * @file apr_optional.h
  * @brief APR-UTIL registration of functions exported by modules
  */
@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-/** 
+/**
  * @defgroup APR_Util_Opt Optional Functions
  * @ingroup APR
  *
@@ -52,13 +52,13 @@ typedef ret (APR_OPTIONAL_FN_TYPE(name)) args
 
 /**
  * XXX: This doesn't belong here, then!
- * Private function! DO NOT USE! 
+ * Private function! DO NOT USE!
  * @internal
  */
 
 typedef void (apr_opt_fn_t)(void);
 /** @internal */
-APR_DECLARE_NONSTD(void) apr_dynamic_fn_register(const char *szName, 
+APR_DECLARE_NONSTD(void) apr_dynamic_fn_register(const char *szName,
                                                   apr_opt_fn_t *pfn);
 
 /**
@@ -73,7 +73,7 @@ APR_DECLARE_NONSTD(void) apr_dynamic_fn_register(const char *szName,
 } while (0)
 
 /** @internal
- * Private function! DO NOT USE! 
+ * Private function! DO NOT USE!
  */
 APR_DECLARE(apr_opt_fn_t *) apr_dynamic_fn_retrieve(const char *szName);
 

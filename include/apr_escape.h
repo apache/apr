@@ -72,7 +72,7 @@ extern "C" {
 
 /**
  * Perform shell escaping on the provided string.
- * 
+ *
  * Shell escaping causes characters to be prefixed with a '\' character.
  * @param escaped Optional buffer to write the encoded string, can be
  * NULL

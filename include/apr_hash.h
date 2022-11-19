@@ -30,7 +30,7 @@ extern "C" {
 
 /**
  * @defgroup apr_hash Hash Tables
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -59,7 +59,7 @@ typedef struct apr_hash_index_t apr_hash_index_t;
 /**
  * Callback functions for calculating hash values.
  * @param key The key.
- * @param klen The length of the key, or APR_HASH_KEY_STRING to use the string 
+ * @param klen The length of the key, or APR_HASH_KEY_STRING to use the string
  *             length. If APR_HASH_KEY_STRING then returns the actual key length.
  */
 typedef unsigned int (*apr_hashfunc_t)(const char *key, apr_ssize_t *klen);
@@ -83,7 +83,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool);
  * @param hash_func A custom hash function.
  * @return The hash table just created
   */
-APR_DECLARE(apr_hash_t *) apr_hash_make_custom(apr_pool_t *pool, 
+APR_DECLARE(apr_hash_t *) apr_hash_make_custom(apr_pool_t *pool,
                                                apr_hashfunc_t hash_func);
 
 /**
@@ -164,7 +164,7 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_pool_t *p, apr_hash_t *ht);
 /**
  * Continue iterating over the entries in a hash table.
  * @param hi The iteration state
- * @return a pointer to the updated iteration state.  NULL if there are no more  
+ * @return a pointer to the updated iteration state.  NULL if there are no more
  *         entries.
  */
 APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi);
@@ -178,7 +178,7 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi);
  * @remark The return pointers should point to a variable that will be set to the
  *         corresponding data, or they may be NULL if the data isn't interesting.
  */
-APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi, const void **key, 
+APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi, const void **key,
                                 apr_ssize_t *klen, void **val);
 
 /**
@@ -225,7 +225,7 @@ APR_DECLARE(void) apr_hash_clear(apr_hash_t *ht);
  * @return A new hash table containing all of the data from the two passed in
  */
 APR_DECLARE(apr_hash_t *) apr_hash_overlay(apr_pool_t *p,
-                                           const apr_hash_t *overlay, 
+                                           const apr_hash_t *overlay,
                                            const apr_hash_t *base);
 
 /**
@@ -261,14 +261,14 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
  * @param klen The key length from this iteration of the hash table
  * @param value The value from this iteration of the hash table
  * @remark Iteration continues while this callback function returns non-zero.
- * To export the callback function for apr_hash_do() it must be declared 
+ * To export the callback function for apr_hash_do() it must be declared
  * in the _NONSTD convention.
  */
 typedef int (apr_hash_do_callback_fn_t)(void *rec, const void *key,
                                                    apr_ssize_t klen,
                                                    const void *value);
 
-/** 
+/**
  * Iterate over a hash table running the provided function once for every
  * element in the hash table. The @p comp function will be invoked for
  * every element in the hash table.

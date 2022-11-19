@@ -74,7 +74,7 @@ APR_DECLARE(apr_time_t) apr_date_parse_http(const char *date);
 
 /**
  * Parses a string resembling an RFC 822 date.  This is meant to be
- * leinent in its parsing of dates.  Hence, this will parse a wider 
+ * leinent in its parsing of dates.  Hence, this will parse a wider
  * range of dates than apr_date_parse_http.
  *
  * The prominent mailer (or poster, if mailer is unknown) that has
@@ -86,10 +86,10 @@ APR_DECLARE(apr_time_t) apr_date_parse_http(const char *date);
  *     Sun, 6 Nov 1994 08:49:37 GMT   ; RFC 822, updated by RFC 1123
  *     Sun, 06 Nov 94 08:49:37 GMT    ; RFC 822
  *     Sun, 6 Nov 94 08:49:37 GMT     ; RFC 822
- *     Sun, 06 Nov 94 08:49 GMT       ; Unknown [drtr\@ast.cam.ac.uk] 
+ *     Sun, 06 Nov 94 08:49 GMT       ; Unknown [drtr\@ast.cam.ac.uk]
  *     Sun, 6 Nov 94 08:49 GMT        ; Unknown [drtr\@ast.cam.ac.uk]
  *     Sun, 06 Nov 94 8:49:37 GMT     ; Unknown [Elm 70.85]
- *     Sun, 6 Nov 94 8:49:37 GMT      ; Unknown [Elm 70.85] 
+ *     Sun, 6 Nov 94 8:49:37 GMT      ; Unknown [Elm 70.85]
  * </PRE>
  *
  * @param date The date in one of the formats above

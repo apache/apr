@@ -161,7 +161,7 @@ struct apr_dbd_driver_t {
      */
     int (*get_row)(apr_pool_t *pool, apr_dbd_results_t *res,
                    apr_dbd_row_t **row, int rownum);
-  
+
     /** get_entry: get an entry from a row
      *
      *  @param row - row pointer
@@ -170,7 +170,7 @@ struct apr_dbd_driver_t {
      *  @return 0 for success, -1 for no data, +1 for general error
      */
     const char* (*get_entry)(const apr_dbd_row_t *row, int col);
-  
+
     /** error: get current error message (if any)
      *
      *  @param handle - the connection
@@ -179,7 +179,7 @@ struct apr_dbd_driver_t {
      *          (implementation-dependent whether errnum is ignored)
      */
     const char *(*error)(apr_dbd_t *handle, int errnum);
-  
+
     /** escape: escape a string so it is safe for use in query/select
      *
      *  @param pool - pool to alloc the result from
@@ -189,7 +189,7 @@ struct apr_dbd_driver_t {
      */
     const char *(*escape)(apr_pool_t *pool, const char *string,
                           apr_dbd_t *handle);
-  
+
     /** prepare: prepare a statement
      *
      *  @param pool - pool to alloc the result from
@@ -260,7 +260,7 @@ struct apr_dbd_driver_t {
                    apr_dbd_results_t **res, apr_dbd_prepared_t *statement,
                    int random, const char **args);
 
-  
+
     /** get_name: get a column title from a result set
      *
      *  @param res - result set pointer
@@ -338,7 +338,7 @@ struct apr_dbd_driver_t {
     int (*pbselect)(apr_pool_t *pool, apr_dbd_t *handle,
                     apr_dbd_results_t **res, apr_dbd_prepared_t *statement,
                     int random, const void **args);
-  
+
     /** datum_get: get a binary entry from a row
      *
      *  @param row - row pointer
@@ -351,7 +351,7 @@ struct apr_dbd_driver_t {
                               apr_dbd_type_e type, void *data);
 };
 
-/* Export mutex lock/unlock for drivers that need it 
+/* Export mutex lock/unlock for drivers that need it
  * deprecated; create a per-dbd mutex within the (*init) function
  * to avoid blocking other providers running on other threads
  */

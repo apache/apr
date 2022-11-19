@@ -61,7 +61,7 @@ extern "C" {
 
 /**
  * @defgroup apr_strings String routines
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -76,7 +76,7 @@ extern "C" {
 APR_DECLARE(int) apr_strnatcmp(char const *a, char const *b);
 
 /**
- * Do a natural order comparison of two strings ignoring the case of the 
+ * Do a natural order comparison of two strings ignoring the case of the
  * strings.
  * @param a The first string to compare
  * @param b The second string to compare
@@ -113,7 +113,7 @@ APR_DECLARE(char *) apr_pstrmemdup(apr_pool_t *p, const char *s, apr_size_t n)
     ;
 
 /**
- * Duplicate at most n characters of a string into memory allocated 
+ * Duplicate at most n characters of a string into memory allocated
  * out of a pool; the new string will be NUL-terminated
  * @param p The pool to allocate out of
  * @param s The string to duplicate
@@ -162,7 +162,7 @@ APR_DECLARE(char *) apr_pstrcatv(apr_pool_t *p, const struct iovec *vec,
                                  apr_size_t nvec, apr_size_t *nbytes);
 
 /**
- * printf-style style printing routine.  The data is output to a string 
+ * printf-style style printing routine.  The data is output to a string
  * allocated from a pool
  * @param p The pool to allocate out of
  * @param fmt The format of the string
@@ -172,7 +172,7 @@ APR_DECLARE(char *) apr_pstrcatv(apr_pool_t *p, const struct iovec *vec,
 APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap);
 
 /**
- * printf-style style printing routine.  The data is output to a string 
+ * printf-style style printing routine.  The data is output to a string
  * allocated from a pool
  * @param p The pool to allocate out of
  * @param fmt The format of the string
@@ -207,10 +207,10 @@ APR_DECLARE(apr_status_t) apr_memzero_explicit(void *buffer, apr_size_t size);
  * <PRE>
  * Note the differences between this function and strncpy():
  *  1) strncpy() doesn't always NUL terminate; apr_cpystrn() does.
- *  2) strncpy() pads the destination string with NULs, which is often 
+ *  2) strncpy() pads the destination string with NULs, which is often
  *     unnecessary; apr_cpystrn() does not.
  *  3) strncpy() returns a pointer to the beginning of the dst string;
- *     apr_cpystrn() returns a pointer to the NUL terminator of dst, 
+ *     apr_cpystrn() returns a pointer to the NUL terminator of dst,
  *     to allow a check for truncation.
  * </PRE>
  */
@@ -227,7 +227,7 @@ APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src,
 APR_DECLARE(char *) apr_collapse_spaces(char *dest, const char *src);
 
 /**
- * Convert the arguments to a program from one string to an array of 
+ * Convert the arguments to a program from one string to an array of
  * strings terminated by a NULL pointer
  * @param arg_str The arguments to convert
  * @param argv_out Output location.  This is a pointer to an array of strings.
@@ -238,7 +238,7 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
                                                apr_pool_t *token_context);
 
 /**
- * Split a string into separate null-terminated tokens.  The tokens are 
+ * Split a string into separate null-terminated tokens.  The tokens are
  * delimited in the string by one or more characters from the sep
  * argument.
  * @param str The string to separate; this should be specified on the
@@ -342,7 +342,7 @@ APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n);
  * @bug *end breaks type safety; where *buf is const, *end needs to be
  * declared as const in APR 2.0
  */
-APR_DECLARE(apr_status_t) apr_strtoff(apr_off_t *offset, const char *buf, 
+APR_DECLARE(apr_status_t) apr_strtoff(apr_off_t *offset, const char *buf,
                                       char **end, int base);
 
 /**
