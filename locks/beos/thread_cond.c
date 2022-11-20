@@ -36,16 +36,16 @@ static struct waiter_t *make_waiter(apr_pool_t *pool)
                        apr_palloc(pool, sizeof(struct waiter_t));
     if (w == NULL)
         return NULL;
-      
+
     w->sem  = create_sem(0, "apr conditional waiter");
     if (w->sem < 0)
         return NULL;
 
     APR_RING_ELEM_INIT(w, link);
-    
+
     return w;
 }
-  
+
 APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,
                                                  apr_pool_t *pool)
 {
@@ -60,12 +60,12 @@ APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,
 
     if ((rv = create_sem(1, "apr conditional lock")) < B_OK)
         return rv;
-    
+
     new_cond->lock = rv;
     new_cond->pool = pool;
     APR_RING_INIT(&new_cond->alist, waiter_t, link);
     APR_RING_INIT(&new_cond->flist, waiter_t, link);
-        
+
     for (i=0;i < 10 ;i++) {
         struct waiter_t *nw = make_waiter(pool);
         APR_RING_INSERT_TAIL(&new_cond->flist, nw, waiter_t, link);
@@ -87,8 +87,8 @@ static apr_status_t do_wait(apr_thread_cond_t *cond, apr_thread_mutex_t *mutex,
     thread_id cth = find_thread(NULL);
     apr_status_t rv;
     int flags = B_RELATIVE_TIMEOUT;
-    
-    /* We must be the owner of the mutex or we can't do this... */    
+
+    /* We must be the owner of the mutex or we can't do this... */
     if (mutex->owner != cth) {
         /* What should we return??? */
         return APR_EINVAL;
@@ -99,31 +99,31 @@ static apr_status_t do_wait(apr_thread_cond_t *cond, apr_thread_mutex_t *mutex,
     if (wait)
         APR_RING_REMOVE(wait, link);
     else
-        wait = make_waiter(cond->pool);   
+        wait = make_waiter(cond->pool);
     APR_RING_INSERT_TAIL(&cond->alist, wait, waiter_t, link);
     cond->condlock = mutex;
     release_sem(cond->lock);
-       
+
     apr_thread_mutex_unlock(cond->condlock);
 
     if (timeout == 0)
         flags = 0;
-        
+
     rv = acquire_sem_etc(wait->sem, 1, flags, timeout);
 
     apr_thread_mutex_lock(cond->condlock);
-    
+
     if (rv != B_OK) {
         if (rv == B_TIMED_OUT)
             return APR_TIMEUP;
-        return rv;       
+        return rv;
     }
 
     acquire_sem(cond->lock);
     APR_RING_REMOVE(wait, link);
     APR_RING_INSERT_TAIL(&cond->flist, wait, waiter_t, link);
     release_sem(cond->lock);
-    
+
     return APR_SUCCESS;
 }
 
@@ -144,7 +144,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_signal(apr_thread_cond_t *cond)
 {
     struct waiter_t *wake;
 
-    acquire_sem(cond->lock);    
+    acquire_sem(cond->lock);
     if (!APR_RING_EMPTY(&cond->alist, waiter_t, link)) {
         wake = APR_RING_FIRST(&cond->alist);
         APR_RING_REMOVE(wake, link);
@@ -152,14 +152,14 @@ APR_DECLARE(apr_status_t) apr_thread_cond_signal(apr_thread_cond_t *cond)
         APR_RING_INSERT_TAIL(&cond->flist, wake, waiter_t, link);
     }
     release_sem(cond->lock);
-    
+
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_cond_broadcast(apr_thread_cond_t *cond)
 {
     struct waiter_t *wake;
-    
+
     acquire_sem(cond->lock);
     while (! APR_RING_EMPTY(&cond->alist, waiter_t, link)) {
         wake = APR_RING_FIRST(&cond->alist);
@@ -168,7 +168,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_broadcast(apr_thread_cond_t *cond)
         APR_RING_INSERT_TAIL(&cond->flist, wake, waiter_t, link);
     }
     release_sem(cond->lock);
-    
+
     return APR_SUCCESS;
 }
 

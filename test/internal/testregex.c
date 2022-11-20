@@ -34,14 +34,14 @@ int main( int argc, char** argv) {
     apr_time_t now;
     apr_time_t end;
     apr_hash_t *h;
-    
+
 
     if (argc !=4 ) {
             fprintf(stderr, "Usage %s match string #iterations\n",argv[0]);
             return -1;
     }
     iters = atoi( argv[3]);
-    
+
     apr_initialize() ;
     atexit(apr_terminate);
     if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
@@ -86,6 +86,6 @@ int main( int argc, char** argv) {
     }
     end=apr_time_now();
     puts(apr_psprintf( context, "Time to run %d hash (find)'s    %8lld\n",iters,end-now));
- 
+
     return 0;
 }

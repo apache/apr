@@ -68,7 +68,7 @@ APR_DECLARE(apr_status_t) apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
+APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
                                      char *optch, const char **optarg)
 {
     const char *oli;  /* option letter list index */
@@ -121,7 +121,7 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
                 return (APR_BADARG);
             }
             if (os->errfn) {
-                (os->errfn)(os->errarg, 
+                (os->errfn)(os->errarg,
                             "%s: option requires an argument -- %c\n",
                             apr_filepath_name_get(*os->argv), os->opt);
             }
@@ -182,7 +182,7 @@ static apr_status_t serr(apr_getopt_t *os, const char *err, const char *str,
                          apr_status_t status)
 {
     if (os->errfn)
-        (os->errfn)(os->errarg, "%s: %s: %s\n", 
+        (os->errfn)(os->errarg, "%s: %s: %s\n",
                     apr_filepath_name_get(*os->argv), err, str);
     return status;
 }
@@ -192,7 +192,7 @@ static apr_status_t cerr(apr_getopt_t *os, const char *err, int ch,
                          apr_status_t status)
 {
     if (os->errfn)
-        (os->errfn)(os->errarg, "%s: %s: %c\n", 
+        (os->errfn)(os->errarg, "%s: %s: %c\n",
                     apr_filepath_name_get(*os->argv), err, ch);
     return status;
 }
@@ -251,7 +251,7 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
             if (opts[i].has_arg) {
                 if (p[len] == '=')             /* Argument inline */
                     *optarg = p + len + 1;
-                else { 
+                else {
                     if (os->ind >= os->argc)   /* Argument missing */
                         return serr(os, "missing argument", p - 2, APR_BADARG);
                     else                       /* Argument in next arg */
@@ -270,7 +270,7 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
                 os->ind = os->skip_start;
                 return APR_EOF;
             }
-            else 
+            else
                 if (*p == '\0')                    /* Bare "-" is illegal */
                     return serr(os, "invalid option", p, APR_BADCH);
         }
@@ -292,7 +292,7 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
     if (opts[i].has_arg) {
         if (*p != '\0')                         /* Argument inline */
             *optarg = p;
-        else { 
+        else {
             if (os->ind >= os->argc)           /* Argument missing */
                 return cerr(os, "missing argument", *optch, APR_BADARG);
             else                               /* Argument in next arg */

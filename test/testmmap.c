@@ -81,7 +81,7 @@ static void test_file_close(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     thefile = NULL;
 }
-   
+
 static void test_file_open(abts_case *tc, void *data)
 {
     apr_status_t rv;
@@ -91,7 +91,7 @@ static void test_file_open(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, thefile);
 }
-   
+
 static void test_get_filesize(abts_case *tc, void *data)
 {
     apr_status_t rv;

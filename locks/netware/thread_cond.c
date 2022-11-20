@@ -28,9 +28,9 @@ static apr_status_t thread_cond_cleanup(void *data)
 {
     apr_thread_cond_t *cond = (apr_thread_cond_t *)data;
 
-    NXCondFree(cond->cond);        
+    NXCondFree(cond->cond);
     return APR_SUCCESS;
-} 
+}
 
 APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,
                                                  apr_pool_t *pool)
@@ -38,18 +38,18 @@ APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,
     apr_thread_cond_t *new_cond = NULL;
 
     new_cond = (apr_thread_cond_t *)apr_pcalloc(pool, sizeof(apr_thread_cond_t));
-	
+
 	if(new_cond ==NULL) {
         return APR_ENOMEM;
-    }     
+    }
     new_cond->pool = pool;
 
     new_cond->cond = NXCondAlloc(NULL);
-    
+
     if(new_cond->cond == NULL)
         return APR_ENOMEM;
 
-    apr_pool_cleanup_register(new_cond->pool, new_cond, 
+    apr_pool_cleanup_register(new_cond->pool, new_cond,
                                 (void*)thread_cond_cleanup,
                                 apr_pool_cleanup_null);
    *cond = new_cond;

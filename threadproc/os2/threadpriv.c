@@ -23,7 +23,7 @@
 #include "apr_arch_file_io.h"
 
 APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key,
-                                                       void (*dest)(void *), 
+                                                       void (*dest)(void *),
                                                        apr_pool_t *pool)
 {
     (*key) = (apr_threadkey_t *)apr_palloc(pool, sizeof(apr_threadkey_t));
@@ -72,8 +72,8 @@ APR_DECLARE(apr_status_t) apr_os_threadkey_get(apr_os_threadkey_t *thekey, apr_t
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key, 
-                                               apr_os_threadkey_t *thekey, 
+APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key,
+                                               apr_os_threadkey_t *thekey,
                                                apr_pool_t *pool)
 {
     if (pool == NULL) {
@@ -85,4 +85,4 @@ APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key,
     }
     (*key)->key = *thekey;
     return APR_SUCCESS;
-}           
+}

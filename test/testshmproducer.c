@@ -39,7 +39,7 @@ int main(void)
     int sent = 0;
 
     apr_initialize();
-    
+
     if (apr_pool_create(&pool, NULL) != APR_SUCCESS) {
         exit(-1);
     }

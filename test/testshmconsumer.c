@@ -38,7 +38,7 @@ int main(void)
     int recvd;
 
     apr_initialize();
-    
+
     if (apr_pool_create(&pool, NULL) != APR_SUCCESS) {
         exit(-1);
     }
@@ -66,7 +66,7 @@ int main(void)
 int main(void)
 {
     /* Just return, this program will never be called, so we don't need
-     * to print a message 
+     * to print a message
      */
     return 0;
 }

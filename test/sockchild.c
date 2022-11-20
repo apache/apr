@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     }
 
     apr_socket_connect(sock, remote_sa);
-        
+
     if (!strcmp("read", argv[1])) {
         char datarecv[STRLEN];
         apr_size_t length = STRLEN;
@@ -60,13 +60,13 @@ int main(int argc, char *argv[])
         rv = apr_socket_recv(sock, datarecv, &length);
         apr_socket_close(sock);
         if (APR_STATUS_IS_TIMEUP(rv)) {
-            exit(SOCKET_TIMEOUT); 
+            exit(SOCKET_TIMEOUT);
         }
 
         if (strcmp(datarecv, DATASTR)) {
             exit(-1);
         }
-        
+
         exit((int)length);
     }
     else if (!strcmp("write", argv[1])

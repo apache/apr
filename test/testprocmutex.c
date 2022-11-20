@@ -106,7 +106,7 @@ static void make_child(abts_case *tc, int trylock, apr_proc_t **proc, apr_pool_t
                 exit(1);
         } while (i < MAX_ITER);
         exit(0);
-    } 
+    }
 
     ABTS_ASSERT(tc, "fork failed", rv == APR_INPARENT);
 }
@@ -123,22 +123,22 @@ static void await_child(abts_case *tc, apr_proc_t *proc)
              rv == APR_CHILD_DONE && why == APR_PROC_EXIT && code == 0);
 }
 
-static void test_exclusive(abts_case *tc, const char *lockname, 
+static void test_exclusive(abts_case *tc, const char *lockname,
                            lockmech_t *mech)
 {
     apr_proc_t *child[CHILDREN];
     apr_status_t rv;
     int n;
- 
+
     rv = apr_proc_mutex_create(&proc_lock, lockname, mech->num, p);
     APR_ASSERT_SUCCESS(tc, "create the mutex", rv);
- 
+
     for (n = 0; n < CHILDREN; n++)
         make_child(tc, 0, &child[n], p);
 
     for (n = 0; n < CHILDREN; n++)
         await_child(tc, child[n]);
-    
+
     ABTS_ASSERT(tc, "Locks don't appear to work", *x == MAX_COUNTER);
 
     rv = apr_proc_mutex_trylock(proc_lock);
@@ -174,7 +174,7 @@ static void test_exclusive(abts_case *tc, const char *lockname,
 
         for (n = 0; n < CHILDREN; n++)
             await_child(tc, child[n]);
-        
+
         ABTS_ASSERT(tc, "Locks don't appear to work with trylock",
                     *x == MAX_COUNTER);
     }
@@ -211,7 +211,7 @@ static void test_exclusive(abts_case *tc, const char *lockname,
 
         for (n = 0; n < CHILDREN; n++)
             await_child(tc, child[n]);
-        
+
         ABTS_ASSERT(tc, "Locks don't appear to work with timedlock",
                     *x == MAX_COUNTER);
     }

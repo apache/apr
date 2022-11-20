@@ -160,7 +160,7 @@ static void table_overlap(abts_case *tc, void *data)
     apr_table_addn(t2, "b", "2.");
     apr_table_addn(t2, "f", "6");
     apr_table_overlap(t1, t2, APR_OVERLAP_TABLES_SET);
-    
+
     ABTS_INT_EQUAL(tc, 7, apr_table_elts(t1)->nelts);
     val = apr_table_get(t1, "a");
     ABTS_STR_EQUAL(tc, "1", val);
@@ -189,11 +189,11 @@ static void table_overlap2(abts_case *tc, void *data)
     t2 = apr_table_make(p, 1);
     apr_table_addn(t1, "t1", "one");
     apr_table_addn(t2, "t2", "two");
-    
+
     apr_table_overlap(t1, t2, APR_OVERLAP_TABLES_SET);
-    
+
     ABTS_INT_EQUAL(tc, 2, apr_table_elts(t1)->nelts);
-    
+
     ABTS_STR_EQUAL(tc, "one", apr_table_get(t1, "t1"));
     ABTS_STR_EQUAL(tc, "two", apr_table_get(t1, "t2"));
 

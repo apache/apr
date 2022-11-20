@@ -200,7 +200,7 @@ static void test_date_exp_get(abts_case *tc, void *data)
         1, 2, 10, 100, 1000, 9000, 10000, 100000,
         -1, -2, -10, -100, -1000, -9000, -10000, -100000,
     };
-    
+
     tm.tm_mday = 1;
     tm.tm_year = 70;
 

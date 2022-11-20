@@ -33,7 +33,7 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
         thefile->direction = 0;
     }
 
-    /* We may be truncating to size here. 
+    /* We may be truncating to size here.
      * XXX: testing an 'unsigned' as >= 0 below indicates a bug
      */
     newbufpos = pos - (thefile->filePtr - thefile->dataRead);
@@ -44,7 +44,7 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
     } else {
         LARGE_INTEGER li;
         li.QuadPart = pos;
-        
+
         if (!SetFilePointerEx(thefile->filehand, li, NULL, FILE_BEGIN)) {
             rv = apr_get_os_error();
         }
@@ -78,7 +78,7 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
                 break;
 
             case APR_CUR:
-                rc = setptr(thefile, thefile->filePtr - thefile->dataRead 
+                rc = setptr(thefile, thefile->filePtr - thefile->dataRead
                                       + thefile->bufpos + *offset);
                 break;
 
@@ -103,11 +103,11 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
             case APR_SET:
                 thefile->filePtr = *offset;
                 break;
-        
+
             case APR_CUR:
                 thefile->filePtr += *offset;
                 break;
-        
+
             case APR_END:
                 rc = apr_file_info_get(&finfo, APR_FINFO_SIZE, thefile);
                 if (rc == APR_SUCCESS && finfo.size + *offset >= 0)

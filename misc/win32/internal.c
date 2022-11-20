@@ -29,7 +29,7 @@
  */
 
 
-/* Shared by apr_app.c and start.c 
+/* Shared by apr_app.c and start.c
  *
  * An internal apr function to convert an array of strings (either
  * a counted or NULL terminated list, such as an argv[argc] or env[]
@@ -37,7 +37,7 @@
  * These are allocated from the MSVCRT's _CRT_BLOCK to trick the system
  * into trusting our store.
  */
-int apr_wastrtoastr(char const * const * *retarr, 
+int apr_wastrtoastr(char const * const * *retarr,
                     wchar_t const * const *arr, int args)
 {
     apr_size_t elesize = 0;

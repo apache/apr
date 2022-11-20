@@ -36,7 +36,7 @@ static void alloc_bytes(abts_case *tc, void *data)
 {
     int i;
     char *alloc;
-    
+
     alloc = apr_palloc(pmain, ALLOC_BYTES);
     ABTS_PTR_NOTNULL(tc, alloc);
 
@@ -54,7 +54,7 @@ static void calloc_bytes(abts_case *tc, void *data)
 {
     int i;
     char *alloc;
-    
+
     alloc = apr_pcalloc(pmain, ALLOC_BYTES);
     ABTS_PTR_NOTNULL(tc, alloc);
 
@@ -109,7 +109,7 @@ static char *another_data = "Hello again, world.";
 static apr_status_t another_cleanup(void *data)
 {
     return data == another_data ? APR_SUCCESS : APR_EGENERAL;
-}    
+}
 
 /* A few places in httpd modify the cleanup list for a pool while
  * cleanups are being run. An example is close_listeners_on_exec ->
@@ -121,7 +121,7 @@ static apr_status_t another_cleanup(void *data)
 static apr_status_t dodgy_cleanup(void *data)
 {
     apr_pool_t *p = data;
-    
+
     return apr_pool_cleanup_run(p, another_data, another_cleanup);
 }
 
@@ -136,7 +136,7 @@ static void test_cleanups(abts_case *tc, void *data)
                                   success_cleanup);
         apr_pool_cleanup_register(pchild, checker_data, checker_cleanup,
                                   success_cleanup);
-        apr_pool_cleanup_register(pchild, NULL, checker_cleanup, 
+        apr_pool_cleanup_register(pchild, NULL, checker_cleanup,
                                   success_cleanup);
         apr_pool_cleanup_register(pchild, another_data, another_cleanup,
                                   another_cleanup);

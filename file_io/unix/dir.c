@@ -37,7 +37,7 @@ static apr_status_t dir_cleanup(void *thedir)
     else {
         return errno;
     }
-} 
+}
 
 #define PATH_SEPARATOR '/'
 
@@ -48,10 +48,10 @@ static const char *path_canonicalize (const char *path, apr_pool_t *pool)
      * now, it just makes sure there is no trailing slash. */
     apr_size_t len = strlen (path);
     apr_size_t orig_len = len;
-    
+
     while ((len > 0) && (path[len - 1] == PATH_SEPARATOR))
         len--;
-    
+
     if (len != orig_len)
         return apr_pstrndup (pool, path, len);
     else
@@ -63,7 +63,7 @@ static char *path_remove_last_component (const char *path, apr_pool_t *pool)
 {
     const char *newpath = path_canonicalize (path, pool);
     int i;
-    
+
     for (i = (strlen(newpath) - 1); i >= 0; i--) {
         if (path[i] == PATH_SEPARATOR)
             break;
@@ -72,7 +72,7 @@ static char *path_remove_last_component (const char *path, apr_pool_t *pool)
     return apr_pstrndup (pool, path, (i < 0) ? 0 : i);
 }
 
-apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, 
+apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname,
                           apr_pool_t *pool)
 {
     DIR *dir = opendir(dirname);
@@ -89,7 +89,7 @@ apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname,
 
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
                     && !defined(READDIR_IS_THREAD_SAFE)
-    /* On some platforms (e.g., Linux+GNU libc), d_name[] in struct 
+    /* On some platforms (e.g., Linux+GNU libc), d_name[] in struct
      * dirent is declared with enough storage for the name.  On other
      * platforms (e.g., Solaris 8 for Intel), d_name is declared as a
      * one-byte array.  Note: gcc evaluates this at compile time.
@@ -248,7 +248,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         if (end > fspec && end[-1] != '/' && (end < fspec + APR_PATH_MAX))
             *end++ = '/';
 
-        apr_cpystrn(end, thedir->entry->d_name, 
+        apr_cpystrn(end, thedir->entry->d_name,
                     sizeof fspec - (end - fspec));
 
         ret = apr_stat(finfo, fspec, APR_FINFO_LINK | wanted, thedir->pool);
@@ -294,7 +294,7 @@ apr_status_t apr_dir_rewind(apr_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_dir_make(const char *path, apr_fileperms_t perm, 
+apr_status_t apr_dir_make(const char *path, apr_fileperms_t perm,
                           apr_pool_t *pool)
 {
     mode_t mode = apr_unix_perms2mode(perm);
@@ -308,15 +308,15 @@ apr_status_t apr_dir_make(const char *path, apr_fileperms_t perm,
 }
 
 apr_status_t apr_dir_make_recursive(const char *path, apr_fileperms_t perm,
-                                           apr_pool_t *pool) 
+                                           apr_pool_t *pool)
 {
     apr_status_t apr_err = 0;
-    
+
     apr_err = apr_dir_make (path, perm, pool); /* Try to make PATH right out */
-    
+
     if (apr_err == ENOENT) { /* Missing an intermediate dir */
         char *dir;
-        
+
         dir = path_remove_last_component(path, pool);
         /* If there is no path left, give up. */
         if (dir[0] == '\0') {
@@ -324,8 +324,8 @@ apr_status_t apr_dir_make_recursive(const char *path, apr_fileperms_t perm,
         }
 
         apr_err = apr_dir_make_recursive(dir, perm, pool);
-        
-        if (!apr_err) 
+
+        if (!apr_err)
             apr_err = apr_dir_make (path, perm, pool);
     }
 
@@ -370,4 +370,4 @@ apr_status_t apr_os_dir_put(apr_dir_t **dir, apr_os_dir_t *thedir,
     return APR_SUCCESS;
 }
 
-  
+

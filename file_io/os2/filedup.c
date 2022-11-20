@@ -115,7 +115,7 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
     if (!(old_file->flags & APR_FOPEN_NOCLEANUP)) {
         apr_pool_cleanup_kill(old_file->pool, (void *)old_file,
                               apr_file_cleanup);
-        apr_pool_cleanup_register(p, (void *)(*new_file), 
+        apr_pool_cleanup_register(p, (void *)(*new_file),
                                   apr_file_cleanup,
                                   apr_file_cleanup);
     }

@@ -24,8 +24,8 @@
 #include "apr_arch_internal_time.h"
 
 
-APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, 
-                                             const char * const * *argv, 
+APR_DECLARE(apr_status_t) apr_app_initialize(int *argc,
+                                             const char * const * *argv,
                                              const char * const * *env)
 {
     /* An absolute noop.  At present, only Win32 requires this stub, but it's
@@ -54,7 +54,7 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
 
     if ((status = apr_pool_initialize()) != APR_SUCCESS)
         return status;
-    
+
     if (apr_pool_create(&pool, NULL) != APR_SUCCESS) {
         return APR_ENOPOOL;
     }
@@ -80,7 +80,7 @@ APR_DECLARE_NONSTD(void) apr_terminate(void)
         return;
     }
     apr_pool_terminate();
-    
+
 }
 
 APR_DECLARE(void) apr_terminate2(void)

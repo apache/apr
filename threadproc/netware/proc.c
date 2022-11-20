@@ -65,7 +65,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
 
     if ((in != APR_NO_PIPE) && (in != APR_NO_FILE)) {
         /* APR_CHILD_BLOCK maps to APR_WRITE_BLOCK, while
-         * APR_PARENT_BLOCK maps to APR_READ_BLOCK, so transpose 
+         * APR_PARENT_BLOCK maps to APR_READ_BLOCK, so transpose
          * the CHILD/PARENT blocking flags for the stdin pipe.
          * stdout/stderr map to the correct mode by default.
          */
@@ -158,7 +158,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr, apr_f
                 rv = apr_file_inherit_set(attr->child_out);
         }
     }
-  
+
     if (parent_out != NULL && rv == APR_SUCCESS) {
         rv = apr_file_dup(&attr->parent_out, parent_out, attr->pool);
     }
@@ -188,7 +188,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr, apr_f
                 rv = apr_file_inherit_set(attr->child_err);
         }
     }
-  
+
     if (parent_err != NULL && rv == APR_SUCCESS) {
         rv = apr_file_dup(&attr->parent_err, parent_err, attr->pool);
     }
@@ -197,21 +197,21 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr, apr_f
 }
 
 
-APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr, 
-                               const char *dir) 
+APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
+                               const char *dir)
 {
-    return apr_filepath_merge(&attr->currdir, NULL, dir, 
+    return apr_filepath_merge(&attr->currdir, NULL, dir,
                               APR_FILEPATH_NATIVE, attr->pool);
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
-                                     apr_cmdtype_e cmd) 
+                                     apr_cmdtype_e cmd)
 {
     /* won't ever be called on this platform, so don't save the function pointer */
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr, apr_int32_t detach) 
+APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr, apr_int32_t detach)
 {
     attr->detached = detach;
     return APR_SUCCESS;
@@ -221,7 +221,7 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr, apr_int3
 APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
 {
     int pid;
-    
+
     if ((pid = fork()) < 0) {
         return errno;
     }
@@ -230,15 +230,15 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
         apr_thread_current_after_fork();
 #endif
         proc->pid = pid;
-        proc->in = NULL; 
-        proc->out = NULL; 
-        proc->err = NULL; 
+        proc->in = NULL;
+        proc->out = NULL;
+        proc->err = NULL;
         return APR_INCHILD;
     }
     proc->pid = pid;
-    proc->in = NULL; 
-    proc->out = NULL; 
-    proc->err = NULL; 
+    proc->in = NULL;
+    proc->out = NULL;
+    proc->err = NULL;
     return APR_INPARENT;
 }
 #endif
@@ -310,25 +310,25 @@ APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
 }
 
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
-                                          const char *progname, 
-                                          const char * const *args, 
+                                          const char *progname,
+                                          const char * const *args,
                                           const char * const *env,
-                                          apr_procattr_t *attr, 
+                                          apr_procattr_t *attr,
                                           apr_pool_t *pool)
 {
     wiring_t wire;
     int      addr_space;
 
-    wire.infd  = attr->child_in  
-               ? (attr->child_in->filedes != -1 ? attr->child_in->filedes 
+    wire.infd  = attr->child_in
+               ? (attr->child_in->filedes != -1 ? attr->child_in->filedes
                                                 : FD_UNUSED)
                : fileno(stdin);
     wire.outfd  = attr->child_out
-                ? (attr->child_out->filedes != -1 ? attr->child_out->filedes 
+                ? (attr->child_out->filedes != -1 ? attr->child_out->filedes
                                                   : FD_UNUSED)
                 : fileno(stdout);
     wire.errfd  = attr->child_err
-                ? (attr->child_err->filedes != -1 ? attr->child_err->filedes 
+                ? (attr->child_err->filedes != -1 ? attr->child_err->filedes
                                                   : FD_UNUSED)
                 : fileno(stderr);
 
@@ -346,30 +346,30 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
         char *fullpath = NULL;
         apr_status_t rv;
 
-        if ((rv = apr_filepath_merge(&fullpath, attr->currdir, progname, 
+        if ((rv = apr_filepath_merge(&fullpath, attr->currdir, progname,
                                      APR_FILEPATH_NATIVE, pool)) != APR_SUCCESS) {
             return rv;
         }
         progname = fullpath;
-    } 
+    }
 
-    if ((newproc->pid = procve(progname, addr_space, (const char**)env, &wire, 
+    if ((newproc->pid = procve(progname, addr_space, (const char**)env, &wire,
         NULL, NULL, 0, NULL, (const char **)args)) == -1) {
         return errno;
     }
 
     if (attr->child_in && (attr->child_in->filedes != -1)) {
-        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_in), 
+        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_in),
                               attr->child_in, apr_unix_file_cleanup);
         apr_file_close(attr->child_in);
     }
     if (attr->child_out && (attr->child_out->filedes != -1)) {
-        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_out), 
+        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_out),
                               attr->child_out, apr_unix_file_cleanup);
         apr_file_close(attr->child_out);
     }
     if (attr->child_err && (attr->child_err->filedes != -1)) {
-        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_err), 
+        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_err),
                               attr->child_err, apr_unix_file_cleanup);
         apr_file_close(attr->child_err);
     }
@@ -412,13 +412,13 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
         waitpid_options |= WNOHANG;
     }
 
-    /* If the pid is 0 then the process was started detached. There 
-       is no need to wait since there is nothing to wait for on a 
+    /* If the pid is 0 then the process was started detached. There
+       is no need to wait since there is nothing to wait for on a
        detached process.  Starting a process as non-detached and
        then calling wait or waitpid could cause the thread to hang.
-       The reason for this is because NetWare does not have a way 
-       to kill or even signal a process to be killed.  Starting 
-       all processes as detached avoids the possibility of a 
+       The reason for this is because NetWare does not have a way
+       to kill or even signal a process to be killed.  Starting
+       all processes as detached avoids the possibility of a
        thread hanging. */
     if (proc->pid == 0) {
         *exitwhy = APR_PROC_EXIT;
@@ -453,7 +453,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
 
 #if APR_HAVE_STRUCT_RLIMIT
 APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr,
-                                                 apr_int32_t what, 
+                                                 apr_int32_t what,
                                                  struct rlimit *limit)
 {
     switch(what) {
@@ -491,10 +491,10 @@ APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr,
 
     }
     return APR_SUCCESS;
-}  
+}
 #endif /* APR_HAVE_STRUCT_RLIMIT */
 
-APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr,
                                                 const char *username,
                                                 const char *password)
 {

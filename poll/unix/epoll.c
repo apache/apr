@@ -239,7 +239,7 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
              ep != APR_RING_SENTINEL(&(pollset->p->query_ring),
                                      pfd_elem_t, link);
              ep = APR_RING_NEXT(ep, link)) {
-                
+
             if (descriptor->desc.s == ep->pfd.desc.s) {
                 APR_RING_REMOVE(ep, link);
                 APR_RING_INSERT_TAIL(&(pollset->p->dead_ring),
@@ -347,13 +347,13 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
                                        apr_uint32_t flags)
 {
     int fd;
-    
+
 #ifdef HAVE_EPOLL_CREATE1
     fd = epoll_create1(EPOLL_CLOEXEC);
 #else
     fd = epoll_create(size);
 #endif
-    
+
     if (fd < 0) {
         return apr_get_netos_error();
     }
@@ -379,7 +379,7 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
         }
     }
 #endif
-    
+
     pollcb->fd = fd;
     pollcb->pollset.epoll = apr_palloc(p, size * sizeof(struct epoll_event));
 
@@ -391,7 +391,7 @@ static apr_status_t impl_pollcb_add(apr_pollcb_t *pollcb,
 {
     struct epoll_event ev = { 0 };
     int ret;
-    
+
     ev.events = get_epoll_event(descriptor->reqevents);
     ev.data.ptr = (void *) descriptor;
 
@@ -403,11 +403,11 @@ static apr_status_t impl_pollcb_add(apr_pollcb_t *pollcb,
         ret = epoll_ctl(pollcb->fd, EPOLL_CTL_ADD,
                         descriptor->desc.f->filedes, &ev);
     }
-    
+
     if (ret == -1) {
         return apr_get_netos_error();
     }
-    
+
     return APR_SUCCESS;
 }
 
@@ -419,7 +419,7 @@ static apr_status_t impl_pollcb_remove(apr_pollcb_t *pollcb,
                                   * kernel < 2.6.9
                                   */
     int ret;
-    
+
     if (descriptor->desc_type == APR_POLL_SOCKET) {
         ret = epoll_ctl(pollcb->fd, EPOLL_CTL_DEL,
                         descriptor->desc.s->socketdes, &ev);
@@ -428,11 +428,11 @@ static apr_status_t impl_pollcb_remove(apr_pollcb_t *pollcb,
         ret = epoll_ctl(pollcb->fd, EPOLL_CTL_DEL,
                         descriptor->desc.f->filedes, &ev);
     }
-    
+
     if (ret < 0) {
         rv = APR_NOTFOUND;
     }
-    
+
     return rv;
 }
 
@@ -444,11 +444,11 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
 {
     int ret, i;
     apr_status_t rv = APR_SUCCESS;
-    
+
     if (timeout > 0) {
         timeout = (timeout + 999) / 1000;
     }
-    
+
     ret = epoll_wait(pollcb->fd, pollcb->pollset.epoll, pollcb->nalloc,
                      timeout);
     if (ret < 0) {
@@ -476,7 +476,7 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
             }
         }
     }
-    
+
     return rv;
 }
 

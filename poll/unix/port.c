@@ -86,7 +86,7 @@ struct apr_pollset_private_t
     volatile apr_uint32_t waiting;
 };
 
-static apr_status_t call_port_getn(int port, port_event_t list[], 
+static apr_status_t call_port_getn(int port, port_event_t list[],
                                    unsigned int max, unsigned int *nget,
                                    apr_interval_time_t timeout)
 {
@@ -108,7 +108,7 @@ static apr_status_t call_port_getn(int port, port_event_t list[],
                                        */
 
     ret = port_getn(port, list, max, nget, tvptr);
-    /* Note: 32-bit port_getn() on Solaris 10 x86 returns large negative 
+    /* Note: 32-bit port_getn() on Solaris 10 x86 returns large negative
      * values instead of 0 when returning immediately.
      */
 
@@ -246,7 +246,7 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
      * wait until the next call to apr_pollset_poll().
      */
     if (apr_atomic_read32(&pollset->p->waiting)) {
-        res = port_associate(pollset->p->port_fd, PORT_SOURCE_FD, fd, 
+        res = port_associate(pollset->p->port_fd, PORT_SOURCE_FD, fd,
                              get_event(descriptor->reqevents), (void *)elem);
 
         if (res < 0) {
@@ -257,7 +257,7 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
             elem->on_query_ring = 1;
             APR_RING_INSERT_TAIL(&(pollset->p->query_ring), elem, pfd_elem_t, link);
         }
-    } 
+    }
     else {
         APR_RING_INSERT_TAIL(&(pollset->p->add_ring), elem, pfd_elem_t, link);
     }
@@ -287,10 +287,10 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
     }
 
     /* Search the add ring first.  This ring is often shorter,
-     * and it often contains the descriptor being removed.  
-     * (For the common scenario where apr_pollset_poll() 
+     * and it often contains the descriptor being removed.
+     * (For the common scenario where apr_pollset_poll()
      * returns activity for the descriptor and the descriptor
-     * is then removed from the pollset, it will have just 
+     * is then removed from the pollset, it will have just
      * been moved to the add ring by apr_pollset_poll().)
      *
      * If it is on the add ring, it isn't associated with the
@@ -317,7 +317,7 @@ static apr_status_t impl_pollset_remove(apr_pollset_t *pollset,
         if (res < 0) {
             /* The expected case for this failure is that another
              * thread's call to port_getn() returned this fd and
-             * disassociated the fd from the event port, and 
+             * disassociated the fd from the event port, and
              * impl_pollset_poll() is blocked on the ring lock,
              * which this thread holds.
              */
@@ -378,7 +378,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
             fd = ep->pfd.desc.f->filedes;
         }
 
-        ret = port_associate(pollset->p->port_fd, PORT_SOURCE_FD, 
+        ret = port_associate(pollset->p->port_fd, PORT_SOURCE_FD,
                              fd, get_event(ep->pfd.reqevents), ep);
         if (ret < 0) {
             rv = apr_get_netos_error();
@@ -397,10 +397,10 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
         return rv;
     }
 
-    rv = call_port_getn(pollset->p->port_fd, pollset->p->port_set, 
+    rv = call_port_getn(pollset->p->port_fd, pollset->p->port_set,
                         pollset->nalloc, &nget, timeout);
 
-    /* decrease the waiting ASAP to reduce the window for calling 
+    /* decrease the waiting ASAP to reduce the window for calling
        port_associate within apr_pollset_add() */
     apr_atomic_dec32(&pollset->p->waiting);
 

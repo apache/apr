@@ -17,7 +17,7 @@
 /*Read/Write locking implementation based on the MultiLock code from
  * Stephen Beaulieu <hippo@be.com>
  */
- 
+
 #include "apr_arch_thread_mutex.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
@@ -28,7 +28,7 @@ static apr_status_t _thread_mutex_cleanup(void * data)
     if (lock->LockCount != 0) {
         /* we're still locked... */
         while (atomic_add(&lock->LockCount , -1) > 1){
-            /* OK we had more than one person waiting on the lock so 
+            /* OK we had more than one person waiting on the lock so
              * the sem is also locked. Release it until we have no more
              * locks left.
              */
@@ -37,7 +37,7 @@ static apr_status_t _thread_mutex_cleanup(void * data)
     }
     delete_sem(lock->Lock);
     return APR_SUCCESS;
-}    
+}
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
                                                   unsigned int flags,
@@ -45,21 +45,21 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
 {
     apr_thread_mutex_t *new_m;
     apr_status_t stat = APR_SUCCESS;
-  
+
     new_m = (apr_thread_mutex_t *)apr_pcalloc(pool, sizeof(apr_thread_mutex_t));
     if (new_m == NULL){
         return APR_ENOMEM;
     }
-    
+
     if ((stat = create_sem(0, "APR_Lock")) < B_NO_ERROR) {
         _thread_mutex_cleanup(new_m);
         return stat;
     }
     new_m->LockCount = 0;
-    new_m->Lock = stat;  
+    new_m->Lock = stat;
     new_m->pool  = pool;
 
-    /* Optimal default is APR_THREAD_MUTEX_UNNESTED, 
+    /* Optimal default is APR_THREAD_MUTEX_UNNESTED,
      * no additional checks required for either flag.
      */
     new_m->nested = flags & APR_THREAD_MUTEX_NESTED;
@@ -78,19 +78,19 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create_np(apr_thread_mutex_t **mutex,
                                                    apr_pool_t *pool)
 {
     return APR_ENOTIMPL;
-}       
+}
 #endif
-  
+
 APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 {
     int32 stat;
     thread_id me = find_thread(NULL);
-    
+
     if (mutex->nested && mutex->owner == me) {
         mutex->owner_ref++;
         return APR_SUCCESS;
     }
-    
+
     if (atomic_add(&mutex->LockCount, 1) > 0) {
         if ((stat = acquire_sem(mutex->Lock)) < B_NO_ERROR) {
             /* Oh dear, acquire_sem failed!!  */
@@ -101,7 +101,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 
     mutex->owner = me;
     mutex->owner_ref = 1;
-    
+
     return APR_SUCCESS;
 }
 
@@ -109,12 +109,12 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 {
     int32 stat;
     thread_id me = find_thread(NULL);
-    
+
     if (mutex->nested && mutex->owner == me) {
         mutex->owner_ref++;
         return APR_SUCCESS;
     }
-    
+
     if (atomic_add(&mutex->LockCount, 1) > 0) {
         if ((stat = acquire_sem_etc(mutex->Lock, 1, 0, 0)) < B_NO_ERROR) {
             atomic_add(&mutex->LockCount, -1);
@@ -127,7 +127,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 
     mutex->owner = me;
     mutex->owner_ref = 1;
-    
+
     return APR_SUCCESS;
 }
 
@@ -136,12 +136,12 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
 {
     int32 stat;
     thread_id me = find_thread(NULL);
-    
+
     if (mutex->nested && mutex->owner == me) {
         mutex->owner_ref++;
         return APR_SUCCESS;
     }
-    
+
     if (atomic_add(&mutex->LockCount, 1) > 0) {
         if (timeout <= 0) {
             stat = B_TIMED_OUT;
@@ -161,20 +161,20 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_timedlock(apr_thread_mutex_t *mutex,
 
     mutex->owner = me;
     mutex->owner_ref = 1;
-    
+
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 {
     int32 stat;
-        
+
     if (mutex->nested && mutex->owner == find_thread(NULL)) {
         mutex->owner_ref--;
         if (mutex->owner_ref > 0)
             return APR_SUCCESS;
     }
-    
+
     if (atomic_add(&mutex->LockCount, -1) > 1) {
         if ((stat = release_sem(mutex->Lock)) < B_NO_ERROR) {
             atomic_add(&mutex->LockCount, 1);

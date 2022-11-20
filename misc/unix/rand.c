@@ -103,13 +103,13 @@ APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
 
     return APR_SUCCESS;
 }
-#endif 
+#endif
 
 #endif /* APR_HAS_OS_UUID */
 
 #if APR_HAS_RANDOM
 
-APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 
+APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
                                                     apr_size_t length)
 {
 #if defined(HAVE_EGD)
@@ -121,9 +121,9 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
      *   0xMM (bytes granted) MM bytes
      * 0x02 (read entropy blocking) 0xNN (bytes desired)
      *   [block] NN bytes
-     * 0x03 (write entropy) 0xMM 0xLL (bits of entropy) 0xNN (bytes of data) 
+     * 0x03 (write entropy) 0xMM 0xLL (bits of entropy) 0xNN (bytes of data)
      *      NN bytes
-     * (no response - write only) 
+     * (no response - write only)
      * 0x04 (report PID)
      *   0xMM (length of PID string, not null-terminated) MM chars
      */
@@ -139,7 +139,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
 
     for (egdsockname = egd_sockets; *egdsockname && length > 0; egdsockname++) {
         egd_path_len = strlen(*egdsockname);
-        
+
         if (egd_path_len > sizeof(addr.sun_path)) {
             return APR_EINVAL;
         }
@@ -147,8 +147,8 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
         memset(&addr, 0, sizeof(struct sockaddr_un));
         addr.sun_family = AF_UNIX;
         memcpy(addr.sun_path, *egdsockname, egd_path_len);
-        egd_addr_len = APR_OFFSETOF(struct sockaddr_un, sun_path) + 
-          egd_path_len; 
+        egd_addr_len = APR_OFFSETOF(struct sockaddr_un, sun_path) +
+          egd_path_len;
 
         egd_socket = socket(PF_UNIX, SOCK_STREAM, 0);
 
@@ -163,7 +163,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
             continue;
         }
 
-        /* EGD can only return 255 bytes of data at a time.  Silly.  */ 
+        /* EGD can only return 255 bytes of data at a time.  Silly.  */
         while (length > 0) {
             apr_ssize_t srv;
             req[0] = 2; /* We'll block for now. */
@@ -182,7 +182,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
                 close(egd_socket);
                 return APR_EGENERAL;
             }
-            
+
             resp_expected = req[1];
             srv = read(egd_socket, resp, resp_expected);
             if (srv == -1) {
@@ -191,12 +191,12 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
                 close(egd_socket);
                 return bad_errno;
             }
-            
+
             memcpy(curbuf, resp, srv);
             curbuf += srv;
             length -= srv;
         }
-        
+
         shutdown(egd_socket, SHUT_RDWR);
         close(egd_socket);
     }
@@ -242,7 +242,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
         if (fd == -1)
             if ((fd = open(DEV_RANDOM, O_RDONLY)) == -1)
                 return errno;
-        
+
         do {
             rc = read(fd, buf, length);
         } while (rc == -1 && errno == EINTR);
@@ -261,7 +261,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
             length -= rc;
         }
     } while (length > 0);
-    
+
     close(fd);
 
 #elif defined(OS2)

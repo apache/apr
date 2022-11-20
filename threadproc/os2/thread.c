@@ -68,7 +68,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
     return APR_ENOTIMPL;
 }
 
-APR_DECLARE(apr_status_t) apr_threadattr_max_free_set(apr_threadattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_threadattr_max_free_set(apr_threadattr_t *attr,
                                                       apr_size_t size)
 {
     attr->max_free = size;
@@ -278,7 +278,7 @@ APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd, apr_thread
 
 
 
-APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd, 
+APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd,
                                             apr_pool_t *pool)
 {
     if ((*thd) == NULL) {
@@ -348,7 +348,7 @@ APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
 
 
 
-APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control, 
+APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control,
                                           void (*func)(void))
 {
     if (!control->hit) {

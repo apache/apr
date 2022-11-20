@@ -95,9 +95,9 @@ static unsigned int boundary_size;
 #define GUARDPAGE_SIZE 0
 #endif /* APR_ALLOCATOR_GUARD_PAGES */
 
-/* 
+/*
  * Timing constants for killing subprocesses
- * There is a total 3-second delay between sending a SIGINT 
+ * There is a total 3-second delay between sending a SIGINT
  * and sending of the final SIGKILL.
  * TIMEOUT_INTERVAL should be set to TIMEOUT_USECS / 64
  * for the exponetial timeout alogrithm.
@@ -295,7 +295,7 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t in_size)
      * dividing its size by the boundary size
      */
     index = (size >> BOUNDARY_INDEX) - 1;
-    
+
     if (index > APR_UINT32_MAX) {
         return NULL;
     }
@@ -1167,7 +1167,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
                 abort_fn(APR_ENOMEM);
 
             apr_allocator_destroy(pool_allocator);
-            
+
             return APR_ENOMEM;
         }
     }
@@ -2396,7 +2396,7 @@ APR_DECLARE(apr_abortfunc_t) apr_pool_abort_get(apr_pool_t *pool)
 APR_DECLARE(apr_pool_t *) apr_pool_parent_get(apr_pool_t *pool)
 {
 #ifdef NETWARE
-    /* On NetWare, don't return the global_pool, return the application pool 
+    /* On NetWare, don't return the global_pool, return the application pool
        as the top most pool */
     if (pool->parent == global_pool)
         return pool;
@@ -2722,7 +2722,7 @@ APR_DECLARE(void) apr_pool_cleanup_for_exec(void)
 APR_DECLARE(void) apr_pool_cleanup_for_exec(void)
 {
     /*
-     * Don't need to do anything on NT or OS/2, because 
+     * Don't need to do anything on NT or OS/2, because
      * these platforms will spawn the new process - not
      * fork for exec. All handles that are not inheritable,
      * will be automajically closed. The only problem is

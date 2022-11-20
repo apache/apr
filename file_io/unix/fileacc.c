@@ -107,13 +107,13 @@ apr_fileperms_t apr_unix_mode2perms(mode_t mode)
 
 APR_DECLARE(apr_status_t) apr_file_data_get(void **data, const char *key,
                                            apr_file_t *file)
-{    
+{
     return apr_pool_userdata_get(data, key, file->pool);
 }
 
 APR_DECLARE(apr_status_t) apr_file_data_set(apr_file_t *file, void *data,
                                            const char *key,
                                            apr_status_t (*cleanup)(void *))
-{    
+{
     return apr_pool_userdata_set(data, key, cleanup, file->pool);
 }

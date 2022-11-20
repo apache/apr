@@ -145,14 +145,14 @@ static apr_xlate_t *xlate_ebcdic_to_ascii; /* used in apr_md5_encode() */
 APR_DECLARE(apr_status_t) apr_md5_init(apr_md5_ctx_t *context)
 {
     context->count[0] = context->count[1] = 0;
-    
+
     /* Load magic initialization constants. */
     context->state[0] = 0x67452301;
     context->state[1] = 0xefcdab89;
     context->state[2] = 0x98badcfe;
     context->state[3] = 0x10325476;
     context->xlate = NULL;
-    
+
     return APR_SUCCESS;
 }
 
@@ -160,7 +160,7 @@ APR_DECLARE(apr_status_t) apr_md5_init(apr_md5_ctx_t *context)
  * to be used for translating the content before calculating the
  * digest.
  */
-APR_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context, 
+APR_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context,
                                             apr_xlate_t *xlate)
 {
 #if APR_HAS_XLATE
@@ -202,7 +202,7 @@ static apr_status_t md5_update_buffer(apr_md5_ctx_t *context,
     idx = (unsigned int)((context->count[0] >> 3) & 0x3F);
 
     /* Update number of bits */
-    if ((context->count[0] += ((apr_uint32_t)inputLen << 3)) 
+    if ((context->count[0] += ((apr_uint32_t)inputLen << 3))
             < ((apr_uint32_t)inputLen << 3))
         context->count[1]++;
     context->count[1] += (apr_uint32_t)inputLen >> 29;
@@ -229,9 +229,9 @@ static apr_status_t md5_update_buffer(apr_md5_ctx_t *context,
     if (inputLen >= partLen) {
         if (context->xlate && (xlate_buffer == DO_XLATE)) {
             inbytes_left = outbytes_left = partLen;
-            apr_xlate_conv_buffer(context->xlate, (const char *)input, 
+            apr_xlate_conv_buffer(context->xlate, (const char *)input,
                                   &inbytes_left,
-                                  (char *)&context->buffer[idx], 
+                                  (char *)&context->buffer[idx],
                                   &outbytes_left);
         }
         else {
@@ -243,8 +243,8 @@ static apr_status_t md5_update_buffer(apr_md5_ctx_t *context,
             if (context->xlate && (xlate_buffer == DO_XLATE)) {
                 unsigned char inp_tmp[64];
                 inbytes_left = outbytes_left = 64;
-                apr_xlate_conv_buffer(context->xlate, (const char *)&input[i], 
-                                      &inbytes_left, (char *)inp_tmp, 
+                apr_xlate_conv_buffer(context->xlate, (const char *)&input[i],
+                                      &inbytes_left, (char *)inp_tmp,
                                       &outbytes_left);
                 MD5Transform(context->state, inp_tmp);
             }
@@ -261,8 +261,8 @@ static apr_status_t md5_update_buffer(apr_md5_ctx_t *context,
     /* Buffer remaining input */
     if (context->xlate && (xlate_buffer == DO_XLATE)) {
         inbytes_left = outbytes_left = inputLen - i;
-        apr_xlate_conv_buffer(context->xlate, (const char *)&input[i], 
-                              &inbytes_left, (char *)&context->buffer[idx], 
+        apr_xlate_conv_buffer(context->xlate, (const char *)&input[i],
+                              &inbytes_left, (char *)&context->buffer[idx],
                               &outbytes_left);
     }
     else {
@@ -272,9 +272,9 @@ static apr_status_t md5_update_buffer(apr_md5_ctx_t *context,
     return APR_SUCCESS;
 }
 
-/* MD5 block update operation. API with the default setting 
+/* MD5 block update operation. API with the default setting
  * for EBCDIC translations
- */  
+ */
 APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
                                          const void *input,
                                          apr_size_t inputLen)
@@ -312,7 +312,7 @@ APR_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[APR_MD5_DIGESTSIZE]
 
     /* Zeroize sensitive information. */
     memset(context, 0, sizeof(*context));
-    
+
     return APR_SUCCESS;
 }
 
@@ -517,7 +517,7 @@ APR_DECLARE(apr_status_t) apr_md5_encode(const char *pw, const char *salt,
     apr_md5_ctx_t ctx, ctx1;
     unsigned long l;
 
-    /* 
+    /*
      * Refine the salt first.  It's possible we were given an already-hashed
      * string as the salt argument, so extract the actual salt value from it
      * if so.  Otherwise just use the string up to the first '$' as the salt.
@@ -550,7 +550,7 @@ APR_DECLARE(apr_status_t) apr_md5_encode(const char *pw, const char *salt,
 #if APR_CHARSET_EBCDIC
     apr_md5_set_xlate(&ctx, xlate_ebcdic_to_ascii);
 #endif
-    
+
     /*
      * The password first, since that is what is most unknown
      */

@@ -19,7 +19,7 @@
 
 APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *pool)
 {
-    (*new) = (apr_threadattr_t *)apr_palloc(pool, 
+    (*new) = (apr_threadattr_t *)apr_palloc(pool,
               sizeof(apr_threadattr_t));
 
     if ((*new) == NULL) {
@@ -38,7 +38,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr, apr_
         attr->detached = 1;
     } else {
         attr->detached = 0;
-    }    
+    }
     return APR_SUCCESS;
 }
 
@@ -62,7 +62,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
     return APR_ENOTIMPL;
 }
 
-APR_DECLARE(apr_status_t) apr_threadattr_max_free_set(apr_threadattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_threadattr_max_free_set(apr_threadattr_t *attr,
                                                       apr_size_t size)
 {
     attr->max_free = size;
@@ -149,7 +149,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
         temp = B_NORMAL_PRIORITY;
 
     /* First we create the new thread...*/
-    (*new)->td = spawn_thread((thread_func)dummy_worker, 
+    (*new)->td = spawn_thread((thread_func)dummy_worker,
                               "apr thread", temp, (*new));
 
     /* Now we try to run it...*/
@@ -290,7 +290,7 @@ APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd, apr_thread
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd, 
+APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd,
                                             apr_pool_t *pool)
 {
     if (pool == NULL) {
@@ -332,7 +332,7 @@ APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
 
 
 
-APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control, 
+APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control,
                                           void (*func)(void))
 {
     if (!control->hit) {

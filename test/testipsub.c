@@ -77,7 +77,7 @@ static void test_singleton_subnets(abts_case *tc, void *data)
 {
     const char *v4addrs[] = {
         "127.0.0.1", "129.42.18.99", "63.161.155.20", "207.46.230.229", "64.208.42.36",
-        "198.144.203.195", "192.18.97.241", "198.137.240.91", "62.156.179.119", 
+        "198.144.203.195", "192.18.97.241", "198.137.240.91", "62.156.179.119",
         "204.177.92.181"
     };
     apr_ipsubnet_t *ipsub;
@@ -201,14 +201,14 @@ static void test_parse_addr_port(abts_case *tc, void *data)
 /*        ,{ "localhost:-1", APR_EINVAL, NULL, NULL, 0 }   <- should fail, doesn't */
     };
     unsigned i;
-        
+
     for (i = 0; i < (sizeof testcases / sizeof testcases[0]); i++) {
         char *addr, *scope_id;
         apr_port_t port;
         apr_status_t rv;
 
         test = &testcases[i];
-        
+
         rv = apr_parse_addr_port(&addr, &scope_id, &port, test->input, p);
         ABTS_INT_EQUAL(tc, test->rv, rv);
 

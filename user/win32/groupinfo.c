@@ -22,7 +22,7 @@
 #include <sys/types.h>
 #endif
 
-APR_DECLARE(apr_status_t) apr_gid_get(apr_gid_t *gid, 
+APR_DECLARE(apr_status_t) apr_gid_get(apr_gid_t *gid,
                                       const char *groupname, apr_pool_t *p)
 {
     SID_NAME_USE sidtype;
@@ -44,16 +44,16 @@ APR_DECLARE(apr_status_t) apr_gid_get(apr_gid_t *gid,
     else {
         domain = NULL;
     }
-    /* Get nothing on the first pass ... need to size the sid buffer 
+    /* Get nothing on the first pass ... need to size the sid buffer
      */
-    rv = LookupAccountName(domain, groupname, domain, &sidlen, 
+    rv = LookupAccountName(domain, groupname, domain, &sidlen,
                            anydomain, &domlen, &sidtype);
     if (sidlen) {
         /* Give it back on the second pass
          */
         *gid = apr_palloc(p, sidlen);
         domlen = sizeof(anydomain);
-        rv = LookupAccountName(domain, groupname, *gid, &sidlen, 
+        rv = LookupAccountName(domain, groupname, *gid, &sidlen,
                                anydomain, &domlen, &sidtype);
     }
     if (!sidlen || !rv) {
@@ -71,13 +71,13 @@ APR_DECLARE(apr_status_t) apr_gid_name_get(char **groupname, apr_gid_t groupid, 
         return APR_EINVAL;
     if (!LookupAccountSid(NULL, groupid, name, &cbname, domain, &cbdomain, &type))
         return apr_get_os_error();
-    if (type != SidTypeGroup && type != SidTypeWellKnownGroup 
+    if (type != SidTypeGroup && type != SidTypeWellKnownGroup
                              && type != SidTypeAlias)
         return APR_EINVAL;
     *groupname = apr_pstrdup(p, name);
     return APR_SUCCESS;
 }
-  
+
 APR_DECLARE(apr_status_t) apr_gid_compare(apr_gid_t left, apr_gid_t right)
 {
     if (!left || !right)

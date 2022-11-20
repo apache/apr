@@ -40,8 +40,8 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
     new_mutex = (apr_proc_mutex_t *)apr_pcalloc(pool, sizeof(apr_proc_mutex_t));
     if (new_mutex == NULL) {
         return APR_ENOMEM;
-    }     
-    
+    }
+
     new_mutex->pool = pool;
     ret = apr_thread_mutex_create(&(new_mutex->mutex), flags, pool);
 
@@ -57,7 +57,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
 {
     return APR_SUCCESS;
 }
-    
+
 APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex)
 {
     if (mutex)
@@ -125,7 +125,7 @@ APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 
 /* Implement OS-specific accessors defined in apr_portable.h */
 
-APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex, 
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex,
                                                    apr_proc_mutex_t *pmutex,
                                                    apr_lockmech_e *mech)
 {

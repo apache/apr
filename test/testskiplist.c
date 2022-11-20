@@ -337,7 +337,7 @@ static int ecomp(void *a, void *b)
  * Using apr_skiplist_remove_compare(..., scomp, NULL) would not work because
  * it will likely remove any duplicate (the first one) encountered on the path,
  * hence possibly not the expected one.
- * 
+ *
  * Using apr_skiplist_remove_compare(..., ecomp, NULL) works provided all the
  * duplicates (same a) don't also have the same b (which is the case in the
  * test below), hence uniqueness is cooked in the elem itself.
@@ -385,7 +385,7 @@ static void skiplist_test(abts_case *tc, void *data) {
 
     ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_skiplist_init(&list, ptmp));
     apr_skiplist_set_compare(list, comp, comp);
-    
+
     /* insert 10 objects */
     for (i = 0; i < test_elems; ++i){
         add_int_to_skiplist(tc, list, i);
@@ -412,7 +412,7 @@ static void skiplist_test(abts_case *tc, void *data) {
 
     add_int_to_skiplist(tc, list, 42);
     val = apr_skiplist_pop(list, NULL);
-    ABTS_INT_EQUAL(tc, *val, 42); 
+    ABTS_INT_EQUAL(tc, *val, 42);
 
     /* empty */
     val = apr_skiplist_pop(list, NULL);

@@ -33,7 +33,7 @@ static int NXSeedRandomInternal( size_t width, void *seed )
         srand(NXGetSystemTick());
         init = 1;
     }
- 
+
     if (width > 3)
     {
         do
@@ -42,21 +42,21 @@ static int NXSeedRandomInternal( size_t width, void *seed )
         }
         while ((width -= 4) > 3);
     }
- 
+
     if (width > 0)
     {
         char *p = (char *) s;
 
         u.x = rand();
- 
+
         while (width > 0)
            *p++ = u.y[width--];
     }
- 
+
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 
+APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
                                                     apr_size_t length)
 {
     if (NXSeedRandom(length, buf) != 0) {

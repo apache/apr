@@ -41,7 +41,7 @@ APR_DECLARE(char *) apr_strtok(char *str, const char *sep, char **last)
     token = str;
 
     /* skip valid token characters to terminate token and
-     * prepare for the next call (will terminate at '\0) 
+     * prepare for the next call (will terminate at '\0)
      */
     *last = token + 1;
     while (**last && !strchr(sep, **last))

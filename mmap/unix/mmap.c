@@ -76,9 +76,9 @@ static apr_status_t mmap_cleanup(void *themmap)
     return errno;
 }
 
-APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, 
-                                          apr_file_t *file, apr_off_t offset, 
-                                          apr_size_t size, apr_int32_t flag, 
+APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
+                                          apr_file_t *file, apr_off_t offset,
+                                          apr_size_t size, apr_int32_t flag,
                                           apr_pool_t *cont)
 {
     void *mm;
@@ -101,11 +101,11 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
 
     if (size == 0)
         return APR_EINVAL;
-    
+
     if (file == NULL || file->filedes == -1 || file->buffered)
         return APR_EBADF;
     (*new) = (apr_mmap_t *)apr_pcalloc(cont, sizeof(apr_mmap_t));
-    
+
 #ifdef BEOS
     /* XXX: mmap shouldn't really change the seek offset */
     apr_file_seek(file, APR_SET, &offset);
@@ -126,7 +126,7 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
 
     if (aid >= B_NO_ERROR)
         read(file->filedes, mm, size);
-    
+
     (*new)->area = aid;
 #else
 

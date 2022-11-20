@@ -422,7 +422,7 @@ static int dbd_sqlite3_prepare(apr_pool_t *pool, apr_dbd_t *sql,
 
     ret = sqlite3_prepare(sql->conn, query, strlen(query), &stmt, &tail);
     if (ret == SQLITE_OK) {
-        apr_dbd_prepared_t *prep; 
+        apr_dbd_prepared_t *prep;
 
         prep = apr_pcalloc(sql->pool, sizeof(*prep));
         prep->stmt = stmt;
@@ -438,7 +438,7 @@ static int dbd_sqlite3_prepare(apr_pool_t *pool, apr_dbd_t *sql,
     } else {
         sqlite3_finalize(stmt);
     }
-   
+
     apr_dbd_mutex_unlock();
 
     return ret;

@@ -339,7 +339,7 @@ static void *APR_THREAD_FUNC thread_pool_func(apr_thread_t * t, void *param)
         ++me->idle_cnt;
         APR_RING_INSERT_TAIL(me->idle_thds, elt, apr_thread_list_elt, link);
 
-        /* 
+        /*
          * If there is a scheduled task, always scheduled to perform that task.
          * Since there is no guarantee that current idle threads are scheduled
          * for next scheduled task.
@@ -432,8 +432,8 @@ APR_DECLARE(apr_status_t) apr_thread_pool_create(apr_thread_pool_t ** me,
         return rv;
     apr_pool_pre_cleanup_register(tp->pool, tp, thread_pool_cleanup);
 
-    /* Grab the mutex as apr_thread_create() and thread_pool_func() will 
-     * allocate from (*me)->pool. This is dangerous if there are multiple 
+    /* Grab the mutex as apr_thread_create() and thread_pool_func() will
+     * allocate from (*me)->pool. This is dangerous if there are multiple
      * initial threads to create.
      */
     apr_thread_mutex_lock(tp->lock);
@@ -498,8 +498,8 @@ static apr_thread_pool_task_t *task_new(apr_thread_pool_t * me,
 }
 
 /*
- * Test it the task is the only one within the priority segment. 
- * If it is not, return the first element with same or lower priority. 
+ * Test it the task is the only one within the priority segment.
+ * If it is not, return the first element with same or lower priority.
  * Otherwise, add the task into the queue and return NULL.
  *
  * NOTE: This function is not thread safe by itself. Caller should hold the lock
@@ -978,7 +978,7 @@ APR_DECLARE(apr_size_t) apr_thread_pool_thread_max_set(apr_thread_pool_t *me,
         n = i; /* stop all idle threads */
     }
     stop_idle_threads(me, i - n);
-    
+
     return n;
 }
 

@@ -45,7 +45,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_bucket_simple_split(apr_bucket *a,
     return APR_SUCCESS;
 }
 
-static apr_status_t simple_bucket_read(apr_bucket *b, const char **str, 
+static apr_status_t simple_bucket_read(apr_bucket *b, const char **str,
                                        apr_size_t *len, apr_read_type_e block)
 {
     *str = (char *)b->data + b->start;
@@ -129,7 +129,7 @@ const apr_bucket_type_t apr_bucket_type_immortal = {
 
 APR_DECLARE_DATA const apr_bucket_type_t apr_bucket_type_transient = {
     "TRANSIENT", 5, APR_BUCKET_DATA,
-    apr_bucket_destroy_noop, 
+    apr_bucket_destroy_noop,
     simple_bucket_read,
     transient_bucket_setaside,
     apr_bucket_simple_split,

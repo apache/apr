@@ -213,7 +213,7 @@ static unsigned int hashfunc_default(const char *char_key, apr_ssize_t *klen,
     const unsigned char *key = (const unsigned char *)char_key;
     const unsigned char *p;
     apr_ssize_t i;
-    
+
     /*
      * This is the popular `times 33' hash algorithm which is used by
      * perl and also appears in Berkeley DB. This is one of the best

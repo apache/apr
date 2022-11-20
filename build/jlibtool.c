@@ -223,7 +223,7 @@ enum lib_type {
 
 typedef struct {
     const char **vals;
-    int num; 
+    int num;
 } count_chars;
 
 typedef struct {
@@ -312,7 +312,7 @@ static int snprintf( char *str, size_t n, const char *fmt, ... )
 {
         va_list ap;
         int res;
- 
+
         va_start( ap, fmt );
         res = vsnprintf( str, n, fmt, ap );
         va_end( ap );
@@ -680,7 +680,7 @@ long safe_strtol(const char *nptr, const char **endptr, int base)
         return 0;
     }
 
-    return rv; 
+    return rv;
 }
 
 void safe_mkdir(const char *path)
@@ -867,7 +867,7 @@ char *check_object_exists(command_t *cmd, const char *arg, int arglen)
 */
         default:
             break;
-        } 
+        }
 
         if (!cmd->options.silent) {
             printf("Checking (obj): %s\n", newarg);
@@ -939,7 +939,7 @@ char *check_library_exists(command_t *cmd, const char *arg, int pathlen,
         default:
             *libtype = type_UNKNOWN;
             break;
-        } 
+        }
 
         if (!cmd->options.silent) {
             printf("Checking (lib): %s\n", newarg);
@@ -1932,7 +1932,7 @@ int run_mode(command_t *cmd_data)
         break;
     default:
         break;
-    } 
+    }
 
     return 0;
 }
@@ -2048,7 +2048,7 @@ int main(int argc, char *argv[])
     rc = run_mode(&cmd_data);
 
     if (!rc) {
-       add_for_runtime(&cmd_data); 
+       add_for_runtime(&cmd_data);
     }
 
     cleanup_tmp_dirs(&cmd_data);

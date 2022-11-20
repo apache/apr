@@ -29,16 +29,16 @@
 
  /* WinNT accepts several odd forms of a 'root' path.  Under Unicode
  * calls (ApiFunctionW) the //?/C:/foo or //?/UNC/mach/share/foo forms
- * are accepted.  Ansi and Unicode functions both accept the //./C:/foo 
- * form under WinNT/2K.  Since these forms are handled in the utf-8 to 
- * unicode translation phase, we don't want the user confused by them, so 
+ * are accepted.  Ansi and Unicode functions both accept the //./C:/foo
+ * form under WinNT/2K.  Since these forms are handled in the utf-8 to
+ * unicode translation phase, we don't want the user confused by them, so
  * we will accept them but always return the canonical C:/ or //mach/share/
  *
  * OS2 appears immune from the nonsense :)
  */
 
-APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath, 
-                                            const char **inpath, 
+APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
+                                            const char **inpath,
                                             apr_int32_t flags,
                                             apr_pool_t *p)
 {
@@ -73,7 +73,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
     if (volsep) {
         /* Split the inpath into its separate parts. */
         deconstruct(testpath, server, volume, NULL, file, NULL, &elements, PATH_UNDEF);
-    
+
         /* If we got a volume part then continue splitting out the root.
             Otherwise we either have an incomplete or relative path
         */
@@ -131,7 +131,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 #ifdef WIN32 /* //server/share isn't the only // delimited syntax */
             if ((testpath[2] == '?' || testpath[2] == '.')
                     && (testpath[3] == '/' || testpath[3] == '\\')) {
-                if (IS_FNCHAR(testpath[4]) && testpath[5] == ':') 
+                if (IS_FNCHAR(testpath[4]) && testpath[5] == ':')
                 {
                     apr_status_t rv;
                     testpath += 4;
@@ -144,9 +144,9 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                     return rv;
                 }
                 else if (strncasecmp(testpath + 4, "UNC", 3) == 0
-                      && (testpath[7] == '/' || testpath[7] == '\\') 
+                      && (testpath[7] == '/' || testpath[7] == '\\')
                       && (testpath[2] == '?')) {
-                    /* given  '//?/UNC/machine/share, a little magic 
+                    /* given  '//?/UNC/machine/share, a little magic
                      * at the end makes this all work out by using
                      * 'C/machine' as the starting point and replacing
                      * the UNC delimiters with \'s, including the 'C'
@@ -176,9 +176,9 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                     /* Protect against //machine/X/ where X is illegal */
                     if (!IS_FNCHAR(*(delim2++)))
                         return APR_EBADPATH;
-                } 
+                }
 
-                /* Copy the '//machine/[share[/]]' path, always providing 
+                /* Copy the '//machine/[share[/]]' path, always providing
                  * an extra byte for the trailing slash.
                  */
                 newpath = apr_pstrmemdup(p, testpath, delim2 - testpath + 1);
@@ -192,11 +192,11 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                 }
 
                 if (flags & APR_FILEPATH_TRUENAME) {
-                    /* Validate the \\Machine\Share\ designation, 
-                     * Win32 will argue about slashed in UNC paths, 
+                    /* Validate the \\Machine\Share\ designation,
+                     * Win32 will argue about slashed in UNC paths,
                      * so use backslashes till we finish testing,
                      * and add the trailing backslash [required].
-                     * apr_pstrmemdup above guarentees us the new 
+                     * apr_pstrmemdup above guarentees us the new
                      * trailing null character.
                      */
                     newpath[0] = '\\';
@@ -215,7 +215,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                     newpath[delim1 - testpath] = seperator[0];
                     newpath[delim2 - testpath] = (*delim2 ? seperator[0] : '\0');
                 }
-                else {                
+                else {
                     /* Give back the caller's own choice of delimiters
                      */
                     newpath[0] = testpath[0];
@@ -224,7 +224,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                     newpath[delim2 - testpath] = *delim2;
                 }
 
-                /* If this root included the trailing / or \ designation 
+                /* If this root included the trailing / or \ designation
                  * then lop off multiple trailing slashes and give back
                  * appropriate delimiters.
                  */
@@ -240,7 +240,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                 *rootpath = newpath;
                 return APR_SUCCESS;
             }
-            
+
             /* Have path of '\\[machine]', if the machine is given,
              * append same trailing slash as the leading slash
              */
@@ -265,7 +265,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
             return APR_EINCOMPLETE;
         }
 
-        /* Left with a path of '/', what drive are we asking about? 
+        /* Left with a path of '/', what drive are we asking about?
          */
         *inpath = testpath + 1;
         newpath = apr_palloc(p, 2);
@@ -279,7 +279,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
     }
 
     /* Evaluate path of 'd:[/]' */
-    if (IS_FNCHAR(*testpath) && testpath[1] == ':') 
+    if (IS_FNCHAR(*testpath) && testpath[1] == ':')
     {
         apr_status_t rv;
         /* Validate that D:\ drive exists, test must be rooted
@@ -349,9 +349,9 @@ static int same_drive(const char *path1, const char *path2)
 }
 #endif
 
-APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath, 
-                                             const char *basepath, 
-                                             const char *addpath, 
+APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
+                                             const char *basepath,
+                                             const char *addpath,
                                              apr_int32_t flags,
                                              apr_pool_t *p)
 {
@@ -370,7 +370,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
 #ifndef NETWARE
     int fixunc = 0;  /* flag to complete an incomplete UNC basepath */
 #endif
-    
+
     /* Treat null as an empty path, otherwise split addroot from the addpath
      */
     if (!addpath) {
@@ -380,7 +380,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     else {
         /* This call _should_ test the path
          */
-        addtype = apr_filepath_root(&addroot, &addpath, 
+        addtype = apr_filepath_root(&addroot, &addpath,
                                     APR_FILEPATH_TRUENAME
                                     | (flags & APR_FILEPATH_NATIVE),
                                     p);
@@ -398,7 +398,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     }
 
     /* If addpath is (even partially) rooted, then basepath is
-     * unused.  Ths violates any APR_FILEPATH_SECUREROOTTEST 
+     * unused.  Ths violates any APR_FILEPATH_SECUREROOTTEST
      * and APR_FILEPATH_NOTABSOLUTE flags specified.
      */
     if (addtype == APR_EABSOLUTE || addtype == APR_EINCOMPLETE)
@@ -422,8 +422,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
             basetype = APR_ERELATIVE;
         }
 
-        /* If APR_FILEPATH_NOTABSOLUTE is specified, the caller 
-         * requires an absolutely relative result, So do not retrieve 
+        /* If APR_FILEPATH_NOTABSOLUTE is specified, the caller
+         * requires an absolutely relative result, So do not retrieve
          * the working path.
          */
         if (addtype == APR_ERELATIVE && (flags & APR_FILEPATH_NOTABSOLUTE)) {
@@ -432,12 +432,12 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         }
     }
 
-    if (!basepath) 
+    if (!basepath)
     {
         /* Start with the current working path.  This is bass akwards,
          * but required since the compiler (at least vc) doesn't like
          * passing the address of a char const* for a char** arg.
-         * We must grab the current path of the designated drive 
+         * We must grab the current path of the designated drive
          * if addroot is given in drive-relative form (e.g. d:foo)
          */
         char *getpath;
@@ -471,8 +471,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     }
     baselen = strlen(basepath);
 
-    /* If APR_FILEPATH_NOTABSOLUTE is specified, the caller 
-     * requires an absolutely relative result.  If the given 
+    /* If APR_FILEPATH_NOTABSOLUTE is specified, the caller
+     * requires an absolutely relative result.  If the given
      * basepath is not relative then fail.
      */
     if ((flags & APR_FILEPATH_NOTABSOLUTE) && basetype != APR_ERELATIVE)
@@ -485,7 +485,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     {
         /* Ignore the given root path, and start with the addroot
          */
-        if ((flags & APR_FILEPATH_NOTABOVEROOT) 
+        if ((flags & APR_FILEPATH_NOTABOVEROOT)
                 && strncmp(baseroot, addroot, strlen(baseroot)))
             return APR_EABOVEROOT;
         keptlen = 0;
@@ -494,22 +494,22 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     }
     else if (addtype == APR_EINCOMPLETE)
     {
-        /* There are several types of incomplete paths, 
+        /* There are several types of incomplete paths,
          *     incomplete UNC paths         (//foo/ or //),
-         *     drives without rooted paths  (d: as in d:foo), 
+         *     drives without rooted paths  (d: as in d:foo),
          * and simple roots                 (/ as in /foo).
          * Deal with these in significantly different manners...
          */
 #ifndef NETWARE
         if ((addroot[0] == '/' || addroot[0] == '\\') &&
-            (addroot[1] == '/' || addroot[1] == '\\')) 
+            (addroot[1] == '/' || addroot[1] == '\\'))
         {
             /* Ignore the given root path if the incomplete addpath is UNC,
              * (note that the final result will be incomplete).
              */
             if (flags & APR_FILEPATH_NOTRELATIVE)
                 return addtype;
-            if ((flags & APR_FILEPATH_NOTABOVEROOT) 
+            if ((flags & APR_FILEPATH_NOTABOVEROOT)
                     && strncmp(baseroot, addroot, strlen(baseroot)))
                 return APR_EABOVEROOT;
             fixunc = 1;
@@ -518,8 +518,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
             memcpy(path, addroot, pathlen);
         }
         else
-#endif            
-        if ((addroot[0] == '/' || addroot[0] == '\\') && !addroot[1]) 
+#endif
+        if ((addroot[0] == '/' || addroot[0] == '\\') && !addroot[1])
         {
             /* Bring together the drive or UNC root from the baseroot
              * if the addpath is a simple root and basepath is rooted,
@@ -529,7 +529,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 return basetype;
             if (basetype != APR_ERELATIVE) {
 #ifndef NETWARE
-                if (basetype == APR_INCOMPLETE 
+                if (basetype == APR_INCOMPLETE
                         && (baseroot[0] == '/' || baseroot[0] == '\\')
                         && (baseroot[1] == '/' || baseroot[1] == '\\'))
                     fixunc = 1;
@@ -546,16 +546,16 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
             }
         }
 #ifdef NETWARE
-        else if (filepath_has_drive(addroot, DRIVE_ONLY, p)) 
+        else if (filepath_has_drive(addroot, DRIVE_ONLY, p))
         {
             /* If the addroot is a drive (without a volume root)
              * use the basepath _if_ it matches this drive letter!
              * Otherwise we must discard the basepath.
              */
-            if (!filepath_compare_drive(addroot, baseroot, p) && 
+            if (!filepath_compare_drive(addroot, baseroot, p) &&
                 filepath_has_drive(baseroot, 0, p)) {
 #else
-        else if (addroot[0] && addroot[1] == ':' && !addroot[2]) 
+        else if (addroot[0] && addroot[1] == ':' && !addroot[2])
         {
             /* If the addroot is a drive (without a volume root)
              * use the basepath _if_ it matches this drive letter!
@@ -573,7 +573,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                     return APR_ENAMETOOLONG;
                 memcpy(path, baseroot, rootlen);
                 memcpy(path + rootlen, basepath, baselen);
-            } 
+            }
             else {
                 if (flags & APR_FILEPATH_NOTRELATIVE)
                     return addtype;
@@ -600,7 +600,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
 #ifndef NETWARE
         /* An incomplete UNC path must be completed
          */
-        if (basetype == APR_INCOMPLETE 
+        if (basetype == APR_INCOMPLETE
                 && (baseroot[0] == '/' || baseroot[0] == '\\')
                 && (baseroot[1] == '/' || baseroot[1] == '\\'))
             fixunc = 1;
@@ -624,7 +624,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         if (path[pathlen - 1] != '/' && path[pathlen - 1] != '\\') {
             if (pathlen + 1 >= sizeof(path))
                 return APR_ENAMETOOLONG;
-        
+
             path[pathlen++] = ((flags & APR_FILEPATH_NATIVE) ? '\\' : '/');
         }
     /*  XXX: wrong, but gotta figure out what I intended;
@@ -633,9 +633,9 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
      */
     }
 
-    while (*addpath) 
+    while (*addpath)
     {
-        /* Parse each segment, find the closing '/' 
+        /* Parse each segment, find the closing '/'
          */
         seglen = 0;
         while (addpath[seglen] && addpath[seglen] != '/'
@@ -644,7 +644,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
 
         /* Truncate all trailing spaces and all but the first two dots */
         segend = seglen;
-        while (seglen && (addpath[seglen - 1] == ' ' 
+        while (seglen && (addpath[seglen - 1] == ' '
                        || addpath[seglen - 1] == '.')) {
             if (seglen > 2 || addpath[seglen - 1] != '.' || addpath[0] != '.')
                 --seglen;
@@ -652,7 +652,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 break;
         }
 
-        if (seglen == 0 || (seglen == 1 && addpath[0] == '.')) 
+        if (seglen == 0 || (seglen == 1 && addpath[0] == '.'))
         {
             /* NOTE: win32 _hates_ '/ /' and '/. /' (yes, with spaces in there)
              * so eliminate all preconceptions that it is valid.
@@ -667,13 +667,13 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 return APR_EBADPATH;
 #endif
 
-            /* Otherwise, this is a noop segment (/ or ./) so ignore it 
+            /* Otherwise, this is a noop segment (/ or ./) so ignore it
              */
         }
-        else if (seglen == 2 && addpath[0] == '.' && addpath[1] == '.') 
+        else if (seglen == 2 && addpath[0] == '.' && addpath[1] == '.')
         {
             /* NOTE: win32 _hates_ '/.. /' (yes, with a space in there)
-             * and '/..../', some functions treat it as ".", and some 
+             * and '/..../', some functions treat it as ".", and some
              * fail! Eliminate all preconceptions that they are valid.
              */
             if (seglen < segend && (seglen != 3 || addpath[2] != '.'))
@@ -687,32 +687,32 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
 #endif
 
             /* backpath (../) when an absolute path is given */
-            if (rootlen && (pathlen <= rootlen)) 
+            if (rootlen && (pathlen <= rootlen))
             {
-                /* Attempt to move above root.  Always die if the 
+                /* Attempt to move above root.  Always die if the
                  * APR_FILEPATH_SECUREROOTTEST flag is specified.
                  */
                 if (flags & APR_FILEPATH_SECUREROOTTEST)
                     return APR_EABOVEROOT;
-                
+
                 /* Otherwise this is simply a noop, above root is root.
                  */
             }
-            else if (pathlen == 0 
-                      || (pathlen >= 3 
+            else if (pathlen == 0
+                      || (pathlen >= 3
                            && (pathlen == 3
                                 || path[pathlen - 4] == ':'
-                                || path[pathlen - 4] == '/' 
+                                || path[pathlen - 4] == '/'
                                 || path[pathlen - 4] == '\\')
-                           &&  path[pathlen - 3] == '.' 
-                           &&  path[pathlen - 2] == '.' 
-                           && (path[pathlen - 1] == '/' 
+                           &&  path[pathlen - 3] == '.'
+                           &&  path[pathlen - 2] == '.'
+                           && (path[pathlen - 1] == '/'
                                 || path[pathlen - 1] == '\\')))
             {
                 /* Verified path is empty, exactly "..[/\]", or ends
                  * in "[:/\]..[/\]" - these patterns we will not back
                  * over since they aren't 'prior segements'.
-                 * 
+                 *
                  * If APR_FILEPATH_SECUREROOTTEST.was given, die now.
                  */
                 if (flags & APR_FILEPATH_SECUREROOTTEST)
@@ -725,7 +725,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 path[pathlen++] = '.';
                 path[pathlen++] = '.';
                 if (addpath[segend]) {
-                    path[pathlen++] = ((flags & APR_FILEPATH_NATIVE) 
+                    path[pathlen++] = ((flags & APR_FILEPATH_NATIVE)
                                     ? '\\' : ((flags & APR_FILEPATH_TRUENAME)
                                            ? '/' : addpath[segend]));
                 }
@@ -735,9 +735,9 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                  */
                 keptlen = pathlen;
             }
-            else 
+            else
             {
-                /* otherwise crop the prior segment 
+                /* otherwise crop the prior segment
                  */
                 do {
                     --pathlen;
@@ -747,7 +747,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 /* Now test if we are above where we started and back up
                  * the keptlen offset to reflect the added/altered path.
                  */
-                if (pathlen < keptlen) 
+                if (pathlen < keptlen)
                 {
                     if (flags & APR_FILEPATH_SECUREROOTTEST)
                         return APR_EABOVEROOT;
@@ -763,7 +763,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 const char *testroot;
                 apr_status_t testtype;
                 apr_size_t i = (addpath[segend] != '\0');
-                
+
                 /* This isn't legal unless the unc path is complete!
                  */
                 if (seglen < segend)
@@ -771,10 +771,10 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 if (pathlen + seglen + 1 >= sizeof(path))
                     return APR_ENAMETOOLONG;
                 memcpy(path + pathlen, addpath, seglen + i);
-                
+
                 /* Always add the trailing slash to a UNC segment
                  */
-                path[pathlen + seglen] = ((flags & APR_FILEPATH_NATIVE) 
+                path[pathlen + seglen] = ((flags & APR_FILEPATH_NATIVE)
                                              ? '\\' : '/');
                 pathlen += seglen + 1;
 
@@ -785,7 +785,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 path[pathlen] = '\0';
                 /* This call _should_ test the path
                  */
-                testtype = apr_filepath_root(&testroot, &testpath, 
+                testtype = apr_filepath_root(&testroot, &testpath,
                                              APR_FILEPATH_TRUENAME
                                              | (flags & APR_FILEPATH_NATIVE),
                                              p);
@@ -810,7 +810,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                     return APR_ENAMETOOLONG;
                 memcpy(path + pathlen, addpath, seglen + i);
                 if (i)
-                    path[pathlen + seglen] = ((flags & APR_FILEPATH_NATIVE) 
+                    path[pathlen + seglen] = ((flags & APR_FILEPATH_NATIVE)
                                                  ? '\\' : '/');
                 pathlen += seglen + i;
             }
@@ -823,23 +823,23 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
 
         addpath += segend;
     }
-    
+
     /* keptlen will be the baselen unless the addpath contained
      * backpath elements.  If so, and APR_FILEPATH_NOTABOVEROOT
      * is specified (APR_FILEPATH_SECUREROOTTEST was caught above),
-     * compare the string beyond the root to assure the result path 
-     * is still within given basepath.  Note that the root path 
+     * compare the string beyond the root to assure the result path
+     * is still within given basepath.  Note that the root path
      * segment is thoroughly tested prior to path parsing.
      */
     if ((flags & APR_FILEPATH_NOTABOVEROOT) && baselen) {
         if (memcmp(basepath, path + rootlen, baselen) != 0)
             return APR_EABOVEROOT;
- 
+
          /* Ahem... if we have a basepath without a trailing slash,
           * we better be sure that /foo wasn't replaced with /foobar!
           */
         if (basepath[baselen - 1] != '/' && basepath[baselen - 1] != '\\'
-              && path[rootlen + baselen] && path[rootlen + baselen] != '/' 
+              && path[rootlen + baselen] && path[rootlen + baselen] != '/'
                                          && path[rootlen + baselen] != '\\')
             return APR_EABOVEROOT;
     }
@@ -869,7 +869,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
             }
             /* Null term for stat! */
             path[keptlen + seglen] = '\0';
-            if ((rv = apr_stat(&finfo, path, 
+            if ((rv = apr_stat(&finfo, path,
                                APR_FINFO_LINK | APR_FINFO_TYPE | APR_FINFO_NAME, p))
                 == APR_SUCCESS) {
                 apr_size_t namelen = strlen(finfo.name);
@@ -881,8 +881,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 }
 #else /* WIN32 || NETWARE; here there be aliases that gire and gimble and change length */
 
-                if ((namelen != seglen) || 
-                    (memcmp(finfo.name, path + keptlen, seglen) != 0)) 
+                if ((namelen != seglen) ||
+                    (memcmp(finfo.name, path + keptlen, seglen) != 0))
                 {
                     if (namelen <= seglen) {
                         memcpy(path + keptlen, finfo.name, namelen);
@@ -909,17 +909,17 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 }
 #endif /* !OS2 (Whatever that alias was we're over it) */
 
-                /* That's it, the rest is path info. 
+                /* That's it, the rest is path info.
                  * I don't know how we aught to handle this.  Should
                  * we define a new error to indicate 'more info'?
                  * Should we split out the rest of the path?
                  */
-                if ((finfo.filetype != APR_DIR) && 
-                    (finfo.filetype != APR_LNK) && saveslash) 
+                if ((finfo.filetype != APR_DIR) &&
+                    (finfo.filetype != APR_LNK) && saveslash)
                     rv = APR_ENOTDIR;
 #ifdef XXX_FIGURE_THIS_OUT
                 {
-                    /* the example inserts a null between the end of 
+                    /* the example inserts a null between the end of
                      * the filename and the next segment, and increments
                      * the path length so we would return both segments.
                      */

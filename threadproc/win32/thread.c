@@ -23,7 +23,7 @@
 #ifdef HAVE_PROCESS_H
 #include <process.h>
 #endif
-#include "apr_arch_misc.h"   
+#include "apr_arch_misc.h"
 
 /* Chosen for us by apr_initialize */
 DWORD tls_apr_thread = 0;
@@ -31,7 +31,7 @@ DWORD tls_apr_thread = 0;
 APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new,
                                                 apr_pool_t *pool)
 {
-    (*new) = (apr_threadattr_t *)apr_palloc(pool, 
+    (*new) = (apr_threadattr_t *)apr_palloc(pool,
               sizeof(apr_threadattr_t));
 
     if ((*new) == NULL) {
@@ -72,7 +72,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
     return APR_ENOTIMPL;
 }
 
-APR_DECLARE(apr_status_t) apr_threadattr_max_free_set(apr_threadattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_threadattr_max_free_set(apr_threadattr_t *attr,
                                                       apr_size_t size)
 {
     attr->max_free = size;
@@ -238,7 +238,7 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
 {
     apr_status_t rv = APR_SUCCESS;
     DWORD ret;
-    
+
     if (!thd->td) {
         /* Can not join on detached threads */
         return APR_DETACH;
@@ -312,11 +312,11 @@ APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void)
     if (hthread) {
         return hthread;
     }
-    
+
     hproc = GetCurrentProcess();
     hthread = GetCurrentThread();
-    if (!DuplicateHandle(hproc, hthread, 
-                         hproc, &hthread, 0, FALSE, 
+    if (!DuplicateHandle(hproc, hthread,
+                         hproc, &hthread, 0, FALSE,
                          DUPLICATE_SAME_ACCESS)) {
         return NULL;
     }

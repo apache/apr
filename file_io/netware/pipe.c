@@ -102,7 +102,7 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put_ex(apr_file_t **file,
                                              apr_pool_t *pool)
 {
     int *dafile = thefile;
-    
+
     (*file) = apr_pcalloc(pool, sizeof(apr_file_t));
     (*file)->pool = pool;
     (*file)->eof_hit = 0;
@@ -156,7 +156,7 @@ static apr_status_t file_pipe_create(apr_file_t **in,
     (*out)->flags    = APR_INHERIT;
     (*in)->is_pipe      =
     (*out)->is_pipe     = 1;
-    (*out)->fname    = 
+    (*out)->fname    =
     (*in)->fname     = NULL;
     (*in)->buffered  =
     (*out)->buffered = 0;
@@ -200,8 +200,8 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in,
     return file_pipe_create(in, out, APR_FULL_BLOCK, pool, pool);
 }
 
-APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in, 
-                                                  apr_file_t **out, 
+APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
+                                                  apr_file_t **out,
                                                   apr_int32_t blocking,
                                                   apr_pool_t *pool)
 {
@@ -217,11 +217,11 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_pools(apr_file_t **in,
     return file_pipe_create(in, out, blocking, pool_in, pool_out);
 }
 
-APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, 
+APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename,
                                                     apr_fileperms_t perm, apr_pool_t *pool)
 {
     return APR_ENOTIMPL;
-} 
+}
 
-    
+
 

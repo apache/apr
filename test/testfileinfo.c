@@ -40,13 +40,13 @@ static const struct view_fileinfo
     {APR_FINFO_INODE,  "INODE"},
     {APR_FINFO_NLINK,  "NLINK"},
     {APR_FINFO_TYPE,   "TYPE"},
-    {APR_FINFO_USER,   "USER"}, 
-    {APR_FINFO_GROUP,  "GROUP"}, 
-    {APR_FINFO_UPROT,  "UPROT"}, 
+    {APR_FINFO_USER,   "USER"},
+    {APR_FINFO_GROUP,  "GROUP"},
+    {APR_FINFO_UPROT,  "UPROT"},
     {APR_FINFO_GPROT,  "GPROT"},
     {APR_FINFO_WPROT,  "WPROT"},
     {0,                NULL}
-}; 
+};
 
 static void finfo_equal(abts_case *tc, apr_finfo_t *f1, apr_finfo_t *f2)
 {
@@ -160,7 +160,7 @@ static void test_stat_eq_finfo(abts_case *tc, void *data)
     rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
 
     /* Opening the file may have toggled the atime member (time last
-     * accessed), so fetch our apr_stat() after getting the fileinfo 
+     * accessed), so fetch our apr_stat() after getting the fileinfo
      * of the open file...
      */
     rv = apr_stat(&stat_finfo, FILENAME, APR_FINFO_NORM, p);

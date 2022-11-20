@@ -54,7 +54,7 @@ static apr_status_t file_read_buffered(apr_file_t *thefile, void *buf,
     }
     while (rv == 0 && size > 0) {
         if (thefile->bufpos >= thefile->dataRead) {
-            int bytesread = read(thefile->filedes, thefile->buffer, 
+            int bytesread = read(thefile->filedes, thefile->buffer,
                                  thefile->bufsize);
             if (bytesread == 0) {
                 thefile->eof_hit = TRUE;
@@ -118,8 +118,8 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
             rv = read(thefile->filedes, buf, *nbytes);
         } while (rv == -1 && errno == EINTR);
 #ifdef USE_WAIT_FOR_IO
-        if (rv == -1 && 
-            (errno == EAGAIN || errno == EWOULDBLOCK) && 
+        if (rv == -1 &&
+            (errno == EAGAIN || errno == EWOULDBLOCK) &&
             thefile->timeout != 0) {
             apr_status_t arv = apr_wait_for_io_or_timeout(thefile, NULL, 1);
             if (arv != APR_SUCCESS) {
@@ -131,7 +131,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
                     rv = read(thefile->filedes, buf, *nbytes);
                 } while (rv == -1 && errno == EINTR);
             }
-        }  
+        }
 #endif
         *nbytes = bytes_read;
         if (rv == 0) {
@@ -159,7 +159,7 @@ static apr_status_t do_rotating_check(apr_file_t *thefile, apr_time_t now)
         rv = apr_stat(&new_finfo, thefile->fname,
                       APR_FINFO_DEV|APR_FINFO_INODE, tmp_pool);
 
-        if (rv != APR_SUCCESS || 
+        if (rv != APR_SUCCESS ||
             new_finfo.inode != thefile->rotating->finfo.inode ||
             new_finfo.device != thefile->rotating->finfo.device)  {
 
@@ -240,7 +240,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         file_lock(thefile);
 
         if ( thefile->direction == 0 ) {
-            /* Position file pointer for writing at the offset we are 
+            /* Position file pointer for writing at the offset we are
              * logically reading from
              */
             apr_int64_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
@@ -256,9 +256,9 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             if (thefile->bufpos == thefile->bufsize)   /* write buffer is full*/
                 rv = apr_file_flush_locked(thefile);
 
-            blocksize = size > thefile->bufsize - thefile->bufpos ? 
+            blocksize = size > thefile->bufsize - thefile->bufpos ?
                         thefile->bufsize - thefile->bufpos : size;
-            memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);                      
+            memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);
             thefile->bufpos += blocksize;
             pos += blocksize;
             size -= blocksize;
@@ -274,7 +274,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         } while (rv == (apr_size_t)-1 && errno == EINTR);
 #ifdef USE_WAIT_FOR_IO
         if (rv == (apr_size_t)-1 &&
-            (errno == EAGAIN || errno == EWOULDBLOCK) && 
+            (errno == EAGAIN || errno == EWOULDBLOCK) &&
             thefile->timeout != 0) {
             apr_status_t arv = apr_wait_for_io_or_timeout(thefile, NULL, 0);
             if (arv != APR_SUCCESS) {
@@ -297,7 +297,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                     }
                 } while (1);
             }
-        }  
+        }
 #endif
         if (rv == (apr_size_t)-1) {
             (*nbytes) = 0;
@@ -358,14 +358,14 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
     /**
      * The problem with trying to output the entire iovec is that we cannot
      * maintain the behaviour that a real writev would have.  If we iterate
-     * over the iovec one at a time, we lose the atomic properties of 
+     * over the iovec one at a time, we lose the atomic properties of
      * writev().  The other option is to combine the entire iovec into one
-     * buffer that we could then send in one call to write().  This is not 
+     * buffer that we could then send in one call to write().  This is not
      * reasonable since we do not know how much data an iovec could contain.
      *
-     * The only reasonable option, that maintains the semantics of a real 
+     * The only reasonable option, that maintains the semantics of a real
      * writev(), is to only write the first iovec.  Callers of file_writev()
-     * must deal with partial writes as they normally would. If you want to 
+     * must deal with partial writes as they normally would. If you want to
      * ensure an entire iovec is written, use apr_file_writev_full().
      */
 
@@ -384,7 +384,7 @@ APR_DECLARE(apr_status_t) apr_file_putc(char ch, apr_file_t *thefile)
 APR_DECLARE(apr_status_t) apr_file_ungetc(char ch, apr_file_t *thefile)
 {
     thefile->ungetchar = (unsigned char)ch;
-    return APR_SUCCESS; 
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_file_getc(char *ch, apr_file_t *thefile)
@@ -506,8 +506,8 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
     const char *str_start = str;
     char *final = str + len - 1;
 
-    if (len <= 1) {  
-        /* sort of like fgets(), which returns NULL and stores no bytes 
+    if (len <= 1) {
+        /* sort of like fgets(), which returns NULL and stores no bytes
          */
         return APR_SUCCESS;
     }
@@ -567,7 +567,7 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
     }
 
     /* We must store a terminating '\0' if we've stored any chars. We can
-     * get away with storing it if we hit an error first. 
+     * get away with storing it if we hit an error first.
      */
     *str = '\0';
     if (str > str_start) {

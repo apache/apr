@@ -65,7 +65,7 @@ static apr_status_t dso_cleanup(void *thedso)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
+APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
                                        const char *path, apr_pool_t *pool)
 {
 
@@ -73,7 +73,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     char *fullpath = NULL;
     apr_status_t rv;
 
-    if ((rv = apr_filepath_merge(&fullpath, NULL, path, 
+    if ((rv = apr_filepath_merge(&fullpath, NULL, path,
                                  APR_FILEPATH_NATIVE, pool)) != APR_SUCCESS) {
         return rv;
     }
@@ -97,14 +97,14 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 
     return APR_SUCCESS;
 }
-    
+
 APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
 {
     return apr_pool_cleanup_run(handle->pool, handle, dso_cleanup);
 }
 
-APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
-                                      apr_dso_handle_t *handle, 
+APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
+                                      apr_dso_handle_t *handle,
                                       const char *symname)
 {
     sym_list *symbol = NULL;
@@ -121,11 +121,11 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     symbol->symbol = apr_pstrdup(handle->pool, symname);
 
     *ressym = retval;
-    
+
     return APR_SUCCESS;
 }
 
-APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, 
+APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer,
                                         apr_size_t buflen)
 {
     if (dso->errormsg) {

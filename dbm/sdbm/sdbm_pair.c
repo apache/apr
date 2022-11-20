@@ -34,8 +34,8 @@
 
 #define exhash(item)	sdbm_hash((item).dptr, (item).dsize)
 
-/* 
- * forward 
+/*
+ * forward
  */
 static int seepair(char *, int, char *, int);
 
@@ -270,7 +270,7 @@ long sbit;
 
 	n = ino[0];
 	for (ino++; n > 0; ino += 2) {
-		key.dptr = cur + ino[0]; 
+		key.dptr = cur + ino[0];
 		key.dsize = off - ino[0];
 		val.dptr = cur + ino[1];
 		val.dsize = ino[0] - ino[1];
@@ -283,13 +283,13 @@ long sbit;
 		n -= 2;
 	}
 
-	debug(("%d split %d/%d\n", ((short *) cur)[0] / 2, 
+	debug(("%d split %d/%d\n", ((short *) cur)[0] / 2,
 	       ((short *) new)[0] / 2,
 	       ((short *) pag)[0] / 2));
 }
 
 /*
- * check page sanity: 
+ * check page sanity:
  * number of entries should be something
  * reasonable, and all offsets in the index should be in order.
  * this could be made more rigorous.

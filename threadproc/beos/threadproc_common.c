@@ -18,4 +18,4 @@
    code duplication */
 #include "../unix/signals.c"
 #include "../unix/procsup.c"
-   
+

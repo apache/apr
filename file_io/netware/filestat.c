@@ -55,8 +55,8 @@ static apr_filetype_e filetype_from_mode(mode_t mode)
 
 static void fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
                            apr_int32_t wanted)
-{ 
-    finfo->valid = APR_FINFO_MIN | APR_FINFO_IDENT | APR_FINFO_NLINK 
+{
+    finfo->valid = APR_FINFO_MIN | APR_FINFO_IDENT | APR_FINFO_NLINK
                     | APR_FINFO_OWNER | APR_FINFO_PROT;
 
     finfo->protection = apr_unix_mode2perms(info->st_mode);
@@ -104,7 +104,7 @@ apr_status_t apr_file_info_get_locked(apr_finfo_t *finfo, apr_int32_t wanted,
     }
 }
 
-APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, 
+APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo,
                                             apr_int32_t wanted,
                                             apr_file_t *thefile)
 {
@@ -128,7 +128,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo,
     }
 }
 
-APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname, 
+APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
                                              apr_fileperms_t perms)
 {
     mode_t mode = apr_unix_perms2mode(perms);
@@ -232,14 +232,14 @@ int cstat (NXPathCtx_t ctx, char *path, struct stat *buf, unsigned long requestm
            and return */
         if (!gPool) {
             char poolname[50];
-    
+
             if (apr_pool_create(&gPool, NULL) != APR_SUCCESS) {
                 return getstat(ctx, path, buf, requestmap);
             }
-    
+
             setGlobalPool(gPool);
             apr_pool_tag(gPool, apr_pstrdup(gPool, "cstat_mem_pool"));
-    
+
             statCache = apr_hash_make(gPool);
             apr_pool_userdata_set ((void*)statCache, "STAT_CACHE", stat_cache_cleanup, gPool);
 
@@ -254,7 +254,7 @@ int cstat (NXPathCtx_t ctx, char *path, struct stat *buf, unsigned long requestm
         if (!gPool || !statCache || !rwlock) {
             return getstat(ctx, path, buf, requestmap);
         }
-    
+
         for (x = 0,tr = path;*tr != '\0';tr++,x++) {
             if (*tr == '\\' || *tr == '/') {
                 ptr = tr;
@@ -265,7 +265,7 @@ int cstat (NXPathCtx_t ctx, char *path, struct stat *buf, unsigned long requestm
                 len = x;
             }
         }
-    
+
         if (ptr) {
             ppath = apr_pstrndup (p, path, len);
             strlwr(ppath);
@@ -283,7 +283,7 @@ int cstat (NXPathCtx_t ctx, char *path, struct stat *buf, unsigned long requestm
                 pinfo = apr_pstrdup (p, ptr);
             }
         }
-    
+
         /* If we have a statCache then try to pull the information
            from the cache.  Otherwise just stat the file and return.*/
         if (statCache) {
@@ -310,8 +310,8 @@ int cstat (NXPathCtx_t ctx, char *path, struct stat *buf, unsigned long requestm
 }
 #endif
 
-APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, 
-                                   const char *fname, 
+APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
+                                   const char *fname,
                                    apr_int32_t wanted, apr_pool_t *pool)
 {
     struct stat info;
@@ -347,17 +347,17 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
          * include files, APR cannot report a good reason why the stat()
          * of the file failed; there are cases where it can fail even though
          * the file exists.  This opens holes in Apache, for example, because
-         * it becomes possible for someone to get a directory listing of a 
-         * directory even though there is an index (eg. index.html) file in 
-         * it.  If you do not have a problem with this, delete the above 
+         * it becomes possible for someone to get a directory listing of a
+         * directory even though there is an index (eg. index.html) file in
+         * it.  If you do not have a problem with this, delete the above
          * #error lines and start the compile again.  If you need to do this,
          * please submit a bug report to http://www.apache.org/bug_report.html
-         * letting us know that you needed to do this.  Please be sure to 
+         * letting us know that you needed to do this.  Please be sure to
          * include the operating system you are using.
          */
         /* WARNING: All errors will be handled as not found
          */
-#if !defined(ENOENT) 
+#if !defined(ENOENT)
         return APR_ENOENT;
 #else
         /* WARNING: All errors but not found will be handled as not directory
@@ -388,12 +388,12 @@ APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
 #ifdef HAVE_UTIMES
     {
       struct timeval tvp[2];
-    
+
       tvp[0].tv_sec = apr_time_sec(finfo.atime);
       tvp[0].tv_usec = apr_time_usec(finfo.atime);
       tvp[1].tv_sec = apr_time_sec(mtime);
       tvp[1].tv_usec = apr_time_usec(mtime);
-      
+
       if (utimes(fname, tvp) == -1) {
         return errno;
       }
@@ -401,10 +401,10 @@ APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
 #elif defined(HAVE_UTIME)
     {
       struct utimbuf buf;
-      
+
       buf.actime = (time_t) (finfo.atime / APR_USEC_PER_SEC);
       buf.modtime = (time_t) (mtime / APR_USEC_PER_SEC);
-      
+
       if (utime(fname, &buf) == -1) {
         return errno;
       }

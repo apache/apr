@@ -53,7 +53,7 @@ int (*WSACleanupWithNLMHandle)( void *handle ) = NULL;
 static int wsa_startup_with_handle (WORD wVersionRequested, LPWSADATA data, void *handle)
 {
     APP_DATA *app_data;
-    
+
     if (!(app_data = (APP_DATA*) get_app_data(gLibId)))
         return APR_EGENERAL;
 
@@ -63,18 +63,18 @@ static int wsa_startup_with_handle (WORD wVersionRequested, LPWSADATA data, void
     app_data->gs_event_rtag   = AllocateResourceTag(handle, "WinSock Event", WS_WSAEVENT_SIGNATURE);
     app_data->gs_pcp_rtag     = AllocateResourceTag(handle, "WinSock C-Port", WS_CPORT_SIGNATURE);
 
-    return WSAStartupRTags(wVersionRequested, data, 
-                           app_data->gs_startup_rtag, 
-                           app_data->gs_socket_rtag, 
-                           app_data->gs_lookup_rtag, 
-                           app_data->gs_event_rtag, 
+    return WSAStartupRTags(wVersionRequested, data,
+                           app_data->gs_startup_rtag,
+                           app_data->gs_socket_rtag,
+                           app_data->gs_lookup_rtag,
+                           app_data->gs_event_rtag,
                            app_data->gs_pcp_rtag);
 }
 
 static int wsa_cleanup_with_handle (void *handle)
 {
     APP_DATA *app_data;
-    
+
     if (!(app_data = (APP_DATA*) get_app_data(gLibId)))
         return APR_EGENERAL;
 
@@ -108,7 +108,7 @@ static int RegisterAppWithWinSock (void *nlm_handle)
 
     if (LOBYTE(wsaData.wVersion) != WSAHighByte ||
         HIBYTE(wsaData.wVersion) != WSALowByte) {
-        
+
         UnregisterAppWithWinSock (nlm_handle);
         return APR_EEXIST;
     }
@@ -119,8 +119,8 @@ static int RegisterAppWithWinSock (void *nlm_handle)
 
 
 
-APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, 
-                                             const char * const * *argv, 
+APR_DECLARE(apr_status_t) apr_app_initialize(int *argc,
+                                             const char * const * *argv,
                                              const char * const * *env)
 {
     /* An absolute noop.  At present, only Win32 requires this stub, but it's
@@ -143,9 +143,9 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
     }
 
     /* apr_pool_initialize() is being called from the library
-        startup code since all of the memory resources belong 
+        startup code since all of the memory resources belong
         to the library rather than the application. */
-    
+
     if (apr_pool_create(&pool, NULL) != APR_SUCCESS) {
         return APR_ENOPOOL;
     }
@@ -180,7 +180,7 @@ APR_DECLARE_NONSTD(void) apr_terminate(void)
         return;
     }
 
-    /* apr_pool_terminate() is being called from the 
+    /* apr_pool_terminate() is being called from the
         library shutdown code since the memory resources
         belong to the library rather than the application */
 

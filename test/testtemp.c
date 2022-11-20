@@ -37,7 +37,7 @@ static void test_mktemp(abts_case *tc, void *data)
 
     rv = apr_temp_dir_get(&tempdir, p);
     APR_ASSERT_SUCCESS(tc, "Error finding Temporary Directory", rv);
-    
+
     filetemplate = apr_pstrcat(p, tempdir, "/tempfileXXXXXX", NULL);
     rv = apr_file_mktemp(&f, filetemplate, 0, p);
     APR_ASSERT_SUCCESS(tc, "Error opening Temporary file", rv);

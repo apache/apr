@@ -762,7 +762,7 @@ static const char *dbd_oracle_error(apr_dbd_t *sql, int n)
     switch (OCIErrorGet(sql->err, 1, NULL, &errorcode,
                         (text*) sql->buf, sizeof(sql->buf), OCI_HTYPE_ERROR)) {
     case OCI_SUCCESS:
-        return sql->buf; 
+        return sql->buf;
     default:
         return "internal error: OCIErrorGet failed";
     }
@@ -2134,16 +2134,16 @@ static apr_status_t dbd_oracle_check_conn(apr_pool_t *pool, apr_dbd_t *sql)
 {
     apr_dbd_results_t *res = NULL;
     apr_dbd_row_t *row = NULL;
-    
+
     if(dbd_oracle_pselect(pool, sql, &res, sql->check_conn_stmt,
                           0, NULL) != 0) {
         return APR_EGENERAL;
     }
-    
+
     if(dbd_oracle_get_row(pool, res, &row, -1) != 0) {
         return APR_EGENERAL;
     }
-    
+
     if(dbd_oracle_get_row(pool, res, &row, -1) != -1) {
         return APR_EGENERAL;
     }

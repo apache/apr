@@ -33,7 +33,7 @@ static void test_file_dup(abts_case *tc, void *data)
     apr_finfo_t finfo;
 
     /* First, create a new file, empty... */
-    rv = apr_file_open(&file1, FILEPATH "testdup.file", 
+    rv = apr_file_open(&file1, FILEPATH "testdup.file",
                        APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE |
                        APR_FOPEN_DELONCLOSE, APR_FPROT_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -51,7 +51,7 @@ static void test_file_dup(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_stat(&finfo, FILEPATH "testdup.file", APR_FINFO_NORM, p);
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_ENOENT(rv));
-}  
+}
 
 static void test_file_readwrite(abts_case *tc, void *data)
 {
@@ -64,7 +64,7 @@ static void test_file_readwrite(abts_case *tc, void *data)
     apr_off_t fpos;
 
     /* First, create a new file, empty... */
-    rv = apr_file_open(&file1, FILEPATH "testdup.readwrite.file", 
+    rv = apr_file_open(&file1, FILEPATH "testdup.readwrite.file",
                        APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE |
                        APR_FOPEN_DELONCLOSE, APR_FPROT_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -96,7 +96,7 @@ static void test_file_readwrite(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_stat(&finfo, FILEPATH "testdup.readwrite.file", APR_FINFO_NORM, p);
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_ENOENT(rv));
-}  
+}
 
 static void test_dup2(abts_case *tc, void *data)
 {
@@ -105,7 +105,7 @@ static void test_dup2(abts_case *tc, void *data)
     apr_file_t *saveerr = NULL;
     apr_status_t rv;
 
-    rv = apr_file_open(&testfile, FILEPATH "testdup2.file", 
+    rv = apr_file_open(&testfile, FILEPATH "testdup2.file",
                        APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE |
                        APR_FOPEN_DELONCLOSE, APR_FPROT_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -142,7 +142,7 @@ static void test_dup2_readwrite(abts_case *tc, void *data)
     char buff[50];
     apr_off_t fpos;
 
-    rv = apr_file_open(&testfile, FILEPATH "testdup2.readwrite.file", 
+    rv = apr_file_open(&testfile, FILEPATH "testdup2.readwrite.file",
                        APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE |
                        APR_FOPEN_DELONCLOSE, APR_FPROT_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -174,7 +174,7 @@ static void test_dup2_readwrite(abts_case *tc, void *data)
     rv = apr_file_read(testfile, buff, &txtlen);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_STR_EQUAL(tc, TEST2, buff);
-      
+
     apr_file_close(testfile);
 
     rv = apr_file_dup2(errfile, saveerr, p);

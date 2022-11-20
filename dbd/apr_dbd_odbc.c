@@ -30,7 +30,7 @@
 
 #include <stdlib.h>
 
-/* If library is ODBC-V2, use macros for limited ODBC-V2 support 
+/* If library is ODBC-V2, use macros for limited ODBC-V2 support
  * No random access in V2.
  */
 #ifdef ODBCV2
@@ -47,9 +47,9 @@
 #include <odbc/sqlext.h>
 #endif
 
-/* Driver name is "odbc" and the entry point is 'apr_dbd_odbc_driver' 
+/* Driver name is "odbc" and the entry point is 'apr_dbd_odbc_driver'
  * unless ODBC_DRIVER_NAME is defined and it is linked with another db library which
- * is ODBC source-compatible. e.g. DB2, Informix, TimesTen, mysql.  
+ * is ODBC source-compatible. e.g. DB2, Informix, TimesTen, mysql.
  */
 #ifndef ODBC_DRIVER_NAME
 #define ODBC_DRIVER_NAME odbc
@@ -86,14 +86,14 @@ static void check_error(apr_dbd_t *a, const char *step, SQLRETURN rc,
 #define TEXTMODE 1              /* used for text (APR 1.2) mode params */
 #define BINARYMODE 0            /* used for binary (APR 1.3+) mode params */
 
-/* Identify datatypes which are LOBs 
+/* Identify datatypes which are LOBs
  * - DB2 DRDA driver uses undefined types -98 and -99 for CLOB & BLOB
  */
 #define IS_LOB(t)  (t == SQL_LONGVARCHAR \
      || t == SQL_LONGVARBINARY || t == SQL_VARBINARY \
      || t == -98 || t == -99)
 
-/* These types are CLOBs 
+/* These types are CLOBs
  * - DB2 DRDA driver uses undefined type -98 for CLOB
  */
 #define IS_CLOB(t) \
@@ -112,7 +112,7 @@ struct apr_dbd_t
     int lasterrorcode;
     int lineNumber;
     char lastError[MAX_ERROR_STRING];
-    int defaultBufferSize;      /* used for CLOBs in text mode, 
+    int defaultBufferSize;      /* used for CLOBs in text mode,
                                  * and when fld size is indeterminate */
     apr_intptr_t transaction_mode;
     apr_intptr_t dboptions;     /* driver options re SQLGetData */
@@ -136,7 +136,7 @@ struct apr_dbd_results_t
     SQLSMALLINT *coltypes;      /* array of SQL data types for columns */
     SQLLEN *colinds;            /* array of SQL data indicator/strlens */
     int *colstate;              /* array of column states
-                                 * - avail, bound, present, unavail 
+                                 * - avail, bound, present, unavail
                                  */
     int *all_data_fetched;      /* flags data as all fetched, for LOBs  */
     void *data;                 /* buffer for all data for one row */
@@ -150,7 +150,7 @@ enum                            /* results column states */
     COL_RETRIEVED,              /* all data from column has been returned */
     COL_UNAVAIL                 /* column is unavailable because ODBC driver
                                  *  requires that columns be retrieved
-                                 *  in ascending order and a higher col 
+                                 *  in ascending order and a higher col
                                  *  was accessed
                                  */
 };
@@ -200,8 +200,8 @@ typedef struct {
     SQLSMALLINT type;
 } odbc_bucket;
 
-/* SQL datatype mappings to DBD datatypes 
- * These tables must correspond *exactly* to the apr_dbd_type_e enum 
+/* SQL datatype mappings to DBD datatypes
+ * These tables must correspond *exactly* to the apr_dbd_type_e enum
  * in apr_dbd.h
  */
 
@@ -296,7 +296,7 @@ static apr_status_t odbc_close_results(void *d)
 {
     apr_dbd_results_t *dbr = (apr_dbd_results_t *)d;
     SQLRETURN rc = SQL_SUCCESS;
-    
+
     if (dbr && dbr->apr_dbd && dbr->apr_dbd->dbc) {
     	if (!dbr->isclosed)
             rc = SQLCloseCursor(dbr->stmt);
@@ -307,7 +307,7 @@ static apr_status_t odbc_close_results(void *d)
 
 /* close the ODBC statement handle from a  prepare */
 static apr_status_t odbc_close_pstmt(void *s)
-{   
+{
     SQLRETURN rc = APR_SUCCESS;
     apr_dbd_prepared_t *statement = s;
 
@@ -346,7 +346,7 @@ static apr_status_t odbc_close_cleanup(void *handle)
 
 /* close the ODBC environment handle at process termination */
 static apr_status_t odbc_close_env(SQLHANDLE henv)
-{   
+{
     SQLRETURN rc;
 
     rc = SQLFreeHandle(SQL_HANDLE_ENV, henv);
@@ -355,7 +355,7 @@ static apr_status_t odbc_close_env(SQLHANDLE henv)
 }
 
 /* setup the arrays in results for all the returned columns */
-static SQLRETURN odbc_set_result_column(int icol, apr_dbd_results_t *res, 
+static SQLRETURN odbc_set_result_column(int icol, apr_dbd_results_t *res,
                                         SQLHANDLE stmt)
 {
     SQLRETURN rc;
@@ -388,21 +388,21 @@ static SQLRETURN odbc_set_result_column(int icol, apr_dbd_results_t *res,
       type += (isunsigned) ? SQL_UNSIGNED_OFFSET : SQL_SIGNED_OFFSET;
       break;
     /* LOB types are not changed to C types */
-    case SQL_LONGVARCHAR: 
-        type = SQL_LONGVARCHAR; 
+    case SQL_LONGVARCHAR:
+        type = SQL_LONGVARCHAR;
         break;
-    case SQL_LONGVARBINARY: 
-        type = SQL_LONGVARBINARY; 
+    case SQL_LONGVARBINARY:
+        type = SQL_LONGVARBINARY;
         break;
-    case SQL_FLOAT : 
-        type = SQL_C_FLOAT; 
+    case SQL_FLOAT :
+        type = SQL_C_FLOAT;
         break;
-    case SQL_DOUBLE : 
-        type = SQL_C_DOUBLE; 
+    case SQL_DOUBLE :
+        type = SQL_C_DOUBLE;
         break;
 
     /* DBD wants times as strings */
-    case SQL_TIMESTAMP:      
+    case SQL_TIMESTAMP:
     case SQL_DATE:
     case SQL_TIME:
     default:
@@ -449,15 +449,15 @@ static SQLRETURN odbc_set_result_column(int icol, apr_dbd_results_t *res,
         res->colsizes[icol] = (SQLINTEGER)maxsize;
         if (res->apr_dbd->dboptions & SQL_GD_BOUND) {
             /* we are allowed to call SQLGetData if we need to */
-            rc = SQLBindCol(stmt, icol + 1, res->coltypes[icol], 
-                            res->colptrs[icol], maxsize, 
+            rc = SQLBindCol(stmt, icol + 1, res->coltypes[icol],
+                            res->colptrs[icol], maxsize,
                             &(res->colinds[icol]));
             CHECK_ERROR(res->apr_dbd, "SQLBindCol", rc, SQL_HANDLE_STMT,
                         stmt);
             res->colstate[icol] = SQL_SUCCEEDED(rc) ? COL_BOUND : COL_AVAIL;
         }
         else {
-            /* this driver won't allow us to call SQLGetData on bound 
+            /* this driver won't allow us to call SQLGetData on bound
              * columns - so don't bind any
              */
             res->colstate[icol] = COL_AVAIL;
@@ -599,7 +599,7 @@ static SQLRETURN odbc_bind_param(apr_pool_t *pool,
             (*argp)++;          /* non LOBs consume one argument */
         }
     }
-    rc = SQLBindParameter(statement->stmt, narg, inOut, cType, 
+    rc = SQLBindParameter(statement->stmt, narg, inOut, cType,
                           baseType, len, 0, ptr, len, indicator);
     CHECK_ERROR(statement->apr_dbd, "SQLBindParameter", rc, SQL_HANDLE_STMT,
                 statement->stmt);
@@ -625,7 +625,7 @@ static apr_status_t odbc_lob_bucket_setaside(apr_bucket *e, apr_pool_t *pool)
     /* Unlikely - but if the row pool is ancestor of this pool then it is OK */
     if (apr_pool_is_ancestor(bd->row->pool, pool))
         return APR_SUCCESS;
-    
+
     return apr_bucket_setaside_notimpl(e, pool);
 }
 
@@ -641,12 +641,12 @@ static apr_status_t odbc_lob_bucket_read(apr_bucket *e, const char **str,
     void *buf;
     int bufsize = bd->row->res->apr_dbd->defaultBufferSize;
     int eos;
-    
+
     /* C type is CHAR for CLOBs, DEFAULT for BLOBs */
     type = bd->row->res->coltypes[bd->col];
     type = (type == SQL_LONGVARCHAR) ? SQL_C_CHAR : SQL_C_DEFAULT;
 
-    /* LOB buffers are always at least APR_BUCKET_BUFF_SIZE, 
+    /* LOB buffers are always at least APR_BUCKET_BUFF_SIZE,
      *   but they may be much bigger per the BUFSIZE parameter.
      */
     if (bufsize < APR_BUCKET_BUFF_SIZE)
@@ -656,13 +656,13 @@ static apr_status_t odbc_lob_bucket_read(apr_bucket *e, const char **str,
     *str = NULL;
     *len = 0;
 
-    rc = SQLGetData(bd->row->res->stmt, bd->col + 1, 
-                    type, buf, bufsize, 
+    rc = SQLGetData(bd->row->res->stmt, bd->col + 1,
+                    type, buf, bufsize,
                     &len_indicator);
 
-    CHECK_ERROR(bd->row->res->apr_dbd, "SQLGetData", rc, 
+    CHECK_ERROR(bd->row->res->apr_dbd, "SQLGetData", rc,
                 SQL_HANDLE_STMT, bd->row->res->stmt);
-    
+
     if (rc == SQL_NO_DATA || len_indicator == SQL_NULL_DATA || len_indicator < 0)
         len_indicator = 0;
 
@@ -676,11 +676,11 @@ static apr_status_t odbc_lob_bucket_read(apr_bucket *e, const char **str,
              eos = 0;
         }
         else {
-            /* the last read - len_indicator is supposed to be the length, 
+            /* the last read - len_indicator is supposed to be the length,
              * but some driver get this wrong and return the total length.
              * We try to handle both interpretations.
              */
-            *len =  (len_indicator > bufsize 
+            *len =  (len_indicator > bufsize
                      && len_indicator >= (SQLLEN)e->start)
                 ? (len_indicator - (SQLLEN)e->start) : len_indicator;
 
@@ -713,14 +713,14 @@ static apr_status_t odbc_lob_bucket_read(apr_bucket *e, const char **str,
 }
 
 /* Create a bucket brigade on the row pool for a LOB column */
-static apr_status_t odbc_create_bucket(const apr_dbd_row_t *row, const int col, 
+static apr_status_t odbc_create_bucket(const apr_dbd_row_t *row, const int col,
                                        SQLSMALLINT type, apr_bucket_brigade *bb)
 {
     apr_bucket_alloc_t *list = bb->bucket_alloc;
     apr_bucket *b = apr_bucket_alloc(sizeof(*b), list);
     odbc_bucket *bd = apr_bucket_alloc(sizeof(odbc_bucket), list);
     apr_bucket *eos = apr_bucket_eos_create(list);
-    
+
     bd->row = row;
     bd->col = col;
     bd->type = type;
@@ -741,7 +741,7 @@ static apr_status_t odbc_create_bucket(const apr_dbd_row_t *row, const int col,
 /* returns a data pointer for a column,  returns NULL for NULL value,
  * return -1 if data not available
  */
-static void *odbc_get(const apr_dbd_row_t *row, const int col, 
+static void *odbc_get(const apr_dbd_row_t *row, const int col,
                       const SQLSMALLINT sqltype)
 {
     SQLRETURN rc;
@@ -756,11 +756,11 @@ static void *odbc_get(const apr_dbd_row_t *row, const int col,
         return NULL;
 
     case (COL_BOUND):
-    case (COL_PRESENT): 
+    case (COL_PRESENT):
         if (sqltype == row->res->coltypes[col]) {
             /* same type and we already have the data */
             row->res->colstate[col] = COL_RETRIEVED;
-            return (row->res->colinds[col] == SQL_NULL_DATA) ? 
+            return (row->res->colinds[col] == SQL_NULL_DATA) ?
                 NULL : row->res->colptrs[col];
         }
     }
@@ -793,7 +793,7 @@ static void *odbc_get(const apr_dbd_row_t *row, const int col,
 
     rc = SQLGetData(row->res->stmt, col + 1, sqltype, row->res->colptrs[col],
                     row->res->colsizes[col], &indicator);
-    CHECK_ERROR(row->res->apr_dbd, "SQLGetData", rc, SQL_HANDLE_STMT, 
+    CHECK_ERROR(row->res->apr_dbd, "SQLGetData", rc, SQL_HANDLE_STMT,
                 row->res->stmt);
     if (indicator == SQL_NULL_DATA || rc == SQL_NO_DATA)
         return NULL;
@@ -804,7 +804,7 @@ static void *odbc_get(const apr_dbd_row_t *row, const int col,
         /* this allows getting CLOBs in text mode by calling get_entry
          *   until it returns NULL
          */
-        row->res->colstate[col] = 
+        row->res->colstate[col] =
             (rc == SQL_SUCCESS_WITH_INFO) ? COL_AVAIL : COL_RETRIEVED;
         return row->res->colptrs[col];
     }
@@ -814,8 +814,8 @@ static void *odbc_get(const apr_dbd_row_t *row, const int col,
 
 /* Parse the parameter string for open */
 static apr_status_t odbc_parse_params(apr_pool_t *pool, const char *params,
-                               int *connect, SQLCHAR **datasource, 
-                               SQLCHAR **user, SQLCHAR **password, 
+                               int *connect, SQLCHAR **datasource,
+                               SQLCHAR **user, SQLCHAR **password,
                                int *defaultBufferSize, int *nattrs,
                                int **attrs, apr_intptr_t **attrvals)
 {
@@ -954,7 +954,7 @@ static void check_error(apr_dbd_t *dbc, const char *step, SQLRETURN rc,
         res = "unrecognized SQL return code";
     }
     /* these two returns are expected during normal execution */
-    if (rc != SQL_SUCCESS_WITH_INFO && rc != SQL_NO_DATA 
+    if (rc != SQL_SUCCESS_WITH_INFO && rc != SQL_NO_DATA
         && dbc->can_commit != APR_DBD_TRANSACTION_IGNORE_ERRORS) {
         dbc->can_commit = APR_DBD_TRANSACTION_ROLLBACK;
     }
@@ -964,9 +964,9 @@ static void check_error(apr_dbd_t *dbc, const char *step, SQLRETURN rc,
     p += sprintf(p, "[dbd_odbc] %.64s returned %.30s (%d) at %.24s:%d ",
                  step, res, rc, SOURCE_FILE, line - 1);
     for (i = 1, rc = 0; rc == 0; i++) {
-        rc = SQLGetDiagRec(type, h, i, sqlstate, &native, buffer, 
+        rc = SQLGetDiagRec(type, h, i, sqlstate, &native, buffer,
                             sizeof(buffer), &reslength);
-        if (SQL_SUCCEEDED(rc) && (p < (end - 280))) 
+        if (SQL_SUCCEEDED(rc) && (p < (end - 280)))
             p += sprintf(p, "%.256s %.20s ", buffer, sqlstate);
     }
     apr_env_get(&logval, "apr_dbd_odbc_log", dbc->pool);
@@ -1002,21 +1002,21 @@ static void odbc_init(apr_pool_t *pool)
     SQLRETURN rc;
     char *step;
     apr_version_t aprver;
-    
+
     apr_version(&aprver);
-    if (aprver.major != DRIVER_APR_VERSION_MAJOR 
+    if (aprver.major != DRIVER_APR_VERSION_MAJOR
         || aprver.minor != DRIVER_APR_VERSION_MINOR) {
             apr_file_t *se;
 
             apr_file_open_stderr(&se, pool);
             apr_file_printf(se, "Incorrect " ODBC_DRIVER_STRING " dbd driver version\n"
                 "Attempt to load APR version %d.%d driver with APR version %d.%d\n",
-                DRIVER_APR_VERSION_MAJOR, DRIVER_APR_VERSION_MINOR, 
+                DRIVER_APR_VERSION_MAJOR, DRIVER_APR_VERSION_MINOR,
                 aprver.major, aprver.minor);
         abort();
     }
 
-    if (henv) 
+    if (henv)
         return;
 
     step = "SQLAllocHandle (SQL_HANDLE_ENV)";
@@ -1045,7 +1045,7 @@ static void *odbc_native_handle(apr_dbd_t *handle)
 
 /** open: obtain a database connection from the server rec. **/
 
-/* It would be more efficient to allocate a single statement handle 
+/* It would be more efficient to allocate a single statement handle
  * here - but SQL_ATTR_CURSOR_SCROLLABLE must be set before
  * SQLPrepare, and we don't know whether random-access is
  * specified until SQLExecute so we cannot.
@@ -1199,7 +1199,7 @@ static int odbc_start_transaction(apr_pool_t *pool, apr_dbd_t *handle,
 static int odbc_end_transaction(apr_dbd_transaction_t *trans)
 {
     SQLRETURN rc;
-    int action = (trans->apr_dbd->can_commit != APR_DBD_TRANSACTION_ROLLBACK) 
+    int action = (trans->apr_dbd->can_commit != APR_DBD_TRANSACTION_ROLLBACK)
         ? SQL_COMMIT : SQL_ROLLBACK;
 
     rc = SQLEndTran(SQL_HANDLE_DBC, trans->dbc, action);
@@ -1283,7 +1283,7 @@ static int odbc_select(apr_pool_t *pool, apr_dbd_t *handle,
     }
     if (SQL_SUCCEEDED(rc)) {
         rc = odbc_create_results(handle, hstmt, pool, random, res);
-        apr_pool_cleanup_register(pool, *res, 
+        apr_pool_cleanup_register(pool, *res,
                                   odbc_close_results, apr_pool_cleanup_null);
     }
     return APR_FROM_SQL_RESULT(rc);
@@ -1327,7 +1327,7 @@ static int odbc_get_row(apr_pool_t *pool, apr_dbd_results_t *res,
         }
         /* some drivers do not null-term zero-len CHAR data */
         if (res->colptrs[c])
-            *(char *)res->colptrs[c] = 0; 
+            *(char *)res->colptrs[c] = 0;
     }
     if (res->random && (rownum > 0)) {
         fetchtype = "SQLFetchScroll";
@@ -1369,7 +1369,7 @@ static apr_status_t odbc_datum_get(const apr_dbd_row_t *row, int col,
     sqltype = sqlCtype[dbdtype];
 
     /* must not memcpy a brigade, sentinals are relative to orig loc */
-    if (IS_LOB(sqltype)) 
+    if (IS_LOB(sqltype))
         return odbc_create_bucket(row, col, sqltype, data);
 
     p = odbc_get(row, col, sqltype);
@@ -1378,12 +1378,12 @@ static apr_status_t odbc_datum_get(const apr_dbd_row_t *row, int col,
 
     if (p == NULL)
         return APR_ENOENT;          /* SQL NULL value */
-    
+
     if (len < 0)
        *(char**)data = (char *)p;
     else
         memcpy(data, p, len);
-    
+
     return APR_SUCCESS;
 
 }
@@ -1400,26 +1400,26 @@ static const char *odbc_get_entry(const apr_dbd_row_t *row, int col)
 
     /* NULL or invalid (-1) */
     if (p == NULL || p == (void *)-1)
-        return p;     
+        return p;
     else
-        return apr_pstrdup(row->pool, p);   
+        return apr_pstrdup(row->pool, p);
 }
 
 /** error: get current error message (if any) **/
 static const char *odbc_error(apr_dbd_t *handle, int errnum)
-{   
+{
     return (handle) ? handle->lastError : "[dbd_odbc]No error message available";
 }
 
 /** escape: escape a string so it is safe for use in query/select **/
 static const char *odbc_escape(apr_pool_t *pool, const char *s,
                                apr_dbd_t *handle)
-{   
+{
     char *newstr, *src, *dst, *sq;
     int qcount;
 
     /* return the original if there are no single-quotes */
-    if (!(sq = strchr(s, '\''))) 
+    if (!(sq = strchr(s, '\'')))
         return (char *)s;
     /* count the single-quotes and allocate a new buffer */
     for (qcount = 1; (sq = strchr(sq + 1, '\'')); )
@@ -1429,7 +1429,7 @@ static const char *odbc_escape(apr_pool_t *pool, const char *s,
     /* move chars, doubling all single-quotes */
     src = (char *)s;
     for (dst = newstr; *src; src++) {
-        if ((*dst++ = *src) == '\'')  
+        if ((*dst++ = *src) == '\'')
             *dst++ = '\'';
     }
     *dst = 0;
@@ -1456,7 +1456,7 @@ static int odbc_prepare(apr_pool_t *pool, apr_dbd_t *handle,
     (*statement)->types =
         apr_pmemdup(pool, types, nargs * sizeof(apr_dbd_type_e));
     rc = SQLAllocHandle(SQL_HANDLE_STMT, handle->dbc, &((*statement)->stmt));
-    apr_pool_cleanup_register(pool, *statement, 
+    apr_pool_cleanup_register(pool, *statement,
                               odbc_close_pstmt, apr_pool_cleanup_null);
     CHECK_ERROR(handle, "SQLAllocHandle (STMT)", rc,
                 SQL_HANDLE_DBC, handle->dbc);

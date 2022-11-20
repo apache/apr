@@ -18,13 +18,13 @@
 
 #if APR_HAS_MMAP
 
-static apr_status_t mmap_bucket_read(apr_bucket *b, const char **str, 
+static apr_status_t mmap_bucket_read(apr_bucket *b, const char **str,
                                      apr_size_t *length, apr_read_type_e block)
 {
     apr_bucket_mmap *m = b->data;
     apr_status_t ok;
     void *addr;
-   
+
     if (!m->mmap) {
         /* the apr_mmap_t was already cleaned up out from under us */
         return APR_EINVAL;
@@ -68,8 +68,8 @@ static void mmap_bucket_destroy(void *data)
 /*
  * XXX: are the start and length arguments useful?
  */
-APR_DECLARE(apr_bucket *) apr_bucket_mmap_make(apr_bucket *b, apr_mmap_t *mm, 
-                                               apr_off_t start, 
+APR_DECLARE(apr_bucket *) apr_bucket_mmap_make(apr_bucket *b, apr_mmap_t *mm,
+                                               apr_off_t start,
                                                apr_size_t length)
 {
     apr_bucket_mmap *m;
@@ -87,8 +87,8 @@ APR_DECLARE(apr_bucket *) apr_bucket_mmap_make(apr_bucket *b, apr_mmap_t *mm,
 }
 
 
-APR_DECLARE(apr_bucket *) apr_bucket_mmap_create(apr_mmap_t *mm, 
-                                                 apr_off_t start, 
+APR_DECLARE(apr_bucket *) apr_bucket_mmap_create(apr_mmap_t *mm,
+                                                 apr_off_t start,
                                                  apr_size_t length,
                                                  apr_bucket_alloc_t *list)
 {

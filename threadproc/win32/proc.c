@@ -45,7 +45,7 @@ static apr_file_t no_file = { NULL, INVALID_HANDLE_VALUE, };
 #define LOGON32_LOGON_NETWORK 3
 #endif
 
-/* 
+/*
  * some of the ideas expressed herein are based off of Microsoft
  * Knowledge Base article: Q190351
  *
@@ -60,7 +60,7 @@ APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new,
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
-                                              apr_int32_t in, 
+                                              apr_int32_t in,
                                               apr_int32_t out,
                                               apr_int32_t err)
 {
@@ -68,7 +68,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
 
     if (in) {
         /* APR_CHILD_BLOCK maps to APR_WRITE_BLOCK, while
-         * APR_PARENT_BLOCK maps to APR_READ_BLOCK, so transpose 
+         * APR_PARENT_BLOCK maps to APR_READ_BLOCK, so transpose
          * the CHILD/PARENT blocking flags for the stdin pipe.
          * stdout/stderr map to the correct mode by default.
          */
@@ -79,7 +79,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
 
         if (in == APR_NO_FILE)
             attr->child_in = &no_file;
-        else { 
+        else {
             stat = apr_file_pipe_create_ex(&attr->child_in, &attr->parent_in,
                                            in, attr->pool);
         }
@@ -89,7 +89,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
     if (out && stat == APR_SUCCESS) {
         if (out == APR_NO_FILE)
             attr->child_out = &no_file;
-        else { 
+        else {
             stat = apr_file_pipe_create_ex(&attr->parent_out, &attr->child_out,
                                            out, attr->pool);
         }
@@ -99,7 +99,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
     if (err && stat == APR_SUCCESS) {
         if (err == APR_NO_FILE)
             attr->child_err = &no_file;
-        else { 
+        else {
             stat = apr_file_pipe_create_ex(&attr->parent_err, &attr->child_err,
                                            err, attr->pool);
         }
@@ -109,8 +109,8 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
     return stat;
 }
 
-APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr, 
-                                                  apr_file_t *child_in, 
+APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr,
+                                                  apr_file_t *child_in,
                                                   apr_file_t *parent_in)
 {
     apr_status_t rv = APR_SUCCESS;
@@ -188,24 +188,24 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr,
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
-                                              const char *dir) 
+                                              const char *dir)
 {
     /* curr dir must be in native format, there are all sorts of bugs in
      * the NT library loading code that flunk the '/' parsing test.
      */
-    return apr_filepath_merge(&attr->currdir, NULL, dir, 
+    return apr_filepath_merge(&attr->currdir, NULL, dir,
                               APR_FILEPATH_NATIVE, attr->pool);
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
-                                                  apr_cmdtype_e cmd) 
+                                                  apr_cmdtype_e cmd)
 {
     attr->cmdtype = cmd;
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr,
-                                                 apr_int32_t det) 
+                                                 apr_int32_t det)
 {
     attr->detached = det;
     return APR_SUCCESS;
@@ -213,14 +213,14 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr,
 
 static apr_status_t attr_cleanup(void *theattr)
 {
-    apr_procattr_t *attr = (apr_procattr_t *)theattr;    
+    apr_procattr_t *attr = (apr_procattr_t *)theattr;
     if (attr->user_token)
         CloseHandle(attr->user_token);
     attr->user_token = NULL;
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr,
                                                 const char *username,
                                                 const char *password)
 {
@@ -230,14 +230,14 @@ APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr,
     apr_status_t rv;
     apr_size_t len, wlen;
 
-    if (apr_os_level >= APR_WIN_NT_4) 
+    if (apr_os_level >= APR_WIN_NT_4)
     {
         if (attr->user_token) {
             /* Cannot set that twice */
             if (attr->errfn) {
-                attr->errfn(attr->pool, 0, 
-                            apr_pstrcat(attr->pool, 
-                                        "function called twice" 
+                attr->errfn(attr->pool, 0,
+                            apr_pstrcat(attr->pool,
+                                        "function called twice"
                                          " on username: ", username, NULL));
             }
             return APR_EINVAL;
@@ -248,8 +248,8 @@ APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr,
         if ((rv = apr_conv_utf8_to_utf16(username, &len, wusername, &wlen))
                    != APR_SUCCESS) {
             if (attr->errfn) {
-                attr->errfn(attr->pool, rv, 
-                    apr_pstrcat(attr->pool, "utf8 to utf16 conversion failed" 
+                attr->errfn(attr->pool, rv,
+                    apr_pstrcat(attr->pool, "utf8 to utf16 conversion failed"
                                 " on username: ", username, NULL));
             }
             return rv;
@@ -261,26 +261,26 @@ APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr,
             if ((rv = apr_conv_utf8_to_utf16(password, &len, wpassword, &wlen))
                        != APR_SUCCESS) {
                 if (attr->errfn) {
-                    attr->errfn(attr->pool, rv, "utf8 to utf16 conversion" 
+                    attr->errfn(attr->pool, rv, "utf8 to utf16 conversion"
                                 " failed on password: <redacted>");
                 }
                 return rv;
             }
         }
-        if (!LogonUserW(wusername, 
-                        NULL, 
+        if (!LogonUserW(wusername,
+                        NULL,
                         wpassword ? wpassword : L"",
                         LOGON32_LOGON_NETWORK,
                         LOGON32_PROVIDER_DEFAULT,
                         &user)) {
-            /* Logon Failed */            
+            /* Logon Failed */
             return apr_get_os_error();
         }
         if (wpassword)
             memset(wpassword, 0, wlen * sizeof(apr_wchar_t));
         /* Get the primary token for user */
-        if (!DuplicateTokenEx(user, 
-                              TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY, 
+        if (!DuplicateTokenEx(user,
+                              TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY,
                               NULL,
                               SecurityImpersonation,
                               TokenPrimary,
@@ -424,7 +424,7 @@ static char *apr_caret_escape_args(apr_pool_t *p, const char *str)
     s = (const unsigned char *)str;
     for (; *s; ++s) {
 
-        /* 
+        /*
          * Newlines to Win32/OS2 CreateProcess() are ill advised.
          * Convert them to spaces since they are effectively white
          * space to most applications
@@ -519,14 +519,14 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
          * not manage the stdio handles properly when running old 16
          * bit executables if the detached attribute is set.
          */
-        /* 
-         * XXX DETACHED_PROCESS won't on Win9x at all; on NT/W2K 
+        /*
+         * XXX DETACHED_PROCESS won't on Win9x at all; on NT/W2K
          * 16 bit executables fail (MS KB: Q150956)
          */
         dwCreationFlags |= DETACHED_PROCESS;
     }
 
-    /* progname must be unquoted, in native format, as there are all sorts 
+    /* progname must be unquoted, in native format, as there are all sorts
      * of bugs in the NT library loader code that fault when parsing '/'.
      * XXX progname must be NULL if this is a 16 bit app running in WOW
      */
@@ -536,18 +536,18 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
     if (attr->cmdtype == APR_PROGRAM || attr->cmdtype == APR_PROGRAM_ENV) {
         char *fullpath = NULL;
-        if ((rv = apr_filepath_merge(&fullpath, attr->currdir, progname, 
+        if ((rv = apr_filepath_merge(&fullpath, attr->currdir, progname,
                                      APR_FILEPATH_NATIVE, pool)) != APR_SUCCESS) {
             if (attr->errfn) {
-                attr->errfn(pool, rv, 
-                            apr_pstrcat(pool, "filepath_merge failed.", 
-                                        " currdir: ", attr->currdir, 
+                attr->errfn(pool, rv,
+                            apr_pstrcat(pool, "filepath_merge failed.",
+                                        " currdir: ", attr->currdir,
                                         " progname: ", progname, NULL));
             }
             return rv;
         }
         progname = fullpath;
-    } 
+    }
     else {
         /* Do not fail if the path isn't parseable for APR_PROGRAM_PATH
          * or APR_SHELLCMD.  We only invoke apr_filepath_merge (with no
@@ -557,10 +557,10 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
          * built-in shell command.)
          */
         char *fullpath = NULL;
-        if ((rv = apr_filepath_merge(&fullpath, "", progname, 
+        if ((rv = apr_filepath_merge(&fullpath, "", progname,
                                      APR_FILEPATH_NATIVE, pool)) == APR_SUCCESS) {
             progname = fullpath;
-        }        
+        }
     }
 
     if (has_space(progname)) {
@@ -600,8 +600,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
 
         cmdline = apr_pstrcat(pool, shellcmd, " /C \"", argv0, cmdline, "\"", NULL);
-    } 
-    else 
+    }
+    else
     {
         /* Win32 is _different_ than unix.  While unix will find the given
          * program since it's already chdir'ed, Win32 cannot since the parent
@@ -645,7 +645,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
              * is not a shellcmd, and the source of argv[] is untrusted.
              * Notice we escape ALL the cmdline args, including the quotes
              * around the individual args themselves.  No sense in allowing
-             * the shift-state to be toggled, and the application will 
+             * the shift-state to be toggled, and the application will
              * not see the caret escapes.
              */
             cmdline = apr_caret_escape_args(pool, cmdline);
@@ -690,14 +690,14 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
          * Win32's CreateProcess call requires that the environment
          * be passed in an environment block, a null terminated block of
          * null terminated strings.
-         */  
+         */
         i = 0;
         iEnvBlockLen = 1;
         while (env[i]) {
             iEnvBlockLen += strlen(env[i]) + 1;
             i++;
         }
-        if (!i) 
+        if (!i)
             ++iEnvBlockLen;
 
         {
@@ -709,12 +709,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             pNext = (apr_wchar_t*)pEnvBlock;
             while (env[i]) {
                 apr_size_t in = strlen(env[i]) + 1;
-                if ((rv = apr_conv_utf8_to_utf16(env[i], &in, 
-                                                 pNext, &iEnvBlockLen)) 
+                if ((rv = apr_conv_utf8_to_utf16(env[i], &in,
+                                                 pNext, &iEnvBlockLen))
                         != APR_SUCCESS) {
                     if (attr->errfn) {
-                        attr->errfn(pool, rv, 
-                            apr_pstrcat(pool, "utf8 to utf16 conversion failed" 
+                        attr->errfn(pool, rv,
+                            apr_pstrcat(pool, "utf8 to utf16 conversion failed"
                                         " on this string: ", env[i], NULL));
                     }
                     return rv;
@@ -726,7 +726,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 *(pNext++) = L'\0';
             *pNext = L'\0';
         }
-    } 
+    }
 
     new->invoked = cmdline;
 
@@ -746,8 +746,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             if ((rv = apr_conv_utf8_to_utf16(progname, &nprg, wprg, &nwprg))
                    != APR_SUCCESS) {
                 if (attr->errfn) {
-                    attr->errfn(pool, rv, 
-                        apr_pstrcat(pool, "utf8 to utf16 conversion failed" 
+                    attr->errfn(pool, rv,
+                        apr_pstrcat(pool, "utf8 to utf16 conversion failed"
                                           " on progname: ", progname, NULL));
                 }
                 return rv;
@@ -761,8 +761,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             if ((rv = apr_conv_utf8_to_utf16(cmdline, &ncmd, wcmd, &nwcmd))
                     != APR_SUCCESS) {
                 if (attr->errfn) {
-                    attr->errfn(pool, rv, 
-                        apr_pstrcat(pool, "utf8 to utf16 conversion failed" 
+                    attr->errfn(pool, rv,
+                        apr_pstrcat(pool, "utf8 to utf16 conversion failed"
                                           " on cmdline: ", cmdline, NULL));
                 }
                 return rv;
@@ -774,12 +774,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             apr_size_t ncwd = strlen(attr->currdir) + 1;
             apr_size_t nwcwd = ncwd;
             wcwd = apr_palloc(pool, ncwd * sizeof(wcwd[0]));
-            if ((rv = apr_conv_utf8_to_utf16(attr->currdir, &ncwd, 
+            if ((rv = apr_conv_utf8_to_utf16(attr->currdir, &ncwd,
                                             wcwd, &nwcwd))
                     != APR_SUCCESS) {
                 if (attr->errfn) {
-                    attr->errfn(pool, rv, 
-                        apr_pstrcat(pool, "utf8 to utf16 conversion failed" 
+                    attr->errfn(pool, rv,
+                        apr_pstrcat(pool, "utf8 to utf16 conversion failed"
                                     " on currdir: ", attr->currdir, NULL));
                 }
                 return rv;
@@ -794,7 +794,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             si.wShowWindow = SW_HIDE;
         }
 
-        /* LOCK CRITICAL SECTION 
+        /* LOCK CRITICAL SECTION
          * before we begin to manipulate the inherited handles
          */
         EnterCriticalSection(&proc_lock);
@@ -814,12 +814,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                     SetHandleInformation(si.hStdInput,
                                          HANDLE_FLAG_INHERIT, 0);
 
-                if ( (si.hStdInput = attr->child_in->filehand) 
+                if ( (si.hStdInput = attr->child_in->filehand)
                                    != INVALID_HANDLE_VALUE )
                     SetHandleInformation(si.hStdInput, HANDLE_FLAG_INHERIT,
                                                        HANDLE_FLAG_INHERIT);
             }
-            
+
             si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
             if (attr->child_out && attr->child_out->filehand)
             {
@@ -829,7 +829,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                     SetHandleInformation(si.hStdOutput,
                                          HANDLE_FLAG_INHERIT, 0);
 
-                if ( (si.hStdOutput = attr->child_out->filehand) 
+                if ( (si.hStdOutput = attr->child_out->filehand)
                                    != INVALID_HANDLE_VALUE )
                     SetHandleInformation(si.hStdOutput, HANDLE_FLAG_INHERIT,
                                                         HANDLE_FLAG_INHERIT);
@@ -844,7 +844,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                     SetHandleInformation(si.hStdError,
                                          HANDLE_FLAG_INHERIT, 0);
 
-                if ( (si.hStdError = attr->child_err->filehand) 
+                if ( (si.hStdError = attr->child_err->filehand)
                                    != INVALID_HANDLE_VALUE )
                     SetHandleInformation(si.hStdError, HANDLE_FLAG_INHERIT,
                                                        HANDLE_FLAG_INHERIT);
@@ -852,7 +852,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
         if (attr->user_token) {
             /* XXX: for terminal services, handles can't be cannot be
-             * inherited across sessions.  This process must be created 
+             * inherited across sessions.  This process must be created
              * in our existing session.  lpDesktop assignment appears
              * to be wrong according to these rules.
              */
@@ -903,14 +903,14 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 SetHandleInformation(GetStdHandle(STD_ERROR_HANDLE),
                                      stderr_reset, stderr_reset);
         }
-        /* RELEASE CRITICAL SECTION 
+        /* RELEASE CRITICAL SECTION
          * The state of the inherited handles has been restored.
          */
         LeaveCriticalSection(&proc_lock);
 
     }
 
-    /* Check CreateProcess result 
+    /* Check CreateProcess result
      */
     if (!rv)
         return apr_get_os_error();
@@ -938,7 +938,7 @@ static apr_exit_why_e why_from_exit_code(DWORD exit) {
     /* See WinNT.h STATUS_ACCESS_VIOLATION and family for how
      * this class of failures was determined
      */
-    if (((exit & 0xC0000000) == 0xC0000000) 
+    if (((exit & 0xC0000000) == 0xC0000000)
                     && !(exit & 0x3FFF0000))
         return APR_PROC_SIGNAL;
     else
@@ -993,7 +993,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
                             else
                                 CloseHandle(hProcess);
                         }
-                        else {                                
+                        else {
                             /* Process has exited.
                              * No need to wait for its termination.
                              */

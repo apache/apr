@@ -17,7 +17,7 @@
 /*Read/Write locking implementation based on the MultiLock code from
  * Stephen Beaulieu <hippo@be.com>
  */
- 
+
 #include "apr_arch_proc_mutex.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
@@ -28,7 +28,7 @@ static apr_status_t _proc_mutex_cleanup(void * data)
     if (lock->LockCount != 0) {
         /* we're still locked... */
         while (atomic_add(&lock->LockCount , -1) > 1){
-            /* OK we had more than one person waiting on the lock so 
+            /* OK we had more than one person waiting on the lock so
              * the sem is also locked. Release it until we have no more
              * locks left.
              */
@@ -37,7 +37,7 @@ static apr_status_t _proc_mutex_cleanup(void * data)
     }
     delete_sem(lock->Lock);
     return APR_SUCCESS;
-}    
+}
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
                                                 const char *fname,
@@ -46,7 +46,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
 {
     apr_proc_mutex_t *new;
     apr_status_t stat = APR_SUCCESS;
-  
+
     if (mech != APR_LOCK_DEFAULT && mech != APR_LOCK_DEFAULT_TIMED) {
         return APR_ENOTIMPL;
     }
@@ -55,13 +55,13 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
     if (new == NULL){
         return APR_ENOMEM;
     }
-    
+
     if ((stat = create_sem(0, "APR_Lock")) < B_NO_ERROR) {
         _proc_mutex_cleanup(new);
         return stat;
     }
     new->LockCount = 0;
-    new->Lock = stat;  
+    new->Lock = stat;
     new->pool  = pool;
 
     apr_pool_cleanup_register(new->pool, (void *)new, _proc_mutex_cleanup,
@@ -77,11 +77,11 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
 {
     return APR_SUCCESS;
 }
-    
+
 APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex)
 {
     int32 stat;
-    
+
     if (atomic_add(&mutex->LockCount, 1) > 0) {
         if ((stat = acquire_sem(mutex->Lock)) < B_NO_ERROR) {
             atomic_add(&mutex->LockCount, -1);
@@ -135,7 +135,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
 APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex)
 {
     int32 stat;
-    
+
     if (atomic_add(&mutex->LockCount, -1) > 1) {
         if ((stat = release_sem(mutex->Lock)) < B_NO_ERROR) {
             atomic_add(&mutex->LockCount, 1);
@@ -187,7 +187,7 @@ APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 
 /* Implement OS-specific accessors defined in apr_portable.h */
 
-APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex, 
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex,
                                                    apr_proc_mutex_t *pmutex,
                                                    apr_lockmech_e *mech)
 {

@@ -62,7 +62,7 @@ static void test_withlock(abts_case *tc, void *data)
     apr_file_t *file;
     apr_status_t rv;
     int code;
-    
+
     rv = apr_file_open(&file, TESTFILE, APR_FOPEN_WRITE|APR_FOPEN_CREATE,
                        APR_FPROT_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "Could not create file.", rv);
@@ -81,7 +81,7 @@ static void test_withlock(abts_case *tc, void *data)
 static void test_withoutlock(abts_case *tc, void *data)
 {
     int code;
-    
+
     code = launch_reader(tc);
     ABTS_INT_EQUAL(tc, SUCCESSFUL_READ, code);
 }
@@ -91,7 +91,7 @@ static void remove_lockfile(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "Couldn't remove lock file.",
                        apr_file_remove(TESTFILE, p));
 }
-    
+
 abts_suite *testflock(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)

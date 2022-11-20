@@ -79,7 +79,7 @@ static void SystemTimeToAprExpTime(apr_time_exp_t *xt, SYSTEMTIME *tm)
         xt->tm_yday++;
 }
 
-APR_DECLARE(apr_status_t) apr_time_ansi_put(apr_time_t *result, 
+APR_DECLARE(apr_status_t) apr_time_ansi_put(apr_time_t *result,
                                                     time_t input)
 {
     *result = (apr_time_t) input * APR_USEC_PER_SEC;
@@ -94,7 +94,7 @@ APR_DECLARE(apr_time_t) apr_time_now(void)
 
     GetSystemTimeAsFileTime(&time);
     FileTimeToAprTime(&aprtime, &time);
-    return aprtime; 
+    return aprtime;
 }
 
 APR_DECLARE(apr_status_t) apr_time_exp_gmt(apr_time_exp_t *result,
@@ -113,8 +113,8 @@ APR_DECLARE(apr_status_t) apr_time_exp_gmt(apr_time_exp_t *result,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_time_exp_tz(apr_time_exp_t *result, 
-                                          apr_time_t input, 
+APR_DECLARE(apr_status_t) apr_time_exp_tz(apr_time_exp_t *result,
+                                          apr_time_t input,
                                           apr_int32_t offs)
 {
     FILETIME ft;
@@ -159,14 +159,14 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
 
 
     /* Recover the resulting time as an apr time and use the
-     * delta for gmtoff in seconds (and ignore msec rounding) 
+     * delta for gmtoff in seconds (and ignore msec rounding)
      */
     SystemTimeToFileTime(&localst, &localft);
     FileTimeToAprTime(&localtime, &localft);
-    result->tm_gmtoff = (int)apr_time_sec(localtime) 
+    result->tm_gmtoff = (int)apr_time_sec(localtime)
                       - (int)apr_time_sec(input);
 
-    /* To compute the dst flag, we compare the expected 
+    /* To compute the dst flag, we compare the expected
      * local (standard) timezone bias to the delta.
      * [Note, in war time or double daylight time the
      * resulting tm_isdst is, desireably, 2 hours]
@@ -225,7 +225,7 @@ APR_DECLARE(apr_status_t) apr_os_imp_time_get(apr_os_imp_time_t **ostime,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_os_exp_time_get(apr_os_exp_time_t **ostime, 
+APR_DECLARE(apr_status_t) apr_os_exp_time_get(apr_os_exp_time_t **ostime,
                                               apr_time_exp_t *aprexptime)
 {
     (*ostime)->wYear = aprexptime->tm_year + 1900;

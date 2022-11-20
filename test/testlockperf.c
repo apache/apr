@@ -104,7 +104,7 @@ int test_thread_mutex(int num_threads)
 
     apr_thread_mutex_lock(thread_lock);
     /* set_concurrency(4)? -aaron */
-    printf("    Starting %d threads    ", num_threads); 
+    printf("    Starting %d threads    ", num_threads);
     for (i = 0; i < num_threads; ++i) {
         s[i] = apr_thread_create(&t[i], NULL, thread_mutex_func, NULL, pool);
         if (s[i] != APR_SUCCESS) {
@@ -152,7 +152,7 @@ int test_thread_mutex_nested(int num_threads)
 
     apr_thread_mutex_lock(thread_lock);
     /* set_concurrency(4)? -aaron */
-    printf("    Starting %d threads    ", num_threads); 
+    printf("    Starting %d threads    ", num_threads);
     for (i = 0; i < num_threads; ++i) {
         s[i] = apr_thread_create(&t[i], NULL, thread_mutex_func, NULL, pool);
         if (s[i] != APR_SUCCESS) {
@@ -203,7 +203,7 @@ static int test_thread_mutex_timed(int num_threads)
 
     apr_thread_mutex_lock(thread_lock);
     /* set_concurrency(4)? -aaron */
-    printf("    Starting %d threads    ", num_threads); 
+    printf("    Starting %d threads    ", num_threads);
     for (i = 0; i < num_threads; ++i) {
         s[i] = apr_thread_create(&t[i], NULL, thread_mutex_func, &timeout, pool);
         if (s[i] != APR_SUCCESS) {
@@ -251,7 +251,7 @@ int test_thread_rwlock(int num_threads)
 
     apr_thread_rwlock_wrlock(thread_rwlock);
     /* set_concurrency(4)? -aaron */
-    printf("    Starting %d threads    ", num_threads); 
+    printf("    Starting %d threads    ", num_threads);
     for (i = 0; i < num_threads; ++i) {
         s[i] = apr_thread_create(&t[i], NULL, thread_rwlock_func, NULL, pool);
         if (s[i] != APR_SUCCESS) {
@@ -288,7 +288,7 @@ int main(int argc, const char * const *argv)
     const char *optarg;
 
     printf("APR Lock Performance Test\n==============\n\n");
-        
+
     apr_initialize();
     atexit(apr_terminate);
 
@@ -300,7 +300,7 @@ int main(int argc, const char * const *argv)
                 rv, apr_strerror(rv, errmsg, sizeof errmsg));
         exit(-1);
     }
-        
+
     while ((rv = apr_getopt(opt, "c:v", &optchar, &optarg)) == APR_SUCCESS) {
         if (optchar == 'c') {
             max_counter = atol(optarg);

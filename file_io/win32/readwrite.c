@@ -26,7 +26,7 @@
 #include <malloc.h>
 
 /*
- * read_with_timeout() 
+ * read_with_timeout()
  * Uses async i/o to emulate unix non-blocking i/o with timeouts.
  */
 static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t len_in, apr_size_t *nbytes)
@@ -61,7 +61,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
             }
         }
         else {
-            /* ToDo: Handle zero timeout non-blocking file i/o 
+            /* ToDo: Handle zero timeout non-blocking file i/o
              * This is not needed until an APR application needs to
              * timeout file i/o (which means setting file i/o non-blocking)
              */
@@ -73,7 +73,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
         file->pOverlapped->OffsetHigh = (DWORD)(file->filePtr >> 32);
     }
 
-    if (ReadFile(file->filehand, buf, len, 
+    if (ReadFile(file->filehand, buf, len,
                  &bytesread, file->pOverlapped)) {
         rv = APR_SUCCESS;
     }
@@ -86,7 +86,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
              * when I/O operation completed syncronously.
              * Use fast macro to check that overlapped I/O already
              * completed to avoid kernel call.
-             */ 
+             */
             if (HasOverlappedIoCompleted(file->pOverlapped)) {
                 res = WAIT_OBJECT_0;
             }
@@ -115,7 +115,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
              * fail if the handle is closed, yet the read may have
              * completed before we attempted to CancelIo...
              */
-            if (GetOverlappedResult(file->filehand, file->pOverlapped, 
+            if (GetOverlappedResult(file->filehand, file->pOverlapped,
                                     &bytesread, TRUE)) {
                 rv = APR_SUCCESS;
             }
@@ -135,11 +135,11 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
             rv = APR_EOF;
         }
     }
-    
+
     /* OK and 0 bytes read ==> end of file */
     if (rv == APR_SUCCESS && bytesread == 0)
         rv = APR_EOF;
-    
+
     if (rv == APR_SUCCESS && file->pOverlapped && file->ftype == APR_FILETYPE_FILE) {
         file->filePtr += bytesread;
     }
@@ -242,11 +242,11 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
     }
 
     /* If the file is open for xthread support, allocate and
-     * initialize the overlapped and io completion event (hEvent). 
+     * initialize the overlapped and io completion event (hEvent).
      * Threads should NOT share an apr_file_t or its hEvent.
      */
     if ((thefile->flags & APR_FOPEN_XTHREAD) && !thefile->pOverlapped ) {
-        thefile->pOverlapped = (OVERLAPPED*) apr_pcalloc(thefile->pool, 
+        thefile->pOverlapped = (OVERLAPPED*) apr_pcalloc(thefile->pool,
                                                          sizeof(OVERLAPPED));
         thefile->pOverlapped->hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
         if (!thefile->pOverlapped->hEvent) {
@@ -275,7 +275,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         if (thefile->flags & APR_FOPEN_XTHREAD) {
             apr_thread_mutex_unlock(thefile->mutex);
         }
-    } else {  
+    } else {
         /* Unbuffered i/o */
         apr_size_t nbytes;
         rv = read_with_timeout(thefile, buf, *len, &nbytes);
@@ -389,11 +389,11 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
     DWORD bwrote = 0;
 
     /* If the file is open for xthread support, allocate and
-     * initialize the overlapped and io completion event (hEvent). 
+     * initialize the overlapped and io completion event (hEvent).
      * Threads should NOT share an apr_file_t or its hEvent.
      */
     if ((thefile->flags & APR_FOPEN_XTHREAD) && !thefile->pOverlapped ) {
-        thefile->pOverlapped = (OVERLAPPED*) apr_pcalloc(thefile->pool, 
+        thefile->pOverlapped = (OVERLAPPED*) apr_pcalloc(thefile->pool,
                                                          sizeof(OVERLAPPED));
         thefile->pOverlapped->hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
         if (!thefile->pOverlapped->hEvent) {
@@ -498,7 +498,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             rv = apr_get_os_error();
 
             if (rv == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
- 
+
                 DWORD res;
 
                 /* It seems that WriteFile() return ERROR_IO_PENDING even
@@ -557,7 +557,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
  */
 APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile,
                                      const struct iovec *vec,
-                                     apr_size_t nvec, 
+                                     apr_size_t nvec,
                                      apr_size_t *nbytes)
 {
     apr_status_t rv = APR_SUCCESS;
@@ -602,12 +602,12 @@ APR_DECLARE(apr_status_t) apr_file_getc(char *ch, apr_file_t *thefile)
     if (rc) {
         return rc;
     }
-    
+
     if (bread == 0) {
         thefile->eof_hit = TRUE;
         return APR_EOF;
     }
-    return APR_SUCCESS; 
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_file_puts(const char *str, apr_file_t *thefile)
@@ -745,7 +745,7 @@ APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
     /* There isn't anything to do if we aren't buffering the output
      * so just return success.
      */
-    return APR_SUCCESS; 
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_file_sync(apr_file_t *thefile){
@@ -786,7 +786,7 @@ static int file_printf_flush(apr_vformatter_buff_t *buff)
     return 0;
 }
 
-APR_DECLARE_NONSTD(int) apr_file_printf(apr_file_t *fptr, 
+APR_DECLARE_NONSTD(int) apr_file_printf(apr_file_t *fptr,
                                         const char *format, ...)
 {
     struct apr_file_printf_data data;

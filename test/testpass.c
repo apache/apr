@@ -48,7 +48,7 @@ static struct {
 {
 /*
   passwords and hashes created with Apache's htpasswd utility like this:
-  
+
   htpasswd -c -b passwords pass1 pass1
   htpasswd -b passwords pass2 pass2
   htpasswd -b passwords pass3 pass3
@@ -183,7 +183,7 @@ static void test_bcryptpass(abts_case *tc, void *data)
     const char *hash2 = "$2a$08$qipUJiI9fySUN38hcbz.lucXvAmtgowKOWYtB9y3CXyl6lTknruou";
     const char *pass3 = "foobar";
 
-    APR_ASSERT_SUCCESS(tc, "bcrypt encode password", 
+    APR_ASSERT_SUCCESS(tc, "bcrypt encode password",
                        apr_bcrypt_encode(pass, 5, salt, sizeof(salt), hash,
                                          sizeof(hash)));
 
@@ -200,7 +200,7 @@ abts_suite *testpass(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
 
-#if CRYPT_ALGO_SUPPORTED 
+#if CRYPT_ALGO_SUPPORTED
     abts_run_test(suite, test_crypt, NULL);
 #if APR_HAS_THREADS
     abts_run_test(suite, test_threadsafe, NULL);
@@ -212,6 +212,6 @@ abts_suite *testpass(abts_suite *suite)
 #ifdef GLIBCSHA_ALGO_SUPPORTED
     abts_run_test(suite, test_glibc_shapass, NULL);
 #endif
-    
+
     return suite;
 }

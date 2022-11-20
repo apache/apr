@@ -45,7 +45,7 @@ static void test_mkdir_recurs(abts_case *tc, void *data)
     apr_status_t rv;
     apr_finfo_t finfo;
 
-    rv = apr_dir_make_recursive("data/one/two/three", 
+    rv = apr_dir_make_recursive("data/one/two/three",
                                 APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_UEXECUTE,
                                 p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -325,7 +325,7 @@ static void test_uncleared_errno(abts_case *tc, void *data)
     apr_finfo_t finfo;
     apr_int32_t finfo_flags = APR_FINFO_TYPE | APR_FINFO_NAME;
     apr_dir_t *this_dir;
-    apr_status_t rv; 
+    apr_status_t rv;
 
     rv = apr_dir_make("dir1", APR_FPROT_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -343,7 +343,7 @@ static void test_uncleared_errno(abts_case *tc, void *data)
        `errno' will be set as a result. */
     rv = apr_dir_remove("dir1", p);
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_ENOTEMPTY(rv));
-    
+
     /* Read `.' and `..' out of dir2. */
     rv = apr_dir_open(&this_dir, "dir2", p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -361,7 +361,7 @@ static void test_uncleared_errno(abts_case *tc, void *data)
 
     rv = apr_dir_close(this_dir);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-		 
+
     /* Cleanup */
     rv = apr_file_remove("dir1/file1", p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);

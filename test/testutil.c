@@ -26,8 +26,8 @@
 
 apr_pool_t *p;
 
-void apr_assert_success(abts_case* tc, const char* context, apr_status_t rv, 
-                        int lineno) 
+void apr_assert_success(abts_case* tc, const char* context, apr_status_t rv,
+                        int lineno)
 {
     if (rv == APR_ENOTIMPL) {
         abts_not_impl(tc, context, lineno);
@@ -54,7 +54,7 @@ void apr_assert_failure(abts_case* tc, const char* context, apr_status_t rv,
 void initialize(void) {
     apr_initialize();
     atexit(apr_terminate);
-    
+
     apr_pool_create(&p, NULL);
 
 #if _MSC_VER >= 1400

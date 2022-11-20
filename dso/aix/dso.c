@@ -33,10 +33,10 @@
  *  as such, and this notice is not modified.
  *
  *  Changes marked with `--jwe' were made on April 7 1996 by
- *  John W. Eaton <jwe@bevo.che.wisc.edu> to support g++ 
+ *  John W. Eaton <jwe@bevo.che.wisc.edu> to support g++
  *
- *  Bundled, stripped and adjusted on April 1998 as one single source file 
- *  for inclusion into the Apache HTTP server by 
+ *  Bundled, stripped and adjusted on April 1998 as one single source file
+ *  for inclusion into the Apache HTTP server by
  *  Ralf S. Engelschall <rse@apache.org>
  *
  *  Added to APR by David Reid April 2000
@@ -125,7 +125,7 @@ static apr_status_t dso_cleanup(void *thedso)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
+APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
                                        const char *path, apr_pool_t *ctx)
 {
     void *os_handle = dlopen((char *)path, RTLD_NOW | RTLD_GLOBAL);
@@ -133,7 +133,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
 
     if(os_handle == NULL) {
-        (*res_handle)->errormsg = dlerror();       
+        (*res_handle)->errormsg = dlerror();
         return APR_EDSOOPEN;
     }
 
@@ -151,8 +151,8 @@ APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
     return apr_pool_cleanup_run(handle->pool, handle, dso_cleanup);
 }
 
-APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
-                                      apr_dso_handle_t *handle, 
+APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
+                                      apr_dso_handle_t *handle,
                                       const char *symname)
 {
     void *retval = dlsym(handle->handle, symname);

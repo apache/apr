@@ -81,7 +81,7 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_set(void *priv, apr_threadkey_t 
     thread_id tid;
     int i,index = 0, ret = 0;
 
-    tid = find_thread(NULL);    
+    tid = find_thread(NULL);
     for (i=0; i < BEOS_MAX_DATAKEYS; i++){
         if (beos_data[i]->data){
             if (beos_data[i]->td == tid){index = i;}
@@ -165,7 +165,7 @@ APR_DECLARE(apr_status_t) apr_os_threadkey_get(apr_os_threadkey_t *thekey, apr_t
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key, 
+APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key,
                                                apr_os_threadkey_t *thekey, apr_pool_t *pool)
 {
     if (pool == NULL) {

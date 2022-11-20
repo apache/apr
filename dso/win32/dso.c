@@ -51,7 +51,7 @@ static apr_status_t dso_cleanup(void *thedso)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle, 
+APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
                                        const char *path, apr_pool_t *ctx)
 {
     HINSTANCE os_handle;
@@ -59,7 +59,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
     DWORD em;
 
     apr_wchar_t wpath[APR_PATH_MAX];
-    if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+    if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath)
                                         / sizeof(apr_wchar_t), path))
             != APR_SUCCESS) {
         *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
@@ -97,14 +97,14 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
 
     return APR_SUCCESS;
 }
-    
+
 APR_DECLARE(apr_status_t) apr_dso_unload(struct apr_dso_handle_t *handle)
 {
     return apr_pool_cleanup_run(handle->cont, handle, dso_cleanup);
 }
 
-APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
-                         struct apr_dso_handle_t *handle, 
+APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
+                         struct apr_dso_handle_t *handle,
                          const char *symname)
 {
     *ressym = (apr_dso_handle_sym_t)GetProcAddress(handle->handle, symname);

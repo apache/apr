@@ -47,15 +47,15 @@ static void fill_mip_v4(struct ip_mreq *mip, apr_sockaddr_t *mcast,
 static unsigned int find_if_index(const apr_sockaddr_t *iface)
 {
     unsigned int index = 0;
-#if defined(HAVE_GETIFADDRS) && APR_HAVE_IFADDRS_H && APR_HAVE_IPV6 
+#if defined(HAVE_GETIFADDRS) && APR_HAVE_IFADDRS_H && APR_HAVE_IPV6
     struct ifaddrs *ifp, *ifs;
 
     /**
-     * TODO: getifaddrs is only portable to *BSD and OS X. Using ioctl 
+     * TODO: getifaddrs is only portable to *BSD and OS X. Using ioctl
      *       and SIOCGIFCONF is needed for Linux/Solaris support.
-     *       
-     *       There is a wrapper that takes the messy ioctl interface into 
-     *       getifaddrs. The license is acceptable, but, It is a fairly large 
+     *
+     *       There is a wrapper that takes the messy ioctl interface into
+     *       getifaddrs. The license is acceptable, but, It is a fairly large
      *       chunk of code.
      */
     if (getifaddrs(&ifs) != 0) {
@@ -129,7 +129,7 @@ static apr_status_t do_mcast(int type, apr_socket_t *sock,
 #ifdef GROUP_FILTER_SIZE
         if (sock_is_ipv4(sock)) {
             ip_proto = IPPROTO_IP;
-        } 
+        }
 #if APR_HAVE_IPV6
         else if (sock_is_ipv6(sock)) {
             ip_proto = IPPROTO_IPV6;

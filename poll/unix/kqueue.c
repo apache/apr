@@ -368,7 +368,7 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
                                        apr_uint32_t flags)
 {
     int fd;
-    
+
     fd = kqueue();
     if (fd < 0) {
         return apr_get_netos_error();
@@ -393,10 +393,10 @@ static apr_status_t impl_pollcb_create(apr_pollcb_t *pollcb,
             return rv;
         }
     }
- 
+
     pollcb->fd = fd;
     pollcb->pollset.ke = (struct kevent *) apr_pcalloc(p, 2 * size * sizeof(struct kevent));
-    
+
     return APR_SUCCESS;
 }
 
@@ -406,30 +406,30 @@ static apr_status_t impl_pollcb_add(apr_pollcb_t *pollcb,
     apr_os_sock_t fd;
     struct kevent ev;
     apr_status_t rv = APR_SUCCESS;
-    
+
     if (descriptor->desc_type == APR_POLL_SOCKET) {
         fd = descriptor->desc.s->socketdes;
     }
     else {
         fd = descriptor->desc.f->filedes;
     }
-    
+
     if (descriptor->reqevents & APR_POLLIN) {
         EV_SET(&ev, fd, EVFILT_READ, EV_ADD, 0, 0, descriptor);
-        
+
         if (kevent(pollcb->fd, &ev, 1, NULL, 0, NULL) == -1) {
             rv = apr_get_netos_error();
         }
     }
-    
+
     if (descriptor->reqevents & APR_POLLOUT && rv == APR_SUCCESS) {
         EV_SET(&ev, fd, EVFILT_WRITE, EV_ADD, 0, 0, descriptor);
-        
+
         if (kevent(pollcb->fd, &ev, 1, NULL, 0, NULL) == -1) {
             rv = apr_get_netos_error();
         }
     }
-    
+
     return rv;
 }
 
@@ -439,7 +439,7 @@ static apr_status_t impl_pollcb_remove(apr_pollcb_t *pollcb,
     apr_status_t rv;
     struct kevent ev;
     apr_os_sock_t fd;
-    
+
     if (descriptor->desc_type == APR_POLL_SOCKET) {
         fd = descriptor->desc.s->socketdes;
     }
@@ -450,20 +450,20 @@ static apr_status_t impl_pollcb_remove(apr_pollcb_t *pollcb,
     rv = APR_NOTFOUND; /* unless at least one of the specified conditions is */
     if (descriptor->reqevents & APR_POLLIN) {
         EV_SET(&ev, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-        
+
         if (kevent(pollcb->fd, &ev, 1, NULL, 0, NULL) != -1) {
             rv = APR_SUCCESS;
         }
     }
-    
+
     if (descriptor->reqevents & APR_POLLOUT) {
         EV_SET(&ev, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-        
+
         if (kevent(pollcb->fd, &ev, 1, NULL, 0, NULL) != -1) {
             rv = APR_SUCCESS;
         }
     }
-    
+
     return rv;
 }
 
@@ -476,7 +476,7 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
     int ret, i;
     struct timespec tv, *tvptr;
     apr_status_t rv = APR_SUCCESS;
-    
+
     if (timeout < 0) {
         tvptr = NULL;
     }
@@ -485,7 +485,7 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
         tv.tv_nsec = (long) apr_time_usec(timeout) * 1000;
         tvptr = &tv;
     }
-    
+
     ret = kevent(pollcb->fd, NULL, 0, pollcb->pollset.ke, 2 * pollcb->nalloc,
                  tvptr);
 
@@ -508,9 +508,9 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
 
             pollfd->rtnevents = get_kqueue_revent(pollcb->pollset.ke[i].filter,
                                                   pollcb->pollset.ke[i].flags);
-            
+
             rv = func(baton, pollfd);
-            
+
             if (rv) {
                 return rv;
             }

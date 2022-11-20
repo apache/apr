@@ -90,14 +90,14 @@ apr_status_t apr_socket_timeout_set(apr_socket_t *sock, apr_interval_time_t t)
             }
             apr_set_option(sock, APR_SO_NONBLOCK, 1);
         }
-    } 
+    }
     else if (t < 0 && sock->timeout >= 0) {
-        if (apr_is_option_set(sock, APR_SO_NONBLOCK) != 0) { 
-            if ((stat = soblock(sock->socketdes)) != APR_SUCCESS) { 
-                return stat; 
+        if (apr_is_option_set(sock, APR_SO_NONBLOCK) != 0) {
+            if ((stat = soblock(sock->socketdes)) != APR_SUCCESS) {
+                return stat;
             }
             apr_set_option(sock, APR_SO_NONBLOCK, 0);
-        } 
+        }
     }
     /* must disable the incomplete read support if we disable
      * a timeout
@@ -110,7 +110,7 @@ apr_status_t apr_socket_timeout_set(apr_socket_t *sock, apr_interval_time_t t)
 }
 
 
-apr_status_t apr_socket_opt_set(apr_socket_t *sock, 
+apr_status_t apr_socket_opt_set(apr_socket_t *sock,
                                 apr_int32_t opt, apr_int32_t on)
 {
     int one;
@@ -182,7 +182,7 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
     case APR_SO_NONBLOCK:
         if (apr_is_option_set(sock, APR_SO_NONBLOCK) != on) {
             if (on) {
-                if ((rv = sononblock(sock->socketdes)) != APR_SUCCESS) 
+                if ((rv = sononblock(sock->socketdes)) != APR_SUCCESS)
                     return rv;
             }
             else {
@@ -213,7 +213,7 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
             int optlevel = IPPROTO_TCP;
             int optname = TCP_DEFER_ACCEPT;
 
-            if (setsockopt(sock->socketdes, optlevel, optname, 
+            if (setsockopt(sock->socketdes, optlevel, optname,
                            (void *)&on, sizeof(int)) == -1) {
                 return errno;
             }
@@ -348,8 +348,8 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
         return APR_EINVAL;
     }
 
-    return APR_SUCCESS; 
-}         
+    return APR_SUCCESS;
+}
 
 
 apr_status_t apr_socket_timeout_get(apr_socket_t *sock, apr_interval_time_t *t)
@@ -359,7 +359,7 @@ apr_status_t apr_socket_timeout_get(apr_socket_t *sock, apr_interval_time_t *t)
 }
 
 
-apr_status_t apr_socket_opt_get(apr_socket_t *sock, 
+apr_status_t apr_socket_opt_get(apr_socket_t *sock,
                                 apr_int32_t opt, apr_int32_t *on)
 {
     switch(opt) {
@@ -392,7 +392,7 @@ apr_status_t apr_gethostname(char *buf, apr_int32_t len, apr_pool_t *cont)
     if (gethostname(buf, len) == 0) {
 #else
     if (gethostname(buf, len) != 0) {
-#endif  
+#endif
         buf[0] = '\0';
         return errno;
     }

@@ -43,7 +43,7 @@ static apr_status_t dir_cleanup(void *thedir)
     }
     dir->dirhand = INVALID_HANDLE_VALUE;
     return APR_SUCCESS;
-} 
+}
 
 APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
                                        apr_pool_t *pool)
@@ -52,7 +52,7 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
 
     apr_size_t len = strlen(dirname);
     (*new) = apr_pcalloc(pool, sizeof(apr_dir_t));
-    /* Leave room here to add and pop the '*' wildcard for FindFirstFile 
+    /* Leave room here to add and pop the '*' wildcard for FindFirstFile
      * and double-null terminate so we have one character to change.
      */
     (*new)->dirname = apr_palloc(pool, len + 3);
@@ -63,7 +63,7 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
     (*new)->dirname[len++] = '\0';
     (*new)->dirname[len] = '\0';
 
-    /* Create a buffer for the longest file name we will ever see 
+    /* Create a buffer for the longest file name we will ever see
         */
     (*new)->entry = apr_pcalloc(pool, sizeof(WIN32_FIND_DATAW));
     (*new)->name = apr_pcalloc(pool, APR_FILE_MAX * 3 + 1);
@@ -103,10 +103,10 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     /* This code path is always be invoked by apr_dir_open or
      * apr_dir_rewind, so return without filling out the finfo.
      */
-    if (thedir->dirhand == INVALID_HANDLE_VALUE) 
+    if (thedir->dirhand == INVALID_HANDLE_VALUE)
     {
-        if ((rv = utf8_to_unicode_path(wdirname, sizeof(wdirname) 
-                                                / sizeof(apr_wchar_t), 
+        if ((rv = utf8_to_unicode_path(wdirname, sizeof(wdirname)
+                                                / sizeof(apr_wchar_t),
                                         thedir->dirname))) {
             return rv;
         }
@@ -130,7 +130,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
          * either apr_dir_open or apr_dir_rewind ... use
          * that first record.
          */
-        thedir->bof = 0; 
+        thedir->bof = 0;
     }
     else if (!FindNextFileW(thedir->dirhand, thedir->entry)) {
         return apr_get_os_error();
@@ -143,7 +143,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
             return apr_get_os_error();
         }
     }
-    if ((rv = unicode_to_utf8_path(thedir->name, APR_FILE_MAX * 3 + 1, 
+    if ((rv = unicode_to_utf8_path(thedir->name, APR_FILE_MAX * 3 + 1,
                                    thedir->entry->cFileName)))
         return rv;
     fname = thedir->name;
@@ -227,7 +227,7 @@ static apr_status_t dir_make_parent(char *path,
 
     *ch = '\0';
     rv = apr_dir_make (path, perm, pool); /* Try to make straight off */
-    
+
     if (APR_STATUS_IS_ENOENT(rv)) { /* Missing an intermediate dir */
         rv = dir_make_parent(path, perm, pool);
 

@@ -44,7 +44,7 @@ static void test_open_noreadwrite(abts_case *tc, void *data)
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
     ABTS_TRUE(tc, rv != APR_SUCCESS);
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_EACCES(rv));
-    ABTS_PTR_EQUAL(tc, NULL, thefile); 
+    ABTS_PTR_EQUAL(tc, NULL, thefile);
 }
 
 static void test_open_excl(abts_case *tc, void *data)
@@ -57,7 +57,7 @@ static void test_open_excl(abts_case *tc, void *data)
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
     ABTS_TRUE(tc, rv != APR_SUCCESS);
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_EEXIST(rv));
-    ABTS_PTR_EQUAL(tc, NULL, thefile); 
+    ABTS_PTR_EQUAL(tc, NULL, thefile);
 }
 
 static void test_open_read(abts_case *tc, void *data)
@@ -65,7 +65,7 @@ static void test_open_read(abts_case *tc, void *data)
     apr_status_t rv;
     apr_file_t *filetest = NULL;
 
-    rv = apr_file_open(&filetest, FILENAME, 
+    rv = apr_file_open(&filetest, FILENAME,
                        APR_FOPEN_READ,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -76,7 +76,7 @@ static void test_open_read(abts_case *tc, void *data)
 static void link_existing(abts_case *tc, void *data)
 {
     apr_status_t rv;
-    
+
     rv = apr_file_link("data/file_datafile.txt", "data/file_datafile2.txt");
     apr_file_remove("data/file_datafile2.txt", p);
     ABTS_ASSERT(tc, "Couldn't create hardlink to file", rv == APR_SUCCESS);
@@ -85,7 +85,7 @@ static void link_existing(abts_case *tc, void *data)
 static void link_nonexisting(abts_case *tc, void *data)
 {
     apr_status_t rv;
-    
+
     rv = apr_file_link("data/does_not_exist.txt", "data/fake.txt");
     ABTS_ASSERT(tc, "", rv != APR_SUCCESS);
 }
@@ -96,8 +96,8 @@ static void test_read(abts_case *tc, void *data)
     apr_size_t nbytes = 256;
     char *str = apr_pcalloc(p, nbytes + 1);
     apr_file_t *filetest = NULL;
-    
-    rv = apr_file_open(&filetest, FILENAME, 
+
+    rv = apr_file_open(&filetest, FILENAME,
                        APR_FOPEN_READ,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
 
@@ -116,7 +116,7 @@ static void test_readzero(abts_case *tc, void *data)
     apr_size_t nbytes = 0;
     char *str = NULL;
     apr_file_t *filetest;
-    
+
     rv = apr_file_open(&filetest, FILENAME, APR_FOPEN_READ, APR_FPROT_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "Opening test file " FILENAME, rv);
 
@@ -132,8 +132,8 @@ static void test_filename(abts_case *tc, void *data)
     const char *str;
     apr_status_t rv;
     apr_file_t *filetest = NULL;
-    
-    rv = apr_file_open(&filetest, FILENAME, 
+
+    rv = apr_file_open(&filetest, FILENAME,
                        APR_FOPEN_READ,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
     APR_ASSERT_SUCCESS(tc, "Opening test file " FILENAME, rv);
@@ -144,15 +144,15 @@ static void test_filename(abts_case *tc, void *data)
 
     apr_file_close(filetest);
 }
-    
+
 static void test_fileclose(abts_case *tc, void *data)
 {
     char str;
     apr_status_t rv;
     apr_size_t one = 1;
     apr_file_t *filetest = NULL;
-    
-    rv = apr_file_open(&filetest, FILENAME, 
+
+    rv = apr_file_open(&filetest, FILENAME,
                        APR_FOPEN_READ,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
     APR_ASSERT_SUCCESS(tc, "Opening test file " FILENAME, rv);
@@ -183,7 +183,7 @@ static void test_open_write(abts_case *tc, void *data)
     apr_file_t *filetest = NULL;
 
     filetest = NULL;
-    rv = apr_file_open(&filetest, FILENAME, 
+    rv = apr_file_open(&filetest, FILENAME,
                        APR_FOPEN_WRITE,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_ENOENT(rv));
@@ -196,7 +196,7 @@ static void test_open_writecreate(abts_case *tc, void *data)
     apr_file_t *filetest = NULL;
 
     filetest = NULL;
-    rv = apr_file_open(&filetest, FILENAME, 
+    rv = apr_file_open(&filetest, FILENAME,
                        APR_FOPEN_WRITE | APR_FOPEN_CREATE,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -210,7 +210,7 @@ static void test_write(abts_case *tc, void *data)
     apr_size_t bytes = strlen(TESTSTR);
     apr_file_t *filetest = NULL;
 
-    rv = apr_file_open(&filetest, FILENAME, 
+    rv = apr_file_open(&filetest, FILENAME,
                        APR_FOPEN_WRITE | APR_FOPEN_CREATE,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -227,7 +227,7 @@ static void test_open_readwrite(abts_case *tc, void *data)
     apr_file_t *filetest = NULL;
 
     filetest = NULL;
-    rv = apr_file_open(&filetest, FILENAME, 
+    rv = apr_file_open(&filetest, FILENAME,
                        APR_FOPEN_READ | APR_FOPEN_WRITE,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -244,7 +244,7 @@ static void test_seek(abts_case *tc, void *data)
     char *str = apr_pcalloc(p, nbytes + 1);
     apr_file_t *filetest = NULL;
 
-    rv = apr_file_open(&filetest, FILENAME, 
+    rv = apr_file_open(&filetest, FILENAME,
                        APR_FOPEN_READ,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
     APR_ASSERT_SUCCESS(tc, "Open test file " FILENAME, rv);
@@ -258,7 +258,7 @@ static void test_seek(abts_case *tc, void *data)
 
     rv = apr_file_seek(filetest, SEEK_SET, &offset);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    
+
     rv = apr_file_read(filetest, str, &nbytes);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_SIZE_EQUAL(tc, strlen(TESTSTR) - 5, nbytes);
@@ -286,14 +286,14 @@ static void test_seek(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, &TESTSTR[strlen(TESTSTR) - 5], str);
 
     apr_file_close(filetest);
-}                
+}
 
 static void test_userdata_set(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *filetest = NULL;
 
-    rv = apr_file_open(&filetest, FILENAME, 
+    rv = apr_file_open(&filetest, FILENAME,
                        APR_FOPEN_WRITE,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -311,7 +311,7 @@ static void test_userdata_get(abts_case *tc, void *data)
     char *teststr;
     apr_file_t *filetest = NULL;
 
-    rv = apr_file_open(&filetest, FILENAME, 
+    rv = apr_file_open(&filetest, FILENAME,
                        APR_FOPEN_WRITE,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -334,7 +334,7 @@ static void test_userdata_getnokey(abts_case *tc, void *data)
     void *teststr;
     apr_file_t *filetest = NULL;
 
-    rv = apr_file_open(&filetest, FILENAME, 
+    rv = apr_file_open(&filetest, FILENAME,
                        APR_FOPEN_WRITE,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -352,27 +352,27 @@ static void test_buffer_set_get(abts_case *tc, void *data)
     apr_file_t *filetest = NULL;
     char   * buffer;
 
-    rv = apr_file_open(&filetest, FILENAME, 
+    rv = apr_file_open(&filetest, FILENAME,
                        APR_FOPEN_WRITE | APR_FOPEN_BUFFERED,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE | APR_FPROT_GREAD, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     bufsize = apr_file_buffer_size_get(filetest);
     ABTS_SIZE_EQUAL(tc, APR_BUFFERSIZE, bufsize);
- 
+
     buffer = apr_pcalloc(p, 10240);
     rv = apr_file_buffer_set(filetest, buffer, 10240);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    
+
     bufsize = apr_file_buffer_size_get(filetest);
     ABTS_SIZE_EQUAL(tc, 10240, bufsize);
-    
+
     rv = apr_file_buffer_set(filetest, buffer, 12);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    
+
     bufsize = apr_file_buffer_size_get(filetest);
     ABTS_SIZE_EQUAL(tc, 12, bufsize);
-    
+
     apr_file_close(filetest);
 }
 static void test_getc(abts_case *tc, void *data)
@@ -679,7 +679,7 @@ static void test_bigread(abts_case *tc, void *data)
 
     /* Create a test file with known content.
      */
-    rv = apr_file_open(&f, "data/created_file", 
+    rv = apr_file_open(&f, "data/created_file",
                        APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_TRUNCATE,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -724,7 +724,7 @@ static void test_mod_neg(abts_case *tc, void *data)
     apr_off_t cur;
     const char *fname = "data/modneg.dat";
 
-    rv = apr_file_open(&f, fname, 
+    rv = apr_file_open(&f, fname,
                        APR_FOPEN_CREATE | APR_FOPEN_WRITE,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -734,7 +734,7 @@ static void test_mod_neg(abts_case *tc, void *data)
     rv = apr_file_write(f, s, &nbytes);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_SIZE_EQUAL(tc, strlen(s), nbytes);
-    
+
     for (i = 0; i < 7980; i++) {
         s = "0";
         nbytes = strlen(s);
@@ -742,7 +742,7 @@ static void test_mod_neg(abts_case *tc, void *data)
         ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
         ABTS_SIZE_EQUAL(tc, strlen(s), nbytes);
     }
-    
+
     s = "end456789\n";
     nbytes = strlen(s);
     rv = apr_file_write(f, s, &nbytes);
@@ -756,7 +756,7 @@ static void test_mod_neg(abts_case *tc, void *data)
         ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
         ABTS_SIZE_EQUAL(tc, strlen(s), nbytes);
     }
-    
+
     rv = apr_file_close(f);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
@@ -808,7 +808,7 @@ static void file_contents_equal(abts_case *tc,
                                      0, p));
     APR_ASSERT_SUCCESS(tc, "read from file",
                        apr_file_read_full(f, actual, expectlen, NULL));
-    
+
     ABTS_ASSERT(tc, "matched expected file contents",
                 memcmp(expect, actual, expectlen) == 0);
 
@@ -824,15 +824,15 @@ static void test_puts(abts_case *tc, void *data)
     const char *fname = "data/testputs.dat";
 
     APR_ASSERT_SUCCESS(tc, "open file for writing",
-                       apr_file_open(&f, fname, 
+                       apr_file_open(&f, fname,
                                      APR_FOPEN_WRITE|APR_FOPEN_CREATE|APR_FOPEN_TRUNCATE,
                                      APR_FPROT_OS_DEFAULT, p));
-    
-    APR_ASSERT_SUCCESS(tc, "write line to file", 
+
+    APR_ASSERT_SUCCESS(tc, "write line to file",
                        apr_file_puts(LINE1, f));
-    APR_ASSERT_SUCCESS(tc, "write second line to file", 
+    APR_ASSERT_SUCCESS(tc, "write second line to file",
                        apr_file_puts(LINE2, f));
-    
+
     APR_ASSERT_SUCCESS(tc, "close for writing",
                        apr_file_close(f));
 
@@ -847,10 +847,10 @@ static void test_writev(abts_case *tc, void *data)
     const char *fname = "data/testwritev.dat";
 
     APR_ASSERT_SUCCESS(tc, "open file for writing",
-                       apr_file_open(&f, fname, 
+                       apr_file_open(&f, fname,
                                      APR_FOPEN_WRITE|APR_FOPEN_CREATE|APR_FOPEN_TRUNCATE,
                                      APR_FPROT_OS_DEFAULT, p));
-    
+
     vec[0].iov_base = LINE1;
     vec[0].iov_len = strlen(LINE1);
 
@@ -858,7 +858,7 @@ static void test_writev(abts_case *tc, void *data)
                        apr_file_writev(f, vec, 1, &nbytes));
 
     file_contents_equal(tc, fname, LINE1, strlen(LINE1));
-    
+
     vec[0].iov_base = LINE1;
     vec[0].iov_len = strlen(LINE1);
     vec[1].iov_base = LINE2;
@@ -876,7 +876,7 @@ static void test_writev(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "close for writing",
                        apr_file_close(f));
 
-    file_contents_equal(tc, fname, LINE1 LINE1 LINE2 LINE1 LINE1 LINE2, 
+    file_contents_equal(tc, fname, LINE1 LINE1 LINE2 LINE1 LINE1 LINE2,
                         strlen(LINE1)*4 + strlen(LINE2)*2);
 
 }
@@ -889,10 +889,10 @@ static void test_writev_full(abts_case *tc, void *data)
     const char *fname = "data/testwritev_full.dat";
 
     APR_ASSERT_SUCCESS(tc, "open file for writing",
-                       apr_file_open(&f, fname, 
+                       apr_file_open(&f, fname,
                                      APR_FOPEN_WRITE|APR_FOPEN_CREATE|APR_FOPEN_TRUNCATE,
                                      APR_FPROT_OS_DEFAULT, p));
-    
+
     vec[0].iov_base = LINE1;
     vec[0].iov_len = strlen(LINE1);
     vec[1].iov_base = LINE2;
@@ -912,7 +912,7 @@ static void test_writev_full(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "close for writing",
                        apr_file_close(f));
 
-    file_contents_equal(tc, fname, LINE1 LINE2 LINE1 LINE1 LINE2, 
+    file_contents_equal(tc, fname, LINE1 LINE2 LINE1 LINE1 LINE2,
                         strlen(LINE1)*3 + strlen(LINE2)*2);
 
 }
@@ -1002,7 +1002,7 @@ static void test_truncate(abts_case *tc, void *data)
                        APR_FOPEN_CREATE | APR_FOPEN_WRITE,
                        APR_FPROT_UREAD | APR_FPROT_UWRITE, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    
+
     s = "some data";
     nbytes = strlen(s);
     rv = apr_file_write(f, s, &nbytes);
@@ -1232,7 +1232,7 @@ static void test_bigfprintf(abts_case *tc, void *data)
                        apr_file_open(&f, fname,
                                      APR_FOPEN_CREATE|APR_FOPEN_WRITE,
                                      APR_FPROT_UREAD|APR_FPROT_UWRITE, p));
-    
+
 
     to_write = malloc(HUGE_STRING_LEN + 3);
 
@@ -1335,7 +1335,7 @@ static void test_xthread(abts_case *tc, void *data)
     apr_int32_t flags = APR_FOPEN_CREATE|APR_FOPEN_READ|APR_FOPEN_WRITE|APR_FOPEN_APPEND|APR_FOPEN_XTHREAD;
     char buf[128] = { 0 };
 
-    /* Test for bug 38438, opening file with append + xthread and seeking to 
+    /* Test for bug 38438, opening file with append + xthread and seeking to
        the end of the file resulted in writes going to the beginning not the
        end. */
 
@@ -1349,7 +1349,7 @@ static void test_xthread(abts_case *tc, void *data)
                        apr_file_puts("hello", f));
 
     apr_file_close(f);
-    
+
     APR_ASSERT_SUCCESS(tc, "open test file",
                        apr_file_open(&f, fname, flags,
                                      APR_FPROT_UREAD|APR_FPROT_UWRITE, p));
@@ -1368,11 +1368,11 @@ static void test_xthread(abts_case *tc, void *data)
     /* Back to the beginning. */
     {
         apr_off_t offset = 0;
-        
+
         rv = apr_file_seek(f, APR_SET, &offset);
         ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     }
-    
+
     apr_file_read_full(f, buf, sizeof(buf), NULL);
 
     ABTS_STR_EQUAL(tc, "helloworld", buf);
@@ -2258,8 +2258,8 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_open_readwrite, NULL);
     abts_run_test(suite, link_existing, NULL);
     abts_run_test(suite, link_nonexisting, NULL);
-    abts_run_test(suite, test_read, NULL); 
-    abts_run_test(suite, test_readzero, NULL); 
+    abts_run_test(suite, test_read, NULL);
+    abts_run_test(suite, test_readzero, NULL);
     abts_run_test(suite, test_seek, NULL);
     abts_run_test(suite, test_filename, NULL);
     abts_run_test(suite, test_fileclose, NULL);

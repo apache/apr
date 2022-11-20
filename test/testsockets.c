@@ -234,7 +234,7 @@ abts_suite *testsockets(abts_suite *suite)
 #endif
 
     abts_run_test(suite, socket_userdata, NULL);
-    
+
     return suite;
 }
 

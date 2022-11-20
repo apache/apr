@@ -98,7 +98,7 @@ static apr_status_t prep(apr_sdbm_t **pdb, const char *dirname, const char *pagn
     db->pool = p;
 
     /*
-     * adjust user flags so that WRONLY becomes RDWR, 
+     * adjust user flags so that WRONLY becomes RDWR,
      * as required by this package. Also set our internal
      * flag for RDONLY if needed.
      */
@@ -132,7 +132,7 @@ static apr_status_t prep(apr_sdbm_t **pdb, const char *dirname, const char *pagn
                 != APR_SUCCESS)
         goto error;
 
-    if ((status = apr_sdbm_lock(db, (db->flags & SDBM_RDONLY) 
+    if ((status = apr_sdbm_lock(db, (db->flags & SDBM_RDONLY)
                                         ? APR_FLOCK_SHARED
                                         : APR_FLOCK_EXCLUSIVE))
                 != APR_SUCCESS)
@@ -143,7 +143,7 @@ static apr_status_t prep(apr_sdbm_t **pdb, const char *dirname, const char *pagn
      */
 
     /*
-     * if we are opened in SHARED mode, unlock ourself 
+     * if we are opened in SHARED mode, unlock ourself
      */
     if (db->flags & SDBM_SHARED)
         if ((status = apr_sdbm_unlock(db)) != APR_SUCCESS)
@@ -168,13 +168,13 @@ error:
     return status;
 }
 
-APR_DECLARE(apr_status_t) apr_sdbm_open(apr_sdbm_t **db, const char *file, 
-                                        apr_int32_t flags, 
+APR_DECLARE(apr_status_t) apr_sdbm_open(apr_sdbm_t **db, const char *file,
+                                        apr_int32_t flags,
                                         apr_fileperms_t perms, apr_pool_t *p)
 {
     char *dirname = apr_pstrcat(p, file, APR_SDBM_DIRFEXT, NULL);
     char *pagname = apr_pstrcat(p, file, APR_SDBM_PAGFEXT, NULL);
-    
+
     return prep(db, dirname, pagname, flags, perms, p);
 }
 
@@ -187,7 +187,7 @@ APR_DECLARE(apr_status_t) apr_sdbm_fetch(apr_sdbm_t *db, apr_sdbm_datum_t *val,
                                          apr_sdbm_datum_t key)
 {
     apr_status_t status;
-    
+
     if (db == NULL || bad(key))
         return APR_EINVAL;
 
@@ -208,23 +208,23 @@ static apr_status_t write_page(apr_sdbm_t *db, const char *buf, long pagno)
 {
     apr_status_t status;
     apr_off_t off = OFF_PAG(pagno);
-    
+
     if ((status = apr_file_seek(db->pagf, APR_SET, &off)) == APR_SUCCESS)
         status = apr_file_write_full(db->pagf, buf, PBLKSIZ, NULL);
 
     return status;
 }
 
-APR_DECLARE(apr_status_t) apr_sdbm_delete(apr_sdbm_t *db, 
+APR_DECLARE(apr_status_t) apr_sdbm_delete(apr_sdbm_t *db,
                                           const apr_sdbm_datum_t key)
 {
     apr_status_t status;
-    
+
     if (db == NULL || bad(key))
         return APR_EINVAL;
     if (apr_sdbm_rdonly(db))
         return APR_EINVAL;
-    
+
     if ((status = apr_sdbm_lock(db, APR_FLOCK_EXCLUSIVE)) != APR_SUCCESS)
         return status;
 
@@ -247,7 +247,7 @@ APR_DECLARE(apr_status_t) apr_sdbm_store(apr_sdbm_t *db, apr_sdbm_datum_t key,
     int need;
     register long hash;
     apr_status_t status;
-    
+
     if (db == NULL || bad(key))
         return APR_EINVAL;
     if (apr_sdbm_rdonly(db))
@@ -290,7 +290,7 @@ APR_DECLARE(apr_status_t) apr_sdbm_store(apr_sdbm_t *db, apr_sdbm_datum_t key,
     }
 
 error:
-    (void) apr_sdbm_unlock(db);    
+    (void) apr_sdbm_unlock(db);
 
     return status;
 }
@@ -328,10 +328,10 @@ static apr_status_t makroom(apr_sdbm_t *db, long hash, int need)
          * here, as sdbm_store will do so, after it inserts the incoming pair.
          */
         if (hash & (db->hmask + 1)) {
-            if ((status = write_page(db, db->pagbuf, db->pagbno)) 
+            if ((status = write_page(db, db->pagbuf, db->pagbno))
                         != APR_SUCCESS)
                 return status;
-                    
+
             db->pagbno = newp;
             (void) memcpy(pag, new, PBLKSIZ);
         }
@@ -356,11 +356,11 @@ static apr_status_t makroom(apr_sdbm_t *db, long hash, int need)
         db->curbit = 2 * db->curbit
                    + ((hash & (db->hmask + 1)) ? 2 : 1);
         db->hmask |= db->hmask + 1;
-            
+
         if ((status = write_page(db, db->pagbuf, db->pagbno))
                     != APR_SUCCESS)
             return status;
-            
+
     } while (--smax);
 
     /*
@@ -380,7 +380,7 @@ static apr_status_t makroom(apr_sdbm_t *db, long hash, int need)
  * If 'create' is asked and EOF is returned while reading, this is taken
  * as success (i.e. a cleared buffer is returned).
  */
-static apr_status_t read_from(apr_file_t *f, void *buf, 
+static apr_status_t read_from(apr_file_t *f, void *buf,
                               apr_off_t off, apr_size_t len,
                               int create)
 {
@@ -402,11 +402,11 @@ static apr_status_t read_from(apr_file_t *f, void *buf,
  * the following two routines will break if
  * deletions aren't taken into account. (ndbm bug)
  */
-APR_DECLARE(apr_status_t) apr_sdbm_firstkey(apr_sdbm_t *db, 
+APR_DECLARE(apr_status_t) apr_sdbm_firstkey(apr_sdbm_t *db,
                                             apr_sdbm_datum_t *key)
 {
     apr_status_t status;
-    
+
     if ((status = apr_sdbm_lock(db, APR_FLOCK_SHARED)) != APR_SUCCESS)
         return status;
 
@@ -424,11 +424,11 @@ APR_DECLARE(apr_status_t) apr_sdbm_firstkey(apr_sdbm_t *db,
     return status;
 }
 
-APR_DECLARE(apr_status_t) apr_sdbm_nextkey(apr_sdbm_t *db, 
+APR_DECLARE(apr_status_t) apr_sdbm_nextkey(apr_sdbm_t *db,
                                            apr_sdbm_datum_t *key)
 {
     apr_status_t status;
-    
+
     if ((status = apr_sdbm_lock(db, APR_FLOCK_SHARED)) != APR_SUCCESS)
         return status;
 
@@ -468,7 +468,7 @@ static apr_status_t getpage(apr_sdbm_t *db, long hash, int by_num, int create)
      * see if the block we need is already in memory.
      * note: this lookaside cache has about 10% hit rate.
      */
-    if (pagb != db->pagbno) { 
+    if (pagb != db->pagbno) {
         /*
          * note: here, we assume a "hole" is read as 0s.
          * if not, must zero pagbuf first.
@@ -529,7 +529,7 @@ static apr_status_t setdbit(apr_sdbm_t *db, long dbit)
             return status;
 
         db->dirbno = dirb;
-        
+
         debug(("dir read: %d\n", dirb));
     }
 

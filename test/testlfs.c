@@ -78,7 +78,7 @@ static void test_open(abts_case *tc, void *data)
         ABTS_NOT_IMPL(tc, "Creation of large file (apparently not sparse)");
 
         madefile = 0;
-    } 
+    }
     else {
         /* Proceed with our 8GB sparse file now */
         rv = apr_file_trunc(f, eightGB);
@@ -91,7 +91,7 @@ static void test_open(abts_case *tc, void *data)
 #endif
             ) {
             ABTS_NOT_IMPL(tc, "Creation of large file (rlimit, quota or fs)");
-        } 
+        }
         else {
             APR_ASSERT_SUCCESS(tc, "truncate file to 8gb", rv);
         }
@@ -112,14 +112,14 @@ static void test_reopen(abts_case *tc, void *data)
     apr_status_t rv;
 
     PRECOND;
-    
+
     rv = apr_file_open(&fh, TESTFN, APR_FOPEN_SPARSE | APR_FOPEN_READ,
                        APR_FPROT_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "re-open 8GB file", rv);
 
     APR_ASSERT_SUCCESS(tc, "file_info_get failed",
                        apr_file_info_get(&finfo, APR_FINFO_NORM, fh));
-    
+
     ABTS_ASSERT(tc, "file_info_get gave incorrect size",
              finfo.size == eightGB);
 
@@ -132,9 +132,9 @@ static void test_stat(abts_case *tc, void *data)
 
     PRECOND;
 
-    APR_ASSERT_SUCCESS(tc, "stat large file", 
+    APR_ASSERT_SUCCESS(tc, "stat large file",
                        apr_stat(&finfo, TESTFN, APR_FINFO_NORM, p));
-    
+
     ABTS_ASSERT(tc, "stat gave incorrect size", finfo.size == eightGB);
 }
 
@@ -145,25 +145,25 @@ static void test_readdir(abts_case *tc, void *data)
 
     PRECOND;
 
-    APR_ASSERT_SUCCESS(tc, "open test directory", 
+    APR_ASSERT_SUCCESS(tc, "open test directory",
                        apr_dir_open(&dh, TESTDIR, p));
 
     do {
         apr_finfo_t finfo;
-        
+
         rv = apr_dir_read(&finfo, APR_FINFO_MIN, dh);
-        
+
         if (rv == APR_SUCCESS && strcmp(finfo.name, TESTFILE) == 0) {
-            ABTS_ASSERT(tc, "apr_dir_read gave incorrect size for large file", 
+            ABTS_ASSERT(tc, "apr_dir_read gave incorrect size for large file",
                      finfo.size == eightGB);
         }
 
     } while (rv == APR_SUCCESS);
-        
+
     if (!APR_STATUS_IS_ENOENT(rv)) {
         APR_ASSERT_SUCCESS(tc, "apr_dir_read failed", rv);
     }
-    
+
     APR_ASSERT_SUCCESS(tc, "close test directory",
                        apr_dir_close(dh));
 }
@@ -175,11 +175,11 @@ static void test_append(abts_case *tc, void *data)
     apr_file_t *fh;
     apr_finfo_t finfo;
     apr_status_t rv;
-    
+
     PRECOND;
 
-    rv = apr_file_open(&fh, TESTFN, APR_FOPEN_SPARSE | APR_FOPEN_WRITE 
-                                  | APR_FOPEN_APPEND, 
+    rv = apr_file_open(&fh, TESTFN, APR_FOPEN_SPARSE | APR_FOPEN_WRITE
+                                  | APR_FOPEN_APPEND,
                        APR_FPROT_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "open 8GB file for append", rv);
 
@@ -188,7 +188,7 @@ static void test_append(abts_case *tc, void *data)
 
     APR_ASSERT_SUCCESS(tc, "file_info_get failed",
                        apr_file_info_get(&finfo, APR_FINFO_NORM, fh));
-    
+
     ABTS_ASSERT(tc, "file_info_get gave incorrect size",
              finfo.size == eightGB + strlen(TESTSTR));
 
@@ -202,16 +202,16 @@ static void test_seek(abts_case *tc, void *data)
     apr_status_t rv;
 
     PRECOND;
-    
+
     rv = apr_file_open(&fh, TESTFN, APR_FOPEN_SPARSE | APR_FOPEN_WRITE,
                        APR_FPROT_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "open 8GB file for writing", rv);
 
     pos = 0;
-    APR_ASSERT_SUCCESS(tc, "relative seek to end", 
+    APR_ASSERT_SUCCESS(tc, "relative seek to end",
                        apr_file_seek(fh, APR_END, &pos));
     ABTS_ASSERT(tc, "seek to END gave 8GB", pos == eightGB);
-    
+
     pos = eightGB;
     APR_ASSERT_SUCCESS(tc, "seek to 8GB", apr_file_seek(fh, APR_SET, &pos));
     ABTS_ASSERT(tc, "seek gave 8GB offset", pos == eightGB);
@@ -235,7 +235,7 @@ static void test_write(abts_case *tc, void *data)
                        APR_FPROT_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "re-open 8GB file", rv);
 
-    APR_ASSERT_SUCCESS(tc, "seek to 8GB - 4", 
+    APR_ASSERT_SUCCESS(tc, "seek to 8GB - 4",
                        apr_file_seek(fh, APR_SET, &pos));
     ABTS_ASSERT(tc, "seek gave 8GB-4 offset", pos == eightGB - 4);
 
@@ -252,7 +252,7 @@ static void test_mmap(abts_case *tc, void *data)
     apr_mmap_t *map;
     apr_file_t *fh;
     apr_size_t len = 65536; /* hopefully a multiple of the page size */
-    apr_off_t off = eightGB - len; 
+    apr_off_t off = eightGB - len;
     apr_status_t rv;
     void *ptr;
 
@@ -261,14 +261,14 @@ static void test_mmap(abts_case *tc, void *data)
     rv = apr_file_open(&fh, TESTFN, APR_FOPEN_SPARSE | APR_FOPEN_READ,
                        APR_FPROT_OS_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "open 8gb file for mmap", rv);
-    
+
     APR_ASSERT_SUCCESS(tc, "mmap 8GB file",
                        apr_mmap_create(&map, fh, off, len, APR_MMAP_READ, p));
 
     APR_ASSERT_SUCCESS(tc, "close file", apr_file_close(fh));
 
     ABTS_ASSERT(tc, "mapped a 64K block", map->size == len);
-    
+
     APR_ASSERT_SUCCESS(tc, "get pointer into mmaped region",
                        apr_mmap_offset(&ptr, map, len - 4));
     ABTS_ASSERT(tc, "pointer was not NULL", ptr != NULL);

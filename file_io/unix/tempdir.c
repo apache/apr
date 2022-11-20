@@ -37,7 +37,7 @@ static int test_tempdir(const char *temp_dir, apr_pool_t *p)
 }
 
 
-APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir, 
+APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
                                            apr_pool_t *p)
 {
     apr_status_t apr_err;
@@ -60,7 +60,7 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
           "/var/tmp"
           "/usr/tmp"
           P_tmpdir      (POSIX define)
-          `pwd` 
+          `pwd`
 
        NOTE: This algorithm is basically the same one used by Python
        2.2's tempfile.py module.  */
@@ -102,16 +102,16 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
     }
 
 #ifdef P_tmpdir
-    /* 
-     * If we have it, use the POSIX definition of where 
-     * the tmpdir should be 
+    /*
+     * If we have it, use the POSIX definition of where
+     * the tmpdir should be
      */
     if (test_tempdir(P_tmpdir, p)) {
         dir = P_tmpdir;
         goto end;
     }
 #endif
-    
+
     /* Finally, try the current working directory. */
     if (APR_SUCCESS == apr_filepath_get(&cwd, APR_FILEPATH_NATIVE, p)) {
         if (test_tempdir(cwd, p)) {

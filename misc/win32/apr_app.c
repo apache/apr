@@ -31,7 +31,7 @@
  *   _dbg_malloc/realloc is used in place of the usual API, in order
  *   to convince the MSVCRT that it created these entities.  If we
  *   do not create them as _CRT_BLOCK entities, the crt will fault
- *   on an assert.  We are not worrying about the crt's locks here, 
+ *   on an assert.  We are not worrying about the crt's locks here,
  *   since we are single threaded [so far].
  */
 

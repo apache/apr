@@ -59,7 +59,7 @@ static void launch_child(abts_case *tc, apr_proc_t *proc, const char *arg1, apr_
     APR_ASSERT_SUCCESS(tc, "Couldn't launch program", rv);
 }
 
-static int wait_child(abts_case *tc, apr_proc_t *proc) 
+static int wait_child(abts_case *tc, apr_proc_t *proc)
 {
     int exitcode;
     apr_exit_why_e why;
@@ -181,11 +181,11 @@ static apr_socket_t *setup_socket(abts_case *tc)
 
     rv = apr_socket_opt_set(sock, APR_SO_REUSEADDR, 1);
     APR_ASSERT_SUCCESS(tc, "Could not set REUSEADDR on socket", rv);
-    
+
     rv = apr_socket_bind(sock, sa);
     APR_ASSERT_SUCCESS(tc, "Problem binding to port", rv);
     if (rv) return NULL;
-                
+
     rv = apr_socket_listen(sock, 5);
     APR_ASSERT_SUCCESS(tc, "Problem listening on socket", rv);
 
@@ -196,9 +196,9 @@ static void test_create_bind_listen(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_socket_t *sock = setup_socket(tc);
-    
+
     if (!sock) return;
-    
+
     rv = apr_socket_close(sock);
     APR_ASSERT_SUCCESS(tc, "Problem closing socket", rv);
 }
@@ -216,13 +216,13 @@ static void test_send(abts_case *tc, void *data)
     if (!sock) return;
 
     launch_child(tc, &proc, "read", p);
-    
+
     rv = apr_socket_accept(&sock2, sock, p);
     APR_ASSERT_SUCCESS(tc, "Problem with receiving connection", rv);
 
     apr_socket_protocol_get(sock2, &protocol);
     ABTS_INT_EQUAL(tc, APR_PROTO_TCP, protocol);
-    
+
     length = strlen(DATASTR);
     apr_socket_send(sock2, DATASTR, &length);
 
@@ -244,18 +244,18 @@ static void test_recv(abts_case *tc, void *data)
     int protocol;
     apr_size_t length = STRLEN;
     char datastr[STRLEN];
-    
+
     sock = setup_socket(tc);
     if (!sock) return;
 
     launch_child(tc, &proc, "write", p);
-    
+
     rv = apr_socket_accept(&sock2, sock, p);
     APR_ASSERT_SUCCESS(tc, "Problem with receiving connection", rv);
 
     apr_socket_protocol_get(sock2, &protocol);
     ABTS_INT_EQUAL(tc, APR_PROTO_TCP, protocol);
-    
+
     memset(datastr, 0, STRLEN);
     apr_socket_recv(sock2, datastr, &length);
 
@@ -338,19 +338,19 @@ static void test_timeout(abts_case *tc, void *data)
     apr_proc_t proc;
     int protocol;
     int exit;
-    
+
     sock = setup_socket(tc);
     if (!sock) return;
 
     launch_child(tc, &proc, "read", p);
-    
+
     rv = apr_socket_accept(&sock2, sock, p);
     APR_ASSERT_SUCCESS(tc, "Problem with receiving connection", rv);
 
     apr_socket_protocol_get(sock2, &protocol);
     ABTS_INT_EQUAL(tc, APR_PROTO_TCP, protocol);
-    
-    exit = wait_child(tc, &proc);    
+
+    exit = wait_child(tc, &proc);
     ABTS_INT_EQUAL(tc, SOCKET_TIMEOUT, exit);
 
     /* We didn't write any data, so make sure the child program returns
@@ -389,10 +389,10 @@ static void test_print_addr(abts_case *tc, void *data)
         ABTS_INT_NEQUAL(tc, 0, rc);
 
         memset(buf, 'z', sizeof buf);
-        
+
         APR_ASSERT_SUCCESS(tc, "could not get IP address",
                            apr_sockaddr_ip_getbuf(buf, 22, sa));
-        
+
         ABTS_STR_EQUAL(tc, "0.0.0.0", buf);
     }
 #endif
@@ -443,7 +443,7 @@ static void test_get_addr(abts_case *tc, void *data)
 
     APR_ASSERT_SUCCESS(tc, "accept connection",
                        apr_socket_accept(&sd, ld, subp));
-    
+
     {
         /* wait for writability */
         apr_pollfd_t pfd;
@@ -488,7 +488,7 @@ static void test_get_addr(abts_case *tc, void *data)
 
     ABTS_PTR_EQUAL(tc, subp, sa->pool);
     ABTS_PTR_EQUAL(tc, subp, ca->pool);
-                       
+
     apr_socket_close(cd);
     apr_socket_close(sd);
     apr_socket_close(ld);
@@ -614,11 +614,11 @@ static void test_freebind(abts_case *tc, void *data)
     apr_socket_t *sock;
     apr_sockaddr_t *sa;
     apr_int32_t on;
-    
+
     /* RFC 5737 address */
     rv = apr_sockaddr_info_get(&sa, "192.0.2.1", APR_INET, 8080, 0, p);
     APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
-    
+
     rv = apr_socket_create(&sock, sa->family, SOCK_STREAM, APR_PROTO_TCP, p);
     APR_ASSERT_SUCCESS(tc, "Problem creating socket", rv);
 
@@ -627,14 +627,14 @@ static void test_freebind(abts_case *tc, void *data)
 
     rv = apr_socket_opt_set(sock, APR_SO_FREEBIND, 1);
     APR_ASSERT_SUCCESS(tc, "Could not enable FREEBIND option", rv);
-    
+
     rv = apr_socket_opt_get(sock, APR_SO_FREEBIND, &on);
     APR_ASSERT_SUCCESS(tc, "Could not retrieve FREEBIND option", rv);
     ABTS_INT_EQUAL(tc, 1, on);
-    
+
     rv = apr_socket_bind(sock, sa);
     APR_ASSERT_SUCCESS(tc, "Problem binding to port with FREEBIND", rv);
-    
+
     rv = apr_socket_close(sock);
     APR_ASSERT_SUCCESS(tc, "Problem closing socket", rv);
 #endif
@@ -648,7 +648,7 @@ static void test_freebind(abts_case *tc, void *data)
 /* ... fill in other platforms here */
 #endif
 
-#ifdef TEST_ZONE_NAME 
+#ifdef TEST_ZONE_NAME
 #define TEST_ZONE_FULLADDR TEST_ZONE_ADDR "%" TEST_ZONE_NAME
 #endif
 
@@ -659,7 +659,7 @@ static void test_zone(abts_case *tc, void *data)
     apr_status_t rv;
     const char *name = NULL;
     apr_uint32_t id = 0;
-    
+
     rv = apr_sockaddr_info_get(&sa, "127.0.0.1", APR_INET, 8080, 0, p);
     APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
 
@@ -668,7 +668,7 @@ static void test_zone(abts_case *tc, void *data)
                    apr_sockaddr_zone_set(sa, "1"));
     ABTS_INT_EQUAL(tc, APR_EBADIP,
                    apr_sockaddr_zone_get(sa, &name, &id, p));
-    
+
     rv = apr_sockaddr_info_get(&sa, "::1", APR_INET6, 8080, 0, p);
     APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
 
@@ -684,13 +684,13 @@ static void test_zone(abts_case *tc, void *data)
     {
         apr_sockaddr_t *sa2;
         char buf[50];
-        
+
         APR_ASSERT_SUCCESS(tc, "Set zone to " TEST_ZONE_NAME,
                            apr_sockaddr_zone_set(sa, TEST_ZONE_NAME));
-        
+
         APR_ASSERT_SUCCESS(tc, "Get zone",
                            apr_sockaddr_zone_get(sa, NULL, NULL, p));
-        
+
         APR_ASSERT_SUCCESS(tc, "Get zone",
                            apr_sockaddr_zone_get(sa, &name, &id, p));
         ABTS_STR_EQUAL(tc, TEST_ZONE_NAME, name);
@@ -704,12 +704,12 @@ static void test_zone(abts_case *tc, void *data)
         memset(buf, 'A', sizeof buf);
         ABTS_INT_EQUAL(tc, APR_ENOSPC, apr_sockaddr_ip_getbuf(buf, strlen(TEST_ZONE_ADDR), sa));
         ABTS_INT_EQUAL(tc, APR_ENOSPC, apr_sockaddr_ip_getbuf(buf, strlen(TEST_ZONE_FULLADDR), sa));
-        
+
         APR_ASSERT_SUCCESS(tc, "get IP address",
                            apr_sockaddr_ip_getbuf(buf, strlen(TEST_ZONE_FULLADDR) + 1, sa));
         /* Check for overflow. */
         ABTS_INT_EQUAL(tc, 'A', buf[strlen(buf) + 1]);
-        
+
         rv = apr_sockaddr_info_copy(&sa2, sa, p);
         APR_ASSERT_SUCCESS(tc, "Problem copying sockaddr", rv);
 
@@ -733,7 +733,7 @@ static void test_zone(abts_case *tc, void *data)
 #endif /* TEST_ZONE_NAME */
 #endif /* APR_HAVE_IPV6 */
 }
-    
+
 abts_suite *testsock(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)

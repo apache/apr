@@ -35,7 +35,7 @@ static apr_status_t thread_rwlock_cleanup(void *data)
     }
 #endif
     return stat;
-} 
+}
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
                                                    apr_pool_t *pool)

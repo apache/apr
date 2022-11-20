@@ -87,7 +87,7 @@ APR_DECLARE(apr_status_t) apr_base64init_ebcdic(apr_xlate_t *to_ascii,
     apr_size_t inbytes_left, outbytes_left;
     apr_status_t rv;
     int onoff;
-    
+
     /* Only single-byte conversion is supported.
      */
     rv = apr_xlate_sb_get(to_ascii, &onoff);
@@ -135,7 +135,7 @@ APR_DECLARE(int) apr_base64_decode(char *bufplain, const char *bufcoded)
     apr_size_t inbytes_left, outbytes_left;
 #endif /* APR_CHARSET_EBCDIC */
     int len;
-    
+
     len = apr_base64_decode_binary((unsigned char *) bufplain, bufcoded);
 #if APR_CHARSET_EBCDIC
     inbytes_left = outbytes_left = len;

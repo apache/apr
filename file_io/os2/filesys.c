@@ -27,8 +27,8 @@
  *
  * Leading spaces and periods are accepted, however.
  * The * ? < > codes all have wildcard side effects
- * The " / \ : are exclusively component separator tokens 
- * The system doesn't accept | for any (known) purpose 
+ * The " / \ : are exclusively component separator tokens
+ * The system doesn't accept | for any (known) purpose
  * Oddly, \x7f _is_ acceptable ;)
  */
 
@@ -63,7 +63,7 @@ apr_status_t filepath_root_test(char *path, apr_pool_t *p)
 }
 
 
-apr_status_t filepath_drive_get(char **rootpath, char drive, 
+apr_status_t filepath_drive_get(char **rootpath, char drive,
                                 apr_int32_t flags, apr_pool_t *p)
 {
     char path[APR_PATH_MAX];
@@ -130,7 +130,7 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **defpath, apr_int32_t flags,
     }
 
     return APR_SUCCESS;
-}    
+}
 
 
 

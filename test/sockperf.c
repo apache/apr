@@ -58,14 +58,14 @@ struct testResult {
 static apr_int16_t testPort = 4747;
 static apr_sockaddr_t *sockAddr = NULL;
 
-static void reportError(const char *msg, apr_status_t rv, 
+static void reportError(const char *msg, apr_status_t rv,
                         apr_pool_t *pool)
 {
     fprintf(stderr, "%s\n", msg);
     if (rv != APR_SUCCESS)
         fprintf(stderr, "Error: %d\n'%s'\n", rv,
                 apr_psprintf(pool, "%pm", &rv));
-    
+
 }
 
 static void closeConnection(apr_socket_t *sock)
@@ -74,7 +74,7 @@ static void closeConnection(apr_socket_t *sock)
     apr_socket_send(sock, NULL, &len);
 }
 
-static apr_status_t sendRecvBuffer(apr_time_t *t, const char *buf, 
+static apr_status_t sendRecvBuffer(apr_time_t *t, const char *buf,
                                    apr_size_t size, apr_pool_t *pool)
 {
     apr_socket_t *sock;
@@ -142,14 +142,14 @@ static apr_status_t sendRecvBuffer(apr_time_t *t, const char *buf,
 
         rv = apr_socket_send(sock, buf, &len);
         if (rv != APR_SUCCESS || len != size) {
-            reportError(apr_psprintf(pool, 
+            reportError(apr_psprintf(pool,
                          "Unable to send data correctly (iteration %d of 3)",
                          i) , rv, pool);
             closeConnection(sock);
             apr_socket_close(sock);
             return rv;
         }
-    
+
         do {
             len = thistime;
             rv = apr_socket_recv(sock, &recvBuf[size - thistime], &len);
@@ -169,7 +169,7 @@ static apr_status_t sendRecvBuffer(apr_time_t *t, const char *buf,
     if (thistime) {
         reportError("Received less than we sent :-(", rv, pool);
         return rv;
-    }        
+    }
     if (strncmp(recvBuf, buf, size) != 0) {
         reportError("Received corrupt data :-(", 0, pool);
         printf("We sent:\n%s\nWe received:\n%s\n", buf, recvBuf);
@@ -186,7 +186,7 @@ static apr_status_t runTest(struct testSet *ts, struct testResult *res,
     apr_status_t rv = APR_SUCCESS;
     int i;
     apr_size_t sz = ts->size * TEST_SIZE;
-    
+
     buffer = apr_palloc(pool, sz);
     if (!buffer) {
         reportError("Unable to allocate buffer", ENOMEM, pool);
@@ -224,7 +224,7 @@ int main(int argc, char **argv)
 
     apr_pool_create(&pool, NULL);
 
-    results = (struct testResult *)apr_pcalloc(pool, 
+    results = (struct testResult *)apr_pcalloc(pool,
                                         sizeof(*results) * nTests);
 
     for (i = 0; i < nTests; i++) {

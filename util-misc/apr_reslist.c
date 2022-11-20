@@ -392,7 +392,7 @@ static apr_status_t reslist_acquire(apr_reslist_t *reslist,
     while (reslist->ntotal >= reslist->hmax && reslist->nidle <= 0) {
 #if APR_HAS_THREADS
         if (reslist->timeout) {
-            if ((rv = apr_thread_cond_timedwait(reslist->avail, 
+            if ((rv = apr_thread_cond_timedwait(reslist->avail,
                 reslist->listlock, reslist->timeout)) != APR_SUCCESS) {
                 apr_thread_mutex_unlock(reslist->listlock);
                 return rv;

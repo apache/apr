@@ -41,7 +41,7 @@ static apr_file_t no_file = { NULL, -1, };
 
 APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new, apr_pool_t *pool)
 {
-    (*new) = (apr_procattr_t *)apr_palloc(pool, 
+    (*new) = (apr_procattr_t *)apr_palloc(pool,
               sizeof(apr_procattr_t));
 
     if ((*new) == NULL) {
@@ -54,7 +54,7 @@ APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new, apr_pool_t *
     (*new)->child_out = NULL;
     (*new)->parent_err = NULL;
     (*new)->child_err = NULL;
-    (*new)->currdir = NULL; 
+    (*new)->currdir = NULL;
     (*new)->cmdtype = APR_PROGRAM;
     (*new)->detached = FALSE;
     return APR_SUCCESS;
@@ -69,7 +69,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
 
     if ((in != APR_NO_PIPE) && (in != APR_NO_FILE)) {
         /* APR_CHILD_BLOCK maps to APR_WRITE_BLOCK, while
-         * APR_PARENT_BLOCK maps to APR_READ_BLOCK, so transpose 
+         * APR_PARENT_BLOCK maps to APR_READ_BLOCK, so transpose
          * the CHILD/PARENT blocking flags for the stdin pipe.
          * stdout/stderr map to the correct mode by default.
          */
@@ -160,7 +160,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr, apr_f
                 rv = apr_file_inherit_set(attr->child_out);
         }
     }
-  
+
     if (parent_out != NULL && rv == APR_SUCCESS) {
         rv = apr_file_dup(&attr->parent_out, parent_out, attr->pool);
     }
@@ -189,7 +189,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr, apr_f
                 rv = apr_file_inherit_set(attr->child_err);
         }
     }
-  
+
     if (parent_err != NULL && rv == APR_SUCCESS) {
         rv = apr_file_dup(&attr->parent_err, parent_err, attr->pool);
     }
@@ -207,13 +207,13 @@ APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr, const char 
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
-                                                   apr_cmdtype_e cmd) 
+                                                   apr_cmdtype_e cmd)
 {
     attr->cmdtype = cmd;
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr, apr_int32_t detach) 
+APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr, apr_int32_t detach)
 {
     attr->detached = detach;
     return APR_SUCCESS;
@@ -222,7 +222,7 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr, apr_int3
 APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
 {
     int pid;
-    
+
     if ((pid = fork()) < 0) {
         return errno;
     }
@@ -231,15 +231,15 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
         apr_thread_current_after_fork();
 #endif
         proc->pid = pid;
-        proc->in = NULL; 
-        proc->out = NULL; 
-        proc->err = NULL; 
+        proc->in = NULL;
+        proc->out = NULL;
+        proc->err = NULL;
         return APR_INCHILD;
     }
     proc->pid = pid;
-    proc->in = NULL; 
-    proc->out = NULL; 
-    proc->err = NULL; 
+    proc->in = NULL;
+    proc->out = NULL;
+    proc->err = NULL;
     return APR_INPARENT;
 }
 
@@ -253,20 +253,20 @@ static char *double_quotes(apr_pool_t *pool, const char *str)
     int num_quotes = 0;
     int len = 0;
     char *quote_doubled_str, *dest;
-    
+
     while (str[len]) {
         num_quotes += str[len++] == '\"';
     }
-    
+
     quote_doubled_str = apr_palloc(pool, len + num_quotes + 1);
     dest = quote_doubled_str;
-    
+
     while (*str) {
         if (*str == '\"')
             *(dest++) = '\"';
         *(dest++) = *(str++);
     }
-    
+
     *dest = 0;
     return quote_doubled_str;
 }
@@ -336,7 +336,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
         else
             DosDupHandle(attr->child_in->filedes, &dup);
     }
-    
+
     if (attr->child_out) {
         save_out = -1;
         DosDupHandle(STDOUT_FILENO, &save_out);
@@ -346,7 +346,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
         else
             DosDupHandle(attr->child_out->filedes, &dup);
     }
-    
+
     if (attr->child_err) {
         save_err = -1;
         DosDupHandle(STDERR_FILENO, &save_err);
@@ -361,7 +361,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
 
     if (attr->currdir != NULL) {
         _getcwd2(savedir, sizeof(savedir));
-        
+
         if (_chdir2(attr->currdir) < 0) {
             if (criticalsection)
                 DosExitCritSec();
@@ -516,7 +516,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
         DosDupHandle(save_in, &dup);
         DosClose(save_in);
     }
-    
+
     if (attr->child_out) {
         if  (attr->child_out->filedes != -1) {
             apr_file_close(attr->child_out);
@@ -526,7 +526,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
         DosDupHandle(save_out, &dup);
         DosClose(save_out);
     }
-    
+
     if (attr->child_err) {
         if (attr->child_err->filedes != -1) {
             apr_file_close(attr->child_err);
@@ -545,8 +545,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
 
 
 
-static void proces_result_codes(RESULTCODES codes, 
-                                int *exitcode, 
+static void proces_result_codes(RESULTCODES codes,
+                                int *exitcode,
                                 apr_exit_why_e *exitwhy)
 {
     int result = 0;
@@ -624,7 +624,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
     }
 
     return APR_FROM_OS_ERROR(rc);
-} 
+}
 
 
 
@@ -645,7 +645,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
     }
 
     return APR_FROM_OS_ERROR(rc);
-} 
+}
 
 
 
@@ -654,7 +654,7 @@ APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize)
     return APR_ENOTIMPL;
 }
 
-APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr,
                                                 const char *username,
                                                 const char *password)
 {

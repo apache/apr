@@ -48,7 +48,7 @@ APR_DECLARE(apr_status_t) apr_socket_sendto(apr_socket_t *sock,
     int serrno;
 
     do {
-        rv = sendto(sock->socketdes, buf, (*len), flags, 
+        rv = sendto(sock->socketdes, buf, (*len), flags,
                     (struct sockaddr*)&where->sa,
                     where->salen);
 

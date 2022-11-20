@@ -39,7 +39,7 @@ static void username(abts_case *tc, void *data)
 
     APR_ASSERT_SUCCESS(tc, "apr_uid_current failed",
                        apr_uid_current(&uid, &gid, p));
-   
+
     APR_ASSERT_SUCCESS(tc, "apr_uid_name_get failed",
                        apr_uid_name_get(&uname, uid, p));
     ABTS_PTR_NOTNULL(tc, uname);
@@ -65,7 +65,7 @@ static void username(abts_case *tc, void *data)
         }
         else {
             ABTS_NOT_IMPL(tc, "Groups from apr_uid_get");
-        }        
+        }
     }
     else {
 #endif

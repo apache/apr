@@ -33,8 +33,8 @@ APR_DECLARE(apr_status_t) apr_gid_name_get(char **groupname, apr_gid_t groupid,
 {
     return APR_ENOTIMPL;
 }
-  
-APR_DECLARE(apr_status_t) apr_gid_get(apr_gid_t *groupid, 
+
+APR_DECLARE(apr_status_t) apr_gid_get(apr_gid_t *groupid,
                                       const char *groupname, apr_pool_t *p)
 {
     return APR_ENOTIMPL;

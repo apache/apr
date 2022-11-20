@@ -228,7 +228,7 @@ static void show_info(apr_status_t rv, apr_status_t expected, const apr_uri_t *i
         fprintf(stderr, "  actual rv: %d    expected rv:  %d\n", rv, expected);
     }
     else {
-        fprintf(stderr, 
+        fprintf(stderr,
                 "  scheme:           %s\n"
                 "  hostinfo:         %s\n"
                 "  user:             %s\n"

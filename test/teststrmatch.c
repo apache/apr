@@ -43,7 +43,7 @@ static void test_str(abts_case *tc, void *data)
 
     pattern = apr_strmatch_precompile(pool, "pattern", 1);
     ABTS_PTR_NOTNULL(tc, pattern);
- 
+
     pattern_nocase = apr_strmatch_precompile(pool, "pattern", 0);
     ABTS_PTR_NOTNULL(tc, pattern_nocase);
 

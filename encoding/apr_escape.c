@@ -1171,7 +1171,7 @@ APR_DECLARE(apr_status_t) apr_escape_ldap(char *escaped, const void *str,
         }
         else {
             while (((c = *s) && slen) || (slen > 0)) {
-                if (((flags & APR_ESCAPE_LDAP_DN) && TEST_CHAR(c, T_ESCAPE_LDAP_DN)) 
+                if (((flags & APR_ESCAPE_LDAP_DN) && TEST_CHAR(c, T_ESCAPE_LDAP_DN))
                      || ((flags & APR_ESCAPE_LDAP_FILTER) && TEST_CHAR(c, T_ESCAPE_LDAP_FILTER))) {
                     size += 2;
                     found = 1;

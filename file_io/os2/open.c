@@ -49,7 +49,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     dafile->flags = flag;
     dafile->blocking = BLK_ON;
     dafile->ungetchar = -1;
-    
+
     if ((flag & APR_FOPEN_READ) && (flag & APR_FOPEN_WRITE)) {
         mflags |= OPEN_ACCESS_READWRITE;
     } else if (flag & APR_FOPEN_READ) {
@@ -83,7 +83,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
             oflags |= OPEN_ACTION_OPEN_IF_EXISTS;
         }
     }
-    
+
     if ((flag & APR_FOPEN_EXCL) && !(flag & APR_FOPEN_CREATE))
         return APR_EACCES;
 
@@ -92,20 +92,20 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     } else if ((oflags & 0xFF) == 0) {
         oflags |= OPEN_ACTION_OPEN_IF_EXISTS;
     }
-    
+
     rv = DosOpen(fname, &(dafile->filedes), &action, 0, 0, oflags, mflags, NULL);
-    
+
     if (rv == 0 && (flag & APR_FOPEN_APPEND)) {
         ULONG newptr;
         rv = DosSetFilePtr(dafile->filedes, 0, FILE_END, &newptr );
-        
+
         if (rv)
             DosClose(dafile->filedes);
     }
-    
+
     if (rv != 0)
         return APR_FROM_OS_ERROR(rv);
-    
+
     dafile->isopen = TRUE;
     dafile->fname = apr_pstrdup(pool, fname);
     dafile->filePtr = 0;
@@ -128,18 +128,18 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
 {
     ULONG rc;
     apr_status_t status;
-    
+
     if (file && file->isopen) {
         status = apr_file_flush(file);
         rc = DosClose(file->filedes);
-    
+
         if (rc == 0) {
             file->isopen = FALSE;
 
             if (file->flags & APR_FOPEN_DELONCLOSE) {
                 status = APR_FROM_OS_ERROR(DosDelete(file->fname));
             }
-            /* else we return the status of the flush attempt 
+            /* else we return the status of the flush attempt
              * when all else succeeds
              */
         } else {
@@ -217,7 +217,7 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, apr_os_file_t *thef
     }
 
     return APR_SUCCESS;
-}    
+}
 
 
 APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr)
@@ -226,10 +226,10 @@ APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr)
         return APR_EOF;
     }
     return APR_SUCCESS;
-}   
+}
 
 
-APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile, 
+APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile,
                                                      apr_int32_t flags,
                                                      apr_pool_t *pool)
 {
@@ -239,7 +239,7 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile,
 }
 
 
-APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile, 
+APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile,
                                                      apr_int32_t flags,
                                                      apr_pool_t *pool)
 {
@@ -249,7 +249,7 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile,
 }
 
 
-APR_DECLARE(apr_status_t) apr_file_open_flags_stdin(apr_file_t **thefile, 
+APR_DECLARE(apr_status_t) apr_file_open_flags_stdin(apr_file_t **thefile,
                                                     apr_int32_t flags,
                                                     apr_pool_t *pool)
 {

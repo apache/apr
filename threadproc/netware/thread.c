@@ -24,7 +24,7 @@ static int thread_count = 0;
 apr_status_t apr_threadattr_create(apr_threadattr_t **new,
                                                 apr_pool_t *pool)
 {
-    (*new) = (apr_threadattr_t *)apr_palloc(pool, 
+    (*new) = (apr_threadattr_t *)apr_palloc(pool,
               sizeof(apr_threadattr_t));
 
     if ((*new) == NULL) {
@@ -41,7 +41,7 @@ apr_status_t apr_threadattr_create(apr_threadattr_t **new,
 apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr,apr_int32_t on)
 {
     attr->detach = on;
-    return APR_SUCCESS;   
+    return APR_SUCCESS;
 }
 
 apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr)
@@ -64,7 +64,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
     return APR_ENOTIMPL;
 }
 
-APR_DECLARE(apr_status_t) apr_threadattr_max_free_set(apr_threadattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_threadattr_max_free_set(apr_threadattr_t *attr,
                                                       apr_size_t size)
 {
     attr->max_free = size;
@@ -265,7 +265,7 @@ void apr_thread_exit(apr_thread_t *thd, apr_status_t retval)
 apr_status_t apr_thread_join(apr_status_t *retval,
                                           apr_thread_t *thd)
 {
-    apr_status_t  stat;    
+    apr_status_t  stat;
     NXThreadId_t dthr;
 
     if (thd->detached) {

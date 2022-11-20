@@ -34,10 +34,10 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname, apr
     FILESTATUS3 filestatus;
     int rv;
     apr_dir_t *thedir = (apr_dir_t *)apr_palloc(pool, sizeof(apr_dir_t));
-    
+
     if (thedir == NULL)
         return APR_ENOMEM;
-    
+
     thedir->pool = pool;
     thedir->dirname = apr_pstrdup(pool, dirname);
 
@@ -67,17 +67,17 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname, apr
 APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *thedir)
 {
     int rv = 0;
-    
+
     if (thedir->handle) {
         rv = DosFindClose(thedir->handle);
-        
+
         if (rv == 0) {
             thedir->handle = 0;
         }
     }
 
     return APR_FROM_OS_ERROR(rv);
-} 
+}
 
 
 
@@ -86,11 +86,11 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
 {
     int rv;
     ULONG entries = 1;
-    
+
     if (thedir->handle == 0) {
         thedir->handle = HDIR_CREATE;
-        rv = DosFindFirst(apr_pstrcat(thedir->pool, thedir->dirname, "/*", NULL), &thedir->handle, 
-                          FILE_ARCHIVED|FILE_DIRECTORY|FILE_SYSTEM|FILE_HIDDEN|FILE_READONLY, 
+        rv = DosFindFirst(apr_pstrcat(thedir->pool, thedir->dirname, "/*", NULL), &thedir->handle,
+                          FILE_ARCHIVED|FILE_DIRECTORY|FILE_SYSTEM|FILE_HIDDEN|FILE_READONLY,
                           &thedir->entry, sizeof(thedir->entry), &entries, FIL_STANDARD);
     } else {
         rv = DosFindNext(thedir->handle, &thedir->entry, sizeof(thedir->entry), &entries);

@@ -30,7 +30,7 @@
 #if !APR_HAS_SENDFILE
 int main(void)
 {
-    fprintf(stderr, 
+    fprintf(stderr,
             "This program won't work on this platform because there is no "
             "support for sendfile().\n");
     return 0;
@@ -95,13 +95,13 @@ static void create_testfile(apr_pool_t *p, const char *fname)
     apr_finfo_t finfo;
 
     printf("Creating a test file...\n");
-    rv = apr_file_open(&f, fname, 
+    rv = apr_file_open(&f, fname,
                  APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_TRUNCATE | APR_FOPEN_BUFFERED,
                  APR_FPROT_UREAD | APR_FPROT_UWRITE, p);
     if (rv) {
         aprerr("apr_file_open()", rv);
     }
-    
+
     buf[0] = FILE_DATA_CHAR;
     buf[1] = '\0';
     for (i = 0; i < FILE_LENGTH; i++) {
@@ -131,7 +131,7 @@ static void create_testfile(apr_pool_t *p, const char *fname)
     }
 
     if (finfo.size != FILE_LENGTH) {
-        fprintf(stderr, 
+        fprintf(stderr,
                 "test file %s should be %ld-bytes long\n"
                 "instead it is %ld-bytes long\n",
                 fname,
@@ -290,11 +290,11 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
     memset(hdtr.trailers[2].iov_base, TRL3_CHAR, TRL3_LEN);
     hdtr.trailers[2].iov_len  = TRL3_LEN;
 
-    expected_len = 
+    expected_len =
         strlen(HDR1) + strlen(HDR2) + HDR3_LEN +
         strlen(TRL1) + strlen(TRL2) + TRL3_LEN +
         FILE_LENGTH;
-    
+
     if (socket_mode == BLK) {
         current_file_offset = 0;
         len = FILE_LENGTH;
@@ -302,13 +302,13 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
         if (rv != APR_SUCCESS) {
             aprerr("apr_socket_sendfile()", rv);
         }
-        
+
         printf("apr_socket_sendfile() updated offset with %ld\n",
                (long int)current_file_offset);
-        
+
         printf("apr_socket_sendfile() updated len with %ld\n",
                (long int)len);
-        
+
         printf("bytes really sent: %" APR_SIZE_T_FMT "\n",
                expected_len);
 
@@ -333,7 +333,7 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
         pfd.desc.s = sock;
         pfd.client_data = NULL;
 
-        rv = apr_pollset_add(pset, &pfd);        
+        rv = apr_pollset_add(pset, &pfd);
         assert(!rv);
 
         total_bytes_sent = 0;
@@ -388,7 +388,7 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
                 }
                 else {
                     hdtr.headers[0].iov_len -= tmplen;
-                    hdtr.headers[0].iov_base = 
+                    hdtr.headers[0].iov_base =
 			(char*) hdtr.headers[0].iov_base + tmplen;
                     tmplen = 0;
                 }
@@ -421,14 +421,14 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
                 }
                 else {
                     hdtr.trailers[0].iov_len -= tmplen;
-                    hdtr.trailers[0].iov_base = 
+                    hdtr.trailers[0].iov_base =
 			(char *)hdtr.trailers[0].iov_base + tmplen;
                     tmplen = 0;
                 }
             }
 
         } while (total_bytes_sent < expected_len &&
-                 (rv == APR_SUCCESS || 
+                 (rv == APR_SUCCESS ||
                  (APR_STATUS_IS_EAGAIN(rv) && socket_mode != TIMEOUT)));
         if (total_bytes_sent != expected_len) {
             fprintf(stderr,
@@ -444,7 +444,7 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
             exit(1);
         }
     }
-    
+
     current_file_offset = 0;
     rv = apr_file_seek(f, APR_CUR, &current_file_offset);
     if (rv != APR_SUCCESS) {
@@ -467,7 +467,7 @@ static int client(apr_pool_t *p, client_socket_mode_t socket_mode,
     if (rv != APR_SUCCESS) {
         aprerr("apr_socket_timeout_set()", rv);
     }
-    
+
     bytes_read = 1;
     rv = apr_socket_recv(sock, buf, &bytes_read);
     if (rv != APR_EOF) {
@@ -575,7 +575,7 @@ static int server(apr_pool_t *p)
                 (int)bytes_read, buf, HDR1);
         exit(1);
     }
-        
+
     assert(sizeof buf > strlen(HDR2));
     bytes_read = strlen(HDR2);
     rv = apr_socket_recv(newsock, buf, &bytes_read);
@@ -614,7 +614,7 @@ static int server(apr_pool_t *p)
             exit(1);
         }
     }
-        
+
     for (i = 0; i < FILE_LENGTH; i++) {
         bytes_read = 1;
         rv = apr_socket_recv(newsock, buf, &bytes_read);
@@ -636,7 +636,7 @@ static int server(apr_pool_t *p)
             exit(1);
         }
     }
-        
+
     assert(sizeof buf > strlen(TRL1));
     bytes_read = strlen(TRL1);
     rv = apr_socket_recv(newsock, buf, &bytes_read);
@@ -653,7 +653,7 @@ static int server(apr_pool_t *p)
                 (int)bytes_read, buf, TRL1);
         exit(1);
     }
-        
+
     assert(sizeof buf > strlen(TRL2));
     bytes_read = strlen(TRL2);
     rv = apr_socket_recv(newsock, buf, &bytes_read);
@@ -692,7 +692,7 @@ static int server(apr_pool_t *p)
             exit(1);
         }
     }
-        
+
     bytes_read = 1;
     rv = apr_socket_recv(newsock, buf, &bytes_read);
     if (rv != APR_EOF) {
@@ -752,7 +752,7 @@ int main(int argc, char *argv[])
             }
             else {
                 host = argv[i];
-            }	
+            }
         }
         return client(p, mode, host, start_server);
     }
@@ -760,7 +760,7 @@ int main(int argc, char *argv[])
         return server(p);
     }
 
-    fprintf(stderr, 
+    fprintf(stderr,
             "Usage: %s client {blocking|nonblocking|timeout} [startserver] [server-host]\n"
             "       %s server\n",
             argv[0], argv[0]);

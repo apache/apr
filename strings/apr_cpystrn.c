@@ -70,10 +70,10 @@ APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src, apr_size_t dst_size)
 
 /*
  * This function provides a way to parse a generic argument string
- * into a standard argv[] form of argument list. It respects the 
+ * into a standard argv[] form of argument list. It respects the
  * usual "whitespace" and quoteing rules. In the future this could
  * be expanded to include support for the apr_call_exec command line
- * string processing (including converting '+' to ' ' and doing the 
+ * string processing (including converting '+' to ' ' and doing the
  * url processing. It does not currently support this function.
  *
  *    token_context: Context from which pool allocations will occur.
@@ -82,9 +82,9 @@ APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src, apr_size_t dst_size)
  *                   of pointers to strings (ie. &(char *argv[]).
  *                   This value will be allocated from the contexts
  *                   pool and filled in with copies of the tokens
- *                   found during parsing of the arg_str. 
+ *                   found during parsing of the arg_str.
  */
-APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str, 
+APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
                                             char ***argv_out,
                                             apr_pool_t *token_context)
 {
@@ -127,7 +127,7 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
             break; \
         } \
     }
- 
+
 /* REMOVE_ESCAPE_CHARS:
  * Compresses the arg string to remove all of the '\' escape chars.
  * The final argv strings should not have any extra escape chars in it.
@@ -151,7 +151,7 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
     ct = cp;
 
     /* This is ugly and expensive, but if anyone wants to figure a
-     * way to support any number of args without counting and 
+     * way to support any number of args without counting and
      * allocating, please go ahead and change the code.
      *
      * Must account for the trailing NULL arg.
@@ -220,7 +220,7 @@ APR_DECLARE(const char *) apr_filepath_name_get(const char *pathname)
 APR_DECLARE(char *) apr_collapse_spaces(char *dest, const char *src)
 {
     while (*src) {
-        if (!apr_isspace(*src)) 
+        if (!apr_isspace(*src))
             *dest++ = *src;
         ++src;
     }

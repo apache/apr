@@ -64,7 +64,7 @@ static void set_socket_vars(apr_socket_t *sock, int family, int type, int protoc
         apr_set_option(sock, APR_IPV6_V6ONLY, 1);
     }
 #endif
-}                                                                                                  
+}
 static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
 {
     *new = (apr_socket_t *)apr_pcalloc(p, sizeof(apr_socket_t));
@@ -72,7 +72,7 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
     (*new)->local_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->pool,
                                                        sizeof(apr_sockaddr_t));
     (*new)->local_addr->pool = p;
-    
+
     (*new)->remote_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->pool,
                                                         sizeof(apr_sockaddr_t));
     (*new)->remote_addr->pool = p;
@@ -91,7 +91,7 @@ APR_DECLARE(apr_status_t) apr_socket_protocol_get(apr_socket_t *sock,
 }
 
 APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
-                                            int type, int protocol, 
+                                            int type, int protocol,
                                             apr_pool_t *cont)
 {
     DWORD flags;
@@ -153,11 +153,11 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
     (*new)->timeout = -1;
     (*new)->disconnected = 0;
 
-    apr_pool_cleanup_register((*new)->pool, (void *)(*new), 
+    apr_pool_cleanup_register((*new)->pool, (void *)(*new),
                         socket_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
-} 
+}
 
 APR_DECLARE(apr_status_t) apr_socket_shutdown(apr_socket_t *thesocket,
                                               apr_shutdown_how_e how)
@@ -199,8 +199,8 @@ APR_DECLARE(apr_status_t) apr_socket_close(apr_socket_t *thesocket)
 APR_DECLARE(apr_status_t) apr_socket_bind(apr_socket_t *sock,
                                           apr_sockaddr_t *sa)
 {
-    if (bind(sock->socketdes, 
-             (struct sockaddr *)&sa->sa, 
+    if (bind(sock->socketdes,
+             (struct sockaddr *)&sa->sa,
              sa->salen) == -1) {
         return apr_get_netos_error();
     }
@@ -236,7 +236,7 @@ APR_DECLARE(apr_status_t) apr_socket_listen(apr_socket_t *sock,
         return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_socket_accept(apr_socket_t **new, 
+APR_DECLARE(apr_status_t) apr_socket_accept(apr_socket_t **new,
                                             apr_socket_t *sock, apr_pool_t *p)
 {
     SOCKET s;
@@ -255,10 +255,10 @@ APR_DECLARE(apr_status_t) apr_socket_accept(apr_socket_t **new,
     }
 
     alloc_socket(new, p);
-    set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM, 
+    set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM,
                     sock->protocol);
 
-    (*new)->timeout = -1;   
+    (*new)->timeout = -1;
     (*new)->disconnected = 0;
 
     (*new)->socketdes = s;
@@ -269,8 +269,8 @@ APR_DECLARE(apr_status_t) apr_socket_accept(apr_socket_t **new,
 
     *(*new)->local_addr = *sock->local_addr;
 
-    /* The above assignment just overwrote the pool entry. Setting the local_addr 
-       pool for the accepted socket back to what it should be.  Otherwise all 
+    /* The above assignment just overwrote the pool entry. Setting the local_addr
+       pool for the accepted socket back to what it should be.  Otherwise all
        allocations for this socket will come from a server pool that is not
        freed until the process goes down.*/
     (*new)->local_addr->pool = p;
@@ -314,7 +314,7 @@ APR_DECLARE(apr_status_t) apr_socket_accept(apr_socket_t **new,
         (*new)->local_interface_unknown = 1;
     }
 
-    apr_pool_cleanup_register((*new)->pool, (void *)(*new), 
+    apr_pool_cleanup_register((*new)->pool, (void *)(*new),
                         socket_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
@@ -360,7 +360,7 @@ static apr_status_t wait_for_connect(apr_socket_t *sock)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock, 
+APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock,
                                              apr_sockaddr_t *sa)
 {
     apr_status_t rv;
@@ -380,8 +380,8 @@ APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock,
     if (rv == APR_FROM_OS_ERROR(WSAEWOULDBLOCK)) {
         if (sock->timeout == 0) {
             /* Tell the app that the connect is in progress...
-             * Gotta play some games here.  connect on Unix will return 
-             * EINPROGRESS under the same circumstances that Windows 
+             * Gotta play some games here.  connect on Unix will return
+             * EINPROGRESS under the same circumstances that Windows
              * returns WSAEWOULDBLOCK. Do some adhoc canonicalization...
              */
             rv = APR_FROM_OS_ERROR(WSAEINPROGRESS);
@@ -483,8 +483,8 @@ APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
     (*apr_sock)->disconnected = 0;
     (*apr_sock)->socketdes = *os_sock_info->os_sock;
     if (os_sock_info->local) {
-        memcpy(&(*apr_sock)->local_addr->sa.sin, 
-               os_sock_info->local, 
+        memcpy(&(*apr_sock)->local_addr->sa.sin,
+               os_sock_info->local,
                (*apr_sock)->local_addr->salen);
         (*apr_sock)->local_addr->pool = cont;
         /* XXX IPv6 - this assumes sin_port and sin6_port at same offset */
@@ -494,7 +494,7 @@ APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
         (*apr_sock)->local_port_unknown = (*apr_sock)->local_interface_unknown = 1;
     }
     if (os_sock_info->remote) {
-        memcpy(&(*apr_sock)->remote_addr->sa.sin, 
+        memcpy(&(*apr_sock)->remote_addr->sa.sin,
                os_sock_info->remote,
                (*apr_sock)->remote_addr->salen);
         (*apr_sock)->remote_addr->pool = cont;
@@ -502,8 +502,8 @@ APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
         (*apr_sock)->remote_addr->port = ntohs((*apr_sock)->remote_addr->sa.sin.sin_port);
         (*apr_sock)->remote_addr_unknown = 0;
     }
-        
-    apr_pool_cleanup_register((*apr_sock)->pool, (void *)(*apr_sock), 
+
+    apr_pool_cleanup_register((*apr_sock)->pool, (void *)(*apr_sock),
                         socket_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
@@ -533,14 +533,14 @@ APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock,
  * This is not trivial to implement.
  */
 
-APR_DECLARE(apr_status_t) apr_socket_inherit_set(apr_socket_t *socket)    
-{    
+APR_DECLARE(apr_status_t) apr_socket_inherit_set(apr_socket_t *socket)
+{
     return APR_ENOTIMPL;
-}    
+}
 
-APR_DECLARE(apr_status_t) apr_socket_inherit_unset(apr_socket_t *socket)    
-{    
+APR_DECLARE(apr_status_t) apr_socket_inherit_unset(apr_socket_t *socket)
+{
     return APR_ENOTIMPL;
-}    
+}
 
 APR_POOL_IMPLEMENT_ACCESSOR(socket);

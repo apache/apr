@@ -29,7 +29,7 @@
 #include <sys/uio.h>
 #endif
 
-static apr_status_t brigade_cleanup(void *data) 
+static apr_status_t brigade_cleanup(void *data)
 {
     return apr_brigade_cleanup(data);
 }
@@ -57,7 +57,7 @@ APR_DECLARE(apr_status_t) apr_brigade_cleanup(void *data)
         apr_bucket_delete(e);
     }
 #endif
-    
+
     /* We don't need to free(bb) because it's allocated from a pool. */
     return APR_SUCCESS;
 }
@@ -68,7 +68,7 @@ APR_DECLARE(apr_status_t) apr_brigade_destroy(apr_bucket_brigade *b)
     return apr_pool_cleanup_run(b->p, b, brigade_cleanup);
 #else
     apr_status_t rv;
-    
+
     APR_BRIGADE_CHECK_CONSISTENCY(b);
 
     rv = apr_pool_cleanup_run(b->p, b, brigade_cleanup);
@@ -109,8 +109,8 @@ APR_DECLARE(apr_bucket_brigade *) apr_brigade_split_ex(apr_bucket_brigade *b,
     else if (!APR_BRIGADE_EMPTY(a)) {
         apr_brigade_cleanup(a);
     }
-    /* Return an empty brigade if there is nothing left in 
-     * the first brigade to split off 
+    /* Return an empty brigade if there is nothing left in
+     * the first brigade to split off
      */
     if (e != APR_BRIGADE_SENTINEL(b)) {
         f = APR_RING_LAST(&b->list);
@@ -183,7 +183,7 @@ APR_DECLARE(apr_status_t) apr_brigade_partition(apr_bucket_brigade *b,
              * and is within this bucket, or this bucket's len
              * is undefined, so now we are ready to split it.
              * First try to split the bucket natively... */
-            if ((rv = apr_bucket_split(e, (apr_size_t)point64)) 
+            if ((rv = apr_bucket_split(e, (apr_size_t)point64))
                     != APR_ENOTIMPL) {
                 *after_point = APR_BUCKET_NEXT(e);
                 return rv;
@@ -212,7 +212,7 @@ APR_DECLARE(apr_status_t) apr_brigade_partition(apr_bucket_brigade *b,
         }
         point64 -= (apr_uint64_t)e->length;
     }
-    *after_point = APR_BRIGADE_SENTINEL(b); 
+    *after_point = APR_BRIGADE_SENTINEL(b);
     return APR_INCOMPLETE;
 }
 
@@ -254,7 +254,7 @@ APR_DECLARE(apr_status_t) apr_brigade_flatten(apr_bucket_brigade *bb,
 {
     apr_size_t actual = 0;
     apr_bucket *b;
- 
+
     for (b = APR_BRIGADE_FIRST(bb);
          b != APR_BRIGADE_SENTINEL(bb);
          b = APR_BUCKET_NEXT(b))
@@ -304,14 +304,14 @@ APR_DECLARE(apr_status_t) apr_brigade_pflatten(apr_bucket_brigade *bb,
     apr_status_t rv;
 
     apr_brigade_length(bb, 1, &actual);
-    
+
     /* XXX: This is dangerous beyond belief.  At least in the
      * apr_brigade_flatten case, the user explicitly stated their
      * buffer length - so we don't up and palloc 4GB for a single
      * file bucket.  This API must grow a useful max boundry,
      * either compiled-in or preset via the *len value.
      *
-     * Shouldn't both fn's grow an additional return value for 
+     * Shouldn't both fn's grow an additional return value for
      * the case that the brigade couldn't be flattened into the
      * provided or allocated buffer (such as APR_EMOREDATA?)
      * Not a failure, simply an advisory result.
@@ -319,7 +319,7 @@ APR_DECLARE(apr_status_t) apr_brigade_pflatten(apr_bucket_brigade *bb,
     total = (apr_size_t)actual;
 
     *c = apr_palloc(pool, total);
-    
+
     rv = apr_brigade_flatten(bb, *c, &total);
 
     if (rv != APR_SUCCESS) {
@@ -687,7 +687,7 @@ skip:
 }
 
 
-APR_DECLARE(apr_status_t) apr_brigade_to_iovec(apr_bucket_brigade *b, 
+APR_DECLARE(apr_status_t) apr_brigade_to_iovec(apr_bucket_brigade *b,
                                                struct iovec *vec, int *nvec)
 {
     int left = *nvec;
@@ -719,7 +719,7 @@ APR_DECLARE(apr_status_t) apr_brigade_to_iovec(apr_bucket_brigade *b,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_brigade_vputstrs(apr_bucket_brigade *b, 
+APR_DECLARE(apr_status_t) apr_brigade_vputstrs(apr_bucket_brigade *b,
                                                apr_brigade_flush flush,
                                                void *ctx,
                                                va_list va)
@@ -761,7 +761,7 @@ APR_DECLARE(apr_status_t) apr_brigade_putc(apr_bucket_brigade *b,
 
 APR_DECLARE(apr_status_t) apr_brigade_write(apr_bucket_brigade *b,
                                             apr_brigade_flush flush,
-                                            void *ctx, 
+                                            void *ctx,
                                             const char *str, apr_size_t nbyte)
 {
     apr_bucket *e = APR_BRIGADE_LAST(b);
@@ -782,7 +782,7 @@ APR_DECLARE(apr_status_t) apr_brigade_write(apr_bucket_brigade *b,
     }
 
     if (nbyte > remaining) {
-        /* either a buffer bucket exists but is full, 
+        /* either a buffer bucket exists but is full,
          * or no buffer bucket exists and the data is too big
          * to buffer.  In either case, we should flush.  */
         if (flush) {
@@ -946,7 +946,7 @@ APR_DECLARE(apr_status_t) apr_brigade_puts(apr_bucket_brigade *bb,
     return apr_brigade_write(bb, flush, ctx, str, strlen(str));
 }
 
-APR_DECLARE_NONSTD(apr_status_t) apr_brigade_putstrs(apr_bucket_brigade *b, 
+APR_DECLARE_NONSTD(apr_status_t) apr_brigade_putstrs(apr_bucket_brigade *b,
                                                      apr_brigade_flush flush,
                                                      void *ctx, ...)
 {
@@ -959,9 +959,9 @@ APR_DECLARE_NONSTD(apr_status_t) apr_brigade_putstrs(apr_bucket_brigade *b,
     return rv;
 }
 
-APR_DECLARE_NONSTD(apr_status_t) apr_brigade_printf(apr_bucket_brigade *b, 
+APR_DECLARE_NONSTD(apr_status_t) apr_brigade_printf(apr_bucket_brigade *b,
                                                     apr_brigade_flush flush,
-                                                    void *ctx, 
+                                                    void *ctx,
                                                     const char *fmt, ...)
 {
     va_list ap;
@@ -1046,12 +1046,12 @@ APR_DECLARE(apr_bucket *) apr_brigade_insert_file(apr_bucket_brigade *bb,
     apr_bucket *e;
 
     if (sizeof(apr_off_t) == sizeof(apr_size_t) || length < MAX_BUCKET_SIZE) {
-        e = apr_bucket_file_create(f, start, (apr_size_t)length, p, 
+        e = apr_bucket_file_create(f, start, (apr_size_t)length, p,
                                    bb->bucket_alloc);
     }
     else {
-        /* Several buckets are needed. */        
-        e = apr_bucket_file_create(f, start, MAX_BUCKET_SIZE, p, 
+        /* Several buckets are needed. */
+        e = apr_bucket_file_create(f, start, MAX_BUCKET_SIZE, p,
                                    bb->bucket_alloc);
 
         while (length > MAX_BUCKET_SIZE) {
@@ -1063,7 +1063,7 @@ APR_DECLARE(apr_bucket *) apr_brigade_insert_file(apr_bucket_brigade *bb,
         }
         e->length = (apr_size_t)length; /* Resize just the last bucket */
     }
-    
+
     APR_BRIGADE_INSERT_TAIL(bb, e);
     return e;
 }

@@ -38,14 +38,14 @@ static void FS3_to_finfo(apr_finfo_t *finfo, FILESTATUS3 *fstatus)
     finfo->device = 0;
     finfo->size = fstatus->cbFile;
     finfo->csize = fstatus->cbFileAlloc;
-    apr_os2_time_to_apr_time(&finfo->atime, fstatus->fdateLastAccess, 
+    apr_os2_time_to_apr_time(&finfo->atime, fstatus->fdateLastAccess,
                              fstatus->ftimeLastAccess );
-    apr_os2_time_to_apr_time(&finfo->mtime, fstatus->fdateLastWrite,  
+    apr_os2_time_to_apr_time(&finfo->mtime, fstatus->fdateLastWrite,
                              fstatus->ftimeLastWrite );
-    apr_os2_time_to_apr_time(&finfo->ctime, fstatus->fdateCreation,   
+    apr_os2_time_to_apr_time(&finfo->ctime, fstatus->fdateCreation,
                              fstatus->ftimeCreation );
     finfo->valid = APR_FINFO_TYPE | APR_FINFO_PROT | APR_FINFO_SIZE
-                 | APR_FINFO_CSIZE | APR_FINFO_MTIME 
+                 | APR_FINFO_CSIZE | APR_FINFO_MTIME
                  | APR_FINFO_CTIME | APR_FINFO_ATIME | APR_FINFO_LINK;
 }
 
@@ -84,7 +84,7 @@ static apr_status_t handle_type(apr_filetype_e *ftype, HFILE file)
 
 
 
-APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t wanted, 
+APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t wanted,
                                    apr_file_t *thefile)
 {
     ULONG rc;
@@ -133,12 +133,12 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
 {
     ULONG rc;
     FILESTATUS3 fstatus;
-    
+
     finfo->protection = 0;
     finfo->filetype = APR_NOFILE;
     finfo->name = NULL;
     rc = DosQueryPathInfo(fname, FIL_STANDARD, &fstatus, sizeof(fstatus));
-    
+
     if (rc == 0) {
         FS3_to_finfo(finfo, &fstatus);
         finfo->fname = fname;

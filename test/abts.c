@@ -97,7 +97,7 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name_full)
     char *p;
     const char *suite_name;
     curr_char = 0;
-    
+
     /* Only end the suite if we actually ran it */
     if (suite && suite->tail &&!suite->tail->not_run) {
         end_suite(suite);
@@ -108,7 +108,7 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name_full)
     subsuite->failed = 0;
     subsuite->skipped = 0;
     subsuite->next = NULL;
-    /* suite_name_full may be an absolute path depending on __FILE__ 
+    /* suite_name_full may be an absolute path depending on __FILE__
      * expansion */
     suite_name = strrchr(suite_name_full, '/');
     if (!suite_name) {
@@ -131,7 +131,7 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name_full)
     if (list_tests) {
         fprintf(stdout, "%s\n", subsuite->name);
     }
-    
+
     subsuite->not_run = 0;
 
     if (suite == NULL) {
@@ -185,12 +185,12 @@ void abts_run_test(abts_suite *ts, test_func f, void *value)
     tc.failed = 0;
     tc.skipped = 0;
     tc.suite = ss;
-    
+
     ss->num_test++;
     update_status();
 
     f(&tc, value);
-    
+
     if (tc.failed) {
         ss->failed++;
     }
@@ -373,7 +373,7 @@ void abts_ptr_notnull(abts_case *tc, const void *ptr, int lineno)
         fflush(stderr);
     }
 }
- 
+
 void abts_ptr_equal(abts_case *tc, const void *expected, const void *actual, int lineno)
 {
     update_status();
@@ -456,7 +456,7 @@ int main(int argc, const char *const argv[]) {
     int rv;
     int list_provided = 0;
     abts_suite *suite = NULL;
-   
+
     initialize();
 
     quiet = !isatty(STDOUT_FILENO);
@@ -503,4 +503,4 @@ int main(int argc, const char *const argv[]) {
     abts_free_suite(suite);
     return rv;
 }
-       
+

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 /* Derived from The Open Group Base Specifications Issue 7, IEEE Std 1003.1-2008
@@ -22,9 +22,9 @@
  * Filename pattern matches defined in section 2.13, "Pattern Matching Notation"
  * from chapter 2. "Shell Command Language"
  *   http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_13
- * where; 1. A bracket expression starting with an unquoted <circumflex> '^' 
- * character CONTINUES to specify a non-matching list; 2. an explicit <period> '.' 
- * in a bracket expression matching list, e.g. "[.abc]" does NOT match a leading 
+ * where; 1. A bracket expression starting with an unquoted <circumflex> '^'
+ * character CONTINUES to specify a non-matching list; 2. an explicit <period> '.'
+ * in a bracket expression matching list, e.g. "[.abc]" does NOT match a leading
  * <period> in a filename; 3. a <left-square-bracket> '[' which does not introduce
  * a valid bracket expression is treated as an ordinary character; 4. a differing
  * number of consecutive slashes within pattern and string will NOT match;
@@ -33,10 +33,10 @@
  * Bracket expansion defined in section 9.3.5, "RE Bracket Expression",
  * from chapter 9, "Regular Expressions"
  *   http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html#tag_09_03_05
- * with no support for collating symbols, equivalence class expressions or 
- * character class expressions.  A partial range expression with a leading 
+ * with no support for collating symbols, equivalence class expressions or
+ * character class expressions.  A partial range expression with a leading
  * hyphen following a valid range expression will match only the ordinary
- * <hyphen> and the ending character (e.g. "[a-m-z]" will match characters 
+ * <hyphen> and the ending character (e.g. "[a-m-z]" will match characters
  * 'a' through 'm', a <hyphen> '-', or a 'z').
  *
  * NOTE: Only POSIX/C single byte locales are correctly supported at this time.
@@ -65,7 +65,7 @@
 
 
 /* Most MBCS/collation/case issues handled here.  Wildcard '*' is not handled.
- * EOS '\0' and the FNM_PATHNAME '/' delimiters are not advanced over, 
+ * EOS '\0' and the FNM_PATHNAME '/' delimiters are not advanced over,
  * however the "\/" sequence is advanced to '/'.
  *
  * Both pattern and string are **char to support pointer increment of arbitrary
@@ -116,7 +116,7 @@ static APR_INLINE int fnmatch_ch(const char **pattern, const char **string, int 
                 break;
 
 leadingclosebrace:
-            /* Look at only well-formed range patterns; 
+            /* Look at only well-formed range patterns;
              * "x-]" is not allowed unless escaped ("x-\]")
              * XXX: Fix for locale/MBCS character width
              */
@@ -125,7 +125,7 @@ leadingclosebrace:
                 startch = *pattern;
                 *pattern += (escape && ((*pattern)[2] == '\\')) ? 3 : 2;
 
-                /* NOT a properly balanced [expr] pattern, EOS terminated 
+                /* NOT a properly balanced [expr] pattern, EOS terminated
                  * or ranges containing a slash in FNM_PATHNAME mode pattern
                  * fall out to to the rewind and test '[' literal code path
                  */
@@ -137,7 +137,7 @@ leadingclosebrace:
                     result = 0;
                 else if (nocase && (isupper(**string) || isupper(*startch)
                                                       || isupper(**pattern))
-                            && (tolower(**string) >= tolower(*startch)) 
+                            && (tolower(**string) >= tolower(*startch))
                             && (tolower(**string) <= tolower(**pattern)))
                     result = 0;
 
@@ -220,7 +220,7 @@ APR_DECLARE(int) apr_fnmatch(const char *pattern, const char *string, int flags)
         if (slash && (*pattern == '/') && (*string == '/')) {
             ++pattern;
             ++string;
-        }            
+        }
 
 firstsegment:
         /* At the beginning of each segment, validate leading period behavior.
@@ -289,7 +289,7 @@ firstsegment:
                  */
                 for (matchptr = pattern, matchlen = 0; 1; ++matchlen)
                 {
-                    if ((*matchptr == '\0') 
+                    if ((*matchptr == '\0')
                         || (slash && ((*matchptr == '/')
                                       || (escape && (*matchptr == '\\')
                                                  && (matchptr[1] == '/')))))
@@ -321,7 +321,7 @@ firstsegment:
 
                     /* Skip forward in pattern by a single character match
                      * Use a dummy fnmatch_ch() test to count one "[range]" escape
-                     */ 
+                     */
                     /* XXX: Adjust for MBCS */
                     if (escape && (*matchptr == '\\') && matchptr[1]) {
                         matchptr += 2;
@@ -357,7 +357,7 @@ firstsegment:
                 if (!fnmatch_ch(&pattern, &string, flags))
                     continue;
 
-                /* Failed to match, loop against next char offset of string segment 
+                /* Failed to match, loop against next char offset of string segment
                  * until not enough string chars remain to match the fixed pattern
                  */
                 if (wild) {
@@ -396,7 +396,7 @@ firstsegment:
 /* This function is an Apache addition
  * return non-zero if pattern has any glob chars in it
  * @bug Function does not distinguish for FNM_PATHNAME mode, which renders
- * a false positive for test[/]this (which is not a range, but 
+ * a false positive for test[/]this (which is not a range, but
  * seperate test[ and ]this segments and no glob.)
  * @bug Function does not distinguish for non-FNM_ESCAPE mode.
  * @bug Function does not parse []] correctly
@@ -435,7 +435,7 @@ APR_DECLARE(int) apr_fnmatch_test(const char *pattern)
 
 
 /* Find all files matching the specified pattern */
-APR_DECLARE(apr_status_t) apr_match_glob(const char *pattern, 
+APR_DECLARE(apr_status_t) apr_match_glob(const char *pattern,
                                          apr_array_header_t **result,
                                          apr_pool_t *p)
 {
@@ -454,7 +454,7 @@ APR_DECLARE(apr_status_t) apr_match_glob(const char *pattern,
      * I get to it.  rbb
      */
     char *idx = strrchr(pattern, '/');
-    
+
     if (idx == NULL) {
         idx = strrchr(pattern, '\\');
     }

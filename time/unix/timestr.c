@@ -129,7 +129,7 @@ apr_status_t apr_ctime(char *date_str, apr_time_t t)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_strftime(char *s, apr_size_t *retsize, apr_size_t max, 
+apr_status_t apr_strftime(char *s, apr_size_t *retsize, apr_size_t max,
                         const char *format, apr_time_exp_t *xt)
 {
     struct tm tm;

@@ -48,7 +48,7 @@ APR_DECLARE(apr_status_t) apr_sdbm_lock(apr_sdbm_t *db, int type)
      * zero size: either a fresh database, or one with a single,
      * unsplit data page: dirpage is all zeros.
      */
-    if ((status = apr_file_lock(db->dirf, type)) == APR_SUCCESS) 
+    if ((status = apr_file_lock(db->dirf, type)) == APR_SUCCESS)
     {
         apr_finfo_t finfo;
         if ((status = apr_file_info_get(&finfo, APR_FINFO_SIZE, db->dirf))

@@ -170,17 +170,17 @@ static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
   ULONG len;
   char *pos;
   int c;
-  
+
   if (err >= 10000 && err < 12000) {  /* socket error codes */
       return stuffbuffer(buf, bufsize,
                          strerror(apr_canonical_error(err+APR_OS_START_SYSERR)));
-  } 
+  }
   else if (DosGetMessage(NULL, 0, message, HUGE_STRING_LEN, err,
 			 "OSO001.MSG", &len) == 0) {
       len--;
       message[len] = 0;
       pos = result;
-  
+
       if (len >= sizeof(result))
         len = sizeof(result) - 1;
 
@@ -190,17 +190,17 @@ static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
               c++;
           *(pos++) = apr_isspace(message[c]) ? ' ' : message[c];
       }
-  
+
       *pos = 0;
-  } 
+  }
   else {
       sprintf(result, "OS/2 error %d", err);
   }
 
-  /* Stuff the string into the caller supplied buffer, then return 
+  /* Stuff the string into the caller supplied buffer, then return
    * a pointer to it.
    */
-  return stuffbuffer(buf, bufsize, result);  
+  return stuffbuffer(buf, bufsize, result);
 }
 
 #elif defined(WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
@@ -267,7 +267,7 @@ static char *apr_os_strerror(char *buf, apr_size_t bufsize, apr_status_t errcode
     apr_size_t len=0, i;
 
 #ifndef NETWARE
-    len = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM 
+    len = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM
                       | FORMAT_MESSAGE_IGNORE_INSERTS,
                         NULL,
                         errcode,
@@ -311,10 +311,10 @@ static char *apr_os_strerror(char *buf, apr_size_t bufsize, apr_status_t errcode
 }
 
 #else
-/* On Unix, apr_os_strerror() handles error codes from the resolver 
- * (h_errno). 
+/* On Unix, apr_os_strerror() handles error codes from the resolver
+ * (h_errno).
  */
-static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err) 
+static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
 {
 #ifdef HAVE_HSTRERROR
     return stuffbuffer(buf, bufsize, hstrerror(err));
@@ -351,7 +351,7 @@ static char *native_strerror(apr_status_t statcode, char *buf,
                              apr_size_t bufsize)
 {
     if (strerror_r(statcode, buf, bufsize) < 0) {
-        return stuffbuffer(buf, bufsize, 
+        return stuffbuffer(buf, bufsize,
                            "APR does not understand this error code");
     }
     else {
@@ -384,7 +384,7 @@ static char *native_strerror(apr_status_t statcode, char *buf,
     }
 }
 #else
-/* plain old strerror(); 
+/* plain old strerror();
  * thread-safe on some platforms (e.g., Solaris, OS/390)
  */
 static char *native_strerror(apr_status_t statcode, char *buf,
@@ -394,7 +394,7 @@ static char *native_strerror(apr_status_t statcode, char *buf,
     if (err) {
         return stuffbuffer(buf, bufsize, err);
     } else {
-        return stuffbuffer(buf, bufsize, 
+        return stuffbuffer(buf, bufsize,
                            "APR does not understand this error code");
     }
 }

@@ -51,7 +51,7 @@ static apr_status_t mmap_cleanup(void *themmap)
         }
         mm->mv = NULL;
     }
-    if (mm->mhandle) 
+    if (mm->mhandle)
     {
         if (!CloseHandle(mm->mhandle))
         {
@@ -80,7 +80,7 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
 
     if (size == 0)
         return APR_EINVAL;
-    
+
     if (flag & APR_MMAP_WRITE)
         fmaccess |= PAGE_READWRITE;
     else if (flag & APR_MMAP_READ)
@@ -100,14 +100,14 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
         SYSTEM_INFO si;
         GetSystemInfo(&si);
         memblock = si.dwAllocationGranularity;
-    }   
-    
+    }
+
     *new = apr_pcalloc(cont, sizeof(apr_mmap_t));
     pstart = (offset / memblock) * memblock;
     poffset = offset - pstart;
     psize = (apr_size_t)poffset + size;
     /* The size of the CreateFileMapping object is the current size
-     * of the size of the mmap object (e.g. file size), not the size 
+     * of the size of the mmap object (e.g. file size), not the size
      * of the mapped region!
      */
 

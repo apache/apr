@@ -33,7 +33,7 @@ static apr_status_t thread_cond_cleanup(void *data)
     }
 #endif
     return rv;
-} 
+}
 
 APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,
                                                  apr_pool_t *pool)

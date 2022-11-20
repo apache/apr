@@ -57,8 +57,8 @@ APR_DECLARE(apr_status_t) apr_gid_name_get(char **groupname, apr_gid_t groupid,
     *groupname = apr_pstrdup(p, gr->gr_name);
     return APR_SUCCESS;
 }
-  
-APR_DECLARE(apr_status_t) apr_gid_get(apr_gid_t *groupid, 
+
+APR_DECLARE(apr_status_t) apr_gid_get(apr_gid_t *groupid,
                                       const char *groupname, apr_pool_t *p)
 {
     struct group *gr;

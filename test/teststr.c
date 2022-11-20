@@ -106,7 +106,7 @@ static void snprintf_noNULL(abts_case *tc, void *data)
     testing[4] = 'i';
     testing[5] = 'n';
     testing[6] = 'g';
-    
+
     /* If this test fails, we are going to seg fault. */
     apr_snprintf(buff, sizeof(buff), "%.*s", 7, testing);
     ABTS_STR_NEQUAL(tc, buff, testing, 7);
@@ -138,11 +138,11 @@ static void snprintf_underflow(abts_case *tc, void *data)
     rv = apr_snprintf(buf, sizeof buf, "%.2f", (double)0.0001);
     ABTS_INT_EQUAL(tc, 4, rv);
     ABTS_STR_EQUAL(tc, "0.00", buf);
-    
+
     rv = apr_snprintf(buf, sizeof buf, "%.2f", (double)0.001);
     ABTS_INT_EQUAL(tc, 4, rv);
     ABTS_STR_EQUAL(tc, "0.00", buf);
-    
+
     rv = apr_snprintf(buf, sizeof buf, "%.2f", (double)0.01);
     ABTS_INT_EQUAL(tc, 4, rv);
     ABTS_STR_EQUAL(tc, "0.01", buf);
@@ -161,7 +161,7 @@ static void string_error(abts_case *tc, void *data)
      rv = apr_strerror(APR_TIMEUP, buf, sizeof buf);
      ABTS_PTR_EQUAL(tc, buf, rv);
      ABTS_STR_EQUAL(tc, "The timeout specified has expired", buf);
-     
+
      /* throw some randomish numbers at it to check for robustness */
      for (n = 1; n < 1000000; n *= 2) {
          apr_strerror(n, buf, sizeof buf);
@@ -190,7 +190,7 @@ static void string_strtoi64(abts_case *tc, void *data)
         const char *in, *end;
         apr_int64_t result;
     } ts[] = {
-        
+
         /* base 10 tests */
         { 0, 10, "123545", NULL, APR_INT64_C(123545) },
         { 0, 10, "   123545", NULL, APR_INT64_C(123545) },
@@ -245,17 +245,17 @@ static void string_strtoi64(abts_case *tc, void *data)
         char *end = "end ptr not changed";
         apr_int64_t result;
         int errnum;
-        
+
         errno = 0;
         result = apr_strtoi64(ts[n].in, &end, ts[n].base);
         errnum = errno;
 
         ABTS_ASSERT(tc,
-                 apr_psprintf(p, "for '%s': result was %" APR_INT64_T_FMT 
+                 apr_psprintf(p, "for '%s': result was %" APR_INT64_T_FMT
                               " not %" APR_INT64_T_FMT, ts[n].in,
                               result, ts[n].result),
                  result == ts[n].result);
-        
+
         if (ts[n].errnum != -1) {
             ABTS_ASSERT(tc,
                      apr_psprintf(p, "for '%s': errno was %d not %d", ts[n].in,
@@ -339,7 +339,7 @@ static void string_strfsize(abts_case *tc, void *data)
 
     for (n = 0; n < sizeof(ts)/sizeof(ts[0]); n++) {
         char buf[6], *ret;
-        
+
         buf[5] = '%';
 
         ret = apr_strfsize(ts[n].size, buf);
@@ -353,7 +353,7 @@ static void string_strfsize(abts_case *tc, void *data)
 static void string_cpystrn(abts_case *tc, void *data)
 {
     char buf[6], *ret;
-    
+
     buf[5] = 'Z';
 
     ret = apr_cpystrn(buf, "123456", 5);
@@ -368,7 +368,7 @@ static void snprintf_overflow(abts_case *tc, void *data)
 {
     char buf[4];
     int rv;
-    
+
     buf[2] = '4';
     buf[3] = '2';
 

@@ -17,11 +17,11 @@
 #include "apr_portable.h"
 #include "apr_arch_threadproc.h"
 
-apr_status_t apr_threadkey_private_create(apr_threadkey_t **key, 
-                                        void (*dest)(void *), apr_pool_t *pool) 
+apr_status_t apr_threadkey_private_create(apr_threadkey_t **key,
+                                        void (*dest)(void *), apr_pool_t *pool)
 {
     apr_status_t stat;
-    
+
     (*key) = (apr_threadkey_t *)apr_palloc(pool, sizeof(apr_threadkey_t));
     if ((*key) == NULL) {
         return APR_ENOMEM;
@@ -38,12 +38,12 @@ apr_status_t apr_threadkey_private_create(apr_threadkey_t **key,
 apr_status_t apr_threadkey_private_get(void **new, apr_threadkey_t *key)
 {
     apr_status_t stat;
-    
+
     if ((stat = NXKeyGetValue(key->key, new)) == 0) {
         return APR_SUCCESS;
     }
     else {
-        return stat;    
+        return stat;
     }
 }
 
@@ -62,7 +62,7 @@ apr_status_t apr_threadkey_private_delete(apr_threadkey_t *key)
 {
     apr_status_t stat;
     if ((stat = NXKeyDelete(key->key)) == 0) {
-        return APR_SUCCESS; 
+        return APR_SUCCESS;
     }
     return stat;
 }
@@ -86,7 +86,7 @@ apr_status_t apr_os_threadkey_get(apr_os_threadkey_t *thekey,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_os_threadkey_put(apr_threadkey_t **key, 
+apr_status_t apr_os_threadkey_put(apr_threadkey_t **key,
                                 apr_os_threadkey_t *thekey, apr_pool_t *pool)
 {
     if (pool == NULL) {
@@ -98,5 +98,5 @@ apr_status_t apr_os_threadkey_put(apr_threadkey_t **key,
     }
     (*key)->key = *thekey;
     return APR_SUCCESS;
-}           
+}
 

@@ -95,7 +95,7 @@ static void resolve_prot(apr_finfo_t *finfo, apr_int32_t wanted, PACL dacl)
     TRUSTEE_W ident = {NULL, NO_MULTIPLE_TRUSTEE, TRUSTEE_IS_SID};
     ACCESS_MASK acc;
     /*
-     * This function is only invoked for WinNT, 
+     * This function is only invoked for WinNT,
      * there is no reason for os_level testing here.
      */
     if ((wanted & APR_FINFO_WPROT) && !worldid) {
@@ -120,7 +120,7 @@ static void resolve_prot(apr_finfo_t *finfo, apr_int32_t wanted, PACL dacl)
     }
     /* Windows NT: did not return group rights.
      * Windows 2000 returns group rights information.
-     * Since WinNT kernels don't follow the unix model of 
+     * Since WinNT kernels don't follow the unix model of
      * group associations, this all all pretty mute.
      */
     if ((wanted & APR_FINFO_GPROT) && (finfo->valid & APR_FINFO_GROUP)) {
@@ -146,7 +146,7 @@ static apr_status_t resolve_ident(apr_finfo_t *finfo, const char *fname,
 {
     apr_file_t *thefile = NULL;
     apr_status_t rv;
-    /* 
+    /*
      * NT5 (W2K) only supports symlinks in the same manner as mount points.
      * This code should eventually take that into account, for now treat
      * every reparse point as a symlink...
@@ -154,7 +154,7 @@ static apr_status_t resolve_ident(apr_finfo_t *finfo, const char *fname,
      * We must open the file with READ_CONTROL if we plan to retrieve the
      * user, group or permissions.
      */
-    
+
     if ((rv = apr_file_open(&thefile, fname, APR_OPENINFO
                           | ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0)
                           | ((wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
@@ -164,7 +164,7 @@ static apr_status_t resolve_ident(apr_finfo_t *finfo, const char *fname,
         finfo->filehand = NULL;
         apr_file_close(thefile);
     }
-    else if (APR_STATUS_IS_EACCES(rv) && (wanted & (APR_FINFO_PROT 
+    else if (APR_STATUS_IS_EACCES(rv) && (wanted & (APR_FINFO_PROT
                                                   | APR_FINFO_OWNER))) {
         /* We have a backup plan.  Perhaps we couldn't grab READ_CONTROL?
          * proceed without asking for that permission...
@@ -172,7 +172,7 @@ static apr_status_t resolve_ident(apr_finfo_t *finfo, const char *fname,
         if ((rv = apr_file_open(&thefile, fname, APR_OPENINFO
                               | ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0),
                                 APR_FPROT_OS_DEFAULT, pool)) == APR_SUCCESS) {
-            rv = apr_file_info_get(finfo, wanted & ~(APR_FINFO_PROT 
+            rv = apr_file_info_get(finfo, wanted & ~(APR_FINFO_PROT
                                                  | APR_FINFO_OWNER),
                                  thefile);
             finfo->filehand = NULL;
@@ -256,7 +256,7 @@ static int reparse_point_is_link(WIN32_FILE_ATTRIBUTE_DATA *wininfo,
     return IsReparseTagNameSurrogate(tag);
 }
 
-apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, 
+apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
                         apr_int32_t wanted, int whatfile)
 {
     PSID user = NULL, grp = NULL;
@@ -290,7 +290,7 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
                 if (wcsncmp(wfile + fix, L"UNC\\", 4) == 0)
                     wfile[6] = L'\\', fix = 6;
             }
-            rv = GetNamedSecurityInfoW(wfile + fix, 
+            rv = GetNamedSecurityInfoW(wfile + fix,
                                  SE_FILE_OBJECT, sinf,
                                  ((wanted & (APR_FINFO_USER | APR_FINFO_UPROT)) ? &user : NULL),
                                  ((wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT)) ? &grp : NULL),
@@ -300,7 +300,7 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
                 wfile[6] = L'C';
         }
         else if (whatfile == MORE_OF_HANDLE)
-            rv = GetSecurityInfo((HANDLE)ufile, 
+            rv = GetSecurityInfo((HANDLE)ufile,
                                  SE_FILE_OBJECT, sinf,
                                  ((wanted & (APR_FINFO_USER | APR_FINFO_UPROT)) ? &user : NULL),
                                  ((wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT)) ? &grp : NULL),
@@ -309,7 +309,7 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
         else
             return APR_INCOMPLETE; /* should not occur */
         if (rv == ERROR_SUCCESS)
-            apr_pool_cleanup_register(finfo->pool, pdesc, free_localheap, 
+            apr_pool_cleanup_register(finfo->pool, pdesc, free_localheap,
                                  apr_pool_cleanup_null);
         else
             user = grp = dacl = NULL;
@@ -349,7 +349,7 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
                 sizelo = GetCompressedFileSizeW((apr_wchar_t*)ufile, &sizehi);
             else
                 return APR_EGENERAL; /* should not occur */
-        
+
             if (sizelo != INVALID_FILE_SIZE || GetLastError() == NO_ERROR) {
 #if APR_HAS_LARGE_FILES
                 finfo->csize =  (apr_off_t)sizelo
@@ -377,8 +377,8 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
  * if this is a CHR filetype.  If it's reasonably certain it can't be,
  * then the function returns 0.
  */
-int fillin_fileinfo(apr_finfo_t *finfo, 
-                    WIN32_FILE_ATTRIBUTE_DATA *wininfo, 
+int fillin_fileinfo(apr_finfo_t *finfo,
+                    WIN32_FILE_ATTRIBUTE_DATA *wininfo,
                     int byhandle,
                     int finddata,
                     const char *fname,
@@ -420,8 +420,8 @@ int fillin_fileinfo(apr_finfo_t *finfo,
          * appears to be unknowable (in any trustworthy or consistent sense)
          * on WinNT/2K as far as PIPE, CHR, etc are concerned.
          */
-        if (!wininfo->ftLastWriteTime.dwLowDateTime 
-                && !wininfo->ftLastWriteTime.dwHighDateTime 
+        if (!wininfo->ftLastWriteTime.dwLowDateTime
+                && !wininfo->ftLastWriteTime.dwHighDateTime
                 && !finfo->size)
             warn = 1;
         finfo->filetype = APR_REG;
@@ -432,7 +432,7 @@ int fillin_fileinfo(apr_finfo_t *finfo,
      */
     if (wininfo->dwFileAttributes & FILE_ATTRIBUTE_READONLY)
         finfo->protection = APR_FREADONLY;
-    
+
     finfo->valid = APR_FINFO_ATIME | APR_FINFO_CTIME | APR_FINFO_MTIME
                  | APR_FINFO_SIZE  | APR_FINFO_TYPE;   /* == APR_FINFO_MIN */
 
@@ -547,7 +547,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
             else if (FileType == FILE_TYPE_PIPE) {
                 finfo->filetype = APR_PIPE;
             }
-            /* Otherwise leave the original conclusion alone 
+            /* Otherwise leave the original conclusion alone
              */
         }
     }
@@ -559,7 +559,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
      * we pstrdup the fname into???
      */
     finfo->fname = thefile->fname;
- 
+
     /* Extra goodies known only by GetFileInformationByHandle() */
     finfo->inode  =  (apr_ino_t)FileInfo.nFileIndexLow
                   | ((apr_ino_t)FileInfo.nFileIndexHigh << 32);
@@ -568,7 +568,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
 
     finfo->valid |= APR_FINFO_IDENT | APR_FINFO_NLINK;
 
-    /* If we still want something more (besides the name) go get it! 
+    /* If we still want something more (besides the name) go get it!
      */
     if ((wanted &= ~finfo->valid) & ~APR_FINFO_NAME) {
         return more_finfo(finfo, thefile->filehand, wanted, MORE_OF_HANDLE);
@@ -598,20 +598,20 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         WIN32_FILE_ATTRIBUTE_DATA i;
     } FileInfo;
     int finddata = 0;
-    
-    /* Catch fname length == MAX_PATH since GetFileAttributesEx fails 
-     * with PATH_NOT_FOUND.  We would rather indicate length error than 
+
+    /* Catch fname length == MAX_PATH since GetFileAttributesEx fails
+     * with PATH_NOT_FOUND.  We would rather indicate length error than
      * 'not found'
-     */        
+     */
     if (strlen(fname) >= APR_PATH_MAX) {
         return APR_ENAMETOOLONG;
     }
 
-    if ((wanted & (APR_FINFO_IDENT | APR_FINFO_NLINK)) 
+    if ((wanted & (APR_FINFO_IDENT | APR_FINFO_NLINK))
            || (~wanted & APR_FINFO_LINK)) {
         /* FindFirstFile and GetFileAttributesEx can't figure the inode,
-         * device or number of links, so we need to resolve with an open 
-         * file handle.  If the user has asked for these fields, fall over 
+         * device or number of links, so we need to resolve with an open
+         * file handle.  If the user has asked for these fields, fall over
          * to the get file info by handle method.  If we fail, or the user
          * also asks for the file name, continue by our usual means.
          *
@@ -620,18 +620,18 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
          * on a Junction always returns the junction, opening the target
          * is the only way to resolve the target's attributes.
          */
-        if ((ident_rv = resolve_ident(finfo, fname, wanted, pool)) 
+        if ((ident_rv = resolve_ident(finfo, fname, wanted, pool))
                 == APR_SUCCESS)
             return ident_rv;
         else if (ident_rv == APR_INCOMPLETE)
             wanted &= ~finfo->valid;
     }
 
-    if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
+    if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname)
                                         / sizeof(apr_wchar_t), fname)))
         return rv;
     if (!(wanted & APR_FINFO_NAME)) {
-        if (!GetFileAttributesExW(wfname, GetFileExInfoStandard, 
+        if (!GetFileAttributesExW(wfname, GetFileExInfoStandard,
                                   &FileInfo.i))
             return apr_get_os_error();
     }
@@ -659,7 +659,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     }
 
     if (ident_rv != APR_INCOMPLETE) {
-        if (fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 
+        if (fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo,
                             0, finddata, fname, wanted))
         {
             /* Go the extra mile to assure we have a file.  WinNT/2000 seems
@@ -675,9 +675,9 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
                     if (tmpoff == tmpname + 4) {
                         finfo->filetype = APR_CHR;
                     }
-                    /* For WHATEVER reason, CHR devices such as \\.\con 
+                    /* For WHATEVER reason, CHR devices such as \\.\con
                      * or \\.\lpt1 *may*not* update tmpoff; in fact the
-                     * resulting tmpoff is set to NULL.  Guard against 
+                     * resulting tmpoff is set to NULL.  Guard against
                      * either case.
                      *
                      * This code is identical for wide and narrow chars...

@@ -155,7 +155,7 @@ static void test_billion_laughs(abts_case *tc, void *data)
     apr_xml_doc *doc;
     apr_status_t rv;
 
-    rv = apr_file_open(&fd, "data/billion-laughs.xml", 
+    rv = apr_file_open(&fd, "data/billion-laughs.xml",
                        APR_FOPEN_READ, 0, p);
     APR_ASSERT_SUCCESS(tc, "open billion-laughs.xml", rv);
 

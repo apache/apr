@@ -35,7 +35,7 @@ static void create_pipe(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, readp);
     ABTS_PTR_NOTNULL(tc, writep);
-}   
+}
 
 static void close_pipe(abts_case *tc, void *data)
 {
@@ -49,7 +49,7 @@ static void close_pipe(abts_case *tc, void *data)
 
     rv = apr_file_read(readp, buf, &nbytes);
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_EBADF(rv));
-}   
+}
 
 static void set_timeout(abts_case *tc, void *data)
 {
@@ -70,7 +70,7 @@ static void set_timeout(abts_case *tc, void *data)
 
     rv = apr_file_pipe_timeout_get(readp, &timeout);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    ABTS_ASSERT(tc, "Timeout mismatch, expected 1 second", 
+    ABTS_ASSERT(tc, "Timeout mismatch, expected 1 second",
 		        timeout == apr_time_from_sec(1));
 }
 
@@ -79,7 +79,7 @@ static void read_write(abts_case *tc, void *data)
     apr_status_t rv;
     char *buf;
     apr_size_t nbytes;
-    
+
     nbytes = strlen("this is a test");
     buf = (char *)apr_palloc(p, nbytes + 1);
 
@@ -104,7 +104,7 @@ static void read_write_notimeout(abts_case *tc, void *data)
     char *buf = "this is a test";
     char *input;
     apr_size_t nbytes;
-    
+
     nbytes = strlen("this is a test");
 
     rv = apr_file_pipe_create(&readp, &writep, p);
@@ -138,7 +138,7 @@ static void test_pipe_writefull(abts_case *tc, void *data)
     const char *args[2];
     apr_status_t rv;
     apr_exit_why_e why;
-    
+
     rv = apr_procattr_create(&procattr, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
@@ -173,7 +173,7 @@ static void test_pipe_writefull(abts_case *tc, void *data)
 
     rv = apr_file_close(proc.in);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    
+
     nbytes = sizeof(responsebuf);
     rv = apr_file_read(proc.out, responsebuf, &nbytes);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -182,7 +182,7 @@ static void test_pipe_writefull(abts_case *tc, void *data)
 
     ABTS_ASSERT(tc, "wait for child process",
              apr_proc_wait(&proc, NULL, &why, APR_WAIT) == APR_CHILD_DONE);
-    
+
     ABTS_ASSERT(tc, "child terminated normally", why == APR_PROC_EXIT);
 }
 

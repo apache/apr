@@ -247,7 +247,7 @@ static apr_status_t asio_pollset_cleanup(apr_pollset_t *pollset)
     int rv;
 
     DBG(4, "entered\n");
-    if (pollset->flags & APR_POLLSET_THREADSAFE) { 
+    if (pollset->flags & APR_POLLSET_THREADSAFE) {
         rv = msgctl(pollset->p->msg_q, IPC_RMID, NULL);
         DBG1(4, "asio_pollset_cleanup: msgctl(IPC_RMID) returned %d\n", rv);
     }
@@ -484,7 +484,7 @@ static apr_status_t asio_pollset_remove(apr_pollset_t *pollset,
     apr_status_t rv = APR_SUCCESS;
     apr_pollset_private_t *priv = pollset->p;
     /* AIO_CANCEL is synchronous, so autodata works fine.  */
-    struct aiocb cancel_a = {0};   
+    struct aiocb cancel_a = {0};
 
     int fd;
 
@@ -519,7 +519,7 @@ static apr_status_t asio_pollset_remove(apr_pollset_t *pollset,
             cancel_a.aio_cflags  = 0;
             cancel_a.aio_cflags2 = 0;
 
-            /* we want the original aiocb to show up on the pollset message queue 
+            /* we want the original aiocb to show up on the pollset message queue
              * before recycling its memory to eliminate race conditions
              */
 
@@ -650,12 +650,12 @@ static apr_status_t asio_pollset_poll(apr_pollset_t *pollset,
 
         if (elem->state == ASIO_REMOVED) {
 
-            /* 
+            /*
              * async i/o is done since it was found on prior_ready
-             * the state says the caller is done with it too 
-             * so recycle the elem 
+             * the state says the caller is done with it too
+             * so recycle the elem
              */
-             
+
             APR_RING_INSERT_TAIL(&(priv->free_ring), elem,
                                  asio_elem_t, link);
             continue;  /* do not re-add if it has been _removed */

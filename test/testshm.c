@@ -182,7 +182,7 @@ static void test_named(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "Couldn't set copy environment", rv);
 
     args[0] = apr_pstrdup(p, "testshmconsumer" EXTENSION);
-    rv = apr_proc_create(&pidconsumer, TESTBINPATH "testshmconsumer" EXTENSION, args, 
+    rv = apr_proc_create(&pidconsumer, TESTBINPATH "testshmconsumer" EXTENSION, args,
                          NULL, attr2, p);
     APR_ASSERT_SUCCESS(tc, "Couldn't launch consumer", rv);
 
@@ -198,9 +198,9 @@ static void test_named(abts_case *tc, void *data)
      * This way, if they didn't succeed, we can just run this test again
      * without having to cleanup manually.
      */
-    APR_ASSERT_SUCCESS(tc, "Error destroying shared memory", 
+    APR_ASSERT_SUCCESS(tc, "Error destroying shared memory",
                        apr_shm_destroy(shm));
-    
+
     ABTS_INT_EQUAL(tc, sent, received);
 
 }
@@ -298,9 +298,9 @@ abts_suite *testshm(abts_suite *suite)
 #if APR_HAS_FORK
     abts_run_test(suite, test_anon, NULL);
 #endif
-    abts_run_test(suite, test_named, NULL); 
-    abts_run_test(suite, test_named_remove, NULL); 
-    abts_run_test(suite, test_named_delete, NULL); 
+    abts_run_test(suite, test_named, NULL);
+    abts_run_test(suite, test_named_remove, NULL);
+    abts_run_test(suite, test_named_delete, NULL);
 #endif
 
     return suite;

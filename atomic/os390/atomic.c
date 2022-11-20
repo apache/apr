@@ -29,7 +29,7 @@ apr_status_t apr_atomic_init(apr_pool_t *p)
 
 apr_uint32_t apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
-    apr_uint32_t old, new_val; 
+    apr_uint32_t old, new_val;
 
     old = *mem;   /* old is automatically updated on cs failure */
     do {
@@ -55,12 +55,12 @@ apr_uint32_t apr_atomic_inc32(volatile apr_uint32_t *mem)
 
 int apr_atomic_dec32(volatile apr_uint32_t *mem)
 {
-    apr_uint32_t old, new_val; 
+    apr_uint32_t old, new_val;
 
     old = *mem;   /* old is automatically updated on cs failure */
     do {
         new_val = old - 1;
-    } while (__cs(&old, (cs_t *)mem, new_val)); 
+    } while (__cs(&old, (cs_t *)mem, new_val));
 
     return new_val != 0;
 }
@@ -75,11 +75,11 @@ void apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
     *mem = val;
 }
 
-apr_uint32_t apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint32_t swap, 
+apr_uint32_t apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint32_t swap,
                               apr_uint32_t cmp)
 {
     apr_uint32_t old = cmp;
-    
+
     __cs(&old, (cs_t *)mem, swap);
     return old; /* old is automatically updated from mem on cs failure */
 }
@@ -101,7 +101,7 @@ void *apr_atomic_casptr(void *volatile *mem_ptr,
 {
      __csg(&cmp_ptr,     /* automatically updated from mem on __csg failure  */
            mem_ptr,      /* set from swap when __csg succeeds                */
-           &swap_ptr);  
+           &swap_ptr);
      return (void *)cmp_ptr;
 }
 #else
@@ -110,12 +110,12 @@ void *apr_atomic_casptr(void *volatile *mem_ptr,
 
 apr_uint32_t apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
-    apr_uint32_t old, new_val; 
+    apr_uint32_t old, new_val;
 
     old = *mem;   /* old is automatically updated on cs failure */
     do {
         new_val = val;
-    } while (__cs(&old, (cs_t *)mem, new_val)); 
+    } while (__cs(&old, (cs_t *)mem, new_val));
 
     return old;
 }
@@ -127,10 +127,10 @@ APR_DECLARE(void*) apr_atomic_xchgptr(void *volatile *mem_ptr, void *new_ptr)
     old_ptr = *mem_ptr; /* old is automatically updated on cs failure */
 #if APR_SIZEOF_VOIDP == 4
     do {
-    } while (__cs1(&old_ptr, mem_ptr, &new_ptr)); 
+    } while (__cs1(&old_ptr, mem_ptr, &new_ptr));
 #elif APR_SIZEOF_VOIDP == 8
-    do { 
-    } while (__csg(&old_ptr, mem_ptr, &new_ptr)); 
+    do {
+    } while (__csg(&old_ptr, mem_ptr, &new_ptr));
 #else
 #error APR_SIZEOF_VOIDP value not supported
 #endif /* APR_SIZEOF_VOIDP */

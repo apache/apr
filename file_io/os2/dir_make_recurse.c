@@ -64,7 +64,7 @@ apr_status_t apr_dir_make_recursive(const char *path, apr_fileperms_t perm,
                                     apr_pool_t *pool)
 {
     apr_status_t apr_err = APR_SUCCESS;
-    
+
     apr_err = apr_dir_make(path, perm, pool); /* Try to make PATH right out */
 
     if (APR_STATUS_IS_ENOENT(apr_err)) { /* Missing an intermediate dir */

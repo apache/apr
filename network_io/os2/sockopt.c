@@ -29,7 +29,7 @@
 #include <sys/so_ioctl.h>
 
 
-APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock, 
+APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock,
                                                  apr_interval_time_t t)
 {
     apr_status_t rv = APR_SUCCESS;
@@ -44,14 +44,14 @@ APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock,
     }
     else if (t != 0 && sock->timeout == 0) {
         rv = apr_socket_opt_set(sock, APR_SO_NONBLOCK, 0);
-    } 
+    }
 
     sock->timeout = t;
     return rv;
 }
 
 
-APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock, 
+APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
                                              apr_int32_t opt, apr_int32_t on)
 {
     int one;
@@ -110,7 +110,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
 }
 
 
-APR_DECLARE(apr_status_t) apr_socket_timeout_get(apr_socket_t *sock, 
+APR_DECLARE(apr_status_t) apr_socket_timeout_get(apr_socket_t *sock,
                                                  apr_interval_time_t *t)
 {
     *t = sock->timeout;
@@ -118,7 +118,7 @@ APR_DECLARE(apr_status_t) apr_socket_timeout_get(apr_socket_t *sock,
 }
 
 
-APR_DECLARE(apr_status_t) apr_socket_opt_get(apr_socket_t *sock, 
+APR_DECLARE(apr_status_t) apr_socket_opt_get(apr_socket_t *sock,
                                              apr_int32_t opt, apr_int32_t *on)
 {
     switch(opt) {
@@ -143,7 +143,7 @@ APR_DECLARE(apr_status_t) apr_socket_atmark(apr_socket_t *sock, int *atmark)
 }
 
 
-APR_DECLARE(apr_status_t) apr_gethostname(char *buf, apr_int32_t len, 
+APR_DECLARE(apr_status_t) apr_gethostname(char *buf, apr_int32_t len,
                                           apr_pool_t *cont)
 {
     if (gethostname(buf, len) == -1) {

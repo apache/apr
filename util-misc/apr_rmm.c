@@ -73,7 +73,7 @@ struct apr_rmm_t {
     apr_anylock_t lock;
 };
 
-static apr_rmm_off_t find_block_by_offset(apr_rmm_t *rmm, apr_rmm_off_t next, 
+static apr_rmm_off_t find_block_by_offset(apr_rmm_t *rmm, apr_rmm_off_t next,
                                           apr_rmm_off_t find, int includes)
 {
     apr_rmm_off_t prev = 0;
@@ -107,7 +107,7 @@ static apr_rmm_off_t find_block_of_size(apr_rmm_t *rmm, apr_size_t size)
             return next;
 
         if (blk->size >= size) {
-            /* XXX: sub optimal algorithm 
+            /* XXX: sub optimal algorithm
              * We need the most thorough best-fit logic, since we can
              * never grow our rmm, we are SOL when we hit the wall.
              */
@@ -141,7 +141,7 @@ static apr_rmm_off_t find_block_of_size(apr_rmm_t *rmm, apr_size_t size)
 }
 
 static void move_block(apr_rmm_t *rmm, apr_rmm_off_t this, int free)
-{   
+{
     struct rmm_block_t *blk = (rmm_block_t*)((char*)rmm->base + this);
 
     /* close the gap */
@@ -210,14 +210,14 @@ static void move_block(apr_rmm_t *rmm, apr_rmm_off_t this, int free)
     }
 }
 
-APR_DECLARE(apr_status_t) apr_rmm_init(apr_rmm_t **rmm, apr_anylock_t *lock, 
+APR_DECLARE(apr_status_t) apr_rmm_init(apr_rmm_t **rmm, apr_anylock_t *lock,
                                        void *base, apr_size_t size,
                                        apr_pool_t *p)
 {
     apr_status_t rv;
     rmm_block_t *blk;
     apr_anylock_t nulllock;
-    
+
     if (!lock) {
         nulllock.type = apr_anylock_none;
         nulllock.lock.pm = NULL;
@@ -298,7 +298,7 @@ APR_DECLARE(apr_status_t) apr_rmm_attach(apr_rmm_t **rmm, apr_anylock_t *lock,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_rmm_detach(apr_rmm_t *rmm) 
+APR_DECLARE(apr_status_t) apr_rmm_detach(apr_rmm_t *rmm)
 {
     /* A noop until we introduce locked/refcounts */
     return APR_SUCCESS;
@@ -308,7 +308,7 @@ APR_DECLARE(apr_rmm_off_t) apr_rmm_malloc(apr_rmm_t *rmm, apr_size_t reqsize)
 {
     apr_size_t size;
     apr_rmm_off_t this;
-    
+
     size = APR_ALIGN_DEFAULT(reqsize) + RMM_BLOCK_SIZE;
     if (size < reqsize) {
         return 0;
@@ -331,7 +331,7 @@ APR_DECLARE(apr_rmm_off_t) apr_rmm_calloc(apr_rmm_t *rmm, apr_size_t reqsize)
 {
     apr_size_t size;
     apr_rmm_off_t this;
-        
+
     size = APR_ALIGN_DEFAULT(reqsize) + RMM_BLOCK_SIZE;
     if (size < reqsize) {
         return 0;
@@ -427,11 +427,11 @@ APR_DECLARE(apr_status_t) apr_rmm_free(apr_rmm_t *rmm, apr_rmm_off_t this)
     /* Ok, it remained [apparently] sane, so unlink it
      */
     move_block(rmm, this, 1);
-    
+
     return APR_ANYLOCK_UNLOCK(&rmm->lock);
 }
 
-APR_DECLARE(void *) apr_rmm_addr_get(apr_rmm_t *rmm, apr_rmm_off_t entity) 
+APR_DECLARE(void *) apr_rmm_addr_get(apr_rmm_t *rmm, apr_rmm_off_t entity)
 {
     /* debug-sanity checking here would be good
      */
@@ -448,7 +448,7 @@ APR_DECLARE(apr_rmm_off_t) apr_rmm_offset_get(apr_rmm_t *rmm, void* entity)
     return ((char*)entity - (char*)rmm->base);
 }
 
-APR_DECLARE(apr_size_t) apr_rmm_overhead_get(int n) 
+APR_DECLARE(apr_size_t) apr_rmm_overhead_get(int n)
 {
     /* overhead per block is at most APR_ALIGN_DEFAULT(1) wasted bytes
      * for alignment overhead, plus the size of the rmm_block_t

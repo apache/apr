@@ -105,7 +105,7 @@ static void crypt_mutex_unlock()
  * they match, or APR_EMISMATCH if they don't.  If the platform doesn't
  * support crypt, then the default check is against a clear text string.
  */
-APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd, 
+APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
                                                 const char *hash)
 {
     char sample[200];

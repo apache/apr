@@ -73,7 +73,7 @@ struct apr_dbd_prepared_t {
 
 static apr_status_t free_table(void *data)
 {
-    sqlite_free_table(data); 
+    sqlite_free_table(data);
     return APR_SUCCESS;
 }
 
@@ -159,8 +159,8 @@ static int dbd_sqlite_get_row(apr_pool_t * pool, apr_dbd_results_t * res,
     }
 
     /* Pointer magic explanation:
-     *      The sqlite result is an array such that the first res->sz elements are 
-     *      the column names and each tuple follows afterwards 
+     *      The sqlite result is an array such that the first res->sz elements are
+     *      the column names and each tuple follows afterwards
      *      ex: (from the sqlite2 documentation)
      SELECT employee_name, login, host FROM users WHERE login LIKE *        'd%';
 

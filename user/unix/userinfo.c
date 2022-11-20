@@ -94,7 +94,7 @@ APR_DECLARE(apr_status_t) apr_uid_current(apr_uid_t *uid,
 {
     *uid = getuid();
     *gid = getgid();
-  
+
     return APR_SUCCESS;
 }
 
@@ -107,7 +107,7 @@ APR_DECLARE(apr_status_t) apr_uid_get(apr_uid_t *uid, apr_gid_t *gid,
     struct passwd pw;
     char pwbuf[PWBUF_SIZE];
     apr_status_t rv;
-        
+
     if ((rv = getpwnam_safe(username, &pw, pwbuf)) != APR_SUCCESS)
         return rv;
 

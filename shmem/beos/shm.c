@@ -33,20 +33,20 @@ struct apr_shm_t {
     area_id aid;
 };
 
-APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m, 
-                                         apr_size_t reqsize, 
-                                         const char *filename, 
+APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
+                                         apr_size_t reqsize,
+                                         const char *filename,
                                          apr_pool_t *p)
 {
     apr_size_t pagesize;
     area_id newid;
     char *addr;
     char shname[B_OS_NAME_LENGTH];
-    
+
     (*m) = (apr_shm_t *)apr_pcalloc(p, sizeof(apr_shm_t));
     /* we MUST allocate in pages, so calculate how big an area we need... */
     pagesize = ((reqsize + B_PAGE_SIZE - 1) / B_PAGE_SIZE) * B_PAGE_SIZE;
-     
+
     if (!filename) {
         int num = 0;
         snprintf(shname, B_OS_NAME_LENGTH, "apr_shmem_%ld", find_thread(NULL));
@@ -54,7 +54,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
             snprintf(shname, B_OS_NAME_LENGTH, "apr_shmem_%ld_%d",
                      find_thread(NULL), num++);
     }
-    newid = create_area(filename ? filename : shname, 
+    newid = create_area(filename ? filename : shname,
                         (void*)&addr, B_ANY_ADDRESS,
                         pagesize, B_LAZY_LOCK, B_READ_AREA|B_WRITE_AREA);
 
@@ -71,9 +71,9 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_shm_create_ex(apr_shm_t **m, 
-                                            apr_size_t reqsize, 
-                                            const char *filename, 
+APR_DECLARE(apr_status_t) apr_shm_create_ex(apr_shm_t **m,
+                                            apr_size_t reqsize,
+                                            const char *filename,
                                             apr_pool_t *p,
                                             apr_int32_t flags)
 {
@@ -92,7 +92,7 @@ APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
                                          apr_pool_t *pool)
 {
     area_id deleteme = find_area(filename);
-    
+
     if (deleteme == B_NAME_NOT_FOUND)
         return APR_EINVAL;
 
@@ -108,7 +108,7 @@ APR_DECLARE(apr_status_t) apr_shm_delete(apr_shm_t *m)
     else {
         return APR_ENOTIMPL;
     }
-} 
+}
 
 APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
                                          const char *filename,
@@ -132,13 +132,13 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
 
     if (ti.team != ai.team) {
         area_id narea;
-        
+
         narea = clone_area(ai.name, &(ai.address), B_CLONE_ADDRESS,
                            B_READ_AREA|B_WRITE_AREA, ai.area);
 
         if (narea < B_OK)
             return narea;
-            
+
         get_area_info(narea, &ai);
         new_m->aid = narea;
         new_m->memblock = ai.address;
@@ -148,7 +148,7 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
     }
 
     (*m) = new_m;
-    
+
     return APR_SUCCESS;
 }
 
@@ -191,5 +191,5 @@ APR_DECLARE(apr_status_t) apr_os_shm_put(apr_shm_t **m,
                                          apr_pool_t *pool)
 {
     return APR_ENOTIMPL;
-}    
+}
 

@@ -387,7 +387,7 @@ static void pipe_consumer(toolbox_t *box)
     } while (1);
 
     /* naive fairness test - it would be good to introduce or solidify
-     * a solid test to ensure one thread is not starved.  
+     * a solid test to ensure one thread is not starved.
      * ABTS_INT_EQUAL(tc, 1, !!consumed);
      */
 }

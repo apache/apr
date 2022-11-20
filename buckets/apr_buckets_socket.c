@@ -55,7 +55,7 @@ static apr_status_t socket_bucket_read(apr_bucket *a, const char **str,
      * new bucket.
      *
      * Even if there is nothing more to read, don't close the socket here
-     * as we have to use it to send any response :)  We could shut it 
+     * as we have to use it to send any response :)  We could shut it
      * down for reading, but there is no benefit to doing so.
      */
     if (*len > 0) {
@@ -83,7 +83,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_socket_make(apr_bucket *b, apr_socket_t *p)
      * destroy it instead.
      *
      * Note that typically the socket is allocated from the connection pool
-     * so it will disappear when the connection is finished. 
+     * so it will disappear when the connection is finished.
      */
     b->type        = &apr_bucket_type_socket;
     b->length      = (apr_size_t)(-1);
@@ -108,7 +108,7 @@ APR_DECLARE_DATA const apr_bucket_type_t apr_bucket_type_socket = {
     "SOCKET", 5, APR_BUCKET_DATA,
     apr_bucket_destroy_noop,
     socket_bucket_read,
-    apr_bucket_setaside_notimpl, 
+    apr_bucket_setaside_notimpl,
     apr_bucket_split_notimpl,
     apr_bucket_copy_notimpl
 };

@@ -17,7 +17,7 @@
 /* common .c
  * This file has any function that is truly common and platform
  * neutral.  Or at least that's the theory.
- * 
+ *
  * The header files are a problem so there are a few #ifdef's to take
  * care of those.
  *
@@ -35,7 +35,7 @@ APR_DECLARE(apr_status_t) apr_mmap_offset(void **addr, apr_mmap_t *mmap,
 {
     if (offset < 0 || (apr_size_t)offset > mmap->size)
         return APR_EINVAL;
-    
+
     (*addr) = (char *) mmap->mm + offset;
     return APR_SUCCESS;
 }

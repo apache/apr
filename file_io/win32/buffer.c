@@ -17,7 +17,7 @@
 #include "apr_arch_file_io.h"
 #include "apr_thread_mutex.h"
 
-APR_DECLARE(apr_status_t) apr_file_buffer_set(apr_file_t *file, 
+APR_DECLARE(apr_status_t) apr_file_buffer_set(apr_file_t *file,
                                               char * buffer,
                                               apr_size_t bufsize)
 {
@@ -26,7 +26,7 @@ APR_DECLARE(apr_status_t) apr_file_buffer_set(apr_file_t *file,
     if (file->flags & APR_FOPEN_XTHREAD) {
         apr_thread_mutex_lock(file->mutex);
     }
- 
+
     if(file->buffered) {
         /* Flush the existing buffer */
         rv = apr_file_flush(file);
@@ -37,21 +37,21 @@ APR_DECLARE(apr_status_t) apr_file_buffer_set(apr_file_t *file,
             return rv;
         }
     }
-        
+
     file->buffer = buffer;
     file->bufsize = bufsize;
     file->buffered = 1;
     file->bufpos = 0;
     file->direction = 0;
     file->dataRead = 0;
- 
+
     if (file->bufsize == 0) {
-            /* Setting the buffer size to zero is equivalent to turning 
-             * buffering off. 
+            /* Setting the buffer size to zero is equivalent to turning
+             * buffering off.
              */
             file->buffered = 0;
     }
-    
+
     if (file->flags & APR_FOPEN_XTHREAD) {
         apr_thread_mutex_unlock(file->mutex);
     }

@@ -26,7 +26,7 @@ static apr_status_t thread_mutex_cleanup(void *data)
 {
     apr_thread_mutex_t *mutex = (apr_thread_mutex_t *)data;
 
-    NXMutexFree(mutex->mutex);        
+    NXMutexFree(mutex->mutex);
     return APR_SUCCESS;
 }
 
@@ -45,23 +45,23 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
 
     if (new_mutex == NULL) {
         return APR_ENOMEM;
-    }     
+    }
     new_mutex->pool = pool;
 
     new_mutex->mutex = NXMutexAlloc(NX_MUTEX_RECURSIVE, 0, NULL);
-    
+
     if(new_mutex->mutex == NULL)
         return APR_ENOMEM;
 
     if (flags & APR_THREAD_MUTEX_TIMED) {
         apr_status_t rv = apr_thread_cond_create(&new_mutex->cond, pool);
         if (rv != APR_SUCCESS) {
-            NXMutexFree(new_mutex->mutex);        
+            NXMutexFree(new_mutex->mutex);
             return rv;
         }
     }
 
-    apr_pool_cleanup_register(new_mutex->pool, new_mutex, 
+    apr_pool_cleanup_register(new_mutex->pool, new_mutex,
                                 (void*)thread_mutex_cleanup,
                                 apr_pool_cleanup_null);
    *mutex = new_mutex;

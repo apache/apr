@@ -61,7 +61,7 @@ static const char txt[] =
  * this datatype is for our custom server determination function. this might
  * be useful if you don't want to rely on simply hashing keys to determine
  * where a key belongs, but instead want to write something fancy, or use some
- * other kind of configuration data, i.e. a hash plus some data about a 
+ * other kind of configuration data, i.e. a hash plus some data about a
  * namespace, or whatever. see my_server_func, and test_redis_user_funcs
  * for the examples.
  */
@@ -71,7 +71,7 @@ typedef struct {
 } my_hash_server_baton;
 
 
-/* this could do something fancy and return some hash result. 
+/* this could do something fancy and return some hash result.
  * for simplicity, just return the same value, so we can test it later on.
  * if you wanted to use some external hashing library or functions for
  * consistent hashing, for example, this would be a good place to do it.
@@ -86,7 +86,7 @@ static apr_uint32_t my_hash_func(void *baton, const char *data,
 /*
  * a fancy function to determine which server to use given some kind of data
  * and a hash value. this example actually ignores the hash value itself
- * and pulls some number from the *baton, which is a struct that has some 
+ * and pulls some number from the *baton, which is a struct that has some
  * kind of meaningful stuff in it.
  */
 static apr_redis_server_t *my_server_func(void *baton,
@@ -98,7 +98,7 @@ static apr_redis_server_t *my_server_func(void *baton,
 
   if(mc->ntotal == 0) {
     return NULL;
-  } 
+  }
 
   if(mc->ntotal < mhsb->which_server) {
     return NULL;
@@ -238,40 +238,40 @@ static void test_redis_create(abts_case * tc, void *data)
 
   rv = apr_redis_create(pool, max_servers, 0, &redis);
   ABTS_ASSERT(tc, "redis create failed", rv == APR_SUCCESS);
-  
+
   for (i = 1; i <= max_servers; i++) {
     apr_port_t port;
-    
+
     port = PORT + i;
     rv =
       apr_redis_server_create(pool, HOST, PORT + i, 0, 1, 1, 60, 60, &server);
     ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
-    
+
     rv = apr_redis_add_server(redis, server);
     ABTS_ASSERT(tc, "server add failed", rv == APR_SUCCESS);
-    
+
     s = apr_redis_find_server(redis, HOST, port);
     ABTS_PTR_EQUAL(tc, server, s);
-    
+
     rv = apr_redis_disable_server(redis, s);
     ABTS_ASSERT(tc, "server disable failed", rv == APR_SUCCESS);
-    
+
     rv = apr_redis_enable_server(redis, s);
     ABTS_ASSERT(tc, "server enable failed", rv == APR_SUCCESS);
-    
+
     hash = apr_redis_hash(redis, prefix, strlen(prefix));
     ABTS_ASSERT(tc, "hash failed", hash > 0);
-    
+
     s = apr_redis_find_server_hash(redis, hash);
     ABTS_PTR_NOTNULL(tc, s);
   }
 
   rv = apr_redis_server_create(pool, HOST, PORT, 0, 1, 1, 60, 60, &server);
   ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
-  
+
   rv = apr_redis_add_server(redis, server);
   ABTS_ASSERT(tc, "server add should have failed", rv != APR_SUCCESS);
-  
+
 }
 
 /* install our own custom hashing and server selection routines. */
@@ -279,13 +279,13 @@ static void test_redis_create(abts_case * tc, void *data)
 static int create_test_hash(apr_pool_t *p, apr_hash_t *h)
 {
   int i;
-  
+
   for (i = 0; i < TDATA_SIZE; i++) {
     char *k, *v;
-    
+
     k = apr_pstrcat(p, prefix, apr_itoa(p, i), NULL);
     v = apr_pstrndup(p, txt, randval((apr_uint32_t)strlen(txt)));
-    
+
     apr_hash_set(h, k, APR_HASH_KEY_STRING, v);
   }
 
@@ -301,7 +301,7 @@ static void test_redis_user_funcs(abts_case * tc, void *data)
   apr_uint32_t max_servers = 10;
   apr_uint32_t hres;
   apr_uint32_t i;
-  my_hash_server_baton *baton = 
+  my_hash_server_baton *baton =
     apr_pcalloc(pool, sizeof(my_hash_server_baton));
 
   if (!has_redis_server()) {
@@ -312,7 +312,7 @@ static void test_redis_user_funcs(abts_case * tc, void *data)
   rv = apr_redis_create(pool, max_servers, 0, &redis);
   ABTS_ASSERT(tc, "redis create failed", rv == APR_SUCCESS);
 
-  /* as noted above, install our custom hash function, and call 
+  /* as noted above, install our custom hash function, and call
    * apr_redis_hash. the return value should be our predefined number,
    * and our function just ignores the other args, for simplicity.
    */
@@ -320,20 +320,20 @@ static void test_redis_user_funcs(abts_case * tc, void *data)
 
   hres = apr_redis_hash(redis, "whatever", sizeof("whatever") - 1);
   ABTS_INT_EQUAL(tc, HASH_FUNC_RESULT, hres);
-  
+
   /* add some servers */
   for(i = 1; i <= 10; i++) {
     apr_redis_server_t *ms;
 
     rv = apr_redis_server_create(pool, HOST, i, 0, 1, 1, 60, 60, &ms);
     ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
-    
+
     rv = apr_redis_add_server(redis, ms);
     ABTS_ASSERT(tc, "server add failed", rv == APR_SUCCESS);
   }
 
-  /* 
-   * set 'which_server' in our server_baton to find the third server 
+  /*
+   * set 'which_server' in our server_baton to find the third server
    * which should have the same port.
    */
   baton->which_server = 3;
@@ -373,7 +373,7 @@ static void test_redis_meta(abts_case * tc, void *data)
     apr_redis_stats(server, p, &stats);
     ABTS_PTR_NOTNULL(tc, stats);
 
-    /* 
+    /*
      * no way to know exactly what will be in most of these, so
      * just make sure there is something.
      */
@@ -418,19 +418,19 @@ static void test_redis_incrdecr(abts_case * tc, void *data)
      ABTS_SKIP(tc, data, "Redis server not found.");
      return;
  }
-  
+
   rv = apr_redis_create(pool, 1, 0, &redis);
   ABTS_ASSERT(tc, "redis create failed", rv == APR_SUCCESS);
-  
+
   rv = apr_redis_server_create(pool, HOST, PORT, 0, 1, 1, 60, 60, &server);
   ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
-  
+
   rv = apr_redis_add_server(redis, server);
   ABTS_ASSERT(tc, "server add failed", rv == APR_SUCCESS);
 
   rv = apr_redis_set(redis, prefix, "271", sizeof("271") - 1, 27);
   ABTS_ASSERT(tc, "set failed", rv == APR_SUCCESS);
-  
+
   for( i = 1; i <= TDATA_SIZE; i++) {
     apr_uint32_t expect;
 

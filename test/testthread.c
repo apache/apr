@@ -56,7 +56,7 @@ static void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data)
     }
     apr_thread_exit(thd, exit_ret_val);
     return NULL;
-} 
+}
 
 static void thread_init(abts_case *tc, void *data)
 {
@@ -65,7 +65,7 @@ static void thread_init(abts_case *tc, void *data)
     rv = apr_thread_once_init(&control, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    rv = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_DEFAULT, p); 
+    rv = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 

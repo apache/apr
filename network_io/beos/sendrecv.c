@@ -40,7 +40,7 @@ static apr_status_t wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
         }
         srv = select(sock->socketdes + 1,
             for_read ? &fdset : NULL,
-            for_read ? NULL : &fdset, 
+            for_read ? NULL : &fdset,
             NULL,
             tvptr);
             /* TODO - timeout should be smaller on repeats of this loop */
@@ -61,15 +61,15 @@ APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
                                           apr_size_t *len)
 {
     apr_ssize_t rv;
-	
+
     do {
         rv = send(sock->socketdes, buf, (*len), 0);
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && errno == EWOULDBLOCK && sock->timeout > 0) {
         apr_int32_t snooze_val = SEND_WAIT;
-        apr_int32_t zzz = 0;  
-        
+        apr_int32_t zzz = 0;
+
         do {
             rv = send(sock->socketdes, buf, (*len), 0);
             if (rv == -1 && errno == EWOULDBLOCK){
@@ -91,11 +91,11 @@ APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock, char *buf, 
+APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock, char *buf,
                                           apr_size_t *len)
 {
     apr_ssize_t rv;
-   
+
     do {
         rv = recv(sock->socketdes, buf, (*len), 0);
     } while (rv == -1 && errno == EINTR);
@@ -124,7 +124,7 @@ APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock, char *buf,
 
 /* BeOS doesn't have writev for sockets so we use the following instead...
  */
-APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t * sock, 
+APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t * sock,
                                            const struct iovec *vec,
                                            apr_int32_t nvec, apr_size_t *len)
 {
@@ -132,7 +132,7 @@ APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t * sock,
     return apr_socket_send(sock, vec[0].iov_base, len);
 }
 
-APR_DECLARE(apr_status_t) apr_socket_sendto(apr_socket_t *sock, 
+APR_DECLARE(apr_status_t) apr_socket_sendto(apr_socket_t *sock,
                                             apr_sockaddr_t *where,
                                             apr_int32_t flags, const char *buf,
                                             apr_size_t *len)
@@ -203,9 +203,9 @@ APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from,
         (*len) = 0;
         return errno;
     }
-	
+
     from->port = ntohs(from->sa.sin.sin_port);
-	
+
     (*len) = rv;
     if (rv == 0)
         return APR_EOF;

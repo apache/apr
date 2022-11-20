@@ -82,7 +82,7 @@ void displaynw(struct testval *f, struct testval *l)
     apr_size_t i;
     for (i = 0; i < f->nl; ++i)
         t += sprintf(t, "%02X ", f->n[i]);
-    *(t++) = '-'; 
+    *(t++) = '-';
     for (i = 0; i < l->nl; ++i)
         t += sprintf(t, " %02X", l->n[i]);
     *(t++) = ' ';
@@ -98,7 +98,7 @@ void displaynw(struct testval *f, struct testval *l)
 }
 
 /*
- *  Test every possible byte value. 
+ *  Test every possible byte value.
  *  If the test passes or fails at this byte value we are done.
  *  Otherwise iterate test_nrange again, appending another byte.
  */
@@ -107,10 +107,10 @@ void test_nrange(struct testval *p)
     struct testval f, l, s;
     apr_status_t rc;
     int success = 0;
-    
+
     memcpy (&s, p, sizeof(s));
-    ++s.nl;    
-    
+    ++s.nl;
+
     do {
         apr_size_t nl = s.nl, wl = sizeof(s.w) / 2;
         rc = apr_conv_utf8_to_utf16(s.n, &nl, s.w, &wl);
@@ -121,13 +121,13 @@ void test_nrange(struct testval *p)
                 success = -1;
             }
             else {
-                if (s.wl != l.wl 
+                if (s.wl != l.wl
                  || memcmp(s.w, l.w, (s.wl - 1) * 2) != 0
                  || s.w[s.wl - 1] != l.w[l.wl - 1] + 1) {
                     displaynw(&f, &l);
                     memcpy(&f, &s, sizeof(s));
                 }
-            }            
+            }
             memcpy(&l, &s, sizeof(s));
         }
         else {
@@ -147,10 +147,10 @@ void test_nrange(struct testval *p)
     }
 }
 
-/* 
- *  Test every possible word value. 
+/*
+ *  Test every possible word value.
  *  Once we are finished, retest every possible word value.
- *  if the test fails on the following null word, iterate test_nrange 
+ *  if the test fails on the following null word, iterate test_nrange
  *  again, appending another word.
  *  This assures the output order of the two tests are in sync.
  */
@@ -159,12 +159,12 @@ void test_wrange(struct testval *p)
     struct testval f, l, s;
     apr_status_t rc;
     int success = 0;
-    
+
     memcpy (&s, p, sizeof(s));
-    ++s.wl;    
-    
+    ++s.wl;
+
     do {
-        apr_size_t nl = sizeof(s.n), wl = s.wl;        
+        apr_size_t nl = sizeof(s.n), wl = s.wl;
         rc = apr_conv_utf16_to_utf8(s.w, &wl, s.n, &nl);
         s.nl = sizeof(s.n) - nl;
         if (!wl && rc == APR_SUCCESS) {
@@ -173,13 +173,13 @@ void test_wrange(struct testval *p)
                 success = -1;
             }
             else {
-                if (s.nl != l.nl 
+                if (s.nl != l.nl
                  || memcmp(s.n, l.n, s.nl - 1) != 0
                  || s.n[s.nl - 1] != l.n[l.nl - 1] + 1) {
                     displaynw(&f, &l);
                     memcpy(&f, &s, sizeof(s));
                 }
-            }            
+            }
             memcpy(&l, &s, sizeof(s));
         }
         else {
@@ -206,7 +206,7 @@ void test_wrange(struct testval *p)
 }
 
 /*
- *  Test every possible byte value. 
+ *  Test every possible byte value.
  *  If the test passes or fails at this byte value we are done.
  *  Otherwise iterate test_nrange again, appending another byte.
  */

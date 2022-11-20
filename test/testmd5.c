@@ -28,7 +28,7 @@
 static struct {
     const char *string;
     const char *digest;
-} md5sums[] = 
+} md5sums[] =
 {
     {"Jeff was here!",
      "\xa5\x25\x8a\x89\x11\xb2\x9d\x1f\x81\x75\x96\x3b\x60\x94\x49\xc0"},
@@ -58,7 +58,7 @@ static void test_md5sum(abts_case *tc, void *data)
         unsigned int len = (unsigned int)strlen(string);
 
         ABTS_ASSERT(tc, "apr_md5_init", (apr_md5_init(&context) == 0));
-        ABTS_ASSERT(tc, "apr_md5_update", 
+        ABTS_ASSERT(tc, "apr_md5_update",
                     (apr_md5_update(&context, string, len) == 0));
         ABTS_ASSERT(tc, "apr_md5_final", (apr_md5_final(digest, &context)
                                           == 0));
@@ -93,7 +93,7 @@ static void test_md5sum_unaligned(abts_case *tc, void *data)
 abts_suite *testmd5(abts_suite *suite)
 {
         suite = ADD_SUITE(suite);
-        
+
         for (count=0; count < num_sums; count++) {
             abts_run_test(suite, test_md5sum, NULL);
         }

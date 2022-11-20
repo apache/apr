@@ -61,7 +61,7 @@ int _NonAppStart
     WSADATA wsaData;
 #endif
     apr_status_t status;
-    
+
     NX_LOCK_INFO_ALLOC(liblock, "Per-Application Data Lock", 0);
 
     gLibId = register_library(DisposeLibraryData);

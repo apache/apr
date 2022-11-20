@@ -19,10 +19,10 @@
 APR_DECLARE(apr_status_t) apr_file_lock(apr_file_t *thefile, int type)
 {
     const DWORD len = 0xffffffff;
-    DWORD flags; 
+    DWORD flags;
 
     flags = ((type & APR_FLOCK_NONBLOCK) ? LOCKFILE_FAIL_IMMEDIATELY : 0)
-          + (((type & APR_FLOCK_TYPEMASK) == APR_FLOCK_SHARED) 
+          + (((type & APR_FLOCK_TYPEMASK) == APR_FLOCK_SHARED)
                                        ? 0 : LOCKFILE_EXCLUSIVE_LOCK);
     /* Syntax is correct, len is passed for LengthLow and LengthHigh*/
     OVERLAPPED offset;

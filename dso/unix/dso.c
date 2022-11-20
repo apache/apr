@@ -77,7 +77,7 @@ static apr_status_t dso_cleanup(void *thedso)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
+APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
                                        const char *path, apr_pool_t *pool)
 {
 #if defined(DSO_USE_SHL)
@@ -137,7 +137,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     }
 #endif
     os_handle = dlopen(path, flags);
-#endif    
+#endif
 #endif /* DSO_USE_x */
 
     *res_handle = apr_pcalloc(pool, sizeof(**res_handle));
@@ -163,14 +163,14 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 
     return APR_SUCCESS;
 }
-    
+
 APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
 {
     return apr_pool_cleanup_run(handle->pool, handle, dso_cleanup);
 }
 
-APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
-                                      apr_dso_handle_t *handle, 
+APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
+                                      apr_dso_handle_t *handle,
                                       const char *symname)
 {
 #if defined(DSO_USE_SHL)
@@ -233,12 +233,12 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     }
 
     *ressym = retval;
-    
+
     return APR_SUCCESS;
 #endif /* DSO_USE_x */
 }
 
-APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, 
+APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer,
                                         apr_size_t buflen)
 {
     if (dso->errormsg) {

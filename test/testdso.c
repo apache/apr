@@ -36,8 +36,8 @@
 #elif defined(WIN32)
 # define MOD_NAME TESTBINPATH "mod_test.dll"
 #elif defined(DARWIN)
-# define MOD_NAME ".libs/mod_test.so" 
-# define LIB_NAME ".libs/libmod_test.dylib" 
+# define MOD_NAME ".libs/mod_test.so"
+# define LIB_NAME ".libs/libmod_test.dylib"
 #elif (defined(__hpux__) || defined(__hpux)) && !defined(__ia64)
 # define MOD_NAME ".libs/mod_test.sl"
 # define LIB_NAME ".libs/libmod_test.sl"
@@ -230,7 +230,7 @@ static void test_load_notthere(abts_case *tc, void *data)
 
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_EDSOOPEN(status));
     ABTS_PTR_NOTNULL(tc, h);
-}    
+}
 
 #endif /* APR_HAS_DSO */
 
@@ -240,7 +240,7 @@ abts_suite *testdso(abts_suite *suite)
 
 #if APR_HAS_DSO
     apr_filepath_merge(&modname, NULL, MOD_NAME, 0, p);
-    
+
     abts_run_test(suite, test_load_module, NULL);
     abts_run_test(suite, test_dso_sym, NULL);
     abts_run_test(suite, test_dso_sym_return_value, NULL);
@@ -248,7 +248,7 @@ abts_suite *testdso(abts_suite *suite)
 
 #ifdef LIB_NAME
     apr_filepath_merge(&libname, NULL, LIB_NAME, 0, p);
-    
+
     abts_run_test(suite, test_load_library, NULL);
     abts_run_test(suite, test_dso_sym_library, NULL);
     abts_run_test(suite, test_dso_sym_return_value_library, NULL);

@@ -25,7 +25,7 @@
 APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **aprdso,
                                                 apr_os_dso_handle_t osdso,
                                                 apr_pool_t *pool)
-{   
+{
     *aprdso = apr_pcalloc(pool, sizeof **aprdso);
     (*aprdso)->handle = osdso;
     (*aprdso)->pool = pool;
@@ -46,7 +46,7 @@ static apr_status_t dso_cleanup(void *thedso)
 
     if (dso->handle == 0)
         return APR_SUCCESS;
-       
+
     rc = dllfree(dso->handle);
 
     if (rc == 0) {
@@ -57,7 +57,7 @@ static apr_status_t dso_cleanup(void *thedso)
     return errno;
 }
 
-APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
+APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
                                        const char *path, apr_pool_t *ctx)
 {
     dllhandle *handle;
@@ -80,12 +80,12 @@ APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
     return apr_pool_cleanup_run(handle->pool, handle, dso_cleanup);
 }
 
-APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
-                                      apr_dso_handle_t *handle, 
+APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
+                                      apr_dso_handle_t *handle,
                                       const char *symname)
 {
     void *func_ptr;
-    void *var_ptr; 
+    void *var_ptr;
 
     if ((var_ptr = dllqueryvar(handle->handle, symname)) != NULL) {
         *ressym = var_ptr;
@@ -99,7 +99,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     return APR_ESYMNOTFOUND;
 }
 
-APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *handle, char *buffer, 
+APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *handle, char *buffer,
                           apr_size_t buflen)
 {
     apr_cpystrn(buffer, strerror(handle->failing_errno), buflen);

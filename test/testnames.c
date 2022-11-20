@@ -54,7 +54,7 @@ static void merge_belowroot(abts_case *tc, void *data)
     apr_status_t rv;
     char *dstpath = NULL;
 
-    rv = apr_filepath_merge(&dstpath, ABS_ROOT"foo", ABS_ROOT"foo/bar", 
+    rv = apr_filepath_merge(&dstpath, ABS_ROOT"foo", ABS_ROOT"foo/bar",
                             APR_FILEPATH_NOTABOVEROOT, p);
     ABTS_PTR_NOTNULL(tc, dstpath);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -101,13 +101,13 @@ static void merge_dotdot_dotdot_dotdot(abts_case *tc, void *data)
     apr_status_t rv;
     char *dstpath = NULL;
 
-    rv = apr_filepath_merge(&dstpath, "", 
+    rv = apr_filepath_merge(&dstpath, "",
                             "../../..", APR_FILEPATH_TRUENAME, p);
     ABTS_PTR_NOTNULL(tc, dstpath);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_STR_EQUAL(tc, "../../..", dstpath);
 
-    rv = apr_filepath_merge(&dstpath, "", 
+    rv = apr_filepath_merge(&dstpath, "",
                             "../../../", APR_FILEPATH_TRUENAME, p);
     ABTS_PTR_NOTNULL(tc, dstpath);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -143,7 +143,7 @@ static void merge_notrelfail(abts_case *tc, void *data)
     char *dstpath = NULL;
     char errmsg[256];
 
-    rv = apr_filepath_merge(&dstpath, "foo/bar", "../baz", 
+    rv = apr_filepath_merge(&dstpath, "foo/bar", "../baz",
                             APR_FILEPATH_NOTRELATIVE, p);
     apr_strerror(rv, errmsg, sizeof(errmsg));
 
@@ -158,7 +158,7 @@ static void merge_notabsfail(abts_case *tc, void *data)
     char *dstpath = NULL;
     char errmsg[256];
 
-    rv = apr_filepath_merge(&dstpath, ABS_ROOT"foo/bar", "../baz", 
+    rv = apr_filepath_merge(&dstpath, ABS_ROOT"foo/bar", "../baz",
                             APR_FILEPATH_NOTABSOLUTE, p);
     apr_strerror(rv, errmsg, sizeof(errmsg));
 
@@ -172,7 +172,7 @@ static void merge_notabs(abts_case *tc, void *data)
     apr_status_t rv;
     char *dstpath = NULL;
 
-    rv = apr_filepath_merge(&dstpath, "foo/bar", "../baz", 
+    rv = apr_filepath_merge(&dstpath, "foo/bar", "../baz",
                             APR_FILEPATH_NOTABSOLUTE, p);
 
     ABTS_PTR_NOTNULL(tc, dstpath);
@@ -338,7 +338,7 @@ static void root_from_cwd_and_back(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, origpath + 1, path);
 #endif
 
-    rv = apr_filepath_merge(&testpath, root, path, 
+    rv = apr_filepath_merge(&testpath, root, path,
                             APR_FILEPATH_TRUENAME
                           | APR_FILEPATH_NOTABOVEROOT
                           | APR_FILEPATH_NOTRELATIVE, p);
@@ -346,7 +346,7 @@ static void root_from_cwd_and_back(abts_case *tc, void *data)
 #if defined(WIN32) || defined(OS2) || defined(NETWARE)
     hadfailed = tc->failed;
 #endif
-    /* The API doesn't promise equality!!! 
+    /* The API doesn't promise equality!!!
      * apr_filepath_get never promised a canonical filepath.
      * We'll emit noise under verbose so the user is aware,
      * but translate this back to success.

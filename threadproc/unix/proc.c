@@ -49,7 +49,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
 
     if ((in != APR_NO_PIPE) && (in != APR_NO_FILE)) {
         /* APR_CHILD_BLOCK maps to APR_WRITE_BLOCK, while
-         * APR_PARENT_BLOCK maps to APR_READ_BLOCK, so transpose 
+         * APR_PARENT_BLOCK maps to APR_READ_BLOCK, so transpose
          * the CHILD/PARENT blocking flags for the stdin pipe.
          * stdout/stderr map to the correct mode by default.
          */
@@ -220,7 +220,7 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr,
 APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
 {
     int pid;
-    
+
     memset(proc, 0, sizeof(apr_proc_t));
 
     /* Rekey PRNG(s) to clear buffer(s) and make sure that the
@@ -343,7 +343,7 @@ APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr,
         attr->uid = -1;
         return rv;
     }
-    
+
     /* Use default user group if not already set */
     if (attr->gid == -1) {
         attr->gid = gid;
@@ -548,7 +548,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             default:
             {
                 char *ch, *onearg;
-                
+
                 ch = onearg = apr_palloc(pool, onearg_len);
                 i = 0;
                 while (args[i]) {

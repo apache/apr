@@ -165,7 +165,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
                                                apr_interval_time_t timeout)
 {
     ULONG rc;
-    
+
     if (timeout <= 0) {
         rc = DosRequestMutexSem(mutex->hMutex, SEM_IMMEDIATE_RETURN);
     }
@@ -234,7 +234,7 @@ APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 
 /* Implement OS-specific accessors defined in apr_portable.h */
 
-APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex, 
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex,
                                                    apr_proc_mutex_t *pmutex,
                                                    apr_lockmech_e *mech)
 {

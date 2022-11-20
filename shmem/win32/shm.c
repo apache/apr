@@ -41,7 +41,7 @@ static apr_status_t shm_cleanup(void* shm)
 {
     apr_status_t rv = APR_SUCCESS;
     apr_shm_t *m = shm;
-    
+
     if (!UnmapViewOfFile(m->memblk)) {
         rv = apr_get_os_error();
     }
@@ -140,7 +140,7 @@ APR_DECLARE(apr_status_t) apr_shm_create_ex(apr_shm_t **m,
         SYSTEM_INFO si;
         GetSystemInfo(&si);
         memblock = si.dwAllocationGranularity;
-    }   
+    }
 
     /* Compute the granualar multiple of the pagesize */
     size = memblock * (1 + (reqsize - 1) / memblock);
@@ -159,7 +159,7 @@ APR_DECLARE(apr_status_t) apr_shm_create_ex(apr_shm_t **m,
     else {
         int global;
 
-        /* Do file backed, which is not an inherited handle 
+        /* Do file backed, which is not an inherited handle
          * While we could open APR_FOPEN_EXCL, it doesn't seem that Unix
          * ever did.  Ignore that error here, but fail later when
          * we discover we aren't the creator of the file map object.
@@ -189,7 +189,7 @@ APR_DECLARE(apr_status_t) apr_shm_create_ex(apr_shm_t **m,
         mapkey = res_name_from_filename(file, global, pool);
     }
 
-	hMap = CreateFileMappingW(hFile, NULL, PAGE_READWRITE, 
+	hMap = CreateFileMappingW(hFile, NULL, PAGE_READWRITE,
 							  sizehi, sizelo, mapkey);
     err = apr_get_os_error();
 
@@ -204,14 +204,14 @@ APR_DECLARE(apr_status_t) apr_shm_create_ex(apr_shm_t **m,
     if (!hMap) {
         return err;
     }
-    
+
     base = MapViewOfFile(hMap, FILE_MAP_READ | FILE_MAP_WRITE,
                          0, 0, size);
     if (!base) {
         CloseHandle(hMap);
         return apr_get_os_error();
     }
-    
+
     *m = (apr_shm_t *) apr_palloc(pool, sizeof(apr_shm_t));
     (*m)->pool = pool;
     (*m)->hMap = hMap;
@@ -220,12 +220,12 @@ APR_DECLARE(apr_status_t) apr_shm_create_ex(apr_shm_t **m,
 
     (*m)->usrmem = (char*)base + sizeof(memblock_t);
     (*m)->length = reqsize - sizeof(memblock_t);;
-    
+
     (*m)->memblk->length = (*m)->length;
     (*m)->memblk->size = (*m)->size;
     (*m)->filename = file ? apr_pstrdup(pool, file) : NULL;
 
-    apr_pool_cleanup_register((*m)->pool, *m, 
+    apr_pool_cleanup_register((*m)->pool, *m,
                               shm_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
@@ -238,7 +238,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     return apr_shm_create_ex(m, reqsize, file, pool, 0);
 }
 
-APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m) 
+APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m)
 {
     apr_status_t rv = shm_cleanup(m);
     apr_pool_cleanup_kill(m->pool, m, shm_cleanup);
@@ -259,7 +259,7 @@ APR_DECLARE(apr_status_t) apr_shm_delete(apr_shm_t *m)
     else {
         return APR_ENOTIMPL;
     }
-} 
+}
 
 static apr_status_t shm_attach_internal(apr_shm_t **m,
                                         const char *file,
@@ -280,13 +280,13 @@ static apr_status_t shm_attach_internal(apr_shm_t **m,
     if (!hMap) {
         return apr_get_os_error();
     }
-    
+
     base = MapViewOfFile(hMap, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, 0);
     if (!base) {
         CloseHandle(hMap);
         return apr_get_os_error();
     }
-    
+
     *m = (apr_shm_t *) apr_palloc(pool, sizeof(apr_shm_t));
     (*m)->pool = pool;
     (*m)->memblk = base;
@@ -297,7 +297,7 @@ static apr_status_t shm_attach_internal(apr_shm_t **m,
     (*m)->usrmem = (char*)base + sizeof(memblock_t);
     (*m)->filename = NULL;
 
-    apr_pool_cleanup_register((*m)->pool, *m, 
+    apr_pool_cleanup_register((*m)->pool, *m,
                               shm_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
@@ -388,7 +388,7 @@ APR_DECLARE(apr_status_t) apr_os_shm_put(apr_shm_t **m,
     if (!base) {
         return apr_get_os_error();
     }
-    
+
     *m = (apr_shm_t *) apr_palloc(pool, sizeof(apr_shm_t));
     (*m)->pool = pool;
     (*m)->hMap = *osshm;
@@ -399,8 +399,8 @@ APR_DECLARE(apr_status_t) apr_os_shm_put(apr_shm_t **m,
     (*m)->length = (*m)->memblk->length;
     (*m)->filename = NULL;
 
-    apr_pool_cleanup_register((*m)->pool, *m, 
+    apr_pool_cleanup_register((*m)->pool, *m,
                               shm_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
-}    
+}
 

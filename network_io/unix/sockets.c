@@ -50,7 +50,7 @@ static apr_status_t socket_cleanup(void *sock)
         /* XXX: Check for return values ? */
         unlink(thesocket->local_addr->hostname);
     }
-#endif        
+#endif
     if (close(sd) == 0) {
         return APR_SUCCESS;
     }
@@ -200,9 +200,9 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
                               socket_child_cleanup);
 
     return APR_SUCCESS;
-} 
+}
 
-apr_status_t apr_socket_shutdown(apr_socket_t *thesocket, 
+apr_status_t apr_socket_shutdown(apr_socket_t *thesocket,
                                  apr_shutdown_how_e how)
 {
     return (shutdown(thesocket->socketdes, how) == -1) ? errno : APR_SUCCESS;
@@ -215,7 +215,7 @@ apr_status_t apr_socket_close(apr_socket_t *thesocket)
 
 apr_status_t apr_socket_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
-    if (bind(sock->socketdes, 
+    if (bind(sock->socketdes,
              (struct sockaddr *)&sa->sa, sa->salen) == -1) {
         return errno;
     }
@@ -275,7 +275,7 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
         return errno;
     }
 #ifdef TPF
-    if (s == 0) { 
+    if (s == 0) {
         /* 0 is an invalid socket for TPF */
         return APR_EINTR;
     }
@@ -304,8 +304,8 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
 
     *(*new)->local_addr = *sock->local_addr;
 
-    /* The above assignment just overwrote the pool entry. Setting the local_addr 
-       pool for the accepted socket back to what it should be.  Otherwise all 
+    /* The above assignment just overwrote the pool entry. Setting the local_addr
+       pool for the accepted socket back to what it should be.  Otherwise all
        allocations for this socket will come from a server pool that is not
        freed until the process goes down.*/
     (*new)->local_addr->pool = connection_context;
@@ -348,7 +348,7 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
         !memcmp(sock->local_addr->ipaddr_ptr,
                 generic_inaddr_any,
                 sock->local_addr->ipaddr_len)) {
-        /* If the interface address inside the listening socket's local_addr wasn't 
+        /* If the interface address inside the listening socket's local_addr wasn't
          * up-to-date, we don't know local interface of the connected socket either.
          *
          * If the listening socket was not bound to a specific interface, we
@@ -387,7 +387,7 @@ apr_status_t apr_socket_accept(apr_socket_t **new, apr_socket_t *sock,
 
 apr_status_t apr_socket_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
-    int rc;        
+    int rc;
 
     do {
         rc = connect(sock->socketdes,
@@ -409,7 +409,7 @@ apr_status_t apr_socket_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
         {
             int error;
             apr_socklen_t len = sizeof(error);
-            if ((rc = getsockopt(sock->socketdes, SOL_SOCKET, SO_ERROR, 
+            if ((rc = getsockopt(sock->socketdes, SOL_SOCKET, SO_ERROR,
                                  (char *)&error, &len)) < 0) {
                 return errno;
             }
@@ -509,8 +509,8 @@ apr_status_t apr_os_sock_get(apr_os_sock_t *thesock, apr_socket_t *sock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_os_sock_make(apr_socket_t **apr_sock, 
-                              apr_os_sock_info_t *os_sock_info, 
+apr_status_t apr_os_sock_make(apr_socket_t **apr_sock,
+                              apr_os_sock_info_t *os_sock_info,
                               apr_pool_t *cont)
 {
     alloc_socket(apr_sock, cont);
@@ -518,8 +518,8 @@ apr_status_t apr_os_sock_make(apr_socket_t **apr_sock,
     (*apr_sock)->timeout = -1;
     (*apr_sock)->socketdes = *os_sock_info->os_sock;
     if (os_sock_info->local) {
-        memcpy(&(*apr_sock)->local_addr->sa.sin, 
-               os_sock_info->local, 
+        memcpy(&(*apr_sock)->local_addr->sa.sin,
+               os_sock_info->local,
                (*apr_sock)->local_addr->salen);
         /* XXX IPv6 - this assumes sin_port and sin6_port at same offset */
         (*apr_sock)->local_addr->port = ntohs((*apr_sock)->local_addr->sa.sin.sin_port);
@@ -531,7 +531,7 @@ apr_status_t apr_os_sock_make(apr_socket_t **apr_sock,
 #ifndef HAVE_POLL
         (*apr_sock)->connected = 1;
 #endif
-        memcpy(&(*apr_sock)->remote_addr->sa.sin, 
+        memcpy(&(*apr_sock)->remote_addr->sa.sin,
                os_sock_info->remote,
                (*apr_sock)->remote_addr->salen);
         /* XXX IPv6 - this assumes sin_port and sin6_port at same offset */
@@ -540,14 +540,14 @@ apr_status_t apr_os_sock_make(apr_socket_t **apr_sock,
     else {
         (*apr_sock)->remote_addr_unknown = 1;
     }
-        
+
     (*apr_sock)->inherit = 0;
-    apr_pool_cleanup_register((*apr_sock)->pool, (void *)(*apr_sock), 
+    apr_pool_cleanup_register((*apr_sock)->pool, (void *)(*apr_sock),
                               socket_cleanup, socket_cleanup);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock, 
+apr_status_t apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock,
                            apr_pool_t *cont)
 {
     /* XXX Bogus assumption that *sock points at anything legit */

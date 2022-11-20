@@ -52,7 +52,7 @@ static void no_options_found(abts_case *tc, void *data)
     str[0] = '\0';
     rv = apr_getopt_init(&opt, p, largc, largv);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-   
+
     while (apr_getopt(opt, "abcd", &ch, &opt_arg) == APR_SUCCESS) {
         switch (ch) {
             case 'a':
@@ -85,7 +85,7 @@ static void no_options(abts_case *tc, void *data)
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
-   
+
     while (apr_getopt(opt, "efgh", &ch, &opt_arg) == APR_SUCCESS) {
         switch (ch) {
             case 'a':
@@ -117,7 +117,7 @@ static void required_option(abts_case *tc, void *data)
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
-   
+
     while (apr_getopt(opt, "a:", &ch, &opt_arg) == APR_SUCCESS) {
         switch (ch) {
             case 'a':
@@ -146,7 +146,7 @@ static void required_option_notgiven(abts_case *tc, void *data)
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
-   
+
     while (apr_getopt(opt, "a:", &ch, &opt_arg) == APR_SUCCESS) {
         switch (ch) {
             case 'a':
@@ -175,7 +175,7 @@ static void optional_option(abts_case *tc, void *data)
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
-   
+
     while (apr_getopt(opt, "a::", &ch, &opt_arg) == APR_SUCCESS) {
         switch (ch) {
             case 'a':
@@ -204,7 +204,7 @@ static void optional_option_notgiven(abts_case *tc, void *data)
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
-   
+
     while (apr_getopt(opt, "a::", &ch, &opt_arg) == APR_SUCCESS) {
         switch (ch) {
             case 'a':

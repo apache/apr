@@ -28,7 +28,7 @@
 
 #define BUF_SIZE 4096
 
-static void reportError(const char *msg, apr_status_t rv, 
+static void reportError(const char *msg, apr_status_t rv,
                         apr_pool_t *pool)
 {
     fprintf(stderr, "%s\nError: %d\n'%s'\n", msg, rv,

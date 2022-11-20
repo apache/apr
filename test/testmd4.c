@@ -42,9 +42,9 @@
 static struct {
         const char *string;
         const char *md4sum;
-} md4sums[] = 
+} md4sums[] =
 {
-/* 
+/*
 * Taken from the old md4 test suite.
 * MD4 ("") = 31d6cfe0d16ae931b73c59d7e0c089c0
 * MD4 ("a") = bde52cb31de33e46245e05fbdbd6fb24
@@ -53,25 +53,25 @@ static struct {
 * MD4 ("abcdefghijklmnopqrstuvwxyz") = d79e1c308aa5bbcdeea8ed63df412da9
 * MD4 ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
 * MD4 ("12345678901234567890123456789012345678901234567890123456789012345678901234567890") = e33b4ddc9c38f2199c3e7b164fcc0536
-* 
+*
 */
-        {"", 
+        {"",
          "\x31\xd6\xcf\xe0\xd1\x6a\xe9\x31\xb7\x3c\x59\xd7\xe0\xc0\x89\xc0"},
-        {"a", 
+        {"a",
          "\xbd\xe5\x2c\xb3\x1d\xe3\x3e\x46\x24\x5e\x05\xfb\xdb\xd6\xfb\x24"},
-        {"abc", 
+        {"abc",
          "\xa4\x48\x01\x7a\xaf\x21\xd8\x52\x5f\xc1\x0a\xe8\x7a\xa6\x72\x9d"},
-        {"message digest", 
+        {"message digest",
          "\xd9\x13\x0a\x81\x64\x54\x9f\xe8\x18\x87\x48\x06\xe1\xc7\x01\x4b"},
-        {"abcdefghijklmnopqrstuvwxyz", 
+        {"abcdefghijklmnopqrstuvwxyz",
          "\xd7\x9e\x1c\x30\x8a\xa5\xbb\xcd\xee\xa8\xed\x63\xdf\x41\x2d\xa9"},
-        {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 
+        {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
          "\x04\x3f\x85\x82\xf2\x41\xdb\x35\x1c\xe6\x27\xe1\x53\xe7\xf0\xe4"},
-        {"12345678901234567890123456789012345678901234567890123456789012345678901234567890", 
+        {"12345678901234567890123456789012345678901234567890123456789012345678901234567890",
          "\xe3\x3b\x4d\xdc\x9c\x38\xf2\x19\x9c\x3e\x7b\x16\x4f\xcc\x05\x36"}
 };
 
-static int num_sums = sizeof(md4sums) / sizeof(md4sums[0]); 
+static int num_sums = sizeof(md4sums) / sizeof(md4sums[0]);
 static int count;
 
 #if 0
@@ -98,12 +98,12 @@ static void test_md4sum(abts_case *tc, void *data)
         size_t len = strlen(string);
 
         ABTS_ASSERT(tc, "apr_md4_init", (apr_md4_init(&context) == 0));
-        ABTS_ASSERT(tc, "apr_md4_update", 
-                    (apr_md4_update(&context, 
+        ABTS_ASSERT(tc, "apr_md4_update",
+                    (apr_md4_update(&context,
                                     (unsigned char *)string, len) == 0));
-        
+
         ABTS_ASSERT(tc, "apr_md4_final", (apr_md4_final(digest, &context) ==0));
-        ABTS_ASSERT(tc, "check for correct md4 digest", 
+        ABTS_ASSERT(tc, "check for correct md4 digest",
                     (memcmp(digest, sum, APR_MD4_DIGESTSIZE) == 0));
 }
 

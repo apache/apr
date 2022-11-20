@@ -29,8 +29,8 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
     HANDLE hproc = GetCurrentProcess();
     HANDLE newhand = NULL;
 
-    if (!DuplicateHandle(hproc, old_file->filehand, 
-                         hproc, &newhand, 0, FALSE, 
+    if (!DuplicateHandle(hproc, old_file->filehand,
+                         hproc, &newhand, 0, FALSE,
                          DUPLICATE_SAME_ACCESS)) {
         return apr_get_os_error();
     }
@@ -142,13 +142,13 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
             _setmode(0, _O_BINARY);
             newhand = (HANDLE)_get_osfhandle(0);
         }
-        newflags = (new_file->flags & APR_STD_FLAGS) 
+        newflags = (new_file->flags & APR_STD_FLAGS)
                  | (old_file->flags & ~APR_STD_FLAGS) | APR_INHERIT;
 
         /* No need  to close the old file, _dup2() above did that for us */
     }
     else {
-        if (!DuplicateHandle(hproc, old_file->filehand, 
+        if (!DuplicateHandle(hproc, old_file->filehand,
                              hproc, &newhand, 0,
                              FALSE, DUPLICATE_SAME_ACCESS)) {
             return apr_get_os_error();
@@ -205,7 +205,7 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
     if (!(old_file->flags & APR_FOPEN_NOCLEANUP)) {
         apr_pool_cleanup_kill(old_file->pool, (void *)old_file,
                               file_cleanup);
-        apr_pool_cleanup_register(p, (void *)(*new_file), 
+        apr_pool_cleanup_register(p, (void *)(*new_file),
                                   file_cleanup,
                                   file_cleanup);
     }

@@ -59,7 +59,7 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_set(void *priv,
 APR_DECLARE(apr_status_t) apr_threadkey_private_delete(apr_threadkey_t *key)
 {
     if (TlsFree(key->key)) {
-        return APR_SUCCESS; 
+        return APR_SUCCESS;
     }
     return apr_get_os_error();
 }
@@ -97,5 +97,5 @@ APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key,
     }
     (*key)->key = *thekey;
     return APR_SUCCESS;
-}           
+}
 

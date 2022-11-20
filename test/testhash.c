@@ -29,7 +29,7 @@ static int comp_string(const void *str1, const void *str2)
     return strcmp(str1,str2);
 }
 
-static void dump_hash(apr_pool_t *p, apr_hash_t *h, char str[][MAX_LTH]) 
+static void dump_hash(apr_pool_t *p, apr_hash_t *h, char str[][MAX_LTH])
 {
     apr_hash_index_t *hi;
     int i = 0;
@@ -58,7 +58,7 @@ static void dump_hash(apr_pool_t *p, apr_hash_t *h, char str[][MAX_LTH])
     );
 }
 
-static void sum_hash(apr_pool_t *p, apr_hash_t *h, int *pcount, int *keySum, int *valSum) 
+static void sum_hash(apr_pool_t *p, apr_hash_t *h, int *pcount, int *keySum, int *valSum)
 {
     apr_hash_index_t *hi;
     void *val, *key;
@@ -218,7 +218,7 @@ static void hash_clear(abts_case *tc, void *data)
 }
 
 /* This is kind of a hack, but I am just keeping an existing test.  This is
- * really testing apr_hash_first, apr_hash_next, and apr_hash_this which 
+ * really testing apr_hash_first, apr_hash_next, and apr_hash_this which
  * should be tested in three separate tests, but this will do for now.
  */
 static void hash_traverse(abts_case *tc, void *data)
@@ -252,7 +252,7 @@ static void hash_traverse(abts_case *tc, void *data)
 }
 
 /* This is kind of a hack, but I am just keeping an existing test.  This is
- * really testing apr_hash_first, apr_hash_next, and apr_hash_this which 
+ * really testing apr_hash_first, apr_hash_next, and apr_hash_this which
  * should be tested in three separate tests, but this will do for now.
  */
 static void summation_test(abts_case *tc, void *data)

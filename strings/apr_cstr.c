@@ -238,7 +238,7 @@ static const unsigned char ucharmap[256] = {
  * conformance, arbitrary election of an ISO-8859-1 ordering, and
  * very arbitrary control code assignments into C1 to achieve
  * identity and a reversible mapping of code points),
- * then folding the equivalences of ASCII 41-5A into 61-7A, 
+ * then folding the equivalences of ASCII 41-5A into 61-7A,
  * presenting comparison results in a somewhat ISO/IEC 10646
  * (ASCII-like) order, depending on the EBCDIC code page in use.
  *

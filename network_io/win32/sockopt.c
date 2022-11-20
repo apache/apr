@@ -69,15 +69,15 @@ APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock, apr_interva
             apr_set_option(sock, APR_SO_NONBLOCK, 0);
         }
         /* Reset socket timeouts if the new timeout differs from the old timeout */
-        if (sock->timeout != t) 
+        if (sock->timeout != t)
         {
             /* Win32 timeouts are in msec, represented as int */
             sock->timeout_ms = (int)apr_time_as_msec(t);
-            setsockopt(sock->socketdes, SOL_SOCKET, SO_RCVTIMEO, 
-                       (char *) &sock->timeout_ms, 
+            setsockopt(sock->socketdes, SOL_SOCKET, SO_RCVTIMEO,
+                       (char *) &sock->timeout_ms,
                        sizeof(sock->timeout_ms));
-            setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDTIMEO, 
-                       (char *) &sock->timeout_ms, 
+            setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDTIMEO,
+                       (char *) &sock->timeout_ms,
                        sizeof(sock->timeout_ms));
         }
     }
@@ -86,9 +86,9 @@ APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock, apr_interva
         /* Set the socket to blocking with infinite timeouts */
         if ((stat = soblock(sock->socketdes)) != APR_SUCCESS)
             return stat;
-        setsockopt(sock->socketdes, SOL_SOCKET, SO_RCVTIMEO, 
+        setsockopt(sock->socketdes, SOL_SOCKET, SO_RCVTIMEO,
                    (char *) &zero, sizeof(zero));
-        setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDTIMEO, 
+        setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDTIMEO,
                    (char *) &zero, sizeof(zero));
     }
     sock->timeout = t;
@@ -107,7 +107,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
     switch (opt) {
     case APR_SO_KEEPALIVE:
         if (on != apr_is_option_set(sock, APR_SO_KEEPALIVE)) {
-            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_KEEPALIVE, 
+            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_KEEPALIVE,
                            (void *)&one, sizeof(int)) == -1) {
                 return apr_get_netos_error();
             }
@@ -116,7 +116,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
         break;
     case APR_SO_DEBUG:
         if (on != apr_is_option_set(sock, APR_SO_DEBUG)) {
-            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_DEBUG, 
+            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_DEBUG,
                            (void *)&one, sizeof(int)) == -1) {
                 return apr_get_netos_error();
             }
@@ -137,7 +137,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
         break;
     case APR_SO_BROADCAST:
         if (on != apr_is_option_set(sock, APR_SO_BROADCAST)) {
-           if (setsockopt(sock->socketdes, SOL_SOCKET, SO_BROADCAST, 
+           if (setsockopt(sock->socketdes, SOL_SOCKET, SO_BROADCAST,
                            (void *)&one, sizeof(int)) == -1) {
                 return apr_get_netos_error();
             }
@@ -146,7 +146,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
         break;
     case APR_SO_REUSEADDR:
         if (on != apr_is_option_set(sock, APR_SO_REUSEADDR)) {
-            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_REUSEADDR, 
+            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_REUSEADDR,
                            (void *)&one, sizeof(int)) == -1) {
                 return apr_get_netos_error();
             }
@@ -156,7 +156,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
     case APR_SO_NONBLOCK:
         if (apr_is_option_set(sock, APR_SO_NONBLOCK) != on) {
             if (on) {
-                if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS) 
+                if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS)
                     return stat;
             }
             else {
@@ -172,7 +172,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
             struct linger li;
             li.l_onoff = on;
             li.l_linger = APR_MAX_SECS_TO_LINGER;
-            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_LINGER, 
+            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_LINGER,
                            (char *) &li, sizeof(struct linger)) == -1) {
                 return apr_get_netos_error();
             }
@@ -186,7 +186,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
             int optlevel = IPPROTO_TCP;
             int optname = TCP_DEFER_ACCEPT;
 
-            if (setsockopt(sock->socketdes, optlevel, optname, 
+            if (setsockopt(sock->socketdes, optlevel, optname,
                            (void *)&on, sizeof(int)) == -1) {
                 return apr_get_netos_error();
             }
@@ -215,7 +215,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
         break;
     case APR_IPV6_V6ONLY:
 #if APR_HAVE_IPV6
-        if (apr_os_level < APR_WIN_VISTA && 
+        if (apr_os_level < APR_WIN_VISTA &&
             sock->local_addr->family == AF_INET6) {
             /* apr_set_option() called at socket creation */
             if (on) {

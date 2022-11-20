@@ -35,7 +35,7 @@ int main(int argc, const char * const *argv)
 
     if (apr_file_open(&file, TESTFILE, APR_FOPEN_WRITE, APR_FPROT_OS_DEFAULT, p)
         != APR_SUCCESS) {
-        
+
         exit(UNEXPECTED_ERROR);
     }
     status = apr_file_lock(file, APR_FLOCK_EXCLUSIVE | APR_FLOCK_NONBLOCK);

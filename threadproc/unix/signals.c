@@ -85,7 +85,7 @@ APR_DECLARE(apr_sigfunc_t *) apr_signal(int signo, apr_sigfunc_t * func)
     /* XXX jeff thinks this should be enabled whenever SA_NOCLDWAIT is defined */
 
     /* this is required on Tru64 to cause child processes to
-     * disappear gracefully - XPG4 compatible 
+     * disappear gracefully - XPG4 compatible
      */
     if ((signo == SIGCHLD) && (func == SIG_IGN)) {
         act.sa_flags |= SA_NOCLDWAIT;
@@ -93,7 +93,7 @@ APR_DECLARE(apr_sigfunc_t *) apr_signal(int signo, apr_sigfunc_t * func)
 #endif
 #if defined(__NetBSD__) || defined(DARWIN)
     /* ignoring SIGCHLD or leaving the default disposition doesn't avoid zombies,
-     * and there is no SA_NOCLDWAIT flag, so catch the signal and reap status in 
+     * and there is no SA_NOCLDWAIT flag, so catch the signal and reap status in
      * the handler to avoid zombies
      */
     if ((signo == SIGCHLD) && (func == SIG_IGN)) {
@@ -321,7 +321,7 @@ APR_DECLARE(apr_status_t) apr_signal_thread(int(*signal_handler)(int signum))
     sigfillset(&sig_mask);
 
     /* On certain platforms, sigwait() returns EINVAL if any of various
-     * unblockable signals are included in the mask.  This was first 
+     * unblockable signals are included in the mask.  This was first
      * observed on AIX and Tru64.
      */
 #ifdef SIGKILL
@@ -378,7 +378,7 @@ APR_DECLARE(apr_status_t) apr_signal_thread(int(*signal_handler)(int signum))
         {
             /* handle sigwait() error here */
         }
-        
+
         if (sig_func(signal_received) == 1) {
             return APR_SUCCESS;
         }
@@ -401,7 +401,7 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
      * No thread should ever block synchronous signals.
      * See the Solaris man page for pthread_sigmask() for
      * some information.  Solaris chooses to knock out such
-     * processes when a blocked synchronous signal is 
+     * processes when a blocked synchronous signal is
      * delivered, skipping any registered signal handler.
      * AIX doesn't call a signal handler either.  At least
      * one level of linux+glibc does call the handler even

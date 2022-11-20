@@ -424,7 +424,7 @@ static void test_memcache_addreplace(abts_case * tc, void *data)
       ABTS_SKIP(tc, data, "Memcache server not found.");
       return;
   }
- 
+
   rv = apr_memcache_create(pool, 1, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
 
@@ -488,7 +488,7 @@ static void test_memcache_incrdecr(abts_case * tc, void *data)
       ABTS_SKIP(tc, data, "Memcache server not found.");
       return;
   }
- 
+
   rv = apr_memcache_create(pool, 1, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
 

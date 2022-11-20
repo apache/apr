@@ -56,9 +56,9 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_shm_create_ex(apr_shm_t **m, 
-                                            apr_size_t reqsize, 
-                                            const char *filename, 
+APR_DECLARE(apr_status_t) apr_shm_create_ex(apr_shm_t **m,
+                                            apr_size_t reqsize,
+                                            const char *filename,
                                             apr_pool_t *p,
                                             apr_int32_t flags)
 {
@@ -80,7 +80,7 @@ APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
 APR_DECLARE(apr_status_t) apr_shm_delete(apr_shm_t *m)
 {
     return APR_ENOTIMPL;
-} 
+}
 
 APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
                                          const char *filename,
@@ -164,5 +164,5 @@ APR_DECLARE(apr_status_t) apr_os_shm_put(apr_shm_t **m,
 
     *m = newm;
     return APR_SUCCESS;
-}    
+}
 

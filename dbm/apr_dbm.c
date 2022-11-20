@@ -36,7 +36,7 @@
 #include "apr_dbm_private.h"
 
 /* ### note: the setting of DBM_VTABLE will go away once we have multiple
-   ### DBMs in here. 
+   ### DBMs in here.
    ### Well, that day is here.  So, do we remove DBM_VTABLE and the old
    ### API entirely?  Oh, what to do.  We need an APU_DEFAULT_DBM #define.
    ### Sounds like a job for autoconf. */
@@ -143,9 +143,9 @@ APR_DECLARE(apr_status_t) apr_dbm_get_driver(const apr_dbm_driver_t **vtable,
     if (!strcasecmp(type, "default"))        type = DBM_NAME;
     else if (!strcasecmp(type, "db"))        type = "db";
     else if (*type && !strcasecmp(type + 1, "dbm")) {
-        if      (*type == 'G' || *type == 'g') type = "gdbm"; 
-        else if (*type == 'N' || *type == 'n') type = "ndbm"; 
-        else if (*type == 'S' || *type == 's') type = "sdbm"; 
+        if      (*type == 'G' || *type == 'g') type = "gdbm";
+        else if (*type == 'N' || *type == 'n') type = "ndbm";
+        else if (*type == 'S' || *type == 's') type = "sdbm";
     }
     else usertype = 1;
 
@@ -232,8 +232,8 @@ APR_DECLARE(apr_status_t) apr_dbm_get_driver(const apr_dbm_driver_t **vtable,
 #endif /* APR_HAVE_MODULAR_DSO */
 }
 
-APR_DECLARE(apr_status_t) apr_dbm_open_ex(apr_dbm_t **pdb, const char *type, 
-                                          const char *pathname, 
+APR_DECLARE(apr_status_t) apr_dbm_open_ex(apr_dbm_t **pdb, const char *type,
+                                          const char *pathname,
                                           apr_int32_t mode,
                                           apr_fileperms_t perm,
                                           apr_pool_t *pool)
@@ -245,9 +245,9 @@ APR_DECLARE(apr_status_t) apr_dbm_open_ex(apr_dbm_t **pdb, const char *type,
         rv = (vtable->open)(pdb, pathname, mode, perm, pool);
     }
     return rv;
-} 
+}
 
-APR_DECLARE(apr_status_t) apr_dbm_open(apr_dbm_t **pdb, const char *pathname, 
+APR_DECLARE(apr_status_t) apr_dbm_open(apr_dbm_t **pdb, const char *pathname,
                                        apr_int32_t mode, apr_fileperms_t perm,
                                        apr_pool_t *pool)
 {
@@ -319,8 +319,8 @@ APR_DECLARE(char *) apr_dbm_geterror(apr_dbm_t *dbm, int *errcode,
     return errbuf;
 }
 
-APR_DECLARE(apr_status_t) apr_dbm_get_usednames_ex(apr_pool_t *p, 
-                                                   const char *type, 
+APR_DECLARE(apr_status_t) apr_dbm_get_usednames_ex(apr_pool_t *p,
+                                                   const char *type,
                                                    const char *pathname,
                                                    const char **used1,
                                                    const char **used2)
@@ -333,14 +333,14 @@ APR_DECLARE(apr_status_t) apr_dbm_get_usednames_ex(apr_pool_t *p,
         return APR_SUCCESS;
     }
     return rv;
-} 
+}
 
 APR_DECLARE(void) apr_dbm_get_usednames(apr_pool_t *p,
                                         const char *pathname,
                                         const char **used1,
                                         const char **used2)
 {
-    apr_dbm_get_usednames_ex(p, DBM_NAME, pathname, used1, used2); 
+    apr_dbm_get_usednames_ex(p, DBM_NAME, pathname, used1, used2);
 }
 
 /* Most DBM libraries take a POSIX mode for creating files.  Don't trust

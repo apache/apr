@@ -17,7 +17,7 @@
 /*Read/Write locking implementation based on the MultiLock code from
  * Stephen Beaulieu <hippo@be.com>
  */
- 
+
 #include "apr_arch_thread_rwlock.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
@@ -43,23 +43,23 @@ static apr_status_t _thread_rw_cleanup(void * data)
             release_sem (mutex->Lock);
     	}
     }
-    
+
     delete_sem(mutex->Read);
     delete_sem(mutex->Write);
     delete_sem(mutex->Lock);
     return APR_SUCCESS;
-}    
+}
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
                                                    apr_pool_t *pool)
 {
     apr_thread_rwlock_t *new;
-  
+
     new = (apr_thread_rwlock_t *)apr_pcalloc(pool, sizeof(apr_thread_rwlock_t));
     if (new == NULL){
         return APR_ENOMEM;
     }
-    
+
     new->pool  = pool;
     /* we need to make 3 locks... */
     new->ReadCount = 0;
@@ -68,7 +68,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
     new->Read  = create_sem(0, "APR_ReadLock");
     new->Write = create_sem(0, "APR_WriteLock");
     new->Lock  = create_sem(0, "APR_Lock");
-    
+
     if (new->Lock < 0 || new->Read < 0 || new->Write < 0) {
         _thread_rw_cleanup(new);
         return -1;
@@ -132,7 +132,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_wrlock(apr_thread_rwlock_t *rwlock)
                 rwlock->writer = find_thread(NULL);
         }
     }
-    
+
     return rv;
 }
 

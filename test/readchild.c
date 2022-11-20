@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     apr_pool_t *p;
     char buf[128];
     apr_status_t rv;
-    
+
     apr_initialize();
     atexit(apr_terminate);
     apr_pool_create(&p, NULL);

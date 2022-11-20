@@ -28,9 +28,9 @@ static void copy_helper(abts_case *tc, const char *from, const char * to,
     apr_finfo_t copy;
     apr_finfo_t orig;
     apr_finfo_t dest;
-    
+
     dest_rv = apr_stat(&dest, to, APR_FINFO_SIZE, p);
-    
+
     if (!append) {
         rv = apr_file_copy(from, to, perms, p);
     }
@@ -49,8 +49,8 @@ static void copy_helper(abts_case *tc, const char *from, const char * to,
         ABTS_ASSERT(tc, "File size differs", orig.size == copy.size);
     }
     else {
-        ABTS_ASSERT(tc, "File size differs", 
-			            ((dest_rv == APR_SUCCESS) 
+        ABTS_ASSERT(tc, "File size differs",
+			            ((dest_rv == APR_SUCCESS)
 			              ? dest.size : 0) + orig.size == copy.size);
     }
 }
@@ -61,8 +61,8 @@ static void copy_short_file(abts_case *tc, void *data)
 
     /* make absolutely sure that the dest file doesn't exist. */
     apr_file_remove("data/file_copy.txt", p);
-    
-    copy_helper(tc, "data/file_datafile.txt", "data/file_copy.txt", 
+
+    copy_helper(tc, "data/file_datafile.txt", "data/file_copy.txt",
                 APR_FPROT_FILE_SOURCE_PERMS, 0, p);
     rv = apr_file_remove("data/file_copy.txt", p);
     APR_ASSERT_SUCCESS(tc, "Couldn't remove copy file", rv);
@@ -71,20 +71,20 @@ static void copy_short_file(abts_case *tc, void *data)
 static void copy_over_existing(abts_case *tc, void *data)
 {
     apr_status_t rv;
-    
+
     /* make absolutely sure that the dest file doesn't exist. */
     apr_file_remove("data/file_copy.txt", p);
-    
+
     /* This is a cheat.  I don't want to create a new file, so I just copy
      * one file, then I copy another.  If the second copy succeeds, then
      * this works.
      */
-    copy_helper(tc, "data/file_datafile.txt", "data/file_copy.txt", 
+    copy_helper(tc, "data/file_datafile.txt", "data/file_copy.txt",
                 APR_FPROT_FILE_SOURCE_PERMS, 0, p);
-    
-    copy_helper(tc, "data/mmap_datafile.txt", "data/file_copy.txt", 
+
+    copy_helper(tc, "data/mmap_datafile.txt", "data/file_copy.txt",
                 APR_FPROT_FILE_SOURCE_PERMS, 0, p);
-  
+
     rv = apr_file_remove("data/file_copy.txt", p);
     APR_ASSERT_SUCCESS(tc, "Couldn't remove copy file", rv);
 }
@@ -96,7 +96,7 @@ static void append_nonexist(abts_case *tc, void *data)
     /* make absolutely sure that the dest file doesn't exist. */
     apr_file_remove("data/file_copy.txt", p);
 
-    copy_helper(tc, "data/file_datafile.txt", "data/file_copy.txt", 
+    copy_helper(tc, "data/file_datafile.txt", "data/file_copy.txt",
                 APR_FPROT_FILE_SOURCE_PERMS, 0, p);
     rv = apr_file_remove("data/file_copy.txt", p);
     APR_ASSERT_SUCCESS(tc, "Couldn't remove copy file", rv);
@@ -105,20 +105,20 @@ static void append_nonexist(abts_case *tc, void *data)
 static void append_exist(abts_case *tc, void *data)
 {
     apr_status_t rv;
-    
+
     /* make absolutely sure that the dest file doesn't exist. */
     apr_file_remove("data/file_copy.txt", p);
-    
+
     /* This is a cheat.  I don't want to create a new file, so I just copy
      * one file, then I copy another.  If the second copy succeeds, then
      * this works.
      */
-    copy_helper(tc, "data/file_datafile.txt", "data/file_copy.txt", 
+    copy_helper(tc, "data/file_datafile.txt", "data/file_copy.txt",
                 APR_FPROT_FILE_SOURCE_PERMS, 0, p);
-    
-    copy_helper(tc, "data/mmap_datafile.txt", "data/file_copy.txt", 
+
+    copy_helper(tc, "data/mmap_datafile.txt", "data/file_copy.txt",
                 APR_FPROT_FILE_SOURCE_PERMS, 1, p);
-  
+
     rv = apr_file_remove("data/file_copy.txt", p);
     APR_ASSERT_SUCCESS(tc, "Couldn't remove copy file", rv);
 }

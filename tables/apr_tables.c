@@ -100,7 +100,7 @@ APR_DECLARE(void *) apr_array_pop(apr_array_header_t *arr)
     if (apr_is_empty_array(arr)) {
         return NULL;
     }
-   
+
     return arr->elts + (arr->elt_size * (--arr->nelts));
 }
 
@@ -366,7 +366,7 @@ typedef struct
 } table_getm_t;
 
 /*
- * NOTICE: if you tweak this you should look at is_empty_table() 
+ * NOTICE: if you tweak this you should look at is_empty_table()
  * and table_elts() in alloc.h
  */
 #ifdef MAKE_TABLE_PROFILE
@@ -895,15 +895,15 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
  * caller can pass additional info for the task.
  *
  * ADDENDUM for apr_table_vdo():
- * 
+ *
  * The caching api will allow a user to walk the header values:
  *
- * apr_status_t apr_cache_el_header_walk(apr_cache_el *el, 
+ * apr_status_t apr_cache_el_header_walk(apr_cache_el *el,
  *    int (*comp)(void *, const char *, const char *), void *rec, ...);
  *
  * So it can be ..., however from there I use a  callback that use a va_list:
  *
- * apr_status_t (*cache_el_header_walk)(apr_cache_el *el, 
+ * apr_status_t (*cache_el_header_walk)(apr_cache_el *el,
  *    int (*comp)(void *, const char *, const char *), void *rec, va_list);
  *
  * To pass those ...'s on down to the actual module that will handle walking
@@ -911,7 +911,7 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
  * rather than reimplementing apr_table_do (which IMHO would be bad) I just
  * called it with the va_list. For mod_shmem_cache I don't need it since I
  * can't use apr_table's, but mod_file_cache should (though a good hash would
- * be better, but that's a different issue :). 
+ * be better, but that's a different issue :).
  *
  * So to make mod_file_cache easier to maintain, it's a good thing
  */
@@ -926,7 +926,7 @@ APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
     va_end(vp);
 
     return rv;
-} 
+}
 
 /* XXX: do the semantics of this routine make any sense?  Right now,
  * if the caller passed in a non-empty va_list of keys to search for,
@@ -1000,7 +1000,7 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
 }
 
 static apr_table_entry_t **table_mergesort(apr_pool_t *pool,
-                                           apr_table_entry_t **values, 
+                                           apr_table_entry_t **values,
                                            apr_size_t n)
 {
     /* Bottom-up mergesort, based on design in Sedgewick's "Algorithms

@@ -152,7 +152,7 @@ static void get_current_time(apr_uint64_t *timestamp)
     static apr_uint64_t fudge = 0;
 
     get_system_time(&time_now);
-        
+
     /* if clock reading changed since last UUID generated... */
     if (time_last != time_now) {
         /* The clock reading has changed since the last UUID was generated.

@@ -105,8 +105,8 @@ APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock, char *buf,
 
 
 
-APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock, 
-                                           const struct iovec *vec, 
+APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock,
+                                           const struct iovec *vec,
                                            apr_int32_t nvec, apr_size_t *len)
 {
     apr_status_t rv;
@@ -159,7 +159,7 @@ APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock,
 APR_DECLARE(apr_status_t) apr_socket_wait(apr_socket_t *sock, apr_wait_type_t direction)
 {
     int pollsocket = sock->socketdes;
-    int wait_rc = select(&pollsocket, direction == APR_WAIT_READ, 
+    int wait_rc = select(&pollsocket, direction == APR_WAIT_READ,
                          direction == APR_WAIT_WRITE, 0, sock->timeout / 1000);
 
     if (wait_rc == 0) {

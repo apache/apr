@@ -73,7 +73,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr,
 
     if ((stat = pthread_attr_setdetachstate(&attr->attr, &arg)) == 0) {
 #else
-    if ((stat = pthread_attr_setdetachstate(&attr->attr, 
+    if ((stat = pthread_attr_setdetachstate(&attr->attr,
                                             DETACH_ARG(on))) == 0) {
 #endif
         return APR_SUCCESS;
@@ -136,7 +136,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
 #endif
 }
 
-APR_DECLARE(apr_status_t) apr_threadattr_max_free_set(apr_threadattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_threadattr_max_free_set(apr_threadattr_t *attr,
                                                       apr_size_t size)
 {
     attr->max_free = size;

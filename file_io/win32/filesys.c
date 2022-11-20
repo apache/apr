@@ -22,19 +22,19 @@
  *
  * Note that trailing spaces and trailing periods are never recorded
  * in the file system, except by a very obscure bug where any file
- * that is created with a trailing space or period, followed by the 
+ * that is created with a trailing space or period, followed by the
  * ':' stream designator on an NTFS volume can never be accessed again.
  * In other words, don't ever accept them when designating a stream!
  *
- * An interesting side effect is that two or three periods are both 
+ * An interesting side effect is that two or three periods are both
  * treated as the parent directory, although the fourth and on are
  * not [strongly suggest all trailing periods are trimmed off, or
  * down to two if there are no other characters.]
  *
  * Leading spaces and periods are accepted, however.
  * The * ? < > codes all have wildcard side effects
- * The " / \ : are exclusively component separator tokens 
- * The system doesn't accept | for any (known) purpose 
+ * The " / \ : are exclusively component separator tokens
+ * The system doesn't accept | for any (known) purpose
  * Oddly, \x7f _is_ acceptable ;)
  */
 
@@ -68,7 +68,7 @@ apr_status_t filepath_root_test(char *path, apr_pool_t *p)
     apr_status_t rv;
     apr_wchar_t wpath[APR_PATH_MAX];
 
-    if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+    if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath)
                                         / sizeof(apr_wchar_t), path)))
         return rv;
     rv = GetDriveTypeW(wpath);
@@ -79,7 +79,7 @@ apr_status_t filepath_root_test(char *path, apr_pool_t *p)
 }
 
 
-apr_status_t filepath_drive_get(char **rootpath, char drive, 
+apr_status_t filepath_drive_get(char **rootpath, char drive,
                                 apr_int32_t flags, apr_pool_t *p)
 {
     char path[APR_PATH_MAX];
@@ -87,7 +87,7 @@ apr_status_t filepath_drive_get(char **rootpath, char drive,
     apr_wchar_t wdrive[8];
     apr_wchar_t wpath[APR_PATH_MAX];
     apr_status_t rv;
-    /* ???: This needs review, apparently "\\?\d:." returns "\\?\d:" 
+    /* ???: This needs review, apparently "\\?\d:." returns "\\?\d:"
      * as if that is useful for anything.
      */
     wcscpy(wdrive, L"D:.");
@@ -113,16 +113,16 @@ apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)
     apr_wchar_t wpath[APR_PATH_MAX];
     apr_status_t rv;
     apr_wchar_t wroot[APR_PATH_MAX];
-    /* ???: This needs review, apparently "\\?\d:." returns "\\?\d:" 
+    /* ???: This needs review, apparently "\\?\d:." returns "\\?\d:"
      * as if that is useful for anything.
      */
-    if ((rv = utf8_to_unicode_path(wroot, sizeof(wroot) 
+    if ((rv = utf8_to_unicode_path(wroot, sizeof(wroot)
                                         / sizeof(apr_wchar_t), root)))
         return rv;
     if (!GetFullPathNameW(wroot, sizeof(wpath) / sizeof(apr_wchar_t), wpath, &ignored))
         return apr_get_os_error();
 
-    /* Borrow wroot as a char buffer (twice as big as necessary) 
+    /* Borrow wroot as a char buffer (twice as big as necessary)
      */
     if ((rv = unicode_to_utf8_path((char*)wroot, sizeof(wroot), wpath)))
         return rv;
@@ -159,7 +159,7 @@ APR_DECLARE(apr_status_t) apr_filepath_set(const char *rootpath,
     apr_wchar_t wpath[APR_PATH_MAX];
     apr_status_t rv;
 
-    if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+    if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath)
                                         / sizeof(apr_wchar_t), rootpath)))
         return rv;
     if (!SetCurrentDirectoryW(wpath))

@@ -39,10 +39,10 @@ static void test_simple(abts_case *tc, void *data)
     apr_bucket_alloc_t *ba;
     apr_bucket_brigade *bb;
     apr_bucket *fb, *tb;
-    
+
     ba = apr_bucket_alloc_create(p);
     bb = apr_brigade_create(p, ba);
-    
+
     fb = APR_BRIGADE_FIRST(bb);
     ABTS_ASSERT(tc, "first bucket of empty brigade is sentinel",
                 fb == APR_BRIGADE_SENTINEL(bb));
@@ -75,12 +75,12 @@ static void test_simple(abts_case *tc, void *data)
 }
 
 static apr_bucket_brigade *make_simple_brigade(apr_bucket_alloc_t *ba,
-                                               const char *first, 
+                                               const char *first,
                                                const char *second)
 {
     apr_bucket_brigade *bb = apr_brigade_create(p, ba);
     apr_bucket *e;
- 
+
     e = apr_bucket_transient_create(first, strlen(first), ba);
     APR_BRIGADE_INSERT_TAIL(bb, e);
 
@@ -120,7 +120,7 @@ static void test_flatten(abts_case *tc, void *data)
     flatten_match(tc, "flatten brigade", bb, "hello, world");
 
     apr_brigade_destroy(bb);
-    apr_bucket_alloc_destroy(ba);    
+    apr_bucket_alloc_destroy(ba);
 }
 
 static int count_buckets(apr_bucket_brigade *bb)
@@ -128,12 +128,12 @@ static int count_buckets(apr_bucket_brigade *bb)
     apr_bucket *e;
     int count = 0;
 
-    for (e = APR_BRIGADE_FIRST(bb); 
+    for (e = APR_BRIGADE_FIRST(bb);
          e != APR_BRIGADE_SENTINEL(bb);
          e = APR_BUCKET_NEXT(e)) {
         count++;
     }
-    
+
     return count;
 }
 
@@ -173,7 +173,7 @@ static void test_bwrite(abts_case *tc, void *data)
     int n;
 
     for (n = 0; n < COUNT; n++) {
-        APR_ASSERT_SUCCESS(tc, "brigade_write", 
+        APR_ASSERT_SUCCESS(tc, "brigade_write",
                            apr_brigade_write(bb, NULL, NULL,
                                              THESTR, sizeof THESTR));
     }
@@ -183,7 +183,7 @@ static void test_bwrite(abts_case *tc, void *data)
 
     ABTS_ASSERT(tc, "brigade has correct length",
                 length == (COUNT * sizeof THESTR));
-    
+
     apr_brigade_destroy(bb);
     apr_bucket_alloc_destroy(ba);
 }
@@ -275,7 +275,7 @@ static void test_bucket_content(abts_case *tc,
     apr_size_t alen;
 
     APR_ASSERT_SUCCESS(tc, "read from bucket",
-                       apr_bucket_read(e, &adata, &alen, 
+                       apr_bucket_read(e, &adata, &alen,
                                        APR_BLOCK_READ));
 
     ABTS_ASSERT(tc, "read expected length", alen == elen);
@@ -294,19 +294,19 @@ static void test_splits(abts_case *tc, void *ctx)
 
     APR_BRIGADE_INSERT_TAIL(bb,
                             apr_bucket_immortal_create(str, 9, ba));
-    APR_BRIGADE_INSERT_TAIL(bb, 
+    APR_BRIGADE_INSERT_TAIL(bb,
                             apr_bucket_transient_create(str, 9, ba));
-    APR_BRIGADE_INSERT_TAIL(bb, 
+    APR_BRIGADE_INSERT_TAIL(bb,
                             apr_bucket_heap_create(strdup(str), 9, free, ba));
-    APR_BRIGADE_INSERT_TAIL(bb, 
-                            apr_bucket_pool_create(apr_pstrdup(p, str), 9, p, 
+    APR_BRIGADE_INSERT_TAIL(bb,
+                            apr_bucket_pool_create(apr_pstrdup(p, str), 9, p,
                                                    ba));
 
     ABTS_ASSERT(tc, "four buckets inserted", count_buckets(bb) == 4);
-    
+
     /* now split each of the buckets after byte 5 */
     for (n = 0, e = APR_BRIGADE_FIRST(bb); n < 4; n++) {
-        ABTS_ASSERT(tc, "reached end of brigade", 
+        ABTS_ASSERT(tc, "reached end of brigade",
                     e != APR_BRIGADE_SENTINEL(bb));
         ABTS_ASSERT(tc, "split bucket OK",
                     apr_bucket_split(e, 5) == APR_SUCCESS);
@@ -314,14 +314,14 @@ static void test_splits(abts_case *tc, void *ctx)
         ABTS_ASSERT(tc, "split OK", e != APR_BRIGADE_SENTINEL(bb));
         e = APR_BUCKET_NEXT(e);
     }
-    
-    ABTS_ASSERT(tc, "four buckets split into eight", 
+
+    ABTS_ASSERT(tc, "four buckets split into eight",
                 count_buckets(bb) == 8);
 
     for (n = 0, e = APR_BRIGADE_FIRST(bb); n < 4; n++) {
         const char *data;
         apr_size_t len;
-        
+
         APR_ASSERT_SUCCESS(tc, "read alpha from bucket",
                            apr_bucket_read(e, &data, &len, APR_BLOCK_READ));
         ABTS_ASSERT(tc, "read 5 bytes", len == 5);
@@ -346,9 +346,9 @@ static void test_splits(abts_case *tc, void *ctx)
         f = APR_BUCKET_NEXT(e);
         apr_bucket_delete(e);
         e = APR_BUCKET_NEXT(f);
-    }    
-    
-    ABTS_ASSERT(tc, "eight buckets reduced to four", 
+    }
+
+    ABTS_ASSERT(tc, "eight buckets reduced to four",
                 count_buckets(bb) == 4);
 
     flatten_match(tc, "flatten beta brigade", bb,
@@ -381,11 +381,11 @@ static void test_insertfile(abts_case *tc, void *ctx)
         ABTS_NOT_IMPL(tc, "Skipped: could not create large file");
         return;
     }
-    
+
     bb = apr_brigade_create(p, ba);
 
     e = apr_brigade_insert_file(bb, f, 0, bignum, p);
-    
+
     ABTS_ASSERT(tc, "inserted file was not at end of brigade",
                 e == APR_BRIGADE_LAST(bb));
 
@@ -426,7 +426,7 @@ static apr_file_t *make_test_file(abts_case *tc, const char *fname,
                 apr_file_open(&f, fname,
                               APR_FOPEN_READ|APR_FOPEN_WRITE|APR_FOPEN_TRUNCATE|APR_FOPEN_CREATE,
                               APR_FPROT_OS_DEFAULT, p) == APR_SUCCESS);
-    
+
     ABTS_ASSERT(tc, "write test file contents",
                 apr_file_puts(contents, f) == APR_SUCCESS);
 
@@ -486,7 +486,7 @@ static void test_truncfile(abts_case *tc, void *data)
                 apr_bucket_read(e, &buf, &len, APR_BLOCK_READ) == APR_EOF);
 
     ABTS_ASSERT(tc, "read length 0", len == 0);
-    
+
     ABTS_ASSERT(tc, "still a single bucket in brigade",
                 APR_BUCKET_NEXT(e) == APR_BRIGADE_SENTINEL(bb));
 

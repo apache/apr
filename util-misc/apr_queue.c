@@ -34,7 +34,7 @@
 #include "apr_queue.h"
 
 #if APR_HAS_THREADS
-/* 
+/*
  * define this to get debug messages
  *
 #define QUEUE_DEBUG
@@ -56,14 +56,14 @@ struct apr_queue_t {
 
 #ifdef QUEUE_DEBUG
 static void Q_DBG(char*msg, apr_queue_t *q) {
-    fprintf(stderr, "%ld\t#%d in %d out %d\t%s\n", 
+    fprintf(stderr, "%ld\t#%d in %d out %d\t%s\n",
                     apr_os_thread_current(),
                     q->nelts, q->in, q->out,
                     msg
                     );
 }
 #else
-#define Q_DBG(x,y) 
+#define Q_DBG(x,y)
 #endif
 
 /**
@@ -82,7 +82,7 @@ static void Q_DBG(char*msg, apr_queue_t *q) {
  * Callback routine that is called to destroy this
  * apr_queue_t when its pool is destroyed.
  */
-static apr_status_t queue_destroy(void *data) 
+static apr_status_t queue_destroy(void *data)
 {
     apr_queue_t *queue = data;
 
@@ -98,8 +98,8 @@ static apr_status_t queue_destroy(void *data)
 /**
  * Initialize the apr_queue_t.
  */
-APR_DECLARE(apr_status_t) apr_queue_create(apr_queue_t **q, 
-                                           unsigned int queue_capacity, 
+APR_DECLARE(apr_status_t) apr_queue_create(apr_queue_t **q,
+                                           unsigned int queue_capacity,
                                            apr_pool_t *a)
 {
     apr_status_t rv;
@@ -302,7 +302,7 @@ static apr_status_t queue_pop(apr_queue_t *queue, void **data,
                 return APR_EINTR;
             }
         }
-    } 
+    }
 
     *data = queue->data[queue->out];
     queue->nelts--;
@@ -342,7 +342,7 @@ APR_DECLARE(apr_status_t) apr_queue_timedpop(apr_queue_t *queue, void **data,
 APR_DECLARE(apr_status_t) apr_queue_interrupt_all(apr_queue_t *queue)
 {
     apr_status_t rv;
-    Q_DBG("intr all", queue);    
+    Q_DBG("intr all", queue);
     if ((rv = apr_thread_mutex_lock(queue->one_big_mutex)) != APR_SUCCESS) {
         return rv;
     }
@@ -365,7 +365,7 @@ APR_DECLARE(apr_status_t) apr_queue_term(apr_queue_t *queue)
     }
 
     /* we must hold one_big_mutex when setting this... otherwise,
-     * we could end up setting it and waking everybody up just after a 
+     * we could end up setting it and waking everybody up just after a
      * would-be popper checks it but right before they block
      */
     queue->terminated = 1;

@@ -27,7 +27,7 @@ struct pipefd {
 
 int main(int argc, char *argv[]) {
 /* we expect the following...
- * 
+ *
  * argv[0] = this stub
  * argv[1] = directory to run in...
  * argv[2] = progname to execute
@@ -40,14 +40,14 @@ int main(int argc, char *argv[]) {
 	void *buffer;
 	char ** newargs;
 	int i = 0;
-	
+
 	newargs = (char**)malloc(sizeof(char*) * (argc - 1));
-  
+
 	buffer = (void*)malloc(sizeof(struct pipefd));
 	/* this will block until we get the data */
 	receive_data(&sender, buffer, sizeof(struct pipefd));
 	pfd = (struct pipefd*)buffer;
-	
+
 	if (pfd->in > STDERR_FILENO) {
 		if (dup2(pfd->in, STDIN_FILENO) != STDIN_FILENO) return (-1);
 	    close (pfd->in);
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
 	for	(i=3;i<=argc;i++){
 	    newargs[i-3] = argv[i];
 	}
-	
+
 	/* tell the caller we're OK to start */
 	send_data(sender,1,NULL,0);
 

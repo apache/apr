@@ -148,8 +148,8 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in,
     return file_pipe_create(in, out, APR_FULL_BLOCK, pool, pool);
 }
 
-APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in, 
-                                                  apr_file_t **out, 
+APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
+                                                  apr_file_t **out,
                                                   apr_int32_t blocking,
                                                   apr_pool_t *pool)
 {
@@ -164,15 +164,15 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_pools(apr_file_t **in,
 {
     return file_pipe_create(in, out, blocking, pool_in, pool_out);
 }
-    
-    
+
+
 APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, apr_fileperms_t perm, apr_pool_t *pool)
 {
     /* Not yet implemented, interface not suitable */
     return APR_ENOTIMPL;
-} 
+}
 
- 
+
 
 APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
 {

@@ -16,7 +16,7 @@
 
 #include "apr_buckets.h"
 
-static apr_status_t eos_bucket_read(apr_bucket *b, const char **str, 
+static apr_status_t eos_bucket_read(apr_bucket *b, const char **str,
                                     apr_size_t *len, apr_read_type_e block)
 {
     *str = NULL;
@@ -30,7 +30,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_eos_make(apr_bucket *b)
     b->start       = 0;
     b->data        = NULL;
     b->type        = &apr_bucket_type_eos;
-    
+
     return b;
 }
 

@@ -28,9 +28,9 @@
 #include <sys/wait.h>
 #endif
 
-/* Windows only really support killing process, but that will do for now. 
+/* Windows only really support killing process, but that will do for now.
  *
- * ### Actually, closing the input handle to the proc should also do fine 
+ * ### Actually, closing the input handle to the proc should also do fine
  * for most console apps.  This definitely needs improvement...
  */
 APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int signal)
@@ -39,7 +39,7 @@ APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int signal)
         if (TerminateProcess(proc->hproc, signal) == 0) {
             return apr_get_os_error();
         }
-        /* On unix, SIGKILL leaves a apr_proc_wait()able pid lying around, 
+        /* On unix, SIGKILL leaves a apr_proc_wait()able pid lying around,
          * so we will leave hproc alone until the app calls apr_proc_wait().
          */
         return APR_SUCCESS;

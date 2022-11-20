@@ -42,7 +42,7 @@ static apr_status_t pool_bucket_cleanup(void *data)
     return APR_SUCCESS;
 }
 
-static apr_status_t pool_bucket_read(apr_bucket *b, const char **str, 
+static apr_status_t pool_bucket_read(apr_bucket *b, const char **str,
                                      apr_size_t *len, apr_read_type_e block)
 {
     apr_bucket_pool *p = b->data;

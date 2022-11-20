@@ -48,7 +48,7 @@ static void set_debug(abts_case *tc, void *data)
 {
     apr_status_t rv1, rv2;
     apr_int32_t ck;
-    
+
     /* On some platforms APR_SO_DEBUG can only be set as root; just test
      * for get/set consistency of this option. */
     rv1 = apr_socket_opt_set(sock, APR_SO_DEBUG, 1);
@@ -108,7 +108,7 @@ static void corkable(abts_case *tc, void *data)
 
     rv = apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    
+
     rv = apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_INT_EQUAL(tc, 1, ck);

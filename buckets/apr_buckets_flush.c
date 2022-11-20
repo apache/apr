@@ -16,7 +16,7 @@
 
 #include "apr_buckets.h"
 
-static apr_status_t flush_bucket_read(apr_bucket *b, const char **str, 
+static apr_status_t flush_bucket_read(apr_bucket *b, const char **str,
                                       apr_size_t *len, apr_read_type_e block)
 {
     *str = NULL;
@@ -30,7 +30,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_flush_make(apr_bucket *b)
     b->start       = 0;
     b->data        = NULL;
     b->type        = &apr_bucket_type_flush;
-    
+
     return b;
 }
 
@@ -45,7 +45,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_flush_create(apr_bucket_alloc_t *list)
 }
 
 APR_DECLARE_DATA const apr_bucket_type_t apr_bucket_type_flush = {
-    "FLUSH", 5, APR_BUCKET_METADATA, 
+    "FLUSH", 5, APR_BUCKET_METADATA,
     apr_bucket_destroy_noop,
     flush_bucket_read,
     apr_bucket_setaside_noop,

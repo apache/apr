@@ -29,7 +29,7 @@ typedef struct {
     apr_skiplistnode **data;
     size_t size, pos;
     apr_pool_t *p;
-} apr_skiplist_q; 
+} apr_skiplist_q;
 
 struct apr_skiplist {
     apr_skiplist_compare compare;

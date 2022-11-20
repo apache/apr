@@ -152,7 +152,7 @@ static void test_basic_ordering(abts_case *tc, void *data)
 
     probe_buf_pool = p;
     test_run_toyhook(buf, sizeof buf);
-    
+
     ABTS_STR_EQUAL(tc, "12345", buf);
     ABTS_STR_EQUAL(tc, "EI1CI2CI3CI4CI5CR", probe_buf);
 }
@@ -179,7 +179,7 @@ static void test_pred_ordering(abts_case *tc, void *data)
 
     probe_buf_pool = p;
     test_run_toyhook(buf, sizeof buf);
-    
+
     /* FAILS ABTS_STR_EQUAL(tc, "1223", buf); */
 }
 

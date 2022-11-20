@@ -29,7 +29,7 @@ static apr_status_t dso_cleanup(void *thedso)
 
     if (dso->handle == 0)
         return APR_SUCCESS;
-       
+
     rc = DosFreeModule(dso->handle);
 
     if (rc == 0)
@@ -70,8 +70,8 @@ APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
 
 
 
-APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
-                                      apr_dso_handle_t *handle, 
+APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
+                                      apr_dso_handle_t *handle,
                                       const char *symname)
 {
     PFN func;

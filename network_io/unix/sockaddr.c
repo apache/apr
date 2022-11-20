@@ -122,7 +122,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_getbuf(char *buf, apr_size_t buflen,
     }
 
 #if APR_HAVE_IPV6
-    if (sockaddr->family == AF_INET6 
+    if (sockaddr->family == AF_INET6
         && IN6_IS_ADDR_V4MAPPED((struct in6_addr *)sockaddr->ipaddr_ptr)
         && buflen > strlen("::ffff:")) {
         /* This is an IPv4-mapped IPv6 address; drop the leading
@@ -153,7 +153,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_getbuf(char *buf, apr_size_t buflen,
             *p++ = '%';
             memcpy(p, scbuf, strlen(scbuf) + 1);
         }
-    }    
+    }
 #endif /* HAVE_IF_INDEXTONAME */
 #endif /* APR_HAVE_IPV6 */
 
@@ -283,9 +283,9 @@ APR_DECLARE(apr_status_t) apr_parse_addr_port(char **addr,
     /* now handle the hostname */
     addrlen = lastchar - str + 1;
 
-/* XXX we don't really have to require APR_HAVE_IPV6 for this; 
+/* XXX we don't really have to require APR_HAVE_IPV6 for this;
  * just pass char[] for ipaddr (so we don't depend on struct in6_addr)
- * and always define APR_INET6 
+ * and always define APR_INET6
  */
 #if APR_HAVE_IPV6
     if (*str == '[') {
@@ -320,10 +320,10 @@ APR_DECLARE(apr_status_t) apr_parse_addr_port(char **addr,
             return APR_EINVAL;
         }
     }
-    else 
+    else
 #endif
     {
-        /* XXX If '%' is not a valid char in a DNS name, we *could* check 
+        /* XXX If '%' is not a valid char in a DNS name, we *could* check
          *     for bogus scope ids first.
          */
         *addr = apr_pstrmemdup(p, str, addrlen);
@@ -335,13 +335,13 @@ APR_DECLARE(apr_status_t) apr_parse_addr_port(char **addr,
 
 static apr_status_t call_resolver(apr_sockaddr_t **sa,
                                   const char *hostname, apr_int32_t family,
-                                  apr_port_t port, apr_int32_t flags, 
+                                  apr_port_t port, apr_int32_t flags,
                                   apr_pool_t *p)
 {
     struct addrinfo hints, *ai, *ai_list;
     apr_sockaddr_t *prev_sa;
     int error;
-    char *servname = NULL; 
+    char *servname = NULL;
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = family;
@@ -356,16 +356,16 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
 #endif
 
 #ifdef __MVS__
-    /* z/OS will not return IPv4 address under AF_UNSPEC if any IPv6 results 
-     * are returned, w/o AI_ALL. 
+    /* z/OS will not return IPv4 address under AF_UNSPEC if any IPv6 results
+     * are returned, w/o AI_ALL.
      */
-    if (family == APR_UNSPEC) { 
+    if (family == APR_UNSPEC) {
        hints.ai_flags |= AI_ALL;
     }
 #endif
 
     if(hostname == NULL) {
-#ifdef AI_PASSIVE 
+#ifdef AI_PASSIVE
         /* If hostname is NULL, assume we are trying to bind to all
          * interfaces. */
         hints.ai_flags |= AI_PASSIVE;
@@ -426,11 +426,11 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
         if (error == EAI_SYSTEM) {
             return errno ? errno : APR_EGENERAL;
         }
-        else 
+        else
         {
             /* issues with representing this with APR's error scheme:
-             * glibc uses negative values for these numbers, perhaps so 
-             * they don't conflict with h_errno values...  Tru64 uses 
+             * glibc uses negative values for these numbers, perhaps so
+             * they don't conflict with h_errno values...  Tru64 uses
              * positive values which conflict with h_errno values
              */
 #if defined(NEGATIVE_EAI)
@@ -491,9 +491,9 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
     return APR_SUCCESS;
 }
 
-static apr_status_t find_addresses(apr_sockaddr_t **sa, 
+static apr_status_t find_addresses(apr_sockaddr_t **sa,
                                    const char *hostname, apr_int32_t family,
-                                   apr_port_t port, apr_int32_t flags, 
+                                   apr_port_t port, apr_int32_t flags,
                                    apr_pool_t *p)
 {
     if (flags & APR_IPV4_ADDR_OK) {
@@ -525,9 +525,9 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
 
 #else /* end of HAVE_GETADDRINFO code */
 
-static apr_status_t find_addresses(apr_sockaddr_t **sa, 
+static apr_status_t find_addresses(apr_sockaddr_t **sa,
                                    const char *hostname, apr_int32_t family,
-                                   apr_port_t port, apr_int32_t flags, 
+                                   apr_port_t port, apr_int32_t flags,
                                    apr_pool_t *p)
 {
     struct hostent *hp;
@@ -573,7 +573,7 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
 #else
 #if defined(GETHOSTBYNAME_R_GLIBC2)
         /* Linux glibc2+ */
-        gethostbyname_r(hostname, &hs, tmp, GETHOSTBYNAME_BUFLEN - 1, 
+        gethostbyname_r(hostname, &hs, tmp, GETHOSTBYNAME_BUFLEN - 1,
                         &hp, &hosterror);
 #else
         /* Solaris, Irix et alia */
@@ -632,7 +632,7 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
 #endif /* end of !HAVE_GETADDRINFO code */
 
 APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
-                                                const char *hostname, 
+                                                const char *hostname,
                                                 apr_int32_t family, apr_port_t port,
                                                 apr_int32_t flags, apr_pool_t *p)
 {
@@ -791,7 +791,7 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
                 return errno + APR_OS_START_SYSERR;
             }
         }
-        else 
+        else
 #endif
         {
 #if defined(NEGATIVE_EAI)
@@ -800,7 +800,7 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
             return rc + APR_OS_START_EAIERR; /* return the EAI_ error */
         }
     }
-    *hostname = sockaddr->hostname = apr_pstrdup(sockaddr->pool, 
+    *hostname = sockaddr->hostname = apr_pstrdup(sockaddr->pool,
                                                  tmphostname);
     return APR_SUCCESS;
 #else
@@ -816,18 +816,18 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
 
 #if defined(GETHOSTBYNAME_R_HOSTENT_DATA)
     /* AIX, HP/UX, D/UX et alia */
-    gethostbyaddr_r((char *)&sockaddr->sa.sin.sin_addr, 
+    gethostbyaddr_r((char *)&sockaddr->sa.sin.sin_addr,
                   sizeof(struct in_addr), AF_INET, &hs, &hd);
     hptr = &hs;
 #else
 #if defined(GETHOSTBYNAME_R_GLIBC2)
     /* Linux glibc2+ */
-    gethostbyaddr_r((char *)&sockaddr->sa.sin.sin_addr, 
+    gethostbyaddr_r((char *)&sockaddr->sa.sin.sin_addr,
                     sizeof(struct in_addr), AF_INET,
                     &hs, tmp, GETHOSTBYNAME_BUFLEN - 1, &hptr, &hosterror);
 #else
     /* Solaris, Irix et alia */
-    hptr = gethostbyaddr_r((char *)&sockaddr->sa.sin.sin_addr, 
+    hptr = gethostbyaddr_r((char *)&sockaddr->sa.sin.sin_addr,
                            sizeof(struct in_addr), AF_INET,
                            &hs, tmp, GETHOSTBYNAME_BUFLEN, &hosterror);
 #endif /* !defined(GETHOSTBYNAME_R_GLIBC2) */
@@ -838,7 +838,7 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
 #endif /* !defined(GETHOSTBYNAME_R_HOSTENT_DATA) */
 #else
     struct hostent *hptr;
-    hptr = gethostbyaddr((char *)&sockaddr->sa.sin.sin_addr, 
+    hptr = gethostbyaddr((char *)&sockaddr->sa.sin.sin_addr,
                          sizeof(struct in_addr), AF_INET);
 #endif
 
@@ -1046,7 +1046,7 @@ static apr_status_t parse_ip(apr_ipsubnet_t *ipsub, const char *ipstr, int netwo
     /* supported flavors of IP:
      *
      * . IPv6 numeric address string (e.g., "fe80::1")
-     * 
+     *
      *   IMPORTANT: Don't store IPv4-mapped IPv6 address as an IPv6 address.
      *
      * . IPv4 numeric address string (e.g., "127.0.0.1")
@@ -1093,7 +1093,7 @@ static int looks_like_ip(const char *ipstr)
     if (strlen(ipstr) == 0) {
         return 0;
     }
-    
+
     if (strchr(ipstr, ':')) {
         /* definitely not a hostname; assume it is intended to be an IPv6 address */
         return 1;
@@ -1118,14 +1118,14 @@ static void fix_subnet(apr_ipsubnet_t *ipsub)
 }
 
 /* be sure not to store any IPv4 address as a v4-mapped IPv6 address */
-APR_DECLARE(apr_status_t) apr_ipsubnet_create(apr_ipsubnet_t **ipsub, const char *ipstr, 
+APR_DECLARE(apr_status_t) apr_ipsubnet_create(apr_ipsubnet_t **ipsub, const char *ipstr,
                                               const char *mask_or_numbits, apr_pool_t *p)
 {
     apr_status_t rv;
     char *endptr;
     long bits, maxbits = 32;
 
-    /* filter out stuff which doesn't look remotely like an IP address; this helps 
+    /* filter out stuff which doesn't look remotely like an IP address; this helps
      * callers like mod_access which have a syntax allowing hostname or IP address;
      * APR_EINVAL tells the caller that it was probably not intended to be an IP
      * address
@@ -1227,7 +1227,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_zone_set(apr_sockaddr_t *sa,
     return APR_ENOTIMPL;
 #else
     unsigned int idx;
-    
+
     if (sa->family != APR_INET6
         || !IN6_IS_ADDR_LINKLOCAL((struct in6_addr *)sa->ipaddr_ptr)) {
         return APR_EBADIP;
@@ -1266,7 +1266,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_zone_get(const apr_sockaddr_t *sa,
 #else
     if (sa->family != APR_INET6 || !sa->sa.sin6.sin6_scope_id) {
         return APR_EBADIP;
-    }        
+    }
 
     if (name) {
         char *buf = apr_palloc(p, IF_NAMESIZE);
@@ -1276,7 +1276,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_zone_get(const apr_sockaddr_t *sa,
     }
 
     if (id) *id = sa->sa.sin6.sin6_scope_id;
-    
+
     return APR_SUCCESS;
 #endif
 }

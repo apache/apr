@@ -38,7 +38,7 @@
 #if !defined(HAVE_STRUCT_TM_TM_GMTOFF) && !defined(HAVE_STRUCT_TM___TM_GMTOFF)
 static apr_int32_t server_gmt_offset;
 #define NO_GMTOFF_IN_STRUCT_TM
-#endif          
+#endif
 
 static apr_int32_t get_offset(struct tm *tm)
 {
@@ -164,7 +164,7 @@ APR_DECLARE(apr_status_t) apr_time_exp_get(apr_time_t *t, apr_time_exp_t *xt)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_time_exp_gmt_get(apr_time_t *t, 
+APR_DECLARE(apr_status_t) apr_time_exp_gmt_get(apr_time_t *t,
                                                apr_time_exp_t *xt)
 {
     apr_status_t status = apr_time_exp_get(t, xt);
@@ -244,7 +244,7 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t)
     delay((t + 999) / 1000);
 #elif defined(HAVE_NANOSLEEP)
     struct timespec ts;
-    ts.tv_sec = t / APR_USEC_PER_SEC; 
+    ts.tv_sec = t / APR_USEC_PER_SEC;
     ts.tv_nsec = (t % APR_USEC_PER_SEC) * 1000;
     nanosleep(&ts, NULL);
 #else

@@ -29,19 +29,19 @@ static void ocmaint(int reason, void *data, int status)
 {
     switch (reason) {
     case APR_OC_REASON_DEATH:
-        apr_cpystrn(reasonstr, "APR_OC_REASON_DEATH", 
+        apr_cpystrn(reasonstr, "APR_OC_REASON_DEATH",
                     strlen("APR_OC_REASON_DEATH") + 1);
         break;
     case APR_OC_REASON_LOST:
-        apr_cpystrn(reasonstr, "APR_OC_REASON_LOST", 
+        apr_cpystrn(reasonstr, "APR_OC_REASON_LOST",
                     strlen("APR_OC_REASON_LOST") + 1);
         break;
     case APR_OC_REASON_UNWRITABLE:
-        apr_cpystrn(reasonstr, "APR_OC_REASON_UNWRITEABLE", 
+        apr_cpystrn(reasonstr, "APR_OC_REASON_UNWRITEABLE",
                     strlen("APR_OC_REASON_UNWRITEABLE") + 1);
         break;
     case APR_OC_REASON_RESTART:
-        apr_cpystrn(reasonstr, "APR_OC_REASON_RESTART", 
+        apr_cpystrn(reasonstr, "APR_OC_REASON_RESTART",
                     strlen("APR_OC_REASON_RESTART") + 1);
         break;
     }
@@ -69,7 +69,7 @@ static void test_child_kill(abts_case *tc, void *data)
     rv = apr_procattr_create(&procattr, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    rv = apr_procattr_io_set(procattr, APR_FULL_BLOCK, APR_NO_PIPE, 
+    rv = apr_procattr_io_set(procattr, APR_FULL_BLOCK, APR_NO_PIPE,
                              APR_NO_PIPE);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
@@ -89,13 +89,13 @@ static void test_child_kill(abts_case *tc, void *data)
     apr_sleep(apr_time_from_sec(1));
     rv = apr_proc_kill(&newproc, SIGKILL);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    
+
     /* allow time for things to settle... */
     apr_sleep(apr_time_from_sec(3));
-    
+
     apr_proc_other_child_refresh_all(APR_OC_REASON_RUNNING);
     ABTS_STR_EQUAL(tc, "APR_OC_REASON_DEATH", reasonstr);
-}    
+}
 #else
 
 static void oc_not_impl(abts_case *tc, void *data)
@@ -112,7 +112,7 @@ abts_suite *testoc(abts_suite *suite)
     abts_run_test(suite, oc_not_impl, NULL);
 #else
 
-    abts_run_test(suite, test_child_kill, NULL); 
+    abts_run_test(suite, test_child_kill, NULL);
 
 #endif
     return suite;

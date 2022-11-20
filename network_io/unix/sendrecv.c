@@ -27,11 +27,11 @@
 #include <osreldate.h>
 #endif
 
-apr_status_t apr_socket_send(apr_socket_t *sock, const char *buf, 
+apr_status_t apr_socket_send(apr_socket_t *sock, const char *buf,
                              apr_size_t *len)
 {
     apr_ssize_t rv;
-    
+
     if (sock->options & APR_INCOMPLETE_WRITE) {
         sock->options &= ~APR_INCOMPLETE_WRITE;
         goto do_select;
@@ -41,7 +41,7 @@ apr_status_t apr_socket_send(apr_socket_t *sock, const char *buf,
         rv = write(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
-    while (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) 
+    while (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)
                     && (sock->timeout > 0)) {
         apr_status_t arv;
 do_select:
@@ -116,8 +116,8 @@ apr_status_t apr_socket_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
     apr_ssize_t rv;
 
     do {
-        rv = sendto(sock->socketdes, buf, (*len), flags, 
-                    (const struct sockaddr*)&where->sa, 
+        rv = sendto(sock->socketdes, buf, (*len), flags,
+                    (const struct sockaddr*)&where->sa,
                     where->salen);
     } while (rv == -1 && errno == EINTR);
 
@@ -144,15 +144,15 @@ apr_status_t apr_socket_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
 }
 
 apr_status_t apr_socket_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
-                                 apr_int32_t flags, char *buf, 
+                                 apr_int32_t flags, char *buf,
                                  apr_size_t *len)
 {
     apr_ssize_t rv;
-    
+
     from->salen = sizeof(from->sa);
 
     do {
-        rv = recvfrom(sock->socketdes, buf, (*len), flags, 
+        rv = recvfrom(sock->socketdes, buf, (*len), flags,
                       (struct sockaddr*)&from->sa, &from->salen);
     } while (rv == -1 && errno == EINTR);
 
@@ -207,7 +207,7 @@ apr_status_t apr_socket_sendv(apr_socket_t * sock, const struct iovec *vec,
         rv = writev(sock->socketdes, vec, nvec);
     } while (rv == -1 && errno == EINTR);
 
-    while ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK) 
+    while ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK)
                       && (sock->timeout > 0)) {
         apr_status_t arv;
 do_select:
@@ -279,12 +279,12 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
     /* 64-bit apr_off_t but no sendfile64(): fail if trying to send
      * past the 2Gb limit. */
     off_t off;
-    
+
     if ((apr_int64_t)*offset + bytes_to_send > INT_MAX) {
         *len = 0;
         return EINVAL;
     }
-    
+
     off = *offset;
 
 #else
@@ -325,8 +325,8 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
             return arv;
         }
 
-        /* If this was a partial write and we aren't doing timeouts, 
-         * return now with the partial byte count; this is a non-blocking 
+        /* If this was a partial write and we aren't doing timeouts,
+         * return now with the partial byte count; this is a non-blocking
          * socket.
          */
         total_hdrbytes = 0;
@@ -353,7 +353,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                       bytes_to_send);   /* number of bytes to send */
     } while (rv == -1 && errno == EINTR);
 
-    while ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK) 
+    while ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK)
                       && (sock->timeout > 0)) {
 do_select:
         arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
@@ -388,8 +388,8 @@ do_select:
             arv = APR_SUCCESS;
         }
         if (rv > 0) {
-                
-            /* If this was a partial write, return now with the 
+
+            /* If this was a partial write, return now with the
              * partial byte count;  this is a non-blocking socket.
              */
 
@@ -400,7 +400,7 @@ do_select:
         }
         else {
             /* If the file got smaller mid-request, eventually the offset
-             * becomes equal to the new file size and the kernel returns 0.  
+             * becomes equal to the new file size and the kernel returns 0.
              * Make this an error so the caller knows to log something and
              * exit.
              */
@@ -446,8 +446,8 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         hdtr = &no_hdtr;
     }
 
-    /* OS X can send the headers/footers as part of the system call, 
-     * but how it counts bytes isn't documented properly. We use 
+    /* OS X can send the headers/footers as part of the system call,
+     * but how it counts bytes isn't documented properly. We use
      * apr_socket_sendv() instead.
      */
      if (hdtr->numheaders > 0) {
@@ -566,9 +566,9 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
 #if defined(__FreeBSD_version) && __FreeBSD_version < 460001
     else if (hdtr->numheaders) {
 
-        /* On early versions of FreeBSD sendfile, the number of bytes to send 
-         * must include the length of the headers.  Don't look at the man page 
-         * for this :(  Instead, look at the logic in 
+        /* On early versions of FreeBSD sendfile, the number of bytes to send
+         * must include the length of the headers.  Don't look at the man page
+         * for this :(  Instead, look at the logic in
          * src/sys/kern/uipc_syscalls::sendfile().
          *
          * This was fixed in the middle of 4.6-STABLE
@@ -635,7 +635,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                 }
                 *len += nbytes;
             }
-        }    
+        }
         else {
             /* just trailer bytes... use writev()
              */
@@ -673,7 +673,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
 /* ssize_t sendfile(int s, int fd, off_t offset, size_t nbytes,
  *                  const struct iovec *hdtrl, int flags);
  *
- * nbytes is the number of bytes to send just from the file; as with FreeBSD, 
+ * nbytes is the number of bytes to send just from the file; as with FreeBSD,
  * if nbytes == 0, the rest of the file (from offset) is sent
  */
 
@@ -728,7 +728,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         headerlen = 0;
         for (i = 0; i < hdtr->numheaders; i++) {
             headerlen += hdtr->headers[i].iov_len;
-        }  
+        }
 
         /* XXX:  BUHHH? wow, what a memory leak! */
         headerbuf = hdtrarray[0].iov_base = apr_palloc(sock->pool, headerlen);
@@ -780,7 +780,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         }
     } while (rc == -1 && errno == EINTR);
 
-    while ((rc == -1) && (errno == EAGAIN || errno == EWOULDBLOCK) 
+    while ((rc == -1) && (errno == EAGAIN || errno == EWOULDBLOCK)
                       && (sock->timeout > 0)) {
         apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
 
@@ -927,7 +927,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                        flags);             /* flags */
     } while (rv == -1 && errno == EINTR);
 
-    while ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK) 
+    while ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK)
                       && (sock->timeout > 0)) {
 do_select:
         arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
@@ -957,7 +957,7 @@ do_select:
     }
 
     if ((sock->timeout > 0)
-          && (parms.bytes_sent 
+          && (parms.bytes_sent
                 < (parms.file_bytes + parms.header_length + parms.trailer_length))) {
         sock->options |= APR_INCOMPLETE_WRITE;
     }
@@ -970,7 +970,7 @@ do_select:
  * hang the machine and the only way to fix it is a reboot.
  */
 #elif defined(HAVE_SENDFILEV)
-/* Solaris 8's sendfilev() interface 
+/* Solaris 8's sendfilev() interface
  *
  * SFV_FD_SELF refers to our memory space.
  *
@@ -1027,7 +1027,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         sfv[curvec].sfv_fd = file->filedes;
         sfv[curvec].sfv_flag = 0;
         sfv[curvec].sfv_off = *offset;
-        sfv[curvec].sfv_len = *len; 
+        sfv[curvec].sfv_len = *len;
         requested_len += sfv[curvec].sfv_len;
 
         curvec++;
@@ -1056,14 +1056,14 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
             return arv;
         }
     }
- 
+
     /* Actually do the sendfilev
      *
      * Solaris may return -1/EAGAIN even if it sent bytes on a non-block sock.
      *
-     * If no bytes were originally sent (nbytes == 0) and we are on a TIMEOUT 
-     * socket (which as far as the OS is concerned is a non-blocking socket), 
-     * we want to retry after waiting for the other side to read the data (as 
+     * If no bytes were originally sent (nbytes == 0) and we are on a TIMEOUT
+     * socket (which as far as the OS is concerned is a non-blocking socket),
+     * we want to retry after waiting for the other side to read the data (as
      * determined by poll).  Once it is clear to send, we want to retry
      * sending the sendfilevec_t once more.
      */
@@ -1087,7 +1087,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                     return t;
                 }
 
-                arv = 1; 
+                arv = 1;
                 repeat = 1;
             }
         }
@@ -1115,7 +1115,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
 }
 #else
 #error APR has detected sendfile on your system, but nobody has written a
-#error version of it for APR yet.  To get past this, either write 
+#error version of it for APR yet.  To get past this, either write
 #error apr_socket_sendfile or change APR_HAS_SENDFILE in apr.h to 0.
 #endif /* __linux__, __FreeBSD__, __DragonFly__, __HPUX__, _AIX, __MVS__,
       Tru64/OSF1 */

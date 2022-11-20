@@ -25,7 +25,7 @@ APR_DECLARE_DATA apr_oslevel_e apr_os_level = APR_WIN_UNK;
 
 apr_status_t apr_get_oslevel(apr_oslevel_e *level)
 {
-    if (apr_os_level == APR_WIN_UNK) 
+    if (apr_os_level == APR_WIN_UNK)
     {
         OSVERSIONINFOEXW oslev;
         oslev.dwOSVersionInfoSize = sizeof(oslev);
@@ -33,7 +33,7 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
             return apr_get_os_error();
         }
 
-        if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) 
+        if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT)
         {
             unsigned int servpack = oslev.wServicePackMajor;
 
@@ -94,7 +94,7 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
 }
 
 
-/* This is the helper code to resolve late bound entry points 
+/* This is the helper code to resolve late bound entry points
  * missing from one or more releases of the Win32 API
  */
 
@@ -222,7 +222,7 @@ DWORD apr_wait_for_single_object(HANDLE handle, apr_interval_time_t timeout)
 
 /* Declared in include/arch/win32/apr_dbg_win32_handles.h
  */
-APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln, 
+APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
                                        int nh, /* HANDLE hv, char *dsc */...)
 {
     static DWORD tlsid = 0xFFFFFFFF;
@@ -232,7 +232,7 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
     long seq;
     DWORD wrote;
     char *sbuf;
-    
+
     seq = (InterlockedIncrement)(&ctr);
 
     if (tlsid == 0xFFFFFFFF) {
@@ -248,7 +248,7 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
             (GetModuleFileNameA)(NULL, sbuf, 250);
             sprintf(strchr(sbuf, '\0'), ".%u",
                     (unsigned int)(GetCurrentProcessId)());
-            fh = (CreateFileA)(sbuf, GENERIC_WRITE, 0, NULL, 
+            fh = (CreateFileA)(sbuf, GENERIC_WRITE, 0, NULL,
                             CREATE_ALWAYS, 0, NULL);
             (InitializeCriticalSection)(&cs);
         }
@@ -261,7 +261,7 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
         (EnterCriticalSection)(&cs);
         (WriteFile)(fh, sbuf, (DWORD)strlen(sbuf), &wrote, NULL);
         (LeaveCriticalSection)(&cs);
-    } 
+    }
     else {
         va_list a;
         va_start(a,nh);
@@ -270,7 +270,7 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
             HANDLE *hv = va_arg(a, HANDLE*);
             char *dsc = va_arg(a, char*);
             if (strcmp(dsc, "Signaled") == 0) {
-                if ((apr_ssize_t)ha >= STATUS_WAIT_0 
+                if ((apr_ssize_t)ha >= STATUS_WAIT_0
                        && (apr_ssize_t)ha < STATUS_ABANDONED_WAIT_0) {
                     hv += (apr_ssize_t)ha;
                 }
@@ -285,7 +285,7 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
             }
             (sprintf)(sbuf, "%p %08x %08x %s(%s) %s:%d\n",
                       *hv, (unsigned int)seq,
-                      (unsigned int)GetCurrentThreadId(), 
+                      (unsigned int)GetCurrentThreadId(),
                       fn, dsc, fl, ln);
             (WriteFile)(fh, sbuf, (DWORD)strlen(sbuf), &wrote, NULL);
         } while (--nh);

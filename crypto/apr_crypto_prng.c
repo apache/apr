@@ -472,7 +472,7 @@ APR_DECLARE(apr_status_t) apr_crypto_prng_reseed(apr_crypto_prng_t *cprng,
         /* Use the system entropy, i.e. one of "/dev/[u]random", getrandom(),
          * arc4random()... This may block but still we really want to wait for
          * the system to gather enough entropy for these 32 initial bytes, much
-         * more than we want non-random bytes, and that's once and for all! 
+         * more than we want non-random bytes, and that's once and for all!
          */
         rv = apr_generate_random_bytes(cprng->key, CPRNG_KEY_SIZE);
     }

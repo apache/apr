@@ -33,7 +33,7 @@
 #include <mysql/mysql.h>
 #include <mysql/errmsg.h>
 #else /* !defined(HAVE_MYSQL_MYSQL_H) */
-#if defined(HAVE_MY_GLOBAL_H) 
+#if defined(HAVE_MY_GLOBAL_H)
 #include <my_global.h>
 #if defined(HAVE_MY_SYS_H)
 #include <my_sys.h>

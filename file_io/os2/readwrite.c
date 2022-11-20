@@ -136,7 +136,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         }
 
         *nbytes = bytesread;
-        
+
         if (bytesread == 0 && req_nbytes > 0) {
             thefile->eof_hit = TRUE;
             return APR_EOF;
@@ -289,12 +289,12 @@ APR_DECLARE(apr_status_t) apr_file_getc(char *ch, apr_file_t *thefile)
     if (rc) {
         return rc;
     }
-    
+
     if (bytesread == 0) {
         thefile->eof_hit = TRUE;
         return APR_EOF;
     }
-    
+
     return APR_SUCCESS;
 }
 
@@ -305,7 +305,7 @@ APR_DECLARE(apr_status_t) apr_file_puts(const char *str, apr_file_t *thefile)
     apr_size_t len;
 
     len = strlen(str);
-    return apr_file_write(thefile, str, &len); 
+    return apr_file_write(thefile, str, &len);
 }
 
 
@@ -360,7 +360,7 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
 {
     apr_size_t readlen;
     apr_status_t rv = APR_SUCCESS;
-    int i;    
+    int i;
 
     for (i = 0; i < len-1; i++) {
         readlen = 1;
@@ -374,7 +374,7 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
             rv = APR_EOF;
             break;
         }
-        
+
         if (str[i] == '\n') {
             i++;
             break;

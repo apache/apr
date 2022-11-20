@@ -17,12 +17,12 @@
 /*
  * apr_date.c: date parsing utility routines
  *     These routines are (hopefully) platform independent.
- * 
+ *
  * 27 Oct 1996  Roy Fielding
  *     Extracted (with many modifications) from mod_proxy.c and
  *     tested with over 50,000 randomly chosen valid date strings
  *     and several hundred variations of invalid date strings.
- * 
+ *
  */
 
 #include "apr.h"
@@ -49,7 +49,7 @@
  *   & - hex digit
  *   # - digit
  *   ~ - digit or space
- *   * - swallow remaining characters 
+ *   * - swallow remaining characters
  *  <x> - exact match for any other character
  */
 APR_DECLARE(int) apr_date_checkmask(const char *data, const char *mask)
@@ -102,11 +102,11 @@ APR_DECLARE(int) apr_date_checkmask(const char *data, const char *mask)
  *     Sunday, 06-Nov-94 08:49:37 GMT ; RFC 850, obsoleted by RFC 1036
  *     Sun Nov  6 08:49:37 1994       ; ANSI C's asctime() format
  *
- * and returns the apr_time_t number of microseconds since 1 Jan 1970 GMT, 
+ * and returns the apr_time_t number of microseconds since 1 Jan 1970 GMT,
  * or APR_DATE_BAD if this would be out of range or if the date is invalid.
  *
  * The restricted HTTP syntax is
- * 
+ *
  *     HTTP-date    = rfc1123-date | rfc850-date | asctime-date
  *
  *     rfc1123-date = wkday "," SP date1 SP time SP "GMT"
@@ -163,7 +163,7 @@ APR_DECLARE(apr_time_t) apr_date_parse_http(const char *date)
     while (*date && apr_isspace(*date))    /* Find first non-whitespace char */
         ++date;
 
-    if (*date == '\0') 
+    if (*date == '\0')
         return APR_DATE_BAD;
 
     if ((date = strchr(date, ' ')) == NULL)       /* Find space after weekday */
@@ -186,7 +186,7 @@ APR_DECLARE(apr_time_t) apr_date_parse_http(const char *date)
         monstr = date + 3;
         timstr = date + 12;
     }
-    else if (apr_date_checkmask(date, "##-@$$-## ##:##:## *")) { 
+    else if (apr_date_checkmask(date, "##-@$$-## ##:##:## *")) {
         /* RFC 850 format */
         ds.tm_year = ((date[7] - '0') * 10) + (date[8] - '0');
         if (ds.tm_year < 70)
@@ -200,7 +200,7 @@ APR_DECLARE(apr_time_t) apr_date_parse_http(const char *date)
     else if (apr_date_checkmask(date, "@$$ ~# ##:##:## ####*")) {
         /* asctime format */
         ds.tm_year = ((date[16] - '0') * 10 + (date[17] - '0') - 19) * 100;
-        if (ds.tm_year < 0) 
+        if (ds.tm_year < 0)
             return APR_DATE_BAD;
 
         ds.tm_year += ((date[18] - '0') * 10) + (date[19] - '0');
@@ -238,7 +238,7 @@ APR_DECLARE(apr_time_t) apr_date_parse_http(const char *date)
     ds.tm_min = ((timstr[3] - '0') * 10) + (timstr[4] - '0');
     ds.tm_sec = ((timstr[6] - '0') * 10) + (timstr[7] - '0');
 
-    if ((ds.tm_hour > 23) || (ds.tm_min > 59) || (ds.tm_sec > 61)) 
+    if ((ds.tm_hour > 23) || (ds.tm_min > 59) || (ds.tm_sec > 61))
         return APR_DATE_BAD;
 
     mint = (monstr[0] << 16) | (monstr[1] << 8) | monstr[2];
@@ -254,7 +254,7 @@ APR_DECLARE(apr_time_t) apr_date_parse_http(const char *date)
 
     /* February gets special check for leapyear */
     if ((mon == 1) &&
-        ((ds.tm_mday > 29) || 
+        ((ds.tm_mday > 29) ||
         ((ds.tm_mday == 29)
         && ((ds.tm_year & 3)
         || (((ds.tm_year % 100) == 0)
@@ -263,26 +263,26 @@ APR_DECLARE(apr_time_t) apr_date_parse_http(const char *date)
 
     ds.tm_mon = mon;
 
-    /* ap_mplode_time uses tm_usec and tm_gmtoff fields, but they haven't 
-     * been set yet. 
+    /* ap_mplode_time uses tm_usec and tm_gmtoff fields, but they haven't
+     * been set yet.
      * It should be safe to just zero out these values.
      * tm_usec is the number of microseconds into the second.  HTTP only
      * cares about second granularity.
      * tm_gmtoff is the number of seconds off of GMT the time is.  By
      * definition all times going through this function are in GMT, so this
-     * is zero. 
+     * is zero.
      */
     ds.tm_usec = 0;
     ds.tm_gmtoff = 0;
-    if (apr_time_exp_get(&result, &ds) != APR_SUCCESS) 
+    if (apr_time_exp_get(&result, &ds) != APR_SUCCESS)
         return APR_DATE_BAD;
-    
+
     return result;
 }
 
 /*
  * Parses a string resembling an RFC 822 date.  This is meant to be
- * leinent in its parsing of dates.  Hence, this will parse a wider 
+ * leinent in its parsing of dates.  Hence, this will parse a wider
  * range of dates than apr_date_parse_http.
  *
  * The prominent mailer (or poster, if mailer is unknown) that has
@@ -294,10 +294,10 @@ APR_DECLARE(apr_time_t) apr_date_parse_http(const char *date)
  *     Sun, 6 Nov 1994 08:49:37 GMT   ; RFC 822, updated by RFC 1123
  *     Sun, 06 Nov 94 08:49:37 GMT    ; RFC 822
  *     Sun, 6 Nov 94 08:49:37 GMT     ; RFC 822
- *     Sun, 06 Nov 94 08:49 GMT       ; Unknown [drtr@ast.cam.ac.uk] 
+ *     Sun, 06 Nov 94 08:49 GMT       ; Unknown [drtr@ast.cam.ac.uk]
  *     Sun, 6 Nov 94 08:49 GMT        ; Unknown [drtr@ast.cam.ac.uk]
  *     Sun, 06 Nov 94 8:49:37 GMT     ; Unknown [Elm 70.85]
- *     Sun, 6 Nov 94 8:49:37 GMT      ; Unknown [Elm 70.85] 
+ *     Sun, 6 Nov 94 8:49:37 GMT      ; Unknown [Elm 70.85]
  *     Mon,  7 Jan 2002 07:21:22 GMT  ; Unknown [Postfix]
  *     Sun, 06-Nov-1994 08:49:37 GMT  ; RFC 850 with four digit years
  *
@@ -340,7 +340,7 @@ APR_DECLARE(apr_time_t) apr_date_parse_rfc(const char *date)
         while (*date && apr_isspace(*date)) /* Find first non-whitespace char */
             ++date;
 
-        if (*date == '\0') 
+        if (*date == '\0')
             return APR_DATE_BAD;
 
         if ((date = strchr(date, ' ')) == NULL)   /* Find space after weekday */
@@ -382,7 +382,7 @@ APR_DECLARE(apr_time_t) apr_date_parse_rfc(const char *date)
     else if (apr_date_checkmask(date, "@$$ ~# ##:##:## ####*")) {
         /* asctime format */
         ds.tm_year = ((date[16] - '0') * 10 + (date[17] - '0') - 19) * 100;
-        if (ds.tm_year < 0) 
+        if (ds.tm_year < 0)
             return APR_DATE_BAD;
 
         ds.tm_year += ((date[18] - '0') * 10) + (date[19] - '0');
@@ -433,7 +433,7 @@ APR_DECLARE(apr_time_t) apr_date_parse_rfc(const char *date)
         gmtstr = date + 19;
 
         TIMEPARSE_STD(ds, timstr);
-    } 
+    }
     else if (apr_date_checkmask(date, " # @$$ ## ##:##:## *")) {
         /* This is the old RFC 1123 date format - many many years ago, people
          * used two-digit years.  Oh, how foolish.
@@ -451,7 +451,7 @@ APR_DECLARE(apr_time_t) apr_date_parse_rfc(const char *date)
         gmtstr = date + 19;
 
         TIMEPARSE_STD(ds, timstr);
-    } 
+    }
     else if (apr_date_checkmask(date, "# @$$ ## ##:##:## *")) {
         /* This is the old RFC 1123 date format - many many years ago, people
          * used two-digit years.  Oh, how foolish.
@@ -469,7 +469,7 @@ APR_DECLARE(apr_time_t) apr_date_parse_rfc(const char *date)
         gmtstr = date + 18;
 
         TIMEPARSE_STD(ds, timstr);
-    } 
+    }
     else if (apr_date_checkmask(date, "## @$$ ## ##:## *")) {
         /* Loser format.  This is quite bogus.  */
         ds.tm_year = ((date[7] - '0') * 10) + (date[8] - '0');
@@ -484,7 +484,7 @@ APR_DECLARE(apr_time_t) apr_date_parse_rfc(const char *date)
         gmtstr = NULL;
 
         TIMEPARSE(ds, timstr[0],timstr[1], timstr[3],timstr[4], '0','0');
-    } 
+    }
     else if (apr_date_checkmask(date, "# @$$ ## ##:## *")) {
         /* Loser format.  This is quite bogus.  */
         ds.tm_year = ((date[6] - '0') * 10) + (date[7] - '0');
@@ -530,7 +530,7 @@ APR_DECLARE(apr_time_t) apr_date_parse_rfc(const char *date)
 
         TIMEPARSE(ds, '0',timstr[1], timstr[3],timstr[4], timstr[6],timstr[7]);
     }
-    else if (apr_date_checkmask(date, " # @$$ #### ##:##:## *")) {   
+    else if (apr_date_checkmask(date, " # @$$ #### ##:##:## *")) {
         /* RFC 1123 format with a space instead of a leading zero. */
         ds.tm_year = ((date[7] - '0') * 10 + (date[8] - '0') - 19) * 100;
 
@@ -571,7 +571,7 @@ APR_DECLARE(apr_time_t) apr_date_parse_rfc(const char *date)
     if (ds.tm_mday <= 0 || ds.tm_mday > 31)
         return APR_DATE_BAD;
 
-    if ((ds.tm_hour > 23) || (ds.tm_min > 59) || (ds.tm_sec > 61)) 
+    if ((ds.tm_hour > 23) || (ds.tm_min > 59) || (ds.tm_sec > 61))
         return APR_DATE_BAD;
 
     mint = (monstr[0] << 16) | (monstr[1] << 8) | monstr[2];
@@ -623,15 +623,15 @@ APR_DECLARE(apr_time_t) apr_date_parse_rfc(const char *date)
         }
     }
 
-    /* apr_time_exp_get uses tm_usec field, but it hasn't been set yet. 
+    /* apr_time_exp_get uses tm_usec field, but it hasn't been set yet.
      * It should be safe to just zero out this value.
      * tm_usec is the number of microseconds into the second.  HTTP only
      * cares about second granularity.
      */
     ds.tm_usec = 0;
 
-    if (apr_time_exp_gmt_get(&result, &ds) != APR_SUCCESS) 
+    if (apr_time_exp_gmt_get(&result, &ds) != APR_SUCCESS)
         return APR_DATE_BAD;
-    
+
     return result;
 }

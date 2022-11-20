@@ -27,10 +27,10 @@
  * used as the actual storage conventions by that archicture, these functions
  * exist to transform or validate utf-16 strings into APR's 'char' type
  * convention.  It is left up to the operating system to determine the
- * validitity of the string, e.g. normative forms, in the context of 
- * its native language support.  Other file systems which support filename 
+ * validitity of the string, e.g. normative forms, in the context of
+ * its native language support.  Other file systems which support filename
  * characters of 0x80-0xff but have no explicit requirement for Unicode
- * will find this function useful only for validating the character sequences 
+ * will find this function useful only for validating the character sequences
  * and rejecting poorly encoded utf-8 sequences.
  *
  * len  utf-4 range (hex)  utf-8 octet sequence (binary)
@@ -46,10 +46,10 @@
  * For conversion into utf-16, the 4th form is limited in range to 0010 FFFF,
  * and the final two forms are used only by full utf-32, per RFC 3629;
  *
- *   "Pairs of UCS-2 values between D800 and DFFF (surrogate pairs in 
- *   Unicode parlance), being actually UCS-4 characters transformed 
- *   through UTF-16, need special treatment: the UTF-16 transformation 
- *   must be undone, yielding a UCS-4 character that is then transformed 
+ *   "Pairs of UCS-2 values between D800 and DFFF (surrogate pairs in
+ *   Unicode parlance), being actually UCS-4 characters transformed
+ *   through UTF-16, need special treatment: the UTF-16 transformation
+ *   must be undone, yielding a UCS-4 character that is then transformed
  *   as above."
  *
  * From RFC2781 UTF-16: the compressed ISO 10646 encoding bitmask
@@ -62,7 +62,7 @@
  *   Max U  = 0000 00010000 11111111 11111111
  *
  * Also note ISO/IEC 10646:2014 Clause 9.4: "Because surrogate code points
- * are not UCS scalar values, UTF-32 code units in the range 
+ * are not UCS scalar values, UTF-32 code units in the range
  * 0000 D800-0000 DFFF are ill-formed" for future reference in adding any
  * utf-32 accessor functions.
  *
@@ -73,16 +73,16 @@
  * apr_conv_utf16_to_utf8 out words:sizeof(in) / 2 <= Req <= sizeof(in) * 3 / 2
  */
 
-APR_DECLARE(apr_status_t) apr_conv_utf8_to_utf16(const char *in, 
+APR_DECLARE(apr_status_t) apr_conv_utf8_to_utf16(const char *in,
                                                  apr_size_t *inbytes,
-                                                 apr_wchar_t *out, 
+                                                 apr_wchar_t *out,
                                                  apr_size_t *outwords)
 {
     apr_int64_t newch, mask;
     apr_size_t expect, eating;
     int ch;
-    
-    while (*inbytes && *outwords) 
+
+    while (*inbytes && *outwords)
     {
         ch = (unsigned char)(*in++);
         if (!(ch & 0200)) {
@@ -94,7 +94,7 @@ APR_DECLARE(apr_status_t) apr_conv_utf8_to_utf16(const char *in,
         }
         else
         {
-            if ((ch & 0300) != 0300) { 
+            if ((ch & 0300) != 0300) {
                 /* Multibyte Continuation is out of place
                  */
                 return APR_EINVAL;
@@ -147,7 +147,7 @@ APR_DECLARE(apr_status_t) apr_conv_utf8_to_utf16(const char *in,
                 /* Where the boolean (expect > 2) is true, we will need
                  * an extra word for the output.
                  */
-                if (*outwords < (apr_size_t)(expect > 2) + 1) 
+                if (*outwords < (apr_size_t)(expect > 2) + 1)
                     break; /* buffer full */
                 while (expect--)
                 {
@@ -162,17 +162,17 @@ APR_DECLARE(apr_status_t) apr_conv_utf8_to_utf16(const char *in,
                  *
                  * now we need to fold to utf-16
                  */
-                if (newch < 0x10000) 
+                if (newch < 0x10000)
                 {
                     --*outwords;
                     *(out++) = (apr_wchar_t) newch;
                 }
-                else 
+                else
                 {
                     *outwords -= 2;
                     newch -= 0x10000;
                     *(out++) = (apr_wchar_t) (0xD800 | (newch >> 10));
-                    *(out++) = (apr_wchar_t) (0xDC00 | (newch & 0x03FF));                    
+                    *(out++) = (apr_wchar_t) (0xDC00 | (newch & 0x03FF));
                 }
             }
         }
@@ -183,17 +183,17 @@ APR_DECLARE(apr_status_t) apr_conv_utf8_to_utf16(const char *in,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_conv_utf16_to_utf8(const apr_wchar_t *in, 
+APR_DECLARE(apr_status_t) apr_conv_utf16_to_utf8(const apr_wchar_t *in,
                                                  apr_size_t *inwords,
-                                                 char *out, 
+                                                 char *out,
                                                  apr_size_t *outbytes)
 {
     apr_int64_t newch, require;
     apr_size_t need;
     char *invout;
     int ch;
-    
-    while (*inwords && *outbytes) 
+
+    while (*inwords && *outbytes)
     {
         ch = (unsigned short)(*in++);
         if (ch < 0x80)
@@ -202,7 +202,7 @@ APR_DECLARE(apr_status_t) apr_conv_utf16_to_utf8(const apr_wchar_t *in,
             --*outbytes;
             *(out++) = (unsigned char) ch;
         }
-        else 
+        else
         {
             if ((ch & 0xFC00) == 0xDC00) {
                 /* Invalid Leading utf-16 Multiword Continuation Character
@@ -259,5 +259,5 @@ APR_DECLARE(apr_status_t) apr_conv_utf16_to_utf8(const apr_wchar_t *in,
     /* Buffer full 'errors' aren't errors, the client must inspect both
      * the inwords and outbytes values
      */
-    return APR_SUCCESS;    
+    return APR_SUCCESS;
 }

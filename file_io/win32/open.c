@@ -34,15 +34,15 @@
 #include <io.h>
 #include <winioctl.h>
 
-apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen, 
+apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen,
                                   const char* srcstr)
 {
     /* TODO: The computations could preconvert the string to determine
      * the true size of the retstr, but that's a memory over speed
      * tradeoff that isn't appropriate this early in development.
      *
-     * Allocate the maximum string length based on leading 4 
-     * characters of \\?\ (allowing nearly unlimited path lengths) 
+     * Allocate the maximum string length based on leading 4
+     * characters of \\?\ (allowing nearly unlimited path lengths)
      * plus the trailing null, then transform /'s into \\'s since
      * the \\?\ form doesn't allow '/' path seperators.
      *
@@ -54,15 +54,15 @@ apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen,
     apr_status_t rv;
 
     /* This is correct, we don't twist the filename if it is will
-     * definitely be shorter than 248 characters.  It merits some 
+     * definitely be shorter than 248 characters.  It merits some
      * performance testing to see if this has any effect, but there
      * seem to be applications that get confused by the resulting
      * Unicode \\?\ style file names, especially if they use argv[0]
      * or call the Win32 API functions such as GetModuleName, etc.
      * Not every application is prepared to handle such names.
-     * 
-     * Note also this is shorter than MAX_PATH, as directory paths 
-     * are actually limited to 248 characters. 
+     *
+     * Note also this is shorter than MAX_PATH, as directory paths
+     * are actually limited to 248 characters.
      *
      * Note that a utf-8 name can never result in more wide chars
      * than the original number of utf-8 narrow chars.
@@ -109,9 +109,9 @@ apr_status_t unicode_to_utf8_path(char* retstr, apr_size_t retlen,
     apr_size_t srcremains = wcslen(srcstr) + 1;
     apr_status_t rv;
     char *t = retstr;
-    if (srcstr[0] == L'\\' && srcstr[1] == L'\\' && 
+    if (srcstr[0] == L'\\' && srcstr[1] == L'\\' &&
         srcstr[2] == L'?'  && srcstr[3] == L'\\') {
-        if (srcstr[4] == L'U' && srcstr[5] == L'N' && 
+        if (srcstr[4] == L'U' && srcstr[5] == L'N' &&
             srcstr[6] == L'C' && srcstr[7] == L'\\') {
             srcremains -= 8;
             srcstr += 8;
@@ -125,7 +125,7 @@ apr_status_t unicode_to_utf8_path(char* retstr, apr_size_t retlen,
             srcstr += 4;
         }
     }
-        
+
     if ((rv = apr_conv_utf16_to_utf8(srcstr, &srcremains, t, &retlen))) {
         return rv;
     }
@@ -191,7 +191,7 @@ static apr_status_t make_sparse_file(apr_file_t *file)
                         &bytesread, file->pOverlapped)) {
         rv = APR_SUCCESS;
     }
-    else 
+    else
     {
         rv = apr_get_os_error();
 
@@ -206,7 +206,7 @@ static apr_status_t make_sparse_file(apr_file_t *file)
                 CancelIoEx(file->filehand, file->pOverlapped);
             }
 
-            if (GetOverlappedResult(file->filehand, file->pOverlapped, 
+            if (GetOverlappedResult(file->filehand, file->pOverlapped,
                                     &bytesread, TRUE))
                 rv = APR_SUCCESS;
             else
@@ -230,7 +230,7 @@ apr_status_t file_cleanup(void *thefile)
 
         /* In order to avoid later segfaults with handle 'reuse',
          * we must protect against the case that a dup2'ed handle
-         * is being closed, and invalidate the corresponding StdHandle 
+         * is being closed, and invalidate the corresponding StdHandle
          * We also tell msvcrt when stdhandles are closed.
          */
         if (file->flags & APR_STD_FLAGS)
@@ -307,8 +307,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
 
     if ((flag & APR_FOPEN_EXCL) && !(flag & APR_FOPEN_CREATE)) {
         return APR_EACCES;
-    }   
-    
+    }
+
     if (flag & APR_FOPEN_DELONCLOSE) {
         attributes |= FILE_FLAG_DELETE_ON_CLOSE;
     }
@@ -336,7 +336,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     }
 
     if (flag & APR_FOPEN_XTHREAD) {
-        /* This win32 specific feature is required 
+        /* This win32 specific feature is required
          * to allow multiple threads to work with the file.
          */
         attributes |= FILE_FLAG_OVERLAPPED;
@@ -350,7 +350,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         attributes |= FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_OVERLAPPED;
     }
 
-    if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
+    if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname)
                                          / sizeof(apr_wchar_t), fname)))
         return rv;
     handle = CreateFileW(wfname, oflags, sharemode,
@@ -377,7 +377,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     }
     /* Need the mutex to share an apr_file_t across multiple threads */
     if (flag & APR_FOPEN_XTHREAD) {
-        rv = apr_thread_mutex_create(&(*new)->mutex, 
+        rv = apr_thread_mutex_create(&(*new)->mutex,
                                      APR_THREAD_MUTEX_DEFAULT, pool);
         if (rv) {
             if (file_cleanup(*new) == APR_SUCCESS) {
@@ -431,7 +431,7 @@ APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *pool)
     apr_wchar_t wpath[APR_PATH_MAX];
     apr_status_t rv;
 
-    if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+    if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath)
                                         / sizeof(apr_wchar_t), path))) {
         return rv;
     }
@@ -463,7 +463,7 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
     return apr_get_os_error();
 }
 
-APR_DECLARE(apr_status_t) apr_file_link(const char *from_path, 
+APR_DECLARE(apr_status_t) apr_file_link(const char *from_path,
                                            const char *to_path)
 {
     apr_status_t rv = APR_SUCCESS;
@@ -513,7 +513,7 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     }
     if (flags & APR_FOPEN_XTHREAD) {
         apr_status_t rv;
-        rv = apr_thread_mutex_create(&(*file)->mutex, 
+        rv = apr_thread_mutex_create(&(*file)->mutex,
                                      APR_THREAD_MUTEX_DEFAULT, pool);
         if (rv) {
             return rv;
@@ -525,13 +525,13 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     /* ### check return codes */
     (void) apr_pollset_create(&(*file)->pollset, 1, pool, 0);
 #endif
-    /* Should we be testing if thefile is a handle to 
+    /* Should we be testing if thefile is a handle to
      * a PIPE and set up the mechanics appropriately?
      *
      *  (*file)->pipe;
      */
     return APR_SUCCESS;
-}    
+}
 
 APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr)
 {
@@ -539,10 +539,10 @@ APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr)
         return APR_EOF;
     }
     return APR_SUCCESS;
-}   
+}
 
-APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile, 
-                                                     apr_int32_t flags, 
+APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile,
+                                                     apr_int32_t flags,
                                                      apr_pool_t *pool)
 {
     apr_os_file_t file_handle;
@@ -556,7 +556,7 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stderr(apr_file_t **thefile,
                            flags | APR_FOPEN_WRITE | APR_STDERR_FLAG, pool);
 }
 
-APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile, 
+APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile,
                                                      apr_int32_t flags,
                                                      apr_pool_t *pool)
 {
@@ -571,7 +571,7 @@ APR_DECLARE(apr_status_t) apr_file_open_flags_stdout(apr_file_t **thefile,
                            flags | APR_FOPEN_WRITE | APR_STDOUT_FLAG, pool);
 }
 
-APR_DECLARE(apr_status_t) apr_file_open_flags_stdin(apr_file_t **thefile, 
+APR_DECLARE(apr_status_t) apr_file_open_flags_stdin(apr_file_t **thefile,
                                                     apr_int32_t flags,
                                                     apr_pool_t *pool)
 {
@@ -604,5 +604,5 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *
 APR_POOL_IMPLEMENT_ACCESSOR(file);
 
 APR_IMPLEMENT_INHERIT_SET(file, flags, pool, file_cleanup)
- 
+
 APR_IMPLEMENT_INHERIT_UNSET(file, flags, pool, file_cleanup)

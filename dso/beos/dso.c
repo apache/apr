@@ -30,7 +30,7 @@ static apr_status_t dso_cleanup(void *thedso)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
+APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
                                        const char *path, apr_pool_t *pool)
 {
     image_id newid = -1;
@@ -41,7 +41,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
         (*res_handle)->errormsg = strerror(newid);
         return APR_EDSOOPEN;
 	}
-	
+
     (*res_handle)->pool = pool;
     (*res_handle)->handle = newid;
 
@@ -63,7 +63,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_hand
     if (symname == NULL)
         return APR_ESYMNOTFOUND;
 
-    err = get_image_symbol(handle->handle, symname, B_SYMBOL_TYPE_ANY, 
+    err = get_image_symbol(handle->handle, symname, B_SYMBOL_TYPE_ANY,
 			 ressym);
 
     if(err != B_OK)

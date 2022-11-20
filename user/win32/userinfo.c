@@ -36,7 +36,7 @@ static void get_sid_string(char *buf, apr_size_t blen, apr_uid_t id)
     DWORD sa;
     int slen;
 
-    /* Determine authority values (these is a big-endian value, 
+    /* Determine authority values (these is a big-endian value,
      * and NT records the value as hex if the value is > 2^32.)
      */
     psia = GetSidIdentifierAuthority(id);
@@ -58,13 +58,13 @@ static void get_sid_string(char *buf, apr_size_t blen, apr_uid_t id)
         slen += apr_snprintf(buf + slen, blen - slen, "-%lu",
                              *GetSidSubAuthority(id, sa));
     }
-} 
+}
 
 /* Query the ProfileImagePath from the version-specific branch, where the
  * regkey uses the user's name on 9x, and user's sid string on NT.
  */
-APR_DECLARE(apr_status_t) apr_uid_homepath_get(char **dirname, 
-                                               const char *username, 
+APR_DECLARE(apr_status_t) apr_uid_homepath_get(char **dirname,
+                                               const char *username,
                                                apr_pool_t *p)
 {
     apr_status_t rv;
@@ -77,7 +77,7 @@ APR_DECLARE(apr_status_t) apr_uid_homepath_get(char **dirname,
     if (apr_os_level >= APR_WIN_NT) {
         apr_uid_t uid;
         apr_gid_t gid;
-    
+
         if ((rv = apr_uid_get(&uid, &gid, username, p)) != APR_SUCCESS)
             return rv;
 
@@ -93,7 +93,7 @@ APR_DECLARE(apr_status_t) apr_uid_homepath_get(char **dirname,
         apr_cpystrn(regkey + keylen, username, sizeof(regkey) - keylen);
     }
 
-    if ((rv = RegOpenKeyEx(HKEY_LOCAL_MACHINE, regkey, 0, 
+    if ((rv = RegOpenKeyEx(HKEY_LOCAL_MACHINE, regkey, 0,
                            KEY_QUERY_VALUE, &key)) != ERROR_SUCCESS)
         return APR_FROM_OS_ERROR(rv);
 
@@ -105,7 +105,7 @@ APR_DECLARE(apr_status_t) apr_uid_homepath_get(char **dirname,
 		return APR_FROM_OS_ERROR(rv);
 	if (type == REG_SZ) {
 		char retdir[MAX_PATH];
-		if ((rv = unicode_to_utf8_path(retdir, sizeof(retdir), 
+		if ((rv = unicode_to_utf8_path(retdir, sizeof(retdir),
 									   (apr_wchar_t*)regkey)) != APR_SUCCESS)
 			return rv;
 		*dirname = apr_pstrdup(p, retdir);
@@ -113,7 +113,7 @@ APR_DECLARE(apr_status_t) apr_uid_homepath_get(char **dirname,
 	else if (type == REG_EXPAND_SZ) {
 		apr_wchar_t path[MAX_PATH];
 		char retdir[MAX_PATH];
-		ExpandEnvironmentStringsW((apr_wchar_t*)regkey, path, 
+		ExpandEnvironmentStringsW((apr_wchar_t*)regkey, path,
 								  sizeof(path) / 2);
 		if ((rv = unicode_to_utf8_path(retdir, sizeof(retdir), path))
 				!= APR_SUCCESS)
@@ -156,7 +156,7 @@ APR_DECLARE(apr_status_t) apr_uid_current(apr_uid_t *uid,
     }
 
     if (!GetTokenInformation(threadtok, TokenPrimaryGroup, NULL, 0, &needed)
-        && (GetLastError() == ERROR_INSUFFICIENT_BUFFER) 
+        && (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
         && (grp = apr_palloc(p, needed))
         && GetTokenInformation(threadtok, TokenPrimaryGroup, grp, needed, &needed)) {
         *gid = grp->PrimaryGroup;
@@ -194,16 +194,16 @@ APR_DECLARE(apr_status_t) apr_uid_get(apr_uid_t *uid, apr_gid_t *gid,
     else {
         domain = NULL;
     }
-    /* Get nothing on the first pass ... need to size the sid buffer 
+    /* Get nothing on the first pass ... need to size the sid buffer
      */
-    rv = LookupAccountName(domain, username, domain, &sidlen, 
+    rv = LookupAccountName(domain, username, domain, &sidlen,
                            anydomain, &domlen, &sidtype);
     if (sidlen) {
         /* Give it back on the second pass
          */
         *uid = apr_palloc(p, sidlen);
         domlen = sizeof(anydomain);
-        rv = LookupAccountName(domain, username, *uid, &sidlen, 
+        rv = LookupAccountName(domain, username, *uid, &sidlen,
                                anydomain, &domlen, &sidtype);
     }
     if (!sidlen || !rv) {
@@ -230,7 +230,7 @@ APR_DECLARE(apr_status_t) apr_uid_name_get(char **username, apr_uid_t userid,
     *username = apr_pstrdup(p, name);
     return APR_SUCCESS;
 }
-  
+
 APR_DECLARE(apr_status_t) apr_uid_compare(apr_uid_t left, apr_uid_t right)
 {
     if (!left || !right)

@@ -37,7 +37,7 @@ int main(int argc, const char * const argv[])
 
     apr_initialize();
     atexit(apr_terminate);
-    
+
     apr_pool_create(&p, NULL);
     if (argc >= 2) {
         mech = (apr_lockmech_e)apr_strtoi64(argv[1], NULL, 0);
@@ -50,7 +50,7 @@ int main(int argc, const char * const argv[])
         exit(-rv);
     }
     apr_global_mutex_child_init(&global_lock, LOCKNAME, p);
-    
+
     while (1) {
         apr_global_mutex_lock(global_lock);
         if (i == MAX_ITER) {

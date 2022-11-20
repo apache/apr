@@ -32,7 +32,7 @@ static apr_status_t thread_mutex_cleanup(void *data)
     }
 #endif
     return rv;
-} 
+}
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
                                                   unsigned int flags,
@@ -40,7 +40,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
 {
     apr_thread_mutex_t *new_mutex;
     apr_status_t rv;
-    
+
 #ifndef HAVE_PTHREAD_MUTEX_RECURSIVE
     if (flags & APR_THREAD_MUTEX_NESTED) {
         return APR_ENOTIMPL;
@@ -53,18 +53,18 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
 #ifdef HAVE_PTHREAD_MUTEX_RECURSIVE
     if (flags & APR_THREAD_MUTEX_NESTED) {
         pthread_mutexattr_t mattr;
-        
+
         rv = pthread_mutexattr_init(&mattr);
         if (rv) return rv;
-        
+
         rv = pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
         if (rv) {
             pthread_mutexattr_destroy(&mattr);
             return rv;
         }
-         
+
         rv = pthread_mutex_init(&new_mutex->mutex, &mattr);
-        
+
         pthread_mutexattr_destroy(&mattr);
     } else
 #endif
@@ -74,7 +74,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
 
         rv = pthread_mutexattr_init(&mattr);
         if (rv) return rv;
-        
+
         rv = pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_ERRORCHECK);
         if (rv) {
             pthread_mutexattr_destroy(&mattr);
@@ -351,7 +351,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex)
     if (rv == APR_SUCCESS) {
         rv = rv2;
     }
-    
+
     return rv;
 }
 

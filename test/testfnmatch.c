@@ -192,7 +192,7 @@ static void test_fnmatch_test(abts_case *tc, void *data)
 
     for (t = ft_tests; t->pattern != NULL; t++) {
         int res = apr_fnmatch_test(t->pattern);
-        
+
         if (res != t->result) {
             char buf[128];
 
@@ -208,7 +208,7 @@ static void test_glob(abts_case *tc, void *data)
     int i;
     char **list;
     apr_array_header_t *result;
-    
+
     APR_ASSERT_SUCCESS(tc, "glob match against data/*.txt",
                        apr_match_glob("data\\*.txt", &result, p));
 
@@ -227,7 +227,7 @@ static void test_glob_currdir(abts_case *tc, void *data)
     char **list;
     apr_array_header_t *result;
     apr_filepath_set("data", p);
-    
+
     APR_ASSERT_SUCCESS(tc, "glob match against *.txt with data as current",
                        apr_match_glob("*.txt", &result, p));
 

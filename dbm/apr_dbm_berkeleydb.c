@@ -28,7 +28,7 @@
 #include "apu.h"
 #include "apr_private.h"
 
-#if APU_HAVE_DB 
+#if APU_HAVE_DB
 #include "apr_dbm_private.h"
 
 /*
@@ -169,8 +169,8 @@ static apr_status_t vt_db_open(apr_dbm_t **pdb, const char *pathname,
 #if DB_VER == 4
                                            NULL,
 #endif
-                                           pathname, NULL, 
-                                           DB_HASH, dbmode, 
+                                           pathname, NULL,
+                                           DB_HASH, dbmode,
                                            apr_posix_perms2mode(perm))) != 0) {
                 /* close the DB handler */
                 (void) (*file.bdb->close)(file.bdb, 0);

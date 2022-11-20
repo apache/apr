@@ -46,7 +46,7 @@ static apr_status_t pipe_bucket_read(apr_bucket *a, const char **str,
     /*
      * If there's more to read we have to keep the rest of the pipe
      * for later.  Otherwise, we'll close the pipe.
-     * XXX: Note that more complicated bucket types that 
+     * XXX: Note that more complicated bucket types that
      * refer to data not in memory and must therefore have a read()
      * function similar to this one should be wary of copying this
      * code because if they have a destroy function they probably
@@ -94,7 +94,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_pipe_make(apr_bucket *b, apr_file_t *p)
     b->length      = (apr_size_t)(-1);
     b->start       = -1;
     b->data        = p;
-    
+
     return b;
 }
 
@@ -110,7 +110,7 @@ APR_DECLARE(apr_bucket *) apr_bucket_pipe_create(apr_file_t *p,
 }
 
 APR_DECLARE_DATA const apr_bucket_type_t apr_bucket_type_pipe = {
-    "PIPE", 5, APR_BUCKET_DATA, 
+    "PIPE", 5, APR_BUCKET_DATA,
     apr_bucket_destroy_noop,
     pipe_bucket_read,
     apr_bucket_setaside_notimpl,

@@ -67,7 +67,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
     (*mutex)->pool = pool;
     (*mutex)->handle = hMutex;
     (*mutex)->fname = fname;
-    apr_pool_cleanup_register((*mutex)->pool, *mutex, 
+    apr_pool_cleanup_register((*mutex)->pool, *mutex,
                               proc_mutex_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
@@ -99,11 +99,11 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
     (*mutex)->pool = pool;
     (*mutex)->handle = hMutex;
     (*mutex)->fname = fname;
-    apr_pool_cleanup_register((*mutex)->pool, *mutex, 
+    apr_pool_cleanup_register((*mutex)->pool, *mutex,
                               proc_mutex_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
-    
+
 APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex)
 {
     DWORD rv;
@@ -124,7 +124,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
 
     if (rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
         return APR_SUCCESS;
-    } 
+    }
     else if (rv == WAIT_TIMEOUT) {
         return APR_EBUSY;
     }
@@ -143,7 +143,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_timedlock(apr_proc_mutex_t *mutex,
     }
     if (rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
         return APR_SUCCESS;
-    } 
+    }
     return apr_get_os_error();
 }
 
@@ -197,7 +197,7 @@ APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 
 /* Implement OS-specific accessors defined in apr_portable.h */
 
-APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex, 
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_get_ex(apr_os_proc_mutex_t *ospmutex,
                                                    apr_proc_mutex_t *pmutex,
                                                    apr_lockmech_e *mech)
 {

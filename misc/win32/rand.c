@@ -46,7 +46,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf,
 
 APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
 {
-    /* Note: this call doesn't actually require CoInitialize() first 
+    /* Note: this call doesn't actually require CoInitialize() first
      *
      * XXX: we should scramble the bytes or some such to eliminate the
      * possible misuse/abuse since uuid is based on the NIC address, and

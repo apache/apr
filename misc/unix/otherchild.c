@@ -65,7 +65,7 @@ APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *proc,
     ocr->data = data;
     ocr->next = other_children;
     other_children = ocr;
-    apr_pool_cleanup_register(p, ocr->data, other_child_cleanup, 
+    apr_pool_cleanup_register(p, ocr->data, other_child_cleanup,
                               apr_pool_cleanup_null);
 }
 
@@ -107,7 +107,7 @@ APR_DECLARE(apr_status_t) apr_proc_other_child_alert(apr_proc_t *proc,
 APR_DECLARE(void) apr_proc_other_child_refresh(apr_other_child_rec_t *ocr,
                                                int reason)
 {
-    /* Todo: 
+    /* Todo:
      * Implement code to detect if pipes are still alive.
      */
 #ifdef WIN32
@@ -168,7 +168,7 @@ APR_DECLARE(void) apr_proc_other_child_refresh(apr_other_child_rec_t *ocr,
         break;
     }
 #else /* ndef Win32 */
-    pid_t waitret; 
+    pid_t waitret;
     int status;
 
     if (ocr->proc == NULL)

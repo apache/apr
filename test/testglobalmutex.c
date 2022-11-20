@@ -82,7 +82,7 @@ static void test_exclusive(abts_case *tc, void *data)
     int x = 0;
     abts_log_message("lock mechanism is: ");
     abts_log_message(mutexname(mech));
- 
+
     rv = apr_global_mutex_create(&global_lock, LOCKNAME, mech, p);
     if (rv == APR_ENOTIMPL) {
         /* MacOS lacks TIMED implementation, so don't fail for ENOTIMPL */
@@ -95,7 +95,7 @@ static void test_exclusive(abts_case *tc, void *data)
     launch_child(tc, mech, &p2, p);
     launch_child(tc, mech, &p3, p);
     launch_child(tc, mech, &p4, p);
- 
+
     x += wait_child(tc, &p1);
     x += wait_child(tc, &p2);
     x += wait_child(tc, &p3);

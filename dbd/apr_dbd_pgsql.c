@@ -424,7 +424,7 @@ static int dbd_pgsql_query(apr_dbd_t *sql, int *nrows, const char *query)
     else {
         ret = PGRES_FATAL_ERROR;
     }
-    
+
     if (ret != 0){
         if (TXN_IGNORE_ERRORS(sql->trans)) {
             PGresult *res = PQexec(sql->conn,
@@ -501,19 +501,19 @@ static int dbd_pgsql_prepare(apr_pool_t *pool, apr_dbd_t *sql,
 
     for (i = 0; i < nargs; i++) {
         switch (types[i]) {
-        case APR_DBD_TYPE_TINY: 
-        case APR_DBD_TYPE_UTINY: 
-        case APR_DBD_TYPE_SHORT: 
+        case APR_DBD_TYPE_TINY:
+        case APR_DBD_TYPE_UTINY:
+        case APR_DBD_TYPE_SHORT:
         case APR_DBD_TYPE_USHORT:
             args[i] = "smallint";
             break;
-        case APR_DBD_TYPE_INT: 
+        case APR_DBD_TYPE_INT:
         case APR_DBD_TYPE_UINT:
             args[i] = "integer";
             break;
-        case APR_DBD_TYPE_LONG: 
-        case APR_DBD_TYPE_ULONG:   
-        case APR_DBD_TYPE_LONGLONG: 
+        case APR_DBD_TYPE_LONG:
+        case APR_DBD_TYPE_ULONG:
+        case APR_DBD_TYPE_LONGLONG:
         case APR_DBD_TYPE_ULONGLONG:
             args[i] = "bigint";
             break;
@@ -1209,7 +1209,7 @@ static apr_dbd_t *dbd_pgsql_open(apr_pool_t *pool, const char *params,
                                  const char **error)
 {
     apr_dbd_t *sql;
-    
+
     PGconn *conn = PQconnectdb(params);
 
     /* if there's an error in the connect string or something we get

@@ -216,7 +216,7 @@ static const char *dbd_statement(apr_pool_t *pool,
     const char *p_in;
     char *p_out;
     char *q;
-   
+
     /* compute upper bound on length (since untaint shrinks) */
     len  = strlen(stmt->fmt) +1;
     for (i=0; i<nargs; ++i) {
@@ -612,7 +612,7 @@ static DBPROCESS *freetds_open(apr_pool_t *pool, const char *params,
     {
         dbuse(process, databaseName);
     }
- 
+
     dbloginfree(login);
     if (process == NULL) {
         return NULL;
