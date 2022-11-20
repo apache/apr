@@ -19,6 +19,12 @@ PROJECT(APR C)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
+# Enable support for MSVC runtime library selection by abstraction
+# if supported by CMake.
+IF(POLICY CMP0091)
+  CMAKE_POLICY(SET CMP0091 NEW)
+ENDIF()
+
 # Add simple support CMAKE_WARNING_AS_ERROR if CMake doesn't
 # support it.
 IF (CMAKE_VERSION VERSION_LESS 3.24)
