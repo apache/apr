@@ -15,9 +15,11 @@
 #
 # Read README.cmake before using this.
 
-PROJECT(APR C)
-
+# CMAKE_MINIMUM_REQUIRED should be the first directive in the file:
+# https://cmake.org/cmake/help/latest/command/cmake_minimum_required.html
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+
+PROJECT(APR C)
 
 # Enable support for MSVC runtime library selection by abstraction
 # if supported by CMake.
