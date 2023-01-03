@@ -499,7 +499,7 @@ AC_CACHE_CHECK([whether return code from strerror_r has type int],
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-main()
+int main(void)
 {
   char buf[1024];
   if (strerror_r(ERANGE, buf, sizeof buf) < 1) {

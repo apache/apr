@@ -6,6 +6,9 @@ Changes for APR 1.7.1
      (This issue was addressed as CVE-2017-12613 in APR 1.6.3 and
      later 1.6.x releases, but was missing in 1.7.0.)  [Stefan Sperling]
 
+  *) configure: Fix configure for compilers which don't accept implicit
+     "int".  PR 66396.  [Florian Weimer <fweimer redhat.com>]
+
   *) apr_atomic_read64(): Fix non-atomic read on 32-bit Windows [Ivan Zhakov]
 
   *) configure: Prefer posix name-based shared memory over SysV IPC.
