@@ -235,7 +235,7 @@ AC_DEFUN([APU_TRY_BERKELEY_DB],
 #include <stdlib.h>
 #include <stdio.h>
 #include <$apu_try_berkeley_db_header>
-main ()
+int main (void)
 {
   int major, minor, patch;
 

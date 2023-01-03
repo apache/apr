@@ -275,7 +275,7 @@ void main(void)
 #ifndef SEM_FAILED
 #define SEM_FAILED (-1)
 #endif
-main()
+int main()
 {
     sem_t *psem;
     const char *sem_name = "/apr_autoconf";
@@ -394,7 +394,7 @@ int main(void) {
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
-main()
+int main()
 {
     union semun arg;
     semctl(0, 0, 0, arg);
