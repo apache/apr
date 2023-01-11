@@ -198,7 +198,7 @@ APR_DECLARE(const char *) apr_pollset_method_name(apr_pollset_t *pollset)
     return pollset->provider->name;
 }
 
-APR_DECLARE(const char *) apr_poll_method_defname()
+APR_DECLARE(const char *) apr_poll_method_defname(void)
 {
     const apr_pollset_provider_t *provider = NULL;
 
