@@ -1562,8 +1562,6 @@ AC_CHECK_FUNCS(sigaction, [ have_sigaction="1" ], [ have_sigaction="0" ])
 AC_DECL_SYS_SIGLIST
 
 AC_CHECK_FUNCS(fork, [ fork="1" ], [ fork="0" ])
-APR_CHECK_INET_ADDR
-APR_CHECK_INET_NETWORK
 AC_SUBST(apr_inaddr_none)
 AC_CHECK_FUNC(_getch)
 AC_CHECK_FUNCS(strerror_r, [ strerror_r="1" ], [ strerror_r="0" ])
@@ -1668,6 +1666,9 @@ APR_FLAG_HEADERS(
     sys/uio.h		\
     sys/un.h		\
     sys/wait.h)
+
+APR_CHECK_INET_ADDR
+APR_CHECK_INET_NETWORK
 
 # IRIX 6.5 has a problem in <netinet/tcp.h> which prevents it from
 # being included by itself.  Check for <netinet/tcp.h> manually,
@@ -2371,7 +2372,7 @@ AC_TRY_RUN([
 #ifndef SEM_FAILED
 #define SEM_FAILED (-1)
 #endif
-main()
+int main()
 {
     sem_t *psem;
     const char *sem_name = "/apr_autoconf";
@@ -2567,6 +2568,8 @@ AC_TRY_RUN([
 int fd;
 struct flock proc_mutex_lock_it = {0};
 const char *fname = "conftest.fcntl";
+
+int lockit();
 
 int main()
 {

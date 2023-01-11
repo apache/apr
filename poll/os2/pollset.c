@@ -308,7 +308,7 @@ APR_DECLARE(apr_status_t) apr_pollset_wakeup(apr_pollset_t *pollset)
 
 
 
-APR_DECLARE(const char *) apr_poll_method_defname()
+APR_DECLARE(const char *) apr_poll_method_defname(void)
 {
     return "select";
 }
