@@ -7,7 +7,7 @@ Changes for APR 1.7.1
      later 1.6.x releases, but was missing in 1.7.0.)  [Stefan Sperling]
 
   *) configure: Fix various build issues for compilers enforcing
-     strict C99 compliance.  PR 66396, 66408.
+     strict C99 compliance.  PR 66396, 66408, 66426.
      [Florian Weimer <fweimer redhat.com>, Sam James <sam gentoo.org>]
 
   *) apr_atomic_read64(): Fix non-atomic read on 32-bit Windows [Ivan Zhakov]
