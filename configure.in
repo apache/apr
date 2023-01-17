@@ -2316,7 +2316,7 @@ AC_TRY_RUN([
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <stdlib.h>
-main()
+int main(void)
 {
     struct rlimit limit;
     limit.rlim_cur = 0;
