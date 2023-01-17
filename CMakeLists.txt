@@ -15,9 +15,11 @@
 #
 # Read README.cmake before using this.
 
-PROJECT(APR C)
-
+# CMAKE_MINIMUM_REQUIRED should be the first directive in the file:
+# https://cmake.org/cmake/help/latest/command/cmake_minimum_required.html
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
+PROJECT(APR C)
 
 OPTION(APR_INSTALL_PRIVATE_H  "Install selected private .h files (for httpd)"  OFF)
 OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)
