@@ -1362,6 +1362,10 @@ case $host in
                                   USE_SHMEM_SHMGET)
         fi
         ;;
+    *aix* )
+        # AIX cannot lseek() shared memory, and we always truncate/lseek together
+        APR_DECISION_OVERRIDE(USE_SHMEM_SHMGET)
+       ;;
 esac
 APR_END_DECISION
 AC_DEFINE_UNQUOTED($ac_decision)
