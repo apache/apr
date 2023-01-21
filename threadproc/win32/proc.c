@@ -503,7 +503,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     apr_size_t i;
     const char *argv0;
     char *cmdline;
-    char *pEnvBlock;
+    apr_wchar_t *pEnvBlock;
     PROCESS_INFORMATION pi;
     DWORD dwCreationFlags = 0;
 
@@ -702,11 +702,11 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
         {
             apr_wchar_t *pNext;
-            pEnvBlock = (char *)apr_palloc(pool, iEnvBlockLen * sizeof(apr_wchar_t));
+            pEnvBlock = apr_palloc(pool, iEnvBlockLen * sizeof(apr_wchar_t));
             dwCreationFlags |= CREATE_UNICODE_ENVIRONMENT;
 
             i = 0;
-            pNext = (apr_wchar_t*)pEnvBlock;
+            pNext = pEnvBlock;
             while (env[i]) {
                 apr_size_t in = strlen(env[i]) + 1;
                 if ((rv = apr_conv_utf8_to_utf16(env[i], &in,
