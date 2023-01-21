@@ -915,6 +915,21 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 SetHandleInformation(GetStdHandle(STD_ERROR_HANDLE),
                                      stderr_reset, stderr_reset);
         }
+
+        /* Close our side of pipes before releasing lock: otherwise they
+         * could like to other process when apr_proc_create() is used from
+         * from multiple threads.
+         */
+        if ((attr->child_in) && (attr->child_in != &no_file)) {
+            apr_file_close(attr->child_in);
+        }
+        if ((attr->child_out) && (attr->child_out != &no_file)) {
+            apr_file_close(attr->child_out);
+        }
+        if ((attr->child_err) && (attr->child_err != &no_file)) {
+            apr_file_close(attr->child_err);
+        }
+
         /* RELEASE CRITICAL SECTION
          * The state of the inherited handles has been restored.
          */
@@ -933,15 +948,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     new->hproc = pi.hProcess;
     new->pid = pi.dwProcessId;
 
-    if ((attr->child_in) && (attr->child_in != &no_file)) {
-        apr_file_close(attr->child_in);
-    }
-    if ((attr->child_out) && (attr->child_out != &no_file)) {
-        apr_file_close(attr->child_out);
-    }
-    if ((attr->child_err) && (attr->child_err != &no_file)) {
-        apr_file_close(attr->child_err);
-    }
     CloseHandle(pi.hThread);
 
     return APR_SUCCESS;
