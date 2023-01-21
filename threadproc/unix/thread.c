@@ -22,6 +22,11 @@
 
 #if APR_HAVE_PTHREAD_H
 
+/* Unfortunately the kernel headers do not export the TASK_COMM_LEN
+   macro.  So we have to define it here. Used in apr_thread_name_get and
+   apr_thread_name_set functions */
+#define TASK_COMM_LEN 16
+
 /* Destroy the threadattr object */
 static apr_status_t threadattr_cleanup(void *data)
 {
@@ -276,6 +281,56 @@ APR_DECLARE(apr_thread_t *) apr_thread_current(void)
     return current_thread;
 #else
     return NULL;
+#endif
+}
+
+APR_DECLARE(apr_status_t) apr_thread_name_set(const char *name,
+                                              apr_thread_t *thread,
+                                              apr_pool_t *pool)
+{
+#if HAVE_PTHREAD_SETNAME_NP
+    pthread_t td;
+
+    size_t name_len;
+    if (!name) {
+        return APR_BADARG;
+    }
+
+    if (thread) {
+        td = *thread->td;
+    }
+    else {
+        td = pthread_self();
+    }
+
+    name_len = strlen(name);
+    if (name_len >= TASK_COMM_LEN) {
+        name = name + name_len - TASK_COMM_LEN + 1;
+    }
+
+    return pthread_setname_np(td, name);
+#else
+    return APR_ENOTIMPL;
+#endif
+}
+
+APR_DECLARE(apr_status_t) apr_thread_name_get(char **name,
+                                              apr_thread_t *thread,
+                                              apr_pool_t *pool)
+{
+#if HAVE_PTHREAD_SETNAME_NP
+    pthread_t td;
+    if (thread) {
+        td = *thread->td;
+    }
+    else {
+        td = pthread_self();
+    }
+
+    *name = apr_pcalloc(pool, TASK_COMM_LEN);
+    return pthread_getname_np(td, *name, TASK_COMM_LEN);
+#else
+    return APR_ENOTIMPL;
 #endif
 }
 

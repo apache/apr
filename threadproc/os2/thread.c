@@ -261,6 +261,20 @@ APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_thread_name_set(const char *name,
+                                              apr_thread_t *thread,
+                                              apr_pool_t *pool)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_name_get(char ** name,
+                                              apr_thread_t *thread,
+                                              apr_pool_t *pool)
+{ 
+    return APR_ENOTIMPL;
+}
+
 
 
 void apr_thread_yield()

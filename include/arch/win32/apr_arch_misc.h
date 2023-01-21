@@ -293,4 +293,14 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_API_MS_WIN_DOWNLEVEL_SHELL32_L1_1_0, LPWSTR *,
                           (LPCWSTR lpCmdLine, int *pNumArgs),
                           (lpCmdLine, pNumArgs));
 
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetThreadDescription, 0, (
+                          HANDLE hThread,
+                          PWSTR *ppszThreadDescription),
+                          (hThread, ppszThreadDescription));
+
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, SetThreadDescription, 0, (
+                          HANDLE hThread,
+                          PCWSTR lpThreadDescription),
+                          (hThread, lpThreadDescription));
+
 #endif  /* ! MISC_H */

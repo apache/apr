@@ -340,6 +340,29 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
                                           apr_thread_t *thd);
 
 /**
+ * Get name of thread
+ * @param name The variable where is will be stored name of thread.
+ * @param thread The thread that name required to get.
+ * Current thread will be used if @param thread is NULL.
+ * @param cont The pool to use
+ */
+APR_DECLARE(apr_status_t) apr_thread_name_get(char **name,
+                                              apr_thread_t *thread,
+                                              apr_pool_t *pool);
+
+/**
+ * Set name of thread
+ * @param name The name of thread must be setted. If name is to long, then
+ * name stripped to max length supported by operation system.
+ * @param thread The thread that name will be changed.
+ * Current thread will be used if @param thread is NULL.
+ * @param cont The pool to use for temporary allocations
+ */
+APR_DECLARE(apr_status_t) apr_thread_name_set(const char *name,
+                                              apr_thread_t *thread,
+                                              apr_pool_t *pool);
+
+/**
  * force the current thread to yield the processor
  */
 APR_DECLARE(void) apr_thread_yield(void);

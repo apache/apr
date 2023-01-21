@@ -24,6 +24,7 @@
 #include <process.h>
 #endif
 #include "apr_arch_misc.h"
+#include "apr_arch_utf8.h"
 
 /* Chosen for us by apr_initialize */
 DWORD tls_apr_thread = 0;
@@ -303,6 +304,77 @@ APR_DECLARE(apr_status_t) apr_thread_data_set(void *data, const char *key,
     return apr_pool_userdata_set(data, key, cleanup, thread->pool);
 }
 
+APR_DECLARE(apr_status_t) apr_thread_name_set(const char *name,
+                                              apr_thread_t *thread,
+                                              apr_pool_t *pool)
+{
+    apr_wchar_t *wname;
+    apr_size_t wname_len;
+    apr_size_t name_len;
+    apr_status_t rv;
+    HANDLE thread_handle;
+
+    if (!APR_HAVE_LATE_DLL_FUNC(SetThreadDescription)) {
+	    return APR_ENOTIMPL;
+    }
+
+    if (thread) {
+        thread_handle = thread->td;
+    }
+    else {
+        thread_handle = GetCurrentThread();
+    }
+
+    name_len = strlen(name) + 1;
+    wname_len = name_len;
+    wname = apr_palloc(pool, wname_len * sizeof(apr_wchar_t));
+    rv = apr_conv_utf8_to_ucs2(name, &name_len, wname, &wname_len);
+    if (rv) {
+        return rv;
+    }
+
+    if (!apr_winapi_SetThreadDescription(thread_handle, wname)) {
+        return apr_get_os_error();
+    }
+
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_name_get(char **name,
+                                              apr_thread_t *thread,
+                                              apr_pool_t *pool)
+{
+    apr_wchar_t *wname;
+    apr_size_t wname_len;
+    apr_size_t name_len;
+    apr_status_t rv;
+    HANDLE thread_handle;
+
+    if (!APR_HAVE_LATE_DLL_FUNC(GetThreadDescription)) {
+	    return APR_ENOTIMPL;
+    }
+
+    if (thread) {
+        thread_handle = thread->td;
+    }
+    else {
+        thread_handle = GetCurrentThread();
+    }
+
+    if (!apr_winapi_GetThreadDescription(thread_handle, &wname)) {
+        return apr_get_os_error();
+    }
+
+    wname_len = wcslen(wname) + 1;
+
+    name_len = wname_len * 3;
+    *name = apr_palloc(pool, name_len);
+
+    rv = apr_conv_ucs2_to_utf8(wname, &wname_len, *name, &name_len);
+    LocalFree(wname);
+ 
+    return rv;
+}
 
 APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void)
 {
