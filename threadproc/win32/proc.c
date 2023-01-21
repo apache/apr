@@ -865,7 +865,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 LeaveCriticalSection(&proc_lock);
                 return rv;
             }
-            rv = CreateProcessAsUserW(attr->user_token,
+            if (!CreateProcessAsUserW(attr->user_token,
                                       wprg, wcmd,
                                       attr->sa,
                                       NULL,
@@ -873,18 +873,30 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                       dwCreationFlags,
                                       pEnvBlock,
                                       wcwd,
-                                      &si, &pi);
+                                      &si, &pi)) {
+                /* Save error code. */
+                rv = apr_get_os_error();
+            }
+            else {
+                rv = APR_SUCCESS;
+            }
 
             RevertToSelf();
         }
         else {
-            rv = CreateProcessW(wprg, wcmd,        /* Executable & Command line */
+            if (!CreateProcessW(wprg, wcmd,        /* Executable & Command line */
                                 NULL, NULL,        /* Proc & thread security attributes */
                                 TRUE,              /* Inherit handles */
                                 dwCreationFlags,   /* Creation flags */
                                 pEnvBlock,         /* Environment block */
                                 wcwd,              /* Current directory name */
-                                &si, &pi);
+                                &si, &pi)) {
+                /* Save error code. */
+                rv = apr_get_os_error();
+            }
+            else {
+                rv = APR_SUCCESS;
+            }
         }
 
         if ((attr->child_in && attr->child_in->filehand)
@@ -912,8 +924,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
     /* Check CreateProcess result
      */
-    if (!rv)
-        return apr_get_os_error();
+    if (rv) {
+        return rv;
+    }
 
     /* XXX Orphaned handle warning - no fix due to broken apr_proc_t api.
      */
