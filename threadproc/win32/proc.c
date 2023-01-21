@@ -702,7 +702,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
         {
             apr_wchar_t *pNext;
-            pEnvBlock = (char *)apr_palloc(pool, iEnvBlockLen * 2);
+            pEnvBlock = (char *)apr_palloc(pool, iEnvBlockLen * sizeof(apr_wchar_t));
             dwCreationFlags |= CREATE_UNICODE_ENVIRONMENT;
 
             i = 0;
