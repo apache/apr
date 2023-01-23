@@ -161,7 +161,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     apr_size_t nbytes;
 #endif
 #if APR_USE_SHMEM_MMAP_ZERO || APR_USE_SHMEM_SHMGET || \
-    APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM
+    APR_USE_SHMEM_MMAP_TMP
     apr_file_t *file;   /* file where metadata is stored */
 #endif
 
@@ -325,25 +325,22 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
             return errno;
         }
 
-        status = apr_os_file_put(&file, &tmpfd,
-                                 APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_EXCL,
-                                 pool);
-        if (status != APR_SUCCESS) {
-            return status;
-        }
-
-        status = apr_file_trunc(file, new_m->realsize);
+        /* Note that apr_file_trunc() also calls lseek() so wrapping
+         * the fd into an apr_file_t and doing this indirectly is
+         * undesirable, see PR 66435. */
+        status = ftruncate(tmpfd, new_m->realsize) < 0 ? errno : APR_SUCCESS;
         if (status != APR_SUCCESS && status != APR_ESPIPE) {
             shm_unlink(shm_name); /* we're failing, remove the object */
+            close(tmpfd);
             return status;
         }
         new_m->base = mmap(NULL, new_m->realsize, PROT_READ | PROT_WRITE,
                            MAP_SHARED, tmpfd, 0);
-
-        /* FIXME: check for errors */
-
-        status = apr_file_close(file);
-        if (status != APR_SUCCESS) {
+        status = (new_m->base == (void *)-1) ? errno : APR_SUCCESS;
+        /* fd no longer needed once the memory is mapped. */
+        close(tmpfd);
+        if (status) {
+            shm_unlink(shm_name);
             return status;
         }
 #endif /* APR_USE_SHMEM_MMAP_SHM */
