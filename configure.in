@@ -2305,10 +2305,11 @@ fi
 AC_SUBST(have_proc_invoked)
 
 AC_MSG_CHECKING(for Variable Length Arrays)
-APR_TRY_COMPILE_NO_WARNING([],
+APR_TRY_COMPILE_NO_WARNING([#include <stdio.h>],
 [
     int foo[argc];
     foo[0] = 0;
+    printf("%d\n", foo[0]);
 ], vla_msg=yes, vla_msg=no )
 AC_MSG_RESULT([$vla_msg])
 if test "$vla_msg" = "yes"; then
