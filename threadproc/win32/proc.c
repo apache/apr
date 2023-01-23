@@ -917,8 +917,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
 
         if (rv == APR_SUCCESS) {
-            /* Close our side of pipes before releasing lock: otherwise they
-             * could like to other process when apr_proc_create() is used from
+            /* Close our copy of pipes before releasing lock: otherwise they
+             * could leak to other process when apr_proc_create() is used from
              * from multiple threads.
              */
             if ((attr->child_in) && (attr->child_in != &no_file)) {
