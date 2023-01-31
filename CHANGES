@@ -1,4 +1,6 @@
                                                      -*- coding: utf-8 -*-
+Changes for APR 1.7.2
+
 Changes for APR 1.7.1
 
   *) SECURITY: CVE-2022-24963 (cve.mitre.org)
