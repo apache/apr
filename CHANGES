@@ -1,6 +1,16 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.1
 
+  *) SECURITY: CVE-2022-24963 (cve.mitre.org)
+     Integer Overflow or Wraparound vulnerability in apr_encode functions of 
+     Apache Portable Runtime (APR) allows an attacker to write beyond bounds 
+     of a buffer.
+
+  *) SECURITY: CVE-2022-28331 (cve.mitre.org)
+     On Windows, Apache Portable Runtime 1.7.0 and earlier may write beyond 
+     the end of a stack based buffer in apr_socket_sendv(). This is a result 
+     of integer overflow.
+
   *) SECURITY: CVE-2021-35940 (cve.mitre.org)
      Restore fix for out-of-bounds array dereference in apr_time_exp*() functions.
      (This issue was addressed as CVE-2017-12613 in APR 1.6.3 and
