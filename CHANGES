@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.2
 
+  *) Correct a packaging issue in 1.7.1. The contents of the release were
+     correct, but the top level directory was misnamed.
+
 Changes for APR 1.7.1
 
   *) SECURITY: CVE-2022-24963 (cve.mitre.org)
