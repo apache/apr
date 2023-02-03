@@ -290,9 +290,9 @@ static apr_status_t conn_connect(apr_memcache_conn_t *conn)
     apr_status_t rv = APR_SUCCESS;
     apr_sockaddr_t *sa;
 #if APR_HAVE_SOCKADDR_UN
-    apr_int32_t family = conn->ms->host[0] != '/' ? APR_INET : APR_UNIX;
+    apr_int32_t family = conn->ms->host[0] != '/' ? APR_UNSPEC : APR_UNIX;
 #else
-    apr_int32_t family = APR_INET;
+    apr_int32_t family = APR_UNSPEC;
 #endif
 
     rv = apr_sockaddr_info_get(&sa, conn->ms->host, family, conn->ms->port, 0, conn->p);
@@ -328,9 +328,9 @@ mc_conn_construct(void **conn_, void *params, apr_pool_t *pool)
     apr_pool_t *tp;
     apr_memcache_server_t *ms = params;
 #if APR_HAVE_SOCKADDR_UN
-    apr_int32_t family = ms->host[0] != '/' ? APR_INET : APR_UNIX;
+    apr_int32_t family = ms->host[0] != '/' ? APR_UNSPEC : APR_UNIX;
 #else
-    apr_int32_t family = APR_INET;
+    apr_int32_t family = APR_UNSPEC;
 #endif
 
     rv = apr_pool_create(&np, pool);
