@@ -173,7 +173,7 @@ BSC32_FLAGS=/nologo /o"$(OUTDIR)\libapr.bsc"
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /pdb:"$(OUTDIR)\libapr-1.pdb" /debug /out:"$(OUTDIR)\libapr-1.dll" /implib:"$(OUTDIR)\libapr-1.lib"  /opt:ref 
+LINK32_FLAGS=kernel32.lib advapi32.lib ws2_32.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /pdb:"$(OUTDIR)\libapr-1.pdb" /debug /out:"$(OUTDIR)\libapr-1.dll" /implib:"$(OUTDIR)\libapr-1.lib"  /opt:ref 
 LINK32_OBJS= \
 	"$(INTDIR)\apr_atomic.obj" \
 	"$(INTDIR)\apr_atomic64.obj" \
@@ -417,7 +417,7 @@ BSC32_FLAGS=/nologo /o"$(OUTDIR)\libapr.bsc"
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /pdb:"$(OUTDIR)\libapr-1.pdb" /debug /out:"$(OUTDIR)\libapr-1.dll" /implib:"$(OUTDIR)\libapr-1.lib"  
+LINK32_FLAGS=kernel32.lib advapi32.lib ws2_32.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /pdb:"$(OUTDIR)\libapr-1.pdb" /debug /out:"$(OUTDIR)\libapr-1.dll" /implib:"$(OUTDIR)\libapr-1.lib"  
 LINK32_OBJS= \
 	"$(INTDIR)\apr_atomic.obj" \
 	"$(INTDIR)\apr_atomic64.obj" \
@@ -661,7 +661,7 @@ BSC32_FLAGS=/nologo /o"$(OUTDIR)\libapr.bsc"
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /pdb:"$(OUTDIR)\libapr-1.pdb" /debug /out:"$(OUTDIR)\libapr-1.dll" /implib:"$(OUTDIR)\libapr-1.lib"  /opt:ref 
+LINK32_FLAGS=kernel32.lib advapi32.lib ws2_32.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /pdb:"$(OUTDIR)\libapr-1.pdb" /debug /out:"$(OUTDIR)\libapr-1.dll" /implib:"$(OUTDIR)\libapr-1.lib"  /opt:ref 
 LINK32_OBJS= \
 	"$(INTDIR)\apr_atomic.obj" \
 	"$(INTDIR)\apr_atomic64.obj" \
@@ -905,7 +905,7 @@ BSC32_FLAGS=/nologo /o"$(OUTDIR)\libapr.bsc"
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /pdb:"$(OUTDIR)\libapr-1.pdb" /debug /out:"$(OUTDIR)\libapr-1.dll" /implib:"$(OUTDIR)\libapr-1.lib"  
+LINK32_FLAGS=kernel32.lib advapi32.lib ws2_32.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /pdb:"$(OUTDIR)\libapr-1.pdb" /debug /out:"$(OUTDIR)\libapr-1.dll" /implib:"$(OUTDIR)\libapr-1.lib"  
 LINK32_OBJS= \
 	"$(INTDIR)\apr_atomic.obj" \
 	"$(INTDIR)\apr_atomic64.obj" \

@@ -255,9 +255,27 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
     int disconnected = 0;
     int sendv_trailers = 0;
     char hdtrbuf[4096];
+    LPFN_TRANSMITFILE pfn_transmit_file = NULL;
+    static GUID wsaid_transmitfile = WSAID_TRANSMITFILE;
+    DWORD dw;
 
     if (apr_os_level < APR_WIN_NT) {
         return APR_ENOTIMPL;
+    }
+
+    /* According to documentation TransmitFile() should not be used directly.
+     * Pointer to function should retrieved using WSAIoctl:
+     * https://docs.microsoft.com/en-gb/windows/win32/api/mswsock/nf-mswsock-transmitfile#remarks
+     */
+    if (WSAIoctl(sock->socketdes, SIO_GET_EXTENSION_FUNCTION_POINTER,
+                 &wsaid_transmitfile, sizeof(wsaid_transmitfile),
+                 &pfn_transmit_file, sizeof(pfn_transmit_file),
+                 &dw, NULL, NULL) == SOCKET_ERROR) {
+        return apr_get_os_error();
+    }
+
+    if (dw != sizeof(pfn_transmit_file)) {
+        return APR_EINVAL;
     }
 
     /* Use len to keep track of number of total bytes sent (including headers) */
@@ -351,13 +369,13 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
         sock->overlapped->OffsetHigh = (DWORD)(curoff >> 32);
 #endif  
         /* XXX BoundsChecker claims dwFlags must not be zero. */
-        rv = TransmitFile(sock->socketdes,  /* socket */
-                          file->filehand, /* open file descriptor of the file to be sent */
-                          xmitbytes,      /* number of bytes to send. 0=send all */
-                          0,              /* Number of bytes per send. 0=use default */
-                          sock->overlapped,    /* OVERLAPPED structure */
-                          ptfb,           /* header and trailer buffers */
-                          dwFlags);       /* flags to control various aspects of TransmitFile */
+        rv = pfn_transmit_file(sock->socketdes,  /* socket */
+                               file->filehand, /* open file descriptor of the file to be sent */
+                               xmitbytes,      /* number of bytes to send. 0=send all */
+                               0,              /* Number of bytes per send. 0=use default */
+                               sock->overlapped,    /* OVERLAPPED structure */
+                               ptfb,           /* header and trailer buffers */
+                               dwFlags);       /* flags to control various aspects of TransmitFile */
         if (!rv) {
             status = apr_get_netos_error();
             if ((status == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) ||

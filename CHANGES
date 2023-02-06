@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.3
 
+  *) apr_socket_sendfile: Use WSAIoctl() to get TransmitFile function
+     pointer on Windows.
+
 Changes for APR 1.7.2
 
   *) Correct a packaging issue in 1.7.1. The contents of the release were
