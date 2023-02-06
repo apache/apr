@@ -272,7 +272,7 @@ Changes for APR 2.0.0
      on Windows [Ivan Zhakov]
 
   *) apr_proc_create(): Fix potential handle leak when apr_proc_create() is used
-     from from multiple threads on Windows [Ivan Zhakov]
+     from multiple threads on Windows [Ivan Zhakov]
 
 Changes for APR and APR-util 1.7.x and later:
 
