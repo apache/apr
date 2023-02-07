@@ -21,6 +21,8 @@
 #include "apr_general.h"
 #include "apr_poll.h"
 #include "apr_lib.h"
+#include "apr_strings.h"
+#include "apr_thread_proc.h"
 #include "testutil.h"
 
 #define DIRNAME "data"
@@ -1472,6 +1474,169 @@ static void test_datasync_on_stream(abts_case *tc, void *data)
     }
 }
 
+typedef struct thread_file_append_ctx_t {
+    apr_pool_t *pool;
+    const char *fname;
+    apr_size_t chunksize;
+    char val;
+    int num_writes;
+    char *errmsg;
+} thread_file_append_ctx_t;
+
+static void * APR_THREAD_FUNC thread_file_append_func(apr_thread_t *thd, void *data)
+{
+    thread_file_append_ctx_t *ctx = data;
+    apr_status_t rv;
+    apr_file_t *f;
+    int i;
+    char *writebuf;
+    char *readbuf;
+
+    rv = apr_file_open(&f, ctx->fname,
+                       APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_APPEND,
+                       APR_FPROT_OS_DEFAULT, ctx->pool);
+    if (rv) {
+        apr_thread_exit(thd, rv);
+        return NULL;
+    }
+
+    writebuf = apr_palloc(ctx->pool, ctx->chunksize);
+    memset(writebuf, ctx->val, ctx->chunksize);
+    readbuf = apr_palloc(ctx->pool, ctx->chunksize);
+
+    for (i = 0; i < ctx->num_writes; i++) {
+        apr_size_t bytes_written;
+        apr_size_t bytes_read;
+        apr_off_t offset;
+
+        rv = apr_file_write_full(f, writebuf, ctx->chunksize, &bytes_written);
+        if (rv) {
+            apr_thread_exit(thd, rv);
+            return NULL;
+        }
+        /* After writing the data, seek back from the current offset and
+         * verify what we just wrote. */
+        offset = -((apr_off_t)ctx->chunksize);
+        rv = apr_file_seek(f, APR_CUR, &offset);
+        if (rv) {
+            apr_thread_exit(thd, rv);
+            return NULL;
+        }
+        rv = apr_file_read_full(f, readbuf, ctx->chunksize, &bytes_read);
+        if (rv) {
+            apr_thread_exit(thd, rv);
+            return NULL;
+        }
+        if (memcmp(readbuf, writebuf, ctx->chunksize) != 0) {
+            ctx->errmsg = apr_psprintf(
+                ctx->pool,
+                "Unexpected data at file offset %" APR_OFF_T_FMT,
+                offset);
+            apr_thread_exit(thd, APR_SUCCESS);
+            return NULL;
+        }
+    }
+
+    apr_file_close(f);
+    apr_thread_exit(thd, APR_SUCCESS);
+
+    return NULL;
+}
+
+static void test_atomic_append(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_status_t thread_rv;
+    apr_file_t *f;
+    const char *fname = "data/testatomic_append.dat";
+    unsigned int seed;
+    thread_file_append_ctx_t ctx1 = {0};
+    thread_file_append_ctx_t ctx2 = {0};
+    apr_thread_t *t1;
+    apr_thread_t *t2;
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_WRITE | APR_FOPEN_CREATE,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "create file", rv);
+    apr_file_close(f);
+
+    seed = (unsigned int)apr_time_now();
+    abts_log_message("Random seed for test_atomic_append() is %u", seed);
+    srand(seed);
+
+    /* Create two threads appending data to the same file. */
+    apr_pool_create(&ctx1.pool, p);
+    ctx1.fname = fname;
+    ctx1.chunksize = 1 + rand() % 8192;
+    ctx1.val = 'A';
+    ctx1.num_writes = 1000;
+    rv = apr_thread_create(&t1, NULL, thread_file_append_func, &ctx1, p);
+    APR_ASSERT_SUCCESS(tc, "create thread", rv);
+
+    apr_pool_create(&ctx2.pool, p);
+    ctx2.fname = fname;
+    ctx2.chunksize = 1 + rand() % 8192;
+    ctx2.val = 'B';
+    ctx2.num_writes = 1000;
+    rv = apr_thread_create(&t2, NULL, thread_file_append_func, &ctx2, p);
+    APR_ASSERT_SUCCESS(tc, "create thread", rv);
+
+    rv = apr_thread_join(&thread_rv, t1);
+    APR_ASSERT_SUCCESS(tc, "join thread", rv);
+    APR_ASSERT_SUCCESS(tc, "no thread errors", thread_rv);
+    if (ctx1.errmsg) {
+        ABTS_FAIL(tc, ctx1.errmsg);
+    }
+    rv = apr_thread_join(&thread_rv, t2);
+    APR_ASSERT_SUCCESS(tc, "join thread", rv);
+    APR_ASSERT_SUCCESS(tc, "no thread errors", thread_rv);
+    if (ctx2.errmsg) {
+        ABTS_FAIL(tc, ctx2.errmsg);
+    }
+
+    apr_file_remove(fname, p);
+}
+
+static void test_append_locked(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testappend_locked.dat";
+    apr_size_t bytes_written;
+    apr_size_t bytes_read;
+    char buf[64] = {0};
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname,
+                       APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_APPEND,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "create file", rv);
+
+    rv = apr_file_lock(f, APR_FLOCK_EXCLUSIVE);
+    APR_ASSERT_SUCCESS(tc, "lock file", rv);
+
+    /* PR50058: Appending to a locked file should not deadlock. */
+    rv = apr_file_write_full(f, "abc", 3, &bytes_written);
+    APR_ASSERT_SUCCESS(tc, "write to file", rv);
+
+    apr_file_unlock(f);
+    apr_file_close(f);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_READ, APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open file", rv);
+
+    rv = apr_file_read_full(f, buf, sizeof(buf), &bytes_read);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_INT_EQUAL(tc, 3, (int)bytes_read);
+    ABTS_STR_EQUAL(tc, "abc", buf);
+
+    apr_file_close(f);
+    apr_file_remove(fname, p);
+}
+
 abts_suite *testfile(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -1523,6 +1688,8 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_xthread, NULL);
     abts_run_test(suite, test_datasync_on_file, NULL);
     abts_run_test(suite, test_datasync_on_stream, NULL);
+    abts_run_test(suite, test_atomic_append, NULL);
+    abts_run_test(suite, test_append_locked, NULL);
 
     return suite;
 }

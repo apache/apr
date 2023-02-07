@@ -303,7 +303,44 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         }
         return rv;
     } else {
-        if (!thefile->pipe) {
+        if (thefile->pipe) {
+            rv = WriteFile(thefile->filehand, buf, (DWORD)*nbytes, &bwrote,
+                           thefile->pOverlapped);
+        }
+        else if (thefile->append && !thefile->pOverlapped) {
+            OVERLAPPED ov = {0};
+
+            /* If the file is opened for synchronous I/O, take advantage of the
+             * documented way to atomically append data by calling WriteFile()
+             * with both the OVERLAPPED.Offset and OffsetHigh members set to
+             * 0xFFFFFFFF.  This avoids calling LockFile() that is otherwise
+             * required to avoid a race condition between seeking to the end
+             * and writing data.  Not locking the file improves robustness of
+             * such appends and avoids a deadlock when appending to an already
+             * locked file, as described in PR50058.
+             *
+             * We use this approach only for files opened for synchronous I/O
+             * because in this case the I/O Manager maintains the current file
+             * position.  Otherwise, the file offset returned or changed by
+             * the SetFilePointer() API is not guaranteed to be valid and that
+             * could, for instance, break apr_file_seek() calls after appending
+             * data.  Sadly, if a file is opened for asynchronous I/O, this
+             * call doesn't update the OVERLAPPED.Offset member to reflect the
+             * actual offset used when appending the data (which we could then
+             * use to make seeking and other operations involving filePtr work).
+             * Therefore, when appending to files opened for asynchronous I/O,
+             * we still use the LockFile + SetFilePointer + WriteFile approach.
+             *
+             * References:
+             * https://bz.apache.org/bugzilla/show_bug.cgi?id=50058
+             * https://msdn.microsoft.com/en-us/library/windows/desktop/aa365747
+             * https://msdn.microsoft.com/en-us/library/windows/hardware/ff567121
+             */
+            ov.Offset = MAXDWORD;
+            ov.OffsetHigh = MAXDWORD;
+            rv = WriteFile(thefile->filehand, buf, (DWORD)*nbytes, &bwrote, &ov);
+        }
+        else {
             apr_off_t offset = 0;
             apr_status_t rc;
             if (thefile->append) {
@@ -334,10 +371,6 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                 apr_file_unlock(thefile);
                 apr_thread_mutex_unlock(thefile->mutex);
             }
-        }
-        else {
-            rv = WriteFile(thefile->filehand, buf, (DWORD)*nbytes, &bwrote,
-                           thefile->pOverlapped);
         }
         if (rv) {
             *nbytes = bwrote;

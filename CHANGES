@@ -1,6 +1,5 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.3
-
   *) apr_socket_sendfile: Use WSAIoctl() to get TransmitFile function
      pointer on Windows. [Ivan Zhakov]
 
@@ -8,6 +7,10 @@ Changes for APR 1.7.3
      and later. [Ivan Zhakov]
 
   *) apr_file_gets: Optimize for buffered files on Windows.
+     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
+
+  *) Fix a deadlock when writing to locked files opened with APR_FOPEN_APPEND
+     on Windows. PR 50058.
      [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
 Changes for APR 1.7.2
