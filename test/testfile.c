@@ -1637,6 +1637,56 @@ static void test_append_locked(abts_case *tc, void *data)
     apr_file_remove(fname, p);
 }
 
+static void test_append_read(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testappend_read.dat";
+    apr_off_t offset;
+    char buf[64];
+
+    apr_file_remove(fname, p);
+
+    /* Create file with contents. */
+    rv = apr_file_open(&f, fname, APR_FOPEN_WRITE | APR_FOPEN_CREATE,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "create file", rv);
+
+    rv = apr_file_puts("abc", f);
+    APR_ASSERT_SUCCESS(tc, "write to file", rv);
+    apr_file_close(f);
+
+    /* Re-open it with APR_FOPEN_APPEND. */
+    rv = apr_file_open(&f, fname,
+                       APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_APPEND,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open file", rv);
+
+    /* Test the initial file offset.  Even though we used APR_FOPEN_APPEND,
+     * the offset should be kept in the beginning of the file until the
+     * first append.  (Previously, the Windows implementation performed
+     * an erroneous seek to the file's end right after opening it.)
+     */
+    offset = 0;
+    rv = apr_file_seek(f, APR_CUR, &offset);
+    APR_ASSERT_SUCCESS(tc, "get file offset", rv);
+    ABTS_INT_EQUAL(tc, 0, (int)offset);
+
+    /* Test reading from the file. */
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    APR_ASSERT_SUCCESS(tc, "read from file", rv);
+    ABTS_STR_EQUAL(tc, "abc", buf);
+
+    /* Test the file offset after reading. */
+    offset = 0;
+    rv = apr_file_seek(f, APR_CUR, &offset);
+    APR_ASSERT_SUCCESS(tc, "get file offset", rv);
+    ABTS_INT_EQUAL(tc, 3, (int)offset);
+
+    apr_file_close(f);
+    apr_file_remove(fname, p);
+}
+
 abts_suite *testfile(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -1690,6 +1740,7 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_datasync_on_stream, NULL);
     abts_run_test(suite, test_atomic_append, NULL);
     abts_run_test(suite, test_append_locked, NULL);
+    abts_run_test(suite, test_append_read, NULL);
 
     return suite;
 }
