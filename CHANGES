@@ -7,17 +7,16 @@ Changes for APR 1.7.3
      and later. [Ivan Zhakov]
 
   *) apr_file_gets: Optimize for buffered files on Windows.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
+     [Evgeny Kotkov]
 
   *) Fix a deadlock when writing to locked files opened with APR_FOPEN_APPEND
-     on Windows. PR 50058.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
+     on Windows. PR 50058. [Evgeny Kotkov]
 
   *) Don't seek to the end when opening files with APR_FOPEN_APPEND on Windows.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
+     [Evgeny Kotkov]
 
   *) apr_file_write: Optimize large writes to buffered files on Windows.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
+     [Evgeny Kotkov]
 
   *) apr_file_write: Optimize large reads from buffered files on Windows.
      [Evgeny Kotkov]
