@@ -140,6 +140,56 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
     return rv;
 }
 
+static apr_status_t read_buffered(apr_file_t *thefile, void *buf, apr_size_t *len)
+{
+    apr_status_t rv;
+    char *pos = (char *)buf;
+    apr_size_t blocksize;
+    apr_size_t size = *len;
+
+    if (thefile->direction == 1) {
+        rv = apr_file_flush(thefile);
+        if (rv != APR_SUCCESS) {
+            return rv;
+        }
+        thefile->bufpos = 0;
+        thefile->direction = 0;
+        thefile->dataRead = 0;
+    }
+
+    rv = 0;
+    while (rv == 0 && size > 0) {
+        if (thefile->bufpos >= thefile->dataRead) {
+            apr_size_t read;
+            rv = read_with_timeout(thefile, thefile->buffer,
+                                   thefile->bufsize, &read);
+            if (read == 0) {
+                if (rv == APR_EOF)
+                    thefile->eof_hit = TRUE;
+                break;
+            }
+            else {
+                thefile->dataRead = read;
+                thefile->filePtr += thefile->dataRead;
+                thefile->bufpos = 0;
+            }
+        }
+
+        blocksize = size > thefile->dataRead - thefile->bufpos ? thefile->dataRead - thefile->bufpos : size;
+        memcpy(pos, thefile->buffer + thefile->bufpos, blocksize);
+        thefile->bufpos += blocksize;
+        pos += blocksize;
+        size -= blocksize;
+    }
+
+    *len = pos - (char *)buf;
+    if (*len) {
+        rv = APR_SUCCESS;
+    }
+
+    return rv;
+}
+
 APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *len)
 {
     apr_status_t rv;
@@ -177,57 +227,10 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         }
     }
     if (thefile->buffered) {
-        char *pos = (char *)buf;
-        apr_size_t blocksize;
-        apr_size_t size = *len;
-
         if (thefile->flags & APR_FOPEN_XTHREAD) {
             apr_thread_mutex_lock(thefile->mutex);
         }
-
-        if (thefile->direction == 1) {
-            rv = apr_file_flush(thefile);
-            if (rv != APR_SUCCESS) {
-                if (thefile->flags & APR_FOPEN_XTHREAD) {
-                    apr_thread_mutex_unlock(thefile->mutex);
-                }
-                return rv;
-            }
-            thefile->bufpos = 0;
-            thefile->direction = 0;
-            thefile->dataRead = 0;
-        }
-
-        rv = 0;
-        while (rv == 0 && size > 0) {
-            if (thefile->bufpos >= thefile->dataRead) {
-                apr_size_t read;
-                rv = read_with_timeout(thefile, thefile->buffer, 
-                                       thefile->bufsize, &read);
-                if (read == 0) {
-                    if (rv == APR_EOF)
-                        thefile->eof_hit = TRUE;
-                    break;
-                }
-                else {
-                    thefile->dataRead = read;
-                    thefile->filePtr += thefile->dataRead;
-                    thefile->bufpos = 0;
-                }
-            }
-
-            blocksize = size > thefile->dataRead - thefile->bufpos ? thefile->dataRead - thefile->bufpos : size;
-            memcpy(pos, thefile->buffer + thefile->bufpos, blocksize);
-            thefile->bufpos += blocksize;
-            pos += blocksize;
-            size -= blocksize;
-        }
-
-        *len = pos - (char *)buf;
-        if (*len) {
-            rv = APR_SUCCESS;
-        }
-
+        rv = read_buffered(thefile, buf, len);
         if (thefile->flags & APR_FOPEN_XTHREAD) {
             apr_thread_mutex_unlock(thefile->mutex);
         }
@@ -455,30 +458,107 @@ APR_DECLARE(apr_status_t) apr_file_puts(const char *str, apr_file_t *thefile)
 
 APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
 {
-    apr_size_t readlen;
     apr_status_t rv = APR_SUCCESS;
-    int i;    
+    apr_size_t nbytes;
+    const char *str_start = str;
+    char *final = str + len - 1;
 
-    for (i = 0; i < len-1; i++) {
-        readlen = 1;
-        rv = apr_file_read(thefile, str+i, &readlen);
-
-        if (rv != APR_SUCCESS && rv != APR_EOF)
+    /* If the file is open for xthread support, allocate and
+     * initialize the overlapped and io completion event (hEvent).
+     * Threads should NOT share an apr_file_t or its hEvent.
+     */
+    if ((thefile->flags & APR_FOPEN_XTHREAD) && !thefile->pOverlapped) {
+        thefile->pOverlapped = (OVERLAPPED*) apr_pcalloc(thefile->pool,
+                                                         sizeof(OVERLAPPED));
+        thefile->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+        if (!thefile->pOverlapped->hEvent) {
+            rv = apr_get_os_error();
             return rv;
-
-        if (readlen == 0) {
-            /* If we have bytes, defer APR_EOF to the next call */
-            if (i > 0)
-                rv = APR_SUCCESS;
-            break;
-        }
-        
-        if (str[i] == '\n') {
-            i++; /* don't clobber this char below */
-            break;
         }
     }
-    str[i] = 0;
+
+    /* Handle the ungetchar if there is one. */
+    if (thefile->ungetchar != -1 && str < final) {
+        *str = thefile->ungetchar;
+        thefile->ungetchar = -1;
+        if (*str == '\n') {
+            *(++str) = '\0';
+            return APR_SUCCESS;
+        }
+        ++str;
+    }
+
+    /* If we have an underlying buffer, we can be *much* more efficient
+     * and skip over the read_with_timeout() calls.
+     */
+    if (thefile->buffered) {
+        if (thefile->flags & APR_FOPEN_XTHREAD) {
+            apr_thread_mutex_lock(thefile->mutex);
+        }
+
+        if (thefile->direction == 1) {
+            rv = apr_file_flush(thefile);
+            if (rv) {
+                if (thefile->flags & APR_FOPEN_XTHREAD) {
+                    apr_thread_mutex_unlock(thefile->mutex);
+                }
+                return rv;
+            }
+
+            thefile->direction = 0;
+            thefile->bufpos = 0;
+            thefile->dataRead = 0;
+        }
+
+        while (str < final) { /* leave room for trailing '\0' */
+            if (thefile->bufpos < thefile->dataRead) {
+                *str = thefile->buffer[thefile->bufpos++];
+            }
+            else {
+                nbytes = 1;
+                rv = read_buffered(thefile, str, &nbytes);
+                if (rv != APR_SUCCESS) {
+                    break;
+                }
+            }
+            if (*str == '\n') {
+                ++str;
+                break;
+            }
+            ++str;
+        }
+        if (thefile->flags & APR_FOPEN_XTHREAD) {
+            apr_thread_mutex_unlock(thefile->mutex);
+        }
+    }
+    else {
+        while (str < final) { /* leave room for trailing '\0' */
+            nbytes = 1;
+            rv = read_with_timeout(thefile, str, nbytes, &nbytes);
+            if (rv == APR_EOF)
+                thefile->eof_hit = TRUE;
+
+            if (rv != APR_SUCCESS) {
+                break;
+            }
+            if (*str == '\n') {
+                ++str;
+                break;
+            }
+            ++str;
+        }
+    }
+
+    /* We must store a terminating '\0' if we've stored any chars. We can
+     * get away with storing it if we hit an error first.
+     */
+    *str = '\0';
+    if (str > str_start) {
+        /* We stored chars; don't report EOF or any other errors;
+         * the app will find out about that on the next call.
+         */
+        return APR_SUCCESS;
+    }
     return rv;
 }
 

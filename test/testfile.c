@@ -430,6 +430,10 @@ static void test_gets(abts_case *tc, void *data)
     rv = apr_file_gets(str, 256, f);
     ABTS_INT_EQUAL(tc, APR_EOF, rv);
     ABTS_STR_EQUAL(tc, "", str);
+    /* Calling gets after EOF should return EOF. */
+    rv = apr_file_gets(str, 256, f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_STR_EQUAL(tc, "", str);
     apr_file_close(f);
 }
 
@@ -453,6 +457,214 @@ static void test_gets_buffered(abts_case *tc, void *data)
     rv = apr_file_gets(str, 256, f);
     ABTS_INT_EQUAL(tc, APR_EOF, rv);
     ABTS_STR_EQUAL(tc, "", str);
+    /* Calling gets after EOF should return EOF. */
+    rv = apr_file_gets(str, 256, f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_STR_EQUAL(tc, "", str);
+    apr_file_close(f);
+}
+
+static void test_gets_empty(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testgets_empty.txt";
+    char buf[256];
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_CREATE | APR_FOPEN_WRITE,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file", rv);
+    apr_file_close(f);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_READ, APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "re-open test file", rv);
+
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_STR_EQUAL(tc, "", buf);
+    /* Calling gets after EOF should return EOF. */
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_STR_EQUAL(tc, "", buf);
+    apr_file_close(f);
+}
+
+static void test_gets_multiline(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testgets_multiline.txt";
+    char buf[256];
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_CREATE | APR_FOPEN_WRITE,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file", rv);
+    rv = apr_file_puts("a\nb\n", f);
+    APR_ASSERT_SUCCESS(tc, "write test data", rv);
+    apr_file_close(f);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_READ, APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "re-open test file", rv);
+
+    memset(buf, 0, sizeof(buf));
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    APR_ASSERT_SUCCESS(tc, "read first line", rv);
+    ABTS_STR_EQUAL(tc, "a\n", buf);
+
+    memset(buf, 0, sizeof(buf));
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    APR_ASSERT_SUCCESS(tc, "read second line", rv);
+    ABTS_STR_EQUAL(tc, "b\n", buf);
+
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_STR_EQUAL(tc, "", buf);
+    /* Calling gets after EOF should return EOF. */
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_STR_EQUAL(tc, "", buf);
+    apr_file_close(f);
+}
+
+static void test_gets_small_buf(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testgets_small_buf.txt";
+    char buf[2];
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_CREATE | APR_FOPEN_WRITE,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file", rv);
+    rv = apr_file_puts("ab\n", f);
+    apr_file_close(f);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_READ, APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "re-open test file", rv);
+    /* Buffer is too small to hold the full line, test that gets properly
+     * returns the line content character by character.
+     */
+    memset(buf, 0, sizeof(buf));
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    APR_ASSERT_SUCCESS(tc, "read first chunk", rv);
+    ABTS_STR_EQUAL(tc, "a", buf);
+
+    memset(buf, 0, sizeof(buf));
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    APR_ASSERT_SUCCESS(tc, "read second chunk", rv);
+    ABTS_STR_EQUAL(tc, "b", buf);
+
+    memset(buf, 0, sizeof(buf));
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    APR_ASSERT_SUCCESS(tc, "read third chunk", rv);
+    ABTS_STR_EQUAL(tc, "\n", buf);
+
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_STR_EQUAL(tc, "", buf);
+    /* Calling gets after EOF should return EOF. */
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_STR_EQUAL(tc, "", buf);
+    apr_file_close(f);
+}
+
+static void test_gets_ungetc(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testgets_ungetc.txt";
+    char buf[256];
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_CREATE | APR_FOPEN_WRITE,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file", rv);
+    rv = apr_file_puts("a\n", f);
+    APR_ASSERT_SUCCESS(tc, "write test data", rv);
+    apr_file_close(f);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_READ, APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "re-open test file", rv);
+
+    rv = apr_file_ungetc('b', f);
+    APR_ASSERT_SUCCESS(tc, "call ungetc", rv);
+    memset(buf, 0, sizeof(buf));
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    APR_ASSERT_SUCCESS(tc, "read line", rv);
+    ABTS_STR_EQUAL(tc, "ba\n", buf);
+
+    rv = apr_file_ungetc('\n', f);
+    APR_ASSERT_SUCCESS(tc, "call ungetc with EOL", rv);
+    memset(buf, 0, sizeof(buf));
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    APR_ASSERT_SUCCESS(tc, "read line", rv);
+    ABTS_STR_EQUAL(tc, "\n", buf);
+
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_STR_EQUAL(tc, "", buf);
+    /* Calling gets after EOF should return EOF. */
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_STR_EQUAL(tc, "", buf);
+    apr_file_close(f);
+}
+
+static void test_gets_buffered_big(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testgets_buffered_big.txt";
+    char hugestr[APR_BUFFERSIZE + 2];
+    char buf[APR_BUFFERSIZE + 2];
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_CREATE | APR_FOPEN_WRITE,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file", rv);
+    /* Test an edge case with a buffered file and the line that exceeds
+     * the default buffer size by 1 (the line itself fits into the buffer,
+     * but the line + EOL does not).
+     */
+    memset(hugestr, 'a', sizeof(hugestr));
+    hugestr[sizeof(hugestr) - 2] = '\n';
+    hugestr[sizeof(hugestr) - 1] = '\0';
+    rv = apr_file_puts(hugestr, f);
+    APR_ASSERT_SUCCESS(tc, "write first line", rv);
+    rv = apr_file_puts("b\n", f);
+    APR_ASSERT_SUCCESS(tc, "write second line", rv);
+    apr_file_close(f);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_READ | APR_FOPEN_BUFFERED,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "re-open test file", rv);
+
+    memset(buf, 0, sizeof(buf));
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    APR_ASSERT_SUCCESS(tc, "read first line", rv);
+    ABTS_STR_EQUAL(tc, hugestr, buf);
+
+    memset(buf, 0, sizeof(buf));
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    APR_ASSERT_SUCCESS(tc, "read second line", rv);
+    ABTS_STR_EQUAL(tc, "b\n", buf);
+
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_STR_EQUAL(tc, "", buf);
+    /* Calling gets after EOF should return EOF. */
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_STR_EQUAL(tc, "", buf);
     apr_file_close(f);
 }
 
@@ -1286,6 +1498,11 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_ungetc, NULL);
     abts_run_test(suite, test_gets, NULL);
     abts_run_test(suite, test_gets_buffered, NULL);
+    abts_run_test(suite, test_gets_empty, NULL);
+    abts_run_test(suite, test_gets_multiline, NULL);
+    abts_run_test(suite, test_gets_small_buf, NULL);
+    abts_run_test(suite, test_gets_ungetc, NULL);
+    abts_run_test(suite, test_gets_buffered_big, NULL);
     abts_run_test(suite, test_puts, NULL);
     abts_run_test(suite, test_writev, NULL);
     abts_run_test(suite, test_writev_full, NULL);

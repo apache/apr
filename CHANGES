@@ -12,6 +12,9 @@ Changes for APR 1.7.2
   *) Correct a packaging issue in 1.7.1. The contents of the release were
      correct, but the top level directory was misnamed.
 
+  *) apr_file_gets: Optimize for buffered files on Windows.
+     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
+
 Changes for APR 1.7.1
 
   *) SECURITY: CVE-2022-24963 (cve.mitre.org)
