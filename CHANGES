@@ -7,13 +7,13 @@ Changes for APR 1.7.3
   *) apr_dir_read: Do not request short file names on Windows 7
      and later. [Ivan Zhakov]
 
+  *) apr_file_gets: Optimize for buffered files on Windows.
+     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
+
 Changes for APR 1.7.2
 
   *) Correct a packaging issue in 1.7.1. The contents of the release were
      correct, but the top level directory was misnamed.
-
-  *) apr_file_gets: Optimize for buffered files on Windows.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
 Changes for APR 1.7.1
 
