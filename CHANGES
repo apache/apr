@@ -19,6 +19,9 @@ Changes for APR 1.7.3
   *) apr_file_write: Optimize large writes to buffered files on Windows.
      [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
+  *) apr_file_write: Optimize large reads from buffered files on Windows.
+     [Evgeny Kotkov]
+
 Changes for APR 1.7.2
 
   *) Correct a packaging issue in 1.7.1. The contents of the release were
