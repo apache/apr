@@ -470,7 +470,7 @@ static void test_gets_empty(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *f;
-    const char *fname = "data/testgets_empty.txt";
+    const char *fname = "data/testgets_empty.dat";
     char buf[256];
 
     apr_file_remove(fname, p);
@@ -497,7 +497,7 @@ static void test_gets_multiline(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *f;
-    const char *fname = "data/testgets_multiline.txt";
+    const char *fname = "data/testgets_multiline.dat";
     char buf[256];
 
     apr_file_remove(fname, p);
@@ -536,7 +536,7 @@ static void test_gets_small_buf(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *f;
-    const char *fname = "data/testgets_small_buf.txt";
+    const char *fname = "data/testgets_small_buf.dat";
     char buf[2];
 
     apr_file_remove(fname, p);
@@ -581,7 +581,7 @@ static void test_gets_ungetc(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *f;
-    const char *fname = "data/testgets_ungetc.txt";
+    const char *fname = "data/testgets_ungetc.dat";
     char buf[256];
 
     apr_file_remove(fname, p);
@@ -624,7 +624,7 @@ static void test_gets_buffered_big(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_file_t *f;
-    const char *fname = "data/testgets_buffered_big.txt";
+    const char *fname = "data/testgets_buffered_big.dat";
     char hugestr[APR_BUFFERSIZE + 2];
     char buf[APR_BUFFERSIZE + 2];
 
