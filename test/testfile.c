@@ -1687,6 +1687,188 @@ static void test_append_read(abts_case *tc, void *data)
     apr_file_remove(fname, p);
 }
 
+static void test_large_write_buffered(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testlarge_write_buffered.dat";
+    apr_size_t len;
+    apr_size_t bytes_written;
+    apr_size_t bytes_read;
+    char *buf;
+    char *buf2;
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname,
+                       APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_BUFFERED,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file for writing", rv);
+
+    /* Test a single large write. */
+    len = 80000;
+    buf = apr_palloc(p, len);
+    memset(buf, 'a', len);
+    rv = apr_file_write_full(f, buf, len, &bytes_written);
+    APR_ASSERT_SUCCESS(tc, "write to file", rv);
+    ABTS_INT_EQUAL(tc, (int)len, (int)bytes_written);
+    apr_file_close(f);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_READ,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file for reading", rv);
+
+    buf2 = apr_palloc(p, len + 1);
+    rv = apr_file_read_full(f, buf2, len + 1, &bytes_read);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_INT_EQUAL(tc, (int)len, (int)bytes_read);
+    ABTS_TRUE(tc, memcmp(buf, buf2, len) == 0);
+    apr_file_close(f);
+
+    apr_file_remove(fname, p);
+}
+
+static void test_two_large_writes_buffered(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testtwo_large_writes_buffered.dat";
+    apr_size_t len;
+    apr_size_t bytes_written;
+    apr_size_t bytes_read;
+    char *buf;
+    char *buf2;
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname,
+                       APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_BUFFERED,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file for writing", rv);
+
+    /* Test two consecutive large writes. */
+    len = 80000;
+    buf = apr_palloc(p, len);
+    memset(buf, 'a', len);
+
+    rv = apr_file_write_full(f, buf, len / 2, &bytes_written);
+    APR_ASSERT_SUCCESS(tc, "write to file", rv);
+    ABTS_INT_EQUAL(tc, (int)(len / 2), (int)bytes_written);
+
+    rv = apr_file_write_full(f, buf, len / 2, &bytes_written);
+    APR_ASSERT_SUCCESS(tc, "write to file", rv);
+    ABTS_INT_EQUAL(tc, (int)(len / 2), (int)bytes_written);
+
+    apr_file_close(f);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_READ,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file for reading", rv);
+
+    buf2 = apr_palloc(p, len + 1);
+    rv = apr_file_read_full(f, buf2, len + 1, &bytes_read);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_INT_EQUAL(tc, (int) len, (int)bytes_read);
+    ABTS_TRUE(tc, memcmp(buf, buf2, len) == 0);
+    apr_file_close(f);
+
+    apr_file_remove(fname, p);
+}
+
+static void test_small_and_large_writes_buffered(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testtwo_large_writes_buffered.dat";
+    apr_size_t len;
+    apr_size_t bytes_written;
+    apr_size_t bytes_read;
+    char *buf;
+    char *buf2;
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname,
+                       APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_BUFFERED,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file for writing", rv);
+
+    /* Test small write followed by a large write. */
+    len = 80000;
+    buf = apr_palloc(p, len);
+    memset(buf, 'a', len);
+
+    rv = apr_file_write_full(f, buf, 5, &bytes_written);
+    APR_ASSERT_SUCCESS(tc, "write to file", rv);
+    ABTS_INT_EQUAL(tc, 5, (int)bytes_written);
+
+    rv = apr_file_write_full(f, buf, len - 5, &bytes_written);
+    APR_ASSERT_SUCCESS(tc, "write to file", rv);
+    ABTS_INT_EQUAL(tc, (int)(len - 5), (int)bytes_written);
+
+    apr_file_close(f);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_READ,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file for reading", rv);
+
+    buf2 = apr_palloc(p, len + 1);
+    rv = apr_file_read_full(f, buf2, len + 1, &bytes_read);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_INT_EQUAL(tc, (int) len, (int)bytes_read);
+    ABTS_TRUE(tc, memcmp(buf, buf2, len) == 0);
+    apr_file_close(f);
+
+    apr_file_remove(fname, p);
+}
+
+static void test_write_buffered_spanning_over_bufsize(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testwrite_buffered_spanning_over_bufsize.dat";
+    apr_size_t len;
+    apr_size_t bytes_written;
+    apr_size_t bytes_read;
+    char *buf;
+    char *buf2;
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname,
+                       APR_FOPEN_CREATE | APR_FOPEN_WRITE | APR_FOPEN_BUFFERED,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file for writing", rv);
+
+    /* Test three writes than span over the default buffer size. */
+    len = APR_BUFFERSIZE + 1;
+    buf = apr_palloc(p, len);
+    memset(buf, 'a', len);
+
+    rv = apr_file_write_full(f, buf, APR_BUFFERSIZE - 1, &bytes_written);
+    APR_ASSERT_SUCCESS(tc, "write to file", rv);
+    ABTS_INT_EQUAL(tc, APR_BUFFERSIZE - 1, (int)bytes_written);
+
+    rv = apr_file_write_full(f, buf, 2, &bytes_written);
+    APR_ASSERT_SUCCESS(tc, "write to file", rv);
+    ABTS_INT_EQUAL(tc, 2, (int)bytes_written);
+
+    apr_file_close(f);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_READ,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open test file for reading", rv);
+
+    buf2 = apr_palloc(p, len + 1);
+    rv = apr_file_read_full(f, buf2, len + 1, &bytes_read);
+    ABTS_INT_EQUAL(tc, APR_EOF, rv);
+    ABTS_INT_EQUAL(tc, (int)len, (int)bytes_read);
+    ABTS_TRUE(tc, memcmp(buf, buf2, len) == 0);
+    apr_file_close(f);
+
+    apr_file_remove(fname, p);
+}
+
 abts_suite *testfile(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -1741,6 +1923,10 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_atomic_append, NULL);
     abts_run_test(suite, test_append_locked, NULL);
     abts_run_test(suite, test_append_read, NULL);
+    abts_run_test(suite, test_large_write_buffered, NULL);
+    abts_run_test(suite, test_two_large_writes_buffered, NULL);
+    abts_run_test(suite, test_small_and_large_writes_buffered, NULL);
+    abts_run_test(suite, test_write_buffered_spanning_over_bufsize, NULL);
 
     return suite;
 }
