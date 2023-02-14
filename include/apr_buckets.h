@@ -620,16 +620,16 @@ typedef struct apr_bucket_file apr_bucket_file;
 struct apr_bucket_file {
     /** Number of buckets using this memory */
     apr_bucket_refcount  refcount;
-    /** The file this bucket refers to */
-    apr_file_t *fd;
-    /** The pool into which any needed structures should
-     *  be created while reading from this file bucket */
-    apr_pool_t *readpool;
 #if APR_HAS_MMAP
     /** Whether this bucket should be memory-mapped if
      *  a caller tries to read from it */
     int can_mmap;
 #endif /* APR_HAS_MMAP */
+    /** The file this bucket refers to */
+    apr_file_t *fd;
+    /** The pool into which any needed structures should
+     *  be created while reading from this file bucket */
+    apr_pool_t *readpool;
     /** File read block size */
     apr_size_t read_size;
 };
