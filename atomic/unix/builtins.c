@@ -18,10 +18,11 @@
 
 #ifdef USE_ATOMICS_BUILTINS
 
-#if defined(__arm__) || defined(__powerpc__) || defined(__powerpc64__)
-#define WEAK_MEMORY_ORDERING 1
-#else
+#if defined(__i386__) || defined(__x86_64__) \
+    || defined(__s390__) || defined(__s390x__)
 #define WEAK_MEMORY_ORDERING 0
+#else
+#define WEAK_MEMORY_ORDERING 1
 #endif
 
 APR_DECLARE(apr_status_t) apr_atomic_init(apr_pool_t *p)

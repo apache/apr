@@ -18,17 +18,18 @@
 
 #ifdef USE_ATOMICS_BUILTINS64
 
-#if defined(__arm__) || defined(__powerpc__) || defined(__powerpc64__)
-#define WEAK_MEMORY_ORDERING 1
-#else
+#if defined(__i386__) || defined(__x86_64__) \
+    || defined(__s390__) || defined(__s390x__)
 #define WEAK_MEMORY_ORDERING 0
+#else
+#define WEAK_MEMORY_ORDERING 1
 #endif
 
 APR_DECLARE(apr_uint64_t) apr_atomic_read64(volatile apr_uint64_t *mem)
 {
 #if HAVE__ATOMIC_BUILTINS64
     return __atomic_load_n(mem, __ATOMIC_SEQ_CST);
-#elif WEAK_MEMORY_ORDERING
+#elif WEAK_MEMORY_ORDERING || APR_SIZEOF_VOIDP < 8
     /* No __sync_load() available => apr_atomic_add64(mem, 0) */
     return __sync_fetch_and_add(mem, 0);
 #else
@@ -40,7 +41,7 @@ APR_DECLARE(void) apr_atomic_set64(volatile apr_uint64_t *mem, apr_uint64_t val)
 {
 #if HAVE__ATOMIC_BUILTINS64
     __atomic_store_n(mem, val, __ATOMIC_SEQ_CST);
-#elif WEAK_MEMORY_ORDERING
+#elif WEAK_MEMORY_ORDERING || APR_SIZEOF_VOIDP < 8
     /* No __sync_store() available => apr_atomic_xchg64(mem, val) */
     __sync_synchronize();
     __sync_lock_test_and_set(mem, val);
