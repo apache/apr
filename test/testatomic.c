@@ -682,6 +682,9 @@ static void test_atomics_threaded64(abts_case *tc, void *data)
     pthread_setconcurrency(8);
 #endif
 
+    mutex_locks64 = 0;
+    apr_atomic_set64(&atomic_ops64, 0);
+
     rv = apr_thread_mutex_create(&thread_lock64, APR_THREAD_MUTEX_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "Could not create lock", rv);
 

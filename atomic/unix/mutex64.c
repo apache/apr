@@ -96,7 +96,14 @@ apr_status_t apr__atomic_generic64_init(apr_pool_t *p)
 
 APR_DECLARE(apr_uint64_t) apr_atomic_read64(volatile apr_uint64_t *mem)
 {
-    return *mem;
+    apr_uint64_t cur_value;
+    DECLARE_MUTEX_LOCKED(mutex, mem);
+
+    cur_value = *mem;
+
+    MUTEX_UNLOCK(mutex);
+
+    return cur_value;
 }
 
 APR_DECLARE(void) apr_atomic_set64(volatile apr_uint64_t *mem, apr_uint64_t val)
