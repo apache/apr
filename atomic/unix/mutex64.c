@@ -96,17 +96,6 @@ apr_status_t apr__atomic_generic64_init(apr_pool_t *p)
 
 APR_DECLARE(apr_uint64_t) apr_atomic_read64(volatile apr_uint64_t *mem)
 {
-    /* On 32bit CPUs this loads with two instructions (tearing),
-     * so a lock is needed to ensure atomicity.
-     *
-     * APR_SIZEOF_VOIDP is probably not the right check for 32 vs 64 bits CPUs
-     * but it spares an (hardly-)exhaustive list of supported CPUs (and using
-     * assembly). If APR_SIZEOF_VOIDP==4 means that the compiler generates
-     * 32bit instructions (-m32 or whatever) then it's the right check though.
-     */
-#if APR_SIZEOF_VOIDP >= 8
-    return *mem;
-#else
     apr_uint64_t cur_value;
     DECLARE_MUTEX_LOCKED(mutex, mem);
 
@@ -115,7 +104,6 @@ APR_DECLARE(apr_uint64_t) apr_atomic_read64(volatile apr_uint64_t *mem)
     MUTEX_UNLOCK(mutex);
 
     return cur_value;
-#endif
 }
 
 APR_DECLARE(void) apr_atomic_set64(volatile apr_uint64_t *mem, apr_uint64_t val)
