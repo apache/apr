@@ -188,12 +188,12 @@ struct apr_finfo_t {
     apr_uid_t user;
     /** The group id that owns the file */
     apr_gid_t group;
+    /** The number of hard links to the file. */
+    apr_int32_t nlink;
     /** The inode of the file. */
     apr_ino_t inode;
     /** The id of the device the file is on. */
     apr_dev_t device;
-    /** The number of hard links to the file. */
-    apr_int32_t nlink;
     /** The size of the file */
     apr_off_t size;
     /** The storage size consumed by the file */
