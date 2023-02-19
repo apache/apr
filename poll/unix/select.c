@@ -188,7 +188,6 @@ struct apr_pollset_private_t
     int maxfd;
     apr_pollfd_t *query_set;
     apr_pollfd_t *result_set;
-    apr_uint32_t flags;
 #ifdef NETWARE
     int set_type;
 #endif
