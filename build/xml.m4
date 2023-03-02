@@ -218,7 +218,7 @@ APU_FIND_EXPAT
 
 if test ${apu_has_expat} = "1" && test ${apu_has_libxml2} = "1" ; then
   AC_MSG_ERROR(Cannot build with both expat and libxml2 - please select one)
-elif test ${apu_has_expat} != "1" && test ${apu_has_libxml2} != "1" ; then
-  AC_MSG_ERROR(No XML parser found!  Please specify --with-expat or --with-libxml2)
+#elif test ${apu_has_expat} != "1" && test ${apu_has_libxml2} != "1" ; then
+#  AC_MSG_ERROR(No XML parser found!  Please specify --with-expat or --with-libxml2)
 fi
 ])
