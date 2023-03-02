@@ -240,50 +240,52 @@ void abts_log_message(const char *fmt, ...)
     }
 }
 
-void abts_int_equal(abts_case *tc, const int expected, const int actual, int lineno)
-{
-    update_status();
-    if (tc->failed) return;
-
-    if (expected == actual) return;
-
-    tc->failed = TRUE;
-    if (verbose) {
-        fprintf(stderr, "Line %d: expected <%d>, but saw <%d>\n", lineno, expected, actual);
-        fflush(stderr);
-    }
+#define IMPL_abts_T_equal(T, NAME, FMT, CAST) \
+void abts_##NAME##_equal(abts_case *tc, const T expected, const T actual, int lineno) \
+{ \
+    update_status(); \
+    if (tc->failed) return; \
+    \
+    if (expected == actual) return; \
+    \
+    tc->failed = TRUE; \
+    if (verbose) { \
+        fprintf(stderr, "Line %d: expected <%" FMT ">, but saw <%" FMT ">\n", \
+                lineno, CAST expected, CAST actual); \
+        fflush(stderr); \
+    } \
 }
+IMPL_abts_T_equal(int,                int,    "d",   (int))
+IMPL_abts_T_equal(unsigned int,       uint,   "u",   (unsigned int))
+IMPL_abts_T_equal(long,               long,   "ld",  (long))
+IMPL_abts_T_equal(unsigned long,      ulong,  "lu",  (unsigned long))
+IMPL_abts_T_equal(long long,          llong,  "lld", (long long))
+IMPL_abts_T_equal(unsigned long long, ullong, "llu", (unsigned long long))
+IMPL_abts_T_equal(size_t,             size,   "lu",  (unsigned long))
 
-void abts_int_nequal(abts_case *tc, const int expected, const int actual, int lineno)
-{
-    update_status();
-    if (tc->failed) return;
-
-    if (expected != actual) return;
-
-    tc->failed = TRUE;
-    if (verbose) {
-        fprintf(stderr, "Line %d: expected something other than <%d>, but saw <%d>\n",
-                lineno, expected, actual);
-        fflush(stderr);
-    }
+#define IMPL_abts_T_nequal(T, NAME, FMT, CAST) \
+void abts_##NAME##_nequal(abts_case *tc, const T expected, const T actual, int lineno) \
+{ \
+    update_status(); \
+    if (tc->failed) return; \
+    \
+    if (expected != actual) return; \
+    \
+    tc->failed = TRUE; \
+    if (verbose) { \
+        fprintf(stderr, "Line %d: expected something other than <%" FMT ">, " \
+                "but saw <%" FMT ">\n", \
+                lineno, CAST expected, CAST actual); \
+        fflush(stderr); \
+    } \
 }
-
-void abts_size_equal(abts_case *tc, size_t expected, size_t actual, int lineno)
-{
-    update_status();
-    if (tc->failed) return;
-
-    if (expected == actual) return;
-
-    tc->failed = TRUE;
-    if (verbose) {
-        /* Note that the comparison is type-exact, reporting must be a best-fit */
-        fprintf(stderr, "Line %d: expected %lu, but saw %lu\n", lineno, 
-                (unsigned long)expected, (unsigned long)actual);
-        fflush(stderr);
-    }
-}
+IMPL_abts_T_nequal(int,                int,    "d",   (int))
+IMPL_abts_T_nequal(unsigned int,       uint,   "u",   (unsigned int))
+IMPL_abts_T_nequal(long,               long,   "ld",  (long))
+IMPL_abts_T_nequal(unsigned long,      ulong,  "lu",  (unsigned long))
+IMPL_abts_T_nequal(long long,          llong,  "lld", (long long))
+IMPL_abts_T_nequal(unsigned long long, ullong, "llu", (unsigned long long))
+IMPL_abts_T_nequal(size_t,             size,   "lu",  (unsigned long))
 
 void abts_str_equal(abts_case *tc, const char *expected, const char *actual, int lineno)
 {
