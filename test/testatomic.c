@@ -356,10 +356,18 @@ void *APR_THREAD_FUNC thread_func_atomic64(apr_thread_t *thd, void *data);
 
 apr_thread_mutex_t *thread_lock;
 apr_thread_mutex_t *thread_lock64;
-volatile apr_uint32_t mutex_locks = 0;
-volatile apr_uint64_t mutex_locks64 = 0;
-volatile apr_uint32_t atomic_ops = 0;
-volatile apr_uint64_t atomic_ops64 = 0;
+apr_uint32_t mutex_locks = 0;
+apr_uint64_t mutex_locks64 = 0;
+apr_uint32_t atomic_ops = 0;
+apr_uint64_t atomic_ops64 = 0;
+#ifndef CACHELINE_SIZE
+#define CACHELINE_SIZE 64
+#endif
+struct {
+    char pad[CACHELINE_SIZE - 5];
+    apr_uint64_t ops64;
+} atomic_pad __attribute__((aligned(CACHELINE_SIZE)));
+
 apr_status_t exit_ret_val = 123; /* just some made up number to check on later */
 
 #define NUM_THREADS 40
@@ -639,13 +647,14 @@ void *APR_THREAD_FUNC thread_func_mutex64(apr_thread_t *thd, void *data)
 
 void *APR_THREAD_FUNC thread_func_atomic64(apr_thread_t *thd, void *data)
 {
+    apr_uint64_t *ops64 = data;
     int i;
 
     for (i = 0; i < NUM_ITERATIONS ; i++) {
-        apr_atomic_inc64(&atomic_ops64);
-        apr_atomic_add64(&atomic_ops64, 2);
-        apr_atomic_dec64(&atomic_ops64);
-        apr_atomic_dec64(&atomic_ops64);
+        apr_atomic_inc64(ops64);
+        apr_atomic_add64(ops64, 2);
+        apr_atomic_dec64(ops64);
+        apr_atomic_dec64(ops64);
     }
     apr_thread_exit(thd, exit_ret_val);
     return NULL;
@@ -653,6 +662,7 @@ void *APR_THREAD_FUNC thread_func_atomic64(apr_thread_t *thd, void *data)
 
 static void test_atomics_threaded64(abts_case *tc, void *data)
 {
+    apr_uint64_t *ops64 = data;
     apr_thread_t *t1[NUM_THREADS];
     apr_thread_t *t2[NUM_THREADS];
     apr_status_t rv;
@@ -662,13 +672,16 @@ static void test_atomics_threaded64(abts_case *tc, void *data)
     pthread_setconcurrency(8);
 #endif
 
+    mutex_locks64 = 0;
+    apr_atomic_set64(ops64, 0);
+
     rv = apr_thread_mutex_create(&thread_lock64, APR_THREAD_MUTEX_DEFAULT, p);
     APR_ASSERT_SUCCESS(tc, "Could not create lock", rv);
 
     for (i = 0; i < NUM_THREADS; i++) {
         apr_status_t r1, r2;
         r1 = apr_thread_create(&t1[i], NULL, thread_func_mutex64, NULL, p);
-        r2 = apr_thread_create(&t2[i], NULL, thread_func_atomic64, NULL, p);
+        r2 = apr_thread_create(&t2[i], NULL, thread_func_atomic64, ops64, p);
         ABTS_ASSERT(tc, "Failed creating threads", !r1 && !r2);
     }
 
@@ -683,7 +696,7 @@ static void test_atomics_threaded64(abts_case *tc, void *data)
 
     ABTS_ULLONG_EQUAL(tc, NUM_THREADS * NUM_ITERATIONS, mutex_locks64);
     ABTS_ULLONG_EQUAL(tc, NUM_THREADS * NUM_ITERATIONS,
-                      apr_atomic_read64(&atomic_ops64));
+                      apr_atomic_read64(ops64));
 
     rv = apr_thread_mutex_destroy(thread_lock64);
     ABTS_ASSERT(tc, "Failed creating threads", rv == APR_SUCCESS);
@@ -878,11 +891,12 @@ static void test_atomics_busyloop_threaded64(abts_case *tc, void *data)
 
 static void *APR_THREAD_FUNC test_func_set64(apr_thread_t *thd, void *data)
 {
+    apr_uint64_t *ops64 = data;
     int i;
 
     for (i = 0; i < 1000 * 1000; i++) {
-        apr_atomic_set64(&atomic_ops64, APR_UINT64_C(0x1111222233334444));
-        apr_atomic_set64(&atomic_ops64, APR_UINT64_C(0x4444555566667777));
+        apr_atomic_set64(ops64, APR_UINT64_C(0x1111222233334444));
+        apr_atomic_set64(ops64, APR_UINT64_C(0x4444555566667777));
     }
 
     apr_thread_exit(thd, APR_SUCCESS);
@@ -891,16 +905,17 @@ static void *APR_THREAD_FUNC test_func_set64(apr_thread_t *thd, void *data)
 
 static void test_atomics_threaded_setread64(abts_case *tc, void *data)
 {
-    apr_status_t retval;
+    apr_uint64_t *ops64 = data;
     apr_thread_t *thread;
+    apr_status_t retval;
     int i;
 
-    apr_atomic_set64(&atomic_ops64, APR_UINT64_C(0x1111222233334444));
+    apr_atomic_set64(ops64, APR_UINT64_C(0x1111222233334444));
 
-    apr_thread_create(&thread, NULL, test_func_set64, NULL, p);
+    apr_thread_create(&thread, NULL, test_func_set64, ops64, p);
 
     for (i = 0; i < 1000 * 1000 * 2; i++) {
-        apr_uint64_t val = apr_atomic_read64(&atomic_ops64);
+        apr_uint64_t val = apr_atomic_read64(ops64);
 
         if (val != APR_UINT64_C(0x1111222233334444) &&
             val != APR_UINT64_C(0x4444555566667777))
@@ -950,10 +965,12 @@ abts_suite *testatomic(abts_suite *suite)
 
 #if APR_HAS_THREADS
     abts_run_test(suite, test_atomics_threaded, NULL);
-    abts_run_test(suite, test_atomics_threaded64, NULL);
+    abts_run_test(suite, test_atomics_threaded64, &atomic_ops64);
+    abts_run_test(suite, test_atomics_threaded64, &atomic_pad.ops64);
     abts_run_test(suite, test_atomics_busyloop_threaded, NULL);
     abts_run_test(suite, test_atomics_busyloop_threaded64, NULL);
-    abts_run_test(suite, test_atomics_threaded_setread64, NULL);
+    abts_run_test(suite, test_atomics_threaded_setread64, &atomic_ops64);
+    abts_run_test(suite, test_atomics_threaded_setread64, &atomic_pad.ops64);
 #endif
 
     return suite;
