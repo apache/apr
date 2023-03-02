@@ -23,9 +23,7 @@
 const struct testlist {
     abts_suite *(*func)(abts_suite *suite);
 } alltests[] = {
-    {testatomic}
-#if 0
-    ,
+    {testatomic},
     {testdir},
     {testdso},
     {testdup},
@@ -96,7 +94,6 @@ const struct testlist {
     {testsiphash},
     {testjson},
     {testjose}
-#endif
 };
 
 #endif /* APR_TEST_INCLUDES */

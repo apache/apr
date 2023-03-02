@@ -566,9 +566,6 @@ if test "$ap_cv_atomic_builtins" = "yes" -o "$ap_cv__atomic_builtins" = "yes"; t
     if test "$ap_cv__atomic_builtins" = "yes"; then
         AC_DEFINE(HAVE__ATOMIC_BUILTINS, 1, [Define if compiler provides 32bit __atomic builtins])
     fi
-    has_atomic_builtins=yes
-else
-    has_atomic_builtins=no
 fi
 
 AC_CACHE_CHECK([whether the compiler provides 64bit atomic builtins], [ap_cv_atomic_builtins64],
@@ -832,15 +829,10 @@ AC_ARG_ENABLE(nonportable-atomics,
    force_generic_atomics=yes
  fi
 ],
-[force_generic_atomics=no
-case $host_cpu in
-   i[[34]]86) force_generic_atomics=yes;;
-   i[[56]]86)
-      if test $has_atomic_builtins != yes; then
-        force_generic_atomics=yes
-      fi
-      ;;
-   *) case $host in
+[case $host_cpu in
+   i[[456]]86) force_generic_atomics=yes ;;
+   *) force_generic_atomics=no
+      case $host in
          *solaris2.10*)
             AC_TRY_COMPILE(
                 [#include <atomic.h>],
@@ -855,6 +847,7 @@ case $host_cpu in
       ;;
 esac
 ])
+
 if test $force_generic_atomics = yes; then
    AC_DEFINE([USE_ATOMICS_GENERIC], 1,
              [Define if use of generic atomics is requested])
