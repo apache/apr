@@ -30,25 +30,6 @@
 
 #if APR_HAS_SHARED_MEMORY
 
-static int msgwait(int sleep_sec, int first_box, int last_box)
-{
-    int i;
-    int recvd = 0;
-    apr_time_t start = apr_time_now();
-    apr_interval_time_t sleep_duration = apr_time_from_sec(sleep_sec);
-    while (apr_time_now() - start < sleep_duration) {
-        for (i = first_box; i < last_box; i++) {
-            if (boxes[i].msgavail && !strcmp(boxes[i].msg, MSG)) {
-                recvd++;
-                boxes[i].msgavail = 0; /* reset back to 0 */
-                memset(boxes[i].msg, 0, 1024);
-            }
-        }
-        apr_sleep(apr_time_from_sec(1));
-    }
-    return recvd;
-}
-
 int main(void)
 {
     apr_status_t rv;
@@ -70,7 +51,7 @@ int main(void)
     boxes = apr_shm_baseaddr_get(shm);
 
     /* consume messages on all of the boxes */
-    recvd = msgwait(30, 0, N_BOXES); /* wait for 30 seconds for messages */
+    recvd = msgwait(MSG, N_MESSAGES, 30, 1);
 
     rv = apr_shm_detach(shm);
     if (rv != APR_SUCCESS) {
