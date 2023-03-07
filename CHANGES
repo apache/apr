@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.3
 
+  *) configure: Add --enable-sysv-shm to use SysV shared memory (shmget) if
+     available. [Ruediger Pluem]
+
   *) apr_socket_sendfile: Use WSAIoctl() to get TransmitFile function
      pointer on Windows. [Ivan Zhakov]
 
