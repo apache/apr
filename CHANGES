@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) configure: Add --enable-sysv-shm to use SysV shared memory (shmget) if
+     available. [Ruediger Pluem]
+
   *) configure: Prefer posix name-based shared memory over SysV IPC.
      [Jim Jagielski]
 
