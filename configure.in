@@ -140,6 +140,18 @@ fi
 
 AC_SUBST(APR_CONFIG_LOCATION)
 
+if test "x$host_alias" != x; then
+  if test "x$build_alias" = x; then
+    APR_CROSS_COMPILING=maybe
+  elif test "x$build_alias" != "x$host_alias"; then
+    APR_CROSS_COMPILING=yes
+  fi
+else
+    APR_CROSS_COMPILING=no
+fi
+
+AC_SUBST(APR_CROSS_COMPILING)
+
 # Libtool might need this symbol -- it must point to the location of
 # the generated libtool script (not necessarily the "top" build dir).
 #
