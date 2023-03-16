@@ -319,13 +319,18 @@ dnl Note: Only detects two-arg version
 AC_DEFUN([APR_CHECK_PTHREAD_SETNAME_NP], [
 AC_CACHE_CHECK([for pthread_setname_np support],
 [apr_cv_pthread_setname_np], [
-AC_TRY_COMPILE([
+AC_TRY_RUN([
 #include <pthread.h>
-],[
-pthread_t td = pthread_self();
-pthread_setname_np(td, "name");
+
+int main(int argc, const char *argv[])
+{
+    pthread_t td = pthread_self();
+    return pthread_setname_np(td, "name");
+}
 ],[
     apr_cv_pthread_setname_np=yes
+],[
+    apr_cv_pthread_setname_np=no
 ],[
     apr_cv_pthread_setname_np=no
 ])])
