@@ -58,5 +58,7 @@ jobs:
       run: ./configure ${{ matrix.config }}
     - name: make
       run: make $MARGS
-    - name: make check
+    - name: install
+      run: make install
+    - name: check
       run: make check
