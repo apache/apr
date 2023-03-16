@@ -32,6 +32,10 @@
 
 #if APU_HAVE_CRYPTO
 
+#ifndef OPENSSL_API_COMPAT
+#define OPENSSL_API_COMPAT 0x10100000L /* for ENGINE API */
+#endif
+
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/engine.h>
@@ -40,24 +44,61 @@
 #include <openssl/conf.h>
 #include <openssl/comp.h>
 #include <openssl/ssl.h>
+#include <openssl/opensslv.h>
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+#include <openssl/macros.h>
+#include <openssl/core_names.h>
+#endif
 
-#define LOG_PREFIX "apr_crypto_openssl: "
-
-#ifndef APR_USE_OPENSSL_PRE_1_1_API
 #if defined(LIBRESSL_VERSION_NUMBER)
+
 /* LibreSSL declares OPENSSL_VERSION_NUMBER == 2.0 but does not necessarily
  * include changes from OpenSSL >= 1.1 (new functions, macros, * deprecations,
  * ...), so we have to work around this...
  */
-#define APR_USE_OPENSSL_PRE_1_0_API     (0)
-#define APR_USE_OPENSSL_PRE_1_1_API     (LIBRESSL_VERSION_NUMBER < 0x2070000f)
-#define APR_USE_OPENSSL_PRE_1_1_1_API   (1)
+#define APR_USE_OPENSSL_PRE_1_0_API     0
+#if LIBRESSL_VERSION_NUMBER < 0x2070000f
+#define APR_USE_OPENSSL_PRE_1_1_API     1
+#else
+#define APR_USE_OPENSSL_PRE_1_1_API     0
+#endif
+/* TODO: keep up with LibreSSL latest versions */
+#define APR_USE_OPENSSL_PRE_1_1_1_API   1
+#define APR_USE_OPENSSL_PRE_3_0_API     1
+
 #else  /* defined(LIBRESSL_VERSION_NUMBER) */
-#define APR_USE_OPENSSL_PRE_1_0_API     (OPENSSL_VERSION_NUMBER < 0x10000000L)
-#define APR_USE_OPENSSL_PRE_1_1_API     (OPENSSL_VERSION_NUMBER < 0x10100000L)
-#define APR_USE_OPENSSL_PRE_1_1_1_API   (OPENSSL_VERSION_NUMBER < 0x10101000L)
+
+#if OPENSSL_VERSION_NUMBER < 0x10000000L
+#define APR_USE_OPENSSL_PRE_1_0_API     1
+#else
+#define APR_USE_OPENSSL_PRE_1_0_API     0
+#endif
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#define APR_USE_OPENSSL_PRE_1_1_API     1
+#else
+#define APR_USE_OPENSSL_PRE_1_1_API     0
+#endif
+#if OPENSSL_VERSION_NUMBER < 0x10101000L
+#define APR_USE_OPENSSL_PRE_1_1_1_API   1
+#else
+#define APR_USE_OPENSSL_PRE_1_1_1_API   0
+#endif
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
+#define APR_USE_OPENSSL_PRE_3_0_API     1
+#else
+#define APR_USE_OPENSSL_PRE_3_0_API     0
+#endif
+
 #endif /* defined(LIBRESSL_VERSION_NUMBER) */
-#endif /* ndef APR_USE_OPENSSL_PRE_1_1_API */
+
+#if APR_USE_OPENSSL_PRE_3_0_API \
+    || (defined(OPENSSL_API_LEVEL) && OPENSSL_API_LEVEL < 30000)
+#define APR_USE_OPENSSL_ENGINE_API 1
+#else
+#define APR_USE_OPENSSL_ENGINE_API 0
+#endif
+
+#define LOG_PREFIX "apr_crypto_openssl: "
 
 struct apr_crypto_t {
     apr_pool_t *pool;
@@ -70,7 +111,11 @@ struct apr_crypto_t {
 };
 
 struct apr_crypto_config_t {
+#if APR_USE_OPENSSL_ENGINE_API
     ENGINE *engine;
+#else
+    void *engine;
+#endif
 };
 
 struct apr_crypto_key_t {
@@ -79,8 +124,11 @@ struct apr_crypto_key_t {
     const apr_crypto_t *f;
     const apr_crypto_key_rec_t *rec;
     const EVP_CIPHER *cipher;
-    const EVP_MD *hmac;
+    const EVP_MD *md;
     EVP_PKEY *pkey;
+#if !APR_USE_OPENSSL_PRE_3_0_API
+    EVP_MAC *mac;
+#endif
     unsigned char *key;
     int keyLen;
     int doPad;
@@ -93,7 +141,6 @@ struct apr_crypto_block_t {
     const apr_crypto_t *f;
     const apr_crypto_key_t *key;
     EVP_CIPHER_CTX *cipherCtx;
-    int initialised;
     int ivSize;
     int blockSize;
     int doPad;
@@ -106,7 +153,9 @@ struct apr_crypto_digest_t {
     const apr_crypto_key_t *key;
     apr_crypto_digest_rec_t *rec;
     EVP_MD_CTX *mdCtx;
-    int initialised;
+#if !APR_USE_OPENSSL_PRE_3_0_API
+    EVP_MAC_CTX *macCtx;
+#endif
     int digestSize;
 };
 
@@ -253,6 +302,9 @@ static apr_status_t crypto_key_cleanup(apr_crypto_key_t *key)
     if (key->pkey) {
         EVP_PKEY_free(key->pkey);
     }
+    if (key->mac) {
+        EVP_MAC_free(key->mac);
+    }
 
     return APR_SUCCESS;
 }
@@ -272,17 +324,14 @@ static apr_status_t crypto_key_cleanup_helper(void *data)
 static apr_status_t crypto_block_cleanup(apr_crypto_block_t *ctx)
 {
 
-    if (ctx->initialised) {
-        if (ctx->cipherCtx) {
+    if (ctx->cipherCtx) {
 #if APR_USE_OPENSSL_PRE_1_1_API
-            EVP_CIPHER_CTX_cleanup(ctx->cipherCtx);
+        EVP_CIPHER_CTX_cleanup(ctx->cipherCtx);
 #else
-            EVP_CIPHER_CTX_reset(ctx->cipherCtx);
-            EVP_CIPHER_CTX_free(ctx->cipherCtx);
+        EVP_CIPHER_CTX_reset(ctx->cipherCtx);
+        EVP_CIPHER_CTX_free(ctx->cipherCtx);
 #endif
-            ctx->cipherCtx = NULL;
-        }
-        ctx->initialised = 0;
+        ctx->cipherCtx = NULL;
     }
 
     return APR_SUCCESS;
@@ -303,13 +352,13 @@ static apr_status_t crypto_block_cleanup_helper(void *data)
  */
 static apr_status_t crypto_digest_cleanup(apr_crypto_digest_t *ctx)
 {
-
-    if (ctx->initialised) {
-        if (ctx->mdCtx) {
-            EVP_MD_CTX_free(ctx->mdCtx);
-            ctx->mdCtx = NULL;
-        }
-        ctx->initialised = 0;
+    if (ctx->mdCtx) {
+        EVP_MD_CTX_free(ctx->mdCtx);
+        ctx->mdCtx = NULL;
+    }
+    if (ctx->macCtx) {
+        EVP_MAC_CTX_free(ctx->macCtx);
+        ctx->macCtx = NULL;
     }
 
     return APR_SUCCESS;
@@ -330,12 +379,13 @@ static apr_status_t crypto_digest_cleanup_helper(void *data)
  */
 static apr_status_t crypto_cleanup(apr_crypto_t *f)
 {
-
+#if APR_USE_OPENSSL_ENGINE_API
     if (f->config->engine) {
         ENGINE_finish(f->config->engine);
         ENGINE_free(f->config->engine);
         f->config->engine = NULL;
     }
+#endif
     return APR_SUCCESS;
 
 }
@@ -362,8 +412,8 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
         const apr_crypto_driver_t *provider, const char *params,
         apr_pool_t *pool)
 {
+    apr_crypto_t *f;
     apr_crypto_config_t *config = NULL;
-    apr_crypto_t *f = apr_pcalloc(pool, sizeof(apr_crypto_t));
 
     const char *engine = NULL;
 
@@ -381,6 +431,16 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
     char *elt;
     int i = 0, j;
     apr_status_t status;
+
+    f = apr_pcalloc(pool, sizeof(apr_crypto_t));
+    if (!f) {
+        return APR_ENOMEM;
+    }
+
+    config = f->config = apr_pcalloc(pool, sizeof(apr_crypto_config_t));
+    if (!config) {
+        return APR_ENOMEM;
+    }
 
     if (params) {
         if (APR_SUCCESS != (status = apr_tokenize_to_argv(params, &elts, pool))) {
@@ -414,16 +474,28 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
         engine = fields[0].value;
     }
 
-    if (!f) {
-        return APR_ENOMEM;
+    /* The default/builtin "openssl" engine is the same as NULL though with
+     * openssl-3+ it's called something else, keep NULL for that name.
+     */
+    if (engine && strcasecmp(engine, "openssl") != 0) {
+#if APR_USE_OPENSSL_ENGINE_API
+        config->engine = ENGINE_by_id(engine);
+        if (!config->engine) {
+            return APR_ENOENGINE;
+        }
+        if (!ENGINE_init(config->engine)) {
+            ENGINE_free(config->engine);
+            config->engine = NULL;
+            return APR_EINITENGINE;
+        }
+#else
+        return APR_ENOTIMPL;
+#endif
     }
+
     *ff = f;
     f->pool = pool;
     f->provider = provider;
-    config = f->config = apr_pcalloc(pool, sizeof(apr_crypto_config_t));
-    if (!config) {
-        return APR_ENOMEM;
-    }
 
     f->result = apr_pcalloc(pool, sizeof(apu_err_t));
     if (!f->result) {
@@ -464,18 +536,6 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
 
     apr_pool_cleanup_register(pool, f, crypto_cleanup_helper,
             apr_pool_cleanup_null);
-
-    if (engine) {
-        config->engine = ENGINE_by_id(engine);
-        if (!config->engine) {
-            return APR_ENOENGINE;
-        }
-        if (!ENGINE_init(config->engine)) {
-            ENGINE_free(config->engine);
-            config->engine = NULL;
-            return APR_EINITENGINE;
-        }
-    }
 
     return APR_SUCCESS;
 
@@ -592,7 +652,6 @@ static apr_status_t crypto_cipher_mechanism(apr_crypto_key_t *key,
     if (!key->key) {
         return APR_ENOMEM;
     }
-    apr_crypto_clear(p, key->key, key->keyLen);
 
     return APR_SUCCESS;
 }
@@ -678,22 +737,22 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
 
         switch (rec->k.hash.digest) {
         case APR_CRYPTO_DIGEST_MD5:
-            key->hmac = EVP_md5();
+            key->md = EVP_md5();
             break;
         case APR_CRYPTO_DIGEST_SHA1:
-            key->hmac = EVP_sha1();
+            key->md = EVP_sha1();
             break;
         case APR_CRYPTO_DIGEST_SHA224:
-            key->hmac = EVP_sha224();
+            key->md = EVP_sha224();
             break;
         case APR_CRYPTO_DIGEST_SHA256:
-            key->hmac = EVP_sha256();
+            key->md = EVP_sha256();
             break;
         case APR_CRYPTO_DIGEST_SHA384:
-            key->hmac = EVP_sha384();
+            key->md = EVP_sha384();
             break;
         case APR_CRYPTO_DIGEST_SHA512:
-            key->hmac = EVP_sha512();
+            key->md = EVP_sha512();
             break;
         default:
             return APR_ENODIGEST;
@@ -701,84 +760,70 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
 
         break;
     }
-    case APR_CRYPTO_KTYPE_HMAC: {
-
-        apr_crypto_config_t *config = f->config;
-
-        /* create hmac key */
-        if (!(key->pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, config->engine,
-                rec->k.hmac.secret, rec->k.hmac.secretLen))) {
-            return APR_ENOKEY;
-        }
-
-        switch (rec->k.hmac.digest) {
-        case APR_CRYPTO_DIGEST_MD5:
-            key->hmac = EVP_md5();
-            break;
-        case APR_CRYPTO_DIGEST_SHA1:
-            key->hmac = EVP_sha1();
-            break;
-        case APR_CRYPTO_DIGEST_SHA224:
-            key->hmac = EVP_sha224();
-            break;
-        case APR_CRYPTO_DIGEST_SHA256:
-            key->hmac = EVP_sha256();
-            break;
-        case APR_CRYPTO_DIGEST_SHA384:
-            key->hmac = EVP_sha384();
-            break;
-        case APR_CRYPTO_DIGEST_SHA512:
-            key->hmac = EVP_sha512();
-            break;
-        default:
-            return APR_ENODIGEST;
-        }
-
-        break;
-    }
-
+    case APR_CRYPTO_KTYPE_HMAC:
     case APR_CRYPTO_KTYPE_CMAC: {
 
-#if !APR_USE_OPENSSL_PRE_1_1_1_API
-        apr_crypto_config_t *config = f->config;
-
-        /* decide on what cipher mechanism we will be using */
-        rv = crypto_cipher_mechanism(key, rec->type, rec->mode, rec->pad, p);
-        if (APR_SUCCESS != rv) {
-            return rv;
-        }
-
-        /* create cmac key */
-        if (!(key->pkey = EVP_PKEY_new_CMAC_key(config->engine,
-                rec->k.cmac.secret, rec->k.cmac.secretLen, key->cipher))) {
-            return APR_ENOKEY;
-        }
-
         switch (rec->k.hmac.digest) {
         case APR_CRYPTO_DIGEST_MD5:
-            key->hmac = EVP_md5();
+            key->md = EVP_md5();
             break;
         case APR_CRYPTO_DIGEST_SHA1:
-            key->hmac = EVP_sha1();
+            key->md = EVP_sha1();
             break;
         case APR_CRYPTO_DIGEST_SHA224:
-            key->hmac = EVP_sha224();
+            key->md = EVP_sha224();
             break;
         case APR_CRYPTO_DIGEST_SHA256:
-            key->hmac = EVP_sha256();
+            key->md = EVP_sha256();
             break;
         case APR_CRYPTO_DIGEST_SHA384:
-            key->hmac = EVP_sha384();
+            key->md = EVP_sha384();
             break;
         case APR_CRYPTO_DIGEST_SHA512:
-            key->hmac = EVP_sha512();
+            key->md = EVP_sha512();
             break;
         default:
             return APR_ENODIGEST;
         }
 
+        /* create hmac key */
+#if APR_USE_OPENSSL_PRE_3_0_API
+        if (rec->ktype == APR_CRYPTO_KTYPE_HMAC) {
+            apr_crypto_config_t *config = f->config;
+            key->pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC,
+                                             config->engine,
+                                             rec->k.hmac.secret,
+                                             rec->k.hmac.secretLen);
+        }
+        else {
+#if !APR_USE_OPENSSL_PRE_1_1_1_API
+            apr_crypto_config_t *config = f->config;
+            /* decide on what cipher mechanism we will be using */
+            rv = crypto_cipher_mechanism(key, rec->type, rec->mode, rec->pad, p);
+            if (APR_SUCCESS != rv) {
+                return rv;
+            }
+            key->pkey = EVP_PKEY_new_CMAC_key(config->engine,
+                                              rec->k.cmac.secret,
+                                              rec->k.cmac.secretLen,
+                                              key->cipher);
 #else
-        return APR_ENOTIMPL;
+            return APR_ENOTIMPL;
+#endif
+        }
+        if (!key->pkey) {
+            return APR_ENOKEY;
+        }
+#else
+        if (rec->ktype == APR_CRYPTO_KTYPE_HMAC) {
+            key->mac = EVP_MAC_fetch(NULL, "HMAC", NULL);
+        }
+        else {
+            key->mac = EVP_MAC_fetch(NULL, "CMAC", NULL);
+        }
+        if (!key->mac) {
+            return APR_ENOMEM;
+        }
 #endif
 
         break;
@@ -926,9 +971,11 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
     case APR_CRYPTO_KTYPE_SECRET: {
 
         /* create a new context for encryption */
-        if (!block->initialised) {
+        if (!block->cipherCtx) {
             block->cipherCtx = EVP_CIPHER_CTX_new();
-            block->initialised = 1;
+            if (!block->cipherCtx) {
+                return APR_ENOMEM;
+            }
         }
 
         /* generate an IV, if necessary */
@@ -942,7 +989,6 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
                 if (!usedIv) {
                     return APR_ENOMEM;
                 }
-                apr_crypto_clear(p, usedIv, key->ivSize);
                 if (!((RAND_status() == 1)
                         && (RAND_bytes(usedIv, key->ivSize) == 1))) {
                     return APR_ENOIV;
@@ -959,7 +1005,8 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
         if (!EVP_EncryptInit_ex(block->cipherCtx, key->cipher, config->engine,
                 key->key, usedIv)) {
 #else
-        if (!EVP_EncryptInit_ex(block->cipherCtx, key->cipher, config->engine, (unsigned char *) key->key, (unsigned char *) usedIv)) {
+        if (!EVP_EncryptInit_ex(block->cipherCtx, key->cipher, config->engine,
+                                (unsigned char *) key->key, (unsigned char *) usedIv)) {
 #endif
             return APR_EINIT;
         }
@@ -1023,11 +1070,10 @@ static apr_status_t crypto_block_encrypt(unsigned char **out,
 
         /* must we allocate the output buffer from a pool? */
         if (!*out) {
-            buffer = apr_palloc(block->pool, inlen + EVP_MAX_BLOCK_LENGTH);
+            buffer = apr_pcalloc(block->pool, inlen + EVP_MAX_BLOCK_LENGTH);
             if (!buffer) {
                 return APR_ENOMEM;
             }
-            apr_crypto_clear(block->pool, buffer, inlen + EVP_MAX_BLOCK_LENGTH);
             *out = buffer;
         }
 
@@ -1037,7 +1083,6 @@ static apr_status_t crypto_block_encrypt(unsigned char **out,
         if (!EVP_EncryptUpdate(block->cipherCtx, (*out), &outl,
                 (unsigned char *) in, inlen)) {
 #endif
-            crypto_block_cleanup(block);
             return APR_ECRYPT;
         }
         *outlen = outl;
@@ -1089,7 +1134,6 @@ static apr_status_t crypto_block_encrypt_finish(unsigned char *out,
         else {
             *outlen = len;
         }
-        crypto_block_cleanup(block);
 
         return rc;
 
@@ -1144,9 +1188,11 @@ static apr_status_t crypto_block_decrypt_init(apr_crypto_block_t **ctx,
     case APR_CRYPTO_KTYPE_SECRET: {
 
         /* create a new context for encryption */
-        if (!block->initialised) {
+        if (!block->cipherCtx) {
             block->cipherCtx = EVP_CIPHER_CTX_new();
-            block->initialised = 1;
+            if (!block->cipherCtx) {
+                return APR_ENOMEM;
+            }
         }
 
         /* generate an IV, if necessary */
@@ -1161,7 +1207,8 @@ static apr_status_t crypto_block_decrypt_init(apr_crypto_block_t **ctx,
         if (!EVP_DecryptInit_ex(block->cipherCtx, key->cipher, config->engine,
                 key->key, iv)) {
 #else
-            if (!EVP_DecryptInit_ex(block->cipherCtx, key->cipher, config->engine, (unsigned char *) key->key, (unsigned char *) iv)) {
+            if (!EVP_DecryptInit_ex(block->cipherCtx, key->cipher, config->engine,
+                                    (unsigned char *) key->key, (unsigned char *) iv)) {
 #endif
             return APR_EINIT;
         }
@@ -1225,11 +1272,10 @@ static apr_status_t crypto_block_decrypt(unsigned char **out,
 
         /* must we allocate the output buffer from a pool? */
         if (!(*out)) {
-            buffer = apr_palloc(block->pool, inlen + EVP_MAX_BLOCK_LENGTH);
+            buffer = apr_pcalloc(block->pool, inlen + EVP_MAX_BLOCK_LENGTH);
             if (!buffer) {
                 return APR_ENOMEM;
             }
-            apr_crypto_clear(block->pool, buffer, inlen + EVP_MAX_BLOCK_LENGTH);
             *out = buffer;
         }
 
@@ -1239,8 +1285,6 @@ static apr_status_t crypto_block_decrypt(unsigned char **out,
         if (!EVP_DecryptUpdate(block->cipherCtx, *out, &outl, (unsigned char *) in,
                 inlen)) {
 #endif
-            crypto_block_cleanup(block);
-
             return APR_ECRYPT;
         }
         *outlen = outl;
@@ -1292,7 +1336,6 @@ static apr_status_t crypto_block_decrypt_finish(unsigned char *out,
         else {
             *outlen = len;
         }
-        crypto_block_cleanup(block);
 
         return rc;
 
@@ -1323,22 +1366,19 @@ static apr_status_t crypto_digest_init(apr_crypto_digest_t **d,
     digest->key = key;
     digest->rec = rec;
 
-    /* create a new context for digest */
-    if (!digest->initialised) {
-        digest->mdCtx = EVP_MD_CTX_new();
-        digest->initialised = 1;
-    }
-
     apr_pool_cleanup_register(p, digest, crypto_digest_cleanup_helper,
             apr_pool_cleanup_null);
 
     switch (key->rec->ktype) {
 
     case APR_CRYPTO_KTYPE_HASH: {
-
-        if (1
-                != EVP_DigestInit_ex(digest->mdCtx, key->hmac,
-                        config->engine)) {
+        if (!digest->mdCtx) {
+            digest->mdCtx = EVP_MD_CTX_new();
+            if (!digest->mdCtx) {
+                return APR_ENOMEM;
+            }
+        }
+        if (!EVP_DigestInit_ex(digest->mdCtx, key->md, config->engine)) {
             return APR_EINIT;
         }
 
@@ -1346,11 +1386,45 @@ static apr_status_t crypto_digest_init(apr_crypto_digest_t **d,
     }
     case APR_CRYPTO_KTYPE_HMAC:
     case APR_CRYPTO_KTYPE_CMAC: {
-        if (1
-                != EVP_DigestSignInit(digest->mdCtx, NULL, key->hmac,
-                        config->engine, key->pkey)) {
+#if APR_USE_OPENSSL_PRE_3_0_API
+        if (!digest->mdCtx) {
+            digest->mdCtx = EVP_MD_CTX_new();
+            if (!digest->mdCtx) {
+                return APR_ENOMEM;
+            }
+        }
+        if (!EVP_DigestSignInit(digest->mdCtx, NULL, key->md,
+                                config->engine, key->pkey)) {
             return APR_EINIT;
         }
+#else
+        OSSL_PARAM params[2];
+        if (!digest->macCtx) {
+            digest->macCtx = EVP_MAC_CTX_new(key->mac);
+            if (!digest->macCtx) {
+                return APR_ENOMEM;
+            }
+        }
+        if (key->rec->ktype == APR_CRYPTO_KTYPE_HMAC) {
+            params[0] =
+                OSSL_PARAM_construct_utf8_string("digest",
+                                                 (char *)EVP_MD_name(key->md),
+                                                 0);
+        }
+        else {
+            params[0] =
+                OSSL_PARAM_construct_utf8_string("cipher",
+                                                 (char *)EVP_CIPHER_name(key->cipher),
+                                                 0);
+        }
+        params[1] = OSSL_PARAM_construct_end();
+        if (!EVP_MAC_init(digest->macCtx,
+                          key->rec->k.hmac.secret,
+                          key->rec->k.hmac.secretLen,
+                          params)) {
+            return APR_EINIT;
+        }
+#endif
         break;
     }
     default: {
@@ -1368,23 +1442,24 @@ static apr_status_t crypto_digest_update(apr_crypto_digest_t *digest,
     switch (digest->key->rec->ktype) {
 
     case APR_CRYPTO_KTYPE_HASH: {
-
-        if (1 != EVP_DigestUpdate(digest->mdCtx, in, inlen)) {
-            crypto_digest_cleanup(digest);
+        if (!EVP_DigestUpdate(digest->mdCtx, in, inlen)) {
             return APR_ECRYPT;
         }
 
         return APR_SUCCESS;
 
     }
-
     case APR_CRYPTO_KTYPE_HMAC:
     case APR_CRYPTO_KTYPE_CMAC: {
-
-        if (1 != EVP_DigestSignUpdate(digest->mdCtx, in, inlen)) {
-            crypto_digest_cleanup(digest);
+#if APR_USE_OPENSSL_PRE_3_0_API
+        if (!EVP_DigestSignUpdate(digest->mdCtx, in, inlen)) {
             return APR_ECRYPT;
         }
+#else
+        if (!EVP_MAC_update(digest->macCtx, in, inlen)) {
+            return APR_ECRYPT;
+        }
+#endif
 
         return APR_SUCCESS;
 
@@ -1398,31 +1473,29 @@ static apr_status_t crypto_digest_update(apr_crypto_digest_t *digest,
 
 static apr_status_t crypto_digest_final(apr_crypto_digest_t *digest)
 {
+    apr_status_t status = APR_SUCCESS;
 
     switch (digest->key->rec->ktype) {
 
     case APR_CRYPTO_KTYPE_HASH: {
-
-        apr_status_t status = APR_SUCCESS;
-
-        unsigned int len = EVP_MD_CTX_size(digest->mdCtx);
-
         switch (digest->rec->dtype) {
         case APR_CRYPTO_DTYPE_HASH: {
+            unsigned int len = EVP_MD_CTX_size(digest->mdCtx);
 
             /* must we allocate the output buffer from a pool? */
             if (!digest->rec->d.hash.s || digest->rec->d.hash.slen != len) {
                 digest->rec->d.hash.slen = len;
-                digest->rec->d.hash.s = apr_palloc(digest->pool, len);
+                digest->rec->d.hash.s = apr_pcalloc(digest->pool, len);
                 if (!digest->rec->d.hash.s) {
                     return APR_ENOMEM;
                 }
-                apr_crypto_clear(digest->pool, digest->rec->d.hash.s, len);
             }
 
             /* then, determine the signature */
             if (EVP_DigestFinal_ex(digest->mdCtx, digest->rec->d.hash.s, &len)
                     == 0) {
+                OPENSSL_cleanse(digest->rec->d.hash.s,
+                                digest->rec->d.hash.slen);
                 status = APR_ECRYPT;
             }
 
@@ -1432,72 +1505,85 @@ static apr_status_t crypto_digest_final(apr_crypto_digest_t *digest)
             status = APR_ENODIGEST;
         }
 
-        crypto_digest_cleanup(digest);
-
-        return status;
-
+        break;
     }
-
     case APR_CRYPTO_KTYPE_HMAC:
     case APR_CRYPTO_KTYPE_CMAC: {
-
-        apr_status_t status = APR_SUCCESS;
-
         size_t len;
 
         /* first, determine the signature length */
-        if (1 != EVP_DigestSignFinal(digest->mdCtx, NULL, &len)) {
+#if APR_USE_OPENSSL_PRE_3_0_API
+        if (!EVP_DigestSignFinal(digest->mdCtx, NULL, &len)) {
             status = APR_ECRYPT;
-        } else {
-
+        }
+#else
+        if (!EVP_MAC_final(digest->macCtx, NULL, &len, 0)) {
+            status = APR_ECRYPT;
+        }
+#endif
+        if (status == APR_SUCCESS) {
             switch (digest->rec->dtype) {
             case APR_CRYPTO_DTYPE_SIGN: {
-
                 /* must we allocate the output buffer from a pool? */
                 if (!digest->rec->d.sign.s || digest->rec->d.sign.slen != len) {
                     digest->rec->d.sign.slen = len;
-                    digest->rec->d.sign.s = apr_palloc(digest->pool, len);
+                    digest->rec->d.sign.s = apr_pcalloc(digest->pool, len);
                     if (!digest->rec->d.sign.s) {
                         return APR_ENOMEM;
                     }
-                    apr_crypto_clear(digest->pool, digest->rec->d.sign.s, len);
                 }
 
                 /* then, determine the signature */
-                if (EVP_DigestSignFinal(digest->mdCtx, digest->rec->d.sign.s,
-                        &len) == 0) {
+#if APR_USE_OPENSSL_PRE_3_0_API
+                if (!EVP_DigestSignFinal(digest->mdCtx,
+                                         digest->rec->d.sign.s, &len)) {
                     status = APR_ECRYPT;
+                }
+#else
+                if (!EVP_MAC_final(digest->macCtx,
+                                   digest->rec->d.sign.s, &len, len)) {
+                    status = APR_ECRYPT;
+                }
+#endif
+                if (status != APR_SUCCESS) {
+                    OPENSSL_cleanse(digest->rec->d.sign.s,
+                                    digest->rec->d.sign.slen);
                 }
 
                 break;
             }
             case APR_CRYPTO_DTYPE_VERIFY: {
-
                 /* must we allocate the output buffer from a pool? */
                 if (!digest->rec->d.verify.s
                         || digest->rec->d.verify.slen != len) {
                     digest->rec->d.verify.slen = len;
-                    digest->rec->d.verify.s = apr_palloc(digest->pool, len);
+                    digest->rec->d.verify.s = apr_pcalloc(digest->pool, len);
                     if (!digest->rec->d.verify.s) {
                         return APR_ENOMEM;
                     }
-                    apr_crypto_clear(digest->pool, digest->rec->d.verify.s,
-                            len);
                 }
 
                 /* then, determine the signature */
-                if (EVP_DigestSignFinal(digest->mdCtx, digest->rec->d.verify.s,
-                        &len) == 0) {
+#if APR_USE_OPENSSL_PRE_3_0_API
+                if (!EVP_DigestSignFinal(digest->mdCtx,
+                                         digest->rec->d.verify.s, &len)) {
                     status = APR_ECRYPT;
-                } else if (digest->rec->d.verify.slen
-                        == digest->rec->d.verify.vlen) {
-                    status =
-                            CRYPTO_memcmp(digest->rec->d.verify.s,
-                                    digest->rec->d.verify.v,
-                                    digest->rec->d.verify.slen) ?
-                            APR_ENOVERIFY : APR_SUCCESS;
-                } else {
+                }
+#else
+                if (!EVP_MAC_final(digest->macCtx,
+                                   digest->rec->d.verify.s, &len, len)) {
+                    status = APR_ECRYPT;
+                }
+#endif
+                if (status == APR_SUCCESS
+                    && (len != digest->rec->d.verify.vlen
+                        || CRYPTO_memcmp(digest->rec->d.verify.v,
+                                         digest->rec->d.verify.s, len))) {
                     status = APR_ENOVERIFY;
+                }
+                if (status != APR_SUCCESS) {
+                    OPENSSL_cleanse(digest->rec->d.verify.s,
+                                    digest->rec->d.verify.slen);
                 }
 
                 break;
@@ -1505,19 +1591,15 @@ static apr_status_t crypto_digest_final(apr_crypto_digest_t *digest)
             default:
                 status = APR_ENODIGEST;
             }
-
         }
 
-        crypto_digest_cleanup(digest);
-
-        return status;
-
+        break;
     }
-    default: {
-        return APR_EINVAL;
-    }
+    default:
+        status = APR_EINVAL;
     }
 
+    return status;
 }
 
 static apr_status_t crypto_digest(
