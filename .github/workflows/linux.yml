@@ -30,6 +30,8 @@ jobs:
           - name: Maintainer-mode, -Werror
             notest-cflags: -Werror
             config: --enable-maintainer-mode
+          - name: With crypto
+            config: --with-crypto=yes
           - name: ASan
             # w/o ODBC since DSO unload leaks memory and fails the tests
             notest-cflags: -fsanitize=address -fno-sanitize-recover=address -fno-omit-frame-pointer -Werror -O2
