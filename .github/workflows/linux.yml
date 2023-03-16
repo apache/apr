@@ -55,7 +55,7 @@ jobs:
     - name: buildconf
       run: ./buildconf
     - name: configure
-      run: ./configure ${{ matrix.config }}
+      run: ./configure --prefix=/tmp/apr ${{ matrix.config }}
     - name: make
       run: make $MARGS
     - name: install
