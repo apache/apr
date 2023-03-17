@@ -301,10 +301,12 @@ static apr_status_t crypto_key_cleanup(apr_crypto_key_t *key)
 {
     if (key->pkey) {
         EVP_PKEY_free(key->pkey);
+        key->pkey = NULL;
     }
 #if !APR_USE_OPENSSL_PRE_3_0_API
     if (key->mac) {
         EVP_MAC_free(key->mac);
+        key->mac = NULL;
     }
 #endif
 
@@ -417,10 +419,9 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
         apr_pool_t *pool)
 {
     apr_crypto_t *f;
-    apr_crypto_config_t *config = NULL;
-
+    apr_crypto_config_t *config;
     const char *engine = NULL;
-
+    apr_status_t status = APR_SUCCESS;
     struct {
         const char *field;
         const char *value;
@@ -434,17 +435,8 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
     char **elts = NULL;
     char *elt;
     int i = 0, j;
-    apr_status_t status;
 
-    f = apr_pcalloc(pool, sizeof(apr_crypto_t));
-    if (!f) {
-        return APR_ENOMEM;
-    }
-
-    config = f->config = apr_pcalloc(pool, sizeof(apr_crypto_config_t));
-    if (!config) {
-        return APR_ENOMEM;
-    }
+    *ff = NULL;
 
     if (params) {
         if (APR_SUCCESS != (status = apr_tokenize_to_argv(params, &elts, pool))) {
@@ -478,6 +470,17 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
         engine = fields[0].value;
     }
 
+    f = apr_pcalloc(pool, sizeof(apr_crypto_t));
+    if (!f) {
+        return APR_ENOMEM;
+    }
+    f->config = config = apr_pcalloc(pool, sizeof(apr_crypto_config_t));
+    if (!config) {
+        return APR_ENOMEM;
+    }
+    f->pool = pool;
+    f->provider = provider;
+
     /* The default/builtin "openssl" engine is the same as NULL though with
      * openssl-3+ it's called something else, keep NULL for that name.
      */
@@ -488,27 +491,24 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
             return APR_ENOENGINE;
         }
         if (!ENGINE_init(config->engine)) {
-            ENGINE_free(config->engine);
-            config->engine = NULL;
-            return APR_EINITENGINE;
+            status = APR_EINITENGINE;
+            goto cleanup;
         }
 #else
         return APR_ENOTIMPL;
 #endif
     }
 
-    *ff = f;
-    f->pool = pool;
-    f->provider = provider;
-
     f->result = apr_pcalloc(pool, sizeof(apu_err_t));
     if (!f->result) {
-        return APR_ENOMEM;
+        status = APR_ENOMEM;
+        goto cleanup;
     }
 
     f->digests = apr_hash_make(pool);
     if (!f->digests) {
-        return APR_ENOMEM;
+        status = APR_ENOMEM;
+        goto cleanup;
     }
     apr_hash_set(f->digests, "md5", APR_HASH_KEY_STRING, &(key_digests[i = 0]));
     apr_hash_set(f->digests, "sha1", APR_HASH_KEY_STRING, &(key_digests[++i]));
@@ -519,7 +519,8 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
 
     f->types = apr_hash_make(pool);
     if (!f->types) {
-        return APR_ENOMEM;
+        status = APR_ENOMEM;
+        goto cleanup;
     }
     apr_hash_set(f->types, "3des192", APR_HASH_KEY_STRING, &(key_types[i = 0]));
     apr_hash_set(f->types, "aes128", APR_HASH_KEY_STRING, &(key_types[++i]));
@@ -528,21 +529,26 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
 
     f->modes = apr_hash_make(pool);
     if (!f->modes) {
-        return APR_ENOMEM;
+        status = APR_ENOMEM;
+        goto cleanup;
     }
     apr_hash_set(f->modes, "ecb", APR_HASH_KEY_STRING, &(key_modes[i = 0]));
     apr_hash_set(f->modes, "cbc", APR_HASH_KEY_STRING, &(key_modes[++i]));
 
     f->digests = apr_hash_make(pool);
     if (!f->digests) {
-        return APR_ENOMEM;
+        status = APR_ENOMEM;
+        goto cleanup;
     }
 
+    *ff = f;
     apr_pool_cleanup_register(pool, f, crypto_cleanup_helper,
-            apr_pool_cleanup_null);
-
+                              apr_pool_cleanup_null);
     return APR_SUCCESS;
 
+cleanup:
+    crypto_cleanup(f);
+    return status;
 }
 
 /**
@@ -687,11 +693,12 @@ static apr_status_t crypto_key(apr_crypto_key_t **k,
         if (!key) {
             return APR_ENOMEM;
         }
+        apr_pool_cleanup_register(p, key, crypto_key_cleanup_helper,
+                                  apr_pool_cleanup_null);
     }
-
-    apr_pool_cleanup_register(p, key, crypto_key_cleanup_helper,
-            apr_pool_cleanup_null);
-
+    else {
+        crypto_key_cleanup(key);
+    }
     key->pool = p;
     key->f = f;
     key->provider = f->provider;
@@ -955,19 +962,22 @@ static apr_status_t crypto_block_encrypt_init(apr_crypto_block_t **ctx,
     unsigned char *usedIv;
     apr_crypto_config_t *config = key->f->config;
     apr_crypto_block_t *block = *ctx;
+
     if (!block) {
         *ctx = block = apr_pcalloc(p, sizeof(apr_crypto_block_t));
+        if (!block) {
+            return APR_ENOMEM;
+        }
+        apr_pool_cleanup_register(p, block, crypto_block_cleanup_helper,
+                                  apr_pool_cleanup_null);
     }
-    if (!block) {
-        return APR_ENOMEM;
+    else {
+        crypto_block_cleanup(block);
     }
     block->f = key->f;
     block->pool = p;
     block->provider = key->provider;
     block->key = key;
-
-    apr_pool_cleanup_register(p, block, crypto_block_cleanup_helper,
-            apr_pool_cleanup_null);
 
     switch (key->rec->ktype) {
 
@@ -1172,19 +1182,22 @@ static apr_status_t crypto_block_decrypt_init(apr_crypto_block_t **ctx,
 {
     apr_crypto_config_t *config = key->f->config;
     apr_crypto_block_t *block = *ctx;
+
     if (!block) {
         *ctx = block = apr_pcalloc(p, sizeof(apr_crypto_block_t));
+        if (!block) {
+            return APR_ENOMEM;
+        }
+        apr_pool_cleanup_register(p, block, crypto_block_cleanup_helper,
+                                  apr_pool_cleanup_null);
     }
-    if (!block) {
-        return APR_ENOMEM;
+    else {
+        crypto_block_cleanup(block);
     }
     block->f = key->f;
     block->pool = p;
     block->provider = key->provider;
     block->key = key;
-
-    apr_pool_cleanup_register(p, block, crypto_block_cleanup_helper,
-            apr_pool_cleanup_null);
 
     switch (key->rec->ktype) {
 
@@ -1358,20 +1371,23 @@ static apr_status_t crypto_digest_init(apr_crypto_digest_t **d,
 {
     apr_crypto_config_t *config = key->f->config;
     apr_crypto_digest_t *digest = *d;
+
     if (!digest) {
         *d = digest = apr_pcalloc(p, sizeof(apr_crypto_digest_t));
+        if (!digest) {
+            return APR_ENOMEM;
+        }
+        apr_pool_cleanup_register(p, digest, crypto_digest_cleanup_helper,
+                                  apr_pool_cleanup_null);
     }
-    if (!digest) {
-        return APR_ENOMEM;
+    else {
+        crypto_digest_cleanup(digest);
     }
     digest->f = key->f;
     digest->pool = p;
     digest->provider = key->provider;
     digest->key = key;
     digest->rec = rec;
-
-    apr_pool_cleanup_register(p, digest, crypto_digest_cleanup_helper,
-            apr_pool_cleanup_null);
 
     switch (key->rec->ktype) {
 
