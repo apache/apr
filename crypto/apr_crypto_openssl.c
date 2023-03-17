@@ -302,9 +302,11 @@ static apr_status_t crypto_key_cleanup(apr_crypto_key_t *key)
     if (key->pkey) {
         EVP_PKEY_free(key->pkey);
     }
+#if !APR_USE_OPENSSL_PRE_3_0_API
     if (key->mac) {
         EVP_MAC_free(key->mac);
     }
+#endif
 
     return APR_SUCCESS;
 }
@@ -356,10 +358,12 @@ static apr_status_t crypto_digest_cleanup(apr_crypto_digest_t *ctx)
         EVP_MD_CTX_free(ctx->mdCtx);
         ctx->mdCtx = NULL;
     }
+#if !APR_USE_OPENSSL_PRE_3_0_API
     if (ctx->macCtx) {
         EVP_MAC_CTX_free(ctx->macCtx);
         ctx->macCtx = NULL;
     }
+#endif
 
     return APR_SUCCESS;
 
