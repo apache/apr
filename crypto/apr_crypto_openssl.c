@@ -33,7 +33,7 @@
 #if APU_HAVE_CRYPTO
 
 #ifndef OPENSSL_API_COMPAT
-#define OPENSSL_API_COMPAT 0x10100000L /* for ENGINE API */
+#define OPENSSL_API_COMPAT 0x10101000L /* for ENGINE API */
 #endif
 
 #include <openssl/evp.h>
