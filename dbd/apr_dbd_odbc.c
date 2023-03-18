@@ -567,8 +567,8 @@ static SQLRETURN odbc_bind_param(apr_pool_t *pool,
                     (textmode ? atoi(args[*argp]) : *(short *)args[*argp]);
                 break;
             case SQL_INTEGER:
-                ptr = apr_palloc(pool, sizeof(int));
-                len = sizeof(int);
+                ptr = apr_palloc(pool, sizeof(long));
+                len = sizeof(long);
                 *(long *)ptr =
                     (textmode ? atol(args[*argp]) : *(long *)args[*argp]);
                 break;
