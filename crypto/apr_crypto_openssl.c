@@ -203,7 +203,7 @@ static apr_status_t crypto_error(const apu_err_t **result,
  */
 static apr_status_t crypto_shutdown(void)
 {
-#if HAVE_DECL_OPENSSL_INIT_CRYPTO
+#if HAVE_OPENSSL_INIT_CRYPTO
     /* Openssl v1.1+ handles all termination automatically. Do
      * nothing in this case.
      */
@@ -232,7 +232,7 @@ static apr_status_t crypto_shutdown_helper(void *data)
 static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
         const apu_err_t **result)
 {
-#if HAVE_DECL_OPENSSL_INIT_CRYPTO
+#if HAVE_OPENSSL_INIT_CRYPTO
     /* Openssl v1.1+ handles all initialisation automatically, apart
      * from hints as to how we want to use the library.
      *

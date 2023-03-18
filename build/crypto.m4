@@ -54,11 +54,11 @@ AC_DEFUN([APU_CHECK_CRYPTO], [
             crypto_library_enabled=1
           fi
         done
-	if test "$crypto_library_enabled" = "1"; then
+        if test "$crypto_library_enabled" = "1"; then
           AC_MSG_NOTICE([Crypto was requested but no crypto library was found; autodetecting possible libraries])
         else
           AC_ERROR([Crypto was requested but all possible crypto libraries were disabled.])
-	fi
+        fi
       fi
 
       APU_CHECK_CRYPTO_OPENSSL
@@ -97,15 +97,14 @@ AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
     if test "$withval" = "yes"; then
       AC_CHECK_HEADERS(openssl/x509.h, [openssl_have_headers=1])
       AC_CHECK_LIB(crypto, EVP_CIPHER_CTX_new, openssl_have_libs=1)
-      if test "$openssl_have_headers" != "0" && test "$openssl_have_libs" != "0"; then
+      if test "$openssl_have_headers" = "1" && test "$openssl_have_libs" = "1"; then
         apu_have_openssl=1
       fi
     elif test "$withval" = "no"; then
       apu_have_openssl=0
     else
-
       openssl_CPPFLAGS="-I$withval/include"
-      openssl_LDFLAGS="-L$withval/lib "
+      openssl_LDFLAGS="-L$withval/lib -L$withval/lib64"
 
       APR_ADDTO(CPPFLAGS, [$openssl_CPPFLAGS])
       APR_ADDTO(LDFLAGS, [$openssl_LDFLAGS])
@@ -113,15 +112,13 @@ AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
       AC_MSG_NOTICE(checking for openssl in $withval)
       AC_CHECK_HEADERS(openssl/x509.h, [openssl_have_headers=1])
       AC_CHECK_LIB(crypto, EVP_CIPHER_CTX_new, openssl_have_libs=1)
-      if test "$openssl_have_headers" != "0" && test "$openssl_have_libs" != "0"; then
+      if test "$openssl_have_headers" = "1" && test "$openssl_have_libs" = "1"; then
         apu_have_openssl=1
-        APR_ADDTO(LDFLAGS, [-L$withval/lib])
-        APR_ADDTO(INCLUDES, [-I$withval/include])
       fi
-
-      AC_CHECK_DECLS([EVP_PKEY_CTX_new, OPENSSL_init_crypto], [], [],
-                     [#include <openssl/evp.h>])
-
+    fi
+    if test "$apu_have_openssl" = "1"; then
+        AC_CHECK_LIB(crypto, OPENSSL_init_crypto)
+        AC_CHECK_FUNCS([OPENSSL_init_crypto])
     fi
   ], [
     apu_have_openssl=0
@@ -136,18 +133,12 @@ AC_DEFUN([APU_CHECK_CRYPTO_OPENSSL], [
     apu_have_crypto=1
 
     AC_MSG_CHECKING([for const input buffers in OpenSSL])
-    AC_TRY_COMPILE([#include <openssl/rsa.h>],
-        [ const unsigned char * buf;
-          unsigned char * outbuf;
-          RSA rsa;
-
-                RSA_private_decrypt(1,
-                                                        buf,
-                                                        outbuf,
-                                                        &rsa,
-                                                        RSA_PKCS1_PADDING);
-
-        ],
+    AC_TRY_COMPILE(
+        [#include <openssl/evp.h>],
+        [ EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+          const unsigned char key[128] = {0}, iv[128] = {0};
+          EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, iv);
+          EVP_CIPHER_CTX_free(ctx); ],
         [AC_MSG_RESULT([yes])]
         [AC_DEFINE([CRYPTO_OPENSSL_CONST_BUFFERS], 1, [Define that OpenSSL uses const buffers])],
         [AC_MSG_RESULT([no])])
