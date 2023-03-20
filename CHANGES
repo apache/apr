@@ -4,6 +4,8 @@ Changes for APR 1.8.0
   [Anything backed out from 1.7.x branch should be slid up here, and the
   details of 1.7.1 deleted]
 
+  *) New APR_THREAD_LOCAL and apr_thread_current*() API.  [Yann Ylavic]
+
   *) Fix a regression in apr_stat() for root path on Windows. [Ivan Zhakov]
 
   *) apr_file_mtime_set(): Minor optimization on Windows. [Ivan Zhakov]
