@@ -165,6 +165,7 @@ APR_DECLARE(apr_status_t) apr_thread_current_create(apr_thread_t **current,
                                                     apr_threadattr_t *attr,
                                                     apr_pool_t *pool)
 {
+#if APR_HAS_THREAD_LOCAL
     apr_status_t stat;
 
     *current = apr_thread_current();
@@ -180,10 +181,11 @@ APR_DECLARE(apr_status_t) apr_thread_current_create(apr_thread_t **current,
 
     (*current)->td = apr_os_thread_current();
 
-#if APR_HAS_THREAD_LOCAL
     current_thread = *current;
-#endif
     return APR_SUCCESS;
+#else
+    return APR_ENOTIMPL;
+#endif
 }
 
 APR_DECLARE(void) apr_thread_current_after_fork(void)
