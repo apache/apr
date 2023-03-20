@@ -1,6 +1,8 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) New APR_THREAD_LOCAL and apr_thread_current*() API.  [Yann Ylavic]
+
   *) apr_crypto_openssl: Compatibility with OpenSSL 3.  [Yann Ylavic]
 
   *) apr-1-config: Fix crosscompiling detection in apr-1-config. PR 66510
