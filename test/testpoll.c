@@ -22,6 +22,13 @@
 #include "apr_network_io.h"
 #include "apr_poll.h"
 
+#if defined(__linux__)
+#include "arch/unix/apr_private.h"
+#endif
+#ifndef HAVE_EPOLL_WAIT_RELIABLE_TIMEOUT
+#define HAVE_EPOLL_WAIT_RELIABLE_TIMEOUT 0
+#endif
+
 #define SMALL_NUM_SOCKETS 3
 /* We can't use 64 here, because some platforms *ahem* Solaris *ahem* have
  * a default limit of 64 open file descriptors per process.  If we use
@@ -854,6 +861,16 @@ static void pollcb_wakeup(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_EINTR, rv);
 }
 
+#define JUSTSLEEP_DELAY apr_time_from_msec(200)
+#if HAVE_EPOLL_WAIT_RELIABLE_TIMEOUT
+#define JUSTSLEEP_ENOUGH(ts, te) \
+    ((te) - (ts) >= JUSTSLEEP_DELAY)
+#else
+#define JUSTSLEEP_JIFFY apr_time_from_msec(10)
+#define JUSTSLEEP_ENOUGH(ts, te) \
+    ((te) - (ts) >= JUSTSLEEP_DELAY - JUSTSLEEP_JIFFY)
+#endif
+
 static void justsleep(abts_case *tc, void *data)
 {
     apr_int32_t nsds;
@@ -872,13 +889,13 @@ static void justsleep(abts_case *tc, void *data)
 
     nsds = 1;
     t1 = apr_time_now();
-    rv = apr_poll(NULL, 0, &nsds, apr_time_from_msec(200));
+    rv = apr_poll(NULL, 0, &nsds, JUSTSLEEP_DELAY);
     t2 = apr_time_now();
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
     ABTS_INT_EQUAL(tc, 0, nsds);
     ABTS_ASSERT(tc,
                 "apr_poll() didn't sleep",
-                (t2 - t1) >= apr_time_from_msec(200));
+                JUSTSLEEP_ENOUGH(t1, t2));
 
     for (i = 0; i < sizeof methods / sizeof methods[0]; i++) {
         rv = apr_pollset_create_ex(&pollset, 5, p, 0, methods[i]);
@@ -887,14 +904,13 @@ static void justsleep(abts_case *tc, void *data)
 
             nsds = 1;
             t1 = apr_time_now();
-            rv = apr_pollset_poll(pollset, apr_time_from_msec(200), &nsds,
-                                  &hot_files);
+            rv = apr_pollset_poll(pollset, JUSTSLEEP_DELAY, &nsds, &hot_files);
             t2 = apr_time_now();
             ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
             ABTS_INT_EQUAL(tc, 0, nsds);
             ABTS_ASSERT(tc,
                         "apr_pollset_poll() didn't sleep",
-                        (t2 - t1) >= apr_time_from_msec(200));
+                        JUSTSLEEP_ENOUGH(t1, t2));
 
             rv = apr_pollset_destroy(pollset);
             ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -905,12 +921,12 @@ static void justsleep(abts_case *tc, void *data)
             ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
             t1 = apr_time_now();
-            rv = apr_pollcb_poll(pollcb, apr_time_from_msec(200), NULL, NULL);
+            rv = apr_pollcb_poll(pollcb, JUSTSLEEP_DELAY, NULL, NULL);
             t2 = apr_time_now();
             ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
             ABTS_ASSERT(tc,
                         "apr_pollcb_poll() didn't sleep",
-                        (t2 - t1) >= apr_time_from_msec(200));
+                        JUSTSLEEP_ENOUGH(t1, t2));
 
             /* no apr_pollcb_destroy() */
         }
