@@ -173,6 +173,18 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
                                       apr_dso_handle_t *handle,
                                       const char *symname)
 {
+    /* This is necessary for `testdso.c`. For some reason, musl
+     * builds fail the `test_unload_library` test if the below
+     * check isn't in place. `test_unload_library` unloads the
+     * library and then immediately calls this function. Maybe
+     * musl's `dlsym()` assumes the handle is never NULL and
+     * some UB is being invoked here...
+     */
+    if (handle->handle == NULL) {
+        handle->errormsg = "library not loaded";
+        return APR_ESYMNOTFOUND;
+    }
+
 #if defined(DSO_USE_SHL)
     void *symaddr = NULL;
     int status;
