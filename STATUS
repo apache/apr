@@ -140,7 +140,7 @@ CURRENT test/testall -v EXCEPTIONS:
     * 'testdso' fails on older versions of OpenBSD due to dlsym(NULL,
       ...) segfaulting.
 
-    * Win32 Not Implemented tests 
+    * Win32 Not Implemented tests
         poll: pollcb not implemented
         procmutex: lacks fork() support
         sock : Sync behavior causes us to skip one test
