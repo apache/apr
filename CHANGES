@@ -123,9 +123,6 @@ Changes for APR 2.0.0
   *) apr_sockaddr_ip_getbuf, apr_sockaddr_ip_get: Append "%zone" for
      IPv6 link-local addresses.  [Joe Orton]
 
-  *) Don't seek to the end when opening files with APR_FOPEN_APPEND on Windows.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
-
   *) Fix a deadlock when writing to locked files opened with APR_FOPEN_APPEND
      on Windows. PR 50058.
      [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]

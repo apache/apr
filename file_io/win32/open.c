@@ -369,6 +369,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
 
     if (flag & APR_FOPEN_APPEND) {
         (*new)->append = 1;
+        SetFilePointer((*new)->filehand, 0, NULL, FILE_END);
     }
     if (flag & APR_FOPEN_BUFFERED) {
         (*new)->buffered = 1;
