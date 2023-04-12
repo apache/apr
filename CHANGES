@@ -109,9 +109,6 @@ Changes for APR 2.0.0
   *) Add apr_reslist_acquire_ex() which allows to control acquire order,
      that is LIFO (default) or FIFO.  [Yann Ylavic]
 
-  *) apr_file_read: Optimize large reads from buffered files on Windows.
-     [Evgeny Kotkov]
-
   *) Add apr_pool_tag_get to retrieve the pool tag name.  [Joe Orton]
 
   *) Add apr_sockaddr_zone_set, apr_sockaddr_zone_set to set and retrieve
@@ -122,13 +119,6 @@ Changes for APR 2.0.0
 
   *) apr_sockaddr_ip_getbuf, apr_sockaddr_ip_get: Append "%zone" for
      IPv6 link-local addresses.  [Joe Orton]
-
-  *) Fix a deadlock when writing to locked files opened with APR_FOPEN_APPEND
-     on Windows. PR 50058.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
-
-  *) apr_file_write: Optimize large writes to buffered files on Windows.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
   *) apr_file_trunc: Truncating a buffered file could add unexpected
      data after the truncate position. PR 51017.
@@ -142,9 +132,6 @@ Changes for APR 2.0.0
      apr_allocator_min_order_set() to respectively get the (system's) page size
      in use and set the minimum allocation size for an allocator (expressed in
      2^order pages).  [Yann Ylavic]
-
-  *) apr_file_gets: Optimize for buffered files on Windows.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
   *) apr_crypto: avoid excessive iteration in bcrypt hash.
      [Hanno Böck <hanno hboeck.de>]
