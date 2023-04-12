@@ -27,7 +27,7 @@ Changes for APR 1.7.3
   *) apr_file_write: Optimize large writes to buffered files on Windows.
      [Evgeny Kotkov]
 
-  *) apr_file_write: Optimize large reads from buffered files on Windows.
+  *) apr_file_read: Optimize large reads from buffered files on Windows.
      [Evgeny Kotkov]
 
 Changes for APR 1.7.2
