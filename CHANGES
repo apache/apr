@@ -122,11 +122,11 @@ Changes for APR 2.0.0
 
   *) apr_file_trunc: Truncating a buffered file could add unexpected
      data after the truncate position. PR 51017.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
+     [Evgeny Kotkov]
 
   *) apr_file_trunc: Fix an issue where reading from a buffered file
      after truncate could return stale data from the buffer.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
+     [Evgeny Kotkov]
 
   *) apr_allocator, apr_pools: Add apr_allocator_page_size() and
      apr_allocator_min_order_set() to respectively get the (system's) page size
@@ -246,7 +246,7 @@ Changes for APR 2.0.0
   *) Merge APR-util into APR.  [various]
 
   *) apr_socket_listen: Allow larger listen backlog values on Windows 8+.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
+     [Evgeny Kotkov]
 
   *) Remove the APR_SENDFILE_DISCONNECT_SOCKET flag. [Ivan Zhakov]
 
