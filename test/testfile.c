@@ -2198,6 +2198,50 @@ static void test_datasync_on_stream(abts_case *tc, void *data)
     }
 }
 
+static void test_append_buffered(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testappend_buffered.dat";
+    apr_size_t bytes_written;
+    char buf[64];
+
+    apr_file_remove(fname, p);
+
+    /* Create file with contents. */
+    rv = apr_file_open(&f, fname, APR_FOPEN_WRITE | APR_FOPEN_CREATE,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "create file", rv);
+
+    rv = apr_file_write_full(f, "abc", 3, &bytes_written);
+    APR_ASSERT_SUCCESS(tc, "write to file", rv);
+    apr_file_close(f);
+
+    /* Re-open it with APR_FOPEN_APPEND and APR_FOPEN_BUFFERED. */
+    rv = apr_file_open(&f, fname,
+                       APR_FOPEN_READ | APR_FOPEN_WRITE |
+                       APR_FOPEN_APPEND | APR_FOPEN_BUFFERED,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open file", rv);
+
+    /* Append to the file. */
+    rv = apr_file_write_full(f, "def", 3, &bytes_written);
+    APR_ASSERT_SUCCESS(tc, "write to file", rv);
+    apr_file_close(f);
+
+    rv = apr_file_open(&f, fname, APR_FOPEN_READ,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "open file", rv);
+
+    /* Test the file contents. */
+    rv = apr_file_gets(buf, sizeof(buf), f);
+    APR_ASSERT_SUCCESS(tc, "read from file", rv);
+    ABTS_STR_EQUAL(tc, "abcdef", buf);
+
+    apr_file_close(f);
+    apr_file_remove(fname, p);
+}
+
 abts_suite *testfile(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -2262,6 +2306,7 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_read_buffered_seek, NULL);
     abts_run_test(suite, test_datasync_on_file, NULL);
     abts_run_test(suite, test_datasync_on_stream, NULL);
+    abts_run_test(suite, test_append_buffered, NULL);
 
     return suite;
 }
