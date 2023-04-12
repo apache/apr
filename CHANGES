@@ -15,19 +15,6 @@ Changes for APR 1.8.0
 
   *) Fix double free on exit when apr_app is used on Windows. [Ivan Zhakov]
 
-  *) Fix a deadlock when writing to locked files opened with APR_FOPEN_APPEND
-     on Windows. PR 50058.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
-
-  *) apr_file_gets: Optimize for buffered files on Windows.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
-
-  *) apr_file_write: Optimize large writes to buffered files on Windows.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
-
-  *) apr_file_read: Optimize large reads from buffered files on Windows.
-     [Evgeny Kotkov]
-
 Changes for APR 1.7.1
 
   *) SECURITY: CVE-2021-35940 (cve.mitre.org)
