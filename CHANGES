@@ -1,9 +1,6 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.8.0
 
-  [Anything backed out from 1.7.x branch should be slid up here, and the
-  details of 1.7.1 deleted]
-
   *) New APR_THREAD_LOCAL and apr_thread_current*() API.  [Yann Ylavic]
 
   *) Fix a regression in apr_stat() for root path on Windows. [Ivan Zhakov]
@@ -14,74 +11,6 @@ Changes for APR 1.8.0
      on Windows. [Ivan Zhakov]
 
   *) Fix double free on exit when apr_app is used on Windows. [Ivan Zhakov]
-
-Changes for APR 1.7.1
-
-  *) SECURITY: CVE-2021-35940 (cve.mitre.org)
-     Restore fix for out-of-bounds array dereference in apr_time_exp*()
-     functions. (This issue was addressed as CVE-2017-12613 in APR 1.6.3 and
-     later 1.6.x releases, but was missing in 1.7.0.)  [Stefan Sperling]
-
-  *) apr_atomic_read64(): Fix non-atomic read on 32-bit Windows [Ivan Zhakov]
-
-  *) configure: Add --disable-sctp argument to forcibly disable SCTP
-     support, or --enable-sctp which fails if SCTP support is not
-     detected.  [Lubos Uhliarik <luhliari redhat.com>, Joe Orton]
-
-  *) Fix handle leak in the Win32 apr_uid_current implementation.
-     PR 61165. [Ivan Zhakov]
-
-  *) Add error handling for lseek() failures in apr_file_write() and
-     apr_file_writev().  [Joe Orton]
-
-  *) Align apr_mmap()ing offset to a page boundary.  PR 65158.  [Yann Ylavic]
-
-  *) Don't silently set APR_FOPEN_NOCLEANUP for apr_file_mktemp() created file
-     to avoid a fd and inode leak when/if later passed to apr_file_setaside().
-     [Yann Ylavic]
-
-  *) APR's configure script uses AC_TRY_RUN to detect whether the return type
-     of strerror_r is int. When cross-compiling this defaults to no.
-     This commit adds an AC_CACHE_CHECK so users who cross-compile APR may
-     influence the outcome with a configure variable. [Sebastian Kemper
-     <sebastian_ml gmx net>]
-
-  *) Add a cache check with which users who cross-compile APR
-     can influence the outcome of the /dev/zero test by setting the variable
-     ac_cv_mmap__dev_zero=yes [Sebastian Kemper <sebastian_ml gmx net>]
-
-  *) Trick autoconf into printing the correct default prefix in the help.
-     [Stefan Fritsch]
-
-  *) Don't try to use PROC_PTHREAD by default when cross compiling.
-     [Yann Ylavic]
-
-  *) Add the ability to cross compile APR. [Graham Leggett]
-
-  *) While cross-compiling, the tools/gen_test_char could not
-     be executed at build time, use AX_PROG_CC_FOR_BUILD to
-     build native tools/gen_test_char
-     Support explicit libtool by variable assigning before buildcheck.sh,
-     it is helpful for cross-compiling (such as libtool=aarch64-linux-libtool)
-     [Hongxu Jia <hongxu.jia windriver.com>]
-
-  *) Avoid an overflow on 32 bit platforms. [René Hjortskov Nielsen
-     <r... hjortskov.dk>]
-
-  *) Use AC_CHECK_SIZEOF, so as to support cross compiling. PR 56053.
-     [Mike Frysinger <vapier gentoo.org>]
-
-  *) Add --tag=CC to libtool invocations. PR 62640. [Michael Osipov]
-
-  *) apr_pools: Fix pool debugging output so that creation events are
-     always emitted before allocation events and subpool destruction
-     events are emitted on pool clear/destroy for proper accounting.
-     [Brane Čibej]
-
-  *) apr_socket_listen: Allow larger listen backlog values on Windows 8+.
-     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
-
-  *) Fixed: apr_get_oslevel() was returning APR_WIN_XP on Windows 10
 
 Changes for APR 1.7.0 and later:
 
