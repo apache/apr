@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.4
 
+  *) Fix a regression where writing to a file opened with both APR_FOPEN_APPEND
+     and APR_FOPEN_BUFFERED did not properly append the data on Windows.
+     (This regression was introduced in APR 1.7.3)  [Evgeny Kotkov]
+
 Changes for APR 1.7.3
 
   *) apr-1-config: Fix crosscompiling detection in apr-1-config. PR 66510
