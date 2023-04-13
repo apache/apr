@@ -20,13 +20,26 @@
  * ugly 'len' functions, which is quite a nasty cost.
  */
 
-#undef NDEBUG /* always abort() on assert()ion failure */
-#include <assert.h>
-
 #include "apr_base64.h"
 #if APR_CHARSET_EBCDIC
 #include "apr_xlate.h"
 #endif                /* APR_CHARSET_EBCDIC */
+
+/* APR__ASSERT() to always abort() on failure (no output when NDEBUG) */
+#ifndef NDEBUG
+#include <assert.h>
+#define APR__ASSERT(cond) assert(cond)
+#else
+#include "apr.h"
+#if APR_HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#define APR__ASSERT(cond) do { \
+    if (!(cond)) { \
+        abort(); \
+    } \
+} while (0)
+#endif
 
 /* Above APR_BASE64_ENCODE_MAX length the encoding can't fit in an int >= 0 */
 #define APR_BASE64_ENCODE_MAX 1610612733
@@ -124,7 +137,7 @@ APR_DECLARE(int) apr_base64_decode_len(const char *bufcoded)
     bufin = (const unsigned char *) bufcoded;
     while (pr2six[*(bufin++)] <= 63);
     nprbytes = (bufin - (const unsigned char *) bufcoded) - 1;
-    assert(nprbytes <= APR_BASE64_DECODE_MAX);
+    APR__ASSERT(nprbytes <= APR_BASE64_DECODE_MAX);
 
     return (int)(((nprbytes + 3u) / 4u) * 3u + 1u);
 }
@@ -161,7 +174,7 @@ APR_DECLARE(int) apr_base64_decode_binary(unsigned char *bufplain,
     bufin = (const unsigned char *) bufcoded;
     while (pr2six[*(bufin++)] <= 63);
     nprbytes = (bufin - (const unsigned char *) bufcoded) - 1;
-    assert(nprbytes <= APR_BASE64_DECODE_MAX);
+    APR__ASSERT(nprbytes <= APR_BASE64_DECODE_MAX);
     nbytesdecoded = (int)(((nprbytes + 3u) / 4u) * 3u);
 
     bufout = (unsigned char *) bufplain;
@@ -206,7 +219,7 @@ static const char basis_64[] =
 
 APR_DECLARE(int) apr_base64_encode_len(int len)
 {
-    assert(len >= 0 && len <= APR_BASE64_ENCODE_MAX);
+    APR__ASSERT(len >= 0 && len <= APR_BASE64_ENCODE_MAX);
 
     return ((len + 2) / 3 * 4) + 1;
 }
@@ -219,7 +232,7 @@ APR_DECLARE(int) apr_base64_encode(char *encoded, const char *string, int len)
     int i;
     char *p;
 
-    assert(len >= 0 && len <= APR_BASE64_ENCODE_MAX);
+    APR__ASSERT(len >= 0 && len <= APR_BASE64_ENCODE_MAX);
 
     p = encoded;
     for (i = 0; i < len - 2; i += 3) {
@@ -258,7 +271,7 @@ APR_DECLARE(int) apr_base64_encode_binary(char *encoded,
     int i;
     char *p;
 
-    assert(len >= 0 && len <= APR_BASE64_ENCODE_MAX);
+    APR__ASSERT(len >= 0 && len <= APR_BASE64_ENCODE_MAX);
 
     p = encoded;
     for (i = 0; i < len - 2; i += 3) {
@@ -292,7 +305,7 @@ APR_DECLARE(char *) apr_pbase64_encode(apr_pool_t *p, const char *string)
     char *encoded;
     apr_size_t len = strlen(string);
 
-    assert(len <= (apr_size_t)APR_BASE64_ENCODE_MAX);
+    APR__ASSERT(len <= (apr_size_t)APR_BASE64_ENCODE_MAX);
     encoded = (char *) apr_palloc(p, apr_base64_encode_len((int)len));
     apr_base64_encode(encoded, string, (int)len);
 
