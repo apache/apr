@@ -1,4 +1,6 @@
                                                      -*- coding: utf-8 -*-
+Changes for APR 1.7.5
+
 Changes for APR 1.7.4
 
   *) Fix a regression where writing to a file opened with both APR_FOPEN_APPEND
