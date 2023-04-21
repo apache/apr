@@ -328,7 +328,7 @@ static void test_wrap_zero64(abts_case *tc, void *data)
     rv = apr_atomic_dec64(&y64);
 
     ABTS_ASSERT(tc, "apr_atomic_dec64 on zero returned zero.", rv != 0);
-    str = apr_psprintf(p, "zero wrap failed: 0 - 1 = %lu", y64);
+    str = apr_psprintf(p, "zero wrap failed: 0 - 1 = %" APR_UINT64_T_FMT, y64);
     ABTS_ASSERT(tc, str, y64 == minus1);
 }
 
@@ -342,7 +342,7 @@ static void test_inc_neg164(abts_case *tc, void *data)
     rv = apr_atomic_inc64(&y64);
 
     ABTS_ASSERT(tc, "apr_atomic_inc64 didn't return the old value.", rv == minus1);
-    str = apr_psprintf(p, "zero wrap failed: -1 + 1 = %lu", y64);
+    str = apr_psprintf(p, "zero wrap failed: -1 + 1 = %" APR_UINT64_T_FMT, y64);
     ABTS_ASSERT(tc, str, y64 == 0);
 }
 
