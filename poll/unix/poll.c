@@ -114,7 +114,8 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
     num_to_poll = i;
 
     if (timeout > 0) {
-        timeout /= 1000; /* convert microseconds to milliseconds */
+        /* convert microseconds to milliseconds (round up) */
+        timeout = (timeout + 999) / 1000;
     }
 
     i = poll(pollset, num_to_poll, timeout);
@@ -248,14 +249,15 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
         }
         return APR_SUCCESS;
     }
+#endif
+
     if (timeout > 0) {
-        timeout /= 1000;
+        timeout = (timeout + 999) / 1000;
     }
+
+#ifdef WIN32
     ret = WSAPoll(pollset->p->pollset, pollset->nelts, (int)timeout);
 #else
-    if (timeout > 0) {
-        timeout /= 1000;
-    }
     ret = poll(pollset->p->pollset, pollset->nelts, timeout);
 #endif
     if (ret < 0) {
@@ -412,14 +414,15 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
         }
         return APR_SUCCESS;
     }
+#endif
+
     if (timeout > 0) {
-        timeout /= 1000;
+        timeout = (timeout + 999) / 1000;
     }
+
+#ifdef WIN32
     ret = WSAPoll(pollcb->pollset.ps, pollcb->nelts, (int)timeout);
 #else
-    if (timeout > 0) {
-        timeout /= 1000;
-    }
     ret = poll(pollcb->pollset.ps, pollcb->nelts, timeout);
 #endif
     if (ret < 0) {

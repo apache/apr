@@ -61,7 +61,8 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
     }
 
     if (timeout > 0) {
-        timeout /= 1000; /* convert microseconds to milliseconds */
+        /* convert microseconds to milliseconds (round up) */
+        timeout = (timeout + 999) / 1000;
     }
 
     i = select(pollset, num_read, num_write, num_except, timeout);

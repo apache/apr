@@ -265,7 +265,7 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     *num = 0;
 
     if (timeout > 0) {
-        timeout /= 1000;
+        timeout = (timeout + 999) / 1000;
     }
 
     ret = epoll_wait(pollset->p->epoll_fd, pollset->p->pollset, pollset->nalloc,
@@ -446,7 +446,7 @@ static apr_status_t impl_pollcb_poll(apr_pollcb_t *pollcb,
     apr_status_t rv = APR_SUCCESS;
     
     if (timeout > 0) {
-        timeout /= 1000;
+        timeout = (timeout + 999) / 1000;
     }
     
     ret = epoll_wait(pollcb->fd, pollcb->pollset.epoll, pollcb->nalloc,

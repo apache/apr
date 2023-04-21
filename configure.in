@@ -1055,7 +1055,7 @@ AC_CACHE_CHECK([for epoll support], [apr_cv_epoll],
 #include <sys/epoll.h>
 #include <unistd.h>
 
-int main()
+int main(int argc, const char *argv[])
 {
     return epoll_create(5) == -1;
 }], [apr_cv_epoll=yes], [apr_cv_epoll=no], [apr_cv_epoll=no])])
@@ -1071,13 +1071,54 @@ AC_CACHE_CHECK([for epoll_create1 support], [apr_cv_epoll_create1],
 #include <sys/epoll.h>
 #include <unistd.h>
 
-int main()
+int main(int argc, const char *argv[])
 {
     return epoll_create1(0) == -1;
 }], [apr_cv_epoll_create1=yes], [apr_cv_epoll_create1=no], [apr_cv_epoll_create1=no])])
 
 if test "$apr_cv_epoll_create1" = "yes"; then
    AC_DEFINE([HAVE_EPOLL_CREATE1], 1, [Define if epoll_create1 function is supported])
+fi
+
+AC_CACHE_CHECK([whether epoll_wait has a reliable timeout (min)],
+               [apr_cv_epoll_wait_has_reliable_timeout],
+[AC_TRY_RUN([
+#include <unistd.h>
+#include <sys/epoll.h>
+#include <sys/time.h>   /* for gettimeofday */
+
+#define TV2US(tv) ((tv).tv_sec * 1000000LL + (tv).tv_usec)
+
+int main(int argc, const char *argv[])
+{
+    struct epoll_event events[1];
+    int fd, i;
+#ifdef HAVE_EPOLL_CREATE1
+    fd = epoll_create1(0);
+#else
+    fd = epoll_create(1);
+#endif
+    if (fd < 0) {
+        return 1;
+    }
+    for (i = 0; i < 10; ++i) {
+        struct timeval t1 = {0,},
+                       t2 = {0,};
+        (void)gettimeofday(&t1, NULL);
+        (void)epoll_wait(fd, events, 1, 100);  /* ms */
+        (void)gettimeofday(&t2, NULL);
+        if (TV2US(t2) - TV2US(t1) < 100000) {  /* us */
+            return 1;
+        }
+    }
+    return 0;
+}], [apr_cv_epoll_wait_has_reliable_timeout=yes],
+    [apr_cv_epoll_wait_has_reliable_timeout=no],
+    [apr_cv_epoll_wait_has_reliable_timeout=no])])
+
+if test "$apr_cv_epoll_wait_has_reliable_timeout" = "yes"; then
+   AC_DEFINE([HAVE_EPOLL_WAIT_RELIABLE_TIMEOUT], 1,
+             [Define if epoll_wait has a reliable timeout (min)])
 fi
 
 # test for dup3
