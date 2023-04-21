@@ -20,7 +20,7 @@
 
 apr_status_t apr_atomic_init(apr_pool_t *p)
 {
-#if defined (NEED_ATOMICS_GENERIC64)
+#if defined(USE_ATOMICS_GENERIC64)
     return apr__atomic_generic64_init(p);
 #else
     return APR_SUCCESS;
