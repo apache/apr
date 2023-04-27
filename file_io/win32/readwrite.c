@@ -470,6 +470,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                 }
                 rc = apr_file_seek(thefile, APR_END, &offset);
                 if (rc != APR_SUCCESS) {
+                    apr_file_unlock(thefile);//There will be deal lock
                     if (thefile->flags & APR_FOPEN_XTHREAD) {
                         apr_thread_mutex_unlock(thefile->mutex);
                     }
