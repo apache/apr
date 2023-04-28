@@ -435,6 +435,11 @@ APR_DECLARE(apr_status_t) apr_memcache_server_create(apr_pool_t *p,
         return rv;
     }
 
+    server->min = min;
+    server->smax = smax;
+    server->max = max;
+    server->ttl = ttl;
+
     apr_reslist_cleanup_order_set(server->conns, APR_RESLIST_CLEANUP_FIRST);
 #else
     rv = mc_conn_construct((void**)&(server->conn), server, np);

@@ -72,6 +72,13 @@ struct apr_memcache_server_t
     apr_thread_mutex_t *lock;
 #endif
     apr_time_t btime;
+#if APR_HAS_THREADS
+    /** Resource list parameters */
+    apr_uint32_t min;
+    apr_uint32_t smax;
+    apr_uint32_t max;
+    apr_uint32_t ttl;
+#endif
 };
 
 /* Custom hash callback function prototype, user for server selection.
