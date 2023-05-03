@@ -719,6 +719,9 @@ static void test_connection_validation(abts_case *tc, void *data)
     rv = apr_memcache_version(memserver, p, &result);
     ABTS_ASSERT(tc, "Couldn't get initial version", rv == APR_SUCCESS);
 
+    /* Wait for the mock memcached to shutdown the socket */
+    apr_sleep(apr_time_from_sec(1));
+
     rv = apr_memcache_version(memserver, p, &result);
     ABTS_ASSERT(tc, "Couldn't get version after connection shutdown", rv == APR_SUCCESS);
 
