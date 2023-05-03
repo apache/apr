@@ -655,6 +655,7 @@ IF(APR_BUILD_TESTAPR)
     test/proc_child.c
     test/readchild.c
     test/sockchild.c
+    test/memcachedmock.c
     test/testshmproducer.c
     test/testshmconsumer.c
     test/tryread.c
