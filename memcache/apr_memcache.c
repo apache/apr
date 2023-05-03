@@ -222,22 +222,83 @@ APR_DECLARE(apr_memcache_server_t *) apr_memcache_find_server(apr_memcache_t *mc
     return NULL;
 }
 
+
+/* Forward declare mc_conn_construct */
+static apr_status_t
+mc_conn_construct(void **conn_, void *params, apr_pool_t *pool);
+
 static apr_status_t ms_find_conn(apr_memcache_server_t *ms, apr_memcache_conn_t **conn)
 {
-    apr_status_t rv;
+    apr_status_t rv = APR_SUCCESS;
     apr_bucket_alloc_t *balloc;
     apr_bucket *e;
+#if APR_HAS_THREADS
+    int i;
+#endif
+    int atreadeof;
 
 #if APR_HAS_THREADS
-    rv = apr_reslist_acquire(ms->conns, (void **)conn);
+    /*
+     * In order to avoid an endless loop in case that a freshly connected
+     * socket is immediately closed by the remote side we limit this loop
+     * to the maxium number of connections in the reslist plus 1.
+     */
+    for (i = 0; i <= ms->max; i++) {
+        rv = apr_reslist_acquire(ms->conns, (void **)conn);
+
+        if (rv != APR_SUCCESS) {
+            return rv;
+        }
+
+        atreadeof = 0;
+        rv = apr_socket_atreadeof((*conn)->sock, &atreadeof);
+
+        if ((rv == APR_SUCCESS) && !atreadeof) {
+            break;
+        }
+        /*
+         * The socket we got is fishy. But maybe the memcached was just
+         * restarted. Hence give it a chance by destroying the socket and
+         * getting a new one.
+         */
+        rv = apr_reslist_invalidate(ms->conns, *conn);
+        *conn = NULL;
+
+        if (rv != APR_SUCCESS) {
+            return rv;
+        }
+    }
+
+    /*
+     * Even after refreshing all sockets we still do not have a working one.
+     * Give up.
+     */
+    if (!(*conn)) {
+        return APR_EGENERAL;
+    }
 #else
     *conn = ms->conn;
-    rv = APR_SUCCESS;
-#endif
-
-    if (rv != APR_SUCCESS) {
-        return rv;
+    atreadeof = 0;
+    if (*conn) {
+        rv = apr_socket_atreadeof((*conn)->sock, &atreadeof);
+        if ((rv != APR_SUCCESS) || !atreadeof) {
+            ms->conn = NULL;
+            apr_pool_destroy((*conn)->p);
+            rv = mc_conn_construct((void**)conn, ms, ms->p);
+            if (rv != APR_SUCCESS) {
+                return rv;
+            }
+            ms->conn = *conn;
+        }
     }
+    else {
+        rv = mc_conn_construct((void**)conn, ms, ms->p);
+        if (rv != APR_SUCCESS) {
+            return rv;
+        }
+        ms->conn = *conn;
+    }
+#endif
 
     balloc = apr_bucket_alloc_create((*conn)->tp);
     (*conn)->bb = apr_brigade_create((*conn)->tp, balloc);

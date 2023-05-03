@@ -73,6 +73,7 @@ TESTALL_COMPONENTS = \
 	$(OUTDIR)\proc_child.exe \
         $(OUTDIR)\tryread.exe \
 	$(OUTDIR)\sockchild.exe \
+	$(OUTDIR)\memcachedmock.exe \
 	$(OUTDIR)\testshmproducer.exe \
 	$(OUTDIR)\testshmconsumer.exe \
 	$(OUTDIR)\globalmutexchild.exe
@@ -270,6 +271,11 @@ $(OUTDIR)\readchild.exe: $(INTDIR)\readchild.obj $(LOCAL_LIB)
 	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
 
 $(OUTDIR)\sockchild.exe: $(INTDIR)\sockchild.obj $(LOCAL_LIB)
+	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
+	@if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
+
+$(OUTDIR)\memcachedmock.exe: $(INTDIR)\memcachedmock.obj $(LOCAL_LIB)
 	$(LD) $(LDFLAGS) /out:"$@" $** $(LD_LIBS)
 	@if exist "$@.manifest" \
 	    mt.exe -manifest "$@.manifest" -outputresource:$@;1

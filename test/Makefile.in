@@ -52,6 +52,7 @@ TESTALL_COMPONENTS = \
 	proc_child@EXEEXT@ \
 	readchild@EXEEXT@ \
 	sockchild@EXEEXT@ \
+	memcachedmock@EXEEXT@ \
 	testshmproducer@EXEEXT@ \
 	testshmconsumer@EXEEXT@ \
 	tryread@EXEEXT@ \
@@ -155,6 +156,10 @@ readchild@EXEEXT@: $(OBJECTS_readchild)
 OBJECTS_sockchild = sockchild.lo $(LOCAL_LIBS)
 sockchild@EXEEXT@: $(OBJECTS_sockchild)
 	$(LINK_PROG) $(OBJECTS_sockchild) $(ALL_LIBS)
+
+OBJECTS_memcachedmock = memcachedmock.lo $(LOCAL_LIBS)
+memcachedmock@EXEEXT@: $(OBJECTS_memcachedmock)
+	$(LINK_PROG) $(OBJECTS_memcachedmock) $(ALL_LIBS)
 
 OBJECTS_testshmconsumer = testshmconsumer.lo $(LOCAL_LIBS)
 testshmconsumer@EXEEXT@: $(OBJECTS_testshmconsumer) $(LOCAL_LIBS)

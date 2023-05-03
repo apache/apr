@@ -1,30 +1,23 @@
 #
-# Declare the sub-directories to be built here
-#
-
-SUBDIRS = \
-	$(EOLIST) 
-
-#
-# Get the 'head' of the build environment.  This includes default targets and
-# paths to tools
-#
-
-include $(APR_WORK)/build/NWGNUhead.inc
-
-#
-# build this level's files
-
-#
 # Make sure all needed macro's are defined
 #
 
+#
+# Get the 'head' of the build environment if necessary.  This includes default
+# targets and paths to tools
+#
+
+ifndef EnvironmentDefined
+include $(APR_WORK)/build/NWGNUhead.inc
+endif
 
 #
 # These directories will be at the beginning of the include list, followed by
 # INCDIRS
 #
 XINCDIRS	+= \
+			$(APR)/include \
+			$(APR)/include/arch/netware \
 			$(EOLIST)
 
 #
@@ -96,31 +89,31 @@ endif
 # This is used by the link 'name' directive to name the nlm.  If left blank
 # TARGET_nlm (see below) will be used.
 #
-NLM_NAME	=
+NLM_NAME	= memcachedmock
 
 #
 # This is used by the link '-desc ' directive. 
 # If left blank, NLM_NAME will be used.
 #
-NLM_DESCRIPTION	=  NLM is to test the apr layer
+NLM_DESCRIPTION	= socket NLM to test sockets
 
 #
 # This is used by the '-threadname' directive.  If left blank,
 # NLM_NAME Thread will be used.
 #
-NLM_THREAD_NAME	= 
+NLM_THREAD_NAME	= $(NLM_NAME)
 
 #
 # This is used by the '-screenname' directive.  If left blank,
 # 'Apache for NetWare' Thread will be used.
 #
-NLM_SCREEN_NAME =
+NLM_SCREEN_NAME = DEFAULT
 
 #
 # If this is specified, it will override VERSION value in 
 # $(APR_WORK)/build/NWGNUenvironment.inc
 #
-NLM_VERSION	= 
+NLM_VERSION	=
 
 #
 # If this is specified, it will override the default of 64K
@@ -130,12 +123,12 @@ NLM_STACK_SIZE	=
 #
 # If this is specified it will be used by the link '-entry' directive
 #
-NLM_ENTRY_SYM	= 
+NLM_ENTRY_SYM	=
 
 #
 # If this is specified it will be used by the link '-exit' directive
 #
-NLM_EXIT_SYM	= 
+NLM_EXIT_SYM	=
 
 #
 # If this is specified it will be used by the link '-check' directive
@@ -145,7 +138,7 @@ NLM_CHECK_SYM	=
 #
 # If this is specified it will be used by the link '-flags' directive
 #
-NLM_FLAGS	=
+NLM_FLAGS	= AUTOUNLOAD, PSEUDOPREEMPTION, MULTIPLE
  
 #
 # If this is specified it will be linked in with the XDCData option in the def 
@@ -162,18 +155,9 @@ XDCDATA		=
 # If there is an NLM target, put it here
 #
 TARGET_nlm = \
-	$(OBJDIR)/aprtest.nlm \
-	$(OBJDIR)/echod.nlm \
-	$(OBJDIR)/globalmutexchild.nlm \
-	$(OBJDIR)/mod_test.nlm \
-	$(OBJDIR)/proc_child.nlm \
-	$(OBJDIR)/readchild.nlm \
-	$(OBJDIR)/sockchild.nlm \
-	$(OBJDIR)/memcachedmock.nlm \
-	$(OBJDIR)/sockperf.nlm \
-	$(OBJDIR)/testatmc.nlm \
-	$(OBJDIR)/tryread.nlm \
+	$(OBJDIR)/$(NLM_NAME).nlm \
 	$(EOLIST)
+
 #
 # If there is an LIB target, put it here
 #
@@ -185,6 +169,7 @@ TARGET_lib = \
 # Paths must all use the '/' character
 #
 FILES_nlm_objs = \
+	$(OBJDIR)/$(NLM_NAME).o \
 	$(EOLIST)
 
 #
@@ -192,6 +177,7 @@ FILES_nlm_objs = \
 # These will be added as a library command in the link.opt file.
 #
 FILES_nlm_libs = \
+	$(PRELUDE) \
 	$(EOLIST)
 
 #
@@ -200,6 +186,7 @@ FILES_nlm_libs = \
 #
 FILES_nlm_modules = \
 	aprlib \
+	libc \
 	$(EOLIST)
 
 #
@@ -221,6 +208,8 @@ FILE_nlm_copyright =
 # Any additional imports go here
 #
 FILES_nlm_Ximports = \
+	@$(APR)/aprlib.imp \
+	@$(NOVI)/libc.imp \
 	$(EOLIST)
  
 #   
@@ -249,8 +238,6 @@ nlms :: libs $(TARGET_nlm)
 # correct place.  (See $(APR_WORK)/build/NWGNUhead.inc for examples)
 #
 install :: nlms FORCE
-	$(call COPY,$(OBJDIR)/*.nlm,$(INSTALLBASE)/)
-	$(call COPYR,data,$(INSTALLBASE)/data/)
 
 #
 # Any specialized rules here

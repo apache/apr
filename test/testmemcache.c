@@ -23,6 +23,8 @@
 #include "apr_memcache.h"
 #include "apr_network_io.h"
 #include "apr_thread_proc.h"
+#include "apr_signal.h"
+#include "testmemcache.h"
 
 #if APR_HAVE_STDLIB_H
 #include <stdlib.h>             /* for exit() */
@@ -662,6 +664,72 @@ static void test_memcache_setget(abts_case * tc, void *data)
     }
 }
 
+static void test_connection_validation(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_memcache_t *memcache;
+    apr_memcache_server_t *memserver;
+    char *result;
+    apr_procattr_t *procattr;
+    apr_proc_t proc;
+    const char *args[2];
+    int exitcode;
+    apr_exit_why_e why;
+#ifdef SIGPIPE
+    /*
+     * If SIGPIPE is present ignore it as we will write to a closed socket.
+     * Otherwise we would be terminated by the default handler for SIGPIPE.
+     */
+    apr_sigfunc_t *old_action;
+
+    old_action = apr_signal(SIGPIPE, SIG_IGN);
+#endif
+
+    rv = apr_procattr_create(&procattr, p);
+    ABTS_ASSERT(tc, "Couldn't create procattr", rv == APR_SUCCESS);
+
+    rv = apr_procattr_io_set(procattr, APR_NO_PIPE, APR_NO_PIPE,
+            APR_NO_PIPE);
+    ABTS_ASSERT(tc, "Couldn't set io in procattr", rv == APR_SUCCESS);
+
+    rv = apr_procattr_error_check_set(procattr, 1);
+    ABTS_ASSERT(tc, "Couldn't set error check in procattr", rv == APR_SUCCESS);
+
+    rv = apr_procattr_cmdtype_set(procattr, APR_PROGRAM_ENV);
+    ABTS_ASSERT(tc, "Couldn't set copy environment", rv == APR_SUCCESS);
+
+    args[0] = "memcachedmock" EXTENSION;
+    args[1] = NULL;
+    rv = apr_proc_create(&proc, TESTBINPATH "memcachedmock" EXTENSION, args, NULL,
+                         procattr, p);
+    ABTS_ASSERT(tc, "Couldn't launch program", rv == APR_SUCCESS);
+
+    /* Wait for the mock memcached to start */
+    apr_sleep(apr_time_from_sec(2));
+
+    rv = apr_memcache_create(p, 1, 0, &memcache);
+    ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
+
+    rv = apr_memcache_server_create(p, MOCK_HOST, MOCK_PORT, 0, 1, 1, 60000, &memserver);
+    ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
+
+    rv = apr_memcache_add_server(memcache, memserver);
+    ABTS_ASSERT(tc, "server add failed", rv == APR_SUCCESS);
+
+    rv = apr_memcache_version(memserver, p, &result);
+    ABTS_ASSERT(tc, "Couldn't get initial version", rv == APR_SUCCESS);
+
+    rv = apr_memcache_version(memserver, p, &result);
+    ABTS_ASSERT(tc, "Couldn't get version after connection shutdown", rv == APR_SUCCESS);
+
+#ifdef SIGPIPE
+    /* Restore old SIGPIPE handler */
+    apr_signal(SIGPIPE, old_action);
+#endif
+
+    apr_proc_wait(&proc, &exitcode, &why, APR_WAIT);
+}
+
 abts_suite *testmemcache(abts_suite * suite)
 {
     suite = ADD_SUITE(suite);
@@ -672,6 +740,7 @@ abts_suite *testmemcache(abts_suite * suite)
     abts_run_test(suite, test_memcache_multiget, NULL);
     abts_run_test(suite, test_memcache_addreplace, NULL);
     abts_run_test(suite, test_memcache_incrdecr, NULL);
+    abts_run_test(suite, test_connection_validation, NULL);
 
     return suite;
 }
