@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_memcache: Check sockets from connection pool before using them and try
+     to reconnect them if they are not usable any longer.[Ruediger Pluem]
+
   *) New APR_THREAD_LOCAL and apr_thread_current*() API.  [Yann Ylavic]
 
   *) apr_crypto_openssl: Compatibility with OpenSSL 3.  [Yann Ylavic]
