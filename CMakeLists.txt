@@ -262,6 +262,12 @@ SET(APR_TEST_SUITES
 SET(install_targets)
 SET(install_bin_pdb)
 
+IF (MSVC)
+  # Ignore Microsoft's interpretation of secure development
+  # and the POSIX string handling API
+  ADD_COMPILE_DEFINITIONS(_CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_WARNINGS)
+ENDIF()
+
 # libapr-1 is shared, apr-1 is static
 ADD_LIBRARY(libapr-1 SHARED ${APR_SOURCES} ${APR_PUBLIC_HEADERS_GENERATED} libapr.rc)
 SET(install_targets ${install_targets} libapr-1)
