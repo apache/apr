@@ -17,7 +17,7 @@
 #include "apr_arch_atomic.h"
 #include "apr_thread_mutex.h"
 
-#if defined(USE_ATOMICS_GENERIC) || defined (NEED_ATOMICS_GENERIC64)
+#if defined(USE_ATOMICS_GENERIC64)
 
 #include <stdlib.h>
 
