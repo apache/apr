@@ -79,7 +79,7 @@ APR_DECLARE(apr_jose_t *) apr_jose_json_make(apr_jose_t *jose, const char *cty,
 
 APR_DECLARE(apr_jose_signature_t *) apr_jose_signature_make(
         apr_jose_signature_t *signature, apr_json_value_t *header,
-        apr_json_value_t *protected, apr_pool_t *pool)
+        apr_json_value_t *protected, void *ctx, apr_pool_t *pool)
 {
 
     if (!signature) {
@@ -91,13 +91,14 @@ APR_DECLARE(apr_jose_signature_t *) apr_jose_signature_make(
 
     signature->header = header;
     signature->protected_header = protected;
+    signature->ctx = ctx;
 
     return signature;
 }
 
 APR_DECLARE(apr_jose_recipient_t *) apr_jose_recipient_make(
         apr_jose_recipient_t *recipient, apr_json_value_t *header,
-        apr_pool_t *pool)
+        void *ctx, apr_pool_t *pool)
 {
 
     if (!recipient) {
@@ -108,6 +109,7 @@ APR_DECLARE(apr_jose_recipient_t *) apr_jose_recipient_make(
     }
 
     recipient->header = header;
+    recipient->ctx = ctx;
 
     return recipient;
 }

@@ -537,6 +537,8 @@ typedef struct apr_jose_signature_t {
     apr_json_value_t *protected_header;
     /** JWS Signature */
     apr_jose_data_t sig;
+    /** Caller specified context */
+    void *ctx;
     /** Result of verification for this signature */
     apr_status_t status;
 } apr_jose_signature_t;
@@ -583,6 +585,8 @@ typedef struct apr_jose_recipient_t {
     apr_json_value_t *header;
     /** JWE Encrypted Key */
     apr_jose_data_t ekey;
+    /** Caller specified context */
+    void *ctx;
     /** Result of decryption for this recipient */
     apr_status_t status;
 } apr_jose_recipient_t;
@@ -962,25 +966,27 @@ APR_DECLARE(apr_jose_t *) apr_jose_jwks_make(apr_jose_t *jose,
  * @param signature the result.
  * @param header the unprotected header.
  * @param protected the protected header.
+ * @param ctx user supplied context
  * @param pool the pool to use.
  * @return The apr_jose_signature_t is returned.
  */
 APR_DECLARE(apr_jose_signature_t *) apr_jose_signature_make(
         apr_jose_signature_t *signature, apr_json_value_t *header,
-        apr_json_value_t *protected, apr_pool_t *pool)
-        __attribute__((nonnull(4)));
+        apr_json_value_t *protected, void *ctx, apr_pool_t *pool)
+        __attribute__((nonnull(5)));
 
 /**
  * Make a recipient structure for JWE.
  *
  * @param recipient the result.
  * @param unprotected the unprotected header.
+ * @param ctx user supplied context
  * @param pool the pool to use.
  * @return The apr_jose_recipient_t is returned.
  */
 APR_DECLARE(apr_jose_recipient_t *) apr_jose_recipient_make(apr_jose_recipient_t *recipient,
-        apr_json_value_t *unprotected, apr_pool_t *pool)
-        __attribute__((nonnull(3)));
+        apr_json_value_t *unprotected, void *ctx, apr_pool_t *pool)
+        __attribute__((nonnull(4)));
 
 /**
  * Make an encryption structure for JWE.

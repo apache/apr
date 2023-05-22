@@ -426,7 +426,7 @@ apr_status_t apr_jose_decode_compact_jws(apr_jose_t **jose,
      * the JWS Protected Header.
      */
 
-    jws->signature = apr_jose_signature_make(NULL, NULL, ph, pool);
+    jws->signature = apr_jose_signature_make(NULL, NULL, ph, NULL, pool);
     if (!jws->signature) {
         return APR_ENOMEM;
     }
@@ -525,7 +525,7 @@ apr_status_t apr_jose_decode_compact_jwe(apr_jose_t **jose, const char *left,
         return APR_ENOMEM;
     }
 
-    jwe->recipient = apr_jose_recipient_make(NULL, NULL, pool);
+    jwe->recipient = apr_jose_recipient_make(NULL, NULL, NULL, pool);
     if (!jwe->recipient) {
         return APR_ENOMEM;
     }
@@ -1066,7 +1066,7 @@ apr_status_t apr_jose_decode_json_jws(apr_jose_t **jose, apr_json_value_t *val,
     }
 
     jws->signature = apr_jose_signature_make(NULL, NULL, NULL,
-            pool);
+            NULL, pool);
     if (!jws->signature) {
         return APR_ENOMEM;
     }
