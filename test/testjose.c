@@ -894,7 +894,7 @@ static void test_jose_encode_jwe_compact_rsaes_oaep_aes_gcm(abts_case *tc, void 
     bb = apr_brigade_create(p, ba);
 
     jdata = apr_jose_data_make(NULL, "JWT", pl, sizeof(pl), p);
-    recipient = apr_jose_recipient_make(NULL, header, p);
+    recipient = apr_jose_recipient_make(NULL, header, NULL, p);
     encryption = apr_jose_encryption_make(NULL, NULL, protected_header, p);
     jose = apr_jose_jwe_make(NULL, recipient, NULL, encryption, jdata, p);
 
