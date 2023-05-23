@@ -113,6 +113,8 @@ struct apr_memcache_t
     apr_memcache_hash_func hash_func;
     void *server_baton;
     apr_memcache_server_func server_func;
+    /** Period of time before retrying a dead server */
+    apr_time_t retry_period;
 };
 
 /** Returned Data from a multiple get */
@@ -208,6 +210,26 @@ APR_DECLARE(apr_status_t) apr_memcache_enable_server(apr_memcache_t *mc,
  */
 APR_DECLARE(apr_status_t) apr_memcache_disable_server(apr_memcache_t *mc,
                                                       apr_memcache_server_t *ms);
+
+
+/**
+ * Set the retry period for retrying a dead server
+ * @param mc The memcache client object to use
+ * @param retry_period Period that must have passed until a server that was
+ *        declared dead is retried.
+ */
+APR_DECLARE(void) apr_memcache_set_retry_period(apr_memcache_t *mc,
+                                                apr_time_t retry_period);
+
+
+/**
+ * Get the retry period for retrying a dead server
+ * @param mc The memcache client object to use
+ * @return retry_period Period that must have passed until a server that was
+ *         declared dead is retried.
+ */
+APR_DECLARE(apr_time_t) apr_memcache_get_retry_period(apr_memcache_t *mc);
+
 
 /**
  * Creates a new Server Object
