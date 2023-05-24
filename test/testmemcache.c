@@ -244,7 +244,8 @@ static void test_memcache_create(abts_case * tc, void *data)
 
     port = PORT + i;
     rv =
-      apr_memcache_server_create(pool, HOST, PORT + i, 0, 1, 1, 60, &server);
+      apr_memcache_server_create(pool, HOST, PORT + i, 0, 1, 1,
+                                 apr_time_from_sec(60), &server);
     ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
 
     rv = apr_memcache_add_server(memcache, server);
@@ -266,7 +267,8 @@ static void test_memcache_create(abts_case * tc, void *data)
     ABTS_PTR_NOTNULL(tc, s);
   }
 
-  rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1, 60, &server);
+  rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1,
+                                  apr_time_from_sec(60), &server);
   ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
 
   rv = apr_memcache_add_server(memcache, server);
@@ -325,7 +327,8 @@ static void test_memcache_user_funcs(abts_case * tc, void *data)
   for(i = 1; i <= 10; i++) {
     apr_memcache_server_t *ms;
 
-    rv = apr_memcache_server_create(pool, HOST, i, 0, 1, 1, 60, &ms);
+    rv = apr_memcache_server_create(pool, HOST, i, 0, 1, 1,
+                                    apr_time_from_sec(60), &ms);
     ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
 
     rv = apr_memcache_add_server(memcache, ms);
@@ -361,7 +364,8 @@ static void test_memcache_meta(abts_case * tc, void *data)
     rv = apr_memcache_create(pool, 1, 0, &memcache);
     ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
 
-    rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1, 60, &server);
+    rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1,
+                                    apr_time_from_sec(60), &server);
     ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
 
     rv = apr_memcache_add_server(memcache, server);
@@ -430,7 +434,8 @@ static void test_memcache_addreplace(abts_case * tc, void *data)
   rv = apr_memcache_create(pool, 1, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
 
-  rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1, 60, &server);
+  rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1,
+                                  apr_time_from_sec(60), &server);
   ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
 
   rv = apr_memcache_add_server(memcache, server);
@@ -494,7 +499,8 @@ static void test_memcache_incrdecr(abts_case * tc, void *data)
   rv = apr_memcache_create(pool, 1, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
 
-  rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1, 60, &server);
+  rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1,
+                                  apr_time_from_sec(60), &server);
   ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
 
   rv = apr_memcache_add_server(memcache, server);
@@ -551,7 +557,8 @@ static void test_memcache_multiget(abts_case * tc, void *data)
   rv = apr_memcache_create(pool, 1, 0, &memcache);
   ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
 
-  rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1, 60, &server);
+  rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1,
+                                  apr_time_from_sec(60), &server);
   ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
 
   rv = apr_memcache_add_server(memcache, server);
@@ -624,7 +631,8 @@ static void test_memcache_setget(abts_case * tc, void *data)
     rv = apr_memcache_create(pool, 1, 0, &memcache);
     ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
 
-    rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1, 60, &server);
+    rv = apr_memcache_server_create(pool, HOST, PORT, 0, 1, 1,
+                                    apr_time_from_sec(60), &server);
     ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
 
     rv = apr_memcache_add_server(memcache, server);
@@ -710,7 +718,8 @@ static void test_connection_validation(abts_case *tc, void *data)
     rv = apr_memcache_create(p, 1, 0, &memcache);
     ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
 
-    rv = apr_memcache_server_create(p, MOCK_HOST, MOCK_PORT, 0, 1, 1, 60000, &memserver);
+    rv = apr_memcache_server_create(p, MOCK_HOST, MOCK_PORT, 0, 1, 1,
+                                    apr_time_from_sec(60), &memserver);
     ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
 
     rv = apr_memcache_add_server(memcache, memserver);

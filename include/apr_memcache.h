@@ -74,10 +74,10 @@ struct apr_memcache_server_t
     apr_time_t btime;
 #if APR_HAS_THREADS
     /** Resource list parameters */
-    apr_uint32_t min;
-    apr_uint32_t smax;
-    apr_uint32_t max;
-    apr_uint32_t ttl;
+    int min;
+    int smax;
+    int max;
+    apr_interval_time_t ttl;
 #endif
 };
 
@@ -247,10 +247,10 @@ APR_DECLARE(apr_time_t) apr_memcache_get_retry_period(apr_memcache_t *mc);
 APR_DECLARE(apr_status_t) apr_memcache_server_create(apr_pool_t *p,
                                                      const char *host,
                                                      apr_port_t port,
-                                                     apr_uint32_t min,
-                                                     apr_uint32_t smax,
-                                                     apr_uint32_t max,
-                                                     apr_uint32_t ttl,
+                                                     int min,
+                                                     int smax,
+                                                     int max,
+                                                     apr_interval_time_t ttl,
                                                      apr_memcache_server_t **ns);
 /**
  * Creates a new memcached client object

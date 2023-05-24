@@ -459,8 +459,8 @@ mc_conn_destruct(void *conn_, void *params, apr_pool_t *pool)
 
 APR_DECLARE(apr_status_t) apr_memcache_server_create(apr_pool_t *p,
                                                      const char *host, apr_port_t port,
-                                                     apr_uint32_t min, apr_uint32_t smax,
-                                                     apr_uint32_t max, apr_uint32_t ttl,
+                                                     int min, int smax,
+                                                     int max, apr_interval_time_t ttl,
                                                      apr_memcache_server_t **ms)
 {
     apr_status_t rv = APR_SUCCESS;
