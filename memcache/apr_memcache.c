@@ -165,7 +165,7 @@ apr_memcache_find_server_hash_default(void *baton, apr_memcache_t *mc,
     apr_uint32_t i = 0;
     apr_time_t curtime = 0;
 
-    if(mc->ntotal == 0) {
+    if (mc->ntotal == 0) {
         return NULL;
     }
 
@@ -182,7 +182,7 @@ apr_memcache_find_server_hash_default(void *baton, apr_memcache_t *mc,
             apr_thread_mutex_lock(ms->lock);
 #endif
             /* Try the dead server, every 5 seconds */
-            if (curtime - ms->btime >  mc->retry_period) {
+            if (curtime - ms->btime > mc->retry_period) {
                 ms->btime = curtime;
                 if (mc_version_ping(ms) == APR_SUCCESS) {
                     make_server_live(mc, ms);
