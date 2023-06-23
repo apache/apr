@@ -346,20 +346,9 @@ APR_DECLARE(apr_status_t) apr_memcache_disable_server(apr_memcache_t *mc, apr_me
     return make_server_dead(mc, ms);
 }
 
-static apr_status_t conn_connect(apr_memcache_conn_t *conn)
+static apr_status_t conn_connect(apr_memcache_conn_t *conn, apr_sockaddr_t *sa)
 {
     apr_status_t rv = APR_SUCCESS;
-    apr_sockaddr_t *sa;
-#if APR_HAVE_SOCKADDR_UN
-    apr_int32_t family = conn->ms->host[0] != '/' ? APR_UNSPEC : APR_UNIX;
-#else
-    apr_int32_t family = APR_UNSPEC;
-#endif
-
-    rv = apr_sockaddr_info_get(&sa, conn->ms->host, family, conn->ms->port, 0, conn->p);
-    if (rv != APR_SUCCESS) {
-        return rv;
-    }
 
     rv = apr_socket_timeout_set(conn->sock, 1 * APR_USEC_PER_SEC);
     if (rv != APR_SUCCESS) {
@@ -388,6 +377,7 @@ mc_conn_construct(void **conn_, void *params, apr_pool_t *pool)
     apr_pool_t *np;
     apr_pool_t *tp;
     apr_memcache_server_t *ms = params;
+    apr_sockaddr_t *sa;
 #if APR_HAVE_SOCKADDR_UN
     apr_int32_t family = ms->host[0] != '/' ? APR_UNSPEC : APR_UNIX;
 #else
@@ -410,6 +400,14 @@ mc_conn_construct(void **conn_, void *params, apr_pool_t *pool)
     conn->p = np;
     conn->tp = tp;
 
+    if (family == APR_UNSPEC){
+        rv = apr_sockaddr_info_get(&sa, ms->host, family, ms->port, 0, np);
+        if (rv != APR_SUCCESS) {
+            return rv;
+        }
+        family = sa->family;
+    }
+
     rv = apr_socket_create(&conn->sock, family, SOCK_STREAM, 0, np);
 
     if (rv != APR_SUCCESS) {
@@ -421,7 +419,7 @@ mc_conn_construct(void **conn_, void *params, apr_pool_t *pool)
     conn->blen = 0;
     conn->ms = ms;
 
-    rv = conn_connect(conn);
+    rv = conn_connect(conn, sa);
     if (rv != APR_SUCCESS) {
         apr_pool_destroy(np);
     }
