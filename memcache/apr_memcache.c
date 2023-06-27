@@ -361,14 +361,26 @@ static apr_status_t conn_connect(apr_memcache_conn_t *conn)
         return rv;
     }
 
-    rv = apr_socket_timeout_set(conn->sock, 1 * APR_USEC_PER_SEC);
-    if (rv != APR_SUCCESS) {
-        return rv;
+    /* Cycle through address until a connect() succeeds. */
+    for (; sa; sa = sa->next) {
+        rv = apr_socket_create(&conn->sock, sa->family, SOCK_STREAM, 0, conn->p);
+        if (rv == APR_SUCCESS) {
+            rv = apr_socket_timeout_set(conn->sock, 1 * APR_USEC_PER_SEC);
+            if (rv != APR_SUCCESS) {
+                return rv;
+            }
+
+            rv = apr_socket_connect(conn->sock, sa);
+            if (rv == APR_SUCCESS) {
+                break;
+            }
+
+            apr_socket_close(conn->sock);
+        }
     }
 
-    rv = apr_socket_connect(conn->sock, sa);
-    if (rv != APR_SUCCESS) {
-        return rv;
+    if (!sa) {
+        return APR_ECONNREFUSED;
     }
 
     rv = apr_socket_timeout_set(conn->sock, -1);
@@ -388,11 +400,6 @@ mc_conn_construct(void **conn_, void *params, apr_pool_t *pool)
     apr_pool_t *np;
     apr_pool_t *tp;
     apr_memcache_server_t *ms = params;
-#if APR_HAVE_SOCKADDR_UN
-    apr_int32_t family = ms->host[0] != '/' ? APR_UNSPEC : APR_UNIX;
-#else
-    apr_int32_t family = APR_UNSPEC;
-#endif
 
     rv = apr_pool_create(&np, pool);
     if (rv != APR_SUCCESS) {
@@ -409,13 +416,6 @@ mc_conn_construct(void **conn_, void *params, apr_pool_t *pool)
 
     conn->p = np;
     conn->tp = tp;
-
-    rv = apr_socket_create(&conn->sock, family, SOCK_STREAM, 0, np);
-
-    if (rv != APR_SUCCESS) {
-        apr_pool_destroy(np);
-        return rv;
-    }
 
     conn->buffer = apr_palloc(conn->p, BUFFER_SIZE + 1);
     conn->blen = 0;
