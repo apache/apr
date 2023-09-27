@@ -682,6 +682,7 @@ typedef int apr_wait_t;
  * we always have SDBM (it's in our codebase)
  */
 #define APU_HAVE_SDBM   @apu_have_sdbm@
+#define APU_HAVE_LMDB   @apu_have_lmdb@
 #define APU_HAVE_GDBM   @apu_have_gdbm@
 #define APU_HAVE_NDBM   @apu_have_ndbm@
 #define APU_HAVE_DB     @apu_have_db@

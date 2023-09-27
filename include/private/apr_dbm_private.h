@@ -112,6 +112,7 @@ struct apr_dbm_t
 APR_MODULE_DECLARE_DATA extern const apr_dbm_driver_t apr_dbm_type_sdbm;
 APR_MODULE_DECLARE_DATA extern const apr_dbm_driver_t apr_dbm_type_gdbm;
 APR_MODULE_DECLARE_DATA extern const apr_dbm_driver_t apr_dbm_type_ndbm;
+APR_MODULE_DECLARE_DATA extern const apr_dbm_driver_t apr_dbm_type_lmdb;
 APR_MODULE_DECLARE_DATA extern const apr_dbm_driver_t apr_dbm_type_db;
 
 #ifdef __cplusplus

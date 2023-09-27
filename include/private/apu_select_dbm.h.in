@@ -21,6 +21,7 @@
 ** The following macros control what features APRUTIL will use
 */
 #define APU_USE_SDBM    @apu_use_sdbm@
+#define APU_USE_LMDB    @apu_use_lmdb@
 #define APU_USE_NDBM    @apu_use_ndbm@
 #define APU_USE_GDBM    @apu_use_gdbm@
 #define APU_USE_DB      @apu_use_db@

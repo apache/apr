@@ -33,6 +33,21 @@ typedef struct {
     int visited;
 } dbm_table_t;
 
+struct apr_dbm_t
+{
+    /** Associated pool */
+    apr_pool_t *pool;
+
+    /** pointer to DB Implementation Specific data */
+    void *file;
+
+    /** Current integer error code */
+    int errcode;
+    /** Current string error code */
+    const char *errmsg;
+};
+
+
 static dbm_table_t *generate_table(void)
 {
     unsigned int i;
@@ -153,6 +168,9 @@ static void test_dbm_traversal(abts_case *tc, apr_dbm_t *db, dbm_table_t *table)
 
         rv = apr_dbm_nextkey(db, &key);
         ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+        /** avoid infinite loop */
+        if (rv != APR_SUCCESS) break;
     } while (1);
 
     for (i = 0; i < NUM_TABLE_ROWS; i++) {
@@ -180,6 +198,7 @@ static void test_dbm(abts_case *tc, void *data)
     table = generate_table();
 
     test_dbm_store(tc, db, table);
+
     test_dbm_fetch(tc, db, table);
     test_dbm_delete(tc, db, table);
     test_dbm_exists(tc, db, table);
@@ -197,6 +216,7 @@ static void test_dbm(abts_case *tc, void *data)
     test_dbm_traversal(tc, db, table);
     test_dbm_fetch(tc, db, table);
 
+
     apr_dbm_close(db);
 }
 
@@ -204,6 +224,9 @@ abts_suite *testdbm(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
 
+#if APU_HAVE_LMDB
+    abts_run_test(suite, test_dbm, "lmdb");
+#endif
 #if APU_HAVE_GDBM
     abts_run_test(suite, test_dbm, "gdbm");
 #endif
