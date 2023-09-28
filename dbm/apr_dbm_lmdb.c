@@ -50,35 +50,29 @@ typedef struct {
 ** UTILITY FUNCTIONS
 */
 
-/* map a DB error to an apr_status_t */
+/* Map a DB error to an apr_status_t */
 static apr_status_t db2s(int dberr)
 {
-    if (dberr != 0) {
-        /* ### need to fix this */
-        return APR_OS_START_USEERR + dberr;
-    }
-
-    return APR_SUCCESS;
+    /* MDB_* error codes are negative, which are mapped to EGENERAL;
+     * positive error codes are errno which maps directly to
+     * apr_status_t. MDB_ codes could be mapped to some status code
+     * region. */
+    return dberr < 0 ? APR_EGENERAL : dberr;
 }
 
-
-static apr_status_t set_error(apr_dbm_t *dbm, apr_status_t dbm_said)
+/* Handle the return code of an mdb_* function (dberr), store the
+ * error string for access via apr_dbm_geterror(), return translated
+ * to an apr_status_t. */
+static apr_status_t set_error(apr_dbm_t *dbm, int dberr)
 {
-    apr_status_t rv = APR_SUCCESS;
-
-    /* ### ignore whatever the DBM said (dbm_said); ask it explicitly */
-    if (dbm_said == APR_SUCCESS) {
-        dbm->errcode = 0;
+    if ((dbm->errcode = dberr) == MDB_SUCCESS) {
         dbm->errmsg = NULL;
     }
     else {
-        dbm->errcode = dbm_said;
-        dbm->errmsg = mdb_strerror(dbm_said - APR_OS_START_USEERR);
-
-        rv = dbm_said;
+        dbm->errmsg = mdb_strerror(dberr);
     }
 
-    return rv;
+    return db2s(dberr);
 }
 
 #if 0
@@ -100,6 +94,8 @@ static apr_status_t lmdb_retry(real_file_t *f, int dberr)
 ** DEFINE THE VTABLE FUNCTIONS FOR LMDB
 **
 */
+
+#define DEFAULT_ENV_FLAGS (MDB_NOSUBDIR)
 
 static apr_status_t vt_lmdb_open(apr_dbm_t **pdb, const char *pathname,
                                  apr_int32_t mode, apr_fileperms_t perm,
@@ -133,7 +129,7 @@ static apr_status_t vt_lmdb_open(apr_dbm_t **pdb, const char *pathname,
         file.txn = NULL;
         file.cursor = NULL;
 
-        if ((dberr = mdb_env_create(&file.env)) == 0){
+        if ((dberr = mdb_env_create(&file.env)) == 0) {
             //XXX: properly set db size
             if ((dberr = mdb_env_set_mapsize(file.env, UINT32_MAX)) == 0){
                 if ((dberr = mdb_env_open(file.env, pathname, dbmode | MDB_NOSUBDIR, apr_posix_perms2mode(perm))) == 0) {
@@ -213,7 +209,7 @@ static apr_status_t vt_lmdb_fetch(apr_dbm_t *dbm, apr_datum_t key,
 
     /* store the error info into DBM, and return a status code. Also, note
        that *pvalue should have been cleared on error. */
-    return set_error(dbm, db2s(dberr));
+    return set_error(dbm, dberr);
 }
 
 
@@ -222,7 +218,7 @@ static apr_status_t vt_lmdb_store(apr_dbm_t *dbm, apr_datum_t key,
                                   apr_datum_t value)
 {
     real_file_t *f = dbm->file;
-    apr_status_t rv;
+    int rv;
     MDB_val ckey = { 0 };
     MDB_val cvalue = { 0 };
 
@@ -232,10 +228,10 @@ static apr_status_t vt_lmdb_store(apr_dbm_t *dbm, apr_datum_t key,
     cvalue.mv_data = value.dptr;
     cvalue.mv_size = value.dsize;
 
-    if ((rv = db2s(mdb_put(f->txn, f->dbi, &ckey, &cvalue, 0))) == 0) {
+    if ((rv = mdb_put(f->txn, f->dbi, &ckey, &cvalue, 0)) == 0) {
         /* commit transaction */
-        if (((rv = db2s(mdb_txn_commit(f->txn))) == MDB_SUCCESS) && 
-            ((rv = db2s(mdb_txn_begin(f->env, NULL, 0, &f->txn))) == MDB_SUCCESS)) {
+        if (((rv = mdb_txn_commit(f->txn)) == MDB_SUCCESS)
+            && ((rv = mdb_txn_begin(f->env, NULL, 0, &f->txn)) == MDB_SUCCESS)) {
             f->cursor = NULL;
         }
     }
@@ -247,16 +243,16 @@ static apr_status_t vt_lmdb_store(apr_dbm_t *dbm, apr_datum_t key,
 static apr_status_t vt_lmdb_del(apr_dbm_t *dbm, apr_datum_t key)
 {
     real_file_t *f = dbm->file;
-    apr_status_t rv;
+    int rv;
     MDB_val ckey = { 0 };
 
     ckey.mv_data = key.dptr;
     ckey.mv_size = key.dsize;
 
-    if ((rv = db2s(mdb_del(f->txn, f->dbi, &ckey, NULL))) == 0) {
+    if ((rv = mdb_del(f->txn, f->dbi, &ckey, NULL)) == 0) {
         /* commit transaction */
-        if (((rv = db2s(mdb_txn_commit(f->txn))) == MDB_SUCCESS) && 
-            ((rv = db2s(mdb_txn_begin(f->env, NULL, 0, &f->txn))) == MDB_SUCCESS)) {
+        if (((rv = mdb_txn_commit(f->txn)) == MDB_SUCCESS)
+            && ((rv = mdb_txn_begin(f->env, NULL, 0, &f->txn)) == MDB_SUCCESS)) {
             f->cursor = NULL;
         }
     }
@@ -304,7 +300,7 @@ static apr_status_t vt_lmdb_firstkey(apr_dbm_t *dbm, apr_datum_t * pkey)
     pkey->dsize = first.mv_size;
 
     /* store any error info into DBM, and return a status code. */
-    return set_error(dbm, db2s(dberr));
+    return set_error(dbm, dberr);
 }
 
 static apr_status_t vt_lmdb_nextkey(apr_dbm_t *dbm, apr_datum_t * pkey)
@@ -333,7 +329,7 @@ static apr_status_t vt_lmdb_nextkey(apr_dbm_t *dbm, apr_datum_t * pkey)
     pkey->dsize = ckey.mv_size;
 
     /* store any error info into DBM, and return a status code. */
-    return set_error(dbm, db2s(dberr));
+    return set_error(dbm, dberr);
 }
 
 static void vt_lmdb_freedatum(apr_dbm_t *dbm, apr_datum_t data)
