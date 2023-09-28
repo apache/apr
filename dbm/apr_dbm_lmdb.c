@@ -343,7 +343,7 @@ static void vt_lmdb_usednames(apr_pool_t *pool, const char *pathname,
                               const char **used1, const char **used2)
 {
     *used1 = apr_pstrdup(pool, pathname);
-    *used2 = NULL;
+    *used2 = apr_pstrcat(pool, pathname, "-lock", NULL);
 }
 
 
