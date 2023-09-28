@@ -45,7 +45,7 @@ jobs:
           - name: LMDB
             packages: lmdb-dev
             notest-cflags: -Werror
-            config: --enable-maintainer-mode
+            config: --enable-maintainer-mode --with-lmdb
       fail-fast: false
 
     runs-on: ubuntu-latest
