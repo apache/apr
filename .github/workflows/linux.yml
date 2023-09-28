@@ -42,6 +42,10 @@ jobs:
             config: --enable-pool-debug --with-odbc=no
           - name: UBsan
             notest-cflags: -fsanitize=undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -Werror -O2
+          - name: LMDB
+            packages: lmdb-dev
+            notest-cflags: -Werror
+            config: --enable-maintainer-mode
       fail-fast: false
 
     runs-on: ubuntu-latest
@@ -50,7 +54,7 @@ jobs:
     name: ${{ matrix.name }}
     steps:
     - name: Install prerequisites
-      run: sudo apt-get install libtool libtool-bin
+      run: sudo apt-get install libtool libtool-bin ${{ matrix.packages }}
     - uses: actions/checkout@v3
     - name: buildconf
       run: ./buildconf
