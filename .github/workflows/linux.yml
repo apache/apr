@@ -45,7 +45,11 @@ jobs:
           - name: LMDB
             packages: liblmdb-dev
             notest-cflags: -Werror
-            config: --enable-maintainer-mode --with-lmdb
+            config: --enable-maintainer-mode --with-lmdb --with-dbm=lmdb
+          - name: Berkeley DB v5.3
+            packages: libdb5.3-dev
+            notest-cflags: -Werror
+            config: --enable-maintainer-mode --with-berkeley-db --with-dbm=db5
       fail-fast: false
 
     runs-on: ubuntu-latest
