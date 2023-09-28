@@ -26,9 +26,10 @@
 #include "apu.h"
 #include "apr_private.h"
 
+#if APU_HAVE_LMDB
+
 #include <lmdb.h>
 
-#if APU_HAVE_LMDB
 #include "apr_dbm_private.h"
 
 typedef struct {
