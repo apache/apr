@@ -81,6 +81,7 @@ static apr_status_t set_error(apr_dbm_t *dbm, apr_status_t dbm_said)
     return rv;
 }
 
+#if 0
 static apr_status_t lmdb_retry(real_file_t *f, int dberr)
 {
     if (f->cursor != 0)
@@ -92,7 +93,7 @@ static apr_status_t lmdb_retry(real_file_t *f, int dberr)
         
     }
 }
-
+#endif
 
 /* --------------------------------------------------------------------------
 **
@@ -231,7 +232,7 @@ static apr_status_t vt_lmdb_store(apr_dbm_t *dbm, apr_datum_t key,
     cvalue.mv_data = value.dptr;
     cvalue.mv_size = value.dsize;
 
-    if (rv = db2s(mdb_put(f->txn, f->dbi, &ckey, &cvalue, 0)) == 0){
+    if ((rv = db2s(mdb_put(f->txn, f->dbi, &ckey, &cvalue, 0))) == 0) {
         /* commit transaction */
         if (((rv = db2s(mdb_txn_commit(f->txn))) == MDB_SUCCESS) && 
             ((rv = db2s(mdb_txn_begin(f->env, NULL, 0, &f->txn))) == MDB_SUCCESS)) {
@@ -252,7 +253,7 @@ static apr_status_t vt_lmdb_del(apr_dbm_t *dbm, apr_datum_t key)
     ckey.mv_data = key.dptr;
     ckey.mv_size = key.dsize;
 
-    if (rv = db2s(mdb_del(f->txn, f->dbi, &ckey, NULL)) == 0){
+    if ((rv = db2s(mdb_del(f->txn, f->dbi, &ckey, NULL))) == 0) {
         /* commit transaction */
         if (((rv = db2s(mdb_txn_commit(f->txn))) == MDB_SUCCESS) && 
             ((rv = db2s(mdb_txn_begin(f->env, NULL, 0, &f->txn))) == MDB_SUCCESS)) {
