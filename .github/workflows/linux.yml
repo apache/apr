@@ -43,7 +43,7 @@ jobs:
           - name: UBsan
             notest-cflags: -fsanitize=undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -Werror -O2
           - name: LMDB
-            packages: lmdb-dev
+            packages: liblmdb-dev
             notest-cflags: -Werror
             config: --enable-maintainer-mode --with-lmdb
       fail-fast: false
