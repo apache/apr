@@ -32,6 +32,7 @@ jobs:
             config: --enable-maintainer-mode
           - name: With crypto
             config: --with-crypto=yes --with-openssl=yes
+            config-output: APU_HAVE_CRYPTO APU_HAVE_OPENSSL
           - name: ASan
             # w/o ODBC since DSO unload leaks memory and fails the tests
             notest-cflags: -fsanitize=address -fno-sanitize-recover=address -fno-omit-frame-pointer -Werror -O2
@@ -46,10 +47,12 @@ jobs:
             packages: liblmdb-dev
             notest-cflags: -Werror
             config: --enable-maintainer-mode --with-lmdb --with-dbm=lmdb
+            config-output: APU_HAVE_LMDB
           - name: Berkeley DB v5.3
             packages: libdb5.3-dev
             notest-cflags: -Werror
             config: --enable-maintainer-mode --with-berkeley-db --with-dbm=db5
+            config-output: APU_HAVE_DB
       fail-fast: false
 
     runs-on: ubuntu-latest
@@ -64,6 +67,9 @@ jobs:
       run: ./buildconf
     - name: configure
       run: ./configure --prefix=/tmp/apr ${{ matrix.config }}
+    - if: ${{ matrix.config-output != '' }}
+      name: check for expected configure output ${{ matrix.config-output }}
+      run: for var in ${{ matrix.config-output }}; do grep "^#define *${var} *1" include/apr.h; done
     - name: make
       run: make $MARGS
     - name: install
