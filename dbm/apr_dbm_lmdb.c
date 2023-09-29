@@ -75,19 +75,6 @@ static apr_status_t set_error(apr_dbm_t *dbm, int dberr)
     return db2s(dberr);
 }
 
-#if 0
-static apr_status_t lmdb_retry(real_file_t *f, int dberr)
-{
-    if (f->cursor != 0)
-//        slmdb_cursor_close(slmdb);
-
-    if (dberr == MDB_MAP_FULL){
-        
-    } else if (dberr == MDB_MAP_RESIZED){
-        
-    }
-}
-#endif
 
 /* --------------------------------------------------------------------------
 **
