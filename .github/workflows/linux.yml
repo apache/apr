@@ -42,6 +42,14 @@ jobs:
             config: --enable-pool-debug --with-odbc=no
           - name: UBsan
             notest-cflags: -fsanitize=undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -Werror -O2
+          - name: LMDB
+            packages: liblmdb-dev
+            notest-cflags: -Werror
+            config: --enable-maintainer-mode --with-lmdb --with-dbm=lmdb
+          - name: Berkeley DB v5.3
+            packages: libdb5.3-dev
+            notest-cflags: -Werror
+            config: --enable-maintainer-mode --with-berkeley-db --with-dbm=db5
       fail-fast: false
 
     runs-on: ubuntu-latest
@@ -50,7 +58,7 @@ jobs:
     name: ${{ matrix.name }}
     steps:
     - name: Install prerequisites
-      run: sudo apt-get install libtool libtool-bin
+      run: sudo apt-get install libtool libtool-bin ${{ matrix.packages }}
     - uses: actions/checkout@v3
     - name: buildconf
       run: ./buildconf

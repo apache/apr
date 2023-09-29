@@ -33,21 +33,6 @@ typedef struct {
     int visited;
 } dbm_table_t;
 
-struct apr_dbm_t
-{
-    /** Associated pool */
-    apr_pool_t *pool;
-
-    /** pointer to DB Implementation Specific data */
-    void *file;
-
-    /** Current integer error code */
-    int errcode;
-    /** Current string error code */
-    const char *errmsg;
-};
-
-
 static dbm_table_t *generate_table(void)
 {
     unsigned int i;
@@ -188,6 +173,7 @@ static void test_dbm(abts_case *tc, void *data)
     dbm_table_t *table;
     const char *type = data;
     const char *file = apr_pstrcat(p, "data/test-", type, NULL);
+    const char *nofile = apr_pstrcat(p, "data/no-such-test-", type, NULL);
 
     rv = apr_dbm_open_ex(&db, type, file, APR_DBM_RWCREATE, APR_FPROT_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -216,8 +202,10 @@ static void test_dbm(abts_case *tc, void *data)
     test_dbm_traversal(tc, db, table);
     test_dbm_fetch(tc, db, table);
 
-
     apr_dbm_close(db);
+
+    rv = apr_dbm_open_ex(&db, type, nofile, APR_DBM_READONLY, APR_FPROT_OS_DEFAULT, p);
+    ABTS_TRUE(tc, rv != APR_SUCCESS);
 }
 
 abts_suite *testdbm(abts_suite *suite)
