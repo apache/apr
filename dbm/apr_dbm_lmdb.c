@@ -95,7 +95,7 @@ static apr_status_t lmdb_retry(real_file_t *f, int dberr)
 **
 */
 
-#define DEFAULT_ENV_FLAGS (MDB_NOSUBDIR)
+#define DEFAULT_ENV_FLAGS (MDB_NOSUBDIR|MDB_NOSYNC)
 
 static apr_status_t vt_lmdb_open(apr_dbm_t **pdb, const char *pathname,
                                  apr_int32_t mode, apr_fileperms_t perm,
@@ -132,7 +132,7 @@ static apr_status_t vt_lmdb_open(apr_dbm_t **pdb, const char *pathname,
         if ((dberr = mdb_env_create(&file.env)) == 0) {
             //XXX: properly set db size
             if ((dberr = mdb_env_set_mapsize(file.env, UINT32_MAX)) == 0){
-                if ((dberr = mdb_env_open(file.env, pathname, dbmode | MDB_NOSUBDIR, apr_posix_perms2mode(perm))) == 0) {
+                if ((dberr = mdb_env_open(file.env, pathname, dbmode | DEFAULT_ENV_FLAGS, apr_posix_perms2mode(perm))) == 0) {
                     if ((dberr = mdb_txn_begin(file.env, NULL, dbmode, &file.txn)) == 0){
                         if ((dberr = mdb_dbi_open(file.txn, NULL, dbi_open_flags, &file.dbi)) != 0){
                             /* close the env handler */
