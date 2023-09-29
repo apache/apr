@@ -117,11 +117,12 @@ static apr_status_t vt_lmdb_open(apr_dbm_t **pdb, const char *pathname,
         file.cursor = NULL;
 
         if ((dberr = mdb_env_create(&file.env)) == 0) {
-            //XXX: properly set db size
-            if ((dberr = mdb_env_set_mapsize(file.env, UINT32_MAX)) == 0){
+            /* Default to 2GB map size which limits the total database
+             * size to something reasonable. */
+            if ((dberr = mdb_env_set_mapsize(file.env, UINT32_MAX)) == 0) {
                 if ((dberr = mdb_env_open(file.env, pathname, dbmode | DEFAULT_ENV_FLAGS, apr_posix_perms2mode(perm))) == 0) {
-                    if ((dberr = mdb_txn_begin(file.env, NULL, dbmode, &file.txn)) == 0){
-                        if ((dberr = mdb_dbi_open(file.txn, NULL, dbi_open_flags, &file.dbi)) != 0){
+                    if ((dberr = mdb_txn_begin(file.env, NULL, dbmode, &file.txn)) == 0) {
+                        if ((dberr = mdb_dbi_open(file.txn, NULL, dbi_open_flags, &file.dbi)) != 0) {
                             /* close the env handler */
                             mdb_env_close(file.env);
                         }
@@ -130,8 +131,8 @@ static apr_status_t vt_lmdb_open(apr_dbm_t **pdb, const char *pathname,
             }
         }
 
-        if (truncate){
-            if ((dberr = mdb_drop(file.txn, file.dbi, 0)) != 0){
+        if (truncate) {
+            if ((dberr = mdb_drop(file.txn, file.dbi, 0)) != 0) {
                 mdb_env_close(file.env);
             }
         }
@@ -155,12 +156,12 @@ static void vt_lmdb_close(apr_dbm_t *dbm)
 {
     real_file_t *f = dbm->file;
 
-    if (f->cursor){
+    if (f->cursor) {
         mdb_cursor_close(f->cursor);
         f->cursor = NULL;
     }
 
-    if (f->txn){
+    if (f->txn) {
        mdb_txn_commit(f->txn);
        f->txn = NULL;
     }
@@ -199,8 +200,6 @@ static apr_status_t vt_lmdb_fetch(apr_dbm_t *dbm, apr_datum_t key,
     return set_error(dbm, dberr);
 }
 
-
-//XXX: performance of store+del functions are very bad --> everything is one transaction
 static apr_status_t vt_lmdb_store(apr_dbm_t *dbm, apr_datum_t key,
                                   apr_datum_t value)
 {
@@ -299,7 +298,7 @@ static apr_status_t vt_lmdb_nextkey(apr_dbm_t *dbm, apr_datum_t * pkey)
     ckey.mv_data = pkey->dptr;
     ckey.mv_size = pkey->dsize;
 
-    if (f->cursor == NULL){
+    if (f->cursor == NULL) {
         return APR_EINVAL;
     }
 
