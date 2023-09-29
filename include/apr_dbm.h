@@ -89,6 +89,7 @@ APR_DECLARE(apr_status_t) apr_dbm_get_driver(const apr_dbm_driver_t **driver,
  * @param type The type of the DBM (not all may be available at run time)
  * <pre>
  *  db   for Berkeley DB files
+ *  lmdb for LMDB files
  *  gdbm for GDBM files
  *  ndbm for NDBM files
  *  sdbm for SDBM files (always available)

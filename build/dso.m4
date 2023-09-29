@@ -46,6 +46,7 @@ AC_DEFUN([APR_MODULAR_DSO], [
      test $apu_have_db = 1 && objs="$objs dbm/apr_dbm_berkeleydb.lo"
      test $apu_have_gdbm = 1 && objs="$objs dbm/apr_dbm_gdbm.lo"
      test $apu_have_ndbm = 1 && objs="$objs dbm/apr_dbm_ndbm.lo"
+     test $apu_have_lmdb = 1 && objs="$objs dbm/apr_dbm_lmdb.lo"
      EXTRA_OBJECTS="$EXTRA_OBJECTS $objs"
 
      # Use libtool *.la for mysql if available
@@ -64,10 +65,10 @@ AC_DEFUN([APR_MODULAR_DSO], [
 
      LIBS="$LIBS $LDADD_crypto_openssl $LDADD_crypto_nss $LDADD_crypto_commoncrypto"
      LIBS="$LIBS $LDADD_dbd_pgsql $LDADD_dbd_sqlite2 $LDADD_dbd_sqlite3 $LDADD_dbd_oracle $LDADD_dbd_mysql $LDADD_dbd_odbc"
-     LIBS="$LIBS $LDADD_dbm_db $LDADD_dbm_gdbm $LDADD_dbm_ndbm"
+     LIBS="$LIBS $LDADD_dbm_db $LDADD_dbm_gdbm $LDADD_dbm_ndbm $LDADD_dbm_lmdb"
      APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_crypto_openssl $LDADD_crypto_nss $LDADD_crypto_commoncrypto"
      APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_dbd_pgsql $LDADD_dbd_sqlite2 $LDADD_dbd_sqlite3 $LDADD_dbd_oracle $LDADD_dbd_mysql $LDADD_dbd_odbc"
-     APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_dbm_db $LDADD_dbm_gdbm $LDADD_dbm_ndbm"
+     APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $LDADD_dbm_db $LDADD_dbm_gdbm $LDADD_dbm_ndbm $LDADD_dbm_lmdb"
 
   else
 
@@ -85,6 +86,7 @@ AC_DEFUN([APR_MODULAR_DSO], [
      test $apu_have_db = 1 && dsos="$dsos dbm/apr_dbm_db.la"
      test $apu_have_gdbm = 1 && dsos="$dsos dbm/apr_dbm_gdbm.la"
      test $apu_have_ndbm = 1 && dsos="$dsos dbm/apr_dbm_ndbm.la"
+     test $apu_have_lmdb = 1 && dsos="$dsos dbm/apr_dbm_lmdb.la"
 
      if test -n "$dsos"; then
         APR_DSO_MODULES="$APR_DSO_MODULES $dsos"

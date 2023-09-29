@@ -498,11 +498,13 @@ dnl APU_CHECK_DBM: see what kind of DBM backend to use for apr_dbm.
 dnl
 AC_DEFUN([APU_CHECK_DBM], [
   apu_use_sdbm=0
+  apu_use_lmdb=0
   apu_use_ndbm=0
   apu_use_gdbm=0
   apu_use_db=0
   dnl it's in our codebase
   apu_have_sdbm=1
+  apu_have_lmdb=0
   apu_have_gdbm=0
   apu_have_ndbm=0
   apu_have_db=0
@@ -514,7 +516,7 @@ AC_DEFUN([APU_CHECK_DBM], [
   # Although we search for all versions up to 6.9,
   # we should only include existing versions in our
   # help string.
-  dbm_list="sdbm, gdbm, ndbm, db, db1, db185, db2, db3, db4"
+  dbm_list="sdbm, lmdb, gdbm, ndbm, db, db1, db185, db2, db3, db4"
   db_max_version=48
   db_min_version=41
   db_version="$db_min_version"
@@ -541,7 +543,7 @@ AC_DEFUN([APU_CHECK_DBM], [
   done
 
   AC_ARG_WITH(dbm, [APR_HELP_STRING([--with-dbm=DBM], [choose the DBM type to use.
-      DBM={sdbm,gdbm,ndbm,db,db1,db185,db2,db3,db4,db4X,db5X,db6X} for some X=0,...,9])],
+      DBM={sdbm,lmdb,gdbm,ndbm,db,db1,db185,db2,db3,db4,db4X,db5X,db6X} for some X=0,...,9])],
   [
     if test "$withval" = "yes"; then
       AC_MSG_ERROR([--with-dbm needs to specify a DBM type to use.
@@ -551,6 +553,31 @@ AC_DEFUN([APU_CHECK_DBM], [
   ], [
     requested=default
   ])
+
+  AC_ARG_WITH([lmdb], [APR_HELP_STRING([--with-lmdb=DIR], [enable LMDB support])],
+  [
+    apu_have_lmdb=0
+    if test "$withval" = "yes"; then
+      AC_CHECK_HEADER(lmdb.h, AC_CHECK_LIB(lmdb, mdb_dbi_open, [apu_have_lmdb=1]))
+    elif test "$withval" = "no"; then
+      apu_have_lmdb=0
+    else
+      saved_cppflags="$CPPFLAGS"
+      saved_ldflags="$LDFLAGS"
+      CPPFLAGS="$CPPFLAGS -I$withval/include"
+      LDFLAGS="$LDFLAGS -L$withval/lib "
+
+      AC_MSG_CHECKING(checking for lmdb in $withval)
+      AC_CHECK_HEADER(lmdb.h, AC_CHECK_LIB(lmdb, mdb_dbi_open, [apu_have_lmdb=1]))
+      if test "$apu_have_lmdb" != "0"; then
+        APR_ADDTO(LDFLAGS, [-L$withval/lib])
+        APR_ADDTO(INCLUDES, [-I$withval/include])
+      fi
+      CPPFLAGS="$saved_cppflags"
+      LDFLAGS="$saved_ldflags"
+    fi
+  ])
+
 
   dnl We don't pull in GDBM unless the user asks for it, since it's GPL
   AC_ARG_WITH([gdbm], [APR_HELP_STRING([--with-gdbm=DIR], [enable GDBM support])],
@@ -680,7 +707,7 @@ AC_DEFUN([APU_CHECK_DBM], [
   fi
 
   case "$requested" in
-    sdbm | gdbm | ndbm | db)
+    lmdb | sdbm | gdbm | ndbm | db)
       eval "apu_use_$requested=1"
       apu_default_dbm=$requested
       ;;
@@ -709,11 +736,13 @@ AC_DEFUN([APU_CHECK_DBM], [
   AC_MSG_CHECKING(for default DBM)
   AC_MSG_RESULT($apu_default_dbm)
 
+  AC_SUBST(apu_use_lmdb)
   AC_SUBST(apu_use_sdbm)
   AC_SUBST(apu_use_gdbm)
   AC_SUBST(apu_use_ndbm)
   AC_SUBST(apu_use_db)
 
+  AC_SUBST(apu_have_lmdb)
   AC_SUBST(apu_have_sdbm)
   AC_SUBST(apu_have_gdbm)
   AC_SUBST(apu_have_ndbm)
@@ -738,8 +767,13 @@ AC_DEFUN([APU_CHECK_DBM], [
     APR_ADDTO(LDADD_dbm_ndbm, [-l$apu_ndbm_lib])
   fi
 
+  if test "$apu_have_lmdb" = "1"; then
+    APR_ADDTO(LDADD_dbm_lmdb, [-llmdb])
+  fi
+
   AC_SUBST(LDADD_dbm_db)
   AC_SUBST(LDADD_dbm_gdbm)
   AC_SUBST(LDADD_dbm_ndbm)
+  AC_SUBST(LDADD_dbm_lmdb)
 ])
 

@@ -153,6 +153,9 @@ static void test_dbm_traversal(abts_case *tc, apr_dbm_t *db, dbm_table_t *table)
 
         rv = apr_dbm_nextkey(db, &key);
         ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+        /** avoid infinite loop */
+        if (rv != APR_SUCCESS) break;
     } while (1);
 
     for (i = 0; i < NUM_TABLE_ROWS; i++) {
@@ -170,6 +173,7 @@ static void test_dbm(abts_case *tc, void *data)
     dbm_table_t *table;
     const char *type = data;
     const char *file = apr_pstrcat(p, "data/test-", type, NULL);
+    const char *nofile = apr_pstrcat(p, "data/no-such-test-", type, NULL);
 
     rv = apr_dbm_open_ex(&db, type, file, APR_DBM_RWCREATE, APR_FPROT_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -198,12 +202,18 @@ static void test_dbm(abts_case *tc, void *data)
     test_dbm_fetch(tc, db, table);
 
     apr_dbm_close(db);
+
+    rv = apr_dbm_open_ex(&db, type, nofile, APR_DBM_READONLY, APR_FPROT_OS_DEFAULT, p);
+    ABTS_TRUE(tc, rv != APR_SUCCESS);
 }
 
 abts_suite *testdbm(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
 
+#if APU_HAVE_LMDB
+    abts_run_test(suite, test_dbm, "lmdb");
+#endif
 #if APU_HAVE_GDBM
     abts_run_test(suite, test_dbm, "gdbm");
 #endif

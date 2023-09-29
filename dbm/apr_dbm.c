@@ -53,6 +53,9 @@
 #elif APU_USE_SDBM
 #define DBM_VTABLE apr_dbm_type_sdbm
 #define DBM_NAME   "sdbm"
+#elif APU_USE_LMDB
+#define DBM_VTABLE apr_dbm_type_lmdb
+#define DBM_NAME   "lmdb"
 #else /* Not in the USE_xDBM list above */
 #error a DBM implementation was not specified
 #endif
@@ -94,6 +97,9 @@ APR_DECLARE(apr_status_t) apr_dbm_get_driver(const apr_dbm_driver_t **vtable,
     if (!strcasecmp(type, "default"))     *vtable = &DBM_VTABLE;
 #if APU_HAVE_DB
     else if (!strcasecmp(type, "db"))     *vtable = &apr_dbm_type_db;
+#endif
+#if APU_HAVE_LMDB
+    else if (!strcasecmp(type, "lmdb"))   *vtable = &apr_dbm_type_lmdb;
 #endif
     else if (*type && !strcasecmp(type + 1, "dbm")) {
 #if APU_HAVE_GDBM
@@ -142,6 +148,7 @@ APR_DECLARE(apr_status_t) apr_dbm_get_driver(const apr_dbm_driver_t **vtable,
 
     if (!strcasecmp(type, "default"))        type = DBM_NAME;
     else if (!strcasecmp(type, "db"))        type = "db";
+    else if (!strcasecmp(type, "lmdb"))      type = "lmdb";
     else if (*type && !strcasecmp(type + 1, "dbm")) {
         if      (*type == 'G' || *type == 'g') type = "gdbm";
         else if (*type == 'N' || *type == 'n') type = "ndbm";

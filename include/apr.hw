@@ -641,6 +641,7 @@ typedef int apr_wait_t;
 #define APU_HAVE_SDBM           1
 
 #ifndef APU_DSO_MODULE_BUILD
+#define APU_HAVE_LMDB           0
 #define APU_HAVE_GDBM           0
 #define APU_HAVE_NDBM           0
 #define APU_HAVE_DB             0
