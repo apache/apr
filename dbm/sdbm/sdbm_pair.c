@@ -60,9 +60,7 @@ static int seepair(char *, int, char *, int);
  */
 
 int
-fitpair(pag, need)
-char *pag;
-int need;
+fitpair(char *pag, int need)
 {
 	register int n;
 	register int off;
@@ -79,10 +77,7 @@ int need;
 }
 
 void
-putpair(pag, key, val)
-char *pag;
-apr_sdbm_datum_t key;
-apr_sdbm_datum_t val;
+putpair(char *pag, apr_sdbm_datum_t key, apr_sdbm_datum_t val)
 {
 	register int n;
 	register int off;
@@ -108,9 +103,7 @@ apr_sdbm_datum_t val;
 }
 
 apr_sdbm_datum_t
-getpair(pag, key)
-char *pag;
-apr_sdbm_datum_t key;
+getpair(char *pag, apr_sdbm_datum_t key)
 {
 	register int i;
 	register int n;
@@ -129,18 +122,14 @@ apr_sdbm_datum_t key;
 }
 
 int
-duppair(pag, key)
-char *pag;
-apr_sdbm_datum_t key;
+duppair(char *pag, apr_sdbm_datum_t key)
 {
 	register short *ino = (short *) pag;
 	return ino[0] > 0 && seepair(pag, ino[0], key.dptr, key.dsize) > 0;
 }
 
 apr_sdbm_datum_t
-getnkey(pag, num)
-char *pag;
-int num;
+getnkey(char *pag, int num)
 {
 	apr_sdbm_datum_t key;
 	register int off;
@@ -159,9 +148,7 @@ int num;
 }
 
 int
-delpair(pag, key)
-char *pag;
-apr_sdbm_datum_t key;
+delpair(char *pag, apr_sdbm_datum_t key)
 {
 	register int n;
 	register int i;
@@ -231,11 +218,7 @@ apr_sdbm_datum_t key;
  * return 0 if not found.
  */
 static int
-seepair(pag, n, key, siz)
-char *pag;
-register int n;
-register char *key;
-register int siz;
+seepair(char *pag, register int n, register char *key, register int siz)
 {
 	register int i;
 	register int off = PBLKSIZ;
@@ -251,10 +234,7 @@ register int siz;
 }
 
 void
-splpage(pag, new, sbit)
-char *pag;
-char *new;
-long sbit;
+splpage(char *pag, char *new, long sbit)
 {
 	apr_sdbm_datum_t key;
 	apr_sdbm_datum_t val;
@@ -295,8 +275,7 @@ long sbit;
  * this could be made more rigorous.
  */
 int
-chkpage(pag)
-char *pag;
+chkpage(char *pag)
 {
 	register int n;
 	register int off;
