@@ -115,30 +115,42 @@ static apr_status_t vt_lmdb_open(apr_dbm_t **pdb, const char *pathname,
         int dberr;
         file.txn = NULL;
         file.cursor = NULL;
+        file.env = NULL;
 
-        if ((dberr = mdb_env_create(&file.env)) == 0) {
-            /* Default to 2GB map size which limits the total database
-             * size to something reasonable. */
-            if ((dberr = mdb_env_set_mapsize(file.env, UINT32_MAX)) == 0) {
-                if ((dberr = mdb_env_open(file.env, pathname, dbmode | DEFAULT_ENV_FLAGS, apr_posix_perms2mode(perm))) == 0) {
-                    if ((dberr = mdb_txn_begin(file.env, NULL, dbmode, &file.txn)) == 0) {
-                        if ((dberr = mdb_dbi_open(file.txn, NULL, dbi_open_flags, &file.dbi)) != 0) {
-                            /* close the env handler */
-                            mdb_env_close(file.env);
-                        }
-                    }
+        dberr = mdb_env_create(&file.env);
+        if (dberr == 0){
+            /*   Default to 2GB map size which limits the total database
+             *   size to something reasonable. */
+            dberr = mdb_env_set_mapsize(file.env, UINT32_MAX);
+        }
+
+        if (dberr == 0){
+            dberr = mdb_env_open(file.env, pathname, dbmode | DEFAULT_ENV_FLAGS, apr_posix_perms2mode(perm));
+        }
+
+        if (dberr == 0){
+            dberr = mdb_txn_begin(file.env, NULL, dbmode, &file.txn);
+        }
+
+        if (dberr == 0){
+            dberr = mdb_dbi_open(file.txn, NULL, dbi_open_flags, &file.dbi);
+
+            /* if mode == APR_DBM_RWTRUNC, drop database */
+            if ((dberr == 0) && truncate) {
+                dberr = mdb_drop(file.txn, file.dbi, 0);
+                if (dberr != 0) {
+                    mdb_dbi_close(file.env, file.dbi);
                 }
             }
         }
 
-        if (truncate) {
-            if ((dberr = mdb_drop(file.txn, file.dbi, 0)) != 0) {
+        if (dberr != 0){
+            /* close the env handler */
+            if (file.env) 
                 mdb_env_close(file.env);
-            }
-        }
 
-        if (dberr != 0)
             return db2s(dberr);
+        }
     }
 
     /* we have an open database... return it */
@@ -156,14 +168,16 @@ static void vt_lmdb_close(apr_dbm_t *dbm)
 {
     real_file_t *f = dbm->file;
 
-    if (f->cursor) {
-        mdb_cursor_close(f->cursor);
-        f->cursor = NULL;
-    }
-
+    /* try to commit all transactions that haven't been commited yet on close */
     if (f->txn) {
        mdb_txn_commit(f->txn);
        f->txn = NULL;
+       f->cursor = NULL;
+    }
+
+    if (f->cursor) {
+        mdb_cursor_close(f->cursor);
+        f->cursor = NULL;
     }
 
     mdb_dbi_close(f->env, f->dbi);
@@ -216,9 +230,14 @@ static apr_status_t vt_lmdb_store(apr_dbm_t *dbm, apr_datum_t key,
 
     if ((rv = mdb_put(f->txn, f->dbi, &ckey, &cvalue, 0)) == 0) {
         /* commit transaction */
-        if (((rv = mdb_txn_commit(f->txn)) == MDB_SUCCESS)
-            && ((rv = mdb_txn_begin(f->env, NULL, 0, &f->txn)) == MDB_SUCCESS)) {
+        if ((rv = mdb_txn_commit(f->txn)) == MDB_SUCCESS){
             f->cursor = NULL;
+            rv = mdb_txn_begin(f->env, NULL, 0, &f->txn);
+        }
+
+        /* if mdb_txn_commit OR mdb_txn_begin fails ... */
+        if (rv != MDB_SUCCESS) {
+            f->txn = NULL;
         }
     }
 
@@ -237,9 +256,14 @@ static apr_status_t vt_lmdb_del(apr_dbm_t *dbm, apr_datum_t key)
 
     if ((rv = mdb_del(f->txn, f->dbi, &ckey, NULL)) == 0) {
         /* commit transaction */
-        if (((rv = mdb_txn_commit(f->txn)) == MDB_SUCCESS)
-            && ((rv = mdb_txn_begin(f->env, NULL, 0, &f->txn)) == MDB_SUCCESS)) {
+        if ((rv = mdb_txn_commit(f->txn)) == MDB_SUCCESS) {
             f->cursor = NULL;
+            rv = mdb_txn_begin(f->env, NULL, 0, &f->txn);
+        }
+
+        /* if mdb_txn_commit OR mdb_txn_begin fails ... */
+        if (rv != MDB_SUCCESS) {
+            f->txn = NULL;
         }
     }
 
@@ -280,6 +304,9 @@ static apr_status_t vt_lmdb_firstkey(apr_dbm_t *dbm, apr_datum_t * pkey)
             f->cursor = NULL;
             dberr = 0;
         }
+    } else {
+        /* clear first if mdb_cursor_open fails */
+        memset(&first, 0, sizeof(first));
     }
 
     pkey->dptr = first.mv_data;
