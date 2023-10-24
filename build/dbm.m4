@@ -576,6 +576,10 @@ AC_DEFUN([APU_CHECK_DBM], [
       CPPFLAGS="$saved_cppflags"
       LDFLAGS="$saved_ldflags"
     fi
+
+    if test "$requested" = "lmdb" -a "$apu_have_lmdb" = 0; then
+       AC_MSG_ERROR([LMDB requested, but not found])
+    fi
   ])
 
 
@@ -695,6 +699,7 @@ AC_DEFUN([APU_CHECK_DBM], [
     fi
 
     if test "$apu_want_db" != "0"; then
+      AC_MSG_NOTICE([checking for Berkeley DB $requested in $user_places])
       APU_CHECK_DB($requested, $user_places)
       if test "$apu_have_db" = "0"; then
         AC_ERROR(Berkeley DB not found.)
