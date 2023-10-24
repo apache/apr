@@ -118,21 +118,21 @@ static apr_status_t vt_lmdb_open(apr_dbm_t **pdb, const char *pathname,
         file.env = NULL;
 
         dberr = mdb_env_create(&file.env);
-        if (dberr == 0){
+        if (dberr == 0) {
             /*   Default to 2GB map size which limits the total database
              *   size to something reasonable. */
             dberr = mdb_env_set_mapsize(file.env, UINT32_MAX);
         }
 
-        if (dberr == 0){
+        if (dberr == 0) {
             dberr = mdb_env_open(file.env, pathname, dbmode | DEFAULT_ENV_FLAGS, apr_posix_perms2mode(perm));
         }
 
-        if (dberr == 0){
+        if (dberr == 0) {
             dberr = mdb_txn_begin(file.env, NULL, dbmode, &file.txn);
         }
 
-        if (dberr == 0){
+        if (dberr == 0) {
             dberr = mdb_dbi_open(file.txn, NULL, dbi_open_flags, &file.dbi);
 
             /* if mode == APR_DBM_RWTRUNC, drop database */
@@ -144,7 +144,7 @@ static apr_status_t vt_lmdb_open(apr_dbm_t **pdb, const char *pathname,
             }
         }
 
-        if (dberr != 0){
+        if (dberr != 0) {
             /* close the env handler */
             if (file.env) 
                 mdb_env_close(file.env);
@@ -230,7 +230,7 @@ static apr_status_t vt_lmdb_store(apr_dbm_t *dbm, apr_datum_t key,
 
     if ((rv = mdb_put(f->txn, f->dbi, &ckey, &cvalue, 0)) == 0) {
         /* commit transaction */
-        if ((rv = mdb_txn_commit(f->txn)) == MDB_SUCCESS){
+        if ((rv = mdb_txn_commit(f->txn)) == MDB_SUCCESS) {
             f->cursor = NULL;
             rv = mdb_txn_begin(f->env, NULL, 0, &f->txn);
         }
