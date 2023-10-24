@@ -176,8 +176,7 @@ static void test_dbm(abts_case *tc, void *data)
     const char *nofile = apr_pstrcat(p, "data/no-such-test-", type, NULL);
 
     rv = apr_dbm_open_ex(&db, type, file, APR_DBM_RWCREATE, APR_FPROT_OS_DEFAULT, p);
-    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-
+    APR_ASSERT_SUCCESS(tc, "open database r/w", rv);
     if (rv != APR_SUCCESS)
         return;
 
@@ -192,7 +191,7 @@ static void test_dbm(abts_case *tc, void *data)
     apr_dbm_close(db);
 
     rv = apr_dbm_open_ex(&db, type, file, APR_DBM_READONLY, APR_FPROT_OS_DEFAULT, p);
-    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    APR_ASSERT_SUCCESS(tc, "open database r/o", rv);
 
     if (rv != APR_SUCCESS)
         return;
