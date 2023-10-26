@@ -121,7 +121,7 @@ static apr_status_t vt_lmdb_open(apr_dbm_t **pdb, const char *pathname,
         if (dberr == 0) {
             /*   Default to 2GB map size which limits the total database
              *   size to something reasonable. */
-            dberr = mdb_env_set_mapsize(file.env, UINT32_MAX);
+            dberr = mdb_env_set_mapsize(file.env, INT32_MAX);
         }
 
         if (dberr == 0) {
