@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.8.0
 
+  *) apr_getopt: Fix error message. The "-" is the invalid character, not
+     the empty string. [Daniel Sahlberg]
+
   *) New APR_THREAD_LOCAL and apr_thread_current*() API.  [Yann Ylavic]
 
   *) Fix a regression in apr_stat() for root path on Windows. [Ivan Zhakov]
