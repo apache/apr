@@ -272,7 +272,7 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
             }
             else
                 if (*p == '\0')                    /* Bare "-" is illegal */
-                    return serr(os, "invalid option", p, APR_BADCH);
+                    return serr(os, "invalid option", "-", APR_BADCH);
         }
     }
 
