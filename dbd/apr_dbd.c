@@ -47,11 +47,11 @@ static apr_uint32_t initialised = 0, in_init = 1;
  * no longer be exported.
  */
 static apr_thread_mutex_t* mutex = NULL;
-APR_DECLARE(apr_status_t) apr_dbd_mutex_lock()
+APR_DECLARE(apr_status_t) apr_dbd_mutex_lock(void)
 {
     return apr_thread_mutex_lock(mutex);
 }
-APR_DECLARE(apr_status_t) apr_dbd_mutex_unlock()
+APR_DECLARE(apr_status_t) apr_dbd_mutex_unlock(void)
 {
     return apr_thread_mutex_unlock(mutex);
 }
