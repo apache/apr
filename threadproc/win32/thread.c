@@ -281,7 +281,7 @@ APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
     }
 }
 
-APR_DECLARE(void) apr_thread_yield()
+APR_DECLARE(void) apr_thread_yield(void)
 {
     SwitchToThread();
 }

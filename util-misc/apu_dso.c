@@ -40,19 +40,19 @@ static apr_hash_t *dsos = NULL;
 static apr_uint32_t in_init = 0, initialised = 0;
 
 #if APR_HAS_THREADS
-apr_status_t apu_dso_mutex_lock()
+apr_status_t apu_dso_mutex_lock(void)
 {
     return apr_thread_mutex_lock(mutex);
 }
-apr_status_t apu_dso_mutex_unlock()
+apr_status_t apu_dso_mutex_unlock(void)
 {
     return apr_thread_mutex_unlock(mutex);
 }
 #else
-apr_status_t apu_dso_mutex_lock() {
+apr_status_t apu_dso_mutex_lock(void) {
     return APR_SUCCESS;
 }
-apr_status_t apu_dso_mutex_unlock() {
+apr_status_t apu_dso_mutex_unlock(void) {
     return APR_SUCCESS;
 }
 #endif
