@@ -114,8 +114,13 @@ static void test_flatten(abts_case *tc, void *data)
 {
     apr_bucket_alloc_t *ba = apr_bucket_alloc_create(p);
     apr_bucket_brigade *bb;
+    apr_bucket *e;
 
     bb = make_simple_brigade(ba, "hello, ", "world");
+
+    /* add an EOS, which should be silently ignored. */
+    e = apr_bucket_eos_create(ba);
+    APR_BRIGADE_INSERT_HEAD(bb, e);
 
     flatten_match(tc, "flatten brigade", bb, "hello, world");
 
@@ -203,6 +208,36 @@ static void test_splitline(abts_case *tc, void *data)
 
     flatten_match(tc, "split line", bout, "blah blah blah-end of line.\n");
     flatten_match(tc, "remainder", bin, "foo foo foo");
+
+    apr_brigade_destroy(bout);
+    apr_brigade_destroy(bin);
+    apr_bucket_alloc_destroy(ba);
+}
+
+static void test_splitline_eos(abts_case *tc, void *data)
+{
+    apr_bucket_alloc_t *ba = apr_bucket_alloc_create(p);
+    apr_bucket_brigade *bin, *bout;
+    apr_bucket *eos = apr_bucket_eos_create(ba);
+
+    bin = make_simple_brigade(ba, "blah blah\n",
+                              "foo foo");
+    APR_BRIGADE_INSERT_TAIL(bin, eos);
+
+    bout = apr_brigade_create(p, ba);
+
+    APR_ASSERT_SUCCESS(tc, "split line eos #1",
+                       apr_brigade_split_line(bout, bin,
+                                              APR_BLOCK_READ, 100));
+    
+    flatten_match(tc, "split line eos", bout, "blah blah\n");
+
+    apr_brigade_cleanup(bout);
+    APR_ASSERT_SUCCESS(tc, "split line eos #2",
+                       apr_brigade_split_line(bout, bin,
+                                              APR_BLOCK_READ, 100));
+
+    flatten_match(tc, "split line eos", bout, "foo foo");
 
     apr_brigade_destroy(bout);
     apr_brigade_destroy(bin);
@@ -559,9 +594,39 @@ static void test_write_putstrs(abts_case *tc, void *data)
     apr_brigade_putstrs(bb, NULL, NULL, "2", "34", "567", "8", "9a", "bcd",
                         "e", "f", "gh", "i", NULL);
     apr_brigade_putstrs(bb, NULL, NULL, "j", NULL);
+    e = apr_bucket_eos_create(ba);
+    APR_BRIGADE_INSERT_HEAD(bb, e);
+
     APR_ASSERT_SUCCESS(tc, "apr_brigade_flatten",
                        apr_brigade_flatten(bb, buf, &len));
     ABTS_STR_NEQUAL(tc, expect, buf, strlen(expect));
+
+    apr_brigade_destroy(bb);
+    apr_bucket_alloc_destroy(ba);
+}
+
+static void test_iovec(abts_case *tc, void *data)
+{
+    apr_bucket_alloc_t *ba = apr_bucket_alloc_create(p);
+    apr_bucket_brigade *bb;
+    apr_bucket *e;
+    struct iovec vec[3];
+    int vecs = 3;
+
+    bb = make_simple_brigade(ba, "foo", "bar");
+
+    /* add an EOS, which should be silently ignored. */
+    e = apr_bucket_eos_create(ba);
+    APR_BRIGADE_INSERT_HEAD(bb, e);
+
+    APR_ASSERT_SUCCESS(tc, "apr_brigade_to_iovec",
+                       apr_brigade_to_iovec(bb, vec, &vecs));
+
+    ABTS_INT_EQUAL(tc, 2, vecs);
+    ABTS_STR_EQUAL(tc, "foo", vec[0].iov_base);
+    ABTS_INT_EQUAL(tc, 3, vec[0].iov_len);
+    ABTS_STR_EQUAL(tc, "bar", vec[1].iov_base);
+    ABTS_INT_EQUAL(tc, 3, vec[1].iov_len);
 
     apr_brigade_destroy(bb);
     apr_bucket_alloc_destroy(ba);
@@ -577,6 +642,7 @@ abts_suite *testbuckets(abts_suite *suite)
     abts_run_test(suite, test_split, NULL);
     abts_run_test(suite, test_bwrite, NULL);
     abts_run_test(suite, test_splitline, NULL);
+    abts_run_test(suite, test_splitline_eos, NULL);
     abts_run_test(suite, test_splitboundary, NULL);
     abts_run_test(suite, test_splits, NULL);
     abts_run_test(suite, test_insertfile, NULL);
@@ -585,6 +651,7 @@ abts_suite *testbuckets(abts_suite *suite)
     abts_run_test(suite, test_partition, NULL);
     abts_run_test(suite, test_write_split, NULL);
     abts_run_test(suite, test_write_putstrs, NULL);
+    abts_run_test(suite, test_iovec, NULL);
 
     return suite;
 }
