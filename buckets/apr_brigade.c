@@ -278,7 +278,9 @@ APR_DECLARE(apr_status_t) apr_brigade_flatten(apr_bucket_brigade *bb,
          *
          * No, we only copy the data up to their requested size.  -- jre
          */
-        memcpy(c, str, str_len);
+        if (str_len) {
+            memcpy(c, str, str_len);
+        }
 
         c += str_len;
         actual += str_len;
@@ -353,13 +355,15 @@ APR_DECLARE(apr_status_t) apr_brigade_split_line(apr_bucket_brigade *bbOut,
             return rv;
         }
 
-        pos = memchr(str, APR_ASCII_LF, len);
-        /* We found a match. */
-        if (pos != NULL) {
-            apr_bucket_split(e, pos - str + 1);
-            APR_BUCKET_REMOVE(e);
-            APR_BRIGADE_INSERT_TAIL(bbOut, e);
-            return APR_SUCCESS;
+        if (len) {
+            pos = memchr(str, APR_ASCII_LF, len);
+            /* We found a match. */
+            if (pos != NULL) {
+                apr_bucket_split(e, pos - str + 1);
+                APR_BUCKET_REMOVE(e);
+                APR_BRIGADE_INSERT_TAIL(bbOut, e);
+                return APR_SUCCESS;
+            }
         }
         APR_BUCKET_REMOVE(e);
         if (APR_BUCKET_IS_METADATA(e) || len > APR_BUCKET_BUFF_SIZE/4) {
@@ -700,6 +704,9 @@ APR_DECLARE(apr_status_t) apr_brigade_to_iovec(apr_bucket_brigade *b,
          e != APR_BRIGADE_SENTINEL(b);
          e = APR_BUCKET_NEXT(e))
     {
+        /* Skip metadata buckets. */
+        if (APR_BUCKET_IS_METADATA(e)) continue;
+
         if (left-- == 0)
             break;
 
