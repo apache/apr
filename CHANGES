@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_escape: Add apr_escape_json() and apr_pescape_json().
+     [Graham Leggett]
+
   *) dbm: Add LMDB driver. [Lubos Uhliarik <luhliari redhat.com>]
 
   *) apr_memcache: Check sockets from connection pool before using them and try

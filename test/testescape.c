@@ -31,6 +31,11 @@ static void test_escape(abts_case *tc, void *data)
     const char *dest;
     const void *vdest;
     apr_size_t len, vlen;
+    apr_status_t status;
+
+    char goodutf8[11] = { 0x24, 0xC2, 0xA3, 0xE0, 0xA4, 0xB9, 0xF0, 0x90, 0x8D, 0x88, 0x00 };
+    char badutf8[11] = { 0xFF, 0xC2, 0xFF, 0xE0, 0xA4, 0xFF, 0xF0, 0x90, 0x8D, 0xFF, 0x00 };
+    char replacementutf8[31] = { 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0x00 };
 
     apr_pool_create(&pool, NULL);
 
@@ -294,6 +299,70 @@ static void test_escape(abts_case *tc, void *data)
                              dest, target),
                 (strcmp(dest, target) == 0));
     apr_escape_ldap(NULL, src, APR_ESCAPE_STRING, APR_ESCAPE_LDAP_ALL, &len);
+    ABTS_ASSERT(tc,
+            apr_psprintf(pool, "size mismatch (%" APR_SIZE_T_FMT "!=%" APR_SIZE_T_FMT ")", len, strlen(dest) + 1),
+            (len == strlen(dest) + 1));
+
+    /* all ascii */
+    src = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+    target = " !\\\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+    dest = apr_pescape_json(pool, src, APR_ESCAPE_STRING, 0);
+    ABTS_ASSERT(tc,
+                apr_psprintf(pool, "json escaped (%s) does not match expected output (%s)",
+                             dest, target),
+                (strcmp(dest, target) == 0));
+    status = apr_escape_json(NULL, src, APR_ESCAPE_STRING, 0, &len);
+    ABTS_ASSERT(tc,
+            apr_psprintf(pool, "apr_escape_json should have returned APR_SUCCESS: (%pm)", &status),
+            status == APR_SUCCESS);
+    ABTS_ASSERT(tc,
+            apr_psprintf(pool, "size mismatch (%" APR_SIZE_T_FMT "!=%" APR_SIZE_T_FMT ")", len, strlen(dest) + 1),
+            (len == strlen(dest) + 1));
+
+    /* ascii minus double quote and backslash */
+    src = " !#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+    target = src;
+    dest = apr_pescape_json(pool, src, APR_ESCAPE_STRING, 0);
+    ABTS_ASSERT(tc,
+                apr_psprintf(pool, "json escaped (%s) does not match expected output (%s)",
+                             dest, target),
+                (strcmp(dest, target) == 0));
+    status = apr_escape_json(NULL, src, APR_ESCAPE_STRING, 0, &len);
+    ABTS_ASSERT(tc,
+            apr_psprintf(pool, "apr_escape_json should have returned APR_NOTFOUND: (%pm)", &status),
+            status == APR_NOTFOUND);
+    ABTS_ASSERT(tc,
+            apr_psprintf(pool, "size mismatch (%" APR_SIZE_T_FMT "!=%" APR_SIZE_T_FMT ")", len, strlen(dest) + 1),
+            (len == strlen(dest) + 1));
+
+    /* good utf8 */
+    src = goodutf8;
+    target = goodutf8;
+    dest = apr_pescape_json(pool, src, APR_ESCAPE_STRING, 0);
+    ABTS_ASSERT(tc,
+                apr_psprintf(pool, "json escaped (%s) does not match expected output (%s)",
+                             dest, target),
+                (strcmp(dest, target) == 0));
+    status = apr_escape_json(NULL, src, APR_ESCAPE_STRING, 0, &len);
+    ABTS_ASSERT(tc,
+            apr_psprintf(pool, "apr_escape_json should have returned APR_NOTFOUND: (%pm)", &status),
+            status == APR_NOTFOUND);
+    ABTS_ASSERT(tc,
+            apr_psprintf(pool, "size mismatch (%" APR_SIZE_T_FMT "!=%" APR_SIZE_T_FMT ")", len, strlen(dest) + 1),
+            (len == strlen(dest) + 1));
+
+    /* bad utf8 */
+    src = badutf8;
+    target = replacementutf8;
+    dest = apr_pescape_json(pool, src, APR_ESCAPE_STRING, 0);
+    ABTS_ASSERT(tc,
+                apr_psprintf(pool, "json escaped (%s) does not match expected output (%s)",
+                             dest, target),
+                (strcmp(dest, target) == 0));
+    status = apr_escape_json(NULL, src, APR_ESCAPE_STRING, 0, &len);
+    ABTS_ASSERT(tc,
+            apr_psprintf(pool, "apr_escape_json should have returned APR_EINVAL: (%pm)", &status),
+            status == APR_EINVAL);
     ABTS_ASSERT(tc,
             apr_psprintf(pool, "size mismatch (%" APR_SIZE_T_FMT "!=%" APR_SIZE_T_FMT ")", len, strlen(dest) + 1),
             (len == strlen(dest) + 1));
