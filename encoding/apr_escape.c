@@ -1438,7 +1438,7 @@ APR_DECLARE(apr_status_t) apr_escape_json(char *escaped, const char *str,
 
     else if (quote) {
         if (d) {
-            memcpy(d, "NULL", 5);
+            memcpy(d, "null", 5);
         }
         else {
             size += 4;
