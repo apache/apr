@@ -82,7 +82,7 @@ static apr_status_t set_error(apr_dbm_t *dbm, int dberr)
 **
 */
 
-#define DEFAULT_ENV_FLAGS (MDB_NOSUBDIR|MDB_NOSYNC)
+#define DEFAULT_ENV_FLAGS (MDB_NOSUBDIR|MDB_NOSYNC|MDB_NOLOCK)
 
 static apr_status_t vt_lmdb_open(apr_dbm_t **pdb, const char *pathname,
                                  apr_int32_t mode, apr_fileperms_t perm,
