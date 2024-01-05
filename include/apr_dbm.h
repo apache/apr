@@ -154,6 +154,11 @@ APR_DECLARE(apr_status_t) apr_dbm_open2(apr_dbm_t **pdb,
  * @param cntxt The pool to use when creating the dbm
  * @remark The dbm name may not be a true file name, as many dbm packages
  * append suffixes for separate data and index files.
+ * @warning DBM drivers do not guarantee thread-safe or cross-process
+ * locking; multiple threads or processes reading and writing
+ * concurrently to the database is not safe and results in
+ * undefined behaviour (likely database corruption and possible
+ * crashes).
  */
 APR_DECLARE(apr_status_t) apr_dbm_open(apr_dbm_t **dbm, const char *name,
                                        apr_int32_t mode, apr_fileperms_t perm,
