@@ -84,8 +84,10 @@ static apr_bucket_brigade *make_simple_brigade(apr_bucket_alloc_t *ba,
     e = apr_bucket_transient_create(first, strlen(first), ba);
     APR_BRIGADE_INSERT_TAIL(bb, e);
 
-    e = apr_bucket_transient_create(second, strlen(second), ba);
-    APR_BRIGADE_INSERT_TAIL(bb, e);
+    if (second) {
+        e = apr_bucket_transient_create(second, strlen(second), ba);
+        APR_BRIGADE_INSERT_TAIL(bb, e);
+    }
 
     return bb;
 }
@@ -213,6 +215,29 @@ static void test_splitline(abts_case *tc, void *data)
     apr_brigade_destroy(bin);
     apr_bucket_alloc_destroy(ba);
 }
+
+static void test_splitline_exactly(abts_case *tc, void *data)
+{
+    apr_bucket_alloc_t *ba = apr_bucket_alloc_create(p);
+    apr_bucket_brigade *bin, *bout;
+
+    bin = make_simple_brigade(ba, "foo bar.\n", NULL);
+    bout = apr_brigade_create(p, ba);
+
+    APR_ASSERT_SUCCESS(tc, "split line",
+                       apr_brigade_split_line(bout, bin,
+                                              APR_BLOCK_READ, 100));
+
+    ABTS_INT_EQUAL(tc, 1, count_buckets(bout));
+    ABTS_INT_EQUAL(tc, 0, count_buckets(bin));
+
+    flatten_match(tc, "output brigade", bout, "foo bar.\n");
+
+    apr_brigade_destroy(bout);
+    apr_brigade_destroy(bin);
+    apr_bucket_alloc_destroy(ba);
+}
+
 
 static void test_splitline_eos(abts_case *tc, void *data)
 {
@@ -642,6 +667,7 @@ abts_suite *testbuckets(abts_suite *suite)
     abts_run_test(suite, test_split, NULL);
     abts_run_test(suite, test_bwrite, NULL);
     abts_run_test(suite, test_splitline, NULL);
+    abts_run_test(suite, test_splitline_exactly, NULL);
     abts_run_test(suite, test_splitline_eos, NULL);
     abts_run_test(suite, test_splitboundary, NULL);
     abts_run_test(suite, test_splits, NULL);
