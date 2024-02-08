@@ -359,7 +359,10 @@ APR_DECLARE(apr_status_t) apr_brigade_split_line(apr_bucket_brigade *bbOut,
             pos = memchr(str, APR_ASCII_LF, len);
             /* We found a match. */
             if (pos != NULL) {
-                apr_bucket_split(e, pos - str + 1);
+                /* Split if the LF is not the last character in the bucket. */
+                if ((pos - str + 1) < len) {
+                    apr_bucket_split(e, pos - str + 1);
+                }
                 APR_BUCKET_REMOVE(e);
                 APR_BRIGADE_INSERT_TAIL(bbOut, e);
                 return APR_SUCCESS;
