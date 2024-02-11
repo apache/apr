@@ -1292,7 +1292,7 @@ static apr_status_t thread_end(void *data)
 
 static void dbd_mysql_init(apr_pool_t *pool)
 {
-#if MYSQL_VERSION_ID < 100000
+#if MYSQL_VERSION_ID < 80000
     my_init();
 #endif
     mysql_thread_init();
