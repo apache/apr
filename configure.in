@@ -926,7 +926,7 @@ dnl without the extra " " in that case, but they didn't do that.  So, we
 dnl end up LIBS="-lm -lcrypt -lnsl  -ldl" which is an annoyance.
 case $host in
    *-mingw*)
-      APR_ADDTO(LIBS,[-lshell32 -ladvapi32 -lws2_32 -lrpcrt4 -lmswsock])
+      APR_ADDTO(LIBS,[-lbcrypt -lshell32 -ladvapi32 -lws2_32 -lrpcrt4 -lmswsock])
       ac_cv_func_CreateFileMapping=yes
       ;;
    *)
