@@ -162,39 +162,52 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
  */
 
 typedef struct win32_late_dll_t {
+    INIT_ONCE control;
     const char *dll_name;
     HMODULE dll_handle;
 } win32_late_dll_t;
 
 static win32_late_dll_t late_dll[DLL_defined] = {
-    {"kernel32", NULL},
-    {"advapi32", NULL},
-    {"mswsock", NULL},
-    {"ws2_32", NULL},
-    {"shell32", NULL},
-    {"ntdll.dll", NULL},
-    {"Iphplapi", NULL}
+    {INIT_ONCE_STATIC_INIT, "kernel32", NULL},
+    {INIT_ONCE_STATIC_INIT, "advapi32", NULL},
+    {INIT_ONCE_STATIC_INIT, "mswsock", NULL},
+    {INIT_ONCE_STATIC_INIT, "ws2_32", NULL},
+    {INIT_ONCE_STATIC_INIT, "shell32", NULL},
+    {INIT_ONCE_STATIC_INIT, "ntdll.dll", NULL},
+    {INIT_ONCE_STATIC_INIT, "Iphplapi", NULL}
 };
+
+static BOOL WINAPI load_dll_callback(PINIT_ONCE InitOnce,
+                                     PVOID Parameter,
+                                     PVOID *Context)
+{
+    win32_late_dll_t *dll = Parameter;
+
+    dll->dll_handle = LoadLibrary(dll->dll_name);
+
+    return TRUE;
+}
 
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
 {
-    if (!late_dll[fnLib].dll_handle) {
-        late_dll[fnLib].dll_handle = LoadLibraryA(late_dll[fnLib].dll_name);
-        if (!late_dll[fnLib].dll_handle)
-            return NULL;
-    }
+    win32_late_dll_t *dll = &late_dll[fnLib];
+
+    InitOnceExecuteOnce(&dll->control, load_dll_callback, dll, NULL);
+    if (!dll->dll_handle)
+        return NULL;
+
 #if defined(_WIN32_WCE)
     if (ordinal)
-        return GetProcAddressA(late_dll[fnLib].dll_handle,
+        return GetProcAddressA(dll->dll_handle,
                                (const char *) (apr_ssize_t)ordinal);
     else
-        return GetProcAddressA(late_dll[fnLib].dll_handle, fnName);
+        return GetProcAddressA(dll->dll_handle, fnName);
 #else
     if (ordinal)
-        return GetProcAddress(late_dll[fnLib].dll_handle,
+        return GetProcAddress(dll->dll_handle,
                               (const char *) (apr_ssize_t)ordinal);
     else
-        return GetProcAddress(late_dll[fnLib].dll_handle, fnName);
+        return GetProcAddress(dll->dll_handle, fnName);
 #endif
 }
 
