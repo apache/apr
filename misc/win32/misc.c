@@ -161,32 +161,40 @@ apr_status_t apr_get_oslevel(apr_oslevel_e *level)
  * missing from one or more releases of the Win32 API
  */
 
-static const char* const lateDllName[DLL_defined] = {
-    "kernel32", "advapi32", "mswsock",  "ws2_32", "shell32", "ntdll.dll",
-    "Iphplapi"  };
-static HMODULE lateDllHandle[DLL_defined] = {
-     NULL,       NULL,       NULL,       NULL,     NULL,      NULL,
-     NULL       };
+typedef struct win32_late_dll_t {
+    const char *dll_name;
+    HMODULE dll_handle;
+} win32_late_dll_t;
+
+static win32_late_dll_t late_dll[DLL_defined] = {
+    {"kernel32", NULL},
+    {"advapi32", NULL},
+    {"mswsock", NULL},
+    {"ws2_32", NULL},
+    {"shell32", NULL},
+    {"ntdll.dll", NULL},
+    {"Iphplapi", NULL}
+};
 
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
 {
-    if (!lateDllHandle[fnLib]) { 
-        lateDllHandle[fnLib] = LoadLibraryA(lateDllName[fnLib]);
-        if (!lateDllHandle[fnLib])
+    if (!late_dll[fnLib].dll_handle) {
+        late_dll[fnLib].dll_handle = LoadLibraryA(late_dll[fnLib].dll_name);
+        if (!late_dll[fnLib].dll_handle)
             return NULL;
     }
 #if defined(_WIN32_WCE)
     if (ordinal)
-        return GetProcAddressA(lateDllHandle[fnLib], (const char *)
-                                                     (apr_ssize_t)ordinal);
+        return GetProcAddressA(late_dll[fnLib].dll_handle,
+                               (const char *) (apr_ssize_t)ordinal);
     else
-        return GetProcAddressA(lateDllHandle[fnLib], fnName);
+        return GetProcAddressA(late_dll[fnLib].dll_handle, fnName);
 #else
     if (ordinal)
-        return GetProcAddress(lateDllHandle[fnLib], (const char *)
-                                                    (apr_ssize_t)ordinal);
+        return GetProcAddress(late_dll[fnLib].dll_handle,
+                              (const char *) (apr_ssize_t)ordinal);
     else
-        return GetProcAddress(lateDllHandle[fnLib], fnName);
+        return GetProcAddress(late_dll[fnLib].dll_handle, fnName);
 #endif
 }
 
