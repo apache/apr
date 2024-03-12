@@ -198,13 +198,14 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
  */
 #define APR_DECLARE_LATE_DLL_FUNC(lib, rettype, calltype, fn, ord, args, names) \
     typedef rettype (calltype *apr_winapi_fpt_##fn) args; \
-    static volatile apr_winapi_fpt_##fn apr_winapi_pfn_##fn = (PVOID) (ULONG_PTR) (-1); \
+    static volatile apr_winapi_fpt_##fn apr_winapi_pfn_##fn = (apr_winapi_fpt_##fn) (ULONG_PTR) (-1); \
     static APR_INLINE int apr_winapi_ld_##fn(void) \
     {   \
         apr_winapi_fpt_##fn cached_func = apr_winapi_pfn_##fn; \
-        if (cached_func == (PVOID) (ULONG_PTR) (-1)) { \
+        if (cached_func == (apr_winapi_fpt_##fn) (ULONG_PTR) (-1)) { \
             cached_func = (apr_winapi_fpt_##fn) apr_load_dll_func(lib, #fn, ord); \
-            InterlockedExchangePointer(&((PVOID)apr_winapi_pfn_##fn), cached_func); \
+            /* Pointer-sized writes are atomic on Windows. */ \
+            apr_winapi_pfn_##fn = cached_func; \
         } \
         if (cached_func) return 1; else return 0; }; \
     static APR_INLINE rettype apr_winapi_##fn args \
