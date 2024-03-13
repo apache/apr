@@ -1588,6 +1588,7 @@ AC_CHECK_FUNCS(mmap, [ mmap="1" ], [ mmap="0" ])
 if test "$native_mmap_emul" = "1"; then
     mmap="1"
 fi
+AC_CHECK_HEADERS([string.h])
 AC_CHECK_FUNCS(memmem, [ have_memmem="1" ], [have_memmem="0" ])
 AC_CHECK_FUNCS(memmove, [ have_memmove="1" ], [have_memmove="0" ])
 AC_CHECK_FUNCS([getpass getpassphrase gmtime_r localtime_r])
