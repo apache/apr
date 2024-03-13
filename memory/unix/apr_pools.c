@@ -2057,6 +2057,13 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     pool->file_line = file_line;
 
 #if APR_HAS_THREADS
+    pool->owner = apr_os_thread_current();
+#endif /* APR_HAS_THREADS */
+#ifdef NETWARE
+    pool->owner_proc = (apr_os_proc_t)getnlmhandle();
+#endif /* defined(NETWARE) */
+
+#if APR_HAS_THREADS
     if (parent == NULL || parent->allocator != allocator) {
         apr_status_t rv;
 
@@ -2094,13 +2101,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
         pool->sibling = NULL;
         pool->ref = NULL;
     }
-
-#if APR_HAS_THREADS
-    pool->owner = apr_os_thread_current();
-#endif /* APR_HAS_THREADS */
-#ifdef NETWARE
-    pool->owner_proc = (apr_os_proc_t)getnlmhandle();
-#endif /* defined(NETWARE) */
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "CREATE", file_line, 1);
