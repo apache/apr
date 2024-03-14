@@ -119,7 +119,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
 
 
 
-APR_DECLARE(apr_os_thread_t) apr_os_thread_current()
+APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void)
 {
     PIB *ppib;
     TIB *ptib;
