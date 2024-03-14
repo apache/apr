@@ -208,7 +208,7 @@ APR_DECLARE(apr_thread_t *) apr_thread_current(void)
 }
 
 
-APR_DECLARE(apr_os_thread_t) apr_os_thread_current()
+APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void)
 {
     PIB *ppib;
     TIB *ptib;
