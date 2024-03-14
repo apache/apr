@@ -467,9 +467,12 @@ static const apr_proc_mutex_unix_lock_methods_t mutex_sysv_methods =
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
 
 #ifndef APR_USE_PROC_PTHREAD_MUTEX_COND
-#define APR_USE_PROC_PTHREAD_MUTEX_COND \
-            (defined(HAVE_PTHREAD_CONDATTR_SETPSHARED) \
-             && !defined(HAVE_PTHREAD_MUTEX_TIMEDLOCK))
+#if defined(HAVE_PTHREAD_CONDATTR_SETPSHARED) \
+    && !defined(HAVE_PTHREAD_MUTEX_TIMEDLOCK)
+#define APR_USE_PROC_PTHREAD_MUTEX_COND 1
+#else
+#define APR_USE_PROC_PTHREAD_MUTEX_COND 0
+#endif
 #endif
 
 /* The mmap()ed pthread_interproc is the native pthread_mutex_t followed
