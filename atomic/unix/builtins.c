@@ -119,7 +119,7 @@ APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint
 APR_DECLARE(void*) apr_atomic_casptr(volatile void **mem, void *ptr, const void *cmp)
 {
 #if HAVE__ATOMIC_BUILTINS
-    __atomic_compare_exchange_n(mem, (void **)&cmp, ptr, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    __atomic_compare_exchange_n(mem, (void *)&cmp, ptr, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
     return (void *)cmp;
 #else
     return (void *)__sync_val_compare_and_swap(mem, (void *)cmp, ptr);
