@@ -103,7 +103,9 @@ typedef int               apr_signum_t;
  * @param field  data field within the structure
  * @return offset
  */
-#if defined(offsetof) && !defined(__cplusplus)
+#if defined(__has_builtin) && __has_builtin(__builtin_offsetof)
+#define APR_OFFSETOF(s_type,field) __builtin_offsetof(s_type,field)
+#elif defined(offsetof) && !defined(__cplusplus)
 #define APR_OFFSETOF(s_type,field) offsetof(s_type,field)
 #else
 #define APR_OFFSETOF(s_type,field) APR_OFFSET(s_type*,field)
