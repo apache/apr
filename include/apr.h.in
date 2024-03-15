@@ -88,6 +88,7 @@
 #define APR_HAVE_SEMAPHORE_H     @semaphoreh@
 #define APR_HAVE_SIGNAL_H        @signalh@
 #define APR_HAVE_STDARG_H        @stdargh@
+#define APR_HAVE_STDDEF_H        @stddefh@
 #define APR_HAVE_STDINT_H        @stdint@
 #define APR_HAVE_STDIO_H         @stdioh@
 #define APR_HAVE_STDLIB_H        @stdlibh@
@@ -163,6 +164,10 @@
 
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+
+#if APR_HAVE_STDDEF_H
+#include <stddef.h>
 #endif
 
 #if APR_HAVE_SYS_SOCKET_H
