@@ -93,7 +93,7 @@ static void lock_release(test_mode_e test_mode)
 
 static void * APR_THREAD_FUNC eachThread(apr_thread_t *id, void *p)
 {
-    test_mode_e test_mode = (test_mode_e)p;
+    test_mode_e test_mode = (test_mode_e)(apr_uintptr_t)p;
 
     lock_grab(test_mode);
     ++counter;
@@ -142,7 +142,7 @@ static void test_mech_mode(apr_lockmech_e mech, const char *mech_name,
     rv = apr_thread_create(&threads[i],
                            NULL,
                            eachThread,
-                           (void *)test_mode,
+                           (void *)(apr_uintptr_t)test_mode,
                            p);
     if (rv != APR_SUCCESS) {
       fprintf(stderr, "apr_thread_create->%d\n", rv);
