@@ -172,7 +172,7 @@ static void test_escape(abts_case *tc, void *data)
     ABTS_PTR_EQUAL(tc, src, dest);
 
     src = "\xFF<>&\'\"Hello World";
-    target = "&#255&lt;&gt;&amp;'&quot;Hello World";
+    target = "&#255;&lt;&gt;&amp;'&quot;Hello World";
     dest = apr_pescape_entity(pool, src, 1);
     ABTS_STR_EQUAL(tc, target, dest);
     apr_escape_entity(NULL, src, APR_ESCAPE_STRING, 1, &len);
