@@ -1275,8 +1275,9 @@ APR_DECLARE(apr_status_t) apr_escape_json(char *escaped, const char *str,
                         break;
                     default:
                         if (c < 0x20) {
-                            size += apr_snprintf((char *)d, 6, "\\u%04x", c);
-                            d += 5; 
+                            apr_snprintf((char *)d, 7, "\\u%04x", c);
+                            size += 6;
+                            d += 6; 
                             found = 1;
                         }
                         else if (((c >> 7) == 0x00)) {
@@ -1374,7 +1375,7 @@ APR_DECLARE(apr_status_t) apr_escape_json(char *escaped, const char *str,
                         break;
                     default:
                         if (c < 0x20) {
-                            size += 5;
+                            size += 6; /* \uXXXX */
                             found = 1;
                         }
                         else if (((c >> 7) == 0x00)) {

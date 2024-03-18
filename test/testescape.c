@@ -304,8 +304,8 @@ static void test_escape(abts_case *tc, void *data)
             (len == strlen(dest) + 1));
 
     /* all ascii */
-    src = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-    target = " !\\\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+    src = "\x01\b\f\n\r\t\\ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+    target = "\\u0001\\b\\f\\n\\r\\t\\\\ !\\\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
     dest = apr_pescape_json(pool, src, APR_ESCAPE_STRING, 0);
     ABTS_ASSERT(tc,
                 apr_psprintf(pool, "json escaped (%s) does not match expected output (%s)",
