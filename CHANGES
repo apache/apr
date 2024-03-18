@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.5
 
+  *) Fix missing ';' for XML/HTML hex entities from apr_escape_entity().
+     [Yann Ylavic]
+
   *) Fix crash in apr_pool_create() with --enable-pool-debug=all|owner.
      [Yann Ylavic]
 

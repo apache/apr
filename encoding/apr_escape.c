@@ -571,7 +571,7 @@ APR_DECLARE(apr_status_t) apr_escape_entity(char *escaped, const char *str,
                     found = 1;
                 }
                 else if (toasc && !apr_isascii(c)) {
-                    int offset = apr_snprintf((char *) d, 6, "&#%3.3d;", c);
+                    int offset = apr_snprintf((char *) d, 7, "&#%3.3d;", c);
                     size += offset;
                     d += offset;
                     found = 1;
@@ -613,8 +613,7 @@ APR_DECLARE(apr_status_t) apr_escape_entity(char *escaped, const char *str,
                     found = 1;
                 }
                 else if (toasc && !apr_isascii(c)) {
-                    char buf[8];
-                    size += apr_snprintf(buf, 6, "&#%3.3d;", c);
+                    size += apr_snprintf(NULL, 0, "&#%3.3d;", c);
                     found = 1;
                 }
                 else {
