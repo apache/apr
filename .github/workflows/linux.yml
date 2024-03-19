@@ -50,6 +50,9 @@ jobs:
     - name: Install prerequisites
       run: sudo apt-get install libtool libtool-bin
     - uses: actions/checkout@v3
+    # https://github.com/actions/runner-images/issues/9491#issuecomment-1989718917
+    - name: Workaround ASAN issue in Ubuntu 22.04 runners
+      run: sudo sysctl vm.mmap_rnd_bits=28
     - name: buildconf
       run: ./buildconf
     - name: configure
