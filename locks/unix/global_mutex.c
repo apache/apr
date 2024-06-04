@@ -86,6 +86,10 @@ APR_DECLARE(apr_status_t) apr_global_mutex_child_init(
 {
     apr_status_t rv;
 
+    if (*mutex == NULL) {
+        return APR_ENOLOCK;
+    }
+
     rv = apr_proc_mutex_child_init(&((*mutex)->proc_mutex), fname, pool);
     return rv;
 }
