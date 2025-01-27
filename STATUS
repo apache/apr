@@ -123,6 +123,13 @@ RELEASE SHOWSTOPPERS:
 
   * apr_file_rotating_* on most platforms
 
+  * building against expat and libxml2 located in
+    non-system default path is broken.
+    File xml.m4 sets variable APRUTIL_LDFLAGS only in configure,
+    but it is never transferred into the Makefile.
+    Makefile uses APRUTIL_LDFLAGS, but it is never set there.
+    Other m4 files, like crypto.m4, no longer use APRUTIL_LDFLAGS.
+
 CURRENT VOTES:
 
 
