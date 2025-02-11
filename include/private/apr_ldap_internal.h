@@ -124,66 +124,6 @@ extern "C" {
 #endif
 
 
-typedef struct apr_ldap_t {
-    apr_pool_t *pool;
-    LDAP *ld;
-    apr_socket_t *socket;
-    apr_skiplist *results;
-    apr_array_header_t *abandons;
-    apr_array_header_t *prepares;
-    LDAPControl **serverctrls;
-    LDAPControl **clientctrls;
-    apu_err_t err;
-    apr_status_t status;
-} apr_ldap_t;
-
-
-typedef struct apr_ldap_prepare_t {
-    apr_pool_t *pool;
-    apr_ldap_prepare_cb cb;
-    void *ctx;
-} apr_ldap_prepare_t;
- 
-
-
-typedef struct apr_ldap_result_t {
-    apr_pool_t *pool;
-    apr_ldap_t *ld;
-    const char *mech;
-    const char *rmech;
-    LDAPMessage *message;
-    int msgid;
-    int msgtype;
-    union {
-        apr_ldap_bind_cb bind;
-        apr_ldap_compare_cb compare;
-        apr_ldap_search_result_cb search;
-        apr_ldap_add_cb add;
-        apr_ldap_modify_cb modify;
-        apr_ldap_rename_cb rename;
-        apr_ldap_delete_cb delete;
-        apr_ldap_extended_cb ext;
-    } cb;
-    union {
-        apr_ldap_search_entry_cb search;
-    } entry_cb;
-    void *ctx;
-    apr_size_t nentries;
-} apr_ldap_result_t;
-
-
-
-APU_DECLARE_LDAP(apr_status_t) apr_ldap_status(int rc, apr_status_t status);
-
-APU_DECLARE_LDAP(void) apr_ldap_result_add(apr_pool_t *pool,
-                                           apr_ldap_t *ldap,
-                                           apr_ldap_result_t *res,
-                                           int msgid)
-                                           __attribute__((nonnull(1,2,3)));
-
-
-
-
 #if APR_HAVE_MODULAR_DSO
 
 /* For LDAP internal builds, wrap our LDAP namespace */
