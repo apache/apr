@@ -204,6 +204,10 @@ static char *apr_error_string(apr_status_t statcode)
         return "Call me again when the socket is ready for writing";
     case APR_USER_CANCELLED:
         return "User has cancelled the request";
+    case APR_ALREADY_EXISTS:
+        return "The object already exists";
+    case APR_OBJECT_CLASS_VIOLATION:
+        return "Add or modify results in an objectclass violation";
 
     default:
         return "Error string not specified yet";

@@ -238,6 +238,11 @@ APR_DECLARE(int) apr_ldap_url_parse(apr_pool_t *pool,
 #define apr_ldap_bind apr__ldap_bind
 #define apr_ldap_compare apr__ldap_compare
 #define apr_ldap_search apr__ldap_search
+#define apr_ldap_add apr__ldap_add
+#define apr_ldap_modify apr__ldap_modify
+#define apr_ldap_delete apr__ldap_delete
+#define apr_ldap_rename apr__ldap_rename
+#define apr_ldap_extended apr__ldap_extended
 #define apr_ldap_unbind apr__ldap_unbind
 
 #define APU_DECLARE_LDAP(type) type
@@ -1503,6 +1508,485 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_search(apr_pool_t *pool,
                                                void *ctx,
                                                apu_err_t *err)
                                                __attribute__((nonnull(1,2,3,15)));
+
+/**
+ * Attribute-value pair.
+ *
+ * An array of pairs is passed to apr_ldap_add(), and
+ * a pair forms part of the apr_ldap_modify_t that is
+ * passed to apr_ldap_modify().
+ *
+ * @see apr_ldap_add
+ * @see apr_ldap_modify
+ */
+typedef struct apr_ldap_pair_t {
+    /** Attribute to perform the operation on */
+    const char *attr;
+    /** Array of apr_buffer_t values */
+    apr_array_header_t *vals;
+} apr_ldap_pair_t;
+
+/**
+ * Callback to receive the results of an add operation.
+ *
+ * When an addition is successful, this function is called with a status of
+ * APR_SUCCESS.
+ *
+ * If the addition fails, status will carry the error code, and err will return
+ * the human readable details.
+ *
+ * If the underlying LDAP connection has failed, status will return details
+ * of the error, allowing an opportunity to clean up.
+ *
+ * When complete, return APR_SUCCESS to indicate you want to continue, or
+ * a different code if you want the event loop to give up. This code will
+ * be returned from apr_ldap_result().
+ *
+ * If this callback was called during a pool cleanup, the return value is
+ * ignored.
+ * @see apr_ldap_add
+ * @see apr_ldap_result
+ */
+typedef apr_status_t (*apr_ldap_add_cb)(apr_ldap_t *ldap, apr_status_t status,
+                                        const char *matcheddn,
+                                        apr_ldap_control_t **serverctrls,
+                                        void *ctx, apu_err_t *err);
+
+
+/**
+ * APR LDAP add function
+ *
+ * This function allows addition of an entry containing attributes and values
+ * described by the given distinguished name stored in the directory.
+ *
+ * Additions are attempted asynchronously. For non blocking
+ * behaviour, this function must be called after the underlying
+ * socket has indicated that it is ready to write.
+ *
+ * In the absence of an error, apr_ldap_add will return
+ * APR_WANT_READ or APR_WANT_WRITE to indicate that the next message
+ * in the conversation be retrieved using apr_ldap_result().
+ *
+ * The outcome of the addition will be retrieved and handled by
+ * the apr_ldap_process() function, and the outcome is passed to the
+ * apr_ldap_add_cb provided.
+ *
+ * @param pool The pool that keeps track of the lifetime of the add conversation.
+ * If this pool is cleaned up, the add conversation will be gracefully
+ * abandoned without affecting other LDAP requests in progress. This pool need
+ * not have any relationship with the LDAP connection pool.
+ * @param ldap The ldap handle
+ * @param dn The distinguished named of the object to add.
+ * @param adds Array of apr_ldap_pair_t attributes and values.
+ * @param serverctrls NULL terminated array of server controls.
+ * @param clientctrls NULL terminated array of client controls.
+ * @param timeout The timeout to use for writes.
+ * @param add_cb The addition result callback function. When the add process has
+ * completed the success or failure of the addition is returned here. The callback
+ * is triggered from inside apr_ldap_process() so that it is safe to write the
+ * next LDAP request.
+ * @param ctx Context passed to the add callback.
+ * @param err Error structure for reporting detailed results.
+ *
+ * @return APR_WANT_READ means that processing has occurred, and
+ * the message in reply needs to be fetched using apr_ldap_result().
+ * APR_SUCCESS means that the processing is complete, and the addition
+ * has been successful. Other error codes indicate that the addition
+ * was not successful.
+ * @see apr_ldap_add_cb
+ * @see apr_ldap_process
+ * @see apr_ldap_result
+ */
+APU_DECLARE_LDAP(apr_status_t) apr_ldap_add(apr_pool_t *pool,
+                                            apr_ldap_t *ldap,
+                                            const char *dn,
+                                            apr_array_header_t *adds,
+                                            apr_ldap_control_t **serverctrls,
+                                            apr_ldap_control_t **clientctrls,
+                                            apr_interval_time_t timeout,
+                                            apr_ldap_add_cb add_cb, void *ctx,
+                                            apu_err_t *err)
+                                            __attribute__((nonnull(1,2,3,4,10)));
+
+
+/**
+ * LDAP modification operations
+ *
+ * @see apr_ldap_modify
+ */
+typedef enum {
+    /** Add an attribute or entry */
+    APR_LDAP_MOD_ADD = 0,
+    /** Remove an attribute or entry */
+    APR_LDAP_MOD_DELETE = 1,
+    /** Replace an attribute or entry */
+    APR_LDAP_MOD_REPLACE = 2,
+    /** Increment an attribute, see RFC4525 */
+    APR_LDAP_MOD_INCREMENT = 3
+} apr_ldap_operation_e;
+
+/**
+ * Modification to be performed by apr_ldap_modify().
+ *
+ * Modifications can take the form of additions, deletions, or
+ * the in place modification or increment of an attribute.
+ *
+ * @see apr_ldap_pair_t
+ * @see apr_ldap_modify
+ */
+typedef struct apr_ldap_modify_t {
+    /** Operation to be performed */
+    apr_ldap_operation_e op;
+    /** Attribute-value pair to perform the operation on */
+    apr_ldap_pair_t pair;
+} apr_ldap_modify_t;
+
+
+/**
+ * Callback to receive the results of a modify operation.
+ *
+ * When a modification is successful, this function is called with a status of
+ * APR_SUCCESS.
+ *
+ * If the modify fails, status will carry the error code, and err will return
+ * the human readable details.
+ *
+ * If the underlying LDAP connection has failed, status will return details
+ * of the error, allowing an opportunity to clean up.
+ *
+ * When complete, return APR_SUCCESS to indicate you want to continue, or
+ * a different code if you want the event loop to give up. This code will
+ * be returned from apr_ldap_result().
+ *
+ * If this callback was called during a pool cleanup, the return value is
+ * ignored.
+ * @see apr_ldap_modify
+ * @see apr_ldap_result
+ */
+typedef apr_status_t (*apr_ldap_modify_cb)(apr_ldap_t *ldap, apr_status_t status,
+                                           const char *matcheddn,
+                                           apr_ldap_control_t **serverctrls,
+                                           void *ctx, apu_err_t *err);
+
+
+
+/**
+ * APR LDAP modify function
+ *
+ * This function allows modification of attributes and values
+ * within an entry described by the given distinguished name stored
+ * in the directory.
+ *
+ * Modifications are attempted asynchronously. For non blocking
+ * behaviour, this function must be called after the underlying
+ * socket has indicated that it is ready to write.
+ *
+ * In the absence of an error, apr_ldap_modify will return
+ * APR_WANT_READ or APR_WANT_WRITE to indicate that the next message
+ * in the conversation be retrieved using apr_ldap_result().
+ *
+ * The outcome of the modification will be retrieved and handled by
+ * the apr_ldap_process() function, and the outcome is passed to the
+ * apr_ldap_modify_cb provided.
+ *
+ * @param pool The pool that keeps track of the lifetime of the modify conversation.
+ * If this pool is cleaned up, the modify conversation will be gracefully
+ * abandoned without affecting other LDAP requests in progress. This pool need
+ * not have any relationship with the LDAP connection pool.
+ * @param ldap The ldap handle
+ * @param dn The distinguished named of the object to modify.
+ * @param mods Array of apr_ldap_modify_t operations.
+ * @param serverctrls NULL terminated array of server controls.
+ * @param clientctrls NULL terminated array of client controls.
+ * @param timeout The timeout to use for writes.
+ * @param modify_cb The modify result callback function. When the modify process has
+ * completed the success or failure of the modification is returned here. The callback
+ * is triggered from inside apr_ldap_process() so that it is safe to write the
+ * next LDAP request.
+ * @param ctx Context passed to the modify callback.
+ * @param err Error structure for reporting detailed results.
+ *
+ * @return APR_WANT_READ means that processing has occurred, and
+ * the message in reply needs to be fetched using apr_ldap_result().
+ * APR_SUCCESS means that the processing is complete, and the modify
+ * has been successful. Other error codes indicate that the modify
+ * was not successful.
+ * @see apr_ldap_modify_cb
+ * @see apr_ldap_process
+ * @see apr_ldap_result
+ */
+APU_DECLARE_LDAP(apr_status_t) apr_ldap_modify(apr_pool_t *pool,
+                                               apr_ldap_t *ldap,
+                                               const char *dn,
+                                               apr_array_header_t *mods,
+                                               apr_ldap_control_t **serverctrls,
+                                               apr_ldap_control_t **clientctrls,
+                                               apr_interval_time_t timeout,
+                                               apr_ldap_modify_cb modify_cb, void *ctx,
+                                               apu_err_t *err)
+                                              __attribute__((nonnull(1,2,3,4,10)));
+
+/**
+ * LDAP rename flags
+ *
+ * @see apr_ldap_rename
+ */
+typedef enum {
+    /** No flags */
+    APR_LDAP_RENAME_NONE = 0,
+    /** Delete the old relative distinguished name from the entry */
+    APR_LDAP_RENAME_DELETEOLDRDN = 1,
+} apr_ldap_rename_e;
+
+/**
+ * Callback to receive the results of a rename operation.
+ *
+ * When a rename is successful, this function is called with a status of
+ * APR_SUCCESS.
+ *
+ * If the rename fails, status will carry the error code, and err will return
+ * the human readable details.
+ *
+ * If the underlying LDAP connection has failed, status will return details
+ * of the error, allowing an opportunity to clean up.
+ *
+ * When complete, return APR_SUCCESS to indicate you want to continue, or
+ * a different code if you want the event loop to give up. This code will
+ * be returned from apr_ldap_result().
+ *
+ * If this callback was called during a pool cleanup, the return value is
+ * ignored.
+ * @see apr_ldap_rename
+ * @see apr_ldap_result
+ */
+typedef apr_status_t (*apr_ldap_rename_cb)(apr_ldap_t *ldap, apr_status_t status,
+                                           const char *matcheddn,
+                                           apr_ldap_control_t **serverctrls,
+                                           void *ctx, apu_err_t *err);
+
+
+
+/**
+ * APR LDAP rename function
+ *
+ * This function allows moving or renaming of an entry from the given
+ * distinguished name, to a new relative distinguished name, a new
+ * parent object, or both.
+ *
+ * Renamed are attempted asynchronously. For non blocking
+ * behaviour, this function must be called after the underlying
+ * socket has indicated that it is ready to write.
+ *
+ * In the absence of an error, apr_ldap_rename will return
+ * APR_WANT_READ or APR_WANT_WRITE to indicate that the next message
+ * in the conversation be retrieved using apr_ldap_result().
+ *
+ * The outcome of the deletion will be retrieved and handled by
+ * the apr_ldap_process() function, and the outcome is passed to the
+ * apr_ldap_rename_cb provided.
+ *
+ * @param pool The pool that keeps track of the lifetime of the rename conversation.
+ * If this pool is cleaned up, the rename conversation will be gracefully
+ * abandoned without affecting other LDAP requests in progress. This pool need
+ * not have any relationship with the LDAP connection pool.
+ * @param ldap The ldap handle
+ * @param dn The distinguished named of the object to rename.
+ * @param newrdn The new relative distinguished named of the object.
+ * @param newparent The distinguished named of the parent object to move to.
+ * @param flags If APR_LDAP_RENAME_DELETEOLDRDN is passed, the old RDN in the entry will be removed.
+ * @param serverctrls NULL terminated array of server controls.
+ * @param clientctrls NULL terminated array of client controls.
+ * @param timeout The timeout to use for writes.
+ * @param rename_cb The rename result callback function. When the rename process has
+ * completed the success or failure of the rename is returned here. The callback
+ * is triggered from inside apr_ldap_process() so that it is safe to write the
+ * next LDAP request.
+ * @param ctx Context passed to the rename callback.
+ * @param err Error structure for reporting detailed results.
+ *
+ * @return APR_WANT_READ means that processing has occurred, and
+ * the message in reply needs to be fetched using apr_ldap_result().
+ * APR_SUCCESS means that the processing is complete, and the rename
+ * has been successful. Other error codes indicate that the rename
+ * was not successful.
+ * @see apr_ldap_rename_cb
+ * @see apr_ldap_process
+ * @see apr_ldap_result
+ */
+APU_DECLARE_LDAP(apr_status_t) apr_ldap_rename(apr_pool_t *pool,
+                                               apr_ldap_t *ldap,
+                                               const char *dn, const char *newrdn, const char *newparent,
+                                               apr_ldap_rename_e flags,
+                                               apr_ldap_control_t **serverctrls,
+                                               apr_ldap_control_t **clientctrls,
+                                               apr_interval_time_t timeout,
+                                               apr_ldap_rename_cb rename_cb, void *ctx,
+                                               apu_err_t *err)
+                                              __attribute__((nonnull(1,2,3,4,12)));
+
+/**
+ * Callback to receive the results of a delete operation.
+ *
+ * When a deletion is successful, this function is called with a status of
+ * APR_SUCCESS.
+ *
+ * If the delete fails, status will carry the error code, and err will return
+ * the human readable details.
+ *
+ * If the underlying LDAP connection has failed, status will return details
+ * of the error, allowing an opportunity to clean up.
+ *
+ * When complete, return APR_SUCCESS to indicate you want to continue, or
+ * a different code if you want the event loop to give up. This code will
+ * be returned from apr_ldap_result().
+ *
+ * If this callback was called during a pool cleanup, the return value is
+ * ignored.
+ * @see apr_ldap_delete
+ * @see apr_ldap_result
+ */
+typedef apr_status_t (*apr_ldap_delete_cb)(apr_ldap_t *ldap, apr_status_t status,
+                                           const char *matcheddn,
+                                           apr_ldap_control_t **serverctrls,
+                                           void *ctx, apu_err_t *err);
+
+
+
+/**
+ * APR LDAP delete function
+ *
+ * This function allows deletion of an entry described by the given
+ * distinguished name stored in the directory.
+ *
+ * Deletions are attempted asynchronously. For non blocking
+ * behaviour, this function must be called after the underlying
+ * socket has indicated that it is ready to write.
+ *
+ * In the absence of an error, apr_ldap_delete will return
+ * APR_WANT_READ or APR_WANT_WRITE to indicate that the next message
+ * in the conversation be retrieved using apr_ldap_result().
+ *
+ * The outcome of the deletion will be retrieved and handled by
+ * the apr_ldap_process() function, and the outcome is passed to the
+ * apr_ldap_modify_cb provided.
+ *
+ * @param pool The pool that keeps track of the lifetime of the delete conversation.
+ * If this pool is cleaned up, the delete conversation will be gracefully
+ * abandoned without affecting other LDAP requests in progress. This pool need
+ * not have any relationship with the LDAP connection pool.
+ * @param ldap The ldap handle
+ * @param dn The distinguished named of the object to delete.
+ * @param serverctrls NULL terminated array of server controls.
+ * @param clientctrls NULL terminated array of client controls.
+ * @param timeout The timeout to use for writes.
+ * @param delete_cb The delete result callback function. When the delete process has
+ * completed the success or failure of the deletion is returned here. The callback
+ * is triggered from inside apr_ldap_process() so that it is safe to write the
+ * next LDAP request.
+ * @param ctx Context passed to the delete callback.
+ * @param err Error structure for reporting detailed results.
+ *
+ * @return APR_WANT_READ means that processing has occurred, and
+ * the message in reply needs to be fetched using apr_ldap_result().
+ * APR_SUCCESS means that the processing is complete, and the delete
+ * has been successful. Other error codes indicate that the delete
+ * was not successful.
+ * @see apr_ldap_delete_cb
+ * @see apr_ldap_process
+ * @see apr_ldap_result
+ */
+APU_DECLARE_LDAP(apr_status_t) apr_ldap_delete(apr_pool_t *pool,
+                                               apr_ldap_t *ldap,
+                                               const char *dn,
+                                               apr_ldap_control_t **serverctrls,
+                                               apr_ldap_control_t **clientctrls,
+                                               apr_interval_time_t timeout,
+                                               apr_ldap_delete_cb delete_cb, void *ctx,
+                                               apu_err_t *err)
+                                              __attribute__((nonnull(1,2,3,9)));
+
+/**
+ * Callback to receive the results of an extended operation.
+ *
+ * When an extended operation is successful, this function is called with a
+ * status of APR_SUCCESS.
+ *
+ * If the extended operation fails, status will carry the error code, and err
+ * will return the human readable details.
+ *
+ * If the underlying LDAP connection has failed, status will return details
+ * of the error, allowing an opportunity to clean up.
+ *
+ * When complete, return APR_SUCCESS to indicate you want to continue, or
+ * a different code if you want the event loop to give up. This code will
+ * be returned from apr_ldap_result().
+ *
+ * If this callback was called during a pool cleanup, the return value is
+ * ignored.
+ * @see apr_ldap_extended
+ * @see apr_ldap_result
+ */
+typedef apr_status_t (*apr_ldap_extended_cb)(apr_ldap_t *ldap, apr_status_t status,
+                                             const char *roid,
+                                             apr_buffer_t *rdata,
+                                             void *ctx, apu_err_t *err);
+
+
+
+/**
+ * APR LDAP extended operation function
+ *
+ * This function allows extended operations to be performed on
+ * the directory.
+ *
+ * Extended operations are attempted asynchronously. For non blocking
+ * behaviour, this function must be called after the underlying
+ * socket has indicated that it is ready to write.
+ *
+ * In the absence of an error, apr_ldap_extended_operation will return
+ * APR_WANT_READ or APR_WANT_WRITE to indicate that the next message
+ * in the conversation be retrieved using apr_ldap_result().
+ *
+ * The outcome of the extended operation will be retrieved and handled by
+ * the apr_ldap_process() function, and the outcome is passed to the
+ * apr_ldap_extended_operation_cb provided.
+ *
+ * @param pool The pool that keeps track of the lifetime of the extended operation conversation.
+ * If this pool is cleaned up, the extended operation conversation will be gracefully
+ * abandoned without affecting other LDAP requests in progress. This pool need
+ * not have any relationship with the LDAP connection pool.
+ * @param ldap The ldap handle
+ * @param oid The OID of the extended operation.
+ * @param data The data used by the extended operation.
+ * @param serverctrls NULL terminated array of server controls.
+ * @param clientctrls NULL terminated array of client controls.
+ * @param timeout The timeout to use for writes.
+ * @param ext_cb The extended operation result callback function. When the extended operation process has
+ * completed the success or failure of the extended operation is returned here. The callback
+ * is triggered from inside apr_ldap_process() so that it is safe to write the
+ * next LDAP request.
+ * @param ctx Context passed to the delete callback.
+ * @param err Error structure for reporting detailed results.
+ *
+ * @return APR_WANT_READ means that processing has occurred, and
+ * the message in reply needs to be fetched using apr_ldap_result().
+ * APR_SUCCESS means that the processing is complete, and the
+ * extended operation has been successful. Other error codes indicate
+ * that the extended operation was not successful.
+ * @see apr_ldap_extended_cb
+ * @see apr_ldap_process
+ * @see apr_ldap_result
+ */
+APU_DECLARE_LDAP(apr_status_t) apr_ldap_extended(apr_pool_t *pool,
+                                                 apr_ldap_t *ldap,
+                                                 const char *oid,
+                                                 apr_buffer_t *data,
+                                                 apr_ldap_control_t **serverctrls,
+                                                 apr_ldap_control_t **clientctrls,
+                                                 apr_interval_time_t timeout,
+                                                 apr_ldap_extended_cb ext_cb, void *ctx,
+                                                 apu_err_t *err)
+                                                 __attribute__((nonnull(1,2,3,10)));
 
 /**
  * APR LDAP unbind function

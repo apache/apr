@@ -70,6 +70,8 @@ extern "C" {
  * APR_WANT_READ      Call me again when the socket is ready for reading
  * APR_WANT_WRITE     Call me again when the socket is ready for writing
  * APR_USER_CANCELLED User has cancelled the request
+ * APR_ALREADY_EXISTS The object already exists
+ * APR_OBJECT_CLASS_VIOLATION Add or modify results in an objectclass violation
  * </PRE>
  *
  * <PRE>
@@ -138,6 +140,11 @@ extern "C" {
 #define APR_WANT_WRITE                 (APR_UTIL_START_STATUS + 116)
 /** @see APR_STATUS_IS_USER_CANCELLED */
 #define APR_USER_CANCELLED             (APR_UTIL_START_STATUS + 117)
+/** @see APR_STATUS_IS_ALREADY_EXISTS */
+#define APR_ALREADY_EXISTS             (APR_UTIL_START_STATUS + 118)
+/** @see APR_STATUS_IS_OBJECT_CLASS_VIOLATION */
+#define APR_OBJECT_CLASS_VIOLATION     (APR_UTIL_START_STATUS + 119)
+
 /** @} */
 
 /**
@@ -279,6 +286,14 @@ extern "C" {
  * User has cancelled the request.
  */
 #define APR_STATUS_IS_USER_CANCELLED(s)        ((s) == APR_USER_CANCELLED)
+/**
+ * Object already exists.
+ */
+#define APR_STATUS_IS_ALREADY_EXISTS(s)        ((s) == APR_ALREADY_EXISTS)
+/**
+ * Object class violation.
+ */
+#define APR_STATUS_IS_OBJECT_CLASS_VIOLATION(s)        ((s) == APR_OBJECT_CLASS_VIOLATION)
 /** @} */
 
 /**
