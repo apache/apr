@@ -1277,8 +1277,8 @@ static void apr_ldap_result_add(apr_pool_t *pool,
     apr_skiplist_add(ldap->results, res);
 }
 
-APU_DECLARE_LDAP(void) apr_ldap_result_remove(apr_ldap_t *ldap,
-                                              apr_ldap_result_t *res)
+static void apr_ldap_result_remove(apr_ldap_t *ldap,
+                                   apr_ldap_result_t *res)
 {
     apr_pool_cleanup_run(res->pool, res, result_cleanup);
 }
