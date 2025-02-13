@@ -33,6 +33,7 @@
 #include "apr_cstr.h"
 #include "apr_strings.h"
 #include "apr_escape.h"
+#include "apr_hash.h"
 
 #define APR_WANT_MEMFUNC
 #include "apr_want.h"
@@ -1204,6 +1205,197 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_prepare(apr_pool_t *pool,
 
 
 
+static apr_status_t ldap_control_cleanup(void *dptr)
+{
+    if (dptr) {
+
+        LDAPControl *ctl = dptr;
+
+        ldap_control_free(ctl);
+    }
+
+    return APR_SUCCESS;
+}
+
+static apr_status_t apr_ldap_control_parse(apr_pool_t *pool,
+                                           apr_ldap_t *ldap,
+                                           LDAPControl **ctls,
+                                           apr_hash_t **controls,
+                                           apu_err_t *err)
+{
+    apr_hash_t *cs;
+
+    int i = 0;
+
+    if (!ctls || !ctls[0]) {
+        *controls = NULL;
+        return APR_SUCCESS;
+    }
+
+    for (i = 0; ctls[i]; i++);
+
+    cs = apr_hash_make(pool);
+
+    if (!cs) {
+        return APR_ENOMEM;
+    }
+
+    for (i = 0; ctls[i]; i++) {
+
+        LDAPControl *ctl = (LDAPControl *)ctls[i];
+
+        apr_ldap_control_t *c = apr_pcalloc(pool, sizeof(apr_ldap_control_t));
+
+        c->critical = ctl->ldctl_iscritical ? 1 : 0;
+
+        /* what controls do we recognise? */
+
+#if APR_HAS_OPENLDAP_LDAPSDK
+
+        if (!strcmp(ctl->ldctl_oid, LDAP_CONTROL_SORTRESPONSE)) {
+
+            ber_int_t result;
+            char *attr;
+
+            err->rc = ldap_parse_sortresponse_control(ldap->ld, ctl, &result, &attr);
+
+            if (err->rc != LDAP_SUCCESS) {
+                err->msg = ldap_err2string(err->rc);
+                err->reason = "LDAP: ldap_parse_sortresponse_control failed";
+                return apr_ldap_status(err->rc, APR_EGENERAL);
+            }
+
+            c->type = APR_LDAP_CONTROL_SORT_RESPONSE;
+
+            c->c.sortrs.attribute = (const char *)attr;
+            c->c.sortrs.result = apr_ldap_status(result, APR_EGENERAL);;
+
+            apr_hash_set(cs, ctl->ldctl_oid, APR_HASH_KEY_STRING, c);
+
+            continue;
+        }
+
+#endif
+
+        /* not recognised, return raw value */
+        c->type = APR_LDAP_CONTROL_OID;
+
+        c->c.oid.oid = (const char *)ctl->ldctl_oid;
+
+        apr_buffer_mem_set(&c->c.oid.val, ctl->ldctl_value.bv_val,
+                           ctl->ldctl_value.bv_len);
+
+        apr_hash_set(cs, ctl->ldctl_oid, APR_HASH_KEY_STRING, c);
+
+    }
+
+    *controls = cs;
+
+    return APR_SUCCESS;
+}
+
+static apr_status_t apr_ldap_control_create(apr_pool_t *pool,
+                                            apr_ldap_t *ldap,
+                                            LDAPControl ***ctrls,
+                                            apr_array_header_t *controls,
+                                            apu_err_t *err)
+{
+    LDAPControl **cs;
+
+    int i, j, count;
+
+    if (!controls || !(count = controls->nelts)) {
+        *ctrls = NULL;
+        return APR_SUCCESS;
+    }
+
+    cs = apr_pcalloc(pool, (count + 1) * sizeof(LDAPControl *));
+
+    for (i = 0; i < count; ++i) {
+
+        apr_ldap_control_t *control = &APR_ARRAY_IDX(controls, i, apr_ldap_control_t);
+
+        /* what controls do we recognise? */
+        switch (control->type) {
+
+        /* sort control */
+        case APR_LDAP_CONTROL_SORT_REQUEST: {
+#if APR_HAS_OPENLDAP_LDAPSDK
+
+            LDAPControl *c;
+            LDAPSortKey **sks;
+
+            apr_array_header_t *keys = control->c.sortrq.keys;
+
+            if (!keys || !keys->nelts) {
+                err->reason = "LDAP: no sort control keys specified";
+                return APR_EINVAL;
+            }
+
+            sks = apr_pcalloc(pool, (keys->nelts + 1) * sizeof(LDAPSortKey *));
+
+            for (j = 0; j < keys->nelts; ++j) {
+
+                apr_ldap_control_sortkey_t *sortkey = &APR_ARRAY_IDX(keys, j, apr_ldap_control_sortkey_t);
+
+                LDAPSortKey *sk = apr_pcalloc(pool, sizeof(LDAPSortKey));
+
+                sk->attributeType = (char *)sortkey->attribute;
+                sk->orderingRule = (char *)sortkey->order;
+                sk->reverseOrder = sortkey->direction == APR_LDAP_CONTROL_SORT_REVERSE ? 1 : 0;
+
+                sks[j] = sk;
+            }
+
+            err->rc = ldap_create_sort_control(ldap->ld, sks, control->critical ? 1 : 0, &c);
+
+            if (err->rc != LDAP_SUCCESS) {
+                err->msg = ldap_err2string(err->rc);
+                err->reason = "LDAP: ldap_create_sort_control failed";
+                return apr_ldap_status(err->rc, APR_EGENERAL);
+            }
+
+            apr_pool_cleanup_register(pool, c, ldap_control_cleanup,
+                                      apr_pool_cleanup_null);
+
+            cs[i] = c;
+
+            break;
+#else
+            err->reason = "LDAP: sort control not supported";
+            return APR_ENOTIMPL;
+#endif
+        }
+
+        /* not recognised, return raw value */
+        case APR_LDAP_CONTROL_OID: {
+
+            apr_size_t size;
+
+            LDAPControl *c = apr_pcalloc(pool, count * sizeof(LDAPControl));
+
+            c->ldctl_oid = (char *)control->c.oid.oid;
+            c->ldctl_value.bv_val = apr_buffer_mem(&control->c.oid.val, &size);
+            c->ldctl_value.bv_len = size;
+            c->ldctl_iscritical = control->critical ? 1 : 0;
+
+            cs[i] = c;
+
+            break;
+        }
+        default:
+            err->reason = "LDAP: control not recognised";
+            return APR_EINVAL;
+        }
+
+    }
+
+    *ctrls = (LDAPControl **)cs;
+
+    return APR_SUCCESS;
+}
+
+
 
 
 /*
@@ -1450,22 +1642,25 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_process(apr_pool_t *pool,
             char *matcheddn = NULL;
             char *errmsg = NULL;
             LDAPControl **serverctrls = NULL;
+            apr_hash_t *controls = NULL;
             int rc;
 
             err->rc = ldap_parse_result(ldap->ld, res->message, &rc, &matcheddn,
                                         &errmsg, NULL, &serverctrls, 0);
 
-            err->rc = rc != LDAP_SUCCESS ? rc : err->rc;
-            err->msg = ldap_err2string(err->rc);
-            err->reason = "LDAP search: ldap_parse_result()";
+            status = apr_ldap_control_parse(res->pool, ldap, serverctrls, &controls, err);
+
+            if (APR_SUCCESS == status) {
+                err->rc = rc != LDAP_SUCCESS ? rc : err->rc;
+                err->msg = ldap_err2string(err->rc);
+                err->reason = "LDAP search: ldap_parse_result()";
+                status = apr_ldap_status(err->rc, APR_EGENERAL);
+            }
 
             if (res->cb.search) {
-                status = res->cb.search(ldap, apr_ldap_status(err->rc, APR_EGENERAL), 0,
-                                        matcheddn, (apr_ldap_control_t **)serverctrls,
+                status = res->cb.search(ldap, status, 0,
+                                        matcheddn, controls,
                                         res->ctx, err);
-            }
-            else {
-                status = apr_ldap_status(err->rc, APR_EGENERAL);
             }
 
             apr_ldap_result_remove(ldap, res);
@@ -2325,29 +2520,6 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_bind(apr_pool_t *pool, apr_ldap_t *ldap,
 
 }
 
-APU_DECLARE_LDAP(apr_ldap_control_t *) apr_ldap_control_make(apr_pool_t *pool,
-                                                             apr_ldap_t *ldap,
-                                                             const char *oid,
-                                                             apr_buffer_t *val,
-                                                             int iscritical)
-{
-    apr_ldap_control_t *ctl;
-    LDAPControl *c;
-
-    ctl = apr_pcalloc(pool, sizeof(apr_ldap_result_t));
-    c = (LDAPControl *)ctl;
-
-    if (c) {
-        apr_size_t size;
-        c->ldctl_oid = (char *)oid;
-        c->ldctl_value.bv_val = apr_buffer_mem(val, &size);
-        c->ldctl_value.bv_len = size;
-        c->ldctl_iscritical = iscritical ? 1 : 0;
-    }
-
-    return ctl;
-}
-
 APU_DECLARE_LDAP(apr_status_t) apr_ldap_compare(apr_pool_t *pool,
                                                 apr_ldap_t *ldap,
                                                 const char *dn,
@@ -2427,8 +2599,8 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_search(apr_pool_t *pool,
                                                const char *filter,
                                                const char **attrs,
                                                apr_ldap_switch_e attrsonly,
-                                               apr_ldap_control_t **serverctrls,
-                                               apr_ldap_control_t **clientctrls,
+                                               apr_array_header_t *serverctrls,
+                                               apr_array_header_t *clientctrls,
                                                apr_interval_time_t timeout,
                                                apr_ssize_t sizelimit,
                                                apr_ldap_search_result_cb search_result_cb,
@@ -2436,11 +2608,28 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_search(apr_pool_t *pool,
                                                void *search_ctx,
                                                apu_err_t *err)
 {
+    LDAPControl **sctrls = NULL;
+    LDAPControl **cctrls = NULL;
+
     apr_ldap_result_t *res;
 
     struct timeval tv, *tvptr;
 
     int msgid = 0;
+
+    apr_status_t status;
+
+    status = apr_ldap_control_create(pool, ldap, &sctrls, serverctrls, err);
+
+    if (APR_SUCCESS != status) {
+        return status;
+    }
+
+    status = apr_ldap_control_create(pool, ldap, &cctrls, clientctrls, err);
+
+    if (APR_SUCCESS != status) {
+        return status;
+    }
 
     if (timeout < 0) {
         tvptr = NULL;
@@ -2452,7 +2641,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_search(apr_pool_t *pool,
     }
 
     err->rc = ldap_search_ext(ldap->ld, (char *)dn, scope, (char *)filter, (char **)attrs, attrsonly,
-                              (LDAPControl **)serverctrls, (LDAPControl **)clientctrls, tvptr, sizelimit, &msgid);
+                              sctrls, cctrls, tvptr, sizelimit, &msgid);
 
     if (err->rc != LDAP_SUCCESS) {
         err->msg = ldap_err2string(err->rc);

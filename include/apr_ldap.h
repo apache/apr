@@ -81,6 +81,7 @@
 #include "apu_errno.h"
 #include "apr_escape.h"
 #include "apr_buffer.h"
+#include "apr_hash.h"
 
 /*
  * LDAP URL handling
@@ -919,6 +920,123 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_set(apr_pool_t *pool, apr_ldap_t 
                                                    apu_err_t *result_err)
                                                    __attribute__((nonnull(1,5)));
 
+
+/**
+ * LDAP control types.
+ *
+ * This enumeration represents the controls understood by
+ * the library.
+ *
+ * Controls not specifically recognised can be created
+ * using APR_LDAP_CONTROL_OID and the binary control value,
+ * and will be parsed to APR_LDAP_CONTROL_OID and the binary
+ * control value.
+ */
+typedef enum {
+    /** Control specified by OID */
+    APR_LDAP_CONTROL_OID = 0,
+    /** Sort request control RFC 2891 */
+    APR_LDAP_CONTROL_SORT_REQUEST = 1,
+    /** Sort response control RFC 2891 */
+    APR_LDAP_CONTROL_SORT_RESPONSE = 2,
+#if 0
+    /** Paged control */
+    APR_LDAP_CONTROL_PAGED = 2
+#endif
+} apr_ldap_control_e;
+
+/**
+ * Control specified by OID and value.
+ *
+ * All controls unrecognised by this API can be parsed
+ * and returned as this type.
+ */
+typedef struct apr_ldap_control_oid_t {
+    /** The OID of the control */
+    const char *oid;
+    /** The raw value of the control */
+    apr_buffer_t val;
+} apr_ldap_control_oid_t;
+
+/**
+ * Sort request control RFC 2891.
+ */
+typedef struct apr_ldap_control_sortrequest_t {
+    /** The keys to sort by */
+    apr_array_header_t *keys;
+} apr_ldap_control_sortrequest_t;
+
+typedef enum {
+    /** Sort forwards */
+    APR_LDAP_CONTROL_SORT_FORWARD = 0,
+    /** Sort backwards */
+    APR_LDAP_CONTROL_SORT_REVERSE = 1,
+} apr_ldap_control_sortkey_e;
+
+/**
+ * Sort key list.
+ */
+typedef struct apr_ldap_control_sortkey_t {
+    /** The attribute to sort by */
+    const char *attribute;
+    /** The ordering rule to use */
+    const char *order;
+    /** Reverse or forward order */
+    apr_ldap_control_sortkey_e direction;
+} apr_ldap_control_sortkey_t;
+
+/**
+ * Sort Response Control RFC 2891.
+ */
+typedef struct apr_ldap_control_sortresponse_t {
+    /** The attribute involved in a sort failure */
+    const char *attribute;
+    /** Result of the sort */
+    apr_status_t result;
+} apr_ldap_control_sortresponse_t;
+
+
+
+
+/**
+ * LDAP parsed control structures.
+ *
+ * Use this structure to pass or receive the parameters
+ * required when creating or parsing a control.
+ *
+ * Unrecognised controls can be created or parsed using the
+ * APR_LDAP_CONTROL_OID type and a raw binary value.
+ *
+ * @see apr_ldap_bind_cb
+ * @see apr_ldap_compare_cb
+ * @see apr_ldap_search_result_cb
+ * @see apr_ldap_compare
+ * @see apr_ldap_search
+ * @see apr_ldap_add
+ * @see apr_ldap_modify
+ * @see apr_ldap_rename
+ * @see apr_ldap_delete
+ * @see apr_ldap_extended
+ */
+typedef struct apr_ldap_control_t {
+    /** The type of the control. */
+    apr_ldap_control_e type;
+    /** Is the control critical */
+    int critical;
+    /** Details of each control, based on the control type. */
+    union {
+        /** Control specified by OID and value */
+        apr_ldap_control_oid_t oid;
+        apr_ldap_control_sortrequest_t sortrq;
+        apr_ldap_control_sortresponse_t sortrs;
+#if 0
+        apr_ldap_control_paged_t paged;
+#endif
+    } c;
+} apr_ldap_control_t;
+
+
+
 /**
  * LDAP interaction identifiers during LDAP binding
  *
@@ -988,20 +1106,6 @@ typedef apr_status_t (apr_ldap_rebind_proc)(
         apr_ldap_t *ld, apr_ldap_rebind_t *rebind, void *ctx);
 
 #endif
-
-
-
-/**
- * LDAP Control structure
- *
- * @see apr_ldap_bind_cb
- * @see apr_ldap_compare_cb
- * @see apr_ldap_search_result_cb
- * @see apr_ldap_compare
- * @see apr_ldap_search
- */
-typedef struct apr_ldap_control_t apr_ldap_control_t;
-
 
 
 
@@ -1408,7 +1512,7 @@ typedef enum {
  */
 typedef apr_status_t (*apr_ldap_search_result_cb)(apr_ldap_t *ldap, apr_status_t status,
                                                   apr_size_t count, const char *matcheddn,
-                                                  apr_ldap_control_t **serverctrls,
+                                                  apr_hash_t *serverctrls,
                                                   void *ctx, apu_err_t *err);
 
 /**
@@ -1499,8 +1603,8 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_search(apr_pool_t *pool,
                                                const char *filter,
                                                const char **attrs,
                                                apr_ldap_switch_e attrsonly,
-                                               apr_ldap_control_t **serverctrls,
-                                               apr_ldap_control_t **clientctrls,
+                                               apr_array_header_t *serverctrls,
+                                               apr_array_header_t *clientctrls,
                                                apr_interval_time_t timeout,
                                                apr_ssize_t sizelimit,
                                                apr_ldap_search_result_cb search_result_cb,

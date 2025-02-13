@@ -563,7 +563,7 @@ static apr_status_t test_ldap_search_result_cb(apr_ldap_t *ldap,
                                                apr_status_t status,
                                                apr_size_t nentries,
                                                const char *matcheddn,
-                                               apr_ldap_control_t **serverctrls,
+                                               apr_hash_t *serverctrls,
                                                void *ctx, apu_err_t *err)
 {
     char errbuf[128];
@@ -631,8 +631,23 @@ static apr_status_t test_ldap_whoami_cb(apr_ldap_t *ldap, apr_status_t status,
         /*
          * Step 8: extended operation successful, it is time to trigger the search.
          */
-
         const char *attrs[2];
+
+        apr_array_header_t *scontrols = apr_array_make(test->pool, 1, sizeof(apr_ldap_control_t));
+        apr_ldap_control_t *sort = apr_array_push(scontrols);
+        apr_ldap_control_sortkey_t *sortkey;
+
+        /* make a sort control */
+        sort->type = APR_LDAP_CONTROL_SORT_REQUEST;
+        sort->critical = 0;
+        sort->c.sortrq.keys = apr_array_make(test->pool, 1, sizeof(apr_ldap_control_sortkey_t));
+
+        /* sort by namingContexts */
+        sortkey = apr_array_push(sort->c.sortrq.keys);
+        sortkey->attribute = "namingContexts";
+        sortkey->order = "caseIgnoreOrderingMatch";
+        sortkey->direction = APR_LDAP_CONTROL_SORT_FORWARD;
+
         attrs[0] = "+";
         attrs[1] = NULL;
 
@@ -643,7 +658,7 @@ static apr_status_t test_ldap_whoami_cb(apr_ldap_t *ldap, apr_status_t status,
         status = apr_ldap_search(test->pool, test->ldap, "" /* root dn */,
                                  APR_LDAP_SCOPE_BASE, "(objectclass=*)" /* filter */,
                                  attrs /* attrs */, APR_LDAP_OPT_OFF /* attrsonly */,
-                                 NULL /* serverctls */, NULL /* clientctls */,
+                                 scontrols /* serverctls */, NULL /* clientctls */,
                                  apr_time_from_sec(5) /* timelimit */, 0 /* sizelimit */,
                                  test_ldap_search_result_cb, test_ldap_search_entry_cb, test, &test->err);
 
