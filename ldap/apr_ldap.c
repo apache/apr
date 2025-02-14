@@ -275,7 +275,7 @@ static apr_status_t prepare_cleanup(void *dptr)
     return APR_SUCCESS;
 }
 
-static apr_status_t ldap_cleanup(void *dptr)
+static apr_status_t apr_ldap_cleanup(void *dptr)
 {
     if (dptr) {
 
@@ -336,7 +336,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_initialise(apr_pool_t *pool,
     (*ldap)->abandons = apr_array_make(pool, 1, sizeof(int));
     (*ldap)->prepares = apr_array_make(pool, 1, sizeof(apr_ldap_prepare_t));
 
-    apr_pool_cleanup_register(pool, (*ldap), ldap_cleanup,
+    apr_pool_cleanup_register(pool, (*ldap), apr_ldap_cleanup,
                               apr_pool_cleanup_null);
 
     return APR_SUCCESS;
@@ -3330,7 +3330,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_unbind(apr_ldap_t *ldap,
         return status;
     }
 
-    apr_pool_cleanup_run(ldap->pool, ldap, ldap_cleanup);
+    apr_pool_cleanup_run(ldap->pool, ldap, apr_ldap_cleanup);
 
     memcpy(err, &ldap->err, sizeof(apu_err_t));
 
