@@ -99,7 +99,7 @@ typedef struct apr_ldap_result_t {
 } apr_ldap_result_t;
 
 
-static apr_status_t apr_ldap_status(int rc, apr_status_t status)
+static apr_status_t apr_ldap_status(int rc)
 {
 
     if (LDAP_SUCCESS == rc) {
@@ -110,8 +110,58 @@ static apr_status_t apr_ldap_status(int rc, apr_status_t status)
     case LDAP_SUCCESS:
         return APR_SUCCESS;
 
+    case LDAP_LOCAL_ERROR:
+        return APR_LOCAL_ERROR;
+
+    case LDAP_ENCODING_ERROR:
+        return APR_ENCODING_ERROR;
+
+    case LDAP_DECODING_ERROR:
+        return APR_DECODING_ERROR;
+
     case LDAP_TIMEOUT:
-        return APR_ETIMEDOUT;
+        return APR_TIMEOUT;
+
+    case LDAP_AUTH_UNKNOWN:
+        return APR_AUTH_UNKNOWN;
+
+    case LDAP_FILTER_ERROR:
+        return APR_FILTER_ERROR;
+
+    case LDAP_USER_CANCELLED:
+        return APR_USER_CANCELLED;
+
+    case LDAP_PARAM_ERROR:
+        return APR_PARAM_ERROR;
+
+    case LDAP_NO_MEMORY:
+        return APR_NO_MEMORY;
+
+    case LDAP_CONNECT_ERROR:
+        return APR_CONNECT_ERROR;
+
+    case LDAP_NOT_SUPPORTED:
+        return APR_NOT_SUPPORTED;
+
+    case LDAP_CONTROL_NOT_FOUND:
+        return APR_CONTROL_NOT_FOUND;
+
+    case LDAP_NO_RESULTS_RETURNED:
+        return APR_NO_RESULTS_RETURNED;
+
+    case LDAP_MORE_RESULTS_TO_RETURN:
+        return APR_MORE_RESULTS_TO_RETURN;
+
+    case LDAP_CLIENT_LOOP:
+        return APR_CLIENT_LOOP;
+
+    case LDAP_REFERRAL_LIMIT_EXCEEDED:
+        return APR_REFERRAL_LIMIT_EXCEEDED;
+
+#ifdef LDAP_X_CONNECTING
+    case LDAP_X_CONNECTING:
+        return APR_CONNECTING;
+#endif
 
 #if defined(LDAP_SERVER_DOWN)
     case LDAP_SERVER_DOWN:
@@ -120,29 +170,30 @@ static apr_status_t apr_ldap_status(int rc, apr_status_t status)
 
 #if defined(LDAP_UNAVAILABLE)    
     case LDAP_UNAVAILABLE:
-        return APR_SERVER_DOWN;
+        return APR_UNAVAILABLE;
 #endif
-
-    case LDAP_AUTH_UNKNOWN:
-        return APR_AUTH_UNKNOWN;
 
 #ifdef LDAP_X_PROXY_AUTHZ_FAILURE
     case LDAP_X_PROXY_AUTHZ_FAILURE:
         return APR_PROXY_AUTH;
-
 #endif
+
     case LDAP_INAPPROPRIATE_AUTH:
         return APR_INAPPROPRIATE_AUTH;
 
     case LDAP_INVALID_CREDENTIALS:
         return APR_INVALID_CREDENTIALS;
 
+#ifdef LDAP_INSUFFICIENT_ACCESS
+    /* openldap */
     case LDAP_INSUFFICIENT_ACCESS:
         return APR_INSUFFICIENT_ACCESS;
+#endif
 
 #ifdef LDAP_INSUFFICIENT_RIGHTS
+    /* microsoftsdk */
     case LDAP_INSUFFICIENT_RIGHTS:
-        return APR_INSUFFICIENT_RIGHTS;
+        return APR_INSUFFICIENT_ACCESS;
 #endif
 
 #ifdef LDAP_CONSTRAINT_VIOLATION
@@ -154,9 +205,6 @@ static apr_status_t apr_ldap_status(int rc, apr_status_t status)
     case LDAP_OBJECT_CLASS_VIOLATION:
         return APR_OBJECT_CLASS_VIOLATION;
 #endif
-
-    case LDAP_NO_RESULTS_RETURNED:
-        return APR_NO_RESULTS_RETURNED;
 
     case LDAP_COMPARE_TRUE:
         return APR_COMPARE_TRUE;
@@ -174,15 +222,19 @@ static apr_status_t apr_ldap_status(int rc, apr_status_t status)
         return APR_ALREADY_EXISTS;
 
     case LDAP_OPERATIONS_ERROR:
-    case LDAP_PROTOCOL_ERROR:
-    case LDAP_TIMELIMIT_EXCEEDED:
-    case LDAP_SIZELIMIT_EXCEEDED:
+        return APR_OPERATIONS_ERROR;
 
-    case LDAP_OTHER:
-        return APR_EGENERAL;
+    case LDAP_PROTOCOL_ERROR:
+        return APR_PROTOCOL_ERROR;
+
+    case LDAP_TIMELIMIT_EXCEEDED:
+        return APR_TIMELIMIT_EXCEEDED;
+
+    case LDAP_SIZELIMIT_EXCEEDED:
+        return APR_SIZELIMIT_EXCEEDED;
 
     default:
-        return status;
+        return APR_UTIL_START_STATUS + 200 + rc;
     }
 
 }
@@ -743,7 +795,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_get(apr_pool_t *pool, apr_ldap_t 
                 status = apr_os_sock_put(&ldap->socket, &sock, ldap->pool);
             }
             else {
-                status = apr_ldap_status(rc, APR_EGENERAL);
+                status = apr_ldap_status(rc);
             }
         }
         outvalue->socket = ldap->socket;
@@ -1165,7 +1217,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_connect(apr_pool_t *pool,
     if (err->rc != LDAP_SUCCESS) {
         err->msg = ldap_err2string(err->rc);
         err->reason = "LDAP: ldap_connect() failed";
-        return apr_ldap_status(err->rc, APR_EGENERAL);
+        return apr_ldap_status(err->rc);
     }
     else {
         memset(err, 0, sizeof(*err));
@@ -1262,13 +1314,13 @@ static apr_status_t apr_ldap_control_parse(apr_pool_t *pool,
             if (err->rc != LDAP_SUCCESS) {
                 err->msg = ldap_err2string(err->rc);
                 err->reason = "LDAP: ldap_parse_sortresponse_control failed";
-                return apr_ldap_status(err->rc, APR_EGENERAL);
+                return apr_ldap_status(err->rc);
             }
 
             c->type = APR_LDAP_CONTROL_SORT_RESPONSE;
 
             c->c.sortrs.attribute = (const char *)attr;
-            c->c.sortrs.result = apr_ldap_status(result, APR_EGENERAL);;
+            c->c.sortrs.result = apr_ldap_status(result);;
 
             apr_hash_set(cs, ctl->ldctl_oid, APR_HASH_KEY_STRING, c);
 
@@ -1352,7 +1404,7 @@ static apr_status_t apr_ldap_control_create(apr_pool_t *pool,
             if (err->rc != LDAP_SUCCESS) {
                 err->msg = ldap_err2string(err->rc);
                 err->reason = "LDAP: ldap_create_sort_control failed";
-                return apr_ldap_status(err->rc, APR_EGENERAL);
+                return apr_ldap_status(err->rc);
             }
 
             apr_pool_cleanup_register(pool, c, ldap_control_cleanup,
@@ -1531,7 +1583,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_process(apr_pool_t *pool,
         else {
             err->reason = "LDAP: ldap_abandon_ext() failed";
             err->msg = ldap_err2string(err->rc);
-            return apr_ldap_status(err->rc, APR_EGENERAL);
+            return apr_ldap_status(err->rc);
         }
 
     }
@@ -1581,11 +1633,11 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_process(apr_pool_t *pool,
 
                 /* we got a response, send the news, good or bad */
                 if (res->cb.bind) {
-                    status = res->cb.bind(ldap, apr_ldap_status(err->rc, APR_EGENERAL),
+                    status = res->cb.bind(ldap, apr_ldap_status(err->rc),
                                  NULL, NULL, res->ctx, err);
                 }
                 else {
-                    status = apr_ldap_status(err->rc, APR_EGENERAL);
+                    status = apr_ldap_status(err->rc);
                 }
 
                 apr_ldap_result_remove(ldap, res);
@@ -1610,12 +1662,12 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_process(apr_pool_t *pool,
             err->reason = "LDAP compare: ldap_parse_result()";
 
             if (res->cb.compare) {
-                status = res->cb.compare(ldap, apr_ldap_status(err->rc, APR_EGENERAL),
+                status = res->cb.compare(ldap, apr_ldap_status(err->rc),
                                          matcheddn, (apr_ldap_control_t **)serverctrls,
                                          res->ctx, err);
             }
             else {
-                status = apr_ldap_status(err->rc, APR_EGENERAL);
+                status = apr_ldap_status(err->rc);
             }
 
 
@@ -1654,7 +1706,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_process(apr_pool_t *pool,
                 err->rc = rc != LDAP_SUCCESS ? rc : err->rc;
                 err->msg = ldap_err2string(err->rc);
                 err->reason = "LDAP search: ldap_parse_result()";
-                status = apr_ldap_status(err->rc, APR_EGENERAL);
+                status = apr_ldap_status(err->rc);
             }
 
             if (res->cb.search) {
@@ -1696,12 +1748,12 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_process(apr_pool_t *pool,
             err->reason = "LDAP add: ldap_parse_result()";
 
             if (res->cb.add) {
-                status = res->cb.add(ldap, apr_ldap_status(err->rc, APR_EGENERAL),
+                status = res->cb.add(ldap, apr_ldap_status(err->rc),
                                          matcheddn, (apr_ldap_control_t **)serverctrls,
                                          res->ctx, err);
             }
             else {
-                status = apr_ldap_status(err->rc, APR_EGENERAL);
+                status = apr_ldap_status(err->rc);
             }
 
 
@@ -1738,12 +1790,12 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_process(apr_pool_t *pool,
             err->reason = "LDAP modify: ldap_parse_result()";
 
             if (res->cb.modify) {
-                status = res->cb.modify(ldap, apr_ldap_status(err->rc, APR_EGENERAL),
+                status = res->cb.modify(ldap, apr_ldap_status(err->rc),
                                         matcheddn, (apr_ldap_control_t **)serverctrls,
                                         res->ctx, err);
             }
             else {
-                status = apr_ldap_status(err->rc, APR_EGENERAL);
+                status = apr_ldap_status(err->rc);
             }
 
 
@@ -1780,12 +1832,12 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_process(apr_pool_t *pool,
             err->reason = "LDAP rename: ldap_parse_result()";
 
             if (res->cb.rename) {
-                status = res->cb.rename(ldap, apr_ldap_status(err->rc, APR_EGENERAL),
+                status = res->cb.rename(ldap, apr_ldap_status(err->rc),
                                         matcheddn, (apr_ldap_control_t **)serverctrls,
                                         res->ctx, err);
             }
             else {
-                status = apr_ldap_status(err->rc, APR_EGENERAL);
+                status = apr_ldap_status(err->rc);
             }
 
 
@@ -1822,12 +1874,12 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_process(apr_pool_t *pool,
             err->reason = "LDAP delete: ldap_parse_result()";
 
             if (res->cb.delete) {
-                status = res->cb.delete(ldap, apr_ldap_status(err->rc, APR_EGENERAL),
+                status = res->cb.delete(ldap, apr_ldap_status(err->rc),
                                         matcheddn, (apr_ldap_control_t **)serverctrls,
                                         res->ctx, err);
             }
             else {
-                status = apr_ldap_status(err->rc, APR_EGENERAL);
+                status = apr_ldap_status(err->rc);
             }
 
 
@@ -1866,12 +1918,12 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_process(apr_pool_t *pool,
             }
 
             if (res->cb.ext) {
-                status = res->cb.ext(ldap, apr_ldap_status(err->rc, APR_EGENERAL),
+                status = res->cb.ext(ldap, apr_ldap_status(err->rc),
                                      roid, &rdata,
                                      res->ctx, err);
             }
             else {
-                status = apr_ldap_status(err->rc, APR_EGENERAL);
+                status = apr_ldap_status(err->rc);
             }
 
 
@@ -1934,7 +1986,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_result(apr_pool_t *pool,
 #endif 
         err->msg = ldap_err2string(err->rc);
 
-        return apr_ldap_status(err->rc, APR_EGENERAL);
+        return apr_ldap_status(err->rc);
     }
     else if (err->rc == 0) {
         err->reason = "LDAP: ldap_result() timed out";
@@ -2050,7 +2102,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_result(apr_pool_t *pool,
                                                           attr, nvals, k, &buf, 0, res->ctx, err);
                         }
                         else {
-                            status = apr_ldap_status(err->rc, APR_EGENERAL);
+                            status = apr_ldap_status(err->rc);
                         }
 
                         if (str) {
@@ -2065,7 +2117,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_result(apr_pool_t *pool,
                                                       attr, 0, 0, NULL, 0, res->ctx, err);
                     }
                     else {
-                        status = apr_ldap_status(err->rc, APR_EGENERAL);
+                        status = apr_ldap_status(err->rc);
                     }      
                 }
 
@@ -2086,7 +2138,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_result(apr_pool_t *pool,
                                               0, 0, NULL, 0, res->ctx, err);
             }
             else {
-                status = apr_ldap_status(err->rc, APR_EGENERAL);
+                status = apr_ldap_status(err->rc);
             }    
 
             ldap_memfree((void *)dn);
@@ -2436,7 +2488,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_bind(apr_pool_t *pool, apr_ldap_t *ldap,
         if (err->rc != LDAP_SUCCESS) {
             err->msg = ldap_err2string(err->rc);
             err->reason = "LDAP: ldap_sasl_bind(SIMPLE) failed";
-            return apr_ldap_status(err->rc, APR_EGENERAL);
+            return apr_ldap_status(err->rc);
         }
         else {
             memset(err, 0, sizeof(*err));
@@ -2500,7 +2552,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_bind(apr_pool_t *pool, apr_ldap_t *ldap,
         else {
             err->msg = ldap_err2string(err->rc);
             err->reason = "LDAP: ldap_sasl_interactive_bind() failed";
-            return apr_ldap_status(err->rc, APR_EGENERAL);
+            return apr_ldap_status(err->rc);
         }
 
 #else
@@ -2586,7 +2638,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_compare(apr_pool_t *pool,
     if (err->rc != LDAP_SUCCESS) {
         err->msg = ldap_err2string(err->rc);
         err->reason = "LDAP: ldap_compare failed";
-        return apr_ldap_status(err->rc, APR_EGENERAL);
+        return apr_ldap_status(err->rc);
     }
     else {
         memset(err, 0, sizeof(*err));
@@ -2663,7 +2715,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_search(apr_pool_t *pool,
     if (err->rc != LDAP_SUCCESS) {
         err->msg = ldap_err2string(err->rc);
         err->reason = "LDAP: ldap_search failed";
-        return apr_ldap_status(err->rc, APR_EGENERAL);
+        return apr_ldap_status(err->rc);
     }
     else {
         memset(err, 0, sizeof(*err));
@@ -2809,7 +2861,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_add(apr_pool_t *pool,
     if (err->rc != LDAP_SUCCESS) {
         err->msg = ldap_err2string(err->rc);
         err->reason = "LDAP: ldap_add failed";
-        return apr_ldap_status(err->rc, APR_EGENERAL);
+        return apr_ldap_status(err->rc);
     }
     else {
         memset(err, 0, sizeof(*err));
@@ -2984,7 +3036,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_modify(apr_pool_t *pool,
     if (err->rc != LDAP_SUCCESS) {
         err->msg = ldap_err2string(err->rc);
         err->reason = "LDAP: ldap_modify failed";
-        return apr_ldap_status(err->rc, APR_EGENERAL);
+        return apr_ldap_status(err->rc);
     }
     else {
         memset(err, 0, sizeof(*err));
@@ -3066,7 +3118,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_rename(apr_pool_t *pool,
     if (err->rc != LDAP_SUCCESS) {
         err->msg = ldap_err2string(err->rc);
         err->reason = "LDAP: ldap_rename failed";
-        return apr_ldap_status(err->rc, APR_EGENERAL);
+        return apr_ldap_status(err->rc);
     }
     else {
         memset(err, 0, sizeof(*err));
@@ -3145,7 +3197,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_delete(apr_pool_t *pool,
     if (err->rc != LDAP_SUCCESS) {
         err->msg = ldap_err2string(err->rc);
         err->reason = "LDAP: ldap_delete failed";
-        return apr_ldap_status(err->rc, APR_EGENERAL);
+        return apr_ldap_status(err->rc);
     }
     else {
         memset(err, 0, sizeof(*err));
@@ -3237,7 +3289,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_extended(apr_pool_t *pool,
     if (err->rc != LDAP_SUCCESS) {
         err->msg = ldap_err2string(err->rc);
         err->reason = "LDAP: ldap_extended_operation failed";
-        return apr_ldap_status(err->rc, APR_EGENERAL);
+        return apr_ldap_status(err->rc);
     }
     else {
         memset(err, 0, sizeof(*err));
