@@ -924,8 +924,17 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_set(apr_pool_t *pool, apr_ldap_t 
 /**
  * LDAP control types.
  *
- * This enumeration represents the controls understood by
+ * This enumeration represents the controls processed by
  * the library.
+ *
+ * Most controls are simple, consisting of an OID and a
+ * binary or text value. These controls need no special
+ * processing.
+ *
+ * Some controls have values consisting of BER structures.
+ * For convenience, three such controls are understood by
+ * the library, paged control, sort control, and the vlv
+ * control.
  *
  * Controls not specifically recognised can be created
  * using APR_LDAP_CONTROL_OID and the binary control value,
@@ -939,11 +948,41 @@ typedef enum {
     APR_LDAP_CONTROL_SORT_REQUEST = 1,
     /** Sort response control RFC 2891 */
     APR_LDAP_CONTROL_SORT_RESPONSE = 2,
-#if 0
-    /** Paged control */
-    APR_LDAP_CONTROL_PAGED = 2
-#endif
+    /** Page request control RFC 2696 */
+    APR_LDAP_CONTROL_PAGE_REQUEST = 3,
+    /** Page response control RFC 2696 */
+    APR_LDAP_CONTROL_PAGE_RESPONSE = 4,
+    /** VLV request control draft-ietf-ldapext-ldapv3-vlv-09 */
+    APR_LDAP_CONTROL_VLV_REQUEST = 5,
+    /** VLV response control draft-ietf-ldapext-ldapv3-vlv-09 */
+    APR_LDAP_CONTROL_VLV_RESPONSE = 6,
 } apr_ldap_control_e;
+
+
+/**
+ * RFC 2696 Paged control OID.
+ */
+#define APR_LDAP_CONTROL_PAGE_OID       "1.2.840.113556.1.4.319"   /* RFC 2696 */
+
+/**
+ * RFC 2891 Sort request control OID.
+ */
+#define APR_LDAP_CONTROL_SORT_REQUEST_OID    "1.2.840.113556.1.4.473" /* RFC 2891 */
+
+/**
+ * RFC 2891 Sort response control OID.
+ */
+#define APR_LDAP_CONTROL_SORT_RESPONSE_OID       "1.2.840.113556.1.4.474" /* RFC 2891 */
+
+/**
+ * VLV request control OID.
+ */
+#define APR_LDAP_CONTROL_VLV_REQUEST_OID "2.16.840.1.113730.3.4.9"
+
+/**
+ * VLV response control OID.
+ */
+#define APR_LDAP_CONTROL_VLV_RESPONSE_OID "2.16.840.1.113730.3.4.10"
 
 /**
  * Control specified by OID and value.
@@ -995,6 +1034,58 @@ typedef struct apr_ldap_control_sortresponse_t {
     apr_status_t result;
 } apr_ldap_control_sortresponse_t;
 
+/**
+ * Page request control RFC 2696.
+ */
+typedef struct apr_ldap_control_pagerequest_t {
+    /** The page size */
+    apr_size_t size;
+    /** The opaque cookie identifing this page */
+    apr_buffer_t cookie;
+} apr_ldap_control_pagerequest_t;
+
+/**
+ * Page Response Control RFC 2696.
+ */
+typedef struct apr_ldap_control_pageresponse_t {
+    /** The total count */
+    apr_size_t count;
+    /** The opaque cookie identifing this page */
+    apr_buffer_t cookie;
+} apr_ldap_control_pageresponse_t;
+
+/**
+ * VLV request control draft-ietf-ldapext-ldapv3-vlv-09.
+ */
+typedef struct apr_ldap_control_vlvrequest_t {
+    /** Before count */
+    apr_size_t before;
+    /** After count */
+    apr_size_t after;
+    /** Offset */
+    apr_size_t offset;
+    /** Count */
+    apr_size_t count;
+    /** Optional search value as an alternative to offset */
+    apr_buffer_t attrvalue;
+    /** The opaque cookie identifing this vlv result */
+    apr_buffer_t context;
+} apr_ldap_control_vlvrequest_t;
+
+/**
+ * VLV Response Control draft-ietf-ldapext-ldapv3-vlv-09.
+ */
+typedef struct apr_ldap_control_vlvresponse_t {
+    /** Offset */
+    apr_size_t offset;
+    /** Count */
+    apr_size_t count;
+    /** Result of the sort */
+    apr_status_t result;
+    /** The opaque cookie identifing this page */
+    apr_buffer_t context;
+} apr_ldap_control_vlvresponse_t;
+
 
 
 
@@ -1023,15 +1114,22 @@ typedef struct apr_ldap_control_t {
     apr_ldap_control_e type;
     /** Is the control critical */
     int critical;
+    /** Control specified by OID and value */
+    apr_ldap_control_oid_t oid;
     /** Details of each control, based on the control type. */
     union {
-        /** Control specified by OID and value */
-        apr_ldap_control_oid_t oid;
+        /** Sort request control */
         apr_ldap_control_sortrequest_t sortrq;
+        /** Sort response control */
         apr_ldap_control_sortresponse_t sortrs;
-#if 0
-        apr_ldap_control_paged_t paged;
-#endif
+        /** Page request control */
+        apr_ldap_control_pagerequest_t pagerq;
+        /** Page response control */
+        apr_ldap_control_pageresponse_t pagers;
+        /** VLV request control */
+        apr_ldap_control_vlvrequest_t vlvrq;
+        /** VLV response control */
+        apr_ldap_control_vlvresponse_t vlvrs;
     } c;
 } apr_ldap_control_t;
 

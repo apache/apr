@@ -1269,6 +1269,29 @@ static apr_status_t ldap_control_cleanup(void *dptr)
     return APR_SUCCESS;
 }
 
+#if APR_HAS_OPENLDAP_LDAPSDK
+static apr_status_t ldap_berval_cleanup(void *dptr)
+{
+    if (dptr) {
+
+        struct berval *val = dptr;
+
+        ber_bvfree(val);
+    }
+
+    return APR_SUCCESS;
+}
+
+static apr_status_t ldap_memfree_cleanup(void *dptr)
+{
+    if (dptr) {
+        ldap_memfree(dptr);
+    }
+
+    return APR_SUCCESS;
+}
+#endif
+
 static apr_status_t apr_ldap_control_parse(apr_pool_t *pool,
                                            apr_ldap_t *ldap,
                                            LDAPControl **ctls,
@@ -1283,8 +1306,6 @@ static apr_status_t apr_ldap_control_parse(apr_pool_t *pool,
         *controls = NULL;
         return APR_SUCCESS;
     }
-
-    for (i = 0; ctls[i]; i++);
 
     cs = apr_hash_make(pool);
 
@@ -1319,8 +1340,87 @@ static apr_status_t apr_ldap_control_parse(apr_pool_t *pool,
 
             c->type = APR_LDAP_CONTROL_SORT_RESPONSE;
 
+            if (attr) {
+
+                apr_pool_cleanup_register(pool, attr, ldap_memfree_cleanup,
+                                          apr_pool_cleanup_null);
+
+            }
+
             c->c.sortrs.attribute = (const char *)attr;
-            c->c.sortrs.result = apr_ldap_status(result);;
+            c->c.sortrs.result = apr_ldap_status(result);
+
+            apr_hash_set(cs, ctl->ldctl_oid, APR_HASH_KEY_STRING, c);
+
+            continue;
+        }
+
+        if (!strcmp(ctl->ldctl_oid, LDAP_CONTROL_PAGEDRESULTS)) {
+
+            ber_int_t count;
+            struct berval cookie;
+
+            err->rc = ldap_parse_pageresponse_control(ldap->ld, ctl, &count, &cookie);
+
+            if (err->rc != LDAP_SUCCESS) {
+                err->msg = ldap_err2string(err->rc);
+                err->reason = "LDAP: ldap_parse_pageresponse_control failed";
+                return apr_ldap_status(err->rc);
+            }
+
+            c->type = APR_LDAP_CONTROL_PAGE_RESPONSE;
+
+            if (cookie.bv_val) {
+                apr_buffer_mem_set(&c->c.pagers.cookie, cookie.bv_val, cookie.bv_len);
+
+                apr_pool_cleanup_register(pool, cookie.bv_val, ldap_memfree_cleanup,
+                                          apr_pool_cleanup_null);
+
+            }
+            else {
+                apr_buffer_mem_set(&c->c.pagers.cookie, NULL, 0);
+            }
+
+            c->c.pagers.count = (apr_size_t)count;
+
+            apr_hash_set(cs, ctl->ldctl_oid, APR_HASH_KEY_STRING, c);
+
+            continue;
+        }
+
+        if (!strcmp(ctl->ldctl_oid, LDAP_CONTROL_VLVRESPONSE)) {
+
+            ber_int_t target_posp;
+            ber_int_t list_countp;
+            int result;
+
+            struct berval *context = NULL;
+
+            err->rc = ldap_parse_vlvresponse_control(ldap->ld, ctl, &target_posp, &list_countp, &context, &result);
+
+            if (err->rc != LDAP_SUCCESS) {
+                err->msg = ldap_err2string(err->rc);
+                err->reason = "LDAP: ldap_parse_vlvresponse_control failed";
+                return apr_ldap_status(err->rc);
+            }
+
+            c->type = APR_LDAP_CONTROL_VLV_RESPONSE;
+
+            c->c.vlvrs.offset = (apr_size_t)target_posp;
+            c->c.vlvrs.count = (apr_size_t)list_countp;
+
+            if (context) {
+                apr_buffer_mem_set(&c->c.vlvrs.context, context->bv_val, context->bv_len);
+
+                apr_pool_cleanup_register(pool, context, ldap_berval_cleanup,
+                                          apr_pool_cleanup_null);
+
+            }
+            else {
+                apr_buffer_mem_set(&c->c.vlvrs.context, NULL, 0);
+            }
+
+            c->c.vlvrs.result = apr_ldap_status(result);
 
             apr_hash_set(cs, ctl->ldctl_oid, APR_HASH_KEY_STRING, c);
 
@@ -1332,9 +1432,9 @@ static apr_status_t apr_ldap_control_parse(apr_pool_t *pool,
         /* not recognised, return raw value */
         c->type = APR_LDAP_CONTROL_OID;
 
-        c->c.oid.oid = (const char *)ctl->ldctl_oid;
+        c->oid.oid = (const char *)ctl->ldctl_oid;
 
-        apr_buffer_mem_set(&c->c.oid.val, ctl->ldctl_value.bv_val,
+        apr_buffer_mem_set(&c->oid.val, ctl->ldctl_value.bv_val,
                            ctl->ldctl_value.bv_len);
 
         apr_hash_set(cs, ctl->ldctl_oid, APR_HASH_KEY_STRING, c);
@@ -1369,6 +1469,38 @@ static apr_status_t apr_ldap_control_create(apr_pool_t *pool,
 
         /* what controls do we recognise? */
         switch (control->type) {
+
+        /* page control */
+        case APR_LDAP_CONTROL_PAGE_REQUEST: {
+#if APR_HAS_OPENLDAP_LDAPSDK
+
+            LDAPControl *c;
+
+            ber_int_t pagesize = control->c.pagerq.size;
+            struct berval cookie;
+
+            cookie.bv_val = apr_buffer_str(&control->c.pagerq.cookie);
+            cookie.bv_len = apr_buffer_len(&control->c.pagerq.cookie);
+
+            err->rc = ldap_create_page_control(ldap->ld, pagesize, &cookie, control->critical ? 1 : 0, &c);
+
+            if (err->rc != LDAP_SUCCESS) {
+                err->msg = ldap_err2string(err->rc);
+                err->reason = "LDAP: ldap_create_page_control failed";
+                return apr_ldap_status(err->rc);
+            }
+
+            apr_pool_cleanup_register(pool, c, ldap_control_cleanup,
+                                      apr_pool_cleanup_null);
+
+            cs[i] = c;
+
+            break;
+#else
+            err->reason = "LDAP: page control not supported";
+            return APR_ENOTIMPL;
+#endif
+        }
 
         /* sort control */
         case APR_LDAP_CONTROL_SORT_REQUEST: {
@@ -1419,6 +1551,61 @@ static apr_status_t apr_ldap_control_create(apr_pool_t *pool,
 #endif
         }
 
+        /* vlv control */
+        case APR_LDAP_CONTROL_VLV_REQUEST: {
+#if APR_HAS_OPENLDAP_LDAPSDK
+
+            LDAPControl *c;
+            LDAPVLVInfo vlvInfo;
+            struct berval attrvalue;
+            struct berval context;
+
+            vlvInfo.ldvlv_before_count = control->c.vlvrq.before;
+            vlvInfo.ldvlv_after_count = control->c.vlvrq.after;
+            vlvInfo.ldvlv_offset = control->c.vlvrq.offset;
+            vlvInfo.ldvlv_count = control->c.vlvrq.count;
+
+            if (apr_buffer_is_null(&control->c.vlvrq.attrvalue)) {
+                vlvInfo.ldvlv_attrvalue = NULL;
+            }
+            else {
+                attrvalue.bv_val = (char *)apr_buffer_mem(&control->c.vlvrq.attrvalue, NULL);
+                attrvalue.bv_len = apr_buffer_len(&control->c.vlvrq.attrvalue);
+                vlvInfo.ldvlv_attrvalue = &attrvalue;
+            }
+
+            if (apr_buffer_is_null(&control->c.vlvrq.context)) {
+                vlvInfo.ldvlv_context = NULL;
+            }
+            else {
+                context.bv_val = (char *)apr_buffer_mem(&control->c.vlvrq.context, NULL);
+                context.bv_len = apr_buffer_len(&control->c.vlvrq.context);
+                vlvInfo.ldvlv_context = &context;
+            }
+
+            vlvInfo.ldvlv_extradata = NULL;
+            vlvInfo.ldvlv_version = 1;
+
+            err->rc = ldap_create_vlv_control(ldap->ld, &vlvInfo, &c);
+
+            if (err->rc != LDAP_SUCCESS) {
+                err->msg = ldap_err2string(err->rc);
+                err->reason = "LDAP: ldap_create_vlv_control failed";
+                return apr_ldap_status(err->rc);
+            }
+
+            apr_pool_cleanup_register(pool, c, ldap_control_cleanup,
+                                      apr_pool_cleanup_null);
+
+            cs[i] = c;
+
+            break;
+#else
+            err->reason = "LDAP: vlv control not supported";
+            return APR_ENOTIMPL;
+#endif
+        }
+
         /* not recognised, return raw value */
         case APR_LDAP_CONTROL_OID: {
 
@@ -1426,8 +1613,14 @@ static apr_status_t apr_ldap_control_create(apr_pool_t *pool,
 
             LDAPControl *c = apr_pcalloc(pool, count * sizeof(LDAPControl));
 
-            c->ldctl_oid = (char *)control->c.oid.oid;
-            c->ldctl_value.bv_val = apr_buffer_mem(&control->c.oid.val, &size);
+            if (!control->oid.oid) {
+                err->msg = NULL;
+                err->reason = "LDAP: control oid missing";
+                return APR_EINVAL;
+            }
+
+            c->ldctl_oid = (char *)control->oid.oid;
+            c->ldctl_value.bv_val = apr_buffer_mem(&control->oid.val, &size);
             c->ldctl_value.bv_len = size;
             c->ldctl_iscritical = control->critical ? 1 : 0;
 

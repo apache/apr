@@ -216,6 +216,75 @@ typedef struct test_ldap_connection_t {
     const char *newdn;
 } test_ldap_connection_t;
 
+static apr_status_t test_ldap_vlv_result_cb(apr_ldap_t *ldap,
+                                            apr_status_t status,
+                                            apr_size_t nentries,
+                                            const char *matcheddn,
+                                            apr_hash_t *serverctrls,
+                                            void *ctx, apu_err_t *err)
+{
+    char errbuf[128];
+
+    apr_ldap_control_t *sort = apr_hash_get(serverctrls, APR_LDAP_CONTROL_SORT_RESPONSE_OID, APR_HASH_KEY_STRING);
+    apr_ldap_control_t *vlv = apr_hash_get(serverctrls, APR_LDAP_CONTROL_VLV_RESPONSE_OID, APR_HASH_KEY_STRING);
+
+    /*
+     * Step 30: vlv search result callback triggered, result is complete.
+     */
+
+    abts_log_message("vlv search matcheddn: \n", matcheddn);
+
+    if (sort) {
+        abts_log_message("apr_ldap_search() sort control response: %s\n", apr_strerror(sort->c.sortrs.result, errbuf, sizeof(errbuf)));
+    }
+
+    if (vlv) {
+        abts_log_message("apr_ldap_search() vlv control response: %s\n", apr_strerror(sort->c.vlvrs.result, errbuf, sizeof(errbuf)));
+    }
+
+    if (APR_SUCCESS == status) {
+        /* success */
+    }
+    if (APR_STATUS_IS_OPERATIONS_ERROR(status)) {
+        abts_log_message("apr_ldap_search() failed, most likely because the LDAP server does not have a VLV index configured: %s\n", apr_strerror(status, errbuf, sizeof(errbuf)));
+    }
+    else {
+        abts_log_message("apr_ldap_search() failed: %s\n", apr_strerror(status, errbuf, sizeof(errbuf)));
+    }
+
+    return status;
+}
+
+static apr_status_t test_ldap_vlv_entry_cb(apr_ldap_t *ldap,
+                                           const char *dn,
+                                           int eidx,
+                                           int nattrs,
+                                           int aidx,
+                                           const char *attr,
+                                           int nvals,
+                                           int vidx,
+                                           apr_buffer_t *val,
+                                           int binary,
+                                           void *ctx, apu_err_t *err)
+{
+    test_ldap_connection_t *test = (test_ldap_connection_t *)ctx;
+
+    /*
+     * Step 29: search vlv entry callback triggered, start processing results.
+     */
+
+    if (!nattrs && !vidx && attr) {
+        /* first attribute and first value and attr present? output dn */
+        abts_log_message("dn: %s", dn);
+    }
+
+    if (val) {
+        abts_log_message("%s: %s", attr, apr_buffer_pstrdup(test->pool, val));
+    }
+
+    return APR_SUCCESS;
+}
+
 static apr_status_t test_ldap_delete_cb(apr_ldap_t *ldap,
                                         apr_status_t status,
                                         const char *matcheddn,
@@ -226,12 +295,59 @@ static apr_status_t test_ldap_delete_cb(apr_ldap_t *ldap,
     test_ldap_connection_t *test = (test_ldap_connection_t *)ctx;
 
     /*
-     * Step 27: add result callback triggered, result is complete.
+     * Step 27: delete result callback triggered, next is vlv search.
      */
 
     abts_log_message("delete matcheddn: \n", matcheddn);
 
-    if (APR_SUCCESS != status) {
+    if (APR_SUCCESS == status) {
+
+        /*
+         * Step 28: we're writable, trigger a vlv search, then wait for readable.
+         */
+        apr_array_header_t *scontrols = apr_array_make(test->pool, 2, sizeof(apr_ldap_control_t));
+        apr_ldap_control_t *sort = apr_array_push(scontrols);
+        apr_ldap_control_t *vlv = apr_array_push(scontrols);
+        apr_ldap_control_sortkey_t *sortkey;
+
+        /* make a sort control */
+        sort->type = APR_LDAP_CONTROL_SORT_REQUEST;
+        sort->critical = 1;
+        sort->c.sortrq.keys = apr_array_make(test->pool, 1, sizeof(apr_ldap_control_sortkey_t));
+
+        /* sort by ou */
+        sortkey = apr_array_push(sort->c.sortrq.keys);
+        sortkey->attribute = "ou";
+        sortkey->order = "caseIgnoreOrderingMatch";
+        sortkey->direction = APR_LDAP_CONTROL_SORT_FORWARD;
+
+        /* make a vlv control */
+        vlv->type = APR_LDAP_CONTROL_VLV_REQUEST;
+        vlv->c.vlvrq.before = 1; /* we want the one before the second entry */
+        vlv->c.vlvrq.after = 1; /* we want one after the second entry */
+        vlv->c.vlvrq.offset = 2; /* we want the second entry */
+
+        status = apr_ldap_search(test->pool, test->ldap, test->context /* base dn */,
+                                 APR_LDAP_SCOPE_ONELEVEL, "(objectclass=*)" /* filter */,
+                                 NULL /* attrs */, APR_LDAP_OPT_ON /* attrsonly */,
+                                 scontrols /* serverctls */, NULL /* clientctls */,
+                                 apr_time_from_sec(5) /* timelimit */, 0 /* sizelimit */,
+                                 test_ldap_vlv_result_cb, test_ldap_vlv_entry_cb, test, &test->err);
+
+        ABTS_INT_EQUAL(test->tc, APR_WANT_READ, status);
+
+        switch (status) {
+        case APR_SUCCESS:
+        case APR_WANT_READ:
+        case APR_WANT_WRITE:
+            break;
+        default:
+            abts_log_message("apr_ldap_result: %s [%s]\n", test->err.reason,
+                              apr_strerror(status, errbuf, sizeof(errbuf)));
+        }
+
+    }
+    else {
         abts_log_message("apr_ldap_delete() failed: %s\n", apr_strerror(status, errbuf, sizeof(errbuf)));
         ABTS_INT_EQUAL(test->tc, APR_SUCCESS, status);
     }
@@ -634,19 +750,12 @@ static apr_status_t test_ldap_whoami_cb(apr_ldap_t *ldap, apr_status_t status,
         const char *attrs[2];
 
         apr_array_header_t *scontrols = apr_array_make(test->pool, 1, sizeof(apr_ldap_control_t));
-        apr_ldap_control_t *sort = apr_array_push(scontrols);
-        apr_ldap_control_sortkey_t *sortkey;
+        apr_ldap_control_t *page = apr_array_push(scontrols);
 
-        /* make a sort control */
-        sort->type = APR_LDAP_CONTROL_SORT_REQUEST;
-        sort->critical = 0;
-        sort->c.sortrq.keys = apr_array_make(test->pool, 1, sizeof(apr_ldap_control_sortkey_t));
-
-        /* sort by namingContexts */
-        sortkey = apr_array_push(sort->c.sortrq.keys);
-        sortkey->attribute = "namingContexts";
-        sortkey->order = "caseIgnoreOrderingMatch";
-        sortkey->direction = APR_LDAP_CONTROL_SORT_FORWARD;
+        /* make a page control */
+        page->type = APR_LDAP_CONTROL_PAGE_REQUEST;
+        page->critical = 0;
+        page->c.pagerq.size = 1; /* one entry per page */
 
         attrs[0] = "+";
         attrs[1] = NULL;
@@ -981,7 +1090,7 @@ static void test_ldap_connection(abts_case *tc, apr_pool_t *pool, apr_ldap_t *ld
 
 
     /*
-     * Step 28: bind, extended, search, compare, add, modify, rename, delete.
+     * Step 31: bind, extended, search, compare, add, modify, rename, delete, search.
      *
      * result is complete, event loop unwound.
      */
