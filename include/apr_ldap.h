@@ -1614,6 +1614,32 @@ typedef apr_status_t (*apr_ldap_search_result_cb)(apr_ldap_t *ldap, apr_status_t
                                                   void *ctx, apu_err_t *err);
 
 /**
+ * Search entry attribute value callback structure.
+ *
+ * The callback is passed a pointer to the following structure
+ * containing the current state of the attribute values being
+ * returned.
+ *
+ * @see apr_ldap_search
+ */
+typedef struct apr_ldap_search_entry_t {
+    /** Total number of attributes */
+    apr_size_t nattrs;
+    /** Attribute index - counts up for each attribute returned */
+    apr_size_t aidx;
+    /** Attribute */
+    const char *attr;
+    /** Total number of values */
+    apr_size_t nvals;
+    /** Value index - counts up for each value returned */
+    apr_size_t vidx;
+    /** Value */
+    apr_buffer_t val;
+    /** Flags */
+    int flags;
+} apr_ldap_search_entry_t;
+
+/**
  * Callback to receive the entries of a search operation.
  *
  * This callback is fired once for every attribute and value combination,
@@ -1627,9 +1653,8 @@ typedef apr_status_t (*apr_ldap_search_result_cb)(apr_ldap_t *ldap, apr_status_t
  * @see apr_ldap_result
  */
 typedef apr_status_t (*apr_ldap_search_entry_cb)(apr_ldap_t *ldap, const char *dn,
-                                                 int eidx, int nattrs, int aidx,
-                                                 const char *attr, int nvals,
-                                                 int vidx, apr_buffer_t *val, int binary,
+                                                 apr_size_t eidx,
+                                                 apr_ldap_search_entry_t *entry,
                                                  void *ctx, apu_err_t *err);
 
 

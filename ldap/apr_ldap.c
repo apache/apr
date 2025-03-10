@@ -2243,7 +2243,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_result(apr_pool_t *pool,
             char *attr;
             BerElement *ber;
 
-            int nattrs = 0, j = 0;
+            apr_ldap_search_entry_t e = { 0 };
 
             entry = ldap_first_entry(ldap->ld, msg);
 
@@ -2252,7 +2252,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_result(apr_pool_t *pool,
             for (attr = ldap_first_attribute(ldap->ld, entry, &ber);
                  attr != NULL;
                  attr = ldap_next_attribute(ldap->ld, entry, ber)) {
-                nattrs++;
+                e.nattrs++;
             }
 
             for (attr = ldap_first_attribute(ldap->ld, entry, &ber);
@@ -2261,9 +2261,11 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_result(apr_pool_t *pool,
 
                 struct berval **vals = ldap_get_values_len(ldap->ld, entry, attr);
 
+                e.attr = attr;
+
                 if (vals) {
 
-                    int k, nvals, binary = 0;
+                    int binary = 0;
 
                     char *sc = attr;
 
@@ -2275,24 +2277,23 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_result(apr_pool_t *pool,
                         }
                     }
 
-                    nvals = ldap_count_values_len(vals);
+                    e.nvals = ldap_count_values_len(vals);
 
-                    for (k = 0; k < nvals; k++) {
+                    for (e.vidx = 0; e.vidx < e.nvals; e.vidx++) {
 
-                        apr_buffer_t buf;
                         char *str = NULL;
 
                         if (binary) {
-                            apr_buffer_mem_set(&buf, vals[k]->bv_val, vals[k]->bv_len);
+                            apr_buffer_mem_set(&e.val, vals[e.vidx]->bv_val, vals[e.vidx]->bv_len);
                         }
                         else {
-                            str = strndup(vals[k]->bv_val, vals[k]->bv_len);
-                            apr_buffer_str_set(&buf, str, vals[k]->bv_len);
+                            str = strndup(vals[e.vidx]->bv_val, vals[e.vidx]->bv_len);
+                            apr_buffer_str_set(&e.val, str, vals[e.vidx]->bv_len);
                         }
 
                         if (res->entry_cb.search) {
-                            status = res->entry_cb.search(ldap, dn, res->nentries, nattrs, j,
-                                                          attr, nvals, k, &buf, 0, res->ctx, err);
+                            status = res->entry_cb.search(ldap, dn, res->nentries, &e,
+                                                          res->ctx, err);
                         }
                         else {
                             status = apr_ldap_status(err->rc);
@@ -2306,8 +2307,8 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_result(apr_pool_t *pool,
                 }
                 else {
                     if (res->entry_cb.search) {
-                        status = res->entry_cb.search(ldap, dn, res->nentries, nattrs, j,
-                                                      attr, 0, 0, NULL, 0, res->ctx, err);
+                        status = res->entry_cb.search(ldap, dn, res->nentries, &e,
+                                                      res->ctx, err);
                     }
                     else {
                         status = apr_ldap_status(err->rc);
@@ -2321,14 +2322,13 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_result(apr_pool_t *pool,
                     break;
                 }
 
-                j++;
+                e.aidx++;
             }
 
             res->nentries++;
 
             if (res->entry_cb.search) {
-                status = res->entry_cb.search(ldap, dn, res->nentries, 0, 0, NULL,
-                                              0, 0, NULL, 0, res->ctx, err);
+                status = res->entry_cb.search(ldap, dn, res->nentries, NULL, res->ctx, err);
             }
             else {
                 status = apr_ldap_status(err->rc);

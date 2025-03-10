@@ -257,14 +257,8 @@ static apr_status_t test_ldap_vlv_result_cb(apr_ldap_t *ldap,
 
 static apr_status_t test_ldap_vlv_entry_cb(apr_ldap_t *ldap,
                                            const char *dn,
-                                           int eidx,
-                                           int nattrs,
-                                           int aidx,
-                                           const char *attr,
-                                           int nvals,
-                                           int vidx,
-                                           apr_buffer_t *val,
-                                           int binary,
+                                           apr_size_t eidx,
+                                           apr_ldap_search_entry_t *entry,
                                            void *ctx, apu_err_t *err)
 {
     test_ldap_connection_t *test = (test_ldap_connection_t *)ctx;
@@ -273,13 +267,13 @@ static apr_status_t test_ldap_vlv_entry_cb(apr_ldap_t *ldap,
      * Step 29: search vlv entry callback triggered, start processing results.
      */
 
-    if (!nattrs && !vidx && attr) {
+    if (entry && !entry->aidx && !entry->vidx) {
         /* first attribute and first value and attr present? output dn */
         abts_log_message("dn: %s", dn);
     }
 
-    if (val) {
-        abts_log_message("%s: %s", attr, apr_buffer_pstrdup(test->pool, val));
+    if (entry) {
+        abts_log_message("%s: %s", entry->attr, apr_buffer_pstrdup(test->pool, &entry->val));
     }
 
     return APR_SUCCESS;
@@ -642,14 +636,8 @@ static apr_status_t test_ldap_compare_cb(apr_ldap_t *ldap,
 
 static apr_status_t test_ldap_search_entry_cb(apr_ldap_t *ldap,
                                               const char *dn,
-                                              int eidx,
-                                              int nattrs,
-                                              int aidx,
-                                              const char *attr,
-                                              int nvals,
-                                              int vidx,
-                                              apr_buffer_t *val,
-                                              int binary,
+                                              apr_size_t eidx,
+                                              apr_ldap_search_entry_t *entry,
                                               void *ctx, apu_err_t *err)
 {
     test_ldap_connection_t *test = (test_ldap_connection_t *)ctx;
@@ -658,22 +646,21 @@ static apr_status_t test_ldap_search_entry_cb(apr_ldap_t *ldap,
      * Step 11: search entry callback triggered, start processing results.
      */
 
-    if (!nattrs && !vidx && attr) {
+    if (entry && !entry->aidx && !entry->vidx) {
         /* first attribute and first value and attr present? output dn */
         abts_log_message("dn: %s", dn);
     }
 
-    if (val) {
-        abts_log_message("%s: %s", attr, apr_buffer_pstrdup(test->pool, val));
+    if (entry) {
+        abts_log_message("%s: %s", entry->attr, apr_buffer_pstrdup(test->pool, &entry->val));
 
-        if (!strcmp(attr, "namingContexts")) {
-            test->context = apr_buffer_pstrdup(test->pool, val);
+        if (!strcmp(entry->attr, "namingContexts")) {
+            test->context = apr_buffer_pstrdup(test->pool, &entry->val);
         }
     }
 
     return APR_SUCCESS;
 }
-
 
 static apr_status_t test_ldap_search_result_cb(apr_ldap_t *ldap, 
                                                apr_status_t status,
