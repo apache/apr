@@ -103,7 +103,7 @@ static void test_file_open(abts_case *tc, void *data)
 
     if (APR_SUCCESS != rv) {
         char errbuf[128];
-        abts_log_message("apr_file_open() failed: %s\n",
+        abts_log_message("apr_file_open() failed: %s: %s\n", file1,
                          apr_strerror(rv, errbuf, sizeof(errbuf)));
     }
 
