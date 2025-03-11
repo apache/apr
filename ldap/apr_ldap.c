@@ -76,6 +76,9 @@
 
 typedef struct apr_ldap_t {
     apr_pool_t *pool;
+#if !APR_HAS_OPENLDAP_LDAPSDK
+    const char *uri;
+#endif
     LDAP *ld;
     apr_socket_t *socket;
     apr_skiplist *results;
