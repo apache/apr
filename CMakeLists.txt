@@ -118,6 +118,7 @@ SET(APR_INCLUDE_DIRECTORIES
 
 SET(APR_SYSTEM_LIBS
   ws2_32
+  mswsock
   rpcrt4
 )
 
