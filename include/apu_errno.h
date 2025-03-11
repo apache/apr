@@ -70,6 +70,8 @@ extern "C" {
  * APR_WANT_READ      Call me again when the socket is ready for reading
  * APR_WANT_WRITE     Call me again when the socket is ready for writing
  * APR_USER_CANCELLED User has cancelled the request
+ * APR_ALREADY_EXISTS The object already exists
+ * APR_OBJECT_CLASS_VIOLATION Add or modify results in an objectclass violation
  * </PRE>
  *
  * <PRE>
@@ -104,40 +106,84 @@ extern "C" {
 #define APR_EREINIT          (APR_UTIL_START_STATUS + 12)
 /** @see APR_STATUS_IS_ENOVERIFY */
 #define APR_ENOVERIFY        (APR_UTIL_START_STATUS + 13)
+
+/** @see APR_STATUS_IS_WANT_READ */
+#define APR_WANT_READ                  (APR_UTIL_START_STATUS + 98)
+/** @see APR_STATUS_IS_WANT_WRITE */
+#define APR_WANT_WRITE                 (APR_UTIL_START_STATUS + 99)
+
+/** @see APR_STATUS_IS_OTHER */
+#define APR_OTHER                      (APR_UTIL_START_STATUS + 100)
 /** @see APR_STATUS_IS_SERVER_DOWN */
 #define APR_SERVER_DOWN                (APR_UTIL_START_STATUS + 101)
+/** @see APR_STATUS_IS_LOCAL_ERROR */
+#define APR_LOCAL_ERROR                (APR_UTIL_START_STATUS + 102)
+/** @see APR_STATUS_IS_ENCODING_ERROR */
+#define APR_ENCODING_ERROR             (APR_UTIL_START_STATUS + 103)
+/** @see APR_STATUS_IS_DECODING_ERROR */
+#define APR_DECODING_ERROR             (APR_UTIL_START_STATUS + 104)
+/** @see APR_STATUS_IS_TIMEOUT */
+#define APR_TIMEOUT                    (APR_ETIMEDOUT)
 /** @see APR_STATUS_IS_AUTH_UNKNOWN */
-#define APR_AUTH_UNKNOWN               (APR_UTIL_START_STATUS + 102)
-/** @see APR_STATUS_IS_PROXY_AUTH */
-#define APR_PROXY_AUTH                 (APR_UTIL_START_STATUS + 103)
-/** @see APR_STATUS_IS_INAPPROPRIATE_AUTH */
-#define APR_INAPPROPRIATE_AUTH         (APR_UTIL_START_STATUS + 104)
-/** @see APR_STATUS_IS_INVALID_CREDENTIALS */
-#define APR_INVALID_CREDENTIALS        (APR_UTIL_START_STATUS + 105)
-/** @see APR_STATUS_IS_INSUFFICIENT_ACCESS */
-#define APR_INSUFFICIENT_ACCESS        (APR_UTIL_START_STATUS + 106)
-/** @see APR_STATUS_IS_INSUFFICIENT_RIGHTS */
-#define APR_INSUFFICIENT_RIGHTS        (APR_UTIL_START_STATUS + 107)
-/** @see APR_STATUS_IS_CONSTRAINT_VIOLATION */
-#define APR_CONSTRAINT_VIOLATION       (APR_UTIL_START_STATUS + 108)
+#define APR_AUTH_UNKNOWN               (APR_UTIL_START_STATUS + 106)
 /** @see APR_STATUS_IS_FILTER_ERROR */
-#define APR_FILTER_ERROR               (APR_UTIL_START_STATUS + 109)
-/** @see APR_STATUS_IS_NO_SUCH_OBJECT */
-#define APR_NO_SUCH_OBJECT             (APR_UTIL_START_STATUS + 110)
-/** @see APR_STATUS_IS_NO_SUCH_ATTRIBUTE */
-#define APR_NO_SUCH_ATTRIBUTE          (APR_UTIL_START_STATUS + 111)
-/** @see APR_STATUS_IS_COMPARE_TRUE */
-#define APR_COMPARE_TRUE               (APR_UTIL_START_STATUS + 112)
-/** @see APR_STATUS_IS_COMPARE_FALSE */
-#define APR_COMPARE_FALSE              (APR_UTIL_START_STATUS + 113)
+#define APR_FILTER_ERROR               (APR_UTIL_START_STATUS + 107)
+/** @see APR_STATUS_IS_USER_CANCELLED */
+#define APR_USER_CANCELLED             (APR_UTIL_START_STATUS + 108)
+/** @see APR_STATUS_IS_PARAM_ERROR */
+#define APR_PARAM_ERROR                (APR_UTIL_START_STATUS + 109)
+/** @see APR_STATUS_IS_NO_MEMORY */
+#define APR_NO_MEMORY                  (APR_ENOMEM)
+/** @see APR_STATUS_IS_CONNECT_ERROR */
+#define APR_CONNECT_ERROR              (APR_UTIL_START_STATUS + 111)
+/** @see APR_STATUS_IS_NOT_SUPPORTED */
+#define APR_NOT_SUPPORTED              (APR_UTIL_START_STATUS + 112)
+/** @see APR_STATUS_IS_CONTROL_NOT_FOUND */
+#define APR_CONTROL_NOT_FOUND          (APR_UTIL_START_STATUS + 113)
 /** @see APR_STATUS_IS_NO_RESULTS_RETURNED */
 #define APR_NO_RESULTS_RETURNED        (APR_UTIL_START_STATUS + 114)
-/** @see APR_STATUS_IS_WANT_READ */
-#define APR_WANT_READ                  (APR_UTIL_START_STATUS + 115)
-/** @see APR_STATUS_IS_WANT_WRITE */
-#define APR_WANT_WRITE                 (APR_UTIL_START_STATUS + 116)
-/** @see APR_STATUS_IS_USER_CANCELLED */
-#define APR_USER_CANCELLED             (APR_UTIL_START_STATUS + 117)
+/** @see APR_STATUS_IS_MORE_RESULTS_TO_RETURN */
+#define APR_MORE_RESULTS_TO_RETURN     (APR_UTIL_START_STATUS + 115)
+/** @see APR_STATUS_IS_CLIENT_LOOP */
+#define APR_CLIENT_LOOP                (APR_UTIL_START_STATUS + 116)
+/** @see APR_STATUS_IS_REFERRAL_LIMIT_EXCEEDED */
+#define APR_REFERRAL_LIMIT_EXCEEDED    (APR_UTIL_START_STATUS + 117)
+/** @see APR_STATUS_IS_CONNECTING */
+#define APR_CONNECTING                 (APR_UTIL_START_STATUS + 118)
+
+/** @see APR_STATUS_IS_OPERATIONS_ERROR */
+#define APR_OPERATIONS_ERROR           (APR_UTIL_START_STATUS + 200 + 0x01)
+/** @see APR_STATUS_IS_PROTOCOL_ERROR */
+#define APR_PROTOCOL_ERROR             (APR_UTIL_START_STATUS + 200 + 0x02)
+/** @see APR_STATUS_IS_TIMELIMIT_EXCEEDED */
+#define APR_TIMELIMIT_EXCEEDED         (APR_UTIL_START_STATUS + 200 + 0x03)
+/** @see APR_STATUS_IS_SIZELIMIT_EXCEEDED */
+#define APR_SIZELIMIT_EXCEEDED         (APR_UTIL_START_STATUS + 200 + 0x04)
+/** @see APR_STATUS_IS_COMPARE_FALSE */
+#define APR_COMPARE_FALSE              (APR_UTIL_START_STATUS + 200 + 0x05)
+/** @see APR_STATUS_IS_COMPARE_TRUE */
+#define APR_COMPARE_TRUE               (APR_UTIL_START_STATUS + 200 + 0x06)
+/** @see APR_STATUS_IS_PROXY_AUTH */
+#define APR_PROXY_AUTH                 (APR_UTIL_START_STATUS + 200 + 0x2F)
+/** @see APR_STATUS_IS_INAPPROPRIATE_AUTH */
+#define APR_INAPPROPRIATE_AUTH         (APR_UTIL_START_STATUS + 200 + 0x30)
+/** @see APR_STATUS_IS_INVALID_CREDENTIALS */
+#define APR_INVALID_CREDENTIALS        (APR_UTIL_START_STATUS + 200 + 0x31)
+/** @see APR_STATUS_IS_INSUFFICIENT_ACCESS */
+#define APR_INSUFFICIENT_ACCESS        (APR_UTIL_START_STATUS + 200 + 0x32)
+/** @see APR_STATUS_IS_UNAVAILABLE */
+#define APR_UNAVAILABLE                (APR_UTIL_START_STATUS + 200 + 0x34)
+/** @see APR_STATUS_IS_CONSTRAINT_VIOLATION */
+#define APR_CONSTRAINT_VIOLATION       (APR_UTIL_START_STATUS + 200 + 0x13)
+/** @see APR_STATUS_IS_NO_SUCH_OBJECT */
+#define APR_NO_SUCH_OBJECT             (APR_UTIL_START_STATUS + 200 + 0x20)
+/** @see APR_STATUS_IS_NO_SUCH_ATTRIBUTE */
+#define APR_NO_SUCH_ATTRIBUTE          (APR_UTIL_START_STATUS + 200 + 0x10)
+/** @see APR_STATUS_IS_ALREADY_EXISTS */
+#define APR_ALREADY_EXISTS             (APR_UTIL_START_STATUS + 200 + 0x44)
+/** @see APR_STATUS_IS_OBJECT_CLASS_VIOLATION */
+#define APR_OBJECT_CLASS_VIOLATION     (APR_UTIL_START_STATUS + 200 + 0x41)
+
 /** @} */
 
 /**
@@ -210,14 +256,109 @@ extern "C" {
  * The signature verification failed
  */
 #define APR_STATUS_IS_ENOVERIFY(s)        ((s) == APR_ENOVERIFY)
+
+/**
+ * Call us back when the socket is ready for a read.
+ */
+#define APR_STATUS_IS_WANT_READ(s)        ((s) == APR_WANT_READ)
+/**
+ * Call us back when the socket is ready for a write.
+ */
+#define APR_STATUS_IS_WANT_WRITE(s)        ((s) == APR_WANT_WRITE)
+
+/**
+ * An internal LDAP error has occurred
+ */
+#define APR_STATUS_IS_OTHER(s)        ((s) == APR_OTHER)
 /**
  * The server is down
  */
 #define APR_STATUS_IS_SERVER_DOWN(s)        ((s) == APR_SERVER_DOWN)
 /**
- * Authentication mechanism not supoorted by this server
+ * An error has occurred locally
+ */
+#define APR_STATUS_IS_LOCAL_ERROR(s)        ((s) == APR_LOCAL_ERROR)
+/**
+ * Encoding has failed
+ */
+#define APR_STATUS_IS_ENCODING_ERROR(s)        ((s) == APR_ENCODING_ERROR)
+/**
+ * Decoding has failed
+ */
+#define APR_STATUS_IS_DECODING_ERROR(s)        ((s) == APR_DECODING_ERROR)
+/**
+ * Timeout has occurred
+ */
+#define APR_STATUS_IS_TIMEOUT(s)        ((s) == APR_TIMEOUT)
+/**
+ * Authentication mechanism not supported by this server
  */
 #define APR_STATUS_IS_AUTH_UNKNOWN(s)        ((s) == APR_AUTH_UNKNOWN)
+/**
+ * The filter was malformed
+ */
+#define APR_STATUS_IS_FILTER_ERROR(s)        ((s) == APR_FILTER_ERROR)
+/**
+ * User has cancelled the request
+ */
+#define APR_STATUS_IS_USER_CANCELLED(s)        ((s) == APR_USER_CANCELLED)
+/**
+ * Parameter error
+ */
+#define APR_STATUS_IS_PARAM_ERROR(s)        ((s) == APR_PARAM_ERROR)
+/**
+ * No memory
+ */
+#define APR_STATUS_IS_NO_MEMORY(s)        ((s) == APR_NO_MEMORY)
+/**
+ * Connect error
+ */
+#define APR_STATUS_IS_CONNECT_ERROR(s)        ((s) == APR_CONNECT_ERROR)
+/**
+ * Not supported
+ */
+#define APR_STATUS_IS_NOT_SUPPORTED(s)        ((s) == APR_NOT_SUPPORTED)
+/**
+ * Control not found
+ */
+#define APR_STATUS_IS_CONTROL_NOT_FOUND(s)        ((s) == APR_CONTROL_NOT_FOUND)
+/**
+ * No results returned
+ */
+#define APR_STATUS_IS_NO_RESULTS_RETURNED(s)        ((s) == APR_NO_RESULTS_RETURNED)
+/**
+ * More results to be returned
+ */
+#define APR_STATUS_IS_MORE_RESULTS_TO_RETURN(s)        ((s) == APR_MORE_RESULTS_TO_RETURN)
+/**
+ * Client loop has occurred
+ */
+#define APR_STATUS_IS_CLIENT_LOOP(s)        ((s) == APR_CLIENT_LOOP)
+/**
+ * Referral limit exceeded
+ */
+#define APR_STATUS_IS_REFERRAL_LIMIT_EXCEEDED(s)        ((s) == APR_REFERRAL_LIMIT_EXCEEDED)
+/**
+ * Connecting
+ */
+#define APR_STATUS_IS_CONNECTING(s)        ((s) == APR_CONNECTING)
+
+/**
+ * An operations error has occurred
+ */
+#define APR_STATUS_IS_OPERATIONS_ERROR(s)        ((s) == APR_OPERATIONS_ERROR)
+/**
+ * An protocol error has occurred
+ */
+#define APR_STATUS_IS_PROTOCOL_ERROR(s)        ((s) == APR_PROTOCOL_ERROR)
+/**
+ * Time limit has been exceeded
+ */
+#define APR_STATUS_IS_TIMELIMIT_EXCEEDED(s)        ((s) == APR_TIMELIMIT_EXCEEDED)
+/**
+ * Size limit has been exceeded
+ */
+#define APR_STATUS_IS_SIZELIMIT_EXCEEDED(s)        ((s) == APR_SIZELIMIT_EXCEEDED)
 /**
  * Proxy authorization has failed
  */
@@ -236,17 +377,13 @@ extern "C" {
  */
 #define APR_STATUS_IS_INSUFFICIENT_ACCESS(s)        ((s) == APR_INSUFFICIENT_ACCESS)
 /**
- * The user has insufficient rights to perform the operation.
+ * Unavailable.
  */
-#define APR_STATUS_IS_INSUFFICIENT_RIGHTS(s)        ((s) == APR_INSUFFICIENT_RIGHTS)
+#define APR_STATUS_IS_UNAVAILABLE(s)        ((s) == APR_UNAVAILABLE)
 /**
  * A constraint was violated.
  */
 #define APR_STATUS_IS_CONSTRAINT_VIOLATION(s)        ((s) == APR_CONSTRAINT_VIOLATION)
-/**
- * The filter was malformed.
- */
-#define APR_STATUS_IS_FILTER_ERROR(s)        ((s) == APR_FILTER_ERROR)
 /**
  * No such object.
  */
@@ -264,21 +401,13 @@ extern "C" {
  */
 #define APR_STATUS_IS_COMPARE_FALSE(s)        ((s) == APR_COMPARE_FALSE)
 /**
- * No results were returned.
+ * Object already exists.
  */
-#define APR_STATUS_IS_NO_RESULTS_RETURNED(s)        ((s) == APR_NO_RESULTS_RETURNED)
+#define APR_STATUS_IS_ALREADY_EXISTS(s)        ((s) == APR_ALREADY_EXISTS)
 /**
- * Call us back when the socket is ready for a read.
+ * Object class violation.
  */
-#define APR_STATUS_IS_WANT_READ(s)        ((s) == APR_WANT_READ)
-/**
- * Call us back when the socket is ready for a write.
- */
-#define APR_STATUS_IS_WANT_WRITE(s)        ((s) == APR_WANT_WRITE)
-/**
- * User has cancelled the request.
- */
-#define APR_STATUS_IS_USER_CANCELLED(s)        ((s) == APR_USER_CANCELLED)
+#define APR_STATUS_IS_OBJECT_CLASS_VIOLATION(s)        ((s) == APR_OBJECT_CLASS_VIOLATION)
 /** @} */
 
 /**

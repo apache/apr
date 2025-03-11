@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_ldap: Add write capability to the LDAP API. Support for
+     add, modify, rename, delete, and extended operations.
+     [Graham Leggett]
+
   *) apr_ldap: Explicitly detect the case where OpenLDAP has been
      installed with SASL support, but the SASL headers are missing.
      [Graham Leggett]

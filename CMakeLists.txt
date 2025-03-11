@@ -54,6 +54,7 @@ option(APU_HAVE_SQLITE3     "Build SQLite3 DBD driver"     OFF)
 option(APU_HAVE_PGSQL       "Build PostgreSQL DBD driver"  OFF)
 option(APU_HAVE_CRYPTO      "Crypto support"               OFF)
 option(APU_HAVE_ICONV       "Xlate support"                OFF)
+option(APR_HAS_LDAP         "LDAP support"                 ON)
 option(APR_HAVE_IPV6        "IPv6 support"                 ON)
 option(INSTALL_PDB          "Install .pdb files (if generated)"  ON)
 option(APR_BUILD_TESTAPR    "Build the test suite"         ON)
@@ -112,6 +113,11 @@ if(APU_HAVE_PGSQL)
   find_package(PostgreSQL REQUIRED)
 endif()
 
+set(LDAP_LIBRARIES)
+if(APR_HAS_LDAP)
+  set(LDAP_LIBRARIES wldap32)
+endif()
+
 if(APR_POOL_DEBUG)
   add_compile_definitions(APR_POOL_DEBUG=1)
 endif()
@@ -132,6 +138,9 @@ string(REGEX REPLACE ".*#define APR_PATCH_VERSION[ \t]+([0-9]+).*" "\\1" APR_PAT
 configure_file(include/apr.hwc
                ${PROJECT_BINARY_DIR}/apr.h)
 # "COPYONLY" just because anything else isn't implemented ;)
+configure_file(include/private/apu_ldap_internal.hw
+               ${PROJECT_BINARY_DIR}/apu_ldap_internal.h
+               COPYONLY)
 configure_file(include/private/apu_select_dbm.hw
                ${PROJECT_BINARY_DIR}/apu_select_dbm.h
                COPYONLY)
@@ -392,6 +401,10 @@ set(APR_SOURCES
   xml/apr_xml_xmllite.c
 )
 
+if(APR_HAS_LDAP)
+  set(APR_SOURCES ${APR_SOURCES} ldap/apr_ldap_stub.c ldap/apr_ldap_url.c)
+endif()
+
 # Sources and libraries for APR builtin drivers. Used when APR_MODULAR_DSO=OFF.
 set(APR_EXTRA_SOURCES)
 set(APR_EXTRA_LIBRARIES)
@@ -511,6 +524,14 @@ if(APU_HAVE_CRYPTO)
     "crypto/apr_crypto_openssl.c"
     "OpenSSL::Crypto")
 endif()
+
+IF(APR_HAS_LDAP)
+  ADD_APR_MODULE(
+    apr_ldap-2 "apr_ldap"
+    "ldap/apr_ldap.c"
+    ${LDAP_LIBRARIES}
+  )
+ENDIF()
 
 if(APU_HAVE_ODBC)
   list(APPEND dbd_drivers odbc)
@@ -770,6 +791,7 @@ message(STATUS "  IPv6 ............................ : ${APR_HAVE_IPV6}")
 message(STATUS "  DBD ODBC driver ................. : ${APU_HAVE_ODBC}")
 message(STATUS "  DBD SQLite3 driver .............. : ${APU_HAVE_SQLITE3}")
 message(STATUS "  DBD PostgreSQL .................. : ${APU_HAVE_PGSQL}")
+message(STATUS "  LDAP driver ..................... : ${APR_HAS_LDAP}")
 message(STATUS "  XML backend ..................... : ${APR_XML_BACKEND}")
 message(STATUS "  Have Crypto ..................... : ${APU_HAVE_CRYPTO}")
 message(STATUS "  Have Iconv ...................... : ${APU_HAVE_ICONV}")

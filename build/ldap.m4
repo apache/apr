@@ -94,6 +94,7 @@ AC_DEFUN([APU_FIND_LDAPLIB], [
       [
         LDADD_ldap_found="-l${ldaplib} ${extralib}"
         AC_CHECK_LIB(${ldaplib}, ldap_sasl_interactive_bind, apu_have_ldap_sasl_interactive_bind="1", , ${extralib})
+        AC_CHECK_LIB(${ldaplib}, ldap_connect, apu_have_ldap_connect="1", , ${extralib})
         apu_have_ldap="1";
       ], , ${extralib})
   fi
@@ -108,6 +109,7 @@ AC_DEFUN([APU_FIND_LDAP],  [
 echo $ac_n "${nl}checking for ldap support..."
 
 apu_have_ldap_sasl_interactive_bind="0"
+apu_have_ldap_connect="0"
 apu_have_ldap="0";
 apu_have_ldap_openldap="0"
 apu_have_ldap_microsoft="0"
@@ -227,6 +229,7 @@ AC_CHECK_HEADERS([sasl.h sasl/sasl.h])
 AC_SUBST(ldap_h)
 AC_SUBST(lber_h)
 AC_SUBST(apu_have_ldap_sasl_interactive_bind)
+AC_SUBST(apu_have_ldap_connect)
 AC_SUBST(apu_have_ldap)
 AC_SUBST(apu_have_ldap_openldap)
 AC_SUBST(apu_have_ldap_solaris)

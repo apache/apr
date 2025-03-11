@@ -124,61 +124,6 @@ extern "C" {
 #endif
 
 
-typedef struct apr_ldap_t {
-    apr_pool_t *pool;
-    LDAP *ld;
-    apr_socket_t *socket;
-    apr_skiplist *results;
-    apr_array_header_t *abandons;
-    apr_array_header_t *prepares;
-    LDAPControl **serverctrls;
-    LDAPControl **clientctrls;
-    apu_err_t err;
-    apr_status_t status;
-} apr_ldap_t;
-
-
-typedef struct apr_ldap_prepare_t {
-    apr_pool_t *pool;
-    apr_ldap_prepare_cb cb;
-    void *ctx;
-} apr_ldap_prepare_t;
- 
-
-
-typedef struct apr_ldap_result_t {
-    apr_pool_t *pool;
-    apr_ldap_t *ld;
-    const char *mech;
-    const char *rmech;
-    LDAPMessage *message;
-    int msgid;
-    int msgtype;
-    union {
-        apr_ldap_bind_cb bind;
-        apr_ldap_compare_cb compare;
-        apr_ldap_search_result_cb search;
-    } cb;
-    union {
-        apr_ldap_search_entry_cb search;
-    } entry_cb;
-    void *ctx;
-    apr_size_t nentries;
-} apr_ldap_result_t;
-
-
-
-APU_DECLARE_LDAP(apr_status_t) apr_ldap_status(int rc, apr_status_t status);
-
-APU_DECLARE_LDAP(void) apr_ldap_result_add(apr_pool_t *pool,
-                                           apr_ldap_t *ldap,
-                                           apr_ldap_result_t *res,
-                                           int msgid)
-                                           __attribute__((nonnull(1,2,3)));
-
-
-
-
 #if APR_HAVE_MODULAR_DSO
 
 /* For LDAP internal builds, wrap our LDAP namespace */
@@ -210,21 +155,52 @@ struct apr__ldap_dso_fntable {
     apr_status_t (*compare)(apr_pool_t *pool, apr_ldap_t *ldap,
                             const char *dn, const char *attr,
                             const apr_buffer_t *bval,
-                            apr_ldap_control_t **serverctrls,
-                            apr_ldap_control_t **clientctrls,
+                            apr_array_header_t *serverctrls,
+                            apr_array_header_t *clientctrls,
                             apr_interval_time_t timeout,
                             apr_ldap_compare_cb compare_cb, void *ctx, apu_err_t *err);
     apr_status_t (*search)(apr_pool_t *pool, apr_ldap_t *ldap, const char *dn,
                            apr_ldap_search_scope_e scope, const char *filter,
                            const char **attrs, apr_ldap_switch_e attrsonly,
-                           apr_ldap_control_t **serverctrls,
-                           apr_ldap_control_t **clientctrls,
+                           apr_array_header_t *serverctrls,
+                           apr_array_header_t *clientctrls,
                            apr_interval_time_t timeout, apr_ssize_t sizelimit,
                            apr_ldap_search_result_cb search_result_cb,          
                            apr_ldap_search_entry_cb search_entry_cb,                                          
                            void *search_ctx, apu_err_t *err);
-    apr_status_t (*unbind)(apr_ldap_t *ldap, apr_ldap_control_t **serverctrls,
-                           apr_ldap_control_t **clientctrls, apu_err_t *err);
+    apr_status_t (*add)(apr_pool_t *pool, apr_ldap_t *ldap,
+                        const char *dn, apr_array_header_t *adds,
+                        apr_array_header_t *serverctrls,
+                        apr_array_header_t *clientctrls,
+                        apr_interval_time_t timeout,
+                        apr_ldap_add_cb add_cb, void *ctx, apu_err_t *err);
+    apr_status_t (*modify)(apr_pool_t *pool, apr_ldap_t *ldap,
+                           const char *dn, apr_array_header_t *mods,
+                           apr_array_header_t *serverctrls,
+                           apr_array_header_t *clientctrls,
+                           apr_interval_time_t timeout,
+                           apr_ldap_modify_cb modify_cb, void *ctx, apu_err_t *err);
+    apr_status_t (*rename)(apr_pool_t *pool, apr_ldap_t *ldap,
+                           const char *dn, const char *newrdn, const char *newparent,
+                           apr_ldap_rename_e flags,
+                           apr_array_header_t *serverctrls,
+                           apr_array_header_t *clientctrls,
+                           apr_interval_time_t timeout,
+                           apr_ldap_rename_cb rename_cb, void *ctx, apu_err_t *err);
+    apr_status_t (*delete)(apr_pool_t *pool, apr_ldap_t *ldap,
+                           const char *dn,
+                           apr_array_header_t *serverctrls,
+                           apr_array_header_t *clientctrls,
+                           apr_interval_time_t timeout,
+                           apr_ldap_delete_cb delete_cb, void *ctx, apu_err_t *err);
+    apr_status_t (*extended)(apr_pool_t *pool, apr_ldap_t *ldap,
+                             const char *dn, apr_buffer_t *data,
+                             apr_array_header_t *serverctrls,
+                             apr_array_header_t *clientctrls,
+                             apr_interval_time_t timeout,
+                             apr_ldap_extended_cb ext_cb, void *ctx, apu_err_t *err);
+    apr_status_t (*unbind)(apr_ldap_t *ldap, apr_array_header_t *serverctrls,
+                           apr_array_header_t *clientctrls, apu_err_t *err);
 };
 
 #endif /* APR_HAVE_MODULAR_DSO */

@@ -172,10 +172,55 @@ static char *apr_error_string(apr_status_t statcode)
         return "Underlying crypto has already been initialised";
     case APR_ENOVERIFY:
         return "The signature verification failed";
+
+    case APR_WANT_READ:
+        return "Call me again when the socket is ready for reading";
+    case APR_WANT_WRITE:
+        return "Call me again when the socket is ready for writing";
+
+    case APR_OTHER:
+    	return "An internal LDAP error has occurred";
     case APR_SERVER_DOWN:
         return "The server is down";
+    case APR_LOCAL_ERROR:
+        return "An error has occurred locally";
+    case APR_ENCODING_ERROR:
+        return "Encoding has failed";
+    case APR_DECODING_ERROR:
+        return "Decoding has failed";
     case APR_AUTH_UNKNOWN:
         return "Unknown SASL mechanism";
+    case APR_FILTER_ERROR:
+        return "The filter was malformed";
+    case APR_USER_CANCELLED:
+        return "User has cancelled the request";
+    case APR_PARAM_ERROR:
+    	return "Parameter error";
+    case APR_CONNECT_ERROR:
+    	return "Connect error";
+    case APR_NOT_SUPPORTED:
+    	return "Not supported";
+    case APR_CONTROL_NOT_FOUND:
+    	return "Control not found";
+    case APR_NO_RESULTS_RETURNED:
+    	return "No results returned";
+    case APR_MORE_RESULTS_TO_RETURN:
+    	return "More results to be returned";
+    case APR_CLIENT_LOOP:
+    	return "Client loop has occurred";
+    case APR_REFERRAL_LIMIT_EXCEEDED:
+    	return "Referral limit exceeded";
+    case APR_CONNECTING:
+    	return "Connecting";
+
+    case APR_OPERATIONS_ERROR:
+    	return "Operations error has occurred";
+    case APR_PROTOCOL_ERROR:
+    	return "Protocol error has occurred";
+    case APR_TIMELIMIT_EXCEEDED:
+    	return "Time limit has been exceeded";
+    case APR_SIZELIMIT_EXCEEDED:
+    	return "Size limit has been exceeded";
     case APR_PROXY_AUTH:
         return "Proxy authorization has failed";
     case APR_INAPPROPRIATE_AUTH:
@@ -184,26 +229,22 @@ static char *apr_error_string(apr_status_t statcode)
         return "Invalid credentials were presented";
     case APR_INSUFFICIENT_ACCESS:
         return "The user has insufficient access";
-    case APR_INSUFFICIENT_RIGHTS:
-        return "The user has insufficient rights";
+    case APR_UNAVAILABLE:
+        return "Unavailable";
     case APR_CONSTRAINT_VIOLATION:
         return "A constraint was violated";
-    case APR_FILTER_ERROR:
-        return "The filter was malformed";
     case APR_NO_SUCH_OBJECT:
         return "No such object";
+    case APR_NO_SUCH_ATTRIBUTE:
+        return "No such attribute";
     case APR_COMPARE_TRUE:
         return "Comparison is true";
     case APR_COMPARE_FALSE:
         return "Comparison is false";
-    case APR_NO_RESULTS_RETURNED:
-        return "No results returned";
-    case APR_WANT_READ:
-        return "Call me again when the socket is ready for reading";
-    case APR_WANT_WRITE:
-        return "Call me again when the socket is ready for writing";
-    case APR_USER_CANCELLED:
-        return "User has cancelled the request";
+    case APR_ALREADY_EXISTS:
+        return "The object already exists";
+    case APR_OBJECT_CLASS_VIOLATION:
+        return "Add or modify results in an objectclass violation";
 
     default:
         return "Error string not specified yet";
