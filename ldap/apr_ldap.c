@@ -401,6 +401,8 @@ static apr_status_t option_set_uri(apr_ldap_t *ldap, const char *uri,
         ld = ldap_init((char *)urld->lud_host, urld->lud_port);
 #endif
 
+        ldap->uri = apr_pstrdup(ldap->pool, uri);
+
     }
 
 #endif
@@ -824,6 +826,15 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_get(apr_pool_t *pool, apr_ldap_t 
         outvalue->socket = ldap->socket;
 
         return status;
+    }
+    case APR_LDAP_OPT_URI: {
+#if APR_HAS_OPENLDAP_LDAPSDK
+        rc = ldap_get_option(ldap ? ldap->ld : NULL, option, &outvalue->opt);
+        break;
+#else
+        outvalue->uri = ldap->uri;
+        return APR_SUCCESS;
+#endif
     }
     case APR_LDAP_OPT_DEBUG_LEVEL: {
 
