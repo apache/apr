@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.8.0
 
+  *) testmmap: Avoid a crash after test_file_open() fails. [Graham
+     Leggett]
+
   *) apr_proc_mutex_timedlock() should return APR_TIMEUP on systems
      where semtimedop() returns ETIMEDOUT rather than
      EAGAIN. Likely AIX-only. [Eric Covener]

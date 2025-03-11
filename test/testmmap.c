@@ -77,6 +77,11 @@ static void test_file_close(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
+    if (!thefile) {
+        ABTS_SKIP(tc, data, "File not open, skipping file close.");
+        return;
+    }
+
     rv = apr_file_close(thefile);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     thefile = NULL;
@@ -96,6 +101,11 @@ static void test_get_filesize(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
+    if (!thefile) {
+        ABTS_SKIP(tc, data, "File not open, skipping filesize test.");
+        return;
+    }
+
     rv = apr_file_info_get(&thisfinfo, APR_FINFO_NORM, thefile);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_TRUE(tc, thisfinfo.size == (apr_off_t)(apr_size_t)thisfinfo.size);
@@ -110,6 +120,11 @@ static void read_expected_contents(abts_case *tc, void *data)
     apr_off_t *offset = data;
     apr_size_t nbytes = 0;
     apr_status_t rv;
+
+    if (!thefile) {
+        ABTS_SKIP(tc, data, "File not open, skipping read.");
+        return;
+    }
 
     ABTS_TRUE(tc, *offset == (apr_off_t)(apr_size_t)*offset);
 
@@ -135,6 +150,11 @@ static void test_mmap_create(abts_case *tc, void *data)
     apr_off_t *offset = data;
     apr_status_t rv;
 
+    if (!thefile) {
+        ABTS_SKIP(tc, data, "File not open, skipping mmap create.");
+        return;
+    }
+
     rv = apr_mmap_create(&themmap, thefile, *offset, thisfsize,
                          APR_MMAP_READ, ptest);
     ABTS_PTR_NOTNULL(tc, themmap);
@@ -144,21 +164,33 @@ static void test_mmap_create(abts_case *tc, void *data)
 static void test_mmap_contents(abts_case *tc, void *data)
 {
     ABTS_PTR_NOTNULL(tc, themmap);
+
+    if (!themmap) {
+        ABTS_SKIP(tc, data, "MMap not open, skipping size comparison.");
+        return;
+    }
+
     ABTS_PTR_NOTNULL(tc, themmap->mm);
     ABTS_SIZE_EQUAL(tc, thisfsize, themmap->size);
 
     /* Must use nEquals since the string is not guaranteed to be NULL terminated */
     ABTS_STR_NEQUAL(tc, themmap->mm, thisfdata, thisfsize);
+
 }
 
 static void test_mmap_delete(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
-    ABTS_PTR_NOTNULL(tc, themmap);
+    if (!themmap) {
+        ABTS_SKIP(tc, data, "MMap not open, skipping mmap delete.");
+        return;
+    }
+        
     rv = apr_mmap_delete(themmap);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     themmap = NULL;
+
 }
 
 static void test_mmap_offset(abts_case *tc, void *data)
@@ -166,12 +198,17 @@ static void test_mmap_offset(abts_case *tc, void *data)
     apr_status_t rv;
     void *addr;
 
-    ABTS_PTR_NOTNULL(tc, themmap);
+    if (!themmap) {
+        ABTS_SKIP(tc, data, "MMap not open, skipping mmap offset.");
+        return;
+    }    
+
     rv = apr_mmap_offset(&addr, themmap, 5);
 
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     /* Must use nEquals since the string is not guaranteed to be NULL terminated */
     ABTS_STR_NEQUAL(tc, addr, thisfdata + 5, thisfsize - 5);
+
 }
 
 #endif
