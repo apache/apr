@@ -83,6 +83,13 @@ static void test_file_close(abts_case *tc, void *data)
     }
 
     rv = apr_file_close(thefile);
+
+    if (APR_SUCCESS != rv) {
+        char errbuf[128];
+        abts_log_message("apr_file_close() failed: %s\n",
+                         apr_strerror(rv, errbuf, sizeof(errbuf)));
+    }
+
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     thefile = NULL;
 }
@@ -93,6 +100,13 @@ static void test_file_open(abts_case *tc, void *data)
 
     rv = apr_file_open(&thefile, file1, APR_FOPEN_READ,
                        APR_UREAD | APR_GREAD, ptest);
+
+    if (APR_SUCCESS != rv) {
+        char errbuf[128];
+        abts_log_message("apr_file_open() failed: %s\n",
+                         apr_strerror(rv, errbuf, sizeof(errbuf)));
+    }
+
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_NOTNULL(tc, thefile);
 }
@@ -107,6 +121,13 @@ static void test_get_filesize(abts_case *tc, void *data)
     }
 
     rv = apr_file_info_get(&thisfinfo, APR_FINFO_NORM, thefile);
+
+    if (APR_SUCCESS != rv) {
+        char errbuf[128];
+        abts_log_message("apr_file_info_get() failed: %s\n",
+                         apr_strerror(rv, errbuf, sizeof(errbuf)));
+    }
+
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_TRUE(tc, thisfinfo.size == (apr_off_t)(apr_size_t)thisfinfo.size);
 
@@ -129,6 +150,13 @@ static void read_expected_contents(abts_case *tc, void *data)
     ABTS_TRUE(tc, *offset == (apr_off_t)(apr_size_t)*offset);
 
     rv = apr_file_read_full(thefile, thisfdata, thisfsize, &nbytes);
+
+    if (APR_SUCCESS != rv) {
+        char errbuf[128];
+        abts_log_message("apr_file_read_full() failed: %s\n",
+                         apr_strerror(rv, errbuf, sizeof(errbuf)));
+    }
+
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_ASSERT(tc, "File size mismatch", nbytes == thisfsize);
     thisfdata[nbytes] = '\0';
@@ -157,6 +185,13 @@ static void test_mmap_create(abts_case *tc, void *data)
 
     rv = apr_mmap_create(&themmap, thefile, *offset, thisfsize,
                          APR_MMAP_READ, ptest);
+
+    if (APR_SUCCESS != rv) {
+        char errbuf[128];
+        abts_log_message("apr_mmap_create() failed: %s\n",
+                         apr_strerror(rv, errbuf, sizeof(errbuf)));
+    }
+
     ABTS_PTR_NOTNULL(tc, themmap);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
@@ -188,6 +223,13 @@ static void test_mmap_delete(abts_case *tc, void *data)
     }
         
     rv = apr_mmap_delete(themmap);
+
+    if (APR_SUCCESS != rv) {
+        char errbuf[128];
+        abts_log_message("apr_mmap_delete() failed: %s\n",
+                         apr_strerror(rv, errbuf, sizeof(errbuf)));
+    }
+
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     themmap = NULL;
 
@@ -204,6 +246,12 @@ static void test_mmap_offset(abts_case *tc, void *data)
     }    
 
     rv = apr_mmap_offset(&addr, themmap, 5);
+
+    if (APR_SUCCESS != rv) {
+        char errbuf[128];
+        abts_log_message("apr_mmap_offset() failed: %s\n",
+                         apr_strerror(rv, errbuf, sizeof(errbuf)));
+    }
 
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     /* Must use nEquals since the string is not guaranteed to be NULL terminated */
