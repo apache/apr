@@ -710,7 +710,14 @@ static void test_connection_validation(abts_case *tc, void *data)
     args[1] = NULL;
     rv = apr_proc_create(&proc, TESTBINPATH "memcachedmock" EXTENSION, args, NULL,
                          procattr, p);
-    ABTS_ASSERT(tc, "Couldn't launch program", rv == APR_SUCCESS);
+
+    if (APR_SUCCESS != rv) {
+        char errbuf[128];
+        abts_log_message(TESTBINPATH "memcachedmock" EXTENSION " could not be executed: %s",
+                         apr_strerror(rv, errbuf, sizeof(errbuf)));
+        ABTS_SKIP(tc, data, TESTBINPATH "memcachedmock" EXTENSION " could not be executed, skipped");
+        return;
+    }
 
     /* Wait for the mock memcached to start */
     apr_sleep(apr_time_from_sec(2));
