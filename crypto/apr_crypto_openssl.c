@@ -90,8 +90,7 @@
 
 #endif /* defined(LIBRESSL_VERSION_NUMBER) */
 
-#if APR_USE_OPENSSL_PRE_3_0_API \
-    || (defined(OPENSSL_API_LEVEL) && OPENSSL_API_LEVEL < 30000)
+#if APR_USE_OPENSSL_PRE_3_0_API
 #define APR_USE_OPENSSL_ENGINE_API 1
 #else
 #define APR_USE_OPENSSL_ENGINE_API 0
@@ -218,7 +217,9 @@ static apr_status_t crypto_shutdown(void)
 
     ERR_free_strings();
     EVP_cleanup();
+#if APR_USE_OPENSSL_ENGINE_API
     ENGINE_cleanup();
+#endif
 #endif
 
     return APR_SUCCESS;
@@ -241,7 +242,9 @@ static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
      *
      * We tell openssl we want to include engine support.
      */
+#if APR_USE_OPENSSL_ENGINE_API
     OPENSSL_init_crypto(OPENSSL_INIT_ENGINE_ALL_BUILTIN, NULL);
+#endif
 
 #else
     /* Configuration below is for legacy versions Openssl v1.0 and
@@ -256,8 +259,10 @@ static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
     ERR_load_crypto_strings();
     /* SSL_load_error_strings(); */
     OpenSSL_add_all_algorithms();
+#if APR_USE_OPENSSL_ENGINE_API
     ENGINE_load_builtin_engines();
     ENGINE_register_all_complete();
+#endif
 #endif
 
     apr_pool_cleanup_register(pool, pool, crypto_shutdown_helper,
