@@ -107,12 +107,19 @@ static apr_crypto_t *make(abts_case *tc, apr_pool_t *pool,
 
     apr_crypto_t *f = NULL;
 
+    apr_status_t status;
+
     if (!driver) {
         return NULL;
     }
 
     /* get the context */
-    apr_crypto_make(&f, driver, "engine=openssl", pool);
+    status = apr_crypto_make(&f, driver, "engine=openssl", pool);
+
+    if (APR_ENOTIMPL == status) {
+        apr_crypto_make(&f, driver, "provider=default", pool);
+    }
+
     ABTS_ASSERT(tc, "apr_crypto_make returned NULL", f != NULL);
 
     return f;

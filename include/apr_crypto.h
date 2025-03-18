@@ -608,8 +608,11 @@ APR_DECLARE(apr_status_t) apr_crypto_error(const apu_err_t **result,
  * @return APR_ENOENGINE when the engine specified does not exist. APR_EINITENGINE
  * if the engine cannot be initialised.
  * @remarks NSS: currently no params are supported.
- * @remarks OpenSSL: the params can have "engine" as a key, followed by an equal
- *  sign and a value.
+ * @remarks OpenSSL legacy: prior to v3, use "engine=[engine]" to set the engine.
+ * @remarks OpenSSL3+: use "provider=[provider]" to set the provider to load, can
+ *          be specified more than once.
+ * @remarks OpenSSL3.5+: "name=[value]" params specified after each "provider"
+ *          are applied to that provider.
  */
 APR_DECLARE(apr_status_t) apr_crypto_make(apr_crypto_t **f,
         const apr_crypto_driver_t *driver, const char *params,

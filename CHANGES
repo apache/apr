@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_crypto_openssl: Add provider support on OpenSSL3+.
+     [Graham Leggett]
+
   *) apr_ldap: Add write capability to the LDAP API. Support for
      add, modify, rename, delete, and extended operations.
      [Graham Leggett]
