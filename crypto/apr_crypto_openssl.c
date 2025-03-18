@@ -215,8 +215,10 @@ static apr_status_t crypto_shutdown(void)
      * older.
      */
 
+#if APR_USE_OPENSSL_PRE_3_0_API
     ERR_free_strings();
     EVP_cleanup();
+#endif
 #if APR_USE_OPENSSL_ENGINE_API
     ENGINE_cleanup();
 #endif
@@ -232,6 +234,8 @@ static apr_status_t crypto_shutdown_helper(void *data)
 
 /**
  * Initialise the crypto library and perform one time initialisation.
+ *
+ * This is a noop from OpenSSL v3+.
  */
 static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
         const apu_err_t **result)
@@ -253,12 +257,16 @@ static apr_status_t crypto_init(apr_pool_t *pool, const char *params,
 
 #if APR_USE_OPENSSL_PRE_1_1_API
     (void)CRYPTO_malloc_init();
-#else
+#elif APR_USE_OPENSSL_PRE_3_0_API
     OPENSSL_malloc_init();
 #endif
+
+#if APR_USE_OPENSSL_PRE_3_0_API
     ERR_load_crypto_strings();
     /* SSL_load_error_strings(); */
     OpenSSL_add_all_algorithms();
+#endif
+
 #if APR_USE_OPENSSL_ENGINE_API
     ENGINE_load_builtin_engines();
     ENGINE_register_all_complete();
