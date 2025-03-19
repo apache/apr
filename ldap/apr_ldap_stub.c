@@ -80,8 +80,9 @@ static apr_status_t load_ldap(apr_pool_t *pool, const apr_ldap_driver_t **driver
     modname = "apr_ldap-" APR_STRINGIFY(APR_MAJOR_VERSION) ".so";
 #endif
     rv = apu_dso_load(&dlhandle, &symbol, modname, "apr__ldap_fns", pool, err);
-    if (rv == APR_SUCCESS) {
+    if (rv == APR_SUCCESS || APR_EINIT == rv) {
         lfn = symbol;
+        rv = APR_SUCCESS;
     }
 
     if (driver) {
@@ -93,9 +94,12 @@ static apr_status_t load_ldap(apr_pool_t *pool, const apr_ldap_driver_t **driver
     return rv;
 }
 
-#define LOAD_LDAP_STUB(pool, err, failres) \
-    if (!lfn && (apr_ldap_get_driver(pool, NULL, err) != APR_SUCCESS)) \
-        return failres;
+#define LOAD_LDAP_STUB(pool, err) \
+    { \
+        apr_status_t status; \
+        if (!lfn && ((status = apr_ldap_get_driver(pool, NULL, err)) != APR_SUCCESS)) \
+            return status; \
+    }
 
 #define CHECK_LDAP_STUB(failres) \
     if (!lfn) \
@@ -132,7 +136,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_info(apr_pool_t *pool,
                                              apu_err_t **result_err)
 {
     *result_err = (apu_err_t *)apr_pcalloc(pool, sizeof(apu_err_t));
-    LOAD_LDAP_STUB(pool, *result_err, APR_EINIT);
+    LOAD_LDAP_STUB(pool, *result_err);
     return lfn->info(pool, result_err);
 }
 
@@ -140,7 +144,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_initialise(apr_pool_t *pool,
                                                    apr_ldap_t **ldap,
                                                    apu_err_t *err)
 {
-    LOAD_LDAP_STUB(pool, err, APR_EINIT);
+    LOAD_LDAP_STUB(pool, err);
     return lfn->initialise(pool, ldap, err);
 }
 
@@ -150,7 +154,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_get(apr_pool_t *pool,
                                                    apr_ldap_opt_t *outvalue,
                                                    apu_err_t *err)
 {
-    LOAD_LDAP_STUB(pool, err, APR_EINIT);
+    LOAD_LDAP_STUB(pool, err);
     return lfn->option_get(pool, ldap, option, outvalue, err);
 }
 
@@ -160,7 +164,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_set(apr_pool_t *pool,
                                                    const apr_ldap_opt_t *invalue,
                                                    apu_err_t *err)
 {
-    LOAD_LDAP_STUB(pool, err, APR_EINIT);
+    LOAD_LDAP_STUB(pool, err);
     return lfn->option_set(pool, ldap, option, invalue, err);
 }
 
