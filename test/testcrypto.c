@@ -2005,14 +2005,14 @@ static void test_crypto_block_nss_openssl_pad(abts_case *tc, void *data)
 static void test_crypto_block_openssl_nss_pad(abts_case *tc, void *data)
 {
     apr_pool_t *pool = NULL;
-    const apr_crypto_driver_t *drivers[] = { NULL, NULL };
+    /* const apr_crypto_driver_t *drivers[] = { NULL, NULL }; */
 
-    const unsigned char *in = (const unsigned char *) TEST_STRING;
-    apr_size_t inlen = sizeof(TEST_STRING);
+    /* const unsigned char *in = (const unsigned char *) TEST_STRING; */
+    /* apr_size_t inlen = sizeof(TEST_STRING); */
 
     apr_pool_create(&pool, NULL);
-    drivers[0] = get_openssl_driver(tc, pool);
-    drivers[1] = get_nss_driver(tc, pool);
+    /* drivers[0] = get_openssl_driver(tc, pool); */
+    /* drivers[1] = get_nss_driver(tc, pool); */
     /* crypto_block_cross(tc, pool, drivers, APR_KEY_3DES_192, APR_MODE_CBC, 1,
             in, inlen, 24, "KEY_3DES_192/MODE_CBC"); */
 
