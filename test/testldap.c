@@ -1408,17 +1408,24 @@ static void test_ldap_opts(abts_case *tc, void *data)
     apu_err_t err;
     const char *url;
 
+    apr_status_t status;
+
     apr_pool_create(&pool, p);
 
     url = apr_psprintf(pool, "ldap://%s:%d", "localhost", APR_LDAP_PORT);
 
-    apr_ldap_initialise(pool, &ldap, &(err));
+    status = apr_ldap_initialise(pool, &ldap, &(err));
+
+    if (APR_SUCCESS != status) {
+        char errbuf[128];
+        abts_log_message("apr_ldap_initialise() skipped: %s\n", apr_strerror(status, errbuf, sizeof(errbuf)));
+        return;
+    }
 
     ABTS_TRUE(tc, ldap != NULL);
 
     if (ldap) {
 
-        apr_status_t status;
         apr_ldap_opt_t opt;
 
         opt.uri = url;
