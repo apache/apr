@@ -767,6 +767,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_get(apr_pool_t *pool, apr_ldap_t 
 
     switch (option) {
     case APR_LDAP_OPT_API_INFO: {
+#if defined(LDAP_OPT_API_INFO)
         LDAPAPIInfo info = { 0 };
 
         info.ldapai_info_version = LDAP_API_INFO_VERSION;
@@ -780,9 +781,15 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_get(apr_pool_t *pool, apr_ldap_t 
         outvalue->info.vendor_version = info.ldapai_vendor_version;
 
         break;
-
+#else
+        result->reason = "LDAP: API info not yet supported by APR on this "
+                         "LDAP SDK";
+        result->rc = LDAP_UNWILLING_TO_PERFORM;
+        return APR_ENOTIMPL;
+#endif
     }
     case APR_LDAP_OPT_API_FEATURE_INFO: {
+#if defined(LDAP_OPT_API_FEATURE_INFO)
         LDAPAPIFeatureInfo ldfi = { 0 };
 
         ldfi.ldapaif_info_version = LDAP_FEATURE_INFO_VERSION;
@@ -794,6 +801,12 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_get(apr_pool_t *pool, apr_ldap_t 
 
         break;
 
+#else
+        result->reason = "LDAP: API feature info not yet supported by APR on this "
+                         "LDAP SDK";
+        result->rc = LDAP_UNWILLING_TO_PERFORM;
+        return APR_ENOTIMPL;
+#endif
     }
     case APR_LDAP_OPT_PROTOCOL_VERSION: {
 
@@ -808,6 +821,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_get(apr_pool_t *pool, apr_ldap_t 
         return APR_SUCCESS;
     }
     case APR_LDAP_OPT_DESC: {
+#if defined(LDAP_OPT_DESC)
 
         apr_status_t status = APR_SUCCESS;
 
@@ -826,6 +840,12 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_get(apr_pool_t *pool, apr_ldap_t 
         outvalue->socket = ldap->socket;
 
         return status;
+#else
+        result->reason = "LDAP: LDAP_OPT_DESC not yet supported by APR on this "
+                         "LDAP SDK";
+        result->rc = LDAP_UNWILLING_TO_PERFORM;
+        return APR_ENOTIMPL;
+#endif
     }
     case APR_LDAP_OPT_URI: {
 #if APR_HAS_OPENLDAP_LDAPSDK
@@ -1032,7 +1052,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_set(apr_pool_t *pool, apr_ldap_t 
         break;
 
     case APR_LDAP_OPT_PROTOCOL_VERSION:
-        rc = ldap_set_option(ldap ? ldap->ld : NULL, LDAP_OPT_PROTOCOL_VERSION, &invalue->pv);
+        rc = ldap_set_option(ldap ? ldap->ld : NULL, LDAP_OPT_PROTOCOL_VERSION, (void*)&invalue->pv);
         break;
 
     case APR_LDAP_OPT_HANDLE:
@@ -1051,11 +1071,11 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_set(apr_pool_t *pool, apr_ldap_t 
 #endif
 
     case APR_LDAP_OPT_DEREF:
-        rc = ldap_set_option(ldap ? ldap->ld : NULL, LDAP_OPT_DEREF, &invalue->deref);
+        rc = ldap_set_option(ldap ? ldap->ld : NULL, LDAP_OPT_DEREF, (void*)&invalue->deref);
         break;
 
     case APR_LDAP_OPT_REFERRALS: {
-        void *refs = invalue->refs ? LDAP_OPT_ON : LDAP_OPT_OFF;
+        void *refs = invalue->refs ? (void *)LDAP_OPT_ON : (void *)LDAP_OPT_OFF;
 
         /* Setting this option is supported on at least TIVOLI_SDK and OpenLDAP.
          */
@@ -1071,7 +1091,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_set(apr_pool_t *pool, apr_ldap_t 
 #elif defined(LDAP_OPT_REFHOPLIMIT)
         /* Setting this option is supported on TIVOLI_SDK.
          */
-        rc = ldap_set_option(ldap ? ldap->ld : NULL, LDAP_OPT_REFHOPLIMIT, &invalue->refhoplimit);
+        rc = ldap_set_option(ldap ? ldap->ld : NULL, LDAP_OPT_REFHOPLIMIT, (void*)&invalue->refhoplimit);
 #else
         /* If the LDAP_OPT_REFHOPLIMIT symbol is missing, assume that the
          * particular LDAP library has a reasonable default. So far certain
