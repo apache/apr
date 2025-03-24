@@ -387,11 +387,10 @@ static apr_status_t option_set_uri(apr_ldap_t *ldap, const char *uri,
 
     {
         apr_ldap_url_desc_t *urld;
-        apu_err_t *result;
         apr_status_t status;
         int secure;
 
-        status = apr_ldap_url_parse(ldap->pool, uri, &(urld), &(result));
+        status = apr_ldap_url_parse(ldap->pool, uri, &(urld), &(err));
         if (status != APR_SUCCESS) {
             return status;
         }
