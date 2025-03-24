@@ -560,7 +560,7 @@ static apr_status_t crypto_make(apr_crypto_t **ff,
                 /* options after a provider apply to the provider */
 #if !APR_USE_OPENSSL_PRE_3_5_API
                 if (!OSSL_PROVIDER_add_conf_parameter(prov, elt, ptr)) {
-                    return PR_EINVAL;
+                    return APR_EINVAL;
                 }
 #else
                 return APR_ENOTIMPL;
