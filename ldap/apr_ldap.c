@@ -74,7 +74,7 @@
 #define TO_BV_LEN(a) (a)
 #endif
 
-typedef struct apr_ldap_t {
+struct apr_ldap_t {
     apr_pool_t *pool;
 #if !APR_HAS_OPENLDAP_LDAPSDK
     const char *uri;
@@ -88,7 +88,7 @@ typedef struct apr_ldap_t {
     LDAPControl **clientctrls;
     apu_err_t err;
     apr_status_t status;
-} apr_ldap_t;
+};
 
 
 typedef struct apr_ldap_prepare_t {
