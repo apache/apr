@@ -146,6 +146,27 @@ static void error_fmt(abts_case *tc, void *data)
     ABTS_STR_EQUAL(tc, sbuf, s);
 }
 
+#define TEST_TAG "pool_tag_fmt_tag"
+
+static void pool_tag_fmt(abts_case *tc, void *data)
+{
+    char sbuf[150];
+    apr_pool_t *testp;
+
+    APR_ASSERT_SUCCESS(tc, "Create test pool", apr_pool_create(&testp, NULL));
+
+#if !APR_POOL_DEBUG
+    apr_snprintf(sbuf, sizeof sbuf, "tag-%pg-end", testp);
+    ABTS_STR_EQUAL(tc, "tag-(untagged)-end", sbuf);
+#endif
+
+    apr_pool_tag(testp, TEST_TAG);
+    apr_snprintf(sbuf, sizeof sbuf, "tag-%pg-end", testp);
+    ABTS_STR_EQUAL(tc, "tag-" TEST_TAG "-end", sbuf);
+
+    apr_pool_destroy(testp);
+}
+
 abts_suite *testfmt(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -160,6 +181,7 @@ abts_suite *testfmt(abts_suite *suite)
     abts_run_test(suite, uint64_t_hex_fmt, NULL);
     abts_run_test(suite, more_int64_fmts, NULL);
     abts_run_test(suite, error_fmt, NULL);
+    abts_run_test(suite, pool_tag_fmt, NULL);
 
     return suite;
 }

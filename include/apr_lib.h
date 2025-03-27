@@ -120,6 +120,8 @@ APR_DECLARE(const char *) apr_filepath_name_get(const char *pathname);
  * ('0' is printed if !APR_HAS_THREADS)
  * - %%pm takes an apr_status_t * and prints the appropriate error
  * string (from apr_strerror) corresponding to that error code.
+ * - %%pg takes an apr_pool_t * and prints the pool tag,
+ * or '(untagged)' if no pool tag is set
  * - %%pp takes a void * and outputs it in hex
  * - %%pB takes a apr_uint32_t * as bytes and outputs it's apr_strfsize
  * - %%pF same as above, but takes a apr_off_t *
@@ -128,6 +130,7 @@ APR_DECLARE(const char *) apr_filepath_name_get(const char *pathname);
  * %%pA, %%pI, %%pT, %%pp are available from APR 1.0.0 onwards (and in 0.9.x).
  * %%pt is only available from APR 1.2.0 onwards.
  * %%pm, %%pB, %%pF and %%pS are only available from APR 1.3.0 onwards.
+ * %%pg is only available from APR 2.0.0 onwards.
  *
  * The %%p hacks are to force gcc's printf warning code to skip
  * over a pointer argument without complaining.  This does
