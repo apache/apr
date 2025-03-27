@@ -1191,6 +1191,25 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
                 }
                 break;
 
+                /* print the tag for an apr_pool_t */
+                case 'g':
+                {
+                    apr_pool_t *prv;
+
+                    prv = va_arg(ap, apr_pool_t *);
+                    if (prv != NULL) {
+                        s = (char *)apr_pool_get_tag(prv);
+                        if (!s) s = "(untagged)";
+                        s_len = strlen(s);
+                    }
+                    else {
+                        s = S_NULL;
+                        s_len = S_NULL_LEN;
+                    }
+                    pad_char = ' ';
+                }
+                break;
+
                 case 'T':
 #if APR_HAS_THREADS
                 {
