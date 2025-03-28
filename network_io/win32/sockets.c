@@ -414,7 +414,10 @@ APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock,
         sock->remote_addr_unknown = 0;
 
         /* Copy the address structure details in. */
-        sock->remote_addr = sa;
+        sock->remote_addr->sa = sa->sa;
+        sock->remote_addr->salen = sa->salen;
+        /* Adjust ipaddr_ptr et al. */
+        apr_sockaddr_vars_set(sock->remote_addr, sa->family, sa->port);
     }
 
     if (sock->local_addr->sa.sin.sin_port == 0) {

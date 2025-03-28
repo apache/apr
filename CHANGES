@@ -1,5 +1,12 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.6
+
+  *) network_io/win32/sockets.c: (apr_socket_connect): Copy the remote
+     address by value rather than by reference.  This ensures that the
+     sockaddr object returned by apr_socket_addr_get is allocated from
+     the same pool as the socket object itself, as apr_socket_accept
+     does; avoiding any potential lifetime mismatches. [Ivan Zhakov]
+
   *) CMake: Install include/apr_encode.h. [Ivan Zhakov]
 
   *) CMake: Fix installation PDB files with multi-config generators.
