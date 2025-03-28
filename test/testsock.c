@@ -420,17 +420,17 @@ static void test_get_addr(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "create client socket", rv);
 
     APR_ASSERT_SUCCESS(tc, "enable non-block mode",
-                       apr_socket_opt_set(cd, APR_SO_NONBLOCK, 1));
+                       apr_socket_timeout_set(cd, 0));
 
-    /* It is valid for a connect() on a socket with NONBLOCK set to
-     * succeed (if the connection can be established synchronously),
-     * but if it does, this test cannot proceed.  */
+    /* It is valid for a connect() on a non-blocking socket to succeed
+     * (if the connection can be established synchronously), but if it
+     * does, this test cannot proceed.  */
     rv = apr_socket_connect(cd, sa);
     if (rv == APR_SUCCESS) {
         apr_socket_close(ld);
         apr_socket_close(cd);
-        ABTS_NOT_IMPL(tc, "Cannot test if connect completes "
-                      "synchronously");
+        ABTS_SKIP(tc, data, "Cannot test if connect() completes "
+                  "synchronously");
         return;
     }
 

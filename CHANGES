@@ -1,6 +1,11 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.6
 
+  *) test/testsock.c (test_get_addr): Fix test to portably switch
+     the socket to non-blocking mode using apr_socket_timeout_set().
+     Also make the test SKIP for the case where the connect() completes
+     synchronously. [Ivan Zhakov]
+
   *) network_io/win32/sockets.c: (apr_socket_connect): Copy the remote
      address by value rather than by reference.  This ensures that the
      sockaddr object returned by apr_socket_addr_get is allocated from
