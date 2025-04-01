@@ -84,6 +84,7 @@ endif()
 
 if(APU_HAVE_CRYPTO)
   find_package(OpenSSL REQUIRED)
+  set(APU_HAVE_OPENSSL ON)
 endif()
 
 if(APR_XML_BACKEND STREQUAL "expat")
