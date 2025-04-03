@@ -2332,6 +2332,10 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_result(apr_pool_t *pool,
                  attr != NULL;
                  attr = ldap_next_attribute(ldap->ld, entry, ber)) {
                 e.nattrs++;
+                ldap_memfree(attr);
+            }
+            if (ber) {
+                ber_free(ber,0);
             }
 
             for (attr = ldap_first_attribute(ldap->ld, entry, &ber);
@@ -2404,6 +2408,9 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_result(apr_pool_t *pool,
                 }
 
                 e.aidx++;
+            }
+            if (ber) {
+                ber_free(ber,0);
             }
 
             res->nentries++;
