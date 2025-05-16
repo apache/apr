@@ -1,4 +1,6 @@
                                                      -*- coding: utf-8 -*-
+Changes for APR 1.7.7
+
 Changes for APR 1.7.6
 
   *) test/testsock.c (test_get_addr): Fix test to portably switch
