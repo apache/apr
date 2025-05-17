@@ -649,9 +649,9 @@ static void test_iovec(abts_case *tc, void *data)
 
     ABTS_INT_EQUAL(tc, 2, vecs);
     ABTS_STR_EQUAL(tc, "foo", vec[0].iov_base);
-    ABTS_INT_EQUAL(tc, 3, vec[0].iov_len);
+    ABTS_SIZE_EQUAL(tc, 3, vec[0].iov_len);
     ABTS_STR_EQUAL(tc, "bar", vec[1].iov_base);
-    ABTS_INT_EQUAL(tc, 3, vec[1].iov_len);
+    ABTS_SIZE_EQUAL(tc, 3, vec[1].iov_len);
 
     apr_brigade_destroy(bb);
     apr_bucket_alloc_destroy(ba);
