@@ -33,6 +33,7 @@ extern "C" {
 
 #if APR_HAS_MICROSOFT_LDAPSDK
 #include <winldap.h>
+#include <WinBer.h>
 #else
 #include <lber.h>
 #include <ldap.h>
