@@ -51,7 +51,7 @@ static apr_status_t create_socket_pipe(SOCKET *rd, SOCKET *wr)
 
     pa.sin_family = AF_INET;
     pa.sin_port = 0;
-    pa.sin_addr.s_addr = inet_addr("127.0.0.1");
+    pa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
     if (bind(ls, (SOCKADDR *)&pa, sizeof(pa)) == SOCKET_ERROR) {
         rv = apr_get_netos_error();
