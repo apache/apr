@@ -49,7 +49,7 @@ struct testSet {
 };
 
 struct testResult {
-    int size;
+    apr_size_t size;
     int iters;
     apr_time_t msecs[MAX_ITERS];
     apr_time_t avg;
@@ -241,7 +241,7 @@ int main(int argc, char **argv)
     for (i = 0; i < nTests; i++) {
         int j;
         apr_time_t totTime = 0;
-        printf("%10d byte block:\n", results[i].size);
+        printf("%" APR_SIZE_T_FMT " byte block:\n", results[i].size);
         printf("\t%2d iterations : ", results[i].iters);
         for (j = 0; j < results[i].iters; j++) {
             printf("%6" APR_TIME_T_FMT, results[i].msecs[j]);
