@@ -498,7 +498,7 @@ endif()
 
 macro(ADD_APR_MODULE name dllname sources libraries)
   if(APR_MODULAR_DSO)
-    add_library(${name} SHARED ${sources})
+    add_library(${name} MODULE ${sources})
     list(APPEND install_modules ${name})
     list(APPEND install_bin_pdb $<TARGET_PDB_FILE:${name}>)
 
@@ -755,7 +755,6 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${project_name_lower}-config-version.
 
 # For DSO modules, install only binaries
 install(TARGETS ${install_modules}
-        COMPONENT RUNTIME
         DESTINATION ${APR_INSTALL_BIN_DIR})
 
 if(INSTALL_PDB)
