@@ -20,6 +20,7 @@ if (VCPKG_TARGET_IS_WINDOWS)
             dbd-odbc FEATURE_DBD_ODBC
             dbd-sqlite3 FEATURE_DBD_SQLITE3
             dbd-postgresql FEATURE_DBD_PGQL
+            ldap FEATURE_LDAP
     )
 
     vcpkg_cmake_configure(
@@ -32,6 +33,7 @@ if (VCPKG_TARGET_IS_WINDOWS)
             -DAPU_HAVE_ODBC=${FEATURE_DBD_ODBC}
             -DAPU_HAVE_SQLITE3=${FEATURE_DBD_SQLITE3}
             -DAPU_HAVE_PGSQL=${FEATURE_DBD_PGQL}
+            -DAPR_HAS_LDAP=${FEATURE_LDAP}
             -DAPU_USE_EXPAT=${APU_USE_EXPAT}
             -DAPR_INSTALL_PRIVATE_H=${INSTALL_PRIVATE_H}
     )
