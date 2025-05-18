@@ -2606,12 +2606,12 @@ static void test_crypto_prng(abts_case *tc, apr_crypto_cipher_e cipher, const un
 
 static void test_crypto_prng_aes256(abts_case *tc, void *data)
 {
-    return test_crypto_prng(tc, APR_CRYPTO_CIPHER_AES_256_CTR, test_PRNG_kat0_aes256);
+    test_crypto_prng(tc, APR_CRYPTO_CIPHER_AES_256_CTR, test_PRNG_kat0_aes256);
 }
 
 static void test_crypto_prng_chacha20(abts_case *tc, void *data)
 {
-    return test_crypto_prng(tc, APR_CRYPTO_CIPHER_CHACHA20, test_PRNG_kat0_chacha20);
+    test_crypto_prng(tc, APR_CRYPTO_CIPHER_CHACHA20, test_PRNG_kat0_chacha20);
 }
 
 #if APR_HAS_FORK
