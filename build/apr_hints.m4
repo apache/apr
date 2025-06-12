@@ -427,7 +427,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         AC_DEFINE(HAVE_ZOS_PTHREADS, 1, [Define for z/OS pthread API nuances])
         APR_ADDTO(CPPFLAGS, [-U_NO_PROTO -DSIGPROCMASK_SETS_THREAD_MASK -DTCP_NODELAY=1])
         ;;
-    *-ibm-as400)
+    *-ibm-as400 | *-ibm-os400)
         APR_SETIFNULL(apr_lock_method, [USE_SYSVSEM_SERIALIZE])
         APR_SETIFNULL(apr_process_lock_is_global, [yes])
         APR_SETIFNULL(apr_gethostbyname_is_thread_safe, [yes])
