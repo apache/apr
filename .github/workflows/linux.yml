@@ -15,7 +15,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ ubuntu-latest, ubuntu-22.04-arm ]
+        os: [ ubuntu-latest ]
         include: 
           - name: Default
             # Check default shm decision logic for Linux:
@@ -23,6 +23,7 @@ jobs:
           - name: Default (arm64)
             # Check default shm decision logic for Linux:
             config-output: APR_USE_SHMEM_MMAP_SHM APR_USE_SHMEM_MMAP_ANON
+            os: ubuntu-22.04-arm
           - name: Static
             config: --enable-static
           - name: Maintainer-mode
@@ -72,7 +73,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       NOTEST_CFLAGS: ${{ matrix.notest-cflags }}
-    name: ${{ matrix.name }}
+    name: ${{ matrix.name }} on ${{ matrix.os }}
     steps:
     - name: Install prerequisites
       run: sudo apt-get install libtool libtool-bin ${{ matrix.packages }}
