@@ -15,55 +15,70 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ ubuntu-latest ]
         include: 
           - name: Default
+            os: ubuntu-latest
             # Check default shm decision logic for Linux:
             config-output: APR_USE_SHMEM_MMAP_SHM APR_USE_SHMEM_MMAP_ANON
           - name: Default (arm64)
+            os: ubuntu-22.04-arm
             # Check default shm decision logic for Linux:
             config-output: APR_USE_SHMEM_MMAP_SHM APR_USE_SHMEM_MMAP_ANON
-            os: ubuntu-22.04-arm
           - name: Static
+            os: ubuntu-latest
             config: --enable-static
           - name: Maintainer-mode
+            os: ubuntu-latest
             config: --enable-maintainer-mode
           - name: Named SHM - SysV, Maintainer-mode
+            os: ubuntu-latest
             config: --enable-maintainer-mode --enable-sysv-shm
             config-output: APR_USE_SHMEM_SHMGET
           - name: Named SHM - Classic mmap, Maintainer-mode
+            os: ubuntu-latest
             config: --enable-maintainer-mode ac_cv_func_shm_open=no ac_cv_func_shmget=no
             config-output: APR_USE_SHMEM_MMAP_TMP
           - name: Pool-debug
+            os: ubuntu-latest
             config: --enable-pool-debug
           - name: Pool-debug, maintainer-mode
+            os: ubuntu-latest
             config: --enable-pool-debug --enable-maintainer-mode
           - name: Thread-debug, maintainer-mode
+            os: ubuntu-latest
             config: --enable-thread-debug --enable-maintainer-mode
           - name: Maintainer-mode, no IPv6
+            os: ubuntu-latest
             config: --enable-maintainer-mode --disable-ipv6
           - name: Maintainer-mode, -Werror
+            os: ubuntu-latest
             notest-cflags: -Werror
             config: --enable-maintainer-mode
           - name: With crypto
+            os: ubuntu-latest
             config: --with-crypto=yes --with-openssl=yes
             config-output: APU_HAVE_CRYPTO APU_HAVE_OPENSSL
           - name: ASan
+            os: ubuntu-latest
             # w/o ODBC since DSO unload leaks memory and fails the tests
             notest-cflags: -fsanitize=address -fno-sanitize-recover=address -fno-omit-frame-pointer -Werror -O2
             config: --with-odbc=no
           - name: ASan, pool-debug
+            os: ubuntu-latest
             # w/o ODBC since DSO unload leaks memory and fails the tests
             notest-cflags: -fsanitize=address -fno-sanitize-recover=address -fno-omit-frame-pointer -Werror -O2
             config: --enable-pool-debug --with-odbc=no
           - name: UBsan
+            os: ubuntu-latest
             notest-cflags: -fsanitize=undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -Werror -O2
           - name: LMDB
+            os: ubuntu-latest
             packages: liblmdb-dev
             notest-cflags: -Werror
             config: --enable-maintainer-mode --with-lmdb --with-dbm=lmdb
             config-output: APU_HAVE_LMDB
           - name: Berkeley DB v5.3
+            os: ubuntu-latest
             packages: libdb5.3-dev
             notest-cflags: -Werror
             config: --enable-maintainer-mode --with-berkeley-db --with-dbm=db5
@@ -73,7 +88,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       NOTEST_CFLAGS: ${{ matrix.notest-cflags }}
-    name: ${{ matrix.name }} on ${{ matrix.os }}
+    name: ${{ matrix.name }}
     steps:
     - name: Install prerequisites
       run: sudo apt-get install libtool libtool-bin ${{ matrix.packages }}
