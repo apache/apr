@@ -208,6 +208,7 @@ static void test_named(abts_case *tc, void *data)
 static void test_named_remove(abts_case *tc, void *data)
 {
     apr_status_t rv;
+    apr_status_t rv2;
     apr_shm_t *shm, *shm2;
 
     apr_shm_remove(SHARED_FILENAME, p);
@@ -221,6 +222,11 @@ static void test_named_remove(abts_case *tc, void *data)
 
     rv = apr_shm_remove(SHARED_FILENAME, p);
 
+    /* On some platforms (e.g. Windows), objects are alive until last handle
+     * is closed. So detach from shared memory. */
+    rv2 = apr_shm_detach(shm);
+    APR_ASSERT_SUCCESS(tc, "Error detach shared memory block", rv);
+
     /* On platforms which acknowledge the removal of the shared resource,
      * ensure another of the same name may be created after removal;
      */
@@ -237,9 +243,6 @@ static void test_named_remove(abts_case *tc, void *data)
       APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
     }
 
-    rv = apr_shm_destroy(shm);
-    APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
-
     /* Now ensure no named resource remains which we may attach to */
     rv = apr_shm_attach(&shm, SHARED_FILENAME, p);
     ABTS_TRUE(tc, rv != 0);
@@ -248,6 +251,7 @@ static void test_named_remove(abts_case *tc, void *data)
 static void test_named_delete(abts_case *tc, void *data)
 {
     apr_status_t rv;
+    apr_status_t rv2;
     apr_shm_t *shm, *shm2;
 
     apr_shm_remove(SHARED_FILENAME, p);
@@ -261,6 +265,11 @@ static void test_named_delete(abts_case *tc, void *data)
 
     rv = apr_shm_delete(shm);
 
+    /* On some platforms (e.g. Windows), objects are alive until last handle
+     * is closed. So detach from shared memory. */
+    rv2 = apr_shm_detach(shm);
+    APR_ASSERT_SUCCESS(tc, "Error detach shared memory block", rv);
+
     /* On platforms which acknowledge the removal of the shared resource,
      * ensure another of the same name may be created after removal;
      */
@@ -276,9 +285,6 @@ static void test_named_delete(abts_case *tc, void *data)
       rv = apr_shm_destroy(shm2);
       APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
     }
-
-    rv = apr_shm_destroy(shm);
-    APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
 
     /* Now ensure no named resource remains which we may attach to */
     rv = apr_shm_attach(&shm, SHARED_FILENAME, p);
