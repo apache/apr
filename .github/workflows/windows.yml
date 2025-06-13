@@ -28,6 +28,14 @@ jobs:
             generator: Ninja
             build-shared: ON
             dso-build: ON
+          - name: Default arm64
+            os: windows-11-arm
+            triplet: arm64-windows
+            arch: arm64
+            build-type: Debug
+            generator: Ninja
+            build-shared: ON
+            dso-build: ON
           - name: Use Expat
             os: windows-latest
             triplet: x64-windows
