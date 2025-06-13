@@ -225,7 +225,7 @@ static void test_named_remove(abts_case *tc, void *data)
     /* On some platforms (e.g. Windows), objects are alive until last handle
      * is closed. So detach from shared memory. */
     rv2 = apr_shm_detach(shm);
-    APR_ASSERT_SUCCESS(tc, "Error detach shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error detach shared memory block", rv2);
 
     /* On platforms which acknowledge the removal of the shared resource,
      * ensure another of the same name may be created after removal;
@@ -268,7 +268,7 @@ static void test_named_delete(abts_case *tc, void *data)
     /* On some platforms (e.g. Windows), objects are alive until last handle
      * is closed. So detach from shared memory. */
     rv2 = apr_shm_detach(shm);
-    APR_ASSERT_SUCCESS(tc, "Error detach shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error detach shared memory block", rv2);
 
     /* On platforms which acknowledge the removal of the shared resource,
      * ensure another of the same name may be created after removal;
