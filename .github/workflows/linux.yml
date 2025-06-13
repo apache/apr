@@ -15,8 +15,12 @@ jobs:
   build:
     strategy:
       matrix:
+        os: [ ubuntu-latest, ubuntu-22.04-arm ]
         include: 
           - name: Default
+            # Check default shm decision logic for Linux:
+            config-output: APR_USE_SHMEM_MMAP_SHM APR_USE_SHMEM_MMAP_ANON
+          - name: Default (arm64)
             # Check default shm decision logic for Linux:
             config-output: APR_USE_SHMEM_MMAP_SHM APR_USE_SHMEM_MMAP_ANON
           - name: Static
@@ -65,7 +69,7 @@ jobs:
             config-output: APU_HAVE_DB
       fail-fast: false
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     env:
       NOTEST_CFLAGS: ${{ matrix.notest-cflags }}
     name: ${{ matrix.name }}
