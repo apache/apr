@@ -146,7 +146,9 @@ apr_status_t apu_dso_load(apr_dso_handle_t **dlhandleptr,
 
     entry = apr_hash_get(dsos, module, APR_HASH_KEY_STRING);
     if (entry) {
-        *dlhandleptr = entry->handle;
+        if (dlhandleptr) {
+            *dlhandleptr = entry->handle;
+        }
         *dsoptr = entry->sym;
         return APR_EINIT;
     }
