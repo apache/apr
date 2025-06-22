@@ -132,9 +132,11 @@ jobs:
       run: |
         $root = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
         Import-Module "$root\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+        $OldEnv = ls env:
         Enter-VsDevShell -VsInstallPath $root -DevCmdArguments "-arch=${{ matrix.arch }}"
+        $NewEnv = ls env:
 
-        ls env: | foreach { "$($_.Name)=$($_.Value)" >> $env:GITHUB_ENV }
+        Compare-Object $OldEnv $NewEnv -Property Name, Value -CaseSensitive | Where-Object -Property SideIndicator -EQ "=>" | foreach { "$($_.Name)=$($_.Value)" >> $env:GITHUB_ENV }
 
     - name: Install dependencies
       if: ${{ matrix.packages != '' }}
