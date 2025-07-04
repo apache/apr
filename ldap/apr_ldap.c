@@ -2712,9 +2712,11 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_bind(apr_pool_t *pool, apr_ldap_t *ldap,
         const char *dn;
         struct berval cred;
 
-        apr_ldap_bind_interact_t interaction = { 0 };
+        apr_ldap_bind_interact_t interaction;
 
         memset(err, 0, sizeof(*err));
+
+        memset(&interaction, 0, sizeof(apr_ldap_bind_interact_t));
 
         interaction.id = APR_LDAP_INTERACT_DN;
         interaction.prompt = "Distinguished Name";
@@ -2736,6 +2738,8 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_bind(apr_pool_t *pool, apr_ldap_t *ldap,
         } else {
             dn = "";
         }
+
+        memset(&interaction, 0, sizeof(apr_ldap_bind_interact_t));
 
         interaction.id = APR_LDAP_INTERACT_PASS;
         interaction.prompt = "Password";
