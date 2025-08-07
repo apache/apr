@@ -1926,6 +1926,8 @@ else
     AC_ERROR([could not detect a 64-bit integer type])
 fi
 
+AC_MSG_NOTICE([for apr_(u)int64_t using $int64_strfn and ${int64_value}/${uint64_value}])
+
 # If present, allow the C99 macro INT64_C to override our conversion.
 #
 # HP-UX's ANSI C compiler provides this without any includes, so we
@@ -2107,7 +2109,6 @@ else
     aprlfs=0     
 fi
 
-AC_MSG_CHECKING([which type to use for apr_off_t])
 if test "${ac_cv_sizeof_off_t}${apr_cv_use_lfs64}" = "4yes"; then
     # LFS is go!
     off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
@@ -2163,7 +2164,7 @@ else
     off_t_strfn='strtoi'
     off_t_size=4
 fi
-AC_MSG_RESULT($off_t_value)
+AC_MSG_NOTICE([for apr_off_t using $off_t_strfn and $off_t_value])
 
 
 # Regardless of whether _LARGEFILE64_SOURCE is used, on some
@@ -2195,7 +2196,7 @@ case $host in
     fi
     ;;
 esac
-AC_MSG_NOTICE([using $ino_t_value for ino_t])
+AC_MSG_NOTICE([for apr_ino_t using $ino_t_value])
 
 # Checks for endianness
 AC_C_BIGENDIAN
