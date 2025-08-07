@@ -15,11 +15,11 @@ else
   echo "buildconf: python version $py_version (ok)"
 fi
 
-# autoconf 2.59 or newer
+# autoconf 2.61 or newer
 ac_version=`${AUTOCONF:-autoconf} --version 2>/dev/null|sed -e 's/^[^0-9]*//;s/[a-z]* *$//;q'`
 if test -z "$ac_version"; then
   echo "buildconf: autoconf not found."
-  echo "           You need autoconf version 2.59 or newer installed"
+  echo "           You need autoconf version 2.61 or newer installed"
   echo "           to build APR from SVN."
   res=1
 else
