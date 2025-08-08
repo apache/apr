@@ -50,7 +50,7 @@ typedef apr_size_t   apr_rmm_off_t;
  * @param membuf The block of relocatable memory to be managed
  * @param memsize The size of relocatable memory block to be managed
  * @param cont The pool to use for local storage and management
- * @remark Both @param membuf and @param memsize must be aligned
+ * @remark Both @a membuf and @a memsize must be aligned
  * (for instance using APR_ALIGN_DEFAULT).
  */
 APR_DECLARE(apr_status_t) apr_rmm_init(apr_rmm_t **rmm, apr_anylock_t *lock,
@@ -134,4 +134,3 @@ APR_DECLARE(apr_size_t) apr_rmm_overhead_get(int n);
 #endif
 /** @} */
 #endif  /* ! APR_RMM_H */
-

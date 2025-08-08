@@ -779,6 +779,9 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
 /**
  * Write the IP address (in numeric address string format) of the APR
  * socket address @a sockaddr into the buffer @a buf (of size @a buflen).
+ * @param buf A buffer to store the IP address in.
+ * @param buflen The length of @a buf.  Must be enough to store the IP address,
+ *               otherwise APR_ENOSPC will be returned.
  * @param sockaddr The socket address to reference.
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_ip_getbuf(char *buf, apr_size_t buflen,
@@ -954,4 +957,3 @@ APR_DECLARE(apr_status_t) apr_mcast_interface(apr_socket_t *sock,
 #endif
 
 #endif  /* ! APR_NETWORK_IO_H */
-

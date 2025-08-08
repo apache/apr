@@ -239,7 +239,7 @@ APR_DECLARE(void) apr_terminate2(void);
 /** @} */
 
 /**
- * @defgroup apr_random Random Functions
+ * @defgroup apr_random PRNG Functions
  * @{
  */
 

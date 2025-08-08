@@ -288,7 +288,6 @@ APR_DECLARE(apr_status_t) apr_memcache_getp(apr_memcache_t *mc,
  * @param data_pool pool from where the hash and their items are created from
  * @param key null terminated string containing the key
  * @param values hash of keys and values that this key will be added to
- * @return
  */
 APR_DECLARE(void) apr_memcache_add_multget_key(apr_pool_t *data_pool,
                                                const char* key,

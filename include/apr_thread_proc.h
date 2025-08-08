@@ -171,7 +171,7 @@ typedef struct apr_proc_t {
  * @param err APR error code describing the error
  * @param description Text description of type of processing which failed
  */
-typedef void (apr_child_errfn_t)(apr_pool_t *proc, apr_status_t err,
+typedef void (apr_child_errfn_t)(apr_pool_t *pool, apr_status_t err,
                                  const char *description);
 
 /** Opaque Thread structure. */
@@ -281,7 +281,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
  * Set the threshold at which the thread pool allocator should start
  * giving blocks back to the system.
  * @param attr The threadattr to affect
- * @param on Non-zero if detached threads should be created.
+ * @param size Non-zero if detached threads should be created.
  */
 APR_DECLARE(apr_status_t) apr_threadattr_max_free_set(apr_threadattr_t *attr,
                                                       apr_size_t size);
@@ -318,8 +318,8 @@ APR_DECLARE(void) apr_thread_current_after_fork(void);
 
 /**
  * Get the current thread
- * @param The current apr_thread, NULL if it is not an apr_thread or if
- *        it could not be determined.
+ * @return The current apr_thread, NULL if it is not an apr_thread or if
+ *         it could not be determined.
  */
 APR_DECLARE(apr_thread_t *) apr_thread_current(void);
 
@@ -343,8 +343,8 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
  * Get name of thread
  * @param name The variable where is will be stored name of thread.
  * @param thread The thread that name required to get.
- * Current thread will be used if @param thread is NULL.
- * @param cont The pool to use
+ * Current thread will be used if @a thread is NULL.
+ * @param pool The pool to use
  */
 APR_DECLARE(apr_status_t) apr_thread_name_get(char **name,
                                               apr_thread_t *thread,
@@ -355,8 +355,8 @@ APR_DECLARE(apr_status_t) apr_thread_name_get(char **name,
  * @param name The name of thread must be setted. If name is to long, then
  * name stripped to max length supported by operation system.
  * @param thread The thread that name will be changed.
- * Current thread will be used if @param thread is NULL.
- * @param cont The pool to use for temporary allocations
+ * Current thread will be used if @a thread is NULL.
+ * @param pool The pool to use for temporary allocations
  */
 APR_DECLARE(apr_status_t) apr_thread_name_set(const char *name,
                                               apr_thread_t *thread,
@@ -919,4 +919,3 @@ APR_POOL_DECLARE_ACCESSOR(thread);
 #endif
 
 #endif  /* ! APR_THREAD_PROC_H */
-

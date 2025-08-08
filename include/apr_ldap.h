@@ -124,7 +124,7 @@ typedef struct apr_ldap_url_desc_t {
  * @see apr_ldap_url_parse()
  */
 #define APR_LDAP_URL_ERR_MEM          0x01
-/** 
+/**
  * Parameter is bad
  * @see apr_ldap_url_parse()
  */
@@ -134,37 +134,37 @@ typedef struct apr_ldap_url_desc_t {
  * @see apr_ldap_url_parse()
  */
 #define APR_LDAP_URL_ERR_BADSCHEME    0x03
-/** 
+/**
  * URL is missing trailing ">"
  * @see apr_ldap_url_parse()
  */
 #define APR_LDAP_URL_ERR_BADENCLOSURE 0x04
-/** 
+/**
  * URL is bad
  * @see apr_ldap_url_parse()
  */
 #define APR_LDAP_URL_ERR_BADURL       0x05
-/** 
+/**
  * Host port is bad
  * @see apr_ldap_url_parse()
  */
 #define APR_LDAP_URL_ERR_BADHOST      0x06
-/** 
+/**
  * Bad (or missing) attributes
  * @see apr_ldap_url_parse()
  */
 #define APR_LDAP_URL_ERR_BADATTRS     0x07
-/** 
+/**
  * Scope string is invalid (or missing)
  * @see apr_ldap_url_parse()
  */
 #define APR_LDAP_URL_ERR_BADSCOPE     0x08
-/** 
+/**
  * Bad or missing filter
  * @see apr_ldap_url_parse()
  */
 #define APR_LDAP_URL_ERR_BADFILTER    0x09
-/** 
+/**
  * Bad or missing extensions
  * @see apr_ldap_url_parse()
  */
@@ -459,7 +459,7 @@ typedef enum {
 
 /**
  * LDAP deref settings
- *  
+ *
  * @see apr_ldap_option_set
  * @see APR_LDAP_OPT_DEREF
  */
@@ -472,7 +472,7 @@ typedef enum {
 
 /**
  * LDAP options on or off
- *  
+ *
  * @see apr_ldap_option_set
  * @see APR_LDAP_OPT_REFERRALS
  */
@@ -808,7 +808,7 @@ typedef union apr_ldap_opt_t {
      * Timeouts
      *
      * @see APR_LDAP_OPT_NETWORK_TIMEOUT
-     * @see APR_LDAP_OPT_TIMEOUT     
+     * @see APR_LDAP_OPT_TIMEOUT
      */
     apr_interval_time_t timeout;
     /**
@@ -877,7 +877,7 @@ typedef union apr_ldap_opt_t {
  * @see APR_LDAP_OPT_PROTOCOL_VERSION
  * @see APR_LDAP_OPT_REFERRALS
  * @see APR_LDAP_OPT_REFHOPLIMIT
- * @see APR_LDAP_OPT_RESULT_CODE     
+ * @see APR_LDAP_OPT_RESULT_CODE
  * @see APR_LDAP_OPT_TIMEOUT
  */
 APU_DECLARE_LDAP(apr_status_t) apr_ldap_option_get(apr_pool_t *pool, apr_ldap_t *ldap,
@@ -1183,7 +1183,7 @@ typedef struct apr_ldap_bind_interact_t {
  *
  * @see apr_ldap_bind_interact_t
  * @see apr_ldap_bind
- */ 
+ */
 typedef apr_status_t (apr_ldap_bind_interact_cb)(
         apr_ldap_t *ld, unsigned int flags, apr_ldap_bind_interact_t *interact, void *ctx);
 
@@ -1208,8 +1208,8 @@ typedef apr_status_t (apr_ldap_rebind_proc)(
 
 
 /**
- * APR LDAP connect function. 
- *  
+ * APR LDAP connect function.
+ *
  * This function makes an attempt to connect to the server initialised
  * by apr_ldap_initialise().
  *
@@ -1245,7 +1245,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_connect(apr_pool_t *pool,
  */
 typedef apr_status_t (*apr_ldap_prepare_cb)(apr_ldap_t *ldap, apr_status_t status,
                                             void *ctx, apu_err_t *err);
- 
+
 
 /**
  * APR LDAP prepare function
@@ -1265,7 +1265,6 @@ typedef apr_status_t (*apr_ldap_prepare_cb)(apr_ldap_t *ldap, apr_status_t statu
  * next called this callback will be triggered in the expectation of the next
  * LDAP request.
  * @param prepare_ctx Context passed to the prepare callback.
- * @param err Error structure for reporting detailed results.
  *
  * @return APR_SUCCESS means the callback was successfully prepared. Other error
  * codes indicate that the attept to send the cancellation was not successful.
@@ -1321,7 +1320,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_process(apr_pool_t *pool,
  * @return APR_WANT_WRITE means that at least one further process is outstanding
  * and a further write callback should be scheduled. APR_WANTS_READ indicates
  * more responses are expected and we're waiting for the response. APR_SUCCESS
- * means that no further processing is needed. Other error codes indicate that 
+ * means that no further processing is needed. Other error codes indicate that
  * the processing of outstanding conversations was not successful.
  */
 APU_DECLARE_LDAP(apr_status_t) apr_ldap_result(apr_pool_t *pool,
@@ -1355,7 +1354,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_poll(apr_pool_t *pool,
                                              __attribute__((nonnull(1,2,3,5)));
 
 
-/** 
+/**
  * Callback to receive the results of a bind operation.
  *
  * When a bind is successful, this function is called with a status of
@@ -1381,7 +1380,7 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_poll(apr_pool_t *pool,
  * @see apr_ldap_bind
  * @see apr_ldap_process
  * @see apr_ldap_result
- */ 
+ */
 typedef apr_status_t (*apr_ldap_bind_cb)(apr_ldap_t *ldap, apr_status_t status,
                                          const char *matcheddn,
                                          apr_ldap_control_t **serverctrls,
@@ -1389,9 +1388,9 @@ typedef apr_status_t (*apr_ldap_bind_cb)(apr_ldap_t *ldap, apr_status_t status,
 
 
 #if 0
-/** 
+/**
  * Function called to report cancel results.
- */ 
+ */
 typedef void (*apr_ldap_cancel_cb)(apr_ldap_t *ldap, apr_ldap_message_t *msg, void *ctx);
 
 /**
@@ -1528,7 +1527,7 @@ typedef apr_status_t (*apr_ldap_compare_cb)(apr_ldap_t *ldap, apr_status_t statu
  * apr_ldap_compare_cb provided.
  *
  * @param pool The pool that keeps track of the lifetime of the compare conversation.
- * If this pool is cleaned up, the compare conversation will be gracefully 
+ * If this pool is cleaned up, the compare conversation will be gracefully
  * abandoned without affecting other LDAP requests in progress. This pool need
  * not have any relationship with the LDAP connection pool.
  * @param ldap The ldap handle
@@ -1538,7 +1537,7 @@ typedef apr_status_t (*apr_ldap_compare_cb)(apr_ldap_t *ldap, apr_status_t statu
  * terminated text, or binary.
  * @param serverctrls NULL terminated array of server controls.
  * @param clientctrls NULL terminated array of client controls.
- * @param timeout The timeout to use for writes. 
+ * @param timeout The timeout to use for writes.
  * @param compare_cb The compare result callback function. When the compare process has
  * completed the success or failure of the compare is returned here. The callback
  * is triggered from inside apr_ldap_process() so that it is safe to write the
@@ -1646,7 +1645,7 @@ typedef struct apr_ldap_search_entry_t {
  * and then once for each entry to indicate the entry is complete.
  *
  * When complete, return APR_SUCCESS to indicate you want to continue, or
- * a different code if you want the event loop to give up. This code will 
+ * a different code if you want the event loop to give up. This code will
  * be returned from apr_ldap_result().
  *
  * @see apr_ldap_search
@@ -1660,9 +1659,9 @@ typedef apr_status_t (*apr_ldap_search_entry_cb)(apr_ldap_t *ldap, const char *d
 
 /**
  * APR LDAP search function
- *      
+ *
  * This function searches a previously initialised LDAP connection to the directory.
- *  
+ *
  * Searches are attempted asynchronously. For non blocking behaviour, this function
  * must be called after the underlying socket has indicated that it is ready to
  * write.
@@ -2235,4 +2234,3 @@ APU_DECLARE_LDAP(apr_status_t) apr_ldap_unbind(apr_ldap_t *ldap,
 #endif /* APU_HAS_LDAP */
 /** @} */
 #endif /* APU_LDAP_H */
-

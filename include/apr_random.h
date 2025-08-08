@@ -30,7 +30,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @defgroup apr_random PRNG Routines
+ * @defgroup apr_random PRNG Functions
  * @ingroup APR
  * @{
  */

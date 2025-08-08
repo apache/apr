@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 /**
- * @defgroup APR_Util_Encode_Private
+ * @defgroup APR_Util_Encode_Private Internal APR encoding functions
  * @ingroup APR_Util
  * @{
  */
