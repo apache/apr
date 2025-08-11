@@ -73,7 +73,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
                                    apr_interval_time_t timeout)
 {
     int i, num_to_poll;
-#ifdef HAVE_VLA
+#ifdef HAVE_C_VARARRAYS
     /* XXX: I trust that this is a segv when insufficient stack exists? */
     struct pollfd pollset[num + 1]; /* +1 since allocating 0 is undefined behaviour */
 #elif defined(HAVE_ALLOCA)
@@ -130,7 +130,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
         }
     }
 
-#if !defined(HAVE_VLA) && !defined(HAVE_ALLOCA)
+#if !defined(HAVE_C_VARARRAYS) && !defined(HAVE_ALLOCA)
     if (num > SMALL_POLLSET_LIMIT) {
         free(pollset);
     }
