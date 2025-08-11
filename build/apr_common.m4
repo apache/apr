@@ -467,19 +467,11 @@ AC_DEFUN([APR_TRY_COMPILE_NO_WARNING],
    CFLAGS="$CFLAGS -Werror"
  fi
  AC_COMPILE_IFELSE(
-  [AC_LANG_SOURCE(
-   [
-#ifndef PACKAGE_NAME
-#include "confdefs.h"
-#endif
-   ]
-   [[$1]]
-   [int main(int argc, const char *const *argv) {]
-   [[$2]]
-   [   return 0; }]
-  )], [CFLAGS=$apr_save_CFLAGS
-$3],  [CFLAGS=$apr_save_CFLAGS
-$4])
+  [AC_LANG_PROGRAM([[$1]], [[$2]])],
+  [CFLAGS=$apr_save_CFLAGS
+   $3],
+  [CFLAGS=$apr_save_CFLAGS
+   $4])
 ])
 
 dnl
