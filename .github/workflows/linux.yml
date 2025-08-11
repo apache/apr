@@ -20,6 +20,10 @@ jobs:
             os: ubuntu-latest
             # Check default shm decision logic for Linux:
             config-output: APR_USE_SHMEM_MMAP_SHM APR_USE_SHMEM_MMAP_ANON
+            # Check various defaults for Linux
+            config-private: >-
+              HAVE_EPOLL HAVE_C_VARARRAYS HAVE_CALLOC HAVE_EXPAT_H HAVE_FLOCK HAVE_FORK
+              HAVE_GAI_ADDRCONFIG HAVE_GAI_STRERROR GETSERVBYNAME_R_GLIBC2
           - name: Default (arm64)
             os: ubuntu-22.04-arm
             # Check default shm decision logic for Linux:
@@ -101,8 +105,11 @@ jobs:
     - name: configure
       run: ./configure --prefix=/tmp/apr ${{ matrix.config }}
     - if: ${{ matrix.config-output != '' }}
-      name: check for expected configure output ${{ matrix.config-output }}
+      name: check for expected apr.h definitions ${{ matrix.config-output }}
       run: for var in ${{ matrix.config-output }}; do grep "^#define *${var} *1" include/apr.h; done
+    - if: ${{ matrix.config-private != '' }}
+      name: check for expected apr_private.h definitions ${{ matrix.config-private }}
+      run: for var in ${{ matrix.config-private }}; do grep "^#define *${var} *1" include/arch/unix/apr_private.h; done
     - name: make
       run: make $MARGS
     - name: install
