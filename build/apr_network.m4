@@ -259,11 +259,12 @@ APR_TRY_COMPILE_NO_WARNING([
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#include <stdio.h>
 ],[
 int tmp = gethostbyname_r((const char *) 0, (struct hostent *) 0, 
                           (char *) 0, 0, (struct hostent **) 0, &tmp);
 /* use tmp to suppress the warning */
-tmp=0;
+puts(tmp ? "non-zero" : "zero");
 ], ac_cv_gethostbyname_r_style=glibc2, ac_cv_gethostbyname_r_style=none))
 
 if test "$ac_cv_gethostbyname_r_style" = "glibc2"; then
@@ -287,11 +288,12 @@ APR_TRY_COMPILE_NO_WARNING([
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#include <stdio.h>
 ],[
 int tmp = gethostbyname_r((const char *) 0, (struct hostent *) 0, 
                           (struct hostent_data *) 0);
 /* use tmp to suppress the warning */
-tmp=0;
+puts(tmp ? "non-zero" : "zero");
 ], ac_cv_gethostbyname_r_arg=hostent_data, ac_cv_gethostbyname_r_arg=char))
 
 if test "$ac_cv_gethostbyname_r_arg" = "hostent_data"; then
@@ -327,12 +329,13 @@ APR_TRY_COMPILE_NO_WARNING([
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#include <stdio.h>
 ],[
 int tmp = getservbyname_r((const char *) 0, (const char *) 0,
                           (struct servent *) 0, (char *) 0, 0,
                           (struct servent **) 0);
 /* use tmp to suppress the warning */
-tmp=0;
+puts(tmp ? "non-zero" : "zero");
 ], ac_cv_getservbyname_r_style=glibc2, ac_cv_getservbyname_r_style=none)
 
 if test "$ac_cv_getservbyname_r_style" = "none"; then
@@ -354,11 +357,12 @@ if test "$ac_cv_getservbyname_r_style" = "none"; then
     #ifdef HAVE_STDLIB_H
     #include <stdlib.h>
     #endif
+    #include <stdio.h>
     ],[
     struct servent *tmp = getservbyname_r((const char *) 0, (const char *) 0,
                                           (struct servent *) 0, (char *) 0, 0);
     /* use tmp to suppress the warning */
-    tmp=NULL;
+    puts(tmp ? "non-zero" : "zero");
     ], ac_cv_getservbyname_r_style=solaris, ac_cv_getservbyname_r_style=none)
 fi
 
@@ -381,11 +385,12 @@ if test "$ac_cv_getservbyname_r_style" = "none"; then
     #ifdef HAVE_STDLIB_H
     #include <stdlib.h>
     #endif
+    #include <stdio.h>
     ],[
     int tmp = getservbyname_r((const char *) 0, (const char *) 0,
                               (struct servent *) 0, (struct servent_data *) 0);
     /* use tmp to suppress the warning */
-    tmp=0;
+    puts(tmp ? "non-zero" : "zero");
     ], ac_cv_getservbyname_r_style=osf1, ac_cv_getservbyname_r_style=none)
 fi
 ])
