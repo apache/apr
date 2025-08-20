@@ -590,6 +590,7 @@ struct apr_pool_t {
     apr_os_thread_t       owner;
     apr_thread_mutex_t   *mutex;
 #endif /* APR_HAS_THREADS */
+    int                   unmanaged;
 #endif /* APR_POOL_DEBUG */
 #ifdef NETWARE
     apr_os_proc_t         owner_proc;
@@ -1605,7 +1606,8 @@ static void apr_pool_check_lifetime(apr_pool_t *pool)
      * people have searched for the top level parent and
      * started to use that...
      */
-    if (pool == global_pool || global_pool == NULL)
+    if (pool == global_pool || global_pool == NULL
+        || (pool->parent == NULL && pool->unmanaged))
         return;
 
     /* Lifetime
@@ -2035,6 +2037,22 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     pool->owner_proc = (apr_os_proc_t)getnlmhandle();
 #endif /* defined(NETWARE) */
 
+    if ((pool->parent = parent) != NULL) {
+        pool_lock(parent);
+
+        if ((pool->sibling = parent->child) != NULL)
+            pool->sibling->ref = &pool->sibling;
+
+        parent->child = pool;
+        pool->ref = &parent->child;
+
+        pool_unlock(parent);
+    }
+    else {
+        pool->sibling = NULL;
+        pool->ref = NULL;
+    }
+
 #if APR_HAS_THREADS
     if (parent == NULL || parent->allocator != allocator) {
         apr_status_t rv;
@@ -2057,22 +2075,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
         pool->mutex = parent->mutex;
     }
 #endif /* APR_HAS_THREADS */
-
-    if ((pool->parent = parent) != NULL) {
-        pool_lock(parent);
-
-        if ((pool->sibling = parent->child) != NULL)
-            pool->sibling->ref = &pool->sibling;
-
-        parent->child = pool;
-        pool->ref = &parent->child;
-
-        pool_unlock(parent);
-    }
-    else {
-        pool->sibling = NULL;
-        pool->ref = NULL;
-    }
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "CREATE", file_line, 1);
@@ -2111,9 +2113,28 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
 
     memset(pool, 0, SIZEOF_POOL_T);
 
+    pool->unmanaged = 1;
     pool->abort_fn = abort_fn;
     pool->tag = file_line;
     pool->file_line = file_line;
+
+#if APR_HAS_THREADS
+    pool->owner = apr_os_thread_current();
+#endif /* APR_HAS_THREADS */
+#ifdef NETWARE
+    pool->owner_proc = (apr_os_proc_t)getnlmhandle();
+#endif /* defined(NETWARE) */
+
+    if ((pool_allocator = allocator) == NULL) {
+        apr_status_t rv;
+        if ((rv = apr_allocator_create(&pool_allocator)) != APR_SUCCESS) {
+            if (abort_fn)
+                abort_fn(rv);
+            return rv;
+        }
+        pool_allocator->owner = pool;
+    }
+    pool->allocator = pool_allocator;
 
 #if APR_HAS_THREADS
     {
@@ -2134,24 +2155,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
         }
     }
 #endif /* APR_HAS_THREADS */
-
-#if APR_HAS_THREADS
-    pool->owner = apr_os_thread_current();
-#endif /* APR_HAS_THREADS */
-#ifdef NETWARE
-    pool->owner_proc = (apr_os_proc_t)getnlmhandle();
-#endif /* defined(NETWARE) */
-
-    if ((pool_allocator = allocator) == NULL) {
-        apr_status_t rv;
-        if ((rv = apr_allocator_create(&pool_allocator)) != APR_SUCCESS) {
-            if (abort_fn)
-                abort_fn(rv);
-            return rv;
-        }
-        pool_allocator->owner = pool;
-    }
-    pool->allocator = pool_allocator;
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "CREATEU", file_line, 1);
