@@ -2083,6 +2083,8 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
          */
         if ((rv = apr_thread_mutex_create(&pool->mutex,
                 APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
+            if (abort_fn)
+                abort_fn(rv);
             free(pool);
             return rv;
         }
@@ -2172,6 +2174,8 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
          */
         if ((rv = apr_thread_mutex_create(&pool->mutex,
                 APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
+            if (abort_fn)
+                abort_fn(rv);
             /* Free the allocator created/owned above eventually */
             if (pool_allocator->owner == pool)
                 apr_allocator_destroy(pool_allocator);
