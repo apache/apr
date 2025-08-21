@@ -600,7 +600,6 @@ struct apr_pool_t {
     apr_os_thread_t       owner;
     apr_thread_mutex_t   *mutex;
 #endif /* APR_HAS_THREADS */
-    int                   unmanaged;
 #endif /* APR_POOL_DEBUG */
 #ifdef NETWARE
     apr_os_proc_t         owner_proc;
@@ -1619,9 +1618,14 @@ static void apr_pool_check_lifetime(apr_pool_t *pool)
      * ok, since the only user is apr_pools.c.  Unless
      * people have searched for the top level parent and
      * started to use that...
+     * Like the global pool, unmanaged pools have their
+     * own lifetime and no ->parent, ignore both here.
+     * Last (internal) case is from apr_pool_create_ex_debug()
+     * where pool->mutex is created before attaching to the
+     * parent, hence an allocation happens with no ->parent
+     * nor lifetime to be checked here.
      */
-    if (pool == global_pool || global_pool == NULL
-        || (pool->parent == NULL && pool->unmanaged))
+    if (pool->parent == NULL)
         return;
 
     /* Lifetime
@@ -2065,22 +2069,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     pool->owner_proc = (apr_os_proc_t)getnlmhandle();
 #endif /* defined(NETWARE) */
 
-    if ((pool->parent = parent) != NULL) {
-        pool_lock(parent);
-
-        if ((pool->sibling = parent->child) != NULL)
-            pool->sibling->ref = &pool->sibling;
-
-        parent->child = pool;
-        pool->ref = &parent->child;
-
-        pool_unlock(parent);
-    }
-    else {
-        pool->sibling = NULL;
-        pool->ref = NULL;
-    }
-
 #if APR_HAS_THREADS
     if (parent == NULL || parent->allocator != allocator) {
         apr_status_t rv;
@@ -2103,6 +2091,22 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
         pool->mutex = parent->mutex;
     }
 #endif /* APR_HAS_THREADS */
+
+    if ((pool->parent = parent) != NULL) {
+        pool_lock(parent);
+
+        if ((pool->sibling = parent->child) != NULL)
+            pool->sibling->ref = &pool->sibling;
+
+        parent->child = pool;
+        pool->ref = &parent->child;
+
+        pool_unlock(parent);
+    }
+    else {
+        pool->sibling = NULL;
+        pool->ref = NULL;
+    }
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "CREATE", file_line, 1);
@@ -2132,7 +2136,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
 
     memset(pool, 0, SIZEOF_POOL_T);
 
-    pool->unmanaged = 1;
     pool->abort_fn = abort_fn;
     pool->tag = file_line;
     pool->file_line = file_line;
@@ -2169,6 +2172,9 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
          */
         if ((rv = apr_thread_mutex_create(&pool->mutex,
                 APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
+            /* Free the allocator created/owned above eventually */
+            if (pool_allocator->owner == pool)
+                apr_allocator_destroy(pool_allocator);
             free(pool);
             return rv;
         }
