@@ -1,6 +1,10 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_uri: Update apr_uri_parse() and apr_uri_unparse() to decode / encode
+     a % separating a zone identifier in an IPv6 literal if detected following
+     RFC6874. [Jens Finkhaeuser <jens@finkhaeuser.de>, Ruediger Pluem]
+
   *) apr_crypto_openssl: Add provider support on OpenSSL3+.
      [Graham Leggett]
 

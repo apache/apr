@@ -70,6 +70,85 @@ static schemes_t schemes[] =
     { NULL, 0xFFFF }     /* unknown port */
 };
 
+/*
+ * *only* for IPv6 addresses with a zone identifier according to RFC6874
+ */
+static apr_status_t detect_scope_zone_id(int * have_zone_id, char const * ipv6addr, size_t len)
+{
+    *have_zone_id = 0;
+    char *s;
+
+    if (len < 3) {
+        /* Need *at least* the three characters for a percent-encoded percent
+         * sign.
+         */
+        return APR_SUCCESS;
+    }
+
+    s = memchr(ipv6addr, '%', len);
+    if (s != NULL && s < ipv6addr + len - 2) {
+        /* RFC3986 is pretty specific about how to percent encode, but
+         * decoding is to be performed per component, which is what we
+         * already have here. On the other hand, RFC6874 is clear that
+         * the delimiter for a zone identifier must be a percent encoded
+         * percent, i.e. "%25". Any other percent-encoded character is
+         * invalid here.
+         */
+        if (s[1] != '2' || s[2] != '5') {
+            return APR_EINVAL;
+        }
+        *have_zone_id = 1;
+    }
+    return APR_SUCCESS;
+}
+
+static void percent_decode_scope_zone_id(char *hostname)
+{
+    /* RFC6874 is a little hand-wavy in terms of what to decode. Technically,
+     * all percent-encoded characters should be decoded, but also, the RFC states
+     * that they SHOULD not occur, basically.
+     *
+     * So let's assume they don't, to keep things simple. Because otherwise we'd
+     * have to deal with full RFC3986 rules and perform UTF-8 decoding as well
+     * and all that.
+     */
+    size_t len = strlen(hostname);
+
+    /* We know from the caller already that this *is* a percent encoded
+     * percent sign, so we just want to skip it. Trust the caller here.
+     */
+    char *s = memchr(hostname, '%', len);
+    size_t offset = s - hostname;
+    memmove(hostname + offset + 1, hostname + offset + 3, len - offset - 2);
+}
+
+static char * percent_encode_scope_zone_id(apr_pool_t *p, apr_uri_t const *uptr)
+{
+    /* Inverse to the logic in the decode function, we need to encode the first
+     * percent sign we encounter (if any).
+     */
+    size_t len = strlen(uptr->hostname);
+    char * s = memchr(uptr->hostname, '%', len);
+    size_t offset;
+    char *hostcopy;
+
+    if (s == NULL) {
+        return uptr->hostname;
+    }
+
+    offset = s - uptr->hostname;
+
+    hostcopy = apr_palloc(p, len + 2);
+    memcpy(hostcopy, uptr->hostname, offset + 1);
+    hostcopy[offset + 1] = '2';
+    hostcopy[offset + 2] = '5';
+    memcpy(hostcopy + offset + 3, uptr->hostname + offset + 1,
+           len - offset - 1);
+    hostcopy[len + 2] = '\0';
+
+    return hostcopy;
+}
+
 APR_DECLARE(apr_port_t) apr_uri_port_of_scheme(const char *scheme_str)
 {
     schemes_t *scheme;
@@ -118,10 +197,13 @@ APR_DECLARE(char *) apr_uri_unparse(apr_pool_t *p,
         if (uptr->hostname) {
             int is_default_port;
             const char *lbrk = "", *rbrk = "";
+            char *host = uptr->hostname;
 
-            if (strchr(uptr->hostname, ':')) { /* v6 literal */
+            if (strchr(host, ':')) { /* v6 literal */
                 lbrk = "[";
                 rbrk = "]";
+
+                host = percent_encode_scope_zone_id(p, uptr);
             }
 
             is_default_port =
@@ -129,7 +211,7 @@ APR_DECLARE(char *) apr_uri_unparse(apr_pool_t *p,
                  uptr->port == 0 ||
                  uptr->port == apr_uri_port_of_scheme(uptr->scheme));
 
-            ret = apr_pstrcat(p, "//", ret, lbrk, uptr->hostname, rbrk,
+            ret = apr_pstrcat(p, "//", ret, lbrk, host, rbrk,
                         is_default_port ? "" : ":",
                         is_default_port ? "" : uptr->port_str,
                         NULL);
@@ -728,6 +810,7 @@ APR_DECLARE(apr_status_t) apr_uri_parse(apr_pool_t *p, const char *uri,
     char *endstr;
     int port;
     int v6_offset1 = 0, v6_offset2 = 0;
+    int have_zone_id = 0;
 
     /* Initialize the structure. parse_uri() and parse_uri_components()
      * can be called more than once per request.
@@ -854,8 +937,23 @@ deal_with_host:
         /* We expect hostinfo to point to the first character of
          * the hostname.  If there's a port it is the first colon,
          * except with IPv6.
+         *
+         * IPv6 also has the interesting property (RFC6874) that it may contain
+         * a percent-encoded percent delimiting the zone identifier. We need to
+         * unescape that.
          */
         if (*hostinfo == '[') {
+            /* zone identifier */
+            apr_status_t err = detect_scope_zone_id(&have_zone_id, hostinfo,
+                                                    uri - hostinfo);
+            /* FIXME: Ignore APR_EINVAL (invalid escaped character) for now as
+             * old code may rely on it silently getting ignored?
+             */
+            if ((err != APR_SUCCESS) && (err != APR_EINVAL)) {
+                return err;
+            }
+
+            /* Port */
             v6_offset1 = 1;
             v6_offset2 = 2;
             s = memchr(hostinfo, ']', uri - hostinfo);
@@ -874,11 +972,17 @@ deal_with_host:
             uptr->hostname = apr_pstrmemdup(p,
                                             hostinfo + v6_offset1,
                                             uri - hostinfo - v6_offset2);
+            if (have_zone_id) {
+                percent_decode_scope_zone_id(uptr->hostname);
+            }
             goto deal_with_path;
         }
         uptr->hostname = apr_pstrmemdup(p,
                                         hostinfo + v6_offset1,
                                         s - hostinfo - v6_offset2);
+        if (have_zone_id) {
+            percent_decode_scope_zone_id(uptr->hostname);
+        }
         ++s;
         uptr->port_str = apr_pstrmemdup(p, s, uri - s);
         if (uri != s) {
@@ -949,6 +1053,21 @@ APR_DECLARE(apr_status_t) apr_uri_parse_hostinfo(apr_pool_t *p,
         return APR_EGENERAL;
     }
     uptr->hostname = apr_pstrndup(p, hostinfo, s - hostinfo - v6_offset1);
+
+    /* Again, ensure zone IDs are decoded. */
+    int have_zone_id = 0;
+    apr_status_t err = detect_scope_zone_id(&have_zone_id, uptr->hostname,
+                                            strlen(uptr->hostname));
+    /* FIXME: Ignore APR_EINVAL (invalid escaped character) for now as old code
+     * may rely on it silently getting ignored?
+     */
+    if ((err != APR_SUCCESS) && (err != APR_EINVAL)) {
+        return err;
+    }
+    if (have_zone_id) {
+        percent_decode_scope_zone_id(uptr->hostname);
+    }
+
     ++s;
     uptr->port_str = apr_pstrdup(p, s);
     if (*s != '\0') {
