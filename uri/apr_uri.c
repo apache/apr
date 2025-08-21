@@ -140,13 +140,13 @@ static char * percent_encode_scope_zone_id(apr_pool_t *p, apr_uri_t const *uptr)
 
     offset = s - uptr->hostname;
 
-    hostcopy = apr_palloc(p, len + 2);
+    hostcopy = apr_palloc(p, len + 3);
     memcpy(hostcopy, uptr->hostname, offset + 1);
     hostcopy[offset + 1] = '2';
     hostcopy[offset + 2] = '5';
     memcpy(hostcopy + offset + 3, uptr->hostname + offset + 1,
            len - offset - 1);
-    hostcopy[len + 1] = '\0';
+    hostcopy[len + 2] = '\0';
 
     return hostcopy;
 }
