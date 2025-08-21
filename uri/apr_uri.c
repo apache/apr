@@ -73,7 +73,8 @@ static schemes_t schemes[] =
 /*
  * *only* for IPv6 addresses with a zone identifier according to RFC6874
  */
-static apr_status_t detect_scope_zone_id(int * have_zone_id, char const * ipv6addr, size_t len)
+static apr_status_t detect_scope_zone_id(int *have_zone_id, char const *ipv6addr,
+                                         size_t len)
 {
     *have_zone_id = 0;
     char *s;
