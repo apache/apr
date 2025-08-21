@@ -76,8 +76,9 @@ static schemes_t schemes[] =
 static apr_status_t detect_scope_zone_id(int *have_zone_id, char const *ipv6addr,
                                          size_t len)
 {
-    *have_zone_id = 0;
     char *s;
+
+    *have_zone_id = 0;
 
     if (len < 3) {
         /* Need *at least* the three characters for a percent-encoded percent
