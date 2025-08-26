@@ -124,7 +124,7 @@ static void percent_decode_scope_zone_id(char *hostname)
     memmove(hostname + offset + 1, hostname + offset + 3, len - offset - 2);
 }
 
-static char * percent_encode_scope_zone_id(apr_pool_t *p, apr_uri_t const *uptr)
+static char *percent_encode_scope_zone_id(apr_pool_t *p, apr_uri_t const *uptr)
 {
     /* Inverse to the logic in the decode function, we need to encode the first
      * percent sign we encounter (if any).
@@ -945,9 +945,17 @@ deal_with_host:
          * unescape that.
          */
         if (*hostinfo == '[') {
+            apr_status_t err;
+
+            v6_offset1 = 1;
+            v6_offset2 = 2;
+            s = memchr(hostinfo, ']', uri - hostinfo);
+            if (s == NULL) {
+                return APR_EGENERAL;
+            }
+
             /* zone identifier */
-            apr_status_t err = detect_scope_zone_id(&have_zone_id, hostinfo,
-                                                    uri - hostinfo);
+            err = detect_scope_zone_id(&have_zone_id, hostinfo + 1, s - hostinfo - 1);
             /* FIXME: Ignore APR_EINVAL (invalid escaped character) for now as
              * old code may rely on it silently getting ignored?
              */
@@ -956,12 +964,6 @@ deal_with_host:
             }
 
             /* Port */
-            v6_offset1 = 1;
-            v6_offset2 = 2;
-            s = memchr(hostinfo, ']', uri - hostinfo);
-            if (s == NULL) {
-                return APR_EGENERAL;
-            }
             if (*++s != ':') {
                 s = NULL; /* no port */
             }
