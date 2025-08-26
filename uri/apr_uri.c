@@ -80,9 +80,19 @@ static apr_status_t detect_scope_zone_id(int *have_zone_id, char const *ipv6addr
 
     *have_zone_id = 0;
 
-    if (len < 3) {
-        /* Need *at least* the three characters for a percent-encoded percent
-         * sign.
+    if (len < 3 + 5) {
+        /*
+         * We neeed *at least* the three characters for a percent-encoded
+         * percent sign. Furthermore scope id's are only allowed for link-local
+         * addresses under prefix fe80::/10.
+         */
+        return APR_SUCCESS;
+    }
+
+    if (strncasecmp(ipv6addr, "fe80:", 5)) {
+        /*
+         * Scope id's are only allowed for link-local addresses under prefix
+         * fe80::/10.
          */
         return APR_SUCCESS;
     }
@@ -134,7 +144,11 @@ static char *percent_encode_scope_zone_id(apr_pool_t *p, apr_uri_t const *uptr)
     size_t offset;
     char *hostcopy;
 
-    if (s == NULL) {
+    if ((s == NULL) || strncasecmp(uptr->hostname, "fe80:", 5)) {
+        /*
+         * Scope id's are only allowed for link-local addresses under prefix
+         * fe80::/10.
+         */
         return uptr->hostname;
     }
 
