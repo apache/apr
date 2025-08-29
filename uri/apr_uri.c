@@ -70,6 +70,12 @@ static schemes_t schemes[] =
     { NULL, 0xFFFF }     /* unknown port */
 };
 
+#define LINK_LOCAL(ipv6addr) ((strlen(ipv6addr) >= 5) && \
+                             ((ipv6addr)[4] == ':') && \
+                             !strncasecmp(ipv6addr, "fe", 2) && \
+                             strchr("89aAbB", (ipv6addr)[2]) && \
+                             strchr("0123456789aAbBcCdDeEfF", (ipv6addr)[3]))
+
 /*
  * *only* for IPv6 addresses with a zone identifier according to RFC6874
  */
@@ -89,7 +95,7 @@ static apr_status_t detect_scope_zone_id(int *have_zone_id, char const *ipv6addr
         return APR_SUCCESS;
     }
 
-    if (strncasecmp(ipv6addr, "fe80:", 5)) {
+    if (!LINK_LOCAL(ipv6addr)) {
         /*
          * Scope id's are only allowed for link-local addresses under prefix
          * fe80::/10.
@@ -144,7 +150,7 @@ static char *percent_encode_scope_zone_id(apr_pool_t *p, apr_uri_t const *uptr)
     size_t offset;
     char *hostcopy;
 
-    if ((s == NULL) || strncasecmp(uptr->hostname, "fe80:", 5)) {
+    if ((s == NULL) || !LINK_LOCAL(uptr->hostname)) {
         /*
          * Scope id's are only allowed for link-local addresses under prefix
          * fe80::/10.
