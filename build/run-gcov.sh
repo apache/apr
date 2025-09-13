@@ -30,7 +30,6 @@ for i in `find . -name "*.gcno" | sort`; do
         continue
     fi
 
-    echo $i
     # Find the directory and base name of this gcno file
     basename=`basename "$i"`
     filename="${i%.*}"
