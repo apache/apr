@@ -42,8 +42,6 @@ typedef struct {
 
 #define APR_DBM_LMDBMODE_RO       MDB_RDONLY
 #define APR_DBM_LMDBMODE_RWCREATE MDB_CREATE
-#define APR_DBM_LMDBMODE_RW       (MDB_RDONLY + MDB_CREATE + 1)
-#define APR_DBM_LMDBMODE_RWTRUNC  (APR_DBM_LMDBMODE_RW + 1)
 
 /* --------------------------------------------------------------------------
 **
@@ -99,13 +97,13 @@ static apr_status_t vt_lmdb_open(apr_dbm_t **pdb, const char *pathname,
         dbmode = APR_DBM_LMDBMODE_RO;
         break;
     case APR_DBM_READWRITE:
-        dbmode = APR_DBM_LMDBMODE_RW;
+        dbmode = 0;
         break;
     case APR_DBM_RWCREATE:
         dbi_open_flags = APR_DBM_LMDBMODE_RWCREATE;
         break;
     case APR_DBM_RWTRUNC:
-        truncate = APR_DBM_LMDBMODE_RWTRUNC;
+        truncate = 1;
         break;
     default:
         return APR_EINVAL;
@@ -125,14 +123,17 @@ static apr_status_t vt_lmdb_open(apr_dbm_t **pdb, const char *pathname,
         }
 
         if (dberr == 0) {
+            /* we pass MDB_RDONLY and the default */
             dberr = mdb_env_open(file.env, pathname, dbmode | DEFAULT_ENV_FLAGS, apr_posix_perms2mode(perm));
         }
 
         if (dberr == 0) {
+            /* we pass MDB_RDONLY */
             dberr = mdb_txn_begin(file.env, NULL, dbmode, &file.txn);
         }
 
         if (dberr == 0) {
+            /* we pass the DB_CREATE */
             dberr = mdb_dbi_open(file.txn, NULL, dbi_open_flags, &file.dbi);
 
             /* if mode == APR_DBM_RWTRUNC, drop database */
