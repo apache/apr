@@ -219,7 +219,11 @@ static void test_named_remove(abts_case *tc, void *data)
     }
     ABTS_PTR_NOTNULL(tc, shm);
 
+#ifdef WIN32
+    rv = apr_shm_destroy(shm);
+#else
     rv = apr_shm_remove(SHARED_FILENAME, p);
+#endif
 
     /* On platforms which acknowledge the removal of the shared resource,
      * ensure another of the same name may be created after removal;
@@ -237,8 +241,10 @@ static void test_named_remove(abts_case *tc, void *data)
       APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
     }
 
+#ifndef WIN32
     rv = apr_shm_destroy(shm);
     APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
+#endif
 
     /* Now ensure no named resource remains which we may attach to */
     rv = apr_shm_attach(&shm, SHARED_FILENAME, p);
@@ -259,7 +265,12 @@ static void test_named_delete(abts_case *tc, void *data)
     }
     ABTS_PTR_NOTNULL(tc, shm);
 
+
+#ifdef WIN32
+    rv = apr_shm_destroy(shm);
+#else
     rv = apr_shm_delete(shm);
+#endif    
 
     /* On platforms which acknowledge the removal of the shared resource,
      * ensure another of the same name may be created after removal;
@@ -277,8 +288,10 @@ static void test_named_delete(abts_case *tc, void *data)
       APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
     }
 
+#ifndef WIN32
     rv = apr_shm_destroy(shm);
     APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
+#endif
 
     /* Now ensure no named resource remains which we may attach to */
     rv = apr_shm_attach(&shm, SHARED_FILENAME, p);
