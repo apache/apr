@@ -94,6 +94,100 @@ static void test_strtok(abts_case *tc, void *data)
     }
 }
 
+static void test_strqtok(abts_case *tc, void *data)
+{
+    char *retval1, *retval2;
+    char *str1, *str2;
+    char *state1, *state2;
+
+    /* test empty string */
+    str1 = str2 = "";
+    str1 = apr_pstrdup(p, str1);
+    str2 = apr_pstrdup(p, str2);
+
+    retval1 = apr_strtok(str1, ",", &state1);
+    retval2 = apr_strqtok(str2, ",", &state2);
+
+    ABTS_TRUE(tc, retval1 == NULL);
+    ABTS_TRUE(tc, retval2 == NULL);
+
+    /* test delimiters only */
+    str1 = str2 = ",";
+    str1 = apr_pstrdup(p, str1);
+    str2 = apr_pstrdup(p, str2);
+
+    retval1 = apr_strtok(str1, ",", &state1);
+    retval2 = apr_strqtok(str2, ",", &state2);
+
+    /* test unquoted string */
+    str1 = str2 = "key";
+    str1 = apr_pstrdup(p, str1);
+    str2 = apr_pstrdup(p, str2);
+
+    retval1 = apr_strtok(str1, "=", &state1);
+    retval2 = apr_strqtok(str2, "=", &state2);
+
+    ABTS_STR_EQUAL(tc, retval1, "key");
+    ABTS_STR_EQUAL(tc, retval2, "key");
+
+    /* test quoted string */
+    str1 = str2 = "\"key\"";
+    str1 = apr_pstrdup(p, str1);
+    str2 = apr_pstrdup(p, str2);
+
+    retval1 = apr_strtok(str1, "=", &state1);
+    retval2 = apr_strqtok(str2, "=", &state2);
+
+    ABTS_STR_EQUAL(tc, retval1, "\"key\"");
+    ABTS_STR_EQUAL(tc, retval2, "key");
+
+    /* test quoted key value pair */
+    str1 = str2 = "\"key\"='value'";
+    str1 = apr_pstrdup(p, str1);
+    str2 = apr_pstrdup(p, str2);
+
+    retval1 = apr_strtok(str1, "=", &state1);
+    retval2 = apr_strqtok(str2, "=", &state2);
+
+    ABTS_STR_EQUAL(tc, retval1, "\"key\"");
+    ABTS_STR_EQUAL(tc, retval2, "key");
+
+    retval1 = apr_strtok(NULL, "=", &state1);
+    retval2 = apr_strqtok(NULL, "=", &state2);
+
+    ABTS_STR_EQUAL(tc, retval1, "'value'");
+    ABTS_STR_EQUAL(tc, retval2, "value");
+
+    retval1 = apr_strtok(NULL, "=", &state1);
+    retval2 = apr_strqtok(NULL, "=", &state2);
+
+    ABTS_TRUE(tc, retval1 == NULL);
+    ABTS_TRUE(tc, retval2 == NULL);
+
+    /* test quoted against quoted */
+    str1 = str2 = "\"k\"'ey'";
+    str1 = apr_pstrdup(p, str1);
+    str2 = apr_pstrdup(p, str2);
+
+    retval1 = apr_strtok(str1, "=", &state1);
+    retval2 = apr_strqtok(str2, "=", &state2);
+
+    ABTS_STR_EQUAL(tc, retval1, "\"k\"'ey'");
+    ABTS_STR_EQUAL(tc, retval2, "key");
+
+    /* test escapes, unquoted against quoted */
+    str1 = str2 = "outside\\'in\\'sid=e'";
+    str1 = apr_pstrdup(p, str1);
+    str2 = apr_pstrdup(p, str2);
+
+    retval1 = apr_strtok(str1, "=", &state1);
+    retval2 = apr_strqtok(str2, "=", &state2);
+
+    ABTS_STR_EQUAL(tc, retval1, "outside\\'in\\'sid");
+    ABTS_STR_EQUAL(tc, retval2, "outside\\in'sid=e");
+
+}
+
 static void snprintf_noNULL(abts_case *tc, void *data)
 {
     char buff[100];
@@ -512,6 +606,7 @@ abts_suite *teststr(abts_suite *suite)
     abts_run_test(suite, snprintf_noNULL, NULL);
     abts_run_test(suite, snprintf_underflow, NULL);
     abts_run_test(suite, test_strtok, NULL);
+    abts_run_test(suite, test_strqtok, NULL);
     abts_run_test(suite, string_error, NULL);
     abts_run_test(suite, string_long, NULL);
     abts_run_test(suite, string_strtoi64, NULL);

@@ -54,3 +54,85 @@ APR_DECLARE(char *) apr_strtok(char *str, const char *sep, char **last)
 
     return token;
 }
+
+APR_DECLARE(char *) apr_strqtok(char *str, const char *sep, char **last)
+{
+    char *token;
+    apr_size_t rewind = 0;
+    char c, q = 0, s = 0;
+
+    if (!str) {         /* subsequent call */
+        str = *last;    /* start where we left off */
+    }
+
+    /* skip characters in sep (will terminate at '\0') */
+    while (*str && strchr(sep, *str)) {
+        ++str;
+    }
+
+    if (!*str) {        /* no more tokens */
+        return NULL;
+    }
+
+    token = str;
+
+    /* skip quoted sections */
+    while ((c = *str)) {
+
+        if (!q) {
+            if ('\'' == c) {
+                q = '\'';
+                rewind++;
+            }
+            else if ('\"' == c) {
+                q = '\"';
+                rewind++;
+            }
+            else if (strchr(sep, c)) {
+                break;
+            }
+            else if (rewind) {
+                str[-rewind] = c;
+            }
+        }
+        else {
+            if (!s) {
+                if ('\\' == c) {
+                    s = c;
+                    rewind++;
+                }
+                else if (!s && q == c) {
+                    rewind++;
+                    q = 0;
+                }
+                else if (rewind) {
+                    str[-rewind] = c;
+                }
+            }
+            else {
+                s = 0;
+                if (rewind) {
+                    str[-rewind] = c;
+                }
+            }
+        }
+
+        str++;
+    }
+
+    if (rewind) {
+        str[-rewind] = '\0';
+    }
+
+    /* prepare for the next call (will terminate at '\0)
+     */
+    *last = str;
+
+    if (**last) {
+        **last = '\0';
+        ++*last;
+    }
+
+    return token;
+}
+

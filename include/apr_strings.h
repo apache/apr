@@ -291,18 +291,39 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
  * argument.
  * @param str The string to separate; this should be specified on the
  *            first call to apr_strtok() for a given string, and NULL
- *            on subsequent calls.
+ *            on subsequent calls. This string is modified in place.
  * @param sep The set of delimiters
  * @param last State saved by apr_strtok() between calls.
  * @return The next token from the string
  * @note the 'last' state points to the trailing NUL char of the final
  * token, otherwise it points to the character following the current
- * token (all successive or empty occurances of sep are skiped on the
+ * token (all successive or empty occurances of sep are skipped on the
  * subsequent call to apr_strtok).  Therefore it is possible to avoid
  * a strlen() determination, with the following logic;
  * toklen = last - retval; if (*last) --toklen;
  */
 APR_DECLARE(char *) apr_strtok(char *str, const char *sep, char **last);
+
+/**
+ * Split a string into separate null-terminated possibly quoted tokens.
+ * The tokens are delimited in the string by one or more characters
+ * from the sep argument. A quoted token may be separated by single or
+ * double quotes, and quoted sections may appear more than once in each
+ * token. The backslash character escapes each quote. The apr_strqtok
+ * function can be used interchangeably with the apr_strtok function
+ * using the same state variable.
+ * @param str The string to separate; this should be specified on the
+ *            first call to apr_strtok() for a given string, and NULL 
+ *            on subsequent calls. This string is modified in place.
+ * @param sep The set of delimiters
+ * @param last State saved by apr_strqtok() between calls.
+ * @return The next token from the string
+ * @note while the 'last' state points to the trailing NUL char of the
+ * final token, otherwise it points to the character following the
+ * current token, no string length can be inferred as quoted characters
+ * and backslash escape characters are removed from the final token.
+ */
+APR_DECLARE(char *) apr_strqtok(char *str, const char *sep, char **last);
 
 /**
  * @defgroup APR_Strings_Snprintf snprintf implementations
