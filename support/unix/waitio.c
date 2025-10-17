@@ -40,15 +40,22 @@ apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
                                         int for_read)
 {
     struct pollfd pfd;
+    apr_interval_time_t raw_timeout;
     int rc, timeout;
 
-    timeout    = f        ? f->timeout        : s->timeout;
+    raw_timeout = f ? f->timeout : s->timeout;
+    if (raw_timeout > ((apr_interval_time_t)INT_MAX) * 1000) {
+        /* timeout value exceeds maximum allowed (~25 days in microseconds)
+         * capping to INT_MAX milliseconds to avoid overflow */
+        timeout = INT_MAX;
+    } else {
+        /* convert microseconds to milliseconds (round up) */
+        timeout = raw_timeout > 0 ? (int)((raw_timeout + 999) / 1000) : (int)raw_timeout;
+    }
+
     pfd.fd     = f        ? f->filedes        : s->socketdes;
     pfd.events = for_read ? POLLIN            : POLLOUT;
 
-    if (timeout > 0) {
-        timeout = (timeout + 999) / 1000;
-    }
     do {
         rc = poll(&pfd, 1, timeout);
     } while (rc == -1 && errno == EINTR);

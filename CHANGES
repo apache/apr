@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 2.0.0
 
+  *) apr_wait_for_io_or_timeout: Fix integer overflow for larger timeout values.
+     PR 69542 [Alejandro Perez <alejandroperezpestana99@gmail.com>]
+
   *) apr_strings: Add apr_strqtok() function to tokenise quoted strings.
      [Graham Leggett]
 
