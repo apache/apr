@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.8.0
 
+  *) apr_wait_for_io_or_timeout: Fix integer overflow for larger timeout values.
+     PR 69542 [Alejandro Perez <alejandroperezpestana99@gmail.com>]
+
   *) testmmap: Avoid a crash after test_file_open() fails. [Graham
      Leggett]
 
