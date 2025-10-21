@@ -1,6 +1,9 @@
                                                      -*- coding: utf-8 -*-
 Changes for APR 1.7.7
 
+  *) apr_wait_for_io_or_timeout: Fix integer overflow for larger timeout values.
+     PR 69542 [Alejandro Perez <alejandroperezpestana99@gmail.com>]
+
 Changes for APR 1.7.6
 
   *) test/testsock.c (test_get_addr): Fix test to portably switch
