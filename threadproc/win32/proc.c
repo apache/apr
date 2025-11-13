@@ -603,6 +603,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                     || strcasecmp(progname + i - 4, ".cmd") == 0))
         {
             const char *argv0;
+            char *shellcmd;
 
             if (has_space(progname)) {
                 argv0 = apr_pstrcat(pool, "\"", progname, "\"", NULL);
@@ -611,7 +612,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 argv0 = progname;
             }
 
-            char *shellcmd = getenv("COMSPEC");
+            shellcmd = getenv("COMSPEC");
             if (!shellcmd) {
                 if (attr->errfn) {
                     attr->errfn(pool, APR_EINVAL, "COMSPEC envar is not set");
