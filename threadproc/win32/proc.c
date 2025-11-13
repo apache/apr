@@ -551,7 +551,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
     if (attr->cmdtype == APR_SHELLCMD || attr->cmdtype == APR_SHELLCMD_ENV) {
         const char *argv0;
-        char *shellcmd;
+        const char *shellcmd;
 
         if (has_space(progname)) {
             argv0 = apr_pstrcat(pool, "\"", progname, "\"", NULL);
@@ -603,7 +603,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                     || strcasecmp(progname + i - 4, ".cmd") == 0))
         {
             const char *argv0;
-            char *shellcmd;
+            const char *shellcmd;
 
             if (has_space(progname)) {
                 argv0 = apr_pstrcat(pool, "\"", progname, "\"", NULL);
