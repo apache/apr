@@ -355,7 +355,7 @@ static const char * quote_arg(const char *str, apr_pool_t *pool)
             ch++;
         }
 
-        if (*ch == 0) {
+        if (*ch == '\0') {
             /* Escape backslashes. */
             needed += backslash_count * 2;
             break;
@@ -391,7 +391,7 @@ static const char * quote_arg(const char *str, apr_pool_t *pool)
             ch++;
         }
 
-        if (*ch == 0) {
+        if (*ch == '\0') {
             memset(dst, '\\', backslash_count * 2);
             dst += backslash_count * 2;
             break;
@@ -408,7 +408,7 @@ static const char * quote_arg(const char *str, apr_pool_t *pool)
         }
     }
     *dst++ = '"';
-    *dst = 0;
+    *dst = '\0';
 
     return escaped;
 }
