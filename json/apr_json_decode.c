@@ -417,8 +417,8 @@ static apr_status_t apr_json_decode_array(apr_json_scanner_t * self,
         array->value.array->array = apr_array_make(self->pool, count,
                                                    sizeof(apr_json_value_t *));
         while (element) {
-            *((apr_json_value_t **) (apr_array_push(array->value.array->array))) =
-                    element;
+            APR_ARRAY_PUSH(array->value.array->array, apr_json_value_t *) =
+                element;
             element = apr_json_array_next(array, element);
         }
     }

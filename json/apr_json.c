@@ -274,7 +274,7 @@ APR_DECLARE(apr_status_t) apr_json_array_add(apr_json_value_t *arr,
 
     array = arr->value.array->array;
     if (array) {
-        *((apr_json_value_t **) (apr_array_push(array))) = val;
+        APR_ARRAY_PUSH(array, apr_json_value_t *) = val;
     }
 
     return APR_SUCCESS;
