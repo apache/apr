@@ -38,7 +38,7 @@
  */
 
 
-#define APR_COPYRIGHT "Copyright 2025 The Apache Software Foundation."
+#define APR_COPYRIGHT "Copyright 2026 The Apache Software Foundation."
 
 /* The numeric compile-time version constants. These constants are the
  * authoritative version numbers for APR.
