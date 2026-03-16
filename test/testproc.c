@@ -65,6 +65,9 @@ static void test_create_proc(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_SIZE_EQUAL(tc, strlen(TESTSTR), length);
 
+    rv = apr_file_close(testfile);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
     testfile = newproc.out;
     length = 256;
     buf = apr_pcalloc(p, length);
