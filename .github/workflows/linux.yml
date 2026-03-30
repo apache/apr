@@ -87,6 +87,9 @@ jobs:
             notest-cflags: -Werror
             config: --enable-maintainer-mode --with-berkeley-db --with-dbm=db5
             config-output: APU_HAVE_DB
+          - name: Auto-var-init
+            os: ubuntu-latest  # requires gcc 12 or higher
+            notest-cflags: -ftrivial-auto-var-init=zero
       fail-fast: false
 
     runs-on: ${{ matrix.os }}

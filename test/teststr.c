@@ -48,10 +48,15 @@ static void test_strtok(abts_case *tc, void *data)
             "      asdf jkl; 77889909            \r\n\1\2\3Z",
             " \r\n\3\2\1"
         },
+#if 0
+/* don't do this... apr_strtok() is not supposed to be called with
+ * str == NULL in the first invocation, otherwise it segfaults.
+ */
         {
-            NULL,  /* but who cares if apr_strtok() segfaults? */
+            NULL,
             " \t"
         },
+#endif
 #if 0     /* don't do this... you deserve to segfault */
         {
             "a b c              ",
