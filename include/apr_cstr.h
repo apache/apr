@@ -26,9 +26,9 @@
 #ifndef APR_CSTR_H
 #define APR_CSTR_H
 
-#include <apr.h>          /* for apr_size_t */
-#include <apr_pools.h>    /* for apr_pool_t */
-#include <apr_tables.h>   /* for apr_array_header_t */
+#include "apr.h"          /* for apr_size_t */
+#include "apr_pools.h"    /* for apr_pool_t */
+#include "apr_tables.h"   /* for apr_array_header_t */
 
 #ifdef __cplusplus
 extern "C" {
