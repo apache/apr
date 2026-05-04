@@ -111,7 +111,7 @@ static win32_late_dll_t late_dll[DLL_defined] = {
     {NULL, L"ws2_32", INVALID_HANDLE_VALUE},
     {NULL, L"shell32", INVALID_HANDLE_VALUE},
     {NULL, L"ntdll.dll", INVALID_HANDLE_VALUE},
-    {NULL, L"Iphplapi", INVALID_HANDLE_VALUE},
+    {NULL, L"Iphlpapi", INVALID_HANDLE_VALUE},
     {L"api-ms-win-downlevel-shell32-l1-1-0.dll", L"shell32", INVALID_HANDLE_VALUE}
 };
 
