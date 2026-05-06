@@ -2061,7 +2061,6 @@ case $os in
 	| mvs* \
 	| nacl* \
 	| netbsd* \
-	| netware* \
 	| newsos* \
 	| nextstep* \
 	| nindy* \

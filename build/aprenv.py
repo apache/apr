@@ -11,7 +11,6 @@ import traceback
 _platforms = [ 
     'aix', 
     'beos', 
-    'netware', 
     'os2', 
     'os390', 
     'unix', 
