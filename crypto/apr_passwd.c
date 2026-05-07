@@ -92,7 +92,7 @@ static void crypt_mutex_unlock()
 #endif
 #endif
 
-#if defined(WIN32) || defined(BEOS) || defined(NETWARE) || defined(__ANDROID__)
+#if defined(WIN32) || defined(BEOS) || defined(__ANDROID__)
 #define CRYPT_MISSING 1
 #else
 #define CRYPT_MISSING 0

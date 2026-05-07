@@ -57,7 +57,7 @@ struct apr_other_child_rec_t {
     void *data;
 };
 
-#if defined(WIN32) || defined(NETWARE)
+#if defined(WIN32)
 #define WSAHighByte 2
 #define WSALowByte 0
 #endif

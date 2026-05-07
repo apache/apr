@@ -297,7 +297,7 @@ static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
   return stuffbuffer(buf, bufsize, result);
 }
 
-#elif defined(WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
+#elif defined(WIN32)
 
 static const struct {
     apr_status_t code;
@@ -360,7 +360,6 @@ static char *apr_os_strerror(char *buf, apr_size_t bufsize, apr_status_t errcode
 {
     apr_size_t len=0, i;
 
-#ifndef NETWARE
     len = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM
                       | FORMAT_MESSAGE_IGNORE_INSERTS,
                         NULL,
@@ -369,7 +368,6 @@ static char *apr_os_strerror(char *buf, apr_size_t bufsize, apr_status_t errcode
                         buf,
                         (DWORD)bufsize,
                         NULL);
-#endif
 
     if (!len) {
         for (i = 0; gaErrorList[i].msg; ++i) {

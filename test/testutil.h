@@ -37,8 +37,6 @@
 
 #ifdef WIN32
 #define EXTENSION ".exe"
-#elif NETWARE
-#define EXTENSION ".nlm"
 #else
 #define EXTENSION
 #endif

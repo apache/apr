@@ -64,14 +64,6 @@ typedef struct tsort_
     struct tsort_ *pNext;
 } TSort;
 
-#ifdef NETWARE
-#include "apr_private.h"
-#define get_apd                 APP_DATA* apd = (APP_DATA*)get_app_data(gLibId);
-#define s_aHooksToSort          ((apr_array_header_t *)(apd->gs_aHooksToSort))
-#define s_phOptionalHooks       ((apr_hash_t *)(apd->gs_phOptionalHooks))
-#define s_phOptionalFunctions   ((apr_hash_t *)(apd->gs_phOptionalFunctions))
-#endif
-
 static int crude_order(const void *a_,const void *b_)
 {
     const TSortData *a=a_;
@@ -216,9 +208,7 @@ static apr_array_header_t *sort_hook(apr_array_header_t *pHooks,
     return pNew;
 }
 
-#ifndef NETWARE
 static apr_array_header_t *s_aHooksToSort;
-#endif
 
 typedef struct
 {
@@ -229,9 +219,6 @@ typedef struct
 APR_DECLARE(void) apr_hook_sort_register(const char *szHookName,
                                         apr_array_header_t **paHooks)
 {
-#ifdef NETWARE
-    get_apd
-#endif
     HookSortEntry *pEntry;
 
     if(!s_aHooksToSort)
@@ -243,9 +230,6 @@ APR_DECLARE(void) apr_hook_sort_register(const char *szHookName,
 
 APR_DECLARE(void) apr_hook_sort_all(void)
 {
-#ifdef NETWARE
-    get_apd
-#endif
     int n;
 
     if (!s_aHooksToSort) {
@@ -258,16 +242,11 @@ APR_DECLARE(void) apr_hook_sort_all(void)
     }
 }
 
-#ifndef NETWARE
 static apr_hash_t *s_phOptionalHooks;
 static apr_hash_t *s_phOptionalFunctions;
-#endif
 
 APR_DECLARE(void) apr_hook_deregister_all(void)
 {
-#ifdef NETWARE
-    get_apd
-#endif
     int n;
 
     if (!s_aHooksToSort) {
@@ -323,9 +302,6 @@ APR_DECLARE_EXTERNAL_HOOK(apr,APR,void,_optional,(void))
 
 APR_DECLARE(apr_array_header_t *) apr_optional_hook_get(const char *szName)
 {
-#ifdef NETWARE
-    get_apd
-#endif
     apr_array_header_t **ppArray;
 
     if(!s_phOptionalHooks)
@@ -340,9 +316,6 @@ APR_DECLARE(void) apr_optional_hook_add(const char *szName,void (*pfn)(void),
                                         const char * const *aszPre,
                                         const char * const *aszSucc,int nOrder)
 {
-#ifdef NETWARE
-    get_apd
-#endif
     apr_array_header_t *pArray=apr_optional_hook_get(szName);
     apr_LINK__optional_t *pHook;
 
@@ -372,9 +345,6 @@ APR_DECLARE(void) apr_optional_hook_add(const char *szName,void (*pfn)(void),
 
 APR_DECLARE(apr_opt_fn_t *) apr_dynamic_fn_retrieve(const char *szName)
 {
-#ifdef NETWARE
-    get_apd
-#endif
     if(!s_phOptionalFunctions)
         return NULL;
     return (void(*)(void))apr_hash_get(s_phOptionalFunctions,szName,strlen(szName));
@@ -384,9 +354,6 @@ APR_DECLARE(apr_opt_fn_t *) apr_dynamic_fn_retrieve(const char *szName)
 APR_DECLARE_NONSTD(void) apr_dynamic_fn_register(const char *szName,
                                                   apr_opt_fn_t *pfn)
 {
-#ifdef NETWARE
-    get_apd
-#endif
     if(!s_phOptionalFunctions)
         s_phOptionalFunctions=apr_hash_make(apr_hook_global_pool);
     apr_hash_set(s_phOptionalFunctions,szName,strlen(szName),(void *)pfn);

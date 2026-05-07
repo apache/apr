@@ -1154,73 +1154,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EALREADY(s)       ((s) == APR_EALREADY \
                 || (s) == APR_OS_START_SYSERR + WSAEALREADY)
 
-#elif defined(NETWARE) && defined(USE_WINSOCK) && !defined(DOXYGEN) /* !defined(OS2) && !defined(WIN32) */
-
-#define APR_FROM_OS_ERROR(e) (e == 0 ? APR_SUCCESS : e + APR_OS_START_SYSERR)
-#define APR_TO_OS_ERROR(e)   (e == 0 ? APR_SUCCESS : e - APR_OS_START_SYSERR)
-
-#define apr_get_os_error()    (errno)
-#define apr_set_os_error(e)   (errno = (e))
-
-/* A special case, only socket calls require this: */
-#define apr_get_netos_error()   (APR_FROM_OS_ERROR(WSAGetLastError()))
-#define apr_set_netos_error(e)  (WSASetLastError(APR_TO_OS_ERROR(e)))
-
-/* APR CANONICAL ERROR TESTS */
-#define APR_STATUS_IS_EACCES(s)         ((s) == APR_EACCES)
-#define APR_STATUS_IS_EEXIST(s)         ((s) == APR_EEXIST)
-#define APR_STATUS_IS_ENAMETOOLONG(s)   ((s) == APR_ENAMETOOLONG)
-#define APR_STATUS_IS_ENOENT(s)         ((s) == APR_ENOENT)
-#define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR)
-#define APR_STATUS_IS_ENOSPC(s)         ((s) == APR_ENOSPC)
-#define APR_STATUS_IS_ENOMEM(s)         ((s) == APR_ENOMEM)
-#define APR_STATUS_IS_EMFILE(s)         ((s) == APR_EMFILE)
-#define APR_STATUS_IS_ENFILE(s)         ((s) == APR_ENFILE)
-#define APR_STATUS_IS_EBADF(s)          ((s) == APR_EBADF)
-#define APR_STATUS_IS_EINVAL(s)         ((s) == APR_EINVAL)
-#define APR_STATUS_IS_ESPIPE(s)         ((s) == APR_ESPIPE)
-
-#define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN \
-                || (s) ==                       EWOULDBLOCK \
-                || (s) == APR_OS_START_SYSERR + WSAEWOULDBLOCK)
-#define APR_STATUS_IS_EINTR(s)          ((s) == APR_EINTR \
-                || (s) == APR_OS_START_SYSERR + WSAEINTR)
-#define APR_STATUS_IS_ENOTSOCK(s)       ((s) == APR_ENOTSOCK \
-                || (s) == APR_OS_START_SYSERR + WSAENOTSOCK)
-#define APR_STATUS_IS_ECONNREFUSED(s)   ((s) == APR_ECONNREFUSED \
-                || (s) == APR_OS_START_SYSERR + WSAECONNREFUSED)
-#define APR_STATUS_IS_EINPROGRESS(s)    ((s) == APR_EINPROGRESS \
-                || (s) == APR_OS_START_SYSERR + WSAEINPROGRESS)
-#define APR_STATUS_IS_ECONNABORTED(s)   ((s) == APR_ECONNABORTED \
-                || (s) == APR_OS_START_SYSERR + WSAECONNABORTED)
-#define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
-                || (s) == APR_OS_START_SYSERR + WSAECONNRESET)
-/* XXX deprecated */
-#define APR_STATUS_IS_ETIMEDOUT(s)       ((s) == APR_ETIMEDOUT \
-                || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
-                || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
-#undef APR_STATUS_IS_TIMEUP
-#define APR_STATUS_IS_TIMEUP(s)         ((s) == APR_TIMEUP \
-                || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
-                || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
-#define APR_STATUS_IS_EHOSTUNREACH(s)   ((s) == APR_EHOSTUNREACH \
-                || (s) == APR_OS_START_SYSERR + WSAEHOSTUNREACH)
-#define APR_STATUS_IS_ENETUNREACH(s)    ((s) == APR_ENETUNREACH \
-                || (s) == APR_OS_START_SYSERR + WSAENETUNREACH)
-#define APR_STATUS_IS_ENETDOWN(s)       ((s) == APR_OS_START_SYSERR + WSAENETDOWN)
-#define APR_STATUS_IS_EFTYPE(s)         ((s) == APR_EFTYPE)
-#define APR_STATUS_IS_EPIPE(s)          ((s) == APR_EPIPE)
-#define APR_STATUS_IS_EXDEV(s)          ((s) == APR_EXDEV)
-#define APR_STATUS_IS_ENOTEMPTY(s)      ((s) == APR_ENOTEMPTY)
-#define APR_STATUS_IS_EAFNOSUPPORT(s)   ((s) == APR_EAFNOSUPPORT \
-                || (s) == APR_OS_START_SYSERR + WSAEAFNOSUPPORT)
-#define APR_STATUS_IS_EOPNOTSUPP(s)     ((s) == APR_EOPNOTSUPP \
-                || (s) == APR_OS_START_SYSERR + WSAEOPNOTSUPP)
-#define APR_STATUS_IS_ERANGE(s)         ((s) == APR_ERANGE)
-#define APR_STATUS_IS_EALREADY(s)       ((s) == APR_EALREADY \
-                || (s) == APR_OS_START_SYSERR + WSAEALREADY)
-
-#else /* !defined(NETWARE) && !defined(OS2) && !defined(WIN32) */
+#else /* !defined(OS2) && !defined(WIN32) */
 
 /*
  *  os error codes are clib error codes
@@ -1348,7 +1282,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EALREADY(s)       ((s) == APR_EALREADY)
 /** @} */
 
-#endif /* !defined(NETWARE) && !defined(OS2) && !defined(WIN32) */
+#endif /* !defined(OS2) && !defined(WIN32) */
 
 /** @} */
 

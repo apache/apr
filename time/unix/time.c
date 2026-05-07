@@ -47,18 +47,8 @@ static apr_int32_t get_offset(struct tm *tm)
 #elif defined(HAVE_STRUCT_TM___TM_GMTOFF)
     return tm->__tm_gmtoff;
 #else
-#ifdef NETWARE
-    /* Need to adjust the global variable each time otherwise
-        the web server would have to be restarted when daylight
-        savings changes.
-    */
-    if (daylightOnOff) {
-        return server_gmt_offset + daylightOffset;
-    }
-#else
     if (tm->tm_isdst)
         return server_gmt_offset + 3600;
-#endif
     return server_gmt_offset;
 #endif
 }
@@ -240,8 +230,6 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t)
     DosSleep((t + 999) / 1000);
 #elif defined(BEOS)
     snooze(t);
-#elif defined(NETWARE)
-    delay((t + 999) / 1000);
 #elif defined(HAVE_NANOSLEEP)
     struct timespec ts;
     ts.tv_sec = t / APR_USEC_PER_SEC;
@@ -294,13 +282,6 @@ APR_DECLARE(apr_status_t) apr_apr_time_to_os2_time(FDATE *os2date,
 }
 #endif
 
-#ifdef NETWARE
-APR_DECLARE(void) apr_netware_setup_time(void)
-{
-    tzset();
-    server_gmt_offset = -TZONE;
-}
-#else
 APR_DECLARE(void) apr_unix_setup_time(void)
 {
 #ifdef NO_GMTOFF_IN_STRUCT_TM
@@ -346,7 +327,6 @@ APR_DECLARE(void) apr_unix_setup_time(void)
 #endif /* NO_GMTOFF_IN_STRUCT_TM */
 }
 
-#endif
 
 /* A noop on all known Unix implementations */
 APR_DECLARE(void) apr_time_clock_hires(apr_pool_t *p)

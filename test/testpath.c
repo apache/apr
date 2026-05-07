@@ -20,7 +20,7 @@
 #include "apr_pools.h"
 #include "apr_tables.h"
 
-#if defined(WIN32) || defined(NETWARE) || defined(OS2)
+#if defined(WIN32) || defined(OS2)
 #define PSEP ";"
 #define DSEP "\\"
 #else

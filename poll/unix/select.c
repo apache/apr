@@ -37,9 +37,6 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num,
     int rv, i;
     int maxfd = -1;
     struct timeval tv, *tvptr;
-#ifdef NETWARE
-    apr_datatype_e set_type = APR_NO_DESC;
-#endif
 
 #ifdef WIN32
     /* On Win32, select() must be presented with at least one socket to
@@ -75,27 +72,12 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num,
         aprset[i].rtnevents = 0;
 
         if (aprset[i].desc_type == APR_POLL_SOCKET) {
-#ifdef NETWARE
-            if (HAS_PIPES(set_type)) {
-                return APR_EBADF;
-            }
-            else {
-                set_type = APR_POLL_SOCKET;
-            }
-#endif
             fd = aprset[i].desc.s->socketdes;
         }
         else if (aprset[i].desc_type == APR_POLL_FILE) {
 #if !APR_FILES_AS_SOCKETS
             return APR_EBADF;
 #else
-#ifdef NETWARE
-            if (aprset[i].desc.f->is_pipe && !HAS_SOCKETS(set_type)) {
-                set_type = APR_POLL_FILE;
-            }
-            else
-                return APR_EBADF;
-#endif /* NETWARE */
 
             fd = aprset[i].desc.f->filedes;
 
@@ -104,7 +86,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num,
         else {
             break;
         }
-#if !defined(WIN32) && !defined(NETWARE)        /* socket sets handled with array of handles */
+#if !defined(WIN32)        /* socket sets handled with array of handles */
         if (fd >= FD_SETSIZE) {
             /* XXX invent new error code so application has a clue */
             return APR_EBADF;
@@ -125,18 +107,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num,
         }
     }
 
-#ifdef NETWARE
-    if (HAS_PIPES(set_type)) {
-        rv = pipe_select(maxfd + 1, &readset, &writeset, &exceptset, tvptr);
-    }
-    else {
-#endif
-
-        rv = select(maxfd + 1, &readset, &writeset, &exceptset, tvptr);
-
-#ifdef NETWARE
-    }
-#endif
+    rv = select(maxfd + 1, &readset, &writeset, &exceptset, tvptr);
 
     (*nsds) = rv;
     if ((*nsds) == 0) {
@@ -188,9 +159,6 @@ struct apr_pollset_private_t
     int maxfd;
     apr_pollfd_t *query_set;
     apr_pollfd_t *result_set;
-#ifdef NETWARE
-    int set_type;
-#endif
 };
 
 static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
@@ -213,9 +181,6 @@ static apr_status_t impl_pollset_create(apr_pollset_t *pollset,
     FD_ZERO(&(pollset->p->writeset));
     FD_ZERO(&(pollset->p->exceptset));
     pollset->p->maxfd = 0;
-#ifdef NETWARE
-    pollset->p->set_type = APR_NO_DESC;
-#endif
     pollset->p->query_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
     pollset->p->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
 
@@ -234,36 +199,16 @@ static apr_status_t impl_pollset_add(apr_pollset_t *pollset,
     pollset->p->query_set[pollset->nelts] = *descriptor;
 
     if (descriptor->desc_type == APR_POLL_SOCKET) {
-#ifdef NETWARE
-        /* NetWare can't handle mixed descriptor types in select() */
-        if (HAS_PIPES(pollset->p->set_type)) {
-            return APR_EBADF;
-        }
-        else {
-            pollset->p->set_type = APR_POLL_SOCKET;
-        }
-#endif
         fd = descriptor->desc.s->socketdes;
     }
     else {
 #if !APR_FILES_AS_SOCKETS
         return APR_EBADF;
 #else
-#ifdef NETWARE
-        /* NetWare can't handle mixed descriptor types in select() */
-        if (descriptor->desc.f->is_pipe && !HAS_SOCKETS(pollset->p->set_type)) {
-            pollset->p->set_type = APR_POLL_FILE;
-            fd = descriptor->desc.f->filedes;
-        }
-        else {
-            return APR_EBADF;
-        }
-#else
         fd = descriptor->desc.f->filedes;
 #endif
-#endif
     }
-#if !defined(WIN32) && !defined(NETWARE)        /* socket sets handled with array of handles */
+#if !defined(WIN32)         /* socket sets handled with array of handles */
     if (fd >= FD_SETSIZE) {
         /* XXX invent new error code so application has a clue */
         return APR_EBADF;
@@ -371,15 +316,8 @@ static apr_status_t impl_pollset_poll(apr_pollset_t *pollset,
     memcpy(&writeset, &(pollset->p->writeset), sizeof(fd_set));
     memcpy(&exceptset, &(pollset->p->exceptset), sizeof(fd_set));
 
-#ifdef NETWARE
-    if (HAS_PIPES(pollset->p->set_type)) {
-        rs = pipe_select(pollset->p->maxfd + 1, &readset, &writeset, &exceptset,
-                         tvptr);
-    }
-    else
-#endif
-        rs = select(pollset->p->maxfd + 1, &readset, &writeset, &exceptset,
-                    tvptr);
+    rs = select(pollset->p->maxfd + 1, &readset, &writeset, &exceptset,
+                tvptr);
 
     if (rs < 0) {
         return apr_get_netos_error();

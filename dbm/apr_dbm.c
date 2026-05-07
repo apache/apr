@@ -201,9 +201,7 @@ APR_DECLARE(apr_status_t) apr_dbm_get_driver(const apr_dbm_driver_t **vtable,
      * drivers hash table; ignore the passed-in pool */
     pool = apr_hash_pool_get(drivers);
 
-#if defined(NETWARE)
-    apr_snprintf(modname, sizeof(modname), "dbm%s.nlm", type);
-#elif defined(WIN32) || defined (__CYGWIN__)
+#if defined(WIN32) || defined (__CYGWIN__)
     apr_snprintf(modname, sizeof(modname),
                  "apr_dbm_%s-" APR_STRINGIFY(APR_MAJOR_VERSION) ".dll", type);
 #else

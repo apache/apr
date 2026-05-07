@@ -26,7 +26,7 @@
 
 #include "apr_private.h"
 
-#if defined(WIN32) || defined(OS2) || defined(NETWARE)
+#if defined(WIN32) || defined(OS2)
 #define PATH_SEPARATOR ';'
 #define PATH_SEPARATOR_STRING ";"
 #else

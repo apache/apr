@@ -59,12 +59,10 @@ static void create_filename(abts_case *tc, void *data)
     char *oldfileptr;
 
     apr_filepath_get(&file1, 0, ptest);
-#ifndef NETWARE
 #ifdef WIN32
     ABTS_TRUE(tc, file1[1] == ':');
 #else
     ABTS_TRUE(tc, file1[0] == '/');
-#endif
 #endif
     ABTS_TRUE(tc, file1[strlen(file1) - 1] != '/');
 

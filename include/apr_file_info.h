@@ -123,7 +123,7 @@ typedef struct apr_dir_t          apr_dir_t;
  * Structure for determining file permissions.
  */
 typedef apr_int32_t               apr_fileperms_t;
-#if (defined WIN32) || (defined NETWARE)
+#if (defined WIN32)
 /**
  * Structure for determining the device the file is on.
  */

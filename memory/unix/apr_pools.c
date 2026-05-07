@@ -601,9 +601,6 @@ struct apr_pool_t {
     apr_thread_mutex_t   *mutex;
 #endif /* APR_HAS_THREADS */
 #endif /* APR_POOL_DEBUG */
-#ifdef NETWARE
-    apr_os_proc_t         owner_proc;
-#endif /* defined(NETWARE) */
     cleanup_t            *pre_cleanups;
 #if APR_POOL_CONCURRENCY_CHECK
 
@@ -1115,10 +1112,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     pool->user_data = NULL;
     pool->tag = NULL;
 
-#ifdef NETWARE
-    pool->owner_proc = (apr_os_proc_t)getnlmhandle();
-#endif /* defined(NETWARE) */
-
     if ((pool->parent = parent) != NULL) {
         allocator_lock(parent->allocator);
 
@@ -1199,9 +1192,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
     pool->sibling = NULL;
     pool->ref = NULL;
 
-#ifdef NETWARE
-    pool->owner_proc = (apr_os_proc_t)getnlmhandle();
-#endif /* defined(NETWARE) */
     if (!allocator)
         pool_allocator->owner = pool;
 
@@ -2065,9 +2055,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
 #if APR_HAS_THREADS
     pool->owner = apr_os_thread_current();
 #endif /* APR_HAS_THREADS */
-#ifdef NETWARE
-    pool->owner_proc = (apr_os_proc_t)getnlmhandle();
-#endif /* defined(NETWARE) */
 
 #if APR_HAS_THREADS
     if (parent == NULL || parent->allocator != allocator) {
@@ -2145,9 +2132,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex_debug(apr_pool_t **newpoo
 #if APR_HAS_THREADS
     pool->owner = apr_os_thread_current();
 #endif /* APR_HAS_THREADS */
-#ifdef NETWARE
-    pool->owner_proc = (apr_os_proc_t)getnlmhandle();
-#endif /* defined(NETWARE) */
 
     if ((pool_allocator = allocator) == NULL) {
         apr_status_t rv;
@@ -2356,25 +2340,6 @@ APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag)
 
 #endif /* !APR_POOL_DEBUG */
 
-#ifdef NETWARE
-void netware_pool_proc_cleanup ()
-{
-    apr_pool_t *pool = global_pool->child;
-    apr_os_proc_t owner_proc = (apr_os_proc_t)getnlmhandle();
-
-    while (pool) {
-        if (pool->owner_proc == owner_proc) {
-            apr_pool_destroy (pool);
-            pool = global_pool->child;
-        }
-        else {
-            pool = pool->sibling;
-        }
-    }
-    return;
-}
-#endif /* defined(NETWARE) */
-
 
 /*
  * "Print" functions (common)
@@ -2408,13 +2373,6 @@ APR_DECLARE(apr_abortfunc_t) apr_pool_abort_get(apr_pool_t *pool)
 
 APR_DECLARE(apr_pool_t *) apr_pool_parent_get(apr_pool_t *pool)
 {
-#ifdef NETWARE
-    /* On NetWare, don't return the global_pool, return the application pool
-       as the top most pool */
-    if (pool->parent == global_pool)
-        return pool;
-    else
-#endif
     return pool->parent;
 }
 

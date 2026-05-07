@@ -38,11 +38,6 @@
 #include <sys/epoll.h>
 #endif
 
-#ifdef NETWARE
-#define HAS_SOCKETS(dt) (dt == APR_POLL_SOCKET) ? 1 : 0
-#define HAS_PIPES(dt) (dt == APR_POLL_FILE) ? 1 : 0
-#endif
-
 #if defined(HAVE_AIO_H) && defined(HAVE_AIO_MSGQ)
 #define _AIO_OS390	/* enable a bunch of z/OS aio.h definitions */
 #include <aio.h>	/* aiocb	*/

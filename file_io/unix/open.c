@@ -21,12 +21,6 @@
 #include "apr_arch_inherit.h"
 #include "apr_time.h"
 
-#ifdef NETWARE
-#include "nks/dirio.h"
-#include "apr_hash.h"
-#include "fsio.h"
-#endif
-
 static apr_status_t file_cleanup(apr_file_t *file, int is_child)
 {
     apr_status_t rv = APR_SUCCESS;
