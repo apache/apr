@@ -26,7 +26,6 @@
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
 #include "apr_errno.h"
-#include "apr_getopt.h"
 
 #if APR_HAVE_STDIO_H
 #include <stdio.h>
