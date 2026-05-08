@@ -23,7 +23,6 @@
 #include "apr_strings.h"
 #include "apr_errno.h"
 #include "apr_time.h"
-#include <sys/stat.h>
 #include "apr_arch_atime.h"
 #include "apr_arch_misc.h"
 
