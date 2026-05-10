@@ -60,6 +60,23 @@
     runtimedir:    ${localstatedir}/run
 </Layout>
 
+#	Haiku Layout making use of finddir
+<Layout haiku>
+    prefix:        /boot/system
+    exec_prefix:   /boot/system
+    bindir:        /boot/system/bin
+    sbindir:       /boot/system/servers
+    libdir:        /boot/system/lib
+    libexecdir:    /boot/system/servers
+    mandir:        /boot/system/documentation/man
+    sysconfdir:    /boot/system/settings
+    datadir:       /boot/system/data
+    installbuilddir: /boot/develop/build
+    includedir:    /boot/system/include
+    localstatedir: /boot/system/var
+    runtimedir:    ${localstatedir}/log
+</Layout>
+
 #   Mac OS X Server (Rhapsody)
 <Layout Mac OS X Server>
     prefix:        /Local/Library/WebServer
