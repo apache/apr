@@ -22,18 +22,14 @@
  *
  * You must modify apr.hwc instead.
  *
- * And please, make an effort to stub apr.hnw and apr.h.in in the process.
- *
- * This is the Win32 specific version of apr.h.  It is copied from
- * apr.hw by the apr.dsp and libapr.dsp projects.
+ * And please, make an effort to stub apr.h.in in the process.
  */
 
 /**
  * @file apr.h
  * @brief APR Platform Definitions
- * @remark This is a generated header generated from include/apr.h.in by
- * ./configure, or copied from include/apr.hw or include/apr.hnw 
- * for Win32 or Netware by those build environments, respectively.
+ * @remark This is a generated header generated from include/apr.hwc by
+ * CMake.
  */
 
 /* Make sure we have our platform identifier macro defined we ask for later.
@@ -62,14 +58,6 @@
 #if defined(_MSC_VER)
 #pragma warning(disable: 4100 4127 4163 4201 4514; once: 4057 4075 4244)
 #endif
-
-/**
- * @file apr.h
- * @brief APR Platform Definitions
- * @remark This is a generated header generated from include/apr.h.in by
- * ./configure, or copied from include/apr.hw or include/apr.hnw
- * for Win32 or Netware by those build environments, respectively.
- */
 
 /**
  * @defgroup APR Apache Portability Runtime library

@@ -22,15 +22,14 @@
  *
  * You must modify apr.h.in instead.
  *
- * And please, make an effort to stub apr.hw and apr.hnw in the process.
+ * And please, make an effort to stub apr.hwc in the process.
  */
 
 /**
  * @file apr.h
  * @brief APR Platform Definitions
  * @remark This is a generated header generated from include/apr.h.in by
- * ./configure, or copied from include/apr.hw or include/apr.hnw 
- * for Win32 or Netware by those build environments, respectively.
+ * ./configure.
  */
 
 /**
