@@ -2,7 +2,7 @@
 #
 # USAGE: gen-build.py TYPE
 #
-# where TYPE is one of: make, dsp, vcproj
+# where TYPE is one of: make
 #
 # It reads build.conf from the current directory, and produces its output
 # into the current directory.
@@ -43,11 +43,6 @@ def main():
   parser = configparser.ConfigParser()
   parser.read('build.conf')
 
-  if parser.has_option('options', 'dsp'):
-    dsp_file = parser.get('options', 'dsp')
-  else:
-    dsp_file = None
-
   headers = get_files(parser.get('options', 'headers'))
 
   # compute the relevant headers, along with the implied includes
@@ -75,24 +70,7 @@ def main():
     # record the object symbols to build for each platform
     group = [ '$(OBJECTS_all)' ]
 
-    # If we're doing win32, we're going to look in the libapr.dsp file
-    # for those files that we have to manually add to our list.
     inherit_parent = { }
-    if platform == 'win32' and dsp_file:
-      for line in open(dsp_file).readlines():
-        if line[:7] != 'SOURCE=':
-          continue
-        if line[7:].find('unix') != -1:
-          # skip the leading .\ and split it out
-          inherit_files = line[9:].strip().split('\\')
-          # change the .c to .lo
-          assert inherit_files[-1][-2:] == '.c'
-          inherit_files[-1] = inherit_files[-1][:-2] + '.lo'
-          # replace the \\'s with /'s
-          inherit_line = '/'.join(inherit_files)
-          if inherit_files[0] not in inherit_parent:
-            inherit_parent[inherit_files[0]] = []
-          inherit_parent[inherit_files[0]].append(inherit_line)
 
     for subdir in parser.get('options', 'platform_dirs').split():
       path = '%s/%s' % (subdir, platform)
