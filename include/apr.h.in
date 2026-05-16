@@ -123,8 +123,8 @@
 /** @} */
 /** @} */
 
-/* We don't include our conditional headers within the doxyblocks 
- * or the extern "C" namespace 
+/* We don't include our conditional headers within the doxyblocks
+ * or the extern "C" namespace
  */
 
 #if APR_HAVE_WINDOWS_H && defined(WIN32)
@@ -191,7 +191,7 @@
 
 #if APR_HAVE_STDINT_H
 #ifdef __cplusplus
-/* C99 7.18.4 requires that stdint.h only exposes INT64_C 
+/* C99 7.18.4 requires that stdint.h only exposes INT64_C
  * and UINT64_C for C++ implementations if this is defined: */
 #ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS
@@ -241,7 +241,7 @@ extern "C" {
 
 /**
  * @addtogroup apr_platform
- * @ingroup APR 
+ * @ingroup APR
  * @{
  */
 
@@ -261,12 +261,12 @@ extern "C" {
 #define APR_USE_SHMEM_MMAP_ANON    @usemmapanon@
 #define APR_USE_SHMEM_BEOS         @usebeosarea@
 
-#define APR_USE_FLOCK_SERIALIZE           @flockser@ 
+#define APR_USE_FLOCK_SERIALIZE           @flockser@
 #define APR_USE_SYSVSEM_SERIALIZE         @sysvser@
 #define APR_USE_POSIXSEM_SERIALIZE        @posixser@
 #define APR_USE_FCNTL_SERIALIZE           @fcntlser@
-#define APR_USE_PROC_PTHREAD_SERIALIZE    @procpthreadser@ 
-#define APR_USE_PTHREAD_SERIALIZE         @pthreadser@ 
+#define APR_USE_PROC_PTHREAD_SERIALIZE    @procpthreadser@
+#define APR_USE_PTHREAD_SERIALIZE         @pthreadser@
 
 #define APR_HAS_FLOCK_SERIALIZE           @hasflockser@
 #define APR_HAS_SYSVSEM_SERIALIZE         @hassysvser@
@@ -276,7 +276,7 @@ extern "C" {
 
 #define APR_PROCESS_LOCK_IS_GLOBAL        @proclockglobal@
 
-#define APR_HAVE_CORKABLE_TCP   @have_corkable_tcp@ 
+#define APR_HAVE_CORKABLE_TCP   @have_corkable_tcp@
 #define APR_HAVE_GETRLIMIT      @have_getrlimit@
 #define APR_HAVE_IN_ADDR        @have_in_addr@
 #define APR_HAVE_INET_ADDR      @have_inet_addr@
@@ -336,11 +336,11 @@ extern "C" {
 #define APR_TCP_NOPUSH_FLAG       @apr_tcp_nopush_flag@
 
 /* Is the TCP_NODELAY socket option inherited from listening sockets?
-*/
+ */
 #define APR_TCP_NODELAY_INHERITED @tcp_nodelay_inherited@
 
 /* Is the O_NONBLOCK flag inherited from listening sockets?
-*/
+ */
 #define APR_O_NONBLOCK_INHERITED @o_nonblock_inherited@
 
 /* Typedefs that APR needs. */
@@ -471,7 +471,6 @@ typedef  apr_int32_t             apr_intptr_t;
 #define APR_SIZE_MAX    (~((apr_size_t)0))
 #define APR_OFF_MAX     (sizeof(apr_off_t) == 4 ? APR_INT32_MAX : sizeof(apr_off_t) == 8 ? APR_INT64_MAX :0)
 
-
 /* Definitions that APR programs need to work properly. */
 
 /**
@@ -485,8 +484,8 @@ typedef  apr_int32_t             apr_intptr_t;
 #define APR_END_DECLS
 #endif
 
-/** 
- * Thread callbacks from APR functions must be declared with APR_THREAD_FUNC, 
+/**
+ * Thread callbacks from APR functions must be declared with APR_THREAD_FUNC,
  * so that they follow the platform's calling convention.
  * <PRE>
  *
@@ -500,7 +499,7 @@ typedef  apr_int32_t             apr_intptr_t;
 
 /**
  * The public APR functions are declared with APR_DECLARE(), so they may
- * use the most appropriate calling convention.  Public APR functions with 
+ * use the most appropriate calling convention.  Public APR functions with
  * variable arguments must use APR_DECLARE_NONSTD().
  *
  * @remark Both the declaration and implementations must use the same macro.
@@ -509,20 +508,20 @@ typedef  apr_int32_t             apr_intptr_t;
  * APR_DECLARE(rettype) apr_func(args)
  * </PRE>
  * @see APR_DECLARE_NONSTD @see APR_DECLARE_DATA
- * @remark Note that when APR compiles the library itself, it passes the 
- * symbol -DAPR_DECLARE_EXPORT to the compiler on some platforms (e.g. Win32) 
+ * @remark Note that when APR compiles the library itself, it passes the
+ * symbol -DAPR_DECLARE_EXPORT to the compiler on some platforms (e.g. Win32)
  * to export public symbols from the dynamic library build.\n
  * The user must define the APR_DECLARE_STATIC when compiling to target
- * the static APR library on some platforms (e.g. Win32.)  The public symbols 
+ * the static APR library on some platforms (e.g. Win32.)  The public symbols
  * are neither exported nor imported when APR_DECLARE_STATIC is defined.\n
  * By default, compiling an application and including the APR public
  * headers, without defining APR_DECLARE_STATIC, will prepare the code to be
  * linked to the dynamic library.
  */
-#define APR_DECLARE(type)            type 
+#define APR_DECLARE(type)            type
 
 /**
- * The public APR functions using variable arguments are declared with 
+ * The public APR functions using variable arguments are declared with
  * APR_DECLARE_NONSTD(), as they must follow the C language calling convention.
  * @see APR_DECLARE @see APR_DECLARE_DATA
  * @remark Both the declaration and implementations must use the same macro.
@@ -540,7 +539,7 @@ typedef  apr_int32_t             apr_intptr_t;
  * @see APR_DECLARE @see APR_DECLARE_NONSTD
  * @remark Note that the declaration and implementations use different forms,
  * but both must include the macro.
- * 
+ *
  * <PRE>
  *
  * extern APR_DECLARE_DATA type apr_variable;\n
@@ -568,7 +567,7 @@ typedef  apr_int32_t             apr_intptr_t;
 /**
  * Declare a dso module's exported module structure as APR_MODULE_DECLARE_DATA.
  *
- * Unless APR_MODULE_DECLARE_STATIC is defined at compile time, symbols 
+ * Unless APR_MODULE_DECLARE_STATIC is defined at compile time, symbols
  * declared with APR_MODULE_DECLARE_DATA are always exported.
  * @code
  * module APR_MODULE_DECLARE_DATA mod_tag
@@ -585,7 +584,7 @@ typedef  apr_int32_t             apr_intptr_t;
  */
 #define APU_MODULE_DECLARE_DATA           APR_MODULE_DECLARE_DATA
 
-/* Define APR_SSIZE_T_FMT.  
+/* Define APR_SSIZE_T_FMT.
  * If ssize_t is an integer we define it to be "d",
  * if ssize_t is a long int we define it to be "ld",
  * if ssize_t is neither we declare an error here.
