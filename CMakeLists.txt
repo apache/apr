@@ -623,8 +623,10 @@ if(APR_BUILD_TESTAPR)
             ${PROJECT_SOURCE_DIR}/test/data/file_datafile.txt
             ${PROJECT_SOURCE_DIR}/test/data/mmap_datafile.txt
             ${PROJECT_SOURCE_DIR}/test/data/mmap_large_datafile.txt
-            ${PROJECT_SOURCE_DIR}/test/echoargs.bat
        DESTINATION ${PROJECT_BINARY_DIR}/data)
+
+  file(COPY ${PROJECT_SOURCE_DIR}/test/echoargs.bat
+       DESTINATION ${PROJECT_BINARY_DIR})
 
   add_executable(testapp test/testapp.c)
   target_link_libraries(testapp ${apr_libname} libaprapp-2)
