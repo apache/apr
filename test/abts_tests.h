@@ -24,6 +24,7 @@ const struct testlist {
     abts_suite *(*func)(abts_suite *suite);
 } alltests[] = {
     {testatomic},
+    {testcharset},
     {testdir},
     {testdso},
     {testdup},

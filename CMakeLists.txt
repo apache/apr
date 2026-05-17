@@ -417,6 +417,7 @@ set(APR_TEST_SUITES
   testbase64
   testbuckets
   testbuffer
+  testcharset
   testcond
   testcrypto
   testdate
