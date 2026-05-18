@@ -18,10 +18,14 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 
+static const char * encoding_from_codepage(DWORD codepage, apr_pool_t *pool)
+{
+    return apr_psprintf(pool, "CP%u", (unsigned)codepage);
+}
 
 APR_DECLARE(const char*) apr_os_default_encoding (apr_pool_t *pool)
 {
-    return apr_psprintf(pool, "CP%u", (unsigned) GetACP());
+    return encoding_from_codepage(GetACP(), pool);
 }
 
 
@@ -35,7 +39,7 @@ APR_DECLARE(const char*) apr_os_locale_encoding (apr_pool_t *pool)
                           (LPTSTR)&codepage,
                           sizeof(codepage) / sizeof(TCHAR)))
     {
-        return apr_psprintf(pool, "CP%u", codepage);
+        return encoding_from_codepage(codepage, pool);
     }
 
     return apr_os_default_encoding(pool);
