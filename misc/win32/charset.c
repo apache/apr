@@ -20,7 +20,12 @@
 
 static const char * encoding_from_codepage(DWORD codepage, apr_pool_t *pool)
 {
-    return apr_psprintf(pool, "CP%u", (unsigned)codepage);
+    if (codepage == CP_UTF8) {
+        return "UTF-8";
+    }
+    else {
+        return apr_psprintf(pool, "CP%u", (unsigned)codepage);
+    }
 }
 
 APR_DECLARE(const char*) apr_os_default_encoding (apr_pool_t *pool)
