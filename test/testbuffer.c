@@ -265,6 +265,22 @@ static void test_compare_buffers(abts_case *tc, void *data)
     apr_pool_destroy(pool);
 }
 
+static void *test_failing_alloc(void *ctx, apr_size_t size)
+{
+    return NULL;
+}
+
+static void test_buffer_cpy_alloc_failure(abts_case *tc, void *data)
+{
+    apr_buffer_t src, dst;
+
+    apr_buffer_str_set(&src, "test", APR_BUFFER_STRING);
+    memset(&dst, 0, sizeof(dst));
+
+    ABTS_ASSERT(tc, "apr_buffer_cpy returns NULL on alloc failure",
+                    apr_buffer_cpy(&dst, &src, test_failing_alloc, NULL) == NULL);
+}
+
 abts_suite *testbuffer(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
@@ -274,6 +290,7 @@ abts_suite *testbuffer(abts_suite *suite)
     abts_run_test(suite, test_null_buffer, NULL);
     abts_run_test(suite, test_buffers, NULL);
     abts_run_test(suite, test_compare_buffers, NULL);
+    abts_run_test(suite, test_buffer_cpy_alloc_failure, NULL);
 
     return suite;
 }
