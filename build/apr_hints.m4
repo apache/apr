@@ -386,20 +386,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-irix*)
 	APR_ADDTO(CPPFLAGS, [-D_POSIX_THREAD_SAFE_FUNCTIONS])
 	;;
-    *beos*)
-        APR_ADDTO(CPPFLAGS, [-DBEOS])
-        PLATOSVERS=`uname -r`
-        APR_SETIFNULL(apr_process_lock_is_global, [yes])
-        case $PLATOSVERS in
-            5.0.4)
-                APR_ADDTO(LDFLAGS, [-L/boot/beos/system/lib])
-                APR_ADDTO(LIBS, [-lbind -lsocket])
-                APR_ADDTO(CPPFLAGS,[-DBONE7])
-                ;;
-            5.1)
-                APR_ADDTO(LDFLAGS, [-L/boot/beos/system/lib])
-                APR_ADDTO(LIBS, [-lbind -lsocket])
-                ;;
 	esac
 	APR_ADDTO(CPPFLAGS, [-DSIGPROCMASK_SETS_THREAD_MASK])
         ;;

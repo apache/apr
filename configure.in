@@ -51,13 +51,6 @@ AH_TOP([
 
 dnl Hard-coded inclusion at the tail end of apr_private.h:
 AH_BOTTOM([
-/* switch this on if we have a BeOS version below BONE */
-#if defined(BEOS) && !defined(HAVE_BONE_VERSION)
-#define BEOS_R5 1
-#else
-#define BEOS_BONE 1
-#endif
-
 /*
  * Darwin 10's default compiler (gcc42) builds for both 64 and
  * 32 bit architectures unless specifically told not to.
@@ -398,11 +391,6 @@ AC_ARG_ENABLE(profile,[  --enable-profile        Turn on profiling for the build
   if test "$GCC" = "yes"; then
     APR_ADDTO(CFLAGS, -pg)
     APR_REMOVEFROM(CFLAGS, -g)
-    if test "$host" = "i586-pc-beos"; then
-        APR_REMOVEFROM(CFLAGS, -O2)
-        APR_ADDTO(CFLAGS, -O1)
-        APR_ADDTO(LDFLAGS, -p)
-    fi
   fi
 )dnl
 
@@ -457,13 +445,6 @@ AC_ARG_ENABLE(thread-debug,
     fi
   ])
 
-if test "$host" = "i586-pc-beos"; then
-  AC_ARG_ENABLE(malloc-debug,[  --enable-malloc-debug   Switch on malloc_debug for BeOS],
-    APR_REMOVEFROM(CFLAGS, -O2)
-    APR_ADDTO(CPPFLAGS, -fcheck-memory-usage -D_KERNEL_MODE)
-  ) dnl
-fi
-
 # this is the place to put specific options for platform/compiler
 # combinations
 case "$host:$CC" in
@@ -479,11 +460,6 @@ case "$host:$CC" in
 	    fi 
 	    ;;
         esac
-	;;
-    powerpc-*-beos:mwcc* )
-	APR_SETVAR(CPP,[mwcc -E])
-	APR_SETVAR(CC,mwcc)
-	APR_SETVAR(AR,ar)
 	;;
 
     dnl If building static APR, both the APR build and the app build
@@ -730,25 +706,6 @@ case $host in
        file_as_socket="0"
        proc_mutex_is_global=1
        OBJECTS_PLATFORM='$(OBJECTS_os2)'
-       ;;
-   *beos*)
-       OSDIR="beos"
-       APR_ADDTO(CPPFLAGS,-DBEOS)
-       enable_threads="system_threads"
-       native_mmap_emul="1"
-       APR_CHECK_DEFINE(BONE_VERSION, sys/socket.h)
-       eolstr="\\n"
-       osver=`uname -r`
-       proc_mutex_is_global=1
-       OBJECTS_PLATFORM='$(OBJECTS_beos)'
-       case $osver in
-          5.0.4)
-             file_as_socket="1"
-             ;;
-          *)
-             file_as_socket="0"
-             ;;
-       esac
        ;;
    *apple-darwin*)
        ac_cv_func_fdatasync="no" # Mac OS X wrongly reports it has fdatasync()
@@ -1376,10 +1333,6 @@ APR_IFALLYES(header:sys/mman.h func:mmap func:munmap define:MAP_ANON,
 APR_IFALLYES(header:os2.h,
              [haveos2shm="1"
               APR_DECIDE(USE_SHMEM_OS2_ANON, [OS/2 DosAllocSharedMem()])])
-APR_IFALLYES(header:kernel/OS.h func:create_area,
-             [havebeosshm="1"
-              APR_DECIDE(USE_SHMEM_BEOS_ANON,
-                         [BeOS areas])])
 APR_IFALLYES(header:windows.h func:CreateFileMapping,
              [havewin32shm="1"
               APR_DECIDE(USE_SHMEM_WIN32_ANON,
@@ -1429,7 +1382,6 @@ AC_SUBST(havemmapanon)
 havemmaptmp="0"
 havemmapshm="0"
 haveshmget="0"
-havebeosarea="0"
 haveos2shm="0"
 havewin32shm="0"
 APR_BEGIN_DECISION([namebased memory allocation method])
@@ -1446,9 +1398,6 @@ APR_IFALLYES(header:sys/mman.h func:mmap func:munmap func:shm_open dnl
              [havemmapshm="1"
               APR_DECIDE(USE_SHMEM_MMAP_SHM, 
                   [mmap() via POSIX.1 shm_open() on temporary file])])
-APR_IFALLYES(header:kernel/OS.h func:create_area,
-             [havebeosshm="1"
-              APR_DECIDE(USE_SHMEM_BEOS, [BeOS areas])])
 APR_IFALLYES(header:os2.h,
              [haveos2shm="1"
               APR_DECIDE(USE_SHMEM_OS2, [OS/2 DosAllocSharedMem()])])
@@ -1489,7 +1438,6 @@ AC_DEFINE_UNQUOTED($ac_decision)
 usemmaptmp="0"
 usemmapshm="0"
 useshmget="0"
-usebeosarea="0"
 useos2shm="0"
 usewin32shm="0"
 
@@ -1503,9 +1451,6 @@ case $ac_decision in
     USE_SHMEM_SHMGET )
         useshmget="1"
         ;;
-    USE_SHMEM_BEOS )
-        usebeosarea="1"
-        ;;
     USE_SHMEM_OS2 )
         useos2shm="1"
         ;;
@@ -1515,7 +1460,7 @@ case $ac_decision in
 esac
 
 # Do we have any shared memory support?
-if test "$usemmaptmp$usemmapshm$usemmapzero$useshmget$usemmapanon$usebeosarea$useos2shm$usewin32shm" = "00000000"; then
+if test "$usemmaptmp$usemmapshm$usemmapzero$useshmget$usemmapanon$useos2shm$usewin32shm" = "00000000"; then
   sharedmem="0"
 else
   sharedmem="1"
@@ -1524,13 +1469,11 @@ fi
 AC_SUBST(usemmaptmp)
 AC_SUBST(usemmapshm)
 AC_SUBST(useshmget)
-AC_SUBST(usebeosarea)
 AC_SUBST(useos2shm)
 AC_SUBST(usewin32shm)
 AC_SUBST(havemmaptmp)
 AC_SUBST(havemmapshm)
 AC_SUBST(haveshmget)
-AC_SUBST(havebeosarea)
 AC_SUBST(haveos2shm)
 AC_SUBST(havewin32shm)
 AC_SUBST(sharedmem)
@@ -2020,10 +1963,6 @@ case $host in
        ssize_t_fmt="ld"
        size_t_fmt="lu"
        ;;
-    *beos*)
-        ssize_t_fmt="ld"
-        size_t_fmt="ld"
-        ;;
     *apple-darwin*)
         osver=`uname -r`
         case $osver in
@@ -2566,7 +2505,6 @@ APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
              func:pthread_mutexattr_setpshared dnl
              file:/dev/zero,
              hasprocpthreadser="1", hasprocpthreadser="0")
-APR_IFALLYES(header:OS.h func:create_sem, hasbeossem="1", hasbeossem="0")
 
 AC_CHECK_FUNCS(pthread_condattr_setpshared)
 APR_IFALLYES(header:pthread.h func:pthread_condattr_setpshared,
@@ -2580,9 +2518,6 @@ AC_SUBST(have_pthread_condattr_setpshared)
 # POSIX semaphores and cross-process pthread mutexes are not
 # used by default since they have less desirable behaviour when
 # e.g. a process holding the mutex segfaults.
-# The BEOSSEM decision doesn't require any substitutions but is
-# included here to prevent the fcntl() branch being selected
-# from the decision making.
 APR_BEGIN_DECISION([apr_lock implementation method])
 APR_IFALLYES(func:flock define:LOCK_EX,
             APR_DECIDE(USE_FLOCK_SERIALIZE, [4.2BSD-style flock()]))
@@ -2590,8 +2525,6 @@ APR_IFALLYES(header:fcntl.h define:F_SETLK,
             APR_DECIDE(USE_FCNTL_SERIALIZE, [SVR4-style fcntl()]))
 APR_IFALLYES(func:semget func:semctl func:semop define:SEM_UNDO,
             APR_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
-APR_IFALLYES(header:OS.h func:create_sem func:acquire_sem func:acquire_sem_etc, 
-            APR_DECIDE(USE_BEOSSEM, [BeOS Semaphores])) 
 # pthread mutex both pshared and robust[_np] is the best default
 case "$hasprocpthreadser:$apr_cv_mutex_robust_shared" in
 "1:yes" | "1:np")
@@ -2631,10 +2564,6 @@ case $ac_decision in
     USE_PROC_PTHREAD_SERIALIZE )
         hasprocpthreadser="1"
         procpthreadser="1"
-        ;;
-    USE_BEOSSEM )
-        hasbeossem="1"
-        beossem="1"
         ;;
 esac
 

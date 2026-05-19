@@ -251,7 +251,6 @@ extern "C" {
 #define APR_HAVE_SHMEM_SHMGET_ANON  @haveshmgetanon@
 #define APR_HAVE_SHMEM_SHMGET       @haveshmget@
 #define APR_HAVE_SHMEM_MMAP_ANON    @havemmapanon@
-#define APR_HAVE_SHMEM_BEOS         @havebeosarea@
 
 #define APR_USE_SHMEM_MMAP_TMP     @usemmaptmp@
 #define APR_USE_SHMEM_MMAP_SHM     @usemmapshm@
@@ -259,7 +258,6 @@ extern "C" {
 #define APR_USE_SHMEM_SHMGET_ANON  @useshmgetanon@
 #define APR_USE_SHMEM_SHMGET       @useshmget@
 #define APR_USE_SHMEM_MMAP_ANON    @usemmapanon@
-#define APR_USE_SHMEM_BEOS         @usebeosarea@
 
 #define APR_USE_FLOCK_SERIALIZE           @flockser@
 #define APR_USE_SYSVSEM_SERIALIZE         @sysvser@
