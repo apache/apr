@@ -317,6 +317,8 @@ Changes for APR 2.0.0
   *) apr_proc_create(): Check that progname argument is quoted correctly if
      it's quoted on Windows. [Ivan Zhakov]
 
+  *) Remove support for Netware.
+
 Changes for APR and APR-util 1.7.x and later:
 
   *) http://svn.apache.org/viewvc/apr/apr/branches/1.7.x/CHANGES?view=markup
