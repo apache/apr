@@ -386,9 +386,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-irix*)
 	APR_ADDTO(CPPFLAGS, [-D_POSIX_THREAD_SAFE_FUNCTIONS])
 	;;
-	esac
-	APR_ADDTO(CPPFLAGS, [-DSIGPROCMASK_SETS_THREAD_MASK])
-        ;;
     4850-*.*)
 	APR_ADDTO(CPPFLAGS, [-DSVR4 -DMPRAS])
 	APR_ADDTO(LIBS, [-lc -L/usr/ucblib -lucb])
