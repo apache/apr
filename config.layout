@@ -145,23 +145,6 @@
     runtimedir:    ${localstatedir}/run
 </Layout>
 
-#  BeOS layout...
-<Layout beos>
-    prefix:        /boot/home/apr
-    exec_prefix:   ${prefix}
-    bindir:        ${exec_prefix}/bin
-    sbindir:       ${exec_prefix}/bin
-    libdir:        ${exec_prefix}/lib
-    libexecdir:    ${exec_prefix}/libexec
-    mandir:        ${prefix}/man
-    sysconfdir:    ${prefix}/conf
-    datadir:       ${prefix}
-    installbuilddir: ${datadir}/build
-    includedir:    ${prefix}/include
-    localstatedir: ${prefix}
-    runtimedir:    ${localstatedir}/logs
-</Layout>
-
 #   SuSE 6.x layout
 <Layout SuSE>
     prefix:        /usr

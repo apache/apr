@@ -23,14 +23,13 @@ import re
 #import ezt
 
 #
-# legal platforms: aix, beos, os2, os390, unix, win32
-# 'make' users: aix, beos, os2, os390, unix, win32 (mingw)
+# legal platforms: aix, os2, os390, unix, win32
+# 'make' users: aix, os2, os390, unix, win32 (mingw)
 #
-PLATFORMS = [ 'aix', 'beos', 'os2', 'os390', 'unix', 'win32' ]
+PLATFORMS = [ 'aix', 'os2', 'os390', 'unix', 'win32' ]
 MAKE_PLATFORMS = [
   ('unix', None),
   ('aix', 'unix'),
-  ('beos', 'unix'),
   ('os2', 'unix'),
   ('os390', 'unix'),
   ('win32', 'unix'),

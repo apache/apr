@@ -19,7 +19,7 @@ Recommends: apr-lmdb%{_isa} = %{version}-%{release}
 The mission of the Apache Portable Runtime (APR) is to provide a
 free library of C data structures and routines, forming a system
 portability layer to as many operating systems as possible,
-including Unices, MS Win32, BeOS and OS/2.
+including Unices, MS Win32 and OS/2.
 
 %package devel
 Summary: APR library development kit
