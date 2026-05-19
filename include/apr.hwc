@@ -393,9 +393,7 @@ typedef  apr_uint32_t            apr_uintptr_t;
 typedef  apr_int32_t             apr_intptr_t;
 #endif
 
-/* Are we big endian? */
-/* XXX: Fatal assumption on Alpha platforms */
-#define APR_IS_BIGENDIAN        0
+#cmakedefine01 APR_IS_BIGENDIAN
 
 /* Mechanisms to properly type numeric literals */
 
