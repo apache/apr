@@ -28,7 +28,7 @@
 #include "apr_mmap.h"
 #include "apr_errno.h"
 
-#if APR_HAS_MMAP || defined(BEOS)
+#if APR_HAS_MMAP
 
 APR_DECLARE(apr_status_t) apr_mmap_offset(void **addr, apr_mmap_t *mmap,
                                           apr_off_t offset)

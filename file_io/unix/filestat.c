@@ -43,7 +43,7 @@ static apr_filetype_e filetype_from_mode(mode_t mode)
     case S_IFFIFO:
         type = APR_PIPE; break;
 #endif
-#if !defined(BEOS) && defined(S_IFSOCK)
+#if defined(S_IFSOCK)
     case S_IFSOCK:
         type = APR_SOCK; break;
 #endif
@@ -57,7 +57,7 @@ static apr_filetype_e filetype_from_mode(mode_t mode)
             type = APR_PIPE;
 	} else
 #endif
-#if !defined(BEOS) && !defined(S_IFSOCK) && defined(S_ISSOCK)
+#if !defined(S_IFSOCK) && defined(S_ISSOCK)
     	if (S_ISSOCK(mode)) {
             type = APR_SOCK;
 	} else

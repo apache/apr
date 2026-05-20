@@ -21,8 +21,8 @@
 #include "apr_support.h"
 
 /* The only case where we don't use wait_for_io_or_timeout is on
- * pre-BONE BeOS, so this check should be sufficient and simpler */
-#if !defined(BEOS_R5) && !defined(OS2) && APR_FILES_AS_SOCKETS
+ * OS/2, so this check should be sufficient and simpler */
+#if !defined(OS2) && APR_FILES_AS_SOCKETS
 #define USE_WAIT_FOR_IO
 #endif
 

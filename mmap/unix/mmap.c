@@ -26,9 +26,6 @@
 #include "apr_portable.h"
 
 /* System headers required for the mmap library */
-#ifdef BEOS
-#include <kernel/OS.h>
-#endif
 #if APR_HAVE_STRING_H
 #include <string.h>
 #endif
@@ -45,7 +42,7 @@
 #include <sys/mman.h>
 #endif
 
-#if APR_HAS_MMAP || defined(BEOS)
+#if APR_HAS_MMAP
 
 static apr_status_t mmap_cleanup(void *themmap)
 {
@@ -63,11 +60,7 @@ static apr_status_t mmap_cleanup(void *themmap)
         return APR_SUCCESS;
     }
 
-#ifdef BEOS
-    rv = delete_area(mm->area);
-#else
     rv = munmap((char *)mm->mm - mm->poffset, mm->size + mm->poffset);
-#endif
     mm->mm = (void *)-1;
 
     if (rv == 0) {
@@ -82,14 +75,9 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
                                           apr_pool_t *cont)
 {
     void *mm;
-#ifdef BEOS
-    area_id aid = -1;
-    uint32 pages = 0;
-#else
     static long psize;
     apr_off_t poffset = 0;
     apr_int32_t native_flags = 0;
-#endif
 
 #if APR_HAS_LARGE_FILES && defined(HAVE_MMAP64)
 #define mmap mmap64
@@ -105,30 +93,6 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
     if (file == NULL || file->filedes == -1 || file->buffered)
         return APR_EBADF;
     (*new) = (apr_mmap_t *)apr_pcalloc(cont, sizeof(apr_mmap_t));
-
-#ifdef BEOS
-    /* XXX: mmap shouldn't really change the seek offset */
-    apr_file_seek(file, APR_SET, &offset);
-
-    /* There seems to be some strange interactions that mean our area must
-     * be set as READ & WRITE or writev will fail!  Go figure...
-     * So we ignore the value in flags and always ask for both READ and WRITE
-     */
-    pages = (size + B_PAGE_SIZE -1) / B_PAGE_SIZE;
-    aid = create_area("apr_mmap", &mm , B_ANY_ADDRESS, pages * B_PAGE_SIZE,
-        B_NO_LOCK, B_WRITE_AREA|B_READ_AREA);
-
-    if (aid < B_NO_ERROR) {
-        /* we failed to get an area we can use... */
-        *new = NULL;
-        return APR_ENOMEM;
-    }
-
-    if (aid >= B_NO_ERROR)
-        read(file->filedes, mm, size);
-
-    (*new)->area = aid;
-#else
 
     if (flag & APR_MMAP_WRITE) {
         native_flags |= PROT_WRITE;
@@ -158,7 +122,6 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
     }
 
     mm = (char *)mm + poffset;
-#endif
 
     (*new)->mm = mm;
     (*new)->size = size;

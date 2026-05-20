@@ -39,7 +39,7 @@
 
 static const char * const apr1_id = "$apr1$";
 
-#if !defined(WIN32) && !defined(BEOS) && !defined(NETWARE)
+#if !defined(WIN32) && !defined(NETWARE)
 #if defined(APU_CRYPT_THREADSAFE) || !APR_HAS_THREADS || \
     defined(CRYPT_R_CRYPTD) || defined(CRYPT_R_STRUCT_CRYPT_DATA)
 
@@ -92,7 +92,7 @@ static void crypt_mutex_unlock()
 #endif
 #endif
 
-#if defined(WIN32) || defined(BEOS) || defined(__ANDROID__)
+#if defined(WIN32) || defined(__ANDROID__)
 #define CRYPT_MISSING 1
 #else
 #define CRYPT_MISSING 0

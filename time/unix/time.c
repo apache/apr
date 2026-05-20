@@ -228,8 +228,6 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t)
 {
 #ifdef OS2
     DosSleep((t + 999) / 1000);
-#elif defined(BEOS)
-    snooze(t);
 #elif defined(HAVE_NANOSLEEP)
     struct timespec ts;
     ts.tv_sec = t / APR_USEC_PER_SEC;

@@ -20,22 +20,8 @@
 
 #include "apr_arch_inherit.h"
 
-/* Figure out how to get pipe block/nonblock on BeOS...
- * Basically, BONE7 changed things again so that ioctl didn't work,
- * but now fcntl does, hence we need to do this extra checking.
- * The joys of beta programs. :-)
- */
-#if defined(BEOS)
-#if !defined(BONE7)
-# define BEOS_BLOCKING 1
-#else
-# define BEOS_BLOCKING 0
-#endif
-#endif
-
 static apr_status_t pipeblock(apr_file_t *thepipe)
 {
-#if !defined(BEOS) || !BEOS_BLOCKING
       int fd_flags;
 
       fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
@@ -52,18 +38,6 @@ static apr_status_t pipeblock(apr_file_t *thepipe)
       if (fcntl(thepipe->filedes, F_SETFL, fd_flags) == -1) {
           return errno;
       }
-#else /* BEOS_BLOCKING */
-
-#  if BEOS_BONE /* This only works on BONE 0-6 */
-      int on = 0;
-      if (ioctl(thepipe->filedes, FIONBIO, &on, sizeof(on)) < 0) {
-          return errno;
-      }
-#  else /* "classic" BeOS doesn't support this at all */
-      return APR_ENOTIMPL;
-#  endif
-
-#endif /* !BEOS_BLOCKING */
 
     thepipe->blocking = BLK_ON;
     return APR_SUCCESS;
@@ -71,7 +45,6 @@ static apr_status_t pipeblock(apr_file_t *thepipe)
 
 static apr_status_t pipenonblock(apr_file_t *thepipe)
 {
-#if !defined(BEOS) || !BEOS_BLOCKING
       int fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
 
 #  if defined(O_NONBLOCK)
@@ -87,19 +60,6 @@ static apr_status_t pipenonblock(apr_file_t *thepipe)
       if (fcntl(thepipe->filedes, F_SETFL, fd_flags) == -1) {
           return errno;
       }
-
-#else /* BEOS_BLOCKING */
-
-#  if BEOS_BONE /* This only works on BONE 0-6 */
-      int on = 1;
-      if (ioctl(thepipe->filedes, FIONBIO, &on, sizeof(on)) < 0) {
-          return errno;
-      }
-#  else /* "classic" BeOS doesn't support this at all */
-      return APR_ENOTIMPL;
-#  endif
-
-#endif /* !BEOS_BLOCKING */
 
     thepipe->blocking = BLK_OFF;
     return APR_SUCCESS;

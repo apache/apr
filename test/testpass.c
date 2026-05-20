@@ -27,7 +27,7 @@
 #include "abts.h"
 #include "testutil.h"
 
-#if defined(WIN32) || defined(BEOS)
+#if defined(WIN32)
 #define CRYPT_ALGO_SUPPORTED 0
 #else
 #define CRYPT_ALGO_SUPPORTED 1

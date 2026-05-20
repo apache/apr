@@ -129,7 +129,7 @@ static apr_filetype_e filetype_from_dirent_type(int type)
     case DT_FIFO:
         return APR_PIPE;
 #endif
-#if !defined(BEOS) && defined(DT_SOCK)
+#if defined(DT_SOCK)
     case DT_SOCK:
         return APR_SOCK;
 #endif

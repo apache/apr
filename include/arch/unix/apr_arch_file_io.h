@@ -69,22 +69,13 @@
 #if APR_HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#ifdef BEOS
-#include <kernel/OS.h>
-#endif
 /* Hunting down DEV_BSIZE if not from dirent.h, sys/stat.h etc */
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 
-#if BEOS_BONE
-# ifndef BONE7
-  /* prior to BONE/7 fd_set & select were defined in sys/socket.h */
-#  include <sys/socket.h>
-# else
-  /* Be moved the fd_set stuff and also the FIONBIO definition... */
-#  include <sys/ioctl.h>
-# endif
+#if APR_HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
 #endif
 /* End System headers */
 

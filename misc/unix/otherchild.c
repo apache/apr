@@ -30,9 +30,6 @@
 #if APR_HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#ifdef BEOS
-#include <sys/socket.h> /* for fd_set definition! */
-#endif
 
 static apr_other_child_rec_t *other_children = NULL;
 

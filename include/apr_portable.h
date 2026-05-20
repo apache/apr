@@ -87,27 +87,6 @@ typedef struct tm             apr_os_exp_time_t;
 typedef HMODULE               apr_os_dso_handle_t;
 typedef void*                 apr_os_shm_t;
 
-#elif defined(__BEOS__)
-#include <kernel/OS.h>
-#include <kernel/image.h>
-
-struct apr_os_proc_mutex_t {
-	sem_id sem;
-	int32  ben;
-};
-
-typedef int                   apr_os_file_t;
-typedef DIR                   apr_os_dir_t;
-typedef int                   apr_os_sock_t;
-typedef struct apr_os_proc_mutex_t  apr_os_proc_mutex_t;
-typedef thread_id             apr_os_thread_t;
-typedef thread_id             apr_os_proc_t;
-typedef int                   apr_os_threadkey_t;
-typedef struct timeval        apr_os_imp_time_t;
-typedef struct tm             apr_os_exp_time_t;
-typedef image_id              apr_os_dso_handle_t;
-typedef void*                 apr_os_shm_t;
-
 #else
 /* Any other OS should go above this one.  This is the lowest common
  * denominator typedefs for  all UNIX-like systems.  :)

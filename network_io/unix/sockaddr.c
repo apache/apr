@@ -534,7 +534,7 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
     apr_sockaddr_t *prev_sa;
     int curaddr;
 #if APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
-    defined(HAVE_GETHOSTBYNAME_R) && !defined(BEOS)
+    defined(HAVE_GETHOSTBYNAME_R)
 #ifdef GETHOSTBYNAME_R_HOSTENT_DATA
     struct hostent_data hd;
 #else
@@ -565,7 +565,7 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
     }
     else {
 #if APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
-    defined(HAVE_GETHOSTBYNAME_R) && !defined(BEOS)
+    defined(HAVE_GETHOSTBYNAME_R)
 #if defined(GETHOSTBYNAME_R_HOSTENT_DATA)
         /* AIX, HP/UX, D/UX et alia */
         gethostbyname_r(hostname, &hs, &hd);
@@ -805,7 +805,7 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
     return APR_SUCCESS;
 #else
 #if APR_HAS_THREADS && !defined(GETHOSTBYADDR_IS_THREAD_SAFE) && \
-    defined(HAVE_GETHOSTBYADDR_R) && !defined(BEOS)
+    defined(HAVE_GETHOSTBYADDR_R)
 #ifdef GETHOSTBYNAME_R_HOSTENT_DATA
     struct hostent_data hd;
 #else

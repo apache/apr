@@ -21,11 +21,6 @@
 #include "apr_portable.h"
 #include "apr_arch_inherit.h"
 
-#ifdef BEOS_R5
-#undef close
-#define close closesocket
-#endif /* BEOS_R5 */
-
 #if APR_HAVE_SOCKADDR_UN
 #define GENERIC_INADDR_ANY_LEN  sizeof(struct sockaddr_un)
 #else
@@ -81,12 +76,6 @@ static void set_socket_vars(apr_socket_t *sock, int family, int type, int protoc
     apr_sockaddr_vars_set(sock->local_addr, family, 0);
     apr_sockaddr_vars_set(sock->remote_addr, family, 0);
     sock->options = 0;
-#if defined(BEOS) && !defined(BEOS_BONE)
-    /* BeOS pre-BONE has TCP_NODELAY on by default and it can't be
-     * switched off!
-     */
-    sock->options |= APR_TCP_NODELAY;
-#endif
 }
 
 static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
@@ -137,28 +126,7 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
 #endif
     alloc_socket(new, cont);
 
-#ifndef BEOS_R5
     (*new)->socketdes = socket(family, type|flags, protocol);
-#else
-    /* For some reason BeOS R5 has an unconventional protocol numbering,
-     * so we need to translate here. */
-    switch (protocol) {
-    case 0:
-        (*new)->socketdes = socket(family, type|flags, 0);
-        break;
-    case APR_PROTO_TCP:
-        (*new)->socketdes = socket(family, type|flags, IPPROTO_TCP);
-        break;
-    case APR_PROTO_UDP:
-        (*new)->socketdes = socket(family, type|flags, IPPROTO_UDP);
-        break;
-    case APR_PROTO_SCTP:
-    default:
-        errno = EPROTONOSUPPORT;
-        (*new)->socketdes = -1;
-        break;
-    }
-#endif /* BEOS_R5 */
 
 #if APR_HAVE_IPV6
     if ((*new)->socketdes < 0 && ofamily == APR_UNSPEC) {

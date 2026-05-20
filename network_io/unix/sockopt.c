@@ -20,8 +20,6 @@
 
 static apr_status_t soblock(int sd)
 {
-/* BeOS uses setsockopt at present for non blocking... */
-#ifndef BEOS
     int fd_flags;
 
     fd_flags = fcntl(sd, F_GETFL, 0);
@@ -37,17 +35,11 @@ static apr_status_t soblock(int sd)
     if (fcntl(sd, F_SETFL, fd_flags) == -1) {
         return errno;
     }
-#else
-    int on = 0;
-    if (setsockopt(sd, SOL_SOCKET, SO_NONBLOCK, &on, sizeof(int)) < 0)
-        return errno;
-#endif /* BEOS */
     return APR_SUCCESS;
 }
 
 static apr_status_t sononblock(int sd)
 {
-#ifndef BEOS
     int fd_flags;
 
     fd_flags = fcntl(sd, F_GETFL, 0);
@@ -63,11 +55,6 @@ static apr_status_t sononblock(int sd)
     if (fcntl(sd, F_SETFL, fd_flags) == -1) {
         return errno;
     }
-#else
-    int on = 1;
-    if (setsockopt(sd, SOL_SOCKET, SO_NONBLOCK, &on, sizeof(int)) < 0)
-        return errno;
-#endif /* BEOS */
     return APR_SUCCESS;
 }
 
@@ -241,15 +228,6 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
             apr_set_option(sock, APR_TCP_NODELAY, on);
         }
 #else
-        /* BeOS pre-BONE has TCP_NODELAY set by default.
-         * As it can't be turned off we might as well check if they're asking
-         * for it to be turned on!
-         */
-#ifdef BEOS
-        if (on == 1)
-            return APR_SUCCESS;
-        else
-#endif
         return APR_ENOTIMPL;
 #endif
         break;
@@ -372,7 +350,6 @@ apr_status_t apr_socket_opt_get(apr_socket_t *sock,
 
 apr_status_t apr_socket_atmark(apr_socket_t *sock, int *atmark)
 {
-#ifndef BEOS_R5
     int oobmark;
 
     if (ioctl(sock->socketdes, SIOCATMARK, (void*) &oobmark) < 0)
@@ -381,18 +358,11 @@ apr_status_t apr_socket_atmark(apr_socket_t *sock, int *atmark)
     *atmark = (oobmark != 0);
 
     return APR_SUCCESS;
-#else /* BEOS_R5 */
-    return APR_ENOTIMPL;
-#endif
 }
 
 apr_status_t apr_gethostname(char *buf, apr_int32_t len, apr_pool_t *cont)
 {
-#ifdef BEOS_R5
-    if (gethostname(buf, len) == 0) {
-#else
     if (gethostname(buf, len) != 0) {
-#endif
         buf[0] = '\0';
         return errno;
     }

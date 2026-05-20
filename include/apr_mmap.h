@@ -28,10 +28,6 @@
 #include "apr_ring.h"
 #include "apr_file_io.h"        /* for apr_file_t */
 
-#ifdef BEOS
-#include <kernel/OS.h>
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -53,19 +49,15 @@ typedef struct apr_mmap_t            apr_mmap_t;
 /**
  * @remark
  * As far as I can tell the only really sane way to store an MMAP is as a
- * void * and a length.  BeOS requires this area_id, but that's just a little
- * something extra.  I am exposing this type, because it doesn't make much
- * sense to keep it private, and opening it up makes some stuff easier in
- * Apache.
+ * void * and a length.  I am exposing this type, because it doesn't make
+ * much sense to keep it private, and opening it up makes some stuff easier
+ * in Apache.
  */
 /** The MMAP structure */
 struct apr_mmap_t {
     /** The pool the mmap structure was allocated out of. */
     apr_pool_t *cntxt;
-#if defined(BEOS)
-    /** An area ID.  Only valid on BeOS */
-    area_id area;
-#elif defined(WIN32)
+#if defined(WIN32)
     /** The handle of the file mapping */
     HANDLE mhandle;
     /** The start of the real memory page area (mapped view) */

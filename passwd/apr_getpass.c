@@ -83,7 +83,7 @@
 
 #if !defined(HAVE_GETPASS) && !defined(HAVE_GETPASSPHRASE) && !defined(HAVE_GETPASS_R)
 
-/* MPE, Win32, and BeOS all lack a native getpass() */
+/* MPE and  Win32 all lack a native getpass() */
 
 #if !defined(HAVE_TERMIOS_H) && !defined(WIN32)
 /*

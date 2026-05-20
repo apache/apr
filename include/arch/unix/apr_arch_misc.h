@@ -45,10 +45,6 @@
 #include <string.h>
 #endif
 
-#ifdef BEOS
-#include <kernel/OS.h>
-#endif
-
 struct apr_other_child_rec_t {
     apr_pool_t *p;
     struct apr_other_child_rec_t *next;

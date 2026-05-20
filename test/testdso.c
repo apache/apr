@@ -29,7 +29,7 @@
 
 #if APR_HAS_DSO
 
-#if defined(BEOS) || defined(__MVS__)
+#if defined(__MVS__)
 # define MOD_NAME "mod_test.so"
 #elif defined(WIN32)
 # define MOD_NAME TESTBINPATH "mod_test.dll"

@@ -22,7 +22,7 @@ APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize)
         return errno;
     }
 
-#if !defined(MPE) && !defined(OS2) && !defined(TPF) && !defined(BEOS)
+#if !defined(MPE) && !defined(OS2) && !defined(TPF)
     /* Don't detach for MPE because child processes can't survive the death of
      * the parent. */
     if (daemonize) {
