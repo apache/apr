@@ -1057,13 +1057,13 @@ static apr_status_t create_pool(apr_pool_t **newpool,
                                 apr_abortfunc_t abort_fn,
                                 apr_allocator_t *allocator)
 {
-    const int need_allocator = (allocator == NULL);
+    const int create_unmanaged_pool = (parent == NULL);
+    const int need_new_allocator = (allocator == NULL);
     apr_pool_t *pool;
     apr_memnode_t *node;
 
-    if (!parent) {
-        /* We're creating an unmanaged pool. */
-        if (need_allocator) {
+    if (create_unmanaged_pool) {
+        if (need_new_allocator) {
             if (apr_allocator_create(&allocator) != APR_SUCCESS) {
                 if (abort_fn)
                     abort_fn(APR_ENOMEM);
@@ -1076,7 +1076,7 @@ static apr_status_t create_pool(apr_pool_t **newpool,
         if (!abort_fn)
             abort_fn = parent->abort_fn;
 
-        if (need_allocator)
+        if (need_new_allocator)
             allocator = parent->allocator;
     }
 
@@ -1085,7 +1085,7 @@ static apr_status_t create_pool(apr_pool_t **newpool,
         if (abort_fn)
             abort_fn(APR_ENOMEM);
 
-        if (need_allocator && allocator != NULL) {
+        if (create_unmanaged_pool && need_new_allocator && allocator != NULL) {
             /* We created a new allocator but can't allocate, so destroy it. */
             apr_allocator_destroy(allocator);
         }
