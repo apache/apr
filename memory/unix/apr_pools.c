@@ -1125,24 +1125,29 @@ static apr_status_t create_pool(apr_pool_t **newpool,
     pool->user_data = NULL;
     pool->tag = NULL;
 
-    if ((pool->parent = parent) != NULL) {
-        allocator_lock(parent->allocator);
-
-        if ((pool->sibling = parent->child) != NULL)
-            pool->sibling->ref = &pool->sibling;
-
-        parent->child = pool;
-        pool->ref = &parent->child;
-
-        allocator_unlock(parent->allocator);
+    if (create_unmanaged_pool) {
+        if (need_new_allocator)
+            allocator->owner = pool;
     }
     else {
-        pool->sibling = NULL;
-        pool->ref = NULL;
+        if ((pool->parent = parent) != NULL) {
+            allocator_lock(parent->allocator);
+
+            if ((pool->sibling = parent->child) != NULL)
+                pool->sibling->ref = &pool->sibling;
+
+            parent->child = pool;
+            pool->ref = &parent->child;
+
+            allocator_unlock(parent->allocator);
+        }
+        else {
+            pool->sibling = NULL;
+            pool->ref = NULL;
+        }
     }
 
     pool_concurrency_init(pool);
-
     *newpool = pool;
 
     return APR_SUCCESS;
