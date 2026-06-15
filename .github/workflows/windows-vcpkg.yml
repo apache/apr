@@ -38,7 +38,7 @@ jobs:
           core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
           core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Vcpkg Install
       run: C:\vcpkg\vcpkg.exe install ${{ matrix.port }} --head --overlay-ports ${{ github.workspace }}\build\vcpkg --triplet ${{ matrix.triplet }} --enforce-port-checks
