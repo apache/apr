@@ -1049,33 +1049,46 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
     APR_IF_VALGRIND(VALGRIND_DESTROY_MEMPOOL(pool));
 }
 
-APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
-                                             apr_pool_t *parent,
-                                             apr_abortfunc_t abort_fn,
-                                             apr_allocator_t *allocator)
+
+/* Create a managed or unmanaged pool. If PARENT is NULL, create an unmanaged
+   pool without a parent, otherwise create a managed pool under PARENT. */
+static apr_status_t create_pool(apr_pool_t **newpool,
+                                apr_pool_t *parent,
+                                apr_abortfunc_t abort_fn,
+                                apr_allocator_t *allocator)
 {
+    const int create_unmanaged = (parent == NULL);
+    const int need_allocator = (allocator == NULL);
     apr_pool_t *pool;
     apr_memnode_t *node;
 
-    *newpool = NULL;
+    if (create_unmanaged) {
+        if (need_allocator) {
+            if (apr_allocator_create(&allocator) != APR_SUCCESS) {
+                if (abort_fn)
+                    abort_fn(APR_ENOMEM);
 
-    if (!parent)
-        parent = global_pool;
+                return APR_ENOMEM;
+            }
+        }
+    }
+    else {
+        if (!abort_fn)
+            abort_fn = parent->abort_fn;
 
-    /* parent will always be non-NULL here except the first time a
-     * pool is created, in which case allocator is guaranteed to be
-     * non-NULL. */
-
-    if (!abort_fn && parent)
-        abort_fn = parent->abort_fn;
-
-    if (allocator == NULL)
-        allocator = parent->allocator;
+        if (need_allocator)
+            allocator = parent->allocator;
+    }
 
     if ((node = allocator_alloc(allocator,
                                 MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
         if (abort_fn)
             abort_fn(APR_ENOMEM);
+
+        if (create_unmanaged && need_allocator) {
+            /* We created the allocator; destroy it before returning. */
+            apr_allocator_destroy(allocator);
+        }
 
         return APR_ENOMEM;
     }
@@ -1111,8 +1124,13 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     pool->subprocesses = NULL;
     pool->user_data = NULL;
     pool->tag = NULL;
+    pool->parent = parent;
 
-    if ((pool->parent = parent) != NULL) {
+    if (create_unmanaged) {
+        pool->sibling = NULL;
+        pool->ref = NULL;
+    }
+    else {
         allocator_lock(parent->allocator);
 
         if ((pool->sibling = parent->child) != NULL)
@@ -1123,82 +1141,56 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
 
         allocator_unlock(parent->allocator);
     }
-    else {
-        pool->sibling = NULL;
-        pool->ref = NULL;
+
+    if (create_unmanaged && need_allocator) {
+        /* We created the allocator; set its owner. */
+        allocator->owner = pool;
     }
 
     pool_concurrency_init(pool);
-
     *newpool = pool;
 
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
+                                             apr_pool_t *parent,
+                                             apr_abortfunc_t abort_fn,
+                                             apr_allocator_t *allocator)
+{
+    *newpool = NULL;
+
+    if (!parent)
+        parent = global_pool;
+
+    /* parent will always be non-NULL here except the first time a
+     * pool is created, in which case allocator is guaranteed to be
+     * non-NULL. */
+
+    if (parent == NULL && allocator == NULL) {
+        if (abort_fn)
+            abort_fn(APR_ENOPOOL);
+
+        return APR_ENOPOOL;
+    }
+
+    return create_pool(newpool, parent, abort_fn, allocator);
 }
 
 APR_DECLARE(apr_status_t) apr_pool_create_unmanaged_ex(apr_pool_t **newpool,
                                                   apr_abortfunc_t abort_fn,
                                                   apr_allocator_t *allocator)
 {
-    apr_pool_t *pool;
-    apr_memnode_t *node;
-    apr_allocator_t *pool_allocator;
-
     *newpool = NULL;
 
-    if (!apr_pools_initialized)
-        return APR_ENOPOOL;
-    if ((pool_allocator = allocator) == NULL) {
-        if (apr_allocator_create(&pool_allocator) != APR_SUCCESS) {
-            if (abort_fn)
-                abort_fn(APR_ENOMEM);
-
-            return APR_ENOMEM;
-        }
-        if ((node = allocator_alloc(pool_allocator,
-                                    MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
-            if (abort_fn)
-                abort_fn(APR_ENOMEM);
-
-            apr_allocator_destroy(pool_allocator);
-
-            return APR_ENOMEM;
-        }
-    }
-    else if ((node = allocator_alloc(pool_allocator,
-                                     MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
+    if (!apr_pools_initialized) {
         if (abort_fn)
-            abort_fn(APR_ENOMEM);
+            abort_fn(APR_ENOPOOL);
 
-        return APR_ENOMEM;
+        return APR_ENOPOOL;
     }
 
-    node->next = node;
-    node->ref = &node->next;
-
-    pool = (apr_pool_t *)node->first_avail;
-    node->first_avail = pool->self_first_avail = (char *)pool + SIZEOF_POOL_T;
-
-    pool->allocator = pool_allocator;
-    pool->active = pool->self = node;
-    pool->abort_fn = abort_fn;
-    pool->child = NULL;
-    pool->cleanups = NULL;
-    pool->free_cleanups = NULL;
-    pool->pre_cleanups = NULL;
-    pool->subprocesses = NULL;
-    pool->user_data = NULL;
-    pool->tag = NULL;
-    pool->parent = NULL;
-    pool->sibling = NULL;
-    pool->ref = NULL;
-
-    if (!allocator)
-        pool_allocator->owner = pool;
-
-    pool_concurrency_init(pool);
-    *newpool = pool;
-
-    return APR_SUCCESS;
+    return create_pool(newpool, NULL, abort_fn, allocator);
 }
 
 /*
