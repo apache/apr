@@ -196,7 +196,7 @@ static void roundtrip(abts_case* tc, char* xml, char* expected, int lineno)
 
     apr_xml_to_text(pool, doc->root, APR_XML_X2T_FULL_NS_LANG, doc->namespaces, NULL, &actual, NULL);
 
-    abts_str_equal(tc, expected, actual, lineno);
+    abts_str_equal(NULL, tc, expected, actual, lineno);
 
     apr_pool_destroy(pool);
 }

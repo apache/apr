@@ -60,9 +60,8 @@ DECLARE_TEST_PARAMS(utf7, utf8, 0);
 #undef DECLARE_TEST_PARAMS
 
 
-static void test_conversion(abts_case *tc, apr_xlate_t *convset,
-                            const char *inbuf, const char *expected,
-                            const char *cs1, const char *cs2, apr_pool_t *pool)
+static void test_conversion(const char *ctx, abts_case *tc, apr_xlate_t *convset,
+                            const char *inbuf, const char *expected)
 {
     static char buf[1024];
     apr_size_t inbytes_left = strlen(inbuf);
@@ -82,16 +81,7 @@ static void test_conversion(abts_case *tc, apr_xlate_t *convset,
 
     buf[sizeof(buf) - outbytes_left - 1] = '\0';
 
-    {
-        /* Make the source and target encodings part of the comparison
-           so that ABTS prints them if the results don't match, otherwise
-           we wouldn't know which conversion failed. */
-        const char *const expect = apr_psprintf(pool, "%s to %s: %s",
-                                                cs1, cs2, expected);
-        const char *const result = apr_psprintf(pool, "%s to %s: %s",
-                                                cs1, cs2, buf);
-        ABTS_STR_EQUAL(tc, expect, result);
-    }
+    ABTS_CTX_STR_EQUAL(ctx, tc, expected, buf);
 }
 
 /* some iconv implementations don't support all tested transforms;
@@ -135,8 +125,8 @@ static void test_transformation(abts_case *tc, void *data)
     if (rv != APR_SUCCESS)
         return;
 
-    test_conversion(tc, convset, params->source, params->expected,
-                    params->cs1, params->cs2, p);
+    test_conversion(apr_psprintf(p, "%s to %s", params->cs1, params->cs2),
+                    tc, convset, params->source, params->expected);
 
     rv = apr_xlate_close(convset);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
