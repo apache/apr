@@ -184,11 +184,14 @@ dbd@EXEEXT@: $(OBJECTS_dbd)
 check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	teststatus=0; \
 	progfailed=""; \
+	shlibdirs="`cd ../dbm/.libs && pwd`:`cd ../dbm/.libs && pwd`"; \
+	shlibpath="`echo "$$shlibdirs:$$@shlibpath_var@" | sed -e 's/::*$$//'`"; \
+	echo "@shlibpath_var@=$$shlibpath"; \
 	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
-	        if test "$$prog" = 'dbd@EXEEXT@'; then \
+		if test "$$prog" = 'dbd@EXEEXT@'; then \
 			for driver in none @apu_dbd_tests@; do \
 				if test "$$driver" != 'none'; then \
-					@shlibpath_var@="`echo "../dbm/.libs:../dbd/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
+					@shlibpath_var@="$$shlibpath" \
 					./$$prog $$driver; \
 					status=$$?; \
 					if test $$status != 0; then \
@@ -199,7 +202,7 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 			done; \
 		elif test "$$prog" = 'sendfile@EXEEXT@'; then \
 			for mode in blocking nonblocking timeout; do \
-				@shlibpath_var@="`echo "../dbm/.libs:../dbd/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
+				@shlibpath_var@="$$shlibpath" \
 				./$$prog client $$mode startserver 127.0.0.1; \
 				status=$$?; \
 				if test $$status != 0; then \
@@ -207,8 +210,8 @@ check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 					progfailed="$$progfailed '$$prog mode $$mode'"; \
 				fi; \
 			done; \
-	        else \
-			@shlibpath_var@="`echo "../dbm/.libs:../dbd/.libs:$$@shlibpath_var@" | sed -e 's/::*$$//'`" \
+		else \
+			@shlibpath_var@="$$shlibpath" \
 			./$$prog -v; \
 			status=$$?; \
 			if test $$status != 0; then \
