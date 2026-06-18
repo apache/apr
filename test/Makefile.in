@@ -184,7 +184,7 @@ dbd@EXEEXT@: $(OBJECTS_dbd)
 check: $(TESTALL_COMPONENTS) $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	teststatus=0; \
 	progfailed=""; \
-	shlibdirs="`cd ../dbm/.libs && pwd`:`cd ../dbm/.libs && pwd`"; \
+	shlibdirs="`cd ../dbm/.libs && pwd`:`cd ../dbd/.libs && pwd`"; \
 	shlibpath="`echo "$$shlibdirs:$$@shlibpath_var@" | sed -e 's/::*$$//'`"; \
 	echo "@shlibpath_var@=$$shlibpath"; \
 	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
