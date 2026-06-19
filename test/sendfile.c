@@ -50,7 +50,7 @@ int main(void)
 #define TRL3_LEN       90000
 #define TRL3_CHAR      '@'
 
-#define TESTSF_PORT    8021
+#define TESTSF_PORT    38021
 
 #define TESTFILE       "testsf.dat"
 

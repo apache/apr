@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    rv = apr_sockaddr_info_get(&remote_sa, argv[2], APR_UNSPEC, 8021, 0, p);
+    rv = apr_sockaddr_info_get(&remote_sa, argv[2], APR_UNSPEC, 38021, 0, p);
     if (rv != APR_SUCCESS) {
         exit(-1);
     }
