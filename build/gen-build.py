@@ -12,11 +12,14 @@
 import os
 try:
   import configparser
+  def open_with_encoding(path, mode, encoding):
+    return open(path, mode, encoding=encoding)
 except ImportError:
+  # Python 2.7 compatibility
+  import codecs
   import ConfigParser as configparser
-import codecs
-import getopt
-import string
+  def open_with_encoding(path, mode, encoding):
+    return codecs.open(path, mode, encoding)
 import glob
 import re
 
@@ -190,7 +193,7 @@ def write_objects(f, legal_deps, h_deps, files):
 def extract_deps(fname, legal_deps):
   "Extract the headers this file includes."
   deps = { }
-  for line in codecs.open(fname, 'r', 'utf-8').readlines():
+  for line in open_with_encoding(fname, 'r', 'utf-8').readlines():
     if line[:8] != '#include':
       continue
     inc = _re_include.match(line).group(1)
