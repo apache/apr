@@ -354,7 +354,7 @@ APR_DECLARE(apr_status_t) apr_buffer_dup(apr_buffer_t **out,
  * @param src The second buffer
  * @param alloc The function callback to allocate memory for the buffer
  * @param ctx The context for the callback
- * @return Returns dst.
+ * @return Returns dst, or NULL if alloc is provided and returns NULL.
  */
 APR_DECLARE(apr_buffer_t *) apr_buffer_cpy(apr_buffer_t *dst,
                                            const apr_buffer_t *src,

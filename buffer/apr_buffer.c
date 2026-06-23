@@ -297,6 +297,9 @@ APR_DECLARE(apr_buffer_t *) apr_buffer_cpy(apr_buffer_t *dst,
         apr_size_t size = src->size + src->zero_terminated;
 
         void *mem = alloc(ctx, size);
+        if (!mem) {
+            return NULL;
+        }
         memcpy(mem, src->d.mem, size);
 
         dst->zero_terminated = src->zero_terminated;
