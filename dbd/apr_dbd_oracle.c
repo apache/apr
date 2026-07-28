@@ -1032,7 +1032,8 @@ static int outputParams(apr_dbd_t *sql, apr_dbd_prepared_t *stmt)
                                      &paramname[stmt->nout],
                                      &paramnamelen[stmt->nout],
                                      OCI_ATTR_NAME, sql->err);
-            ++stmt->nout;
+            if (++stmt->nout == DBD_ORACLE_MAX_COLUMNS)
+                return 1;
         }
     }
     switch (sql->status) {
