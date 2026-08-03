@@ -288,8 +288,10 @@ APR_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset,
         const char *inbufptr = inbuf;
         char *outbufptr = outbuf;
         apr_size_t translated;
+        apr_size_t zero = 0;
+        apr_size_t *inbytes_ptr = inbytes_left ? inbytes_left : &zero;
         translated = iconv(convset->ich, (ICONV_INBUF_TYPE)&inbufptr,
-                           inbytes_left, &outbufptr, outbytes_left);
+                           inbytes_ptr, &outbufptr, outbytes_left);
 
         /* If everything went fine but we ran out of buffer, don't
          * report it as an error.  Caller needs to look at the two
