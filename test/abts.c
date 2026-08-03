@@ -94,7 +94,7 @@ static void end_suite(abts_suite *suite)
 abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name_full)
 {
     sub_suite *subsuite;
-    char *p;
+    const char *p;
     const char *suite_name;
     curr_char = 0;
 

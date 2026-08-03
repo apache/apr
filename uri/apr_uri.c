@@ -914,7 +914,7 @@ deal_with_path:
              * RFC 3986 3.3: If we have no scheme and no authority,
              * the leading segment of a relative path must not contain a ':'.
              */
-            char *first_slash = strchr(uri, '/');
+            const char *first_slash = strchr(uri, '/');
             if (first_slash) {
                 while (s < first_slash) {
                     if (s[0] == ':')

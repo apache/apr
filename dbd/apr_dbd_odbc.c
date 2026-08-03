@@ -1415,7 +1415,8 @@ static const char *odbc_error(apr_dbd_t *handle, int errnum)
 static const char *odbc_escape(apr_pool_t *pool, const char *s,
                                apr_dbd_t *handle)
 {
-    char *newstr, *src, *dst, *sq;
+    char *newstr, *dst;
+    const char *src, *sq;
     int qcount;
 
     /* return the original if there are no single-quotes */
@@ -1427,7 +1428,7 @@ static const char *odbc_escape(apr_pool_t *pool, const char *s,
     newstr = apr_palloc(pool, strlen(s) + qcount + 1);
 
     /* move chars, doubling all single-quotes */
-    src = (char *)s;
+    src = s;
     for (dst = newstr; *src; src++) {
         if ((*dst++ = *src) == '\'')
             *dst++ = '\'';
