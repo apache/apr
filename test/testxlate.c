@@ -52,11 +52,11 @@ DECLARE_TEST_PARAMS(utf8, latin1, 0);
 DECLARE_TEST_PARAMS(latin1, utf8, 0);
 DECLARE_TEST_PARAMS(latin1, latin2, 1);
 DECLARE_TEST_PARAMS(latin2, latin1, 1);
-DECLARE_TEST_PARAMS(utf8, utf7, 0);
+DECLARE_TEST_PARAMS(utf8, utf7, 1);
 /* NOTE: The system libiconv on macOS has a bug in the UTF-7 to UTF-8
  *       conversion that leaves the trailing '-' in the translated
  *       string, causing this test to fail. */
-DECLARE_TEST_PARAMS(utf7, utf8, 0);
+DECLARE_TEST_PARAMS(utf7, utf8, 1);
 #undef DECLARE_TEST_PARAMS
 
 
