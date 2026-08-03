@@ -853,26 +853,42 @@ APR_DECLARE(apr_status_t) apr_redis_setex(apr_redis_t *rc,
     return rv;
 }
 
+/* Redis upstream default is 512Mb. This code will try to read the entire
+ * response into a brigade, and then copy that into a pool, so impose
+ * some reasonable limit since RAM consumption will be double this.
+ * https://redis.io/docs/latest/develop/reference/protocol-spec/#bulk-strings
+ */
+#ifndef APR_REDIS_MAX_BULK_LEN
+#define APR_REDIS_MAX_BULK_LEN (64 * 1024 * 1024)
+#endif
+
 static apr_status_t grab_bulk_resp(apr_redis_server_t *rs, apr_redis_t *rc,
                                    apr_redis_conn_t *conn, apr_pool_t *p,
                                    char **baton, apr_size_t *new_length)
 {
-    char *length;
+    /* conn->buffer contains "$<length>\r\n" */
+    char *length = conn->buffer + 1;
     char *last;
     apr_status_t rv;
     apr_size_t len = 0;
+    long val;
+
     *new_length = 0;
+    *baton = NULL;
 
-    length = apr_strtok(conn->buffer + 1, " ", &last);
-    if (length) {
-        len = strtol(length, (char **) NULL, 10);
+    errno = 0;
+    last = NULL;
+    val = strtol(length, &last, 10);
+    if (errno || last == NULL || last == length || *last != '\r'
+        || val < 0 || val > APR_REDIS_MAX_BULK_LEN) {
+        rs_bad_conn(rs, conn);
+        if (rc)
+            apr_redis_disable_server(rc, rs);
+        return val > APR_REDIS_MAX_BULK_LEN ? APR_ENOSPC : APR_EGENERAL;
     }
+    len = (apr_size_t)val;
 
-    if (len == 0) {
-        *new_length = 0;
-        *baton = NULL;
-    }
-    else {
+    if (len) {
         apr_bucket_brigade *bbb;
         apr_bucket *e;
 
@@ -907,6 +923,11 @@ static apr_status_t grab_bulk_resp(apr_redis_server_t *rs, apr_redis_t *rc,
 
         conn->bb = bbb;
 
+        if (len < 2) {
+            *baton = NULL;
+            *new_length = 0;
+            return APR_EGENERAL;
+        }
         *new_length = len - 2;
         (*baton)[*new_length] = '\0';
     }
@@ -992,6 +1013,10 @@ APR_DECLARE(apr_status_t) apr_redis_getp(apr_redis_t *rc,
     }
     else if (strncmp(RS_TYPE_STRING, conn->buffer, RS_TYPE_STRING_LEN) == 0) {
         rv = grab_bulk_resp(rs, rc, conn, p, baton, new_length);
+        if (rv != APR_SUCCESS) {
+            /* grab_bulk_resp already called rs_bad_conn; do not also release */
+            return rv;
+        }
     }
     else {
         rv = APR_EGENERAL;
@@ -1172,12 +1197,19 @@ apr_redis_info(apr_redis_server_t *rs, apr_pool_t *p, char **baton)
         return rv;
     }
 
-    if (strncmp(RS_TYPE_STRING, conn->buffer, RS_TYPE_STRING_LEN) == 0) {
+    if (strncmp(RS_NOT_FOUND_GET, conn->buffer, RS_NOT_FOUND_GET_LEN) == 0) {
+        rv = APR_NOTFOUND;
+    }
+    else if (strncmp(RS_TYPE_STRING, conn->buffer, RS_TYPE_STRING_LEN) == 0) {
         apr_size_t nl;
         rv = grab_bulk_resp(rs, NULL, conn, p, baton, &nl);
+        if (rv != APR_SUCCESS) {
+            /* grab_bulk_resp already called rs_bad_conn; do not also release */
+            return rv;
+        }
     } else {
         rs_bad_conn(rs, conn);
-        rv = APR_EGENERAL;
+        return APR_EGENERAL;
     }
 
     rs_release_conn(rs, conn);
