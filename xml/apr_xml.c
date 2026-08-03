@@ -44,6 +44,10 @@ static const char APR_KW_xmlns_lang[] = { 0x78, 0x6D, 0x6C, 0x3A, 0x6C, 0x61, 0x
           (name[2] == 0x4C || name[2] == 0x6C) )
 
 
+#ifndef APR_XML_MAX_DEPTH
+#define APR_XML_MAX_DEPTH 256
+#endif
+
 /* struct for scoping namespace declarations */
 typedef struct apr_xml_ns_scope {
     const char *prefix;         /* prefix used for this ns */
@@ -129,6 +133,11 @@ static void start_handler(void *userdata, const char *name, const char **attrs)
     /* punt once we find an error */
     if (parser->error)
         return;
+
+    if (++parser->depth > APR_XML_MAX_DEPTH) {
+        parser->error = APR_XML_ERROR_DEPTH_LIMIT;
+        return;
+    }
 
     elem = apr_pcalloc(parser->p, sizeof(*elem));
 
@@ -303,6 +312,8 @@ static void end_handler(void *userdata, const char *name)
     if (parser->error)
         return;
 
+    parser->depth--;
+
     /* pop up one level */
     parser->cur_elem = parser->cur_elem->parent;
 }
@@ -389,6 +400,11 @@ APR_DECLARE(char *) apr_xml_parser_geterror(apr_xml_parser *parser,
                             "XML parser error code: %s (%d)",
                             parser->xp_msg, parser->xp_err);
         return errbuf;
+
+    case APR_XML_ERROR_DEPTH_LIMIT:
+        msg = "The maximum element nesting limit ("
+            APR_STRINGIFY(APR_XML_MAX_DEPTH) ") was exceeded.";
+        break;
 
     case APR_XML_ERROR_PARSE_DONE:
         msg = "The parser is not active.";

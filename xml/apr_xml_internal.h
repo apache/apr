@@ -40,8 +40,11 @@ struct apr_xml_parser {
     int error;
 #define APR_XML_ERROR_EXPAT             1
 #define APR_XML_ERROR_PARSE_DONE        2
-/* also: public APR_XML_NS_ERROR_* values (if any) */
+#define APR_XML_ERROR_DEPTH_LIMIT       3
 
+/* also: public APR_XML_NS_ERROR_* values (if any) */
+    /** depth of element tree. */
+    unsigned int depth;
     /** the actual (Expat) XML parser */
     XML_Parser xp;
     /** stored Expat error code */

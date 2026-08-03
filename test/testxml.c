@@ -20,6 +20,10 @@
 #include "abts.h"
 #include "testutil.h"
 
+#ifndef APR_XML_MAX_DEPTH
+#define APR_XML_MAX_DEPTH 256
+#endif
+
 static apr_status_t create_dummy_file_error(abts_case *tc, apr_pool_t *p,
                                             apr_file_t **fd)
 {
@@ -161,6 +165,33 @@ static void test_billion_laughs(abts_case *tc, void *data)
 
     rv = apr_xml_parse_file(p, &parser, &doc, fd, 2000);
     ABTS_TRUE(tc, rv != APR_SUCCESS);
+
+    apr_file_close(fd);
+}
+
+static void test_nesting_limit(abts_case *tc, void *data)
+{
+    apr_file_t *fd;
+    apr_xml_parser *parser = NULL;
+    apr_xml_doc *doc;
+    apr_status_t rv;
+    char errbuf[256], *err;
+
+    rv = apr_file_open(&fd, "data/nesting.xml",
+                       APR_FOPEN_READ, 0, p);
+    APR_ASSERT_SUCCESS(tc, "open nesting.xml", rv);
+
+    rv = apr_xml_parse_file(p, &parser, &doc, fd, 2000);
+    ABTS_TRUE(tc, rv != APR_SUCCESS);
+
+    if (parser) {
+        err = apr_xml_parser_geterror(parser, errbuf, sizeof errbuf);
+        ABTS_STR_EQUAL(tc,
+                       "The maximum element nesting limit "
+                       "(" APR_STRINGIFY(APR_XML_MAX_DEPTH) ")"
+                       " was exceeded.",
+                       err);
+    }
 
     apr_file_close(fd);
 }
@@ -330,6 +361,7 @@ abts_suite *testxml(abts_suite *suite)
 
     abts_run_test(suite, test_xml_parser, NULL);
     abts_run_test(suite, test_billion_laughs, NULL);
+    abts_run_test(suite, test_nesting_limit, NULL);
     abts_run_test(suite, test_xml_roundtrip, NULL);
     abts_run_test(suite, test_xml_parser_geterror, NULL);
 

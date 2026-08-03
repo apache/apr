@@ -369,11 +369,16 @@ static char * get_xmllite_errmsg(HRESULT hr)
 
 static apr_status_t handle_xmllite_err(apr_xml_parser *parser, HRESULT hr)
 {
-    parser->xp_err = hr;
-
-    parser->xp_msg = get_xmllite_errmsg(hr);
-    /* this misnomer is used as a test for (any) parser error. */
-    parser->error = APR_XML_ERROR_EXPAT;
+    /* Check if this is XMLLite's depth limit error */
+    if (hr == SC_E_MAXELEMENTDEPTH) {
+        parser->error = APR_XML_ERROR_DEPTH_LIMIT;
+    }
+    else {
+        parser->xp_err = hr;
+        parser->xp_msg = get_xmllite_errmsg(hr);
+        /* this misnomer is used as a test for (any) parser error. */
+        parser->error = APR_XML_ERROR_EXPAT;
+    }
 
     return APR_EGENERAL;
 }

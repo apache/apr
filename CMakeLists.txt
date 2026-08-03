@@ -628,6 +628,7 @@ if(APR_BUILD_TESTAPR)
   # copy data files to build directory so that we can run programs from there
   file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/data)
   file(COPY ${PROJECT_SOURCE_DIR}/test/data/billion-laughs.xml
+            ${PROJECT_SOURCE_DIR}/test/data/nesting.xml
             ${PROJECT_SOURCE_DIR}/test/data/file_datafile.txt
             ${PROJECT_SOURCE_DIR}/test/data/mmap_datafile.txt
             ${PROJECT_SOURCE_DIR}/test/data/mmap_large_datafile.txt
