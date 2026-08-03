@@ -453,7 +453,7 @@ APR_DECLARE(apr_status_t) apr_match_glob(const char *pattern,
      * we really need apr_filepath_basename, which will be coming as soon as
      * I get to it.  rbb
      */
-    char *idx = strrchr(pattern, '/');
+    const char *idx = strrchr(pattern, '/');
 
     if (idx == NULL) {
         idx = strrchr(pattern, '\\');
