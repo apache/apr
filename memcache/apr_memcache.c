@@ -677,6 +677,11 @@ static apr_status_t get_server_line(apr_memcache_conn_t *conn)
     conn->blen = bsize;
     conn->buffer[bsize] = '\0';
 
+    /* Validate CRLF line termination to prevent integer underflow attacks */
+    if (bsize < 2 || conn->buffer[bsize-2] != '\r' || conn->buffer[bsize-1] != '\n') {
+        return APR_EGENERAL;
+    }
+
     return apr_brigade_cleanup(conn->tb);
 }
 
@@ -1169,9 +1174,14 @@ apr_memcache_version(apr_memcache_server_t *ms,
     }
 
     if (strncmp(MS_VERSION, conn->buffer, MS_VERSION_LEN) == 0) {
-        *baton = apr_pstrmemdup(p, conn->buffer+MS_VERSION_LEN+1,
-                                conn->blen - MS_VERSION_LEN - 2);
-        rv = APR_SUCCESS;
+        if (conn->blen < MS_VERSION_LEN + 2) {
+            rv = APR_EGENERAL;
+        }
+        else {
+            *baton = apr_pstrmemdup(p, conn->buffer+MS_VERSION_LEN+1,
+                                    conn->blen - MS_VERSION_LEN - 2);
+            rv = APR_SUCCESS;
+        }
     }
     else {
         rv = APR_EGENERAL;
@@ -1638,23 +1648,35 @@ apr_memcache_multgetp(apr_memcache_t *mc,
 static const char *stat_read_string(apr_pool_t *p, char *buf, apr_size_t len)
 {
     /* remove trailing \r\n and null char */
+    if (len < 2) {
+        return apr_pstrdup(p, "");
+    }
     return apr_pstrmemdup(p, buf, len-2);
 }
 
 static apr_uint32_t stat_read_uint32(apr_pool_t *p, char *buf, apr_size_t  len)
 {
+    if (len < 2) {
+        return 0;
+    }
     buf[len-2] = '\0';
     return atoi(buf);
 }
 
 static apr_uint64_t stat_read_uint64(apr_pool_t *p, char *buf, apr_size_t  len)
 {
+    if (len < 2) {
+        return 0;
+    }
     buf[len-2] = '\0';
     return apr_atoi64(buf);
 }
 
 static apr_time_t stat_read_time(apr_pool_t *p, char *buf, apr_size_t  len)
 {
+    if (len < 2) {
+        return 0;
+    }
     buf[len-2] = '\0';
     return apr_time_from_sec(atoi(buf));
 }
@@ -1666,6 +1688,9 @@ static apr_time_t stat_read_rtime(apr_pool_t *p, char *buf, apr_size_t  len)
     char *usecs;
     const char *sep = ":.";
 
+    if (len < 2) {
+        return apr_time_make(0, 0);
+    }
     buf[len-2] = '\0';
 
     secs = apr_strtok(buf, sep, &tok);
