@@ -112,28 +112,33 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
 #if !CRYPT_MISSING
     char *crypt_pw;
 #endif
-    if (hash[0] == '$'
-        && hash[1] == '2'
-        && (hash[2] == 'a' || hash[2] == 'y')
-        && hash[3] == '$') {
+
+    if ((apr_strneq_timingsafe(hash, "$2a$", 4) | /* test both */
+         apr_strneq_timingsafe(hash, "$2y$", 4))) {
+        /*
+         * The hash was created using [apr_]bcrypt encoding.
+         */
         if (_crypt_blowfish_rn(passwd, hash, sample, sizeof(sample)) == NULL)
             return APR_FROM_OS_ERROR(errno);
     }
-    else if (!strncmp(hash, apr1_id, strlen(apr1_id))) {
+    else if (apr_strneq_timingsafe(hash, apr1_id, strlen(apr1_id))) {
         /*
          * The hash was created using our custom algorithm.
          */
         apr_md5_encode(passwd, hash, sample, sizeof(sample));
     }
-    else if (!strncmp(hash, APR_SHA1PW_ID, APR_SHA1PW_IDLEN)) {
-         apr_sha1_base64(passwd, (int)strlen(passwd), sample);
+    else if (apr_strneq_timingsafe(hash, APR_SHA1PW_ID, APR_SHA1PW_IDLEN)) {
+        /*
+         * The hash is a (naked) SHA1.
+         */
+        apr_sha1_base64(passwd, (int)strlen(passwd), sample);
     }
     else {
         /*
          * It's not our algorithm, so feed it to crypt() if possible.
          */
 #if CRYPT_MISSING
-        return (strcmp(passwd, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
+        return apr_streq_timingsafe(hash, passwd) ? APR_SUCCESS : APR_EMISMATCH;
 #elif defined(CRYPT_R_CRYPTD)
         apr_status_t rv;
         CRYPTD *buffer = malloc(sizeof(*buffer));
@@ -144,7 +149,7 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
         if (!crypt_pw)
             rv = APR_EMISMATCH;
         else
-            rv = (strcmp(crypt_pw, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
+            rv = apr_streq_timingsafe(hash, crypt_pw) ? APR_SUCCESS : APR_EMISMATCH;
         free(buffer);
         return rv;
 #elif defined(CRYPT_R_STRUCT_CRYPT_DATA)
@@ -175,7 +180,7 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
         if (!crypt_pw)
             rv = APR_EMISMATCH;
         else
-            rv = (strcmp(crypt_pw, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
+            rv = apr_streq_timingsafe(hash, crypt_pw) ? APR_SUCCESS : APR_EMISMATCH;
         free(buffer);
         return rv;
 #else
@@ -199,14 +204,14 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
                 rv = APR_EMISMATCH;
             }
             else {
-                rv = (strcmp(crypt_pw, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
+                rv = apr_streq_timingsafe(hash, crypt_pw) ? APR_SUCCESS : APR_EMISMATCH;
             }
             crypt_mutex_unlock();
             return rv;
         }
 #endif
     }
-    return (strcmp(sample, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
+    return apr_streq_timingsafe(hash, sample) ? APR_SUCCESS : APR_EMISMATCH;
 }
 
 static const char * const bcrypt_id = "$2y$";
