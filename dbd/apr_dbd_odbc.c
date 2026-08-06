@@ -1421,7 +1421,7 @@ static const char *odbc_escape(apr_pool_t *pool, const char *s,
 
     /* return the original if there are no single-quotes */
     if (!(sq = strchr(s, '\'')))
-        return (char *)s;
+        return s;
     /* count the single-quotes and allocate a new buffer */
     for (qcount = 1; (sq = strchr(sq + 1, '\'')); )
         qcount++;
