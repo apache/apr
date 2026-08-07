@@ -815,6 +815,11 @@ static void test_version_responses(abts_case *tc, void *data)
 {
     apr_status_t rv;
     char *result;
+#ifdef SIGPIPE
+    apr_sigfunc_t *old_action;
+
+    old_action = apr_signal(SIGPIPE, SIG_IGN);
+#endif
 
     /* --- good response ------------------------------------------------ */
     abts_log_message("version test: sending 'VERSION 1.5.22\\r\\n', expecting APR_SUCCESS");
@@ -851,6 +856,10 @@ static void test_version_responses(abts_case *tc, void *data)
     abts_log_message("version test: rv=%d result='%s'", rv, result ? result : "(null)");
     ABTS_ASSERT(tc, "single-char VERSION should succeed", rv == APR_SUCCESS);
     ABTS_STR_EQUAL(tc, "1", result);
+
+#ifdef SIGPIPE
+    apr_signal(SIGPIPE, old_action);
+#endif
 }
 
 abts_suite *testmemcache(abts_suite * suite)
