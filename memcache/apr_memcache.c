@@ -1174,12 +1174,12 @@ apr_memcache_version(apr_memcache_server_t *ms,
     }
 
     if (strncmp(MS_VERSION, conn->buffer, MS_VERSION_LEN) == 0) {
-        if (conn->blen < MS_VERSION_LEN + 2) {
+        if (conn->blen < MS_VERSION_LEN + 4) {
             rv = APR_EGENERAL;
         }
         else {
             *baton = apr_pstrmemdup(p, conn->buffer+MS_VERSION_LEN+1,
-                                    conn->blen - MS_VERSION_LEN - 2);
+                                    conn->blen - MS_VERSION_LEN - 3);
             rv = APR_SUCCESS;
         }
     }

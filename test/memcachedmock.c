@@ -20,7 +20,15 @@
 #include "apr_pools.h"
 #include "testmemcache.h"
 
-#define MOCK_REPLY "VERSION 1.5.22\r\n"
+#define MOCK_REPLY_DEFAULT "VERSION 1.5.22\r\n"
+
+/* Number of connections to serve before exiting.
+ * The test_connection_validation test needs 2 (one intentional, one
+ * after the server closes the socket).  The version-response tests
+ * need only 1 each.  Pass MOCK_NCONN on the command line after the
+ * reply string to override; default is 2 for backward compatibility.
+ */
+#define MOCK_NCONN_DEFAULT 2
 
 int main(int argc, char *argv[])
 {
@@ -30,7 +38,11 @@ int main(int argc, char *argv[])
     apr_socket_t *server_connection;
     apr_status_t rv;
     apr_size_t length;
-    int i;
+    int i, nconn, conn;
+    const char *reply;
+
+    reply = (argc >= 2) ? argv[1] : MOCK_REPLY_DEFAULT;
+    nconn = (argc >= 3) ? atoi(argv[2]) : MOCK_NCONN_DEFAULT;
 
     apr_initialize();
     atexit(apr_terminate);
@@ -48,37 +60,23 @@ int main(int argc, char *argv[])
 
     apr_socket_listen(server, 5);
 
-    /* Do spin instead of a proper poll for sake of simplicity */
-    for (i = 0; i < 4; i++) {
+    for (conn = 0; conn < nconn; conn++) {
+        /* Do spin instead of a proper poll for sake of simplicity */
+        for (i = 0; i < 4; i++) {
 
-        rv = apr_socket_accept(&server_connection, server, p);
-        if (rv == APR_SUCCESS) {
-            break;
+            rv = apr_socket_accept(&server_connection, server, p);
+            if (rv == APR_SUCCESS) {
+                break;
+            }
+
+            apr_sleep(apr_time_from_sec(1));
         }
 
-        apr_sleep(apr_time_from_sec(1));
+        length = strlen(reply);
+        apr_socket_send(server_connection, reply, &length);
+
+        apr_socket_close(server_connection);
     }
-
-    length = strlen(MOCK_REPLY);
-    apr_socket_send(server_connection, MOCK_REPLY, &length);
-
-    apr_socket_close(server_connection);
-
-    /* Do spin instead of a proper poll for sake of simplicity */
-    for (i = 0; i < 4; i++) {
-
-        rv = apr_socket_accept(&server_connection, server, p);
-        if (rv == APR_SUCCESS) {
-            break;
-        }
-
-        apr_sleep(apr_time_from_sec(1));
-    }
-
-    length = strlen(MOCK_REPLY);
-    apr_socket_send(server_connection, MOCK_REPLY, &length);
-
-    apr_socket_close(server_connection);
 
     exit(0);
 }

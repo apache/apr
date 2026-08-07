@@ -749,6 +749,110 @@ static void test_connection_validation(abts_case *tc, void *data)
     apr_proc_wait(&proc, &exitcode, &why, APR_WAIT);
 }
 
+/*
+ * Helper: spawn memcachedmock with a specific reply string (and nconn=1),
+ * call apr_memcache_version(), return the status and (on success) the
+ * version string.  Waits for the mock to finish before returning.
+ */
+static apr_status_t run_mock_version(abts_case *tc, const char *reply,
+                                     char **result_out)
+{
+    apr_procattr_t *procattr;
+    apr_proc_t proc;
+    apr_status_t rv;
+    apr_memcache_t *memcache;
+    apr_memcache_server_t *memserver;
+    char *result = NULL;
+    const char *args[4];
+    int exitcode;
+    apr_exit_why_e why;
+
+    rv = apr_procattr_create(&procattr, p);
+    ABTS_ASSERT(tc, "Couldn't create procattr", rv == APR_SUCCESS);
+    rv = apr_procattr_io_set(procattr, APR_NO_PIPE, APR_NO_PIPE, APR_NO_PIPE);
+    ABTS_ASSERT(tc, "Couldn't set io in procattr", rv == APR_SUCCESS);
+    rv = apr_procattr_error_check_set(procattr, 1);
+    ABTS_ASSERT(tc, "Couldn't set error check in procattr", rv == APR_SUCCESS);
+    rv = apr_procattr_cmdtype_set(procattr, APR_PROGRAM_ENV);
+    ABTS_ASSERT(tc, "Couldn't set copy environment", rv == APR_SUCCESS);
+
+    /* argv: memcachedmock <reply> 1   (serve exactly one connection) */
+    args[0] = "memcachedmock" EXTENSION;
+    args[1] = reply;
+    args[2] = "1";
+    args[3] = NULL;
+    rv = apr_proc_create(&proc, TESTBINPATH "memcachedmock" EXTENSION,
+                         args, NULL, procattr, p);
+    if (APR_SUCCESS != rv) {
+        return APR_ENOTIMPL; /* signal skip to caller */
+    }
+
+    apr_sleep(apr_time_from_sec(2));
+
+    rv = apr_memcache_create(p, 1, 0, &memcache);
+    ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
+    rv = apr_memcache_server_create(p, MOCK_HOST, MOCK_PORT, 0, 1, 1,
+                                    apr_time_from_sec(60), &memserver);
+    ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
+    rv = apr_memcache_add_server(memcache, memserver);
+    ABTS_ASSERT(tc, "server add failed", rv == APR_SUCCESS);
+
+    rv = apr_memcache_version(memserver, p, &result);
+
+    apr_proc_wait(&proc, &exitcode, &why, APR_WAIT);
+
+    if (result_out) {
+        *result_out = result;
+    }
+    return rv;
+}
+
+/*
+ * Test how apr_memcache_version() handles well-formed and malformed
+ * VERSION responses from the server.
+ */
+static void test_version_responses(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    char *result;
+
+    /* --- good response ------------------------------------------------ */
+    abts_log_message("version test: sending 'VERSION 1.5.22\\r\\n', expecting APR_SUCCESS");
+    rv = run_mock_version(tc, "VERSION 1.5.22\r\n", &result);
+    if (rv == APR_ENOTIMPL) {
+        ABTS_SKIP(tc, data, TESTBINPATH "memcachedmock" EXTENSION " could not be executed, skipped");
+        return;
+    }
+    abts_log_message("version test: rv=%d result='%s'", rv, result ? result : "(null)");
+    ABTS_ASSERT(tc, "good VERSION should succeed", rv == APR_SUCCESS);
+    ABTS_STR_EQUAL(tc, "1.5.22", result);
+
+    /* --- empty version string: "VERSION \r\n" ------------------------- */
+    abts_log_message("version test: sending 'VERSION \\r\\n' (empty version), expecting EGENERAL");
+    rv = run_mock_version(tc, "VERSION \r\n", &result);
+    abts_log_message("version test: rv=%d (expected non-zero)", rv);
+    ABTS_ASSERT(tc, "empty version string should fail", rv != APR_SUCCESS);
+
+    /* --- no space after VERSION: "VERSION\r\n" ------------------------ */
+    abts_log_message("version test: sending 'VERSION\\r\\n' (no space), expecting EGENERAL");
+    rv = run_mock_version(tc, "VERSION\r\n", &result);
+    abts_log_message("version test: rv=%d (expected non-zero)", rv);
+    ABTS_ASSERT(tc, "missing space should fail", rv != APR_SUCCESS);
+
+    /* --- completely wrong prefix -------------------------------------- */
+    abts_log_message("version test: sending 'ERROR\\r\\n' (wrong prefix), expecting EGENERAL");
+    rv = run_mock_version(tc, "ERROR\r\n", &result);
+    abts_log_message("version test: rv=%d (expected non-zero)", rv);
+    ABTS_ASSERT(tc, "wrong prefix should fail", rv != APR_SUCCESS);
+
+    /* --- single-character version: shortest valid response ------------ */
+    abts_log_message("version test: sending 'VERSION 1\\r\\n' (single char version), expecting APR_SUCCESS");
+    rv = run_mock_version(tc, "VERSION 1\r\n", &result);
+    abts_log_message("version test: rv=%d result='%s'", rv, result ? result : "(null)");
+    ABTS_ASSERT(tc, "single-char VERSION should succeed", rv == APR_SUCCESS);
+    ABTS_STR_EQUAL(tc, "1", result);
+}
+
 abts_suite *testmemcache(abts_suite * suite)
 {
     suite = ADD_SUITE(suite);
@@ -760,6 +864,7 @@ abts_suite *testmemcache(abts_suite * suite)
     abts_run_test(suite, test_memcache_addreplace, NULL);
     abts_run_test(suite, test_memcache_incrdecr, NULL);
     abts_run_test(suite, test_connection_validation, NULL);
+    abts_run_test(suite, test_version_responses, NULL);
 
     return suite;
 }
