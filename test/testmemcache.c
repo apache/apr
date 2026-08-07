@@ -677,6 +677,7 @@ static void test_connection_validation(abts_case *tc, void *data)
     apr_status_t rv;
     apr_memcache_t *memcache;
     apr_memcache_server_t *memserver;
+    apr_pool_t *mc_pool;
     char *result;
     apr_procattr_t *procattr;
     apr_proc_t proc;
@@ -722,10 +723,18 @@ static void test_connection_validation(abts_case *tc, void *data)
     /* Wait for the mock memcached to start */
     apr_sleep(apr_time_from_sec(2));
 
-    rv = apr_memcache_create(p, 1, 0, &memcache);
+    /*
+     * Use a sub-pool for the memcache objects so the reslist (and its
+     * mc_conn_destruct callbacks, which write to the now-dead socket) is
+     * torn down before we restore the SIGPIPE handler.
+     */
+    rv = apr_pool_create(&mc_pool, p);
+    ABTS_ASSERT(tc, "pool create failed", rv == APR_SUCCESS);
+
+    rv = apr_memcache_create(mc_pool, 1, 0, &memcache);
     ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
 
-    rv = apr_memcache_server_create(p, MOCK_HOST, MOCK_PORT, 0, 1, 1,
+    rv = apr_memcache_server_create(mc_pool, MOCK_HOST, MOCK_PORT, 0, 1, 1,
                                     apr_time_from_sec(60), &memserver);
     ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
 
@@ -740,6 +749,12 @@ static void test_connection_validation(abts_case *tc, void *data)
 
     rv = apr_memcache_version(memserver, p, &result);
     ABTS_ASSERT(tc, "Couldn't get version after connection shutdown", rv == APR_SUCCESS);
+
+    /*
+     * Destroy the pool while SIGPIPE is still ignored: mc_conn_destruct sends
+     * "quit\r\n" to the dead socket which would otherwise raise SIGPIPE.
+     */
+    apr_pool_destroy(mc_pool);
 
 #ifdef SIGPIPE
     /* Restore old SIGPIPE handler */
@@ -762,6 +777,7 @@ static apr_status_t run_mock_version(abts_case *tc, const char *reply,
     apr_status_t rv;
     apr_memcache_t *memcache;
     apr_memcache_server_t *memserver;
+    apr_pool_t *mc_pool;
     char *result = NULL;
     const char *args[4];
     int exitcode;
@@ -789,15 +805,30 @@ static apr_status_t run_mock_version(abts_case *tc, const char *reply,
 
     apr_sleep(apr_time_from_sec(2));
 
-    rv = apr_memcache_create(p, 1, 0, &memcache);
+    /*
+     * Use a sub-pool for the memcache objects so the reslist (and its
+     * mc_conn_destruct callbacks, which write to the now-dead socket) is
+     * torn down before the caller restores the SIGPIPE handler.
+     */
+    rv = apr_pool_create(&mc_pool, p);
+    ABTS_ASSERT(tc, "pool create failed", rv == APR_SUCCESS);
+
+    rv = apr_memcache_create(mc_pool, 1, 0, &memcache);
     ABTS_ASSERT(tc, "memcache create failed", rv == APR_SUCCESS);
-    rv = apr_memcache_server_create(p, MOCK_HOST, MOCK_PORT, 0, 1, 1,
+    rv = apr_memcache_server_create(mc_pool, MOCK_HOST, MOCK_PORT, 0, 1, 1,
                                     apr_time_from_sec(60), &memserver);
     ABTS_ASSERT(tc, "server create failed", rv == APR_SUCCESS);
     rv = apr_memcache_add_server(memcache, memserver);
     ABTS_ASSERT(tc, "server add failed", rv == APR_SUCCESS);
 
     rv = apr_memcache_version(memserver, p, &result);
+
+    /*
+     * Destroy the sub-pool before waiting for the process: this tears down
+     * the reslist and its mc_conn_destruct callbacks while SIGPIPE is still
+     * ignored by the caller (test_version_responses).
+     */
+    apr_pool_destroy(mc_pool);
 
     apr_proc_wait(&proc, &exitcode, &why, APR_WAIT);
 
