@@ -66,7 +66,9 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     if (dafile->buffered) {
         dafile->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
         dafile->bufsize = APR_FILE_DEFAULT_BUFSIZE;
-
+        if (dafile->buffer == NULL) {
+            return APR_ENOMEM;
+        }
         if (flag & APR_FOPEN_XTHREAD) {
             rv = apr_thread_mutex_create(&dafile->mutex, 0, pool);
 
@@ -196,6 +198,9 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, apr_os_file_t *thef
     apr_os_file_t *dafile = thefile;
 
     (*file) = apr_palloc(pool, sizeof(apr_file_t));
+    if ((*file) == NULL) {
+        return APR_ENOMEM;
+    }
     (*file)->pool = pool;
     (*file)->filedes = *dafile;
     (*file)->isopen = TRUE;
@@ -210,6 +215,9 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, apr_os_file_t *thef
 
         (*file)->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
         (*file)->bufsize = APR_FILE_DEFAULT_BUFSIZE;
+        if ((*file)->buffer == NULL) {
+            return APR_ENOMEM;
+        }
         rv = apr_thread_mutex_create(&(*file)->mutex, 0, pool);
 
         if (rv)

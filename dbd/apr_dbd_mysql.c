@@ -163,6 +163,9 @@ static apr_status_t lob_bucket_read(apr_bucket *e, const char **str,
 
     /* allocate new buffer, since we used this one for the bucket */
     bind->buffer = apr_palloc(res->pool, bind->buffer_length);
+    if (bind->buffer == NULL) {
+        return APR_ENOMEM;
+    }
 
     /*
      * Change the current bucket to refer to what we read,
@@ -242,6 +245,9 @@ static int dbd_mysql_select(apr_pool_t *pool, apr_dbd_t *sql,
             if (!*results) {
                 *results = apr_palloc(pool, sizeof(apr_dbd_results_t));
             }
+            if (!*results) {
+                return CR_OUT_OF_MEMORY;
+            }
             (*results)->random = seek;
             (*results)->statement = NULL;
             (*results)->pool = pool;
@@ -318,6 +324,9 @@ static int dbd_mysql_get_row(apr_pool_t *pool, apr_dbd_results_t *res,
     if (ret == 0) {
         if (!*row) {
             *row = apr_palloc(pool, sizeof(apr_dbd_row_t));
+            if (!*row) {
+                return CR_OUT_OF_MEMORY;
+            }
         }
         (*row)->row = r;
         (*row)->res = res;
@@ -592,6 +601,9 @@ static int dbd_mysql_prepare(apr_pool_t *pool, apr_dbd_t *sql,
 
     if (!*statement) {
         *statement = apr_palloc(pool, sizeof(apr_dbd_prepared_t));
+        if (!*statement) {
+            return CR_OUT_OF_MEMORY;
+        }
     }
     (*statement)->stmt = mysql_stmt_init(sql->conn);
 

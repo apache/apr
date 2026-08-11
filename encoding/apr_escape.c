@@ -104,7 +104,9 @@ APR_DECLARE(const char *) apr_pescape_shell(apr_pool_t *p, const char *str)
     switch (apr_escape_shell(NULL, str, APR_ESCAPE_STRING, &len)) {
     case APR_SUCCESS: {
         char *cmd = apr_palloc(p, len);
-        apr_escape_shell(cmd, str, APR_ESCAPE_STRING, NULL);
+        if (cmd) {
+            apr_escape_shell(cmd, str, APR_ESCAPE_STRING, NULL);
+        }
         return cmd;
     }
     case APR_NOTFOUND: {
@@ -258,8 +260,10 @@ APR_DECLARE(const char *) apr_punescape_url(apr_pool_t *p, const char *url,
             plus, &len)) {
     case APR_SUCCESS: {
         char *buf = apr_palloc(p, len);
-        apr_unescape_url(buf, url, APR_ESCAPE_STRING, forbid, reserved, plus,
-                NULL);
+        if (buf){
+            apr_unescape_url(buf, url, APR_ESCAPE_STRING, forbid, reserved, plus,
+                    NULL);
+        }
         return buf;
     }
     case APR_EINVAL:
@@ -355,7 +359,9 @@ APR_DECLARE(const char *) apr_pescape_path_segment(apr_pool_t *p,
     switch (apr_escape_path_segment(NULL, str, APR_ESCAPE_STRING, &len)) {
     case APR_SUCCESS: {
         char *cmd = apr_palloc(p, len);
-        apr_escape_path_segment(cmd, str, APR_ESCAPE_STRING, NULL);
+        if (cmd) {
+            apr_escape_path_segment(cmd, str, APR_ESCAPE_STRING, NULL);
+        }
         return cmd;
     }
     case APR_NOTFOUND: {
@@ -438,7 +444,9 @@ APR_DECLARE(const char *) apr_pescape_path(apr_pool_t *p, const char *str,
     switch (apr_escape_path(NULL, str, APR_ESCAPE_STRING, partial, &len)) {
     case APR_SUCCESS: {
         char *path = apr_palloc(p, len);
-        apr_escape_path(path, str, APR_ESCAPE_STRING, partial, NULL);
+        if (path) {
+            apr_escape_path(path, str, APR_ESCAPE_STRING, partial, NULL);
+        }
         return path;
     }
     case APR_NOTFOUND: {
@@ -512,7 +520,9 @@ APR_DECLARE(const char *) apr_pescape_urlencoded(apr_pool_t *p, const char *str)
     switch (apr_escape_urlencoded(NULL, str, APR_ESCAPE_STRING, &len)) {
     case APR_SUCCESS: {
         char *encoded = apr_palloc(p, len);
-        apr_escape_urlencoded(encoded, str, APR_ESCAPE_STRING, NULL);
+        if (encoded) {
+            apr_escape_urlencoded(encoded, str, APR_ESCAPE_STRING, NULL);
+        }
         return encoded;
     }
     case APR_NOTFOUND: {
@@ -643,7 +653,9 @@ APR_DECLARE(const char *) apr_pescape_entity(apr_pool_t *p, const char *str,
     switch (apr_escape_entity(NULL, str, APR_ESCAPE_STRING, toasc, &len)) {
     case APR_SUCCESS: {
         char *cmd = apr_palloc(p, len);
-        apr_escape_entity(cmd, str, APR_ESCAPE_STRING, toasc, NULL);
+        if (cmd) {
+            apr_escape_entity(cmd, str, APR_ESCAPE_STRING, toasc, NULL);
+        }
         return cmd;
     }
     case APR_NOTFOUND: {
@@ -817,7 +829,9 @@ APR_DECLARE(const char *) apr_punescape_entity(apr_pool_t *p, const char *str)
     switch (apr_unescape_entity(NULL, str, APR_ESCAPE_STRING, &len)) {
     case APR_SUCCESS: {
         char *cmd = apr_palloc(p, len);
-        apr_unescape_entity(cmd, str, APR_ESCAPE_STRING, NULL);
+        if (cmd) {
+            apr_unescape_entity(cmd, str, APR_ESCAPE_STRING, NULL);
+        }
         return cmd;
     }
     case APR_NOTFOUND: {
@@ -966,7 +980,9 @@ APR_DECLARE(const char *) apr_pescape_echo(apr_pool_t *p, const char *str,
     switch (apr_escape_echo(NULL, str, APR_ESCAPE_STRING, quote, &len)) {
     case APR_SUCCESS: {
         char *cmd = apr_palloc(p, len);
-        apr_escape_echo(cmd, str, APR_ESCAPE_STRING, quote, NULL);
+        if (cmd) {
+            apr_escape_echo(cmd, str, APR_ESCAPE_STRING, quote, NULL);
+        }
         return cmd;
     }
     case APR_NOTFOUND: {
@@ -1018,7 +1034,9 @@ APR_DECLARE(const char *) apr_pescape_hex(apr_pool_t *p, const void *src,
     switch (apr_escape_hex(NULL, src, srclen, colon, &len)) {
     case APR_SUCCESS: {
         char *cmd = apr_palloc(p, len);
-        apr_escape_hex(cmd, src, srclen, colon, NULL);
+        if (cmd) {
+            apr_escape_hex(cmd, src, srclen, colon, NULL);
+        }
         return cmd;
     }
     case APR_NOTFOUND: {
@@ -1129,7 +1147,9 @@ APR_DECLARE(const void *) apr_punescape_hex(apr_pool_t *p, const char *str,
     switch (apr_unescape_hex(NULL, str, APR_ESCAPE_STRING, colon, &size)) {
     case APR_SUCCESS: {
         void *cmd = apr_palloc(p, size);
-        apr_unescape_hex(cmd, str, APR_ESCAPE_STRING, colon, len);
+        if (cmd) {
+            apr_unescape_hex(cmd, str, APR_ESCAPE_STRING, colon, len);
+        }
         return cmd;
     }
     case APR_BADCH:
@@ -1200,7 +1220,9 @@ APR_DECLARE(const char *) apr_pescape_ldap(apr_pool_t *p, const void *src,
     switch (apr_escape_ldap(NULL, src, srclen, flags, &len)) {
     case APR_SUCCESS: {
         char *encoded = apr_palloc(p, len);
-        apr_escape_ldap(encoded, src, srclen, flags, NULL);
+        if (encoded) {
+            apr_escape_ldap(encoded, src, srclen, flags, NULL);
+        }
         return encoded;
     }
     case APR_NOTFOUND: {
@@ -1469,7 +1491,9 @@ APR_DECLARE(const char *) apr_pescape_json(apr_pool_t *p, const char *src,
     }
     default: {
         char *encoded = apr_palloc(p, len);
-        apr_escape_json(encoded, src, srclen, quote, NULL);
+        if (encoded) {
+            apr_escape_json(encoded, src, srclen, quote, NULL);
+        }
         return encoded;
     }
     }

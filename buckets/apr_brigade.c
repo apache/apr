@@ -88,6 +88,9 @@ APR_DECLARE(apr_bucket_brigade *) apr_brigade_create(apr_pool_t *p,
     apr_bucket_brigade *b;
 
     b = apr_palloc(p, sizeof(*b));
+    if (b == NULL) {
+        return NULL;
+    }
     b->p = p;
     b->bucket_alloc = list;
 
@@ -321,6 +324,9 @@ APR_DECLARE(apr_status_t) apr_brigade_pflatten(apr_bucket_brigade *bb,
     total = (apr_size_t)actual;
 
     *c = apr_palloc(pool, total);
+    if (*c == NULL) {
+        return APR_ENOMEM;
+    }
 
     rv = apr_brigade_flatten(bb, *c, &total);
 

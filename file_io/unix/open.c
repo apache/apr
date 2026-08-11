@@ -213,6 +213,9 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     if ((*new)->buffered) {
         (*new)->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
         (*new)->bufsize = APR_FILE_DEFAULT_BUFSIZE;
+        if ((*new)->buffer == NULL) {
+            return APR_ENOMEM;
+        }
     }
     else {
         (*new)->buffer = NULL;
@@ -328,6 +331,9 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     if ((*file)->buffered) {
         (*file)->buffer = apr_palloc(pool, APR_FILE_DEFAULT_BUFSIZE);
         (*file)->bufsize = APR_FILE_DEFAULT_BUFSIZE;
+        if ((*file)->buffer == NULL) {
+            return APR_ENOMEM;
+        }
 #if APR_HAS_THREADS
         if ((*file)->flags & APR_FOPEN_XTHREAD) {
             apr_status_t rv;

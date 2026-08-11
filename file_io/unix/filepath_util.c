@@ -96,6 +96,9 @@ APR_DECLARE(apr_status_t) apr_filepath_list_merge(char **liststr,
 
     /* Merge the path components */
     path = *liststr = apr_palloc(p, path_size + 1);
+    if (path == NULL) {
+        return APR_ENOMEM;
+    }
     for (i = 0; i < pathelts->nelts; ++i)
     {
         /* ### Hmmmm. Calling strlen twice on the same string. Yuck.
