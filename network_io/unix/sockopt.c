@@ -180,12 +180,12 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
         }
         break;
     case APR_SO_LINGER:
-#ifdef SO_LINGER
+#ifdef SO_LINGER_SEC
         if (apr_is_option_set(sock, APR_SO_LINGER) != on) {
             struct linger li;
             li.l_onoff = on;
             li.l_linger = APR_MAX_SECS_TO_LINGER;
-            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_LINGER, (char *) &li, sizeof(struct linger)) == -1) {
+            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_LINGER_SEC, (char *) &li, sizeof(struct linger)) == -1) {
                 return errno;
             }
             apr_set_option(sock, APR_SO_LINGER, on);
