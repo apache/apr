@@ -23,6 +23,7 @@
 #include "apr_general.h"
 #include "apr_getopt.h"
 #include "apr_atomic.h"
+#include "apr_private.h"
 #include "testutil.h"
 
 #if APR_HAS_THREADS
@@ -551,13 +552,17 @@ abts_suite *testlock(abts_suite *suite)
     abts_run_test(suite, threads_not_impl, NULL);
 #else
     abts_run_test(suite, test_thread_mutex, NULL);
+#if APR_HAVE_TIME_DEPENDANT_TESTS
     abts_run_test(suite, test_thread_timedmutex, NULL);
+#endif
     abts_run_test(suite, test_thread_nestedmutex, NULL);
     abts_run_test(suite, test_thread_unnestedmutex, NULL);
     abts_run_test(suite, test_thread_rwlock, NULL);
     abts_run_test(suite, test_cond, NULL);
     abts_run_test(suite, test_timeoutcond, NULL);
+#if APR_HAVE_TIME_DEPENDANT_TESTS
     abts_run_test(suite, test_timeoutmutex, NULL);
+#endif
 #ifdef WIN32
     abts_run_test(suite, test_win32_abandoned_mutex, NULL);
 #endif
