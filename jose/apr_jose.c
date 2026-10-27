@@ -144,7 +144,9 @@ APR_DECLARE(apr_jose_t *) apr_jose_jwe_make(apr_jose_t *jose,
         return NULL;
     }
 
-    jose->cty = payload->cty;
+    if (payload) {
+        jose->cty = payload->cty;
+    }
 
     jwe = jose->jose.jwe = apr_palloc(pool, sizeof(apr_jose_jwe_t));
     if (!jwe) {
