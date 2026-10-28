@@ -1105,6 +1105,43 @@ static void test_crypto_init(abts_case *tc, void *data)
 
 }
 
+/**
+ * apr_crypto_make() must reject NULL arguments with APR_EINVAL rather
+ * than dereferencing them.
+ */
+static void test_crypto_make_null(abts_case *tc, void *data)
+{
+    apr_pool_t *pool = NULL;
+    apr_crypto_t *f = NULL;
+    apr_status_t rv;
+#if APU_HAVE_OPENSSL
+    const apr_crypto_driver_t *driver;
+#endif
+
+    apr_pool_create(&pool, NULL);
+
+    rv = apr_crypto_make(NULL, NULL, NULL, pool);
+    ABTS_INT_EQUAL(tc, APR_EINVAL, rv);
+
+#if APU_HAVE_OPENSSL
+    driver = get_openssl_driver(tc, pool);
+    if (driver) {
+        rv = apr_crypto_make(NULL, driver, NULL, pool);
+        ABTS_INT_EQUAL(tc, APR_EINVAL, rv);
+
+        rv = apr_crypto_make(&f, driver, NULL, NULL);
+        ABTS_INT_EQUAL(tc, APR_EINVAL, rv);
+        ABTS_PTR_EQUAL(tc, NULL, f);
+
+        rv = apr_crypto_make(&f, NULL, NULL, pool);
+        ABTS_INT_EQUAL(tc, APR_EINVAL, rv);
+        ABTS_PTR_EQUAL(tc, NULL, f);
+    }
+#endif
+
+    apr_pool_destroy(pool);
+}
+
 #if APU_HAVE_OPENSSL
 /**
  * Simple test of OpenSSL key.
@@ -2769,6 +2806,8 @@ abts_suite *testcrypto(abts_suite *suite)
 
     /* test simple init and shutdown */
     abts_run_test(suite, test_crypto_init, NULL);
+    /* test NULL argument handling in apr_crypto_make */
+    abts_run_test(suite, test_crypto_make_null, NULL);
 
 #if APU_HAVE_OPENSSL
     /* test key parsing - openssl */
