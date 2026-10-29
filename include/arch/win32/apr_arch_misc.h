@@ -164,7 +164,10 @@ typedef enum {
     DLL_API_MS_WIN_DOWNLEVEL_SHELL32_L1_1_0 = 7,
                            /* api-ms-win-downlevel-shell32-l1-1-0.dll,
                               fallback to shell32.dll       */
-    DLL_defined = 8        /* must define as last idx_ + 1  */
+    DLL_API_MS_WIN_CORE_FILE_L2_1_4 = 8,
+                           /* api-ms-win-core-file-l2-1-4.dll,
+                              fallback to kernel32.dll      */
+    DLL_defined = 9        /* must define as last idx_ + 1  */
 } apr_dlltoken_e;
 
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
@@ -301,5 +304,12 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, SetThreadDescription, 0,
                           HANDLE hThread,
                           PCWSTR lpThreadDescription),
                           (hThread, lpThreadDescription));
+
+APR_DECLARE_LATE_DLL_FUNC(DLL_API_MS_WIN_CORE_FILE_L2_1_4, BOOL, WINAPI, GetFileInformationByName, 0, (
+                          PCWSTR FileName,
+                          /* FILE_INFO_BY_NAME_CLASS */ int FileInformationClass,
+                          PVOID FileInfoBuffer,
+                          ULONG FileInfoBufferSize),
+                          (FileName, FileInformationClass, FileInfoBuffer, FileInfoBufferSize));
 
 #endif  /* ! MISC_H */

@@ -16,6 +16,7 @@
 
 #include "apr.h"
 #include <aclapi.h>
+#include <winioctl.h>
 #include "apr_private.h"
 #include "apr_arch_file_io.h"
 #include "apr_file_io.h"
@@ -25,6 +26,34 @@
 #include "apr_time.h"
 #include "apr_arch_atime.h"
 #include "apr_arch_misc.h"
+
+#if !defined(NTDDI_WIN11_ZN) || !(NTDDI_VERSION >= NTDDI_WIN11_ZN)
+typedef struct _FILE_STAT_BASIC_INFORMATION {
+    LARGE_INTEGER FileId;
+    LARGE_INTEGER CreationTime;
+    LARGE_INTEGER LastAccessTime;
+    LARGE_INTEGER LastWriteTime;
+    LARGE_INTEGER ChangeTime;
+    LARGE_INTEGER AllocationSize;
+    LARGE_INTEGER EndOfFile;
+    DWORD FileAttributes;
+    DWORD ReparseTag;
+    DWORD NumberOfLinks;
+    DWORD DeviceType;
+    DWORD DeviceCharacteristics;
+    DWORD Reserved;
+    LARGE_INTEGER VolumeSerialNumber;
+    FILE_ID_128 FileId128;
+} FILE_STAT_BASIC_INFORMATION, *PFILE_STAT_BASIC_INFORMATION;
+
+typedef enum _FILE_INFO_BY_NAME_CLASS {
+    FileStatByNameInfo,
+    FileStatLxByNameInfo,
+    FileCaseSensitiveByNameInfo,
+    FileStatBasicByNameInfo,
+    MaximumFileInfoByNameClass
+} FILE_INFO_BY_NAME_CLASS, *PFILE_INFO_BY_NAME_CLASS;
+#endif
 
 /* We have to assure that the file name contains no '*'s, or other
  * wildcards when using FindFirstFile to recover the true file name.
@@ -582,6 +611,205 @@ APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
     return APR_ENOTIMPL;
 }
 
+static int is_unc_path(const apr_wchar_t *p)
+{
+    if (p[0] == L'\\' && p[1] == L'\\' && p[2] == L'?' && p[3] == L'\\') {
+        /* Only \\?\UNC\ paths are UNC, other \\?\... paths are not. */
+        return (p[4] == L'U' || p[4] == L'u') &&
+               (p[5] == L'N' || p[5] == L'n') &&
+               (p[6] == L'C' || p[6] == L'c') &&
+                p[7] == L'\\';
+    }
+    else if (p[0] == L'\\' && p[1] == L'\\') {
+        /* Anything else starting with \\ is a UNC path. */
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+static apr_time_t convert_to_apr_time(const LARGE_INTEGER *value)
+{
+    apr_time_t result;
+    FILETIME ft;
+
+    ft.dwLowDateTime = value->LowPart;
+    ft.dwHighDateTime = value->HighPart;
+
+    FileTimeToAprTime(&result, &ft);
+
+    return result;
+}
+
+static DWORD get_file_type(DWORD device_type)
+{
+    switch (device_type) {
+        case FILE_DEVICE_CD_ROM:
+        case FILE_DEVICE_CD_ROM_FILE_SYSTEM:
+        case FILE_DEVICE_CONTROLLER:
+        case FILE_DEVICE_DATALINK:
+        case FILE_DEVICE_DFS:
+        case FILE_DEVICE_DISK:
+        case FILE_DEVICE_DISK_FILE_SYSTEM:
+        case FILE_DEVICE_VIRTUAL_DISK:
+            return FILE_TYPE_DISK;
+
+        case FILE_DEVICE_KEYBOARD:
+        case FILE_DEVICE_MOUSE:
+        case FILE_DEVICE_NULL:
+        case FILE_DEVICE_PARALLEL_PORT:
+        case FILE_DEVICE_PRINTER:
+        case FILE_DEVICE_SERIAL_PORT:
+        case FILE_DEVICE_SCREEN:
+        case FILE_DEVICE_SOUND:
+        case FILE_DEVICE_MODEM:
+        case FILE_DEVICE_CONSOLE:
+            return FILE_TYPE_CHAR;
+
+        case FILE_DEVICE_NAMED_PIPE:
+            return FILE_TYPE_PIPE;
+
+        default:
+            return FILE_TYPE_UNKNOWN;
+    }
+}
+
+static apr_status_t get_file_information_by_name(apr_finfo_t *finfo,
+                                                 const apr_wchar_t *wfname,
+                                                 apr_int32_t wanted,
+                                                 apr_pool_t *pool)
+{
+    FILE_STAT_BASIC_INFORMATION info;
+    apr_filetype_e filetype;
+
+    if (!APR_HAVE_LATE_DLL_FUNC(GetFileInformationByName)) {
+        return APR_ENOTIMPL;
+    }
+
+    if (is_unc_path(wfname)) {
+        /* For network UNC paths calling GetFileInformationByName() may spend an
+         * actual RPC call to report that the API is not supported.  We use it
+         * only as an optimization, so don't even try calling it in such cases
+         * to avoid regressions. */
+        return APR_ENOTIMPL;
+    }
+
+    if (!apr_winapi_GetFileInformationByName(wfname, FileStatBasicByNameInfo,
+                                             &info, sizeof(info))) {
+        DWORD err = GetLastError();
+
+        switch (err) {
+            case ERROR_FILE_NOT_FOUND:
+            case ERROR_PATH_NOT_FOUND:
+            case ERROR_NOT_READY:
+            case ERROR_BAD_NET_NAME:
+            case ERROR_BAD_NETPATH:
+            case ERROR_BAD_PATHNAME:
+            case ERROR_INVALID_NAME:
+            case ERROR_FILENAME_EXCED_RANGE:
+                /* Those are real errors that can be reported back immediately. */
+                return APR_FROM_OS_ERROR(err);
+            default:
+                return APR_ENOTIMPL;
+        }
+    }
+
+    if (info.FileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+        if (~wanted & APR_FINFO_LINK) {
+            /* Caller wants to stat the link target, but our function doesn't
+             * follow links. */
+            return APR_ENOTIMPL;
+        }
+
+        /* Caller wants to stat the link itself, and we have all necessary
+         * data for the reparse point. */
+        if (IsReparseTagNameSurrogate(info.ReparseTag)) {
+            filetype = APR_LNK;
+        }
+        else if (info.FileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            filetype = APR_DIR;
+        }
+        else {
+            filetype = APR_REG;
+        }
+    }
+    else if (info.FileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        filetype = APR_DIR;
+    }
+    else {
+        filetype = APR_REG;
+    }
+
+    if (filetype == APR_REG) {
+        /* Go the extra mile to be -certain- that we have a real, regular file. */
+        switch (get_file_type(info.DeviceType)) {
+            case FILE_TYPE_CHAR:
+                filetype = APR_CHR;
+                break;
+            case FILE_TYPE_PIPE:
+                filetype = APR_PIPE;
+                break;
+        }
+    }
+
+    memset(finfo, '\0', sizeof(*finfo));
+
+    /* Our function doesn't follow links, so report we did a stat for link.
+     * Report the same way as in e.g. apr_file_info_get(). */
+    if (wanted & APR_FINFO_LINK)
+        finfo->valid |= APR_FINFO_LINK;
+
+    finfo->filetype = filetype;
+    finfo->valid |= APR_FINFO_TYPE;
+
+    finfo->atime = convert_to_apr_time(&info.LastAccessTime);
+    finfo->valid |= APR_FINFO_ATIME;
+
+    finfo->ctime = convert_to_apr_time(&info.CreationTime);
+    finfo->valid |= APR_FINFO_CTIME;
+
+    finfo->mtime = convert_to_apr_time(&info.LastWriteTime);
+    finfo->valid |= APR_FINFO_MTIME;
+
+#if APR_HAS_LARGE_FILES
+    finfo->size = (apr_off_t)info.EndOfFile.QuadPart;
+#else
+    finfo->size = (apr_off_t)info.EndOfFile.LowPart;
+    if (finfo->size < 0 || info.EndOfFile.HighPart)
+        finfo->size = 0x7fffffff;
+#endif
+    finfo->valid |= APR_FINFO_SIZE;
+
+#if APR_HAS_LARGE_FILES
+    finfo->csize = (apr_off_t)info.AllocationSize.QuadPart;
+#else
+    finfo->csize = (apr_off_t)info.AllocationSize.LowPart;
+    if (finfo->csize < 0 || info.AllocationSize.HighPart)
+        finfo->csize = 0x7fffffff;
+#endif
+    finfo->valid |= APR_FINFO_CSIZE;
+
+    if (info.FileAttributes & FILE_ATTRIBUTE_READONLY)
+        finfo->protection = APR_FREADONLY;
+
+    finfo->inode = (apr_ino_t)info.FileId.QuadPart;
+    finfo->device = info.VolumeSerialNumber.LowPart;
+    finfo->valid |= APR_FINFO_IDENT;
+
+    finfo->nlink = info.NumberOfLinks;
+    finfo->valid |= APR_FINFO_NLINK;
+
+    finfo->pool = pool;
+
+    if (wanted &= ~finfo->valid) {
+        /* Caller wants more than APR_FINFO_MIN | APR_FINFO_NAME */
+        return more_finfo(finfo, wfname, wanted, MORE_OF_WFSPEC);
+    }
+
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
                                    apr_int32_t wanted, apr_pool_t *pool)
 {
@@ -606,6 +834,20 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         return APR_ENAMETOOLONG;
     }
 
+    if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname)
+                                        / sizeof(apr_wchar_t), fname)))
+        return rv;
+
+    if (!(wanted & APR_FINFO_NAME)) {
+        /* Optimize stat by using GetFileInformationByName() when possible.
+         * For stats on existing files, this API is 2-5x faster because it
+         * works without actually opening the file. */
+        rv = get_file_information_by_name(finfo, wfname, wanted, pool);
+        if (rv != APR_ENOTIMPL) {
+            return rv;
+        }
+    }
+
     if ((wanted & (APR_FINFO_IDENT | APR_FINFO_NLINK))
            || (~wanted & APR_FINFO_LINK)) {
         /* FindFirstFile and GetFileAttributesEx can't figure the inode,
@@ -626,9 +868,6 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
             wanted &= ~finfo->valid;
     }
 
-    if ((rv = utf8_to_unicode_path(wfname, sizeof(wfname)
-                                        / sizeof(apr_wchar_t), fname)))
-        return rv;
     if (!(wanted & APR_FINFO_NAME)) {
         if (!GetFileAttributesExW(wfname, GetFileExInfoStandard,
                                   &FileInfo.i))

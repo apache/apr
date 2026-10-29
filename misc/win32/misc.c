@@ -112,7 +112,8 @@ static win32_late_dll_t late_dll[DLL_defined] = {
     {NULL, L"shell32", INVALID_HANDLE_VALUE},
     {NULL, L"ntdll.dll", INVALID_HANDLE_VALUE},
     {NULL, L"Iphlpapi", INVALID_HANDLE_VALUE},
-    {L"api-ms-win-downlevel-shell32-l1-1-0.dll", L"shell32", INVALID_HANDLE_VALUE}
+    {L"api-ms-win-downlevel-shell32-l1-1-0.dll", L"shell32", INVALID_HANDLE_VALUE},
+    {L"api-ms-win-core-file-l2-1-4.dll", L"kernel32", INVALID_HANDLE_VALUE}
 };
 
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
