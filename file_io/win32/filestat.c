@@ -118,6 +118,22 @@ static apr_fileperms_t convert_prot(ACCESS_MASK acc, prot_scope_e scope)
     return (prot << scope);
 }
 
+static APR_INLINE apr_off_t convert_filesize(DWORD sizelo, DWORD sizehi)
+{
+    apr_off_t result;
+
+    #if APR_HAS_LARGE_FILES
+    result = (apr_off_t)sizelo | ((apr_off_t)sizehi << 32);
+    #else
+    result = (apr_off_t)sizelo;
+    if (result < 0 || sizehi) {
+        result = 0x7fffffff;
+    }
+    #endif
+
+    return result;
+}
+
 static void resolve_prot(apr_finfo_t *finfo, apr_int32_t wanted, PACL dacl)
 {
     TRUSTEE_W ident = {NULL, NO_MULTIPLE_TRUSTEE, TRUSTEE_IS_SID};
@@ -379,14 +395,7 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
                 return APR_EGENERAL; /* should not occur */
 
             if (sizelo != INVALID_FILE_SIZE || GetLastError() == NO_ERROR) {
-#if APR_HAS_LARGE_FILES
-                finfo->csize =  (apr_off_t)sizelo
-                             | ((apr_off_t)sizehi << 32);
-#else
-                finfo->csize = (apr_off_t)sizelo;
-                if (finfo->csize < 0 || sizehi)
-                    finfo->csize = 0x7fffffff;
-#endif
+                finfo->csize = convert_filesize(sizelo, sizehi);
                 finfo->valid |= APR_FINFO_CSIZE;
             }
         }
@@ -421,14 +430,7 @@ int fillin_fileinfo(apr_finfo_t *finfo,
     FileTimeToAprTime(&finfo->ctime, &wininfo->ftCreationTime);
     FileTimeToAprTime(&finfo->mtime, &wininfo->ftLastWriteTime);
 
-#if APR_HAS_LARGE_FILES
-    finfo->size =  (apr_off_t)sizes[1]
-                | ((apr_off_t)sizes[0] << 32);
-#else
-    finfo->size = (apr_off_t)sizes[1];
-    if (finfo->size < 0 || sizes[0])
-        finfo->size = 0x7fffffff;
-#endif
+    finfo->size = convert_filesize(sizes[1], sizes[0]);
 
     if (wanted & APR_FINFO_LINK &&
         reparse_point_is_link(wininfo, finddata, fname)) {
@@ -533,14 +535,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
     FileTimeToAprTime(&finfo->ctime, &FileInfo.ftCreationTime);
     FileTimeToAprTime(&finfo->mtime, &FileInfo.ftLastWriteTime);
 
-#if APR_HAS_LARGE_FILES
-    finfo->size = (apr_off_t)FileInfo.nFileSizeLow
-        | ((apr_off_t)FileInfo.nFileSizeHigh << 32);
-#else
-    finfo->size = (apr_off_t)FileInfo.nFileSizeLow;
-    if (finfo->size < 0 || FileInfo.nFileSizeHigh)
-        finfo->size = 0x7fffffff;
-#endif
+    finfo->size = convert_filesize(FileInfo.nFileSizeLow, FileInfo.nFileSizeHigh);
 
     if (is_link) {
         finfo->filetype = APR_LNK;
@@ -790,22 +785,10 @@ static apr_status_t get_file_information_by_name(apr_finfo_t *finfo,
     finfo->mtime = convert_to_apr_time(&info.LastWriteTime);
     finfo->valid |= APR_FINFO_MTIME;
 
-#if APR_HAS_LARGE_FILES
-    finfo->size = (apr_off_t)info.EndOfFile.QuadPart;
-#else
-    finfo->size = (apr_off_t)info.EndOfFile.LowPart;
-    if (finfo->size < 0 || info.EndOfFile.HighPart)
-        finfo->size = 0x7fffffff;
-#endif
+    finfo->size = convert_filesize(info.EndOfFile.LowPart, info.EndOfFile.HighPart);
     finfo->valid |= APR_FINFO_SIZE;
 
-#if APR_HAS_LARGE_FILES
-    finfo->csize = (apr_off_t)info.AllocationSize.QuadPart;
-#else
-    finfo->csize = (apr_off_t)info.AllocationSize.LowPart;
-    if (finfo->csize < 0 || info.AllocationSize.HighPart)
-        finfo->csize = 0x7fffffff;
-#endif
+    finfo->csize = convert_filesize(info.AllocationSize.LowPart, info.AllocationSize.HighPart);
     finfo->valid |= APR_FINFO_CSIZE;
 
     if (info.FileAttributes & FILE_ATTRIBUTE_READONLY)
