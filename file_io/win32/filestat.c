@@ -478,6 +478,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
                                             apr_file_t *thefile)
 {
     BY_HANDLE_FILE_INFORMATION FileInfo;
+    int is_link;
 
     if (thefile->buffered) {
         /* XXX: flush here is not mutex protected */
@@ -508,6 +509,24 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
         return apr_get_os_error();
     }
 
+    if ((wanted & APR_FINFO_LINK) &&
+        (FileInfo.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)) {
+
+        FILE_ATTRIBUTE_TAG_INFO attr_tag_info;
+
+        if (!GetFileInformationByHandleEx(thefile->filehand,
+                                          FileAttributeTagInfo,
+                                          &attr_tag_info,
+                                          sizeof(attr_tag_info))) {
+            return apr_get_os_error();
+        }
+
+        is_link = IsReparseTagNameSurrogate(attr_tag_info.ReparseTag);
+    }
+    else {
+        is_link = 0;
+    }
+
     memset(finfo, '\0', sizeof(*finfo));
 
     FileTimeToAprTime(&finfo->atime, &FileInfo.ftLastAccessTime);
@@ -523,8 +542,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
         finfo->size = 0x7fffffff;
 #endif
 
-    if (wanted & APR_FINFO_LINK &&
-        reparse_point_is_link((WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 0, thefile->fname)) {
+    if (is_link) {
         finfo->filetype = APR_LNK;
     }
     else if (FileInfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
