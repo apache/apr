@@ -327,21 +327,13 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
         if (wanted & APR_FINFO_PROT)
             sinf |= DACL_SECURITY_INFORMATION;
         if (whatfile == MORE_OF_WFSPEC) {
-            apr_wchar_t *wfile = (apr_wchar_t*) ufile;
-            int fix = 0;
-            if (wcsncmp(wfile, L"\\\\?\\", 4) == 0) {
-                fix = 4;
-                if (wcsncmp(wfile + fix, L"UNC\\", 4) == 0)
-                    wfile[6] = L'\\', fix = 6;
-            }
-            rv = GetNamedSecurityInfoW(wfile + fix,
+            const apr_wchar_t *wfile = (const apr_wchar_t*) ufile;
+            rv = GetNamedSecurityInfoW(wfile,
                                  SE_FILE_OBJECT, sinf,
                                  ((wanted & (APR_FINFO_USER | APR_FINFO_UPROT)) ? &user : NULL),
                                  ((wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT)) ? &grp : NULL),
                                  ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
                                  NULL, &pdesc);
-            if (fix == 6)
-                wfile[6] = L'C';
         }
         else if (whatfile == MORE_OF_HANDLE)
             rv = GetSecurityInfo((HANDLE)ufile,
