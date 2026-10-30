@@ -139,12 +139,8 @@ int fillin_fileinfo(apr_finfo_t *finfo, WIN32_FILE_ATTRIBUTE_DATA *wininfo,
                     apr_int32_t wanted);
 
 /* Private function that extends apr_stat/lstat/getfileinfo/dir_read */
-apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
-                        apr_int32_t wanted, int whatfile);
-
-/* whatfile types for the ufile arg */
-#define MORE_OF_HANDLE 0
-#define MORE_OF_WFSPEC 2
+apr_status_t more_finfo(apr_finfo_t *finfo, const apr_wchar_t *wfile,
+                        apr_int32_t wanted);
 
 /* quick run-down of fields in windows' apr_file_t structure that may have
  * obvious uses.

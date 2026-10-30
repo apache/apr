@@ -174,7 +174,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         }
 
         wcscpy(eos, thedir->entry->cFileName);
-        rv = more_finfo(finfo, wdirname, wanted, MORE_OF_WFSPEC);
+        rv = more_finfo(finfo, wdirname, wanted);
         eos[0] = '\0';
         return rv;
     }

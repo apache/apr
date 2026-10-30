@@ -300,8 +300,8 @@ static int reparse_point_is_link(WIN32_FILE_ATTRIBUTE_DATA *wininfo,
     return IsReparseTagNameSurrogate(tag);
 }
 
-apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
-                        apr_int32_t wanted, int whatfile)
+apr_status_t more_finfo(apr_finfo_t *finfo, const apr_wchar_t *wfile,
+                        apr_int32_t wanted)
 {
     apr_status_t rv;
 
@@ -324,24 +324,13 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
             sinf |= GROUP_SECURITY_INFORMATION;
         if (wanted & APR_FINFO_PROT)
             sinf |= DACL_SECURITY_INFORMATION;
-        if (whatfile == MORE_OF_WFSPEC) {
-            const apr_wchar_t *wfile = (const apr_wchar_t*) ufile;
-            rv = GetNamedSecurityInfoW(wfile,
-                                 SE_FILE_OBJECT, sinf,
-                                 ((wanted & (APR_FINFO_USER | APR_FINFO_UPROT)) ? &user : NULL),
-                                 ((wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT)) ? &grp : NULL),
-                                 ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
-                                 NULL, &pdesc);
-        }
-        else if (whatfile == MORE_OF_HANDLE)
-            rv = GetSecurityInfo((HANDLE)ufile,
-                                 SE_FILE_OBJECT, sinf,
-                                 ((wanted & (APR_FINFO_USER | APR_FINFO_UPROT)) ? &user : NULL),
-                                 ((wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT)) ? &grp : NULL),
-                                 ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
-                                 NULL, &pdesc);
-        else
-            return APR_INCOMPLETE; /* should not occur */
+        rv = GetNamedSecurityInfoW(wfile,
+                             SE_FILE_OBJECT, sinf,
+                             ((wanted & (APR_FINFO_USER | APR_FINFO_UPROT)) ? &user : NULL),
+                             ((wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT)) ? &grp : NULL),
+                             ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
+                             NULL, &pdesc);
+
         if (rv == ERROR_SUCCESS)
             apr_pool_cleanup_register(finfo->pool, pdesc, free_localheap,
                                  apr_pool_cleanup_null);
@@ -368,26 +357,14 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
 
     if ((wanted & APR_FINFO_CSIZE) && (finfo->filetype == APR_REG))
     {
-        if (whatfile == MORE_OF_HANDLE) {
-            FILE_ALLOCATION_INFO fi;
-            if (GetFileInformationByHandleEx((HANDLE)ufile, FileAllocationInfo, &fi, sizeof(fi))) {
-                finfo->csize = fi.AllocationSize.QuadPart;
-                finfo->valid |= APR_FINFO_CSIZE;
-            }
-        }
-        else {
-            DWORD sizelo, sizehi;
+        DWORD sizelo, sizehi;
 
-            SetLastError(NO_ERROR);
-            if (whatfile == MORE_OF_WFSPEC)
-                sizelo = GetCompressedFileSizeW((apr_wchar_t*)ufile, &sizehi);
-            else
-                return APR_EGENERAL; /* should not occur */
+        SetLastError(NO_ERROR);
+        sizelo = GetCompressedFileSizeW(wfile, &sizehi);
 
-            if (sizelo != INVALID_FILE_SIZE || GetLastError() == NO_ERROR) {
-                finfo->csize = convert_filesize(sizelo, sizehi);
-                finfo->valid |= APR_FINFO_CSIZE;
-            }
+        if (sizelo != INVALID_FILE_SIZE || GetLastError() == NO_ERROR) {
+            finfo->csize = convert_filesize(sizelo, sizehi);
+            finfo->valid |= APR_FINFO_CSIZE;
         }
     }
     return ((wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS);
@@ -602,7 +579,70 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
     /* If we still want something more (besides the name) go get it!
      */
     if ((wanted &= ~finfo->valid) & ~APR_FINFO_NAME) {
-        return more_finfo(finfo, thefile->filehand, wanted, MORE_OF_HANDLE);
+        DWORD err;
+
+        if (wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
+        {
+            PSID user = NULL;
+            PSID grp = NULL;
+            PACL dacl = NULL;
+            SECURITY_INFORMATION sinf = 0;
+            PSECURITY_DESCRIPTOR pdesc = NULL;
+
+            if (wanted & (APR_FINFO_USER | APR_FINFO_UPROT))
+                sinf |= OWNER_SECURITY_INFORMATION;
+            if (wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT))
+                sinf |= GROUP_SECURITY_INFORMATION;
+            if (wanted & APR_FINFO_PROT)
+                sinf |= DACL_SECURITY_INFORMATION;
+
+            err = GetSecurityInfo(thefile->filehand,
+                                  SE_FILE_OBJECT, sinf,
+                                  ((wanted & (APR_FINFO_USER | APR_FINFO_UPROT)) ? &user : NULL),
+                                  ((wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT)) ? &grp : NULL),
+                                  ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
+                                  NULL, &pdesc);
+            if (err == ERROR_SUCCESS) {
+                apr_pool_cleanup_register(finfo->pool, pdesc, free_localheap,
+                                          apr_pool_cleanup_null);
+            }
+            else {
+                user = NULL;
+                grp = NULL;
+                dacl = NULL;
+            }
+
+            if (user) {
+                finfo->user = user;
+                finfo->valid |= APR_FINFO_USER;
+            }
+
+            if (grp) {
+                finfo->group = grp;
+                finfo->valid |= APR_FINFO_GROUP;
+            }
+
+            if (dacl) {
+                /* Retrieved the discresionary access list */
+                resolve_prot(finfo, wanted, dacl);
+            }
+            else if (wanted & APR_FINFO_PROT)
+                guess_protection_bits(finfo, wanted);
+        }
+
+        if ((wanted & APR_FINFO_CSIZE) && (finfo->filetype == APR_REG))
+        {
+            FILE_ALLOCATION_INFO allocation_info;
+            if (GetFileInformationByHandleEx(thefile->filehand,
+                                             FileAllocationInfo,
+                                             &allocation_info,
+                                             sizeof(allocation_info))) {
+                finfo->csize = allocation_info.AllocationSize.QuadPart;
+                finfo->valid |= APR_FINFO_CSIZE;
+            }
+        }
+
+        return ((wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS);
     }
 
     return APR_SUCCESS;
@@ -795,7 +835,7 @@ static apr_status_t get_file_information_by_name(apr_finfo_t *finfo,
 
     if (wanted &= ~finfo->valid) {
         /* Caller wants more than APR_FINFO_MIN | APR_FINFO_NAME */
-        return more_finfo(finfo, wfname, wanted, MORE_OF_WFSPEC);
+        return more_finfo(finfo, wfname, wanted);
     }
 
     return APR_SUCCESS;
@@ -939,7 +979,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
 
     if (wanted &= ~finfo->valid) {
         /* Caller wants more than APR_FINFO_MIN | APR_FINFO_NAME */
-        return more_finfo(finfo, wfname, wanted, MORE_OF_WFSPEC);
+        return more_finfo(finfo, wfname, wanted);
     }
 
     return APR_SUCCESS;
