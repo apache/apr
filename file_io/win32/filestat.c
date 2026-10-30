@@ -303,12 +303,13 @@ static int reparse_point_is_link(WIN32_FILE_ATTRIBUTE_DATA *wininfo,
 apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
                         apr_int32_t wanted, int whatfile)
 {
-    PSID user = NULL, grp = NULL;
-    PACL dacl = NULL;
     apr_status_t rv;
 
     if (wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
     {
+        PSID user = NULL, grp = NULL;
+        PACL dacl = NULL;
+
         /* On NT this request is incredibly expensive, but accurate.
          * Since the WinNT-only functions below are protected by the
          * (apr_os_level < APR_WIN_NT) case above, we need no extra
