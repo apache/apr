@@ -307,9 +307,6 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
     PACL dacl = NULL;
     apr_status_t rv;
 
-    if (apr_os_level < APR_WIN_NT)
-        return guess_protection_bits(finfo, wanted);
-
     if (wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
     {
         /* On NT this request is incredibly expensive, but accurate.
