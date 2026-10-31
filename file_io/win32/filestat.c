@@ -745,13 +745,6 @@ static apr_status_t resolve_ident(apr_finfo_t *finfo, const WCHAR *wfname,
 
     CloseHandle(filehand);
 
-    if (rv != APR_SUCCESS && rv != APR_INCOMPLETE)
-        return (rv);
-
-    /* We picked up this case above and had opened the link's properties */
-    if (wanted & APR_FINFO_LINK)
-        finfo->valid |= APR_FINFO_LINK;
-
     return rv;
 }
 
