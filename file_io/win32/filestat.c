@@ -185,53 +185,26 @@ static void resolve_prot(apr_finfo_t *finfo, apr_int32_t wanted, PACL dacl)
     }
 }
 
-static apr_status_t resolve_ident(apr_finfo_t *finfo, const char *fname,
-                                  apr_int32_t wanted, apr_pool_t *pool)
+static apr_status_t
+win32_file_open(HANDLE *filehand_p,
+                const apr_wchar_t *wfname,
+                DWORD desired_access,
+                DWORD sharemode,
+                DWORD createflags,
+                DWORD attributes)
 {
-    apr_file_t *thefile = NULL;
-    apr_status_t rv;
-    /*
-     * NT5 (W2K) only supports symlinks in the same manner as mount points.
-     * This code should eventually take that into account, for now treat
-     * every reparse point as a symlink...
-     *
-     * We must open the file with READ_CONTROL if we plan to retrieve the
-     * user, group or permissions.
-     */
+    HANDLE filehand;
 
-    if ((rv = apr_file_open(&thefile, fname, APR_OPENINFO
-                          | ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0)
-                          | ((wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
-                                ? APR_READCONTROL : 0),
-                            APR_FPROT_OS_DEFAULT, pool)) == APR_SUCCESS) {
-        rv = apr_file_info_get(finfo, wanted, thefile);
-        finfo->filehand = NULL;
-        apr_file_close(thefile);
-    }
-    else if (APR_STATUS_IS_EACCES(rv) && (wanted & (APR_FINFO_PROT
-                                                  | APR_FINFO_OWNER))) {
-        /* We have a backup plan.  Perhaps we couldn't grab READ_CONTROL?
-         * proceed without asking for that permission...
-         */
-        if ((rv = apr_file_open(&thefile, fname, APR_OPENINFO
-                              | ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0),
-                                APR_FPROT_OS_DEFAULT, pool)) == APR_SUCCESS) {
-            rv = apr_file_info_get(finfo, wanted & ~(APR_FINFO_PROT
-                                                 | APR_FINFO_OWNER),
-                                 thefile);
-            finfo->filehand = NULL;
-            apr_file_close(thefile);
-        }
+    filehand = CreateFileW(wfname, desired_access, sharemode, NULL,
+                           createflags, attributes, 0);
+
+    if (filehand == INVALID_HANDLE_VALUE) {
+        return apr_get_os_error();
     }
 
-    if (rv != APR_SUCCESS && rv != APR_INCOMPLETE)
-        return (rv);
+    *filehand_p = filehand;
 
-    /* We picked up this case above and had opened the link's properties */
-    if (wanted & APR_FINFO_LINK)
-        finfo->valid |= APR_FINFO_LINK;
-
-    return rv;
+    return APR_SUCCESS;
 }
 
 static apr_status_t guess_protection_bits(apr_finfo_t *finfo,
@@ -442,39 +415,31 @@ int fillin_fileinfo(apr_finfo_t *finfo,
     return warn;
 }
 
-
-APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t wanted,
-                                            apr_file_t *thefile)
+static apr_status_t
+get_file_info_byhandle(apr_finfo_t *finfo,
+                       apr_int32_t wanted,
+                       HANDLE filehand)
 {
     BY_HANDLE_FILE_INFORMATION FileInfo;
     int is_link;
-
-    if (thefile->buffered) {
-        /* XXX: flush here is not mutex protected */
-        apr_status_t rv = apr_file_flush(thefile);
-        if (rv != APR_SUCCESS)
-            return rv;
-    }
 
     /* GetFileInformationByHandle() is implemented via two syscalls:
      * QueryInformationVolume and QueryAllInformationFile. Use cheaper
      * GetFileSizeEx() API if we only need to get the file size. */
     if (wanted == APR_FINFO_SIZE) {
-       LARGE_INTEGER size;
+        LARGE_INTEGER size;
 
-       if (!GetFileSizeEx(thefile->filehand, &size)) {
-          return apr_get_os_error();
-       }
+        if (!GetFileSizeEx(filehand, &size)) {
+            return apr_get_os_error();
+        }
 
-       finfo->pool = thefile->pool;
-       finfo->fname = thefile->fname;
-       finfo->size = size.QuadPart;
-       finfo->valid = APR_FINFO_SIZE;
+        finfo->size = size.QuadPart;
+        finfo->valid |= APR_FINFO_SIZE;
 
-       return APR_SUCCESS;
+        return APR_SUCCESS;
     }
 
-    if (!GetFileInformationByHandle(thefile->filehand, &FileInfo)) {
+    if (!GetFileInformationByHandle(filehand, &FileInfo)) {
         return apr_get_os_error();
     }
 
@@ -483,7 +448,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
 
         FILE_ATTRIBUTE_TAG_INFO attr_tag_info;
 
-        if (!GetFileInformationByHandleEx(thefile->filehand,
+        if (!GetFileInformationByHandleEx(filehand,
                                           FileAttributeTagInfo,
                                           &attr_tag_info,
                                           sizeof(attr_tag_info))) {
@@ -495,8 +460,6 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
     else {
         is_link = 0;
     }
-
-    memset(finfo, '\0', sizeof(*finfo));
 
     FileTimeToAprTime(&finfo->atime, &FileInfo.ftLastAccessTime);
     FileTimeToAprTime(&finfo->ctime, &FileInfo.ftCreationTime);
@@ -548,7 +511,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
          * don't need to take chances while the handle is already open.
          */
         DWORD FileType;
-        if ((FileType = GetFileType(thefile->filehand))) {
+        if ((FileType = GetFileType(filehand))) {
             if (FileType == FILE_TYPE_CHAR) {
                 finfo->filetype = APR_CHR;
             }
@@ -560,19 +523,11 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
         }
     }
 
-    finfo->pool = thefile->pool;
-
-    /* ### The finfo lifetime may exceed the lifetime of thefile->pool
-     * but finfo's aren't managed in pools, so where on earth would
-     * we pstrdup the fname into???
-     */
-    finfo->fname = thefile->fname;
-
     /* Extra goodies known only by GetFileInformationByHandle() */
-    finfo->inode  =  (apr_ino_t)FileInfo.nFileIndexLow
-                  | ((apr_ino_t)FileInfo.nFileIndexHigh << 32);
+    finfo->inode = (apr_ino_t)FileInfo.nFileIndexLow
+        | ((apr_ino_t)FileInfo.nFileIndexHigh << 32);
     finfo->device = FileInfo.dwVolumeSerialNumber;
-    finfo->nlink  = FileInfo.nNumberOfLinks;
+    finfo->nlink = FileInfo.nNumberOfLinks;
 
     finfo->valid |= APR_FINFO_IDENT | APR_FINFO_NLINK;
 
@@ -596,7 +551,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
             if (wanted & APR_FINFO_PROT)
                 sinf |= DACL_SECURITY_INFORMATION;
 
-            err = GetSecurityInfo(thefile->filehand,
+            err = GetSecurityInfo(filehand,
                                   SE_FILE_OBJECT, sinf,
                                   ((wanted & (APR_FINFO_USER | APR_FINFO_UPROT)) ? &user : NULL),
                                   ((wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT)) ? &grp : NULL),
@@ -633,7 +588,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
         if ((wanted & APR_FINFO_CSIZE) && (finfo->filetype == APR_REG))
         {
             FILE_ALLOCATION_INFO allocation_info;
-            if (GetFileInformationByHandleEx(thefile->filehand,
+            if (GetFileInformationByHandleEx(filehand,
                                              FileAllocationInfo,
                                              &allocation_info,
                                              sizeof(allocation_info))) {
@@ -646,6 +601,28 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
     }
 
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t wanted,
+                                            apr_file_t *thefile)
+{
+    if (thefile->buffered) {
+        /* XXX: flush here is not mutex protected */
+        apr_status_t rv = apr_file_flush(thefile);
+        if (rv != APR_SUCCESS)
+            return rv;
+    }
+
+    memset(finfo, '\0', sizeof(*finfo));
+    finfo->pool = thefile->pool;
+    /* ### The finfo lifetime may exceed the lifetime of thefile->pool
+     * but finfo's aren't managed in pools, so where on earth would
+     * we pstrdup the fname into???
+     */
+    finfo->fname = thefile->fname;
+    finfo->valid = 0;
+
+    return get_file_info_byhandle(finfo, wanted, thefile->filehand);
 }
 
 APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
@@ -716,6 +693,66 @@ static DWORD get_file_type(DWORD device_type)
         default:
             return FILE_TYPE_UNKNOWN;
     }
+}
+
+static apr_status_t resolve_ident(apr_finfo_t *finfo, const WCHAR *wfname,
+                                  apr_int32_t wanted, apr_pool_t *pool)
+{
+    HANDLE filehand;
+    apr_status_t rv;
+    DWORD sharemode;
+    DWORD desired_access;
+    DWORD attributes;
+
+    /*
+     * NT5 (W2K) only supports symlinks in the same manner as mount points.
+     * This code should eventually take that into account, for now treat
+     * every reparse point as a symlink...
+     *
+     * We must open the file with READ_CONTROL if we plan to retrieve the
+     * user, group or permissions.
+     */
+
+    sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
+    desired_access = FILE_READ_ATTRIBUTES;
+    if (wanted & (APR_FINFO_PROT | APR_FINFO_OWNER)) {
+        desired_access |= READ_CONTROL;
+    }
+
+    attributes = FILE_FLAG_BACKUP_SEMANTICS;
+    if (wanted & APR_FINFO_LINK) {
+        attributes |= FILE_FLAG_OPEN_REPARSE_POINT;
+    }
+
+    rv = win32_file_open(&filehand, wfname, desired_access, sharemode,
+                         OPEN_EXISTING, attributes);
+
+    if (APR_STATUS_IS_EACCES(rv) && (desired_access & READ_CONTROL)) {
+        /* We have a backup plan.  Perhaps we couldn't grab READ_CONTROL?
+         * proceed without asking for that permission...
+         */
+        wanted &= ~(APR_FINFO_PROT | APR_FINFO_OWNER);
+        desired_access &= ~READ_CONTROL;
+
+        rv = win32_file_open(&filehand, wfname, desired_access, sharemode,
+                             OPEN_EXISTING, attributes);
+    }
+
+    if (rv != APR_SUCCESS)
+        return rv;
+
+    rv = get_file_info_byhandle(finfo, wanted, filehand);
+
+    CloseHandle(filehand);
+
+    if (rv != APR_SUCCESS && rv != APR_INCOMPLETE)
+        return (rv);
+
+    /* We picked up this case above and had opened the link's properties */
+    if (wanted & APR_FINFO_LINK)
+        finfo->valid |= APR_FINFO_LINK;
+
+    return rv;
 }
 
 static apr_status_t get_file_information_by_name(apr_finfo_t *finfo,
@@ -892,7 +929,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
          * on a Junction always returns the junction, opening the target
          * is the only way to resolve the target's attributes.
          */
-        if ((ident_rv = resolve_ident(finfo, fname, wanted, pool))
+        if ((ident_rv = resolve_ident(finfo, wfname, wanted, pool))
                 == APR_SUCCESS)
             return ident_rv;
         else if (ident_rv == APR_INCOMPLETE)
