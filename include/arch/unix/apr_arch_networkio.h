@@ -93,6 +93,13 @@
 #define POLLNVAL 32
 #endif
 
+#ifdef SO_LINGER
+/* SO_LINGER on macOS works in term of clock ticks */
+#ifndef SO_LINGER_SEC
+#define SO_LINGER_SEC SO_LINGER
+#endif
+#endif
+
 typedef struct sock_userdata_t sock_userdata_t;
 struct sock_userdata_t {
     sock_userdata_t *next;
