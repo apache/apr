@@ -82,7 +82,9 @@ apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname,
     }
 
     (*new) = (apr_dir_t *)apr_palloc(pool, sizeof(apr_dir_t));
-
+    if (!(*new)) {
+        return APR_ENOMEM;
+    }
     (*new)->pool = pool;
     (*new)->dirname = apr_pstrdup(pool, dirname);
     (*new)->dirstruct = dir;

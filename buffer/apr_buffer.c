@@ -378,6 +378,10 @@ APR_DECLARE(char *) apr_buffer_pstrncat(apr_pool_t *p, const apr_buffer_t *buf,
 
     str = dst = apr_palloc(p, size + 1);
 
+    if (!str) {
+        return NULL;
+    }
+
     src = buf;
 
     for (i = 0; i < nelts; i++) {

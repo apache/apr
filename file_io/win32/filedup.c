@@ -187,6 +187,9 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
     if (old_file->buffered) {
         (*new_file)->buffer = apr_palloc(p, old_file->bufsize);
         (*new_file)->bufsize = old_file->bufsize;
+        if ((*new_file)->buffer == NULL) {
+            return APR_ENOMEM;
+        }
         if (old_file->direction == 1) {
             memcpy((*new_file)->buffer, old_file->buffer, old_file->bufpos);
         }

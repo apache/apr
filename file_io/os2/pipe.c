@@ -56,6 +56,11 @@ static apr_status_t file_pipe_create(apr_file_t **in, apr_file_t **out,
     }
 
     (*in) = (apr_file_t *)apr_palloc(pool_in, sizeof(apr_file_t));
+    if (!(*in)) {
+        DosClose(filedes[0]);
+        DosClose(filedes[1]);
+        return APR_ENOMEM;
+    }
     rc = DosCreateEventSem(NULL, &(*in)->pipeSem, DC_SEM_SHARED, FALSE);
 
     if (rc) {
@@ -91,6 +96,12 @@ static apr_status_t file_pipe_create(apr_file_t **in, apr_file_t **out,
             apr_pool_cleanup_null);
 
     (*out) = (apr_file_t *)apr_palloc(pool_out, sizeof(apr_file_t));
+    if (!(*out)) {
+        DosClose(filedes[0]);
+        DosClose(filedes[1]);
+        DosCloseEventSem((*in)->pipeSem);
+        return APR_ENOMEM;
+    }
     rc = DosCreateEventSem(NULL, &(*out)->pipeSem, DC_SEM_SHARED, FALSE);
 
     if (rc) {
