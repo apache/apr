@@ -44,7 +44,7 @@ extern "C" {
  */
 
 /* Many applications use the type member to determine the
- * existance of a file or initialization of the file info,
+ * existence of a file or initialization of the file info,
  * so the APR_NOFILE value must be distinct from APR_UNKFILE.
  */
 
