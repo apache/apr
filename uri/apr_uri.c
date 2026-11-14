@@ -82,7 +82,7 @@ static schemes_t schemes[] =
 static apr_status_t detect_scope_zone_id(int *have_zone_id, char const *ipv6addr,
                                          size_t len)
 {
-    char *s;
+    const char *s;
 
     *have_zone_id = 0;
 
