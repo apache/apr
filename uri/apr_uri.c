@@ -263,7 +263,7 @@ APR_DECLARE(char *) apr_uri_unparse(apr_pool_t *p,
     return ret;
 }
 
-/* Here is the hand-optimized parse_uri_components().  There are some wild
+/* Here is the hand-optimized apr_uri_parse().  There are some wild
  * tricks we could pull in assembly language that we don't pull here... like we
  * can do word-at-time scans for delimiter characters using the same technique
  * that fast memchr()s use.  But that would be way non-portable. -djg
@@ -815,12 +815,12 @@ static const unsigned char uri_delims[256] = {
 #define NOTEND_HOSTINFO   (T_SLASH | T_QUESTION | T_HASH | T_NUL)
 #define NOTEND_PATH       (T_QUESTION | T_HASH | T_NUL)
 
-/* parse_uri_components():
- * Parse a given URI, fill in all supplied fields of a uri_components
+/* apr_uri_parse():
+ * Parse a given URI, fill in all supplied fields of a apr_uri_t
  * structure. This eliminates the necessity of extracting host, port,
  * path, query info repeatedly in the modules.
  * Side effects:
- *  - fills in fields of uri_components *uptr
+ *  - fills in fields of apr_uri_t *uptr
  *  - none on any of the r->* fields
  */
 APR_DECLARE(apr_status_t) apr_uri_parse(apr_pool_t *p, const char *uri,
@@ -834,8 +834,7 @@ APR_DECLARE(apr_status_t) apr_uri_parse(apr_pool_t *p, const char *uri,
     int v6_offset1 = 0, v6_offset2 = 0;
     int have_zone_id = 0;
 
-    /* Initialize the structure. parse_uri() and parse_uri_components()
-     * can be called more than once per request.
+    /* Initialize the structure.
      */
     memset (uptr, '\0', sizeof(*uptr));
     uptr->is_initialized = 1;
@@ -1050,8 +1049,7 @@ APR_DECLARE(apr_status_t) apr_uri_parse_hostinfo(apr_pool_t *p,
     const char *rsb;
     int v6_offset1 = 0;
 
-    /* Initialize the structure. parse_uri() and parse_uri_components()
-     * can be called more than once per request.
+    /* Initialize the structure.
      */
     memset(uptr, '\0', sizeof(*uptr));
     uptr->is_initialized = 1;
