@@ -19,6 +19,10 @@
 #include "apr_file_io.h"
 #include "apr_buckets.h"
 
+#if APR_HAVE_UNISTD_H
+#include <unistd.h> /* for sysconf() */
+#endif
+
 #if APR_HAS_MMAP
 #include "apr_mmap.h"
 
@@ -70,6 +74,39 @@ static int file_make_mmap(apr_bucket *e, apr_size_t filelength,
     file_bucket_destroy(a);
     return 1;
 }
+
+/* Returns the number of bytes to read from the bucket to reach the
+ * next page boundary in the file, or zero if the bucket should not be
+ * split at a page boundary.  A bucket which does not start on a page
+ * boundary, and which cannot be read in a single read regardless, is
+ * read up to the next page boundary so that the remainder of the
+ * bucket can be mapped from a page-aligned offset, provided that
+ * remainder is large enough to be mapped. */
+static apr_size_t file_align_length(apr_bucket_file *a, apr_size_t filelength,
+                                    apr_off_t fileoffset)
+{
+#ifdef _SC_PAGESIZE
+    long psize;
+
+    if (!a->can_mmap || filelength <= a->read_size) {
+        return 0;
+    }
+
+    psize = sysconf(_SC_PAGESIZE);
+    if (psize > 0 && (fileoffset & (apr_off_t)(psize - 1)) != 0) {
+        apr_size_t align = (apr_size_t)(psize
+                                        - (fileoffset & (apr_off_t)(psize - 1)));
+
+        /* Only worthwhile if enough of the bucket remains beyond the
+         * page boundary to be mapped. */
+        if (align < filelength
+            && filelength - align >= APR_MMAP_THRESHOLD) {
+            return align;
+        }
+    }
+#endif
+    return 0;
+}
 #endif
 
 static apr_status_t file_bucket_read(apr_bucket *e, const char **str,
@@ -87,7 +124,10 @@ static apr_status_t file_bucket_read(apr_bucket *e, const char **str,
 #endif
 
 #if APR_HAS_MMAP
-    if (file_make_mmap(e, filelength, fileoffset, a->readpool)) {
+    apr_size_t alignlength = file_align_length(a, filelength, fileoffset);
+
+    if (!alignlength
+        && file_make_mmap(e, filelength, fileoffset, a->readpool)) {
         return apr_bucket_read(e, str, len, block);
     }
 #endif
@@ -110,6 +150,11 @@ static apr_status_t file_bucket_read(apr_bucket *e, const char **str,
 
     *str = NULL;  /* in case we die prematurely */
     *len = (filelength > a->read_size) ? a->read_size : filelength;
+#if APR_HAS_MMAP
+    if (alignlength && alignlength < *len) {
+        *len = alignlength;
+    }
+#endif
     buf = apr_bucket_alloc(*len, e->list);
 
     /* Handle offset ... */

@@ -555,6 +555,197 @@ static void test_truncfile(abts_case *tc, void *data)
     apr_bucket_alloc_destroy(ba);
 }
 
+#if APR_HAS_MMAP
+#include "apr_mmap.h"
+
+#if APR_HAVE_UNISTD_H
+#include <unistd.h> /* for sysconf() */
+#endif
+
+/* Byte expected at offset OFF of a file created by make_pattern_file(). */
+#define PATTERN_BYTE(off) ((char)((off) % 251))
+
+/* Make a test file named FNAME of length LEN, opened with FLAGS. */
+static apr_file_t *make_pattern_file(abts_case *tc, const char *fname,
+                                     apr_off_t len, apr_int32_t flags)
+{
+    apr_file_t *f;
+    char buf[8192];
+    apr_off_t off = 0;
+    apr_status_t rv;
+
+    rv = apr_file_open(&f, fname,
+                       APR_FOPEN_WRITE|APR_FOPEN_TRUNCATE|APR_FOPEN_CREATE,
+                       APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "create test file", rv);
+    if (rv != APR_SUCCESS) {
+        return NULL;
+    }
+
+    while (off < len) {
+        apr_size_t n, chunk = sizeof buf;
+
+        if ((apr_off_t)chunk > len - off) {
+            chunk = (apr_size_t)(len - off);
+        }
+        for (n = 0; n < chunk; n++) {
+            buf[n] = PATTERN_BYTE(off + n);
+        }
+        APR_ASSERT_SUCCESS(tc, "write test file contents",
+                           apr_file_write_full(f, buf, chunk, NULL));
+        off += chunk;
+    }
+    apr_file_close(f);
+
+    rv = apr_file_open(&f, fname, flags, APR_FPROT_OS_DEFAULT, p);
+    APR_ASSERT_SUCCESS(tc, "reopen test file", rv);
+
+    return rv == APR_SUCCESS ? f : NULL;
+}
+
+/* Returns non-zero if the LEN bytes at BUF match those expected at
+ * offset OFF of a file created by make_pattern_file(). */
+static int pattern_match(const char *buf, apr_size_t len, apr_off_t off)
+{
+    apr_size_t n;
+
+    for (n = 0; n < len; n++) {
+        if (buf[n] != PATTERN_BYTE(off + n)) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+/* A FILE bucket which starts at an offset which is not a multiple of
+ * the page size, and is larger than APR_MMAP_LIMIT, is read up to the
+ * next page boundary and then via a sequence of MMAP buckets. */
+static void test_mmap_unaligned(abts_case *tc, void *data)
+{
+    static const char fname[] = "mmapfile.bin";
+    apr_bucket_alloc_t *ba = apr_bucket_alloc_create(p);
+    apr_bucket_brigade *bb = apr_brigade_create(p, ba);
+    const apr_off_t start = 4321;
+    const apr_size_t tail = 100000;
+    const apr_size_t flen = APR_MMAP_LIMIT + tail;
+    apr_size_t expect[4] = { 0 }; /* expected bucket lengths */
+    int first_mmap = 0; /* index of first MMAP bucket */
+    apr_off_t off = start;
+    apr_file_t *f;
+    apr_bucket *e;
+    int count = 0;
+
+#ifdef _SC_PAGESIZE
+    {
+        apr_size_t psize = (apr_size_t)sysconf(_SC_PAGESIZE);
+
+        /* Assumes the page size is small enough that the boundary is
+         * reached in a single read. */
+        if (psize > APR_BUCKET_BUFF_SIZE) {
+            ABTS_NOT_IMPL(tc, "Skipped: page size too large");
+            return;
+        }
+        expect[count++] = psize - (apr_size_t)start % psize;
+        first_mmap = 1;
+    }
+#endif
+    expect[count++] = APR_MMAP_LIMIT;
+    expect[count] = flen - APR_MMAP_LIMIT - (first_mmap ? expect[0] : 0);
+
+    f = make_pattern_file(tc, fname, start + flen, APR_FOPEN_READ);
+    if (!f) {
+        return;
+    }
+
+    apr_brigade_insert_file(bb, f, start, flen, p);
+
+    count = 0;
+    while ((e = APR_BRIGADE_FIRST(bb)) != APR_BRIGADE_SENTINEL(bb)
+           && count < 3) {
+        const char *buf;
+        apr_size_t len;
+
+        ABTS_ASSERT(tc, "bucket is a FILE bucket before read",
+                    APR_BUCKET_IS_FILE(e));
+        APR_ASSERT_SUCCESS(tc, "read file bucket",
+                           apr_bucket_read(e, &buf, &len, APR_BLOCK_READ));
+        if (count < first_mmap) {
+            ABTS_ASSERT(tc, "FILE bucket read up to page boundary",
+                        !APR_BUCKET_IS_MMAP(e));
+        }
+        else {
+            ABTS_ASSERT(tc, "FILE bucket morphed to MMAP bucket",
+                        APR_BUCKET_IS_MMAP(e));
+        }
+        ABTS_SIZE_EQUAL(tc, expect[count], len);
+        ABTS_ASSERT(tc, "bucket contents match",
+                    pattern_match(buf, len, off));
+
+        off += len;
+        count++;
+        apr_bucket_delete(e);
+    }
+
+    ABTS_ASSERT(tc, "read whole file", off == start + (apr_off_t)flen);
+    ABTS_ASSERT(tc, "brigade is empty", APR_BRIGADE_EMPTY(bb));
+
+    apr_file_close(f);
+    apr_brigade_destroy(bb);
+    apr_bucket_alloc_destroy(ba);
+    apr_file_remove(fname, p);
+}
+
+/* If the file cannot be mmap()ed, the FILE bucket must fall back to
+ * reading the file. */
+static void test_mmap_fail(abts_case *tc, void *data)
+{
+    static const char fname[] = "mmapfile.bin";
+    apr_bucket_alloc_t *ba = apr_bucket_alloc_create(p);
+    apr_bucket_brigade *bb = apr_brigade_create(p, ba);
+    const apr_size_t flen = 3 * APR_BUCKET_BUFF_SIZE;
+    apr_off_t off = 0;
+    apr_file_t *f;
+    apr_bucket *e;
+    const char *buf;
+    apr_size_t len;
+
+    /* apr_mmap_create() fails for a buffered file. */
+    f = make_pattern_file(tc, fname, flen,
+                          APR_FOPEN_READ | APR_FOPEN_BUFFERED);
+    if (!f) {
+        return;
+    }
+
+    e = apr_brigade_insert_file(bb, f, 0, flen, p);
+
+    APR_ASSERT_SUCCESS(tc, "read file bucket",
+                       apr_bucket_read(e, &buf, &len, APR_BLOCK_READ));
+    ABTS_ASSERT(tc, "FILE bucket did not morph to MMAP bucket",
+                !APR_BUCKET_IS_MMAP(e));
+    ABTS_ASSERT(tc, "partial read of file", len > 0 && len < flen);
+
+    ABTS_ASSERT(tc, "remainder is a FILE bucket",
+                APR_BUCKET_NEXT(e) != APR_BRIGADE_SENTINEL(bb)
+                && APR_BUCKET_IS_FILE(APR_BUCKET_NEXT(e)));
+
+    /* The whole file is still readable. */
+    while ((e = APR_BRIGADE_FIRST(bb)) != APR_BRIGADE_SENTINEL(bb)) {
+        APR_ASSERT_SUCCESS(tc, "read bucket",
+                           apr_bucket_read(e, &buf, &len, APR_BLOCK_READ));
+        ABTS_ASSERT(tc, "bucket contents match",
+                    pattern_match(buf, len, off));
+        off += len;
+        apr_bucket_delete(e);
+    }
+    ABTS_ASSERT(tc, "read whole file", off == (apr_off_t)flen);
+
+    apr_file_close(f);
+    apr_brigade_destroy(bb);
+    apr_bucket_alloc_destroy(ba);
+    apr_file_remove(fname, p);
+}
+#endif /* APR_HAS_MMAP */
+
 static const char hello[] = "hello, world";
 
 static void test_partition(abts_case *tc, void *data)
@@ -674,6 +865,10 @@ abts_suite *testbuckets(abts_suite *suite)
     abts_run_test(suite, test_insertfile, NULL);
     abts_run_test(suite, test_manyfile, NULL);
     abts_run_test(suite, test_truncfile, NULL);
+#if APR_HAS_MMAP
+    abts_run_test(suite, test_mmap_unaligned, NULL);
+    abts_run_test(suite, test_mmap_fail, NULL);
+#endif
     abts_run_test(suite, test_partition, NULL);
     abts_run_test(suite, test_write_split, NULL);
     abts_run_test(suite, test_write_putstrs, NULL);
