@@ -77,6 +77,8 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
     apr_size_t psize;
     apr_off_t  poffset;
     DWORD offlo, offhi;
+    HANDLE mhandle;
+    void *mv;
 
     if (size == 0)
         return APR_EINVAL;
@@ -102,7 +104,6 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
         memblock = si.dwAllocationGranularity;
     }
 
-    *new = apr_pcalloc(cont, sizeof(apr_mmap_t));
     pstart = (offset / memblock) * memblock;
     poffset = offset - pstart;
     psize = (apr_size_t)poffset + size;
@@ -111,9 +112,8 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
      * of the mapped region!
      */
 
-    (*new)->mhandle = CreateFileMappingW(file->filehand, NULL, fmaccess,
-                                         0, 0, NULL);
-    if (!(*new)->mhandle || (*new)->mhandle == INVALID_HANDLE_VALUE)
+    mhandle = CreateFileMappingW(file->filehand, NULL, fmaccess, 0, 0, NULL);
+    if (!mhandle || mhandle == INVALID_HANDLE_VALUE)
     {
         *new = NULL;
         return apr_get_os_error();
@@ -121,16 +121,20 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
 
     offlo = (DWORD)pstart;
     offhi = (DWORD)(pstart >> 32);
-    (*new)->mv = MapViewOfFile((*new)->mhandle, mvaccess, offhi,
-                               offlo, psize);
-    if (!(*new)->mv)
+    mv = MapViewOfFile(mhandle, mvaccess, offhi, offlo, psize);
+    if (!mv)
     {
         apr_status_t rv = apr_get_os_error();
-        CloseHandle((*new)->mhandle);
+        CloseHandle(mhandle);
         *new = NULL;
         return rv;
     }
 
+    /* Allocate only on success, so that a caller which repeatedly
+     * fails does not consume memory from the pool. */
+    *new = apr_pcalloc(cont, sizeof(apr_mmap_t));
+    (*new)->mhandle = mhandle;
+    (*new)->mv = mv;
     (*new)->mm = (char *)(*new)->mv + poffset;
     (*new)->size = size;
     (*new)->cntxt = cont;

@@ -92,7 +92,6 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
 
     if (file == NULL || file->filedes == -1 || file->buffered)
         return APR_EBADF;
-    (*new) = (apr_mmap_t *)apr_pcalloc(cont, sizeof(apr_mmap_t));
 
     if (flag & APR_MMAP_WRITE) {
         native_flags |= PROT_WRITE;
@@ -108,7 +107,6 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
         assert(psize > 0 && (psize & (psize - 1)) == 0);
     }
     poffset = offset & (apr_off_t)(psize - 1);
-    (*new)->poffset = poffset;
 #endif
 
     mm = mmap(NULL, size + poffset,
@@ -121,9 +119,11 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
         return errno;
     }
 
-    mm = (char *)mm + poffset;
-
-    (*new)->mm = mm;
+    /* Allocate only on success, so that a caller which repeatedly
+     * fails does not consume memory from the pool. */
+    (*new) = (apr_mmap_t *)apr_pcalloc(cont, sizeof(apr_mmap_t));
+    (*new)->poffset = poffset;
+    (*new)->mm = (char *)mm + poffset;
     (*new)->size = size;
     (*new)->cntxt = cont;
     APR_RING_ELEM_INIT(*new, link);
