@@ -213,6 +213,39 @@ static void test_mmap_contents(abts_case *tc, void *data)
 
 }
 
+static void test_mmap_dup(abts_case *tc, void *data)
+{
+    apr_off_t *offset = data;
+    apr_pool_t *subp;
+    apr_mmap_t *dup;
+    apr_status_t rv;
+
+    if (!themmap) {
+        ABTS_SKIP(tc, data, "MMap not open, skipping mmap dup.");
+        return;
+    }
+
+    apr_pool_create(&subp, ptest);
+    rv = apr_mmap_dup(&dup, themmap, subp);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    /* Deleting the original leaves the region mapped via the dup. */
+    rv = apr_mmap_delete(themmap);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    themmap = NULL;
+    ABTS_STR_NEQUAL(tc, dup->mm, thisfdata, thisfsize);
+
+    /* Deleting the last reference must unmap the region. */
+    rv = apr_mmap_delete(dup);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    apr_pool_destroy(subp);
+
+    /* Map the file again for the remaining tests. */
+    rv = apr_mmap_create(&themmap, thefile, *offset, thisfsize,
+                         APR_MMAP_READ, ptest);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
+
 static void test_mmap_delete(abts_case *tc, void *data)
 {
     apr_status_t rv;
@@ -276,6 +309,7 @@ abts_suite *testmmap(abts_suite *suite)
         abts_run_test(suite, test_mmap_create, &test_set[i].offset);
         abts_run_test(suite, test_mmap_contents, &test_set[i].offset);
         abts_run_test(suite, test_mmap_offset, &test_set[i].offset);
+        abts_run_test(suite, test_mmap_dup, &test_set[i].offset);
         abts_run_test(suite, test_mmap_delete, NULL);
         abts_run_test(suite, test_file_close, NULL);
         apr_pool_clear(ptest);
