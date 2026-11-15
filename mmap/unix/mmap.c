@@ -128,7 +128,6 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
     
     if (file == NULL || file->filedes == -1 || file->buffered)
         return APR_EBADF;
-    (*new) = (apr_mmap_t *)apr_pcalloc(cont, sizeof(apr_mmap_t));
 
 #ifdef BEOS
     /* XXX: mmap shouldn't really change the seek offset */
@@ -150,8 +149,6 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
 
     if (aid >= B_NO_ERROR)
         read(file->filedes, mm, size);
-    
-    (*new)->area = aid;
 #else
 
     if (flag & APR_MMAP_WRITE) {
@@ -177,6 +174,12 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
     mm = (char *)mm + poffset;
 #endif
 
+    /* Allocate only on success, so that a caller which repeatedly
+     * fails does not consume memory from the pool. */
+    (*new) = (apr_mmap_t *)apr_pcalloc(cont, sizeof(apr_mmap_t));
+#ifdef BEOS
+    (*new)->area = aid;
+#endif
     (*new)->mm = mm;
     (*new)->size = size;
     (*new)->cntxt = cont;
