@@ -1,3 +1,19 @@
+# Build products wherever they land (libtool objects, archives, Makefiles,
+# dependency dirs, debug symbols and coverage data); the explicit per-directory
+# entries below predate these patterns and are kept for older git versions.
+*.o
+*.lo
+*.la
+*.slo
+*.a
+.libs/
+.deps/
+Makefile
+*.dSYM/
+*.gcda
+*.gcno
+*.gcov
+
 /apr-*-config
 /apr-config
 /apr-config.out
@@ -147,6 +163,7 @@
 /include/private/apr_escape_test_char.h
 /include/private/apu_config.h
 /include/private/apu_config.h.in
+/include/private/apu_ldap_internal.h
 /include/private/apu_private.h
 /include/private/apu_select_dbm.h
 /*.la
