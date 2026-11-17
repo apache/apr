@@ -1,3 +1,19 @@
+# Build products wherever they land (libtool objects, archives, Makefiles,
+# dependency dirs, debug symbols and coverage data); the explicit per-directory
+# entries below predate these patterns and are kept for older git versions.
+*.o
+*.lo
+*.la
+*.slo
+*.a
+.libs/
+.deps/
+Makefile
+*.dSYM/
+*.gcda
+*.gcno
+*.gcov
+
 /apr-*-config
 /apr-config
 /apr-config.out
