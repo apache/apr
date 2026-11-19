@@ -132,6 +132,10 @@ APR_DECLARE(apr_status_t) apr_crypto_clear(apr_pool_t *pool,
 {
     apr_crypto_clear_t *clear = apr_palloc(pool, sizeof(apr_crypto_clear_t));
 
+    if (!clear) {
+        return APR_ENOMEM;
+    }
+
     clear->buffer = buffer;
     clear->size = size;
 

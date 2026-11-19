@@ -56,6 +56,9 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
      * and double-null terminate so we have one character to change.
      */
     (*new)->dirname = apr_palloc(pool, len + 3);
+    if ((*new)->dirname == NULL) {
+        return APR_ENOMEM;
+    }
     memcpy((*new)->dirname, dirname, len);
     if (len && (*new)->dirname[len - 1] != '/') {
         (*new)->dirname[len++] = '/';

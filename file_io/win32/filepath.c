@@ -190,6 +190,9 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
          */
         *inpath = testpath + 1;
         newpath = apr_palloc(p, 2);
+        if (newpath == NULL) {
+            return APR_ENOMEM;
+        }
         if (flags & APR_FILEPATH_TRUENAME)
             newpath[0] = seperator[0];
         else
@@ -210,6 +213,9 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
          * side effects of legal mis-mapped non-us-ascii codes.
          */
         newpath = apr_palloc(p, 4);
+        if (newpath == NULL) {
+            return APR_ENOMEM;
+        }
         newpath[0] = testpath[0];
         newpath[1] = testpath[1];
         newpath[2] = seperator[0];
