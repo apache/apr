@@ -213,6 +213,39 @@ static void test_mmap_contents(abts_case *tc, void *data)
 
 }
 
+static void test_mmap_dup(abts_case *tc, void *data)
+{
+    apr_off_t *offset = data;
+    apr_pool_t *subp;
+    apr_mmap_t *dup;
+    apr_status_t rv;
+
+    if (!themmap) {
+        ABTS_SKIP(tc, data, "MMap not open, skipping mmap dup.");
+        return;
+    }
+
+    apr_pool_create(&subp, ptest);
+    rv = apr_mmap_dup(&dup, themmap, subp);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+    /* Deleting the original leaves the region mapped via the dup. */
+    rv = apr_mmap_delete(themmap);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    themmap = NULL;
+    ABTS_STR_NEQUAL(tc, dup->mm, thisfdata, thisfsize);
+
+    /* Deleting the last reference must unmap the region. */
+    rv = apr_mmap_delete(dup);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    apr_pool_destroy(subp);
+
+    /* Map the file again for the remaining tests. */
+    rv = apr_mmap_create(&themmap, thefile, *offset, thisfsize,
+                         APR_MMAP_READ, ptest);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
+
 static void test_mmap_delete(abts_case *tc, void *data)
 {
     apr_status_t rv;
@@ -259,6 +292,50 @@ static void test_mmap_offset(abts_case *tc, void *data)
 
 }
 
+/* A failed apr_mmap_create() must not consume memory from the pool;
+ * callers such as the FILE bucket may retry many times within the
+ * lifetime of one pool. */
+static void test_mmap_create_fail(abts_case *tc, void *data)
+{
+    static const char fname[] = "data/mmap_wronly.txt";
+    apr_pool_t *subp;
+    apr_file_t *f;
+    apr_mmap_t *mm = (void *)tc; /* any non-NULL value */
+    apr_status_t rv;
+    apr_size_t before;
+
+    apr_pool_create(&subp, ptest);
+
+    /* A file which is open only for writing cannot be mapped for
+     * reading. */
+    rv = apr_file_open(&f, fname,
+                       APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_TRUNCATE,
+                       APR_FPROT_OS_DEFAULT, subp);
+    APR_ASSERT_SUCCESS(tc, "open file for writing", rv);
+    if (rv != APR_SUCCESS) {
+        return;
+    }
+    APR_ASSERT_SUCCESS(tc, "write to file", apr_file_puts("hello, world", f));
+
+    /* apr_pool_num_bytes() always returns zero unless built with
+     * pool debugging, so this is only checked in such builds. */
+    before = apr_pool_num_bytes(subp, 0);
+
+    rv = apr_mmap_create(&mm, f, 0, 5, APR_MMAP_READ, subp);
+    ABTS_TRUE(tc, rv != APR_SUCCESS);
+    ABTS_PTR_EQUAL(tc, NULL, mm);
+
+    ABTS_ASSERT(tc, "failed apr_mmap_create() allocated from the pool",
+                apr_pool_num_bytes(subp, 0) == before);
+
+    if (mm) {
+        apr_mmap_delete(mm);
+    }
+    apr_file_close(f);
+    apr_file_remove(fname, subp);
+    apr_pool_destroy(subp);
+}
+
 #endif
 
 abts_suite *testmmap(abts_suite *suite)
@@ -276,10 +353,12 @@ abts_suite *testmmap(abts_suite *suite)
         abts_run_test(suite, test_mmap_create, &test_set[i].offset);
         abts_run_test(suite, test_mmap_contents, &test_set[i].offset);
         abts_run_test(suite, test_mmap_offset, &test_set[i].offset);
+        abts_run_test(suite, test_mmap_dup, &test_set[i].offset);
         abts_run_test(suite, test_mmap_delete, NULL);
         abts_run_test(suite, test_file_close, NULL);
         apr_pool_clear(ptest);
     }
+    abts_run_test(suite, test_mmap_create_fail, NULL);
     apr_pool_destroy(ptest);
 #else
     abts_run_test(suite, not_implemented, NULL);

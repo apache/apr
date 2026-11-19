@@ -48,30 +48,23 @@
 #if APR_HAS_MMAP || defined(BEOS)
 
 #ifndef BEOS
-struct mm_layout {
-    apr_mmap_t mm;
-    apr_off_t poffset;
-};
-
-static APR_INLINE
-apr_mmap_t *alloc_with_poffset(apr_pool_t *p)
+/* Returns the offset of ADDR from the start of the page containing
+ * it.  The start of a mapping is always page-aligned, so for the
+ * ->mm pointer of an apr_mmap_t this is the offset of the data from
+ * the start of the underlying mapping; no state beyond apr_mmap_t
+ * (the size of which cannot change) is needed to track it. */
+static apr_size_t page_offset(apr_uintptr_t addr)
 {
-    struct mm_layout *layout = apr_pcalloc(p, sizeof(*layout));
-    return &layout->mm;
-}
+#if defined(_SC_PAGESIZE)
+    long psize = sysconf(_SC_PAGESIZE);
 
-static APR_INLINE
-void set_poffset(apr_mmap_t *mm, apr_off_t poffset)
-{
-    struct mm_layout *layout = (struct mm_layout *)mm;
-    layout->poffset = poffset;
-}
+    /* the page size should be a power of two */
+    assert(psize > 0 && (psize & (psize - 1)) == 0);
 
-static APR_INLINE
-apr_off_t get_poffset(apr_mmap_t *mm)
-{
-    struct mm_layout *layout = (struct mm_layout *)mm;
-    return layout->poffset;
+    return (apr_size_t)(addr & (apr_uintptr_t)(psize - 1));
+#else
+    return 0;
+#endif
 }
 #endif
 
@@ -94,7 +87,11 @@ static apr_status_t mmap_cleanup(void *themmap)
 #ifdef BEOS
     rv = delete_area(mm->area);
 #else
-    rv = munmap((char *)mm->mm - get_poffset(mm), mm->size + get_poffset(mm));
+    {
+        apr_size_t poffset = page_offset((apr_uintptr_t)mm->mm);
+
+        rv = munmap((char *)mm->mm - poffset, mm->size + poffset);
+    }
 #endif
     mm->mm = (void *)-1;
 
@@ -114,8 +111,7 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
     area_id aid = -1;
     uint32 pages = 0;
 #else
-    static long psize;
-    apr_off_t poffset = 0;
+    apr_size_t poffset;
     apr_int32_t native_flags = 0;
 #endif
 
@@ -134,9 +130,6 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
         return APR_EBADF;
 
 #ifdef BEOS
-
-    *new = (apr_mmap_t *)apr_pcalloc(cont, sizeof(apr_mmap_t));
-
     /* XXX: mmap shouldn't really change the seek offset */
     apr_file_seek(file, APR_SET, &offset);
 
@@ -156,11 +149,7 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
 
     if (aid >= B_NO_ERROR)
         read(file->filedes, mm, size);
-    
-    (*new)->area = aid;
-
 #else
-    *new = alloc_with_poffset(cont);
 
     if (flag & APR_MMAP_WRITE) {
         native_flags |= PROT_WRITE;
@@ -169,15 +158,8 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
         native_flags |= PROT_READ;
     }
 
-#if defined(_SC_PAGESIZE)
-    if (psize == 0) {
-        psize = sysconf(_SC_PAGESIZE);
-        /* the page size should be a power of two */
-        assert(psize > 0 && (psize & (psize - 1)) == 0);
-    }
-    poffset = offset & (apr_off_t)(psize - 1);
-    set_poffset(*new, poffset);
-#endif
+    /* Map from the start of the page containing the offset. */
+    poffset = page_offset((apr_uintptr_t)offset);
 
     mm = mmap(NULL, size + poffset,
               native_flags, MAP_SHARED,
@@ -192,6 +174,12 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
     mm = (char *)mm + poffset;
 #endif
 
+    /* Allocate only on success, so that a caller which repeatedly
+     * fails does not consume memory from the pool. */
+    (*new) = (apr_mmap_t *)apr_pcalloc(cont, sizeof(apr_mmap_t));
+#ifdef BEOS
+    (*new)->area = aid;
+#endif
     (*new)->mm = mm;
     (*new)->size = size;
     (*new)->cntxt = cont;
@@ -207,12 +195,7 @@ APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
                                        apr_mmap_t *old_mmap,
                                        apr_pool_t *p)
 {
-#ifdef BEOS
     *new_mmap = (apr_mmap_t *)apr_pmemdup(p, old_mmap, sizeof(apr_mmap_t));
-#else
-    *new_mmap = (apr_mmap_t *)apr_pmemdup(p, old_mmap,
-                                          sizeof(struct mm_layout));
-#endif
     (*new_mmap)->cntxt = p;
 
     APR_RING_INSERT_AFTER(old_mmap, *new_mmap, link);
