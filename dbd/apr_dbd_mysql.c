@@ -1210,7 +1210,7 @@ static apr_dbd_t *dbd_mysql_open(apr_pool_t *pool, const char *params,
     }
 #endif
 
-#if MYSQL_VERSION_ID >= 50013
+#if MYSQL_VERSION_ID >= 50013 && MYSQL_VERSION_ID < 80034
     /* the MySQL manual says this should be BEFORE mysql_real_connect */
     mysql_options(sql->conn, MYSQL_OPT_RECONNECT, &do_reconnect);
 #endif
@@ -1228,7 +1228,7 @@ static apr_dbd_t *dbd_mysql_open(apr_pool_t *pool, const char *params,
         return NULL;
     }
 
-#if MYSQL_VERSION_ID >= 50013
+#if MYSQL_VERSION_ID >= 50013 && MYSQL_VERSION_ID < 80034
     /* Some say this should be AFTER mysql_real_connect */
     mysql_options(sql->conn, MYSQL_OPT_RECONNECT, &do_reconnect);
 #endif
