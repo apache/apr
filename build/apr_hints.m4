@@ -416,6 +416,14 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         APR_SETIFNULL(apr_gethostbyname_is_thread_safe, [yes])
         APR_SETIFNULL(apr_gethostbyaddr_is_thread_safe, [yes])
         APR_SETIFNULL(apr_getservbyname_is_thread_safe, [yes])
+        APR_SETIFNULL(ac_cv_func_uuid_create, [no])
+        APR_SETIFNULL(ac_cv_search_uuid_create, [no])
+        APR_SETIFNULL(ac_cv_header_uuid_h, [no])
+        APR_ADDTO(CFLAGS, [-D_THREAD_SAFE -D_LINUX_SOURCE_COMPAT -pthread -I/qopensys/pkgs/include/libxml2])
+        APR_SETVAR(SHELL, [/qopensys/bin/sh])
+        APR_SETVAR(CONFIG_SHELL, [/qopensys/bin/sh])
+        APR_SETVAR(AR, [ar -X64])
+        APR_SETVAR(NM, [nm -X64 -B])
         ;;
     *mingw*)
         APR_ADDTO(INTERNAL_CPPFLAGS, -DBINPATH=$apr_builddir/test/.libs)
@@ -480,8 +488,8 @@ case "$host" in
   *-ibm-os390)
       APR_SETIFNULL(CC, [cc])
       ;;
-  *-ibm-as400)
-      APR_SETIFNULL(CC, [icc])
+  *-ibm-as400 | *-ibm-os400)
+      APR_SETIFNULL(CC, [gcc-12 -m64])
       ;;
   *-isc4*)
       APR_SETIFNULL(CC, [gcc])
