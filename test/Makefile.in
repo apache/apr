@@ -74,7 +74,7 @@ CLEAN_TARGETS = testfile.tmp lfstests/*.bin \
 CLEAN_SUBDIRS = internal
 
 INCDIR=../include
-INCLUDES=-I$(INCDIR) -I$(srcdir)/../include
+INCLUDES=-I$(INCDIR) -I$(srcdir)/../include -I$(srcdir)/../include/arch/@DEFAULT_OSDIR@
 
 # link programs using -no-install to get real executables not
 # libtool wrapper scripts which link an executable when first run.
