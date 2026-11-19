@@ -616,7 +616,7 @@ apr_status_t apr_jose_decode_compact_jwe(apr_jose_t **jose, const char *left,
 
     /* tag */
     jwe->encryption->tag.data = apr_pdecode_base64_binary(pool, left,
-            dot - left, APR_ENCODE_BASE64URL, &jwe->encryption->tag.len);
+            right - left, APR_ENCODE_BASE64URL, &jwe->encryption->tag.len);
     if (!jwe->encryption->tag.data) {
         apr_errprintf(&(*jose)->result, pool, NULL, 0,
                 "Syntax error: JWE tag base64url decoding failed at %" APR_SIZE_T_FMT "",
